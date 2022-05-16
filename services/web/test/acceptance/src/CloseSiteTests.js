@@ -1,5 +1,5 @@
 /* eslint-disable
-    node/handle-callback-err,
+    n/handle-callback-err,
     no-return-assign,
     no-unused-vars,
 */

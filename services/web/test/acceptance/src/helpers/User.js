@@ -477,7 +477,7 @@ class User {
             value: imageFile,
             options: {
               filename: name,
-              contentType: contentType,
+              contentType,
             },
           },
         },
@@ -532,7 +532,7 @@ class User {
       {
         uri: `project/${projectId}/${type}/${itemId}/rename`,
         json: {
-          name: name,
+          name,
         },
       },
       (error, res) => {

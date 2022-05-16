@@ -405,7 +405,7 @@ const AuthenticationController = {
     if (!adminDomains.find(domain => email.endsWith(`@${domain}`))) {
       return next(
         new OError('[ValidateAdmin] Admin user with invalid email domain', {
-          email: email,
+          email,
           userId: user._id,
         })
       )

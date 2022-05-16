@@ -239,7 +239,7 @@ function makeAffiliationRequest(options, callback) {
           message: 'error getting affiliations from v1',
           info: {
             status: response.statusCode,
-            body: body,
+            body,
           },
         })
       )

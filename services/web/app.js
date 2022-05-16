@@ -77,7 +77,7 @@ if (!module.parent) {
 
 // handle SIGTERM for graceful shutdown in kubernetes
 process.on('SIGTERM', function (signal) {
-  logger.warn({ signal: signal }, 'received signal, shutting down')
+  logger.warn({ signal }, 'received signal, shutting down')
   Settings.shuttingDown = true
 })
 

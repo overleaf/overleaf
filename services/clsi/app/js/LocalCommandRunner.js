@@ -81,7 +81,7 @@ module.exports = CommandRunner = {
         err.code = code
         return callback(err)
       } else {
-        return callback(null, { stdout: stdout })
+        return callback(null, { stdout })
       }
     })
 

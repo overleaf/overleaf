@@ -6,7 +6,7 @@ function TrackChangesToggleButton({ trackChangesIsOpen, disabled, onClick }) {
   const { t } = useTranslation()
   const classes = classNames('btn', 'btn-full-height', {
     active: trackChangesIsOpen && !disabled,
-    disabled: disabled,
+    disabled,
   })
 
   return (

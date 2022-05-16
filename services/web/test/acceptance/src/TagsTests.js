@@ -25,7 +25,7 @@ const _expect204 = (err, response) => {
 }
 
 const _createTag = (user, name, callback) => {
-  user.request.post({ url: `/tag`, json: { name: name } }, callback)
+  user.request.post({ url: `/tag`, json: { name } }, callback)
 }
 
 const _createTags = (user, tagNames, callback) => {

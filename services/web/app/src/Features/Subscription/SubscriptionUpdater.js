@@ -192,7 +192,7 @@ async function createDeletedSubscription(subscription, deleterData) {
       deleterId: deleterData.id,
       deleterIpAddress: deleterData.ip,
     },
-    subscription: subscription,
+    subscription,
   }
   const options = { upsert: true, new: true, setDefaultsOnInsert: true }
   await DeletedSubscription.findOneAndUpdate(filter, data, options).exec()

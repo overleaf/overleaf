@@ -1,6 +1,6 @@
 /* eslint-disable
     camelcase,
-    node/handle-callback-err,
+    n/handle-callback-err,
     max-len,
     no-unused-vars,
 */
@@ -92,7 +92,7 @@ module.exports = CompileController = {
           Metrics.inc('compile-error')
           return next(error)
         }
-        Metrics.inc('compile-status', 1, { status: status })
+        Metrics.inc('compile-status', 1, { status })
         res.json({
           status,
           outputFiles,

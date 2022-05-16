@@ -1,6 +1,6 @@
 /* eslint-disable
     camelcase,
-    node/handle-callback-err,
+    n/handle-callback-err,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.

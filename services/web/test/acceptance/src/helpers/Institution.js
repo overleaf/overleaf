@@ -29,7 +29,7 @@ class Institution {
   setManagerIds(managerIds, callback) {
     return InstitutionModel.findOneAndUpdate(
       { _id: ObjectId(this._id) },
-      { managerIds: managerIds },
+      { managerIds },
       callback
     )
   }

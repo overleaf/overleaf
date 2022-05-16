@@ -141,7 +141,7 @@ async function createNewUser(attributes, options = {}) {
 const UserCreator = {
   createNewUser: util.callbackify(createNewUser),
   promises: {
-    createNewUser: createNewUser,
+    createNewUser,
   },
 }
 

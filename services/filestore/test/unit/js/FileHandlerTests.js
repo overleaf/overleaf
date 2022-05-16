@@ -83,7 +83,7 @@ describe('FileHandler', function () {
         './ImageOptimiser': ImageOptimiser,
         '@overleaf/settings': Settings,
         '@overleaf/object-persistor': ObjectPersistor,
-        fs: fs,
+        fs,
       },
       globals: { console },
     })

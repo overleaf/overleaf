@@ -1,5 +1,5 @@
 /* eslint-disable
-    node/handle-callback-err,
+    n/handle-callback-err,
     max-len,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -155,7 +155,7 @@ module.exports = V1SubscriptionManager = {
               message: 'error from v1',
               info: {
                 status: response.statusCode,
-                body: body,
+                body,
               },
             })
           )

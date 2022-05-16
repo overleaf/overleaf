@@ -69,7 +69,7 @@ const V1Api = {
       return callback(
         new Errors.V1ConnectionError({
           message: 'error from V1 API',
-          info: { status: response.statusCode, body: body },
+          info: { status: response.statusCode, body },
         })
       )
     }

@@ -1,6 +1,6 @@
 /* eslint-disable
     chai-friendly/no-unused-expressions,
-    node/handle-callback-err,
+    n/handle-callback-err,
     max-len,
     no-return-assign,
     no-unused-vars,

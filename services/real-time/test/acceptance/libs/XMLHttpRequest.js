@@ -150,7 +150,7 @@ exports.XMLHttpRequest = function () {
     }
 
     settings = {
-      method: method,
+      method,
       url: url.toString(),
       async: typeof async !== 'boolean' ? true : async,
       user: user || null,
@@ -346,11 +346,11 @@ exports.XMLHttpRequest = function () {
     }
 
     const options = {
-      host: host,
-      port: port,
+      host,
+      port,
       path: uri,
       method: settings.method,
-      headers: headers,
+      headers,
     }
 
     // Reset error flag

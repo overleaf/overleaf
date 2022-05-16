@@ -76,7 +76,7 @@ class AccessTokenEncryptor {
         logger.err({ err }, 'error getting Fn key')
         return callback(err)
       }
-      // eslint-disable-next-line node/no-deprecated-api
+      // eslint-disable-next-line n/no-deprecated-api
       const decipher = crypto.createDecipher(ALGORITHM, key)
       const dec =
         decipher.update(cipherText, 'base64', 'utf8') + decipher.final('utf8')

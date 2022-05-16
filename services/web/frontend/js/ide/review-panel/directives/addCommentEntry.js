@@ -11,7 +11,7 @@ App.directive('addCommentEntry', () => ({
   link(scope, element, attrs) {
     scope.state = {
       isAdding: false,
-      content: content,
+      content,
     }
 
     scope.$on('comment:start_adding', () => scope.startNewComment())

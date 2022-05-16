@@ -36,14 +36,14 @@ class Adapter {
 
   async markExecuted(name) {
     return db.migrations.insertOne({
-      name: name,
+      name,
       migratedAt: new Date(),
     })
   }
 
   async unmarkExecuted(name) {
     return db.migrations.deleteOne({
-      name: name,
+      name,
     })
   }
 }

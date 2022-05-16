@@ -401,7 +401,7 @@ export default HistoryManager = (function () {
         if (currentUpdate != null) {
           for (const pathname of currentUpdate.pathnames) {
             filesWithOps.push({
-              pathname: pathname,
+              pathname,
               operation: 'edited',
             })
           }

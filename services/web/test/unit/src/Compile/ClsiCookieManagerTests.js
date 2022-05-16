@@ -1,5 +1,5 @@
 /* eslint-disable
-    node/handle-callback-err,
+    n/handle-callback-err,
     max-len,
     no-return-assign,
     no-unused-vars,
@@ -221,7 +221,7 @@ describe('ClsiCookieManager', function () {
       delete this.settings.clsiCookie.key
       this.ClsiCookieManager = SandboxedModule.require(modulePath, {
         globals: {
-          console: console,
+          console,
         },
         requires: this.requires,
       })()
@@ -265,7 +265,7 @@ describe('ClsiCookieManager', function () {
         .returns(this.redis_secondary)
       this.ClsiCookieManager = SandboxedModule.require(modulePath, {
         globals: {
-          console: console,
+          console,
         },
         requires: this.requires,
       })()
@@ -320,7 +320,7 @@ describe('ClsiCookieManager', function () {
       delete this.settings.clsiCookie.key
       this.ClsiCookieManager = SandboxedModule.require(modulePath, {
         globals: {
-          console: console,
+          console,
         },
         requires: this.requires,
       })()

@@ -21,8 +21,8 @@ function checkValidationToken(req) {
       } else {
         logger.error(
           {
-            sessionToken: sessionToken,
-            clientToken: clientToken,
+            sessionToken,
+            clientToken,
           },
           'session token validation failed'
         )

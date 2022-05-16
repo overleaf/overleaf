@@ -260,8 +260,8 @@ module.exports = PackManager = {
         pack: { $each: newUpdates },
       },
       $inc: {
-        n: n,
-        sz: sz,
+        n,
+        sz,
       },
       $set: {
         'meta.end_ts': last.meta.end_ts,

@@ -32,7 +32,7 @@ module.exports = (modelName, requires = {}) => {
   }
 
   SandboxedModule.require('../../../../app/src/models/' + modelName, {
-    requires: requires,
+    requires,
   })
 
   return model

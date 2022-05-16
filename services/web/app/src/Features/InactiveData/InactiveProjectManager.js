@@ -86,7 +86,7 @@ module.exports = InactiveProjectManager = {
               function (err) {
                 if (err) {
                   logger.err(
-                    { project_id: project._id, err: err },
+                    { project_id: project._id, err },
                     'unable to deactivate project'
                   )
                 }

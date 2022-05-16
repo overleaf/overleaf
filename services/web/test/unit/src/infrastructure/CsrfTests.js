@@ -97,7 +97,7 @@ describe('Csrf', function () {
         let err
         this.Csrf = SandboxedModule.require(modulePath, {
           globals: {
-            console: console,
+            console,
           },
           requires: {
             csurf: (this.csurf = sinon
@@ -131,7 +131,7 @@ describe('Csrf', function () {
       it('calls the callback without an error', function () {
         this.Csrf = SandboxedModule.require(modulePath, {
           globals: {
-            console: console,
+            console,
           },
           requires: {
             csurf: (this.csurf = sinon
@@ -159,7 +159,7 @@ describe('Csrf', function () {
       it('calls the callback with `true`', function () {
         this.Csrf = SandboxedModule.require(modulePath, {
           globals: {
-            console: console,
+            console,
           },
           requires: {
             csurf: (this.csurf = sinon
@@ -177,7 +177,7 @@ describe('Csrf', function () {
       it('calls the callback with an error', function () {
         this.Csrf = SandboxedModule.require(modulePath, {
           globals: {
-            console: console,
+            console,
           },
           requires: {
             csurf: (this.csurf = sinon

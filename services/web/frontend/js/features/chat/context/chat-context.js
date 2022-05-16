@@ -156,7 +156,7 @@ export function ChatProvider({ children }) {
         .catch(error => {
           dispatch({
             type: 'ERROR',
-            error: error,
+            error,
           })
         })
     }
@@ -201,7 +201,7 @@ export function ChatProvider({ children }) {
       }).catch(error => {
         dispatch({
           type: 'ERROR',
-          error: error,
+          error,
         })
       })
     },

@@ -52,7 +52,7 @@ describe('index', function () {
         ioredis: this.ioredis,
       },
       globals: {
-        process: process,
+        process,
       },
     })
     return (this.auth_pass = '1234 pass')

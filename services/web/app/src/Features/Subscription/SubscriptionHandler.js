@@ -132,7 +132,7 @@ function updateSubscription(user, planCode, couponCode, callback) {
               const timeframe = changeAtTermEnd ? 'term_end' : 'now'
               RecurlyClient.changeSubscriptionByUuid(
                 subscription.recurlySubscription_id,
-                { planCode: planCode, timeframe: timeframe },
+                { planCode, timeframe },
                 function (error, subscriptionChange) {
                   if (error != null) {
                     return cb(error)

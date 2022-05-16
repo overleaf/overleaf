@@ -126,7 +126,7 @@ async function archiveProject(projectId, userId) {
 
     await Project.updateOne(
       { _id: projectId },
-      { $set: { archived: archived }, $pull: { trashed: ObjectId(userId) } }
+      { $set: { archived }, $pull: { trashed: ObjectId(userId) } }
     )
   } catch (err) {
     logger.warn({ err }, 'problem archiving project')
@@ -147,10 +147,7 @@ async function unarchiveProject(projectId, userId) {
       'UNARCHIVE'
     )
 
-    await Project.updateOne(
-      { _id: projectId },
-      { $set: { archived: archived } }
-    )
+    await Project.updateOne({ _id: projectId }, { $set: { archived } })
   } catch (err) {
     logger.warn({ err }, 'problem unarchiving project')
     throw err
@@ -174,7 +171,7 @@ async function trashProject(projectId, userId) {
       { _id: projectId },
       {
         $addToSet: { trashed: ObjectId(userId) },
-        $set: { archived: archived },
+        $set: { archived },
       }
     )
   } catch (err) {

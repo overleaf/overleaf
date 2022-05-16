@@ -219,6 +219,16 @@
         //  - web/scripts/ukamf/package.json
         "import/no-extraneous-dependencies": ["error", {"packageDir": [".", "scripts/ukamf"]}]
       }
+    },
+    {
+      "files": ["scripts/learn/checkSanitize/*.js"],
+      "rules": {
+        // The checkSanitize script is used in the dev-env only.
+        "import/no-extraneous-dependencies": ["error", {
+          "devDependencies": true,
+          "packageDir": [".", "../../"]
+        }]
+      }
     }
   ]
 }

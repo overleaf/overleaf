@@ -255,7 +255,7 @@ module.exports = Router = {
           function (err, ...args) {
             if (err) {
               Router._handleError(callback, err, client, 'joinProject', {
-                project_id: project_id,
+                project_id,
                 user_id: user._id,
               })
             } else {

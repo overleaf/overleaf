@@ -131,7 +131,7 @@ async function settingsPage(req, res) {
       reconfirmedViaSAML,
       reconfirmationRemoveEmail,
       samlBeta: req.session.samlBeta,
-      ssoError: ssoError,
+      ssoError,
       thirdPartyIds: UserPagesController._restructureThirdPartyIds(user),
     })
   }

@@ -97,7 +97,7 @@ document.querySelectorAll('[data-ol-purchase-group-plan]').forEach(el =>
     eventTracking.sendMB('groups-modal-click', {
       plan: planCode,
       users: size,
-      currency: currency,
+      currency,
       type: usage,
     })
     const url = new URL('/user/subscription/new', window.origin)

@@ -86,8 +86,8 @@ describe('UserDeleter', function () {
 
     this.UserDeleter = SandboxedModule.require(modulePath, {
       requires: {
-        '../../models/User': { User: User },
-        '../../models/DeletedUser': { DeletedUser: DeletedUser },
+        '../../models/User': { User },
+        '../../models/DeletedUser': { DeletedUser },
         '../Newsletter/NewsletterManager': this.NewsletterManager,
         './UserSessionsManager': this.UserSessionsManager,
         '../Subscription/SubscriptionHandler': this.SubscriptionHandler,

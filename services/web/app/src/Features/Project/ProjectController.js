@@ -1055,7 +1055,7 @@ const ProjectController = {
                 last_name: user.last_name,
                 referal_id: user.referal_id,
                 signUpDate: user.signUpDate,
-                allowedFreeTrial: allowedFreeTrial,
+                allowedFreeTrial,
                 featureSwitches: user.featureSwitches,
                 features: user.features,
                 refProviders: _.mapValues(user.refProviders, Boolean),

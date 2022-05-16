@@ -8,14 +8,14 @@ describe('mongoose', function () {
     const email = 'wombat@potato.net'
 
     it('allows the creation of a user', async function () {
-      await expect(User.create({ email: email })).to.be.fulfilled
-      await expect(User.findOne({ email: email })).to.eventually.exist
+      await expect(User.create({ email })).to.be.fulfilled
+      await expect(User.findOne({ email })).to.eventually.exist
     })
 
     it('does not allow the creation of multiple users with the same email', async function () {
-      await expect(User.create({ email: email })).to.be.fulfilled
-      await expect(User.create({ email: email })).to.be.rejected
-      await expect(User.countDocuments({ email: email })).to.eventually.equal(1)
+      await expect(User.create({ email })).to.be.fulfilled
+      await expect(User.create({ email })).to.be.rejected
+      await expect(User.countDocuments({ email })).to.eventually.equal(1)
     })
 
     it('formats assignedAt as Date', async function () {

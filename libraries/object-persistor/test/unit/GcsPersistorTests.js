@@ -79,7 +79,7 @@ describe('GcsPersistorTests', function () {
 
     Stream = {
       pipeline: sinon.stub().yields(),
-      Transform: Transform,
+      Transform,
     }
 
     GcsFile = {
@@ -222,7 +222,7 @@ describe('GcsPersistorTests', function () {
       })
 
       it('stores the bucket and key in the error', function () {
-        expect(error.info).to.include({ bucketName: bucket, key: key })
+        expect(error.info).to.include({ bucketName: bucket, key })
       })
     })
 
@@ -252,7 +252,7 @@ describe('GcsPersistorTests', function () {
       })
 
       it('stores the bucket and key in the error', function () {
-        expect(error.info).to.include({ bucketName: bucket, key: key })
+        expect(error.info).to.include({ bucketName: bucket, key })
       })
     })
   })

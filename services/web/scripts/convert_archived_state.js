@@ -56,7 +56,7 @@ async function setArchived(collection, project) {
   return collection.updateOne(
     { _id: project._id },
     {
-      $set: { archived: archived },
+      $set: { archived },
     }
   )
 }

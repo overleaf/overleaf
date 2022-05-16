@@ -54,7 +54,7 @@ describe('RecurlyClient', function () {
 
     return (this.RecurlyClient = SandboxedModule.require(modulePath, {
       globals: {
-        console: console,
+        console,
       },
       requires: {
         '@overleaf/settings': this.settings,

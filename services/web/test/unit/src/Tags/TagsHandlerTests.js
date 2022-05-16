@@ -17,13 +17,13 @@ describe('TagsHandler', function () {
     this.tagId = ObjectId().toString()
     this.projectId = ObjectId().toString()
 
-    this.mongodb = { ObjectId: ObjectId }
+    this.mongodb = { ObjectId }
     this.TagMock = sinon.mock(Tag)
 
     this.TagsHandler = SandboxedModule.require(modulePath, {
       requires: {
         '../../infrastructure/mongodb': this.mongodb,
-        '../../models/Tag': { Tag: Tag },
+        '../../models/Tag': { Tag },
       },
     })
   })

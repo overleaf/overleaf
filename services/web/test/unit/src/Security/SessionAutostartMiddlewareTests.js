@@ -13,7 +13,7 @@ describe('SessionAutostartMiddleware', function () {
 
   beforeEach(function () {
     Settings = {
-      cookieName: cookieName,
+      cookieName,
     }
 
     SessionAutostartMiddleware = SandboxedModule.require(modulePath, {

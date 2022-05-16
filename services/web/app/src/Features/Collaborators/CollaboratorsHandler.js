@@ -44,7 +44,7 @@ async function removeUserFromProject(projectId, userId) {
       await Project.updateOne(
         { _id: projectId },
         {
-          $set: { archived: archived },
+          $set: { archived },
           $pull: {
             collaberator_refs: userId,
             readOnly_refs: userId,

@@ -153,9 +153,9 @@ export default describe('HistoryV2Manager', function () {
       }
       this.ide = {
         globalEditorWatchdogManager: { attachToEditor() {} },
-        $q: $q,
-        $http: $http,
-        $filter: $filter,
+        $q,
+        $http,
+        $filter,
       }
       this.eventTracking = {
         sendMB: () => {},

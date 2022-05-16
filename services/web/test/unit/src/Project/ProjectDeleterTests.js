@@ -145,9 +145,9 @@ describe('ProjectDeleter', function () {
       requires: {
         '../../infrastructure/Features': this.Features,
         '../Editor/EditorRealTimeController': this.EditorRealTimeController,
-        '../../models/Project': { Project: Project },
+        '../../models/Project': { Project },
         './ProjectHelper': this.ProjectHelper,
-        '../../models/DeletedProject': { DeletedProject: DeletedProject },
+        '../../models/DeletedProject': { DeletedProject },
         '../DocumentUpdater/DocumentUpdaterHandler':
           this.DocumentUpdaterHandler,
         '../Tags/TagsHandler': this.TagsHandler,
@@ -611,7 +611,7 @@ describe('ProjectDeleter', function () {
         .withArgs(
           { _id: this.project._id },
           {
-            $set: { archived: archived },
+            $set: { archived },
             $pull: { trashed: ObjectId(this.user._id) },
           }
         )
@@ -650,7 +650,7 @@ describe('ProjectDeleter', function () {
         .resolves(this.project)
 
       this.ProjectMock.expects('updateOne')
-        .withArgs({ _id: this.project._id }, { $set: { archived: archived } })
+        .withArgs({ _id: this.project._id }, { $set: { archived } })
         .resolves()
     })
 
@@ -690,7 +690,7 @@ describe('ProjectDeleter', function () {
           { _id: this.project._id },
           {
             $addToSet: { trashed: ObjectId(this.user._id) },
-            $set: { archived: archived },
+            $set: { archived },
           }
         )
         .resolves()

@@ -14,7 +14,7 @@ function generateAndEmailResetToken(email, callback) {
     if (user.email !== email) {
       return callback(null, 'secondary')
     }
-    const data = { user_id: user._id.toString(), email: email }
+    const data = { user_id: user._id.toString(), email }
     OneTimeTokenHandler.getNewToken('password', data, (err, token) => {
       if (err) {
         return callback(err)

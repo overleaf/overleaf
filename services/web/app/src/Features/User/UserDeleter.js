@@ -21,11 +21,11 @@ module.exports = {
   expireDeletedUsersAfterDuration: callbackify(expireDeletedUsersAfterDuration),
 
   promises: {
-    deleteUser: deleteUser,
-    deleteMongoUser: deleteMongoUser,
-    expireDeletedUser: expireDeletedUser,
-    ensureCanDeleteUser: ensureCanDeleteUser,
-    expireDeletedUsersAfterDuration: expireDeletedUsersAfterDuration,
+    deleteUser,
+    deleteMongoUser,
+    expireDeletedUser,
+    ensureCanDeleteUser,
+    expireDeletedUsersAfterDuration,
   },
 }
 
@@ -104,7 +104,7 @@ async function _createDeletedUser(user, options) {
   await DeletedUser.updateOne(
     { 'deleterData.deletedUserId': user._id },
     {
-      user: user,
+      user,
       deleterData: {
         deletedAt: new Date(),
         deleterId: options.deleterUser ? options.deleterUser._id : undefined,

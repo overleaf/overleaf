@@ -2,7 +2,7 @@
     camelcase,
     max-len,
     no-unused-vars,
-    node/no-deprecated-api,
+    n/no-deprecated-api,
 */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.

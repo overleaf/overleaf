@@ -203,7 +203,7 @@ function tpdsFileLimit(userId) {
         callback = function () {}
       }
       const messageOpts = {
-        projectName: projectName,
+        projectName,
       }
       NotificationsHandler.createNotification(
         userId,

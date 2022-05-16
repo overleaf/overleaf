@@ -66,7 +66,7 @@ describe('S3PersistorTests', function () {
 
     Stream = {
       pipeline: sinon.stub().yields(),
-      Transform: Transform,
+      Transform,
     }
 
     EmptyPromise = {
@@ -306,7 +306,7 @@ describe('S3PersistorTests', function () {
       })
 
       it('stores the bucket and key in the error', function () {
-        expect(error.info).to.include({ bucketName: bucket, key: key })
+        expect(error.info).to.include({ bucketName: bucket, key })
       })
     })
 
@@ -336,7 +336,7 @@ describe('S3PersistorTests', function () {
       })
 
       it('stores the bucket and key in the error', function () {
-        expect(error.info).to.include({ bucketName: bucket, key: key })
+        expect(error.info).to.include({ bucketName: bucket, key })
       })
     })
 
@@ -366,7 +366,7 @@ describe('S3PersistorTests', function () {
       })
 
       it('stores the bucket and key in the error', function () {
-        expect(error.info).to.include({ bucketName: bucket, key: key })
+        expect(error.info).to.include({ bucketName: bucket, key })
       })
     })
   })

@@ -193,7 +193,7 @@ const UserEmailsController = {
         if (err) {
           return UserEmailsController._handleEmailError(err, req, res, next)
         }
-        SessionManager.setInSessionUser(req.session, { email: email })
+        SessionManager.setInSessionUser(req.session, { email })
         const user = SessionManager.getSessionUser(req.session)
         UserSessionsManager.revokeAllUserSessions(
           user,

@@ -32,8 +32,8 @@ class FSStream extends Stream {
     end = Math.min(end, this.length)
     // keep a cache of previous reads with {begin,end,buffer} values
     const result = {
-      begin: begin,
-      end: end,
+      begin,
+      end,
       buffer: Buffer.alloc(end - begin, 0),
     }
     this.cachedBytes.push(result)

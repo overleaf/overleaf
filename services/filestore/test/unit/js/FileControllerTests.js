@@ -57,7 +57,7 @@ describe('FileController', function () {
         './FileHandler': FileHandler,
         './PersistorManager': PersistorManager,
         './Errors': Errors,
-        stream: stream,
+        stream,
         '@overleaf/settings': settings,
         '@overleaf/metrics': {
           inc() {},
@@ -67,8 +67,8 @@ describe('FileController', function () {
     })
 
     req = {
-      key: key,
-      bucket: bucket,
+      key,
+      bucket,
       project_id: projectId,
       query: {},
       params: {

@@ -25,7 +25,7 @@ describe('UserGetter', function () {
         {
           email: 'email1@foo.bar',
           reversedHostname: 'rab.oof',
-          confirmedAt: confirmedAt,
+          confirmedAt,
           lastConfirmedAt: confirmedAt,
         },
         { email: 'email2@foo.bar', reversedHostname: 'rab.oof' },
@@ -454,21 +454,21 @@ describe('UserGetter', function () {
                 email: email1,
                 reversedHostname: 'rab.oss',
                 confirmedAt: new Date('2019-09-24'),
-                reconfirmedAt: reconfirmedAt,
+                reconfirmedAt,
                 default: true,
               },
               {
                 email: email2,
                 reversedHostname: 'rab.oss',
                 confirmedAt: new Date('2019-09-24'),
-                reconfirmedAt: reconfirmedAt,
+                reconfirmedAt,
                 samlProviderId: institutionSSO.id,
               },
               {
                 email: email3,
                 reversedHostname: 'rab.oss',
                 confirmedAt: new Date('2019-09-24'),
-                reconfirmedAt: reconfirmedAt,
+                reconfirmedAt,
               },
             ],
             samlIdentifiers: [
