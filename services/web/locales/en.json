@@ -102,6 +102,7 @@
   "template_gallery": "Template Gallery",
   "template_not_found_description": "This way of creating projects from templates has been removed. Please visit our template gallery to find more templates.",
   "integrations": "Integrations",
+  "dropbox_successfully_linked_description": "Thanks, we’ve successfully linked your Dropbox account to __appName__.",
   "dropbox_checking_sync_status": "Checking Dropbox for updates",
   "dropbox_sync_in": "Receiving updates from Dropbox",
   "dropbox_sync_out": "Sending updates to Dropbox",

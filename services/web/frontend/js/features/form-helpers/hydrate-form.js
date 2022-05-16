@@ -74,6 +74,7 @@ function formSubmitHelper(formEl) {
         type: 'error',
         key: error.data?.message?.key,
         text,
+        hints: error.data?.message?.hints,
       })
 
       // Let the user re-submit the form.
@@ -145,6 +146,15 @@ function showMessages(formEl, messageBag) {
       'role',
       message.type === 'error' ? 'alert' : 'status'
     )
+    if (message.hints && message.hints.length) {
+      const listEl = document.createElement('ul')
+      message.hints.forEach(hint => {
+        const listItemEl = document.createElement('li')
+        listItemEl.textContent = hint
+        listEl.append(listItemEl)
+      })
+      messageEl.append(listEl)
+    }
     messagesEl.append(messageEl)
   })
 }

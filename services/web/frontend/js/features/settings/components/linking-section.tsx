@@ -10,6 +10,9 @@ function LinkingSection() {
   const { t } = useTranslation()
   const { subscriptions } = useSSOContext()
   const ssoErrorMessage = getMeta('ol-ssoErrorMessage') as string
+  const projectSyncSuccessMessage = getMeta(
+    'ol-projectSyncSuccessMessage'
+  ) as string
   const [integrationLinkingWidgets] = useState(
     () =>
       getMeta('integrationLinkingWidgets') ||
@@ -42,6 +45,9 @@ function LinkingSection() {
           <h3 id="project-sync" className="text-capitalize">
             {t('sync_dropbox_github')}
           </h3>
+          {projectSyncSuccessMessage ? (
+            <Alert bsStyle="success">{projectSyncSuccessMessage}</Alert>
+          ) : null}
           <div className="settings-widgets-container">
             {integrationLinkingWidgets.map(
               ({ import: importObject, path }, widgetIndex) => (

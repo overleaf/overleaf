@@ -311,6 +311,19 @@ describe('UserPagesController', function () {
       return this.UserPagesController.settingsPage(this.req, this.res)
     })
 
+    it("should set and clear 'projectSyncSuccessMessage'", function (done) {
+      this.SplitTestHandler.promises.getAssignment = sinon
+        .stub()
+        .resolves({ variant: 'react' })
+      this.req.session.projectSyncSuccessMessage = 'Some Sync Success'
+      this.res.render = (page, opts) => {
+        opts.projectSyncSuccessMessage.should.equal('Some Sync Success')
+        expect(this.req.session.projectSyncSuccessMessage).to.not.exist
+        return done()
+      }
+      return this.UserPagesController.settingsPage(this.req, this.res)
+    })
+
     describe('when ldap.updateUserDetailsOnLogin is true', function () {
       beforeEach(function () {
         return (this.settings.ldap = { updateUserDetailsOnLogin: true })

@@ -22,6 +22,10 @@ async function settingsPage(req, res) {
   if (ssoErrorMessage) {
     delete req.session.ssoErrorMessage
   }
+  const projectSyncSuccessMessage = req.session.projectSyncSuccessMessage
+  if (projectSyncSuccessMessage) {
+    delete req.session.projectSyncSuccessMessage
+  }
   // Institution SSO
   let institutionLinked = _.get(req.session, ['saml', 'linked'])
   if (institutionLinked) {
@@ -103,6 +107,7 @@ async function settingsPage(req, res) {
       samlBeta: req.session.samlBeta,
       ssoErrorMessage,
       thirdPartyIds: UserPagesController._restructureThirdPartyIds(user),
+      projectSyncSuccessMessage,
     })
   } else {
     res.render('user/settings', {

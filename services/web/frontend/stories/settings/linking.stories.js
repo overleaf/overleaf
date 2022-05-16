@@ -63,6 +63,24 @@ export const SectionSSOErrors = args => {
   )
 }
 
+export const SectionProjetSyncSuccess = args => {
+  useFetchMock(defaultSetupMocks)
+  setDefaultMeta()
+  window.metaAttributesCache.set('ol-github', { enabled: true })
+  window.metaAttributesCache.set(
+    'ol-projectSyncSuccessMessage',
+    'Thanks, we’ve successfully linked your GitHub account to Overleaf. You can now export your Overleaf projects to GitHub, or import projects from your GitHub repositories.'
+  )
+
+  return (
+    <UserProvider>
+      <SSOProvider>
+        <LinkingSection {...args} />
+      </SSOProvider>
+    </UserProvider>
+  )
+}
+
 export default {
   title: 'Account Settings / Linking',
   component: LinkingSection,
