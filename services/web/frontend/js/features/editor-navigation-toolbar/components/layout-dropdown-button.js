@@ -45,6 +45,31 @@ function IconCheckmark({ iconFor, pdfLayout, view, detachRole }) {
   return <IconPlaceholder />
 }
 
+function PdfDetachMenuItem({ handleDetach, children }) {
+  const { t } = useTranslation()
+
+  if (!('BroadcastChannel' in window)) {
+    return (
+      <OverlayTrigger
+        placement="left"
+        overlay={
+          <Tooltip id="detach-disabled-tooltip">
+            {t('your_browser_does_not_support_this_feature')}
+          </Tooltip>
+        }
+      >
+        <MenuItem disabled>{children}</MenuItem>
+      </OverlayTrigger>
+    )
+  }
+
+  return <MenuItem onSelect={handleDetach}>{children}</MenuItem>
+}
+PdfDetachMenuItem.propTypes = {
+  handleDetach: PropTypes.func.isRequired,
+  children: PropTypes.arrayOf(PropTypes.node).isRequired,
+}
+
 function LayoutDropdownButton() {
   const { t } = useTranslation()
 
@@ -174,11 +199,11 @@ function LayoutDropdownButton() {
               {t('pdf_in_separate_tab')}
             </MenuItem>
           ) : (
-            <MenuItem onSelect={handleDetach}>
+            <PdfDetachMenuItem handleDetach={handleDetach}>
               <IconPlaceholder />
               <IconDetach />
               {t('pdf_in_separate_tab')}
-            </MenuItem>
+            </PdfDetachMenuItem>
           )}
 
           <MenuItem divider />

@@ -86,7 +86,10 @@ describe('<LayoutDropdownButton />', function () {
   })
 
   describe('on detach', function () {
+    let originalBroadcastChannel
     beforeEach(function () {
+      window.BroadcastChannel = originalBroadcastChannel || true // ensure that window.BroadcastChannel is truthy
+
       renderWithEditorContext(<LayoutDropdownButton />, {
         ui: { ...defaultUi, view: 'editor' },
       })
@@ -95,6 +98,10 @@ describe('<LayoutDropdownButton />', function () {
         name: 'PDF in separate tab',
       })
       fireEvent.click(menuItem)
+    })
+
+    afterEach(function () {
+      window.BroadcastChannel = originalBroadcastChannel
     })
 
     it('should show processing', function () {
