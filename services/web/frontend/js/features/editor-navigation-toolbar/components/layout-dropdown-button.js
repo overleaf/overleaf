@@ -117,7 +117,7 @@ function LayoutDropdownButton() {
               view={view}
               detachRole={detachRole}
             />
-            <Icon type="columns" />
+            <Icon type="columns" fw />
             {t('editor_and_pdf')}
           </MenuItem>
 
@@ -131,7 +131,9 @@ function LayoutDropdownButton() {
               view={view}
               detachRole={detachRole}
             />
-            <IconEditorOnly />
+            <i className="fa fa-fw">
+              <IconEditorOnly />
+            </i>
             <span>
               <Trans
                 i18nKey="editor_only_hide_pdf"
@@ -152,7 +154,9 @@ function LayoutDropdownButton() {
               view={view}
               detachRole={detachRole}
             />
-            <IconPdfOnly />
+            <i className="fa fa-fw">
+              <IconPdfOnly />
+            </i>
             <span>
               <Trans
                 i18nKey="pdf_only_hide_editor"
