@@ -43,7 +43,7 @@ module.exports = {
             throw error
           }
           this.running = true
-          logger.log('track changes running in dev mode')
+          logger.info('track changes running in dev mode')
 
           return (() => {
             const result = []

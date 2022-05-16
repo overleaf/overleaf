@@ -154,11 +154,6 @@ describe('LoggingManager', function () {
       this.logger.err(this.logArgs)
       this.bunyanLogger.error.should.have.been.calledWith(this.logArgs)
     })
-
-    it('should log log', function () {
-      this.logger.log(this.logArgs)
-      this.bunyanLogger.info.should.have.been.calledWith(this.logArgs)
-    })
   })
 
   describe('logger.error', function () {

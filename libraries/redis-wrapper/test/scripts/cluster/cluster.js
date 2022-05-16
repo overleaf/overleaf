@@ -20,7 +20,7 @@ setInterval(() => {
     if (err) {
       logger.error({ err }, 'HEALTH CHECK FAILED')
     } else {
-      logger.log('HEALTH CHECK OK')
+      logger.info('HEALTH CHECK OK')
     }
   })
 }, 1000)

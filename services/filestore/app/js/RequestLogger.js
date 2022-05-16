@@ -42,7 +42,7 @@ class RequestLogger {
         })
       }
 
-      const level = res.statusCode >= 500 ? 'err' : 'log'
+      const level = res.statusCode >= 500 ? 'err' : 'info'
       logger[level](
         {
           req,

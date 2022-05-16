@@ -41,10 +41,6 @@ const LoggingManager = {
     return this.logger.info.apply(this.logger, arguments)
   },
 
-  log() {
-    return this.logger.info.apply(this.logger, arguments)
-  },
-
   error(attributes, message, ...args) {
     if (this.ringBuffer !== null && Array.isArray(this.ringBuffer.records)) {
       attributes.logBuffer = this.ringBuffer.records.filter(function (record) {
