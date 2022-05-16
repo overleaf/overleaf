@@ -29,7 +29,7 @@ describe('PersistorManager', function () {
       './GcsPersistor': GcsPersistor,
       './S3Persistor': S3Persistor,
       './FSPersistor': FSPersistor,
-      'logger-sharelatex': {
+      '@overleaf/logger': {
         info() {},
         err() {},
       },

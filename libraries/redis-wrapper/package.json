@@ -19,6 +19,7 @@
     "test:ci": "npm run test"
   },
   "peerDependencies": {
+    "@overleaf/logger": "*",
     "@overleaf/o-error": "^3.4.0"
   },
   "dependencies": {
@@ -27,7 +28,7 @@
   "devDependencies": {
     "@overleaf/o-error": "^3.4.0",
     "chai": "^4.3.6",
-    "@overleaf/logger": "^2.3.0",
+    "@overleaf/logger": "*",
     "mocha": "^8.4.0",
     "sandboxed-module": "^2.0.4",
     "sinon": "^9.2.4"

@@ -1,6 +1,6 @@
 const Crypto = require('crypto')
 const Stream = require('stream')
-const Logger = require('logger-sharelatex')
+const Logger = require('@overleaf/logger')
 const { WriteError, ReadError, NotFoundError } = require('./Errors')
 const { promisify } = require('util')
 

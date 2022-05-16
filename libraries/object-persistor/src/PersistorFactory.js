@@ -1,4 +1,4 @@
-const Logger = require('logger-sharelatex')
+const Logger = require('@overleaf/logger')
 const { SettingsError } = require('./Errors')
 const GcsPersistor = require('./GcsPersistor')
 const S3Persistor = require('./S3Persistor')

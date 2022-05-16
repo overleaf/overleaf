@@ -15,12 +15,12 @@
   "license": "AGPL-3.0-only",
   "dependencies": {},
   "peerDependencies": {
-    "@overleaf/logger": "^2.3.0"
+    "@overleaf/logger": "*"
   },
   "devDependencies": {
     "bunyan": "^1.8.15",
     "chai": "^4.3.6",
-    "@overleaf/logger": "^2.2.0",
+    "@overleaf/logger": "*",
     "mocha": "^8.4.0",
     "nock": "0.15.2",
     "sandboxed-module": "^2.0.4",

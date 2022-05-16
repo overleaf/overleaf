@@ -32,6 +32,6 @@
     "test:ci": "npm run test"
   },
   "peerDependencies": {
-    "@overleaf/logger": ">= 3.0.0"
+    "@overleaf/logger": "*"
   }
 }

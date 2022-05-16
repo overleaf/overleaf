@@ -148,7 +148,7 @@ describe('S3PersistorTests', function () {
     S3Persistor = new (SandboxedModule.require(modulePath, {
       requires: {
         'aws-sdk/clients/s3': S3,
-        'logger-sharelatex': Logger,
+        '@overleaf/logger': Logger,
         './Errors': Errors,
         fs: Fs,
         stream: Stream,

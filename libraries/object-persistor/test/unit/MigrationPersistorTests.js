@@ -76,7 +76,7 @@ describe('MigrationPersistorTests', function () {
       requires: {
         stream: Stream,
         './Errors': Errors,
-        'logger-sharelatex': Logger,
+        '@overleaf/logger': Logger,
       },
       globals: { console },
     })

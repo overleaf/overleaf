@@ -1,5 +1,5 @@
 const AbstractPersistor = require('./AbstractPersistor')
-const Logger = require('logger-sharelatex')
+const Logger = require('@overleaf/logger')
 const Stream = require('stream')
 const { promisify } = require('util')
 const { NotFoundError, WriteError } = require('./Errors')

@@ -18,18 +18,21 @@
   },
   "author": "Overleaf (https://www.overleaf.com/)",
   "license": "AGPL-3.0",
+  "peerDependencies": {
+    "@overleaf/logger": "*"
+  },
   "dependencies": {
     "@google-cloud/storage": "~5.1.2",
     "@overleaf/o-error": "^3.4.0",
     "aws-sdk": "^2.718.0",
     "fast-crc32c": "https://github.com/overleaf/node-fast-crc32c/archive/aae6b2a4c7a7a159395df9cc6c38dfde702d6f51.tar.gz",
     "glob": "^7.1.6",
-    "logger-sharelatex": "^2.1.1",
     "node-uuid": "^1.4.8",
     "range-parser": "^1.2.1",
     "tiny-async-pool": "^1.1.0"
   },
   "devDependencies": {
+    "@overleaf/logger": "*",
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
     "mocha": "^8.4.0",

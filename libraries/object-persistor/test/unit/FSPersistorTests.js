@@ -62,7 +62,7 @@ describe('FSPersistorTests', function () {
         crypto,
         'node-uuid': uuid,
         // imported by PersistorHelper but otherwise unused here
-        'logger-sharelatex': {},
+        '@overleaf/logger': {},
       },
       globals: { console },
     }))({ paths: { uploadFolder: '/tmp' } })
