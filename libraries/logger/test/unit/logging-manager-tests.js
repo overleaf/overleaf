@@ -90,9 +90,9 @@ describe('LoggingManager', function () {
         delete process.env.NODE_ENV
       })
 
-      it('should default to log level warn', function () {
+      it('should default to log level info', function () {
         this.Bunyan.createLogger.firstCall.args[0].streams[0].level.should.equal(
-          'warn'
+          'info'
         )
       })
 

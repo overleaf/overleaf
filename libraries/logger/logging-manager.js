@@ -13,7 +13,7 @@ const LoggingManager = {
     this.isProduction =
       (process.env.NODE_ENV || '').toLowerCase() === 'production'
     this.defaultLevel =
-      process.env.LOG_LEVEL || (this.isProduction ? 'warn' : 'debug')
+      process.env.LOG_LEVEL || (this.isProduction ? 'info' : 'debug')
     this.loggerName = name
     this.logger = bunyan.createLogger({
       name,
