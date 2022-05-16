@@ -285,7 +285,7 @@ function successfulSubscription(req, res, next) {
 
 function cancelSubscription(req, res, next) {
   const user = SessionManager.getSessionUser(req.session)
-  logger.log({ user_id: user._id }, 'canceling subscription')
+  logger.debug({ user_id: user._id }, 'canceling subscription')
   SubscriptionHandler.cancelSubscription(user, function (err) {
     if (err) {
       OError.tag(err, 'something went wrong canceling subscription', {
@@ -307,7 +307,7 @@ function canceledSubscription(req, res, next) {
 
 function cancelV1Subscription(req, res, next) {
   const userId = SessionManager.getLoggedInUserId(req.session)
-  logger.log({ userId }, 'canceling v1 subscription')
+  logger.debug({ userId }, 'canceling v1 subscription')
   V1SubscriptionManager.cancelV1Subscription(userId, function (err) {
     if (err) {
       OError.tag(err, 'something went wrong canceling v1 subscription', {
@@ -331,7 +331,7 @@ function updateSubscription(req, res, next) {
     )
     return next(err)
   }
-  logger.log({ planCode, user_id: user._id }, 'updating subscription')
+  logger.debug({ planCode, user_id: user._id }, 'updating subscription')
   SubscriptionHandler.updateSubscription(user, planCode, null, function (err) {
     if (err) {
       OError.tag(err, 'something went wrong updating subscription', {
@@ -345,7 +345,7 @@ function updateSubscription(req, res, next) {
 
 function cancelPendingSubscriptionChange(req, res, next) {
   const user = SessionManager.getSessionUser(req.session)
-  logger.log({ user_id: user._id }, 'canceling pending subscription change')
+  logger.debug({ user_id: user._id }, 'canceling pending subscription change')
   SubscriptionHandler.cancelPendingSubscriptionChange(user, function (err) {
     if (err) {
       OError.tag(
@@ -377,7 +377,7 @@ function updateAccountEmailAddress(req, res, next) {
 
 function reactivateSubscription(req, res, next) {
   const user = SessionManager.getSessionUser(req.session)
-  logger.log({ user_id: user._id }, 'reactivating subscription')
+  logger.debug({ user_id: user._id }, 'reactivating subscription')
   SubscriptionHandler.reactivateSubscription(user, function (err) {
     if (err) {
       OError.tag(err, 'something went wrong reactivating subscription', {
@@ -390,7 +390,7 @@ function reactivateSubscription(req, res, next) {
 }
 
 function recurlyCallback(req, res, next) {
-  logger.log({ data: req.body }, 'received recurly callback')
+  logger.debug({ data: req.body }, 'received recurly callback')
   const event = Object.keys(req.body)[0]
   const eventData = req.body[event]
 
@@ -473,7 +473,7 @@ function processUpgradeToAnnualPlan(req, res, next) {
   const { planName } = req.body
   const couponCode = Settings.coupon_codes.upgradeToAnnualPromo[planName]
   const annualPlanName = `${planName}-annual`
-  logger.log(
+  logger.debug(
     { user_id: user._id, planName: annualPlanName },
     'user is upgrading to annual billing with discount'
   )

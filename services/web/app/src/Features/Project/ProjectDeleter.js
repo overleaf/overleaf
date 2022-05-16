@@ -56,7 +56,7 @@ module.exports = {
 }
 
 async function markAsDeletedByExternalSource(projectId) {
-  logger.log(
+  logger.debug(
     { project_id: projectId },
     'marking project as deleted by external data source'
   )
@@ -277,7 +277,7 @@ async function deleteProject(projectId, options = {}) {
     throw err
   }
 
-  logger.log({ project_id: projectId }, 'successfully deleted project')
+  logger.debug({ project_id: projectId }, 'successfully deleted project')
 }
 
 async function undeleteProject(projectId, options = {}) {

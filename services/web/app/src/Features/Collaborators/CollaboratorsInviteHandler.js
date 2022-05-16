@@ -28,7 +28,7 @@ const CollaboratorsInviteHandler = {
     if (callback == null) {
       callback = function () {}
     }
-    logger.log({ projectId }, 'fetching invites for project')
+    logger.debug({ projectId }, 'fetching invites for project')
     return ProjectInvite.find({ projectId }, function (err, invites) {
       if (err != null) {
         OError.tag(err, 'error getting invites from mongo', {
@@ -36,7 +36,7 @@ const CollaboratorsInviteHandler = {
         })
         return callback(err)
       }
-      logger.log(
+      logger.debug(
         { projectId, count: invites.length },
         'found invites for project'
       )
@@ -48,7 +48,7 @@ const CollaboratorsInviteHandler = {
     if (callback == null) {
       callback = function () {}
     }
-    logger.log({ projectId }, 'counting invites for project')
+    logger.debug({ projectId }, 'counting invites for project')
     return ProjectInvite.countDocuments({ projectId }, function (err, count) {
       if (err != null) {
         OError.tag(err, 'error getting invites from mongo', {
@@ -77,7 +77,10 @@ const CollaboratorsInviteHandler = {
           return callback(err)
         }
         if (existingUser == null) {
-          logger.log({ projectId, email }, 'no existing user found, returning')
+          logger.debug(
+            { projectId, email },
+            'no existing user found, returning'
+          )
           return callback(null)
         }
         return ProjectGetter.getProject(
@@ -92,7 +95,7 @@ const CollaboratorsInviteHandler = {
               return callback(err)
             }
             if (project == null) {
-              logger.log(
+              logger.debug(
                 { projectId },
                 'no project found while sending notification, returning'
               )
@@ -126,7 +129,7 @@ const CollaboratorsInviteHandler = {
     if (callback == null) {
       callback = function () {}
     }
-    logger.log(
+    logger.debug(
       { projectId, inviteId: invite._id },
       'sending notification and email for invite'
     )
@@ -158,7 +161,7 @@ const CollaboratorsInviteHandler = {
     if (callback == null) {
       callback = function () {}
     }
-    logger.log(
+    logger.debug(
       { projectId, sendingUserId: sendingUser._id, email, privileges },
       'adding invite'
     )
@@ -211,7 +214,7 @@ const CollaboratorsInviteHandler = {
     if (callback == null) {
       callback = function () {}
     }
-    logger.log({ projectId, inviteId }, 'removing invite')
+    logger.debug({ projectId, inviteId }, 'removing invite')
     return ProjectInvite.deleteOne(
       { projectId, _id: inviteId },
       function (err) {
@@ -235,7 +238,7 @@ const CollaboratorsInviteHandler = {
     if (callback == null) {
       callback = function () {}
     }
-    logger.log({ projectId, inviteId }, 'resending invite email')
+    logger.debug({ projectId, inviteId }, 'resending invite email')
     return ProjectInvite.findOne(
       { _id: inviteId, projectId },
       function (err, invite) {
@@ -276,7 +279,7 @@ const CollaboratorsInviteHandler = {
     if (callback == null) {
       callback = function () {}
     }
-    logger.log({ projectId }, 'fetching invite by token')
+    logger.debug({ projectId }, 'fetching invite by token')
     return ProjectInvite.findOne(
       { projectId, token: tokenString },
       function (err, invite) {
@@ -299,7 +302,7 @@ const CollaboratorsInviteHandler = {
     if (callback == null) {
       callback = function () {}
     }
-    logger.log({ projectId, userId: user._id }, 'accepting invite')
+    logger.debug({ projectId, userId: user._id }, 'accepting invite')
     return CollaboratorsInviteHandler.getInviteByToken(
       projectId,
       tokenString,
@@ -313,7 +316,7 @@ const CollaboratorsInviteHandler = {
         }
         if (!invite) {
           err = new Errors.NotFoundError('no matching invite found')
-          logger.log({ err, projectId }, 'no matching invite found')
+          logger.debug({ err, projectId }, 'no matching invite found')
           return callback(err)
         }
         const inviteId = invite._id
@@ -332,7 +335,7 @@ const CollaboratorsInviteHandler = {
               return callback(err)
             }
             // Remove invite
-            logger.log({ projectId, inviteId }, 'removing invite')
+            logger.debug({ projectId, inviteId }, 'removing invite')
             return ProjectInvite.deleteOne({ _id: inviteId }, function (err) {
               if (err != null) {
                 OError.tag(err, 'error removing invite', {

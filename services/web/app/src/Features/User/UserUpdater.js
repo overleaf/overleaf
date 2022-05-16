@@ -231,7 +231,7 @@ async function confirmEmail(userId, email) {
   if (email == null) {
     throw new Error('invalid email')
   }
-  logger.log({ userId, email }, 'confirming user email')
+  logger.debug({ userId, email }, 'confirming user email')
 
   try {
     await InstitutionsAPI.promises.addAffiliation(userId, email, {

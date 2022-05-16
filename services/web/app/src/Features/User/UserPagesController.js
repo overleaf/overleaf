@@ -197,7 +197,7 @@ const UserPagesController = {
 
   sessionsPage(req, res, next) {
     const user = SessionManager.getSessionUser(req.session)
-    logger.log({ userId: user._id }, 'loading sessions page')
+    logger.debug({ userId: user._id }, 'loading sessions page')
     const currentSession = {
       ip_address: user.ip_address,
       session_created: user.session_created,

@@ -15,7 +15,7 @@ let COUNT = 0
 
 const LOCK_QUEUES = new Map() // queue lock requests for each name/id so they get the lock on a first-come first-served basis
 
-logger.log(
+logger.debug(
   { lockManagerSettings: settings.lockManager },
   'LockManager initialising'
 )
@@ -60,7 +60,7 @@ const LockManager = {
       // is designed to log if this happens.
       function countIfExceededLockTimeout() {
         metrics.inc(`lock.${namespace}.exceeded_lock_timeout`)
-        logger.log('exceeded lock timeout', {
+        logger.debug('exceeded lock timeout', {
           namespace,
           id,
           slowExecutionError,
@@ -77,7 +77,7 @@ const LockManager = {
 
           const timeTaken = new Date() - timer.start
           if (timeTaken > LockManager.SLOW_EXECUTION_THRESHOLD) {
-            logger.log('slow execution during lock', {
+            logger.debug('slow execution during lock', {
               namespace,
               id,
               timeTaken,
@@ -113,7 +113,7 @@ const LockManager = {
           callback(err, true, lockValue)
         } else {
           metrics.inc(`lock.${namespace}.try.failed`)
-          logger.log({ key, redis_response: gotLock }, 'lock is locked')
+          logger.debug({ key, redis_response: gotLock }, 'lock is locked')
           callback(err, false)
         }
       }

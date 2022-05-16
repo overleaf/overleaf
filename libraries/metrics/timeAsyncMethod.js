@@ -36,7 +36,7 @@ module.exports = function (obj, methodName, prefix, logger) {
 
     if (callback == null || typeof callback !== 'function') {
       if (logger != null) {
-        logger.log(
+        logger.debug(
           `[Metrics] expected wrapped method '${methodName}' to be invoked with a callback`
         )
       }
@@ -74,7 +74,7 @@ module.exports = function (obj, methodName, prefix, logger) {
               }
             }
           } catch (error) {}
-          logger.log(
+          logger.debug(
             { key, args: loggableArgs, elapsedTime },
             '[Metrics] timed async method call'
           )

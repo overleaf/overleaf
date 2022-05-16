@@ -70,7 +70,7 @@ async function archiveDocById(projectId, docId) {
 }
 
 async function archiveDoc(projectId, doc) {
-  logger.log(
+  logger.debug(
     { project_id: projectId, doc_id: doc._id },
     'sending doc to persistor'
   )
@@ -154,7 +154,7 @@ async function getDoc(projectId, docId) {
 
 // get the doc and unarchive it to mongo
 async function unarchiveDoc(projectId, docId) {
-  logger.log({ projectId, docId }, 'getting doc from persistor')
+  logger.debug({ projectId, docId }, 'getting doc from persistor')
   const mongoDoc = await MongoManager.findDoc(projectId, docId, {
     inS3: 1,
     rev: 1,

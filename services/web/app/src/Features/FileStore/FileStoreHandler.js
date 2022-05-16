@@ -30,7 +30,7 @@ const FileStoreHandler = {
         return callback(new Error('error getting stat, not available'))
       }
       if (!stat.isFile()) {
-        logger.log(
+        logger.debug(
           { projectId, fileArgs, fsPath },
           'tried to upload symlink, not continuing'
         )
@@ -162,7 +162,7 @@ const FileStoreHandler = {
   },
 
   deleteFile(projectId, fileId, callback) {
-    logger.log({ projectId, fileId }, 'telling file store to delete file')
+    logger.debug({ projectId, fileId }, 'telling file store to delete file')
     const opts = {
       method: 'delete',
       uri: this._buildUrl(projectId, fileId),
@@ -202,7 +202,7 @@ const FileStoreHandler = {
   },
 
   copyFile(oldProjectId, oldFileId, newProjectId, newFileId, callback) {
-    logger.log(
+    logger.debug(
       { oldProjectId, oldFileId, newProjectId, newFileId },
       'telling filestore to copy a file'
     )

@@ -15,7 +15,7 @@ const metrics = require('@overleaf/metrics')
 
 module.exports = {
   getUserNotifications(req, res, next) {
-    logger.log(
+    logger.debug(
       { user_id: req.params.user_id },
       'getting user unread notifications'
     )
@@ -30,7 +30,7 @@ module.exports = {
   },
 
   addNotification(req, res) {
-    logger.log(
+    logger.debug(
       { user_id: req.params.user_id, notification: req.body },
       'adding notification'
     )
@@ -49,7 +49,7 @@ module.exports = {
   },
 
   removeNotificationId(req, res, next) {
-    logger.log(
+    logger.debug(
       {
         user_id: req.params.user_id,
         notification_id: req.params.notification_id,
@@ -68,7 +68,7 @@ module.exports = {
   },
 
   removeNotificationKey(req, res, next) {
-    logger.log(
+    logger.debug(
       { user_id: req.params.user_id, notification_key: req.body.key },
       'mark key notification as read'
     )
@@ -85,7 +85,7 @@ module.exports = {
 
   removeNotificationByKeyOnly(req, res, next) {
     const notification_key = req.params.key
-    logger.log({ notification_key }, 'mark notification as read by key only')
+    logger.debug({ notification_key }, 'mark notification as read by key only')
     metrics.inc('removeNotificationKey')
     return Notifications.removeNotificationByKeyOnly(notification_key, err => {
       if (err) return next(err)

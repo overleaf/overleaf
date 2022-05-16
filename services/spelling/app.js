@@ -44,7 +44,7 @@ if (!module.parent) {
     if (error != null) {
       throw error
     }
-    return logger.info(`spelling starting up, listening on ${host}:${port}`)
+    return logger.debug(`spelling starting up, listening on ${host}:${port}`)
   })
 }
 

@@ -23,7 +23,7 @@ module.exports = HttpController = {
       return
     }
 
-    logger.log({ user_id, contact_id }, 'adding contact')
+    logger.debug({ user_id, contact_id }, 'adding contact')
 
     return ContactManager.touchContact(user_id, contact_id, function (error) {
       if (error != null) {
@@ -50,7 +50,7 @@ module.exports = HttpController = {
     }
     limit = Math.min(limit, HttpController.CONTACT_LIMIT)
 
-    logger.log({ user_id }, 'getting contacts')
+    logger.debug({ user_id }, 'getting contacts')
 
     return ContactManager.getContacts(user_id, function (error, contact_dict) {
       if (error != null) {

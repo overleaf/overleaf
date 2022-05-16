@@ -31,7 +31,7 @@ module.exports = {
       url,
       timeout: 3000,
     })
-    logger.log({ lines, url, doc_id, project_id }, 'running health check')
+    logger.debug({ lines, url, doc_id, project_id }, 'running health check')
     const jobs = [
       function (cb) {
         const opts = getOpts()

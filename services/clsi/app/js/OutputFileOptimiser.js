@@ -71,7 +71,7 @@ module.exports = OutputFileOptimiser = {
     }
     const tmpOutput = dst + '.opt'
     const args = ['--linearize', '--newline-before-endstream', src, tmpOutput]
-    logger.log({ args }, 'running qpdf command')
+    logger.debug({ args }, 'running qpdf command')
 
     const timer = new Metrics.Timer('qpdf')
     const proc = spawn('qpdf', args)

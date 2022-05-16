@@ -32,7 +32,7 @@ module.exports = DraftModeManager = {
         return callback()
       }
       const modified_content = DraftModeManager._injectDraftOption(content)
-      logger.log(
+      logger.debug(
         {
           content: content.slice(0, 1024), // \documentclass is normally v near the top
           modified_content: modified_content.slice(0, 1024),

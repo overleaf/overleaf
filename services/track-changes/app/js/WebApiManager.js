@@ -43,7 +43,7 @@ module.exports = WebApiManager = {
           return callback(error)
         }
         if (res.statusCode === 404) {
-          logger.log({ url }, 'got 404 from web api')
+          logger.debug({ url }, 'got 404 from web api')
           return callback(null, null)
         }
         if (res.statusCode >= 200 && res.statusCode < 300) {
@@ -63,7 +63,7 @@ module.exports = WebApiManager = {
       callback = function () {}
     }
     const url = `/user/${user_id}/personal_info`
-    logger.log({ user_id }, 'getting user info from web')
+    logger.debug({ user_id }, 'getting user info from web')
     return WebApiManager.sendRequest(url, function (error, body) {
       let user
       if (error != null) {
@@ -95,7 +95,7 @@ module.exports = WebApiManager = {
       callback = function () {}
     }
     const url = `/project/${project_id}/details`
-    logger.log({ project_id }, 'getting project details from web')
+    logger.debug({ project_id }, 'getting project details from web')
     return WebApiManager.sendRequest(url, function (error, body) {
       let project
       if (error != null) {

@@ -86,7 +86,7 @@ async function addFolderContents(
   replace
 ) {
   if (!(await _isSafeOnFileSystem(folderPath))) {
-    logger.log(
+    logger.debug(
       { userId, projectId, parentFolderId, folderPath },
       'add folder contents is from symlink, stopping insert'
     )
@@ -110,7 +110,7 @@ async function addFolderContents(
 
 async function addEntity(userId, projectId, folderId, name, fsPath, replace) {
   if (!(await _isSafeOnFileSystem(fsPath))) {
-    logger.log(
+    logger.debug(
       { userId, projectId, folderId, fsPath },
       'add entry is from symlink, stopping insert'
     )

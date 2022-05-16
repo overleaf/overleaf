@@ -36,7 +36,7 @@ async function createAccountForUserId(userId) {
     lastName: user.last_name,
   }
   const account = await client.createAccount(accountCreate)
-  logger.log({ userId, account }, 'created recurly account')
+  logger.debug({ userId, account }, 'created recurly account')
   return account
 }
 
@@ -46,7 +46,7 @@ async function getSubscription(subscriptionId) {
 
 async function changeSubscription(subscriptionId, body) {
   const change = await client.createSubscriptionChange(subscriptionId, body)
-  logger.log(
+  logger.debug(
     { subscriptionId, changeId: change.id },
     'created subscription change'
   )
@@ -59,7 +59,7 @@ async function changeSubscriptionByUuid(subscriptionUuid, ...args) {
 
 async function removeSubscriptionChange(subscriptionId) {
   const removed = await client.removeSubscriptionChange(subscriptionId)
-  logger.log({ subscriptionId }, 'removed pending subscription change')
+  logger.debug({ subscriptionId }, 'removed pending subscription change')
   return removed
 }
 
@@ -79,7 +79,7 @@ async function cancelSubscriptionByUuid(subscriptionUuid) {
       if (
         err.message === 'Only active and future subscriptions can be canceled.'
       ) {
-        logger.log(
+        logger.debug(
           { subscriptionUuid },
           'subscription cancellation failed, subscription not active'
         )

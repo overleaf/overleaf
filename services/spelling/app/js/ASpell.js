@@ -28,7 +28,7 @@ try {
   const oldCache = fs.readFileSync(cacheFsPath)
   cache.load(JSON.parse(oldCache))
 } catch (error) {
-  logger.log(
+  logger.debug(
     OError.tag(error, 'could not load the cache file', { cacheFsPath })
   )
 }
@@ -38,14 +38,14 @@ const cacheDump = setInterval(function () {
   const dump = JSON.stringify(cache.dump())
   return fs.writeFile(cacheFsPathTmp, dump, function (err) {
     if (err != null) {
-      logger.log(OError.tag(err, 'error writing cache file'))
+      logger.debug(OError.tag(err, 'error writing cache file'))
       fs.unlink(cacheFsPathTmp, () => {})
     } else {
       fs.rename(cacheFsPathTmp, cacheFsPath, err => {
         if (err) {
           logger.error(OError.tag(err, 'error renaming cache file'))
         } else {
-          logger.log({ len: dump.length, cacheFsPath }, 'wrote cache file')
+          logger.debug({ len: dump.length, cacheFsPath }, 'wrote cache file')
         }
       })
     }
@@ -96,7 +96,7 @@ class ASpellRunner {
         cache.set(k, v)
       }
 
-      logger.info(
+      logger.debug(
         {
           hits,
           total: words.length,

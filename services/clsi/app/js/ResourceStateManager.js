@@ -26,7 +26,7 @@ module.exports = {
     const stateFile = Path.join(basePath, this.SYNC_STATE_FILE)
     if (state == null) {
       // remove the file if no state passed in
-      logger.log({ state, basePath }, 'clearing sync state')
+      logger.debug({ state, basePath }, 'clearing sync state')
       fs.unlink(stateFile, function (err) {
         if (err && err.code !== 'ENOENT') {
           return callback(err)
@@ -35,7 +35,7 @@ module.exports = {
         }
       })
     } else {
-      logger.log({ state, basePath }, 'writing sync state')
+      logger.debug({ state, basePath }, 'writing sync state')
       const resourceList = resources.map(resource => resource.path)
       fs.writeFile(
         stateFile,
@@ -67,7 +67,7 @@ module.exports = {
         const resourceList = array.slice(0, adjustedLength - 1)
         const oldState = array[adjustedLength - 1]
         const newState = `stateHash:${state}`
-        logger.log(
+        logger.debug(
           { state, oldState, basePath, stateMatches: newState === oldState },
           'checking sync state'
         )

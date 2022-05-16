@@ -41,7 +41,7 @@ module.exports = ProxyManager = {
   createProxy(target) {
     return function (req, res, next) {
       const targetUrl = makeTargetUrl(target, req)
-      logger.log({ targetUrl, reqUrl: req.url }, 'proxying url')
+      logger.debug({ targetUrl, reqUrl: req.url }, 'proxying url')
 
       const options = { url: targetUrl }
       if (req.headers != null ? req.headers.cookie : undefined) {

@@ -102,7 +102,7 @@ function setDocument(req, res, next) {
         })
         return next(error)
       }
-      logger.log(
+      logger.debug(
         { docId, projectId },
         'finished receiving set document request from api (docupdater)'
       )

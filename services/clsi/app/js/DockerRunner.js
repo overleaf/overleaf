@@ -10,7 +10,7 @@ const Path = require('path')
 const _ = require('lodash')
 
 const ONE_HOUR_IN_MS = 60 * 60 * 1000
-logger.info('using docker runner')
+logger.debug('using docker runner')
 
 function usingSiblingContainers() {
   return (
@@ -36,7 +36,7 @@ const DockerRunner = {
   ) {
     if (usingSiblingContainers()) {
       const _newPath = Settings.path.sandboxedCompilesHostDir
-      logger.log(
+      logger.debug(
         { path: _newPath },
         'altering bind path for sibling containers'
       )
@@ -85,14 +85,14 @@ const DockerRunner = {
 
     // logOptions = _.clone(options)
     // logOptions?.HostConfig?.SecurityOpt = "secomp used, removed in logging"
-    logger.log({ projectId }, 'running docker container')
+    logger.debug({ projectId }, 'running docker container')
     DockerRunner._runAndWaitForContainer(
       options,
       volumes,
       timeout,
       (error, output) => {
         if (error && error.statusCode === 500) {
-          logger.log(
+          logger.debug(
             { err: error, projectId },
             'error running container so destroying and retrying'
           )
@@ -118,7 +118,7 @@ const DockerRunner = {
   },
 
   kill(containerId, callback) {
-    logger.log({ containerId }, 'sending kill signal to container')
+    logger.debug({ containerId }, 'sending kill signal to container')
     const container = dockerode.getContainer(containerId)
     container.kill(error => {
       if (
@@ -193,7 +193,7 @@ const DockerRunner = {
           if (options != null && options.HostConfig != null) {
             options.HostConfig.SecurityOpt = null
           }
-          logger.log({ exitCode, options }, 'docker container has exited')
+          logger.debug({ exitCode, options }, 'docker container has exited')
           callbackIfFinished()
         })
       }
@@ -352,7 +352,7 @@ const DockerRunner = {
     callback = _.once(callback)
     const { name } = options
 
-    logger.log({ container_name: name }, 'starting container')
+    logger.debug({ container_name: name }, 'starting container')
     const container = dockerode.getContainer(name)
 
     function createAndStartContainer() {
@@ -412,7 +412,7 @@ const DockerRunner = {
         attachStartCallback()
       }
 
-      logger.log({ containerId }, 'attached to container')
+      logger.debug({ containerId }, 'attached to container')
 
       const MAX_OUTPUT = 1024 * 1024 // limit output to 1MB
       function createStringOutputStream(name) {
@@ -469,13 +469,13 @@ const DockerRunner = {
     let timedOut = false
     const timeoutId = setTimeout(() => {
       timedOut = true
-      logger.log({ containerId }, 'timeout reached, killing container')
+      logger.debug({ containerId }, 'timeout reached, killing container')
       container.kill(err => {
         logger.warn({ err, containerId }, 'failed to kill container')
       })
     }, timeout)
 
-    logger.log({ containerId }, 'waiting for docker container')
+    logger.debug({ containerId }, 'waiting for docker container')
     container.wait((error, res) => {
       if (error != null) {
         clearTimeout(timeoutId)
@@ -483,13 +483,13 @@ const DockerRunner = {
         return callback(error)
       }
       if (timedOut) {
-        logger.log({ containerId }, 'docker container timed out')
+        logger.debug({ containerId }, 'docker container timed out')
         error = new Error('container timed out')
         error.timedout = true
         callback(error)
       } else {
         clearTimeout(timeoutId)
-        logger.log(
+        logger.debug(
           { containerId, exitCode: res.StatusCode },
           'docker container returned'
         )
@@ -518,7 +518,7 @@ const DockerRunner = {
   },
 
   _destroyContainer(containerId, shouldForce, callback) {
-    logger.log({ containerId }, 'destroying docker container')
+    logger.debug({ containerId }, 'destroying docker container')
     const container = dockerode.getContainer(containerId)
     container.remove({ force: shouldForce === true, v: true }, error => {
       if (error != null && error.statusCode === 404) {
@@ -531,7 +531,7 @@ const DockerRunner = {
       if (error != null) {
         logger.error({ err: error, containerId }, 'error destroying container')
       } else {
-        logger.log({ containerId }, 'destroyed container')
+        logger.debug({ containerId }, 'destroyed container')
       }
       callback(error)
     })
@@ -548,7 +548,7 @@ const DockerRunner = {
     const age = now - created
     const maxAge = DockerRunner.MAX_CONTAINER_AGE
     const ttl = maxAge - age
-    logger.log(
+    logger.debug(
       { containerName: name, created, now, age, maxAge, ttl },
       'checking whether to destroy container'
     )
@@ -579,7 +579,7 @@ const DockerRunner = {
   },
 
   startContainerMonitor() {
-    logger.log(
+    logger.debug(
       { maxAge: DockerRunner.MAX_CONTAINER_AGE },
       'starting container expiry'
     )

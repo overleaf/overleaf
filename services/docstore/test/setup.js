@@ -15,7 +15,9 @@ chai.use(chaiAsPromised)
 const sandbox = sinon.createSandbox()
 const stubs = {
   logger: {
+    debug: sandbox.stub(),
     log: sandbox.stub(),
+    info: sandbox.stub(),
     warn: sandbox.stub(),
     err: sandbox.stub(),
     error: sandbox.stub(),

@@ -16,7 +16,7 @@ if (!module.parent) {
           logger.fatal({ err }, `Cannot bind to ${host}:${port}. Exiting.`)
           process.exit(1)
         }
-        logger.info(`Chat starting up, listening on ${host}:${port}`)
+        logger.debug(`Chat starting up, listening on ${host}:${port}`)
       })
     })
     .catch(err => {

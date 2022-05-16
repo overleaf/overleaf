@@ -20,7 +20,7 @@ module.exports = RestoreManager = {
     if (callback == null) {
       callback = function () {}
     }
-    logger.log({ project_id, doc_id, version, user_id }, 'restoring document')
+    logger.debug({ project_id, doc_id, version, user_id }, 'restoring document')
     return DiffManager.getDocumentBeforeVersion(
       project_id,
       doc_id,

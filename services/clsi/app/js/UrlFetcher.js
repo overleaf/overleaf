@@ -61,7 +61,7 @@ module.exports = UrlFetcher = {
       3 * oneMinute
     )
 
-    logger.log({ url, filePath }, 'started downloading url to cache')
+    logger.debug({ url, filePath }, 'started downloading url to cache')
     const urlStream = request.get({ url, timeout: oneMinute })
     urlStream.pause() // stop data flowing until we are ready
 
@@ -74,7 +74,7 @@ module.exports = UrlFetcher = {
     })
 
     urlStream.on('end', () =>
-      logger.log({ url, filePath }, 'finished downloading file into cache')
+      logger.debug({ url, filePath }, 'finished downloading file into cache')
     )
 
     return urlStream.on('response', function (res) {
@@ -97,7 +97,7 @@ module.exports = UrlFetcher = {
         })
 
         fileStream.on('finish', function () {
-          logger.log({ url, filePath }, 'finished writing file into cache')
+          logger.debug({ url, filePath }, 'finished writing file into cache')
           fs.rename(atomicWrite, filePath, error => {
             if (error) {
               fs.unlink(atomicWrite, () => callbackOnce(error))
@@ -108,7 +108,7 @@ module.exports = UrlFetcher = {
         })
 
         fileStream.on('pipe', () =>
-          logger.log({ url, filePath }, 'piping into filestream')
+          logger.debug({ url, filePath }, 'piping into filestream')
         )
 
         urlStream.pipe(fileStream)

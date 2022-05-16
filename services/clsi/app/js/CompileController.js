@@ -72,7 +72,7 @@ module.exports = CompileController = {
                 status = `validation-${error.validate}`
               } else if (error != null ? error.timedout : undefined) {
                 status = 'timedout'
-                logger.log(
+                logger.debug(
                   { err: error, project_id: request.project_id },
                   'timeout running compile'
                 )
@@ -245,7 +245,7 @@ module.exports = CompileController = {
     if (image && !isImageNameAllowed(image)) {
       return res.status(400).send('invalid image')
     }
-    logger.log({ image, file, project_id }, 'word count request')
+    logger.debug({ image, file, project_id }, 'word count request')
 
     return CompileManager.wordcount(
       project_id,

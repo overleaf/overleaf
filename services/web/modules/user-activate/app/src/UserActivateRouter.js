@@ -5,7 +5,7 @@ const AuthorizationMiddleware = require('../../../../app/src/Features/Authorizat
 
 module.exports = {
   apply(webRouter) {
-    logger.log({}, 'Init UserActivate router')
+    logger.debug({}, 'Init UserActivate router')
 
     webRouter.get(
       '/admin/user',

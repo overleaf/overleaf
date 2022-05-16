@@ -53,7 +53,7 @@ module.exports = {
         const start = new Date()
         return _method.call(this, dbCommand, options, function () {
           timer.done()
-          logger.log(
+          logger.debug(
             {
               query: dbCommand.query,
               query_type: type,
@@ -89,7 +89,7 @@ module.exports = {
         const start = new Date()
         return _method.call(this, ns, ops, options, function () {
           timer.done()
-          logger.log(
+          logger.debug(
             {
               query: ops[0].q,
               query_type: type,

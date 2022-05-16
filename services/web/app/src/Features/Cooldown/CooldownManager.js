@@ -26,7 +26,7 @@ module.exports = CooldownManager = {
     if (callback == null) {
       callback = function () {}
     }
-    logger.log(
+    logger.debug(
       { projectId },
       `[Cooldown] putting project on cooldown for ${COOLDOWN_IN_SECONDS} seconds`
     )

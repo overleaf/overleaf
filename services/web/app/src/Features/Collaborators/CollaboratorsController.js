@@ -39,7 +39,7 @@ async function removeSelfFromProject(req, res, next) {
 
 async function getAllMembers(req, res, next) {
   const projectId = req.params.Project_id
-  logger.log({ projectId }, 'getting all active members for project')
+  logger.debug({ projectId }, 'getting all active members for project')
   let members
   try {
     members = await CollaboratorsGetter.promises.getAllInvitedMembers(projectId)

@@ -30,7 +30,7 @@ const rateLimiter = require('../../infrastructure/RateLimiter')
 module.exports = CollaboratorsInviteController = {
   getAllInvites(req, res, next) {
     const projectId = req.params.Project_id
-    logger.log({ projectId }, 'getting all active invites for project')
+    logger.debug({ projectId }, 'getting all active invites for project')
     return CollaboratorsInviteHandler.getAllInvites(
       projectId,
       function (err, invites) {
@@ -50,7 +50,7 @@ module.exports = CollaboratorsInviteController = {
       callback = function () {}
     }
     if (Settings.restrictInvitesToExistingAccounts === true) {
-      logger.log({ email }, 'checking if user exists with this email')
+      logger.debug({ email }, 'checking if user exists with this email')
       return UserGetter.getUserByAnyEmail(
         email,
         { _id: 1 },
@@ -102,13 +102,13 @@ module.exports = CollaboratorsInviteController = {
     const sendingUser = SessionManager.getSessionUser(req.session)
     const sendingUserId = sendingUser._id
     if (email === sendingUser.email) {
-      logger.log(
+      logger.debug(
         { projectId, email, sendingUserId },
         'cannot invite yourself to project'
       )
       return res.json({ invite: null, error: 'cannot_invite_self' })
     }
-    logger.log({ projectId, email, sendingUserId }, 'inviting to project')
+    logger.debug({ projectId, email, sendingUserId }, 'inviting to project')
     return LimitationsManager.canAddXCollaborators(
       projectId,
       1,
@@ -118,7 +118,7 @@ module.exports = CollaboratorsInviteController = {
           return next(error)
         }
         if (!allowed) {
-          logger.log(
+          logger.debug(
             { projectId, email, sendingUserId },
             'not allowed to invite more users to project'
           )
@@ -127,7 +127,7 @@ module.exports = CollaboratorsInviteController = {
         ;({ email, privileges } = req.body)
         email = EmailHelper.parseEmail(email)
         if (email == null || email === '') {
-          logger.log(
+          logger.debug(
             { projectId, email, sendingUserId },
             'invalid email address'
           )
@@ -158,7 +158,7 @@ module.exports = CollaboratorsInviteController = {
                   return next(err)
                 }
                 if (!shouldAllowInvite) {
-                  logger.log(
+                  logger.debug(
                     { email, projectId, sendingUserId },
                     'not allowed to send an invite to this email address'
                   )
@@ -181,7 +181,7 @@ module.exports = CollaboratorsInviteController = {
                       })
                       return next(err)
                     }
-                    logger.log(
+                    logger.debug(
                       { projectId, email, sendingUserId },
                       'invite created'
                     )
@@ -204,7 +204,7 @@ module.exports = CollaboratorsInviteController = {
   revokeInvite(req, res, next) {
     const projectId = req.params.Project_id
     const inviteId = req.params.invite_id
-    logger.log({ projectId, inviteId }, 'revoking invite')
+    logger.debug({ projectId, inviteId }, 'revoking invite')
     return CollaboratorsInviteHandler.revokeInvite(
       projectId,
       inviteId,
@@ -229,7 +229,7 @@ module.exports = CollaboratorsInviteController = {
   resendInvite(req, res, next) {
     const projectId = req.params.Project_id
     const inviteId = req.params.invite_id
-    logger.log({ projectId, inviteId }, 'resending invite')
+    logger.debug({ projectId, inviteId }, 'resending invite')
     const sendingUser = SessionManager.getSessionUser(req.session)
     return CollaboratorsInviteController._checkRateLimit(
       sendingUser._id,
@@ -263,7 +263,7 @@ module.exports = CollaboratorsInviteController = {
     const projectId = req.params.Project_id
     const { token } = req.params
     const _renderInvalidPage = function () {
-      logger.log({ projectId }, 'invite not valid, rendering not-valid page')
+      logger.debug({ projectId }, 'invite not valid, rendering not-valid page')
       return res.render('project/invite/not-valid', { title: 'Invalid Invite' })
     }
     // check if the user is already a member of the project
@@ -279,7 +279,7 @@ module.exports = CollaboratorsInviteController = {
           return next(err)
         }
         if (isMember) {
-          logger.log(
+          logger.debug(
             { projectId, userId: currentUser._id },
             'user is already a member of this project, redirecting'
           )
@@ -298,7 +298,7 @@ module.exports = CollaboratorsInviteController = {
             }
             // check if invite is gone, or otherwise non-existent
             if (invite == null) {
-              logger.log({ projectId }, 'no invite found for this token')
+              logger.debug({ projectId }, 'no invite found for this token')
               return _renderInvalidPage()
             }
             // check the user who sent the invite exists
@@ -313,7 +313,7 @@ module.exports = CollaboratorsInviteController = {
                   return next(err)
                 }
                 if (owner == null) {
-                  logger.log({ projectId }, 'no project owner found')
+                  logger.debug({ projectId }, 'no project owner found')
                   return _renderInvalidPage()
                 }
                 // fetch the project name
@@ -328,7 +328,7 @@ module.exports = CollaboratorsInviteController = {
                       return next(err)
                     }
                     if (project == null) {
-                      logger.log({ projectId }, 'no project found')
+                      logger.debug({ projectId }, 'no project found')
                       return _renderInvalidPage()
                     }
                     // finally render the invite
@@ -352,7 +352,7 @@ module.exports = CollaboratorsInviteController = {
     const projectId = req.params.Project_id
     const { token } = req.params
     const currentUser = SessionManager.getSessionUser(req.session)
-    logger.log(
+    logger.debug(
       { projectId, userId: currentUser._id },
       'got request to accept invite'
     )

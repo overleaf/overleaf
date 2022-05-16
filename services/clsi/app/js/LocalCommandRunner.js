@@ -17,7 +17,7 @@ const { spawn } = require('child_process')
 const _ = require('lodash')
 const logger = require('@overleaf/logger')
 
-logger.info('using standard command runner')
+logger.debug('using standard command runner')
 
 module.exports = CommandRunner = {
   run(
@@ -35,7 +35,7 @@ module.exports = CommandRunner = {
     command = Array.from(command).map(arg =>
       arg.toString().replace('$COMPILE_DIR', directory)
     )
-    logger.log({ project_id, command, directory }, 'running command')
+    logger.debug({ project_id, command, directory }, 'running command')
     logger.warn('timeouts and sandboxing are not enabled with CommandRunner')
 
     // merge environment settings
@@ -69,7 +69,7 @@ module.exports = CommandRunner = {
 
     proc.on('close', function (code, signal) {
       let err
-      logger.info({ code, signal, project_id }, 'command exited')
+      logger.debug({ code, signal, project_id }, 'command exited')
       if (signal === 'SIGTERM') {
         // signal from kill method below
         err = new Error('terminated')

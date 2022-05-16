@@ -127,10 +127,10 @@ const AdminController = {
   },
 
   writeAllToMongo(req, res) {
-    logger.log('writing all docs to mongo')
+    logger.debug('writing all docs to mongo')
     Settings.mongo.writeAll = true
     return DocumentUpdaterHandler.flushAllDocsToMongo(function () {
-      logger.log('all docs have been saved to mongo')
+      logger.debug('all docs have been saved to mongo')
       return res.sendStatus(200)
     })
   },

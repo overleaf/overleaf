@@ -24,13 +24,13 @@ module.exports = ProjectZipStreamManager = {
           return cb(error)
         }
         if (!project) {
-          logger.log(
+          logger.debug(
             { projectId },
             'cannot append project to zip stream: project not found'
           )
           return cb()
         }
-        logger.log(
+        logger.debug(
           { projectId, name: project.name },
           'appending project to zip stream'
         )
@@ -42,7 +42,10 @@ module.exports = ProjectZipStreamManager = {
             }
             archive.append(stream, { name: `${project.name}.zip` })
             stream.on('end', () => {
-              logger.log({ projectId, name: project.name }, 'zip stream ended')
+              logger.debug(
+                { projectId, name: project.name },
+                'zip stream ended'
+              )
               cb()
             })
           }
@@ -51,7 +54,7 @@ module.exports = ProjectZipStreamManager = {
     })
 
     async.series(jobs, () => {
-      logger.log(
+      logger.debug(
         { projectIds },
         'finished creating zip stream of multiple projects'
       )
@@ -97,7 +100,7 @@ module.exports = ProjectZipStreamManager = {
         if (path[0] === '/') {
           path = path.slice(1)
         }
-        logger.log({ projectId }, 'Adding doc')
+        logger.debug({ projectId }, 'Adding doc')
         archive.append(doc.lines.join('\n'), { name: path })
         setImmediate(cb)
       })

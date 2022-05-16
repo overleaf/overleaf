@@ -29,7 +29,10 @@ module.exports = TikzManager = {
     }
     for (const resource of Array.from(resources)) {
       if (resource.path === 'output.tex') {
-        logger.log({ compileDir, mainFile }, 'output.tex already in resources')
+        logger.debug(
+          { compileDir, mainFile },
+          'output.tex already in resources'
+        )
         return callback(null, false)
       }
     }
@@ -55,7 +58,7 @@ module.exports = TikzManager = {
                 : undefined) >= 0
             const usesPsTool =
               (content != null ? content.indexOf('{pstool}') : undefined) >= 0
-            logger.log(
+            logger.debug(
               { compileDir, mainFile, usesTikzExternalize, usesPsTool },
               'checked for packages needing main file as output.tex'
             )
@@ -82,7 +85,7 @@ module.exports = TikzManager = {
           if (error != null) {
             return callback(error)
           }
-          logger.log(
+          logger.debug(
             { compileDir, mainFile },
             'copied file to output.tex as project uses packages which require it'
           )

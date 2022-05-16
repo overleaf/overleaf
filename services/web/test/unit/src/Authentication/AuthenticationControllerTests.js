@@ -471,7 +471,7 @@ describe('AuthenticationController', function () {
       })
 
       it('should log the failed login', function () {
-        this.logger.log
+        this.logger.debug
           .calledWith({ email: this.email.toLowerCase() }, 'failed log in')
           .should.equal(true)
       })
@@ -911,7 +911,7 @@ describe('AuthenticationController', function () {
     })
 
     it('should log out a message', function () {
-      this.logger.log
+      this.logger.debug
         .calledWith(
           { url: this.url },
           'user not logged in so redirecting to register page'
@@ -1417,7 +1417,7 @@ describe('AuthenticationController', function () {
       })
 
       it('should log the successful login', function () {
-        this.logger.log
+        this.logger.debug
           .calledWith(
             { email: this.user.email, user_id: this.user._id.toString() },
             'successful log in'

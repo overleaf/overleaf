@@ -14,7 +14,7 @@ module.exports = {
   check(req, res) {
     metrics.inc('spelling-check', 0.1)
     const { token, wordCount } = extractCheckRequestData(req)
-    logger.info({ token, wordCount }, 'running check')
+    logger.debug({ token, wordCount }, 'running check')
     SpellingAPIManager.runRequest(token, req.body, function (error, result) {
       if (error != null) {
         logger.error(

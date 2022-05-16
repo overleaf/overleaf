@@ -229,7 +229,7 @@ module.exports = CompileController = {
             logger.err({ err }, 'error checking rate limit for pdf download')
             return res.sendStatus(500)
           } else if (!canContinue) {
-            logger.log(
+            logger.debug(
               { project_id, ip: req.ip },
               'rate limit hit downloading pdf'
             )

@@ -117,7 +117,7 @@ function getDocContext(projectId, docId, callback) {
                     //  3. web triggers (soft)-delete in docstore
                     // Specifically when an update comes in after 1
                     //  and before 3 completes.
-                    logger.info(
+                    logger.debug(
                       { projectId, docId },
                       'updating doc that is in process of getting soft-deleted'
                     )
@@ -174,7 +174,10 @@ const ProjectEntityUpdateHandler = {
         return callback(err)
       }
       const { projectName, isDeletedDoc, path } = ctx
-      logger.log({ projectId, docId }, 'telling docstore manager to update doc')
+      logger.debug(
+        { projectId, docId },
+        'telling docstore manager to update doc'
+      )
       DocstoreManager.updateDoc(
         projectId,
         docId,
@@ -189,7 +192,7 @@ const ProjectEntityUpdateHandler = {
             })
             return callback(err)
           }
-          logger.log(
+          logger.debug(
             { projectId, docId, modified },
             'finished updating doc lines'
           )
@@ -219,7 +222,7 @@ const ProjectEntityUpdateHandler = {
   },
 
   setRootDoc(projectId, newRootDocID, callback) {
-    logger.log({ projectId, rootDocId: newRootDocID }, 'setting root doc')
+    logger.debug({ projectId, rootDocId: newRootDocID }, 'setting root doc')
     if (projectId == null || newRootDocID == null) {
       return callback(
         new Errors.InvalidError('missing arguments (project or doc)')
@@ -251,7 +254,7 @@ const ProjectEntityUpdateHandler = {
   },
 
   unsetRootDoc(projectId, callback) {
-    logger.log({ projectId }, 'removing root doc')
+    logger.debug({ projectId }, 'removing root doc')
     Project.updateOne(
       { _id: projectId },
       { $unset: { rootDoc_id: true } },
@@ -758,7 +761,7 @@ const ProjectEntityUpdateHandler = {
               if (err != null) {
                 return callback(err)
               }
-              logger.log(
+              logger.debug(
                 { projectId, docId: existingDoc._id },
                 'notifying users that the document has been updated'
               )
@@ -1109,7 +1112,7 @@ const ProjectEntityUpdateHandler = {
     userId,
     callback
   ) {
-    logger.log({ entityId, entityType, projectId }, 'deleting project entity')
+    logger.debug({ entityId, entityType, projectId }, 'deleting project entity')
     if (entityType == null) {
       logger.warn({ err: 'No entityType set', projectId, entityId })
       return callback(new Error('No entityType set'))
@@ -1227,7 +1230,7 @@ const ProjectEntityUpdateHandler = {
     userId,
     callback
   ) {
-    logger.log(
+    logger.debug(
       { entityType, entityId, projectId, destFolderId },
       'moving entity'
     )
@@ -1283,7 +1286,7 @@ const ProjectEntityUpdateHandler = {
     if (!SafePath.isCleanFilename(newName)) {
       return callback(new Errors.InvalidNameError('invalid element name'))
     }
-    logger.log({ entityId, projectId }, `renaming ${entityType}`)
+    logger.debug({ entityId, projectId }, `renaming ${entityType}`)
     if (entityType == null) {
       logger.warn({ err: 'No entityType set', projectId, entityId })
       return callback(new Error('No entityType set'))

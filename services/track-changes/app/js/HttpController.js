@@ -30,7 +30,7 @@ module.exports = HttpController = {
     }
     const { doc_id } = req.params
     const { project_id } = req.params
-    logger.log({ project_id, doc_id }, 'compressing doc history')
+    logger.debug({ project_id, doc_id }, 'compressing doc history')
     return UpdatesManager.processUncompressedUpdatesWithLock(
       project_id,
       doc_id,
@@ -48,7 +48,7 @@ module.exports = HttpController = {
       next = function () {}
     }
     const { project_id } = req.params
-    logger.log({ project_id }, 'compressing project history')
+    logger.debug({ project_id }, 'compressing project history')
     return UpdatesManager.processUncompressedUpdatesForProject(
       project_id,
       function (error) {
@@ -66,7 +66,7 @@ module.exports = HttpController = {
       next = function () {}
     }
     const limit = req.query.limit != null ? parseInt(req.query.limit, 10) : -1
-    logger.log({ limit }, 'flushing all projects')
+    logger.debug({ limit }, 'flushing all projects')
     return UpdatesManager.flushAll(limit, function (error, result) {
       if (error != null) {
         return next(error)
@@ -78,7 +78,7 @@ module.exports = HttpController = {
           .status(200)
           .send(`${status}\nwould flush:\n${all.join('\n')}\n`)
       } else if (failed.length > 0) {
-        logger.log({ failed, succeeded }, 'error flushing projects')
+        logger.debug({ failed, succeeded }, 'error flushing projects')
         return res
           .status(500)
           .send(`${status}\nfailed to flush:\n${failed.join('\n')}\n`)
@@ -96,13 +96,13 @@ module.exports = HttpController = {
     if (next == null) {
       next = function () {}
     }
-    logger.log('checking dangling updates')
+    logger.debug('checking dangling updates')
     return UpdatesManager.getDanglingUpdates(function (error, result) {
       if (error != null) {
         return next(error)
       }
       if (result.length > 0) {
-        logger.log({ dangling: result }, 'found dangling updates')
+        logger.debug({ dangling: result }, 'found dangling updates')
         return res.status(500).send(`dangling updates:\n${result.join('\n')}\n`)
       } else {
         return res.status(200).send('no dangling updates found\n')
@@ -116,7 +116,7 @@ module.exports = HttpController = {
     }
     const { doc_id } = req.params
     const { project_id } = req.params
-    logger.log({ project_id, doc_id }, 'checking doc history')
+    logger.debug({ project_id, doc_id }, 'checking doc history')
     return DiffManager.getDocumentBeforeVersion(
       project_id,
       doc_id,
@@ -161,7 +161,7 @@ module.exports = HttpController = {
       to = null
     }
 
-    logger.log({ project_id, doc_id, from, to }, 'getting diff')
+    logger.debug({ project_id, doc_id, from, to }, 'getting diff')
     return DiffManager.getDiff(
       project_id,
       doc_id,
@@ -207,7 +207,7 @@ module.exports = HttpController = {
 
   zipProject(req, res, next) {
     const { project_id: projectId } = req.params
-    logger.log({ projectId }, 'exporting project history as zip file')
+    logger.debug({ projectId }, 'exporting project history as zip file')
     ZipManager.makeTempDirectory((err, tmpdir) => {
       if (err) {
         return next(err)
@@ -234,7 +234,7 @@ module.exports = HttpController = {
     //  - multiple updates form a pack
     // Flush updates per pack onto the wire.
     const { project_id } = req.params
-    logger.log({ project_id }, 'exporting project history')
+    logger.debug({ project_id }, 'exporting project history')
     UpdatesManager.exportProject(
       project_id,
       function (err, { updates, userIds }, confirmWrite) {
@@ -317,7 +317,7 @@ module.exports = HttpController = {
     }
     const { project_id } = req.params
     const { doc_id } = req.params
-    logger.log({ project_id, doc_id }, 'pushing all finalised changes to s3')
+    logger.debug({ project_id, doc_id }, 'pushing all finalised changes to s3')
     return PackManager.pushOldPacks(project_id, doc_id, function (error) {
       if (error != null) {
         return next(error)
@@ -332,7 +332,7 @@ module.exports = HttpController = {
     }
     const { project_id } = req.params
     const { doc_id } = req.params
-    logger.log({ project_id, doc_id }, 'pulling all packs from s3')
+    logger.debug({ project_id, doc_id }, 'pulling all packs from s3')
     return PackManager.pullOldPacks(project_id, doc_id, function (error) {
       if (error != null) {
         return next(error)

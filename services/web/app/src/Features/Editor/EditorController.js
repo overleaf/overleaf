@@ -356,7 +356,7 @@ const EditorController = {
     if (callback == null) {
       callback = function () {}
     }
-    logger.log({ project_id, path }, "making directories if they don't exist")
+    logger.debug({ project_id, path }, "making directories if they don't exist")
     return ProjectEntityUpdateHandler.mkdirp(
       project_id,
       path,
@@ -402,7 +402,7 @@ const EditorController = {
           })
           return callback(err)
         }
-        logger.log(
+        logger.debug(
           { project_id, entity_id, entityType },
           'telling users entity has been deleted'
         )
@@ -441,7 +441,7 @@ const EditorController = {
     if (callback == null) {
       callback = function () {}
     }
-    logger.log({ project_id, description }, 'updating project description')
+    logger.debug({ project_id, description }, 'updating project description')
     return ProjectDetailsHandler.setProjectDescription(
       project_id,
       description,

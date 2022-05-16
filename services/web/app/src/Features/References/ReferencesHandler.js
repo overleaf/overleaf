@@ -29,7 +29,7 @@ const oneMinInMs = 60 * 1000
 const fiveMinsInMs = oneMinInMs * 5
 
 if (!Features.hasFeature('references')) {
-  logger.log('references search not enabled')
+  logger.debug('references search not enabled')
 }
 
 module.exports = ReferencesHandler = {
@@ -117,7 +117,7 @@ module.exports = ReferencesHandler = {
             new Errors.NotFoundError(`project does not exist: ${projectId}`)
           )
         }
-        logger.log({ projectId }, 'indexing all bib files in project')
+        logger.debug({ projectId }, 'indexing all bib files in project')
         const docIds = ReferencesHandler._findBibDocIds(project)
         const fileIds = ReferencesHandler._findBibFileIds(project)
         return ReferencesHandler._doIndexOperation(
@@ -172,7 +172,7 @@ module.exports = ReferencesHandler = {
         })
         return callback(err)
       }
-      logger.log(
+      logger.debug(
         { projectId, docIds },
         'flushing docs to mongo before calling references service'
       )
@@ -213,7 +213,7 @@ module.exports = ReferencesHandler = {
                 return callback(err)
               }
               if (res.statusCode >= 200 && res.statusCode < 300) {
-                logger.log({ projectId }, 'got keys from references api')
+                logger.debug({ projectId }, 'got keys from references api')
                 return callback(null, data)
               } else {
                 err = new Error(

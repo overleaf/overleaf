@@ -33,7 +33,7 @@ module.exports = {
       if (!languageCodeIsSupported(language)) {
         // this log statement can be changed to 'error' once projects with
         // unsupported languages are removed from the DB
-        logger.info({ language }, 'language not supported')
+        logger.debug({ language }, 'language not supported')
         return res.status(422).json({ misspellings: [] })
       }
     }

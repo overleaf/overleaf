@@ -64,7 +64,7 @@ if (!source.match(/^[0-9]+$/)) {
 
 let shutDownRequested = false
 const shutDownTimer = setTimeout(function () {
-  logger.log('pack timed out, requesting shutdown')
+  logger.debug('pack timed out, requesting shutdown')
   // start the shutdown on the next pack
   shutDownRequested = true
   // do a hard shutdown after a further 5 minutes
@@ -75,20 +75,20 @@ const shutDownTimer = setTimeout(function () {
   return hardTimeout.unref()
 }, TIMEOUT)
 
-logger.log(
+logger.debug(
   `checking for updates, limit=${LIMIT}, delay=${DOCUMENT_PACK_DELAY}, timeout=${TIMEOUT}`
 )
 
 const finish = function () {
   if (shutDownTimer != null) {
-    logger.log('cancelling timeout')
+    logger.debug('cancelling timeout')
     clearTimeout(shutDownTimer)
   }
-  logger.log('closing db')
+  logger.debug('closing db')
   callbackify(closeDb)(function () {
-    logger.log('closing LockManager Redis Connection')
+    logger.debug('closing LockManager Redis Connection')
     return LockManager.close(function () {
-      logger.log(
+      logger.debug(
         { processedCount: COUNT, allCount: TOTAL },
         'ready to exit from pack archive worker'
       )
@@ -101,7 +101,7 @@ const finish = function () {
   })
 }
 
-process.on('exit', code => logger.log({ code }, 'pack archive worker exited'))
+process.on('exit', code => logger.debug({ code }, 'pack archive worker exited'))
 
 const processUpdates = pending =>
   async.eachSeries(
@@ -110,9 +110,9 @@ const processUpdates = pending =>
       let _id
       ;({ _id, project_id, doc_id } = result)
       COUNT++
-      logger.log({ project_id, doc_id }, `processing ${COUNT}/${TOTAL}`)
+      logger.debug({ project_id, doc_id }, `processing ${COUNT}/${TOTAL}`)
       if (project_id == null || doc_id == null) {
-        logger.log(
+        logger.debug(
           { project_id, doc_id },
           'skipping pack, missing project/doc id'
         )
@@ -164,7 +164,7 @@ const ObjectIdFromDate = function (date) {
 waitForDb()
   .then(() => {
     if (pending != null) {
-      logger.log(`got ${pending.length} entries from ${source}`)
+      logger.debug(`got ${pending.length} entries from ${source}`)
       processUpdates(pending)
     } else {
       processFromOneWeekAgo()
@@ -194,13 +194,13 @@ function processFromOneWeekAgo() {
     .limit(LIMIT)
     .toArray(function (err, results) {
       if (err != null) {
-        logger.log({ err }, 'error checking for updates')
+        logger.debug({ err }, 'error checking for updates')
         finish()
         return
       }
       pending = _.uniq(results, false, result => result.doc_id.toString())
       TOTAL = pending.length
-      logger.log(`found ${TOTAL} documents to archive`)
+      logger.debug(`found ${TOTAL} documents to archive`)
       return processUpdates(pending)
     })
 }

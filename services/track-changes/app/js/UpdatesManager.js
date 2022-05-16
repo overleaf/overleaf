@@ -182,7 +182,7 @@ module.exports = UpdatesManager = {
               return callback(error)
             }
             if (result != null) {
-              logger.log(
+              logger.debug(
                 {
                   project_id,
                   doc_id,
@@ -257,7 +257,7 @@ module.exports = UpdatesManager = {
               )
               return callback(error)
             }
-            logger.log(
+            logger.debug(
               { project_id, doc_id, rawUpdates },
               'retrieved raw updates from redis'
             )
@@ -270,7 +270,7 @@ module.exports = UpdatesManager = {
                 if (error != null) {
                   return callback(error)
                 }
-                logger.log(
+                logger.debug(
                   { project_id, doc_id },
                   'compressed and saved doc updates'
                 )
@@ -285,7 +285,7 @@ module.exports = UpdatesManager = {
                     }
                     if (length === UpdatesManager.REDIS_READ_BATCH_SIZE) {
                       // There might be more updates
-                      logger.log(
+                      logger.debug(
                         { project_id, doc_id },
                         'continuing processing updates'
                       )
@@ -300,7 +300,7 @@ module.exports = UpdatesManager = {
                         0
                       )
                     } else {
-                      logger.log(
+                      logger.debug(
                         { project_id, doc_id },
                         'all raw updates processed'
                       )
@@ -416,7 +416,7 @@ module.exports = UpdatesManager = {
       if (error != null) {
         return callback(error)
       }
-      logger.log(
+      logger.debug(
         {
           count: project_ids != null ? project_ids.length : undefined,
           project_ids,
@@ -497,7 +497,7 @@ module.exports = UpdatesManager = {
         return task(function (error, project_doc_ids) {
           if (error) return callback(error)
           const dangling_doc_ids = _.difference(all_doc_ids, project_doc_ids)
-          logger.log(
+          logger.debug(
             { all_doc_ids, all_project_ids, project_doc_ids, dangling_doc_ids },
             'checking for dangling doc ids'
           )

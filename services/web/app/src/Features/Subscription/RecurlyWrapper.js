@@ -62,7 +62,7 @@ const RecurlyWrapper = {
     checkAccountExists(cache, next) {
       const { user } = cache
       const { subscriptionDetails } = cache
-      logger.log(
+      logger.debug(
         { user_id: user._id },
         'checking if recurly account exists for user'
       )
@@ -85,14 +85,17 @@ const RecurlyWrapper = {
           }
           if (response.statusCode === 404) {
             // actually not an error in this case, just no existing account
-            logger.log(
+            logger.debug(
               { user_id: user._id },
               'user does not currently exist in recurly, proceed'
             )
             cache.userExists = false
             return next(null, cache)
           }
-          logger.log({ user_id: user._id }, 'user appears to exist in recurly')
+          logger.debug(
+            { user_id: user._id },
+            'user appears to exist in recurly'
+          )
           return RecurlyWrapper._parseAccountXml(
             responseBody,
             function (err, account) {
@@ -176,7 +179,7 @@ const RecurlyWrapper = {
       const { user } = cache
       const { recurlyTokenIds } = cache
       const { subscriptionDetails } = cache
-      logger.log({ user_id: user._id }, 'creating billing info in recurly')
+      logger.debug({ user_id: user._id }, 'creating billing info in recurly')
       const accountCode = __guard__(
         cache != null ? cache.account : undefined,
         x1 => x1.account_code
@@ -231,7 +234,7 @@ const RecurlyWrapper = {
     setAddressAndCompanyBillingInfo(cache, next) {
       const { user } = cache
       const { subscriptionDetails } = cache
-      logger.log(
+      logger.debug(
         { user_id: user._id },
         'setting billing address and company info in recurly'
       )
@@ -303,7 +306,7 @@ const RecurlyWrapper = {
     createSubscription(cache, next) {
       const { user } = cache
       const { subscriptionDetails } = cache
-      logger.log({ user_id: user._id }, 'creating subscription in recurly')
+      logger.debug({ user_id: user._id }, 'creating subscription in recurly')
       const data = {
         plan_code: subscriptionDetails.plan_code,
         currency: subscriptionDetails.currencyCode,
@@ -367,7 +370,7 @@ const RecurlyWrapper = {
     recurlyTokenIds,
     callback
   ) {
-    logger.log(
+    logger.debug(
       { user_id: user._id },
       'starting process of creating paypal subscription'
     )
@@ -397,7 +400,7 @@ const RecurlyWrapper = {
           })
           return callback(err)
         }
-        logger.log(
+        logger.debug(
           { user_id: user._id },
           'done creating paypal subscription for user'
         )
@@ -467,7 +470,7 @@ const RecurlyWrapper = {
 
   createSubscription(user, subscriptionDetails, recurlyTokenIds, callback) {
     const { isPaypal } = subscriptionDetails
-    logger.log(
+    logger.debug(
       { user_id: user._id, isPaypal },
       'setting up subscription in recurly'
     )
@@ -615,7 +618,7 @@ const RecurlyWrapper = {
           }
           const items = data[resource]
           allItems = allItems.concat(items)
-          logger.log(
+          logger.debug(
             `got another ${items.length}, total now ${allItems.length}`
           )
           cursor = __guard__(
@@ -736,7 +739,7 @@ const RecurlyWrapper = {
   },
 
   updateSubscription(subscriptionId, options, callback) {
-    logger.log(
+    logger.debug(
       { subscriptionId, options },
       'telling recurly to update subscription'
     )
@@ -796,7 +799,7 @@ const RecurlyWrapper = {
       )
     }
 
-    logger.log({ coupon_code, requestBody }, 'creating coupon')
+    logger.debug({ coupon_code, requestBody }, 'creating coupon')
     return RecurlyWrapper.apiRequest(
       {
         url: 'coupons',
@@ -840,7 +843,7 @@ const RecurlyWrapper = {
       )
     }
 
-    logger.log(
+    logger.debug(
       { account_code, coupon_code, requestBody },
       'redeeming coupon for user'
     )
@@ -868,7 +871,7 @@ const RecurlyWrapper = {
     }
     const next_renewal_date = new Date()
     next_renewal_date.setDate(next_renewal_date.getDate() + daysUntilExpire)
-    logger.log(
+    logger.debug(
       { subscriptionId, daysUntilExpire },
       'Exending Free trial for user'
     )

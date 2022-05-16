@@ -112,7 +112,7 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
     const cdnBlocked = req.query.nocdn === 'true' || req.session.cdnBlocked
     const userId = SessionManager.getLoggedInUserId(req.session)
     if (cdnBlocked && req.session.cdnBlocked == null) {
-      logger.log(
+      logger.debug(
         { user_id: userId, ip: req != null ? req.ip : undefined },
         'cdnBlocked for user, not using it and turning it off for future requets'
       )

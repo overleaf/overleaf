@@ -258,13 +258,13 @@ Settings.processTooOld = false
 if (Settings.processLifespanLimitMs) {
   Settings.processLifespanLimitMs +=
     Settings.processLifespanLimitMs * (Math.random() / 10)
-  logger.info(
+  logger.debug(
     'Lifespan limited to ',
     Date.now() + Settings.processLifespanLimitMs
   )
 
   setTimeout(() => {
-    logger.log('shutting down, process is too old')
+    logger.debug('shutting down, process is too old')
     Settings.processTooOld = true
   }, Settings.processLifespanLimitMs)
 }
@@ -276,10 +276,10 @@ function runSmokeTest() {
     smokeTest.lastRunSuccessful() &&
     Date.now() - CompileController.lastSuccessfulCompile < INTERVAL / 2
   ) {
-    logger.log('skipping smoke tests, got recent successful user compile')
+    logger.debug('skipping smoke tests, got recent successful user compile')
     return setTimeout(runSmokeTest, INTERVAL / 2)
   }
-  logger.log('running smoke tests')
+  logger.debug('running smoke tests')
   smokeTest.triggerRun(err => {
     if (err) logger.error({ err }, 'smoke tests failed')
     setTimeout(runSmokeTest, INTERVAL)
@@ -300,7 +300,7 @@ app.get('/smoke_test_force', (req, res) => smokeTest.sendNewResult(res))
 
 app.use(function (error, req, res, next) {
   if (error instanceof Errors.NotFoundError) {
-    logger.log({ err: error, url: req.url }, 'not found error')
+    logger.debug({ err: error, url: req.url }, 'not found error')
     return res.sendStatus(404)
   } else if (error.code === 'EPIPE') {
     // inspect container returns EPIPE when shutting down
@@ -362,19 +362,19 @@ const loadHttpServer = express()
 
 loadHttpServer.post('/state/up', function (req, res, next) {
   STATE = 'up'
-  logger.info('getting message to set server to down')
+  logger.debug('getting message to set server to down')
   return res.sendStatus(204)
 })
 
 loadHttpServer.post('/state/down', function (req, res, next) {
   STATE = 'down'
-  logger.info('getting message to set server to down')
+  logger.debug('getting message to set server to down')
   return res.sendStatus(204)
 })
 
 loadHttpServer.post('/state/maint', function (req, res, next) {
   STATE = 'maint'
-  logger.info('getting message to set server to maint')
+  logger.debug('getting message to set server to maint')
   return res.sendStatus(204)
 })
 
@@ -407,7 +407,7 @@ if (!module.parent) {
     if (error) {
       logger.fatal({ error }, `Error starting CLSI on ${host}:${port}`)
     } else {
-      logger.info(`CLSI starting up, listening on ${host}:${port}`)
+      logger.debug(`CLSI starting up, listening on ${host}:${port}`)
     }
   })
 
@@ -415,14 +415,16 @@ if (!module.parent) {
     if (error != null) {
       throw error
     }
-    return logger.info(`Load tcp agent listening on load port ${loadTcpPort}`)
+    return logger.debug(`Load tcp agent listening on load port ${loadTcpPort}`)
   })
 
   loadHttpServer.listen(loadHttpPort, host, function (error) {
     if (error != null) {
       throw error
     }
-    return logger.info(`Load http agent listening on load port ${loadHttpPort}`)
+    return logger.debug(
+      `Load http agent listening on load port ${loadHttpPort}`
+    )
   })
 }
 

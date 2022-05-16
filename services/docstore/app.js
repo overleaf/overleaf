@@ -109,7 +109,9 @@ if (!module.parent) {
           logger.fatal({ err }, `Cannot bind to ${host}:${port}. Exiting.`)
           process.exit(1)
         }
-        return logger.info(`Docstore starting up, listening on ${host}:${port}`)
+        return logger.debug(
+          `Docstore starting up, listening on ${host}:${port}`
+        )
       })
       server.timeout = 120000
       server.keepAliveTimeout = 5000

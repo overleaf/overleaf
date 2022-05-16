@@ -106,7 +106,10 @@ const UserRegistrationHandler = {
         }
 
         if (error && error.message === 'EmailAlreadyRegistered') {
-          logger.log({ email }, 'user already exists, resending welcome email')
+          logger.debug(
+            { email },
+            'user already exists, resending welcome email'
+          )
         }
 
         const ONE_WEEK = 7 * 24 * 60 * 60 // seconds

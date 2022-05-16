@@ -25,14 +25,14 @@ function getClient() {
   if (EMAIL_SETTINGS.parameters) {
     const emailParameters = EMAIL_SETTINGS.parameters
     if (emailParameters.AWSAccessKeyID || EMAIL_SETTINGS.driver === 'ses') {
-      logger.log('using aws ses for email')
+      logger.debug('using aws ses for email')
       client = nodemailer.createTransport(sesTransport(emailParameters))
     } else if (emailParameters.sendgridApiKey) {
       throw new OError(
         'sendgridApiKey configuration option is deprecated, use SMTP instead'
       )
     } else if (emailParameters.MandrillApiKey) {
-      logger.log('using mandril for email')
+      logger.debug('using mandril for email')
       client = nodemailer.createTransport(
         mandrillTransport({
           auth: {
@@ -41,7 +41,7 @@ function getClient() {
         })
       )
     } else {
-      logger.log('using smtp for email')
+      logger.debug('using smtp for email')
       const smtp = _.pick(
         emailParameters,
         'host',
@@ -60,7 +60,7 @@ function getClient() {
     )
     client = {
       async sendMail(options) {
-        logger.log({ options }, 'Would send email if enabled.')
+        logger.debug({ options }, 'Would send email if enabled.')
       },
     }
   }
@@ -71,7 +71,7 @@ async function sendEmail(options) {
   try {
     const canContinue = await checkCanSendEmail(options)
     if (!canContinue) {
-      logger.log(
+      logger.debug(
         {
           sendingUser_id: options.sendingUser_id,
           to: options.to,

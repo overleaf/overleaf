@@ -22,7 +22,7 @@ async function sendThreadMessage(req, res) {
 
 async function getAllThreads(req, res) {
   const { projectId } = req.params
-  logger.log({ projectId }, 'getting all threads')
+  logger.debug({ projectId }, 'getting all threads')
   const rooms = await ThreadManager.findAllThreadRooms(projectId)
   const roomIds = rooms.map(r => r._id)
   const messages = await MessageManager.findAllMessagesInRooms(roomIds)
@@ -33,21 +33,21 @@ async function getAllThreads(req, res) {
 async function resolveThread(req, res) {
   const { projectId, threadId } = req.params
   const { user_id: userId } = req.body
-  logger.log({ userId, projectId, threadId }, 'marking thread as resolved')
+  logger.debug({ userId, projectId, threadId }, 'marking thread as resolved')
   await ThreadManager.resolveThread(projectId, threadId, userId)
   res.sendStatus(204)
 }
 
 async function reopenThread(req, res) {
   const { projectId, threadId } = req.params
-  logger.log({ projectId, threadId }, 'reopening thread')
+  logger.debug({ projectId, threadId }, 'reopening thread')
   await ThreadManager.reopenThread(projectId, threadId)
   res.sendStatus(204)
 }
 
 async function deleteThread(req, res) {
   const { projectId, threadId } = req.params
-  logger.log({ projectId, threadId }, 'deleting thread')
+  logger.debug({ projectId, threadId }, 'deleting thread')
   const roomId = await ThreadManager.deleteThread(projectId, threadId)
   await MessageManager.deleteAllMessagesInRoom(roomId)
   res.sendStatus(204)
@@ -56,7 +56,7 @@ async function deleteThread(req, res) {
 async function editMessage(req, res) {
   const { content, userId } = req.body
   const { projectId, threadId, messageId } = req.params
-  logger.log({ projectId, threadId, messageId, content }, 'editing message')
+  logger.debug({ projectId, threadId, messageId, content }, 'editing message')
   const room = await ThreadManager.findOrCreateThread(projectId, threadId)
   const found = await MessageManager.updateMessage(
     room._id,
@@ -73,7 +73,7 @@ async function editMessage(req, res) {
 
 async function deleteMessage(req, res) {
   const { projectId, threadId, messageId } = req.params
-  logger.log({ projectId, threadId, messageId }, 'deleting message')
+  logger.debug({ projectId, threadId, messageId }, 'deleting message')
   const room = await ThreadManager.findOrCreateThread(projectId, threadId)
   await MessageManager.deleteMessage(room._id, messageId)
   res.sendStatus(204)
@@ -81,12 +81,12 @@ async function deleteMessage(req, res) {
 
 async function destroyProject(req, res) {
   const { projectId } = req.params
-  logger.log({ projectId }, 'destroying project')
+  logger.debug({ projectId }, 'destroying project')
   const rooms = await ThreadManager.findAllThreadRoomsAndGlobalThread(projectId)
   const roomIds = rooms.map(r => r._id)
-  logger.log({ projectId, roomIds }, 'deleting all messages in rooms')
+  logger.debug({ projectId, roomIds }, 'deleting all messages in rooms')
   await MessageManager.deleteAllMessagesInRooms(roomIds)
-  logger.log({ projectId }, 'deleting all threads in project')
+  logger.debug({ projectId }, 'deleting all threads in project')
   await ThreadManager.deleteAllThreadsInProject(projectId)
   res.sendStatus(204)
 }
@@ -105,7 +105,7 @@ async function _sendMessage(clientThreadId, req, res) {
       .status(400)
       .send(`Content too long (> ${MAX_MESSAGE_LENGTH} bytes)`)
   }
-  logger.log(
+  logger.debug(
     { clientThreadId, projectId, userId, content },
     'new message received'
   )
@@ -137,7 +137,7 @@ async function _getMessages(clientThreadId, req, res) {
   } else {
     limit = DEFAULT_MESSAGE_LIMIT
   }
-  logger.log(
+  logger.debug(
     { limit, before, projectId, clientThreadId },
     'get message request received'
   )
@@ -146,13 +146,13 @@ async function _getMessages(clientThreadId, req, res) {
     clientThreadId
   )
   const threadObjectId = thread._id
-  logger.log(
+  logger.debug(
     { limit, before, projectId, clientThreadId, threadObjectId },
     'found or created thread'
   )
   let messages = await MessageManager.getMessages(threadObjectId, limit, before)
   messages = MessageFormatter.formatMessagesForClientSide(messages)
-  logger.log({ projectId, messages }, 'got messages')
+  logger.debug({ projectId, messages }, 'got messages')
   res.status(200).send(messages)
 }
 

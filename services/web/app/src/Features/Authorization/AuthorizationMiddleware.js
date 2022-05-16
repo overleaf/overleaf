@@ -64,10 +64,10 @@ async function ensureUserCanReadProject(req, res, next) {
     token
   )
   if (canRead) {
-    logger.log({ userId, projectId }, 'allowing user read access to project')
+    logger.debug({ userId, projectId }, 'allowing user read access to project')
     return next()
   }
-  logger.log({ userId, projectId }, 'denying user read access to project')
+  logger.debug({ userId, projectId }, 'denying user read access to project')
   HttpErrorHandler.forbidden(req, res)
 }
 
@@ -114,13 +114,13 @@ async function ensureUserCanWriteProjectContent(req, res, next) {
       token
     )
   if (canWrite) {
-    logger.log(
+    logger.debug(
       { userId, projectId },
       'allowing user write access to project content'
     )
     return next()
   }
-  logger.log(
+  logger.debug(
     { userId, projectId },
     'denying user write access to project settings'
   )
@@ -137,21 +137,21 @@ async function ensureUserCanAdminProject(req, res, next) {
     token
   )
   if (canAdmin) {
-    logger.log({ userId, projectId }, 'allowing user admin access to project')
+    logger.debug({ userId, projectId }, 'allowing user admin access to project')
     return next()
   }
-  logger.log({ userId, projectId }, 'denying user admin access to project')
+  logger.debug({ userId, projectId }, 'denying user admin access to project')
   HttpErrorHandler.forbidden(req, res)
 }
 
 async function ensureUserIsSiteAdmin(req, res, next) {
   const userId = _getUserId(req)
   if (await AuthorizationManager.promises.isUserSiteAdmin(userId)) {
-    logger.log({ userId }, 'allowing user admin access to site')
+    logger.debug({ userId }, 'allowing user admin access to site')
     return next()
   }
   if (handleAdminDomainRedirect(req, res)) return
-  logger.log({ userId }, 'denying user admin access to site')
+  logger.debug({ userId }, 'denying user admin access to site')
   _redirectToRestricted(req, res, next)
 }
 
@@ -184,7 +184,7 @@ function restricted(req, res, next) {
     return res.render('user/restricted', { title: 'restricted' })
   }
   const { from } = req.query
-  logger.log({ from }, 'redirecting to login')
+  logger.debug({ from }, 'redirecting to login')
   if (from) {
     AuthenticationController.setRedirectInSession(req, from)
   }

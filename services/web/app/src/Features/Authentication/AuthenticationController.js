@@ -190,7 +190,7 @@ const AuthenticationController = {
             return done(err)
           }
           if (!isAllowed) {
-            logger.log({ email }, 'too many login requests')
+            logger.debug({ email }, 'too many login requests')
             return done(null, null, {
               text: req.i18n.translate('to_many_login_requests_2_mins'),
               type: 'error',
@@ -222,7 +222,7 @@ const AuthenticationController = {
                 done(null, user)
               } else {
                 AuthenticationController._recordFailedLogin()
-                logger.log({ email }, 'failed log in')
+                logger.debug({ email }, 'failed log in')
                 done(null, false, {
                   text: req.i18n.translate('email_or_password_wrong_try_again'),
                   type: 'error',
@@ -372,7 +372,7 @@ const AuthenticationController = {
     } else if (SessionManager.isUserLoggedIn(req.session)) {
       next()
     } else {
-      logger.log(
+      logger.debug(
         { url: req.url },
         'user trying to access endpoint not in global whitelist'
       )
@@ -475,7 +475,7 @@ const AuthenticationController = {
   },
 
   _redirectToLoginPage(req, res) {
-    logger.log(
+    logger.debug(
       { url: req.url },
       'user not logged in so redirecting to login page'
     )
@@ -486,7 +486,7 @@ const AuthenticationController = {
   },
 
   _redirectToReconfirmPage(req, res, user) {
-    logger.log(
+    logger.debug(
       { url: req.url },
       'user needs to reconfirm so redirecting to reconfirm page'
     )
@@ -496,7 +496,7 @@ const AuthenticationController = {
   },
 
   _redirectToRegisterPage(req, res) {
-    logger.log(
+    logger.debug(
       { url: req.url },
       'user not logged in so redirecting to register page'
     )
@@ -617,7 +617,7 @@ function _loginAsyncHandlers(req, user, anonymousAnalyticsId, isNewUser) {
   })
   Analytics.identifyUser(user._id, anonymousAnalyticsId, isNewUser)
 
-  logger.log(
+  logger.debug(
     { email: user.email, user_id: user._id.toString() },
     'successful log in'
   )

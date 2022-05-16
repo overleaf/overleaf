@@ -8,7 +8,7 @@ const SessionManager = require('../Authentication/SessionManager')
 const BetaProgramController = {
   optIn(req, res, next) {
     const userId = SessionManager.getLoggedInUserId(req.session)
-    logger.log({ userId }, 'user opting in to beta program')
+    logger.debug({ userId }, 'user opting in to beta program')
     if (userId == null) {
       return next(new Error('no user id in session'))
     }
@@ -22,7 +22,7 @@ const BetaProgramController = {
 
   optOut(req, res, next) {
     const userId = SessionManager.getLoggedInUserId(req.session)
-    logger.log({ userId }, 'user opting out of beta program')
+    logger.debug({ userId }, 'user opting out of beta program')
     if (userId == null) {
       return next(new Error('no user id in session'))
     }
@@ -36,7 +36,10 @@ const BetaProgramController = {
 
   optInPage(req, res, next) {
     const userId = SessionManager.getLoggedInUserId(req.session)
-    logger.log({ user_id: userId }, 'showing beta participation page for user')
+    logger.debug(
+      { user_id: userId },
+      'showing beta participation page for user'
+    )
     UserGetter.getUser(userId, function (err, user) {
       if (err) {
         OError.tag(err, 'error fetching user', {

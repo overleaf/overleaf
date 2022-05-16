@@ -289,7 +289,10 @@ module.exports = DocManager = {
             if (updateRanges) {
               update.ranges = ranges
             }
-            logger.log({ project_id, doc_id }, 'updating doc lines and ranges')
+            logger.debug(
+              { project_id, doc_id },
+              'updating doc lines and ranges'
+            )
 
             modified = true
             rev += 1 // rev will be incremented in mongo by MongoManager.upsertIntoDocCollection
@@ -300,7 +303,7 @@ module.exports = DocManager = {
               cb
             )
           } else {
-            logger.log(
+            logger.debug(
               { project_id, doc_id },
               'doc lines have not changed - not updating'
             )
@@ -310,7 +313,7 @@ module.exports = DocManager = {
 
         const updateVersionIfNeeded = function (cb) {
           if (updateVersion) {
-            logger.log(
+            logger.debug(
               {
                 project_id,
                 doc_id,
@@ -322,7 +325,7 @@ module.exports = DocManager = {
             modified = true
             return MongoManager.setDocVersion(doc_id, version, cb)
           } else {
-            logger.log(
+            logger.debug(
               { project_id, doc_id, version },
               'doc version has not changed - not updating'
             )

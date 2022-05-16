@@ -233,7 +233,7 @@ const removeLegacyInvite = (subscriptionId, email, callback) =>
 
 function checkIfInviteIsPossible(subscription, email, callback) {
   if (!subscription.groupPlan) {
-    logger.log(
+    logger.debug(
       { subscriptionId: subscription.id },
       'can not add members to a subscription that is not in a group plan'
     )
@@ -241,7 +241,7 @@ function checkIfInviteIsPossible(subscription, email, callback) {
   }
 
   if (LimitationsManager.teamHasReachedMemberLimit(subscription)) {
-    logger.log(
+    logger.debug(
       { subscriptionId: subscription.id },
       'team has reached member limit'
     )
@@ -261,7 +261,7 @@ function checkIfInviteIsPossible(subscription, email, callback) {
     )
 
     if (existingMember) {
-      logger.log(
+      logger.debug(
         { subscriptionId: subscription.id, email },
         'user already in team'
       )

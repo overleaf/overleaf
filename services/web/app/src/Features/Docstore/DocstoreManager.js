@@ -130,7 +130,7 @@ function getDoc(projectId, docId, options, callback) {
       return callback(error)
     }
     if (res.statusCode >= 200 && res.statusCode < 300) {
-      logger.log(
+      logger.debug(
         { docId, projectId, version: doc.version, rev: doc.rev },
         'got doc from docstore api'
       )
@@ -199,7 +199,10 @@ function updateDoc(projectId, docId, lines, version, ranges, callback) {
         return callback(error)
       }
       if (res.statusCode >= 200 && res.statusCode < 300) {
-        logger.log({ projectId, docId }, 'update doc in docstore url finished')
+        logger.debug(
+          { projectId, docId },
+          'update doc in docstore url finished'
+        )
         callback(null, result.modified, result.rev)
       } else {
         error = new OError(
@@ -226,7 +229,7 @@ function destroyProject(projectId, callback) {
 
 function _operateOnProject(projectId, method, callback) {
   const url = `${settings.apis.docstore.url}/project/${projectId}/${method}`
-  logger.log({ projectId }, `calling ${method} for project in docstore`)
+  logger.debug({ projectId }, `calling ${method} for project in docstore`)
   // use default timeout for archiving/unarchiving/destroying
   request.post(url, (err, res, docs) => {
     if (err) {

@@ -219,7 +219,7 @@ const ArchiveManager = {
       }
 
       const timer = new metrics.Timer('unzipDirectory')
-      logger.log({ source, destination }, 'unzipping file')
+      logger.debug({ source, destination }, 'unzipping file')
 
       return ArchiveManager._extractZipFiles(
         source,

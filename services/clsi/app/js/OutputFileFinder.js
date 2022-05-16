@@ -53,7 +53,7 @@ module.exports = OutputFileFinder = {
       'f',
       '-print',
     ]
-    logger.log({ args }, 'running find command')
+    logger.debug({ args }, 'running find command')
 
     const proc = spawn('find', args)
     let stdout = ''

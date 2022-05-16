@@ -21,7 +21,7 @@ module.exports = DocumentUpdaterManager = {
       callback = function () {}
     }
 
-    logger.log({ project_id, doc_id }, 'getting doc from document updater')
+    logger.debug({ project_id, doc_id }, 'getting doc from document updater')
     return request.get(url, function (error, res, body) {
       if (error != null) {
         return callback(error)
@@ -33,7 +33,7 @@ module.exports = DocumentUpdaterManager = {
           error = error1
           return callback(error)
         }
-        logger.log(
+        logger.debug(
           { project_id, doc_id, version: body.version },
           'got doc from document updater'
         )
@@ -66,7 +66,7 @@ module.exports = DocumentUpdaterManager = {
       callback = function () {}
     }
     const url = `${Settings.apis.documentupdater.url}/project/${project_id}/doc/${doc_id}`
-    logger.log({ project_id, doc_id }, 'setting doc in document updater')
+    logger.debug({ project_id, doc_id }, 'setting doc in document updater')
     return request.post(
       {
         url,

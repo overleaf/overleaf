@@ -147,7 +147,7 @@ async function checkAndGetProjectOrResponseAction(
   if (isAnonymousUser && tokenAccessEnabled) {
     if (tokenType === TokenAccessHandler.TOKEN_TYPES.READ_AND_WRITE) {
       if (TokenAccessHandler.ANONYMOUS_READ_AND_WRITE_ENABLED) {
-        logger.info({ projectId }, 'granting read-write anonymous access')
+        logger.debug({ projectId }, 'granting read-write anonymous access')
         TokenAccessHandler.grantSessionTokenAccess(req, projectId, token)
         return [
           null,
@@ -178,7 +178,7 @@ async function checkAndGetProjectOrResponseAction(
         ]
       }
     } else if (tokenType === TokenAccessHandler.TOKEN_TYPES.READ_ONLY) {
-      logger.info({ projectId }, 'granting read-only anonymous access')
+      logger.debug({ projectId }, 'granting read-only anonymous access')
       TokenAccessHandler.grantSessionTokenAccess(req, projectId, token)
       return [
         null,

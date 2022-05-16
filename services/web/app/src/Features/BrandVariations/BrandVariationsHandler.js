@@ -13,7 +13,7 @@ function getBrandVariationById(brandVariationId, callback) {
   if (brandVariationId == null || brandVariationId === '') {
     return callback(new Error('Branding variation id not provided'))
   }
-  logger.log({ brandVariationId }, 'fetching brand variation details from v1')
+  logger.debug({ brandVariationId }, 'fetching brand variation details from v1')
   V1Api.request(
     {
       uri: `/api/v2/brand_variations/${brandVariationId}`,

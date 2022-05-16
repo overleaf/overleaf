@@ -69,7 +69,7 @@ function doCompile(request, callback) {
     COMPILE_TIME_BUCKETS
   )
   const timer = new Metrics.Timer('write-to-disk', 1, request.metricsOpts)
-  logger.log(
+  logger.debug(
     { projectId: request.project_id, userId: request.user_id },
     'syncing resources to disk'
   )
@@ -95,7 +95,7 @@ function doCompile(request, callback) {
         )
         return callback(error)
       }
-      logger.log(
+      logger.debug(
         {
           projectId: request.project_id,
           userId: request.user_id,
@@ -257,7 +257,7 @@ function doCompile(request, callback) {
                 Metrics.gauge('load-avg', loadavg[0])
               }
               const ts = timer.done()
-              logger.log(
+              logger.debug(
                 {
                   projectId: request.project_id,
                   userId: request.user_id,
@@ -498,7 +498,10 @@ function syncFromPdf(projectId, userId, page, h, v, imageName, callback) {
     if (error != null) {
       return callback(error)
     }
-    logger.log({ projectId, userId, page, h, v, stdout }, 'synctex pdf output')
+    logger.debug(
+      { projectId, userId, page, h, v, stdout },
+      'synctex pdf output'
+    )
     callback(null, SynctexOutputParser.parseEditOutput(stdout, baseDir))
   })
 }
@@ -561,7 +564,7 @@ function _runSynctex(projectId, userId, command, imageName, callback) {
 }
 
 function wordcount(projectId, userId, filename, image, callback) {
-  logger.log({ projectId, userId, filename, image }, 'running wordcount')
+  logger.debug({ projectId, userId, filename, image }, 'running wordcount')
   const filePath = `$COMPILE_DIR/${filename}`
   const command = [
     'texcount',
@@ -607,7 +610,7 @@ function wordcount(projectId, userId, filename, image, callback) {
               return callback(err)
             }
             const results = _parseWordcountFromOutput(stdout)
-            logger.log(
+            logger.debug(
               { projectId, userId, wordcount: results },
               'word count results'
             )

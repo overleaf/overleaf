@@ -121,7 +121,7 @@ module.exports = ProjectPersistenceManager = {
       if (error != null) {
         return callback(error)
       }
-      logger.log({ project_ids }, 'clearing expired projects')
+      logger.debug({ project_ids }, 'clearing expired projects')
       const jobs = Array.from(project_ids || []).map(project_id =>
         (
           project_id => callback =>
@@ -152,7 +152,7 @@ module.exports = ProjectPersistenceManager = {
     if (callback == null) {
       callback = function () {}
     }
-    logger.log({ project_id, user_id }, 'clearing project for user')
+    logger.debug({ project_id, user_id }, 'clearing project for user')
     return CompileManager.clearProject(project_id, user_id, function (error) {
       if (error != null) {
         return callback(error)
@@ -173,7 +173,7 @@ module.exports = ProjectPersistenceManager = {
     if (callback == null) {
       callback = function () {}
     }
-    logger.log({ project_id }, 'clearing project from cache')
+    logger.debug({ project_id }, 'clearing project from cache')
     return UrlCache.clearProject(project_id, function (error) {
       if (error != null) {
         logger.err({ error, project_id }, 'error clearing project from cache')
@@ -212,7 +212,7 @@ module.exports = ProjectPersistenceManager = {
   },
 }
 
-logger.log(
+logger.debug(
   { EXPIRY_TIMEOUT: ProjectPersistenceManager.EXPIRY_TIMEOUT },
   'project assets kept timeout'
 )

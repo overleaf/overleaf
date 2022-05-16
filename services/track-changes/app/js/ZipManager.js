@@ -33,7 +33,7 @@ async function getLatestContent(projectId, docId, lastUpdateVersion) {
 }
 
 async function rewindDoc(projectId, docId, zipfile) {
-  logger.log({ projectId, docId }, 'rewinding document')
+  logger.debug({ projectId, docId }, 'rewinding document')
 
   // Prepare to rewind content
 

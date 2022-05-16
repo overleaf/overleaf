@@ -247,7 +247,7 @@ const ProjectController = {
     metrics.inc('cloned-project')
     const projectId = req.params.Project_id
     const { projectName } = req.body
-    logger.log({ projectId, projectName }, 'cloning project')
+    logger.debug({ projectId, projectName }, 'cloning project')
     if (!SessionManager.isUserLoggedIn(req.session)) {
       return res.json({ redir: '/register' })
     }
@@ -743,7 +743,7 @@ const ProjectController = {
                 if (err) {
                   return cb(err)
                 }
-                logger.log({ projectId, userId }, 'got user')
+                logger.debug({ projectId, userId }, 'got user')
                 if (FeaturesUpdater.featuresEpochIsCurrent(user)) {
                   return cb(null, user)
                 }

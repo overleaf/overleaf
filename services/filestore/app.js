@@ -145,7 +145,7 @@ if (!module.parent) {
       logger.error('Error starting Filestore', error)
       throw error
     }
-    logger.info(`Filestore starting up, listening on ${host}:${port}`)
+    logger.debug(`Filestore starting up, listening on ${host}:${port}`)
   })
 }
 

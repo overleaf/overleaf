@@ -153,7 +153,7 @@ const FileWriter = {
           return callback(err)
         }
 
-        logger.log(
+        logger.debug(
           { identifier, fsPath },
           '[writeStreamToDisk] write stream finished'
         )

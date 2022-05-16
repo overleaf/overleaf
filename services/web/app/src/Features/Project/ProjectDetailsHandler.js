@@ -85,7 +85,7 @@ async function getProjectDescription(projectId) {
 async function setProjectDescription(projectId, description) {
   const conditions = { _id: projectId }
   const update = { description }
-  logger.log(
+  logger.debug(
     { conditions, update, projectId, description },
     'setting project description'
   )
@@ -99,7 +99,7 @@ async function setProjectDescription(projectId, description) {
 async function renameProject(projectId, newName) {
   newName = newName.trim()
   await validateProjectName(newName)
-  logger.log({ projectId, newName }, 'renaming project')
+  logger.debug({ projectId, newName }, 'renaming project')
   let project
   try {
     project = await ProjectGetter.promises.getProject(projectId, { name: true })

@@ -20,7 +20,7 @@ const logger = require('@overleaf/logger')
 module.exports = MetaController = {
   getMetadata(req, res, next) {
     const { project_id } = req.params
-    logger.log({ project_id }, 'getting all labels for project')
+    logger.debug({ project_id }, 'getting all labels for project')
     return MetaHandler.getAllMetaForProject(
       project_id,
       function (err, projectMeta) {
@@ -43,7 +43,7 @@ module.exports = MetaController = {
     const { project_id } = req.params
     const { doc_id } = req.params
     const { broadcast } = req.body
-    logger.log({ project_id, doc_id, broadcast }, 'getting labels for doc')
+    logger.debug({ project_id, doc_id, broadcast }, 'getting labels for doc')
     return MetaHandler.getMetaForDoc(
       project_id,
       doc_id,

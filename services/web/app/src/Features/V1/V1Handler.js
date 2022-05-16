@@ -37,7 +37,7 @@ module.exports = V1Handler = {
         if ([200, 403].includes(response.statusCode)) {
           const isValid = body.valid
           const userProfile = body.user_profile
-          logger.log(
+          logger.debug(
             {
               email,
               isValid,
@@ -78,7 +78,7 @@ module.exports = V1Handler = {
           return callback(err, false)
         }
         if ([200].includes(response.statusCode)) {
-          logger.log(
+          logger.debug(
             { v1_user_id, changed: true },
             'got success response from v1 password reset api'
           )

@@ -21,7 +21,7 @@ module.exports = {
   check(callback) {
     const project_id = ObjectId(settings.trackchanges.healthCheck.project_id)
     const url = `http://localhost:${port}/project/${project_id}`
-    logger.log({ project_id }, 'running health check')
+    logger.debug({ project_id }, 'running health check')
     const jobs = [
       cb =>
         request.get(

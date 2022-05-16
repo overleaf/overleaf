@@ -57,7 +57,9 @@ if (!module.parent) {
           logger.fatal({ err }, `Cannot bind to ${host}:${port}. Exiting.`)
           process.exit(1)
         }
-        return logger.info(`contacts starting up, listening on ${host}:${port}`)
+        return logger.debug(
+          `contacts starting up, listening on ${host}:${port}`
+        )
       })
     })
     .catch(err => {

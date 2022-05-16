@@ -28,7 +28,7 @@ class ASpellWorkerPool {
 
   create(language) {
     if (this.PROCESS_POOL.length >= this.MAX_WORKERS) {
-      logger.log(
+      logger.debug(
         { maxworkers: this.MAX_WORKERS },
         'maximum number of workers already running'
       )
@@ -44,7 +44,7 @@ class ASpellWorkerPool {
         clearTimeout(worker.idleTimer)
         worker.idleTimer = null
       }
-      logger.info(
+      logger.debug(
         { process: worker.pipe.pid, lang: language },
         'removing aspell worker from pool'
       )

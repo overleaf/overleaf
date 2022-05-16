@@ -87,7 +87,7 @@ app.post('/pack', function (req, res, next) {
   if (packWorker != null) {
     return res.send('pack already running')
   } else {
-    logger.log('running pack')
+    logger.debug('running pack')
     packWorker = childProcess.fork(
       Path.join(__dirname, '/app/js/PackWorker.js'),
       [
@@ -97,7 +97,7 @@ app.post('/pack', function (req, res, next) {
       ]
     )
     packWorker.on('exit', function (code, signal) {
-      logger.log({ code, signal }, 'history auto pack exited')
+      logger.debug({ code, signal }, 'history auto pack exited')
       return (packWorker = null)
     })
     return res.send('pack started')
@@ -142,7 +142,7 @@ if (!module.parent) {
             'could not start track-changes server'
           )
         } else {
-          return logger.info(
+          return logger.debug(
             `trackchanges starting up, listening on ${host}:${port}`
           )
         }

@@ -68,7 +68,7 @@ function getDetails(ip, callback) {
     timeout: 1000,
     json: true,
   }
-  logger.log({ ip, opts }, 'getting geo ip details')
+  logger.debug({ ip, opts }, 'getting geo ip details')
   request.get(opts, function (err, res, ipDetails) {
     if (err) {
       logger.warn({ err, ip }, 'error getting ip details')
@@ -91,7 +91,7 @@ function getCurrencyCode(ip, callback) {
         ? ipDetails.country_code.toUpperCase()
         : undefined
     const currencyCode = currencyMappings[countryCode] || 'USD'
-    logger.log({ ip, currencyCode, ipDetails }, 'got currencyCode for ip')
+    logger.debug({ ip, currencyCode, ipDetails }, 'got currencyCode for ip')
     callback(err, currencyCode, countryCode)
   })
 }

@@ -23,10 +23,10 @@ class NonFatalEmailUpdateError extends OError {
 
 function getProvider() {
   if (mailchimpIsConfigured()) {
-    logger.info('Using newsletter provider: mailchimp')
+    logger.debug('Using newsletter provider: mailchimp')
     return makeMailchimpProvider()
   } else {
-    logger.info('Using newsletter provider: none')
+    logger.debug('Using newsletter provider: none')
     return makeNullProvider()
   }
 }
@@ -70,7 +70,7 @@ function makeMailchimpProvider() {
         status_if_new: 'subscribed',
         merge_fields: getMergeFields(user),
       })
-      logger.info({ user }, 'finished subscribing user to newsletter')
+      logger.debug({ user }, 'finished subscribing user to newsletter')
     } catch (err) {
       throw OError.tag(err, 'error subscribing user to newsletter', {
         userId: user._id,
@@ -89,7 +89,7 @@ function makeMailchimpProvider() {
           merge_fields: getMergeFields(user),
         })
       }
-      logger.info(
+      logger.debug(
         { user, options },
         'finished unsubscribing user from newsletter'
       )
@@ -100,7 +100,7 @@ function makeMailchimpProvider() {
       }
 
       if (err.message.includes('looks fake or invalid')) {
-        logger.info(
+        logger.debug(
           { err, user, options },
           'Mailchimp declined to unsubscribe user because it finds the email looks fake'
         )
@@ -121,7 +121,7 @@ function makeMailchimpProvider() {
     } catch (updateError) {
       // if we failed to update the user, delete their old email address so that
       // we don't leave it stuck in mailchimp
-      logger.info(
+      logger.debug(
         { oldEmail, newEmail, updateError },
         'unable to change email in newsletter, removing old mail'
       )
@@ -161,7 +161,7 @@ function makeMailchimpProvider() {
         email_address: newEmail,
         merge_fields: getMergeFields(user),
       })
-      logger.info('finished changing email in the newsletter')
+      logger.debug('finished changing email in the newsletter')
     } catch (err) {
       // silently ignore users who were never subscribed
       if (err.status === 404) {
@@ -173,7 +173,7 @@ function makeMailchimpProvider() {
         if (err.message.includes(key)) {
           const message = `unable to change email in newsletter, ${errors[key]}`
 
-          logger.info({ oldEmail, newEmail }, message)
+          logger.debug({ oldEmail, newEmail }, message)
 
           throw new NonFatalEmailUpdateError(
             message,
@@ -218,7 +218,7 @@ function makeNullProvider() {
   }
 
   async function subscribed(user) {
-    logger.info(
+    logger.debug(
       { user },
       'Not checking user because no newsletter provider is configured'
     )
@@ -226,21 +226,21 @@ function makeNullProvider() {
   }
 
   async function subscribe(user) {
-    logger.info(
+    logger.debug(
       { user },
       'Not subscribing user to newsletter because no newsletter provider is configured'
     )
   }
 
   async function unsubscribe(user) {
-    logger.info(
+    logger.debug(
       { user },
       'Not unsubscribing user from newsletter because no newsletter provider is configured'
     )
   }
 
   async function changeEmail(oldEmail, newEmail) {
-    logger.info(
+    logger.debug(
       { oldEmail, newEmail },
       'Not changing email in newsletter for user because no newsletter provider is configured'
     )

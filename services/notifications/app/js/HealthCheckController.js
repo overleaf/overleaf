@@ -29,7 +29,7 @@ module.exports = {
       url: `http://localhost:${port}/user/${user_id}${endPath}`,
       timeout: 5000,
     })
-    logger.log(
+    logger.debug(
       { user_id, opts: getOpts(), key: notification_key, user_id },
       'Health Check: running'
     )
@@ -82,7 +82,7 @@ module.exports = {
         const notification_id = body[1][0]._id
         notification_key = body[1][0].key
         let opts = getOpts(`/notification/${notification_id}`)
-        logger.log(
+        logger.debug(
           { notification_id, notification_key },
           'Health Check: doing cleanup'
         )

@@ -127,7 +127,7 @@ module.exports = DiffManager = {
     if (callback == null) {
       callback = function () {}
     }
-    logger.log(
+    logger.debug(
       { project_id, doc_id, version },
       'getting document before version'
     )
@@ -162,7 +162,7 @@ module.exports = DiffManager = {
           return callback(error)
         }
 
-        logger.log(
+        logger.debug(
           {
             docVersion: version,
             lastUpdateVersion: lastUpdate != null ? lastUpdate.v : undefined,

@@ -87,13 +87,13 @@ module.exports = MemoryMonitor = {
     Metrics.gauge('memory.gc-interval', gcInterval)
     // Metrics.gauge("memory.cpu-time-bucket", CpuTimeBucket)
 
-    logger.log(mem, 'process.memoryUsage()')
+    logger.debug(mem, 'process.memoryUsage()')
 
     if (global.gc != null && readyToGc()) {
       const gcTime = executeAndTime(global.gc).toFixed(2)
       const memAfterGc = inMegaBytes(process.memoryUsage())
       const deltaMem = updateMemoryStats(memBeforeGc, memAfterGc)
-      logger.log(
+      logger.debug(
         {
           gcTime,
           memBeforeGc,

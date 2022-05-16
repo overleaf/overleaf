@@ -60,8 +60,10 @@ if (!module.parent) {
   Promise.all([mongodb.waitForDb(), mongoose.connectionPromise])
     .then(() => {
       Server.server.listen(port, host, function () {
-        logger.info(`web starting up, listening on ${host}:${port}`)
-        logger.info(`${require('http').globalAgent.maxSockets} sockets enabled`)
+        logger.debug(`web starting up, listening on ${host}:${port}`)
+        logger.debug(
+          `${require('http').globalAgent.maxSockets} sockets enabled`
+        )
         // wait until the process is ready before monitoring the event loop
         metrics.event_loop.monitor(logger)
       })

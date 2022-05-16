@@ -277,30 +277,30 @@ webRouter.use(
 
 // add CSP header to HTML-rendering routes, if enabled
 if (Settings.csp && Settings.csp.enabled) {
-  logger.info('adding CSP header to rendered routes', Settings.csp)
+  logger.debug('adding CSP header to rendered routes', Settings.csp)
   app.use(csp(Settings.csp))
 }
 
-logger.info('creating HTTP server'.yellow)
+logger.debug('creating HTTP server'.yellow)
 const server = require('http').createServer(app)
 
 // provide settings for separate web and api processes
 if (Settings.enabledServices.includes('api')) {
-  logger.info('providing api router')
+  logger.debug('providing api router')
   app.use(privateApiRouter)
   app.use(Validation.errorMiddleware)
   app.use(ErrorController.handleApiError)
 }
 
 if (Settings.enabledServices.includes('web')) {
-  logger.info('providing web router')
+  logger.debug('providing web router')
 
   if (Settings.precompilePugTemplatesAtBootTime) {
-    logger.info('precompiling views for web in production environment')
+    logger.debug('precompiling views for web in production environment')
     Views.precompileViews(app)
   }
   if (app.get('env') === 'test') {
-    logger.info('enabling view cache for acceptance tests')
+    logger.debug('enabling view cache for acceptance tests')
     app.enable('view cache')
   }
 

@@ -68,7 +68,7 @@ mongodb
   .waitForDb()
   .then(() => {
     app.listen(port, host, () =>
-      logger.info(`notifications starting up, listening on ${host}:${port}`)
+      logger.debug(`notifications starting up, listening on ${host}:${port}`)
     )
   })
   .catch(err => {

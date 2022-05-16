@@ -428,7 +428,7 @@ const UserController = {
   doLogout(req, cb) {
     metrics.inc('user.logout')
     const user = SessionManager.getSessionUser(req.session)
-    logger.log({ user }, 'logging out')
+    logger.debug({ user }, 'logging out')
     const sessionId = req.sessionID
     if (typeof req.logout === 'function') {
       req.logout()

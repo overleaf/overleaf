@@ -104,12 +104,12 @@ module.exports = LaunchpadController = {
   sendTestEmail(req, res, next) {
     const { email } = req.body
     if (!email) {
-      logger.log({}, 'no email address supplied')
+      logger.debug({}, 'no email address supplied')
       return res.status(400).json({
         message: 'no email address supplied',
       })
     }
-    logger.log({ email }, 'sending test email')
+    logger.debug({ email }, 'sending test email')
     const emailOptions = { to: email }
     return EmailHandler.sendEmail('testEmail', emailOptions, function (err) {
       if (err != null) {
@@ -118,7 +118,7 @@ module.exports = LaunchpadController = {
         })
         return next(err)
       }
-      logger.log({ email }, 'sent test email')
+      logger.debug({ email }, 'sent test email')
       res.json({ message: res.locals.translate('email_sent') })
     })
   },
@@ -126,7 +126,7 @@ module.exports = LaunchpadController = {
   registerExternalAuthAdmin(authMethod) {
     return function (req, res, next) {
       if (LaunchpadController._getAuthMethod() !== authMethod) {
-        logger.log(
+        logger.debug(
           { authMethod },
           'trying to register external admin, but that auth service is not enabled, disallow'
         )
@@ -134,18 +134,18 @@ module.exports = LaunchpadController = {
       }
       const { email } = req.body
       if (!email) {
-        logger.log({ authMethod }, 'no email supplied, disallow')
+        logger.debug({ authMethod }, 'no email supplied, disallow')
         return res.sendStatus(400)
       }
 
-      logger.log({ email }, 'attempted register first admin user')
+      logger.debug({ email }, 'attempted register first admin user')
       return LaunchpadController._atLeastOneAdminExists(function (err, exists) {
         if (err != null) {
           return next(err)
         }
 
         if (exists) {
-          logger.log(
+          logger.debug(
             { email },
             'already have at least one admin user, disallow'
           )
@@ -158,7 +158,7 @@ module.exports = LaunchpadController = {
           first_name: email,
           last_name: '',
         }
-        logger.log(
+        logger.debug(
           { body, authMethod },
           'creating admin account for specified external-auth user'
         )
@@ -189,7 +189,7 @@ module.exports = LaunchpadController = {
                 }
 
                 AuthenticationController.setRedirectInSession(req, '/launchpad')
-                logger.log(
+                logger.debug(
                   { email, user_id: user._id, authMethod },
                   'created first admin account'
                 )
@@ -207,18 +207,18 @@ module.exports = LaunchpadController = {
     const { email } = req.body
     const { password } = req.body
     if (!email || !password) {
-      logger.log({}, 'must supply both email and password, disallow')
+      logger.debug({}, 'must supply both email and password, disallow')
       return res.sendStatus(400)
     }
 
-    logger.log({ email }, 'attempted register first admin user')
+    logger.debug({ email }, 'attempted register first admin user')
     return LaunchpadController._atLeastOneAdminExists(function (err, exists) {
       if (err != null) {
         return next(err)
       }
 
       if (exists) {
-        logger.log(
+        logger.debug(
           { email: req.body.email },
           'already have at least one admin user, disallow'
         )
@@ -233,7 +233,7 @@ module.exports = LaunchpadController = {
             return next(err)
           }
 
-          logger.log({ user_id: user._id }, 'making user an admin')
+          logger.debug({ user_id: user._id }, 'making user an admin')
           User.updateOne(
             { _id: user._id },
             {
@@ -250,7 +250,7 @@ module.exports = LaunchpadController = {
                 return next(err)
               }
 
-              logger.log(
+              logger.debug(
                 { email, user_id: user._id },
                 'created first admin account'
               )

@@ -7,7 +7,7 @@ const SessionManager = require('../Authentication/SessionManager')
 function removeUserFromGroup(req, res, next) {
   const subscription = req.entity
   const userToRemoveId = req.params.user_id
-  logger.log(
+  logger.debug(
     { subscriptionId: subscription._id, userToRemove_id: userToRemoveId },
     'removing user from group subscription'
   )

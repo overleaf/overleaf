@@ -217,7 +217,7 @@ module.exports = PackManager = {
       newPack.expiresAt = new Date(Date.now() + 7 * DAYS)
       newPack.last_checked = new Date(Date.now() + 30 * DAYS) // never check temporary packs
     }
-    logger.log(
+    logger.debug(
       { project_id, doc_id, newUpdates },
       'inserting updates into new pack'
     )
@@ -271,7 +271,7 @@ module.exports = PackManager = {
     if (lastUpdate.expiresAt && temporary) {
       update.$set.expiresAt = new Date(Date.now() + 7 * DAYS)
     }
-    logger.log(
+    logger.debug(
       { project_id, doc_id, lastUpdate, newUpdates },
       'appending updates to existing pack'
     )
@@ -402,7 +402,7 @@ module.exports = PackManager = {
           pack._id.toString()
         )
         const packIdsToFetch = _.difference(allPackIds, loadedPackIds)
-        logger.log(
+        logger.debug(
           { project_id, doc_id, loadedPackIds, allPackIds, packIdsToFetch },
           'analysed packs'
         )
@@ -418,7 +418,7 @@ module.exports = PackManager = {
             if (err != null) {
               return callback(err)
             }
-            logger.log({ project_id, doc_id }, 'done unarchiving')
+            logger.debug({ project_id, doc_id }, 'done unarchiving')
             return callback()
           }
         )
@@ -663,7 +663,7 @@ module.exports = PackManager = {
             if (err != null) {
               return callback(err)
             }
-            logger.log(
+            logger.debug(
               { project_id, doc_id, newPacks },
               'added new packs to index'
             )
@@ -769,7 +769,7 @@ module.exports = PackManager = {
             return result1
           })()
           if (newPacks.length) {
-            logger.log(
+            logger.debug(
               { project_id, doc_id, n: newPacks.length },
               'found new packs'
             )
@@ -959,7 +959,7 @@ module.exports = PackManager = {
           return callback(err)
         }
       )
-    logger.log({ project_id, doc_id }, 'processing old packs')
+    logger.debug({ project_id, doc_id }, 'processing old packs')
     return db.docHistory.findOne({ _id: pack_id }, function (err, pack) {
       if (err != null) {
         return markAsChecked(err)
@@ -998,7 +998,7 @@ module.exports = PackManager = {
                       ? unarchivedPacks.length
                       : undefined)
                   ) {
-                    logger.log(
+                    logger.debug(
                       { project_id, doc_id },
                       'no packs need archiving'
                     )
@@ -1012,7 +1012,7 @@ module.exports = PackManager = {
                       if (err != null) {
                         return markAsChecked(err)
                       }
-                      logger.log({ project_id, doc_id }, 'done processing')
+                      logger.debug({ project_id, doc_id }, 'done processing')
                       return markAsChecked()
                     }
                   )
@@ -1031,13 +1031,16 @@ module.exports = PackManager = {
     const age = (Date.now() - pack.meta.end_ts) / DAYS
     if (age < 30) {
       // always keep if less than 1 month old
-      logger.log({ project_id, doc_id, pack_id, age }, 'less than 30 days old')
+      logger.debug(
+        { project_id, doc_id, pack_id, age },
+        'less than 30 days old'
+      )
       return callback()
     }
     // compute an archiving threshold which decreases for each month of age
     const archive_threshold = 30 / age
     if (sz > archive_threshold || n > archive_threshold || age > 90) {
-      logger.log(
+      logger.debug(
         { project_id, doc_id, pack_id, age, archive_threshold, sz, n },
         'meets archive threshold'
       )
@@ -1048,7 +1051,7 @@ module.exports = PackManager = {
         callback
       )
     } else {
-      logger.log(
+      logger.debug(
         { project_id, doc_id, pack_id, age, archive_threshold, sz, n },
         'does not meet archive threshold'
       )
@@ -1071,7 +1074,7 @@ module.exports = PackManager = {
   },
 
   _markPackAsFinalised(project_id, doc_id, pack_id, callback) {
-    logger.log({ project_id, doc_id, pack_id }, 'marking pack as finalised')
+    logger.debug({ project_id, doc_id, pack_id }, 'marking pack as finalised')
     return db.docHistory.updateOne(
       { _id: pack_id },
       { $set: { finalised: true } },
@@ -1080,7 +1083,7 @@ module.exports = PackManager = {
   },
 
   updateIndexIfNeeded(project_id, doc_id, callback) {
-    logger.log({ project_id, doc_id }, 'archiving old packs')
+    logger.debug({ project_id, doc_id }, 'archiving old packs')
     return PackManager.getIndexWithKeys(doc_id, function (err, index) {
       if (err != null) {
         return callback(err)
@@ -1094,7 +1097,7 @@ module.exports = PackManager = {
   },
 
   markPackAsChecked(project_id, doc_id, pack_id, callback) {
-    logger.log({ project_id, doc_id, pack_id }, 'marking pack as checked')
+    logger.debug({ project_id, doc_id, pack_id }, 'marking pack as checked')
     return db.docHistory.updateOne(
       { _id: pack_id },
       { $currentDate: { last_checked: true } },
@@ -1119,7 +1122,7 @@ module.exports = PackManager = {
         return result
       })()
       if (unArchivedPacks.length) {
-        logger.log(
+        logger.debug(
           { project_id, doc_id, n: unArchivedPacks.length },
           'find unarchived packs'
         )
@@ -1131,7 +1134,7 @@ module.exports = PackManager = {
   // Archive locking flags
 
   checkArchiveNotInProgress(project_id, doc_id, pack_id, callback) {
-    logger.log(
+    logger.debug(
       { project_id, doc_id, pack_id },
       'checking if archive in progress'
     )
@@ -1157,7 +1160,7 @@ module.exports = PackManager = {
   },
 
   markPackAsArchiveInProgress(project_id, doc_id, pack_id, callback) {
-    logger.log(
+    logger.debug(
       { project_id, doc_id },
       'marking pack as archive in progress status'
     )
@@ -1175,7 +1178,7 @@ module.exports = PackManager = {
         if (!result.value) {
           return callback(new Error('archive is already in progress'))
         }
-        logger.log(
+        logger.debug(
           { project_id, doc_id, pack_id },
           'marked as archive in progress'
         )
@@ -1185,7 +1188,7 @@ module.exports = PackManager = {
   },
 
   clearPackAsArchiveInProgress(project_id, doc_id, pack_id, callback) {
-    logger.log(
+    logger.debug(
       { project_id, doc_id, pack_id },
       'clearing as archive in progress'
     )
@@ -1200,7 +1203,7 @@ module.exports = PackManager = {
   },
 
   markPackAsArchived(project_id, doc_id, pack_id, callback) {
-    logger.log({ project_id, doc_id, pack_id }, 'marking pack as archived')
+    logger.debug({ project_id, doc_id, pack_id }, 'marking pack as archived')
     return db.docHistoryIndex.findOneAndUpdate(
       {
         _id: ObjectId(doc_id.toString()),
@@ -1215,7 +1218,7 @@ module.exports = PackManager = {
         if (!result.value) {
           return callback(new Error('archive is not marked as progress'))
         }
-        logger.log({ project_id, doc_id, pack_id }, 'marked as archived')
+        logger.debug({ project_id, doc_id, pack_id }, 'marked as archived')
         return callback()
       }
     )
@@ -1229,7 +1232,7 @@ module.exports = PackManager = {
         if (err) {
           return callback(err)
         }
-        logger.log({ project_id, doc_id, pack_id }, 'set expiry on pack')
+        logger.debug({ project_id, doc_id, pack_id }, 'set expiry on pack')
         return callback()
       }
     )

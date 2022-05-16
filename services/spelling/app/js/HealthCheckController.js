@@ -26,7 +26,7 @@ module.exports = {
           : 0
 
       if (numberOfSuggestions > 10) {
-        logger.log('health check passed')
+        logger.debug('health check passed')
         res.sendStatus(200)
       } else {
         logger.err(

@@ -34,7 +34,7 @@ module.exports = InactiveProjectManager = {
           })
           return callback(err)
         }
-        logger.log(
+        logger.debug(
           { project_id, active: project.active },
           'seeing if need to reactivate project'
         )
@@ -94,7 +94,7 @@ module.exports = InactiveProjectManager = {
               }
             )
         )
-        logger.log(
+        logger.debug(
           { numberOfProjects: projects && projects.length },
           'deactivating projects'
         )
@@ -108,7 +108,7 @@ module.exports = InactiveProjectManager = {
   },
 
   deactivateProject(project_id, callback) {
-    logger.log({ project_id }, 'deactivating inactive project')
+    logger.debug({ project_id }, 'deactivating inactive project')
     const jobs = [
       cb => DocstoreManager.archiveProject(project_id, cb),
       cb => ProjectUpdateHandler.markAsInactive(project_id, cb),

@@ -14,7 +14,7 @@ if ((Settings.clsi != null ? Settings.clsi.dockerRunner : undefined) === true) {
 } else {
   commandRunnerPath = './LocalCommandRunner'
 }
-logger.info({ commandRunnerPath }, 'selecting command runner for clsi')
+logger.debug({ commandRunnerPath }, 'selecting command runner for clsi')
 const CommandRunner = require(commandRunnerPath)
 
 module.exports = CommandRunner

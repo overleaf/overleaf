@@ -130,10 +130,10 @@ describe('timeAsyncMethod', function () {
 
   describe('when a logger is supplied', function () {
     beforeEach(function () {
-      return (this.logger = { log: sinon.stub() })
+      return (this.logger = { debug: sinon.stub(), log: sinon.stub() })
     })
 
-    return it('should also call logger.log', function (done) {
+    return it('should also call logger.debug', function (done) {
       this.timeAsyncMethod(
         this.testObject,
         'nextNumber',
@@ -145,7 +145,7 @@ describe('timeAsyncMethod', function () {
         expect(result).to.equal(3)
         expect(this.TimerConstructor.callCount).to.equal(1)
         expect(this.Timer.done.callCount).to.equal(1)
-        expect(this.logger.log.callCount).to.equal(1)
+        expect(this.logger.debug.callCount).to.equal(1)
         return done()
       })
     })

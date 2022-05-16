@@ -16,7 +16,7 @@ const AuthorizationMiddleware = require('../../../../app/src/Features/Authorizat
 
 module.exports = {
   apply(webRouter) {
-    logger.log({}, 'Init launchpad router')
+    logger.debug({}, 'Init launchpad router')
 
     webRouter.get('/launchpad', LaunchpadController.launchpadPage)
     webRouter.post(

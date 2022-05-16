@@ -65,7 +65,7 @@ function recordEventForSession(session, event, segmentation) {
   if (_isAnalyticsDisabled() || _isSmokeTestUser(userId)) {
     return
   }
-  logger.info({
+  logger.debug({
     analyticsId,
     userId,
     event,

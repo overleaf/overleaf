@@ -27,7 +27,7 @@ const connectionPromise = mongoose.connect(
 )
 
 mongoose.connection.on('connected', () =>
-  logger.log('mongoose default connection open')
+  logger.debug('mongoose default connection open')
 )
 
 mongoose.connection.on('error', err =>
@@ -35,7 +35,7 @@ mongoose.connection.on('error', err =>
 )
 
 mongoose.connection.on('disconnected', () =>
-  logger.log('mongoose default connection disconnected')
+  logger.debug('mongoose default connection disconnected')
 )
 
 if (process.env.MONGOOSE_DEBUG) {

@@ -220,7 +220,7 @@ const ClsiManager = {
           )
         }
         if (validationProblems != null) {
-          logger.log(
+          logger.debug(
             { projectId, validationProblems },
             'problems with users latex before compile was attempted'
           )
@@ -395,7 +395,7 @@ const ClsiManager = {
           const currentCompileTime = results.currentBackend.finishTime
           const newBackendCompileTime = results.newBackend.finishTime || 0
           const timeDifference = newBackendCompileTime - currentCompileTime
-          logger.log(
+          logger.debug(
             {
               statusCodeSame,
               timeDifference,

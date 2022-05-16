@@ -37,7 +37,7 @@ async function deleteUser(userId, options = {}) {
 
   try {
     const user = await User.findById(userId).exec()
-    logger.log({ user }, 'deleting user')
+    logger.debug({ user }, 'deleting user')
 
     await ensureCanDeleteUser(user)
     await _cleanupUser(user)

@@ -464,7 +464,7 @@ module.exports = OutputCacheManager = {
       OutputCacheManager.ARCHIVE_SUBDIR,
       buildId
     )
-    logger.log({ dir: archiveDir }, 'archiving log files for project')
+    logger.debug({ dir: archiveDir }, 'archiving log files for project')
     return fse.ensureDir(archiveDir, function (err) {
       if (err != null) {
         return callback(err)
@@ -577,7 +577,7 @@ module.exports = OutputCacheManager = {
 
       const removeDir = (dir, cb) =>
         fse.remove(Path.join(cacheRoot, dir), function (err, result) {
-          logger.log({ cache: cacheRoot, dir }, 'removed expired cache dir')
+          logger.debug({ cache: cacheRoot, dir }, 'removed expired cache dir')
           if (err != null) {
             logger.error({ err, dir }, 'cache remove error')
           }

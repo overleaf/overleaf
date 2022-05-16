@@ -39,7 +39,7 @@ async function refreshFeatures(userId, reason) {
   })
   const oldFeatures = _.clone(user.features)
   const features = await computeFeatures(userId)
-  logger.log({ userId, features }, 'updating user features')
+  logger.debug({ userId, features }, 'updating user features')
 
   const matchedFeatureSet = FeaturesHelper.getMatchedFeatureSet(features)
   AnalyticsManager.setUserPropertyForUser(
@@ -51,7 +51,7 @@ async function refreshFeatures(userId, reason) {
   const { features: newFeatures, featuresChanged } =
     await UserFeaturesUpdater.promises.updateFeatures(userId, features)
   if (oldFeatures.dropbox === true && features.dropbox === false) {
-    logger.log({ userId }, '[FeaturesUpdater] must unlink dropbox')
+    logger.debug({ userId }, '[FeaturesUpdater] must unlink dropbox')
     const Modules = require('../../infrastructure/Modules')
     try {
       await Modules.promises.hooks.fire('removeDropbox', userId, reason)
@@ -77,7 +77,7 @@ async function computeFeatures(userId) {
   const v1Features = await _getV1Features(user)
   const bonusFeatures = await ReferalFeatures.promises.getBonusFeatures(userId)
   const featuresOverrides = await _getFeaturesOverrides(user)
-  logger.log(
+  logger.debug(
     {
       userId,
       individualFeatures,
@@ -161,7 +161,7 @@ function _planCodeToFeatures(planCode) {
 }
 
 async function doSyncFromV1(v1UserId) {
-  logger.log({ v1UserId }, '[AccountSync] starting account sync')
+  logger.debug({ v1UserId }, '[AccountSync] starting account sync')
   const user = await UserGetter.promises.getUser(
     { 'overleaf.id': v1UserId },
     { _id: 1 }
@@ -170,7 +170,7 @@ async function doSyncFromV1(v1UserId) {
     logger.warn({ v1UserId }, '[AccountSync] no user found for v1 id')
     return
   }
-  logger.log(
+  logger.debug(
     { v1UserId, userId: user._id },
     '[AccountSync] updating user subscription and features'
   )

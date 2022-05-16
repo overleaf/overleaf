@@ -36,7 +36,7 @@ module.exports = UpdateTrimmer = {
               if (error != null) {
                 return callback(error)
               }
-              logger.log({ project_id, details }, 'got details')
+              logger.debug({ project_id, details }, 'got details')
               if (
                 __guard__(
                   details != null ? details.features : undefined,

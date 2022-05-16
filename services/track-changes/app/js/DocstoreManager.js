@@ -5,7 +5,7 @@ const Errors = require('./Errors')
 
 function peekDocument(projectId, docId, callback) {
   const url = `${Settings.apis.docstore.url}/project/${projectId}/doc/${docId}/peek`
-  logger.log(
+  logger.debug(
     { project_id: projectId, doc_id: docId },
     'getting doc from docstore'
   )
@@ -19,7 +19,7 @@ function peekDocument(projectId, docId, callback) {
       } catch (error) {
         return callback(error)
       }
-      logger.log(
+      logger.debug(
         { project_id: projectId, doc_id: docId, version: body.version },
         'got doc from docstore'
       )

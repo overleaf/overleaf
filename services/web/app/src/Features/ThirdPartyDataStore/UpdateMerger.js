@@ -212,7 +212,7 @@ module.exports = UpdateMerger = {
             )
             return callback(err)
           }
-          logger.log({ docLines }, 'processing doc update from tpds')
+          logger.debug({ docLines }, 'processing doc update from tpds')
           return EditorController.upsertDocWithPath(
             project_id,
             path,

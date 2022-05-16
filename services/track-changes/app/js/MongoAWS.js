@@ -64,7 +64,7 @@ module.exports = MongoAWS = {
       return callback(new Error('invalid pack id'))
     }
 
-    logger.log({ project_id, doc_id, pack_id }, 'uploading data to s3')
+    logger.debug({ project_id, doc_id, pack_id }, 'uploading data to s3')
 
     const upload = createStream(S3S.WriteStream, project_id, doc_id, pack_id)
 
@@ -85,7 +85,7 @@ module.exports = MongoAWS = {
         return callback(error)
       }
       return zlib.gzip(uncompressedData, function (err, buf) {
-        logger.log(
+        logger.debug(
           {
             project_id,
             doc_id,
@@ -101,7 +101,10 @@ module.exports = MongoAWS = {
         upload.on('error', err => callback(err))
         upload.on('finish', function () {
           Metrics.inc('archive-pack')
-          logger.log({ project_id, doc_id, pack_id }, 'upload to s3 completed')
+          logger.debug(
+            { project_id, doc_id, pack_id },
+            'upload to s3 completed'
+          )
           return callback(null)
         })
         upload.write(buf)
@@ -129,7 +132,7 @@ module.exports = MongoAWS = {
       return callback(new Error('invalid pack id'))
     }
 
-    logger.log({ project_id, doc_id, pack_id }, 'downloading data from s3')
+    logger.debug({ project_id, doc_id, pack_id }, 'downloading data from s3')
 
     const download = createStream(S3S.ReadStream, project_id, doc_id, pack_id)
 
@@ -140,7 +143,7 @@ module.exports = MongoAWS = {
     const gunzip = zlib.createGunzip()
     gunzip.setEncoding('utf8')
     gunzip.on('error', function (err) {
-      logger.log(
+      logger.debug(
         { project_id, doc_id, pack_id, err },
         'error uncompressing gzip stream'
       )
@@ -152,7 +155,10 @@ module.exports = MongoAWS = {
     outputStream.on('error', err => callback(err))
     outputStream.on('end', function () {
       let object
-      logger.log({ project_id, doc_id, pack_id }, 'download from s3 completed')
+      logger.debug(
+        { project_id, doc_id, pack_id },
+        'download from s3 completed'
+      )
       try {
         object = JSON.parse(parts.join(''))
       } catch (e) {
@@ -186,7 +192,10 @@ module.exports = MongoAWS = {
         Metrics.inc('unarchive-pack')
         // allow the object to expire, we can always retrieve it again
         object.expiresAt = new Date(Date.now() + 7 * DAYS)
-        logger.log({ project_id, doc_id, pack_id }, 'inserting object from s3')
+        logger.debug(
+          { project_id, doc_id, pack_id },
+          'inserting object from s3'
+        )
         return db.docHistory.insertOne(object, (err, confirmation) => {
           if (err) return callback(err)
           object._id = confirmation.insertedId

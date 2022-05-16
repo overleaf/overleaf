@@ -8,12 +8,12 @@ const Settings = require('@overleaf/settings')
 function getDoc(req, res, next) {
   const { doc_id: docId, project_id: projectId } = req.params
   const includeDeleted = req.query.include_deleted === 'true'
-  logger.log({ projectId, docId }, 'getting doc')
+  logger.debug({ projectId, docId }, 'getting doc')
   DocManager.getFullDoc(projectId, docId, function (error, doc) {
     if (error) {
       return next(error)
     }
-    logger.log({ docId, projectId }, 'got doc')
+    logger.debug({ docId, projectId }, 'got doc')
     if (doc == null) {
       res.sendStatus(404)
     } else if (doc.deleted && !includeDeleted) {
@@ -26,7 +26,7 @@ function getDoc(req, res, next) {
 
 function peekDoc(req, res, next) {
   const { doc_id: docId, project_id: projectId } = req.params
-  logger.log({ projectId, docId }, 'peeking doc')
+  logger.debug({ projectId, docId }, 'peeking doc')
   DocManager.peekDoc(projectId, docId, function (error, doc) {
     if (error) {
       return next(error)
@@ -52,7 +52,7 @@ function isDocDeleted(req, res, next) {
 
 function getRawDoc(req, res, next) {
   const { doc_id: docId, project_id: projectId } = req.params
-  logger.log({ projectId, docId }, 'getting raw doc')
+  logger.debug({ projectId, docId }, 'getting raw doc')
   DocManager.getDocLines(projectId, docId, function (error, doc) {
     if (error) {
       return next(error)
@@ -68,7 +68,7 @@ function getRawDoc(req, res, next) {
 
 function getAllDocs(req, res, next) {
   const { project_id: projectId } = req.params
-  logger.log({ projectId }, 'getting all docs')
+  logger.debug({ projectId }, 'getting all docs')
   DocManager.getAllNonDeletedDocs(
     projectId,
     { lines: true, rev: true },
@@ -86,7 +86,7 @@ function getAllDocs(req, res, next) {
 
 function getAllDeletedDocs(req, res, next) {
   const { project_id: projectId } = req.params
-  logger.log({ projectId }, 'getting all deleted docs')
+  logger.debug({ projectId }, 'getting all deleted docs')
   DocManager.getAllDeletedDocs(
     projectId,
     { name: true, deletedAt: true },
@@ -107,7 +107,7 @@ function getAllDeletedDocs(req, res, next) {
 
 function getAllRanges(req, res, next) {
   const { project_id: projectId } = req.params
-  logger.log({ projectId }, 'getting all ranges')
+  logger.debug({ projectId }, 'getting all ranges')
   DocManager.getAllNonDeletedDocs(
     projectId,
     { ranges: true },
@@ -154,7 +154,7 @@ function updateDoc(req, res, next) {
     return
   }
 
-  logger.log({ projectId, docId }, 'got http request to update doc')
+  logger.debug({ projectId, docId }, 'got http request to update doc')
   DocManager.updateDoc(
     projectId,
     docId,
@@ -175,7 +175,7 @@ function updateDoc(req, res, next) {
 
 function patchDoc(req, res, next) {
   const { doc_id: docId, project_id: projectId } = req.params
-  logger.log({ projectId, docId }, 'patching doc')
+  logger.debug({ projectId, docId }, 'patching doc')
 
   const allowedFields = ['deleted', 'deletedAt', 'name']
   const meta = {}
@@ -226,7 +226,7 @@ function _buildDocsArrayView(projectId, docs) {
 
 function archiveAllDocs(req, res, next) {
   const { project_id: projectId } = req.params
-  logger.log({ projectId }, 'archiving all docs')
+  logger.debug({ projectId }, 'archiving all docs')
   DocArchive.archiveAllDocs(projectId, function (error) {
     if (error) {
       return next(error)
@@ -237,7 +237,7 @@ function archiveAllDocs(req, res, next) {
 
 function archiveDoc(req, res, next) {
   const { doc_id: docId, project_id: projectId } = req.params
-  logger.log({ projectId, docId }, 'archiving a doc')
+  logger.debug({ projectId, docId }, 'archiving a doc')
   DocArchive.archiveDocById(projectId, docId, function (error) {
     if (error) {
       return next(error)
@@ -248,7 +248,7 @@ function archiveDoc(req, res, next) {
 
 function unArchiveAllDocs(req, res, next) {
   const { project_id: projectId } = req.params
-  logger.log({ projectId }, 'unarchiving all docs')
+  logger.debug({ projectId }, 'unarchiving all docs')
   DocArchive.unArchiveAllDocs(projectId, function (err) {
     if (err) {
       if (err instanceof Errors.DocRevValueError) {
@@ -263,7 +263,7 @@ function unArchiveAllDocs(req, res, next) {
 
 function destroyProject(req, res, next) {
   const { project_id: projectId } = req.params
-  logger.log({ projectId }, 'destroying all docs')
+  logger.debug({ projectId }, 'destroying all docs')
   DocArchive.destroyProject(projectId, function (error) {
     if (error) {
       return next(error)

@@ -51,7 +51,7 @@ module.exports = LatexRunner = {
       timeout = 60000
     } // milliseconds
 
-    logger.log(
+    logger.debug(
       {
         directory,
         compiler,
@@ -169,7 +169,7 @@ module.exports = LatexRunner = {
       callback = function () {}
     }
     const id = `${project_id}`
-    logger.log({ id }, 'killing running compile')
+    logger.debug({ id }, 'killing running compile')
     if (ProcessTable[id] == null) {
       logger.warn({ id }, 'no such project to kill')
       return callback(null)

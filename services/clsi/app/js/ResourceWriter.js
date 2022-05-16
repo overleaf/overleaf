@@ -32,7 +32,7 @@ module.exports = ResourceWriter = {
       callback = function () {}
     }
     if (request.syncType === 'incremental') {
-      logger.log(
+      logger.debug(
         { project_id: request.project_id, user_id: request.user_id },
         'incremental sync'
       )
@@ -77,7 +77,7 @@ module.exports = ResourceWriter = {
         }
       )
     }
-    logger.log(
+    logger.debug(
       { project_id: request.project_id, user_id: request.user_id },
       'full sync'
     )
@@ -160,7 +160,7 @@ module.exports = ResourceWriter = {
         if (err.code === 'EEXIST') {
           return callback()
         } else {
-          logger.log({ err, dir: basePath }, 'error creating directory')
+          logger.debug({ err, dir: basePath }, 'error creating directory')
           return callback(err)
         }
       } else {

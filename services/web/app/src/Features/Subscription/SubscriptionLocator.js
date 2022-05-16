@@ -20,7 +20,7 @@ const SubscriptionLocator = {
   getUsersSubscription(user_or_id, callback) {
     const user_id = SubscriptionLocator._getUserId(user_or_id)
     Subscription.findOne({ admin_id: user_id }, function (err, subscription) {
-      logger.log({ user_id }, 'got users subscription')
+      logger.debug({ user_id }, 'got users subscription')
       callback(err, subscription)
     })
   },
@@ -30,7 +30,7 @@ const SubscriptionLocator = {
     Subscription.findOne(
       { admin_id: user_id, groupPlan: false },
       function (err, subscription) {
-        logger.log({ user_id }, 'got users individual subscription')
+        logger.debug({ user_id }, 'got users individual subscription')
         callback(err, subscription)
       }
     )

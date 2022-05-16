@@ -27,14 +27,14 @@ class ASpellWorker {
       '-d',
       language,
     ])
-    logger.info(
+    logger.debug(
       { process: this.pipe.pid, lang: this.language },
       'starting new aspell worker'
     )
     metrics.inc('aspellWorker', 1, { status: 'start', method: this.language })
     this.pipe.on('exit', () => {
       this.state = 'killed'
-      logger.info(
+      logger.debug(
         { process: this.pipe.pid, lang: this.language },
         'aspell worker has exited'
       )
@@ -201,14 +201,14 @@ class ASpellWorker {
   }
 
   shutdown(reason) {
-    logger.info({ process: this.pipe.pid, reason }, 'shutting down')
+    logger.debug({ process: this.pipe.pid, reason }, 'shutting down')
     this.state = 'closing'
     this.closeReason = reason
     return this.pipe.stdin.end()
   }
 
   kill(reason) {
-    logger.info({ process: this.pipe.pid, reason }, 'killing')
+    logger.debug({ process: this.pipe.pid, reason }, 'killing')
     this.closeReason = reason
     if (this.state === 'killed') {
       return

@@ -27,7 +27,7 @@ module.exports = CooldownMiddleware = {
           return next(err)
         }
         if (projectIsOnCooldown) {
-          logger.log(
+          logger.debug(
             { projectId },
             '[Cooldown] project is on cooldown, denying request'
           )

@@ -38,14 +38,14 @@ module.exports = {
           cache: true,
           compileDebug: Settings.debugPugTemplates,
         })
-        logger.log({ filename }, 'compiled')
+        logger.debug({ filename }, 'compiled')
         success++
       } catch (err) {
         logger.error({ filename, err: err.message }, 'error compiling')
         failures++
       }
     })
-    logger.log(
+    logger.debug(
       { timeTaken: Date.now() - startTime, failures, success },
       'compiled templates'
     )

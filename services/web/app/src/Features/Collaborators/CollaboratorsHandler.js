@@ -110,10 +110,13 @@ async function addUserIdToProject(
   }
   if (privilegeLevel === PrivilegeLevels.READ_AND_WRITE) {
     level = { collaberator_refs: userId }
-    logger.log({ privileges: 'readAndWrite', userId, projectId }, 'adding user')
+    logger.debug(
+      { privileges: 'readAndWrite', userId, projectId },
+      'adding user'
+    )
   } else if (privilegeLevel === PrivilegeLevels.READ_ONLY) {
     level = { readOnly_refs: userId }
-    logger.log({ privileges: 'readOnly', userId, projectId }, 'adding user')
+    logger.debug({ privileges: 'readOnly', userId, projectId }, 'adding user')
   } else {
     throw new Error(`unknown privilegeLevel: ${privilegeLevel}`)
   }
@@ -146,7 +149,7 @@ async function transferProjects(fromUserId, toUserId) {
     { _id: 1 }
   ).exec()
   const projectIds = projects.map(p => p._id)
-  logger.log({ projectIds, fromUserId, toUserId }, 'transferring projects')
+  logger.debug({ projectIds, fromUserId, toUserId }, 'transferring projects')
 
   await Project.updateMany(
     { owner_ref: fromUserId },

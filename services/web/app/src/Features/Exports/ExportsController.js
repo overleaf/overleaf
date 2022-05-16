@@ -54,7 +54,7 @@ module.exports = {
       function (err, export_data) {
         if (err != null) {
           if (err.forwardResponse != null) {
-            logger.log(
+            logger.debug(
               { responseError: err.forwardResponse },
               'forwarding response'
             )
@@ -64,7 +64,7 @@ module.exports = {
             return next(err)
           }
         }
-        logger.log(
+        logger.debug(
           {
             user_id,
             project_id,
