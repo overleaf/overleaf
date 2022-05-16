@@ -1,15 +1,15 @@
 const Metrics = require('./index')
 
-module.exports.monitor = logger =>
-  function (req, res, next) {
+function monitor(logger, level = 'debug') {
+  return function (req, res, next) {
     const startTime = Date.now()
+    req.logger = new RequestLogger(logger, level)
     const { end } = res
     res.end = function (...args) {
       end.apply(this, args)
       const responseTimeMs = Date.now() - startTime
       const requestSize = parseInt(req.headers['content-length'], 10)
       const routePath = getRoutePath(req)
-      const reqUrl = req.originalUrl || req.url
 
       if (routePath != null) {
         Metrics.timing('http_request', responseTimeMs, null, {
@@ -25,10 +25,12 @@ module.exports.monitor = logger =>
           })
         }
       }
-      logger.info({ req, res, responseTimeMs }, '%s %s', req.method, reqUrl)
+      req.logger.addFields({ responseTimeMs })
+      req.logger.emit(req, res)
     }
     next()
   }
+}
 
 function getRoutePath(req) {
   if (req.route && req.route.path != null) {
@@ -43,3 +45,34 @@ function getRoutePath(req) {
   }
   return null
 }
+
+class RequestLogger {
+  constructor(logger, level) {
+    this._logger = logger
+    this._level = level
+    this._info = {}
+  }
+
+  addFields(fields) {
+    Object.assign(this._info, fields)
+  }
+
+  setLevel(level) {
+    this._level = level
+  }
+
+  disable() {
+    this._disabled = true
+  }
+
+  emit(req, res) {
+    if (this._disabled) {
+      return
+    }
+    this.addFields({ req, res })
+    const url = req.originalUrl || req.url
+    this._logger[this._level](this._info, '%s %s', req.method, url)
+  }
+}
+
+module.exports.monitor = monitor
