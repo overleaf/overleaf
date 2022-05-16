@@ -14,6 +14,8 @@ import EmailsSection from '../../../../../../frontend/js/features/settings/compo
 const userData1: UserEmailData = {
   affiliation: {
     cachedConfirmedAt: null,
+    cachedEntitlement: null,
+    cachedLastDayToReconfirm: null,
     cachedPastReconfirmDate: false,
     cachedReconfirmedAt: null,
     department: null,
@@ -22,6 +24,7 @@ const userData1: UserEmailData = {
       confirmed: true,
       id: 1,
       isUniversity: false,
+      maxConfirmationMonths: null,
       name: 'Overleaf',
       ssoEnabled: false,
       ssoBeta: false,
@@ -41,6 +44,8 @@ const userData1: UserEmailData = {
 const userData2: UserEmailData = {
   affiliation: {
     cachedConfirmedAt: null,
+    cachedEntitlement: null,
+    cachedLastDayToReconfirm: null,
     cachedPastReconfirmDate: false,
     cachedReconfirmedAt: null,
     department: 'Art History',
@@ -49,6 +54,7 @@ const userData2: UserEmailData = {
       confirmed: true,
       id: 1,
       isUniversity: false,
+      maxConfirmationMonths: null,
       name: 'Overleaf',
       ssoEnabled: false,
       ssoBeta: false,

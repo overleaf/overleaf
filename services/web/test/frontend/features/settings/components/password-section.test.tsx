@@ -47,7 +47,7 @@ describe('<PasswordSection />', function () {
     submitValidForm()
 
     expect(updateMock.called()).to.be.true
-    expect(JSON.parse(updateMock.lastCall()[1].body)).to.deep.equal({
+    expect(JSON.parse(updateMock.lastCall()[1].body as string)).to.deep.equal({
       currentPassword: 'foobar',
       newPassword1: 'barbaz',
       newPassword2: 'barbaz',
@@ -71,7 +71,7 @@ describe('<PasswordSection />', function () {
 
     const button = screen.getByRole('button', {
       name: 'Change',
-    })
+    }) as HTMLButtonElement
     expect(button.disabled).to.be.true
 
     fireEvent.change(screen.getByLabelText('Current Password'), {
@@ -104,9 +104,15 @@ describe('<PasswordSection />', function () {
     })
     render(<PasswordSection />)
 
-    const currentPasswordInput = screen.getByLabelText('Current Password')
-    const newPassword1Input = screen.getByLabelText('New Password')
-    const newPassword2Input = screen.getByLabelText('Confirm New Password')
+    const currentPasswordInput = screen.getByLabelText(
+      'Current Password'
+    ) as HTMLInputElement
+    const newPassword1Input = screen.getByLabelText(
+      'New Password'
+    ) as HTMLInputElement
+    const newPassword2Input = screen.getByLabelText(
+      'Confirm New Password'
+    ) as HTMLInputElement
 
     expect(newPassword1Input.minLength).to.equal(3)
 

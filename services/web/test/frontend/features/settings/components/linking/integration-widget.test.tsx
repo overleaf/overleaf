@@ -4,9 +4,10 @@ import { IntegrationLinkingWidget } from '../../../../../../frontend/js/features
 
 describe('<IntegrationLinkingWidgetTest/>', function () {
   const defaultProps = {
-    logoSrc: '/logo',
+    logo: <div />,
     title: 'Integration',
-    description: ['paragraph1', 'paragraph2'],
+    description: 'paragraph1',
+    helpPath: '/learn',
     linkPath: '/link',
     unlinkPath: '/unlink',
     unlinkConfirmationTitle: 'confirm unlink',

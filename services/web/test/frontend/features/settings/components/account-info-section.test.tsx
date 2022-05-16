@@ -52,7 +52,7 @@ describe('<AccountInfoSection />', function () {
       })
     )
     expect(updateMock.called()).to.be.true
-    expect(JSON.parse(updateMock.lastCall()[1].body)).to.deep.equal({
+    expect(JSON.parse(updateMock.lastCall()[1].body as string)).to.deep.equal({
       email: 'john@watson.co.uk',
       first_name: 'John',
       last_name: 'Watson',
@@ -68,7 +68,7 @@ describe('<AccountInfoSection />', function () {
     })
     const button = screen.getByRole('button', {
       name: 'Update',
-    })
+    }) as HTMLButtonElement
 
     expect(button.disabled).to.be.true
     fireEvent.click(button)
@@ -155,7 +155,7 @@ describe('<AccountInfoSection />', function () {
         name: 'Update',
       })
     )
-    expect(JSON.parse(updateMock.lastCall()[1].body)).to.deep.equal({
+    expect(JSON.parse(updateMock.lastCall()[1].body as string)).to.deep.equal({
       first_name: 'Sherlock',
       last_name: 'Holmes',
     })
@@ -169,16 +169,22 @@ describe('<AccountInfoSection />', function () {
     const updateMock = fetchMock.post('/user/settings', 200)
 
     renderSectionWithUserProvider()
-    expect(screen.getByLabelText('Email').readOnly).to.be.true
-    expect(screen.getByLabelText('First Name').readOnly).to.be.false
-    expect(screen.getByLabelText('Last Name').readOnly).to.be.false
+    expect(screen.getByLabelText('Email')).to.have.property('readOnly', true)
+    expect(screen.getByLabelText('First Name')).to.have.property(
+      'readOnly',
+      false
+    )
+    expect(screen.getByLabelText('Last Name')).to.have.property(
+      'readOnly',
+      false
+    )
 
     fireEvent.click(
       screen.getByRole('button', {
         name: 'Update',
       })
     )
-    expect(JSON.parse(updateMock.lastCall()[1].body)).to.deep.equal({
+    expect(JSON.parse(updateMock.lastCall()[1].body as string)).to.deep.equal({
       first_name: 'Sherlock',
       last_name: 'Holmes',
     })
@@ -189,16 +195,22 @@ describe('<AccountInfoSection />', function () {
     const updateMock = fetchMock.post('/user/settings', 200)
 
     renderSectionWithUserProvider()
-    expect(screen.getByLabelText('Email').readOnly).to.be.false
-    expect(screen.getByLabelText('First Name').readOnly).to.be.true
-    expect(screen.getByLabelText('Last Name').readOnly).to.be.true
+    expect(screen.getByLabelText('Email')).to.have.property('readOnly', false)
+    expect(screen.getByLabelText('First Name')).to.have.property(
+      'readOnly',
+      true
+    )
+    expect(screen.getByLabelText('Last Name')).to.have.property(
+      'readOnly',
+      true
+    )
 
     fireEvent.click(
       screen.getByRole('button', {
         name: 'Update',
       })
     )
-    expect(JSON.parse(updateMock.lastCall()[1].body)).to.deep.equal({
+    expect(JSON.parse(updateMock.lastCall()[1].body as string)).to.deep.equal({
       email: 'sherlock@holmes.co.uk',
     })
   })

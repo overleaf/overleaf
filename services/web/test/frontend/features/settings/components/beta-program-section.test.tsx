@@ -21,7 +21,7 @@ describe('<BetaProgramSection />', function () {
   })
 
   it('shows link to sessions', async function () {
-    renderSectionWithUserProvider(<BetaProgramSection />)
+    renderSectionWithUserProvider()
 
     const link = screen.getByRole('link', {
       name: 'Manage Beta Program Membership',
@@ -31,7 +31,7 @@ describe('<BetaProgramSection />', function () {
   })
 
   it('shows enrolled status', async function () {
-    renderSectionWithUserProvider(<BetaProgramSection />)
+    renderSectionWithUserProvider()
     screen.getByText('You are enrolled in the Beta Program')
   })
 
@@ -39,7 +39,7 @@ describe('<BetaProgramSection />', function () {
     window.metaAttributesCache.set('ol-user', {
       betaProgram: false,
     })
-    renderSectionWithUserProvider(<BetaProgramSection />)
+    renderSectionWithUserProvider()
     screen.getByText(/By joining our Beta program you can have early access/)
   })
 })

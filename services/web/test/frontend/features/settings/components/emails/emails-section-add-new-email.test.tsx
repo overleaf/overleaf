@@ -13,6 +13,8 @@ import { UserEmailData } from '../../../../../../types/user-email'
 const userEmailData: UserEmailData = {
   affiliation: {
     cachedConfirmedAt: null,
+    cachedEntitlement: null,
+    cachedLastDayToReconfirm: null,
     cachedPastReconfirmDate: false,
     cachedReconfirmedAt: null,
     department: 'Art History',
@@ -21,6 +23,7 @@ const userEmailData: UserEmailData = {
       confirmed: true,
       id: 1,
       isUniversity: true,
+      maxConfirmationMonths: null,
       name: 'Overleaf',
       ssoEnabled: false,
       ssoBeta: false,
