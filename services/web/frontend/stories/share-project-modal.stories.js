@@ -128,6 +128,7 @@ const project = {
     readAndWrite: 'rw-token',
   },
   owner: {
+    _id: 'fakeOwnerId',
     email: 'stories@overleaf.com',
   },
   members: [

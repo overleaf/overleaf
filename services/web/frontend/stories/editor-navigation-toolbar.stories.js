@@ -1,9 +1,5 @@
 import ToolbarHeader from '../js/features/editor-navigation-toolbar/components/toolbar-header'
 
-import { setupContext } from './fixtures/context'
-
-setupContext()
-
 export const UpToThreeConnectedUsers = args => {
   return <ToolbarHeader {...args} />
 }

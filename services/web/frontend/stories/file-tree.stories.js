@@ -10,6 +10,7 @@ import useFetchMock from './hooks/use-fetch-mock'
 const MOCK_DELAY = 2000
 
 window._ide = {
+  ...window._ide,
   socket: new MockedSocket(),
 }
 const DEFAULT_PROJECT = {

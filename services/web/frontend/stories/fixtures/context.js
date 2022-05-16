@@ -6,35 +6,34 @@ export function setupContext() {
     id: 'fake_user',
     allowedFreeTrial: true,
   }
-  let $scope = {}
-  if (window._ide) {
-    $scope = {
-      ...window._ide.$scope,
-      user: window.user,
-      project: {
-        features: {},
-        rootFolder: [
-          {
-            _id: 'root-folder-id',
-            name: 'rootFolder',
-            docs: [],
-            folders: [],
-            fileRefs: [],
-          },
-        ],
-      },
-      $watch: () => {},
-      $applyAsync: () => {},
-      $broadcast: () => {},
-      ui: {
-        chatOpen: true,
-        pdfLayout: 'flat',
-      },
-      settings: {
-        pdfViewer: 'js',
-      },
-      toggleHistory: () => {},
-    }
+  const $scope = {
+    ...window._ide?.$scope,
+    user: window.user,
+    project: {
+      _id: window.project_id,
+      name: 'Project Fake Name',
+      features: {},
+      rootFolder: [
+        {
+          _id: 'root-folder-id',
+          name: 'rootFolder',
+          docs: [],
+          folders: [],
+          fileRefs: [],
+        },
+      ],
+    },
+    $watch: () => {},
+    $applyAsync: () => {},
+    $broadcast: () => {},
+    ui: {
+      chatOpen: true,
+      pdfLayout: 'flat',
+    },
+    settings: {
+      pdfViewer: 'js',
+    },
+    toggleHistory: () => {},
   }
   window._ide = {
     ...window._ide,
@@ -66,4 +65,7 @@ export function setupContext() {
   window.ExposedSettings = window.ExposedSettings || {}
   window.ExposedSettings.appName = 'Overleaf'
   window.gitBridgePublicBaseUrl = 'https://git.stories.com'
+
+  window.metaAttributesCache = window.metaAttributesCache || new Map()
+  window.metaAttributesCache.set('ol-user', window.user)
 }

@@ -3,7 +3,6 @@ import { v4 as uuid } from 'uuid'
 import { ContextRoot } from '../js/shared/context/root-context'
 import ChatPane from '../js/features/chat/components/chat-pane'
 import { stubMathJax } from '../../test/frontend/features/chat/components/stubs'
-import { setupContext } from './fixtures/context'
 import useFetchMock from './hooks/use-fetch-mock'
 
 const ONE_MINUTE = 60 * 1000
@@ -40,7 +39,6 @@ function generateMessages(count) {
 }
 
 stubMathJax()
-setupContext()
 
 export const Conversation = args => {
   useFetchMock(fetchMock => {

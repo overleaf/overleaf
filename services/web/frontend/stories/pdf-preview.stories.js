@@ -1,7 +1,6 @@
 import { withContextRoot } from './utils/with-context-root'
 import { useCallback, useMemo, useState } from 'react'
 import useFetchMock from './hooks/use-fetch-mock'
-import { setupContext } from './fixtures/context'
 import { Button } from 'react-bootstrap'
 import PdfPreviewPane from '../js/features/pdf-preview/components/pdf-preview-pane'
 import PdfPreview from '../js/features/pdf-preview/components/pdf-preview'
@@ -22,8 +21,6 @@ import {
   outputFiles,
 } from './fixtures/compile'
 import { cloneDeep } from 'lodash'
-
-setupContext()
 
 export default {
   title: 'Editor / PDF Preview',
