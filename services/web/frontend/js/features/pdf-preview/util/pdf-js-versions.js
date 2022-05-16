@@ -49,10 +49,10 @@ async function importPDFJS() {
 
   switch (variant) {
     case '213':
+    case 'default':
       return importPDFJS213()
 
     case '210':
-    case 'default':
       return importPDFJS210()
   }
 }
