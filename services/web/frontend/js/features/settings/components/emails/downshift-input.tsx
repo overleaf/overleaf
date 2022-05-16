@@ -66,7 +66,7 @@ function Downshift({
         }
       )}
     >
-      <div {...getComboboxProps()} className="form-group mb-2">
+      <div {...getComboboxProps()}>
         {/* eslint-disable-next-line jsx-a11y/label-has-for */}
         <label {...getLabelProps()} className="sr-only">
           {label}

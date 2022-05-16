@@ -52,7 +52,7 @@ function Downshift({ setValue, inputRef }: CountryInputProps) {
         }
       )}
     >
-      <div {...getComboboxProps()} className="form-group mb-2 ui-select-toggle">
+      <div {...getComboboxProps()} className="ui-select-toggle">
         {/* eslint-disable-next-line jsx-a11y/label-has-for */}
         <label {...getLabelProps()} className="sr-only">
           {t('country')}

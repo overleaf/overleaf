@@ -46,7 +46,7 @@ const institutionDomainData = [
     hostname: 'autocomplete.edu',
     confirmed: true,
   },
-]
+] as const
 
 function resetFetchMock() {
   fetchMock.reset()
@@ -390,5 +390,155 @@ describe('<EmailsSection />', function () {
     screen.getByText(newUniversity)
     screen.getByText(userEmailData.affiliation.role, { exact: false })
     screen.getByText(userEmailData.affiliation.department, { exact: false })
+  })
+
+  it('shows country, university, role and department fields based on whether `change` was clicked or not', async function () {
+    const institutionDomainDataCopy = [
+      {
+        ...institutionDomainData[0],
+        university: {
+          ...institutionDomainData[0].university,
+          ssoEnabled: false,
+        },
+      },
+    ]
+    const hostnameFirstChar = institutionDomainDataCopy[0].hostname.charAt(0)
+    fetchMock.get('/user/emails?ensureAffiliation=true', [])
+    render(<EmailsSection />)
+
+    await fetchMock.flush(true)
+    fetchMock.reset()
+    fetchMock.get(
+      `/institutions/domains?hostname=${hostnameFirstChar}&limit=1`,
+      institutionDomainDataCopy
+    )
+
+    await userEvent.click(
+      screen.getByRole('button', {
+        name: /add another email/i,
+      })
+    )
+
+    await userEvent.type(
+      screen.getByLabelText(/email/i),
+      `user@${hostnameFirstChar}`
+    )
+
+    await userEvent.keyboard('{Tab}')
+    await fetchMock.flush(true)
+    fetchMock.reset()
+
+    expect(
+      screen.queryByRole('textbox', {
+        name: /country/i,
+      })
+    ).to.be.null
+    expect(
+      screen.queryByRole('textbox', {
+        name: /university/i,
+      })
+    ).to.be.null
+    screen.getByRole('textbox', {
+      name: /role/i,
+    })
+    screen.getByRole('textbox', {
+      name: /department/i,
+    })
+
+    await userEvent.click(screen.getByRole('button', { name: /change/i }))
+
+    screen.getByRole('textbox', {
+      name: /country/i,
+    })
+    screen.getByRole('textbox', {
+      name: /university/i,
+    })
+    expect(
+      screen.queryByRole('textbox', {
+        name: /role/i,
+      })
+    ).to.be.null
+    expect(
+      screen.queryByRole('textbox', {
+        name: /department/i,
+      })
+    ).to.be.null
+  })
+
+  it('displays institution name with change button when autocompleted and adds new record', async function () {
+    const institutionDomainDataCopy = [
+      {
+        ...institutionDomainData[0],
+        university: {
+          ...institutionDomainData[0].university,
+          ssoEnabled: false,
+        },
+      },
+    ]
+    const hostnameFirstChar = institutionDomainDataCopy[0].hostname.charAt(0)
+    fetchMock.get('/user/emails?ensureAffiliation=true', [])
+    render(<EmailsSection />)
+
+    await fetchMock.flush(true)
+    fetchMock.reset()
+    fetchMock.get(
+      `/institutions/domains?hostname=${hostnameFirstChar}&limit=1`,
+      institutionDomainDataCopy
+    )
+
+    await userEvent.click(
+      screen.getByRole('button', {
+        name: /add another email/i,
+      })
+    )
+
+    await userEvent.type(
+      screen.getByLabelText(/email/i),
+      `user@${hostnameFirstChar}`
+    )
+
+    await userEvent.keyboard('{Tab}')
+    await fetchMock.flush(true)
+    fetchMock.reset()
+
+    screen.getByText(institutionDomainDataCopy[0].university.name)
+
+    const userEmailDataCopy = {
+      ...userEmailData,
+      affiliation: {
+        ...userEmailData.affiliation,
+        institution: {
+          ...userEmailData.affiliation.institution,
+          name: institutionDomainDataCopy[0].university.name,
+        },
+      },
+    }
+
+    fetchMock
+      .get('/user/emails?ensureAffiliation=true', [userEmailDataCopy])
+      .post('/user/emails', 200)
+
+    await userEvent.type(
+      screen.getByRole('textbox', { name: /role/i }),
+      userEmailData.affiliation.role
+    )
+    await userEvent.type(
+      screen.getByRole('textbox', { name: /department/i }),
+      userEmailData.affiliation.department
+    )
+    await userEvent.click(
+      screen.getByRole('button', {
+        name: /add new email/i,
+      })
+    )
+
+    await fetchMock.flush(true)
+    fetchMock.reset()
+
+    screen.getByText(userEmailDataCopy.affiliation.institution.name, {
+      exact: false,
+    })
+    screen.getByText(userEmailDataCopy.affiliation.role, { exact: false })
+    screen.getByText(userEmailDataCopy.affiliation.department, { exact: false })
   })
 })

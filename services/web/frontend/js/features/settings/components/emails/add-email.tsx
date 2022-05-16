@@ -50,22 +50,27 @@ function AddEmail() {
     setNewEmailMatchedInstitution(institution || null)
   }
 
+  const getSelectedKnownUniversityId = (): number | undefined => {
+    if (countryCode) {
+      return universities[countryCode]?.find(
+        ({ name }) => name === universityName
+      )?.id
+    }
+
+    return newEmailMatchedInstitution?.university.id
+  }
+
   const handleAddNewEmail = () => {
-    const selectedKnownUniversity = countryCode
-      ? universities[countryCode]?.find(({ name }) => name === universityName)
-      : undefined
-
-    const knownUniversityData = universityName &&
-      selectedKnownUniversity && {
-        university: {
-          id: selectedKnownUniversity.id,
-        },
-        role,
-        department,
-      }
-
+    const selectedKnownUniversityId = getSelectedKnownUniversityId()
+    const knownUniversityData = selectedKnownUniversityId && {
+      university: {
+        id: selectedKnownUniversityId,
+      },
+      role,
+      department,
+    }
     const unknownUniversityData = universityName &&
-      !selectedKnownUniversity && {
+      !selectedKnownUniversityId && {
         university: {
           name: universityName,
           country_code: countryCode,
@@ -136,6 +141,7 @@ function AddEmail() {
                   setRole={setRole}
                   department={department}
                   setDepartment={setDepartment}
+                  newEmailMatchedInstitution={newEmailMatchedInstitution}
                 />
               </Cell>
             </Col>

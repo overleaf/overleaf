@@ -118,21 +118,25 @@ function InstitutionAndRole({ userEmailData }: InstitutionAndRoleProps) {
       ) : (
         <div className="affiliation-change-container small">
           <form onSubmit={handleSubmit}>
-            <DownshiftInput
-              items={[...defaultRoles]}
-              inputValue={role}
-              placeholder={t('role')}
-              label={t('role')}
-              setValue={setRole}
-              ref={roleRef}
-            />
-            <DownshiftInput
-              items={departments}
-              inputValue={department}
-              placeholder={t('department')}
-              label={t('department')}
-              setValue={setDepartment}
-            />
+            <div className="form-group mb-2">
+              <DownshiftInput
+                items={[...defaultRoles]}
+                inputValue={role}
+                placeholder={t('role')}
+                label={t('role')}
+                setValue={setRole}
+                ref={roleRef}
+              />
+            </div>
+            <div className="form-group mb-2">
+              <DownshiftInput
+                items={departments}
+                inputValue={department}
+                placeholder={t('department')}
+                label={t('department')}
+                setValue={setDepartment}
+              />
+            </div>
             <Button
               bsSize="small"
               bsStyle="success"

@@ -62,7 +62,7 @@ const bazFakeInstitution = {
   team_id: null,
 }
 
-const fakeInstitutionDomain = [
+const fakeInstitutionDomain1 = [
   {
     university: {
       id: 1234,
@@ -70,6 +70,18 @@ const fakeInstitutionDomain = [
       name: 'Auto Complete University',
     },
     hostname: 'autocomplete.edu',
+    confirmed: true,
+  },
+]
+
+const fakeInstitutionDomain2 = [
+  {
+    university: {
+      id: 5678,
+      ssoEnabled: false,
+      name: 'Fake Auto Complete University',
+    },
+    hostname: 'fake-autocomplete.edu',
     confirmed: true,
   },
 ]
@@ -82,7 +94,8 @@ export function defaultSetupMocks(fetchMock) {
     .get(/\/institutions\/list\?country_code=.*/, fakeInstitutions, {
       delay: MOCK_DELAY,
     })
-    .get(/\/institutions\/domains/, fakeInstitutionDomain)
+    .get(/\/institutions\/domains\?hostname=a/, fakeInstitutionDomain1)
+    .get(/\/institutions\/domains\?hostname=f/, fakeInstitutionDomain2)
     .post(/\/user\/emails\/*/, 200, {
       delay: MOCK_DELAY,
     })

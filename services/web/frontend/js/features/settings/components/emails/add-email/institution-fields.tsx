@@ -7,8 +7,10 @@ import defaultRoles from '../../../data/roles'
 import defaultDepartments from '../../../data/departments'
 import { CountryCode } from '../../../data/countries-list'
 import { University } from '../../../../../../../types/university'
+import { InstitutionInfo } from './input'
 import { getJSON } from '../../../../../infrastructure/fetch-json'
 import useAsync from '../../../../../shared/hooks/use-async'
+import UniversityName from './university-name'
 
 type InstitutionFieldsProps = {
   countryCode: CountryCode | null
@@ -23,6 +25,7 @@ type InstitutionFieldsProps = {
   setRole: React.Dispatch<React.SetStateAction<string>>
   department: string
   setDepartment: React.Dispatch<React.SetStateAction<string>>
+  newEmailMatchedInstitution: InstitutionInfo | null
 }
 
 function InstitutionFields({
@@ -36,6 +39,7 @@ function InstitutionFields({
   setRole,
   department,
   setDepartment,
+  newEmailMatchedInstitution,
 }: InstitutionFieldsProps) {
   const { t } = useTranslation()
   const countryRef = useRef<HTMLInputElement | null>(null)
@@ -58,6 +62,16 @@ function InstitutionFields({
       setIsUniversityDirty(true)
     }
   }, [setIsUniversityDirty, universityName])
+
+  // If the institution selected by autocompletion has changed
+  // hide the fields visibility and reset values
+  useEffect(() => {
+    if (!newEmailMatchedInstitution) {
+      setIsInstitutionFieldsVisible(false)
+      setRole('')
+      setDepartment('')
+    }
+  }, [newEmailMatchedInstitution, setRole, setDepartment])
 
   useEffect(() => {
     const selectedKnownUniversity = countryCode
@@ -100,7 +114,21 @@ function InstitutionFields({
     setIsInstitutionFieldsVisible(true)
   }
 
-  if (!isInstitutionFieldsVisible) {
+  const handleSelectUniversityManually = () => {
+    setRole('')
+    setDepartment('')
+    handleShowInstitutionFields()
+  }
+
+  const isLetUsKnowVisible =
+    !newEmailMatchedInstitution && !isInstitutionFieldsVisible
+  const isAutocompletedInstitutionVisible =
+    newEmailMatchedInstitution && !isInstitutionFieldsVisible
+  const isRoleAndDepartmentVisible =
+    isAutocompletedInstitutionVisible || isUniversityDirty
+
+  // Is the email affiliated with an institution?
+  if (isLetUsKnowVisible) {
     return (
       <EmailAffiliatedWithInstitution onClick={handleShowInstitutionFields} />
     )
@@ -108,24 +136,39 @@ function InstitutionFields({
 
   return (
     <>
-      <div className="form-group mb-2">
-        <CountryInput
-          id="new-email-country-input"
-          setValue={setCountryCode}
-          ref={countryRef}
+      {isAutocompletedInstitutionVisible ? (
+        // Display the institution name after autocompletion
+        <UniversityName
+          name={newEmailMatchedInstitution.university.name}
+          onClick={handleSelectUniversityManually}
         />
-      </div>
-      <div className="form-group mb-2">
-        <DownshiftInput
-          items={getUniversityItems()}
-          inputValue={universityName}
-          placeholder={t('university')}
-          label={t('university')}
-          setValue={setUniversityName}
-          disabled={!countryCode}
-        />
-      </div>
-      {isUniversityDirty && (
+      ) : (
+        // Display the country and university fields
+        <>
+          <div className="form-group mb-2">
+            <CountryInput
+              id="new-email-country-input"
+              setValue={setCountryCode}
+              ref={countryRef}
+            />
+          </div>
+          <div
+            className={`form-group ${
+              isRoleAndDepartmentVisible ? 'mb-2' : 'mb-0'
+            }`}
+          >
+            <DownshiftInput
+              items={getUniversityItems()}
+              inputValue={universityName}
+              placeholder={t('university')}
+              label={t('university')}
+              setValue={setUniversityName}
+              disabled={!countryCode}
+            />
+          </div>
+        </>
+      )}
+      {isRoleAndDepartmentVisible && (
         <>
           <div className="form-group mb-2">
             <DownshiftInput
