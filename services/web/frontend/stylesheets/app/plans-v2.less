@@ -196,74 +196,47 @@
   position: absolute;
   color: @white;
   width: auto;
-  height: 35px;
   padding: @padding-xs @padding-sm;
   border-radius: 4px;
-  left: 59px;
-  top: -5px;
+  left: 100%;
+  top: 0;
   z-index: @plans-v2-m-a-tooltip-z-index;
+
+  &.plans-v2-m-a-tooltip-annual-selected {
+    .tooltip-inner {
+      background-color: @ol-green;
+    }
+
+    .tooltip-arrow {
+      border-right-color: @ol-green;
+    }
+  }
 
   span {
     white-space: nowrap;
   }
 
   @media (max-width: @screen-xs-max) {
-    top: 36px;
+    left: -121%;
+    top: unset;
+
+    &.plans-v2-m-a-tooltip-annual-selected {
+      left: -33%;
+
+      .tooltip-inner {
+        background-color: @ol-green;
+      }
+
+      .tooltip-arrow {
+        border-right-color: unset;
+        border-bottom-color: @ol-green;
+      }
+    }
 
     span {
       font-size: @font-size-extra-small;
       position: relative;
     }
-  }
-}
-
-.plans-v2-m-a-tooltip-monthly {
-  background-color: rgba(0, 0, 0, 0.9);
-
-  .plans-v2-m-a-tooltip-arrow {
-    background-color: rgba(0, 0, 0, 0.9);
-  }
-
-  @media (max-width: @screen-xs-max) {
-    left: -86px;
-
-    .plans-v2-m-a-tooltip-arrow {
-      left: 102px;
-    }
-  }
-}
-
-.plans-v2-m-a-tooltip-annual {
-  background-color: @ol-green;
-
-  .plans-v2-m-a-tooltip-arrow {
-    background-color: @ol-green;
-  }
-
-  @media (max-width: @screen-xs-max) {
-    left: -27px;
-
-    .plans-v2-m-a-tooltip-arrow {
-      left: 43px;
-    }
-  }
-}
-
-.plans-v2-m-a-tooltip-arrow {
-  background-color: rgba(0, 0, 0, 0.9);
-  position: absolute;
-  left: -4px;
-  top: 14px;
-  width: 8px;
-  height: 8px;
-  transform: rotate(45deg);
-  // hide the arrow behind the tooltip text
-  z-index: @plans-v2-m-a-tooltip-arrow-z-index;
-
-  @media (max-width: @screen-xs-max) {
-    width: 18px;
-    height: 18px;
-    top: -9px;
   }
 }
 

@@ -28,12 +28,16 @@ include ./_mixins
 				autocomplete="off"
 			)
 			span
-		div.plans-v2-m-a-switch-annual-text-container
+		.plans-v2-m-a-switch-annual-text-container
 			span(data-ol-plans-v2-m-a-switch-annual-text) #{translate("annual")}
-			div.plans-v2-m-a-tooltip.plans-v2-m-a-tooltip-monthly(data-ol-plans-v2-m-a-tooltip)
-				div.plans-v2-m-a-tooltip-arrow
-				span(data-ol-tooltip-period='monthly') #{translate("save_20_percent_by_paying_annually")}
-				span(hidden data-ol-tooltip-period='annual') #{translate("saving_20_percent")}
+			.tooltip.in.right.plans-v2-m-a-tooltip(
+				role="tooltip"
+				data-ol-plans-v2-m-a-tooltip
+			)
+				.tooltip-arrow
+				.tooltip-inner
+					span(data-ol-tooltip-period='monthly') #{translate("save_20_percent_by_paying_annually")}
+					span(hidden data-ol-tooltip-period='annual') #{translate("saving_20_percent")}
 
 .row(hidden data-ol-plans-v2-license-picker-container)
 	.col-sm-12

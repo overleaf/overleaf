@@ -68,9 +68,9 @@ export function enableMonthlyAnnualSwitching() {
 }
 
 export function hideMonthlyAnnualSwitchOnSmallScreen() {
-  const isSmallScreen = window.matchMedia('(max-width: 767px)').matches
+  const smallScreen = window.matchMedia('(max-width: 767px)').matches
 
-  if (isSmallScreen) {
+  if (smallScreen) {
     const el = document.querySelector('[data-ol-plans-v2-m-a-switch-container]')
 
     el.hidden = true
@@ -78,9 +78,9 @@ export function hideMonthlyAnnualSwitchOnSmallScreen() {
 }
 
 export function showMonthlyAnnualSwitchOnSmallScreen() {
-  const isSmallScreen = window.matchMedia('(max-width: 767px)').matches
+  const smallScreen = window.matchMedia('(max-width: 767px)').matches
 
-  if (isSmallScreen) {
+  if (smallScreen) {
     const el = document.querySelector('[data-ol-plans-v2-m-a-switch-container]')
 
     el.hidden = false
@@ -107,10 +107,7 @@ export function hideMonthlyAnnualTooltip() {
 function switchMonthlyAnnualTooltip() {
   const el = document.querySelector('[data-ol-plans-v2-m-a-tooltip]')
   if (currentMonthlyAnnualSwitchValue === 'annual') {
-    el.classList.replace(
-      'plans-v2-m-a-tooltip-annual',
-      'plans-v2-m-a-tooltip-monthly'
-    )
+    el.classList.remove('plans-v2-m-a-tooltip-annual-selected')
     document.querySelectorAll('[data-ol-tooltip-period]').forEach(childEl => {
       const period = childEl.getAttribute('data-ol-tooltip-period')
       if (period === 'monthly') {
@@ -120,10 +117,7 @@ function switchMonthlyAnnualTooltip() {
       }
     })
   } else {
-    el.classList.replace(
-      'plans-v2-m-a-tooltip-monthly',
-      'plans-v2-m-a-tooltip-annual'
-    )
+    el.classList.add('plans-v2-m-a-tooltip-annual-selected')
     document.querySelectorAll('[data-ol-tooltip-period]').forEach(childEl => {
       const period = childEl.getAttribute('data-ol-tooltip-period')
       if (period === 'annual') {
@@ -132,6 +126,17 @@ function switchMonthlyAnnualTooltip() {
         childEl.hidden = true
       }
     })
+  }
+}
+
+function changeMonthlyAnnualTooltipPosition() {
+  const smallScreen = window.matchMedia('(max-width: 767px)').matches
+  const el = document.querySelector('[data-ol-plans-v2-m-a-tooltip]')
+
+  if (smallScreen) {
+    el.classList.replace('right', 'bottom')
+  } else {
+    el.classList.replace('bottom', 'right')
   }
 }
 
@@ -215,4 +220,7 @@ export function setUpMonthlyAnnualSwitching() {
       switchMonthlyAnnualTable()
       switchUnderlineText()
     })
+
+  changeMonthlyAnnualTooltipPosition()
+  window.addEventListener('resize', changeMonthlyAnnualTooltipPosition)
 }
