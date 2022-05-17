@@ -350,7 +350,7 @@ mixin table_cell(feature, plan)
 mixin group_plans_license_picker()
 	form.plans-v2-license-picker-form(data-ol-plans-v2-license-picker-form)
 		.plans-v2-license-picker-select-container
-			span #{translate("how_many_licenses_are_you_looking_for")}
+			span #{translate("number_of_users_with_colon")}
 			select.plans-v2-license-picker-select(
 				name="plans-v2-license-picker-select"
 				id="plans-v2-license-picker-select"
@@ -372,11 +372,11 @@ mixin group_plans_license_picker()
 					autocomplete="off"
 					data-ol-plans-v2-license-picker-educational-discount-input
 				)
-				span #{translate("include_educational_discount")}
+				span #{translate("apply_educational_discount")}
 			//- will only appear on screen width >= 768px (using CSS)
 			i.fa.fa-question-circle.plans-v2-license-picker-educational-discount-question-icon(
 				data-toggle="tooltip"
-				title=translate("include_educational_discount_info"),
+				title=translate("apply_educational_discount_info"),
 				data-placement="bottom"
 			)
 			//- will only appear on screen width < 768px (using CSS)
@@ -384,7 +384,7 @@ mixin group_plans_license_picker()
 				span (
 				span.plans-v2-license-picker-educational-discount-learn-more-text(
 					data-toggle="tooltip"
-					title=translate("include_educational_discount_info"),
+					title=translate("apply_educational_discount_info"),
 					data-placement="bottom"
 				) #{translate("learn_more_lowercase")}
 				span )
