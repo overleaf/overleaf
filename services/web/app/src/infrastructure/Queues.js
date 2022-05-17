@@ -6,17 +6,30 @@ const Settings = require('@overleaf/settings')
 // uses the completed job records to report on job duration.
 const MAX_COMPLETED_JOBS_RETAINED = 10000
 const MAX_FAILED_JOBS_RETAINED = 50000
+const MAX_FAILED_JOBS_RETAINED_ANALYTICS = 3000000
 
 const QUEUES_JOB_OPTIONS = {
-  'analytics-events': {},
-  'analytics-editing-sessions': {},
-  'analytics-user-properties': {},
+  'analytics-events': {
+    removeOnFail: MAX_FAILED_JOBS_RETAINED_ANALYTICS,
+  },
+  'analytics-editing-sessions': {
+    removeOnFail: MAX_FAILED_JOBS_RETAINED_ANALYTICS,
+  },
+  'analytics-user-properties': {
+    removeOnFail: MAX_FAILED_JOBS_RETAINED_ANALYTICS,
+  },
   'refresh-features': {
+    removeOnFail: MAX_FAILED_JOBS_RETAINED,
     attempts: 3,
   },
-  'emails-onboarding': {},
-  'post-registration-analytics': {},
+  'emails-onboarding': {
+    removeOnFail: MAX_FAILED_JOBS_RETAINED,
+  },
+  'post-registration-analytics': {
+    removeOnFail: MAX_FAILED_JOBS_RETAINED_ANALYTICS,
+  },
   'scheduled-jobs': {
+    removeOnFail: MAX_FAILED_JOBS_RETAINED,
     attempts: 1,
   },
 }
@@ -42,7 +55,6 @@ function getQueue(queueName) {
       redis: redisOptions,
       defaultJobOptions: {
         removeOnComplete: MAX_COMPLETED_JOBS_RETAINED,
-        removeOnFail: MAX_FAILED_JOBS_RETAINED,
         attempts: 11,
         backoff: {
           type: 'exponential',
