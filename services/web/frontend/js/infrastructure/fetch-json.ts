@@ -48,12 +48,17 @@ function getErrorMessageForStatusCode(statusCode?: number) {
 }
 
 export class FetchError extends OError {
+  public url: string
+  public options?: RequestInit
+  public response?: Response
+  public data?: any
+
   constructor(
     message: string,
-    public url: string,
-    public options?: RequestInit,
-    public response?: Response,
-    public data?: any
+    url: string,
+    options?: RequestInit,
+    response?: Response,
+    data?: any
   ) {
     // On HTTP2, the `statusText` property is not set,
     // so this `message` will be undefined. We need to
@@ -62,7 +67,13 @@ export class FetchError extends OError {
     if (!message) {
       message = getErrorMessageForStatusCode(response?.status)
     }
+
     super(message, { statusCode: response ? response.status : undefined })
+
+    this.url = url
+    this.options = options
+    this.response = response
+    this.data = data
   }
 
   getUserFacingMessage() {
