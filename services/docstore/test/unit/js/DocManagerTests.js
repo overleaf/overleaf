@@ -379,7 +379,7 @@ describe('DocManager', function () {
           .stub()
           .yields(null, { _id: ObjectId(this.doc_id) })
         this.MongoManager.patchDoc = sinon.stub().yields(null)
-        this.DocArchiveManager.archiveDocById = sinon.stub().yields(null)
+        this.DocArchiveManager.archiveDoc = sinon.stub().yields(null)
         this.meta = {}
       })
 
@@ -429,7 +429,7 @@ describe('DocManager', function () {
         })
 
         it('should not flush the doc out of mongo', function () {
-          expect(this.DocArchiveManager.archiveDocById).to.not.have.been.called
+          expect(this.DocArchiveManager.archiveDoc).to.not.have.been.called
         })
       })
 
@@ -447,7 +447,7 @@ describe('DocManager', function () {
         })
 
         it('should not flush the doc out of mongo', function () {
-          expect(this.DocArchiveManager.archiveDocById).to.not.have.been.called
+          expect(this.DocArchiveManager.archiveDoc).to.not.have.been.called
         })
       })
 
@@ -459,7 +459,7 @@ describe('DocManager', function () {
 
         describe('when the background flush succeeds', function () {
           beforeEach(function (done) {
-            this.DocArchiveManager.archiveDocById = sinon.stub().yields(null)
+            this.DocArchiveManager.archiveDoc = sinon.stub().yields(null)
             this.callback = sinon.stub().callsFake(done)
             this.DocManager.patchDoc(
               this.project_id,
@@ -474,18 +474,17 @@ describe('DocManager', function () {
           })
 
           it('should flush the doc out of mongo', function () {
-            expect(
-              this.DocArchiveManager.archiveDocById
-            ).to.have.been.calledWith(this.project_id, this.doc_id)
+            expect(this.DocArchiveManager.archiveDoc).to.have.been.calledWith(
+              this.project_id,
+              this.doc_id
+            )
           })
         })
 
         describe('when the background flush fails', function () {
           beforeEach(function (done) {
             this.err = new Error('foo')
-            this.DocArchiveManager.archiveDocById = sinon
-              .stub()
-              .yields(this.err)
+            this.DocArchiveManager.archiveDoc = sinon.stub().yields(this.err)
             this.callback = sinon.stub().callsFake(done)
             this.DocManager.patchDoc(
               this.project_id,

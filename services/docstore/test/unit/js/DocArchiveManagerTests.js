@@ -118,15 +118,26 @@ describe('DocArchiveManager', function () {
       deleteDirectory: sinon.stub().resolves(),
     }
 
-    const getNonArchivedProjectDocs = sinon.stub()
-    getNonArchivedProjectDocs
+    const getNonArchivedProjectDocIds = sinon.stub()
+    getNonArchivedProjectDocIds
       .onCall(0)
-      .resolves(mongoDocs.filter(doc => !doc.inS3))
-    getNonArchivedProjectDocs.onCall(1).resolves([])
+      .resolves(mongoDocs.filter(doc => !doc.inS3).map(doc => doc._id))
+    getNonArchivedProjectDocIds.onCall(1).resolves([])
 
     const getArchivedProjectDocs = sinon.stub()
     getArchivedProjectDocs.onCall(0).resolves(archivedDocs)
     getArchivedProjectDocs.onCall(1).resolves([])
+
+    const fakeGetDoc = async (_projectId, _docId) => {
+      if (_projectId.equals(projectId)) {
+        for (const mongoDoc of mongoDocs.concat(archivedDocs)) {
+          if (mongoDoc._id.equals(_docId)) {
+            return mongoDoc
+          }
+        }
+      }
+      throw new Errors.NotFoundError()
+    }
 
     MongoManager = {
       promises: {
@@ -135,16 +146,12 @@ describe('DocArchiveManager', function () {
         upsertIntoDocCollection: sinon.stub().resolves(),
         getProjectsDocs: sinon.stub().resolves(mongoDocs),
         getNonDeletedArchivedProjectDocs: getArchivedProjectDocs,
-        getNonArchivedProjectDocs,
+        getNonArchivedProjectDocIds,
         getArchivedProjectDocs,
-        findDoc: sinon.stub().rejects(new Errors.NotFoundError()),
+        findDoc: sinon.stub().callsFake(fakeGetDoc),
+        getDocForArchiving: sinon.stub().callsFake(fakeGetDoc),
         destroyProject: sinon.stub().resolves(),
       },
-    }
-    for (const mongoDoc of mongoDocs.concat(archivedDocs)) {
-      MongoManager.promises.findDoc
-        .withArgs(projectId, mongoDoc._id, sinon.match.any)
-        .resolves(mongoDoc)
     }
 
     DocArchiveManager = SandboxedModule.require(modulePath, {
@@ -163,7 +170,7 @@ describe('DocArchiveManager', function () {
   describe('archiveDoc', function () {
     it('should resolve when passed a valid document', async function () {
       await expect(
-        DocArchiveManager.promises.archiveDoc(projectId, mongoDocs[0])
+        DocArchiveManager.promises.archiveDoc(projectId, mongoDocs[0]._id)
       ).to.eventually.be.fulfilled
     })
 
@@ -172,26 +179,26 @@ describe('DocArchiveManager', function () {
       doc.lines = null
 
       await expect(
-        DocArchiveManager.promises.archiveDoc(projectId, doc)
+        DocArchiveManager.promises.archiveDoc(projectId, doc._id)
       ).to.eventually.be.rejectedWith('doc has no lines')
     })
 
     it('should add the schema version', async function () {
-      await DocArchiveManager.promises.archiveDoc(projectId, mongoDocs[1])
+      await DocArchiveManager.promises.archiveDoc(projectId, mongoDocs[1]._id)
       expect(Streamifier.createReadStream).to.have.been.calledWith(
         sinon.match(/"schema_v":1/)
       )
     })
 
     it('should calculate the hex md5 sum of the content', async function () {
-      await DocArchiveManager.promises.archiveDoc(projectId, mongoDocs[0])
+      await DocArchiveManager.promises.archiveDoc(projectId, mongoDocs[0]._id)
       expect(Crypto.createHash).to.have.been.calledWith('md5')
       expect(HashUpdate).to.have.been.calledWith(archivedDocJson)
       expect(HashDigest).to.have.been.calledWith('hex')
     })
 
     it('should pass the md5 hash to the object persistor for verification', async function () {
-      await DocArchiveManager.promises.archiveDoc(projectId, mongoDocs[0])
+      await DocArchiveManager.promises.archiveDoc(projectId, mongoDocs[0]._id)
 
       expect(PersistorManager.sendStream).to.have.been.calledWith(
         sinon.match.any,
@@ -202,7 +209,7 @@ describe('DocArchiveManager', function () {
     })
 
     it('should pass the correct bucket and key to the persistor', async function () {
-      await DocArchiveManager.promises.archiveDoc(projectId, mongoDocs[0])
+      await DocArchiveManager.promises.archiveDoc(projectId, mongoDocs[0]._id)
 
       expect(PersistorManager.sendStream).to.have.been.calledWith(
         Settings.docstore.bucket,
@@ -211,7 +218,7 @@ describe('DocArchiveManager', function () {
     })
 
     it('should create a stream from the encoded json and send it', async function () {
-      await DocArchiveManager.promises.archiveDoc(projectId, mongoDocs[0])
+      await DocArchiveManager.promises.archiveDoc(projectId, mongoDocs[0]._id)
       expect(Streamifier.createReadStream).to.have.been.calledWith(
         archivedDocJson
       )
@@ -223,8 +230,9 @@ describe('DocArchiveManager', function () {
     })
 
     it('should mark the doc as archived', async function () {
-      await DocArchiveManager.promises.archiveDoc(projectId, mongoDocs[0])
+      await DocArchiveManager.promises.archiveDoc(projectId, mongoDocs[0]._id)
       expect(MongoManager.promises.markDocAsArchived).to.have.been.calledWith(
+        projectId,
         mongoDocs[0]._id,
         mongoDocs[0].rev
       )
@@ -243,7 +251,7 @@ describe('DocArchiveManager', function () {
 
       it('should return an error', async function () {
         await expect(
-          DocArchiveManager.promises.archiveDoc(projectId, mongoDocs[0])
+          DocArchiveManager.promises.archiveDoc(projectId, mongoDocs[0]._id)
         ).to.eventually.be.rejectedWith('null bytes detected')
       })
     })
@@ -452,22 +460,25 @@ describe('DocArchiveManager', function () {
       await DocArchiveManager.promises.archiveAllDocs(projectId)
       // not inS3
       expect(MongoManager.promises.markDocAsArchived).to.have.been.calledWith(
+        projectId,
         mongoDocs[0]._id
       )
       expect(MongoManager.promises.markDocAsArchived).to.have.been.calledWith(
+        projectId,
         mongoDocs[1]._id
       )
       expect(MongoManager.promises.markDocAsArchived).to.have.been.calledWith(
+        projectId,
         mongoDocs[4]._id
       )
 
       // inS3
       expect(
         MongoManager.promises.markDocAsArchived
-      ).not.to.have.been.calledWith(mongoDocs[2]._id)
+      ).not.to.have.been.calledWith(projectId, mongoDocs[2]._id)
       expect(
         MongoManager.promises.markDocAsArchived
-      ).not.to.have.been.calledWith(mongoDocs[3]._id)
+      ).not.to.have.been.calledWith(projectId, mongoDocs[3]._id)
     })
   })
 

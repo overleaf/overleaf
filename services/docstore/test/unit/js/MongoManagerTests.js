@@ -23,7 +23,10 @@ describe('MongoManager', function () {
           ObjectId,
         },
         '@overleaf/metrics': { timeAsyncMethod: sinon.stub() },
-        '@overleaf/settings': { max_deleted_docs: 42 },
+        '@overleaf/settings': {
+          max_deleted_docs: 42,
+          docstore: { archivingLockDurationMs: 5000 },
+        },
         './Errors': Errors,
       },
     })

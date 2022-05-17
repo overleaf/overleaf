@@ -10,12 +10,10 @@ const PersistorManager = require('./PersistorManager')
 const pMap = require('p-map')
 
 const PARALLEL_JOBS = Settings.parallelArchiveJobs
-const ARCHIVE_BATCH_SIZE = Settings.archiveBatchSize
 const UN_ARCHIVE_BATCH_SIZE = Settings.unArchiveBatchSize
 
 module.exports = {
   archiveAllDocs: callbackify(archiveAllDocs),
-  archiveDocById: callbackify(archiveDocById),
   archiveDoc: callbackify(archiveDoc),
   unArchiveAllDocs: callbackify(unArchiveAllDocs),
   unarchiveDoc: callbackify(unarchiveDoc),
@@ -23,7 +21,6 @@ module.exports = {
   getDoc: callbackify(getDoc),
   promises: {
     archiveAllDocs,
-    archiveDocById,
     archiveDoc,
     unArchiveAllDocs,
     unarchiveDoc,
@@ -33,43 +30,21 @@ module.exports = {
 }
 
 async function archiveAllDocs(projectId) {
-  while (true) {
-    const docs = await MongoManager.getNonArchivedProjectDocs(
-      projectId,
-      ARCHIVE_BATCH_SIZE
-    )
-    if (!docs || docs.length === 0) {
-      break
-    }
-
-    await pMap(docs, doc => archiveDoc(projectId, doc), {
-      concurrency: PARALLEL_JOBS,
-    })
-  }
+  const docIds = await MongoManager.getNonArchivedProjectDocIds(projectId)
+  await pMap(docIds, docId => archiveDoc(projectId, docId), {
+    concurrency: PARALLEL_JOBS,
+  })
 }
 
-async function archiveDocById(projectId, docId) {
-  const doc = await MongoManager.findDoc(projectId, docId, {
-    lines: true,
-    ranges: true,
-    rev: true,
-    inS3: true,
-  })
+async function archiveDoc(projectId, docId) {
+  const doc = await MongoManager.getDocForArchiving(projectId, docId)
 
   if (!doc) {
-    throw new Errors.NotFoundError(
-      `Cannot find doc ${docId} in project ${projectId}`
-    )
-  }
-
-  if (doc.inS3) {
-    // No need to throw an error if the doc is already archived
+    // The doc wasn't found, it was already archived, or the lock couldn't be
+    // acquired. Since we don't know which it is, silently return.
     return
   }
-  await archiveDoc(projectId, doc)
-}
 
-async function archiveDoc(projectId, doc) {
   logger.debug(
     { project_id: projectId, doc_id: doc._id },
     'sending doc to persistor'
@@ -100,7 +75,7 @@ async function archiveDoc(projectId, doc) {
   await PersistorManager.sendStream(Settings.docstore.bucket, key, stream, {
     sourceMd5: md5,
   })
-  await MongoManager.markDocAsArchived(doc._id, doc.rev)
+  await MongoManager.markDocAsArchived(projectId, docId, doc.rev)
 }
 
 async function unArchiveAllDocs(projectId) {

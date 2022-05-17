@@ -238,7 +238,7 @@ function archiveAllDocs(req, res, next) {
 function archiveDoc(req, res, next) {
   const { doc_id: docId, project_id: projectId } = req.params
   logger.debug({ projectId, docId }, 'archiving a doc')
-  DocArchive.archiveDocById(projectId, docId, function (error) {
+  DocArchive.archiveDoc(projectId, docId, function (error) {
     if (error) {
       return next(error)
     }

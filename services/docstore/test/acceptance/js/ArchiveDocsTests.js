@@ -342,7 +342,7 @@ describe('Archiving', function () {
           if (error) {
             return done(error)
           }
-          DocstoreClient.archiveDocById(
+          DocstoreClient.archiveDoc(
             this.project_id,
             this.doc._id,
             (error, res) => {

@@ -40,9 +40,10 @@ const Settings = {
   maxJsonRequestSize:
     parseInt(process.env.MAX_JSON_REQUEST_SIZE) || 6 * 1024 * 1024, // 6 MB
 
-  archiveBatchSize: parseInt(process.env.ARCHIVE_BATCH_SIZE, 10) || 50,
   unArchiveBatchSize: parseInt(process.env.UN_ARCHIVE_BATCH_SIZE, 10) || 50,
   parallelArchiveJobs: parseInt(process.env.PARALLEL_ARCHIVE_JOBS, 10) || 5,
+  archivingLockDurationMs:
+    parseInt(process.env.ARCHIVING_LOCK_DURATION_MS, 10) || 60000,
 }
 
 if (process.env.MONGO_CONNECTION_STRING) {

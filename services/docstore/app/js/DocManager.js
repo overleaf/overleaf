@@ -364,7 +364,7 @@ module.exports = DocManager = {
 
       if (meta.deleted && Settings.docstore.archiveOnSoftDelete) {
         // The user will not read this doc anytime soon. Flush it out of mongo.
-        DocArchive.archiveDocById(project_id, doc_id, err => {
+        DocArchive.archiveDoc(project_id, doc_id, err => {
           if (err) {
             logger.warn(
               { project_id, doc_id, err },

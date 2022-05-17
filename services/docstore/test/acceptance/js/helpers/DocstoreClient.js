@@ -163,7 +163,7 @@ module.exports = DocstoreClient = {
     )
   },
 
-  archiveDocById(projectId, docId, callback) {
+  archiveDoc(projectId, docId, callback) {
     request.post(
       {
         url: `http://localhost:${settings.internal.docstore.port}/project/${projectId}/doc/${docId}/archive`,

@@ -6,6 +6,8 @@ const OError = require('@overleaf/o-error')
 const Errors = require('./Errors')
 const { promisify } = require('util')
 
+const ARCHIVING_LOCK_DURATION_MS = Settings.archivingLockDurationMs
+
 function findDoc(projectId, docId, filter, callback) {
   db.docs.findOne(
     {
@@ -59,12 +61,17 @@ function getArchivedProjectDocs(projectId, maxResults, callback) {
     .toArray(callback)
 }
 
-function getNonArchivedProjectDocs(projectId, maxResults, callback) {
-  const query = {
-    project_id: ObjectId(projectId.toString()),
-    inS3: { $ne: true },
-  }
-  db.docs.find(query, { limit: maxResults }).toArray(callback)
+function getNonArchivedProjectDocIds(projectId, callback) {
+  db.docs
+    .find(
+      {
+        project_id: ObjectId(projectId),
+        inS3: { $ne: true },
+      },
+      { projection: { _id: 1 } }
+    )
+    .map(doc => doc._id)
+    .toArray(callback)
 }
 
 function getNonDeletedArchivedProjectDocs(projectId, maxResults, callback) {
@@ -108,19 +115,44 @@ function patchDoc(projectId, docId, meta, callback) {
   )
 }
 
-function markDocAsArchived(docId, rev, callback) {
-  const update = {
-    $set: {},
-    $unset: {},
-  }
-  update.$set.inS3 = true
-  update.$unset.lines = true
-  update.$unset.ranges = true
-  const query = {
-    _id: docId,
-    rev,
-  }
-  db.docs.updateOne(query, update, callback)
+/**
+ * Fetch a doc and lock it for archiving
+ *
+ * This will return null if the doc is not found, if it's already archived or
+ * if the lock can't be acquired.
+ */
+function getDocForArchiving(projectId, docId, callback) {
+  const archivingUntil = new Date(Date.now() + ARCHIVING_LOCK_DURATION_MS)
+  db.docs.findOneAndUpdate(
+    {
+      _id: ObjectId(docId),
+      project_id: ObjectId(projectId),
+      inS3: { $ne: true },
+      $or: [{ archivingUntil: null }, { archivingUntil: { $lt: new Date() } }],
+    },
+    { $set: { archivingUntil } },
+    { projection: { lines: 1, ranges: 1, rev: 1 } },
+    (err, result) => {
+      if (err) {
+        return callback(err)
+      }
+      callback(null, result.value)
+    }
+  )
+}
+
+/**
+ * Clear the doc contents from Mongo and release the archiving lock
+ */
+function markDocAsArchived(projectId, docId, rev, callback) {
+  db.docs.updateOne(
+    { _id: ObjectId(docId), rev },
+    {
+      $set: { inS3: true },
+      $unset: { lines: 1, ranges: 1, archivingUntil: 1 },
+    },
+    callback
+  )
 }
 
 /**
@@ -267,11 +299,12 @@ module.exports = {
   getProjectsDeletedDocs,
   getProjectsDocs,
   getArchivedProjectDocs,
-  getNonArchivedProjectDocs,
+  getNonArchivedProjectDocIds,
   getNonDeletedArchivedProjectDocs,
   upsertIntoDocCollection,
   restoreArchivedDoc,
   patchDoc,
+  getDocForArchiving,
   markDocAsArchived,
   getDocVersion,
   setDocVersion,
