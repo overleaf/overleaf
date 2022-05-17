@@ -7,10 +7,10 @@ const individualPlans = [
         info: 'number_of_users_info',
         value: 'str',
         plans: {
-          free: '1 users',
-          personal: '1 users',
-          collaborator: '1 users',
-          professional: '1 users',
+          free: '1 user',
+          personal: '1 user',
+          collaborator: '1 user',
+          professional: '1 user',
         },
       },
       {
@@ -464,8 +464,8 @@ const studentPlans = [
         info: 'number_of_users_info',
         value: 'str',
         plans: {
-          free: '1 users',
-          student: '1 users',
+          free: '1 user',
+          student: '1 user',
           university: 'Multiple users',
         },
       },
