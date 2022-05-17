@@ -668,5 +668,6 @@
   "link_to_github": "Enlace a tu cuenta de GitHub",
   "github_integration": "Integración con GitHub",
   "github_is_premium": "La sincronización con GitHub es una característica premium",
-  "thank_you": "Gracias"
+  "thank_you": "Gracias",
+  "group_plans": "Planes grupales"
 }

@@ -138,7 +138,6 @@
   "project_ownership_transfer_confirmation_2": "Cette action est irréversible. Le nouveau propriétaire sera notifié et sera en mesure de modifier les paramètres d’accès au projet (y compris de vous ôter le droit d’accès).",
   "change_owner": "Changer de propriétaire",
   "change_project_owner": "Changer le propriétaire du projet",
-  "faq_pay_by_invoice_answer": "Oui, si vous souhaitez acheter un compte groupé ou une licence de site et que vous préférez payer par facture,\nou si vous avez besoin d’un bon de commande, <0>faites-le nous savoir</0>.\nPour les comptes individuels ou à facturation mensuelle, nous ne pouvons accepter que le paiement en ligne\npar carte bleue ou PayPal.",
   "password_too_long_please_reset": "La longueur maximale autorisée pour le mot de passe a été dépassée. Merci de réinitialiser votre mot de passe.",
   "view_other_options_to_log_in": "Voir d’autres options de connexion",
   "we_logged_you_in": "Nous vous avons connecté.",
@@ -446,6 +445,7 @@
   "faq_purchase_more_licenses_answer": "Oui, nous proposons des __groupLink__, qui sont plus faciles à gérer, réduisent les formalités et vous permettent d’économiser sur l’achat de plusieurs licences.",
   "faq_monthly_or_annual_answer": "La facturation annuelle vous permet de simplifier votre comptabilité et les formalités afférentes. Si vous préférez gérer un unique paiement par an au lieu de douze, la facturation annuelle est faite pour vous.",
   "faq_how_to_pay_answer": "Oui, vous pouvez. La grande majorité des cartes bleues ainsi que le paiement PayPal sont acceptés. Choisissez l’offre qui vous convient ci-dessus puis vous aurez la possibilité de payer par carte ou de passer par PayPal au moment du paiement.",
+  "faq_pay_by_invoice_answer": "Oui, si vous souhaitez acheter un compte groupé ou une licence de site et que vous préférez payer par facture,\nou si vous avez besoin d’un bon de commande, <0>faites-le nous savoir</0>.\nPour les comptes individuels ou à facturation mensuelle, nous ne pouvons accepter que le paiement en ligne\npar carte bleue ou PayPal.",
   "powerful_latex_editor": "Éditeur LaTeX puissant",
   "realtime_track_changes": "Suivi des modifications en temps réel",
   "realtime_track_changes_info": "Vous n’aurez plus à choisir entre suivre vos modifications et composer vos documents en LaTeX. Laissez des commentaires, gardez trace de ce qu’il reste à faire et acceptez ou rejetez les modifications des autres.",
@@ -1482,5 +1482,6 @@
   "pagination_navigation": "Navigation pagination",
   "can_now_relink_dropbox": "Vous pouvez désormais <0>reconnecter votre compte Dropbox</0>.",
   "skip_to_content": "Aller au contenu",
-  "logging_out": "Déconnexion de"
+  "logging_out": "Déconnexion de",
+  "group_plans": "Offres de groupes"
 }

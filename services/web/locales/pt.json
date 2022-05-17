@@ -1073,5 +1073,6 @@
   "link_to_github": "Vincule à sua conta do GitHub",
   "github_integration": "Integração com o GitHub",
   "github_is_premium": "Sincronizar com GitHub é um recurso premium",
-  "thank_you": "Obrigado"
+  "thank_you": "Obrigado",
+  "group_plans": "Planos de Grupos"
 }
