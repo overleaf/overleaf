@@ -342,7 +342,7 @@ block content
 														span.sr-only #{translate('processing')}
 														| &nbsp;
 													span(ng-if="paymentMethod.value === 'credit_card'")
-														| {{ monthlyBilling ? '#{translate("upgrade_cc_btn")}' : '#{translate("upgrade_now")}'}}
+														| {{ trialLength ? '#{translate("upgrade_cc_btn")}' : '#{translate("upgrade_now")}'}}
 													span(ng-if="paymentMethod.value !== 'credit_card'") #{translate("upgrade_paypal_btn")}
 
 											p.tos-agreement-notice !{translate("by_subscribing_you_agree_to_our_terms_of_service", {}, [{name: 'a', attrs: {href: '/legal#Terms', target:'_blank', rel:'noopener noreferrer'}}])}
