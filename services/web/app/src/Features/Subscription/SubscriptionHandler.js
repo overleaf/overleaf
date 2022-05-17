@@ -11,16 +11,13 @@ const PlansLocator = require('./PlansLocator')
 const SubscriptionHelper = require('./SubscriptionHelper')
 
 function validateNoSubscriptionInRecurly(userId, callback) {
-  if (callback == null) {
-    callback = function () {}
-  }
   RecurlyWrapper.listAccountActiveSubscriptions(
     userId,
     function (error, subscriptions) {
-      if (subscriptions == null) {
+      if (!subscriptions) {
         subscriptions = []
       }
-      if (error != null) {
+      if (error) {
         return callback(error)
       }
       if (subscriptions.length > 0) {
@@ -28,7 +25,7 @@ function validateNoSubscriptionInRecurly(userId, callback) {
           subscriptions[0],
           userId,
           function (error) {
-            if (error != null) {
+            if (error) {
               return callback(error)
             }
             callback(null, false)
@@ -48,7 +45,7 @@ function createSubscription(
   callback
 ) {
   validateNoSubscriptionInRecurly(user._id, function (error, valid) {
-    if (error != null) {
+    if (error) {
       return callback(error)
     }
     if (!valid) {
@@ -59,14 +56,14 @@ function createSubscription(
       subscriptionDetails,
       recurlyTokenIds,
       function (error, recurlySubscription) {
-        if (error != null) {
+        if (error) {
           return callback(error)
         }
         return SubscriptionUpdater.syncSubscription(
           recurlySubscription,
           user._id,
           function (error) {
-            if (error != null) {
+            if (error) {
               return callback(error)
             }
             return callback()
@@ -93,14 +90,14 @@ function updateSubscription(user, planCode, couponCode, callback) {
         return async.series(
           [
             function (cb) {
-              if (couponCode == null) {
+              if (!couponCode) {
                 return cb()
               }
               RecurlyWrapper.getSubscription(
                 subscription.recurlySubscription_id,
                 { includeAccount: true },
                 function (err, usersSubscription) {
-                  if (err != null) {
+                  if (err) {
                     return cb(err)
                   }
                   RecurlyWrapper.redeemCoupon(
@@ -134,7 +131,7 @@ function updateSubscription(user, planCode, couponCode, callback) {
                 subscription.recurlySubscription_id,
                 { planCode, timeframe },
                 function (error, subscriptionChange) {
-                  if (error != null) {
+                  if (error) {
                     return cb(error)
                   }
                   // v2 recurly API wants a UUID, but UUID isn't included in the subscription change response
@@ -167,7 +164,7 @@ function cancelPendingSubscriptionChange(user, callback) {
         RecurlyClient.removeSubscriptionChangeByUuid(
           subscription.recurlySubscription_id,
           function (error) {
-            if (error != null) {
+            if (error) {
               return callback(error)
             }
             callback()
@@ -194,7 +191,7 @@ function cancelSubscription(user, callback) {
         RecurlyClient.cancelSubscriptionByUuid(
           subscription.recurlySubscription_id,
           function (error) {
-            if (error != null) {
+            if (error) {
               return callback(error)
             }
             const emailOpts = {
@@ -208,7 +205,7 @@ function cancelSubscription(user, callback) {
                   'canceledSubscription',
                   emailOpts,
                   err => {
-                    if (err != null) {
+                    if (err) {
                       logger.warn(
                         { err },
                         'failed to send confirmation email for subscription cancellation'
@@ -242,14 +239,14 @@ function reactivateSubscription(user, callback) {
         RecurlyClient.reactivateSubscriptionByUuid(
           subscription.recurlySubscription_id,
           function (error) {
-            if (error != null) {
+            if (error) {
               return callback(error)
             }
             EmailHandler.sendEmail(
               'reactivatedSubscription',
               { to: user.email },
               err => {
-                if (err != null) {
+                if (err) {
                   logger.warn(
                     { err },
                     'failed to send reactivation confirmation email'
@@ -272,17 +269,17 @@ function syncSubscription(recurlySubscription, requesterData, callback) {
     recurlySubscription.uuid,
     { includeAccount: true },
     function (error, recurlySubscription) {
-      if (error != null) {
+      if (error) {
         return callback(error)
       }
       User.findById(
         recurlySubscription.account.account_code,
         { _id: 1 },
         function (error, user) {
-          if (error != null) {
+          if (error) {
             return callback(error)
           }
-          if (user == null) {
+          if (!user) {
             return callback(new Error('no user found'))
           }
           SubscriptionUpdater.syncSubscription(

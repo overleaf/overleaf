@@ -1,21 +1,7 @@
-/* eslint-disable
-    n/handle-callback-err,
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 const modulePath =
   '../../../../app/src/Features/Subscription/SubscriptionLocator'
-const { assert } = require('chai')
 
 describe('Subscription Locator Tests', function () {
   beforeEach(function () {
@@ -29,7 +15,7 @@ describe('Subscription Locator Tests', function () {
       findOne: sinon.stub().yields(),
       find: sinon.stub().yields(),
     }
-    return (this.SubscriptionLocator = SandboxedModule.require(modulePath, {
+    this.SubscriptionLocator = SandboxedModule.require(modulePath, {
       requires: {
         './GroupPlansData': {},
         '../../models/Subscription': {
@@ -39,45 +25,47 @@ describe('Subscription Locator Tests', function () {
           DeletedSubscription: this.DeletedSubscription,
         },
       },
-    }))
+    })
   })
 
   describe('finding users subscription', function () {
     it('should send the users features', function (done) {
       this.Subscription.findOne.callsArgWith(1, null, this.subscription)
-      return this.SubscriptionLocator.getUsersSubscription(
+      this.SubscriptionLocator.getUsersSubscription(
         this.user,
         (err, subscription) => {
+          if (err) return done(err)
           this.Subscription.findOne
             .calledWith({ admin_id: this.user._id })
             .should.equal(true)
           subscription.should.equal(this.subscription)
-          return done()
+          done()
         }
       )
     })
 
     it('should error if not found', function (done) {
       this.Subscription.findOne.callsArgWith(1, 'not found')
-      return this.SubscriptionLocator.getUsersSubscription(
+      this.SubscriptionLocator.getUsersSubscription(
         this.user,
         (err, subscription) => {
           err.should.exist
-          return done()
+          done()
         }
       )
     })
 
     it('should take a user id rather than the user object', function (done) {
       this.Subscription.findOne.callsArgWith(1, null, this.subscription)
-      return this.SubscriptionLocator.getUsersSubscription(
+      this.SubscriptionLocator.getUsersSubscription(
         this.user._id,
         (err, subscription) => {
+          if (err) return done(err)
           this.Subscription.findOne
             .calledWith({ admin_id: this.user._id })
             .should.equal(true)
           subscription.should.equal(this.subscription)
-          return done()
+          done()
         }
       )
     })

@@ -1,23 +1,4 @@
-/* eslint-disable
-    camelcase,
-    n/handle-callback-err,
-    max-len,
-    no-unused-vars,
-    n/no-deprecated-api,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const OError = require('@overleaf/o-error')
-const querystring = require('querystring')
-const crypto = require('crypto')
 const request = require('request')
 const Settings = require('@overleaf/settings')
 const xml2js = require('xml2js')
@@ -47,7 +28,7 @@ function updateAccountEmailAddress(accountId, newEmail, callback) {
       body: requestBody,
     },
     (error, response, body) => {
-      if (error != null) {
+      if (error) {
         return callback(error)
       }
       RecurlyWrapper._parseAccountXml(body, callback)
@@ -61,12 +42,11 @@ const RecurlyWrapper = {
   _paypal: {
     checkAccountExists(cache, next) {
       const { user } = cache
-      const { subscriptionDetails } = cache
       logger.debug(
         { user_id: user._id },
         'checking if recurly account exists for user'
       )
-      return RecurlyWrapper.apiRequest(
+      RecurlyWrapper.apiRequest(
         {
           url: `accounts/${user._id}`,
           method: 'GET',
@@ -96,7 +76,7 @@ const RecurlyWrapper = {
             { user_id: user._id },
             'user appears to exist in recurly'
           )
-          return RecurlyWrapper._parseAccountXml(
+          RecurlyWrapper._parseAccountXml(
             responseBody,
             function (err, account) {
               if (err) {
@@ -107,7 +87,7 @@ const RecurlyWrapper = {
               }
               cache.userExists = true
               cache.account = account
-              return next(null, cache)
+              next(null, cache)
             }
           )
         }
@@ -142,7 +122,7 @@ const RecurlyWrapper = {
         )
       }
 
-      return RecurlyWrapper.apiRequest(
+      RecurlyWrapper.apiRequest(
         {
           url: 'accounts',
           method: 'POST',
@@ -159,7 +139,7 @@ const RecurlyWrapper = {
             )
             return next(error)
           }
-          return RecurlyWrapper._parseAccountXml(
+          RecurlyWrapper._parseAccountXml(
             responseBody,
             function (err, account) {
               if (err) {
@@ -169,7 +149,7 @@ const RecurlyWrapper = {
                 return next(err)
               }
               cache.account = account
-              return next(null, cache)
+              next(null, cache)
             }
           )
         }
@@ -178,12 +158,8 @@ const RecurlyWrapper = {
     createBillingInfo(cache, next) {
       const { user } = cache
       const { recurlyTokenIds } = cache
-      const { subscriptionDetails } = cache
       logger.debug({ user_id: user._id }, 'creating billing info in recurly')
-      const accountCode = __guard__(
-        cache != null ? cache.account : undefined,
-        x1 => x1.account_code
-      )
+      const accountCode = cache?.account?.account_code
       if (!accountCode) {
         return next(new Error('no account code at createBillingInfo stage'))
       }
@@ -196,7 +172,7 @@ const RecurlyWrapper = {
           OError.tag(error, 'error building xml', { user_id: user._id })
         )
       }
-      return RecurlyWrapper.apiRequest(
+      RecurlyWrapper.apiRequest(
         {
           url: `accounts/${accountCode}/billing_info`,
           method: 'POST',
@@ -213,7 +189,7 @@ const RecurlyWrapper = {
             )
             return next(error)
           }
-          return RecurlyWrapper._parseBillingInfoXml(
+          RecurlyWrapper._parseBillingInfoXml(
             responseBody,
             function (err, billingInfo) {
               if (err) {
@@ -224,7 +200,7 @@ const RecurlyWrapper = {
                 return next(err)
               }
               cache.billingInfo = billingInfo
-              return next(null, cache)
+              next(null, cache)
             }
           )
         }
@@ -238,10 +214,7 @@ const RecurlyWrapper = {
         { user_id: user._id },
         'setting billing address and company info in recurly'
       )
-      const accountCode = __guard__(
-        cache != null ? cache.account : undefined,
-        x1 => x1.account_code
-      )
+      const accountCode = cache?.account?.account_code
       if (!accountCode) {
         return next(
           new Error('no account code at setAddressAndCompanyBillingInfo stage')
@@ -270,7 +243,7 @@ const RecurlyWrapper = {
         )
       }
 
-      return RecurlyWrapper.apiRequest(
+      RecurlyWrapper.apiRequest(
         {
           url: `accounts/${accountCode}/billing_info`,
           method: 'PUT',
@@ -287,7 +260,7 @@ const RecurlyWrapper = {
             )
             return next(error)
           }
-          return RecurlyWrapper._parseBillingInfoXml(
+          RecurlyWrapper._parseBillingInfoXml(
             responseBody,
             function (err, billingInfo) {
               if (err) {
@@ -297,7 +270,7 @@ const RecurlyWrapper = {
                 return next(err)
               }
               cache.billingInfo = billingInfo
-              return next(null, cache)
+              next(null, cache)
             }
           )
         }
@@ -329,7 +302,7 @@ const RecurlyWrapper = {
         )
       }
 
-      return RecurlyWrapper.apiRequest(
+      RecurlyWrapper.apiRequest(
         {
           url: 'subscriptions',
           method: 'POST',
@@ -346,7 +319,7 @@ const RecurlyWrapper = {
             )
             return next(error)
           }
-          return RecurlyWrapper._parseSubscriptionXml(
+          RecurlyWrapper._parseSubscriptionXml(
             responseBody,
             function (err, subscription) {
               if (err) {
@@ -356,7 +329,7 @@ const RecurlyWrapper = {
                 return next(err)
               }
               cache.subscription = subscription
-              return next(null, cache)
+              next(null, cache)
             }
           )
         }
@@ -378,7 +351,7 @@ const RecurlyWrapper = {
     // passing a `cache` object along the way. The cache is initialized
     // with required data, and `async.apply` to pass the cache to the first function
     const cache = { user, recurlyTokenIds, subscriptionDetails }
-    return Async.waterfall(
+    Async.waterfall(
       [
         Async.apply(RecurlyWrapper._paypal.checkAccountExists, cache),
         RecurlyWrapper._paypal.createAccount,
@@ -404,7 +377,7 @@ const RecurlyWrapper = {
           { user_id: user._id },
           'done creating paypal subscription for user'
         )
-        return callback(null, result.subscription)
+        callback(null, result.subscription)
       }
     )
   },
@@ -447,7 +420,7 @@ const RecurlyWrapper = {
       )
     }
 
-    return RecurlyWrapper.apiRequest(
+    RecurlyWrapper.apiRequest(
       {
         url: 'subscriptions',
         method: 'POST',
@@ -455,7 +428,7 @@ const RecurlyWrapper = {
         expect422: true,
       },
       (error, response, responseBody) => {
-        if (error != null) {
+        if (error) {
           return callback(error)
         }
 
@@ -493,9 +466,9 @@ const RecurlyWrapper = {
     const { expect404, expect422 } = options
     delete options.expect404
     delete options.expect422
-    return request(options, function (error, response, body) {
+    request(options, function (error, response, body) {
       if (
-        error == null &&
+        !error &&
         response.statusCode !== 200 &&
         response.statusCode !== 201 &&
         response.statusCode !== 204 &&
@@ -507,7 +480,7 @@ const RecurlyWrapper = {
             err: error,
             body,
             options,
-            statusCode: response != null ? response.statusCode : undefined,
+            statusCode: response ? response.statusCode : undefined,
           },
           'error returned from recurly'
         )
@@ -516,27 +489,27 @@ const RecurlyWrapper = {
           { statusCode: response.statusCode }
         )
       }
-      return callback(error, response, body)
+      callback(error, response, body)
     })
   },
 
   getSubscriptions(accountId, callback) {
-    return RecurlyWrapper.apiRequest(
+    RecurlyWrapper.apiRequest(
       {
         url: `accounts/${accountId}/subscriptions`,
       },
       (error, response, body) => {
-        if (error != null) {
+        if (error) {
           return callback(error)
         }
-        return RecurlyWrapper._parseXml(body, callback)
+        RecurlyWrapper._parseXml(body, callback)
       }
     )
   },
 
   getSubscription(subscriptionId, options, callback) {
     let url
-    if (callback == null) {
+    if (!callback) {
       callback = options
     }
     if (!options) {
@@ -549,25 +522,25 @@ const RecurlyWrapper = {
       url = `subscriptions/${subscriptionId}`
     }
 
-    return RecurlyWrapper.apiRequest(
+    RecurlyWrapper.apiRequest(
       {
         url,
       },
       (error, response, body) => {
-        if (error != null) {
+        if (error) {
           return callback(error)
         }
-        return RecurlyWrapper._parseSubscriptionXml(
+        RecurlyWrapper._parseSubscriptionXml(
           body,
           (error, recurlySubscription) => {
-            if (error != null) {
+            if (error) {
               return callback(error)
             }
             if (options.includeAccount) {
               let accountId
               if (
-                recurlySubscription.account != null &&
-                recurlySubscription.account.url != null
+                recurlySubscription.account &&
+                recurlySubscription.account.url
               ) {
                 accountId =
                   recurlySubscription.account.url.match(/accounts\/(.*)/)[1]
@@ -577,18 +550,15 @@ const RecurlyWrapper = {
                 )
               }
 
-              return RecurlyWrapper.getAccount(
-                accountId,
-                function (error, account) {
-                  if (error != null) {
-                    return callback(error)
-                  }
-                  recurlySubscription.account = account
-                  return callback(null, recurlySubscription)
+              RecurlyWrapper.getAccount(accountId, function (error, account) {
+                if (error) {
+                  return callback(error)
                 }
-              )
+                recurlySubscription.account = account
+                callback(null, recurlySubscription)
+              })
             } else {
-              return callback(null, recurlySubscription)
+              callback(null, recurlySubscription)
             }
           }
         )
@@ -604,52 +574,50 @@ const RecurlyWrapper = {
         url: resource,
         qs: queryParams,
       }
-      if (cursor != null) {
+      if (cursor) {
         opts.qs.cursor = cursor
       }
       return RecurlyWrapper.apiRequest(opts, (error, response, body) => {
-        if (error != null) {
+        if (error) {
           return callback(error)
         }
         return RecurlyWrapper._parseXml(body, function (err, data) {
-          if (err != null) {
+          if (err) {
             logger.warn({ err }, 'could not get accoutns')
-            callback(err)
+            return callback(err)
           }
           const items = data[resource]
           allItems = allItems.concat(items)
           logger.debug(
             `got another ${items.length}, total now ${allItems.length}`
           )
-          cursor = __guard__(
-            response.headers.link != null
-              ? response.headers.link.match(/cursor=([0-9.]+%3A[0-9.]+)&/)
-              : undefined,
-            x1 => x1[1]
+          const match = response.headers.link?.match(
+            /cursor=([0-9.]+%3A[0-9.]+)&/
           )
-          if (cursor != null) {
+          cursor = match && match[1]
+          if (cursor) {
             cursor = decodeURIComponent(cursor)
             return getPage(cursor)
           } else {
-            return callback(err, allItems)
+            callback(err, allItems)
           }
         })
       })
     }
 
-    return getPage()
+    getPage()
   },
 
   getAccount(accountId, callback) {
-    return RecurlyWrapper.apiRequest(
+    RecurlyWrapper.apiRequest(
       {
         url: `accounts/${accountId}`,
       },
       (error, response, body) => {
-        if (error != null) {
+        if (error) {
           return callback(error)
         }
-        return RecurlyWrapper._parseAccountXml(body, callback)
+        RecurlyWrapper._parseAccountXml(body, callback)
       }
     )
   },
@@ -657,18 +625,18 @@ const RecurlyWrapper = {
   updateAccountEmailAddress,
 
   getAccountActiveCoupons(accountId, callback) {
-    return RecurlyWrapper.apiRequest(
+    RecurlyWrapper.apiRequest(
       {
         url: `accounts/${accountId}/redemptions`,
       },
       (error, response, body) => {
-        if (error != null) {
+        if (error) {
           return callback(error)
         }
-        return RecurlyWrapper._parseRedemptionsXml(
+        RecurlyWrapper._parseRedemptionsXml(
           body,
           function (error, redemptions) {
-            if (error != null) {
+            if (error) {
               return callback(error)
             }
             const activeRedemptions = redemptions.filter(
@@ -677,11 +645,11 @@ const RecurlyWrapper = {
             const couponCodes = activeRedemptions.map(
               redemption => redemption.coupon_code
             )
-            return Async.map(
+            Async.map(
               couponCodes,
               RecurlyWrapper.getCoupon,
               function (error, coupons) {
-                if (error != null) {
+                if (error) {
                   return callback(error)
                 }
                 return callback(null, coupons)
@@ -695,21 +663,24 @@ const RecurlyWrapper = {
 
   getCoupon(couponCode, callback) {
     const opts = { url: `coupons/${couponCode}` }
-    return RecurlyWrapper.apiRequest(opts, (error, response, body) =>
+    RecurlyWrapper.apiRequest(opts, (error, response, body) => {
+      if (error) {
+        return callback(error)
+      }
       RecurlyWrapper._parseCouponXml(body, callback)
-    )
+    })
   },
 
   getBillingInfo(accountId, callback) {
-    return RecurlyWrapper.apiRequest(
+    RecurlyWrapper.apiRequest(
       {
         url: `accounts/${accountId}/billing_info`,
       },
       (error, response, body) => {
-        if (error != null) {
+        if (error) {
           return callback(error)
         }
-        return RecurlyWrapper._parseXml(body, callback)
+        RecurlyWrapper._parseXml(body, callback)
       }
     )
   },
@@ -756,82 +727,85 @@ const RecurlyWrapper = {
       )
     }
 
-    return RecurlyWrapper.apiRequest(
+    RecurlyWrapper.apiRequest(
       {
         url: `subscriptions/${subscriptionId}`,
         method: 'put',
         body: requestBody,
       },
       (error, response, responseBody) => {
-        if (error != null) {
+        if (error) {
           return callback(error)
         }
-        return RecurlyWrapper._parseSubscriptionXml(responseBody, callback)
+        RecurlyWrapper._parseSubscriptionXml(responseBody, callback)
       }
     )
   },
 
   createFixedAmmountCoupon(
-    coupon_code,
+    couponCode,
     name,
     currencyCode,
-    discount_in_cents,
-    plan_code,
+    discountInCents,
+    planCode,
     callback
   ) {
     const data = {
-      coupon_code,
+      coupon_code: couponCode,
       name,
       discount_type: 'dollars',
       discount_in_cents: {},
       plan_codes: {
-        plan_code,
+        plan_code: planCode,
       },
       applies_to_all_plans: false,
     }
-    data.discount_in_cents[currencyCode] = discount_in_cents
+    data.discount_in_cents[currencyCode] = discountInCents
     let requestBody
     try {
       requestBody = RecurlyWrapper._buildXml('coupon', data)
     } catch (error) {
       return callback(
-        OError.tag(error, 'error building xml', { coupon_code, name })
+        OError.tag(error, 'error building xml', {
+          couponCode,
+          name,
+        })
       )
     }
 
-    logger.debug({ coupon_code, requestBody }, 'creating coupon')
-    return RecurlyWrapper.apiRequest(
+    logger.debug({ couponCode, requestBody }, 'creating coupon')
+    RecurlyWrapper.apiRequest(
       {
         url: 'coupons',
         method: 'post',
         body: requestBody,
       },
       (error, response, responseBody) => {
-        if (error != null) {
-          logger.warn({ err: error, coupon_code }, 'error creating coupon')
+        if (error) {
+          logger.warn({ err: error, couponCode }, 'error creating coupon')
         }
-        return callback(error)
+        callback(error)
       }
     )
   },
 
-  lookupCoupon(coupon_code, callback) {
-    return RecurlyWrapper.apiRequest(
+  lookupCoupon(couponCode, callback) {
+    RecurlyWrapper.apiRequest(
       {
-        url: `coupons/${coupon_code}`,
+        url: `coupons/${couponCode}`,
       },
       (error, response, body) => {
-        if (error != null) {
+        if (error) {
           return callback(error)
         }
-        return RecurlyWrapper._parseXml(body, callback)
+        RecurlyWrapper._parseXml(body, callback)
       }
     )
   },
 
-  redeemCoupon(account_code, coupon_code, callback) {
+  redeemCoupon(accountCode, couponCode, callback) {
     const data = {
-      account_code,
+      account_code: accountCode,
       currency: 'USD',
     }
     let requestBody
@@ -839,28 +813,31 @@ const RecurlyWrapper = {
       requestBody = RecurlyWrapper._buildXml('redemption', data)
     } catch (error) {
       return callback(
-        OError.tag(error, 'error building xml', { account_code, coupon_code })
+        OError.tag(error, 'error building xml', {
+          accountCode,
+          couponCode,
+        })
       )
     }
 
     logger.debug(
-      { account_code, coupon_code, requestBody },
+      { accountCode, couponCode, requestBody },
       'redeeming coupon for user'
     )
-    return RecurlyWrapper.apiRequest(
+    RecurlyWrapper.apiRequest(
       {
-        url: `coupons/${coupon_code}/redeem`,
+        url: `coupons/${couponCode}/redeem`,
         method: 'post',
         body: requestBody,
       },
       (error, response, responseBody) => {
-        if (error != null) {
+        if (error) {
           logger.warn(
-            { err: error, account_code, coupon_code },
+            { err: error, accountCode, couponCode },
             'error redeeming coupon'
           )
         }
-        return callback(error)
+        callback(error)
       }
     )
   },
@@ -869,49 +846,46 @@ const RecurlyWrapper = {
     if (daysUntilExpire == null) {
       daysUntilExpire = 7
     }
-    const next_renewal_date = new Date()
-    next_renewal_date.setDate(next_renewal_date.getDate() + daysUntilExpire)
+    const nextRenewalDate = new Date()
+    nextRenewalDate.setDate(nextRenewalDate.getDate() + daysUntilExpire)
     logger.debug(
       { subscriptionId, daysUntilExpire },
       'Exending Free trial for user'
     )
-    return RecurlyWrapper.apiRequest(
+    RecurlyWrapper.apiRequest(
       {
-        url: `/subscriptions/${subscriptionId}/postpone?next_renewal_date=${next_renewal_date}&bulk=false`,
+        url: `/subscriptions/${subscriptionId}/postpone?next_renewal_date=${nextRenewalDate}&bulk=false`,
         method: 'put',
       },
       (error, response, responseBody) => {
-        if (error != null) {
+        if (error) {
           logger.warn(
             { err: error, subscriptionId, daysUntilExpire },
             'error exending trial'
           )
         }
-        return callback(error)
+        callback(error)
       }
     )
   },
 
-  listAccountActiveSubscriptions(account_id, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    return RecurlyWrapper.apiRequest(
+  listAccountActiveSubscriptions(accountId, callback) {
+    RecurlyWrapper.apiRequest(
       {
-        url: `accounts/${account_id}/subscriptions`,
+        url: `accounts/${accountId}/subscriptions`,
         qs: {
           state: 'active',
         },
         expect404: true,
       },
       function (error, response, body) {
-        if (error != null) {
+        if (error) {
           return callback(error)
         }
         if (response.statusCode === 404) {
-          return callback(null, [])
+          callback(null, [])
         } else {
-          return RecurlyWrapper._parseSubscriptionsXml(body, callback)
+          RecurlyWrapper._parseSubscriptionsXml(body, callback)
         }
       }
     )
@@ -955,60 +929,46 @@ const RecurlyWrapper = {
     })
   },
   _parseSubscriptionsXml(xml, callback) {
-    return RecurlyWrapper._parseXmlAndGetAttribute(
-      xml,
-      'subscriptions',
-      callback
-    )
+    RecurlyWrapper._parseXmlAndGetAttribute(xml, 'subscriptions', callback)
   },
 
   _parseSubscriptionXml(xml, callback) {
-    return RecurlyWrapper._parseXmlAndGetAttribute(
-      xml,
-      'subscription',
-      callback
-    )
+    RecurlyWrapper._parseXmlAndGetAttribute(xml, 'subscription', callback)
   },
 
   _parseAccountXml(xml, callback) {
-    return RecurlyWrapper._parseXmlAndGetAttribute(xml, 'account', callback)
+    RecurlyWrapper._parseXmlAndGetAttribute(xml, 'account', callback)
   },
 
   _parseBillingInfoXml(xml, callback) {
-    return RecurlyWrapper._parseXmlAndGetAttribute(
-      xml,
-      'billing_info',
-      callback
-    )
+    RecurlyWrapper._parseXmlAndGetAttribute(xml, 'billing_info', callback)
   },
 
   _parseRedemptionsXml(xml, callback) {
-    return RecurlyWrapper._parseXmlAndGetAttribute(xml, 'redemptions', callback)
+    RecurlyWrapper._parseXmlAndGetAttribute(xml, 'redemptions', callback)
   },
 
   _parseCouponXml(xml, callback) {
-    return RecurlyWrapper._parseXmlAndGetAttribute(xml, 'coupon', callback)
+    RecurlyWrapper._parseXmlAndGetAttribute(xml, 'coupon', callback)
   },
 
   _parseErrorsXml(xml, callback) {
-    return RecurlyWrapper._parseXmlAndGetAttribute(xml, 'errors', callback)
+    RecurlyWrapper._parseXmlAndGetAttribute(xml, 'errors', callback)
   },
 
   _parseInvoicesXml(xml, callback) {
-    return RecurlyWrapper._parseXmlAndGetAttribute(xml, 'invoices', callback)
+    RecurlyWrapper._parseXmlAndGetAttribute(xml, 'invoices', callback)
   },
 
   _parseXmlAndGetAttribute(xml, attribute, callback) {
-    return RecurlyWrapper._parseXml(xml, function (error, data) {
-      if (error != null) {
+    RecurlyWrapper._parseXml(xml, function (error, data) {
+      if (error) {
         return callback(error)
       }
-      if (data != null && data[attribute] != null) {
-        return callback(null, data[attribute])
+      if (data && data[attribute] != null) {
+        callback(null, data[attribute])
       } else {
-        return callback(
-          new Error("I don't understand the response from Recurly")
-        )
+        callback(new Error("I don't understand the response from Recurly"))
       }
     })
   },
@@ -1016,10 +976,10 @@ const RecurlyWrapper = {
   _parseXml(xml, callback) {
     function convertDataTypes(data) {
       let key, value
-      if (data != null && data.$ != null) {
+      if (data && data.$) {
         if (data.$.nil === 'nil') {
           data = null
-        } else if (data.$.href != null) {
+        } else if (data.$.href) {
           data.url = data.$.href
           delete data.$
         } else if (data.$.type === 'integer') {
@@ -1042,7 +1002,7 @@ const RecurlyWrapper = {
       }
 
       if (data instanceof Array) {
-        data = Array.from(data).map(entry => convertDataTypes(entry))
+        data = data.map(entry => convertDataTypes(entry))
       } else if (typeof data === 'object') {
         for (key in data) {
           value = data[key]
@@ -1057,12 +1017,12 @@ const RecurlyWrapper = {
       explicitArray: false,
       emptyTag: '',
     })
-    return parser.parseString(xml, function (error, data) {
-      if (error != null) {
+    parser.parseString(xml, function (error, data) {
+      if (error) {
         return callback(error)
       }
       const result = convertDataTypes(data)
-      return callback(null, result)
+      callback(null, result)
     })
   },
 
@@ -1149,10 +1109,4 @@ function getAddressFromSubscriptionDetails(
   }
 
   return addressObject
-}
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
 }

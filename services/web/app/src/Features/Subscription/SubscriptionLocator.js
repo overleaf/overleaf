@@ -1,15 +1,3 @@
-/* eslint-disable
-    camelcase,
-    max-len,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const { promisify } = require('util')
 const { Subscription } = require('../../models/Subscription')
 const { DeletedSubscription } = require('../../models/DeletedSubscription')
@@ -17,62 +5,55 @@ const logger = require('@overleaf/logger')
 require('./GroupPlansData') // make sure dynamic group plans are loaded
 
 const SubscriptionLocator = {
-  getUsersSubscription(user_or_id, callback) {
-    const user_id = SubscriptionLocator._getUserId(user_or_id)
-    Subscription.findOne({ admin_id: user_id }, function (err, subscription) {
-      logger.debug({ user_id }, 'got users subscription')
+  getUsersSubscription(userOrId, callback) {
+    const userId = SubscriptionLocator._getUserId(userOrId)
+    Subscription.findOne({ admin_id: userId }, function (err, subscription) {
+      logger.debug({ userId }, 'got users subscription')
       callback(err, subscription)
     })
   },
 
-  getUserIndividualSubscription(user_or_id, callback) {
-    const user_id = SubscriptionLocator._getUserId(user_or_id)
+  getUserIndividualSubscription(userOrId, callback) {
+    const userId = SubscriptionLocator._getUserId(userOrId)
     Subscription.findOne(
-      { admin_id: user_id, groupPlan: false },
+      { admin_id: userId, groupPlan: false },
       function (err, subscription) {
-        logger.debug({ user_id }, 'got users individual subscription')
+        logger.debug({ userId }, 'got users individual subscription')
         callback(err, subscription)
       }
     )
   },
 
-  getManagedGroupSubscriptions(user_or_id, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
+  getManagedGroupSubscriptions(userOrId, callback) {
     Subscription.find({
-      manager_ids: user_or_id,
+      manager_ids: userOrId,
       groupPlan: true,
     })
       .populate('admin_id')
       .exec(callback)
   },
 
-  getMemberSubscriptions(user_or_id, callback) {
-    const user_id = SubscriptionLocator._getUserId(user_or_id)
-    Subscription.find({ member_ids: user_id })
+  getMemberSubscriptions(userOrId, callback) {
+    const userId = SubscriptionLocator._getUserId(userOrId)
+    Subscription.find({ member_ids: userId })
       .populate('admin_id')
       .exec(callback)
   },
 
-  getSubscription(subscription_id, callback) {
-    Subscription.findOne({ _id: subscription_id }, callback)
+  getSubscription(subscriptionId, callback) {
+    Subscription.findOne({ _id: subscriptionId }, callback)
   },
 
-  getSubscriptionByMemberIdAndId(user_id, subscription_id, callback) {
+  getSubscriptionByMemberIdAndId(userId, subscriptionId, callback) {
     Subscription.findOne(
-      { member_ids: user_id, _id: subscription_id },
+      { member_ids: userId, _id: subscriptionId },
       { _id: 1 },
       callback
     )
   },
 
-  getGroupSubscriptionsMemberOf(user_id, callback) {
-    Subscription.find(
-      { member_ids: user_id },
-      { _id: 1, planCode: 1 },
-      callback
-    )
+  getGroupSubscriptionsMemberOf(userId, callback) {
+    Subscription.find({ member_ids: userId }, { _id: 1, planCode: 1 }, callback)
   },
 
   getGroupsWithEmailInvite(email, callback) {
@@ -96,11 +77,11 @@ const SubscriptionLocator = {
     )
   },
 
-  _getUserId(user_or_id) {
-    if (user_or_id != null && user_or_id._id != null) {
-      return user_or_id._id
-    } else if (user_or_id != null) {
-      return user_or_id
+  _getUserId(userOrId) {
+    if (userOrId && userOrId._id) {
+      return userOrId._id
+    } else if (userOrId) {
+      return userOrId
     }
   },
 }

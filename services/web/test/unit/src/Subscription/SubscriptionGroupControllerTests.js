@@ -1,21 +1,7 @@
-/* eslint-disable
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
-const { assert } = require('chai')
 const modulePath =
   '../../../../app/src/Features/Subscription/SubscriptionGroupController'
-const MockResponse = require('../helpers/MockResponse')
 
 describe('SubscriptionGroupController', function () {
   beforeEach(function () {
@@ -55,13 +41,13 @@ describe('SubscriptionGroupController', function () {
       },
     }
 
-    return (this.Controller = SandboxedModule.require(modulePath, {
+    this.Controller = SandboxedModule.require(modulePath, {
       requires: {
         './SubscriptionGroupHandler': this.GroupHandler,
         './SubscriptionLocator': this.SubscriptionLocator,
         '../Authentication/SessionManager': this.SessionManager,
       },
-    }))
+    })
   })
 
   describe('removeUserFromGroup', function () {
@@ -75,16 +61,15 @@ describe('SubscriptionGroupController', function () {
           this.GroupHandler.removeUserFromGroup
             .calledWith(this.subscriptionId, userIdToRemove)
             .should.equal(true)
-          return done()
+          done()
         },
       }
-      return this.Controller.removeUserFromGroup(this.req, res)
+      this.Controller.removeUserFromGroup(this.req, res)
     })
   })
 
   describe('removeSelfFromGroup', function () {
     it('gets subscription and remove user', function (done) {
-      const userIdToRemove = '31231'
       this.req.query = { subscriptionId: this.subscriptionId }
       const memberUserIdToremove = 123456789
       this.req.session.user._id = memberUserIdToremove
@@ -100,10 +85,10 @@ describe('SubscriptionGroupController', function () {
             this.subscriptionId,
             memberUserIdToremove
           )
-          return done()
+          done()
         },
       }
-      return this.Controller.removeSelfFromGroup(this.req, res)
+      this.Controller.removeSelfFromGroup(this.req, res)
     })
   })
 })

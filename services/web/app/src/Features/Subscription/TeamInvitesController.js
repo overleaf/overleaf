@@ -1,17 +1,4 @@
-/* eslint-disable
-    max-len,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const settings = require('@overleaf/settings')
-const logger = require('@overleaf/logger')
 const TeamInvitesHandler = require('./TeamInvitesHandler')
 const SessionManager = require('../Authentication/SessionManager')
 const SubscriptionLocator = require('./SubscriptionLocator')
@@ -23,7 +10,7 @@ module.exports = {
     const teamManagerId = SessionManager.getLoggedInUserId(req.session)
     const subscription = req.entity
     const email = EmailHelper.parseEmail(req.body.email)
-    if (email == null) {
+    if (!email) {
       return res.status(422).json({
         error: {
           code: 'invalid_email',
@@ -32,12 +19,12 @@ module.exports = {
       })
     }
 
-    return TeamInvitesHandler.createInvite(
+    TeamInvitesHandler.createInvite(
       teamManagerId,
       subscription,
       email,
       function (err, inviteUserData) {
-        if (err != null) {
+        if (err) {
           if (err.alreadyInTeam) {
             return res.status(400).json({
               error: {
@@ -56,7 +43,7 @@ module.exports = {
           }
           return next(err)
         }
-        return res.json({ user: inviteUserData })
+        res.json({ user: inviteUserData })
       }
     )
   },
@@ -65,10 +52,10 @@ module.exports = {
     const { token } = req.params
     const userId = SessionManager.getLoggedInUserId(req.session)
 
-    return TeamInvitesHandler.getInvite(
+    TeamInvitesHandler.getInvite(
       token,
       function (err, invite, teamSubscription) {
-        if (err != null) {
+        if (err) {
           return next(err)
         }
 
@@ -76,21 +63,21 @@ module.exports = {
           return ErrorController.notFound(req, res, next)
         }
 
-        return SubscriptionLocator.getUsersSubscription(
+        SubscriptionLocator.getUsersSubscription(
           userId,
           function (err, personalSubscription) {
-            if (err != null) {
+            if (err) {
               return next(err)
             }
 
             const hasIndividualRecurlySubscription =
-              personalSubscription != null &&
-              personalSubscription.planCode.match(/(free|trial)/) == null &&
+              personalSubscription &&
+              !personalSubscription.planCode.match(/(free|trial)/) &&
               personalSubscription.groupPlan === false &&
-              personalSubscription.recurlySubscription_id != null &&
+              personalSubscription.recurlySubscription_id &&
               personalSubscription.recurlySubscription_id !== ''
 
-            return res.render('subscriptions/team/invite', {
+            res.render('subscriptions/team/invite', {
               inviterName: invite.inviterName,
               inviteToken: invite.token,
               hasIndividualRecurlySubscription,
@@ -107,35 +94,31 @@ module.exports = {
     const { token } = req.params
     const userId = SessionManager.getLoggedInUserId(req.session)
 
-    return TeamInvitesHandler.acceptInvite(
-      token,
-      userId,
-      function (err, results) {
-        if (err != null) {
-          return next(err)
-        }
-        return res.sendStatus(204)
+    TeamInvitesHandler.acceptInvite(token, userId, function (err, results) {
+      if (err) {
+        return next(err)
       }
-    )
+      res.sendStatus(204)
+    })
   },
 
   revokeInvite(req, res, next) {
     const subscription = req.entity
     const email = EmailHelper.parseEmail(req.params.email)
     const teamManagerId = SessionManager.getLoggedInUserId(req.session)
-    if (email == null) {
+    if (!email) {
       return res.sendStatus(400)
     }
 
-    return TeamInvitesHandler.revokeInvite(
+    TeamInvitesHandler.revokeInvite(
       teamManagerId,
       subscription,
       email,
       function (err, results) {
-        if (err != null) {
+        if (err) {
           return next(err)
         }
-        return res.sendStatus(204)
+        res.sendStatus(204)
       }
     )
   },

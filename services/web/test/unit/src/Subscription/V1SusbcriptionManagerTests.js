@@ -1,19 +1,4 @@
-/* eslint-disable
-    camelcase,
-    n/handle-callback-err,
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const SandboxedModule = require('sandboxed-module')
-const assert = require('assert')
 const path = require('path')
 const modulePath = path.join(
   __dirname,
@@ -45,13 +30,13 @@ describe('V1SubscriptionManager', function () {
     })
     this.userId = 'abcd'
     this.v1UserId = 42
-    return (this.user = {
+    this.user = {
       _id: this.userId,
       email: 'user@example.com',
       overleaf: {
         id: this.v1UserId,
       },
-    })
+    }
   })
 
   describe('getGrandfatheredFeaturesForV1User', function () {
@@ -60,7 +45,7 @@ describe('V1SubscriptionManager', function () {
         expect(
           this.V1SubscriptionManager.getGrandfatheredFeaturesForV1User(100)
         ).to.eql({})
-        return done()
+        done()
       })
     })
 
@@ -72,14 +57,14 @@ describe('V1SubscriptionManager', function () {
           github: true,
           mendeley: true,
         })
-        return done()
+        done()
       })
     })
   })
 
   describe('_v1Request', function () {
     beforeEach(function () {
-      return (this.UserGetter.getUser = sinon.stub().yields(null, this.user))
+      this.UserGetter.getUser = sinon.stub().yields(null, this.user)
     })
 
     describe('when v1IdForUser produces an error', function () {
@@ -87,8 +72,8 @@ describe('V1SubscriptionManager', function () {
         this.V1SubscriptionManager.v1IdForUser = sinon
           .stub()
           .yields(new Error('woops'))
-        return (this.call = cb => {
-          return this.V1SubscriptionManager._v1Request(
+        this.call = cb => {
+          this.V1SubscriptionManager._v1Request(
             this.user_id,
             {
               url() {
@@ -97,20 +82,20 @@ describe('V1SubscriptionManager', function () {
             },
             cb
           )
-        })
+        }
       })
 
       it('should not call request', function (done) {
-        return this.call((err, planCode) => {
+        this.call(() => {
           expect(this.request.callCount).to.equal(0)
-          return done()
+          done()
         })
       })
 
       it('should produce an error', function (done) {
-        return this.call((err, planCode) => {
+        this.call((err, planCode) => {
           expect(err).to.exist
-          return done()
+          done()
         })
       })
     })
@@ -118,8 +103,8 @@ describe('V1SubscriptionManager', function () {
     describe('when v1IdForUser does not find a user', function () {
       beforeEach(function () {
         this.V1SubscriptionManager.v1IdForUser = sinon.stub().yields(null, null)
-        return (this.call = cb => {
-          return this.V1SubscriptionManager._v1Request(
+        this.call = cb => {
+          this.V1SubscriptionManager._v1Request(
             this.user_id,
             {
               url() {
@@ -128,20 +113,21 @@ describe('V1SubscriptionManager', function () {
             },
             cb
           )
-        })
+        }
       })
 
       it('should not call request', function (done) {
-        return this.call((err, planCode) => {
+        this.call((err, planCode) => {
+          if (err) return done(err)
           expect(this.request.callCount).to.equal(0)
-          return done()
+          done()
         })
       })
 
       it('should not error', function (done) {
-        return this.call(err => {
+        this.call(err => {
           expect(err).to.not.exist
-          return done()
+          done()
         })
       })
     })
@@ -149,8 +135,8 @@ describe('V1SubscriptionManager', function () {
     describe('when the request to v1 fails', function () {
       beforeEach(function () {
         this.request.yields(new Error('woops'))
-        return (this.call = cb => {
-          return this.V1SubscriptionManager._v1Request(
+        this.call = cb => {
+          this.V1SubscriptionManager._v1Request(
             this.user_id,
             {
               url() {
@@ -159,13 +145,13 @@ describe('V1SubscriptionManager', function () {
             },
             cb
           )
-        })
+        }
       })
 
       it('should produce an error', function (done) {
-        return this.call(err => {
+        this.call(err => {
           expect(err).to.exist
-          return done()
+          done()
         })
       })
     })
@@ -176,8 +162,8 @@ describe('V1SubscriptionManager', function () {
           .stub()
           .yields(null, this.v1UserId)
         this.request.yields(null, { statusCode: 200 }, '{}')
-        return (this.call = cb => {
-          return this.V1SubscriptionManager._v1Request(
+        this.call = cb => {
+          this.V1SubscriptionManager._v1Request(
             this.user_id,
             {
               method: 'GET',
@@ -187,39 +173,42 @@ describe('V1SubscriptionManager', function () {
             },
             cb
           )
-        })
+        }
       })
 
       it('should not produce an error', function (done) {
-        return this.call((err, body, v1Id) => {
+        this.call((err, body, v1Id) => {
           expect(err).not.to.exist
-          return done()
+          done()
         })
       })
 
       it('should have supplied retry options to request', function (done) {
-        return this.call((err, body, v1Id) => {
+        this.call((err, body, v1Id) => {
+          if (err) return done(err)
           const requestOptions = this.request.lastCall.args[0]
           expect(requestOptions.url).to.equal('/foo')
           expect(requestOptions.maxAttempts).to.exist
           expect(requestOptions.maxAttempts > 0).to.be.true
           expect(requestOptions.retryDelay).to.exist
           expect(requestOptions.retryDelay > 0).to.be.true
-          return done()
+          done()
         })
       })
 
       it('should return the v1 user id', function (done) {
-        return this.call((err, body, v1Id) => {
+        this.call((err, body, v1Id) => {
+          if (err) return done(err)
           expect(v1Id).to.equal(this.v1UserId)
-          return done()
+          done()
         })
       })
 
       it('should return the http response body', function (done) {
-        return this.call((err, body, v1Id) => {
+        this.call((err, body, v1Id) => {
+          if (err) return done(err)
           expect(body).to.equal('{}')
-          return done()
+          done()
         })
       })
     })
@@ -230,8 +219,8 @@ describe('V1SubscriptionManager', function () {
           .stub()
           .yields(null, this.v1UserId)
         this.request.yields(null, { statusCode: 500 }, '{}')
-        return (this.call = cb => {
-          return this.V1SubscriptionManager._v1Request(
+        this.call = cb => {
+          this.V1SubscriptionManager._v1Request(
             this.user_id,
             {
               url() {
@@ -240,13 +229,13 @@ describe('V1SubscriptionManager', function () {
             },
             cb
           )
-        })
+        }
       })
 
       it('should produce an error', function (done) {
-        return this.call((err, body, v1Id) => {
+        this.call((err, body, v1Id) => {
           expect(err).to.exist
-          return done()
+          done()
         })
       })
     })
@@ -257,8 +246,8 @@ describe('V1SubscriptionManager', function () {
           .stub()
           .yields(null, this.v1UserId)
         this.request.yields(null, { statusCode: 404 }, '{}')
-        return (this.call = cb => {
-          return this.V1SubscriptionManager._v1Request(
+        this.call = cb => {
+          this.V1SubscriptionManager._v1Request(
             this.user_id,
             {
               url() {
@@ -267,14 +256,14 @@ describe('V1SubscriptionManager', function () {
             },
             cb
           )
-        })
+        }
       })
 
       it('should produce an not-found error', function (done) {
-        return this.call((err, body, v1Id) => {
+        this.call((err, body, v1Id) => {
           expect(err).to.exist
           expect(err.name).to.equal('NotFoundError')
-          return done()
+          done()
         })
       })
     })
@@ -282,21 +271,21 @@ describe('V1SubscriptionManager', function () {
 
   describe('v1IdForUser', function () {
     beforeEach(function () {
-      return (this.UserGetter.getUser = sinon.stub().yields(null, this.user))
+      this.UserGetter.getUser = sinon.stub().yields(null, this.user)
     })
 
     describe('when getUser produces an error', function () {
       beforeEach(function () {
         this.UserGetter.getUser = sinon.stub().yields(new Error('woops'))
-        return (this.call = cb => {
-          return this.V1SubscriptionManager.v1IdForUser(this.user_id, cb)
-        })
+        this.call = cb => {
+          this.V1SubscriptionManager.v1IdForUser(this.user_id, cb)
+        }
       })
 
       it('should produce an error', function (done) {
-        return this.call(err => {
+        this.call(err => {
           expect(err).to.exist
-          return done()
+          done()
         })
       })
     })
@@ -304,37 +293,38 @@ describe('V1SubscriptionManager', function () {
     describe('when getUser does not find a user', function () {
       beforeEach(function () {
         this.UserGetter.getUser = sinon.stub().yields(null, null)
-        return (this.call = cb => {
-          return this.V1SubscriptionManager.v1IdForUser(this.user_id, cb)
-        })
+        this.call = cb => {
+          this.V1SubscriptionManager.v1IdForUser(this.user_id, cb)
+        }
       })
 
       it('should not error', function (done) {
-        return this.call((err, user_id) => {
+        this.call((err, userId) => {
           expect(err).to.not.exist
-          return done()
+          done()
         })
       })
     })
 
     describe('when it works', function () {
       beforeEach(function () {
-        return (this.call = cb => {
-          return this.V1SubscriptionManager.v1IdForUser(this.user_id, cb)
-        })
+        this.call = cb => {
+          this.V1SubscriptionManager.v1IdForUser(this.user_id, cb)
+        }
       })
 
       it('should not error', function (done) {
-        return this.call((err, user_id) => {
+        this.call((err, userId) => {
           expect(err).to.not.exist
-          return done()
+          done()
         })
       })
 
       it('should return the v1 user id', function (done) {
-        return this.call((err, user_id) => {
-          expect(user_id).to.eql(42)
-          return done()
+        this.call((err, userId) => {
+          if (err) return done(err)
+          expect(userId).to.eql(42)
+          done()
         })
       })
     })

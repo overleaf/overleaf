@@ -1,16 +1,3 @@
-/* eslint-disable
-    n/handle-callback-err,
-    max-len,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 let V1SubscriptionManager
 const UserGetter = require('../User/UserGetter')
 const request = require('requestretry')
@@ -20,10 +7,7 @@ const { promisifyAll } = require('../../util/promises')
 
 module.exports = V1SubscriptionManager = {
   getSubscriptionsFromV1(userId, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    return V1SubscriptionManager._v1Request(
+    V1SubscriptionManager._v1Request(
       userId,
       {
         method: 'GET',
@@ -36,10 +20,7 @@ module.exports = V1SubscriptionManager = {
   },
 
   getSubscriptionStatusFromV1(userId, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    return V1SubscriptionManager._v1Request(
+    V1SubscriptionManager._v1Request(
       userId,
       {
         method: 'GET',
@@ -52,10 +33,7 @@ module.exports = V1SubscriptionManager = {
   },
 
   cancelV1Subscription(userId, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    return V1SubscriptionManager._v1Request(
+    V1SubscriptionManager._v1Request(
       userId,
       {
         method: 'DELETE',
@@ -68,34 +46,23 @@ module.exports = V1SubscriptionManager = {
   },
 
   v1IdForUser(userId, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    return UserGetter.getUser(
-      userId,
-      { 'overleaf.id': 1 },
-      function (err, user) {
-        if (err != null) {
-          return callback(err)
-        }
-        const v1Id = __guard__(
-          user != null ? user.overleaf : undefined,
-          x => x.id
-        )
-
-        return callback(null, v1Id)
+    UserGetter.getUser(userId, { 'overleaf.id': 1 }, function (err, user) {
+      if (err) {
+        return callback(err)
       }
-    )
+      const v1Id = user?.overleaf?.id
+      callback(null, v1Id)
+    })
   },
 
   // v1 accounts created before migration to v2 had github and mendeley for free
   // but these are now paid-for features for new accounts (v1id > cutoff)
   getGrandfatheredFeaturesForV1User(v1Id) {
     const cutoff = settings.v1GrandfatheredFeaturesUidCutoff
-    if (cutoff == null) {
+    if (!cutoff) {
       return {}
     }
-    if (v1Id == null) {
+    if (!v1Id) {
       return {}
     }
 
@@ -107,18 +74,15 @@ module.exports = V1SubscriptionManager = {
   },
 
   _v1Request(userId, options, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
     if (!settings.apis.v1.url) {
       return callback(null, null)
     }
 
-    return V1SubscriptionManager.v1IdForUser(userId, function (err, v1Id) {
-      if (err != null) {
+    V1SubscriptionManager.v1IdForUser(userId, function (err, v1Id) {
+      if (err) {
         return callback(err)
       }
-      if (v1Id == null) {
+      if (!v1Id) {
         return callback(null, null, null)
       }
       const url = options.url(v1Id)
@@ -141,7 +105,7 @@ module.exports = V1SubscriptionManager = {
         requestOptions.maxAttempts = 0
       }
       request(requestOptions, function (error, response, body) {
-        if (error != null) {
+        if (error) {
           return callback(
             new V1ConnectionError({
               message: 'no v1 connection',
@@ -178,12 +142,6 @@ module.exports = V1SubscriptionManager = {
       })
     })
   },
-}
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
 }
 
 module.exports.promises = promisifyAll(module.exports, {

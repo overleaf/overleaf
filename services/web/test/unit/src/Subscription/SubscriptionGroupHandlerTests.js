@@ -1,20 +1,6 @@
-/* eslint-disable
-    n/handle-callback-err,
-    max-len,
-    no-dupe-keys,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
-const { assert, expect } = require('chai')
+const { expect } = require('chai')
 const modulePath =
   '../../../../app/src/Features/Subscription/SubscriptionGroupHandler'
 
@@ -85,7 +71,7 @@ describe('SubscriptionGroupHandler', function () {
       },
     }
 
-    return (this.Handler = SandboxedModule.require(modulePath, {
+    this.Handler = SandboxedModule.require(modulePath, {
       requires: {
         '../User/UserCreator': this.UserCreator,
         './SubscriptionUpdater': this.SubscriptionUpdater,
@@ -102,19 +88,20 @@ describe('SubscriptionGroupHandler', function () {
         '../UserMembership/UserMembershipViewModel':
           this.UserMembershipViewModel,
       },
-    }))
+    })
   })
 
   describe('removeUserFromGroup', function () {
     it('should call the subscription updater to remove the user', function (done) {
-      return this.Handler.removeUserFromGroup(
+      this.Handler.removeUserFromGroup(
         this.adminUser_id,
         this.user._id,
         err => {
+          if (err) return done(err)
           this.SubscriptionUpdater.removeUserFromGroup
             .calledWith(this.adminUser_id, this.user._id)
             .should.equal(true)
-          return done()
+          done()
         }
       )
     })
@@ -124,15 +111,13 @@ describe('SubscriptionGroupHandler', function () {
     beforeEach(function (done) {
       this.oldId = 'ba5eba11'
       this.newId = '5ca1ab1e'
-      return this.Handler.replaceUserReferencesInGroups(
-        this.oldId,
-        this.newId,
-        () => done()
+      this.Handler.replaceUserReferencesInGroups(this.oldId, this.newId, () =>
+        done()
       )
     })
 
     it('replaces the admin_id', function () {
-      return this.Subscription.updateOne
+      this.Subscription.updateOne
         .calledWith({ admin_id: this.oldId }, { admin_id: this.newId })
         .should.equal(true)
     })
@@ -145,7 +130,7 @@ describe('SubscriptionGroupHandler', function () {
         )
         .should.equal(true)
 
-      return this.Subscription.updateMany
+      this.Subscription.updateMany
         .calledWith(
           { manager_ids: 'ba5eba11' },
           { $pull: { manager_ids: 'ba5eba11' } }
@@ -161,7 +146,7 @@ describe('SubscriptionGroupHandler', function () {
         )
         .should.equal(true)
 
-      return this.Subscription.updateMany
+      this.Subscription.updateMany
         .calledWith(
           { member_ids: this.oldId },
           { $pull: { member_ids: this.oldId } }
@@ -172,7 +157,7 @@ describe('SubscriptionGroupHandler', function () {
 
   describe('isUserPartOfGroup', function () {
     beforeEach(function () {
-      return (this.subscription_id = '123ed13123')
+      this.subscription_id = '123ed13123'
     })
 
     it('should return true when user is part of subscription', function (done) {
@@ -181,12 +166,13 @@ describe('SubscriptionGroupHandler', function () {
         null,
         { _id: this.subscription_id }
       )
-      return this.Handler.isUserPartOfGroup(
+      this.Handler.isUserPartOfGroup(
         this.user_id,
         this.subscription_id,
         (err, partOfGroup) => {
+          if (err) return done(err)
           partOfGroup.should.equal(true)
-          return done()
+          done()
         }
       )
     })
@@ -196,12 +182,13 @@ describe('SubscriptionGroupHandler', function () {
         2,
         null
       )
-      return this.Handler.isUserPartOfGroup(
+      this.Handler.isUserPartOfGroup(
         this.user_id,
         this.subscription_id,
         (err, partOfGroup) => {
+          if (err) return done(err)
           partOfGroup.should.equal(false)
-          return done()
+          done()
         }
       )
     })
@@ -210,30 +197,29 @@ describe('SubscriptionGroupHandler', function () {
   describe('getTotalConfirmedUsersInGroup', function () {
     describe('for existing subscriptions', function () {
       beforeEach(function () {
-        return (this.subscription.member_ids = ['12321', '3121321'])
+        this.subscription.member_ids = ['12321', '3121321']
       })
       it('should call the subscription locator and return 2 users', function (done) {
-        return this.Handler.getTotalConfirmedUsersInGroup(
+        this.Handler.getTotalConfirmedUsersInGroup(
           this.subscription_id,
           (err, count) => {
+            if (err) return done(err)
             this.SubscriptionLocator.getSubscription
               .calledWith(this.subscription_id)
               .should.equal(true)
             count.should.equal(2)
-            return done()
+            done()
           }
         )
       })
     })
     describe('for nonexistent subscriptions', function () {
       it('should return undefined', function (done) {
-        return this.Handler.getTotalConfirmedUsersInGroup(
-          'fake-id',
-          (err, count) => {
-            expect(count).not.to.exist
-            return done()
-          }
-        )
+        this.Handler.getTotalConfirmedUsersInGroup('fake-id', (err, count) => {
+          if (err) return done(err)
+          expect(count).not.to.exist
+          done()
+        })
       })
     })
   })
