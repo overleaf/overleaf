@@ -206,7 +206,7 @@ function useUserEmails() {
   const { data, isLoading, isError, isSuccess, runAsync } = useAsync()
 
   const getEmails = useCallback(() => {
-    runAsync<UserEmailData[]>(getJSON('/user/emails?ensureAffiliation=true'))
+    runAsync(getJSON<UserEmailData[]>('/user/emails?ensureAffiliation=true'))
       .then(data => {
         dispatch(ActionCreators.setData(data))
       })

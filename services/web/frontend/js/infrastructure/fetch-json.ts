@@ -5,126 +5,86 @@
 // - parse JSON response body, unless response is empty
 import OError from '@overleaf/o-error'
 
-/**
- * @typedef {Object} FetchOptions
- * @extends RequestInit
- * @property {Object} [body]
- * @property {Boolean} [swallowAbortError] Set to false for throwing AbortErrors.
- * @property {AbortSignal} [signal] Allows aborting a request via AbortController
- */
+type FetchPath = string
+// Custom config types are merged with `fetch`s RequestInit type
+type FetchConfig = {
+  swallowAbortError?: boolean
+  body?: Record<string, unknown>
+} & Omit<RequestInit, 'body'>
 
-/**
- * @param {string} path
- * @param {FetchOptions} [options]
- */
-export function getJSON(path, options) {
-  return fetchJSON(path, { ...options, method: 'GET' })
+export function getJSON<T = any>(path: FetchPath, options?: FetchConfig) {
+  return fetchJSON<T>(path, { ...options, method: 'GET' })
 }
 
-/**
- * @param {string} path
- * @param {FetchOptions} [options]
- */
-export function postJSON(path, options) {
-  return fetchJSON(path, { ...options, method: 'POST' })
+export function postJSON<T = any>(path: FetchPath, options?: FetchConfig) {
+  return fetchJSON<T>(path, { ...options, method: 'POST' })
 }
 
-/**
- * @param {string} path
- * @param {FetchOptions} [options]
- */
-export function putJSON(path, options) {
-  return fetchJSON(path, { ...options, method: 'PUT' })
+export function putJSON<T = any>(path: FetchPath, options?: FetchConfig) {
+  return fetchJSON<T>(path, { ...options, method: 'PUT' })
 }
 
-/**
- * @param {string} path
- * @param {FetchOptions} [options]
- */
-export function deleteJSON(path, options) {
-  return fetchJSON(path, { ...options, method: 'DELETE' })
+export function deleteJSON<T = any>(path: FetchPath, options?: FetchConfig) {
+  return fetchJSON<T>(path, { ...options, method: 'DELETE' })
 }
 
-/**
- * @param {number} statusCode
- * @returns {string}
- */
-function getErrorMessageForStatusCode(statusCode) {
-  switch (statusCode) {
-    case 400:
-      return 'Bad Request'
-    case 401:
-      return 'Unauthorized'
-    case 403:
-      return 'Forbidden'
-    case 404:
-      return 'Not Found'
-    case 429:
-      return 'Too Many Requests'
-    case 500:
-      return 'Internal Server Error'
-    case 502:
-      return 'Bad Gateway'
-    case 503:
-      return 'Service Unavailable'
-    default:
-      return `Unexpected Error: ${statusCode}`
+function getErrorMessageForStatusCode(statusCode?: number) {
+  if (!statusCode) {
+    return 'Unknown Error'
   }
+
+  const statusCodes: { readonly [K: number]: string } = {
+    400: 'Bad Request',
+    401: 'Unauthorized',
+    403: 'Forbidden',
+    404: 'Not Found',
+    429: 'Too Many Requests',
+    500: 'Internal Server Error',
+    502: 'Bad Gateway',
+    503: 'Service Unavailable',
+  }
+
+  return statusCodes[statusCode] ?? `Unexpected Error: ${statusCode}`
 }
 
 export class FetchError extends OError {
-  /**
-   * @param {string} message
-   * @param {string} url
-   * @param {FetchOptions} [options]
-   * @param {Response} [response]
-   * @param {Object} [data]
-   */
-  constructor(message, url, options, response, data) {
+  constructor(
+    message: string,
+    public url: string,
+    public options?: RequestInit,
+    public response?: Response,
+    public data?: any
+  ) {
     // On HTTP2, the `statusText` property is not set,
     // so this `message` will be undefined. We need to
     // set a message based on the response `status`, so
     // our error UI rendering will work
     if (!message) {
-      message = getErrorMessageForStatusCode(response.status)
+      message = getErrorMessageForStatusCode(response?.status)
     }
     super(message, { statusCode: response ? response.status : undefined })
-    this.url = url
-    this.options = options
-    this.response = response
-    this.data = data
   }
 
-  /**
-   * @returns {string}
-   */
   getUserFacingMessage() {
     const statusCode = this.response?.status
     const defaultMessage = getErrorMessageForStatusCode(statusCode)
     const message = this.data?.message?.text || this.data?.message
     if (message && message !== defaultMessage) return message
 
-    switch (statusCode) {
-      case 400:
-        return 'Invalid Request. Please correct the data and try again.'
-      case 403:
-        return 'Session error. Please check you have cookies enabled. If the problem persists, try clearing your cache and cookies.'
-      case 429:
-        return 'Too many attempts. Please wait for a while and try again.'
-      default:
-        return 'Something went wrong. Please try again.'
+    const statusCodes: { readonly [K: number]: string } = {
+      400: 'Invalid Request. Please correct the data and try again.',
+      403: 'Session error. Please check you have cookies enabled. If the problem persists, try clearing your cache and cookies.',
+      429: 'Too many attempts. Please wait for a while and try again.',
     }
+
+    return statusCode && statusCodes[statusCode]
+      ? statusCodes[statusCode]
+      : 'Something went wrong. Please try again.'
   }
 }
 
-/**
- * @param {string} path
- * @param {FetchOptions} [options]
- *
- * @return Promise<Object>
- */
-function fetchJSON(
-  path,
+function fetchJSON<T>(
+  path: FetchPath,
   {
     body = {},
     headers = {},
@@ -132,9 +92,9 @@ function fetchJSON(
     credentials = 'same-origin',
     swallowAbortError = true,
     ...otherOptions
-  }
+  }: FetchConfig
 ) {
-  const options = {
+  const options: RequestInit = {
     ...otherOptions,
     headers: {
       ...headers,
@@ -155,7 +115,7 @@ function fetchJSON(
   // after a component has unmounted.
   // `resolve` will be called when the request succeeds, `reject` will be called when the request fails,
   // but nothing will be called if the request is cancelled via an AbortController.
-  return new Promise((resolve, reject) => {
+  return new Promise<T>((resolve, reject) => {
     fetch(path, options).then(
       response => {
         return parseResponseBody(response).then(
@@ -206,12 +166,12 @@ function fetchJSON(
   })
 }
 
-/**
- * @param {Response} response
- * @returns {Promise<Object>}
- */
-async function parseResponseBody(response) {
+async function parseResponseBody(response: Response) {
   const contentType = response.headers.get('Content-Type')
+
+  if (!contentType) {
+    return {}
+  }
 
   if (/application\/json/.test(contentType)) {
     return response.json()

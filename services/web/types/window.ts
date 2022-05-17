@@ -4,6 +4,7 @@ import { OAuthProviders } from './oauth-providers'
 declare global {
   // eslint-disable-next-line no-unused-vars
   interface Window {
+    csrfToken: string
     sl_debugging: boolean
     user: {
       id: string
