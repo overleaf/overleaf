@@ -6,6 +6,12 @@ div.modal.fade(tabindex="-1" role="dialog" data-ol-group-plan-modal)
 			event-tracking-trigger="load"
 		)
 			.modal-header
+				button.close(
+					type="button"
+					data-dismiss="modal"
+					aria-label=translate("close")
+				)
+					span(aria-hidden="true") &times;
 				h2 Customise your group subscription
 				h3 Save 30% or more
 			.modal-body.plans.group-subscription-modal
