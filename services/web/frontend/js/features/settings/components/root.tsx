@@ -15,6 +15,7 @@ import { SSOProvider } from '../context/sso-context'
 import useWaitForI18n from '../../../shared/hooks/use-wait-for-i18n'
 import useScrollToIdOnLoad from '../../../shared/hooks/use-scroll-to-id-on-load'
 import { ExposedSettings } from '../../../../../types/exposed-settings'
+import { SSOAlert } from './emails/sso-alert'
 
 function SettingsPageRoot() {
   const { isReady } = useWaitForI18n()
@@ -47,6 +48,7 @@ function SettingsPageContent() {
         </div>
         <div>
           <EmailsSection />
+          <SSOAlert />
           <div className="row">
             <div className="col-md-5">
               <AccountInfoSection />

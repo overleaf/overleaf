@@ -37,7 +37,7 @@ export function SSOAlert() {
   if (samlError) {
     return (
       !errorClosed && (
-        <Alert bsStyle="danger" onDismiss={handleErrorClosed}>
+        <Alert bsStyle="danger" className="mb-0" onDismiss={handleErrorClosed}>
           <p className="text-center">
             <Icon
               type="exclamation-triangle"
@@ -62,7 +62,7 @@ export function SSOAlert() {
   return (
     <>
       {!infoClosed && (
-        <Alert bsStyle="info" onDismiss={handleInfoClosed}>
+        <Alert bsStyle="info" className="mb-0" onDismiss={handleInfoClosed}>
           <p className="text-center">
             <Trans
               i18nKey="institution_acct_successfully_linked_2"
@@ -82,7 +82,11 @@ export function SSOAlert() {
         </Alert>
       )}
       {!warningClosed && institutionEmailNonCanonical && (
-        <Alert bsStyle="warning" onDismiss={handleWarningClosed}>
+        <Alert
+          bsStyle="warning"
+          className="mb-0"
+          onDismiss={handleWarningClosed}
+        >
           <p className="text-center">
             <Icon
               type="exclamation-triangle"
