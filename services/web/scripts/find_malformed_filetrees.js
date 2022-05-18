@@ -34,20 +34,58 @@ function processProject(project) {
 
 function findBadPaths(folder) {
   const result = []
-  for (const attr of ['docs', 'fileRefs', 'folders']) {
-    if (folder[attr] && !Array.isArray(folder[attr])) {
-      result.push(attr)
+
+  if (typeof folder.name !== 'string' || !folder.name) {
+    result.push('name')
+  }
+
+  if (folder.folders) {
+    if (Array.isArray(folder.folders)) {
+      for (const [i, subfolder] of folder.folders.entries()) {
+        if (!subfolder || typeof subfolder !== 'object') {
+          result.push(`folders.${i}`)
+          continue
+        }
+        for (const badPath of findBadPaths(subfolder)) {
+          result.push(`folders.${i}.${badPath}`)
+        }
+      }
+    } else {
+      result.push('folders')
     }
   }
-  if (folder.folders && Array.isArray(folder.folders)) {
-    for (const [i, subfolder] of folder.folders.entries()) {
-      if (!subfolder) {
-        result.push(`folders.${i}`)
-        continue
+
+  if (folder.docs) {
+    if (Array.isArray(folder.docs)) {
+      for (const [i, doc] of folder.docs.entries()) {
+        if (!doc || typeof doc !== 'object') {
+          result.push(`docs.${i}`)
+          continue
+        }
+        if (typeof doc.name !== 'string' || !doc.name) {
+          result.push(`docs.${i}.name`)
+          continue
+        }
       }
-      for (const badPath of findBadPaths(subfolder)) {
-        result.push(`folders.${i}.${badPath}`)
+    } else {
+      result.push('docs')
+    }
+  }
+
+  if (folder.fileRefs) {
+    if (Array.isArray(folder.fileRefs)) {
+      for (const [i, file] of folder.fileRefs.entries()) {
+        if (!file || typeof file !== 'object') {
+          result.push(`fileRefs.${i}`)
+          continue
+        }
+        if (typeof file.name !== 'string' || !file.name) {
+          result.push(`fileRefs.${i}.name`)
+          continue
+        }
       }
+    } else {
+      result.push('fileRefs')
     }
   }
   return result
