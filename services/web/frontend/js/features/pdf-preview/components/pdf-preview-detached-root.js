@@ -1,11 +1,14 @@
 import ReactDOM from 'react-dom'
 import PdfPreview from './pdf-preview'
 import { ContextRoot } from '../../../shared/context/root-context'
+import { Shortcuts } from './shortcuts'
 
 function PdfPreviewDetachedRoot() {
   return (
     <ContextRoot>
-      <PdfPreview />
+      <Shortcuts>
+        <PdfPreview />
+      </Shortcuts>
     </ContextRoot>
   )
 }

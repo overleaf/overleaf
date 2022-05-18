@@ -3,21 +3,13 @@ import PropTypes from 'prop-types'
 import Icon from '../../../shared/components/icon'
 import { useTranslation } from 'react-i18next'
 import { memo } from 'react'
-import { useLayoutContext } from '../../../shared/context/layout-context'
 
 const modifierKey = /Mac/i.test(navigator.platform) ? 'Cmd' : 'Ctrl'
 
 function PdfCompileButtonInner({ startCompile, compiling }) {
-  const { detachRole, view, pdfLayout } = useLayoutContext()
-
   const { t } = useTranslation()
 
   const compileButtonLabel = compiling ? t('compiling') + '…' : t('recompile')
-
-  // show the compile shortcut when the editor is visible
-  const showCompileShortcut =
-    detachRole !== 'detached' &&
-    (view === 'editor' || pdfLayout === 'sideBySide')
 
   return (
     <OverlayTrigger
@@ -26,9 +18,7 @@ function PdfCompileButtonInner({ startCompile, compiling }) {
       overlay={
         <Tooltip id="tooltip-logs-toggle" className="keyboard-tooltip">
           {t('recompile_pdf')}{' '}
-          {showCompileShortcut && (
-            <span className="keyboard-shortcut">({modifierKey} + Enter)</span>
-          )}
+          <span className="keyboard-shortcut">({modifierKey} + Enter)</span>
         </Tooltip>
       }
     >

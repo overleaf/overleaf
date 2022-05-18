@@ -14,8 +14,14 @@ import getMeta from '../../../utils/meta'
 function PdfJsViewer({ url }) {
   const { _id: projectId } = useProjectContext()
 
-  const { setError, firstRenderDone, highlights, position, setPosition } =
-    useCompileContext()
+  const {
+    setError,
+    firstRenderDone,
+    highlights,
+    position,
+    setPosition,
+    startCompile,
+  } = useCompileContext()
   const [timePDFFetched, setTimePDFFetched] = useState()
 
   // state values persisted in localStorage to restore on load
@@ -297,9 +303,15 @@ function PdfJsViewer({ url }) {
       } else if ((event.metaKey || event.ctrlKey) && event.key === '0') {
         event.preventDefault()
         setZoom('fit-width')
+      } else if (
+        (event.metaKey && (event.key === 's' || event.key === 'Enter')) ||
+        (event.ctrlKey && event.key === '.')
+      ) {
+        event.preventDefault()
+        startCompile({ keyShortcut: true })
       }
     },
-    [initialised, setZoom]
+    [initialised, setZoom, startCompile]
   )
 
   /* eslint-disable jsx-a11y/no-noninteractive-tabindex */
