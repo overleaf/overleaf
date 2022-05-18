@@ -49,7 +49,7 @@ function InstitutionFields({
   const [isInstitutionFieldsVisible, setIsInstitutionFieldsVisible] =
     useState(false)
   const [isUniversityDirty, setIsUniversityDirty] = useState(false)
-  const { runAsync: institutionRunAsync } = useAsync()
+  const { runAsync: institutionRunAsync } = useAsync<University[]>()
 
   useEffect(() => {
     if (isInstitutionFieldsVisible && countryRef.current) {
@@ -93,7 +93,7 @@ function InstitutionFields({
       return
     }
 
-    institutionRunAsync<University[]>(
+    institutionRunAsync(
       getJSON(`/institutions/list?country_code=${countryCode}`)
     )
       .then(data => {

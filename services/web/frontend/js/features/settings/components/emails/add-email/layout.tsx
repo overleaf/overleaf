@@ -1,6 +1,7 @@
 import { Row, Alert } from 'react-bootstrap'
 import Icon from '../../../../../shared/components/icon'
 import { UseAsyncReturnType } from '../../../../../shared/hooks/use-async'
+import { getUserFacingMessage } from '../../../../../infrastructure/fetch-json'
 
 type LayoutProps = {
   children: React.ReactNode
@@ -14,7 +15,7 @@ function Layout({ isError, error, children }: LayoutProps) {
       <Row>{children}</Row>
       {isError && (
         <Alert bsStyle="danger" className="text-center">
-          <Icon type="exclamation-triangle" fw /> {error.getUserFacingMessage()}
+          <Icon type="exclamation-triangle" fw /> {getUserFacingMessage(error)}
         </Alert>
       )}
     </div>

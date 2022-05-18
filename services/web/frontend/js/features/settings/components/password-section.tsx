@@ -7,11 +7,20 @@ import {
   FormGroup,
 } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
-import { postJSON } from '../../../infrastructure/fetch-json'
+import {
+  getUserFacingMessage,
+  postJSON,
+} from '../../../infrastructure/fetch-json'
 import getMeta from '../../../utils/meta'
 import { ExposedSettings } from '../../../../../types/exposed-settings'
 import { PasswordStrengthOptions } from '../../../../../types/password-strength-options'
 import useAsync from '../../../shared/hooks/use-async'
+
+type PasswordUpdateResult = {
+  message?: {
+    text: string
+  }
+}
 
 function PasswordSection() {
   const { t } = useTranslation()
@@ -58,7 +67,8 @@ function PasswordForm() {
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword1, setNewPassword1] = useState('')
   const [newPassword2, setNewPassword2] = useState('')
-  const { isLoading, isSuccess, isError, data, error, runAsync } = useAsync()
+  const { isLoading, isSuccess, isError, data, error, runAsync } =
+    useAsync<PasswordUpdateResult>()
   const [isNewPasswordValid, setIsNewPasswordValid] = useState(false)
   const [isFormValid, setIsFormValid] = useState(false)
 
@@ -128,7 +138,7 @@ function PasswordForm() {
       ) : null}
       {isError ? (
         <FormGroup>
-          <Alert bsStyle="danger">{error.getUserFacingMessage()}</Alert>
+          <Alert bsStyle="danger">{getUserFacingMessage(error)}</Alert>
         </FormGroup>
       ) : null}
       <Button

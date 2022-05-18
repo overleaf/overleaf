@@ -4,6 +4,7 @@ import { Response } from 'node-fetch'
 import {
   deleteJSON,
   FetchError,
+  getUserFacingMessage,
   getJSON,
   postJSON,
   putJSON,
@@ -189,5 +190,30 @@ describe('fetchJSON', function () {
     fetchMock.once({ method: 'DELETE', url: '/test', headers }, { status: 204 })
 
     return expect(deleteJSON('/test')).to.eventually.deep.equal({})
+  })
+
+  describe('getUserFacingMessage()', function () {
+    it('returns the error facing message for FetchError instances', function () {
+      const error = new FetchError(
+        '403 error',
+        'http:/example.com',
+        {},
+        { status: 403 }
+      )
+      expect(getUserFacingMessage(error)).to.equal(
+        'Session error. Please check you have cookies enabled. If the problem persists, try clearing your cache and cookies.'
+      )
+    })
+
+    it('returns `message` for Error instances different than FetchError', function () {
+      const error = new Error('403 error')
+      expect(getUserFacingMessage(error)).to.equal('403 error')
+    })
+
+    it('returns `undefined` for non-Error instances', function () {
+      expect(getUserFacingMessage(undefined)).to.be.undefined
+      expect(getUserFacingMessage(null)).to.be.undefined
+      expect(getUserFacingMessage('error')).to.be.undefined
+    })
   })
 })

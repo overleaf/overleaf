@@ -18,7 +18,7 @@ type InstitutionAndRoleProps = {
 function InstitutionAndRole({ userEmailData }: InstitutionAndRoleProps) {
   const { t } = useTranslation()
   const { isLoading, isError, runAsync } = useAsync()
-  const changeAffiliationAsync = useAsync()
+  const changeAffiliationAsync = useAsync<University>()
   const { affiliation } = userEmailData
   const {
     state,
@@ -55,9 +55,7 @@ function InstitutionAndRole({ userEmailData }: InstitutionAndRoleProps) {
     }
 
     changeAffiliationAsync
-      .runAsync<University>(
-        getJSON(`/institutions/list/${affiliation.institution.id}`)
-      )
+      .runAsync(getJSON(`/institutions/list/${affiliation.institution.id}`))
       .then(data => {
         if (data.departments.length) {
           setDepartments(data.departments)

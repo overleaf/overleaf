@@ -207,3 +207,12 @@ async function parseResponseBody(response: Response) {
   // responses) or unsupported
   return {}
 }
+
+export function getUserFacingMessage(error: Error): string {
+  if (error instanceof FetchError) {
+    return error.getUserFacingMessage()
+  } else {
+    // checking existence of `error` to prevent errors when called from Javascript
+    return error?.message
+  }
+}

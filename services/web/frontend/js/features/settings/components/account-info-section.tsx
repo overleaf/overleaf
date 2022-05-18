@@ -7,7 +7,10 @@ import {
   FormGroup,
 } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
-import { postJSON } from '../../../infrastructure/fetch-json'
+import {
+  getUserFacingMessage,
+  postJSON,
+} from '../../../infrastructure/fetch-json'
 import getMeta from '../../../utils/meta'
 import { ExposedSettings } from '../../../../../types/exposed-settings'
 import useAsync from '../../../shared/hooks/use-async'
@@ -109,7 +112,7 @@ function AccountInfoSection() {
         ) : null}
         {isError ? (
           <FormGroup>
-            <Alert bsStyle="danger">{error.getUserFacingMessage()}</Alert>
+            <Alert bsStyle="danger">{getUserFacingMessage(error)}</Alert>
           </FormGroup>
         ) : null}
         {canUpdateEmail || canUpdateNames ? (

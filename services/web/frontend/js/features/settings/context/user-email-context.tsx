@@ -203,10 +203,11 @@ function useUserEmails() {
   )
   const [state, unsafeDispatch] = useReducer(reducer, initialState)
   const dispatch = useSafeDispatch(unsafeDispatch)
-  const { data, isLoading, isError, isSuccess, runAsync } = useAsync()
+  const { data, isLoading, isError, isSuccess, runAsync } =
+    useAsync<UserEmailData[]>()
 
   const getEmails = useCallback(() => {
-    runAsync(getJSON<UserEmailData[]>('/user/emails?ensureAffiliation=true'))
+    runAsync(getJSON('/user/emails?ensureAffiliation=true'))
       .then(data => {
         dispatch(ActionCreators.setData(data))
       })

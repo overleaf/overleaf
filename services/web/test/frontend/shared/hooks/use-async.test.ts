@@ -150,7 +150,7 @@ describe('useAsync', function () {
   })
 
   it('can set the error', function () {
-    const mockError = Symbol('rejected value')
+    const mockError = new Error('rejected value')
     const { result } = renderHook(() => useAsync())
 
     act(() => {
