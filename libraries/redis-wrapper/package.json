@@ -5,7 +5,8 @@
   "main": "index.js",
   "files": [
     "index.js",
-    "Errors.js"
+    "Errors.js",
+    "RedisLocker.js"
   ],
   "author": "Overleaf (https://www.overleaf.com)",
   "repository": "github:overleaf/redis-wrapper",
@@ -20,6 +21,7 @@
   },
   "peerDependencies": {
     "@overleaf/logger": "*",
+    "@overleaf/metrics": "*",
     "@overleaf/o-error": "^3.4.0"
   },
   "dependencies": {

@@ -14,6 +14,7 @@
 const sinon = require('sinon')
 const modulePath = '../../../../app/js/LockManager.js'
 const SandboxedModule = require('sandboxed-module')
+const tk = require('timekeeper')
 
 describe('LockManager - trying the lock', function () {
   beforeEach(function () {
@@ -95,14 +96,17 @@ describe('LockManager - trying the lock', function () {
 
   return describe('when it takes a long time for redis to set the lock', function () {
     beforeEach(function () {
-      this.Profiler.prototype.end = () => 7000 // take a long time
-      this.Profiler.prototype.log = sinon
-        .stub()
-        .returns({ end: this.Profiler.prototype.end })
+      tk.freeze(Date.now())
       this.lockValue = 'mock-lock-value'
       this.LockManager.randomLock = sinon.stub().returns(this.lockValue)
       this.LockManager.releaseLock = sinon.stub().callsArgWith(2, null)
-      return this.set.callsArgWith(5, null, 'OK')
+      this.set.callsFake((_key, _v, _ex, _ttl, _nx, cb) => {
+        tk.freeze(Date.now() + 7000)
+        cb(null, 'OK')
+      })
+    })
+    after(function () {
+      tk.reset()
     })
 
     describe('in all cases', function () {
