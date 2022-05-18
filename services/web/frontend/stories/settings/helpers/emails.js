@@ -13,6 +13,7 @@ const fakeUsersData = [
     confirmedAt: '2022-03-09T10:59:44.139Z',
     email: 'foo@overleaf.com',
     default: true,
+    emailHasInstitutionLicence: true,
   },
   {
     confirmedAt: '2022-03-10T10:59:44.139Z',
@@ -115,4 +116,8 @@ export function setDefaultMeta() {
     hasSamlFeature: true,
     samlInitPath: 'saml/init',
   })
+  localStorage.setItem(
+    'showInstitutionalLeaversSurveyUntil',
+    (Date.now() - 1000 * 60 * 60).toString()
+  )
 }

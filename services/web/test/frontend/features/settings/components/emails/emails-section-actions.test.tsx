@@ -92,16 +92,12 @@ describe('email actions - delete', function () {
     const button = await screen.findByRole('button', { name: /remove/i })
     fireEvent.click(button)
 
-    expect(screen.queryByRole('button', { name: /remove/i })).to.be.null
-
     await waitForElementToBeRemoved(() =>
-      screen.getByRole('button', { name: /deleting/i })
+      screen.queryByText(userEmailData.email)
     )
-
-    expect(screen.queryByText(userEmailData.email)).to.be.null
   })
 
-  it('shows error when making email primary', async function () {
+  it('shows error when deleting', async function () {
     fetchMock
       .get('/user/emails?ensureAffiliation=true', [userEmailData])
       .post('/user/emails/delete', 503)
@@ -110,11 +106,7 @@ describe('email actions - delete', function () {
     const button = await screen.findByRole('button', { name: /remove/i })
     fireEvent.click(button)
 
-    await waitForElementToBeRemoved(() =>
-      screen.getByRole('button', { name: /deleting/i })
-    )
-
-    screen.getByText(/sorry, something went wrong/i)
+    await screen.queryByText(/sorry, something went wrong/i)
     screen.getByRole('button', { name: /remove/i })
   })
 })

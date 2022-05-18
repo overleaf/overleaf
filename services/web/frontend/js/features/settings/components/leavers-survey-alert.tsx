@@ -7,13 +7,26 @@ export function LeaversSurveyAlert() {
 
   const [expirationDate, setExpirationDate] = usePersistedState(
     'showInstitutionalLeaversSurveyUntil',
-    0
+    0,
+    true
   )
+
+  const [hide, setHide] = usePersistedState(
+    'hideInstitutionalLeaversSurvey',
+    false,
+    true
+  )
+
   function handleDismiss() {
     setExpirationDate(0)
+    setHide(true)
   }
 
   if (Date.now() > expirationDate) {
+    return null
+  }
+
+  if (hide) {
     return null
   }
 

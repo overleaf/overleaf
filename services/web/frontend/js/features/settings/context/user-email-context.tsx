@@ -220,23 +220,21 @@ function useUserEmails() {
 
   const resetLeaversSurveyExpiration = useCallback(
     (deletedEmail: UserEmailData) => {
-      if (!data) {
-        return
-      }
-      const emailData = data as UserEmailData[]
       if (
         deletedEmail.emailHasInstitutionLicence ||
         deletedEmail.affiliation?.pastReconfirmDate
       ) {
-        const stillHasLicenseAccess = emailData.some(
-          userEmail => userEmail.emailHasInstitutionLicence
+        const stillHasLicenseAccess = Object.values(state.data.byId).some(
+          userEmail =>
+            userEmail.email !== deletedEmail.email &&
+            userEmail.emailHasInstitutionLicence
         )
-        if (stillHasLicenseAccess) {
+        if (!stillHasLicenseAccess) {
           setExpirationDate(Date.now() + ONE_WEEK_IN_MS)
         }
       }
     },
-    [data, setExpirationDate]
+    [state, setExpirationDate]
   )
 
   return {

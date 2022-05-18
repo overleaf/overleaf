@@ -8,6 +8,8 @@ import { postJSON } from '../../../../../infrastructure/fetch-json'
 import { UseAsyncReturnType } from '../../../../../shared/hooks/use-async'
 
 function DeleteButton({ children, disabled, onClick }: Button.ButtonProps) {
+  const { t } = useTranslation()
+
   return (
     <Button
       bsSize="small"
@@ -15,7 +17,7 @@ function DeleteButton({ children, disabled, onClick }: Button.ButtonProps) {
       disabled={disabled}
       onClick={onClick}
     >
-      {children}
+      <Icon type="trash" fw accessibilityLabel={t('remove')} />
     </Button>
   )
 }
@@ -47,7 +49,7 @@ function Remove({ userEmailData, deleteEmailAsync }: RemoveProps) {
   }
 
   if (deleteEmailAsync.isLoading) {
-    return <DeleteButton disabled>{t('deleting')}...</DeleteButton>
+    return <DeleteButton disabled />
   }
 
   return (
@@ -64,17 +66,7 @@ function Remove({ userEmailData, deleteEmailAsync }: RemoveProps) {
         <DeleteButton
           disabled={state.isLoading || userEmailData.default}
           onClick={handleRemoveUserEmail}
-        >
-          <Icon
-            type="trash"
-            fw
-            accessibilityLabel={
-              userEmailData.default
-                ? t('please_change_primary_to_remove')
-                : t('remove')
-            }
-          />
-        </DeleteButton>
+        />
       </span>
     </Tooltip>
   )
