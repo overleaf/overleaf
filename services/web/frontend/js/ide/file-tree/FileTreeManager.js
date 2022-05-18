@@ -54,7 +54,7 @@ export default FileTreeManager = class FileTreeManager {
 
     $(document).on('click', () => {
       this.clearMultiSelectedEntities()
-      return this.$scope.$digest()
+      setTimeout(() => this.$scope.$digest(), 0)
     })
   }
 
