@@ -1,18 +1,15 @@
-import Icon from '../../../shared/components/icon'
 import { useTranslation } from 'react-i18next'
-import { OverlayTrigger, Tooltip } from 'react-bootstrap'
+import Tooltip from '../../../shared/components/tooltip'
+import Icon from '../../../shared/components/icon'
 
 function BackToProjectsButton() {
   const { t } = useTranslation()
 
   return (
-    <OverlayTrigger
-      placement="right"
-      overlay={
-        <Tooltip id="back-to-projects-tooltip">
-          {t('back_to_your_projects')}
-        </Tooltip>
-      }
+    <Tooltip
+      id="back-to-projects"
+      description={t('back_to_your_projects')}
+      overlayProps={{ placement: 'right' }}
     >
       <div className="toolbar-item">
         <a className="btn btn-full-height" href="/project">
@@ -23,7 +20,7 @@ function BackToProjectsButton() {
           />
         </a>
       </div>
-    </OverlayTrigger>
+    </Tooltip>
   )
 }
 

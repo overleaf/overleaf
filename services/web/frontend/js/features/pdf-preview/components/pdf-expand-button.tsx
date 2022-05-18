@@ -1,7 +1,8 @@
-import { Button, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
+import { Button } from 'react-bootstrap'
+import Tooltip from '../../../shared/components/tooltip'
 import Icon from '../../../shared/components/icon'
-import { memo, useMemo } from 'react'
+import { useMemo } from 'react'
 import { useLayoutContext } from '../../../shared/context/layout-context'
 
 function PdfExpandButton() {
@@ -14,9 +15,10 @@ function PdfExpandButton() {
   }, [pdfLayout, t])
 
   return (
-    <OverlayTrigger
-      placement="left"
-      overlay={<Tooltip id="expand-pdf-btn">{text}</Tooltip>}
+    <Tooltip
+      id="expand-pdf-btn"
+      description="text"
+      overlayProps={{ placement: 'left' }}
     >
       <Button
         onClick={switchLayout}
@@ -25,8 +27,8 @@ function PdfExpandButton() {
       >
         <Icon type={pdfLayout === 'sideBySide' ? 'expand' : 'compress'} />
       </Button>
-    </OverlayTrigger>
+    </Tooltip>
   )
 }
 
-export default memo(PdfExpandButton)
+export default PdfExpandButton

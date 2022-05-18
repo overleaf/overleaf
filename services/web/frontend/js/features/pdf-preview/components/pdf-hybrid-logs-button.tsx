@@ -1,6 +1,7 @@
 import { memo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button, Label, OverlayTrigger, Tooltip } from 'react-bootstrap'
+import { Button, Label } from 'react-bootstrap'
+import Tooltip from '../../../shared/components/tooltip'
 import Icon from '../../../shared/components/icon'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 
@@ -18,11 +19,10 @@ function PdfHybridLogsButton() {
   const totalCount = errorCount + warningCount
 
   return (
-    <OverlayTrigger
-      placement="bottom"
-      overlay={
-        <Tooltip id="tooltip-logs-toggle">{t('logs_and_output_files')}</Tooltip>
-      }
+    <Tooltip
+      id="logs-toggle"
+      description={t('logs_and_output_files')}
+      overlayProps={{ placement: 'bottom' }}
     >
       <Button
         bsStyle="link"
@@ -41,7 +41,7 @@ function PdfHybridLogsButton() {
           </Label>
         )}
       </Button>
-    </OverlayTrigger>
+    </Tooltip>
   )
 }
 

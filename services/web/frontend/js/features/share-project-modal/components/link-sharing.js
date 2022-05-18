@@ -1,7 +1,8 @@
 import { useCallback, useState } from 'react'
 import PropTypes from 'prop-types'
-import { Button, Col, OverlayTrigger, Row, Tooltip } from 'react-bootstrap'
+import { Button, Col, Row } from 'react-bootstrap'
 import { Trans } from 'react-i18next'
+import Tooltip from '../../../shared/components/tooltip'
 import Icon from '../../../shared/components/icon'
 import { useShareProjectContext } from './share-project-modal'
 import { setProjectAccessLevel } from '../utils/api'
@@ -93,6 +94,7 @@ function PrivateSharing({ setAccessLevel, inflight }) {
     </Row>
   )
 }
+
 PrivateSharing.propTypes = {
   setAccessLevel: PropTypes.func.isRequired,
   inflight: PropTypes.bool,
@@ -144,6 +146,7 @@ function TokenBasedSharing({ setAccessLevel, inflight }) {
     </Row>
   )
 }
+
 TokenBasedSharing.propTypes = {
   setAccessLevel: PropTypes.func.isRequired,
   inflight: PropTypes.bool,
@@ -177,6 +180,7 @@ function LegacySharing({ accessLevel, setAccessLevel, inflight }) {
     </Row>
   )
 }
+
 LegacySharing.propTypes = {
   accessLevel: PropTypes.string.isRequired,
   setAccessLevel: PropTypes.func.isRequired,
@@ -230,6 +234,7 @@ function AccessToken({ token, path, tooltipId }) {
     </pre>
   )
 }
+
 AccessToken.propTypes = {
   token: PropTypes.string,
   tooltipId: PropTypes.string.isRequired,
@@ -238,13 +243,9 @@ AccessToken.propTypes = {
 
 function LinkSharingInfo() {
   return (
-    <OverlayTrigger
-      placement="top"
-      overlay={
-        <Tooltip id="tooltip-link-sharing-info">
-          <Trans i18nKey="learn_more_about_link_sharing" />
-        </Tooltip>
-      }
+    <Tooltip
+      id="link-sharing-info"
+      description={<Trans i18nKey="learn_more_about_link_sharing" />}
     >
       <a
         href="/learn/how-to/What_is_Link_Sharing%3F"
@@ -253,6 +254,6 @@ function LinkSharingInfo() {
       >
         <Icon type="question-circle" />
       </a>
-    </OverlayTrigger>
+    </Tooltip>
   )
 }

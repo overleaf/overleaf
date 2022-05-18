@@ -2,7 +2,8 @@ import { useCallback } from 'react'
 import PropTypes from 'prop-types'
 import { useShareProjectContext } from './share-project-modal'
 import Icon from '../../../shared/components/icon'
-import { Button, Col, Row, OverlayTrigger, Tooltip } from 'react-bootstrap'
+import { Button, Col, Row } from 'react-bootstrap'
+import Tooltip from '../../../shared/components/tooltip'
 import { Trans, useTranslation } from 'react-i18next'
 import MemberPrivileges from './member-privileges'
 import { resendInvite, revokeInvite } from '../utils/api'
@@ -68,6 +69,7 @@ function ResendInvite({ invite }) {
     </Button>
   )
 }
+
 ResendInvite.propTypes = {
   invite: PropTypes.object.isRequired,
 }
@@ -88,13 +90,10 @@ function RevokeInvite({ invite }) {
   }
 
   return (
-    <OverlayTrigger
-      placement="bottom"
-      overlay={
-        <Tooltip id="tooltip-revoke-invite">
-          <Trans i18nKey="revoke_invite" />
-        </Tooltip>
-      }
+    <Tooltip
+      id="revoke-invite"
+      description={<Trans i18nKey="revoke_invite" />}
+      overlayProps={{ placement: 'bottom' }}
     >
       <Button
         type="button"
@@ -105,9 +104,10 @@ function RevokeInvite({ invite }) {
       >
         <Icon type="times" />
       </Button>
-    </OverlayTrigger>
+    </Tooltip>
   )
 }
+
 RevokeInvite.propTypes = {
   invite: PropTypes.object.isRequired,
 }

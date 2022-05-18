@@ -1,9 +1,13 @@
-import PropTypes from 'prop-types'
-import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import classNames from 'classnames'
+import Tooltip from '../../../shared/components/tooltip'
 import Icon from '../../../shared/components/icon'
 
-function PdfToggleButton({ onClick, pdfViewIsOpen }) {
+type PdfToggleButtonProps = {
+  onClick: () => void
+  pdfViewIsOpen?: boolean
+}
+
+function PdfToggleButton({ onClick, pdfViewIsOpen }: PdfToggleButtonProps) {
   const classes = classNames(
     'btn',
     'btn-full-height',
@@ -14,22 +18,17 @@ function PdfToggleButton({ onClick, pdfViewIsOpen }) {
   )
 
   return (
-    <OverlayTrigger
-      placement="bottom"
-      trigger={['hover', 'focus']}
-      overlay={<Tooltip id="tooltip-online-user">PDF</Tooltip>}
+    <Tooltip
+      id="online-user"
+      description="PDF"
+      overlayProps={{ placement: 'bottom', trigger: ['hover', 'focus'] }}
     >
       {/* eslint-disable-next-line jsx-a11y/anchor-is-valid,jsx-a11y/click-events-have-key-events,jsx-a11y/interactive-supports-focus */}
       <a role="button" className={classes} onClick={onClick}>
         <Icon type="file-pdf-o" fw accessibilityLabel="PDF" />
       </a>
-    </OverlayTrigger>
+    </Tooltip>
   )
-}
-
-PdfToggleButton.propTypes = {
-  onClick: PropTypes.func.isRequired,
-  pdfViewIsOpen: PropTypes.bool,
 }
 
 export default PdfToggleButton

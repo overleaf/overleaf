@@ -2,8 +2,8 @@ import PropTypes from 'prop-types'
 import classNames from 'classnames'
 import { useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import useResizeObserver from '../hooks/use-resize-observer'
+import Tooltip from '../../../shared/components/tooltip'
 import Icon from '../../../shared/components/icon'
 
 function PreviewLogEntryHeader({
@@ -84,13 +84,6 @@ function PreviewLogEntryHeader({
     </button>
   ) : null
 
-  const locationTooltip =
-    locationSpanOverflown && locationLinkText ? (
-      <Tooltip id={locationLinkText} className="log-location-tooltip">
-        {locationLinkText}
-      </Tooltip>
-    ) : null
-
   const headerTitleText = logType ? `${logType} ${headerTitle}` : headerTitle
 
   return (
@@ -99,10 +92,15 @@ function PreviewLogEntryHeader({
         <div className="log-entry-header-icon-container">{headerIcon}</div>
       ) : null}
       <h3 className="log-entry-header-title">{headerTitleText}</h3>
-      {locationTooltip ? (
-        <OverlayTrigger placement="left" overlay={locationTooltip}>
+      {locationSpanOverflown && locationLinkText ? (
+        <Tooltip
+          id={locationLinkText}
+          description={locationLinkText}
+          overlayProps={{ placement: 'left' }}
+          tooltipProps={{ className: 'log-location-tooltip' }}
+        >
           {locationLink}
-        </OverlayTrigger>
+        </Tooltip>
       ) : (
         locationLink
       )}

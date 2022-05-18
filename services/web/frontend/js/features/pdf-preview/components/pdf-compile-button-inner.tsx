@@ -1,26 +1,35 @@
-import { Button, OverlayTrigger, Tooltip } from 'react-bootstrap'
-import PropTypes from 'prop-types'
+import { Button } from 'react-bootstrap'
+import Tooltip from '../../../shared/components/tooltip'
 import Icon from '../../../shared/components/icon'
 import { useTranslation } from 'react-i18next'
 import { memo } from 'react'
 
 const modifierKey = /Mac/i.test(navigator.platform) ? 'Cmd' : 'Ctrl'
 
-function PdfCompileButtonInner({ startCompile, compiling }) {
+type PdfCompileButtonInnerProps = {
+  startCompile: () => void
+  compiling: boolean
+}
+
+function PdfCompileButtonInner({
+  startCompile,
+  compiling,
+}: PdfCompileButtonInnerProps) {
   const { t } = useTranslation()
 
   const compileButtonLabel = compiling ? t('compiling') + '…' : t('recompile')
 
   return (
-    <OverlayTrigger
-      placement="bottom"
-      delayShow={500}
-      overlay={
-        <Tooltip id="tooltip-logs-toggle" className="keyboard-tooltip">
+    <Tooltip
+      id="logs-toggle"
+      description={
+        <>
           {t('recompile_pdf')}{' '}
           <span className="keyboard-shortcut">({modifierKey} + Enter)</span>
-        </Tooltip>
+        </>
       }
+      tooltipProps={{ className: 'keyboard-tooltip' }}
+      overlayProps={{ delayShow: 500 }}
     >
       <Button
         className="btn-recompile"
@@ -34,13 +43,8 @@ function PdfCompileButtonInner({ startCompile, compiling }) {
           {compileButtonLabel}
         </span>
       </Button>
-    </OverlayTrigger>
+    </Tooltip>
   )
-}
-
-PdfCompileButtonInner.propTypes = {
-  compiling: PropTypes.bool.isRequired,
-  startCompile: PropTypes.func.isRequired,
 }
 
 export default memo(PdfCompileButtonInner)

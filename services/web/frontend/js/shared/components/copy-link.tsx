@@ -1,10 +1,15 @@
 import { useCallback, useState } from 'react'
-import { Button, OverlayTrigger, Tooltip } from 'react-bootstrap'
-import PropTypes from 'prop-types'
+import { Button } from 'react-bootstrap'
 import { Trans, useTranslation } from 'react-i18next'
+import Tooltip from './tooltip'
 import Icon from './icon'
 
-export default function CopyLink({ link, tooltipId }) {
+type CopyLinkProps = {
+  link: string
+  tooltipId: string
+}
+
+function CopyLink({ link, tooltipId }: CopyLinkProps) {
   const { t } = useTranslation()
 
   const [copied, setCopied] = useState(false)
@@ -23,15 +28,13 @@ export default function CopyLink({ link, tooltipId }) {
   }
 
   return (
-    <OverlayTrigger
-      placement="top"
-      delayHide={copied ? 1000 : 250}
-      shouldUpdatePosition
-      overlay={
-        <Tooltip id={tooltipId}>
-          {copied ? 'Copied!' : <Trans i18nKey="copy" />}
-        </Tooltip>
-      }
+    <Tooltip
+      id={tooltipId}
+      description={copied ? 'Copied!' : <Trans i18nKey="copy" />}
+      overlayProps={{
+        delayHide: copied ? 1000 : 250,
+        shouldUpdatePosition: true,
+      }}
     >
       <Button
         onClick={handleClick}
@@ -42,10 +45,8 @@ export default function CopyLink({ link, tooltipId }) {
       >
         {copied ? <Icon type="check" /> : <Icon type="clipboard" />}
       </Button>
-    </OverlayTrigger>
+    </Tooltip>
   )
 }
-CopyLink.propTypes = {
-  link: PropTypes.string.isRequired,
-  tooltipId: PropTypes.string.isRequired,
-}
+
+export default CopyLink

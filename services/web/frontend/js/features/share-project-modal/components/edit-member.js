@@ -2,18 +2,11 @@ import { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { Trans, useTranslation } from 'react-i18next'
 import { useShareProjectContext } from './share-project-modal'
-import Icon from '../../../shared/components/icon'
 import TransferOwnershipModal from './transfer-ownership-modal'
-import {
-  Button,
-  Col,
-  Form,
-  FormControl,
-  FormGroup,
-  OverlayTrigger,
-  Tooltip,
-} from 'react-bootstrap'
 import { removeMemberFromProject, updateMember } from '../utils/api'
+import { Button, Col, Form, FormControl, FormGroup } from 'react-bootstrap'
+import Tooltip from '../../../shared/components/tooltip'
+import Icon from '../../../shared/components/icon'
 import { useProjectContext } from '../../../shared/context/project-context'
 
 export default function EditMember({ member }) {
@@ -110,6 +103,7 @@ function SelectPrivilege({ value, handleChange }) {
     </FormControl>
   )
 }
+
 SelectPrivilege.propTypes = {
   value: PropTypes.string.isRequired,
   handleChange: PropTypes.func.isRequired,
@@ -134,13 +128,10 @@ function RemoveMemberAction({ member }) {
 
   return (
     <FormControl.Static className="text-center">
-      <OverlayTrigger
-        placement="bottom"
-        overlay={
-          <Tooltip id="tooltip-remove-collaborator">
-            <Trans i18nKey="remove_collaborator" />
-          </Tooltip>
-        }
+      <Tooltip
+        id="remove-collaborator"
+        description={<Trans i18nKey="remove_collaborator" />}
+        overlayProps={{ placement: 'bottom' }}
       >
         <Button
           type="button"
@@ -151,10 +142,11 @@ function RemoveMemberAction({ member }) {
         >
           <Icon type="times" />
         </Button>
-      </OverlayTrigger>
+      </Tooltip>
     </FormControl.Static>
   )
 }
+
 RemoveMemberAction.propTypes = {
   member: PropTypes.shape({
     _id: PropTypes.string.isRequired,
@@ -179,6 +171,7 @@ function ChangePrivilegesActions({ handleReset }) {
     </div>
   )
 }
+
 ChangePrivilegesActions.propTypes = {
   handleReset: PropTypes.func.isRequired,
 }

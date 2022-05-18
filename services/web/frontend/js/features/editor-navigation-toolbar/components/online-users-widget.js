@@ -1,7 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
-import { Dropdown, MenuItem, OverlayTrigger, Tooltip } from 'react-bootstrap'
+import { Dropdown, MenuItem } from 'react-bootstrap'
+import Tooltip from '../../../shared/components/tooltip'
 import Icon from '../../../shared/components/icon'
 import { getHueForUserId } from '../../../shared/utils/colors'
 import ControlledDropdown from '../../../shared/components/controlled-dropdown'
@@ -37,17 +38,17 @@ function OnlineUsersWidget({ onlineUsers, goToUser }) {
     return (
       <div className="online-users">
         {onlineUsers.map((user, index) => (
-          <OverlayTrigger
+          <Tooltip
             key={`${user.user_id}_${index}`}
-            placement="bottom"
-            trigger={['hover', 'focus']}
-            overlay={<Tooltip id="tooltip-online-user">{user.name}</Tooltip>}
+            id="online-user"
+            description={user.name}
+            overlayProps={{ placement: 'bottom', trigger: ['hover', 'focus'] }}
           >
             <span>
               {/* OverlayTrigger won't fire unless UserIcon is wrapped in a span */}
               <UserIcon user={user} onClick={goToUser} />
             </span>
-          </OverlayTrigger>
+          </Tooltip>
         ))}
       </div>
     )
@@ -94,11 +95,10 @@ UserIcon.propTypes = {
 const DropDownToggleButton = React.forwardRef((props, ref) => {
   const { t } = useTranslation()
   return (
-    <OverlayTrigger
-      placement="left"
-      overlay={
-        <Tooltip id="tooltip-connected-users">{t('connected_users')}</Tooltip>
-      }
+    <Tooltip
+      id="connected-users"
+      description={t('connected_users')}
+      overlayProps={{ placement: 'left' }}
     >
       <button
         className="btn online-user online-user-multi"
@@ -107,7 +107,7 @@ const DropDownToggleButton = React.forwardRef((props, ref) => {
         <strong>{props.onlineUserCount}</strong>
         <Icon type="users" fw />
       </button>
-    </OverlayTrigger>
+    </Tooltip>
   )
 })
 

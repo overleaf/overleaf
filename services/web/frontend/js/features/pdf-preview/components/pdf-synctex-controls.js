@@ -7,7 +7,8 @@ import { getJSON } from '../../../infrastructure/fetch-json'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import { useLayoutContext } from '../../../shared/context/layout-context'
 import useScopeValue from '../../../shared/hooks/use-scope-value'
-import { Button, OverlayTrigger, Tooltip } from 'react-bootstrap'
+import { Button } from 'react-bootstrap'
+import Tooltip from '../../../shared/components/tooltip'
 import Icon from '../../../shared/components/icon'
 import { useTranslation } from 'react-i18next'
 import useIsMounted from '../../../shared/hooks/use-is-mounted'
@@ -38,13 +39,10 @@ function GoToCodeButton({
   }
 
   return (
-    <OverlayTrigger
-      placement={tooltipPlacement}
-      overlay={
-        <Tooltip id="sync-to-code-tooltip">
-          {t('go_to_pdf_location_in_code')}
-        </Tooltip>
-      }
+    <Tooltip
+      id="sync-to-code"
+      description={t('go_to_pdf_location_in_code')}
+      overlayProps={{ placement: tooltipPlacement }}
     >
       <Button
         bsStyle="default"
@@ -57,7 +55,7 @@ function GoToCodeButton({
         {buttonIcon}
         {isDetachLayout ? <span>&nbsp;{t('show_in_code')}</span> : ''}
       </Button>
-    </OverlayTrigger>
+    </Tooltip>
   )
 }
 
@@ -82,13 +80,10 @@ function GoToPdfButton({
   }
 
   return (
-    <OverlayTrigger
-      placement={tooltipPlacement}
-      overlay={
-        <Tooltip id="sync-to-pdf-tooltip">
-          {t('go_to_code_location_in_pdf')}
-        </Tooltip>
-      }
+    <Tooltip
+      id="sync-to-pdf"
+      description={t('go_to_code_location_in_pdf')}
+      overlayProps={{ placement: tooltipPlacement }}
     >
       <Button
         bsStyle="default"
@@ -101,7 +96,7 @@ function GoToPdfButton({
         {buttonIcon}
         {isDetachLayout ? <span>&nbsp;{t('show_in_pdf')}</span> : ''}
       </Button>
-    </OverlayTrigger>
+    </Tooltip>
   )
 }
 

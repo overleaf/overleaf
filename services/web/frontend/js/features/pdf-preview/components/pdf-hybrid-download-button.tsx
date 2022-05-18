@@ -1,25 +1,19 @@
 import { useTranslation } from 'react-i18next'
-import { Button, OverlayTrigger, Tooltip } from 'react-bootstrap'
+import { Button } from 'react-bootstrap'
+import Tooltip from '../../../shared/components/tooltip'
 import Icon from '../../../shared/components/icon'
-import { memo } from 'react'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 
 function PdfHybridDownloadButton() {
   const { pdfDownloadUrl } = useCompileContext()
 
   const { t } = useTranslation()
+  const description = pdfDownloadUrl
+    ? t('download_pdf')
+    : t('please_compile_pdf_before_download')
 
   return (
-    <OverlayTrigger
-      placement="bottom"
-      overlay={
-        <Tooltip id="tooltip-logs-toggle">
-          {pdfDownloadUrl
-            ? t('download_pdf')
-            : t('please_compile_pdf_before_download')}
-        </Tooltip>
-      }
-    >
+    <Tooltip id="logs-toggle" description={description}>
       <Button
         bsStyle="link"
         disabled={!pdfDownloadUrl}
@@ -30,8 +24,8 @@ function PdfHybridDownloadButton() {
       >
         <Icon type="download" fw />
       </Button>
-    </OverlayTrigger>
+    </Tooltip>
   )
 }
 
-export default memo(PdfHybridDownloadButton)
+export default PdfHybridDownloadButton

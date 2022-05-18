@@ -1,8 +1,9 @@
 import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 
+import { Button } from 'react-bootstrap'
+import Tooltip from '../../../shared/components/tooltip'
 import Icon from '../../../shared/components/icon'
-import TooltipButton from '../../../shared/components/tooltip-button'
 
 import { useEditorContext } from '../../../shared/context/editor-context'
 import { useFileTreeActionable } from '../contexts/file-tree-actionable'
@@ -37,27 +38,33 @@ function FileTreeToolbarLeft() {
 
   return (
     <div className="toolbar-left">
-      <TooltipButton
-        id="new_file"
+      <Tooltip
+        id="new-file"
         description={t('new_file')}
-        onClick={startCreatingDocOrFile}
+        overlayProps={{ placement: 'bottom' }}
       >
-        <Icon type="file" fw accessibilityLabel={t('new_file')} />
-      </TooltipButton>
-      <TooltipButton
-        id="new_folder"
+        <Button onClick={startCreatingDocOrFile}>
+          <Icon type="file" fw accessibilityLabel={t('new_file')} />
+        </Button>
+      </Tooltip>
+      <Tooltip
+        id="new-folder"
         description={t('new_folder')}
-        onClick={startCreatingFolder}
+        overlayProps={{ placement: 'bottom' }}
       >
-        <Icon type="folder" fw accessibilityLabel={t('new_folder')} />
-      </TooltipButton>
-      <TooltipButton
+        <Button onClick={startCreatingFolder}>
+          <Icon type="folder" fw accessibilityLabel={t('new_folder')} />
+        </Button>
+      </Tooltip>
+      <Tooltip
         id="upload"
         description={t('upload')}
-        onClick={startUploadingDocOrFile}
+        overlayProps={{ placement: 'bottom' }}
       >
-        <Icon type="upload" fw accessibilityLabel={t('upload')} />
-      </TooltipButton>
+        <Button onClick={startUploadingDocOrFile}>
+          <Icon type="upload" fw accessibilityLabel={t('upload')} />
+        </Button>
+      </Tooltip>
     </div>
   )
 }
@@ -74,22 +81,26 @@ function FileTreeToolbarRight() {
   return (
     <div className="toolbar-right">
       {canRename ? (
-        <TooltipButton
+        <Tooltip
           id="rename"
           description={t('rename')}
-          onClick={startRenaming}
+          overlayProps={{ placement: 'bottom' }}
         >
-          <Icon type="pencil" fw accessibilityLabel={t('rename')} />
-        </TooltipButton>
+          <Button onClick={startRenaming}>
+            <Icon type="pencil" fw accessibilityLabel={t('rename')} />
+          </Button>
+        </Tooltip>
       ) : null}
       {canDelete ? (
-        <TooltipButton
+        <Tooltip
           id="delete"
           description={t('delete')}
-          onClick={startDeleting}
+          overlayProps={{ placement: 'bottom' }}
         >
-          <Icon type="trash-o" fw accessibilityLabel={t('delete')} />
-        </TooltipButton>
+          <Button onClick={startDeleting}>
+            <Icon type="trash-o" fw accessibilityLabel={t('delete')} />
+          </Button>
+        </Tooltip>
       ) : null}
     </div>
   )

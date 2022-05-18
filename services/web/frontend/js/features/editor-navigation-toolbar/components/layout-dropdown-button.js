@@ -1,7 +1,8 @@
 import { useCallback } from 'react'
 import PropTypes from 'prop-types'
-import { Dropdown, MenuItem, OverlayTrigger, Tooltip } from 'react-bootstrap'
+import { Dropdown, MenuItem } from 'react-bootstrap'
 import { Trans, useTranslation } from 'react-i18next'
+import Tooltip from '../../../shared/components/tooltip'
 import Icon from '../../../shared/components/icon'
 import IconChecked from '../../../shared/components/icon-checked'
 import ControlledDropdown from '../../../shared/components/controlled-dropdown'
@@ -50,21 +51,19 @@ function PdfDetachMenuItem({ handleDetach, children }) {
 
   if (!('BroadcastChannel' in window)) {
     return (
-      <OverlayTrigger
-        placement="left"
-        overlay={
-          <Tooltip id="detach-disabled-tooltip">
-            {t('your_browser_does_not_support_this_feature')}
-          </Tooltip>
-        }
+      <Tooltip
+        id="detach-disabled"
+        description={t('your_browser_does_not_support_this_feature')}
+        overlayProps={{ placement: 'left' }}
       >
         <MenuItem disabled>{children}</MenuItem>
-      </OverlayTrigger>
+      </Tooltip>
     )
   }
 
   return <MenuItem onSelect={handleDetach}>{children}</MenuItem>
 }
+
 PdfDetachMenuItem.propTypes = {
   handleDetach: PropTypes.func.isRequired,
   children: PropTypes.arrayOf(PropTypes.node).isRequired,
@@ -126,13 +125,13 @@ function LayoutDropdownButton() {
         <Dropdown.Toggle className="btn-full-height" bsStyle="link">
           {processing ? <IconRefresh /> : <IconLayout />}
           <span className="toolbar-label">{t('layout')}</span>
-          <OverlayTrigger
-            placement="bottom"
-            overlay={<Tooltip id="pdf-detach-badge">Beta feature</Tooltip>}
-            delayHide={100}
+          <Tooltip
+            id="pdf-detach-badge"
+            description="Beta feature"
+            overlayProps={{ placement: 'bottom', delayHide: 100 }}
           >
             <span className="beta-badge" />
-          </OverlayTrigger>
+          </Tooltip>
         </Dropdown.Toggle>
         <Dropdown.Menu id="layout-dropdown-list">
           <MenuItem onSelect={() => handleChangeLayout('sideBySide')}>

@@ -4,11 +4,15 @@ import {
   Tooltip as BSTooltip,
 } from 'react-bootstrap'
 
+type OverlayTriggerCustomProps = {
+  shouldUpdatePosition?: boolean // Not officially documented https://stackoverflow.com/a/43138470
+} & OverlayTriggerProps
+
 type TooltipProps = {
   children: React.ReactNode
-  description: string
+  description: React.ReactNode
   id: string
-  overlayProps?: Omit<OverlayTriggerProps, 'overlay'>
+  overlayProps?: Omit<OverlayTriggerCustomProps, 'overlay'>
   tooltipProps?: BSTooltip.TooltipProps
 }
 

@@ -1,16 +1,22 @@
 import { useEffect, useState, useRef } from 'react'
-import PropTypes from 'prop-types'
-import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import classNames from 'classnames'
+import Tooltip from '../../../shared/components/tooltip'
 import Icon from '../../../shared/components/icon'
+
+type ProjectNameEditableLabelProps = {
+  projectName: string
+  onChange: (value: string) => void
+  hasRenamePermissions?: boolean
+  className?: string
+}
 
 function ProjectNameEditableLabel({
   projectName,
   hasRenamePermissions,
   onChange,
   className,
-}) {
+}: ProjectNameEditableLabelProps) {
   const { t } = useTranslation()
 
   const [isRenaming, setIsRenaming] = useState(false)
@@ -19,11 +25,11 @@ function ProjectNameEditableLabel({
 
   const [inputContent, setInputContent] = useState(projectName)
 
-  const inputRef = useRef(null)
+  const inputRef = useRef<HTMLInputElement | null>(null)
 
   useEffect(() => {
     if (isRenaming) {
-      inputRef.current.select()
+      inputRef.current?.select()
     }
   }, [isRenaming])
 
@@ -39,14 +45,14 @@ function ProjectNameEditableLabel({
     onChange(inputContent)
   }
 
-  function handleKeyDown(event) {
+  function handleKeyDown(event: React.KeyboardEvent) {
     if (event.key === 'Enter') {
       event.preventDefault()
       finishRenaming()
     }
   }
 
-  function handleOnChange(event) {
+  function handleOnChange(event: React.ChangeEvent<HTMLInputElement>) {
     setInputContent(event.target.value)
   }
 
@@ -75,26 +81,19 @@ function ProjectNameEditableLabel({
         />
       )}
       {canRename && (
-        <OverlayTrigger
-          placement="bottom"
-          trigger={['hover', 'focus']}
-          overlay={<Tooltip id="tooltip-online-user">{t('rename')}</Tooltip>}
+        <Tooltip
+          id="online-user"
+          description={t('rename')}
+          overlayProps={{ placement: 'bottom', trigger: ['hover', 'focus'] }}
         >
           {/* eslint-disable-next-line jsx-a11y/anchor-is-valid, jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus */}
           <a className="rename" role="button" onClick={startRenaming}>
             <Icon type="pencil" fw />
           </a>
-        </OverlayTrigger>
+        </Tooltip>
       )}
     </div>
   )
-}
-
-ProjectNameEditableLabel.propTypes = {
-  projectName: PropTypes.string.isRequired,
-  hasRenamePermissions: PropTypes.bool,
-  onChange: PropTypes.func.isRequired,
-  className: PropTypes.string,
 }
 
 export default ProjectNameEditableLabel
