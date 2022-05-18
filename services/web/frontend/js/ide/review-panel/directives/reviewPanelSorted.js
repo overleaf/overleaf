@@ -61,7 +61,7 @@ export default App.directive('reviewPanelSorted', $timeout => ({
         } else {
           entry.$layout_el = entry.$indicator_el
         }
-        entry.height = entry.$layout_el.height() // Do all of our DOM reads first for perfomance, see http://wilsonpage.co.uk/preventing-layout-thrashing/
+        entry.height = entry.$layout_el.height() // Do all of our DOM reads first for performance, see http://wilsonpage.co.uk/preventing-layout-thrashing/
         entries.push(entry)
       }
       entries.sort((a, b) => a.scope.entry.offset - b.scope.entry.offset)
