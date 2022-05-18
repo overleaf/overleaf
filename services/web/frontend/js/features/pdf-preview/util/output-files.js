@@ -5,7 +5,7 @@ import { v4 as uuid } from 'uuid'
 
 const searchParams = new URLSearchParams(window.location.search)
 
-export const handleOutputFiles = async (outputFiles, projectId, data) => {
+export function handleOutputFiles(outputFiles, projectId, data) {
   const result = {}
 
   const pdfDownloadDomain = data.pdfDownloadDomain ?? ''

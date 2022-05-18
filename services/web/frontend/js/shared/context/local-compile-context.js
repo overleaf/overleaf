@@ -247,49 +247,48 @@ export function LocalCompileProvider({ children }) {
         }
 
         // set the PDF URLs
-        handleOutputFiles(outputFiles, projectId, data).then(result => {
-          if (data.status === 'success') {
-            setPdfDownloadUrl(result.pdfDownloadUrl)
-            setPdfUrl(result.pdfUrl)
-          }
+        const result = handleOutputFiles(outputFiles, projectId, data)
+        if (data.status === 'success') {
+          setPdfDownloadUrl(result.pdfDownloadUrl)
+          setPdfUrl(result.pdfUrl)
+        }
 
-          setFileList(
-            buildFileList(outputFiles, data.clsiServerId, data.compileGroup)
-          )
+        setFileList(
+          buildFileList(outputFiles, data.clsiServerId, data.compileGroup)
+        )
 
-          // handle log files
-          // asynchronous (TODO: cancel on new compile?)
-          setLogEntryAnnotations(null)
-          setLogEntries(null)
-          setRawLog(null)
+        // handle log files
+        // asynchronous (TODO: cancel on new compile?)
+        setLogEntryAnnotations(null)
+        setLogEntries(null)
+        setRawLog(null)
 
-          handleLogFiles(outputFiles, data, abortController.signal).then(
-            result => {
-              setRawLog(result.log)
-              setLogEntries(result.logEntries)
-              setLogEntryAnnotations(
-                buildLogEntryAnnotations(
-                  result.logEntries.all,
-                  ide.fileTreeManager
-                )
+        handleLogFiles(outputFiles, data, abortController.signal).then(
+          result => {
+            setRawLog(result.log)
+            setLogEntries(result.logEntries)
+            setLogEntryAnnotations(
+              buildLogEntryAnnotations(
+                result.logEntries.all,
+                ide.fileTreeManager
               )
+            )
 
-              // sample compile stats for real users
-              if (!window.user.alphaProgram && data.status === 'success') {
-                sendMBSampled(
-                  'compile-result',
-                  {
-                    errors: result.logEntries.errors.length,
-                    warnings: result.logEntries.warnings.length,
-                    typesetting: result.logEntries.typesetting.length,
-                    newPdfPreview: true, // TODO: is this useful?
-                  },
-                  0.01
-                )
-              }
+            // sample compile stats for real users
+            if (!window.user.alphaProgram && data.status === 'success') {
+              sendMBSampled(
+                'compile-result',
+                {
+                  errors: result.logEntries.errors.length,
+                  warnings: result.logEntries.warnings.length,
+                  typesetting: result.logEntries.typesetting.length,
+                  newPdfPreview: true, // TODO: is this useful?
+                },
+                0.01
+              )
             }
-          )
-        })
+          }
+        )
       }
 
       switch (data.status) {
