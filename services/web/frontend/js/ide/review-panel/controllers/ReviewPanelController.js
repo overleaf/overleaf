@@ -92,6 +92,7 @@ export default App.controller(
       },
       commentThreads: {},
       resolvedThreadIds: {},
+      layoutToLeft: false,
       rendererData: {},
       formattedProjectMembers: {},
       fullTCStateCollapsed: true,
@@ -126,9 +127,11 @@ export default App.controller(
       $scope.$broadcast('review-panel:layout')
     )
 
-    $scope.$on('layout:pdf:resize', (event, state) =>
+    $scope.$on('layout:pdf:resize', (event, state) => {
+      $scope.reviewPanel.layoutToLeft =
+        state.east?.size < 220 || state.east?.initClosed
       $scope.$broadcast('review-panel:layout', false)
-    )
+    })
 
     $scope.$on('expandable-text-area:resize', event =>
       $timeout(() => $scope.$broadcast('review-panel:layout'))
