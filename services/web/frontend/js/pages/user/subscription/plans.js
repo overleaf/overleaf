@@ -3,6 +3,8 @@ import '../../../features/plans/group-plan-modal'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import getMeta from '../../../utils/meta'
 
+const PLANS_PAGE_LAYOUT_V2 = 'plans-page-layout-v2'
+
 let currentView = 'monthly'
 let currentCurrencyCode = getMeta('ol-recommendedCurrency')
 
@@ -23,11 +25,16 @@ function selectView(view) {
 }
 
 function setUpViewSwitching(liEl) {
+  const plansPageV2SplitTestVariant =
+    getMeta('ol-splitTestVariants')?.[PLANS_PAGE_LAYOUT_V2] ?? 'default'
   const view = liEl.getAttribute('data-ol-view-tab')
   liEl.querySelector('a').addEventListener('click', function (e) {
     e.preventDefault()
     eventTracking.send('subscription-funnel', 'plans-page', `${view}-prices`)
-    eventTracking.sendMB('plans-page-toggle', { button: view })
+    eventTracking.sendMB('plans-page-toggle', {
+      button: view,
+      PLANS_PAGE_LAYOUT_V2: plansPageV2SplitTestVariant,
+    })
     selectView(view)
   })
 }
@@ -46,6 +53,8 @@ function setUpCurrencySwitching(linkEl) {
 }
 
 function setUpSubscriptionTracking(linkEl) {
+  const plansPageV2SplitTestVariant =
+    getMeta('ol-splitTestVariants')?.[PLANS_PAGE_LAYOUT_V2] ?? 'default'
   const plan =
     linkEl.getAttribute('data-ol-tracking-plan') ||
     linkEl.getAttribute('data-ol-start-new-subscription')
@@ -63,6 +72,7 @@ function setUpSubscriptionTracking(linkEl) {
       button: plan,
       location,
       period,
+      PLANS_PAGE_LAYOUT_V2: plansPageV2SplitTestVariant,
     })
   })
 }

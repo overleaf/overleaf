@@ -1,5 +1,6 @@
 import '../../../../marketing'
 
+import * as eventTracking from '../../../../infrastructure/event-tracking'
 import {
   setUpStickyHeaderObserver,
   switchStickyHeader,
@@ -65,9 +66,11 @@ function setUpTabSwitching() {
 
     el.querySelector('a').addEventListener('click', function (e) {
       e.preventDefault()
-      // TODO: analytics
-      // eventTracking.send('subscription-funnel', 'plans-page', `${view}-prices`)
-      // eventTracking.sendMB('plans-page-toggle', { button: view })
+      eventTracking.send(
+        'subscription-funnel',
+        'plans-page',
+        `${viewTab}-prices`
+      )
       selectTab(viewTab)
     })
   })

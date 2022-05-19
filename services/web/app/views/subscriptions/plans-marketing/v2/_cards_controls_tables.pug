@@ -3,17 +3,35 @@ include ./_mixins
 .row.plans-v2-top-switch
 	.col-xs-12
 		ul.nav.plans-v2-nav
-			li.active.plans-v2-top-switch-individual(data-ol-plans-v2-view-tab='individual')
+			li.active.plans-v2-top-switch-individual(
+				data-ol-plans-v2-view-tab='individual'
+				event-tracking="plans-page-toggle-plan"
+				event-tracking-mb="true"
+				event-tracking-trigger="click"
+				event-segmentation='{"button": "individual", "plans-page-layout-v2": "new-plans-page"}'
+			)
 				a.btn.btn-default-outline(
 					href="#"
 				) #{translate("indvidual_plans")}
-			li.plans-v2-top-switch-group(data-ol-plans-v2-view-tab='group')
+			li.plans-v2-top-switch-group(
+				data-ol-plans-v2-view-tab='group'
+				event-tracking="plans-page-toggle-plan"
+				event-tracking-mb="true"
+				event-tracking-trigger="click"
+				event-segmentation='{"button": "group", "plans-page-layout-v2": "new-plans-page"}'
+			)
 				a.btn.btn-default-outline(
 					href="#"
 				)
 					span #{translate("group_plans")} 
 					span (save 30% or more)
-			li.plans-v2-top-switch-student(data-ol-plans-v2-view-tab='student')
+			li.plans-v2-top-switch-student(
+				data-ol-plans-v2-view-tab='student'
+				event-tracking="plans-page-toggle-plan"
+				event-tracking-mb="true"
+				event-tracking-trigger="click"
+				event-segmentation='{"button": "student", "plans-page-layout-v2": "new-plans-page"}'
+			)
 				a.btn.btn-default-outline(
 					href="#"
 				) #{translate("student_plans")}
@@ -26,6 +44,11 @@ include ./_mixins
 				type="checkbox"
 				role="switch"
 				autocomplete="off"
+				event-tracking="plans-page-toggle-period"
+				event-tracking-mb="true"
+				event-tracking-trigger="click"
+				event-tracking-element="checkbox"
+				event-segmentation='{"plans-page-layout-v2": "new-plans-page"}'
 			)
 			span
 		.plans-v2-m-a-switch-annual-text-container

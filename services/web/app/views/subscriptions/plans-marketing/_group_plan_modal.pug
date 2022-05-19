@@ -58,7 +58,14 @@ div.modal.fade(tabindex="-1" role="dialog" data-ol-group-plan-modal)
 								.form-group
 									label(for='size')
 										| Number of users
-									select.form-control(id="size")
+									select.form-control(
+										id="size"
+										event-tracking="groups-modal-group-size"
+										event-tracking-mb="true"
+										event-tracking-trigger="click"
+										event-tracking-element="select"
+										event-segmentation='{"plans-page-layout-v2": "' + (newPlansPageVariantV2 ? 'new-plans-page' : 'default') + '"}'
+									)
 										for size in groupPlanModalOptions.sizes
 											option(
 												value=size
@@ -81,6 +88,11 @@ div.modal.fade(tabindex="-1" role="dialog" data-ol-group-plan-modal)
 										id="usage"
 										type="checkbox"
 										autocomplete="off"
+										event-tracking="groups-modal-edu-discount"
+										event-tracking-mb="true"
+										event-tracking-trigger="click"
+										event-tracking-element="checkbox"
+										event-segmentation='{"plans-page-layout-v2": "' + (newPlansPageVariantV2 ? 'new-plans-page' : 'default') + '"}'
 									)
 									span This license is for educational purposes (applies to students or faculty using Overleaf for teaching)
 
