@@ -122,11 +122,15 @@ describe('SubscriptionController', function () {
         getAssignment: sinon.stub().resolves({ variant: 'default' }),
       },
     }
+    this.SubscriptionHelper = {
+      generateInitialLocalizedGroupPrice: sinon.stub(),
+    }
     this.SubscriptionController = SandboxedModule.require(modulePath, {
       requires: {
         '../SplitTests/SplitTestHandler': this.SplitTestV2Hander,
         '../Authentication/SessionManager': this.SessionManager,
         './SubscriptionHandler': this.SubscriptionHandler,
+        './SubscriptionHelper': this.SubscriptionHelper,
         './PlansLocator': this.PlansLocator,
         './SubscriptionViewModelBuilder': this.SubscriptionViewModelBuilder,
         './LimitationsManager': this.LimitationsManager,

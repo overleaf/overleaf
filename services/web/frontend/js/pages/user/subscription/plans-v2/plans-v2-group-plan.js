@@ -60,11 +60,11 @@ export function updateGroupPricing() {
   ).innerText = displayPriceCollaborator
 
   document.querySelector(
-    '[data-ol-group-price-per-user="collaborator"]'
+    '[data-ol-plans-v2-group-price-per-user="collaborator"]'
   ).innerText = displayPerUserPriceCollaborator
 
   document.querySelector(
-    '[data-ol-group-price-per-user="professional"]'
+    '[data-ol-plans-v2-group-price-per-user="professional"]'
   ).innerText = displayPerUserPriceProfessional
 
   // educational discount can only be activated if numberOfLicenses is > 10

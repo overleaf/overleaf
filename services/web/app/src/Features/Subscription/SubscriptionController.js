@@ -20,6 +20,7 @@ const RecurlyEventHandler = require('./RecurlyEventHandler')
 const { expressify } = require('../../util/promises')
 const OError = require('@overleaf/o-error')
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
+const SubscriptionHelper = require('./SubscriptionHelper')
 
 const groupPlanModalOptions = Settings.groupPlanModalOptions
 const validGroupPlanModalOptions = {
@@ -95,6 +96,10 @@ async function plansPage(req, res) {
     groupPlanModalOptions,
     groupPlanModalDefaults,
     useNewPlanName,
+    initialLocalizedGroupPrice:
+      SubscriptionHelper.generateInitialLocalizedGroupPrice(
+        recommendedCurrency
+      ),
   })
 }
 
