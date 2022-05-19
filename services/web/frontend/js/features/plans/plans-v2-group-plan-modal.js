@@ -1,11 +1,5 @@
 import './group-plan-modal'
-import getMeta from '../../utils/meta'
-
-const NEW_PLANS_PAGE_VARIANT = 'new-plans-page'
-
-export function checkIfGroupModalOpen() {
-  return window.location.hash.includes('groups')
-}
+import { updateMainGroupPlanPricing } from '../../pages/user/subscription/plans-v2/plans-v2-group-plan'
 
 export function changePlansV2MainPageGroupData() {
   const mainPlansPageFormEl = document.querySelector(
@@ -30,47 +24,36 @@ export function changePlansV2MainPageGroupData() {
   const educationalDiscountEnabled =
     educationalDiscountChecked && groupPlanModalNumberOfLicenses >= 10
 
-  if (checkIfGroupModalOpen()) {
-    // update license picker on the main plans page
-    mainPlansPageLicensePickerEl.value = groupPlanModalNumberOfLicenses
-    mainPlansPageLicensePickerEl.dispatchEvent(new Event('change'))
+  // update license picker on the main plans page
+  mainPlansPageLicensePickerEl.value = groupPlanModalNumberOfLicenses
 
-    // update educational discount checkbox on the main plans page
-    if (groupPlanModalNumberOfLicenses >= 10) {
-      mainPlansPageEducationalDiscountEl.checked = educationalDiscountEnabled
-      mainPlansPageEducationalDiscountEl.dispatchEvent(new Event('change'))
-    } else {
-      if (educationalDiscountChecked) {
-        mainPlansPageEducationalDiscountEl.checked = false
-        mainPlansPageEducationalDiscountEl.dispatchEvent(new Event('change'))
-      }
+  // update educational discount checkbox on the main plans page
+  //
+  // extra note
+  // for number of users < 10, there is a difference on the checkbox behaviour
+  // between the group plan modal and the main plan page
+  //
+  // On the group plan modal, the checkbox button is not visually disabled for number of users < 10 (checkbox can still be clicked)
+  // but the logic is disabled and there will be an extra text whether or not the discount is applied
+  //
+  // However, on the main group plan page, the checkbox button is visually disabled for number of users < 10 (checkbox can not be clicked)
+  // Hence, there's a possibility that the checkbox on the group plan modal is checked, but the discount is not applied.
+  // i.e user can still click the checkbox with number of users < 10. The price won't be discounted, but the checkbox is checked.
+  if (groupPlanModalNumberOfLicenses >= 10) {
+    mainPlansPageEducationalDiscountEl.checked = educationalDiscountEnabled
+  } else {
+    // The code below is for disabling the checkbox button on the main plan page for number of users <10
+    // while still checking the educational discount
+    if (educationalDiscountChecked) {
+      mainPlansPageEducationalDiscountEl.checked = false
     }
   }
+
+  updateMainGroupPlanPricing()
 }
 
 function hideCurrencyPicker() {
   document.querySelector('[data-ol-group-plan-form-currency]').hidden = true
-}
-
-const plansPageVariant =
-  getMeta('ol-splitTestVariants')?.['plans-page-layout-v2'] ?? 'default'
-
-if (plansPageVariant === NEW_PLANS_PAGE_VARIANT) {
-  hideCurrencyPicker()
-
-  // we need to sync the form data between group plan modal
-  // and the main plan page
-  document.querySelectorAll('[data-ol-group-plan-code]').forEach(el => {
-    // listening to new CustomEvent 'showmodal'
-    // we do this to check whether user clicks the "Standard (Collaborator)" plan or the "Professional" plan
-    // and the radio button on the group plan modal will then be 'checked' accordingly
-    el.addEventListener('showmodal', () => {
-      if (!checkIfGroupModalOpen()) {
-        el.checked = true
-        el.dispatchEvent(new Event('change'))
-      }
-    })
-  })
 }
 
 document
@@ -79,3 +62,5 @@ document
 document
   .querySelectorAll('[data-ol-group-plan-form] input')
   .forEach(el => el.addEventListener('change', changePlansV2MainPageGroupData))
+
+hideCurrencyPicker()

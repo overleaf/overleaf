@@ -45,20 +45,6 @@ async function plansPage(req, res) {
     }
     return defaultValue
   }
-
-  let defaultGroupPlanModalCurrency = 'USD'
-  if (validGroupPlanModalOptions.currency.includes(recommendedCurrency)) {
-    defaultGroupPlanModalCurrency = recommendedCurrency
-  }
-  const groupPlanModalDefaults = {
-    plan_code: getDefault('plan', 'plan_code', 'collaborator'),
-    size: getDefault('number', 'size', '10'),
-    currency: getDefault('currency', 'currency', defaultGroupPlanModalCurrency),
-    usage: getDefault('usage', 'usage', 'enterprise'),
-  }
-
-  AnalyticsManager.recordEventForSession(req.session, 'plans-page-view')
-
   const newPlansPageAssignmentV2 =
     await SplitTestHandler.promises.getAssignment(
       req,
@@ -69,6 +55,19 @@ async function plansPage(req, res) {
   const newPlansPageVariantV2 =
     newPlansPageAssignmentV2 &&
     newPlansPageAssignmentV2.variant === 'new-plans-page'
+
+  let defaultGroupPlanModalCurrency = 'USD'
+  if (validGroupPlanModalOptions.currency.includes(recommendedCurrency)) {
+    defaultGroupPlanModalCurrency = recommendedCurrency
+  }
+  const groupPlanModalDefaults = {
+    plan_code: getDefault('plan', 'plan_code', 'collaborator'),
+    size: getDefault('number', 'size', newPlansPageVariantV2 ? '2' : '10'),
+    currency: getDefault('currency', 'currency', defaultGroupPlanModalCurrency),
+    usage: getDefault('usage', 'usage', 'enterprise'),
+  }
+
+  AnalyticsManager.recordEventForSession(req.session, 'plans-page-view')
 
   const standardPlanNameAssignment =
     await SplitTestHandler.promises.getAssignment(

@@ -21,10 +21,9 @@ import {
   changeGroupPlanModalNumberOfLicenses,
   hideGroupPlansLicensePicker,
   showGroupPlansLicensePicker,
-  updateGroupPricing,
+  updateMainGroupPlanPricing,
 } from './plans-v2-group-plan'
 import { setUpGroupSubscriptionButtonAction } from './plans-v2-subscription-button'
-import { checkIfGroupModalOpen } from '../../../../features/plans/plans-v2-group-plan-modal'
 import { updateLinkTargets } from '../plans'
 
 function selectTab(viewTab) {
@@ -48,7 +47,7 @@ function selectTab(viewTab) {
   if (viewTab === 'group') {
     disableMonthlyAnnualSwitching()
     hideMonthlyAnnualTooltip()
-    updateGroupPricing()
+    updateMainGroupPlanPricing()
     underlineAnnualText()
     showGroupPlansLicensePicker()
     hideMonthlyAnnualSwitchOnSmallScreen()
@@ -81,10 +80,8 @@ function setUpGroupPlanPricingChange() {
     .querySelectorAll('[data-ol-plans-v2-license-picker-select]')
     .forEach(el => {
       el.addEventListener('change', () => {
-        updateGroupPricing()
-        if (!checkIfGroupModalOpen()) {
-          changeGroupPlanModalNumberOfLicenses()
-        }
+        updateMainGroupPlanPricing()
+        changeGroupPlanModalNumberOfLicenses()
       })
     })
 
@@ -94,10 +91,8 @@ function setUpGroupPlanPricingChange() {
     )
     .forEach(el =>
       el.addEventListener('change', () => {
-        updateGroupPricing()
-        if (!checkIfGroupModalOpen()) {
-          changeGroupPlanModalEducationalDiscount()
-        }
+        updateMainGroupPlanPricing()
+        changeGroupPlanModalEducationalDiscount()
       })
     )
 }

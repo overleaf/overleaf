@@ -1,9 +1,10 @@
-import { checkIfGroupModalOpen } from '../../../../features/plans/plans-v2-group-plan-modal'
+import { updateGroupModalPlanPricing } from '../../../../features/plans/group-plan-modal'
+import '../../../../features/plans/plans-v2-group-plan-modal'
 import getMeta from '../../../../utils/meta'
 
 const MINIMUM_NUMBER_OF_LICENSES_EDUCATIONAL_DISCOUNT = 10
 
-export function updateGroupPricing() {
+export function updateMainGroupPlanPricing() {
   const groupPlans = getMeta('ol-groupPlans')
   const currencySymbols = getMeta('ol-currencySymbols')
   const currentCurrencyCode = getMeta('ol-recommendedCurrency')
@@ -116,10 +117,8 @@ export function changeGroupPlanModalNumberOfLicenses() {
 
   const groupPlanModalLicensePickerEl = modalEl.querySelector('#size')
 
-  if (!checkIfGroupModalOpen()) {
-    groupPlanModalLicensePickerEl.value = numberOfLicenses
-    groupPlanModalLicensePickerEl.dispatchEvent(new Event('change'))
-  }
+  groupPlanModalLicensePickerEl.value = numberOfLicenses
+  updateGroupModalPlanPricing()
 }
 
 export function changeGroupPlanModalEducationalDiscount() {
@@ -129,8 +128,6 @@ export function changeGroupPlanModalEducationalDiscount() {
     '[data-ol-plans-v2-license-picker-educational-discount-input]'
   ).checked
 
-  if (!checkIfGroupModalOpen()) {
-    groupPlanModalEducationalDiscountEl.checked = educationalDiscountChecked
-    groupPlanModalEducationalDiscountEl.dispatchEvent(new Event('change'))
-  }
+  groupPlanModalEducationalDiscountEl.checked = educationalDiscountChecked
+  updateGroupModalPlanPricing()
 }

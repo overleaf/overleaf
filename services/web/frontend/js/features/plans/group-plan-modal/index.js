@@ -15,7 +15,7 @@ function getFormValues() {
   return { planCode, size, currency, usage }
 }
 
-function updateGroupPlanView() {
+export function updateGroupModalPlanPricing() {
   const groupPlans = getMeta('ol-groupPlans')
   const currencySymbols = getMeta('ol-currencySymbols')
 
@@ -74,10 +74,10 @@ function showGroupPlanModal() {
 
 document
   .querySelectorAll('[data-ol-group-plan-form] select')
-  .forEach(el => el.addEventListener('change', updateGroupPlanView))
+  .forEach(el => el.addEventListener('change', updateGroupModalPlanPricing))
 document
   .querySelectorAll('[data-ol-group-plan-form] input')
-  .forEach(el => el.addEventListener('change', updateGroupPlanView))
+  .forEach(el => el.addEventListener('change', updateGroupModalPlanPricing))
 document.querySelectorAll('[data-ol-purchase-group-plan]').forEach(el =>
   el.addEventListener('click', e => {
     e.preventDefault()
@@ -131,7 +131,7 @@ document
     })
   })
 
-updateGroupPlanView()
+updateGroupModalPlanPricing()
 
 if (window.location.hash === '#groups') {
   showGroupPlanModal()

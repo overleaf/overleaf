@@ -1,17 +1,20 @@
-function sendShowModalEvent(plan) {
+import { updateGroupModalPlanPricing } from '../../../../features/plans/group-plan-modal'
+
+function changeGroupPlanModalRadioInputData(plan) {
   const groupPlan = plan.split('_')[1]
 
   const groupModalRadioInputEl = document.querySelector(
     `[data-ol-group-plan-code="${groupPlan}"]`
   )
 
-  groupModalRadioInputEl.dispatchEvent(new CustomEvent('showmodal'))
+  groupModalRadioInputEl.checked = true
+  updateGroupModalPlanPricing()
 }
 
 function showGroupPlanModal(el) {
   const plan = el.getAttribute('data-ol-start-new-subscription')
 
-  sendShowModalEvent(plan)
+  changeGroupPlanModalRadioInputData(plan)
 
   const modalEl = $('[data-ol-group-plan-modal]')
   modalEl
