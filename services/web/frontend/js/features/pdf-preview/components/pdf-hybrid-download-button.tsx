@@ -13,7 +13,11 @@ function PdfHybridDownloadButton() {
     : t('please_compile_pdf_before_download')
 
   return (
-    <Tooltip id="logs-toggle" description={description}>
+    <Tooltip
+      id="logs-toggle"
+      description={description}
+      overlayProps={{ placement: 'bottom' }}
+    >
       <Button
         bsStyle="link"
         disabled={!pdfDownloadUrl}
