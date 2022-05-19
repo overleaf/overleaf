@@ -1739,5 +1739,6 @@
   "all_our_group_plans_offer_educational_discount": "All of our <0>group plans</0> offer an <1>educational discount</1> for students and faculty",
   "unlink_dropbox_folder": "Unlink Dropbox Account",
   "unlink_dropbox_warning": "Any projects that you have synced with Dropbox will be disconnected and no longer kept in sync with Dropbox. Are you sure you want to unlink your Dropbox account?",
-  "group_plans_are_only_available_on_an_annual_billing_cycle": "Group plans are only available on an annual billing cycle"
+  "group_plans_are_only_available_on_an_annual_billing_cycle": "Group plans are only available on an annual billing cycle",
+  "email_or_password_wrong_try_again_or_reset": "Your email or password is incorrect. Please try again, or <0>set or reset your password</0>."
 }
