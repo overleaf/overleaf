@@ -35,6 +35,10 @@ function processProject(project) {
 function findBadPaths(folder) {
   const result = []
 
+  if (!folder._id) {
+    result.push('_id')
+  }
+
   if (typeof folder.name !== 'string' || !folder.name) {
     result.push('name')
   }
@@ -62,9 +66,13 @@ function findBadPaths(folder) {
           result.push(`docs.${i}`)
           continue
         }
+        if (!doc._id) {
+          result.push(`docs.${i}._id`)
+          // no need to check further: this doc can be deleted
+          continue
+        }
         if (typeof doc.name !== 'string' || !doc.name) {
           result.push(`docs.${i}.name`)
-          continue
         }
       }
     } else {
@@ -79,9 +87,13 @@ function findBadPaths(folder) {
           result.push(`fileRefs.${i}`)
           continue
         }
+        if (!file._id) {
+          result.push(`fileRefs.${i}._id`)
+          // no need to check further: this file can be deleted
+          continue
+        }
         if (typeof file.name !== 'string' || !file.name) {
           result.push(`fileRefs.${i}.name`)
-          continue
         }
       }
     } else {
