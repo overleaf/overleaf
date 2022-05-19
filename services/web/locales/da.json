@@ -88,7 +88,6 @@
   "dropbox_sync_out": "Opdaterer Dropbox",
   "dropbox_sync_both": "Opdaterer Overleaf og Dropbox",
   "dropbox_synced": "Overleaf og Dropbox er fuldt opdaterede",
-  "dropbox_sync_status_error": "Der er sket en fejl i Dropboxintegrationen",
   "dropbox_duplicate_names_error": "Din Dropbox–konto kan ikke kobles til, fordi du har mere end et projekt med det samme navn: ",
   "requesting_password_reset": "Beder om nulstilling af kodeord",
   "tex_live_version": "TeX Live–version",
