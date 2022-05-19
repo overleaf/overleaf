@@ -264,9 +264,6 @@ footer.site-footer {
 }
 
 .cookie-banner {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
   padding: 10px 20px;
   font-size: 0.9rem;
   line-height: 1;
@@ -278,13 +275,24 @@ footer.site-footer {
   color: @text-color;
   background: @ol-blue-gray-0;
   box-shadow: 0px -5px 8px 0px #0000001a;
-}
 
-.cookie-banner-content {
-  flex: 1;
-}
+  .cookie-banner-actions {
+    padding-top: 10px;
+  }
 
-.cookie-banner-actions {
-  flex-shrink: 0;
-  white-space: nowrap;
+  @media (min-width: @screen-sm-min) {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+
+    .cookie-banner-content {
+      flex: 1;
+    }
+
+    .cookie-banner-actions {
+      flex-shrink: 0;
+      white-space: nowrap;
+      padding-top: 0;
+    }
+  }
 }
