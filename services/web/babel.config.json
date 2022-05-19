@@ -11,24 +11,5 @@
     ["@babel/react", { "runtime": "automatic" }],
     "@babel/typescript"
   ],
-  "plugins": ["angularjs-annotate", "macros"],
-  // Target our current Node version in test environment, to transform and
-  // polyfill only what's necessary
-  "env": {
-    "test": {
-      "presets": [
-        [
-          "@babel/env",
-          {
-            "targets": { "node": "current" },
-            "useBuiltIns": "usage",
-            // This version must be aligned with the `core-js` version in `package.json`
-            "corejs": { "version": 3.6 }
-          }
-        ],
-        ["@babel/react", { "runtime": "automatic" }],
-        "@babel/typescript"
-      ]
-    }
-  }
+  "plugins": ["angularjs-annotate", "macros"]
 }
