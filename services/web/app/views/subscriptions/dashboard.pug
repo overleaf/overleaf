@@ -63,3 +63,5 @@ block content
 									for feature in ['realtime_track_changes', 'full_doc_history', 'reference_search', 'reference_sync', 'dropbox_integration_lowercase', 'github_integration_lowercase', 'priority_support']
 										li #{translate(feature)}
 								a(ng-controller="UpgradeSubscriptionController" href="/user/subscription/plans" ng-click="upgradeSubscription()").btn.btn-primary Upgrade now
+
+	!= moduleIncludes("contactModalGeneral", locals)
