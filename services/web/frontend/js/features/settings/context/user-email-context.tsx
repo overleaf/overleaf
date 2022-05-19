@@ -83,12 +83,18 @@ const setData = (state: State, action: ActionSetData) => {
     idAttribute: 'email',
   })
   const byId = normalized || {}
+  const linkedInstitutionIds = action.payload
+    .filter(email => Boolean(email.samlProviderId))
+    .map(email => email.samlProviderId) as NonNullable<
+    UserEmailData['samlProviderId']
+  >[]
 
   return {
     ...state,
     data: {
       ...initialState.data,
       byId,
+      linkedInstitutionIds,
     },
   }
 }
