@@ -22,7 +22,12 @@ module.exports = merge(
             keep_fnames: /(Error|Exception)$/,
           },
         }),
-        new CssMinimizerPlugin(),
+        new CssMinimizerPlugin({
+          minimizerOptions: {
+            // disable mergeLonghand to avoid a cssnano bug https://github.com/cssnano/cssnano/issues/864
+            preset: ['default', { mergeLonghand: false }],
+          },
+        }),
       ],
     },
 
