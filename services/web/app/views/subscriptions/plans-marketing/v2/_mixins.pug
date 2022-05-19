@@ -9,7 +9,7 @@ mixin table_individual(period)
 					.plans-v2-table-btn-buy-container-mobile
 						+btn_buy_individual_free()
 					ul.plans-v2-table-th-content-benefit
-						li #{translate("only_one_collaborator")}
+						li #{translate("one_collaborator")}
 					.plans-v2-table-btn-buy-container-desktop
 						+btn_buy_individual_free()
 			th.plans-v2-table-cell-before-highlighted-column
@@ -19,7 +19,7 @@ mixin table_individual(period)
 					.plans-v2-table-btn-buy-container-mobile
 						+btn_buy_individual_personal(period)
 					ul.plans-v2-table-th-content-benefit
-						li #{translate("only_one_collaborator")}
+						li #{translate("one_collaborator")}
 						li #{translate("most_premium_features")}
 					.plans-v2-table-btn-buy-container-desktop
 						+btn_buy_individual_personal(period)
@@ -31,7 +31,7 @@ mixin table_individual(period)
 					.plans-v2-table-btn-buy-container-mobile
 						+btn_buy_individual_collaborator(period)
 					ul.plans-v2-table-th-content-benefit
-						li #{translate("only_one_collaborator")}
+						li !{translate("x_collaborators_per_project", {collaboratorsCount: '10'})}
 						li #{translate("all_premium_features")}
 					.plans-v2-table-btn-buy-container-desktop
 						+btn_buy_individual_collaborator(period)
@@ -43,7 +43,7 @@ mixin table_individual(period)
 					.plans-v2-table-btn-buy-container-mobile
 						+btn_buy_individual_professional(period)
 					ul.plans-v2-table-th-content-benefit
-						li !{translate("x_collaborators_per_project", {collaboratorsCount: '10'})}
+						li #{translate("unlimited_collabs")}
 						li #{translate("all_premium_features")}
 					.plans-v2-table-btn-buy-container-desktop
 						+btn_buy_individual_professional(period)
@@ -243,8 +243,7 @@ mixin table_student(period)
 					.plans-v2-table-btn-buy-container-mobile
 						+btn_buy_student_free()
 					ul.plans-v2-table-th-content-benefit
-						li #{translate("only_one_collaborator")}
-						li #{translate("most_premium_features")}
+						li #{translate("one_collaborator")}
 					.plans-v2-table-btn-buy-container-desktop
 						+btn_buy_student_free()
 			th.plans-v2-table-green-highlighted
@@ -259,7 +258,7 @@ mixin table_student(period)
 					.plans-v2-table-btn-buy-container-mobile
 						+btn_buy_student_student(period)
 					ul.plans-v2-table-th-content-benefit
-						li #{translate("only_one_collaborator")}
+						li !{translate("x_collaborators_per_project", {collaboratorsCount: '6'})}
 						li #{translate("all_premium_features")}
 					.plans-v2-table-btn-buy-container-desktop
 						+btn_buy_student_student(period)
@@ -415,7 +414,7 @@ mixin btn_buy_individual(subscriptionPlan, period, highlighted)
 			if (period === 'monthly')
 				span #{translate("try_for_free")}
 			else 
-				span #{translate("buy_now")}
+				span #{translate("buy_now_no_exclamation_mark")}
 	else
 		a.btn.btn-default.plans-v2-table-btn-buy(
 			data-ol-start-new-subscription=subscriptionPlan
@@ -424,7 +423,7 @@ mixin btn_buy_individual(subscriptionPlan, period, highlighted)
 			if (period === 'monthly')
 				span #{translate("try_for_free")}
 			else 
-				span #{translate("buy_now")}
+				span #{translate("buy_now_no_exclamation_mark")}
 
 mixin btn_buy_individual_free()
 	if (!getSessionUser())
@@ -490,7 +489,7 @@ mixin btn_buy_student_student(period)
 		if (period === 'monthly')
 			span #{translate("try_for_free")}
 		else 
-			span #{translate("buy_now")}
+			span #{translate("buy_now_no_exclamation_mark")}
 	if (period === 'monthly')
 		+additional_link_buy('student', period)
 

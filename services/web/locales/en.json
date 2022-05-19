@@ -1693,7 +1693,6 @@
   "mendeley_integration_lowercase_info": "Manage your reference library in Mendeley, and link it directly to .bib files in Overleaf, so you can easily cite anything from your libraries.",
   "zotero_integration_lowercase": "Zotero integration",
   "zotero_integration_lowercase_info": "Manage your reference library in Zotero, and link it directly to .bib files in Overleaf, so you can easily cite anything from your libraries.",
-  "only_one_collaborator": "Only one collaborator",
   "up_to": "Up to",
   "x_collaborators_per_project": "__collaboratorsCount__ collaborators per project",
   "unlimited_collaborators_in_each_project": "Unlimited collaborators in each project",
