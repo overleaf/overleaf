@@ -1,11 +1,15 @@
-each institution in currentInstitutionsWithLicence
-	-hasDisplayedSubscription = true
-	p
-		| You have a
-		|
-		strong(ng-non-bindable) Professional
-		|
-		| #{settings.appName} account as a confirmed member of
-		|
-		strong(ng-non-bindable)= institution.name
-	hr
+if currentInstitutionsWithLicence === false
+	.alert.alert-warning
+		p Sorry, something went wrong. Subscription information related to institutional affiliations may not be displayed. Please try again later.
+else 
+	each institution in currentInstitutionsWithLicence
+		-hasDisplayedSubscription = true
+		p
+			| You have a
+			|
+			strong(ng-non-bindable) Professional
+			|
+			| #{settings.appName} account as a confirmed member of
+			|
+			strong(ng-non-bindable)= institution.name
+		hr

@@ -11,7 +11,11 @@ const _ = require('underscore')
 const async = require('async')
 const SubscriptionHelper = require('./SubscriptionHelper')
 const { promisify } = require('../../util/promises')
-const { InvalidError, NotFoundError } = require('../Errors/Errors')
+const {
+  InvalidError,
+  NotFoundError,
+  V1ConnectionError,
+} = require('../Errors/Errors')
 
 function buildHostedLink(type) {
   return `/user/subscription/recurly/${type}`
@@ -109,7 +113,15 @@ function buildUsersSubscriptionViewModel(user, callback) {
         SubscriptionLocator.getManagedGroupSubscriptions(user, cb)
       },
       currentInstitutionsWithLicence(cb) {
-        InstitutionsGetter.getCurrentInstitutionsWithLicence(user._id, cb)
+        InstitutionsGetter.getCurrentInstitutionsWithLicence(
+          user._id,
+          (error, institutions) => {
+            if (error instanceof V1ConnectionError) {
+              return cb(null, false)
+            }
+            cb(null, institutions)
+          }
+        )
       },
       managedInstitutions(cb) {
         InstitutionsGetter.getManagedInstitutions(user._id, cb)
