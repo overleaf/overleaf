@@ -96,8 +96,8 @@ export default App.directive('layout', ($parse, $compile, ide) => ({
         options.east.resizerCursor = 'ew-resize'
         options.west.resizerCursor = 'ew-resize'
 
-        const repositionControls = function () {
-          state = element.layout().readState()
+        function repositionControls() {
+          state = layout.readState()
           if (state.east != null) {
             const controls = element.find('> .ui-layout-resizer-controls')
             if (state.east.initClosed) {
@@ -111,11 +111,11 @@ export default App.directive('layout', ($parse, $compile, ide) => ({
           }
         }
 
-        const repositionCustomToggler = function () {
+        function repositionCustomToggler() {
           if (customTogglerEl == null) {
             return
           }
-          state = element.layout().readState()
+          state = layout.readState()
           const positionAnchor = customTogglerPane === 'east' ? 'right' : 'left'
           const paneState = state[customTogglerPane]
           if (paneState != null) {
@@ -126,8 +126,8 @@ export default App.directive('layout', ($parse, $compile, ide) => ({
           }
         }
 
-        const resetOpenStates = function () {
-          state = element.layout().readState()
+        function resetOpenStates() {
+          state = layout.readState()
           if (attrs.openEast != null && state.east != null) {
             const openEast = $parse(attrs.openEast)
             return openEast.assign(scope, !state.east.initClosed)
@@ -136,7 +136,7 @@ export default App.directive('layout', ($parse, $compile, ide) => ({
 
         // Someone moved the resizer
         function onInternalResize() {
-          state = element.layout().readState()
+          state = layout.readState()
           scope.$broadcast(`layout:${name}:resize`, state)
           repositionControls()
           if (hasCustomToggler) {
@@ -152,23 +152,23 @@ export default App.directive('layout', ($parse, $compile, ide) => ({
             attrs.resizeProportionally != null &&
             scope.$eval(attrs.resizeProportionally)
           ) {
-            const eastState = element.layout().readState().east
+            const eastState = layout.readState().east
             if (eastState != null) {
               const newInternalWidth =
                 (eastState.size / oldWidth) * element.width()
               oldWidth = element.width()
-              element.layout().sizePane('east', newInternalWidth)
+              layout.sizePane('east', newInternalWidth)
               return
             }
           }
 
           ide.$timeout(() => {
-            element.layout().resizeAll()
+            layout.resizeAll()
           })
         }
 
-        element.layout(options)
-        element.layout().resizeAll()
+        const layout = element.layout(options)
+        layout.resizeAll()
 
         if (attrs.resizeOn != null) {
           for (const event of Array.from(attrs.resizeOn.split(','))) {
@@ -177,7 +177,7 @@ export default App.directive('layout', ($parse, $compile, ide) => ({
         }
 
         if (hasCustomToggler) {
-          state = element.layout().readState()
+          state = layout.readState()
           const customTogglerScope = scope.$new()
 
           customTogglerScope.isOpen = true
@@ -197,7 +197,7 @@ export default App.directive('layout', ($parse, $compile, ide) => ({
           customTogglerScope.tooltipPlacement =
             customTogglerPane === 'east' ? 'left' : 'right'
           customTogglerScope.handleClick = function () {
-            element.layout().toggle(customTogglerPane)
+            layout.toggle(customTogglerPane)
             return repositionCustomToggler()
           }
           customTogglerEl = $compile(`\
@@ -236,7 +236,7 @@ ng-click=\"handleClick()\">\
           // If we save sublayouts state (`children`), the layout library will use it when
           // initializing. This raises errors when the sublayout elements aren't available (due to
           // being loaded at init or just not existing for the current project/user).
-          const stateToSave = _.mapValues(element.layout().readState(), pane =>
+          const stateToSave = _.mapValues(layout.readState(), pane =>
             _.omit(pane, 'children')
           )
           ide.localStorage(`layout.${name}`, stateToSave)
@@ -246,9 +246,9 @@ ng-click=\"handleClick()\">\
           scope.$watch(attrs.openEast, function (value, oldValue) {
             if (value != null && value !== oldValue) {
               if (value) {
-                element.layout().open('east')
+                layout.open('east')
               } else {
-                element.layout().close('east')
+                layout.close('east')
               }
             }
             return setTimeout(() => scope.$digest(), 0)
@@ -256,11 +256,10 @@ ng-click=\"handleClick()\">\
         }
 
         if (attrs.allowOverflowOn != null) {
-          const layoutObj = element.layout()
           const overflowPane = scope.$eval(attrs.allowOverflowOn)
-          const overflowPaneEl = layoutObj.panes[overflowPane]
+          const overflowPaneEl = layout.panes[overflowPane]
           // Set the panel as overflowing (gives it higher z-index and sets overflow rules)
-          layoutObj.allowOverflow(overflowPane)
+          layout.allowOverflow(overflowPane)
           // Read the given z-index value and increment it, so that it's higher than synctex controls.
           const overflowPaneZVal = overflowPaneEl.zIndex()
           overflowPaneEl.css('z-index', overflowPaneZVal + 1)
@@ -272,9 +271,9 @@ ng-click=\"handleClick()\">\
         if (attrs.layoutDisabled != null) {
           return scope.$watch(attrs.layoutDisabled, function (value) {
             if (value) {
-              element.layout().hide('east')
+              layout.hide('east')
             } else {
-              element.layout().show('east')
+              layout.show('east')
             }
             if (hasCustomToggler) {
               return customTogglerEl.scope().$applyAsync(function () {
