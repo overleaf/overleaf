@@ -17,7 +17,7 @@ function PdfExpandButton() {
   return (
     <Tooltip
       id="expand-pdf-btn"
-      description="text"
+      description={text}
       overlayProps={{ placement: 'left' }}
     >
       <Button
