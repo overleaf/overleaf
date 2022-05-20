@@ -10,6 +10,7 @@ import useScopeValue from '../hooks/use-scope-value'
 import useBrowserWindow from '../hooks/use-browser-window'
 import { useIdeContext } from './ide-context'
 import { useProjectContext } from './project-context'
+import { useDetachContext } from './detach-context'
 
 export const EditorContext = createContext()
 
@@ -40,6 +41,8 @@ EditorContext.Provider.propTypes = {
 
 export function EditorProvider({ children, settings }) {
   const ide = useIdeContext()
+
+  const { role } = useDetachContext()
 
   const { owner, features } = useProjectContext({
     owner: PropTypes.shape({
@@ -107,12 +110,24 @@ export function EditorProvider({ children, settings }) {
 
   const { setTitle } = useBrowserWindow()
   useEffect(() => {
-    setTitle(
-      `${projectName ? projectName + ' - ' : ''}Online LaTeX Editor ${
-        window.ExposedSettings.appName
-      }`
-    )
-  }, [projectName, setTitle])
+    const parts = []
+
+    if (role === 'detached') {
+      parts.push('[PDF]')
+    }
+
+    if (projectName) {
+      parts.push(projectName)
+      parts.push('-')
+    }
+
+    parts.push('Online LaTeX Editor')
+    parts.push(window.ExposedSettings.appName)
+
+    const title = parts.join(' ')
+
+    setTitle(title)
+  }, [projectName, setTitle, role])
 
   const insertSymbol = useCallback(symbol => {
     window.dispatchEvent(

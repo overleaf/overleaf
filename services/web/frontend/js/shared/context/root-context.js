@@ -20,8 +20,8 @@ export function ContextRoot({ children, ide, settings }) {
         <UserProvider>
           <ProjectProvider>
             <FileTreeDataProvider>
-              <EditorProvider settings={settings}>
-                <DetachProvider>
+              <DetachProvider>
+                <EditorProvider settings={settings}>
                   <LayoutProvider>
                     <LocalCompileProvider>
                       <DetachCompileProvider>
@@ -29,8 +29,8 @@ export function ContextRoot({ children, ide, settings }) {
                       </DetachCompileProvider>
                     </LocalCompileProvider>
                   </LayoutProvider>
-                </DetachProvider>
-              </EditorProvider>
+                </EditorProvider>
+              </DetachProvider>
             </FileTreeDataProvider>
           </ProjectProvider>
         </UserProvider>

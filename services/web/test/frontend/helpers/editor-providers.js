@@ -109,15 +109,15 @@ export function EditorProviders({
         <UserProvider>
           <ProjectProvider>
             <FileTreeDataProvider>
-              <EditorProvider settings={{}}>
-                <DetachProvider>
+              <DetachProvider>
+                <EditorProvider settings={{}}>
                   <LayoutProvider>
                     <LocalCompileProvider>
                       <DetachCompileProvider>{children}</DetachCompileProvider>
                     </LocalCompileProvider>
                   </LayoutProvider>
-                </DetachProvider>
-              </EditorProvider>
+                </EditorProvider>
+              </DetachProvider>
             </FileTreeDataProvider>
           </ProjectProvider>
         </UserProvider>

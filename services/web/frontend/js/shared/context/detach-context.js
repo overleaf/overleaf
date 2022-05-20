@@ -135,6 +135,9 @@ DetachProvider.propTypes = {
 
 export function useDetachContext(propTypes) {
   const data = useContext(DetachContext)
+  if (!data) {
+    throw new Error('useDetachContext is only available inside DetachProvider')
+  }
   PropTypes.checkPropTypes(propTypes, data, 'data', 'DetachContext.Provider')
   return data
 }
