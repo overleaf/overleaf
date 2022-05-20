@@ -31,9 +31,7 @@ describe('Sharing', function () {
         { privilegeLevel: 'readAndWrite' }
       )
       const project = await this.ownerSession.getProject(this.projectId)
-      expect(project.collaberator_refs).to.be.unordered.ids([
-        this.collaborator._id,
-      ])
+      expect(project.collaberator_refs).to.deep.equal([this.collaborator._id])
       expect(project.readOnly_refs).to.deep.equal([])
     })
 
@@ -45,7 +43,7 @@ describe('Sharing', function () {
       )
       const project = await this.ownerSession.getProject(this.projectId)
       expect(project.collaberator_refs).to.deep.equal([])
-      expect(project.readOnly_refs).to.be.unordered.ids([this.collaborator._id])
+      expect(project.readOnly_refs).to.deep.equal([this.collaborator._id])
     })
 
     it('prevents non-owners to set the privilege level', async function () {
@@ -96,7 +94,7 @@ describe('Sharing', function () {
       )
       const project = await this.ownerSession.getProject(this.projectId)
       expect(project.collaberator_refs).to.deep.equal([])
-      expect(project.readOnly_refs).to.be.unordered.ids([this.collaborator._id])
+      expect(project.readOnly_refs).to.deep.equal([this.collaborator._id])
     })
   })
 })

@@ -127,7 +127,7 @@ describe('ProjectStructureMongoLock', function () {
           { _id: true },
           (err, project) => {
             expect(err).to.equal(null)
-            expect(project).to.have.same.id(this.locked_project)
+            expect(project._id).to.deep.equal(this.locked_project._id)
             return done()
           }
         )
@@ -167,7 +167,7 @@ describe('ProjectStructureMongoLock', function () {
           this.unlocked_project._id,
           (err, project) => {
             expect(err).to.equal(null)
-            expect(project).to.have.same.id(this.unlocked_project)
+            expect(project._id).to.deep.equal(this.unlocked_project._id)
             return done()
           }
         )
