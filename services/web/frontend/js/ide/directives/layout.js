@@ -66,7 +66,7 @@ export default App.directive('layout', ($parse, $compile, ide) => ({
             initClosed: scope.$eval(attrs.initClosedEast),
           },
           west: {
-            size: scope.$eval(attrs.initialSizeEast),
+            size: scope.$eval(attrs.initialSizeWest),
             initClosed: scope.$eval(attrs.initClosedWest),
           },
         }
@@ -81,6 +81,7 @@ export default App.directive('layout', ($parse, $compile, ide) => ({
             ) {
               options.east = state.east
             }
+            options.east.initClosed = state.east.initClosed
           }
           if (state.west != null) {
             if (
@@ -90,6 +91,7 @@ export default App.directive('layout', ($parse, $compile, ide) => ({
             ) {
               options.west = state.west
             }
+            options.west.initClosed = state.west.initClosed
           }
         }
 
@@ -154,10 +156,13 @@ export default App.directive('layout', ($parse, $compile, ide) => ({
           ) {
             const eastState = layout.readState().east
             if (eastState != null) {
-              const newInternalWidth =
-                (eastState.size / oldWidth) * element.width()
-              oldWidth = element.width()
-              layout.sizePane('east', newInternalWidth)
+              const currentWidth = element.width()
+              if (currentWidth > 0) {
+                const newInternalWidth =
+                  (eastState.size / oldWidth) * currentWidth
+                oldWidth = currentWidth
+                layout.sizePane('east', newInternalWidth)
+              }
               return
             }
           }
@@ -249,6 +254,12 @@ ng-click=\"handleClick()\">\
                 layout.open('east')
               } else {
                 layout.close('east')
+              }
+              if (hasCustomToggler) {
+                repositionCustomToggler()
+                customTogglerEl.scope().$applyAsync(function () {
+                  customTogglerEl.scope().isOpen = value
+                })
               }
             }
             return setTimeout(() => scope.$digest(), 0)

@@ -332,6 +332,21 @@ If the project has been renamed please look in your project list for a new proje
       $scope.switchToSideBySideLayout()
     }
 
+    // Update ui.pdfOpen when the layout changes.
+    // The east pane should open when the layout changes from "Editor only" or "PDF only" to "Editor & PDF".
+    $scope.$watch('ui.pdfLayout', value => {
+      $scope.ui.pdfOpen = value === 'sideBySide'
+    })
+
+    // Update ui.pdfLayout when the east pane is toggled.
+    // The layout should be set to "Editor & PDF" (sideBySide) when the east pane is opened, and "Editor only" (flat) when the east pane is closed.
+    $scope.$watch('ui.pdfOpen', value => {
+      $scope.ui.pdfLayout = value ? 'sideBySide' : 'flat'
+      if (value) {
+        window.dispatchEvent(new CustomEvent('ui:pdf-open'))
+      }
+    })
+
     // note: { keyShortcut: true } exists only for tracking purposes.
     $scope.recompileViaKey = () => {
       if ($scope.recompile) {

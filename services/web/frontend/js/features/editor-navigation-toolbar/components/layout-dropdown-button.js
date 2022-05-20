@@ -10,6 +10,7 @@ import IconEditorOnly from './icon-editor-only'
 import IconPdfOnly from './icon-pdf-only'
 import { useLayoutContext } from '../../../shared/context/layout-context'
 import * as eventTracking from '../../../infrastructure/event-tracking'
+import useEventListener from '../../../shared/hooks/use-event-listener'
 
 function IconPlaceholder() {
   return <Icon type="" fw />
@@ -94,6 +95,9 @@ function LayoutDropdownButton() {
     reattach()
     eventTracking.sendMB('project-layout-reattach')
   }, [detachRole, reattach])
+
+  // reattach when the PDF pane opens
+  useEventListener('ui:pdf-open', handleReattach)
 
   const handleChangeLayout = useCallback(
     (newLayout, newView) => {
