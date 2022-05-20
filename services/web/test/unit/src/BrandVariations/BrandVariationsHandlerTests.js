@@ -26,7 +26,7 @@ describe('BrandVariationsHandler', function () {
     this.settings = {
       apis: {
         v1: {
-          url: 'http://overleaf.example.com',
+          publicUrl: 'http://overleaf.example.com',
         },
       },
       modules: {
@@ -111,7 +111,9 @@ describe('BrandVariationsHandler', function () {
         '12',
         (err, brandVariationDetails) => {
           expect(
-            brandVariationDetails.logo_url.startsWith(this.settings.apis.v1.url)
+            brandVariationDetails.logo_url.startsWith(
+              this.settings.apis.v1.publicUrl
+            )
           ).to.be.true
           return done()
         }

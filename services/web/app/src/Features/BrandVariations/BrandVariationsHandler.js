@@ -78,5 +78,5 @@ function setV1AsHostIfRelativeURL(urlString) {
   // As it only applies if the second argument is not absolute, we can use it to transform relative URLs into
   // absolute ones using v1 as the host. If the URL is absolute (e.g. a filepicker one), then the base
   // argument is just ignored
-  return new URL(urlString, settings.apis.v1.url).href
+  return new URL(urlString, settings.apis.v1.publicUrl).href
 }
