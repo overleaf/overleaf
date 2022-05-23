@@ -69,6 +69,11 @@ describe('CompileController', function () {
         '../Authentication/SessionManager': this.SessionManager,
         '../../infrastructure/RateLimiter': this.RateLimiter,
         './ClsiCookieManager': () => this.ClsiCookieManager,
+        '../SplitTests/SplitTestHandler': {
+          getAssignment: (this.getAssignment = sinon.stub().yields(null, {
+            variant: 'default',
+          })),
+        },
       },
     })
     this.project_id = 'project-id'
@@ -81,14 +86,66 @@ describe('CompileController', function () {
     beforeEach(function () {
       this.req.params = { Project_id: this.project_id }
       this.req.session = {}
-      return (this.CompileManager.compile = sinon
-        .stub()
-        .callsArgWith(
-          3,
-          null,
-          (this.status = 'success'),
-          (this.outputFiles = ['mock-output-files'])
-        ))
+      return (this.CompileManager.compile = sinon.stub().callsArgWith(
+        3,
+        null,
+        (this.status = 'success'),
+        (this.outputFiles = [
+          {
+            path: 'output.pdf',
+            url: `/zone/b/project/${this.project_id}/user/${this.user_id}/build/id/output.pdf`,
+            type: 'pdf',
+          },
+        ])
+      ))
+    })
+
+    describe('zonal downloads', function () {
+      describe('when in the default split test variant', function () {
+        beforeEach(function () {
+          this.getAssignment.yields(null, { variant: 'default' })
+          this.CompileController.compile(this.req, this.res, this.next)
+        })
+
+        it('should remove the zone prefix', function () {
+          this.res.statusCode.should.equal(200)
+          this.res.body.should.equal(
+            JSON.stringify({
+              status: this.status,
+              outputFiles: [
+                {
+                  path: 'output.pdf',
+                  url: `/project/${this.project_id}/user/${this.user_id}/build/id/output.pdf`,
+                  type: 'pdf',
+                },
+              ],
+            })
+          )
+        })
+      })
+
+      describe('when in the zonal split test variant', function () {
+        beforeEach(function () {
+          this.getAssignment.yields(null, { variant: 'zonal' })
+          this.CompileController.compile(this.req, this.res, this.next)
+        })
+
+        it('should keep the zone prefix', function () {
+          this.res.statusCode.should.equal(200)
+          this.res.body.should.equal(
+            JSON.stringify({
+              status: this.status,
+              outputFiles: [
+                {
+                  path: 'output.pdf',
+                  url: `/zone/b/project/${this.project_id}/user/${this.user_id}/build/id/output.pdf`,
+                  type: 'pdf',
+                },
+              ],
+            })
+          )
+        })
+      })
     })
 
     describe('when not an auto compile', function () {

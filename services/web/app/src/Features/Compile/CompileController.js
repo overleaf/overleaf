@@ -27,6 +27,7 @@ const ClsiCookieManager = require('./ClsiCookieManager')(
   Settings.apis.clsi != null ? Settings.apis.clsi.backendGroupName : undefined
 )
 const Path = require('path')
+const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 
 const COMPILE_TIMEOUT_MS = 10 * 60 * 1000
 
@@ -93,16 +94,29 @@ module.exports = CompileController = {
           return next(error)
         }
         Metrics.inc('compile-status', 1, { status })
-        res.json({
-          status,
-          outputFiles,
-          compileGroup: limits != null ? limits.compileGroup : undefined,
-          clsiServerId,
-          validationProblems,
-          stats,
-          timings,
-          pdfDownloadDomain: Settings.pdfDownloadDomain,
-        })
+        SplitTestHandler.getAssignment(
+          req,
+          res,
+          'zonal-clsi-lb-downloads',
+          {},
+          (_err, assignment) => {
+            if (assignment?.variant !== 'zonal') {
+              outputFiles.forEach(file => {
+                file.url = file.url.replace(/^\/zone\/\w/, '')
+              })
+            }
+            res.json({
+              status,
+              outputFiles,
+              compileGroup: limits != null ? limits.compileGroup : undefined,
+              clsiServerId,
+              validationProblems,
+              stats,
+              timings,
+              pdfDownloadDomain: Settings.pdfDownloadDomain,
+            })
+          }
+        )
       }
     )
   },
