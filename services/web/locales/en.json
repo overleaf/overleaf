@@ -1070,6 +1070,7 @@
   "click_here_to_preview_pdf": "Click here to preview your work as a PDF.",
   "server_error": "Server Error",
   "somthing_went_wrong_compiling": "Sorry, something went wrong and your project could not be compiled. Please try again in a few moments.",
+  "something_went_wrong_loading_pdf_viewer": "Something went wrong loading the PDF viewer. This might be caused by issues like <0>temporary network problems</0> or an <0>outdated web browser</0>. Please follow the <1>troubleshooting steps for access, loading and display problems</1>. If the issue persists, please <2>let us know</2>.",
   "timedout": "Timed out",
   "proj_timed_out_reason": "Sorry, your compile took too long to run and timed out. This may be due to a LaTeX error, or a large number of high-res images or complicated diagrams.",
   "no_errors_good_job": "No errors, good job!",

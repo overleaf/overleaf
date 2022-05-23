@@ -10,6 +10,7 @@ import withErrorBoundary from '../../../infrastructure/error-boundary'
 import ErrorBoundaryFallback from './error-boundary-fallback'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import getMeta from '../../../utils/meta'
+import { captureException } from '../../../infrastructure/error-reporter'
 
 function PdfJsViewer({ url }) {
   const { _id: projectId } = useProjectContext()
@@ -35,19 +36,28 @@ function PdfJsViewer({ url }) {
   const [initialised, setInitialised] = useState(false)
 
   // create the viewer when the container is mounted
-  const handleContainer = useCallback(parent => {
-    if (parent) {
-      const wrapper = new PDFJSWrapper(parent.firstChild)
-      wrapper.init().then(() => {
-        setPdfJsWrapper(wrapper)
-      })
+  const handleContainer = useCallback(
+    parent => {
+      if (parent) {
+        const wrapper = new PDFJSWrapper(parent.firstChild)
+        wrapper
+          .init()
+          .then(() => {
+            setPdfJsWrapper(wrapper)
+          })
+          .catch(error => {
+            setError('pdf-viewer-loading-error')
+            captureException(error)
+          })
 
-      return () => {
-        setPdfJsWrapper(null)
-        wrapper.destroy()
+        return () => {
+          setPdfJsWrapper(null)
+          wrapper.destroy()
+        }
       }
-    }
-  }, [])
+    },
+    [setError]
+  )
 
   // listen for initialize event
   useEffect(() => {

@@ -117,6 +117,26 @@ function PdfPreviewError({ error }) {
         </ErrorLogEntry>
       )
 
+    case 'pdf-viewer-loading-error':
+      return (
+        <ErrorLogEntry title={t('pdf_rendering_error')}>
+          <Trans
+            i18nKey="something_went_wrong_loading_pdf_viewer"
+            components={[
+              <strong key="strong-" />,
+              // eslint-disable-next-line jsx-a11y/anchor-has-content
+              <a
+                key="learn-link"
+                target="_blank"
+                href="/learn/how-to/Resolving_access%2C_loading%2C_and_display_problems"
+              />,
+              // eslint-disable-next-line jsx-a11y/anchor-has-content
+              <a key="contact-link" target="_blank" href="/contact" />,
+            ]}
+          />
+        </ErrorLogEntry>
+      )
+
     case 'validation-problems':
       return null // handled elsewhere
 
