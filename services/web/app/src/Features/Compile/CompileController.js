@@ -100,7 +100,7 @@ module.exports = CompileController = {
           'zonal-clsi-lb-downloads',
           {},
           (_err, assignment) => {
-            if (assignment?.variant !== 'zonal') {
+            if (assignment?.variant !== 'zonal' && Array.isArray(outputFiles)) {
               outputFiles.forEach(file => {
                 file.url = file.url.replace(/^\/zone\/\w/, '')
               })

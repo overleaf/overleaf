@@ -101,6 +101,31 @@ describe('CompileController', function () {
     })
 
     describe('zonal downloads', function () {
+      describe('when in the default split test variant and not output files were returned', function () {
+        beforeEach(function () {
+          this.getAssignment.yields(null, { variant: 'default' })
+          this.CompileManager.compile = sinon
+            .stub()
+            .callsArgWith(
+              3,
+              null,
+              (this.status = 'success'),
+              (this.outputFiles = null)
+            )
+          this.CompileController.compile(this.req, this.res, this.next)
+        })
+
+        it('should ignore the output files', function () {
+          this.res.statusCode.should.equal(200)
+          this.res.body.should.equal(
+            JSON.stringify({
+              status: this.status,
+              outputFiles: null,
+            })
+          )
+        })
+      })
+
       describe('when in the default split test variant', function () {
         beforeEach(function () {
           this.getAssignment.yields(null, { variant: 'default' })
