@@ -91,7 +91,8 @@ export default App.directive('layout', ($parse, $compile, ide) => ({
             ) {
               options.west = state.west
             }
-            options.west.initClosed = state.west.initClosed
+            // NOTE: disabled so that the file tree re-opens on page load
+            // options.west.initClosed = state.west.initClosed
           }
         }
 
