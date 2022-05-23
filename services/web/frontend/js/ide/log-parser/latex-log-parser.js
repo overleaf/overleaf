@@ -1,12 +1,12 @@
 // Define some constants
 const LOG_WRAP_LIMIT = 79
-const LATEX_WARNING_REGEX = /^LaTeX(3| Font)? Warning: (.*)$/
+const LATEX_WARNING_REGEX = /^LaTeX(?:3| Font)? Warning: (.*)$/
 const HBOX_WARNING_REGEX = /^(Over|Under)full \\(v|h)box/
-const PACKAGE_WARNING_REGEX = /^((Package|Class|Module) \b.+\b Warning:.*)$/
+const PACKAGE_WARNING_REGEX = /^((?:Package|Class|Module) \b.+\b Warning:.*)$/
 // This is used to parse the line number from common latex warnings
 const LINES_REGEX = /lines? ([0-9]+)/
 // This is used to parse the package name from the package warnings
-const PACKAGE_REGEX = /^(Package|Class|Module) (\b.+\b) Warning/
+const PACKAGE_REGEX = /^(?:Package|Class|Module) (\b.+\b) Warning/
 const FILE_LINE_ERROR_REGEX = /^([./].*):(\d+): (.*)/
 
 const STATE = {
