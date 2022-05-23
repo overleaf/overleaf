@@ -13,6 +13,7 @@ describe('InstitutionsManager', function () {
     this.institutionId = 123
     this.user = {}
     this.getInstitutionAffiliations = sinon.stub()
+    this.getConfirmedInstitutionAffiliations = sinon.stub()
     this.refreshFeatures = sinon.stub().yields()
     this.users = [
       { _id: 'lapsed', features: {} },
@@ -95,9 +96,15 @@ describe('InstitutionsManager', function () {
       requires: {
         './InstitutionsAPI': {
           getInstitutionAffiliations: this.getInstitutionAffiliations,
+          getConfirmedInstitutionAffiliations:
+            this.getConfirmedInstitutionAffiliations,
           promises: {
             getInstitutionAffiliations:
               (this.getInstitutionAffiliationsPromise = sinon
+                .stub()
+                .resolves(this.affiliations)),
+            getConfirmedInstitutionAffiliations:
+              (this.getConfirmedInstitutionAffiliationsPromise = sinon
                 .stub()
                 .resolves(this.affiliations)),
             getInstitutionAffiliationsCounts:
@@ -173,6 +180,7 @@ describe('InstitutionsManager', function () {
 
       this.refreshFeatures.withArgs(this.user1Id).yields(null, {}, true)
       this.getInstitutionAffiliations.yields(null, this.affiliations)
+      this.getConfirmedInstitutionAffiliations.yields(null, this.affiliations)
     })
 
     it('refresh all users Features', function (done) {

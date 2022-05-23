@@ -22,6 +22,17 @@ const InstitutionsAPI = {
     )
   },
 
+  getConfirmedInstitutionAffiliations(institutionId, callback) {
+    makeAffiliationRequest(
+      {
+        method: 'GET',
+        path: `/api/v2/institutions/${institutionId.toString()}/confirmed_affiliations`,
+        defaultErrorMessage: "Couldn't get institution affiliations",
+      },
+      (error, body) => callback(error, body || [])
+    )
+  },
+
   getInstitutionAffiliationsCounts(institutionId, callback) {
     makeAffiliationRequest(
       {
@@ -267,6 +278,7 @@ function makeAffiliationRequest(options, callback) {
 }
 ;[
   'getInstitutionAffiliations',
+  'getConfirmedInstitutionAffiliations',
   'getUserAffiliations',
   'addAffiliation',
   'removeAffiliation',

@@ -4,6 +4,7 @@ const { ObjectId } = require('mongodb')
 const Settings = require('@overleaf/settings')
 const {
   getInstitutionAffiliations,
+  getConfirmedInstitutionAffiliations,
   promises: InstitutionsAPIPromises,
 } = require('./InstitutionsAPI')
 const FeaturesUpdater = require('../Subscription/FeaturesUpdater')
@@ -261,8 +262,9 @@ const fetchInstitutionAndAffiliations = (institutionId, callback) =>
       (institution, cb) =>
         institution.fetchV1Data((err, institution) => cb(err, institution)),
       (institution, cb) =>
-        getInstitutionAffiliations(institutionId, (err, affiliations) =>
-          cb(err, institution, affiliations)
+        getConfirmedInstitutionAffiliations(
+          institutionId,
+          (err, affiliations) => cb(err, institution, affiliations)
         ),
     ],
     callback
