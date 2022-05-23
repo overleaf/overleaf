@@ -2,6 +2,14 @@ import PropTypes from 'prop-types'
 import { useLayoutContext } from '../../../shared/context/layout-context'
 import PdfSynctexControls from './pdf-synctex-controls'
 
+export function DefaultSynctexControl() {
+  const { detachRole } = useLayoutContext(layoutContextPropTypes)
+  if (!detachRole) {
+    return <PdfSynctexControls />
+  }
+  return null
+}
+
 export function DetacherSynctexControl() {
   const { detachRole, detachIsLinked } = useLayoutContext(
     layoutContextPropTypes
