@@ -106,6 +106,7 @@
     "daterangepicker": "https://github.com/overleaf/daterangepicker/archive/e496d2d44ca53e208c930e4cb4bcf29bcefa4550.tar.gz",
     "downshift": "^6.1.0",
     "east": "^2.0.2",
+    "email-addresses": "^5.0.0",
     "events": "^3.3.0",
     "express": "4.17.1",
     "express-bearer-token": "^2.4.0",

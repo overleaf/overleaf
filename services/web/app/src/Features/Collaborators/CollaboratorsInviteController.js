@@ -125,7 +125,7 @@ module.exports = CollaboratorsInviteController = {
           return res.json({ invite: null })
         }
         ;({ email, privileges } = req.body)
-        email = EmailHelper.parseEmail(email)
+        email = EmailHelper.parseEmail(email, true)
         if (email == null || email === '') {
           logger.debug(
             { projectId, email, sendingUserId },
