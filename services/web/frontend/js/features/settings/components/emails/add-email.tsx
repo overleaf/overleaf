@@ -10,7 +10,7 @@ import SsoLinkingInfo from './add-email/sso-linking-info'
 import AddNewEmailBtn from './add-email/add-new-email-btn'
 import useAsync from '../../../../shared/hooks/use-async'
 import { useUserEmailsContext } from '../../context/user-email-context'
-import { isSsoAvailable } from '../../utils/sso'
+import { ssoAvailableForDomain } from '../../utils/sso'
 import { postJSON } from '../../../../infrastructure/fetch-json'
 import { University } from '../../../../../../types/university'
 import { CountryCode } from '../../data/countries-list'
@@ -120,7 +120,7 @@ function AddEmail() {
             />
           </Cell>
         </Col>
-        {isSsoAvailable(newEmailMatchedInstitution) ? (
+        {ssoAvailableForDomain(newEmailMatchedInstitution) ? (
           <Col md={8}>
             <Cell>
               <SsoLinkingInfo

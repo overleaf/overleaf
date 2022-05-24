@@ -1,9 +1,9 @@
 import getMeta from '../../../utils/meta'
 import { InstitutionInfo } from '../components/emails/add-email/input'
 import { ExposedSettings } from '../../../../../types/exposed-settings'
-import { Nullable } from '../../../../../types/utils'
+import { Institution } from '../../../../../types/institution'
 
-const ssoAvailableForDomain = (domain: InstitutionInfo | null) => {
+export const ssoAvailableForDomain = (domain: InstitutionInfo | null) => {
   const { hasSamlBeta, hasSamlFeature } = getMeta(
     'ol-ExposedSettings'
   ) as ExposedSettings
@@ -16,8 +16,20 @@ const ssoAvailableForDomain = (domain: InstitutionInfo | null) => {
   return hasSamlBeta && domain.university.ssoBeta
 }
 
-export const isSsoAvailable = (
-  institutionInfo: Nullable<InstitutionInfo>
-): institutionInfo is InstitutionInfo => {
-  return Boolean(institutionInfo && ssoAvailableForDomain(institutionInfo))
+export const ssoAvailableForInstitution = (institution: Institution | null) => {
+  const { hasSamlBeta, hasSamlFeature } = getMeta(
+    'ol-ExposedSettings'
+  ) as ExposedSettings
+  if (
+    !hasSamlFeature ||
+    !institution ||
+    !institution.confirmed ||
+    !institution.isUniversity
+  ) {
+    return false
+  }
+  if (institution.ssoEnabled) {
+    return true
+  }
+  return hasSamlBeta && institution.ssoBeta
 }
