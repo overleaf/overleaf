@@ -54,6 +54,7 @@ describe('UserEmailContext', function () {
         'baz@overleaf.com': unconfirmedUserData,
         'foo@overleaf.com': professionalUserData,
       })
+      expect(result.current.state.data.linkedInstitutionIds).to.have.lengthOf(0)
 
       expect(result.current.isInitializing).to.equal(false)
       expect(result.current.isInitializingSuccess).to.equal(true)
@@ -96,28 +97,44 @@ describe('UserEmailContext', function () {
     describe('getEmails()', function () {
       beforeEach(async function () {
         fetchMock.reset()
+      })
+
+      it('should set `isLoading === true`', function () {
         fetchMock.get(/\/user\/emails/, [
           {
             email: 'new@email.com',
             default: true,
           },
         ])
-      })
-
-      it('should set `isLoading === true`', function () {
         result.current.getEmails()
         expect(result.current.state.isLoading).to.be.true
       })
 
       it('requests a new set of emails', async function () {
+        const emailData = {
+          email: 'new@email.com',
+          default: true,
+        }
+        fetchMock.get(/\/user\/emails/, [emailData])
         result.current.getEmails()
         await fetchMock.flush(true)
         expect(result.current.state.data.byId).to.deep.equal({
-          'new@email.com': {
-            email: 'new@email.com',
-            default: true,
-          },
+          'new@email.com': emailData,
         })
+      })
+
+      it('should populate `linkedInstitutionIds`', async function () {
+        fetchMock.get(/\/user\/emails/, [
+          confirmedUserData,
+          { ...unconfirmedUserData, samlProviderId: 'saml_provider_1' },
+          { ...professionalUserData, samlProviderId: 'saml_provider_2' },
+        ])
+        const { result } = renderUserEmailsContext()
+        await fetchMock.flush(true)
+        expect(result.current.state.data.linkedInstitutionIds).to.deep.equal([
+          'saml_provider_1',
+          'saml_provider_2',
+        ])
       })
     })
 
