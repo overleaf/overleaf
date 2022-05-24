@@ -34,7 +34,12 @@ module.exports = {
   },
   apis: {
     clsi: {
+      // Internal requests (used by tests only at the time of writing).
       url: `http://${process.env.CLSI_HOST || 'localhost'}:3013`,
+      // External url prefix for output files, e.g. for requests via load-balancers.
+      outputUrl: `http://${process.env.CLSI_HOST || 'localhost'}:3013${
+        process.env.ZONE ? `/zone/${process.env.ZONE}` : ''
+      }`,
     },
     clsiPerf: {
       host: `${process.env.CLSI_PERF_HOST || 'localhost'}:${

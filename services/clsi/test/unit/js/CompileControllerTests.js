@@ -69,7 +69,7 @@ describe('CompileController', function () {
         '@overleaf/settings': (this.Settings = {
           apis: {
             clsi: {
-              url: 'http://clsi.example.com',
+              outputUrl: 'http://clsi.example.com',
             },
           },
         }),
@@ -157,7 +157,7 @@ describe('CompileController', function () {
               timings: this.timings,
               outputFiles: this.output_files.map(file => {
                 return {
-                  url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
+                  url: `${this.Settings.apis.clsi.outputUrl}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
                   ...file,
                 }
               }),
@@ -198,7 +198,7 @@ describe('CompileController', function () {
               timings: this.timings,
               outputFiles: this.output_files.map(file => {
                 return {
-                  url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
+                  url: `${this.Settings.apis.clsi.outputUrl}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
                   ...file,
                 }
               }),
@@ -240,7 +240,7 @@ describe('CompileController', function () {
               timings: this.timings,
               outputFiles: this.output_files.map(file => {
                 return {
-                  url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
+                  url: `${this.Settings.apis.clsi.outputUrl}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
                   ...file,
                 }
               }),

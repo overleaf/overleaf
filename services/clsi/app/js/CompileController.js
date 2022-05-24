@@ -125,7 +125,7 @@ module.exports = CompileController = {
                   outputFiles: outputFiles.map(file => {
                     return {
                       url:
-                        `${Settings.apis.clsi.url}/project/${request.project_id}` +
+                        `${Settings.apis.clsi.outputUrl}/project/${request.project_id}` +
                         (request.user_id != null
                           ? `/user/${request.user_id}`
                           : '') +
