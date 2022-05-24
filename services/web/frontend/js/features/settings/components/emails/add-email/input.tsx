@@ -40,9 +40,10 @@ export function clearDomainCache() {
 
 type InputProps = {
   onChange: (value: string, institution?: InstitutionInfo) => void
+  handleAddNewEmail: () => void
 }
 
-function Input({ onChange }: InputProps) {
+function Input({ onChange, handleAddNewEmail }: InputProps) {
   const { signal } = useAbortController()
 
   const inputRef = useRef<HTMLInputElement | null>(null)
@@ -126,6 +127,11 @@ function Input({ onChange }: InputProps) {
 
         if (suggestion) {
           setInputValueAndResetSuggestion()
+        } else {
+          const match = matchLocalAndDomain(inputValue)
+          if (match.local && match.domain) {
+            handleAddNewEmail()
+          }
         }
       }
 
@@ -134,7 +140,7 @@ function Input({ onChange }: InputProps) {
         setInputValueAndResetSuggestion()
       }
     },
-    [suggestion]
+    [inputValue, suggestion, handleAddNewEmail]
   )
 
   useEffect(() => {

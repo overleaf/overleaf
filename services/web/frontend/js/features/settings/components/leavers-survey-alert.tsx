@@ -1,15 +1,15 @@
 import { Alert } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import usePersistedState from '../../../shared/hooks/use-persisted-state'
+import { useUserEmailsContext } from '../context/user-email-context'
 
 export function LeaversSurveyAlert() {
   const { t } = useTranslation()
 
-  const [expirationDate, setExpirationDate] = usePersistedState(
-    'showInstitutionalLeaversSurveyUntil',
-    0,
-    true
-  )
+  const {
+    showInstitutionalLeaversSurveyUntil,
+    setShowInstitutionalLeaversSurveyUntil,
+  } = useUserEmailsContext()
 
   const [hide, setHide] = usePersistedState(
     'hideInstitutionalLeaversSurvey',
@@ -18,11 +18,11 @@ export function LeaversSurveyAlert() {
   )
 
   function handleDismiss() {
-    setExpirationDate(0)
+    setShowInstitutionalLeaversSurveyUntil(0)
     setHide(true)
   }
 
-  if (Date.now() > expirationDate) {
+  if (Date.now() > showInstitutionalLeaversSurveyUntil) {
     return null
   }
 

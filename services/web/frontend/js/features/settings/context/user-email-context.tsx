@@ -203,10 +203,10 @@ const reducer = (state: State, action: Action) => {
 }
 
 function useUserEmails() {
-  const [, setExpirationDate] = usePersistedState(
-    'showInstitutionalLeaversSurveyUntil',
-    0
-  )
+  const [
+    showInstitutionalLeaversSurveyUntil,
+    setShowInstitutionalLeaversSurveyUntil,
+  ] = usePersistedState('showInstitutionalLeaversSurveyUntil', 0, true)
   const [state, unsafeDispatch] = useReducer(reducer, initialState)
   const dispatch = useSafeDispatch(unsafeDispatch)
   const { data, isLoading, isError, isSuccess, runAsync } =
@@ -237,11 +237,11 @@ function useUserEmails() {
             userEmail.emailHasInstitutionLicence
         )
         if (!stillHasLicenseAccess) {
-          setExpirationDate(Date.now() + ONE_WEEK_IN_MS)
+          setShowInstitutionalLeaversSurveyUntil(Date.now() + ONE_WEEK_IN_MS)
         }
       }
     },
-    [state, setExpirationDate]
+    [state, setShowInstitutionalLeaversSurveyUntil]
   )
 
   return {
@@ -250,6 +250,8 @@ function useUserEmails() {
     isInitializingSuccess: isSuccess,
     isInitializingError: isError,
     getEmails,
+    showInstitutionalLeaversSurveyUntil,
+    setShowInstitutionalLeaversSurveyUntil,
     resetLeaversSurveyExpiration,
     setLoading: useCallback(
       (flag: boolean) => dispatch(ActionCreators.setLoading(flag)),

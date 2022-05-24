@@ -64,7 +64,7 @@ function LinkingSection() {
       {hasReferencesLinkingSection ? (
         <>
           <h3 id="references" className="text-capitalize">
-            {t('reference_sync')}
+            {t('reference_managers')}
           </h3>
           <div className="settings-widgets-container">
             {referenceLinkingWidgets.map(
@@ -146,9 +146,9 @@ function SSOLinkingWidgetContainer({
       break
     case 'google':
     case 'twitter':
-      description = t('login_with_service', {
+      description = `${t('login_with_service', {
         service: subscription.provider.name,
-      })
+      })}.`
       break
     case 'orcid':
       description = t('oauth_orcid_description')

@@ -18,6 +18,7 @@ const testInstitutionData = [
 describe('<AddEmailInput/>', function () {
   const defaultProps = {
     onChange: (value: string) => {},
+    handleAddNewEmail: () => {},
   }
 
   beforeEach(function () {
@@ -40,11 +41,19 @@ describe('<AddEmailInput/>', function () {
 
   describe('when typing text that does not contain any potential domain match', function () {
     let onChangeStub
+    let handleAddNewEmailStub
 
     beforeEach(function () {
       fetchMock.get('express:/institutions/domains', 200)
       onChangeStub = sinon.stub()
-      render(<Input {...defaultProps} onChange={onChangeStub} />)
+      handleAddNewEmailStub = sinon.stub()
+      render(
+        <Input
+          {...defaultProps}
+          onChange={onChangeStub}
+          handleAddNewEmail={handleAddNewEmailStub}
+        />
+      )
       fireEvent.change(screen.getByRole('textbox'), {
         target: { value: 'user' },
       })
@@ -66,6 +75,22 @@ describe('<AddEmailInput/>', function () {
     it('should not make any request for institution domains', function () {
       expect(fetchMock.called()).to.be.false
     })
+
+    it('should submit on Enter if email looks valid', async function () {
+      fireEvent.change(screen.getByRole('textbox'), {
+        target: { value: 'user@domain.com' },
+      })
+      fireEvent.keyDown(screen.getByRole('textbox'), { key: 'Enter' })
+      expect(handleAddNewEmailStub.calledWith()).to.equal(true)
+    })
+
+    it('should not submit on Enter if email does not look valid', async function () {
+      fireEvent.change(screen.getByRole('textbox'), {
+        target: { value: 'user@' },
+      })
+      fireEvent.keyDown(screen.getByRole('textbox'), { key: 'Enter' })
+      expect(handleAddNewEmailStub.calledWith()).to.equal(false)
+    })
   })
 
   describe('when typing text that contains a potential domain match', function () {
@@ -73,7 +98,7 @@ describe('<AddEmailInput/>', function () {
 
     beforeEach(function () {
       onChangeStub = sinon.stub()
-      render(<Input onChange={onChangeStub} />)
+      render(<Input {...defaultProps} onChange={onChangeStub} />)
     })
 
     describe('when there are no matches', function () {

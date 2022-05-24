@@ -97,6 +97,7 @@ export function defaultSetupMocks(fetchMock) {
     })
     .get(/\/institutions\/domains\?hostname=a/, fakeInstitutionDomain1)
     .get(/\/institutions\/domains\?hostname=f/, fakeInstitutionDomain2)
+    .get(/\/institutions\/domains/, [])
     .post(/\/user\/emails\/*/, 200, {
       delay: MOCK_DELAY,
     })

@@ -1,14 +1,23 @@
 import { expect } from 'chai'
 import { fireEvent, screen, render } from '@testing-library/react'
+import { UserEmailsProvider } from '../../../../../frontend/js/features/settings/context/user-email-context'
 import { LeaversSurveyAlert } from '../../../../../frontend/js/features/settings/components/leavers-survey-alert'
 import localStorage from '../../../../../frontend/js/infrastructure/local-storage'
+
+function renderWithProvider() {
+  render(<LeaversSurveyAlert />, {
+    wrapper: ({ children }) => (
+      <UserEmailsProvider>{children}</UserEmailsProvider>
+    ),
+  })
+}
 
 describe('<LeaversSurveyAlert/>', function () {
   it('should render before the expiration date', function () {
     const tomorrow = Date.now() + 1000 * 60 * 60 * 24
     localStorage.setItem('showInstitutionalLeaversSurveyUntil', tomorrow)
     localStorage.setItem('hideInstitutionalLeaversSurvey', false)
-    render(<LeaversSurveyAlert />)
+    renderWithProvider()
     screen.getByRole('alert')
     screen.getByText(/Provide some quick feedback/)
     screen.getByRole('link', { name: 'Take a short survey' })
@@ -18,7 +27,7 @@ describe('<LeaversSurveyAlert/>', function () {
     const yesterday = Date.now() - 1000 * 60 * 60 * 24
     localStorage.setItem('showInstitutionalLeaversSurveyUntil', yesterday)
     localStorage.setItem('hideInstitutionalLeaversSurvey', false)
-    render(<LeaversSurveyAlert />)
+    renderWithProvider()
     expect(screen.queryByRole('alert')).to.be.null
   })
 
@@ -26,7 +35,7 @@ describe('<LeaversSurveyAlert/>', function () {
     const tomorrow = Date.now() + 1000 * 60 * 60 * 24
     localStorage.setItem('showInstitutionalLeaversSurveyUntil', tomorrow)
     localStorage.setItem('hideInstitutionalLeaversSurvey', true)
-    render(<LeaversSurveyAlert />)
+    renderWithProvider()
     expect(screen.queryByRole('alert')).to.be.null
   })
 
@@ -34,7 +43,7 @@ describe('<LeaversSurveyAlert/>', function () {
     const tomorrow = Date.now() + 1000 * 60 * 60 * 24
     localStorage.setItem('showInstitutionalLeaversSurveyUntil', tomorrow)
     localStorage.setItem('hideInstitutionalLeaversSurvey', false)
-    render(<LeaversSurveyAlert />)
+    renderWithProvider()
     screen.getByRole('alert')
 
     fireEvent.click(screen.getByRole('button'))

@@ -65,7 +65,7 @@ describe('<LinkingSection />', function () {
 
     screen.getByText('Integrations')
     screen.getByText(
-      'You can link your Overleaf account with other services to enable the features described below'
+      'You can link your Overleaf account with other services to enable the features described below.'
     )
   })
 
@@ -74,7 +74,7 @@ describe('<LinkingSection />', function () {
     screen.getByText('linked accounts')
 
     screen.getByText('Google')
-    screen.getByText('Log in with Google')
+    screen.getByText('Log in with Google.')
     screen.getByRole('button', { name: 'Unlink' })
 
     screen.getByText('Orcid')

@@ -31,7 +31,7 @@ function EmailsSectionContent() {
         <Trans i18nKey="change_primary_email_address_instructions">
           <strong />
           {/* eslint-disable-next-line jsx-a11y/anchor-has-content */}
-          <a href="/learn/how-to/Keeping_your_account_secure" />
+          <a href="/learn/how-to/Managing_your_Overleaf_emails" />
         </Trans>
       </p>
       <>

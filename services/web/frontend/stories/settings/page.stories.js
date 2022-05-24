@@ -21,6 +21,7 @@ import {
   defaultSetupMocks as defaultSetupLinkingMocks,
 } from './helpers/linking'
 import { UserProvider } from '../../js/shared/context/user-context'
+import { ScopeDecorator } from '../decorators/scope'
 
 export const Overleaf = args => {
   setDefaultLeaveMeta()
@@ -70,4 +71,5 @@ export const ServerPro = args => {
 export default {
   title: 'Account Settings / Full Page',
   component: SettingsPageRoot,
+  decorators: [ScopeDecorator],
 }

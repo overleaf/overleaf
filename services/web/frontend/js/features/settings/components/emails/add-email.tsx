@@ -114,7 +114,10 @@ function AddEmail() {
             <label htmlFor="affiliations-email" className="sr-only">
               {t('email')}
             </label>
-            <Input onChange={handleEmailChange} />
+            <Input
+              onChange={handleEmailChange}
+              handleAddNewEmail={handleAddNewEmail}
+            />
           </Cell>
         </Col>
         {isSsoAvailable(newEmailMatchedInstitution) ? (
