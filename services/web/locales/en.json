@@ -464,6 +464,7 @@
   "faq_change_plans_question": "Can I change plans later?",
   "faq_change_plans_or_cancel_question": "Can I change plans or cancel later?",
   "faq_do_collab_need_premium_question": "Do my collaborators also need premium accounts?",
+  "faq_do_collab_need_premium_answer": "Premium features, such as tracked changes, will be available to your collaborators on projects that you have created, even if those collaborators have free accounts.",
   "faq_do_collab_need_on_paid_plan_question": "Do my collaborators also need to be on a paid plan?",
   "faq_need_more_collab_question": "What if I need more collaborators?",
   "faq_purchase_more_licenses_question": "Can I purchase additional licenses for my colleagues?",
