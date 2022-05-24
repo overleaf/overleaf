@@ -1,7 +1,13 @@
+import { useEffect } from 'react'
 import { Alert } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import usePersistedState from '../../../shared/hooks/use-persisted-state'
 import { useUserEmailsContext } from '../context/user-email-context'
+import { sendMB } from '../../../infrastructure/event-tracking'
+
+function sendMetrics(segmentation: 'view' | 'click' | 'close') {
+  sendMB('institutional-leavers-survey-notification', { type: segmentation })
+}
 
 export function LeaversSurveyAlert() {
   const { t } = useTranslation()
@@ -20,13 +26,23 @@ export function LeaversSurveyAlert() {
   function handleDismiss() {
     setShowInstitutionalLeaversSurveyUntil(0)
     setHide(true)
+    sendMetrics('close')
   }
 
-  if (Date.now() > showInstitutionalLeaversSurveyUntil) {
-    return null
+  function handleLinkClick() {
+    sendMetrics('click')
   }
 
-  if (hide) {
+  const shouldDisplay =
+    !hide && Date.now() <= showInstitutionalLeaversSurveyUntil
+
+  useEffect(() => {
+    if (shouldDisplay) {
+      sendMetrics('view')
+    }
+  }, [shouldDisplay])
+
+  if (!shouldDisplay) {
     return null
   }
 
@@ -39,6 +55,7 @@ export function LeaversSurveyAlert() {
           href="https://docs.google.com/forms/d/e/1FAIpQLSfYdeeoY5p1d31r5iUx1jw0O-Gd66vcsBi_Ntu3lJRMjV2EJA/viewform"
           target="_blank"
           rel="noopener noreferrer"
+          onClick={handleLinkClick}
         >
           {t('take_short_survey')}
         </a>

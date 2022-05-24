@@ -1,7 +1,9 @@
 import { expect } from 'chai'
+import sinon from 'sinon'
 import { fireEvent, screen, render } from '@testing-library/react'
 import { UserEmailsProvider } from '../../../../../frontend/js/features/settings/context/user-email-context'
 import { LeaversSurveyAlert } from '../../../../../frontend/js/features/settings/components/leavers-survey-alert'
+import * as eventTracking from '../../../../../frontend/js/infrastructure/event-tracking'
 import localStorage from '../../../../../frontend/js/infrastructure/local-storage'
 
 function renderWithProvider() {
@@ -51,5 +53,48 @@ describe('<LeaversSurveyAlert/>', function () {
 
     expect(localStorage.getItem('showInstitutionalLeaversSurveyUntil')).to.be
       .null
+  })
+
+  describe('event tracking', function () {
+    let sendMBSpy
+
+    beforeEach(function () {
+      sendMBSpy = sinon.spy(eventTracking, 'sendMB')
+      const tomorrow = Date.now() + 1000 * 60 * 60 * 24
+      localStorage.setItem('showInstitutionalLeaversSurveyUntil', tomorrow)
+      localStorage.setItem('hideInstitutionalLeaversSurvey', false)
+      renderWithProvider()
+    })
+
+    afterEach(function () {
+      sendMBSpy.restore()
+      localStorage.clear()
+    })
+
+    it('should sent a `view` event on load', function () {
+      expect(sendMBSpy).to.be.calledOnce
+      expect(sendMBSpy).calledWith(
+        'institutional-leavers-survey-notification',
+        { type: 'view' }
+      )
+    })
+
+    it('should sent a `click` event when the link is clicked', function () {
+      fireEvent.click(screen.getByRole('link'))
+      expect(sendMBSpy).to.be.calledTwice
+      expect(sendMBSpy).calledWith(
+        'institutional-leavers-survey-notification',
+        { type: 'click' }
+      )
+    })
+
+    it('should sent a `close` event when it is closed', function () {
+      fireEvent.click(screen.getByRole('button'))
+      expect(sendMBSpy).to.be.calledTwice
+      expect(sendMBSpy).calledWith(
+        'institutional-leavers-survey-notification',
+        { type: 'close' }
+      )
+    })
   })
 })
