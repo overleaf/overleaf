@@ -161,30 +161,6 @@
   }
 }
 
-#layout-dropdown {
-  // override style added by required bsStyle react-bootstrap prop
-  text-decoration: none !important;
-}
-
-.layout-dropdown {
-  .pdf-detach-survey {
-    display: flex;
-    font-size: @font-size-small;
-  }
-
-  .pdf-detach-survey-text {
-    margin-left: @margin-sm;
-    white-space: normal;
-  }
-}
-#layout-dropdown-list {
-  a {
-    i {
-      margin-right: @margin-xs;
-    }
-  }
-}
-
 .header-cobranding-logo {
   display: block;
   width: auto;
@@ -461,67 +437,4 @@
   cursor: not-allowed;
   .opacity(0.65);
   .box-shadow(none);
-}
-
-.menu-item-with-svg {
-  a {
-    align-items: center;
-    display: flex !important;
-  }
-
-  svg {
-    line,
-    rect {
-      stroke: @dropdown-link-color;
-    }
-    path {
-      fill: @dropdown-link-color;
-    }
-  }
-
-  a:hover,
-  a:focus {
-    svg {
-      line,
-      rect {
-        stroke: @dropdown-link-hover-color;
-      }
-      path {
-        fill: @dropdown-link-hover-color;
-      }
-    }
-  }
-
-  &.disabled {
-    .subdued {
-      color: @dropdown-link-disabled-color;
-    }
-
-    svg {
-      line,
-      rect {
-        stroke: @dropdown-link-disabled-color;
-      }
-      path {
-        fill: @dropdown-link-disabled-color;
-      }
-    }
-
-    a:hover,
-    a:focus {
-      .subdued {
-        color: @dropdown-link-disabled-color;
-      }
-
-      svg {
-        line,
-        rect {
-          stroke: @dropdown-link-disabled-color;
-        }
-        path {
-          fill: @dropdown-link-disabled-color;
-        }
-      }
-    }
-  }
 }

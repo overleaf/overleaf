@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { memo, useCallback, useEffect, useMemo } from 'react'
 import PropTypes from 'prop-types'
 import { Dropdown, MenuItem } from 'react-bootstrap'
 import { Trans, useTranslation } from 'react-i18next'
@@ -11,6 +11,7 @@ import IconPdfOnly from './icon-pdf-only'
 import { useLayoutContext } from '../../../shared/context/layout-context'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import useEventListener from '../../../shared/hooks/use-event-listener'
+import Shortcut from './shortcut'
 
 function IconPlaceholder() {
   return <Icon type="" fw />
@@ -47,27 +48,46 @@ function IconCheckmark({ iconFor, pdfLayout, view, detachRole }) {
   return <IconPlaceholder />
 }
 
-function PdfDetachMenuItem({ handleDetach, children }) {
-  const { t } = useTranslation()
-
-  if (!('BroadcastChannel' in window)) {
-    return (
-      <Tooltip
-        id="detach-disabled"
-        description={t('your_browser_does_not_support_this_feature')}
-        overlayProps={{ placement: 'left' }}
-      >
-        <MenuItem disabled>{children}</MenuItem>
-      </Tooltip>
-    )
-  }
-
-  return <MenuItem onSelect={handleDetach}>{children}</MenuItem>
+function LayoutMenuItem({ checkmark, icon, text, shortcut, ...props }) {
+  return (
+    <MenuItem {...props}>
+      <div className="layout-menu-item">
+        <div className="layout-menu-item-start">
+          <div>{checkmark}</div>
+          <div>{icon}</div>
+          <div>{text}</div>
+        </div>
+        <Shortcut shortcut={shortcut} />
+      </div>
+    </MenuItem>
+  )
+}
+LayoutMenuItem.propTypes = {
+  checkmark: PropTypes.node.isRequired,
+  icon: PropTypes.node.isRequired,
+  text: PropTypes.oneOfType([PropTypes.string, PropTypes.node]).isRequired,
+  shortcut: PropTypes.string.isRequired,
+  onSelect: PropTypes.func,
 }
 
-PdfDetachMenuItem.propTypes = {
-  handleDetach: PropTypes.func.isRequired,
-  children: PropTypes.arrayOf(PropTypes.node).isRequired,
+function DetachDisabled() {
+  const { t } = useTranslation()
+
+  return (
+    <Tooltip
+      id="detach-disabled"
+      description={t('your_browser_does_not_support_this_feature')}
+      overlayProps={{ placement: 'left' }}
+    >
+      <LayoutMenuItem
+        disabled
+        checkmark={<IconPlaceholder />}
+        icon={<IconDetach />}
+        text={t('pdf_in_separate_tab')}
+        shortcut="Control+Option+ArrowUp"
+      />
+    </Tooltip>
+  )
 }
 
 function LayoutDropdownButton() {
@@ -111,6 +131,31 @@ function LayoutDropdownButton() {
     [changeLayout, handleReattach]
   )
 
+  const keyMap = useMemo(() => {
+    return {
+      ArrowDown: () => handleChangeLayout('sideBySide', null),
+      ArrowRight: () => handleChangeLayout('flat', 'pdf'),
+      ArrowLeft: () => handleChangeLayout('flat', 'editor'),
+      ArrowUp: () => handleDetach(),
+    }
+  }, [handleChangeLayout, handleDetach])
+
+  useEffect(() => {
+    const listener = event => {
+      if (event.ctrlKey && event.altKey && event.key in keyMap) {
+        event.preventDefault()
+        event.stopImmediatePropagation()
+        keyMap[event.key]()
+      }
+    }
+
+    window.addEventListener('keydown', listener, true)
+
+    return () => {
+      window.removeEventListener('keydown', listener, true)
+    }
+  }, [keyMap])
+
   const processing = !detachIsLinked && detachRole === 'detacher'
 
   // bsStyle is required for Dropdown.Toggle, but we will override style
@@ -137,76 +182,94 @@ function LayoutDropdownButton() {
             <span className="beta-badge" />
           </Tooltip>
         </Dropdown.Toggle>
-        <Dropdown.Menu id="layout-dropdown-list">
-          <MenuItem onSelect={() => handleChangeLayout('sideBySide')}>
-            <IconCheckmark
-              iconFor="sideBySide"
-              pdfLayout={pdfLayout}
-              view={view}
-              detachRole={detachRole}
-            />
-            <Icon type="columns" fw />
-            {t('editor_and_pdf')}
-          </MenuItem>
+        <Dropdown.Menu className="layout-dropdown-list">
+          <LayoutMenuItem
+            onSelect={() => handleChangeLayout('sideBySide')}
+            checkmark={
+              <IconCheckmark
+                iconFor="sideBySide"
+                pdfLayout={pdfLayout}
+                view={view}
+                detachRole={detachRole}
+              />
+            }
+            icon={<Icon type="columns" fw />}
+            text={t('editor_and_pdf')}
+            shortcut="Control+Option+ArrowDown"
+          />
 
-          <MenuItem
+          <LayoutMenuItem
             onSelect={() => handleChangeLayout('flat', 'editor')}
-            className="menu-item-with-svg"
-          >
-            <IconCheckmark
-              iconFor="editorOnly"
-              pdfLayout={pdfLayout}
-              view={view}
-              detachRole={detachRole}
-            />
-            <i className="fa fa-fw">
-              <IconEditorOnly />
-            </i>
-            <span>
+            checkmark={
+              <IconCheckmark
+                iconFor="editorOnly"
+                pdfLayout={pdfLayout}
+                view={view}
+                detachRole={detachRole}
+              />
+            }
+            icon={
+              <i className="fa fa-fw">
+                <IconEditorOnly />
+              </i>
+            }
+            text={
               <Trans
                 i18nKey="editor_only_hide_pdf"
                 components={[
                   <span key="editor_only_hide_pdf" className="subdued" />,
                 ]}
               />
-            </span>
-          </MenuItem>
+            }
+            shortcut="Control+Option+ArrowLeft"
+          />
 
-          <MenuItem
+          <LayoutMenuItem
             onSelect={() => handleChangeLayout('flat', 'pdf')}
-            className="menu-item-with-svg"
-          >
-            <IconCheckmark
-              iconFor="pdfOnly"
-              pdfLayout={pdfLayout}
-              view={view}
-              detachRole={detachRole}
-            />
-            <i className="fa fa-fw">
-              <IconPdfOnly />
-            </i>
-            <span>
+            checkmark={
+              <IconCheckmark
+                iconFor="pdfOnly"
+                pdfLayout={pdfLayout}
+                view={view}
+                detachRole={detachRole}
+              />
+            }
+            icon={
+              <i className="fa fa-fw">
+                <IconPdfOnly />
+              </i>
+            }
+            text={
               <Trans
                 i18nKey="pdf_only_hide_editor"
                 components={[
                   <span key="pdf_only_hide_editor" className="subdued" />,
                 ]}
               />
-            </span>
-          </MenuItem>
+            }
+            shortcut="Control+Option+ArrowRight"
+          />
 
-          {detachRole === 'detacher' ? (
-            <MenuItem>
-              {detachIsLinked ? <IconChecked /> : <IconRefresh />}
-              <IconDetach />
-              {t('pdf_in_separate_tab')}
-            </MenuItem>
+          {'BroadcastChannel' in window ? (
+            <LayoutMenuItem
+              onSelect={() => handleDetach()}
+              checkmark={
+                detachRole === 'detacher' ? (
+                  detachIsLinked ? (
+                    <IconChecked />
+                  ) : (
+                    <IconRefresh />
+                  )
+                ) : (
+                  <IconPlaceholder />
+                )
+              }
+              icon={<IconDetach />}
+              text={t('pdf_in_separate_tab')}
+              shortcut="Control+Option+ArrowUp"
+            />
           ) : (
-            <PdfDetachMenuItem handleDetach={handleDetach}>
-              <IconPlaceholder />
-              <IconDetach />
-              {t('pdf_in_separate_tab')}
-            </PdfDetachMenuItem>
+            <DetachDisabled />
           )}
 
           <MenuItem divider />
@@ -232,7 +295,7 @@ function LayoutDropdownButton() {
   )
 }
 
-export default LayoutDropdownButton
+export default memo(LayoutDropdownButton)
 
 IconCheckmark.propTypes = {
   iconFor: PropTypes.string.isRequired,
