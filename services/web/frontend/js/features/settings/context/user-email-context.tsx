@@ -105,6 +105,9 @@ const setLoadingAction = (state: State, action: ActionSetLoading) => ({
 })
 
 const makePrimaryAction = (state: State, action: ActionMakePrimary) => {
+  if (!state.data.byId[action.payload]) {
+    return state
+  }
   const byId: State['data']['byId'] = {}
   for (const id of Object.keys(state.data.byId)) {
     byId[id] = {
@@ -137,19 +140,29 @@ const deleteEmailAction = (state: State, action: ActionDeleteEmail) => {
 const setEmailAffiliationBeingEditedAction = (
   state: State,
   action: ActionSetEmailAffiliationBeingEdited
-) => ({
-  ...state,
-  data: {
-    ...state.data,
-    emailAffiliationBeingEdited: action.payload,
-  },
-})
+) => {
+  if (action.payload && !state.data.byId[action.payload]) {
+    return state
+  }
+  return {
+    ...state,
+    data: {
+      ...state.data,
+      emailAffiliationBeingEdited: action.payload,
+    },
+  }
+}
 
 const updateAffiliationAction = (
   state: State,
   action: ActionUpdateAffiliation
 ) => {
   const { email, role, department } = action.payload
+
+  if (action.payload && !state.data.byId[email]) {
+    return state
+  }
+
   const affiliation = state.data.byId[email].affiliation
 
   return {
@@ -213,11 +226,13 @@ function useUserEmails() {
     useAsync<UserEmailData[]>()
 
   const getEmails = useCallback(() => {
+    dispatch(ActionCreators.setLoading(true))
     runAsync(getJSON('/user/emails?ensureAffiliation=true'))
       .then(data => {
         dispatch(ActionCreators.setData(data))
       })
       .catch(() => {})
+      .finally(() => dispatch(ActionCreators.setLoading(false)))
   }, [runAsync, dispatch])
 
   // Get emails on page load
@@ -308,4 +323,6 @@ const useUserEmailsContext = () => {
   return context
 }
 
-export { UserEmailsProvider, useUserEmailsContext }
+type EmailContextType = ReturnType<typeof useUserEmailsContext>
+
+export { UserEmailsProvider, useUserEmailsContext, EmailContextType }
