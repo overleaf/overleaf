@@ -8,16 +8,25 @@ export class IgnoredWords {
   constructor() {
     this.reset()
     this.ignoredMisspellings = new Set(IGNORED_MISSPELLINGS)
+    window.addEventListener('learnedWords:doreset', () => this.reset()) // for tests
   }
 
   reset() {
     this.learnedWords = new Set(getMeta('ol-learnedWords'))
+    window.dispatchEvent(new CustomEvent('learnedWords:reset'))
   }
 
   add(wordText) {
     this.learnedWords.add(wordText)
     window.dispatchEvent(
       new CustomEvent('learnedWords:add', { detail: wordText })
+    )
+  }
+
+  remove(wordText) {
+    this.learnedWords.delete(wordText)
+    window.dispatchEvent(
+      new CustomEvent('learnedWords:remove', { detail: wordText })
     )
   }
 

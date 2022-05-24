@@ -893,6 +893,22 @@ const ProjectController = {
             }
           )
         },
+        dictionaryEditorAssignment(cb) {
+          SplitTestHandler.getAssignment(
+            req,
+            res,
+            'dictionary-editor',
+            {},
+            (error, assignment) => {
+              // do not fail editor load if assignment fails
+              if (error) {
+                cb(null, { variant: 'default' })
+              } else {
+                cb(null, assignment)
+              }
+            }
+          )
+        },
         persistentUpgradePromptsAssignment(cb) {
           SplitTestHandler.getAssignment(
             req,
@@ -923,6 +939,7 @@ const ProjectController = {
           newSourceEditorAssignment,
           pdfDetachAssignment,
           pdfjsAssignment,
+          dictionaryEditorAssignment,
           persistentUpgradePromptsAssignment,
         }
       ) => {
@@ -1029,6 +1046,11 @@ const ProjectController = {
               !Features.hasFeature('saas') ||
               (user.features && user.features.symbolPalette)
 
+            const dictionaryEditorEnabled = shouldDisplayFeature(
+              'dictionary-editor',
+              dictionaryEditorAssignment.variant === 'enabled'
+            )
+
             // Persistent upgrade prompts
             const showHeaderUpgradePrompt =
               persistentUpgradePromptsAssignment.variant ===
@@ -1098,6 +1120,7 @@ const ProjectController = {
               wsUrl,
               showSupport: Features.hasFeature('support'),
               pdfjsVariant: pdfjsAssignment.variant,
+              dictionaryEditorEnabled,
               showPdfDetach,
               debugPdfDetach,
               showNewSourceEditorOption,

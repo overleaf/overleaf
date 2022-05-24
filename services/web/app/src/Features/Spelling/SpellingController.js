@@ -19,6 +19,15 @@ module.exports = {
     })
   },
 
+  unlearn(req, res, next) {
+    const { word } = req.body
+    const userId = SessionManager.getLoggedInUserId(req.session)
+    LearnedWordsManager.unlearnWord(userId, word, err => {
+      if (err) return next(err)
+      res.sendStatus(204)
+    })
+  },
+
   proxyRequestToSpellingApi(req, res) {
     const { language } = req.body
 

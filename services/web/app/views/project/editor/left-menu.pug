@@ -117,6 +117,16 @@ aside#left-menu.full-size(
 								value=language.code
 							)= language.name
 
+			if dictionaryEditorEnabled
+				.form-controls(ng-controller="DictionaryModalController")
+					label #{translate("dictionary")}
+					button.btn.btn-default.btn-sm(ng-click="openModal()") #{translate("edit")}
+
+					dictionary-modal(
+						handle-hide="handleHide"
+						show="show"
+					)
+
 			.form-controls
 				label(for="autoComplete") #{translate("auto_complete")}
 				select(

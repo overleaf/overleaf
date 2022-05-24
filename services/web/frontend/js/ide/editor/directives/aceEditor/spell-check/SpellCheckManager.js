@@ -61,6 +61,12 @@ class SpellCheckManager {
 
     this.selectedHighlightContents = null
 
+    window.addEventListener('learnedWords:reset', () => this.reset())
+
+    window.addEventListener('learnedWords:remove', ({ detail: word }) =>
+      this.removeWordFromCache(word)
+    )
+
     $(document).on('click', e => {
       // There is a bug (?) in Safari when ctrl-clicking an element, and the
       // the contextmenu event is preventDefault-ed. In this case, the
@@ -101,9 +107,13 @@ class SpellCheckManager {
     }
   }
 
-  reInitForLangChange() {
+  reset() {
     this.adapter.highlightedWordManager.reset()
     this.init()
+  }
+
+  reInitForLangChange() {
+    this.reset()
   }
 
   isSpellCheckEnabled() {
@@ -186,6 +196,11 @@ class SpellCheckManager {
         this.$scope.spellMenu.open = false
       })
     }
+  }
+
+  removeWordFromCache(word) {
+    const language = this.$scope.spellCheckLanguage
+    this.cache.remove(`${language}:${word}`)
   }
 
   learnWord(highlight) {

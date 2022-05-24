@@ -932,6 +932,17 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     SpellingController.learn
   )
 
+  webRouter.post(
+    '/spelling/unlearn',
+    validate({
+      body: Joi.object({
+        word: Joi.string().required(),
+      }),
+    }),
+    AuthenticationController.requireLogin(),
+    SpellingController.unlearn
+  )
+
   webRouter.get(
     '/project/:project_id/messages',
     AuthorizationMiddleware.blockRestrictedUserFromProject,
