@@ -17,15 +17,6 @@ function showGroupPlanModal(el) {
   changeGroupPlanModalRadioInputData(plan)
 
   const modalEl = $('[data-ol-group-plan-modal]')
-  modalEl
-    .on('shown.bs.modal', function () {
-      const path = `${window.location.pathname}${window.location.search}`
-      history.replaceState(null, document.title, path + '#groups')
-    })
-    .on('hidden.bs.modal', function () {
-      history.replaceState(null, document.title, window.location.pathname)
-    })
-
   modalEl.modal()
 }
 
