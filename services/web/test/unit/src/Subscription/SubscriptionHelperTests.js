@@ -32,8 +32,6 @@ const plans = {
 describe('SubscriptionHelper', function () {
   beforeEach(function () {
     this.INITIAL_LICENSE_SIZE = 2
-    this.mockCollaboratorPrice = 2000
-    this.mockProfessionalPrice = 4000
     this.settings = {
       groupPlanModalOptions: {
         currencySymbols: {
@@ -48,56 +46,56 @@ describe('SubscriptionHelper', function () {
     this.GroupPlansData = {
       enterprise: {
         collaborator: {
-          USD: {
-            [this.INITIAL_LICENSE_SIZE]: {
-              price_in_cents: this.mockCollaboratorPrice,
-            },
-          },
           CHF: {
             [this.INITIAL_LICENSE_SIZE]: {
-              price_in_cents: this.mockCollaboratorPrice,
+              price_in_cents: 1000,
             },
           },
           DKK: {
             [this.INITIAL_LICENSE_SIZE]: {
-              price_in_cents: this.mockCollaboratorPrice,
-            },
-          },
-          NOK: {
-            [this.INITIAL_LICENSE_SIZE]: {
-              price_in_cents: this.mockCollaboratorPrice,
+              price_in_cents: 2000,
             },
           },
           SEK: {
             [this.INITIAL_LICENSE_SIZE]: {
-              price_in_cents: this.mockCollaboratorPrice,
+              price_in_cents: 3000,
+            },
+          },
+          NOK: {
+            [this.INITIAL_LICENSE_SIZE]: {
+              price_in_cents: 4000,
+            },
+          },
+          USD: {
+            [this.INITIAL_LICENSE_SIZE]: {
+              price_in_cents: 5000,
             },
           },
         },
         professional: {
-          USD: {
-            [this.INITIAL_LICENSE_SIZE]: {
-              price_in_cents: this.mockProfessionalPrice,
-            },
-          },
           CHF: {
             [this.INITIAL_LICENSE_SIZE]: {
-              price_in_cents: this.mockProfessionalPrice,
+              price_in_cents: 10000,
             },
           },
           DKK: {
             [this.INITIAL_LICENSE_SIZE]: {
-              price_in_cents: this.mockProfessionalPrice,
-            },
-          },
-          NOK: {
-            [this.INITIAL_LICENSE_SIZE]: {
-              price_in_cents: this.mockProfessionalPrice,
+              price_in_cents: 20000,
             },
           },
           SEK: {
             [this.INITIAL_LICENSE_SIZE]: {
-              price_in_cents: this.mockProfessionalPrice,
+              price_in_cents: 30000,
+            },
+          },
+          NOK: {
+            [this.INITIAL_LICENSE_SIZE]: {
+              price_in_cents: 40000,
+            },
+          },
+          USD: {
+            [this.INITIAL_LICENSE_SIZE]: {
+              price_in_cents: 50000,
             },
           },
         },
@@ -150,374 +148,92 @@ describe('SubscriptionHelper', function () {
   })
 
   describe('generateInitialLocalizedGroupPrice', function () {
-    describe('collaborator plan', function () {
-      beforeEach(function () {
-        this.plan = 'collaborator'
-      })
+    describe('CHF currency', function () {
+      it('should return the correct localized price for every plan', function () {
+        const localizedPrice =
+          this.SubscriptionHelper.generateInitialLocalizedGroupPrice('CHF')
 
-      describe('for CHF currency', function () {
-        beforeEach(function () {
-          this.mockRecommendedCurrency = 'CHF'
-          this.recommendedCurrencySymbol =
-            this.settings.groupPlanModalOptions.currencySymbols[
-              this.mockRecommendedCurrency
-            ]
-          this.expectedPrice =
-            this.GroupPlansData.enterprise[this.plan][
-              this.mockRecommendedCurrency
-            ][this.INITIAL_LICENSE_SIZE].price_in_cents / 100
-        })
-
-        it('should return the correct localized price', function () {
-          const expectedLocalizedPrice = `${this.recommendedCurrencySymbol} ${this.expectedPrice}`
-          const {
-            price: { collaborator },
-          } = this.SubscriptionHelper.generateInitialLocalizedGroupPrice(
-            this.mockRecommendedCurrency
-          )
-          expect(collaborator).to.be.equal(expectedLocalizedPrice)
-        })
-
-        it('should return the correct localized price per user', function () {
-          const expectedPricePerUser =
-            this.expectedPrice / this.INITIAL_LICENSE_SIZE
-          const expectedLocalizedPricePerUser = `${this.recommendedCurrencySymbol} ${expectedPricePerUser}`
-          const {
-            pricePerUser: { collaborator },
-          } = this.SubscriptionHelper.generateInitialLocalizedGroupPrice(
-            this.mockRecommendedCurrency
-          )
-          expect(collaborator).to.be.equal(expectedLocalizedPricePerUser)
-        })
-      })
-
-      describe('for DKK currency', function () {
-        beforeEach(function () {
-          this.mockRecommendedCurrency = 'DKK'
-          this.recommendedCurrencySymbol =
-            this.settings.groupPlanModalOptions.currencySymbols[
-              this.mockRecommendedCurrency
-            ]
-          this.expectedPrice =
-            this.GroupPlansData.enterprise[this.plan][
-              this.mockRecommendedCurrency
-            ][this.INITIAL_LICENSE_SIZE].price_in_cents / 100
-        })
-
-        it('should return the correct localized price', function () {
-          const expectedLocalizedPrice = `${this.expectedPrice} ${this.recommendedCurrencySymbol}`
-          const {
-            price: { collaborator },
-          } = this.SubscriptionHelper.generateInitialLocalizedGroupPrice(
-            this.mockRecommendedCurrency
-          )
-          expect(collaborator).to.be.equal(expectedLocalizedPrice)
-        })
-
-        it('should return the correct localized price per user', function () {
-          const expectedPricePerUser =
-            this.expectedPrice / this.INITIAL_LICENSE_SIZE
-          const expectedLocalizedPricePerUser = `${expectedPricePerUser} ${this.recommendedCurrencySymbol}`
-          const {
-            pricePerUser: { collaborator },
-          } = this.SubscriptionHelper.generateInitialLocalizedGroupPrice(
-            this.mockRecommendedCurrency
-          )
-          expect(collaborator).to.be.equal(expectedLocalizedPricePerUser)
-        })
-      })
-
-      describe('for SEK currency', function () {
-        beforeEach(function () {
-          this.mockRecommendedCurrency = 'SEK'
-          this.recommendedCurrencySymbol =
-            this.settings.groupPlanModalOptions.currencySymbols[
-              this.mockRecommendedCurrency
-            ]
-          this.expectedPrice =
-            this.GroupPlansData.enterprise[this.plan][
-              this.mockRecommendedCurrency
-            ][this.INITIAL_LICENSE_SIZE].price_in_cents / 100
-        })
-
-        it('should return the correct localized price', function () {
-          const expectedLocalizedPrice = `${this.expectedPrice} ${this.recommendedCurrencySymbol}`
-          const {
-            price: { collaborator },
-          } = this.SubscriptionHelper.generateInitialLocalizedGroupPrice(
-            this.mockRecommendedCurrency
-          )
-          expect(collaborator).to.be.equal(expectedLocalizedPrice)
-        })
-
-        it('should return the correct localized price per user', function () {
-          const expectedPricePerUser =
-            this.expectedPrice / this.INITIAL_LICENSE_SIZE
-          const expectedLocalizedPricePerUser = `${expectedPricePerUser} ${this.recommendedCurrencySymbol}`
-          const {
-            pricePerUser: { collaborator },
-          } = this.SubscriptionHelper.generateInitialLocalizedGroupPrice(
-            this.mockRecommendedCurrency
-          )
-          expect(collaborator).to.be.equal(expectedLocalizedPricePerUser)
-        })
-      })
-
-      describe('for NOK currency', function () {
-        beforeEach(function () {
-          this.mockRecommendedCurrency = 'NOK'
-          this.recommendedCurrencySymbol =
-            this.settings.groupPlanModalOptions.currencySymbols[
-              this.mockRecommendedCurrency
-            ]
-          this.expectedPrice =
-            this.GroupPlansData.enterprise[this.plan][
-              this.mockRecommendedCurrency
-            ][this.INITIAL_LICENSE_SIZE].price_in_cents / 100
-        })
-
-        it('should return the correct localized price', function () {
-          const expectedLocalizedPrice = `${this.expectedPrice} ${this.recommendedCurrencySymbol}`
-          const {
-            price: { collaborator },
-          } = this.SubscriptionHelper.generateInitialLocalizedGroupPrice(
-            this.mockRecommendedCurrency
-          )
-          expect(collaborator).to.be.equal(expectedLocalizedPrice)
-        })
-
-        it('should return the correct localized price per user', function () {
-          const expectedPricePerUser =
-            this.expectedPrice / this.INITIAL_LICENSE_SIZE
-          const expectedLocalizedPricePerUser = `${expectedPricePerUser} ${this.recommendedCurrencySymbol}`
-          const {
-            pricePerUser: { collaborator },
-          } = this.SubscriptionHelper.generateInitialLocalizedGroupPrice(
-            this.mockRecommendedCurrency
-          )
-          expect(collaborator).to.be.equal(expectedLocalizedPricePerUser)
-        })
-      })
-
-      describe('for other supported currencies', function () {
-        beforeEach(function () {
-          this.mockRecommendedCurrency = 'USD'
-          this.recommendedCurrencySymbol =
-            this.settings.groupPlanModalOptions.currencySymbols[
-              this.mockRecommendedCurrency
-            ]
-          this.expectedPrice =
-            this.GroupPlansData.enterprise[this.plan][
-              this.mockRecommendedCurrency
-            ][this.INITIAL_LICENSE_SIZE].price_in_cents / 100
-        })
-
-        it('should return the correct localized price', function () {
-          const expectedLocalizedPrice = `${this.recommendedCurrencySymbol}${this.expectedPrice}`
-          const {
-            price: { collaborator },
-          } = this.SubscriptionHelper.generateInitialLocalizedGroupPrice(
-            this.mockRecommendedCurrency
-          )
-          expect(collaborator).to.be.equal(expectedLocalizedPrice)
-        })
-
-        it('should return the correct localized price per user', function () {
-          const expectedPricePerUser =
-            this.expectedPrice / this.INITIAL_LICENSE_SIZE
-          const expectedLocalizedPricePerUser = `${this.recommendedCurrencySymbol}${expectedPricePerUser}`
-          const {
-            pricePerUser: { collaborator },
-          } = this.SubscriptionHelper.generateInitialLocalizedGroupPrice(
-            this.mockRecommendedCurrency
-          )
-          expect(collaborator).to.be.equal(expectedLocalizedPricePerUser)
+        expect(localizedPrice).to.deep.equal({
+          price: {
+            collaborator: 'Fr 10',
+            professional: 'Fr 100',
+          },
+          pricePerUser: {
+            collaborator: 'Fr 5',
+            professional: 'Fr 50',
+          },
         })
       })
     })
 
-    describe('professional plan plan', function () {
-      beforeEach(function () {
-        this.plan = 'professional'
-      })
+    describe('DKK currency', function () {
+      it('should return the correct localized price for every plan', function () {
+        const localizedPrice =
+          this.SubscriptionHelper.generateInitialLocalizedGroupPrice('DKK')
 
-      describe('for CHF currency', function () {
-        beforeEach(function () {
-          this.mockRecommendedCurrency = 'CHF'
-          this.recommendedCurrencySymbol =
-            this.settings.groupPlanModalOptions.currencySymbols[
-              this.mockRecommendedCurrency
-            ]
-          this.expectedPrice =
-            this.GroupPlansData.enterprise[this.plan][
-              this.mockRecommendedCurrency
-            ][this.INITIAL_LICENSE_SIZE].price_in_cents / 100
-        })
-
-        it('should return the correct localized price', function () {
-          const expectedLocalizedPrice = `${this.recommendedCurrencySymbol} ${this.expectedPrice}`
-          const {
-            price: { professional },
-          } = this.SubscriptionHelper.generateInitialLocalizedGroupPrice(
-            this.mockRecommendedCurrency
-          )
-          expect(professional).to.be.equal(expectedLocalizedPrice)
-        })
-
-        it('should return the correct localized price per user', function () {
-          const expectedPricePerUser =
-            this.expectedPrice / this.INITIAL_LICENSE_SIZE
-          const expectedLocalizedPricePerUser = `${this.recommendedCurrencySymbol} ${expectedPricePerUser}`
-          const {
-            pricePerUser: { professional },
-          } = this.SubscriptionHelper.generateInitialLocalizedGroupPrice(
-            this.mockRecommendedCurrency
-          )
-          expect(professional).to.be.equal(expectedLocalizedPricePerUser)
+        expect(localizedPrice).to.deep.equal({
+          price: {
+            collaborator: '20 kr',
+            professional: '200 kr',
+          },
+          pricePerUser: {
+            collaborator: '10 kr',
+            professional: '100 kr',
+          },
         })
       })
+    })
 
-      describe('for DKK currency', function () {
-        beforeEach(function () {
-          this.mockRecommendedCurrency = 'DKK'
-          this.recommendedCurrencySymbol =
-            this.settings.groupPlanModalOptions.currencySymbols[
-              this.mockRecommendedCurrency
-            ]
-          this.expectedPrice =
-            this.GroupPlansData.enterprise[this.plan][
-              this.mockRecommendedCurrency
-            ][this.INITIAL_LICENSE_SIZE].price_in_cents / 100
-        })
+    describe('SEK currency', function () {
+      it('should return the correct localized price for every plan', function () {
+        const localizedPrice =
+          this.SubscriptionHelper.generateInitialLocalizedGroupPrice('SEK')
 
-        it('should return the correct localized price', function () {
-          const expectedLocalizedPrice = `${this.expectedPrice} ${this.recommendedCurrencySymbol}`
-          const {
-            price: { professional },
-          } = this.SubscriptionHelper.generateInitialLocalizedGroupPrice(
-            this.mockRecommendedCurrency
-          )
-          expect(professional).to.be.equal(expectedLocalizedPrice)
-        })
-
-        it('should return the correct localized price per user', function () {
-          const expectedPricePerUser =
-            this.expectedPrice / this.INITIAL_LICENSE_SIZE
-          const expectedLocalizedPricePerUser = `${expectedPricePerUser} ${this.recommendedCurrencySymbol}`
-          const {
-            pricePerUser: { professional },
-          } = this.SubscriptionHelper.generateInitialLocalizedGroupPrice(
-            this.mockRecommendedCurrency
-          )
-          expect(professional).to.be.equal(expectedLocalizedPricePerUser)
+        expect(localizedPrice).to.deep.equal({
+          price: {
+            collaborator: '30 kr',
+            professional: '300 kr',
+          },
+          pricePerUser: {
+            collaborator: '15 kr',
+            professional: '150 kr',
+          },
         })
       })
+    })
 
-      describe('for SEK currency', function () {
-        beforeEach(function () {
-          this.mockRecommendedCurrency = 'SEK'
-          this.recommendedCurrencySymbol =
-            this.settings.groupPlanModalOptions.currencySymbols[
-              this.mockRecommendedCurrency
-            ]
-          this.expectedPrice =
-            this.GroupPlansData.enterprise[this.plan][
-              this.mockRecommendedCurrency
-            ][this.INITIAL_LICENSE_SIZE].price_in_cents / 100
-        })
+    describe('NOK currency', function () {
+      it('should return the correct localized price for every plan', function () {
+        const localizedPrice =
+          this.SubscriptionHelper.generateInitialLocalizedGroupPrice('NOK')
 
-        it('should return the correct localized price', function () {
-          const expectedLocalizedPrice = `${this.expectedPrice} ${this.recommendedCurrencySymbol}`
-          const {
-            price: { professional },
-          } = this.SubscriptionHelper.generateInitialLocalizedGroupPrice(
-            this.mockRecommendedCurrency
-          )
-          expect(professional).to.be.equal(expectedLocalizedPrice)
-        })
-
-        it('should return the correct localized price per user', function () {
-          const expectedPricePerUser =
-            this.expectedPrice / this.INITIAL_LICENSE_SIZE
-          const expectedLocalizedPricePerUser = `${expectedPricePerUser} ${this.recommendedCurrencySymbol}`
-          const {
-            pricePerUser: { professional },
-          } = this.SubscriptionHelper.generateInitialLocalizedGroupPrice(
-            this.mockRecommendedCurrency
-          )
-          expect(professional).to.be.equal(expectedLocalizedPricePerUser)
+        expect(localizedPrice).to.deep.equal({
+          price: {
+            collaborator: '40 kr',
+            professional: '400 kr',
+          },
+          pricePerUser: {
+            collaborator: '20 kr',
+            professional: '200 kr',
+          },
         })
       })
+    })
 
-      describe('for NOK currency', function () {
-        beforeEach(function () {
-          this.mockRecommendedCurrency = 'NOK'
-          this.recommendedCurrencySymbol =
-            this.settings.groupPlanModalOptions.currencySymbols[
-              this.mockRecommendedCurrency
-            ]
-          this.expectedPrice =
-            this.GroupPlansData.enterprise[this.plan][
-              this.mockRecommendedCurrency
-            ][this.INITIAL_LICENSE_SIZE].price_in_cents / 100
-        })
+    describe('other supported currencies', function () {
+      it('should return the correct localized price for every plan', function () {
+        const localizedPrice =
+          this.SubscriptionHelper.generateInitialLocalizedGroupPrice('USD')
 
-        it('should return the correct localized price', function () {
-          const expectedLocalizedPrice = `${this.expectedPrice} ${this.recommendedCurrencySymbol}`
-          const {
-            price: { professional },
-          } = this.SubscriptionHelper.generateInitialLocalizedGroupPrice(
-            this.mockRecommendedCurrency
-          )
-          expect(professional).to.be.equal(expectedLocalizedPrice)
-        })
-
-        it('should return the correct localized price per user', function () {
-          const expectedPricePerUser =
-            this.expectedPrice / this.INITIAL_LICENSE_SIZE
-          const expectedLocalizedPricePerUser = `${expectedPricePerUser} ${this.recommendedCurrencySymbol}`
-          const {
-            pricePerUser: { professional },
-          } = this.SubscriptionHelper.generateInitialLocalizedGroupPrice(
-            this.mockRecommendedCurrency
-          )
-          expect(professional).to.be.equal(expectedLocalizedPricePerUser)
-        })
-      })
-
-      describe('for other supported currencies', function () {
-        beforeEach(function () {
-          this.mockRecommendedCurrency = 'USD'
-          this.recommendedCurrencySymbol =
-            this.settings.groupPlanModalOptions.currencySymbols[
-              this.mockRecommendedCurrency
-            ]
-          this.expectedPrice =
-            this.GroupPlansData.enterprise[this.plan][
-              this.mockRecommendedCurrency
-            ][this.INITIAL_LICENSE_SIZE].price_in_cents / 100
-        })
-
-        it('should return the correct localized price', function () {
-          const expectedLocalizedPrice = `${this.recommendedCurrencySymbol}${this.expectedPrice}`
-          const {
-            price: { professional },
-          } = this.SubscriptionHelper.generateInitialLocalizedGroupPrice(
-            this.mockRecommendedCurrency
-          )
-          expect(professional).to.be.equal(expectedLocalizedPrice)
-        })
-
-        it('should return the correct localized price per user', function () {
-          const expectedPricePerUser =
-            this.expectedPrice / this.INITIAL_LICENSE_SIZE
-          const expectedLocalizedPricePerUser = `${this.recommendedCurrencySymbol}${expectedPricePerUser}`
-          const {
-            pricePerUser: { professional },
-          } = this.SubscriptionHelper.generateInitialLocalizedGroupPrice(
-            this.mockRecommendedCurrency
-          )
-          expect(professional).to.be.equal(expectedLocalizedPricePerUser)
+        expect(localizedPrice).to.deep.equal({
+          price: {
+            collaborator: '$50',
+            professional: '$500',
+          },
+          pricePerUser: {
+            collaborator: '$25',
+            professional: '$250',
+          },
         })
       })
     })
