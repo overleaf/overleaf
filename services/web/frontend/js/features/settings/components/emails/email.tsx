@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { UserEmailData } from '../../../../../../types/user-email'
 import ResendConfirmationEmailButton from './resend-confirmation-email-button'
+import { ssoAvailableForInstitution } from '../../utils/sso'
 
 type EmailProps = {
   userEmailData: UserEmailData
@@ -8,6 +9,10 @@ type EmailProps = {
 
 function Email({ userEmailData }: EmailProps) {
   const { t } = useTranslation()
+
+  const ssoAvailable = ssoAvailableForInstitution(
+    userEmailData.affiliation?.institution
+  )
 
   return (
     <>
@@ -17,12 +22,10 @@ function Email({ userEmailData }: EmailProps) {
         <div className="small">
           <strong>
             {t('unconfirmed')}.
-            {!userEmailData.ssoAvailable && (
-              <span> {t('please_check_your_inbox')}.</span>
-            )}
+            {!ssoAvailable && <span> {t('please_check_your_inbox')}.</span>}
           </strong>
           <br />
-          {!userEmailData.ssoAvailable && (
+          {!ssoAvailable && (
             <ResendConfirmationEmailButton email={userEmailData.email} />
           )}
         </div>

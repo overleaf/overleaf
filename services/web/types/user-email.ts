@@ -6,6 +6,5 @@ export type UserEmailData = {
   email: string
   default: boolean
   samlProviderId?: string
-  ssoAvailable?: boolean
   emailHasInstitutionLicence?: boolean
 }

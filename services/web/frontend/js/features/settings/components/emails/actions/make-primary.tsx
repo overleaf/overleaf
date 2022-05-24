@@ -12,6 +12,7 @@ import {
 } from '../../../context/user-email-context'
 import { UserEmailData } from '../../../../../../../types/user-email'
 import { UseAsyncReturnType } from '../../../../../shared/hooks/use-async'
+import { ssoAvailableForInstitution } from '../../../utils/sso'
 
 const getDescription = (
   t: (s: string) => string,
@@ -26,8 +27,12 @@ const getDescription = (
     return t('make_email_primary_description')
   }
 
+  const ssoAvailable = ssoAvailableForInstitution(
+    userEmailData.affiliation?.institution
+  )
+
   if (!institutionAlreadyLinked(state, userEmailData)) {
-    return userEmailData.ssoAvailable
+    return ssoAvailable
       ? t('please_link_before_making_primary')
       : t('please_confirm_your_email_before_making_it_default')
   }
