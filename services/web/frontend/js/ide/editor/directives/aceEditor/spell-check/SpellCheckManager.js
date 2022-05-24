@@ -1,5 +1,4 @@
-import getMeta from '../../../../../utils/meta'
-import { IGNORED_MISSPELLINGS } from './IgnoredMisspellings'
+import ignoredWords from '../../../../../features/dictionary/ignored-words'
 
 // eslint-disable-next-line prefer-regex-literals
 const BLACKLISTED_COMMAND_REGEX = new RegExp(
@@ -61,10 +60,6 @@ class SpellCheckManager {
       })
 
     this.selectedHighlightContents = null
-
-    this.ignoredMisspellings = new Set(
-      IGNORED_MISSPELLINGS.concat(getMeta('ol-learnedWords'))
-    )
 
     $(document).on('click', e => {
       // There is a bug (?) in Safari when ctrl-clicking an element, and the
@@ -198,7 +193,7 @@ class SpellCheckManager {
     this.adapter.highlightedWordManager.removeWord(highlight.word)
     const language = this.$scope.spellCheckLanguage
     this.cache.put(`${language}:${highlight.word}`, true)
-    this.ignoredMisspellings.add(highlight.word)
+    ignoredWords.add(highlight.word)
   }
 
   markLinesAsUpdated(change) {
@@ -341,7 +336,9 @@ class SpellCheckManager {
   apiRequest(endpoint, data, callback) {
     if (callback == null) {
       callback = function (error, result) {
-        console.error(error)
+        if (error) {
+          console.error(error)
+        }
       }
     }
     data.token = window.user.id
@@ -384,7 +381,7 @@ class SpellCheckManager {
         if (word[word.length - 1] === "'") {
           word = word.slice(0, -1)
         }
-        if (!this.ignoredMisspellings.has(word)) {
+        if (!ignoredWords.has(word)) {
           positions.push({ row: rowIdx, column: result.index })
           words.push(word)
         }
