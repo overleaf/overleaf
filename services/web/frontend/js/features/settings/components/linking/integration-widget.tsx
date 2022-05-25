@@ -105,29 +105,21 @@ function ActionButton({
 
   if (!hasFeature) {
     return (
-      <a href={upgradePath} className="btn btn-info text-capitalize">
-        {t('upgrade')}
-      </a>
+      <Button bsStyle="info" href={upgradePath}>
+        <span className="text-capitalize">{t('upgrade')}</span>
+      </Button>
     )
   } else if (linked) {
     return (
-      <button
-        className="btn btn-danger"
-        onClick={handleUnlinkClick}
-        disabled={disabled}
-      >
+      <Button bsStyle="danger" onClick={handleUnlinkClick} disabled={disabled}>
         {t('unlink')}
-      </button>
+      </Button>
     )
   } else {
     return (
-      <a
-        href={linkPath}
-        className="btn btn-info text-capitalize"
-        disabled={disabled}
-      >
-        {t('link')}
-      </a>
+      <Button bsStyle="info" href={linkPath} disabled={disabled}>
+        <span className="text-capitalize">{t('link')}</span>
+      </Button>
     )
   }
 }
