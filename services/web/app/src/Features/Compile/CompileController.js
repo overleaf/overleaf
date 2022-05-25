@@ -87,7 +87,8 @@ module.exports = CompileController = {
         limits,
         validationProblems,
         stats,
-        timings
+        timings,
+        outputUrlPrefix
       ) => {
         if (error) {
           Metrics.inc('compile-error')
@@ -100,10 +101,19 @@ module.exports = CompileController = {
           'zonal-clsi-lb-downloads',
           {},
           (_err, assignment) => {
-            if (assignment?.variant !== 'zonal' && Array.isArray(outputFiles)) {
+            if (Array.isArray(outputFiles)) {
+              // NOTE: keep this around as a safeguard for rolling back clsi.
               outputFiles.forEach(file => {
                 file.url = file.url.replace(/^\/zone\/\w/, '')
               })
+            }
+            let pdfDownloadDomain = Settings.pdfDownloadDomain
+            if (
+              assignment?.variant === 'zonal' &&
+              pdfDownloadDomain &&
+              outputUrlPrefix
+            ) {
+              pdfDownloadDomain += outputUrlPrefix
             }
             res.json({
               status,
@@ -113,7 +123,7 @@ module.exports = CompileController = {
               validationProblems,
               stats,
               timings,
-              pdfDownloadDomain: Settings.pdfDownloadDomain,
+              pdfDownloadDomain,
             })
           }
         )

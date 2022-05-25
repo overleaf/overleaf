@@ -96,7 +96,8 @@ module.exports = CompileManager = {
                             clsiServerId,
                             validationProblems,
                             stats,
-                            timings
+                            timings,
+                            outputUrlPrefix
                           ) {
                             if (error != null) {
                               return callback(error)
@@ -109,7 +110,8 @@ module.exports = CompileManager = {
                               limits,
                               validationProblems,
                               stats,
-                              timings
+                              timings,
+                              outputUrlPrefix
                             )
                           }
                         )

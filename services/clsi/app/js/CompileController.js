@@ -122,10 +122,11 @@ module.exports = CompileController = {
                   error: (error != null ? error.message : undefined) || error,
                   stats,
                   timings,
+                  outputUrlPrefix: Settings.apis.clsi.outputUrlPrefix,
                   outputFiles: outputFiles.map(file => {
                     return {
                       url:
-                        `${Settings.apis.clsi.outputUrl}/project/${request.project_id}` +
+                        `${Settings.apis.clsi.url}/project/${request.project_id}` +
                         (request.user_id != null
                           ? `/user/${request.user_id}`
                           : '') +

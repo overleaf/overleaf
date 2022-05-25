@@ -254,6 +254,7 @@ const ClsiManager = {
             const status = compile.status
             const stats = compile.stats
             const timings = compile.timings
+            const outputUrlPrefix = compile.outputUrlPrefix
             const validationProblems = undefined
             callback(
               null,
@@ -262,7 +263,8 @@ const ClsiManager = {
               clsiServerId,
               validationProblems,
               stats,
-              timings
+              timings,
+              outputUrlPrefix
             )
           }
         )

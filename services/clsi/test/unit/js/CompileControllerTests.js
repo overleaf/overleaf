@@ -69,7 +69,8 @@ describe('CompileController', function () {
         '@overleaf/settings': (this.Settings = {
           apis: {
             clsi: {
-              outputUrl: 'http://clsi.example.com',
+              url: 'http://clsi.example.com',
+              outputUrlPrefix: '/zone/b',
             },
           },
         }),
@@ -155,9 +156,41 @@ describe('CompileController', function () {
               error: null,
               stats: this.stats,
               timings: this.timings,
+              outputUrlPrefix: '/zone/b',
               outputFiles: this.output_files.map(file => {
                 return {
-                  url: `${this.Settings.apis.clsi.outputUrl}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
+                  url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
+                  ...file,
+                }
+              }),
+            },
+          })
+          .should.equal(true)
+      })
+    })
+
+    describe('without a outputUrlPrefix', function () {
+      beforeEach(function () {
+        this.Settings.apis.clsi.outputUrlPrefix = ''
+        this.CompileManager.doCompileWithLock = sinon
+          .stub()
+          .yields(null, this.output_files, this.stats, this.timings)
+        this.CompileController.compile(this.req, this.res)
+      })
+
+      it('should return the JSON response with empty outputUrlPrefix', function () {
+        this.res.status.calledWith(200).should.equal(true)
+        this.res.send
+          .calledWith({
+            compile: {
+              status: 'success',
+              error: null,
+              stats: this.stats,
+              timings: this.timings,
+              outputUrlPrefix: '',
+              outputFiles: this.output_files.map(file => {
+                return {
+                  url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
                   ...file,
                 }
               }),
@@ -196,9 +229,10 @@ describe('CompileController', function () {
               error: null,
               stats: this.stats,
               timings: this.timings,
+              outputUrlPrefix: '/zone/b',
               outputFiles: this.output_files.map(file => {
                 return {
-                  url: `${this.Settings.apis.clsi.outputUrl}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
+                  url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
                   ...file,
                 }
               }),
@@ -238,9 +272,10 @@ describe('CompileController', function () {
               error: null,
               stats: this.stats,
               timings: this.timings,
+              outputUrlPrefix: '/zone/b',
               outputFiles: this.output_files.map(file => {
                 return {
-                  url: `${this.Settings.apis.clsi.outputUrl}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
+                  url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
                   ...file,
                 }
               }),
@@ -265,6 +300,7 @@ describe('CompileController', function () {
             compile: {
               status: 'error',
               error: this.message,
+              outputUrlPrefix: '/zone/b',
               outputFiles: [],
               // JSON.stringify will omit these
               stats: undefined,
@@ -292,6 +328,7 @@ describe('CompileController', function () {
             compile: {
               status: 'timedout',
               error: this.message,
+              outputUrlPrefix: '/zone/b',
               outputFiles: [],
               // JSON.stringify will omit these
               stats: undefined,
@@ -317,6 +354,7 @@ describe('CompileController', function () {
             compile: {
               error: null,
               status: 'failure',
+              outputUrlPrefix: '/zone/b',
               outputFiles: [],
               // JSON.stringify will omit these
               stats: undefined,

@@ -93,7 +93,7 @@ describe('CompileController', function () {
         (this.outputFiles = [
           {
             path: 'output.pdf',
-            url: `/zone/b/project/${this.project_id}/user/${this.user_id}/build/id/output.pdf`,
+            url: `/project/${this.project_id}/user/${this.user_id}/build/id/output.pdf`,
             type: 'pdf',
           },
         ])
@@ -101,6 +101,65 @@ describe('CompileController', function () {
     })
 
     describe('zonal downloads', function () {
+      beforeEach(function () {
+        this.settings.pdfDownloadDomain = 'https://compiles.overleaf.test'
+        this.CompileManager.compile = sinon.stub().callsArgWith(
+          3,
+          null,
+          (this.status = 'success'),
+          (this.outputFiles = [
+            {
+              path: 'output.pdf',
+              url: `/project/${this.project_id}/user/${this.user_id}/build/id/output.pdf`,
+              type: 'pdf',
+            },
+          ]),
+          undefined, // clsiServerId
+          undefined, // limits
+          undefined, // validationProblems
+          undefined, // stats
+          undefined, // timings
+          '/zone/b'
+        )
+      })
+
+      describe('when in the default split test variant and with the old clsi deploy', function () {
+        beforeEach(function () {
+          this.getAssignment.yields(null, { variant: 'default' })
+          this.CompileManager.compile = sinon.stub().callsArgWith(
+            3,
+            null,
+            (this.status = 'success'),
+            (this.outputFiles = [
+              {
+                path: 'output.pdf',
+                // The previous clsi version sent the zone prefix in the url
+                url: `/zone/b/project/${this.project_id}/user/${this.user_id}/build/id/output.pdf`,
+                type: 'pdf',
+              },
+            ])
+          )
+          this.CompileController.compile(this.req, this.res, this.next)
+        })
+
+        it('should remove the zone prefix', function () {
+          this.res.statusCode.should.equal(200)
+          this.res.body.should.equal(
+            JSON.stringify({
+              status: this.status,
+              outputFiles: [
+                {
+                  path: 'output.pdf',
+                  url: `/project/${this.project_id}/user/${this.user_id}/build/id/output.pdf`,
+                  type: 'pdf',
+                },
+              ],
+              pdfDownloadDomain: 'https://compiles.overleaf.test',
+            })
+          )
+        })
+      })
+
       describe('when in the default split test variant and not output files were returned', function () {
         beforeEach(function () {
           this.getAssignment.yields(null, { variant: 'default' })
@@ -121,6 +180,7 @@ describe('CompileController', function () {
             JSON.stringify({
               status: this.status,
               outputFiles: null,
+              pdfDownloadDomain: 'https://compiles.overleaf.test',
             })
           )
         })
@@ -144,6 +204,7 @@ describe('CompileController', function () {
                   type: 'pdf',
                 },
               ],
+              pdfDownloadDomain: 'https://compiles.overleaf.test',
             })
           )
         })
@@ -155,7 +216,7 @@ describe('CompileController', function () {
           this.CompileController.compile(this.req, this.res, this.next)
         })
 
-        it('should keep the zone prefix', function () {
+        it('should add the zone prefix', function () {
           this.res.statusCode.should.equal(200)
           this.res.body.should.equal(
             JSON.stringify({
@@ -163,10 +224,11 @@ describe('CompileController', function () {
               outputFiles: [
                 {
                   path: 'output.pdf',
-                  url: `/zone/b/project/${this.project_id}/user/${this.user_id}/build/id/output.pdf`,
+                  url: `/project/${this.project_id}/user/${this.user_id}/build/id/output.pdf`,
                   type: 'pdf',
                 },
               ],
+              pdfDownloadDomain: 'https://compiles.overleaf.test/zone/b',
             })
           )
         })
