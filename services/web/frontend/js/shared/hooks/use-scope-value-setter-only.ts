@@ -1,5 +1,9 @@
-import PropTypes from 'prop-types'
-import { useCallback, useState } from 'react'
+import {
+  type Dispatch,
+  type SetStateAction,
+  useCallback,
+  useState,
+} from 'react'
 import { useIdeContext } from '../context/ide-context'
 import _ from 'lodash'
 
@@ -10,20 +14,17 @@ import _ from 'lodash'
  *
  * The interface is compatible with React.useState(), including
  * the option of passing a function to the setter.
- *
- * @param {string} path - dot '.' path of a property in the Angular scope.
- * @param {any} [defaultValue]
- * @returns {[any, function]} - value and setter function tuple.
  */
-export default function useScopeValueSetterOnly(path, defaultValue) {
-  const { $scope } = useIdeContext({
-    $scope: PropTypes.object.isRequired,
-  })
+export default function useScopeValueSetterOnly<T = any>(
+  path: string, // dot '.' path of a property in the Angular scope.
+  defaultValue?: T
+): [T, Dispatch<SetStateAction<T>>] {
+  const { $scope } = useIdeContext()
 
-  const [value, setValue] = useState(defaultValue)
+  const [value, setValue] = useState<T>(defaultValue)
 
   const scopeSetter = useCallback(
-    newValue => {
+    (newValue: SetStateAction<T>) => {
       setValue(val => {
         const actualNewValue = _.isFunction(newValue) ? newValue(val) : newValue
         $scope.$applyAsync(() => _.set($scope, path, actualNewValue))

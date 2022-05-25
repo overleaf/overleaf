@@ -1,5 +1,10 @@
-import { useCallback, useEffect, useState } from 'react'
-import PropTypes from 'prop-types'
+import {
+  type Dispatch,
+  type SetStateAction,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react'
 import _ from 'lodash'
 import { useIdeContext } from '../context/ide-context'
 
@@ -7,17 +12,14 @@ import { useIdeContext } from '../context/ide-context'
  * Binds a property in an Angular scope making it accessible in a React
  * component. The interface is compatible with React.useState(), including
  * the option of passing a function to the setter.
- *
- * @param {string} path - dot '.' path of a property in the Angular scope.
- * @param {boolean} deep
- * @returns {[any, function]} - Binded value and setter function tuple.
  */
-export default function useScopeValue(path, deep = false) {
-  const { $scope } = useIdeContext({
-    $scope: PropTypes.object.isRequired,
-  })
+export default function useScopeValue<T = any>(
+  path: string, // dot '.' path of a property in the Angular scope
+  deep = false
+): [T, Dispatch<SetStateAction<T>>] {
+  const { $scope } = useIdeContext()
 
-  const [value, setValue] = useState(() => _.get($scope, path))
+  const [value, setValue] = useState<T>(() => _.get($scope, path))
 
   useEffect(() => {
     return $scope.$watch(
@@ -34,7 +36,7 @@ export default function useScopeValue(path, deep = false) {
   }, [path, $scope, deep])
 
   const scopeSetter = useCallback(
-    newValue => {
+    (newValue: SetStateAction<T>) => {
       setValue(val => {
         const actualNewValue = _.isFunction(newValue) ? newValue(val) : newValue
         $scope.$applyAsync(() => _.set($scope, path, actualNewValue))

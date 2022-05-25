@@ -5,6 +5,7 @@ import {
   SetStateAction,
   Dispatch,
 } from 'react'
+import _ from 'lodash'
 import localStorage from '../../infrastructure/local-storage'
 
 function usePersistedState<T>(
@@ -17,10 +18,11 @@ function usePersistedState<T>(
   })
 
   const updateFunction = useCallback(
-    newValue => {
+    (newValue: SetStateAction<T>) => {
       setValue(value => {
-        const actualNewValue =
-          typeof newValue === 'function' ? newValue(value) : newValue
+        const actualNewValue = _.isFunction(newValue)
+          ? newValue(value)
+          : newValue
 
         if (actualNewValue === defaultValue) {
           localStorage.removeItem(key)
