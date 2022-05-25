@@ -128,7 +128,7 @@ script(type='text/ng-template', id='confirmChangePlanModalTemplate')
 			ng-click="cancel()"
 		) #{translate("cancel")}
 		button.btn.btn-success(
-			ng-disabled="state.inflight"
+			ng-disabled="inflight"
 			ng-click="confirmChangePlan()"
 		)
 			span(ng-hide="inflight") #{translate("change_plan")}
@@ -147,7 +147,7 @@ script(type='text/ng-template', id='cancelPendingPlanChangeModalTemplate')
 			ng-click="cancel()"
 		) #{translate("cancel")}
 		button.btn.btn-success(
-			ng-disabled="state.inflight"
+			ng-disabled="inflight"
 			ng-click="confirmCancelPendingPlanChange()"
 		)
 			span(ng-hide="inflight") #{translate("revert_pending_plan_change")}
