@@ -208,8 +208,17 @@ describe('<PdfSynctexControls/>', function () {
       }).should('be.disabled')
 
       cy.wait('@sync-code').should(() => {
+        const messages = sysendTestHelper
+          .getAllBroacastMessages()
+          .map(item => item.args[1])
+
+        const message = messages.find(
+          message => message.event === 'action-setHighlights'
+        )
+
         // synctex is called locally and the result are broadcast for the detached tab
-        expect(sysendTestHelper.getLastBroacastMessage()).to.deep.equal({
+        // NOTE: can't use `.to.deep.include({…})` as it doesn't match the nested array
+        expect(message).to.deep.equal({
           role: 'detacher',
           event: 'action-setHighlights',
           data: { args: [mockHighlights] },
