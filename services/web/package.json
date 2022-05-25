@@ -55,6 +55,7 @@
     "@codemirror/search": "^0.20.1",
     "@codemirror/state": "^0.20.0",
     "@codemirror/view": "^0.20.2",
+    "@lezer/common": "^0.16.0",
     "@lezer/highlight": "^0.16.0",
     "@lezer/lr": "^0.16.3",
     "@overleaf/logger": "^3.1.0",
