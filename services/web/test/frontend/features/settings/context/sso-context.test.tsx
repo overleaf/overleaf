@@ -19,7 +19,7 @@ const mockOauthProviders = {
       link: '/blog/434',
       appName: 'Overleaf',
     },
-    name: 'Orcid',
+    name: 'ORCID',
     linkPath: '/auth/orcid',
   },
   twitter: {

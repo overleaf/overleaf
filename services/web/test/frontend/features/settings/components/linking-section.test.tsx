@@ -28,7 +28,7 @@ const mockOauthProviders = {
       link: '/blog/434',
       appName: 'Overleaf',
     },
-    name: 'Orcid',
+    name: 'ORCID',
     linkPath: '/auth/orcid',
   },
   twitter: {
@@ -77,7 +77,7 @@ describe('<LinkingSection />', function () {
     screen.getByText('Log in with Google.')
     screen.getByRole('button', { name: 'Unlink' })
 
-    screen.getByText('Orcid')
+    screen.getByText('ORCID')
     screen.getByText(
       /Securely establish your identity by linking your ORCID iD/
     )

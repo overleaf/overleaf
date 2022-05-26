@@ -36,7 +36,7 @@ describe('ThirdPartyIdentityManager', function () {
               name: 'Google',
             },
             orcid: {
-              name: 'Orcid',
+              name: 'ORCID',
             },
           },
         },
@@ -174,7 +174,7 @@ describe('ThirdPartyIdentityManager', function () {
       const emailCall = this.EmailHandler.sendEmail.getCall(0)
       expect(emailCall.args[0]).to.equal('securityAlert')
       expect(emailCall.args[1].actionDescribed).to.contain(
-        'an Orcid account was unlinked from'
+        'an ORCID account was unlinked from'
       )
     })
     it('should update user audit log', async function () {
