@@ -120,7 +120,7 @@ aside#left-menu.full-size(
 			if dictionaryEditorEnabled
 				.form-controls(ng-controller="DictionaryModalController")
 					label #{translate("dictionary")}
-					button.btn.btn-default.btn-sm(ng-click="openModal()") #{translate("edit")}
+					button.btn.btn-default.btn-xs(ng-click="openModal()") #{translate("edit")}
 
 					dictionary-modal(
 						handle-hide="handleHide"

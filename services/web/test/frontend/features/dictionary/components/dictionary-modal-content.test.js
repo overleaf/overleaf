@@ -33,7 +33,7 @@ describe('<DictionaryModalContent />', function () {
 
   it('removes words', async function () {
     fetchMock.post('/spelling/unlearn', 200)
-    setLearnedWords(['foo', 'bar'])
+    setLearnedWords(['Foo', 'bar'])
     renderWithEditorContext(<DictionaryModal show handleHide={() => {}} />)
     screen.getByText('bar')
     const [firstButton] = screen.getAllByRole('button', {
@@ -41,7 +41,7 @@ describe('<DictionaryModalContent />', function () {
     })
     fireEvent.click(firstButton)
     expect(screen.queryByText('bar')).to.not.exist
-    screen.getByText('foo')
+    screen.getByText('Foo')
   })
 
   it('handles errors', async function () {
