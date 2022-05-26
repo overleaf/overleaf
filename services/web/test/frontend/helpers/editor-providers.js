@@ -55,6 +55,13 @@ export function EditorProviders({
     getCurrentDocValue: () => {},
     openDoc: sinon.stub(),
   },
+  metadataManager = {
+    metadata: {
+      state: {
+        documents: {},
+      },
+    },
+  },
 }) {
   window.user = user || window.user
   window.gitBridgePublicBaseUrl = 'git.overleaf.test'
@@ -84,14 +91,6 @@ export function EditorProviders({
     toggleHistory: sinon.stub(),
     permissionsLevel,
     ...scope,
-  }
-
-  const metadataManager = {
-    metadata: {
-      state: {
-        documents: {},
-      },
-    },
   }
 
   window._ide = {

@@ -1,7 +1,10 @@
+import { Doc } from './doc'
+import { FileRef } from './fileref'
+
 export type Folder = {
   _id: string
   name: string
-  docs: []
-  folders: []
-  fileRefs: []
+  docs: Doc[]
+  folders: Folder[]
+  fileRefs: FileRef[]
 }
