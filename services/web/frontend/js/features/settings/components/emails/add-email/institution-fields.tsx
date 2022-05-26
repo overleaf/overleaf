@@ -107,7 +107,13 @@ function InstitutionFields({
       return []
     }
 
-    return universities[countryCode]?.map(({ name }) => name) ?? []
+    return (
+      universities[countryCode]
+        ?.map(({ name }) => name)
+        .filter(name =>
+          name.trim().toLowerCase().includes(universityName.toLowerCase())
+        ) ?? []
+    )
   }
 
   const handleShowInstitutionFields = () => {
