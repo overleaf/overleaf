@@ -5,6 +5,10 @@ const async = require('async')
 const FeaturesUpdater = require('../app/src/Features/Subscription/FeaturesUpdater')
 const FeaturesHelper = require('../app/src/Features/Subscription/FeaturesHelper')
 const UserFeaturesUpdater = require('../app/src/Features/Subscription/UserFeaturesUpdater')
+const AnalyticsManager = require('../app/src/Features/Analytics/AnalyticsManager')
+const DropboxHandler = require('../modules/dropbox/app/src/DropboxHandler')
+const { OError } = require('../app/src/Features/Errors/Errors')
+const logger = require('@overleaf/logger')
 
 const ScriptLogger = {
   checkedUsersCount: 0,
@@ -76,7 +80,44 @@ const checkAndUpdateUser = (user, callback) =>
       return callback()
     }
 
-    UserFeaturesUpdater.overrideFeatures(user._id, freshFeatures, callback)
+    const matchedFeatureSet = FeaturesHelper.getMatchedFeatureSet(freshFeatures)
+    AnalyticsManager.setUserPropertyForUser(
+      user._id,
+      'feature-set',
+      matchedFeatureSet
+    )
+
+    UserFeaturesUpdater.overrideFeatures(
+      user._id,
+      freshFeatures,
+      (error, featuresChanged) => {
+        if (error) {
+          return callback(error)
+        }
+        if (
+          mismatchReasons.dropbox !== undefined &&
+          freshFeatures.dropbox === false
+        ) {
+          DropboxHandler.unlinkAccount(
+            user._id,
+            { sendEmail: false },
+            error => {
+              if (error) {
+                return callback(
+                  OError.tag(error, 'error unlinking dropbox', {
+                    userId: user._id,
+                  })
+                )
+              }
+              logger.log({ userId: user._id }, 'Unlinked dropbox')
+              callback(null, featuresChanged)
+            }
+          )
+        } else {
+          callback(null, featuresChanged)
+        }
+      }
+    )
   })
 
 const checkAndUpdateUsers = (users, callback) =>

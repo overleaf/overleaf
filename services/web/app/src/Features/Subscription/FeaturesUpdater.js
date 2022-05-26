@@ -96,12 +96,11 @@ async function computeFeatures(userId) {
     bonusFeatures,
     featuresOverrides,
   ])
-  const features = _.reduce(
+  return _.reduce(
     featureSets,
     FeaturesHelper.mergeFeatures,
     Settings.defaultFeatures
   )
-  return features
 }
 
 async function _getIndividualFeatures(userId) {
@@ -131,12 +130,7 @@ async function _getFeaturesOverrides(user) {
       activeFeaturesOverrides.push(featuresOverride.features)
     }
   }
-  const features = _.reduce(
-    activeFeaturesOverrides,
-    FeaturesHelper.mergeFeatures,
-    {}
-  )
-  return features
+  return _.reduce(activeFeaturesOverrides, FeaturesHelper.mergeFeatures, {})
 }
 
 async function _getV1Features(user) {
