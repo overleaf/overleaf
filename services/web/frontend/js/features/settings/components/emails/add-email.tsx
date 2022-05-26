@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Col } from 'react-bootstrap'
 import Cell from './cell'
 import Layout from './add-email/layout'
-import Input, { InstitutionInfo } from './add-email/input'
+import Input, { DomainInfo } from './add-email/input'
 import AddAnotherEmailBtn from './add-email/add-another-email-btn'
 import InstitutionFields from './add-email/institution-fields'
 import SsoLinkingInfo from './add-email/sso-linking-info'
@@ -21,8 +21,8 @@ function AddEmail() {
     () => window.location.hash === '#add-email'
   )
   const [newEmail, setNewEmail] = useState('')
-  const [newEmailMatchedInstitution, setNewEmailMatchedInstitution] =
-    useState<InstitutionInfo | null>(null)
+  const [newEmailMatchedDomain, setNewEmailMatchedDomain] =
+    useState<DomainInfo | null>(null)
   const [countryCode, setCountryCode] = useState<CountryCode | null>(null)
   const [universities, setUniversities] = useState<
     Partial<Record<CountryCode, University[]>>
@@ -45,9 +45,9 @@ function AddEmail() {
     setIsFormVisible(true)
   }
 
-  const handleEmailChange = (value: string, institution?: InstitutionInfo) => {
+  const handleEmailChange = (value: string, domain?: DomainInfo) => {
     setNewEmail(value)
-    setNewEmailMatchedInstitution(institution || null)
+    setNewEmailMatchedDomain(domain || null)
   }
 
   const getSelectedKnownUniversityId = (): number | undefined => {
@@ -57,7 +57,7 @@ function AddEmail() {
       )?.id
     }
 
-    return newEmailMatchedInstitution?.university.id
+    return newEmailMatchedDomain?.university.id
   }
 
   const handleAddNewEmail = () => {
@@ -120,12 +120,12 @@ function AddEmail() {
             />
           </Cell>
         </Col>
-        {ssoAvailableForDomain(newEmailMatchedInstitution) ? (
+        {ssoAvailableForDomain(newEmailMatchedDomain) ? (
           <Col md={8}>
             <Cell>
               <SsoLinkingInfo
                 email={newEmail}
-                institutionInfo={newEmailMatchedInstitution}
+                domainInfo={newEmailMatchedDomain}
               />
             </Cell>
           </Col>
@@ -144,7 +144,7 @@ function AddEmail() {
                   setRole={setRole}
                   department={department}
                   setDepartment={setDepartment}
-                  newEmailMatchedInstitution={newEmailMatchedInstitution}
+                  newEmailMatchedDomain={newEmailMatchedDomain}
                 />
               </Cell>
             </Col>

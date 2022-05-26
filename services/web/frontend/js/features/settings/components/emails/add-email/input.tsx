@@ -21,7 +21,7 @@ function matchLocalAndDomain(emailHint: string) {
   }
 }
 
-export type InstitutionInfo = {
+export type DomainInfo = {
   hostname: string
   confirmed?: boolean
   university: {
@@ -32,14 +32,14 @@ export type InstitutionInfo = {
   }
 }
 
-let domainCache = new Map<string, InstitutionInfo>()
+let domainCache = new Map<string, DomainInfo>()
 
 export function clearDomainCache() {
-  domainCache = new Map<string, InstitutionInfo>()
+  domainCache = new Map<string, DomainInfo>()
 }
 
 type InputProps = {
-  onChange: (value: string, institution?: InstitutionInfo) => void
+  onChange: (value: string, domain?: DomainInfo) => void
   handleAddNewEmail: () => void
 }
 
@@ -49,8 +49,7 @@ function Input({ onChange, handleAddNewEmail }: InputProps) {
   const inputRef = useRef<HTMLInputElement | null>(null)
   const [suggestion, setSuggestion] = useState<string | null>(null)
   const [inputValue, setInputValue] = useState<string | null>(null)
-  const [matchedInstitution, setMatchedInstitution] =
-    useState<InstitutionInfo | null>(null)
+  const [matchedDomain, setMatchedDomain] = useState<DomainInfo | null>(null)
 
   useEffect(() => {
     inputRef.current?.focus()
@@ -60,22 +59,19 @@ function Input({ onChange, handleAddNewEmail }: InputProps) {
     if (inputValue == null) {
       return
     }
-    if (
-      matchedInstitution &&
-      inputValue.endsWith(matchedInstitution.hostname)
-    ) {
-      onChange(inputValue, matchedInstitution)
+    if (matchedDomain && inputValue.endsWith(matchedDomain.hostname)) {
+      onChange(inputValue, matchedDomain)
     } else {
       onChange(inputValue)
     }
-  }, [onChange, inputValue, suggestion, matchedInstitution])
+  }, [onChange, inputValue, suggestion, matchedDomain])
 
   const handleEmailChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
       const hint = event.target.value
       setInputValue(hint)
       const match = matchLocalAndDomain(hint)
-      if (!matchedInstitution?.hostname.startsWith(match.domain)) {
+      if (!matchedDomain?.hostname.startsWith(match.domain)) {
         setSuggestion(null)
       }
       if (!match.domain) {
@@ -84,11 +80,13 @@ function Input({ onChange, handleAddNewEmail }: InputProps) {
       if (domainCache.has(match.domain)) {
         const cachedDomain = domainCache.get(match.domain)
         setSuggestion(`${match.local}@${cachedDomain.hostname}`)
-        setMatchedInstitution(cachedDomain)
+        setMatchedDomain(cachedDomain)
         return
       }
       const query = `?hostname=${match.domain}&limit=1`
-      getJSON(`/institutions/domains${query}`, { signal })
+      getJSON<Nullable<DomainInfo[]>>(`/institutions/domains${query}`, {
+        signal,
+      })
         .then(data => {
           if (!(data && data[0])) {
             return
@@ -100,19 +98,19 @@ function Input({ onChange, handleAddNewEmail }: InputProps) {
           if (hostname) {
             domainCache.set(match.domain, data[0])
             setSuggestion(`${match.local}@${hostname}`)
-            setMatchedInstitution(data[0])
+            setMatchedDomain(data[0])
           } else {
             setSuggestion(null)
-            setMatchedInstitution(null)
+            setMatchedDomain(null)
           }
         })
         .catch(error => {
           setSuggestion(null)
-          setMatchedInstitution(null)
+          setMatchedDomain(null)
           console.error(error)
         })
     },
-    [signal, matchedInstitution]
+    [signal, matchedDomain]
   )
 
   const handleKeyDownEvent = useCallback(

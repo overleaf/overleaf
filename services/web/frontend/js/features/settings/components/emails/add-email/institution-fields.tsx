@@ -7,7 +7,7 @@ import defaultRoles from '../../../data/roles'
 import defaultDepartments from '../../../data/departments'
 import { CountryCode } from '../../../data/countries-list'
 import { University } from '../../../../../../../types/university'
-import { InstitutionInfo } from './input'
+import { DomainInfo } from './input'
 import { getJSON } from '../../../../../infrastructure/fetch-json'
 import useAsync from '../../../../../shared/hooks/use-async'
 import UniversityName from './university-name'
@@ -25,7 +25,7 @@ type InstitutionFieldsProps = {
   setRole: React.Dispatch<React.SetStateAction<string>>
   department: string
   setDepartment: React.Dispatch<React.SetStateAction<string>>
-  newEmailMatchedInstitution: InstitutionInfo | null
+  newEmailMatchedDomain: DomainInfo | null
 }
 
 function InstitutionFields({
@@ -39,7 +39,7 @@ function InstitutionFields({
   setRole,
   department,
   setDepartment,
-  newEmailMatchedInstitution,
+  newEmailMatchedDomain,
 }: InstitutionFieldsProps) {
   const { t } = useTranslation()
   const countryRef = useRef<HTMLInputElement | null>(null)
@@ -66,12 +66,12 @@ function InstitutionFields({
   // If the institution selected by autocompletion has changed
   // hide the fields visibility and reset values
   useEffect(() => {
-    if (!newEmailMatchedInstitution) {
+    if (!newEmailMatchedDomain) {
       setIsInstitutionFieldsVisible(false)
       setRole('')
       setDepartment('')
     }
-  }, [newEmailMatchedInstitution, setRole, setDepartment])
+  }, [newEmailMatchedDomain, setRole, setDepartment])
 
   useEffect(() => {
     const selectedKnownUniversity = countryCode
@@ -121,9 +121,9 @@ function InstitutionFields({
   }
 
   const isLetUsKnowVisible =
-    !newEmailMatchedInstitution && !isInstitutionFieldsVisible
+    !newEmailMatchedDomain && !isInstitutionFieldsVisible
   const isAutocompletedInstitutionVisible =
-    newEmailMatchedInstitution && !isInstitutionFieldsVisible
+    newEmailMatchedDomain && !isInstitutionFieldsVisible
   const isRoleAndDepartmentVisible =
     isAutocompletedInstitutionVisible || isUniversityDirty
 
@@ -139,7 +139,7 @@ function InstitutionFields({
       {isAutocompletedInstitutionVisible ? (
         // Display the institution name after autocompletion
         <UniversityName
-          name={newEmailMatchedInstitution.university.name}
+          name={newEmailMatchedDomain.university.name}
           onClick={handleSelectUniversityManually}
         />
       ) : (

@@ -1,9 +1,9 @@
 import getMeta from '../../../utils/meta'
-import { InstitutionInfo } from '../components/emails/add-email/input'
+import { DomainInfo } from '../components/emails/add-email/input'
 import { ExposedSettings } from '../../../../../types/exposed-settings'
 import { Institution } from '../../../../../types/institution'
 
-export const ssoAvailableForDomain = (domain: InstitutionInfo | null) => {
+export const ssoAvailableForDomain = (domain: DomainInfo | null) => {
   const { hasSamlBeta, hasSamlFeature } = getMeta(
     'ol-ExposedSettings'
   ) as ExposedSettings
