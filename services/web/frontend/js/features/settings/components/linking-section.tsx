@@ -13,12 +13,12 @@ function LinkingSection() {
   const projectSyncSuccessMessage = getMeta(
     'ol-projectSyncSuccessMessage'
   ) as string
-  const [integrationLinkingWidgets] = useState(
+  const [integrationLinkingWidgets] = useState<any[]>(
     () =>
       getMeta('integrationLinkingWidgets') ||
       importOverleafModules('integrationLinkingWidgets')
   )
-  const [referenceLinkingWidgets] = useState(
+  const [referenceLinkingWidgets] = useState<any[]>(
     () =>
       getMeta('referenceLinkingWidgets') ||
       importOverleafModules('referenceLinkingWidgets')
@@ -139,7 +139,7 @@ function SSOLinkingWidgetContainer({
   const { t } = useTranslation()
   const { unlink } = useSSOContext()
 
-  let description = null
+  let description = ''
   switch (subscription.providerId) {
     case 'collabratec':
       description = t('linked_collabratec_description')

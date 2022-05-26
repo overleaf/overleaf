@@ -35,24 +35,20 @@ export function SSOAlert() {
   const handleErrorClosed = () => setErrorClosed(true)
 
   if (samlError) {
-    return (
-      !errorClosed && (
-        <Alert bsStyle="danger" className="mb-0" onDismiss={handleErrorClosed}>
-          <p className="text-center">
-            <Icon
-              type="exclamation-triangle"
-              accessibilityLabel={t('generic_something_went_wrong')}
-            />{' '}
-            {samlError.translatedMessage
-              ? samlError.translatedMessage
-              : samlError.message}
-          </p>
-          {samlError.tryAgain && (
-            <p className="text-center">{t('try_again')}</p>
-          )}
-        </Alert>
-      )
-    )
+    return !errorClosed ? (
+      <Alert bsStyle="danger" className="mb-0" onDismiss={handleErrorClosed}>
+        <p className="text-center">
+          <Icon
+            type="exclamation-triangle"
+            accessibilityLabel={t('generic_something_went_wrong')}
+          />{' '}
+          {samlError.translatedMessage
+            ? samlError.translatedMessage
+            : samlError.message}
+        </p>
+        {samlError.tryAgain && <p className="text-center">{t('try_again')}</p>}
+      </Alert>
+    ) : null
   }
 
   if (!institutionLinked) {

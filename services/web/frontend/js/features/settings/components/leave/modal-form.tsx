@@ -24,11 +24,15 @@ function LeaveModalForm({
   const [confirmation, setConfirmation] = useState(false)
   const [error, setError] = useState<FetchError | null>(null)
 
-  const handleEmailChange = event => {
+  const handleEmailChange = (
+    event: React.ChangeEvent<HTMLFormElement & FormControl>
+  ) => {
     setEmail(event.target.value)
   }
 
-  const handlePasswordChange = event => {
+  const handlePasswordChange = (
+    event: React.ChangeEvent<HTMLFormElement & FormControl>
+  ) => {
     setPassword(event.target.value)
   }
 
@@ -36,7 +40,7 @@ function LeaveModalForm({
     setConfirmation(prev => !prev)
   }
 
-  const handleSubmit = event => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!isFormValid) {
       return

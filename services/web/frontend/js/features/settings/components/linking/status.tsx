@@ -4,7 +4,7 @@ import Icon from '../../../../shared/components/icon'
 type Status = 'pending' | 'success' | 'error'
 
 type LinkingStatusProps = {
-  status?: Status
+  status: Status
   description: string | ReactNode
 }
 

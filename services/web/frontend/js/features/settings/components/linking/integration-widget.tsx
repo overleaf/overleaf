@@ -141,7 +141,9 @@ function UnlinkConfirmationModal({
 }: UnlinkConfirmModalProps) {
   const { t } = useTranslation()
 
-  const handleCancel = event => {
+  const handleCancel = (
+    event: React.MouseEvent<HTMLButtonElement & Button>
+  ) => {
     event.preventDefault()
     handleHide()
   }

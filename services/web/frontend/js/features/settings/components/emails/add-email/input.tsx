@@ -70,20 +70,20 @@ function Input({ onChange, handleAddNewEmail }: InputProps) {
     (event: ChangeEvent<HTMLInputElement>) => {
       const hint = event.target.value
       setInputValue(hint)
-      const match = matchLocalAndDomain(hint)
-      if (!matchedDomain?.hostname.startsWith(match.domain)) {
+      const { local, domain } = matchLocalAndDomain(hint)
+      if (domain && !matchedDomain?.hostname.startsWith(domain)) {
         setSuggestion(null)
       }
-      if (!match.domain) {
+      if (!domain) {
         return
       }
-      if (domainCache.has(match.domain)) {
-        const cachedDomain = domainCache.get(match.domain)
-        setSuggestion(`${match.local}@${cachedDomain.hostname}`)
+      if (domainCache.has(domain)) {
+        const cachedDomain = domainCache.get(domain) as DomainInfo
+        setSuggestion(`${local}@${cachedDomain.hostname}`)
         setMatchedDomain(cachedDomain)
         return
       }
-      const query = `?hostname=${match.domain}&limit=1`
+      const query = `?hostname=${domain}&limit=1`
       getJSON<Nullable<DomainInfo[]>>(`/institutions/domains${query}`, {
         signal,
       })
@@ -96,8 +96,8 @@ function Input({ onChange, handleAddNewEmail }: InputProps) {
           }
           const hostname = data[0]?.hostname
           if (hostname) {
-            domainCache.set(match.domain, data[0])
-            setSuggestion(`${match.local}@${hostname}`)
+            domainCache.set(domain, data[0])
+            setSuggestion(`${local}@${hostname}`)
             setMatchedDomain(data[0])
           } else {
             setSuggestion(null)
@@ -142,7 +142,7 @@ function Input({ onChange, handleAddNewEmail }: InputProps) {
   )
 
   useEffect(() => {
-    if (suggestion && !suggestion.startsWith(inputValue)) {
+    if (suggestion && inputValue && !suggestion.startsWith(inputValue)) {
       setSuggestion(null)
     }
   }, [suggestion, inputValue])

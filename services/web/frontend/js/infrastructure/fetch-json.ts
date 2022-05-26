@@ -79,7 +79,9 @@ export class FetchError extends OError {
   getUserFacingMessage() {
     const statusCode = this.response?.status
     const defaultMessage = getErrorMessageForStatusCode(statusCode)
-    const message = this.data?.message?.text || this.data?.message
+    const message = (this.data?.message?.text || this.data?.message) as
+      | string
+      | undefined
     if (message && message !== defaultMessage) return message
 
     const statusCodes: { readonly [K: number]: string } = {
@@ -208,11 +210,14 @@ async function parseResponseBody(response: Response) {
   return {}
 }
 
-export function getUserFacingMessage(error: Error): string {
+export function getUserFacingMessage(error: Error | null) {
+  if (!error) {
+    return undefined
+  }
+
   if (error instanceof FetchError) {
     return error.getUserFacingMessage()
-  } else {
-    // checking existence of `error` to prevent errors when called from Javascript
-    return error?.message
   }
+
+  return error.message
 }

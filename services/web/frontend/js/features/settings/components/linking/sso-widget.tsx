@@ -8,7 +8,7 @@ import GoogleLogo from '../../../../shared/svgs/google-logo'
 import OrcidLogo from '../../../../shared/svgs/orcid-logo'
 import LinkingStatus from './status'
 
-const providerLogos = {
+const providerLogos: { readonly [p: string]: JSX.Element } = {
   collabratec: <IEEELogo />,
   google: <GoogleLogo />,
   orcid: <OrcidLogo />,
@@ -95,6 +95,7 @@ export function SSOLinkingWidget({
     </div>
   )
 }
+
 type ActionButtonProps = {
   unlinkRequestInflight: boolean
   accountIsLinked?: boolean

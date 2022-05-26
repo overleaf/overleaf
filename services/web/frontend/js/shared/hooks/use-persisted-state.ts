@@ -38,7 +38,7 @@ function usePersistedState<T>(
 
   useEffect(() => {
     if (listen) {
-      const listener = event => {
+      const listener = (event: StorageEvent) => {
         if (event.key === key) {
           // note: this value is read via getItem rather than from event.newValue
           // because getItem handles deserializing the JSON that's stored in localStorage.

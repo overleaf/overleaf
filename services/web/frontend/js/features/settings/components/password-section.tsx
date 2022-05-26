@@ -72,16 +72,22 @@ function PasswordForm() {
   const [isNewPasswordValid, setIsNewPasswordValid] = useState(false)
   const [isFormValid, setIsFormValid] = useState(false)
 
-  const handleCurrentPasswordChange = event => {
+  const handleCurrentPasswordChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setCurrentPassword(event.target.value)
   }
 
-  const handleNewPassword1Change = event => {
+  const handleNewPassword1Change = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setNewPassword1(event.target.value)
     setIsNewPasswordValid(event.target.validity.valid)
   }
 
-  const handleNewPassword2Change = event => {
+  const handleNewPassword2Change = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setNewPassword2(event.target.value)
   }
 
@@ -91,7 +97,7 @@ function PasswordForm() {
     )
   }, [currentPassword, newPassword1, newPassword2, isNewPasswordValid])
 
-  const handleSubmit = event => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!isFormValid) {
       return
@@ -157,7 +163,7 @@ type PasswordFormGroupProps = {
   id: string
   label: string
   value: string
-  handleChange: (event: any) => void
+  handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void
   minLength?: number
   validationMessage?: string
 }
@@ -173,11 +179,15 @@ function PasswordFormGroup({
   const [validationMessage, setValidationMessage] = useState('')
   const [hadInteraction, setHadInteraction] = useState(false)
 
-  const handleInvalid = event => {
+  const handleInvalid = (
+    event: React.InvalidEvent<HTMLInputElement & FormControl>
+  ) => {
     event.preventDefault()
   }
 
-  const handleChangeAndValidity = event => {
+  const handleChangeAndValidity = (
+    event: React.ChangeEvent<HTMLInputElement & FormControl>
+  ) => {
     handleChange(event)
     setHadInteraction(true)
     setValidationMessage(event.target.validationMessage)

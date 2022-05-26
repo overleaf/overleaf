@@ -39,16 +39,18 @@ function AccountInfoSection() {
   const { isLoading, isSuccess, isError, error, runAsync } = useAsync()
   const [isFormValid, setIsFormValid] = useState(true)
 
-  const handleEmailChange = event => {
+  const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(event.target.value)
     setIsFormValid(event.target.validity.valid)
   }
 
-  const handleFirstNameChange = event => {
+  const handleFirstNameChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setFirstName(event.target.value)
   }
 
-  const handleLastNameChange = event => {
+  const handleLastNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setLastName(event.target.value)
   }
 
@@ -56,7 +58,7 @@ function AccountInfoSection() {
     !hasAffiliationsFeature && !isExternalAuthenticationSystemUsed
   const canUpdateNames = shouldAllowEditingDetails
 
-  const handleSubmit = event => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!isFormValid) {
       return
@@ -151,11 +153,15 @@ function ReadOrWriteFormGroup({
 }: ReadOrWriteFormGroupProps) {
   const [validationMessage, setValidationMessage] = useState('')
 
-  const handleInvalid = event => {
+  const handleInvalid = (
+    event: React.InvalidEvent<HTMLInputElement & FormControl>
+  ) => {
     event.preventDefault()
   }
 
-  const handleChangeAndValidity = event => {
+  const handleChangeAndValidity = (
+    event: React.ChangeEvent<HTMLInputElement & FormControl>
+  ) => {
     handleChange(event)
     setValidationMessage(event.target.validationMessage)
   }
