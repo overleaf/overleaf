@@ -152,7 +152,7 @@ const initialize = () => {
       'gv',
       'mf',
     ],
-  }
+  } as typeof window.ExposedSettings
 
   window.project_id = project._id
 

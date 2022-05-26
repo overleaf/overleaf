@@ -17,6 +17,7 @@ FROM base as deps
 COPY package.json package-lock.json /overleaf/
 COPY services/web/package.json /overleaf/services/web/
 COPY libraries/ /overleaf/libraries/
+COPY patches/ /overleaf/patches/
 
 ENV CYPRESS_INSTALL_BINARY=0
 

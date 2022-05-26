@@ -436,9 +436,8 @@ lint: lint_flag_res_send_usage
 lint_flag_res_send_usage:
 	bin/lint_flag_res_send_usage
 
-#lint: typecheck_frontend
+lint: typecheck_frontend
 typecheck_frontend:
-	cd ../.. && npx patch-package
 	npx tsc --noEmit
 
 lint_in_docker:

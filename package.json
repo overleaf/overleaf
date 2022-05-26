@@ -19,7 +19,8 @@
     "format": "prettier --list-different $PWD/'**/*.js'",
     "format:fix": "prettier --write $PWD/'**/*.js'",
     "lint": "eslint --max-warnings 0 --format unix .",
-    "lint:fix": "eslint --fix ."
+    "lint:fix": "eslint --fix .",
+    "postinstall": "patch-package"
   },
   "workspaces": [
     "libraries/*",
