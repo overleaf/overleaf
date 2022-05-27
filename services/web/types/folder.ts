@@ -1,5 +1,5 @@
 import { Doc } from './doc'
-import { FileRef } from './fileref'
+import { FileRef } from './file-ref'
 
 export type Folder = {
   _id: string

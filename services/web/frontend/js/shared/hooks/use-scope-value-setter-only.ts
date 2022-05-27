@@ -18,13 +18,13 @@ import _ from 'lodash'
 export default function useScopeValueSetterOnly<T = any>(
   path: string, // dot '.' path of a property in the Angular scope.
   defaultValue?: T
-): [T, Dispatch<SetStateAction<T>>] {
+): [T | undefined, Dispatch<SetStateAction<T | undefined>>] {
   const { $scope } = useIdeContext()
 
-  const [value, setValue] = useState<T>(defaultValue)
+  const [value, setValue] = useState<T | undefined>(defaultValue)
 
   const scopeSetter = useCallback(
-    (newValue: SetStateAction<T>) => {
+    (newValue: SetStateAction<T | undefined>) => {
       setValue(val => {
         const actualNewValue = _.isFunction(newValue) ? newValue(val) : newValue
         $scope.$applyAsync(() => _.set($scope, path, actualNewValue))

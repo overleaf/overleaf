@@ -8,7 +8,7 @@ import {
 import _ from 'lodash'
 import localStorage from '../../infrastructure/local-storage'
 
-function usePersistedState<T>(
+function usePersistedState<T = any>(
   key: string,
   defaultValue?: T,
   listen = false

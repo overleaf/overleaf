@@ -2,7 +2,7 @@ import getMeta from '../../utils/meta'
 import { IGNORED_MISSPELLINGS } from '../../ide/editor/directives/aceEditor/spell-check/IgnoredMisspellings'
 
 export class IgnoredWords {
-  public learnedWords: Set<string>
+  public learnedWords!: Set<string>
   private ignoredMisspellings: Set<string>
 
   constructor() {
@@ -16,21 +16,21 @@ export class IgnoredWords {
     window.dispatchEvent(new CustomEvent('learnedWords:reset'))
   }
 
-  add(wordText) {
+  add(wordText: string) {
     this.learnedWords.add(wordText)
     window.dispatchEvent(
       new CustomEvent('learnedWords:add', { detail: wordText })
     )
   }
 
-  remove(wordText) {
+  remove(wordText: string) {
     this.learnedWords.delete(wordText)
     window.dispatchEvent(
       new CustomEvent('learnedWords:remove', { detail: wordText })
     )
   }
 
-  has(wordText) {
+  has(wordText: string) {
     return (
       this.ignoredMisspellings.has(wordText) || this.learnedWords.has(wordText)
     )

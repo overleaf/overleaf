@@ -5,7 +5,9 @@ fetchMock.config.fallbackToNetwork = true
 /**
  * Run callback to mock fetch routes, call restore() when unmounted
  */
-export default function useFetchMock(callback) {
+export default function useFetchMock(
+  callback: (value: typeof fetchMock) => void
+) {
   useLayoutEffect(() => {
     callback(fetchMock)
 

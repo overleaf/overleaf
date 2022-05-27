@@ -24,7 +24,7 @@ export default function useScopeValue<T = any>(
   useEffect(() => {
     return $scope.$watch(
       path,
-      newValue => {
+      (newValue: T) => {
         setValue(() => {
           // NOTE: this is deliberately wrapped in a function,
           // to avoid calling setValue directly with a value that's a function

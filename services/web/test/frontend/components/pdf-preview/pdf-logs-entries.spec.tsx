@@ -21,7 +21,7 @@ describe('<PdfLogsEntries/>', function () {
     },
   ]
 
-  let props
+  let props: Record<string, any>
 
   beforeEach(function () {
     props = {

@@ -4,7 +4,7 @@ import PdfPreview from '../../../../frontend/js/features/pdf-preview/components/
 import { EditorProviders } from '../../helpers/editor-providers'
 import { mockScope } from './scope'
 
-const storeAndFireEvent = (win, key, value) => {
+const storeAndFireEvent = (win: typeof window, key: string, value: unknown) => {
   localStorage.setItem(key, value)
   win.dispatchEvent(new StorageEvent('storage', { key }))
 }
@@ -98,7 +98,7 @@ describe('<PdfPreview/>', function () {
   })
 
   it('does not compile while compiling', function () {
-    let compileResolve
+    let compileResolve: (value?: unknown) => void
     let counter = 0
 
     const promise = new Promise(resolve => {

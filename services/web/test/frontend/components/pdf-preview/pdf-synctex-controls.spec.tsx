@@ -25,15 +25,25 @@ const mockHighlights = [
   },
 ]
 
-const mockPosition = {
+type Position = {
+  page: number
+  offset: { top: number; left: number }
+  pageSize: { height: number; width: number }
+}
+
+const mockPosition: Position = {
   page: 1,
   offset: { top: 10, left: 10 },
   pageSize: { height: 500, width: 500 },
 }
 
-const mockSelectedEntities = [{ type: 'doc' }]
+type Entity = {
+  type: string
+}
 
-const WithPosition = ({ mockPosition }) => {
+const mockSelectedEntities: Entity[] = [{ type: 'doc' }]
+
+const WithPosition = ({ mockPosition }: { mockPosition: Position }) => {
   const { setPosition } = useCompileContext()
 
   // mock PDF scroll position update
@@ -44,7 +54,11 @@ const WithPosition = ({ mockPosition }) => {
   return null
 }
 
-const WithSelectedEntities = ({ mockSelectedEntities = [] }) => {
+const WithSelectedEntities = ({
+  mockSelectedEntities = [],
+}: {
+  mockSelectedEntities: Entity[]
+}) => {
   const { setSelectedEntities } = useFileTreeData()
 
   useEffect(() => {
@@ -210,10 +224,10 @@ describe('<PdfSynctexControls/>', function () {
       cy.wait('@sync-code').should(() => {
         const messages = sysendTestHelper
           .getAllBroacastMessages()
-          .map(item => item.args[1])
+          .map((item: any) => item.args[1])
 
         const message = messages.find(
-          message => message.event === 'action-setHighlights'
+          (message: any) => message.event === 'action-setHighlights'
         )
 
         // synctex is called locally and the result are broadcast for the detached tab

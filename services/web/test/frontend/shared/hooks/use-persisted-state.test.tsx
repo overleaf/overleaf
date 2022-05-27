@@ -119,7 +119,7 @@ describe('usePersistedState', function () {
     expect(window.Storage.prototype.setItem).to.have.callCount(1)
 
     const Test = () => {
-      const [value, setValue] = usePersistedState(key)
+      const [value, setValue] = usePersistedState<string>(key)
 
       useEffect(() => {
         setValue(value => value + 'bar')
