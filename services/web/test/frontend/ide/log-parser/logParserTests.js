@@ -84,6 +84,13 @@ describe('logParser', function (done) {
         flag: 'r',
       }
     )
+    this.issue1023Log = fs.readFileSync(
+      path.resolve(__dirname, fixturePath + 'open-source-issue-1023.log'),
+      {
+        encoding: 'utf8',
+        flag: 'r',
+      }
+    )
   })
 
   it('should parse errors', function () {
@@ -568,5 +575,51 @@ describe('logParser', function (done) {
     expect(
       styleError.message.indexOf("I couldn't open style file aa.bst")
     ).to.equal(0)
+  })
+
+  // https://github.com/overleaf/overleaf/issues/1023
+  it('should parse logs from issue 1023', function () {
+    const latexParser = new LatexLogParser(this.issue1023Log)
+    const { errors, warnings } = latexParser.parse()
+    expect(errors.map(x => [x.line, x.message, x.file])).to.deep.equal([
+      [38, 'Package PACKAGE Error: TEXT PackageError.', './main.tex'],
+      [45, 'Class PACKAGE Error: TEXT ClassError.', './main.tex'],
+      [53, 'LaTeX Error: TEXT @latex@error.', './main.tex'],
+      [72, 'Package PACKAGE Error: TEXT msg_error package', './main.tex'],
+      [84, 'Class PACKAGE Error: TEXT msg_error class', './main.tex'],
+      [97, 'LaTeX3 Error: TEXT msg_error latex3', './main.tex'],
+      [
+        6,
+        'Critical LaTeX3 Error: TEXT msg_critical latex3',
+        './output-critical.tex',
+      ],
+      [
+        133,
+        'Missing character: There is no 3 ("33) in font nullfont.',
+        './main.tex',
+      ],
+    ])
+    expect(warnings.map(x => [x.line, x.message, x.file])).to.deep.equal([
+      [
+        37,
+        'Package PACKAGE Warning: TEXT PackageWarning on input line 37.',
+        './main.tex',
+      ],
+      [
+        44,
+        'Class PACKAGE Warning: TEXT ClassWarning on input line 44.',
+        './main.tex',
+      ],
+      [52, 'TEXT @latex@warning on input line 52.', './main.tex'],
+      [58, 'TEXT @font@warning on input line 58.', './main.tex'],
+      [null, 'Package PACKAGE Warning: TEXT msg_warning package', './main.tex'],
+      [null, 'Class PACKAGE Warning: TEXT msg_warning class', './main.tex'],
+      [null, 'TEXT msg_warning latex3', './main.tex'],
+      [
+        null,
+        "File `output-critical' already exists on the system.",
+        './main.tex',
+      ],
+    ])
   })
 })

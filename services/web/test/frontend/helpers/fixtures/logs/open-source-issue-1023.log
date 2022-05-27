@@ -1,0 +1,217 @@
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2021) (preloaded format=pdflatex 2021.9.30)  27 MAY 2022 15:25
+entering extended mode
+ \write18 enabled.
+ %&-line parsing enabled.
+**main.tex
+(./main.tex
+LaTeX2e <2021-06-01> patch level 1
+L3 programming layer <2021-07-12> (/usr/local/texlive/2021/texmf-dist/tex/latex
+/base/article.cls
+Document Class: article 2021/02/12 v1.4n Standard LaTeX document class
+(/usr/local/texlive/2021/texmf-dist/tex/latex/base/size10.clo
+File: size10.clo 2021/02/12 v1.4n Standard LaTeX file (size option)
+)
+\c@part=\count182
+\c@section=\count183
+\c@subsection=\count184
+\c@subsubsection=\count185
+\c@paragraph=\count186
+\c@subparagraph=\count187
+\c@figure=\count188
+\c@table=\count189
+\abovecaptionskip=\skip47
+\belowcaptionskip=\skip48
+\bibindent=\dimen138
+)
+\infos=\count190
+\warnings=\count191
+\errors=\count192
+
+BEGIN INFOS/ERRORS/WARNINGS
+
+Package PACKAGE Info: TEXT PackageInfo on input line 35.
+
+Package PACKAGE Warning: TEXT PackageWarning on input line 37.
+
+
+! Package PACKAGE Error: TEXT PackageError.
+
+See the PACKAGE package documentation for explanation.
+Type  H <return>  for immediate help.
+ ...
+
+l.38 ...EXT PackageError}{ADDITIONAL PackageError}
+                                                   \increment\errors
+ADDITIONAL PackageError
+
+Class PACKAGE Info: TEXT ClassInfo on input line 42.
+
+Class PACKAGE Warning: TEXT ClassWarning on input line 44.
+
+
+! Class PACKAGE Error: TEXT ClassError.
+
+See the PACKAGE class documentation for explanation.
+Type  H <return>  for immediate help.
+ ...
+
+l.45 ...E}{TEXT ClassError}{ADDITIONAL ClassError}
+                                                   \increment\errors
+ADDITIONAL ClassError
+
+LaTeX Info: TEXT @latex@info on input line 50.
+
+LaTeX Warning: TEXT @latex@warning on input line 52.
+
+
+! LaTeX Error: TEXT @latex@error.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...
+
+l.53 ...EXT @latex@error}{ADDITIONAL @latex@error}
+                                                   \increment\errors
+ADDITIONAL @latex@error
+
+LaTeX Font Info:    TEXT @font@info on input line 57.
+
+LaTeX Font Warning: TEXT @font@warning on input line 58.
+
+
+Package PACKAGE Info: TEXT msg_info package
+
+
+Package PACKAGE Info: TEXT msg_note package
+
+
+Package PACKAGE Warning: TEXT msg_warning package
+
+
+! Package PACKAGE Error: TEXT msg_error package
+
+For immediate help type H <return>.
+ ...
+
+l.72 ...E } { message-name } { msg_error~package }
+                                                   \increment\errors
+
+ADDITIONAL msg_error package
+
+
+
+Class PACKAGE Info: TEXT msg_info class
+
+
+Class PACKAGE Info: TEXT msg_note class
+
+
+Class PACKAGE Warning: TEXT msg_warning class
+
+
+! Class PACKAGE Error: TEXT msg_error class
+
+For immediate help type H <return>.
+ ...
+
+l.84 ...AGE } { message-name } { msg_error~class }
+                                                   \increment\errors
+
+ADDITIONAL msg_error class
+
+
+
+LaTeX3 Info: TEXT msg_info latex3
+
+
+LaTeX3 Info: TEXT msg_note latex3
+
+
+LaTeX3 Warning: TEXT msg_warning latex3
+
+
+! LaTeX3 Error: TEXT msg_error latex3
+
+For immediate help type H <return>.
+ ...
+
+l.97 ...GE } { message-name } { msg_error~latex3 }
+                                                   \increment\errors
+
+ADDITIONAL msg_error latex3
+
+
+
+LaTeX Warning: File `output-critical' already exists on the system.
+               Not generating it from this source.
+
+(./output-critical.tex
+
+! Critical LaTeX3 Error: TEXT msg_critical latex3
+
+For immediate help type H <return>.
+ ...
+
+l.6 ... } { message-name } { msg_critical~latex3 }
+                                                   \increment\errors
+
+ADDITIONAL msg_critical latex3
+
+Reading the current file 'output' will stop.
+
+
+) (/usr/local/texlive/2021/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
+File: l3backend-pdftex.def 2021-07-12 L3 backend support: PDF output (pdfTeX)
+\l__color_backend_stack_int=\count193
+\l__pdf_internal_box=\box50
+) (./output.aux)
+\openout1 = `output.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 129.
+LaTeX Font Info:    ... okay on input line 129.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 129.
+LaTeX Font Info:    ... okay on input line 129.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 129.
+LaTeX Font Info:    ... okay on input line 129.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 129.
+LaTeX Font Info:    ... okay on input line 129.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 129.
+LaTeX Font Info:    ... okay on input line 129.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 129.
+LaTeX Font Info:    ... okay on input line 129.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 129.
+LaTeX Font Info:    ... okay on input line 129.
+
+! Missing character: There is no 3 ("33) in font nullfont.
+<recently read> 3
+
+l.133     {\nullfont 3
+                      }\increment\errors
+
+Missing character: There is no 1 in font nullfont!
+[1
+
+{/usr/local/texlive/2021/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
+(./output.aux)
+Infos 13
+Warnings 9
+Errors 9
+
+ )
+Here is how much of TeX's memory you used:
+ 403 strings out of 478542
+ 7227 string characters out of 5850413
+ 298530 words of memory out of 5000000
+ 18420 multiletter control sequences out of 15000+600000
+ 403430 words of font info for 27 fonts, out of 8000000 for 9000
+ 1141 hyphenation exceptions out of 8191
+ 34i,5n,44p,166b,318s stack positions out of 5000i,500n,10000p,200000b,80000s
+pdfTeX warning (dest): Page 9999999 has been referenced but does not exist!
+
+</usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb>
+Output written on output.pdf (1 page, 9003 bytes).
+PDF statistics:
+ 14 PDF objects out of 1000 (max. 8388607)
+ 7 compressed objects within 1 object stream
+ 0 named destinations out of 1000 (max. 500000)
+ 1 words of extra memory for PDF output out of 10000 (max. 10000000)
