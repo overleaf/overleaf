@@ -28,16 +28,14 @@ const getDescription = (
   }
 
   const ssoAvailable = ssoAvailableForInstitution(
-    userEmailData.affiliation?.institution
+    userEmailData.affiliation?.institution || null
   )
 
-  if (!institutionAlreadyLinked(state, userEmailData)) {
-    return ssoAvailable
-      ? t('please_link_before_making_primary')
-      : t('please_confirm_your_email_before_making_it_default')
+  if (!institutionAlreadyLinked(state, userEmailData) && ssoAvailable) {
+    return t('please_link_before_making_primary')
   }
 
-  return ''
+  return t('please_confirm_your_email_before_making_it_default')
 }
 
 function PrimaryButton({ children, disabled, onClick }: Button.ButtonProps) {
@@ -87,7 +85,7 @@ function MakePrimary({ userEmailData, makePrimaryAsync }: MakePrimaryProps) {
 
   return (
     <Tooltip
-      id={`tooltip-make-primary-${userEmailData.email}`}
+      id={`make-primary-${userEmailData.email}`}
       description={getDescription(t, state, userEmailData)}
     >
       {/*
@@ -97,10 +95,9 @@ function MakePrimary({ userEmailData, makePrimaryAsync }: MakePrimaryProps) {
       <span>
         <PrimaryButton
           disabled={
+            !userEmailData.confirmedAt ||
             state.isLoading ||
-            inReconfirmNotificationPeriod(userEmailData) ||
-            (!userEmailData.confirmedAt &&
-              !institutionAlreadyLinked(state, userEmailData))
+            inReconfirmNotificationPeriod(userEmailData)
           }
           onClick={handleSetDefaultUserEmail}
         >
