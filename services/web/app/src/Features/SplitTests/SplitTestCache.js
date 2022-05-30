@@ -10,7 +10,10 @@ class SplitTestCache extends CacheLoader {
   }
 
   async load(name) {
-    return await SplitTestManager.getSplitTestByName(name)
+    return await SplitTestManager.getSplitTest({
+      name,
+      archived: { $ne: true },
+    })
   }
 
   serialize(value) {

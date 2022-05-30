@@ -6,13 +6,18 @@ const ALPHA_PHASE = 'alpha'
 const BETA_PHASE = 'beta'
 const RELEASE_PHASE = 'release'
 
-async function getSplitTests({ name, activeOnly }) {
+async function getSplitTests({ name, activeOnly, archivedOnly }) {
   const filters = {}
   if (name && name !== '') {
     filters.name = { $regex: _.escapeRegExp(name) }
   }
   if (activeOnly) {
     filters.$where = 'this.versions[this.versions.length - 1].active === true'
+  }
+  if (archivedOnly) {
+    filters.archived = true
+  } else {
+    filters.archived = { $ne: true }
   }
   try {
     return await SplitTest.find(filters).limit(100).exec()
@@ -21,11 +26,11 @@ async function getSplitTests({ name, activeOnly }) {
   }
 }
 
-async function getSplitTestByName(name) {
+async function getSplitTest(query) {
   try {
-    return await SplitTest.findOne({ name }).exec()
+    return await SplitTest.findOne(query).exec()
   } catch (error) {
-    throw OError.tag(error, 'Failed to get split test', { name })
+    throw OError.tag(error, 'Failed to get split test', { query })
   }
 }
 
@@ -37,12 +42,15 @@ async function createSplitTest(name, configuration, info = {}) {
     stripedVariants.push({
       name: (variant.name || '').trim(),
       rolloutPercent: variant.rolloutPercent,
-      rolloutStripes: [
-        {
-          start: stripeStart,
-          end: stripeStart + variant.rolloutPercent,
-        },
-      ],
+      rolloutStripes:
+        variant.rolloutPercent > 0
+          ? [
+              {
+                start: stripeStart,
+                end: stripeStart + variant.rolloutPercent,
+              },
+            ]
+          : [],
     })
     stripeStart += variant.rolloutPercent
   }
@@ -68,107 +76,137 @@ async function createSplitTest(name, configuration, info = {}) {
 }
 
 async function updateSplitTestConfig(name, configuration) {
-  const splitTest = await getSplitTestByName(name)
-  if (splitTest) {
-    const lastVersion = splitTest.getCurrentVersion().toObject()
-    if (configuration.phase !== lastVersion.phase) {
-      throw new OError(
-        `Cannot update with different phase - use /switch-to-next-phase endpoint instead`
-      )
-    }
-    _checkNewVariantsConfiguration(lastVersion.variants, configuration.variants)
-    const updatedVariants = _updateVariantsWithNewConfiguration(
-      lastVersion.variants,
-      configuration.variants
-    )
-
-    splitTest.versions.push({
-      versionNumber: lastVersion.versionNumber + 1,
-      phase: configuration.phase,
-      active: configuration.active,
-      analyticsEnabled: configuration.active && configuration.analyticsEnabled,
-      variants: updatedVariants,
-    })
-    return _saveSplitTest(splitTest)
-  } else {
+  const splitTest = await getSplitTest({ name })
+  if (!splitTest) {
     throw new OError(`Cannot update split test '${name}': not found`)
   }
+  if (splitTest.archived) {
+    throw new OError('Cannot update an archived split test', { name })
+  }
+  const lastVersion = splitTest.getCurrentVersion().toObject()
+  if (configuration.phase !== lastVersion.phase) {
+    throw new OError(
+      `Cannot update with different phase - use /switch-to-next-phase endpoint instead`
+    )
+  }
+  _checkNewVariantsConfiguration(lastVersion.variants, configuration.variants)
+  const updatedVariants = _updateVariantsWithNewConfiguration(
+    lastVersion.variants,
+    configuration.variants
+  )
+
+  splitTest.versions.push({
+    versionNumber: lastVersion.versionNumber + 1,
+    phase: configuration.phase,
+    active: configuration.active,
+    analyticsEnabled: configuration.active && configuration.analyticsEnabled,
+    variants: updatedVariants,
+  })
+  return _saveSplitTest(splitTest)
 }
 
 async function updateSplitTestInfo(name, info) {
-  const splitTest = await getSplitTestByName(name)
-  if (splitTest) {
-    splitTest.description = info.description
-    splitTest.expectedEndDate = info.expectedEndDate
-    splitTest.ticketUrl = info.ticketUrl
-    splitTest.reportsUrls = info.reportsUrls
-    splitTest.winningVariant = info.winningVariant
-    return _saveSplitTest(splitTest)
-  } else {
+  const splitTest = await getSplitTest({ name })
+  if (!splitTest) {
     throw new OError(`Cannot update split test '${name}': not found`)
   }
+  splitTest.description = info.description
+  splitTest.expectedEndDate = info.expectedEndDate
+  splitTest.ticketUrl = info.ticketUrl
+  splitTest.reportsUrls = info.reportsUrls
+  splitTest.winningVariant = info.winningVariant
+  return _saveSplitTest(splitTest)
 }
 
 async function switchToNextPhase(name) {
-  const splitTest = await getSplitTestByName(name)
-  if (splitTest) {
-    const lastVersionCopy = splitTest.getCurrentVersion().toObject()
-    lastVersionCopy.versionNumber++
-    if (lastVersionCopy.phase === ALPHA_PHASE) {
-      lastVersionCopy.phase = BETA_PHASE
-    } else if (lastVersionCopy.phase === BETA_PHASE) {
-      if (splitTest.forbidReleasePhase) {
-        throw new OError('Switch to release phase is disabled for this test')
-      }
-      lastVersionCopy.phase = RELEASE_PHASE
-    } else if (splitTest.phase === RELEASE_PHASE) {
-      throw new OError(
-        `Split test with ID '${name}' is already in the release phase`
-      )
-    }
-    for (const variant of lastVersionCopy.variants) {
-      variant.rolloutPercent = 0
-      variant.rolloutStripes = []
-    }
-    splitTest.versions.push(lastVersionCopy)
-    return _saveSplitTest(splitTest)
-  } else {
+  const splitTest = await getSplitTest({ name })
+  if (!splitTest) {
     throw new OError(
       `Cannot switch split test with ID '${name}' to next phase: not found`
     )
   }
+  if (splitTest.archived) {
+    throw new OError('Cannot switch an archived split test to next phase', {
+      name,
+    })
+  }
+  const lastVersionCopy = splitTest.getCurrentVersion().toObject()
+  lastVersionCopy.versionNumber++
+  if (lastVersionCopy.phase === ALPHA_PHASE) {
+    lastVersionCopy.phase = BETA_PHASE
+  } else if (lastVersionCopy.phase === BETA_PHASE) {
+    if (splitTest.forbidReleasePhase) {
+      throw new OError('Switch to release phase is disabled for this test', {
+        name,
+      })
+    }
+    lastVersionCopy.phase = RELEASE_PHASE
+  } else if (splitTest.phase === RELEASE_PHASE) {
+    throw new OError(
+      `Split test with ID '${name}' is already in the release phase`
+    )
+  }
+  for (const variant of lastVersionCopy.variants) {
+    variant.rolloutPercent = 0
+    variant.rolloutStripes = []
+  }
+  splitTest.versions.push(lastVersionCopy)
+  return _saveSplitTest(splitTest)
 }
 
 async function revertToPreviousVersion(name, versionNumber) {
-  const splitTest = await getSplitTestByName(name)
-  if (splitTest) {
-    if (splitTest.versions.length <= 1) {
-      throw new OError(
-        `Cannot revert split test with ID '${name}' to previous version: split test must have at least 2 versions`
-      )
-    }
-    const previousVersion = splitTest.getVersion(versionNumber)
-    if (!previousVersion) {
-      throw new OError(
-        `Cannot revert split test with ID '${name}' to version number ${versionNumber}: version not found`
-      )
-    }
-    const lastVersion = splitTest.getCurrentVersion()
-    if (
-      lastVersion.phase === RELEASE_PHASE &&
-      previousVersion.phase !== RELEASE_PHASE
-    ) {
-      splitTest.forbidReleasePhase = true
-    }
-    const previousVersionCopy = previousVersion.toObject()
-    previousVersionCopy.versionNumber = lastVersion.versionNumber + 1
-    splitTest.versions.push(previousVersionCopy)
-    return _saveSplitTest(splitTest)
-  } else {
+  const splitTest = await getSplitTest({ name })
+  if (!splitTest) {
     throw new OError(
       `Cannot revert split test with ID '${name}' to previous version: not found`
     )
   }
+  if (splitTest.archived) {
+    throw new OError(
+      'Cannot revert an archived split test to previous version',
+      {
+        name,
+      }
+    )
+  }
+  if (splitTest.versions.length <= 1) {
+    throw new OError(
+      `Cannot revert split test with ID '${name}' to previous version: split test must have at least 2 versions`
+    )
+  }
+  const previousVersion = splitTest.getVersion(versionNumber)
+  if (!previousVersion) {
+    throw new OError(
+      `Cannot revert split test with ID '${name}' to version number ${versionNumber}: version not found`
+    )
+  }
+  const lastVersion = splitTest.getCurrentVersion()
+  if (
+    lastVersion.phase === RELEASE_PHASE &&
+    previousVersion.phase !== RELEASE_PHASE
+  ) {
+    splitTest.forbidReleasePhase = true
+  }
+  const previousVersionCopy = previousVersion.toObject()
+  previousVersionCopy.versionNumber = lastVersion.versionNumber + 1
+  splitTest.versions.push(previousVersionCopy)
+  return _saveSplitTest(splitTest)
+}
+
+async function archive(name) {
+  const splitTest = await getSplitTest({ name })
+  if (!splitTest) {
+    throw new OError(`Cannot archive split test with ID '${name}': not found`)
+  }
+  if (splitTest.archived) {
+    throw new OError(`Split test with ID '${name}' is already archived`)
+  }
+  splitTest.archived = true
+  const previousVersionCopy = splitTest.getCurrentVersion().toObject()
+  previousVersionCopy.versionNumber += 1
+  previousVersionCopy.active = false
+  splitTest.versions.push(previousVersionCopy)
+  return _saveSplitTest(splitTest)
 }
 
 function _checkNewVariantsConfiguration(variants, newVariantsConfiguration) {
@@ -206,6 +244,9 @@ function _updateVariantsWithNewConfiguration(
   let totalRolloutPercentage = _getTotalRolloutPercentage(variants)
   const variantsCopy = _.clone(variants)
   for (const newVariantConfig of newVariantsConfiguration) {
+    if (newVariantConfig.rolloutPercent === 0) {
+      continue
+    }
     const variant = _.find(variantsCopy, { name: newVariantConfig.name })
     if (!variant) {
       variantsCopy.push({
@@ -248,11 +289,12 @@ async function _saveSplitTest(splitTest) {
 }
 
 module.exports = {
-  getSplitTestByName,
+  getSplitTest,
   getSplitTests,
   createSplitTest,
   updateSplitTestConfig,
   updateSplitTestInfo,
   switchToNextPhase,
   revertToPreviousVersion,
+  archive,
 }

@@ -114,6 +114,10 @@ const SplitTestSchema = new Schema({
     type: String,
     required: false,
   },
+  archived: {
+    type: Boolean,
+    required: false,
+  },
 })
 
 SplitTestSchema.methods.getCurrentVersion = function () {
