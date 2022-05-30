@@ -30,7 +30,6 @@
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
     "mocha": "^8.4.0",
-    "nodemon": "^2.0.2",
     "request": "^2.88.2",
     "sandboxed-module": "^2.0.4",
     "sinon": "^9.2.4",
