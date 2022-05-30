@@ -176,10 +176,10 @@ function LayoutDropdownButton() {
           <span className="toolbar-label">{t('layout')}</span>
           <Tooltip
             id="pdf-detach-badge"
-            description="Beta feature"
+            description="New feature"
             overlayProps={{ placement: 'bottom', delayHide: 100 }}
           >
-            <span className="beta-badge" />
+            <span className="info-badge" />
           </Tooltip>
         </Dropdown.Toggle>
         <Dropdown.Menu className="layout-dropdown-list">
@@ -275,13 +275,12 @@ function LayoutDropdownButton() {
           <MenuItem divider />
           <div className="pdf-detach-survey">
             <span>
-              <span className="beta-badge" />
+              <span className="info-badge" />
             </span>
             <span className="pdf-detach-survey-text">
-              The Layout menu and opening the PDF in a new tab are beta
-              features.{' '}
+              The Layout menu and opening the PDF in a new tab are new features.{' '}
               <a
-                href="https://docs.google.com/forms/d/e/1FAIpQLScuxQA8Az9NQwvYgC6FALG7FEtCCj4e8of27e_L0SXGrJFRMw/viewform"
+                href="https://docs.google.com/forms/d/e/1FAIpQLScBc0LSttM02-HgfoUi7jj7MmFT9u3Y4cUDwT_AmDK9to--gg/viewform"
                 target="_blank"
                 rel="noopener noreferrer"
               >
