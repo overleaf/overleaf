@@ -11,7 +11,7 @@ function Email({ userEmailData }: EmailProps) {
   const { t } = useTranslation()
 
   const ssoAvailable = ssoAvailableForInstitution(
-    userEmailData.affiliation?.institution
+    userEmailData.affiliation?.institution || null
   )
 
   return (

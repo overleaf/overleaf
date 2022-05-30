@@ -125,11 +125,17 @@ function Input({ onChange, handleAddNewEmail }: InputProps) {
 
         if (suggestion) {
           setInputValueAndResetSuggestion()
-        } else {
-          const match = matchLocalAndDomain(inputValue)
-          if (match.local && match.domain) {
-            handleAddNewEmail()
-          }
+
+          return
+        }
+
+        if (!inputValue) {
+          return
+        }
+
+        const match = matchLocalAndDomain(inputValue)
+        if (match.local && match.domain) {
+          handleAddNewEmail()
         }
       }
 

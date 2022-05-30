@@ -120,7 +120,8 @@ function AddEmail() {
             />
           </Cell>
         </Col>
-        {ssoAvailableForDomain(newEmailMatchedDomain) ? (
+        {newEmailMatchedDomain &&
+        ssoAvailableForDomain(newEmailMatchedDomain) ? (
           <Col md={8}>
             <Cell>
               <SsoLinkingInfo
