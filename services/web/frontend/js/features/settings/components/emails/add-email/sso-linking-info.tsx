@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import { Button } from 'react-bootstrap'
 import { Trans, useTranslation } from 'react-i18next'
 import { DomainInfo } from './input'
 import { ExposedSettings } from '../../../../../../../types/exposed-settings'
@@ -11,6 +13,14 @@ type SSOLinkingInfoProps = {
 function SsoLinkingInfo({ domainInfo, email }: SSOLinkingInfoProps) {
   const { samlInitPath } = getMeta('ol-ExposedSettings') as ExposedSettings
   const { t } = useTranslation()
+
+  const [linkAccountsButtonDisabled, setLinkAccountsButtonDisabled] =
+    useState(false)
+
+  function handleLinkAccountsButtonClick() {
+    setLinkAccountsButtonDisabled(true)
+    window.location.href = `${samlInitPath}?university_id=${domainInfo.university.id}&auto=/user/settings&email=${email}`
+  }
 
   return (
     <>
@@ -36,12 +46,14 @@ function SsoLinkingInfo({ domainInfo, email }: SSOLinkingInfoProps) {
           {t('find_out_more_about_institution_login')}.
         </a>
       </p>
-      <a
-        className="btn-sm btn btn-primary btn-link-accounts"
-        href={`${samlInitPath}?university_id=${domainInfo.university.id}&auto=/user/settings&email=${email}`}
+      <Button
+        bsStyle="primary"
+        className="btn-sm btn-link-accounts"
+        disabled={linkAccountsButtonDisabled}
+        onClick={handleLinkAccountsButtonClick}
       >
         {t('link_accounts_and_add_email')}
-      </a>
+      </Button>
     </>
   )
 }

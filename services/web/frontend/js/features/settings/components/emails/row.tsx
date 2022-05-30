@@ -1,6 +1,7 @@
+import { useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { UserEmailData } from '../../../../../../types/user-email'
-import { Row, Col } from 'react-bootstrap'
+import { Button, Row, Col } from 'react-bootstrap'
 import Email from './email'
 import InstitutionAndRole from './institution-and-role'
 import EmailCell from './cell'
@@ -58,6 +59,14 @@ function SSOAffiliationInfo({ userEmailData }: SSOAffiliationInfoProps) {
   const { samlInitPath } = getMeta('ol-ExposedSettings') as ExposedSettings
   const { t } = useTranslation()
   const { state } = useUserEmailsContext()
+
+  const [linkAccountsButtonDisabled, setLinkAccountsButtonDisabled] =
+    useState(false)
+
+  function handleLinkAccountsButtonClick() {
+    setLinkAccountsButtonDisabled(true)
+    window.location.href = `${samlInitPath}?university_id=${userEmailData.affiliation?.institution?.id}&auto=/user/settings&email=${userEmailData.email}`
+  }
 
   if (
     !userEmailData.samlProviderId &&
@@ -127,12 +136,14 @@ function SSOAffiliationInfo({ userEmailData }: SSOAffiliationInfoProps) {
           </Col>
           <Col md={3} className="text-md-right">
             <EmailCell>
-              <a
-                className="btn-sm btn btn-info btn-link-accounts"
-                href={`${samlInitPath}?university_id=${userEmailData.affiliation?.institution?.id}&auto=/user/settings&email=${userEmailData.email}`}
+              <Button
+                bsStyle="info"
+                className="btn-sm btn-link-accounts"
+                disabled={linkAccountsButtonDisabled}
+                onClick={handleLinkAccountsButtonClick}
               >
                 {t('link_accounts')}
-              </a>
+              </Button>
             </EmailCell>
           </Col>
         </Row>

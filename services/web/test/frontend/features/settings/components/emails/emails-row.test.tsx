@@ -89,7 +89,7 @@ describe('<EmailsRow/>', function () {
         getByTextContent(
           'You can now link your Overleaf account to your Overleaf institutional account.'
         )
-        screen.getByRole('link', { name: 'Link Accounts' })
+        screen.getByRole('button', { name: 'Link Accounts' })
       })
     })
 
@@ -106,7 +106,8 @@ describe('<EmailsRow/>', function () {
         getByTextContent(
           'You can log in to Overleaf through your Overleaf institutional login.'
         )
-        expect(screen.queryByRole('link', { name: 'Link Accounts' })).to.be.null
+        expect(screen.queryByRole('button', { name: 'Link Accounts' })).to.be
+          .null
       })
     })
   })
