@@ -299,6 +299,56 @@ describe('<EmailsSection />', function () {
     screen.getByText(customDepartment, { exact: false })
   })
 
+  it('autocompletes institution name', async function () {
+    fetchMock.get('/user/emails?ensureAffiliation=true', [])
+    render(<EmailsSection />)
+
+    await fetchMock.flush(true)
+    resetFetchMock()
+
+    fetchMock.get(/\/institutions\/list/, [
+      {
+        id: 1,
+        name: 'University of Bonn',
+      },
+      {
+        id: 2,
+        name: 'Bochum institute of Science',
+      },
+    ])
+
+    // open "add new email" section and click "let us know" to open the Country/University form
+    await userEvent.click(
+      screen.getByRole('button', {
+        name: /add another email/i,
+      })
+    )
+    await userEvent.type(screen.getByLabelText(/email/i), userEmailData.email)
+    await userEvent.click(screen.getByRole('button', { name: /let us know/i }))
+
+    // select a country
+    const countryInput = screen.getByRole('textbox', {
+      name: /country/i,
+    }) as HTMLInputElement
+    await userEvent.click(countryInput)
+    await userEvent.type(countryInput, 'Germ')
+    await userEvent.click(await screen.findByText('Germany'))
+
+    // match several universities on initial typing
+    const universityInput = screen.getByRole('textbox', {
+      name: /university/i,
+    }) as HTMLInputElement
+    await userEvent.click(universityInput)
+    await userEvent.type(universityInput, 'bo')
+    screen.getByText('University of Bonn')
+    screen.getByText('Bochum institute of Science')
+
+    // match a single university when typing to refine the search
+    await userEvent.type(universityInput, 'nn')
+    screen.getByText('University of Bonn')
+    expect(screen.queryByText('Bochum institute of Science')).to.be.null
+  })
+
   it('adds new email address without existing institution', async function () {
     const country = 'Germany'
     const countryCode = 'de'
