@@ -94,7 +94,9 @@ export default function DictionaryModalContent({
               ))}
           </ul>
         ) : (
-          <i>{t('edit_dictionary_empty')}</i>
+          <p className="dictionary-empty-body text-center">
+            <i>{t('edit_dictionary_empty')}</i>
+          </p>
         )}
       </Modal.Body>
 
