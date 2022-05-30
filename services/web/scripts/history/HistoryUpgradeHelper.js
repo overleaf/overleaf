@@ -1,0 +1,299 @@
+const { ReadPreference, ObjectId } = require('mongodb')
+const { db } = require('../../app/src/infrastructure/mongodb')
+
+const ProjectHistoryHandler = require('../../app/src/Features/Project/ProjectHistoryHandler')
+const HistoryManager = require('../../app/src/Features/History/HistoryManager')
+const ProjectHistoryController = require('../../modules/admin-panel/app/src/ProjectHistoryController')
+
+// Timestamp of when 'Enable history for SL in background' release
+const ID_WHEN_FULL_PROJECT_HISTORY_ENABLED = '5a8d8a370000000000000000'
+const OBJECT_ID_WHEN_FULL_PROJECT_HISTORY_ENABLED = new ObjectId(
+  ID_WHEN_FULL_PROJECT_HISTORY_ENABLED
+)
+const DATETIME_WHEN_FULL_PROJECT_HISTORY_ENABLED =
+  OBJECT_ID_WHEN_FULL_PROJECT_HISTORY_ENABLED.getTimestamp()
+
+async function determineProjectHistoryType(project) {
+  if (project.overleaf && project.overleaf.history) {
+    if (project.overleaf.history.upgradeFailed) {
+      return 'UpgradeFailed'
+    }
+    if (project.overleaf.history.conversionFailed) {
+      return 'ConversionFailed'
+    }
+  }
+  if (
+    project.overleaf &&
+    project.overleaf.history &&
+    project.overleaf.history.id
+  ) {
+    if (project.overleaf.history.display) {
+      // v2: full project history, do nothing
+      return 'V2'
+    } else {
+      if (projectCreatedAfterFullProjectHistoryEnabled(project)) {
+        // IF project initialised after full project history enabled for all projects
+        //    THEN project history should contain all information we need, without intervention
+        return 'V1WithoutConversion'
+      } else {
+        // ELSE SL history may predate full project history
+        //    THEN delete full project history and convert their SL history to full project history
+        // --
+        // TODO: how to verify this, can get rough start date of SL history, but not full project history
+        const preserveHistory = await shouldPreserveHistory(project)
+        const anyDocHistory = await anyDocHistoryExists(project)
+        const anyDocHistoryIndex = await anyDocHistoryIndexExists(project)
+        if (preserveHistory) {
+          if (anyDocHistory || anyDocHistoryIndex) {
+            // if SL history exists that we need to preserve, then we must convert
+            return 'V1WithConversion'
+          } else {
+            // otherwise just upgrade without conversion
+            return 'V1WithoutConversion'
+          }
+        } else {
+          // if preserveHistory false, then max 7 days of SL history
+          // but v1 already record to both histories, so safe to upgrade
+          return 'V1WithoutConversion'
+        }
+      }
+    }
+  } else {
+    const preserveHistory = await shouldPreserveHistory(project)
+    const anyDocHistory = await anyDocHistoryExists(project)
+    const anyDocHistoryIndex = await anyDocHistoryIndexExists(project)
+    if (anyDocHistory || anyDocHistoryIndex) {
+      // IF there is SL history ->
+      if (preserveHistory) {
+        // that needs to be preserved:
+        //    THEN initialise full project history and convert SL history to full project history
+        return 'NoneWithConversion'
+      } else {
+        return 'NoneWithTemporaryHistory'
+      }
+    } else {
+      // ELSE there is not any SL history ->
+      //    THEN initialise full project history and sync with current content
+      return 'NoneWithoutConversion'
+    }
+  }
+}
+
+async function upgradeProject(project) {
+  const historyType = await determineProjectHistoryType(project)
+  if (historyType === 'V2') {
+    return { historyType, upgraded: true }
+  }
+  const upgradeFn = getUpgradeFunctionForType(historyType)
+  if (!upgradeFn) {
+    return { error: 'unsupported history type' }
+  }
+  const result = await upgradeFn(project)
+  result.historyType = historyType
+  return result
+}
+
+// Do upgrades/conversion:
+
+function getUpgradeFunctionForType(historyType) {
+  return UpgradeFunctionMapping[historyType]
+}
+
+const UpgradeFunctionMapping = {
+  NoneWithoutConversion: doUpgradeForNoneWithoutConversion,
+  UpgradeFailed: doUpgradeForNoneWithoutConversion,
+  ConversionFailed: doUpgradeForNoneWithConversion,
+  V1WithoutConversion: doUpgradeForV1WithoutConversion,
+  V1WithConversion: doUpgradeForV1WithConversion,
+  NoneWithConversion: doUpgradeForNoneWithConversion,
+  NoneWithTemporaryHistory: doUpgradeForNoneWithConversion,
+}
+
+async function doUpgradeForV1WithoutConversion(project) {
+  await db.projects.updateOne(
+    { _id: project._id },
+    {
+      $set: {
+        'overleaf.history.display': true,
+        'overleaf.history.upgradedAt': new Date(),
+        'overleaf.history.upgradeReason': `v1-without-sl-history`,
+      },
+    }
+  )
+  return { upgraded: true }
+}
+
+async function doUpgradeForV1WithConversion(project) {
+  const result = {}
+  const projectId = project._id
+  // migrateProjectHistory expects project id as a string
+  const projectIdString = project._id.toString()
+  try {
+    // We treat these essentially as None projects, the V1 history is irrelevant,
+    // so we will delete it, and do a conversion as if we're a None project
+    await ProjectHistoryController.deleteProjectHistory(projectIdString)
+    await ProjectHistoryController.migrateProjectHistory(projectIdString)
+  } catch (err) {
+    // if migrateProjectHistory fails, it cleans up by deleting
+    // the history and unsetting the history id
+    // therefore a failed project will still look like a 'None with conversion' project
+    result.error = err
+    await db.projects.updateOne(
+      { _id: projectId },
+      {
+        $set: {
+          'overleaf.history.conversionFailed': true,
+        },
+      }
+    )
+    return result
+  }
+  await db.projects.updateOne(
+    { _id: projectId },
+    {
+      $set: {
+        'overleaf.history.upgradeReason': `v1-with-conversion`,
+      },
+      $unset: {
+        'overleaf.history.upgradeFailed': true,
+        'overleaf.history.conversionFailed': true,
+      },
+    }
+  )
+  result.upgraded = true
+  return result
+}
+
+async function doUpgradeForNoneWithoutConversion(project) {
+  const result = {}
+  const projectId = project._id
+  try {
+    // Logic originally from ProjectHistoryHandler.ensureHistoryExistsForProject
+    // However sends a force resync project to project history instead
+    // of a resync request to doc-updater
+    const historyId = await ProjectHistoryHandler.promises.getHistoryId(
+      projectId
+    )
+    if (!historyId) {
+      const history = await HistoryManager.promises.initializeProject()
+      if (history && history.overleaf_id) {
+        await ProjectHistoryHandler.promises.setHistoryId(
+          projectId,
+          history.overleaf_id
+        )
+      }
+    }
+    await HistoryManager.promises.resyncProject(projectId, {
+      force: true,
+      origin: { kind: 'history-migration' },
+    })
+    await HistoryManager.promises.flushProject(projectId)
+  } catch (err) {
+    result.error = err
+    await db.projects.updateOne(
+      { _id: project._id },
+      {
+        $set: {
+          'overleaf.history.upgradeFailed': true,
+        },
+      }
+    )
+    return result
+  }
+  await db.projects.updateOne(
+    { _id: project._id },
+    {
+      $set: {
+        'overleaf.history.display': true,
+        'overleaf.history.upgradedAt': new Date(),
+        'overleaf.history.upgradeReason': `none-without-conversion`,
+      },
+    }
+  )
+  result.upgraded = true
+  return result
+}
+
+async function doUpgradeForNoneWithConversion(project) {
+  const result = {}
+  const projectId = project._id
+  // migrateProjectHistory expects project id as a string
+  const projectIdString = project._id.toString()
+  try {
+    await ProjectHistoryController.migrateProjectHistory(projectIdString)
+  } catch (err) {
+    // if migrateProjectHistory fails, it cleans up by deleting
+    // the history and unsetting the history id
+    // therefore a failed project will still look like a 'None with conversion' project
+    result.error = err
+    await db.projects.updateOne(
+      { _id: projectId },
+      {
+        $set: {
+          'overleaf.history.conversionFailed': true,
+        },
+      }
+    )
+    return result
+  }
+  await db.projects.updateOne(
+    { _id: projectId },
+    {
+      $set: {
+        'overleaf.history.upgradeReason': `none-with-conversion`,
+      },
+      $unset: {
+        'overleaf.history.upgradeFailed': true,
+        'overleaf.history.conversionFailed': true,
+      },
+    }
+  )
+  result.upgraded = true
+  return result
+}
+
+// Util
+
+function projectCreatedAfterFullProjectHistoryEnabled(project) {
+  return (
+    project._id.getTimestamp() >= DATETIME_WHEN_FULL_PROJECT_HISTORY_ENABLED
+  )
+}
+
+async function shouldPreserveHistory(project) {
+  return await db.projectHistoryMetaData.findOne(
+    {
+      $and: [
+        { project_id: { $eq: project._id } },
+        { preserveHistory: { $eq: true } },
+      ],
+    },
+    { readPreference: ReadPreference.SECONDARY }
+  )
+}
+
+async function anyDocHistoryExists(project) {
+  return await db.docHistory.findOne(
+    { project_id: { $eq: project._id } },
+    {
+      projection: { _id: 1 },
+      readPreference: ReadPreference.SECONDARY,
+    }
+  )
+}
+
+async function anyDocHistoryIndexExists(project) {
+  return await db.docHistoryIndex.findOne(
+    { project_id: { $eq: project._id } },
+    {
+      projection: { _id: 1 },
+      readPreference: ReadPreference.SECONDARY,
+    }
+  )
+}
+
+module.exports = {
+  determineProjectHistoryType,
+  getUpgradeFunctionForType,
+  upgradeProject,
+}
