@@ -14,6 +14,7 @@ import { ssoAvailableForDomain } from '../../utils/sso'
 import { postJSON } from '../../../../infrastructure/fetch-json'
 import { University } from '../../../../../../types/university'
 import { CountryCode } from '../../data/countries-list'
+import { isValidEmail } from '../../../../shared/utils/email'
 
 function AddEmail() {
   const { t } = useTranslation()
@@ -106,20 +107,44 @@ function AddEmail() {
     )
   }
 
+  const InputCol = (
+    <Col md={4}>
+      <Cell>
+        <label htmlFor="affiliations-email" className="sr-only">
+          {t('email')}
+        </label>
+        <Input
+          onChange={handleEmailChange}
+          handleAddNewEmail={handleAddNewEmail}
+        />
+      </Cell>
+    </Col>
+  )
+
+  if (!isValidEmail(newEmail)) {
+    return (
+      <Layout isError={isError} error={error}>
+        <form>
+          {InputCol}
+          <Col md={5}>
+            <Cell>
+              <div>{t('start_by_adding_your_email')}</div>
+            </Cell>
+          </Col>
+          <Col md={3}>
+            <Cell className="text-md-right">
+              <AddNewEmailBtn email={newEmail} disabled />
+            </Cell>
+          </Col>
+        </form>
+      </Layout>
+    )
+  }
+
   return (
     <Layout isError={isError} error={error}>
       <form>
-        <Col md={4}>
-          <Cell>
-            <label htmlFor="affiliations-email" className="sr-only">
-              {t('email')}
-            </label>
-            <Input
-              onChange={handleEmailChange}
-              handleAddNewEmail={handleAddNewEmail}
-            />
-          </Cell>
-        </Col>
+        {InputCol}
         {newEmailMatchedDomain &&
         ssoAvailableForDomain(newEmailMatchedDomain) ? (
           <Col md={8}>

@@ -92,6 +92,54 @@ describe('<EmailsSection />', function () {
     screen.getByLabelText(/email/i)
   })
 
+  it('renders "Start adding your address" until a valid email is typed', async function () {
+    fetchMock.get('/user/emails?ensureAffiliation=true', [])
+    render(<EmailsSection />)
+
+    const addAnotherEmailBtn = (await screen.findByRole('button', {
+      name: /add another email/i,
+    })) as HTMLButtonElement
+    fireEvent.click(addAnotherEmailBtn)
+
+    const input = screen.getByLabelText(/email/i)
+
+    // initially the text is displayed and the "add email" button disabled
+    screen.getByText('Start by adding your email address.')
+    expect(
+      (
+        screen.getByRole('button', {
+          name: /add new email/i,
+        }) as HTMLButtonElement
+      ).disabled
+    ).to.be.true
+
+    // no changes while writing the email address
+    fireEvent.change(input, {
+      target: { value: 'partial@email' },
+    })
+    screen.getByText('Start by adding your email address.')
+    expect(
+      (
+        screen.getByRole('button', {
+          name: /add new email/i,
+        }) as HTMLButtonElement
+      ).disabled
+    ).to.be.true
+
+    // the text is removed when the complete email address is typed, and the "add button" is reenabled
+    fireEvent.change(input, {
+      target: { value: 'valid@email.com' },
+    })
+    expect(screen.queryByText('Start by adding your email address.')).to.be.null
+    expect(
+      (
+        screen.getByRole('button', {
+          name: /add new email/i,
+        }) as HTMLButtonElement
+      ).disabled
+    ).to.be.false
+  })
+
   it('renders "add new email" button', async function () {
     fetchMock.get('/user/emails?ensureAffiliation=true', [])
     render(<EmailsSection />)
