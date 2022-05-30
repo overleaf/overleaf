@@ -1653,6 +1653,7 @@
   "redirect_to_editor": "Redirect to editor",
   "layout_processing": "Layout processing",
   "your_browser_does_not_support_this_feature": "Sorry, your browser doesn’t support this feature. Please update your browser to its latest version.",
+  "pdf_detach_safari_issues": "Safari users reported experiencing problems with opening PDF in a new tab. If you are also experiencing problems, we recommend trying a different browser.",
   "show_in_code": "Show in code",
   "show_in_pdf": "Show in PDF",
   "fold_line": "Fold line",

@@ -6,6 +6,7 @@ import PdfCompileButton from './pdf-compile-button'
 import PdfExpandButton from './pdf-expand-button'
 import PdfHybridLogsButton from './pdf-hybrid-logs-button'
 import PdfHybridDownloadButton from './pdf-hybrid-download-button'
+import PdfHybridSafariWarning from './pdf-hybrid-safari-warning'
 import PdfHybridCodeCheckButton from './pdf-hybrid-code-check-button'
 import PdfOrphanRefreshButton from './pdf-orphan-refresh-button'
 import { DetachedSynctexControl } from './detach-synctex-control'
@@ -60,6 +61,7 @@ function PdfPreviewHybridToolbarInner() {
         <PdfCompileButton />
         <PdfHybridLogsButton />
         <PdfHybridDownloadButton />
+        <PdfHybridSafariWarning />
       </div>
       <div className="toolbar-pdf-right">
         <PdfHybridCodeCheckButton />
