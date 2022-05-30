@@ -1,7 +1,7 @@
 import useFetchMock from './../hooks/use-fetch-mock'
 import Input from '../../js/features/settings/components/emails/add-email/input'
 
-export const EmailInput = args => {
+export const EmailInput = (args: any) => {
   useFetchMock(fetchMock =>
     fetchMock.get(/\/institutions\/domains/, [
       {

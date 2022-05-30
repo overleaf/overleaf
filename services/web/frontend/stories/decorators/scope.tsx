@@ -10,7 +10,7 @@ import {
 } from '../fixtures/compile'
 import useFetchMock from '../hooks/use-fetch-mock'
 
-const scopeWatchers = []
+const scopeWatchers: [string, (value: any) => void][] = []
 
 const initialize = () => {
   const user: User = {
@@ -46,10 +46,10 @@ const initialize = () => {
   const scope = {
     user,
     project,
-    $watch: (key, callback) => {
+    $watch: (key: string, callback: () => void) => {
       scopeWatchers.push([key, callback])
     },
-    $applyAsync: callback => {
+    $applyAsync: (callback: () => void) => {
       window.setTimeout(() => {
         callback()
         for (const [key, watcher] of scopeWatchers) {
@@ -57,7 +57,7 @@ const initialize = () => {
         }
       }, 0)
     },
-    $on: (eventName, callback) => {
+    $on: (eventName: string, callback: () => void) => {
       //
     },
     $broadcast: () => {},
@@ -101,7 +101,7 @@ const initialize = () => {
     },
     editorManager: {
       getCurrentDocId: () => 'foo',
-      openDoc: (id, options) => {
+      openDoc: (id: string, options: unknown) => {
         console.log('open doc', id, options)
       },
     },
@@ -166,7 +166,7 @@ const initialize = () => {
   return ide
 }
 
-export const ScopeDecorator = Story => {
+export const ScopeDecorator = (Story: any) => {
   // mock compile on load
   useFetchMock(fetchMock => {
     mockCompile(fetchMock)
