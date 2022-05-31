@@ -33,7 +33,7 @@ describe('<SSOLinkingWidget />', function () {
   })
 
   describe('when linked', function () {
-    let unlinkFunction
+    let unlinkFunction: sinon.SinonStub
 
     beforeEach(function () {
       unlinkFunction = sinon.stub()
@@ -69,7 +69,7 @@ describe('<SSOLinkingWidget />', function () {
   })
 
   describe('unlinking an account', function () {
-    let confirmBtn, unlinkFunction
+    let confirmBtn: HTMLElement, unlinkFunction: sinon.SinonStub
 
     beforeEach(function () {
       unlinkFunction = sinon.stub()

@@ -10,8 +10,9 @@ import fetchMock from 'fetch-mock'
 import InstitutionAndRole from '../../../../../../frontend/js/features/settings/components/emails/institution-and-role'
 import { UserEmailsProvider } from '../../../../../../frontend/js/features/settings/context/user-email-context'
 import EmailsSection from '../../../../../../frontend/js/features/settings/components/emails-section'
+import { Affiliation } from '../../../../../../types/affiliation'
 
-const userData1: UserEmailData = {
+const userData1: UserEmailData & { affiliation: Affiliation } = {
   affiliation: {
     cachedConfirmedAt: null,
     cachedEntitlement: null,
@@ -41,7 +42,7 @@ const userData1: UserEmailData = {
   default: true,
 }
 
-const userData2: UserEmailData = {
+const userData2: UserEmailData & { affiliation: Affiliation } = {
   affiliation: {
     cachedConfirmedAt: null,
     cachedEntitlement: null,
@@ -110,8 +111,8 @@ describe('user role and institution', function () {
     screen.getByText(userEmailData.affiliation.institution.name, {
       exact: false,
     })
-    screen.getByText(userEmailData.affiliation.department, { exact: false })
-    screen.getByText(userEmailData.affiliation.role, { exact: false })
+    screen.getByText(userEmailData.affiliation.department!, { exact: false })
+    screen.getByText(userEmailData.affiliation.role!, { exact: false })
     screen.getByRole('button', { name: /change/i })
     expect(screen.queryByRole('button', { name: /add role and department/i }))
       .to.not.exist

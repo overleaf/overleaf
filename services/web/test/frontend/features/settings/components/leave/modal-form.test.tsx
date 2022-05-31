@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
 import { fireEvent, screen, render, waitFor } from '@testing-library/react'
-import fetchMock from 'fetch-mock'
+import fetchMock, { FetchMockStatic } from 'fetch-mock'
 
 import LeaveModalForm from '../../../../../../frontend/js/features/settings/components/leave/modal-form'
 
@@ -40,7 +40,7 @@ describe('<LeaveModalForm />', function () {
 
     const setIsFormValidCalls = setIsFormValid.getCalls()
     const lastSetIsFormValidCall = setIsFormValidCalls.pop()
-    expect(lastSetIsFormValidCall.args[0]).to.be.true
+    expect(lastSetIsFormValidCall!.args[0]).to.be.true
 
     for (const setIsFormValidCall of setIsFormValidCalls) {
       expect(setIsFormValidCall.args[0]).to.be.false
@@ -48,10 +48,10 @@ describe('<LeaveModalForm />', function () {
   })
 
   describe('submits', async function () {
-    let setInFlight
-    let setIsFormValid
-    let deleteMock
-    let locationStub
+    let setInFlight: sinon.SinonStub
+    let setIsFormValid: sinon.SinonStub
+    let deleteMock: FetchMockStatic
+    let locationStub: sinon.SinonStub
     const originalLocation = window.location
 
     beforeEach(function () {

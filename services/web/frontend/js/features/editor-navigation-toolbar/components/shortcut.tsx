@@ -2,7 +2,7 @@ import { Fragment, memo } from 'react'
 
 const isMac = /Mac/.test(window.navigator.platform)
 
-const symbols = isMac
+const symbols: Record<string, string> = isMac
   ? {
       CommandOrControl: '⌘',
       Option: '⌥',

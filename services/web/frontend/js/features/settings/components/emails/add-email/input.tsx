@@ -125,7 +125,6 @@ function Input({ onChange, handleAddNewEmail }: InputProps) {
 
         if (suggestion) {
           setInputValueAndResetSuggestion()
-
           return
         }
 

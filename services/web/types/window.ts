@@ -19,5 +19,6 @@ declare global {
     project_id: string
     gitBridgePublicBaseUrl: string
     _ide: Record<string, unknown>
+    isRestrictedTokenMember: boolean
   }
 }

@@ -12,7 +12,7 @@ type DictionaryModalContentProps = {
   handleHide: () => void
 }
 
-const wordsSortFunction = (a, b) => a.localeCompare(b)
+const wordsSortFunction = (a: string, b: string) => a.localeCompare(b)
 
 export default function DictionaryModalContent({
   handleHide,

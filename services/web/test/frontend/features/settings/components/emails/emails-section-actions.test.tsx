@@ -18,7 +18,7 @@ const userEmailData: UserEmailData = {
   default: false,
 }
 
-const userEmailData2: UserEmailData = {
+const userEmailData2: UserEmailData & { affiliation: Affiliation } = {
   affiliation: {
     inReconfirmNotificationPeriod: false,
     institution: {
@@ -91,7 +91,7 @@ describe('email actions - make primary', function () {
         name: /make primary/i,
       })) as HTMLButtonElement
 
-      userEvent.hover(button.parentElement)
+      userEvent.hover(button.parentElement!)
 
       screen.getByText(
         /Please confirm your affiliation before making this the primary/i
@@ -108,7 +108,7 @@ describe('email actions - make primary', function () {
         name: /make primary/i,
       })) as HTMLButtonElement
 
-      userEvent.hover(button.parentElement)
+      userEvent.hover(button.parentElement!)
 
       screen.getByText('Make this the primary email, used to log in', {
         exact: false,
@@ -149,7 +149,7 @@ describe('email actions - make primary', function () {
         name: /make primary/i,
       })) as HTMLButtonElement[]
 
-      userEvent.hover(buttons[1].parentElement)
+      userEvent.hover(buttons[1].parentElement!)
 
       screen.getByText(
         'Please confirm your email by linking to your institutional account before making it the primary email',

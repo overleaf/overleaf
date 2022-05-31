@@ -9,8 +9,9 @@ import EmailsSection from '../../../../../../frontend/js/features/settings/compo
 import { expect } from 'chai'
 import fetchMock from 'fetch-mock'
 import { UserEmailData } from '../../../../../../types/user-email'
+import { Affiliation } from '../../../../../../types/affiliation'
 
-const userEmailData: UserEmailData = {
+const userEmailData: UserEmailData & { affiliation: Affiliation } = {
   affiliation: {
     cachedConfirmedAt: null,
     cachedEntitlement: null,
@@ -307,7 +308,7 @@ describe('<EmailsSection />', function () {
     )
 
     const roleInput = screen.getByRole('textbox', { name: /role/i })
-    await userEvent.type(roleInput, userEmailData.affiliation.role)
+    await userEvent.type(roleInput, userEmailData.affiliation.role!)
     const departmentInput = screen.getByRole('textbox', { name: /department/i })
     await userEvent.click(departmentInput)
     await userEvent.click(screen.getByText(customDepartment))
@@ -343,7 +344,7 @@ describe('<EmailsSection />', function () {
 
     screen.getByText(userEmailData.email)
     screen.getByText(userEmailData.affiliation.institution.name)
-    screen.getByText(userEmailData.affiliation.role, { exact: false })
+    screen.getByText(userEmailData.affiliation.role!, { exact: false })
     screen.getByText(customDepartment, { exact: false })
   })
 
@@ -450,9 +451,9 @@ describe('<EmailsSection />', function () {
     await userEvent.type(universityInput, newUniversity)
 
     const roleInput = screen.getByRole('textbox', { name: /role/i })
-    await userEvent.type(roleInput, userEmailData.affiliation.role)
+    await userEvent.type(roleInput, userEmailData.affiliation.role!)
     const departmentInput = screen.getByRole('textbox', { name: /department/i })
-    await userEvent.type(departmentInput, userEmailData.affiliation.department)
+    await userEvent.type(departmentInput, userEmailData.affiliation.department!)
 
     const userEmailDataCopy = {
       ...userEmailData,
@@ -489,8 +490,8 @@ describe('<EmailsSection />', function () {
 
     screen.getByText(userEmailData.email)
     screen.getByText(newUniversity)
-    screen.getByText(userEmailData.affiliation.role, { exact: false })
-    screen.getByText(userEmailData.affiliation.department, { exact: false })
+    screen.getByText(userEmailData.affiliation.role!, { exact: false })
+    screen.getByText(userEmailData.affiliation.department!, { exact: false })
   })
 
   it('shows country, university, role and department fields based on whether `change` was clicked or not', async function () {
@@ -621,11 +622,11 @@ describe('<EmailsSection />', function () {
 
     await userEvent.type(
       screen.getByRole('textbox', { name: /role/i }),
-      userEmailData.affiliation.role
+      userEmailData.affiliation.role!
     )
     await userEvent.type(
       screen.getByRole('textbox', { name: /department/i }),
-      userEmailData.affiliation.department
+      userEmailData.affiliation.department!
     )
     await userEvent.click(
       screen.getByRole('button', {
@@ -639,7 +640,9 @@ describe('<EmailsSection />', function () {
     screen.getByText(userEmailDataCopy.affiliation.institution.name, {
       exact: false,
     })
-    screen.getByText(userEmailDataCopy.affiliation.role, { exact: false })
-    screen.getByText(userEmailDataCopy.affiliation.department, { exact: false })
+    screen.getByText(userEmailDataCopy.affiliation.role!, { exact: false })
+    screen.getByText(userEmailDataCopy.affiliation.department!, {
+      exact: false,
+    })
   })
 })

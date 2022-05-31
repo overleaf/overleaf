@@ -47,11 +47,13 @@ describe('<PasswordSection />', function () {
     submitValidForm()
 
     expect(updateMock.called()).to.be.true
-    expect(JSON.parse(updateMock.lastCall()[1].body as string)).to.deep.equal({
-      currentPassword: 'foobar',
-      newPassword1: 'barbaz',
-      newPassword2: 'barbaz',
-    })
+    expect(JSON.parse(updateMock.lastCall()![1]!.body as string)).to.deep.equal(
+      {
+        currentPassword: 'foobar',
+        newPassword1: 'barbaz',
+        newPassword2: 'barbaz',
+      }
+    )
   })
 
   it('disables button on invalid form', async function () {
@@ -136,7 +138,7 @@ describe('<PasswordSection />', function () {
   })
 
   it('shows inflight state and success message', async function () {
-    let finishUpdateCall
+    let finishUpdateCall: (value: any) => void = () => {}
     fetchMock.post(
       '/user/password/update',
       new Promise(resolve => (finishUpdateCall = resolve))

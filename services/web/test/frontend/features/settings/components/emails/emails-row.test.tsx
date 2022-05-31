@@ -9,6 +9,7 @@ import {
 } from '../../fixtures/test-user-email-data'
 import { UserEmailData } from '../../../../../../types/user-email'
 import { UserEmailsProvider } from '../../../../../../frontend/js/features/settings/context/user-email-context'
+import { Affiliation } from '../../../../../../types/affiliation'
 
 function renderEmailsRow(data: UserEmailData) {
   return render(
@@ -21,7 +22,7 @@ function renderEmailsRow(data: UserEmailData) {
 function getByTextContent(text: string) {
   return screen.getAllByText(
     (content, node) =>
-      content === text || node.children[0]?.textContent === text
+      content === text || node?.children[0]?.textContent === text
   )
 }
 
@@ -65,7 +66,7 @@ describe('<EmailsRow/>', function () {
   })
 
   describe('with email data affiliated to an institution with SSO available', function () {
-    let affiliatedEmail: UserEmailData
+    let affiliatedEmail: UserEmailData & { affiliation: Affiliation }
 
     beforeEach(function () {
       window.metaAttributesCache.get('ol-ExposedSettings').hasSamlFeature = true

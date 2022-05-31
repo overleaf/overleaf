@@ -202,10 +202,10 @@ describe('UserEmailContext', function () {
           'new department'
         )
         expect(
-          result.current.state.data.byId['foo@overleaf.com'].affiliation.role
+          result.current.state.data.byId['foo@overleaf.com'].affiliation!.role
         ).to.equal('new role')
         expect(
-          result.current.state.data.byId['foo@overleaf.com'].affiliation
+          result.current.state.data.byId['foo@overleaf.com'].affiliation!
             .department
         ).to.equal('new department')
       })

@@ -1,4 +1,5 @@
 import { UserEmailData } from '../../../../../types/user-email'
+import { Affiliation } from '../../../../../types/affiliation'
 
 export const confirmedUserData: UserEmailData = {
   confirmedAt: '2022-03-10T10:59:44.139Z',
@@ -11,7 +12,9 @@ export const unconfirmedUserData: UserEmailData = {
   default: false,
 }
 
-export const professionalUserData: UserEmailData = {
+export const professionalUserData: UserEmailData & {
+  affiliation: Affiliation
+} = {
   affiliation: {
     cachedConfirmedAt: null,
     cachedEntitlement: null,

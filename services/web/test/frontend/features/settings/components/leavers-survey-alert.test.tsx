@@ -56,7 +56,7 @@ describe('<LeaversSurveyAlert/>', function () {
   })
 
   describe('event tracking', function () {
-    let sendMBSpy
+    let sendMBSpy: sinon.SinonSpy
 
     beforeEach(function () {
       sendMBSpy = sinon.spy(eventTracking, 'sendMB')

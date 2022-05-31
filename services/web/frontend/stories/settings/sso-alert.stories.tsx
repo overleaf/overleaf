@@ -1,7 +1,7 @@
 import EmailsSection from '../../js/features/settings/components/emails-section'
 import { SSOAlert } from '../../js/features/settings/components/emails/sso-alert'
 
-export const Info = (args: any) => {
+export const Info = () => {
   window.metaAttributesCache = new Map()
   window.metaAttributesCache.set('ol-institutionLinked', {
     universityName: 'Overleaf University',
@@ -9,7 +9,7 @@ export const Info = (args: any) => {
   return <SSOAlert />
 }
 
-export const InfoWithEntitlement = (args: any) => {
+export const InfoWithEntitlement = () => {
   window.metaAttributesCache = new Map()
   window.metaAttributesCache.set('ol-institutionLinked', {
     universityName: 'Overleaf University',
@@ -18,7 +18,7 @@ export const InfoWithEntitlement = (args: any) => {
   return <SSOAlert />
 }
 
-export const NonCanonicalEmail = (args: any) => {
+export const NonCanonicalEmail = () => {
   window.metaAttributesCache = new Map()
   window.metaAttributesCache.set('ol-institutionLinked', {
     universityName: 'Overleaf University',
@@ -30,7 +30,7 @@ export const NonCanonicalEmail = (args: any) => {
   return <SSOAlert />
 }
 
-export const Error = (args: any) => {
+export const Error = () => {
   window.metaAttributesCache = new Map()
   window.metaAttributesCache.set('ol-samlError', {
     translatedMessage: 'There was an Error',
@@ -38,7 +38,7 @@ export const Error = (args: any) => {
   return <SSOAlert />
 }
 
-export const ErrorTranslated = (args: any) => {
+export const ErrorTranslated = () => {
   window.metaAttributesCache = new Map()
   window.metaAttributesCache.set('ol-samlError', {
     translatedMessage: 'Translated Error Message',
@@ -47,7 +47,7 @@ export const ErrorTranslated = (args: any) => {
   return <SSOAlert />
 }
 
-export const ErrorWithTryAgain = (args: any) => {
+export const ErrorWithTryAgain = () => {
   window.metaAttributesCache = new Map()
   window.metaAttributesCache.set('ol-samlError', {
     message: 'There was an Error',

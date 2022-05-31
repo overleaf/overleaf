@@ -5,7 +5,7 @@ import * as eventTracking from '../../../../../frontend/js/infrastructure/event-
 import SettingsPageRoot from '../../../../../frontend/js/features/settings/components/root'
 
 describe('<SettingsPageRoot />', function () {
-  let sendMBSpy
+  let sendMBSpy: sinon.SinonSpy
   beforeEach(function () {
     window.metaAttributesCache = new Map()
     window.metaAttributesCache.set('ol-usersEmail', 'foo@bar.com')

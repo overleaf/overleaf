@@ -40,8 +40,8 @@ describe('<AddEmailInput/>', function () {
   })
 
   describe('when typing text that does not contain any potential domain match', function () {
-    let onChangeStub
-    let handleAddNewEmailStub
+    let onChangeStub: sinon.SinonStub
+    let handleAddNewEmailStub: sinon.SinonStub
 
     beforeEach(function () {
       fetchMock.get('express:/institutions/domains', 200)
@@ -94,7 +94,7 @@ describe('<AddEmailInput/>', function () {
   })
 
   describe('when typing text that contains a potential domain match', function () {
-    let onChangeStub
+    let onChangeStub: sinon.SinonStub
 
     beforeEach(function () {
       onChangeStub = sinon.stub()
