@@ -11,6 +11,7 @@ import { useUserEmailsContext } from '../../context/user-email-context'
 import getMeta from '../../../../utils/meta'
 import { ExposedSettings } from '../../../../../../types/exposed-settings'
 import { ssoAvailableForInstitution } from '../../utils/sso'
+import ReconfirmationInfo from './reconfirmation-info'
 
 type EmailsRowProps = {
   userEmailData: UserEmailData
@@ -47,6 +48,7 @@ function EmailsRow({ userEmailData }: EmailsRowProps) {
       {hasSSOAffiliation && (
         <SSOAffiliationInfo userEmailData={userEmailData} />
       )}
+      <ReconfirmationInfo userEmailData={userEmailData} />
     </>
   )
 }

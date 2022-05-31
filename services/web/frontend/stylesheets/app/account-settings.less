@@ -189,3 +189,25 @@ tbody > tr.affiliations-table-warning-row > td {
     }
   }
 }
+
+.settings-reconfirm-info {
+  display: flex;
+  justify-content: space-between;
+  margin: 0px auto @margin-sm auto !important;
+  padding: @padding-md;
+  &:not(.alert-info) {
+    background-color: @ol-blue-gray-0;
+  }
+
+  > *:not(:last-child) {
+    margin-right: @margin-md;
+  }
+
+  .fa-warning {
+    color: @brand-warning;
+  }
+}
+
+.setting-reconfirm-info-right {
+  white-space: nowrap;
+}

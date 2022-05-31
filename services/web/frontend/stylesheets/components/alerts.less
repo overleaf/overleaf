@@ -101,8 +101,14 @@
   .btn-inline-link {
     color: white;
     text-decoration: underline;
+    background: none;
+    &:hover,
+    &:focus,
+    &:active {
+      background: none;
+    }
   }
-  .btn {
+  .btn:not(.btn-inline-link) {
     text-decoration: none;
   }
 }

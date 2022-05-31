@@ -39,6 +39,71 @@ const fakeUsersData = [
     default: false,
   },
 ]
+const fakeReconfirmationUsersData = [
+  {
+    affiliation: {
+      institution: {
+        confirmed: true,
+        isUniversity: true,
+        id: 4,
+        name: 'Reconfirmable Email Highlighted',
+      },
+      licence: 'pro_plus',
+      inReconfirmNotificationPeriod: true,
+    },
+    email: 'reconfirmation-highlighted@overleaf.com',
+    confirmedAt: '2022-03-09T10:59:44.139Z',
+    default: false,
+  },
+  {
+    affiliation: {
+      institution: {
+        confirmed: true,
+        isUniversity: true,
+        id: 4,
+        name: 'Reconfirmable Emails Primary',
+      },
+      licence: 'pro_plus',
+      inReconfirmNotificationPeriod: true,
+    },
+    email: 'reconfirmation-nonsso@overleaf.com',
+    confirmedAt: '2022-03-09T10:59:44.139Z',
+    default: true,
+  },
+  {
+    affiliation: {
+      institution: {
+        confirmed: true,
+        ssoEnabled: true,
+        isUniversity: true,
+        id: 3,
+        name: 'Reconfirmable SSO',
+      },
+      licence: 'pro_plus',
+      inReconfirmNotificationPeriod: true,
+    },
+    email: 'reconfirmation-sso@overleaf.com',
+    confirmedAt: '2022-03-09T10:59:44.139Z',
+    samlProviderId: 'reconfirmation-sso-provider-id',
+    default: false,
+  },
+  {
+    affiliation: {
+      institution: {
+        confirmed: true,
+        isUniversity: true,
+        ssoEnabled: true,
+        id: 5,
+        name: 'Reconfirmed SSO',
+      },
+      licence: 'pro_plus',
+    },
+    confirmedAt: '2022-03-09T10:59:44.139Z',
+    email: 'sso@overleaf.com',
+    samlProviderId: 'sso-reconfirmed-provider-id',
+    default: false,
+  },
+]
 
 const fakeInstitutions = [
   {
@@ -103,6 +168,14 @@ export function defaultSetupMocks(fetchMock) {
     })
 }
 
+export function reconfirmationSetupMocks(fetchMock) {
+  defaultSetupMocks(fetchMock)
+  fetchMock.get(/\/user\/emails/, fakeReconfirmationUsersData, {
+    delay: MOCK_DELAY,
+    overwriteRoutes: true,
+  })
+}
+
 export function errorsMocks(fetchMock) {
   fetchMock
     .get(/\/user\/emails/, fakeUsersData, { delay: MOCK_DELAY })
@@ -120,5 +193,17 @@ export function setDefaultMeta() {
   localStorage.setItem(
     'showInstitutionalLeaversSurveyUntil',
     (Date.now() - 1000 * 60 * 60).toString()
+  )
+}
+
+export function setReconfirmationMeta() {
+  setDefaultMeta()
+  window.metaAttributesCache.set(
+    'ol-reconfirmationRemoveEmail',
+    'reconfirmation-highlighted@overleaf.com'
+  )
+  window.metaAttributesCache.set(
+    'ol-reconfirmedViaSAML',
+    'sso-reconfirmed-provider-id'
   )
 }
