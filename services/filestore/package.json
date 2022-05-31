@@ -28,10 +28,9 @@
     "express": "^4.17.1",
     "glob": "^7.1.6",
     "lodash.once": "^4.1.1",
+    "node-fetch": "^2.6.7",
     "node-uuid": "~1.4.8",
     "range-parser": "^1.2.1",
-    "request": "^2.88.2",
-    "request-promise-native": "^1.0.8",
     "stream-buffers": "~0.2.6",
     "tiny-async-pool": "^1.1.0"
   },

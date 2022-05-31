@@ -5,12 +5,8 @@ const Settings = require('@overleaf/settings')
 const Path = require('path')
 const FilestoreApp = require('./FilestoreApp')
 const TestHelper = require('./TestHelper')
-const rp = require('request-promise-native').defaults({
-  resolveWithFullResponse: true,
-})
+const fetch = require('node-fetch')
 const S3 = require('aws-sdk/clients/s3')
-const Stream = require('stream')
-const request = require('request')
 const { promisify } = require('util')
 const { Storage } = require('@google-cloud/storage')
 const streamifier = require('streamifier')
@@ -21,7 +17,6 @@ const ChildProcess = require('child_process')
 
 const fsWriteFile = promisify(fs.writeFile)
 const fsStat = promisify(fs.stat)
-const pipeline = promisify(Stream.pipeline)
 const exec = promisify(ChildProcess.exec)
 const msleep = promisify(setTimeout)
 
@@ -132,16 +127,18 @@ describe('Filestore', function () {
       })
 
       it('should send a 200 for the status endpoint', async function () {
-        const response = await rp(`${filestoreUrl}/status`)
-        expect(response.statusCode).to.equal(200)
-        expect(response.body).to.contain('filestore')
-        expect(response.body).to.contain('up')
+        const response = await fetch(`${filestoreUrl}/status`)
+        expect(response.status).to.equal(200)
+        const body = await response.text()
+        expect(body).to.contain('filestore')
+        expect(body).to.contain('up')
       })
 
       it('should send a 200 for the health-check endpoint', async function () {
-        const response = await rp(`${filestoreUrl}/health_check`)
-        expect(response.statusCode).to.equal(200)
-        expect(response.body).to.equal('OK')
+        const response = await fetch(`${filestoreUrl}/health_check`)
+        expect(response.status).to.equal(200)
+        const body = await response.text()
+        expect(body).to.equal('OK')
       })
 
       describe('with a file on the server', function () {
@@ -161,11 +158,8 @@ describe('Filestore', function () {
 
           await fsWriteFile(localFileReadPath, constantFileContent)
 
-          const writeStream = request.post(fileUrl)
           const readStream = fs.createReadStream(localFileReadPath)
-          // hack to consume the result to ensure the http request has been fully processed
-          const resultStream = fs.createWriteStream('/dev/null')
-          await pipeline(readStream, writeStream, resultStream)
+          await fetch(fileUrl, { method: 'POST', body: readStream })
         })
 
         beforeEach(async function retrievePreviousIngressMetrics() {
@@ -181,93 +175,82 @@ describe('Filestore', function () {
         })
 
         it('should return 404 for a non-existant id', async function () {
-          const options = { uri: fileUrl + '___this_is_clearly_wrong___' }
-          await expect(
-            rp.get(options)
-          ).to.eventually.be.rejected.and.have.property('statusCode', 404)
+          const url = fileUrl + '___this_is_clearly_wrong___'
+          const response = await fetch(url)
+          expect(response.status).to.equal(404)
         })
 
         it('should return the file size on a HEAD request', async function () {
           const expectedLength = Buffer.byteLength(constantFileContent)
-          const res = await rp.head(fileUrl)
-          expect(res.statusCode).to.equal(200)
-          expect(res.headers['content-length']).to.equal(
+          const res = await fetch(fileUrl, { method: 'HEAD' })
+          expect(res.status).to.equal(200)
+          expect(res.headers.get('Content-Length')).to.equal(
             expectedLength.toString()
           )
         })
 
         it('should be able get the file back', async function () {
-          const res = await rp.get(fileUrl)
-          expect(res.body).to.equal(constantFileContent)
+          const res = await fetch(fileUrl)
+          const body = await res.text()
+          expect(body).to.equal(constantFileContent)
         })
 
         it('should not leak a socket', async function () {
-          await rp.get(fileUrl)
+          await fetch(fileUrl)
           await expectNoSockets()
         })
 
         it('should be able to get back the first 9 bytes of the file', async function () {
-          const options = {
-            uri: fileUrl,
-            headers: {
-              Range: 'bytes=0-8',
-            },
-          }
-          const res = await rp.get(options)
-          expect(res.body).to.equal('hello wor')
+          const res = await fetch(fileUrl, { headers: { Range: 'bytes=0-8' } })
+          const body = await res.text()
+          expect(body).to.equal('hello wor')
         })
 
         it('should be able to get back bytes 4 through 10 of the file', async function () {
-          const options = {
-            uri: fileUrl,
-            headers: {
-              Range: 'bytes=4-10',
-            },
-          }
-          const res = await rp.get(options)
-          expect(res.body).to.equal('o world')
+          const res = await fetch(fileUrl, { headers: { Range: 'bytes=4-10' } })
+          const body = await res.text()
+          expect(body).to.equal('o world')
         })
 
         it('should be able to delete the file', async function () {
-          const response = await rp.del(fileUrl)
-          expect(response.statusCode).to.equal(204)
-          await expect(
-            rp.get(fileUrl)
-          ).to.eventually.be.rejected.and.have.property('statusCode', 404)
+          const response = await fetch(fileUrl, { method: 'DELETE' })
+          expect(response.status).to.equal(204)
+          const response2 = await fetch(fileUrl)
+          expect(response2.status).to.equal(404)
         })
 
         it('should be able to copy files', async function () {
           const newProjectID = ObjectId().toString()
           const newFileId = ObjectId().toString()
           const newFileUrl = `${filestoreUrl}/project/${newProjectID}/file/${newFileId}`
-          const opts = {
-            method: 'put',
-            uri: newFileUrl,
-            json: {
+          let response = await fetch(newFileUrl, {
+            method: 'PUT',
+            body: JSON.stringify({
               source: {
                 project_id: projectId,
                 file_id: fileId,
               },
+            }),
+            headers: {
+              'Content-Type': 'application/json',
             },
-          }
-          let response = await rp(opts)
-          expect(response.statusCode).to.equal(200)
-          response = await rp.del(fileUrl)
-          expect(response.statusCode).to.equal(204)
-          response = await rp.get(newFileUrl)
-          expect(response.body).to.equal(constantFileContent)
+          })
+          expect(response.status).to.equal(200)
+          response = await fetch(fileUrl, { method: 'DELETE' })
+          expect(response.status).to.equal(204)
+          response = await fetch(newFileUrl)
+          const body = await response.text()
+          expect(body).to.equal(constantFileContent)
         })
 
         it('should be able to overwrite the file', async function () {
           const newContent = `here is some different content, ${Math.random()}`
-          const writeStream = request.post(fileUrl)
           const readStream = streamifier.createReadStream(newContent)
-          // hack to consume the result to ensure the http request has been fully processed
-          const resultStream = fs.createWriteStream('/dev/null')
-          await pipeline(readStream, writeStream, resultStream)
+          await fetch(fileUrl, { method: 'POST', body: readStream })
 
-          const response = await rp.get(fileUrl)
-          expect(response.body).to.equal(newContent)
+          const response = await fetch(fileUrl)
+          const body = await response.text()
+          expect(body).to.equal(newContent)
         })
 
         if (['S3Persistor', 'GcsPersistor'].includes(backend)) {
@@ -280,7 +263,8 @@ describe('Filestore', function () {
           })
 
           it('should record an ingress metric when downloading the file', async function () {
-            await rp.get(fileUrl)
+            const response = await fetch(fileUrl)
+            expect(response.ok).to.be.true
             const metric = await TestHelper.getMetric(
               filestoreUrl,
               `${metricPrefix}_ingress`
@@ -291,13 +275,10 @@ describe('Filestore', function () {
           })
 
           it('should record an ingress metric for a partial download', async function () {
-            const options = {
-              uri: fileUrl,
-              headers: {
-                Range: 'bytes=0-8',
-              },
-            }
-            await rp.get(options)
+            const response = await fetch(fileUrl, {
+              headers: { Range: 'bytes=0-8' },
+            })
+            expect(response.ok).to.be.true
             const metric = await TestHelper.getMetric(
               filestoreUrl,
               `${metricPrefix}_ingress`
@@ -354,72 +335,62 @@ describe('Filestore', function () {
           ]
           otherFileUrls = [`${otherProjectUrl}/file/${fileIds[2]}`]
 
-          const writeStreams = [
-            request.post(fileUrls[0]),
-            request.post(fileUrls[1]),
-            request.post(otherFileUrls[0]),
-          ]
-          const readStreams = [
-            fs.createReadStream(localFileReadPaths[0]),
-            fs.createReadStream(localFileReadPaths[1]),
-            fs.createReadStream(localFileReadPaths[2]),
-          ]
-          // hack to consume the result to ensure the http request has been fully processed
-          const resultStreams = [
-            fs.createWriteStream('/dev/null'),
-            fs.createWriteStream('/dev/null'),
-            fs.createWriteStream('/dev/null'),
-          ]
-          return Promise.all([
-            pipeline(readStreams[0], writeStreams[0], resultStreams[0]),
-            pipeline(readStreams[1], writeStreams[1], resultStreams[1]),
-            pipeline(readStreams[2], writeStreams[2], resultStreams[2]),
+          await Promise.all([
+            fetch(fileUrls[0], {
+              method: 'POST',
+              body: fs.createReadStream(localFileReadPaths[0]),
+            }),
+            fetch(fileUrls[1], {
+              method: 'POST',
+              body: fs.createReadStream(localFileReadPaths[1]),
+            }),
+            fetch(otherFileUrls[0], {
+              method: 'POST',
+              body: fs.createReadStream(localFileReadPaths[2]),
+            }),
           ])
         })
 
         it('should get the directory size', async function () {
-          const response = await rp.get(
+          const response = await fetch(
             `${filestoreUrl}/project/${projectId}/size`
           )
-          expect(parseInt(JSON.parse(response.body)['total bytes'])).to.equal(
+          const body = await response.text()
+          expect(parseInt(JSON.parse(body)['total bytes'])).to.equal(
             constantFileContents[0].length + constantFileContents[1].length
           )
         })
 
         it('should store the files', async function () {
           for (const index in fileUrls) {
-            await expect(rp.get(fileUrls[index])).to.eventually.have.property(
-              'body',
-              constantFileContents[index]
-            )
+            const response = await fetch(fileUrls[index])
+            const body = await response.text()
+            expect(body).to.equal(constantFileContents[index])
           }
         })
 
         it('should be able to delete the project', async function () {
-          await expect(rp.delete(projectUrl)).to.eventually.have.property(
-            'statusCode',
-            204
-          )
+          let response = await fetch(projectUrl, { method: 'DELETE' })
+          expect(response.status).to.equal(204)
 
           for (const index in fileUrls) {
-            await expect(
-              rp.get(fileUrls[index])
-            ).to.eventually.be.rejected.and.have.property('statusCode', 404)
+            response = await fetch(fileUrls[index])
+            expect(response.status).to.equal(404)
           }
         })
 
         it('should not delete files in other projects', async function () {
           for (const index in otherFileUrls) {
-            await expect(
-              rp.get(otherFileUrls[index])
-            ).to.eventually.have.property('statusCode', 200)
+            const response = await fetch(otherFileUrls[index])
+            expect(response.status).to.equal(200)
           }
         })
 
         it('should not delete a partial project id', async function () {
-          await expect(
-            rp.delete(`${filestoreUrl}/project/5`)
-          ).to.eventually.be.rejected.and.have.property('statusCode', 400)
+          const response = await fetch(`${filestoreUrl}/project/5`, {
+            method: 'DELETE',
+          })
+          expect(response.status).to.equal(400)
         })
       })
 
@@ -433,21 +404,14 @@ describe('Filestore', function () {
           largeFileContent = '_wombat_'.repeat(1024 * 1024) // 8 megabytes
           largeFileContent += Math.random()
 
-          const writeStream = request.post(fileUrl)
           const readStream = streamifier.createReadStream(largeFileContent)
-          // hack to consume the result to ensure the http request has been fully processed
-          const resultStream = fs.createWriteStream('/dev/null')
-
-          try {
-            await pipeline(readStream, writeStream, resultStream)
-          } catch (err) {
-            error = err
-          }
+          await fetch(fileUrl, { method: 'POST', body: readStream })
         })
 
         it('should be able to get the file back', async function () {
-          const response = await rp.get(fileUrl)
-          expect(response.body).to.equal(largeFileContent)
+          const response = await fetch(fileUrl)
+          const body = await response.text()
+          expect(body).to.equal(largeFileContent)
         })
 
         it('should not throw an error', function () {
@@ -455,27 +419,17 @@ describe('Filestore', function () {
         })
 
         it('should not leak a socket', async function () {
-          await rp.get(fileUrl)
+          const response = await fetch(fileUrl)
+          await response.text()
           await expectNoSockets()
         })
 
         it('should not leak a socket if the connection is aborted', async function () {
-          this.timeout(20000)
-          for (let i = 0; i < 5; i++) {
-            // test is not 100% reliable, so repeat
-            // create a new connection and have it time out before reading any data
-            await new Promise(resolve => {
-              const streamThatHangs = new Stream.PassThrough()
-              const stream = request({ url: fileUrl, timeout: 1000 })
-              stream.pipe(streamThatHangs)
-              stream.on('error', () => {
-                stream.destroy()
-                streamThatHangs.destroy()
-                resolve()
-              })
-            })
-            await expectNoSockets()
-          }
+          const controller = new AbortController()
+          const response = await fetch(fileUrl, { signal: controller.signal })
+          expect(response.ok).to.be.true
+          controller.abort()
+          await expectNoSockets()
         })
       })
 
@@ -515,8 +469,9 @@ describe('Filestore', function () {
           })
 
           it('should get the file from the specified bucket', async function () {
-            const response = await rp.get(fileUrl)
-            expect(response.body).to.equal(constantFileContent)
+            const response = await fetch(fileUrl)
+            const body = await response.text()
+            expect(body).to.equal(constantFileContent)
           })
         })
       }
@@ -533,17 +488,9 @@ describe('Filestore', function () {
 
             content = '_wombat_' + Math.random()
 
-            const writeStream = request.post(fileUrl)
             const readStream = streamifier.createReadStream(content)
-            // hack to consume the result to ensure the http request has been fully processed
-            const resultStream = fs.createWriteStream('/dev/null')
-
-            try {
-              await pipeline(readStream, writeStream, resultStream)
-              await rp.delete(fileUrl)
-            } catch (err) {
-              error = err
-            }
+            await fetch(fileUrl, { method: 'POST', body: readStream })
+            await fetch(fileUrl, { method: 'DELETE' })
           })
 
           afterEach(function () {
@@ -625,12 +572,14 @@ describe('Filestore', function () {
               })
 
               it('should fetch the file', async function () {
-                const res = await rp.get(fileUrl)
-                expect(res.body).to.equal(constantFileContent)
+                const res = await fetch(fileUrl)
+                const body = await res.text()
+                expect(body).to.equal(constantFileContent)
               })
 
               it('should not copy the file to the primary', async function () {
-                await rp.get(fileUrl)
+                const response = await fetch(fileUrl)
+                expect(response.ok).to.be.true
 
                 await TestHelper.expectPersistorNotToHaveFile(
                   app.persistor.primaryPersistor,
@@ -646,12 +595,14 @@ describe('Filestore', function () {
               })
 
               it('should fetch the file', async function () {
-                const res = await rp.get(fileUrl)
-                expect(res.body).to.equal(constantFileContent)
+                const res = await fetch(fileUrl)
+                const body = await res.text()
+                expect(body).to.equal(constantFileContent)
               })
 
               it('copies the file to the primary', async function () {
-                await rp.get(fileUrl)
+                const response = await fetch(fileUrl)
+                expect(response.ok).to.be.true
                 // wait for the file to copy in the background
                 await msleep(1000)
 
@@ -675,12 +626,14 @@ describe('Filestore', function () {
 
                 opts = {
                   method: 'put',
-                  uri: newFileUrl,
-                  json: {
+                  body: JSON.stringify({
                     source: {
                       project_id: projectId,
                       file_id: fileId,
                     },
+                  }),
+                  headers: {
+                    'Content-Type': 'application/json',
                   },
                 }
               })
@@ -689,8 +642,8 @@ describe('Filestore', function () {
                 beforeEach(async function () {
                   app.persistor.settings.copyOnMiss = false
 
-                  const response = await rp(opts)
-                  expect(response.statusCode).to.equal(200)
+                  const response = await fetch(newFileUrl, opts)
+                  expect(response.status).to.equal(200)
                 })
 
                 it('should leave the old file in the old bucket', async function () {
@@ -735,8 +688,8 @@ describe('Filestore', function () {
                 beforeEach(async function () {
                   app.persistor.settings.copyOnMiss = true
 
-                  const response = await rp(opts)
-                  expect(response.statusCode).to.equal(200)
+                  const response = await fetch(newFileUrl, opts)
+                  expect(response.status).to.equal(200)
                 })
 
                 it('should leave the old file in the old bucket', async function () {
@@ -782,12 +735,9 @@ describe('Filestore', function () {
 
           describe('when sending a file', function () {
             beforeEach(async function () {
-              const writeStream = request.post(fileUrl)
               const readStream =
                 streamifier.createReadStream(constantFileContent)
-              // hack to consume the result to ensure the http request has been fully processed
-              const resultStream = fs.createWriteStream('/dev/null')
-              await pipeline(readStream, writeStream, resultStream)
+              await fetch(fileUrl, { method: 'POST', body: readStream })
             })
 
             it('should store the file on the primary', async function () {
@@ -820,11 +770,10 @@ describe('Filestore', function () {
               })
 
               it('should delete the file', async function () {
-                const response = await rp.del(fileUrl)
-                expect(response.statusCode).to.equal(204)
-                await expect(
-                  rp.get(fileUrl)
-                ).to.eventually.be.rejected.and.have.property('statusCode', 404)
+                const response1 = await fetch(fileUrl, { method: 'DELETE' })
+                expect(response1.status).to.equal(204)
+                const response2 = await fetch(fileUrl)
+                expect(response2.status).to.equal(404)
               })
             })
 
@@ -839,11 +788,10 @@ describe('Filestore', function () {
               })
 
               it('should delete the file', async function () {
-                const response = await rp.del(fileUrl)
-                expect(response.statusCode).to.equal(204)
-                await expect(
-                  rp.get(fileUrl)
-                ).to.eventually.be.rejected.and.have.property('statusCode', 404)
+                const response1 = await fetch(fileUrl, { method: 'DELETE' })
+                expect(response1.status).to.equal(204)
+                const response2 = await fetch(fileUrl)
+                expect(response2.status).to.equal(404)
               })
             })
 
@@ -864,11 +812,10 @@ describe('Filestore', function () {
               })
 
               it('should delete the files', async function () {
-                const response = await rp.del(fileUrl)
-                expect(response.statusCode).to.equal(204)
-                await expect(
-                  rp.get(fileUrl)
-                ).to.eventually.be.rejected.and.have.property('statusCode', 404)
+                const response1 = await fetch(fileUrl, { method: 'DELETE' })
+                expect(response1.status).to.equal(204)
+                const response2 = await fetch(fileUrl)
+                expect(response2.status).to.equal(404)
               })
             })
 
@@ -876,8 +823,8 @@ describe('Filestore', function () {
               it('should return return 204', async function () {
                 // S3 doesn't give us a 404 when the object doesn't exist, so to stay
                 // consistent we merrily return 204 ourselves here as well
-                const response = await rp.del(fileUrl)
-                expect(response.statusCode).to.equal(204)
+                const response = await fetch(fileUrl, { method: 'DELETE' })
+                expect(response.status).to.equal(204)
               })
             })
           })
@@ -896,15 +843,14 @@ describe('Filestore', function () {
           fileUrl = `${filestoreUrl}/project/${projectId}/file/${fileId}`
           const stat = await fsStat(localFileReadPath)
           localFileSize = stat.size
-          const writeStream = request.post(fileUrl)
-          const endStream = fs.createWriteStream('/dev/null')
           const readStream = fs.createReadStream(localFileReadPath)
-          await pipeline(readStream, writeStream, endStream)
+          await fetch(fileUrl, { method: 'POST', body: readStream })
         })
 
         it('should be able get the file back', async function () {
-          const response = await rp.get(fileUrl)
-          expect(response.body.substring(0, 8)).to.equal('%PDF-1.5')
+          const response = await fetch(fileUrl)
+          const body = await response.text()
+          expect(body.substring(0, 8)).to.equal('%PDF-1.5')
         })
 
         if (['S3Persistor', 'GcsPersistor'].includes(backend)) {
@@ -926,15 +872,16 @@ describe('Filestore', function () {
           })
 
           it('should not time out', async function () {
-            const response = await rp.get(previewFileUrl)
-            expect(response.statusCode).to.equal(200)
+            const response = await fetch(previewFileUrl)
+            expect(response.status).to.equal(200)
           })
 
           it('should respond with image data', async function () {
             // note: this test relies of the imagemagick conversion working
-            const response = await rp.get(previewFileUrl)
-            expect(response.body.length).to.be.greaterThan(400)
-            expect(response.body.substr(1, 3)).to.equal('PNG')
+            const response = await fetch(previewFileUrl)
+            const body = await response.text()
+            expect(body.length).to.be.greaterThan(400)
+            expect(body.substr(1, 3)).to.equal('PNG')
           })
         })
 
@@ -947,14 +894,15 @@ describe('Filestore', function () {
           })
 
           it('should not time out', async function () {
-            const response = await rp.get(previewFileUrl)
-            expect(response.statusCode).to.equal(200)
+            const response = await fetch(previewFileUrl)
+            expect(response.status).to.equal(200)
           })
 
           it("should respond with only an 'OK'", async function () {
             // note: this test relies of the imagemagick conversion working
-            const response = await rp.get(previewFileUrl)
-            expect(response.body).to.equal('OK')
+            const response = await fetch(previewFileUrl)
+            const body = await response.text()
+            expect(body).to.equal('OK')
           })
         })
       })

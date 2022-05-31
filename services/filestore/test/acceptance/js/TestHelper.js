@@ -1,7 +1,5 @@
 const streamifier = require('streamifier')
-const rp = require('request-promise-native').defaults({
-  resolveWithFullResponse: true,
-})
+const fetch = require('node-fetch')
 
 const { expect } = require('chai')
 
@@ -15,10 +13,11 @@ module.exports = {
 }
 
 async function getMetric(filestoreUrl, metric) {
-  const res = await rp.get(`${filestoreUrl}/metrics`)
-  expect(res.statusCode).to.equal(200)
+  const res = await fetch(`${filestoreUrl}/metrics`)
+  expect(res.status).to.equal(200)
   const metricRegex = new RegExp(`^${metric}{[^}]+} ([0-9]+)$`, 'm')
-  const found = metricRegex.exec(res.body)
+  const body = await res.text()
+  const found = metricRegex.exec(body)
   return parseInt(found ? found[1] : 0) || 0
 }
 
