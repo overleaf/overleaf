@@ -1,5 +1,6 @@
 const { parseOneAddress } = require('email-addresses')
 
+// available for frontend in https://github.com/overleaf/internal/blob/19d432c70b173752ee7c6d8978dd6be16b042921/services/web/frontend/js/shared/utils/email.tsx#L4
 const EMAIL_REGEXP =
   // eslint-disable-next-line no-useless-escape
   /^([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
