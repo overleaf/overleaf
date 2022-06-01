@@ -10,7 +10,6 @@ import PdfLogsEntries from './pdf-logs-entries'
 import withErrorBoundary from '../../../infrastructure/error-boundary'
 import ErrorBoundaryFallback from './error-boundary-fallback'
 import PdfCodeCheckFailedNotice from './pdf-code-check-failed-notice'
-import PdfLogsPaneInfoNotice from './pdf-logs-pane-info-notice'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import PdfLogEntry from './pdf-log-entry'
 
@@ -29,8 +28,6 @@ function PdfLogsViewer() {
   return (
     <div className={classnames('logs-pane', { hidden: !showLogs })}>
       <div className="logs-pane-content">
-        <PdfLogsPaneInfoNotice />
-
         {codeCheckFailed && <PdfCodeCheckFailedNotice />}
 
         {error && <PdfPreviewError error={error} />}
