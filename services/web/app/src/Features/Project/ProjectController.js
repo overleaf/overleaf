@@ -459,38 +459,14 @@ const ProjectController = {
             }
           )
         },
-
-        persistentUpgradePromptsAssignment(cb) {
-          SplitTestHandler.getAssignment(
-            req,
-            res,
-            'persistent-upgrade-prompt',
-            (err, assignment) => {
-              if (err) {
-                logger.warn(
-                  { err },
-                  'failed to get "persistent-upgrade-prompt" split test assignment'
-                )
-                cb(null, { variant: 'default' })
-              } else {
-                cb(null, assignment)
-              }
-            }
-          )
-        },
       },
       (err, results) => {
         if (err != null) {
           OError.tag(err, 'error getting data for project list page')
           return next(err)
         }
-        const {
-          notifications,
-          user,
-          userEmailsData,
-          primaryEmailCheckActive,
-          persistentUpgradePromptsAssignment,
-        } = results
+        const { notifications, user, userEmailsData, primaryEmailCheckActive } =
+          results
 
         if (
           user &&
@@ -621,7 +597,6 @@ const ProjectController = {
 
         // Persistent upgrade prompts
         const showToolbarUpgradePrompt =
-          persistentUpgradePromptsAssignment.variant === 'persistent-upgrade' &&
           !results.hasSubscription &&
           !userEmails.some(e => e.emailHasInstitutionLicence)
 
@@ -909,21 +884,6 @@ const ProjectController = {
             }
           )
         },
-        persistentUpgradePromptsAssignment(cb) {
-          SplitTestHandler.getAssignment(
-            req,
-            res,
-            'persistent-upgrade-prompt',
-            (error, assignment) => {
-              // do not fail editor load if assignment fails
-              if (error) {
-                cb(null, { variant: 'default' })
-              } else {
-                cb(null, assignment)
-              }
-            }
-          )
-        },
       },
       (
         err,
@@ -940,7 +900,6 @@ const ProjectController = {
           pdfDetachAssignment,
           pdfjsAssignment,
           dictionaryEditorAssignment,
-          persistentUpgradePromptsAssignment,
         }
       ) => {
         if (err != null) {
@@ -1053,8 +1012,6 @@ const ProjectController = {
 
             // Persistent upgrade prompts
             const showHeaderUpgradePrompt =
-              persistentUpgradePromptsAssignment.variant ===
-                'persistent-upgrade' &&
               userId &&
               !subscription &&
               !userIsMemberOfGroupSubscription &&
