@@ -11,7 +11,7 @@ block append meta
 	if (personalSubscription && personalSubscription.recurly)
 		meta(name="ol-recurlyApiKey" content=settings.apis.recurly.publicKey)
 		meta(name="ol-subscription" data-type="json" content=personalSubscription)
-		meta(name="ol-recomendedCurrency" content=personalSubscription.recurly.currency)
+		meta(name="ol-recommendedCurrency" content=personalSubscription.recurly.currency)
 		meta(name="ol-groupPlans" data-type="json" content=groupPlans)
 		meta(name="ol-groupPlanModalOptions" data-type="json" content=groupPlanModalOptions)
 

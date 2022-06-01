@@ -88,7 +88,6 @@ async function plansPage(req, res) {
     title: 'plans_and_pricing',
     plans,
     itm_content: req.query && req.query.itm_content,
-    recomendedCurrency: recommendedCurrency,
     recommendedCurrency,
     planFeatures: newPlansPageVariantV2 ? planFeaturesV2 : planFeatures,
     groupPlans: GroupPlansData,

@@ -3,7 +3,7 @@ extends ../layout
 block append meta
 	meta(name="ol-countryCode" content=countryCode)
 	meta(name="ol-recurlyApiKey" content=settings.apis.recurly.publicKey)
-	meta(name="ol-recomendedCurrency" content=String(currency).slice(0,3))
+	meta(name="ol-recommendedCurrency" content=String(currency).slice(0,3))
 
 block head-scripts
 	script(type="text/javascript", nonce=scriptNonce, src="https://js.recurly.com/v4/recurly.js")

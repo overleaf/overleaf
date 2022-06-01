@@ -5,7 +5,7 @@
 import App from '../base'
 import getMeta from '../utils/meta'
 App.factory('MultiCurrencyPricing', function () {
-  const currencyCode = getMeta('ol-recomendedCurrency')
+  const currencyCode = getMeta('ol-recommendedCurrency')
 
   return {
     currencyCode,
