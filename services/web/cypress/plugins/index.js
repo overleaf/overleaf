@@ -9,6 +9,7 @@ module.exports = (on, config) => {
     const webpackConfig = merge(devConfig, {
       devServer: {
         static: path.join(__dirname, '../../public'),
+        port: 3200,
       },
       stats: 'none',
       plugins: [
