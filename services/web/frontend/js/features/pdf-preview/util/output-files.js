@@ -8,8 +8,6 @@ const searchParams = new URLSearchParams(window.location.search)
 export function handleOutputFiles(outputFiles, projectId, data) {
   const result = {}
 
-  const pdfDownloadDomain = data.pdfDownloadDomain ?? ''
-
   const outputFile = outputFiles.get('output.pdf')
 
   if (outputFile) {
@@ -32,7 +30,7 @@ export function handleOutputFiles(outputFiles, projectId, data) {
       params.set('enable_pdf_caching', 'true')
     }
 
-    result.pdfUrl = `${pdfDownloadDomain}${outputFile.url}?${params}`
+    result.pdfUrl = `${buildURL(outputFile, data.pdfDownloadDomain)}?${params}`
 
     // build the URL for downloading the PDF
     params.set('popupDownload', 'true') // save PDF download as file
@@ -44,8 +42,6 @@ export function handleOutputFiles(outputFiles, projectId, data) {
 }
 
 export const handleLogFiles = async (outputFiles, data, signal) => {
-  const pdfDownloadDomain = data.pdfDownloadDomain ?? ''
-
   const result = {
     log: null,
     logEntries: {
@@ -76,7 +72,7 @@ export const handleLogFiles = async (outputFiles, data, signal) => {
 
   if (logFile) {
     try {
-      const response = await fetch(`${pdfDownloadDomain}${logFile.url}`, {
+      const response = await fetch(buildURL(logFile, data.pdfDownloadDomain), {
         signal,
       })
 
@@ -99,7 +95,7 @@ export const handleLogFiles = async (outputFiles, data, signal) => {
 
   if (blgFile) {
     try {
-      const response = await fetch(`${pdfDownloadDomain}${blgFile.url}`, {
+      const response = await fetch(buildURL(blgFile, data.pdfDownloadDomain), {
         signal,
       })
 
@@ -154,6 +150,16 @@ export function buildLogEntryAnnotations(entries, fileTreeManager) {
   }
 
   return logEntryAnnotations
+}
+
+function buildURL(file, pdfDownloadDomain) {
+  if (file.build && pdfDownloadDomain) {
+    // Downloads from the compiles domain must include a build id.
+    // The build id is used implicitly for access control.
+    return `${pdfDownloadDomain}${file.url}`
+  }
+  // Go through web instead, which uses mongo for checking project access.
+  return file.url
 }
 
 function normalizeFilePath(path, rootDocDirname) {
