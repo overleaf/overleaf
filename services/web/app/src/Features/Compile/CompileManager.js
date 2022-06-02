@@ -1,18 +1,3 @@
-/* eslint-disable
-    camelcase,
-    n/handle-callback-err,
-    max-len,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 let CompileManager
 const Settings = require('@overleaf/settings')
 const RedisWrapper = require('../../infrastructure/RedisWrapper')
@@ -25,48 +10,42 @@ const Metrics = require('@overleaf/metrics')
 const rateLimiter = require('../../infrastructure/RateLimiter')
 
 module.exports = CompileManager = {
-  compile(project_id, user_id, options, _callback) {
-    if (options == null) {
-      options = {}
-    }
-    if (_callback == null) {
-      _callback = function () {}
-    }
+  compile(projectId, userId, options = {}, _callback) {
     const timer = new Metrics.Timer('editor.compile')
     const callback = function (...args) {
       timer.done()
-      return _callback(...Array.from(args || []))
+      _callback(...args)
     }
 
-    return CompileManager._checkIfRecentlyCompiled(
-      project_id,
-      user_id,
+    CompileManager._checkIfRecentlyCompiled(
+      projectId,
+      userId,
       function (error, recentlyCompiled) {
-        if (error != null) {
+        if (error) {
           return callback(error)
         }
         if (recentlyCompiled) {
           return callback(null, 'too-recently-compiled', [])
         }
 
-        return CompileManager._checkIfAutoCompileLimitHasBeenHit(
+        CompileManager._checkIfAutoCompileLimitHasBeenHit(
           options.isAutoCompile,
           'everyone',
           function (err, canCompile) {
-            if (!canCompile) {
+            if (err || !canCompile) {
               return callback(null, 'autocompile-backoff', [])
             }
 
-            return ProjectRootDocManager.ensureRootDocumentIsSet(
-              project_id,
+            ProjectRootDocManager.ensureRootDocumentIsSet(
+              projectId,
               function (error) {
-                if (error != null) {
+                if (error) {
                   return callback(error)
                 }
-                return CompileManager.getProjectCompileLimits(
-                  project_id,
+                CompileManager.getProjectCompileLimits(
+                  projectId,
                   function (error, limits) {
-                    if (error != null) {
+                    if (error) {
                       return callback(error)
                     }
                     for (const key in limits) {
@@ -74,19 +53,19 @@ module.exports = CompileManager = {
                       options[key] = value
                     }
                     // Put a lower limit on autocompiles for free users, based on compileGroup
-                    return CompileManager._checkCompileGroupAutoCompileLimit(
+                    CompileManager._checkCompileGroupAutoCompileLimit(
                       options.isAutoCompile,
                       limits.compileGroup,
                       function (err, canCompile) {
-                        if (!canCompile) {
+                        if (err || !canCompile) {
                           return callback(null, 'autocompile-backoff', [])
                         }
-                        // only pass user_id down to clsi if this is a per-user compile
+                        // only pass userId down to clsi if this is a per-user compile
                         const compileAsUser = Settings.disablePerUserCompiles
                           ? undefined
-                          : user_id
-                        return ClsiManager.sendRequest(
-                          project_id,
+                          : userId
+                        ClsiManager.sendRequest(
+                          projectId,
                           compileAsUser,
                           options,
                           function (
@@ -99,10 +78,10 @@ module.exports = CompileManager = {
                             timings,
                             outputUrlPrefix
                           ) {
-                            if (error != null) {
+                            if (error) {
                               return callback(error)
                             }
-                            return callback(
+                            callback(
                               null,
                               status,
                               outputFiles,
@@ -127,66 +106,51 @@ module.exports = CompileManager = {
     )
   },
 
-  stopCompile(project_id, user_id, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    return CompileManager.getProjectCompileLimits(
-      project_id,
-      function (error, limits) {
-        if (error != null) {
-          return callback(error)
-        }
-        return ClsiManager.stopCompile(project_id, user_id, limits, callback)
+  stopCompile(projectId, userId, callback) {
+    CompileManager.getProjectCompileLimits(projectId, function (error, limits) {
+      if (error) {
+        return callback(error)
       }
-    )
+      ClsiManager.stopCompile(projectId, userId, limits, callback)
+    })
   },
 
-  deleteAuxFiles(project_id, user_id, clsiserverid, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    return CompileManager.getProjectCompileLimits(
-      project_id,
-      function (error, limits) {
-        if (error != null) {
-          return callback(error)
-        }
-        ClsiManager.deleteAuxFiles(
-          project_id,
-          user_id,
-          limits,
-          clsiserverid,
-          callback
-        )
+  deleteAuxFiles(projectId, userId, clsiserverid, callback) {
+    CompileManager.getProjectCompileLimits(projectId, function (error, limits) {
+      if (error) {
+        return callback(error)
       }
-    )
+      ClsiManager.deleteAuxFiles(
+        projectId,
+        userId,
+        limits,
+        clsiserverid,
+        callback
+      )
+    })
   },
 
-  getProjectCompileLimits(project_id, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    return ProjectGetter.getProject(
-      project_id,
+  getProjectCompileLimits(projectId, callback) {
+    ProjectGetter.getProject(
+      projectId,
       { owner_ref: 1 },
       function (error, project) {
-        if (error != null) {
+        if (error) {
           return callback(error)
         }
-        return UserGetter.getUser(
+        UserGetter.getUser(
           project.owner_ref,
           { alphaProgram: 1, betaProgram: 1, features: 1 },
           function (err, owner) {
-            if (error != null) {
-              return callback(error)
+            if (err) {
+              return callback(err)
             }
             const ownerFeatures = (owner && owner.features) || {}
             // put alpha users into their own compile group
             if (owner && owner.alphaProgram) {
               ownerFeatures.compileGroup = 'alpha'
             }
-            return callback(null, {
+            callback(null, {
               timeout:
                 ownerFeatures.compileTimeout ||
                 Settings.defaultFeatures.compileTimeout,
@@ -201,54 +165,45 @@ module.exports = CompileManager = {
   },
 
   COMPILE_DELAY: 1, // seconds
-  _checkIfRecentlyCompiled(project_id, user_id, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    const key = `compile:${project_id}:${user_id}`
-    return rclient.set(
+  _checkIfRecentlyCompiled(projectId, userId, callback) {
+    const key = `compile:${projectId}:${userId}`
+    rclient.set(
       key,
       true,
       'EX',
       this.COMPILE_DELAY,
       'NX',
       function (error, ok) {
-        if (error != null) {
+        if (error) {
           return callback(error)
         }
         if (ok === 'OK') {
-          return callback(null, false)
+          callback(null, false)
         } else {
-          return callback(null, true)
+          callback(null, true)
         }
       }
     )
   },
 
   _checkCompileGroupAutoCompileLimit(isAutoCompile, compileGroup, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
     if (!isAutoCompile) {
       return callback(null, true)
     }
     if (compileGroup === 'standard') {
       // apply extra limits to the standard compile group
-      return CompileManager._checkIfAutoCompileLimitHasBeenHit(
+      CompileManager._checkIfAutoCompileLimitHasBeenHit(
         isAutoCompile,
         compileGroup,
         callback
       )
     } else {
       Metrics.inc(`auto-compile-${compileGroup}`)
-      return callback(null, true)
+      callback(null, true)
     }
   }, // always allow priority group users to compile
 
   _checkIfAutoCompileLimitHasBeenHit(isAutoCompile, compileGroup, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
     if (!isAutoCompile) {
       return callback(null, true)
     }
@@ -259,36 +214,30 @@ module.exports = CompileManager = {
       subjectName: compileGroup,
       throttle: Settings.rateLimit.autoCompile[compileGroup] || 25,
     }
-    return rateLimiter.addCount(opts, function (err, canCompile) {
-      if (err != null) {
+    rateLimiter.addCount(opts, function (err, canCompile) {
+      if (err) {
         canCompile = false
       }
       if (!canCompile) {
         Metrics.inc(`auto-compile-${compileGroup}-limited`)
       }
-      return callback(err, canCompile)
+      callback(null, canCompile)
     })
   },
 
-  wordCount(project_id, user_id, file, clsiserverid, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    return CompileManager.getProjectCompileLimits(
-      project_id,
-      function (error, limits) {
-        if (error != null) {
-          return callback(error)
-        }
-        ClsiManager.wordCount(
-          project_id,
-          user_id,
-          file,
-          limits,
-          clsiserverid,
-          callback
-        )
+  wordCount(projectId, userId, file, clsiserverid, callback) {
+    CompileManager.getProjectCompileLimits(projectId, function (error, limits) {
+      if (error) {
+        return callback(error)
       }
-    )
+      ClsiManager.wordCount(
+        projectId,
+        userId,
+        file,
+        limits,
+        clsiserverid,
+        callback
+      )
+    })
   },
 }
