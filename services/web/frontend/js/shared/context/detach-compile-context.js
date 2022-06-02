@@ -45,8 +45,10 @@ export function DetachCompileProvider({ children }) {
     setPosition: _setPosition,
     setShowLogs: _setShowLogs,
     toggleLogs: _toggleLogs,
+    setStopOnFirstError: _setStopOnFirstError,
     setStopOnValidationError: _setStopOnValidationError,
     showLogs: _showLogs,
+    stopOnFirstError: _stopOnFirstError,
     stopOnValidationError: _stopOnValidationError,
     uncompiled: _uncompiled,
     validationIssues: _validationIssues,
@@ -158,6 +160,12 @@ export function DetachCompileProvider({ children }) {
     'detacher',
     'detached'
   )
+  const [stopOnFirstError] = useDetachStateWatcher(
+    'stopOnFirstError',
+    _stopOnFirstError,
+    'detacher',
+    'detached'
+  )
   const [stopOnValidationError] = useDetachStateWatcher(
     'stopOnValidationError',
     _stopOnValidationError,
@@ -231,6 +239,14 @@ export function DetachCompileProvider({ children }) {
     'detached',
     'detacher'
   )
+
+  const setStopOnFirstError = useDetachAction(
+    'setStopOnFirstError',
+    _setStopOnFirstError,
+    'detached',
+    'detacher'
+  )
+
   const setStopOnValidationError = useDetachAction(
     'setStopOnValidationError',
     _setStopOnValidationError,
@@ -310,10 +326,12 @@ export function DetachCompileProvider({ children }) {
       setPosition,
       setShowLogs,
       toggleLogs,
+      setStopOnFirstError,
       setStopOnValidationError,
       showLogs,
       startCompile,
       stopCompile,
+      stopOnFirstError,
       stopOnValidationError,
       uncompiled,
       validationIssues,
@@ -350,10 +368,12 @@ export function DetachCompileProvider({ children }) {
       setPosition,
       setShowLogs,
       toggleLogs,
+      setStopOnFirstError,
       setStopOnValidationError,
       showLogs,
       startCompile,
       stopCompile,
+      stopOnFirstError,
       stopOnValidationError,
       uncompiled,
       validationIssues,

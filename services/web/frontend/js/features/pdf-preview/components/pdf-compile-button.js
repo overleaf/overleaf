@@ -6,6 +6,7 @@ import { memo } from 'react'
 import classnames from 'classnames'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import PdfCompileButtonInner from './pdf-compile-button-inner'
+import getMeta from '../../../utils/meta'
 
 function PdfCompileButton() {
   const {
@@ -15,7 +16,9 @@ function PdfCompileButton() {
     hasChanges,
     setAutoCompile,
     setDraft,
+    setStopOnFirstError,
     setStopOnValidationError,
+    stopOnFirstError,
     stopOnValidationError,
     startCompile,
     stopCompile,
@@ -23,6 +26,7 @@ function PdfCompileButton() {
   } = useCompileContext()
 
   const { t } = useTranslation()
+  const showStopOnFirstError = getMeta('ol-showStopOnFirstError')
 
   return (
     <ControlledDropdown
@@ -80,6 +84,24 @@ function PdfCompileButton() {
           <Icon type={!stopOnValidationError ? 'check' : ''} fw />
           {t('ignore_validation_errors')}
         </MenuItem>
+
+        {showStopOnFirstError && (
+          <MenuItem header>{t('compile_error_handling')}</MenuItem>
+        )}
+
+        {showStopOnFirstError && (
+          <MenuItem onSelect={() => setStopOnFirstError(true)}>
+            <Icon type={stopOnFirstError ? 'check' : ''} fw />
+            {t('stop_on_first_error')}
+          </MenuItem>
+        )}
+
+        {showStopOnFirstError && (
+          <MenuItem onSelect={() => setStopOnFirstError(false)}>
+            <Icon type={!stopOnFirstError ? 'check' : ''} fw />
+            {t('try_to_compile_despite_errors')}
+          </MenuItem>
+        )}
 
         <MenuItem divider />
 

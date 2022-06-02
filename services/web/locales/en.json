@@ -1749,5 +1749,8 @@
   "unlink_dropbox_folder": "Unlink Dropbox Account",
   "unlink_dropbox_warning": "Any projects that you have synced with Dropbox will be disconnected and no longer kept in sync with Dropbox. Are you sure you want to unlink your Dropbox account?",
   "group_plans_are_only_available_on_an_annual_billing_cycle": "Group plans are only available on an annual billing cycle",
-  "email_or_password_wrong_try_again_or_reset": "Your email or password is incorrect. Please try again, or <0>set or reset your password</0>."
+  "email_or_password_wrong_try_again_or_reset": "Your email or password is incorrect. Please try again, or <0>set or reset your password</0>.",
+  "compile_error_handling": "Compile Error Handling",
+  "stop_on_first_error": "Stop on first error",
+  "try_to_compile_despite_errors": "Try to compile despite errors"
 }

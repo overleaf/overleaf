@@ -884,6 +884,21 @@ const ProjectController = {
             }
           )
         },
+        stopOnFirstErrorAssignment(cb) {
+          SplitTestHandler.getAssignment(
+            req,
+            res,
+            'stop-on-first-error',
+            (error, assignment) => {
+              // do not fail editor load if assignment fails
+              if (error) {
+                cb(null, { variant: 'default' })
+              } else {
+                cb(null, assignment)
+              }
+            }
+          )
+        },
       },
       (
         err,
@@ -900,6 +915,7 @@ const ProjectController = {
           pdfDetachAssignment,
           pdfjsAssignment,
           dictionaryEditorAssignment,
+          stopOnFirstErrorAssignment,
         }
       ) => {
         if (err != null) {
@@ -1017,6 +1033,9 @@ const ProjectController = {
               !userIsMemberOfGroupSubscription &&
               !userHasInstitutionLicence
 
+            const showStopOnFirstError =
+              stopOnFirstErrorAssignment.variant === 'enabled'
+
             const template =
               detachRole === 'detached'
                 ? 'project/editor_detached'
@@ -1082,6 +1101,7 @@ const ProjectController = {
               debugPdfDetach,
               showNewSourceEditorOption,
               showSymbolPalette,
+              showStopOnFirstError,
               trackPdfDownload: partOfPdfCachingRollout('collect-metrics'),
               enablePdfCaching: partOfPdfCachingRollout('enable-caching'),
               resetServiceWorker:

@@ -57,8 +57,10 @@ export const CompileContextPropTypes = {
     setPosition: PropTypes.func.isRequired,
     setShowLogs: PropTypes.func.isRequired,
     toggleLogs: PropTypes.func.isRequired,
+    setStopOnFirstError: PropTypes.func.isRequired,
     setStopOnValidationError: PropTypes.func.isRequired,
     showLogs: PropTypes.bool.isRequired,
+    stopOnFirstError: PropTypes.bool.isRequired,
     stopOnValidationError: PropTypes.bool.isRequired,
     uncompiled: PropTypes.bool,
     validationIssues: PropTypes.object,
@@ -154,6 +156,13 @@ export function LocalCompileProvider({ children }) {
 
   // whether the compile should run in draft mode
   const [draft, setDraft] = usePersistedState(`draft:${projectId}`, false, true)
+
+  // whether compiling should stop on first error
+  const [stopOnFirstError, setStopOnFirstError] = usePersistedState(
+    `stop_on_first_error:${projectId}`,
+    false,
+    true
+  )
 
   // whether compiling should be prevented if there are linting errors
   const [stopOnValidationError, setStopOnValidationError] = usePersistedState(
@@ -463,10 +472,12 @@ export function LocalCompileProvider({ children }) {
       setPosition,
       setShowLogs,
       toggleLogs,
+      setStopOnFirstError,
       setStopOnValidationError,
       showLogs,
       startCompile,
       stopCompile,
+      stopOnFirstError,
       stopOnValidationError,
       uncompiled,
       validationIssues,
@@ -500,10 +511,12 @@ export function LocalCompileProvider({ children }) {
       setHasLintingError, // only for stories
       setHighlights,
       setPosition,
+      setStopOnFirstError,
       setStopOnValidationError,
       showLogs,
       startCompile,
       stopCompile,
+      stopOnFirstError,
       stopOnValidationError,
       uncompiled,
       validationIssues,
