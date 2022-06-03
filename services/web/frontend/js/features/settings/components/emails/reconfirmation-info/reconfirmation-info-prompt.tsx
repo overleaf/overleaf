@@ -48,7 +48,7 @@ function ReconfirmationInfoPrompt({
       )
     } else {
       runAsync(
-        postJSON('/user/emails/resend_confirmation', {
+        postJSON('/user/emails/send-reconfirmation', {
           body: {
             email,
           },

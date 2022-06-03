@@ -132,7 +132,7 @@ describe('<ReconfirmationInfo/>', function () {
         window.metaAttributesCache.set('ol-ExposedSettings', {
           hasSamlFeature: false,
         })
-        fetchMock.post('/user/emails/resend_confirmation', 200)
+        fetchMock.post('/user/emails/send-reconfirmation', 200)
       })
 
       it('sends and resends confirmation email', async function () {
