@@ -58,6 +58,19 @@ nav.navbar.navbar-default.navbar-main
 									each child in item.dropdown
 										if child.divider
 											li.divider
+										if child.splitTest 
+											if (splitTestVariants && (splitTestVariants[child.splitTest.name] === child.splitTest.variant))
+												li
+													if child.url
+														a(
+															href=child.url,
+															class=child.class,
+															event-tracking=child.event
+															event-tracking-mb="true"
+															event-tracking-trigger="click"
+														) !{translate(child.text)}
+													else
+														| !{translate(child.text)}
 										else
 											li
 												if child.url
