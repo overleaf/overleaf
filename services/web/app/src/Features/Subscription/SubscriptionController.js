@@ -9,7 +9,7 @@ const logger = require('@overleaf/logger')
 const GeoIpLookup = require('../../infrastructure/GeoIpLookup')
 const FeaturesUpdater = require('./FeaturesUpdater')
 const planFeatures = require('./planFeatures')
-const planFeaturesV2 = require('./planFeaturesV2')
+const plansV2Config = require('./plansV2Config')
 const GroupPlansData = require('./GroupPlansData')
 const V1SubscriptionManager = require('./V1SubscriptionManager')
 const Errors = require('../Errors/Errors')
@@ -89,7 +89,8 @@ async function plansPage(req, res) {
     plans,
     itm_content: req.query && req.query.itm_content,
     recommendedCurrency,
-    planFeatures: newPlansPageVariantV2 ? planFeaturesV2 : planFeatures,
+    planFeatures,
+    plansV2Config,
     groupPlans: GroupPlansData,
     groupPlanModalOptions,
     groupPlanModalDefaults,
