@@ -210,6 +210,10 @@ App.controller(
   function ($scope, $modal, RecurlyPricing) {
     if (!ensureRecurlyIsSetup()) return
 
+    function stripCentsIfZero(displayPrice) {
+      return displayPrice ? displayPrice.replace(/\.00$/, '') : '...'
+    }
+
     $scope.changePlan = () =>
       $modal.open({
         templateUrl: 'confirmChangePlanModalTemplate',
@@ -239,6 +243,26 @@ App.controller(
       const planCode = plan.planCode
       const subscription = getMeta('ol-subscription')
       const { currency, taxRate } = subscription.recurly
+      if (subscription.recurly.displayPrice) {
+        if (subscription.pendingPlan?.planCode === planCode) {
+          $scope.displayPrice = stripCentsIfZero(
+            subscription.recurly.displayPrice
+          )
+          return
+        }
+        if (subscription.planCode === planCode) {
+          if (subscription.pendingPlan) {
+            $scope.displayPrice = stripCentsIfZero(
+              subscription.recurly.currentPlanDisplayPrice
+            )
+          } else {
+            $scope.displayPrice = stripCentsIfZero(
+              subscription.recurly.displayPrice
+            )
+          }
+          return
+        }
+      }
       $scope.displayPrice = '...' // Placeholder while we talk to recurly
       RecurlyPricing.loadDisplayPriceWithTax(planCode, currency, taxRate).then(
         recurlyPrice => {
