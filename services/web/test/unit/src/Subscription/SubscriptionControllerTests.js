@@ -208,6 +208,7 @@ describe('SubscriptionController', function () {
           opts.groupPlanModalDefaults.usage.should.equal('foo')
           done()
         }
+        this.GeoIpLookup.isValidCurrencyParam.returns(false)
         this.req.query = {
           number: '42',
           currency: 'ABC',

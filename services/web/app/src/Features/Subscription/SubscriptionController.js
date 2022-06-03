@@ -33,10 +33,19 @@ const validGroupPlanModalOptions = {
 async function plansPage(req, res) {
   const plans = SubscriptionViewModelBuilder.buildPlansList()
 
-  const { currencyCode: recommendedCurrency } =
-    await GeoIpLookup.promises.getCurrencyCode(
+  let recommendedCurrency
+  if (req.query.currency) {
+    const queryCurrency = req.query.currency.toUpperCase()
+    if (GeoIpLookup.isValidCurrencyParam(queryCurrency)) {
+      recommendedCurrency = queryCurrency
+    }
+  }
+  if (!recommendedCurrency) {
+    const currencyLookup = await GeoIpLookup.promises.getCurrencyCode(
       (req.query ? req.query.ip : undefined) || req.ip
     )
+    recommendedCurrency = currencyLookup.currencyCode
+  }
 
   function getDefault(param, category, defaultValue) {
     const v = req.query && req.query[param]
