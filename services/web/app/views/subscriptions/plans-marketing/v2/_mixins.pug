@@ -469,3 +469,30 @@ mixin table_sticky_header
 			span #{translate("student")}
 		.plans-v2-table-sticky-header-item
 			span #{translate("university")}
+
+mixin monthly_annual_switch(eventTracking, eventSegmentation)
+	.row
+		.col-md-4.col-md-offset-4.text-centered.plans-v2-m-a-switch-container(data-ol-plans-v2-m-a-switch-container)
+			span.underline(data-ol-plans-v2-m-a-switch-monthly-text) #{translate("monthly")}
+			label.plans-v2-m-a-switch(data-ol-plans-v2-m-a-switch)
+				input(
+					type="checkbox"
+					role="switch"
+					autocomplete="off"
+					event-tracking=eventTracking
+					event-tracking-mb="true"
+					event-tracking-trigger="click"
+					event-tracking-element="checkbox"
+					event-segmentation=eventSegmentation
+				)
+				span
+			.plans-v2-m-a-switch-annual-text-container
+				span(data-ol-plans-v2-m-a-switch-annual-text) #{translate("annual")}
+				.tooltip.in.right.plans-v2-m-a-tooltip(
+					role="tooltip"
+					data-ol-plans-v2-m-a-tooltip
+				)
+					.tooltip-arrow
+					.tooltip-inner
+						span(data-ol-tooltip-period='monthly') #{translate("save_20_percent_by_paying_annually")}
+						span(hidden data-ol-tooltip-period='annual') #{translate("saving_20_percent")}
