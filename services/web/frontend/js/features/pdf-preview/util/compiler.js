@@ -41,6 +41,7 @@ export default class DocumentCompiler {
     this.currentDoc = null
     this.error = undefined
     this.timer = 0
+    this.stopOnFirstError = false
 
     this.debouncedAutoCompile = debounce(
       () => {
@@ -82,20 +83,22 @@ export default class DocumentCompiler {
 
       const t0 = performance.now()
 
+      const body = {
+        rootDoc_id: this.getRootDocOverrideId(),
+        draft: this.draft,
+        check: 'silent', // NOTE: 'error' and 'validate' are possible, but unused
+        // use incremental compile for all users but revert to a full compile
+        // if there was previously a server error
+        incrementalCompilesEnabled: !this.error,
+      }
+      if (getMeta('ol-showStopOnFirstError')) {
+        body.stopOnFirstError = this.stopOnFirstError
+      }
       const data = await postJSON(
         `/project/${this.projectId}/compile?${params}`,
-        {
-          body: {
-            rootDoc_id: this.getRootDocOverrideId(),
-            draft: this.draft,
-            check: 'silent', // NOTE: 'error' and 'validate' are possible, but unused
-            // use incremental compile for all users but revert to a full compile
-            // if there was previously a server error
-            incrementalCompilesEnabled: !this.error,
-          },
-          signal: this.signal,
-        }
+        { body, signal: this.signal }
       )
+
       const compileTimeClientE2E = performance.now() - t0
       const { firstRenderDone } = trackPdfDownload(data, compileTimeClientE2E)
       this.setFirstRenderDone(() => firstRenderDone)

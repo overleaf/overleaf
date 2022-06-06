@@ -623,6 +623,7 @@ describe('ClsiManager', function () {
               enablePdfCaching: false,
               flags: undefined,
               metricsMethod: 'standard',
+              stopOnFirstError: false,
             }, // "01234567890abcdef"
             rootResourcePath: 'main.tex',
             resources: [
@@ -718,6 +719,7 @@ describe('ClsiManager', function () {
               enablePdfCaching: false,
               flags: undefined,
               metricsMethod: 'priority',
+              stopOnFirstError: false,
             },
             rootResourcePath: 'main.tex',
             resources: [

@@ -12,24 +12,25 @@ const TIME_V_METRICS = Object.entries({
   'sys-time': /System time.*: (\d+.\d+)/m,
 })
 
+const COMPILER_FLAGS = {
+  latex: '-pdfdvi',
+  lualatex: '-lualatex',
+  pdflatex: '-pdf',
+  xelatex: '-xelatex',
+}
+
 function runLatex(projectId, options, callback) {
-  let command
-  let {
+  const {
     directory,
     mainFile,
-    compiler,
-    timeout,
     image,
     environment,
     flags,
     compileGroup,
+    stopOnFirstError,
   } = options
-  if (!compiler) {
-    compiler = 'pdflatex'
-  }
-  if (!timeout) {
-    timeout = 60000
-  } // milliseconds
+  const compiler = options.compiler || 'pdflatex'
+  const timeout = options.timeout || 60000 // milliseconds
 
   logger.debug(
     {
@@ -40,28 +41,20 @@ function runLatex(projectId, options, callback) {
       environment,
       flags,
       compileGroup,
+      stopOnFirstError,
     },
     'starting compile'
   )
 
-  // We want to run latexmk on the tex file which we will automatically
-  // generate from the Rtex/Rmd/md file.
-  mainFile = mainFile.replace(/\.(Rtex|md|Rmd)$/, '.tex')
-
-  if (compiler === 'pdflatex') {
-    command = _pdflatexCommand(mainFile, flags)
-  } else if (compiler === 'latex') {
-    command = _latexCommand(mainFile, flags)
-  } else if (compiler === 'xelatex') {
-    command = _xelatexCommand(mainFile, flags)
-  } else if (compiler === 'lualatex') {
-    command = _lualatexCommand(mainFile, flags)
-  } else {
-    return callback(new Error(`unknown compiler: ${compiler}`))
-  }
-
-  if (Settings.clsi?.strace) {
-    command = ['strace', '-o', 'strace', '-ff'].concat(command)
+  let command
+  try {
+    command = _buildLatexCommand(mainFile, {
+      compiler,
+      stopOnFirstError,
+      flags,
+    })
+  } catch (err) {
+    return callback(err)
   }
 
   const id = `${projectId}` // record running project under this id
@@ -145,49 +138,55 @@ function killLatex(projectId, callback) {
   }
 }
 
-function _latexmkBaseCommand(flags) {
-  let args = [
+function _buildLatexCommand(mainFile, opts = {}) {
+  const command = []
+
+  if (Settings.clsi?.strace) {
+    command.push('strace', '-o', 'strace', '-ff')
+  }
+
+  if (Settings.clsi?.latexmkCommandPrefix) {
+    command.push(...Settings.clsi.latexmkCommandPrefix)
+  }
+
+  // Basic command and flags
+  command.push(
     'latexmk',
     '-cd',
-    '-f',
     '-jobname=output',
     '-auxdir=$COMPILE_DIR',
     '-outdir=$COMPILE_DIR',
     '-synctex=1',
-    '-interaction=batchmode',
-  ]
-  if (flags) {
-    args = args.concat(flags)
+    '-interaction=batchmode'
+  )
+
+  // Stop on first error option
+  if (opts.stopOnFirstError) {
+    command.push('-halt-on-error')
+  } else {
+    // Run all passes despite errors
+    command.push('-f')
   }
-  return (Settings.clsi?.latexmkCommandPrefix || []).concat(args)
-}
 
-function _pdflatexCommand(mainFile, flags) {
-  return _latexmkBaseCommand(flags).concat([
-    '-pdf',
-    Path.join('$COMPILE_DIR', mainFile),
-  ])
-}
+  // Extra flags
+  if (opts.flags) {
+    command.push(...opts.flags)
+  }
 
-function _latexCommand(mainFile, flags) {
-  return _latexmkBaseCommand(flags).concat([
-    '-pdfdvi',
-    Path.join('$COMPILE_DIR', mainFile),
-  ])
-}
+  // TeX Engine selection
+  const compilerFlag = COMPILER_FLAGS[opts.compiler]
+  if (compilerFlag) {
+    command.push(compilerFlag)
+  } else {
+    throw new Error(`unknown compiler: ${opts.compiler}`)
+  }
 
-function _xelatexCommand(mainFile, flags) {
-  return _latexmkBaseCommand(flags).concat([
-    '-xelatex',
-    Path.join('$COMPILE_DIR', mainFile),
-  ])
-}
+  // We want to run latexmk on the tex file which we will automatically
+  // generate from the Rtex/Rmd/md file.
+  mainFile = mainFile.replace(/\.(Rtex|md|Rmd)$/, '.tex')
+  command.push(Path.join('$COMPILE_DIR', mainFile))
 
-function _lualatexCommand(mainFile, flags) {
-  return _latexmkBaseCommand(flags).concat([
-    '-lualatex',
-    Path.join('$COMPILE_DIR', mainFile),
-  ])
+  return command
 }
 
 module.exports = {

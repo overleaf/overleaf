@@ -224,6 +224,11 @@ export function LocalCompileProvider({ children }) {
     compiler.draft = draft
   }, [compiler, draft])
 
+  // keep stop on first error setting in sync with the compiler
+  useEffect(() => {
+    compiler.stopOnFirstError = stopOnFirstError
+  }, [compiler, stopOnFirstError])
+
   // pass the "uncompiled" value up into the scope for use outside this context provider
   useEffect(() => {
     setUncompiled(changedAt > 0)

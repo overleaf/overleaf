@@ -1,29 +1,34 @@
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 const { expect } = require('chai')
-const modulePath = require('path').join(
+
+const MODULE_PATH = require('path').join(
   __dirname,
   '../../../app/js/LatexRunner'
 )
 
 describe('LatexRunner', function () {
   beforeEach(function () {
-    this.LatexRunner = SandboxedModule.require(modulePath, {
+    this.Settings = {
+      docker: {
+        socketPath: '/var/run/docker.sock',
+      },
+    }
+    this.commandRunnerOutput = {
+      stdout: 'this is stdout',
+      stderr: 'this is stderr',
+    }
+    this.CommandRunner = {
+      run: sinon.stub().yields(null, this.commandRunnerOutput),
+    }
+    this.fs = {
+      writeFile: sinon.stub().yields(),
+    }
+    this.LatexRunner = SandboxedModule.require(MODULE_PATH, {
       requires: {
-        '@overleaf/settings': (this.Settings = {
-          docker: {
-            socketPath: '/var/run/docker.sock',
-          },
-        }),
-        './Metrics': {
-          Timer: class Timer {
-            done() {}
-          },
-        },
-        './CommandRunner': (this.CommandRunner = {}),
-        fs: (this.fs = {
-          writeFile: sinon.stub().callsArg(2),
-        }),
+        '@overleaf/settings': this.Settings,
+        './CommandRunner': this.CommandRunner,
+        fs: this.fs,
       },
     })
 
@@ -35,57 +40,70 @@ describe('LatexRunner', function () {
     this.callback = sinon.stub()
     this.project_id = 'project-id-123'
     this.env = { foo: '123' }
+    this.timeout = 42000
+    this.flags = []
+    this.stopOnFirstError = false
+
+    this.call = function (callback) {
+      this.LatexRunner.runLatex(
+        this.project_id,
+        {
+          directory: this.directory,
+          mainFile: this.mainFile,
+          compiler: this.compiler,
+          timeout: this.timeout,
+          image: this.image,
+          environment: this.env,
+          compileGroup: this.compileGroup,
+          flags: this.flags,
+          stopOnFirstError: this.stopOnFirstError,
+        },
+        (error, output, stats, timings) => {
+          this.timings = timings
+          callback(error)
+        }
+      )
+    }
   })
 
   describe('runLatex', function () {
-    beforeEach(function () {
-      this.CommandRunner.run = sinon.stub().callsArgWith(7, null, {
-        stdout: 'this is stdout',
-        stderr: 'this is stderr',
-      })
-    })
-
     describe('normally', function () {
       beforeEach(function (done) {
-        this.LatexRunner.runLatex(
-          this.project_id,
-          {
-            directory: this.directory,
-            mainFile: this.mainFile,
-            compiler: this.compiler,
-            timeout: (this.timeout = 42000),
-            image: this.image,
-            environment: this.env,
-            compileGroup: this.compileGroup,
-          },
-          (error, output, stats, timings) => {
-            this.timings = timings
-            done(error)
-          }
-        )
+        this.call(done)
       })
 
       it('should run the latex command', function () {
-        this.CommandRunner.run
-          .calledWith(
-            this.project_id,
-            sinon.match.any,
-            this.directory,
-            this.image,
-            this.timeout,
-            this.env,
-            this.compileGroup
-          )
-          .should.equal(true)
+        this.CommandRunner.run.should.have.been.calledWith(
+          this.project_id,
+          [
+            'latexmk',
+            '-cd',
+            '-jobname=output',
+            '-auxdir=$COMPILE_DIR',
+            '-outdir=$COMPILE_DIR',
+            '-synctex=1',
+            '-interaction=batchmode',
+            '-f',
+            '-pdf',
+            '$COMPILE_DIR/main-file.tex',
+          ],
+          this.directory,
+          this.image,
+          this.timeout,
+          this.env,
+          this.compileGroup
+        )
       })
 
       it('should record the stdout and stderr', function () {
-        this.fs.writeFile
-          .calledWith(this.directory + '/' + 'output.stdout', 'this is stdout')
-          .should.equal(true)
-        this.fs.writeFile
-          .calledWith(this.directory + '/' + 'output.stderr', 'this is stderr')
-          .should.equal(true)
+        this.fs.writeFile.should.have.been.calledWith(
+          this.directory + '/' + 'output.stdout',
+          'this is stdout'
+        )
+        this.fs.writeFile.should.have.been.calledWith(
+          this.directory + '/' + 'output.stderr',
+          'this is stderr'
+        )
       })
 
       it('should not record cpu metrics', function () {
@@ -95,32 +113,36 @@ describe('LatexRunner', function () {
       })
     })
 
+    describe('with a different compiler', function () {
+      beforeEach(function (done) {
+        this.compiler = 'lualatex'
+        this.call(done)
+      })
+
+      it('should set the appropriate latexmk flag', function () {
+        this.CommandRunner.run.should.have.been.calledWith(this.project_id, [
+          'latexmk',
+          '-cd',
+          '-jobname=output',
+          '-auxdir=$COMPILE_DIR',
+          '-outdir=$COMPILE_DIR',
+          '-synctex=1',
+          '-interaction=batchmode',
+          '-f',
+          '-lualatex',
+          '$COMPILE_DIR/main-file.tex',
+        ])
+      })
+    })
+
     describe('with time -v', function () {
       beforeEach(function (done) {
-        this.CommandRunner.run = sinon.stub().callsArgWith(7, null, {
-          stdout: 'this is stdout',
-          stderr:
-            '\tCommand being timed: "sh -c timeout 1 yes > /dev/null"\n' +
-            '\tUser time (seconds): 0.28\n' +
-            '\tSystem time (seconds): 0.70\n' +
-            '\tPercent of CPU this job got: 98%\n',
-        })
-        this.LatexRunner.runLatex(
-          this.project_id,
-          {
-            directory: this.directory,
-            mainFile: this.mainFile,
-            compiler: this.compiler,
-            timeout: (this.timeout = 42000),
-            image: this.image,
-            environment: this.env,
-            compileGroup: this.compileGroup,
-          },
-          (error, output, stats, timings) => {
-            this.timings = timings
-            done(error)
-          }
-        )
+        this.commandRunnerOutput.stderr =
+          '\tCommand being timed: "sh -c timeout 1 yes > /dev/null"\n' +
+          '\tUser time (seconds): 0.28\n' +
+          '\tSystem time (seconds): 0.70\n' +
+          '\tPercent of CPU this job got: 98%\n'
+        this.call(done)
       })
 
       it('should record cpu metrics', function () {
@@ -131,18 +153,9 @@ describe('LatexRunner', function () {
     })
 
     describe('with an .Rtex main file', function () {
-      beforeEach(function () {
-        this.LatexRunner.runLatex(
-          this.project_id,
-          {
-            directory: this.directory,
-            mainFile: 'main-file.Rtex',
-            compiler: this.compiler,
-            image: this.image,
-            timeout: (this.timeout = 42000),
-          },
-          this.callback
-        )
+      beforeEach(function (done) {
+        this.mainFile = 'main-file.Rtex'
+        this.call(done)
       })
 
       it('should run the latex command on the equivalent .tex file', function () {
@@ -153,19 +166,9 @@ describe('LatexRunner', function () {
     })
 
     describe('with a flags option', function () {
-      beforeEach(function () {
-        this.LatexRunner.runLatex(
-          this.project_id,
-          {
-            directory: this.directory,
-            mainFile: this.mainFile,
-            compiler: this.compiler,
-            image: this.image,
-            timeout: (this.timeout = 42000),
-            flags: ['-shell-restricted', '-halt-on-error'],
-          },
-          this.callback
-        )
+      beforeEach(function (done) {
+        this.flags = ['-shell-restricted', '-halt-on-error']
+        this.call(done)
       })
 
       it('should include the flags in the command', function () {
@@ -176,6 +179,28 @@ describe('LatexRunner', function () {
         flags.length.should.equal(2)
         flags[0].should.equal('-shell-restricted')
         flags[1].should.equal('-halt-on-error')
+      })
+    })
+
+    describe('with the stopOnFirstError option', function () {
+      beforeEach(function (done) {
+        this.stopOnFirstError = true
+        this.call(done)
+      })
+
+      it('should set the appropriate flags', function () {
+        this.CommandRunner.run.should.have.been.calledWith(this.project_id, [
+          'latexmk',
+          '-cd',
+          '-jobname=output',
+          '-auxdir=$COMPILE_DIR',
+          '-outdir=$COMPILE_DIR',
+          '-synctex=1',
+          '-interaction=batchmode',
+          '-halt-on-error',
+          '-pdf',
+          '$COMPILE_DIR/main-file.tex',
+        ])
       })
     })
   })

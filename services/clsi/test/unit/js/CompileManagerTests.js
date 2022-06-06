@@ -135,6 +135,7 @@ describe('CompileManager', function () {
         imageName: (this.image = 'example.com/image'),
         flags: (this.flags = ['-file-line-error']),
         compileGroup: (this.compileGroup = 'compile-group'),
+        stopOnFirstError: false,
       }
       this.env = {}
     })
@@ -187,6 +188,7 @@ describe('CompileManager', function () {
             flags: this.flags,
             environment: this.env,
             compileGroup: this.compileGroup,
+            stopOnFirstError: this.request.stopOnFirstError,
           })
           .should.equal(true)
       })
@@ -240,6 +242,7 @@ describe('CompileManager', function () {
               CHKTEX_ULIMIT_OPTIONS: '-t 5 -v 64000',
             },
             compileGroup: this.compileGroup,
+            stopOnFirstError: this.request.stopOnFirstError,
           })
           .should.equal(true)
       })
@@ -263,6 +266,7 @@ describe('CompileManager', function () {
             flags: this.flags,
             environment: this.env,
             compileGroup: this.compileGroup,
+            stopOnFirstError: this.request.stopOnFirstError,
           })
           .should.equal(true)
       })

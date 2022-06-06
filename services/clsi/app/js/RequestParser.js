@@ -61,6 +61,14 @@ function parse(body, callback) {
       default: false,
       type: 'boolean',
     })
+    response.stopOnFirstError = _parseAttribute(
+      'stopOnFirstError',
+      compile.options.stopOnFirstError,
+      {
+        default: false,
+        type: 'boolean',
+      }
+    )
     response.check = _parseAttribute('check', compile.options.check, {
       type: 'string',
     })

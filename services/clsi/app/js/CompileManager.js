@@ -198,6 +198,7 @@ function doCompile(request, callback) {
               flags: request.flags,
               environment: env,
               compileGroup: request.compileGroup,
+              stopOnFirstError: request.stopOnFirstError,
             },
             (error, output, stats, timings) => {
               // request was for validation only
