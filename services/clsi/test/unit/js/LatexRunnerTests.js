@@ -1,14 +1,3 @@
-/* eslint-disable
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 const { expect } = require('chai')
@@ -16,11 +5,9 @@ const modulePath = require('path').join(
   __dirname,
   '../../../app/js/LatexRunner'
 )
-const Path = require('path')
 
 describe('LatexRunner', function () {
   beforeEach(function () {
-    let Timer
     this.LatexRunner = SandboxedModule.require(modulePath, {
       requires: {
         '@overleaf/settings': (this.Settings = {
@@ -29,9 +16,9 @@ describe('LatexRunner', function () {
           },
         }),
         './Metrics': {
-          Timer: (Timer = class Timer {
+          Timer: class Timer {
             done() {}
-          }),
+          },
         },
         './CommandRunner': (this.CommandRunner = {}),
         fs: (this.fs = {
@@ -47,20 +34,20 @@ describe('LatexRunner', function () {
     this.compileGroup = 'compile-group'
     this.callback = sinon.stub()
     this.project_id = 'project-id-123'
-    return (this.env = { foo: '123' })
+    this.env = { foo: '123' }
   })
 
-  return describe('runLatex', function () {
+  describe('runLatex', function () {
     beforeEach(function () {
-      return (this.CommandRunner.run = sinon.stub().callsArgWith(7, null, {
+      this.CommandRunner.run = sinon.stub().callsArgWith(7, null, {
         stdout: 'this is stdout',
         stderr: 'this is stderr',
-      }))
+      })
     })
 
     describe('normally', function () {
       beforeEach(function (done) {
-        return this.LatexRunner.runLatex(
+        this.LatexRunner.runLatex(
           this.project_id,
           {
             directory: this.directory,
@@ -79,7 +66,7 @@ describe('LatexRunner', function () {
       })
 
       it('should run the latex command', function () {
-        return this.CommandRunner.run
+        this.CommandRunner.run
           .calledWith(
             this.project_id,
             sinon.match.any,
@@ -145,7 +132,7 @@ describe('LatexRunner', function () {
 
     describe('with an .Rtex main file', function () {
       beforeEach(function () {
-        return this.LatexRunner.runLatex(
+        this.LatexRunner.runLatex(
           this.project_id,
           {
             directory: this.directory,
@@ -158,16 +145,16 @@ describe('LatexRunner', function () {
         )
       })
 
-      return it('should run the latex command on the equivalent .tex file', function () {
+      it('should run the latex command on the equivalent .tex file', function () {
         const command = this.CommandRunner.run.args[0][1]
         const mainFile = command.slice(-1)[0]
-        return mainFile.should.equal('$COMPILE_DIR/main-file.tex')
+        mainFile.should.equal('$COMPILE_DIR/main-file.tex')
       })
     })
 
-    return describe('with a flags option', function () {
+    describe('with a flags option', function () {
       beforeEach(function () {
-        return this.LatexRunner.runLatex(
+        this.LatexRunner.runLatex(
           this.project_id,
           {
             directory: this.directory,
@@ -181,14 +168,14 @@ describe('LatexRunner', function () {
         )
       })
 
-      return it('should include the flags in the command', function () {
+      it('should include the flags in the command', function () {
         const command = this.CommandRunner.run.args[0][1]
         const flags = command.filter(
           arg => arg === '-shell-restricted' || arg === '-halt-on-error'
         )
         flags.length.should.equal(2)
         flags[0].should.equal('-shell-restricted')
-        return flags[1].should.equal('-halt-on-error')
+        flags[1].should.equal('-halt-on-error')
       })
     })
   })

@@ -1,14 +1,3 @@
-/* eslint-disable
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 const { expect } = require('chai')
@@ -16,7 +5,6 @@ const modulePath = require('path').join(
   __dirname,
   '../../../app/js/CompileController'
 )
-const tk = require('timekeeper')
 
 function tryImageNameValidation(method, imageNameField) {
   describe('when allowedImages is set', function () {
@@ -80,7 +68,7 @@ describe('CompileController', function () {
     this.Settings.externalUrl = 'http://www.example.com'
     this.req = {}
     this.res = {}
-    return (this.next = sinon.stub())
+    this.next = sinon.stub()
   })
 
   describe('compile', function () {
@@ -118,7 +106,7 @@ describe('CompileController', function () {
       this.stats = { foo: 1 }
       this.timings = { bar: 2 }
       this.res.status = sinon.stub().returnsThis()
-      return (this.res.send = sinon.stub())
+      this.res.send = sinon.stub()
     })
 
     describe('successfully', function () {
@@ -126,30 +114,28 @@ describe('CompileController', function () {
         this.CompileManager.doCompileWithLock = sinon
           .stub()
           .yields(null, this.output_files, this.stats, this.timings)
-        return this.CompileController.compile(this.req, this.res)
+        this.CompileController.compile(this.req, this.res)
       })
 
       it('should parse the request', function () {
-        return this.RequestParser.parse
-          .calledWith(this.req.body)
-          .should.equal(true)
+        this.RequestParser.parse.calledWith(this.req.body).should.equal(true)
       })
 
       it('should run the compile for the specified project', function () {
-        return this.CompileManager.doCompileWithLock
+        this.CompileManager.doCompileWithLock
           .calledWith(this.request_with_project_id)
           .should.equal(true)
       })
 
       it('should mark the project as accessed', function () {
-        return this.ProjectPersistenceManager.markProjectAsJustAccessed
+        this.ProjectPersistenceManager.markProjectAsJustAccessed
           .calledWith(this.project_id)
           .should.equal(true)
       })
 
-      return it('should return the JSON response', function () {
+      it('should return the JSON response', function () {
         this.res.status.calledWith(200).should.equal(true)
-        return this.res.send
+        this.res.send
           .calledWith({
             compile: {
               status: 'success',
@@ -157,12 +143,10 @@ describe('CompileController', function () {
               stats: this.stats,
               timings: this.timings,
               outputUrlPrefix: '/zone/b',
-              outputFiles: this.output_files.map(file => {
-                return {
-                  url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
-                  ...file,
-                }
-              }),
+              outputFiles: this.output_files.map(file => ({
+                url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
+                ...file,
+              })),
             },
           })
           .should.equal(true)
@@ -188,12 +172,10 @@ describe('CompileController', function () {
               stats: this.stats,
               timings: this.timings,
               outputUrlPrefix: '',
-              outputFiles: this.output_files.map(file => {
-                return {
-                  url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
-                  ...file,
-                }
-              }),
+              outputFiles: this.output_files.map(file => ({
+                url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
+                ...file,
+              })),
             },
           })
           .should.equal(true)
@@ -230,12 +212,10 @@ describe('CompileController', function () {
               stats: this.stats,
               timings: this.timings,
               outputUrlPrefix: '/zone/b',
-              outputFiles: this.output_files.map(file => {
-                return {
-                  url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
-                  ...file,
-                }
-              }),
+              outputFiles: this.output_files.map(file => ({
+                url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
+                ...file,
+              })),
             },
           })
           .should.equal(true)
@@ -273,12 +253,10 @@ describe('CompileController', function () {
               stats: this.stats,
               timings: this.timings,
               outputUrlPrefix: '/zone/b',
-              outputFiles: this.output_files.map(file => {
-                return {
-                  url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
-                  ...file,
-                }
-              }),
+              outputFiles: this.output_files.map(file => ({
+                url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
+                ...file,
+              })),
             },
           })
           .should.equal(true)
@@ -290,12 +268,12 @@ describe('CompileController', function () {
         this.CompileManager.doCompileWithLock = sinon
           .stub()
           .callsArgWith(1, new Error((this.message = 'error message')), null)
-        return this.CompileController.compile(this.req, this.res)
+        this.CompileController.compile(this.req, this.res)
       })
 
-      return it('should return the JSON response with the error', function () {
+      it('should return the JSON response with the error', function () {
         this.res.status.calledWith(500).should.equal(true)
-        return this.res.send
+        this.res.send
           .calledWith({
             compile: {
               status: 'error',
@@ -318,12 +296,12 @@ describe('CompileController', function () {
         this.CompileManager.doCompileWithLock = sinon
           .stub()
           .callsArgWith(1, this.error, null)
-        return this.CompileController.compile(this.req, this.res)
+        this.CompileController.compile(this.req, this.res)
       })
 
-      return it('should return the JSON response with the timeout status', function () {
+      it('should return the JSON response with the timeout status', function () {
         this.res.status.calledWith(200).should.equal(true)
-        return this.res.send
+        this.res.send
           .calledWith({
             compile: {
               status: 'timedout',
@@ -339,17 +317,17 @@ describe('CompileController', function () {
       })
     })
 
-    return describe('when the request returns no output files', function () {
+    describe('when the request returns no output files', function () {
       beforeEach(function () {
         this.CompileManager.doCompileWithLock = sinon
           .stub()
           .callsArgWith(1, null, [])
-        return this.CompileController.compile(this.req, this.res)
+        this.CompileController.compile(this.req, this.res)
       })
 
-      return it('should return the JSON response with the failure status', function () {
+      it('should return the JSON response with the failure status', function () {
         this.res.status.calledWith(200).should.equal(true)
-        return this.res.send
+        this.res.send
           .calledWith({
             compile: {
               error: null,
@@ -383,11 +361,11 @@ describe('CompileController', function () {
       this.CompileManager.syncFromCode = sinon
         .stub()
         .yields(null, (this.pdfPositions = ['mock-positions']))
-      return this.CompileController.syncFromCode(this.req, this.res, this.next)
+      this.CompileController.syncFromCode(this.req, this.res, this.next)
     })
 
     it('should find the corresponding location in the PDF', function () {
-      return this.CompileManager.syncFromCode
+      this.CompileManager.syncFromCode
         .calledWith(
           this.project_id,
           undefined,
@@ -399,7 +377,7 @@ describe('CompileController', function () {
     })
 
     it('should return the positions', function () {
-      return this.res.json
+      this.res.json
         .calledWith({
           pdf: this.pdfPositions,
         })
@@ -426,17 +404,17 @@ describe('CompileController', function () {
       this.CompileManager.syncFromPdf = sinon
         .stub()
         .yields(null, (this.codePositions = ['mock-positions']))
-      return this.CompileController.syncFromPdf(this.req, this.res, this.next)
+      this.CompileController.syncFromPdf(this.req, this.res, this.next)
     })
 
     it('should find the corresponding location in the code', function () {
-      return this.CompileManager.syncFromPdf
+      this.CompileManager.syncFromPdf
         .calledWith(this.project_id, undefined, this.page, this.h, this.v)
         .should.equal(true)
     })
 
     it('should return the positions', function () {
-      return this.res.json
+      this.res.json
         .calledWith({
           code: this.codePositions,
         })
@@ -446,7 +424,7 @@ describe('CompileController', function () {
     tryImageNameValidation('syncFromPdf', 'imageName')
   })
 
-  return describe('wordcount', function () {
+  describe('wordcount', function () {
     beforeEach(function () {
       this.file = 'main.tex'
       this.project_id = 'mock-project-id'
@@ -464,14 +442,14 @@ describe('CompileController', function () {
 
     it('should return the word count of a file', function () {
       this.CompileController.wordcount(this.req, this.res, this.next)
-      return this.CompileManager.wordcount
+      this.CompileManager.wordcount
         .calledWith(this.project_id, undefined, this.file, this.image)
         .should.equal(true)
     })
 
     it('should return the texcount info', function () {
       this.CompileController.wordcount(this.req, this.res, this.next)
-      return this.res.json
+      this.res.json
         .calledWith({
           texcount: this.texcount,
         })

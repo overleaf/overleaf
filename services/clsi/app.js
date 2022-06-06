@@ -1,10 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const Metrics = require('@overleaf/metrics')
 Metrics.initialize('clsi')
 
@@ -13,7 +6,7 @@ const ContentController = require('./app/js/ContentController')
 const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
 logger.initialize('clsi')
-if ((Settings.sentry != null ? Settings.sentry.dsn : undefined) != null) {
+if (Settings.sentry.dsn != null) {
   logger.initializeErrorReporting(Settings.sentry.dsn)
 }
 
@@ -48,52 +41,46 @@ app.use(function (req, res, next) {
   req.setTimeout(TIMEOUT)
   res.setTimeout(TIMEOUT)
   res.removeHeader('X-Powered-By')
-  return next()
+  next()
 })
 
 app.param('project_id', function (req, res, next, projectId) {
-  if (projectId != null ? projectId.match(/^[a-zA-Z0-9_-]+$/) : undefined) {
-    return next()
+  if (projectId?.match(/^[a-zA-Z0-9_-]+$/)) {
+    next()
   } else {
-    return next(new Error('invalid project id'))
+    next(new Error('invalid project id'))
   }
 })
 
 app.param('user_id', function (req, res, next, userId) {
-  if (userId != null ? userId.match(/^[0-9a-f]{24}$/) : undefined) {
-    return next()
+  if (userId?.match(/^[0-9a-f]{24}$/)) {
+    next()
   } else {
-    return next(new Error('invalid user id'))
+    next(new Error('invalid user id'))
   }
 })
 
 app.param('build_id', function (req, res, next, buildId) {
-  if (
-    buildId != null ? buildId.match(OutputCacheManager.BUILD_REGEX) : undefined
-  ) {
-    return next()
+  if (buildId?.match(OutputCacheManager.BUILD_REGEX)) {
+    next()
   } else {
-    return next(new Error(`invalid build id ${buildId}`))
+    next(new Error(`invalid build id ${buildId}`))
   }
 })
 
 app.param('contentId', function (req, res, next, contentId) {
-  if (
-    contentId != null
-      ? contentId.match(OutputCacheManager.CONTENT_REGEX)
-      : undefined
-  ) {
-    return next()
+  if (contentId?.match(OutputCacheManager.CONTENT_REGEX)) {
+    next()
   } else {
-    return next(new Error(`invalid content id ${contentId}`))
+    next(new Error(`invalid content id ${contentId}`))
   }
 })
 
 app.param('hash', function (req, res, next, hash) {
-  if (hash != null ? hash.match(ContentCacheManager.HASH_REGEX) : undefined) {
-    return next()
+  if (hash?.match(ContentCacheManager.HASH_REGEX)) {
+    next()
   } else {
-    return next(new Error(`invalid hash ${hash}`))
+    next(new Error(`invalid hash ${hash}`))
   }
 })
 
@@ -156,7 +143,7 @@ const staticCompileServer = ForbidSymlinks(
           '"'
         res.set('Etag', etag(path, stat))
       }
-      return res.set('Content-Type', ContentTypeMapper.map(path))
+      res.set('Content-Type', ContentTypeMapper.map(path))
     },
   }
 )
@@ -176,7 +163,7 @@ const staticOutputServer = ForbidSymlinks(
           '"'
         res.set('Etag', etag(path, stat))
       }
-      return res.set('Content-Type', ContentTypeMapper.map(path))
+      res.set('Content-Type', ContentTypeMapper.map(path))
     },
   }
 )
@@ -188,7 +175,7 @@ app.get(
     req.url =
       `/${req.params.project_id}-${req.params.user_id}/` +
       OutputCacheManager.path(req.params.build_id, `/${req.params[0]}`)
-    return staticOutputServer(req, res, next)
+    staticOutputServer(req, res, next)
   }
 )
 
@@ -208,7 +195,7 @@ app.get(
     req.url =
       `/${req.params.project_id}/` +
       OutputCacheManager.path(req.params.build_id, `/${req.params[0]}`)
-    return staticOutputServer(req, res, next)
+    staticOutputServer(req, res, next)
   }
 )
 
@@ -221,16 +208,13 @@ app.get(
       'direct request for file in compile directory'
     )
     req.url = `/${req.params.project_id}-${req.params.user_id}/${req.params[0]}`
-    return staticCompileServer(req, res, next)
+    staticCompileServer(req, res, next)
   }
 )
 
 app.get('/project/:project_id/output/*', function (req, res, next) {
   logger.warn({ url: req.url }, 'direct request for file in compile directory')
-  if (
-    (req.query != null ? req.query.build : undefined) != null &&
-    req.query.build.match(OutputCacheManager.BUILD_REGEX)
-  ) {
+  if (req.query?.build?.match(OutputCacheManager.BUILD_REGEX)) {
     // for specific build get the path from the OutputCacheManager (e.g. .clsi/buildId)
     req.url =
       `/${req.params.project_id}/` +
@@ -238,12 +222,12 @@ app.get('/project/:project_id/output/*', function (req, res, next) {
   } else {
     req.url = `/${req.params.project_id}/${req.params[0]}`
   }
-  return staticCompileServer(req, res, next)
+  staticCompileServer(req, res, next)
 })
 
 app.get('/oops', function (req, res, next) {
   logger.error({ err: 'hello' }, 'test error')
-  return res.send('error\n')
+  res.send('error\n')
 })
 
 app.get('/oops-internal', function (req, res, next) {
@@ -274,7 +258,7 @@ function runSmokeTest() {
   const INTERVAL = 30 * 1000
   if (
     smokeTest.lastRunSuccessful() &&
-    Date.now() - CompileController.lastSuccessfulCompile < INTERVAL / 2
+    CompileController.timeSinceLastSuccessfulCompile() < INTERVAL / 2
   ) {
     logger.debug('skipping smoke tests, got recent successful user compile')
     return setTimeout(runSmokeTest, INTERVAL / 2)
@@ -301,13 +285,13 @@ app.get('/smoke_test_force', (req, res) => smokeTest.sendNewResult(res))
 app.use(function (error, req, res, next) {
   if (error instanceof Errors.NotFoundError) {
     logger.debug({ err: error, url: req.url }, 'not found error')
-    return res.sendStatus(404)
+    res.sendStatus(404)
   } else if (error.code === 'EPIPE') {
     // inspect container returns EPIPE when shutting down
-    return res.sendStatus(503) // send 503 Unavailable response
+    res.sendStatus(503) // send 503 Unavailable response
   } else {
     logger.error({ err: error, url: req.url }, 'server error')
-    return res.sendStatus((error != null ? error.statusCode : undefined) || 500)
+    res.sendStatus(error.statusCode || 500)
   }
 })
 
@@ -323,7 +307,7 @@ const loadTcpServer = net.createServer(function (socket) {
       return
     }
     logger.err({ err }, 'error with socket on load check')
-    return socket.destroy()
+    socket.destroy()
   })
 
   if (STATE === 'up' && Settings.internal.load_balancer_agent.report_load) {
@@ -351,10 +335,10 @@ const loadTcpServer = net.createServer(function (socket) {
       // Ready will cancel the maint state.
       socket.write(`up, ready, ${freeLoadPercentage}%\n`, 'ASCII')
     }
-    return socket.end()
+    socket.end()
   } else {
     socket.write(`${STATE}\n`, 'ASCII')
-    return socket.end()
+    socket.end()
   }
 })
 
@@ -363,31 +347,23 @@ const loadHttpServer = express()
 loadHttpServer.post('/state/up', function (req, res, next) {
   STATE = 'up'
   logger.debug('getting message to set server to down')
-  return res.sendStatus(204)
+  res.sendStatus(204)
 })
 
 loadHttpServer.post('/state/down', function (req, res, next) {
   STATE = 'down'
   logger.debug('getting message to set server to down')
-  return res.sendStatus(204)
+  res.sendStatus(204)
 })
 
 loadHttpServer.post('/state/maint', function (req, res, next) {
   STATE = 'maint'
   logger.debug('getting message to set server to maint')
-  return res.sendStatus(204)
+  res.sendStatus(204)
 })
 
-const port =
-  __guard__(
-    Settings.internal != null ? Settings.internal.clsi : undefined,
-    x => x.port
-  ) || 3013
-const host =
-  __guard__(
-    Settings.internal != null ? Settings.internal.clsi : undefined,
-    x1 => x1.host
-  ) || 'localhost'
+const port = Settings.internal?.clsi?.port || 3013
+const host = Settings.internal?.clsi?.host || 'localhost'
 
 const loadTcpPort = Settings.internal.load_balancer_agent.load_port
 const loadHttpPort = Settings.internal.load_balancer_agent.local_port
@@ -415,23 +391,15 @@ if (!module.parent) {
     if (error != null) {
       throw error
     }
-    return logger.debug(`Load tcp agent listening on load port ${loadTcpPort}`)
+    logger.debug(`Load tcp agent listening on load port ${loadTcpPort}`)
   })
 
   loadHttpServer.listen(loadHttpPort, host, function (error) {
     if (error != null) {
       throw error
     }
-    return logger.debug(
-      `Load http agent listening on load port ${loadHttpPort}`
-    )
+    logger.debug(`Load http agent listening on load port ${loadHttpPort}`)
   })
 }
 
 module.exports = app
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
-}
