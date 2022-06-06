@@ -1,10 +1,11 @@
 import { mount } from '@cypress/react'
 import sysendTestHelper from '../../helpers/sysend'
 import PdfPreviewDetachedRoot from '../../../../frontend/js/features/pdf-preview/components/pdf-preview-detached-root'
+import { User } from '../../../../types/user'
 
 describe('<PdfPreviewDetachedRoot/>', function () {
   beforeEach(function () {
-    window.user = { id: 'user1' }
+    window.user = { id: 'user1' } as User
 
     window.metaAttributesCache = new Map<string, unknown>([
       ['ol-user', window.user],

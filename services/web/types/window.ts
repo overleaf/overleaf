@@ -1,14 +1,13 @@
 import { ExposedSettings } from './exposed-settings'
 import { OAuthProviders } from './oauth-providers'
+import { User } from './user'
 
 declare global {
   // eslint-disable-next-line no-unused-vars
   interface Window {
     csrfToken: string
     sl_debugging: boolean
-    user: {
-      id: string
-    }
+    user: User
     oauthProviders: OAuthProviders
     thirdPartyIds: Record<string, string>
     metaAttributesCache: Map<string, any>
