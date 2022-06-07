@@ -6,7 +6,8 @@ import Icon from '../../../shared/components/icon'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 
 function PdfHybridLogsButton() {
-  const { error, logEntries, toggleLogs, showLogs } = useCompileContext()
+  const { error, logEntries, toggleLogs, showLogs, stoppedOnFirstError } =
+    useCompileContext()
 
   const { t } = useTranslation()
 
@@ -26,7 +27,7 @@ function PdfHybridLogsButton() {
     >
       <Button
         bsStyle="link"
-        disabled={Boolean(error)}
+        disabled={Boolean(error || stoppedOnFirstError)}
         active={showLogs}
         className="toolbar-item log-btn"
         onClick={handleClick}

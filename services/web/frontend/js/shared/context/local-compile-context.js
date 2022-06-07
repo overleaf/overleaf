@@ -62,6 +62,7 @@ export const CompileContextPropTypes = {
     showLogs: PropTypes.bool.isRequired,
     stopOnFirstError: PropTypes.bool.isRequired,
     stopOnValidationError: PropTypes.bool.isRequired,
+    stoppedOnFirstError: PropTypes.bool.isRequired,
     uncompiled: PropTypes.bool,
     validationIssues: PropTypes.object,
     firstRenderDone: PropTypes.func,
@@ -164,6 +165,9 @@ export function LocalCompileProvider({ children }) {
     true
   )
 
+  // whether the last compiles stopped on first error
+  const [stoppedOnFirstError, setStoppedOnFirstError] = useState(false)
+
   // whether compiling should be prevented if there are linting errors
   const [stopOnValidationError, setStopOnValidationError] = usePersistedState(
     `stop_on_validation_error:${projectId}`,
@@ -221,12 +225,12 @@ export function LocalCompileProvider({ children }) {
 
   // keep draft setting in sync with the compiler
   useEffect(() => {
-    compiler.draft = draft
+    compiler.setOption('draft', draft)
   }, [compiler, draft])
 
   // keep stop on first error setting in sync with the compiler
   useEffect(() => {
-    compiler.stopOnFirstError = stopOnFirstError
+    compiler.setOption('stopOnFirstError', stopOnFirstError)
   }, [compiler, stopOnFirstError])
 
   // pass the "uncompiled" value up into the scope for use outside this context provider
@@ -311,6 +315,11 @@ export function LocalCompileProvider({ children }) {
           setShowLogs(false)
           break
 
+        case 'stopped-on-first-error':
+          setError(undefined)
+          setShowLogs(true)
+          break
+
         case 'clsi-maintenance':
         case 'compile-in-progress':
         case 'exited':
@@ -354,6 +363,8 @@ export function LocalCompileProvider({ children }) {
           setError('error')
           break
       }
+
+      setStoppedOnFirstError(data.status === 'stopped-on-first-error')
     }
 
     return () => {
@@ -484,6 +495,7 @@ export function LocalCompileProvider({ children }) {
       stopCompile,
       stopOnFirstError,
       stopOnValidationError,
+      stoppedOnFirstError,
       uncompiled,
       validationIssues,
       firstRenderDone,
@@ -523,6 +535,7 @@ export function LocalCompileProvider({ children }) {
       stopCompile,
       stopOnFirstError,
       stopOnValidationError,
+      stoppedOnFirstError,
       uncompiled,
       validationIssues,
       firstRenderDone,

@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { memo } from 'react'
 import classnames from 'classnames'
 import PdfValidationIssue from './pdf-validation-issue'
+import StopOnFirstErrorPrompt from './stop-on-first-error-prompt'
 import TimeoutUpgradePrompt from './timeout-upgrade-prompt'
 import PdfPreviewError from './pdf-preview-error'
 import PdfClearCacheButton from './pdf-clear-cache-button'
@@ -21,6 +22,8 @@ function PdfLogsViewer() {
     rawLog,
     validationIssues,
     showLogs,
+    stopOnFirstError,
+    stoppedOnFirstError,
   } = useCompileContext()
 
   const { t } = useTranslation()
@@ -29,6 +32,8 @@ function PdfLogsViewer() {
     <div className={classnames('logs-pane', { hidden: !showLogs })}>
       <div className="logs-pane-content">
         {codeCheckFailed && <PdfCodeCheckFailedNotice />}
+
+        {stopOnFirstError && stoppedOnFirstError && <StopOnFirstErrorPrompt />}
 
         {error && <PdfPreviewError error={error} />}
 

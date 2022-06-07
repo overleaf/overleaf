@@ -79,7 +79,11 @@ export default class LatexParser {
   }
 
   currentLineIsError() {
-    return this.currentLine[0] === '!'
+    return (
+      this.currentLine[0] === '!' &&
+      this.currentLine !==
+        '!  ==> Fatal error occurred, no output PDF file produced!'
+    )
   }
 
   currentLineIsFileLineError() {

@@ -64,16 +64,17 @@ function compile(req, res, next) {
                 'error running compile'
               )
             } else {
-              let file
-              status = 'failure'
-              for (file of outputFiles) {
-                if (file.path === 'output.pdf' && file.size > 0) {
-                  status = 'success'
-                  lastSuccessfulCompileTimestamp = Date.now()
-                }
-              }
-
-              if (status === 'failure') {
+              if (
+                outputFiles.some(
+                  file => file.path === 'output.pdf' && file.size > 0
+                )
+              ) {
+                status = 'success'
+                lastSuccessfulCompileTimestamp = Date.now()
+              } else if (request.stopOnFirstError) {
+                status = 'stopped-on-first-error'
+              } else {
+                status = 'failure'
                 logger.warn(
                   { project_id: request.project_id, outputFiles },
                   'project failed to compile successfully, no output.pdf generated'
@@ -81,13 +82,11 @@ function compile(req, res, next) {
               }
 
               // log an error if any core files are found
-              for (file of outputFiles) {
-                if (file.path === 'core') {
-                  logger.error(
-                    { project_id: request.project_id, req, outputFiles },
-                    'core file found in output'
-                  )
-                }
+              if (outputFiles.some(file => file.path === 'core')) {
+                logger.error(
+                  { project_id: request.project_id, req, outputFiles },
+                  'core file found in output'
+                )
               }
             }
 

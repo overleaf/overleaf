@@ -41,7 +41,10 @@ export default class DocumentCompiler {
     this.currentDoc = null
     this.error = undefined
     this.timer = 0
-    this.stopOnFirstError = false
+    this.defaultOptions = {
+      draft: false,
+      stopOnFirstError: false,
+    }
 
     this.debouncedAutoCompile = debounce(
       () => {
@@ -57,9 +60,7 @@ export default class DocumentCompiler {
   // The main "compile" function.
   // Call this directly to run a compile now, otherwise call debouncedAutoCompile.
   async compile(options = {}) {
-    if (!options) {
-      options = {}
-    }
+    options = { ...this.defaultOptions, ...options }
 
     // set "compiling" to true (in the React component's state), and return if it was already true
     const wasCompiling = this.compilingRef.current
@@ -85,14 +86,14 @@ export default class DocumentCompiler {
 
       const body = {
         rootDoc_id: this.getRootDocOverrideId(),
-        draft: this.draft,
+        draft: options.draft,
         check: 'silent', // NOTE: 'error' and 'validate' are possible, but unused
         // use incremental compile for all users but revert to a full compile
         // if there was previously a server error
         incrementalCompilesEnabled: !this.error,
       }
       if (getMeta('ol-showStopOnFirstError')) {
-        body.stopOnFirstError = this.stopOnFirstError
+        body.stopOnFirstError = options.stopOnFirstError
       }
       const data = await postJSON(
         `/project/${this.projectId}/compile?${params}`,
@@ -201,5 +202,9 @@ export default class DocumentCompiler {
       console.error(error)
       this.setError('clear-cache')
     })
+  }
+
+  setOption(option, value) {
+    this.defaultOptions[option] = value
   }
 }

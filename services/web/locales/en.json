@@ -1752,5 +1752,8 @@
   "email_or_password_wrong_try_again_or_reset": "Your email or password is incorrect. Please try again, or <0>set or reset your password</0>.",
   "compile_error_handling": "Compile Error Handling",
   "stop_on_first_error": "Stop on first error",
-  "try_to_compile_despite_errors": "Try to compile despite errors"
+  "try_to_compile_despite_errors": "Try to compile despite errors",
+  "stop_on_first_error_enabled_title": "No PDF: Stop on first error enabled",
+  "stop_on_first_error_enabled_description": "<0>“Stop on first error” is enabled.</0> Disabling it may allow the compiler to produce a PDF (but your project will still have errors).",
+  "disable_stop_on_first_error": "Disable “Stop on first error”"
 }

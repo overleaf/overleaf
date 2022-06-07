@@ -72,8 +72,14 @@ PdfLogEntry.propTypes = {
   logType: PropTypes.string,
   formattedContent: PropTypes.node,
   extraInfoURL: PropTypes.string,
-  level: PropTypes.oneOf(['error', 'warning', 'typesetting', 'raw', 'success'])
-    .isRequired,
+  level: PropTypes.oneOf([
+    'error',
+    'warning',
+    'info',
+    'typesetting',
+    'raw',
+    'success',
+  ]).isRequired,
   customClass: PropTypes.string,
   showSourceLocationLink: PropTypes.bool,
   showCloseButton: PropTypes.bool,

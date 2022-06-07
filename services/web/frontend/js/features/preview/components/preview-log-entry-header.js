@@ -32,6 +32,7 @@ function PreviewLogEntryHeader({
   const logEntryHeaderClasses = classNames('log-entry-header', {
     'log-entry-header-error': level === 'error',
     'log-entry-header-warning': level === 'warning',
+    'log-entry-header-info': level === 'info',
     'log-entry-header-typesetting': level === 'typesetting',
     'log-entry-header-raw': level === 'raw',
     'log-entry-header-success': level === 'success',
@@ -41,6 +42,7 @@ function PreviewLogEntryHeader({
     'log-entry-header-link-warning': level === 'warning',
     'log-entry-header-link-typesetting': level === 'typesetting',
     'log-entry-header-link-raw': level === 'raw',
+    'log-entry-header-link-info': level === 'info',
     'log-entry-header-link-success': level === 'success',
   })
   const headerLogLocationTitle = t('navigate_log_source', {
