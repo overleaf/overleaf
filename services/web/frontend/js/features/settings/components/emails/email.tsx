@@ -17,7 +17,11 @@ function Email({ userEmailData }: EmailProps) {
   return (
     <>
       {userEmailData.email}
-      {userEmailData.default ? ' (primary)' : ''}
+      {userEmailData.default ? (
+        <span className="small ms-1">
+          <span className="label label-info">Primary</span>
+        </span>
+      ) : null}
       {!userEmailData.confirmedAt && (
         <div className="small">
           <strong>

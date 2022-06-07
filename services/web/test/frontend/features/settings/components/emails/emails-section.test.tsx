@@ -73,7 +73,8 @@ describe('<EmailsSection />', function () {
     fetchMock.get('/user/emails?ensureAffiliation=true', [professionalUserData])
     render(<EmailsSection />)
 
-    await screen.findByText(`${professionalUserData.email} (primary)`)
+    await screen.findByText(`${professionalUserData.email}`)
+    screen.getByText('Primary')
   })
 
   it('shows confirmation status for unconfirmed users', async function () {

@@ -50,7 +50,8 @@ describe('<EmailsRow/>', function () {
   describe('with affiliated email data', function () {
     it('renders email info', function () {
       renderEmailsRow(professionalUserData)
-      screen.getByText('foo@overleaf.com (primary)')
+      screen.getByText('foo@overleaf.com')
+      screen.getByText('Primary')
     })
 
     it('renders actions', function () {
