@@ -139,7 +139,7 @@
     "method-override": "^2.3.3",
     "minimist": "1.2.5",
     "mmmagic": "^0.5.3",
-    "moment": "^2.24.0",
+    "moment": "^2.29.3",
     "mongodb": "~3.6.0",
     "mongoose": "^5.13.11",
     "multer": "https://github.com/overleaf/multer/archive/7a2928d7ea2da02dd92888ea1c9ba5704e07aeeb.tar.gz",
