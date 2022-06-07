@@ -10,26 +10,15 @@ const UserGetter = require('../User/UserGetter')
 const UserUpdater = require('../User/UserUpdater')
 const logger = require('@overleaf/logger')
 const { User } = require('../../models/User')
+const { promiseMapWithLimit } = require('../../util/promises')
 
-async function _addAuditLogEntry(
-  link,
-  userId,
-  auditLog,
-  institutionEmail,
-  providerId,
-  providerName
-) {
-  const operation = link ? 'link-institution-sso' : 'unlink-institution-sso'
+async function _addAuditLogEntry(operation, userId, auditLog, extraInfo) {
   await UserAuditLogHandler.promises.addEntry(
     userId,
     operation,
     auditLog.initiatorId,
     auditLog.ipAddress,
-    {
-      institutionEmail,
-      providerId,
-      providerName,
-    }
+    extraInfo
   )
 }
 
@@ -95,19 +84,25 @@ async function _addIdentifier(
   hasEntitlement,
   institutionEmail,
   providerName,
-  auditLog
+  auditLog,
+  userIdAttribute
 ) {
   providerId = providerId.toString()
 
   await _ensureCanAddIdentifier(userId, institutionEmail, providerId)
 
-  await _addAuditLogEntry(
-    true,
-    userId,
-    auditLog,
+  const auditLogInfo = {
     institutionEmail,
     providerId,
-    providerName
+    providerName,
+    userIdAttribute,
+  }
+
+  await _addAuditLogEntry(
+    'link-institution-sso',
+    userId,
+    auditLog,
+    auditLogInfo
   )
 
   hasEntitlement = !!hasEntitlement
@@ -117,12 +112,14 @@ async function _addIdentifier(
       $ne: providerId,
     },
   }
+
   const update = {
     $push: {
       samlIdentifiers: {
         hasEntitlement,
         externalUserId,
         providerId,
+        userIdAttribute,
       },
     },
   }
@@ -239,15 +236,16 @@ async function redundantSubscription(userId, providerId, providerName) {
   }
 }
 
-async function linkAccounts(
-  userId,
-  externalUserId,
-  institutionEmail,
-  providerId,
-  providerName,
-  hasEntitlement,
-  auditLog
-) {
+async function linkAccounts(userId, samlData, auditLog) {
+  const {
+    externalUserId,
+    institutionEmail,
+    universityId: providerId,
+    universityName: providerName,
+    hasEntitlement,
+    userIdAttribute,
+  } = samlData
+
   await _addIdentifier(
     userId,
     externalUserId,
@@ -255,7 +253,8 @@ async function linkAccounts(
     hasEntitlement,
     institutionEmail,
     providerName,
-    auditLog
+    auditLog,
+    userIdAttribute
   )
   try {
     await _addInstitutionEmail(userId, institutionEmail, providerId, auditLog)
@@ -288,14 +287,11 @@ async function unlinkAccounts(
 ) {
   providerId = providerId.toString()
 
-  await _addAuditLogEntry(
-    false,
-    userId,
-    auditLog,
+  await _addAuditLogEntry('unlink-institution-sso', userId, auditLog, {
     institutionEmail,
     providerId,
-    providerName
-  )
+    providerName,
+  })
   // update v2 user
   await _removeIdentifier(userId, providerId)
   // update v1 affiliations record
@@ -379,12 +375,96 @@ function userHasEntitlement(user, providerId) {
   return false
 }
 
+async function migrateIdentifier(
+  userId,
+  externalUserId,
+  providerId,
+  hasEntitlement,
+  institutionEmail,
+  providerName,
+  auditLog,
+  userIdAttribute
+) {
+  providerId = providerId.toString()
+
+  const query = {
+    _id: userId,
+    'samlIdentifiers.providerId': providerId,
+  }
+
+  const update = {
+    $set: {
+      'samlIdentifiers.$.externalUserId': externalUserId,
+      'samlIdentifiers.$.userIdAttribute': userIdAttribute,
+    },
+  }
+  await User.updateOne(query, update).exec()
+
+  const auditLogInfo = {
+    institutionEmail,
+    providerId,
+    providerName,
+    userIdAttribute,
+  }
+
+  await _addAuditLogEntry(
+    'migrate-institution-sso-id',
+    userId,
+    auditLog,
+    auditLogInfo
+  )
+}
+
+async function unlinkNotMigrated(userId, providerId, providerName, auditLog) {
+  providerId = providerId.toString()
+
+  const query = {
+    _id: userId,
+    'emails.samlProviderId': providerId,
+  }
+  const update = {
+    $pull: {
+      samlIdentifiers: {
+        providerId,
+      },
+    },
+    $unset: {
+      'emails.$.samlProviderId': 1,
+    },
+  }
+
+  const originalDoc = await User.findOneAndUpdate(query, update).exec()
+
+  // should only be 1
+  const linkedEmails = originalDoc.emails.filter(email => {
+    return email.samlProviderId === providerId
+  })
+
+  const auditLogInfo = {
+    providerId,
+    providerName,
+  }
+
+  await _addAuditLogEntry(
+    'unlink-institution-sso-not-migrated',
+    userId,
+    auditLog,
+    auditLogInfo
+  )
+
+  await promiseMapWithLimit(10, linkedEmails, async emailData => {
+    await InstitutionsAPI.promises.removeEntitlement(userId, emailData.email)
+  })
+}
+
 const SAMLIdentityManager = {
   entitlementAttributeMatches,
   getUser,
   linkAccounts,
+  migrateIdentifier,
   redundantSubscription,
   unlinkAccounts,
+  unlinkNotMigrated,
   updateEntitlement,
   userHasEntitlement,
 }

@@ -8,6 +8,7 @@ function _canHaveNoInitiatorId(operation, info) {
   if (operation === 'reset-password') return true
   if (operation === 'unlink-sso' && info.providerId === 'collabratec')
     return true
+  if (operation === 'unlink-institution-sso-not-migrated') return true
 }
 
 /**

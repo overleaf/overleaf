@@ -121,13 +121,7 @@ describe('SAMLIdentityManager', function () {
       it('should throw an error if missing data', async function () {
         let error
         try {
-          await this.SAMLIdentityManager.linkAccounts(
-            null,
-            null,
-            null,
-            null,
-            null
-          )
+          await this.SAMLIdentityManager.linkAccounts(null, null, null)
         } catch (e) {
           error = e
         } finally {
@@ -144,14 +138,17 @@ describe('SAMLIdentityManager', function () {
 
         it('should throw an EmailExistsError error', async function () {
           let error
+
           try {
             await this.SAMLIdentityManager.linkAccounts(
               '6005c75b12cbcaf771f4a105',
-              'not-linked-id',
-              'exists@overleaf.com',
-              'provider-id',
-              'provider-name',
-              true,
+              {
+                externalUserId: 'not-linked-id',
+                institutionEmail: 'exists@overleaf.com',
+                universityId: 'provider-id',
+                universityName: 'provider-name',
+                hasEntitlement: true,
+              },
               {
                 intiatorId: '6005c75b12cbcaf771f4a105',
                 ip: '0:0:0:0',
@@ -181,11 +178,13 @@ describe('SAMLIdentityManager', function () {
           try {
             await this.SAMLIdentityManager.linkAccounts(
               '6005c75b12cbcaf771f4a105',
-              'not-linked-id',
-              'not-affiliated@overleaf.com',
-              'provider-id',
-              'provider-name',
-              true,
+              {
+                externalUserId: 'not-linked-id',
+                institutionEmail: 'not-affiliated@overleaf.com',
+                universityId: 'provider-id',
+                universityName: 'provider-name',
+                hasEntitlement: true,
+              },
               {
                 intiatorId: 'user-id-1',
                 ip: '0:0:0:0',
@@ -216,11 +215,13 @@ describe('SAMLIdentityManager', function () {
           try {
             await this.SAMLIdentityManager.linkAccounts(
               '6005c75b12cbcaf771f4a105',
-              'not-linked-id',
-              'affiliated@overleaf.com',
-              'provider-id',
-              'provider-name',
-              true,
+              {
+                externalUserId: 'not-linked-id',
+                institutionEmail: 'affiliated@overleaf.com',
+                universityId: 'provider-id',
+                universityName: 'provider-name',
+                hasEntitlement: true,
+              },
               {
                 intiatorId: 'user-id-1',
                 ip: '0:0:0:0',
@@ -249,11 +250,13 @@ describe('SAMLIdentityManager', function () {
           try {
             await this.SAMLIdentityManager.linkAccounts(
               '6005c75b12cbcaf771f4a105',
-              'already-linked-id',
-              'linked@overleaf.com',
-              'provider-id',
-              'provider-name',
-              true,
+              {
+                externalUserId: 'already-linked-id',
+                institutionEmail: 'linked@overleaf.com',
+                universityId: 'provider-id',
+                universityName: 'provider-name',
+                hasEntitlement: true,
+              },
               {
                 intiatorId: '6005c75b12cbcaf771f4a105',
                 ip: '0:0:0:0',
@@ -279,11 +282,13 @@ describe('SAMLIdentityManager', function () {
           try {
             await this.SAMLIdentityManager.linkAccounts(
               '6005c75b12cbcaf771f4a105',
-              'already-linked-id',
-              'linked@overleaf.com',
-              123456,
-              'provider-name',
-              true,
+              {
+                externalUserId: 'already-linked-id',
+                institutionEmail: 'linked@overleaf.com',
+                universityId: 123456,
+                universityName: 'provider-name',
+                hasEntitlement: true,
+              },
               {
                 intiatorId: '6005c75b12cbcaf771f4a105',
                 ip: '0:0:0:0',
@@ -311,11 +316,13 @@ describe('SAMLIdentityManager', function () {
         try {
           await this.SAMLIdentityManager.linkAccounts(
             this.user._id,
-            'externalUserId',
-            this.user.email,
-            '1',
-            'Overleaf University',
-            undefined,
+            {
+              externalUserId: 'externalUserId',
+              institutionEmail: this.user.email,
+              universityId: '1',
+              universityName: 'Overleaf University',
+              hasEntitlement: false,
+            },
             {
               intiatorId: '6005c75b12cbcaf771f4a105',
               ipAddress: '0:0:0:0',
@@ -346,11 +353,14 @@ describe('SAMLIdentityManager', function () {
         }
         await this.SAMLIdentityManager.linkAccounts(
           this.user._id,
-          'externalUserId',
-          this.user.email,
-          '1',
-          'Overleaf University',
-          undefined,
+          {
+            externalUserId: 'externalUserId',
+            institutionEmail: this.user.email,
+            universityId: '1',
+            universityName: 'Overleaf University',
+            hasEntitlement: false,
+            userIdAttribute: 'uniqueId',
+          },
           auditLog
         )
 
@@ -365,6 +375,7 @@ describe('SAMLIdentityManager', function () {
             institutionEmail: this.user.email,
             providerId: '1',
             providerName: 'Overleaf University',
+            userIdAttribute: 'uniqueId',
           }
         )
       })
@@ -372,11 +383,13 @@ describe('SAMLIdentityManager', function () {
       it('should send an email notification', async function () {
         await this.SAMLIdentityManager.linkAccounts(
           this.user._id,
-          'externalUserId',
-          this.user.email,
-          '1',
-          'Overleaf University',
-          undefined,
+          {
+            externalUserId: 'externalUserId',
+            institutionEmail: this.user.email,
+            universityId: '1',
+            universityName: 'Overleaf University',
+            hasEntitlement: false,
+          },
           {
             intiatorId: '6005c75b12cbcaf771f4a105',
             ipAddress: '0:0:0:0',
@@ -600,6 +613,125 @@ describe('SAMLIdentityManager', function () {
         expect(this.NotificationsBuilder.promises.redundantPersonalSubscription)
           .to.not.have.been.called
       })
+    })
+  })
+
+  describe('migrateIdentifier', function () {
+    const userId = '5efb8b6e9b647b0027e4c0b0'
+    const externalUserId = '987zyx'
+    const providerId = 123
+    const hasEntitlement = false
+    const institutionEmail = 'someone@email.com'
+    const providerName = 'Example University'
+    const auditLog = {
+      initiatorId: userId,
+      ipAddress: '0.0.0.0',
+      migration: {
+        from: 'uniqueId',
+        to: 'newUniqueId',
+      },
+    }
+    const userIdAttribute = 'newUniqueId'
+
+    it('should remove the old identifier and add the new identifier', async function () {
+      this.UserGetter.promises.getUser.resolves()
+      this.UserGetter.promises.getUserByAnyEmail
+        .withArgs(institutionEmail)
+        .resolves({ _id: userId, emails: [{ email: institutionEmail }] })
+      this.UserGetter.promises.getUserFullEmails.withArgs(userId).resolves([
+        {
+          email: institutionEmail,
+          affiliation: { institution: { id: providerId } },
+        },
+      ])
+      await this.SAMLIdentityManager.migrateIdentifier(
+        userId,
+        externalUserId,
+        providerId,
+        hasEntitlement,
+        institutionEmail,
+        providerName,
+        auditLog,
+        userIdAttribute
+      )
+
+      expect(this.User.updateOne).to.have.been.calledOnce
+      const query = {
+        _id: userId,
+        'samlIdentifiers.providerId': providerId.toString(),
+      }
+
+      const update = {
+        $set: {
+          'samlIdentifiers.$.externalUserId': externalUserId,
+          'samlIdentifiers.$.userIdAttribute': userIdAttribute,
+        },
+      }
+
+      expect(this.User.updateOne.lastCall.args).to.deep.equal([query, update])
+    })
+  })
+
+  describe('unlinkNotMigrated', function () {
+    const userId = '5efb8b6e9b647b0027e4c0b0'
+    const providerId = '123'
+    const institutionEmail = 'someone@email.com'
+    const providerName = 'Example University'
+    const auditLog = {
+      ipAddress: 'N/A',
+    }
+
+    it('should remove the identifier om samlIdentifiers and samlProviderId on the email', async function () {
+      this.User.findOneAndUpdate = sinon.stub().returns({
+        exec: sinon.stub().resolves({
+          _id: userId,
+          emails: [{ email: institutionEmail, samlProviderId: providerId }],
+        }),
+      })
+
+      await this.SAMLIdentityManager.unlinkNotMigrated(
+        userId,
+        providerId,
+        providerName,
+        auditLog
+      )
+
+      expect(this.User.findOneAndUpdate).to.have.been.calledOnce
+      const query = {
+        _id: userId,
+        'emails.samlProviderId': providerId,
+      }
+      const update = {
+        $pull: {
+          samlIdentifiers: {
+            providerId,
+          },
+        },
+        $unset: {
+          'emails.$.samlProviderId': 1,
+        },
+      }
+      expect(this.User.findOneAndUpdate.lastCall.args).to.deep.equal([
+        query,
+        update,
+      ])
+
+      expect(this.UserAuditLogHandler.promises.addEntry).to.have.been.calledOnce
+      expect(
+        this.UserAuditLogHandler.promises.addEntry.lastCall.args
+      ).to.deep.equal([
+        userId,
+        'unlink-institution-sso-not-migrated',
+        undefined,
+        'N/A',
+        { providerId, providerName },
+      ])
+
+      expect(this.InstitutionsAPI.promises.removeEntitlement).to.have.been
+        .calledOnce
+      expect(
+        this.InstitutionsAPI.promises.removeEntitlement.lastCall.args
+      ).to.deep.equal([userId, institutionEmail])
     })
   })
 })
