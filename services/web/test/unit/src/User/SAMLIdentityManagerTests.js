@@ -536,6 +536,7 @@ describe('SAMLIdentityManager', function () {
     const userId = '1bv'
     const providerId = 123
     const providerName = 'University Name'
+
     describe('with a personal subscription', function () {
       beforeEach(function () {
         this.SubscriptionLocator.promises.getUserIndividualSubscription.resolves(
@@ -544,6 +545,7 @@ describe('SAMLIdentityManager', function () {
           }
         )
       })
+
       it('should create redundant personal subscription notification ', async function () {
         try {
           await this.SAMLIdentityManager.redundantSubscription(
@@ -558,8 +560,34 @@ describe('SAMLIdentityManager', function () {
           .to.have.been.calledOnce
       })
     })
-    describe('without a personal subscription', function () {
+
+    describe('with a group subscription', function () {
+      beforeEach(function () {
+        this.SubscriptionLocator.promises.getUserIndividualSubscription.resolves(
+          {
+            planCode: 'professional',
+            groupPlan: true,
+          }
+        )
+      })
+
       it('should create redundant personal subscription notification ', async function () {
+        try {
+          await this.SAMLIdentityManager.redundantSubscription(
+            userId,
+            providerId,
+            providerName
+          )
+        } catch (error) {
+          expect(error).to.not.exist
+        }
+        expect(this.NotificationsBuilder.promises.redundantPersonalSubscription)
+          .to.not.have.been.called
+      })
+    })
+
+    describe('without a personal subscription', function () {
+      it('should not create redundant personal subscription notification ', async function () {
         try {
           await this.SAMLIdentityManager.redundantSubscription(
             userId,

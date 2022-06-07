@@ -226,7 +226,7 @@ async function redundantSubscription(userId, providerId, providerName) {
   const subscription =
     await SubscriptionLocator.promises.getUserIndividualSubscription(userId)
 
-  if (subscription) {
+  if (subscription && !subscription.groupPlan) {
     await NotificationsBuilder.promises
       .redundantPersonalSubscription(
         {
