@@ -109,9 +109,10 @@ export default App.factory('metadata', function ($http, ide) {
     }
 
     return (debouncer[docId] = setTimeout(() => {
+      // TODO: wait for the document to be saved?
       metadata.loadDocMetaFromServer(docId)
       return delete debouncer[docId]
-    }, 1000))
+    }, 2000))
   }
 
   window.addEventListener('editor:metadata-outdated', () => {

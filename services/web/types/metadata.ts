@@ -1,18 +1,19 @@
-type Package = {
+import { Folder } from './folder'
+
+export type Package = {
   caption: string
   meta: string
   score: number
   snippet: string
 }
 
+export type MetadataDocument = {
+  labels: string[]
+  packages: Record<string, Package[]>
+}
+
 export type Metadata = {
-  state: {
-    documents: Record<
-      string,
-      {
-        labels: string[]
-        packages: Record<string, Package[]>
-      }
-    >
-  }
+  documents: Record<string, MetadataDocument>
+  references: string[]
+  fileTreeData: Folder
 }

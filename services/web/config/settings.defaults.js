@@ -773,6 +773,7 @@ module.exports = {
     editorToolbarButtons: [],
     sourceEditorExtensions: [],
     sourceEditorComponents: [],
+    sourceEditorCompletionSources: [],
     integrationLinkingWidgets: [],
     referenceLinkingWidgets: [],
   },

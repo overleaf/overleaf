@@ -17,7 +17,13 @@ declare global {
     ExposedSettings: ExposedSettings
     project_id: string
     gitBridgePublicBaseUrl: string
-    _ide: Record<string, unknown>
+    _ide: Record<string, unknown> & {
+      $scope: Record<string, unknown> & {
+        pdf?: {
+          logEntryAnnotations: Record<string, unknown>
+        }
+      }
+    }
     isRestrictedTokenMember: boolean
   }
 }
