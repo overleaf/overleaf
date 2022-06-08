@@ -3,25 +3,12 @@ export function countFiles(fileTreeData) {
     return 0
   }
 
-  const files = filesInFolder(fileTreeData)
-
-  // count all the non-deleted entities
-  const value = files.filter(item => !item.deleted).length
+  const value = _countElements(fileTreeData)
 
   const limit = window.ExposedSettings.maxEntitiesPerProject
   const status = fileCountStatus(value, limit, Math.ceil(limit / 20))
 
   return { value, status, limit }
-}
-
-function filesInFolder({ docs, folders, fileRefs }) {
-  const files = [...docs, ...fileRefs]
-
-  for (const folder of folders) {
-    files.push(...filesInFolder(folder))
-  }
-
-  return files
 }
 
 function fileCountStatus(value, limit, range) {
@@ -34,4 +21,30 @@ function fileCountStatus(value, limit, range) {
   }
 
   return 'success'
+}
+
+// Copied and adapted from ProjectEntityMongoUpdateHandler
+function _countElements(rootFolder) {
+  function countFolder(folder) {
+    if (folder == null) {
+      return 0
+    }
+
+    let total = 0
+    if (folder.folders) {
+      total += folder.folders.length
+      for (const subfolder of folder.folders) {
+        total += countFolder(subfolder)
+      }
+    }
+    if (folder.docs) {
+      total += folder.docs.length
+    }
+    if (folder.fileRefs) {
+      total += folder.fileRefs.length
+    }
+    return total
+  }
+
+  return countFolder(rootFolder)
 }

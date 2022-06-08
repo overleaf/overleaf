@@ -100,28 +100,53 @@ describe('<FileTreeModalCreateFile/>', function () {
       {
         _id: 'root-folder-id',
         name: 'rootFolder',
-        docs: [{ _id: 'entity-1' }],
+        docs: [{ _id: 'doc-1' }],
         fileRefs: [],
         folders: [
           {
-            docs: [{ _id: 'entity-1-2' }],
+            docs: [{ _id: 'doc-2' }],
             fileRefs: [],
             folders: [
               {
                 docs: [
-                  { _id: 'entity-3' },
-                  { _id: 'entity-4' },
-                  { _id: 'entity-5' },
-                  { _id: 'entity-6' },
-                  { _id: 'entity-7' },
-                  { _id: 'entity-8' },
-                  { _id: 'entity-9' },
+                  { _id: 'doc-3' },
+                  { _id: 'doc-4' },
+                  { _id: 'doc-5' },
+                  { _id: 'doc-6' },
+                  { _id: 'doc-7' },
                 ],
                 fileRefs: [],
                 folders: [],
               },
             ],
           },
+        ],
+      },
+    ]
+
+    renderWithContext(<OpenWithMode mode="doc" />, {
+      contextProps: { rootFolder },
+    })
+
+    screen.getByText(/This project is approaching the file limit \(\d+\/\d+\)/)
+  })
+
+  it('counts folders toward the limit', async function () {
+    const rootFolder = [
+      {
+        _id: 'root-folder-id',
+        name: 'rootFolder',
+        docs: [{ _id: 'doc-1' }],
+        fileRefs: [],
+        folders: [
+          { docs: [], fileRefs: [], folders: [] },
+          { docs: [], fileRefs: [], folders: [] },
+          { docs: [], fileRefs: [], folders: [] },
+          { docs: [], fileRefs: [], folders: [] },
+          { docs: [], fileRefs: [], folders: [] },
+          { docs: [], fileRefs: [], folders: [] },
+          { docs: [], fileRefs: [], folders: [] },
+          { docs: [], fileRefs: [], folders: [] },
         ],
       },
     ]
