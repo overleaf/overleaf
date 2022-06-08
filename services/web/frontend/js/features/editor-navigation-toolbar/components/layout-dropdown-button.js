@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useMemo } from 'react'
+import { memo, useCallback } from 'react'
 import PropTypes from 'prop-types'
 import { Dropdown, MenuItem } from 'react-bootstrap'
 import { Trans, useTranslation } from 'react-i18next'
@@ -11,7 +11,6 @@ import IconPdfOnly from './icon-pdf-only'
 import { useLayoutContext } from '../../../shared/context/layout-context'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import useEventListener from '../../../shared/hooks/use-event-listener'
-import Shortcut from './shortcut'
 
 function IconPlaceholder() {
   return <Icon type="" fw />
@@ -48,7 +47,7 @@ function IconCheckmark({ iconFor, pdfLayout, view, detachRole }) {
   return <IconPlaceholder />
 }
 
-function LayoutMenuItem({ checkmark, icon, text, shortcut, ...props }) {
+function LayoutMenuItem({ checkmark, icon, text, ...props }) {
   return (
     <MenuItem {...props}>
       <div className="layout-menu-item">
@@ -57,7 +56,6 @@ function LayoutMenuItem({ checkmark, icon, text, shortcut, ...props }) {
           <div>{icon}</div>
           <div>{text}</div>
         </div>
-        <Shortcut shortcut={shortcut} />
       </div>
     </MenuItem>
   )
@@ -66,7 +64,6 @@ LayoutMenuItem.propTypes = {
   checkmark: PropTypes.node.isRequired,
   icon: PropTypes.node.isRequired,
   text: PropTypes.oneOfType([PropTypes.string, PropTypes.node]).isRequired,
-  shortcut: PropTypes.string.isRequired,
   onSelect: PropTypes.func,
 }
 
@@ -84,7 +81,6 @@ function DetachDisabled() {
         checkmark={<IconPlaceholder />}
         icon={<IconDetach />}
         text={t('pdf_in_separate_tab')}
-        shortcut="Control+Option+ArrowUp"
       />
     </Tooltip>
   )
@@ -131,31 +127,6 @@ function LayoutDropdownButton() {
     [changeLayout, handleReattach]
   )
 
-  const keyMap = useMemo(() => {
-    return {
-      ArrowDown: () => handleChangeLayout('sideBySide', null),
-      ArrowRight: () => handleChangeLayout('flat', 'pdf'),
-      ArrowLeft: () => handleChangeLayout('flat', 'editor'),
-      ArrowUp: () => handleDetach(),
-    }
-  }, [handleChangeLayout, handleDetach])
-
-  useEffect(() => {
-    const listener = event => {
-      if (event.ctrlKey && event.altKey && event.key in keyMap) {
-        event.preventDefault()
-        event.stopImmediatePropagation()
-        keyMap[event.key]()
-      }
-    }
-
-    window.addEventListener('keydown', listener, true)
-
-    return () => {
-      window.removeEventListener('keydown', listener, true)
-    }
-  }, [keyMap])
-
   const processing = !detachIsLinked && detachRole === 'detacher'
 
   // bsStyle is required for Dropdown.Toggle, but we will override style
@@ -195,7 +166,6 @@ function LayoutDropdownButton() {
             }
             icon={<Icon type="columns" fw />}
             text={t('editor_and_pdf')}
-            shortcut="Control+Option+ArrowDown"
           />
 
           <LayoutMenuItem
@@ -221,7 +191,6 @@ function LayoutDropdownButton() {
                 ]}
               />
             }
-            shortcut="Control+Option+ArrowLeft"
           />
 
           <LayoutMenuItem
@@ -247,7 +216,6 @@ function LayoutDropdownButton() {
                 ]}
               />
             }
-            shortcut="Control+Option+ArrowRight"
           />
 
           {'BroadcastChannel' in window ? (
@@ -266,7 +234,6 @@ function LayoutDropdownButton() {
               }
               icon={<IconDetach />}
               text={t('pdf_in_separate_tab')}
-              shortcut="Control+Option+ArrowUp"
             />
           ) : (
             <DetachDisabled />
