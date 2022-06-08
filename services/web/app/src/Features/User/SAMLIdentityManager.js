@@ -262,19 +262,10 @@ async function linkAccounts(userId, samlData, auditLog) {
     await _removeIdentifier(userId, providerId)
     throw error
   }
-  await UserUpdater.promises.confirmEmail(userId, institutionEmail) // will set confirmedAt if not set, and will always update reconfirmedAt
+  await UserUpdater.promises.confirmEmail(userId, institutionEmail, {
+    entitlement: hasEntitlement,
+  }) // will set confirmedAt if not set, and will always update reconfirmedAt
   await _sendLinkedEmail(userId, providerName, institutionEmail)
-  // update v1 affiliations record
-  if (hasEntitlement) {
-    await InstitutionsAPI.promises.addEntitlement(userId, institutionEmail)
-    try {
-      await redundantSubscription(userId, providerId, providerName)
-    } catch (error) {
-      logger.err({ err: error }, 'error checking redundant subscription')
-    }
-  } else {
-    await InstitutionsAPI.promises.removeEntitlement(userId, institutionEmail)
-  }
 }
 
 async function unlinkAccounts(

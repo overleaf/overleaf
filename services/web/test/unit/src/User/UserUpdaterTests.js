@@ -73,6 +73,7 @@ describe('UserUpdater', function () {
       promises: {
         addAffiliation: sinon.stub().resolves(),
         removeAffiliation: sinon.stub().resolves(),
+        getUserAffiliations: sinon.stub().resolves(),
       },
     }
     this.EmailHandler = {
@@ -94,6 +95,20 @@ describe('UserUpdater', function () {
       },
     }
 
+    this.SubscriptionLocator = {
+      promises: {
+        getUserIndividualSubscription: sinon.stub().resolves(),
+      },
+    }
+
+    this.NotificationsBuilder = {
+      promises: {
+        redundantPersonalSubscription: sinon
+          .stub()
+          .returns({ create: () => {} }),
+      },
+    }
+
     this.UserUpdater = SandboxedModule.require(MODULE_PATH, {
       requires: {
         '../Helpers/Mongo': { normalizeQuery },
@@ -109,6 +124,8 @@ describe('UserUpdater', function () {
         './UserAuditLogHandler': this.UserAuditLogHandler,
         '../Analytics/AnalyticsManager': this.AnalyticsManager,
         '../../Errors/Errors': Errors,
+        '../Subscription/SubscriptionLocator': this.SubscriptionLocator,
+        '../Notifications/NotificationsBuilder': this.NotificationsBuilder,
       },
     })
 
@@ -909,6 +926,52 @@ describe('UserUpdater', function () {
         this.FeaturesUpdater.promises.refreshFeatures,
         this.user._id
       )
+    })
+
+    describe('with institution licence and subscription', function () {
+      beforeEach(async function () {
+        this.affiliation = {
+          email: this.newEmail,
+          licence: 'pro_plus',
+          institution: {
+            id: 123,
+            name: 'Institution',
+          },
+        }
+        this.InstitutionsAPI.promises.getUserAffiliations.resolves([
+          this.affiliation,
+          { email: 'other@email.edu' },
+        ])
+        this.SubscriptionLocator.promises.getUserIndividualSubscription.resolves(
+          {
+            planCode: 'personal',
+            groupPlan: false,
+          }
+        )
+      })
+
+      it('creates redundant subscription notification', async function () {
+        await this.UserUpdater.promises.confirmEmail(
+          this.user._id,
+          this.newEmail
+        )
+        sinon.assert.calledWith(
+          this.InstitutionsAPI.promises.getUserAffiliations,
+          this.user._id
+        )
+        sinon.assert.calledWith(
+          this.SubscriptionLocator.promises.getUserIndividualSubscription,
+          this.user._id
+        )
+        sinon.assert.calledWith(
+          this.NotificationsBuilder.promises.redundantPersonalSubscription,
+          {
+            institutionId: 123,
+            institutionName: 'Institution',
+          },
+          { _id: this.user._id }
+        )
+      })
     })
   })
 })

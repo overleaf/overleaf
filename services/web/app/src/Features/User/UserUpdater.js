@@ -14,6 +14,8 @@ const NewsletterManager = require('../Newsletter/NewsletterManager')
 const RecurlyWrapper = require('../Subscription/RecurlyWrapper')
 const UserAuditLogHandler = require('./UserAuditLogHandler')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
+const SubscriptionLocator = require('../Subscription/SubscriptionLocator')
+const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
 const _ = require('lodash')
 
 async function _sendSecurityAlertPrimaryEmailChanged(userId, oldEmail, email) {
@@ -223,7 +225,7 @@ async function setDefaultEmailAddress(
   }
 }
 
-async function confirmEmail(userId, email) {
+async function confirmEmail(userId, email, affiliationOptions) {
   // used for initial email confirmation (non-SSO and SSO)
   // also used for reconfirmation of non-SSO emails
   const confirmedAt = new Date()
@@ -234,9 +236,13 @@ async function confirmEmail(userId, email) {
   logger.debug({ userId, email }, 'confirming user email')
 
   try {
-    await InstitutionsAPI.promises.addAffiliation(userId, email, {
-      confirmedAt,
-    })
+    affiliationOptions = affiliationOptions || {}
+    affiliationOptions.confirmedAt = confirmedAt
+    await InstitutionsAPI.promises.addAffiliation(
+      userId,
+      email,
+      affiliationOptions
+    )
   } catch (error) {
     throw OError.tag(error, 'problem adding affiliation while confirming email')
   }
@@ -268,6 +274,40 @@ async function confirmEmail(userId, email) {
     throw new Errors.NotFoundError('user id and email do no match')
   }
   await FeaturesUpdater.promises.refreshFeatures(userId, 'confirm-email')
+  try {
+    await maybeCreateRedundantSubscriptionNotification(userId, email)
+  } catch (error) {
+    logger.err(
+      { err: error },
+      'error checking redundant subscription on email confirmation'
+    )
+  }
+}
+
+async function maybeCreateRedundantSubscriptionNotification(userId, email) {
+  const subscription =
+    await SubscriptionLocator.promises.getUserIndividualSubscription(userId)
+  if (!subscription || subscription.groupPlan) {
+    return
+  }
+
+  const affiliations = await InstitutionsAPI.promises.getUserAffiliations(
+    userId
+  )
+  const confirmedAffiliation = affiliations.find(a => a.email === email)
+  if (confirmedAffiliation.licence === 'free') {
+    return
+  }
+
+  await NotificationsBuilder.promises
+    .redundantPersonalSubscription(
+      {
+        institutionId: confirmedAffiliation.institution.id,
+        institutionName: confirmedAffiliation.institution.name,
+      },
+      { _id: userId }
+    )
+    .create()
 }
 
 async function removeEmailAddress(userId, email, skipParseEmail = false) {
