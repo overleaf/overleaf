@@ -1,8 +1,3 @@
-const { ObjectId } = require('mongodb')
-const { db, waitForDb } = require('../../app/src/infrastructure/mongodb')
-const { batchedUpdate } = require('../helpers/batchedUpdate')
-const { promiseMapWithLimit } = require('../../app/src/util/promises')
-
 const DRY_RUN = process.env.DRY_RUN !== 'false'
 const PROJECT_ID = process.env.PROJECT_ID
 const VERBOSE_LOGGING = process.env.VERBOSE_LOGGING === 'true'
@@ -11,6 +6,12 @@ const WRITE_CONCURRENCY = parseInt(process.env.WRITE_CONCURRENCY, 10) || 50
 const BATCH_SIZE = parseInt(process.env.BATCH_SIZE, 10) || 500
 // persist fallback in order to keep batchedUpdate in-sync
 process.env.BATCH_SIZE = BATCH_SIZE
+process.env.VERBOSE_LOGGING = VERBOSE_LOGGING
+
+const { ObjectId } = require('mongodb')
+const { db, waitForDb } = require('../../app/src/infrastructure/mongodb')
+const { batchedUpdate } = require('../helpers/batchedUpdate')
+const { promiseMapWithLimit } = require('../../app/src/util/promises')
 
 const count = {
   projects: 0,
@@ -39,7 +40,7 @@ async function main() {
   } else {
     await batchedUpdate(
       'projects',
-      { 'overleaf.history.display': { $ne: false } },
+      { 'overleaf.history.display': { $ne: true } },
       processBatch,
       projection,
       options

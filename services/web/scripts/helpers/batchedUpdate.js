@@ -3,6 +3,7 @@ const { db, waitForDb } = require('../../app/src/infrastructure/mongodb')
 
 const BATCH_DESCENDING = process.env.BATCH_DESCENDING === 'true'
 const BATCH_SIZE = parseInt(process.env.BATCH_SIZE, 10) || 1000
+const VERBOSE_LOGGING = process.env.VERBOSE_LOGGING === 'true'
 let BATCH_LAST_ID
 if (process.env.BATCH_LAST_ID) {
   BATCH_LAST_ID = ObjectId(process.env.BATCH_LAST_ID)
@@ -78,11 +79,15 @@ async function batchedUpdate(
   ) {
     maxId = nextBatch[nextBatch.length - 1]._id
     updated += nextBatch.length
-    console.log(
-      `Running update on batch with ids ${JSON.stringify(
-        nextBatch.map(entry => entry._id)
-      )}`
-    )
+    if (VERBOSE_LOGGING) {
+      console.log(
+        `Running update on batch with ids ${JSON.stringify(
+          nextBatch.map(entry => entry._id)
+        )}`
+      )
+    } else {
+      console.error(`Running update on batch ending ${maxId}`)
+    }
 
     if (typeof update === 'function') {
       await update(collection, nextBatch)
