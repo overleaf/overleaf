@@ -20,6 +20,7 @@ import './directives/aceEditor'
 import './directives/toggleSwitch'
 import './controllers/SavingNotificationController'
 import './controllers/CompileButton'
+import './controllers/EditorExpandButton'
 import getMeta from '../../utils/meta'
 let EditorManager
 

@@ -65,7 +65,7 @@ function PdfPreviewHybridToolbarInner() {
       </div>
       <div className="toolbar-pdf-right">
         <PdfHybridCodeCheckButton />
-        {!window.showPdfDetach && <PdfExpandButton />}
+        <PdfExpandButton />
         <DetachedSynctexControl />
       </div>
     </>
