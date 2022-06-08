@@ -1,4 +1,3 @@
-import { mount } from '@cypress/react'
 import sysendTestHelper from '../../helpers/sysend'
 import { EditorProviders } from '../../helpers/editor-providers'
 import PdfLogsEntries from '../../../../frontend/js/features/pdf-preview/components/pdf-logs-entries'
@@ -43,7 +42,7 @@ describe('<PdfLogsEntries/>', function () {
   })
 
   it('displays human readable hint', function () {
-    mount(
+    cy.mount(
       <EditorProviders {...props}>
         <PdfLogsEntries entries={logEntries} />
       </EditorProviders>
@@ -53,7 +52,7 @@ describe('<PdfLogsEntries/>', function () {
   })
 
   it('opens doc on click', function () {
-    mount(
+    cy.mount(
       <EditorProviders {...props}>
         <PdfLogsEntries entries={logEntries} />
       </EditorProviders>
@@ -78,7 +77,7 @@ describe('<PdfLogsEntries/>', function () {
       win.metaAttributesCache = new Map([['ol-detachRole', 'detacher']])
     })
 
-    mount(
+    cy.mount(
       <EditorProviders {...props}>
         <PdfLogsEntries entries={logEntries} />
       </EditorProviders>
@@ -111,7 +110,7 @@ describe('<PdfLogsEntries/>', function () {
       win.metaAttributesCache = new Map([['ol-detachRole', 'detached']])
     })
 
-    mount(
+    cy.mount(
       <EditorProviders {...props}>
         <PdfLogsEntries entries={logEntries} />
       </EditorProviders>

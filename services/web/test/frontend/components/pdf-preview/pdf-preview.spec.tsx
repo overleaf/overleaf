@@ -1,4 +1,3 @@
-import { mount } from '@cypress/react'
 import localStorage from '../../../../frontend/js/infrastructure/local-storage'
 import PdfPreview from '../../../../frontend/js/features/pdf-preview/components/pdf-preview'
 import { EditorProviders } from '../../helpers/editor-providers'
@@ -18,7 +17,7 @@ describe('<PdfPreview/>', function () {
   it('renders the PDF preview', function () {
     const scope = mockScope()
 
-    mount(
+    cy.mount(
       <EditorProviders scope={scope}>
         <div className="pdf-viewer">
           <PdfPreview />
@@ -36,7 +35,7 @@ describe('<PdfPreview/>', function () {
   it('runs a compile when the Recompile button is pressed', function () {
     const scope = mockScope()
 
-    mount(
+    cy.mount(
       <EditorProviders scope={scope}>
         <div className="pdf-viewer">
           <PdfPreview />
@@ -68,7 +67,7 @@ describe('<PdfPreview/>', function () {
   it('runs a compile on `pdf:recompile` event', function () {
     const scope = mockScope()
 
-    mount(
+    cy.mount(
       <EditorProviders scope={scope}>
         <div className="pdf-viewer">
           <PdfPreview />
@@ -142,7 +141,7 @@ describe('<PdfPreview/>', function () {
 
     const scope = mockScope()
 
-    mount(
+    cy.mount(
       <EditorProviders scope={scope}>
         <div className="pdf-viewer">
           <PdfPreview />
@@ -168,7 +167,7 @@ describe('<PdfPreview/>', function () {
   it('disables compile button while compile is running', function () {
     const scope = mockScope()
 
-    mount(
+    cy.mount(
       <EditorProviders scope={scope}>
         <div className="pdf-viewer">
           <PdfPreview />
@@ -183,7 +182,7 @@ describe('<PdfPreview/>', function () {
   it('runs a compile on doc change if autocompile is enabled', function () {
     const scope = mockScope()
 
-    mount(
+    cy.mount(
       <EditorProviders scope={scope}>
         <div className="pdf-viewer">
           <PdfPreview />
@@ -217,7 +216,7 @@ describe('<PdfPreview/>', function () {
   it('does not run a compile on doc change if autocompile is disabled', function () {
     const scope = mockScope()
 
-    mount(
+    cy.mount(
       <EditorProviders scope={scope}>
         <div className="pdf-viewer">
           <PdfPreview />
@@ -253,7 +252,7 @@ describe('<PdfPreview/>', function () {
     // mock a linting error
     scope.hasLintingError = true
 
-    mount(
+    cy.mount(
       <EditorProviders scope={scope}>
         <div className="pdf-viewer">
           <PdfPreview />
@@ -320,7 +319,7 @@ describe('<PdfPreview/>', function () {
 
         const scope = mockScope()
 
-        mount(
+        cy.mount(
           <EditorProviders scope={scope}>
             <div className="pdf-viewer">
               <PdfPreview />
@@ -339,7 +338,7 @@ describe('<PdfPreview/>', function () {
     it('displays expandable raw logs', function () {
       const scope = mockScope()
 
-      mount(
+      cy.mount(
         <EditorProviders scope={scope}>
           <div className="pdf-viewer">
             <PdfPreview />
@@ -388,7 +387,7 @@ describe('<PdfPreview/>', function () {
 
       const scope = mockScope()
 
-      mount(
+      cy.mount(
         <EditorProviders scope={scope}>
           <div className="pdf-viewer">
             <PdfPreview />
@@ -410,7 +409,7 @@ describe('<PdfPreview/>', function () {
     it('sends a clear cache request when the button is pressed', function () {
       const scope = mockScope()
 
-      mount(
+      cy.mount(
         <EditorProviders scope={scope}>
           <div className="pdf-viewer">
             <PdfPreview />
@@ -446,7 +445,7 @@ describe('<PdfPreview/>', function () {
     it('handle "recompile from scratch"', function () {
       const scope = mockScope()
 
-      mount(
+      cy.mount(
         <EditorProviders scope={scope}>
           <div className="pdf-viewer">
             <PdfPreview />
@@ -501,7 +500,7 @@ describe('<PdfPreview/>', function () {
 
       const scope = mockScope()
 
-      mount(
+      cy.mount(
         <EditorProviders scope={scope}>
           <div className="pdf-viewer">
             <PdfPreview />
@@ -522,7 +521,7 @@ describe('<PdfPreview/>', function () {
 
       const scope = mockScope()
 
-      mount(
+      cy.mount(
         <EditorProviders scope={scope}>
           <div className="pdf-viewer">
             <PdfPreview />
@@ -545,7 +544,7 @@ describe('<PdfPreview/>', function () {
 
       const scope = mockScope()
 
-      mount(
+      cy.mount(
         <EditorProviders scope={scope}>
           <div className="pdf-viewer">
             <PdfPreview />
@@ -576,7 +575,7 @@ describe('<PdfPreview/>', function () {
 
       const scope = mockScope()
 
-      mount(
+      cy.mount(
         <EditorProviders scope={scope}>
           <div className="pdf-viewer">
             <PdfPreview />

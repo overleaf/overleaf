@@ -1,4 +1,3 @@
-import { mount, unmount } from '@cypress/react'
 import { EditorProviders } from '../../helpers/editor-providers'
 import PdfJsViewer from '../../../../frontend/js/features/pdf-preview/components/pdf-js-viewer'
 import { mockScope } from './scope'
@@ -12,7 +11,7 @@ describe('<PdfJSViewer/>', function () {
   it('loads all PDF pages', function () {
     const scope = mockScope()
 
-    mount(
+    cy.mount(
       <EditorProviders scope={scope}>
         <div className="pdf-viewer">
           <PdfJsViewer url="/build/123/output.pdf" />
@@ -31,7 +30,7 @@ describe('<PdfJSViewer/>', function () {
   it('renders pages in a "loading" state', function () {
     const scope = mockScope()
 
-    mount(
+    cy.mount(
       <EditorProviders scope={scope}>
         <div className="pdf-viewer">
           <PdfJsViewer url="/build/123/output.pdf" />
@@ -45,7 +44,7 @@ describe('<PdfJSViewer/>', function () {
   it('can be unmounted while loading a document', function () {
     const scope = mockScope()
 
-    mount(
+    cy.mount(
       <EditorProviders scope={scope}>
         <div className="pdf-viewer">
           <PdfJsViewer url="/build/123/output.pdf" />
@@ -53,13 +52,13 @@ describe('<PdfJSViewer/>', function () {
       </EditorProviders>
     )
 
-    unmount()
+    cy.unmount()
   })
 
   it('can be unmounted after loading a document', function () {
     const scope = mockScope()
 
-    mount(
+    cy.mount(
       <EditorProviders scope={scope}>
         <div className="pdf-viewer">
           <PdfJsViewer url="/build/123/output.pdf" />
@@ -69,6 +68,6 @@ describe('<PdfJSViewer/>', function () {
 
     cy.findByLabelText('Page 1')
 
-    unmount()
+    cy.unmount()
   })
 })

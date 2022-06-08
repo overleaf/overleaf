@@ -1,4 +1,3 @@
-import { mount } from '@cypress/react'
 import sysendTestHelper from '../../helpers/sysend'
 import PdfPreviewDetachedRoot from '../../../../frontend/js/features/pdf-preview/components/pdf-preview-detached-root'
 import { User } from '../../../../types/user'
@@ -24,7 +23,7 @@ describe('<PdfPreviewDetachedRoot/>', function () {
   })
 
   it('syncs compiling state', function () {
-    mount(<PdfPreviewDetachedRoot />).then(() => {
+    cy.mount(<PdfPreviewDetachedRoot />).then(() => {
       sysendTestHelper.receiveMessage({
         role: 'detacher',
         event: 'connected',
@@ -52,7 +51,7 @@ describe('<PdfPreviewDetachedRoot/>', function () {
   })
 
   it('sends a clear cache request when the button is pressed', function () {
-    mount(<PdfPreviewDetachedRoot />).then(() => {
+    cy.mount(<PdfPreviewDetachedRoot />).then(() => {
       sysendTestHelper.receiveMessage({
         role: 'detacher',
         event: 'state-showLogs',

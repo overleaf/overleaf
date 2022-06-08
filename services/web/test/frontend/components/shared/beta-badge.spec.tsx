@@ -1,9 +1,8 @@
-import { mount } from '@cypress/react'
 import BetaBadge from '../../../../frontend/js/shared/components/beta-badge'
 
 describe('beta badge', function () {
   it('renders the url and tooltip text', function () {
-    mount(
+    cy.mount(
       <BetaBadge
         url="/foo"
         tooltip={{

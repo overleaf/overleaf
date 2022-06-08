@@ -1,4 +1,3 @@
-import { mount } from '@cypress/react'
 import sysendTestHelper from '../../helpers/sysend'
 import { EditorProviders } from '../../helpers/editor-providers'
 import DetachCompileButton from '../../../../frontend/js/features/pdf-preview/components/detach-compile-button'
@@ -22,7 +21,7 @@ describe('<DetachCompileButton/>', function () {
 
     const scope = mockScope()
 
-    mount(
+    cy.mount(
       <EditorProviders scope={scope}>
         <DetachCompileButton />
       </EditorProviders>
@@ -38,7 +37,7 @@ describe('<DetachCompileButton/>', function () {
 
     const scope = mockScope()
 
-    mount(
+    cy.mount(
       <EditorProviders scope={scope}>
         <DetachCompileButton />
       </EditorProviders>
@@ -59,7 +58,7 @@ describe('<DetachCompileButton/>', function () {
 
     const scope = mockScope()
 
-    mount(
+    cy.mount(
       <EditorProviders scope={scope}>
         <DetachCompileButton />
       </EditorProviders>

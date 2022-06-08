@@ -1,2 +1,4 @@
 window.i18n = { currentLangCode: 'en' }
-window.ExposedSettings = { ...window?.ExposedSettings, appName: 'Overleaf' }
+window.ExposedSettings = {
+  appName: 'Overleaf',
+} as typeof window.ExposedSettings

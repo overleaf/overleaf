@@ -43,7 +43,7 @@ const outputFiles = () => {
   ]
 }
 
-Cypress.Commands.add('interceptCompile', (prefix = 'compile') => {
+export const interceptCompile = (prefix = 'compile') => {
   cy.intercept('POST', '/project/*/compile*', {
     body: {
       status: 'success',
@@ -65,4 +65,4 @@ Cypress.Commands.add('interceptCompile', (prefix = 'compile') => {
   cy.intercept('/build/*/output.blg*', {
     fixture: 'build/output.blg',
   }).as(`${prefix}-blg`)
-})
+}

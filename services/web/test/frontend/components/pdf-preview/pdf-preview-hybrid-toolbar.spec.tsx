@@ -1,4 +1,3 @@
-import { mount } from '@cypress/react'
 import sysendTestHelper from '../../helpers/sysend'
 import { EditorProviders } from '../../helpers/editor-providers'
 import PdfPreviewHybridToolbar from '../../../../frontend/js/features/pdf-preview/components/pdf-preview-hybrid-toolbar'
@@ -15,7 +14,7 @@ describe('<PdfPreviewHybridToolbar/>', function () {
   })
 
   it('shows normal mode', function () {
-    mount(
+    cy.mount(
       <EditorProviders>
         <PdfPreviewHybridToolbar />
       </EditorProviders>
@@ -30,7 +29,7 @@ describe('<PdfPreviewHybridToolbar/>', function () {
         win.metaAttributesCache = new Map([['ol-detachRole', 'detached']])
       })
 
-      mount(
+      cy.mount(
         <EditorProviders>
           <PdfPreviewHybridToolbar />
         </EditorProviders>
@@ -44,7 +43,7 @@ describe('<PdfPreviewHybridToolbar/>', function () {
         win.metaAttributesCache = new Map([['ol-detachRole', 'detached']])
       })
 
-      mount(
+      cy.mount(
         <EditorProviders>
           <PdfPreviewHybridToolbar />
         </EditorProviders>
@@ -63,7 +62,7 @@ describe('<PdfPreviewHybridToolbar/>', function () {
         win.metaAttributesCache = new Map([['ol-detachRole', 'detached']])
       })
 
-      mount(
+      cy.mount(
         <EditorProviders>
           <PdfPreviewHybridToolbar />
         </EditorProviders>
@@ -88,7 +87,7 @@ describe('<PdfPreviewHybridToolbar/>', function () {
 
       cy.clock()
 
-      mount(
+      cy.mount(
         <EditorProviders>
           <PdfPreviewHybridToolbar />
         </EditorProviders>
