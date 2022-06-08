@@ -85,9 +85,7 @@ describe('BackFillDeletedFiles', function () {
       logger.error({ error }, 'script failed')
       throw error
     }
-    const { stderr: stdErr, stdout: stdOut } = result
-    expect(stdOut).to.include(projectId1.toString())
-    expect(stdOut).to.include(projectId2.toString())
+    const { stderr: stdErr } = result
 
     expect(stdErr).to.include(`Completed batch ending ${projectId5}`)
   }
