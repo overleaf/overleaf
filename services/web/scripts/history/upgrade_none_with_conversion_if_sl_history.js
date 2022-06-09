@@ -14,8 +14,10 @@ process.env.BATCH_SIZE = BATCH_SIZE
 process.env.MONGO_SOCKET_TIMEOUT =
   parseInt(process.env.MONGO_SOCKET_TIMEOUT, 10) || 3600000
 
-const { ReadPreference } = require('mongodb')
-const { db } = require('../../app/src/infrastructure/mongodb')
+const PROJECT_ID = process.env.PROJECT_ID
+
+const { ObjectId, ReadPreference } = require('mongodb')
+const { db, waitForDb } = require('../../app/src/infrastructure/mongodb')
 const { promiseMapWithLimit } = require('../../app/src/util/promises')
 const { batchedUpdate } = require('../helpers/batchedUpdate')
 const ProjectHistoryController = require('../../modules/admin-panel/app/src/ProjectHistoryController')
@@ -29,6 +31,7 @@ console.log({
   MAX_FAILURES,
   USE_QUERY_HINT,
   RETRY_FAILED,
+  PROJECT_ID,
 })
 
 const RESULT = {
@@ -167,25 +170,31 @@ async function anyDocHistoryIndexExists(project) {
 }
 
 async function main() {
-  const projection = {
-    _id: 1,
-    overleaf: 1,
+  if (PROJECT_ID) {
+    await waitForDb()
+    const project = await db.projects.findOne({ _id: ObjectId(PROJECT_ID) })
+    await processProject(project)
+  } else {
+    const projection = {
+      _id: 1,
+      overleaf: 1,
+    }
+    const options = {}
+    if (USE_QUERY_HINT) {
+      options.hint = { _id: 1 }
+    }
+    await batchedUpdate(
+      'projects',
+      // we originally used
+      // 'overleaf.history.id': { $exists: false }
+      // but display false is indexed and contains all the above,
+      // it can be faster to skip projects with a history ID than to use a query
+      { 'overleaf.history.display': { $ne: true } },
+      processBatch,
+      projection,
+      options
+    )
   }
-  const options = {}
-  if (USE_QUERY_HINT) {
-    options.hint = { _id: 1 }
-  }
-  await batchedUpdate(
-    'projects',
-    // we originally used
-    // 'overleaf.history.id': { $exists: false }
-    // but display false is indexed and contains all the above,
-    // it can be faster to skip projects with a history ID than to use a query
-    { 'overleaf.history.display': { $ne: true } },
-    processBatch,
-    projection,
-    options
-  )
   console.log('Final')
   console.log(RESULT)
 }
