@@ -30,6 +30,7 @@ export function DetachCompileProvider({ children }) {
     fileList: _fileList,
     hasChanges: _hasChanges,
     highlights: _highlights,
+    lastCompileOptions: _lastCompileOptions,
     logEntries: _logEntries,
     logEntryAnnotations: _logEntryAnnotations,
     pdfDownloadUrl: _pdfDownloadUrl,
@@ -110,6 +111,12 @@ export function DetachCompileProvider({ children }) {
   const [highlights] = useDetachStateWatcher(
     'highlights',
     _highlights,
+    'detacher',
+    'detached'
+  )
+  const [lastCompileOptions] = useDetachStateWatcher(
+    'lastCompileOptions',
+    _lastCompileOptions,
     'detacher',
     'detached'
   )
@@ -314,6 +321,7 @@ export function DetachCompileProvider({ children }) {
       fileList,
       hasChanges,
       highlights,
+      lastCompileOptions,
       logEntryAnnotations,
       logEntries,
       pdfDownloadUrl,
@@ -357,6 +365,7 @@ export function DetachCompileProvider({ children }) {
       fileList,
       hasChanges,
       highlights,
+      lastCompileOptions,
       logEntryAnnotations,
       logEntries,
       pdfDownloadUrl,

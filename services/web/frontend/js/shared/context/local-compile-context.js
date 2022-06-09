@@ -458,6 +458,10 @@ export function LocalCompileProvider({ children }) {
     })
   }, [clearCache, compiler])
 
+  // After a compile, the compiler sets `data.options` to the options that were
+  // used for that compile.
+  const lastCompileOptions = useMemo(() => data?.options || {}, [data])
+
   const value = useMemo(
     () => ({
       autoCompile,
@@ -471,6 +475,7 @@ export function LocalCompileProvider({ children }) {
       fileList,
       hasChanges,
       highlights,
+      lastCompileOptions,
       logEntryAnnotations,
       logEntries,
       pdfDownloadUrl,
@@ -514,6 +519,7 @@ export function LocalCompileProvider({ children }) {
       fileList,
       hasChanges,
       highlights,
+      lastCompileOptions,
       logEntries,
       logEntryAnnotations,
       position,

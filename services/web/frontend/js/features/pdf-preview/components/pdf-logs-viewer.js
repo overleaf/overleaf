@@ -22,7 +22,6 @@ function PdfLogsViewer() {
     rawLog,
     validationIssues,
     showLogs,
-    stopOnFirstError,
     stoppedOnFirstError,
   } = useCompileContext()
 
@@ -33,7 +32,7 @@ function PdfLogsViewer() {
       <div className="logs-pane-content">
         {codeCheckFailed && <PdfCodeCheckFailedNotice />}
 
-        {stopOnFirstError && stoppedOnFirstError && <StopOnFirstErrorPrompt />}
+        {stoppedOnFirstError && <StopOnFirstErrorPrompt />}
 
         {error && <PdfPreviewError error={error} />}
 
