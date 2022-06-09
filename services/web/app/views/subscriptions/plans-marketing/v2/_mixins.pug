@@ -436,7 +436,7 @@ mixin additional_link_buy(plan, period)
 	small.plans-v2-table-th-content-additional-link
 		| #{translate("or")} 
 		a(
-			href="/user/subscription/new?planCode=paid-personal&currency=" + recommendedCurrency + "&itm_campaign=plans&itm_content=card"
+			href="/user/subscription/new?planCode=" + plan + "&currency=" + recommendedCurrency + "&itm_campaign=plans&itm_content=card"
 			event-tracking="plans-page-click"
 			event-tracking-mb="true"
 			event-tracking-trigger="click"
