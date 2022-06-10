@@ -11,6 +11,7 @@ const stream = require('stream')
 const fs = require('fs')
 const os = require('os')
 const Path = require('path')
+const { packsAreDuplicated } = require('./util/PackUtils')
 
 const streamPipeline = util.promisify(stream.pipeline)
 
@@ -85,8 +86,13 @@ async function rewindDoc(projectId, docId, zipfile) {
   let content = latestContent
   let v = version
   let update = lastUpdate
+  let previousUpdate = null
 
   while (update) {
+    if (packsAreDuplicated(update, previousUpdate)) {
+      continue
+    }
+
     const updatePath = `${id}/updates/${update.v}`
 
     zipfile.addBuffer(Buffer.from(JSON.stringify(update)), updatePath, {
@@ -107,6 +113,7 @@ async function rewindDoc(projectId, docId, zipfile) {
       ts: update.meta.start_ts,
       doc_length: content.length,
     })
+    previousUpdate = update
     update = await getUpdate()
   }
 

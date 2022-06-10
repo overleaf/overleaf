@@ -31,6 +31,7 @@
     "heap": "^0.2.6",
     "JSONStream": "^1.3.5",
     "line-reader": "^0.4.0",
+    "lodash": "^4.17.21",
     "mongo-uri": "^0.1.2",
     "mongodb": "^3.6.0",
     "redis": "~0.10.1",
