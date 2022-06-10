@@ -1,6 +1,8 @@
 import { expect } from 'chai'
+import sinon from 'sinon'
 import { screen, fireEvent, render, waitFor } from '@testing-library/react'
 import { IntegrationLinkingWidget } from '../../../../../../frontend/js/features/settings/components/linking/integration-widget'
+import * as eventTracking from '../../../../../../frontend/js/infrastructure/event-tracking'
 
 describe('<IntegrationLinkingWidgetTest/>', function () {
   const defaultProps = {
@@ -15,18 +17,28 @@ describe('<IntegrationLinkingWidgetTest/>', function () {
   }
 
   describe('when the feature is not available', function () {
+    let sendMBSpy: sinon.SinonSpy
     beforeEach(function () {
+      sendMBSpy = sinon.spy(eventTracking, 'sendMB')
       render(<IntegrationLinkingWidget {...defaultProps} hasFeature={false} />)
+    })
+
+    afterEach(function () {
+      sendMBSpy.restore()
     })
 
     it("should render 'Premium feature' label", function () {
       screen.getByText('Premium feature')
     })
 
-    it('should render a link to upgrade the account', function () {
-      expect(
-        screen.getByRole('link', { name: 'Upgrade' }).getAttribute('href')
-      ).to.equal('/user/subscription/plans')
+    it('should render an upgrade link and track clicks', function () {
+      const upgradeLink = screen.getByRole('link', { name: 'Upgrade' })
+      expect(upgradeLink.getAttribute('href')).to.equal(
+        '/user/subscription/plans'
+      )
+      fireEvent.click(upgradeLink)
+      expect(sendMBSpy).to.be.calledOnce
+      expect(sendMBSpy).calledWith('settings-upgrade-click')
     })
   })
 

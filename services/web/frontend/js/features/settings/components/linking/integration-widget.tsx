@@ -3,6 +3,11 @@ import { useTranslation } from 'react-i18next'
 import AccessibleModal from '../../../../shared/components/accessible-modal'
 import { Button, Modal } from 'react-bootstrap'
 import getMeta from '../../../../utils/meta'
+import { sendMB } from '../../../../infrastructure/event-tracking'
+
+function trackUpgradeClick() {
+  sendMB('settings-upgrade-click')
+}
 
 type IntegrationLinkingWidgetProps = {
   logo: ReactNode
@@ -66,7 +71,6 @@ export function IntegrationLinkingWidget({
       <div>
         <ActionButton
           hasFeature={hasFeature}
-          upgradePath="/user/subscription/plans"
           linked={linked}
           handleUnlinkClick={handleUnlinkClick}
           linkPath={linkPath}
@@ -86,7 +90,6 @@ export function IntegrationLinkingWidget({
 
 type ActionButtonProps = {
   hasFeature?: boolean
-  upgradePath: string
   linked?: boolean
   handleUnlinkClick: () => void
   linkPath: string
@@ -95,7 +98,6 @@ type ActionButtonProps = {
 
 function ActionButton({
   hasFeature,
-  upgradePath,
   linked,
   handleUnlinkClick,
   linkPath,
@@ -105,7 +107,11 @@ function ActionButton({
 
   if (!hasFeature) {
     return (
-      <Button bsStyle="info" href={upgradePath}>
+      <Button
+        bsStyle="info"
+        href="/user/subscription/plans"
+        onClick={trackUpgradeClick}
+      >
         <span className="text-capitalize">{t('upgrade')}</span>
       </Button>
     )
