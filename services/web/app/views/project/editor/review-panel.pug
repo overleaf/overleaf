@@ -1,4 +1,6 @@
-#review-panel
+#review-panel(
+	ng-class="{ 'rp-collapsed-displaying-entry': reviewPanel.entryHover }"
+)
 	.rp-in-editor-widgets
 		a.rp-track-changes-indicator(
 			href
@@ -125,6 +127,8 @@
 						on-reject="rejectChanges(entry.entry_ids);"
 						on-accept="acceptChanges(entry.entry_ids);"
 						on-indicator-click="toggleReviewPanel();"
+						on-mouse-enter="mouseEnterIndicator()"
+						on-mouse-leave="mouseLeaveIndicator()"
 						on-body-click="gotoEntry(editor.open_doc_id, entry)"
 						permissions="permissions"
 					)
@@ -136,6 +140,8 @@
 						on-reject="rejectChanges(entry.entry_ids);"
 						on-accept="acceptChanges(entry.entry_ids);"
 						on-indicator-click="toggleReviewPanel();"
+						on-mouse-enter="mouseEnterIndicator()"
+						on-mouse-leave="mouseLeaveIndicator()"
 						on-body-click="gotoEntry(editor.open_doc_id, entry)"
 						permissions="permissions"
 					)
@@ -147,6 +153,8 @@
 						on-resolve="resolveComment(entry, entry_id)"
 						on-reply="submitReply(entry, entry_id);"
 						on-indicator-click="toggleReviewPanel();"
+						on-mouse-enter="mouseEnterIndicator()"
+						on-mouse-leave="mouseLeaveIndicator()"
 						on-save-edit="saveEdit(entry.thread_id, comment)"
 						on-delete="deleteComment(entry.thread_id, comment)"
 						on-body-click="gotoEntry(editor.open_doc_id, entry)"
@@ -248,7 +256,10 @@
 
 
 script(type='text/ng-template', id='changeEntryTemplate')
-	div
+	div(
+		ng-mouseenter="onMouseEnter();"
+		ng-mouseleave="onMouseLeave();"
+	)
 		.rp-entry-callout(
 			ng-class="'rp-entry-callout-' + entry.type"
 		)
@@ -296,7 +307,10 @@ script(type='text/ng-template', id='changeEntryTemplate')
 					| &nbsp;#{translate("accept")}
 
 script(type='text/ng-template', id='aggregateChangeEntryTemplate')
-	div
+	div(
+		ng-mouseenter="onMouseEnter();"
+		ng-mouseleave="onMouseLeave();"
+	)
 		.rp-entry-callout.rp-entry-callout-aggregate
 		.rp-entry-indicator(
 			ng-class="{ 'rp-entry-indicator-focused': entry.focused }"
@@ -343,6 +357,8 @@ script(type='text/ng-template', id='aggregateChangeEntryTemplate')
 script(type='text/ng-template', id='commentEntryTemplate')
 	.rp-comment-wrapper(
 		ng-class="{ 'rp-comment-wrapper-resolving': state.animating }"
+		ng-mouseenter="onMouseEnter();"
+		ng-mouseleave="onMouseLeave();"
 	)
 		.rp-entry-callout.rp-entry-callout-comment
 		.rp-entry-indicator(

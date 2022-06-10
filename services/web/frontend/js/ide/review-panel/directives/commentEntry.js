@@ -21,6 +21,8 @@ export default App.directive('commentEntry', $timeout => ({
     onResolve: '&',
     onReply: '&',
     onIndicatorClick: '&',
+    onMouseEnter: '&',
+    onMouseLeave: '&',
     onSaveEdit: '&',
     onDelete: '&',
     onBodyClick: '&',

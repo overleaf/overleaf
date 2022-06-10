@@ -103,6 +103,7 @@ export default App.controller(
       // A count of user-facing selected changes. An aggregated change (insertion + deletion) will count
       // as only one.
       nVisibleSelectedChanges: 0,
+      entryHover: false,
     }
 
     window.addEventListener('beforeunload', function () {
@@ -640,6 +641,18 @@ export default App.controller(
       eventTracking.sendMB('rp-changes-rejected', {
         view: $scope.ui.reviewPanelOpen ? $scope.reviewPanel.subView : 'mini',
       })
+    }
+
+    // The next two functions control a class on the review panel that affects
+    // the overflow-y rule on the panel. This is necessary so that an entry in
+    // the review panel is visible when hovering over its indicator when the
+    // review panel is minimized. See issue #8057.
+    $scope.mouseEnterIndicator = function () {
+      $scope.reviewPanel.entryHover = true
+    }
+
+    $scope.mouseLeaveIndicator = function () {
+      $scope.reviewPanel.entryHover = false
     }
 
     function _doAcceptChanges(change_ids) {

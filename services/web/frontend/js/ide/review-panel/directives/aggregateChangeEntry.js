@@ -21,6 +21,8 @@ export default App.directive('aggregateChangeEntry', $timeout => ({
     onAccept: '&',
     onReject: '&',
     onIndicatorClick: '&',
+    onMouseEnter: '&',
+    onMouseLeave: '&',
     onBodyClick: '&',
   },
   link(scope, element, attrs) {
