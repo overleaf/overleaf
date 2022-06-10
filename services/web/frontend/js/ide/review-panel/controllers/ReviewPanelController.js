@@ -137,9 +137,10 @@ export default App.controller(
       $timeout(() => $scope.$broadcast('review-panel:layout'))
     )
 
-    $scope.$on('review-panel:sizes', (e, sizes) =>
+    $scope.$on('review-panel:sizes', (e, sizes) => {
       $scope.$broadcast('editor:set-scroll-size', sizes)
-    )
+      dispatchReviewPanelEvent('sizes', sizes)
+    })
 
     $scope.$watch('project.features.trackChangesVisible', function (visible) {
       if (visible == null) {

@@ -19,6 +19,16 @@ export default App.directive('reviewPanelSorted', $timeout => ({
   link(scope, element, attrs) {
     let previous_focused_entry_index = 0
 
+    const applyEntryVisibility = function (entry) {
+      const visible = entry.scope.entry.screenPos
+      if (visible) {
+        entry.$wrapper_el.removeClass('rp-entry-hidden')
+      } else {
+        entry.$wrapper_el.addClass('rp-entry-hidden')
+      }
+      return visible
+    }
+
     const layout = function (animate) {
       let entry,
         height,
@@ -51,6 +61,7 @@ export default App.directive('reviewPanelSorted', $timeout => ({
       const entries = []
       for (const el of Array.from(element.find('.rp-entry-wrapper'))) {
         entry = {
+          $wrapper_el: $(el),
           $indicator_el: $(el).find('.rp-entry-indicator'),
           $box_el: $(el).find('.rp-entry'),
           $callout_el: $(el).find('.rp-entry-callout'),
@@ -83,9 +94,19 @@ export default App.directive('reviewPanelSorted', $timeout => ({
           break
         }
       }
-      const entries_after = entries.slice(focused_entry_index + 1)
-      const entries_before = entries.slice(0, focused_entry_index)
+
       const focused_entry = entries[focused_entry_index]
+      const focusedEntryVisible = applyEntryVisibility(focused_entry)
+
+      // If the focused entry has no screenPos, we can't position other entries
+      // relative to it, so we position all other entries as though the focused
+      // entry is at the top and they all follow it
+      const entries_after = focusedEntryVisible
+        ? entries.slice(focused_entry_index + 1)
+        : [...entries]
+      const entries_before = focusedEntryVisible
+        ? entries.slice(0, focused_entry_index)
+        : []
       previous_focused_entry_index = focused_entry_index
 
       sl_console.log('focused_entry_index', focused_entry_index)
@@ -112,68 +133,84 @@ export default App.directive('reviewPanelSorted', $timeout => ({
       }
 
       // Put the focused entry as close to where it wants to be as possible
-      const focused_entry_top = Math.max(
-        focused_entry.scope.entry.screenPos.y,
-        TOOLBAR_HEIGHT
-      )
-      focused_entry.$box_el.css({
-        top: focused_entry_top,
-        // The entry element is invisible by default, to avoid flickering when positioning for
-        // the first time. Here we make sure it becomes visible after having a "top" value.
-        visibility: 'visible',
-      })
-      focused_entry.$indicator_el.css({ top: focused_entry_top })
-      // use screenPos.height if set
-      screenPosHeight =
-        focused_entry.scope.entry.screenPos.height ?? line_height
-      positionLayoutEl(
-        focused_entry.$callout_el,
-        focused_entry.scope.entry.screenPos.y,
-        focused_entry_top,
-        screenPosHeight
-      )
+      let focused_entry_top = 0
+      let previousBottom = 0
 
-      let previousBottom = focused_entry_top + focused_entry.$layout_el.height()
-      for (entry of Array.from(entries_after)) {
-        original_top = entry.scope.entry.screenPos.y
-        // use screenPos.height if set
-        screenPosHeight = entry.scope.entry.screenPos.height ?? line_height
-        ;({ height } = entry)
-        top = Math.max(original_top, previousBottom + PADDING)
-        previousBottom = top + height
-        entry.$box_el.css({
-          top,
+      if (focusedEntryVisible) {
+        const focusedEntryScreenPos = focused_entry.scope.entry.screenPos
+        focused_entry_top = Math.max(focusedEntryScreenPos.y, TOOLBAR_HEIGHT)
+        focused_entry.$box_el.css({
+          top: focused_entry_top,
           // The entry element is invisible by default, to avoid flickering when positioning for
           // the first time. Here we make sure it becomes visible after having a "top" value.
           visibility: 'visible',
         })
-        entry.$indicator_el.css({ top })
-        positionLayoutEl(entry.$callout_el, original_top, top, screenPosHeight)
+        focused_entry.$indicator_el.css({ top: focused_entry_top })
+        // use screenPos.height and screenPos.editorPaddingTop if set
+        screenPosHeight = focusedEntryScreenPos.height ?? line_height
+        positionLayoutEl(
+          focused_entry.$callout_el,
+          focusedEntryScreenPos.y +
+            (focusedEntryScreenPos.editorPaddingTop ?? 0),
+          focused_entry_top,
+          screenPosHeight
+        )
+        previousBottom = focused_entry_top + focused_entry.$layout_el.height()
+      }
+
+      for (entry of entries_after) {
+        const entryVisible = applyEntryVisibility(entry)
+        if (entryVisible) {
+          original_top = entry.scope.entry.screenPos.y
+          // use screenPos.height if set
+          screenPosHeight = entry.scope.entry.screenPos.height ?? line_height
+          ;({ height } = entry)
+          top = Math.max(original_top, previousBottom + PADDING)
+          previousBottom = top + height
+          entry.$box_el.css({
+            top,
+            // The entry element is invisible by default, to avoid flickering when positioning for
+            // the first time. Here we make sure it becomes visible after having a "top" value.
+            visibility: 'visible',
+          })
+          entry.$indicator_el.css({ top })
+          positionLayoutEl(
+            entry.$callout_el,
+            original_top,
+            top,
+            screenPosHeight
+          )
+        }
         sl_console.log('ENTRY', { entry: entry.scope.entry, top })
       }
 
-      const lastBottom = previousBottom
-
       let previousTop = focused_entry_top
       entries_before.reverse() // Work through backwards, starting with the one just above
-      for (i = 0; i < entries_before.length; i++) {
-        entry = entries_before[i]
-        original_top = entry.scope.entry.screenPos.y
-        // use screenPos.height if set
-        screenPosHeight = entry.scope.entry.screenPos.height ?? line_height
-        ;({ height } = entry)
-        const original_bottom = original_top + height
-        const bottom = Math.min(original_bottom, previousTop - PADDING)
-        top = bottom - height
-        previousTop = top
-        entry.$box_el.css({
-          top,
-          // The entry element is invisible by default, to avoid flickering when positioning for
-          // the first time. Here we make sure it becomes visible after having a "top" value.
-          visibility: 'visible',
-        })
-        entry.$indicator_el.css({ top })
-        positionLayoutEl(entry.$callout_el, original_top, top, screenPosHeight)
+      for (entry of entries_before) {
+        const entryVisible = applyEntryVisibility(entry)
+        if (entryVisible) {
+          original_top = entry.scope.entry.screenPos.y
+          // use screenPos.height if set
+          screenPosHeight = entry.scope.entry.screenPos.height ?? line_height
+          ;({ height } = entry)
+          const original_bottom = original_top + height
+          const bottom = Math.min(original_bottom, previousTop - PADDING)
+          top = bottom - height
+          previousTop = top
+          entry.$box_el.css({
+            top,
+            // The entry element is invisible by default, to avoid flickering when positioning for
+            // the first time. Here we make sure it becomes visible after having a "top" value.
+            visibility: 'visible',
+          })
+          entry.$indicator_el.css({ top })
+          positionLayoutEl(
+            entry.$callout_el,
+            original_top,
+            top,
+            screenPosHeight
+          )
+        }
         sl_console.log('ENTRY', { entry: entry.scope.entry, top })
       }
 
@@ -231,8 +268,6 @@ export default App.directive('reviewPanelSorted', $timeout => ({
       if (ignoreNextAceEvent) {
         return (ignoreNextAceEvent = false)
       } else {
-        // TODO: unused?
-        const ignoreNextPanelEvent = true
         list.height(height)
         // console.log({height, scrollTop, top: height - scrollTop})
         return list.css({ top: -scrollTop })
@@ -247,9 +282,9 @@ export default App.directive('reviewPanelSorted', $timeout => ({
 
     // receive the scroll position from the CodeMirror 6 track changes extension
     window.addEventListener('editor:scroll', event => {
-      const { scrollTop, height } = event.detail
+      const { scrollTop, height, paddingTop } = event.detail
 
-      scrollPanel(scrollTop, height)
+      scrollPanel(scrollTop - paddingTop, height)
     })
 
     // send the scroll position to the CodeMirror 6 track changes extension
