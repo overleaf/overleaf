@@ -255,7 +255,7 @@ export default App.directive('reviewPanelSorted', $timeout => ({
         const old_top = parseInt(list.css('top'))
         const top = old_top - deltaY * 4
         scrollAce(-top)
-        dispatchScrollEvent(-top)
+        dispatchScrollEvent(deltaY * 4)
         return e.preventDefault()
       })
 
@@ -287,11 +287,11 @@ export default App.directive('reviewPanelSorted', $timeout => ({
       scrollPanel(scrollTop - paddingTop, height)
     })
 
-    // send the scroll position to the CodeMirror 6 track changes extension
-    const dispatchScrollEvent = value => {
+    // Send scroll delta to the CodeMirror 6 track changes extension
+    const dispatchScrollEvent = scrollTopDelta => {
       window.dispatchEvent(
         new CustomEvent('review-panel:event', {
-          detail: { type: 'scroll', payload: value },
+          detail: { type: 'scroll', payload: scrollTopDelta },
         })
       )
     }
