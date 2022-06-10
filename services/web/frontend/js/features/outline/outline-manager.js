@@ -1,3 +1,4 @@
+import { isEqual, cloneDeep } from 'lodash'
 import './controllers/outline-controller'
 import { matchOutline, nestOutline } from './outline-parser'
 import isValidTeXFile from '../../main/is-valid-tex-file'
@@ -9,6 +10,7 @@ class OutlineManager {
     this.shareJsDoc = null
     this.isTexFile = false
     this.flatOutline = []
+    this.previousFlatOutline = []
     this.outline = []
     this.highlightedLine = null
     this.ignoreNextScroll = false
@@ -67,14 +69,19 @@ class OutlineManager {
   }
 
   updateOutline() {
-    this.outline = []
     if (this.isTexFile) {
       const content = this.ide.editorManager.getCurrentDocValue()
       if (content) {
         this.flatOutline = matchOutline(content)
-        this.outline = nestOutline(this.flatOutline)
+        if (!isEqual(this.flatOutline, this.previousFlatOutline)) {
+          this.previousFlatOutline = cloneDeep(this.flatOutline)
+          this.outline = nestOutline(this.flatOutline)
+        }
+        return
       }
     }
+    this.previousFlatOutline = []
+    this.outline = []
   }
 
   // set highlightedLine to the closest outline line above the editorLine
