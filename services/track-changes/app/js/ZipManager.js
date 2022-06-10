@@ -90,6 +90,8 @@ async function rewindDoc(projectId, docId, zipfile) {
 
   while (update) {
     if (packsAreDuplicated(update, previousUpdate)) {
+      previousUpdate = update
+      update = await getUpdate()
       continue
     }
 
