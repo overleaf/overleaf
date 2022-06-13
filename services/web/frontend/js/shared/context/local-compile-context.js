@@ -293,7 +293,10 @@ export function LocalCompileProvider({ children }) {
             )
 
             // sample compile stats for real users
-            if (!window.user.alphaProgram && data.status === 'success') {
+            if (
+              !window.user.alphaProgram &&
+              ['success', 'stopped-on-first-error'].includes(data.status)
+            ) {
               sendMBSampled(
                 'compile-result',
                 {
@@ -301,6 +304,7 @@ export function LocalCompileProvider({ children }) {
                   warnings: result.logEntries.warnings.length,
                   typesetting: result.logEntries.typesetting.length,
                   newPdfPreview: true, // TODO: is this useful?
+                  stopOnFirstError: data.options.stopOnFirstError,
                 },
                 0.01
               )

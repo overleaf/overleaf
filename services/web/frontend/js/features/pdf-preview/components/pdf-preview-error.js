@@ -1,15 +1,14 @@
 import PropTypes from 'prop-types'
 import { useTranslation, Trans } from 'react-i18next'
-import { memo } from 'react'
+import { memo, useCallback } from 'react'
 import { Button } from 'react-bootstrap'
 import PdfLogEntry from './pdf-log-entry'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
+import { useStopOnFirstError } from '../../../shared/hooks/use-stop-on-first-error'
 import getMeta from '../../../utils/meta'
 
 function PdfPreviewError({ error }) {
   const { t } = useTranslation()
-  const { lastCompileOptions, setStopOnFirstError, startCompile } =
-    useCompileContext()
 
   switch (error) {
     case 'rendering-error':
@@ -75,82 +74,8 @@ function PdfPreviewError({ error }) {
         </ErrorLogEntry>
       )
 
-    case 'timedout': {
-      const showStopOnFirstError = getMeta('ol-showStopOnFirstError')
-      if (showStopOnFirstError) {
-        return (
-          <ErrorLogEntry title={t('timedout')}>
-            <p>{t('project_timed_out_intro')}</p>
-            <ul>
-              <li>
-                <Trans
-                  i18nKey="project_timed_out_optimize_images"
-                  components={[
-                    // eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key
-                    <a href="https://www.overleaf.com/learn/how-to/Optimising_very_large_image_files" />,
-                  ]}
-                />
-              </li>
-              <li>
-                <Trans
-                  i18nKey="project_timed_out_fatal_error"
-                  components={[
-                    // eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key
-                    <a href="https://www.overleaf.com/learn/how-to/Why_do_I_keep_getting_the_compile_timeout_error_message%3F#Fatal_compile_errors_blocking_the_compilation" />,
-                  ]}
-                />
-                {!lastCompileOptions.stopOnFirstError && (
-                  <>
-                    {' '}
-                    <Trans
-                      i18nKey="project_timed_out_enable_stop_on_first_error"
-                      components={[
-                        // eslint-disable-next-line react/jsx-key
-                        <Button
-                          bsSize="xs"
-                          bsStyle="info"
-                          onClick={() => {
-                            startCompile({ stopOnFirstError: true })
-                            setStopOnFirstError(true)
-                          }}
-                        />,
-                      ]}
-                    />
-                  </>
-                )}
-              </li>
-            </ul>
-            <p>
-              <Trans
-                i18nKey="project_timed_out_learn_more"
-                components={{
-                  link: (
-                    // eslint-disable-next-line jsx-a11y/anchor-has-content
-                    <a href="https://www.overleaf.com/learn/how-to/Why_do_I_keep_getting_the_compile_timeout_error_message%3F" />
-                  ),
-                }}
-              />
-            </p>
-          </ErrorLogEntry>
-        )
-      } else {
-        return (
-          <ErrorLogEntry title={t('timedout')}>
-            {t('proj_timed_out_reason')}
-
-            <div>
-              <a
-                href="https://www.overleaf.com/learn/how-to/Why_do_I_keep_getting_the_compile_timeout_error_message%3F"
-                target="_blank"
-                rel="noopener"
-              >
-                {t('learn_how_to_make_documents_compile_quickly')}
-              </a>
-            </div>
-          </ErrorLogEntry>
-        )
-      }
-    }
+    case 'timedout':
+      return <TimedOutLogEntry />
 
     case 'failure':
       return (
@@ -233,8 +158,93 @@ function ErrorLogEntry({ title, children }) {
     />
   )
 }
-
 ErrorLogEntry.propTypes = {
   title: PropTypes.string.isRequired,
   children: PropTypes.any.isRequired,
 }
+
+function TimedOutLogEntry() {
+  const { t } = useTranslation()
+  const { enableStopOnFirstError } = useStopOnFirstError({
+    eventSource: 'timeout',
+  })
+  const { startCompile, lastCompileOptions } = useCompileContext()
+  const showStopOnFirstError = getMeta('ol-showStopOnFirstError')
+
+  const handleEnableStopOnFirstErrorClick = useCallback(() => {
+    enableStopOnFirstError()
+    startCompile({ stopOnFirstError: true })
+  }, [enableStopOnFirstError, startCompile])
+
+  if (showStopOnFirstError) {
+    return (
+      <ErrorLogEntry title={t('timedout')}>
+        <p>{t('project_timed_out_intro')}</p>
+        <ul>
+          <li>
+            <Trans
+              i18nKey="project_timed_out_optimize_images"
+              components={[
+                // eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key
+                <a href="https://www.overleaf.com/learn/how-to/Optimising_very_large_image_files" />,
+              ]}
+            />
+          </li>
+          <li>
+            <Trans
+              i18nKey="project_timed_out_fatal_error"
+              components={[
+                // eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key
+                <a href="https://www.overleaf.com/learn/how-to/Why_do_I_keep_getting_the_compile_timeout_error_message%3F#Fatal_compile_errors_blocking_the_compilation" />,
+              ]}
+            />
+            {!lastCompileOptions.stopOnFirstError && (
+              <>
+                {' '}
+                <Trans
+                  i18nKey="project_timed_out_enable_stop_on_first_error"
+                  components={[
+                    // eslint-disable-next-line react/jsx-key
+                    <Button
+                      bsSize="xs"
+                      bsStyle="info"
+                      onClick={handleEnableStopOnFirstErrorClick}
+                    />,
+                  ]}
+                />
+              </>
+            )}
+          </li>
+        </ul>
+        <p>
+          <Trans
+            i18nKey="project_timed_out_learn_more"
+            components={{
+              link: (
+                // eslint-disable-next-line jsx-a11y/anchor-has-content
+                <a href="https://www.overleaf.com/learn/how-to/Why_do_I_keep_getting_the_compile_timeout_error_message%3F" />
+              ),
+            }}
+          />
+        </p>
+      </ErrorLogEntry>
+    )
+  } else {
+    return (
+      <ErrorLogEntry title={t('timedout')}>
+        {t('proj_timed_out_reason')}
+
+        <div>
+          <a
+            href="https://www.overleaf.com/learn/how-to/Why_do_I_keep_getting_the_compile_timeout_error_message%3F"
+            target="_blank"
+            rel="noopener"
+          >
+            {t('learn_how_to_make_documents_compile_quickly')}
+          </a>
+        </div>
+      </ErrorLogEntry>
+    )
+  }
+}
+TimedOutLogEntry.propTypes = {}

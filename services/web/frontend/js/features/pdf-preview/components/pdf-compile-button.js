@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { memo } from 'react'
 import classnames from 'classnames'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
+import { useStopOnFirstError } from '../../../shared/hooks/use-stop-on-first-error'
 import PdfCompileButtonInner from './pdf-compile-button-inner'
 import getMeta from '../../../utils/meta'
 
@@ -16,7 +17,6 @@ function PdfCompileButton() {
     hasChanges,
     setAutoCompile,
     setDraft,
-    setStopOnFirstError,
     setStopOnValidationError,
     stopOnFirstError,
     stopOnValidationError,
@@ -24,6 +24,8 @@ function PdfCompileButton() {
     stopCompile,
     recompileFromScratch,
   } = useCompileContext()
+  const { enableStopOnFirstError, disableStopOnFirstError } =
+    useStopOnFirstError({ eventSource: 'dropdown' })
 
   const { t } = useTranslation()
   const showStopOnFirstError = getMeta('ol-showStopOnFirstError')
@@ -90,14 +92,14 @@ function PdfCompileButton() {
         )}
 
         {showStopOnFirstError && (
-          <MenuItem onSelect={() => setStopOnFirstError(true)}>
+          <MenuItem onSelect={enableStopOnFirstError}>
             <Icon type={stopOnFirstError ? 'check' : ''} fw />
             {t('stop_on_first_error')}
           </MenuItem>
         )}
 
         {showStopOnFirstError && (
-          <MenuItem onSelect={() => setStopOnFirstError(false)}>
+          <MenuItem onSelect={disableStopOnFirstError}>
             <Icon type={!stopOnFirstError ? 'check' : ''} fw />
             {t('try_to_compile_despite_errors')}
           </MenuItem>

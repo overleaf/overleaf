@@ -1,3 +1,4 @@
+import { useCallback } from 'react'
 import PropTypes from 'prop-types'
 import { Trans, useTranslation } from 'react-i18next'
 import { Button } from 'react-bootstrap'
@@ -5,17 +6,25 @@ import PreviewLogEntryHeader from './preview-log-entry-header'
 import Icon from '../../../shared/components/icon'
 import getMeta from '../../../utils/meta'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
+import { useStopOnFirstError } from '../../../shared/hooks/use-stop-on-first-error'
 
 function PreviewLogsPaneMaxEntries({ totalEntries, entriesShown, hasErrors }) {
   const { t } = useTranslation()
   const showStopOnFirstError = getMeta('ol-showStopOnFirstError')
-  const { startCompile, setStopOnFirstError, stoppedOnFirstError } =
-    useCompileContext()
+  const { startCompile, stoppedOnFirstError } = useCompileContext()
+  const { enableStopOnFirstError } = useStopOnFirstError({
+    eventSource: 'too-many-logs',
+  })
 
   const title = t('log_entry_maximum_entries_title', {
     total: totalEntries,
     displayed: entriesShown,
   })
+
+  const handleEnableStopOnFirstErrorClick = useCallback(() => {
+    enableStopOnFirstError()
+    startCompile({ stopOnFirstError: true })
+  }, [enableStopOnFirstError, startCompile])
 
   return (
     <div className="log-entry" aria-label={t('log_entry_maximum_entries')}>
@@ -35,10 +44,7 @@ function PreviewLogsPaneMaxEntries({ totalEntries, entriesShown, hasErrors }) {
                       <Button
                         bsSize="xs"
                         bsStyle="info"
-                        onClick={() => {
-                          startCompile({ stopOnFirstError: true })
-                          setStopOnFirstError(true)
-                        }}
+                        onClick={handleEnableStopOnFirstErrorClick}
                       />
                     ),
                     'learn-more-link': (
