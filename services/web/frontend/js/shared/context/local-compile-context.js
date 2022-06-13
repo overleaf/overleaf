@@ -121,6 +121,10 @@ export function LocalCompileProvider({ children }) {
   // whether the logs should be visible
   const [showLogs, setShowLogs] = useState(false)
 
+  // whether the compile dropdown arrow should be animated
+  const [animateCompileDropdownArrow, setAnimateCompileDropdownArrow] =
+    useState(false)
+
   const toggleLogs = useCallback(() => {
     setShowLogs(prev => {
       if (!prev) {
@@ -468,6 +472,7 @@ export function LocalCompileProvider({ children }) {
 
   const value = useMemo(
     () => ({
+      animateCompileDropdownArrow,
       autoCompile,
       clearCache,
       clearingCache,
@@ -488,6 +493,7 @@ export function LocalCompileProvider({ children }) {
       position,
       rawLog,
       recompileFromScratch,
+      setAnimateCompileDropdownArrow,
       setAutoCompile,
       setCompiling,
       setDraft,
@@ -512,6 +518,7 @@ export function LocalCompileProvider({ children }) {
       cleanupCompileResult,
     }),
     [
+      animateCompileDropdownArrow,
       autoCompile,
       clearCache,
       clearingCache,
@@ -532,6 +539,7 @@ export function LocalCompileProvider({ children }) {
       pdfViewer,
       rawLog,
       recompileFromScratch,
+      setAnimateCompileDropdownArrow,
       setAutoCompile,
       setDraft,
       setError,

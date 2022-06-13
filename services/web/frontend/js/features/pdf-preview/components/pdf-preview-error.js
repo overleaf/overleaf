@@ -168,13 +168,15 @@ function TimedOutLogEntry() {
   const { enableStopOnFirstError } = useStopOnFirstError({
     eventSource: 'timeout',
   })
-  const { startCompile, lastCompileOptions } = useCompileContext()
+  const { startCompile, lastCompileOptions, setAnimateCompileDropdownArrow } =
+    useCompileContext()
   const showStopOnFirstError = getMeta('ol-showStopOnFirstError')
 
   const handleEnableStopOnFirstErrorClick = useCallback(() => {
     enableStopOnFirstError()
     startCompile({ stopOnFirstError: true })
-  }, [enableStopOnFirstError, startCompile])
+    setAnimateCompileDropdownArrow(true)
+  }, [enableStopOnFirstError, startCompile, setAnimateCompileDropdownArrow])
 
   if (showStopOnFirstError) {
     return (

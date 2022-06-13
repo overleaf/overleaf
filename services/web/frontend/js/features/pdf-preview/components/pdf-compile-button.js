@@ -11,10 +11,12 @@ import getMeta from '../../../utils/meta'
 
 function PdfCompileButton() {
   const {
+    animateCompileDropdownArrow,
     autoCompile,
     compiling,
     draft,
     hasChanges,
+    setAnimateCompileDropdownArrow,
     setAutoCompile,
     setDraft,
     setStopOnValidationError,
@@ -46,8 +48,14 @@ function PdfCompileButton() {
 
       <Dropdown.Toggle
         aria-label={t('toggle_compile_options_menu')}
-        className="btn-recompile"
+        className={classnames({
+          'btn-recompile': true,
+          'btn-recompile-animate': animateCompileDropdownArrow,
+        })}
         bsStyle="success"
+        onAnimationEnd={() => {
+          setAnimateCompileDropdownArrow(false)
+        }}
       />
 
       <Dropdown.Menu>

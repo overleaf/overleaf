@@ -20,6 +20,7 @@ export function DetachCompileProvider({ children }) {
   }
 
   const {
+    animateCompileDropdownArrow: _animateCompileDropdownArrow,
     autoCompile: _autoCompile,
     clearingCache: _clearingCache,
     clsiServerId: _clsiServerId,
@@ -38,6 +39,7 @@ export function DetachCompileProvider({ children }) {
     pdfViewer: _pdfViewer,
     position: _position,
     rawLog: _rawLog,
+    setAnimateCompileDropdownArrow: _setAnimateCompileDropdownArrow,
     setAutoCompile: _setAutoCompile,
     setDraft: _setDraft,
     setError: _setError,
@@ -64,6 +66,12 @@ export function DetachCompileProvider({ children }) {
     clearCache: _clearCache,
   } = localCompileContext
 
+  const [animateCompileDropdownArrow] = useDetachStateWatcher(
+    'animateCompileDropdownArrow',
+    _animateCompileDropdownArrow,
+    'detacher',
+    'detached'
+  )
   const [autoCompile] = useDetachStateWatcher(
     'autoCompile',
     _autoCompile,
@@ -199,6 +207,12 @@ export function DetachCompileProvider({ children }) {
     'detached'
   )
 
+  const setAnimateCompileDropdownArrow = useDetachAction(
+    'setAnimateCompileDropdownArrow',
+    _setAnimateCompileDropdownArrow,
+    'detached',
+    'detacher'
+  )
   const setAutoCompile = useDetachAction(
     'setAutoCompile',
     _setAutoCompile,
@@ -310,6 +324,7 @@ export function DetachCompileProvider({ children }) {
 
   const value = useMemo(
     () => ({
+      animateCompileDropdownArrow,
       autoCompile,
       clearCache,
       clearingCache,
@@ -330,6 +345,7 @@ export function DetachCompileProvider({ children }) {
       position,
       rawLog,
       recompileFromScratch,
+      setAnimateCompileDropdownArrow,
       setAutoCompile,
       setCompiling,
       setDraft,
@@ -354,6 +370,7 @@ export function DetachCompileProvider({ children }) {
       cleanupCompileResult,
     }),
     [
+      animateCompileDropdownArrow,
       autoCompile,
       clearCache,
       clearingCache,
@@ -374,6 +391,7 @@ export function DetachCompileProvider({ children }) {
       position,
       rawLog,
       recompileFromScratch,
+      setAnimateCompileDropdownArrow,
       setAutoCompile,
       setCompiling,
       setDraft,

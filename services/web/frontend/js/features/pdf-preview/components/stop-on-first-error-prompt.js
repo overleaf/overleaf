@@ -7,7 +7,7 @@ import { useStopOnFirstError } from '../../../shared/hooks/use-stop-on-first-err
 
 export default function StopOnFirstErrorPrompt() {
   const { t } = useTranslation()
-  const { startCompile } = useCompileContext()
+  const { startCompile, setAnimateCompileDropdownArrow } = useCompileContext()
   const { disableStopOnFirstError } = useStopOnFirstError({
     eventSource: 'logs-pane',
   })
@@ -15,7 +15,8 @@ export default function StopOnFirstErrorPrompt() {
   const handleDisableButtonClick = useCallback(() => {
     disableStopOnFirstError()
     startCompile({ stopOnFirstError: false })
-  }, [disableStopOnFirstError, startCompile])
+    setAnimateCompileDropdownArrow(true)
+  }, [disableStopOnFirstError, startCompile, setAnimateCompileDropdownArrow])
 
   return (
     <PdfLogEntry

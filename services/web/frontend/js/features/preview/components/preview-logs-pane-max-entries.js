@@ -11,7 +11,8 @@ import { useStopOnFirstError } from '../../../shared/hooks/use-stop-on-first-err
 function PreviewLogsPaneMaxEntries({ totalEntries, entriesShown, hasErrors }) {
   const { t } = useTranslation()
   const showStopOnFirstError = getMeta('ol-showStopOnFirstError')
-  const { startCompile, stoppedOnFirstError } = useCompileContext()
+  const { startCompile, stoppedOnFirstError, setAnimateCompileDropdownArrow } =
+    useCompileContext()
   const { enableStopOnFirstError } = useStopOnFirstError({
     eventSource: 'too-many-logs',
   })
@@ -24,7 +25,8 @@ function PreviewLogsPaneMaxEntries({ totalEntries, entriesShown, hasErrors }) {
   const handleEnableStopOnFirstErrorClick = useCallback(() => {
     enableStopOnFirstError()
     startCompile({ stopOnFirstError: true })
-  }, [enableStopOnFirstError, startCompile])
+    setAnimateCompileDropdownArrow(true)
+  }, [enableStopOnFirstError, startCompile, setAnimateCompileDropdownArrow])
 
   return (
     <div className="log-entry" aria-label={t('log_entry_maximum_entries')}>
