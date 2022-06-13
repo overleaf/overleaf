@@ -192,10 +192,12 @@ async function _getAssignment(
       phase,
       versionNumber,
     }
-    if (sync === true) {
-      await _updateVariantAssignment(assignmentConfig)
-    } else {
-      _updateVariantAssignment(assignmentConfig)
+    if (currentVersion.analyticsEnabled) {
+      if (sync === true) {
+        await _updateVariantAssignment(assignmentConfig)
+      } else {
+        _updateVariantAssignment(assignmentConfig)
+      }
     }
     return _makeAssignment(splitTest, selectedVariantName, currentVersion)
   }
