@@ -220,6 +220,39 @@ describe('SubscriptionController', function () {
     })
   })
 
+  describe('interstitialPaymentPage', function () {
+    beforeEach(function () {
+      this.req.ip = '1234.3123.3131.333 313.133.445.666 653.5345.5345.534'
+      this.GeoIpLookup.promises.getCurrencyCode.resolves({
+        currencyCode: this.stubbedCurrencyCode,
+      })
+    })
+
+    describe('with a user without subscription', function () {
+      it('should render the interstitial payment page', function (done) {
+        this.res.render = (page, opts) => {
+          page.should.equal('subscriptions/interstitial-payment')
+          done()
+        }
+        this.SubscriptionController.interstitialPaymentPage(this.req, this.res)
+      })
+    })
+
+    describe('with a user with subscription', function () {
+      it('should redirect to the subscription dashboard', function (done) {
+        this.PlansLocator.findLocalPlanInSettings.returns({})
+        this.LimitationsManager.promises.userHasV1OrV2Subscription.resolves(
+          true
+        )
+        this.res.redirect = url => {
+          url.should.equal('/user/subscription?hasSubscription=true')
+          done()
+        }
+        this.SubscriptionController.interstitialPaymentPage(this.req, this.res)
+      })
+    })
+  })
+
   describe('paymentPage', function () {
     beforeEach(function () {
       this.req.headers = {}

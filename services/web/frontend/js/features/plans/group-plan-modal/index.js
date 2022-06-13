@@ -131,7 +131,13 @@ document
     })
   })
 
-updateGroupModalPlanPricing()
+const isGroupPlanModalAvailable = document.querySelector(
+  '[data-ol-group-plan-modal]'
+)
+
+if (isGroupPlanModalAvailable) {
+  updateGroupModalPlanPricing()
+}
 
 if (window.location.hash === '#groups') {
   showGroupPlanModal()

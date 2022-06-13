@@ -2,12 +2,12 @@ const plansV2Features = require('./plansV2Features')
 
 const config = {
   individual: {
-    tableHead: [
-      'individual_free',
-      'individual_personal',
-      'individual_collaborator',
-      'individual_professional',
-    ],
+    tableHead: {
+      individual_free: {},
+      individual_personal: {},
+      individual_collaborator: {},
+      individual_professional: {},
+    },
     features: plansV2Features.individual,
     highlightedColumn: {
       index: 2,
@@ -18,11 +18,11 @@ const config = {
     },
   },
   group: {
-    tableHead: [
-      'group_collaborator',
-      'group_professional',
-      'group_organization',
-    ],
+    tableHead: {
+      group_collaborator: {},
+      group_professional: {},
+      group_organization: {},
+    },
     features: plansV2Features.group,
     highlightedColumn: {
       index: 1,
@@ -32,7 +32,13 @@ const config = {
     },
   },
   student: {
-    tableHead: ['student_free', 'student_student', 'student_university'],
+    tableHead: {
+      student_free: {},
+      student_student: {
+        showExtraContent: false,
+      },
+      student_university: {},
+    },
     features: plansV2Features.student,
     highlightedColumn: {
       index: 1,

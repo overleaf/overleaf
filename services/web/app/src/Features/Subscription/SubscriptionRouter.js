@@ -26,6 +26,12 @@ module.exports = {
     )
 
     webRouter.get(
+      '/user/subscription/interstitial-payment',
+      AuthenticationController.requireLogin(),
+      SubscriptionController.interstitialPaymentPage
+    )
+
+    webRouter.get(
       '/user/subscription/thank-you',
       AuthenticationController.requireLogin(),
       SubscriptionController.successfulSubscription

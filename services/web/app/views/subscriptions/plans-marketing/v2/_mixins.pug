@@ -2,12 +2,14 @@ mixin plans_v2_table(period, config)
 	tr
 		th
 		- for (var i = 0; i < 4; i++)
+			- var tableHeadKey = Object.keys(config.tableHead)[i]
+			- var tableHeadOptions = Object.values(config.tableHead)[i]
 			th(
 				class=(i === config.highlightedColumn.index ? 'plans-v2-table-green-highlighted' : (i === config.highlightedColumn.index - 1 ? 'plans-v2-table-cell-before-highlighted-column' : ''))
 			)
 				if (i === config.highlightedColumn.index)
 					p.plans-v2-table-green-highlighted-text !{config.highlightedColumn.text[period]}
-				case config.tableHead[i]
+				case tableHeadKey
 					when 'individual_free'
 						+table_head_individual_free(period)
 					when 'individual_personal'
@@ -25,14 +27,14 @@ mixin plans_v2_table(period, config)
 					when 'student_free'
 						+table_head_student_free(period)
 					when 'student_student'
-						+table_head_student_student(period)
+						+table_head_student_student(period, tableHeadOptions.showExtraContent)
 					when 'student_university'
 						+table_head_student_university(period)
 
 	for featuresPerSection in config.features
 		if featuresPerSection.divider
 			tr.plans-v2-table-divider
-				td(colspan=config.tableHead.length + 1)
+				td(colspan=Object.keys(config.tableHead).length + 1)
 					div
 						b.plans-v2-table-divider-label #{translate(featuresPerSection.dividerLabel)}
 						//- will only appear on screen width >= 768px (using CSS)
@@ -220,7 +222,7 @@ mixin table_head_student_free(period)
 		.plans-v2-table-btn-buy-container-desktop
 			+btn_buy_student_free()
 
-mixin table_head_student_student(period)
+mixin table_head_student_student(period, showExtraContent)
 	div.plans-v2-table-th-content
 		p.plans-v2-table-th-content-title #{translate("student")}
 		+table_head_price('student', period)
@@ -229,6 +231,9 @@ mixin table_head_student_student(period)
 		ul.plans-v2-table-th-content-benefit
 			li !{translate("x_collaborators_per_project", {collaboratorsCount: '6'})}
 			li #{translate("all_premium_features")}
+			if showExtraContent
+				li #{translate("for_students_only")}
+
 		.plans-v2-table-btn-buy-container-desktop
 			+btn_buy_student_student(period)
 

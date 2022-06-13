@@ -21,6 +21,7 @@ const { expressify } = require('../../util/promises')
 const OError = require('@overleaf/o-error')
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const SubscriptionHelper = require('./SubscriptionHelper')
+const interstitialPaymentConfig = require('./interstitialPaymentConfig')
 
 const groupPlanModalOptions = Settings.groupPlanModalOptions
 const validGroupPlanModalOptions = {
@@ -223,6 +224,28 @@ async function userSubscriptionPage(req, res) {
     cancelButtonNewCopy,
   }
   res.render('subscriptions/dashboard', data)
+}
+
+async function interstitialPaymentPage(req, res) {
+  const user = SessionManager.getSessionUser(req.session)
+  const { currencyCode: recommendedCurrency } =
+    await GeoIpLookup.promises.getCurrencyCode(
+      (req.query ? req.query.ip : undefined) || req.ip
+    )
+
+  const hasSubscription =
+    await LimitationsManager.promises.userHasV1OrV2Subscription(user)
+
+  if (hasSubscription) {
+    res.redirect('/user/subscription?hasSubscription=true')
+  } else {
+    res.render('subscriptions/interstitial-payment', {
+      title: 'subscribe',
+      itm_content: req.query && req.query.itm_content,
+      recommendedCurrency,
+      interstitialPaymentConfig,
+    })
+  }
 }
 
 function createSubscription(req, res, next) {
@@ -560,6 +583,7 @@ module.exports = {
   plansPage: expressify(plansPage),
   paymentPage: expressify(paymentPage),
   userSubscriptionPage: expressify(userSubscriptionPage),
+  interstitialPaymentPage: expressify(interstitialPaymentPage),
   createSubscription,
   successfulSubscription,
   cancelSubscription,

@@ -63,4 +63,10 @@ document
   .querySelectorAll('[data-ol-group-plan-form] input')
   .forEach(el => el.addEventListener('change', changePlansV2MainPageGroupData))
 
-hideCurrencyPicker()
+const isGroupPlanModalAvailable = document.querySelector(
+  '[data-ol-group-plan-modal]'
+)
+
+if (isGroupPlanModalAvailable) {
+  hideCurrencyPicker()
+}
