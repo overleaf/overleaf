@@ -142,6 +142,9 @@
       display: inline-block;
       position: relative;
       .annual-saving-tooltip {
+        // hide tooltip below group modal, which has 1050 z-index value (from bootstrap .modal class)
+        // .tooltip (this element) has 1070 default z-index value
+        z-index: 1040;
         white-space: nowrap;
         left: 50%;
         width: 200px;
