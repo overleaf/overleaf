@@ -205,15 +205,16 @@ function _sendUnlinkedEmail(primaryEmail, providerName, institutionEmail) {
   })
 }
 
-async function getUser(providerId, externalUserId) {
-  if (!providerId || !externalUserId) {
+async function getUser(providerId, externalUserId, userIdAttribute) {
+  if (!providerId || !externalUserId || !userIdAttribute) {
     throw new Error(
-      `invalid arguments: providerId: ${providerId}, externalUserId: ${externalUserId}`
+      `invalid arguments: providerId: ${providerId}, externalUserId: ${externalUserId}, userIdAttribute: ${userIdAttribute}`
     )
   }
   const user = await User.findOne({
     'samlIdentifiers.externalUserId': externalUserId.toString(),
     'samlIdentifiers.providerId': providerId.toString(),
+    'samlIdentifiers.userIdAttribute': userIdAttribute.toString(),
   }).exec()
 
   return user
@@ -245,6 +246,12 @@ async function linkAccounts(userId, samlData, auditLog) {
     hasEntitlement,
     userIdAttribute,
   } = samlData
+
+  if (!externalUserId || !institutionEmail || !providerId || !userIdAttribute) {
+    throw new Error(
+      `missing data when linking institution SSO: ${JSON.stringify(samlData)}`
+    )
+  }
 
   await _addIdentifier(
     userId,

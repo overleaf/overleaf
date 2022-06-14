@@ -98,14 +98,53 @@ describe('SAMLIdentityManager', function () {
   })
 
   describe('getUser', function () {
-    it('should throw an error if missing provider ID and/or external user ID', async function () {
+    it('should throw an error if missing all of: provider ID, external user ID, attribute', async function () {
       let error
       try {
-        await this.SAMLIdentityManager.getUser(null, null)
+        await this.SAMLIdentityManager.getUser(undefined, undefined, undefined)
       } catch (e) {
         error = e
       } finally {
         expect(error).to.exist
+        expect(error.message).to.equal(
+          'invalid arguments: providerId: undefined, externalUserId: undefined, userIdAttribute: undefined'
+        )
+      }
+    })
+    it('should throw an error if missing provider ID', async function () {
+      let error
+      try {
+        await this.SAMLIdentityManager.getUser(undefined, 'id123', 'someAttr')
+      } catch (e) {
+        error = e
+      } finally {
+        expect(error).to.exist
+        expect(error.message).to.equal(
+          'invalid arguments: providerId: undefined, externalUserId: id123, userIdAttribute: someAttr'
+        )
+      }
+    })
+    it('should throw an error if missing external user ID', async function () {
+      let error
+      try {
+        await this.SAMLIdentityManager.getUser('123', null, 'someAttr')
+      } catch (e) {
+        error = e
+      } finally {
+        expect(error).to.exist
+      }
+    })
+    it('should throw an error if missing attribute', async function () {
+      let error
+      try {
+        await this.SAMLIdentityManager.getUser('123', 'id123', undefined)
+      } catch (e) {
+        error = e
+      } finally {
+        expect(error).to.exist
+        expect(error.message).to.equal(
+          'invalid arguments: providerId: 123, externalUserId: id123, userIdAttribute: undefined'
+        )
       }
     })
   })
@@ -118,7 +157,7 @@ describe('SAMLIdentityManager', function () {
         this.UserGetter.promises.getUser.onSecondCall().resolves(this.user)
       })
 
-      it('should throw an error if missing data', async function () {
+      it('should throw an error if missing all data', async function () {
         let error
         try {
           await this.SAMLIdentityManager.linkAccounts(null, null, null)
@@ -126,6 +165,33 @@ describe('SAMLIdentityManager', function () {
           error = e
         } finally {
           expect(error).to.exist
+        }
+      })
+
+      describe('linking data', function () {
+        const requiredData = {
+          externalUserId: 'someUniqueId',
+          institutionEmail: 'user@example.com',
+          providerId: '123',
+          userIdAttribute: 'attribute',
+        }
+        for (const [data] of Object.entries(requiredData)) {
+          const testData = { ...requiredData }
+          delete testData[data]
+          let error
+          it(`should throw an error when missing ${data}`, async function () {
+            try {
+              await this.SAMLIdentityManager.linkAccounts('123', testData, {})
+            } catch (e) {
+              error = e
+            } finally {
+              expect(error).to.exist
+              console.log(error)
+              expect(error.message).to.contain(
+                'missing data when linking institution SSO'
+              )
+            }
+          })
         }
       })
 
@@ -148,6 +214,7 @@ describe('SAMLIdentityManager', function () {
                 universityId: 'provider-id',
                 universityName: 'provider-name',
                 hasEntitlement: true,
+                userIdAttribute: 'someAttribute',
               },
               {
                 intiatorId: '6005c75b12cbcaf771f4a105',
@@ -184,6 +251,7 @@ describe('SAMLIdentityManager', function () {
                 universityId: 'provider-id',
                 universityName: 'provider-name',
                 hasEntitlement: true,
+                userIdAttribute: 'someAttribute',
               },
               {
                 intiatorId: 'user-id-1',
@@ -221,6 +289,7 @@ describe('SAMLIdentityManager', function () {
                 universityId: 'provider-id',
                 universityName: 'provider-name',
                 hasEntitlement: true,
+                userIdAttribute: 'someAttribute',
               },
               {
                 intiatorId: 'user-id-1',
@@ -256,6 +325,7 @@ describe('SAMLIdentityManager', function () {
                 universityId: 'provider-id',
                 universityName: 'provider-name',
                 hasEntitlement: true,
+                userIdAttribute: 'someAttribute',
               },
               {
                 intiatorId: '6005c75b12cbcaf771f4a105',
@@ -288,6 +358,7 @@ describe('SAMLIdentityManager', function () {
                 universityId: 123456,
                 universityName: 'provider-name',
                 hasEntitlement: true,
+                userIdAttribute: 'someAttribute',
               },
               {
                 intiatorId: '6005c75b12cbcaf771f4a105',
@@ -322,6 +393,7 @@ describe('SAMLIdentityManager', function () {
               universityId: '1',
               universityName: 'Overleaf University',
               hasEntitlement: false,
+              userIdAttribute: 'someAttribute',
             },
             {
               intiatorId: '6005c75b12cbcaf771f4a105',
@@ -389,6 +461,7 @@ describe('SAMLIdentityManager', function () {
             universityId: '1',
             universityName: 'Overleaf University',
             hasEntitlement: false,
+            userIdAttribute: 'someAttribute',
           },
           {
             intiatorId: '6005c75b12cbcaf771f4a105',
