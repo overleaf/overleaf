@@ -1,4 +1,4 @@
-extends ../layout-marketing
+extends ../layout
 
 include ./plans-marketing/_mixins
 include ./plans-marketing/_tables
@@ -6,6 +6,8 @@ include ./plans-marketing/v2/_mixins
 
 block vars
 	- entrypoint = 'pages/user/subscription/plans-v2/plans-v2-main'
+	- var suppressFooter = true
+	- var suppressNavbarRight = true
 
 block append meta
 	meta(name="ol-recommendedCurrency" content=recommendedCurrency)
