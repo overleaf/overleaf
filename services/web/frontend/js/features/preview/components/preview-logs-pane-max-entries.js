@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import PropTypes from 'prop-types'
 import { Trans, useTranslation } from 'react-i18next'
 import { Button } from 'react-bootstrap'
@@ -7,6 +7,7 @@ import Icon from '../../../shared/components/icon'
 import getMeta from '../../../utils/meta'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import { useStopOnFirstError } from '../../../shared/hooks/use-stop-on-first-error'
+import BetaBadge from '../../../shared/components/beta-badge'
 
 function PreviewLogsPaneMaxEntries({ totalEntries, entriesShown, hasErrors }) {
   const { t } = useTranslation()
@@ -28,61 +29,83 @@ function PreviewLogsPaneMaxEntries({ totalEntries, entriesShown, hasErrors }) {
     setAnimateCompileDropdownArrow(true)
   }, [enableStopOnFirstError, startCompile, setAnimateCompileDropdownArrow])
 
+  const betaBadgeTooltip = useMemo(
+    () => ({
+      id: 'stop-on-first-error-tooltip',
+      placement: 'bottom',
+      className: 'tooltip-wide',
+      text: (
+        <>
+          We are beta testing the “Stop on first error” compilation mode.
+          <br />
+          Click to give feedback
+        </>
+      ),
+    }),
+    []
+  )
+
   return (
     <div className="log-entry" aria-label={t('log_entry_maximum_entries')}>
       <PreviewLogEntryHeader level="raw" headerTitle={title} />
       <div className="log-entry-content">
-        {showStopOnFirstError ? (
-          hasErrors && !stoppedOnFirstError ? (
-            <>
+        <div className="log-entry-formatted-content">
+          {showStopOnFirstError ? (
+            hasErrors && !stoppedOnFirstError ? (
+              <>
+                <p>
+                  <Icon type="lightbulb-o" />
+                  &nbsp;
+                  <strong>{t('tip')}: </strong>
+                  <Trans
+                    i18nKey="log_entry_maximum_entries_enable_stop_on_first_error"
+                    components={{
+                      button: (
+                        <Button
+                          bsSize="xs"
+                          bsStyle="info"
+                          onClick={handleEnableStopOnFirstErrorClick}
+                        />
+                      ),
+                      'learn-more-link': (
+                        // eslint-disable-next-line jsx-a11y/anchor-has-content
+                        <a href="https://www.overleaf.com/learn/latex/Questions/Tips_and_Tricks_for_Troubleshooting_LaTeX" />
+                      ),
+                    }}
+                  />{' '}
+                  <BetaBadge
+                    tooltip={betaBadgeTooltip}
+                    url="https://forms.gle/7M8821o5RDZrFKoF6"
+                  />
+                </p>
+                <p>{t('log_entry_maximum_entries_see_full_logs')}</p>
+              </>
+            ) : (
               <p>
                 <Icon type="lightbulb-o" />
                 &nbsp;
                 <strong>{t('tip')}: </strong>
-                <Trans
-                  i18nKey="log_entry_maximum_entries_enable_stop_on_first_error"
-                  components={{
-                    button: (
-                      <Button
-                        bsSize="xs"
-                        bsStyle="info"
-                        onClick={handleEnableStopOnFirstErrorClick}
-                      />
-                    ),
-                    'learn-more-link': (
-                      // eslint-disable-next-line jsx-a11y/anchor-has-content
-                      <a href="https://www.overleaf.com/learn/latex/Questions/Tips_and_Tricks_for_Troubleshooting_LaTeX" />
-                    ),
-                  }}
-                />
+                {t('log_entry_maximum_entries_see_full_logs')}
               </p>
-              <p>{t('log_entry_maximum_entries_see_full_logs')}</p>
-            </>
+            )
           ) : (
-            <p>
+            <>
               <Icon type="lightbulb-o" />
               &nbsp;
-              <strong>{t('tip')}: </strong>
-              {t('log_entry_maximum_entries_see_full_logs')}
-            </p>
-          )
-        ) : (
-          <>
-            <Icon type="lightbulb-o" />
-            &nbsp;
-            {hasErrors ? (
-              <Trans
-                i18nKey="log_entry_maximum_entries_message"
-                components={[<b />, <p />]} // eslint-disable-line react/jsx-key
-              />
-            ) : (
-              <Trans
-                i18nKey="log_entry_maximum_entries_message_no_errors"
-                components={[<b />]} // eslint-disable-line react/jsx-key
-              />
-            )}
-          </>
-        )}
+              {hasErrors ? (
+                <Trans
+                  i18nKey="log_entry_maximum_entries_message"
+                  components={[<b />, <p />]} // eslint-disable-line react/jsx-key
+                />
+              ) : (
+                <Trans
+                  i18nKey="log_entry_maximum_entries_message_no_errors"
+                  components={[<b />]} // eslint-disable-line react/jsx-key
+                />
+              )}
+            </>
+          )}
+        </div>
       </div>
     </div>
   )

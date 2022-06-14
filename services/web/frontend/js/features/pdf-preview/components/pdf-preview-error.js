@@ -1,10 +1,11 @@
 import PropTypes from 'prop-types'
 import { useTranslation, Trans } from 'react-i18next'
-import { memo, useCallback } from 'react'
+import { memo, useCallback, useMemo } from 'react'
 import { Button } from 'react-bootstrap'
 import PdfLogEntry from './pdf-log-entry'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import { useStopOnFirstError } from '../../../shared/hooks/use-stop-on-first-error'
+import BetaBadge from '../../../shared/components/beta-badge'
 import getMeta from '../../../utils/meta'
 
 function PdfPreviewError({ error }) {
@@ -146,12 +147,13 @@ PdfPreviewError.propTypes = {
 
 export default memo(PdfPreviewError)
 
-function ErrorLogEntry({ title, children }) {
+function ErrorLogEntry({ title, headerIcon, children }) {
   const { t } = useTranslation()
 
   return (
     <PdfLogEntry
       headerTitle={title}
+      headerIcon={headerIcon}
       formattedContent={children}
       entryAriaLabel={t('compile_error_entry_description')}
       level="error"
@@ -160,6 +162,7 @@ function ErrorLogEntry({ title, children }) {
 }
 ErrorLogEntry.propTypes = {
   title: PropTypes.string.isRequired,
+  headerIcon: PropTypes.element,
   children: PropTypes.any.isRequired,
 }
 
@@ -177,6 +180,22 @@ function TimedOutLogEntry() {
     startCompile({ stopOnFirstError: true })
     setAnimateCompileDropdownArrow(true)
   }, [enableStopOnFirstError, startCompile, setAnimateCompileDropdownArrow])
+
+  const betaBadgeTooltip = useMemo(
+    () => ({
+      id: 'stop-on-first-error-tooltip',
+      placement: 'bottom',
+      className: 'tooltip-wide',
+      text: (
+        <>
+          We are beta testing the “Stop on first error” compilation mode.
+          <br />
+          Click to give feedback
+        </>
+      ),
+    }),
+    []
+  )
 
   if (showStopOnFirstError) {
     return (
@@ -213,6 +232,10 @@ function TimedOutLogEntry() {
                       onClick={handleEnableStopOnFirstErrorClick}
                     />,
                   ]}
+                />{' '}
+                <BetaBadge
+                  tooltip={betaBadgeTooltip}
+                  url="https://forms.gle/7M8821o5RDZrFKoF6"
                 />
               </>
             )}
