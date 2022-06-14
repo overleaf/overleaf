@@ -381,31 +381,26 @@ describe('SubscriptionController', function () {
   })
 
   describe('successfulSubscription', function () {
-    it('without a personnal subscription', function (done) {
-      this.SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel.callsArgWith(
-        1,
-        null,
+    it('without a personal subscription', function (done) {
+      this.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel.resolves(
         {}
       )
-      this.res.callback = () => {
-        assert.equal(this.res.redirectedTo, '/user/subscription/plans')
+      this.res.redirect = url => {
+        url.should.equal('/user/subscription/plans')
         done()
       }
       this.SubscriptionController.successfulSubscription(this.req, this.res)
     })
 
-    it('with a personnal subscription', function (done) {
-      this.SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel.callsArgWith(
-        1,
-        null,
-        { personalSubscription: 'foo' }
+    it('with a personal subscription', function (done) {
+      this.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel.resolves(
+        {
+          personalSubscription: 'foo',
+        }
       )
-      this.res.callback = () => {
-        assert.equal(
-          this.res.renderedTemplate,
-          'subscriptions/successful_subscription'
-        )
-        assert.deepEqual(this.res.renderedVariables, {
+      this.res.render = (url, variables) => {
+        url.should.equal('subscriptions/successful_subscription')
+        assert.deepEqual(variables, {
           title: 'thank_you',
           personalSubscription: 'foo',
         })
@@ -414,20 +409,18 @@ describe('SubscriptionController', function () {
       this.SubscriptionController.successfulSubscription(this.req, this.res)
     })
 
-    it('with an error', function () {
-      const next = sinon.stub()
-      const error = new Error('test')
-      this.SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel.callsArgWith(
-        1,
-        error,
+    it('with an error', function (done) {
+      this.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel.resolves(
         undefined
       )
       this.SubscriptionController.successfulSubscription(
         this.req,
         this.res,
-        next
+        error => {
+          assert.isNotNull(error)
+          done()
+        }
       )
-      sinon.assert.calledWith(next, error)
     })
   })
 

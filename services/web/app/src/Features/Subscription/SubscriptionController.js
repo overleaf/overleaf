@@ -300,24 +300,21 @@ function createSubscription(req, res, next) {
   )
 }
 
-function successfulSubscription(req, res, next) {
+async function successfulSubscription(req, res) {
   const user = SessionManager.getSessionUser(req.session)
-  return SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel(
-    user,
-    function (error, { personalSubscription } = {}) {
-      if (error) {
-        return next(error)
-      }
-      if (personalSubscription == null) {
-        res.redirect('/user/subscription/plans')
-      } else {
-        res.render('subscriptions/successful_subscription', {
-          title: 'thank_you',
-          personalSubscription,
-        })
-      }
-    }
-  )
+  const { personalSubscription } =
+    await SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
+      user
+    )
+
+  if (!personalSubscription) {
+    res.redirect('/user/subscription/plans')
+  } else {
+    res.render('subscriptions/successful_subscription', {
+      title: 'thank_you',
+      personalSubscription,
+    })
+  }
 }
 
 function cancelSubscription(req, res, next) {
@@ -585,7 +582,7 @@ module.exports = {
   userSubscriptionPage: expressify(userSubscriptionPage),
   interstitialPaymentPage: expressify(interstitialPaymentPage),
   createSubscription,
-  successfulSubscription,
+  successfulSubscription: expressify(successfulSubscription),
   cancelSubscription,
   canceledSubscription,
   cancelV1Subscription,
