@@ -247,7 +247,7 @@ function LayoutDropdownButton() {
             <span className="pdf-detach-survey-text">
               The Layout menu and opening the PDF in a new tab are new features.{' '}
               <a
-                href="https://docs.google.com/forms/d/e/1FAIpQLScBc0LSttM02-HgfoUi7jj7MmFT9u3Y4cUDwT_AmDK9to--gg/viewform"
+                href="https://docs.google.com/forms/d/1fhc2LUMoun9jXvz9Nd6KkIKAQ8ZBfVZm_w8BpinpWu4"
                 target="_blank"
                 rel="noopener noreferrer"
               >
