@@ -13,7 +13,6 @@ const ClsiCookieManager = require('./ClsiCookieManager')(
   Settings.apis.clsi?.backendGroupName
 )
 const Path = require('path')
-const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 
 const COMPILE_TIMEOUT_MS = 10 * 60 * 1000
 
@@ -84,38 +83,20 @@ module.exports = CompileController = {
           return next(error)
         }
         Metrics.inc('compile-status', 1, { status })
-        SplitTestHandler.getAssignment(
-          req,
-          res,
-          'zonal-clsi-lb-downloads',
-          {},
-          (_err, assignment) => {
-            if (Array.isArray(outputFiles)) {
-              // NOTE: keep this around as a safeguard for rolling back clsi.
-              outputFiles.forEach(file => {
-                file.url = file.url.replace(/^\/zone\/\w/, '')
-              })
-            }
-            let pdfDownloadDomain = Settings.pdfDownloadDomain
-            if (
-              assignment?.variant === 'zonal' &&
-              pdfDownloadDomain &&
-              outputUrlPrefix
-            ) {
-              pdfDownloadDomain += outputUrlPrefix
-            }
-            res.json({
-              status,
-              outputFiles,
-              compileGroup: limits?.compileGroup,
-              clsiServerId,
-              validationProblems,
-              stats,
-              timings,
-              pdfDownloadDomain,
-            })
-          }
-        )
+        let pdfDownloadDomain = Settings.pdfDownloadDomain
+        if (pdfDownloadDomain && outputUrlPrefix) {
+          pdfDownloadDomain += outputUrlPrefix
+        }
+        res.json({
+          status,
+          outputFiles,
+          compileGroup: limits?.compileGroup,
+          clsiServerId,
+          validationProblems,
+          stats,
+          timings,
+          pdfDownloadDomain,
+        })
       }
     )
   },

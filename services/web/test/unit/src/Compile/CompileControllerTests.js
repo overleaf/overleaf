@@ -87,32 +87,36 @@ describe('CompileController', function () {
       )
     })
 
-    describe('zonal downloads', function () {
+    describe('pdfDownloadDomain', function () {
       beforeEach(function () {
         this.settings.pdfDownloadDomain = 'https://compiles.overleaf.test'
-        this.CompileManager.compile = sinon.stub().callsArgWith(
-          3,
-          null,
-          (this.status = 'success'),
-          (this.outputFiles = [
-            {
-              path: 'output.pdf',
-              url: `/project/${this.projectId}/user/${this.user_id}/build/id/output.pdf`,
-              type: 'pdf',
-            },
-          ]),
-          undefined, // clsiServerId
-          undefined, // limits
-          undefined, // validationProblems
-          undefined, // stats
-          undefined, // timings
-          '/zone/b'
-        )
       })
 
-      describe('when in the default split test variant and with the old clsi deploy', function () {
+      describe('when clsi does not emit zone prefix', function () {
         beforeEach(function () {
-          this.getAssignment.yields(null, { variant: 'default' })
+          this.CompileController.compile(this.req, this.res, this.next)
+        })
+
+        it('should add domain verbatim', function () {
+          this.res.statusCode.should.equal(200)
+          this.res.body.should.equal(
+            JSON.stringify({
+              status: this.status,
+              outputFiles: [
+                {
+                  path: 'output.pdf',
+                  url: `/project/${this.projectId}/user/${this.user_id}/build/id/output.pdf`,
+                  type: 'pdf',
+                },
+              ],
+              pdfDownloadDomain: 'https://compiles.overleaf.test',
+            })
+          )
+        })
+      })
+
+      describe('when clsi emits a zone prefix', function () {
+        beforeEach(function () {
           this.CompileManager.compile = sinon.stub().callsArgWith(
             3,
             null,
@@ -120,86 +124,17 @@ describe('CompileController', function () {
             (this.outputFiles = [
               {
                 path: 'output.pdf',
-                // The previous clsi version sent the zone prefix in the url
-                url: `/zone/b/project/${this.projectId}/user/${this.user_id}/build/id/output.pdf`,
+                url: `/project/${this.projectId}/user/${this.user_id}/build/id/output.pdf`,
                 type: 'pdf',
               },
-            ])
+            ]),
+            undefined, // clsiServerId
+            undefined, // limits
+            undefined, // validationProblems
+            undefined, // stats
+            undefined, // timings
+            '/zone/b'
           )
-          this.CompileController.compile(this.req, this.res, this.next)
-        })
-
-        it('should remove the zone prefix', function () {
-          this.res.statusCode.should.equal(200)
-          this.res.body.should.equal(
-            JSON.stringify({
-              status: this.status,
-              outputFiles: [
-                {
-                  path: 'output.pdf',
-                  url: `/project/${this.projectId}/user/${this.user_id}/build/id/output.pdf`,
-                  type: 'pdf',
-                },
-              ],
-              pdfDownloadDomain: 'https://compiles.overleaf.test',
-            })
-          )
-        })
-      })
-
-      describe('when in the default split test variant and not output files were returned', function () {
-        beforeEach(function () {
-          this.getAssignment.yields(null, { variant: 'default' })
-          this.CompileManager.compile = sinon
-            .stub()
-            .callsArgWith(
-              3,
-              null,
-              (this.status = 'success'),
-              (this.outputFiles = null)
-            )
-          this.CompileController.compile(this.req, this.res, this.next)
-        })
-
-        it('should ignore the output files', function () {
-          this.res.statusCode.should.equal(200)
-          this.res.body.should.equal(
-            JSON.stringify({
-              status: this.status,
-              outputFiles: null,
-              pdfDownloadDomain: 'https://compiles.overleaf.test',
-            })
-          )
-        })
-      })
-
-      describe('when in the default split test variant', function () {
-        beforeEach(function () {
-          this.getAssignment.yields(null, { variant: 'default' })
-          this.CompileController.compile(this.req, this.res, this.next)
-        })
-
-        it('should remove the zone prefix', function () {
-          this.res.statusCode.should.equal(200)
-          this.res.body.should.equal(
-            JSON.stringify({
-              status: this.status,
-              outputFiles: [
-                {
-                  path: 'output.pdf',
-                  url: `/project/${this.projectId}/user/${this.user_id}/build/id/output.pdf`,
-                  type: 'pdf',
-                },
-              ],
-              pdfDownloadDomain: 'https://compiles.overleaf.test',
-            })
-          )
-        })
-      })
-
-      describe('when in the zonal split test variant', function () {
-        beforeEach(function () {
-          this.getAssignment.yields(null, { variant: 'zonal' })
           this.CompileController.compile(this.req, this.res, this.next)
         })
 
