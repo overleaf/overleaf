@@ -1,6 +1,39 @@
-import { memo, useCallback, useMemo } from 'react'
+import { memo, useCallback } from 'react'
 import useScopeValue from '../../../shared/hooks/use-scope-value'
-import BetaBadge from '../../../shared/components/beta-badge'
+import Tooltip from '../../../shared/components/tooltip'
+
+function Badge() {
+  const content = (
+    <>
+      Overleaf has upgraded the source editor. You can still use the old editor
+      by selecting "Source (legacy)".
+      <br />
+      <br />
+      Click to learn more and give feedback
+    </>
+  )
+
+  return (
+    <Tooltip
+      id="editor-switch"
+      description={content}
+      overlayProps={{
+        placement: 'bottom',
+        delayHide: 100,
+      }}
+      tooltipProps={{ className: 'tooltip-wide' }}
+    >
+      <a
+        href="https://forms.gle/GmSs6odZRKRp3VX98"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="badge info-badge"
+      >
+        <span className="sr-only">{content}</span>
+      </a>
+    </Tooltip>
+  )
+}
 
 function EditorSwitch() {
   const [newSourceEditor, setNewSourceEditor] = useScopeValue(
@@ -31,26 +64,9 @@ function EditorSwitch() {
     [setRichText, setNewSourceEditor]
   )
 
-  const tooltip = useMemo(() => {
-    return {
-      id: 'editor-switch-tooltip',
-      placement: 'bottom',
-      className: 'tooltip-wide',
-      text: (
-        <>
-          We are upgrading the source editor. Please test it by selecting
-          "Source (Beta)".
-          <br />
-          <br />
-          Click to learn more and give feedback
-        </>
-      ),
-    }
-  }, [])
-
   return (
     <div className="editor-toggle-switch">
-      <BetaBadge tooltip={tooltip} url="https://forms.gle/GmSs6odZRKRp3VX98" />
+      <Badge />
 
       <fieldset className="toggle-switch">
         <legend className="sr-only">Editor mode.</legend>
@@ -65,7 +81,7 @@ function EditorSwitch() {
           onChange={handleChange}
         />
         <label htmlFor="editor-switch-cm6" className="toggle-switch-label">
-          <span>Source (Beta)</span>
+          <span>Source</span>
         </label>
 
         <input
@@ -78,7 +94,7 @@ function EditorSwitch() {
           onChange={handleChange}
         />
         <label htmlFor="editor-switch-ace" className="toggle-switch-label">
-          <span>Source</span>
+          <span>Source (legacy)</span>
         </label>
 
         <input

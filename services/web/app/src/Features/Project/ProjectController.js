@@ -1015,6 +1015,7 @@ const ProjectController = {
             const showNewSourceEditorOption =
               (newSourceEditorAssignment &&
                 newSourceEditorAssignment.variant === 'codemirror') ||
+              user.betaProgram ||
               shouldDisplayFeature('new_source_editor', false) // also allow override via ?new_source_editor=true
 
             const showSymbolPalette =

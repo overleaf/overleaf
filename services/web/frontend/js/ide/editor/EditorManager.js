@@ -22,6 +22,7 @@ import './controllers/SavingNotificationController'
 import './controllers/CompileButton'
 import './controllers/EditorExpandButton'
 import getMeta from '../../utils/meta'
+
 let EditorManager
 
 export default EditorManager = (function () {
@@ -154,10 +155,11 @@ export default EditorManager = (function () {
         return false
       }
 
-      return (
-        this.localStorage(`editor.source_editor.${this.$scope.project_id}`) ===
-        'cm6'
+      const sourceEditor = this.localStorage(
+        `editor.source_editor.${this.$scope.project_id}`
       )
+
+      return sourceEditor === 'cm6' || sourceEditor == null
     }
 
     autoOpenDoc() {
