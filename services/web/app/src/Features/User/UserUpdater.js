@@ -295,7 +295,7 @@ async function maybeCreateRedundantSubscriptionNotification(userId, email) {
     userId
   )
   const confirmedAffiliation = affiliations.find(a => a.email === email)
-  if (confirmedAffiliation.licence === 'free') {
+  if (!confirmedAffiliation || confirmedAffiliation.licence === 'free') {
     return
   }
 

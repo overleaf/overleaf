@@ -928,6 +928,18 @@ describe('UserUpdater', function () {
       )
     })
 
+    it('should not call redundantPersonalSubscription when user is not on a commons license', async function () {
+      this.InstitutionsAPI.promises.getUserAffiliations.resolves([])
+      this.SubscriptionLocator.promises.getUserIndividualSubscription.resolves({
+        planCode: 'personal',
+        groupPlan: false,
+      })
+      await this.UserUpdater.promises.confirmEmail(this.user._id, this.newEmail)
+      sinon.assert.notCalled(
+        this.NotificationsBuilder.promises.redundantPersonalSubscription
+      )
+    })
+
     describe('with institution licence and subscription', function () {
       beforeEach(async function () {
         this.affiliation = {
