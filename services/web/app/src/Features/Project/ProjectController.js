@@ -906,6 +906,21 @@ const ProjectController = {
             }
           )
         },
+        latexLogParserAssignment(cb) {
+          SplitTestHandler.getAssignment(
+            req,
+            res,
+            'latex-log-parser',
+            (error, assignment) => {
+              // do not fail editor load if assignment fails
+              if (error) {
+                cb(null, { variant: 'default' })
+              } else {
+                cb(null, assignment)
+              }
+            }
+          )
+        },
       },
       (
         err,

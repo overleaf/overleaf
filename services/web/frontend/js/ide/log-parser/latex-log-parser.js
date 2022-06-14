@@ -9,6 +9,10 @@ const LINES_REGEX = /lines? ([0-9]+)/
 const PACKAGE_REGEX = /^(?:Package|Class|Module) (\b.+\b) Warning/
 const FILE_LINE_ERROR_REGEX = /^([./].*):(\d+): (.*)/
 
+const LATEX_WARNING_REGEX_OLD = /^LaTeX Warning: (.*)$/
+const PACKAGE_WARNING_REGEX_OLD = /^(Package \b.+\b Warning:.*)$/
+const PACKAGE_REGEX_OLD = /^Package (\b.+\b) Warning/
+
 const STATE = {
   NORMAL: 0,
   ERROR: 1,
@@ -23,6 +27,16 @@ export default class LatexParser {
     this.fileStack = []
     this.currentFileList = this.rootFileList = []
     this.openParens = 0
+    // TODO: Needed only for beta release; remove when over. 20220530
+    if (options.oldRegexes) {
+      this.latexWarningRegex = LATEX_WARNING_REGEX_OLD
+      this.packageWarningRegex = PACKAGE_WARNING_REGEX_OLD
+      this.packageRegex = PACKAGE_REGEX_OLD
+    } else {
+      this.latexWarningRegex = LATEX_WARNING_REGEX
+      this.packageWarningRegex = PACKAGE_WARNING_REGEX
+      this.packageRegex = PACKAGE_REGEX
+    }
     this.log = new LogText(text)
   }
 
@@ -45,7 +59,7 @@ export default class LatexParser {
         } else if (this.currentLineIsRunawayArgument()) {
           this.parseRunawayArgumentError()
         } else if (this.currentLineIsWarning()) {
-          this.parseSingleWarningLine(LATEX_WARNING_REGEX)
+          this.parseSingleWarningLine(this.latexWarningRegex)
         } else if (this.currentLineIsHboxWarning()) {
           this.parseHboxLine()
         } else if (this.currentLineIsPackageWarning()) {
@@ -95,11 +109,11 @@ export default class LatexParser {
   }
 
   currentLineIsWarning() {
-    return !!this.currentLine.match(LATEX_WARNING_REGEX)
+    return !!this.currentLine.match(this.latexWarningRegex)
   }
 
   currentLineIsPackageWarning() {
-    return !!this.currentLine.match(PACKAGE_WARNING_REGEX)
+    return !!this.currentLine.match(this.packageWarningRegex)
   }
 
   currentLineIsHboxWarning() {
@@ -161,7 +175,7 @@ export default class LatexParser {
 
   parseMultipleWarningLine() {
     // Some package warnings are multiple lines, let's parse the first line
-    let warningMatch = this.currentLine.match(PACKAGE_WARNING_REGEX)
+    let warningMatch = this.currentLine.match(this.packageWarningRegex)
     // Something strange happened, return early
     if (!warningMatch) {
       return
@@ -169,7 +183,7 @@ export default class LatexParser {
     const warningLines = [warningMatch[1]]
     let lineMatch = this.currentLine.match(LINES_REGEX)
     let line = lineMatch ? parseInt(lineMatch[1], 10) : null
-    const packageMatch = this.currentLine.match(PACKAGE_REGEX)
+    const packageMatch = this.currentLine.match(this.packageRegex)
     const packageName = packageMatch[1]
     // Regex to get rid of the unnecesary (packagename) prefix in most multi-line warnings
     const prefixRegex = new RegExp(

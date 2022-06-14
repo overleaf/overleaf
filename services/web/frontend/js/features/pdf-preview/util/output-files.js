@@ -82,6 +82,8 @@ export const handleLogFiles = async (outputFiles, data, signal) => {
         result.log,
         {
           ignoreDuplicates: true,
+          oldRegexes:
+            getMeta('ol-splitTestVariants')['latex-log-parser'] !== 'new',
         }
       )
 
