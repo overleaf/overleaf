@@ -24,6 +24,7 @@
     "postinstall": "patch-package"
   },
   "workspaces": [
+    "jobs/mirror-documentation",
     "libraries/*",
     "services/analytics",
     "services/chat",
