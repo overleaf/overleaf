@@ -591,13 +591,11 @@ module.exports = UpdatesManager = {
             }
             // repeatedly get updates and pass them through the summariser to get an final output with user info
             return async.whilst(
-              cb =>
+              () =>
                 // console.log "checking iterator.done", iterator.done()
-                cb(
-                  null,
-                  summarizedUpdates.length < options.min_count &&
-                    !iterator.done()
-                ),
+                summarizedUpdates.length < options.min_count &&
+                !iterator.done(),
+
               cb =>
                 iterator.next(function (err, partialUpdates) {
                   if (err != null) {
@@ -653,7 +651,7 @@ module.exports = UpdatesManager = {
         const accumulatedUserIds = new Set()
 
         async.whilst(
-          cb => cb(null, !iterator.done()),
+          () => !iterator.done(),
 
           cb =>
             iterator.next((err, updatesFromASinglePack) => {

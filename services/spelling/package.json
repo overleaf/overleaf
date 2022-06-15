@@ -26,7 +26,7 @@
     "@overleaf/metrics": "^4.0.0",
     "@overleaf/o-error": "^3.4.0",
     "@overleaf/settings": "^3.0.0",
-    "async": "^3.2.2",
+    "async": "^2.6.3",
     "body-parser": "^1.19.0",
     "bunyan": "^1.8.15",
     "express": "^4.17.1",

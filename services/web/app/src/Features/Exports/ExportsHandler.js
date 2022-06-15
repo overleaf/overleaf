@@ -72,7 +72,7 @@ module.exports = ExportsHandler = {
       // TODO: when we update async, signature will change from (cb, results) to (results, cb)
       rootDoc: [
         'project',
-        (results, cb) =>
+        (cb, results) =>
           ProjectRootDocManager.ensureRootDocumentIsValid(
             project_id,
             function (error) {

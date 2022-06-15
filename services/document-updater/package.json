@@ -21,7 +21,7 @@
     "@overleaf/o-error": "^3.4.0",
     "@overleaf/redis-wrapper": "^2.0.1",
     "@overleaf/settings": "^3.0.0",
-    "async": "^3.2.2",
+    "async": "^2.5.0",
     "body-parser": "^1.19.0",
     "bunyan": "^1.8.15",
     "diff-match-patch": "https://github.com/overleaf/diff-match-patch/archive/89805f9c671a77a263fc53461acd62aa7498f688.tar.gz",
