@@ -14,14 +14,16 @@ function Email({ userEmailData }: EmailProps) {
     userEmailData.affiliation?.institution || null
   )
 
+  const isPrimary = userEmailData.default
+  const isProfessional =
+    userEmailData.confirmedAt &&
+    userEmailData.affiliation?.institution.confirmed &&
+    userEmailData.affiliation.licence !== 'free'
+  const hasBadges = isPrimary || isProfessional
+
   return (
     <>
       {userEmailData.email}
-      {userEmailData.default ? (
-        <span className="small ms-1">
-          <span className="label label-info">Primary</span>
-        </span>
-      ) : null}
       {!userEmailData.confirmedAt && (
         <div className="small">
           <strong>
@@ -34,13 +36,18 @@ function Email({ userEmailData }: EmailProps) {
           )}
         </div>
       )}
-      {userEmailData.confirmedAt &&
-        userEmailData.affiliation?.institution.confirmed &&
-        userEmailData.affiliation.licence !== 'free' && (
-          <div className="small">
+      {hasBadges && (
+        <div className="small">
+          {isPrimary && (
+            <>
+              <span className="label label-info">Primary</span>{' '}
+            </>
+          )}
+          {isProfessional && (
             <span className="label label-primary">{t('professional')}</span>
-          </div>
-        )}
+          )}
+        </div>
+      )}
     </>
   )
 }
