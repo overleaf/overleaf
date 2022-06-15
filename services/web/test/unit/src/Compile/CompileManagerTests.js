@@ -1,3 +1,4 @@
+const { expect } = require('chai')
 const sinon = require('sinon')
 const modulePath = '../../../../app/src/Features/Compile/CompileManager.js'
 const SandboxedModule = require('sandboxed-module')
@@ -16,6 +17,7 @@ describe('CompileManager', function () {
     this.CompileManager = SandboxedModule.require(modulePath, {
       requires: {
         '@overleaf/settings': (this.settings = {
+          apis: { clsi: { defaultBackendClass: 'e2' } },
           redis: { web: { host: 'localhost', port: 42 } },
           rateLimit: { autoCompile: {} },
         }),
@@ -28,6 +30,13 @@ describe('CompileManager', function () {
         './ClsiManager': (this.ClsiManager = {}),
         '../../infrastructure/RateLimiter': this.ratelimiter,
         '@overleaf/metrics': this.Metrics,
+        '../SplitTests/SplitTestHandler': {
+          getAssignmentForMongoUser: (this.getAssignmentForMongoUser = sinon
+            .stub()
+            .yields(null, {
+              variant: 'default',
+            })),
+        },
       },
     })
     this.project_id = 'mock-project-id-123'
@@ -175,7 +184,11 @@ describe('CompileManager', function () {
         )
       this.UserGetter.getUser = sinon
         .stub()
-        .callsArgWith(2, null, (this.user = { features: this.features }))
+        .callsArgWith(
+          2,
+          null,
+          (this.user = { features: this.features, analyticsId: 'abc' })
+        )
       this.CompileManager.getProjectCompileLimits(
         this.project_id,
         this.callback
@@ -191,9 +204,12 @@ describe('CompileManager', function () {
     it("should look up the owner's features", function () {
       this.UserGetter.getUser
         .calledWith(this.project.owner_ref, {
+          _id: 1,
           alphaProgram: 1,
+          analyticsId: 1,
           betaProgram: 1,
           features: 1,
+          splitTests: 1,
         })
         .should.equal(true)
     })
@@ -203,8 +219,111 @@ describe('CompileManager', function () {
         .calledWith(null, {
           timeout: this.timeout,
           compileGroup: this.group,
+          compileBackendClass: 'e2',
+          ownerAnalyticsId: 'abc',
+          emitCompileResultEvent: false,
         })
         .should.equal(true)
+    })
+  })
+
+  describe('compileBackendClass', function () {
+    beforeEach(function () {
+      this.features = {
+        compileTimeout: 42,
+        compileGroup: 'standard',
+      }
+      this.ProjectGetter.getProject = sinon
+        .stub()
+        .yields(null, { owner_ref: 'owner-id-123' })
+      this.UserGetter.getUser = sinon
+        .stub()
+        .yields(null, { features: this.features, analyticsId: 'abc' })
+    })
+
+    describe('with standard compile', function () {
+      beforeEach(function () {
+        this.features.compileGroup = 'standard'
+      })
+      it('should return the default class and disable event', function (done) {
+        this.CompileManager.getProjectCompileLimits(
+          this.project_id,
+          (err, { compileBackendClass, emitCompileResultEvent }) => {
+            if (err) return done(err)
+            expect(compileBackendClass).to.equal('e2')
+            expect(emitCompileResultEvent).to.equal(false)
+            done()
+          }
+        )
+      })
+    })
+
+    describe('with priority compile', function () {
+      beforeEach(function () {
+        this.features.compileGroup = 'priority'
+      })
+      describe('split test not active', function () {
+        beforeEach(function () {
+          this.getAssignmentForMongoUser.yields(null, {
+            analytics: { segmentation: {} },
+            variant: 'default',
+          })
+        })
+
+        it('should return the default class and disable event', function (done) {
+          this.CompileManager.getProjectCompileLimits(
+            this.project_id,
+            (err, { compileBackendClass, emitCompileResultEvent }) => {
+              if (err) return done(err)
+              expect(compileBackendClass).to.equal('e2')
+              expect(emitCompileResultEvent).to.equal(false)
+              done()
+            }
+          )
+        })
+      })
+
+      describe('split test active', function () {
+        describe('default variant', function () {
+          beforeEach(function () {
+            this.getAssignmentForMongoUser.yields(null, {
+              analytics: { segmentation: { splitTest: 'foo' } },
+              variant: 'default',
+            })
+          })
+          it('should return the default class and enable event', function (done) {
+            this.CompileManager.getProjectCompileLimits(
+              this.project_id,
+              (err, { compileBackendClass, emitCompileResultEvent }) => {
+                if (err) return done(err)
+                expect(compileBackendClass).to.equal('e2')
+                expect(emitCompileResultEvent).to.equal(true)
+                done()
+              }
+            )
+          })
+        })
+
+        describe('c2d variant', function () {
+          beforeEach(function () {
+            this.getAssignmentForMongoUser.yields(null, {
+              analytics: { segmentation: { splitTest: 'foo' } },
+              variant: 'c2d',
+            })
+          })
+          it('should return the c2d class and enable event', function (done) {
+            this.CompileManager.getProjectCompileLimits(
+              this.project_id,
+              (err, { compileBackendClass, emitCompileResultEvent }) => {
+                if (err) return done(err)
+                expect(compileBackendClass).to.equal('c2d')
+                expect(emitCompileResultEvent).to.equal(true)
+                done()
+              }
+            )
+          })
+        })
+      })
     })
   })
 

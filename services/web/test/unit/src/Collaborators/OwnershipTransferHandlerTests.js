@@ -70,6 +70,9 @@ describe('OwnershipTransferHandler', function () {
         '../Project/ProjectAuditLogHandler': this.ProjectAuditLogHandler,
         '../Email/EmailHandler': this.EmailHandler,
         './CollaboratorsHandler': this.CollaboratorsHandler,
+        '../Analytics/AnalyticsManager': {
+          recordEventForUser: (this.recordEventForUser = sinon.stub()),
+        },
       },
     })
   })
@@ -188,6 +191,23 @@ describe('OwnershipTransferHandler', function () {
           to: this.collaborator.email,
           project: this.project,
           previousOwner: this.user,
+        }
+      )
+    })
+
+    it('should track the change in BigQuery', async function () {
+      const sessionUserId = ObjectId()
+      await this.handler.promises.transferOwnership(
+        this.project._id,
+        this.collaborator._id,
+        { sessionUserId }
+      )
+      expect(this.recordEventForUser).to.have.been.calledWith(
+        this.user._id,
+        'project-ownership-transfer',
+        {
+          projectId: this.project._id,
+          newOwnerId: this.collaborator._id,
         }
       )
     })

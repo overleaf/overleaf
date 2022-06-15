@@ -202,6 +202,7 @@ module.exports = {
       url: `http://${process.env.CLSI_HOST || 'localhost'}:3013`,
       // url: "http://#{process.env['CLSI_LB_HOST']}:3014"
       backendGroupName: undefined,
+      defaultBackendClass: process.env.CLSI_DEFAULT_BACKEND_CLASS || 'e2',
     },
     realTime: {
       url: `http://${process.env.REALTIME_HOST || 'localhost'}:3026`,

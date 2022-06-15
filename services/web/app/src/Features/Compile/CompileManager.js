@@ -8,6 +8,8 @@ const UserGetter = require('../User/UserGetter')
 const ClsiManager = require('./ClsiManager')
 const Metrics = require('@overleaf/metrics')
 const rateLimiter = require('../../infrastructure/RateLimiter')
+const SplitTestHandler = require('../SplitTests/SplitTestHandler')
+const { getAnalyticsIdFromMongoUser } = require('../Analytics/AnalyticsHelper')
 
 module.exports = CompileManager = {
   compile(projectId, userId, options = {}, _callback) {
@@ -140,7 +142,14 @@ module.exports = CompileManager = {
         }
         UserGetter.getUser(
           project.owner_ref,
-          { alphaProgram: 1, betaProgram: 1, features: 1 },
+          {
+            _id: 1,
+            alphaProgram: 1,
+            analyticsId: 1,
+            betaProgram: 1,
+            features: 1,
+            splitTests: 1,
+          },
           function (err, owner) {
             if (err) {
               return callback(err)
@@ -150,14 +159,25 @@ module.exports = CompileManager = {
             if (owner && owner.alphaProgram) {
               ownerFeatures.compileGroup = 'alpha'
             }
-            callback(null, {
+            const limits = {
               timeout:
                 ownerFeatures.compileTimeout ||
                 Settings.defaultFeatures.compileTimeout,
               compileGroup:
                 ownerFeatures.compileGroup ||
                 Settings.defaultFeatures.compileGroup,
-            })
+              ownerAnalyticsId: getAnalyticsIdFromMongoUser(owner),
+            }
+            CompileManager._getCompileBackendClassDetails(
+              owner,
+              limits.compileGroup,
+              (err, { compileBackendClass, emitCompileResultEvent }) => {
+                if (err) return callback(err)
+                limits.compileBackendClass = compileBackendClass
+                limits.emitCompileResultEvent = emitCompileResultEvent
+                callback(null, limits)
+              }
+            )
           }
         )
       }
@@ -223,6 +243,30 @@ module.exports = CompileManager = {
       }
       callback(null, canCompile)
     })
+  },
+
+  _getCompileBackendClassDetails(owner, compileGroup, callback) {
+    const { defaultBackendClass } = Settings.apis.clsi
+    if (compileGroup === 'standard') {
+      return callback(null, {
+        compileBackendClass: defaultBackendClass,
+        emitCompileResultEvent: false,
+      })
+    }
+    SplitTestHandler.getAssignmentForMongoUser(
+      owner,
+      'compile-backend-class',
+      (err, assignment) => {
+        if (err) return callback(err, {})
+        const { analytics, variant } = assignment
+        const activeForUser = analytics?.segmentation?.splitTest != null
+        callback(null, {
+          compileBackendClass:
+            variant === 'default' ? defaultBackendClass : variant,
+          emitCompileResultEvent: activeForUser,
+        })
+      }
+    )
   },
 
   wordCount(projectId, userId, file, clsiserverid, callback) {

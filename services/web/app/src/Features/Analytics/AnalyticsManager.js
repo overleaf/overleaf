@@ -7,6 +7,7 @@ const uuid = require('uuid')
 const _ = require('lodash')
 const { expressify } = require('../../util/promises')
 const { logger } = require('@overleaf/logger')
+const { getAnalyticsIdFromMongoUser } = require('./AnalyticsHelper')
 
 const analyticsEventsQueue = Queues.getQueue('analytics-events')
 const analyticsEditingSessionsQueue = Queues.getQueue(
@@ -240,8 +241,7 @@ async function analyticsIdMiddleware(req, res, next) {
   const sessionUser = SessionManager.getSessionUser(session)
 
   if (sessionUser) {
-    // ensure `session.analyticsId` is set to the user's `analyticsId`, and fallback to their `userId` for pre-analyticsId users
-    session.analyticsId = sessionUser.analyticsId || sessionUser._id
+    session.analyticsId = getAnalyticsIdFromMongoUser(sessionUser)
   } else if (!session.analyticsId) {
     // generate an `analyticsId` if needed
     session.analyticsId = uuid.v4()

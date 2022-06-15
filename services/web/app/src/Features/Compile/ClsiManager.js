@@ -122,8 +122,9 @@ const ClsiManager = {
     if (options == null) {
       options = {}
     }
-    const { compileGroup } = options
+    const { compileBackendClass, compileGroup } = options
     const compilerUrl = this._getCompilerUrl(
+      compileBackendClass,
       compileGroup,
       projectId,
       userId,
@@ -140,8 +141,13 @@ const ClsiManager = {
     if (options == null) {
       options = {}
     }
-    const { compileGroup } = options
-    const compilerUrl = this._getCompilerUrl(compileGroup, projectId, userId)
+    const { compileBackendClass, compileGroup } = options
+    const compilerUrl = this._getCompilerUrl(
+      compileBackendClass,
+      compileGroup,
+      projectId,
+      userId
+    )
     const opts = {
       url: compilerUrl,
       method: 'DELETE',
@@ -236,6 +242,7 @@ const ClsiManager = {
           projectId,
           userId,
           req,
+          options.compileBackendClass,
           options.compileGroup,
           (err, response, clsiServerId) => {
             if (err != null) {
@@ -469,7 +476,13 @@ const ClsiManager = {
     )
   },
 
-  _getCompilerUrl(compileGroup, projectId, userId, action) {
+  _getCompilerUrl(
+    compileBackendClass,
+    compileGroup,
+    projectId,
+    userId,
+    action
+  ) {
     const u = new URL(`/project/${projectId}`, Settings.apis.clsi.url)
     if (userId != null) {
       u.pathname += `/user/${userId}`
@@ -477,12 +490,23 @@ const ClsiManager = {
     if (action != null) {
       u.pathname += `/${action}`
     }
-    u.search = new URLSearchParams({ compileGroup }).toString()
+    u.search = new URLSearchParams({
+      compileBackendClass,
+      compileGroup,
+    }).toString()
     return u.href
   },
 
-  _postToClsi(projectId, userId, req, compileGroup, callback) {
+  _postToClsi(
+    projectId,
+    userId,
+    req,
+    compileBackendClass,
+    compileGroup,
+    callback
+  ) {
     const compileUrl = this._getCompilerUrl(
+      compileBackendClass,
       compileGroup,
       projectId,
       userId,
@@ -889,7 +913,7 @@ const ClsiManager = {
   },
 
   wordCount(projectId, userId, file, options, clsiserverid, callback) {
-    const { compileGroup } = options
+    const { compileBackendClass, compileGroup } = options
     ClsiManager._buildRequest(projectId, options, (err, req) => {
       if (err != null) {
         return callback(
@@ -901,6 +925,7 @@ const ClsiManager = {
       }
       const filename = file || req.compile.rootResourcePath
       const wordCountUrl = ClsiManager._getCompilerUrl(
+        compileBackendClass,
         compileGroup,
         projectId,
         userId,

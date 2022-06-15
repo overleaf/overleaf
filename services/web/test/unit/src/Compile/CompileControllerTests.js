@@ -61,6 +61,9 @@ describe('CompileController', function () {
             variant: 'default',
           })),
         },
+        '../Analytics/AnalyticsManager': {
+          recordEventForSession: sinon.stub(),
+        },
       },
     })
     this.projectId = 'project-id'

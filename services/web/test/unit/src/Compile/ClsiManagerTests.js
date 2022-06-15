@@ -43,6 +43,7 @@ describe('ClsiManager', function () {
             },
             clsi: {
               url: 'http://clsi.example.com',
+              defaultBackendClass: 'e2',
             },
             clsi_priority: {
               url: 'https://clsipremium.example.com',
@@ -61,6 +62,11 @@ describe('ClsiManager', function () {
         request: this.request,
         './ClsiFormatChecker': this.ClsiFormatChecker,
         '@overleaf/metrics': this.Metrics,
+        '../SplitTests/SplitTestHandler': {
+          getAssignment: (this.getAssignment = sinon.stub().yields(null, {
+            variant: 'default',
+          })),
+        },
       },
     })
     this.project_id = 'project-id'
@@ -78,7 +84,7 @@ describe('ClsiManager', function () {
 
     describe('with a successful compile', function () {
       beforeEach(function () {
-        this.ClsiManager._postToClsi = sinon.stub().callsArgWith(4, null, {
+        this.ClsiManager._postToClsi = sinon.stub().yields(null, {
           compile: {
             status: (this.status = 'success'),
             outputFiles: [
@@ -100,7 +106,7 @@ describe('ClsiManager', function () {
         this.ClsiManager.sendRequest(
           this.project_id,
           this.user_id,
-          { compileGroup: 'standard' },
+          { compileBackendClass: 'e2', compileGroup: 'standard' },
           this.callback
         )
       })
@@ -113,7 +119,13 @@ describe('ClsiManager', function () {
 
       it('should send the request to the CLSI', function () {
         this.ClsiManager._postToClsi
-          .calledWith(this.project_id, this.user_id, this.request, 'standard')
+          .calledWith(
+            this.project_id,
+            this.user_id,
+            this.request,
+            'e2',
+            'standard'
+          )
           .should.equal(true)
       })
 
@@ -180,7 +192,7 @@ describe('ClsiManager', function () {
         this.ClsiManager.sendRequest(
           this.project_id,
           this.user_id,
-          { compileGroup: 'standard' },
+          { compileBackendClass: 'e2', compileGroup: 'standard' },
           this.callback
         )
       })
@@ -222,7 +234,7 @@ describe('ClsiManager', function () {
 
     describe('with a failed compile', function () {
       beforeEach(function () {
-        this.ClsiManager._postToClsi = sinon.stub().callsArgWith(4, null, {
+        this.ClsiManager._postToClsi = sinon.stub().yields(null, {
           compile: {
             status: (this.status = 'failure'),
           },
@@ -327,7 +339,7 @@ describe('ClsiManager', function () {
         this.ClsiFormatChecker.checkRecoursesForProblems = sinon
           .stub()
           .callsArgWith(1, new Error('failed'))
-        this.ClsiManager._postToClsi = sinon.stub().callsArgWith(4, null, {
+        this.ClsiManager._postToClsi = sinon.stub().yields(null, {
           compile: {
             status: (this.status = 'failure'),
           },
@@ -359,7 +371,7 @@ describe('ClsiManager', function () {
 
     describe('with a successful compile', function () {
       beforeEach(function () {
-        this.ClsiManager._postToClsi = sinon.stub().callsArgWith(4, null, {
+        this.ClsiManager._postToClsi = sinon.stub().yields(null, {
           compile: {
             status: (this.status = 'success'),
             outputFiles: [
@@ -381,14 +393,20 @@ describe('ClsiManager', function () {
         this.ClsiManager.sendExternalRequest(
           this.submission_id,
           this.clsi_request,
-          { compileGroup: 'standard' },
+          { compileBackendClass: 'e2', compileGroup: 'standard' },
           this.callback
         )
       })
 
       it('should send the request to the CLSI', function () {
         this.ClsiManager._postToClsi
-          .calledWith(this.submission_id, null, this.clsi_request, 'standard')
+          .calledWith(
+            this.submission_id,
+            null,
+            this.clsi_request,
+            'e2',
+            'standard'
+          )
           .should.equal(true)
       })
 
@@ -423,7 +441,7 @@ describe('ClsiManager', function () {
 
     describe('with a failed compile', function () {
       beforeEach(function () {
-        this.ClsiManager._postToClsi = sinon.stub().callsArgWith(4, null, {
+        this.ClsiManager._postToClsi = sinon.stub().yields(null, {
           compile: {
             status: (this.status = 'failure'),
           },
@@ -446,7 +464,7 @@ describe('ClsiManager', function () {
         this.ClsiFormatChecker.checkRecoursesForProblems = sinon
           .stub()
           .callsArgWith(1, new Error('failed'))
-        this.ClsiManager._postToClsi = sinon.stub().callsArgWith(4, null, {
+        this.ClsiManager._postToClsi = sinon.stub().yields(null, {
           compile: {
             status: (this.status = 'failure'),
           },
@@ -480,7 +498,7 @@ describe('ClsiManager', function () {
         this.ClsiManager.deleteAuxFiles(
           this.project_id,
           this.user_id,
-          { compileGroup: 'standard' },
+          { compileBackendClass: 'e2', compileGroup: 'standard' },
           'node-1',
           this.callback
         )
@@ -494,7 +512,7 @@ describe('ClsiManager', function () {
             'standard',
             {
               method: 'DELETE',
-              url: `${this.settings.apis.clsi.url}/project/${this.project_id}/user/${this.user_id}?compileGroup=standard`,
+              url: `${this.settings.apis.clsi.url}/project/${this.project_id}/user/${this.user_id}?compileBackendClass=e2&compileGroup=standard`,
             },
             'node-1'
           )
@@ -568,7 +586,7 @@ describe('ClsiManager', function () {
       beforeEach(function (done) {
         this.ClsiManager._buildRequest(
           this.project_id,
-          { timeout: 100, compileGroup: 'standard' },
+          { timeout: 100, compileBackendClass: 'e2', compileGroup: 'standard' },
           (err, request) => {
             if (err != null) {
               return done(err)
@@ -930,13 +948,14 @@ describe('ClsiManager', function () {
           this.project_id,
           this.user_id,
           this.req,
+          'e2',
           'standard',
           this.callback
         )
       })
 
       it('should send the request to the CLSI', function () {
-        const url = `${this.settings.apis.clsi.url}/project/${this.project_id}/user/${this.user_id}/compile?compileGroup=standard`
+        const url = `${this.settings.apis.clsi.url}/project/${this.project_id}/user/${this.user_id}/compile?compileBackendClass=e2&compileGroup=standard`
         this.ClsiManager._makeRequest
           .calledWith(this.project_id, this.user_id, 'standard', {
             method: 'POST',
@@ -960,6 +979,7 @@ describe('ClsiManager', function () {
           this.project_id,
           this.user_id,
           this.req,
+          'e2',
           'standard',
           this.callback
         )
@@ -990,7 +1010,7 @@ describe('ClsiManager', function () {
           this.project_id,
           this.user_id,
           false,
-          { compileGroup: 'standard' },
+          { compileBackendClass: 'e2', compileGroup: 'standard' },
           'node-1',
           this.callback
         )
@@ -1004,7 +1024,7 @@ describe('ClsiManager', function () {
             'standard',
             {
               method: 'GET',
-              url: `http://clsi.example.com/project/${this.project_id}/user/${this.user_id}/wordcount?compileGroup=standard`,
+              url: `http://clsi.example.com/project/${this.project_id}/user/${this.user_id}/wordcount?compileBackendClass=e2&compileGroup=standard`,
               qs: {
                 file: 'rootfile.text',
                 image: undefined,
@@ -1027,7 +1047,7 @@ describe('ClsiManager', function () {
           this.project_id,
           this.user_id,
           'main.tex',
-          { compileGroup: 'standard' },
+          { compileBackendClass: 'e2', compileGroup: 'standard' },
           'node-2',
           this.callback
         )
@@ -1041,7 +1061,7 @@ describe('ClsiManager', function () {
             'standard',
             {
               method: 'GET',
-              url: `http://clsi.example.com/project/${this.project_id}/user/${this.user_id}/wordcount?compileGroup=standard`,
+              url: `http://clsi.example.com/project/${this.project_id}/user/${this.user_id}/wordcount?compileBackendClass=e2&compileGroup=standard`,
               qs: { file: 'main.tex', image: undefined },
               json: true,
             },
@@ -1059,7 +1079,7 @@ describe('ClsiManager', function () {
           this.project_id,
           this.user_id,
           'main.tex',
-          { compileGroup: 'standard' },
+          { compileBackendClass: 'e2', compileGroup: 'standard' },
           'node-3',
           this.callback
         )
@@ -1073,7 +1093,7 @@ describe('ClsiManager', function () {
             'standard',
             {
               method: 'GET',
-              url: `http://clsi.example.com/project/${this.project_id}/user/${this.user_id}/wordcount?compileGroup=standard`,
+              url: `http://clsi.example.com/project/${this.project_id}/user/${this.user_id}/wordcount?compileBackendClass=e2&compileGroup=standard`,
               qs: { file: 'main.tex', image: this.image },
               json: true,
             },
@@ -1230,7 +1250,11 @@ describe('ClsiManager', function () {
       this.response = { there: 'something' }
       this.request.callsArgWith(1, null, this.response)
       this.opts = {
-        url: this.ClsiManager._getCompilerUrl('standard', this.project_id),
+        url: this.ClsiManager._getCompilerUrl(
+          'e2',
+          'standard',
+          this.project_id
+        ),
       }
     })
 
@@ -1243,7 +1267,7 @@ describe('ClsiManager', function () {
         () => {
           const args = this.request.args[0]
           args[0].url.should.equal(
-            `https://compiles.somewhere.test/project/${this.project_id}?compileGroup=standard`
+            `https://compiles.somewhere.test/project/${this.project_id}?compileBackendClass=e2&compileGroup=standard`
           )
           done()
         }

@@ -13,6 +13,7 @@ const ClsiCookieManager = require('./ClsiCookieManager')(
   Settings.apis.clsi?.backendGroupName
 )
 const Path = require('path')
+const AnalyticsManager = require('../Analytics/AnalyticsManager')
 
 const COMPILE_TIMEOUT_MS = 10 * 60 * 1000
 
@@ -86,6 +87,20 @@ module.exports = CompileController = {
         let pdfDownloadDomain = Settings.pdfDownloadDomain
         if (pdfDownloadDomain && outputUrlPrefix) {
           pdfDownloadDomain += outputUrlPrefix
+        }
+        if (limits?.emitCompileResultEvent) {
+          AnalyticsManager.recordEventForSession(
+            req.session,
+            'compile-result',
+            {
+              projectId,
+              ownerAnalyticsId: limits.ownerAnalyticsId,
+              status,
+              compileTime: timings?.compileE2E,
+              compileTimeout: limits.timeout * 1000,
+              clsiServerId,
+            }
+          )
         }
         res.json({
           status,

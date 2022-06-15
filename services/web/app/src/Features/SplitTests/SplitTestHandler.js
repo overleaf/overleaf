@@ -8,6 +8,7 @@ const { callbackify } = require('util')
 const SplitTestCache = require('./SplitTestCache')
 const { SplitTest } = require('../../models/SplitTest')
 const UserAnalyticsIdCache = require('../Analytics/UserAnalyticsIdCache')
+const { getAnalyticsIdFromMongoUser } = require('../Analytics/AnalyticsHelper')
 
 const DEFAULT_VARIANT = 'default'
 const ALPHA_PHASE = 'alpha'
@@ -102,6 +103,27 @@ async function getAssignmentForUser(
 }
 
 /**
+ * Get the assignment of a user to a split test by their pre-fetched mongo doc.
+ *
+ * @param user the user
+ * @param splitTestName the unique name of the split test
+ * @param options {Object<sync: boolean>} - for test purposes only, to force the synchronous update of the user's profile
+ * @returns {Promise<{variant: string, analytics: {segmentation: {splitTest: string, variant: string, phase: string, versionNumber: number}|{}}}>}
+ */
+async function getAssignmentForMongoUser(
+  user,
+  splitTestName,
+  { sync = false } = {}
+) {
+  return _getAssignment(splitTestName, {
+    analyticsId: getAnalyticsIdFromMongoUser(user),
+    sync,
+    user,
+    userId: user._id.toString(),
+  })
+}
+
+/**
  * Get a mapping of the active split test assignments for the given user
  */
 async function getActiveAssignmentsForUser(userId) {
@@ -157,7 +179,7 @@ async function _getVariantNames(splitTestName) {
 
 async function _getAssignment(
   splitTestName,
-  { analyticsId, userId, session, sync }
+  { analyticsId, user, userId, session, sync }
 ) {
   if (!analyticsId && !userId) {
     return DEFAULT_ASSIGNMENT
@@ -179,11 +201,12 @@ async function _getAssignment(
       return _makeAssignment(splitTest, cachedVariant, currentVersion)
     }
   }
-  const user = userId && (await _getUser(userId))
+  user = user || (userId && (await _getUser(userId)))
   const { activeForUser, selectedVariantName, phase, versionNumber } =
     await _getAssignmentMetadata(analyticsId, user, splitTest)
   if (activeForUser) {
     const assignmentConfig = {
+      user,
       userId,
       analyticsId,
       session,
@@ -256,6 +279,7 @@ function _getVariantFromPercentile(variants, percentile) {
 }
 
 async function _updateVariantAssignment({
+  user,
   userId,
   analyticsId,
   session,
@@ -272,7 +296,7 @@ async function _updateVariantAssignment({
   }
   // if the user is logged in
   if (userId) {
-    const user = await _getUser(userId)
+    user = user || (await _getUser(userId))
     if (user) {
       const assignedSplitTests = user.splitTests || []
       const assignmentLog = assignedSplitTests[splitTestName] || []
@@ -350,10 +374,12 @@ async function _getUser(id) {
 
 module.exports = {
   getAssignment: callbackify(getAssignment),
+  getAssignmentForMongoUser: callbackify(getAssignmentForMongoUser),
   getAssignmentForUser: callbackify(getAssignmentForUser),
   getActiveAssignmentsForUser: callbackify(getActiveAssignmentsForUser),
   promises: {
     getAssignment,
+    getAssignmentForMongoUser,
     getAssignmentForUser,
     getActiveAssignmentsForUser,
   },

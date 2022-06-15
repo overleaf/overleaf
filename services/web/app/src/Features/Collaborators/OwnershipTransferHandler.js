@@ -8,6 +8,7 @@ const Errors = require('../Errors/Errors')
 const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
 const TpdsProjectFlusher = require('../ThirdPartyDataStore/TpdsProjectFlusher')
 const ProjectAuditLogHandler = require('../Project/ProjectAuditLogHandler')
+const AnalyticsManager = require('../Analytics/AnalyticsManager')
 
 module.exports = {
   promises: { transferOwnership },
@@ -35,6 +36,13 @@ async function transferOwnership(projectId, newOwnerId, options = {}) {
   ) {
     throw new Errors.UserNotCollaboratorError({ info: { userId: newOwnerId } })
   }
+
+  // Track the change of ownership in BigQuery.
+  AnalyticsManager.recordEventForUser(
+    previousOwnerId,
+    'project-ownership-transfer',
+    { projectId, newOwnerId }
+  )
 
   // Transfer ownership
   await ProjectAuditLogHandler.promises.addEntry(
