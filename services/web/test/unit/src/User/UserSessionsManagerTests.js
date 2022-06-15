@@ -89,7 +89,7 @@ describe('UserSessionsManager', function () {
 
     it('should not produce an error', function (done) {
       return this.call(err => {
-        expect(err).to.not.be.instanceof(Error)
+        expect(err).to.not.exist
         return done()
       })
     })
@@ -144,8 +144,7 @@ describe('UserSessionsManager', function () {
 
       it('should not produce an error', function (done) {
         return this.call(err => {
-          expect(err).to.not.be.instanceof(Error)
-          expect(err).to.equal(null)
+          expect(err).to.not.exist
           return done()
         })
       })
@@ -181,8 +180,7 @@ describe('UserSessionsManager', function () {
 
       it('should not produce an error', function (done) {
         return this.call(err => {
-          expect(err).to.not.be.instanceof(Error)
-          expect(err).to.equal(null)
+          expect(err).to.not.exist
           return done()
         })
       })
@@ -227,8 +225,7 @@ describe('UserSessionsManager', function () {
 
     it('should not produce an error', function (done) {
       return this.call(err => {
-        expect(err).to.not.be.instanceof(Error)
-        expect(err).to.equal(undefined)
+        expect(err).to.not.exist
         return done()
       })
     })
@@ -283,8 +280,7 @@ describe('UserSessionsManager', function () {
 
       it('should not produce an error', function (done) {
         return this.call(err => {
-          expect(err).to.not.be.instanceof(Error)
-          expect(err).to.equal(null)
+          expect(err).to.not.exist
           return done()
         })
       })
@@ -320,8 +316,7 @@ describe('UserSessionsManager', function () {
 
       it('should not produce an error', function (done) {
         return this.call(err => {
-          expect(err).to.not.be.instanceof(Error)
-          expect(err).to.equal(null)
+          expect(err).to.not.exist
           return done()
         })
       })
@@ -363,8 +358,7 @@ describe('UserSessionsManager', function () {
 
     it('should not produce an error', function (done) {
       return this.call(err => {
-        expect(err).to.not.be.instanceof(Error)
-        expect(err).to.equal(null)
+        expect(err).to.not.exist
         return done()
       })
     })
@@ -407,8 +401,7 @@ describe('UserSessionsManager', function () {
 
       it('should not produce an error', function (done) {
         return this.call(err => {
-          expect(err).to.not.be.instanceof(Error)
-          expect(err).to.equal(null)
+          expect(err).to.not.exist
           return done()
         })
       })
@@ -474,8 +467,7 @@ describe('UserSessionsManager', function () {
 
       it('should not produce an error', function (done) {
         return this.call(err => {
-          expect(err).to.not.be.instanceof(Error)
-          expect(err).to.equal(null)
+          expect(err).to.not.exist
           return done()
         })
       })
@@ -497,8 +489,7 @@ describe('UserSessionsManager', function () {
 
       it('should not produce an error', function (done) {
         return this.call(err => {
-          expect(err).to.not.be.instanceof(Error)
-          expect(err).to.equal(null)
+          expect(err).to.not.exist
           return done()
         })
       })
@@ -524,8 +515,7 @@ describe('UserSessionsManager', function () {
 
     it('should not produce an error', function (done) {
       return this.call(err => {
-        expect(err).to.not.be.instanceof(Error)
-        expect(err).to.equal(null)
+        expect(err).to.not.exist
         return done()
       })
     })
@@ -559,8 +549,7 @@ describe('UserSessionsManager', function () {
 
       it('should not produce an error', function (done) {
         return this.call(err => {
-          expect(err).to.not.be.instanceof(Error)
-          expect(err).to.equal(null)
+          expect(err).to.not.exist
           return done()
         })
       })
@@ -598,7 +587,7 @@ describe('UserSessionsManager', function () {
 
     it('should not produce an error', function (done) {
       return this.call((err, sessions) => {
-        expect(err).to.equal(null)
+        expect(err).to.not.exist
         return done()
       })
     })
@@ -635,7 +624,7 @@ describe('UserSessionsManager', function () {
 
       it('should not produce an error', function (done) {
         return this.call((err, sessions) => {
-          expect(err).to.equal(null)
+          expect(err).to.not.exist
           return done()
         })
       })
@@ -713,8 +702,7 @@ describe('UserSessionsManager', function () {
 
     it('should not produce an error', function (done) {
       return this.call(err => {
-        expect(err).to.not.be.instanceof(Error)
-        expect(err).to.equal(undefined)
+        expect(err).to.not.exist
         return done()
       })
     })
@@ -736,8 +724,7 @@ describe('UserSessionsManager', function () {
 
       it('should not produce an error', function (done) {
         return this.call(err => {
-          expect(err).to.not.be.instanceof(Error)
-          expect(err).to.equal(undefined)
+          expect(err).to.not.exist
           return done()
         })
       })
@@ -762,8 +749,7 @@ describe('UserSessionsManager', function () {
 
       it('should not produce an error', function (done) {
         return this.call(err => {
-          expect(err).to.not.be.instanceof(Error)
-          expect(err).to.equal(null)
+          expect(err).to.not.exist
           return done()
         })
       })

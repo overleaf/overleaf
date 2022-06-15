@@ -62,7 +62,7 @@ function buildUsersSubscriptionViewModel(user, callback) {
       },
       recurlySubscription: [
         'personalSubscription',
-        (cb, { personalSubscription }) => {
+        ({ personalSubscription }, cb) => {
           if (
             personalSubscription == null ||
             personalSubscription.recurlySubscription_id == null ||
@@ -79,7 +79,7 @@ function buildUsersSubscriptionViewModel(user, callback) {
       ],
       recurlyCoupons: [
         'recurlySubscription',
-        (cb, { recurlySubscription }) => {
+        ({ recurlySubscription }, cb) => {
           if (!recurlySubscription) {
             return cb(null, null)
           }
@@ -89,7 +89,7 @@ function buildUsersSubscriptionViewModel(user, callback) {
       ],
       plan: [
         'personalSubscription',
-        (cb, { personalSubscription }) => {
+        ({ personalSubscription }, cb) => {
           if (personalSubscription == null) {
             return cb()
           }

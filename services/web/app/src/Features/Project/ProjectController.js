@@ -778,7 +778,7 @@ const ProjectController = {
         },
         brandVariation: [
           'project',
-          (cb, results) => {
+          (results, cb) => {
             if (
               (results.project != null
                 ? results.project.brandVariationId
