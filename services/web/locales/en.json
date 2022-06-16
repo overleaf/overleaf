@@ -1765,5 +1765,14 @@
   "try_to_compile_despite_errors": "Try to compile despite errors",
   "stop_on_first_error_enabled_title": "No PDF: Stop on first error enabled",
   "stop_on_first_error_enabled_description": "<0>“Stop on first error” is enabled.</0> Disabling it may allow the compiler to produce a PDF (but your project will still have errors).",
-  "disable_stop_on_first_error": "Disable “Stop on first error”"
+  "disable_stop_on_first_error": "Disable “Stop on first error”",
+  "free_plan_label": "You’re on the <b>free plan</b>",
+  "free_plan_tooltip": "Click to find out how you could benefit from Overleaf premium features!",
+  "premium_plan_label": "You’re using <b>Overleaf Premium</b>",
+  "plan_tooltip": "You’re on the __plan__ plan. Click to find out how you could benefit from Overleaf premium features!",
+  "group_plan_tooltip": "You are on the __plan__ plan as a member of a group subscription. Click to find out how you could benefit from Overleaf premium features!",
+  "group_plan_with_name_tooltip": "You are on the __plan__ plan as a member of a group subscription, __groupName__. Click to find out how you could benefit from Overleaf premium features!",
+  "commons_plan_tooltip": "You’re on the __plan__ plan because of your affiliation with __institution__. Click to find out how you could benefit from Overleaf premium features!",
+  "trial_last_day": "This is the last day of your <b>Overleaf Premium</b> trial",
+  "trial_remaining_days": "__days__ more days on your <b>Overleaf Premium</b> trial"
 }

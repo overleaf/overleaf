@@ -137,6 +137,9 @@ describe('ProjectController', function () {
     this.InstitutionsFeatures = {
       hasLicence: sinon.stub().callsArgWith(1, null, false),
     }
+    this.SubscriptionViewModelBuilder = {
+      getBestSubscription: sinon.stub().yields(null, { type: 'free' }),
+    }
 
     this.ProjectController = SandboxedModule.require(MODULE_PATH, {
       requires: {
@@ -173,6 +176,8 @@ describe('ProjectController', function () {
         '../ThirdPartyDataStore/TpdsProjectFlusher': this.TpdsProjectFlusher,
         '../../models/Project': {},
         '../Analytics/AnalyticsManager': { recordEventForUser: () => {} },
+        '../Subscription/SubscriptionViewModelBuilder':
+          this.SubscriptionViewModelBuilder,
         '../../infrastructure/Modules': {
           hooks: { fire: sinon.stub().yields(null, []) },
         },
@@ -515,6 +520,14 @@ describe('ProjectController', function () {
       this.ProjectController.projectListPage(this.req, this.res)
     })
 
+    it("should send the user's best subscription", function (done) {
+      this.res.render = (pageName, opts) => {
+        expect(opts.usersBestSubscription).to.deep.include({ type: 'free' })
+        done()
+      }
+      this.ProjectController.projectListPage(this.req, this.res)
+    })
+
     describe('front widget', function (done) {
       beforeEach(function () {
         this.settings.overleaf = {
@@ -549,40 +562,6 @@ describe('ProjectController', function () {
         this.user._id = ObjectId('588f3ddae8ebc1bac07c9fff') // last two digits
         this.res.render = (pageName, opts) => {
           expect(opts.frontChatWidgetRoomId).to.equal(undefined)
-          done()
-        }
-        this.ProjectController.projectListPage(this.req, this.res)
-      })
-    })
-
-    describe('persistent upgrade prompt', function () {
-      it('should show for a user without a subscription or only non-paid affiliations', function (done) {
-        this.res.render = (pageName, opts) => {
-          expect(opts.showToolbarUpgradePrompt).to.equal(true)
-          done()
-        }
-        this.ProjectController.projectListPage(this.req, this.res)
-      })
-      it('should not show for a user with a subscription', function (done) {
-        this.LimitationsManager.hasPaidSubscription = sinon
-          .stub()
-          .callsArgWith(1, null, true)
-        this.res.render = (pageName, opts) => {
-          expect(opts.showToolbarUpgradePrompt).to.equal(false)
-          done()
-        }
-        this.ProjectController.projectListPage(this.req, this.res)
-      })
-      it('should not show for a user with an affiliated paid university', function (done) {
-        const emailWithProAffiliation = {
-          email: 'pro@example.com',
-          emailHasInstitutionLicence: true,
-        }
-        this.UserGetter.getUserFullEmails = sinon
-          .stub()
-          .yields(null, [emailWithProAffiliation])
-        this.res.render = (pageName, opts) => {
-          expect(opts.showToolbarUpgradePrompt).to.equal(false)
           done()
         }
         this.ProjectController.projectListPage(this.req, this.res)

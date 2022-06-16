@@ -3,6 +3,7 @@ const RecurlyWrapper = require('./RecurlyWrapper')
 const PlansLocator = require('./PlansLocator')
 const SubscriptionFormatters = require('./SubscriptionFormatters')
 const SubscriptionLocator = require('./SubscriptionLocator')
+const SubscriptionUpdater = require('./SubscriptionUpdater')
 const V1SubscriptionManager = require('./V1SubscriptionManager')
 const InstitutionsGetter = require('../Institutions/InstitutionsGetter')
 const PublishersGetter = require('../Publishers/PublishersGetter')
@@ -10,12 +11,13 @@ const sanitizeHtml = require('sanitize-html')
 const _ = require('underscore')
 const async = require('async')
 const SubscriptionHelper = require('./SubscriptionHelper')
-const { promisify } = require('../../util/promises')
+const { callbackify, promisify } = require('../../util/promises')
 const {
   InvalidError,
   NotFoundError,
   V1ConnectionError,
 } = require('../Errors/Errors')
+const FeaturesHelper = require('./FeaturesHelper')
 
 function buildHostedLink(type) {
   return `/user/subscription/recurly/${type}`
@@ -314,6 +316,78 @@ function buildUsersSubscriptionViewModel(user, callback) {
   )
 }
 
+async function getBestSubscription(user) {
+  let [
+    individualSubscription,
+    memberGroupSubscriptions,
+    currentInstitutionsWithLicence,
+  ] = await Promise.all([
+    SubscriptionLocator.promises.getUsersSubscription(user),
+    SubscriptionLocator.promises.getMemberSubscriptions(user),
+    InstitutionsGetter.promises.getCurrentInstitutionsWithLicence(user._id),
+  ])
+  if (individualSubscription && !individualSubscription.recurly?.state) {
+    const recurlySubscription = await RecurlyWrapper.promises.getSubscription(
+      individualSubscription.recurlySubscription_id,
+      { includeAccount: true }
+    )
+    await SubscriptionUpdater.promises.updateSubscriptionFromRecurly(
+      recurlySubscription,
+      individualSubscription
+    )
+    individualSubscription =
+      await SubscriptionLocator.promises.getUsersSubscription(user)
+  }
+  let bestSubscription = {
+    type: 'free',
+  }
+  if (currentInstitutionsWithLicence?.length) {
+    for (const institutionMembership of currentInstitutionsWithLicence) {
+      const plan = PlansLocator.findLocalPlanInSettings(
+        Settings.institutionPlanCode
+      )
+      if (_isPlanEqualOrBetter(plan, bestSubscription.plan)) {
+        bestSubscription = {
+          type: 'commons',
+          subscription: institutionMembership,
+          plan,
+        }
+      }
+    }
+  }
+  if (memberGroupSubscriptions?.length) {
+    for (const groupSubscription of memberGroupSubscriptions) {
+      const plan = PlansLocator.findLocalPlanInSettings(
+        groupSubscription.planCode
+      )
+      if (_isPlanEqualOrBetter(plan, bestSubscription.plan)) {
+        const remainingTrialDays = _getRemainingTrialDays(groupSubscription)
+        bestSubscription = {
+          type: 'group',
+          subscription: groupSubscription,
+          plan,
+          remainingTrialDays,
+        }
+      }
+    }
+  }
+  if (individualSubscription && !individualSubscription.groupPlan) {
+    const plan = PlansLocator.findLocalPlanInSettings(
+      individualSubscription.planCode
+    )
+    if (_isPlanEqualOrBetter(plan, bestSubscription.plan)) {
+      const remainingTrialDays = _getRemainingTrialDays(individualSubscription)
+      bestSubscription = {
+        type: 'individual',
+        subscription: individualSubscription,
+        plan,
+        remainingTrialDays,
+      }
+    }
+  }
+  return bestSubscription
+}
+
 function buildPlansList(currentPlan) {
   const { plans } = Settings
 
@@ -368,11 +442,30 @@ function buildPlansList(currentPlan) {
   return result
 }
 
+function _isPlanEqualOrBetter(planA, planB) {
+  return FeaturesHelper.isFeatureSetBetter(
+    planA?.features || {},
+    planB?.features || {}
+  )
+}
+
+function _getRemainingTrialDays(subscription) {
+  const now = new Date()
+  const trialEndDate = subscription.recurly?.trialEndsAt
+  return trialEndDate && trialEndDate > now
+    ? Math.ceil(
+        (trialEndDate.getTime() - now.getTime()) / (24 * 60 * 60 * 1000)
+      )
+    : -1
+}
+
 module.exports = {
   buildUsersSubscriptionViewModel,
   buildPlansList,
+  getBestSubscription: callbackify(getBestSubscription),
   promises: {
     buildUsersSubscriptionViewModel: promisify(buildUsersSubscriptionViewModel),
     getRedirectToHostedPage,
+    getBestSubscription,
   },
 }

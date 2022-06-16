@@ -41,6 +41,7 @@ const SpellingHandler = require('../Spelling/SpellingHandler')
 const UserPrimaryEmailCheckHandler = require('../User/UserPrimaryEmailCheckHandler')
 const { hasAdminAccess } = require('../Helpers/AdminAuthorizationHelper')
 const InstitutionsFeatures = require('../Institutions/InstitutionsFeatures')
+const SubscriptionViewModelBuilder = require('../Subscription/SubscriptionViewModelBuilder')
 
 const _ssoAvailable = (affiliation, session, linkedInstitutionIds) => {
   if (!affiliation.institution) return false
@@ -440,7 +441,18 @@ const ProjectController = {
             )
           })
         },
-
+        usersBestSubscription(cb) {
+          SubscriptionViewModelBuilder.getBestSubscription(
+            { _id: userId },
+            (err, subscription) => {
+              if (err) {
+                // do not fail loading the project list when fetching the best subscription fails
+                return cb(null, { type: 'error' })
+              }
+              cb(null, subscription)
+            }
+          )
+        },
         primaryEmailCheckActive(cb) {
           SplitTestHandler.getAssignment(
             req,
@@ -595,11 +607,6 @@ const ProjectController = {
           )
         }
 
-        // Persistent upgrade prompts
-        const showToolbarUpgradePrompt =
-          !results.hasSubscription &&
-          !userEmails.some(e => e.emailHasInstitutionLicence)
-
         ProjectController._injectProjectUsers(projects, (error, projects) => {
           if (error != null) {
             return next(error)
@@ -622,7 +629,7 @@ const ProjectController = {
             isOverleaf: !!Settings.overleaf,
             metadata: { viewport: false },
             showThinFooter: true, // don't show the fat footer on the projects dashboard, as there's a fixed space available
-            showToolbarUpgradePrompt,
+            usersBestSubscription: results.usersBestSubscription,
           }
 
           const paidUser =

@@ -38,6 +38,17 @@ const SubscriptionSchema = new Schema({
       },
     },
   },
+  recurly: {
+    state: {
+      type: String,
+    },
+    trialStartedAt: {
+      type: Date,
+    },
+    trialEndsAt: {
+      type: Date,
+    },
+  },
 })
 
 // Subscriptions have no v1 data to fetch

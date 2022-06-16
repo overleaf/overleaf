@@ -81,6 +81,7 @@
 .project-tools {
   display: inline;
   float: right;
+  line-height: @line-height-base;
 }
 
 .tags-dropdown-menu {
@@ -561,5 +562,14 @@ ul.project-list {
     width: 200px;
     left: 50%;
     margin-left: -100px;
+  }
+}
+
+.current-plan {
+  vertical-align: middle;
+  line-height: @line-height-base;
+  a.current-plan-label {
+    text-decoration: none;
+    color: @text-color;
   }
 }
