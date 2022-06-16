@@ -37,27 +37,28 @@ async function _addAffiliation(user, affiliationOptions) {
 }
 
 async function recordRegistrationEvent(user) {
-  SplitTestHandler.promises
-    .getAssignmentForUser(user._id, 'highlight-sso')
-    .then(assignment => {
-      const segmentation = {
-        highlightSSO: assignment.variant === 'active',
-      }
-      if (user.thirdPartyIdentifiers && user.thirdPartyIdentifiers.length > 0) {
-        segmentation.provider = user.thirdPartyIdentifiers[0].providerId
-      }
-      return Analytics.recordEventForUser(
+  try {
+    const highlightSSOAssignment =
+      await SplitTestHandler.promises.getAssignmentForUser(
         user._id,
-        'user-registered',
-        segmentation
+        'highlight-sso'
       )
-    })
-    .catch(err =>
-      logger.warn(
-        { err },
-        'there was an error recording `user-registered` event'
+    const homeRegistrationAssignment =
+      await SplitTestHandler.promises.getAssignmentForUser(
+        user._id,
+        'home-registration'
       )
-    )
+    const segmentation = {
+      highlightSSO: highlightSSOAssignment.variant === 'active',
+      'home-registration': homeRegistrationAssignment.variant,
+    }
+    if (user.thirdPartyIdentifiers && user.thirdPartyIdentifiers.length > 0) {
+      segmentation.provider = user.thirdPartyIdentifiers[0].providerId
+    }
+    Analytics.recordEventForUser(user._id, 'user-registered', segmentation)
+  } catch (err) {
+    logger.warn({ err }, 'there was an error recording `user-registered` event')
+  }
 }
 
 async function createNewUser(attributes, options = {}) {
