@@ -6,7 +6,8 @@
   "files": [
     "index.js",
     "Errors.js",
-    "RedisLocker.js"
+    "RedisLocker.js",
+    "RedisWebLocker.js"
   ],
   "author": "Overleaf (https://www.overleaf.com)",
   "repository": "github:overleaf/redis-wrapper",
@@ -25,7 +26,8 @@
     "@overleaf/o-error": "^3.4.0"
   },
   "dependencies": {
-    "ioredis": "~4.27.1"
+    "ioredis": "~4.27.1",
+    "async": "0.6.2"
   },
   "devDependencies": {
     "@overleaf/o-error": "^3.4.0",
