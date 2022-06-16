@@ -160,6 +160,14 @@ describe('UserUpdater', function () {
         { $unset: { 'emails.$.affiliationUnchecked': 1 } }
       )
     })
+
+    it('should not throw if removing affiliationUnchecked flag errors', async function () {
+      this.db.users.updateOne.rejects(new Error('nope'))
+      await this.UserUpdater.promises.addAffiliationForNewUser(
+        this.user._id,
+        this.newEmail
+      )
+    })
   })
 
   describe('changeEmailAddress', function () {

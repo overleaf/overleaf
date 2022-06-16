@@ -371,13 +371,15 @@ async function addAffiliationForNewUser(
       { $unset: { 'emails.$.affiliationUnchecked': 1 } }
     )
   } catch (error) {
-    throw OError.tag(
-      error,
-      'could not remove affiliationUnchecked flag for user on create',
-      {
-        userId,
-        email,
-      }
+    logger.error(
+      OError.tag(
+        error,
+        'could not remove affiliationUnchecked flag for user on create',
+        {
+          userId,
+          email,
+        }
+      )
     )
   }
 }
