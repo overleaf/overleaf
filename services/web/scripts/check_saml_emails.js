@@ -3,10 +3,11 @@ process.env.MONGO_CONNECTION_STRING =
   process.env.READ_ONLY_MONGO_CONNECTION_STRING
 const SAMLEmailBatchCheck = require('../modules/overleaf-integration/app/src/SAML/SAMLEmailBatchCheck')
 
+const startInstitutionId = parseInt(process.argv[2])
 const emitDetailedData = process.argv.includes('--detailed-data')
 
 SAMLEmailBatchCheck.promises
-  .checkEmails(emitDetailedData)
+  .checkEmails(startInstitutionId, emitDetailedData)
   .then(result => {
     console.table(result)
     process.exit()
