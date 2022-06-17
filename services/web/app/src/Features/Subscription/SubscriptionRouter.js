@@ -26,7 +26,7 @@ module.exports = {
     )
 
     webRouter.get(
-      '/user/subscription/interstitial-payment',
+      '/user/subscription/choose-your-plan',
       AuthenticationController.requireLogin(),
       SubscriptionController.interstitialPaymentPage
     )
