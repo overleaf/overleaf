@@ -4,6 +4,8 @@ const WRITE_CONCURRENCY = parseInt(process.env.WRITE_CONCURRENCY, 10) || 10
 const BATCH_SIZE = parseInt(process.env.BATCH_SIZE, 10) || 100
 const DRY_RUN = process.env.DRY_RUN !== 'false'
 const USE_QUERY_HINT = process.env.USE_QUERY_HINT !== 'false'
+const UPGRADE_FAILED_WITH_EMPTY_HISTORY =
+  process.env.UPGRADE_FAILED_WITH_EMPTY_HISTORY === 'true'
 // persist fallback in order to keep batchedUpdate in-sync
 process.env.BATCH_SIZE = BATCH_SIZE
 // raise mongo timeout to 1hr if otherwise unspecified
@@ -21,6 +23,7 @@ console.log({
   WRITE_CONCURRENCY,
   BATCH_SIZE,
   USE_QUERY_HINT,
+  UPGRADE_FAILED_WITH_EMPTY_HISTORY,
 })
 
 const RESULT = {
@@ -34,23 +37,30 @@ async function processBatch(_, projects) {
 }
 
 async function processProject(project) {
-  // safety check
+  // safety check if history exists and there was a failed upgrade
+  const anyDocHistory = await anyDocHistoryExists(project)
+  const anyDocHistoryIndex = await anyDocHistoryIndexExists(project)
   if (
     project.overleaf &&
     project.overleaf.history &&
     project.overleaf.history.upgradeFailed
   ) {
-    // a failed history upgrade might look like a v1 project, but history may be broken
-    return
+    const emptyHistory = !anyDocHistory && !anyDocHistoryIndex
+    if (emptyHistory && UPGRADE_FAILED_WITH_EMPTY_HISTORY) {
+      console.log(
+        `upgrading previously failed project ${project._id} with empty history`
+      )
+    } else {
+      // a failed history upgrade might look like a v1 project, but history may be broken
+      return
+    }
   }
   const preserveHistory = await shouldPreserveHistory(project)
   if (preserveHistory) {
     // if we need to preserve history, then we must bail out if history exists
-    const anyDocHistory = await anyDocHistoryExists(project)
     if (anyDocHistory) {
       return
     }
-    const anyDocHistoryIndex = await anyDocHistoryIndexExists(project)
     if (anyDocHistoryIndex) {
       return
     }
