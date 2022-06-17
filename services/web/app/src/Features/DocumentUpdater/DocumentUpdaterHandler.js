@@ -221,6 +221,7 @@ function resyncProjectHistory(
       path: `/project/${projectId}/history/resync`,
       json: { docs, files, projectHistoryId },
       method: 'POST',
+      timeout: 6 * 60 * 1000, // allow 6 minutes for resync
     },
     projectId,
     'resync-project-history',
@@ -299,6 +300,7 @@ function _makeRequest(options, projectId, metricsKey, callback) {
       url: `${settings.apis.documentupdater.url}${options.path}`,
       json: options.json,
       method: options.method || 'GET',
+      timeout: options.timeout || 30 * 1000,
     },
     function (error, res, body) {
       timer.done()

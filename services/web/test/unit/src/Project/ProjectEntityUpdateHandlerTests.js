@@ -88,6 +88,7 @@ describe('ProjectEntityUpdateHandler', function () {
       runWithLock: sinon.spy((namespace, id, runner, callback) =>
         runner(callback)
       ),
+      withTimeout: sinon.stub().returns(this.LockManager),
     }
     this.ProjectModel = {
       updateOne: sinon.stub(),
@@ -1952,6 +1953,10 @@ describe('ProjectEntityUpdateHandler', function () {
         this.ProjectEntityHandler.getAllEntitiesFromProject
           .calledWith(this.project)
           .should.equal(true)
+      })
+
+      it('uses an extended timeout', function () {
+        this.LockManager.withTimeout.calledWith(6 * 60).should.equal(true)
       })
 
       it('tells the doc updater to sync the project', function () {

@@ -311,7 +311,7 @@ describe('HistoryController', function () {
       beforeEach(function () {
         this.project_id = 'mock-project-id'
         this.req = { params: { Project_id: this.project_id } }
-        this.res = { sendStatus: sinon.stub() }
+        this.res = { setTimeout: sinon.stub(), sendStatus: sinon.stub() }
         this.next = sinon.stub()
 
         this.error = new Errors.ProjectHistoryDisabledError()
@@ -335,7 +335,7 @@ describe('HistoryController', function () {
       beforeEach(function () {
         this.project_id = 'mock-project-id'
         this.req = { params: { Project_id: this.project_id } }
-        this.res = { sendStatus: sinon.stub() }
+        this.res = { setTimeout: sinon.stub(), sendStatus: sinon.stub() }
         this.next = sinon.stub()
 
         this.ProjectEntityUpdateHandler.resyncProjectHistory = sinon
@@ -347,6 +347,10 @@ describe('HistoryController', function () {
           this.res,
           this.next
         )
+      })
+
+      it('sets an extended response timeout', function () {
+        this.res.setTimeout.should.have.been.calledWith(6 * 60 * 1000)
       })
 
       it('resyncs the project', function () {

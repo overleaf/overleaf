@@ -99,6 +99,7 @@ async function resyncProject(projectId, options = {}) {
     await request.post({
       url: `${settings.apis.project_history.url}/project/${projectId}/resync`,
       json: body,
+      timeout: 6 * 60 * 1000,
     })
   } catch (err) {
     throw OError.tag(err, 'failed to resync project history', { projectId })

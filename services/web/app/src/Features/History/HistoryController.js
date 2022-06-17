@@ -97,6 +97,8 @@ module.exports = HistoryController = {
   },
 
   resyncProjectHistory(req, res, next) {
+    // increase timeout to 6 minutes
+    res.setTimeout(6 * 60 * 1000)
     const projectId = req.params.Project_id
     ProjectEntityUpdateHandler.resyncProjectHistory(projectId, function (err) {
       if (err instanceof Errors.ProjectHistoryDisabledError) {

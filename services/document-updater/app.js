@@ -149,6 +149,7 @@ app.delete('/project', HttpController.deleteMultipleProjects)
 app.post('/project/:project_id', HttpController.updateProject)
 app.post(
   '/project/:project_id/history/resync',
+  longerTimeout,
   HttpController.resyncProjectHistory
 )
 app.post('/project/:project_id/flush', HttpController.flushProject)
@@ -257,4 +258,9 @@ for (const signal of [
   'SIGABRT',
 ]) {
   process.on(signal, shutdownCleanly(signal))
+}
+
+function longerTimeout(req, res, next) {
+  res.setTimeout(6 * 60 * 1000)
+  next()
 }

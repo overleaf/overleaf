@@ -350,6 +350,7 @@ describe('DocumentUpdaterHandler', function () {
               user_id: this.user_id,
             },
             method: 'POST',
+            timeout: 30 * 1000,
           })
           .should.equal(true)
       })
@@ -439,6 +440,7 @@ describe('DocumentUpdaterHandler', function () {
             url: `${this.settings.apis.documentupdater.url}/project/${this.project_id}/doc/${this.doc_id}?fromVersion=${this.fromVersion}`,
             method: 'GET',
             json: true,
+            timeout: 30 * 1000,
           })
           .should.equal(true)
       })
@@ -658,6 +660,7 @@ describe('DocumentUpdaterHandler', function () {
               change_ids: [this.change_id],
             },
             method: 'POST',
+            timeout: 30 * 1000,
           })
           .should.equal(true)
       })
@@ -881,6 +884,7 @@ describe('DocumentUpdaterHandler', function () {
                     version: this.version,
                     projectHistoryId: this.projectHistoryId,
                   },
+                  timeout: 30 * 1000,
                 })
                 .should.equal(true)
               done()
@@ -926,6 +930,7 @@ describe('DocumentUpdaterHandler', function () {
                     version: this.version,
                     projectHistoryId: this.projectHistoryId,
                   },
+                  timeout: 30 * 1000,
                 })
                 .should.equal(true)
               done()
@@ -975,6 +980,7 @@ describe('DocumentUpdaterHandler', function () {
                     version: this.version,
                     projectHistoryId: this.projectHistoryId,
                   },
+                  timeout: 30 * 1000,
                 })
                 .should.equal(true)
               done()
@@ -1018,6 +1024,7 @@ describe('DocumentUpdaterHandler', function () {
                     version: this.version,
                     projectHistoryId: this.projectHistoryId,
                   },
+                  timeout: 30 * 1000,
                 })
                 .should.equal(true)
               done()
@@ -1080,6 +1087,7 @@ describe('DocumentUpdaterHandler', function () {
                   version: this.version,
                   projectHistoryId: this.projectHistoryId,
                 },
+                timeout: 30 * 1000,
               })
               done()
             }

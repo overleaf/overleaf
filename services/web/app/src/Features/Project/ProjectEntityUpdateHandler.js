@@ -30,7 +30,7 @@ const VALID_ROOT_DOC_REGEXP = new RegExp(
   'i'
 )
 
-function wrapWithLock(methodWithoutLock) {
+function wrapWithLock(methodWithoutLock, lockManager = LockManager) {
   // This lock is used to make sure that the project structure updates are made
   // sequentially. In particular the updates must be made in mongo and sent to
   // the doc-updater in the same order.
@@ -39,7 +39,7 @@ function wrapWithLock(methodWithoutLock) {
       const adjustedLength = Math.max(rest.length, 1)
       const args = rest.slice(0, adjustedLength - 1)
       const callback = rest[adjustedLength - 1]
-      LockManager.runWithLock(
+      lockManager.runWithLock(
         LOCK_NAMESPACE,
         projectId,
         cb => methodWithoutLock(projectId, ...args, cb),
@@ -56,7 +56,7 @@ function wrapWithLock(methodWithoutLock) {
       const adjustedLength = Math.max(rest.length, 1)
       const args = rest.slice(0, adjustedLength - 1)
       const callback = rest[adjustedLength - 1]
-      LockManager.runWithLock(
+      lockManager.runWithLock(
         LOCK_NAMESPACE,
         projectId,
         cb => mainTask(projectId, ...args, cb),
@@ -1331,62 +1331,64 @@ const ProjectEntityUpdateHandler = {
 
   // This doesn't directly update project structure but we need to take the lock
   // to prevent anything else being queued before the resync update
-  resyncProjectHistory: wrapWithLock((projectId, callback) =>
-    ProjectGetter.getProject(
-      projectId,
-      { rootFolder: true, overleaf: true },
-      (error, project) => {
-        if (error != null) {
-          return callback(error)
-        }
-
-        const projectHistoryId =
-          project &&
-          project.overleaf &&
-          project.overleaf.history &&
-          project.overleaf.history.id
-        if (projectHistoryId == null) {
-          error = new Errors.ProjectHistoryDisabledError(
-            `project history not enabled for ${projectId}`
-          )
-          return callback(error)
-        }
-
-        let { docs, files, folders } =
-          ProjectEntityHandler.getAllEntitiesFromProject(project)
-        // _checkFileTree() must be passed the folders before docs and
-        // files
-        ProjectEntityUpdateHandler._checkFiletree(
-          projectId,
-          projectHistoryId,
-          [...folders, ...docs, ...files],
-          error => {
-            if (error) {
-              return callback(error)
-            }
-            docs = _.map(docs, doc => ({
-              doc: doc.doc._id,
-              path: doc.path,
-            }))
-
-            files = _.map(files, file => ({
-              file: file.file._id,
-              path: file.path,
-              url: FileStoreHandler._buildUrl(projectId, file.file._id),
-              _hash: file.file.hash,
-            }))
-
-            DocumentUpdaterHandler.resyncProjectHistory(
-              projectId,
-              projectHistoryId,
-              docs,
-              files,
-              callback
-            )
+  resyncProjectHistory: wrapWithLock(
+    (projectId, callback) =>
+      ProjectGetter.getProject(
+        projectId,
+        { rootFolder: true, overleaf: true },
+        (error, project) => {
+          if (error != null) {
+            return callback(error)
           }
-        )
-      }
-    )
+
+          const projectHistoryId =
+            project &&
+            project.overleaf &&
+            project.overleaf.history &&
+            project.overleaf.history.id
+          if (projectHistoryId == null) {
+            error = new Errors.ProjectHistoryDisabledError(
+              `project history not enabled for ${projectId}`
+            )
+            return callback(error)
+          }
+
+          let { docs, files, folders } =
+            ProjectEntityHandler.getAllEntitiesFromProject(project)
+          // _checkFileTree() must be passed the folders before docs and
+          // files
+          ProjectEntityUpdateHandler._checkFiletree(
+            projectId,
+            projectHistoryId,
+            [...folders, ...docs, ...files],
+            error => {
+              if (error) {
+                return callback(error)
+              }
+              docs = _.map(docs, doc => ({
+                doc: doc.doc._id,
+                path: doc.path,
+              }))
+
+              files = _.map(files, file => ({
+                file: file.file._id,
+                path: file.path,
+                url: FileStoreHandler._buildUrl(projectId, file.file._id),
+                _hash: file.file.hash,
+              }))
+
+              DocumentUpdaterHandler.resyncProjectHistory(
+                projectId,
+                projectHistoryId,
+                docs,
+                files,
+                callback
+              )
+            }
+          )
+        }
+      ),
+    LockManager.withTimeout(6 * 60) // use an extended lock for the resync operations
   ),
 
   _checkFiletree(projectId, projectHistoryId, entities, callback) {
