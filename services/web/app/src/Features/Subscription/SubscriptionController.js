@@ -307,12 +307,23 @@ async function successfulSubscription(req, res) {
       user
     )
 
+  const premiumFeaturesDiscoverabilityAssignment =
+    await SplitTestHandler.promises.getAssignment(
+      req,
+      res,
+      'premium-features-discoverability'
+    )
+
+  const premiumFeaturesDiscoverability =
+    premiumFeaturesDiscoverabilityAssignment?.variant === 'active'
+
   if (!personalSubscription) {
     res.redirect('/user/subscription/plans')
   } else {
     res.render('subscriptions/successful_subscription', {
       title: 'thank_you',
       personalSubscription,
+      premiumFeaturesDiscoverability,
     })
   }
 }

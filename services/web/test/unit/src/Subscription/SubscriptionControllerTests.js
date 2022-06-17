@@ -403,6 +403,7 @@ describe('SubscriptionController', function () {
         assert.deepEqual(variables, {
           title: 'thank_you',
           personalSubscription: 'foo',
+          premiumFeaturesDiscoverability: false,
         })
         done()
       }

@@ -1774,5 +1774,6 @@
   "group_plan_with_name_tooltip": "You are on the __plan__ plan as a member of a group subscription, __groupName__. Click to find out how you could benefit from Overleaf premium features!",
   "commons_plan_tooltip": "You’re on the __plan__ plan because of your affiliation with __institution__. Click to find out how you could benefit from Overleaf premium features!",
   "trial_last_day": "This is the last day of your <b>Overleaf Premium</b> trial",
-  "trial_remaining_days": "__days__ more days on your <b>Overleaf Premium</b> trial"
+  "trial_remaining_days": "__days__ more days on your <b>Overleaf Premium</b> trial",
+  "to_get_the_most_of_sub_check_premium_features": "To get the most out of your subscription, check out the list of <0>__appName__’s premium features</0>"
 }
