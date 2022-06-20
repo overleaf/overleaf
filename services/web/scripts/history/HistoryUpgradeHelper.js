@@ -1,9 +1,12 @@
 const { ReadPreference, ObjectId } = require('mongodb')
 const { db } = require('../../app/src/infrastructure/mongodb')
+const Settings = require('@overleaf/settings')
 
 const ProjectHistoryHandler = require('../../app/src/Features/Project/ProjectHistoryHandler')
 const HistoryManager = require('../../app/src/Features/History/HistoryManager')
 const ProjectHistoryController = require('../../modules/admin-panel/app/src/ProjectHistoryController')
+const ProjectEntityHandler = require('../../app/src/Features/Project/ProjectEntityHandler')
+const ProjectEntityUpdateHandler = require('../../app/src/Features/Project/ProjectEntityUpdateHandler')
 
 // Timestamp of when 'Enable history for SL in background' release
 const ID_WHEN_FULL_PROJECT_HISTORY_ENABLED = '5a8d8a370000000000000000'
@@ -292,8 +295,45 @@ async function anyDocHistoryIndexExists(project) {
   )
 }
 
+async function convertLargeDocsToFile(projectId, userId) {
+  const docs = await ProjectEntityHandler.promises.getAllDocs(projectId)
+  let convertedDocCount = 0
+  for (const doc of Object.values(docs)) {
+    const sizeBound = JSON.stringify(doc.lines)
+    if (docIsTooLarge(sizeBound, doc.lines, Settings.max_doc_length)) {
+      await ProjectEntityUpdateHandler.promises.convertDocToFile(
+        projectId,
+        doc._id,
+        userId
+      )
+      convertedDocCount++
+    }
+  }
+  return convertedDocCount
+}
+
+// check whether the total size of the document in characters exceeds the
+// maxDocLength.
+//
+// Copied from document-updater:
+// https://github.com/overleaf/internal/blob/74adfbebda5f3c2c37d9937f0db5c4106ecde492/services/document-updater/app/js/Limits.js#L18
+function docIsTooLarge(estimatedSize, lines, maxDocLength) {
+  if (estimatedSize <= maxDocLength) {
+    return false // definitely under the limit, no need to calculate the total size
+  }
+  // calculate the total size, bailing out early if the size limit is reached
+  let size = 0
+  for (const line of lines) {
+    size += line.length + 1 // include the newline
+    if (size > maxDocLength) return true
+  }
+  // since we didn't hit the limit in the loop, the document is within the allowed length
+  return false
+}
+
 module.exports = {
   determineProjectHistoryType,
   getUpgradeFunctionForType,
   upgradeProject,
+  convertLargeDocsToFile,
 }

@@ -1,4 +1,4 @@
-const SCRIPT_VERSION = 3
+const SCRIPT_VERSION = 4
 const VERBOSE_LOGGING = process.env.VERBOSE_LOGGING === 'true'
 const WRITE_CONCURRENCY = parseInt(process.env.WRITE_CONCURRENCY, 10) || 10
 const BATCH_SIZE = parseInt(process.env.BATCH_SIZE, 10) || 100
@@ -16,11 +16,16 @@ process.env.MONGO_SOCKET_TIMEOUT =
 
 const PROJECT_ID = process.env.PROJECT_ID
 
+// User id is required to move large documents to filestore
+const USER_ID = process.env.PROJECT_ID
+const CONVERT_LARGE_DOCS_TO_FILE = process.env.DRY_RUN === 'true'
+
 const { ObjectId, ReadPreference } = require('mongodb')
 const { db, waitForDb } = require('../../app/src/infrastructure/mongodb')
 const { promiseMapWithLimit } = require('../../app/src/util/promises')
 const { batchedUpdate } = require('../helpers/batchedUpdate')
 const ProjectHistoryController = require('../../modules/admin-panel/app/src/ProjectHistoryController')
+const HistoryUpgradeHelper = require('./HistoryUpgradeHelper')
 
 console.log({
   DRY_RUN,
@@ -110,6 +115,13 @@ async function doUpgradeForNoneWithConversion(project) {
   const projectIdString = project._id.toString()
   if (!DRY_RUN) {
     try {
+      if (CONVERT_LARGE_DOCS_TO_FILE) {
+        const convertedDocCount =
+          await HistoryUpgradeHelper.convertLargeDocsToFile(projectId, USER_ID)
+        console.log(
+          `converted ${convertedDocCount} large docs to binary files for project ${projectId}`
+        )
+      }
       await ProjectHistoryController.migrateProjectHistory(projectIdString)
     } catch (err) {
       // if migrateProjectHistory fails, it cleans up by deleting
