@@ -97,8 +97,8 @@ module.exports = CompileController = {
               ownerAnalyticsId: limits.ownerAnalyticsId,
               status,
               compileTime: timings?.compileE2E,
-              compileTimeout: limits.timeout * 1000,
-              clsiServerId,
+              timeout: limits.timeout === 60 ? 'short' : 'long',
+              server: clsiServerId?.includes('-c2d-') ? 'faster' : 'normal',
             }
           )
         }
