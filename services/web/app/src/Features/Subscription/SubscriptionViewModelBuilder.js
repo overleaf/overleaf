@@ -296,11 +296,22 @@ function buildUsersSubscriptionViewModel(user, callback) {
       }
 
       for (const memberGroupSubscription of memberGroupSubscriptions) {
+        if (memberGroupSubscription.manager_ids?.includes(user._id)) {
+          memberGroupSubscription.userIsGroupManager = true
+        }
         if (memberGroupSubscription.teamNotice) {
           memberGroupSubscription.teamNotice = sanitizeHtml(
             memberGroupSubscription.teamNotice
           )
         }
+        buildGroupSubscriptionForView(memberGroupSubscription)
+      }
+
+      for (const managedGroupSubscription of managedGroupSubscriptions) {
+        if (managedGroupSubscription.member_ids?.includes(user._id)) {
+          managedGroupSubscription.userIsGroupMember = true
+        }
+        buildGroupSubscriptionForView(managedGroupSubscription)
       }
 
       callback(null, {
@@ -457,6 +468,33 @@ function _getRemainingTrialDays(subscription) {
         (trialEndDate.getTime() - now.getTime()) / (24 * 60 * 60 * 1000)
       )
     : -1
+}
+
+function buildGroupSubscriptionForView(groupSubscription) {
+  // most group plans in Recurly should be in form "group_plancode_size_usage"
+  const planLevelFromGroupPlanCode = groupSubscription.planCode.substr(6, 12)
+  if (planLevelFromGroupPlanCode === 'professional') {
+    groupSubscription.planLevelName = 'Professional'
+  } else if (planLevelFromGroupPlanCode === 'collaborator') {
+    groupSubscription.planLevelName = 'Standard'
+  }
+  // there are some group subscription entries that have the personal plancodes...
+  // this fallback tries to still show the right thing in these cases:
+  if (!groupSubscription.planLevelName) {
+    if (groupSubscription.planCode.startsWith('professional')) {
+      groupSubscription.planLevelName = 'Professional'
+    } else if (groupSubscription.planCode.startsWith('collaborator')) {
+      groupSubscription.planLevelName = 'Standard'
+    } else {
+      // if we still don't have anything, we can show the plan name (eg, v1 Pro):
+      const plan = PlansLocator.findLocalPlanInSettings(
+        groupSubscription.planCode
+      )
+      groupSubscription.planLevelName = plan
+        ? plan.name
+        : groupSubscription.planCode
+    }
+  }
 }
 
 module.exports = {

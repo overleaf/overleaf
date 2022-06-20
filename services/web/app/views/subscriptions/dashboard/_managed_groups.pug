@@ -1,8 +1,8 @@
 each managedGroupSubscription in managedGroupSubscriptions
-	p
-		| You are a manager of
-		|
-		+teamName(managedGroupSubscription)
+	if (managedGroupSubscription.userIsGroupMember)
+		p !{translate("you_are_a_manager_and_member_of_x_plan_as_member_of_group_subscription_y_administered_by_z", {planName: managedGroupSubscription.planLevelName, groupName: managedGroupSubscription.teamName || '', adminEmail: managedGroupSubscription.admin_id.email}, [{name: 'a', attrs: {href: '/user/subscription/plans'}}, 'strong'])}
+	else
+		p !{translate("you_are_a_manager_of_x_plan_as_member_of_group_subscription_y_administered_by_z", {planName: managedGroupSubscription.planLevelName, groupName: managedGroupSubscription.teamName || '', adminEmail: managedGroupSubscription.admin_id.email}, [{name: 'a', attrs: {href: '/user/subscription/plans'}}, 'strong'])}
 	p
 		a.btn.btn-primary(href="/manage/groups/" + managedGroupSubscription._id + "/members")
 			i.fa.fa-fw.fa-users

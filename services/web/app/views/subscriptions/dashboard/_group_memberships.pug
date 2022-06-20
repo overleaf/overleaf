@@ -1,18 +1,16 @@
 div(ng-controller="GroupMembershipController")
 	each groupSubscription in memberGroupSubscriptions
-		if (user._id+'' != groupSubscription.admin_id._id+'')
-			div
-				p
-					| You are a member of
-					|
-					+teamName(groupSubscription)
-				if (groupSubscription.teamNotice && groupSubscription.teamNotice != '')
-					p
-						//- Team notice is sanitized in SubscriptionViewModelBuilder
-						em(ng-non-bindable) !{groupSubscription.teamNotice}
-				span 
-					button.btn.btn-danger.text-capitalise(ng-click="removeSelfFromGroup('"+groupSubscription._id+"')") #{translate("leave_group")}
-			hr
+		unless (groupSubscription.userIsGroupManager)
+			if (user._id+'' != groupSubscription.admin_id._id+'')
+				div
+					p !{translate("you_are_on_x_plan_as_member_of_group_subscription_y_administered_by_z", {planName: groupSubscription.planLevelName, groupName: groupSubscription.teamName || '', adminEmail: groupSubscription.admin_id.email}, [{name: 'a', attrs: {href: '/user/subscription/plans'}}, 'strong'])}
+					if (groupSubscription.teamNotice && groupSubscription.teamNotice != '')
+						p
+							//- Team notice is sanitized in SubscriptionViewModelBuilder
+							em(ng-non-bindable) !{groupSubscription.teamNotice}
+					span 
+						button.btn.btn-danger.text-capitalise(ng-click="removeSelfFromGroup('"+groupSubscription._id+"')") #{translate("leave_group")}
+				hr
 
 script(type='text/ng-template', id='LeaveGroupModalTemplate')
 	.modal-header
