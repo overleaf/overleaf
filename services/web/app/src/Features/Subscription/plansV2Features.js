@@ -278,8 +278,8 @@ const groupPlans = [
         },
       },
       {
-        feature: 'personalised_onboarding',
-        info: 'personalised_onboarding_info',
+        feature: 'personalized_onboarding',
+        info: 'personalized_onboarding_info',
         value: 'bool',
         plans: {
           group_standard: false,
@@ -691,8 +691,8 @@ const studentPlans = [
         },
       },
       {
-        feature: 'personalised_onboarding',
-        info: 'personalised_onboarding_info',
+        feature: 'personalized_onboarding',
+        info: 'personalized_onboarding_info',
         value: 'bool',
         plans: {
           free: false,
