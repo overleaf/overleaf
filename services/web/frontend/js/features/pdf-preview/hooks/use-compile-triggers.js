@@ -37,5 +37,5 @@ export default function useCompileTriggers() {
     showPdfDetach ? setOrTriggerChangedAt(Date.now()) : setChangedAt(Date.now())
   }, [setOrTriggerChangedAt, setChangedAt])
   useEventListener('doc:changed', setChangedAtHandler)
-  useEventListener('doc:saved', setChangedAtHandler)
+  useEventListener('doc:saved', setChangedAtHandler) // TODO: store this separately?
 }

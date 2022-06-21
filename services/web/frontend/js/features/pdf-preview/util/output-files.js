@@ -143,7 +143,7 @@ export function buildLogEntryAnnotations(entries, fileTreeManager) {
           row: entry.line - 1,
           type: entry.level === 'error' ? 'error' : 'warning',
           text: entry.message,
-          source: 'compile',
+          source: 'compile', // NOTE: this is used in Ace for filtering the annotations
         })
       }
     }

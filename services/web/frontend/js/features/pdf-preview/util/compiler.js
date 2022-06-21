@@ -75,7 +75,7 @@ export default class DocumentCompiler {
 
     try {
       // reset values
-      this.setChangedAt(0)
+      this.setChangedAt(0) // TODO: wait for doc:saved?
       this.validationIssues = undefined
 
       window.dispatchEvent(new CustomEvent('flush-changes')) // TODO: wait for this?
