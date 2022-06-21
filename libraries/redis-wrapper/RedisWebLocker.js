@@ -137,7 +137,9 @@ module.exports = class RedisWebLocker {
       queue = async.queue(handler, 1)
       queue.push(task)
       // remove the queue object when queue is empty
-      queue.drain = () => LOCK_QUEUES.delete(queueName)
+      queue.drain(() => {
+        LOCK_QUEUES.delete(queueName)
+      })
       // store the queue in our global map
       LOCK_QUEUES.set(queueName, queue)
     } else {
@@ -188,5 +190,9 @@ module.exports = class RedisWebLocker {
         callback(null, result)
       }
     })
+  }
+
+  _lockQueuesSize() {
+    return LOCK_QUEUES.size
   }
 }

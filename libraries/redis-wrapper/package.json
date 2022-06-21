@@ -26,13 +26,13 @@
     "@overleaf/o-error": "^3.4.0"
   },
   "dependencies": {
-    "ioredis": "~4.27.1",
-    "async": "0.6.2"
+    "async": "^3.2.2",
+    "ioredis": "~4.27.1"
   },
   "devDependencies": {
+    "@overleaf/logger": "*",
     "@overleaf/o-error": "^3.4.0",
     "chai": "^4.3.6",
-    "@overleaf/logger": "*",
     "mocha": "^8.4.0",
     "sandboxed-module": "^2.0.4",
     "sinon": "^9.2.4"

@@ -74,6 +74,10 @@ describe('LockManager - getting the lock', function () {
     it('should return the callback', function () {
       return this.callback.calledWith(null).should.equal(true)
     })
+
+    it('should clear the lock queue', function () {
+      this.LockManager._lockQueuesSize().should.equal(0)
+    })
   })
 
   describe('when the lock is initially set', function () {
@@ -106,6 +110,10 @@ describe('LockManager - getting the lock', function () {
 
     it('should return the callback', function () {
       return this.callback.calledWith(null).should.equal(true)
+    })
+
+    it('should clear the lock queue', function () {
+      this.LockManager._lockQueuesSize().should.equal(0)
     })
   })
 
@@ -177,6 +185,10 @@ describe('LockManager - getting the lock', function () {
 
     it('should process the requests in order', function () {
       return this.results.should.deep.equal([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+    })
+
+    it('should clear the lock queue', function () {
+      this.LockManager._lockQueuesSize().should.equal(0)
     })
   })
 })

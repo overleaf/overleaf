@@ -13,6 +13,6 @@ const queue = async.queue(
   Settings.parallelSqlQueryLimit
 )
 
-queue.drain = () => logger.debug('all items have been processed')
+queue.drain(() => logger.debug('all items have been processed'))
 
 module.exports = { queue }

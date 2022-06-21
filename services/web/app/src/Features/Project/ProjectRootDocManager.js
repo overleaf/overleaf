@@ -95,7 +95,7 @@ module.exports = ProjectRootDocManager = {
             let doc = null
 
             return async.until(
-              () => doc != null || files.length === 0,
+              cb => cb(null, doc != null || files.length === 0),
               function (cb) {
                 const file = files.shift()
                 return fs.readFile(

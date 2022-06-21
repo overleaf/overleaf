@@ -22,7 +22,7 @@
     "@overleaf/o-error": "^3.4.0",
     "@overleaf/redis-wrapper": "^2.0.0",
     "@overleaf/settings": "^3.0.0",
-    "async": "^0.9.0",
+    "async": "^3.2.2",
     "base64id": "0.1.0",
     "body-parser": "^1.19.0",
     "bunyan": "^1.8.15",

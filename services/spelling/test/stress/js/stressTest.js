@@ -149,7 +149,7 @@ const q = async.queue(
   3
 )
 
-q.drain = () => console.log('all items have been processed')
+q.drain(() => console.log('all items have been processed'))
 
 for (let i = 0; i <= 1000; i++) {
   q.push({

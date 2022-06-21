@@ -43,12 +43,12 @@ function scanAndPurge(cb) {
   })
 
   stream.on('end', () => {
-    queue.drain = () => {
+    queue.drain(() => {
       console.log(
         `All sessions have been checked, ${totalDeletedSessions} deleted`
       )
       cb()
-    }
+    })
   })
 
   stream.on('error', err => {
