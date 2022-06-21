@@ -9,7 +9,6 @@ import PDFJSWrapper from '../util/pdf-js-wrapper'
 import withErrorBoundary from '../../../infrastructure/error-boundary'
 import ErrorBoundaryFallback from './error-boundary-fallback'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
-import getMeta from '../../../utils/meta'
 import { captureException } from '../../../infrastructure/error-reporter'
 
 function PdfJsViewer({ url }) {
@@ -64,7 +63,7 @@ function PdfJsViewer({ url }) {
     if (pdfJsWrapper) {
       const handlePagesinit = () => {
         setInitialised(true)
-        if (getMeta('ol-trackPdfDownload') && firstRenderDone) {
+        if (firstRenderDone) {
           const visible = !document.hidden
           if (!visible) {
             firstRenderDone({

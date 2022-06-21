@@ -37,6 +37,7 @@ export const CompileContextPropTypes = {
     clsiServerId: PropTypes.string,
     codeCheckFailed: PropTypes.bool.isRequired,
     compiling: PropTypes.bool.isRequired,
+    deliveryLatencies: PropTypes.object.isRequired,
     draft: PropTypes.bool.isRequired,
     error: PropTypes.string,
     fileList: PropTypes.object,
@@ -45,6 +46,7 @@ export const CompileContextPropTypes = {
     logEntries: PropTypes.object,
     logEntryAnnotations: PropTypes.object,
     pdfDownloadUrl: PropTypes.string,
+    pdfSize: PropTypes.number,
     pdfUrl: PropTypes.string,
     pdfViewer: PropTypes.string,
     position: PropTypes.object,
@@ -60,6 +62,7 @@ export const CompileContextPropTypes = {
     setStopOnFirstError: PropTypes.func.isRequired,
     setStopOnValidationError: PropTypes.func.isRequired,
     showLogs: PropTypes.bool.isRequired,
+    showFasterCompilesFeedbackUI: PropTypes.bool.isRequired,
     stopOnFirstError: PropTypes.bool.isRequired,
     stopOnValidationError: PropTypes.bool.isRequired,
     stoppedOnFirstError: PropTypes.bool.isRequired,
@@ -100,6 +103,8 @@ export function LocalCompileProvider({ children }) {
   // the URL for loading the PDF in the preview pane
   const [pdfUrl, setPdfUrl] = useScopeValueSetterOnly('pdf.url')
 
+  const [pdfSize, setPdfSize] = useState(0)
+
   // the project is considered to be "uncompiled" if a doc has changed since the last compile started
   const [uncompiled, setUncompiled] = useScopeValue('pdf.uncompiled')
 
@@ -112,6 +117,9 @@ export function LocalCompileProvider({ children }) {
   // callback to be invoked for PdfJsMetrics
   const [firstRenderDone, setFirstRenderDone] = useState()
 
+  // latencies of compile/pdf download/rendering
+  const [deliveryLatencies, setDeliveryLatencies] = useState({})
+
   // whether the project has been compiled yet
   const [compiledOnce, setCompiledOnce] = useState(false)
 
@@ -120,6 +128,10 @@ export function LocalCompileProvider({ children }) {
 
   // whether the logs should be visible
   const [showLogs, setShowLogs] = useState(false)
+
+  // whether the faster compiles feedback UI should be displayed
+  const [showFasterCompilesFeedbackUI, setShowFasterCompilesFeedbackUI] =
+    useState(false)
 
   // whether the compile dropdown arrow should be animated
   const [animateCompileDropdownArrow, setAnimateCompileDropdownArrow] =
@@ -215,6 +227,7 @@ export function LocalCompileProvider({ children }) {
       setCompiling,
       setData,
       setFirstRenderDone,
+      setDeliveryLatencies,
       setError,
       cleanupCompileResult,
       compilingRef,
@@ -260,6 +273,9 @@ export function LocalCompileProvider({ children }) {
       if (data.clsiServerId) {
         setClsiServerId(data.clsiServerId) // set in scope, for PdfSynctexController
       }
+      setShowFasterCompilesFeedbackUI(
+        Boolean(data.showFasterCompilesFeedbackUI)
+      )
 
       if (data.outputFiles) {
         const outputFiles = new Map()
@@ -272,6 +288,7 @@ export function LocalCompileProvider({ children }) {
         const result = handleOutputFiles(outputFiles, projectId, data)
         if (data.status === 'success') {
           setPdfDownloadUrl(result.pdfDownloadUrl)
+          setPdfSize(result.pdfSize)
           setPdfUrl(result.pdfUrl)
         }
 
@@ -389,6 +406,7 @@ export function LocalCompileProvider({ children }) {
     setLogEntries,
     setLogEntryAnnotations,
     setPdfDownloadUrl,
+    setPdfSize,
     setPdfUrl,
   ])
 
@@ -479,6 +497,7 @@ export function LocalCompileProvider({ children }) {
       clsiServerId,
       codeCheckFailed,
       compiling,
+      deliveryLatencies,
       draft,
       error,
       fileList,
@@ -488,6 +507,7 @@ export function LocalCompileProvider({ children }) {
       logEntryAnnotations,
       logEntries,
       pdfDownloadUrl,
+      pdfSize,
       pdfUrl,
       pdfViewer,
       position,
@@ -506,6 +526,7 @@ export function LocalCompileProvider({ children }) {
       setStopOnFirstError,
       setStopOnValidationError,
       showLogs,
+      showFasterCompilesFeedbackUI,
       startCompile,
       stopCompile,
       stopOnFirstError,
@@ -525,6 +546,7 @@ export function LocalCompileProvider({ children }) {
       clsiServerId,
       codeCheckFailed,
       compiling,
+      deliveryLatencies,
       draft,
       error,
       fileList,
@@ -535,6 +557,7 @@ export function LocalCompileProvider({ children }) {
       logEntryAnnotations,
       position,
       pdfDownloadUrl,
+      pdfSize,
       pdfUrl,
       pdfViewer,
       rawLog,
@@ -549,6 +572,7 @@ export function LocalCompileProvider({ children }) {
       setStopOnFirstError,
       setStopOnValidationError,
       showLogs,
+      showFasterCompilesFeedbackUI,
       startCompile,
       stopCompile,
       stopOnFirstError,

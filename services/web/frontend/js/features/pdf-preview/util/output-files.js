@@ -9,6 +9,7 @@ export function handleOutputFiles(outputFiles, projectId, data) {
   const result = {}
 
   const outputFile = outputFiles.get('output.pdf')
+  result.pdfSize = outputFile?.size
 
   if (outputFile) {
     // build the URL for viewing the PDF in the preview UI

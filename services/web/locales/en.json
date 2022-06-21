@@ -1,4 +1,9 @@
 {
+  "faster_compiles_feedback_question": "Was this compile different than usual?",
+  "faster_compiles_feedback_seems_faster": "Faster",
+  "faster_compiles_feedback_seems_same": "Same",
+  "faster_compiles_feedback_seems_slower": "Slower",
+  "faster_compiles_feedback_thanks": "Thanks for the feedback!",
   "generic_linked_file_compile_error": "This project’s output files are not available because it failed to compile. Please open the project to see the compilation error details.",
   "chat_error": "Could not load chat messages, please try again.",
   "reconnect": "Try again",

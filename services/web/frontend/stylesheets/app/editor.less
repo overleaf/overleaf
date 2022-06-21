@@ -126,6 +126,34 @@
   padding: @line-height-computed 0;
 }
 
+.faster-compiles-feedback {
+  position: absolute;
+  bottom: 0;
+  right: 0.5rem; // scrollbar
+  margin: 1rem;
+
+  padding: 10px;
+
+  .btn {
+    margin: 0 0 0 10px;
+  }
+  .faster-compiles-feedback-options {
+    display: inline;
+    white-space: nowrap;
+  }
+  .faster-compiles-feedback-option {
+    background: #1d4c82;
+  }
+  .faster-compiles-feedback-dismiss {
+    border: 0;
+    margin: 0 0 0 5px;
+    color: #1d4c82;
+    right: 0;
+    top: 0;
+    float: right;
+  }
+}
+
 .toolbar-editor {
   height: @editor-toolbar-height;
   background-color: @editor-toolbar-bg;

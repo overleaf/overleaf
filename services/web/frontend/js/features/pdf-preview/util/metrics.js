@@ -1,5 +1,6 @@
 import { v4 as uuid } from 'uuid'
 import { sendMB } from '../../../infrastructure/event-tracking'
+import getMeta from '../../../utils/meta'
 
 // VERSION should get incremented when making changes to caching behavior or
 //  adjusting metrics collection.
@@ -20,15 +21,22 @@ export function trackPdfDownload(response, compileTimeClientE2E) {
 
   const t0 = performance.now()
   let bandwidth = 0
+  const deliveryLatencies = {
+    compileTimeClientE2E,
+    compileTimeServerE2E: timings?.compileE2E,
+  }
+
   function firstRenderDone({ timePDFFetched, timePDFRendered }) {
-    const latencyFetch = timePDFFetched - t0
+    const latencyFetch = Math.ceil(timePDFFetched - t0)
+    deliveryLatencies.latencyFetch = latencyFetch
     // The renderer does not yield in case the browser tab is hidden.
     // It will yield when the browser tab is visible again.
     // This will skew our performance metrics for rendering!
     // We are omitting the render time in case we detect this state.
     let latencyRender
     if (timePDFRendered) {
-      latencyRender = timePDFRendered - timePDFFetched
+      latencyRender = Math.ceil(timePDFRendered - timePDFFetched)
+      deliveryLatencies.latencyRender = latencyRender
     }
     done({ latencyFetch, latencyRender })
   }
@@ -41,20 +49,23 @@ export function trackPdfDownload(response, compileTimeClientE2E) {
     done = resolve
   })
 
-  // Submit latency along with compile context.
-  onFirstRenderDone.then(({ latencyFetch, latencyRender }) => {
-    submitCompileMetrics({
-      latencyFetch,
-      latencyRender,
-      compileTimeClientE2E,
-      stats,
-      timings,
+  if (getMeta('ol-trackPdfDownload')) {
+    // Submit latency along with compile context.
+    onFirstRenderDone.then(({ latencyFetch, latencyRender }) => {
+      submitCompileMetrics({
+        latencyFetch,
+        latencyRender,
+        compileTimeClientE2E,
+        stats,
+        timings,
+      })
     })
-  })
-  // Submit bandwidth counter separate from compile context.
-  submitPDFBandwidth({ pdfJsMetrics, serviceWorkerMetrics })
+    // Submit bandwidth counter separate from compile context.
+    submitPDFBandwidth({ pdfJsMetrics, serviceWorkerMetrics })
+  }
 
   return {
+    deliveryLatencies,
     firstRenderDone,
     updateConsumedBandwidth,
   }

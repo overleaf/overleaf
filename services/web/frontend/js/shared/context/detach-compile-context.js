@@ -26,6 +26,7 @@ export function DetachCompileProvider({ children }) {
     clsiServerId: _clsiServerId,
     codeCheckFailed: _codeCheckFailed,
     compiling: _compiling,
+    deliveryLatencies: _deliveryLatencies,
     draft: _draft,
     error: _error,
     fileList: _fileList,
@@ -35,6 +36,7 @@ export function DetachCompileProvider({ children }) {
     logEntries: _logEntries,
     logEntryAnnotations: _logEntryAnnotations,
     pdfDownloadUrl: _pdfDownloadUrl,
+    pdfSize: _pdfSize,
     pdfUrl: _pdfUrl,
     pdfViewer: _pdfViewer,
     position: _position,
@@ -51,6 +53,7 @@ export function DetachCompileProvider({ children }) {
     setStopOnFirstError: _setStopOnFirstError,
     setStopOnValidationError: _setStopOnValidationError,
     showLogs: _showLogs,
+    showFasterCompilesFeedbackUI: _showFasterCompilesFeedbackUI,
     stopOnFirstError: _stopOnFirstError,
     stopOnValidationError: _stopOnValidationError,
     stoppedOnFirstError: _stoppedOnFirstError,
@@ -102,6 +105,12 @@ export function DetachCompileProvider({ children }) {
     'detacher',
     'detached'
   )
+  const [deliveryLatencies] = useDetachStateWatcher(
+    'deliveryLatencies',
+    _deliveryLatencies,
+    'detacher',
+    'detached'
+  )
   const [draft] = useDetachStateWatcher('draft', _draft, 'detacher', 'detached')
   const [error] = useDetachStateWatcher('error', _error, 'detacher', 'detached')
   const [fileList] = useDetachStateWatcher(
@@ -146,6 +155,12 @@ export function DetachCompileProvider({ children }) {
     'detacher',
     'detached'
   )
+  const [pdfSize] = useDetachStateWatcher(
+    'pdfSize',
+    _pdfSize,
+    'detacher',
+    'detached'
+  )
   const [pdfUrl] = useDetachStateWatcher(
     'pdfUrl',
     _pdfUrl,
@@ -173,6 +188,12 @@ export function DetachCompileProvider({ children }) {
   const [showLogs] = useDetachStateWatcher(
     'showLogs',
     _showLogs,
+    'detacher',
+    'detached'
+  )
+  const [showFasterCompilesFeedbackUI] = useDetachStateWatcher(
+    'showFasterCompilesFeedbackUI',
+    _showFasterCompilesFeedbackUI,
     'detacher',
     'detached'
   )
@@ -331,6 +352,7 @@ export function DetachCompileProvider({ children }) {
       clsiServerId,
       codeCheckFailed,
       compiling,
+      deliveryLatencies,
       draft,
       error,
       fileList,
@@ -340,6 +362,7 @@ export function DetachCompileProvider({ children }) {
       logEntryAnnotations,
       logEntries,
       pdfDownloadUrl,
+      pdfSize,
       pdfUrl,
       pdfViewer,
       position,
@@ -358,6 +381,7 @@ export function DetachCompileProvider({ children }) {
       setStopOnFirstError,
       setStopOnValidationError,
       showLogs,
+      showFasterCompilesFeedbackUI,
       startCompile,
       stopCompile,
       stopOnFirstError,
@@ -377,6 +401,7 @@ export function DetachCompileProvider({ children }) {
       clsiServerId,
       codeCheckFailed,
       compiling,
+      deliveryLatencies,
       draft,
       error,
       fileList,
@@ -386,6 +411,7 @@ export function DetachCompileProvider({ children }) {
       logEntryAnnotations,
       logEntries,
       pdfDownloadUrl,
+      pdfSize,
       pdfUrl,
       pdfViewer,
       position,
@@ -404,6 +430,7 @@ export function DetachCompileProvider({ children }) {
       setStopOnFirstError,
       setStopOnValidationError,
       showLogs,
+      showFasterCompilesFeedbackUI,
       startCompile,
       stopCompile,
       stopOnFirstError,

@@ -88,7 +88,9 @@ module.exports = CompileController = {
         if (pdfDownloadDomain && outputUrlPrefix) {
           pdfDownloadDomain += outputUrlPrefix
         }
+        let showFasterCompilesFeedbackUI = false
         if (limits?.emitCompileResultEvent) {
+          showFasterCompilesFeedbackUI = true
           AnalyticsManager.recordEventForSession(
             req.session,
             'compile-result-backend',
@@ -111,6 +113,7 @@ module.exports = CompileController = {
           stats,
           timings,
           pdfDownloadDomain,
+          showFasterCompilesFeedbackUI,
         })
       }
     )

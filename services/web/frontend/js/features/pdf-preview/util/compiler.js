@@ -22,6 +22,7 @@ export default class DocumentCompiler {
     setCompiling,
     setData,
     setFirstRenderDone,
+    setDeliveryLatencies,
     setError,
     cleanupCompileResult,
     signal,
@@ -33,6 +34,7 @@ export default class DocumentCompiler {
     this.setCompiling = setCompiling
     this.setData = setData
     this.setFirstRenderDone = setFirstRenderDone
+    this.setDeliveryLatencies = setDeliveryLatencies
     this.setError = setError
     this.cleanupCompileResult = cleanupCompileResult
     this.signal = signal
@@ -100,8 +102,12 @@ export default class DocumentCompiler {
         { body, signal: this.signal }
       )
 
-      const compileTimeClientE2E = performance.now() - t0
-      const { firstRenderDone } = trackPdfDownload(data, compileTimeClientE2E)
+      const compileTimeClientE2E = Math.ceil(performance.now() - t0)
+      const { deliveryLatencies, firstRenderDone } = trackPdfDownload(
+        data,
+        compileTimeClientE2E
+      )
+      this.setDeliveryLatencies(() => deliveryLatencies)
       this.setFirstRenderDone(() => firstRenderDone)
 
       // unset the error before it's set again later, so that components are recreated and events are tracked

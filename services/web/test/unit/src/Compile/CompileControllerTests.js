@@ -113,6 +113,7 @@ describe('CompileController', function () {
                 },
               ],
               pdfDownloadDomain: 'https://compiles.overleaf.test',
+              showFasterCompilesFeedbackUI: false,
             })
           )
         })
@@ -154,6 +155,7 @@ describe('CompileController', function () {
                 },
               ],
               pdfDownloadDomain: 'https://compiles.overleaf.test/zone/b',
+              showFasterCompilesFeedbackUI: false,
             })
           )
         })
@@ -191,6 +193,7 @@ describe('CompileController', function () {
           JSON.stringify({
             status: this.status,
             outputFiles: this.outputFiles,
+            showFasterCompilesFeedbackUI: false,
           })
         )
       })

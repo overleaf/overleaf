@@ -5,6 +5,7 @@ import PdfViewer from './pdf-viewer'
 import LoadingSpinner from '../../../shared/components/loading-spinner'
 import PdfHybridPreviewToolbar from './pdf-preview-hybrid-toolbar'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
+import FasterCompilesFeedback from './faster-compiles-feedback'
 
 function PdfPreviewPane() {
   const { pdfUrl } = useCompileContext()
@@ -17,6 +18,7 @@ function PdfPreviewPane() {
       <Suspense fallback={<LoadingPreview />}>
         <div className="pdf-viewer">
           <PdfViewer />
+          <FasterCompilesFeedback />
         </div>
       </Suspense>
       <PdfLogsViewer />
