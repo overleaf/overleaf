@@ -91,7 +91,7 @@ module.exports = CompileController = {
         if (limits?.emitCompileResultEvent) {
           AnalyticsManager.recordEventForSession(
             req.session,
-            'compile-result',
+            'compile-result-backend',
             {
               projectId,
               ownerAnalyticsId: limits.ownerAnalyticsId,
