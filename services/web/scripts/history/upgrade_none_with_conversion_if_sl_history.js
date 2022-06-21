@@ -17,8 +17,9 @@ process.env.MONGO_SOCKET_TIMEOUT =
 const PROJECT_ID = process.env.PROJECT_ID
 
 // User id is required to move large documents to filestore
-const USER_ID = process.env.PROJECT_ID
-const CONVERT_LARGE_DOCS_TO_FILE = process.env.DRY_RUN === 'true'
+const USER_ID = process.env.USER_ID
+const CONVERT_LARGE_DOCS_TO_FILE =
+  process.env.CONVERT_LARGE_DOCS_TO_FILE === 'true'
 
 const { ObjectId, ReadPreference } = require('mongodb')
 const { db, waitForDb } = require('../../app/src/infrastructure/mongodb')
