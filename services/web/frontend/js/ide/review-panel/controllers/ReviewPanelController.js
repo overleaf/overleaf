@@ -1301,6 +1301,21 @@ export default App.controller(
           $scope.$broadcast('editor:focus:changed', from, to, !empty)
           break
         }
+
+        case 'add-new-comment': {
+          $scope.addNewCommentFromKbdShortcut()
+          break
+        }
+
+        case 'toggle-track-changes': {
+          $scope.toggleTrackChangesFromKbdShortcut()
+          break
+        }
+
+        case 'toggle-review-panel': {
+          ide.toggleReviewPanel()
+          break
+        }
       }
     })
   }

@@ -133,12 +133,14 @@ App.controller(
     $scope.chat = {}
 
     ide.toggleReviewPanel = $scope.toggleReviewPanel = function () {
-      if (!$scope.project.features.trackChangesVisible) {
-        return
-      }
-      $scope.ui.reviewPanelOpen = !$scope.ui.reviewPanelOpen
-      eventTracking.sendMB('rp-toggle-panel', {
-        value: $scope.ui.reviewPanelOpen,
+      $scope.$applyAsync(() => {
+        if (!$scope.project.features.trackChangesVisible) {
+          return
+        }
+        $scope.ui.reviewPanelOpen = !$scope.ui.reviewPanelOpen
+        eventTracking.sendMB('rp-toggle-panel', {
+          value: $scope.ui.reviewPanelOpen,
+        })
       })
     }
 
