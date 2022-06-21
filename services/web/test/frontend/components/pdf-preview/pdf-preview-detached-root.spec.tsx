@@ -62,7 +62,7 @@ describe('<PdfPreviewDetachedRoot/>', function () {
     cy.findByRole('button', { name: 'Clear cached files' })
       .should('not.be.disabled')
       .click()
-      .then(() => {
+      .should(() => {
         expect(sysendTestHelper.getLastBroacastMessage()).to.deep.equal({
           role: 'detached',
           event: 'action-clearCache',

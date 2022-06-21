@@ -22,7 +22,7 @@ function getLastDetachCall(method) {
 }
 
 function getLastBroacastMessage() {
-  return getLastDetachCall('broadcast').args[1]
+  return getLastDetachCall('broadcast')?.args[1]
 }
 
 function getAllBroacastMessages() {
@@ -32,7 +32,7 @@ function getAllBroacastMessages() {
 // this fakes receiving a message by calling the handler add to `on`. A bit
 // funky, but works for now
 function receiveMessage(message) {
-  getLastDetachCall('on').args[1](message)
+  getLastDetachCall('on')?.args[1](message)
 }
 
 export default {
