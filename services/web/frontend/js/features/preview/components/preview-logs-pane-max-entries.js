@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback } from 'react'
 import PropTypes from 'prop-types'
 import { Trans, useTranslation } from 'react-i18next'
 import { Button } from 'react-bootstrap'
@@ -7,7 +7,7 @@ import Icon from '../../../shared/components/icon'
 import getMeta from '../../../utils/meta'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import { useStopOnFirstError } from '../../../shared/hooks/use-stop-on-first-error'
-import BetaBadge from '../../../shared/components/beta-badge'
+import StopOnFirstErrorBadge from '../../../shared/components/stop-on-first-error-badge'
 
 function PreviewLogsPaneMaxEntries({ totalEntries, entriesShown, hasErrors }) {
   const { t } = useTranslation()
@@ -28,22 +28,6 @@ function PreviewLogsPaneMaxEntries({ totalEntries, entriesShown, hasErrors }) {
     startCompile({ stopOnFirstError: true })
     setAnimateCompileDropdownArrow(true)
   }, [enableStopOnFirstError, startCompile, setAnimateCompileDropdownArrow])
-
-  const betaBadgeTooltip = useMemo(
-    () => ({
-      id: 'stop-on-first-error-tooltip',
-      placement: 'bottom',
-      className: 'tooltip-wide',
-      text: (
-        <>
-          We are beta testing the “Stop on first error” compilation mode.
-          <br />
-          Click to give feedback
-        </>
-      ),
-    }),
-    []
-  )
 
   return (
     <div className="log-entry" aria-label={t('log_entry_maximum_entries')}>
@@ -73,10 +57,7 @@ function PreviewLogsPaneMaxEntries({ totalEntries, entriesShown, hasErrors }) {
                       ),
                     }}
                   />{' '}
-                  <BetaBadge
-                    tooltip={betaBadgeTooltip}
-                    url="https://forms.gle/7M8821o5RDZrFKoF6"
-                  />
+                  <StopOnFirstErrorBadge placement="bottom" />
                 </p>
                 <p>{t('log_entry_maximum_entries_see_full_logs')}</p>
               </>
