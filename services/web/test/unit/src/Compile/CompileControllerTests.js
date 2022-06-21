@@ -24,6 +24,7 @@ describe('CompileController', function () {
       apis: {
         clsi: {
           url: 'clsi.example.com',
+          defaultBackendClass: 'e2',
         },
         clsi_priority: {
           url: 'clsi-priority.example.com',
@@ -280,13 +281,11 @@ describe('CompileController', function () {
       })
 
       it('should use the supplied values', function () {
-        this.ClsiManager.sendExternalRequest
-          .calledWith(
-            this.submission_id,
-            { compileGroup: 'special', timeout: 600 },
-            { compileGroup: 'special', timeout: 600 }
-          )
-          .should.equal(true)
+        this.ClsiManager.sendExternalRequest.should.have.been.calledWith(
+          this.submission_id,
+          { compileGroup: 'special', timeout: 600 },
+          { compileGroup: 'special', compileBackendClass: 'e2', timeout: 600 }
+        )
       })
     })
 
@@ -302,25 +301,24 @@ describe('CompileController', function () {
       })
 
       it('should use the other options but default values for compileGroup and timeout', function () {
-        this.ClsiManager.sendExternalRequest
-          .calledWith(
-            this.submission_id,
-            {
-              rootResourcePath: 'main.tex',
-              compiler: 'lualatex',
-              draft: true,
-              check: 'validate',
-            },
-            {
-              rootResourcePath: 'main.tex',
-              compiler: 'lualatex',
-              draft: true,
-              check: 'validate',
-              compileGroup: 'standard',
-              timeout: 60,
-            }
-          )
-          .should.equal(true)
+        this.ClsiManager.sendExternalRequest.should.have.been.calledWith(
+          this.submission_id,
+          {
+            rootResourcePath: 'main.tex',
+            compiler: 'lualatex',
+            draft: true,
+            check: 'validate',
+          },
+          {
+            rootResourcePath: 'main.tex',
+            compiler: 'lualatex',
+            draft: true,
+            check: 'validate',
+            compileGroup: 'standard',
+            compileBackendClass: 'e2',
+            timeout: 60,
+          }
+        )
       })
     })
   })
@@ -445,11 +443,14 @@ describe('CompileController', function () {
       })
 
       it('should proxy to CLSI with correct URL and default limits', function () {
-        this.CompileController.proxyToClsiWithLimits
-          .calledWith(this.submission_id, this.expected_url, {
+        this.CompileController.proxyToClsiWithLimits.should.have.been.calledWith(
+          this.submission_id,
+          this.expected_url,
+          {
             compileGroup: 'standard',
-          })
-          .should.equal(true)
+            compileBackendClass: 'e2',
+          }
+        )
       })
     })
 
@@ -464,11 +465,14 @@ describe('CompileController', function () {
       })
 
       it('should proxy to CLSI with correct URL and specified limits', function () {
-        this.CompileController.proxyToClsiWithLimits
-          .calledWith(this.submission_id, this.expected_url, {
+        this.CompileController.proxyToClsiWithLimits.should.have.been.calledWith(
+          this.submission_id,
+          this.expected_url,
+          {
             compileGroup: 'special',
-          })
-          .should.equal(true)
+            compileBackendClass: 'e2',
+          }
+        )
       })
     })
   })
@@ -566,7 +570,10 @@ describe('CompileController', function () {
         beforeEach(function () {
           this.CompileManager.getProjectCompileLimits = sinon
             .stub()
-            .callsArgWith(1, null, { compileGroup: 'standard' })
+            .callsArgWith(1, null, {
+              compileGroup: 'standard',
+              compileBackendClass: 'e2',
+            })
           this.CompileController.proxyToClsi(
             this.projectId,
             (this.url = '/test'),
@@ -580,6 +587,7 @@ describe('CompileController', function () {
           this.request
             .calledWith({
               jar: this.jar,
+              qs: { compileGroup: 'standard', compileBackendClass: 'e2' },
               method: this.req.method,
               url: `${this.settings.apis.clsi.url}${this.url}`,
               timeout: 60 * 1000,
@@ -614,6 +622,12 @@ describe('CompileController', function () {
       describe('user with standard priority via query string', function () {
         beforeEach(function () {
           this.req.query = { compileGroup: 'standard' }
+          this.CompileManager.getProjectCompileLimits = sinon
+            .stub()
+            .callsArgWith(1, null, {
+              compileGroup: 'standard',
+              compileBackendClass: 'e2',
+            })
           this.CompileController.proxyToClsi(
             this.projectId,
             (this.url = '/test'),
@@ -627,6 +641,7 @@ describe('CompileController', function () {
           this.request
             .calledWith({
               jar: this.jar,
+              qs: { compileGroup: 'standard', compileBackendClass: 'e2' },
               method: this.req.method,
               url: `${this.settings.apis.clsi.url}${this.url}`,
               timeout: 60 * 1000,
@@ -646,6 +661,12 @@ describe('CompileController', function () {
       describe('user with non-existent priority via query string', function () {
         beforeEach(function () {
           this.req.query = { compileGroup: 'foobar' }
+          this.CompileManager.getProjectCompileLimits = sinon
+            .stub()
+            .callsArgWith(1, null, {
+              compileGroup: 'standard',
+              compileBackendClass: 'e2',
+            })
           this.CompileController.proxyToClsi(
             this.projectId,
             (this.url = '/test'),
@@ -659,6 +680,7 @@ describe('CompileController', function () {
           this.request
             .calledWith({
               jar: this.jar,
+              qs: { compileGroup: 'standard', compileBackendClass: 'e2' },
               method: this.req.method,
               url: `${this.settings.apis.clsi.url}${this.url}`,
               timeout: 60 * 1000,
@@ -671,7 +693,10 @@ describe('CompileController', function () {
         beforeEach(function () {
           this.CompileManager.getProjectCompileLimits = sinon
             .stub()
-            .callsArgWith(1, null, { compileGroup: 'standard' })
+            .callsArgWith(1, null, {
+              compileGroup: 'standard',
+              compileBackendClass: 'e2',
+            })
           this.req.query = { build: 1234 }
           this.CompileController.proxyToClsi(
             this.projectId,
@@ -686,6 +711,7 @@ describe('CompileController', function () {
           this.request
             .calledWith({
               jar: this.jar,
+              qs: { compileGroup: 'standard', compileBackendClass: 'e2' },
               method: this.req.method,
               url: `${this.settings.apis.clsi.url}${this.url}`,
               timeout: 60 * 1000,
@@ -703,7 +729,10 @@ describe('CompileController', function () {
         beforeEach(function () {
           this.CompileManager.getProjectCompileLimits = sinon
             .stub()
-            .callsArgWith(1, null, { compileGroup: 'standard' })
+            .callsArgWith(1, null, {
+              compileGroup: 'standard',
+              compileBackendClass: 'e2',
+            })
           this.CompileController.proxyToClsi(
             this.projectId,
             (this.url = '/test'),
@@ -717,6 +746,7 @@ describe('CompileController', function () {
           this.request
             .calledWith({
               jar: this.jar,
+              qs: { compileGroup: 'standard', compileBackendClass: 'e2' },
               method: this.req.method,
               url: `${this.settings.apis.clsi.url}${this.url}`,
               timeout: 60 * 1000,
@@ -742,7 +772,10 @@ describe('CompileController', function () {
         beforeEach(function () {
           this.CompileManager.getProjectCompileLimits = sinon
             .stub()
-            .callsArgWith(1, null, { compileGroup: 'standard' })
+            .callsArgWith(1, null, {
+              compileGroup: 'standard',
+              compileBackendClass: 'e2',
+            })
           this.req.query = { build: 1234, pdfng: true }
           this.CompileController.proxyToClsi(
             this.projectId,
@@ -758,7 +791,11 @@ describe('CompileController', function () {
             .calledWith({
               jar: this.jar,
               method: this.req.method,
-              qs: { build: 1234 },
+              qs: {
+                build: 1234,
+                compileGroup: 'standard',
+                compileBackendClass: 'e2',
+              },
               url: `${this.settings.apis.clsi.url}${this.url}`,
               timeout: 60 * 1000,
               headers: {

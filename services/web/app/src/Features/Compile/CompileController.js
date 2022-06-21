@@ -149,6 +149,7 @@ module.exports = CompileController = {
     }
     options.compileGroup =
       req.body?.compileGroup || Settings.defaultFeatures.compileGroup
+    options.compileBackendClass = Settings.apis.clsi.defaultBackendClass
     options.timeout =
       req.body?.timeout || Settings.defaultFeatures.compileTimeout
     ClsiManager.sendExternalRequest(
@@ -321,6 +322,7 @@ module.exports = CompileController = {
         req.body?.compileGroup ||
         req.query?.compileGroup ||
         Settings.defaultFeatures.compileGroup,
+      compileBackendClass: Settings.apis.clsi.defaultBackendClass,
     }
     CompileController.proxyToClsiWithLimits(
       submissionId,
@@ -419,33 +421,19 @@ module.exports = CompileController = {
   },
 
   proxyToClsi(projectId, url, req, res, next) {
-    if (req.query?.compileGroup) {
+    CompileManager.getProjectCompileLimits(projectId, function (error, limits) {
+      if (error) {
+        return next(error)
+      }
       CompileController.proxyToClsiWithLimits(
         projectId,
         url,
-        { compileGroup: req.query.compileGroup },
+        limits,
         req,
         res,
         next
       )
-    } else {
-      CompileManager.getProjectCompileLimits(
-        projectId,
-        function (error, limits) {
-          if (error) {
-            return next(error)
-          }
-          CompileController.proxyToClsiWithLimits(
-            projectId,
-            url,
-            limits,
-            req,
-            res,
-            next
-          )
-        }
-      )
-    }
+    })
   },
 
   proxyToClsiWithLimits(projectId, url, limits, req, res, next) {
@@ -453,6 +441,7 @@ module.exports = CompileController = {
       req,
       projectId,
       limits.compileGroup,
+      limits.compileBackendClass,
       (err, persistenceOptions) => {
         let qs
         if (err) {
@@ -529,18 +518,24 @@ module.exports = CompileController = {
   },
 }
 
-function _getPersistenceOptions(req, projectId, compileGroup, callback) {
+function _getPersistenceOptions(
+  req,
+  projectId,
+  compileGroup,
+  compileBackendClass,
+  callback
+) {
   const { clsiserverid } = req.query
   const userId = SessionManager.getLoggedInUserId(req)
   if (clsiserverid && typeof clsiserverid === 'string') {
-    callback(null, { qs: { clsiserverid, compileGroup } })
+    callback(null, { qs: { clsiserverid, compileGroup, compileBackendClass } })
   } else {
     ClsiCookieManager.getCookieJar(
       projectId,
       userId,
       compileGroup,
       (err, jar) => {
-        callback(err, { jar })
+        callback(err, { jar, qs: { compileGroup, compileBackendClass } })
       }
     )
   }
