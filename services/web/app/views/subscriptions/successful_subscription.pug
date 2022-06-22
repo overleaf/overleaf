@@ -21,7 +21,7 @@ block content
 						p.letter-from-founders
 							p #{translate("thanks_for_subscribing_you_help_sl", {planName:personalSubscription.plan.name})}
 							if premiumFeaturesDiscoverability
-								p !{translate("to_get_the_most_of_sub_check_premium_features", {}, [{name: 'a', attrs: {href: 'https://www.overleaf.com/learn/how-to/Overleaf_premium_features'}}])}
+								p !{translate("get_most_subscription_by_checking_premium_features", {}, [{name: 'a', attrs: {href: 'https://www.overleaf.com/learn/how-to/Overleaf_premium_features'}}])}
 							p #{translate("need_anything_contact_us_at")} 
 								a(href=`mailto:${settings.adminEmail}`, ng-non-bindable) #{settings.adminEmail}
 								| .
