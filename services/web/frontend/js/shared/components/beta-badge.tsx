@@ -11,9 +11,23 @@ type TooltipProps = {
 type BetaBadgeProps = {
   tooltip: TooltipProps
   url?: string
+  phase?: string
 }
 
-function BetaBadge({ tooltip, url = '/beta/participate' }: BetaBadgeProps) {
+function BetaBadge({
+  tooltip,
+  url = '/beta/participate',
+  phase = 'beta',
+}: BetaBadgeProps) {
+  let badgeClass
+  switch (phase) {
+    case 'release':
+      badgeClass = 'info-badge'
+      break
+    default:
+      badgeClass = 'beta-badge'
+  }
+
   return (
     <Tooltip
       id={tooltip.id}
@@ -28,7 +42,7 @@ function BetaBadge({ tooltip, url = '/beta/participate' }: BetaBadgeProps) {
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        className="badge beta-badge"
+        className={`badge ${badgeClass}`}
       >
         <span className="sr-only">{tooltip.text}</span>
       </a>

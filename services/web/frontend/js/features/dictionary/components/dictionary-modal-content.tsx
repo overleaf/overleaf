@@ -42,7 +42,7 @@ export default function DictionaryModalContent({
       className: 'tooltip-wide',
       text: (
         <>
-          We are beta testing the dictionary manager.
+          We are testing the dictionary manager.
           <br />
           Click to give feedback
         </>
@@ -58,6 +58,7 @@ export default function DictionaryModalContent({
           <BetaBadge
             tooltip={betaBadgeTooltipProps}
             url="https://forms.gle/8cLBEW6HU9mDKBPX9"
+            phase="release"
           />
         </Modal.Title>
       </Modal.Header>
