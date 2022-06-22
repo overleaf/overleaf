@@ -116,7 +116,6 @@ module.exports = CompileController = {
           stats,
           timings,
           pdfDownloadDomain,
-          showFasterCompilesFeedbackUI: limits?.showFasterCompilesFeedbackUI,
         })
       }
     )
