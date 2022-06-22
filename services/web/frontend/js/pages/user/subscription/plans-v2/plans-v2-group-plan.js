@@ -23,21 +23,26 @@ export function updateMainGroupPlanPricing() {
     ? 'educational'
     : 'enterprise'
 
-  const priceInCentsProfessional =
-    groupPlans[usage].professional[currency][numberOfLicenses].price_in_cents
-  const priceInUnitProfessional = (priceInCentsProfessional / 100).toFixed()
-  const perUserPriceProfessional = parseFloat(
-    (priceInCentsProfessional / 100 / numberOfLicenses).toFixed(2)
-  )
+  function calculatePrice(plan) {
+    const priceInCents =
+      groupPlans[usage][plan][currency][numberOfLicenses].price_in_cents
+    const priceInUnit = (priceInCents / 100).toFixed()
+    const perUserPrice = (priceInCents / 100 / numberOfLicenses).toFixed(2)
+
+    return { priceInUnit, perUserPrice }
+  }
+
+  const {
+    priceInUnit: priceInUnitProfessional,
+    perUserPrice: perUserPriceProfessional,
+  } = calculatePrice('professional')
   let displayPriceProfessional = `${currencySymbol}${priceInUnitProfessional}`
   let displayPerUserPriceProfessional = `${currencySymbol}${perUserPriceProfessional}`
 
-  const priceInCentsCollaborator =
-    groupPlans[usage].collaborator[currency][numberOfLicenses].price_in_cents
-  const priceInUnitCollaborator = (priceInCentsCollaborator / 100).toFixed()
-  const perUserPriceCollaborator = parseFloat(
-    (priceInCentsCollaborator / 100 / numberOfLicenses).toFixed(2)
-  )
+  const {
+    priceInUnit: priceInUnitCollaborator,
+    perUserPrice: perUserPriceCollaborator,
+  } = calculatePrice('collaborator')
   let displayPriceCollaborator = `${currencySymbol}${priceInUnitCollaborator}`
   let displayPerUserPriceCollaborator = `${currencySymbol}${perUserPriceCollaborator}`
 
@@ -68,45 +73,26 @@ export function updateMainGroupPlanPricing() {
     '[data-ol-plans-v2-group-price-per-user="professional"]'
   ).innerText = displayPerUserPriceProfessional
 
-  // educational discount can only be activated if numberOfLicenses is > 10
-  if (numberOfLicenses < MINIMUM_NUMBER_OF_LICENSES_EDUCATIONAL_DISCOUNT) {
-    formEl.querySelector(
-      '[data-ol-plans-v2-license-picker-educational-discount-input]'
-    ).disabled = true
+  // educational discount can only be activated if numberOfLicenses is >= 10
+  const notEligibleForDiscount =
+    numberOfLicenses < MINIMUM_NUMBER_OF_LICENSES_EDUCATIONAL_DISCOUNT
+
+  formEl
+    .querySelector(
+      '[data-ol-plans-v2-license-picker-educational-discount-label]'
+    )
+    .classList.toggle('disabled', notEligibleForDiscount)
+
+  formEl.querySelector(
+    '[data-ol-plans-v2-license-picker-educational-discount-input]'
+  ).disabled = notEligibleForDiscount
+
+  if (notEligibleForDiscount) {
+    // force disable educational discount checkbox
     formEl.querySelector(
       '[data-ol-plans-v2-license-picker-educational-discount-input]'
     ).checked = false
-    formEl
-      .querySelector(
-        '[data-ol-plans-v2-license-picker-educational-discount-label]'
-      )
-      .classList.add('disabled')
-  } else {
-    formEl.querySelector(
-      '[data-ol-plans-v2-license-picker-educational-discount-input]'
-    ).disabled = false
-    formEl
-      .querySelector(
-        '[data-ol-plans-v2-license-picker-educational-discount-label]'
-      )
-      .classList.remove('disabled')
   }
-}
-
-export function showGroupPlansLicensePicker() {
-  const el = document.querySelector(
-    '[data-ol-plans-v2-license-picker-container]'
-  )
-
-  el.hidden = false
-}
-
-export function hideGroupPlansLicensePicker() {
-  const el = document.querySelector(
-    '[data-ol-plans-v2-license-picker-container]'
-  )
-
-  el.hidden = true
 }
 
 export function changeGroupPlanModalNumberOfLicenses() {

@@ -455,7 +455,10 @@ mixin additional_link_buy(plan, period)
 		) #{translate("buy_now_no_exclamation_mark")}
 
 mixin table_sticky_header
-	.row.plans-v2-table-sticky-header.plans-v2-table-sticky-header-individual.sticky(data-ol-plans-v2-table-sticky-header='individual')
+	.row.plans-v2-table-sticky-header.plans-v2-table-sticky-header-individual.sticky(
+		data-ol-plans-v2-table-sticky-header
+		data-ol-plans-v2-view='individual'
+	)
 		.plans-v2-table-sticky-header-item
 			span #{translate("free")}
 		.plans-v2-table-sticky-header-item
@@ -465,7 +468,11 @@ mixin table_sticky_header
 		.plans-v2-table-sticky-header-item
 			span #{translate("professional")}
 
-	.row.plans-v2-table-sticky-header.plans-v2-table-sticky-header-group.sticky(hidden data-ol-plans-v2-table-sticky-header='group')
+	.row.plans-v2-table-sticky-header.plans-v2-table-sticky-header-group.sticky(
+		hidden
+		data-ol-plans-v2-table-sticky-header
+		data-ol-plans-v2-view='group'
+	)
 		.plans-v2-table-sticky-header-item
 			span #{translate("group_standard")}
 		.plans-v2-table-sticky-header-item.plans-v2-table-sticky-header-item-highlighted
@@ -473,7 +480,11 @@ mixin table_sticky_header
 		.plans-v2-table-sticky-header-item
 			span #{translate("organization")}
 
-	.row.plans-v2-table-sticky-header.plans-v2-table-sticky-header-student.sticky(hidden data-ol-plans-v2-table-sticky-header='student')
+	.row.plans-v2-table-sticky-header.plans-v2-table-sticky-header-student.sticky(
+		hidden
+		data-ol-plans-v2-table-sticky-header
+		data-ol-plans-v2-view='student'
+	)
 		.plans-v2-table-sticky-header-item
 			span #{translate("free")}
 		.plans-v2-table-sticky-header-item.plans-v2-table-sticky-header-item-highlighted
@@ -484,7 +495,7 @@ mixin table_sticky_header
 mixin monthly_annual_switch(eventTracking, eventSegmentation)
 	.row
 		.col-md-4.col-md-offset-4.text-centered.plans-v2-m-a-switch-container(data-ol-plans-v2-m-a-switch-container)
-			span.underline(data-ol-plans-v2-m-a-switch-monthly-text) #{translate("monthly")}
+			span.underline(data-ol-plans-v2-m-a-switch-text='monthly') #{translate("monthly")}
 			label.plans-v2-m-a-switch(data-ol-plans-v2-m-a-switch)
 				input(
 					type="checkbox"
@@ -498,7 +509,7 @@ mixin monthly_annual_switch(eventTracking, eventSegmentation)
 				)
 				span
 			.plans-v2-m-a-switch-annual-text-container
-				span(data-ol-plans-v2-m-a-switch-annual-text) #{translate("annual")}
+				span(data-ol-plans-v2-m-a-switch-text='annual') #{translate("annual")}
 				.tooltip.in.right.plans-v2-m-a-tooltip(
 					role="tooltip"
 					data-ol-plans-v2-m-a-tooltip

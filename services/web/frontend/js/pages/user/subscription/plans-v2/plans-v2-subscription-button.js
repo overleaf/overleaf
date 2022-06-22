@@ -1,6 +1,10 @@
 import { updateGroupModalPlanPricing } from '../../../../features/plans/group-plan-modal'
 
-function changeGroupPlanModalRadioInputData(plan) {
+function showGroupPlanModal(el) {
+  const plan = el.getAttribute('data-ol-start-new-subscription')
+
+  // plan is either `group_collaborator` or `group_professional`
+  // we want to get the suffix (collaborator or professional)
   const groupPlan = plan.split('_')[1]
 
   const groupModalRadioInputEl = document.querySelector(
@@ -9,12 +13,6 @@ function changeGroupPlanModalRadioInputData(plan) {
 
   groupModalRadioInputEl.checked = true
   updateGroupModalPlanPricing()
-}
-
-function showGroupPlanModal(el) {
-  const plan = el.getAttribute('data-ol-start-new-subscription')
-
-  changeGroupPlanModalRadioInputData(plan)
 
   const modalEl = $('[data-ol-group-plan-modal]')
   modalEl.modal()
