@@ -221,7 +221,7 @@ describe('CompileManager', function () {
           compileGroup: this.group,
           compileBackendClass: 'e2',
           ownerAnalyticsId: 'abc',
-          emitCompileResultEvent: false,
+          showFasterCompilesFeedbackUI: false,
         })
         .should.equal(true)
     })
@@ -245,13 +245,13 @@ describe('CompileManager', function () {
       beforeEach(function () {
         this.features.compileGroup = 'standard'
       })
-      it('should return the default class and disable event', function (done) {
+      it('should return the default class and disable ui', function (done) {
         this.CompileManager.getProjectCompileLimits(
           this.project_id,
-          (err, { compileBackendClass, emitCompileResultEvent }) => {
+          (err, { compileBackendClass, showFasterCompilesFeedbackUI }) => {
             if (err) return done(err)
             expect(compileBackendClass).to.equal('e2')
-            expect(emitCompileResultEvent).to.equal(false)
+            expect(showFasterCompilesFeedbackUI).to.equal(false)
             done()
           }
         )
@@ -270,13 +270,13 @@ describe('CompileManager', function () {
           })
         })
 
-        it('should return the default class and disable event', function (done) {
+        it('should return the default class and disable ui', function (done) {
           this.CompileManager.getProjectCompileLimits(
             this.project_id,
-            (err, { compileBackendClass, emitCompileResultEvent }) => {
+            (err, { compileBackendClass, showFasterCompilesFeedbackUI }) => {
               if (err) return done(err)
               expect(compileBackendClass).to.equal('e2')
-              expect(emitCompileResultEvent).to.equal(false)
+              expect(showFasterCompilesFeedbackUI).to.equal(false)
               done()
             }
           )
@@ -291,13 +291,13 @@ describe('CompileManager', function () {
               variant: 'default',
             })
           })
-          it('should return the default class and enable event', function (done) {
+          it('should return the default class and enable ui', function (done) {
             this.CompileManager.getProjectCompileLimits(
               this.project_id,
-              (err, { compileBackendClass, emitCompileResultEvent }) => {
+              (err, { compileBackendClass, showFasterCompilesFeedbackUI }) => {
                 if (err) return done(err)
                 expect(compileBackendClass).to.equal('e2')
-                expect(emitCompileResultEvent).to.equal(true)
+                expect(showFasterCompilesFeedbackUI).to.equal(true)
                 done()
               }
             )
@@ -311,13 +311,13 @@ describe('CompileManager', function () {
               variant: 'c2d',
             })
           })
-          it('should return the c2d class and enable event', function (done) {
+          it('should return the c2d class and enable ui', function (done) {
             this.CompileManager.getProjectCompileLimits(
               this.project_id,
-              (err, { compileBackendClass, emitCompileResultEvent }) => {
+              (err, { compileBackendClass, showFasterCompilesFeedbackUI }) => {
                 if (err) return done(err)
                 expect(compileBackendClass).to.equal('c2d')
-                expect(emitCompileResultEvent).to.equal(true)
+                expect(showFasterCompilesFeedbackUI).to.equal(true)
                 done()
               }
             )

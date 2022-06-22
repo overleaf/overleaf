@@ -171,10 +171,11 @@ module.exports = CompileManager = {
             CompileManager._getCompileBackendClassDetails(
               owner,
               limits.compileGroup,
-              (err, { compileBackendClass, emitCompileResultEvent }) => {
+              (err, { compileBackendClass, showFasterCompilesFeedbackUI }) => {
                 if (err) return callback(err)
                 limits.compileBackendClass = compileBackendClass
-                limits.emitCompileResultEvent = emitCompileResultEvent
+                limits.showFasterCompilesFeedbackUI =
+                  showFasterCompilesFeedbackUI
                 callback(null, limits)
               }
             )
@@ -250,7 +251,7 @@ module.exports = CompileManager = {
     if (compileGroup === 'standard') {
       return callback(null, {
         compileBackendClass: defaultBackendClass,
-        emitCompileResultEvent: false,
+        showFasterCompilesFeedbackUI: false,
       })
     }
     SplitTestHandler.getAssignmentForMongoUser(
@@ -263,7 +264,7 @@ module.exports = CompileManager = {
         callback(null, {
           compileBackendClass:
             variant === 'default' ? defaultBackendClass : variant,
-          emitCompileResultEvent: activeForUser,
+          showFasterCompilesFeedbackUI: activeForUser,
         })
       }
     )

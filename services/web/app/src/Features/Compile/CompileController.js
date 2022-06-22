@@ -88,9 +88,12 @@ module.exports = CompileController = {
         if (pdfDownloadDomain && outputUrlPrefix) {
           pdfDownloadDomain += outputUrlPrefix
         }
-        let showFasterCompilesFeedbackUI = false
-        if (limits?.emitCompileResultEvent) {
-          showFasterCompilesFeedbackUI = true
+
+        if (limits) {
+          // For a compile request to be sent to clsi we need limits.
+          // If we get here without having the limits object populated, it is
+          //  a reasonable assumption to make that nothing was compiled.
+          // We need to know the limits in order to make use of the events.
           AnalyticsManager.recordEventForSession(
             req.session,
             'compile-result-backend',
@@ -113,7 +116,7 @@ module.exports = CompileController = {
           stats,
           timings,
           pdfDownloadDomain,
-          showFasterCompilesFeedbackUI,
+          showFasterCompilesFeedbackUI: limits?.showFasterCompilesFeedbackUI,
         })
       }
     )
