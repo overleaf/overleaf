@@ -19,6 +19,7 @@ describe('ProjectHelper', function () {
     this.adminUser = {
       _id: 'admin-user-id',
       isAdmin: true,
+      alphaProgram: true,
     }
 
     this.Settings = {
@@ -29,7 +30,7 @@ describe('ProjectHelper', function () {
         {
           imageName: 'texlive-full:2020.1',
           imageDesc: 'TeX Live 2020',
-          adminOnly: true,
+          alphaOnly: true,
         },
       ],
     }
@@ -267,7 +268,7 @@ describe('ProjectHelper', function () {
   })
 
   describe('getAllowedImagesForUser', function () {
-    it('filters out admin-only images when the user is anonymous', function () {
+    it('filters out alpha-only images when the user is anonymous', function () {
       const images = this.ProjectHelper.getAllowedImagesForUser(null)
       const imageNames = images.map(image => image.imageName)
       expect(imageNames).to.deep.equal([
@@ -276,7 +277,7 @@ describe('ProjectHelper', function () {
       ])
     })
 
-    it('filters out admin-only images when the user is not admin', function () {
+    it('filters out alpha-only images when the user is not admin', function () {
       const images = this.ProjectHelper.getAllowedImagesForUser(this.user)
       const imageNames = images.map(image => image.imageName)
       expect(imageNames).to.deep.equal([

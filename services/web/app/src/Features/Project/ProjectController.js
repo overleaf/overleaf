@@ -961,8 +961,7 @@ const ProjectController = {
           req,
           projectId
         )
-        const allowedImageNames =
-          ProjectHelper.getAllowedImagesForUser(sessionUser)
+        const allowedImageNames = ProjectHelper.getAllowedImagesForUser(user)
 
         AuthorizationManager.getPrivilegeLevelForProject(
           userId,

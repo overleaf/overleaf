@@ -2,7 +2,6 @@ const { ObjectId } = require('mongodb')
 const _ = require('lodash')
 const { promisify } = require('util')
 const Settings = require('@overleaf/settings')
-const { hasAdminAccess } = require('../Helpers/AdminAuthorizationHelper')
 
 const ENGINE_TO_COMPILER_MAP = {
   latex_dvipdf: 'latex',
@@ -164,11 +163,11 @@ function _addNumericSuffixToProjectName(name, allProjectNames, maxLength) {
   return null
 }
 
-function getAllowedImagesForUser(sessionUser) {
+function getAllowedImagesForUser(user) {
   const images = Settings.allowedImageNames || []
-  if (hasAdminAccess(sessionUser)) {
+  if (user?.alphaProgram) {
     return images
   } else {
-    return images.filter(image => !image.adminOnly)
+    return images.filter(image => !image.alphaOnly)
   }
 }
