@@ -1,5 +1,5 @@
 div(ng-controller="GroupMembershipController")
-	each groupSubscription in memberGroupSubscriptions
+	each groupSubscription, index in memberGroupSubscriptions
 		unless (groupSubscription.userIsGroupManager)
 			if (user._id+'' != groupSubscription.admin_id._id+'')
 				div
@@ -8,6 +8,8 @@ div(ng-controller="GroupMembershipController")
 						p
 							//- Team notice is sanitized in SubscriptionViewModelBuilder
 							em(ng-non-bindable) !{groupSubscription.teamNotice}
+					if index === memberGroupSubscriptions.length - 1
+						include ../_premium_features_link
 					span 
 						button.btn.btn-danger.text-capitalise(ng-click="removeSelfFromGroup('"+groupSubscription._id+"')") #{translate("leave_group")}
 				hr

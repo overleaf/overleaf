@@ -198,13 +198,23 @@ async function userSubscriptionPage(req, res) {
 
   AnalyticsManager.recordEventForSession(req.session, 'subscription-page-view')
 
-  const assignment = await SplitTestHandler.promises.getAssignment(
+  const cancelButtonAssignment = await SplitTestHandler.promises.getAssignment(
     req,
     res,
     'subscription-cancel-button'
   )
 
-  const cancelButtonNewCopy = assignment && assignment.variant === 'new-copy'
+  const cancelButtonNewCopy = cancelButtonAssignment?.variant === 'new-copy'
+
+  const premiumFeaturesDiscoverabilityAssignment =
+    await SplitTestHandler.promises.getAssignment(
+      req,
+      res,
+      'premium-features-discoverability'
+    )
+
+  const premiumFeaturesDiscoverability =
+    premiumFeaturesDiscoverabilityAssignment?.variant === 'active'
 
   const data = {
     title: 'your_subscription',
@@ -222,6 +232,7 @@ async function userSubscriptionPage(req, res) {
     currentInstitutionsWithLicence,
     groupPlanModalOptions,
     cancelButtonNewCopy,
+    premiumFeaturesDiscoverability,
   }
   res.render('subscriptions/dashboard', data)
 }

@@ -2,7 +2,9 @@ if currentInstitutionsWithLicence === false
 	.alert.alert-warning
 		p Sorry, something went wrong. Subscription information related to institutional affiliations may not be displayed. Please try again later.
 else 
-	each institution in currentInstitutionsWithLicence
+	each institution, index in currentInstitutionsWithLicence
 		-hasDisplayedSubscription = true
 		p !{translate("you_are_on_x_plan_as_a_confirmed_member_of_institution_y", {planName: 'Professional', institutionName: institution.name || ''}, [{name: 'a', attrs: {href: '/user/subscription/plans'}}, 'strong'])}
+		if (index === currentInstitutionsWithLicence.length - 1)
+			include ../_premium_features_link
 		hr

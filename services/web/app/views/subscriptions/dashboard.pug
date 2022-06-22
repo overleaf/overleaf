@@ -26,7 +26,6 @@ block content
 					.card
 						.page-header
 							h1 #{translate("your_subscription")}
-
 						-var hasDisplayedSubscription = false
 						if (personalSubscription)
 							-hasDisplayedSubscription = true
@@ -57,7 +56,12 @@ block content
 									a(href="mailto:support@overleaf.com") support@overleaf.com
 									|  to find out more.
 							else
-								p(ng-non-bindable) You are on the #{settings.appName} Free plan. Upgrade to access these Premium Features:
+								p(ng-non-bindable)
+								| You are on the #{settings.appName} Free plan. Upgrade to access these 
+								if premiumFeaturesDiscoverability
+									a(href="/learn/how-to/Overleaf_premium_features") Premium Features:
+								else
+									| Premium Features:
 								ul
 									li #{translate('invite_more_collabs')}
 									for feature in ['realtime_track_changes', 'full_doc_history', 'reference_search', 'reference_sync', 'dropbox_integration_lowercase', 'github_integration_lowercase', 'priority_support']
