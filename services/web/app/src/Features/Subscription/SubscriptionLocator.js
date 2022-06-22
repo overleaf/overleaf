@@ -40,6 +40,22 @@ const SubscriptionLocator = {
       .exec(callback)
   },
 
+  hasRecurlyGroupSubscription(userOrId, callback) {
+    const userId = SubscriptionLocator._getUserId(userOrId)
+    Subscription.exists(
+      {
+        groupPlan: true,
+        recurlySubscription_id: { $exists: true },
+        $or: [
+          { member_ids: userId },
+          { manager_ids: userId },
+          { admin_id: userId },
+        ],
+      },
+      callback
+    )
+  },
+
   getSubscription(subscriptionId, callback) {
     Subscription.findOne({ _id: subscriptionId }, callback)
   },
@@ -110,5 +126,8 @@ SubscriptionLocator.promises = {
     SubscriptionLocator.getUserDeletedSubscriptions
   ),
   getDeletedSubscription: promisify(SubscriptionLocator.getDeletedSubscription),
+  hasRecurlyGroupSubscription: promisify(
+    SubscriptionLocator.hasRecurlyGroupSubscription
+  ),
 }
 module.exports = SubscriptionLocator

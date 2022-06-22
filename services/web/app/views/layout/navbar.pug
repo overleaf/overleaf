@@ -14,6 +14,7 @@ nav.navbar.navbar-default.navbar-main
 		- var canDisplayAdminMenu = hasAdminAccess()
 		- var canDisplayAdminRedirect = canRedirectToAdminDomain()
 		- var canDisplaySplitTestMenu = hasFeature('saas') && (canDisplayAdminMenu || (getSessionUser() && getSessionUser().staffAccess && (getSessionUser().staffAccess.splitTestMetrics || getSessionUser().staffAccess.splitTestManagement)))
+		- var canDisplaySurveyMenu = hasFeature('saas') && canDisplayAdminMenu
 
 		if (typeof(suppressNavbarRight) == "undefined")
 			.navbar-collapse.collapse(collapse="navCollapsed")
@@ -37,6 +38,9 @@ nav.navbar.navbar-default.navbar-main
 								if canDisplaySplitTestMenu
 									li
 										a(href="/admin/split-test") Manage Split Tests
+								if canDisplaySurveyMenu
+									li
+										a(href="/admin/survey") Manage Surveys
 
 					// loop over header_extras
 					each item in ((splitTestVariants && (splitTestVariants['unified-navigation'] === 'show-unified-navigation')) ? nav.header_extras_unified : nav.header_extras)

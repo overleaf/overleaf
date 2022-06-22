@@ -13,6 +13,7 @@ block append meta
 	meta(name="ol-userHasNoSubscription" data-type="boolean" content=!!(settings.enableSubscriptions && !hasSubscription))
 	meta(name="ol-allInReconfirmNotificationPeriods" data-type="json" content=allInReconfirmNotificationPeriods)
 	meta(name="ol-reconfirmedViaSAML" content=reconfirmedViaSAML)
+	meta(name="ol-survey-name" data-type="string" content=(survey ? survey.name : undefined))
 
 block content
 
@@ -42,6 +43,26 @@ block content
 					.project-list-sidebar-wrapper.col-md-2.col-xs-3
 						aside.project-list-sidebar
 							include ./list/side-bar
+						
+						if (survey && survey.name)
+							.project-list-sidebar-survey(
+								ng-if="shouldShowSurveyLink"
+								ng-cloak
+							)
+								| #{survey.preText} 
+								a.project-list-sidebar-survey-link(
+									href=survey.url
+									target="_blank"
+									rel="noreferrer noopener"
+								) #{survey.linkText}
+								button.project-list-sidebar-survey-dismiss(
+									type="button"
+									title="Dismiss Overleaf survey"
+									ng-click="dismissSurvey()"
+								)
+									span(
+										aria-hidden="true"
+									) &times;
 
 					.project-list-main.col-md-10.col-xs-9
 						include ./list/notifications

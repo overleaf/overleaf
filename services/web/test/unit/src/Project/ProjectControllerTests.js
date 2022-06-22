@@ -140,6 +140,9 @@ describe('ProjectController', function () {
     this.SubscriptionViewModelBuilder = {
       getBestSubscription: sinon.stub().yields(null, { type: 'free' }),
     }
+    this.SurveyHandler = {
+      getSurvey: sinon.stub().yields(null, {}),
+    }
 
     this.ProjectController = SandboxedModule.require(MODULE_PATH, {
       requires: {
@@ -185,6 +188,7 @@ describe('ProjectController', function () {
           getUserDictionary: sinon.stub().yields(null, []),
         },
         '../Institutions/InstitutionsFeatures': this.InstitutionsFeatures,
+        '../Survey/SurveyHandler': this.SurveyHandler,
       },
     })
 

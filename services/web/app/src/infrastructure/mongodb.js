@@ -64,6 +64,7 @@ async function setupDb() {
   db.spellingPreferences = internalDb.collection('spellingPreferences')
   db.splittests = internalDb.collection('splittests')
   db.subscriptions = internalDb.collection('subscriptions')
+  db.surveys = internalDb.collection('surveys')
   db.systemmessages = internalDb.collection('systemmessages')
   db.tags = internalDb.collection('tags')
   db.teamInvites = internalDb.collection('teamInvites')

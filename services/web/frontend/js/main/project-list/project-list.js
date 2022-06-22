@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import App from '../../base'
 import './services/project-list'
+import getMeta from '../../utils/meta'
 App.controller(
   'ProjectPageController',
   function (
@@ -28,6 +29,14 @@ App.controller(
       $scope.comparator =
         newValue === 'ownerName' ? ownerNameComparator : defaultComparator
     })
+
+    const surveyName = getMeta('ol-survey-name')
+    $scope.shouldShowSurveyLink =
+      localStorage(`dismissed-${surveyName}`) !== true
+    $scope.dismissSurvey = () => {
+      localStorage(`dismissed-${surveyName}`, true)
+      $scope.shouldShowSurveyLink = false
+    }
 
     $timeout(() => recalculateProjectListHeight(), 10)
 

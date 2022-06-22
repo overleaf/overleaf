@@ -42,6 +42,7 @@ const UserPrimaryEmailCheckHandler = require('../User/UserPrimaryEmailCheckHandl
 const { hasAdminAccess } = require('../Helpers/AdminAuthorizationHelper')
 const InstitutionsFeatures = require('../Institutions/InstitutionsFeatures')
 const SubscriptionViewModelBuilder = require('../Subscription/SubscriptionViewModelBuilder')
+const SurveyHandler = require('../Survey/SurveyHandler')
 
 const _ssoAvailable = (affiliation, session, linkedInstitutionIds) => {
   if (!affiliation.institution) return false
@@ -471,6 +472,17 @@ const ProjectController = {
             }
           )
         },
+        survey(cb) {
+          SurveyHandler.getSurvey(userId, (err, survey) => {
+            if (err) {
+              logger.warn({ err }, 'failed to get survey')
+              // do not fail loading the project list if we fail to load the survey
+              cb(null, null)
+            } else {
+              cb(null, survey)
+            }
+          })
+        },
       },
       (err, results) => {
         if (err != null) {
@@ -630,6 +642,7 @@ const ProjectController = {
             metadata: { viewport: false },
             showThinFooter: true, // don't show the fat footer on the projects dashboard, as there's a fixed space available
             usersBestSubscription: results.usersBestSubscription,
+            survey: results.survey,
           }
 
           const paidUser =
