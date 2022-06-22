@@ -23,7 +23,7 @@
 
 .error-status {
   font-family: @font-family-serif;
-  margin-bottom: (@line-height-computed / 4);
+  margin-bottom: @line-height-computed;
   color: @gray-dark;
   font-size: @font-size-h1;
 }
@@ -31,7 +31,16 @@
   font-family: @font-family-serif;
   font-size: @font-size-h3;
   color: @gray;
-  margin-bottom: @line-height-computed * 2;
+  margin-bottom: @line-height-computed;
+}
+.error-box {
+  background-color: @ol-blue-gray-1;
+  padding: @margin-sm;
+  font-family: @font-family-monospace;
+  margin-bottom: @line-height-computed;
+}
+.error-actions {
+  margin-top: @line-height-computed * 2;
 }
 
 .error-btn {

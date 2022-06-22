@@ -9,18 +9,22 @@ block body
 			.container.full-height
 				.error-container.full-height
 					.error-details
-						p.error-status I'm sorry, Dave. I'm afraid I can't do that.
-						p.error-description There was a problem with your latest request
-							if(message)
-								|: #{message}
-							|.
-							br
-							| Please go back and try again.
+						p.error-status Something went wrong, sorry.
 						p.error-description
+							| There was a problem with your request.
+							if(message)
+								|
+								| The error is:
+						if(message)
+							p.error-box
+								| #{message}
+						p.error-description
+							| Please go back and try again.
 							| If the problem persists, please contact us at
 							|
 							a(href="mailto:" + settings.adminEmail) #{settings.adminEmail}
 							| .
-						a.error-btn(href="javascript:history.back()") Back
-						| &nbsp;
-						a.btn.btn-default(href="/") Home
+						p.error-actions
+							a.error-btn(href="javascript:history.back()") Back
+							| &nbsp;
+							a.btn.btn-default(href="/") Home

@@ -38,7 +38,7 @@ describe('BodyParserErrors', function () {
               return done(error)
             }
             response.statusCode.should.equal(413)
-            body.should.match(/I'm afraid I can't do that./)
+            body.should.match(/There was a problem with your request/)
             done()
           }
         )
