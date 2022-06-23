@@ -95,7 +95,6 @@ export default function FileTreeImportFromProject() {
           source_output_file_path: selectedProjectOutputFile.path,
           build_id: selectedProjectOutputFile.build,
           clsiServerId: selectedProjectOutputFile.clsiServerId,
-          compileGroup: selectedProjectOutputFile.compileGroup,
         },
       })
     } else {

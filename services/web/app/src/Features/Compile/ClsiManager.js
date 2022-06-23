@@ -694,33 +694,21 @@ const ClsiManager = {
   getOutputFileStream(
     projectId,
     userId,
-    compileGroup,
+    options,
     clsiServerId,
     buildId,
     outputFilePath,
     callback
   ) {
     const url = `${Settings.apis.clsi.url}/project/${projectId}/user/${userId}/build/${buildId}/output/${outputFilePath}`
-    // TODO(das7pad): remove one week after landing frontend changes.
-    ClsiCookieManager.getCookieJar(projectId, userId, '', (err, jar) => {
-      if (err != null) {
-        return callback(
-          OError.tag(err, 'Failed to get cookie jar', {
-            projectId,
-            userId,
-            buildId,
-            outputFilePath,
-          })
-        )
-      }
-      const options = { url, method: 'GET', timeout: 60 * 1000, jar }
-      if (clsiServerId) {
-        options.qs = { compileGroup, clsiserverid: clsiServerId }
-        delete options.jar
-      }
-      const readStream = request(options)
-      callback(null, readStream)
+    const { compileBackendClass, compileGroup } = options
+    const readStream = request({
+      url,
+      method: 'GET',
+      timeout: 60 * 1000,
+      qs: { compileBackendClass, compileGroup, clsiserverid: clsiServerId },
     })
+    callback(null, readStream)
   },
 
   _buildRequestFromDocupdater(

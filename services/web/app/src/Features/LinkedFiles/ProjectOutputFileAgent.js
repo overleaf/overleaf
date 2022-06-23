@@ -132,7 +132,6 @@ function _sanitizeData(data) {
     source_output_file_path: data.source_output_file_path,
     build_id: data.build_id,
     clsiServerId: data.clsiServerId,
-    compileGroup: data.compileGroup,
   }
 }
 
@@ -174,28 +173,31 @@ function _getFileStream(linkedFileData, userId, callback) {
     source_output_file_path: sourceOutputFilePath,
     build_id: buildId,
     clsiServerId,
-    compileGroup,
   } = linkedFileData
   LinkedFilesHandler.getSourceProject(linkedFileData, (err, project) => {
     if (err) {
       return callback(err)
     }
     const sourceProjectId = project._id
-    ClsiManager.getOutputFileStream(
-      sourceProjectId,
-      userId,
-      compileGroup,
-      clsiServerId,
-      buildId,
-      sourceOutputFilePath,
-      (err, readStream) => {
-        if (err) {
-          return callback(err)
+    CompileManager.getProjectCompileLimits(sourceProjectId, (err, limits) => {
+      if (err) return callback(err)
+
+      ClsiManager.getOutputFileStream(
+        sourceProjectId,
+        userId,
+        limits,
+        clsiServerId,
+        buildId,
+        sourceOutputFilePath,
+        (err, readStream) => {
+          if (err) {
+            return callback(err)
+          }
+          readStream.pause()
+          callback(null, readStream)
         }
-        readStream.pause()
-        callback(null, readStream)
-      }
-    )
+      )
+    })
   })
 }
 
@@ -229,7 +231,7 @@ function _compileAndGetFileStream(linkedFileData, userId, callback) {
         ClsiManager.getOutputFileStream(
           sourceProjectId,
           userId,
-          limits.compileGroup,
+          limits,
           clsiServerId,
           buildId,
           sourceOutputFilePath,
