@@ -31,9 +31,7 @@ async function processProject(project) {
     await ProjectHistoryHandler.promises.downgradeHistory(project._id)
   }
   if (VERBOSE_LOGGING) {
-    console.log(
-      `project ${project._id} converted and upgraded to full project history`
-    )
+    console.log(`project ${project._id} downgraded to track-changes`)
   }
 }
 
@@ -64,7 +62,7 @@ async function main() {
 // then history could get into a broken state
 // Instead, skip any unprocessed projects and exit() at end of the batch.
 process.on('SIGINT', function () {
-  console.log('Caught SIGINT, waiting for in process upgrades to complete')
+  console.log('Caught SIGINT, waiting for in process downgrades to complete')
   INTERRUPT = true
 })
 
