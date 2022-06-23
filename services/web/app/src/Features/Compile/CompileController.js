@@ -289,6 +289,7 @@ module.exports = CompileController = {
           'something went wrong compile and downloading pdf'
         )
         res.sendStatus(500)
+        return
       }
       const url = `/project/${projectId}/output/output.pdf`
       CompileController.proxyToClsi(projectId, url, req, res, next)

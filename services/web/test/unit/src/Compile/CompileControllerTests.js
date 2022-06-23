@@ -836,7 +836,7 @@ describe('CompileController', function () {
       }
       this.CompileManager.compile.callsArgWith(3)
       this.CompileController.proxyToClsi = sinon.stub()
-      this.res = { send: () => {} }
+      this.res = { send: () => {}, sendStatus: sinon.stub() }
     })
 
     it('should call compile in the compile manager', function (done) {
@@ -864,6 +864,13 @@ describe('CompileController', function () {
         )
         .should.equal(true)
       done()
+    })
+
+    it('should not download anything on compilation failures', function () {
+      this.CompileManager.compile.yields(new Error('failed'))
+      this.CompileController.compileAndDownloadPdf(this.req, this.res)
+      this.res.sendStatus.should.have.been.calledWith(500)
+      this.CompileController.proxyToClsi.should.not.have.been.called
     })
   })
 
