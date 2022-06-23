@@ -1,4 +1,4 @@
-import { mount, unmount } from 'cypress/react' // NOTE: not '@cypress/react'?
+import { mount, unmount } from '@cypress/react'
 
 // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-namespace
 declare global {

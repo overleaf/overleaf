@@ -204,7 +204,7 @@ describe('<PdfPreview/>', function () {
       // fire a doc:changed event => compile
       win.dispatchEvent(new CustomEvent('doc:changed'))
 
-      cy.tick(5000) // AUTO_COMPILE_DEBOUNCE
+      cy.tick(6000) // > AUTO_COMPILE_DEBOUNCE
 
       cy.clock().invoke('restore')
     })
