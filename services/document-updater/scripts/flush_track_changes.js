@@ -6,7 +6,7 @@
 const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
 const rclientProjectHistory = require('@overleaf/redis-wrapper').createClient(
-  Settings.redis.documentupdater
+  Settings.redis.history
 )
 const ProjectFlusher = require('../app/js/ProjectFlusher')
 const keys = Settings.redis.history.key_schema
