@@ -90,6 +90,23 @@ function setUpGroupPlanPricingChange() {
     )
 }
 
+function selectViewFromHash() {
+  try {
+    const params = new URLSearchParams(window.location.hash.substring(1))
+    const view = params.get('view')
+    if (view) {
+      // make sure the selected view is valid
+      if (document.querySelector(`[data-ol-plans-v2-view-tab="${view}"]`)) {
+        selectTab(view)
+        // clear the hash so it doesn't persist when switching plans
+        window.location.hash = ''
+      }
+    }
+  } catch {
+    // do nothing
+  }
+}
+
 document
   .querySelector('[data-ol-plans-v2-m-a-switch]')
   .addEventListener('click', () => {
@@ -112,3 +129,6 @@ setUpMonthlyAnnualSwitching()
 setUpGroupSubscriptionButtonAction()
 setUpStickyHeaderObserver()
 updateLinkTargets()
+
+selectViewFromHash()
+window.addEventListener('hashchange', selectViewFromHash)
