@@ -29,6 +29,9 @@ FROM deps as dev
 
 COPY services/web /overleaf/services/web
 
+# Build the latex parser
+RUN cd /overleaf/services/web && npm run 'lezer-latex:generate'
+
 RUN mkdir -p /overleaf/services/web/data/dumpFolder \
 &&  mkdir -p /overleaf/services/web/data/logs \
 &&  mkdir -p /overleaf/services/web/data/pdf \

@@ -92,4 +92,8 @@ cypress/downloads/
 # Ace themes for conversion
 modules/source-editor/frontend/js/themes/ace/
 
+# Compiled parser files
+modules/source-editor/frontend/js/lezer-latex/latex.mjs
+modules/source-editor/frontend/js/lezer-latex/latex.terms.mjs
+
 !**/fixtures/**/*.log

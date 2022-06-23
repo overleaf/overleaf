@@ -13,7 +13,7 @@
     "test:unit:all": "npm run test:unit:run_dir -- test/unit/src modules/*/test/unit/src",
     "test:unit:all:silent": "npm run test:unit:all -- --reporter dot",
     "test:unit:app": "npm run test:unit:run_dir -- test/unit/src",
-    "test:frontend": "NODE_ENV=test TZ=GMT mocha --recursive --timeout 5000 --exit --extension js,ts,tsx --grep=$MOCHA_GREP --require test/frontend/bootstrap.js --ignore '**/*.spec.{js,ts,tsx}' test/frontend modules/*/test/frontend",
+    "test:frontend": "NODE_ENV=test TZ=GMT mocha --recursive --timeout 5000 --exit --extension js,mjs,ts,tsx --grep=$MOCHA_GREP --require test/frontend/bootstrap.js --ignore '**/*.spec.{js,ts,tsx}' test/frontend modules/*/test/frontend",
     "test:frontend:coverage": "c8 --all --include 'frontend/js' --include 'modules/*/frontend/js' --exclude 'frontend/js/vendor' --reporter=lcov --reporter=text-summary npm run test:frontend",
     "test:karma": "karma start",
     "test:karma:single": "karma start --no-auto-watch --single-run",
@@ -34,6 +34,8 @@
     "convert-themes": "node modules/source-editor/frontend/js/themes/convert.js",
     "cypress:open-ct": "SHARELATEX_CONFIG=$PWD/config/settings.webpack.js cypress open --component",
     "cypress:run-ct": "SHARELATEX_CONFIG=$PWD/config/settings.webpack.js cypress run --component",
+    "lezer-latex:generate": "node modules/source-editor/scripts/lezer-latex/generate.js",
+    "lezer-latex:run": "node modules/source-editor/scripts/lezer-latex/run.mjs",
     "routes": "bin/routes"
   },
   "browserslist": [
@@ -205,6 +207,7 @@
     "@babel/register": "^7.14.5",
     "@cypress/react": "^5.12.5",
     "@juggle/resize-observer": "^3.3.1",
+    "@lezer/generator": "^0.16.0",
     "@testing-library/cypress": "^8.0.3",
     "@testing-library/dom": "^8.13.0",
     "@testing-library/react": "^12.1.5",

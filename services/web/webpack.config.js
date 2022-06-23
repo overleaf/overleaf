@@ -4,6 +4,9 @@ const webpack = require('webpack')
 const CopyPlugin = require('copy-webpack-plugin')
 const WebpackAssetsManifest = require('webpack-assets-manifest')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const {
+  LezerGrammarCompilerPlugin,
+} = require('./webpack-plugins/lezer-grammar-compiler')
 
 const PackageVersions = require('./app/src/infrastructure/PackageVersions')
 
@@ -226,6 +229,8 @@ module.exports = {
   },
 
   plugins: [
+    new LezerGrammarCompilerPlugin(),
+
     // Generate a manifest.json file which is used by the backend to map the
     // base filenames to the generated output filenames
     new WebpackAssetsManifest({
