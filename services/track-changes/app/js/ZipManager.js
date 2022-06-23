@@ -97,11 +97,15 @@ async function rewindDoc(projectId, docId, zipfile) {
 
     const updatePath = `${id}/updates/${update.v}`
 
-    zipfile.addBuffer(Buffer.from(JSON.stringify(update)), updatePath, {
-      mtime: new Date(update.meta.start_ts),
-    })
     try {
       content = DiffGenerator.rewindUpdate(content, update)
+      // filter out any known "broken ops" as these may be recoverable
+      update.op = update.op.filter(op => !op.broken)
+      // only store the update in the zip file when we have applied it
+      // successfully, and after filtering out broken ops.
+      zipfile.addBuffer(Buffer.from(JSON.stringify(update)), updatePath, {
+        mtime: new Date(update.meta.start_ts),
+      })
       v = update.v
     } catch (e) {
       e.attempted_update = update // keep a record of the attempted update
