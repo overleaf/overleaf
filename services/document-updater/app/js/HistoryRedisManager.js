@@ -12,9 +12,7 @@
  */
 let HistoryRedisManager
 const Settings = require('@overleaf/settings')
-const rclient = require('@overleaf/redis-wrapper').createClient(
-  Settings.redis.history
-)
+const { rclient } = require('./RedisManager') // docsWithHistoryOps lives in main redis
 const Keys = Settings.redis.history.key_schema
 const logger = require('@overleaf/logger')
 
