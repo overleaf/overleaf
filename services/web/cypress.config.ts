@@ -18,6 +18,7 @@ export default defineConfig({
     specPattern:
       './{test,modules/**/test}/frontend/components/**/*.spec.{js,ts,tsx}',
   },
-  // Docs: https://docs.cypress.io/guides/guides/test-retries#Global-Configuration
-  retries: 3,
+  retries: {
+    runMode: 3,
+  },
 })
