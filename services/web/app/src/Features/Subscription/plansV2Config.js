@@ -16,6 +16,8 @@ const config = {
         annual: 'MOST POPULAR',
       },
     },
+    eventTrackingKey: 'plans-page-click',
+    additionalEventSegmentation: { 'plan-page-layout-v2': 'new-plans-page' },
   },
   group: {
     tableHead: {
@@ -30,6 +32,8 @@ const config = {
         annual: 'RECOMMENDED',
       },
     },
+    eventTrackingKey: 'plans-page-click',
+    additionalEventSegmentation: { 'plan-page-layout-v2': 'new-plans-page' },
   },
   student: {
     tableHead: {
@@ -47,6 +51,8 @@ const config = {
         annual: 'SAVING 20%',
       },
     },
+    eventTrackingKey: 'plans-page-click',
+    additionalEventSegmentation: { 'plan-page-layout-v2': 'new-plans-page' },
   },
 }
 

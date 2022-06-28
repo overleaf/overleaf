@@ -61,6 +61,20 @@ function setUpSubscriptionTracking(linkEl) {
   const location = linkEl.getAttribute('data-ol-location')
   const period = linkEl.getAttribute('data-ol-item-view') || currentView
 
+  const DEFAULT_EVENT_TRACKING_KEY = 'plans-page-click'
+  const eventTrackingKey =
+    linkEl.getAttribute('data-ol-event-tracking-key') ||
+    DEFAULT_EVENT_TRACKING_KEY
+  const eventTrackingSegmentation = {
+    button: plan,
+    location,
+    period,
+  }
+
+  if (eventTrackingKey === DEFAULT_EVENT_TRACKING_KEY) {
+    eventTrackingSegmentation.PLANS_PAGE_LAYOUT_V2 = plansPageV2SplitTestVariant
+  }
+
   linkEl.addEventListener('click', function () {
     const customLabel = linkEl.getAttribute('data-ol-tracking-label')
     const computedLabel = currentView === 'annual' ? `${plan}_annual` : plan
@@ -68,12 +82,7 @@ function setUpSubscriptionTracking(linkEl) {
 
     eventTracking.sendMB('plans-page-start-trial') // deprecated by plans-page-click
     eventTracking.send('subscription-funnel', 'sign_up_now_button', label) // deprecated by plans-page-click
-    eventTracking.sendMB('plans-page-click', {
-      button: plan,
-      location,
-      period,
-      PLANS_PAGE_LAYOUT_V2: plansPageV2SplitTestVariant,
-    })
+    eventTracking.sendMB(eventTrackingKey, eventTrackingSegmentation)
   })
 }
 

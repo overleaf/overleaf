@@ -5,6 +5,8 @@ mixin plans_v2_table(period, config)
 			- var tableHeadKey = Object.keys(config.tableHead)[i]
 			- var tableHeadOptions = Object.values(config.tableHead)[i]
 			- var highlighted = i === config.highlightedColumn.index
+			- var eventTrackingKey = config.eventTrackingKey
+			- var additionalEventSegmentation = config.additionalEventSegmentation || {}
 			th(
 				class=(i === config.highlightedColumn.index ? 'plans-v2-table-green-highlighted' : (i === config.highlightedColumn.index - 1 ? 'plans-v2-table-cell-before-highlighted-column' : ''))
 			)
@@ -14,23 +16,23 @@ mixin plans_v2_table(period, config)
 					when 'individual_free'
 						+table_head_individual_free(highlighted, period)
 					when 'individual_personal'
-						+table_head_individual_personal(highlighted, period)
+						+table_head_individual_personal(highlighted, eventTrackingKey, additionalEventSegmentation, period)
 					when 'individual_collaborator'
-						+table_head_individual_collaborator(highlighted, period)
+						+table_head_individual_collaborator(highlighted, eventTrackingKey, additionalEventSegmentation, period)
 					when 'individual_professional'
-						+table_head_individual_professional(highlighted, period)
+						+table_head_individual_professional(highlighted, eventTrackingKey, additionalEventSegmentation, period)
 					when 'group_collaborator'
-						+table_head_group_collaborator(highlighted)
+						+table_head_group_collaborator(highlighted, eventTrackingKey, additionalEventSegmentation)
 					when 'group_professional'
-						+table_head_group_professional(highlighted)
+						+table_head_group_professional(highlighted, eventTrackingKey, additionalEventSegmentation)
 					when 'group_organization'
-						+table_head_group_organization(highlighted)
+						+table_head_group_organization(highlighted, eventTrackingKey, additionalEventSegmentation)
 					when 'student_free'
 						+table_head_student_free(highlighted, period)
 					when 'student_student'
-						+table_head_student_student(highlighted, period, tableHeadOptions.showExtraContent)
+						+table_head_student_student(highlighted, eventTrackingKey, additionalEventSegmentation, period, tableHeadOptions.showExtraContent)
 					when 'student_university'
-						+table_head_student_university(highlighted, period)
+						+table_head_student_university(highlighted, eventTrackingKey, additionalEventSegmentation, period)
 
 	for featuresPerSection in config.features
 		if featuresPerSection.divider
@@ -107,43 +109,43 @@ mixin table_head_individual_free(highlighted, period)
 		.plans-v2-table-btn-buy-container-desktop
 			+btn_buy_individual_free(highlighted)
 
-mixin table_head_individual_personal(highlighted, period)
+mixin table_head_individual_personal(highlighted, eventTrackingKey, additionalEventSegmentation, period)
 	.plans-v2-table-th-content
 		p.plans-v2-table-th-content-title #{translate("personal")}
 		+table_head_price('personal', period)
 		.plans-v2-table-btn-buy-container-mobile
-			+btn_buy_individual_personal(highlighted, period)
+			+btn_buy_individual_personal(highlighted, eventTrackingKey, additionalEventSegmentation, period)
 		ul.plans-v2-table-th-content-benefit
 			li #{translate("one_collaborator")}
 			li #{translate("most_premium_features")}
 		.plans-v2-table-btn-buy-container-desktop
-			+btn_buy_individual_personal(highlighted, period)
+			+btn_buy_individual_personal(highlighted, eventTrackingKey, additionalEventSegmentation, period)
 
-mixin table_head_individual_collaborator(highlighted, period)
+mixin table_head_individual_collaborator(highlighted, eventTrackingKey, additionalEventSegmentation, period)
 	.plans-v2-table-th-content
 		p.plans-v2-table-th-content-title #{translate("standard")}
 		+table_head_price('collaborator', period)
 		.plans-v2-table-btn-buy-container-mobile
-			+btn_buy_individual_collaborator(highlighted, period)
+			+btn_buy_individual_collaborator(highlighted, eventTrackingKey, additionalEventSegmentation, period)
 		ul.plans-v2-table-th-content-benefit
 			li !{translate("x_collaborators_per_project", {collaboratorsCount: '10'})}
 			li #{translate("all_premium_features")}
 		.plans-v2-table-btn-buy-container-desktop
-			+btn_buy_individual_collaborator(highlighted, period)
+			+btn_buy_individual_collaborator(highlighted, eventTrackingKey, additionalEventSegmentation, period)
 
-mixin table_head_individual_professional(highlighted, period)
+mixin table_head_individual_professional(highlighted, eventTrackingKey, additionalEventSegmentation, period)
 	.plans-v2-table-th-content
 		p.plans-v2-table-th-content-title #{translate("professional")}
 		+table_head_price('professional', period)
 		.plans-v2-table-btn-buy-container-mobile
-			+btn_buy_individual_professional(highlighted, period)
+			+btn_buy_individual_professional(highlighted, eventTrackingKey, additionalEventSegmentation, period)
 		ul.plans-v2-table-th-content-benefit
 			li #{translate("unlimited_collabs")}
 			li #{translate("all_premium_features")}
 		.plans-v2-table-btn-buy-container-desktop
-			+btn_buy_individual_professional(highlighted, period)
+			+btn_buy_individual_professional(highlighted, eventTrackingKey, additionalEventSegmentation, period)
 
-mixin table_head_group_collaborator(highlighted)
+mixin table_head_group_collaborator(highlighted, eventTrackingKey, additionalEventSegmentation)
 	.plans-v2-table-th-content
 		p.plans-v2-table-th-content-title #{translate("group_standard")}
 		.plans-v2-table-price-container
@@ -154,18 +156,18 @@ mixin table_head_group_collaborator(highlighted)
 			p.plans-v2-table-price-period-label
 				| per user / year
 		.plans-v2-table-btn-buy-container-mobile
-			+btn_buy_group_collaborator(highlighted)
-			+additional_link_group('group_collaborator')
+			+btn_buy_group_collaborator(highlighted, eventTrackingKey)
+			+additional_link_group(eventTrackingKey, additionalEventSegmentation, 'group_collaborator')
 		ul.plans-v2-table-th-content-benefit
 			li #{translate("up_to")} !{translate("x_collaborators_per_project", {collaboratorsCount: '10'})}
 			li
 				span.plans-v2-group-total-price(data-ol-plans-v2-group-total-price='collaborator') #{initialLocalizedGroupPrice.price.collaborator}
 				span &nbsp;#{translate("total_per_year_lowercase")}
 		.plans-v2-table-btn-buy-container-desktop
-			+btn_buy_group_collaborator(highlighted)
-			+additional_link_group('group_collaborator')
+			+btn_buy_group_collaborator(highlighted, eventTrackingKey)
+			+additional_link_group(eventTrackingKey, additionalEventSegmentation, 'group_collaborator')
 
-mixin table_head_group_professional(highlighted)
+mixin table_head_group_professional(highlighted, eventTrackingKey, additionalEventSegmentation)
 	.plans-v2-table-th-content
 		p.plans-v2-table-th-content-title #{translate("group_professional")}
 		.plans-v2-table-price-container
@@ -176,25 +178,26 @@ mixin table_head_group_professional(highlighted)
 			p.plans-v2-table-price-period-label
 				| per user / year
 		.plans-v2-table-btn-buy-container-mobile
-			+btn_buy_group_professional(highlighted)
-			+additional_link_group('group_professional')
+			+btn_buy_group_professional(highlighted, eventTrackingKey)
+			+additional_link_group(eventTrackingKey, additionalEventSegmentation, 'group_professional')
 		ul.plans-v2-table-th-content-benefit
 			li #{translate("unlimited_collaborators_in_each_project")}
 			li
 				span.plans-v2-group-total-price(data-ol-plans-v2-group-total-price='professional') #{initialLocalizedGroupPrice.price.professional}
 				span &nbsp;#{translate("total_per_year_lowercase")}
 		.plans-v2-table-btn-buy-container-desktop
-			+btn_buy_group_professional(highlighted)
-			+additional_link_group('group_professional')
+			+btn_buy_group_professional(highlighted, eventTrackingKey)
+			+additional_link_group(eventTrackingKey, additionalEventSegmentation, 'group_professional')
 
 
-mixin table_head_group_organization(highlighted)
+mixin table_head_group_organization(highlighted, eventTrackingKey, additionalEventSegmentation)
+	- var segmentation = JSON.stringify(Object.assign({}, {button: 'group_organization-link', location: 'table-header-list', period: 'annual'}, additionalEventSegmentation))
 	.plans-v2-table-th-content
 		p.plans-v2-table-th-content-title #{translate("organization")}
 		.plans-v2-table-comments-icon
 			i.fa.fa-comments-o
 		.plans-v2-table-btn-buy-container-mobile
-			+btn_buy_group_organization(highlighted)
+			+btn_buy_group_organization(highlighted, eventTrackingKey)
 			small.plans-v2-table-th-content-additional-link.invisible(aria-hidden="true")
 		ul.plans-v2-table-th-content-benefit
 			li #{translate("best_choices_companies_universities_non_profits")}
@@ -206,10 +209,10 @@ mixin table_head_group_organization(highlighted)
 					event-tracking="plans-page-click"
 					event-tracking-mb="true"
 					event-tracking-trigger="click"
-					event-segmentation='{"button": "group_organization-link", "location": "table-header-list", "period": "annual", "plans-page-layout-v2": "new-plans-page"}'
+					event-segmentation=segmentation
 				) #{translate("also_available_as_on_premises")}
 		.plans-v2-table-btn-buy-container-desktop
-			+btn_buy_group_organization(highlighted)
+			+btn_buy_group_organization(highlighted, eventTrackingKey)
 			small.plans-v2-table-th-content-additional-link.invisible(aria-hidden="true")
 
 mixin table_head_student_free(highlighted, period)
@@ -223,12 +226,12 @@ mixin table_head_student_free(highlighted, period)
 		.plans-v2-table-btn-buy-container-desktop
 			+btn_buy_student_free(highlighted)
 
-mixin table_head_student_student(highlighted, period, showExtraContent)
+mixin table_head_student_student(highlighted, eventTrackingKey, additionalEventSegmentation, period, showExtraContent)
 	div.plans-v2-table-th-content
 		p.plans-v2-table-th-content-title #{translate("student")}
 		+table_head_price('student', period)
 		.plans-v2-table-btn-buy-container-mobile
-			+btn_buy_student_student(highlighted, period)
+			+btn_buy_student_student(highlighted, eventTrackingKey, additionalEventSegmentation, period)
 		ul.plans-v2-table-th-content-benefit
 			li !{translate("x_collaborators_per_project", {collaboratorsCount: '6'})}
 			li #{translate("all_premium_features")}
@@ -236,18 +239,18 @@ mixin table_head_student_student(highlighted, period, showExtraContent)
 				li #{translate("for_students_only")}
 
 		.plans-v2-table-btn-buy-container-desktop
-			+btn_buy_student_student(highlighted, period)
+			+btn_buy_student_student(highlighted, eventTrackingKey, additionalEventSegmentation, period)
 
-mixin table_head_student_university(highlighted, period)
+mixin table_head_student_university(highlighted, eventTrackingKey, additionalEventSegmentation, period)
 	div.plans-v2-table-th-content
 		p.plans-v2-table-th-content-title #{translate("university")}
 		div.plans-v2-table-comments-icon
 			i.fa.fa-comments-o
 		.plans-v2-table-btn-buy-container-mobile
-			+btn_buy_student_university(highlighted, period)
+			+btn_buy_student_university(highlighted, eventTrackingKey, additionalEventSegmentation, period)
 		p.plans-v2-table-th-content-benefit !{translate("all_our_group_plans_offer_educational_discount", {}, [{name: 'b'}, {name: 'b'}])}
 		.plans-v2-table-btn-buy-container-desktop
-			+btn_buy_student_university(highlighted, period)
+			+btn_buy_student_university(highlighted, eventTrackingKey, additionalEventSegmentation, period)
 
 mixin table_head_price(plan, period)
 	div.plans-v2-table-price-container
@@ -325,9 +328,10 @@ mixin group_plans_license_picker()
 				) #{translate("learn_more_lowercase")}
 				span )
 
-mixin btn_buy_individual(highlighted, subscriptionPlan, period) 
+mixin btn_buy_individual(highlighted, eventTrackingKey, subscriptionPlan, period) 
 	a.btn.plans-v2-table-btn-buy(
 		data-ol-start-new-subscription=subscriptionPlan
+		data-ol-event-tracking-key=eventTrackingKey
 		data-ol-item-view=period
 		class=(highlighted ? 'btn-primary' : 'btn-default')
 	)
@@ -349,24 +353,25 @@ mixin btn_buy_individual_free()
 			class=(highlighted ? 'btn-primary' : 'btn-default')
 		)
 
-mixin btn_buy_individual_personal(highlighted, period)
-	+btn_buy_individual(highlighted, 'paid-personal', period)
+mixin btn_buy_individual_personal(highlighted, eventTrackingKey, additionalEventSegmentation, period)
+	+btn_buy_individual(highlighted, eventTrackingKey, 'paid-personal', period)
 	if (period === 'monthly')
-		+additional_link_buy('paid-personal', period)
+		+additional_link_buy(eventTrackingKey, additionalEventSegmentation, 'paid-personal', period)
 
-mixin btn_buy_individual_collaborator(highlighted, period)
-	+btn_buy_individual(highlighted, 'collaborator', period)
+mixin btn_buy_individual_collaborator(highlighted, eventTrackingKey, additionalEventSegmentation, period)
+	+btn_buy_individual(highlighted, eventTrackingKey, 'collaborator', period)
 	if (period === 'monthly')
-		+additional_link_buy('collaborator', period)
+		+additional_link_buy(eventTrackingKey, additionalEventSegmentation, 'collaborator', period)
 
-mixin btn_buy_individual_professional(highlighted, period)
-	+btn_buy_individual(highlighted, 'professional', period)
+mixin btn_buy_individual_professional(highlighted, eventTrackingKey, additionalEventSegmentation, period)
+	+btn_buy_individual(highlighted, eventTrackingKey, 'professional', period)
 	if (period === 'monthly')
-		+additional_link_buy('professional', period)
+		+additional_link_buy(eventTrackingKey, additionalEventSegmentation, 'professional', period)
 
-mixin btn_buy_group_collaborator(highlighted) 
+mixin btn_buy_group_collaborator(highlighted, eventTrackingKey) 
 	a.btn.plans-v2-table-btn-buy(
 		data-ol-start-new-subscription='group_collaborator'
+		data-ol-event-tracking-key=eventTrackingKey
 		data-ol-item-view='annual'
 		data-ol-has-custom-href
 		class=(highlighted ? 'btn-primary' : 'btn-default')
@@ -374,9 +379,10 @@ mixin btn_buy_group_collaborator(highlighted)
 		span #{translate("customize")} 
 		span.hidden-mobile #{translate("your_plan_lowercase")}
 
-mixin btn_buy_group_professional(highlighted) 
+mixin btn_buy_group_professional(highlighted, eventTrackingKey) 
 	a.btn.plans-v2-table-btn-buy(
 		data-ol-start-new-subscription='group_professional'
+		data-ol-event-tracking-key=eventTrackingKey
 		data-ol-item-view='annual'
 		data-ol-has-custom-href
 		class=(highlighted ? 'btn-primary' : 'btn-default')
@@ -384,9 +390,10 @@ mixin btn_buy_group_professional(highlighted)
 		span #{translate("customize")} 
 		span.hidden-mobile #{translate("your_plan_lowercase")}
 
-mixin btn_buy_group_organization(highlighted) 
+mixin btn_buy_group_organization(highlighted, eventTrackingKey) 
 	a.btn.plans-v2-table-btn-buy(
 		data-ol-start-new-subscription='group_organization'
+		data-ol-event-tracking-key=eventTrackingKey
 		data-ol-item-view='annual'
 		data-ol-has-custom-href
 		href='/for/enterprises/sales-contact'
@@ -403,9 +410,10 @@ mixin btn_buy_student_free(highlighted)
 		)
 			span #{translate("try_for_free")}
 
-mixin btn_buy_student_student(highlighted, period)
+mixin btn_buy_student_student(highlighted, eventTrackingKey, additionalEventSegmentation, period)
 	a.btn.plans-v2-table-btn-buy(
 		data-ol-start-new-subscription='student'
+		data-ol-event-tracking-key=eventTrackingKey
 		data-ol-item-view=period
 		data-ol-location='card'
 		class=(highlighted ? 'btn-primary' : 'btn-default')
@@ -415,43 +423,46 @@ mixin btn_buy_student_student(highlighted, period)
 		else 
 			span #{translate("buy_now_no_exclamation_mark")}
 	if (period === 'monthly')
-		+additional_link_buy('student', period)
+		+additional_link_buy(eventTrackingKey, additionalEventSegmentation, 'student', period)
 
-mixin btn_buy_student_university(highlighted, period)
+mixin btn_buy_student_university(highlighted, eventTrackingKey, additionalEventSegmentation, period)
+	- var segmentation = JSON.stringify(Object.assign({}, {button: 'student-university', location: 'table-header-list', period}, additionalEventSegmentation))
 	a.btn.plans-v2-table-btn-buy(
 		href="/for/enterprises/sales-contact"
 		target="_blank"
-		event-tracking="plans-page-click"
+		event-tracking=eventTrackingKey
 		event-tracking-mb="true"
 		event-tracking-trigger="click"
-		event-segmentation='{"button": "student-university", "location": "table-header-list", "period": "' + period + '", "plans-page-layout-v2": "new-plans-page"}'
+		event-segmentation=segmentation
 		class=(highlighted ? 'btn-primary' : 'btn-default')
 	)
 		span #{translate("contact_us_lowercase")}
 
-mixin additional_link_group(plan)
+mixin additional_link_group(eventTrackingKey, additionalEventSegmentation, plan)
 	- var buttonSegmentation = plan + '-link'
+	- var segmentation = JSON.stringify(Object.assign({}, {button: buttonSegmentation, location: 'table-header'}, additionalEventSegmentation))
 	small.plans-v2-table-th-content-additional-link
 		| #{translate("or")} 
 		a(
 			href="/for/enterprises/sales-contact"
 			target="_blank"
-			event-tracking="plans-page-click"
+			event-tracking=eventTrackingKey
 			event-tracking-mb="true"
 			event-tracking-trigger="click"
-			event-segmentation='{"button": "' + buttonSegmentation + '", "location": "table-header", "plans-page-layout-v2": "new-plans-page"}'
+			event-segmentation=segmentation
 		) #{translate("contact_us_lowercase")}
 
-mixin additional_link_buy(plan, period)
+mixin additional_link_buy(eventTrackingKey, additionalEventSegmentation, plan, period)
 	- var buttonSegmentation = plan + '-link'
+	- var segmentation = JSON.stringify(Object.assign({}, {button: buttonSegmentation, location: 'table-header', period}, additionalEventSegmentation))
 	small.plans-v2-table-th-content-additional-link
 		| #{translate("or")} 
 		a(
 			href="/user/subscription/new?planCode=" + plan + "&currency=" + recommendedCurrency + "&itm_campaign=plans&itm_content=card"
-			event-tracking="plans-page-click"
+			event-tracking=eventTrackingKey
 			event-tracking-mb="true"
 			event-tracking-trigger="click"
-			event-segmentation='{"button": "' + buttonSegmentation + '", "location": "table-header", "period": "' + period + '", "plans-page-layout-v2": "new-plans-page"}'
+			event-segmentation=segmentation
 		) #{translate("buy_now_no_exclamation_mark")}
 
 mixin table_sticky_header

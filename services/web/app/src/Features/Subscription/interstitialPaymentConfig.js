@@ -14,6 +14,7 @@ const config = {
       annual: 'MOST POPULAR',
     },
   },
+  eventTrackingKey: 'paywall-plans-page-click',
   showStudentsOnlyLabel: true,
   features: [
     {

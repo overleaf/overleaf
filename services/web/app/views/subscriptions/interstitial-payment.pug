@@ -23,8 +23,7 @@ block content
 							.page-header.centered.plans-header.text-centered.top-page-header
 								h1.text-capitalize #{translate('choose_your_plan')}
 
-					//- TODO: add analytics by adding 2 arguments in the mixin below
-					+monthly_annual_switch()
+					+monthly_annual_switch("paywall-plans-page-toggle", '{}')
 
 					.row.plans-v2-table-sticky-header.plans-v2-table-sticky-header-individual.sticky(data-ol-plans-v2-table-sticky-header='individual')
 						.plans-v2-table-sticky-header-item
