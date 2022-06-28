@@ -104,6 +104,7 @@ module.exports = CompileController = {
               compileTime: timings?.compileE2E,
               timeout: limits.timeout === 60 ? 'short' : 'long',
               server: clsiServerId?.includes('-c2d-') ? 'faster' : 'normal',
+              isAutoCompile,
             }
           )
         }
