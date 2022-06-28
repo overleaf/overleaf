@@ -77,6 +77,8 @@ function setUpSubscriptionTracking(linkEl) {
   })
 }
 
+const searchParams = new URLSearchParams(window.location.search)
+
 export function updateLinkTargets() {
   document.querySelectorAll('[data-ol-start-new-subscription]').forEach(el => {
     if (el.hasAttribute('data-ol-has-custom-href')) return
@@ -87,7 +89,21 @@ export function updateLinkTargets() {
     const planCode = `${plan}${suffix}`
 
     const location = el.getAttribute('data-ol-location')
-    el.href = `/user/subscription/new?planCode=${planCode}&currency=${currentCurrencyCode}&itm_campaign=plans&itm_content=${location}`
+    const itmCampaign = searchParams.get('itm_campaign') || 'plans'
+    const itmContent =
+      itmCampaign === 'plans' ? location : searchParams.get('itm_content')
+
+    const queryString = new URLSearchParams({
+      planCode,
+      currency: currentCurrencyCode,
+      itm_campaign: itmCampaign,
+    })
+
+    if (itmContent) {
+      queryString.set('itm_content', itmContent)
+    }
+
+    el.href = `/user/subscription/new?${queryString.toString()}`
   })
 }
 

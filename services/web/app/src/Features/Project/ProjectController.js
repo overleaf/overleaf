@@ -919,6 +919,21 @@ const ProjectController = {
             }
           )
         },
+        interstitialPaymentFromPaywallAssignment(cb) {
+          SplitTestHandler.getAssignment(
+            req,
+            res,
+            'interstitial-payment-from-paywall',
+            (error, assignment) => {
+              // do not fail editor load if assignment fails
+              if (error) {
+                cb(null, { variant: 'default' })
+              } else {
+                cb(null, assignment)
+              }
+            }
+          )
+        },
         latexLogParserAssignment(cb) {
           SplitTestHandler.getAssignment(
             req,

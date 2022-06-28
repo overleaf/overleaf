@@ -2,6 +2,7 @@ import { useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from 'react-bootstrap'
 import PropTypes from 'prop-types'
+import { useSplitTestContext } from '../context/split-test-context'
 import * as eventTracking from '../../infrastructure/event-tracking'
 
 export default function StartFreeTrialButton({
@@ -12,6 +13,12 @@ export default function StartFreeTrialButton({
   source,
 }) {
   const { t } = useTranslation()
+
+  const { splitTestVariants } = useSplitTestContext({
+    splitTestVariants: PropTypes.object,
+  })
+  const interstitialPaymentFromPaywallVariant =
+    splitTestVariants['interstitial-payment-from-paywall']
 
   useEffect(() => {
     eventTracking.sendMB('paywall-prompt', { 'paywall-type': source })
@@ -34,9 +41,15 @@ export default function StartFreeTrialButton({
         itm_campaign: source,
       })
 
-      window.open(`/user/subscription/new?${params}`)
+      if (interstitialPaymentFromPaywallVariant === 'active') {
+        window.open(
+          `/user/subscription/choose-your-plan?itm_campaign=${source}`
+        )
+      } else {
+        window.open(`/user/subscription/new?${params}`)
+      }
     },
-    [setStartedFreeTrial, source]
+    [setStartedFreeTrial, source, interstitialPaymentFromPaywallVariant]
   )
 
   return (
