@@ -24,6 +24,11 @@ export function switchMonthlyAnnual(currentMonthlyAnnualSwitchValue) {
     currentMonthlyAnnualSwitchValue === 'annual'
   )
 
+  document.querySelectorAll('[data-ol-tooltip-period]').forEach(el => {
+    const period = el.getAttribute('data-ol-tooltip-period')
+    el.hidden = period !== currentMonthlyAnnualSwitchValue
+  })
+
   document
     .querySelectorAll('[data-ol-plans-v2-table-annual-price-before-discount]')
     .forEach(el => {
