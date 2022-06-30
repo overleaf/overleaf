@@ -8,6 +8,7 @@ const RETRY_FAILED = process.env.RETRY_FAILED === 'true'
 const MAX_UPGRADES_TO_ATTEMPT =
   parseInt(process.env.MAX_UPGRADES_TO_ATTEMPT, 10) || false
 const MAX_FAILURES = parseInt(process.env.MAX_FAILURES, 10) || 50
+const ARCHIVE_ON_FAILURE = process.env.ARCHIVE_ON_FAILURE === 'true'
 // persist fallback in order to keep batchedUpdate in-sync
 process.env.BATCH_SIZE = BATCH_SIZE
 // raise mongo timeout to 1hr if otherwise unspecified
@@ -37,6 +38,7 @@ console.log({
   MAX_FAILURES,
   USE_QUERY_HINT,
   RETRY_FAILED,
+  ARCHIVE_ON_FAILURE,
   PROJECT_ID,
 })
 
@@ -86,6 +88,9 @@ async function processProject(project) {
       project.overleaf.history.conversionFailed ||
       project.overleaf.history.upgradeFailed
     ) {
+      if (project.overleaf.history.zipFileArchivedInProject) {
+        return // always give up if we have uploaded the zipfile to the project
+      }
       if (!RETRY_FAILED) {
         // we don't want to attempt upgrade on projects
         // that have been previously attempted and failed
@@ -123,7 +128,9 @@ async function doUpgradeForNoneWithConversion(project) {
           `converted ${convertedDocCount} large docs to binary files for project ${projectId}`
         )
       }
-      await ProjectHistoryController.migrateProjectHistory(projectIdString)
+      await ProjectHistoryController.migrateProjectHistory(projectIdString, {
+        archiveOnFailure: ARCHIVE_ON_FAILURE,
+      })
     } catch (err) {
       // if migrateProjectHistory fails, it cleans up by deleting
       // the history and unsetting the history id

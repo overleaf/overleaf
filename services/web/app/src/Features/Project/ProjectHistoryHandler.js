@@ -125,6 +125,27 @@ const ProjectHistoryHandler = {
     )
   },
 
+  setMigrationArchiveFlag(project_id, callback) {
+    if (callback == null) {
+      callback = function () {}
+    }
+    Project.updateOne(
+      { _id: project_id, version: { $exists: true } },
+      {
+        'overleaf.history.zipFileArchivedInProject': true,
+      },
+      function (err, result) {
+        if (err != null) {
+          return callback(err)
+        }
+        if ((result != null ? result.n : undefined) === 0) {
+          return callback(new Error('migration flag not set'))
+        }
+        return callback()
+      }
+    )
+  },
+
   ensureHistoryExistsForProject(project_id, callback) {
     // We can only set a history id for a project that doesn't have one. The
     // history id is cached in the project history service, and changing an

@@ -100,6 +100,7 @@ const ProjectSchema = new Schema({
       display: { type: Boolean },
       upgradedAt: { type: Date },
       allowDowngrade: { type: Boolean },
+      zipFileArchivedInProject: { type: Boolean },
     },
   },
   collabratecUsers: [

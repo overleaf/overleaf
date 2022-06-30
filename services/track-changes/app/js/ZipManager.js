@@ -148,6 +148,20 @@ async function generateZip(projectId, zipfile) {
     Buffer.from(JSON.stringify(manifest, null, 2)),
     'manifest.json'
   )
+  zipfile.addBuffer(
+    Buffer.from(
+      `History Migration Data
+
+This zip file contains a copy of the raw history for this project.
+
+If this file is present in a project it means the history could not
+be fully recovered or migrated.
+
+A new history should have been created starting at the datestamp of
+this file.`
+    ),
+    'README.txt'
+  )
   zipfile.end()
 }
 
