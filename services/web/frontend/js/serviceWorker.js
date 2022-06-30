@@ -8,7 +8,8 @@ const VERSION = 2
 
 const CLEAR_CACHE_REQUEST_MATCHER = /^\/project\/[0-9a-f]{24}\/output$/
 const COMPILE_REQUEST_MATCHER = /^\/project\/[0-9a-f]{24}\/compile$/
-const PDF_REQUEST_MATCHER = /^\/project\/[0-9a-f]{24}\/.*\/output.pdf$/
+const PDF_REQUEST_MATCHER =
+  /^(\/zone\/.)?(\/project\/[0-9a-f]{24}\/.*\/output.pdf)$/
 const PDF_JS_CHUNK_SIZE = 128 * 1024
 const MAX_SUBREQUEST_COUNT = 4
 const MAX_SUBREQUEST_BYTES = 4 * PDF_JS_CHUNK_SIZE
@@ -162,8 +163,9 @@ function onFetch(event) {
     return processCompileRequest(event)
   }
 
-  if (path.match(PDF_REQUEST_MATCHER)) {
-    const ctx = getPdfContext(event.clientId, path)
+  const match = path.match(PDF_REQUEST_MATCHER)
+  if (match) {
+    const ctx = getPdfContext(event.clientId, match[2])
     if (ctx) {
       return processPdfRequest(event, ctx)
     }
