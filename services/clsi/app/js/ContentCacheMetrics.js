@@ -29,7 +29,7 @@ function emitPdfStats(stats, timings, request) {
     emitPdfCachingStats(stats, timings, request)
   } else {
     // How much bandwidth will the pdf incur when downloaded in full?
-    Metrics.summary('pdf-bandwidth', stats['pdf-size'], 1, request.metricsOpts)
+    Metrics.summary('pdf-bandwidth', stats['pdf-size'], request.metricsOpts)
   }
 }
 
@@ -63,7 +63,6 @@ function emitPdfCachingStats(stats, timings, request) {
   Metrics.summary(
     'overhead-compute-pdf-ranges',
     fraction * 100 - 100,
-    1,
     request.metricsOpts
   )
 
@@ -95,7 +94,6 @@ function emitPdfCachingStats(stats, timings, request) {
     Metrics.summary(
       'new-pdf-ranges-relative-to-total-ranges',
       (stats['pdf-caching-n-new-ranges'] / stats['pdf-caching-n-ranges']) * 100,
-      1,
       request.metricsOpts
     )
   }
@@ -104,7 +102,6 @@ function emitPdfCachingStats(stats, timings, request) {
   Metrics.summary(
     'cacheable-ranges-to-pdf-size',
     (stats['pdf-caching-total-ranges-size'] / stats['pdf-size']) * 100,
-    1,
     request.metricsOpts
   )
 
@@ -120,7 +117,6 @@ function emitPdfCachingStats(stats, timings, request) {
   Metrics.summary(
     'pdf-bandwidth-savings',
     100 - (sizeWhenDownloadedInFull / stats['pdf-size']) * 100,
-    1,
     request.metricsOpts
   )
 
@@ -128,7 +124,6 @@ function emitPdfCachingStats(stats, timings, request) {
   Metrics.summary(
     'pdf-bandwidth',
     sizeWhenDownloadedInFull,
-    1,
     request.metricsOpts
   )
 
@@ -137,7 +132,6 @@ function emitPdfCachingStats(stats, timings, request) {
   Metrics.summary(
     'pdf-ranges-disk-size',
     stats['pdf-caching-new-ranges-size'] - stats['pdf-caching-reclaimed-space'],
-    1,
     request.metricsOpts
   )
 }
