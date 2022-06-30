@@ -32,11 +32,13 @@ module.exports = CompileController = {
     const isAutoCompile = !!req.query.auto_compile
     const enablePdfCaching = !!req.query.enable_pdf_caching
     const fileLineErrors = !!req.query.file_line_errors
+    const stopOnFirstError = !!req.body.stopOnFirstError
     const userId = SessionManager.getLoggedInUserId(req.session)
     const options = {
       isAutoCompile,
       enablePdfCaching,
       fileLineErrors,
+      stopOnFirstError,
     }
 
     if (req.body.rootDoc_id) {
@@ -53,9 +55,6 @@ module.exports = CompileController = {
     }
     if (req.body.draft) {
       options.draft = req.body.draft
-    }
-    if (req.body.stopOnFirstError) {
-      options.stopOnFirstError = req.body.stopOnFirstError
     }
     if (['validate', 'error', 'silent'].includes(req.body.check)) {
       options.check = req.body.check
@@ -105,6 +104,7 @@ module.exports = CompileController = {
               timeout: limits.timeout === 60 ? 'short' : 'long',
               server: clsiServerId?.includes('-c2d-') ? 'faster' : 'normal',
               isAutoCompile,
+              stopOnFirstError,
             }
           )
         }

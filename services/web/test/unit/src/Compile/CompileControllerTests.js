@@ -178,6 +178,7 @@ describe('CompileController', function () {
             isAutoCompile: false,
             enablePdfCaching: false,
             fileLineErrors: false,
+            stopOnFirstError: false,
           })
           .should.equal(true)
       })
@@ -209,6 +210,7 @@ describe('CompileController', function () {
             isAutoCompile: true,
             enablePdfCaching: false,
             fileLineErrors: false,
+            stopOnFirstError: false,
           })
           .should.equal(true)
       })
@@ -227,6 +229,7 @@ describe('CompileController', function () {
             enablePdfCaching: false,
             draft: true,
             fileLineErrors: false,
+            stopOnFirstError: false,
           })
           .should.equal(true)
       })
