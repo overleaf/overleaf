@@ -15,7 +15,19 @@ async function addIndexesToCollection(collection, indexes) {
 }
 
 async function dropIndexesFromCollection(collection, indexes) {
-  return Promise.all(indexes.map(index => collection.dropIndex(index.name)))
+  return Promise.all(
+    indexes.map(async index => {
+      try {
+        await collection.dropIndex(index.name)
+      } catch (err) {
+        if (err.code === 27 /* IndexNotFound */) {
+          console.log(`Index ${index.name} not found; drop was a no-op.`)
+        } else {
+          throw err
+        }
+      }
+    })
+  )
 }
 
 async function dropCollection(collectionName) {
