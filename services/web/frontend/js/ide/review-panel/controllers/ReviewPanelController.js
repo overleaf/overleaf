@@ -96,7 +96,6 @@ export default App.controller(
       rendererData: {},
       formattedProjectMembers: {},
       fullTCStateCollapsed: true,
-      loadingThreads: false,
       // All selected changes. If a aggregated change (insertion + deletion) is selection, the two ids
       // will be present. The length of this array will differ from the count below (see explanation).
       selectedEntryIds: [],
@@ -105,6 +104,8 @@ export default App.controller(
       nVisibleSelectedChanges: 0,
       entryHover: false,
     }
+
+    ide.$scope.loadingThreads = true
 
     window.addEventListener('beforeunload', function () {
       const collapsedStates = {}
@@ -319,13 +320,15 @@ export default App.controller(
       })
     })
 
-    $scope.$watch('reviewPanel.subView', function (view) {
+    $scope.$watch('reviewPanel.subView', function (view, oldView) {
       if (view == null) {
         return
       }
       updateScrollbar()
       if (view === $scope.SubViews.OVERVIEW) {
         return refreshOverviewPanel()
+      } else if (oldView === $scope.SubViews.OVERVIEW) {
+        dispatchReviewPanelEvent('overview-closed', view)
       }
     })
 
@@ -1193,12 +1196,12 @@ export default App.controller(
         return
       }
       _threadsLoaded = true
-      $scope.reviewPanel.loadingThreads = true
+      ide.$scope.loadingThreads = true
       return $http
         .get(`/project/${$scope.project_id}/threads`)
         .then(function (response) {
           const threads = response.data
-          $scope.reviewPanel.loadingThreads = false
+          ide.$scope.loadingThreads = false
           for (const thread_id in $scope.reviewPanel.resolvedThreadIds) {
             const _ = $scope.reviewPanel.resolvedThreadIds[thread_id]
             delete $scope.reviewPanel.resolvedThreadIds[thread_id]
@@ -1212,10 +1215,10 @@ export default App.controller(
               thread.resolved_by_user = formatUser(thread.resolved_by_user)
               $scope.reviewPanel.resolvedThreadIds[thread_id] = true
               $scope.$broadcast('comment:resolve_threads', [thread_id])
-              dispatchReviewPanelEvent('comment:resolve_threads', [thread_id])
             }
           }
           $scope.reviewPanel.commentThreads = threads
+          dispatchReviewPanelEvent('loaded_threads')
           return $timeout(() => $scope.$broadcast('review-panel:layout'))
         })
     }

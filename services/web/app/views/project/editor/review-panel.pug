@@ -159,7 +159,7 @@
 						on-delete="deleteComment(entry.thread_id, comment)"
 						on-body-click="gotoEntry(editor.open_doc_id, entry)"
 						permissions="permissions"
-						ng-if="!reviewPanel.loadingThreads"
+						ng-if="!loadingThreads"
 					)
 
 				div(ng-if="entry.type === 'add-comment' && permissions.comment")
