@@ -1,4 +1,9 @@
 {
+  "faster_compiles_feedback_question": "Virkede den her kompilering anderledes end ellers?",
+  "faster_compiles_feedback_seems_faster": "Hurtigere",
+  "faster_compiles_feedback_seems_same": "Det samme",
+  "faster_compiles_feedback_seems_slower": "Langsommere",
+  "faster_compiles_feedback_thanks": "Tak for dit svar!",
   "generic_linked_file_compile_error": "Dette projekts udfiler er ikke tilgængelige, fordi det ikke kunne kompilere. Du kan se detaljer om kompileringsfejl, hvis du åbner projektet.",
   "chat_error": "Kunne ikke indlæse chatbeskeder, prøv venligst igen.",
   "reconnect": "Prøv igen",
