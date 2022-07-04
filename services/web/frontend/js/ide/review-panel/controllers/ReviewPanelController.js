@@ -491,7 +491,7 @@ export default App.controller(
       if (!window.isRestrictedTokenMember) {
         if (rangesTracker.comments.length > 0) {
           ensureThreadsAreLoaded()
-        } else {
+        } else if (ide.$scope.loadingThreads === true) {
           // ensure that tracked changes are highlighted even if no comments are loaded
           ide.$scope.loadingThreads = false
           dispatchReviewPanelEvent('loaded_threads')
