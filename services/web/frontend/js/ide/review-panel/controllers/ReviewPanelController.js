@@ -488,10 +488,15 @@ export default App.controller(
         }
       }
 
-      if (rangesTracker.comments.length > 0) {
-        if (!window.isRestrictedTokenMember) {
-          ensureThreadsAreLoaded()
-        }
+      if (
+        rangesTracker.comments.length > 0 &&
+        !window.isRestrictedTokenMember
+      ) {
+        ensureThreadsAreLoaded()
+      } else {
+        // ensure that tracked changes are highlighted even if no comments are loaded
+        ide.$scope.loadingThreads = false
+        dispatchReviewPanelEvent('loaded_threads')
       }
 
       for (const comment of Array.from(rangesTracker.comments)) {
