@@ -366,6 +366,7 @@ function _getCachedVariantFromSession(session, splitTestName, currentVersion) {
 
 async function _getUser(id) {
   return UserGetter.promises.getUser(id, {
+    analyticsId: 1,
     splitTests: 1,
     alphaProgram: 1,
     betaProgram: 1,
