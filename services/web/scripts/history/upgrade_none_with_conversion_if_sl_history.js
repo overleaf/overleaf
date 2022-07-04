@@ -9,6 +9,8 @@ const MAX_UPGRADES_TO_ATTEMPT =
   parseInt(process.env.MAX_UPGRADES_TO_ATTEMPT, 10) || false
 const MAX_FAILURES = parseInt(process.env.MAX_FAILURES, 10) || 50
 const ARCHIVE_ON_FAILURE = process.env.ARCHIVE_ON_FAILURE === 'true'
+const FIX_INVALID_CHARACTERS = process.env.FIX_INVALID_CHARACTERS === 'true'
+
 // persist fallback in order to keep batchedUpdate in-sync
 process.env.BATCH_SIZE = BATCH_SIZE
 // raise mongo timeout to 1hr if otherwise unspecified
@@ -130,6 +132,7 @@ async function doUpgradeForNoneWithConversion(project) {
       }
       await ProjectHistoryController.migrateProjectHistory(projectIdString, {
         archiveOnFailure: ARCHIVE_ON_FAILURE,
+        fixInvalidCharacters: FIX_INVALID_CHARACTERS,
       })
     } catch (err) {
       // if migrateProjectHistory fails, it cleans up by deleting
