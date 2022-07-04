@@ -3,6 +3,8 @@ import HumanReadableLogs from '../../../ide/human-readable-logs/HumanReadableLog
 import BibLogParser from '../../../ide/log-parser/bib-log-parser'
 import { v4 as uuid } from 'uuid'
 
+// Warnings that may disappear after a second LaTeX pass
+const TRANSIENT_WARNING_REGEX = /^(Reference|Citation).+undefined on input line/
 const searchParams = new URLSearchParams(window.location.search)
 
 export function handleOutputFiles(outputFiles, projectId, data) {
@@ -79,7 +81,7 @@ export const handleLogFiles = async (outputFiles, data, signal) => {
 
       result.log = await response.text()
 
-      const { errors, warnings, typesetting } = HumanReadableLogs.parse(
+      let { errors, warnings, typesetting } = HumanReadableLogs.parse(
         result.log,
         {
           ignoreDuplicates: true,
@@ -87,6 +89,11 @@ export const handleLogFiles = async (outputFiles, data, signal) => {
             getMeta('ol-splitTestVariants')?.['latex-log-parser'] !== 'new',
         }
       )
+
+      if (data.status === 'stopped-on-first-error') {
+        // Hide warnings that could disappear after a second pass
+        warnings = warnings.filter(warning => !isTransientWarning(warning))
+      }
 
       accumulateResults({ errors, warnings, typesetting })
     } catch (e) {
@@ -178,4 +185,8 @@ function normalizeFilePath(path, rootDocDirname) {
   }
 
   return path
+}
+
+function isTransientWarning(warning) {
+  return TRANSIENT_WARNING_REGEX.test(warning.message)
 }
