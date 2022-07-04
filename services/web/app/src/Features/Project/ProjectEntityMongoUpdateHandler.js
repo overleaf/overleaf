@@ -17,6 +17,7 @@ const ProjectLocator = require('./ProjectLocator')
 const FolderStructureBuilder = require('./FolderStructureBuilder')
 const SafePath = require('./SafePath')
 const { DeletedFile } = require('../../models/DeletedFile')
+const { iterablePaths } = require('./IterablePath')
 
 const LOCK_NAMESPACE = 'mongoTransaction'
 const ENTITY_TYPE_TO_MONGO_PATH_SEGMENT = {
@@ -494,7 +495,7 @@ function _countElements(project) {
     let total = 0
     if (folder.folders) {
       total += folder.folders.length
-      for (const subfolder of folder.folders) {
+      for (const subfolder of iterablePaths(folder, 'folders')) {
         total += countFolder(subfolder)
       }
     }

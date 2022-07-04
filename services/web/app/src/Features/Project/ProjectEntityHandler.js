@@ -4,6 +4,7 @@ const Errors = require('../Errors/Errors')
 const ProjectGetter = require('./ProjectGetter')
 const { promisifyAll } = require('../../util/promises')
 const OError = require('@overleaf/o-error')
+const { iterablePaths } = require('./IterablePath')
 
 const ProjectEntityHandler = {
   getAllDocs(projectId, callback) {
@@ -26,7 +27,7 @@ const ProjectEntityHandler = {
         }
         const docs = {}
         for (const { path: folderPath, folder } of folders) {
-          for (const doc of folder.docs || []) {
+          for (const doc of iterablePaths(folder, 'docs')) {
             const content = docContents[doc._id.toString()]
             if (content != null) {
               docs[path.join(folderPath, doc.name)] = {
@@ -51,7 +52,7 @@ const ProjectEntityHandler = {
       }
       const files = {}
       for (const { path: folderPath, folder } of folders) {
-        for (const file of folder.fileRefs || []) {
+        for (const file of iterablePaths(folder, 'fileRefs')) {
           if (file != null) {
             files[path.join(folderPath, file.name)] = file
           }
@@ -80,12 +81,12 @@ const ProjectEntityHandler = {
     const docs = []
     const files = []
     for (const { path: folderPath, folder } of folders) {
-      for (const doc of folder.docs || []) {
+      for (const doc of iterablePaths(folder, 'docs')) {
         if (doc != null) {
           docs.push({ path: path.join(folderPath, doc.name), doc })
         }
       }
-      for (const file of folder.fileRefs || []) {
+      for (const file of iterablePaths(folder, 'fileRefs')) {
         if (file != null) {
           files.push({ path: path.join(folderPath, file.name), file })
         }
@@ -111,7 +112,7 @@ const ProjectEntityHandler = {
     const folders = ProjectEntityHandler._getAllFoldersFromProject(project)
     const docPath = {}
     for (const { path: folderPath, folder } of folders) {
-      for (const doc of folder.docs || []) {
+      for (const doc of iterablePaths(folder, 'docs')) {
         docPath[doc._id] = path.join(folderPath, doc.name)
       }
     }
@@ -171,7 +172,7 @@ const ProjectEntityHandler = {
         return path.join(basePath, docInCurrentFolder.name)
       } else {
         let docPath, childFolder
-        for (childFolder of folder.folders || []) {
+        for (childFolder of iterablePaths(folder, 'folders')) {
           docPath = recursivelyFindDocInFolder(
             path.join(basePath, childFolder.name),
             docId,
@@ -211,7 +212,7 @@ const ProjectEntityHandler = {
       const processFolder = (basePath, folder) => {
         folders.push({ path: basePath, folder })
         if (folder.folders) {
-          for (const childFolder of folder.folders) {
+          for (const childFolder of iterablePaths(folder, 'folders')) {
             if (childFolder.name != null) {
               const childPath = path.join(basePath, childFolder.name)
               processFolder(childPath, childFolder)

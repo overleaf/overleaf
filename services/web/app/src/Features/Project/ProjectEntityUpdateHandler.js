@@ -22,6 +22,7 @@ const TpdsUpdateSender = require('../ThirdPartyDataStore/TpdsUpdateSender')
 const FileWriter = require('../../infrastructure/FileWriter')
 const EditorRealTimeController = require('../Editor/EditorRealTimeController')
 const { promisifyAll } = require('../../util/promises')
+const { iterablePaths } = require('./IterablePath')
 
 const LOCK_NAMESPACE = 'sequentialProjectStructureUpdateLock'
 const VALID_ROOT_DOC_EXTENSIONS = Settings.validRootDocExtensions
@@ -1608,16 +1609,16 @@ const ProjectEntityUpdateHandler = {
     } else if (entityType.indexOf('folder') !== -1) {
       changes = { oldDocs: [], oldFiles: [] }
       const _recurseFolder = (folder, folderPath) => {
-        for (const doc of folder.docs) {
+        for (const doc of iterablePaths(folder, 'docs')) {
           changes.oldDocs.push({ doc, path: Path.join(folderPath, doc.name) })
         }
-        for (const file of folder.fileRefs) {
+        for (const file of iterablePaths(folder, 'fileRefs')) {
           changes.oldFiles.push({
             file,
             path: Path.join(folderPath, file.name),
           })
         }
-        for (const childFolder of folder.folders) {
+        for (const childFolder of iterablePaths(folder, 'folders')) {
           _recurseFolder(childFolder, Path.join(folderPath, childFolder.name))
         }
       }

@@ -9,6 +9,7 @@ const { db, waitForDb } = require('../app/src/infrastructure/mongodb')
 const Errors = require('../app/src/Features/Errors/Errors')
 const FileStoreHandler = require('../app/src/Features/FileStore/FileStoreHandler')
 const ProjectEntityMongoUpdateHandler = require('../app/src/Features/Project/ProjectEntityMongoUpdateHandler')
+const { iterablePaths } = require('../app/src/Features/Project/IterablePath')
 
 const OPTIONS = parseArgs()
 
@@ -70,7 +71,7 @@ async function processProject(project) {
 function findRefsInFolder(folder) {
   let docIds = folder.docs.map(doc => doc._id)
   let fileIds = folder.fileRefs.map(file => file._id)
-  for (const subfolder of folder.folders) {
+  for (const subfolder of iterablePaths(folder, 'folders')) {
     const subrefs = findRefsInFolder(subfolder)
     docIds = docIds.concat(subrefs.docIds)
     fileIds = fileIds.concat(subrefs.fileIds)

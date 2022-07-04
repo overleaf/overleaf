@@ -4,6 +4,7 @@ const async = require('async')
 const ProjectGetter = require('./ProjectGetter')
 const Errors = require('../Errors/Errors')
 const { promisifyMultiResult } = require('../../util/promises')
+const { iterablePaths } = require('./IterablePath')
 
 function findElement(options, _callback) {
   // The search algorithm below potentially invokes the callback multiple
@@ -203,19 +204,19 @@ function _findElementByPathWithProject(
     if (entityName == null) {
       return cb(null, folder, 'folder')
     }
-    for (const file of folder.fileRefs || []) {
+    for (const file of iterablePaths(folder, 'fileRefs')) {
       if (matchFn(file != null ? file.name : undefined, entityName)) {
         result = file
         type = 'file'
       }
     }
-    for (const doc of folder.docs || []) {
+    for (const doc of iterablePaths(folder, 'docs')) {
       if (matchFn(doc != null ? doc.name : undefined, entityName)) {
         result = doc
         type = 'doc'
       }
     }
-    for (const childFolder of folder.folders || []) {
+    for (const childFolder of iterablePaths(folder, 'folders')) {
       if (
         matchFn(childFolder != null ? childFolder.name : undefined, entityName)
       ) {
