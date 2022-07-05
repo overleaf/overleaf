@@ -1789,5 +1789,9 @@
   "commons_plan_tooltip": "You’re on the __plan__ plan because of your affiliation with __institution__. Click to find out how you could benefit from Overleaf premium features!",
   "trial_last_day": "This is the last day of your <b>Overleaf Premium</b> trial",
   "trial_remaining_days": "__days__ more days on your <b>Overleaf Premium</b> trial",
-  "get_most_subscription_by_checking_premium_features": "Get the most out of your __appName__ subscription by checking out the list of <0>__appName__’s premium features</0>."
+  "get_most_subscription_by_checking_premium_features": "Get the most out of your __appName__ subscription by checking out the list of <0>__appName__’s premium features</0>.",
+  "would_you_like_to_see_a_university_subscription": "Would you like to see a university-wide __appName__ subscription at your university?",
+  "student_and_faculty_support": "Student and faculty support make a difference!",
+  "let_us_know_which_university_you_are_from": "Let us know which university you are from and we will take care of the rest.",
+  "show_your_support": "Show your support"
 }
