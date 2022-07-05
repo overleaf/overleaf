@@ -1046,34 +1046,20 @@ p.plans-v2-table-green-highlighted-text {
   }
 }
 
-.plans-v2-table-sticky-header-group,
-.plans-v2-table-sticky-header-student {
-  .plans-v2-table-sticky-header-item {
-    // has 3 visible column on the table for mobile view
-    width: 33.33%;
-  }
+.plans-v2-table-sticky-header-container {
+  height: 100%;
+  width: 100%;
+  position: absolute;
 }
 
-.plans-v2-table-sticky-header-individual {
-  .plans-v2-table-sticky-header-item {
-    // has 4 visible column on the table for mobile view
-    width: 25%;
-  }
-}
-
-.plans-v2-table-sticky-header-group {
+.plans-v2-table-sticky-header-without-switch {
   margin-bottom: -107px;
   margin-top: 67px;
 }
 
-.plans-v2-table-sticky-header-individual,
-.plans-v2-table-sticky-header-student {
+.plans-v2-table-sticky-header-with-switch {
   margin-bottom: -140px;
   margin-top: 100px;
-
-  @media (max-width: @screen-xs-max) {
-    margin-top: 118px;
-  }
 }
 
 .plans-v2-table-sticky-header {
@@ -1097,6 +1083,7 @@ p.plans-v2-table-green-highlighted-text {
 
 .plans-v2-table-sticky-header-item {
   background-color: @white;
+  flex: 1 1 0px;
 
   span {
     margin: 0px @margin-xs;

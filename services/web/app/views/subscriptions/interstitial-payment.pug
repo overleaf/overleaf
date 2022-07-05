@@ -25,15 +25,7 @@ block content
 
 					+monthly_annual_switch("paywall-plans-page-toggle", '{}')
 
-					.row.plans-v2-table-sticky-header.plans-v2-table-sticky-header-individual.sticky(data-ol-plans-v2-table-sticky-header='individual')
-						.plans-v2-table-sticky-header-item
-							span #{translate("personal")}
-						.plans-v2-table-sticky-header-item.plans-v2-table-sticky-header-item-highlighted
-							span #{translate("standard")}
-						.plans-v2-table-sticky-header-item
-							span #{translate("professional")}
-						.plans-v2-table-sticky-header-item
-							span #{translate("student")}
+					+plans_v2_table_sticky_header(true, interstitialPaymentConfig)
 
 					.row.plans-v2-table-container(data-ol-plans-v2-table-container='monthly')
 						.col-sm-12

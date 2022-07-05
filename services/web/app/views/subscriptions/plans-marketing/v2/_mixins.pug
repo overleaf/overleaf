@@ -465,43 +465,43 @@ mixin additional_link_buy(eventTrackingKey, additionalEventSegmentation, plan, p
 			event-segmentation=segmentation
 		) #{translate("buy_now_no_exclamation_mark")}
 
-mixin table_sticky_header
-	.row.plans-v2-table-sticky-header.plans-v2-table-sticky-header-individual.sticky(
+mixin plans_v2_table_sticky_header(withSwitch, config)
+	- var tableHeadKeys = Object.keys(config.tableHead)
+	.row.plans-v2-table-sticky-header.sticky(
 		data-ol-plans-v2-table-sticky-header
+		class=(withSwitch ? 'plans-v2-table-sticky-header-with-switch' : 'plans-v2-table-sticky-header-without-switch')
+	)
+		- for (var i = 0; i < tableHeadKeys.length; i++)
+			- var tableHeadKey = tableHeadKeys[i]
+			- var translateKey = tableHeadKey.split('_')[1]
+			.plans-v2-table-sticky-header-item(
+				class=(config.highlightedColumn.index === i ? 'plans-v2-table-sticky-header-item-highlighted' : '')
+			)
+				case tableHeadKey
+					when 'individual_collaborator'
+						span #{translate('standard')}
+					when 'group_professional'
+						span #{translate(tableHeadKey)}
+					when 'group_collaborator'
+						span #{translate('group_standard')}
+					default
+						span #{translate(translateKey)}
+
+mixin table_sticky_header_all(plansV2Config)
+	.row.plans-v2-table-sticky-header-container(
 		data-ol-plans-v2-view='individual'
 	)
-		.plans-v2-table-sticky-header-item
-			span #{translate("free")}
-		.plans-v2-table-sticky-header-item
-			span #{translate("personal")}
-		.plans-v2-table-sticky-header-item.plans-v2-table-sticky-header-item-highlighted
-			span #{translate("standard")}
-		.plans-v2-table-sticky-header-item
-			span #{translate("professional")}
-
-	.row.plans-v2-table-sticky-header.plans-v2-table-sticky-header-group.sticky(
+		+plans_v2_table_sticky_header(true, plansV2Config.individual)
+	.row.plans-v2-table-sticky-header-container(
 		hidden
-		data-ol-plans-v2-table-sticky-header
 		data-ol-plans-v2-view='group'
 	)
-		.plans-v2-table-sticky-header-item
-			span #{translate("group_standard")}
-		.plans-v2-table-sticky-header-item.plans-v2-table-sticky-header-item-highlighted
-			span #{translate("group_professional")}
-		.plans-v2-table-sticky-header-item
-			span #{translate("organization")}
-
-	.row.plans-v2-table-sticky-header.plans-v2-table-sticky-header-student.sticky(
+		+plans_v2_table_sticky_header(false, plansV2Config.group)
+	.row.plans-v2-table-sticky-header-container(
 		hidden
-		data-ol-plans-v2-table-sticky-header
 		data-ol-plans-v2-view='student'
 	)
-		.plans-v2-table-sticky-header-item
-			span #{translate("free")}
-		.plans-v2-table-sticky-header-item.plans-v2-table-sticky-header-item-highlighted
-			span #{translate("student")}
-		.plans-v2-table-sticky-header-item
-			span #{translate("university")}
+		+plans_v2_table_sticky_header(true, plansV2Config.student)
 
 mixin monthly_annual_switch(eventTracking, eventSegmentation)
 	.row
