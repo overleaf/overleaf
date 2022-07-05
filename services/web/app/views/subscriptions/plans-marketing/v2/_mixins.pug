@@ -1,14 +1,18 @@
 mixin plans_v2_table(period, config)
+	- var baseColspan = config.baseColspan || 1
+	- var maxColumn = config.maxColumn || 4
 	tr
-		th
-		- for (var i = 0; i < 4; i++)
+		th(colspan=baseColspan)
+		- for (var i = 0; i < maxColumn; i++)
 			- var tableHeadKey = Object.keys(config.tableHead)[i]
-			- var tableHeadOptions = Object.values(config.tableHead)[i]
+			- var tableHeadOptions = Object.values(config.tableHead)[i] || {}
+			- var colspan = tableHeadOptions.colspan || baseColspan
 			- var highlighted = i === config.highlightedColumn.index
 			- var eventTrackingKey = config.eventTrackingKey
 			- var additionalEventSegmentation = config.additionalEventSegmentation || {}
 			th(
 				class=(i === config.highlightedColumn.index ? 'plans-v2-table-green-highlighted' : (i === config.highlightedColumn.index - 1 ? 'plans-v2-table-cell-before-highlighted-column' : ''))
+				colspan=colspan
 			)
 				if (highlighted)
 					p.plans-v2-table-green-highlighted-text !{config.highlightedColumn.text[period]}
@@ -35,9 +39,13 @@ mixin plans_v2_table(period, config)
 						+table_head_student_university(highlighted, eventTrackingKey, additionalEventSegmentation, period)
 
 	for featuresPerSection in config.features
+		- var dividerColspan = Object.values(config.tableHead).reduce((prev, curr) => (prev) + (curr.colspan || 1), baseColspan)
 		if featuresPerSection.divider
 			tr.plans-v2-table-divider
-				td(colspan=Object.keys(config.tableHead).length + 1)
+				td(
+					colspan=dividerColspan
+					class=((config.highlightedColumn.index === Object.keys(config.tableHead).length - 1) ? 'plans-v2-table-divider-highlighted' : '')
+				)
 					div
 						b.plans-v2-table-divider-label #{translate(featuresPerSection.dividerLabel)}
 						//- will only appear on screen width >= 768px (using CSS)
@@ -59,7 +67,13 @@ mixin plans_v2_table(period, config)
 			tr(
 				class=(featureIndex === (featuresPerSection.items.length - 1) ? 'plans-v2-table-row-last-row-per-section' : '')
 			)
-				td(event-tracking="plans-page-table" event-tracking-trigger="hover" event-tracking-ga="subscription-funnel" event-tracking-label=`${feature.feature}`)
+				td(
+					event-tracking="plans-page-table"
+					event-tracking-trigger="hover"
+					event-tracking-ga="subscription-funnel"
+					event-tracking-label=`${feature.feature}`
+					colspan=baseColspan
+				)
 					.plans-v2-table-feature-name
 						if feature.info
 							span #{translate(feature.feature)}
@@ -81,8 +95,11 @@ mixin plans_v2_table(period, config)
 						else
 							| #{translate(feature.feature)}
 				for plan, planIndex in Object.keys(feature.plans)
+					- var tableHeadOptions = Object.values(config.tableHead)[planIndex] || {}
+					- var colspan = tableHeadOptions.colspan || baseColspan
 					td(
 						class=(planIndex === config.highlightedColumn.index ? 'plans-v2-table-green-highlighted' : (planIndex === config.highlightedColumn.index - 1 ? 'plans-v2-table-cell-before-highlighted-column' : ''))
+						colspan=colspan
 					)
 						+table_cell(feature, plan)
 

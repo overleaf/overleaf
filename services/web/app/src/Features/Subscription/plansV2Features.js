@@ -466,7 +466,6 @@ const studentPlans = [
         plans: {
           free: '1 user',
           student: '1 user',
-          university: 'Multiple users',
         },
       },
       {
@@ -476,7 +475,6 @@ const studentPlans = [
         plans: {
           free: 'You + 1',
           student: 'You + 6',
-          university: 'Project author + 10 or unlimited',
         },
       },
     ],
@@ -493,7 +491,6 @@ const studentPlans = [
         plans: {
           free: '1 minute',
           student: '4 minutes',
-          university: '4 minutes',
         },
       },
       {
@@ -503,7 +500,6 @@ const studentPlans = [
         plans: {
           free: false,
           student: true,
-          university: true,
         },
       },
       {
@@ -513,7 +509,6 @@ const studentPlans = [
         plans: {
           free: false,
           student: true,
-          university: true,
         },
       },
       {
@@ -523,7 +518,6 @@ const studentPlans = [
         plans: {
           free: false,
           student: true,
-          university: true,
         },
       },
       {
@@ -533,7 +527,6 @@ const studentPlans = [
         plans: {
           free: false,
           student: true,
-          university: true,
         },
       },
     ],
@@ -550,7 +543,6 @@ const studentPlans = [
         plans: {
           free: true,
           student: true,
-          university: true,
         },
       },
       {
@@ -560,7 +552,6 @@ const studentPlans = [
         plans: {
           free: true,
           student: true,
-          university: true,
         },
       },
       {
@@ -570,7 +561,6 @@ const studentPlans = [
         plans: {
           free: true,
           student: true,
-          university: true,
         },
       },
       {
@@ -580,7 +570,6 @@ const studentPlans = [
         plans: {
           free: false,
           student: true,
-          university: true,
         },
       },
       {
@@ -590,7 +579,6 @@ const studentPlans = [
         plans: {
           free: false,
           student: true,
-          university: true,
         },
       },
       {
@@ -600,7 +588,6 @@ const studentPlans = [
         plans: {
           free: false,
           student: true,
-          university: true,
         },
       },
       {
@@ -610,7 +597,6 @@ const studentPlans = [
         plans: {
           free: false,
           student: true,
-          university: true,
         },
       },
       {
@@ -620,7 +606,6 @@ const studentPlans = [
         plans: {
           free: false,
           student: true,
-          university: true,
         },
       },
       {
@@ -630,7 +615,6 @@ const studentPlans = [
         plans: {
           free: false,
           student: true,
-          university: true,
         },
       },
     ],
@@ -647,7 +631,6 @@ const studentPlans = [
         plans: {
           free: false,
           student: false,
-          university: true,
         },
       },
       {
@@ -657,7 +640,6 @@ const studentPlans = [
         plans: {
           free: false,
           student: false,
-          university: true,
         },
       },
       {
@@ -667,7 +649,6 @@ const studentPlans = [
         plans: {
           free: false,
           student: false,
-          university: true,
         },
       },
       {
@@ -677,7 +658,6 @@ const studentPlans = [
         plans: {
           free: false,
           student: false,
-          university: true,
         },
       },
       {
@@ -687,7 +667,6 @@ const studentPlans = [
         plans: {
           free: false,
           student: false,
-          university: true,
         },
       },
       {
@@ -697,7 +676,6 @@ const studentPlans = [
         plans: {
           free: false,
           student: false,
-          university: true,
         },
       },
       {
@@ -707,7 +685,6 @@ const studentPlans = [
         plans: {
           free: false,
           student: false,
-          university: true,
         },
       },
     ],

@@ -36,12 +36,16 @@ const config = {
     additionalEventSegmentation: { 'plan-page-layout-v2': 'new-plans-page' },
   },
   student: {
+    baseColspan: 2,
+    maxColumn: 3,
     tableHead: {
-      student_free: {},
+      student_free: {
+        colspan: 3,
+      },
       student_student: {
         showExtraContent: false,
+        colspan: 3,
       },
-      student_university: {},
     },
     features: plansV2Features.student,
     highlightedColumn: {

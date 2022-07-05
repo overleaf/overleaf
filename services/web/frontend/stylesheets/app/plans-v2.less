@@ -601,7 +601,7 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
     background-clip: padding-box; /* needed for firefox when there is bg color */
     text-align: center;
 
-    &:not(.plans-v2-table-cell-before-highlighted-column):not(.plans-v2-table-green-highlighted) {
+    &:not(.plans-v2-table-cell-before-highlighted-column):not(.plans-v2-table-green-highlighted):not(.plans-v2-table-divider-highlighted) {
       border-right: 1px solid @ol-blue-gray-0;
 
       @media (max-width: @screen-xs-max) {
@@ -638,7 +638,7 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
       text-align: left;
     }
 
-    &:last-child {
+    &:last-child:not(.plans-v2-table-green-highlighted):not(.plans-v2-table-divider-highlighted) {
       border-right: 0;
     }
   }
@@ -966,6 +966,10 @@ tr.plans-v2-table-divider {
     }
   }
 
+  .plans-v2-table-divider-highlighted {
+    border-right: 2px solid @ol-green;
+  }
+
   @media (max-width: @screen-xs-max) {
     // need the colspan attribute selector to increase specificity to override more specific css rule on another selector
     td[colspan] {
@@ -999,6 +1003,10 @@ tr.plans-v2-table-divider {
           }
         }
       }
+    }
+
+    .plans-v2-table-divider-highlighted {
+      border-right: none;
     }
   }
 }
