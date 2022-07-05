@@ -29,15 +29,6 @@ export function switchMonthlyAnnual(currentMonthlyAnnualSwitchValue) {
     el.hidden = period !== currentMonthlyAnnualSwitchValue
   })
 
-  document
-    .querySelectorAll('[data-ol-plans-v2-table-annual-price-before-discount]')
-    .forEach(el => {
-      el.classList.toggle(
-        'hidden',
-        currentMonthlyAnnualSwitchValue === 'monthly'
-      )
-    })
-
   document.querySelectorAll('[data-ol-plans-v2-period').forEach(el => {
     const period = el.getAttribute('data-ol-plans-v2-period')
 

@@ -9,14 +9,22 @@
 @plans-v2-top-switch-group-width-mobile: 46%;
 @plans-v2-m-a-tooltip-arrow-z-index: 10;
 @plans-v2-m-a-tooltip-z-index: 20;
+@plans-v2-green-highlighted-text-z-index: 1;
+@plans-v2-discount-highlighted-text-z-index: 2;
 @plans-v2-table-sticky-header-z-index: 100;
 @plans-v2-table-border-radius: 20px;
+@plans-v2-dark-blue: #2857a1;
 
 .plans {
   @media (max-width: @screen-xs-max) {
     [data-ol-current-view='group'] [data-ol-plans-v2-m-a-switch-container] {
       display: none;
     }
+  }
+
+  .btn-dark-blue {
+    background-color: @plans-v2-dark-blue;
+    color: @white;
   }
 }
 
@@ -601,7 +609,7 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
     background-clip: padding-box; /* needed for firefox when there is bg color */
     text-align: center;
 
-    &:not(.plans-v2-table-cell-before-highlighted-column):not(.plans-v2-table-green-highlighted):not(.plans-v2-table-divider-highlighted) {
+    &:not(.plans-v2-table-cell-before-green-highlighted-column):not(.plans-v2-table-green-highlighted):not(.plans-v2-table-divider-highlighted):not(.plans-v2-table-discount-highlighted) {
       border-right: 1px solid @ol-blue-gray-0;
 
       @media (max-width: @screen-xs-max) {
@@ -666,6 +674,14 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
 
     &:last-child td.plans-v2-table-green-highlighted {
       border-bottom: 2px solid @ol-green;
+
+      @media (max-width: @screen-xs-max) {
+        border-bottom: unset;
+      }
+    }
+
+    &:last-child td.plans-v2-table-discount-highlighted {
+      border-bottom: 2px solid @plans-v2-dark-blue;
 
       @media (max-width: @screen-xs-max) {
         border-bottom: unset;
@@ -873,7 +889,7 @@ p.plans-v2-table-price {
   }
 }
 
-strike.plans-v2-table-annual-price-before-discount {
+strike.plans-v2-table-price-before-discount {
   position: absolute;
   top: -27px;
   font-weight: 700;
@@ -1040,6 +1056,51 @@ p.plans-v2-table-green-highlighted-text {
   color: @white;
   height: @plans-v2-highlighted-text-height-desktop;
   margin: 0;
+  z-index: @plans-v2-green-highlighted-text-z-index;
+
+  @media (max-width: @screen-sm-max) {
+    top: -1 * @plans-v2-highlighted-text-height-mobile;
+    height: @plans-v2-highlighted-text-height-mobile;
+  }
+
+  @media (max-width: @screen-xs-max) {
+    padding-left: 5px;
+    padding-right: 5px;
+    font-size: @font-size-extra-small;
+    line-height: 15px;
+  }
+}
+
+.plans-v2-table-discount-highlighted {
+  border-left: 2px solid @plans-v2-dark-blue;
+  border-right: 2px solid @plans-v2-dark-blue;
+
+  @media (max-width: @screen-xs-max) {
+    border-left: unset;
+    border-right: unset;
+  }
+}
+
+p.plans-v2-table-discount-highlighted-text {
+  border: 2px solid @plans-v2-dark-blue;
+  position: absolute;
+  top: -1 * @plans-v2-highlighted-text-height-desktop;
+  left: -2px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  // 4px because border width is 2px each side (left and right)
+  width: calc(100% + 4px);
+  font-family: @font-family-sans-serif;
+  font-size: @font-size-small;
+  line-height: 19px;
+  font-weight: 700;
+  background-color: @plans-v2-dark-blue;
+  border-radius: @plans-v2-table-border-radius @plans-v2-table-border-radius 0 0;
+  color: @white;
+  height: @plans-v2-highlighted-text-height-desktop;
+  margin: 0;
+  z-index: @plans-v2-discount-highlighted-text-z-index;
 
   @media (max-width: @screen-sm-max) {
     top: -1 * @plans-v2-highlighted-text-height-mobile;
@@ -1116,8 +1177,12 @@ p.plans-v2-table-green-highlighted-text {
   }
 }
 
-.plans-v2-table-sticky-header-item-highlighted span {
+.plans-v2-table-sticky-header-item-green-highlighted span {
   color: @ol-green;
+}
+
+.plans-v2-table-sticky-header-item-discount-highlighted span {
+  color: @plans-v2-dark-blue;
 }
 
 .plans-v2-faq {
