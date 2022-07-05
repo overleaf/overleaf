@@ -98,6 +98,7 @@ async function plansPage(req, res) {
     title: 'plans_and_pricing',
     plans,
     itm_content: req.query && req.query.itm_content,
+    itm_campaign: 'plans',
     recommendedCurrency,
     planFeatures,
     plansV2Config,
@@ -253,6 +254,7 @@ async function interstitialPaymentPage(req, res) {
     res.render('subscriptions/interstitial-payment', {
       title: 'subscribe',
       itm_content: req.query && req.query.itm_content,
+      itm_campaign: req.query?.itm_campaign,
       recommendedCurrency,
       interstitialPaymentConfig,
     })

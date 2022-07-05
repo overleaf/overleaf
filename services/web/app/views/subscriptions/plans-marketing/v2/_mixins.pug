@@ -455,10 +455,11 @@ mixin additional_link_group(eventTrackingKey, additionalEventSegmentation, plan)
 mixin additional_link_buy(eventTrackingKey, additionalEventSegmentation, plan, period)
 	- var buttonSegmentation = plan + '-link'
 	- var segmentation = JSON.stringify(Object.assign({}, {button: buttonSegmentation, location: 'table-header', period}, additionalEventSegmentation))
+	- var qs = new URLSearchParams({planCode: plan, currency: recommendedCurrency, itm_campaign, itm_content: 'card'})
 	small.plans-v2-table-th-content-additional-link
 		| #{translate("or")} 
 		a(
-			href="/user/subscription/new?planCode=" + plan + "&currency=" + recommendedCurrency + "&itm_campaign=plans&itm_content=card"
+			href=`/user/subscription/new?${qs.toString()}`
 			event-tracking=eventTrackingKey
 			event-tracking-mb="true"
 			event-tracking-trigger="click"
