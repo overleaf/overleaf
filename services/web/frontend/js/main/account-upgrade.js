@@ -10,21 +10,24 @@ function startFreeTrial(source, version, $scope) {
 
   const w = window.open()
   const go = function () {
-    let url
     if (typeof ga === 'function') {
       ga('send', 'event', 'subscription-funnel', 'upgraded-free-trial', source)
     }
     eventTracking.sendMB('paywall-click', { 'paywall-type': source })
 
-    if (interstitialPaymentAfterPaywallVariant === 'active') {
-      url = '/user/subscription/choose-your-plan'
-    } else {
-      url = `/user/subscription/new?planCode=${plan}&ssp=true`
+    const searchParams = new URLSearchParams({ itm_campaign: source })
+
+    if (version) {
+      searchParams.set('itm_content', version)
     }
 
-    url = `${url}&itm_campaign=${source}`
-    if (version) {
-      url = `${url}&itm_content=${version}`
+    let url
+    if (interstitialPaymentAfterPaywallVariant === 'active') {
+      url = `/user/subscription/choose-your-plan?${searchParams.toString()}`
+    } else {
+      searchParams.set('ssp', 'true')
+      searchParams.set('planCode', plan)
+      url = `/user/subscription/new?${searchParams.toString()}`
     }
 
     if ($scope) {
