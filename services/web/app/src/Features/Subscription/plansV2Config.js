@@ -27,9 +27,9 @@ const config = {
     },
     features: plansV2Features.group,
     highlightedColumn: {
-      index: 1,
+      index: 0,
       text: {
-        annual: 'RECOMMENDED',
+        annual: 'MOST POPULAR',
       },
     },
     eventTrackingKey: 'plans-page-click',
