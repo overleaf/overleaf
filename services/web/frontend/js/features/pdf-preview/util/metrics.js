@@ -5,13 +5,19 @@ import getMeta from '../../../utils/meta'
 // VERSION should get incremented when making changes to caching behavior or
 //  adjusting metrics collection.
 // Keep in sync with the service worker.
-const VERSION = 2
+const VERSION = 3
 
 const pdfJsMetrics = {
   version: VERSION,
   id: uuid(),
   epoch: Date.now(),
   totalBandwidth: 0,
+}
+
+let pdfCachingMetrics
+
+export function setCachingMetrics(metrics) {
+  pdfCachingMetrics = metrics
 }
 
 const SAMPLING_RATE = 0.01
@@ -60,8 +66,10 @@ export function trackPdfDownload(response, compileTimeClientE2E) {
         timings,
       })
     })
-    // Submit bandwidth counter separate from compile context.
-    submitPDFBandwidth({ pdfJsMetrics, serviceWorkerMetrics })
+    if (getMeta('ol-pdfCachingMode') === 'service-worker') {
+      // Submit (serviceWorker) bandwidth counter separate from compile context.
+      submitPDFBandwidth({ pdfJsMetrics, serviceWorkerMetrics })
+    }
   }
 
   return {
@@ -78,9 +86,11 @@ function submitCompileMetrics(metrics) {
     latencyFetch,
     latencyRender,
     compileTimeClientE2E,
+    id: pdfJsMetrics.id,
+    ...(pdfCachingMetrics || {}),
   }
   sl_console.log('/event/compile-metrics', JSON.stringify(metrics))
-  sendMB('compile-metrics-v5', leanMetrics, SAMPLING_RATE)
+  sendMB('compile-metrics-v6', leanMetrics, SAMPLING_RATE)
 }
 
 function submitPDFBandwidth(metrics) {
@@ -110,5 +120,5 @@ function submitPDFBandwidth(metrics) {
     return
   }
   sl_console.log('/event/pdf-bandwidth', JSON.stringify(metrics))
-  sendMB('pdf-bandwidth-v5', leanMetrics, SAMPLING_RATE)
+  sendMB('pdf-bandwidth-v6', leanMetrics, SAMPLING_RATE)
 }

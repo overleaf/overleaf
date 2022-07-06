@@ -1037,7 +1037,7 @@ const ProjectController = {
               }
             }
 
-            function partOfPdfCachingRollout(flag) {
+            function getTrackPdfDownload() {
               if (!Settings.enablePdfCaching) {
                 // The feature is disabled globally.
                 return false
@@ -1045,7 +1045,20 @@ const ProjectController = {
               // Let the user opt-in only.
               // The flag will opt-out of both caching and metrics collection,
               //  as if this editing session never happened.
-              return shouldDisplayFeature('enable_pdf_caching', false)
+              return shouldDisplayFeature('track-pdf-download', false)
+            }
+
+            function getPdfCachingMode() {
+              if (!Settings.enablePdfCaching) {
+                // The feature is disabled globally.
+                return ''
+              }
+              // Let the user opt-in only.
+              const v = req.query['pdf-caching-mode']
+              if (['service-worker', 'no-service-worker'].includes(v)) {
+                return v
+              }
+              return ''
             }
 
             const showPdfDetach = shouldDisplayFeature(
@@ -1152,11 +1165,8 @@ const ProjectController = {
               showNewSourceEditorOption,
               showSymbolPalette,
               showStopOnFirstError,
-              trackPdfDownload: partOfPdfCachingRollout('collect-metrics'),
-              enablePdfCaching: partOfPdfCachingRollout('enable-caching'),
-              resetServiceWorker:
-                Boolean(Settings.resetServiceWorker) &&
-                !shouldDisplayFeature('enable_pdf_caching', false),
+              trackPdfDownload: getTrackPdfDownload(),
+              pdfCachingMode: getPdfCachingMode(),
               detachRole,
               metadata: { viewport: false },
               showHeaderUpgradePrompt,

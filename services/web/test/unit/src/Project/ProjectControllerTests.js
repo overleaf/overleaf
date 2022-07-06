@@ -1136,10 +1136,10 @@ describe('ProjectController', function () {
           this.ProjectController.loadEditor(this.req, this.res)
         })
       }
-      function expectPDFCachingEnabled() {
+      function expectPDFCachingEnabled(mode) {
         it('should enable pdf caching', function (done) {
           this.res.render = (pageName, opts) => {
-            expect(opts.enablePdfCaching).to.equal(true)
+            expect(opts.pdfCachingMode).to.equal(mode)
             done()
           }
           this.ProjectController.loadEditor(this.req, this.res)
@@ -1157,7 +1157,7 @@ describe('ProjectController', function () {
       function expectPDFCachingDisabled() {
         it('should disable pdf caching', function (done) {
           this.res.render = (pageName, opts) => {
-            expect(opts.enablePdfCaching).to.equal(false)
+            expect(opts.pdfCachingMode).to.equal('')
             done()
           }
           this.ProjectController.loadEditor(this.req, this.res)
@@ -1174,20 +1174,32 @@ describe('ProjectController', function () {
           expectPDFCachingDisabled()
         })
 
-        describe('with enable_pdf_caching=false', function () {
+        describe('with track-pdf-download=false', function () {
           beforeEach(function () {
-            this.req.query.enable_pdf_caching = 'false'
+            this.req.query['track-pdf-download'] = 'false'
           })
           expectBandwidthTrackingDisabled()
-          expectPDFCachingDisabled()
         })
 
-        describe('with enable_pdf_caching=true', function () {
+        describe('with track-pdf-download=true', function () {
           beforeEach(function () {
-            this.req.query.enable_pdf_caching = 'true'
+            this.req.query['track-pdf-download'] = 'true'
           })
           expectBandwidthTrackingEnabled()
-          expectPDFCachingEnabled()
+        })
+
+        describe('with pdf-caching-mode=no-service-worker', function () {
+          beforeEach(function () {
+            this.req.query['pdf-caching-mode'] = 'no-service-worker'
+          })
+          expectPDFCachingEnabled('no-service-worker')
+        })
+
+        describe('with pdf-caching-mode=service-worker', function () {
+          beforeEach(function () {
+            this.req.query['pdf-caching-mode'] = 'service-worker'
+          })
+          expectPDFCachingEnabled('service-worker')
         })
       })
     })

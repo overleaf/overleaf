@@ -11,7 +11,7 @@ export function handleOutputFiles(outputFiles, projectId, data) {
   const result = {}
 
   const outputFile = outputFiles.get('output.pdf')
-  result.pdfSize = outputFile?.size
+  result.pdfFile = outputFile
 
   if (outputFile) {
     // build the URL for viewing the PDF in the preview UI
@@ -28,9 +28,9 @@ export function handleOutputFiles(outputFiles, projectId, data) {
       params.set('verify_chunks', 'true')
     }
 
-    if (getMeta('ol-enablePdfCaching')) {
+    if (getMeta('ol-pdfCachingMode')) {
       // Tag traffic that uses the pdf caching logic.
-      params.set('enable_pdf_caching', 'true')
+      params.set('enable_pdf_caching', getMeta('ol-pdfCachingMode'))
     }
 
     result.pdfUrl = `${buildURL(outputFile, data.pdfDownloadDomain)}?${params}`

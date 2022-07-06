@@ -46,7 +46,7 @@ export const CompileContextPropTypes = {
     logEntries: PropTypes.object,
     logEntryAnnotations: PropTypes.object,
     pdfDownloadUrl: PropTypes.string,
-    pdfSize: PropTypes.number,
+    pdfFile: PropTypes.object,
     pdfUrl: PropTypes.string,
     pdfViewer: PropTypes.string,
     position: PropTypes.object,
@@ -103,7 +103,8 @@ export function LocalCompileProvider({ children }) {
   // the URL for loading the PDF in the preview pane
   const [pdfUrl, setPdfUrl] = useScopeValueSetterOnly('pdf.url')
 
-  const [pdfSize, setPdfSize] = useState(0)
+  // low level details for metrics
+  const [pdfFile, setPdfFile] = useState()
 
   // the project is considered to be "uncompiled" if a doc has changed since the last compile started
   const [uncompiled, setUncompiled] = useScopeValue('pdf.uncompiled')
@@ -288,7 +289,7 @@ export function LocalCompileProvider({ children }) {
         const result = handleOutputFiles(outputFiles, projectId, data)
         if (data.status === 'success') {
           setPdfDownloadUrl(result.pdfDownloadUrl)
-          setPdfSize(result.pdfSize)
+          setPdfFile(result.pdfFile)
           setPdfUrl(result.pdfUrl)
         }
 
@@ -406,7 +407,7 @@ export function LocalCompileProvider({ children }) {
     setLogEntries,
     setLogEntryAnnotations,
     setPdfDownloadUrl,
-    setPdfSize,
+    setPdfFile,
     setPdfUrl,
   ])
 
@@ -507,7 +508,7 @@ export function LocalCompileProvider({ children }) {
       logEntryAnnotations,
       logEntries,
       pdfDownloadUrl,
-      pdfSize,
+      pdfFile,
       pdfUrl,
       pdfViewer,
       position,
@@ -557,7 +558,7 @@ export function LocalCompileProvider({ children }) {
       logEntryAnnotations,
       position,
       pdfDownloadUrl,
-      pdfSize,
+      pdfFile,
       pdfUrl,
       pdfViewer,
       rawLog,

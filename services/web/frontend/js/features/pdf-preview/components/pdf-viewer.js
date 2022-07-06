@@ -6,7 +6,7 @@ const PdfJsViewer = lazy(() =>
 )
 
 function PdfViewer() {
-  const { pdfUrl, pdfViewer } = useCompileContext()
+  const { pdfUrl, pdfFile, pdfViewer } = useCompileContext()
 
   if (!pdfUrl) {
     return null
@@ -18,7 +18,7 @@ function PdfViewer() {
 
     case 'pdfjs':
     default:
-      return <PdfJsViewer url={pdfUrl} />
+      return <PdfJsViewer url={pdfUrl} pdfFile={pdfFile} />
   }
 }
 

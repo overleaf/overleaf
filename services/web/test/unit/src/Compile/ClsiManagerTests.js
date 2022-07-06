@@ -2,6 +2,7 @@ const sinon = require('sinon')
 const { expect } = require('chai')
 const modulePath = '../../../../app/src/Features/Compile/ClsiManager.js'
 const SandboxedModule = require('sandboxed-module')
+const tk = require('timekeeper')
 
 describe('ClsiManager', function () {
   beforeEach(function () {
@@ -72,6 +73,11 @@ describe('ClsiManager', function () {
     this.project_id = 'project-id'
     this.user_id = 'user-id'
     this.callback = sinon.stub()
+    tk.freeze(Date.now())
+  })
+
+  after(function () {
+    tk.reset()
   })
 
   describe('sendRequest', function () {
@@ -136,9 +142,10 @@ describe('ClsiManager', function () {
             path: 'output.pdf',
             type: 'pdf',
             build: 1234,
+            ranges: [],
+            createdAt: new Date(),
             // gets dropped by JSON.stringify
             contentId: undefined,
-            ranges: undefined,
             size: undefined,
           },
           {
@@ -146,10 +153,6 @@ describe('ClsiManager', function () {
             path: 'output.log',
             type: 'log',
             build: 1234,
-            // gets dropped by JSON.stringify
-            contentId: undefined,
-            ranges: undefined,
-            size: undefined,
           },
         ]
         this.callback
@@ -207,16 +210,13 @@ describe('ClsiManager', function () {
             contentId: '123-321',
             ranges: [{ start: 1, end: 42, hash: 'foo' }],
             size: 42,
+            createdAt: new Date(),
           },
           {
             url: `/project/${this.project_id}/user/${this.user_id}/build/1234/output/output.log`,
             path: 'output.log',
             type: 'log',
             build: 1234,
-            // gets dropped by JSON.stringify
-            contentId: undefined,
-            ranges: undefined,
-            size: undefined,
           },
         ]
         const validationError = undefined
@@ -417,9 +417,10 @@ describe('ClsiManager', function () {
             path: 'output.pdf',
             type: 'pdf',
             build: 1234,
+            ranges: [],
+            createdAt: new Date(),
             // gets dropped by JSON.stringify
             contentId: undefined,
-            ranges: undefined,
             size: undefined,
           },
           {
@@ -427,15 +428,13 @@ describe('ClsiManager', function () {
             path: 'output.log',
             type: 'log',
             build: 1234,
-            // gets dropped by JSON.stringify
-            contentId: undefined,
-            ranges: undefined,
-            size: undefined,
           },
         ]
-        this.callback
-          .calledWith(null, this.status, outputFiles)
-          .should.equal(true)
+        this.callback.should.have.been.calledWith(
+          null,
+          this.status,
+          outputFiles
+        )
       })
     })
 

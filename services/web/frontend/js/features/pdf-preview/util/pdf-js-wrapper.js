@@ -1,4 +1,5 @@
 import { captureMessage } from '../../../infrastructure/error-reporter'
+import { generatePdfCachingTransportFactory } from './pdf-caching-transport'
 
 const params = new URLSearchParams(window.location.search)
 const disableFontFace = params.get('disable-font-face') === 'true'
@@ -19,6 +20,7 @@ export default class PDFJSWrapper {
     })
 
     this.PDFJS = PDFJS
+    this.genPdfCachingTransport = generatePdfCachingTransportFactory(PDFJS)
     this.PDFJSViewer = PDFJSViewer
     this.cMapUrl = cMapUrl
     this.imageResourcesPath = imageResourcesPath
@@ -57,7 +59,7 @@ export default class PDFJSWrapper {
   }
 
   // load a document from a URL
-  loadDocument(url) {
+  loadDocument(url, pdfFile) {
     // cancel any previous loading task
     if (this.loadDocumentTask) {
       this.loadDocumentTask.destroy()
@@ -74,6 +76,7 @@ export default class PDFJSWrapper {
         disableAutoFetch: true,
         disableStream,
         textLayerMode: 2, // PDFJSViewer.TextLayerMode.ENABLE,
+        range: this.genPdfCachingTransport(url, pdfFile, reject),
       })
 
       this.loadDocumentTask.promise

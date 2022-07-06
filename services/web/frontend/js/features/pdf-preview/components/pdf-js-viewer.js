@@ -11,7 +11,7 @@ import ErrorBoundaryFallback from './error-boundary-fallback'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import { captureException } from '../../../infrastructure/error-reporter'
 
-function PdfJsViewer({ url }) {
+function PdfJsViewer({ url, pdfFile }) {
   const { _id: projectId } = useProjectContext()
 
   const {
@@ -90,13 +90,13 @@ function PdfJsViewer({ url }) {
       setInitialised(false)
       setError(undefined)
 
-      pdfJsWrapper.loadDocument(url).catch(error => {
+      pdfJsWrapper.loadDocument(url, pdfFile).catch(error => {
         console.error(error)
         setError('rendering-error')
       })
       return () => pdfJsWrapper.abortDocumentLoading()
     }
-  }, [pdfJsWrapper, url, setError])
+  }, [pdfJsWrapper, url, pdfFile, setError])
 
   // listen for scroll events
   useEffect(() => {
@@ -344,6 +344,7 @@ function PdfJsViewer({ url }) {
 
 PdfJsViewer.propTypes = {
   url: PropTypes.string.isRequired,
+  pdfFile: PropTypes.object,
 }
 
 export default withErrorBoundary(memo(PdfJsViewer), () => (

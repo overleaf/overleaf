@@ -36,7 +36,7 @@ export function DetachCompileProvider({ children }) {
     logEntries: _logEntries,
     logEntryAnnotations: _logEntryAnnotations,
     pdfDownloadUrl: _pdfDownloadUrl,
-    pdfSize: _pdfSize,
+    pdfFile: _pdfFile,
     pdfUrl: _pdfUrl,
     pdfViewer: _pdfViewer,
     position: _position,
@@ -155,9 +155,9 @@ export function DetachCompileProvider({ children }) {
     'detacher',
     'detached'
   )
-  const [pdfSize] = useDetachStateWatcher(
-    'pdfSize',
-    _pdfSize,
+  const [pdfFile] = useDetachStateWatcher(
+    'pdfFile',
+    _pdfFile,
     'detacher',
     'detached'
   )
@@ -362,7 +362,7 @@ export function DetachCompileProvider({ children }) {
       logEntryAnnotations,
       logEntries,
       pdfDownloadUrl,
-      pdfSize,
+      pdfFile,
       pdfUrl,
       pdfViewer,
       position,
@@ -411,7 +411,7 @@ export function DetachCompileProvider({ children }) {
       logEntryAnnotations,
       logEntries,
       pdfDownloadUrl,
-      pdfSize,
+      pdfFile,
       pdfUrl,
       pdfViewer,
       position,

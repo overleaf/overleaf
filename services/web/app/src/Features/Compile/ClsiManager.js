@@ -569,15 +569,19 @@ const ClsiManager = {
   _parseOutputFiles(projectId, rawOutputFiles = []) {
     const outputFiles = []
     for (const file of rawOutputFiles) {
-      outputFiles.push({
+      const f = {
         path: file.path, // the clsi is now sending this to web
         url: new URL(file.url).pathname, // the location of the file on the clsi, excluding the host part
         type: file.type,
         build: file.build,
-        contentId: file.contentId,
-        ranges: file.ranges,
-        size: file.size,
-      })
+      }
+      if (file.path === 'output.pdf') {
+        f.contentId = file.contentId
+        f.ranges = file.ranges || []
+        f.size = file.size
+        f.createdAt = new Date()
+      }
+      outputFiles.push(f)
     }
     return outputFiles
   },

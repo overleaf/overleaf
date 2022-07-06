@@ -10,7 +10,7 @@ import { useProjectContext } from '../../../shared/context/project-context'
 const SAY_THANKS_TIMEOUT = 10 * 1000
 
 function FasterCompilesFeedbackContent() {
-  const { clsiServerId, deliveryLatencies, pdfSize, pdfUrl } =
+  const { clsiServerId, deliveryLatencies, pdfFile, pdfUrl } =
     useCompileContext()
   const { _id: projectId } = useProjectContext()
 
@@ -52,7 +52,7 @@ function FasterCompilesFeedbackContent() {
       projectId,
       server: clsiServerId?.includes('-c2d-') ? 'faster' : 'normal',
       feedback,
-      pdfSize,
+      pdfSize: pdfFile.size,
       ...deliveryLatencies,
     })
     setHasRatedProject(true)

@@ -435,10 +435,10 @@ If the project has been renamed please look in your project list for a new proje
   }
 )
 
-if (getMeta('ol-resetServiceWorker')) {
-  unregisterServiceWorker()
-} else if (getMeta('ol-enablePdfCaching')) {
+if (getMeta('ol-pdfCachingMode') === 'service-worker') {
   loadServiceWorker()
+} else {
+  unregisterServiceWorker()
 }
 
 angular.module('SharelatexApp').config(function ($provide) {

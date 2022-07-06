@@ -167,7 +167,7 @@ export default class DocumentCompiler {
     }
 
     // use the feature flag to enable PDF caching in a ServiceWorker
-    if (getMeta('ol-enablePdfCaching')) {
+    if (getMeta('ol-pdfCachingMode')) {
       params.set('enable_pdf_caching', 'true')
     }
 
