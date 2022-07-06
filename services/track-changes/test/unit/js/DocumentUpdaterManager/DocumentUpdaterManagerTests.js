@@ -81,6 +81,25 @@ describe('DocumentUpdaterManager', function () {
       })
     })
 
+    describe('when the document updater returns not found', function () {
+      beforeEach(function () {
+        this.request.get = sinon
+          .stub()
+          .callsArgWith(1, null, { statusCode: 404 }, '')
+        return this.DocumentUpdaterManager.getDocument(
+          this.project_id,
+          this.doc_id,
+          this.callback
+        )
+      })
+
+      it('should return the callback with a "not found" error', function () {
+        return this.callback
+          .calledWith(sinon.match.has('message', 'doc not found'))
+          .should.equal(true)
+      })
+    })
+
     return describe('when the document updater returns a failure error code', function () {
       beforeEach(function () {
         this.request.get = sinon

@@ -14,6 +14,7 @@ let DocumentUpdaterManager
 const request = require('request')
 const logger = require('@overleaf/logger')
 const Settings = require('@overleaf/settings')
+const Errors = require('./Errors')
 
 module.exports = DocumentUpdaterManager = {
   _requestDocument(project_id, doc_id, url, callback) {
@@ -46,7 +47,16 @@ module.exports = DocumentUpdaterManager = {
           { err: error, project_id, doc_id, url },
           'error accessing doc updater'
         )
-        return callback(error)
+        if (res.statusCode === 404) {
+          return callback(
+            new Errors.NotFoundError('doc not found', {
+              projectId: project_id,
+              docId: doc_id,
+            })
+          )
+        } else {
+          return callback(error)
+        }
       }
     })
   },
