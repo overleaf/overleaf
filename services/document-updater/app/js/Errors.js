@@ -37,9 +37,18 @@ function DeleteMismatchError(message) {
 }
 DeleteMismatchError.prototype.__proto__ = Error.prototype
 
+function FileTooLargeError(message) {
+  const error = new Error(message)
+  error.name = 'FileTooLargeError'
+  error.__proto__ = FileTooLargeError.prototype
+  return error
+}
+FileTooLargeError.prototype.__proto__ = Error.prototype
+
 module.exports = Errors = {
   NotFoundError,
   OpRangeNotAvailableError,
   ProjectStateChangedError,
   DeleteMismatchError,
+  FileTooLargeError,
 }

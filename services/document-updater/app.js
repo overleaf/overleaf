@@ -185,6 +185,8 @@ app.use((error, req, res, next) => {
     return res.sendStatus(404)
   } else if (error instanceof Errors.OpRangeNotAvailableError) {
     return res.sendStatus(422) // Unprocessable Entity
+  } else if (error instanceof Errors.FileTooLargeError) {
+    return res.sendStatus(413)
   } else if (error.statusCode === 413) {
     return res.status(413).send('request entity too large')
   } else {

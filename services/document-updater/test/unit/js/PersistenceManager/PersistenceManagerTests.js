@@ -206,6 +206,33 @@ describe('PersistenceManager', function () {
       })
     })
 
+    describe('when the request returns 413', function () {
+      beforeEach(function () {
+        this.request.callsArgWith(1, null, { statusCode: 413 }, '')
+        this.PersistenceManager.getDoc(
+          this.project_id,
+          this.doc_id,
+          this.callback
+        )
+      })
+
+      it('should return a FileTooLargeError', function () {
+        this.callback
+          .calledWith(sinon.match.instanceOf(Errors.FileTooLargeError))
+          .should.equal(true)
+      })
+
+      it('should time the execution', function () {
+        this.Metrics.Timer.prototype.done.called.should.equal(true)
+      })
+
+      it('should increment the metric', function () {
+        this.Metrics.inc
+          .calledWith('getDoc', 1, { status: 413 })
+          .should.equal(true)
+      })
+    })
+
     describe('when the request returns an error status code', function () {
       beforeEach(function () {
         this.request.callsArgWith(1, null, { statusCode: 500 }, '')
@@ -423,6 +450,38 @@ describe('PersistenceManager', function () {
       it('should increment the metric', function () {
         this.Metrics.inc
           .calledWith('setDoc', 1, { status: 404 })
+          .should.equal(true)
+      })
+    })
+
+    describe('when the request returns 413', function () {
+      beforeEach(function () {
+        this.request.callsArgWith(1, null, { statusCode: 413 }, '')
+        this.PersistenceManager.setDoc(
+          this.project_id,
+          this.doc_id,
+          this.lines,
+          this.version,
+          this.ranges,
+          this.lastUpdatedAt,
+          this.lastUpdatedBy,
+          this.callback
+        )
+      })
+
+      it('should return a FileTooLargeError', function () {
+        this.callback
+          .calledWith(sinon.match.instanceOf(Errors.FileTooLargeError))
+          .should.equal(true)
+      })
+
+      it('should time the execution', function () {
+        this.Metrics.Timer.prototype.done.called.should.equal(true)
+      })
+
+      it('should increment the metric', function () {
+        this.Metrics.inc
+          .calledWith('setDoc', 1, { status: 413 })
           .should.equal(true)
       })
     })

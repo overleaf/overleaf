@@ -104,6 +104,10 @@ function getDoc(projectId, docId, options = {}, _callback) {
       )
     } else if (res.statusCode === 404) {
       callback(new Errors.NotFoundError(`doc not not found: ${urlPath}`))
+    } else if (res.statusCode === 413) {
+      callback(
+        new Errors.FileTooLargeError(`doc exceeds maximum size: ${urlPath}`)
+      )
     } else {
       callback(
         new Error(`error accessing web API: ${urlPath} ${res.statusCode}`)
@@ -158,6 +162,10 @@ function setDoc(
         callback(null)
       } else if (res.statusCode === 404) {
         callback(new Errors.NotFoundError(`doc not not found: ${urlPath}`))
+      } else if (res.statusCode === 413) {
+        callback(
+          new Errors.FileTooLargeError(`doc exceeds maximum size: ${urlPath}`)
+        )
       } else {
         callback(
           new Error(`error accessing web API: ${urlPath} ${res.statusCode}`)
