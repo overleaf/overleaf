@@ -72,12 +72,14 @@ async function settingsPage(req, res) {
     res.render('user/settings-react', {
       title: 'account_settings',
       user: {
-        id: user.id,
+        id: user._id,
         isAdmin: user.isAdmin,
         email: user.email,
         allowedFreeTrial: user.allowedFreeTrial,
         first_name: user.first_name,
         last_name: user.last_name,
+        alphaProgram: user.alphaProgram,
+        betaProgram: user.betaProgram,
         features: {
           dropbox: user.features.dropbox,
           github: user.features.github,

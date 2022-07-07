@@ -13,6 +13,8 @@ UserContext.Provider.propTypes = {
       allowedFreeTrial: PropTypes.boolean,
       first_name: PropTypes.string,
       last_name: PropTypes.string,
+      alphaProgram: PropTypes.boolean,
+      betaProgram: PropTypes.boolean,
       features: PropTypes.shape({
         dropbox: PropTypes.boolean,
         github: PropTypes.boolean,
