@@ -106,6 +106,51 @@ describe('AnalyticsManager', function () {
       )
       sinon.assert.notCalled(this.Queues.createScheduledJob)
     })
+
+    it('editing session segmentation is not valid', function () {
+      this.AnalyticsManager.updateEditingSession(
+        this.fakeUserId,
+        '789ghi',
+        'fr',
+        { key: '<alert>' }
+      )
+      sinon.assert.notCalled(this.analyticsEditingSessionQueue.add)
+    })
+
+    it('event is not valid', async function () {
+      await this.AnalyticsManager.recordEventForUser(
+        this.fakeUserId,
+        'not an event!'
+      )
+      sinon.assert.notCalled(this.analyticsEventsQueue.add)
+    })
+
+    it('event segmentation is not valid', async function () {
+      await this.AnalyticsManager.recordEventForUser(
+        this.fakeUserId,
+        'an_event',
+        { not_a: 'Valid Segmentation!' }
+      )
+      sinon.assert.notCalled(this.analyticsEventsQueue.add)
+    })
+
+    it('user property name is not valid', async function () {
+      await this.AnalyticsManager.setUserPropertyForUser(
+        this.fakeUserId,
+        'an invalid property',
+        'a_value'
+      )
+      sinon.assert.notCalled(this.analyticsUserPropertiesQueue.add)
+    })
+
+    it('user property value is not valid', async function () {
+      await this.AnalyticsManager.setUserPropertyForUser(
+        this.fakeUserId,
+        'a_property',
+        'an invalid value'
+      )
+      sinon.assert.notCalled(this.analyticsUserPropertiesQueue.add)
+    })
   })
 
   describe('queues the appropriate message for', function () {

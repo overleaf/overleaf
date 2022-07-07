@@ -131,6 +131,9 @@ function updateEditingSession(userId, projectId, countryCode, segmentation) {
   if (_isAnalyticsDisabled() || _isSmokeTestUser(userId)) {
     return
   }
+  if (!_isSegmentationValid(segmentation)) {
+    return
+  }
   Metrics.analyticsQueue.inc({
     status: 'adding',
     event_type: 'editing-session',
@@ -161,6 +164,12 @@ function _recordEvent(
   { analyticsId, userId, event, segmentation, isLoggedIn },
   { delay } = {}
 ) {
+  if (!_isAttributeValid(event)) {
+    return
+  }
+  if (!_isSegmentationValid(segmentation)) {
+    return
+  }
   Metrics.analyticsQueue.inc({ status: 'adding', event_type: 'event' })
   analyticsEventsQueue
     .add(
@@ -184,6 +193,9 @@ function _recordEvent(
 }
 
 function _setUserProperty({ analyticsId, propertyName, propertyValue }) {
+  if (!_isAttributeValid(propertyName) || !_isAttributeValid(propertyValue)) {
+    return
+  }
   Metrics.analyticsQueue.inc({
     status: 'adding',
     event_type: 'user-property',
@@ -228,6 +240,21 @@ function _checkPropertyValue(propertyValue) {
       'propertyValue cannot be undefined, use null to unset a property'
     )
   }
+}
+
+function _isAttributeValid(attribute) {
+  return attribute && /^[a-zA-Z0-9-_.:;,/]+$/.test(attribute)
+}
+
+function _isSegmentationValid(segmentation) {
+  if (!segmentation) {
+    return true
+  }
+  const hasAnyInvalidAttribute = [
+    ...Object.keys(segmentation),
+    ...Object.values(segmentation),
+  ].some(attribute => !_isAttributeValid(attribute))
+  return !hasAnyInvalidAttribute
 }
 
 function getIdsFromSession(session) {
