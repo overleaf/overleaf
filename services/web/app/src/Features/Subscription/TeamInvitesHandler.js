@@ -174,6 +174,7 @@ function createInvite(subscription, email, inviter, callback) {
       )
 
       if (invite) {
+        invite = invite.toObject()
         invite.sentAt = new Date()
       } else {
         invite = {

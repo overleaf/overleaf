@@ -56,7 +56,12 @@ App.controller('UserMembershipController', function ($scope, queuedHttp) {
           $scope.inputs.addMembers.inflightCount -= 1
           const { data } = response
           if (data.user != null) {
-            $scope.users.push(data.user)
+            const alreadyListed = $scope.users.find(
+              scopeUser => scopeUser.email === data.user.email
+            )
+            if (!alreadyListed) {
+              $scope.users.push(data.user)
+            }
           }
           return ($scope.inputs.addMembers.content = '')
         })

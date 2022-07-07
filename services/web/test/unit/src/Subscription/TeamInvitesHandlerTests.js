@@ -23,6 +23,8 @@ describe('TeamInvitesHandler', function () {
       email: 'jorah@example.com',
       token: this.token,
     }
+    // ensure teamInvite can be converted from Document to Object
+    this.teamInvite.toObject = () => this.teamInvite
 
     this.subscription = {
       id: '55153a8014829a865bbf700d',
