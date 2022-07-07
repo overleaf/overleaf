@@ -11,7 +11,7 @@ block content
 						div
 							| #{translate("join_sl_to_view_project")}.
 						div
-							| #{translate("if_you_are_registered")},
+							| #{translate("already_have_sl_account")}
 							a(href="/login")  #{translate("login_here")}
 					else if newTemplateData.templateName !== undefined
 						h1(ng-non-bindable) #{translate("register_to_edit_template", {templateName:newTemplateData.templateName})}

@@ -744,7 +744,6 @@
   "log_hint_extra_feedback_incorrect": "This doesn’t fix the error",
   "log_hint_extra_feedback_other": "Other:",
   "log_hint_extra_feedback_submit": "Submit",
-  "if_you_are_registered": "If you are already registered",
   "stop_compile": "Stop compilation",
   "terminated": "Compilation cancelled",
   "compile_terminated_by_user": "The compile was cancelled using the ‘Stop Compilation’ button. You can download the raw logs to see where the compile stopped.",
