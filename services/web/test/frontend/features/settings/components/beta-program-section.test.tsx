@@ -40,6 +40,7 @@ describe('<BetaProgramSection />', function () {
       betaProgram: false,
     })
     renderSectionWithUserProvider()
-    screen.getByText(/By joining our Beta program you can have early access/)
+    screen.getByText('You are not enrolled in the Beta Program')
+    screen.getByText(/By joining this program you can have/)
   })
 })
