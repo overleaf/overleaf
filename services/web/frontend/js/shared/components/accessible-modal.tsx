@@ -1,11 +1,10 @@
 import { useCallback } from 'react'
-import PropTypes from 'prop-types'
-import { Modal } from 'react-bootstrap'
+import { Modal, ModalProps } from 'react-bootstrap'
 
 // a bootstrap Modal with its `aria-hidden` attribute removed. Visisble modals
 // should not have their `aria-hidden` attribute set but that's a bug in our
 // version of react-bootstrap.
-function AccessibleModal({ show, ...otherProps }) {
+function AccessibleModal({ show, ...otherProps }: ModalProps) {
   // use a callback ref to track the modal. This will re-run the function
   // when the element node or any of the dependencies are updated
   const setModalRef = useCallback(
@@ -27,10 +26,6 @@ function AccessibleModal({ show, ...otherProps }) {
   )
 
   return <Modal show={show} {...otherProps} ref={setModalRef} />
-}
-
-AccessibleModal.propTypes = {
-  show: PropTypes.bool,
 }
 
 export default AccessibleModal
