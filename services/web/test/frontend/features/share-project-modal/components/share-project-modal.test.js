@@ -686,7 +686,7 @@ describe('<ShareProjectModal/>', function () {
 
     await respondWithError('cannot_invite_non_user')
     await screen.findByText(
-      `Can’t send invite. Recipient must already have a Overleaf account`
+      `Can’t send invite. Recipient must already have an Overleaf account`
     )
 
     await respondWithError('cannot_verify_user_not_robot')
