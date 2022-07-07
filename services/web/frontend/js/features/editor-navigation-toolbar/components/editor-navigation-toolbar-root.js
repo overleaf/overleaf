@@ -54,7 +54,6 @@ const EditorNavigationToolbarRoot = React.memo(
       loading,
       isRestrictedTokenMember,
       renameProject,
-      isProjectOwner,
       permissionsLevel,
     } = useEditorContext(editorContextPropTypes)
 
@@ -93,8 +92,8 @@ const EditorNavigationToolbarRoot = React.memo(
     }, [view, setView])
 
     const openShareModal = useCallback(() => {
-      openShareProjectModal(isProjectOwner)
-    }, [openShareProjectModal, isProjectOwner])
+      openShareProjectModal()
+    }, [openShareProjectModal])
 
     const onShowLeftMenuClick = useCallback(
       () => setLeftMenuShown(value => !value),

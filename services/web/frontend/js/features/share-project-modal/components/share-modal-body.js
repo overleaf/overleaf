@@ -1,4 +1,3 @@
-import { useShareProjectContext } from './share-project-modal'
 import EditMember from './edit-member'
 import LinkSharing from './link-sharing'
 import Invite from './invite'
@@ -6,6 +5,7 @@ import SendInvites from './send-invites'
 import ViewMember from './view-member'
 import OwnerInfo from './owner-info'
 import SendInvitesNotice from './send-invites-notice'
+import { useEditorContext } from '../../../shared/context/editor-context'
 import { useProjectContext } from '../../../shared/context/project-context'
 import { useSplitTestContext } from '../../../shared/context/split-test-context'
 import { Row } from 'react-bootstrap'
@@ -13,11 +13,11 @@ import PropTypes from 'prop-types'
 import RecaptchaConditions from '../../../shared/components/recaptcha-conditions'
 
 export default function ShareModalBody() {
-  const { isProjectOwner } = useShareProjectContext()
   const { splitTestVariants } = useSplitTestContext({
     splitTestVariants: PropTypes.object,
   })
 
+  const { isProjectOwner } = useEditorContext()
   const { invites, members } = useProjectContext()
 
   switch (splitTestVariants['project-share-modal-paywall']) {
