@@ -14,6 +14,7 @@
  */
 let CommandRunner
 const { spawn } = require('child_process')
+const { promisify } = require('util')
 const _ = require('lodash')
 const logger = require('@overleaf/logger')
 
@@ -99,4 +100,9 @@ module.exports = CommandRunner = {
     }
     return callback()
   },
+}
+
+module.exports.promises = {
+  run: promisify(CommandRunner.run),
+  kill: promisify(CommandRunner.kill),
 }

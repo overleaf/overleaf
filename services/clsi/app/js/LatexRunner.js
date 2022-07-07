@@ -1,4 +1,5 @@
 const Path = require('path')
+const { promisify } = require('util')
 const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
 const CommandRunner = require('./CommandRunner')
@@ -192,4 +193,17 @@ function _buildLatexCommand(mainFile, opts = {}) {
 module.exports = {
   runLatex,
   killLatex,
+  promises: {
+    runLatex: (projectId, options) =>
+      new Promise((resolve, reject) => {
+        runLatex(projectId, options, (err, output, stats, timing) => {
+          if (err) {
+            reject(err)
+          } else {
+            resolve({ output, stats, timing })
+          }
+        })
+      }),
+    killLatex: promisify(killLatex),
+  },
 }

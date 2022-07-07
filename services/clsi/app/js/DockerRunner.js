@@ -1,3 +1,4 @@
+const { promisify } = require('util')
 const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
 const Docker = require('dockerode')
@@ -617,3 +618,7 @@ const DockerRunner = {
 DockerRunner.startContainerMonitor()
 
 module.exports = DockerRunner
+module.exports.promises = {
+  run: promisify(DockerRunner.run),
+  kill: promisify(DockerRunner.kill),
+}

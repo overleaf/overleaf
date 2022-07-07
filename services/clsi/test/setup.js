@@ -1,10 +1,12 @@
 const chai = require('chai')
 const sinonChai = require('sinon-chai')
+const chaiAsPromised = require('chai-as-promised')
 const SandboxedModule = require('sandboxed-module')
 
 // Setup chai
 chai.should()
 chai.use(sinonChai)
+chai.use(chaiAsPromised)
 
 // Global SandboxedModule settings
 SandboxedModule.configure({

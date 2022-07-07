@@ -76,3 +76,20 @@ module.exports = OutputFileFinder = {
     })
   },
 }
+
+module.exports.promises = {
+  findOutputFiles: (resources, directory) =>
+    new Promise((resolve, reject) => {
+      OutputFileFinder.findOutputFiles(
+        resources,
+        directory,
+        (err, outputFiles, allFiles) => {
+          if (err) {
+            reject(err)
+          } else {
+            resolve({ outputFiles, allFiles })
+          }
+        }
+      )
+    }),
+}

@@ -12,6 +12,7 @@
  */
 let DraftModeManager
 const fs = require('fs')
+const { promisify } = require('util')
 const logger = require('@overleaf/logger')
 
 module.exports = DraftModeManager = {
@@ -53,4 +54,8 @@ module.exports = DraftModeManager = {
         .replace(/\\documentclass\{/g, '\\documentclass[draft]{')
     )
   },
+}
+
+module.exports.promises = {
+  injectDraftMode: promisify(DraftModeManager.injectDraftMode),
 }

@@ -29,93 +29,96 @@ function compile(req, res, next) {
         if (error) {
           return next(error)
         }
-        CompileManager.doCompileWithLock(
-          request,
-          function (error, outputFiles, stats, timings) {
-            let code, status
-            if (outputFiles == null) {
-              outputFiles = []
-            }
-            if (error instanceof Errors.AlreadyCompilingError) {
-              code = 423 // Http 423 Locked
-              status = 'compile-in-progress'
-            } else if (error instanceof Errors.FilesOutOfSyncError) {
-              code = 409 // Http 409 Conflict
-              status = 'retry'
-            } else if (error?.code === 'EPIPE') {
-              // docker returns EPIPE when shutting down
-              code = 503 // send 503 Unavailable response
-              status = 'unavailable'
-            } else if (error?.terminated) {
-              status = 'terminated'
-            } else if (error?.validate) {
-              status = `validation-${error.validate}`
-            } else if (error?.timedout) {
-              status = 'timedout'
-              logger.debug(
-                { err: error, project_id: request.project_id },
-                'timeout running compile'
-              )
-            } else if (error) {
-              status = 'error'
-              code = 500
-              logger.warn(
-                { err: error, project_id: request.project_id },
-                'error running compile'
-              )
-            } else {
-              if (
-                outputFiles.some(
-                  file => file.path === 'output.pdf' && file.size > 0
-                )
-              ) {
-                status = 'success'
-                lastSuccessfulCompileTimestamp = Date.now()
-              } else if (request.stopOnFirstError) {
-                status = 'stopped-on-first-error'
-              } else {
-                status = 'failure'
-                logger.warn(
-                  { project_id: request.project_id, outputFiles },
-                  'project failed to compile successfully, no output.pdf generated'
-                )
-              }
-
-              // log an error if any core files are found
-              if (outputFiles.some(file => file.path === 'core')) {
-                logger.error(
-                  { project_id: request.project_id, req, outputFiles },
-                  'core file found in output'
-                )
-              }
-            }
-
-            if (error) {
-              outputFiles = error.outputFiles || []
-            }
-
-            timer.done()
-            res.status(code || 200).send({
-              compile: {
-                status,
-                error: error?.message || error,
-                stats,
-                timings,
-                outputUrlPrefix: Settings.apis.clsi.outputUrlPrefix,
-                outputFiles: outputFiles.map(file => ({
-                  url:
-                    `${Settings.apis.clsi.url}/project/${request.project_id}` +
-                    (request.user_id != null
-                      ? `/user/${request.user_id}`
-                      : '') +
-                    (file.build != null ? `/build/${file.build}` : '') +
-                    `/output/${file.path}`,
-                  ...file,
-                })),
-              },
-            })
+        CompileManager.doCompileWithLock(request, (error, result) => {
+          let { outputFiles, stats, timings } = result || {}
+          let code, status
+          if (outputFiles == null) {
+            outputFiles = []
           }
-        )
+          if (error instanceof Errors.AlreadyCompilingError) {
+            code = 423 // Http 423 Locked
+            status = 'compile-in-progress'
+          } else if (error instanceof Errors.FilesOutOfSyncError) {
+            code = 409 // Http 409 Conflict
+            status = 'retry'
+            logger.warn(
+              {
+                projectId: request.project_id,
+                userId: request.user_id,
+              },
+              'files out of sync, please retry'
+            )
+          } else if (error?.code === 'EPIPE') {
+            // docker returns EPIPE when shutting down
+            code = 503 // send 503 Unavailable response
+            status = 'unavailable'
+          } else if (error?.terminated) {
+            status = 'terminated'
+          } else if (error?.validate) {
+            status = `validation-${error.validate}`
+          } else if (error?.timedout) {
+            status = 'timedout'
+            logger.debug(
+              { err: error, projectId: request.project_id },
+              'timeout running compile'
+            )
+          } else if (error) {
+            status = 'error'
+            code = 500
+            logger.error(
+              { err: error, projectId: request.project_id },
+              'error running compile'
+            )
+          } else {
+            if (
+              outputFiles.some(
+                file => file.path === 'output.pdf' && file.size > 0
+              )
+            ) {
+              status = 'success'
+              lastSuccessfulCompileTimestamp = Date.now()
+            } else if (request.stopOnFirstError) {
+              status = 'stopped-on-first-error'
+            } else {
+              status = 'failure'
+              logger.warn(
+                { projectId: request.project_id, outputFiles },
+                'project failed to compile successfully, no output.pdf generated'
+              )
+            }
+
+            // log an error if any core files are found
+            if (outputFiles.some(file => file.path === 'core')) {
+              logger.error(
+                { projectId: request.project_id, req, outputFiles },
+                'core file found in output'
+              )
+            }
+          }
+
+          if (error) {
+            outputFiles = error.outputFiles || []
+          }
+
+          timer.done()
+          res.status(code || 200).send({
+            compile: {
+              status,
+              error: error?.message || error,
+              stats,
+              timings,
+              outputUrlPrefix: Settings.apis.clsi.outputUrlPrefix,
+              outputFiles: outputFiles.map(file => ({
+                url:
+                  `${Settings.apis.clsi.url}/project/${request.project_id}` +
+                  (request.user_id != null ? `/user/${request.user_id}` : '') +
+                  (file.build != null ? `/build/${file.build}` : '') +
+                  `/output/${file.path}`,
+                ...file,
+              })),
+            },
+          })
+        })
       }
     )
   })

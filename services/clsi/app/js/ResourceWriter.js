@@ -14,6 +14,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let ResourceWriter
+const { promisify } = require('util')
 const UrlCache = require('./UrlCache')
 const Path = require('path')
 const fs = require('fs')
@@ -85,22 +86,26 @@ module.exports = ResourceWriter = {
       if (error != null) {
         return callback(error)
       }
-      this.saveAllResourcesToDisk(request, basePath, function (error) {
-        if (error != null) {
-          return callback(error)
-        }
-        return ResourceStateManager.saveProjectState(
-          request.syncState,
-          request.resources,
-          basePath,
-          function (error) {
-            if (error != null) {
-              return callback(error)
-            }
-            return callback(null, request.resources)
+      ResourceWriter.saveAllResourcesToDisk(
+        request,
+        basePath,
+        function (error) {
+          if (error != null) {
+            return callback(error)
           }
-        )
-      })
+          return ResourceStateManager.saveProjectState(
+            request.syncState,
+            request.resources,
+            basePath,
+            function (error) {
+              if (error != null) {
+                return callback(error)
+              }
+              return callback(null, request.resources)
+            }
+          )
+        }
+      )
     })
   },
 
@@ -108,14 +113,19 @@ module.exports = ResourceWriter = {
     if (callback == null) {
       callback = function () {}
     }
-    return this._createDirectory(basePath, error => {
+    return ResourceWriter._createDirectory(basePath, error => {
       if (error != null) {
         return callback(error)
       }
       const jobs = Array.from(resources).map(resource =>
         (resource => {
           return callback =>
-            this._writeResourceToDisk(project_id, resource, basePath, callback)
+            ResourceWriter._writeResourceToDisk(
+              project_id,
+              resource,
+              basePath,
+              callback
+            )
         })(resource)
       )
       return async.parallelLimit(jobs, parallelFileDownloads, callback)
@@ -126,28 +136,33 @@ module.exports = ResourceWriter = {
     if (callback == null) {
       callback = function () {}
     }
-    return this._createDirectory(basePath, error => {
+    return ResourceWriter._createDirectory(basePath, error => {
       if (error != null) {
         return callback(error)
       }
       const { project_id, resources } = request
-      this._removeExtraneousFiles(request, resources, basePath, error => {
-        if (error != null) {
-          return callback(error)
+      ResourceWriter._removeExtraneousFiles(
+        request,
+        resources,
+        basePath,
+        error => {
+          if (error != null) {
+            return callback(error)
+          }
+          const jobs = Array.from(resources).map(resource =>
+            (resource => {
+              return callback =>
+                ResourceWriter._writeResourceToDisk(
+                  project_id,
+                  resource,
+                  basePath,
+                  callback
+                )
+            })(resource)
+          )
+          return async.parallelLimit(jobs, parallelFileDownloads, callback)
         }
-        const jobs = Array.from(resources).map(resource =>
-          (resource => {
-            return callback =>
-              this._writeResourceToDisk(
-                project_id,
-                resource,
-                basePath,
-                callback
-              )
-          })(resource)
-        )
-        return async.parallelLimit(jobs, parallelFileDownloads, callback)
-      })
+      )
     })
   },
 
@@ -355,4 +370,13 @@ module.exports = ResourceWriter = {
       return callback(null, path)
     }
   },
+}
+
+module.exports.promises = {
+  syncResourcesToDisk: promisify(ResourceWriter.syncResourcesToDisk),
+  saveIncrementalResourcesToDisk: promisify(
+    ResourceWriter.saveIncrementalResourcesToDisk
+  ),
+  saveAllResourcesToDisk: promisify(ResourceWriter.saveAllResourcesToDisk),
+  checkPath: promisify(ResourceWriter.checkPath),
 }

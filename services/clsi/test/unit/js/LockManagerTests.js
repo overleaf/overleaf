@@ -1,88 +1,71 @@
-/* eslint-disable
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const SandboxedModule = require('sandboxed-module')
+const { expect } = require('chai')
 const sinon = require('sinon')
-const modulePath = require('path').join(
-  __dirname,
-  '../../../app/js/LockManager'
-)
-const Path = require('path')
+const mockFs = require('mock-fs')
+const OError = require('@overleaf/o-error')
+const LockManager = require('../../../app/js/LockManager')
 const Errors = require('../../../app/js/Errors')
 
-describe('DockerLockManager', function () {
+describe('LockManager', function () {
   beforeEach(function () {
-    this.LockManager = SandboxedModule.require(modulePath, {
-      requires: {
-        '@overleaf/settings': {},
-        fs: {
-          lstat: sinon.stub().callsArgWith(1),
-          readdir: sinon.stub().callsArgWith(1),
-        },
-        lockfile: (this.Lockfile = {}),
-      },
+    this.lockFile = '/local/compile/directory/.project-lock'
+    mockFs({
+      '/local/compile/directory': {},
     })
-    return (this.lockFile = '/local/compile/directory/.project-lock')
+    this.clock = sinon.useFakeTimers()
   })
 
-  return describe('runWithLock', function () {
-    beforeEach(function () {
-      this.runner = sinon.stub().callsArgWith(0, null, 'foo', 'bar')
-      return (this.callback = sinon.stub())
+  afterEach(function () {
+    mockFs.restore()
+    this.clock.restore()
+  })
+
+  describe('when the lock is available', function () {
+    it('the lock can be acquired', async function () {
+      await LockManager.acquire(this.lockFile)
     })
 
-    describe('normally', function () {
-      beforeEach(function () {
-        this.Lockfile.lock = sinon.stub().callsArgWith(2, null)
-        this.Lockfile.unlock = sinon.stub().callsArgWith(1, null)
-        return this.LockManager.runWithLock(
-          this.lockFile,
-          this.runner,
-          this.callback
-        )
-      })
+    it('acquiring a lock in a nonexistent directory throws an error with debug info', async function () {
+      const err = await expect(
+        LockManager.acquire('/invalid/path/.project-lock')
+      ).to.be.rejected
+      const info = OError.getFullInfo(err)
+      expect(info).to.have.keys(['statLock', 'statDir', 'readdirDir'])
+      expect(info.statLock.code).to.equal('ENOENT')
+      expect(info.statDir.code).to.equal('ENOENT')
+      expect(info.readdirDir.code).to.equal('ENOENT')
+    })
+  })
 
-      it('should run the compile', function () {
-        return this.runner.calledWith().should.equal(true)
-      })
-
-      return it('should call the callback with the response from the compile', function () {
-        return this.callback
-          .calledWithExactly(null, 'foo', 'bar')
-          .should.equal(true)
-      })
+  describe('after the lock is acquired', function () {
+    beforeEach(async function () {
+      this.lock = await LockManager.acquire(this.lockFile)
     })
 
-    return describe('when the project is locked', function () {
-      beforeEach(function () {
-        this.error = new Error()
-        this.error.code = 'EEXIST'
-        this.Lockfile.lock = sinon.stub().callsArgWith(2, this.error)
-        this.Lockfile.unlock = sinon.stub().callsArgWith(1, null)
-        return this.LockManager.runWithLock(
-          this.lockFile,
-          this.runner,
-          this.callback
-        )
-      })
+    it("the lock can't be acquired again", function (done) {
+      const promise = LockManager.acquire(this.lockFile)
+      // runAllAsync() will advance through time until there are no pending
+      // timers or promises. It interferes with Mocha's promise interface, so
+      // we use Mocha's callback interface for this test.
+      this.clock.runAllAsync()
+      expect(promise)
+        .to.be.rejectedWith(Errors.AlreadyCompilingError)
+        .then(() => {
+          done()
+        })
+        .catch(err => {
+          done(err)
+        })
+    })
 
-      it('should not run the compile', function () {
-        return this.runner.called.should.equal(false)
-      })
+    it('the lock can be acquired again after an expiry period', async function () {
+      // The expiry time is 5 minutes. Let's wait 10 minutes.
+      this.clock.tick(10 * 60 * 1000)
+      await LockManager.acquire(this.lockFile)
+    })
 
-      it('should return an error', function () {
-        this.callback
-          .calledWithExactly(sinon.match(Errors.AlreadyCompilingError))
-          .should.equal(true)
-      })
+    it('the lock can be acquired again after it was released', async function () {
+      this.lock.release()
+      await LockManager.acquire(this.lockFile)
     })
   })
 })

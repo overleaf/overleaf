@@ -1,14 +1,14 @@
 const SandboxedModule = require('sandboxed-module')
+const { expect } = require('chai')
 const sinon = require('sinon')
-const modulePath = require('path').join(
+
+const MODULE_PATH = require('path').join(
   __dirname,
   '../../../app/js/CompileManager'
 )
-const { EventEmitter } = require('events')
 
 describe('CompileManager', function () {
   beforeEach(function () {
-    this.callback = sinon.stub()
     this.projectId = 'project-id-123'
     this.userId = '1234'
     this.resources = 'mock-resources'
@@ -40,22 +40,25 @@ describe('CompileManager', function () {
     this.compileDir = `${this.compileBaseDir}/${this.projectId}-${this.userId}`
     this.outputDir = `${this.outputBaseDir}/${this.projectId}-${this.userId}`
 
-    this.proc = new EventEmitter()
-    this.proc.stdout = new EventEmitter()
-    this.proc.stderr = new EventEmitter()
-    this.proc.stderr.setEncoding = sinon.stub().returns(this.proc.stderr)
-
     this.LatexRunner = {
-      runLatex: sinon.stub().yields(),
+      promises: {
+        runLatex: sinon.stub().resolves({}),
+      },
     }
     this.ResourceWriter = {
-      syncResourcesToDisk: sinon.stub().yields(null, this.resources),
+      promises: {
+        syncResourcesToDisk: sinon.stub().resolves(this.resources),
+      },
     }
     this.OutputFileFinder = {
-      findOutputFiles: sinon.stub().yields(null, this.outputFiles),
+      promises: {
+        findOutputFiles: sinon.stub().resolves(this.outputFiles),
+      },
     }
     this.OutputCacheManager = {
-      saveOutputFiles: sinon.stub().yields(null, this.buildFiles),
+      promises: {
+        saveOutputFiles: sinon.stub().resolves(this.buildFiles),
+      },
     }
     this.Settings = {
       path: {
@@ -74,37 +77,44 @@ describe('CompileManager', function () {
       .returns(this.compileDir)
     this.child_process = {
       exec: sinon.stub(),
-      spawn: sinon.stub().returns(this.proc),
+      execFile: sinon.stub().yields(),
     }
     this.CommandRunner = {
-      run: sinon.stub().yields(null, { stdout: this.commandOutput }),
+      promises: {
+        run: sinon.stub().resolves({ stdout: this.commandOutput }),
+      },
     }
     this.DraftModeManager = {
-      injectDraftMode: sinon.stub().yields(),
+      promises: {
+        injectDraftMode: sinon.stub().resolves(),
+      },
     }
     this.TikzManager = {
-      checkMainFile: sinon.stub().yields(null, false),
+      promises: {
+        checkMainFile: sinon.stub().resolves(false),
+      },
+    }
+    this.lock = {
+      release: sinon.stub().resolves(),
     }
     this.LockManager = {
-      runWithLock: sinon.stub().callsFake((lockFile, runner, callback) => {
-        runner((err, ...result) => callback(err, ...result))
-      }),
+      acquire: sinon.stub().resolves(this.lock),
     }
     this.SynctexOutputParser = {
       parseViewOutput: sinon.stub(),
       parseEditOutput: sinon.stub(),
     }
 
-    this.fs = {
+    this.fsPromises = {
       lstat: sinon.stub(),
       stat: sinon.stub(),
       readFile: sinon.stub(),
     }
     this.fse = {
-      ensureDir: sinon.stub().yields(),
+      ensureDir: sinon.stub().resolves(),
     }
 
-    this.CompileManager = SandboxedModule.require(modulePath, {
+    this.CompileManager = SandboxedModule.require(MODULE_PATH, {
       requires: {
         './LatexRunner': this.LatexRunner,
         './ResourceWriter': this.ResourceWriter,
@@ -117,7 +127,7 @@ describe('CompileManager', function () {
         './TikzManager': this.TikzManager,
         './LockManager': this.LockManager,
         './SynctexOutputParser': this.SynctexOutputParser,
-        fs: this.fs,
+        'fs/promises': this.fsPromises,
         'fs-extra': this.fse,
       },
     })
@@ -141,45 +151,44 @@ describe('CompileManager', function () {
     })
 
     describe('when the project is locked', function () {
-      beforeEach(function () {
-        this.error = new Error('locked')
-        this.LockManager.runWithLock.callsFake((lockFile, runner, callback) => {
-          callback(this.error)
-        })
-        this.CompileManager.doCompileWithLock(this.request, this.callback)
+      beforeEach(async function () {
+        const error = new Error('locked')
+        this.LockManager.acquire.rejects(error)
+        await expect(
+          this.CompileManager.promises.doCompileWithLock(this.request)
+        ).to.be.rejectedWith(error)
       })
 
       it('should ensure that the compile directory exists', function () {
-        this.fse.ensureDir.calledWith(this.compileDir).should.equal(true)
+        expect(this.fse.ensureDir).to.have.been.calledWith(this.compileDir)
       })
 
       it('should not run LaTeX', function () {
-        this.LatexRunner.runLatex.called.should.equal(false)
-      })
-
-      it('should call the callback with the error', function () {
-        this.callback.calledWithExactly(this.error).should.equal(true)
+        expect(this.LatexRunner.promises.runLatex).not.to.have.been.called
       })
     })
 
     describe('normally', function () {
-      beforeEach(function () {
-        this.CompileManager.doCompileWithLock(this.request, this.callback)
+      beforeEach(async function () {
+        this.result = await this.CompileManager.promises.doCompileWithLock(
+          this.request
+        )
       })
 
       it('should ensure that the compile directory exists', function () {
-        this.fse.ensureDir.calledWith(this.compileDir).should.equal(true)
+        expect(this.fse.ensureDir).to.have.been.calledWith(this.compileDir)
       })
 
       it('should write the resources to disk', function () {
-        this.ResourceWriter.syncResourcesToDisk
-          .calledWith(this.request, this.compileDir)
-          .should.equal(true)
+        expect(
+          this.ResourceWriter.promises.syncResourcesToDisk
+        ).to.have.been.calledWith(this.request, this.compileDir)
       })
 
       it('should run LaTeX', function () {
-        this.LatexRunner.runLatex
-          .calledWith(`${this.projectId}-${this.userId}`, {
+        expect(this.LatexRunner.promises.runLatex).to.have.been.calledWith(
+          `${this.projectId}-${this.userId}`,
+          {
             directory: this.compileDir,
             mainFile: this.rootResourcePath,
             compiler: this.compiler,
@@ -189,47 +198,49 @@ describe('CompileManager', function () {
             environment: this.env,
             compileGroup: this.compileGroup,
             stopOnFirstError: this.request.stopOnFirstError,
-          })
-          .should.equal(true)
+          }
+        )
       })
 
       it('should find the output files', function () {
-        this.OutputFileFinder.findOutputFiles
-          .calledWith(this.resources, this.compileDir)
-          .should.equal(true)
+        expect(
+          this.OutputFileFinder.promises.findOutputFiles
+        ).to.have.been.calledWith(this.resources, this.compileDir)
       })
 
       it('should return the output files', function () {
-        this.callback.calledWith(null, this.buildFiles).should.equal(true)
+        expect(this.result.outputFiles).to.equal(this.buildFiles)
       })
 
       it('should not inject draft mode by default', function () {
-        this.DraftModeManager.injectDraftMode.called.should.equal(false)
+        expect(this.DraftModeManager.promises.injectDraftMode).not.to.have.been
+          .called
       })
     })
 
     describe('with draft mode', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this.request.draft = true
-        this.CompileManager.doCompileWithLock(this.request, this.callback)
+        await this.CompileManager.promises.doCompileWithLock(this.request)
       })
 
       it('should inject the draft mode header', function () {
-        this.DraftModeManager.injectDraftMode
-          .calledWith(this.compileDir + '/' + this.rootResourcePath)
-          .should.equal(true)
+        expect(
+          this.DraftModeManager.promises.injectDraftMode
+        ).to.have.been.calledWith(this.compileDir + '/' + this.rootResourcePath)
       })
     })
 
     describe('with a check option', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this.request.check = 'error'
-        this.CompileManager.doCompileWithLock(this.request, this.callback)
+        await this.CompileManager.promises.doCompileWithLock(this.request)
       })
 
       it('should run chktex', function () {
-        this.LatexRunner.runLatex
-          .calledWith(`${this.projectId}-${this.userId}`, {
+        expect(this.LatexRunner.promises.runLatex).to.have.been.calledWith(
+          `${this.projectId}-${this.userId}`,
+          {
             directory: this.compileDir,
             mainFile: this.rootResourcePath,
             compiler: this.compiler,
@@ -243,21 +254,22 @@ describe('CompileManager', function () {
             },
             compileGroup: this.compileGroup,
             stopOnFirstError: this.request.stopOnFirstError,
-          })
-          .should.equal(true)
+          }
+        )
       })
     })
 
     describe('with a knitr file and check options', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this.request.rootResourcePath = 'main.Rtex'
         this.request.check = 'error'
-        this.CompileManager.doCompileWithLock(this.request, this.callback)
+        await this.CompileManager.promises.doCompileWithLock(this.request)
       })
 
       it('should not run chktex', function () {
-        this.LatexRunner.runLatex
-          .calledWith(`${this.projectId}-${this.userId}`, {
+        expect(this.LatexRunner.promises.runLatex).to.have.been.calledWith(
+          `${this.projectId}-${this.userId}`,
+          {
             directory: this.compileDir,
             mainFile: 'main.Rtex',
             compiler: this.compiler,
@@ -267,69 +279,58 @@ describe('CompileManager', function () {
             environment: this.env,
             compileGroup: this.compileGroup,
             stopOnFirstError: this.request.stopOnFirstError,
-          })
-          .should.equal(true)
+          }
+        )
       })
     })
   })
 
   describe('clearProject', function () {
     describe('succesfully', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this.Settings.compileDir = 'compiles'
-        this.fs.lstat.yields(null, {
+        this.fsPromises.lstat.resolves({
           isDirectory() {
             return true
           },
         })
-        this.CompileManager.clearProject(
+        await this.CompileManager.promises.clearProject(
           this.projectId,
-          this.userId,
-          this.callback
+          this.userId
         )
-        this.proc.emit('close', 0)
       })
 
       it('should remove the project directory', function () {
-        this.child_process.spawn
-          .calledWith('rm', ['-r', '-f', '--', this.compileDir])
-          .should.equal(true)
-      })
-
-      it('should call the callback', function () {
-        this.callback.called.should.equal(true)
+        expect(this.child_process.execFile).to.have.been.calledWith('rm', [
+          '-r',
+          '-f',
+          '--',
+          this.compileDir,
+        ])
       })
     })
 
     describe('with a non-success status code', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this.Settings.compileDir = 'compiles'
-        this.fs.lstat.yields(null, {
+        this.fsPromises.lstat.resolves({
           isDirectory() {
             return true
           },
         })
-        this.CompileManager.clearProject(
-          this.projectId,
-          this.userId,
-          this.callback
-        )
-        this.proc.stderr.emit('data', (this.error = 'oops'))
-        this.proc.emit('close', 1)
+        this.child_process.execFile.yields(new Error('oops'))
+        await expect(
+          this.CompileManager.promises.clearProject(this.projectId, this.userId)
+        ).to.be.rejected
       })
 
       it('should remove the project directory', function () {
-        this.child_process.spawn
-          .calledWith('rm', ['-r', '-f', '--', this.compileDir])
-          .should.equal(true)
-      })
-
-      it('should call the callback with an error from the stderr', function () {
-        this.callback.calledWithExactly(sinon.match(Error)).should.equal(true)
-
-        this.callback.args[0][0].message.should.equal(
-          `rm -r ${this.compileDir} failed: ${this.error}`
-        )
+        expect(this.child_process.execFile).to.have.been.calledWith('rm', [
+          '-r',
+          '-f',
+          '--',
+          this.compileDir,
+        ])
       })
     })
   })
@@ -348,7 +349,7 @@ describe('CompileManager', function () {
 
     describe('syncFromCode', function () {
       beforeEach(function () {
-        this.fs.stat.yields(null, {
+        this.fsPromises.stat.resolves({
           isFile() {
             return true
           },
@@ -357,63 +358,62 @@ describe('CompileManager', function () {
         this.SynctexOutputParser.parseViewOutput
           .withArgs(this.commandOutput)
           .returns(this.records)
-        this.CompileManager.syncFromCode(
-          this.projectId,
-          this.userId,
-          this.filename,
-          this.line,
-          this.column,
-          '',
-          this.callback
-        )
       })
 
-      it('should execute the synctex binary', function () {
-        const outputFilePath = `${this.compileDir}/output.pdf`
-        const inputFilePath = `${this.compileDir}/${this.filename}`
-        this.CommandRunner.run.should.have.been.calledWith(
-          `${this.projectId}-${this.userId}`,
-          [
-            'synctex',
-            'view',
-            '-i',
-            `${this.line}:${this.column}:${inputFilePath}`,
-            '-o',
-            outputFilePath,
-          ],
-          this.compileDir,
-          this.Settings.clsi.docker.image,
-          60000,
-          {}
-        )
-      })
-
-      it('should call the callback with the parsed output', function () {
-        this.callback.should.have.been.calledWith(
-          null,
-          sinon.match.array.deepEquals(this.records)
-        )
-      })
-
-      describe('with a custom imageName', function () {
-        const customImageName = 'foo/bar:tag-0'
-        beforeEach(function () {
-          this.CommandRunner.run.reset()
-          this.CompileManager.syncFromCode(
+      describe('normal case', function () {
+        beforeEach(async function () {
+          this.result = await this.CompileManager.promises.syncFromCode(
             this.projectId,
             this.userId,
             this.filename,
             this.line,
             this.column,
-            customImageName,
-            this.callback
+            ''
+          )
+        })
+
+        it('should execute the synctex binary', function () {
+          const outputFilePath = `${this.compileDir}/output.pdf`
+          const inputFilePath = `${this.compileDir}/${this.filename}`
+          expect(this.CommandRunner.promises.run).to.have.been.calledWith(
+            `${this.projectId}-${this.userId}`,
+            [
+              'synctex',
+              'view',
+              '-i',
+              `${this.line}:${this.column}:${inputFilePath}`,
+              '-o',
+              outputFilePath,
+            ],
+            this.compileDir,
+            this.Settings.clsi.docker.image,
+            60000,
+            {}
+          )
+        })
+
+        it('should return the parsed output', function () {
+          expect(this.result).to.deep.equal(this.records)
+        })
+      })
+
+      describe('with a custom imageName', function () {
+        const customImageName = 'foo/bar:tag-0'
+        beforeEach(async function () {
+          await this.CompileManager.promises.syncFromCode(
+            this.projectId,
+            this.userId,
+            this.filename,
+            this.line,
+            this.column,
+            customImageName
           )
         })
 
         it('should execute the synctex binary in a custom docker image', function () {
           const outputFilePath = `${this.compileDir}/output.pdf`
           const inputFilePath = `${this.compileDir}/${this.filename}`
-          this.CommandRunner.run.should.have.been.calledWith(
+          expect(this.CommandRunner.promises.run).to.have.been.calledWith(
             `${this.projectId}-${this.userId}`,
             [
               'synctex',
@@ -434,7 +434,7 @@ describe('CompileManager', function () {
 
     describe('syncFromPdf', function () {
       beforeEach(function () {
-        this.fs.stat.yields(null, {
+        this.fsPromises.stat.resolves({
           isFile() {
             return true
           },
@@ -443,93 +443,89 @@ describe('CompileManager', function () {
         this.SynctexOutputParser.parseEditOutput
           .withArgs(this.commandOutput, this.compileDir)
           .returns(this.records)
-        this.CompileManager.syncFromPdf(
-          this.projectId,
-          this.userId,
-          this.page,
-          this.h,
-          this.v,
-          '',
-          this.callback
-        )
       })
 
-      it('should execute the synctex binary', function () {
-        const outputFilePath = `${this.compileDir}/output.pdf`
-        this.CommandRunner.run.should.have.been.calledWith(
-          `${this.projectId}-${this.userId}`,
-          [
-            'synctex',
-            'edit',
-            '-o',
-            `${this.page}:${this.h}:${this.v}:${outputFilePath}`,
-          ],
-          this.compileDir,
-          this.Settings.clsi.docker.image,
-          60000,
-          {}
-        )
-      })
-
-      it('should call the callback with the parsed output', function () {
-        this.callback.should.have.been.calledWith(
-          null,
-          sinon.match.array.deepEquals(this.records)
-        )
-      })
-
-      describe('with a custom imageName', function () {
-        const customImageName = 'foo/bar:tag-1'
-        beforeEach(function () {
-          this.CommandRunner.run.reset()
-          this.CompileManager.syncFromPdf(
+      describe('normal case', function () {
+        beforeEach(async function () {
+          this.result = await this.CompileManager.promises.syncFromPdf(
             this.projectId,
             this.userId,
             this.page,
             this.h,
             this.v,
-            customImageName,
-            this.callback
+            ''
+          )
+        })
+
+        it('should execute the synctex binary', function () {
+          const outputFilePath = `${this.compileDir}/output.pdf`
+          expect(this.CommandRunner.promises.run).to.have.been.calledWith(
+            `${this.projectId}-${this.userId}`,
+            [
+              'synctex',
+              'edit',
+              '-o',
+              `${this.page}:${this.h}:${this.v}:${outputFilePath}`,
+            ],
+            this.compileDir,
+            this.Settings.clsi.docker.image,
+            60000,
+            {}
+          )
+        })
+
+        it('should return the parsed output', function () {
+          expect(this.result).to.deep.equal(this.records)
+        })
+      })
+
+      describe('with a custom imageName', function () {
+        const customImageName = 'foo/bar:tag-1'
+        beforeEach(async function () {
+          await this.CompileManager.promises.syncFromPdf(
+            this.projectId,
+            this.userId,
+            this.page,
+            this.h,
+            this.v,
+            customImageName
           )
         })
 
         it('should execute the synctex binary in a custom docker image', function () {
           const outputFilePath = `${this.compileDir}/output.pdf`
-          this.CommandRunner.run
-            .calledWith(
-              `${this.projectId}-${this.userId}`,
-              [
-                'synctex',
-                'edit',
-                '-o',
-                `${this.page}:${this.h}:${this.v}:${outputFilePath}`,
-              ],
-              this.compileDir,
-              customImageName,
-              60000,
-              {}
-            )
-            .should.equal(true)
+          expect(this.CommandRunner.promises.run).to.have.been.calledWith(
+            `${this.projectId}-${this.userId}`,
+            [
+              'synctex',
+              'edit',
+              '-o',
+              `${this.page}:${this.h}:${this.v}:${outputFilePath}`,
+            ],
+            this.compileDir,
+            customImageName,
+            60000,
+            {}
+          )
         })
       })
     })
   })
 
   describe('wordcount', function () {
-    beforeEach(function () {
+    beforeEach(async function () {
       this.stdout = 'Encoding: ascii\nWords in text: 2'
-      this.fs.readFile.yields(null, this.stdout)
+      this.fsPromises.readFile.resolves(this.stdout)
 
       this.timeout = 60 * 1000
       this.filename = 'main.tex'
       this.image = 'example.com/image'
 
-      this.CompileManager.wordcount(
+      this.result = await this.CompileManager.promises.wordcount(
         this.projectId,
         this.userId,
         this.filename,
-        this.image,
-        this.callback
+        this.image
       )
     })
 
@@ -543,33 +539,29 @@ describe('CompileManager', function () {
         `-out=${this.filePath}.wc`,
       ]
 
-      this.CommandRunner.run
-        .calledWith(
-          `${this.projectId}-${this.userId}`,
-          this.command,
-          this.compileDir,
-          this.image,
-          this.timeout,
-          {}
-        )
-        .should.equal(true)
+      expect(this.CommandRunner.promises.run).to.have.been.calledWith(
+        `${this.projectId}-${this.userId}`,
+        this.command,
+        this.compileDir,
+        this.image,
+        this.timeout,
+        {}
+      )
     })
 
-    it('should call the callback with the parsed output', function () {
-      this.callback
-        .calledWith(null, {
-          encode: 'ascii',
-          textWords: 2,
-          headWords: 0,
-          outside: 0,
-          headers: 0,
-          elements: 0,
-          mathInline: 0,
-          mathDisplay: 0,
-          errors: 0,
-          messages: '',
-        })
-        .should.equal(true)
+    it('should return the parsed output', function () {
+      expect(this.result).to.deep.equal({
+        encode: 'ascii',
+        textWords: 2,
+        headWords: 0,
+        outside: 0,
+        headers: 0,
+        elements: 0,
+        mathInline: 0,
+        mathDisplay: 0,
+        errors: 0,
+        messages: '',
+      })
     })
   })
 })

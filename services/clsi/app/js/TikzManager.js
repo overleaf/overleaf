@@ -13,6 +13,7 @@
 let TikzManager
 const fs = require('fs')
 const Path = require('path')
+const { promisify } = require('util')
 const ResourceWriter = require('./ResourceWriter')
 const SafeReader = require('./SafeReader')
 const logger = require('@overleaf/logger')
@@ -100,4 +101,9 @@ module.exports = TikzManager = {
       }
     )
   },
+}
+
+module.exports.promises = {
+  checkMainFile: promisify(TikzManager.checkMainFile),
+  injectOutputFile: promisify(TikzManager.injectOutputFile),
 }

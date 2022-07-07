@@ -695,6 +695,7 @@ function __guard__(value, transform) {
 
 OutputCacheManager.promises = {
   expireOutputFiles: promisify(OutputCacheManager.expireOutputFiles),
+  saveOutputFiles: promisify(OutputCacheManager.saveOutputFiles),
   saveOutputFilesInBuildDir: promisify(
     OutputCacheManager.saveOutputFilesInBuildDir
   ),

@@ -111,9 +111,11 @@ describe('CompileController', function () {
 
     describe('successfully', function () {
       beforeEach(function () {
-        this.CompileManager.doCompileWithLock = sinon
-          .stub()
-          .yields(null, this.output_files, this.stats, this.timings)
+        this.CompileManager.doCompileWithLock = sinon.stub().yields(null, {
+          outputFiles: this.output_files,
+          stats: this.stats,
+          timings: this.timings,
+        })
         this.CompileController.compile(this.req, this.res)
       })
 
@@ -156,9 +158,11 @@ describe('CompileController', function () {
     describe('without a outputUrlPrefix', function () {
       beforeEach(function () {
         this.Settings.apis.clsi.outputUrlPrefix = ''
-        this.CompileManager.doCompileWithLock = sinon
-          .stub()
-          .yields(null, this.output_files, this.stats, this.timings)
+        this.CompileManager.doCompileWithLock = sinon.stub().yields(null, {
+          outputFiles: this.output_files,
+          stats: this.stats,
+          timings: this.timings,
+        })
         this.CompileController.compile(this.req, this.res)
       })
 
@@ -196,9 +200,11 @@ describe('CompileController', function () {
             build: 1234,
           },
         ]
-        this.CompileManager.doCompileWithLock = sinon
-          .stub()
-          .yields(null, this.output_files, this.stats, this.timings)
+        this.CompileManager.doCompileWithLock = sinon.stub().yields(null, {
+          outputFiles: this.output_files,
+          stats: this.stats,
+          timings: this.timings,
+        })
         this.CompileController.compile(this.req, this.res)
       })
 
@@ -237,9 +243,11 @@ describe('CompileController', function () {
             build: 1234,
           },
         ]
-        this.CompileManager.doCompileWithLock = sinon
-          .stub()
-          .yields(null, this.output_files, this.stats, this.timings)
+        this.CompileManager.doCompileWithLock = sinon.stub().yields(null, {
+          outputFiles: this.output_files,
+          stats: this.stats,
+          timings: this.timings,
+        })
         this.CompileController.compile(this.req, this.res)
       })
 
