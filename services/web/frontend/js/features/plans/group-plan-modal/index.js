@@ -1,6 +1,7 @@
 import getMeta from '../../../utils/meta'
 import { swapModal } from '../../utils/swapModal'
 import * as eventTracking from '../../../infrastructure/event-tracking'
+import { createLocalizedGroupPlanPrice } from '../utils/group-plan-pricing'
 
 function getFormValues() {
   const modalEl = document.querySelector('[data-ol-group-plan-modal]')
@@ -16,18 +17,16 @@ function getFormValues() {
 }
 
 export function updateGroupModalPlanPricing() {
-  const groupPlans = getMeta('ol-groupPlans')
-  const currencySymbols = getMeta('ol-currencySymbols')
-
   const modalEl = document.querySelector('[data-ol-group-plan-modal]')
   const { planCode, size, currency, usage } = getFormValues()
 
-  const priceInCents =
-    groupPlans[usage][planCode][currency][size].price_in_cents
-  const priceInUnit = (priceInCents / 100).toFixed()
-  const currencySymbol = currencySymbols[currency]
-  const displayPrice = `${currencySymbol}${priceInUnit}`
-  const perUserPrice = parseFloat((priceInCents / 100 / size).toFixed(2))
+  const { localizedPrice, localizedPerUserPrice } =
+    createLocalizedGroupPlanPrice({
+      plan: planCode,
+      licenseSize: size,
+      currency,
+      usage,
+    })
 
   modalEl.querySelectorAll('[data-ol-group-plan-plan-code]').forEach(el => {
     el.hidden = el.getAttribute('data-ol-group-plan-plan-code') !== planCode
@@ -36,10 +35,10 @@ export function updateGroupModalPlanPricing() {
     el.hidden = el.getAttribute('data-ol-group-plan-usage') !== usage
   })
   modalEl.querySelector('[data-ol-group-plan-display-price]').innerText =
-    displayPrice
+    localizedPrice
   modalEl.querySelector(
     '[data-ol-group-plan-price-per-user]'
-  ).innerText = `${currencySymbol}${perUserPrice} per user`
+  ).innerText = `${localizedPerUserPrice} per user`
 
   modalEl.querySelector('[data-ol-group-plan-educational-discount]').hidden =
     usage !== 'educational'
