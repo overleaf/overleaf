@@ -15,7 +15,11 @@ import {
   cleanUpContext,
 } from '../../../helpers/render-with-context'
 import * as locationModule from '../../../../../frontend/js/features/share-project-modal/utils/location'
-import { EditorProviders } from '../../../helpers/editor-providers'
+import {
+  EditorProviders,
+  USER_EMAIL,
+  USER_ID,
+} from '../../../helpers/editor-providers'
 
 describe('<ShareProjectModal/>', function () {
   const project = {
@@ -26,8 +30,8 @@ describe('<ShareProjectModal/>', function () {
       compileGroup: 'standard',
     },
     owner: {
-      _id: 'member_author',
-      email: 'project-owner@example.com',
+      _id: USER_ID,
+      email: USER_EMAIL,
     },
     members: [],
     invites: [],

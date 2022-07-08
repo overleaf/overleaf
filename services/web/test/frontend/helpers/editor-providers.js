@@ -17,9 +17,11 @@ import { DetachCompileProvider } from '../../../frontend/js/shared/context/detac
 // using magic strings
 export const PROJECT_ID = 'project123'
 export const PROJECT_NAME = 'project-name'
+export const USER_ID = '123abd'
+export const USER_EMAIL = 'testuser@example.com'
 
 export function EditorProviders({
-  user = { id: '123abd', email: 'testuser@example.com' },
+  user = { id: USER_ID, email: USER_EMAIL },
   projectId = PROJECT_ID,
   rootDocId = '_root_doc_id',
   socket = {
