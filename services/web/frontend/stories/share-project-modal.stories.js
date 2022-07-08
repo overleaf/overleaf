@@ -46,7 +46,7 @@ export const LinkSharingLoading = args => {
   return <ShareProjectModal {...args} />
 }
 
-export const NonAdminLinkSharingOff = args => {
+export const NonProjectOwnerLinkSharingOff = args => {
   useScope({
     project: {
       ...args.project,
@@ -54,10 +54,10 @@ export const NonAdminLinkSharingOff = args => {
     },
   })
 
-  return <ShareProjectModal {...args} isAdmin={false} />
+  return <ShareProjectModal {...args} isProjectOwner={false} />
 }
 
-export const NonAdminLinkSharingOn = args => {
+export const NonProjectOwnerLinkSharingOn = args => {
   useScope({
     project: {
       ...args.project,
@@ -65,7 +65,7 @@ export const NonAdminLinkSharingOn = args => {
     },
   })
 
-  return <ShareProjectModal {...args} isAdmin={false} />
+  return <ShareProjectModal {...args} isProjectOwner={false} />
 }
 
 export const RestrictedTokenMember = args => {
@@ -139,7 +139,7 @@ export default {
   args: {
     show: true,
     animation: false,
-    isAdmin: true,
+    isProjectOwner: true,
     user: {},
     project,
   },

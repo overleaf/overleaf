@@ -16,7 +16,7 @@ App.component(
 export default App.controller(
   'ReactShareProjectModalController',
   function ($scope, eventTracking, ide) {
-    $scope.isAdmin = false
+    $scope.isProjectOwner = false
     $scope.show = false
 
     $scope.handleHide = () => {
@@ -25,10 +25,10 @@ export default App.controller(
       })
     }
 
-    $scope.openShareProjectModal = isAdmin => {
+    $scope.openShareProjectModal = isProjectOwner => {
       eventTracking.sendMBOnce('ide-open-share-modal-once')
       $scope.$applyAsync(() => {
-        $scope.isAdmin = isAdmin
+        $scope.isProjectOwner = isProjectOwner
         $scope.show = true
       })
     }

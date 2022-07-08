@@ -9,7 +9,7 @@ import MemberPrivileges from './member-privileges'
 import { resendInvite, revokeInvite } from '../utils/api'
 import { useProjectContext } from '../../../shared/context/project-context'
 
-export default function Invite({ invite, isAdmin }) {
+export default function Invite({ invite, isProjectOwner }) {
   return (
     <Row className="project-invite">
       <Col xs={7}>
@@ -18,7 +18,7 @@ export default function Invite({ invite, isAdmin }) {
         <div className="small">
           <Trans i18nKey="invite_not_accepted" />
           .&nbsp;
-          {isAdmin && <ResendInvite invite={invite} />}
+          {isProjectOwner && <ResendInvite invite={invite} />}
         </div>
       </Col>
 
@@ -26,7 +26,7 @@ export default function Invite({ invite, isAdmin }) {
         <MemberPrivileges privileges={invite.privileges} />
       </Col>
 
-      {isAdmin && (
+      {isProjectOwner && (
         <Col xs={2} className="text-center">
           <RevokeInvite invite={invite} />
         </Col>
@@ -37,7 +37,7 @@ export default function Invite({ invite, isAdmin }) {
 
 Invite.propTypes = {
   invite: PropTypes.object.isRequired,
-  isAdmin: PropTypes.bool.isRequired,
+  isProjectOwner: PropTypes.bool.isRequired,
 }
 
 function ResendInvite({ invite }) {

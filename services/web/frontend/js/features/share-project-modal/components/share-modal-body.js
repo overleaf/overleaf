@@ -13,7 +13,7 @@ import PropTypes from 'prop-types'
 import RecaptchaConditions from '../../../shared/components/recaptcha-conditions'
 
 export default function ShareModalBody() {
-  const { isAdmin } = useShareProjectContext()
+  const { isProjectOwner } = useShareProjectContext()
   const { splitTestVariants } = useSplitTestContext({
     splitTestVariants: PropTypes.object,
   })
@@ -24,7 +24,7 @@ export default function ShareModalBody() {
     case 'new-copy-top':
       return (
         <>
-          {isAdmin ? (
+          {isProjectOwner ? (
             <>
               <SendInvites />
               <Row className="public-access-level" />
@@ -36,7 +36,7 @@ export default function ShareModalBody() {
           <OwnerInfo />
 
           {members.map(member =>
-            isAdmin ? (
+            isProjectOwner ? (
               <EditMember key={member._id} member={member} />
             ) : (
               <ViewMember key={member._id} member={member} />
@@ -44,10 +44,14 @@ export default function ShareModalBody() {
           )}
 
           {invites.map(invite => (
-            <Invite key={invite._id} invite={invite} isAdmin={isAdmin} />
+            <Invite
+              key={invite._id}
+              invite={invite}
+              isProjectOwner={isProjectOwner}
+            />
           ))}
 
-          {isAdmin && (
+          {isProjectOwner && (
             <>
               <br />
               <LinkSharing />
@@ -65,7 +69,7 @@ export default function ShareModalBody() {
           <OwnerInfo />
 
           {members.map(member =>
-            isAdmin ? (
+            isProjectOwner ? (
               <EditMember key={member._id} member={member} />
             ) : (
               <ViewMember key={member._id} member={member} />
@@ -73,12 +77,16 @@ export default function ShareModalBody() {
           )}
 
           {invites.map(invite => (
-            <Invite key={invite._id} invite={invite} isAdmin={isAdmin} />
+            <Invite
+              key={invite._id}
+              invite={invite}
+              isProjectOwner={isProjectOwner}
+            />
           ))}
 
-          {isAdmin ? <SendInvites /> : <SendInvitesNotice />}
+          {isProjectOwner ? <SendInvites /> : <SendInvitesNotice />}
 
-          {isAdmin && (
+          {isProjectOwner && (
             <>
               <br />
               <LinkSharing />
@@ -95,12 +103,12 @@ export default function ShareModalBody() {
     default:
       return (
         <>
-          {isAdmin && <LinkSharing />}
+          {isProjectOwner && <LinkSharing />}
 
           <OwnerInfo />
 
           {members.map(member =>
-            isAdmin ? (
+            isProjectOwner ? (
               <EditMember key={member._id} member={member} />
             ) : (
               <ViewMember key={member._id} member={member} />
@@ -108,10 +116,14 @@ export default function ShareModalBody() {
           )}
 
           {invites.map(invite => (
-            <Invite key={invite._id} invite={invite} isAdmin={isAdmin} />
+            <Invite
+              key={invite._id}
+              invite={invite}
+              isProjectOwner={isProjectOwner}
+            />
           ))}
 
-          {isAdmin ? <SendInvites /> : <SendInvitesNotice />}
+          {isProjectOwner ? <SendInvites /> : <SendInvitesNotice />}
 
           {!window.ExposedSettings.recaptchaDisabled?.invite && (
             <RecaptchaConditions />

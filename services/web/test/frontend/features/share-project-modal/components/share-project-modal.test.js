@@ -77,7 +77,7 @@ describe('<ShareProjectModal/>', function () {
 
   const modalProps = {
     show: true,
-    isAdmin: true,
+    isProjectOwner: true,
     handleHide: sinon.stub(),
   }
 
@@ -192,7 +192,7 @@ describe('<ShareProjectModal/>', function () {
           },
         }}
       >
-        <ShareProjectModal {...modalProps} isAdmin />
+        <ShareProjectModal {...modalProps} isProjectOwner />
       </EditorProviders>
     )
 
@@ -210,7 +210,7 @@ describe('<ShareProjectModal/>', function () {
           },
         }}
       >
-        <ShareProjectModal {...modalProps} isAdmin={false} />
+        <ShareProjectModal {...modalProps} isProjectOwner={false} />
       </EditorProviders>
     )
 
@@ -235,7 +235,7 @@ describe('<ShareProjectModal/>', function () {
           },
         }}
       >
-        <ShareProjectModal {...modalProps} isAdmin={false} />
+        <ShareProjectModal {...modalProps} isProjectOwner={false} />
       </EditorProviders>
     )
 

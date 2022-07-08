@@ -18,7 +18,7 @@ const ShareProjectContext = createContext()
 
 ShareProjectContext.Provider.propTypes = {
   value: PropTypes.shape({
-    isAdmin: PropTypes.bool.isRequired,
+    isProjectOwner: PropTypes.bool.isRequired,
     updateProject: PropTypes.func.isRequired,
     monitorRequest: PropTypes.func.isRequired,
     inFlight: PropTypes.bool,
@@ -44,7 +44,7 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
   handleHide,
   show,
   animation = true,
-  isAdmin,
+  isProjectOwner,
 }) {
   const [inFlight, setInFlight] = useState(false)
   const [error, setError] = useState()
@@ -113,7 +113,7 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
   return (
     <ShareProjectContext.Provider
       value={{
-        isAdmin,
+        isProjectOwner,
         updateProject,
         monitorRequest,
         inFlight,
@@ -135,7 +135,7 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
 ShareProjectModal.propTypes = {
   animation: PropTypes.bool,
   handleHide: PropTypes.func.isRequired,
-  isAdmin: PropTypes.bool.isRequired,
+  isProjectOwner: PropTypes.bool.isRequired,
   show: PropTypes.bool.isRequired,
 }
 
