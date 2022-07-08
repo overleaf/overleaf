@@ -1047,9 +1047,15 @@ p.plans-v2-table-green-highlighted-text {
 }
 
 .plans-v2-table-sticky-header-container {
-  height: 100%;
-  width: 100%;
-  position: absolute;
+  @media (max-width: @screen-xs-max) {
+    // `height: 60%` is just an arbitrary percentage
+    // since we need to cover the whole plans_v2_table
+    // but not too much so it vertically overflows the page
+    // and it's not trivial to calculate the precise table height
+    height: 60%;
+    width: 100%;
+    position: absolute;
+  }
 }
 
 .plans-v2-table-sticky-header-without-switch {
