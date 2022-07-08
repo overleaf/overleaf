@@ -81,11 +81,20 @@ function flushDocToMongo(projectId, docId, callback) {
   )
 }
 
-function deleteDoc(projectId, docId, callback) {
+function deleteDoc(projectId, docId, ignoreFlushErrors, callback) {
+  if (typeof ignoreFlushErrors === 'function') {
+    callback = ignoreFlushErrors
+    ignoreFlushErrors = false
+  }
+  let path = `/project/${projectId}/doc/${docId}`
+  if (ignoreFlushErrors) {
+    path += '?ignore_flush_errors=true'
+  }
+  const method = 'DELETE'
   _makeRequest(
     {
-      path: `/project/${projectId}/doc/${docId}`,
-      method: 'DELETE',
+      path,
+      method,
     },
     projectId,
     'delete.mongo.doc',

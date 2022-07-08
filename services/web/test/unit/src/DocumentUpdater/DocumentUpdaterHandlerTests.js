@@ -320,6 +320,42 @@ describe('DocumentUpdaterHandler', function () {
           .should.equal(true)
       })
     })
+
+    describe("with 'ignoreFlushErrors' option", function () {
+      beforeEach(function () {
+        this.request.callsArgWith(1, null, { statusCode: 204 }, '')
+      })
+
+      it('when option is true, should send a `ignore_flush_errors=true` URL query to document-updater', function () {
+        this.handler.deleteDoc(
+          this.project_id,
+          this.doc_id,
+          true,
+          this.callback
+        )
+        this.request
+          .calledWithMatch({
+            url: `${this.settings.apis.documentupdater.url}/project/${this.project_id}/doc/${this.doc_id}?ignore_flush_errors=true`,
+            method: 'DELETE',
+          })
+          .should.equal(true)
+      })
+
+      it("when option is false, shouldn't send any URL query to document-updater", function () {
+        this.handler.deleteDoc(
+          this.project_id,
+          this.doc_id,
+          false,
+          this.callback
+        )
+        this.request
+          .calledWithMatch({
+            url: `${this.settings.apis.documentupdater.url}/project/${this.project_id}/doc/${this.doc_id}`,
+            method: 'DELETE',
+          })
+          .should.equal(true)
+      })
+    })
   })
 
   describe('setDocument', function () {
