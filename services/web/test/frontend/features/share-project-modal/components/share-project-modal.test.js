@@ -175,7 +175,7 @@ describe('<ShareProjectModal/>', function () {
     await screen.findByRole('button', { name: 'Make Private' })
   })
 
-  it('hides actions from non-admins', async function () {
+  it('hides actions from non-project-owners', async function () {
     const invites = [
       {
         _id: 'invited-author',
@@ -184,7 +184,7 @@ describe('<ShareProjectModal/>', function () {
       },
     ]
 
-    // render as admin: actions should be present
+    // render as project owner: actions should be present
     render(
       <EditorProviders
         scope={{
@@ -202,7 +202,7 @@ describe('<ShareProjectModal/>', function () {
     await screen.findByRole('button', { name: 'Turn off link sharing' })
     await screen.findByRole('button', { name: 'Resend' })
 
-    // render as non-admin (non-owner), link sharing on: actions should be missing and message should be present
+    // render as non-project-owner, link sharing on: actions should be missing and message should be present
     render(
       <EditorProviders
         scope={{
@@ -227,7 +227,7 @@ describe('<ShareProjectModal/>', function () {
       .null
     expect(screen.queryByRole('button', { name: 'Resend' })).to.be.null
 
-    // render as non-admin (non-owner), link sharing off: actions should be missing and message should be present
+    // render as non-project-owner, link sharing off: actions should be missing and message should be present
     render(
       <EditorProviders
         scope={{
