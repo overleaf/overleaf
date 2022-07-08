@@ -22,7 +22,6 @@ function PdfJsViewer({ url, pdfFile }) {
     setPosition,
     startCompile,
   } = useCompileContext()
-  const [timePDFFetched, setTimePDFFetched] = useState()
 
   // state values persisted in localStorage to restore on load
   const [scale, setScale] = usePersistedState(
@@ -58,37 +57,54 @@ function PdfJsViewer({ url, pdfFile }) {
     [setError]
   )
 
+  // fetch and render times
+  const times = useRef({})
+
   // listen for initialize event
   useEffect(() => {
-    if (pdfJsWrapper) {
+    if (pdfJsWrapper && firstRenderDone) {
       const handlePagesinit = () => {
         setInitialised(true)
-        if (firstRenderDone) {
-          const visible = !document.hidden
-          if (!visible) {
-            firstRenderDone({
-              timePDFFetched,
-            })
-          } else {
-            const timePDFRendered = performance.now()
-            firstRenderDone({
-              timePDFFetched,
-              timePDFRendered,
-            })
-          }
+        times.current.timePDFFetched = performance.now()
+        const visible = !document.hidden
+        if (!visible) {
+          // Rendering does not start in case we are hidden.
+          firstRenderDone(times.current)
         }
       }
+      // `pagesinit` fires when the data for rendering the first page is ready.
       pdfJsWrapper.eventBus.on('pagesinit', handlePagesinit)
       return () => pdfJsWrapper.eventBus.off('pagesinit', handlePagesinit)
     }
-  }, [pdfJsWrapper, firstRenderDone, timePDFFetched])
+  }, [pdfJsWrapper, firstRenderDone, times])
+
+  // list for page rendered event
+  useEffect(() => {
+    if (pdfJsWrapper && firstRenderDone) {
+      const handleRendered = () => {
+        const visible = !document.hidden
+        if (!visible) {
+          // The render time is not accurate in case we are hidden.
+          firstRenderDone(times.current)
+        } else {
+          times.current.timePDFRendered = performance.now()
+          firstRenderDone(times.current)
+        }
+        // Only get the times for the first page.
+        pdfJsWrapper.eventBus.off('pagerendered', handleRendered)
+      }
+      // `pagerendered` fires when a page was actually rendered.
+      pdfJsWrapper.eventBus.on('pagerendered', handleRendered)
+      return () => pdfJsWrapper.eventBus.off('pagerendered', handleRendered)
+    }
+  }, [pdfJsWrapper, firstRenderDone, times])
 
   // load the PDF document from the URL
   useEffect(() => {
     if (pdfJsWrapper && url) {
-      setTimePDFFetched(performance.now())
       setInitialised(false)
       setError(undefined)
+      times.current = {}
 
       pdfJsWrapper.loadDocument(url, pdfFile).catch(error => {
         console.error(error)
@@ -96,7 +112,7 @@ function PdfJsViewer({ url, pdfFile }) {
       })
       return () => pdfJsWrapper.abortDocumentLoading()
     }
-  }, [pdfJsWrapper, url, pdfFile, setError])
+  }, [pdfJsWrapper, url, pdfFile, setError, times])
 
   // listen for scroll events
   useEffect(() => {
