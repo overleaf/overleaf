@@ -76,6 +76,9 @@ export function updateMainGroupPlanPricing() {
       '[data-ol-plans-v2-license-picker-educational-discount-input]'
     ).checked = false
   }
+
+  changeNumberOfUsersInTableHead()
+  changeNumberOfUsersInFeatureTable()
 }
 
 export function changeGroupPlanModalNumberOfLicenses() {
@@ -99,4 +102,33 @@ export function changeGroupPlanModalEducationalDiscount() {
 
   groupPlanModalEducationalDiscountEl.checked = educationalDiscountChecked
   updateGroupModalPlanPricing()
+}
+
+export function changeNumberOfUsersInFeatureTable() {
+  document
+    .querySelectorAll(
+      '[data-ol-plans-v2-table-cell-plan^="group"][data-ol-plans-v2-table-cell-feature="number_of_users"]'
+    )
+    .forEach(el => {
+      const licenseSize = document.querySelector(
+        '[data-ol-plans-v2-license-picker-select]'
+      ).value
+
+      el.textContent = `${licenseSize} users`
+    })
+}
+
+export function changeNumberOfUsersInTableHead() {
+  document
+    .querySelectorAll('[data-ol-plans-v2-table-th-group-license-size]')
+    .forEach(el => {
+      const licenseSize = el.getAttribute(
+        'data-ol-plans-v2-table-th-group-license-size'
+      )
+      const currentLicenseSize = document.querySelector(
+        '[data-ol-plans-v2-license-picker-select]'
+      ).value
+
+      el.hidden = licenseSize !== currentLicenseSize
+    })
 }

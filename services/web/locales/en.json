@@ -1729,7 +1729,7 @@
   "x_collaborators_per_project": "__collaboratorsCount__ collaborators per project",
   "unlimited_collaborators_in_each_project": "Unlimited collaborators in each project",
   "most_premium_features": "Most premium features",
-  "total_per_year_lowercase": "total per year",
+  "total_per_year_for_x_users": "total per year for __licenseSize__ users",
   "user_management": "User management",
   "user_management_info": "Group plan admins have access to an admin panel where users can be added and removed easily. For site-wide plans, users are automatically upgraded when they register or add their email address to Overleaf (domain-based enrollment or SSO).",
   "usage_metrics": "Usage metrics",

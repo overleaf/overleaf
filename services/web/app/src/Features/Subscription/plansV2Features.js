@@ -205,8 +205,8 @@ const groupPlans = [
         info: 'number_of_users_info',
         value: 'str',
         plans: {
-          group_standard: '2 - 50 users',
-          group_professional: '2 - 50 users',
+          group_standard: '2 users',
+          group_professional: '2 users',
           organization: 'Contact sales',
         },
       },

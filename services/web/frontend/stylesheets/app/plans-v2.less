@@ -420,7 +420,7 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
       td:nth-last-child(2) {
         background-color: @ol-blue-gray-0;
 
-        .plans-v2-table-cell-inner-content {
+        .plans-v2-table-cell {
           border-bottom-right-radius: @plans-v2-table-border-radius;
         }
       }
@@ -466,7 +466,7 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
         td:nth-last-child(2) {
           background-color: @ol-blue-gray-0;
 
-          .plans-v2-table-cell-inner-content {
+          .plans-v2-table-cell {
             border-bottom-right-radius: @plans-v2-table-border-radius;
           }
         }
@@ -499,7 +499,7 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
 // This is a workaround.
 // Table student have "Dedicated account manager" as its last feature.
 // That name is long and it overflows to the next line,
-// making the `td` is bigger than the inner `plans-v2-table-cell-inner-content` (inner `div` class of most of the `td`).
+// making the `td` is bigger than the inner `plans-v2-table-cell` (inner `div` class of most of the `td`).
 // Since we can't make all `td` have fixed height
 // (due to different text length that makes the
 // `td` has variable height depending whether the text overflows),
@@ -514,13 +514,13 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
 // example reference: https://stackoverflow.com/questions/4094126/how-to-add-border-radius-on-table-row
 .plans-v2-table-student {
   @media (min-width: @screen-md-min) {
-    tr:last-child td:nth-last-child(2) .plans-v2-table-cell-inner-content {
+    tr:last-child td:nth-last-child(2) .plans-v2-table-cell {
       height: 62px;
     }
   }
 
   @media (min-width: @screen-sm-min) {
-    tr:last-child td:nth-last-child(2) .plans-v2-table-cell-inner-content {
+    tr:last-child td:nth-last-child(2) .plans-v2-table-cell {
       height: 56px;
       display: flex;
       align-items: center;
@@ -543,7 +543,7 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
       td:last-child {
         background-color: @ol-blue-gray-0;
 
-        .plans-v2-table-cell-inner-content {
+        .plans-v2-table-cell {
           border-bottom-right-radius: @plans-v2-table-border-radius;
         }
       }
@@ -581,7 +581,7 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
           border-bottom-left-radius: 0;
         }
 
-        td:last-child .plans-v2-table-cell-inner-content {
+        td:last-child .plans-v2-table-cell {
           border-bottom-right-radius: 0;
         }
       }
@@ -704,7 +704,7 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
       background-color: @table-hover-bg;
 
       .plans-v2-table-feature-name,
-      .plans-v2-table-cell-inner-content {
+      .plans-v2-table-cell {
         background-color: @table-hover-bg;
       }
     }
@@ -753,10 +753,10 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
   }
 }
 
-// plans-v2-table-cell-inner-content class only appears for the inner `div` of a `td`
+// plans-v2-table-cell class only appears for the inner `div` of a `td`
 // that doesn't contain divider or feature name
 // (i.e it contains either check mark icon or a dash)
-.plans-v2-table-cell-inner-content {
+.plans-v2-table-cell {
   background-color: @white;
   padding: 6px;
 }

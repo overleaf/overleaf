@@ -56,9 +56,11 @@ function hideCurrencyPicker() {
   document.querySelector('[data-ol-group-plan-form-currency]').hidden = true
 }
 
-document
-  .querySelectorAll('[data-ol-group-plan-form] select')
-  .forEach(el => el.addEventListener('change', changePlansV2MainPageGroupData))
+document.querySelectorAll('[data-ol-group-plan-form] select').forEach(el =>
+  el.addEventListener('change', () => {
+    changePlansV2MainPageGroupData()
+  })
+)
 document
   .querySelectorAll('[data-ol-group-plan-form] input')
   .forEach(el => el.addEventListener('change', changePlansV2MainPageGroupData))
