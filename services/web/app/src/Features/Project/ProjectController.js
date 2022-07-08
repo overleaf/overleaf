@@ -1055,7 +1055,7 @@ const ProjectController = {
               }
               // Let the user opt-in only.
               const v = req.query['pdf-caching-mode']
-              if (['service-worker', 'no-service-worker'].includes(v)) {
+              if (['enabled'].includes(v)) {
                 return v
               }
               return ''

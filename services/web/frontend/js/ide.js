@@ -31,10 +31,6 @@ import MetadataManager from './ide/metadata/MetadataManager'
 import './ide/review-panel/ReviewPanelManager'
 import OutlineManager from './features/outline/outline-manager'
 import SafariScrollPatcher from './ide/SafariScrollPatcher'
-import {
-  loadServiceWorker,
-  unregisterServiceWorker,
-} from './features/pdf-preview/util/service-worker'
 import './ide/cobranding/CobrandingDataService'
 import './ide/settings/index'
 import './ide/chat/index'
@@ -69,6 +65,7 @@ import './features/pdf-preview/controllers/pdf-preview-controller'
 import './features/share-project-modal/controllers/react-share-project-modal-controller'
 import './features/source-editor/controllers/editor-switch-controller'
 import getMeta from './utils/meta'
+import { cleanupServiceWorker } from './utils/service-worker-cleanup'
 
 App.controller(
   'IdeController',
@@ -418,9 +415,6 @@ If the project has been renamed please look in your project list for a new proje
       x => x[1]
     )
 
-    // Allow service worker to be removed via the websocket
-    ide.$scope.$on('service-worker:unregister', unregisterServiceWorker)
-
     // Listen for editor:lint event from CM6 linter
     window.addEventListener('editor:lint', event => {
       $scope.hasLintingError = event.detail.hasLintingError
@@ -435,11 +429,7 @@ If the project has been renamed please look in your project list for a new proje
   }
 )
 
-if (getMeta('ol-pdfCachingMode') === 'service-worker') {
-  loadServiceWorker()
-} else {
-  unregisterServiceWorker()
-}
+cleanupServiceWorker()
 
 angular.module('SharelatexApp').config(function ($provide) {
   $provide.decorator('$browser', [

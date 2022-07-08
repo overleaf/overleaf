@@ -4,7 +4,7 @@ import { captureException } from '../../../infrastructure/error-reporter'
 import { setCachingMetrics } from './metrics'
 
 export function generatePdfCachingTransportFactory(PDFJS) {
-  if (getMeta('ol-pdfCachingMode') !== 'no-service-worker') {
+  if (getMeta('ol-pdfCachingMode') !== 'enabled') {
     return () => null
   }
   const cached = new Set()
@@ -19,6 +19,8 @@ export function generatePdfCachingTransportFactory(PDFJS) {
     requestedCount: 0,
     requestedBytes: 0,
   }
+  const verifyChunks =
+    new URLSearchParams(window.location.search).get('verify_chunks') === 'true'
   setCachingMetrics(metrics)
 
   class PDFDataRangeTransport extends PDFJS.PDFDataRangeTransport {
@@ -37,6 +39,7 @@ export function generatePdfCachingTransportFactory(PDFJS) {
         file: this.pdfFile,
         metrics,
         cached,
+        verifyChunks,
       })
         .catch(err => {
           metrics.failedCount++

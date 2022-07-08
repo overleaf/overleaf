@@ -318,8 +318,17 @@ async function verifyRange({ url, start, end, metrics, actual }) {
  * @param {Object} file
  * @param {Object} metrics
  * @param {Set} cached
+ * @param {boolean} verifyChunks
  */
-export async function fetchRange({ url, start, end, file, metrics, cached }) {
+export async function fetchRange({
+  url,
+  start,
+  end,
+  file,
+  metrics,
+  cached,
+  verifyChunks,
+}) {
   file.createdAt = new Date(file.createdAt)
   backfillEdgeBounds(file)
 
@@ -477,7 +486,7 @@ export async function fetchRange({ url, start, end, file, metrics, cached }) {
     fetchedBytes,
   })
 
-  if (url.includes('verify_chunks=true')) {
+  if (verifyChunks) {
     return await verifyRange({
       url,
       start,

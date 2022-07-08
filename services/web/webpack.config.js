@@ -21,13 +21,6 @@ const entryPoints = {
   'light-style': './frontend/stylesheets/light-style.less',
 }
 
-// ServiceWorker at /serviceWorker.js
-entryPoints.serviceWorker = {
-  import: './frontend/js/serviceWorker.js',
-  publicPath: '/',
-  filename: 'serviceWorker.js',
-}
-
 // Add entrypoints for each "page"
 glob
   .sync(path.join(__dirname, 'modules/*/frontend/js/pages/**/*.js'))

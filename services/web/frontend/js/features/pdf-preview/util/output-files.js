@@ -5,7 +5,6 @@ import { v4 as uuid } from 'uuid'
 
 // Warnings that may disappear after a second LaTeX pass
 const TRANSIENT_WARNING_REGEX = /^(Reference|Citation).+undefined on input line/
-const searchParams = new URLSearchParams(window.location.search)
 
 export function handleOutputFiles(outputFiles, projectId, data) {
   const result = {}
@@ -23,14 +22,9 @@ export function handleOutputFiles(outputFiles, projectId, data) {
       params.set('clsiserverid', data.clsiServerId)
     }
 
-    if (searchParams.get('verify_chunks') === 'true') {
-      // Instruct the serviceWorker to verify composed ranges.
-      params.set('verify_chunks', 'true')
-    }
-
-    if (getMeta('ol-pdfCachingMode')) {
+    if (getMeta('ol-pdfCachingMode') === 'enabled') {
       // Tag traffic that uses the pdf caching logic.
-      params.set('enable_pdf_caching', getMeta('ol-pdfCachingMode'))
+      params.set('enable_pdf_caching', 'true')
     }
 
     result.pdfUrl = `${buildURL(outputFile, data.pdfDownloadDomain)}?${params}`

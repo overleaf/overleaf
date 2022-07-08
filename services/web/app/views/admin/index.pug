@@ -98,13 +98,3 @@ block content
 													input.form-control(type='text',  name='user_id', placeholder='user_id', required)
 												.form-group
 													button.btn-primary.btn(type='submit') Poll
-
-								.tab-pane(
-									role="tabpanel"
-									id='advanced'
-								)
-									.row-spaced
-										form(method='post',action='/admin/unregisterServiceWorker')
-											input(name="_csrf", type="hidden", value=csrfToken)
-											button.btn.btn-danger(type="submit") Unregister service worker
-										p.small Will force service worker reload for all users with the editor open.

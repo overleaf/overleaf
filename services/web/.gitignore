@@ -50,8 +50,6 @@ public/minjs
 public/stylesheets
 public/fonts
 public/images
-public/serviceWorker.js
-public/serviceWorker.js.map
 
 Gemfile.lock
 

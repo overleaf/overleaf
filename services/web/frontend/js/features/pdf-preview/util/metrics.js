@@ -4,15 +4,10 @@ import getMeta from '../../../utils/meta'
 
 // VERSION should get incremented when making changes to caching behavior or
 //  adjusting metrics collection.
-// Keep in sync with the service worker.
 const VERSION = 3
 
-const pdfJsMetrics = {
-  version: VERSION,
-  id: uuid(),
-  epoch: Date.now(),
-  totalBandwidth: 0,
-}
+// editing session id
+const EDITOR_SESSION_ID = uuid()
 
 let pdfCachingMetrics
 
@@ -20,13 +15,10 @@ export function setCachingMetrics(metrics) {
   pdfCachingMetrics = metrics
 }
 
-const SAMPLING_RATE = 0.01
-
 export function trackPdfDownload(response, compileTimeClientE2E) {
-  const { serviceWorkerMetrics, stats, timings } = response
+  const { stats, timings } = response
 
   const t0 = performance.now()
-  let bandwidth = 0
   const deliveryLatencies = {
     compileTimeClientE2E,
     compileTimeServerE2E: timings?.compileE2E,
@@ -46,10 +38,6 @@ export function trackPdfDownload(response, compileTimeClientE2E) {
     }
     done({ latencyFetch, latencyRender })
   }
-  function updateConsumedBandwidth(bytes) {
-    pdfJsMetrics.totalBandwidth += bytes - bandwidth
-    bandwidth = bytes
-  }
   let done
   const onFirstRenderDone = new Promise(resolve => {
     done = resolve
@@ -66,16 +54,11 @@ export function trackPdfDownload(response, compileTimeClientE2E) {
         timings,
       })
     })
-    if (getMeta('ol-pdfCachingMode') === 'service-worker') {
-      // Submit (serviceWorker) bandwidth counter separate from compile context.
-      submitPDFBandwidth({ pdfJsMetrics, serviceWorkerMetrics })
-    }
   }
 
   return {
     deliveryLatencies,
     firstRenderDone,
-    updateConsumedBandwidth,
   }
 }
 
@@ -86,39 +69,9 @@ function submitCompileMetrics(metrics) {
     latencyFetch,
     latencyRender,
     compileTimeClientE2E,
-    id: pdfJsMetrics.id,
+    id: EDITOR_SESSION_ID,
     ...(pdfCachingMetrics || {}),
   }
   sl_console.log('/event/compile-metrics', JSON.stringify(metrics))
-  sendMB('compile-metrics-v6', leanMetrics, SAMPLING_RATE)
-}
-
-function submitPDFBandwidth(metrics) {
-  const metricsFlat = {}
-  Object.entries(metrics).forEach(([section, items]) => {
-    if (!items) return
-    Object.entries(items).forEach(([key, value]) => {
-      metricsFlat[section + '_' + key] = value
-    })
-  })
-  const leanMetrics = {}
-  Object.entries(metricsFlat).forEach(([metric, value]) => {
-    if (
-      [
-        'serviceWorkerMetrics_id',
-        'serviceWorkerMetrics_cachedBytes',
-        'serviceWorkerMetrics_fetchedBytes',
-        'serviceWorkerMetrics_requestedBytes',
-        'serviceWorkerMetrics_version',
-        'serviceWorkerMetrics_epoch',
-      ].includes(metric)
-    ) {
-      leanMetrics[metric] = value
-    }
-  })
-  if (Object.entries(leanMetrics).length === 0) {
-    return
-  }
-  sl_console.log('/event/pdf-bandwidth', JSON.stringify(metrics))
-  sendMB('pdf-bandwidth-v6', leanMetrics, SAMPLING_RATE)
+  sendMB('compile-metrics-v6', leanMetrics)
 }

@@ -1087,11 +1087,6 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     AuthorizationMiddleware.ensureUserIsSiteAdmin,
     AdminController.clearMessages
   )
-  webRouter.post(
-    '/admin/unregisterServiceWorker',
-    AuthorizationMiddleware.ensureUserIsSiteAdmin,
-    AdminController.unregisterServiceWorker
-  )
 
   privateApiRouter.get('/perfTest', (req, res) => {
     plainTextResponse(res, 'hello')

@@ -1188,18 +1188,11 @@ describe('ProjectController', function () {
           expectBandwidthTrackingEnabled()
         })
 
-        describe('with pdf-caching-mode=no-service-worker', function () {
+        describe('with pdf-caching-mode=enabled', function () {
           beforeEach(function () {
-            this.req.query['pdf-caching-mode'] = 'no-service-worker'
+            this.req.query['pdf-caching-mode'] = 'enabled'
           })
-          expectPDFCachingEnabled('no-service-worker')
-        })
-
-        describe('with pdf-caching-mode=service-worker', function () {
-          beforeEach(function () {
-            this.req.query['pdf-caching-mode'] = 'service-worker'
-          })
-          expectPDFCachingEnabled('service-worker')
+          expectPDFCachingEnabled('enabled')
         })
       })
     })
