@@ -658,7 +658,6 @@
   "log_hint_extra_feedback_incorrect": "Ceci ne corrige pas l’erreur",
   "log_hint_extra_feedback_other": "Autre :",
   "log_hint_extra_feedback_submit": "Envoyer",
-  "if_you_are_registered": "Si vous êtes déjà inscrit·e",
   "stop_compile": "Arrêter la compilation",
   "terminated": "Compilation annulée",
   "compile_terminated_by_user": "La compilation a été annulée avec le bouton « Arrêter la compilation ». Vous pouvez télécharger les fichiers journaux pour voir où la compilation s’est arrêtée.",

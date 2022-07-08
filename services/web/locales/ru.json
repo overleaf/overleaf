@@ -50,7 +50,6 @@
   "log_hint_extra_feedback_incorrect": "Это не исправляет ошибку",
   "log_hint_extra_feedback_other": "Ещё:",
   "log_hint_extra_feedback_submit": "Отправить",
-  "if_you_are_registered": "Если Вы уже зарегистрированы",
   "stop_compile": "Остановить компиляцию",
   "terminated": "Компиляция отменена",
   "compile_terminated_by_user": "Компиляция была прервана. Вы можете просмотреть необработанную выдачу компиляции, чтобы увидеть место остановки компиляции.",

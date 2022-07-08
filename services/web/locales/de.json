@@ -125,7 +125,6 @@
   "log_hint_extra_feedback_incorrect": "Der Fehler wird dadurch nicht behoben",
   "log_hint_extra_feedback_other": "Anderes:",
   "log_hint_extra_feedback_submit": "Abschicken",
-  "if_you_are_registered": "Falls du bereits registriert bist",
   "stop_compile": "Kompiliervorgang stoppen",
   "terminated": "Kompiliervorgang abgebrochen",
   "compile_terminated_by_user": "Der Kompiliervorgang wurde durch Klick auf den Button ’Kompiliervorgang stoppen’ abgebrochen. Du kannst dir die Logs anschauen, um zu sehen, wo der Kompiliervorgang gestoppt hat.",

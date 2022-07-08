@@ -170,7 +170,6 @@
   "log_hint_extra_feedback_incorrect": "Dit lost de foutmelding niet op",
   "log_hint_extra_feedback_other": "Anders:",
   "log_hint_extra_feedback_submit": "Verstuur",
-  "if_you_are_registered": "Als u al geregistreerd bent",
   "stop_compile": "Stop met compileren",
   "terminated": "Compileren gestopt",
   "compile_terminated_by_user": "Het compileren was gestopt door de ’Stop Compilatie’ knop. U kan in de log files zien waar het compileren is gestopt",

@@ -606,7 +606,6 @@
   "log_hint_extra_feedback_incorrect": "Dette fjerner ikke fejlen",
   "log_hint_extra_feedback_other": "Andet:",
   "log_hint_extra_feedback_submit": "Indsend",
-  "if_you_are_registered": "Hvis du allerede er registreret",
   "stop_compile": "Stop kompilering",
   "terminated": "Kompilation annulleret",
   "compile_terminated_by_user": "Kompileringen blev annulleret med knappen ‘Stop Kompilering’. Du kan se loggen for at se hvor kompileringen stoppede.",

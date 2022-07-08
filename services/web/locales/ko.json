@@ -212,7 +212,6 @@
   "log_hint_extra_feedback_incorrect": "오류를 해결할 수 없습니다.",
   "log_hint_extra_feedback_other": "기타:",
   "log_hint_extra_feedback_submit": "제출",
-  "if_you_are_registered": "이미 등록하셨다면",
   "stop_compile": "컴파일 중지",
   "terminated": "컴파일 취소됨",
   "compile_terminated_by_user": "’컴파일 중지’ 버튼을 사용하여 컴파일이 취소되었습니다. Raw log를 보시면 어디에서 중지 되었는지 확인할 수 있습니다.",

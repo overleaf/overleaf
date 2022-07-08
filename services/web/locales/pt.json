@@ -375,7 +375,6 @@
   "log_hint_extra_feedback_incorrect": "Isso não corrige o erro",
   "log_hint_extra_feedback_other": "Outra:",
   "log_hint_extra_feedback_submit": "Enviar",
-  "if_you_are_registered": "Se você já está registrado",
   "stop_compile": "Parar compilação",
   "terminated": "Compilação cancelada",
   "compile_terminated_by_user": "O compilador foi cancelado usando o botão \"Parar Compilação\". Você pode olhar os logs e ver onde a compilação parou.",
