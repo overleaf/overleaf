@@ -317,7 +317,9 @@ describe('<ShareProjectModal/>', function () {
       },
     })
 
-    expect(screen.queryAllByText(USER_EMAIL)).to.have.length(1)
+    const projectOwnerEmail = USER_EMAIL
+
+    expect(screen.queryAllByText(projectOwnerEmail)).to.have.length(1)
     expect(screen.queryAllByText('member-author@example.com')).to.have.length(1)
     expect(screen.queryAllByText('member-viewer@example.com')).to.have.length(1)
     expect(screen.queryAllByText('invited-author@example.com')).to.have.length(
