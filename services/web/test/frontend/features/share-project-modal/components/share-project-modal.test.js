@@ -212,6 +212,10 @@ describe('<ShareProjectModal/>', function () {
             publicAccesLevel: 'tokenBased',
           },
         }}
+        user={{
+          id: 'non-project-owner',
+          email: 'non-project-owner@example.com',
+        }}
       >
         <ShareProjectModal {...modalProps} />
       </EditorProviders>
@@ -236,6 +240,10 @@ describe('<ShareProjectModal/>', function () {
             invites,
             publicAccesLevel: 'private',
           },
+        }}
+        user={{
+          id: 'non-project-owner',
+          email: 'non-project-owner@example.com',
         }}
       >
         <ShareProjectModal {...modalProps} />
