@@ -4,4 +4,11 @@
 		.row-spaced
 		p #{translate('student_and_faculty_support')}
 		p #{translate('let_us_know_which_university_you_are_from')}
-		button.btn.plans-v2-btn-header.text-capitalize #{translate('show_your_support')}
+		a.btn.plans-v2-btn-header.text-capitalize(
+			target="_blank"
+			href="/for/support-an-overleaf-university-subscription"
+			event-tracking="plans-page-click"
+			event-tracking-mb="true"
+			event-tracking-trigger="click"
+			event-segmentation='{"button": "university-support"}'
+		) #{translate('show_your_support')}
