@@ -54,7 +54,7 @@ export const NonProjectOwnerLinkSharingOff = args => {
     },
   })
 
-  return <ShareProjectModal {...args} isProjectOwner={false} />
+  return <ShareProjectModal {...args} />
 }
 
 export const NonProjectOwnerLinkSharingOn = args => {
@@ -65,7 +65,7 @@ export const NonProjectOwnerLinkSharingOn = args => {
     },
   })
 
-  return <ShareProjectModal {...args} isProjectOwner={false} />
+  return <ShareProjectModal {...args} />
 }
 
 export const RestrictedTokenMember = args => {
@@ -139,7 +139,6 @@ export default {
   args: {
     show: true,
     animation: false,
-    isProjectOwner: true,
     user: {},
     project,
   },
