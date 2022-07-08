@@ -10,6 +10,9 @@ chown www-data:www-data /var/lib/sharelatex/data/user_files
 mkdir -p /var/lib/sharelatex/data/compiles
 chown www-data:www-data /var/lib/sharelatex/data/compiles
 
+mkdir -p /var/lib/sharelatex/data/output
+chown www-data:www-data /var/lib/sharelatex/data/output
+
 mkdir -p /var/lib/sharelatex/data/cache
 chown www-data:www-data /var/lib/sharelatex/data/cache
 
