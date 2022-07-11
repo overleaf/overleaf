@@ -10,6 +10,8 @@ const MAX_UPGRADES_TO_ATTEMPT =
 const MAX_FAILURES = parseInt(process.env.MAX_FAILURES, 10) || 50
 const ARCHIVE_ON_FAILURE = process.env.ARCHIVE_ON_FAILURE === 'true'
 const FIX_INVALID_CHARACTERS = process.env.FIX_INVALID_CHARACTERS === 'true'
+const FORCE_NEW_HISTORY_ON_FAILURE =
+  process.env.FORCE_NEW_HISTORY_ON_FAILURE === 'true'
 
 // persist fallback in order to keep batchedUpdate in-sync
 process.env.BATCH_SIZE = BATCH_SIZE
@@ -42,6 +44,10 @@ console.log({
   RETRY_FAILED,
   ARCHIVE_ON_FAILURE,
   PROJECT_ID,
+  FIX_INVALID_CHARACTERS,
+  FORCE_NEW_HISTORY_ON_FAILURE,
+  CONVERT_LARGE_DOCS_TO_FILE,
+  USER_ID,
 })
 
 const RESULT = {
@@ -133,6 +139,7 @@ async function doUpgradeForNoneWithConversion(project) {
       await ProjectHistoryController.migrateProjectHistory(projectIdString, {
         archiveOnFailure: ARCHIVE_ON_FAILURE,
         fixInvalidCharacters: FIX_INVALID_CHARACTERS,
+        forceNewHistoryOnFailure: FORCE_NEW_HISTORY_ON_FAILURE,
       })
     } catch (err) {
       // if migrateProjectHistory fails, it cleans up by deleting
