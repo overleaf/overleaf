@@ -16,13 +16,6 @@ const config = {
         annual: 'MOST POPULAR',
       },
     },
-    discountedColumn: {
-      index: 1,
-      text: {
-        monthly: 'LIMITED-TIME DISCOUNT!',
-        annual: 'LIMITED-TIME DISCOUNT!',
-      },
-    },
     eventTrackingKey: 'plans-page-click',
     additionalEventSegmentation: { 'plan-page-layout-v2': 'new-plans-page' },
   },

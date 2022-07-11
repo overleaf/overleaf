@@ -305,9 +305,6 @@ mixin table_head_price(plan, period)
 		if plan !== 'free' && period === 'annual'
 			strike.plans-v2-table-price-before-discount
 				+gen_localized_price_for_plan_view(plan, 'monthlyTimesTwelve')
-		if plan === 'personal' && period === 'monthly'
-			strike.plans-v2-table-price-before-discount
-				+gen_localized_undiscounted_price_for_plan_view_personal(period)
 		p.plans-v2-table-price
 			+gen_localized_price_for_plan_view(plan, period)
 		p.plans-v2-table-price-period-label
