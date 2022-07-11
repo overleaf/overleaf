@@ -12,6 +12,7 @@ const ARCHIVE_ON_FAILURE = process.env.ARCHIVE_ON_FAILURE === 'true'
 const FIX_INVALID_CHARACTERS = process.env.FIX_INVALID_CHARACTERS === 'true'
 const FORCE_NEW_HISTORY_ON_FAILURE =
   process.env.FORCE_NEW_HISTORY_ON_FAILURE === 'true'
+const IMPORT_ZIP_FILE_PATH = process.env.IMPORT_ZIP_FILE_PATH
 
 // persist fallback in order to keep batchedUpdate in-sync
 process.env.BATCH_SIZE = BATCH_SIZE
@@ -48,6 +49,7 @@ console.log({
   FORCE_NEW_HISTORY_ON_FAILURE,
   CONVERT_LARGE_DOCS_TO_FILE,
   USER_ID,
+  IMPORT_ZIP_FILE_PATH,
 })
 
 const RESULT = {
@@ -140,6 +142,7 @@ async function doUpgradeForNoneWithConversion(project) {
         archiveOnFailure: ARCHIVE_ON_FAILURE,
         fixInvalidCharacters: FIX_INVALID_CHARACTERS,
         forceNewHistoryOnFailure: FORCE_NEW_HISTORY_ON_FAILURE,
+        importZipFilePath: IMPORT_ZIP_FILE_PATH,
       })
     } catch (err) {
       // if migrateProjectHistory fails, it cleans up by deleting
