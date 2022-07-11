@@ -13,7 +13,9 @@ const FIX_INVALID_CHARACTERS = process.env.FIX_INVALID_CHARACTERS === 'true'
 const FORCE_NEW_HISTORY_ON_FAILURE =
   process.env.FORCE_NEW_HISTORY_ON_FAILURE === 'true'
 const IMPORT_ZIP_FILE_PATH = process.env.IMPORT_ZIP_FILE_PATH
-
+const CUTOFF_DATE = process.env.CUTOFF_DATE
+  ? new Date(process.env.CUTOFF_DATE)
+  : undefined
 // persist fallback in order to keep batchedUpdate in-sync
 process.env.BATCH_SIZE = BATCH_SIZE
 // raise mongo timeout to 1hr if otherwise unspecified
@@ -50,6 +52,7 @@ console.log({
   CONVERT_LARGE_DOCS_TO_FILE,
   USER_ID,
   IMPORT_ZIP_FILE_PATH,
+  CUTOFF_DATE,
 })
 
 const RESULT = {
@@ -143,6 +146,7 @@ async function doUpgradeForNoneWithConversion(project) {
         fixInvalidCharacters: FIX_INVALID_CHARACTERS,
         forceNewHistoryOnFailure: FORCE_NEW_HISTORY_ON_FAILURE,
         importZipFilePath: IMPORT_ZIP_FILE_PATH,
+        cutoffDate: CUTOFF_DATE,
       })
     } catch (err) {
       // if migrateProjectHistory fails, it cleans up by deleting
