@@ -21,6 +21,7 @@ import uk.ac.ic.wlgitbridge.bridge.swap.job.SwapJobImpl;
 import uk.ac.ic.wlgitbridge.bridge.swap.store.S3SwapStore;
 import uk.ac.ic.wlgitbridge.bridge.swap.store.SwapStore;
 import uk.ac.ic.wlgitbridge.data.CandidateSnapshot;
+import uk.ac.ic.wlgitbridge.data.CannotAcquireLockException;
 import uk.ac.ic.wlgitbridge.data.ProjectLockImpl;
 import uk.ac.ic.wlgitbridge.data.filestore.GitDirectoryContents;
 import uk.ac.ic.wlgitbridge.data.filestore.RawDirectory;
@@ -308,6 +309,8 @@ public class Bridge {
                         projName,
                         new Timestamp(dotGit.lastModified())
                 );
+            } catch (CannotAcquireLockException e) {
+              throw new RuntimeException(e);
             }
         }
     }
@@ -325,7 +328,7 @@ public class Bridge {
     public ProjectRepo getUpdatedRepo(
             Optional<Credential> oauth2,
             String projectName
-    ) throws IOException, GitUserException {
+    ) throws IOException, GitUserException, CannotAcquireLockException {
         try (LockGuard __ = lock.lockGuard(projectName)) {
             Optional<GetDocResult> maybeDoc = snapshotAPI.getDoc(oauth2, projectName);
             if (!maybeDoc.isPresent()) {
@@ -367,7 +370,7 @@ public class Bridge {
             Optional<Credential> oauth2,
             String projectName,
             GetDocResult doc
-    ) throws IOException, GitUserException {
+    ) throws IOException, GitUserException, CannotAcquireLockException {
         ProjectRepo repo;
         ProjectState state = dbStore.getProjectState(projectName);
         switch (state) {
@@ -450,9 +453,10 @@ public class Bridge {
             RawDirectory directoryContents,
             RawDirectory oldDirectoryContents,
             String hostname
-    ) throws SnapshotPostException, IOException, MissingRepositoryException, ForbiddenException, GitUserException {
+    ) throws SnapshotPostException, IOException, MissingRepositoryException, ForbiddenException, GitUserException, CannotAcquireLockException {
         Log.debug("[{}] pushing to Overleaf", projectName);
         try (LockGuard __ = lock.lockGuard(projectName)) {
+            Log.info("[{}] got project lock", projectName);
             pushCritical(
                     oauth2,
                     projectName,

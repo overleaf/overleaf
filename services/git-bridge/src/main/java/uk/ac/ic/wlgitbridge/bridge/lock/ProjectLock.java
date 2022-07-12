@@ -1,5 +1,7 @@
 package uk.ac.ic.wlgitbridge.bridge.lock;
 
+import uk.ac.ic.wlgitbridge.data.CannotAcquireLockException;
+
 /**
  * Project Lock class.
  *
@@ -10,12 +12,12 @@ public interface ProjectLock {
 
     void lockAll();
 
-    void lockForProject(String projectName);
+    void lockForProject(String projectName) throws CannotAcquireLockException;
 
     void unlockForProject(String projectName);
 
     /* RAII hahaha */
-    default LockGuard lockGuard(String projectName) {
+    default LockGuard lockGuard(String projectName) throws CannotAcquireLockException {
         lockForProject(projectName);
         return () -> unlockForProject(projectName);
     }

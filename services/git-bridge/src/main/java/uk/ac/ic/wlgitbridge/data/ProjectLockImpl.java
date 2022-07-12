@@ -4,6 +4,7 @@ import uk.ac.ic.wlgitbridge.bridge.lock.ProjectLock;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -35,9 +36,17 @@ public class ProjectLockImpl implements ProjectLock {
     }
 
     @Override
-    public void lockForProject(String projectName) {
+    public void lockForProject(String projectName) throws CannotAcquireLockException {
         Log.debug("[{}] taking project lock", projectName);
-        getLockForProjectName(projectName).lock();
+        Lock projectLock = getLockForProjectName(projectName);
+        try {
+            if (!projectLock.tryLock(5, TimeUnit.SECONDS)) {
+                Log.debug("[{}] failed to acquire project lock", projectName);
+                throw new CannotAcquireLockException();
+            }
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         Log.debug("[{}] taking reentrant lock", projectName);
         rlock.lock();
         Log.debug("[{}] taken locks", projectName);

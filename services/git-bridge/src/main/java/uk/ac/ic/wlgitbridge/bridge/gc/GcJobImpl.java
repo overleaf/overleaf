@@ -4,6 +4,7 @@ import uk.ac.ic.wlgitbridge.bridge.lock.LockGuard;
 import uk.ac.ic.wlgitbridge.bridge.lock.ProjectLock;
 import uk.ac.ic.wlgitbridge.bridge.repo.ProjectRepo;
 import uk.ac.ic.wlgitbridge.bridge.repo.RepoStore;
+import uk.ac.ic.wlgitbridge.data.CannotAcquireLockException;
 import uk.ac.ic.wlgitbridge.util.Log;
 import uk.ac.ic.wlgitbridge.util.TimerUtils;
 
@@ -126,6 +127,8 @@ public class GcJobImpl implements GcJob {
                 } catch (IOException e) {
                     Log.warn("[{}] Failed to GC project", proj);
                 }
+            } catch (CannotAcquireLockException e) {
+                Log.warn("[{}] Cannot acquire project lock, skipping GC", proj);
             }
         }
         Log.info("GC job finished, num gcs: {}", numGcs);

@@ -13,6 +13,7 @@ import uk.ac.ic.wlgitbridge.bridge.resource.ResourceCache;
 import uk.ac.ic.wlgitbridge.bridge.snapshot.SnapshotApiFacade;
 import uk.ac.ic.wlgitbridge.bridge.swap.job.SwapJob;
 import uk.ac.ic.wlgitbridge.bridge.swap.store.SwapStore;
+import uk.ac.ic.wlgitbridge.data.CannotAcquireLockException;
 import uk.ac.ic.wlgitbridge.git.exception.GitUserException;
 import uk.ac.ic.wlgitbridge.snapshot.getdoc.GetDocResult;
 
@@ -88,7 +89,7 @@ public class BridgeTest {
 
     @Test
     public void updatingRepositorySetsLastAccessedTime(
-    ) throws IOException, GitUserException {
+    ) throws IOException, GitUserException, CannotAcquireLockException {
         ProjectRepo repo = mock(ProjectRepo.class);
         when(repoStore.getExistingRepo("asdf")).thenReturn(repo);
         when(dbStore.getProjectState("asdf")).thenReturn(ProjectState.PRESENT);

@@ -6,6 +6,7 @@ import uk.ac.ic.wlgitbridge.bridge.lock.LockGuard;
 import uk.ac.ic.wlgitbridge.bridge.lock.ProjectLock;
 import uk.ac.ic.wlgitbridge.bridge.repo.RepoStore;
 import uk.ac.ic.wlgitbridge.bridge.swap.store.SwapStore;
+import uk.ac.ic.wlgitbridge.data.CannotAcquireLockException;
 import uk.ac.ic.wlgitbridge.util.Log;
 import uk.ac.ic.wlgitbridge.util.TimerUtils;
 
@@ -209,6 +210,9 @@ public class SwapJobImpl implements SwapJob {
                 dbStore.swap(projName, compression);
                 repoStore.remove(projName);
             }
+        } catch (CannotAcquireLockException e) {
+            Log.warn("[{}] Cannot acquire project lock, skipping swap", projName);
+            return;
         }
         Log.info("Evicted project: {}", projName);
     }
@@ -256,6 +260,8 @@ public class SwapJobImpl implements SwapJob {
                 swapStore.remove(projName);
                 dbStore.restore(projName);
             }
+        } catch (CannotAcquireLockException e) {
+            throw new RuntimeException(e);
         }
     }
 

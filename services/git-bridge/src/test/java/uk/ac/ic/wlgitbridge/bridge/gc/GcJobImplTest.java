@@ -8,6 +8,7 @@ import uk.ac.ic.wlgitbridge.bridge.lock.LockGuard;
 import uk.ac.ic.wlgitbridge.bridge.lock.ProjectLock;
 import uk.ac.ic.wlgitbridge.bridge.repo.ProjectRepo;
 import uk.ac.ic.wlgitbridge.bridge.repo.RepoStore;
+import uk.ac.ic.wlgitbridge.data.CannotAcquireLockException;
 import uk.ac.ic.wlgitbridge.data.ProjectLockImpl;
 
 import java.io.IOException;
@@ -112,6 +113,8 @@ public class GcJobImplTest {
                 assertFalse(fut.isDone());
                 Thread.sleep(1);
             }
+        } catch (CannotAcquireLockException e) {
+            throw new RuntimeException(e);
         }
         /* Now that we've released the lock, fut should complete */
         fut.join();

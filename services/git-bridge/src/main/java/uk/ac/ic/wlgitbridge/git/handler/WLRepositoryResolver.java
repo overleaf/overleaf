@@ -7,6 +7,7 @@ import org.eclipse.jgit.transport.ServiceMayNotContinueException;
 import org.eclipse.jgit.transport.resolver.RepositoryResolver;
 import org.eclipse.jgit.transport.resolver.ServiceNotAuthorizedException;
 import uk.ac.ic.wlgitbridge.bridge.Bridge;
+import uk.ac.ic.wlgitbridge.data.CannotAcquireLockException;
 import uk.ac.ic.wlgitbridge.git.exception.GitUserException;
 import uk.ac.ic.wlgitbridge.git.handler.hook.WriteLatexPutHook;
 import uk.ac.ic.wlgitbridge.git.servlet.WLGitServlet;
@@ -101,6 +102,8 @@ public class WLRepositoryResolver
         } catch (ServiceMayNotContinueException e) {
             /* Such as FailedConnectionException */
             throw e;
+        } catch (CannotAcquireLockException e) {
+            throw new ServiceMayNotContinueException(e.getMessage());
         } catch (RuntimeException e) {
             Log.warn(
                     "Runtime exception when trying to open repo: " + projName,

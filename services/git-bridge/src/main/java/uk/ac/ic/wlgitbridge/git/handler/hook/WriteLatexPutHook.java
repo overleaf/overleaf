@@ -8,6 +8,7 @@ import org.eclipse.jgit.transport.ReceiveCommand.Result;
 import org.eclipse.jgit.transport.ReceivePack;
 import uk.ac.ic.wlgitbridge.bridge.Bridge;
 import uk.ac.ic.wlgitbridge.bridge.repo.RepoStore;
+import uk.ac.ic.wlgitbridge.data.CannotAcquireLockException;
 import uk.ac.ic.wlgitbridge.data.filestore.RawDirectory;
 import uk.ac.ic.wlgitbridge.git.exception.GitUserException;
 import uk.ac.ic.wlgitbridge.git.handler.WLReceivePackFactory;
@@ -86,6 +87,13 @@ public class WriteLatexPutHook implements PreReceiveHook {
             } catch (GitUserException e) {
                 Log.error("GitUserException on pre receive", e);
                 handleSnapshotPostException(receivePack, receiveCommand, e);
+            } catch (CannotAcquireLockException e) {
+                Log.info("CannotAcquireLockException on pre receive");
+                receivePack.sendError(e.getMessage());
+                receiveCommand.setResult(
+                  Result.REJECTED_OTHER_REASON,
+                  e.getMessage()
+                );
             } catch (Throwable t) {
                 Log.error("Throwable on pre receive", t);
                 handleSnapshotPostException(
@@ -126,7 +134,7 @@ public class WriteLatexPutHook implements PreReceiveHook {
             Optional<Credential> oauth2,
             Repository repository,
             ReceiveCommand receiveCommand
-    ) throws IOException, GitUserException {
+    ) throws IOException, GitUserException, CannotAcquireLockException {
         checkBranch(receiveCommand);
         checkForcedPush(receiveCommand);
         bridge.push(
