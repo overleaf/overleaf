@@ -50,6 +50,8 @@ function selectTab(viewTab) {
   } else {
     toggleMonthlyAnnualSwitching(viewTab, currentMonthlyAnnualSwitchValue)
   }
+
+  toggleUniversityInfo(viewTab)
 }
 
 function setUpTabSwitching() {
@@ -88,6 +90,12 @@ function setUpGroupPlanPricingChange() {
         changeGroupPlanModalEducationalDiscount()
       })
     )
+}
+
+function toggleUniversityInfo(viewTab) {
+  const el = document.querySelector('[data-ol-plans-university-info-container]')
+
+  el.hidden = viewTab !== 'student'
 }
 
 function selectViewFromHash() {
