@@ -1206,12 +1206,26 @@ p.plans-v2-table-discount-highlighted-text {
   background-color: @ol-blue-gray-1;
   border-radius: 20px;
 
-  p {
-    margin: 0;
+  h3.plans-v2-university-info-header {
+    margin: 0 @margin-xl @margin-md @margin-xl;
   }
 
-  button {
+  p.plans-v2-university-info-text {
+    margin: 0 @margin-xl;
+  }
+
+  a.plans-v2-btn-university-info {
     margin-top: @margin-md;
+  }
+
+  @media (max-width: @screen-sm-max) {
+    h3.plans-v2-university-info-header {
+      margin: 0 0 @margin-md 0;
+    }
+
+    p.plans-v2-university-info-text {
+      margin: 0;
+    }
   }
 
   @media (max-width: @screen-xs-max) {
