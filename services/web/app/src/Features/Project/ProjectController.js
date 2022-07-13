@@ -949,6 +949,25 @@ const ProjectController = {
             }
           )
         },
+        compileTimeWarningAssignment: [
+          'user',
+          (results, cb) => {
+            if (results.user?.features?.compileTimeout <= 60) {
+              SplitTestHandler.getAssignment(
+                req,
+                res,
+                'compile-time-warning',
+                {},
+                () => {
+                  // do not fail editor load if assignment fails
+                  cb()
+                }
+              )
+            } else {
+              cb()
+            }
+          },
+        ],
       },
       (
         err,

@@ -743,3 +743,36 @@ CodeMirror
 .editor-container {
   overflow: visible !important;
 }
+
+.compile-time-warning {
+  position: absolute;
+  right: @margin-sm;
+  top: @margin-xl;
+  padding: @padding-sm;
+  background-color: @ol-green;
+  width: 400px;
+  z-index: @zindex-popover;
+  box-shadow: 5px 5px 6px rgba(0, 0, 0, 0.3);
+
+  .warning-text {
+    max-width: 300px;
+    padding-right: @alert-padding;
+    display: inline-block;
+    font-size: @font-size-small;
+  }
+  .upgrade-prompt {
+    display: inline-block;
+    position: absolute;
+    height: 100%;
+    top: @margin-lg;
+    right: 32px;
+  }
+
+  button.btn {
+    background-color: @ol-darker-green;
+
+    &.close {
+      background-color: @ol-green;
+    }
+  }
+}

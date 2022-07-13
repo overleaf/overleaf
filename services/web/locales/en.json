@@ -1792,5 +1792,6 @@
   "get_most_subscription_by_checking_premium_features": "Get the most out of your __appName__ subscription by checking out the list of <0>__appName__’s premium features</0>.",
   "would_you_like_to_see_a_university_subscription": "Would you like to see a university-wide __appName__ subscription at your university?",
   "student_and_faculty_support_make_difference": "Student and faculty support make a difference! We can share this information with our contacts at your university when discussing an Overleaf institutional account.",
-  "show_your_support": "Show your support"
+  "show_your_support": "Show your support",
+  "approaching_compile_timeout_limit_upgrade_for_more_compile_time": "You are approaching your compile timeout limit. Upgrade to <strong>Overleaf Premium</strong> for <0>4x more</0> compile time."
 }

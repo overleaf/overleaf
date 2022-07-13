@@ -48,11 +48,13 @@ export function DetachCompileProvider({ children }) {
     setHasLintingError: _setHasLintingError,
     setHighlights: _setHighlights,
     setPosition: _setPosition,
+    setShowCompileTimeWarning: _setShowCompileTimeWarning,
     setShowLogs: _setShowLogs,
     toggleLogs: _toggleLogs,
     setStopOnFirstError: _setStopOnFirstError,
     setStopOnValidationError: _setStopOnValidationError,
     showLogs: _showLogs,
+    showCompileTimeWarning: _showCompileTimeWarning,
     showFasterCompilesFeedbackUI: _showFasterCompilesFeedbackUI,
     stopOnFirstError: _stopOnFirstError,
     stopOnValidationError: _stopOnValidationError,
@@ -185,6 +187,12 @@ export function DetachCompileProvider({ children }) {
     'detacher',
     'detached'
   )
+  const [showCompileTimeWarning] = useDetachStateWatcher(
+    'showCompileTimeWarning',
+    _showCompileTimeWarning,
+    'detacher',
+    'detached'
+  )
   const [showLogs] = useDetachStateWatcher(
     'showLogs',
     _showLogs,
@@ -275,6 +283,12 @@ export function DetachCompileProvider({ children }) {
     _setHighlights,
     'detacher',
     'detached'
+  )
+  const setShowCompileTimeWarning = useDetachAction(
+    'setShowCompileTimeWarning',
+    _setShowCompileTimeWarning,
+    'detached',
+    'detacher'
   )
   const setShowLogs = useDetachAction(
     'setShowLogs',
@@ -376,11 +390,13 @@ export function DetachCompileProvider({ children }) {
       setHasLintingError,
       setHighlights,
       setPosition,
+      setShowCompileTimeWarning,
       setShowLogs,
       toggleLogs,
       setStopOnFirstError,
       setStopOnValidationError,
       showLogs,
+      showCompileTimeWarning,
       showFasterCompilesFeedbackUI,
       startCompile,
       stopCompile,
@@ -425,10 +441,12 @@ export function DetachCompileProvider({ children }) {
       setHasLintingError,
       setHighlights,
       setPosition,
+      setShowCompileTimeWarning,
       setShowLogs,
       toggleLogs,
       setStopOnFirstError,
       setStopOnValidationError,
+      showCompileTimeWarning,
       showLogs,
       showFasterCompilesFeedbackUI,
       startCompile,

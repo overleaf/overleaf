@@ -27,6 +27,9 @@ import { useIdeContext } from './ide-context'
 import { useProjectContext } from './project-context'
 import { useEditorContext } from './editor-context'
 import { buildFileList } from '../../features/pdf-preview/util/file-list'
+import { useSplitTestContext } from './split-test-context'
+
+const ONE_DAY = 24 * 60 * 60 * 24 * 1000
 
 export const LocalCompileContext = createContext()
 
@@ -57,10 +60,12 @@ export const CompileContextPropTypes = {
     setHasLintingError: PropTypes.func.isRequired, // only for storybook
     setHighlights: PropTypes.func.isRequired,
     setPosition: PropTypes.func.isRequired,
+    setShowCompileTimeWarning: PropTypes.func.isRequired,
     setShowLogs: PropTypes.func.isRequired,
     toggleLogs: PropTypes.func.isRequired,
     setStopOnFirstError: PropTypes.func.isRequired,
     setStopOnValidationError: PropTypes.func.isRequired,
+    showCompileTimeWarning: PropTypes.bool.isRequired,
     showLogs: PropTypes.bool.isRequired,
     showFasterCompilesFeedbackUI: PropTypes.bool.isRequired,
     stopOnFirstError: PropTypes.bool.isRequired,
@@ -82,8 +87,20 @@ export function LocalCompileProvider({ children }) {
 
   const { _id: projectId, rootDocId } = useProjectContext()
 
+  const { splitTestVariants } = useSplitTestContext()
+
   // whether a compile is in progress
   const [compiling, setCompiling] = useState(false)
+
+  // whether to show the compile time warning
+  const [showCompileTimeWarning, setShowCompileTimeWarning] = useState(false)
+
+  // the last time the compile time warning was displayed
+  const [lastDisplay, setLastDisplay] = usePersistedState(
+    'compile-time-warning-displayed-at',
+    0,
+    true
+  )
 
   // the log entries parsed from the compile output log
   const [logEntries, setLogEntries] = useScopeValueSetterOnly('pdf.logEntries')
@@ -263,6 +280,31 @@ export function LocalCompileProvider({ children }) {
       compiler.compile({ isAutoCompileOnLoad: true })
     }
   }, [compiledOnce, currentDoc, compiler])
+
+  useEffect(() => {
+    const compileTimeWarningEnabled =
+      splitTestVariants['compile-time-warning'] === 'show-upgrade-prompt'
+
+    if (compileTimeWarningEnabled && compiling && isProjectOwner) {
+      const timeout = window.setTimeout(() => {
+        if (lastDisplay && Date.now() - lastDisplay < ONE_DAY) {
+          return
+        }
+        setShowCompileTimeWarning(true)
+        setLastDisplay(Date.now())
+      }, 30000)
+
+      return () => {
+        window.clearTimeout(timeout)
+      }
+    }
+  }, [
+    compiling,
+    isProjectOwner,
+    lastDisplay,
+    setLastDisplay,
+    splitTestVariants,
+  ])
 
   // handle the data returned from a compile request
   // note: this should _only_ run when `data` changes,
@@ -522,6 +564,8 @@ export function LocalCompileProvider({ children }) {
       setHasLintingError, // only for stories
       setHighlights,
       setPosition,
+      showCompileTimeWarning,
+      setShowCompileTimeWarning,
       setShowLogs,
       toggleLogs,
       setStopOnFirstError,
@@ -570,8 +614,10 @@ export function LocalCompileProvider({ children }) {
       setHasLintingError, // only for stories
       setHighlights,
       setPosition,
+      setShowCompileTimeWarning,
       setStopOnFirstError,
       setStopOnValidationError,
+      showCompileTimeWarning,
       showLogs,
       showFasterCompilesFeedbackUI,
       startCompile,

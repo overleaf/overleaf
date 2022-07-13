@@ -1,5 +1,6 @@
 import { memo, Suspense } from 'react'
 import classNames from 'classnames'
+import CompileTimeWarning from './compile-time-warning'
 import PdfLogsViewer from './pdf-logs-viewer'
 import PdfViewer from './pdf-viewer'
 import LoadingSpinner from '../../../shared/components/loading-spinner'
@@ -15,6 +16,7 @@ function PdfPreviewPane() {
   return (
     <div className={classes}>
       <PdfHybridPreviewToolbar />
+      <CompileTimeWarning />
       <Suspense fallback={<LoadingPreview />}>
         <div className="pdf-viewer">
           <PdfViewer />
