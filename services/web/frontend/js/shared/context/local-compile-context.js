@@ -29,8 +29,6 @@ import { useEditorContext } from './editor-context'
 import { buildFileList } from '../../features/pdf-preview/util/file-list'
 import { useSplitTestContext } from './split-test-context'
 
-const ONE_DAY = 24 * 60 * 60 * 24 * 1000
-
 export const LocalCompileContext = createContext()
 
 export const CompileContextPropTypes = {
@@ -94,13 +92,6 @@ export function LocalCompileProvider({ children }) {
 
   // whether to show the compile time warning
   const [showCompileTimeWarning, setShowCompileTimeWarning] = useState(false)
-
-  // the last time the compile time warning was displayed
-  const [lastDisplay, setLastDisplay] = usePersistedState(
-    'compile-time-warning-displayed-at',
-    0,
-    true
-  )
 
   // the log entries parsed from the compile output log
   const [logEntries, setLogEntries] = useScopeValueSetterOnly('pdf.logEntries')
@@ -287,24 +278,14 @@ export function LocalCompileProvider({ children }) {
 
     if (compileTimeWarningEnabled && compiling && isProjectOwner) {
       const timeout = window.setTimeout(() => {
-        if (lastDisplay && Date.now() - lastDisplay < ONE_DAY) {
-          return
-        }
         setShowCompileTimeWarning(true)
-        setLastDisplay(Date.now())
       }, 30000)
 
       return () => {
         window.clearTimeout(timeout)
       }
     }
-  }, [
-    compiling,
-    isProjectOwner,
-    lastDisplay,
-    setLastDisplay,
-    splitTestVariants,
-  ])
+  }, [compiling, isProjectOwner, splitTestVariants])
 
   // handle the data returned from a compile request
   // note: this should _only_ run when `data` changes,
