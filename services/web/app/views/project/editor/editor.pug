@@ -24,8 +24,7 @@ div.full-size(
 		pdf-synctex-controls()
 
 div.full-size(
-	ng-if="ui.pdfLayout == 'flat'"
-	ng-show="ui.view == 'pdf'"
+	ng-if="ui.pdfLayout == 'flat' && ui.view == 'pdf'"
 )
 	pdf-preview()
 
