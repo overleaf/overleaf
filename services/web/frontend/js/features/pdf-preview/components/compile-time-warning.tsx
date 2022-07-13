@@ -11,9 +11,9 @@ const ONE_DAY = 24 * 60 * 60 * 24 * 1000
 function CompileTimeWarning() {
   const { t } = useTranslation()
 
-  const [lastDisplay, setLastDisplay] = usePersistedState(
-    'compile-time-warning-displayed-at',
-    0,
+  const [displayStatus, setDisplayStatus] = usePersistedState(
+    'compile-time-warning-display-status',
+    { lastDisplayTime: 0, dismissed: false },
     true
   )
 
@@ -22,24 +22,28 @@ function CompileTimeWarning() {
 
   useEffect(() => {
     if (showCompileTimeWarning) {
-      if (lastDisplay && Date.now() - lastDisplay < ONE_DAY) {
+      if (
+        displayStatus &&
+        Date.now() - displayStatus.lastDisplayTime < ONE_DAY
+      ) {
         return
       }
-      setLastDisplay(Date.now())
+      setDisplayStatus({ lastDisplayTime: Date.now(), dismissed: false })
       eventTracking.sendMB('compile-time-warning-displayed', {})
     }
-  }, [showCompileTimeWarning, lastDisplay, setLastDisplay])
+  }, [showCompileTimeWarning, displayStatus, setDisplayStatus])
 
   const getTimeSinceDisplayed = useCallback(() => {
-    return (Date.now() - lastDisplay) / 1000
-  }, [lastDisplay])
+    return (Date.now() - displayStatus.lastDisplayTime) / 1000
+  }, [displayStatus])
 
   const closeWarning = useCallback(() => {
     eventTracking.sendMB('compile-time-warning-dismissed', {
       'time-since-displayed': getTimeSinceDisplayed(),
     })
     setShowCompileTimeWarning(false)
-  }, [getTimeSinceDisplayed, setShowCompileTimeWarning])
+    setDisplayStatus(displayStatus => ({ ...displayStatus, dismissed: true }))
+  }, [getTimeSinceDisplayed, setShowCompileTimeWarning, setDisplayStatus])
 
   const handleUpgradeClick = useCallback(
     event => {
@@ -49,11 +53,12 @@ function CompileTimeWarning() {
         'time-since-displayed': getTimeSinceDisplayed(),
       })
       setShowCompileTimeWarning(false)
+      setDisplayStatus(displayStatus => ({ ...displayStatus, dismissed: true }))
     },
-    [getTimeSinceDisplayed, setShowCompileTimeWarning]
+    [getTimeSinceDisplayed, setShowCompileTimeWarning, setDisplayStatus]
   )
 
-  if (!showCompileTimeWarning) {
+  if (!showCompileTimeWarning || displayStatus.dismissed) {
     return null
   }
 
