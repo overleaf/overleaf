@@ -7,35 +7,34 @@ import { v4 as uuid } from 'uuid'
 const TRANSIENT_WARNING_REGEX = /^(Reference|Citation).+undefined on input line/
 
 export function handleOutputFiles(outputFiles, projectId, data) {
-  const result = {}
-
   const outputFile = outputFiles.get('output.pdf')
-  result.pdfFile = outputFile
+  if (!outputFile) return null
 
-  if (outputFile) {
-    // build the URL for viewing the PDF in the preview UI
-    const params = new URLSearchParams({
-      compileGroup: data.compileGroup,
-    })
+  // build the URL for viewing the PDF in the preview UI
+  const params = new URLSearchParams({
+    compileGroup: data.compileGroup,
+  })
 
-    if (data.clsiServerId) {
-      params.set('clsiserverid', data.clsiServerId)
-    }
-
-    if (getMeta('ol-pdfCachingMode') === 'enabled') {
-      // Tag traffic that uses the pdf caching logic.
-      params.set('enable_pdf_caching', 'true')
-    }
-
-    result.pdfUrl = `${buildURL(outputFile, data.pdfDownloadDomain)}?${params}`
-
-    // build the URL for downloading the PDF
-    params.set('popupDownload', 'true') // save PDF download as file
-
-    result.pdfDownloadUrl = `/download/project/${projectId}/build/${outputFile.build}/output/output.pdf?${params}`
+  if (data.clsiServerId) {
+    params.set('clsiserverid', data.clsiServerId)
   }
 
-  return result
+  if (getMeta('ol-pdfCachingMode') === 'enabled') {
+    // Tag traffic that uses the pdf caching logic.
+    params.set('enable_pdf_caching', 'true')
+  }
+
+  outputFile.pdfUrl = `${buildURL(
+    outputFile,
+    data.pdfDownloadDomain
+  )}?${params}`
+
+  // build the URL for downloading the PDF
+  params.set('popupDownload', 'true') // save PDF download as file
+
+  outputFile.pdfDownloadUrl = `/download/project/${projectId}/build/${outputFile.build}/output/output.pdf?${params}`
+
+  return outputFile
 }
 
 export const handleLogFiles = async (outputFiles, data, signal) => {

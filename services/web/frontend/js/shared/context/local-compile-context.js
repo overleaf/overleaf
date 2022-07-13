@@ -105,14 +105,18 @@ export function LocalCompileProvider({ children }) {
   const [pdfViewer] = useScopeValue('settings.pdfViewer')
 
   // the URL for downloading the PDF
-  const [pdfDownloadUrl, setPdfDownloadUrl] =
-    useScopeValueSetterOnly('pdf.downloadUrl')
+  const [, setPdfDownloadUrl] = useScopeValueSetterOnly('pdf.downloadUrl')
 
   // the URL for loading the PDF in the preview pane
-  const [pdfUrl, setPdfUrl] = useScopeValueSetterOnly('pdf.url')
+  const [, setPdfUrl] = useScopeValueSetterOnly('pdf.url')
 
   // low level details for metrics
   const [pdfFile, setPdfFile] = useState()
+
+  useEffect(() => {
+    setPdfDownloadUrl(pdfFile?.pdfDownloadUrl)
+    setPdfUrl(pdfFile?.pdfUrl)
+  }, [pdfFile, setPdfDownloadUrl, setPdfUrl])
 
   // the project is considered to be "uncompiled" if a doc has changed since the last compile started
   const [uncompiled, setUncompiled] = useScopeValue('pdf.uncompiled')
@@ -215,11 +219,10 @@ export function LocalCompileProvider({ children }) {
   const { signal } = useAbortController()
 
   const cleanupCompileResult = useCallback(() => {
-    setPdfUrl(null)
-    setPdfDownloadUrl(null)
+    setPdfFile(null)
     setLogEntries(null)
     setLogEntryAnnotations({})
-  }, [setPdfUrl, setPdfDownloadUrl, setLogEntries, setLogEntryAnnotations])
+  }, [setPdfFile, setLogEntries, setLogEntryAnnotations])
 
   const compilingRef = useRef(false)
 
@@ -308,12 +311,9 @@ export function LocalCompileProvider({ children }) {
           outputFiles.set(outputFile.path, outputFile)
         }
 
-        // set the PDF URLs
-        const result = handleOutputFiles(outputFiles, projectId, data)
+        // set the PDF context
         if (data.status === 'success') {
-          setPdfDownloadUrl(result.pdfDownloadUrl)
-          setPdfFile(result.pdfFile)
-          setPdfUrl(result.pdfUrl)
+          setPdfFile(handleOutputFiles(outputFiles, projectId, data))
         }
 
         setFileList(
@@ -429,9 +429,7 @@ export function LocalCompileProvider({ children }) {
     setClsiServerId,
     setLogEntries,
     setLogEntryAnnotations,
-    setPdfDownloadUrl,
     setPdfFile,
-    setPdfUrl,
   ])
 
   // switch to logs if there's an error
@@ -493,13 +491,12 @@ export function LocalCompileProvider({ children }) {
       .clearCache()
       .then(() => {
         setFileList(undefined)
-        setPdfDownloadUrl(undefined)
-        setPdfUrl(undefined)
+        setPdfFile(undefined)
       })
       .finally(() => {
         setClearingCache(false)
       })
-  }, [compiler, setPdfDownloadUrl, setPdfUrl])
+  }, [compiler])
 
   // clear the cache then run a compile, triggered by a menu item
   const recompileFromScratch = useCallback(() => {
@@ -530,9 +527,9 @@ export function LocalCompileProvider({ children }) {
       lastCompileOptions,
       logEntryAnnotations,
       logEntries,
-      pdfDownloadUrl,
+      pdfDownloadUrl: pdfFile?.pdfDownloadUrl,
       pdfFile,
-      pdfUrl,
+      pdfUrl: pdfFile?.pdfUrl,
       pdfViewer,
       position,
       rawLog,
@@ -582,9 +579,7 @@ export function LocalCompileProvider({ children }) {
       logEntries,
       logEntryAnnotations,
       position,
-      pdfDownloadUrl,
       pdfFile,
-      pdfUrl,
       pdfViewer,
       rawLog,
       recompileFromScratch,
