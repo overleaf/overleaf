@@ -269,8 +269,8 @@ export function DetachCompileProvider({ children }) {
   const firstRenderDone = useDetachAction(
     'firstRenderDone',
     _firstRenderDone,
-    'detacher',
-    'detached'
+    'detached',
+    'detacher'
   )
   const setHasLintingError = useDetachAction(
     'setHasLintingError',
