@@ -124,7 +124,7 @@
         <dependency>
             <groupId>com.google.oauth-client</groupId>
             <artifactId>google-oauth-client</artifactId>
-            <version>1.23.0</version>
+            <version>1.34.1</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.google.http-client/google-http-client -->
         <dependency>
