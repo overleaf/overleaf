@@ -2,7 +2,7 @@
 # Instead run bin/update_build_scripts from
 # https://github.com/sharelatex/sharelatex-dev-environment
 
-FROM node:16.14.2 as base
+FROM node:16.16.0 as base
 
 WORKDIR /overleaf/services/spelling
 COPY services/spelling/install_deps.sh /overleaf/services/spelling/
@@ -24,7 +24,7 @@ COPY services/spelling/ /overleaf/services/spelling/
 
 FROM app
 RUN mkdir -p cache \
-&&  chown node:node cache
+    &&  chown node:node cache
 USER node
 
 CMD ["node", "--expose-gc", "app.js"]

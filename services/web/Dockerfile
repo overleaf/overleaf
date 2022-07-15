@@ -1,6 +1,6 @@
 # the base image is suitable for running web with /overleaf/services/web bind
 # mounted
-FROM node:16.14.2 as base
+FROM node:16.16.0 as base
 
 WORKDIR /overleaf/services/web
 
@@ -33,13 +33,13 @@ COPY services/web /overleaf/services/web
 RUN cd /overleaf/services/web && npm run 'lezer-latex:generate'
 
 RUN mkdir -p /overleaf/services/web/data/dumpFolder \
-&&  mkdir -p /overleaf/services/web/data/logs \
-&&  mkdir -p /overleaf/services/web/data/pdf \
-&&  mkdir -p /overleaf/services/web/data/uploads \
-&&  mkdir -p /overleaf/services/web/data/zippedProjects \
-&&  mkdir -p /overleaf/services/web/data/projectHistories \
-&&  chmod -R 0755 /overleaf/services/web/data \
-&&  chown -R node:node /overleaf/services/web/data
+    &&  mkdir -p /overleaf/services/web/data/logs \
+    &&  mkdir -p /overleaf/services/web/data/pdf \
+    &&  mkdir -p /overleaf/services/web/data/uploads \
+    &&  mkdir -p /overleaf/services/web/data/zippedProjects \
+    &&  mkdir -p /overleaf/services/web/data/projectHistories \
+    &&  chmod -R 0755 /overleaf/services/web/data \
+    &&  chown -R node:node /overleaf/services/web/data
 
 ARG SENTRY_RELEASE
 ENV SENTRY_RELEASE=$SENTRY_RELEASE

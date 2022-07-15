@@ -2,7 +2,7 @@
 # Instead run bin/update_build_scripts from
 # https://github.com/sharelatex/sharelatex-dev-environment
 
-FROM node:16.14.2 as base
+FROM node:16.16.0 as base
 
 WORKDIR /overleaf/services/filestore
 COPY services/filestore/install_deps.sh /overleaf/services/filestore/
@@ -24,7 +24,7 @@ COPY services/filestore/ /overleaf/services/filestore/
 
 FROM app
 RUN mkdir -p uploads user_files template_files \
-&&  chown node:node uploads user_files template_files
+    &&  chown node:node uploads user_files template_files
 USER node
 
 CMD ["node", "--expose-gc", "app.js"]
