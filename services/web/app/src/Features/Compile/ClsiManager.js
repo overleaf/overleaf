@@ -579,6 +579,7 @@ const ClsiManager = {
         f.contentId = file.contentId
         f.ranges = file.ranges || []
         f.size = file.size
+        f.startXRefTable = file.startXRefTable
         f.createdAt = new Date()
       }
       outputFiles.push(f)

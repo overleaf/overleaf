@@ -16,7 +16,9 @@ async function parseXrefTable(path, size, checkDeadline) {
     checkDeadline('pdfjs: after parseStartXRef')
     await manager.ensureDoc('parse')
     checkDeadline('pdfjs: after parse')
-    return manager.pdfDocument.catalog.xref.entries
+    const xRefEntries = manager.pdfDocument.xref.entries
+    const startXRefTable = manager.pdfDocument.xref.topDict?.get('Prev')
+    return { xRefEntries, startXRefTable }
   } finally {
     file.close()
   }

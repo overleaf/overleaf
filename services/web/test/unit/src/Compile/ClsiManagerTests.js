@@ -147,6 +147,7 @@ describe('ClsiManager', function () {
             // gets dropped by JSON.stringify
             contentId: undefined,
             size: undefined,
+            startXRefTable: undefined,
           },
           {
             url: `/project/${this.project_id}/user/${this.user_id}/build/1234/output/output.log`,
@@ -178,6 +179,7 @@ describe('ClsiManager', function () {
                   build: 1234,
                   contentId: '123-321',
                   ranges: [{ start: 1, end: 42, hash: 'foo' }],
+                  startXRefTable: 42,
                   size: 42,
                 },
                 {
@@ -209,6 +211,7 @@ describe('ClsiManager', function () {
             build: 1234,
             contentId: '123-321',
             ranges: [{ start: 1, end: 42, hash: 'foo' }],
+            startXRefTable: 42,
             size: 42,
             createdAt: new Date(),
           },
@@ -422,6 +425,7 @@ describe('ClsiManager', function () {
             // gets dropped by JSON.stringify
             contentId: undefined,
             size: undefined,
+            startXRefTable: undefined,
           },
           {
             url: `/project/${this.submission_id}/build/1234/output/output.log`,

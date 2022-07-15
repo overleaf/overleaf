@@ -1,125 +1,128 @@
-[
-  {
-    "offset": 0,
-    "gen": 0,
-    "free": true
-  },
-  {
-    "offset": 16762,
-    "gen": 0,
-    "uncompressed": true
-  },
-  {
-    "offset": 16877,
-    "gen": 0,
-    "uncompressed": true
-  },
-  {
-    "offset": 17142,
-    "gen": 0,
-    "uncompressed": true
-  },
-  {
-    "offset": 24335,
-    "gen": 0,
-    "uncompressed": true
-  },
-  {
-    "offset": 32164,
-    "gen": 0,
-    "uncompressed": true
-  },
-  {
-    "offset": 32412,
-    "gen": 0,
-    "uncompressed": true
-  },
-  {
-    "offset": 15,
-    "gen": 0,
-    "uncompressed": true
-  },
-  {
-    "offset": 216,
-    "gen": 0,
-    "uncompressed": true
-  },
-  {
-    "offset": 671,
-    "gen": 0,
-    "uncompressed": true
-  },
-  {
-    "offset": 721,
-    "gen": 0,
-    "uncompressed": true
-  },
-  {
-    "offset": 856,
-    "gen": 0,
-    "uncompressed": true
-  },
-  {
-    "offset": 973,
-    "gen": 0,
-    "uncompressed": true
-  },
-  {
-    "offset": 1318,
-    "gen": 0,
-    "uncompressed": true
-  },
-  {
-    "offset": 2218,
-    "gen": 0,
-    "uncompressed": true
-  },
-  {
-    "offset": 13,
-    "gen": 0
-  },
-  {
-    "offset": 13,
-    "gen": 1
-  },
-  {
-    "offset": 13,
-    "gen": 2
-  },
-  {
-    "offset": 13,
-    "gen": 3
-  },
-  {
-    "offset": 13,
-    "gen": 4
-  },
-  {
-    "offset": 13,
-    "gen": 5
-  },
-  {
-    "offset": 13,
-    "gen": 6
-  },
-  {
-    "offset": 13,
-    "gen": 7
-  },
-  {
-    "offset": 13,
-    "gen": 8
-  },
-  {
-    "offset": 13,
-    "gen": 9
-  },
-  {
-    "offset": 13,
-    "gen": 10
-  },
-  {
-    "offset": 13,
-    "gen": 11
-  }
-]
+{
+  "xRefEntries": [
+    {
+      "offset": 0,
+      "gen": 0,
+      "free": true
+    },
+    {
+      "offset": 16762,
+      "gen": 0,
+      "uncompressed": true
+    },
+    {
+      "offset": 16877,
+      "gen": 0,
+      "uncompressed": true
+    },
+    {
+      "offset": 17142,
+      "gen": 0,
+      "uncompressed": true
+    },
+    {
+      "offset": 24335,
+      "gen": 0,
+      "uncompressed": true
+    },
+    {
+      "offset": 32164,
+      "gen": 0,
+      "uncompressed": true
+    },
+    {
+      "offset": 32412,
+      "gen": 0,
+      "uncompressed": true
+    },
+    {
+      "offset": 15,
+      "gen": 0,
+      "uncompressed": true
+    },
+    {
+      "offset": 216,
+      "gen": 0,
+      "uncompressed": true
+    },
+    {
+      "offset": 671,
+      "gen": 0,
+      "uncompressed": true
+    },
+    {
+      "offset": 721,
+      "gen": 0,
+      "uncompressed": true
+    },
+    {
+      "offset": 856,
+      "gen": 0,
+      "uncompressed": true
+    },
+    {
+      "offset": 973,
+      "gen": 0,
+      "uncompressed": true
+    },
+    {
+      "offset": 1318,
+      "gen": 0,
+      "uncompressed": true
+    },
+    {
+      "offset": 2218,
+      "gen": 0,
+      "uncompressed": true
+    },
+    {
+      "offset": 13,
+      "gen": 0
+    },
+    {
+      "offset": 13,
+      "gen": 1
+    },
+    {
+      "offset": 13,
+      "gen": 2
+    },
+    {
+      "offset": 13,
+      "gen": 3
+    },
+    {
+      "offset": 13,
+      "gen": 4
+    },
+    {
+      "offset": 13,
+      "gen": 5
+    },
+    {
+      "offset": 13,
+      "gen": 6
+    },
+    {
+      "offset": 13,
+      "gen": 7
+    },
+    {
+      "offset": 13,
+      "gen": 8
+    },
+    {
+      "offset": 13,
+      "gen": 9
+    },
+    {
+      "offset": 13,
+      "gen": 10
+    },
+    {
+      "offset": 13,
+      "gen": 11
+    }
+  ],
+  "startXRefTable": 32412
+}

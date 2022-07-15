@@ -1,108 +1,111 @@
-[
-  {
-    "offset": 0,
-    "gen": 0,
-    "free": true
-  },
-  {
-    "offset": 9449,
-    "gen": 0,
-    "uncompressed": true
-  },
-  {
-    "offset": 9564,
-    "gen": 0,
-    "uncompressed": true
-  },
-  {
-    "offset": 9730,
-    "gen": 0,
-    "uncompressed": true
-  },
-  {
-    "offset": 17293,
-    "gen": 0,
-    "uncompressed": true
-  },
-  {
-    "offset": 17541,
-    "gen": 0,
-    "uncompressed": true
-  },
-  {
-    "offset": 15,
-    "gen": 0,
-    "uncompressed": true
-  },
-  {
-    "offset": 216,
-    "gen": 0,
-    "uncompressed": true
-  },
-  {
-    "offset": 650,
-    "gen": 0,
-    "uncompressed": true
-  },
-  {
-    "offset": 700,
-    "gen": 0,
-    "uncompressed": true
-  },
-  {
-    "offset": 835,
-    "gen": 0,
-    "uncompressed": true
-  },
-  {
-    "offset": 952,
-    "gen": 0,
-    "uncompressed": true
-  },
-  {
-    "offset": 1097,
-    "gen": 0,
-    "uncompressed": true
-  },
-  {
-    "offset": 1758,
-    "gen": 0,
-    "uncompressed": true
-  },
-  {
-    "offset": 12,
-    "gen": 0
-  },
-  {
-    "offset": 12,
-    "gen": 1
-  },
-  {
-    "offset": 12,
-    "gen": 2
-  },
-  {
-    "offset": 12,
-    "gen": 3
-  },
-  {
-    "offset": 12,
-    "gen": 4
-  },
-  {
-    "offset": 12,
-    "gen": 5
-  },
-  {
-    "offset": 12,
-    "gen": 6
-  },
-  {
-    "offset": 12,
-    "gen": 7
-  },
-  {
-    "offset": 12,
-    "gen": 8
-  }
-]
+{
+  "xRefEntries": [
+    {
+      "offset": 0,
+      "gen": 0,
+      "free": true
+    },
+    {
+      "offset": 9449,
+      "gen": 0,
+      "uncompressed": true
+    },
+    {
+      "offset": 9564,
+      "gen": 0,
+      "uncompressed": true
+    },
+    {
+      "offset": 9730,
+      "gen": 0,
+      "uncompressed": true
+    },
+    {
+      "offset": 17293,
+      "gen": 0,
+      "uncompressed": true
+    },
+    {
+      "offset": 17541,
+      "gen": 0,
+      "uncompressed": true
+    },
+    {
+      "offset": 15,
+      "gen": 0,
+      "uncompressed": true
+    },
+    {
+      "offset": 216,
+      "gen": 0,
+      "uncompressed": true
+    },
+    {
+      "offset": 650,
+      "gen": 0,
+      "uncompressed": true
+    },
+    {
+      "offset": 700,
+      "gen": 0,
+      "uncompressed": true
+    },
+    {
+      "offset": 835,
+      "gen": 0,
+      "uncompressed": true
+    },
+    {
+      "offset": 952,
+      "gen": 0,
+      "uncompressed": true
+    },
+    {
+      "offset": 1097,
+      "gen": 0,
+      "uncompressed": true
+    },
+    {
+      "offset": 1758,
+      "gen": 0,
+      "uncompressed": true
+    },
+    {
+      "offset": 12,
+      "gen": 0
+    },
+    {
+      "offset": 12,
+      "gen": 1
+    },
+    {
+      "offset": 12,
+      "gen": 2
+    },
+    {
+      "offset": 12,
+      "gen": 3
+    },
+    {
+      "offset": 12,
+      "gen": 4
+    },
+    {
+      "offset": 12,
+      "gen": 5
+    },
+    {
+      "offset": 12,
+      "gen": 6
+    },
+    {
+      "offset": 12,
+      "gen": 7
+    },
+    {
+      "offset": 12,
+      "gen": 8
+    }
+  ],
+  "startXRefTable": 17541
+}

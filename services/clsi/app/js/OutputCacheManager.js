@@ -392,7 +392,12 @@ module.exports = OutputCacheManager = {
               return callback(null, outputFiles)
             }
             if (err) return callback(err, outputFiles)
-            const [contentRanges, newContentRanges, reclaimedSpace] = result
+            const [
+              contentRanges,
+              newContentRanges,
+              reclaimedSpace,
+              startXRefTable,
+            ] = result
 
             if (Settings.enablePdfCachingDark) {
               // In dark mode we are doing the computation only and do not emit
@@ -400,6 +405,7 @@ module.exports = OutputCacheManager = {
             } else {
               outputFile.contentId = Path.basename(contentDir)
               outputFile.ranges = contentRanges
+              outputFile.startXRefTable = startXRefTable
             }
 
             timings['compute-pdf-caching'] = timer.done()

@@ -119,22 +119,26 @@ async function doUpdateInternal(contentDir, filePath, size, checkDeadline) {
 
   checkDeadline('after init HashFileTracker')
 
-  const rawTable = await parseXrefTable(filePath, size, checkDeadline)
-  rawTable.sort((a, b) => {
+  const { xRefEntries, startXRefTable } = await parseXrefTable(
+    filePath,
+    size,
+    checkDeadline
+  )
+  xRefEntries.sort((a, b) => {
     return a.offset - b.offset
   })
-  rawTable.forEach((obj, idx) => {
+  xRefEntries.forEach((obj, idx) => {
     obj.idx = idx
   })
 
   checkDeadline('after parsing')
 
   const uncompressedObjects = []
-  for (const object of rawTable) {
+  for (const object of xRefEntries) {
     if (!object.uncompressed) {
       continue
     }
-    const nextObject = rawTable[object.idx + 1]
+    const nextObject = xRefEntries[object.idx + 1]
     if (!nextObject) {
       // Ignore this possible edge case.
       // The last object should be part of the xRef table.
@@ -204,7 +208,7 @@ async function doUpdateInternal(contentDir, filePath, size, checkDeadline) {
   //       Let the next compile use the already written ranges.
   const reclaimedSpace = await tracker.deleteStaleHashes(5)
   await tracker.flush()
-  return [ranges, newRanges, reclaimedSpace]
+  return [ranges, newRanges, reclaimedSpace, startXRefTable]
 }
 
 function getStatePath(contentDir) {
