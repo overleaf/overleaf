@@ -107,7 +107,7 @@ describe('UserMembershipController', function () {
           expect(viewPath).to.equal('user_membership/index')
           expect(viewParams.users).to.deep.equal(this.users)
           expect(viewParams.groupSize).to.equal(this.subscription.membersLimit)
-          expect(viewParams.translations.title).to.equal('group_account')
+          expect(viewParams.translations.title).to.equal('group_subscription')
           expect(viewParams.paths.addMember).to.equal(
             `/manage/groups/${this.subscription._id}/invites`
           )
@@ -122,7 +122,7 @@ describe('UserMembershipController', function () {
         render: (viewPath, viewParams) => {
           expect(viewPath).to.equal('user_membership/index')
           expect(viewParams.groupSize).to.equal(undefined)
-          expect(viewParams.translations.title).to.equal('group_account')
+          expect(viewParams.translations.title).to.equal('group_subscription')
           expect(viewParams.translations.subtitle).to.equal(
             'managers_management'
           )

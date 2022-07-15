@@ -14,7 +14,7 @@ module.exports = {
       groupPlan: true,
     },
     translations: {
-      title: 'group_account',
+      title: 'group_subscription',
       subtitle: 'members_management',
       remove: 'remove_from_group',
     },
@@ -53,7 +53,7 @@ module.exports = {
       groupPlan: true,
     },
     translations: {
-      title: 'group_account',
+      title: 'group_subscription',
       subtitle: 'managers_management',
       remove: 'remove_manager',
     },

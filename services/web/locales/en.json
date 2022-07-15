@@ -1201,7 +1201,7 @@
   "loading_billing_form": "Loading billing details form",
   "you_have_added_x_of_group_size_y": "You have added <0>__addedUsersSize__</0> of <1>__groupSize__</1> available members",
   "remove_from_group": "Remove from group",
-  "group_account": "Group Account",
+  "group_subscription": "Group Subscription",
   "registered": "Registered",
   "no_members": "No members",
   "add_more_members": "Add more members",
