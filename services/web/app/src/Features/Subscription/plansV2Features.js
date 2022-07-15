@@ -619,77 +619,8 @@ const studentPlans = [
       },
     ],
   },
-  {
-    divider: true,
-    dividerLabel: 'group_admins_get_access_to',
-    dividerInfo: 'group_admins_get_access_to_info',
-    items: [
-      {
-        feature: 'user_management',
-        info: 'user_management_info',
-        value: 'bool',
-        plans: {
-          free: false,
-          student: false,
-        },
-      },
-      {
-        feature: 'usage_metrics',
-        info: 'usage_metrics_info',
-        value: 'bool',
-        plans: {
-          free: false,
-          student: false,
-        },
-      },
-      {
-        feature: 'sso_integration',
-        info: 'sso_integration_info',
-        value: 'bool',
-        plans: {
-          free: false,
-          student: false,
-        },
-      },
-      {
-        feature: 'sitewide_option_available',
-        info: 'sitewide_option_available_info',
-        value: 'bool',
-        plans: {
-          free: false,
-          student: false,
-        },
-      },
-      {
-        feature: 'custom_resource_portal',
-        info: 'custom_resource_portal_info',
-        value: 'bool',
-        plans: {
-          free: false,
-          student: false,
-        },
-      },
-      {
-        feature: 'personalized_onboarding',
-        info: 'personalized_onboarding_info',
-        value: 'bool',
-        plans: {
-          free: false,
-          student: false,
-        },
-      },
-      {
-        feature: 'dedicated_account_manager',
-        info: 'dedicated_account_manager_info',
-        value: 'bool',
-        plans: {
-          free: false,
-          student: false,
-        },
-      },
-    ],
-  },
 ]
+
 module.exports = {
   individual: individualPlans,
   group: groupPlans,

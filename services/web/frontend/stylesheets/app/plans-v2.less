@@ -496,39 +496,6 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
   }
 }
 
-// This is a workaround.
-// Table student have "Dedicated account manager" as its last feature.
-// That name is long and it overflows to the next line,
-// making the `td` is bigger than the inner `plans-v2-table-cell` (inner `div` class of most of the `td`).
-// Since we can't make all `td` have fixed height
-// (due to different text length that makes the
-// `td` has variable height depending whether the text overflows),
-// we need to force the last element of table student to have fixed height
-// so the `border-bottom-right-radius` will work properly
-// on the bottom right of the `plans-v2-table-student` (desktop only).
-// To remove this workaround
-// I think we need to change the whole table structure
-// so it can support direct border-radius without inner div hack
-// probably adding `border-collapse: separate` on the main table will do it, but need more research
-// (we have `border-collapse: collapse` as the default from our normalize.less)
-// example reference: https://stackoverflow.com/questions/4094126/how-to-add-border-radius-on-table-row
-.plans-v2-table-student {
-  @media (min-width: @screen-md-min) {
-    tr:last-child td:nth-last-child(2) .plans-v2-table-cell {
-      height: 62px;
-    }
-  }
-
-  @media (min-width: @screen-sm-min) {
-    tr:last-child td:nth-last-child(2) .plans-v2-table-cell {
-      height: 56px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-  }
-}
-
 .plans-v2-table-individual {
   tr {
     &:last-child {
