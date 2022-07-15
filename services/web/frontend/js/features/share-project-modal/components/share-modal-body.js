@@ -8,6 +8,7 @@ import SendInvitesNotice from './send-invites-notice'
 import { useEditorContext } from '../../../shared/context/editor-context'
 import { useProjectContext } from '../../../shared/context/project-context'
 import { useSplitTestContext } from '../../../shared/context/split-test-context'
+import { useMemo } from 'react'
 import { Row } from 'react-bootstrap'
 import PropTypes from 'prop-types'
 import RecaptchaConditions from '../../../shared/components/recaptcha-conditions'
@@ -17,8 +18,22 @@ export default function ShareModalBody() {
     splitTestVariants: PropTypes.object,
   })
 
+  const { members, invites, features } = useProjectContext()
   const { isProjectOwner } = useEditorContext()
-  const { invites, members } = useProjectContext()
+
+  // whether the project has not reached the collaborator limit
+  const canAddCollaborators = useMemo(() => {
+    if (!isProjectOwner || !features) {
+      return false
+    }
+
+    if (features.collaborators === -1) {
+      // infinite collaborators
+      return true
+    }
+
+    return members.length + invites.length < features.collaborators
+  }, [members, invites, features, isProjectOwner])
 
   switch (splitTestVariants['project-share-modal-paywall']) {
     case 'new-copy-top':
@@ -26,7 +41,7 @@ export default function ShareModalBody() {
         <>
           {isProjectOwner ? (
             <>
-              <SendInvites />
+              <SendInvites canAddCollaborators={canAddCollaborators} />
               <Row className="public-access-level" />
             </>
           ) : (
@@ -54,7 +69,7 @@ export default function ShareModalBody() {
           {isProjectOwner && (
             <>
               <br />
-              <LinkSharing />
+              <LinkSharing canAddCollaborators={canAddCollaborators} />
             </>
           )}
 
@@ -84,12 +99,16 @@ export default function ShareModalBody() {
             />
           ))}
 
-          {isProjectOwner ? <SendInvites /> : <SendInvitesNotice />}
+          {isProjectOwner ? (
+            <SendInvites canAddCollaborators={canAddCollaborators} />
+          ) : (
+            <SendInvitesNotice />
+          )}
 
           {isProjectOwner && (
             <>
               <br />
-              <LinkSharing />
+              <LinkSharing canAddCollaborators={canAddCollaborators} />
             </>
           )}
 
@@ -103,7 +122,9 @@ export default function ShareModalBody() {
     default:
       return (
         <>
-          {isProjectOwner && <LinkSharing />}
+          {isProjectOwner && (
+            <LinkSharing canAddCollaborators={canAddCollaborators} />
+          )}
 
           <OwnerInfo />
 
@@ -123,7 +144,11 @@ export default function ShareModalBody() {
             />
           ))}
 
-          {isProjectOwner ? <SendInvites /> : <SendInvitesNotice />}
+          {isProjectOwner ? (
+            <SendInvites canAddCollaborators={canAddCollaborators} />
+          ) : (
+            <SendInvitesNotice />
+          )}
 
           {!window.ExposedSettings.recaptchaDisabled?.invite && (
             <RecaptchaConditions />

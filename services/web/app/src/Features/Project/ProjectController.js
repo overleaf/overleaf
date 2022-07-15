@@ -968,6 +968,21 @@ const ProjectController = {
             }
           },
         ],
+        linkSharingUpgradePromptAssignment(cb) {
+          SplitTestHandler.getAssignment(
+            req,
+            res,
+            'link-sharing-upgrade-prompt',
+            (error, assignment) => {
+              // do not fail editor load if assignment fails
+              if (error) {
+                cb(null, { variant: 'default' })
+              } else {
+                cb(null, assignment)
+              }
+            }
+          )
+        },
       },
       (
         err,

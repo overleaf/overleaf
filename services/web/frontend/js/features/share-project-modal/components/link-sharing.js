@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import PropTypes from 'prop-types'
 import { Button, Col, Row } from 'react-bootstrap'
-import { Trans } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 import Tooltip from '../../../shared/components/tooltip'
 import Icon from '../../../shared/components/icon'
 import { useShareProjectContext } from './share-project-modal'
@@ -10,8 +10,10 @@ import CopyLink from '../../../shared/components/copy-link'
 import { useProjectContext } from '../../../shared/context/project-context'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import { useUserContext } from '../../../shared/context/user-context'
+import StartFreeTrialButton from '../../../shared/components/start-free-trial-button'
+import { useSplitTestContext } from '../../../shared/context/split-test-context'
 
-export default function LinkSharing() {
+export default function LinkSharing({ canAddCollaborators }) {
   const [inflight, setInflight] = useState(false)
 
   const { monitorRequest } = useShareProjectContext()
@@ -51,6 +53,7 @@ export default function LinkSharing() {
         <TokenBasedSharing
           setAccessLevel={setAccessLevel}
           inflight={inflight}
+          canAddCollaborators={canAddCollaborators}
         />
       )
 
@@ -68,6 +71,10 @@ export default function LinkSharing() {
     default:
       return null
   }
+}
+
+LinkSharing.propTypes = {
+  canAddCollaborators: PropTypes.bool,
 }
 
 function PrivateSharing({ setAccessLevel, inflight }) {
@@ -100,7 +107,7 @@ PrivateSharing.propTypes = {
   inflight: PropTypes.bool,
 }
 
-function TokenBasedSharing({ setAccessLevel, inflight }) {
+function TokenBasedSharing({ setAccessLevel, inflight, canAddCollaborators }) {
   const { tokens } = useProjectContext()
 
   return (
@@ -121,6 +128,7 @@ function TokenBasedSharing({ setAccessLevel, inflight }) {
         <span>&nbsp;&nbsp;</span>
         <LinkSharingInfo />
       </Col>
+      <LinkSharingUpgradePrompt canAddCollaborators={canAddCollaborators} />
       <Col xs={12} className="access-token-display-area">
         <div className="access-token-wrapper">
           <strong>
@@ -150,6 +158,7 @@ function TokenBasedSharing({ setAccessLevel, inflight }) {
 TokenBasedSharing.propTypes = {
   setAccessLevel: PropTypes.func.isRequired,
   inflight: PropTypes.bool,
+  canAddCollaborators: PropTypes.bool,
 }
 
 function LegacySharing({ accessLevel, setAccessLevel, inflight }) {
@@ -256,4 +265,52 @@ function LinkSharingInfo() {
       </a>
     </Tooltip>
   )
+}
+
+function LinkSharingUpgradePrompt({ canAddCollaborators }) {
+  const [startedFreeTrial, setStartedFreeTrial] = useState(false)
+  const { t } = useTranslation()
+  const { splitTestVariants } = useSplitTestContext()
+  const linkSharingUpgradePromptActive =
+    splitTestVariants['link-sharing-upgrade-prompt'] === 'active'
+
+  const user = useUserContext({
+    allowedFreeTrial: PropTypes.bool,
+  })
+
+  const showLinkSharingUpgradePrompt =
+    linkSharingUpgradePromptActive &&
+    user.allowedFreeTrial &&
+    canAddCollaborators
+
+  if (!showLinkSharingUpgradePrompt) {
+    return null
+  }
+
+  return (
+    <>
+      <Col xs={12} className="link-sharing-upgrade-prompt">
+        <p>
+          <Trans
+            i18nKey="premium_makes_collab_easier_with_features"
+            components={[<b />, <b />, <b />]} // eslint-disable-line react/jsx-key
+          />
+        </p>
+        <StartFreeTrialButton
+          buttonStyle="success"
+          setStartedFreeTrial={setStartedFreeTrial}
+          source="link-sharing"
+        />
+      </Col>
+      {startedFreeTrial && (
+        <p className="small teaser-refresh-label">
+          {t('refresh_page_after_starting_free_trial')}
+        </p>
+      )}
+    </>
+  )
+}
+
+LinkSharingUpgradePrompt.propTypes = {
+  canAddCollaborators: PropTypes.bool,
 }
