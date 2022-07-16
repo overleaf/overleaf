@@ -984,7 +984,6 @@
   "loading_billing_form": "Henter betalingsoplysning fra",
   "you_have_added_x_of_group_size_y": "Du har tilføjet <0>__addedUsersSize__</0> af <1>__groupSize__</1> tilgængelige medlemmer",
   "remove_from_group": "Fjern fra gruppe",
-  "group_account": "Gruppekonto",
   "registered": "Registreret",
   "no_members": "Ingen medlemmer",
   "add_more_members": "Tilføj flere medlemmer",

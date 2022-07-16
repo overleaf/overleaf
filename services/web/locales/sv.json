@@ -967,7 +967,6 @@
   "loading_billing_form": "Ladda betalningsinformationsformulär",
   "you_have_added_x_of_group_size_y": "Du har lagt till <0>__addedUsersSize__</0> av <1>__groupSize__</1> tillgängliga medlemmar",
   "remove_from_group": "Ta bort från grupp",
-  "group_account": "Gruppkonto",
   "registered": "Registrerad",
   "no_members": "Inga medlemmar",
   "add_more_members": "Lägg till fler medlemmar",

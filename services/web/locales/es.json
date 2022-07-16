@@ -348,7 +348,6 @@
   "loading_billing_form": "Cargando formulario de detalles de pago",
   "you_have_added_x_of_group_size_y": "Has agregado <0>__addedUsersSize__</0> de <1>__groupSize__</1> miembros disponibles",
   "remove_from_group": "Eliminar del grupo",
-  "group_account": "Cuenta grupal",
   "registered": "Registrado",
   "no_members": "Sin miembros",
   "add_more_members": "Agregar más miembros",
