@@ -441,7 +441,6 @@
   "loading_billing_form": "支払い明細フォームの読み込み中",
   "you_have_added_x_of_group_size_y": "<1>__groupSize__</1> メンバーの <0>__addedUsersSize__</0> を追加しました。",
   "remove_from_group": "グループから削除",
-  "group_account": "グループアカウント",
   "registered": "登録済み",
   "no_members": "メンバーはいません",
   "add_more_members": "メンバーの追加",

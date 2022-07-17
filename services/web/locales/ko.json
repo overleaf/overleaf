@@ -577,7 +577,6 @@
   "loading_billing_form": "청구서 세부사항 양식 로딩중",
   "you_have_added_x_of_group_size_y": "이용가능한<1>__groupSize__</1>멤버 중 <0>__addedUsersSize__</0>멤버가 추가되었습니다",
   "remove_from_group": "그룹에서 삭제하기",
-  "group_account": "그룹 계정",
   "registered": "등록됨",
   "no_members": "멤버없음",
   "add_more_members": "더많은 멤버 추가",

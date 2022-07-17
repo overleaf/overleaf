@@ -1050,7 +1050,6 @@
   "loading_billing_form": "正在加载帐单细节表格",
   "you_have_added_x_of_group_size_y": "您已经添加 <0>__addedUsersSize__</0> / <1>__groupSize__</1> 个可用成员。",
   "remove_from_group": "从群组中移除",
-  "group_account": "群组账户",
   "registered": "已注册",
   "no_members": "没有成员",
   "add_more_members": "添加更多成员",

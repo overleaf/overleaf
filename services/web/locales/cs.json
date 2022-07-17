@@ -265,7 +265,6 @@
   "loading_billing_form": "Načítám formulář s fakturačními údaji",
   "you_have_added_x_of_group_size_y": "Přidal jste <0>__addedUsersSize__</0> z <1>__groupSize__</1> možných členů",
   "remove_from_group": "Odstranit ze skupiny",
-  "group_account": "Účet skupiny",
   "registered": "Registrováno",
   "no_members": "Žádní členové",
   "add_more_members": "Přidat více členů",
