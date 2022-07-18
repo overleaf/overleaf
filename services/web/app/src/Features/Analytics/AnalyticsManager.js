@@ -243,7 +243,7 @@ function _checkPropertyValue(propertyValue) {
 }
 
 function _isAttributeValid(attribute) {
-  return attribute && /^[a-zA-Z0-9-_.:;,/]+$/.test(attribute)
+  return !attribute || /^[a-zA-Z0-9-_.:;,/]+$/.test(attribute)
 }
 
 function _isSegmentationValid(segmentation) {

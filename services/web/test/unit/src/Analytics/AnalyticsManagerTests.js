@@ -209,6 +209,35 @@ describe('AnalyticsManager', function () {
         }
       )
     })
+
+    it('empty field in event segmentation', async function () {
+      const timings = null
+      await this.AnalyticsManager.recordEventForUser(
+        this.fakeUserId,
+        'an_event',
+        { compileTime: timings?.compileE2E }
+      )
+      sinon.assert.calledWithMatch(this.analyticsEventsQueue.add, 'event', {
+        analyticsId: this.analyticsId,
+        event: 'an_event',
+        segmentation: { compileTime: undefined },
+        isLoggedIn: true,
+      })
+    })
+
+    it('boolean field in event segmentation', async function () {
+      await this.AnalyticsManager.recordEventForUser(
+        this.fakeUserId,
+        'an_event',
+        { isAutoCompile: false }
+      )
+      sinon.assert.calledWithMatch(this.analyticsEventsQueue.add, 'event', {
+        analyticsId: this.analyticsId,
+        event: 'an_event',
+        segmentation: { isAutoCompile: false },
+        isLoggedIn: true,
+      })
+    })
   })
 
   describe('AnalyticsIdMiddleware', function () {
