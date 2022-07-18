@@ -19,8 +19,8 @@ describe('<ToolbarHeader />', function () {
     hasPublishPermissions: true,
     trackChangesVisible: true,
     handleChangeLayout: () => {},
-    pdfLayout: '',
-    view: '',
+    pdfLayout: 'sideBySide',
+    view: 'editor',
     reattach: () => {},
     detach: () => {},
   }

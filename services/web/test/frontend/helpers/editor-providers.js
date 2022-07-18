@@ -45,7 +45,7 @@ export function EditorProviders({
       fileRefs: [],
     },
   ],
-  ui = { view: null, pdfLayout: 'flat', chatOpen: true },
+  ui = { view: 'editor', pdfLayout: 'sideBySide', chatOpen: true },
   fileTreeManager = {
     findEntityById: () => null,
     findEntityByPath: () => null,
