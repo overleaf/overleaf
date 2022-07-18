@@ -1,6 +1,9 @@
 {
   "name": "overleaf",
   "private": true,
+  "dependencies": {
+    "patch-package": "^6.4.7"
+  },
   "devDependencies": {
     "eslint": "^8.15.0",
     "eslint-config-prettier": "^8.5.0",
@@ -13,7 +16,6 @@
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-promise": "^6.0.0",
     "nodemon": "^2.0.16",
-    "patch-package": "^6.4.7",
     "prettier": "2.5.1"
   },
   "scripts": {
