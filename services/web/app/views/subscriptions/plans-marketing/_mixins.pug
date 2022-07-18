@@ -132,13 +132,6 @@ mixin gen_localized_price_for_plan_view(plan, view)
 			data-ol-currencyCode=currencyCode
 		) #{settings.localizedPlanPricing[currencyCode][plan][view]}
 
-mixin gen_localized_undiscounted_price_for_plan_view_personal(view)
-	for currencyCode in Object.keys(settings.localizedPlanPricing)
-		span(
-			hidden=(currencyCode !== recommendedCurrency)
-			data-ol-currencyCode=currencyCode
-		) #{settings.localizedPlanPricing[currencyCode]['personal']['withoutDiscount'][view]}
-
 mixin gen_localized_undiscounted_price_for_plan_view(plan)
 	for currencyCode in Object.keys(settings.localizedPlanPricing)
 		span(
@@ -155,18 +148,6 @@ mixin gen_localized_price_for_plan(plan)
 		+gen_localized_price_for_plan_view(plan, 'annual')
 		span.small /yr
 
-mixin gen_localized_undiscounted_price_for_plan_personal()
-	div(data-ol-view='monthly')
-		strike.undiscounted-price.small
-			span.sr-only Price reduced from
-			+gen_localized_undiscounted_price_for_plan_view_personal('monthly')
-			| /mo
-	div(hidden data-ol-view='annual')
-		strike.undiscounted-price.small
-			span.sr-only Price reduced from
-			+gen_localized_undiscounted_price_for_plan_view_personal('annual')
-			| /yr
-
 mixin gen_localized_undiscounted_price_for_plan(plan)
 	div(hidden data-ol-view='annual')
 		strike.undiscounted-price.small
@@ -178,7 +159,7 @@ mixin gen_localized_undiscounted_price_for_plan(plan)
 mixin price_personal
 	+gen_localized_price_for_plan('personal')
 mixin price_personal_undiscounted
-	+gen_localized_undiscounted_price_for_plan_personal()
+	+gen_localized_undiscounted_price_for_plan('personal')
 mixin price_collaborator
 	+gen_localized_price_for_plan('collaborator')
 mixin price_collaborator_undiscounted
@@ -261,7 +242,6 @@ mixin allCardsAndControls(controlsRowSpaced, listLocation)
 									h2 #{translate("personal")}
 								.card-byline
 									h5.tagline #{translate("tagline_personal")}
-									h5.special-offer #{translate("limited_time_discount")}
 								.circle
 									+price_personal
 									+price_personal_undiscounted
