@@ -1,3 +1,4 @@
+const Path = require('path')
 const SandboxedModule = require('sandboxed-module')
 const { expect } = require('chai')
 const sinon = require('sinon')
@@ -105,11 +106,21 @@ describe('CompileManager', function () {
       parseEditOutput: sinon.stub(),
     }
 
+    this.dirStats = {
+      isDirectory: sinon.stub().returns(true),
+    }
+    this.fileStats = {
+      isFile: sinon.stub().returns(true),
+    }
     this.fsPromises = {
       lstat: sinon.stub(),
       stat: sinon.stub(),
       readFile: sinon.stub(),
     }
+    this.fsPromises.lstat.withArgs(this.compileDir).resolves(this.dirStats)
+    this.fsPromises.stat
+      .withArgs(Path.join(this.compileDir, 'output.synctex.gz'))
+      .resolves(this.fileStats)
     this.fse = {
       ensureDir: sinon.stub().resolves(),
     }
@@ -198,6 +209,8 @@ describe('CompileManager', function () {
             environment: this.env,
             compileGroup: this.compileGroup,
             stopOnFirstError: this.request.stopOnFirstError,
+            stats: sinon.match.object,
+            timings: sinon.match.object,
           }
         )
       })
@@ -254,6 +267,8 @@ describe('CompileManager', function () {
             },
             compileGroup: this.compileGroup,
             stopOnFirstError: this.request.stopOnFirstError,
+            stats: sinon.match.object,
+            timings: sinon.match.object,
           }
         )
       })
@@ -279,21 +294,57 @@ describe('CompileManager', function () {
             environment: this.env,
             compileGroup: this.compileGroup,
             stopOnFirstError: this.request.stopOnFirstError,
+            stats: sinon.match.object,
+            timings: sinon.match.object,
           }
         )
+      })
+    })
+
+    describe('when the compile times out', function () {
+      beforeEach(async function () {
+        const error = new Error('timed out!')
+        error.timedout = true
+        this.LatexRunner.promises.runLatex.rejects(error)
+        await expect(
+          this.CompileManager.promises.doCompileWithLock(this.request)
+        ).to.be.rejected
+      })
+
+      it('should clear the compile directory', function () {
+        expect(this.child_process.execFile).to.have.been.calledWith('rm', [
+          '-r',
+          '-f',
+          '--',
+          this.compileDir,
+        ])
+      })
+    })
+
+    describe('when the compile is manually stopped', function () {
+      beforeEach(async function () {
+        const error = new Error('terminated!')
+        error.terminated = true
+        this.LatexRunner.promises.runLatex.rejects(error)
+        await expect(
+          this.CompileManager.promises.doCompileWithLock(this.request)
+        ).to.be.rejected
+      })
+
+      it('should clear the compile directory', function () {
+        expect(this.child_process.execFile).to.have.been.calledWith('rm', [
+          '-r',
+          '-f',
+          '--',
+          this.compileDir,
+        ])
       })
     })
   })
 
   describe('clearProject', function () {
-    describe('succesfully', function () {
+    describe('successfully', function () {
       beforeEach(async function () {
-        this.Settings.compileDir = 'compiles'
-        this.fsPromises.lstat.resolves({
-          isDirectory() {
-            return true
-          },
-        })
         await this.CompileManager.promises.clearProject(
           this.projectId,
           this.userId
@@ -312,12 +363,6 @@ describe('CompileManager', function () {
 
     describe('with a non-success status code', function () {
       beforeEach(async function () {
-        this.Settings.compileDir = 'compiles'
-        this.fsPromises.lstat.resolves({
-          isDirectory() {
-            return true
-          },
-        })
         this.child_process.execFile.yields(new Error('oops'))
         await expect(
           this.CompileManager.promises.clearProject(this.projectId, this.userId)
@@ -349,11 +394,6 @@ describe('CompileManager', function () {
 
     describe('syncFromCode', function () {
       beforeEach(function () {
-        this.fsPromises.stat.resolves({
-          isFile() {
-            return true
-          },
-        })
         this.records = [{ page: 1, h: 2, v: 3, width: 4, height: 5 }]
         this.SynctexOutputParser.parseViewOutput
           .withArgs(this.commandOutput)
@@ -434,11 +474,6 @@ describe('CompileManager', function () {
 
     describe('syncFromPdf', function () {
       beforeEach(function () {
-        this.fsPromises.stat.resolves({
-          isFile() {
-            return true
-          },
-        })
         this.records = [{ file: 'main.tex', line: 1, column: 1 }]
         this.SynctexOutputParser.parseEditOutput
           .withArgs(this.commandOutput, this.compileDir)
@@ -515,7 +550,9 @@ describe('CompileManager', function () {
   describe('wordcount', function () {
     beforeEach(async function () {
       this.stdout = 'Encoding: ascii\nWords in text: 2'
-      this.fsPromises.readFile.resolves(this.stdout)
+      this.fsPromises.readFile
+        .withArgs(Path.join(this.compileDir, 'main.tex.wc'))
+        .resolves(this.stdout)
 
       this.timeout = 60 * 1000
       this.filename = 'main.tex'

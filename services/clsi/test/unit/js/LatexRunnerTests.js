@@ -43,6 +43,8 @@ describe('LatexRunner', function () {
     this.timeout = 42000
     this.flags = []
     this.stopOnFirstError = false
+    this.stats = {}
+    this.timings = {}
 
     this.call = function (callback) {
       this.LatexRunner.runLatex(
@@ -57,11 +59,10 @@ describe('LatexRunner', function () {
           compileGroup: this.compileGroup,
           flags: this.flags,
           stopOnFirstError: this.stopOnFirstError,
+          timings: this.timings,
+          stats: this.stats,
         },
-        (error, output, stats, timings) => {
-          this.timings = timings
-          callback(error)
-        }
+        callback
       )
     }
   })

@@ -29,6 +29,8 @@ function runLatex(projectId, options, callback) {
     flags,
     compileGroup,
     stopOnFirstError,
+    stats,
+    timings,
   } = options
   const compiler = options.compiler || 'pdflatex'
   const timeout = options.timeout || 60000 // milliseconds
@@ -77,14 +79,12 @@ function runLatex(projectId, options, callback) {
         output?.stderr?.match(/^Run number \d+ of .*latex/gm)?.length || 0
       const failed = output?.stdout?.match(/^Latexmk: Errors/m) != null ? 1 : 0
       // counters from latexmk output
-      const stats = {}
       stats['latexmk-errors'] = failed
       stats['latex-runs'] = runs
       stats['latex-runs-with-errors'] = failed ? runs : 0
       stats[`latex-runs-${runs}`] = 1
       stats[`latex-runs-with-errors-${runs}`] = failed ? 1 : 0
       // timing information from /usr/bin/time
-      const timings = {}
       const stderr = (output && output.stderr) || ''
       if (stderr.includes('Command being timed:')) {
         // Add metrics for runs with `$ time -v ...`
@@ -97,7 +97,7 @@ function runLatex(projectId, options, callback) {
       }
       // record output files
       _writeLogOutput(projectId, directory, output, () => {
-        callback(error, output, stats, timings)
+        callback(error, output)
       })
     }
   )
@@ -194,16 +194,7 @@ module.exports = {
   runLatex,
   killLatex,
   promises: {
-    runLatex: (projectId, options) =>
-      new Promise((resolve, reject) => {
-        runLatex(projectId, options, (err, output, stats, timing) => {
-          if (err) {
-            reject(err)
-          } else {
-            resolve({ output, stats, timing })
-          }
-        })
-      }),
+    runLatex: promisify(runLatex),
     killLatex: promisify(killLatex),
   },
 }

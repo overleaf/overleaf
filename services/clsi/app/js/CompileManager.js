@@ -62,7 +62,8 @@ async function doCompileWithLock(request) {
 
 async function doCompile(request) {
   const compileDir = getCompileDir(request.project_id, request.user_id)
-  const outputDir = getOutputDir(request.project_id, request.user_id)
+  const stats = {}
+  const timings = {}
 
   const timerE2E = new Metrics.Timer(
     'compile-e2e-v2',
@@ -109,7 +110,7 @@ async function doCompile(request) {
     },
     'written files to disk'
   )
-  const syncStage = writeToDiskTimer.done()
+  timings.sync = writeToDiskTimer.done()
 
   // set up environment variables for chktex
   const env = {}
@@ -170,9 +171,8 @@ async function doCompile(request) {
   Metrics.inc(`compiles-with-image.${tag}`, 1, request.metricsOpts)
   const compileName = getCompileName(request.project_id, request.user_id)
 
-  let compileResult
   try {
-    compileResult = await LatexRunner.promises.runLatex(compileName, {
+    await LatexRunner.promises.runLatex(compileName, {
       directory: compileDir,
       mainFile: request.rootResourcePath,
       compiler: request.compiler,
@@ -182,6 +182,8 @@ async function doCompile(request) {
       environment: env,
       compileGroup: request.compileGroup,
       stopOnFirstError: request.stopOnFirstError,
+      stats,
+      timings,
     })
 
     // We use errors to return the validation state. It would be nice to use a
@@ -205,26 +207,29 @@ async function doCompile(request) {
       error.validate = 'fail'
     }
 
-    // compile was killed by user, was a validation, or a compile which failed validation
-    if (error.terminated || error.validate || error.timedout) {
-      // record timeout errors as a separate counter, success is recorded later
-      if (error.timedout) {
-        Metrics.inc('compiles-timeout', 1, request.metricsOpts)
-      }
-
-      const { outputFiles } = await OutputFileFinder.promises.findOutputFiles(
-        resourceList,
-        compileDir
-      )
-      error.outputFiles = outputFiles // return output files so user can check logs
+    // record timeout errors as a separate counter, success is recorded later
+    if (error.timedout) {
+      Metrics.inc('compiles-timeout', 1, request.metricsOpts)
     }
+
+    const outputFiles = await _saveOutputFiles({
+      request,
+      compileDir,
+      resourceList,
+      stats,
+      timings,
+    })
+    error.outputFiles = outputFiles // return output files so user can check logs
+
+    // Clear project if this compile was abruptly terminated
+    if (error.terminated || error.timedout) {
+      await clearProject(request.project_id, request.user_id)
+    }
+
     throw error
   }
 
   // compile completed normally
-  let { stats, timings } = compileResult
-  stats = stats || {}
-  timings = timings || {}
   Metrics.inc('compiles-succeeded', 1, request.metricsOpts)
   for (const metricKey in stats) {
     const metricValue = stats[metricKey]
@@ -275,11 +280,38 @@ async function doCompile(request) {
   // Emit compile time.
   timings.compile = ts
 
-  const outputStageTimer = new Metrics.Timer(
+  const outputFiles = await _saveOutputFiles({
+    request,
+    compileDir,
+    resourceList,
+    stats,
+    timings,
+  })
+
+  // Emit e2e compile time.
+  timings.compileE2E = timerE2E.done()
+  Metrics.timing('compile-e2e-v2', timings.compileE2E, 1, request.metricsOpts)
+
+  if (stats['pdf-size']) {
+    emitPdfStats(stats, timings, request)
+  }
+
+  return { outputFiles, stats, timings }
+}
+
+async function _saveOutputFiles({
+  request,
+  compileDir,
+  resourceList,
+  stats,
+  timings,
+}) {
+  const timer = new Metrics.Timer(
     'process-output-files',
     1,
     request.metricsOpts
   )
+  const outputDir = getOutputDir(request.project_id, request.user_id)
 
   let { outputFiles } = await OutputFileFinder.promises.findOutputFiles(
     resourceList,
@@ -298,19 +330,8 @@ async function doCompile(request) {
     logger.err({ projectId, userId, err }, 'failed to save output files')
   }
 
-  const outputStage = outputStageTimer.done()
-  timings.sync = syncStage
-  timings.output = outputStage
-
-  // Emit e2e compile time.
-  timings.compileE2E = timerE2E.done()
-  Metrics.timing('compile-e2e-v2', timings.compileE2E, 1, request.metricsOpts)
-
-  if (stats['pdf-size']) {
-    emitPdfStats(stats, timings, request)
-  }
-
-  return { outputFiles, stats, timings }
+  timings.output = timer.done()
+  return outputFiles
 }
 
 async function stopCompile(projectId, userId) {
