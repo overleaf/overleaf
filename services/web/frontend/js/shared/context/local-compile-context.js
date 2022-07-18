@@ -71,7 +71,7 @@ export const CompileContextPropTypes = {
     stoppedOnFirstError: PropTypes.bool.isRequired,
     uncompiled: PropTypes.bool,
     validationIssues: PropTypes.object,
-    firstRenderDone: PropTypes.func,
+    firstRenderDone: PropTypes.func.isRequired,
     cleanupCompileResult: PropTypes.func,
   }),
 }
@@ -128,7 +128,7 @@ export function LocalCompileProvider({ children }) {
   const [data, setData] = useState()
 
   // callback to be invoked for PdfJsMetrics
-  const [firstRenderDone, setFirstRenderDone] = useState()
+  const [firstRenderDone, setFirstRenderDone] = useState(() => () => {})
 
   // latencies of compile/pdf download/rendering
   const [deliveryLatencies, setDeliveryLatencies] = useState({})

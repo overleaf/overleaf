@@ -57,54 +57,69 @@ function PdfJsViewer({ url, pdfFile }) {
     [setError]
   )
 
-  // fetch and render times
-  const times = useRef({})
+  const [startFetch, setStartFetch] = useState(0)
 
-  // listen for initialize event
+  // listen for events and trigger rendering.
+  // Do everything in one effect to mitigate de-sync between events.
   useEffect(() => {
-    if (pdfJsWrapper && firstRenderDone) {
-      const handlePagesinit = () => {
-        setInitialised(true)
-        times.current.timePDFFetched = performance.now()
-        const visible = !document.hidden
-        if (!visible) {
-          // Rendering does not start in case we are hidden.
-          firstRenderDone(times.current)
-        }
-      }
-      // `pagesinit` fires when the data for rendering the first page is ready.
-      pdfJsWrapper.eventBus.on('pagesinit', handlePagesinit)
-      return () => pdfJsWrapper.eventBus.off('pagesinit', handlePagesinit)
-    }
-  }, [pdfJsWrapper, firstRenderDone, times])
+    if (!pdfJsWrapper || !firstRenderDone) return
 
-  // list for page rendered event
-  useEffect(() => {
-    if (pdfJsWrapper && firstRenderDone) {
-      const handleRendered = () => {
-        const visible = !document.hidden
-        if (!visible) {
-          // The render time is not accurate in case we are hidden.
-          firstRenderDone(times.current)
-        } else {
-          times.current.timePDFRendered = performance.now()
-          firstRenderDone(times.current)
-        }
-        // Only get the times for the first page.
-        pdfJsWrapper.eventBus.off('pagerendered', handleRendered)
+    let timePDFFetched
+    let timePDFRendered
+    const submitLatencies = () => {
+      if (!timePDFFetched) {
+        // The pagerendered event was attached after pagesinit fired. :/
+        return
       }
-      // `pagerendered` fires when a page was actually rendered.
-      pdfJsWrapper.eventBus.on('pagerendered', handleRendered)
-      return () => pdfJsWrapper.eventBus.off('pagerendered', handleRendered)
+
+      const latencyFetch = Math.ceil(timePDFFetched - startFetch)
+      let latencyRender
+      if (timePDFRendered) {
+        // The renderer does not yield in case the browser tab is hidden.
+        // It will yield when the browser tab is visible again.
+        // This will skew our performance metrics for rendering!
+        // We are omitting the render time in case we detect this state.
+        latencyRender = Math.ceil(timePDFRendered - timePDFFetched)
+      }
+      firstRenderDone({ latencyFetch, latencyRender })
     }
-  }, [pdfJsWrapper, firstRenderDone, times])
+
+    const handlePagesinit = () => {
+      setInitialised(true)
+      timePDFFetched = performance.now()
+      if (document.hidden) {
+        // Rendering does not start in case we are hidden. See comment above.
+        submitLatencies()
+      }
+    }
+
+    const handleRendered = () => {
+      if (!document.hidden) {
+        // The render time is not accurate in case we are hidden. See above.
+        timePDFRendered = performance.now()
+      }
+      submitLatencies()
+
+      // Only get the times for the first page.
+      pdfJsWrapper.eventBus.off('pagerendered', handleRendered)
+    }
+
+    // `pagesinit` fires when the data for rendering the first page is ready.
+    pdfJsWrapper.eventBus.on('pagesinit', handlePagesinit)
+    // `pagerendered` fires when a page was actually rendered.
+    pdfJsWrapper.eventBus.on('pagerendered', handleRendered)
+    return () => {
+      pdfJsWrapper.eventBus.off('pagesinit', handlePagesinit)
+      pdfJsWrapper.eventBus.off('pagerendered', handleRendered)
+    }
+  }, [pdfJsWrapper, firstRenderDone, startFetch])
 
   // load the PDF document from the URL
   useEffect(() => {
     if (pdfJsWrapper && url) {
       setInitialised(false)
       setError(undefined)
-      times.current = {}
+      setStartFetch(performance.now())
 
       pdfJsWrapper.loadDocument(url, pdfFile).catch(error => {
         console.error(error)
@@ -112,7 +127,7 @@ function PdfJsViewer({ url, pdfFile }) {
       })
       return () => pdfJsWrapper.abortDocumentLoading()
     }
-  }, [pdfJsWrapper, url, pdfFile, setError, times])
+  }, [pdfJsWrapper, url, pdfFile, setError, setStartFetch])
 
   // listen for scroll events
   useEffect(() => {
