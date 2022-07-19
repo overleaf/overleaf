@@ -152,9 +152,7 @@ class User {
       this.setExtraAttributes(user)
       AuthenticationManager.setUserPasswordInV2(user, this.password, error => {
         if (error != null) {
-          if (error.name !== 'PasswordMustBeDifferentError') {
-            return callback(error)
-          }
+          return callback(error)
         }
         this.mongoUpdate({ $set: { emails: this.emails } }, error => {
           if (error != null) {
@@ -677,7 +675,7 @@ class User {
     )
   }
 
-  changePassword(newPassword, callback) {
+  changePassword(callback) {
     this.getCsrfToken(error => {
       if (error != null) {
         return callback(error)
@@ -687,17 +685,11 @@ class User {
           url: '/user/password/update',
           json: {
             currentPassword: this.password,
-            newPassword1: newPassword,
-            newPassword2: newPassword,
+            newPassword1: this.password,
+            newPassword2: this.password,
           },
         },
-        err => {
-          if (err) {
-            return callback(err)
-          }
-          this.password = newPassword
-          callback()
-        }
+        callback
       )
     })
   }

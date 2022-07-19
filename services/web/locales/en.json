@@ -328,7 +328,6 @@
   "not_found_error_from_the_supplied_url": "The link to open this content on Overleaf pointed to a file that could not be found. If this keeps happening for links on a particular site, please report this to them.",
   "too_many_requests": "Too many requests were received in a short space of time. Please wait for a few moments and try again.",
   "password_change_passwords_do_not_match": "Passwords do not match",
-  "password_change_password_must_be_different": "The password you entered is the same as your current password. Please try a different password.",
   "password_change_old_password_wrong": "Your old password is wrong",
   "github_for_link_shared_projects": "This project was accessed via link-sharing and won’t be synchronised with your GitHub unless you are invited via e-mail by the project owner.",
   "browsing_project_latest_for_pseudo_label": "Browsing your project’s current state",

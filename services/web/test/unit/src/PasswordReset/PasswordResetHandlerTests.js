@@ -335,30 +335,6 @@ describe('PasswordResetHandler', function () {
         })
 
         describe('errors', function () {
-          describe('via setUserPassword', function () {
-            beforeEach(function () {
-              this.PasswordResetHandler.promises.getUserForPasswordResetToken =
-                sinon.stub().withArgs(this.token).resolves(this.user)
-              this.AuthenticationManager.promises.setUserPassword
-                .withArgs(this.user, this.password)
-                .rejects()
-            })
-            it('should return the error', function (done) {
-              this.PasswordResetHandler.setNewUserPassword(
-                this.token,
-                this.password,
-                this.auditLog,
-                (error, _result) => {
-                  expect(error).to.exist
-                  expect(
-                    this.UserAuditLogHandler.promises.addEntry.callCount
-                  ).to.equal(0)
-                  done()
-                }
-              )
-            })
-          })
-
           describe('via UserAuditLogHandler', function () {
             beforeEach(function () {
               this.PasswordResetHandler.promises.getUserForPasswordResetToken =
@@ -378,7 +354,7 @@ describe('PasswordResetHandler', function () {
                     this.UserAuditLogHandler.promises.addEntry.callCount
                   ).to.equal(1)
                   expect(this.AuthenticationManager.promises.setUserPassword).to
-                    .have.been.called
+                    .not.have.been.called
                   done()
                 }
               )
