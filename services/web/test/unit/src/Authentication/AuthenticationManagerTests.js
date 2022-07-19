@@ -181,6 +181,9 @@ describe('AuthenticationManager', function () {
         }
         this.db.users.updateOne = sinon
         this.User.findOne = sinon.stub().callsArgWith(2, null, this.user)
+        this.AuthenticationManager.authenticate = sinon
+          .stub()
+          .callsArgWith(2, null, null)
         this.db.users.updateOne = sinon
           .stub()
           .callsArgWith(2, null, { modifiedCount: 1 })
@@ -614,6 +617,29 @@ describe('AuthenticationManager', function () {
       this.bcrypt.hash = sinon.stub().callsArgWith(2, null, this.hashedPassword)
       this.User.findOne = sinon.stub().callsArgWith(2, null, this.user)
       this.db.users.updateOne = sinon.stub().callsArg(2)
+      this.AuthenticationManager.authenticate = sinon
+        .stub()
+        .callsArgWith(2, null, null)
+    })
+
+    describe('same as previous password', function () {
+      beforeEach(function () {
+        this.AuthenticationManager.authenticate = sinon
+          .stub()
+          .callsArgWith(2, null, this.user)
+      })
+
+      it('should return an error', function (done) {
+        this.AuthenticationManager.setUserPassword(
+          this.user,
+          this.password,
+          err => {
+            expect(err).to.exist
+            expect(err.name).to.equal('PasswordMustBeDifferentError')
+            done()
+          }
+        )
+      })
     })
 
     describe('too long', function () {

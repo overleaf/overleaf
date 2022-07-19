@@ -93,16 +93,16 @@ async function setNewUserPassword(token, password, auditLog) {
     }
   }
 
+  const reset = await AuthenticationManager.promises.setUserPassword(
+    user,
+    password
+  )
+
   await UserAuditLogHandler.promises.addEntry(
     user._id,
     'reset-password',
     auditLog.initiatorId,
     auditLog.ip
-  )
-
-  const reset = await AuthenticationManager.promises.setUserPassword(
-    user,
-    password
   )
 
   return { found: true, reset, userId: user._id }

@@ -7,6 +7,7 @@ const {
   InvalidEmailError,
   InvalidPasswordError,
   ParallelLoginError,
+  PasswordMustBeDifferentError,
 } = require('./AuthenticationErrors')
 const util = require('util')
 const HaveIBeenPwned = require('./HaveIBeenPwned')
@@ -182,31 +183,45 @@ const AuthenticationManager = {
     if (validationError) {
       return callback(validationError)
     }
-    this.hashPassword(password, function (error, hash) {
-      if (error) {
-        return callback(error)
-      }
-      db.users.updateOne(
-        {
-          _id: ObjectId(user._id.toString()),
-        },
-        {
-          $set: {
-            hashedPassword: hash,
-          },
-          $unset: {
-            password: true,
-          },
-        },
-        function (updateError, result) {
-          if (updateError) {
-            return callback(updateError)
-          }
-          _checkWriteResult(result, callback)
-          HaveIBeenPwned.checkPasswordForReuseInBackground(password)
+    // check if we can log in with this password. In which case we should reject it,
+    // because it is the same as the existing password.
+    AuthenticationManager.authenticate(
+      { _id: user._id },
+      password,
+      (err, authedUser) => {
+        if (err) {
+          return callback(err)
         }
-      )
-    })
+        if (authedUser) {
+          return callback(new PasswordMustBeDifferentError())
+        }
+        this.hashPassword(password, function (error, hash) {
+          if (error) {
+            return callback(error)
+          }
+          db.users.updateOne(
+            {
+              _id: ObjectId(user._id.toString()),
+            },
+            {
+              $set: {
+                hashedPassword: hash,
+              },
+              $unset: {
+                password: true,
+              },
+            },
+            function (updateError, result) {
+              if (updateError) {
+                return callback(updateError)
+              }
+              _checkWriteResult(result, callback)
+              HaveIBeenPwned.checkPasswordForReuseInBackground(password)
+            }
+          )
+        })
+      }
+    )
   },
 
   _passwordCharactersAreValid(password) {

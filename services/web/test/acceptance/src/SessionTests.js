@@ -256,7 +256,7 @@ describe('Sessions', function () {
 
           // password reset from second session, should erase two of the three sessions
           next => {
-            this.user2.changePassword(err => next(err))
+            this.user2.changePassword(`password${Date.now()}`, err => next(err))
           },
 
           next => {

@@ -234,6 +234,25 @@ describe('PasswordReset', function () {
         const auditLog = userHelper.getAuditLogWithoutNoise()
         expect(auditLog.length).to.equal(1)
       })
+
+      it('when the password is the same as current, should return 400 and not log the change', async function () {
+        // send reset request
+        response = await userHelper.request.post('/user/password/set', {
+          form: {
+            passwordResetToken: token,
+            password: userHelper.getDefaultPassword(),
+          },
+          simple: false,
+        })
+        expect(response.statusCode).to.equal(400)
+        expect(JSON.parse(response.body).message.key).to.equal(
+          'password-must-be-different'
+        )
+        userHelper = await UserHelper.getUser({ email })
+
+        const auditLog = userHelper.getAuditLogWithoutNoise()
+        expect(auditLog).to.deep.equal([])
+      })
     })
   })
   describe('without a valid token', function () {

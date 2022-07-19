@@ -78,6 +78,12 @@ async function setNewUserPassword(req, res, next) {
           key: 'invalid-password',
         },
       })
+    } else if (error.name === 'PasswordMustBeDifferentError') {
+      return res.status(400).json({
+        message: {
+          key: 'password-must-be-different',
+        },
+      })
     } else {
       return res.status(500).json({
         message: req.i18n.translate('error_performing_request'),
