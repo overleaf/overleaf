@@ -1,84 +1,43 @@
-/* eslint-disable
-    no-return-assign,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+const Path = require('path')
+const fsPromises = require('fs/promises')
+const { expect } = require('chai')
+const mockFs = require('mock-fs')
 const SandboxedModule = require('sandboxed-module')
-const sinon = require('sinon')
-const modulePath = require('path').join(
-  __dirname,
-  '../../../app/js/DraftModeManager'
-)
+
+const MODULE_PATH = Path.join(__dirname, '../../../app/js/DraftModeManager')
 
 describe('DraftModeManager', function () {
   beforeEach(function () {
-    return (this.DraftModeManager = SandboxedModule.require(modulePath, {
+    this.DraftModeManager = SandboxedModule.require(MODULE_PATH, {
       requires: {
-        fs: (this.fs = {}),
+        'fs/promises': fsPromises,
       },
-    }))
-  })
-
-  describe('_injectDraftOption', function () {
-    it('should add draft option into documentclass with existing options', function () {
-      return this.DraftModeManager._injectDraftOption(`\
-\\documentclass[a4paper,foo=bar]{article}\
-`).should.equal(`\
-\\documentclass[draft,a4paper,foo=bar]{article}\
-`)
     })
-
-    return it('should add draft option into documentclass with no options', function () {
-      return this.DraftModeManager._injectDraftOption(`\
-\\documentclass{article}\
-`).should.equal(`\
-\\documentclass[draft]{article}\
-`)
-    })
-  })
-
-  return describe('injectDraftMode', function () {
-    beforeEach(function () {
-      this.filename = '/mock/filename.tex'
-      this.callback = sinon.stub()
-      const content = `\
+    this.filename = '/mock/filename.tex'
+    this.contents = `\
 \\documentclass{article}
 \\begin{document}
 Hello world
 \\end{document}\
 `
-      this.fs.readFile = sinon.stub().callsArgWith(2, null, content)
-      this.fs.writeFile = sinon.stub().callsArg(2)
-      return this.DraftModeManager.injectDraftMode(this.filename, this.callback)
+    mockFs({
+      [this.filename]: this.contents,
     })
+  })
 
-    it('should read the file', function () {
-      return this.fs.readFile
-        .calledWith(this.filename, 'utf8')
-        .should.equal(true)
-    })
+  afterEach(function () {
+    mockFs.restore()
+  })
 
-    it('should write the modified file', function () {
-      return this.fs.writeFile
-        .calledWith(
-          this.filename,
-          `\
-\\documentclass[draft]{article}
-\\begin{document}
-Hello world
-\\end{document}\
-`
-        )
-        .should.equal(true)
-    })
-
-    return it('should call the callback', function () {
-      return this.callback.called.should.equal(true)
+  describe('injectDraftMode', function () {
+    it('prepends a special command to the beginning of the file', async function () {
+      await this.DraftModeManager.promises.injectDraftMode(this.filename)
+      const contents = await fsPromises.readFile(this.filename, {
+        encoding: 'utf8',
+      })
+      expect(contents).to.equal(
+        '\\PassOptionsToPackage{draft}{graphicx}' + this.contents
+      )
     })
   })
 })
