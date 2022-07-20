@@ -311,10 +311,6 @@ function pdfStreamHash(buffer) {
 async function writePdfStream(dir, hash, buffer) {
   const filename = Path.join(dir, hash)
   const atomicWriteFilename = filename + '~'
-  if (Settings.enablePdfCachingDark) {
-    // Write an empty file in dark mode.
-    buffer = Buffer.alloc(0)
-  }
   try {
     await fs.promises.writeFile(atomicWriteFilename, buffer)
     await fs.promises.rename(atomicWriteFilename, filename)

@@ -178,19 +178,34 @@ module.exports = OutputCacheManager = {
             result,
             outputDir,
             stats,
-            (err, result) => {
-              if (err) return callback(err, result)
+            (err, outputFiles) => {
+              if (err) return callback(err, outputFiles)
 
-              if (!Settings.enablePdfCaching || !request.enablePdfCaching) {
-                return callback(null, result)
+              const enablePdfCaching = request.enablePdfCaching
+              const enablePdfCachingDark =
+                Settings.enablePdfCachingDark && !request.enablePdfCaching
+              if (
+                !Settings.enablePdfCaching ||
+                (!enablePdfCaching && !enablePdfCachingDark)
+              ) {
+                return callback(null, outputFiles)
               }
 
               OutputCacheManager.saveStreamsInContentDir(
-                { request, stats, timings },
-                result,
+                { request, stats, timings, enablePdfCachingDark },
+                outputFiles,
                 compileDir,
                 outputDir,
-                callback
+                err => {
+                  if (err) {
+                    logger.warn(
+                      { err, outputDir, stats, timings },
+                      'pdf caching failed'
+                    )
+                    return callback(null, outputFiles)
+                  }
+                  callback(err, outputFiles)
+                }
               )
             }
           )
@@ -348,7 +363,7 @@ module.exports = OutputCacheManager = {
   },
 
   saveStreamsInContentDir(
-    { request, stats, timings },
+    { request, stats, timings, enablePdfCachingDark },
     outputFiles,
     compileDir,
     outputDir,
@@ -357,7 +372,7 @@ module.exports = OutputCacheManager = {
     const cacheRoot = Path.join(outputDir, OutputCacheManager.CONTENT_SUBDIR)
     // check if content dir exists
     OutputCacheManager.ensureContentDir(cacheRoot, function (err, contentDir) {
-      if (err) return callback(err, outputFiles)
+      if (err) return callback(err)
 
       const outputFile = outputFiles.find(x => x.path === 'output.pdf')
       if (outputFile) {
@@ -381,7 +396,7 @@ module.exports = OutputCacheManager = {
             if (err && err instanceof QueueLimitReachedError) {
               logger.warn({ err, outputDir }, 'pdf caching queue limit reached')
               stats['pdf-caching-queue-limit-reached'] = 1
-              return callback(null, outputFiles)
+              return callback(null)
             }
             if (err && err instanceof TimedOutError) {
               logger.warn(
@@ -389,9 +404,9 @@ module.exports = OutputCacheManager = {
                 'pdf caching timed out'
               )
               stats['pdf-caching-timed-out'] = 1
-              return callback(null, outputFiles)
+              return callback(null)
             }
-            if (err) return callback(err, outputFiles)
+            if (err) return callback(err)
             const [
               contentRanges,
               newContentRanges,
@@ -399,7 +414,7 @@ module.exports = OutputCacheManager = {
               startXRefTable,
             ] = result
 
-            if (Settings.enablePdfCachingDark) {
+            if (enablePdfCachingDark) {
               // In dark mode we are doing the computation only and do not emit
               //  any ranges to the frontend.
             } else {
@@ -420,11 +435,11 @@ module.exports = OutputCacheManager = {
               0
             )
             stats['pdf-caching-reclaimed-space'] = reclaimedSpace
-            callback(null, outputFiles)
+            callback(null)
           }
         )
       } else {
-        callback(null, outputFiles)
+        callback(null)
       }
     })
   },
