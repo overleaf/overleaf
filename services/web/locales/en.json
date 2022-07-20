@@ -14,6 +14,8 @@
   "no_pdf_error_reason_output_pdf_already_exists": "This project contains a file called <code>output.pdf</code>. If that file exists, please rename it and compile again.",
   "logs_pane_info_message": "We are testing a new logs pane",
   "logs_pane_info_message_popup": "We are testing a new logs pane. Click here to give feedback.",
+  "switch_to_pdf": "Switch to PDF",
+  "switch_to_editor": "Switch to editor",
   "github_symlink_error": "Your GitHub repository contains symbolic link files, which are not currently supported by Overleaf. Please remove these and try again.",
   "github_workflow_files_error": "The __appName__ GitHub sync service couldn’t sync GitHub Workflow files (in .github/workflows/). Please authorize __appName__ to edit your GitHub workflow files and try again.",
   "github_workflow_authorize": "Authorize GitHub Workflow files",

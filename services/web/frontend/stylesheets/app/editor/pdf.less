@@ -67,7 +67,7 @@
 }
 
 .toolbar-pdf-hybrid {
-  .btn:not(.btn-recompile):not(.btn-orphan):not(.detach-synctex-control) {
+  .btn:not(.btn-recompile):not(.btn-orphan):not(.detach-synctex-control):not(.switch-to-editor-btn) {
     display: inline-block;
     color: @toolbar-btn-color;
     background-color: transparent;
@@ -647,24 +647,6 @@
     ~'100vh - ' @editor-and-logs-pane-toolbars-height ~' - ' @btn-small-height ~' - '
       @margin-md
   );
-}
-
-.toolbar-editor-expand-btn,
-.toolbar-pdf-expand-btn {
-  .btn-inline-link;
-  margin-left: @margin-xs;
-  color: @toolbar-icon-btn-color;
-  border-radius: @border-radius-small;
-  &:hover {
-    color: @toolbar-icon-btn-hover-color;
-  }
-  &:active {
-    color: #fff;
-  }
-  &:focus {
-    outline: 0;
-    color: #fff;
-  }
 }
 
 .pdf-error-alert {

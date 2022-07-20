@@ -3,7 +3,7 @@ import { ButtonToolbar } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import { useLayoutContext } from '../../../shared/context/layout-context'
 import PdfCompileButton from './pdf-compile-button'
-import PdfExpandButton from './pdf-expand-button'
+import SwitchToEditorButton from './switch-to-editor-button'
 import PdfHybridLogsButton from './pdf-hybrid-logs-button'
 import PdfHybridDownloadButton from './pdf-hybrid-download-button'
 import PdfHybridSafariWarning from './pdf-hybrid-safari-warning'
@@ -65,7 +65,7 @@ function PdfPreviewHybridToolbarInner() {
       </div>
       <div className="toolbar-pdf-right">
         <PdfHybridCodeCheckButton />
-        <PdfExpandButton />
+        <SwitchToEditorButton />
         <DetachedSynctexControl />
       </div>
     </>
