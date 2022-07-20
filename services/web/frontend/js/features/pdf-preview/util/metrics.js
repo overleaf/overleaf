@@ -4,15 +4,17 @@ import getMeta from '../../../utils/meta'
 
 // VERSION should get incremented when making changes to caching behavior or
 //  adjusting metrics collection.
-const VERSION = 3
+const VERSION = 4
 
 // editing session id
 const EDITOR_SESSION_ID = uuid()
 
-let pdfCachingMetrics
+const pdfCachingMetrics = {
+  viewerId: EDITOR_SESSION_ID,
+}
 
-export function setCachingMetrics(metrics) {
-  pdfCachingMetrics = metrics
+export function getPdfCachingMetrics() {
+  return pdfCachingMetrics
 }
 
 export function trackPdfDownload(response, compileTimeClientE2E, t0) {
@@ -25,8 +27,9 @@ export function trackPdfDownload(response, compileTimeClientE2E, t0) {
 
   // There can be multiple "first" renderings with two pdf viewers.
   // E.g. two pdf detach tabs or pdf detacher plus pdf detach.
+  // Let the pdfCachingMetrics round trip to account for pdf-detach.
   let isFirstRender = true
-  function firstRenderDone({ latencyFetch, latencyRender }) {
+  function firstRenderDone({ latencyFetch, latencyRender, pdfCachingMetrics }) {
     if (!isFirstRender) return
     isFirstRender = false
 
@@ -43,6 +46,7 @@ export function trackPdfDownload(response, compileTimeClientE2E, t0) {
         latencyFetch,
         latencyRender,
         compileTimeClientE2E,
+        ...pdfCachingMetrics,
       })
     }
   }
@@ -58,8 +62,7 @@ function submitCompileMetrics(metrics) {
     version: VERSION,
     ...metrics,
     id: EDITOR_SESSION_ID,
-    ...(pdfCachingMetrics || {}),
   }
-  sl_console.log('/event/compile-metrics', JSON.stringify(metrics))
+  sl_console.log('/event/compile-metrics', JSON.stringify(leanMetrics))
   sendMB('compile-metrics-v6', leanMetrics)
 }

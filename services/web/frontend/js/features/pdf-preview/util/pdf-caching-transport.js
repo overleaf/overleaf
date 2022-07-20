@@ -1,14 +1,14 @@
 import { fallbackRequest, fetchRange } from './pdf-caching'
 import getMeta from '../../../utils/meta'
 import { captureException } from '../../../infrastructure/error-reporter'
-import { setCachingMetrics } from './metrics'
+import { getPdfCachingMetrics } from './metrics'
 
 export function generatePdfCachingTransportFactory(PDFJS) {
   if (getMeta('ol-pdfCachingMode') !== 'enabled') {
     return () => null
   }
   const cached = new Set()
-  const metrics = {
+  const metrics = Object.assign(getPdfCachingMetrics(), {
     failedCount: 0,
     tooLargeOverheadCount: 0,
     tooManyRequestsCount: 0,
@@ -18,10 +18,9 @@ export function generatePdfCachingTransportFactory(PDFJS) {
     fetchedBytes: 0,
     requestedCount: 0,
     requestedBytes: 0,
-  }
+  })
   const verifyChunks =
     new URLSearchParams(window.location.search).get('verify_chunks') === 'true'
-  setCachingMetrics(metrics)
 
   class PDFDataRangeTransport extends PDFJS.PDFDataRangeTransport {
     constructor(url, pdfFile, reject) {

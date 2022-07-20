@@ -10,6 +10,7 @@ import withErrorBoundary from '../../../infrastructure/error-boundary'
 import ErrorBoundaryFallback from './error-boundary-fallback'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import { captureException } from '../../../infrastructure/error-reporter'
+import { getPdfCachingMetrics } from '../util/metrics'
 
 function PdfJsViewer({ url, pdfFile }) {
   const { _id: projectId } = useProjectContext()
@@ -81,7 +82,12 @@ function PdfJsViewer({ url, pdfFile }) {
         // We are omitting the render time in case we detect this state.
         latencyRender = Math.ceil(timePDFRendered - timePDFFetched)
       }
-      firstRenderDone({ latencyFetch, latencyRender })
+      firstRenderDone({
+        latencyFetch,
+        latencyRender,
+        // Let the pdfCachingMetrics round trip to account for pdf-detach.
+        pdfCachingMetrics: getPdfCachingMetrics(),
+      })
     }
 
     const handlePagesinit = () => {
