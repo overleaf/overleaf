@@ -443,6 +443,9 @@ const ProjectController = {
           })
         },
         usersBestSubscription(cb) {
+          if (!Features.hasFeature('saas')) {
+            return cb()
+          }
           SubscriptionViewModelBuilder.getBestSubscription(
             { _id: userId },
             (err, subscription) => {
@@ -1113,6 +1116,7 @@ const ProjectController = {
 
             // Persistent upgrade prompts
             const showHeaderUpgradePrompt =
+              Features.hasFeature('saas') &&
               userId &&
               !subscription &&
               !userIsMemberOfGroupSubscription &&

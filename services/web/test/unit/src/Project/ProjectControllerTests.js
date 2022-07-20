@@ -524,9 +524,19 @@ describe('ProjectController', function () {
       this.ProjectController.projectListPage(this.req, this.res)
     })
 
-    it("should send the user's best subscription", function (done) {
+    it("should send the user's best subscription when saas feature present", function (done) {
+      this.Features.hasFeature.withArgs('saas').returns(true)
       this.res.render = (pageName, opts) => {
         expect(opts.usersBestSubscription).to.deep.include({ type: 'free' })
+        done()
+      }
+      this.ProjectController.projectListPage(this.req, this.res)
+    })
+
+    it('should not return a best subscription without saas feature', function (done) {
+      this.Features.hasFeature.withArgs('saas').returns(false)
+      this.res.render = (pageName, opts) => {
+        expect(opts.usersBestSubscription).to.be.undefined
         done()
       }
       this.ProjectController.projectListPage(this.req, this.res)
@@ -1404,10 +1414,20 @@ describe('ProjectController', function () {
 
     describe('persistent upgrade prompt', function () {
       beforeEach(function () {
+        // default to saas enabled
+        this.Features.hasFeature.withArgs('saas').returns(true)
         // default to without a subscription
         this.SubscriptionLocator.getUsersSubscription = sinon
           .stub()
           .callsArgWith(1, null, null)
+      })
+      it('should not show without the saas feature', function (done) {
+        this.Features.hasFeature.withArgs('saas').returns(false)
+        this.res.render = (pageName, opts) => {
+          expect(opts.showHeaderUpgradePrompt).to.equal(false)
+          done()
+        }
+        this.ProjectController.loadEditor(this.req, this.res)
       })
       it('should show for a user without a subscription or only non-paid affiliations', function (done) {
         this.res.render = (pageName, opts) => {
