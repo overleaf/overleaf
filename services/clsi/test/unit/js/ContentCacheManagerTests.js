@@ -19,7 +19,11 @@ describe('ContentCacheManager', function () {
       size
     )
     let newlyReclaimed
-    ;[contentRanges, newContentRanges, newlyReclaimed] = result
+    ;({
+      contentRanges,
+      newContentRanges,
+      reclaimedSpace: newlyReclaimed,
+    } = result)
     reclaimed += newlyReclaimed
 
     const fileNames = await fs.promises.readdir(contentDir)

@@ -49,6 +49,14 @@ if (Settings.pdfCachingEnableWorkerPool && workerpool.isMainThread) {
  * @param {number} compileTime
  */
 async function update(contentDir, filePath, size, compileTime) {
+  if (size < Settings.pdfCachingMinChunkSize) {
+    return {
+      contentRanges: [],
+      newContentRanges: [],
+      reclaimedSpace: 0,
+      startXRefTable: undefined,
+    }
+  }
   if (Settings.pdfCachingEnableWorkerPool) {
     return await updateOtherEventLoop(contentDir, filePath, size, compileTime)
   } else {
@@ -64,18 +72,21 @@ async function update(contentDir, filePath, size, compileTime) {
  * @param {number} compileTime
  */
 async function updateOtherEventLoop(contentDir, filePath, size, compileTime) {
-  const timeout = getMaxOverhead(compileTime)
+  const workerLatencyInMs = 20
+  // Prefer getting the timeout error from the worker vs timing out the worker.
+  const timeout = getMaxOverhead(compileTime) + workerLatencyInMs
   try {
-    return await WORKER_POOL.exec('doUpdateInternalNoDeadline', [
+    return await WORKER_POOL.exec('updateSameEventLoop', [
       contentDir,
       filePath,
       size,
+      compileTime,
     ]).timeout(timeout)
   } catch (e) {
     if (e instanceof workerpool.Promise.TimeoutError) {
-      throw new TimedOutError('context-lost-in-worker')
+      throw new TimedOutError('context-lost-in-worker', { timeout })
     }
-    if (e.message.includes('Max queue size of ')) {
+    if (e.message?.includes?.('Max queue size of ')) {
       throw new QueueLimitReachedError()
     }
     throw e
@@ -91,28 +102,8 @@ async function updateOtherEventLoop(contentDir, filePath, size, compileTime) {
  */
 async function updateSameEventLoop(contentDir, filePath, size, compileTime) {
   const checkDeadline = getDeadlineChecker(compileTime)
-  return doUpdateInternal(contentDir, filePath, size, checkDeadline)
-}
-
-/**
- *
- * @param {String} contentDir path to directory where content hash files are cached
- * @param {String} filePath the pdf file to scan for streams
- * @param {number} size the pdf size
- */
-async function doUpdateInternalNoDeadline(contentDir, filePath, size) {
-  return doUpdateInternal(contentDir, filePath, size, () => {})
-}
-/**
- *
- * @param {String} contentDir path to directory where content hash files are cached
- * @param {String} filePath the pdf file to scan for streams
- * @param {number} size the pdf size
- * @param {function} checkDeadline
- */
-async function doUpdateInternal(contentDir, filePath, size, checkDeadline) {
-  const ranges = []
-  const newRanges = []
+  const contentRanges = []
+  const newContentRanges = []
   // keep track of hashes expire old ones when they reach a generation > N.
   const tracker = await HashFileTracker.from(contentDir)
   tracker.updateAge()
@@ -191,14 +182,14 @@ async function doUpdateInternal(contentDir, filePath, size, checkDeadline) {
         end: object.endOffset,
         hash,
       }
-      ranges.push(range)
+      contentRanges.push(range)
 
       // Optimization: Skip writing of duplicate streams.
       if (tracker.track(range)) continue
 
       await writePdfStream(contentDir, hash, buffer)
       checkDeadline('after write ' + idx)
-      newRanges.push(range)
+      newContentRanges.push(range)
     }
   } finally {
     await handle.close()
@@ -208,7 +199,7 @@ async function doUpdateInternal(contentDir, filePath, size, checkDeadline) {
   //       Let the next compile use the already written ranges.
   const reclaimedSpace = await tracker.deleteStaleHashes(5)
   await tracker.flush()
-  return [ranges, newRanges, reclaimedSpace, startXRefTable]
+  return { contentRanges, newContentRanges, reclaimedSpace, startXRefTable }
 }
 
 function getStatePath(contentDir) {
@@ -334,15 +325,16 @@ function getMaxOverhead(compileTime) {
 }
 
 function getDeadlineChecker(compileTime) {
-  const maxOverhead = getMaxOverhead(compileTime)
+  const timeout = getMaxOverhead(compileTime)
 
-  const deadline = Date.now() + maxOverhead
+  const deadline = Date.now() + timeout
   let lastStage = { stage: 'start', now: Date.now() }
   let completedStages = 0
   return function (stage) {
     const now = Date.now()
     if (now > deadline) {
       throw new TimedOutError(stage, {
+        timeout,
         completedStages,
         lastStage: lastStage.stage,
         diffToLastStage: now - lastStage.now,
@@ -363,6 +355,6 @@ module.exports = {
   update: callbackify(update),
   promises: {
     update,
-    doUpdateInternalNoDeadline,
+    updateSameEventLoop,
   },
 }

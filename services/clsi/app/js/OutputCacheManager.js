@@ -411,12 +411,12 @@ module.exports = OutputCacheManager = {
               return callback(null, 'timed-out')
             }
             if (err) return callback(err, 'failed')
-            const [
+            const {
               contentRanges,
               newContentRanges,
               reclaimedSpace,
               startXRefTable,
-            ] = result
+            } = result
 
             if (enablePdfCachingDark) {
               // In dark mode we are doing the computation only and do not emit
