@@ -6,7 +6,6 @@ include ./left-menu
 	spacing-closed="{{ui.chatResizerSizeClosed}}",
 	initial-size-east="250",
 	init-closed-east="true",
-	open-east="ui.chatOpen",
 	ng-hide="state.loading",
 	ng-cloak
 )
@@ -28,6 +27,7 @@ include ./left-menu
 			custom-toggler-msg-when-closed=hasFeature('custom-togglers') ? translate("tooltip_show_filetree") : false
 			ng-keydown="handleKeyDown($event)"
 			tabindex="0"
+			open-east="ui.chatOpen"
 		)
 			.ui-layout-west
 				include ./file-tree-react
@@ -39,7 +39,7 @@ include ./left-menu
 
 				include ./history
 
-	if !isRestrictedTokenMember
-		.ui-layout-east
-			aside.chat
-				chat()
+			if !isRestrictedTokenMember
+				.ui-layout-east
+					aside.chat
+						chat()
