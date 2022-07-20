@@ -7,6 +7,7 @@ export function generatePdfCachingTransportFactory(PDFJS) {
   if (getMeta('ol-pdfCachingMode') !== 'enabled') {
     return () => null
   }
+  let failedOnce = false
   const cached = new Set()
   const metrics = Object.assign(getPdfCachingMetrics(), {
     failedCount: 0,
@@ -28,9 +29,15 @@ export function generatePdfCachingTransportFactory(PDFJS) {
       this.url = url
       this.pdfFile = pdfFile
       this.reject = reject
+      this.abortController = new AbortController()
+    }
+
+    abort() {
+      this.abortController.abort()
     }
 
     requestDataRange(start, end) {
+      const abortSignal = this.abortController.signal
       fetchRange({
         url: this.url,
         start,
@@ -39,12 +46,14 @@ export function generatePdfCachingTransportFactory(PDFJS) {
         metrics,
         cached,
         verifyChunks,
+        abortSignal,
       })
         .catch(err => {
           metrics.failedCount++
+          failedOnce = true
           console.error('optimized pdf download error', err)
           captureException(err)
-          return fallbackRequest({ url: this.url, start, end })
+          return fallbackRequest({ url: this.url, start, end, abortSignal })
         })
         .then(blob => {
           this.onDataRange(start, blob)
@@ -58,6 +67,11 @@ export function generatePdfCachingTransportFactory(PDFJS) {
   }
 
   return function (url, pdfFile, reject) {
+    if (failedOnce) {
+      // Disable pdf caching once any fetch request failed.
+      // Be trigger-happy here until we reached a stable state of the feature.
+      return null
+    }
     return new PDFDataRangeTransport(url, pdfFile, reject)
   }
 }

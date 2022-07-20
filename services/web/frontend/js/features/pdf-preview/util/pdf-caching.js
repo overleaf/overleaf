@@ -212,15 +212,13 @@ function getMultipartBoundary(response, chunk) {
 }
 
 /**
- * @param {Object} response
  * @param {Object} file
+ * @param {Array} chunks
+ * @param {Uint8Array} data
+ * @param {string} boundary
  * @param {Object} metrics
  */
-function resolveMultiPartResponses(response, file, metrics) {
-  const { chunk: chunks, data, boundary } = response
-  if (!boundary) {
-    return [response]
-  }
+function resolveMultiPartResponses({ file, chunks, data, boundary, metrics }) {
   const responses = []
   let offsetStart = 0
   for (const chunk of chunks) {
@@ -272,14 +270,15 @@ function checkChunkResponse(response) {
  * @param {string} url
  * @param {number} start
  * @param {number} end
+ * @param {AbortSignal} abortSignal
  */
-export function fallbackRequest({ url, start, end }) {
-  return fetch(url, { headers: { Range: `bytes=${start}-${end - 1}` } }).then(
-    response => {
-      checkChunkResponse(response)
-      return response.arrayBuffer()
-    }
-  )
+export async function fallbackRequest({ url, start, end, abortSignal }) {
+  const response = await fetch(url, {
+    headers: { Range: `bytes=${start}-${end - 1}` },
+    signal: abortSignal,
+  })
+  checkChunkResponse(response)
+  return response.arrayBuffer()
 }
 
 /**
@@ -289,11 +288,12 @@ export function fallbackRequest({ url, start, end }) {
  * @param {number} end
  * @param {Object} metrics
  * @param {Uint8Array} actual
+ * @param {AbortSignal} abortSignal
  */
-async function verifyRange({ url, start, end, metrics, actual }) {
+async function verifyRange({ url, start, end, metrics, actual, abortSignal }) {
   let expectedRaw
   try {
-    expectedRaw = await fallbackRequest({ url, start, end })
+    expectedRaw = await fallbackRequest({ url, start, end, abortSignal })
   } catch (error) {
     throw OError.tag(error, 'cannot verify range', { url, start, end })
   }
@@ -319,6 +319,7 @@ async function verifyRange({ url, start, end, metrics, actual }) {
  * @param {Object} metrics
  * @param {Set} cached
  * @param {boolean} verifyChunks
+ * @param {AbortSignal} abortSignal
  */
 export async function fetchRange({
   url,
@@ -328,6 +329,7 @@ export async function fetchRange({
   metrics,
   cached,
   verifyChunks,
+  abortSignal,
 }) {
   file.createdAt = new Date(file.createdAt)
   backfillEdgeBounds(file)
@@ -352,7 +354,7 @@ export async function fetchRange({
       fetchedCount: 1,
       fetchedBytes: size,
     })
-    return fallbackRequest({ url, start, end })
+    return fallbackRequest({ url, start, end, abortSignal })
   }
   if (
     chunksSize > MAX_SUB_REQUEST_BYTES &&
@@ -369,7 +371,7 @@ export async function fetchRange({
       fetchedCount: 1,
       fetchedBytes: size,
     })
-    return fallbackRequest({ url, start, end })
+    return fallbackRequest({ url, start, end, abortSignal })
   }
 
   const byteRanges = dynamicChunks
@@ -408,6 +410,7 @@ export async function fetchRange({
     .map(chunk => ({
       chunk,
       url: `${perUserPrefix}/content/${file.contentId}/${chunk.hash}?${query}`,
+      init: {},
     }))
     .concat(coalescedDynamicChunks)
   let cachedCount = 0
@@ -419,7 +422,7 @@ export async function fetchRange({
   const rawResponses = await Promise.all(
     requests.map(async ({ chunk, url, init }) => {
       try {
-        const response = await fetch(url, init)
+        const response = await fetch(url, { ...init, signal: abortSignal })
         checkChunkResponse(response)
         const boundary = getMultipartBoundary(response, chunk)
         const blobFetchDate = getServerTime(response)
@@ -443,23 +446,25 @@ export async function fetchRange({
             fetchedBytes += blobSize
           }
         }
-        return {
-          boundary,
-          chunk,
-          data: backFillObjectContext(
-            chunk,
-            // response.arrayBuffer() yields the first multipart section only.
-            await (await response.blob()).arrayBuffer()
-          ),
+        const data = backFillObjectContext(chunk, await response.arrayBuffer())
+        if (!Array.isArray(chunk)) {
+          return [{ chunk, data }]
         }
-      } catch (error) {
-        throw OError.tag(error, 'cannot fetch chunk', { url })
+        return resolveMultiPartResponses({
+          file,
+          chunks: chunk,
+          data,
+          boundary,
+          metrics,
+        })
+      } catch (err) {
+        throw OError.tag(err, 'cannot fetch chunk', { chunk, url, init })
       }
     })
   )
 
   rawResponses
-    .flatMap(r => resolveMultiPartResponses(r, file, metrics))
+    .flat() // flatten after splitting multipart responses
     .forEach(({ chunk, data }) => {
       // overlap:
       //     | REQUESTED_RANGE |
@@ -493,6 +498,7 @@ export async function fetchRange({
       end,
       metrics,
       actual: reassembledBlob,
+      abortSignal,
     })
   }
   return reassembledBlob

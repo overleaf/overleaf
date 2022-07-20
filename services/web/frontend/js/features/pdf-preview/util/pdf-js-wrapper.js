@@ -5,7 +5,7 @@ const params = new URLSearchParams(window.location.search)
 const disableFontFace = params.get('disable-font-face') === 'true'
 const disableStream = process.env.NODE_ENV !== 'test'
 
-const rangeChunkSize = 128 * 1024 // 128K chunks
+const DEFAULT_RANGE_CHUNK_SIZE = 128 * 1024 // 128K chunks
 
 export default class PDFJSWrapper {
   constructor(container) {
@@ -67,6 +67,13 @@ export default class PDFJSWrapper {
     }
 
     return new Promise((resolve, reject) => {
+      const rangeTransport = this.genPdfCachingTransport(url, pdfFile, reject)
+      let rangeChunkSize = DEFAULT_RANGE_CHUNK_SIZE
+      if (rangeTransport && pdfFile.size < 2 * DEFAULT_RANGE_CHUNK_SIZE) {
+        // pdf.js disables the "bulk" download optimization when providing a
+        //  custom range transport. Restore it by bumping the chunk size.
+        rangeChunkSize = pdfFile.size
+      }
       this.loadDocumentTask = this.PDFJS.getDocument({
         url,
         cMapUrl: this.cMapUrl,
@@ -76,7 +83,7 @@ export default class PDFJSWrapper {
         disableAutoFetch: true,
         disableStream,
         textLayerMode: 2, // PDFJSViewer.TextLayerMode.ENABLE,
-        range: this.genPdfCachingTransport(url, pdfFile, reject),
+        range: rangeTransport,
       })
 
       this.loadDocumentTask.promise
