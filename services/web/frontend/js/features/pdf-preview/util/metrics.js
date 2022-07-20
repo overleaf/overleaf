@@ -1,6 +1,6 @@
 import { v4 as uuid } from 'uuid'
 import { sendMB } from '../../../infrastructure/event-tracking'
-import getMeta from '../../../utils/meta'
+import { trackPdfDownloadEnabled } from './pdf-caching-flags'
 
 // VERSION should get incremented when making changes to caching behavior or
 //  adjusting metrics collection.
@@ -39,7 +39,7 @@ export function trackPdfDownload(response, compileTimeClientE2E, t0) {
     if (latencyRender) {
       deliveryLatencies.latencyRender = latencyRender
     }
-    if (getMeta('ol-trackPdfDownload')) {
+    if (trackPdfDownloadEnabled) {
       // Submit latency along with compile context.
       submitCompileMetrics({
         totalDeliveryTime,

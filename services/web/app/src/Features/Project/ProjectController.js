@@ -983,6 +983,18 @@ const ProjectController = {
             }
           )
         },
+        trackPdfDownloadAssignment(cb) {
+          SplitTestHandler.getAssignment(req, res, 'track-pdf-download', () => {
+            // We'll pick up the assignment from the res.locals assignment.
+            cb()
+          })
+        },
+        pdfCachingModeAssignment(cb) {
+          SplitTestHandler.getAssignment(req, res, 'pdf-caching-mode', () => {
+            // We'll pick up the assignment from the res.locals assignment.
+            cb()
+          })
+        },
       },
       (
         err,
@@ -1069,30 +1081,6 @@ const ProjectController = {
               } else {
                 return variantFlag === true
               }
-            }
-
-            function getTrackPdfDownload() {
-              if (!Settings.enablePdfCaching) {
-                // The feature is disabled globally.
-                return false
-              }
-              // Let the user opt-in only.
-              // The flag will opt-out of both caching and metrics collection,
-              //  as if this editing session never happened.
-              return shouldDisplayFeature('track-pdf-download', false)
-            }
-
-            function getPdfCachingMode() {
-              if (!Settings.enablePdfCaching) {
-                // The feature is disabled globally.
-                return ''
-              }
-              // Let the user opt-in only.
-              const v = req.query['pdf-caching-mode']
-              if (['enabled'].includes(v)) {
-                return v
-              }
-              return ''
             }
 
             const showPdfDetach = shouldDisplayFeature(
@@ -1199,8 +1187,6 @@ const ProjectController = {
               showNewSourceEditorOption,
               showSymbolPalette,
               showStopOnFirstError,
-              trackPdfDownload: getTrackPdfDownload(),
-              pdfCachingMode: getPdfCachingMode(),
               detachRole,
               metadata: { viewport: false },
               showHeaderUpgradePrompt,

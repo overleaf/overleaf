@@ -3,6 +3,7 @@ import getMeta from '../../../utils/meta'
 import { deleteJSON, postJSON } from '../../../infrastructure/fetch-json'
 import { debounce } from 'lodash'
 import { trackPdfDownload } from './metrics'
+import { enablePdfCaching } from './pdf-caching-flags'
 
 const AUTO_COMPILE_MAX_WAIT = 5000
 // We add a 2 second debounce to sending user changes to server if they aren't
@@ -168,7 +169,7 @@ export default class DocumentCompiler {
     }
 
     // use the feature flag to enable PDF caching
-    if (getMeta('ol-pdfCachingMode') === 'enabled') {
+    if (enablePdfCaching) {
       params.set('enable_pdf_caching', 'true')
     }
 

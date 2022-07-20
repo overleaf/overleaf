@@ -1,4 +1,5 @@
 let CompileController
+const { URL } = require('url')
 const OError = require('@overleaf/o-error')
 const Metrics = require('@overleaf/metrics')
 const ProjectGetter = require('../Project/ProjectGetter')
@@ -14,6 +15,7 @@ const ClsiCookieManager = require('./ClsiCookieManager')(
 )
 const Path = require('path')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
+const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 
 const COMPILE_TIMEOUT_MS = 10 * 60 * 1000
 
@@ -25,18 +27,44 @@ function getImageNameForProject(projectId, callback) {
   })
 }
 
+function getEnablePdfCaching(req, res, cb) {
+  if (!req.query.enable_pdf_caching) {
+    // The frontend does not want to do pdf caching.
+    return cb(null, false)
+  }
+
+  // Use the query flags from the editor request for overriding the split test.
+  let query = {}
+  try {
+    const u = new URL(req.headers.referer || req.url, Settings.siteUrl)
+    query = Object.fromEntries(u.searchParams.entries())
+  } catch (e) {}
+  const editorReq = { ...req, query }
+
+  // Double check with the latest split test assignment.
+  // We may need to turn off the feature on a short notice, without requiring
+  //  all users to reload their editor page to disable the feature.
+  SplitTestHandler.getAssignment(
+    editorReq,
+    res,
+    'pdf-caching-mode',
+    (err, assignment) => {
+      if (err) return cb(null, false)
+      cb(null, assignment?.variant === 'enabled')
+    }
+  )
+}
+
 module.exports = CompileController = {
   compile(req, res, next) {
     res.setTimeout(COMPILE_TIMEOUT_MS)
     const projectId = req.params.Project_id
     const isAutoCompile = !!req.query.auto_compile
-    const enablePdfCaching = !!req.query.enable_pdf_caching
     const fileLineErrors = !!req.query.file_line_errors
     const stopOnFirstError = !!req.body.stopOnFirstError
     const userId = SessionManager.getLoggedInUserId(req.session)
     const options = {
       isAutoCompile,
-      enablePdfCaching,
       fileLineErrors,
       stopOnFirstError,
     }
@@ -63,63 +91,68 @@ module.exports = CompileController = {
       options.incrementalCompilesEnabled = true
     }
 
-    CompileManager.compile(
-      projectId,
-      userId,
-      options,
-      (
-        error,
-        status,
-        outputFiles,
-        clsiServerId,
-        limits,
-        validationProblems,
-        stats,
-        timings,
-        outputUrlPrefix
-      ) => {
-        if (error) {
-          Metrics.inc('compile-error')
-          return next(error)
-        }
-        Metrics.inc('compile-status', 1, { status })
-        let pdfDownloadDomain = Settings.pdfDownloadDomain
-        if (pdfDownloadDomain && outputUrlPrefix) {
-          pdfDownloadDomain += outputUrlPrefix
-        }
+    getEnablePdfCaching(req, res, (err, enablePdfCaching) => {
+      if (err) return next(err)
+      options.enablePdfCaching = enablePdfCaching
 
-        if (limits) {
-          // For a compile request to be sent to clsi we need limits.
-          // If we get here without having the limits object populated, it is
-          //  a reasonable assumption to make that nothing was compiled.
-          // We need to know the limits in order to make use of the events.
-          AnalyticsManager.recordEventForSession(
-            req.session,
-            'compile-result-backend',
-            {
-              projectId,
-              ownerAnalyticsId: limits.ownerAnalyticsId,
-              status,
-              compileTime: timings?.compileE2E,
-              timeout: limits.timeout === 60 ? 'short' : 'long',
-              server: clsiServerId?.includes('-c2d-') ? 'faster' : 'normal',
-              isAutoCompile,
-              stopOnFirstError,
-            }
-          )
-        }
-        res.json({
+      CompileManager.compile(
+        projectId,
+        userId,
+        options,
+        (
+          error,
           status,
           outputFiles,
-          compileGroup: limits?.compileGroup,
           clsiServerId,
+          limits,
           validationProblems,
           stats,
           timings,
-          pdfDownloadDomain,
-        })
-      }
-    )
+          outputUrlPrefix
+        ) => {
+          if (error) {
+            Metrics.inc('compile-error')
+            return next(error)
+          }
+          Metrics.inc('compile-status', 1, { status })
+          let pdfDownloadDomain = Settings.pdfDownloadDomain
+          if (pdfDownloadDomain && outputUrlPrefix) {
+            pdfDownloadDomain += outputUrlPrefix
+          }
+
+          if (limits) {
+            // For a compile request to be sent to clsi we need limits.
+            // If we get here without having the limits object populated, it is
+            //  a reasonable assumption to make that nothing was compiled.
+            // We need to know the limits in order to make use of the events.
+            AnalyticsManager.recordEventForSession(
+              req.session,
+              'compile-result-backend',
+              {
+                projectId,
+                ownerAnalyticsId: limits.ownerAnalyticsId,
+                status,
+                compileTime: timings?.compileE2E,
+                timeout: limits.timeout === 60 ? 'short' : 'long',
+                server: clsiServerId?.includes('-c2d-') ? 'faster' : 'normal',
+                isAutoCompile,
+                stopOnFirstError,
+              }
+            )
+          }
+          res.json({
+            status,
+            outputFiles,
+            compileGroup: limits?.compileGroup,
+            clsiServerId,
+            validationProblems,
+            stats,
+            timings,
+            pdfDownloadDomain,
+          })
+        }
+      )
+    })
   },
 
   stopCompile(req, res, next) {

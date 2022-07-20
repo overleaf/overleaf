@@ -1,10 +1,11 @@
 import { fallbackRequest, fetchRange } from './pdf-caching'
-import getMeta from '../../../utils/meta'
 import { captureException } from '../../../infrastructure/error-reporter'
 import { getPdfCachingMetrics } from './metrics'
+import { enablePdfCaching, trackPdfDownloadEnabled } from './pdf-caching-flags'
 
 export function generatePdfCachingTransportFactory(PDFJS) {
-  if (getMeta('ol-pdfCachingMode') !== 'enabled') {
+  // NOTE: The custom transport can be used for tracking download volume.
+  if (!enablePdfCaching && !trackPdfDownloadEnabled) {
     return () => null
   }
   let failedOnce = false
@@ -19,6 +20,7 @@ export function generatePdfCachingTransportFactory(PDFJS) {
     fetchedBytes: 0,
     requestedCount: 0,
     requestedBytes: 0,
+    enablePdfCaching,
   })
   const verifyChunks =
     new URLSearchParams(window.location.search).get('verify_chunks') === 'true'
@@ -51,6 +53,9 @@ export function generatePdfCachingTransportFactory(PDFJS) {
         .catch(err => {
           metrics.failedCount++
           failedOnce = true
+          if (!enablePdfCaching) {
+            throw err // This was a fallback request already. Do not retry.
+          }
           console.error('optimized pdf download error', err)
           captureException(err)
           return fallbackRequest({ url: this.url, start, end, abortSignal })
