@@ -14,7 +14,7 @@ import {
   renderWithEditorContext,
   cleanUpContext,
 } from '../../../helpers/render-with-context'
-import * as locationModule from '../../../../../frontend/js/features/share-project-modal/utils/location'
+import * as locationModule from '../../../../../frontend/js/shared/components/location'
 import {
   EditorProviders,
   USER_EMAIL,

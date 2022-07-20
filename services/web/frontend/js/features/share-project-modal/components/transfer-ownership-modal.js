@@ -5,7 +5,7 @@ import PropTypes from 'prop-types'
 import Icon from '../../../shared/components/icon'
 import { transferProjectOwnership } from '../utils/api'
 import AccessibleModal from '../../../shared/components/accessible-modal'
-import { reload } from '../utils/location'
+import { reload } from '../../../shared/components/location'
 import { useProjectContext } from '../../../shared/context/project-context'
 
 export default function TransferOwnershipModal({ member, cancel }) {
