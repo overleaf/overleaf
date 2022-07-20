@@ -10,7 +10,7 @@ function UniversityName({ name, onClick }: UniversityNameProps) {
   const { t } = useTranslation()
 
   return (
-    <p className="pt-1">
+    <p>
       {name}
       <span className="small">
         {' '}

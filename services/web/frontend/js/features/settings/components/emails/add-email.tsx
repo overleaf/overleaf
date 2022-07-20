@@ -107,31 +107,31 @@ function AddEmail() {
     )
   }
 
-  const InputCol = (
-    <Col md={4}>
-      <Cell>
-        <label htmlFor="affiliations-email" className="sr-only">
-          {t('email')}
-        </label>
-        <Input
-          onChange={handleEmailChange}
-          handleAddNewEmail={handleAddNewEmail}
-        />
-      </Cell>
-    </Col>
+  const InputComponent = (
+    <>
+      <label htmlFor="affiliations-email" className="sr-only">
+        {t('email')}
+      </label>
+      <Input
+        onChange={handleEmailChange}
+        handleAddNewEmail={handleAddNewEmail}
+      />
+    </>
   )
 
   if (!isValidEmail(newEmail)) {
     return (
       <Layout isError={isError} error={error}>
         <form>
-          {InputCol}
-          <Col md={5}>
+          <Col md={8}>
             <Cell>
-              <div>{t('start_by_adding_your_email')}</div>
+              {InputComponent}
+              <div className="affiliations-table-cell-tabbed">
+                <div>{t('start_by_adding_your_email')}</div>
+              </div>
             </Cell>
           </Col>
-          <Col md={3}>
+          <Col md={4}>
             <Cell className="text-md-right">
               <AddNewEmailBtn email={newEmail} disabled />
             </Cell>
@@ -141,24 +141,17 @@ function AddEmail() {
     )
   }
 
+  const isSsoAvailableForDomain =
+    newEmailMatchedDomain && ssoAvailableForDomain(newEmailMatchedDomain)
+
   return (
     <Layout isError={isError} error={error}>
       <form>
-        {InputCol}
-        {newEmailMatchedDomain &&
-        ssoAvailableForDomain(newEmailMatchedDomain) ? (
-          <Col md={8}>
-            <Cell>
-              <SsoLinkingInfo
-                email={newEmail}
-                domainInfo={newEmailMatchedDomain}
-              />
-            </Cell>
-          </Col>
-        ) : (
-          <>
-            <Col md={5}>
-              <Cell>
+        <Col md={8}>
+          <Cell>
+            {InputComponent}
+            {!isSsoAvailableForDomain ? (
+              <div className="affiliations-table-cell-tabbed">
                 <InstitutionFields
                   countryCode={countryCode}
                   setCountryCode={setCountryCode}
@@ -172,18 +165,31 @@ function AddEmail() {
                   setDepartment={setDepartment}
                   newEmailMatchedDomain={newEmailMatchedDomain}
                 />
-              </Cell>
-            </Col>
-            <Col md={3}>
-              <Cell className="text-md-right">
-                <AddNewEmailBtn
+              </div>
+            ) : null}
+          </Cell>
+        </Col>
+        {!isSsoAvailableForDomain ? (
+          <Col md={4}>
+            <Cell className="text-md-right">
+              <AddNewEmailBtn
+                email={newEmail}
+                disabled={isLoading || state.isLoading}
+                onClick={handleAddNewEmail}
+              />
+            </Cell>
+          </Col>
+        ) : (
+          <Col md={12}>
+            <Cell>
+              <div className="affiliations-table-cell-tabbed">
+                <SsoLinkingInfo
                   email={newEmail}
-                  disabled={isLoading || state.isLoading}
-                  onClick={handleAddNewEmail}
+                  domainInfo={newEmailMatchedDomain as DomainInfo}
                 />
-              </Cell>
-            </Col>
-          </>
+              </div>
+            </Cell>
+          </Col>
         )}
       </form>
     </Layout>

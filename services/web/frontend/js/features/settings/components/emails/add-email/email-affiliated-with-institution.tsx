@@ -7,7 +7,6 @@ function EmailAffiliatedWithInstitution({ onClick, ...props }: ButtonProps) {
   return (
     <div className="mt-1">
       {t('is_email_affiliated')}
-      <br />
       <Button className="btn-inline-link" onClick={onClick} {...props}>
         {t('let_us_know')}
       </Button>
