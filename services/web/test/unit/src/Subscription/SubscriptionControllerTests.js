@@ -492,7 +492,7 @@ describe('SubscriptionController', function () {
     })
 
     it('should send the user and subscriptionId to the handler', function (done) {
-      this.SubscriptionHandler.createSubscription
+      this.SubscriptionHandler.promises.createSubscription
         .calledWithMatch(
           this.user,
           this.subscriptionDetails,
@@ -502,7 +502,7 @@ describe('SubscriptionController', function () {
       done()
     })
 
-    it('should redurect to the subscription page', function (done) {
+    it('should redirect to the subscription page', function (done) {
       this.res.sendStatus.calledWith(201).should.equal(true)
       done()
     })
@@ -510,11 +510,13 @@ describe('SubscriptionController', function () {
 
   describe('createSubscription with errors', function () {
     it('should handle users with subscription', function (done) {
-      this.LimitationsManager.userHasV1OrV2Subscription.yields(null, true)
+      this.LimitationsManager.promises.userHasV1OrV2Subscription.resolves(true)
       this.SubscriptionController.createSubscription(this.req, {
         sendStatus: status => {
           expect(status).to.equal(409)
-          this.SubscriptionHandler.createSubscription.called.should.equal(false)
+          this.SubscriptionHandler.promises.createSubscription.called.should.equal(
+            false
+          )
 
           done()
         },
@@ -523,8 +525,8 @@ describe('SubscriptionController', function () {
 
     it('should handle 3DSecure errors', function (done) {
       this.next = sinon.stub()
-      this.LimitationsManager.userHasV1OrV2Subscription.yields(null, false)
-      this.SubscriptionHandler.createSubscription.yields(
+      this.LimitationsManager.promises.userHasV1OrV2Subscription.resolves(false)
+      this.SubscriptionHandler.promises.createSubscription.rejects(
         new SubscriptionErrors.RecurlyTransactionError({})
       )
       this.HttpErrorHandler.unprocessableEntity = sinon.spy(
@@ -540,8 +542,8 @@ describe('SubscriptionController', function () {
 
     it('should handle validation errors', function (done) {
       this.next = sinon.stub()
-      this.LimitationsManager.userHasV1OrV2Subscription.yields(null, false)
-      this.SubscriptionHandler.createSubscription.yields(
+      this.LimitationsManager.promises.userHasV1OrV2Subscription.resolves(false)
+      this.SubscriptionHandler.promises.createSubscription.rejects(
         new Errors.InvalidError('invalid error test')
       )
       this.HttpErrorHandler.unprocessableEntity = sinon.spy(
@@ -556,8 +558,8 @@ describe('SubscriptionController', function () {
     })
 
     it('should handle recurly errors', function (done) {
-      this.LimitationsManager.userHasV1OrV2Subscription.yields(null, false)
-      this.SubscriptionHandler.createSubscription.yields(
+      this.LimitationsManager.promises.userHasV1OrV2Subscription.resolves(false)
+      this.SubscriptionHandler.promises.createSubscription.rejects(
         new SubscriptionErrors.RecurlyTransactionError({})
       )
 
@@ -574,8 +576,8 @@ describe('SubscriptionController', function () {
     })
 
     it('should handle invalid error', function (done) {
-      this.LimitationsManager.userHasV1OrV2Subscription.yields(null, false)
-      this.SubscriptionHandler.createSubscription.yields(
+      this.LimitationsManager.promises.userHasV1OrV2Subscription.resolves(false)
+      this.SubscriptionHandler.promises.createSubscription.rejects(
         new Errors.InvalidError({})
       )
 

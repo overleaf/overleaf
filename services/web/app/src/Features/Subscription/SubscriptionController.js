@@ -261,7 +261,7 @@ async function interstitialPaymentPage(req, res) {
   }
 }
 
-function createSubscription(req, res, next) {
+async function createSubscription(req, res) {
   const user = SessionManager.getSessionUser(req.session)
   const recurlyTokenIds = {
     billing: req.body.recurly_token_id,
@@ -270,47 +270,41 @@ function createSubscription(req, res, next) {
   }
   const { subscriptionDetails } = req.body
 
-  LimitationsManager.userHasV1OrV2Subscription(
-    user,
-    function (err, hasSubscription) {
-      if (err) {
-        return next(err)
-      }
-      if (hasSubscription) {
-        logger.warn({ user_id: user._id }, 'user already has subscription')
-        return res.sendStatus(409) // conflict
-      }
-      return SubscriptionHandler.createSubscription(
-        user,
-        subscriptionDetails,
-        recurlyTokenIds,
-        function (err) {
-          if (!err) {
-            return res.sendStatus(201)
-          }
+  const hasSubscription =
+    await LimitationsManager.promises.userHasV1OrV2Subscription(user)
 
-          if (
-            err instanceof SubscriptionErrors.RecurlyTransactionError ||
-            err instanceof Errors.InvalidError
-          ) {
-            logger.error({ err }, 'recurly transaction error, potential 422')
-            HttpErrorHandler.unprocessableEntity(
-              req,
-              res,
-              err.message,
-              OError.getFullInfo(err).public
-            )
-          } else {
-            logger.warn(
-              { err, user_id: user._id },
-              'something went wrong creating subscription'
-            )
-            next(err)
-          }
-        }
+  if (hasSubscription) {
+    logger.warn({ user_id: user._id }, 'user already has subscription')
+    return res.sendStatus(409) // conflict
+  }
+
+  try {
+    await SubscriptionHandler.promises.createSubscription(
+      user,
+      subscriptionDetails,
+      recurlyTokenIds
+    )
+
+    res.sendStatus(201)
+  } catch (err) {
+    if (
+      err instanceof SubscriptionErrors.RecurlyTransactionError ||
+      err instanceof Errors.InvalidError
+    ) {
+      logger.error({ err }, 'recurly transaction error, potential 422')
+      HttpErrorHandler.unprocessableEntity(
+        req,
+        res,
+        err.message,
+        OError.getFullInfo(err).public
+      )
+    } else {
+      logger.warn(
+        { err, user_id: user._id },
+        'something went wrong creating subscription'
       )
     }
-  )
+  }
 }
 
 async function successfulSubscription(req, res) {
@@ -605,7 +599,7 @@ module.exports = {
   paymentPage: expressify(paymentPage),
   userSubscriptionPage: expressify(userSubscriptionPage),
   interstitialPaymentPage: expressify(interstitialPaymentPage),
-  createSubscription,
+  createSubscription: expressify(createSubscription),
   successfulSubscription: expressify(successfulSubscription),
   cancelSubscription,
   canceledSubscription,
