@@ -196,7 +196,11 @@ module.exports = OutputCacheManager = {
                 outputFiles,
                 compileDir,
                 outputDir,
-                err => {
+                (err, status) => {
+                  Metrics.inc('pdf-caching-status', 1, {
+                    status,
+                    ...request.metricsOpts,
+                  })
                   if (err) {
                     logger.warn(
                       { err, outputDir, stats, timings },
@@ -372,7 +376,7 @@ module.exports = OutputCacheManager = {
     const cacheRoot = Path.join(outputDir, OutputCacheManager.CONTENT_SUBDIR)
     // check if content dir exists
     OutputCacheManager.ensureContentDir(cacheRoot, function (err, contentDir) {
-      if (err) return callback(err)
+      if (err) return callback(err, 'content-dir-unavailable')
 
       const outputFile = outputFiles.find(x => x.path === 'output.pdf')
       if (outputFile) {
@@ -396,7 +400,7 @@ module.exports = OutputCacheManager = {
             if (err && err instanceof QueueLimitReachedError) {
               logger.warn({ err, outputDir }, 'pdf caching queue limit reached')
               stats['pdf-caching-queue-limit-reached'] = 1
-              return callback(null)
+              return callback(null, 'queue-limit')
             }
             if (err && err instanceof TimedOutError) {
               logger.warn(
@@ -404,9 +408,9 @@ module.exports = OutputCacheManager = {
                 'pdf caching timed out'
               )
               stats['pdf-caching-timed-out'] = 1
-              return callback(null)
+              return callback(null, 'timed-out')
             }
-            if (err) return callback(err)
+            if (err) return callback(err, 'failed')
             const [
               contentRanges,
               newContentRanges,
@@ -435,11 +439,11 @@ module.exports = OutputCacheManager = {
               0
             )
             stats['pdf-caching-reclaimed-space'] = reclaimedSpace
-            callback(null)
+            callback(null, 'success')
           }
         )
       } else {
-        callback(null)
+        callback(null, 'missing-pdf')
       }
     })
   },
