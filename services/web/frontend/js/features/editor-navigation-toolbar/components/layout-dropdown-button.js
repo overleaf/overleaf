@@ -6,8 +6,6 @@ import Tooltip from '../../../shared/components/tooltip'
 import Icon from '../../../shared/components/icon'
 import IconChecked from '../../../shared/components/icon-checked'
 import ControlledDropdown from '../../../shared/components/controlled-dropdown'
-import IconEditorOnly from './icon-editor-only'
-import IconPdfOnly from './icon-pdf-only'
 import { useLayoutContext } from '../../../shared/context/layout-context'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import useEventListener from '../../../shared/hooks/use-event-listener'
@@ -24,8 +22,20 @@ function IconLayout() {
   return <Icon type="columns" fw />
 }
 
+function IconSplit() {
+  return <Icon type="columns" fw />
+}
+
 function IconDetach() {
   return <Icon type="window-restore" fw />
+}
+
+function IconEditorOnly() {
+  return <Icon type="code" fw />
+}
+
+function IconPdfOnly() {
+  return <Icon type="file-pdf-o" fw />
 }
 
 function IconCheckmark({ iconFor, pdfLayout, view, detachRole }) {
@@ -164,7 +174,7 @@ function LayoutDropdownButton() {
                 detachRole={detachRole}
               />
             }
-            icon={<Icon type="columns" fw />}
+            icon={<IconSplit />}
             text={t('editor_and_pdf')}
           />
 
@@ -178,11 +188,7 @@ function LayoutDropdownButton() {
                 detachRole={detachRole}
               />
             }
-            icon={
-              <i className="fa fa-fw">
-                <IconEditorOnly />
-              </i>
-            }
+            icon={<IconEditorOnly />}
             text={
               <Trans
                 i18nKey="editor_only_hide_pdf"
@@ -203,11 +209,7 @@ function LayoutDropdownButton() {
                 detachRole={detachRole}
               />
             }
-            icon={
-              <i className="fa fa-fw">
-                <IconPdfOnly />
-              </i>
-            }
+            icon={<IconPdfOnly />}
             text={
               <Trans
                 i18nKey="pdf_only_hide_editor"
