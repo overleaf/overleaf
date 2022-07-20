@@ -159,6 +159,9 @@ aside#left-menu.full-size(
 				)
 					each editorTheme in editorThemes
 						option(value=editorTheme) #{editorTheme.replace(/_/g, ' ')}
+					option(value="—" disabled) —————————————————
+					each editorTheme in legacyEditorThemes
+						option(value=editorTheme) #{editorTheme.replace(/_/g, ' ')} (Legacy)
 
 			if (settings.overleaf != null && !isIEEE(brandVariation))
 				.form-controls

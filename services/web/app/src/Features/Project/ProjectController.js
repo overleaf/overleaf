@@ -1170,6 +1170,7 @@ const ProjectController = {
               languages: Settings.languages,
               learnedWords,
               editorThemes: THEME_LIST,
+              legacyEditorThemes: LEGACY_THEME_LIST,
               maxDocLength: Settings.max_doc_length,
               useV2History:
                 project.overleaf &&
@@ -1442,17 +1443,23 @@ const defaultSettingsForAnonymousUser = userId => ({
 })
 
 const THEME_LIST = [
+  'cobalt',
+  'dracula',
+  'eclipse',
+  'monokai',
+  'overleaf',
+  'textmate',
+]
+
+const LEGACY_THEME_LIST = [
   'ambiance',
   'chaos',
   'chrome',
   'clouds',
   'clouds_midnight',
-  'cobalt',
   'crimson_editor',
   'dawn',
-  'dracula',
   'dreamweaver',
-  'eclipse',
   'github',
   'gob',
   'gruvbox',
@@ -1464,15 +1471,12 @@ const THEME_LIST = [
   'merbivore',
   'merbivore_soft',
   'mono_industrial',
-  'monokai',
   'nord_dark',
-  'overleaf',
   'pastel_on_dark',
   'solarized_dark',
   'solarized_light',
   'sqlserver',
   'terminal',
-  'textmate',
   'tomorrow',
   'tomorrow_night',
   'tomorrow_night_blue',
