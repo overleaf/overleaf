@@ -32,7 +32,13 @@ function getAllBroacastMessages() {
 // this fakes receiving a message by calling the handler add to `on`. A bit
 // funky, but works for now
 function receiveMessage(message) {
-  getLastDetachCall('on')?.args[1](message)
+  getLastDetachCall('on').args[1](message)
+}
+
+function getMessageWithEvent(eventName) {
+  return getAllBroacastMessages()
+    .map(item => item.args[1])
+    .find(item => item.event === eventName)
 }
 
 export default {
@@ -42,5 +48,6 @@ export default {
   getLastDetachCall,
   getLastBroacastMessage,
   getAllBroacastMessages,
+  getMessageWithEvent,
   receiveMessage,
 }
