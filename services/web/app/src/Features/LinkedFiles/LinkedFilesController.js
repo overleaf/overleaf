@@ -140,7 +140,12 @@ module.exports = LinkedFilesController = {
   handleError(error, req, res, next) {
     if (error instanceof AccessDeniedError) {
       res.status(403)
-      plainTextResponse(res, 'You do not have access to this project')
+      plainTextResponse(
+        res,
+        res.locals.translate(
+          'the_project_that_contains_this_file_is_not_shared_with_you'
+        )
+      )
     } else if (error instanceof BadDataError) {
       res.status(400)
       plainTextResponse(res, 'The submitted data is not valid')

@@ -156,7 +156,9 @@ describe('LinkedFiles', function () {
         },
       }))
       expect(response.statusCode).to.equal(403)
-      expect(body).to.equal('You do not have access to this project')
+      expect(body).to.equal(
+        'The project that contains this file is not shared with you'
+      )
     })
 
     it('should generate a proper error message when the source file has been deleted', async function () {

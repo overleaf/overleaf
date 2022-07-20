@@ -138,7 +138,7 @@ export default function FileViewHeader({ file, storeReferencesKeys }) {
         <div className="row">
           <br />
           <div className="alert alert-danger col-md-6 col-md-offset-3">
-            {t('error')}: {refreshError}
+            {t('access_denied')}: {refreshError}
             {tprLinkedFileRefreshError.map(
               ({ import: { LinkedFileRefreshError }, path }) => (
                 <LinkedFileRefreshError key={path} file={file} />
