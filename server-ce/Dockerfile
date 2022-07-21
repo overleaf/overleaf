@@ -20,10 +20,6 @@ ADD services/ /overleaf/services/
 ARG MONOREPO_REVISION
 RUN echo "monorepo-server-ce,$MONOREPO_REVISION" > /var/www/revisions.txt
 
-# Upgrade npm for workspaces support
-# ----------------------------------
-RUN npm install -g npm@7.24.2
-
 # Install npm dependencies
 # ------------------------
 RUN node genScript install | bash
