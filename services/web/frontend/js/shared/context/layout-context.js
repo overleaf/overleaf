@@ -32,6 +32,7 @@ LayoutContext.Provider.propTypes = {
     leftMenuShown: PropTypes.bool,
     setLeftMenuShown: PropTypes.func.isRequired,
     pdfLayout: PropTypes.oneOf(['sideBySide', 'flat']).isRequired,
+    pdfPreviewOpen: PropTypes.bool,
   }).isRequired,
 }
 
@@ -111,6 +112,9 @@ export function LayoutProvider({ children }) {
     isRedundant: detachIsRedundant,
   } = useDetachLayout()
 
+  const pdfPreviewOpen =
+    pdfLayout === 'sideBySide' || view === 'pdf' || detachRole === 'detacher'
+
   useEffect(() => {
     if (debugPdfDetach) {
       console.log('Layout Effect', {
@@ -151,6 +155,7 @@ export function LayoutProvider({ children }) {
       chatIsOpen,
       leftMenuShown,
       pdfLayout,
+      pdfPreviewOpen,
       reviewPanelOpen,
       setChatIsOpen,
       setLeftMenuShown,
@@ -169,6 +174,7 @@ export function LayoutProvider({ children }) {
       chatIsOpen,
       leftMenuShown,
       pdfLayout,
+      pdfPreviewOpen,
       reviewPanelOpen,
       setChatIsOpen,
       setLeftMenuShown,

@@ -10,4 +10,8 @@ export const mockScope = () => ({
     },
   },
   hasLintingError: false,
+  ui: {
+    view: 'editor',
+    pdfLayout: 'sideBySide',
+  },
 })

@@ -28,6 +28,7 @@ import { useProjectContext } from './project-context'
 import { useEditorContext } from './editor-context'
 import { buildFileList } from '../../features/pdf-preview/util/file-list'
 import { useSplitTestContext } from './split-test-context'
+import { useLayoutContext } from './layout-context'
 
 export const LocalCompileContext = createContext()
 
@@ -86,6 +87,8 @@ export function LocalCompileProvider({ children }) {
   const { _id: projectId, rootDocId } = useProjectContext()
 
   const { splitTestVariants } = useSplitTestContext()
+
+  const { pdfPreviewOpen } = useLayoutContext()
 
   // whether a compile is in progress
   const [compiling, setCompiling] = useState(false)
@@ -447,7 +450,10 @@ export function LocalCompileProvider({ children }) {
   const codeCheckFailed = stopOnValidationError && autoCompileLintingError
 
   // the project is available for auto-compiling
-  const canAutoCompile = Boolean(autoCompile && !codeCheckFailed)
+  // (autocompile is enabled, the PDF preview is open, and the code check (if enabled) hasn't failed)
+  const canAutoCompile = Boolean(
+    autoCompile && pdfPreviewOpen && !codeCheckFailed
+  )
 
   // show that the project has pending changes
   const hasChanges = Boolean(canAutoCompile && uncompiled && compiledOnce)

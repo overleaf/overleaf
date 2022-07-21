@@ -2,10 +2,22 @@ import localStorage from '../../../../frontend/js/infrastructure/local-storage'
 import PdfPreview from '../../../../frontend/js/features/pdf-preview/components/pdf-preview'
 import { EditorProviders } from '../../helpers/editor-providers'
 import { mockScope } from './scope'
+import { useLayoutContext } from '../../../../frontend/js/shared/context/layout-context'
+import { FC, useEffect } from 'react'
 
 const storeAndFireEvent = (win: typeof window, key: string, value: unknown) => {
   localStorage.setItem(key, value)
   win.dispatchEvent(new StorageEvent('storage', { key }))
+}
+
+const Layout: FC<{ layout: string; view?: string }> = ({ layout, view }) => {
+  const { changeLayout } = useLayoutContext()
+
+  useEffect(() => {
+    changeLayout(layout, view)
+  }, [changeLayout, layout, view])
+
+  return null
 }
 
 describe('<PdfPreview/>', function () {
@@ -285,6 +297,40 @@ describe('<PdfPreview/>', function () {
     cy.findByText('Code check failed')
   })
 
+  it('does not run a compile on doc change if the PDF preview is not open', function () {
+    const scope = mockScope()
+
+    cy.mount(
+      <EditorProviders scope={scope}>
+        <Layout layout="flat" view="editor" />
+        <div className="pdf-viewer">
+          <PdfPreview />
+        </div>
+      </EditorProviders>
+    )
+
+    // wait for "compile on load" to finish
+    cy.findByRole('button', { name: 'Compiling…' })
+    cy.wait('@compile')
+    cy.findByRole('button', { name: 'Recompile' })
+
+    cy.window().then(win => {
+      cy.clock()
+
+      // switch on auto compile
+      storeAndFireEvent(win, 'autocompile_enabled:project123', true)
+
+      // fire a doc:changed event => compile
+      win.dispatchEvent(new CustomEvent('doc:changed'))
+
+      cy.tick(6000) // > AUTO_COMPILE_DEBOUNCE
+
+      cy.clock().invoke('restore')
+    })
+
+    cy.findByRole('button', { name: 'Recompile' })
+  })
+
   describe('displays error messages', function () {
     const compileErrorStatuses = {
       'clear-cache':
@@ -455,6 +501,7 @@ describe('<PdfPreview/>', function () {
 
       // wait for "compile on load" to finish
       cy.findByRole('button', { name: 'Compiling…' })
+      cy.wait('@compile')
       cy.findByRole('button', { name: 'Recompile' })
 
       // show the logs UI
