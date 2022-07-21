@@ -42,8 +42,6 @@ RUN chmod +x /usr/bin/envsubst
 #     -f Dockerfile-base -t sharelatex/sharelatex-base .
 ARG TEXLIVE_MIRROR=http://mirror.ctan.org/systems/texlive/tlnet
 
-ENV PATH "${PATH}:/usr/local/texlive/2022/bin/x86_64-linux"
-
 RUN mkdir /install-tl-unx \
 &&  curl -sSL \
       ${TEXLIVE_MIRROR}/install-tl-unx.tar.gz \
@@ -58,11 +56,13 @@ RUN mkdir /install-tl-unx \
       -profile /install-tl-unx/texlive.profile \
       -repository ${TEXLIVE_MIRROR} \
     \
+&&  $(find /usr/local/texlive -name tlmgr) path add \
 &&  tlmgr install --repository ${TEXLIVE_MIRROR} \
       latexmk \
       texcount \
       synctex \
     \
+&&  tlmgr path add \
 &&  rm -rf /install-tl-unx
 
 
