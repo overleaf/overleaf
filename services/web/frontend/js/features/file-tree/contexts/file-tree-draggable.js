@@ -1,9 +1,14 @@
 import { useRef, useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
+import getDroppedFiles from '@uppy/utils/lib/getDroppedFiles'
 
 import { DndProvider, createDndContext, useDrag, useDrop } from 'react-dnd'
-import { HTML5Backend, getEmptyImage } from 'react-dnd-html5-backend'
+import {
+  HTML5Backend,
+  getEmptyImage,
+  NativeTypes,
+} from 'react-dnd-html5-backend'
 
 import {
   findAllInTreeOrThrow,
@@ -119,20 +124,32 @@ const editorContextPropTypes = {
 }
 
 export function useDroppable(droppedEntityId) {
-  const { finishMoving } = useFileTreeActionable()
+  const { finishMoving, setDroppedFiles, startUploadingDocOrFile } =
+    useFileTreeActionable()
 
   const [{ isOver }, dropRef] = useDrop({
-    accept: DRAGGABLE_TYPE,
+    accept: [DRAGGABLE_TYPE, NativeTypes.FILE],
     canDrop: (item, monitor) => {
       const isOver = monitor.isOver({ shallow: true })
       if (!isOver) return false
-      if (item.forbiddenFolderIds.has(droppedEntityId)) return false
+      if (
+        item.type === DRAGGABLE_TYPE &&
+        item.forbiddenFolderIds.has(droppedEntityId)
+      )
+        return false
       return true
     },
     drop: (item, monitor) => {
       const didDropInChild = monitor.didDrop()
       if (didDropInChild) return
-      finishMoving(droppedEntityId, item.draggedEntityIds)
+      if (item.type === DRAGGABLE_TYPE) {
+        finishMoving(droppedEntityId, item.draggedEntityIds)
+      } else {
+        getDroppedFiles(item).then(files => {
+          setDroppedFiles({ files, targetFolderId: droppedEntityId })
+          startUploadingDocOrFile()
+        })
+      }
     },
     collect: monitor => ({
       isOver: monitor.canDrop(),

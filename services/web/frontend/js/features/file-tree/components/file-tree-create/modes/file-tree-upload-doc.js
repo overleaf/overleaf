@@ -1,6 +1,6 @@
 import { Trans } from 'react-i18next'
 import { Alert, Button } from 'react-bootstrap'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import Uppy from '@uppy/core'
 import XHRUpload from '@uppy/xhr-upload'
@@ -14,7 +14,8 @@ import { refreshProjectMetadata } from '../../../util/api'
 import ErrorMessage from '../error-message'
 
 export default function FileTreeUploadDoc() {
-  const { parentFolderId, cancel, isDuplicate } = useFileTreeActionable()
+  const { parentFolderId, cancel, isDuplicate, droppedFiles, setDroppedFiles } =
+    useFileTreeActionable()
   const { _id: projectId } = useProjectContext(projectContextPropTypes)
 
   const [error, setError] = useState()
@@ -28,16 +29,22 @@ export default function FileTreeUploadDoc() {
   // calculate conflicts
   const buildConflicts = files =>
     Object.values(files).filter(file =>
-      isDuplicate(parentFolderId, file.meta.name)
+      isDuplicate(file.meta.targetFolderId ?? parentFolderId, file.meta.name)
     )
+
+  const buildEndpoint = (projectId, targetFolderId) => {
+    let endpoint = `/project/${projectId}/upload`
+
+    if (targetFolderId) {
+      endpoint += `?folder_id=${targetFolderId}`
+    }
+
+    return endpoint
+  }
 
   // initialise the Uppy object
   const uppy = useUppy(() => {
-    let endpoint = `/project/${projectId}/upload`
-
-    if (parentFolderId) {
-      endpoint += `?folder_id=${parentFolderId}`
-    }
+    const endpoint = buildEndpoint(projectId, parentFolderId)
 
     return (
       new Uppy({
@@ -112,6 +119,37 @@ export default function FileTreeUploadDoc() {
         })
     )
   })
+
+  useEffect(() => {
+    if (uppy && droppedFiles) {
+      uppy.setOptions({
+        autoProceed: false,
+      })
+      for (const file of droppedFiles.files) {
+        const fileId = uppy.addFile({
+          name: file.name,
+          type: file.type,
+          data: file,
+          source: 'Local',
+          isRemote: false,
+          meta: {
+            targetFolderId: droppedFiles.targetFolderId,
+          },
+        })
+        const uppyFile = uppy.getFile(fileId)
+        uppy.setFileState(fileId, {
+          xhrUpload: {
+            ...uppyFile.xhrUpload,
+            endpoint: buildEndpoint(projectId, droppedFiles.targetFolderId),
+          },
+        })
+      }
+    }
+
+    return () => {
+      setDroppedFiles(null)
+    }
+  }, [uppy, droppedFiles, setDroppedFiles, projectId])
 
   // handle forced overwriting of conflicting files
   const handleOverwrite = useCallback(() => {

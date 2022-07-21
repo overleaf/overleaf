@@ -20,7 +20,7 @@ function FileTreeDraggablePreviewLayer({ isOver }) {
     ? ref.current.getBoundingClientRect()
     : null
 
-  if (!isDragging) {
+  if (!isDragging || !item.title) {
     return null
   }
 

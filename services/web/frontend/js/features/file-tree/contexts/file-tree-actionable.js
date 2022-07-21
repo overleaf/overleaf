@@ -5,6 +5,7 @@ import {
   useReducer,
   useContext,
   useEffect,
+  useState,
 } from 'react'
 import PropTypes from 'prop-types'
 
@@ -131,6 +132,8 @@ export function FileTreeActionableProvider({ children }) {
 
   const { fileTreeData, dispatchRename, dispatchMove } = useFileTreeData()
   const { selectedEntityIds } = useFileTreeSelectable()
+
+  const [droppedFiles, setDroppedFiles] = useState(null)
 
   const startRenaming = useCallback(() => {
     dispatch({ type: ACTION_TYPES.START_RENAME })
@@ -363,6 +366,8 @@ export function FileTreeActionableProvider({ children }) {
     finishCreatingDoc,
     finishCreatingLinkedFile,
     cancel,
+    droppedFiles,
+    setDroppedFiles,
   }
 
   return (
