@@ -2,7 +2,7 @@
 # Overleaf Base Image (sharelatex/sharelatex-base)
 # --------------------------------------------------
 
-FROM phusion/baseimage:focal-1.0.0
+FROM phusion/baseimage:focal-1.2.0
 
 # Makes sure LuaTex cache is writable
 # -----------------------------------
