@@ -4,7 +4,9 @@ const logger = require('@overleaf/logger')
 
 async function injectDraftMode(filename) {
   const content = await fsPromises.readFile(filename, { encoding: 'utf8' })
-  const modifiedContent = '\\PassOptionsToPackage{draft}{graphicx}' + content
+  const modifiedContent =
+    '\\PassOptionsToPackage{draft}{graphicx}\\PassOptionsToPackage{draft}{graphics}' +
+    content
   logger.debug(
     {
       content: content.slice(0, 1024), // \documentclass is normally v near the top

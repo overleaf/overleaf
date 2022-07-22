@@ -36,7 +36,8 @@ Hello world
         encoding: 'utf8',
       })
       expect(contents).to.equal(
-        '\\PassOptionsToPackage{draft}{graphicx}' + this.contents
+        '\\PassOptionsToPackage{draft}{graphicx}\\PassOptionsToPackage{draft}{graphics}' +
+          this.contents
       )
     })
   })
