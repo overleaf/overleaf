@@ -1,12 +1,12 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert, Button, Modal } from 'react-bootstrap'
 import Icon from '../../../shared/components/icon'
+import SplitTestBadge from '../../../shared/components/split-test-badge'
 import Tooltip from '../../../shared/components/tooltip'
 import useAsync from '../../../shared/hooks/use-async'
 import { postJSON } from '../../../infrastructure/fetch-json'
 import ignoredWords from '../ignored-words'
-import BetaBadge from '../../../shared/components/beta-badge'
 
 type DictionaryModalContentProps = {
   handleHide: () => void
@@ -35,30 +35,18 @@ export default function DictionaryModalContent({
     [runAsync]
   )
 
-  const betaBadgeTooltipProps = useMemo(() => {
-    return {
-      id: 'dictionary-modal-tooltip',
-      placement: 'bottom',
-      className: 'tooltip-wide',
-      text: (
-        <>
-          We are testing the dictionary manager.
-          <br />
-          Click to give feedback
-        </>
-      ),
-    }
-  }, [])
-
   return (
     <>
       <Modal.Header closeButton>
         <Modal.Title>
           {t('edit_dictionary')}{' '}
-          <BetaBadge
-            tooltip={betaBadgeTooltipProps}
-            url="https://forms.gle/8cLBEW6HU9mDKBPX9"
-            phase="release"
+          <SplitTestBadge
+            splitTestName="dictionary-editor"
+            displayOnVariants={['enabled']}
+            tooltip={{
+              placement: 'bottom',
+              className: 'tooltip-wide',
+            }}
           />
         </Modal.Title>
       </Modal.Header>
