@@ -32,8 +32,10 @@ function TimeoutUpgradePrompt() {
             <p className="text-center">
               <StartFreeTrialButton
                 source="compile-timeout"
-                buttonStyle="success"
-                classes={{ button: 'row-spaced-small' }}
+                buttonProps={{
+                  bsStyle: 'success',
+                  className: 'row-spaced-small',
+                }}
               />
             </p>
           )}

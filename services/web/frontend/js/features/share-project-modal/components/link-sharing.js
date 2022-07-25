@@ -297,8 +297,8 @@ function LinkSharingUpgradePrompt({ canAddCollaborators }) {
           />
         </p>
         <StartFreeTrialButton
-          buttonStyle="success"
-          setStartedFreeTrial={setStartedFreeTrial}
+          buttonProps={{ bsStyle: 'success' }}
+          handleClick={() => setStartedFreeTrial(true)}
           source="link-sharing"
         />
       </Col>

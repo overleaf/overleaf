@@ -33,8 +33,8 @@ export default function AddCollaboratorsUpgrade() {
       <p className="text-center row-spaced-thin">
         {user.allowedFreeTrial ? (
           <StartFreeTrialButton
-            buttonStyle="success"
-            setStartedFreeTrial={setStartedFreeTrial}
+            buttonProps={{ bsStyle: 'success' }}
+            handleClick={() => setStartedFreeTrial(true)}
             source="project-sharing"
           />
         ) : (
