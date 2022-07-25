@@ -7,6 +7,7 @@ export const SplitTestContext = createContext()
 SplitTestContext.Provider.propTypes = {
   value: PropTypes.shape({
     splitTestVariants: PropTypes.object.isRequired,
+    splitTestInfo: PropTypes.object.isRequired,
   }),
 }
 
@@ -14,6 +15,7 @@ export function SplitTestProvider({ children }) {
   const value = useMemo(
     () => ({
       splitTestVariants: getMeta('ol-splitTestVariants') || {},
+      splitTestInfo: getMeta('ol-splitTestInfo') || {},
     }),
     []
   )

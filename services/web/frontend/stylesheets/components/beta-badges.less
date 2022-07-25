@@ -1,5 +1,6 @@
 .info-badge,
-.beta-badge {
+.beta-badge,
+.alpha-badge {
   display: inline-block;
   width: @line-height-computed * 0.75;
   height: @line-height-computed * 0.75;
@@ -44,6 +45,19 @@
   &::before {
     content: 'β';
   }
+}
+
+.alpha-badge {
+  background-color: @ol-green;
+  border-radius: @border-radius-base;
+
+  &::before {
+    content: 'α';
+  }
+}
+
+.split-test-badge-tooltip .tooltip-inner {
+  white-space: pre-wrap;
 }
 
 .tooltip-wide .tooltip-inner {

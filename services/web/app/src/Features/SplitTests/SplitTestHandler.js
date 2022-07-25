@@ -80,13 +80,15 @@ async function getAssignment(req, res, splitTestName, { sync = false } = {}) {
     splitTestName,
     assignment.variant
   )
+  await _loadSplitTestInfoInLocals(res.locals, splitTestName)
   return assignment
 }
 
 /**
  * Get the assignment of a user to a split test by their user ID.
  *
- * Warning: this does not support query parameters override. Wherever possible, `getAssignment` should be used instead.
+ * Warning: this does not support query parameters override, nor makes the assignment and split test info available to
+ * the frontend through locals. Wherever possible, `getAssignment` should be used instead.
  *
  * @param userId the user ID
  * @param splitTestName the unique name of the split test
@@ -104,6 +106,9 @@ async function getAssignmentForUser(
 
 /**
  * Get the assignment of a user to a split test by their pre-fetched mongo doc.
+ *
+ * Warning: this does not support query parameters override, nor makes the assignment and split test info available to
+ * the frontend through locals. Wherever possible, `getAssignment` should be used instead.
  *
  * @param user the user
  * @param splitTestName the unique name of the split test
@@ -371,6 +376,17 @@ async function _getUser(id) {
     alphaProgram: 1,
     betaProgram: 1,
   })
+}
+
+async function _loadSplitTestInfoInLocals(locals, splitTestName) {
+  const splitTest = await SplitTestCache.get(splitTestName)
+  if (splitTest) {
+    const phase = splitTest.getCurrentVersion().phase
+    LocalsHelper.setSplitTestInfo(locals, splitTestName, {
+      phase,
+      badgeInfo: splitTest.toObject().badgeInfo?.[phase],
+    })
+  }
 }
 
 module.exports = {

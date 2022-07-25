@@ -24,6 +24,10 @@ function BetaBadge({
     case 'release':
       badgeClass = 'info-badge'
       break
+    case 'alpha':
+      badgeClass = 'alpha-badge'
+      break
+    case 'beta':
     default:
       badgeClass = 'beta-badge'
   }

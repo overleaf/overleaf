@@ -12,16 +12,19 @@ describe('PrimaryEmailCheck', function () {
   // Create the primary-email-check split test because this is now required for the query string override to work. See
   // https://github.com/overleaf/internal/pull/7545#discussion_r848575736
   before(async function () {
-    await SplitTestManager.createSplitTest('primary-email-check', {
-      active: true,
-      analyticsEnabled: true,
-      phase: 'release',
-      variants: [
-        {
-          name: 'active',
-          rolloutPercent: 0,
-        },
-      ],
+    await SplitTestManager.createSplitTest({
+      name: 'primary-email-check',
+      configuration: {
+        active: true,
+        analyticsEnabled: true,
+        phase: 'release',
+        variants: [
+          {
+            name: 'active',
+            rolloutPercent: 0,
+          },
+        ],
+      },
     })
   })
 

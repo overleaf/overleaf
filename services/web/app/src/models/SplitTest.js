@@ -16,6 +16,29 @@ const RolloutPercentType = {
   required: true,
 }
 
+const BadgeSchema = new Schema(
+  {
+    tooltipText: {
+      type: String,
+      required: false,
+    },
+    url: {
+      type: String,
+      required: false,
+    },
+  },
+  { _id: false }
+)
+
+const BadgeInfoSchema = new Schema(
+  {
+    alpha: BadgeSchema,
+    beta: BadgeSchema,
+    release: BadgeSchema,
+  },
+  { _id: false }
+)
+
 const VariantSchema = new Schema(
   {
     name: {
@@ -116,6 +139,10 @@ const SplitTestSchema = new Schema({
   },
   archived: {
     type: Boolean,
+    required: false,
+  },
+  badgeInfo: {
+    type: BadgeInfoSchema,
     required: false,
   },
 })

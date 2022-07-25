@@ -5,6 +5,14 @@ function setSplitTestVariant(locals, splitTestName, variant) {
   locals.splitTestVariants[splitTestName] = variant
 }
 
+function setSplitTestInfo(locals, splitTestName, info) {
+  if (!locals.splitTestInfo) {
+    locals.splitTestInfo = {}
+  }
+  locals.splitTestInfo[splitTestName] = info
+}
+
 module.exports = {
   setSplitTestVariant,
+  setSplitTestInfo,
 }

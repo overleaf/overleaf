@@ -47,6 +47,7 @@ html(
 			//- Expose some settings globally to the frontend
 			meta(name="ol-ExposedSettings" data-type="json" content=ExposedSettings)
 			meta(name="ol-splitTestVariants" data-type="json" content=splitTestVariants || {})
+			meta(name="ol-splitTestInfo" data-type="json" content=splitTestInfo || {})
 
 			if (typeof(settings.algolia) != "undefined")
 				meta(name="ol-algolia" data-type="json" content={

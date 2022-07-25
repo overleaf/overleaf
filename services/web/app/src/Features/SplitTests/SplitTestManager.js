@@ -34,7 +34,12 @@ async function getSplitTest(query) {
   }
 }
 
-async function createSplitTest(name, configuration, info = {}) {
+async function createSplitTest({
+  name,
+  configuration,
+  badgeInfo = {},
+  info = {},
+}) {
   const stripedVariants = []
   let stripeStart = 0
   _checkNewVariantsConfiguration([], configuration.variants)
@@ -61,6 +66,7 @@ async function createSplitTest(name, configuration, info = {}) {
     ticketUrl: info.ticketUrl,
     reportsUrls: info.reportsUrls,
     winningVariant: info.winningVariant,
+    badgeInfo,
     versions: [
       {
         versionNumber: 1,
@@ -115,6 +121,15 @@ async function updateSplitTestInfo(name, info) {
   splitTest.ticketUrl = info.ticketUrl
   splitTest.reportsUrls = info.reportsUrls
   splitTest.winningVariant = info.winningVariant
+  return _saveSplitTest(splitTest)
+}
+
+async function updateSplitTestBadgeInfo(name, badgeInfo) {
+  const splitTest = await getSplitTest({ name })
+  if (!splitTest) {
+    throw new OError(`Cannot update split test '${name}': not found`)
+  }
+  splitTest.badgeInfo = badgeInfo
   return _saveSplitTest(splitTest)
 }
 
@@ -294,6 +309,7 @@ module.exports = {
   createSplitTest,
   updateSplitTestConfig,
   updateSplitTestInfo,
+  updateSplitTestBadgeInfo,
   switchToNextPhase,
   revertToPreviousVersion,
   archive,
