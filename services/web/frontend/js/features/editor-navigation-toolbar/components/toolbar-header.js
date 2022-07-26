@@ -65,7 +65,7 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
           pdfViewIsOpen={pdfViewIsOpen}
         />
       )}
-      {window.showHeaderUpgradePrompt && <UpgradePrompt />}
+      {window.showUpgradePrompt && <UpgradePrompt />}
       <ProjectNameEditableLabel
         className="toolbar-center"
         projectName={projectName}

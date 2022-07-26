@@ -88,6 +88,7 @@ describe('<ShareProjectModal/>', function () {
     fetchMock.get('/user/contacts', { contacts })
     window.metaAttributesCache = new Map()
     window.metaAttributesCache.set('ol-user', { allowedFreeTrial: true })
+    window.metaAttributesCache.set('ol-showUpgradePrompt', true)
   })
 
   afterEach(function () {
@@ -832,5 +833,69 @@ describe('<ShareProjectModal/>', function () {
         1
       )
     })
+  })
+
+  it('displays link sharing upgrade prompt', async function () {
+    window.metaAttributesCache.set('ol-splitTestVariants', {
+      ...window.metaAttributesCache.get('ol-splitTestVariants'),
+      'link-sharing-upgrade-prompt': 'active',
+    })
+
+    // render when collaborators can still be added
+    renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
+      scope: {
+        project: {
+          ...project,
+          publicAccesLevel: 'tokenBased',
+          features: {
+            collaborators: 1,
+          },
+        },
+      },
+    })
+
+    await screen.findByText('Link sharing is on')
+
+    // text on share project upgrade prompt
+    await screen.findByText(
+      'makes collaboration with others easier with features such as',
+      { exact: false }
+    )
+  })
+
+  it('not displaying link sharing upgrade prompt when can not add collaborators', async function () {
+    window.metaAttributesCache.set('ol-splitTestVariants', {
+      ...window.metaAttributesCache.get('ol-splitTestVariants'),
+      'link-sharing-upgrade-prompt': 'active',
+    })
+
+    // render when collaborators can still be added
+    renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
+      scope: {
+        project: {
+          ...project,
+          publicAccesLevel: 'tokenBased',
+          features: {
+            collaborators: 0,
+          },
+        },
+      },
+    })
+
+    await screen.findByText('Link sharing is on')
+
+    // text on share project upgrade prompt should not be visible
+    expect(
+      screen.queryByText(
+        'makes collaboration with others easier with features such as',
+        { exact: false }
+      )
+    ).to.be.null
+
+    // show add more collaborators text
+    await screen.findByText(
+      'You need to upgrade your account to add more collaborators',
+      { exact: false }
+    )
   })
 })

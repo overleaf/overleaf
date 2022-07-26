@@ -1115,7 +1115,8 @@ const ProjectController = {
             )
 
             // Persistent upgrade prompts
-            const showHeaderUpgradePrompt =
+            // in header & in share project modal
+            const showUpgradePrompt =
               Features.hasFeature('saas') &&
               userId &&
               !subscription &&
@@ -1194,7 +1195,7 @@ const ProjectController = {
               showStopOnFirstError,
               detachRole,
               metadata: { viewport: false },
-              showHeaderUpgradePrompt,
+              showUpgradePrompt,
             })
             timer.done()
           }

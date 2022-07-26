@@ -1412,7 +1412,7 @@ describe('ProjectController', function () {
       })
     })
 
-    describe('persistent upgrade prompt', function () {
+    describe('upgrade prompt (on header and share project modal)', function () {
       beforeEach(function () {
         // default to saas enabled
         this.Features.hasFeature.withArgs('saas').returns(true)
@@ -1424,14 +1424,14 @@ describe('ProjectController', function () {
       it('should not show without the saas feature', function (done) {
         this.Features.hasFeature.withArgs('saas').returns(false)
         this.res.render = (pageName, opts) => {
-          expect(opts.showHeaderUpgradePrompt).to.equal(false)
+          expect(opts.showUpgradePrompt).to.equal(false)
           done()
         }
         this.ProjectController.loadEditor(this.req, this.res)
       })
       it('should show for a user without a subscription or only non-paid affiliations', function (done) {
         this.res.render = (pageName, opts) => {
-          expect(opts.showHeaderUpgradePrompt).to.equal(true)
+          expect(opts.showUpgradePrompt).to.equal(true)
           done()
         }
         this.ProjectController.loadEditor(this.req, this.res)
@@ -1441,7 +1441,7 @@ describe('ProjectController', function () {
           .stub()
           .callsArgWith(1, null, {})
         this.res.render = (pageName, opts) => {
-          expect(opts.showHeaderUpgradePrompt).to.equal(false)
+          expect(opts.showUpgradePrompt).to.equal(false)
           done()
         }
         this.ProjectController.loadEditor(this.req, this.res)
@@ -1451,7 +1451,7 @@ describe('ProjectController', function () {
           .stub()
           .callsArgWith(1, null, true)
         this.res.render = (pageName, opts) => {
-          expect(opts.showHeaderUpgradePrompt).to.equal(false)
+          expect(opts.showUpgradePrompt).to.equal(false)
           done()
         }
         this.ProjectController.loadEditor(this.req, this.res)
@@ -1461,7 +1461,7 @@ describe('ProjectController', function () {
           .stub()
           .callsArgWith(1, null, true)
         this.res.render = (pageName, opts) => {
-          expect(opts.showHeaderUpgradePrompt).to.equal(false)
+          expect(opts.showUpgradePrompt).to.equal(false)
           done()
         }
         this.ProjectController.loadEditor(this.req, this.res)

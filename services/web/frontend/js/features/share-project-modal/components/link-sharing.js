@@ -12,6 +12,7 @@ import * as eventTracking from '../../../infrastructure/event-tracking'
 import { useUserContext } from '../../../shared/context/user-context'
 import StartFreeTrialButton from '../../../shared/components/start-free-trial-button'
 import { useSplitTestContext } from '../../../shared/context/split-test-context'
+import getMeta from '../../../utils/meta'
 
 export default function LinkSharing({ canAddCollaborators }) {
   const [inflight, setInflight] = useState(false)
@@ -273,15 +274,10 @@ function LinkSharingUpgradePrompt({ canAddCollaborators }) {
   const { splitTestVariants } = useSplitTestContext()
   const linkSharingUpgradePromptActive =
     splitTestVariants['link-sharing-upgrade-prompt'] === 'active'
-
-  const user = useUserContext({
-    allowedFreeTrial: PropTypes.bool,
-  })
+  const showUpgradePrompt = getMeta('ol-showUpgradePrompt')
 
   const showLinkSharingUpgradePrompt =
-    linkSharingUpgradePromptActive &&
-    user.allowedFreeTrial &&
-    canAddCollaborators
+    linkSharingUpgradePromptActive && showUpgradePrompt && canAddCollaborators
 
   if (!showLinkSharingUpgradePrompt) {
     return null
