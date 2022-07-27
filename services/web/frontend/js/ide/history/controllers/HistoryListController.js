@@ -62,7 +62,11 @@ App.controller('HistoryListController', function ($scope, $modal, ide) {
     return (() => {
       const result = []
       for (const update of Array.from($scope.history.updates)) {
-        let inSelection
+        // replacing this declaration with `let` introduces a bug in history point selection:
+        // https://github.com/overleaf/overleaf/issues/1035
+        // eslint-disable-next-line no-var
+        var inSelection
+
         if (update.selectedTo) {
           inSelection = true
           beforeSelection = false
