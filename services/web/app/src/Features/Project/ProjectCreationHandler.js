@@ -31,6 +31,10 @@ const MONTH_NAMES = [
   'December',
 ]
 
+const templateProjectDir = Features.hasFeature('saas')
+  ? 'example-project'
+  : 'example-project-sp'
+
 async function createBlankProject(ownerId, projectName, attributes = {}) {
   const isImport = attributes && attributes.overleaf
   const project = await _createBlankProject(ownerId, projectName, attributes)
@@ -92,14 +96,14 @@ async function createExampleProject(ownerId, projectName) {
 
 async function _addExampleProjectFiles(ownerId, projectName, project) {
   const mainDocLines = await _buildTemplate(
-    'example-project/main.tex',
+    `${templateProjectDir}/main.tex`,
     ownerId,
     projectName
   )
   await _createRootDoc(project, ownerId, mainDocLines)
 
   const bibDocLines = await _buildTemplate(
-    'example-project/sample.bib',
+    `${templateProjectDir}/sample.bib`,
     ownerId,
     projectName
   )
@@ -113,7 +117,7 @@ async function _addExampleProjectFiles(ownerId, projectName, project) {
 
   const frogPath = path.join(
     __dirname,
-    '/../../../templates/project_files/example-project/frog.jpg'
+    `/../../../templates/project_files/${templateProjectDir}/frog.jpg`
   )
   await ProjectEntityUpdateHandler.promises.addFile(
     project._id,
