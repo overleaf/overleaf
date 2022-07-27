@@ -371,6 +371,7 @@
   "featured_latex_templates": "Featured LaTeX Templates",
   "no_featured_templates": "No featured templates",
   "try_again": "Please try again",
+  "sso_user_denied_access": "Cannot log in because __appName__ was not granted access to your __provider__ account. Please try again.",
   "email_required": "Email required",
   "registration_error": "Registration error",
   "newsletter-accept": "I’d like emails about product offers and company news and events.",
