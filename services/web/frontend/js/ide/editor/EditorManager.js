@@ -201,6 +201,10 @@ export default EditorManager = (function () {
         options = {}
       }
       sl_console.log(`[openDoc] Opening ${doc.id}`)
+      if (this.$scope.ui.view === 'editor') {
+        // store position of previous doc before switching docs
+        this.$scope.$broadcast('store-doc-position')
+      }
       this.$scope.ui.view = 'editor'
 
       const done = isNewDoc => {

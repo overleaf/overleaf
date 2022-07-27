@@ -24,7 +24,7 @@ export default CursorPositionManager = class CursorPositionManager {
     this.localStorage = localStorage
     this.$scope.$on('editorInit', this.jumpToPositionInNewDoc)
 
-    this.$scope.$on('beforeChangeDocument', this.storePositionAndLine)
+    this.$scope.$on('store-doc-position', this.storePositionAndLine)
 
     this.$scope.$on('afterChangeDocument', this.jumpToPositionInNewDoc)
 

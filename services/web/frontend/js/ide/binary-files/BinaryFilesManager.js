@@ -25,6 +25,11 @@ export default BinaryFilesManager = class BinaryFilesManager {
   }
 
   openFile(file) {
+    if (this.$scope.ui.view === 'editor') {
+      // store position before switching to binary view
+      this.$scope.$broadcast('store-doc-position')
+    }
+
     this.ide.fileTreeManager.selectEntity(file)
     if (this.$scope.ui.view !== 'history') {
       this.$scope.ui.view = 'file'
