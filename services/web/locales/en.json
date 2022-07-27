@@ -1798,5 +1798,8 @@
   "show_your_support": "Show your support",
   "approaching_compile_timeout_limit_upgrade_for_more_compile_time": "You are approaching your compile timeout limit. Upgrade to <strong>Overleaf Premium</strong> for <0>4x more</0> compile time.",
   "access_denied": "Access Denied",
-  "the_project_that_contains_this_file_is_not_shared_with_you": "The project that contains this file is not shared with you"
+  "the_project_that_contains_this_file_is_not_shared_with_you": "The project that contains this file is not shared with you",
+  "server_pro_license_entitlement_line_1": "<0>__appName__</0> Server Pro license",
+  "server_pro_license_entitlement_line_2": "You currently have <0>__count__ active users</0>. If you need to increase your license entitlement, please <1>contact Overleaf</1>.",
+  "server_pro_license_entitlement_line_3": "An active user is one who has opened a project in this Server Pro instance in the last 12 months."
 }
