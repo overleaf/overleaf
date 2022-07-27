@@ -310,7 +310,12 @@ async function maybeCreateRedundantSubscriptionNotification(userId, email) {
     .create()
 }
 
-async function removeEmailAddress(userId, email, skipParseEmail = false) {
+async function removeEmailAddress(
+  userId,
+  email,
+  auditLog,
+  skipParseEmail = false
+) {
   // remove one of the user's email addresses. The email cannot be the user's
   // default email address
   if (!skipParseEmail) {
@@ -329,6 +334,18 @@ async function removeEmailAddress(userId, email, skipParseEmail = false) {
   if (isMainEmail) {
     throw new Error('cannot remove primary email')
   }
+
+  await UserAuditLogHandler.promises.addEntry(
+    userId,
+    'remove-email',
+    auditLog.initiatorId,
+    auditLog.ipAddress,
+    {
+      removedEmail: email,
+      // Add optional extra info
+      ...(auditLog.extraInfo || {}),
+    }
+  )
 
   try {
     await InstitutionsAPI.promises.removeAffiliation(userId, email)
@@ -406,7 +423,7 @@ async function changeEmailAddress(userId, newEmail, auditLog) {
   const oldEmail = await UserGetter.promises.getUserEmail(userId)
   await addEmailAddress(userId, newEmail, {}, auditLog)
   await setDefaultEmailAddress(userId, newEmail, true, auditLog, true)
-  await removeEmailAddress(userId, oldEmail)
+  await removeEmailAddress(userId, oldEmail, auditLog)
 }
 
 async function removeReconfirmFlag(userId) {

@@ -244,7 +244,11 @@ describe('UserEmailsController', function () {
     })
 
     it('removes email', function (done) {
-      this.UserUpdater.removeEmailAddress.callsArgWith(2, null)
+      const auditLog = {
+        initiatorId: this.user._id,
+        ipAddress: this.req.ip,
+      }
+      this.UserUpdater.removeEmailAddress.callsArgWith(3, null)
 
       this.UserEmailsController.remove(this.req, {
         sendStatus: code => {
@@ -253,7 +257,8 @@ describe('UserEmailsController', function () {
           assertCalledWith(
             this.UserUpdater.removeEmailAddress,
             this.user._id,
-            this.email
+            this.email,
+            auditLog
           )
           done()
         },

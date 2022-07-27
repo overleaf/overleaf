@@ -47,6 +47,19 @@ async function removeEmail() {
     )
   }
 
+  const auditLog = {
+    initiatorId: undefined,
+    ipAddress: '0.0.0.0',
+    extraInfo: {
+      script: true,
+    },
+  }
+
   const skipParseEmail = true
-  await UserUpdater.promises.removeEmailAddress(userId, email, skipParseEmail)
+  await UserUpdater.promises.removeEmailAddress(
+    userId,
+    email,
+    auditLog,
+    skipParseEmail
+  )
 }

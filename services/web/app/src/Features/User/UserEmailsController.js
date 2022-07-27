@@ -164,8 +164,11 @@ const UserEmailsController = {
     if (!email) {
       return res.sendStatus(422)
     }
-
-    UserUpdater.removeEmailAddress(userId, email, function (error) {
+    const auditLog = {
+      initiatorId: userId,
+      ipAddress: req.ip,
+    }
+    UserUpdater.removeEmailAddress(userId, email, auditLog, function (error) {
       if (error) {
         return next(error)
       }

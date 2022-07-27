@@ -65,6 +65,22 @@ describe('UserAuditLogHandler', function () {
         )
         this.UserMock.verify()
       })
+
+      it('updates the log for a email removal via script', async function () {
+        await expect(
+          this.UserAuditLogHandler.promises.addEntry(
+            this.userId,
+            'remove-email',
+            undefined,
+            this.action.ip,
+            {
+              removedEmail: 'foo',
+              script: true,
+            }
+          )
+        )
+        this.UserMock.verify()
+      })
     })
 
     describe('errors', function () {
@@ -121,6 +137,20 @@ describe('UserAuditLogHandler', function () {
               undefined,
               this.action.ip,
               this.action.info
+            )
+          ).to.be.rejected
+        })
+
+        it('throws an error when remove-email is not from a script, but has no initiatorId', async function () {
+          await expect(
+            this.UserAuditLogHandler.promises.addEntry(
+              this.userId,
+              'remove-email',
+              undefined,
+              this.action.ip,
+              {
+                removedEmail: 'foo',
+              }
             )
           ).to.be.rejected
         })

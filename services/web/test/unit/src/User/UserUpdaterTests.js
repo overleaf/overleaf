@@ -376,10 +376,14 @@ describe('UserUpdater', function () {
   })
 
   describe('removeEmailAddress', function () {
+    this.beforeEach(function () {
+      this.auditLog = { initiatorId: this.user._id, ipAddress: '127:0:0:0' }
+    })
     it('removes the email', async function () {
       await this.UserUpdater.promises.removeEmailAddress(
         this.user._id,
-        this.newEmail
+        this.newEmail,
+        this.auditLog
       )
       expect(this.db.users.updateOne).to.have.been.calledWith(
         { _id: this.user._id, email: { $ne: this.newEmail } },
@@ -390,7 +394,8 @@ describe('UserUpdater', function () {
     it('removes the affiliation', async function () {
       await this.UserUpdater.promises.removeEmailAddress(
         this.user._id,
-        this.newEmail
+        this.newEmail,
+        this.auditLog
       )
       expect(this.InstitutionsAPI.promises.removeAffiliation).to.have.been
         .calledOnce
@@ -402,7 +407,8 @@ describe('UserUpdater', function () {
     it('refreshes features', async function () {
       await this.UserUpdater.promises.removeEmailAddress(
         this.user._id,
-        this.newEmail
+        this.newEmail,
+        this.auditLog
       )
       sinon.assert.calledWith(
         this.FeaturesUpdater.promises.refreshFeatures,
@@ -417,7 +423,8 @@ describe('UserUpdater', function () {
       await expect(
         this.UserUpdater.promises.removeEmailAddress(
           this.user._id,
-          this.newEmail
+          this.newEmail,
+          this.auditLog
         )
       ).to.be.rejected
       expect(this.FeaturesUpdater.promises.refreshFeatures).not.to.have.been
@@ -430,7 +437,8 @@ describe('UserUpdater', function () {
       await expect(
         this.UserUpdater.promises.removeEmailAddress(
           this.user._id,
-          this.newEmail
+          this.newEmail,
+          this.auditLog
         )
       ).to.be.rejectedWith('Cannot remove email')
       expect(this.FeaturesUpdater.promises.refreshFeatures).not.to.have.been
@@ -443,7 +451,8 @@ describe('UserUpdater', function () {
       await expect(
         this.UserUpdater.promises.removeEmailAddress(
           this.user._id,
-          this.newEmail
+          this.newEmail,
+          this.auditLog
         )
       ).to.be.rejected
       expect(this.db.users.updateOne).not.to.have.been.called
@@ -455,7 +464,8 @@ describe('UserUpdater', function () {
       await expect(
         this.UserUpdater.promises.removeEmailAddress(
           this.user._id,
-          this.user.email
+          this.user.email,
+          this.auditLog
         )
       ).to.be.rejectedWith('cannot remove primary email')
       expect(this.db.users.updateOne).not.to.have.been.called
@@ -465,7 +475,11 @@ describe('UserUpdater', function () {
 
     it('validates the email', function () {
       expect(
-        this.UserUpdater.promises.removeEmailAddress(this.user._id, 'baz')
+        this.UserUpdater.promises.removeEmailAddress(
+          this.user._id,
+          'baz',
+          this.auditLog
+        )
       ).to.be.rejectedWith('invalid email')
     })
 
@@ -474,6 +488,7 @@ describe('UserUpdater', function () {
       await this.UserUpdater.promises.removeEmailAddress(
         this.user._id,
         'baz',
+        this.auditLog,
         skipParseEmail
       )
     })
@@ -484,9 +499,56 @@ describe('UserUpdater', function () {
         this.UserUpdater.promises.removeEmailAddress(
           this.user._id,
           1,
+          this.auditLog,
           skipParseEmail
         )
       ).to.be.rejectedWith('email must be a string')
+    })
+
+    it('logs the removal to the audit log', async function () {
+      await this.UserUpdater.promises.removeEmailAddress(
+        this.user._id,
+        this.newEmail,
+        this.auditLog
+      )
+      expect(
+        this.UserAuditLogHandler.promises.addEntry
+      ).to.have.been.calledWith(
+        this.user._id,
+        'remove-email',
+        this.auditLog.initiatorId,
+        this.auditLog.ipAddress,
+        {
+          removedEmail: this.newEmail,
+        }
+      )
+    })
+
+    it('logs the removal from script to the audit log', async function () {
+      this.auditLog = {
+        initiatorId: undefined,
+        ipAddress: '0.0.0.0',
+        extraInfo: {
+          script: true,
+        },
+      }
+      await this.UserUpdater.promises.removeEmailAddress(
+        this.user._id,
+        this.newEmail,
+        this.auditLog
+      )
+      expect(
+        this.UserAuditLogHandler.promises.addEntry
+      ).to.have.been.calledWith(
+        this.user._id,
+        'remove-email',
+        this.auditLog.initiatorId,
+        this.auditLog.ipAddress,
+        {
+          removedEmail: this.newEmail,
+          script: true,
+        }
+      )
     })
   })
 
