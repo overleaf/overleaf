@@ -1,18 +1,17 @@
 # git-bridge makefile
 
-MVN_OPTS := "--no-transfer-progress"
+MVN_OPTS := --no-transfer-progress
+MVN_TARGET := target/writelatex-git-bridge-1.0-SNAPSHOT-jar-with-dependencies.jar
 
 runtime-conf:
 	/opt/envsubst < conf/envsubst_template.json > conf/runtime.json
 
 
-run: package runtime-conf
-	java $(GIT_BRIDGE_JVM_ARGS) -jar \
-	target/writelatex-git-bridge-1.0-SNAPSHOT-jar-with-dependencies.jar \
-	conf/runtime.json
+run: $(MVN_TARGET) runtime-conf
+	java $(GIT_BRIDGE_JVM_ARGS) -jar $(MVN_TARGET) conf/runtime.json
 
 
-build:
+$(MVN_TARGET): $(shell find src -type f)
 	mvn $(MVN_OPTS) package -DskipTests
 
 
@@ -28,4 +27,4 @@ package: clean
 	mvn $(MVN_OPTS) package -DskipTests
 
 
-.PHONY: run package build clean test runtime-conf
+.PHONY: run package clean test runtime-conf
