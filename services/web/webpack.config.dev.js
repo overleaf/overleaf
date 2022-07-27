@@ -73,6 +73,11 @@ module.exports = merge(base, {
     chunks: false,
     modules: false,
     // Hide copied assets from output
-    excludeAssets: [/^js\/ace/, /^js\/libs/, /^js\/cmaps/],
+    excludeAssets: [
+      /^js\/ace/,
+      /^js\/libs/,
+      /^js\/cmaps/,
+      /^js\/standard_fonts/,
+    ],
   },
 })

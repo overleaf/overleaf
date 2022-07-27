@@ -13,9 +13,13 @@ export default class PDFJSWrapper {
   }
 
   async init() {
-    const { PDFJS, PDFJSViewer, cMapUrl, imageResourcesPath } = await import(
-      './pdf-js-versions'
-    ).then(m => {
+    const {
+      PDFJS,
+      PDFJSViewer,
+      cMapUrl,
+      imageResourcesPath,
+      standardFontDataUrl,
+    } = await import('./pdf-js-versions').then(m => {
       return m.default
     })
 
@@ -23,6 +27,7 @@ export default class PDFJSWrapper {
     this.genPdfCachingTransport = generatePdfCachingTransportFactory(PDFJS)
     this.PDFJSViewer = PDFJSViewer
     this.cMapUrl = cMapUrl
+    this.standardFontDataUrl = standardFontDataUrl
     this.imageResourcesPath = imageResourcesPath
 
     // create the event bus
@@ -78,6 +83,7 @@ export default class PDFJSWrapper {
         url,
         cMapUrl: this.cMapUrl,
         cMapPacked: true,
+        standardFontDataUrl: this.standardFontDataUrl,
         disableFontFace,
         rangeChunkSize,
         disableAutoFetch: true,

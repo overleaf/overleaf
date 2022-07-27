@@ -305,6 +305,11 @@ module.exports = {
           return [
             { from: `cmaps`, to: `js/${version}/cmaps`, context: dir },
             {
+              from: `standard_fonts`,
+              to: `fonts/${version}`,
+              context: dir,
+            },
+            {
               from: `legacy/web/images`,
               to: `images/${version}`,
               context: dir,
