@@ -1367,9 +1367,22 @@ describe('ProjectController', function () {
     describe('feature flags', function () {
       describe('showPdfDetach', function () {
         describe('showPdfDetach=false', function () {
-          it('should be false by default', function (done) {
+          beforeEach(function () {
+            this.Features.hasFeature.withArgs('saas').returns(true)
+          })
+
+          it('should be false by default in SaaS', function (done) {
             this.res.render = (pageName, opts) => {
               expect(opts.showPdfDetach).to.be.false
+              done()
+            }
+            this.ProjectController.loadEditor(this.req, this.res)
+          })
+
+          it('should be true by default in Server Pro', function (done) {
+            this.Features.hasFeature.withArgs('saas').returns(false)
+            this.res.render = (pageName, opts) => {
+              expect(opts.showPdfDetach).to.be.true
               done()
             }
             this.ProjectController.loadEditor(this.req, this.res)

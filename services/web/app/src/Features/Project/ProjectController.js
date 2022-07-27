@@ -1086,10 +1086,12 @@ const ProjectController = {
               }
             }
 
-            const showPdfDetach = shouldDisplayFeature(
-              'pdf_detach',
-              pdfDetachAssignment.variant === 'enabled'
-            )
+            const showPdfDetach =
+              !Features.hasFeature('saas') ||
+              shouldDisplayFeature(
+                'pdf_detach',
+                pdfDetachAssignment.variant === 'enabled'
+              )
 
             const debugPdfDetach = shouldDisplayFeature('debug_pdf_detach')
 
@@ -1109,10 +1111,12 @@ const ProjectController = {
               !Features.hasFeature('saas') ||
               (user.features && user.features.symbolPalette)
 
-            const dictionaryEditorEnabled = shouldDisplayFeature(
-              'dictionary-editor',
-              dictionaryEditorAssignment.variant === 'enabled'
-            )
+            const dictionaryEditorEnabled =
+              !Features.hasFeature('saas') ||
+              shouldDisplayFeature(
+                'dictionary-editor',
+                dictionaryEditorAssignment.variant === 'enabled'
+              )
 
             // Persistent upgrade prompts
             // in header & in share project modal
