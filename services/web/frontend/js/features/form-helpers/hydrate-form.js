@@ -109,7 +109,13 @@ async function sendFormRequest(formEl, captchaResponse) {
   if (captchaResponse) {
     formData.set('g-recaptcha-response', captchaResponse)
   }
-  const body = Object.fromEntries(formData.entries())
+  const body = Object.fromEntries(
+    Array.from(formData.keys(), key => {
+      // forms may have multiple keys with the same name, eg: checkboxes
+      const val = formData.getAll(key)
+      return [key, val.length > 1 ? val : val.pop()]
+    })
+  )
   const url = formEl.getAttribute('action')
   return postJSON(url, { body })
 }
