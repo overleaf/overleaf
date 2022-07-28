@@ -99,12 +99,7 @@ module.exports = UpdatesManager = {
           }
 
           if (rawUpdates[0] != null && rawUpdates[0].v !== lastVersion + 1) {
-            const ts = __guard__(
-              lastCompressedUpdate != null
-                ? lastCompressedUpdate.meta
-                : undefined,
-              x1 => x1.end_ts
-            )
+            const ts = lastCompressedUpdate?.meta?.end_ts
             const last_timestamp = ts != null ? new Date(ts) : 'unknown time'
             error = new Error(
               `Tried to apply raw op at version ${rawUpdates[0].v} to last compressed update with version ${lastVersion} from ${last_timestamp}`

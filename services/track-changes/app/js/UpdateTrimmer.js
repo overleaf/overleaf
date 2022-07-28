@@ -7,7 +7,6 @@
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -37,12 +36,7 @@ module.exports = UpdateTrimmer = {
                 return callback(error)
               }
               logger.debug({ project_id, details }, 'got details')
-              if (
-                __guard__(
-                  details != null ? details.features : undefined,
-                  x => x.versioning
-                )
-              ) {
+              if (details?.features?.versioning) {
                 return MongoManager.setProjectMetaData(
                   project_id,
                   { preserveHistory: true },
@@ -70,10 +64,4 @@ module.exports = UpdateTrimmer = {
       }
     )
   },
-}
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
 }

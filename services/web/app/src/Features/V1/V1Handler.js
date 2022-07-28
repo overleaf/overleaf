@@ -8,7 +8,6 @@
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -41,10 +40,7 @@ module.exports = V1Handler = {
             {
               email,
               isValid,
-              v1UserId: __guard__(
-                body != null ? body.user_profile : undefined,
-                x => x.id
-              ),
+              v1UserId: body?.user_profile?.id,
             },
             '[V1Handler] got response from v1 login api'
           )
@@ -92,10 +88,4 @@ module.exports = V1Handler = {
       }
     )
   },
-}
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
 }

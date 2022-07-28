@@ -6,7 +6,6 @@
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -73,12 +72,7 @@ module.exports = HistoryManager = {
 
   // flush changes in the background
   flushProjectChangesAsync(project_id) {
-    if (
-      !__guard__(
-        Settings.apis != null ? Settings.apis.project_history : undefined,
-        x => x.enabled
-      )
-    ) {
+    if (!Settings.apis?.project_history?.enabled) {
       return
     }
     return HistoryManager.flushProjectChanges(
@@ -93,12 +87,7 @@ module.exports = HistoryManager = {
     if (callback == null) {
       callback = function () {}
     }
-    if (
-      !__guard__(
-        Settings.apis != null ? Settings.apis.project_history : undefined,
-        x => x.enabled
-      )
-    ) {
+    if (!Settings.apis?.project_history?.enabled) {
       return callback()
     }
     if (options.skip_history_flush) {
@@ -153,12 +142,7 @@ module.exports = HistoryManager = {
     }
 
     // record updates for project history
-    if (
-      __guard__(
-        Settings.apis != null ? Settings.apis.project_history : undefined,
-        x => x.enabled
-      )
-    ) {
+    if (Settings.apis?.project_history?.enabled) {
       if (
         HistoryManager.shouldFlushHistoryOps(
           project_ops_length,
@@ -259,10 +243,4 @@ module.exports = HistoryManager = {
       }
     )
   },
-}
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
 }

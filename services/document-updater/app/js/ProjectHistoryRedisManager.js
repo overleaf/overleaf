@@ -7,17 +7,13 @@
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
  * DS201: Simplify complex destructure assignments
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let ProjectHistoryRedisManager
 const Settings = require('@overleaf/settings')
-const projectHistoryKeys = __guard__(
-  Settings.redis != null ? Settings.redis.project_history : undefined,
-  x => x.key_schema
-)
+const projectHistoryKeys = Settings.redis?.project_history?.key_schema
 const rclient = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.project_history
 )
@@ -175,10 +171,4 @@ module.exports = ProjectHistoryRedisManager = {
     }
     return ProjectHistoryRedisManager.queueOps(project_id, jsonUpdate, callback)
   },
-}
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
 }

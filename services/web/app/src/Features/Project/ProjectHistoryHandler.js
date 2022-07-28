@@ -9,7 +9,6 @@
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -56,16 +55,7 @@ const ProjectHistoryHandler = {
         if (err != null) {
           return callback(err)
         } // n.b. getDetails returns an error if the project doesn't exist
-        return callback(
-          null,
-          __guard__(
-            __guard__(
-              project != null ? project.overleaf : undefined,
-              x1 => x1.history
-            ),
-            x => x.id
-          )
-        )
+        return callback(null, project?.overleaf?.history?.id)
       }
     )
   },
@@ -193,12 +183,6 @@ const ProjectHistoryHandler = {
       }
     )
   },
-}
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
 }
 
 ProjectHistoryHandler.promises = promisifyAll(ProjectHistoryHandler)

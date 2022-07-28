@@ -9,7 +9,6 @@
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -133,10 +132,7 @@ module.exports = ExportsHandler = {
         project: {
           id: project_id,
           rootDocPath: rootDoc[1] != null ? rootDoc[1].fileSystem : undefined,
-          historyId: __guard__(
-            project.overleaf != null ? project.overleaf.history : undefined,
-            x => x.id
-          ),
+          historyId: project.overleaf?.history?.id,
           historyVersion,
           v1ProjectId:
             project.overleaf != null ? project.overleaf.id : undefined,
@@ -286,10 +282,4 @@ module.exports = ExportsHandler = {
       }
     )
   },
-}
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
 }
