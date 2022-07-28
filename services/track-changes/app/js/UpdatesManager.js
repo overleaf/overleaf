@@ -50,7 +50,7 @@ module.exports = UpdatesManager = {
       const op = rawUpdates[i]
       if (i > 0) {
         const thisVersion = op != null ? op.v : undefined
-        const prevVersion = __guard__(rawUpdates[i - 1], x => x.v)
+        const prevVersion = rawUpdates[i - 1]?.v
         if (!(prevVersion < thisVersion)) {
           logger.error(
             {
