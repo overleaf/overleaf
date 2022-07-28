@@ -59,6 +59,15 @@ export function generatePdfCachingTransportFactory(PDFJS) {
         abortSignal,
       })
         .catch(err => {
+          if (
+            err.message === 'non successful response status: 404' &&
+            OError.getFullInfo(err).url === this.url
+          ) {
+            // Do not consider a 404 on the main pdf url as pdf caching failure.
+            // Still, bail out during the initial launch phase.
+            failedOnce = true
+            throw new PDFJS.MissingPDFException()
+          }
           metrics.failedCount++
           failedOnce = true
           if (!enablePdfCaching) {
@@ -75,7 +84,9 @@ export function generatePdfCachingTransportFactory(PDFJS) {
         .catch(err => {
           err = OError.tag(err, 'fatal pdf download error', errorInfo)
           console.error(err)
-          captureException(err, { tags: { fromPdfCaching: true } })
+          if (!(err instanceof PDFJS.MissingPDFException)) {
+            captureException(err, { tags: { fromPdfCaching: true } })
+          }
           this.reject(err)
         })
     }

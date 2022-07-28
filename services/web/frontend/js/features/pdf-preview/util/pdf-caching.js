@@ -274,12 +274,16 @@ function checkChunkResponse(response) {
  * @param {AbortSignal} abortSignal
  */
 export async function fallbackRequest({ url, start, end, abortSignal }) {
-  const response = await fetch(url, {
-    headers: { Range: `bytes=${start}-${end - 1}` },
-    signal: abortSignal,
-  })
-  checkChunkResponse(response)
-  return response.arrayBuffer()
+  try {
+    const response = await fetch(url, {
+      headers: { Range: `bytes=${start}-${end - 1}` },
+      signal: abortSignal,
+    })
+    checkChunkResponse(response)
+    return await response.arrayBuffer()
+  } catch (e) {
+    throw OError.tag(e, 'fallback request failed', { url, start, end })
+  }
 }
 
 /**
