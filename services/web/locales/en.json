@@ -87,7 +87,7 @@
   "you_will_be_able_to_contact_us_any_time_to_share_your_feedback": "<0>You will be able to contact us</0> any time to share your feedback",
   "we_may_also_contact_you_from_time_to_time_by_email_with_a_survey": "<0>We may also contact you</0> from time to time by email with a survey, or to see if you would like to participate in other user research initiatives",
   "you_can_opt_in_and_out_of_the_program_at_any_time_on_this_page": "You can <0>opt in and out</0> of the program at any time on this page",
-  "note_features_under_development": "<0>Please note</0> that features in this program are still being tested and actively developed. This means that they might <0>change</0>, be <0>removed</0> or <0>become part of a premium plan</0>.",
+  "note_features_under_development": "<0>Please note</0> that features in this program are still being tested and actively developed. This means that they might <0>change</0>, be <0>removed</0> or <0>become part of a premium plan</0>",
   "give_feedback": "Give feedback",
   "beta_feature_badge": "Beta feature badge",
   "invalid_filename": "Upload failed: check that the file name doesn’t contain special characters, trailing/leading whitespace or more than __nameLimit__ characters",
