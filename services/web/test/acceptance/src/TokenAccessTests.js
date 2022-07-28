@@ -993,6 +993,41 @@ describe('TokenAccess', function () {
           done
         )
       })
+
+      it('should require login if project does not exist', function (done) {
+        async.series(
+          [
+            // delete project
+            cb => {
+              this.owner.deleteProject(this.projectId, cb)
+            },
+            cb =>
+              tryReadAndWriteTokenAccess(
+                this.anon,
+                this.tokens.readAndWrite,
+                (response, body) => {
+                  expect(response.statusCode).to.equal(200)
+                },
+                (response, body) => {
+                  expect(response.statusCode).to.equal(200)
+                  expect(body).to.deep.equal({
+                    redirect: '/restricted',
+                    anonWriteAccessDenied: true,
+                  })
+                },
+                cb
+              ),
+            cb =>
+              this.anon.login((err, response, body) => {
+                expect(err).to.not.exist
+                expect(response.statusCode).to.equal(200)
+                expect(body.redir).to.equal(`/${this.tokens.readAndWrite}`)
+                cb()
+              }),
+          ],
+          done
+        )
+      })
     })
   } else {
     describe('anonymous read-and-write token, enabled', function () {
@@ -1117,6 +1152,35 @@ describe('TokenAccess', function () {
             done
           )
         })
+      })
+
+      it('should 404 if project does not exist', function (done) {
+        async.series(
+          [
+            // delete project
+            cb => {
+              this.owner.deleteProject(this.projectId, cb)
+            },
+            cb =>
+              tryReadAndWriteTokenAccess(
+                this.anon,
+                this.tokens.readAndWrite,
+                (response, body) => {
+                  expect(response.statusCode).to.equal(200)
+                },
+                (response, body) => {
+                  expect(response.statusCode).to.equal(200)
+                  expect(body).to.deep.equal({
+                    v1Import: {
+                      status: 'mustLogin',
+                    },
+                  })
+                },
+                cb
+              ),
+          ],
+          done
+        )
       })
     })
   }

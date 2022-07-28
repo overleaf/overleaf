@@ -113,6 +113,28 @@ async function checkAndGetProjectOrResponseAction(
   res,
   next
 ) {
+  const isAnonymousUser = !userId
+  if (
+    isAnonymousUser &&
+    tokenType === TokenAccessHandler.TOKEN_TYPES.READ_AND_WRITE &&
+    !TokenAccessHandler.ANONYMOUS_READ_AND_WRITE_ENABLED
+  ) {
+    logger.warn('[TokenAccess] deny anonymous read-and-write token access')
+    AuthenticationController.setRedirectInSession(
+      req,
+      TokenAccessHandler.makeTokenUrl(token)
+    )
+    return [
+      null,
+      () => {
+        res.json({
+          redirect: '/restricted',
+          anonWriteAccessDenied: true,
+        })
+      },
+    ]
+  }
+
   // Try to get the project, and/or an alternative action to take.
   // Returns a tuple of [project, action]
   const project = await TokenAccessHandler.promises.getProjectByToken(
@@ -138,7 +160,6 @@ async function checkAndGetProjectOrResponseAction(
   }
 
   const projectId = project._id
-  const isAnonymousUser = !userId
   const tokenAccessEnabled =
     TokenAccessHandler.tokenAccessEnabledForProject(project)
   if (isAnonymousUser && tokenAccessEnabled) {
@@ -156,23 +177,10 @@ async function checkAndGetProjectOrResponseAction(
           },
         ]
       } else {
-        logger.warn(
-          { projectId },
-          '[TokenAccess] deny anonymous read-and-write token access'
+        // anonymous read-and-write token access should have been denied already
+        throw new Error(
+          'unreachable: anonymous read-and-write token access bug'
         )
-        AuthenticationController.setRedirectInSession(
-          req,
-          TokenAccessHandler.makeTokenUrl(token)
-        )
-        return [
-          null,
-          () => {
-            res.json({
-              redirect: '/restricted',
-              anonWriteAccessDenied: true,
-            })
-          },
-        ]
       }
     } else if (tokenType === TokenAccessHandler.TOKEN_TYPES.READ_ONLY) {
       logger.debug({ projectId }, 'granting read-only anonymous access')
