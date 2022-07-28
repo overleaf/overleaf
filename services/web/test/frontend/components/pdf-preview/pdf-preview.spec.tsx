@@ -557,7 +557,10 @@ describe('<PdfPreview/>', function () {
 
       cy.wait('@compile-pdf-error')
 
-      cy.findByText('Something went wrong while rendering this PDF.')
+      cy.contains('Something went wrong while rendering this PDF.')
+      cy.contains(
+        'Please try recompiling the project from scratch, and if that doesn’t help, follow our troubleshooting guide.'
+      )
       cy.findByLabelText('Page 1').should('not.exist')
     })
 
@@ -578,7 +581,10 @@ describe('<PdfPreview/>', function () {
 
       cy.wait('@compile-pdf-corrupt')
 
-      cy.findByText('Something went wrong while rendering this PDF.')
+      cy.contains('Something went wrong while rendering this PDF.')
+      cy.contains(
+        'Please try recompiling the project from scratch, and if that doesn’t help, follow our troubleshooting guide.'
+      )
       cy.findByLabelText('Page 1').should('not.exist')
     })
   })

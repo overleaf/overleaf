@@ -16,6 +16,14 @@ function PdfPreviewError({ error }) {
       return (
         <ErrorLogEntry title={t('pdf_rendering_error')}>
           {t('something_went_wrong_rendering_pdf')}
+          &nbsp;
+          <Trans
+            i18nKey="try_recompile_project_or_troubleshoot"
+            components={[
+              // eslint-disable-next-line react/jsx-key, jsx-a11y/anchor-has-content
+              <a href="/learn/how-to/Resolving_access%2C_loading%2C_and_display_problems" />,
+            ]}
+          />
         </ErrorLogEntry>
       )
 
