@@ -9,6 +9,7 @@ const SplitTestCache = require('./SplitTestCache')
 const { SplitTest } = require('../../models/SplitTest')
 const UserAnalyticsIdCache = require('../Analytics/UserAnalyticsIdCache')
 const { getAnalyticsIdFromMongoUser } = require('../Analytics/AnalyticsHelper')
+const Features = require('../../infrastructure/Features')
 
 const DEFAULT_VARIANT = 'default'
 const ALPHA_PHASE = 'alpha'
@@ -46,6 +47,10 @@ const DEFAULT_ASSIGNMENT = {
  * @returns {Promise<{variant: string, analytics: {segmentation: {splitTest: string, variant: string, phase: string, versionNumber: number}|{}}}>}
  */
 async function getAssignment(req, res, splitTestName, { sync = false } = {}) {
+  if (!Features.hasFeature('saas')) {
+    return DEFAULT_ASSIGNMENT
+  }
+
   const query = req.query || {}
   let assignment
 
@@ -100,6 +105,10 @@ async function getAssignmentForUser(
   splitTestName,
   { sync = false } = {}
 ) {
+  if (!Features.hasFeature('saas')) {
+    return DEFAULT_ASSIGNMENT
+  }
+
   const analyticsId = await UserAnalyticsIdCache.get(userId)
   return _getAssignment(splitTestName, { analyticsId, userId, sync })
 }
@@ -120,6 +129,10 @@ async function getAssignmentForMongoUser(
   splitTestName,
   { sync = false } = {}
 ) {
+  if (!Features.hasFeature('saas')) {
+    return DEFAULT_ASSIGNMENT
+  }
+
   return _getAssignment(splitTestName, {
     analyticsId: getAnalyticsIdFromMongoUser(user),
     sync,
@@ -132,6 +145,10 @@ async function getAssignmentForMongoUser(
  * Get a mapping of the active split test assignments for the given user
  */
 async function getActiveAssignmentsForUser(userId) {
+  if (!Features.hasFeature('saas')) {
+    return {}
+  }
+
   const user = await _getUser(userId)
   if (user == null) {
     return {}
