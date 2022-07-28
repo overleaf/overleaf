@@ -2,10 +2,13 @@ import { captureException } from './error-reporter'
 import { ErrorBoundary } from 'react-error-boundary'
 
 function errorHandler(error, componentStack) {
-  captureException(error, scope => {
-    scope.setExtra('componentStack', componentStack)
-    scope.setTag('handler', 'react-error-boundary')
-    return scope
+  captureException(error, {
+    extra: {
+      componentStack,
+    },
+    tags: {
+      handler: 'react-error-boundary',
+    },
   })
 }
 

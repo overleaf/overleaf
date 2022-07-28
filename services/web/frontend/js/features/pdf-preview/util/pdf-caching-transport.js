@@ -1,3 +1,4 @@
+import OError from '@overleaf/o-error'
 import { fallbackRequest, fetchRange } from './pdf-caching'
 import { captureException } from '../../../infrastructure/error-reporter'
 import { getPdfCachingMetrics } from './metrics'
@@ -40,6 +41,13 @@ export function generatePdfCachingTransportFactory(PDFJS) {
 
     requestDataRange(start, end) {
       const abortSignal = this.abortController.signal
+      const errorInfo = {
+        pdfFile: this.pdfFile,
+        pdfUrl: this.url,
+        start,
+        end,
+        metrics,
+      }
       fetchRange({
         url: this.url,
         start,
@@ -56,16 +64,18 @@ export function generatePdfCachingTransportFactory(PDFJS) {
           if (!enablePdfCaching) {
             throw err // This was a fallback request already. Do not retry.
           }
-          console.error('optimized pdf download error', err)
-          captureException(err)
+          err = OError.tag(err, 'optimized pdf download error', errorInfo)
+          console.error(err)
+          captureException(err, { tags: { fromPdfCaching: true } })
           return fallbackRequest({ url: this.url, start, end, abortSignal })
         })
         .then(blob => {
           this.onDataRange(start, blob)
         })
         .catch(err => {
-          console.error('fatal pdf download error', err)
-          captureException(err)
+          err = OError.tag(err, 'fatal pdf download error', errorInfo)
+          console.error(err)
+          captureException(err, { tags: { fromPdfCaching: true } })
           this.reject(err)
         })
     }

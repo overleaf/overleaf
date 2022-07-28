@@ -29,9 +29,10 @@ app.config([
             return
           }
 
-          captureException(exception, scope => {
-            scope.setTag('handler', 'angular-exception-handler')
-            return scope
+          captureException(exception, {
+            tags: {
+              handler: 'angular-exception-handler',
+            },
           })
 
           return $delegate(exception, cause)
