@@ -5,12 +5,12 @@ const MAX_SUB_REQUEST_COUNT = 4
 const MAX_SUB_REQUEST_BYTES = 4 * PDF_JS_CHUNK_SIZE
 const INCREMENTAL_CACHE_SIZE = 1000
 
-const ENCODER = new TextEncoder()
 function backfillEdgeBounds(file) {
   if (!file.backfilledEdgeBoundsOnce) {
+    const encoder = new TextEncoder()
     for (const range of file.ranges) {
       if (range.objectId) {
-        range.objectId = ENCODER.encode(range.objectId)
+        range.objectId = encoder.encode(range.objectId)
         range.start -= range.objectId.byteLength
       }
     }
@@ -221,6 +221,7 @@ function getMultipartBoundary(response, chunk) {
 function resolveMultiPartResponses({ file, chunks, data, boundary, metrics }) {
   const responses = []
   let offsetStart = 0
+  const encoder = new TextEncoder()
   for (const chunk of chunks) {
     const header = `\r\n--${boundary}\r\nContent-Type: application/pdf\r\nContent-Range: bytes ${
       chunk.start
@@ -228,7 +229,7 @@ function resolveMultiPartResponses({ file, chunks, data, boundary, metrics }) {
     const headerSize = header.length
 
     // Verify header content. A proxy might have tampered with it.
-    const headerRaw = ENCODER.encode(header)
+    const headerRaw = encoder.encode(header)
     if (
       !data
         .subarray(offsetStart, offsetStart + headerSize)
