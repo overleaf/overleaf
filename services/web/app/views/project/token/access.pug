@@ -91,6 +91,31 @@ block content
 									a.btn.btn-primary(ng-href="{{ buildZipDownloadPath(v1ImportData.projectId) }}")
 										| Download project zip file
 
+			.loading-screen(
+				ng-show="mode == 'requireAccept'"
+			)
+				.container
+					.row
+						.col-md-8.col-md-offset-2
+							.card
+								.page-header.text-centered
+									h1 #{translate("invited_to_join")}
+										br
+										em {{ getProjectName() }}
+								.row.text-center
+									.col-md-12
+										p
+											if user
+												| #{translate("accepting_invite_as")}
+												|
+												em #{user.email}
+								.row.text-center
+									.col-md-12
+											button.btn.btn-lg.btn-primary(
+												type='submit'
+												ng-click="postConfirmedByUser()"
+											) #{translate("join_project")}
+
 
 block append foot-scripts
 	script(type="text/javascript", nonce=scriptNonce).

@@ -3,9 +3,10 @@ App.controller(
   'TokenAccessPageController',
   ($scope, $http, $location, localStorage) => {
     window.S = $scope
-    $scope.mode = 'accessAttempt' // 'accessAttempt' | 'v1Import'
+    $scope.mode = 'accessAttempt' // 'accessAttempt' | 'v1Import' | 'requireAccept'
 
     $scope.v1ImportData = null
+    $scope.requireAccept = null
 
     $scope.accessInFlight = false
     $scope.accessSuccess = false
@@ -20,14 +21,20 @@ App.controller(
     }
 
     $scope.getProjectName = () => {
-      if (!$scope.v1ImportData || !$scope.v1ImportData.name) {
-        return 'This project'
-      } else {
+      if ($scope.v1ImportData?.name) {
         return $scope.v1ImportData.name
+      } else if ($scope.requireAccept?.projectName) {
+        return $scope.requireAccept.projectName
+      } else {
+        return 'This project'
       }
     }
 
-    $scope.post = () => {
+    $scope.postConfirmedByUser = () => {
+      $scope.post(true)
+    }
+
+    $scope.post = (confirmedByUser = false) => {
       $scope.mode = 'accessAttempt'
       const textData = $('#overleaf-token-access-data').text()
       const parsedData = JSON.parse(textData)
@@ -39,6 +46,7 @@ App.controller(
         url: postUrl,
         data: {
           _csrf: csrfToken,
+          confirmedByUser,
         },
       }).then(
         function successCallback(response) {
@@ -59,6 +67,9 @@ App.controller(
           } else if (data.v1Import) {
             $scope.mode = 'v1Import'
             $scope.v1ImportData = data.v1Import
+          } else if (data.requireAccept) {
+            $scope.mode = 'requireAccept'
+            $scope.requireAccept = data.requireAccept
           } else {
             console.warn(
               'invalid data from server in success response',

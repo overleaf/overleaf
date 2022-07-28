@@ -69,7 +69,7 @@ async function getPrivilegeLevelForProject(
   opts = {}
 ) {
   if (userId) {
-    return getPrivilegeLevelForProjectWithUser(userId, projectId, token, opts)
+    return getPrivilegeLevelForProjectWithUser(userId, projectId, opts)
   } else {
     return getPrivilegeLevelForProjectWithoutUser(projectId, token, opts)
   }
@@ -79,7 +79,6 @@ async function getPrivilegeLevelForProject(
 async function getPrivilegeLevelForProjectWithUser(
   userId,
   projectId,
-  token,
   opts = {}
 ) {
   const privilegeLevel =

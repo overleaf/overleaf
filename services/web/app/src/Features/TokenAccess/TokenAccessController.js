@@ -19,20 +19,17 @@ const orderedPrivilegeLevels = [
   PrivilegeLevels.OWNER,
 ]
 
-async function _userAlreadyHasHigherPrivilege(
-  userId,
-  projectId,
-  token,
-  tokenType
-) {
+async function _userAlreadyHasHigherPrivilege(userId, projectId, tokenType) {
   if (!Object.values(TokenAccessHandler.TOKEN_TYPES).includes(tokenType)) {
     throw new Error('bad token type')
+  }
+  if (!userId) {
+    return false
   }
   const privilegeLevel =
     await AuthorizationManager.promises.getPrivilegeLevelForProject(
       userId,
-      projectId,
-      token
+      projectId
     )
   return (
     orderedPrivilegeLevels.indexOf(privilegeLevel) >=
@@ -196,7 +193,6 @@ async function checkAndGetProjectOrResponseAction(
   const userHasPrivilege = await _userAlreadyHasHigherPrivilege(
     userId,
     projectId,
-    token,
     tokenType
   )
   if (userHasPrivilege) {
@@ -220,6 +216,7 @@ async function checkAndGetProjectOrResponseAction(
 
 async function grantTokenAccessReadAndWrite(req, res, next) {
   const { token } = req.params
+  const { confirmedByUser } = req.body
   const userId = SessionManager.getLoggedInUserId(req.session)
   if (!TokenAccessHandler.isReadAndWriteToken(token)) {
     return res.sendStatus(400)
@@ -239,6 +236,13 @@ async function grantTokenAccessReadAndWrite(req, res, next) {
     }
     if (!project) {
       return next(new Errors.NotFoundError())
+    }
+    if (!confirmedByUser) {
+      return res.json({
+        requireAccept: {
+          projectName: project.name,
+        },
+      })
     }
     await TokenAccessHandler.promises.addReadAndWriteUserToProject(
       userId,
@@ -261,6 +265,7 @@ async function grantTokenAccessReadAndWrite(req, res, next) {
 
 async function grantTokenAccessReadOnly(req, res, next) {
   const { token } = req.params
+  const { confirmedByUser } = req.body
   const userId = SessionManager.getLoggedInUserId(req.session)
   if (!TokenAccessHandler.isReadOnlyToken(token)) {
     return res.sendStatus(400)
@@ -285,6 +290,13 @@ async function grantTokenAccessReadOnly(req, res, next) {
     }
     if (!project) {
       return next(new Errors.NotFoundError())
+    }
+    if (!confirmedByUser) {
+      return res.json({
+        requireAccept: {
+          projectName: project.name,
+        },
+      })
     }
     await TokenAccessHandler.promises.addReadOnlyUserToProject(
       userId,

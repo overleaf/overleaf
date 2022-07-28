@@ -96,6 +96,70 @@ const _doTryTokenAccess = (
   })
 }
 
+const tryReadOnlyTokenAccept = (
+  user,
+  token,
+  testPageLoad,
+  testFormPost,
+  callback
+) => {
+  _doTryTokenAccept(
+    `/read/${token}`,
+    user,
+    token,
+    testPageLoad,
+    testFormPost,
+    callback
+  )
+}
+
+const tryReadAndWriteTokenAccept = (
+  user,
+  token,
+  testPageLoad,
+  testFormPost,
+  callback
+) => {
+  _doTryTokenAccept(
+    `/${token}`,
+    user,
+    token,
+    testPageLoad,
+    testFormPost,
+    callback
+  )
+}
+
+const _doTryTokenAccept = (
+  url,
+  user,
+  token,
+  testPageLoad,
+  testFormPost,
+  callback
+) => {
+  user.request.get(url, (err, response, body) => {
+    if (err) {
+      return callback(err)
+    }
+    testPageLoad(response, body)
+    if (!testFormPost) {
+      return callback()
+    }
+    user.request.post(
+      `${url}/grant`,
+      { json: { token, confirmedByUser: true } },
+      (err, response, body) => {
+        if (err) {
+          return callback(err)
+        }
+        testFormPost(response, body)
+        callback()
+      }
+    )
+  })
+}
+
 const tryContentAccess = (user, projcetId, test, callback) => {
   // The real-time service calls this end point to determine the user's
   // permissions.
@@ -233,27 +297,25 @@ describe('TokenAccess', function () {
 
   describe('read-only token', function () {
     beforeEach(function (done) {
-      this.owner.createProject(
-        `token-ro-test${Math.random()}`,
-        (err, projectId) => {
+      this.projectName = `token-ro-test${Math.random()}`
+      this.owner.createProject(this.projectName, (err, projectId) => {
+        if (err != null) {
+          return done(err)
+        }
+        this.projectId = projectId
+        this.owner.makeTokenBased(this.projectId, err => {
           if (err != null) {
             return done(err)
           }
-          this.projectId = projectId
-          this.owner.makeTokenBased(this.projectId, err => {
+          this.owner.getProject(this.projectId, (err, project) => {
             if (err != null) {
               return done(err)
             }
-            this.owner.getProject(this.projectId, (err, project) => {
-              if (err != null) {
-                return done(err)
-              }
-              this.tokens = project.tokens
-              done()
-            })
+            this.tokens = project.tokens
+            done()
           })
-        }
-      )
+        })
+      })
     })
 
     it('allow the user read-only access to the project', function (done) {
@@ -269,8 +331,34 @@ describe('TokenAccess', function () {
             )
           },
           cb => {
-            // use token
+            // try token
             tryReadOnlyTokenAccess(
+              this.other1,
+              this.tokens.readOnly,
+              (response, body) => {
+                expect(response.statusCode).to.equal(200)
+              },
+              (response, body) => {
+                expect(response.statusCode).to.equal(200)
+                expect(body.requireAccept.projectName).to.equal(
+                  this.projectName
+                )
+              },
+              cb
+            )
+          },
+          cb => {
+            // deny access before token is accepted
+            tryEditorAccess(
+              this.other1,
+              this.projectId,
+              expectErrorResponse.restricted.html,
+              cb
+            )
+          },
+          cb => {
+            // accept token
+            tryReadOnlyTokenAccept(
               this.other1,
               this.tokens.readOnly,
               (response, body) => {
@@ -543,27 +631,25 @@ describe('TokenAccess', function () {
 
   describe('read-and-write token', function () {
     beforeEach(function (done) {
-      this.owner.createProject(
-        `token-rw-test${Math.random()}`,
-        (err, projectId) => {
+      this.projectName = `token-rw-test${Math.random()}`
+      this.owner.createProject(this.projectName, (err, projectId) => {
+        if (err != null) {
+          return done(err)
+        }
+        this.projectId = projectId
+        this.owner.makeTokenBased(this.projectId, err => {
           if (err != null) {
             return done(err)
           }
-          this.projectId = projectId
-          this.owner.makeTokenBased(this.projectId, err => {
+          this.owner.getProject(this.projectId, (err, project) => {
             if (err != null) {
               return done(err)
             }
-            this.owner.getProject(this.projectId, (err, project) => {
-              if (err != null) {
-                return done(err)
-              }
-              this.tokens = project.tokens
-              done()
-            })
+            this.tokens = project.tokens
+            done()
           })
-        }
-      )
+        })
+      })
     })
 
     it('should allow the user to access project via read-and-write token url', function (done) {
@@ -577,8 +663,33 @@ describe('TokenAccess', function () {
               expectErrorResponse.restricted.html,
               cb
             ),
+          // try token
           cb =>
             tryReadAndWriteTokenAccess(
+              this.other1,
+              this.tokens.readAndWrite,
+              (response, body) => {
+                expect(response.statusCode).to.equal(200)
+              },
+              (response, body) => {
+                expect(response.statusCode).to.equal(200)
+                expect(body.requireAccept.projectName).to.equal(
+                  this.projectName
+                )
+              },
+              cb
+            ),
+          // deny access before the token is accepted
+          cb =>
+            tryEditorAccess(
+              this.other1,
+              this.projectId,
+              expectErrorResponse.restricted.html,
+              cb
+            ),
+          // accept token
+          cb =>
+            tryReadAndWriteTokenAccept(
               this.other1,
               this.tokens.readAndWrite,
               (response, body) => {
@@ -661,7 +772,7 @@ describe('TokenAccess', function () {
               ),
             cb => {
               // use read-only token
-              tryReadOnlyTokenAccess(
+              tryReadOnlyTokenAccept(
                 this.other1,
                 this.tokens.readOnly,
                 (response, body) => {
@@ -707,7 +818,7 @@ describe('TokenAccess', function () {
             // Then switch to read-write token
             //
             cb =>
-              tryReadAndWriteTokenAccess(
+              tryReadAndWriteTokenAccept(
                 this.other1,
                 this.tokens.readAndWrite,
                 (response, body) => {

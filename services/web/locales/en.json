@@ -1030,6 +1030,7 @@
   "login_here": "Login here",
   "set_new_password": "Set new password",
   "user_wants_you_to_see_project": "__username__ would like you to join __projectname__",
+  "invited_to_join": "You have been invited to join",
   "join_sl_to_view_project": "Join __appName__ to view this project",
   "register_to_edit_template": "Please register to edit the __templateName__ template",
   "already_have_sl_account": "Already have an __appName__ account?",

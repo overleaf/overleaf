@@ -44,8 +44,8 @@ function formSubmitHelper(formEl) {
       formEl.dispatchEvent(new Event('sent'))
 
       // Handle redirects
-      if (data.redir) {
-        window.location = data.redir
+      if (data.redir || data.redirect) {
+        window.location = data.redir || data.redirect
         return
       }
 
