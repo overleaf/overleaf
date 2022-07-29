@@ -73,10 +73,12 @@ services:
         BUILD_NUMBER: $BUILD_NUMBER
         CYPRESS_IMAGE: $CYPRESS_IMAGE
     working_dir: /overleaf/services/web
-    entrypoint: npm
+    entrypoint: bash
+    volumes:
+      - ./cypress/results:/overleaf/services/web/cypress/results/
     command:
-      - "run"
-      - "cypress:run-ct"
+      - "-c"
+      - "if npm run cypress:run-ct; then exit 0; else mkdir -p ./cypress/results && touch ./cypress/results/.cypress_fail; fi;"
 
   tar:
     image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER-webpack

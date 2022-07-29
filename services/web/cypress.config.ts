@@ -3,7 +3,10 @@ import { webpackConfig } from './cypress/support/webpack.cypress'
 
 export default defineConfig({
   fixturesFolder: 'cypress/fixtures',
-  video: false,
+  video: true,
+  screenshotsFolder: 'cypress/results',
+  videosFolder: 'cypress/results',
+  videoUploadOnPasses: false,
   viewportHeight: 800,
   viewportWidth: 800,
   component: {
