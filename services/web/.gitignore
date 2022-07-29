@@ -83,6 +83,7 @@ modules/**/Makefile
 cypress/screenshots/
 cypress/videos/
 cypress/downloads/
+cypress/results/
 
 # Test fixture zip
 !modules/admin-panel/test/unit/src/data/track-changes-project.zip
