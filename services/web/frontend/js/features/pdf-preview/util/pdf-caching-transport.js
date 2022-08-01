@@ -2,18 +2,25 @@ import OError from '@overleaf/o-error'
 import { fallbackRequest, fetchRange } from './pdf-caching'
 import { captureException } from '../../../infrastructure/error-reporter'
 import { getPdfCachingMetrics } from './metrics'
-import { enablePdfCaching, trackPdfDownloadEnabled } from './pdf-caching-flags'
+import {
+  cachedUrlLookupEnabled,
+  enablePdfCaching,
+  prefetchingEnabled,
+  prefetchLargeEnabled,
+  trackPdfDownloadEnabled,
+} from './pdf-caching-flags'
 
 export function generatePdfCachingTransportFactory(PDFJS) {
   // NOTE: The custom transport can be used for tracking download volume.
   if (!enablePdfCaching && !trackPdfDownloadEnabled) {
     return () => null
   }
-  const cached = new Set()
+  const usageScore = new Map()
+  const cachedUrls = new Map()
   const metrics = Object.assign(getPdfCachingMetrics(), {
     failedCount: 0,
     failedOnce: false,
-    tooLargeOverheadCount: 0,
+    tooMuchBandwidthCount: 0,
     tooManyRequestsCount: 0,
     cachedCount: 0,
     cachedBytes: 0,
@@ -21,7 +28,12 @@ export function generatePdfCachingTransportFactory(PDFJS) {
     fetchedBytes: 0,
     requestedCount: 0,
     requestedBytes: 0,
+    oldUrlHitCount: 0,
+    oldUrlMissCount: 0,
     enablePdfCaching,
+    prefetchingEnabled,
+    prefetchLargeEnabled,
+    cachedUrlLookupEnabled,
   })
   const verifyChunks =
     new URLSearchParams(window.location.search).get('verify_chunks') === 'true'
@@ -54,8 +66,12 @@ export function generatePdfCachingTransportFactory(PDFJS) {
         end,
         file: this.pdfFile,
         metrics,
-        cached,
+        usageScore,
+        cachedUrls,
         verifyChunks,
+        prefetchingEnabled,
+        prefetchLargeEnabled,
+        cachedUrlLookupEnabled,
         abortSignal,
       })
         .catch(err => {

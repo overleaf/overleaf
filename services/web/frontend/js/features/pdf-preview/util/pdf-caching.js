@@ -3,19 +3,64 @@ import OError from '@overleaf/o-error'
 const PDF_JS_CHUNK_SIZE = 128 * 1024
 const MAX_SUB_REQUEST_COUNT = 4
 const MAX_SUB_REQUEST_BYTES = 4 * PDF_JS_CHUNK_SIZE
+const HEADER_OVERHEAD_PER_MULTI_PART_CHUNK = 100
+const MULTI_PART_THRESHOLD = 4
 const INCREMENTAL_CACHE_SIZE = 1000
+// Download large chunks once the shard bandwidth exceeds 50% of their size.
+const CHUNK_USAGE_THRESHOLD_PREFETCH_LARGE = 0.5
+// Preferred caching once we downloaded a chunk (in multiple shards) in full.
+const CHUNK_USAGE_THRESHOLD_TRIGGER_PREFERRED = 1
+const CHUNK_USAGE_THRESHOLD_CACHED = 42
+// 42 * 0.7^11 < 1, aka we keep stale entries around for 11 compiles.
+const CHUNK_USAGE_STALE_DECAY_RATE = 0.7
 
+/**
+ * @param {Object} file
+ */
 function backfillEdgeBounds(file) {
-  if (!file.backfilledEdgeBoundsOnce) {
-    const encoder = new TextEncoder()
-    for (const range of file.ranges) {
-      if (range.objectId) {
-        range.objectId = encoder.encode(range.objectId)
-        range.start -= range.objectId.byteLength
-      }
+  const encoder = new TextEncoder()
+  for (const chunk of file.ranges) {
+    if (chunk.objectId) {
+      chunk.objectId = encoder.encode(chunk.objectId)
+      chunk.start -= chunk.objectId.byteLength
+      chunk.size = chunk.end - chunk.start
     }
   }
-  file.backfilledEdgeBoundsOnce = true
+}
+
+/**
+ * @param {Map} usageScore
+ * @param {Map} cachedUrls
+ */
+function trimState({ usageScore, cachedUrls }) {
+  for (const hash of usageScore) {
+    if (usageScore.size < INCREMENTAL_CACHE_SIZE) {
+      break
+    }
+    const score = usageScore.get(hash)
+    if (score >= CHUNK_USAGE_THRESHOLD_TRIGGER_PREFERRED) {
+      // Keep entries that are worth caching around for longer.
+      usageScore.set(hash, score * CHUNK_USAGE_STALE_DECAY_RATE)
+      continue
+    }
+    cachedUrls.delete(hash)
+    usageScore.delete(hash)
+  }
+}
+
+/**
+ * @param {Object} file
+ * @param {Map} usageScore
+ * @param {Map} cachedUrls
+ */
+function preprocessFileOnce({ file, usageScore, cachedUrls }) {
+  if (file.preprocessed) return
+  file.preprocessed = true
+
+  file.createdAt = new Date(file.createdAt)
+  file.prefetched = file.prefetched || []
+  trimState({ usageScore, cachedUrls })
+  backfillEdgeBounds(file)
 }
 
 /**
@@ -79,9 +124,9 @@ function backFillObjectContext(chunk, arrayBuffer) {
     // This is a dynamic chunk
     return new Uint8Array(arrayBuffer)
   }
-  const { start, end, objectId } = chunk
+  const { size, objectId } = chunk
   const header = Uint8Array.from(objectId)
-  const fullBuffer = new Uint8Array(end - start)
+  const fullBuffer = new Uint8Array(size)
   fullBuffer.set(header, 0)
   fullBuffer.set(new Uint8Array(arrayBuffer), objectId.length)
   return fullBuffer
@@ -114,40 +159,125 @@ function getMatchingChunks(chunks, start, end) {
 }
 
 /**
- * @param {Array} potentialChunks
- * @param {Set} cached
- * @param {Object} metrics
+ * @param {Object} a
+ * @param {Object} b
  */
-function cutRequestAmplification(potentialChunks, cached, metrics) {
+function sortBySizeDESC(a, b) {
+  return a.size > b.size ? -1 : 1
+}
+
+/**
+ * @param {Object} a
+ * @param {Object} b
+ */
+function sortByStartASC(a, b) {
+  return a.start > b.start ? 1 : -1
+}
+
+/**
+ * @param {Object} chunk
+ */
+function usageAboveThreshold(chunk) {
+  // We fetched enough shards of this chunk. Cache it in full now.
+  return chunk.totalUsage > CHUNK_USAGE_THRESHOLD_TRIGGER_PREFERRED
+}
+
+/**
+ * @param {Array} potentialChunks
+ * @param {Map} usageScore
+ * @param {Map} cachedUrls
+ * @param {Object} metrics
+ * @param {number} start
+ * @param {number} end
+ * @param {boolean} prefetchLargeEnabled
+ */
+function cutRequestAmplification({
+  potentialChunks,
+  usageScore,
+  cachedUrls,
+  metrics,
+  start,
+  end,
+  prefetchLargeEnabled,
+}) {
+  // NOTE: Map keys are stored in insertion order.
+  // We re-insert keys on cache hit and turn 'usageScore' into a cheap LRU.
+
   const chunks = []
-  const newChunks = []
+  const skipAlreadyAdded = chunk => !chunks.includes(chunk)
   let tooManyRequests = false
+  let tooMuchBandwidth = false
+  let newChunks = 0
+  let newCacheBandwidth = 0
   for (const chunk of potentialChunks) {
-    if (cached.has(chunk.hash)) {
+    const newUsage =
+      (Math.min(end, chunk.end) - Math.max(start, chunk.start)) / chunk.size
+    const totalUsage = (usageScore.get(chunk.hash) || 0) + newUsage
+    usageScore.delete(chunk.hash)
+    usageScore.set(chunk.hash, totalUsage)
+    chunk.totalUsage = totalUsage
+  }
+
+  // Always download already cached entries
+  for (const chunk of potentialChunks) {
+    if (chunk.totalUsage >= CHUNK_USAGE_THRESHOLD_CACHED) {
       chunks.push(chunk)
-      continue
     }
-    if (newChunks.length < MAX_SUB_REQUEST_COUNT) {
-      chunks.push(chunk)
-      newChunks.push(chunk)
-    } else {
-      tooManyRequests = true
+  }
+
+  // Prefer large blobs over small ones.
+  potentialChunks.sort(sortBySizeDESC)
+
+  // Prefer chunks with high (previous) usage over brand-new chunks.
+  const firstComeFirstCache = () => true
+  for (const trigger of [usageAboveThreshold, firstComeFirstCache]) {
+    for (const chunk of potentialChunks.filter(skipAlreadyAdded)) {
+      if (newCacheBandwidth + chunk.size > MAX_SUB_REQUEST_BYTES) {
+        // We would breach the bandwidth amplification limit.
+        tooMuchBandwidth = true
+        continue
+      }
+      if (newChunks + 1 > MAX_SUB_REQUEST_COUNT) {
+        // We would breach the request rate amplification limit.
+        tooManyRequests = true
+        continue
+      }
+      if (trigger(chunk)) {
+        newCacheBandwidth += chunk.size
+        newChunks += 1
+        chunks.push(chunk)
+      }
+    }
+  }
+  const largeChunk = potentialChunks.filter(skipAlreadyAdded)[0]
+  if (largeChunk?.size >= PDF_JS_CHUNK_SIZE) {
+    // This is a large chunk that exceeds the bandwidth amplification limit.
+    if (largeChunk.start <= start && largeChunk.end >= end) {
+      // This is a large chunk spanning the entire range. pdf.js will only
+      //  request these in case it needs the underlying stream, so it is OK to
+      //  download as much data as the stream is large in one go.
+      chunks.push(largeChunk)
+    } else if (
+      prefetchLargeEnabled &&
+      largeChunk.totalUsage > CHUNK_USAGE_THRESHOLD_PREFETCH_LARGE
+    ) {
+      // pdf.js actually wants the smaller (dynamic) chunk in the range that
+      //  happens to sit right next to this large chunk.
+      // pdf.js has requested a lot of the large chunk via shards by now, and it
+      //  is time to download it in full to stop "wasting" more bandwidth and
+      //  more importantly cut down latency as we can prefetch the small chunk.
+      chunks.push(largeChunk)
     }
   }
   if (tooManyRequests) {
     metrics.tooManyRequestsCount++
   }
-  if (cached.size > INCREMENTAL_CACHE_SIZE) {
-    for (const key of cached) {
-      if (cached.size < INCREMENTAL_CACHE_SIZE) {
-        break
-      }
-      // Map keys are stored in insertion order.
-      // We re-insert keys on cache hit, 'cached' is a cheap LRU.
-      cached.delete(key)
-    }
+  if (tooMuchBandwidth) {
+    metrics.tooMuchBandwidthCount++
   }
-  return { chunks, newChunks }
+
+  chunks.sort(sortByStartASC)
+  return chunks
 }
 
 /**
@@ -316,14 +446,156 @@ async function verifyRange({ url, start, end, metrics, actual, abortSignal }) {
 }
 
 /**
+ * @param {Array} chunks
+ * @param {Array} prefetched
+ * @param {number} start
+ * @param {number} end
+ */
+function skipPrefetched(chunks, prefetched, start, end) {
+  return chunks.filter(chunk => {
+    return !prefetched.find(
+      c =>
+        c.start <= Math.max(chunk.start, start) &&
+        c.end >= Math.min(chunk.end, end)
+    )
+  })
+}
+
+/**
+ * @param {Object} chunk
+ * @param {string} url
+ * @param {Object} init
+ * @param {Map<string, string>} cachedUrls
+ * @param {Object} metrics
+ * @param {boolean} cachedUrlLookupEnabled
+ */
+async function fetchChunk({
+  chunk,
+  url,
+  init,
+  cachedUrls,
+  metrics,
+  cachedUrlLookupEnabled,
+}) {
+  const oldUrl = cachedUrls.get(chunk.hash)
+  if (cachedUrlLookupEnabled && chunk.hash && oldUrl && oldUrl !== url) {
+    // When the clsi server id changes, the content id changes too and as a
+    //  result all the browser cache keys (aka urls) get invalidated.
+    // We memorize the previous browser cache keys in `cachedUrls`.
+    try {
+      const response = await fetch(oldUrl, init)
+      if (response.status === 200) {
+        metrics.oldUrlHitCount += 1
+        return response
+      }
+      if (response.status === 404) {
+        // The old browser cache entry is gone and the old file is gone too.
+        metrics.oldUrlMissCount += 1
+      }
+      // Fallback to the latest url.
+    } catch (e) {
+      // Fallback to the latest url.
+    }
+  }
+  const response = await fetch(url, init)
+  checkChunkResponse(response)
+  if (chunk.hash) cachedUrls.set(chunk.hash, url)
+  return response
+}
+
+/**
+ * @param {Object} file
+ * @param {number} start
+ * @param {number} end
+ * @param {Array} dynamicChunks
+ * @param {boolean} prefetchXRefTable
+ * @param {number} startXRefTableRange
+ */
+function addPrefetchingChunks({
+  file,
+  start,
+  end,
+  dynamicChunks,
+  prefetchXRefTable,
+  startXRefTableRange,
+}) {
+  // Prefetch in case this is the first range, or we are fetching dynamic
+  //  chunks anyway (so we can ride-share the round trip).
+  // Rendering cannot start without downloading the xref table, so it's OK to
+  //  "delay" the first range.
+  if (!(start === 0 || dynamicChunks.length > 0)) {
+    return
+  }
+
+  let extra = []
+  if (prefetchXRefTable) {
+    // Prefetch the dynamic chunks around the xref table.
+    extra = skipPrefetched(
+      getInterleavingDynamicChunks(
+        getMatchingChunks(file.ranges, startXRefTableRange, file.size),
+        startXRefTableRange,
+        file.size
+      ),
+      file.prefetched,
+      startXRefTableRange,
+      file.size
+    )
+  }
+  // Stop at the xref table range if present -- we may prefetch it early ^^^.
+  const prefetchEnd = startXRefTableRange || file.size
+  extra = extra.concat(
+    skipPrefetched(
+      getInterleavingDynamicChunks(
+        getMatchingChunks(file.ranges, end, prefetchEnd),
+        end,
+        prefetchEnd
+      ),
+      file.prefetched,
+      end,
+      prefetchEnd
+    )
+  )
+
+  let sum =
+    countBytes(dynamicChunks) +
+    HEADER_OVERHEAD_PER_MULTI_PART_CHUNK * dynamicChunks.length
+  for (const chunk of extra) {
+    sum += chunk.end - chunk.start + HEADER_OVERHEAD_PER_MULTI_PART_CHUNK
+    if (sum > PDF_JS_CHUNK_SIZE) {
+      // Stop prefetching when the range is full.
+    }
+    const sibling = dynamicChunks.find(
+      sibling => sibling.end === chunk.start || sibling.start === chunk.end
+    )
+    if (sibling) {
+      // Just expand the chunk.
+      sibling.start = Math.min(sibling.start, chunk.start)
+      sibling.end = Math.max(sibling.end, chunk.end)
+      continue
+    }
+    if (dynamicChunks.length === MULTI_PART_THRESHOLD) {
+      // Stop prefetching when we would switch to a multipart request.
+      // (We continue in case we are already doing a multipart request.)
+      break
+    }
+    dynamicChunks.push(chunk)
+  }
+  dynamicChunks.sort(sortByStartASC)
+}
+
+/**
  *
  * @param {string} url
  * @param {number} start
  * @param {number} end
  * @param {Object} file
  * @param {Object} metrics
- * @param {Set} cached
+ * @param {Map} usageScore
+ * @param {Map} cachedUrls
  * @param {boolean} verifyChunks
+ * @param {boolean} prefetchingEnabled
+ * @param {boolean} prefetchLargeEnabled
+ * @param {boolean} tryOldCachedUrlEnabled
  * @param {AbortSignal} abortSignal
  */
 export async function fetchRange({
@@ -332,26 +604,52 @@ export async function fetchRange({
   end,
   file,
   metrics,
-  cached,
+  usageScore,
+  cachedUrls,
   verifyChunks,
+  prefetchingEnabled,
+  prefetchLargeEnabled,
+  cachedUrlLookupEnabled,
   abortSignal,
 }) {
-  file.createdAt = new Date(file.createdAt)
-  backfillEdgeBounds(file)
+  preprocessFileOnce({ file, usageScore, cachedUrls })
+  const startXRefTableRange =
+    Math.floor(file.startXRefTable / PDF_JS_CHUNK_SIZE) * PDF_JS_CHUNK_SIZE
+  const prefetchXRefTable = startXRefTableRange > 0 && start === 0
+  const prefetched = getMatchingChunks(file.prefetched, start, end)
 
   // Check that handling the range request won't trigger excessive sub-requests,
   // (to avoid unwanted latency compared to the original request).
-  const { chunks, newChunks } = cutRequestAmplification(
-    getMatchingChunks(file.ranges, start, end),
-    cached,
-    metrics
+  const chunks = cutRequestAmplification({
+    potentialChunks: skipPrefetched(
+      getMatchingChunks(file.ranges, start, end),
+      prefetched,
+      start,
+      end
+    ),
+    usageScore,
+    cachedUrls,
+    metrics,
+    start,
+    end,
+    prefetchLargeEnabled,
+  })
+  const dynamicChunks = skipPrefetched(
+    getInterleavingDynamicChunks(chunks, start, end),
+    prefetched,
+    start,
+    end
   )
-  const dynamicChunks = getInterleavingDynamicChunks(chunks, start, end)
-  const chunksSize = countBytes(newChunks)
   const size = end - start
 
-  if (chunks.length === 0 && dynamicChunks.length === 1) {
+  if (
+    chunks.length === 0 &&
+    prefetched.length === 0 &&
+    dynamicChunks.length === 1 &&
+    !prefetchXRefTable
+  ) {
     // fall back to the original range request when no chunks are cached.
+    // Exception: The first range should fetch the xref table as well.
     trackDownloadStats(metrics, {
       size,
       cachedCount: 0,
@@ -361,36 +659,42 @@ export async function fetchRange({
     })
     return fallbackRequest({ url, start, end, abortSignal })
   }
-  if (
-    chunksSize > MAX_SUB_REQUEST_BYTES &&
-    !(dynamicChunks.length === 0 && newChunks.length <= 1)
-  ) {
-    // fall back to the original range request when a very large amount of
-    // object data would be requested, unless it is the only object in the
-    // request or everything is already cached.
-    metrics.tooLargeOverheadCount++
-    trackDownloadStats(metrics, {
-      size,
-      cachedCount: 0,
-      cachedBytes: 0,
-      fetchedCount: 1,
-      fetchedBytes: size,
+
+  if (prefetchingEnabled) {
+    addPrefetchingChunks({
+      file,
+      start,
+      end,
+      dynamicChunks,
+      prefetchXRefTable,
+      startXRefTableRange,
     })
-    return fallbackRequest({ url, start, end, abortSignal })
   }
 
   const byteRanges = dynamicChunks
     .map(chunk => `${chunk.start}-${chunk.end - 1}`)
     .join(',')
   const coalescedDynamicChunks = []
-  switch (dynamicChunks.length) {
-    case 0:
+  switch (true) {
+    case dynamicChunks.length === 0:
       break
-    case 1:
+    case dynamicChunks.length === 1:
       coalescedDynamicChunks.push({
         chunk: dynamicChunks[0],
         url,
         init: { headers: { Range: `bytes=${byteRanges}` } },
+      })
+      break
+    case dynamicChunks.length <= MULTI_PART_THRESHOLD:
+      // There will always be an OPTIONS request for multi-ranges requests.
+      // It is faster to request few ranges in parallel instead of waiting for
+      //  the OPTIONS request to round trip.
+      dynamicChunks.forEach(chunk => {
+        coalescedDynamicChunks.push({
+          chunk,
+          url,
+          init: { headers: { Range: `bytes=${chunk.start}-${chunk.end - 1}` } },
+        })
       })
       break
     default:
@@ -427,8 +731,14 @@ export async function fetchRange({
   const rawResponses = await Promise.all(
     requests.map(async ({ chunk, url, init }) => {
       try {
-        const response = await fetch(url, { ...init, signal: abortSignal })
-        checkChunkResponse(response)
+        const response = await fetchChunk({
+          chunk,
+          url,
+          init: { ...init, signal: abortSignal },
+          cachedUrls,
+          metrics,
+          cachedUrlLookupEnabled,
+        })
         const boundary = getMultipartBoundary(response, chunk)
         const blobFetchDate = getServerTime(response)
         const blobSize = getResponseSize(response)
@@ -443,8 +753,8 @@ export async function fetchRange({
             cachedCount++
             cachedBytes += usedChunkSection
             // Roll the position of the hash in the Map.
-            cached.delete(chunk.hash)
-            cached.add(chunk.hash)
+            usageScore.delete(chunk.hash)
+            usageScore.set(chunk.hash, CHUNK_USAGE_THRESHOLD_CACHED)
           } else {
             // Blobs are fetched in bulk, record the full size.
             fetchedCount++
@@ -470,7 +780,14 @@ export async function fetchRange({
 
   rawResponses
     .flat() // flatten after splitting multipart responses
+    .concat(prefetched.map(chunk => ({ chunk, data: chunk.buffer })))
     .forEach(({ chunk, data }) => {
+      if (!chunk.hash && chunk.end > end) {
+        // This is a (partially) prefetched chunk.
+        chunk.buffer = data
+        file.prefetched.push(chunk)
+        if (chunk.start > end) return // This is a fully prefetched chunk.
+      }
       // overlap:
       //     | REQUESTED_RANGE |
       //  | CHUNK |

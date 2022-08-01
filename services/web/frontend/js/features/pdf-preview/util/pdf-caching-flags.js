@@ -10,5 +10,10 @@ function isFlagEnabled(flag) {
   return getMeta('ol-splitTestVariants')?.[flag] === 'enabled'
 }
 
+export const cachedUrlLookupEnabled = isFlagEnabled(
+  'pdf-caching-cached-url-lookup'
+)
+export const prefetchingEnabled = isFlagEnabled('pdf-caching-prefetching')
+export const prefetchLargeEnabled = isFlagEnabled('pdf-caching-prefetch-large')
 export const enablePdfCaching = isFlagEnabled('pdf-caching-mode')
 export const trackPdfDownloadEnabled = isFlagEnabled('track-pdf-download')

@@ -998,6 +998,39 @@ const ProjectController = {
             cb()
           })
         },
+        pdfCachingPrefetchingAssignment(cb) {
+          SplitTestHandler.getAssignment(
+            req,
+            res,
+            'pdf-caching-prefetching',
+            () => {
+              // We'll pick up the assignment from the res.locals assignment.
+              cb()
+            }
+          )
+        },
+        pdfCachingPrefetchLargeAssignment(cb) {
+          SplitTestHandler.getAssignment(
+            req,
+            res,
+            'pdf-caching-prefetch-large',
+            () => {
+              // We'll pick up the assignment from the res.locals assignment.
+              cb()
+            }
+          )
+        },
+        pdfCachingCachedUrlLookupAssignment(cb) {
+          SplitTestHandler.getAssignment(
+            req,
+            res,
+            'pdf-caching-cached-url-lookup',
+            () => {
+              // We'll pick up the assignment from the res.locals assignment.
+              cb()
+            }
+          )
+        },
       },
       (
         err,
