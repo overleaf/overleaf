@@ -9,10 +9,10 @@ export function generatePdfCachingTransportFactory(PDFJS) {
   if (!enablePdfCaching && !trackPdfDownloadEnabled) {
     return () => null
   }
-  let failedOnce = false
   const cached = new Set()
   const metrics = Object.assign(getPdfCachingMetrics(), {
     failedCount: 0,
+    failedOnce: false,
     tooLargeOverheadCount: 0,
     tooManyRequestsCount: 0,
     cachedCount: 0,
@@ -27,12 +27,12 @@ export function generatePdfCachingTransportFactory(PDFJS) {
     new URLSearchParams(window.location.search).get('verify_chunks') === 'true'
 
   class PDFDataRangeTransport extends PDFJS.PDFDataRangeTransport {
-    constructor(url, pdfFile, reject) {
+    constructor({ url, pdfFile, abortController, handleFetchError }) {
       super(pdfFile.size, new Uint8Array())
       this.url = url
       this.pdfFile = pdfFile
-      this.reject = reject
-      this.abortController = new AbortController()
+      this.handleFetchError = handleFetchError
+      this.abortController = abortController
     }
 
     abort() {
@@ -59,17 +59,18 @@ export function generatePdfCachingTransportFactory(PDFJS) {
         abortSignal,
       })
         .catch(err => {
+          if (abortSignal.aborted) return
           if (
             err.message === 'non successful response status: 404' &&
             OError.getFullInfo(err).url === this.url
           ) {
             // Do not consider a 404 on the main pdf url as pdf caching failure.
             // Still, bail out during the initial launch phase.
-            failedOnce = true
+            metrics.failedOnce = true
             throw new PDFJS.MissingPDFException()
           }
           metrics.failedCount++
-          failedOnce = true
+          metrics.failedOnce = true
           if (!enablePdfCaching) {
             throw err // This was a fallback request already. Do not retry.
           }
@@ -79,25 +80,33 @@ export function generatePdfCachingTransportFactory(PDFJS) {
           return fallbackRequest({ url: this.url, start, end, abortSignal })
         })
         .then(blob => {
+          if (abortSignal.aborted) return
           this.onDataRange(start, blob)
         })
         .catch(err => {
+          if (abortSignal.aborted) return
           err = OError.tag(err, 'fatal pdf download error', errorInfo)
           console.error(err)
           if (!(err instanceof PDFJS.MissingPDFException)) {
             captureException(err, { tags: { fromPdfCaching: true } })
           }
-          this.reject(err)
+          // Signal error for (subsequent) page load.
+          this.handleFetchError(err)
         })
     }
   }
 
-  return function (url, pdfFile, reject) {
-    if (failedOnce) {
+  return function ({ url, pdfFile, abortController, handleFetchError }) {
+    if (metrics.failedOnce) {
       // Disable pdf caching once any fetch request failed.
       // Be trigger-happy here until we reached a stable state of the feature.
       return null
     }
-    return new PDFDataRangeTransport(url, pdfFile, reject)
+    return new PDFDataRangeTransport({
+      url,
+      pdfFile,
+      abortController,
+      handleFetchError,
+    })
   }
 }

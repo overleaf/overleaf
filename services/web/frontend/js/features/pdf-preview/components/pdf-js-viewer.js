@@ -127,11 +127,23 @@ function PdfJsViewer({ url, pdfFile }) {
       setError(undefined)
       setStartFetch(performance.now())
 
-      pdfJsWrapper.loadDocument(url, pdfFile).catch(error => {
-        console.error(error)
+      const abortController = new AbortController()
+      const handleFetchError = () => {
+        if (abortController.signal.aborted) return
+        // The error is already logged at the call-site with additional context.
         setError('rendering-error')
-      })
-      return () => pdfJsWrapper.abortDocumentLoading()
+      }
+      pdfJsWrapper
+        .loadDocument({ url, pdfFile, abortController, handleFetchError })
+        .catch(error => {
+          if (abortController.signal.aborted) return
+          console.error(error)
+          setError('rendering-error')
+        })
+      return () => {
+        abortController.abort()
+        pdfJsWrapper.abortDocumentLoading()
+      }
     }
   }, [pdfJsWrapper, url, pdfFile, setError, setStartFetch])
 

@@ -64,7 +64,7 @@ export default class PDFJSWrapper {
   }
 
   // load a document from a URL
-  loadDocument(url, pdfFile) {
+  loadDocument({ url, pdfFile, abortController, handleFetchError }) {
     // cancel any previous loading task
     if (this.loadDocumentTask) {
       this.loadDocumentTask.destroy()
@@ -72,7 +72,12 @@ export default class PDFJSWrapper {
     }
 
     return new Promise((resolve, reject) => {
-      const rangeTransport = this.genPdfCachingTransport(url, pdfFile, reject)
+      const rangeTransport = this.genPdfCachingTransport({
+        url,
+        pdfFile,
+        abortController,
+        handleFetchError,
+      })
       let rangeChunkSize = DEFAULT_RANGE_CHUNK_SIZE
       if (rangeTransport && pdfFile.size < 2 * DEFAULT_RANGE_CHUNK_SIZE) {
         // pdf.js disables the "bulk" download optimization when providing a
