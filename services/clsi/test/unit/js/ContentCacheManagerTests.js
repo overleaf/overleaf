@@ -5,7 +5,7 @@ const { expect } = require('chai')
 const MODULE_PATH = '../../../app/js/ContentCacheManager'
 
 describe('ContentCacheManager', function () {
-  let contentDir, pdfPath
+  let contentDir, pdfPath, xrefPath
   let ContentCacheManager, files, Settings
   before(function () {
     Settings = require('@overleaf/settings')
@@ -38,6 +38,8 @@ describe('ContentCacheManager', function () {
       '/overleaf/services/clsi/output/602cee6f6460fca0ba7921e6/content/1797a7f48f9-5abc1998509dea1f'
     pdfPath =
       '/overleaf/services/clsi/output/602cee6f6460fca0ba7921e6/generated-files/1797a7f48ea-8ac6805139f43351/output.pdf'
+    xrefPath =
+      '/overleaf/services/clsi/output/602cee6f6460fca0ba7921e6/generated-files/1797a7f48ea-8ac6805139f43351/output.pdfxref'
 
     reclaimed = 0
     Settings.pdfCachingMinChunkSize = 1024
@@ -50,7 +52,8 @@ describe('ContentCacheManager', function () {
   })
 
   describe('minimal', function () {
-    const PATH_MINIMAL = 'test/acceptance/fixtures/minimal.pdf'
+    const PATH_MINIMAL_PDF = 'test/acceptance/fixtures/minimal.pdf'
+    const PATH_MINIMAL_XREF = 'test/acceptance/fixtures/minimal.pdfxref'
     const OBJECT_ID_1 = '9 0 '
     const HASH_LARGE =
       'd7cfc73ad2fba4578a437517923e3714927bbf35e63ea88bd93c7a8076cf1fcd'
@@ -62,9 +65,10 @@ describe('ContentCacheManager', function () {
     }
     let MINIMAL_SIZE, RANGE_1, RANGE_2, h1, h2, START_1, START_2, END_1, END_2
     before(async function () {
-      await fs.promises.copyFile(PATH_MINIMAL, pdfPath)
-      const MINIMAL = await fs.promises.readFile(PATH_MINIMAL)
-      MINIMAL_SIZE = (await fs.promises.stat(PATH_MINIMAL)).size
+      await fs.promises.copyFile(PATH_MINIMAL_PDF, pdfPath)
+      await fs.promises.copyFile(PATH_MINIMAL_XREF, xrefPath)
+      const MINIMAL = await fs.promises.readFile(PATH_MINIMAL_PDF)
+      MINIMAL_SIZE = (await fs.promises.stat(PATH_MINIMAL_PDF)).size
       RANGE_1 = await fs.promises.readFile(getChunkPath(HASH_LARGE))
       RANGE_2 = await fs.promises.readFile(getChunkPath(HASH_SMALL))
       h1 = HASH_LARGE

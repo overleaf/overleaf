@@ -30,7 +30,6 @@
     "lockfile": "^1.0.4",
     "lodash": "^4.17.21",
     "p-limit": "^3.1.0",
-    "pdfjs-dist": "~2.7.570",
     "request": "^2.88.2",
     "send": "^0.17.1",
     "workerpool": "^6.1.5"

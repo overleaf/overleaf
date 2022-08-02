@@ -1,0 +1,30 @@
+1/0: uncompressed; offset = 31354
+2/0: uncompressed; offset = 31614
+3/0: uncompressed; offset = 15
+4/0: uncompressed; offset = 216
+5/0: uncompressed; offset = 727
+6/0: uncompressed; offset = 777
+7/0: uncompressed; offset = 909
+8/0: uncompressed; offset = 1017
+9/0: uncompressed; offset = 19127
+10/0: uncompressed; offset = 19313
+11/0: uncompressed; offset = 19557
+12/0: uncompressed; offset = 19948
+13/0: uncompressed; offset = 20677
+14/0: uncompressed; offset = 23321
+15/0: uncompressed; offset = 30318
+16/0: compressed; stream = 15, index = 0
+17/0: compressed; stream = 15, index = 1
+18/0: compressed; stream = 15, index = 2
+19/0: compressed; stream = 15, index = 3
+20/0: compressed; stream = 15, index = 4
+21/0: compressed; stream = 15, index = 5
+22/0: compressed; stream = 15, index = 6
+23/0: compressed; stream = 15, index = 7
+24/0: compressed; stream = 15, index = 8
+25/0: compressed; stream = 15, index = 9
+26/0: compressed; stream = 15, index = 10
+27/0: compressed; stream = 15, index = 11
+28/0: compressed; stream = 15, index = 12
+29/0: compressed; stream = 15, index = 13
+30/0: compressed; stream = 15, index = 14

@@ -24,7 +24,11 @@ const Metrics = require('./Metrics')
 
 const OutputFileOptimiser = require('./OutputFileOptimiser')
 const ContentCacheManager = require('./ContentCacheManager')
-const { QueueLimitReachedError, TimedOutError } = require('./Errors')
+const {
+  QueueLimitReachedError,
+  TimedOutError,
+  NoXrefTableError,
+} = require('./Errors')
 
 const OLDEST_BUILD_DIR = new Map()
 const PENDING_PROJECT_ACTIONS = new Map()
@@ -397,6 +401,9 @@ module.exports = OutputCacheManager = {
           pdfSize,
           timings.compile,
           function (err, result) {
+            if (err && err instanceof NoXrefTableError) {
+              return callback(null, err.message)
+            }
             if (err && err instanceof QueueLimitReachedError) {
               logger.warn({ err, outputDir }, 'pdf caching queue limit reached')
               stats['pdf-caching-queue-limit-reached'] = 1

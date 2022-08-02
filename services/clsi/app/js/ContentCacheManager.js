@@ -9,8 +9,12 @@ const Path = require('path')
 const Settings = require('@overleaf/settings')
 const OError = require('@overleaf/o-error')
 const pLimit = require('p-limit')
-const { parseXrefTable } = require('../lib/pdfjs/parseXrefTable')
-const { QueueLimitReachedError, TimedOutError } = require('./Errors')
+const { parseXrefTable } = require('./XrefParser')
+const {
+  QueueLimitReachedError,
+  TimedOutError,
+  NoXrefTableError,
+} = require('./Errors')
 const workerpool = require('workerpool')
 const Metrics = require('@overleaf/metrics')
 
@@ -89,6 +93,9 @@ async function updateOtherEventLoop(contentDir, filePath, size, compileTime) {
     if (e.message?.includes?.('Max queue size of ')) {
       throw new QueueLimitReachedError()
     }
+    if (e.message?.includes?.('xref')) {
+      throw new NoXrefTableError(e.message)
+    }
     throw e
   }
 }
@@ -115,6 +122,7 @@ async function updateSameEventLoop(contentDir, filePath, size, compileTime) {
     size,
     checkDeadline
   )
+
   xRefEntries.sort((a, b) => {
     return a.offset - b.offset
   })

@@ -1,7 +1,8 @@
 const fs = require('fs')
 const Path = require('path')
 const { expect } = require('chai')
-const { parseXrefTable } = require('../../../app/lib/pdfjs/parseXrefTable')
+const { parseXrefTable } = require('../../../app/js/XrefParser')
+const { NoXrefTableError } = require('../../../app/js/Errors')
 const PATH_EXAMPLES = 'test/acceptance/fixtures/examples/'
 const PATH_SNAPSHOTS = 'test/unit/js/snapshots/pdfjs/'
 const EXAMPLES = fs.readdirSync(PATH_EXAMPLES)
@@ -48,24 +49,11 @@ describe('pdfjs', function () {
   describe('when the pdf is an empty file', function () {
     it('should yield no entries', async function () {
       const path = 'does/not/matter.pdf'
-      const table = await parseXrefTable(path, 0)
-      expect(table).to.deep.equal([])
-    })
-  })
-
-  describe('when the operation times out', function () {
-    it('should bail out', async function () {
-      const path = pdfPath(EXAMPLES[0])
-      const { size } = await loadContext(EXAMPLES[0])
-      const err = new Error()
       let table
       try {
-        table = await parseXrefTable(path, size, () => {
-          throw err
-        })
+        table = await parseXrefTable(path, 0)
       } catch (e) {
-        expect(e).to.equal(err)
-        return
+        expect(e).to.be.an.instanceof(NoXrefTableError)
       }
       expect(table).to.not.exist
     })
@@ -89,7 +77,16 @@ describe('pdfjs', function () {
 
       it('should produce the expected xRef table', async function () {
         const table = await parseXrefTable(pdfPath(example), size, () => {})
-        expect(table).to.deep.equal(snapshot)
+        // compare the essential parts of the xref table only
+        expect(table.xRefEntries[0]).to.include({ offset: 0 })
+        expect(table.xRefEntries.slice(1)).to.deep.equal(
+          snapshot.xRefEntries
+            .slice(1)
+            .filter(xref => xref.uncompressed) // we only use the uncompressed fields
+            .map(xref => {
+              return { offset: xref.offset, uncompressed: xref.uncompressed } // ignore unused gen field
+            })
+        )
       })
     })
   }
