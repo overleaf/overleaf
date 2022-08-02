@@ -26,6 +26,7 @@ services:
       - .:/overleaf/services/web
       - ../../node_modules:/overleaf/node_modules
       - ../../libraries:/overleaf/libraries
+    user: node
     working_dir: /overleaf/services/web
     env_file: docker-compose.common.env
     environment:
