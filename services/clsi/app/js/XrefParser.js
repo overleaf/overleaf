@@ -37,16 +37,15 @@ async function parseXrefTable(filePath, pdfFileSize) {
       // put an upper limit of 10^10 on all the matched numbers for safety
       // ignore the generation id in "id/gen"
       // in a linearized pdf all objects must have generation number 0
-      /^(\d{1,9})\/\d{1,9}: uncompressed; offset = (\d{1,9})$/gm
+      /^\d{1,9}\/\d{1,9}: uncompressed; offset = (\d{1,9})$/gm
     )
     // include a zero-index object for backwards compatibility with
     // our existing xref table parsing code
     const xRefEntries = [{ offset: 0 }]
     // extract all the xref table entries
     for (const match of matches) {
-      const id = parseInt(match[1], 10) // must convert from strings to integers
-      const offset = parseInt(match[2], 10)
-      xRefEntries[id] = { offset, uncompressed: true }
+      const offset = parseInt(match[1], 10)
+      xRefEntries.push({ offset, uncompressed: true })
     }
     if (xRefEntries.length === 1) {
       throw new NoXrefTableError('xref file has no objects')
