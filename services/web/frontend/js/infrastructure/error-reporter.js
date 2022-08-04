@@ -19,8 +19,8 @@ function sentryReporter() {
           autoSessionTracking: false,
 
           // Ignore errors unless they come from our origins
-          // Adapted from: https://docs.sentry.io/platforms/javascript/#decluttering-sentry
-          whitelistUrls: [
+          // Adapted from: https://docs.sentry.io/platforms/javascript/configuration/filtering/#decluttering-sentry
+          allowUrls: [
             new RegExp(window.ExposedSettings.sentryAllowedOriginRegex),
           ],
 
