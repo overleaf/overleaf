@@ -24,6 +24,9 @@ const TpdsUpdateSender = require('../ThirdPartyDataStore/TpdsUpdateSender')
 const TpdsProjectFlusher = require('../ThirdPartyDataStore/TpdsProjectFlusher')
 const EditorRealTimeController = require('../Editor/EditorRealTimeController')
 const SystemMessageManager = require('../SystemMessages/SystemMessageManager')
+const {
+  addOptionalCleanupHandlerAfterDrainingConnections,
+} = require('../../infrastructure/GracefulShutdown')
 
 const oneMinInMs = 60 * 1000
 
@@ -46,10 +49,15 @@ function updateOpenConnetionsMetrics() {
     'open_connections.https',
     _.size(__guard__(require('https').globalAgent, x4 => x4.sockets))
   )
-  return setTimeout(updateOpenConnetionsMetrics, oneMinInMs)
 }
 
-setTimeout(updateOpenConnetionsMetrics, oneMinInMs)
+const intervalHandle = setInterval(updateOpenConnetionsMetrics, oneMinInMs)
+addOptionalCleanupHandlerAfterDrainingConnections(
+  'collect connection metrics',
+  () => {
+    clearInterval(intervalHandle)
+  }
+)
 
 const AdminController = {
   _sendDisconnectAllUsersMessage: delay => {

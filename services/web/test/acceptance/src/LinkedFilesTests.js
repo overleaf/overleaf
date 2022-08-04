@@ -28,8 +28,12 @@ describe('LinkedFiles', function () {
   let sourceDocId
   let owner
 
+  let server
   before(function (done) {
-    LinkedUrlProxy.listen(6543, done)
+    server = LinkedUrlProxy.listen(6543, done)
+  })
+  after(function (done) {
+    server.close(done)
   })
 
   beforeEach(async function () {

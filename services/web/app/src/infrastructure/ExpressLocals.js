@@ -16,6 +16,9 @@ const {
   canRedirectToAdminDomain,
   hasAdminAccess,
 } = require('../Features/Helpers/AdminAuthorizationHelper')
+const {
+  addOptionalCleanupHandlerAfterDrainingConnections,
+} = require('./GracefulShutdown')
 
 let webpackManifest
 switch (process.env.NODE_ENV) {
@@ -23,11 +26,21 @@ switch (process.env.NODE_ENV) {
     // Only load webpack manifest file in production.
     webpackManifest = require(`../../../public/manifest.json`)
     break
-  case 'development':
+  case 'development': {
     // In dev, fetch the manifest from the webpack container.
     loadManifestFromWebpackDevServer()
-    setInterval(loadManifestFromWebpackDevServer, 10 * 1000)
+    const intervalHandle = setInterval(
+      loadManifestFromWebpackDevServer,
+      10 * 1000
+    )
+    addOptionalCleanupHandlerAfterDrainingConnections(
+      'refresh webpack manifest',
+      () => {
+        clearInterval(intervalHandle)
+      }
+    )
     break
+  }
   default:
     // In ci, all entries are undefined.
     webpackManifest = {}

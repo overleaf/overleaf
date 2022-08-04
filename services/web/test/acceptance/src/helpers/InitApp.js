@@ -3,7 +3,11 @@ const QueueWorkers = require('../../../../app/src/infrastructure/QueueWorkers')
 const MongoHelper = require('./MongoHelper')
 const RedisHelper = require('./RedisHelper')
 const { logger } = require('@overleaf/logger')
+const Settings = require('@overleaf/settings')
 const MockReCAPTCHAApi = require('../mocks/MockReCaptchaApi')
+const {
+  gracefulShutdown,
+} = require('../../../../app/src/infrastructure/GracefulShutdown')
 
 logger.level('error')
 
@@ -21,9 +25,10 @@ before('start queue workers', function () {
   QueueWorkers.start()
 })
 
-after('stop main app', function (done) {
+after('stop main app', async function () {
   if (!server) {
-    return done()
+    return
   }
-  server.close(done)
+  Settings.gracefulShutdownDelayInMs = 1
+  await gracefulShutdown(server, 'tests')
 })

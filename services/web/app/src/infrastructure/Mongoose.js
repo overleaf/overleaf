@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
+const { addConnectionDrainer } = require('./GracefulShutdown')
 
 if (
   typeof global.beforeEach === 'function' &&
@@ -25,6 +26,10 @@ const connectionPromise = mongoose.connect(
     Settings.mongo.options
   )
 )
+addConnectionDrainer('mongoose', async () => {
+  await connectionPromise
+  await mongoose.disconnect()
+})
 
 mongoose.connection.on('connected', () =>
   logger.debug('mongoose default connection open')

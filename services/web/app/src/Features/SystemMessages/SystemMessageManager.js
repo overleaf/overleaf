@@ -11,6 +11,9 @@
  */
 let SystemMessageManager
 const { SystemMessage } = require('../../models/SystemMessage')
+const {
+  addRequiredCleanupHandlerBeforeDrainingConnections,
+} = require('../../infrastructure/GracefulShutdown')
 
 module.exports = SystemMessageManager = {
   getMessages(callback) {
@@ -53,4 +56,14 @@ module.exports = SystemMessageManager = {
 
 const CACHE_TIMEOUT = 10 * 1000 * (Math.random() + 2) // 20-30 seconds
 SystemMessageManager.refreshCache()
-setInterval(() => SystemMessageManager.refreshCache(), CACHE_TIMEOUT)
+const intervalHandle = setInterval(
+  () => SystemMessageManager.refreshCache(),
+  CACHE_TIMEOUT
+)
+
+addRequiredCleanupHandlerBeforeDrainingConnections(
+  'update system messages',
+  () => {
+    clearInterval(intervalHandle)
+  }
+)

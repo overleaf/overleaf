@@ -10,8 +10,13 @@ const FileTypeManager = require('../Uploads/FileTypeManager')
 const CooldownManager = require('../Cooldown/CooldownManager')
 const Errors = require('../Errors/Errors')
 const Modules = require('../../infrastructure/Modules')
+const {
+  BackgroundTaskTracker,
+} = require('../../infrastructure/GracefulShutdown')
 
 const ROOT_DOC_TIMEOUT_LENGTH = 30 * 1000
+
+const rootDocResets = new BackgroundTaskTracker('root doc resets')
 
 function newUpdate(userId, projectName, path, updateRequest, source, callback) {
   getOrCreateProject(userId, projectName, (err, project) => {
@@ -113,8 +118,11 @@ function getOrCreateProject(userId, projectName, callback) {
             // have a crack at setting the root doc after a while, on creation
             // we won't have it yet, but should have been sent it it within 30
             // seconds
+            rootDocResets.add()
             setTimeout(() => {
-              ProjectRootDocManager.setRootDocAutomatically(project._id)
+              ProjectRootDocManager.setRootDocAutomatically(project._id, () => {
+                rootDocResets.done()
+              })
             }, ROOT_DOC_TIMEOUT_LENGTH)
             callback(err, project)
           }

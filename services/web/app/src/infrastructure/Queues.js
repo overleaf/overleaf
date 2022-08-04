@@ -1,5 +1,6 @@
 const Queue = require('bull')
 const Settings = require('@overleaf/settings')
+const { addConnectionDrainer } = require('./GracefulShutdown')
 
 // Bull will keep a fixed number of the most recently completed jobs. This is
 // useful to inspect recently completed jobs. The bull prometheus exporter also
@@ -62,6 +63,11 @@ function getQueue(queueName) {
         },
         ...jobOptions,
       },
+    })
+
+    // Disconnect from redis eventually.
+    addConnectionDrainer(`bull queue ${queueName}`, async () => {
+      await queues[queueName].disconnect()
     })
   }
   return queues[queueName]

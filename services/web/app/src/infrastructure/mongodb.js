@@ -1,5 +1,6 @@
 const Settings = require('@overleaf/settings')
 const { MongoClient, ObjectId } = require('mongodb')
+const { addConnectionDrainer } = require('./GracefulShutdown')
 
 if (
   typeof global.beforeEach === 'function' &&
@@ -14,6 +15,10 @@ const clientPromise = MongoClient.connect(
   Settings.mongo.url,
   Settings.mongo.options
 )
+addConnectionDrainer('mongodb', async () => {
+  const client = await clientPromise
+  client.close()
+})
 
 let setupDbPromise
 async function waitForDb() {

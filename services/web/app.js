@@ -38,6 +38,9 @@ const Server = require('./app/src/infrastructure/Server')
 const QueueWorkers = require('./app/src/infrastructure/QueueWorkers')
 const mongodb = require('./app/src/infrastructure/mongodb')
 const mongoose = require('./app/src/infrastructure/Mongoose')
+const {
+  triggerGracefulShutdown,
+} = require('./app/src/infrastructure/GracefulShutdown')
 
 if (Settings.catchErrors) {
   process.removeAllListeners('uncaughtException')
@@ -77,8 +80,7 @@ if (!module.parent) {
 
 // handle SIGTERM for graceful shutdown in kubernetes
 process.on('SIGTERM', function (signal) {
-  logger.warn({ signal }, 'received signal, shutting down')
-  Settings.shuttingDown = true
+  triggerGracefulShutdown(Server.server, signal)
 })
 
 module.exports = Server.server

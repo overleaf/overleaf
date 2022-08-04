@@ -1,5 +1,6 @@
 const Settings = require('@overleaf/settings')
 const redis = require('@overleaf/redis-wrapper')
+const { addConnectionDrainer } = require('./GracefulShutdown')
 
 if (
   typeof global.beforeEach === 'function' &&
@@ -19,6 +20,10 @@ module.exports = {
   // feature = 'websessions' | 'ratelimiter' | ...
   client(feature) {
     const redisFeatureSettings = Settings.redis[feature] || Settings.redis.web
-    return redis.createClient(redisFeatureSettings)
+    const client = redis.createClient(redisFeatureSettings)
+    addConnectionDrainer(`redis ${feature}`, async () => {
+      await client.disconnect()
+    })
+    return client
   },
 }

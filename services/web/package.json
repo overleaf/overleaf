@@ -7,7 +7,7 @@
     "public": "./public"
   },
   "scripts": {
-    "test:acceptance:run_dir": "mocha --recursive --timeout 25000 --exit --grep=$MOCHA_GREP --require test/acceptance/bootstrap.js",
+    "test:acceptance:run_dir": "mocha --recursive --timeout 25000 --grep=$MOCHA_GREP --require test/acceptance/bootstrap.js",
     "test:acceptance:app": "npm run test:acceptance:run_dir -- test/acceptance/src",
     "test:unit:run_dir": "mocha --recursive --timeout 25000 --exit --grep=$MOCHA_GREP --require test/unit/bootstrap.js",
     "test:unit:all": "npm run test:unit:run_dir -- test/unit/src modules/*/test/unit/src",
