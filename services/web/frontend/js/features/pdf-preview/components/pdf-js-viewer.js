@@ -325,11 +325,15 @@ function PdfJsViewer({ url, pdfFile }) {
           break
 
         case 'zoom-in':
-          setScale(pdfJsWrapper.viewer.currentScale * 1.25)
+          if (pdfJsWrapper) {
+            setScale(pdfJsWrapper.viewer.currentScale * 1.25)
+          }
           break
 
         case 'zoom-out':
-          setScale(pdfJsWrapper.viewer.currentScale * 0.75)
+          if (pdfJsWrapper) {
+            setScale(pdfJsWrapper.viewer.currentScale * 0.75)
+          }
           break
       }
     },
