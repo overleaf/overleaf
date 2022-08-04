@@ -193,11 +193,19 @@ function PdfJsViewer({ url, pdfFile }) {
         const pageElement = textLayer.source.textLayerDiv.closest('.page')
 
         const doubleClickListener = event => {
-          window.dispatchEvent(
-            new CustomEvent('synctex:sync-to-position', {
-              detail: pdfJsWrapper.clickPosition(event, pageElement, textLayer),
-            })
+          const clickPosition = pdfJsWrapper.clickPosition(
+            event,
+            pageElement,
+            textLayer
           )
+
+          if (clickPosition) {
+            window.dispatchEvent(
+              new CustomEvent('synctex:sync-to-position', {
+                detail: clickPosition,
+              })
+            )
+          }
         }
 
         pageElement.addEventListener('dblclick', doubleClickListener)

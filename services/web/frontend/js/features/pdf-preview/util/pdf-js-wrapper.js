@@ -152,7 +152,13 @@ export default class PDFJSWrapper {
   clickPosition(event, pageElement, textLayer) {
     const { viewport } = this.viewer.getPageView(textLayer.pageNumber - 1)
 
-    const pageRect = pageElement.querySelector('canvas').getBoundingClientRect()
+    const pageCanvas = pageElement.querySelector('canvas')
+
+    if (!pageCanvas) {
+      return
+    }
+
+    const pageRect = pageCanvas.getBoundingClientRect()
 
     const dx = event.clientX - pageRect.left
     const dy = event.clientY - pageRect.top
