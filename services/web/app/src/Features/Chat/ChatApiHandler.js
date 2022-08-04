@@ -17,6 +17,20 @@ const request = require('request')
 const settings = require('@overleaf/settings')
 const { promisify } = require('util')
 
+function getThreads(project_id, callback) {
+  if (callback == null) {
+    callback = function () {}
+  }
+  return ChatApiHandler._apiRequest(
+    {
+      url: `${settings.apis.chat.internal_url}/project/${project_id}/threads`,
+      method: 'GET',
+      json: true,
+    },
+    callback
+  )
+}
+
 function destroyProject(project_id, callback) {
   if (callback == null) {
     callback = function () {}
@@ -97,20 +111,6 @@ module.exports = ChatApiHandler = {
     )
   },
 
-  getThreads(project_id, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    return ChatApiHandler._apiRequest(
-      {
-        url: `${settings.apis.chat.internal_url}/project/${project_id}/threads`,
-        method: 'GET',
-        json: true,
-      },
-      callback
-    )
-  },
-
   resolveThread(project_id, thread_id, user_id, callback) {
     if (callback == null) {
       callback = function () {}
@@ -181,9 +181,11 @@ module.exports = ChatApiHandler = {
     )
   },
 
+  getThreads,
   destroyProject,
 
   promises: {
+    getThreads: promisify(getThreads),
     destroyProject: promisify(destroyProject),
   },
 }
