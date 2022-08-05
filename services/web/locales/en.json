@@ -1781,6 +1781,7 @@
   "try_to_compile_despite_errors": "Try to compile despite errors",
   "stop_on_first_error_enabled_title": "No PDF: Stop on first error enabled",
   "stop_on_first_error_enabled_description": "<0>“Stop on first error” is enabled.</0> Disabling it may allow the compiler to produce a PDF (but your project will still have errors).",
+  "binary_history_error":"Preview not available for this file type",
   "disable_stop_on_first_error": "Disable “Stop on first error”",
   "free_plan_label": "You’re on the <b>free plan</b>",
   "free_plan_tooltip": "Click to find out how you could benefit from Overleaf premium features!",

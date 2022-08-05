@@ -17,7 +17,7 @@
 			navigate-highlights="true"
 		)
 		.alert.alert-info(ng-if="history.selection.diff.binary")
-			| We're still working on showing image and binary changes, sorry. Stay tuned!
+			| #{translate("binary_history_error")}
 
 	.loading-panel(ng-show="isHistoryLoading()")
 		i.fa.fa-spin.fa-refresh
@@ -41,7 +41,7 @@
 			resize-on="layout:main:resize,history:toggle",
 		)
 		.alert.alert-info(ng-if="history.selection.file.binary")
-			| We're still working on showing image and binary changes, sorry. Stay tuned!
+			| #{translate("binary_history_error")}
 	.loading-panel(ng-show="isHistoryLoading()")
 		i.fa.fa-spin.fa-refresh
 		| &nbsp;&nbsp;#{translate("loading")}…
