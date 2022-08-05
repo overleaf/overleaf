@@ -223,11 +223,6 @@ export function ChatProvider({ children }) {
       if (message.clientId === clientId) return
 
       dispatch({ type: 'RECEIVE_MESSAGE', message })
-
-      // Temporary workaround to pass state to unread message balloon in Angular
-      window.dispatchEvent(
-        new CustomEvent('Chat.MessageReceived', { detail: { message } })
-      )
     }
 
     socket.on('new-chat-message', receivedMessage)
