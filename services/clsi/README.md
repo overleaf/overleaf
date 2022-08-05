@@ -42,30 +42,38 @@ Installation
 
 The CLSI can be installed and set up as part of the entire [Overleaf stack](https://github.com/overleaf/overleaf) (complete with front end editor and document storage), or it can be run as a standalone service. To run is as a standalone service, first checkout this repository:
 
-    $ git clone git@github.com:overleaf/clsi.git
+```shell
+git clone git@github.com:overleaf/overleaf.git
+```
 
 Then build the Docker image:
 
-    $ docker build . -t overleaf/clsi
+```shell
+docker build . -t overleaf/clsi -f services/clsi/Dockerfile
+```
 
 Then pull the TeX Live image:
 
-    $ docker pull texlive/texlive
+```shell
+docker pull texlive/texlive
+```
 
 Then start the Docker container:
 
-    $ docker run --rm \
-        -p 127.0.0.1:3013:3013 \
-        -e LISTEN_ADDRESS=0.0.0.0 \
-        -e DOCKER_RUNNER=true \
-        -e TEXLIVE_IMAGE=texlive/texlive \
-        -e TEXLIVE_IMAGE_USER=root \
-        -e COMPILES_HOST_DIR="$PWD/compiles" \
-        -v "$PWD/compiles:/overleaf/services/clsi/compiles" \
-        -v "$PWD/cache:/overleaf/services/clsi/cache" \
-        -v /var/run/docker.sock:/var/run/docker.sock \
-        --name clsi \
-        overleaf/clsi
+```shell
+docker run --rm \
+  -p 127.0.0.1:3013:3013 \
+  -e LISTEN_ADDRESS=0.0.0.0 \
+  -e DOCKER_RUNNER=true \
+  -e TEXLIVE_IMAGE=texlive/texlive \
+  -e TEXLIVE_IMAGE_USER=root \
+  -e COMPILES_HOST_DIR="$PWD/compiles" \
+  -v "$PWD/compiles:/overleaf/services/clsi/compiles" \
+  -v "$PWD/cache:/overleaf/services/clsi/cache" \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  --name clsi \
+  overleaf/clsi
+```
 
 Note: if you're running the CLSI in macOS you may need to use `-v /var/run/docker.sock.raw:/var/run/docker.sock` instead.
 
@@ -75,23 +83,27 @@ Important note for Linux users
 ==============================
 
 The Node application runs as user `node` in the CLSI, which has uid `1000`. As a consequence of this, the `compiles` folder gets created on your host with `uid` and `gid` set to `1000`.
-```
+
+```shell
 ls -lnd compiles
-drwxr-xr-x 2 1000 1000 4096 Mar 19 12:41 compiles
 ```
+> `drwxr-xr-x 2 1000 1000 4096 Mar 19 12:41 compiles`
 
 If there is a user/group on your host which also happens to have `uid` / `gid` `1000` then that user/group will have ownership of the compiles folder on your host.
 
 LaTeX runs in the sibling containers as the user specified in the `TEXLIVE_IMAGE_USER` environment variable. In the example above this is set to `root`, which has uid `0`. This creates a problem with the above permissions, as the root user does not have permission to write to subfolders of `compiles`.
 
 A quick fix is to give the `root` group ownership and read write permissions to `compiles`, with `setgid` set so that new subfolders also inherit this ownership:
-```
+
+```shell
 sudo chown -R 1000:root compiles
 sudo chmod -R g+w compiles
 sudo chmod g+s compiles
 ```
+
 Another solution is to create a `sharelatex` group and add both `root` and the user with `uid` `1000` to it. If the host does not have a user with that `uid`, you will need to create one first.
-```
+
+```shell
 sudo useradd --uid 1000 host-node-user # If required
 sudo groupadd sharelatex
 sudo usermod -a -G sharelatex root
@@ -145,8 +157,8 @@ The CLSI is based on a JSON API.
 
 With `curl`, if you place the above JSON in a file called `data.json`, the request would look like this:
 
-``` shell
-$ curl -X POST -H 'Content-Type: application/json' -d @data.json http://localhost:3013/project/<id>/compile
+```shell
+curl -X POST -H 'Content-Type: application/json' -d @data.json http://localhost:3013/project/<id>/compile
 ```
 
 You can specify any project-id in the URL, and the files and LaTeX environment will be persisted between requests.
