@@ -72,16 +72,13 @@ export default App.directive('verticalResizablePanes', (localStorage, ide) => ({
 
     if (toggledExternally) {
       scope.$on(toggledExternally, (e, open) => {
-        let newSize = defaultSize ?? 'auto'
         if (open) {
-          if (storedSize) {
-            newSize = storedSize
-          }
           enableResizer()
+          layoutHandle.sizePane('south', storedSize ?? defaultSize ?? 'auto')
         } else {
           disableResizer()
+          layoutHandle.sizePane('south', 'auto')
         }
-        layoutHandle.sizePane('south', newSize)
       })
     }
 
