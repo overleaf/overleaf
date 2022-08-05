@@ -489,7 +489,10 @@ module.exports = RedisManager = {
               keys.docOps({ doc_id: docId }),
               RedisManager.DOC_OPS_TTL
             ) // index 6
-            if (projectHistoryType === 'project-history') {
+            if (
+              Settings.disableTrackChanges ||
+              projectHistoryType === 'project-history'
+            ) {
               metrics.inc('history-queue', 1, { status: 'skip-track-changes' })
               logger.debug(
                 { docId },
@@ -514,7 +517,10 @@ module.exports = RedisManager = {
             }
 
             let docUpdateCount
-            if (projectHistoryType === 'project-history') {
+            if (
+              Settings.disableTrackChanges ||
+              projectHistoryType === 'project-history'
+            ) {
               docUpdateCount = undefined // only using project history, don't bother with track-changes
             } else {
               // project is using old track-changes history service

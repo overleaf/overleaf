@@ -180,11 +180,13 @@ module.exports = {
   },
 
   publishOnIndividualChannels:
-    process.env.PUBLISH_ON_INDIVIDUAL_CHANNELS || false,
+    process.env.PUBLISH_ON_INDIVIDUAL_CHANNELS === 'true',
 
-  continuousBackgroundFlush: process.env.CONTINUOUS_BACKGROUND_FLUSH || false,
+  continuousBackgroundFlush: process.env.CONTINUOUS_BACKGROUND_FLUSH === 'true',
 
   smoothingOffset: process.env.SMOOTHING_OFFSET || 1000, // milliseconds
 
-  disableDoubleFlush: process.env.DISABLE_DOUBLE_FLUSH || false, // don't flush track-changes for projects using project-history
+  disableDoubleFlush: process.env.DISABLE_DOUBLE_FLUSH === 'true', // don't flush track-changes for projects using project-history
+
+  disableTrackChanges: process.env.DISABLE_TRACK_CHANGES === 'true', // stop sending any updates to track-changes
 }

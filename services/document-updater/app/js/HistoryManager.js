@@ -162,7 +162,7 @@ module.exports = HistoryManager = {
 
     // if the doc_ops_length is undefined it means the project is not using track-changes
     // so we can bail out here
-    if (typeof doc_ops_length === 'undefined') {
+    if (Settings.disableTrackChanges || typeof doc_ops_length === 'undefined') {
       logger.debug(
         { project_id, doc_id },
         'skipping flush to track-changes, only using project-history'
