@@ -30,6 +30,10 @@ module.exports = HistoryManager = {
       )
       return
     }
+    if (Settings.disableTrackChanges) {
+      logger.debug({ doc_id }, 'track changes is disabled, so not flushing')
+      return
+    }
     return RedisManager.getHistoryType(
       doc_id,
       function (err, projectHistoryType) {
