@@ -1,33 +1,12 @@
 import App from '../../base'
 
-const layoutOptions = {
-  center: {
-    paneSelector: '[vertical-resizable-top]',
-    paneClass: 'vertical-resizable-top',
-    size: 'auto',
-  },
-  south: {
-    paneSelector: '[vertical-resizable-bottom]',
-    paneClass: 'vertical-resizable-bottom',
-    resizerClass: 'vertical-resizable-resizer',
-    resizerCursor: 'ns-resize',
-    size: 'auto',
-    resizable: true,
-    closable: false,
-    slidable: false,
-    spacing_open: 6,
-    spacing_closed: 6,
-    maxSize: '75%',
-  },
-}
-
 export default App.directive('verticalResizablePanes', (localStorage, ide) => ({
   restrict: 'A',
   link(scope, element, attrs) {
     const name = attrs.verticalResizablePanes
-    const minSize = attrs.verticalResizablePanesMinSize
-    const maxSize = attrs.verticalResizablePanesMaxSize
-    const defaultSize = attrs.verticalResizablePanesDefaultSize
+    const minSize = scope.$eval(attrs.verticalResizablePanesMinSize)
+    const maxSize = scope.$eval(attrs.verticalResizablePanesMaxSize)
+    const defaultSize = scope.$eval(attrs.verticalResizablePanesDefaultSize)
     let storedSize = null
     let manualResizeIncoming = false
 
@@ -39,6 +18,27 @@ export default App.directive('verticalResizablePanes', (localStorage, ide) => ({
           localStorage(storageKey, storedSize)
         }
       })
+    }
+
+    const layoutOptions = {
+      center: {
+        paneSelector: '[vertical-resizable-top]',
+        paneClass: 'vertical-resizable-top',
+        size: 'auto',
+      },
+      south: {
+        paneSelector: '[vertical-resizable-bottom]',
+        paneClass: 'vertical-resizable-bottom',
+        resizerClass: 'vertical-resizable-resizer',
+        resizerCursor: 'ns-resize',
+        size: 'auto',
+        resizable: true,
+        closable: false,
+        slidable: false,
+        spacing_open: 6,
+        spacing_closed: 6,
+        maxSize: '75%',
+      },
     }
 
     const toggledExternally = attrs.verticalResizablePanesToggledExternallyOn
@@ -72,7 +72,7 @@ export default App.directive('verticalResizablePanes', (localStorage, ide) => ({
 
     if (toggledExternally) {
       scope.$on(toggledExternally, (e, open) => {
-        let newSize = 'auto'
+        let newSize = defaultSize ?? 'auto'
         if (open) {
           if (storedSize) {
             newSize = storedSize
