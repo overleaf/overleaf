@@ -40,6 +40,12 @@ function sentryReporter() {
             /Non-Error promise rejection captured with value: Object Not Found Matching Id/,
           ],
 
+          denyUrls: [
+            // Chrome extensions
+            /extensions\//i,
+            /^chrome:\/\//i,
+          ],
+
           beforeSend(event) {
             // Limit number of events sent to Sentry to 100 events "per page load",
             // (i.e. the cap will be reset if the page is reloaded). This prevent
@@ -47,9 +53,16 @@ function sentryReporter() {
             eventCount++
             if (eventCount > 100) {
               return null // Block the event from sending
-            } else {
-              return event
             }
+
+            // Do not send events related to third party code (extensions)
+            if (
+              event.extra?.arguments?.[0]?.type === 'UNSTABLE_editor:extensions'
+            ) {
+              return null // Block the event from sending
+            }
+
+            return event
           },
         })
 
