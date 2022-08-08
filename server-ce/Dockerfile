@@ -22,6 +22,7 @@ RUN echo "monorepo-server-ce,$MONOREPO_REVISION" > /var/www/revisions.txt
 
 # Install npm dependencies
 # ------------------------
+ENV CYPRESS_INSTALL_BINARY=0
 RUN node genScript install | bash
 
 # Compile
