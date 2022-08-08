@@ -1111,6 +1111,7 @@ const ProjectController = {
               })
             }
 
+            // should not be used in place of split tests query param overrides (?my-split-test-name=my-variant)
             function shouldDisplayFeature(name, variantFlag) {
               if (req.query && req.query[name]) {
                 return req.query[name] === 'true'
@@ -1135,8 +1136,7 @@ const ProjectController = {
             }
 
             const showNewSourceEditorOption =
-              (newSourceEditorAssignment &&
-                newSourceEditorAssignment.variant === 'codemirror') ||
+              newSourceEditorAssignment?.variant === 'codemirror' ||
               user.betaProgram ||
               shouldDisplayFeature('new_source_editor', false) // also allow override via ?new_source_editor=true
 
@@ -1146,10 +1146,7 @@ const ProjectController = {
 
             const dictionaryEditorEnabled =
               !Features.hasFeature('saas') ||
-              shouldDisplayFeature(
-                'dictionary-editor',
-                dictionaryEditorAssignment.variant === 'enabled'
-              )
+              dictionaryEditorAssignment?.variant === 'enabled'
 
             // Persistent upgrade prompts
             // in header & in share project modal
