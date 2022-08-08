@@ -188,6 +188,13 @@ function buildUsersSubscriptionViewModel(user, callback) {
         personalSubscription.plan = plan
       }
 
+      // Subscription DB object contains a recurly property, used to cache trial info
+      // on the project-list. However, this can cause the wrong template to render,
+      // if we do not have any subscription data from Recurly (recurlySubscription)
+      if (personalSubscription) {
+        delete personalSubscription.recurly
+      }
+
       if (personalSubscription && recurlySubscription) {
         const tax = recurlySubscription.tax_in_cents || 0
         // Some plans allow adding more seats than the base plan provides.
