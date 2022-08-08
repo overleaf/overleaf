@@ -65,12 +65,15 @@ const settings = {
     },
 
     websessions: {
-      host: process.env.WEB_REDIS_HOST || process.env.REDIS_HOST || 'localhost',
-      port: process.env.WEB_REDIS_PORT || process.env.REDIS_PORT || '6379',
+      host:
+        process.env.SESSIONS_REDIS_HOST ||
+        process.env.REDIS_HOST ||
+        'localhost',
+      port: process.env.SESSIONS_REDIS_PORT || process.env.REDIS_PORT || '6379',
       password:
-        process.env.WEB_REDIS_PASSWORD || process.env.REDIS_PASSWORD || '',
+        process.env.SESSIONS_REDIS_PASSWORD || process.env.REDIS_PASSWORD || '',
       maxRetriesPerRequest: parseInt(
-        process.env.WEB_REDIS_MAX_RETRIES_PER_REQUEST ||
+        process.env.SESSIONS_REDIS_MAX_RETRIES_PER_REQUEST ||
           process.env.REDIS_MAX_RETRIES_PER_REQUEST ||
           '20'
       ),
