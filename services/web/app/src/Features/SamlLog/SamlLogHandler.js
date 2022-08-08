@@ -1,11 +1,50 @@
 const { SamlLog } = require('../../models/SamlLog')
+const SessionManager = require('../Authentication/SessionManager')
 const logger = require('@overleaf/logger')
+const { err: errSerializer } = require('@overleaf/logger/serializers')
 
-function log(providerId, sessionId, data) {
+function log(req, data, samlAssertion) {
+  let providerId, sessionId
+
+  data = data || {}
+
   try {
     const samlLog = new SamlLog()
-    samlLog.providerId = providerId = (providerId || '').toString()
-    samlLog.sessionId = sessionId = (sessionId || '').toString().substr(0, 8)
+    const { path, query } = req
+    const { saml } = req.session
+    const userId = SessionManager.getLoggedInUserId(req.session)
+
+    providerId = (req.session.saml?.universityId || '').toString()
+    sessionId = (req.sessionID || '').toString().substr(0, 8)
+
+    samlLog.providerId = providerId
+    samlLog.sessionId = sessionId
+    samlLog.path = path
+    samlLog.userId = userId
+    data.query = query
+    data.samlSession = saml
+
+    if (data.error instanceof Error) {
+      const errSerialized = errSerializer(data.error)
+      if (data.error.tryAgain) {
+        errSerialized.tryAgain = data.error.tryAgain
+      }
+      data.error = errSerialized
+    }
+
+    if (samlAssertion) {
+      const samlAssertionForLog = {
+        assertionXml: samlAssertion.getAssertionXml(),
+        responseXml: samlAssertion.getSamlResponseXml(),
+        assertionJsonExtended: req.user_info,
+      }
+      samlLog.samlAssertion = JSON.stringify(samlAssertionForLog)
+    }
+
+    if (data.error || samlAssertion) {
+      data.body = req.body
+    }
+
     try {
       samlLog.jsonData = JSON.stringify(data)
     } catch (err) {

@@ -31,13 +31,24 @@ describe('SamlLogHandler', function () {
 
   describe('with valid data object', function () {
     beforeEach(function () {
-      SamlLogHandler.log(providerId, sessionId, data)
+      SamlLogHandler.log(
+        {
+          session: { saml: { universityId: providerId } },
+          sessionID: sessionId,
+        },
+        data
+      )
     })
 
     it('should log data', function () {
       samlLog.providerId.should.equal(providerId)
       samlLog.sessionId.should.equal(sessionId.substr(0, 8))
-      samlLog.jsonData.should.equal('{"foo":true}')
+      samlLog.jsonData.should.equal(
+        JSON.stringify({
+          foo: true,
+          samlSession: { universityId: 'provider-id' },
+        })
+      )
       expect(samlLog.data).to.be.undefined
       samlLog.save.should.have.been.calledOnce
     })
@@ -48,7 +59,13 @@ describe('SamlLogHandler', function () {
       const circularRef = {}
       circularRef.circularRef = circularRef
 
-      SamlLogHandler.log(providerId, sessionId, circularRef)
+      SamlLogHandler.log(
+        {
+          session: { saml: { universityId: providerId } },
+          sessionID: sessionId,
+        },
+        circularRef
+      )
     })
 
     it('should log without data and log error', function () {
@@ -68,7 +85,13 @@ describe('SamlLogHandler', function () {
     beforeEach(function () {
       samlLog.save = sinon.stub().yields('error')
 
-      SamlLogHandler.log(providerId, sessionId, data)
+      SamlLogHandler.log(
+        {
+          session: { saml: { universityId: providerId } },
+          sessionID: sessionId,
+        },
+        data
+      )
     })
 
     it('should log error', function () {

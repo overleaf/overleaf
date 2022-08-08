@@ -26,17 +26,7 @@ module.exports = ErrorController = {
     const user = SessionManager.getSessionUser(req.session)
     // log errors related to SAML flow
     if (req.session && req.session.saml) {
-      SamlLogHandler.log(req.session.saml.universityId, req.sessionID, {
-        error: {
-          message: error && error.message,
-          stack: error && error.stack,
-        },
-        body: req.body,
-        path: req.path,
-        query: req.query,
-        saml: req.session.saml,
-        user_id: user && user._id,
-      })
+      SamlLogHandler.log(req, { error })
     }
     if (error.code === 'EBADCSRFTOKEN') {
       logger.warn(
