@@ -1,5 +1,6 @@
 const Settings = require('@overleaf/settings')
 const { MongoClient, ObjectId } = require('mongodb')
+const OError = require('@overleaf/o-error')
 const { addConnectionDrainer } = require('./GracefulShutdown')
 
 if (
@@ -86,6 +87,20 @@ async function getCollectionNames() {
   return collections.map(collection => collection.collectionName)
 }
 
+async function dropTestDatabase() {
+  const internalDb = (await clientPromise).db()
+  const dbName = internalDb.databaseName
+  const env = process.env.NODE_ENV
+
+  if (dbName !== 'test-sharelatex' || env !== 'test') {
+    throw new OError(
+      `Refusing to clear database '${dbName}' in environment '${env}'`
+    )
+  }
+
+  await internalDb.dropDatabase()
+}
+
 /**
  * WARNING: Consider using a pre-populated collection from `db` to avoid typos!
  */
@@ -99,5 +114,6 @@ module.exports = {
   ObjectId,
   getCollectionNames,
   getCollectionInternal,
+  dropTestDatabase,
   waitForDb,
 }

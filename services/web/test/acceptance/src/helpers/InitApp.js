@@ -18,7 +18,7 @@ MockReCAPTCHAApi.initialize(2222)
 let server
 
 before('start main app', function (done) {
-  server = App.listen(3000, 'localhost', done)
+  server = App.listen(23000, 'localhost', done)
 })
 
 before('start queue workers', function () {

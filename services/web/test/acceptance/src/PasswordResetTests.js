@@ -1,16 +1,9 @@
 const { expect } = require('chai')
-const RateLimiter = require('../../../app/src/infrastructure/RateLimiter')
 const UserHelper = require('./helpers/UserHelper')
 const { db } = require('../../../app/src/infrastructure/mongodb')
 
 describe('PasswordReset', function () {
   let email, response, user, userHelper, token, emailQuery
-  afterEach(async function () {
-    await RateLimiter.promises.clearRateLimit(
-      'password_reset_rate_limit',
-      '127.0.0.1'
-    )
-  })
   beforeEach(async function () {
     userHelper = new UserHelper()
     email = userHelper.getDefaultEmail()

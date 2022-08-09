@@ -50,9 +50,7 @@ describe('ServerCEScripts', function () {
 
     it('should exit with code 1 on error', function () {
       try {
-        run(
-          'REDIS_HOST=localhost node modules/server-ce-scripts/scripts/check-redis'
-        )
+        run('REDIS_PORT=42 node modules/server-ce-scripts/scripts/check-redis')
       } catch (e) {
         expect(e.status).to.equal(1)
         return

@@ -18,18 +18,18 @@ const mockOpts = {
   debug: ['1', 'true', 'TRUE'].includes(process.env.DEBUG_MOCKS),
 }
 
-MockChatApi.initialize(3010, mockOpts)
-MockClsiApi.initialize(3013, mockOpts)
-MockDocstoreApi.initialize(3016, mockOpts)
-MockDocUpdaterApi.initialize(3003, mockOpts)
-MockFilestoreApi.initialize(3009, mockOpts)
-MockNotificationsApi.initialize(3042, mockOpts)
-MockSpellingApi.initialize(3005, mockOpts)
+MockChatApi.initialize(23010, mockOpts)
+MockClsiApi.initialize(23013, mockOpts)
+MockDocstoreApi.initialize(23016, mockOpts)
+MockDocUpdaterApi.initialize(23003, mockOpts)
+MockFilestoreApi.initialize(23009, mockOpts)
+MockNotificationsApi.initialize(23042, mockOpts)
+MockSpellingApi.initialize(23005, mockOpts)
 MockHaveIBeenPwnedApi.initialize(1337, mockOpts)
 
 if (Features.hasFeature('saas')) {
-  MockAnalyticsApi.initialize(3050, mockOpts)
-  MockProjectHistoryApi.initialize(3054, mockOpts)
-  MockV1Api.initialize(5000, mockOpts)
-  MockV1HistoryApi.initialize(3100, mockOpts)
+  MockAnalyticsApi.initialize(23050, mockOpts)
+  MockProjectHistoryApi.initialize(23054, mockOpts)
+  MockV1Api.initialize(25000, mockOpts)
+  MockV1HistoryApi.initialize(23100, mockOpts)
 }

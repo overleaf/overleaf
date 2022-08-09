@@ -52,7 +52,7 @@ module.exports = merge(base, {
   devServer: {
     // Expose dev server at www.dev-overleaf.com
     host: '0.0.0.0',
-    port: 3808,
+    port: parseInt(process.env.PORT, 10) || 3808,
     client: {
       webSocketURL: 'auto://0.0.0.0:0/ws',
     },

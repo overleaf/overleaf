@@ -1,5 +1,9 @@
 const { execFile } = require('child_process')
-const { waitForDb, db } = require('../../../../app/src/infrastructure/mongodb')
+const {
+  waitForDb,
+  db,
+  dropTestDatabase,
+} = require('../../../../app/src/infrastructure/mongodb')
 const Settings = require('@overleaf/settings')
 
 const DEFAULT_ENV = 'saas'
@@ -7,6 +11,9 @@ const DEFAULT_ENV = 'saas'
 module.exports = {
   initialize() {
     before(waitForDb)
+    if (process.env.CLEANUP_MONGO === 'true') {
+      before(dropTestDatabase)
+    }
 
     before(function (done) {
       const args = [

@@ -2,13 +2,14 @@ const chai = require('chai')
 const { expect } = chai
 
 function clearSettingsCache() {
-  delete require.cache[
-    require.resolve('../../../../config/settings.defaults.js')
-  ]
+  const monorepoPath = require
+    .resolve('../../../../config/settings.defaults.js')
+    .replace(/\/services\/web\/config\/settings\.defaults\.js$/, '')
   const settingsDeps = Object.keys(require.cache).filter(
     x =>
-      x.includes('/@overleaf/settings/') ||
-      x.includes('/overleaf/libraries/settings')
+      x.includes('/@overleaf/settings') ||
+      x.includes(`${monorepoPath}/libraries/settings`) ||
+      x.includes(`${monorepoPath}/services/web/config`)
   )
   settingsDeps.forEach(dep => delete require.cache[dep])
 }

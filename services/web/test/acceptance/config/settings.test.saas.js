@@ -11,15 +11,21 @@ const overrides = {
   enableSubscriptions: true,
 
   apis: {
+    thirdPartyDataStore: {
+      url: `http://localhost:23002`,
+    },
+    analytics: {
+      url: `http://localhost:23050`,
+    },
     project_history: {
       sendProjectStructureOps: true,
       initializeHistoryForNewProjects: true,
       displayHistoryForNewProjects: true,
-      url: `http://localhost:3054`,
+      url: `http://localhost:23054`,
     },
 
     recurly: {
-      url: 'http://localhost:6034',
+      url: 'http://localhost:26034',
       subdomain: 'test',
       apiKey: 'private-nonsense',
       webhookUser: 'recurly',
@@ -32,13 +38,13 @@ const overrides = {
     },
 
     v1: {
-      url: 'http://localhost:5000',
+      url: `http://localhost:25000`,
       user: 'overleaf',
       pass: 'password',
     },
 
     v1_history: {
-      url: `http://localhost:3100/api`,
+      url: `http://localhost:23100/api`,
       user: 'overleaf',
       pass: 'password',
     },

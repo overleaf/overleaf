@@ -30,6 +30,7 @@ module.exports = {
     },
 
     web: {
+      url: 'http://localhost:23000',
       user: httpAuthUser,
       pass: httpAuthPass,
     },
@@ -37,6 +38,41 @@ module.exports = {
     haveIBeenPwned: {
       enabled: false,
       url: 'http://localhost:1337',
+    },
+    documentupdater: {
+      url: 'http://localhost:23003',
+    },
+    spelling: {
+      url: 'http://localhost:23005',
+      host: 'localhost',
+    },
+    trackchanges: {
+      url: 'http://localhost:23015',
+    },
+    docstore: {
+      url: 'http://localhost:23016',
+      pubUrl: 'http://localhost:23016',
+    },
+    chat: {
+      internal_url: 'http://localhost:23010',
+    },
+    filestore: {
+      url: 'http://localhost:23009',
+    },
+    clsi: {
+      url: 'http://localhost:23013',
+    },
+    realTime: {
+      url: 'http://localhost:23026',
+    },
+    contacts: {
+      url: 'http://localhost:23036',
+    },
+    notifications: {
+      url: 'http://localhost:23042',
+    },
+    webpack: {
+      url: 'http://localhost:23808',
     },
   },
 

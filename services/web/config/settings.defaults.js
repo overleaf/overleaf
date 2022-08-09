@@ -1,3 +1,4 @@
+const Path = require('path')
 const { merge } = require('@overleaf/settings/merge')
 
 let defaultFeatures, siteUrl
@@ -105,6 +106,7 @@ module.exports = {
       host: process.env.REDIS_HOST || 'localhost',
       port: process.env.REDIS_PORT || '6379',
       password: process.env.REDIS_PASSWORD || '',
+      db: process.env.REDIS_DB,
       maxRetriesPerRequest: parseInt(
         process.env.REDIS_MAX_RETRIES_PER_REQUEST || '20'
       ),
@@ -565,8 +567,8 @@ module.exports = {
     // If we ever need to write something to disk (e.g. incoming requests
     // that need processing but may be too big for memory, then write
     // them to disk here).
-    dumpFolder: './data/dumpFolder',
-    uploadFolder: './data/uploads',
+    dumpFolder: Path.resolve(__dirname, '../data/dumpFolder'),
+    uploadFolder: Path.resolve(__dirname, '../data/uploads'),
   },
 
   // Automatic Snapshots

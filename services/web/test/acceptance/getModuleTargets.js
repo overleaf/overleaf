@@ -5,4 +5,8 @@ const Settings = require('@overleaf/settings')
 const MODULES = Settings.moduleImportSequence
 const TARGET = process.argv.slice(2).pop() || 'test_acceptance'
 
-console.debug(MODULES.map(name => `modules/${name}/${TARGET}`).join('\n'))
+if (TARGET === '--name-only') {
+  console.debug(MODULES.join('\n'))
+} else {
+  console.debug(MODULES.map(name => `modules/${name}/${TARGET}`).join('\n'))
+}
