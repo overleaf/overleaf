@@ -65,6 +65,10 @@ export default class DocumentCompiler {
   async compile(options = {}) {
     options = { ...this.defaultOptions, ...options }
 
+    if (options.isAutoCompileOnLoad && getMeta('ol-preventCompileOnLoad')) {
+      return
+    }
+
     // set "compiling" to true (in the React component's state), and return if it was already true
     const wasCompiling = this.compilingRef.current
     this.setCompiling(true)
