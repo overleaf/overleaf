@@ -9,7 +9,7 @@ import PdfClearCacheButton from './pdf-clear-cache-button'
 import PdfDownloadFilesButton from './pdf-download-files-button'
 import PdfLogsEntries from './pdf-logs-entries'
 import withErrorBoundary from '../../../infrastructure/error-boundary'
-import ErrorBoundaryFallback from './error-boundary-fallback'
+import PdfPreviewErrorBoundaryFallback from './pdf-preview-error-boundary-fallback'
 import PdfCodeCheckFailedNotice from './pdf-code-check-failed-notice'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import PdfLogEntry from './pdf-log-entry'
@@ -69,5 +69,5 @@ function PdfLogsViewer() {
 }
 
 export default withErrorBoundary(memo(PdfLogsViewer), () => (
-  <ErrorBoundaryFallback type="logs" />
+  <PdfPreviewErrorBoundaryFallback type="logs" />
 ))

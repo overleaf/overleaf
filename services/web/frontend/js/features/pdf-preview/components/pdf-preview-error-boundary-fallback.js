@@ -1,0 +1,50 @@
+import PropTypes from 'prop-types'
+import { Trans, useTranslation } from 'react-i18next'
+import { ErrorBoundaryFallback } from '../../../shared/components/error-boundary-fallback'
+
+function PdfPreviewErrorBoundaryFallback({ type }) {
+  const { t } = useTranslation()
+
+  const showInfoLink = (
+    <Trans
+      i18nKey="try_recompile_project_or_troubleshoot"
+      components={[
+        // eslint-disable-next-line react/jsx-key, jsx-a11y/anchor-has-content, jsx-a11y/anchor-is-valid
+        <a href="/learn/how-to/Resolving_access%2C_loading%2C_and_display_problems" />,
+      ]}
+    />
+  )
+
+  switch (type) {
+    case 'pdf':
+      return (
+        <ErrorBoundaryFallback>
+          <p>{t('pdf_viewer_error')}</p>
+          <p>{showInfoLink}</p>
+        </ErrorBoundaryFallback>
+      )
+
+    case 'logs':
+      return (
+        <ErrorBoundaryFallback>
+          <p>{t('log_viewer_error')}</p>
+          <p>{showInfoLink}</p>
+        </ErrorBoundaryFallback>
+      )
+
+    case 'preview':
+    default:
+      return (
+        <ErrorBoundaryFallback>
+          <p>{t('pdf_preview_error')}</p>
+          <p>{showInfoLink}</p>
+        </ErrorBoundaryFallback>
+      )
+  }
+}
+
+PdfPreviewErrorBoundaryFallback.propTypes = {
+  type: PropTypes.oneOf(['preview', 'pdf', 'logs']).isRequired,
+}
+
+export default PdfPreviewErrorBoundaryFallback

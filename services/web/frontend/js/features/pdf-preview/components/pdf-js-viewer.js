@@ -7,7 +7,7 @@ import usePersistedState from '../../../shared/hooks/use-persisted-state'
 import { buildHighlightElement } from '../util/highlights'
 import PDFJSWrapper from '../util/pdf-js-wrapper'
 import withErrorBoundary from '../../../infrastructure/error-boundary'
-import ErrorBoundaryFallback from './error-boundary-fallback'
+import PdfPreviewErrorBoundaryFallback from './pdf-preview-error-boundary-fallback'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import { captureException } from '../../../infrastructure/error-reporter'
 import { getPdfCachingMetrics } from '../util/metrics'
@@ -409,5 +409,5 @@ PdfJsViewer.propTypes = {
 }
 
 export default withErrorBoundary(memo(PdfJsViewer), () => (
-  <ErrorBoundaryFallback type="pdf" />
+  <PdfPreviewErrorBoundaryFallback type="pdf" />
 ))
