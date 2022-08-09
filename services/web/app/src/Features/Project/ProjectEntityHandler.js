@@ -232,7 +232,6 @@ module.exports = ProjectEntityHandler
 module.exports.promises = promisifyAll(ProjectEntityHandler, {
   without: ['getAllEntitiesFromProject'],
   multiResult: {
-    getAllEntities: ['docs', 'files'],
     getDoc: ['lines', 'rev', 'version', 'ranges'],
   },
 })

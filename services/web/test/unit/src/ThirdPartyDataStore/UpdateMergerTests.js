@@ -33,7 +33,10 @@ describe('UpdateMerger :', function () {
     this.existingFiles = [{ path: '/figure.pdf' }, { path: '/folder/fig1.pdf' }]
     this.ProjectEntityHandler.getAllEntities = sinon
       .stub()
-      .callsArgWith(1, null, this.existingDocs, this.existingFiles)
+      .callsArgWith(1, null, {
+        docs: this.existingDocs,
+        files: this.existingFiles,
+      })
 
     this.fsPath = '/tmp/file/path'
     this.source = 'dropbox'

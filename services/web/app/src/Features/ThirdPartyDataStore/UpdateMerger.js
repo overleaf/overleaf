@@ -55,7 +55,7 @@ module.exports = UpdateMerger = {
   _findExistingFileType(project_id, path, callback) {
     ProjectEntityHandler.getAllEntities(
       project_id,
-      function (err, docs, files) {
+      function (err, { docs, files }) {
         if (err != null) {
           return callback(err)
         }
