@@ -67,7 +67,7 @@ services:
       retries: 20
 
   s3:
-    image: adobe/s3mock
+    image: adobe/s3mock:2.4.14
     environment:
       - initialBuckets=fake_user_files,fake_template_files,fake_public_files,bucket
     healthcheck:
