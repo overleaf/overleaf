@@ -38,6 +38,7 @@ async function setupDb() {
   db.deletedProjects = internalDb.collection('deletedProjects')
   db.deletedSubscriptions = internalDb.collection('deletedSubscriptions')
   db.deletedUsers = internalDb.collection('deletedUsers')
+  db.dropboxEntities = internalDb.collection('dropboxEntities')
   db.docHistory = internalDb.collection('docHistory')
   db.docHistoryIndex = internalDb.collection('docHistoryIndex')
   db.docOps = internalDb.collection('docOps')

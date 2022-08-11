@@ -23,6 +23,8 @@ async function addDoc(options) {
       `/doc/${options.doc_id}`,
       '/raw'
     )
+  options.entity_id = options.doc_id
+  options.entity_type = 'doc'
 
   return addEntity(options)
 }
@@ -34,6 +36,8 @@ async function addEntity(options) {
     const job = {
       method: 'post',
       headers: {
+        sl_entity_id: options.entity_id,
+        sl_entity_type: options.entity_type,
         sl_entity_rev: options.rev,
         sl_project_id: options.project_id,
         sl_all_user_ids: JSON.stringify([userId]),
@@ -54,6 +58,8 @@ async function addFile(options) {
   options.streamOrigin =
     settings.apis.filestore.url +
     path.join(`/project/${options.project_id}`, `/file/${options.file_id}`)
+  options.entity_id = options.file_id
+  options.entity_type = 'file'
 
   return addEntity(options)
 }
