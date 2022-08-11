@@ -6,7 +6,6 @@
 <h4 align="center">An open-source online real-time collaborative LaTeX editor.</h4>
 
 <p align="center">
-  <a href="#key-features">Key Features</a> •
   <a href="https://github.com/overleaf/overleaf/wiki">Wiki</a> •
   <a href="https://www.overleaf.com/for/enterprises">Server Pro</a> •
   <a href="#contributing">Contributing</a> •
@@ -15,30 +14,30 @@
   <a href="#license">License</a>
 </p>
 
-<a href="https://www.overleaf.com"><img src="doc/screenshot.png" alt="Overleaf" ></a>
+<img src="doc/screenshot.png" alt="A screenshot of a project being edited in Overleaf Community Edition">
 <p align="center">
-  Figure 1: A screenshot of Overleaf Server Pro's comments and tracked changes features.
+  Figure 1: A screenshot of a project being edited in Overleaf Community Edition.
 </p>
 
-## Key Features
+## Community Edition
 
 [Overleaf](https://www.overleaf.com) is an open-source online real-time collaborative LaTeX editor. We run a hosted version at [www.overleaf.com](https://www.overleaf.com), but you can also run your own local version, and contribute to the development of Overleaf.
 
-*[If you want help installing and maintaining Overleaf in your lab or workplace, we offer an officially supported version called Overleaf Server Pro. It also comes with extra security and admin features. Click here to find out more!](https://www.overleaf.com/for/enterprises)*
+## Enterprise
+
+If you want help installing and maintaining Overleaf in your lab or workplace, we offer an officially supported version called [Overleaf Server Pro](https://www.overleaf.com/for/enterprises). It also includes more features for security (SSO with LDAP or SAML), administration and collaboration (e.g. tracked changes). [Find out more!](https://www.overleaf.com/for/enterprises)
 
 ## Keeping up to date
 
-Sign up to the [mailing list](https://mailchi.mp/overleaf.com/community-edition-and-server-pro) to get updates on Overleaf Releases and development
+Sign up to the [mailing list](https://mailchi.mp/overleaf.com/community-edition-and-server-pro) to get updates on Overleaf releases and development.
 
 ## Installation
 
-We have detailed installation instructions in our wiki:
-
-* [Overleaf Quick Start Guide](https://github.com/overleaf/overleaf/wiki/Quick-Start-Guide)
+We have detailed installation instructions in the [Overleaf Toolkit](https://github.com/overleaf/toolkit/).
 
 ## Upgrading
 
-If you are upgrading from a previous version of Overleaf, please see the [Release Notes section on the Wiki](https://github.com/overleaf/overleaf/wiki/Home) for all of the versions between your current version and the version you are upgrading to.
+If you are upgrading from a previous version of Overleaf, please see the [Release Notes section on the Wiki](https://github.com/overleaf/overleaf/wiki#release-notes) for all of the versions between your current version and the version you are upgrading to.
 
 ## Overleaf Docker Image
 
@@ -64,7 +63,7 @@ folder.
 
 ## Contributing
 
-Please see the [CONTRIBUTING](https://github.com/overleaf/overleaf/blob/master/CONTRIBUTING.md) file for information on contributing to the development of Overleaf. See [our wiki](https://github.com/overleaf/overleaf/wiki/Developer-Guidelines) for information on setting up a development environment and how to recompile and run Overleaf after modifications.
+Please see the [CONTRIBUTING](CONTRIBUTING.md) file for information on contributing to the development of Overleaf.
 
 ## Authors
 
@@ -72,6 +71,6 @@ Please see the [CONTRIBUTING](https://github.com/overleaf/overleaf/blob/master/C
 
 ## License
 
-The code in this repository is released under the GNU AFFERO GENERAL PUBLIC LICENSE, version 3. A copy can be found in the `LICENSE` file.
+The code in this repository is released under the GNU AFFERO GENERAL PUBLIC LICENSE, version 3. A copy can be found in the [`LICENSE`](LICENSE) file.
 
 Copyright (c) Overleaf, 2014-2021.
