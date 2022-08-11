@@ -4,7 +4,7 @@ import { trackPdfDownloadEnabled } from './pdf-caching-flags'
 
 // VERSION should get incremented when making changes to caching behavior or
 //  adjusting metrics collection.
-const VERSION = 5
+const VERSION = 6
 
 // editing session id
 const EDITOR_SESSION_ID = uuid()
@@ -33,8 +33,7 @@ export function trackPdfDownload(response, compileTimeClientE2E, t0) {
     if (!isFirstRender) return
     isFirstRender = false
 
-    const totalDeliveryTime = Math.ceil(performance.now() - t0)
-    deliveryLatencies.totalDeliveryTime = totalDeliveryTime
+    deliveryLatencies.totalDeliveryTime = Math.ceil(performance.now() - t0)
     deliveryLatencies.latencyFetch = latencyFetch
     if (latencyRender) {
       deliveryLatencies.latencyRender = latencyRender
@@ -42,10 +41,7 @@ export function trackPdfDownload(response, compileTimeClientE2E, t0) {
     if (trackPdfDownloadEnabled) {
       // Submit latency along with compile context.
       submitCompileMetrics({
-        totalDeliveryTime,
-        latencyFetch,
-        latencyRender,
-        compileTimeClientE2E,
+        ...deliveryLatencies,
         ...pdfCachingMetrics,
       })
     }
