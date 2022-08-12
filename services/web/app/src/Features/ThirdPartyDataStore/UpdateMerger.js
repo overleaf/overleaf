@@ -88,6 +88,7 @@ module.exports = UpdateMerger = {
         FileTypeManager.getType(
           path,
           fsPath,
+          existingFileType,
           function (err, { binary, encoding }) {
             if (err != null) {
               return callback(err)

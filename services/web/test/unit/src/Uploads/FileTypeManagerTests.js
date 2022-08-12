@@ -96,6 +96,7 @@ describe('FileTypeManager', function () {
           this.FileTypeManager.getType(
             filename,
             'utf8.tex',
+            null,
             (err, { binary }) => {
               if (err) {
                 return done(err)
@@ -112,6 +113,7 @@ describe('FileTypeManager', function () {
         this.FileTypeManager.getType(
           '/file.tex',
           'utf8.tex',
+          null,
           (err, { binary }) => {
             if (err) {
               return done(err)
@@ -124,7 +126,7 @@ describe('FileTypeManager', function () {
 
       it('should not try to determine the encoding of large files', function (done) {
         this.stats.size = 2 * 1024 * 1024 // 2Mb
-        this.FileTypeManager.getType('/file.tex', 'utf8.tex', err => {
+        this.FileTypeManager.getType('/file.tex', 'utf8.tex', null, err => {
           if (err) {
             return done(err)
           }
@@ -137,6 +139,7 @@ describe('FileTypeManager', function () {
         this.FileTypeManager.getType(
           '/file.tex',
           'utf8.tex',
+          null,
           (err, { binary, encoding }) => {
             if (err) {
               return done(err)
@@ -153,6 +156,7 @@ describe('FileTypeManager', function () {
         this.FileTypeManager.getType(
           '/file.tex',
           'latin1.tex',
+          null,
           (err, { binary, encoding }) => {
             if (err) {
               return done(err)
@@ -169,6 +173,7 @@ describe('FileTypeManager', function () {
         this.FileTypeManager.getType(
           '/file.tex',
           'utf16.tex',
+          null,
           (err, { binary, encoding }) => {
             if (err) {
               return done(err)
@@ -185,6 +190,7 @@ describe('FileTypeManager', function () {
         this.FileTypeManager.getType(
           '/file.tex',
           'latin1-null.tex',
+          null,
           (err, { binary }) => {
             if (err) {
               return done(err)
@@ -199,6 +205,7 @@ describe('FileTypeManager', function () {
         this.FileTypeManager.getType(
           '/file.tex',
           'utf8-null.tex',
+          null,
           (err, { binary }) => {
             if (err) {
               return done(err)
@@ -213,6 +220,7 @@ describe('FileTypeManager', function () {
         this.FileTypeManager.getType(
           '/file.tex',
           'utf8-non-bmp.tex',
+          null,
           (err, { binary }) => {
             if (err) {
               return done(err)
@@ -227,6 +235,7 @@ describe('FileTypeManager', function () {
         this.FileTypeManager.getType(
           '/file.tex',
           'utf8-control-chars.tex',
+          null,
           (err, { binary, encoding }) => {
             if (err) {
               return done(err)
@@ -250,13 +259,14 @@ describe('FileTypeManager', function () {
       BINARY_FILENAMES.forEach(filename => {
         it(`should classify ${filename} as binary`, function (done) {
           this.FileTypeManager.getType(
-            '/file.tex',
-            'utf8.tex',
+            filename,
+            'latin1.tex', // even if the content is not binary
+            null,
             (err, { binary }) => {
               if (err) {
                 return done(err)
               }
-              binary.should.equal(false)
+              binary.should.equal(true)
               done()
             }
           )
@@ -264,13 +274,58 @@ describe('FileTypeManager', function () {
       })
 
       it('should not try to get the character encoding', function (done) {
-        this.FileTypeManager.getType('/file.png', 'utf8.tex', err => {
+        this.FileTypeManager.getType('/file.png', 'utf8.tex', null, err => {
           if (err) {
             return done(err)
           }
           sinon.assert.notCalled(this.isUtf8)
           done()
         })
+      })
+
+      it('should recognise new binary files as binary', function (done) {
+        this.FileTypeManager.getType(
+          '/file.py',
+          'latin1.tex',
+          null,
+          (err, { binary }) => {
+            if (err) {
+              return done(err)
+            }
+            binary.should.equal(true)
+            done()
+          }
+        )
+      })
+
+      it('should recognise existing binary files as binary', function (done) {
+        this.FileTypeManager.getType(
+          '/file.py',
+          'latin1.tex',
+          'file',
+          (err, { binary }) => {
+            if (err) {
+              return done(err)
+            }
+            binary.should.equal(true)
+            done()
+          }
+        )
+      })
+
+      it('should preserve existing non-binary files as non-binary', function (done) {
+        this.FileTypeManager.getType(
+          '/file.py',
+          'latin1.tex',
+          'doc',
+          (err, { binary }) => {
+            if (err) {
+              return done(err)
+            }
+            binary.should.equal(false)
+            done()
+          }
+        )
       })
     })
   })

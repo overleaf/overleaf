@@ -43,7 +43,7 @@ const FileTypeManager = {
   },
 
   // returns charset as understood by fs.readFile,
-  getType(name, fsPath, callback) {
+  getType(name, fsPath, existingFileType, callback) {
     if (!name) {
       return callback(
         new Error(
@@ -59,7 +59,7 @@ const FileTypeManager = {
       )
     }
     const basename = Path.basename(name)
-    if (!_isTextFilename(basename)) {
+    if (existingFileType !== 'doc' && !_isTextFilename(basename)) {
       return callback(null, { binary: true })
     }
 

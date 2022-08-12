@@ -188,7 +188,8 @@ async function importFile(fsPath, projectPath) {
 
   const { binary, encoding } = await FileTypeManager.promises.getType(
     filename,
-    fsPath
+    fsPath,
+    null
   )
   if (binary) {
     return new FileImport(projectPath, fsPath)
