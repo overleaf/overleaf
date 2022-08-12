@@ -48,7 +48,7 @@ module.exports = HomeController = {
           await SplitTestHandler.promises.getAssignment(
             req,
             res,
-            'highlight-sso'
+            'highlight-sso-2'
           )
         const homeRegistration = await SplitTestHandler.promises.getAssignment(
           req,
@@ -64,7 +64,7 @@ module.exports = HomeController = {
       } catch (err) {
         logger.error(
           { err },
-          "error fetching 'highlight-sso' split test assignment"
+          "error fetching 'highlight-sso-2' split test assignment"
         )
         return res.render('external/home/v2', {
           highlightSSO: false,

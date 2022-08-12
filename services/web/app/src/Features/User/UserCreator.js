@@ -41,7 +41,7 @@ async function recordRegistrationEvent(user) {
     const highlightSSOAssignment =
       await SplitTestHandler.promises.getAssignmentForUser(
         user._id,
-        'highlight-sso'
+        'highlight-sso-2'
       )
     const homeRegistrationAssignment =
       await SplitTestHandler.promises.getAssignmentForUser(
