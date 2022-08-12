@@ -15,12 +15,16 @@ function FileTreeItemMenuItems() {
     startCreatingFolder,
     startCreatingDocOrFile,
     startUploadingDocOrFile,
+    downloadPath,
   } = useFileTreeActionable()
 
   return (
     <>
       {canRename ? (
         <MenuItem onClick={startRenaming}>{t('rename')}</MenuItem>
+      ) : null}
+      {downloadPath ? (
+        <MenuItem href={downloadPath}>{t('download')}</MenuItem>
       ) : null}
       {canDelete ? (
         <MenuItem onClick={startDeleting}>{t('delete')}</MenuItem>

@@ -346,6 +346,17 @@ export function FileTreeActionableProvider({ children }) {
     }
   }, [])
 
+  // build the path for downloading a single file
+  const downloadPath = useMemo(() => {
+    if (selectedEntityIds.size === 1) {
+      const [selectedEntityId] = selectedEntityIds
+      const selectedEntity = findInTree(fileTreeData, selectedEntityId)
+      if (selectedEntity?.type === 'fileRef') {
+        return `/project/${projectId}/file/${selectedEntityId}`
+      }
+    }
+  }, [fileTreeData, projectId, selectedEntityIds])
+
   const value = {
     canDelete: selectedEntityIds.size > 0,
     canRename: selectedEntityIds.size === 1,
@@ -368,6 +379,7 @@ export function FileTreeActionableProvider({ children }) {
     cancel,
     droppedFiles,
     setDroppedFiles,
+    downloadPath,
   }
 
   return (
