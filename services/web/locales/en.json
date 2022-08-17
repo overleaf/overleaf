@@ -496,7 +496,7 @@
   "reference_search_info_v2": "It’s easy to find your references - you can search by author, title, year or journal. You can still search by citation key too.",
   "reference_managers": "Reference managers",
   "reference_sync": "Reference manager sync",
-  "reference_sync_info": "Manage your reference library in Mendeley and link it directly to a .bib file in Overleaf, so you can easily cite anything in your Mendeley library.",
+  "reference_sync_info": "Manage your reference library in Mendeley or Zotero and link it directly to a .bib file in Overleaf, so you can easily cite anything in your library.",
   "faq_how_free_trial_works_answer": "You get full access to your chosen __appName__ plan during your __len__-day free trial. There is no obligation to continue beyond the trial. Your card will be charged at the end of your __len__ day trial unless you cancel before then. You can cancel via your subscription settings.",
   "faq_how_free_trial_works_answer_v2": "You get full access to your chosen premium plan during your __len__ day free trial, and there is no obligation to continue beyond the trial. Your card will be charged at the end of your trial unless you cancel before then. To cancel, go to your subscription settings in your account (the trial will continue for the full __len__ days).",
   "faq_change_plans_answer": "Yes, you can change your plan at any time via your subscription settings. This includes options to switch to a different plan, or to switch between monthly and annual billing options, or to cancel to downgrade to the free plan.",
