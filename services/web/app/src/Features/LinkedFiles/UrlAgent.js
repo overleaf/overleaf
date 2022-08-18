@@ -1,3 +1,4 @@
+const logger = require('@overleaf/logger')
 const request = require('request')
 const _ = require('underscore')
 const urlValidator = require('valid-url')
@@ -13,6 +14,10 @@ function createLinkedFile(
   userId,
   callback
 ) {
+  logger.info(
+    { projectId, userId, url: linkedFileData.url },
+    'create linked file'
+  )
   linkedFileData = _sanitizeData(linkedFileData)
   _getUrlStream(projectId, linkedFileData, userId, (err, readStream) => {
     if (err) {
