@@ -1,7 +1,8 @@
 import { expect } from 'chai'
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 
 import ToolbarHeader from '../../../../../frontend/js/features/editor-navigation-toolbar/components/toolbar-header'
+import { renderWithEditorContext } from '../../../helpers/render-with-context'
 
 describe('<ToolbarHeader />', function () {
   const defaultProps = {
@@ -15,7 +16,6 @@ describe('<ToolbarHeader />', function () {
     projectName: 'test project',
     renameProject: () => {},
     openShareModal: () => {},
-    togglePdfView: () => {},
     hasPublishPermissions: true,
     trackChangesVisible: true,
     handleChangeLayout: () => {},
@@ -27,7 +27,7 @@ describe('<ToolbarHeader />', function () {
 
   describe('cobranding logo', function () {
     it('is not displayed by default', function () {
-      render(<ToolbarHeader {...defaultProps} />)
+      renderWithEditorContext(<ToolbarHeader {...defaultProps} />)
       expect(screen.queryByRole('link', { name: 'variation' })).to.not.exist
     })
 
@@ -40,30 +40,14 @@ describe('<ToolbarHeader />', function () {
           logoImgUrl: 'http://cobranding/logo',
         },
       }
-      render(<ToolbarHeader {...props} />)
+      renderWithEditorContext(<ToolbarHeader {...props} />)
       screen.getByRole('link', { name: 'variation' })
-    })
-  })
-
-  describe('pdf toggle button', function () {
-    it('is not displayed by default', function () {
-      render(<ToolbarHeader {...defaultProps} />)
-      expect(screen.queryByText('PDF')).to.not.exist
-    })
-
-    it('is displayed when "pdfButtonIsVisible" prop is set to true', function () {
-      const props = {
-        ...defaultProps,
-        pdfButtonIsVisible: true,
-      }
-      render(<ToolbarHeader {...props} />)
-      screen.getByText('PDF')
     })
   })
 
   describe('track changes toggle button', function () {
     it('is displayed by default', function () {
-      render(<ToolbarHeader {...defaultProps} />)
+      renderWithEditorContext(<ToolbarHeader {...defaultProps} />)
       screen.getByText('Review')
     })
 
@@ -72,7 +56,7 @@ describe('<ToolbarHeader />', function () {
         ...defaultProps,
         isRestrictedTokenMember: true,
       }
-      render(<ToolbarHeader {...props} />)
+      renderWithEditorContext(<ToolbarHeader {...props} />)
       expect(screen.queryByText('Review')).to.not.exist
     })
 
@@ -81,14 +65,14 @@ describe('<ToolbarHeader />', function () {
         ...defaultProps,
         trackChangesVisible: false,
       }
-      render(<ToolbarHeader {...props} />)
+      renderWithEditorContext(<ToolbarHeader {...props} />)
       expect(screen.queryByText('Review')).to.not.exist
     })
   })
 
   describe('History toggle button', function () {
     it('is displayed by default', function () {
-      render(<ToolbarHeader {...defaultProps} />)
+      renderWithEditorContext(<ToolbarHeader {...defaultProps} />)
       screen.getByText('History')
     })
 
@@ -97,14 +81,14 @@ describe('<ToolbarHeader />', function () {
         ...defaultProps,
         isRestrictedTokenMember: true,
       }
-      render(<ToolbarHeader {...props} />)
+      renderWithEditorContext(<ToolbarHeader {...props} />)
       expect(screen.queryByText('History')).to.not.exist
     })
   })
 
   describe('Chat toggle button', function () {
     it('is displayed by default', function () {
-      render(<ToolbarHeader {...defaultProps} />)
+      renderWithEditorContext(<ToolbarHeader {...defaultProps} />)
       screen.getByText('Chat')
     })
 
@@ -113,14 +97,14 @@ describe('<ToolbarHeader />', function () {
         ...defaultProps,
         isRestrictedTokenMember: true,
       }
-      render(<ToolbarHeader {...props} />)
+      renderWithEditorContext(<ToolbarHeader {...props} />)
       expect(screen.queryByText('Chat')).to.not.exist
     })
   })
 
   describe('Publish button', function () {
     it('is displayed by default', function () {
-      render(<ToolbarHeader {...defaultProps} />)
+      renderWithEditorContext(<ToolbarHeader {...defaultProps} />)
       screen.getByText('Submit')
     })
 
@@ -129,7 +113,7 @@ describe('<ToolbarHeader />', function () {
         ...defaultProps,
         hasPublishPermissions: false,
       }
-      render(<ToolbarHeader {...props} />)
+      renderWithEditorContext(<ToolbarHeader {...props} />)
       expect(screen.queryByText('Submit')).to.not.exist
     })
   })

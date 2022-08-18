@@ -1364,67 +1364,6 @@ describe('ProjectController', function () {
       })
     })
 
-    describe('feature flags', function () {
-      describe('showPdfDetach', function () {
-        describe('showPdfDetach=false', function () {
-          beforeEach(function () {
-            this.Features.hasFeature.withArgs('saas').returns(true)
-          })
-
-          it('should be false by default in SaaS', function (done) {
-            this.res.render = (pageName, opts) => {
-              expect(opts.showPdfDetach).to.be.false
-              done()
-            }
-            this.ProjectController.loadEditor(this.req, this.res)
-          })
-
-          it('should be true by default in Server Pro', function (done) {
-            this.Features.hasFeature.withArgs('saas').returns(false)
-            this.res.render = (pageName, opts) => {
-              expect(opts.showPdfDetach).to.be.true
-              done()
-            }
-            this.ProjectController.loadEditor(this.req, this.res)
-          })
-
-          it('should be false when the split test is enabled and ?pdf_detach=false', function (done) {
-            this.res.render = (pageName, opts) => {
-              expect(opts.showPdfDetach).to.be.false
-              done()
-            }
-            this.SplitTestHandler.getAssignment
-              .withArgs(this.req, this.res, 'pdf-detach')
-              .yields(null, { variant: 'enabled' })
-            this.req.query.pdf_detach = 'false'
-            this.ProjectController.loadEditor(this.req, this.res)
-          })
-        })
-
-        describe('showPdfDetach=true', function () {
-          it('should be true when ?pdf_detach=true', function (done) {
-            this.res.render = (pageName, opts) => {
-              expect(opts.showPdfDetach).to.be.true
-              done()
-            }
-            this.req.query.pdf_detach = 'true'
-            this.ProjectController.loadEditor(this.req, this.res)
-          })
-
-          it('should be true for alpha group', function (done) {
-            this.res.render = (pageName, opts) => {
-              expect(opts.showPdfDetach).to.be.true
-              done()
-            }
-            this.SplitTestHandler.getAssignment
-              .withArgs(this.req, this.res, 'pdf-detach')
-              .yields(null, { variant: 'enabled' })
-            this.ProjectController.loadEditor(this.req, this.res)
-          })
-        })
-      })
-    })
-
     describe('upgrade prompt (on header and share project modal)', function () {
       beforeEach(function () {
         // default to saas enabled

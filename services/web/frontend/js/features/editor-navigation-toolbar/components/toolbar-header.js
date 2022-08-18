@@ -12,7 +12,6 @@ import ProjectNameEditableLabel from './project-name-editable-label'
 import TrackChangesToggleButton from './track-changes-toggle-button'
 import HistoryToggleButton from './history-toggle-button'
 import ShareProjectButton from './share-project-button'
-import PdfToggleButton from './pdf-toggle-button'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 
 const [publishModalModules] = importOverleafModules('publishModal')
@@ -36,9 +35,6 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
   renameProject,
   hasRenamePermissions,
   openShareModal,
-  pdfViewIsOpen,
-  pdfButtonIsVisible,
-  togglePdfView,
   trackChangesVisible,
 }) {
   const { t } = useTranslation()
@@ -59,12 +55,6 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
         )}
         <BackToProjectsButton />
       </div>
-      {!window.showPdfDetach && pdfButtonIsVisible && (
-        <PdfToggleButton
-          onClick={togglePdfView}
-          pdfViewIsOpen={pdfViewIsOpen}
-        />
-      )}
       {window.showUpgradePrompt && <UpgradePrompt />}
       <ProjectNameEditableLabel
         className="toolbar-center"
@@ -96,7 +86,7 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
           />
         )}
 
-        {window.showPdfDetach && <LayoutDropdownButton />}
+        <LayoutDropdownButton />
 
         {!isRestrictedTokenMember && (
           <ChatToggleButton
@@ -128,9 +118,6 @@ ToolbarHeader.propTypes = {
   renameProject: PropTypes.func.isRequired,
   hasRenamePermissions: PropTypes.bool,
   openShareModal: PropTypes.func.isRequired,
-  pdfViewIsOpen: PropTypes.bool,
-  pdfButtonIsVisible: PropTypes.bool,
-  togglePdfView: PropTypes.func.isRequired,
   trackChangesVisible: PropTypes.bool,
 }
 

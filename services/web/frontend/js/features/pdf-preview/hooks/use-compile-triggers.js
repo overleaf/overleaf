@@ -1,10 +1,7 @@
 import { useCallback } from 'react'
-import getMeta from '../../../utils/meta'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import useEventListener from '../../../shared/hooks/use-event-listener'
 import useDetachAction from '../../../shared/hooks/use-detach-action'
-
-const showPdfDetach = getMeta('ol-showPdfDetach')
 
 export default function useCompileTriggers() {
   const { startCompile, setChangedAt } = useCompileContext()
@@ -18,11 +15,9 @@ export default function useCompileTriggers() {
   )
   const compileHandler = useCallback(
     event => {
-      showPdfDetach
-        ? startOrTriggerCompile(event.detail)
-        : startCompile(event.detail)
+      startOrTriggerCompile(event.detail)
     },
-    [startOrTriggerCompile, startCompile]
+    [startOrTriggerCompile]
   )
   useEventListener('pdf:recompile', compileHandler)
 
@@ -34,8 +29,8 @@ export default function useCompileTriggers() {
     'detached'
   )
   const setChangedAtHandler = useCallback(() => {
-    showPdfDetach ? setOrTriggerChangedAt(Date.now()) : setChangedAt(Date.now())
-  }, [setOrTriggerChangedAt, setChangedAt])
+    setOrTriggerChangedAt(Date.now())
+  }, [setOrTriggerChangedAt])
   useEventListener('doc:changed', setChangedAtHandler)
   useEventListener('doc:saved', setChangedAtHandler) // TODO: store this separately?
 }

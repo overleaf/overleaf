@@ -1,4 +1,5 @@
 import ToolbarHeader from '../js/features/editor-navigation-toolbar/components/toolbar-header'
+import { ScopeDecorator } from './decorators/scope'
 
 export const UpToThreeConnectedUsers = args => {
   return <ToolbarHeader {...args} />
@@ -29,7 +30,6 @@ export default {
     toggleHistoryOpen: { action: 'toggleHistoryOpen' },
     toggleReviewPanelOpen: { action: 'toggleReviewPanelOpen' },
     toggleChatOpen: { action: 'toggleChatOpen' },
-    togglePdfView: { action: 'togglePdfView' },
     openShareModal: { action: 'openShareModal' },
     onShowLeftMenuClick: { action: 'onShowLeftMenuClick' },
   },
@@ -38,4 +38,5 @@ export default {
     onlineUsers: [{ user_id: 'abc', name: 'overleaf' }],
     unreadMessageCount: 0,
   },
+  decorators: [ScopeDecorator],
 }

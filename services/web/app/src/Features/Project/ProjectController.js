@@ -859,22 +859,6 @@ const ProjectController = {
             }
           )
         },
-        pdfDetachAssignment(cb) {
-          SplitTestHandler.getAssignment(
-            req,
-            res,
-            'pdf-detach',
-            {},
-            (error, assignment) => {
-              // do not fail editor load if assignment fails
-              if (error) {
-                cb(null)
-              } else {
-                cb(null, assignment)
-              }
-            }
-          )
-        },
         pdfjsAssignment(cb) {
           SplitTestHandler.getAssignment(
             req,
@@ -1044,7 +1028,6 @@ const ProjectController = {
           isTokenMember,
           brandVariation,
           newSourceEditorAssignment,
-          pdfDetachAssignment,
           pdfjsAssignment,
           dictionaryEditorAssignment,
           stopOnFirstErrorAssignment,
@@ -1120,20 +1103,9 @@ const ProjectController = {
               }
             }
 
-            const showPdfDetach =
-              !Features.hasFeature('saas') ||
-              shouldDisplayFeature(
-                'pdf_detach',
-                pdfDetachAssignment.variant === 'enabled'
-              )
-
             const debugPdfDetach = shouldDisplayFeature('debug_pdf_detach')
 
-            let detachRole = null
-
-            if (showPdfDetach) {
-              detachRole = req.params.detachRole
-            }
+            const detachRole = req.params.detachRole
 
             const showNewSourceEditorOption =
               newSourceEditorAssignment?.variant === 'codemirror' ||
@@ -1222,7 +1194,6 @@ const ProjectController = {
               showSupport: Features.hasFeature('support'),
               pdfjsVariant: pdfjsAssignment.variant,
               dictionaryEditorEnabled,
-              showPdfDetach,
               debugPdfDetach,
               showNewSourceEditorOption,
               showSymbolPalette,

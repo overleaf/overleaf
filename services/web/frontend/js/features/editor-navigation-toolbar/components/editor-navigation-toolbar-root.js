@@ -65,7 +65,6 @@ const EditorNavigationToolbarRoot = React.memo(
       view,
       setView,
       setLeftMenuShown,
-      pdfLayout,
     } = useLayoutContext(layoutContextPropTypes)
 
     const { markMessagesAsRead, unreadMessageCount } =
@@ -85,10 +84,6 @@ const EditorNavigationToolbarRoot = React.memo(
 
     const toggleHistoryOpen = useCallback(() => {
       setView(view === 'history' ? 'editor' : 'history')
-    }, [view, setView])
-
-    const togglePdfView = useCallback(() => {
-      setView(view === 'pdf' ? 'editor' : 'pdf')
     }, [view, setView])
 
     const openShareModal = useCallback(() => {
@@ -133,9 +128,6 @@ const EditorNavigationToolbarRoot = React.memo(
         renameProject={renameProject}
         hasRenamePermissions={permissionsLevel === 'owner'}
         openShareModal={openShareModal}
-        pdfViewIsOpen={view === 'pdf'}
-        pdfButtonIsVisible={pdfLayout === 'flat'}
-        togglePdfView={togglePdfView}
         trackChangesVisible={trackChangesVisible}
       />
     )
