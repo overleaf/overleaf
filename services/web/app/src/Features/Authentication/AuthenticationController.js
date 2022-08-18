@@ -413,6 +413,8 @@ const AuthenticationController = {
     return next()
   },
 
+  checkCredentials,
+
   requireBasicAuth: function (userDetails) {
     const userDetailsMap = new Map(Object.entries(userDetails))
     return function (req, res, next) {

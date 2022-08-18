@@ -1,0 +1,66 @@
+.galileo {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 220px;
+  background-color: @galileo-bg;
+  color: @galileo-color;
+
+  .galileo-header {
+    display: flex;
+    background-color: @galileo-header-background;
+
+    :first-child {
+      flex: 1;
+    }
+
+    .galileo-close-button {
+      background: transparent;
+      color: @galileo-color;
+      padding-left: @padding-sm;
+      padding-right: @padding-sm;
+      margin-left: @margin-xs;
+      font-size: 24px;
+      font-weight: bold;
+      line-height: 1;
+    }
+  }
+
+  .galileo-font-lucida {
+    font-family: @editor-font-lucida;
+  }
+
+  .galileo-font-monaco {
+    font-family: @editor-font-monaco;
+  }
+
+  .galileo-body {
+    padding: 5px;
+    overflow-y: auto;
+
+    .galileo-items {
+      h2 {
+        font-size: 120%;
+        font-weight: normal;
+        padding: 0;
+        margin: 5px 0;
+        color: inherit;
+      }
+
+      .galileo-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 5px;
+        margin-bottom: 5px;
+
+        .galileo-item-text {
+          flex: 1;
+          background-color: white;
+          color: black;
+          white-space: break-spaces;
+        }
+      }
+    }
+  }
+}

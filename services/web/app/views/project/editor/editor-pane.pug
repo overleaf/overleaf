@@ -23,13 +23,13 @@
 
 		.editor-container.full-size(
 			ng-show="ui.view == 'editor' && editor.multiSelectedCount === 0"
-			vertical-resizable-panes="symbol-palette-resizer"
-			vertical-resizable-panes-hidden-externally-on="symbol-palette-toggled"
+			vertical-resizable-panes="south-pane-resizer"
+			vertical-resizable-panes-hidden-externally-on="south-pane-toggled"
 			vertical-resizable-panes-hidden-initially="true"
 			vertical-resizable-panes-default-size="250"
 			vertical-resizable-panes-min-size="250"
 			vertical-resizable-panes-max-size="336"
-			vertical-resizable-panes-resize-on="layout:flat-screen:toggle,symbol-palette-toggled"
+			vertical-resizable-panes-resize-on="layout:flat-screen:toggle,south-pane-toggled"
 		)
 			.div(vertical-resizable-top)
 
@@ -58,7 +58,9 @@
 				if !isRestrictedTokenMember
 							include ./review-panel
 
-			if moduleIncludesAvailable('editor:symbol-palette')
+			if moduleIncludesAvailable('editor:symbol-palette') || moduleIncludesAvailable('editor:galileo')
 				.div(vertical-resizable-bottom)
-					!= moduleIncludes('editor:symbol-palette', locals)
-			
+					if moduleIncludesAvailable('editor:symbol-palette')
+						!= moduleIncludes('editor:symbol-palette', locals)
+					if moduleIncludesAvailable('editor:galileo')
+						!= moduleIncludes('editor:galileo', locals)

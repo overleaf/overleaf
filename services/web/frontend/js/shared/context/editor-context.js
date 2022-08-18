@@ -33,6 +33,9 @@ EditorContext.Provider.propTypes = {
     showSymbolPalette: PropTypes.bool,
     toggleSymbolPalette: PropTypes.func,
     insertSymbol: PropTypes.func,
+    showGalileo: PropTypes.bool,
+    toggleGalileo: PropTypes.func,
+    insertGalileoAutocomplete: PropTypes.func,
     isProjectOwner: PropTypes.bool,
     isRestrictedTokenMember: PropTypes.bool,
     permissionsLevel: PropTypes.oneOf(['readOnly', 'readAndWrite', 'owner']),
@@ -76,6 +79,8 @@ export function EditorProvider({ children, settings }) {
   const [permissionsLevel] = useScopeValue('permissionsLevel')
   const [showSymbolPalette] = useScopeValue('editor.showSymbolPalette')
   const [toggleSymbolPalette] = useScopeValue('editor.toggleSymbolPalette')
+  const [showGalileo] = useScopeValue('editor.showGalileo')
+  const [toggleGalileo] = useScopeValue('editor.toggleGalileo')
 
   useEffect(() => {
     if (ide?.socket) {
@@ -137,6 +142,14 @@ export function EditorProvider({ children, settings }) {
     )
   }, [])
 
+  const insertGalileoAutocomplete = useCallback(text => {
+    window.dispatchEvent(
+      new CustomEvent('editor:insert-galileo-completion', {
+        detail: text,
+      })
+    )
+  }, [])
+
   const value = useMemo(
     () => ({
       cobranding,
@@ -149,6 +162,9 @@ export function EditorProvider({ children, settings }) {
       showSymbolPalette,
       toggleSymbolPalette,
       insertSymbol,
+      showGalileo,
+      toggleGalileo,
+      insertGalileoAutocomplete,
     }),
     [
       cobranding,
@@ -160,6 +176,9 @@ export function EditorProvider({ children, settings }) {
       showSymbolPalette,
       toggleSymbolPalette,
       insertSymbol,
+      showGalileo,
+      toggleGalileo,
+      insertGalileoAutocomplete,
     ]
   )
 

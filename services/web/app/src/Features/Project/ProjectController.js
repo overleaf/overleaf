@@ -1116,6 +1116,8 @@ const ProjectController = {
               !Features.hasFeature('saas') ||
               (user.features && user.features.symbolPalette)
 
+            const galileoEnabled = shouldDisplayFeature('galileo')
+
             const dictionaryEditorEnabled =
               !Features.hasFeature('saas') ||
               dictionaryEditorAssignment?.variant === 'enabled'
@@ -1197,6 +1199,7 @@ const ProjectController = {
               debugPdfDetach,
               showNewSourceEditorOption,
               showSymbolPalette,
+              galileoEnabled,
               showStopOnFirstError,
               detachRole,
               metadata: { viewport: false },
