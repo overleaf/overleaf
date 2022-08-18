@@ -200,6 +200,7 @@ function PasswordFormGroup({
         id={id}
         type="password"
         placeholder="*********"
+        autoComplete="new-password"
         value={value}
         data-ol-dirty={!!validationMessage}
         onChange={handleChangeAndValidity}
