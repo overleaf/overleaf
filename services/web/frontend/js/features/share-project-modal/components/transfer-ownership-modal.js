@@ -41,6 +41,7 @@ export default function TransferOwnershipModal({ member, cancel }) {
             i18nKey="project_ownership_transfer_confirmation_1"
             values={{ user: member.email, project: projectName }}
             components={[<strong key="strong-1" />, <strong key="strong-2" />]}
+            shouldUnescape
           />
         </p>
         <p>
