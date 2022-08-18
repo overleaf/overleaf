@@ -155,13 +155,6 @@ function LayoutDropdownButton() {
         <Dropdown.Toggle className="btn-full-height" bsStyle="link">
           {processing ? <IconRefresh /> : <IconLayout />}
           <span className="toolbar-label">{t('layout')}</span>
-          <Tooltip
-            id="pdf-detach-badge"
-            description="New feature"
-            overlayProps={{ placement: 'bottom', delayHide: 100 }}
-          >
-            <span className="info-badge" />
-          </Tooltip>
         </Dropdown.Toggle>
         <Dropdown.Menu className="layout-dropdown-list">
           <LayoutMenuItem
@@ -240,23 +233,6 @@ function LayoutDropdownButton() {
           ) : (
             <DetachDisabled />
           )}
-
-          <MenuItem divider />
-          <div className="pdf-detach-survey">
-            <span>
-              <span className="info-badge" />
-            </span>
-            <span className="pdf-detach-survey-text">
-              The Layout menu and opening the PDF in a new tab are new features.{' '}
-              <a
-                href="https://docs.google.com/forms/d/1fhc2LUMoun9jXvz9Nd6KkIKAQ8ZBfVZm_w8BpinpWu4"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {t('give_feedback')}.
-              </a>
-            </span>
-          </div>
         </Dropdown.Menu>
       </ControlledDropdown>
     </>
