@@ -1,4 +1,4 @@
-import { captureMessage } from '../../../infrastructure/error-reporter'
+import { captureException } from '../../../infrastructure/error-reporter'
 import { generatePdfCachingTransportFactory } from './pdf-caching-transport'
 
 const params = new URLSearchParams(window.location.search)
@@ -117,7 +117,9 @@ export default class PDFJSWrapper {
         .catch(error => {
           if (this.loadDocumentTask) {
             if (!error || error.name !== 'MissingPDFException') {
-              captureMessage(`pdf preview error ${error}`)
+              captureException(error, {
+                tags: { handler: 'pdf-preview' },
+              })
             }
 
             reject(error)
