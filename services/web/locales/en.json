@@ -955,6 +955,7 @@
   "trashed":"Trashed",
   "token_read_write":"token read-write",
   "token_read_only":"token read-only",
+  "duplicate_projects":"This user has projects with duplicate names",
   "welcome_to_sl": "Welcome to __appName__!",
   "new_to_latex_look_at": "New to LaTeX? Start by having a look at our",
   "or": "or",
