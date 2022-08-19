@@ -1,7 +1,6 @@
 const { expect } = require('chai')
 const _ = require('underscore')
-const mkdirp = require('mkdirp')
-const { promisify } = require('util')
+const fs = require('fs')
 
 const Settings = require('@overleaf/settings')
 const User = require('./helpers/User').promises
@@ -39,7 +38,7 @@ describe('LinkedFiles', function () {
   beforeEach(async function () {
     owner = new User()
     await owner.login()
-    await promisify(mkdirp)(Settings.path.dumpFolder)
+    await fs.promises.mkdir(Settings.path.dumpFolder, { recursive: true })
   })
 
   describe('creating a project linked file', function () {
