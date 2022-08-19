@@ -378,7 +378,7 @@ function PdfJsViewer({ url, pdfFile }) {
         (event.ctrlKey && event.key === '.')
       ) {
         event.preventDefault()
-        startCompile({ keyShortcut: true })
+        startCompile()
       }
     },
     [initialised, setZoom, startCompile]

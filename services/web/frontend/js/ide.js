@@ -346,16 +346,11 @@ If the project has been renamed please look in your project list for a new proje
       }
     })
 
-    // note: { keyShortcut: true } exists only for tracking purposes.
     $scope.recompileViaKey = () => {
       if ($scope.recompile) {
-        $scope.recompile({ keyShortcut: true })
+        $scope.recompile()
       } else {
-        window.dispatchEvent(
-          new CustomEvent('pdf:recompile', {
-            detail: { keyShortcut: true },
-          })
-        )
+        window.dispatchEvent(new CustomEvent('pdf:recompile'))
       }
     }
 

@@ -12,14 +12,14 @@ export const Shortcuts = ({ children }) => {
           case 's':
           case 'Enter':
             event.preventDefault()
-            startCompile({ keyShortcut: true })
+            startCompile()
             break
         }
       } else if (event.ctrlKey) {
         switch (event.key) {
           case '.':
             event.preventDefault()
-            startCompile({ keyShortcut: true })
+            startCompile()
             break
         }
       }
