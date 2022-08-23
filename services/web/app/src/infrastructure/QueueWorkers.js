@@ -7,6 +7,9 @@ const {
   addOptionalCleanupHandlerBeforeStoppingTraffic,
   addRequiredCleanupHandlerBeforeDrainingConnections,
 } = require('./GracefulShutdown')
+const EmailHandler = require('../Features/Email/EmailHandler')
+const logger = require('@overleaf/logger')
+const OError = require('@overleaf/o-error')
 
 function start() {
   if (!Features.hasFeature('saas')) {
@@ -47,6 +50,19 @@ function start() {
     await FeaturesUpdater.promises.refreshFeatures(userId, reason)
   })
   registerCleanup(refreshFeaturesQueue)
+
+  const deferredEmailsQueue = Queues.getQueue('deferred-emails')
+  deferredEmailsQueue.process(async job => {
+    const { emailType, opts } = job.data
+    try {
+      await EmailHandler.promises.sendEmail(emailType, opts)
+    } catch (e) {
+      const error = OError.tag(e, 'failed to send deferred email')
+      logger.warn(error)
+      throw error
+    }
+  })
+  registerCleanup(deferredEmailsQueue)
 }
 
 function registerCleanup(queue) {

@@ -199,20 +199,9 @@ function cancelSubscription(user, callback) {
               first_name: user.first_name,
             }
             const ONE_HOUR_IN_MS = 1000 * 60 * 60
-            setTimeout(
-              () =>
-                EmailHandler.sendEmail(
-                  'canceledSubscription',
-                  emailOpts,
-                  err => {
-                    if (err) {
-                      logger.warn(
-                        { err },
-                        'failed to send confirmation email for subscription cancellation'
-                      )
-                    }
-                  }
-                ),
+            EmailHandler.sendDeferredEmail(
+              'canceledSubscription',
+              emailOpts,
               ONE_HOUR_IN_MS
             )
             callback()

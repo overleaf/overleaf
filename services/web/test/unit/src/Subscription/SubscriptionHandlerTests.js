@@ -110,7 +110,10 @@ describe('SubscriptionHandler', function () {
 
     this.LimitationsManager = { userHasV2Subscription: sinon.stub() }
 
-    this.EmailHandler = { sendEmail: sinon.stub() }
+    this.EmailHandler = {
+      sendEmail: sinon.stub(),
+      sendDeferredEmail: sinon.stub(),
+    }
 
     this.AnalyticsManager = { recordEventForUser: sinon.stub() }
 
@@ -404,6 +407,15 @@ describe('SubscriptionHandler', function () {
         this.RecurlyClient.cancelSubscriptionByUuid
           .calledWith(this.subscription.recurlySubscription_id)
           .should.equal(true)
+      })
+
+      it('should send the email after 1 hour', function () {
+        const ONE_HOUR_IN_MS = 1000 * 60 * 60
+        expect(this.EmailHandler.sendDeferredEmail).to.have.been.calledWith(
+          'canceledSubscription',
+          { to: this.user.email, first_name: this.user.first_name },
+          ONE_HOUR_IN_MS
+        )
       })
     })
   })

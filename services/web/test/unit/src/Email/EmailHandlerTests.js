@@ -20,11 +20,15 @@ describe('EmailHandler', function () {
         sendEmail: sinon.stub().resolves(),
       },
     }
+    this.Queues = {
+      createScheduledJob: sinon.stub(),
+    }
     this.EmailHandler = SandboxedModule.require(MODULE_PATH, {
       requires: {
         './EmailBuilder': this.EmailBuilder,
         './EmailSender': this.EmailSender,
         '@overleaf/settings': this.Settings,
+        '../../infrastructure/Queues': this.Queues,
       },
     })
   })
@@ -90,6 +94,29 @@ describe('EmailHandler', function () {
           text: this.text,
         })
       })
+    })
+  })
+
+  describe('send deferred email', function () {
+    beforeEach(function () {
+      this.opts = {
+        to: 'bob@bob.com',
+        first_name: 'hello bob',
+      }
+      this.emailType = 'canceledSubscription'
+      this.ONE_HOUR_IN_MS = 1000 * 60 * 60
+      this.EmailHandler.sendDeferredEmail(
+        this.emailType,
+        this.opts,
+        this.ONE_HOUR_IN_MS
+      )
+    })
+    it('should add a email job to the queue', function () {
+      expect(this.Queues.createScheduledJob).to.have.been.calledWith(
+        'deferred-emails',
+        { data: { emailType: this.emailType, opts: this.opts } },
+        this.ONE_HOUR_IN_MS
+      )
     })
   })
 })
