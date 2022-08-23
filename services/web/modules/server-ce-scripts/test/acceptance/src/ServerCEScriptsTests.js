@@ -129,4 +129,35 @@ describe('ServerCEScripts', function () {
       expect.fail('command should have failed')
     })
   })
+
+  describe('rename-tag', function () {
+    let user
+    beforeEach(async function () {
+      user = new User()
+      await user.login()
+    })
+
+    async function createTag(name) {
+      await user.doRequest('POST', { url: '/tag', json: { name } })
+    }
+
+    async function getTagNames() {
+      const { body } = await user.doRequest('GET', { url: '/tag', json: true })
+      return body.map(tag => tag.name)
+    }
+
+    it('should rename a tag', async function () {
+      const oldName = 'before'
+      const newName = 'after'
+      await createTag(oldName)
+
+      expect(await getTagNames()).to.deep.equal([oldName])
+
+      run(
+        `node modules/server-ce-scripts/scripts/rename-tag --user-id=${user.id} --old-name=${oldName} --new-name=${newName}`
+      )
+
+      expect(await getTagNames()).to.deep.equal([newName])
+    })
+  })
 })
