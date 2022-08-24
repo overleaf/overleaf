@@ -340,16 +340,16 @@ templates.verifyEmailToJoinTeam = ctaTemplate({
   subject(opts) {
     return `${_.escape(
       _formatUserNameAndEmail(opts.inviter, 'A collaborator')
-    )} has invited you to join a team on ${settings.appName}`
+    )} has invited you to join a group subscription on ${settings.appName}`
   },
   title(opts) {
     return `${_.escape(
       _formatUserNameAndEmail(opts.inviter, 'A collaborator')
-    )} has invited you to join a team on ${settings.appName}`
+    )} has invited you to join a group subscription on ${settings.appName}`
   },
   message(opts) {
     return [
-      `Please click the button below to join the team and enjoy the benefits of an upgraded ${settings.appName} account.`,
+      `Please click the button below to join the group subscription and enjoy the benefits of an upgraded ${settings.appName} account.`,
     ]
   },
   ctaText(opts) {
