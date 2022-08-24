@@ -1,3 +1,5 @@
+import EventEmitter from '../frontend/js/utils/EventEmitter'
+import { ShareDoc } from './share-doc'
 import { EditorFacade } from '../modules/source-editor/frontend/js/extensions/realtime'
 import {
   AnyOperation,
@@ -8,9 +10,12 @@ import {
   InsertOperation,
 } from './change'
 
-export type CurrentDoc = {
+// type for the Document class in ide/editor/Document.js
+// note: this is a custom EventEmitter class
+export interface CurrentDoc extends EventEmitter {
   doc_id: string
   docName: string
+  doc: ShareDoc | null
   track_changes_as: string | null
   ranges: {
     changes: Change<InsertOperation | ChangeOperation | DeleteOperation>[]
@@ -25,8 +30,6 @@ export type CurrentDoc = {
   }
   attachToCM6: (editor: EditorFacade) => void
   detachFromCM6: () => void
-  on: (eventName: string, listener: EventListener) => void
-  off: (eventName: string) => void
   submitOp: (op: AnyOperation) => void
   getSnapshot: () => string
 }

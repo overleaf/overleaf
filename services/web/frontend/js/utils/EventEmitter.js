@@ -20,9 +20,8 @@
 // Trigger all events for the foo event (including namespaces): .trigger 'foo'
 // Remove all listeners for the foo event (including namespaces): .off 'foo'
 // Remove a listener for the foo event with the bar namespace: .off 'foo.bar'
-let EventEmitter
 
-export default EventEmitter = class EventEmitter {
+export default class EventEmitter {
   on(event, callback) {
     let namespace
     if (!this.events) {
