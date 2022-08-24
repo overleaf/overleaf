@@ -233,12 +233,10 @@ function TimedOutLogEntry() {
         <p>
           <Trans
             i18nKey="project_timed_out_learn_more"
-            components={{
-              link: (
-                // eslint-disable-next-line jsx-a11y/anchor-has-content
-                <a href="https://www.overleaf.com/learn/how-to/Why_do_I_keep_getting_the_compile_timeout_error_message%3F" />
-              ),
-            }}
+            components={[
+              // eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key
+              <a href="https://www.overleaf.com/learn/how-to/Why_do_I_keep_getting_the_compile_timeout_error_message%3F" />,
+            ]}
           />
         </p>
       </ErrorLogEntry>
