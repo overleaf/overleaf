@@ -123,7 +123,8 @@ async function processDoc(docId) {
         restoredName,
         doc.lines,
         doc.ranges,
-        null
+        null,
+        'recovery-script'
       )
       await deleteDocFromRedis(projectId, docId)
     } catch (err) {

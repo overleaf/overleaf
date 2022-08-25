@@ -322,7 +322,7 @@ function deleteComment(req, res, next) {
 function updateProject(req, res, next) {
   const timer = new Metrics.Timer('http.updateProject')
   const projectId = req.params.project_id
-  const { projectHistoryId, userId, updates = [], version } = req.body
+  const { projectHistoryId, userId, updates = [], version, source } = req.body
   logger.debug({ projectId, updates, version }, 'updating project via http')
   ProjectManager.updateProjectWithLocks(
     projectId,
@@ -330,6 +330,7 @@ function updateProject(req, res, next) {
     userId,
     updates,
     version,
+    source,
     error => {
       timer.done()
       if (error) {

@@ -34,6 +34,7 @@ describe('EditorHttpController', function () {
     this.doc = { _id: new ObjectId(), name: 'excellent-original-idea.tex' }
     this.file = { _id: new ObjectId() }
     this.folder = { _id: new ObjectId() }
+    this.source = 'editor'
 
     this.parentFolderId = 'mock-folder-id'
     this.req = { i18n: { translate: string => string } }
@@ -405,7 +406,7 @@ describe('EditorHttpController', function () {
     describe('successfully', function () {
       beforeEach(function (done) {
         this.newName = 'new-name'
-        this.req.body = { name: this.newName }
+        this.req.body = { name: this.newName, source: this.source }
         this.res.sendStatus.callsFake(() => done())
         this.EditorHttpController.renameEntity(this.req, this.res)
       })
@@ -418,7 +419,8 @@ describe('EditorHttpController', function () {
           this.entityId,
           this.entityType,
           this.newName,
-          this.user._id
+          this.user._id,
+          this.source
         )
       })
 
@@ -429,7 +431,7 @@ describe('EditorHttpController', function () {
     describe('with long name', function () {
       beforeEach(function () {
         this.newName = 'long'.repeat(100)
-        this.req.body = { name: this.newName }
+        this.req.body = { name: this.newName, source: this.source }
         this.EditorHttpController.renameEntity(this.req, this.res)
       })
 
@@ -441,7 +443,7 @@ describe('EditorHttpController', function () {
     describe('with 0 length name', function () {
       beforeEach(function () {
         this.newName = ''
-        this.req.body = { name: this.newName }
+        this.req.body = { name: this.newName, source: this.source }
         this.EditorHttpController.renameEntity(this.req, this.res)
       })
 
@@ -461,7 +463,7 @@ describe('EditorHttpController', function () {
         entity_id: this.entityId,
         entity_type: this.entityType,
       }
-      this.req.body = { folder_id: this.folderId }
+      this.req.body = { folder_id: this.folderId, source: this.source }
       this.res.sendStatus.callsFake(() => done())
       this.EditorHttpController.moveEntity(this.req, this.res)
     })
@@ -472,7 +474,8 @@ describe('EditorHttpController', function () {
         this.entityId,
         this.folderId,
         this.entityType,
-        this.user._id
+        this.user._id,
+        this.source
       )
     })
 

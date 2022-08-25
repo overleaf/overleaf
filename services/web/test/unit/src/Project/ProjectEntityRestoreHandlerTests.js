@@ -18,6 +18,7 @@ describe('ProjectEntityRestoreHandler', function () {
     }
 
     this.docId = '4eecb1c1bffa66588e0000a2'
+
     this.DocModel = class Doc {
       constructor(options) {
         this.name = options.name

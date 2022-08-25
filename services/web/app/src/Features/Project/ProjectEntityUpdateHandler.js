@@ -298,7 +298,7 @@ const ProjectEntityUpdateHandler = {
     )
   },
 
-  addDoc(projectId, folderId, docName, docLines, userId, callback) {
+  addDoc(projectId, folderId, docName, docLines, userId, source, callback) {
     ProjectEntityUpdateHandler.addDocWithRanges(
       projectId,
       folderId,
@@ -306,6 +306,7 @@ const ProjectEntityUpdateHandler = {
       docLines,
       {},
       userId,
+      source,
       callback
     )
   },
@@ -319,6 +320,7 @@ const ProjectEntityUpdateHandler = {
         docLines,
         ranges,
         userId,
+        source,
         callback
       ) {
         if (!SafePath.isCleanFilename(docName)) {
@@ -345,6 +347,7 @@ const ProjectEntityUpdateHandler = {
               docLines,
               ranges,
               userId,
+              source,
               callback
             )
           }
@@ -359,6 +362,7 @@ const ProjectEntityUpdateHandler = {
       docLines,
       ranges,
       userId,
+      source,
       callback
     ) {
       ProjectEntityUpdateHandler._addDocAndSendToTpds(
@@ -386,6 +390,7 @@ const ProjectEntityUpdateHandler = {
             projectHistoryId,
             userId,
             { newDocs, newProject: project },
+            source,
             error => {
               if (error != null) {
                 return callback(error)
@@ -468,6 +473,7 @@ const ProjectEntityUpdateHandler = {
         fsPath,
         linkedFileData,
         userId,
+        source,
         callback
       ) {
         if (!SafePath.isCleanFilename(fileName)) {
@@ -492,6 +498,7 @@ const ProjectEntityUpdateHandler = {
               userId,
               fileRef,
               fileStoreUrl,
+              source,
               callback
             )
           }
@@ -507,6 +514,7 @@ const ProjectEntityUpdateHandler = {
       userId,
       fileRef,
       fileStoreUrl,
+      source,
       callback
     ) {
       ProjectEntityUpdateHandler._addFileAndSendToTpds(
@@ -533,6 +541,7 @@ const ProjectEntityUpdateHandler = {
             projectHistoryId,
             userId,
             { newFiles, newProject: project },
+            source,
             error => {
               if (error != null) {
                 return callback(error)
@@ -554,6 +563,7 @@ const ProjectEntityUpdateHandler = {
         fsPath,
         linkedFileData,
         userId,
+        source,
         callback
       ) {
         // create a new file
@@ -577,6 +587,7 @@ const ProjectEntityUpdateHandler = {
               userId,
               fileRef,
               fileStoreUrl,
+              source,
               callback
             )
           }
@@ -591,6 +602,7 @@ const ProjectEntityUpdateHandler = {
       userId,
       newFileRef,
       fileStoreUrl,
+      source,
       callback
     ) {
       ProjectEntityMongoUpdateHandler.replaceFileWithNew(
@@ -643,6 +655,7 @@ const ProjectEntityUpdateHandler = {
                 projectHistoryId,
                 userId,
                 { oldFiles, newFiles, newProject },
+                source,
                 callback
               )
             }
@@ -732,6 +745,7 @@ const ProjectEntityUpdateHandler = {
                         projectHistoryId,
                         userId,
                         { oldFiles, newDocs, newProject: project },
+                        source,
                         error => {
                           if (error != null) {
                             return callback(error)
@@ -786,6 +800,7 @@ const ProjectEntityUpdateHandler = {
             docLines,
             {},
             userId,
+            source,
             (err, doc) => {
               if (err != null) {
                 return callback(err)
@@ -807,6 +822,7 @@ const ProjectEntityUpdateHandler = {
         fsPath,
         linkedFileData,
         userId,
+        source,
         callback
       ) {
         if (!SafePath.isCleanFilename(fileName)) {
@@ -834,6 +850,7 @@ const ProjectEntityUpdateHandler = {
               userId,
               fileRef,
               fileStoreUrl,
+              source,
               callback
             )
           }
@@ -849,6 +866,7 @@ const ProjectEntityUpdateHandler = {
       userId,
       newFileRef,
       fileStoreUrl,
+      source,
       callback
     ) {
       ProjectLocator.findElement(
@@ -918,6 +936,7 @@ const ProjectEntityUpdateHandler = {
                             ],
                             newProject: project,
                           },
+                          source,
                           err => {
                             if (err) {
                               return callback(err)
@@ -947,6 +966,7 @@ const ProjectEntityUpdateHandler = {
               userId,
               newFileRef,
               fileStoreUrl,
+              source,
               err => {
                 if (err != null) {
                   return callback(err)
@@ -965,6 +985,7 @@ const ProjectEntityUpdateHandler = {
               userId,
               newFileRef,
               fileStoreUrl,
+              source,
               err => {
                 if (err != null) {
                   return callback(err)
@@ -1024,6 +1045,7 @@ const ProjectEntityUpdateHandler = {
         fsPath,
         linkedFileData,
         userId,
+        source,
         callback
       ) {
         if (!SafePath.isCleanPath(elementPath)) {
@@ -1053,6 +1075,7 @@ const ProjectEntityUpdateHandler = {
               userId,
               fileRef,
               fileStoreUrl,
+              source,
               callback
             )
           }
@@ -1068,6 +1091,7 @@ const ProjectEntityUpdateHandler = {
       userId,
       fileRef,
       fileStoreUrl,
+      source,
       callback
     ) {
       ProjectEntityUpdateHandler.mkdirp.withoutLock(
@@ -1087,6 +1111,7 @@ const ProjectEntityUpdateHandler = {
             userId,
             fileRef,
             fileStoreUrl,
+            source,
             (err, newFile, isNewFile, existingFile) => {
               if (err != null) {
                 return callback(err)
@@ -1111,6 +1136,7 @@ const ProjectEntityUpdateHandler = {
     entityId,
     entityType,
     userId,
+    source,
     callback
   ) {
     logger.debug({ entityId, entityType, projectId }, 'deleting project entity')
@@ -1134,6 +1160,7 @@ const ProjectEntityUpdateHandler = {
           entityType,
           path.fileSystem,
           userId,
+          source,
           error => {
             if (error != null) {
               return callback(error)
@@ -1157,25 +1184,27 @@ const ProjectEntityUpdateHandler = {
     )
   }),
 
-  deleteEntityWithPath: wrapWithLock((projectId, path, userId, callback) =>
-    ProjectLocator.findElementByPath(
-      { project_id: projectId, path },
-      (err, element, type) => {
-        if (err != null) {
-          return callback(err)
+  deleteEntityWithPath: wrapWithLock(
+    (projectId, path, userId, source, callback) =>
+      ProjectLocator.findElementByPath(
+        { project_id: projectId, path },
+        (err, element, type) => {
+          if (err != null) {
+            return callback(err)
+          }
+          if (element == null) {
+            return callback(new Errors.NotFoundError('project not found'))
+          }
+          ProjectEntityUpdateHandler.deleteEntity.withoutLock(
+            projectId,
+            element._id,
+            type,
+            userId,
+            source,
+            callback
+          )
         }
-        if (element == null) {
-          return callback(new Errors.NotFoundError('project not found'))
-        }
-        ProjectEntityUpdateHandler.deleteEntity.withoutLock(
-          projectId,
-          element._id,
-          type,
-          userId,
-          callback
-        )
-      }
-    )
+      )
   ),
 
   mkdirp: wrapWithLock(function (projectId, path, callback) {
@@ -1229,6 +1258,7 @@ const ProjectEntityUpdateHandler = {
     destFolderId,
     entityType,
     userId,
+    source,
     callback
   ) {
     logger.debug(
@@ -1270,6 +1300,7 @@ const ProjectEntityUpdateHandler = {
           projectHistoryId,
           userId,
           changes,
+          source,
           callback
         )
       }
@@ -1282,6 +1313,7 @@ const ProjectEntityUpdateHandler = {
     entityType,
     newName,
     userId,
+    source,
     callback
   ) {
     if (!SafePath.isCleanFilename(newName)) {
@@ -1324,6 +1356,7 @@ const ProjectEntityUpdateHandler = {
           projectHistoryId,
           userId,
           changes,
+          source,
           callback
         )
       }
@@ -1501,6 +1534,7 @@ const ProjectEntityUpdateHandler = {
             projectHistoryId,
             null,
             changes,
+            'automatic-fix',
             cb
           )
         }
@@ -1543,6 +1577,7 @@ const ProjectEntityUpdateHandler = {
     entityType,
     path,
     userId,
+    source,
     callback
   ) {
     ProjectEntityUpdateHandler._updateProjectStructureWithDeletedEntity(
@@ -1552,6 +1587,7 @@ const ProjectEntityUpdateHandler = {
       entityType,
       path,
       userId,
+      source,
       error => {
         if (error != null) {
           return callback(error)
@@ -1598,6 +1634,7 @@ const ProjectEntityUpdateHandler = {
     entityType,
     entityPath,
     userId,
+    source,
     callback
   ) {
     // compute the changes to the project structure
@@ -1636,6 +1673,7 @@ const ProjectEntityUpdateHandler = {
       projectHistoryId,
       userId,
       changes,
+      source,
       callback
     )
   },
@@ -1723,7 +1761,7 @@ const ProjectEntityUpdateHandler = {
 
   convertDocToFile: wrapWithLock({
     beforeLock(next) {
-      return function (projectId, docId, userId, callback) {
+      return function (projectId, docId, userId, source, callback) {
         DocumentUpdaterHandler.flushDocToMongo(projectId, docId, err => {
           if (err) {
             return callback(err)
@@ -1778,6 +1816,7 @@ const ProjectEntityUpdateHandler = {
                                 fileRef,
                                 fileStoreUrl,
                                 userId,
+                                source,
                                 callback
                               )
                             })
@@ -1793,7 +1832,16 @@ const ProjectEntityUpdateHandler = {
         })
       }
     },
-    withLock(projectId, doc, path, fileRef, fileStoreUrl, userId, callback) {
+    withLock(
+      projectId,
+      doc,
+      path,
+      fileRef,
+      fileStoreUrl,
+      userId,
+      source,
+      callback
+    ) {
       ProjectEntityMongoUpdateHandler.replaceDocWithFile(
         projectId,
         doc._id,
@@ -1815,6 +1863,7 @@ const ProjectEntityUpdateHandler = {
               newFiles: [{ file: fileRef, path, url: fileStoreUrl }],
               newProject: project,
             },
+            source,
             err => {
               if (err) {
                 return callback(err)

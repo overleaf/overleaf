@@ -1,16 +1,3 @@
-/* eslint-disable
-    camelcase,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS201: Simplify complex destructure assignments
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 let ProjectHistoryRedisManager
 const Settings = require('@overleaf/settings')
 const projectHistoryKeys = Settings.redis?.project_history?.key_schema
@@ -22,106 +9,119 @@ const metrics = require('./Metrics')
 const { docIsTooLarge } = require('./Limits')
 
 module.exports = ProjectHistoryRedisManager = {
-  queueOps(project_id, ...rest) {
+  queueOps(projectId, ...rest) {
     // Record metric for ops pushed onto queue
     const callback = rest.pop()
     const ops = rest
-    for (const op of Array.from(ops)) {
+    for (const op of ops) {
       metrics.summary('redis.projectHistoryOps', op.length, { status: 'push' })
     }
     const multi = rclient.multi()
     // Push the ops onto the project history queue
     multi.rpush(
-      projectHistoryKeys.projectHistoryOps({ project_id }),
-      ...Array.from(ops)
+      projectHistoryKeys.projectHistoryOps({ project_id: projectId }),
+      ...ops
     )
     // To record the age of the oldest op on the queue set a timestamp if not
     // already present (SETNX).
     multi.setnx(
-      projectHistoryKeys.projectHistoryFirstOpTimestamp({ project_id }),
+      projectHistoryKeys.projectHistoryFirstOpTimestamp({
+        project_id: projectId,
+      }),
       Date.now()
     )
-    return multi.exec(function (error, result) {
-      if (error != null) {
+    multi.exec(function (error, result) {
+      if (error) {
         return callback(error)
       }
       // return the number of entries pushed onto the project history queue
-      return callback(null, result[0])
+      callback(null, result[0])
     })
   },
 
   queueRenameEntity(
-    project_id,
+    projectId,
     projectHistoryId,
-    entity_type,
-    entity_id,
-    user_id,
+    entityType,
+    entityId,
+    userId,
     projectUpdate,
+    source,
     callback
   ) {
     projectUpdate = {
       pathname: projectUpdate.pathname,
       new_pathname: projectUpdate.newPathname,
       meta: {
-        user_id,
+        user_id: userId,
         ts: new Date(),
       },
       version: projectUpdate.version,
       projectHistoryId,
     }
-    projectUpdate[entity_type] = entity_id
+    projectUpdate[entityType] = entityId
+    if (source != null) {
+      projectUpdate.meta.source = source
+      if (source !== 'editor') {
+        projectUpdate.meta.type = 'external'
+      }
+    }
 
     logger.debug(
-      { project_id, projectUpdate },
+      { projectId, projectUpdate },
       'queue rename operation to project-history'
     )
     const jsonUpdate = JSON.stringify(projectUpdate)
 
-    return ProjectHistoryRedisManager.queueOps(project_id, jsonUpdate, callback)
+    ProjectHistoryRedisManager.queueOps(projectId, jsonUpdate, callback)
   },
 
   queueAddEntity(
-    project_id,
+    projectId,
     projectHistoryId,
-    entity_type,
-    entitiy_id,
-    user_id,
+    entityType,
+    entityId,
+    userId,
     projectUpdate,
+    source,
     callback
   ) {
-    if (callback == null) {
-      callback = function () {}
-    }
     projectUpdate = {
       pathname: projectUpdate.pathname,
       docLines: projectUpdate.docLines,
       url: projectUpdate.url,
       meta: {
-        user_id,
+        user_id: userId,
         ts: new Date(),
       },
       version: projectUpdate.version,
       projectHistoryId,
     }
-    projectUpdate[entity_type] = entitiy_id
+    projectUpdate[entityType] = entityId
+    if (source != null) {
+      projectUpdate.meta.source = source
+      if (source !== 'editor') {
+        projectUpdate.meta.type = 'external'
+      }
+    }
 
     logger.debug(
-      { project_id, projectUpdate },
+      { projectId, projectUpdate },
       'queue add operation to project-history'
     )
     const jsonUpdate = JSON.stringify(projectUpdate)
 
-    return ProjectHistoryRedisManager.queueOps(project_id, jsonUpdate, callback)
+    ProjectHistoryRedisManager.queueOps(projectId, jsonUpdate, callback)
   },
 
   queueResyncProjectStructure(
-    project_id,
+    projectId,
     projectHistoryId,
     docs,
     files,
     callback
   ) {
-    logger.debug({ project_id, docs, files }, 'queue project structure resync')
+    logger.debug({ projectId, docs, files }, 'queue project structure resync')
     const projectUpdate = {
       resyncProjectStructure: { docs, files },
       projectHistoryId,
@@ -130,20 +130,20 @@ module.exports = ProjectHistoryRedisManager = {
       },
     }
     const jsonUpdate = JSON.stringify(projectUpdate)
-    return ProjectHistoryRedisManager.queueOps(project_id, jsonUpdate, callback)
+    ProjectHistoryRedisManager.queueOps(projectId, jsonUpdate, callback)
   },
 
   queueResyncDocContent(
-    project_id,
+    projectId,
     projectHistoryId,
-    doc_id,
+    docId,
     lines,
     version,
     pathname,
     callback
   ) {
     logger.debug(
-      { project_id, doc_id, lines, version, pathname },
+      { projectId, docId, lines, version, pathname },
       'queue doc content resync'
     )
     const projectUpdate = {
@@ -153,7 +153,7 @@ module.exports = ProjectHistoryRedisManager = {
       },
       projectHistoryId,
       path: pathname,
-      doc: doc_id,
+      doc: docId,
       meta: {
         ts: new Date(),
       },
@@ -166,9 +166,9 @@ module.exports = ProjectHistoryRedisManager = {
       const err = new Error(
         'blocking resync doc content insert into project history queue: doc is too large'
       )
-      logger.error({ project_id, doc_id, err, docSize: sizeBound }, err.message)
+      logger.error({ projectId, docId, err, docSize: sizeBound }, err.message)
       return callback(err)
     }
-    return ProjectHistoryRedisManager.queueOps(project_id, jsonUpdate, callback)
+    ProjectHistoryRedisManager.queueOps(projectId, jsonUpdate, callback)
   },
 }

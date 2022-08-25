@@ -211,7 +211,8 @@ describe('ProjectUploadManager', function () {
             newDocs: this.docEntries,
             newFiles: this.fileEntries,
             newProject: { version: this.newProjectVersion },
-          }
+          },
+          null
         )
       })
 
@@ -298,7 +299,8 @@ describe('ProjectUploadManager', function () {
           newDocs: this.docEntries,
           newFiles: this.fileEntries,
           newProject: { version: this.newProjectVersion },
-        }
+        },
+        null
       )
     })
 

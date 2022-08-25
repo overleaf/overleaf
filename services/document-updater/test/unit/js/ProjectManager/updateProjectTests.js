@@ -36,6 +36,7 @@ describe('ProjectManager', function () {
     this.projectHistoryId = 'history-id-123'
     this.user_id = 'user-id-123'
     this.version = 1234567
+    this.source = 'editor'
     this.callback = sinon.stub()
   })
 
@@ -75,6 +76,7 @@ describe('ProjectManager', function () {
             this.user_id,
             this.updates,
             this.version,
+            this.source,
             this.callback
           )
         })
@@ -121,7 +123,8 @@ describe('ProjectManager', function () {
               'file',
               this.firstFileUpdate.id,
               this.user_id,
-              firstFileUpdateWithVersion
+              firstFileUpdateWithVersion,
+              this.source
             )
             .should.equal(true)
         })
@@ -147,6 +150,7 @@ describe('ProjectManager', function () {
             this.user_id,
             this.updates,
             this.version,
+            this.source,
             this.callback
           )
         })
@@ -166,6 +170,7 @@ describe('ProjectManager', function () {
             this.user_id,
             this.updates,
             this.version,
+            this.source,
             this.callback
           )
         })
@@ -184,6 +189,7 @@ describe('ProjectManager', function () {
             this.user_id,
             this.updates,
             this.version,
+            this.source,
             this.callback
           )
         })
@@ -234,6 +240,7 @@ describe('ProjectManager', function () {
             this.user_id,
             this.updates,
             this.version,
+            this.source,
             this.callback
           )
         })
@@ -255,7 +262,8 @@ describe('ProjectManager', function () {
               'doc',
               this.firstDocUpdate.id,
               this.user_id,
-              firstDocUpdateWithVersion
+              firstDocUpdateWithVersion,
+              this.source
             )
             .should.equal(true)
           this.ProjectHistoryRedisManager.queueAddEntity
@@ -266,7 +274,8 @@ describe('ProjectManager', function () {
               'doc',
               this.secondDocUpdate.id,
               this.user_id,
-              secondDocUpdateWithVersion
+              secondDocUpdateWithVersion,
+              this.source
             )
             .should.equal(true)
         })
@@ -290,7 +299,8 @@ describe('ProjectManager', function () {
               'file',
               this.firstFileUpdate.id,
               this.user_id,
-              firstFileUpdateWithVersion
+              firstFileUpdateWithVersion,
+              this.source
             )
             .should.equal(true)
           this.ProjectHistoryRedisManager.queueAddEntity
@@ -301,7 +311,8 @@ describe('ProjectManager', function () {
               'file',
               this.secondFileUpdate.id,
               this.user_id,
-              secondFileUpdateWithVersion
+              secondFileUpdateWithVersion,
+              this.source
             )
             .should.equal(true)
         })
@@ -327,6 +338,7 @@ describe('ProjectManager', function () {
             this.user_id,
             this.updates,
             this.version,
+            this.source,
             this.callback
           )
         })
@@ -346,6 +358,7 @@ describe('ProjectManager', function () {
             this.user_id,
             this.updates,
             this.version,
+            this.source,
             this.callback
           )
         })
@@ -364,6 +377,7 @@ describe('ProjectManager', function () {
             this.user_id,
             this.updates,
             this.version,
+            this.source,
             this.callback
           )
         })
@@ -385,6 +399,7 @@ describe('ProjectManager', function () {
           this.user_id,
           this.updates,
           this.version,
+          this.source,
           this.callback
         )
       })

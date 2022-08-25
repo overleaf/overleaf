@@ -36,7 +36,8 @@ async function _createRootDoc(project, ownerId, docLines) {
       project.rootFolder[0]._id,
       'main.tex',
       docLines,
-      ownerId
+      ownerId,
+      null
     )
     await ProjectEntityUpdateHandler.promises.setRootDoc(project._id, doc._id)
   } catch (error) {
@@ -62,7 +63,8 @@ async function _addDefaultExampleProjectFiles(ownerId, projectName, project) {
     project.rootFolder[0]._id,
     'sample.bib',
     bibDocLines,
-    ownerId
+    ownerId,
+    null
   )
 
   const frogPath = path.join(
@@ -75,7 +77,8 @@ async function _addDefaultExampleProjectFiles(ownerId, projectName, project) {
     'frog.jpg',
     frogPath,
     null,
-    ownerId
+    ownerId,
+    null
   )
 }
 

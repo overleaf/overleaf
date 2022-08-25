@@ -303,7 +303,8 @@ describe('ProjectDuplicator', function () {
           newDocs: this.docEntries,
           newFiles: this.fileEntries,
           newProject: { version: this.newProjectVersion },
-        }
+        },
+        null
       )
     })
 

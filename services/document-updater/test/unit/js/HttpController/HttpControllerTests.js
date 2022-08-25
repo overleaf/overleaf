@@ -24,6 +24,7 @@ describe('HttpController', function () {
 
     this.project_id = 'project-id-123'
     this.doc_id = 'doc-id-123'
+    this.source = 'editor'
     this.next = sinon.stub()
     this.res = {
       send: sinon.stub(),
@@ -837,6 +838,7 @@ describe('HttpController', function () {
           userId: this.userId,
           updates: this.updates,
           version: this.version,
+          source: this.source,
         },
         params: {
           project_id: this.project_id,
@@ -857,7 +859,8 @@ describe('HttpController', function () {
             this.projectHistoryId,
             this.userId,
             this.updates,
-            this.version
+            this.version,
+            this.source
           )
           .should.equal(true)
       })

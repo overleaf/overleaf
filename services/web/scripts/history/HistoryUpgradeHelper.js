@@ -304,7 +304,8 @@ async function convertLargeDocsToFile(projectId, userId) {
       await ProjectEntityUpdateHandler.promises.convertDocToFile(
         projectId,
         doc._id,
-        userId
+        userId,
+        null
       )
       convertedDocCount++
     }

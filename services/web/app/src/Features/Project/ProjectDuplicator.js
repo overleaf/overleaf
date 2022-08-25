@@ -205,6 +205,7 @@ async function _notifyDocumentUpdater(project, userId, changes) {
     project._id,
     projectHistoryId,
     userId,
-    changes
+    changes,
+    null
   )
 }

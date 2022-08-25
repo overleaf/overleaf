@@ -209,6 +209,7 @@ function updateProjectWithLocks(
   userId,
   updates,
   projectVersion,
+  source,
   _callback
 ) {
   const timer = new Metrics.Timer('projectManager.updateProject')
@@ -231,6 +232,7 @@ function updateProjectWithLocks(
           update.id,
           userId,
           update,
+          source,
           (error, count) => {
             projectOpsLength = count
             cb(error)
@@ -248,6 +250,7 @@ function updateProjectWithLocks(
             update.id,
             userId,
             update,
+            source,
             (error, count) => {
               projectOpsLength = count
               cb(error)
@@ -272,6 +275,7 @@ function updateProjectWithLocks(
                 update.id,
                 userId,
                 update,
+                source,
                 (error, count) => {
                   projectOpsLength = count
                   cb(error)
@@ -289,6 +293,7 @@ function updateProjectWithLocks(
           update.id,
           userId,
           update,
+          source,
           (error, count) => {
             projectOpsLength = count
             cb(error)
@@ -303,6 +308,7 @@ function updateProjectWithLocks(
           update.id,
           userId,
           update,
+          source,
           (error, count) => {
             projectOpsLength = count
             cb(error)

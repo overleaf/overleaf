@@ -21,7 +21,8 @@ async function main() {
     await ProjectEntityUpdateHandler.promises.convertDocToFile(
       projectId,
       docId,
-      userId
+      userId,
+      null
     )
   } catch (err) {
     if (err instanceof Errors.NotFoundError) {

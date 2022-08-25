@@ -1,16 +1,3 @@
-/* eslint-disable
-    camelcase,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const sinon = require('sinon')
 const modulePath = '../../../../app/js/ProjectHistoryRedisManager.js'
 const SandboxedModule = require('sandboxed-module')
@@ -23,43 +10,41 @@ describe('ProjectHistoryRedisManager', function () {
     this.user_id = 'user-id-123'
     this.callback = sinon.stub()
     this.rclient = {}
+    this.source = 'editor'
     tk.freeze(new Date())
 
     this.Limits = {
       docIsTooLarge: sinon.stub().returns(false),
     }
 
-    return (this.ProjectHistoryRedisManager = SandboxedModule.require(
-      modulePath,
-      {
-        requires: {
-          '@overleaf/settings': (this.settings = {
-            max_doc_length: 123,
-            redis: {
-              project_history: {
-                key_schema: {
-                  projectHistoryOps({ project_id }) {
-                    return `ProjectHistory:Ops:${project_id}`
-                  },
-                  projectHistoryFirstOpTimestamp({ project_id }) {
-                    return `ProjectHistory:FirstOpTimestamp:${project_id}`
-                  },
+    this.ProjectHistoryRedisManager = SandboxedModule.require(modulePath, {
+      requires: {
+        '@overleaf/settings': (this.settings = {
+          max_doc_length: 123,
+          redis: {
+            project_history: {
+              key_schema: {
+                projectHistoryOps({ project_id: projectId }) {
+                  return `ProjectHistory:Ops:${projectId}`
+                },
+                projectHistoryFirstOpTimestamp({ project_id: projectId }) {
+                  return `ProjectHistory:FirstOpTimestamp:${projectId}`
                 },
               },
             },
-          }),
-          '@overleaf/redis-wrapper': {
-            createClient: () => this.rclient,
           },
-          './Metrics': (this.metrics = { summary: sinon.stub() }),
-          './Limits': this.Limits,
+        }),
+        '@overleaf/redis-wrapper': {
+          createClient: () => this.rclient,
         },
-      }
-    ))
+        './Metrics': (this.metrics = { summary: sinon.stub() }),
+        './Limits': this.Limits,
+      },
+    })
   })
 
   afterEach(function () {
-    return tk.reset()
+    tk.reset()
   })
 
   describe('queueOps', function () {
@@ -70,15 +55,15 @@ describe('ProjectHistoryRedisManager', function () {
       this.multi.setnx = sinon.stub()
       this.rclient.multi = () => this.multi
       // @rclient = multi: () => @multi
-      return this.ProjectHistoryRedisManager.queueOps(
+      this.ProjectHistoryRedisManager.queueOps(
         this.project_id,
-        ...Array.from(this.ops),
+        ...this.ops,
         this.callback
       )
     })
 
     it('should queue an update', function () {
-      return this.multi.rpush
+      this.multi.rpush
         .calledWithExactly(
           `ProjectHistory:Ops:${this.project_id}`,
           this.ops[0],
@@ -87,8 +72,8 @@ describe('ProjectHistoryRedisManager', function () {
         .should.equal(true)
     })
 
-    return it('should set the queue timestamp if not present', function () {
-      return this.multi.setnx
+    it('should set the queue timestamp if not present', function () {
+      this.multi.setnx
         .calledWithExactly(
           `ProjectHistory:FirstOpTimestamp:${this.project_id}`,
           Date.now()
@@ -108,31 +93,33 @@ describe('ProjectHistoryRedisManager', function () {
       }
 
       this.ProjectHistoryRedisManager.queueOps = sinon.stub()
-      return this.ProjectHistoryRedisManager.queueRenameEntity(
+      this.ProjectHistoryRedisManager.queueRenameEntity(
         this.project_id,
         this.projectHistoryId,
         'file',
         this.file_id,
         this.user_id,
         this.rawUpdate,
+        this.source,
         this.callback
       )
     })
 
-    return it('should queue an update', function () {
+    it('should queue an update', function () {
       const update = {
         pathname: this.pathname,
         new_pathname: this.newPathname,
         meta: {
           user_id: this.user_id,
           ts: new Date(),
+          source: this.source,
         },
         version: this.version,
         projectHistoryId: this.projectHistoryId,
         file: this.file_id,
       }
 
-      return this.ProjectHistoryRedisManager.queueOps
+      this.ProjectHistoryRedisManager.queueOps
         .calledWithExactly(
           this.project_id,
           JSON.stringify(update),
@@ -142,7 +129,7 @@ describe('ProjectHistoryRedisManager', function () {
     })
   })
 
-  return describe('queueAddEntity', function () {
+  describe('queueAddEntity', function () {
     beforeEach(function () {
       this.rclient.rpush = sinon.stub().yields()
       this.doc_id = 1234
@@ -155,13 +142,14 @@ describe('ProjectHistoryRedisManager', function () {
       }
 
       this.ProjectHistoryRedisManager.queueOps = sinon.stub()
-      return this.ProjectHistoryRedisManager.queueAddEntity(
+      this.ProjectHistoryRedisManager.queueAddEntity(
         this.project_id,
         this.projectHistoryId,
         'doc',
         this.doc_id,
         this.user_id,
         this.rawUpdate,
+        this.source,
         this.callback
       )
     })
@@ -174,13 +162,14 @@ describe('ProjectHistoryRedisManager', function () {
         meta: {
           user_id: this.user_id,
           ts: new Date(),
+          source: this.source,
         },
         version: this.version,
         projectHistoryId: this.projectHistoryId,
         doc: this.doc_id,
       }
 
-      return this.ProjectHistoryRedisManager.queueOps
+      this.ProjectHistoryRedisManager.queueOps
         .calledWithExactly(
           this.project_id,
           JSON.stringify(update),
@@ -190,7 +179,7 @@ describe('ProjectHistoryRedisManager', function () {
     })
 
     describe('queueResyncProjectStructure', function () {
-      return it('should queue an update', function () {})
+      it('should queue an update', function () {})
     })
 
     describe('queueResyncDocContent', function () {

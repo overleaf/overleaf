@@ -531,6 +531,7 @@ describe('ProjectEntityUpdateHandler', function () {
           this.docName,
           this.docLines,
           userId,
+          this.source,
           this.callback
         )
       })
@@ -550,10 +551,16 @@ describe('ProjectEntityUpdateHandler', function () {
           },
         ]
         this.DocumentUpdaterHandler.updateProjectStructure
-          .calledWith(projectId, projectHistoryId, userId, {
-            newDocs,
-            newProject: this.project,
-          })
+          .calledWith(
+            projectId,
+            projectHistoryId,
+            userId,
+            {
+              newDocs,
+              newProject: this.project,
+            },
+            this.source
+          )
           .should.equal(true)
       })
     })
@@ -569,6 +576,7 @@ describe('ProjectEntityUpdateHandler', function () {
           `*${this.docName}`,
           this.docLines,
           userId,
+          this.source,
           this.callback
         )
       })
@@ -609,6 +617,7 @@ describe('ProjectEntityUpdateHandler', function () {
           this.fileSystemPath,
           this.linkedFileData,
           userId,
+          this.source,
           this.callback
         )
       })
@@ -661,10 +670,16 @@ describe('ProjectEntityUpdateHandler', function () {
           },
         ]
         this.DocumentUpdaterHandler.updateProjectStructure
-          .calledWith(projectId, projectHistoryId, userId, {
-            newFiles,
-            newProject: this.project,
-          })
+          .calledWith(
+            projectId,
+            projectHistoryId,
+            userId,
+            {
+              newFiles,
+              newProject: this.project,
+            },
+            this.source
+          )
           .should.equal(true)
       })
     })
@@ -692,6 +707,7 @@ describe('ProjectEntityUpdateHandler', function () {
           this.fileSystemPath,
           this.linkedFileData,
           userId,
+          this.source,
           this.callback
         )
       })
@@ -735,6 +751,7 @@ describe('ProjectEntityUpdateHandler', function () {
         this.fileSystemPath,
         this.linkedFileData,
         userId,
+        this.source,
         this.callback
       )
     })
@@ -792,11 +809,17 @@ describe('ProjectEntityUpdateHandler', function () {
         },
       ]
       this.DocumentUpdaterHandler.updateProjectStructure
-        .calledWith(projectId, projectHistoryId, userId, {
-          oldFiles,
-          newFiles,
-          newProject: this.newProject,
-        })
+        .calledWith(
+          projectId,
+          projectHistoryId,
+          userId,
+          {
+            oldFiles,
+            newFiles,
+            newProject: this.newProject,
+          },
+          this.source
+        )
         .should.equal(true)
     })
   })
@@ -916,7 +939,8 @@ describe('ProjectEntityUpdateHandler', function () {
             this.docName,
             this.docLines,
             {},
-            userId
+            userId,
+            this.source
           )
           .should.equal(true)
       })
@@ -1035,11 +1059,17 @@ describe('ProjectEntityUpdateHandler', function () {
         ]
         expect(
           this.DocumentUpdaterHandler.updateProjectStructure
-        ).to.have.been.calledWith(projectId, projectHistoryId, userId, {
-          oldFiles,
-          newDocs,
-          newProject: this.newProject,
-        })
+        ).to.have.been.calledWith(
+          projectId,
+          projectHistoryId,
+          userId,
+          {
+            oldFiles,
+            newDocs,
+            newProject: this.newProject,
+          },
+          this.source
+        )
       })
 
       it('should notify everyone of the file deletion', function () {
@@ -1074,6 +1104,7 @@ describe('ProjectEntityUpdateHandler', function () {
           this.fileSystemPath,
           this.linkedFileData,
           userId,
+          this.source,
           this.callback
         )
       })
@@ -1100,6 +1131,7 @@ describe('ProjectEntityUpdateHandler', function () {
           this.fileSystemPath,
           this.linkedFileData,
           userId,
+          this.source,
           this.callback
         )
       })
@@ -1112,7 +1144,10 @@ describe('ProjectEntityUpdateHandler', function () {
           fileId,
           this.fileSystemPath,
           this.linkedFileData,
-          userId
+          userId,
+          this.newFile,
+          this.fileUrl,
+          this.source
         )
       })
 
@@ -1126,6 +1161,11 @@ describe('ProjectEntityUpdateHandler', function () {
         this.folder = { _id: folderId, fileRefs: [], docs: [] }
         this.newFile = { _id: fileId }
         this.ProjectLocator.findElement.yields(null, this.folder)
+        this.FileStoreHandler.uploadFileFromDisk.yields(
+          null,
+          this.fileUrl,
+          this.newFile
+        )
         this.ProjectEntityUpdateHandler.addFile = {
           mainTask: sinon.stub().yields(null, this.newFile),
         }
@@ -1137,6 +1177,7 @@ describe('ProjectEntityUpdateHandler', function () {
           this.fileSystemPath,
           this.linkedFileData,
           userId,
+          this.source,
           this.callback
         )
       })
@@ -1152,16 +1193,19 @@ describe('ProjectEntityUpdateHandler', function () {
       })
 
       it('adds the file', function () {
-        this.ProjectEntityUpdateHandler.addFile.mainTask
-          .calledWith(
-            projectId,
-            folderId,
-            this.fileName,
-            this.fileSystemPath,
-            this.linkedFileData,
-            userId
-          )
-          .should.equal(true)
+        expect(
+          this.ProjectEntityUpdateHandler.addFile.mainTask
+        ).to.have.been.calledWith(
+          projectId,
+          folderId,
+          this.fileName,
+          this.fileSystemPath,
+          this.linkedFileData,
+          userId,
+          this.newFile,
+          this.fileUrl,
+          this.source
+        )
       })
 
       it('returns the file', function () {
@@ -1185,6 +1229,7 @@ describe('ProjectEntityUpdateHandler', function () {
           this.fileSystemPath,
           this.linkedFileData,
           userId,
+          this.source,
           this.callback
         )
       })
@@ -1247,6 +1292,7 @@ describe('ProjectEntityUpdateHandler', function () {
           this.fileSystemPath,
           this.linkedFileData,
           userId,
+          this.source,
           done
         )
       })
@@ -1278,7 +1324,13 @@ describe('ProjectEntityUpdateHandler', function () {
         }
         expect(
           this.DocumentUpdaterHandler.updateProjectStructure
-        ).to.have.been.calledWith(projectId, projectHistoryId, userId, updates)
+        ).to.have.been.calledWith(
+          projectId,
+          projectHistoryId,
+          userId,
+          updates,
+          this.source
+        )
       })
 
       it('tells everyone in the room the doc is removed', function () {
@@ -1438,6 +1490,7 @@ describe('ProjectEntityUpdateHandler', function () {
           this.fileSystemPath,
           this.linkedFileData,
           userId,
+          this.source,
           this.callback
         )
       })
@@ -1456,7 +1509,10 @@ describe('ProjectEntityUpdateHandler', function () {
             'file.png',
             this.fileSystemPath,
             this.linkedFileData,
-            userId
+            userId,
+            this.newFile,
+            this.fileUrl,
+            this.source
           )
           .should.equal(true)
       })
@@ -1495,6 +1551,7 @@ describe('ProjectEntityUpdateHandler', function () {
           this.fileSystemPath,
           this.linkedFileData,
           userId,
+          this.source,
           this.callback
         )
       })
@@ -1525,6 +1582,7 @@ describe('ProjectEntityUpdateHandler', function () {
           this.fileSystemPath,
           this.linkedFileData,
           userId,
+          this.source,
           this.callback
         )
       })
@@ -1556,6 +1614,7 @@ describe('ProjectEntityUpdateHandler', function () {
         docId,
         'doc',
         userId,
+        this.source,
         this.callback
       )
     })
@@ -1574,7 +1633,8 @@ describe('ProjectEntityUpdateHandler', function () {
           this.doc,
           'doc',
           this.path,
-          userId
+          userId,
+          this.source
         )
         .should.equal(true)
     })
@@ -1607,6 +1667,7 @@ describe('ProjectEntityUpdateHandler', function () {
           projectId,
           this.path,
           userId,
+          this.source,
           this.callback
         )
       })
@@ -1619,7 +1680,14 @@ describe('ProjectEntityUpdateHandler', function () {
 
       it('deletes the entity', function () {
         this.ProjectEntityUpdateHandler.deleteEntity.withoutLock
-          .calledWith(projectId, this.doc._id, 'doc', userId, this.callback)
+          .calledWith(
+            projectId,
+            this.doc._id,
+            'doc',
+            userId,
+            this.source,
+            this.callback
+          )
           .should.equal(true)
       })
     })
@@ -1632,6 +1700,7 @@ describe('ProjectEntityUpdateHandler', function () {
           projectId,
           this.path,
           userId,
+          this.source,
           this.callback
         )
       })
@@ -1743,6 +1812,7 @@ describe('ProjectEntityUpdateHandler', function () {
         folderId,
         'doc',
         userId,
+        this.source,
         this.callback
       )
     })
@@ -1772,6 +1842,7 @@ describe('ProjectEntityUpdateHandler', function () {
           projectHistoryId,
           userId,
           this.changes,
+          this.source,
           this.callback
         )
         .should.equal(true)
@@ -1802,6 +1873,7 @@ describe('ProjectEntityUpdateHandler', function () {
           'doc',
           this.newDocName,
           userId,
+          this.source,
           this.callback
         )
       })
@@ -1831,6 +1903,7 @@ describe('ProjectEntityUpdateHandler', function () {
             projectHistoryId,
             userId,
             this.changes,
+            this.source,
             this.callback
           )
           .should.equal(true)
@@ -1860,6 +1933,7 @@ describe('ProjectEntityUpdateHandler', function () {
           'doc',
           this.newDocName,
           userId,
+          this.source,
           this.callback
         )
       })
@@ -2315,6 +2389,7 @@ describe('ProjectEntityUpdateHandler', function () {
           'file',
           this.path,
           userId,
+          this.source,
           done
         )
       })
@@ -2338,10 +2413,16 @@ describe('ProjectEntityUpdateHandler', function () {
       it('should should send the update to the doc updater', function () {
         const oldFiles = [{ file: this.entity, path: this.path }]
         this.DocumentUpdaterHandler.updateProjectStructure
-          .calledWith(projectId, projectHistoryId, userId, {
-            oldFiles,
-            newProject: this.newProject,
-          })
+          .calledWith(
+            projectId,
+            projectHistoryId,
+            userId,
+            {
+              oldFiles,
+              newProject: this.newProject,
+            },
+            this.source
+          )
           .should.equal(true)
       })
     })
@@ -2359,6 +2440,7 @@ describe('ProjectEntityUpdateHandler', function () {
           'doc',
           this.path,
           userId,
+          this.source,
           done
         )
       })
@@ -2372,10 +2454,16 @@ describe('ProjectEntityUpdateHandler', function () {
       it('should should send the update to the doc updater', function () {
         const oldDocs = [{ doc: this.entity, path: this.path }]
         this.DocumentUpdaterHandler.updateProjectStructure
-          .calledWith(projectId, projectHistoryId, userId, {
-            oldDocs,
-            newProject: this.newProject,
-          })
+          .calledWith(
+            projectId,
+            projectHistoryId,
+            userId,
+            {
+              oldDocs,
+              newProject: this.newProject,
+            },
+            this.source
+          )
           .should.equal(true)
       })
     })
@@ -2408,6 +2496,7 @@ describe('ProjectEntityUpdateHandler', function () {
           'folder',
           path,
           userId,
+          this.source,
           done
         )
       })
@@ -2450,11 +2539,17 @@ describe('ProjectEntityUpdateHandler', function () {
           { doc: this.doc1, path: '/folder/subfolder/doc-name-1' },
         ]
         this.DocumentUpdaterHandler.updateProjectStructure
-          .calledWith(projectId, projectHistoryId, userId, {
-            oldFiles,
-            oldDocs,
-            newProject: this.newProject,
-          })
+          .calledWith(
+            projectId,
+            projectHistoryId,
+            userId,
+            {
+              oldFiles,
+              oldDocs,
+              newProject: this.newProject,
+            },
+            this.source
+          )
           .should.equal(true)
       })
     })
@@ -2571,6 +2666,7 @@ describe('ProjectEntityUpdateHandler', function () {
           this.project._id,
           this.doc._id,
           this.user._id,
+          this.source,
           done
         )
       })
@@ -2615,7 +2711,8 @@ describe('ProjectEntityUpdateHandler', function () {
               { file: this.file, path: this.path, url: this.fileStoreUrl },
             ],
             newProject: this.project,
-          }
+          },
+          this.source
         )
       })
 
@@ -2654,6 +2751,7 @@ describe('ProjectEntityUpdateHandler', function () {
           this.project._id,
           this.doc._id,
           this.user._id,
+          this.source,
           err => {
             expect(err).to.be.instanceof(Errors.DocHasRangesError)
             done()

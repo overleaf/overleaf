@@ -243,6 +243,7 @@ function updateProjectStructure(
   projectHistoryId,
   userId,
   changes,
+  source,
   callback
 ) {
   if (
@@ -293,6 +294,7 @@ function updateProjectStructure(
         userId,
         version: projectVersion,
         projectHistoryId,
+        source,
       },
       method: 'POST',
     },

@@ -1,18 +1,3 @@
-/* eslint-disable
-    camelcase,
-    n/handle-callback-err,
-    max-len,
-    no-dupe-keys,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const logger = require('@overleaf/logger')
 const OError = require('@overleaf/o-error')
 const Metrics = require('@overleaf/metrics')
@@ -20,181 +5,159 @@ const ProjectEntityUpdateHandler = require('../Project/ProjectEntityUpdateHandle
 const ProjectOptionsHandler = require('../Project/ProjectOptionsHandler')
 const ProjectDetailsHandler = require('../Project/ProjectDetailsHandler')
 const ProjectDeleter = require('../Project/ProjectDeleter')
-const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 const EditorRealTimeController = require('./EditorRealTimeController')
 const async = require('async')
 const PublicAccessLevels = require('../Authorization/PublicAccessLevels')
-const _ = require('underscore')
 const { promisifyAll } = require('../../util/promises')
 
 const EditorController = {
-  addDoc(project_id, folder_id, docName, docLines, source, user_id, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    return EditorController.addDocWithRanges(
-      project_id,
-      folder_id,
+  addDoc(projectId, folderId, docName, docLines, source, userId, callback) {
+    EditorController.addDocWithRanges(
+      projectId,
+      folderId,
       docName,
       docLines,
       {},
       source,
-      user_id,
+      userId,
       callback
     )
   },
 
   addDocWithRanges(
-    project_id,
-    folder_id,
+    projectId,
+    folderId,
     docName,
     docLines,
     docRanges,
     source,
-    user_id,
+    userId,
     callback
   ) {
-    if (callback == null) {
-      callback = function () {}
-    }
     docName = docName.trim()
     Metrics.inc('editor.add-doc')
-    return ProjectEntityUpdateHandler.addDocWithRanges(
-      project_id,
-      folder_id,
+    ProjectEntityUpdateHandler.addDocWithRanges(
+      projectId,
+      folderId,
       docName,
       docLines,
       docRanges,
-      user_id,
-      (err, doc, folder_id) => {
-        if (err != null) {
+      userId,
+      source,
+      (err, doc, folderId) => {
+        if (err) {
           OError.tag(err, 'error adding doc without lock', {
-            project_id,
+            projectId,
             docName,
           })
           return callback(err)
         }
         EditorRealTimeController.emitToRoom(
-          project_id,
+          projectId,
           'reciveNewDoc',
-          folder_id,
+          folderId,
           doc,
           source,
-          user_id
+          userId
         )
-        return callback(err, doc)
+        callback(err, doc)
       }
     )
   },
 
   addFile(
-    project_id,
-    folder_id,
+    projectId,
+    folderId,
     fileName,
     fsPath,
     linkedFileData,
     source,
-    user_id,
+    userId,
     callback
   ) {
-    if (callback == null) {
-      callback = function () {}
-    }
     fileName = fileName.trim()
     Metrics.inc('editor.add-file')
-    return ProjectEntityUpdateHandler.addFile(
-      project_id,
-      folder_id,
+    ProjectEntityUpdateHandler.addFile(
+      projectId,
+      folderId,
       fileName,
       fsPath,
       linkedFileData,
-      user_id,
-      (err, fileRef, folder_id) => {
-        if (err != null) {
+      userId,
+      source,
+      (err, fileRef, folderId) => {
+        if (err) {
           OError.tag(err, 'error adding file without lock', {
-            project_id,
-            folder_id,
+            projectId,
+            folderId,
             fileName,
           })
           return callback(err)
         }
         EditorRealTimeController.emitToRoom(
-          project_id,
+          projectId,
           'reciveNewFile',
-          folder_id,
+          folderId,
           fileRef,
           source,
           linkedFileData,
-          user_id
+          userId
         )
-        return callback(err, fileRef)
+        callback(err, fileRef)
       }
     )
   },
 
-  upsertDoc(
-    project_id,
-    folder_id,
-    docName,
-    docLines,
-    source,
-    user_id,
-    callback
-  ) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    return ProjectEntityUpdateHandler.upsertDoc(
-      project_id,
-      folder_id,
+  upsertDoc(projectId, folderId, docName, docLines, source, userId, callback) {
+    ProjectEntityUpdateHandler.upsertDoc(
+      projectId,
+      folderId,
       docName,
       docLines,
       source,
-      user_id,
+      userId,
       function (err, doc, didAddNewDoc) {
         if (didAddNewDoc) {
           EditorRealTimeController.emitToRoom(
-            project_id,
+            projectId,
             'reciveNewDoc',
-            folder_id,
+            folderId,
             doc,
             source,
-            user_id
+            userId
           )
         }
-        return callback(err, doc)
+        callback(err, doc)
       }
     )
   },
 
   upsertFile(
-    project_id,
-    folder_id,
+    projectId,
+    folderId,
     fileName,
     fsPath,
     linkedFileData,
     source,
-    user_id,
+    userId,
     callback
   ) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    return ProjectEntityUpdateHandler.upsertFile(
-      project_id,
-      folder_id,
+    ProjectEntityUpdateHandler.upsertFile(
+      projectId,
+      folderId,
       fileName,
       fsPath,
       linkedFileData,
-      user_id,
+      userId,
+      source,
       function (err, newFile, didAddFile, existingFile) {
-        if (err != null) {
+        if (err) {
           return callback(err)
         }
         if (!didAddFile) {
           // replacement, so remove the existing file from the client
           EditorRealTimeController.emitToRoom(
-            project_id,
+            projectId,
             'removeEntity',
             existingFile._id,
             source
@@ -202,55 +165,55 @@ const EditorController = {
         }
         // now add the new file on the client
         EditorRealTimeController.emitToRoom(
-          project_id,
+          projectId,
           'reciveNewFile',
-          folder_id,
+          folderId,
           newFile,
           source,
           linkedFileData,
-          user_id
+          userId
         )
-        return callback(null, newFile)
+        callback(null, newFile)
       }
     )
   },
 
   upsertDocWithPath(
-    project_id,
+    projectId,
     elementPath,
     docLines,
     source,
-    user_id,
+    userId,
     callback
   ) {
-    return ProjectEntityUpdateHandler.upsertDocWithPath(
-      project_id,
+    ProjectEntityUpdateHandler.upsertDocWithPath(
+      projectId,
       elementPath,
       docLines,
       source,
-      user_id,
+      userId,
       function (err, doc, didAddNewDoc, newFolders, lastFolder) {
-        if (err != null) {
+        if (err) {
           return callback(err)
         }
-        return EditorController._notifyProjectUsersOfNewFolders(
-          project_id,
+        EditorController._notifyProjectUsersOfNewFolders(
+          projectId,
           newFolders,
           function (err) {
-            if (err != null) {
+            if (err) {
               return callback(err)
             }
             if (didAddNewDoc) {
               EditorRealTimeController.emitToRoom(
-                project_id,
+                projectId,
                 'reciveNewDoc',
                 lastFolder._id,
                 doc,
                 source,
-                user_id
+                userId
               )
             }
-            return callback()
+            callback()
           }
         )
       }
@@ -258,20 +221,21 @@ const EditorController = {
   },
 
   upsertFileWithPath(
-    project_id,
+    projectId,
     elementPath,
     fsPath,
     linkedFileData,
     source,
-    user_id,
+    userId,
     callback
   ) {
-    return ProjectEntityUpdateHandler.upsertFileWithPath(
-      project_id,
+    ProjectEntityUpdateHandler.upsertFileWithPath(
+      projectId,
       elementPath,
       fsPath,
       linkedFileData,
-      user_id,
+      userId,
+      source,
       function (
         err,
         newFile,
@@ -280,20 +244,20 @@ const EditorController = {
         newFolders,
         lastFolder
       ) {
-        if (err != null) {
+        if (err) {
           return callback(err)
         }
-        return EditorController._notifyProjectUsersOfNewFolders(
-          project_id,
+        EditorController._notifyProjectUsersOfNewFolders(
+          projectId,
           newFolders,
           function (err) {
-            if (err != null) {
+            if (err) {
               return callback(err)
             }
             if (!didAddFile) {
               // replacement, so remove the existing file from the client
               EditorRealTimeController.emitToRoom(
-                project_id,
+                projectId,
                 'removeEntity',
                 existingFile._id,
                 source
@@ -301,193 +265,189 @@ const EditorController = {
             }
             // now add the new file on the client
             EditorRealTimeController.emitToRoom(
-              project_id,
+              projectId,
               'reciveNewFile',
               lastFolder._id,
               newFile,
               source,
               linkedFileData,
-              user_id
+              userId
             )
-            return callback()
+            callback()
           }
         )
       }
     )
   },
 
-  addFolder(project_id, folder_id, folderName, source, userId, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
+  addFolder(projectId, folderId, folderName, source, userId, callback) {
     folderName = folderName.trim()
     Metrics.inc('editor.add-folder')
-    return ProjectEntityUpdateHandler.addFolder(
-      project_id,
-      folder_id,
+    ProjectEntityUpdateHandler.addFolder(
+      projectId,
+      folderId,
       folderName,
-      (err, folder, folder_id) => {
-        if (err != null) {
+      (err, folder, folderId) => {
+        if (err) {
           OError.tag(err, 'could not add folder', {
-            project_id,
-            folder_id,
+            projectId,
+            folderId,
             folderName,
             source,
           })
           return callback(err)
         }
-        return EditorController._notifyProjectUsersOfNewFolder(
-          project_id,
-          folder_id,
+        EditorController._notifyProjectUsersOfNewFolder(
+          projectId,
+          folderId,
           folder,
           userId,
           function (err) {
-            if (err != null) {
+            if (err) {
               return callback(err)
             }
-            return callback(null, folder)
+            callback(null, folder)
           }
         )
       }
     )
   },
 
-  mkdirp(project_id, path, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    logger.debug({ project_id, path }, "making directories if they don't exist")
-    return ProjectEntityUpdateHandler.mkdirp(
-      project_id,
+  mkdirp(projectId, path, callback) {
+    logger.debug({ projectId, path }, "making directories if they don't exist")
+    ProjectEntityUpdateHandler.mkdirp(
+      projectId,
       path,
       (err, newFolders, lastFolder) => {
-        if (err != null) {
+        if (err) {
           OError.tag(err, 'could not mkdirp', {
-            project_id,
+            projectId,
             path,
           })
           return callback(err)
         }
 
-        return EditorController._notifyProjectUsersOfNewFolders(
-          project_id,
+        EditorController._notifyProjectUsersOfNewFolders(
+          projectId,
           newFolders,
           function (err) {
-            if (err != null) {
+            if (err) {
               return callback(err)
             }
-            return callback(null, newFolders, lastFolder)
+            callback(null, newFolders, lastFolder)
           }
         )
       }
     )
   },
 
-  deleteEntity(project_id, entity_id, entityType, source, userId, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
+  deleteEntity(projectId, entityId, entityType, source, userId, callback) {
     Metrics.inc('editor.delete-entity')
-    return ProjectEntityUpdateHandler.deleteEntity(
-      project_id,
-      entity_id,
+    ProjectEntityUpdateHandler.deleteEntity(
+      projectId,
+      entityId,
       entityType,
       userId,
+      source,
       function (err) {
-        if (err != null) {
+        if (err) {
           OError.tag(err, 'could not delete entity', {
-            project_id,
-            entity_id,
+            projectId,
+            entityId,
             entityType,
           })
           return callback(err)
         }
         logger.debug(
-          { project_id, entity_id, entityType },
+          { projectId, entityId, entityType },
           'telling users entity has been deleted'
         )
         EditorRealTimeController.emitToRoom(
-          project_id,
+          projectId,
           'removeEntity',
-          entity_id,
+          entityId,
           source
         )
-        return callback()
+        callback()
       }
     )
   },
 
-  deleteEntityWithPath(project_id, path, source, user_id, callback) {
-    return ProjectEntityUpdateHandler.deleteEntityWithPath(
-      project_id,
+  deleteEntityWithPath(projectId, path, source, userId, callback) {
+    ProjectEntityUpdateHandler.deleteEntityWithPath(
+      projectId,
       path,
-      user_id,
-      function (err, entity_id) {
-        if (err != null) {
+      userId,
+      source,
+      function (err, entityId) {
+        if (err) {
           return callback(err)
         }
         EditorRealTimeController.emitToRoom(
-          project_id,
+          projectId,
           'removeEntity',
-          entity_id,
+          entityId,
           source
         )
-        return callback(null, entity_id)
+        callback(null, entityId)
       }
     )
   },
 
-  updateProjectDescription(project_id, description, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    logger.debug({ project_id, description }, 'updating project description')
-    return ProjectDetailsHandler.setProjectDescription(
-      project_id,
+  updateProjectDescription(projectId, description, callback) {
+    logger.debug({ projectId, description }, 'updating project description')
+    ProjectDetailsHandler.setProjectDescription(
+      projectId,
       description,
       function (err) {
-        if (err != null) {
+        if (err) {
           OError.tag(
             err,
             'something went wrong setting the project description',
             {
-              project_id,
+              projectId,
               description,
             }
           )
           return callback(err)
         }
         EditorRealTimeController.emitToRoom(
-          project_id,
+          projectId,
           'projectDescriptionUpdated',
           description
         )
-        return callback()
+        callback()
       }
     )
   },
 
-  deleteProject(project_id, callback) {
+  deleteProject(projectId, callback) {
     Metrics.inc('editor.delete-project')
-    return ProjectDeleter.deleteProject(project_id, callback)
+    ProjectDeleter.deleteProject(projectId, callback)
   },
 
-  renameEntity(project_id, entity_id, entityType, newName, userId, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
+  renameEntity(
+    projectId,
+    entityId,
+    entityType,
+    newName,
+    userId,
+    source,
+    callback
+  ) {
     Metrics.inc('editor.rename-entity')
-    return ProjectEntityUpdateHandler.renameEntity(
-      project_id,
-      entity_id,
+    ProjectEntityUpdateHandler.renameEntity(
+      projectId,
+      entityId,
       entityType,
       newName,
       userId,
+      source,
       function (err) {
-        if (err != null) {
+        if (err) {
           OError.tag(err, 'error renaming entity', {
-            project_id,
-            entity_id,
+            projectId,
+            entityId,
             entityType,
             newName,
           })
@@ -495,204 +455,177 @@ const EditorController = {
         }
         if (newName.length > 0) {
           EditorRealTimeController.emitToRoom(
-            project_id,
+            projectId,
             'reciveEntityRename',
-            entity_id,
+            entityId,
             newName
           )
         }
-        return callback()
+        callback()
       }
     )
   },
 
-  moveEntity(project_id, entity_id, folder_id, entityType, userId, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
+  moveEntity(
+    projectId,
+    entityId,
+    folderId,
+    entityType,
+    userId,
+    source,
+    callback
+  ) {
     Metrics.inc('editor.move-entity')
-    return ProjectEntityUpdateHandler.moveEntity(
-      project_id,
-      entity_id,
-      folder_id,
+    ProjectEntityUpdateHandler.moveEntity(
+      projectId,
+      entityId,
+      folderId,
       entityType,
       userId,
+      source,
       function (err) {
-        if (err != null) {
+        if (err) {
           OError.tag(err, 'error moving entity', {
-            project_id,
-            entity_id,
-            folder_id,
+            projectId,
+            entityId,
+            folderId,
           })
           return callback(err)
         }
         EditorRealTimeController.emitToRoom(
-          project_id,
+          projectId,
           'reciveEntityMove',
-          entity_id,
-          folder_id
+          entityId,
+          folderId
         )
-        return callback()
+        callback()
       }
     )
   },
 
-  renameProject(project_id, newName, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    return ProjectDetailsHandler.renameProject(
-      project_id,
-      newName,
-      function (err) {
-        if (err != null) {
-          OError.tag(err, 'error renaming project', {
-            project_id,
-            newName,
-          })
-          return callback(err)
-        }
-        EditorRealTimeController.emitToRoom(
-          project_id,
-          'projectNameUpdated',
-          newName
-        )
-        return callback()
+  renameProject(projectId, newName, callback) {
+    ProjectDetailsHandler.renameProject(projectId, newName, function (err) {
+      if (err) {
+        OError.tag(err, 'error renaming project', {
+          projectId,
+          newName,
+        })
+        return callback(err)
       }
-    )
+      EditorRealTimeController.emitToRoom(
+        projectId,
+        'projectNameUpdated',
+        newName
+      )
+      callback()
+    })
   },
 
-  setCompiler(project_id, compiler, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    return ProjectOptionsHandler.setCompiler(
-      project_id,
-      compiler,
-      function (err) {
-        if (err != null) {
-          return callback(err)
-        }
-        EditorRealTimeController.emitToRoom(
-          project_id,
-          'compilerUpdated',
-          compiler
-        )
-        return callback()
+  setCompiler(projectId, compiler, callback) {
+    ProjectOptionsHandler.setCompiler(projectId, compiler, function (err) {
+      if (err) {
+        return callback(err)
       }
-    )
+      EditorRealTimeController.emitToRoom(
+        projectId,
+        'compilerUpdated',
+        compiler
+      )
+      callback()
+    })
   },
 
-  setImageName(project_id, imageName, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    return ProjectOptionsHandler.setImageName(
-      project_id,
-      imageName,
-      function (err) {
-        if (err != null) {
-          return callback(err)
-        }
-        EditorRealTimeController.emitToRoom(
-          project_id,
-          'imageNameUpdated',
-          imageName
-        )
-        return callback()
+  setImageName(projectId, imageName, callback) {
+    ProjectOptionsHandler.setImageName(projectId, imageName, function (err) {
+      if (err) {
+        return callback(err)
       }
-    )
+      EditorRealTimeController.emitToRoom(
+        projectId,
+        'imageNameUpdated',
+        imageName
+      )
+      callback()
+    })
   },
 
-  setSpellCheckLanguage(project_id, languageCode, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    return ProjectOptionsHandler.setSpellCheckLanguage(
-      project_id,
+  setSpellCheckLanguage(projectId, languageCode, callback) {
+    ProjectOptionsHandler.setSpellCheckLanguage(
+      projectId,
       languageCode,
       function (err) {
-        if (err != null) {
+        if (err) {
           return callback(err)
         }
         EditorRealTimeController.emitToRoom(
-          project_id,
+          projectId,
           'spellCheckLanguageUpdated',
           languageCode
         )
-        return callback()
+        callback()
       }
     )
   },
 
-  setPublicAccessLevel(project_id, newAccessLevel, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    return ProjectDetailsHandler.setPublicAccessLevel(
-      project_id,
+  setPublicAccessLevel(projectId, newAccessLevel, callback) {
+    ProjectDetailsHandler.setPublicAccessLevel(
+      projectId,
       newAccessLevel,
       function (err) {
-        if (err != null) {
+        if (err) {
           return callback(err)
         }
         EditorRealTimeController.emitToRoom(
-          project_id,
+          projectId,
           'project:publicAccessLevel:changed',
           { newAccessLevel }
         )
         if (newAccessLevel === PublicAccessLevels.TOKEN_BASED) {
-          return ProjectDetailsHandler.ensureTokensArePresent(
-            project_id,
+          ProjectDetailsHandler.ensureTokensArePresent(
+            projectId,
             function (err, tokens) {
-              if (err != null) {
+              if (err) {
                 return callback(err)
               }
               EditorRealTimeController.emitToRoom(
-                project_id,
+                projectId,
                 'project:tokens:changed',
                 { tokens }
               )
-              return callback()
+              callback()
             }
           )
         } else {
-          return callback()
+          callback()
         }
       }
     )
   },
 
-  setRootDoc(project_id, newRootDocID, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    return ProjectEntityUpdateHandler.setRootDoc(
-      project_id,
+  setRootDoc(projectId, newRootDocID, callback) {
+    ProjectEntityUpdateHandler.setRootDoc(
+      projectId,
       newRootDocID,
       function (err) {
-        if (err != null) {
+        if (err) {
           return callback(err)
         }
         EditorRealTimeController.emitToRoom(
-          project_id,
+          projectId,
           'rootDocUpdated',
           newRootDocID
         )
-        return callback()
+        callback()
       }
     )
   },
 
-  _notifyProjectUsersOfNewFolders(project_id, folders, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    return async.eachSeries(
+  _notifyProjectUsersOfNewFolders(projectId, folders, callback) {
+    async.eachSeries(
       folders,
       (folder, cb) =>
         EditorController._notifyProjectUsersOfNewFolder(
-          project_id,
+          projectId,
           folder.parentFolder_id,
           folder,
           null,
@@ -703,23 +636,20 @@ const EditorController = {
   },
 
   _notifyProjectUsersOfNewFolder(
-    project_id,
-    folder_id,
+    projectId,
+    folderId,
     folder,
     userId,
     callback
   ) {
-    if (callback == null) {
-      callback = function () {}
-    }
     EditorRealTimeController.emitToRoom(
-      project_id,
+      projectId,
       'reciveNewFolder',
-      folder_id,
+      folderId,
       folder,
       userId
     )
-    return callback()
+    callback()
   },
 }
 

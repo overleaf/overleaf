@@ -96,7 +96,9 @@ describe('EditorController', function () {
           this.folder_id,
           this.docName,
           this.docLines,
-          {}
+          {},
+          this.user_id,
+          this.source
         )
         .should.equal(true)
     })
@@ -144,7 +146,8 @@ describe('EditorController', function () {
           this.fileName,
           this.fsPath,
           this.linkedFileData,
-          this.user_id
+          this.user_id,
+          this.source
         )
         .should.equal(true)
     })
@@ -256,7 +259,8 @@ describe('EditorController', function () {
           this.fileName,
           this.fsPath,
           this.linkedFileData,
-          this.user_id
+          this.user_id,
+          this.source
         )
         .should.equal(true)
     })
@@ -414,7 +418,9 @@ describe('EditorController', function () {
           this.project_id,
           this.filePath,
           this.fsPath,
-          this.linkedFileData
+          this.linkedFileData,
+          this.user_id,
+          this.source
         )
         .should.equal(true)
     })
@@ -583,7 +589,13 @@ describe('EditorController', function () {
 
     it('should delete the folder using the project entity handler', function () {
       return this.ProjectEntityUpdateHandler.deleteEntity
-        .calledWith(this.project_id, this.entity_id, this.type, this.user_id)
+        .calledWith(
+          this.project_id,
+          this.entity_id,
+          this.type,
+          this.user_id,
+          this.source
+        )
         .should.equal(true)
     })
 
@@ -617,7 +629,7 @@ describe('EditorController', function () {
 
     it('should delete the folder using the project entity handler', function () {
       return this.ProjectEntityUpdateHandler.deleteEntityWithPath
-        .calledWith(this.project_id, this.path, this.user_id)
+        .calledWith(this.project_id, this.path, this.user_id, this.source)
         .should.equal(true)
     })
 
@@ -692,6 +704,7 @@ describe('EditorController', function () {
         this.entityType,
         this.newName,
         this.user_id,
+        this.source,
         done
       )
     })
@@ -703,7 +716,8 @@ describe('EditorController', function () {
           this.entity_id,
           this.entityType,
           this.newName,
-          this.user_id
+          this.user_id,
+          this.source
         )
         .should.equal(true)
     })
@@ -731,6 +745,7 @@ describe('EditorController', function () {
         this.folder_id,
         this.entityType,
         this.user_id,
+        this.source,
         this.callback
       )
     })
@@ -742,7 +757,8 @@ describe('EditorController', function () {
           this.entity_id,
           this.folder_id,
           this.entityType,
-          this.user_id
+          this.user_id,
+          this.source
         )
         .should.equal(true)
     })

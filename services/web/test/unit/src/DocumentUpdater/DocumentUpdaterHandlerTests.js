@@ -29,6 +29,7 @@ describe('DocumentUpdaterHandler', function () {
         },
       },
     }
+    this.source = 'dropbox'
 
     this.callback = sinon.stub()
     this.handler = SandboxedModule.require(modulePath, {
@@ -359,10 +360,6 @@ describe('DocumentUpdaterHandler', function () {
   })
 
   describe('setDocument', function () {
-    beforeEach(function () {
-      this.source = 'dropbox'
-    })
-
     describe('successfully', function () {
       beforeEach(function () {
         this.request.callsArgWith(1, null, { statusCode: 204 }, '')
@@ -852,6 +849,7 @@ describe('DocumentUpdaterHandler', function () {
           this.projectHistoryId,
           this.user_id,
           {},
+          this.source,
           this.callback
         )
       })
@@ -909,6 +907,7 @@ describe('DocumentUpdaterHandler', function () {
             this.projectHistoryId,
             this.user_id,
             this.changes,
+            this.source,
             () => {
               this.request
                 .calledWith({
@@ -919,6 +918,7 @@ describe('DocumentUpdaterHandler', function () {
                     userId: this.user_id,
                     version: this.version,
                     projectHistoryId: this.projectHistoryId,
+                    source: this.source,
                   },
                   timeout: 30 * 1000,
                 })
@@ -955,6 +955,7 @@ describe('DocumentUpdaterHandler', function () {
             this.projectHistoryId,
             this.user_id,
             this.changes,
+            this.source,
             () => {
               this.request
                 .calledWith({
@@ -965,6 +966,7 @@ describe('DocumentUpdaterHandler', function () {
                     userId: this.user_id,
                     version: this.version,
                     projectHistoryId: this.projectHistoryId,
+                    source: this.source,
                   },
                   timeout: 30 * 1000,
                 })
@@ -1005,6 +1007,7 @@ describe('DocumentUpdaterHandler', function () {
             this.projectHistoryId,
             this.user_id,
             this.changes,
+            this.source,
             () => {
               this.request
                 .calledWith({
@@ -1015,6 +1018,7 @@ describe('DocumentUpdaterHandler', function () {
                     userId: this.user_id,
                     version: this.version,
                     projectHistoryId: this.projectHistoryId,
+                    source: this.source,
                   },
                   timeout: 30 * 1000,
                 })
@@ -1049,6 +1053,7 @@ describe('DocumentUpdaterHandler', function () {
             this.projectHistoryId,
             this.user_id,
             this.changes,
+            this.source,
             () => {
               this.request
                 .calledWith({
@@ -1059,6 +1064,7 @@ describe('DocumentUpdaterHandler', function () {
                     userId: this.user_id,
                     version: this.version,
                     projectHistoryId: this.projectHistoryId,
+                    source: this.source,
                   },
                   timeout: 30 * 1000,
                 })
@@ -1113,6 +1119,7 @@ describe('DocumentUpdaterHandler', function () {
             this.projectHistoryId,
             this.user_id,
             this.changes,
+            this.source,
             () => {
               this.request.should.have.been.calledWith({
                 url: this.url,
@@ -1122,6 +1129,7 @@ describe('DocumentUpdaterHandler', function () {
                   userId: this.user_id,
                   version: this.version,
                   projectHistoryId: this.projectHistoryId,
+                  source: this.source,
                 },
                 timeout: 30 * 1000,
               })
@@ -1145,6 +1153,7 @@ describe('DocumentUpdaterHandler', function () {
             this.projectHistoryId,
             this.user_id,
             this.changes,
+            this.source,
             this.callback
           )
 

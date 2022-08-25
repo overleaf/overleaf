@@ -212,7 +212,7 @@ async function renameEntity(req, res, next) {
   const projectId = req.params.Project_id
   const entityId = req.params.entity_id
   const entityType = req.params.entity_type
-  const { name } = req.body
+  const { name, source = 'editor' } = req.body
   if (!_nameIsAcceptableLength(name)) {
     return res.sendStatus(400)
   }
@@ -222,7 +222,8 @@ async function renameEntity(req, res, next) {
     entityId,
     entityType,
     name,
-    userId
+    userId,
+    source
   )
   res.sendStatus(204)
 }
@@ -232,13 +233,15 @@ async function moveEntity(req, res, next) {
   const entityId = req.params.entity_id
   const entityType = req.params.entity_type
   const folderId = req.body.folder_id
+  const source = req.body.source ?? 'editor'
   const userId = SessionManager.getLoggedInUserId(req.session)
   await EditorController.promises.moveEntity(
     projectId,
     entityId,
     folderId,
     entityType,
-    userId
+    userId,
+    source
   )
   res.sendStatus(204)
 }
