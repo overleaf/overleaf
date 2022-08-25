@@ -39,7 +39,7 @@
     padding: 5px;
     overflow-y: auto;
 
-    .galileo-items {
+    .galileo-suggestions {
       h2 {
         font-size: 120%;
         font-weight: normal;
@@ -48,16 +48,20 @@
         color: inherit;
       }
 
-      .galileo-item {
+      .galileo-suggestion-body {
+        background-color: @content-alt-bg-color;
+        color: black;
         display: flex;
         align-items: flex-start;
         gap: 5px;
+        padding: 5px;
         margin-bottom: 5px;
 
-        .galileo-item-text {
+        :first-child {
           flex: 1;
-          background-color: white;
-          color: black;
+        }
+
+        .galileo-suggestion-text {
           white-space: break-spaces;
         }
       }
