@@ -196,6 +196,14 @@ script(type="text/ng-template", id="historyEntryTpl")
 						span.name(
 							ng-style="$ctrl.getUserCSSStyle();"
 						) #{translate("anonymous")}
+				span(ng-if="::$ctrl.entry.meta.origin.kind === 'dropbox'")
+					| (#{translate("history_entry_origin_dropbox")})
+				span(ng-if="::$ctrl.entry.meta.origin.kind === 'upload'")
+					| (#{translate("history_entry_origin_upload")})
+				span(ng-if="::$ctrl.entry.meta.origin.kind === 'git-bridge'")
+					| (#{translate("history_entry_origin_git")})
+				span(ng-if="::$ctrl.entry.meta.origin.kind === 'github'")
+					| (#{translate("history_entry_origin_github")})
 
 			.history-entry-fromV-handle(
 				ng-show="$ctrl.rangeSelectionEnabled && $ctrl.selectedHistoryRange && ((!$ctrl.isDragging && $ctrl.selectedHistoryRange.fromV === $ctrl.entry.fromV) || ($ctrl.isDragging && $ctrl.hoveredHistoryRange.fromV === $ctrl.entry.fromV))"
