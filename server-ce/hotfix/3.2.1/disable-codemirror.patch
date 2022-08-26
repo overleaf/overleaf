@@ -1,0 +1,15 @@
+--- services/web/app/src/Features/Project/ProjectController.js
+--- services/web/app/src/Features/Project/ProjectController.js
+@@ -1134,11 +1134,7 @@ const ProjectController = {
+               detachRole = req.params.detachRole
+             }
+ 
+-            const showNewSourceEditorOption =
+-              (newSourceEditorAssignment &&
+-                newSourceEditorAssignment.variant === 'codemirror') ||
+-              user.betaProgram ||
+-              shouldDisplayFeature('new_source_editor', false) // also allow override via ?new_source_editor=true
++            const showNewSourceEditorOption = false // disabled in CE/SP (Hotfix 3.2.1)
+ 
+             const showSymbolPalette =
+               !Features.hasFeature('saas') ||
