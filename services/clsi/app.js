@@ -240,15 +240,19 @@ app.get('/status', (req, res, next) => res.send('CLSI is alive\n'))
 
 Settings.processTooOld = false
 if (Settings.processLifespanLimitMs) {
-  Settings.processLifespanLimitMs +=
+  // Pre-emp instances have a maximum lifespan of 24h after which they will be
+  //  shutdown, with a 30s grace period.
+  // Spread cycling of VMs by up-to 2.4h _before_ their limit to avoid large
+  //  numbers of VMs that are temporarily unavailable (while they reboot).
+  Settings.processLifespanLimitMs -=
     Settings.processLifespanLimitMs * (Math.random() / 10)
-  logger.debug(
-    'Lifespan limited to ',
-    Date.now() + Settings.processLifespanLimitMs
+  logger.info(
+    { target: new Date(Date.now() + Settings.processLifespanLimitMs) },
+    'Lifespan limited'
   )
 
   setTimeout(() => {
-    logger.debug('shutting down, process is too old')
+    logger.info({}, 'shutting down, process is too old')
     Settings.processTooOld = true
   }, Settings.processLifespanLimitMs)
 }
