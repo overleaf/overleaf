@@ -8,7 +8,6 @@ const SessionManager = require('../Authentication/SessionManager')
 const NewsletterManager = require('../Newsletter/NewsletterManager')
 const _ = require('lodash')
 const { expressify } = require('../../util/promises')
-const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 
 async function settingsPage(req, res) {
   const userId = SessionManager.getLoggedInUserId(req.session)
@@ -63,80 +62,48 @@ async function settingsPage(req, res) {
     // The user has just deleted their account.
     return res.redirect('/logout')
   }
-  const assignment = await SplitTestHandler.promises.getAssignment(
-    req,
-    res,
-    'settings-page'
-  )
-  if (assignment.variant === 'react') {
-    res.render('user/settings-react', {
-      title: 'account_settings',
-      user: {
-        id: user._id,
-        isAdmin: user.isAdmin,
-        email: user.email,
-        allowedFreeTrial: user.allowedFreeTrial,
-        first_name: user.first_name,
-        last_name: user.last_name,
-        alphaProgram: user.alphaProgram,
-        betaProgram: user.betaProgram,
-        features: {
-          dropbox: user.features.dropbox,
-          github: user.features.github,
-          mendeley: user.features.mendeley,
-          zotero: user.features.zotero,
-          references: user.features.references,
-        },
-        refProviders: {
-          mendeley: user.refProviders?.mendeley,
-          zotero: user.refProviders?.zotero,
-        },
+  res.render('user/settings', {
+    title: 'account_settings',
+    user: {
+      id: user._id,
+      isAdmin: user.isAdmin,
+      email: user.email,
+      allowedFreeTrial: user.allowedFreeTrial,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      alphaProgram: user.alphaProgram,
+      betaProgram: user.betaProgram,
+      features: {
+        dropbox: user.features.dropbox,
+        github: user.features.github,
+        mendeley: user.features.mendeley,
+        zotero: user.features.zotero,
+        references: user.features.references,
       },
-      hasPassword: !!user.hashedPassword,
-      shouldAllowEditingDetails,
-      oauthProviders: UserPagesController._translateProviderDescriptions(
-        oauthProviders,
-        req
-      ),
-      institutionLinked,
-      samlError,
-      institutionEmailNonCanonical:
-        institutionEmailNonCanonical && institutionRequestedEmail
-          ? institutionEmailNonCanonical
-          : undefined,
-      reconfirmedViaSAML,
-      reconfirmationRemoveEmail,
-      samlBeta: req.session.samlBeta,
-      ssoErrorMessage,
-      thirdPartyIds: UserPagesController._restructureThirdPartyIds(user),
-      projectSyncSuccessMessage,
-    })
-  } else {
-    res.render('user/settings', {
-      title: 'account_settings',
-      user,
-      hasPassword: !!user.hashedPassword,
-      shouldAllowEditingDetails,
-      languages: Settings.languages,
-      accountSettingsTabActive: true,
-      oauthProviders: UserPagesController._translateProviderDescriptions(
-        oauthProviders,
-        req
-      ),
-      oauthUseV2: Settings.oauthUseV2 || false,
-      institutionLinked,
-      samlError,
-      institutionEmailNonCanonical:
-        institutionEmailNonCanonical && institutionRequestedEmail
-          ? institutionEmailNonCanonical
-          : undefined,
-      reconfirmedViaSAML,
-      reconfirmationRemoveEmail,
-      samlBeta: req.session.samlBeta,
-      ssoError,
-      thirdPartyIds: UserPagesController._restructureThirdPartyIds(user),
-    })
-  }
+      refProviders: {
+        mendeley: user.refProviders?.mendeley,
+        zotero: user.refProviders?.zotero,
+      },
+    },
+    hasPassword: !!user.hashedPassword,
+    shouldAllowEditingDetails,
+    oauthProviders: UserPagesController._translateProviderDescriptions(
+      oauthProviders,
+      req
+    ),
+    institutionLinked,
+    samlError,
+    institutionEmailNonCanonical:
+      institutionEmailNonCanonical && institutionRequestedEmail
+        ? institutionEmailNonCanonical
+        : undefined,
+    reconfirmedViaSAML,
+    reconfirmationRemoveEmail,
+    samlBeta: req.session.samlBeta,
+    ssoErrorMessage,
+    thirdPartyIds: UserPagesController._restructureThirdPartyIds(user),
+    projectSyncSuccessMessage,
+  })
 }
 
 const UserPagesController = {

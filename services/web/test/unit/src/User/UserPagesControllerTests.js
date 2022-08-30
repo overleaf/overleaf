@@ -67,11 +67,6 @@ describe('UserPagesController', function () {
       _getRedirectFromSession: sinon.stub(),
       setRedirectInSession: sinon.stub(),
     }
-    this.SplitTestHandler = {
-      promises: {
-        getAssignment: sinon.stub().resolves({ variant: 'default' }),
-      },
-    }
     this.UserPagesController = SandboxedModule.require(modulePath, {
       requires: {
         '@overleaf/settings': this.settings,
@@ -83,7 +78,6 @@ describe('UserPagesController', function () {
           this.AuthenticationController,
         '../Authentication/SessionManager': this.SessionManager,
         request: (this.request = sinon.stub()),
-        '../SplitTests/SplitTestHandler': this.SplitTestHandler,
       },
     })
     this.req = {
@@ -273,20 +267,10 @@ describe('UserPagesController', function () {
       return this.UserPagesController.settingsPage(this.req, this.res)
     })
 
-    it('should render user/settings-react', function (done) {
-      this.SplitTestHandler.promises.getAssignment = sinon
-        .stub()
-        .resolves({ variant: 'react' })
-      this.res.render = function (page) {
-        page.should.equal('user/settings-react')
-        return done()
-      }
-      return this.UserPagesController.settingsPage(this.req, this.res)
-    })
-
     it('should send user', function (done) {
       this.res.render = (page, opts) => {
-        opts.user.should.equal(this.user)
+        opts.user.id.should.equal(this.user._id)
+        opts.user.email.should.equal(this.user.email)
         return done()
       }
       return this.UserPagesController.settingsPage(this.req, this.res)
@@ -312,9 +296,6 @@ describe('UserPagesController', function () {
     })
 
     it("should set and clear 'projectSyncSuccessMessage'", function (done) {
-      this.SplitTestHandler.promises.getAssignment = sinon
-        .stub()
-        .resolves({ variant: 'react' })
       this.req.session.projectSyncSuccessMessage = 'Some Sync Success'
       this.res.render = (page, opts) => {
         opts.projectSyncSuccessMessage.should.equal('Some Sync Success')
