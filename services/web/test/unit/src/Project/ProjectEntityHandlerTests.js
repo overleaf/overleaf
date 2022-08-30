@@ -112,22 +112,22 @@ describe('ProjectEntityHandler', function () {
       })
 
       it('should call the callback with the docs with the lines and rev included', function () {
-        this.callback
-          .calledWith(null, {
-            '/doc1': {
-              _id: this.doc1._id,
-              lines: this.lines1,
-              name: this.doc1.name,
-              rev: this.rev1,
-            },
-            '/folder1/doc2': {
-              _id: this.doc2._id,
-              lines: this.lines2,
-              name: this.doc2.name,
-              rev: this.rev2,
-            },
-          })
-          .should.equal(true)
+        this.callback.should.have.been.calledWith(null, {
+          '/doc1': {
+            _id: this.doc1._id,
+            lines: this.lines1,
+            name: this.doc1.name,
+            rev: this.rev1,
+            folder: this.project.rootFolder[0],
+          },
+          '/folder1/doc2': {
+            _id: this.doc2._id,
+            lines: this.lines2,
+            name: this.doc2.name,
+            rev: this.rev2,
+            folder: this.folder1,
+          },
+        })
       })
     })
 
@@ -138,12 +138,10 @@ describe('ProjectEntityHandler', function () {
       })
 
       it('should call the callback with the files', function () {
-        this.callback
-          .calledWith(null, {
-            '/file1': this.file1,
-            '/folder1/file2': this.file2,
-          })
-          .should.equal(true)
+        this.callback.should.have.been.calledWith(null, {
+          '/file1': { ...this.file1, folder: this.project.rootFolder[0] },
+          '/folder1/file2': { ...this.file2, folder: this.folder1 },
+        })
       })
     })
 

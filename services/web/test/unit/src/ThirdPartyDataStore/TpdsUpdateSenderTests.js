@@ -53,7 +53,7 @@ describe('TpdsUpdateSender', function () {
     this.UserGetter = {
       promises: { getUsers },
     }
-    this.updateSender = SandboxedModule.require(modulePath, {
+    this.TpdsUpdateSender = SandboxedModule.require(modulePath, {
       requires: {
         mongodb: { ObjectId },
         '@overleaf/settings': this.settings,
@@ -69,7 +69,7 @@ describe('TpdsUpdateSender', function () {
 
   describe('enqueue', function () {
     it('should not call request if there is no tpdsworker url', async function () {
-      await this.updateSender.promises.enqueue(null, null, null)
+      await this.TpdsUpdateSender.promises.enqueue(null, null, null)
       this.request.should.not.have.been.called
     })
 
@@ -78,7 +78,7 @@ describe('TpdsUpdateSender', function () {
       const group0 = 'myproject'
       const method0 = 'somemethod0'
       const job0 = 'do something'
-      await this.updateSender.promises.enqueue(group0, method0, job0)
+      await this.TpdsUpdateSender.promises.enqueue(group0, method0, job0)
       const args = this.request.firstCall.args[0]
       args.json.group.should.equal(group0)
       args.json.job.should.equal(job0)
@@ -98,11 +98,11 @@ describe('TpdsUpdateSender', function () {
       const fileId = '4545345'
       const path = '/some/path/here.jpg'
 
-      await this.updateSender.promises.addFile({
-        project_id: projectId,
-        file_id: fileId,
+      await this.TpdsUpdateSender.promises.addFile({
+        projectId,
+        fileId,
         path,
-        project_name: projectName,
+        projectName,
       })
 
       const {
@@ -151,12 +151,12 @@ describe('TpdsUpdateSender', function () {
       const path = '/some/path/here.tex'
       const lines = ['line1', 'line2', 'line3']
 
-      await this.updateSender.promises.addDoc({
-        project_id: projectId,
-        doc_id: docId,
+      await this.TpdsUpdateSender.promises.addDoc({
+        projectId,
+        docId,
         path,
         docLines: lines,
-        project_name: projectName,
+        projectName,
       })
 
       const {
@@ -201,10 +201,10 @@ describe('TpdsUpdateSender', function () {
     it('deleting entity', async function () {
       const path = '/path/here/t.tex'
 
-      await this.updateSender.promises.deleteEntity({
-        project_id: projectId,
+      await this.TpdsUpdateSender.promises.deleteEntity({
+        projectId,
         path,
-        project_name: projectName,
+        projectName,
       })
 
       const {
@@ -247,11 +247,11 @@ describe('TpdsUpdateSender', function () {
       const startPath = 'staring/here/file.tex'
       const endPath = 'ending/here/file.tex'
 
-      await this.updateSender.promises.moveEntity({
-        project_id: projectId,
+      await this.TpdsUpdateSender.promises.moveEntity({
+        projectId,
         startPath,
         endPath,
-        project_name: projectName,
+        projectName,
       })
 
       const {
@@ -295,9 +295,9 @@ describe('TpdsUpdateSender', function () {
       const oldProjectName = '/oldProjectName/'
       const newProjectName = '/newProjectName/'
 
-      await this.updateSender.promises.moveEntity({
-        project_id: projectId,
-        project_name: oldProjectName,
+      await this.TpdsUpdateSender.promises.moveEntity({
+        projectId,
+        projectName: oldProjectName,
         newProjectName,
       })
 
@@ -339,7 +339,7 @@ describe('TpdsUpdateSender', function () {
     })
 
     it('pollDropboxForUser', async function () {
-      await this.updateSender.promises.pollDropboxForUser(userId)
+      await this.TpdsUpdateSender.promises.pollDropboxForUser(userId)
 
       const {
         group: group0,
@@ -357,12 +357,12 @@ describe('TpdsUpdateSender', function () {
   })
   describe('deleteProject', function () {
     it('should not call request if there is no project archiver url', async function () {
-      await this.updateSender.promises.deleteProject({ project_id: projectId })
+      await this.TpdsUpdateSender.promises.deleteProject({ projectId })
       this.request.should.not.have.been.called
     })
     it('should make a delete request to project archiver', async function () {
       this.settings.apis.project_archiver = { url: projectArchiverUrl }
-      await this.updateSender.promises.deleteProject({ project_id: projectId })
+      await this.TpdsUpdateSender.promises.deleteProject({ projectId })
       const { uri, method } = this.request.firstCall.args[0]
       method.should.equal('delete')
       uri.should.equal(`${projectArchiverUrl}/project/${projectId}`)

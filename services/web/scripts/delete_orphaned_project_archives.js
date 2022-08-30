@@ -89,7 +89,7 @@ async function hardDeleteProjectArchiverData(prefix) {
     await sleep(1000 * i)
     try {
       const ok = await TpdsUpdateSender.promises.deleteProject({
-        project_id: encodeURIComponent(prefix),
+        projectId: encodeURIComponent(prefix),
       })
       if (ok) {
         return

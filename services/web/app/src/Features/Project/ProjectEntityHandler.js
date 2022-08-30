@@ -35,6 +35,7 @@ const ProjectEntityHandler = {
                 name: doc.name,
                 lines: content.lines,
                 rev: content.rev,
+                folder,
               }
             }
           }
@@ -54,7 +55,7 @@ const ProjectEntityHandler = {
       for (const { path: folderPath, folder } of folders) {
         for (const file of iterablePaths(folder, 'fileRefs')) {
           if (file != null) {
-            files[path.join(folderPath, file.name)] = file
+            files[path.join(folderPath, file.name)] = { ...file, folder }
           }
         }
       }

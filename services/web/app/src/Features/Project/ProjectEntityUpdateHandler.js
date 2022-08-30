@@ -88,7 +88,7 @@ function getDocContext(projectId, docId, callback) {
       }
       ProjectLocator.findElement(
         { project, element_id: docId, type: 'docs' },
-        (err, doc, path) => {
+        (err, doc, path, folder) => {
           if (err && err instanceof Errors.NotFoundError) {
             // (Soft-)Deleted docs are removed from the file-tree (rootFolder).
             // docstore can tell whether it exists and is (soft)-deleted.
@@ -127,6 +127,7 @@ function getDocContext(projectId, docId, callback) {
                     projectName: project.name,
                     isDeletedDoc: true,
                     path: null,
+                    folder: null,
                   })
                 }
               }
@@ -143,6 +144,7 @@ function getDocContext(projectId, docId, callback) {
               projectName: project.name,
               isDeletedDoc: false,
               path: path.fileSystem,
+              folder,
             })
           }
         }
@@ -174,7 +176,7 @@ const ProjectEntityUpdateHandler = {
       if (err) {
         return callback(err)
       }
-      const { projectName, isDeletedDoc, path } = ctx
+      const { projectName, isDeletedDoc, path, folder } = ctx
       logger.debug(
         { projectId, docId },
         'telling docstore manager to update doc'
@@ -209,11 +211,12 @@ const ProjectEntityUpdateHandler = {
           )
           TpdsUpdateSender.addDoc(
             {
-              project_id: projectId,
+              projectId,
               path,
-              doc_id: docId,
-              project_name: projectName,
+              docId,
+              projectName,
               rev,
+              folderId: folder?._id,
             },
             callback
           )
@@ -281,11 +284,12 @@ const ProjectEntityUpdateHandler = {
         }
         TpdsUpdateSender.addDoc(
           {
-            project_id: projectId,
-            doc_id: doc != null ? doc._id : undefined,
-            path: result && result.path && result.path.fileSystem,
-            project_name: project.name,
+            projectId,
+            docId: doc != null ? doc._id : undefined,
+            path: result?.path?.fileSystem,
+            projectName: project.name,
             rev: 0,
+            folderId,
           },
           err => {
             if (err != null) {
@@ -447,11 +451,12 @@ const ProjectEntityUpdateHandler = {
         }
         TpdsUpdateSender.addFile(
           {
-            project_id: projectId,
-            file_id: fileRef._id,
-            path: result && result.path && result.path.fileSystem,
-            project_name: project.name,
+            projectId,
+            fileId: fileRef._id,
+            path: result?.path?.fileSystem,
+            projectName: project.name,
             rev: fileRef.rev,
+            folderId,
           },
           err => {
             if (err != null) {
@@ -555,115 +560,77 @@ const ProjectEntityUpdateHandler = {
     },
   }),
 
-  replaceFile: wrapWithLock({
-    beforeLock(next) {
-      return function (
-        projectId,
-        fileId,
-        fsPath,
-        linkedFileData,
-        userId,
-        source,
-        callback
-      ) {
-        // create a new file
-        const fileArgs = {
-          name: 'dummy-upload-filename',
-          linkedFileData,
+  _replaceFile(
+    projectId,
+    fileId,
+    fsPath,
+    linkedFileData,
+    userId,
+    newFileRef,
+    fileStoreUrl,
+    folderId,
+    source,
+    callback
+  ) {
+    ProjectEntityMongoUpdateHandler.replaceFileWithNew(
+      projectId,
+      fileId,
+      newFileRef,
+      (err, oldFileRef, project, path, newProject) => {
+        if (err != null) {
+          return callback(err)
         }
-        FileStoreHandler.uploadFileFromDisk(
-          projectId,
-          fileArgs,
-          fsPath,
-          (err, fileStoreUrl, fileRef) => {
+        const oldFiles = [
+          {
+            file: oldFileRef,
+            path: path.fileSystem,
+          },
+        ]
+        const newFiles = [
+          {
+            file: newFileRef,
+            path: path.fileSystem,
+            url: fileStoreUrl,
+          },
+        ]
+        const projectHistoryId =
+          project.overleaf &&
+          project.overleaf.history &&
+          project.overleaf.history.id
+        // Increment the rev for an in-place update (with the same path) so the third-party-datastore
+        // knows this is a new file.
+        // Ideally we would get this from ProjectEntityMongoUpdateHandler.replaceFileWithNew
+        // but it returns the original oldFileRef (after incrementing the rev value in mongo),
+        // so we add 1 to the rev from that. This isn't atomic and relies on the lock
+        // but it is acceptable for now.
+        TpdsUpdateSender.addFile(
+          {
+            projectId: project._id,
+            fileId: newFileRef._id,
+            path: path.fileSystem,
+            rev: oldFileRef.rev + 1,
+            projectName: project.name,
+            folderId,
+          },
+          err => {
             if (err != null) {
               return callback(err)
             }
-            next(
+            ProjectUpdateHandler.markAsUpdated(projectId, new Date(), userId)
+
+            DocumentUpdaterHandler.updateProjectStructure(
               projectId,
-              fileId,
-              fsPath,
-              linkedFileData,
+              projectHistoryId,
               userId,
-              fileRef,
-              fileStoreUrl,
+              { oldFiles, newFiles, newProject },
               source,
               callback
             )
           }
         )
       }
-    },
-    withLock(
-      projectId,
-      fileId,
-      fsPath,
-      linkedFileData,
-      userId,
-      newFileRef,
-      fileStoreUrl,
-      source,
-      callback
-    ) {
-      ProjectEntityMongoUpdateHandler.replaceFileWithNew(
-        projectId,
-        fileId,
-        newFileRef,
-        (err, oldFileRef, project, path, newProject) => {
-          if (err != null) {
-            return callback(err)
-          }
-          const oldFiles = [
-            {
-              file: oldFileRef,
-              path: path.fileSystem,
-            },
-          ]
-          const newFiles = [
-            {
-              file: newFileRef,
-              path: path.fileSystem,
-              url: fileStoreUrl,
-            },
-          ]
-          const projectHistoryId =
-            project.overleaf &&
-            project.overleaf.history &&
-            project.overleaf.history.id
-          // Increment the rev for an in-place update (with the same path) so the third-party-datastore
-          // knows this is a new file.
-          // Ideally we would get this from ProjectEntityMongoUpdateHandler.replaceFileWithNew
-          // but it returns the original oldFileRef (after incrementing the rev value in mongo),
-          // so we add 1 to the rev from that. This isn't atomic and relies on the lock
-          // but it is acceptable for now.
-          TpdsUpdateSender.addFile(
-            {
-              project_id: project._id,
-              file_id: newFileRef._id,
-              path: path.fileSystem,
-              rev: oldFileRef.rev + 1,
-              project_name: project.name,
-            },
-            err => {
-              if (err != null) {
-                return callback(err)
-              }
-              ProjectUpdateHandler.markAsUpdated(projectId, new Date(), userId)
-
-              DocumentUpdaterHandler.updateProjectStructure(
-                projectId,
-                projectHistoryId,
-                userId,
-                { oldFiles, newFiles, newProject },
-                source,
-                callback
-              )
-            }
-          )
-        }
-      )
-    },
-  }),
+    )
+  },
 
   upsertDoc: wrapWithLock(function (
     projectId,
@@ -713,11 +680,12 @@ const ProjectEntityUpdateHandler = {
                   }
                   TpdsUpdateSender.addDoc(
                     {
-                      project_id: projectId,
-                      doc_id: doc._id,
+                      projectId,
+                      docId: doc._id,
                       path: filePath,
-                      project_name: project.name,
+                      projectName: project.name,
                       rev: existingFile.rev + 1,
+                      folderId,
                     },
                     err => {
                       if (err) {
@@ -908,11 +876,12 @@ const ProjectEntityUpdateHandler = {
                       project.overleaf.history.id
                     TpdsUpdateSender.addFile(
                       {
-                        project_id: project._id,
-                        file_id: newFileRef._id,
+                        projectId: project._id,
+                        fileId: newFileRef._id,
                         path: path.fileSystem,
                         rev: newFileRef.rev,
-                        project_name: project.name,
+                        projectName: project.name,
+                        folderId,
                       },
                       err => {
                         if (err) {
@@ -957,8 +926,7 @@ const ProjectEntityUpdateHandler = {
               }
             )
           } else if (existingFile) {
-            // this calls directly into the replaceFile main task (without the beforeLock part)
-            return ProjectEntityUpdateHandler.replaceFile.mainTask(
+            return ProjectEntityUpdateHandler._replaceFile(
               projectId,
               existingFile._id,
               fsPath,
@@ -966,6 +934,7 @@ const ProjectEntityUpdateHandler = {
               userId,
               newFileRef,
               fileStoreUrl,
+              folderId,
               source,
               err => {
                 if (err != null) {
@@ -1167,9 +1136,11 @@ const ProjectEntityUpdateHandler = {
             }
             TpdsUpdateSender.deleteEntity(
               {
-                project_id: projectId,
+                projectId,
                 path: path.fileSystem,
-                project_name: projectBeforeDeletion.name,
+                projectName: projectBeforeDeletion.name,
+                entityId,
+                entityType,
               },
               error => {
                 if (error != null) {
@@ -1286,11 +1257,14 @@ const ProjectEntityUpdateHandler = {
         // do not wait
         TpdsUpdateSender.promises
           .moveEntity({
-            project_id: projectId,
-            project_name: project.name,
+            projectId,
+            projectName: project.name,
             startPath,
             endPath,
             rev,
+            entityId,
+            entityType,
+            folderId: destFolderId,
           })
           .catch(err => {
             logger.error({ err }, 'error sending tpds update')
@@ -1342,11 +1316,14 @@ const ProjectEntityUpdateHandler = {
         // do not wait
         TpdsUpdateSender.promises
           .moveEntity({
-            project_id: projectId,
-            project_name: project.name,
+            projectId,
+            projectName: project.name,
             startPath,
             endPath,
             rev,
+            entityId,
+            entityType,
+            folderId: null, // this means the folder has not changed
           })
           .catch(err => {
             logger.error({ err }, 'error sending tpds update')

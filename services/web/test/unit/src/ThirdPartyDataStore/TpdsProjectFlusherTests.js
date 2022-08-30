@@ -10,13 +10,24 @@ const MODULE_PATH =
 describe('TpdsProjectFlusher', function () {
   beforeEach(function () {
     this.project = { _id: ObjectId() }
+    this.folder = { _id: ObjectId() }
     this.docs = {
-      '/doc/one': { _id: 'mock-doc-1', lines: ['one'], rev: 5 },
-      '/doc/two': { _id: 'mock-doc-2', lines: ['two'], rev: 6 },
+      '/doc/one': {
+        _id: 'mock-doc-1',
+        lines: ['one'],
+        rev: 5,
+        folder: this.folder,
+      },
+      '/doc/two': {
+        _id: 'mock-doc-2',
+        lines: ['two'],
+        rev: 6,
+        folder: this.folder,
+      },
     }
     this.files = {
-      '/file/one': { _id: 'mock-file-1', rev: 7 },
-      '/file/two': { _id: 'mock-file-2', rev: 8 },
+      '/file/one': { _id: 'mock-file-1', rev: 7, folder: this.folder },
+      '/file/two': { _id: 'mock-file-2', rev: 8, folder: this.folder },
     }
     this.DocumentUpdaterHandler = {
       promises: {
@@ -79,11 +90,12 @@ describe('TpdsProjectFlusher', function () {
         for (const [path, doc] of Object.entries(this.docs)) {
           expect(this.TpdsUpdateSender.promises.addDoc).to.have.been.calledWith(
             {
-              project_id: this.project._id,
-              doc_id: doc._id,
-              project_name: this.project.name,
+              projectId: this.project._id,
+              docId: doc._id,
+              projectName: this.project.name,
               rev: doc.rev,
               path,
+              folderId: this.folder._id,
             }
           )
         }
@@ -94,11 +106,12 @@ describe('TpdsProjectFlusher', function () {
           expect(
             this.TpdsUpdateSender.promises.addFile
           ).to.have.been.calledWith({
-            project_id: this.project._id,
-            file_id: file._id,
-            project_name: this.project.name,
+            projectId: this.project._id,
+            fileId: file._id,
+            projectName: this.project.name,
             rev: file.rev,
             path,
+            folderId: this.folder._id,
           })
         }
       })
@@ -206,11 +219,12 @@ describe('TpdsProjectFlusher', function () {
             expect(
               this.TpdsUpdateSender.promises.addDoc
             ).to.have.been.calledWith({
-              project_id: this.project._id,
-              doc_id: doc._id,
-              project_name: this.project.name,
+              projectId: this.project._id,
+              docId: doc._id,
+              projectName: this.project.name,
               rev: doc.rev,
               path,
+              folderId: this.folder._id,
             })
           }
         })
@@ -220,11 +234,12 @@ describe('TpdsProjectFlusher', function () {
             expect(
               this.TpdsUpdateSender.promises.addFile
             ).to.have.been.calledWith({
-              project_id: this.project._id,
-              file_id: file._id,
-              project_name: this.project.name,
+              projectId: this.project._id,
+              fileId: file._id,
+              projectName: this.project.name,
               rev: file.rev,
               path,
+              folderId: this.folder._id,
             })
           }
         })

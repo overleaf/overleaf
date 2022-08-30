@@ -184,11 +184,17 @@ describe('ProjectEntityUpdateHandler', function () {
       this.ranges = { mock: 'ranges' }
       this.lastUpdatedAt = new Date().getTime()
       this.lastUpdatedBy = 'fake-last-updater-id'
+      this.parentFolder = { _id: ObjectId() }
       this.DocstoreManager.isDocDeleted.yields(null, false)
       this.ProjectGetter.getProject.yields(null, this.project)
-      this.ProjectLocator.findElement.yields(null, this.doc, {
-        fileSystem: this.path,
-      })
+      this.ProjectLocator.findElement.yields(
+        null,
+        this.doc,
+        {
+          fileSystem: this.path,
+        },
+        this.parentFolder
+      )
       this.TpdsUpdateSender.addDoc.yields()
     })
 
@@ -248,15 +254,14 @@ describe('ProjectEntityUpdateHandler', function () {
       })
 
       it('should send the doc the to the TPDS', function () {
-        this.TpdsUpdateSender.addDoc
-          .calledWith({
-            project_id: projectId,
-            project_name: this.project.name,
-            doc_id: docId,
-            rev: this.rev,
-            path: this.path,
-          })
-          .should.equal(true)
+        this.TpdsUpdateSender.addDoc.should.have.been.calledWith({
+          projectId,
+          projectName: this.project.name,
+          docId,
+          rev: this.rev,
+          path: this.path,
+          folderId: this.parentFolder._id,
+        })
       })
 
       it('should call the callback', function () {
@@ -645,11 +650,12 @@ describe('ProjectEntityUpdateHandler', function () {
       it('notifies the tpds', function () {
         this.TpdsUpdateSender.addFile
           .calledWith({
-            project_id: projectId,
-            project_name: this.project.name,
-            file_id: fileId,
+            projectId,
+            projectName: this.project.name,
+            fileId,
             rev: 0,
             path: this.path,
+            folderId,
           })
           .should.equal(true)
       })
@@ -716,111 +722,6 @@ describe('ProjectEntityUpdateHandler', function () {
         const errorMatcher = sinon.match.instanceOf(Errors.InvalidNameError)
         this.callback.calledWithMatch(errorMatcher).should.equal(true)
       })
-    })
-  })
-
-  describe('replaceFile', function () {
-    beforeEach(function () {
-      // replacement file now creates a new file object
-      this.newFileUrl = 'new-file-url'
-      this.newFile = {
-        _id: newFileId,
-        name: 'dummy-upload-filename',
-        rev: 0,
-        linkedFileData: this.linkedFileData,
-      }
-      this.oldFile = { _id: fileId, rev: 3 }
-      this.path = '/path/to/file'
-      this.newProject = 'new project'
-      this.FileStoreHandler.uploadFileFromDisk.yields(
-        null,
-        this.newFileUrl,
-        this.newFile
-      )
-      this.ProjectEntityMongoUpdateHandler._insertDeletedFileReference.yields()
-      this.ProjectEntityMongoUpdateHandler.replaceFileWithNew.yields(
-        null,
-        this.oldFile,
-        this.project,
-        { fileSystem: this.path },
-        this.newProject
-      )
-      this.ProjectEntityUpdateHandler.replaceFile(
-        projectId,
-        fileId,
-        this.fileSystemPath,
-        this.linkedFileData,
-        userId,
-        this.source,
-        this.callback
-      )
-    })
-
-    it('uploads a new version of the file', function () {
-      this.FileStoreHandler.uploadFileFromDisk
-        .calledWith(
-          projectId,
-          {
-            name: 'dummy-upload-filename',
-            linkedFileData: this.linkedFileData,
-          },
-          this.fileSystemPath
-        )
-        .should.equal(true)
-    })
-
-    it('replaces the file in mongo', function () {
-      this.ProjectEntityMongoUpdateHandler.replaceFileWithNew
-        .calledWith(projectId, fileId, this.newFile)
-        .should.equal(true)
-    })
-
-    it('notifies the tpds', function () {
-      this.TpdsUpdateSender.addFile
-        .calledWith({
-          project_id: projectId,
-          project_name: this.project.name,
-          file_id: newFileId,
-          rev: this.oldFile.rev + 1,
-          path: this.path,
-        })
-        .should.equal(true)
-    })
-
-    it('should mark the project as updated', function () {
-      const args = this.ProjectUpdater.markAsUpdated.args[0]
-      args[0].should.equal(projectId)
-      args[1].should.exist
-      args[2].should.equal(userId)
-    })
-
-    it('updates the project structure in the doc updater', function () {
-      const oldFiles = [
-        {
-          file: this.oldFile,
-          path: this.path,
-        },
-      ]
-      const newFiles = [
-        {
-          file: this.newFile,
-          path: this.path,
-          url: this.newFileUrl,
-        },
-      ]
-      this.DocumentUpdaterHandler.updateProjectStructure
-        .calledWith(
-          projectId,
-          projectHistoryId,
-          userId,
-          {
-            oldFiles,
-            newFiles,
-            newProject: this.newProject,
-          },
-          this.source
-        )
-        .should.equal(true)
     })
   })
 
@@ -1035,11 +936,12 @@ describe('ProjectEntityUpdateHandler', function () {
 
       it('sends the doc to TPDS', function () {
         expect(this.TpdsUpdateSender.addDoc).to.have.been.calledWith({
-          project_id: projectId,
-          doc_id: this.newDoc._id,
+          projectId,
+          docId: this.newDoc._id,
           path: this.filePath,
-          project_name: this.newProject.name,
+          projectName: this.newProject.name,
           rev: this.existingFile.rev + 1,
+          folderId,
         })
       })
 
@@ -1090,7 +992,7 @@ describe('ProjectEntityUpdateHandler', function () {
       this.FileStoreHandler.uploadFileFromDisk.yields(
         null,
         this.fileUrl,
-        this.newFile
+        this.file
       )
     })
 
@@ -1117,13 +1019,17 @@ describe('ProjectEntityUpdateHandler', function () {
 
     describe('updating an existing file', function () {
       beforeEach(function () {
-        this.existingFile = { _id: fileId, name: this.fileName }
+        this.existingFile = { _id: fileId, name: this.fileName, rev: 1 }
         this.folder = { _id: folderId, fileRefs: [this.existingFile], docs: [] }
         this.ProjectLocator.findElement.yields(null, this.folder)
-        this.ProjectEntityUpdateHandler.replaceFile = {
-          mainTask: sinon.stub().yields(null, this.newFile),
-        }
-
+        this.newProject = 'new-project-stub'
+        this.ProjectEntityMongoUpdateHandler.replaceFileWithNew.yields(
+          null,
+          this.existingFile,
+          this.project,
+          { fileSystem: this.fileSystemPath },
+          this.newProject
+        )
         this.ProjectEntityUpdateHandler.upsertFile(
           projectId,
           folderId,
@@ -1136,17 +1042,66 @@ describe('ProjectEntityUpdateHandler', function () {
         )
       })
 
-      it('replaces the file', function () {
-        expect(
-          this.ProjectEntityUpdateHandler.replaceFile.mainTask
-        ).to.be.calledWith(
+      it('uploads a new version of the file', function () {
+        this.FileStoreHandler.uploadFileFromDisk.should.have.been.calledWith(
           projectId,
-          fileId,
-          this.fileSystemPath,
-          this.linkedFileData,
+          {
+            name: this.fileName,
+            linkedFileData: this.linkedFileData,
+          },
+          this.fileSystemPath
+        )
+      })
+
+      it('replaces the file in mongo', function () {
+        this.ProjectEntityMongoUpdateHandler.replaceFileWithNew.should.have.been.calledWith(
+          projectId,
+          this.existingFile._id,
+          this.file
+        )
+      })
+
+      it('notifies the tpds', function () {
+        this.TpdsUpdateSender.addFile.should.have.been.calledWith({
+          projectId,
+          projectName: this.project.name,
+          fileId: this.file._id,
+          rev: this.existingFile.rev + 1,
+          path: this.fileSystemPath,
+          folderId,
+        })
+      })
+
+      it('should mark the project as updated', function () {
+        const args = this.ProjectUpdater.markAsUpdated.args[0]
+        args[0].should.equal(projectId)
+        args[1].should.exist
+        args[2].should.equal(userId)
+      })
+
+      it('updates the project structure in the doc updater', function () {
+        const oldFiles = [
+          {
+            file: this.existingFile,
+            path: this.fileSystemPath,
+          },
+        ]
+        const newFiles = [
+          {
+            file: this.file,
+            path: this.fileSystemPath,
+            url: this.fileUrl,
+          },
+        ]
+        this.DocumentUpdaterHandler.updateProjectStructure.should.have.been.calledWith(
+          projectId,
+          projectHistoryId,
           userId,
-          this.newFile,
-          this.fileUrl,
+          {
+            oldFiles,
+            newFiles,
+            newProject: this.newProject,
+          },
           this.source
         )
       })
@@ -1262,7 +1217,12 @@ describe('ProjectEntityUpdateHandler', function () {
             element_id: this.existingDoc._id,
             type: 'doc',
           })
-          .yields(null, this.existingDoc, { fileSystem: this.path })
+          .yields(
+            null,
+            this.existingDoc,
+            { fileSystem: this.path },
+            this.folder
+          )
 
         this.newFileUrl = 'new-file-url'
         this.newFile = {
@@ -1642,9 +1602,11 @@ describe('ProjectEntityUpdateHandler', function () {
     it('it notifies the tpds', function () {
       this.TpdsUpdateSender.deleteEntity
         .calledWith({
-          project_id: projectId,
+          projectId,
           path: this.path,
-          project_name: this.projectBeforeDeletion.name,
+          projectName: this.projectBeforeDeletion.name,
+          entityId: docId,
+          entityType: 'doc',
         })
         .should.equal(true)
     })
@@ -1826,11 +1788,14 @@ describe('ProjectEntityUpdateHandler', function () {
     it('notifies tpds', function () {
       this.TpdsUpdateSender.promises.moveEntity
         .calledWith({
-          project_id: projectId,
-          project_name: this.project_name,
+          projectId,
+          projectName: this.project_name,
           startPath: this.startPath,
           endPath: this.endPath,
           rev: this.rev,
+          entityId: docId,
+          entityType: 'doc',
+          folderId,
         })
         .should.equal(true)
     })
@@ -1887,11 +1852,14 @@ describe('ProjectEntityUpdateHandler', function () {
       it('notifies tpds', function () {
         this.TpdsUpdateSender.promises.moveEntity
           .calledWith({
-            project_id: projectId,
-            project_name: this.project_name,
+            projectId,
+            projectName: this.project_name,
             startPath: this.startPath,
             endPath: this.endPath,
             rev: this.rev,
+            entityId: docId,
+            entityType: 'doc',
+            folderId: null,
           })
           .should.equal(true)
       })
@@ -2637,7 +2605,7 @@ describe('ProjectEntityUpdateHandler', function () {
           element_id: this.doc._id,
           type: 'doc',
         })
-        .yields(null, this.doc, { fileSystem: this.path })
+        .yields(null, this.doc, { fileSystem: this.path }, this.folder)
       this.ProjectLocator.findElement
         .withArgs({
           project_id: this.project._id.toString(),

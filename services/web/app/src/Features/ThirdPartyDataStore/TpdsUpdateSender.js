@@ -3,7 +3,7 @@ const _ = require('lodash')
 const { callbackify } = require('util')
 const logger = require('@overleaf/logger')
 const metrics = require('@overleaf/metrics')
-const path = require('path')
+const Path = require('path')
 const request = require('request-promise-native')
 const settings = require('@overleaf/settings')
 
@@ -13,90 +13,116 @@ const UserGetter = require('../User/UserGetter.js').promises
 
 const tpdsUrl = _.get(settings, ['apis', 'thirdPartyDataStore', 'url'])
 
-async function addDoc(options) {
+async function addDoc(params) {
   metrics.inc('tpds.add-doc')
+  const { projectId, path, docId, projectName, rev, folderId } = params
 
-  options.streamOrigin =
+  const streamOrigin =
     settings.apis.docstore.pubUrl +
-    path.join(
-      `/project/${options.project_id}`,
-      `/doc/${options.doc_id}`,
-      '/raw'
-    )
-  options.entity_id = options.doc_id
-  options.entity_type = 'doc'
+    Path.join(`/project/${projectId}`, `/doc/${docId}`, '/raw')
 
-  return addEntity(options)
+  await addEntity({
+    projectId,
+    path,
+    projectName,
+    rev,
+    folderId,
+    streamOrigin,
+    entityId: docId,
+    entityType: 'doc',
+  })
 }
 
-async function addEntity(options) {
-  const projectUserIds = await getProjectUsersIds(options.project_id)
+async function addEntity(params) {
+  const {
+    projectId,
+    path,
+    projectName,
+    rev,
+    folderId,
+    streamOrigin,
+    entityId,
+    entityType,
+  } = params
+
+  const projectUserIds = await getProjectUsersIds(projectId)
 
   for (const userId of projectUserIds) {
     const job = {
       method: 'post',
       headers: {
-        sl_entity_id: options.entity_id,
-        sl_entity_type: options.entity_type,
-        sl_entity_rev: options.rev,
-        sl_project_id: options.project_id,
+        sl_entity_id: entityId,
+        sl_entity_type: entityType,
+        sl_entity_rev: rev,
+        sl_project_id: projectId,
         sl_all_user_ids: JSON.stringify([userId]),
         sl_project_owner_user_id: projectUserIds[0],
+        sl_folder_id: folderId,
       },
-      uri: buildTpdsUrl(userId, options.project_name, options.path),
+      uri: buildTpdsUrl(userId, projectName, path),
       title: 'addFile',
-      streamOrigin: options.streamOrigin,
+      streamOrigin,
     }
 
     await enqueue(userId, 'pipeStreamFrom', job)
   }
 }
 
-async function addFile(options) {
+async function addFile(params) {
   metrics.inc('tpds.add-file')
-
-  options.streamOrigin =
+  const { projectId, fileId, path, projectName, rev, folderId } = params
+  const streamOrigin =
     settings.apis.filestore.url +
-    path.join(`/project/${options.project_id}`, `/file/${options.file_id}`)
-  options.entity_id = options.file_id
-  options.entity_type = 'file'
+    Path.join(`/project/${projectId}`, `/file/${fileId}`)
 
-  return addEntity(options)
+  await addEntity({
+    projectId,
+    path,
+    projectName,
+    rev,
+    folderId,
+    streamOrigin,
+    entityId: fileId,
+    entityType: 'file',
+  })
 }
 
-function buildMovePaths(options) {
-  if (options.newProjectName) {
+function buildMovePaths(params) {
+  if (params.newProjectName) {
     return {
-      startPath: path.join('/', options.project_name, '/'),
-      endPath: path.join('/', options.newProjectName, '/'),
+      startPath: Path.join('/', params.projectName, '/'),
+      endPath: Path.join('/', params.newProjectName, '/'),
     }
   } else {
     return {
-      startPath: path.join('/', options.project_name, '/', options.startPath),
-      endPath: path.join('/', options.project_name, '/', options.endPath),
+      startPath: Path.join('/', params.projectName, '/', params.startPath),
+      endPath: Path.join('/', params.projectName, '/', params.endPath),
     }
   }
 }
 
 function buildTpdsUrl(userId, projectName, filePath) {
-  const projectPath = encodeURIComponent(path.join(projectName, '/', filePath))
+  const projectPath = encodeURIComponent(Path.join(projectName, '/', filePath))
   return `${tpdsUrl}/user/${userId}/entity/${projectPath}`
 }
 
-async function deleteEntity(options) {
+async function deleteEntity(params) {
   metrics.inc('tpds.delete-entity')
+  const { projectId, path, projectName, entityId, entityType } = params
 
-  const projectUserIds = await getProjectUsersIds(options.project_id)
+  const projectUserIds = await getProjectUsersIds(projectId)
 
   for (const userId of projectUserIds) {
     const job = {
       method: 'delete',
       headers: {
-        sl_project_id: options.project_id,
+        sl_project_id: projectId,
         sl_all_user_ids: JSON.stringify([userId]),
         sl_project_owner_user_id: projectUserIds[0],
+        sl_entity_id: entityId,
+        sl_entity_type: entityType,
       },
-      uri: buildTpdsUrl(userId, options.project_name, options.path),
+      uri: buildTpdsUrl(userId, projectName, path),
       title: 'deleteEntity',
       sl_all_user_ids: JSON.stringify([userId]),
     }
@@ -105,7 +131,8 @@ async function deleteEntity(options) {
   }
 }
 
-async function deleteProject(options) {
+async function deleteProject(params) {
+  const { projectId } = params
   // deletion only applies to project archiver
   const projectArchiverUrl = _.get(settings, [
     'apis',
@@ -120,13 +147,13 @@ async function deleteProject(options) {
   // send the request directly to project archiver, bypassing third-party-datastore
   try {
     await request({
-      uri: `${settings.apis.project_archiver.url}/project/${options.project_id}`,
+      uri: `${settings.apis.project_archiver.url}/project/${projectId}`,
       method: 'delete',
     })
     return true
   } catch (err) {
     logger.error(
-      { err, project_id: options.project_id },
+      { err, projectId },
       'error deleting project in third party datastore (project_archiver)'
     )
     return false
@@ -176,23 +203,34 @@ async function getProjectUsersIds(projectId) {
   return [ownerUserId, ...dropboxUserIds]
 }
 
-async function moveEntity(options) {
+async function moveEntity(params) {
   metrics.inc('tpds.move-entity')
+  const { projectId, rev, entityId, entityType, folderId } = params
 
-  const projectUserIds = await getProjectUsersIds(options.project_id)
-  const { endPath, startPath } = buildMovePaths(options)
+  const projectUserIds = await getProjectUsersIds(projectId)
+  const { endPath, startPath } = buildMovePaths(params)
 
   for (const userId of projectUserIds) {
+    const headers = {
+      sl_project_id: projectId,
+      sl_entity_rev: rev,
+      sl_all_user_ids: JSON.stringify([userId]),
+      sl_project_owner_user_id: projectUserIds[0],
+    }
+    if (entityId != null) {
+      headers.sl_entity_id = entityId
+    }
+    if (entityType != null) {
+      headers.sl_entity_type = entityType
+    }
+    if (folderId != null) {
+      headers.sl_folder_id = folderId
+    }
     const job = {
       method: 'put',
       title: 'moveEntity',
       uri: `${tpdsUrl}/user/${userId}/entity`,
-      headers: {
-        sl_project_id: options.project_id,
-        sl_entity_rev: options.rev,
-        sl_all_user_ids: JSON.stringify([userId]),
-        sl_project_owner_user_id: projectUserIds[0],
-      },
+      headers,
       json: {
         user_id: userId,
         endPath,

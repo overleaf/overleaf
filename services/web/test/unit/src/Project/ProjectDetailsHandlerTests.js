@@ -173,8 +173,8 @@ describe('ProjectDetailsHandler', function () {
       await this.handler.promises.renameProject(this.project._id, this.newName)
       expect(this.TpdsUpdateSender.promises.moveEntity).to.have.been.calledWith(
         {
-          project_id: this.project._id,
-          project_name: this.project.name,
+          projectId: this.project._id,
+          projectName: this.project.name,
           newProjectName: this.newName,
         }
       )

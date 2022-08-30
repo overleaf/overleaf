@@ -114,8 +114,8 @@ async function renameProject(projectId, newName) {
   const oldProjectName = project.name
   await Project.updateOne({ _id: projectId }, { name: newName }).exec()
   await TpdsUpdateSender.promises.moveEntity({
-    project_id: projectId,
-    project_name: oldProjectName,
+    projectId,
+    projectName: oldProjectName,
     newProjectName: newName,
   })
 }

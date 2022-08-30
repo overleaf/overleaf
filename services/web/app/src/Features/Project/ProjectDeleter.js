@@ -382,7 +382,7 @@ async function expireDeletedProject(projectId) {
         : Promise.resolve(),
       FilestoreHandler.promises.deleteProject(deletedProject.project._id),
       TpdsUpdateSender.promises.deleteProject({
-        project_id: deletedProject.project._id,
+        projectId: deletedProject.project._id,
       }),
       ChatApiHandler.promises.destroyProject(deletedProject.project._id),
       hardDeleteDeletedFiles(deletedProject.project._id),

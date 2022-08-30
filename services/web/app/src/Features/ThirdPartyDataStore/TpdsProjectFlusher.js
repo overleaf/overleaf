@@ -51,20 +51,22 @@ async function _flushProjectToTpds(project) {
   ])
   for (const [docPath, doc] of Object.entries(docs)) {
     await TpdsUpdateSender.promises.addDoc({
-      project_id: project._id,
-      doc_id: doc._id,
+      projectId: project._id,
+      docId: doc._id,
       path: docPath,
-      project_name: project.name,
+      projectName: project.name,
       rev: doc.rev || 0,
+      folderId: doc.folder._id,
     })
   }
   for (const [filePath, file] of Object.entries(files)) {
     await TpdsUpdateSender.promises.addFile({
-      project_id: project._id,
-      file_id: file._id,
+      projectId: project._id,
+      fileId: file._id,
       path: filePath,
-      project_name: project.name,
+      projectName: project.name,
       rev: file.rev,
+      folderId: file.folder._id,
     })
   }
   await _resetDeferredTpdsFlushCounter(project)

@@ -491,7 +491,7 @@ describe('ProjectDeleter', function () {
         expect(
           this.TpdsUpdateSender.promises.deleteProject
         ).to.have.been.calledWith({
-          project_id: this.deletedProjects[0].project._id,
+          projectId: this.deletedProjects[0].project._id,
         })
       })
 
