@@ -243,9 +243,9 @@ public class Oauth2Filter implements Filter {
           );
           w.println(
             "account first. "
-              + "Please see https://www.overleaf.com/blog/195 for "
+              + "Please see https://www.overleaf.com/learn/how-to/Troubleshooting_git_bridge_problems "
           );
-          w.println("more information.");
+          w.println("for more information.");
         }
 
         w.close();
