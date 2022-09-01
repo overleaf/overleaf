@@ -347,7 +347,7 @@ describe('TpdsUpdateSender', function () {
         method: method0,
       } = this.request.firstCall.args[0].json
 
-      group0.should.equal(`poll-dropbox:${userId}`)
+      group0.should.equal(userId)
       method0.should.equal('standardHttpRequest')
 
       job0.method.should.equal('post')

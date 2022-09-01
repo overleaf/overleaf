@@ -253,7 +253,9 @@ async function pollDropboxForUser(userId) {
     },
   }
 
-  return enqueue(`poll-dropbox:${userId}`, 'standardHttpRequest', job)
+  // Queue poll requests in the user queue along with file updates, in order
+  // to avoid race conditions between polling and updates.
+  return enqueue(userId, 'standardHttpRequest', job)
 }
 
 const TpdsUpdateSender = {
