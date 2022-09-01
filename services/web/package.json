@@ -34,7 +34,7 @@
     "convert-themes": "node modules/source-editor/frontend/js/themes/convert.js",
     "cypress:open-ct": "SHARELATEX_CONFIG=$PWD/config/settings.webpack.js cypress open --component",
     "cypress:run-ct": "SHARELATEX_CONFIG=$PWD/config/settings.webpack.js cypress run --component",
-    "lezer-latex:generate": "node modules/source-editor/scripts/lezer-latex/generate.js",
+    "lezer-latex:generate": "if [ ! -d $(pwd)/modules/source-editor ]; then echo \"'source-editor' module is not available\"; exit 0; fi; node modules/source-editor/scripts/lezer-latex/generate.js",
     "lezer-latex:run": "node modules/source-editor/scripts/lezer-latex/run.mjs",
     "routes": "bin/routes",
     "routes": "bin/routes",
