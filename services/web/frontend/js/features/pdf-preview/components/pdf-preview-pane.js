@@ -1,12 +1,14 @@
 import { memo, Suspense } from 'react'
 import classNames from 'classnames'
-import CompileTimeWarning from './compile-time-warning'
 import PdfLogsViewer from './pdf-logs-viewer'
 import PdfViewer from './pdf-viewer'
 import LoadingSpinner from '../../../shared/components/loading-spinner'
 import PdfHybridPreviewToolbar from './pdf-preview-hybrid-toolbar'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import FasterCompilesFeedback from './faster-compiles-feedback'
+import { PdfPreviewMessages } from './pdf-preview-messages'
+import CompileTimeWarning from './compile-time-warning'
+import RichTextSurvey from './rich-text-survey'
 
 function PdfPreviewPane() {
   const { pdfUrl } = useCompileContext()
@@ -16,7 +18,10 @@ function PdfPreviewPane() {
   return (
     <div className={classes}>
       <PdfHybridPreviewToolbar />
-      <CompileTimeWarning />
+      <PdfPreviewMessages>
+        <CompileTimeWarning />
+        <RichTextSurvey />
+      </PdfPreviewMessages>
       <Suspense fallback={<LoadingPreview />}>
         <div className="pdf-viewer">
           <PdfViewer />

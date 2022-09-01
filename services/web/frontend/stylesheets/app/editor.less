@@ -746,15 +746,26 @@ CodeMirror
   overflow: visible !important;
 }
 
-.compile-time-warning {
+.pdf-preview-messages {
   position: absolute;
   right: @margin-sm;
   top: @margin-xl;
+  z-index: @zindex-popover;
+}
+
+.compile-time-warning,
+.rich-text-survey-warning {
   padding: @padding-sm;
   background-color: @ol-green;
-  width: 400px;
-  z-index: @zindex-popover;
+  width: 420px;
   box-shadow: 5px 5px 6px rgba(0, 0, 0, 0.3);
+
+  .warning-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-right: 32px;
+  }
 
   .warning-text {
     max-width: 300px;
@@ -763,11 +774,7 @@ CodeMirror
     font-size: @font-size-small;
   }
   .upgrade-prompt {
-    display: inline-block;
-    position: absolute;
-    height: 100%;
-    top: @margin-lg;
-    right: 32px;
+    display: inline-flex;
   }
 
   button.btn {

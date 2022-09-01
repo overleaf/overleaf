@@ -67,7 +67,7 @@ function CompileTimeWarning() {
       >
         <span aria-hidden="true">&times;</span>
       </Button>
-      <div>
+      <div className="warning-content">
         <div className="warning-text">
           <Trans
             i18nKey="approaching_compile_timeout_limit_upgrade_for_more_compile_time"
