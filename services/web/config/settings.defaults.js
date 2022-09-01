@@ -597,7 +597,7 @@ module.exports = {
     stepTimeout: parseInt(process.env.SMOKE_TEST_STEP_TIMEOUT || '10000', 10),
   },
 
-  appName: process.env.APP_NAME || 'ShareLaTeX (Community Edition)',
+  appName: process.env.APP_NAME || 'Overleaf (Community Edition)',
 
   adminEmail: process.env.ADMIN_EMAIL || 'placeholder@example.com',
   adminDomains: process.env.ADMIN_DOMAINS
@@ -605,7 +605,7 @@ module.exports = {
     : undefined,
 
   nav: {
-    title: 'ShareLaTeX Community Edition',
+    title: process.env.APP_NAME || 'Overleaf Community Edition',
 
     hide_powered_by: process.env.NAV_HIDE_POWERED_BY === 'true',
     left_footer: [],
