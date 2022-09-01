@@ -402,29 +402,6 @@ describe('RequestParser', function () {
     })
   })
 
-  describe('with a root resource path that needs escaping', function () {
-    beforeEach(function () {
-      this.badPath = '`rm -rf foo`.tex'
-      this.goodPath = 'rm -rf foo.tex'
-      this.validRequest.compile.rootResourcePath = this.badPath
-      this.validRequest.compile.resources.push({
-        path: this.badPath,
-        date: '12:00 01/02/03',
-        content: 'Hello world',
-      })
-      this.RequestParser.parse(this.validRequest, this.callback)
-      this.data = this.callback.args[0][1]
-    })
-
-    it('should return the escaped resource', function () {
-      this.data.rootResourcePath.should.equal(this.goodPath)
-    })
-
-    it('should also escape the resource path', function () {
-      this.data.resources[0].path.should.equal(this.goodPath)
-    })
-  })
-
   describe('with a root resource path that has a relative path', function () {
     beforeEach(function () {
       this.validRequest.compile.rootResourcePath = 'foo/../../bar.tex'
@@ -441,7 +418,7 @@ describe('RequestParser', function () {
 
   describe('with a root resource path that has unescaped + relative path', function () {
     beforeEach(function () {
-      this.validRequest.compile.rootResourcePath = 'foo/#../bar.tex'
+      this.validRequest.compile.rootResourcePath = 'foo/../bar.tex'
       this.RequestParser.parse(this.validRequest, this.callback)
       this.data = this.callback.args[0][1]
     })

@@ -4,7 +4,6 @@ const VALID_COMPILERS = ['pdflatex', 'latex', 'xelatex', 'lualatex']
 const MAX_TIMEOUT = 600
 
 function parse(body, callback) {
-  let resource
   const response = {}
 
   if (body.compile == null) {
@@ -127,15 +126,7 @@ function parse(body, callback) {
         type: 'string',
       }
     )
-    const originalRootResourcePath = rootResourcePath
-    const sanitizedRootResourcePath = _sanitizePath(rootResourcePath)
-    response.rootResourcePath = _checkPath(sanitizedRootResourcePath)
-
-    for (resource of response.resources) {
-      if (resource.path === originalRootResourcePath) {
-        resource.path = sanitizedRootResourcePath
-      }
-    }
+    response.rootResourcePath = _checkPath(rootResourcePath)
   } catch (error1) {
     const error = error1
     return callback(error)
@@ -202,12 +193,6 @@ function _parseAttribute(name, attribute, options) {
     }
   }
   return attribute
-}
-
-function _sanitizePath(path) {
-  // See http://php.net/manual/en/function.escapeshellcmd.php
-  // eslint-disable-next-line no-control-regex
-  return path.replace(/[#&;`|*?~<>^()[\]{}$\\\x0A\xFF\x00]/g, '')
 }
 
 function _checkPath(path) {
