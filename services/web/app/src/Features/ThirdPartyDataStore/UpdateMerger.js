@@ -21,6 +21,7 @@ const EditorController = require('../Editor/EditorController')
 const FileTypeManager = require('../Uploads/FileTypeManager')
 const FileWriter = require('../../infrastructure/FileWriter')
 const ProjectEntityHandler = require('../Project/ProjectEntityHandler')
+const { promisifyAll } = require('../../util/promises')
 
 module.exports = UpdateMerger = {
   mergeUpdate(user_id, project_id, path, updateRequest, source, callback) {
@@ -259,3 +260,5 @@ module.exports = UpdateMerger = {
     },
   },
 }
+
+module.exports.promises = promisifyAll(module.exports)

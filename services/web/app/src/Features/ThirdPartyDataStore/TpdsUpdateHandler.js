@@ -1,3 +1,4 @@
+const { promisify } = require('util')
 const UpdateMerger = require('./UpdateMerger')
 const logger = require('@overleaf/logger')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
@@ -167,4 +168,8 @@ function handleDuplicateProjects(userId, projectName, callback) {
 module.exports = {
   newUpdate,
   deleteUpdate,
+  promises: {
+    newUpdate: promisify(newUpdate),
+    deleteUpdate: promisify(deleteUpdate),
+  },
 }

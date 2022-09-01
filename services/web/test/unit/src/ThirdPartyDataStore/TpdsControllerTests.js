@@ -1,34 +1,44 @@
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
+const { expect } = require('chai')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
-const modulePath = require('path').join(
-  __dirname,
+
+const MODULE_PATH =
   '../../../../app/src/Features/ThirdPartyDataStore/TpdsController.js'
-)
 
 describe('TpdsController', function () {
   beforeEach(function () {
-    this.TpdsUpdateHandler = {}
+    this.TpdsUpdateHandler = {
+      promises: {
+        newUpdate: sinon.stub().resolves(),
+        deleteUpdate: sinon.stub().resolves(),
+      },
+    }
+    this.UpdateMerger = {
+      promises: {
+        mergeUpdate: sinon.stub().resolves(),
+        deleteUpdate: sinon.stub().resolves(),
+      },
+    }
+    this.NotificationsBuilder = {
+      tpdsFileLimit: sinon.stub().returns({ create: sinon.stub() }),
+    }
     this.SessionManager = {
       getLoggedInUserId: sinon.stub().returns('user-id'),
     }
     this.TpdsQueueManager = {
       promises: {
-        getQueues: sinon.stub().returns('queues'),
+        getQueues: sinon.stub().resolves('queues'),
       },
     }
-    this.TpdsController = SandboxedModule.require(modulePath, {
+
+    this.TpdsController = SandboxedModule.require(MODULE_PATH, {
       requires: {
         './TpdsUpdateHandler': this.TpdsUpdateHandler,
-        './UpdateMerger': (this.UpdateMerger = {}),
-        '../Notifications/NotificationsBuilder': (this.NotificationsBuilder = {
-          tpdsFileLimit: sinon.stub().returns({ create: sinon.stub() }),
-        }),
+        './UpdateMerger': this.UpdateMerger,
+        '../Notifications/NotificationsBuilder': this.NotificationsBuilder,
         '../Authentication/SessionManager': this.SessionManager,
         './TpdsQueueManager': this.TpdsQueueManager,
-        '@overleaf/metrics': {
-          inc() {},
-        },
       },
     })
 
@@ -48,10 +58,9 @@ describe('TpdsController', function () {
           'x-sl-update-source': (this.source = 'dropbox'),
         },
       }
-      this.TpdsUpdateHandler.newUpdate = sinon.stub().callsArg(5)
       const res = {
         sendStatus: () => {
-          this.TpdsUpdateHandler.newUpdate
+          this.TpdsUpdateHandler.promises.newUpdate
             .calledWith(
               this.user_id,
               'projectName',
@@ -66,7 +75,7 @@ describe('TpdsController', function () {
       this.TpdsController.mergeUpdate(req, res)
     })
 
-    it('should return a 500 error when the update receiver fails', function () {
+    it('should return a 500 error when the update receiver fails', function (done) {
       const path = '/projectName/here.txt'
       const req = {
         pause() {},
@@ -78,17 +87,18 @@ describe('TpdsController', function () {
           'x-sl-update-source': (this.source = 'dropbox'),
         },
       }
-      this.TpdsUpdateHandler.newUpdate = sinon
-        .stub()
-        .callsArgWith(5, 'update-receiver-error')
+      this.TpdsUpdateHandler.promises.newUpdate.rejects(new Error())
       const res = {
         sendStatus: sinon.stub(),
       }
-      this.TpdsController.mergeUpdate(req, res)
-      res.sendStatus.calledWith(500).should.equal(true)
+      this.TpdsController.mergeUpdate(req, res, err => {
+        expect(err).to.exist
+        expect(res.sendStatus).not.to.have.been.called
+        done()
+      })
     })
 
-    it('should return a 400 error when the project is too big', function () {
+    it('should return a 400 error when the project is too big', function (done) {
       const path = '/projectName/here.txt'
       const req = {
         pause() {},
@@ -100,20 +110,22 @@ describe('TpdsController', function () {
           'x-sl-update-source': (this.source = 'dropbox'),
         },
       }
-      this.TpdsUpdateHandler.newUpdate = sinon
-        .stub()
-        .callsArgWith(5, { message: 'project_has_too_many_files' })
+      this.TpdsUpdateHandler.promises.newUpdate.rejects({
+        message: 'project_has_too_many_files',
+      })
       const res = {
-        sendStatus: sinon.stub(),
+        sendStatus: status => {
+          expect(status).to.equal(400)
+          this.NotificationsBuilder.tpdsFileLimit.should.have.been.calledWith(
+            this.user_id
+          )
+          done()
+        },
       }
       this.TpdsController.mergeUpdate(req, res)
-      res.sendStatus.calledWith(400).should.equal(true)
-      this.NotificationsBuilder.tpdsFileLimit
-        .calledWith(this.user_id)
-        .should.equal(true)
     })
 
-    it('should return a 429 error when the update receiver fails due to too many requests error', function () {
+    it('should return a 429 error when the update receiver fails due to too many requests error', function (done) {
       const path = '/projectName/here.txt'
       const req = {
         pause() {},
@@ -125,14 +137,16 @@ describe('TpdsController', function () {
           'x-sl-update-source': (this.source = 'dropbox'),
         },
       }
-      this.TpdsUpdateHandler.newUpdate = sinon
-        .stub()
-        .callsArgWith(5, new Errors.TooManyRequestsError('project on cooldown'))
+      this.TpdsUpdateHandler.promises.newUpdate.rejects(
+        new Errors.TooManyRequestsError('project on cooldown')
+      )
       const res = {
-        sendStatus: sinon.stub(),
+        sendStatus: status => {
+          expect(status).to.equal(429)
+          done()
+        },
       }
       this.TpdsController.mergeUpdate(req, res)
-      res.sendStatus.calledWith(429).should.equal(true)
     })
   })
 
@@ -148,10 +162,9 @@ describe('TpdsController', function () {
           'x-sl-update-source': (this.source = 'dropbox'),
         },
       }
-      this.TpdsUpdateHandler.deleteUpdate = sinon.stub().callsArg(4)
       const res = {
         sendStatus: () => {
-          this.TpdsUpdateHandler.deleteUpdate
+          this.TpdsUpdateHandler.promises.deleteUpdate
             .calledWith(this.user_id, 'projectName', '/here.txt', this.source)
             .should.equal(true)
           done()
@@ -190,8 +203,7 @@ describe('TpdsController', function () {
   })
 
   describe('updateProjectContents', function () {
-    beforeEach(function () {
-      this.UpdateMerger.mergeUpdate = sinon.stub().callsArg(5)
+    beforeEach(function (done) {
       this.req = {
         params: {
           0: (this.path = 'chapters/main.tex'),
@@ -204,13 +216,17 @@ describe('TpdsController', function () {
           'x-sl-update-source': (this.source = 'github'),
         },
       }
-      this.res = { sendStatus: sinon.stub() }
+      this.res = {
+        sendStatus: sinon.stub().callsFake(() => {
+          done()
+        }),
+      }
 
       this.TpdsController.updateProjectContents(this.req, this.res, this.next)
     })
 
     it('should merge the update', function () {
-      this.UpdateMerger.mergeUpdate
+      this.UpdateMerger.promises.mergeUpdate
         .calledWith(
           null,
           this.project_id,
@@ -227,8 +243,7 @@ describe('TpdsController', function () {
   })
 
   describe('deleteProjectContents', function () {
-    beforeEach(function () {
-      this.UpdateMerger.deleteUpdate = sinon.stub().callsArg(4)
+    beforeEach(function (done) {
       this.req = {
         params: {
           0: (this.path = 'chapters/main.tex'),
@@ -241,13 +256,17 @@ describe('TpdsController', function () {
           'x-sl-update-source': (this.source = 'github'),
         },
       }
-      this.res = { sendStatus: sinon.stub() }
+      this.res = {
+        sendStatus: sinon.stub().callsFake(() => {
+          done()
+        }),
+      }
 
       this.TpdsController.deleteProjectContents(this.req, this.res, this.next)
     })
 
     it('should delete the file', function () {
-      this.UpdateMerger.deleteUpdate
+      this.UpdateMerger.promises.deleteUpdate
         .calledWith(null, this.project_id, `/${this.path}`, this.source)
         .should.equal(true)
     })
@@ -265,8 +284,11 @@ describe('TpdsController', function () {
     })
 
     describe('success', function () {
-      beforeEach(async function () {
-        await this.TpdsController.getQueues(this.req, this.res, this.next)
+      beforeEach(function (done) {
+        this.res.json.callsFake(() => {
+          done()
+        })
+        this.TpdsController.getQueues(this.req, this.res, this.next)
       })
 
       it('should use userId from session', function () {
@@ -283,12 +305,15 @@ describe('TpdsController', function () {
     })
 
     describe('error', function () {
-      beforeEach(async function () {
+      beforeEach(function (done) {
         this.err = new Error()
         this.TpdsQueueManager.promises.getQueues = sinon
           .stub()
           .rejects(this.err)
-        await this.TpdsController.getQueues(this.req, this.res, this.next)
+        this.next.callsFake(() => {
+          done()
+        })
+        this.TpdsController.getQueues(this.req, this.res, this.next)
       })
 
       it('should call next with error', function () {
