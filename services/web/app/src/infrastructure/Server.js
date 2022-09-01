@@ -161,7 +161,7 @@ webRouter.use(
     },
     store: sessionStore,
     key: Settings.cookieName,
-    rolling: true,
+    rolling: Settings.cookieRollingSession === true,
   })
 )
 if (Features.hasFeature('saas')) {
@@ -203,23 +203,25 @@ webRouter.use(webRouter.csrf.middleware)
 webRouter.use(translations.i18nMiddleware)
 webRouter.use(translations.setLangBasedOnDomainMiddleware)
 
-// Measure expiry from last request, not last login
-webRouter.use(function (req, res, next) {
-  if (!req.session.noSessionCallback) {
-    req.session.touch()
-    if (SessionManager.isUserLoggedIn(req.session)) {
-      UserSessionsManager.touch(
-        SessionManager.getSessionUser(req.session),
-        err => {
-          if (err) {
-            logger.err({ err }, 'error extending user session')
+if (Settings.cookieRollingSession) {
+  // Measure expiry from last request, not last login
+  webRouter.use(function (req, res, next) {
+    if (!req.session.noSessionCallback) {
+      req.session.touch()
+      if (SessionManager.isUserLoggedIn(req.session)) {
+        UserSessionsManager.touch(
+          SessionManager.getSessionUser(req.session),
+          err => {
+            if (err) {
+              logger.err({ err }, 'error extending user session')
+            }
           }
-        }
-      )
+        )
+      }
     }
-  }
-  next()
-})
+    next()
+  })
+}
 
 webRouter.use(ReferalConnect.use)
 expressLocals(webRouter, privateApiRouter, publicApiRouter)

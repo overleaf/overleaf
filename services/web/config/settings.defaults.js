@@ -264,6 +264,7 @@ module.exports = {
   // replace subdomain with dot to have them accessible on all subdomains
   cookieDomain: process.env.COOKIE_DOMAIN,
   cookieName: process.env.COOKIE_NAME || 'sharelatex.sid',
+  cookieRollingSession: true,
 
   // this is only used if cookies are used for clsi backend
   // clsiCookieKey: "clsiserver"
