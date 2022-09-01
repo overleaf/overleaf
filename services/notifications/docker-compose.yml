@@ -1,6 +1,6 @@
 # This file was auto-generated, do not edit it directly.
 # Instead run bin/update_build_scripts from
-# https://github.com/sharelatex/sharelatex-dev-environment
+# https://github.com/overleaf/internal/
 
 version: "2.3"
 
@@ -44,7 +44,7 @@ services:
     command: npm run --silent test:acceptance
 
   mongo:
-    image: mongo:4.2.15
+    image: mongo:4.4.16
     healthcheck:
       test: "mongo --quiet localhost/test --eval 'quit(db.runCommand({ ping: 1 }).ok ? 0 : 1)'"
       interval: 1s

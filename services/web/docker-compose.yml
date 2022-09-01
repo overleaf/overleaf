@@ -89,7 +89,7 @@ services:
     image: redis
 
   mongo:
-    image: mongo:4.2.15
+    image: mongo:4.4.16
 
   ldap:
     restart: always
