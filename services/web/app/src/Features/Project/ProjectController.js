@@ -1116,7 +1116,13 @@ const ProjectController = {
               !Features.hasFeature('saas') ||
               (user.features && user.features.symbolPalette)
 
+            // It would be nice if this could go in the Galileo module but
+            // nothing else does that
             const galileoEnabled = shouldDisplayFeature('galileo')
+            const galileoFeatures =
+              req.query && 'galileoFeatures' in req.query
+                ? req.query.galileoFeatures.split(',').map(f => f.trim())
+                : ['all']
 
             const dictionaryEditorEnabled =
               !Features.hasFeature('saas') ||
@@ -1200,6 +1206,7 @@ const ProjectController = {
               showNewSourceEditorOption,
               showSymbolPalette,
               galileoEnabled,
+              galileoFeatures,
               showStopOnFirstError,
               detachRole,
               metadata: { viewport: false },
