@@ -833,6 +833,8 @@
   "ask_proj_owner_to_upgrade_for_references_search": "Please ask the project owner to upgrade to use the References Search feature.",
   "ask_proj_owner_to_upgrade_for_faster_compiles": "Please ask the project owner to upgrade for faster compiles and to increase the timeout limit.",
   "search_bib_files": "Search by author, title, year",
+  "copy_bibtex_to_paste_in_file": "The <strong>__citeKey__</strong> cite key has been inserted. Click <strong>Copy BibTeX</strong> to copy the matching citation information and paste it into your <strong>.bib</strong> file.",
+  "copy_bibtex": "Copy BibTeX",
   "leave_group": "Leave group",
   "leave_now": "Leave now",
   "sure_you_want_to_leave_group": "Are you sure you want to leave this group?",
