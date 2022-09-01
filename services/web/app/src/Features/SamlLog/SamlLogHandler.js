@@ -42,7 +42,9 @@ function log(req, data, samlAssertion) {
     }
 
     if (data.error || samlAssertion) {
-      data.body = req.body
+      data.body = {}
+      if (req.body.email) data.body.email = req.body.email
+      if (req.body.SAMLResponse) data.body.SAMLResponse = req.body.SAMLResponse
     }
 
     try {
