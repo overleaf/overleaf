@@ -133,6 +133,7 @@ async function _addExampleProjectFiles(ownerId, projectName, project) {
 
 async function _createBlankProject(ownerId, projectName, attributes = {}) {
   metrics.inc('project-creation')
+  const timer = new metrics.Timer('project-creation')
   await ProjectDetailsHandler.promises.validateProjectName(projectName)
 
   if (!attributes.overleaf) {
@@ -169,7 +170,9 @@ async function _createBlankProject(ownerId, projectName, attributes = {}) {
   project.rootFolder[0] = rootFolder
   const user = await User.findById(ownerId, 'ace.spellCheckLanguage')
   project.spellCheckLanguage = user.ace.spellCheckLanguage
-  return await project.save()
+  await project.save()
+  timer.done()
+  return project
 }
 
 async function _createRootDoc(project, ownerId, docLines) {
