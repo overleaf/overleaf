@@ -102,15 +102,24 @@
   h3 {
     margin-top: 0;
   }
+  h4 {
+    margin-top: 5px;
+    margin-bottom: 15px;
+  }
   ul {
     padding-left: 10px;
   }
   li {
     list-style-position: inside;
   }
+  .number-of-collaborators {
+    margin-bottom: 5px;
+  }
 }
 
 .price-summary {
+  padding-bottom: 7.5px;
+
   .price-summary-line {
     display: flex;
     justify-content: space-between;
@@ -118,6 +127,10 @@
   .price-summary-total-line {
     margin-top: 5px;
     font-size: 16px;
+  }
+  hr {
+    margin-top: 20px;
+    margin-bottom: 20px;
   }
 }
 
@@ -127,4 +140,38 @@
 
 .price-cancel-anytime {
   font-size: 12px;
+}
+
+.trial-coupon-summary {
+  font-size: 12px;
+  padding-top: 7.5px;
+  padding-bottom: 7.5px;
+}
+
+.toggle-address-second-line {
+  margin-bottom: @line-height-computed / 2;
+}
+
+.payment-method-toggle {
+  border-bottom: 1px solid @hr-border;
+}
+
+.change-currency {
+  margin-top: 5px;
+}
+
+.change-currency-toggle {
+  padding-left: 0px;
+  font-size: 12px;
+  text-decoration: underline;
+  color: @text-small-color;
+  &:hover,
+  &:focus {
+    color: @text-small-color;
+  }
+}
+
+.change-currency-dropdown-selected-icon {
+  position: absolute;
+  left: 10px;
 }

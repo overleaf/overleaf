@@ -1,3 +1,20 @@
 .recurly-hosted-field {
   &:extend(.form-control);
 }
+
+.recurly-element-card {
+  &:extend(.form-control);
+  padding: 4px 4px;
+  border: 1px #cccccc solid;
+  border-radius: 20px;
+  height: 50px;
+}
+
+.recurly-element-card-invalid {
+  &:extend(.has-error);
+  border-color: @red;
+}
+
+.recurly-element-number {
+  &:extend(.form-control);
+}

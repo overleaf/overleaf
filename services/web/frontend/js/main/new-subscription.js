@@ -22,11 +22,14 @@ export default App.controller(
     }
 
     $scope.ui = {
+      showCurrencyDropdown: false,
+      showAddressSecondLine: false,
       addCompanyDetails: false,
     }
 
     $scope.recurlyLoadError = false
     $scope.currencyCode = MultiCurrencyPricing.currencyCode
+    $scope.initiallySelectedCurrencyCode = MultiCurrencyPricing.currencyCode // track for payment-page-refreshed
     $scope.allCurrencies = MultiCurrencyPricing.plans
     $scope.availableCurrencies = {}
     $scope.planCode = window.plan_code
@@ -157,6 +160,20 @@ export default App.controller(
         }
       }
 
+      // abridged list for payment-page-refreshed split test
+      $scope.limitedCurrencies = {}
+      const limitedCurrencyCodes = ['USD', 'EUR', 'GBP']
+      if (
+        limitedCurrencyCodes.indexOf($scope.initiallySelectedCurrencyCode) ===
+        -1
+      ) {
+        limitedCurrencyCodes.unshift($scope.initiallySelectedCurrencyCode)
+      }
+      limitedCurrencyCodes.forEach(currencyCode => {
+        $scope.limitedCurrencies[currencyCode] =
+          MultiCurrencyPricing.plans[currencyCode]
+      })
+
       if (
         pricing.items &&
         pricing.items.coupon &&
@@ -208,6 +225,41 @@ export default App.controller(
         .done()
     }
 
+    $scope.showAddressSecondLine = function (e) {
+      e.preventDefault()
+      $scope.ui.showAddressSecondLine = true
+    }
+
+    $scope.showCurrencyDropdown = function (e) {
+      e.preventDefault()
+      $scope.ui.showCurrencyDropdown = true
+    }
+
+    // This check is just so we don't load this on the default checkout variant
+    const newCardInputElement = document.querySelector('#recurly-card-input')
+    const elements = recurly.Elements()
+    if (newCardInputElement) {
+      const card = elements.CardElement({
+        displayIcon: true,
+        style: {
+          inputType: 'mobileSelect',
+          fontColor: '#5d6879',
+          placeholder: {},
+          invalid: {
+            fontColor: '#a93529',
+          },
+        },
+      })
+      card.attach('#recurly-card-input')
+      card.on('change', state => {
+        $scope.$applyAsync(() => {
+          $scope.showCardElementInvalid =
+            !state.focus && !state.empty && !state.valid
+          $scope.cardIsValid = state.valid
+        })
+      })
+    }
+
     $scope.applyVatNumber = () =>
       pricing
         .tax({ tax_code: 'digital', vat_number: $scope.data.vat_number })
@@ -242,7 +294,11 @@ export default App.controller(
       if ($scope.paymentMethod.value === 'paypal') {
         return $scope.data.country !== ''
       } else {
-        return form.$valid
+        if (newCardInputElement) {
+          return form.$valid && $scope.cardIsValid
+        } else {
+          return form.$valid
+        }
       }
     }
 
@@ -367,7 +423,11 @@ export default App.controller(
           delete tokenData.company
           delete tokenData.vat_number
         }
-        recurly.token(tokenData, completeSubscription)
+        if (newCardInputElement) {
+          recurly.token(elements, tokenData, completeSubscription)
+        } else {
+          recurly.token(tokenData, completeSubscription)
+        }
       }
     }
 

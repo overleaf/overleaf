@@ -154,10 +154,25 @@ async function paymentPage(req, res) {
         res,
         'payment-page'
       )
-      const template =
+      const useUpdatedPaymentPage =
         assignment && assignment.variant === 'updated-payment-page'
-          ? 'subscriptions/new-updated'
-          : 'subscriptions/new'
+
+      const refreshedPaymentPageAssignment =
+        await SplitTestHandler.promises.getAssignment(
+          req,
+          res,
+          'payment-page-refresh'
+        )
+      const useRefreshedPaymentPage =
+        refreshedPaymentPageAssignment &&
+        refreshedPaymentPageAssignment.variant === 'refreshed-payment-page'
+
+      const template = useRefreshedPaymentPage
+        ? 'subscriptions/new-refreshed'
+        : useUpdatedPaymentPage
+        ? 'subscriptions/new-updated'
+        : 'subscriptions/new'
+
       res.render(template, {
         title: 'subscribe',
         currency,
