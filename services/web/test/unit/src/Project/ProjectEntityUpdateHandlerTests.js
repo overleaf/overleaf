@@ -1567,7 +1567,9 @@ describe('ProjectEntityUpdateHandler', function () {
         this.projectBeforeDeletion,
         this.newProject
       )
-      this.ProjectEntityUpdateHandler._cleanUpEntity = sinon.stub().yields()
+      this.ProjectEntityUpdateHandler._cleanUpEntity = sinon
+        .stub()
+        .yields(null, [{ type: 'doc', entity: this.doc, path: this.path }])
 
       this.ProjectEntityUpdateHandler.deleteEntity(
         projectId,
@@ -1600,15 +1602,14 @@ describe('ProjectEntityUpdateHandler', function () {
     })
 
     it('it notifies the tpds', function () {
-      this.TpdsUpdateSender.deleteEntity
-        .calledWith({
-          projectId,
-          path: this.path,
-          projectName: this.projectBeforeDeletion.name,
-          entityId: docId,
-          entityType: 'doc',
-        })
-        .should.equal(true)
+      this.TpdsUpdateSender.deleteEntity.should.have.been.calledWith({
+        projectId,
+        path: this.path,
+        projectName: this.projectBeforeDeletion.name,
+        entityId: docId,
+        entityType: 'doc',
+        subtreeEntityIds: [this.doc._id],
+      })
     })
 
     it('retuns the entity_id', function () {
@@ -2358,7 +2359,13 @@ describe('ProjectEntityUpdateHandler', function () {
           this.path,
           userId,
           this.source,
-          done
+          (err, subtreeListing) => {
+            if (err) {
+              return done(err)
+            }
+            this.subtreeListing = subtreeListing
+            done()
+          }
         )
       })
 
@@ -2378,20 +2385,25 @@ describe('ProjectEntityUpdateHandler', function () {
         this.DocumentUpdaterHandler.deleteDoc.called.should.equal(false)
       })
 
-      it('should should send the update to the doc updater', function () {
+      it('should send the update to the doc updater', function () {
         const oldFiles = [{ file: this.entity, path: this.path }]
-        this.DocumentUpdaterHandler.updateProjectStructure
-          .calledWith(
-            projectId,
-            projectHistoryId,
-            userId,
-            {
-              oldFiles,
-              newProject: this.newProject,
-            },
-            this.source
-          )
-          .should.equal(true)
+        this.DocumentUpdaterHandler.updateProjectStructure.should.have.been.calledWith(
+          projectId,
+          projectHistoryId,
+          userId,
+          {
+            oldFiles,
+            oldDocs: [],
+            newProject: this.newProject,
+          },
+          this.source
+        )
+      })
+
+      it('should return a subtree listing containing only the file', function () {
+        expect(this.subtreeListing).to.deep.equal([
+          { type: 'file', entity: this.entity, path: this.path },
+        ])
       })
     })
 
@@ -2409,7 +2421,13 @@ describe('ProjectEntityUpdateHandler', function () {
           this.path,
           userId,
           this.source,
-          done
+          (err, subtreeListing) => {
+            if (err) {
+              return done(err)
+            }
+            this.subtreeListing = subtreeListing
+            done()
+          }
         )
       })
 
@@ -2419,20 +2437,25 @@ describe('ProjectEntityUpdateHandler', function () {
           .should.equal(true)
       })
 
-      it('should should send the update to the doc updater', function () {
+      it('should send the update to the doc updater', function () {
         const oldDocs = [{ doc: this.entity, path: this.path }]
-        this.DocumentUpdaterHandler.updateProjectStructure
-          .calledWith(
-            projectId,
-            projectHistoryId,
-            userId,
-            {
-              oldDocs,
-              newProject: this.newProject,
-            },
-            this.source
-          )
-          .should.equal(true)
+        this.DocumentUpdaterHandler.updateProjectStructure.should.have.been.calledWith(
+          projectId,
+          projectHistoryId,
+          userId,
+          {
+            oldDocs,
+            oldFiles: [],
+            newProject: this.newProject,
+          },
+          this.source
+        )
+      })
+
+      it('should return a subtree listing containing only the doc', function () {
+        expect(this.subtreeListing).to.deep.equal([
+          { type: 'doc', entity: this.entity, path: this.path },
+        ])
       })
     })
 
@@ -2465,7 +2488,13 @@ describe('ProjectEntityUpdateHandler', function () {
           path,
           userId,
           this.source,
-          done
+          (err, subtreeListing) => {
+            if (err) {
+              return done(err)
+            }
+            this.subtreeListing = subtreeListing
+            done()
+          }
         )
       })
 
@@ -2519,6 +2548,29 @@ describe('ProjectEntityUpdateHandler', function () {
             this.source
           )
           .should.equal(true)
+      })
+
+      it('should return a subtree listing containing all sub-entities', function () {
+        expect(this.subtreeListing).to.have.deep.members([
+          { type: 'folder', entity: this.folder, path: '/folder' },
+          {
+            type: 'folder',
+            entity: this.folder.folders[0],
+            path: '/folder/subfolder',
+          },
+          {
+            type: 'file',
+            entity: this.file1,
+            path: '/folder/subfolder/file-name-1',
+          },
+          {
+            type: 'doc',
+            entity: this.doc1,
+            path: '/folder/subfolder/doc-name-1',
+          },
+          { type: 'file', entity: this.file2, path: '/folder/file-name-2' },
+          { type: 'doc', entity: this.doc2, path: '/folder/doc-name-2' },
+        ])
       })
     })
   })

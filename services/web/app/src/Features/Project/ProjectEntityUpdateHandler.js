@@ -1130,10 +1130,13 @@ const ProjectEntityUpdateHandler = {
           path.fileSystem,
           userId,
           source,
-          error => {
+          (error, subtreeListing) => {
             if (error != null) {
               return callback(error)
             }
+            const subtreeEntityIds = subtreeListing.map(entry =>
+              entry.entity._id.toString()
+            )
             TpdsUpdateSender.deleteEntity(
               {
                 projectId,
@@ -1141,6 +1144,7 @@ const ProjectEntityUpdateHandler = {
                 projectName: projectBeforeDeletion.name,
                 entityId,
                 entityType,
+                subtreeEntityIds,
               },
               error => {
                 if (error != null) {
@@ -1557,87 +1561,69 @@ const ProjectEntityUpdateHandler = {
     source,
     callback
   ) {
+    const subtreeListing = _listSubtree(entity, entityType, path)
     ProjectEntityUpdateHandler._updateProjectStructureWithDeletedEntity(
       project,
       newProject,
-      entity,
-      entityType,
-      path,
+      subtreeListing,
       userId,
       source,
       error => {
         if (error != null) {
           return callback(error)
         }
-        if (entityType.indexOf('file') !== -1) {
-          ProjectEntityUpdateHandler._cleanUpFile(
-            project,
-            entity,
-            path,
-            userId,
-            callback
-          )
-        } else if (entityType.indexOf('doc') !== -1) {
-          ProjectEntityUpdateHandler._cleanUpDoc(
-            project,
-            entity,
-            path,
-            userId,
-            callback
-          )
-        } else if (entityType.indexOf('folder') !== -1) {
-          ProjectEntityUpdateHandler._cleanUpFolder(
-            project,
-            entity,
-            path,
-            userId,
-            callback
-          )
-        } else {
-          callback()
+        const jobs = []
+
+        for (const entry of subtreeListing) {
+          if (entry.type === 'doc') {
+            jobs.push(cb => {
+              ProjectEntityUpdateHandler._cleanUpDoc(
+                project,
+                entry.entity,
+                entry.path,
+                userId,
+                cb
+              )
+            })
+          } else if (entry.type === 'file') {
+            jobs.push(cb => {
+              ProjectEntityUpdateHandler._cleanUpFile(
+                project,
+                entry.entity,
+                entry.path,
+                userId,
+                cb
+              )
+            })
+          }
         }
+        async.series(jobs, err => {
+          if (err) {
+            return callback(err)
+          }
+          callback(null, subtreeListing)
+        })
       }
     )
   },
 
-  // Note: the _cleanUpEntity code and _updateProjectStructureWithDeletedEntity
-  // methods both need to recursively iterate over the entities in folder.
-  // These are currently using separate implementations of the recursion. In
-  // future, these could be simplified using a common project entity iterator.
   _updateProjectStructureWithDeletedEntity(
     project,
     newProject,
-    entity,
-    entityType,
-    entityPath,
+    subtreeListing,
     userId,
     source,
     callback
   ) {
-    // compute the changes to the project structure
-    let changes
-    if (entityType.indexOf('file') !== -1) {
-      changes = { oldFiles: [{ file: entity, path: entityPath }] }
-    } else if (entityType.indexOf('doc') !== -1) {
-      changes = { oldDocs: [{ doc: entity, path: entityPath }] }
-    } else if (entityType.indexOf('folder') !== -1) {
-      changes = { oldDocs: [], oldFiles: [] }
-      const _recurseFolder = (folder, folderPath) => {
-        for (const doc of iterablePaths(folder, 'docs')) {
-          changes.oldDocs.push({ doc, path: Path.join(folderPath, doc.name) })
-        }
-        for (const file of iterablePaths(folder, 'fileRefs')) {
-          changes.oldFiles.push({
-            file,
-            path: Path.join(folderPath, file.name),
-          })
-        }
-        for (const childFolder of iterablePaths(folder, 'folders')) {
-          _recurseFolder(childFolder, Path.join(folderPath, childFolder.name))
-        }
+    const changes = { oldDocs: [], oldFiles: [] }
+    for (const entry of subtreeListing) {
+      if (entry.type === 'doc') {
+        changes.oldDocs.push({ doc: entry.entity, path: entry.path })
+      } else if (entry.type === 'file') {
+        changes.oldFiles.push({ file: entry.entity, path: entry.path })
       }
-      _recurseFolder(entity, entityPath)
     }
+
     // now send the project structure changes to the docupdater
     changes.newProject = newProject
     const projectId = project._id.toString()
@@ -1690,50 +1676,6 @@ const ProjectEntityUpdateHandler = {
       file,
       callback
     )
-  },
-
-  _cleanUpFolder(project, folder, folderPath, userId, callback) {
-    const jobs = []
-    folder.docs.forEach(doc => {
-      const docPath = Path.join(folderPath, doc.name)
-      jobs.push(callback =>
-        ProjectEntityUpdateHandler._cleanUpDoc(
-          project,
-          doc,
-          docPath,
-          userId,
-          callback
-        )
-      )
-    })
-
-    folder.fileRefs.forEach(file => {
-      const filePath = Path.join(folderPath, file.name)
-      jobs.push(callback =>
-        ProjectEntityUpdateHandler._cleanUpFile(
-          project,
-          file,
-          filePath,
-          userId,
-          callback
-        )
-      )
-    })
-
-    folder.folders.forEach(childFolder => {
-      folderPath = Path.join(folderPath, childFolder.name)
-      jobs.push(callback =>
-        ProjectEntityUpdateHandler._cleanUpFolder(
-          project,
-          childFolder,
-          folderPath,
-          userId,
-          callback
-        )
-      )
-    })
-
-    async.series(jobs, callback)
   },
 
   convertDocToFile: wrapWithLock({
@@ -1879,6 +1821,45 @@ const ProjectEntityUpdateHandler = {
       )
     },
   }),
+}
+
+/**
+ * List all descendants of an entity along with their type and path. Include
+ * the top-level entity as well.
+ */
+function _listSubtree(entity, entityType, entityPath) {
+  if (entityType.indexOf('file') !== -1) {
+    return [{ type: 'file', entity, path: entityPath }]
+  } else if (entityType.indexOf('doc') !== -1) {
+    return [{ type: 'doc', entity, path: entityPath }]
+  } else if (entityType.indexOf('folder') !== -1) {
+    const listing = []
+    const _recurseFolder = (folder, folderPath) => {
+      listing.push({ type: 'folder', entity: folder, path: folderPath })
+      for (const doc of iterablePaths(folder, 'docs')) {
+        listing.push({
+          type: 'doc',
+          entity: doc,
+          path: Path.join(folderPath, doc.name),
+        })
+      }
+      for (const file of iterablePaths(folder, 'fileRefs')) {
+        listing.push({
+          type: 'file',
+          entity: file,
+          path: Path.join(folderPath, file.name),
+        })
+      }
+      for (const childFolder of iterablePaths(folder, 'folders')) {
+        _recurseFolder(childFolder, Path.join(folderPath, childFolder.name))
+      }
+    }
+    _recurseFolder(entity, entityPath)
+    return listing
+  } else {
+    // This shouldn't happen, but if it does, fail silently.
+    return []
+  }
 }
 
 module.exports = ProjectEntityUpdateHandler

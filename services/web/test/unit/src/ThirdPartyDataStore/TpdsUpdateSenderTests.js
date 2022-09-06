@@ -2,6 +2,7 @@ const { ObjectId } = require('mongodb')
 const SandboxedModule = require('sandboxed-module')
 const path = require('path')
 const sinon = require('sinon')
+const { expect } = require('chai')
 
 const modulePath = path.join(
   __dirname,
@@ -200,11 +201,13 @@ describe('TpdsUpdateSender', function () {
 
     it('deleting entity', async function () {
       const path = '/path/here/t.tex'
+      const subtreeEntityIds = ['id1', 'id2']
 
       await this.TpdsUpdateSender.promises.deleteEntity({
         projectId,
         path,
         projectName,
+        subtreeEntityIds,
       })
 
       const {
@@ -221,6 +224,7 @@ describe('TpdsUpdateSender', function () {
       )}${encodeURIComponent(path)}`
       job0.headers.sl_all_user_ids.should.eql(JSON.stringify([userId]))
       job0.uri.should.equal(expectedUrl)
+      expect(job0.json).to.deep.equal({ subtreeEntityIds })
 
       const { group: group1, job: job1 } = this.request.secondCall.args[0].json
       group1.should.equal(collaberatorRef)

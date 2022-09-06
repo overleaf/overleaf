@@ -108,7 +108,14 @@ function buildTpdsUrl(userId, projectName, filePath) {
 
 async function deleteEntity(params) {
   metrics.inc('tpds.delete-entity')
-  const { projectId, path, projectName, entityId, entityType } = params
+  const {
+    projectId,
+    path,
+    projectName,
+    entityId,
+    entityType,
+    subtreeEntityIds,
+  } = params
 
   const projectUserIds = await getProjectUsersIds(projectId)
 
@@ -123,6 +130,10 @@ async function deleteEntity(params) {
         sl_entity_type: entityType,
       },
       uri: buildTpdsUrl(userId, projectName, path),
+      // We're sending a body with the DELETE request. This is unconventional,
+      // but Express does handle it on the other side. Ideally, this operation
+      // would be moved to a POST endpoint.
+      json: { subtreeEntityIds },
       title: 'deleteEntity',
       sl_all_user_ids: JSON.stringify([userId]),
     }
