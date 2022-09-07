@@ -1,25 +1,15 @@
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
-const modulePath = require('path').join(
-  __dirname,
-  '../../../../app/src/Features/ThirdPartyDataStore/UpdateMerger.js'
-)
+const { expect } = require('chai')
 const BufferedStream = require('bufferedstream')
+
+const MODULE_PATH =
+  '../../../../app/src/Features/ThirdPartyDataStore/UpdateMerger.js'
 
 describe('UpdateMerger :', function () {
   beforeEach(function () {
-    this.updateMerger = SandboxedModule.require(modulePath, {
-      requires: {
-        fs: (this.fs = { unlink: sinon.stub().callsArgWith(1) }),
-        '../Editor/EditorController': (this.EditorController = {}),
-        '../Uploads/FileTypeManager': (this.FileTypeManager = {}),
-        '../../infrastructure/FileWriter': (this.FileWriter = {}),
-        '../Project/ProjectEntityHandler': (this.ProjectEntityHandler = {}),
-        '@overleaf/settings': { path: { dumpPath: 'dump_here' } },
-      },
-    })
-    this.project_id = 'project_id_here'
-    this.user_id = 'mock-user-id'
+    this.projectId = 'project_id_here'
+    this.userId = 'mock-user-id'
 
     this.docPath = this.newDocPath = '/folder/doc.tex'
     this.filePath = this.newFilePath = '/folder/file.png'
@@ -31,340 +21,311 @@ describe('UpdateMerger :', function () {
 
     this.existingDocs = [{ path: '/main.tex' }, { path: '/folder/other.tex' }]
     this.existingFiles = [{ path: '/figure.pdf' }, { path: '/folder/fig1.pdf' }]
-    this.ProjectEntityHandler.getAllEntities = sinon
-      .stub()
-      .callsArgWith(1, null, {
-        docs: this.existingDocs,
-        files: this.existingFiles,
-      })
 
     this.fsPath = '/tmp/file/path'
+    this.fileContents = `\\documentclass{article}
+\\usepackage[utf8]{inputenc}
+
+\\title{42}
+\\author{Jane Doe}
+\\date{June 2011}`
+    this.docLines = this.fileContents.split('\n')
     this.source = 'dropbox'
     this.updateRequest = new BufferedStream()
-    this.FileWriter.writeStreamToDisk = sinon.stub().yields(null, this.fsPath)
-    this.callback = sinon.stub()
+
+    this.fsPromises = {
+      unlink: sinon.stub().resolves(),
+      readFile: sinon.stub().withArgs(this.fsPath).resolves(this.fileContents),
+    }
+
+    this.EditorController = {
+      promises: {
+        deleteEntityWithPath: sinon.stub().resolves(),
+        upsertDocWithPath: sinon.stub().resolves(),
+        upsertFileWithPath: sinon.stub().resolves(),
+      },
+    }
+
+    this.FileTypeManager = {
+      promises: {
+        getType: sinon.stub(),
+      },
+    }
+
+    this.FileWriter = {
+      promises: {
+        writeStreamToDisk: sinon.stub().resolves(this.fsPath),
+      },
+    }
+
+    this.ProjectEntityHandler = {
+      promises: {
+        getAllEntities: sinon.stub().resolves({
+          docs: this.existingDocs,
+          files: this.existingFiles,
+        }),
+      },
+    }
+
+    this.Settings = { path: { dumpPath: 'dump_here' } }
+
+    this.UpdateMerger = SandboxedModule.require(MODULE_PATH, {
+      requires: {
+        'fs/promises': this.fsPromises,
+        '../Editor/EditorController': this.EditorController,
+        '../Uploads/FileTypeManager': this.FileTypeManager,
+        '../../infrastructure/FileWriter': this.FileWriter,
+        '../Project/ProjectEntityHandler': this.ProjectEntityHandler,
+        '@overleaf/settings': this.Settings,
+      },
+    })
   })
 
   describe('mergeUpdate', function () {
     describe('doc updates for a new doc', function () {
-      beforeEach(function () {
-        this.FileTypeManager.getType = sinon
-          .stub()
-          .yields(null, { binary: false, encoding: 'utf-8' })
-        this.updateMerger.p.processDoc = sinon.stub().yields()
-        this.updateMerger.mergeUpdate(
-          this.user_id,
-          this.project_id,
+      beforeEach(async function () {
+        this.FileTypeManager.promises.getType.resolves({
+          binary: false,
+          encoding: 'utf-8',
+        })
+        await this.UpdateMerger.promises.mergeUpdate(
+          this.userId,
+          this.projectId,
           this.docPath,
           this.updateRequest,
-          this.source,
-          this.callback
+          this.source
         )
       })
 
       it('should look at the file contents', function () {
-        this.FileTypeManager.getType.called.should.equal(true)
+        expect(this.FileTypeManager.promises.getType).to.have.been.called
       })
 
       it('should process update as doc', function () {
-        this.updateMerger.p.processDoc
-          .calledWith(
-            this.project_id,
-            this.user_id,
-            this.fsPath,
-            this.docPath,
-            this.source
-          )
-          .should.equal(true)
+        expect(
+          this.EditorController.promises.upsertDocWithPath
+        ).to.have.been.calledWith(
+          this.projectId,
+          this.docPath,
+          this.docLines,
+          this.source,
+          this.userId
+        )
       })
 
       it('removes the temp file from disk', function () {
-        this.fs.unlink.calledWith(this.fsPath).should.equal(true)
+        expect(this.fsPromises.unlink).to.have.been.calledWith(this.fsPath)
       })
     })
 
     describe('file updates for a new file ', function () {
-      beforeEach(function () {
-        this.FileTypeManager.getType = sinon
-          .stub()
-          .yields(null, { binary: true })
-        this.updateMerger.p.processFile = sinon.stub().yields()
-        this.updateMerger.mergeUpdate(
-          this.user_id,
-          this.project_id,
+      beforeEach(async function () {
+        this.FileTypeManager.promises.getType.resolves({ binary: true })
+        await this.UpdateMerger.promises.mergeUpdate(
+          this.userId,
+          this.projectId,
           this.filePath,
           this.updateRequest,
-          this.source,
-          this.callback
+          this.source
         )
       })
 
       it('should look at the file contents', function () {
-        this.FileTypeManager.getType.called.should.equal(true)
+        expect(this.FileTypeManager.promises.getType).to.have.been.called
       })
 
       it('should process update as file', function () {
-        this.updateMerger.p.processFile
-          .calledWith(
-            this.project_id,
-            this.fsPath,
-            this.filePath,
-            this.source,
-            this.user_id
-          )
-          .should.equal(true)
+        expect(
+          this.EditorController.promises.upsertFileWithPath
+        ).to.have.been.calledWith(
+          this.projectId,
+          this.filePath,
+          this.fsPath,
+          null,
+          this.source,
+          this.userId
+        )
       })
 
       it('removes the temp file from disk', function () {
-        this.fs.unlink.calledWith(this.fsPath).should.equal(true)
+        expect(this.fsPromises.unlink).to.have.been.calledWith(this.fsPath)
       })
     })
 
     describe('doc updates for an existing doc', function () {
-      beforeEach(function () {
-        this.FileTypeManager.getType = sinon
-          .stub()
-          .yields(null, { binary: false, encoding: 'utf-8' })
-        this.updateMerger.p.processDoc = sinon.stub().yields()
-        this.updateMerger.mergeUpdate(
-          this.user_id,
-          this.project_id,
+      beforeEach(async function () {
+        this.FileTypeManager.promises.getType.resolves({
+          binary: false,
+          encoding: 'utf-8',
+        })
+        await this.UpdateMerger.promises.mergeUpdate(
+          this.userId,
+          this.projectId,
           this.existingDocPath,
           this.updateRequest,
-          this.source,
-          this.callback
+          this.source
         )
       })
 
       it('should look at the file contents', function () {
-        this.FileTypeManager.getType.called.should.equal(true)
+        expect(this.FileTypeManager.promises.getType).to.have.been.called
       })
 
       it('should process update as doc', function () {
-        this.updateMerger.p.processDoc
-          .calledWith(
-            this.project_id,
-            this.user_id,
-            this.fsPath,
-            this.existingDocPath,
-            this.source
-          )
-          .should.equal(true)
+        expect(
+          this.EditorController.promises.upsertDocWithPath
+        ).to.have.been.calledWith(
+          this.projectId,
+          this.existingDocPath,
+          this.docLines,
+          this.source,
+          this.userId
+        )
       })
 
       it('removes the temp file from disk', function () {
-        this.fs.unlink.calledWith(this.fsPath).should.equal(true)
+        expect(this.fsPromises.unlink).to.have.been.calledWith(this.fsPath)
       })
     })
 
     describe('file updates for an existing file', function () {
-      beforeEach(function () {
-        this.FileTypeManager.getType = sinon
-          .stub()
-          .yields(null, { binary: true })
-        this.updateMerger.p.processFile = sinon.stub().yields()
-        this.updateMerger.mergeUpdate(
-          this.user_id,
-          this.project_id,
+      beforeEach(async function () {
+        this.FileTypeManager.promises.getType.resolves({ binary: true })
+        await this.UpdateMerger.promises.mergeUpdate(
+          this.userId,
+          this.projectId,
           this.existingFilePath,
           this.updateRequest,
-          this.source,
-          this.callback
+          this.source
         )
       })
 
       it('should look at the file contents', function () {
-        this.FileTypeManager.getType.called.should.equal(true)
+        expect(this.FileTypeManager.promises.getType).to.have.been.called
       })
 
       it('should process update as file', function () {
-        this.updateMerger.p.processFile
-          .calledWith(
-            this.project_id,
-            this.fsPath,
-            this.existingFilePath,
-            this.source,
-            this.user_id
-          )
-          .should.equal(true)
+        expect(
+          this.EditorController.promises.upsertFileWithPath
+        ).to.have.been.calledWith(
+          this.projectId,
+          this.existingFilePath,
+          this.fsPath,
+          null,
+          this.source,
+          this.userId
+        )
       })
 
       it('removes the temp file from disk', function () {
-        this.fs.unlink.calledWith(this.fsPath).should.equal(true)
+        expect(this.fsPromises.unlink).to.have.been.calledWith(this.fsPath)
       })
     })
   })
 
   describe('file updates for an existing doc', function () {
-    beforeEach(function () {
-      this.FileTypeManager.getType = sinon.stub().yields(null, { binary: true })
-      this.updateMerger.deleteUpdate = sinon.stub().yields()
-      this.updateMerger.p.processFile = sinon.stub().yields()
-      this.updateMerger.mergeUpdate(
-        this.user_id,
-        this.project_id,
+    beforeEach(async function () {
+      this.FileTypeManager.promises.getType.resolves({ binary: true })
+      await this.UpdateMerger.promises.mergeUpdate(
+        this.userId,
+        this.projectId,
         this.existingDocPath,
         this.updateRequest,
-        this.source,
-        this.callback
+        this.source
       )
     })
 
     it('should look at the file contents', function () {
-      this.FileTypeManager.getType.called.should.equal(true)
+      expect(this.FileTypeManager.promises.getType).to.have.been.called
     })
 
     it('should delete the existing doc', function () {
-      this.updateMerger.deleteUpdate
-        .calledWith(
-          this.user_id,
-          this.project_id,
-          this.existingDocPath,
-          this.source
-        )
-        .should.equal(true)
+      expect(
+        this.EditorController.promises.deleteEntityWithPath
+      ).to.have.been.calledWith(
+        this.projectId,
+        this.existingDocPath,
+        this.source,
+        this.userId
+      )
     })
 
     it('should process update as file', function () {
-      this.updateMerger.p.processFile
-        .calledWith(
-          this.project_id,
-          this.fsPath,
-          this.existingDocPath,
-          this.source,
-          this.user_id
-        )
-        .should.equal(true)
+      expect(
+        this.EditorController.promises.upsertFileWithPath
+      ).to.have.been.calledWith(
+        this.projectId,
+        this.existingDocPath,
+        this.fsPath,
+        null,
+        this.source,
+        this.userId
+      )
     })
 
     it('removes the temp file from disk', function () {
-      this.fs.unlink.calledWith(this.fsPath).should.equal(true)
+      expect(this.fsPromises.unlink).to.have.been.calledWith(this.fsPath)
     })
   })
 
   describe('doc updates for an existing file', function () {
-    beforeEach(function () {
-      this.FileTypeManager.getType = sinon.stub().yields(null, { binary: true })
-      this.updateMerger.deleteUpdate = sinon.stub().yields()
-      this.updateMerger.p.processFile = sinon.stub().yields()
-      this.updateMerger.mergeUpdate(
-        this.user_id,
-        this.project_id,
+    beforeEach(async function () {
+      this.FileTypeManager.promises.getType.resolves({ binary: true })
+      await this.UpdateMerger.promises.mergeUpdate(
+        this.userId,
+        this.projectId,
         this.existingFilePath,
         this.updateRequest,
-        this.source,
-        this.callback
+        this.source
       )
     })
 
     it('should look at the file contents', function () {
-      this.FileTypeManager.getType.called.should.equal(true)
+      expect(this.FileTypeManager.promises.getType).to.have.been.called
     })
 
     it('should not delete the existing file', function () {
-      this.updateMerger.deleteUpdate.called.should.equal(false)
+      expect(this.EditorController.promises.deleteEntityWithPath).to.not.have
+        .been.called
     })
 
     it('should process update as file', function () {
-      this.updateMerger.p.processFile
-        .calledWith(
-          this.project_id,
-          this.fsPath,
-          this.existingFilePath,
-          this.source,
-          this.user_id
-        )
-        .should.equal(true)
+      expect(
+        this.EditorController.promises.upsertFileWithPath
+      ).to.have.been.calledWith(
+        this.projectId,
+        this.existingFilePath,
+        this.fsPath,
+        null,
+        this.source,
+        this.userId
+      )
     })
 
     it('removes the temp file from disk', function () {
-      this.fs.unlink.calledWith(this.fsPath).should.equal(true)
+      expect(this.fsPromises.unlink).to.have.been.calledWith(this.fsPath)
     })
   })
 
   describe('deleteUpdate', function () {
-    beforeEach(function () {
-      this.EditorController.deleteEntityWithPath = sinon.stub().yields()
-      this.updateMerger.deleteUpdate(
-        this.user_id,
-        this.project_id,
+    beforeEach(async function () {
+      await this.UpdateMerger.promises.deleteUpdate(
+        this.userId,
+        this.projectId,
         this.docPath,
-        this.source,
-        this.callback
+        this.source
       )
     })
 
     it('should delete the entity in the editor controller', function () {
-      this.EditorController.deleteEntityWithPath
-        .calledWith(this.project_id, this.docPath, this.source, this.user_id)
-        .should.equal(true)
-    })
-  })
-
-  describe('private methods', function () {
-    describe('processDoc', function () {
-      beforeEach(function () {
-        this.docLines =
-          '\\documentclass{article}\n\\usepackage[utf8]{inputenc}\n\n\\title{42}\n\\author{Jane Doe}\n\\date{June 2011}'
-        this.updateMerger.p.readFileIntoTextArray = sinon
-          .stub()
-          .yields(null, this.docLines)
-        this.EditorController.upsertDocWithPath = sinon.stub().yields()
-
-        this.updateMerger.p.processDoc(
-          this.project_id,
-          this.user_id,
-          this.fsPath,
-          this.docPath,
-          this.source,
-          this.callback
-        )
-      })
-
-      it('reads the temp file from disk', function () {
-        this.updateMerger.p.readFileIntoTextArray
-          .calledWith(this.fsPath)
-          .should.equal(true)
-      })
-
-      it('should upsert the doc in the editor controller', function () {
-        this.EditorController.upsertDocWithPath
-          .calledWith(
-            this.project_id,
-            this.docPath,
-            this.docLines,
-            this.source,
-            this.user_id
-          )
-          .should.equal(true)
-      })
-    })
-
-    describe('processFile', function () {
-      beforeEach(function () {
-        this.EditorController.upsertFileWithPath = sinon.stub().yields()
-        this.updateMerger.p.processFile(
-          this.project_id,
-          this.fsPath,
-          this.filePath,
-          this.source,
-          this.user_id,
-          this.callback
-        )
-      })
-
-      it('should upsert the file in the editor controller', function () {
-        this.EditorController.upsertFileWithPath
-          .calledWith(
-            this.project_id,
-            this.filePath,
-            this.fsPath,
-            null,
-            this.source,
-            this.user_id
-          )
-          .should.equal(true)
-      })
+      expect(
+        this.EditorController.promises.deleteEntityWithPath
+      ).to.have.been.calledWith(
+        this.projectId,
+        this.docPath,
+        this.source,
+        this.userId
+      )
     })
   })
 })
