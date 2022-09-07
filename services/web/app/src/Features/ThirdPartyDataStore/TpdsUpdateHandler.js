@@ -1,4 +1,4 @@
-const { promisify } = require('util')
+const { callbackify } = require('util')
 const UpdateMerger = require('./UpdateMerger')
 const logger = require('@overleaf/logger')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
@@ -19,157 +19,135 @@ const ROOT_DOC_TIMEOUT_LENGTH = 30 * 1000
 
 const rootDocResets = new BackgroundTaskTracker('root doc resets')
 
-function newUpdate(userId, projectName, path, updateRequest, source, callback) {
-  getOrCreateProject(userId, projectName, (err, project) => {
-    if (err) {
-      return callback(err)
-    }
-    if (project == null) {
-      return callback()
-    }
-    CooldownManager.isProjectOnCooldown(
-      project._id,
-      (err, projectIsOnCooldown) => {
-        if (err) {
-          return callback(err)
-        }
-        if (projectIsOnCooldown) {
-          return callback(
-            new Errors.TooManyRequestsError('project on cooldown')
-          )
-        }
-        FileTypeManager.shouldIgnore(path, (err, shouldIgnore) => {
-          if (err) {
-            return callback(err)
-          }
-          if (shouldIgnore) {
-            return callback()
-          }
-          UpdateMerger.mergeUpdate(
-            userId,
-            project._id,
-            path,
-            updateRequest,
-            source,
-            callback
-          )
-        })
-      }
-    )
-  })
+async function newUpdate(userId, projectName, path, updateRequest, source) {
+  const project = await getOrCreateProject(userId, projectName)
+  if (project == null) {
+    return
+  }
+
+  const projectIsOnCooldown =
+    await CooldownManager.promises.isProjectOnCooldown(project._id)
+  if (projectIsOnCooldown) {
+    throw new Errors.TooManyRequestsError('project on cooldown')
+  }
+
+  const shouldIgnore = await FileTypeManager.promises.shouldIgnore(path)
+  if (shouldIgnore) {
+    return
+  }
+
+  await UpdateMerger.promises.mergeUpdate(
+    userId,
+    project._id,
+    path,
+    updateRequest,
+    source
+  )
 }
 
-function deleteUpdate(userId, projectName, path, source, callback) {
+async function deleteUpdate(userId, projectName, path, source) {
   logger.debug({ userId, filePath: path }, 'handling delete update from tpds')
-  ProjectGetter.findUsersProjectsByName(
+
+  const projects = await ProjectGetter.promises.findUsersProjectsByName(
     userId,
-    projectName,
-    (err, projects) => {
-      if (err) {
-        return callback(err)
-      }
-      const activeProjects = projects.filter(
-        project => !ProjectHelper.isArchivedOrTrashed(project, userId)
-      )
-      if (activeProjects.length === 0) {
-        logger.debug(
-          { userId, filePath: path, projectName },
-          'project not found from tpds update, ignoring folder or project'
-        )
-        return callback()
-      }
-      if (projects.length > 1) {
-        // There is more than one project with that name, and one of them is
-        // active (previous condition)
-        return handleDuplicateProjects(userId, projectName, callback)
-      }
-
-      const project = activeProjects[0]
-      if (path === '/') {
-        logger.debug(
-          { userId, filePath: path, projectName, project_id: project._id },
-          'project found for delete update, path is root so marking project as deleted'
-        )
-        ProjectDeleter.markAsDeletedByExternalSource(project._id, callback)
-      } else {
-        UpdateMerger.deleteUpdate(userId, project._id, path, source, err => {
-          callback(err)
-        })
-      }
-    }
+    projectName
   )
-}
-
-function getOrCreateProject(userId, projectName, callback) {
-  ProjectGetter.findUsersProjectsByName(
-    userId,
-    projectName,
-    (err, projects) => {
-      if (err) {
-        return callback(err)
-      }
-
-      if (projects.length === 0) {
-        // No project with that name -- active, archived or trashed -- has been
-        // found. Create one.
-        return ProjectCreationHandler.createBlankProject(
-          userId,
-          projectName,
-          (err, project) => {
-            // have a crack at setting the root doc after a while, on creation
-            // we won't have it yet, but should have been sent it it within 30
-            // seconds
-            rootDocResets.add()
-            setTimeout(() => {
-              ProjectRootDocManager.setRootDocAutomatically(project._id, () => {
-                rootDocResets.done()
-              })
-            }, ROOT_DOC_TIMEOUT_LENGTH)
-            callback(err, project)
-          }
-        )
-      }
-      const activeProjects = projects.filter(
-        project => !ProjectHelper.isArchivedOrTrashed(project, userId)
-      )
-      if (activeProjects.length === 0) {
-        // All projects with that name are archived or trashed. Ignore.
-        return callback(null, null)
-      }
-
-      if (projects.length > 1) {
-        // There is more than one project with that name, and one of them is
-        // active (previous condition)
-        return handleDuplicateProjects(userId, projectName, err => {
-          if (err) {
-            return callback(err)
-          }
-          callback(null, null)
-        })
-      }
-
-      callback(err, activeProjects[0])
-    }
+  const activeProjects = projects.filter(
+    project => !ProjectHelper.isArchivedOrTrashed(project, userId)
   )
-}
 
-function handleDuplicateProjects(userId, projectName, callback) {
-  Modules.hooks.fire('removeDropbox', userId, 'duplicate-projects', err => {
-    if (err) {
-      return callback(err)
-    }
-    NotificationsBuilder.dropboxDuplicateProjectNames(userId).create(
-      projectName,
-      callback
+  if (activeProjects.length === 0) {
+    logger.debug(
+      { userId, filePath: path, projectName },
+      'project not found from tpds update, ignoring folder or project'
     )
-  })
+    return
+  }
+
+  if (projects.length > 1) {
+    // There is more than one project with that name, and one of them is
+    // active (previous condition)
+    await handleDuplicateProjects(userId, projectName)
+    return
+  }
+
+  const project = activeProjects[0]
+  if (path === '/') {
+    logger.debug(
+      { userId, filePath: path, projectName, project_id: project._id },
+      'project found for delete update, path is root so marking project as deleted'
+    )
+    await ProjectDeleter.promises.markAsDeletedByExternalSource(project._id)
+  } else {
+    await UpdateMerger.promises.deleteUpdate(userId, project._id, path, source)
+  }
+}
+
+async function getOrCreateProject(userId, projectName) {
+  const projects = await ProjectGetter.promises.findUsersProjectsByName(
+    userId,
+    projectName
+  )
+
+  if (projects.length === 0) {
+    // No project with that name -- active, archived or trashed -- has been
+    // found. Create one.
+    const project = await ProjectCreationHandler.promises.createBlankProject(
+      userId,
+      projectName
+    )
+
+    // have a crack at setting the root doc after a while, on creation
+    // we won't have it yet, but should have been sent it it within 30
+    // seconds
+    rootDocResets.add()
+    setTimeout(() => {
+      ProjectRootDocManager.promises
+        .setRootDocAutomatically(project._id)
+        .then(() => {
+          rootDocResets.done()
+        })
+        .catch(err => {
+          logger.warn({ err }, 'failed to set root doc after project creation')
+        })
+    }, ROOT_DOC_TIMEOUT_LENGTH)
+    return project
+  }
+
+  const activeProjects = projects.filter(
+    project => !ProjectHelper.isArchivedOrTrashed(project, userId)
+  )
+  if (activeProjects.length === 0) {
+    // All projects with that name are archived or trashed. Ignore.
+    return null
+  }
+
+  if (projects.length > 1) {
+    // There is more than one project with that name, and one of them is
+    // active (previous condition)
+    await handleDuplicateProjects(userId, projectName)
+    return null
+  }
+
+  return activeProjects[0]
+}
+
+async function handleDuplicateProjects(userId, projectName) {
+  await Modules.promises.hooks.fire(
+    'removeDropbox',
+    userId,
+    'duplicate-projects'
+  )
+  await NotificationsBuilder.promises
+    .dropboxDuplicateProjectNames(userId)
+    .create(projectName)
 }
 
 module.exports = {
-  newUpdate,
-  deleteUpdate,
+  newUpdate: callbackify(newUpdate),
+  deleteUpdate: callbackify(deleteUpdate),
   promises: {
-    newUpdate: promisify(newUpdate),
-    deleteUpdate: promisify(deleteUpdate),
+    newUpdate,
+    deleteUpdate,
   },
 }

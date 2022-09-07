@@ -38,28 +38,42 @@ describe('TpdsUpdateHandler', function () {
     this.update = {}
 
     this.CooldownManager = {
-      isProjectOnCooldown: sinon.stub().yields(null, false),
+      promises: {
+        isProjectOnCooldown: sinon.stub().resolves(false),
+      },
     }
     this.FileTypeManager = {
-      shouldIgnore: sinon.stub().yields(null, false),
+      promises: {
+        shouldIgnore: sinon.stub().resolves(false),
+      },
     }
     this.Modules = {
-      hooks: { fire: sinon.stub().yields() },
+      promises: {
+        hooks: { fire: sinon.stub().resolves() },
+      },
     }
     this.notification = {
-      create: sinon.stub().yields(),
+      create: sinon.stub().resolves(),
     }
     this.NotificationsBuilder = {
-      dropboxDuplicateProjectNames: sinon.stub().returns(this.notification),
+      promises: {
+        dropboxDuplicateProjectNames: sinon.stub().returns(this.notification),
+      },
     }
     this.ProjectCreationHandler = {
-      createBlankProject: sinon.stub().yields(null, this.projects.active1),
+      promises: {
+        createBlankProject: sinon.stub().resolves(this.projects.active1),
+      },
     }
     this.ProjectDeleter = {
-      markAsDeletedByExternalSource: sinon.stub().yields(),
+      promises: {
+        markAsDeletedByExternalSource: sinon.stub().resolves(),
+      },
     }
     this.ProjectGetter = {
-      findUsersProjectsByName: sinon.stub(),
+      promises: {
+        findUsersProjectsByName: sinon.stub(),
+      },
     }
     this.ProjectHelper = {
       isArchivedOrTrashed: sinon.stub().returns(false),
@@ -70,10 +84,16 @@ describe('TpdsUpdateHandler', function () {
     this.ProjectHelper.isArchivedOrTrashed
       .withArgs(this.projects.archived2, this.userId)
       .returns(true)
-    this.RootDocManager = { setRootDocAutomatically: sinon.stub() }
+    this.RootDocManager = {
+      promises: {
+        setRootDocAutomatically: sinon.stub().resolves(),
+      },
+    }
     this.UpdateMerger = {
-      deleteUpdate: sinon.stub().yields(),
-      mergeUpdate: sinon.stub().yields(),
+      promises: {
+        deleteUpdate: sinon.stub().resolves(),
+        mergeUpdate: sinon.stub().resolves(),
+      },
     }
 
     this.TpdsUpdateHandler = SandboxedModule.require(MODULE_PATH, {
@@ -139,10 +159,10 @@ describe('TpdsUpdateHandler', function () {
       expectDropboxUnlinked()
     })
 
-    describe('update to a file that should be ignored', function (done) {
+    describe('update to a file that should be ignored', async function () {
       setupMatchingProjects(['active1'])
       beforeEach(function () {
-        this.FileTypeManager.shouldIgnore.yields(null, true)
+        this.FileTypeManager.promises.shouldIgnore.resolves(true)
       })
       receiveUpdate()
       expectProjectNotCreated()
@@ -150,21 +170,19 @@ describe('TpdsUpdateHandler', function () {
       expectDropboxNotUnlinked()
     })
 
-    describe('update to a project on cooldown', function (done) {
+    describe('update to a project on cooldown', async function () {
       setupMatchingProjects(['active1'])
       setupProjectOnCooldown()
-      beforeEach(function (done) {
-        this.TpdsUpdateHandler.newUpdate(
-          this.userId,
-          this.projectName,
-          this.path,
-          this.update,
-          this.source,
-          err => {
-            expect(err).to.be.instanceof(Errors.TooManyRequestsError)
-            done()
-          }
-        )
+      beforeEach(async function () {
+        await expect(
+          this.TpdsUpdateHandler.promises.newUpdate(
+            this.userId,
+            this.projectName,
+            this.path,
+            this.update,
+            this.source
+          )
+        ).to.be.rejectedWith(Errors.TooManyRequestsError)
       })
       expectUpdateNotProcessed()
     })
@@ -270,55 +288,52 @@ describe('TpdsUpdateHandler', function () {
 function setupMatchingProjects(projectKeys) {
   beforeEach(function () {
     const projects = projectKeys.map(key => this.projects[key])
-    this.ProjectGetter.findUsersProjectsByName
+    this.ProjectGetter.promises.findUsersProjectsByName
       .withArgs(this.userId, this.projectName)
-      .yields(null, projects)
+      .resolves(projects)
   })
 }
 
 function setupProjectOnCooldown() {
   beforeEach(function () {
-    this.CooldownManager.isProjectOnCooldown
+    this.CooldownManager.promises.isProjectOnCooldown
       .withArgs(this.projects.active1._id)
-      .yields(null, true)
+      .resolves(true)
   })
 }
 
 /* Test helpers */
 
 function receiveUpdate() {
-  beforeEach(function (done) {
-    this.TpdsUpdateHandler.newUpdate(
+  beforeEach(async function () {
+    await this.TpdsUpdateHandler.promises.newUpdate(
       this.userId,
       this.projectName,
       this.path,
       this.update,
-      this.source,
-      done
+      this.source
     )
   })
 }
 
 function receiveFileDelete() {
-  beforeEach(function (done) {
-    this.TpdsUpdateHandler.deleteUpdate(
+  beforeEach(async function () {
+    await this.TpdsUpdateHandler.promises.deleteUpdate(
       this.userId,
       this.projectName,
       this.path,
-      this.source,
-      done
+      this.source
     )
   })
 }
 
 function receiveProjectDelete() {
-  beforeEach(function (done) {
-    this.TpdsUpdateHandler.deleteUpdate(
+  beforeEach(async function () {
+    await this.TpdsUpdateHandler.promises.deleteUpdate(
       this.userId,
       this.projectName,
       '/',
-      this.source,
-      done
+      this.source
     )
   })
 }
@@ -328,35 +343,36 @@ function receiveProjectDelete() {
 function expectProjectCreated() {
   it('creates a project', function () {
     expect(
-      this.ProjectCreationHandler.createBlankProject
+      this.ProjectCreationHandler.promises.createBlankProject
     ).to.have.been.calledWith(this.userId, this.projectName)
   })
 
   it('sets the root doc', function () {
     // Fire pending timers
     this.clock.runAll()
-    expect(this.RootDocManager.setRootDocAutomatically).to.have.been.calledWith(
-      this.projects.active1._id
-    )
+    expect(
+      this.RootDocManager.promises.setRootDocAutomatically
+    ).to.have.been.calledWith(this.projects.active1._id)
   })
 }
 
 function expectProjectNotCreated() {
   it('does not create a project', function () {
-    expect(this.ProjectCreationHandler.createBlankProject).not.to.have.been
-      .called
+    expect(this.ProjectCreationHandler.promises.createBlankProject).not.to.have
+      .been.called
   })
 
   it('does not set the root doc', function () {
     // Fire pending timers
     this.clock.runAll()
-    expect(this.RootDocManager.setRootDocAutomatically).not.to.have.been.called
+    expect(this.RootDocManager.promises.setRootDocAutomatically).not.to.have
+      .been.called
   })
 }
 
 function expectUpdateProcessed() {
   it('processes the update', function () {
-    expect(this.UpdateMerger.mergeUpdate).to.have.been.calledWith(
+    expect(this.UpdateMerger.promises.mergeUpdate).to.have.been.calledWith(
       this.userId,
       this.projects.active1._id,
       this.path,
@@ -368,13 +384,13 @@ function expectUpdateProcessed() {
 
 function expectUpdateNotProcessed() {
   it('does not process the update', function () {
-    expect(this.UpdateMerger.mergeUpdate).not.to.have.been.called
+    expect(this.UpdateMerger.promises.mergeUpdate).not.to.have.been.called
   })
 }
 
 function expectDropboxUnlinked() {
   it('unlinks Dropbox', function () {
-    expect(this.Modules.hooks.fire).to.have.been.calledWith(
+    expect(this.Modules.promises.hooks.fire).to.have.been.calledWith(
       'removeDropbox',
       this.userId,
       'duplicate-projects'
@@ -383,7 +399,7 @@ function expectDropboxUnlinked() {
 
   it('creates a notification that dropbox was unlinked', function () {
     expect(
-      this.NotificationsBuilder.dropboxDuplicateProjectNames
+      this.NotificationsBuilder.promises.dropboxDuplicateProjectNames
     ).to.have.been.calledWith(this.userId)
     expect(this.notification.create).to.have.been.calledWith(this.projectName)
   })
@@ -391,18 +407,18 @@ function expectDropboxUnlinked() {
 
 function expectDropboxNotUnlinked() {
   it('does not unlink Dropbox', function () {
-    expect(this.Modules.hooks.fire).not.to.have.been.called
+    expect(this.Modules.promises.hooks.fire).not.to.have.been.called
   })
 
   it('does not create a notification that dropbox was unlinked', function () {
-    expect(this.NotificationsBuilder.dropboxDuplicateProjectNames).not.to.have
-      .been.called
+    expect(this.NotificationsBuilder.promises.dropboxDuplicateProjectNames).not
+      .to.have.been.called
   })
 }
 
 function expectDeleteProcessed() {
   it('processes the delete', function () {
-    expect(this.UpdateMerger.deleteUpdate).to.have.been.calledWith(
+    expect(this.UpdateMerger.promises.deleteUpdate).to.have.been.calledWith(
       this.userId,
       this.projects.active1._id,
       this.path,
@@ -413,21 +429,21 @@ function expectDeleteProcessed() {
 
 function expectDeleteNotProcessed() {
   it('does not process the delete', function () {
-    expect(this.UpdateMerger.deleteUpdate).not.to.have.been.called
+    expect(this.UpdateMerger.promises.deleteUpdate).not.to.have.been.called
   })
 }
 
 function expectProjectDeleted() {
   it('deletes the project', function () {
     expect(
-      this.ProjectDeleter.markAsDeletedByExternalSource
+      this.ProjectDeleter.promises.markAsDeletedByExternalSource
     ).to.have.been.calledWith(this.projects.active1._id)
   })
 }
 
 function expectProjectNotDeleted() {
   it('does not delete the project', function () {
-    expect(this.ProjectDeleter.markAsDeletedByExternalSource).not.to.have.been
-      .called
+    expect(this.ProjectDeleter.promises.markAsDeletedByExternalSource).not.to
+      .have.been.called
   })
 }

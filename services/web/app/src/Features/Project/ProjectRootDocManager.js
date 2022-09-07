@@ -24,6 +24,7 @@ const { promisify } = require('util')
 const async = require('async')
 const globby = require('globby')
 const _ = require('underscore')
+const { promisifyAll } = require('../../util/promises')
 
 module.exports = ProjectRootDocManager = {
   setRootDocAutomatically(project_id, callback) {
@@ -300,27 +301,10 @@ module.exports = ProjectRootDocManager = {
   },
 }
 
-const promises = {
-  setRootDocAutomatically: promisify(
-    ProjectRootDocManager.setRootDocAutomatically
-  ),
-
-  findRootDocFileFromDirectory: directoryPath =>
-    new Promise((resolve, reject) => {
-      ProjectRootDocManager.findRootDocFileFromDirectory(
-        directoryPath,
-        (error, path, content) => {
-          if (error) {
-            reject(error)
-          } else {
-            resolve({ path, content })
-          }
-        }
-      )
-    }),
-  setRootDocFromName: promisify(ProjectRootDocManager.setRootDocFromName),
-}
-
-ProjectRootDocManager.promises = promises
-
 module.exports = ProjectRootDocManager
+module.exports.promises = promisifyAll(module.exports, {
+  without: ['_rootDocSort'],
+  multiResult: {
+    findRootDocFileFromDirectory: ['path', 'content'],
+  },
+})

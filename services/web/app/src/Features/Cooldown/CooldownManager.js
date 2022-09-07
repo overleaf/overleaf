@@ -14,6 +14,7 @@ let CooldownManager
 const RedisWrapper = require('../../infrastructure/RedisWrapper')
 const rclient = RedisWrapper.client('cooldown')
 const logger = require('@overleaf/logger')
+const { promisifyAll } = require('../../util/promises')
 
 const COOLDOWN_IN_SECONDS = 60 * 10
 
@@ -54,3 +55,7 @@ module.exports = CooldownManager = {
     )
   },
 }
+
+module.exports.promises = promisifyAll(module.exports, {
+  without: ['_buildKey'],
+})
