@@ -1,6 +1,7 @@
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 const { expect } = require('chai')
+const { ObjectId } = require('mongodb')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 
 const MODULE_PATH =
@@ -8,15 +9,20 @@ const MODULE_PATH =
 
 describe('TpdsController', function () {
   beforeEach(function () {
+    this.metadata = {
+      entityId: ObjectId(),
+      entityType: 'doc',
+      rev: 2,
+    }
     this.TpdsUpdateHandler = {
       promises: {
-        newUpdate: sinon.stub().resolves(),
+        newUpdate: sinon.stub().resolves(this.metadata),
         deleteUpdate: sinon.stub().resolves(),
       },
     }
     this.UpdateMerger = {
       promises: {
-        mergeUpdate: sinon.stub().resolves(),
+        mergeUpdate: sinon.stub().resolves(this.file),
         deleteUpdate: sinon.stub().resolves(),
       },
     }
@@ -46,70 +52,65 @@ describe('TpdsController', function () {
   })
 
   describe('getting an update', function () {
-    it('should process the update with the update receiver', function (done) {
-      const path = '/projectName/here.txt'
-      const req = {
-        pause() {},
-        params: { 0: path, user_id: this.user_id },
-        session: {
-          destroy() {},
-        },
+    beforeEach(function () {
+      this.projectName = 'projectName'
+      this.path = '/here.txt'
+      this.req = {
+        params: { 0: `${this.projectName}${this.path}`, user_id: this.user_id },
         headers: {
           'x-sl-update-source': (this.source = 'dropbox'),
         },
       }
+    })
+
+    it('should process the update with the update receiver', function (done) {
       const res = {
-        sendStatus: () => {
+        json: payload => {
+          expect(payload).to.deep.equal({
+            status: 'applied',
+            entityId: this.metadata.entityId.toString(),
+            entityType: this.metadata.entityType,
+            rev: this.metadata.rev,
+          })
           this.TpdsUpdateHandler.promises.newUpdate
             .calledWith(
               this.user_id,
-              'projectName',
-              '/here.txt',
-              req,
+              this.projectName,
+              this.path,
+              this.req,
               this.source
             )
             .should.equal(true)
           done()
         },
       }
-      this.TpdsController.mergeUpdate(req, res)
+      this.TpdsController.mergeUpdate(this.req, res)
+    })
+
+    it('should indicate in the response when the update was rejected', function (done) {
+      this.TpdsUpdateHandler.promises.newUpdate.resolves(null)
+      const res = {
+        json: payload => {
+          expect(payload).to.deep.equal({ status: 'rejected' })
+          done()
+        },
+      }
+      this.TpdsController.mergeUpdate(this.req, res)
     })
 
     it('should return a 500 error when the update receiver fails', function (done) {
-      const path = '/projectName/here.txt'
-      const req = {
-        pause() {},
-        params: { 0: path, user_id: this.user_id },
-        session: {
-          destroy() {},
-        },
-        headers: {
-          'x-sl-update-source': (this.source = 'dropbox'),
-        },
-      }
       this.TpdsUpdateHandler.promises.newUpdate.rejects(new Error())
       const res = {
-        sendStatus: sinon.stub(),
+        json: sinon.stub(),
       }
-      this.TpdsController.mergeUpdate(req, res, err => {
+      this.TpdsController.mergeUpdate(this.req, res, err => {
         expect(err).to.exist
-        expect(res.sendStatus).not.to.have.been.called
+        expect(res.json).not.to.have.been.called
         done()
       })
     })
 
     it('should return a 400 error when the project is too big', function (done) {
-      const path = '/projectName/here.txt'
-      const req = {
-        pause() {},
-        params: { 0: path, user_id: this.user_id, projectName: 'projectName' },
-        session: {
-          destroy() {},
-        },
-        headers: {
-          'x-sl-update-source': (this.source = 'dropbox'),
-        },
-      }
       this.TpdsUpdateHandler.promises.newUpdate.rejects({
         message: 'project_has_too_many_files',
       })
@@ -122,21 +123,10 @@ describe('TpdsController', function () {
           done()
         },
       }
-      this.TpdsController.mergeUpdate(req, res)
+      this.TpdsController.mergeUpdate(this.req, res)
     })
 
     it('should return a 429 error when the update receiver fails due to too many requests error', function (done) {
-      const path = '/projectName/here.txt'
-      const req = {
-        pause() {},
-        params: { 0: path, user_id: this.user_id },
-        session: {
-          destroy() {},
-        },
-        headers: {
-          'x-sl-update-source': (this.source = 'dropbox'),
-        },
-      }
       this.TpdsUpdateHandler.promises.newUpdate.rejects(
         new Errors.TooManyRequestsError('project on cooldown')
       )
@@ -146,7 +136,7 @@ describe('TpdsController', function () {
           done()
         },
       }
-      this.TpdsController.mergeUpdate(req, res)
+      this.TpdsController.mergeUpdate(this.req, res)
     })
   })
 

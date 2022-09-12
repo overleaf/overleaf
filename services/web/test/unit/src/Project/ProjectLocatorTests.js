@@ -557,4 +557,23 @@ describe('ProjectLocator', function () {
       })
     })
   })
+
+  describe('findElementByMongoPath', function () {
+    it('traverses the file tree like Mongo would do', function () {
+      const element = this.locator.findElementByMongoPath(
+        project,
+        'rootFolder.0.folders.1.folders.0.fileRefs.0'
+      )
+      expect(element).to.equal(subSubFile)
+    })
+
+    it('throws an error if no element is found', function () {
+      expect(() =>
+        this.locator.findElementByMongoPath(
+          project,
+          'rootolder.0.folders.0.folders.0.fileRefs.0'
+        )
+      ).to.throw
+    })
+  })
 })

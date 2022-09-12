@@ -9,17 +9,19 @@ const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
 const SessionManager = require('../Authentication/SessionManager')
 const TpdsQueueManager = require('./TpdsQueueManager')
 
-// mergeUpdate and deleteUpdate are used by Dropbox, where the project is only passed as the name, as the
-// first part of the file path. They have to check the project exists, find it, and create it if not.
-// They also ignore 'noisy' files like .DS_Store, .gitignore, etc.
+// mergeUpdate and deleteUpdate are used by Dropbox, where the project is only
+// passed as the name, as the first part of the file path. They have to check
+// the project exists, find it, and create it if not.  They also ignore 'noisy'
+// files like .DS_Store, .gitignore, etc.
 
 async function mergeUpdate(req, res) {
   metrics.inc('tpds.merge-update')
   const { filePath, userId, projectName } = parseParams(req)
   const source = req.headers['x-sl-update-source'] || 'unknown'
 
+  let metadata
   try {
-    await TpdsUpdateHandler.promises.newUpdate(
+    metadata = await TpdsUpdateHandler.promises.newUpdate(
       userId,
       projectName,
       filePath,
@@ -45,7 +47,19 @@ async function mergeUpdate(req, res) {
     }
   }
 
-  res.sendStatus(200)
+  if (metadata == null) {
+    return res.json({ status: 'rejected' })
+  }
+
+  const payload = {
+    status: 'applied',
+    entityId: metadata.entityId.toString(),
+    entityType: metadata.entityType,
+  }
+  if (metadata.rev != null) {
+    payload.rev = metadata.rev
+  }
+  res.json(payload)
 }
 
 async function deleteUpdate(req, res) {
@@ -62,10 +76,11 @@ async function deleteUpdate(req, res) {
   res.sendStatus(200)
 }
 
-// updateProjectContents and deleteProjectContents are used by GitHub. The project_id is known so we
-// can skip right ahead to creating/updating/deleting the file. These methods will not ignore noisy
-// files like .DS_Store, .gitignore, etc because people are generally more explicit with the files they
-// want in git.
+// updateProjectContents and deleteProjectContents are used by GitHub. The
+// project_id is known so we can skip right ahead to creating/updating/deleting
+// the file. These methods will not ignore noisy files like .DS_Store,
+// .gitignore, etc because people are generally more explicit with the files
+// they want in git.
 
 async function updateProjectContents(req, res, next) {
   const projectId = req.params.project_id

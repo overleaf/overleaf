@@ -2,6 +2,7 @@ const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 const { expect } = require('chai')
 const BufferedStream = require('bufferedstream')
+const { ObjectId } = require('mongodb')
 
 const MODULE_PATH =
   '../../../../app/src/Features/ThirdPartyDataStore/UpdateMerger.js'
@@ -38,11 +39,21 @@ describe('UpdateMerger :', function () {
       readFile: sinon.stub().withArgs(this.fsPath).resolves(this.fileContents),
     }
 
+    this.doc = {
+      _id: ObjectId(),
+      rev: 2,
+    }
+
+    this.file = {
+      _id: ObjectId(),
+      rev: 6,
+    }
+
     this.EditorController = {
       promises: {
         deleteEntityWithPath: sinon.stub().resolves(),
-        upsertDocWithPath: sinon.stub().resolves(),
-        upsertFileWithPath: sinon.stub().resolves(),
+        upsertDocWithPath: sinon.stub().resolves(this.doc),
+        upsertFileWithPath: sinon.stub().resolves(this.file),
       },
     }
 
@@ -237,17 +248,6 @@ describe('UpdateMerger :', function () {
 
     it('should look at the file contents', function () {
       expect(this.FileTypeManager.promises.getType).to.have.been.called
-    })
-
-    it('should delete the existing doc', function () {
-      expect(
-        this.EditorController.promises.deleteEntityWithPath
-      ).to.have.been.calledWith(
-        this.projectId,
-        this.existingDocPath,
-        this.source,
-        this.userId
-      )
     })
 
     it('should process update as file', function () {

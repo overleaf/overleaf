@@ -13,7 +13,8 @@ async function mergeUpdate(userId, projectId, path, updateRequest, source) {
     updateRequest
   )
   try {
-    await _mergeUpdate(userId, projectId, path, fsPath, source)
+    const metadata = await _mergeUpdate(userId, projectId, path, fsPath, source)
+    return metadata
   } finally {
     try {
       await fsPromises.unlink(fsPath)
@@ -52,54 +53,37 @@ async function _determineFileType(projectId, path, fsPath) {
   // sync, so we'll treat non-utf8 files as binary
   const isBinary = binary || encoding !== 'utf-8'
 
-  // Existing | Update    | Action
-  // ---------|-----------|-------
-  // file     | isBinary  | existing-file
-  // file     | !isBinary | existing-file
-  // doc      | isBinary  | new-file, delete-existing-doc
-  // doc      | !isBinary | existing-doc
-  // null     | isBinary  | new-file
-  // null     | !isBinary | new-doc
+  // Existing | Update    | Resulting file type
+  // ---------|-----------|--------------------
+  // file     | isBinary  | file
+  // file     | !isBinary | file
+  // doc      | isBinary  | file
+  // doc      | !isBinary | doc
+  // null     | isBinary  | file
+  // null     | !isBinary | doc
 
   // if a binary file already exists, always keep it as a binary file
   // even if the update looks like a text file
   if (existingFileType === 'file') {
-    return { fileType: 'existing-file' }
+    return 'file'
+  } else {
+    return isBinary ? 'file' : 'doc'
   }
-
-  // if there is an existing doc, keep it as a doc except when the
-  // incoming update is binary. In that case delete the doc and replace
-  // it with a new file.
-  if (existingFileType === 'doc') {
-    if (isBinary) {
-      return {
-        fileType: 'new-file',
-        deleteOriginalEntity: 'delete-existing-doc',
-      }
-    } else {
-      return { fileType: 'existing-doc' }
-    }
-  }
-
-  // if there no existing file, create a file or doc as needed
-  return { fileType: isBinary ? 'new-file' : 'new-doc' }
 }
 
 async function _mergeUpdate(userId, projectId, path, fsPath, source) {
-  const { fileType, deleteOriginalEntity } = await _determineFileType(
-    projectId,
-    path,
-    fsPath
-  )
+  const fileType = await _determineFileType(projectId, path, fsPath)
 
-  if (deleteOriginalEntity) {
-    await deleteUpdate(userId, projectId, path, source)
-  }
-
-  if (['existing-file', 'new-file'].includes(fileType)) {
-    await _processFile(projectId, fsPath, path, source, userId)
-  } else if (['existing-doc', 'new-doc'].includes(fileType)) {
-    await _processDoc(projectId, userId, fsPath, path, source)
+  if (fileType === 'file') {
+    const file = await _processFile(projectId, fsPath, path, source, userId)
+    return { entityType: 'file', entityId: file._id, rev: file.rev }
+  } else if (fileType === 'doc') {
+    const doc = await _processDoc(projectId, userId, fsPath, path, source)
+    // The doc entry doesn't have a rev. Since the document is set in
+    // docupdater, it's possible that the next rev contains a merge of changes
+    // in Dropbox and changes from docupdater.
+    const metadata = { entityType: 'doc', entityId: doc._id, rev: doc.rev }
+    return metadata
   } else {
     throw new Error('unrecognized file')
   }
@@ -124,17 +108,18 @@ async function deleteUpdate(userId, projectId, path, source) {
 async function _processDoc(projectId, userId, fsPath, path, source) {
   const docLines = await _readFileIntoTextArray(fsPath)
   logger.debug({ docLines }, 'processing doc update from tpds')
-  await EditorController.promises.upsertDocWithPath(
+  const doc = await EditorController.promises.upsertDocWithPath(
     projectId,
     path,
     docLines,
     source,
     userId
   )
+  return doc
 }
 
 async function _processFile(projectId, fsPath, path, source, userId) {
-  await EditorController.promises.upsertFileWithPath(
+  const file = await EditorController.promises.upsertFileWithPath(
     projectId,
     path,
     fsPath,
@@ -142,6 +127,7 @@ async function _processFile(projectId, fsPath, path, source, userId) {
     source,
     userId
   )
+  return file
 }
 
 async function _readFileIntoTextArray(path) {

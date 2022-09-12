@@ -343,6 +343,7 @@ const ProjectEntityUpdateHandler = {
             if (err != null) {
               return callback(err)
             }
+            doc.rev = rev
             next(
               projectId,
               folderId,
@@ -576,7 +577,7 @@ const ProjectEntityUpdateHandler = {
       projectId,
       fileId,
       newFileRef,
-      (err, oldFileRef, project, path, newProject) => {
+      (err, oldFileRef, project, path, newProject, newFileRef) => {
         if (err != null) {
           return callback(err)
         }
@@ -597,18 +598,12 @@ const ProjectEntityUpdateHandler = {
           project.overleaf &&
           project.overleaf.history &&
           project.overleaf.history.id
-        // Increment the rev for an in-place update (with the same path) so the third-party-datastore
-        // knows this is a new file.
-        // Ideally we would get this from ProjectEntityMongoUpdateHandler.replaceFileWithNew
-        // but it returns the original oldFileRef (after incrementing the rev value in mongo),
-        // so we add 1 to the rev from that. This isn't atomic and relies on the lock
-        // but it is acceptable for now.
         TpdsUpdateSender.addFile(
           {
             projectId: project._id,
             fileId: newFileRef._id,
             path: path.fileSystem,
-            rev: oldFileRef.rev + 1,
+            rev: newFileRef.rev,
             projectName: project.name,
             folderId,
           },
@@ -624,7 +619,12 @@ const ProjectEntityUpdateHandler = {
               userId,
               { oldFiles, newFiles, newProject },
               source,
-              callback
+              err => {
+                if (err) {
+                  return callback(err)
+                }
+                callback(null, newFileRef)
+              }
             )
           }
         )
@@ -670,6 +670,7 @@ const ProjectEntityUpdateHandler = {
               if (err != null) {
                 return callback(err)
               }
+              doc.rev = rev
               ProjectEntityMongoUpdateHandler.replaceFileWithDoc(
                 projectId,
                 existingFile._id,
@@ -936,7 +937,7 @@ const ProjectEntityUpdateHandler = {
               fileStoreUrl,
               folderId,
               source,
-              err => {
+              (err, newFileRef) => {
                 if (err != null) {
                   return callback(err)
                 }

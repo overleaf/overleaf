@@ -43,6 +43,7 @@ module.exports = {
     'project',
     'path',
     'newProject',
+    'newFileRef',
   ]),
   replaceDocWithFile: callbackify(replaceDocWithFile),
   replaceFileWithDoc: callbackify(replaceFileWithDoc),
@@ -188,7 +189,9 @@ async function replaceFileWithNew(projectId, fileId, newFileRef) {
       path,
     })
   }
-  return { oldFileRef: fileRef, project, path, newProject }
+  // Refresh newFileRef with the version returned from the database
+  newFileRef = ProjectLocator.findElementByMongoPath(newProject, path.mongo)
+  return { oldFileRef: fileRef, project, path, newProject, newFileRef }
 }
 
 async function replaceDocWithFile(projectId, docId, fileRef) {

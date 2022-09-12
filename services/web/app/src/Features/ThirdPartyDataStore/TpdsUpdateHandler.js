@@ -22,7 +22,7 @@ const rootDocResets = new BackgroundTaskTracker('root doc resets')
 async function newUpdate(userId, projectName, path, updateRequest, source) {
   const project = await getOrCreateProject(userId, projectName)
   if (project == null) {
-    return
+    return null
   }
 
   const projectIsOnCooldown =
@@ -33,16 +33,17 @@ async function newUpdate(userId, projectName, path, updateRequest, source) {
 
   const shouldIgnore = await FileTypeManager.promises.shouldIgnore(path)
   if (shouldIgnore) {
-    return
+    return null
   }
 
-  await UpdateMerger.promises.mergeUpdate(
+  const metadata = await UpdateMerger.promises.mergeUpdate(
     userId,
     project._id,
     path,
     updateRequest,
     source
   )
+  return metadata
 }
 
 async function deleteUpdate(userId, projectName, path, source) {

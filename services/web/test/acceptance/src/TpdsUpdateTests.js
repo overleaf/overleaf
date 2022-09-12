@@ -1,16 +1,3 @@
-/* eslint-disable
-    camelcase,
-    max-len,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const { expect } = require('chai')
 const ProjectGetter = require('../../../app/src/Features/Project/ProjectGetter.js')
 const request = require('./helpers/request')
@@ -19,19 +6,19 @@ const User = require('./helpers/User')
 describe('TpdsUpdateTests', function () {
   beforeEach(function (done) {
     this.owner = new User()
-    return this.owner.login(error => {
-      if (error != null) {
+    this.owner.login(error => {
+      if (error) {
         throw error
       }
-      return this.owner.createProject(
+      this.owner.createProject(
         'test-project',
         { template: 'example' },
-        (error, project_id) => {
-          if (error != null) {
+        (error, projectId) => {
+          if (error) {
             throw error
           }
-          this.project_id = project_id
-          return done()
+          this.projectId = projectId
+          done()
         }
       )
     })
@@ -39,10 +26,10 @@ describe('TpdsUpdateTests', function () {
 
   describe('adding a file', function () {
     beforeEach(function (done) {
-      return request(
+      request(
         {
           method: 'POST',
-          url: `/project/${this.project_id}/contents/test.tex`,
+          url: `/project/${this.projectId}/contents/test.tex`,
           auth: {
             username: 'sharelatex',
             password: 'password',
@@ -51,34 +38,34 @@ describe('TpdsUpdateTests', function () {
           body: 'test one two',
         },
         (error, response, body) => {
-          if (error != null) {
+          if (error) {
             throw error
           }
           expect(response.statusCode).to.equal(200)
-          return done()
+          done()
         }
       )
     })
 
     it('should have added the file', function (done) {
-      return ProjectGetter.getProject(this.project_id, (error, project) => {
-        if (error != null) {
+      ProjectGetter.getProject(this.projectId, (error, project) => {
+        if (error) {
           throw error
         }
         const projectFolder = project.rootFolder[0]
         const file = projectFolder.docs.find(e => e.name === 'test.tex')
         expect(file).to.exist
-        return done()
+        done()
       })
     })
   })
 
   describe('deleting a file', function () {
     beforeEach(function (done) {
-      return request(
+      request(
         {
           method: 'DELETE',
-          url: `/project/${this.project_id}/contents/main.tex`,
+          url: `/project/${this.projectId}/contents/main.tex`,
           auth: {
             username: 'sharelatex',
             password: 'password',
@@ -86,34 +73,34 @@ describe('TpdsUpdateTests', function () {
           },
         },
         (error, response, body) => {
-          if (error != null) {
+          if (error) {
             throw error
           }
           expect(response.statusCode).to.equal(200)
-          return done()
+          done()
         }
       )
     })
 
     it('should have deleted the file', function (done) {
-      return ProjectGetter.getProject(this.project_id, (error, project) => {
-        if (error != null) {
+      ProjectGetter.getProject(this.projectId, (error, project) => {
+        if (error) {
           throw error
         }
         const projectFolder = project.rootFolder[0]
-        for (const doc of Array.from(projectFolder.docs)) {
+        for (const doc of projectFolder.docs) {
           if (doc.name === 'main.tex') {
             throw new Error('expected main.tex to have been deleted')
           }
         }
-        return done()
+        done()
       })
     })
   })
 
   describe('update a new file', function () {
     beforeEach(function (done) {
-      return request(
+      request(
         {
           method: 'POST',
           url: `/user/${this.owner._id}/update/test-project/other.tex`,
@@ -125,24 +112,29 @@ describe('TpdsUpdateTests', function () {
           body: 'test one two',
         },
         (error, response, body) => {
-          if (error != null) {
+          if (error) {
             throw error
           }
           expect(response.statusCode).to.equal(200)
-          return done()
+          const json = JSON.parse(response.body)
+          expect(json.status).to.equal('applied')
+          expect(json.entityType).to.equal('doc')
+          expect(json).to.have.property('entityId')
+          expect(json).to.have.property('rev')
+          done()
         }
       )
     })
 
     it('should have added the file', function (done) {
-      return ProjectGetter.getProject(this.project_id, (error, project) => {
-        if (error != null) {
+      ProjectGetter.getProject(this.projectId, (error, project) => {
+        if (error) {
           throw error
         }
         const projectFolder = project.rootFolder[0]
         const file = projectFolder.docs.find(e => e.name === 'other.tex')
         expect(file).to.exist
-        return done()
+        done()
       })
     })
   })
@@ -151,12 +143,12 @@ describe('TpdsUpdateTests', function () {
     beforeEach(function (done) {
       this.owner.request(
         {
-          url: `/Project/${this.project_id}/archive`,
+          url: `/Project/${this.projectId}/archive`,
           method: 'post',
         },
         (err, response, body) => {
           expect(err).to.not.exist
-          return request(
+          request(
             {
               method: 'POST',
               url: `/user/${this.owner._id}/update/test-project/test.tex`,
@@ -168,11 +160,13 @@ describe('TpdsUpdateTests', function () {
               body: 'test one two',
             },
             (error, response, body) => {
-              if (error != null) {
+              if (error) {
                 throw error
               }
               expect(response.statusCode).to.equal(200)
-              return done()
+              const json = JSON.parse(response.body)
+              expect(json.status).to.equal('rejected')
+              done()
             }
           )
         }
@@ -192,14 +186,14 @@ describe('TpdsUpdateTests', function () {
     })
 
     it('should not have added the file', function (done) {
-      return ProjectGetter.getProject(this.project_id, (error, project) => {
-        if (error != null) {
+      ProjectGetter.getProject(this.projectId, (error, project) => {
+        if (error) {
           throw error
         }
         const projectFolder = project.rootFolder[0]
         const file = projectFolder.docs.find(e => e.name === 'test.tex')
         expect(file).to.not.exist
-        return done()
+        done()
       })
     })
   })

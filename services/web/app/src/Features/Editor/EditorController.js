@@ -213,7 +213,7 @@ const EditorController = {
                 userId
               )
             }
-            callback()
+            callback(null, doc)
           }
         )
       }
@@ -273,7 +273,7 @@ const EditorController = {
               linkedFileData,
               userId
             )
-            callback()
+            callback(null, newFile)
           }
         )
       }

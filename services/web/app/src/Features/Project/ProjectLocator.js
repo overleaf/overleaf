@@ -1,5 +1,6 @@
 const _ = require('underscore')
 const logger = require('@overleaf/logger')
+const OError = require('@overleaf/o-error')
 const async = require('async')
 const ProjectGetter = require('./ProjectGetter')
 const Errors = require('../Errors/Errors')
@@ -282,10 +283,31 @@ function getIndexOf(searchEntity, id) {
   }
 }
 
+/**
+ * Follow the given Mongo path (as returned by findElement) and return the
+ * entity at the end of it.
+ */
+function findElementByMongoPath(project, mongoPath) {
+  const components = mongoPath.split('.')
+  let node = project
+  for (const component of components) {
+    const key = Array.isArray(node) ? parseInt(component, 10) : component
+    node = node[key]
+    if (node == null) {
+      throw new OError('entity not found', {
+        projectId: project._id,
+        mongoPath,
+      })
+    }
+  }
+  return node
+}
+
 module.exports = {
   findElement,
   findElementByPath,
   findRootDoc,
+  findElementByMongoPath,
   promises: {
     findElement: promisifyMultiResult(findElement, [
       'element',

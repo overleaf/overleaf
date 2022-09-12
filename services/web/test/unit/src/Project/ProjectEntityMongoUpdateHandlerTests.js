@@ -77,6 +77,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
       getAllEntitiesFromProject: sinon.stub(),
     }
     this.ProjectLocator = {
+      findElementByMongoPath: sinon.stub().throws(new Error('not found')),
       promises: {
         findElement: sinon.stub().rejects(new Error('not found')),
         findElementByPath: sinon.stub().rejects(new Error('not found')),
@@ -388,6 +389,9 @@ describe('ProjectEntityMongoUpdateHandler', function () {
         )
         .chain('exec')
         .resolves(this.project)
+      this.ProjectLocator.findElementByMongoPath
+        .withArgs(this.project, 'rootFolder.0.fileRefs.0')
+        .returns(newFile)
       await this.subject.promises.replaceFileWithNew(
         this.project._id,
         this.file._id,

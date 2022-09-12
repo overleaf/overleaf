@@ -34,7 +34,7 @@ describe('ProjectEntityUpdateHandler', function () {
         this.name = options.name
         this.lines = options.lines
         this._id = docId
-        this.rev = 0
+        this.rev = options.rev ?? 0
       }
     }
     this.FileModel = class File {
@@ -516,14 +516,15 @@ describe('ProjectEntityUpdateHandler', function () {
     describe('adding a doc', function () {
       beforeEach(function () {
         this.path = '/path/to/doc'
+        this.rev = 5
 
         this.newDoc = new this.DocModel({
           name: this.docName,
           lines: undefined,
           _id: docId,
-          rev: 0,
+          rev: this.rev,
         })
-        this.DocstoreManager.updateDoc.yields(null, false, (this.rev = 5))
+        this.DocstoreManager.updateDoc.yields(null, false, this.rev)
         this.TpdsUpdateSender.addDoc.yields()
         this.ProjectEntityMongoUpdateHandler.addDoc.yields(
           null,
@@ -555,18 +556,16 @@ describe('ProjectEntityUpdateHandler', function () {
             docLines: this.docLines.join('\n'),
           },
         ]
-        this.DocumentUpdaterHandler.updateProjectStructure
-          .calledWith(
-            projectId,
-            projectHistoryId,
-            userId,
-            {
-              newDocs,
-              newProject: this.project,
-            },
-            this.source
-          )
-          .should.equal(true)
+        this.DocumentUpdaterHandler.updateProjectStructure.should.have.been.calledWith(
+          projectId,
+          projectHistoryId,
+          userId,
+          {
+            newDocs,
+            newProject: this.project,
+          },
+          this.source
+        )
       })
     })
 
@@ -1020,6 +1019,7 @@ describe('ProjectEntityUpdateHandler', function () {
     describe('updating an existing file', function () {
       beforeEach(function () {
         this.existingFile = { _id: fileId, name: this.fileName, rev: 1 }
+        this.newFile = { _id: ObjectId(), name: this.fileName, rev: 3 }
         this.folder = { _id: folderId, fileRefs: [this.existingFile], docs: [] }
         this.ProjectLocator.findElement.yields(null, this.folder)
         this.newProject = 'new-project-stub'
@@ -1028,7 +1028,8 @@ describe('ProjectEntityUpdateHandler', function () {
           this.existingFile,
           this.project,
           { fileSystem: this.fileSystemPath },
-          this.newProject
+          this.newProject,
+          this.newFile
         )
         this.ProjectEntityUpdateHandler.upsertFile(
           projectId,
@@ -1065,8 +1066,8 @@ describe('ProjectEntityUpdateHandler', function () {
         this.TpdsUpdateSender.addFile.should.have.been.calledWith({
           projectId,
           projectName: this.project.name,
-          fileId: this.file._id,
-          rev: this.existingFile.rev + 1,
+          fileId: this.newFile._id,
+          rev: this.newFile.rev,
           path: this.fileSystemPath,
           folderId,
         })
@@ -1088,7 +1089,7 @@ describe('ProjectEntityUpdateHandler', function () {
         ]
         const newFiles = [
           {
-            file: this.file,
+            file: this.newFile,
             path: this.fileSystemPath,
             url: this.fileUrl,
           },
