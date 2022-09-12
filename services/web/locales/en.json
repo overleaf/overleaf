@@ -960,6 +960,7 @@
   "no_projects": "No projects",
   "archived": "Archived",
   "trashed": "Trashed",
+  "created_at": "Created at",
   "token_read_write": "token read-write",
   "token_read_only": "token read-only",
   "duplicate_projects": "This user has projects with duplicate names",
