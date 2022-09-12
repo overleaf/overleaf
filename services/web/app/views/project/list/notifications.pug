@@ -251,3 +251,28 @@ include ../../_mixins/reconfirm_affiliation
 			ng-if="userEmail.samlIdentifier && userEmail.samlIdentifier.providerId === reconfirmedViaSAML"
 		)
 			+reconfirmedAffiliationNotification()
+
+	- var hasPaidAffiliation = userAffiliations.some(affiliation => affiliation.licence && affiliation.licence !== 'free')
+	if settings.enableSubscriptions && !hasSubscription && !hasPaidAffiliation
+		ul.list-unstyled(
+			ng-controller="DismissableNotificationsController",
+			ng-cloak
+		)
+			li.notification-entry(
+				ng-if="shouldShowNotification && projects.length > 0"
+			)
+				.alert.alert-info
+					.notification-body
+						span We're celebrating the new school year! For a limited time, receive 15% off the first year of any new annual subscription.
+					.notification-action
+						a.pull-right.btn.btn-sm.btn-info(
+							href="https://www.overleaf.com/events/limited-time-promo-sept2022"
+							event-tracking="promo-click"
+							event-tracking-mb="true"
+							event-tracking-trigger="click"
+							event-segmentation='{"name": "bts2022", "location": "dashboard-banner"}'
+						) Upgrade
+					.notification-close
+						button(ng-click="dismiss()").close.pull-right
+							span(aria-hidden="true") &times;
+							span.sr-only #{translate("close")}
