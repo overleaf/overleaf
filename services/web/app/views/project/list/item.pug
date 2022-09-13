@@ -5,7 +5,7 @@ td.project-list-table-name-cell
 			type="checkbox",
 			ng-model="project.selected"
 			stop-propagation="click"
-			aria-label=translate('select_project') + " '{{ project.name }}'"
+			aria-label=translate('select_project', {project: '{{ project.name }}'})
 		)
 		span.project-list-table-name
 			a.project-list-table-name-link(

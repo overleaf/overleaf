@@ -1,27 +1,30 @@
 import * as React from 'react'
 import useSafeDispatch from './use-safe-dispatch'
 import { Nullable } from '../../../../types/utils'
+import { FetchError } from '../../infrastructure/fetch-json'
 
-type State<T> = {
+type State<T, E> = {
   status: 'idle' | 'pending' | 'resolved' | 'rejected'
   data: Nullable<T>
-  error: Nullable<Error>
+  error: Nullable<E>
 }
-type Action<T> = Partial<State<T>>
+type Action<T, E> = Partial<State<T, E>>
 
-const defaultInitialState: State<null> = {
+const defaultInitialState: State<null, null> = {
   status: 'idle',
   data: null,
   error: null,
 }
 
-function useAsync<T = any>(initialState?: Partial<State<T>>) {
+function useAsync<T = any, E extends Error | FetchError = Error>(
+  initialState?: Partial<State<T, E>>
+) {
   const initialStateRef = React.useRef({
     ...defaultInitialState,
     ...initialState,
   })
   const [{ status, data, error }, setState] = React.useReducer(
-    (state: State<T>, action: Action<T>) => ({ ...state, ...action }),
+    (state: State<T, E>, action: Action<T, E>) => ({ ...state, ...action }),
     initialStateRef.current
   )
 
@@ -33,7 +36,7 @@ function useAsync<T = any>(initialState?: Partial<State<T>>) {
   )
 
   const setError = React.useCallback(
-    (error: Nullable<Error>) => safeSetState({ error, status: 'rejected' }),
+    (error: Nullable<E>) => safeSetState({ error, status: 'rejected' }),
     [safeSetState]
   )
 

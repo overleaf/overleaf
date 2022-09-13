@@ -783,6 +783,7 @@ module.exports = {
     sourceEditorCompletionSources: [],
     integrationLinkingWidgets: [],
     referenceLinkingWidgets: [],
+    importProjectFromGithubModalWrapper: [],
   },
 
   moduleImportSequence: ['launchpad', 'server-ce-scripts', 'user-activate'],

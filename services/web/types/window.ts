@@ -8,6 +8,7 @@ declare global {
     csrfToken: string
     sl_debugging: boolean
     user: User
+    user_id?: string
     oauthProviders: OAuthProviders
     thirdPartyIds: Record<string, string>
     metaAttributesCache: Map<string, any>

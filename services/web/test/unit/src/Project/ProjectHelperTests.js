@@ -63,22 +63,6 @@ describe('ProjectHelper', function () {
       })
     })
 
-    describe('project.archived being a boolean', function () {
-      it('returns true if archived is true', function () {
-        this.project.archived = true
-        expect(
-          this.ProjectHelper.isArchived(this.project, this.user._id)
-        ).to.equal(true)
-      })
-
-      it('returns false if archived is false', function () {
-        this.project.archived = false
-        expect(
-          this.ProjectHelper.isArchived(this.project, this.user._id)
-        ).to.equal(false)
-      })
-    })
-
     describe('project.archived being undefined', function () {
       it('returns false if archived is undefined', function () {
         this.project.archived = undefined

@@ -1,13 +1,15 @@
 import classNames from 'classnames'
 
-type IconProps = {
+type IconOwnProps = {
   type: string
   spin?: boolean
   fw?: boolean
   modifier?: string
-  className?: string
   accessibilityLabel?: string
 }
+
+type IconProps = IconOwnProps &
+  Omit<React.ComponentProps<'i'>, keyof IconOwnProps>
 
 function Icon({
   type,
@@ -16,6 +18,7 @@ function Icon({
   modifier,
   className = '',
   accessibilityLabel,
+  ...rest
 }: IconProps) {
   const iconClassName = classNames(
     'fa',
@@ -30,7 +33,7 @@ function Icon({
 
   return (
     <>
-      <i className={iconClassName} aria-hidden="true" />
+      <i className={iconClassName} aria-hidden="true" {...rest} />
       {accessibilityLabel && (
         <span className="sr-only">{accessibilityLabel}</span>
       )}

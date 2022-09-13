@@ -19,6 +19,8 @@ const {
 } = require('../Errors/Errors')
 const FeaturesHelper = require('./FeaturesHelper')
 
+/** @typedef {import("../../../../types/project/dashboard/subscription").Subscription} Subscription */
+
 function buildHostedLink(type) {
   return `/user/subscription/recurly/${type}`
 }
@@ -334,6 +336,10 @@ function buildUsersSubscriptionViewModel(user, callback) {
   )
 }
 
+/**
+ * @param {{_id: string}} user
+ * @returns {Promise<Subscription>}
+ */
 async function getBestSubscription(user) {
   let [
     individualSubscription,

@@ -32,4 +32,5 @@ export default function ControlledDropdown(props) {
 ControlledDropdown.propTypes = {
   children: PropTypes.any,
   defaultOpen: PropTypes.bool,
+  id: PropTypes.string,
 }

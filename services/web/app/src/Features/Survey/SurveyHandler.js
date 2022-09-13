@@ -2,6 +2,14 @@ const SurveyCache = require('./SurveyCache')
 const SubscriptionLocator = require('../Subscription/SubscriptionLocator')
 const { callbackify } = require('../../util/promises')
 
+/**
+ * @typedef {import('../../../../types/project/dashboard/survey').Survey} Survey
+ */
+
+/**
+ * @param {string} userId
+ * @returns {Promise<Survey | undefined>}
+ */
 async function getSurvey(userId) {
   const survey = await SurveyCache.get(true)
   if (survey) {

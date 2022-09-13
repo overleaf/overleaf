@@ -3,6 +3,10 @@ const _ = require('lodash')
 const { promisify } = require('util')
 const Settings = require('@overleaf/settings')
 
+/**
+ * @typedef {import("./types").MongoProject} MongoProject
+ */
+
 const ENGINE_TO_COMPILER_MAP = {
   latex_dvipdf: 'latex',
   pdflatex: 'pdflatex',
@@ -27,26 +31,33 @@ function compilerFromV1Engine(engine) {
   return ENGINE_TO_COMPILER_MAP[engine]
 }
 
+/**
+ @param {MongoProject} project
+ @param {string} userId
+ * @returns {boolean}
+ */
 function isArchived(project, userId) {
   userId = ObjectId(userId)
 
-  if (Array.isArray(project.archived)) {
-    return project.archived.some(id => id.equals(userId))
-  } else {
-    return !!project.archived
-  }
+  return (project.archived || []).some(id => id.equals(userId))
 }
 
+/**
+ * @param {MongoProject} project
+ * @param {string} userId
+ * @returns {boolean}
+ */
 function isTrashed(project, userId) {
   userId = ObjectId(userId)
 
-  if (project.trashed) {
-    return project.trashed.some(id => id.equals(userId))
-  } else {
-    return false
-  }
+  return (project.trashed || []).some(id => id.equals(userId))
 }
 
+/**
+ * @param {MongoProject} project
+ * @param {string} userId
+ * @returns {boolean}
+ */
 function isArchivedOrTrashed(project, userId) {
   return isArchived(project, userId) || isTrashed(project, userId)
 }

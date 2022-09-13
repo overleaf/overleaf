@@ -2,6 +2,7 @@ const settings = require('@overleaf/settings')
 const request = require('request')
 const logger = require('@overleaf/logger')
 const _ = require('lodash')
+const { promisifyAll } = require('../../util/promises')
 
 const notificationsApi = _.get(settings, ['apis', 'notifications', 'url'])
 const oneSecond = 1000
@@ -14,7 +15,7 @@ const makeRequest = function (opts, callback) {
   }
 }
 
-module.exports = {
+const NotificationsHandler = {
   getUserNotifications(userId, callback) {
     const opts = {
       uri: `${notificationsApi}/user/${userId}`,
@@ -136,3 +137,6 @@ module.exports = {
     })
   },
 }
+
+NotificationsHandler.promises = promisifyAll(NotificationsHandler)
+module.exports = NotificationsHandler

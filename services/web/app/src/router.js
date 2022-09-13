@@ -2,6 +2,7 @@ const AdminController = require('./Features/ServerAdmin/AdminController')
 const ErrorController = require('./Features/Errors/ErrorController')
 const ProjectController = require('./Features/Project/ProjectController')
 const ProjectApiController = require('./Features/Project/ProjectApiController')
+const ProjectListController = require('./Features/Project/ProjectListController')
 const SpellingController = require('./Features/Spelling/SpellingController')
 const EditorRouter = require('./Features/Editor/EditorRouter')
 const Settings = require('@overleaf/settings')
@@ -357,6 +358,16 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
       timeInterval: 60,
     }),
     ProjectController.newProject
+  )
+  webRouter.post(
+    '/api/project',
+    AuthenticationController.requireLogin(),
+    RateLimiterMiddleware.rateLimit({
+      endpointName: 'get-projects',
+      maxRequests: 30,
+      timeInterval: 60,
+    }),
+    ProjectListController.getProjectsJson
   )
 
   for (const route of [

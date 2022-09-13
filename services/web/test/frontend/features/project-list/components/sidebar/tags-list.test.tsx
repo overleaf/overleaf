@@ -1,0 +1,261 @@
+import {
+  render,
+  fireEvent,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react'
+import { assert, expect } from 'chai'
+import fetchMock from 'fetch-mock'
+import TagsList from '../../../../../../frontend/js/features/project-list/components/sidebar/tags-list'
+import { ProjectListProvider } from '../../../../../../frontend/js/features/project-list/context/project-list-context'
+
+describe('<TagsList />', function () {
+  beforeEach(async function () {
+    window.metaAttributesCache.set('ol-tags', [
+      {
+        _id: 'abc123def456',
+        name: 'Tag 1',
+        project_ids: ['456fea789bcd'],
+      },
+      {
+        _id: 'bcd234efg567',
+        name: 'Another tag',
+        project_ids: ['456fea789bcd', '567efa890bcd'],
+      },
+    ])
+
+    fetchMock.post('/api/project', {
+      projects: [
+        {
+          id: '456fea789bcd',
+          archived: false,
+          trashed: false,
+        },
+        {
+          id: '567efa890bcd',
+          archived: false,
+          trashed: false,
+        },
+        {
+          id: '999fff999fff',
+          archived: false,
+          trashed: false,
+        },
+      ],
+    })
+    fetchMock.post('/tag', {
+      _id: 'eee888eee888',
+      name: 'New Tag',
+      project_ids: [],
+    })
+    fetchMock.post('express:/tag/:tagId/rename', 200)
+    fetchMock.delete('express:/tag/:tagId', 200)
+
+    render(<TagsList />, {
+      wrapper: ({ children }) => (
+        <ProjectListProvider>{children}</ProjectListProvider>
+      ),
+    })
+
+    await waitFor(() => expect(fetchMock.called('/api/project')))
+  })
+
+  afterEach(function () {
+    fetchMock.reset()
+  })
+
+  it('displays the tags list', async function () {
+    screen.getByRole('heading', {
+      name: 'Tags/Folders',
+    })
+    screen.getByRole('button', {
+      name: 'New Folder',
+    })
+    screen.getByRole('button', {
+      name: 'Tag 1 (1)',
+    })
+    screen.getByRole('button', {
+      name: 'Another tag (2)',
+    })
+    screen.getByRole('button', {
+      name: 'Uncategorized (1)',
+    })
+  })
+
+  it('selects the tag when clicked', async function () {
+    const tag1Button = screen.getByText('Tag 1')
+    assert.isFalse(tag1Button.closest('li')?.classList.contains('active'))
+
+    await fireEvent.click(tag1Button)
+    assert.isTrue(tag1Button.closest('li')?.classList.contains('active'))
+  })
+
+  it('selects uncategorized when clicked', function () {
+    const uncategorizedButton = screen.getByText('Uncategorized')
+    assert.isFalse(
+      uncategorizedButton.closest('li')?.classList.contains('active')
+    )
+
+    fireEvent.click(uncategorizedButton)
+    assert.isTrue(
+      uncategorizedButton.closest('li')?.classList.contains('active')
+    )
+  })
+
+  describe('create modal', function () {
+    beforeEach(async function () {
+      const newTagButton = screen.getByRole('button', {
+        name: 'New Folder',
+      })
+
+      await fireEvent.click(newTagButton)
+    })
+
+    it('modal is open', async function () {
+      const modal = screen.getAllByRole('dialog', { hidden: false })[0]
+      within(modal).getByRole('heading', { name: 'Create New Folder' })
+    })
+
+    it('click on cancel closes the modal', async function () {
+      const modal = screen.getAllByRole('dialog', { hidden: false })[0]
+      const cancelButton = within(modal).getByRole('button', { name: 'Cancel' })
+
+      await fireEvent.click(cancelButton)
+      expect(screen.queryByRole('dialog', { hidden: false })).to.be.null
+    })
+
+    it('Create button is disabled when input is empty', async function () {
+      const modal = screen.getAllByRole('dialog', { hidden: false })[0]
+      const createButton = within(modal).getByRole('button', { name: 'Create' })
+
+      expect(createButton.hasAttribute('disabled')).to.be.true
+    })
+
+    it('filling the input and clicking Create sends a request', async function () {
+      const modal = screen.getAllByRole('dialog', { hidden: false })[0]
+      const input = within(modal).getByRole('textbox')
+      fireEvent.change(input, { target: { value: 'New Tag' } })
+
+      const createButton = within(modal).getByRole('button', { name: 'Create' })
+      expect(createButton.hasAttribute('disabled')).to.be.false
+
+      await fireEvent.click(createButton)
+
+      await waitFor(() => expect(fetchMock.called(`/tag`)))
+
+      expect(screen.queryByRole('dialog', { hidden: false })).to.be.null
+
+      screen.getByRole('button', {
+        name: 'New Tag (0)',
+      })
+    })
+  })
+
+  describe('rename modal', function () {
+    beforeEach(async function () {
+      const tag1Button = screen.getByText('Tag 1')
+
+      const renameButton = within(
+        tag1Button.closest('li') as HTMLElement
+      ).getByRole('button', {
+        name: 'Rename',
+      })
+
+      await fireEvent.click(renameButton)
+    })
+
+    it('modal is open', async function () {
+      const modal = screen.getAllByRole('dialog', { hidden: false })[0]
+      within(modal).getByRole('heading', { name: 'Rename Folder' })
+    })
+
+    it('click on cancel closes the modal', async function () {
+      const modal = screen.getAllByRole('dialog', { hidden: false })[0]
+      const cancelButton = within(modal).getByRole('button', { name: 'Cancel' })
+
+      await fireEvent.click(cancelButton)
+      expect(screen.queryByRole('dialog', { hidden: false })).to.be.null
+    })
+
+    it('Rename button is disabled when input is empty', async function () {
+      const modal = screen.getAllByRole('dialog', { hidden: false })[0]
+      const renameButton = within(modal).getByRole('button', { name: 'Rename' })
+
+      expect(renameButton.hasAttribute('disabled')).to.be.true
+    })
+
+    it('filling the input and clicking Rename sends a request', async function () {
+      const modal = screen.getAllByRole('dialog', { hidden: false })[0]
+      const input = within(modal).getByRole('textbox')
+      fireEvent.change(input, { target: { value: 'New Tag Name' } })
+
+      const renameButton = within(modal).getByRole('button', { name: 'Rename' })
+      expect(renameButton.hasAttribute('disabled')).to.be.false
+
+      await fireEvent.click(renameButton)
+
+      await waitFor(() => expect(fetchMock.called(`/tag/abc123def456/rename`)))
+
+      expect(screen.queryByRole('dialog', { hidden: false })).to.be.null
+
+      screen.getByRole('button', {
+        name: 'New Tag Name (1)',
+      })
+    })
+  })
+
+  describe('delete modal', function () {
+    beforeEach(async function () {
+      const tag1Button = screen.getByText('Another tag')
+
+      const renameButton = within(
+        tag1Button.closest('li') as HTMLElement
+      ).getByRole('button', {
+        name: 'Delete',
+      })
+
+      await fireEvent.click(renameButton)
+    })
+
+    it('modal is open', async function () {
+      const modal = screen.getAllByRole('dialog', { hidden: false })[0]
+      within(modal).getByRole('heading', { name: 'Delete Folder' })
+    })
+
+    it('click on Cancel closes the modal', async function () {
+      const modal = screen.getAllByRole('dialog', { hidden: false })[0]
+      const cancelButton = within(modal).getByRole('button', { name: 'Cancel' })
+
+      await fireEvent.click(cancelButton)
+      expect(screen.queryByRole('dialog', { hidden: false })).to.be.null
+    })
+
+    it('clicking Delete sends a request', async function () {
+      const modal = screen.getAllByRole('dialog', { hidden: false })[0]
+      const deleteButton = within(modal).getByRole('button', { name: 'Delete' })
+      await fireEvent.click(deleteButton)
+
+      await waitFor(() => expect(fetchMock.called(`/tag/bcd234efg567`)))
+
+      expect(screen.queryByRole('dialog', { hidden: false })).to.be.null
+      expect(
+        screen.queryByRole('button', {
+          name: 'Another Tag (2)',
+        })
+      ).to.be.null
+    })
+
+    it('a failed request displays an error message', async function () {
+      fetchMock.delete('express:/tag/:tagId', 500, { overwriteRoutes: true })
+
+      const modal = screen.getAllByRole('dialog', { hidden: false })[0]
+      const deleteButton = within(modal).getByRole('button', { name: 'Delete' })
+      await fireEvent.click(deleteButton)
+
+      await waitFor(() => expect(fetchMock.called(`/tag/bcd234efg567`)))
+
+      within(modal).getByText('Sorry, something went wrong')
+    })
+  })
+})

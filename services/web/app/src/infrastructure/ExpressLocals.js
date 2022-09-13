@@ -410,6 +410,7 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
         Settings.analytics.ga &&
         Settings.analytics.ga.tokenV4,
       cookieDomain: Settings.cookieDomain,
+      templateLinks: Settings.templateLinks,
     }
     next()
   })

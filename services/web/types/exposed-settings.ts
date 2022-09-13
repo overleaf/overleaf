@@ -1,3 +1,8 @@
+type TemplateLink = {
+  name: string
+  url: string
+}
+
 export type ExposedSettings = {
   appName: string
   cookieDomain: string
@@ -30,4 +35,5 @@ export type ExposedSettings = {
   siteUrl: string
   textExtensions: string[]
   validRootDocExtensions: string[]
+  templateLinks: TemplateLink[]
 }
