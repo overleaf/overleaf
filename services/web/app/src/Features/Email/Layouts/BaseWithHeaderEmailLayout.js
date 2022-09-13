@@ -55,6 +55,10 @@ module.exports = _.template(`\
 	.small-text-right {
 		text-align: right !important;
 	}
+
+	.cta-table {
+		table-layout: fixed;
+	}
 }
 
 @media only screen and (max-width: 596px) {
