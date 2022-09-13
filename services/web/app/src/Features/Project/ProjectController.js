@@ -451,6 +451,10 @@ const ProjectController = {
             (err, subscription) => {
               if (err) {
                 // do not fail loading the project list when fetching the best subscription fails
+                logger.error(
+                  { userId, err },
+                  'Could not get usersBestSubscription'
+                )
                 return cb(null, { type: 'error' })
               }
               cb(null, subscription)
