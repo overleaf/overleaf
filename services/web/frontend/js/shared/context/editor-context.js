@@ -36,7 +36,6 @@ EditorContext.Provider.propTypes = {
     showGalileo: PropTypes.bool,
     toggleGalileo: PropTypes.func,
     insertGalileoAutocomplete: PropTypes.func,
-    insertGalileoCiteAutocomplete: PropTypes.func,
     isProjectOwner: PropTypes.bool,
     isRestrictedTokenMember: PropTypes.bool,
     permissionsLevel: PropTypes.oneOf(['readOnly', 'readAndWrite', 'owner']),
@@ -143,18 +142,10 @@ export function EditorProvider({ children, settings }) {
     )
   }, [])
 
-  const insertGalileoAutocomplete = useCallback(text => {
+  const insertGalileoAutocomplete = useCallback(suggestion => {
     window.dispatchEvent(
       new CustomEvent('editor:insert-galileo-completion', {
-        detail: { text, cite: false },
-      })
-    )
-  }, [])
-
-  const insertGalileoCiteAutocomplete = useCallback(text => {
-    window.dispatchEvent(
-      new CustomEvent('editor:insert-galileo-completion', {
-        detail: { text, cite: true },
+        detail: suggestion,
       })
     )
   }, [])
@@ -174,7 +165,6 @@ export function EditorProvider({ children, settings }) {
       showGalileo,
       toggleGalileo,
       insertGalileoAutocomplete,
-      insertGalileoCiteAutocomplete,
     }),
     [
       cobranding,
@@ -189,7 +179,6 @@ export function EditorProvider({ children, settings }) {
       showGalileo,
       toggleGalileo,
       insertGalileoAutocomplete,
-      insertGalileoCiteAutocomplete,
     ]
   )
 
