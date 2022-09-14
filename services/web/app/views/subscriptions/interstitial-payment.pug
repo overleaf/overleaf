@@ -41,5 +41,15 @@ block content
 
 					//- sticky header on mobile will be "hidden" (by removing its sticky position) if it reaches this div
 					.invisible(aria-hidden="true" data-ol-plans-v2-table-sticky-header-stop)
-
+		
+		if (showSkipLink)
+			.row.row-spaced-small.text-center
+				a(href='/project'
+					event-tracking="skip-button-click"
+					event-tracking-mb="true"
+					event-tracking-trigger="click"
+					event-segmentation='{"paywall-type": "interstitial-page"}'
+				)
+					| #{translate("continue_with_free_plan")}			
+			
 	!= moduleIncludes("contactModalGeneral-marketing", locals)

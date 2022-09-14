@@ -263,6 +263,8 @@ async function interstitialPaymentPage(req, res) {
   const hasSubscription =
     await LimitationsManager.promises.userHasV1OrV2Subscription(user)
 
+  const showSkipLink = req.query?.skipLink === 'true'
+
   if (hasSubscription) {
     res.redirect('/user/subscription?hasSubscription=true')
   } else {
@@ -272,6 +274,7 @@ async function interstitialPaymentPage(req, res) {
       itm_campaign: req.query?.itm_campaign,
       recommendedCurrency,
       interstitialPaymentConfig,
+      showSkipLink,
     })
   }
 }
@@ -339,6 +342,8 @@ async function successfulSubscription(req, res) {
   const premiumFeaturesDiscoverability =
     premiumFeaturesDiscoverabilityAssignment?.variant === 'active'
 
+  const postCheckoutRedirect = req.session?.postCheckoutRedirect
+
   if (!personalSubscription) {
     res.redirect('/user/subscription/plans')
   } else {
@@ -346,6 +351,7 @@ async function successfulSubscription(req, res) {
       title: 'thank_you',
       personalSubscription,
       premiumFeaturesDiscoverability,
+      postCheckoutRedirect,
     })
   }
 }

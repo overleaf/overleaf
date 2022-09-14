@@ -181,6 +181,7 @@ const UserSchema = new Schema({
   auditLog: [AuditLogEntrySchema],
   splitTests: Schema.Types.Mixed,
   analyticsId: { type: String },
+  surveyResponses: Schema.Types.Mixed,
 })
 
 function formatSplitTestsSchema(next) {

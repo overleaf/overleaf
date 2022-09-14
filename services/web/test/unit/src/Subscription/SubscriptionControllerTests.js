@@ -404,6 +404,7 @@ describe('SubscriptionController', function () {
           title: 'thank_you',
           personalSubscription: 'foo',
           premiumFeaturesDiscoverability: false,
+          postCheckoutRedirect: undefined,
         })
         done()
       }

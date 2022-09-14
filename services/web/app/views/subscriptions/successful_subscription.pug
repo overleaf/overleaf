@@ -30,4 +30,7 @@ block content
 								br(ng-non-bindable)
 								| The #{settings.appName} Team
 						p
-							a.btn.btn-primary(href="/project") &lt; #{translate("back_to_your_projects")}
+							if (postCheckoutRedirect)
+								a.btn.btn-primary(href=postCheckoutRedirect) &lt; #{translate("back_to_your_projects")}
+							else
+								a.btn.btn-primary(href="/project") &lt; #{translate("back_to_your_projects")}
