@@ -8,7 +8,6 @@ import { useDetachCompileContext as useCompileContext } from '../../../shared/co
 import FasterCompilesFeedback from './faster-compiles-feedback'
 import { PdfPreviewMessages } from './pdf-preview-messages'
 import CompileTimeWarning from './compile-time-warning'
-import RichTextSurvey from './rich-text-survey'
 
 function PdfPreviewPane() {
   const { pdfUrl } = useCompileContext()
@@ -20,7 +19,6 @@ function PdfPreviewPane() {
       <PdfHybridPreviewToolbar />
       <PdfPreviewMessages>
         <CompileTimeWarning />
-        <RichTextSurvey />
       </PdfPreviewMessages>
       <Suspense fallback={<LoadingPreview />}>
         <div className="pdf-viewer">
