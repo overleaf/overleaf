@@ -120,6 +120,7 @@ function PasswordForm() {
         label={t('current_password')}
         value={currentPassword}
         handleChange={handleCurrentPasswordChange}
+        autoComplete="current-password"
       />
       <PasswordFormGroup
         id="new-password-1-input"
@@ -127,6 +128,7 @@ function PasswordForm() {
         value={newPassword1}
         handleChange={handleNewPassword1Change}
         minLength={passwordStrengthOptions?.length?.min || 6}
+        autoComplete="new-password"
       />
       <PasswordFormGroup
         id="new-password-2-input"
@@ -136,6 +138,7 @@ function PasswordForm() {
         validationMessage={
           newPassword1 !== newPassword2 ? t('doesnt_match') : ''
         }
+        autoComplete="new-password"
       />
       {isSuccess && data?.message?.text ? (
         <FormGroup>
@@ -166,6 +169,7 @@ type PasswordFormGroupProps = {
   handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void
   minLength?: number
   validationMessage?: string
+  autoComplete?: string
 }
 
 function PasswordFormGroup({
@@ -175,6 +179,7 @@ function PasswordFormGroup({
   handleChange,
   minLength,
   validationMessage: parentValidationMessage,
+  autoComplete,
 }: PasswordFormGroupProps) {
   const [validationMessage, setValidationMessage] = useState('')
   const [hadInteraction, setHadInteraction] = useState(false)
@@ -200,7 +205,7 @@ function PasswordFormGroup({
         id={id}
         type="password"
         placeholder="*********"
-        autoComplete="new-password"
+        autoComplete={autoComplete}
         value={value}
         data-ol-dirty={!!validationMessage}
         onChange={handleChangeAndValidity}
