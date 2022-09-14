@@ -7,7 +7,7 @@ function errSerializer(err) {
   return {
     message: err.message,
     name: err.name,
-    stack: err.stack && OError.getFullStack(err),
+    stack: OError.getFullStack(err),
     info: OError.getFullInfo(err),
     code: err.code,
     signal: err.signal,

@@ -35,7 +35,7 @@ function convertLogEntry(entry) {
     if (entry.err.signal) {
       gcpEntry.signal = entry.err.signal
     }
-    if (entry.err.stack) {
+    if (entry.err.stack !== '(no stack)') {
       gcpEntry.message = entry.err.stack
     } else if (entry.err.message) {
       gcpEntry.message = entry.err.message
