@@ -1,6 +1,9 @@
 const webpack = require('webpack')
 const { merge } = require('webpack-merge')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin')
+
+process.env.REACT_REFRESH = '1'
 
 const base = require('./webpack.config')
 
@@ -42,6 +45,8 @@ module.exports = merge(base, {
       filename: 'stylesheets/[name].css',
     }),
 
+    new ReactRefreshWebpackPlugin(),
+
     // Disable React DevTools if DISABLE_REACT_DEVTOOLS is set to "true"
     process.env.DISABLE_REACT_DEVTOOLS === 'true' &&
       new webpack.DefinePlugin({
@@ -56,6 +61,7 @@ module.exports = merge(base, {
     client: {
       webSocketURL: 'auto://0.0.0.0:0/ws',
     },
+    hot: true,
     allowedHosts: '.dev-overleaf.com',
     setupMiddlewares(middlewares, devServer) {
       devServer.app.get('/status', (req, res) => res.send('webpack is up'))

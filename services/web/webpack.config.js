@@ -100,6 +100,9 @@ module.exports = {
               // subsequent compile runs are much faster
               cacheDirectory: true,
               configFile: path.join(__dirname, './babel.config.json'),
+              plugins: [
+                process.env.REACT_REFRESH && 'react-refresh/babel',
+              ].filter(Boolean),
             },
           },
         ],
