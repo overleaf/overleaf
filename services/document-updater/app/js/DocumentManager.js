@@ -222,6 +222,13 @@ module.exports = DocumentManager = {
               user_id: userId,
             },
           }
+          // Keep track of external updates, whether they are for live documents
+          // (flush) or unloaded documents (evict), and whether the update is a no-op.
+          Metrics.inc('external-update', 1, {
+            status: op.length > 0 ? 'diff' : 'noop',
+            method: alreadyLoaded ? 'flush' : 'evict',
+            path: source,
+          })
           UpdateManager.applyUpdate(projectId, docId, update, error => {
             if (error) {
               return callback(error)

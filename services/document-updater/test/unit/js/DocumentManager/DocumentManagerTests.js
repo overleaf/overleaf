@@ -9,6 +9,7 @@ describe('DocumentManager', function () {
     tk.freeze(new Date())
     this.Metrics = {
       Timer: class Timer {},
+      inc: sinon.stub(),
     }
     this.Metrics.Timer.prototype.done = sinon.stub()
 
@@ -42,6 +43,7 @@ describe('DocumentManager', function () {
     this.unflushedTime = Date.now()
     this.lastUpdatedAt = Date.now()
     this.lastUpdatedBy = 'last-author-id'
+    this.source = 'external-source'
   })
 
   afterEach(function () {
@@ -517,6 +519,16 @@ describe('DocumentManager', function () {
             .should.equal(true)
         })
 
+        it('should increment the external update metric', function () {
+          this.Metrics.inc
+            .calledWith('external-update', 1, {
+              status: 'diff',
+              method: 'flush',
+              path: this.source,
+            })
+            .should.equal(true)
+        })
+
         it('should flush the doc to Mongo', function () {
           this.DocumentManager.flushDocIfLoaded
             .calledWith(this.project_id, this.doc_id)
@@ -565,6 +577,16 @@ describe('DocumentManager', function () {
         it('should flush and delete the doc from the doc updater', function () {
           this.DocumentManager.flushAndDeleteDoc
             .calledWith(this.project_id, this.doc_id, {})
+            .should.equal(true)
+        })
+
+        it('should increment the external update metric', function () {
+          this.Metrics.inc
+            .calledWith('external-update', 1, {
+              status: 'diff',
+              method: 'evict',
+              path: this.source,
+            })
             .should.equal(true)
         })
 
