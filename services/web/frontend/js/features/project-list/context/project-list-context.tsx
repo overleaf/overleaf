@@ -14,6 +14,7 @@ import {
   Project,
   Sort,
 } from '../../../../../types/project/dashboard/api'
+import usePersistedState from '../../../shared/hooks/use-persisted-state'
 import getMeta from '../../../utils/meta'
 import useAsync from '../../../shared/hooks/use-async'
 import { getProjects } from '../util/api'
@@ -46,6 +47,8 @@ const filters: FilterMap = {
   },
 }
 
+export const UNCATEGORIZED_KEY = 'uncategorized'
+
 type ProjectListContextValue = {
   visibleProjects: Project[]
   setVisibleProjects: React.Dispatch<React.SetStateAction<Project[]>>
@@ -59,8 +62,8 @@ type ProjectListContextValue = {
   untaggedProjectsCount: number
   filter: Filter
   selectFilter: (filter: Filter) => void
-  selectedTag?: string | null
-  selectTag: (tagName: string | null) => void
+  selectedTagId?: string | undefined
+  selectTag: (tagId: string) => void
   addTag: (tag: Tag) => void
   renameTag: (tagId: string, newTagName: string) => void
   deleteTag: (tagId: string) => void
@@ -86,9 +89,14 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
     by: 'lastUpdated',
     order: 'desc',
   })
-  const [filter, setFilter] = useState<Filter>('all')
-  const [selectedTag, setSelectedTag] = useState<string | null>()
-  const [tags, setTags] = useState<Tag[]>([])
+  const [filter, setFilter] = usePersistedState<Filter>(
+    'project-list-filter',
+    'all'
+  )
+  const [selectedTagId, setSelectedTagId] = usePersistedState<
+    string | undefined
+  >('project-list-selected-tag-id', undefined)
+  const [tags, setTags] = useState<Tag[]>(getMeta('ol-tags', []) as Tag[])
   const [searchText, setSearchText] = useState('')
   const {
     isLoading: loading,
@@ -97,8 +105,6 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
     runAsync,
   } = useAsync<GetProjectsResponseBody>()
   const isLoading = isIdle ? true : loading
-
-  useEffect(() => setTags(getMeta('ol-tags', []) as Tag[]), [])
 
   useEffect(() => {
     setLoadProgress(40)
@@ -122,8 +128,8 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       )
     }
 
-    if (selectedTag !== undefined) {
-      if (selectedTag === null) {
+    if (selectedTagId !== undefined) {
+      if (selectedTagId === UNCATEGORIZED_KEY) {
         const taggedProjectIds = _.uniq(
           _.flatten(tags.map(tag => tag.project_ids))
         )
@@ -134,17 +140,30 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
             !taggedProjectIds.includes(project.id)
         )
       } else {
-        const tag = _.find(tags, tag => tag._id === selectedTag)
-        filteredProjects = filteredProjects.filter(project =>
-          tag?.project_ids?.includes(project.id)
-        )
+        const tag = _.find(tags, tag => tag._id === selectedTagId)
+        if (tag) {
+          filteredProjects = filteredProjects.filter(project =>
+            tag?.project_ids?.includes(project.id)
+          )
+        } else {
+          setFilter('all')
+          setSelectedTagId(undefined)
+        }
       }
     } else {
       filteredProjects = _.filter(filteredProjects, filters[filter])
     }
 
     setVisibleProjects(filteredProjects)
-  }, [loadedProjects, tags, filter, selectedTag, searchText])
+  }, [
+    loadedProjects,
+    tags,
+    filter,
+    setFilter,
+    selectedTagId,
+    setSelectedTagId,
+    searchText,
+  ])
 
   const untaggedProjectsCount = useMemo(() => {
     const taggedProjectIds = _.uniq(_.flatten(tags.map(tag => tag.project_ids)))
@@ -156,14 +175,20 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
     ).length
   }, [tags, loadedProjects])
 
-  const selectFilter = useCallback((filter: Filter) => {
-    setFilter(filter)
-    setSelectedTag(undefined)
-  }, [])
+  const selectFilter = useCallback(
+    (filter: Filter) => {
+      setFilter(filter)
+      setSelectedTagId(undefined)
+    },
+    [setFilter, setSelectedTagId]
+  )
 
-  const selectTag = useCallback((tagId: string | null) => {
-    setSelectedTag(tagId)
-  }, [])
+  const selectTag = useCallback(
+    (tagId: string) => {
+      setSelectedTagId(tagId)
+    },
+    [setSelectedTagId]
+  )
 
   const addTag = useCallback((tag: Tag) => {
     setTags(tags => _.uniqBy(_.concat(tags, [tag]), '_id'))
@@ -219,7 +244,7 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       isLoading,
       loadProgress,
       renameTag,
-      selectedTag,
+      selectedTagId,
       selectFilter,
       selectTag,
       setSearchText,
@@ -241,7 +266,7 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       isLoading,
       loadProgress,
       renameTag,
-      selectedTag,
+      selectedTagId,
       selectFilter,
       selectTag,
       setSearchText,

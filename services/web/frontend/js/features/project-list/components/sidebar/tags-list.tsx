@@ -5,7 +5,10 @@ import { useTranslation } from 'react-i18next'
 import { Tag } from '../../../../../../app/src/Features/Tags/types'
 import ColorManager from '../../../../ide/colors/ColorManager'
 import Icon from '../../../../shared/components/icon'
-import { useProjectListContext } from '../../context/project-list-context'
+import {
+  UNCATEGORIZED_KEY,
+  useProjectListContext,
+} from '../../context/project-list-context'
 import CreateTagModal from './create-tag-modal'
 import DeleteTagModal from './delete-tag-modal'
 import RenameTagModal from './rename-tag-modal'
@@ -15,7 +18,7 @@ export default function TagsList() {
   const {
     tags,
     untaggedProjectsCount,
-    selectedTag,
+    selectedTagId,
     selectTag,
     addTag,
     renameTag,
@@ -98,7 +101,7 @@ export default function TagsList() {
       {_.sortBy(tags, ['name']).map((tag, index) => {
         return (
           <li
-            className={`tag ${selectedTag === tag._id ? 'active' : ''}`}
+            className={`tag ${selectedTagId === tag._id ? 'active' : ''}`}
             key={index}
           >
             <Button
@@ -113,7 +116,7 @@ export default function TagsList() {
                 }}
               >
                 <Icon
-                  type={selectedTag === tag._id ? 'folder-open' : 'folder'}
+                  type={selectedTagId === tag._id ? 'folder-open' : 'folder'}
                 />
               </span>
               <span className="name">
@@ -153,8 +156,15 @@ export default function TagsList() {
           </li>
         )
       })}
-      <li className={`tag untagged ${selectedTag === null ? 'active' : ''}`}>
-        <Button className="tag-name" onClick={() => selectTag(null)}>
+      <li
+        className={`tag untagged ${
+          selectedTagId === UNCATEGORIZED_KEY ? 'active' : ''
+        }`}
+      >
+        <Button
+          className="tag-name"
+          onClick={() => selectTag(UNCATEGORIZED_KEY)}
+        >
           <span className="name">{t('uncategorized')}</span>
           <span className="subdued"> ({untaggedProjectsCount})</span>
         </Button>

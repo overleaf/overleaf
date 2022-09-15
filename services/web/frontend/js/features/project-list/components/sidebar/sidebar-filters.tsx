@@ -15,13 +15,13 @@ function SidebarFilter({ filter, text }: SidebarFilterProps) {
   const {
     filter: activeFilter,
     selectFilter,
-    selectedTag,
+    selectedTagId,
   } = useProjectListContext()
 
   return (
     <li
       className={
-        selectedTag === undefined && filter === activeFilter ? 'active' : ''
+        selectedTagId === undefined && filter === activeFilter ? 'active' : ''
       }
     >
       <Button onClick={() => selectFilter(filter)}>{text}</Button>
