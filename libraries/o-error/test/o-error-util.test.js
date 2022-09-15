@@ -409,5 +409,17 @@ describe('utils', function () {
         expect(OError.getFullInfo(error.cause)).to.eql({ foo: 1 })
       }
     })
+
+    it('works when given non Error', function () {
+      expect(OError.getFullStack({ message: 'Foo' })).to.equal('Foo')
+    })
+
+    it('works when given non Error with tags', function () {
+      const error = OError.tag({ message: 'Foo: bar' }, 'baz')
+      expectFullStackWithoutStackFramesToEqual(error, [
+        'Foo: bar',
+        'TaggedError: baz',
+      ])
+    })
   })
 })

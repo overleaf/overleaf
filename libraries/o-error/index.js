@@ -137,7 +137,7 @@ class OError extends Error {
 
     const oError = /** @type{OError} */ (error)
 
-    let stack = oError.stack || '(no stack)'
+    let stack = oError.stack || oError.message || '(no stack)'
 
     if (Array.isArray(oError._oErrorTags) && oError._oErrorTags.length) {
       stack += `\n${oError._oErrorTags.map(tag => tag.stack).join('\n')}`
