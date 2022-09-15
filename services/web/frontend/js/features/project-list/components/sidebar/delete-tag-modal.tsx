@@ -70,7 +70,7 @@ export default function DeleteTagModal({
           bsStyle="primary"
           disabled={status === 'pending'}
         >
-          {status === 'pending' ? t('deleting') + '...' : t('delete')}
+          {status === 'pending' ? t('deleting') + '…' : t('delete')}
         </Button>
       </Modal.Footer>
     </AccessibleModal>

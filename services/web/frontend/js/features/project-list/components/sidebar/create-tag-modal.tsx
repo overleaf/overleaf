@@ -1,10 +1,11 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Button, Form, Modal } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import { Tag } from '../../../../../../app/src/Features/Tags/types'
 import AccessibleModal from '../../../../shared/components/accessible-modal'
 import useAsync from '../../../../shared/hooks/use-async'
 import { createTag } from '../../util/api'
+import { MAX_TAG_LENGTH } from '../../util/tag'
 
 type CreateTagModalProps = {
   show: boolean
@@ -21,6 +22,7 @@ export default function CreateTagModal({
   const { isError, runAsync, status } = useAsync<Tag>()
 
   const [tagName, setTagName] = useState<string>()
+  const [validationError, setValidationError] = useState<string>()
 
   const runCreateTag = useCallback(() => {
     if (tagName) {
@@ -37,6 +39,16 @@ export default function CreateTagModal({
     },
     [runCreateTag]
   )
+
+  useEffect(() => {
+    if (tagName && tagName.length > MAX_TAG_LENGTH) {
+      setValidationError(
+        t('tag_name_cannot_exceed_characters', { maxLength: MAX_TAG_LENGTH })
+      )
+    } else if (validationError) {
+      setValidationError(undefined)
+    }
+  }, [tagName, t, validationError])
 
   if (!show) {
     return null
@@ -68,6 +80,11 @@ export default function CreateTagModal({
       </Modal.Body>
 
       <Modal.Footer>
+        {validationError && (
+          <div className="modal-footer-left">
+            <span className="text-danger error">{validationError}</span>
+          </div>
+        )}
         {isError && (
           <div className="modal-footer-left">
             <span className="text-danger error">
@@ -81,9 +98,11 @@ export default function CreateTagModal({
         <Button
           onClick={() => runCreateTag()}
           bsStyle="primary"
-          disabled={status === 'pending' || !tagName?.length}
+          disabled={
+            status === 'pending' || !tagName?.length || !!validationError
+          }
         >
-          {status === 'pending' ? t('creating') + '...' : t('create')}
+          {status === 'pending' ? t('creating') + '…' : t('create')}
         </Button>
       </Modal.Footer>
     </AccessibleModal>

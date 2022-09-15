@@ -65,6 +65,19 @@ describe('TagsHandler', function () {
       })
     })
 
+    describe('when tag is too long', function () {
+      it('should throw an error', function (done) {
+        this.TagsHandler.createTag(
+          this.tag.user_id,
+          'this is a tag that is very very very very very very long',
+          err => {
+            expect(err.message).to.equal('Exceeded max tag length')
+            done()
+          }
+        )
+      })
+    })
+
     describe('when insert has duplicate key error error', function () {
       beforeEach(function () {
         this.duplicateKeyError = new Error('Duplicate')
@@ -250,6 +263,20 @@ describe('TagsHandler', function () {
           err => {
             expect(err).to.not.exist
             this.TagMock.verify()
+            done()
+          }
+        )
+      })
+    })
+
+    describe('when tag is too long', function () {
+      it('should throw an error', function (done) {
+        this.TagsHandler.renameTag(
+          this.userId,
+          this.tagId,
+          'this is a tag that is very very very very very very long',
+          err => {
+            expect(err.message).to.equal('Exceeded max tag length')
             done()
           }
         )

@@ -1862,5 +1862,6 @@
   "descending": "Descending",
   "reverse_x_sort_order" : "Reverse __x__ sort order",
   "create_first_project": "Create First Project",
-  "you_dont_have_any_repositories": "You don’t have any repositories"
+  "you_dont_have_any_repositories": "You don’t have any repositories",
+  "tag_name_cannot_exceed_characters": "Tag name cannot exceed __maxLength__ characters"
 }

@@ -1,6 +1,8 @@
 const { Tag } = require('../../models/Tag')
 const { promisifyAll } = require('../../util/promises')
 
+const MAX_TAG_LENGTH = 50
+
 function getAllTags(userId, callback) {
   Tag.find({ user_id: userId }, callback)
 }
@@ -8,6 +10,9 @@ function getAllTags(userId, callback) {
 function createTag(userId, name, callback) {
   if (!callback) {
     callback = function () {}
+  }
+  if (name.length > MAX_TAG_LENGTH) {
+    return callback(new Error('Exceeded max tag length'))
   }
   Tag.create({ user_id: userId, name }, function (err, tag) {
     // on duplicate key error return existing tag
@@ -21,6 +26,9 @@ function createTag(userId, name, callback) {
 function renameTag(userId, tagId, name, callback) {
   if (!callback) {
     callback = function () {}
+  }
+  if (name.length > MAX_TAG_LENGTH) {
+    return callback(new Error('Exceeded max tag length'))
   }
   Tag.updateOne(
     {

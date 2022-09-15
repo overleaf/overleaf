@@ -1,10 +1,11 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Button, Form, Modal } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import { Tag } from '../../../../../../app/src/Features/Tags/types'
 import AccessibleModal from '../../../../shared/components/accessible-modal'
 import useAsync from '../../../../shared/hooks/use-async'
 import { renameTag } from '../../util/api'
+import { MAX_TAG_LENGTH } from '../../util/tag'
 
 type RenameTagModalProps = {
   tag?: Tag
@@ -21,6 +22,7 @@ export default function RenameTagModal({
   const { isError, runAsync, status } = useAsync()
 
   const [newTagName, setNewTageName] = useState<string>()
+  const [validationError, setValidationError] = useState<string>()
 
   const runRenameTag = useCallback(
     (tagId: string) => {
@@ -42,6 +44,16 @@ export default function RenameTagModal({
     },
     [tag, runRenameTag]
   )
+
+  useEffect(() => {
+    if (newTagName && newTagName.length > MAX_TAG_LENGTH) {
+      setValidationError(
+        t('tag_name_cannot_exceed_characters', { maxLength: MAX_TAG_LENGTH })
+      )
+    } else if (validationError) {
+      setValidationError(undefined)
+    }
+  }, [newTagName, t, validationError])
 
   if (!tag) {
     return null
@@ -74,6 +86,11 @@ export default function RenameTagModal({
       </Modal.Body>
 
       <Modal.Footer>
+        {validationError && (
+          <div className="modal-footer-left">
+            <span className="text-danger error">{validationError}</span>
+          </div>
+        )}
         {isError && (
           <div className="modal-footer-left">
             <span className="text-danger error">
@@ -87,9 +104,11 @@ export default function RenameTagModal({
         <Button
           onClick={() => runRenameTag(tag._id)}
           bsStyle="primary"
-          disabled={status === 'pending' || !newTagName?.length}
+          disabled={
+            status === 'pending' || !newTagName?.length || !!validationError
+          }
         >
-          {status === 'pending' ? t('renaming') + '...' : t('rename')}
+          {status === 'pending' ? t('renaming') + '…' : t('rename')}
         </Button>
       </Modal.Footer>
     </AccessibleModal>
