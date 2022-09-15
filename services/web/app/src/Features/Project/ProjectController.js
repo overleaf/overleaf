@@ -277,6 +277,7 @@ const ProjectController = {
         }
         res.json({
           name: project.name,
+          lastUpdated: project.lastUpdated,
           project_id: project._id,
           owner_ref: project.owner_ref,
           owner: {

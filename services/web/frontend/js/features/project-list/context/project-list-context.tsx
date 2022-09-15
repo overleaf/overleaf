@@ -50,6 +50,7 @@ const filters: FilterMap = {
 export const UNCATEGORIZED_KEY = 'uncategorized'
 
 type ProjectListContextValue = {
+  addClonedProjectToViewData: (project: Project) => void
   visibleProjects: Project[]
   setVisibleProjects: React.Dispatch<React.SetStateAction<Project[]>>
   totalProjectsCount: number
@@ -153,7 +154,6 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
     } else {
       filteredProjects = _.filter(filteredProjects, filters[filter])
     }
-
     setVisibleProjects(filteredProjects)
   }, [
     loadedProjects,
@@ -212,6 +212,29 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
     [setTags]
   )
 
+  const addClonedProjectToViewData = useCallback(
+    project => {
+      // clone API not using camelCase and does not return all data
+      project.id = project.project_id
+      const owner = {
+        id: project.owner?._id,
+        email: project.owner?.email,
+        firstName: project.owner?.first_name,
+        lastName: project.owner?.last_name,
+      }
+      project.owner = owner
+      project.lastUpdatedBy = project.owner
+      project.source = 'owner'
+      project.trashed = false
+      project.archived = false
+      const projects = [...loadedProjects]
+      projects.push(project)
+      setLoadedProjects(projects)
+      // to do: sort projects after loaded projects updated, otherwise, it's at bottom of list
+    },
+    [loadedProjects, setLoadedProjects]
+  )
+
   const updateProjectViewData = useCallback(
     (project: Project) => {
       const projects = loadedProjects.map((p: Project) => {
@@ -238,6 +261,7 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
   const value = useMemo<ProjectListContextValue>(
     () => ({
       addTag,
+      addClonedProjectToViewData,
       deleteTag,
       error,
       filter,
@@ -260,6 +284,7 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
     }),
     [
       addTag,
+      addClonedProjectToViewData,
       deleteTag,
       error,
       filter,
