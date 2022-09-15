@@ -6,6 +6,7 @@ import {
   getUserFacingMessage,
   postJSON,
 } from '../../../../infrastructure/fetch-json'
+import { useRefWithAutoFocus } from '../../../../shared/hooks/use-ref-with-auto-focus'
 
 type NewProjectData = {
   project_id: string
@@ -25,6 +26,7 @@ type Props = {
 
 function ModalContentNewProjectForm({ onCancel, template = 'none' }: Props) {
   const { t } = useTranslation()
+  const { autoFocusedRef } = useRefWithAutoFocus<HTMLInputElement>()
   const [projectName, setProjectName] = useState('')
   const { isLoading, isError, error, runAsync } = useAsync<NewProjectData>()
 
@@ -62,8 +64,10 @@ function ModalContentNewProjectForm({ onCancel, template = 'none' }: Props) {
         {isError && (
           <Alert bsStyle="danger">{getUserFacingMessage(error)}</Alert>
         )}
-        <FormControl
+        <input
           type="text"
+          className="form-control"
+          ref={autoFocusedRef}
           placeholder={t('project_name')}
           onChange={handleChangeName}
           value={projectName}

@@ -1,7 +1,7 @@
 import { useRef, useEffect } from 'react'
 
-export function useRefWithAutoFocus() {
-  const autoFocusedRef = useRef()
+export function useRefWithAutoFocus<T extends HTMLElement = any>() {
+  const autoFocusedRef = useRef<T>(null)
 
   useEffect(() => {
     if (autoFocusedRef.current) {
