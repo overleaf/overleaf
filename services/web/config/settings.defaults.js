@@ -486,9 +486,7 @@ module.exports = {
     ? process.env.PRECOMPILE_PUG_TEMPLATES_AT_BOOT_TIME === 'true'
     : process.env.NODE_ENV === 'production',
 
-  // Should javascript assets be served minified or not. Note that you will
-  // need to run `grunt compile:minify` within the web-sharelatex directory
-  // to generate these.
+  // Should javascript assets be served minified or not.
   useMinifiedJs: process.env.MINIFIED_JS === 'true' || false,
 
   // Should static assets be sent with a header to tell the browser to cache

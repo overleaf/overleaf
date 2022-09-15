@@ -10,19 +10,6 @@ a lot of logic around creating and editing projects, and account management.
 The rest of the Overleaf stack, along with information about contributing can be found in the
 [overleaf/overleaf](https://github.com/overleaf/overleaf) repository.
 
-Build process
-----------------
-
-overleaf/web uses [Grunt](http://gruntjs.com/) to build its front-end related assets.
-
-Image processing tasks are commented out in the gruntfile and the needed packages aren't presently in the project's `package.json`. If the images need to be processed again (minified and sprited), start by fetching the packages (`npm install grunt-contrib-imagemin grunt-sprity`), then *decomment* the tasks in `Gruntfile.coffee`. After this, the tasks can be called (explicitly, via `grunt imagemin` and `grunt sprity`).
-
-New Docker-based build process
-------------------------------
-
-Note that the Grunt workflow from above should still work, but we are transitioning to a
-Docker based testing workflow, which is documented below:
-
 ### Running the app
 
 The app runs natively using npm and Node on the local system:
@@ -31,8 +18,6 @@ The app runs natively using npm and Node on the local system:
 $ npm install
 $ npm run start
 ```
-
-*Ideally the app would run in Docker like the tests below, but with host networking not supported in OS X, we need to run it natively until all services are Dockerised.*
 
 ### Running Tests
 
