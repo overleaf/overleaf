@@ -2,10 +2,10 @@ import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { expect } from 'chai'
 import sinon from 'sinon'
 import fetchMock from 'fetch-mock'
-import CloneProjectModal from '../../../../../frontend/js/features/clone-project-modal/components/clone-project-modal'
+import EditorCloneProjectModalWrapper from '../../../../../frontend/js/features/clone-project-modal/components/editor-clone-project-modal-wrapper'
 import { renderWithEditorContext } from '../../../helpers/render-with-context'
 
-describe('<CloneProjectModal />', function () {
+describe('<EditorCloneProjectModalWrapper />', function () {
   beforeEach(function () {
     fetchMock.reset()
   })
@@ -24,7 +24,7 @@ describe('<CloneProjectModal />', function () {
     const openProject = sinon.stub()
 
     renderWithEditorContext(
-      <CloneProjectModal
+      <EditorCloneProjectModalWrapper
         handleHide={handleHide}
         openProject={openProject}
         show
@@ -49,7 +49,7 @@ describe('<CloneProjectModal />', function () {
     const openProject = sinon.stub()
 
     renderWithEditorContext(
-      <CloneProjectModal
+      <EditorCloneProjectModalWrapper
         handleHide={handleHide}
         openProject={openProject}
         show
@@ -112,7 +112,7 @@ describe('<CloneProjectModal />', function () {
     const openProject = sinon.stub()
 
     renderWithEditorContext(
-      <CloneProjectModal
+      <EditorCloneProjectModalWrapper
         handleHide={handleHide}
         openProject={openProject}
         show
@@ -149,7 +149,7 @@ describe('<CloneProjectModal />', function () {
     const openProject = sinon.stub()
 
     renderWithEditorContext(
-      <CloneProjectModal
+      <EditorCloneProjectModalWrapper
         handleHide={handleHide}
         openProject={openProject}
         show

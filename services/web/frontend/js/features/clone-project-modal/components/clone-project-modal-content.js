@@ -9,16 +9,16 @@ import {
   FormControl,
   FormGroup,
 } from 'react-bootstrap'
-import { useProjectContext } from '../../../shared/context/project-context'
 import { postJSON } from '../../../infrastructure/fetch-json'
 
 export default function CloneProjectModalContent({
   handleHide,
   inFlight,
   setInFlight,
-  openProject,
+  handleAfterCloned,
+  projectId,
+  projectName,
 }) {
-  const { _id: projectId, name: projectName } = useProjectContext()
   const { t } = useTranslation()
 
   const [error, setError] = useState()
@@ -49,7 +49,7 @@ export default function CloneProjectModalContent({
     })
       .then(data => {
         // open the cloned project
-        openProject(data.project_id)
+        handleAfterCloned(data)
       })
       .catch(({ response, data }) => {
         if (response?.status === 400) {
@@ -115,5 +115,7 @@ CloneProjectModalContent.propTypes = {
   handleHide: PropTypes.func.isRequired,
   inFlight: PropTypes.bool,
   setInFlight: PropTypes.func.isRequired,
-  openProject: PropTypes.func.isRequired,
+  handleAfterCloned: PropTypes.func.isRequired,
+  projectId: PropTypes.string,
+  projectName: PropTypes.string,
 }

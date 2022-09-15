@@ -1,13 +1,14 @@
-import React, { useCallback, useState } from 'react'
+import React, { memo, useCallback, useState } from 'react'
 import PropTypes from 'prop-types'
 import CloneProjectModalContent from './clone-project-modal-content'
 import AccessibleModal from '../../../shared/components/accessible-modal'
-import withErrorBoundary from '../../../infrastructure/error-boundary'
 
-const CloneProjectModal = React.memo(function CloneProjectModal({
+function CloneProjectModal({
   show,
   handleHide,
-  openProject,
+  handleAfterCloned,
+  projectId,
+  projectName,
 }) {
   const [inFlight, setInFlight] = useState(false)
 
@@ -29,16 +30,20 @@ const CloneProjectModal = React.memo(function CloneProjectModal({
         handleHide={onHide}
         inFlight={inFlight}
         setInFlight={setInFlight}
-        openProject={openProject}
+        handleAfterCloned={handleAfterCloned}
+        projectId={projectId}
+        projectName={projectName}
       />
     </AccessibleModal>
   )
-})
+}
 
 CloneProjectModal.propTypes = {
   handleHide: PropTypes.func.isRequired,
   show: PropTypes.bool.isRequired,
-  openProject: PropTypes.func.isRequired,
+  handleAfterCloned: PropTypes.func.isRequired,
+  projectId: PropTypes.string,
+  projectName: PropTypes.string,
 }
 
-export default withErrorBoundary(CloneProjectModal)
+export default memo(CloneProjectModal)

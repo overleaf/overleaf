@@ -1,6 +1,6 @@
 import App from '../../../base'
 import { react2angular } from 'react2angular'
-import CloneProjectModal from '../components/clone-project-modal'
+import EditorCloneProjectModalWrapper from '../components/editor-clone-project-modal-wrapper'
 import { rootContext } from '../../../shared/context/root-context'
 
 export default App.controller(
@@ -20,8 +20,8 @@ export default App.controller(
       })
     }
 
-    $scope.openProject = projectId => {
-      window.location.assign(`/project/${projectId}`)
+    $scope.openProject = project => {
+      window.location.assign(`/project/${project.project_id}`)
     }
   }
 )
@@ -29,7 +29,7 @@ export default App.controller(
 App.component(
   'cloneProjectModal',
   react2angular(
-    rootContext.use(CloneProjectModal),
-    Object.keys(CloneProjectModal.propTypes)
+    rootContext.use(EditorCloneProjectModalWrapper),
+    Object.keys(EditorCloneProjectModalWrapper.propTypes)
   )
 )
