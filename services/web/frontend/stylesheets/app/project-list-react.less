@@ -218,7 +218,9 @@
       }
 
       &:hover {
-        background-color: @structured-list-hover-color;
+        &:not(.no-projects) {
+          background-color: @structured-list-hover-color;
+        }
       }
     }
 

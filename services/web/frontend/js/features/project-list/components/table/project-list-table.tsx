@@ -128,8 +128,8 @@ function ProjectListTable() {
               <ProjectListTableRow project={p} key={p.id} />
             ))
           ) : (
-            <tr>
-              <td className="project-list-table-no-projects-cell" colSpan={4}>
+            <tr className="no-projects">
+              <td className="project-list-table-no-projects-cell" colSpan={5}>
                 {t('no_projects')}
               </td>
             </tr>
