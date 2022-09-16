@@ -1,6 +1,11 @@
+import { Project, Sort } from '../../../../../types/project/dashboard/api'
+import { SortingOrder } from '../../../../../types/sorting-order'
 import { getOwnerName } from './project'
-import { Project } from '../../../../../types/project/dashboard/api'
 import { Compare } from '../../../../../types/array/sort'
+
+const order = (order: SortingOrder, projects: Project[]) => {
+  return order === 'asc' ? [...projects] : projects.reverse()
+}
 
 export const ownerNameComparator = (v1: Project, v2: Project) => {
   const ownerNameV1 = getOwnerName(v1)
@@ -62,4 +67,27 @@ export const defaultComparator = (
   }
 
   return Compare.SORT_KEEP_ORDER
+}
+
+export default function sortProjects(projects: Project[], sort: Sort) {
+  let sorted = [...projects]
+  if (sort.by === 'title') {
+    sorted = sorted.sort((...args) => {
+      return defaultComparator(...args, 'name')
+    })
+  }
+
+  if (sort.by === 'lastUpdated') {
+    sorted = sorted.sort((...args) => {
+      return defaultComparator(...args, 'lastUpdated')
+    })
+  }
+
+  if (sort.by === 'owner') {
+    sorted = sorted.sort((...args) => {
+      return ownerNameComparator(...args)
+    })
+  }
+
+  return order(sort.order, sorted)
 }

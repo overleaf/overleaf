@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import {
   ownerNameComparator,
   defaultComparator,
-} from '../../../../../frontend/js/features/project-list/util/sort-comparators'
+} from '../../../../../frontend/js/features/project-list/util/sort-projects'
 import { Project } from '../../../../../types/project/dashboard/api'
 
 const now = new Date()

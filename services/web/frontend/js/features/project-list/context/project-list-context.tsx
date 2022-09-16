@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react'
 import { Tag } from '../../../../../app/src/Features/Tags/types'
@@ -18,6 +19,7 @@ import usePersistedState from '../../../shared/hooks/use-persisted-state'
 import getMeta from '../../../utils/meta'
 import useAsync from '../../../shared/hooks/use-async'
 import { getProjects } from '../util/api'
+import sortProjects from '../util/sort-projects'
 
 export type Filter = 'all' | 'owned' | 'shared' | 'archived' | 'trashed'
 type FilterMap = {
@@ -52,7 +54,6 @@ export const UNCATEGORIZED_KEY = 'uncategorized'
 type ProjectListContextValue = {
   addClonedProjectToViewData: (project: Project) => void
   visibleProjects: Project[]
-  setVisibleProjects: React.Dispatch<React.SetStateAction<Project[]>>
   totalProjectsCount: number
   error: Error | null
   isLoading: ReturnType<typeof useAsync>['isLoading']
@@ -94,6 +95,7 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
     'project-list-filter',
     'all'
   )
+  const prevSortRef = useRef<Sort>(sort)
   const [selectedTagId, setSelectedTagId] = usePersistedState<
     string | undefined
   >('project-list-selected-tag-id', undefined)
@@ -154,6 +156,13 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
     } else {
       filteredProjects = _.filter(filteredProjects, filters[filter])
     }
+
+    if (prevSortRef.current !== sort) {
+      filteredProjects = sortProjects(filteredProjects, sort)
+      const loadedProjectsSorted = sortProjects(loadedProjects, sort)
+      setLoadedProjects(loadedProjectsSorted)
+    }
+
     setVisibleProjects(filteredProjects)
   }, [
     loadedProjects,
@@ -163,7 +172,12 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
     selectedTagId,
     setSelectedTagId,
     searchText,
+    sort,
   ])
+
+  useEffect(() => {
+    prevSortRef.current = sort
+  }, [sort])
 
   const untaggedProjectsCount = useMemo(() => {
     const taggedProjectIds = _.uniq(_.flatten(tags.map(tag => tag.project_ids)))
@@ -227,12 +241,13 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       project.source = 'owner'
       project.trashed = false
       project.archived = false
-      const projects = [...loadedProjects]
-      projects.push(project)
-      setLoadedProjects(projects)
-      // to do: sort projects after loaded projects updated, otherwise, it's at bottom of list
+      loadedProjects.push(project)
+      const loadedProjectsSorted = sortProjects(loadedProjects, sort)
+      const visibleProjectsSorted = sortProjects(visibleProjects, sort)
+      setVisibleProjects(visibleProjectsSorted)
+      setLoadedProjects(loadedProjectsSorted)
     },
-    [loadedProjects, setLoadedProjects]
+    [loadedProjects, visibleProjects, sort]
   )
 
   const updateProjectViewData = useCallback(
@@ -273,7 +288,6 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       selectTag,
       setSearchText,
       setSort,
-      setVisibleProjects,
       sort,
       tags,
       totalProjectsCount,
@@ -296,7 +310,6 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       selectTag,
       setSearchText,
       setSort,
-      setVisibleProjects,
       sort,
       tags,
       totalProjectsCount,

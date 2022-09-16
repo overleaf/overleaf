@@ -1,12 +1,7 @@
-import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import Icon from '../../../../shared/components/icon'
 import ProjectListTableRow from './project-list-table-row'
 import { useProjectListContext } from '../../context/project-list-context'
-import {
-  ownerNameComparator,
-  defaultComparator,
-} from '../../util/sort-comparators'
 import { Project, Sort } from '../../../../../../types/project/dashboard/api'
 import { SortingOrder } from '../../../../../../types/sorting-order'
 
@@ -42,41 +37,9 @@ const toggleSort = (order: SortingOrder): SortingOrder => {
   return order === 'asc' ? 'desc' : 'asc'
 }
 
-const order = (order: SortingOrder, projects: Project[]) => {
-  return order === 'asc' ? [...projects] : projects.reverse()
-}
-
 function ProjectListTable() {
   const { t } = useTranslation()
-  const { visibleProjects, setVisibleProjects, sort, setSort } =
-    useProjectListContext()
-
-  useEffect(() => {
-    if (sort.by === 'title') {
-      setVisibleProjects(prevProjects => {
-        const sorted = [...prevProjects].sort((...args) => {
-          return defaultComparator(...args, 'name')
-        })
-        return order(sort.order, sorted)
-      })
-    }
-
-    if (sort.by === 'lastUpdated') {
-      setVisibleProjects(prevProjects => {
-        const sorted = [...prevProjects].sort((...args) => {
-          return defaultComparator(...args, 'lastUpdated')
-        })
-        return order(sort.order, sorted)
-      })
-    }
-
-    if (sort.by === 'owner') {
-      setVisibleProjects(prevProjects => {
-        const sorted = [...prevProjects].sort(ownerNameComparator)
-        return order(sort.order, sorted)
-      })
-    }
-  }, [sort.by, sort.order, setVisibleProjects])
+  const { visibleProjects, sort, setSort } = useProjectListContext()
 
   const handleSortClick = (by: Sort['by']) => {
     setSort(prev => ({

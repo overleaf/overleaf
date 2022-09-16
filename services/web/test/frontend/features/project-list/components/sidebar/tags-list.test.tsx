@@ -1,14 +1,9 @@
-import {
-  render,
-  fireEvent,
-  screen,
-  waitFor,
-  within,
-} from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { assert, expect } from 'chai'
 import fetchMock from 'fetch-mock'
 import TagsList from '../../../../../../frontend/js/features/project-list/components/sidebar/tags-list'
-import { ProjectListProvider } from '../../../../../../frontend/js/features/project-list/context/project-list-context'
+import { projectsData } from '../../fixtures/projects-data'
+import { renderWithProjectListContext } from '../../helpers/render-with-context'
 
 describe('<TagsList />', function () {
   beforeEach(async function () {
@@ -16,34 +11,15 @@ describe('<TagsList />', function () {
       {
         _id: 'abc123def456',
         name: 'Tag 1',
-        project_ids: ['456fea789bcd'],
+        project_ids: [projectsData[0].id],
       },
       {
         _id: 'bcd234efg567',
         name: 'Another tag',
-        project_ids: ['456fea789bcd', '567efa890bcd'],
+        project_ids: [projectsData[0].id, projectsData[1].id],
       },
     ])
 
-    fetchMock.post('/api/project', {
-      projects: [
-        {
-          id: '456fea789bcd',
-          archived: false,
-          trashed: false,
-        },
-        {
-          id: '567efa890bcd',
-          archived: false,
-          trashed: false,
-        },
-        {
-          id: '999fff999fff',
-          archived: false,
-          trashed: false,
-        },
-      ],
-    })
     fetchMock.post('/tag', {
       _id: 'eee888eee888',
       name: 'New Tag',
@@ -52,11 +28,7 @@ describe('<TagsList />', function () {
     fetchMock.post('express:/tag/:tagId/rename', 200)
     fetchMock.delete('express:/tag/:tagId', 200)
 
-    render(<TagsList />, {
-      wrapper: ({ children }) => (
-        <ProjectListProvider>{children}</ProjectListProvider>
-      ),
-    })
+    renderWithProjectListContext(<TagsList />)
 
     await waitFor(() => expect(fetchMock.called('/api/project')))
   })
@@ -79,7 +51,7 @@ describe('<TagsList />', function () {
       name: 'Another tag (2)',
     })
     screen.getByRole('button', {
-      name: 'Uncategorized (1)',
+      name: 'Uncategorized (3)',
     })
   })
 
