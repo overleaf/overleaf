@@ -9,7 +9,7 @@ import * as eventTracking from '../../../../infrastructure/event-tracking'
 
 type ProjectsActionModalProps = {
   title: string
-  action: 'archive' | 'trash'
+  action: 'archive' | 'trash' | 'delete'
   actionHandler: (project: Project) => Promise<void>
   handleCloseModal: () => void
   bodyTop: React.ReactNode

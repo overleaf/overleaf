@@ -33,6 +33,14 @@ export function archiveProject(projectId: string) {
   })
 }
 
+export function deleteProject(projectId: string) {
+  return deleteJSON(`/project/${projectId}`, {
+    body: {
+      _csrf: window.csrfToken,
+    },
+  })
+}
+
 export function leaveProject(projectId: string) {
   return postJSON(`/project/${projectId}/leave`, {
     body: {
