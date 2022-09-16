@@ -1,21 +1,18 @@
-import { useTranslation } from 'react-i18next'
 import { memo, useCallback, useState } from 'react'
-import { Project } from '../../../../../../../../types/project/dashboard/api'
+import { useTranslation } from 'react-i18next'
 import Icon from '../../../../../../shared/components/icon'
 import Tooltip from '../../../../../../shared/components/tooltip'
-import ProjectsActionModal from '../../projects-action-modal'
 import useIsMounted from '../../../../../../shared/hooks/use-is-mounted'
 import { useProjectListContext } from '../../../../context/project-list-context'
 import { trashProject } from '../../../../util/api'
+import ProjectsActionModal from '../../projects-action-modal'
 
-type TrashProjectButtonProps = {
-  project: Project
-}
-
-function TrashProjectButton({ project }: TrashProjectButtonProps) {
-  const { updateProjectViewData } = useProjectListContext()
+function TrashProjectsButton() {
+  const { selectedProjects, setSelectedProjects, updateProjectViewData } =
+    useProjectListContext()
   const { t } = useTranslation()
   const text = t('trash')
+
   const [showModal, setShowModal] = useState(false)
   const isMounted = useIsMounted()
 
@@ -29,43 +26,41 @@ function TrashProjectButton({ project }: TrashProjectButtonProps) {
     }
   }, [isMounted])
 
-  const handleTrashProject = useCallback(async () => {
-    await trashProject(project.id)
-
-    // update view
-    project.trashed = true
-    project.archived = false
-    updateProjectViewData(project)
-  }, [project, updateProjectViewData])
-
-  if (project.trashed) return null
+  const handleTrashProjects = useCallback(async () => {
+    for (const project of selectedProjects) {
+      await trashProject(project.id)
+      // update view
+      project.trashed = true
+      project.archived = false
+      updateProjectViewData(project)
+    }
+    setSelectedProjects([])
+  }, [selectedProjects, setSelectedProjects, updateProjectViewData])
 
   return (
     <>
       <Tooltip
-        key={`tooltip-trash-project-${project.id}`}
-        id={`tooltip-trash-project-${project.id}`}
+        id="tooltip-download-projects"
         description={text}
-        overlayProps={{ placement: 'top', trigger: ['hover', 'focus'] }}
+        overlayProps={{ placement: 'bottom', trigger: ['hover', 'focus'] }}
       >
         <button
-          className="btn btn-link action-btn"
+          className="btn btn-default"
           aria-label={text}
           onClick={handleOpenModal}
         >
           <Icon type="trash" />
         </button>
       </Tooltip>
-
       <ProjectsActionModal
         action="trash"
-        actionHandler={handleTrashProject}
+        actionHandler={handleTrashProjects}
         showModal={showModal}
         handleCloseModal={handleCloseModal}
-        projects={[project]}
+        projects={selectedProjects}
       />
     </>
   )
 }
 
-export default memo(TrashProjectButton)
+export default memo(TrashProjectsButton)

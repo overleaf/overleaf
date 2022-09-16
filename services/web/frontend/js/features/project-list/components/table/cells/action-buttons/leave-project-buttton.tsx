@@ -59,16 +59,8 @@ function LeaveProjectButton({ project }: LeaveProjectButtonProps) {
       </Tooltip>
 
       <ProjectsActionModal
-        title={t('leave_projects')}
-        action="trash"
+        action="leave"
         actionHandler={handleLeaveProject}
-        bodyTop={<p>{t('about_to_leave_projects')}</p>}
-        bodyBottom={
-          <div className="project-action-alert alert alert-warning">
-            <Icon type="exclamation-triangle" fw />{' '}
-            {t('this_action_cannot_be_undone')}
-          </div>
-        }
         showModal={showModal}
         handleCloseModal={handleCloseModal}
         projects={[project]}

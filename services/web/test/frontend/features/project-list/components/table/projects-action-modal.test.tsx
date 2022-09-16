@@ -13,12 +13,6 @@ describe('<ProjectsActionModal />', function () {
   const actionHandler = sinon.stub().resolves({})
   let sendSpy: sinon.SinonSpy
 
-  const modalText = {
-    title: 'Action Title',
-    top: <p>top text</p>,
-    bottom: <b>bottom text</b>,
-  }
-
   beforeEach(function () {
     sendSpy = sinon.spy(eventTracking, 'send')
   })
@@ -31,11 +25,8 @@ describe('<ProjectsActionModal />', function () {
   it('should handle the action passed', async function () {
     renderWithProjectListContext(
       <ProjectsActionModal
-        title={modalText.title}
         action="archive"
         actionHandler={actionHandler}
-        bodyTop={modalText.top}
-        bodyBottom={modalText.bottom}
         projects={[projectsData[0], projectsData[1]]}
         handleCloseModal={() => {}}
         showModal
@@ -58,11 +49,8 @@ describe('<ProjectsActionModal />', function () {
 
     renderWithProjectListContext(
       <ProjectsActionModal
-        title={modalText.title}
         action="archive"
         actionHandler={actionHandler}
-        bodyTop={modalText.top}
-        bodyBottom={modalText.bottom}
         projects={[
           projectsData[0],
           projectsData[1],
@@ -91,11 +79,8 @@ describe('<ProjectsActionModal />', function () {
   it('should send an analytics even when opened', function () {
     renderWithProjectListContext(
       <ProjectsActionModal
-        title={modalText.title}
         action="archive"
         actionHandler={actionHandler}
-        bodyTop={modalText.top}
-        bodyBottom={modalText.bottom}
         projects={[projectsData[0], projectsData[1]]}
         handleCloseModal={() => {}}
         showModal

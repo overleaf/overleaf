@@ -14,6 +14,7 @@ import WelcomeMessage from './welcome-message'
 import LoadingBranded from '../../../shared/components/loading-branded'
 import UserNotifications from './notifications/user-notifications'
 import SearchForm from './search-form'
+import ProjectTools from './table/project-tools/project-tools'
 
 function ProjectListRoot() {
   const { isReady } = useWaitForI18n()
@@ -26,8 +27,14 @@ function ProjectListRoot() {
 }
 
 function ProjectListPageContent() {
-  const { totalProjectsCount, error, isLoading, loadProgress, setSearchText } =
-    useProjectListContext()
+  const {
+    totalProjectsCount,
+    error,
+    isLoading,
+    loadProgress,
+    setSearchText,
+    selectedProjects,
+  } = useProjectListContext()
 
   return isLoading ? (
     <div className="loading-container">
@@ -58,9 +65,11 @@ function ProjectListPageContent() {
                 </Col>
                 <Col md={5} xs={12}>
                   <div className="project-tools">
-                    <div className="text-right pull-right">
+                    {selectedProjects.length === 0 ? (
                       <CurrentPlanWidget />
-                    </div>
+                    ) : (
+                      <ProjectTools />
+                    )}
                   </div>
                 </Col>
               </Row>

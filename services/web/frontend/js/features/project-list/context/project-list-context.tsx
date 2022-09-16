@@ -72,6 +72,8 @@ type ProjectListContextValue = {
   updateProjectViewData: (project: Project) => void
   removeProjectFromView: (project: Project) => void
   setSearchText: React.Dispatch<React.SetStateAction<string>>
+  selectedProjects: Project[]
+  setSelectedProjects: React.Dispatch<React.SetStateAction<Project[]>>
 }
 
 export const ProjectListContext = createContext<
@@ -101,6 +103,8 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
   >('project-list-selected-tag-id', undefined)
   const [tags, setTags] = useState<Tag[]>(getMeta('ol-tags', []) as Tag[])
   const [searchText, setSearchText] = useState('')
+  const [selectedProjects, setSelectedProjects] = useState<Project[]>([])
+
   const {
     isLoading: loading,
     isIdle,
@@ -193,6 +197,7 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
     (filter: Filter) => {
       setFilter(filter)
       setSelectedTagId(undefined)
+      setSelectedProjects([])
     },
     [setFilter, setSelectedTagId]
   )
@@ -285,8 +290,10 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       renameTag,
       selectedTagId,
       selectFilter,
+      selectedProjects,
       selectTag,
       setSearchText,
+      setSelectedProjects,
       setSort,
       sort,
       tags,
@@ -307,8 +314,10 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       renameTag,
       selectedTagId,
       selectFilter,
+      selectedProjects,
       selectTag,
       setSearchText,
+      setSelectedProjects,
       setSort,
       sort,
       tags,

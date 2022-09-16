@@ -60,16 +60,8 @@ function DeleteProjectButton({ project }: DeleteProjectButtonProps) {
       </Tooltip>
 
       <ProjectsActionModal
-        title={t('delete_projects')}
         action="delete"
         actionHandler={handleDeleteProject}
-        bodyTop={<p>{t('about_to_delete_projects')}</p>}
-        bodyBottom={
-          <div className="project-action-alert alert alert-warning">
-            <Icon type="exclamation-triangle" fw />{' '}
-            {t('this_action_cannot_be_undone')}
-          </div>
-        }
         showModal={showModal}
         handleCloseModal={handleCloseModal}
         projects={[project]}

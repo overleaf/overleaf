@@ -1,3 +1,4 @@
+import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import Icon from '../../../../shared/components/icon'
 import ProjectListTableRow from './project-list-table-row'
@@ -39,7 +40,13 @@ const toggleSort = (order: SortingOrder): SortingOrder => {
 
 function ProjectListTable() {
   const { t } = useTranslation()
-  const { visibleProjects, sort, setSort } = useProjectListContext()
+  const {
+    visibleProjects,
+    sort,
+    setSort,
+    selectedProjects,
+    setSelectedProjects,
+  } = useProjectListContext()
 
   const handleSortClick = (by: Sort['by']) => {
     setSort(prev => ({
@@ -47,6 +54,17 @@ function ProjectListTable() {
       order: prev.by === by ? toggleSort(sort.order) : sort.order,
     }))
   }
+
+  const handleAllProjectsCheckboxChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      if (event.target.checked) {
+        setSelectedProjects(visibleProjects)
+      } else {
+        setSelectedProjects([])
+      }
+    },
+    [setSelectedProjects, visibleProjects]
+  )
 
   return (
     <div className="card project-list-card">
@@ -57,7 +75,16 @@ function ProjectListTable() {
               className="dash-cell-checkbox"
               aria-label={t('select_projects')}
             >
-              <input type="checkbox" id="project-list-table-select-all" />
+              <input
+                type="checkbox"
+                id="project-list-table-select-all"
+                onChange={handleAllProjectsCheckboxChange}
+                checked={
+                  visibleProjects.length === selectedProjects.length &&
+                  visibleProjects.length !== 0
+                }
+                disabled={visibleProjects.length === 0}
+              />
               <label
                 htmlFor="project-list-table-select-all"
                 aria-label={t('select_all_projects')}

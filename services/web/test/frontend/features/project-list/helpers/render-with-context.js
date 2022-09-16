@@ -6,13 +6,13 @@ import fetchMock from 'fetch-mock'
 import { ProjectListProvider } from '../../../../../frontend/js/features/project-list/context/project-list-context'
 import { projectsData } from '../fixtures/projects-data'
 
-export function renderWithProjectListContext(component, contextProps) {
+export function renderWithProjectListContext(component) {
   fetchMock.post('express:/api/project', {
     status: 200,
-    body: { projects: projectsData },
+    body: { projects: projectsData, totalSize: projectsData.length },
   })
   const ProjectListProviderWrapper = ({ children }) => (
-    <ProjectListProvider {...contextProps}>{children}</ProjectListProvider>
+    <ProjectListProvider>{children}</ProjectListProvider>
   )
 
   return render(component, {

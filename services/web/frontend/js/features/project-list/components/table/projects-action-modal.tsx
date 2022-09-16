@@ -6,28 +6,24 @@ import AccessibleModal from '../../../../shared/components/accessible-modal'
 import { getUserFacingMessage } from '../../../../infrastructure/fetch-json'
 import useIsMounted from '../../../../shared/hooks/use-is-mounted'
 import * as eventTracking from '../../../../infrastructure/event-tracking'
+import Icon from '../../../../shared/components/icon'
 
 type ProjectsActionModalProps = {
-  title: string
-  action: 'archive' | 'trash' | 'delete'
+  action: 'archive' | 'trash' | 'delete' | 'leave'
   actionHandler: (project: Project) => Promise<void>
   handleCloseModal: () => void
-  bodyTop: React.ReactNode
-  bodyBottom: React.ReactNode
   projects: Array<Project>
   showModal: boolean
 }
 
 function ProjectsActionModal({
-  title,
   action,
   actionHandler,
   handleCloseModal,
-  bodyTop,
-  bodyBottom,
   showModal,
   projects,
 }: ProjectsActionModalProps) {
+  let bodyTop, bodyBottom, title
   const { t } = useTranslation()
   const [errors, setErrors] = useState<Array<any>>([])
   const [isProcessing, setIsProcessing] = useState(false)
@@ -66,6 +62,56 @@ function ProjectsActionModal({
       )
     }
   }, [action, showModal])
+
+  if (action === 'archive') {
+    title = t('archive_projects')
+    bodyTop = <p>{t('about_to_archive_projects')}</p>
+    bodyBottom = (
+      <p>
+        {t('archiving_projects_wont_affect_collaborators')}{' '}
+        <a
+          href="https://www.overleaf.com/blog/new-feature-using-archive-and-trash-to-keep-your-projects-organized"
+          target="_blank"
+          rel="noreferrer"
+        >
+          {t('find_out_more_nt')}
+        </a>
+      </p>
+    )
+  } else if (action === 'leave') {
+    title = t('leave_projects')
+    bodyTop = <p>{t('about_to_leave_projects')}</p>
+    bodyBottom = (
+      <div className="project-action-alert alert alert-warning">
+        <Icon type="exclamation-triangle" fw />{' '}
+        {t('this_action_cannot_be_undone')}
+      </div>
+    )
+  } else if (action === 'trash') {
+    title = t('trash_projects')
+    bodyTop = <p>{t('about_to_trash_projects')}</p>
+    bodyBottom = (
+      <p>
+        {t('trashing_projects_wont_affect_collaborators')}{' '}
+        <a
+          href="https://www.overleaf.com/blog/new-feature-using-archive-and-trash-to-keep-your-projects-organized"
+          target="_blank"
+          rel="noreferrer"
+        >
+          {t('find_out_more_nt')}
+        </a>
+      </p>
+    )
+  } else if (action === 'delete') {
+    title = t('delete_projects')
+    bodyTop = <p>{t('about_to_delete_projects')}</p>
+    bodyBottom = (
+      <div className="project-action-alert alert alert-warning">
+        <Icon type="exclamation-triangle" fw />{' '}
+        {t('this_action_cannot_be_undone')}
+      </div>
+    )
+  }
 
   return (
     <AccessibleModal
