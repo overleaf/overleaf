@@ -36,7 +36,7 @@ include ./_mixins
 					href="#"
 				) #{translate("student_plans")}
 
-+monthly_annual_switch("plans-page-toggle-period", '{"plans-page-layout-v2": "new-plans-page"}')
++monthly_annual_switch("annual", "plans-page-toggle-period", '{"plans-page-layout-v2": "new-plans-page"}')
 
 .row(hidden data-ol-plans-v2-license-picker-container)
 	.col-sm-12
@@ -44,7 +44,7 @@ include ./_mixins
 
 +table_sticky_header_all(plansV2Config)
 
-.row.plans-v2-table-container(data-ol-plans-v2-period='monthly')
+.row.plans-v2-table-container(hidden data-ol-plans-v2-period='monthly')
 	.col-sm-12(data-ol-plans-v2-view='individual')
 		.row
 			+table_individual('monthly')
@@ -52,7 +52,7 @@ include ./_mixins
 		.row
 			+table_student('monthly')
 
-.row.plans-v2-table-container(hidden data-ol-plans-v2-period='annual')
+.row.plans-v2-table-container(data-ol-plans-v2-period='annual')
 	.col-sm-12(data-ol-plans-v2-view='individual')
 		.row
 			+table_individual('annual')
