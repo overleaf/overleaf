@@ -308,12 +308,13 @@ describe('ProjectLocator', function () {
       const path = `${doc1.name}`
       this.locator.findElementByPath(
         { project, path },
-        (err, element, type) => {
+        (err, element, type, folder) => {
           if (err != null) {
             return done(err)
           }
           element.should.deep.equal(doc1)
           expect(type).to.equal('doc')
+          expect(folder).to.equal(rootFolder)
           done()
         }
       )
@@ -323,12 +324,13 @@ describe('ProjectLocator', function () {
       const path = `/${doc1.name}`
       this.locator.findElementByPath(
         { project, path },
-        (err, element, type) => {
+        (err, element, type, folder) => {
           if (err != null) {
             return done(err)
           }
           element.should.deep.equal(doc1)
           expect(type).to.equal('doc')
+          expect(folder).to.equal(rootFolder)
           done()
         }
       )
@@ -338,12 +340,13 @@ describe('ProjectLocator', function () {
       const path = `${subFolder.name}/${secondSubFolder.name}/${subSubDoc.name}`
       this.locator.findElementByPath(
         { project, path },
-        (err, element, type) => {
+        (err, element, type, folder) => {
           if (err != null) {
             return done(err)
           }
           element.should.deep.equal(subSubDoc)
           expect(type).to.equal('doc')
+          expect(folder).to.equal(secondSubFolder)
           done()
         }
       )
@@ -353,12 +356,13 @@ describe('ProjectLocator', function () {
       const path = `${file1.name}`
       this.locator.findElementByPath(
         { project, path },
-        (err, element, type) => {
+        (err, element, type, folder) => {
           if (err != null) {
             return done(err)
           }
           element.should.deep.equal(file1)
           expect(type).to.equal('file')
+          expect(folder).to.equal(rootFolder)
           done()
         }
       )
@@ -368,12 +372,13 @@ describe('ProjectLocator', function () {
       const path = `${subFolder.name}/${secondSubFolder.name}/${subSubFile.name}`
       this.locator.findElementByPath(
         { project, path },
-        (err, element, type) => {
+        (err, element, type, folder) => {
           if (err != null) {
             return done(err)
           }
           element.should.deep.equal(subSubFile)
           expect(type).to.equal('file')
+          expect(folder).to.equal(secondSubFolder)
           done()
         }
       )
@@ -383,12 +388,13 @@ describe('ProjectLocator', function () {
       const path = `${subFolder.name.toUpperCase()}/${secondSubFolder.name.toUpperCase()}/${subSubFile.name.toUpperCase()}`
       this.locator.findElementByPath(
         { project, path },
-        (err, element, type) => {
+        (err, element, type, folder) => {
           if (err != null) {
             return done(err)
           }
           element.should.deep.equal(subSubFile)
           expect(type).to.equal('file')
+          expect(folder).to.equal(secondSubFolder)
           done()
         }
       )
@@ -398,12 +404,13 @@ describe('ProjectLocator', function () {
       const path = `${subFolder.name}/${secondSubFolder.name}`
       this.locator.findElementByPath(
         { project, path },
-        (err, element, type) => {
+        (err, element, type, folder) => {
           if (err != null) {
             return done(err)
           }
           element.should.deep.equal(secondSubFolder)
           expect(type).to.equal('folder')
+          expect(folder).to.equal(subFolder)
           done()
         }
       )
@@ -413,12 +420,13 @@ describe('ProjectLocator', function () {
       const path = '/'
       this.locator.findElementByPath(
         { project, path },
-        (err, element, type) => {
+        (err, element, type, folder) => {
           if (err != null) {
             return done(err)
           }
           element.should.deep.equal(rootFolder)
           expect(type).to.equal('folder')
+          expect(folder).to.equal(null)
           done()
         }
       )

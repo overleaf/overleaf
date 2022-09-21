@@ -144,11 +144,39 @@ async function handleDuplicateProjects(userId, projectName) {
     .create(projectName)
 }
 
+async function createFolder(userId, projectName, path) {
+  const project = await getOrCreateProject(userId, projectName)
+  if (project == null) {
+    return null
+  }
+
+  const projectIsOnCooldown =
+    await CooldownManager.promises.isProjectOnCooldown(project._id)
+  if (projectIsOnCooldown) {
+    throw new Errors.TooManyRequestsError('project on cooldown')
+  }
+
+  const shouldIgnore = await FileTypeManager.promises.shouldIgnore(path)
+  if (shouldIgnore) {
+    return null
+  }
+
+  const folder = await UpdateMerger.promises.createFolder(project._id, path)
+  return {
+    folderId: folder._id,
+    parentFolderId: folder.parentFolder_id,
+    projectId: project._id,
+    path,
+  }
+}
+
 module.exports = {
   newUpdate: callbackify(newUpdate),
   deleteUpdate: callbackify(deleteUpdate),
+  createFolder: callbackify(createFolder),
   promises: {
     newUpdate,
     deleteUpdate,
+    createFolder,
   },
 }

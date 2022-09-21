@@ -50,6 +50,7 @@ module.exports = {
   mkdirp: callbackifyMultiResult(wrapWithLock(mkdirp), [
     'newFolders',
     'folder',
+    'parentFolder',
   ]),
   moveEntity: callbackifyMultiResult(wrapWithLock(moveEntity), [
     'project',
@@ -279,13 +280,14 @@ async function mkdirp(projectId, path, options = {}) {
   for (const folderName of folders) {
     builtUpPath += `/${folderName}`
     try {
-      const { element: foundFolder } =
+      const { element: foundFolder, folder: parentFolder } =
         await ProjectLocator.promises.findElementByPath({
           project,
           path: builtUpPath,
           exactCaseMatch: options.exactCaseMatch,
         })
       lastFolder = foundFolder
+      lastFolder.parentFolder_id = parentFolder._id
     } catch (err) {
       // Folder couldn't be found. Create it.
       const parentFolderId = lastFolder && lastFolder._id

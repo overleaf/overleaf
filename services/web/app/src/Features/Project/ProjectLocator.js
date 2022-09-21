@@ -203,7 +203,7 @@ function _findElementByPathWithProject(
   function getEntity(folder, entityName, cb) {
     let result, type
     if (entityName == null) {
-      return cb(null, folder, 'folder')
+      return cb(null, folder, 'folder', null)
     }
     for (const file of iterablePaths(folder, 'fileRefs')) {
       if (matchFn(file != null ? file.name : undefined, entityName)) {
@@ -227,7 +227,7 @@ function _findElementByPathWithProject(
     }
 
     if (result != null) {
-      cb(null, result, type)
+      cb(null, result, type, folder)
     } else {
       cb(
         new Error(
@@ -241,7 +241,7 @@ function _findElementByPathWithProject(
     return callback(new Error('Tried to find an element for a null project'))
   }
   if (needlePath === '' || needlePath === '/') {
-    return callback(null, project.rootFolder[0], 'folder')
+    return callback(null, project.rootFolder[0], 'folder', null)
   }
 
   if (needlePath.indexOf('/') === 0) {
@@ -317,6 +317,7 @@ module.exports = {
     findElementByPath: promisifyMultiResult(findElementByPath, [
       'element',
       'type',
+      'folder',
     ]),
     findRootDoc: promisifyMultiResult(findRootDoc, [
       'element',

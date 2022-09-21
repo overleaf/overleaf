@@ -653,5 +653,9 @@ const EditorController = {
   },
 }
 
-EditorController.promises = promisifyAll(EditorController)
+EditorController.promises = promisifyAll(EditorController, {
+  multiResult: {
+    mkdirp: ['newFolders', 'lastFolder'],
+  },
+})
 module.exports = EditorController

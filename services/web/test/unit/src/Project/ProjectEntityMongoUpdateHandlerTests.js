@@ -144,7 +144,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
           path: '/',
         })
       )
-      .resolves({ element: this.rootFolder, type: 'folder' })
+      .resolves({ element: this.rootFolder, type: 'folder', folder: null })
     this.ProjectLocator.promises.findElementByPath
       .withArgs(
         sinon.match({
@@ -152,7 +152,11 @@ describe('ProjectEntityMongoUpdateHandler', function () {
           path: '/test-folder',
         })
       )
-      .resolves({ element: this.folder, type: 'folder' })
+      .resolves({
+        element: this.folder,
+        type: 'folder',
+        folder: this.rootFolder,
+      })
     this.ProjectLocator.promises.findElementByPath
       .withArgs(
         sinon.match({
@@ -160,7 +164,11 @@ describe('ProjectEntityMongoUpdateHandler', function () {
           path: '/test-folder/test-subfolder',
         })
       )
-      .resolves({ element: this.subfolder, type: 'folder' })
+      .resolves({
+        element: this.subfolder,
+        type: 'folder',
+        folder: this.folder,
+      })
 
     this.ProjectGetter = {
       promises: {
@@ -437,9 +445,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
       })
 
       it('should report the parent folder', function () {
-        expect(this.result.folder.parentFolder_id).not.equal(
-          this.rootFolder._id
-        )
+        expect(this.result.folder.parentFolder_id).to.equal(this.rootFolder._id)
       })
 
       it('should not return new folders', function () {

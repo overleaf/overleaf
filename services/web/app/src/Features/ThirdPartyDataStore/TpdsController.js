@@ -7,6 +7,7 @@ const Path = require('path')
 const metrics = require('@overleaf/metrics')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
 const SessionManager = require('../Authentication/SessionManager')
+const HttpErrorHandler = require('../Errors/HttpErrorHandler')
 const TpdsQueueManager = require('./TpdsQueueManager')
 
 // mergeUpdate and deleteUpdate are used by Dropbox, where the project is only
@@ -80,6 +81,32 @@ async function deleteUpdate(req, res) {
   res.sendStatus(200)
 }
 
+/**
+ * Update endpoint that accepts update details as JSON
+ */
+async function updateFolder(req, res) {
+  const userId = req.body.userId
+  const { projectName, filePath } = splitPath(req.body.path)
+  const metadata = await TpdsUpdateHandler.promises.createFolder(
+    userId,
+    projectName,
+    filePath
+  )
+  if (metadata == null) {
+    return HttpErrorHandler.conflict(req, res, 'Could not create folder', {
+      userId,
+      projectName,
+      filePath,
+    })
+  }
+  res.json({
+    entityId: metadata.folderId.toString(),
+    projectId: metadata.projectId.toString(),
+    path: metadata.path,
+    folderId: metadata.parentFolderId.toString(),
+  })
+}
+
 // updateProjectContents and deleteProjectContents are used by GitHub. The
 // project_id is known so we can skip right ahead to creating/updating/deleting
 // the file. These methods will not ignore noisy files like .DS_Store,
@@ -118,10 +145,13 @@ async function getQueues(req, res, next) {
 }
 
 function parseParams(req) {
-  let filePath, projectName
-  let path = req.params[0]
   const userId = req.params.user_id
+  const { projectName, filePath } = splitPath(req.params[0])
+  return { filePath, userId, projectName }
+}
 
+function splitPath(path) {
+  let filePath, projectName
   path = Path.join('/', path)
   if (path.substring(1).indexOf('/') === -1) {
     filePath = '/'
@@ -132,12 +162,13 @@ function parseParams(req) {
     projectName = projectName.replace('/', '')
   }
 
-  return { filePath, userId, projectName }
+  return { projectName, filePath }
 }
 
 module.exports = {
   mergeUpdate: expressify(mergeUpdate),
   deleteUpdate: expressify(deleteUpdate),
+  updateFolder: expressify(updateFolder),
   updateProjectContents: expressify(updateProjectContents),
   deleteProjectContents: expressify(deleteProjectContents),
   getQueues: expressify(getQueues),

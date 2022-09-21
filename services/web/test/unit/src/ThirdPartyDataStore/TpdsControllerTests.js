@@ -19,6 +19,7 @@ describe('TpdsController', function () {
       promises: {
         newUpdate: sinon.stub().resolves(this.metadata),
         deleteUpdate: sinon.stub().resolves(),
+        createFolder: sinon.stub().resolves(),
       },
     }
     this.UpdateMerger = {
@@ -38,6 +39,9 @@ describe('TpdsController', function () {
         getQueues: sinon.stub().resolves('queues'),
       },
     }
+    this.HttpErrorHandler = {
+      conflict: sinon.stub(),
+    }
 
     this.TpdsController = SandboxedModule.require(MODULE_PATH, {
       requires: {
@@ -45,6 +49,7 @@ describe('TpdsController', function () {
         './UpdateMerger': this.UpdateMerger,
         '../Notifications/NotificationsBuilder': this.NotificationsBuilder,
         '../Authentication/SessionManager': this.SessionManager,
+        '../Errors/HttpErrorHandler': this.HttpErrorHandler,
         './TpdsQueueManager': this.TpdsQueueManager,
       },
     })
@@ -163,6 +168,47 @@ describe('TpdsController', function () {
         },
       }
       this.TpdsController.deleteUpdate(req, res)
+    })
+  })
+
+  describe('updateFolder', function () {
+    beforeEach(function () {
+      this.req = {
+        body: { userId: this.user_id, path: '/abc/def/ghi.txt' },
+      }
+      this.res = {
+        json: sinon.stub(),
+      }
+    })
+
+    it("creates a folder if it doesn't exist", function (done) {
+      const metadata = {
+        folderId: ObjectId(),
+        projectId: ObjectId(),
+        path: '/def/ghi.txt',
+        parentFolderId: ObjectId(),
+      }
+      this.TpdsUpdateHandler.promises.createFolder.resolves(metadata)
+      this.res.json.callsFake(body => {
+        expect(body).to.deep.equal({
+          entityId: metadata.folderId.toString(),
+          projectId: metadata.projectId.toString(),
+          path: metadata.path,
+          folderId: metadata.parentFolderId.toString(),
+        })
+        done()
+      })
+      this.TpdsController.updateFolder(this.req, this.res)
+    })
+
+    it("returns a 409 if the folder couldn't be created", function (done) {
+      this.TpdsUpdateHandler.promises.createFolder.resolves(null)
+      this.HttpErrorHandler.conflict.callsFake((req, res) => {
+        expect(req).to.equal(this.req)
+        expect(res).to.equal(this.res)
+        done()
+      })
+      this.TpdsController.updateFolder(this.req, this.res)
     })
   })
 

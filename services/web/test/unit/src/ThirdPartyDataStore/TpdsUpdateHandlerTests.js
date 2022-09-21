@@ -36,6 +36,11 @@ describe('TpdsUpdateHandler', function () {
     this.source = 'dropbox'
     this.path = `/some/file`
     this.update = {}
+    this.folderPath = '/some/folder'
+    this.folder = {
+      _id: ObjectId(),
+      parentFolder_id: ObjectId(),
+    }
 
     this.CooldownManager = {
       promises: {
@@ -93,6 +98,7 @@ describe('TpdsUpdateHandler', function () {
       promises: {
         deleteUpdate: sinon.stub().resolves(),
         mergeUpdate: sinon.stub().resolves(),
+        createFolder: sinon.stub().resolves(this.folder),
       },
     }
 
@@ -281,6 +287,69 @@ describe('TpdsUpdateHandler', function () {
       expectDropboxUnlinked()
     })
   })
+
+  describe('getting a folder update', function () {
+    describe('with no matching project', function () {
+      setupMatchingProjects([])
+      receiveFolderUpdate()
+      expectProjectCreated()
+      expectFolderUpdateProcessed()
+    })
+
+    describe('with one matching active project', function () {
+      setupMatchingProjects(['active1'])
+      receiveFolderUpdate()
+      expectProjectNotCreated()
+      expectFolderUpdateProcessed()
+    })
+
+    describe('with one matching archived project', function () {
+      setupMatchingProjects(['archived1'])
+      receiveFolderUpdate()
+      expectProjectNotCreated()
+      expectFolderUpdateNotProcessed()
+      expectDropboxNotUnlinked()
+    })
+
+    describe('with two matching active projects', function () {
+      setupMatchingProjects(['active1', 'active2'])
+      receiveFolderUpdate()
+      expectProjectNotCreated()
+      expectFolderUpdateNotProcessed()
+      expectDropboxUnlinked()
+    })
+
+    describe('with two matching archived projects', function () {
+      setupMatchingProjects(['archived1', 'archived2'])
+      receiveFolderUpdate()
+      expectProjectNotCreated()
+      expectFolderUpdateNotProcessed()
+      expectDropboxNotUnlinked()
+    })
+
+    describe('with one matching active and one matching archived project', function () {
+      setupMatchingProjects(['active1', 'archived1'])
+      receiveFolderUpdate()
+      expectProjectNotCreated()
+      expectFolderUpdateNotProcessed()
+      expectDropboxUnlinked()
+    })
+
+    describe('update to a project on cooldown', async function () {
+      setupMatchingProjects(['active1'])
+      setupProjectOnCooldown()
+      beforeEach(async function () {
+        await expect(
+          this.TpdsUpdateHandler.promises.createFolder(
+            this.userId,
+            this.projectName,
+            this.path
+          )
+        ).to.be.rejectedWith(Errors.TooManyRequestsError)
+      })
+      expectFolderUpdateNotProcessed()
+    })
+  })
 })
 
 /* Setup helpers */
@@ -338,6 +407,16 @@ function receiveProjectDelete() {
   })
 }
 
+function receiveFolderUpdate() {
+  beforeEach(async function () {
+    await this.TpdsUpdateHandler.promises.createFolder(
+      this.userId,
+      this.projectName,
+      this.folderPath
+    )
+  })
+}
+
 /* Expectations */
 
 function expectProjectCreated() {
@@ -385,6 +464,21 @@ function expectUpdateProcessed() {
 function expectUpdateNotProcessed() {
   it('does not process the update', function () {
     expect(this.UpdateMerger.promises.mergeUpdate).not.to.have.been.called
+  })
+}
+
+function expectFolderUpdateProcessed() {
+  it('processes the folder update', function () {
+    expect(this.UpdateMerger.promises.createFolder).to.have.been.calledWith(
+      this.projects.active1._id,
+      this.folderPath
+    )
+  })
+}
+
+function expectFolderUpdateNotProcessed() {
+  it("doesn't process the folder update", function () {
+    expect(this.UpdateMerger.promises.createFolder).not.to.have.been.called
   })
 }
 

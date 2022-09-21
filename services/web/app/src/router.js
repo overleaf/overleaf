@@ -909,6 +909,11 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   )
 
   privateApiRouter.post(
+    '/tpds/folder-update',
+    AuthenticationController.requirePrivateApiAuth(),
+    TpdsController.updateFolder
+  )
+  privateApiRouter.post(
     '/user/:user_id/update/*',
     AuthenticationController.requirePrivateApiAuth(),
     TpdsController.mergeUpdate

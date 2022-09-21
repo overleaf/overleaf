@@ -157,13 +157,23 @@ async function _readFileIntoTextArray(path) {
   return lines
 }
 
+async function createFolder(projectId, path) {
+  const { lastFolder: folder } = await EditorController.promises.mkdirp(
+    projectId,
+    path
+  )
+  return folder
+}
+
 module.exports = {
   mergeUpdate: callbackify(mergeUpdate),
   _mergeUpdate: callbackify(_mergeUpdate),
   deleteUpdate: callbackify(deleteUpdate),
+  createFolder: callbackify(createFolder),
   promises: {
     mergeUpdate,
     _mergeUpdate, // called by GitBridgeHandler
     deleteUpdate,
+    createFolder,
   },
 }
