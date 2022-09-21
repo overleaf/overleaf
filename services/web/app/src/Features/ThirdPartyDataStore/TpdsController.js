@@ -103,7 +103,7 @@ async function updateFolder(req, res) {
     entityId: metadata.folderId.toString(),
     projectId: metadata.projectId.toString(),
     path: metadata.path,
-    folderId: metadata.parentFolderId.toString(),
+    folderId: metadata.parentFolderId?.toString() || null,
   })
 }
 

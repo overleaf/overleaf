@@ -201,6 +201,26 @@ describe('TpdsController', function () {
       this.TpdsController.updateFolder(this.req, this.res)
     })
 
+    it('supports top level folders', function (done) {
+      const metadata = {
+        folderId: ObjectId(),
+        projectId: ObjectId(),
+        path: '/',
+        parentFolderId: null,
+      }
+      this.TpdsUpdateHandler.promises.createFolder.resolves(metadata)
+      this.res.json.callsFake(body => {
+        expect(body).to.deep.equal({
+          entityId: metadata.folderId.toString(),
+          projectId: metadata.projectId.toString(),
+          path: metadata.path,
+          folderId: null,
+        })
+        done()
+      })
+      this.TpdsController.updateFolder(this.req, this.res)
+    })
+
     it("returns a 409 if the folder couldn't be created", function (done) {
       this.TpdsUpdateHandler.promises.createFolder.resolves(null)
       this.HttpErrorHandler.conflict.callsFake((req, res) => {
