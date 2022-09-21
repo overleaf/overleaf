@@ -51,7 +51,7 @@ export default EditorManager = (function () {
           const newValue = !this.$scope.editor.showSymbolPalette
           this.$scope.editor.showSymbolPalette = newValue
           if (newValue && this.$scope.editor.showGalileo) {
-            this.$scope.editor.toggleGalileo()
+            this.$scope.editor.toggleGalileoPanel()
           }
           ide.$scope.$emit('south-pane-toggled', newValue)
           eventTracking.sendMB(
@@ -63,7 +63,7 @@ export default EditorManager = (function () {
           eventTracking.sendMB('symbol-palette-insert')
         },
         showGalileo: false,
-        toggleGalileo: () => {
+        toggleGalileoPanel: () => {
           const newValue = !this.$scope.editor.showGalileo
           this.$scope.editor.showGalileo = newValue
           if (newValue && this.$scope.editor.showSymbolPalette) {
@@ -71,6 +71,14 @@ export default EditorManager = (function () {
           }
           ide.$scope.$emit('south-pane-toggled', newValue)
           eventTracking.sendMB(newValue ? 'galileo-show' : 'galileo-hide')
+        },
+        galileoActivated: false,
+        toggleGalileo: () => {
+          const newValue = !this.$scope.editor.galileoActivated
+          this.$scope.editor.galileoActivated = newValue
+          eventTracking.sendMB(
+            newValue ? 'galileo-activated' : 'galileo-disabled'
+          )
         },
         multiSelectedCount: 0,
       }

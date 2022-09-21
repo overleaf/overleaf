@@ -9,10 +9,17 @@
 
   .galileo-header {
     display: flex;
+    align-items: center;
+    padding-left: @padding-sm;
     background-color: @galileo-header-background;
 
     :first-child {
       flex: 1;
+    }
+
+    .toggle-switch {
+      overflow: clip;
+      margin-left: @margin-sm;
     }
 
     .galileo-close-button {
@@ -20,7 +27,6 @@
       color: @galileo-color;
       padding-left: @padding-sm;
       padding-right: @padding-sm;
-      margin-left: @margin-xs;
       font-size: 24px;
       font-weight: bold;
       line-height: 1;
@@ -36,35 +42,111 @@
   }
 
   .galileo-body {
-    padding: 5px;
+    padding: 0 @padding-sm @padding-xs @padding-sm;
     overflow-y: auto;
+    flex: 1;
 
     .galileo-suggestions {
-      h2 {
-        font-size: 120%;
-        font-weight: normal;
-        padding: 0;
-        margin: 5px 0;
-        color: inherit;
+      .loading {
+        text-align: center;
+        margin: @margin-sm;
       }
+    }
+
+    .galileo-suggestion {
+      background: @galileo-suggestion-background;
+      color: @galileo-color;
+      margin-top: @margin-xs;
 
       .galileo-suggestion-body {
-        background-color: @content-alt-bg-color;
-        color: black;
-        display: flex;
-        align-items: flex-start;
-        gap: 5px;
-        padding: 5px;
-        margin-bottom: 5px;
-
-        :first-child {
-          flex: 1;
-        }
+        padding: @padding-xs;
+        max-height: @line-height-computed * 4; // 4 lines
+        overflow: hidden;
 
         .galileo-suggestion-text {
           white-space: break-spaces;
         }
       }
+
+      .galileo-suggestion-footer {
+        display: flex;
+        justify-content: space-between;
+        padding: @padding-xs;
+      }
+
+      .galileo-suggestion-footer-links {
+        display: flex;
+        align-items: flex-end;
+        gap: @padding-xs;
+      }
+    }
+
+    .galileo-promo {
+      margin-top: @margin-md;
+      text-align: center;
+
+      p {
+        margin: @margin-md 0;
+      }
+    }
+
+    .galileo-promo-boxes {
+      display: flex;
+      justify-content: center;
+      gap: @margin-md;
+      text-align: left;
+    }
+
+    .galileo-promo-box {
+      width: 40%;
+      background: @galileo-suggestion-background;
+      padding-top: @padding-xs;
+      border-radius: @border-radius-base;
+
+      img {
+        width: 100%;
+      }
+
+      h3,
+      p {
+        color: @galileo-color;
+        padding: 0 @padding-sm;
+        margin: 0;
+      }
+
+      h3 {
+        padding-top: @padding-xs;
+      }
+
+      h3,
+      p {
+        padding-top: @padding-xs;
+        padding-bottom: @padding-xs;
+      }
+    }
+
+    .galileo-promo-image {
+      width: 100%;
+      height: 100px;
+      background-size: cover;
+    }
+  }
+
+  .galileo-footer {
+    background-color: @galileo-bg;
+    display: flex;
+    justify-content: center;
+    gap: @padding-xs;
+    padding: @padding-xs 0;
+  }
+
+  a,
+  button.btn-inline-link {
+    color: @galileo-color;
+    text-decoration: underline;
+
+    &:hover {
+      text-decoration: none;
     }
   }
 }

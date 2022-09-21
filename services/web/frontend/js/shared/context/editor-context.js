@@ -34,8 +34,11 @@ EditorContext.Provider.propTypes = {
     toggleSymbolPalette: PropTypes.func,
     insertSymbol: PropTypes.func,
     showGalileo: PropTypes.bool,
+    galileoActivated: PropTypes.bool,
+    toggleGalileoPanel: PropTypes.func,
     toggleGalileo: PropTypes.func,
     insertGalileoAutocomplete: PropTypes.func,
+    addGalileoReferenceToProject: PropTypes.func,
     isProjectOwner: PropTypes.bool,
     isRestrictedTokenMember: PropTypes.bool,
     permissionsLevel: PropTypes.oneOf(['readOnly', 'readAndWrite', 'owner']),
@@ -80,6 +83,8 @@ export function EditorProvider({ children, settings }) {
   const [showSymbolPalette] = useScopeValue('editor.showSymbolPalette')
   const [toggleSymbolPalette] = useScopeValue('editor.toggleSymbolPalette')
   const [showGalileo] = useScopeValue('editor.showGalileo')
+  const [galileoActivated] = useScopeValue('editor.galileoActivated')
+  const [toggleGalileoPanel] = useScopeValue('editor.toggleGalileoPanel')
   const [toggleGalileo] = useScopeValue('editor.toggleGalileo')
 
   useEffect(() => {
@@ -150,6 +155,14 @@ export function EditorProvider({ children, settings }) {
     )
   }, [])
 
+  const addGalileoReferenceToProject = useCallback((citationKey, bibtex) => {
+    window.dispatchEvent(
+      new CustomEvent('editor:galileo-request-save-reference-in-project', {
+        detail: { citationKey, bibtex },
+      })
+    )
+  }, [])
+
   const value = useMemo(
     () => ({
       cobranding,
@@ -163,8 +176,11 @@ export function EditorProvider({ children, settings }) {
       toggleSymbolPalette,
       insertSymbol,
       showGalileo,
+      galileoActivated,
+      toggleGalileoPanel,
       toggleGalileo,
       insertGalileoAutocomplete,
+      addGalileoReferenceToProject,
     }),
     [
       cobranding,
@@ -177,8 +193,11 @@ export function EditorProvider({ children, settings }) {
       toggleSymbolPalette,
       insertSymbol,
       showGalileo,
+      galileoActivated,
+      toggleGalileoPanel,
       toggleGalileo,
       insertGalileoAutocomplete,
+      addGalileoReferenceToProject,
     ]
   )
 

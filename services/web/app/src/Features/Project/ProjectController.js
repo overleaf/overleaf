@@ -1152,7 +1152,7 @@ const ProjectController = {
 
             // It would be nice if this could go in the Galileo module but
             // nothing else does that
-            const galileoEnabled = shouldDisplayFeature('galileo')
+            const galileoEnabled = req.query?.galileo || ''
             const galileoFeatures =
               req.query && 'galileoFeatures' in req.query
                 ? req.query.galileoFeatures.split(',').map(f => f.trim())
