@@ -49,11 +49,19 @@ describe('UpdateMerger :', function () {
       rev: 6,
     }
 
+    this.folder = {
+      _id: ObjectId(),
+    }
+
     this.EditorController = {
       promises: {
         deleteEntityWithPath: sinon.stub().resolves(),
-        upsertDocWithPath: sinon.stub().resolves(this.doc),
-        upsertFileWithPath: sinon.stub().resolves(this.file),
+        upsertDocWithPath: sinon
+          .stub()
+          .resolves({ doc: this.doc, folder: this.folder }),
+        upsertFileWithPath: sinon
+          .stub()
+          .resolves({ file: this.file, folder: this.folder }),
       },
     }
 

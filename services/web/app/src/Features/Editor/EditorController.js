@@ -213,7 +213,7 @@ const EditorController = {
                 userId
               )
             }
-            callback(null, doc)
+            callback(null, { doc, folder: lastFolder })
           }
         )
       }
@@ -273,7 +273,7 @@ const EditorController = {
               linkedFileData,
               userId
             )
-            callback(null, newFile)
+            callback(null, { file: newFile, folder: lastFolder })
           }
         )
       }

@@ -75,15 +75,33 @@ async function _mergeUpdate(userId, projectId, path, fsPath, source) {
   const fileType = await _determineFileType(projectId, path, fsPath)
 
   if (fileType === 'file') {
-    const file = await _processFile(projectId, fsPath, path, source, userId)
-    return { entityType: 'file', entityId: file._id, rev: file.rev }
+    const { file, folder } = await _processFile(
+      projectId,
+      fsPath,
+      path,
+      source,
+      userId
+    )
+    return {
+      entityType: 'file',
+      entityId: file._id,
+      rev: file.rev,
+      folderId: folder._id,
+    }
   } else if (fileType === 'doc') {
-    const doc = await _processDoc(projectId, userId, fsPath, path, source)
-    // The doc entry doesn't have a rev. Since the document is set in
-    // docupdater, it's possible that the next rev contains a merge of changes
-    // in Dropbox and changes from docupdater.
-    const metadata = { entityType: 'doc', entityId: doc._id, rev: doc.rev }
-    return metadata
+    const { doc, folder } = await _processDoc(
+      projectId,
+      userId,
+      fsPath,
+      path,
+      source
+    )
+    return {
+      entityType: 'doc',
+      entityId: doc._id,
+      rev: doc.rev,
+      folderId: folder._id,
+    }
   } else {
     throw new Error('unrecognized file')
   }
@@ -119,7 +137,7 @@ async function _processDoc(projectId, userId, fsPath, path, source) {
 }
 
 async function _processFile(projectId, fsPath, path, source, userId) {
-  const file = await EditorController.promises.upsertFileWithPath(
+  const { file, folder } = await EditorController.promises.upsertFileWithPath(
     projectId,
     path,
     fsPath,
@@ -127,7 +145,7 @@ async function _processFile(projectId, fsPath, path, source, userId) {
     source,
     userId
   )
-  return file
+  return { file, folder }
 }
 
 async function _readFileIntoTextArray(path) {

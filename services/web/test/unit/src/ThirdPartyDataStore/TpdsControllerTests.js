@@ -11,6 +11,7 @@ describe('TpdsController', function () {
   beforeEach(function () {
     this.metadata = {
       entityId: ObjectId(),
+      folderId: ObjectId(),
       entityType: 'doc',
       rev: 2,
     }
@@ -69,8 +70,9 @@ describe('TpdsController', function () {
           expect(payload).to.deep.equal({
             status: 'applied',
             entityId: this.metadata.entityId.toString(),
+            folderId: this.metadata.folderId.toString(),
             entityType: this.metadata.entityType,
-            rev: this.metadata.rev,
+            rev: this.metadata.rev.toString(),
           })
           this.TpdsUpdateHandler.promises.newUpdate
             .calledWith(

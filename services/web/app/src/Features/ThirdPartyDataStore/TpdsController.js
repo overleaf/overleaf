@@ -55,9 +55,13 @@ async function mergeUpdate(req, res) {
     status: 'applied',
     entityId: metadata.entityId.toString(),
     entityType: metadata.entityType,
+    folderId: metadata.folderId.toString(),
   }
+
+  // When the update is a doc edit, the update is merged in docupdater and
+  // doesn't generate a new rev.
   if (metadata.rev != null) {
-    payload.rev = metadata.rev
+    payload.rev = metadata.rev.toString()
   }
   res.json(payload)
 }
