@@ -6,6 +6,7 @@ import AccountInfoSection from './account-info-section'
 import PasswordSection from './password-section'
 import LinkingSection from './linking-section'
 import BetaProgramSection from './beta-program-section'
+import LabsProgramSection from './labs-program-section'
 import SessionsSection from './sessions-section'
 import NewsletterSection from './newsletter-section'
 import LeaveSection from './leave-section'
@@ -38,7 +39,9 @@ function SettingsPageRoot() {
 
 function SettingsPageContent() {
   const { t } = useTranslation()
-  const { isOverleaf } = getMeta('ol-ExposedSettings') as ExposedSettings
+  const { isOverleaf, labsEnabled } = getMeta(
+    'ol-ExposedSettings'
+  ) as ExposedSettings
 
   return (
     <UserProvider>
@@ -64,6 +67,12 @@ function SettingsPageContent() {
           {isOverleaf ? (
             <>
               <BetaProgramSection />
+              <hr />
+            </>
+          ) : null}
+          {labsEnabled ? (
+            <>
+              <LabsProgramSection />
               <hr />
             </>
           ) : null}

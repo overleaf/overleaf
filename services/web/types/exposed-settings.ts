@@ -36,4 +36,5 @@ export type ExposedSettings = {
   textExtensions: string[]
   validRootDocExtensions: string[]
   templateLinks: TemplateLink[]
+  labsEnabled: boolean
 }

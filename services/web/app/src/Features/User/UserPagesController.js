@@ -73,6 +73,7 @@ async function settingsPage(req, res) {
       last_name: user.last_name,
       alphaProgram: user.alphaProgram,
       betaProgram: user.betaProgram,
+      labsProgram: user.labsProgram,
       features: {
         dropbox: user.features.dropbox,
         github: user.features.github,

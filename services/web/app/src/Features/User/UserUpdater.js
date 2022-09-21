@@ -217,6 +217,16 @@ async function setDefaultEmailAddress(
       'Failed to change email in newsletter subscription'
     )
   }
+  try {
+    // TODO: figure out why things go wrong if we import at the top
+    const Modules = require('../../infrastructure/Modules')
+    await Modules.promises.hooks.fire('userEmailChanged', user, email)
+  } catch (err) {
+    logger.error(
+      { err, oldEmail, newEmail: email },
+      'Failed to fire "userEmailChanged" hook'
+    )
+  }
 
   try {
     await RecurlyWrapper.promises.updateAccountEmailAddress(user._id, email)

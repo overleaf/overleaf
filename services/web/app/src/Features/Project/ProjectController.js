@@ -765,7 +765,7 @@ const ProjectController = {
             )
             User.findById(
               userId,
-              'email first_name last_name referal_id signUpDate featureSwitches features featuresEpoch refProviders alphaProgram betaProgram isAdmin ace',
+              'email first_name last_name referal_id signUpDate featureSwitches features featuresEpoch refProviders alphaProgram betaProgram isAdmin ace labsProgram labsProgramGalileo',
               (err, user) => {
                 // Handle case of deleted user
                 if (user == null) {
@@ -1197,6 +1197,8 @@ const ProjectController = {
                 refProviders: _.mapValues(user.refProviders, Boolean),
                 alphaProgram: user.alphaProgram,
                 betaProgram: user.betaProgram,
+                labsProgram: user.labsProgram,
+                labsProgramGalileo: user.labsProgramGalileo,
                 isAdmin: hasAdminAccess(user),
               },
               userSettings: {

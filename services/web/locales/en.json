@@ -1876,5 +1876,20 @@
   "reverse_x_sort_order" : "Reverse __x__ sort order",
   "create_first_project": "Create First Project",
   "you_dont_have_any_repositories": "You don’t have any repositories",
-  "tag_name_cannot_exceed_characters": "Tag name cannot exceed __maxLength__ characters"
+  "tag_name_cannot_exceed_characters": "Tag name cannot exceed __maxLength__ characters",
+  "overleaf_labs": "Overleaf Labs",
+  "labs_program_already_participating": "You are enrolled in Labs",
+  "labs_program_not_participating": "You are not enrolled in Labs",
+  "labs_program_benefits": "__appName__ is always looking for new ways to help users work more quickly and effectively. By joining Overleaf Labs, you can participate in experiments that explore innovative ideas in the space of collaborative writing and publishing.",
+  "you_can_opt_in_and_out_of_overleaf_labs_at_any_time_on_this_page": "You can <0>opt in and out</0> of Overleaf Labs at any time on this page",
+  "you_can_opt_in_and_out_of_galileo_at_any_time_on_this_page": "You can <0>opt in and out</0> of Galileo at any time on this page",
+  "you_can_opt_in_to_individual_experiments": "You will be asked to opt in and out of individual experiments; each experiment may have unique partners, requirements, terms and conditions, etc. that must be opted in to for that specific experiment",
+  "labs_program_badge_description": "While using __appName__, you will see Labs features marked with this badge:",
+  "note_experiments_under_development": "<0>Please note</0> that experiments in this program are still being tested and actively developed. This means that they might <0>change</0>, be <0>removed</0> or <0>become part of a paid plan</0>",
+  "galileo_program_description": "Galileo is an AI that helps you write your documents",
+  "galileo_is_part_of_overleaf_labs": "Galileo is an experiment in <0>Overleaf Labs</0>",
+  "thank_you_for_being_part_of_our_labs_program": "Thank you for being part of our Labs program, where you can have <0>early access to experimental features</0> and help us explore innovative ideas that help you work more quickly and effectively",
+  "manage_labs_program_membership": "Manage Labs Program Membership",
+  "current_experiments": "Current Experiments",
+  "overleaf_labs": "Overleaf Labs"
 }

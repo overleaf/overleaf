@@ -163,6 +163,8 @@ const UserSchema = new Schema({
   },
   alphaProgram: { type: Boolean, default: false }, // experimental features
   betaProgram: { type: Boolean, default: false },
+  labsProgram: { type: Boolean, default: false },
+  labsProgramGalileo: { type: Boolean, default: false },
   overleaf: {
     id: { type: Number },
     accessToken: { type: String },

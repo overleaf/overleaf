@@ -411,6 +411,7 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
         Settings.analytics.ga.tokenV4,
       cookieDomain: Settings.cookieDomain,
       templateLinks: Settings.templateLinks,
+      labsEnabled: Settings.labs && Settings.labs.enable,
     }
     next()
   })
