@@ -76,6 +76,7 @@ describe('Setting a document', function () {
                     return done(error)
                   }
                   this.statusCode = res.statusCode
+                  this.body = body
                   done()
                 }
               )
@@ -91,8 +92,8 @@ describe('Setting a document', function () {
       MockWebApi.setDocument.resetHistory()
     })
 
-    it('should return a 204 status code', function () {
-      this.statusCode.should.equal(204)
+    it('should return a 200 status code', function () {
+      this.statusCode.should.equal(200)
     })
 
     it('should send the updated doc lines and version to the web api', function () {
@@ -141,6 +142,10 @@ describe('Setting a document', function () {
         }
       )
     })
+
+    it('should return the mongo rev in the json response', function () {
+      this.body.should.deep.equal({ rev: '123' })
+    })
   })
 
   describe('when the updated doc does not exist in the doc updater', function () {
@@ -163,6 +168,7 @@ describe('Setting a document', function () {
             return done(error)
           }
           this.statusCode = res.statusCode
+          this.body = body
           setTimeout(done, 200)
         }
       )
@@ -174,8 +180,8 @@ describe('Setting a document', function () {
       MockWebApi.setDocument.resetHistory()
     })
 
-    it('should return a 204 status code', function () {
-      this.statusCode.should.equal(204)
+    it('should return a 200 status code', function () {
+      this.statusCode.should.equal(200)
     })
 
     it('should send the updated doc lines to the web api', function () {
@@ -205,6 +211,10 @@ describe('Setting a document', function () {
           done()
         }
       )
+    })
+
+    it('should return the mongo rev in the json response', function () {
+      this.body.should.deep.equal({ rev: '123' })
     })
   })
 
@@ -302,6 +312,7 @@ describe('Setting a document', function () {
             return done(error)
           }
           this.statusCode = res.statusCode
+          this.body = body
           setTimeout(done, 200)
         }
       )
@@ -313,14 +324,18 @@ describe('Setting a document', function () {
       MockWebApi.setDocument.resetHistory()
     })
 
-    it('should return a 204 status code', function () {
-      this.statusCode.should.equal(204)
+    it('should return a 200 status code', function () {
+      this.statusCode.should.equal(200)
     })
 
     it('should send the updated doc lines to the web api', function () {
       MockWebApi.setDocument
         .calledWith(this.project_id, this.doc_id, this.newLines)
         .should.equal(true)
+    })
+
+    it('should return the mongo rev in the json response', function () {
+      this.body.should.deep.equal({ rev: '123' })
     })
   })
 

@@ -99,7 +99,7 @@ module.exports = MockWebApi = {
             if (error != null) {
               return res.sendStatus(500)
             } else {
-              return res.sendStatus(204)
+              return res.json({ rev: '123' })
             }
           }
         )

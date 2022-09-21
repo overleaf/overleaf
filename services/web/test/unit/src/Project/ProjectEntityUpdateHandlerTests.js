@@ -790,12 +790,6 @@ describe('ProjectEntityUpdateHandler', function () {
           .should.equal(true)
       })
 
-      it('flushes the doc contents', function () {
-        this.DocumentUpdaterHandler.flushDocToMongo
-          .calledWith(projectId, this.existingDoc._id)
-          .should.equal(true)
-      })
-
       it('returns the doc', function () {
         this.callback.calledWith(null, this.existingDoc, false)
       })

@@ -238,23 +238,32 @@ module.exports = DocumentManager = {
             // Otherwise we should remove it immediately since nothing else
             // is using it.
             if (alreadyLoaded) {
-              DocumentManager.flushDocIfLoaded(projectId, docId, error => {
-                if (error) {
-                  return callback(error)
+              DocumentManager.flushDocIfLoaded(
+                projectId,
+                docId,
+                (error, result) => {
+                  if (error) {
+                    return callback(error)
+                  }
+                  callback(null, result)
                 }
-                callback(null)
-              })
+              )
             } else {
-              DocumentManager.flushAndDeleteDoc(projectId, docId, {}, error => {
-                // There is no harm in flushing project history if the previous
-                // call failed and sometimes it is required
-                HistoryManager.flushProjectChangesAsync(projectId)
+              DocumentManager.flushAndDeleteDoc(
+                projectId,
+                docId,
+                {},
+                (error, result) => {
+                  // There is no harm in flushing project history if the previous
+                  // call failed and sometimes it is required
+                  HistoryManager.flushProjectChangesAsync(projectId)
 
-                if (error) {
-                  return callback(error)
+                  if (error) {
+                    return callback(error)
+                  }
+                  callback(null, result)
                 }
-                callback(null)
-              })
+              )
             }
           })
         })
@@ -302,11 +311,16 @@ module.exports = DocumentManager = {
             ranges,
             lastUpdatedAt,
             lastUpdatedBy,
-            error => {
+            (error, result) => {
               if (error) {
                 return callback(error)
               }
-              RedisManager.clearUnflushedTime(docId, callback)
+              RedisManager.clearUnflushedTime(docId, err => {
+                if (err) {
+                  return callback(err)
+                }
+                callback(null, result)
+              })
             }
           )
         }
@@ -321,7 +335,7 @@ module.exports = DocumentManager = {
       _callback(...args)
     }
 
-    DocumentManager.flushDocIfLoaded(projectId, docId, error => {
+    DocumentManager.flushDocIfLoaded(projectId, docId, (error, result) => {
       if (error) {
         if (options.ignoreFlushErrors) {
           logger.warn(
@@ -340,7 +354,7 @@ module.exports = DocumentManager = {
         if (error) {
           return callback(error)
         }
-        callback(null)
+        callback(null, result)
       })
     })
   },

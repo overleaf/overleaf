@@ -17,6 +17,7 @@ describe('HttpController', function () {
         './RedisManager': (this.RedisManager = {}),
         './Metrics': (this.Metrics = {}),
         './Errors': Errors,
+        '@overleaf/settings': { max_doc_length: 2 * 1024 * 1024 },
       },
     })
     this.Metrics.Timer = class Timer {}
@@ -202,7 +203,9 @@ describe('HttpController', function () {
 
     describe('successfully', function () {
       beforeEach(function () {
-        this.DocumentManager.setDocWithLock = sinon.stub().callsArgWith(6)
+        this.DocumentManager.setDocWithLock = sinon
+          .stub()
+          .callsArgWith(6, null, { rev: '123' })
         this.HttpController.setDoc(this.req, this.res, this.next)
       })
 
@@ -219,8 +222,8 @@ describe('HttpController', function () {
           .should.equal(true)
       })
 
-      it('should return a successful No Content response', function () {
-        this.res.sendStatus.calledWith(204).should.equal(true)
+      it('should return a json response with the document rev from web', function () {
+        this.res.json.calledWithMatch({ rev: '123' }).should.equal(true)
       })
 
       it('should log the request', function () {

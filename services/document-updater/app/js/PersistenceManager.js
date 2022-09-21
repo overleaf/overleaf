@@ -159,7 +159,7 @@ function setDoc(
         return callback(new Error('error connecting to web API'))
       }
       if (res.statusCode >= 200 && res.statusCode < 300) {
-        callback(null)
+        callback(null, body)
       } else if (res.statusCode === 404) {
         callback(new Errors.NotFoundError(`doc not not found: ${urlPath}`))
       } else if (res.statusCode === 413) {

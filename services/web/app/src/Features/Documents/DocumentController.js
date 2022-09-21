@@ -94,7 +94,7 @@ function setDocument(req, res, next) {
     ranges,
     lastUpdatedAt,
     lastUpdatedBy,
-    error => {
+    (error, result) => {
       if (error) {
         OError.tag(error, 'error finding element for getDocument', {
           docId,
@@ -106,7 +106,7 @@ function setDocument(req, res, next) {
         { docId, projectId },
         'finished receiving set document request from api (docupdater)'
       )
-      res.sendStatus(200)
+      res.json(result)
     }
   )
 }

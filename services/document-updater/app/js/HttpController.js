@@ -163,13 +163,13 @@ function setDoc(req, res, next) {
     source,
     userId,
     undoing,
-    error => {
+    (error, result) => {
       timer.done()
       if (error) {
         return next(error)
       }
       logger.debug({ projectId, docId }, 'set doc via http')
-      res.sendStatus(204) // No Content
+      res.json(result)
     }
   )
 }

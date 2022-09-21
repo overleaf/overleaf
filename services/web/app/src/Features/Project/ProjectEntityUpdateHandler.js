@@ -201,7 +201,7 @@ const ProjectEntityUpdateHandler = {
           )
           // path will only be present if the doc is not deleted
           if (!modified || isDeletedDoc) {
-            return callback()
+            return callback(null, { rev })
           }
           // Don't need to block for marking as updated
           ProjectUpdateHandler.markAsUpdated(
@@ -218,7 +218,12 @@ const ProjectEntityUpdateHandler = {
               rev,
               folderId: folder?._id,
             },
-            callback
+            err => {
+              if (err) {
+                return callback(err)
+              }
+              callback(null, { rev, modified })
+            }
           )
         }
       )
@@ -741,7 +746,7 @@ const ProjectEntityUpdateHandler = {
             userId,
             docLines,
             source,
-            err => {
+            (err, result) => {
               if (err != null) {
                 return callback(err)
               }
@@ -749,16 +754,11 @@ const ProjectEntityUpdateHandler = {
                 { projectId, docId: existingDoc._id },
                 'notifying users that the document has been updated'
               )
-              DocumentUpdaterHandler.flushDocToMongo(
-                projectId,
-                existingDoc._id,
-                err => {
-                  if (err != null) {
-                    return callback(err)
-                  }
-                  callback(null, existingDoc, existingDoc == null)
-                }
-              )
+              // there is no need to flush the doc to mongo at this point as docupdater
+              // flushes it as part of setDoc.
+              //
+              // combine rev from response with existing doc metadata
+              callback(null, { ...existingDoc, ...result }, existingDoc == null)
             }
           )
         } else {
