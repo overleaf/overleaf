@@ -3,7 +3,6 @@ const express = require('express')
 const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
 const metrics = require('@overleaf/metrics')
-const expressLocals = require('./ExpressLocals')
 const Validation = require('./Validation')
 const csp = require('./CSP')
 const Router = require('../router')
@@ -31,7 +30,6 @@ const ReferalConnect = require('../Features/Referal/ReferalConnect')
 const RedirectManager = require('./RedirectManager')
 const ProxyManager = require('./ProxyManager')
 const translations = require('./Translations')
-const Modules = require('./Modules')
 const Views = require('./Views')
 const Features = require('./Features')
 
@@ -43,6 +41,9 @@ const SessionManager = require('../Features/Authentication/SessionManager')
 const {
   hasAdminAccess,
 } = require('../Features/Helpers/AdminAuthorizationHelper')
+
+const Modules = require('./Modules')
+const expressLocals = require('./ExpressLocals')
 
 const STATIC_CACHE_AGE = Settings.cacheStaticAssets
   ? oneDayInMilliseconds * 365

@@ -17,6 +17,7 @@ const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const SubscriptionLocator = require('../Subscription/SubscriptionLocator')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
 const _ = require('lodash')
+const Modules = require('../../infrastructure/Modules')
 
 async function _sendSecurityAlertPrimaryEmailChanged(userId, oldEmail, email) {
   // Send email to the following:
@@ -218,8 +219,6 @@ async function setDefaultEmailAddress(
     )
   }
   try {
-    // TODO: figure out why things go wrong if we import at the top
-    const Modules = require('../../infrastructure/Modules')
     await Modules.promises.hooks.fire('userEmailChanged', user, email)
   } catch (err) {
     logger.error(

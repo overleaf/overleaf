@@ -25,6 +25,7 @@ const {
 } = require('../../infrastructure/RequestContentTypeDetection')
 const { ParallelLoginError } = require('./AuthenticationErrors')
 const { hasAdminAccess } = require('../Helpers/AdminAuthorizationHelper')
+const Modules = require('../../infrastructure/Modules')
 
 function send401WithChallenge(res) {
   res.setHeader('WWW-Authenticate', 'OverleafLogin')
@@ -119,7 +120,6 @@ const AuthenticationController = {
     const anonymousAnalyticsId = req.session.analyticsId
     const isNewUser = req.session.justRegistered || false
 
-    const Modules = require('../../infrastructure/Modules')
     Modules.hooks.fire(
       'preFinishLogin',
       req,
@@ -172,7 +172,6 @@ const AuthenticationController = {
 
   doPassportLogin(req, username, password, done) {
     const email = username.toLowerCase()
-    const Modules = require('../../infrastructure/Modules')
     Modules.hooks.fire(
       'preDoPassportLogin',
       req,

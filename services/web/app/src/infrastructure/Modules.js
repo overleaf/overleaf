@@ -8,8 +8,16 @@ const Settings = require('@overleaf/settings')
 const MODULE_BASE_PATH = Path.join(__dirname, '/../../../modules')
 
 const _modules = []
+let _modulesLoaded = false
 const _hooks = {}
 let _viewIncludes = {}
+
+function modules() {
+  if (!_modulesLoaded) {
+    loadModules()
+  }
+  return _modules
+}
 
 function loadModules() {
   const settingsCheckModule = Path.join(
@@ -30,11 +38,12 @@ function loadModules() {
     loadedModule.name = moduleName
     _modules.push(loadedModule)
   }
+  _modulesLoaded = true
   attachHooks()
 }
 
 function applyRouter(webRouter, privateApiRouter, publicApiRouter) {
-  for (const module of _modules) {
+  for (const module of modules()) {
     if (module.router && module.router.apply) {
       module.router.apply(webRouter, privateApiRouter, publicApiRouter)
     }
@@ -42,7 +51,7 @@ function applyRouter(webRouter, privateApiRouter, publicApiRouter) {
 }
 
 function applyNonCsrfRouter(webRouter, privateApiRouter, publicApiRouter) {
-  for (const module of _modules) {
+  for (const module of modules()) {
     if (module.nonCsrfRouter != null) {
       module.nonCsrfRouter.apply(webRouter, privateApiRouter, publicApiRouter)
     }
@@ -58,7 +67,7 @@ function applyNonCsrfRouter(webRouter, privateApiRouter, publicApiRouter) {
 
 function loadViewIncludes(app) {
   _viewIncludes = {}
-  for (const module of _modules) {
+  for (const module of modules()) {
     const object = module.viewIncludes || {}
     for (const view in object) {
       const partial = object[view]
@@ -82,7 +91,7 @@ function loadViewIncludes(app) {
 }
 
 function registerAppMiddleware(app) {
-  for (const module of _modules) {
+  for (const module of modules()) {
     if (module.appMiddleware) {
       module.appMiddleware(app)
     }
@@ -104,7 +113,7 @@ function moduleIncludesAvailable(view) {
 
 function linkedFileAgentsIncludes() {
   const agents = {}
-  for (const module of _modules) {
+  for (const module of modules()) {
     for (const name in module.linkedFileAgents) {
       const agentFunction = module.linkedFileAgents[name]
       agents[name] = agentFunction()
@@ -114,7 +123,7 @@ function linkedFileAgentsIncludes() {
 }
 
 function attachHooks() {
-  for (const module of _modules) {
+  for (const module of modules()) {
     if (module.hooks != null) {
       for (const hook in module.hooks) {
         const method = module.hooks[hook]
@@ -163,5 +172,3 @@ module.exports = {
     },
   },
 }
-
-loadModules()

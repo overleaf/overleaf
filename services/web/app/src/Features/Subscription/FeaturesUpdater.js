@@ -13,6 +13,7 @@ const InstitutionsFeatures = require('../Institutions/InstitutionsFeatures')
 const UserGetter = require('../User/UserGetter')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const Queues = require('../../infrastructure/Queues')
+const Modules = require('../../infrastructure/Modules')
 
 /**
  * Enqueue a job for refreshing features for the given user
@@ -52,7 +53,6 @@ async function refreshFeatures(userId, reason) {
     await UserFeaturesUpdater.promises.updateFeatures(userId, features)
   if (oldFeatures.dropbox === true && features.dropbox === false) {
     logger.debug({ userId }, '[FeaturesUpdater] must unlink dropbox')
-    const Modules = require('../../infrastructure/Modules')
     try {
       await Modules.promises.hooks.fire('removeDropbox', userId, reason)
     } catch (err) {

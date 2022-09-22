@@ -21,6 +21,7 @@ const { expressify } = require('../../util/promises')
 const {
   acceptsJson,
 } = require('../../infrastructure/RequestContentTypeDetection')
+const Modules = require('../../infrastructure/Modules')
 
 async function _sendSecurityAlertClearedSessions(user) {
   const emailOptions = {
@@ -290,8 +291,6 @@ const UserController = {
           OError.tag(err, 'error unsubscribing to newsletter')
           return next(err)
         }
-        // TODO: figure out why things go wrong if we import at the top
-        const Modules = require('../../infrastructure/Modules')
         Modules.hooks.fire('newsletterUnsubscribed', user, err => {
           if (err) {
             OError.tag(err, 'error firing "newsletterUnsubscribed" hook')
