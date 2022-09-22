@@ -140,7 +140,13 @@ export default {
     show: true,
     animation: false,
     user: {},
-    project,
+    project: {
+      ...project,
+      owner: {
+        ...project.owner,
+        _id: window.user.id,
+      },
+    },
   },
   argTypes: {
     handleHide: { action: 'hide' },

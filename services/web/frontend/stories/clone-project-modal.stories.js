@@ -47,6 +47,7 @@ export default {
   argTypes: {
     handleHide: { action: 'close modal' },
     openProject: { action: 'open project' },
+    handleAfterCloned: { action: 'after cloned' },
   },
   decorators: [ScopeDecorator],
 }
