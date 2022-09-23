@@ -7,18 +7,20 @@ import useAsync from '../../../../shared/hooks/use-async'
 import { deleteTag } from '../../util/api'
 
 type DeleteTagModalProps = {
+  id: string
   tag?: Tag
   onDelete: (tagId: string) => void
   onClose: () => void
 }
 
 export default function DeleteTagModal({
+  id,
   tag,
   onDelete,
   onClose,
 }: DeleteTagModalProps) {
   const { t } = useTranslation()
-  const { isError, runAsync, status } = useAsync()
+  const { isLoading, isError, runAsync } = useAsync()
 
   const runDeleteTag = useCallback(
     (tagId: string) => {
@@ -36,13 +38,7 @@ export default function DeleteTagModal({
   }
 
   return (
-    <AccessibleModal
-      show
-      animation
-      onHide={onClose}
-      id="delete-tag-modal"
-      backdrop="static"
-    >
+    <AccessibleModal show animation onHide={onClose} id={id} backdrop="static">
       <Modal.Header closeButton>
         <Modal.Title>{t('delete_folder')}</Modal.Title>
       </Modal.Header>
@@ -62,15 +58,15 @@ export default function DeleteTagModal({
             </span>
           </div>
         )}
-        <Button onClick={onClose} disabled={status === 'pending'}>
+        <Button onClick={onClose} disabled={isLoading}>
           {t('cancel')}
         </Button>
         <Button
           onClick={() => runDeleteTag(tag._id)}
           bsStyle="primary"
-          disabled={status === 'pending'}
+          disabled={isLoading}
         >
-          {status === 'pending' ? t('deleting') + '…' : t('delete')}
+          {isLoading ? <>{t('deleting')} &hellip;</> : t('delete')}
         </Button>
       </Modal.Footer>
     </AccessibleModal>

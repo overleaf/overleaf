@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { fireEvent, screen } from '@testing-library/react'
-import UnarchiveProjectButton from '../../../../../../../../frontend/js/features/project-list/components/table/cells/action-buttons/unarchive-project-button'
+import { UnarchiveProjectButtonTooltip } from '../../../../../../../../frontend/js/features/project-list/components/table/cells/action-buttons/unarchive-project-button'
 import {
   archiveableProject,
   archivedProject,
@@ -19,7 +19,7 @@ describe('<UnarchiveProjectButton />', function () {
 
   it('renders tooltip for button', function () {
     renderWithProjectListContext(
-      <UnarchiveProjectButton project={archivedProject} />
+      <UnarchiveProjectButtonTooltip project={archivedProject} />
     )
     const btn = screen.getByLabelText('Restore')
     fireEvent.mouseOver(btn)
@@ -28,14 +28,14 @@ describe('<UnarchiveProjectButton />', function () {
 
   it('does not render the button when project is trashed', function () {
     renderWithProjectListContext(
-      <UnarchiveProjectButton project={trashedProject} />
+      <UnarchiveProjectButtonTooltip project={trashedProject} />
     )
     expect(screen.queryByLabelText('Restore')).to.be.null
   })
 
   it('does not render the button when project is current', function () {
     renderWithProjectListContext(
-      <UnarchiveProjectButton project={archiveableProject} />
+      <UnarchiveProjectButtonTooltip project={archiveableProject} />
     )
     expect(screen.queryByLabelText('Restore')).to.be.null
   })
@@ -49,7 +49,9 @@ describe('<UnarchiveProjectButton />', function () {
       },
       { delay: 0 }
     )
-    renderWithProjectListContext(<UnarchiveProjectButton project={project} />)
+    renderWithProjectListContext(
+      <UnarchiveProjectButtonTooltip project={project} />
+    )
     const btn = screen.getByLabelText('Restore')
     fireEvent.click(btn)
 

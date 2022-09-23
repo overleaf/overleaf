@@ -181,13 +181,13 @@ describe('<TagsList />', function () {
     beforeEach(async function () {
       const tag1Button = screen.getByText('Another tag')
 
-      const renameButton = within(
+      const deleteButton = within(
         tag1Button.closest('li') as HTMLElement
       ).getByRole('button', {
         name: 'Delete',
       })
 
-      await fireEvent.click(renameButton)
+      await fireEvent.click(deleteButton)
     })
 
     it('modal is open', async function () {

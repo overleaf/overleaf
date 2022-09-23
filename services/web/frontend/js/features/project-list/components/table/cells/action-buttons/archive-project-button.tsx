@@ -3,16 +3,20 @@ import { Project } from '../../../../../../../../types/project/dashboard/api'
 import { memo, useCallback, useState } from 'react'
 import Icon from '../../../../../../shared/components/icon'
 import Tooltip from '../../../../../../shared/components/tooltip'
-import ProjectsActionModal from '../../projects-action-modal'
+import ArchiveProjectModal from '../../../modals/archive-project-modal'
 import useIsMounted from '../../../../../../shared/hooks/use-is-mounted'
 import { useProjectListContext } from '../../../../context/project-list-context'
 import { archiveProject } from '../../../../util/api'
 
 type ArchiveProjectButtonProps = {
   project: Project
+  children: (text: string, handleOpenModal: () => void) => React.ReactElement
 }
 
-function ArchiveProjectButton({ project }: ArchiveProjectButtonProps) {
+function ArchiveProjectButton({
+  project,
+  children,
+}: ArchiveProjectButtonProps) {
   const { updateProjectViewData } = useProjectListContext()
   const { t } = useTranslation()
   const text = t('archive')
@@ -41,30 +45,41 @@ function ArchiveProjectButton({ project }: ArchiveProjectButtonProps) {
 
   return (
     <>
-      <Tooltip
-        key={`tooltip-archive-project-${project.id}`}
-        id={`tooltip-archive-project-${project.id}`}
-        description={text}
-        overlayProps={{ placement: 'top', trigger: ['hover', 'focus'] }}
-      >
-        <button
-          className="btn btn-link action-btn"
-          aria-label={text}
-          onClick={handleOpenModal}
-        >
-          <Icon type="inbox" />
-        </button>
-      </Tooltip>
-
-      <ProjectsActionModal
-        action="archive"
+      {children(text, handleOpenModal)}
+      <ArchiveProjectModal
+        projects={[project]}
         actionHandler={handleArchiveProject}
         showModal={showModal}
         handleCloseModal={handleCloseModal}
-        projects={[project]}
       />
     </>
   )
 }
 
+const ArchiveProjectButtonTooltip = memo(function ArchiveProjectButtonTooltip({
+  project,
+}: Pick<ArchiveProjectButtonProps, 'project'>) {
+  return (
+    <ArchiveProjectButton project={project}>
+      {(text, handleOpenModal) => (
+        <Tooltip
+          key={`tooltip-archive-project-${project.id}`}
+          id={`archive-project-${project.id}`}
+          description={text}
+          overlayProps={{ placement: 'top', trigger: ['hover', 'focus'] }}
+        >
+          <button
+            className="btn btn-link action-btn"
+            aria-label={text}
+            onClick={handleOpenModal}
+          >
+            <Icon type="inbox" />
+          </button>
+        </Tooltip>
+      )}
+    </ArchiveProjectButton>
+  )
+})
+
 export default memo(ArchiveProjectButton)
+export { ArchiveProjectButtonTooltip }

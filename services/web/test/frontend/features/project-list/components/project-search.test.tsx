@@ -11,7 +11,7 @@ import * as eventTracking from '../../../../../frontend/js/infrastructure/event-
 import fetchMock from 'fetch-mock'
 import { projectsData } from '../fixtures/projects-data'
 
-describe('<ProjectListTable />', function () {
+describe('Project list search form', function () {
   beforeEach(function () {
     fetchMock.reset()
   })
@@ -21,35 +21,32 @@ describe('<ProjectListTable />', function () {
   })
 
   it('renders the search form', function () {
-    render(<SearchForm onChange={() => {}} />)
+    render(<SearchForm inputValue="" setInputValue={() => {}} />)
     screen.getByRole('search')
     screen.getByRole('textbox', { name: /search projects/i })
   })
 
-  it('clears text when clear button is clicked', function () {
-    render(<SearchForm onChange={() => {}} />)
+  it('calls clear text when clear button is clicked', function () {
+    const setInputValueMock = sinon.stub()
+    render(<SearchForm inputValue="abc" setInputValue={setInputValueMock} />)
+
     const input = screen.getByRole<HTMLInputElement>('textbox', {
       name: /search projects/i,
     })
 
-    expect(input.value).to.equal('')
-    expect(screen.queryByRole('button', { name: 'clear search' })).to.be.null // clear button
-
-    fireEvent.change(input, {
-      target: { value: 'abc' },
-    })
+    expect(input.value).to.equal('abc')
 
     const clearBtn = screen.getByRole('button', { name: 'clear search' })
     fireEvent.click(clearBtn)
 
-    expect(input.value).to.equal('')
+    expect(setInputValueMock).to.be.calledWith('')
   })
 
   it('changes text', function () {
-    const onChangeMock = sinon.stub()
+    const setInputValueMock = sinon.stub()
     const sendSpy = sinon.spy(eventTracking, 'send')
 
-    render(<SearchForm onChange={onChangeMock} />)
+    render(<SearchForm inputValue="" setInputValue={setInputValueMock} />)
     const input = screen.getByRole('textbox', { name: /search projects/i })
     const value = 'abc'
 
@@ -59,7 +56,7 @@ describe('<ProjectListTable />', function () {
       'project-search',
       'keydown'
     )
-    expect(onChangeMock).to.be.calledWith(value)
+    expect(setInputValueMock).to.be.calledWith(value)
     sendSpy.restore()
   })
 
@@ -93,7 +90,7 @@ describe('<ProjectListTable />', function () {
       )
 
       const handleChange = result.current.setSearchText
-      render(<SearchForm onChange={handleChange} />)
+      render(<SearchForm inputValue="" setInputValue={handleChange} />)
 
       const input = screen.getByRole('textbox', { name: /search projects/i })
       const value = projectsData[0].name

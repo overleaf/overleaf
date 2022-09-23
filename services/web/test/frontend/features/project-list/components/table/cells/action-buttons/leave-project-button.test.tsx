@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { fireEvent, screen } from '@testing-library/react'
-import LeaveProjectButton from '../../../../../../../../frontend/js/features/project-list/components/table/cells/action-buttons/leave-project-buttton'
+import { LeaveProjectButtonTooltip } from '../../../../../../../../frontend/js/features/project-list/components/table/cells/action-buttons/leave-project-button'
 import {
   trashedProject,
   trashedAndNotOwnedProject,
@@ -19,7 +19,7 @@ describe('<LeaveProjectButtton />', function () {
   })
   it('renders tooltip for button', function () {
     renderWithProjectListContext(
-      <LeaveProjectButton project={trashedAndNotOwnedProject} />
+      <LeaveProjectButtonTooltip project={trashedAndNotOwnedProject} />
     )
     const btn = screen.getByLabelText('Leave')
     fireEvent.mouseOver(btn)
@@ -29,7 +29,7 @@ describe('<LeaveProjectButtton />', function () {
   it('does not render button when owner', function () {
     window.user_id = trashedProject?.owner?.id
     renderWithProjectListContext(
-      <LeaveProjectButton project={trashedProject} />
+      <LeaveProjectButtonTooltip project={trashedProject} />
     )
     const btn = screen.queryByLabelText('Leave')
     expect(btn).to.be.null
@@ -37,14 +37,14 @@ describe('<LeaveProjectButtton />', function () {
 
   it('does not render the button when project is archived', function () {
     renderWithProjectListContext(
-      <LeaveProjectButton project={archivedProject} />
+      <LeaveProjectButtonTooltip project={archivedProject} />
     )
     expect(screen.queryByLabelText('Leave')).to.be.null
   })
 
   it('does not render the button when project is current', function () {
     renderWithProjectListContext(
-      <LeaveProjectButton project={archiveableProject} />
+      <LeaveProjectButtonTooltip project={archiveableProject} />
     )
     expect(screen.queryByLabelText('Leave')).to.be.null
   })
@@ -58,7 +58,9 @@ describe('<LeaveProjectButtton />', function () {
       },
       { delay: 0 }
     )
-    renderWithProjectListContext(<LeaveProjectButton project={project} />)
+    renderWithProjectListContext(
+      <LeaveProjectButtonTooltip project={project} />
+    )
     const btn = screen.getByLabelText('Leave')
     fireEvent.click(btn)
     screen.getByText('Leave Projects')

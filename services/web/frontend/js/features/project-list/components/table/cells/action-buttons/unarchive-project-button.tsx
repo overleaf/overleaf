@@ -8,9 +8,16 @@ import { unarchiveProject } from '../../../../util/api'
 
 type UnarchiveProjectButtonProps = {
   project: Project
+  children: (
+    text: string,
+    handleUnarchiveProject: () => Promise<void>
+  ) => React.ReactElement
 }
 
-function UnarchiveProjectButton({ project }: UnarchiveProjectButtonProps) {
+function UnarchiveProjectButton({
+  project,
+  children,
+}: UnarchiveProjectButtonProps) {
   const { t } = useTranslation()
   const text = t('unarchive')
   const { updateProjectViewData } = useProjectListContext()
@@ -25,22 +32,35 @@ function UnarchiveProjectButton({ project }: UnarchiveProjectButtonProps) {
 
   if (!project.archived) return null
 
-  return (
-    <Tooltip
-      key={`tooltip-unarchive-project-${project.id}`}
-      id={`tooltip-unarchive-project-${project.id}`}
-      description={text}
-      overlayProps={{ placement: 'top', trigger: ['hover', 'focus'] }}
-    >
-      <button
-        className="btn btn-link action-btn"
-        aria-label={text}
-        onClick={handleUnarchiveProject}
-      >
-        <Icon type="reply" />
-      </button>
-    </Tooltip>
-  )
+  return children(text, handleUnarchiveProject)
 }
 
+const UnarchiveProjectButtonTooltip = memo(
+  function UnarchiveProjectButtonTooltip({
+    project,
+  }: Pick<UnarchiveProjectButtonProps, 'project'>) {
+    return (
+      <UnarchiveProjectButton project={project}>
+        {(text, handleUnarchiveProject) => (
+          <Tooltip
+            key={`tooltip-unarchive-project-${project.id}`}
+            id={`unarchive-project-${project.id}`}
+            description={text}
+            overlayProps={{ placement: 'top', trigger: ['hover', 'focus'] }}
+          >
+            <button
+              className="btn btn-link action-btn"
+              aria-label={text}
+              onClick={handleUnarchiveProject}
+            >
+              <Icon type="reply" />
+            </button>
+          </Tooltip>
+        )}
+      </UnarchiveProjectButton>
+    )
+  }
+)
+
 export default memo(UnarchiveProjectButton)
+export { UnarchiveProjectButtonTooltip }

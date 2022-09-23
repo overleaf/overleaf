@@ -1,18 +1,19 @@
-import { useTranslation } from 'react-i18next'
 import { memo, useCallback, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Project } from '../../../../../../../../types/project/dashboard/api'
 import Icon from '../../../../../../shared/components/icon'
 import Tooltip from '../../../../../../shared/components/tooltip'
-import ProjectsActionModal from '../../projects-action-modal'
+import DeleteProjectModal from '../../../modals/delete-project-modal'
 import useIsMounted from '../../../../../../shared/hooks/use-is-mounted'
 import { deleteProject } from '../../../../util/api'
 import { useProjectListContext } from '../../../../context/project-list-context'
 
 type DeleteProjectButtonProps = {
   project: Project
+  children: (text: string, handleOpenModal: () => void) => React.ReactElement
 }
 
-function DeleteProjectButton({ project }: DeleteProjectButtonProps) {
+function DeleteProjectButton({ project, children }: DeleteProjectButtonProps) {
   const { removeProjectFromView } = useProjectListContext()
   const { t } = useTranslation()
   const text = t('delete')
@@ -44,30 +45,41 @@ function DeleteProjectButton({ project }: DeleteProjectButtonProps) {
 
   return (
     <>
-      <Tooltip
-        key={`tooltip-delete-project-${project.id}`}
-        id={`tooltip-delete-project-${project.id}`}
-        description={text}
-        overlayProps={{ placement: 'top', trigger: ['hover', 'focus'] }}
-      >
-        <button
-          className="btn btn-link action-btn"
-          aria-label={text}
-          onClick={handleOpenModal}
-        >
-          <Icon type="ban" />
-        </button>
-      </Tooltip>
-
-      <ProjectsActionModal
-        action="delete"
+      {children(text, handleOpenModal)}
+      <DeleteProjectModal
+        projects={[project]}
         actionHandler={handleDeleteProject}
         showModal={showModal}
         handleCloseModal={handleCloseModal}
-        projects={[project]}
       />
     </>
   )
 }
 
+const DeleteProjectButtonTooltip = memo(function DeleteProjectButtonTooltip({
+  project,
+}: Pick<DeleteProjectButtonProps, 'project'>) {
+  return (
+    <DeleteProjectButton project={project}>
+      {(text, handleOpenModal) => (
+        <Tooltip
+          key={`tooltip-delete-project-${project.id}`}
+          id={`delete-project-${project.id}`}
+          description={text}
+          overlayProps={{ placement: 'top', trigger: ['hover', 'focus'] }}
+        >
+          <button
+            className="btn btn-link action-btn"
+            aria-label={text}
+            onClick={handleOpenModal}
+          >
+            <Icon type="ban" />
+          </button>
+        </Tooltip>
+      )}
+    </DeleteProjectButton>
+  )
+})
+
 export default memo(DeleteProjectButton)
+export { DeleteProjectButtonTooltip }

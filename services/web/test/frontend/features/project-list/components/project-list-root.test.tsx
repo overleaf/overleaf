@@ -32,7 +32,7 @@ describe('<ProjectListRoot />', function () {
 
   describe('checkboxes', function () {
     let allCheckboxes: Array<HTMLInputElement> = []
-    let toolbar: HTMLElement
+    let actionsToolbar: HTMLElement
     let project1Id: string | null, project2Id: string | null
 
     beforeEach(async function () {
@@ -52,11 +52,11 @@ describe('<ProjectListRoot />', function () {
 
         project1Id = allCheckboxes[1].getAttribute('data-project-id')
         project2Id = allCheckboxes[2].getAttribute('data-project-id')
-        toolbar = screen.getByRole('toolbar')
+        actionsToolbar = screen.getAllByRole('toolbar')[0]
       })
 
       it('downloads all selected projects and then unselects them', async function () {
-        const downloadButton = within(toolbar).getByLabelText('Download')
+        const downloadButton = within(actionsToolbar).getByLabelText('Download')
         fireEvent.click(downloadButton)
 
         await waitFor(() => {
@@ -89,7 +89,7 @@ describe('<ProjectListRoot />', function () {
           { delay: 0 }
         )
 
-        const archiveButton = within(toolbar).getByLabelText('Archive')
+        const archiveButton = within(actionsToolbar).getByLabelText('Archive')
         fireEvent.click(archiveButton)
 
         const confirmBtn = screen.getByText('Confirm') as HTMLButtonElement
@@ -124,7 +124,7 @@ describe('<ProjectListRoot />', function () {
           { delay: 0 }
         )
 
-        const archiveButton = within(toolbar).getByLabelText('Trash')
+        const archiveButton = within(actionsToolbar).getByLabelText('Trash')
         fireEvent.click(archiveButton)
 
         const confirmBtn = screen.getByText('Confirm') as HTMLButtonElement
@@ -146,7 +146,7 @@ describe('<ProjectListRoot />', function () {
 
     describe('archived projects', function () {
       beforeEach(function () {
-        const filterButton = screen.getByText('Archived Projects')
+        const filterButton = screen.getAllByText('Archived Projects')[0]
         fireEvent.click(filterButton)
 
         allCheckboxes = screen.getAllByRole<HTMLInputElement>('checkbox')
@@ -162,7 +162,7 @@ describe('<ProjectListRoot />', function () {
 
     describe('trashed projects', function () {
       beforeEach(function () {
-        const filterButton = screen.getByText('Trashed Projects')
+        const filterButton = screen.getAllByText('Trashed Projects')[0]
         fireEvent.click(filterButton)
 
         allCheckboxes = screen.getAllByRole<HTMLInputElement>('checkbox')
@@ -176,7 +176,7 @@ describe('<ProjectListRoot />', function () {
       })
 
       it('clears selected projects when filter changed', function () {
-        const filterButton = screen.getByText('All Projects')
+        const filterButton = screen.getAllByText('All Projects')[0]
         fireEvent.click(filterButton)
 
         const allCheckboxes = screen.getAllByRole<HTMLInputElement>('checkbox')

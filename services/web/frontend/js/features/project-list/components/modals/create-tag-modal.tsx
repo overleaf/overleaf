@@ -4,83 +4,73 @@ import { useTranslation } from 'react-i18next'
 import { Tag } from '../../../../../../app/src/Features/Tags/types'
 import AccessibleModal from '../../../../shared/components/accessible-modal'
 import useAsync from '../../../../shared/hooks/use-async'
-import { renameTag } from '../../util/api'
+import { createTag } from '../../util/api'
 import { MAX_TAG_LENGTH } from '../../util/tag'
 
-type RenameTagModalProps = {
-  tag?: Tag
-  onRename: (tagId: string, newTagName: string) => void
+type CreateTagModalProps = {
+  id: string
+  show: boolean
+  onCreate: (tag: Tag) => void
   onClose: () => void
 }
 
-export default function RenameTagModal({
-  tag,
-  onRename,
+export default function CreateTagModal({
+  id,
+  show,
+  onCreate,
   onClose,
-}: RenameTagModalProps) {
+}: CreateTagModalProps) {
   const { t } = useTranslation()
-  const { isError, runAsync, status } = useAsync()
+  const { isError, runAsync, status } = useAsync<Tag>()
 
-  const [newTagName, setNewTageName] = useState<string>()
+  const [tagName, setTagName] = useState<string>()
   const [validationError, setValidationError] = useState<string>()
 
-  const runRenameTag = useCallback(
-    (tagId: string) => {
-      if (newTagName) {
-        runAsync(renameTag(tagId, newTagName))
-          .then(() => onRename(tagId, newTagName))
-          .catch(console.error)
-      }
-    },
-    [runAsync, newTagName, onRename]
-  )
+  const runCreateTag = useCallback(() => {
+    if (tagName) {
+      runAsync(createTag(tagName))
+        .then(tag => onCreate(tag))
+        .catch(console.error)
+    }
+  }, [runAsync, tagName, onCreate])
 
   const handleSubmit = useCallback(
     e => {
       e.preventDefault()
-      if (tag) {
-        runRenameTag(tag._id)
-      }
+      runCreateTag()
     },
-    [tag, runRenameTag]
+    [runCreateTag]
   )
 
   useEffect(() => {
-    if (newTagName && newTagName.length > MAX_TAG_LENGTH) {
+    if (tagName && tagName.length > MAX_TAG_LENGTH) {
       setValidationError(
         t('tag_name_cannot_exceed_characters', { maxLength: MAX_TAG_LENGTH })
       )
     } else if (validationError) {
       setValidationError(undefined)
     }
-  }, [newTagName, t, validationError])
+  }, [tagName, t, validationError])
 
-  if (!tag) {
+  if (!show) {
     return null
   }
 
   return (
-    <AccessibleModal
-      show
-      animation
-      onHide={onClose}
-      id="rename-tag-modal"
-      backdrop="static"
-    >
+    <AccessibleModal show animation onHide={onClose} id={id} backdrop="static">
       <Modal.Header closeButton>
-        <Modal.Title>{t('rename_folder')}</Modal.Title>
+        <Modal.Title>{t('create_new_folder')}</Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
-        <Form name="renameTagForm" onSubmit={handleSubmit}>
+        <Form name="createTagForm" onSubmit={handleSubmit}>
           <input
             className="form-control"
             type="text"
-            placeholder="Tag Name"
+            placeholder="New Tag Name"
             name="new-tag-name"
-            value={newTagName === undefined ? tag.name : newTagName}
             required
-            onChange={e => setNewTageName(e.target.value)}
+            onChange={e => setTagName(e.target.value)}
           />
         </Form>
       </Modal.Body>
@@ -102,13 +92,13 @@ export default function RenameTagModal({
           {t('cancel')}
         </Button>
         <Button
-          onClick={() => runRenameTag(tag._id)}
+          onClick={() => runCreateTag()}
           bsStyle="primary"
           disabled={
-            status === 'pending' || !newTagName?.length || !!validationError
+            status === 'pending' || !tagName?.length || !!validationError
           }
         >
-          {status === 'pending' ? t('renaming') + '…' : t('rename')}
+          {status === 'pending' ? t('creating') + '…' : t('create')}
         </Button>
       </Modal.Footer>
     </AccessibleModal>

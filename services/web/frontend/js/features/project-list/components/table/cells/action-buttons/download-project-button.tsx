@@ -7,9 +7,13 @@ import * as eventTracking from '../../../../../../infrastructure/event-tracking'
 
 type DownloadProjectButtonProps = {
   project: Project
+  children: (text: string, downloadProject: () => void) => React.ReactElement
 }
 
-function DownloadProjectButton({ project }: DownloadProjectButtonProps) {
+function DownloadProjectButton({
+  project,
+  children,
+}: DownloadProjectButtonProps) {
   const { t } = useTranslation()
   const text = t('download')
 
@@ -22,22 +26,35 @@ function DownloadProjectButton({ project }: DownloadProjectButtonProps) {
     window.location.assign(`/project/${project.id}/download/zip`)
   }, [project])
 
-  return (
-    <Tooltip
-      key={`tooltip-download-project-${project.id}`}
-      id={`tooltip-download-project-${project.id}`}
-      description={text}
-      overlayProps={{ placement: 'top', trigger: ['hover', 'focus'] }}
-    >
-      <button
-        className="btn btn-link action-btn"
-        aria-label={text}
-        onClick={downloadProject}
-      >
-        <Icon type="cloud-download" />
-      </button>
-    </Tooltip>
-  )
+  return children(text, downloadProject)
 }
 
+const DownloadProjectButtonTooltip = memo(
+  function DownloadProjectButtonTooltip({
+    project,
+  }: Pick<DownloadProjectButtonProps, 'project'>) {
+    return (
+      <DownloadProjectButton project={project}>
+        {(text, downloadProject) => (
+          <Tooltip
+            key={`tooltip-download-project-${project.id}`}
+            id={`download-project-${project.id}`}
+            description={text}
+            overlayProps={{ placement: 'top', trigger: ['hover', 'focus'] }}
+          >
+            <button
+              className="btn btn-link action-btn"
+              aria-label={text}
+              onClick={downloadProject}
+            >
+              <Icon type="cloud-download" />
+            </button>
+          </Tooltip>
+        )}
+      </DownloadProjectButton>
+    )
+  }
+)
+
 export default memo(DownloadProjectButton)
+export { DownloadProjectButtonTooltip }

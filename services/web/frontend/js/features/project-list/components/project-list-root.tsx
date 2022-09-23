@@ -14,6 +14,8 @@ import WelcomeMessage from './welcome-message'
 import LoadingBranded from '../../../shared/components/loading-branded'
 import UserNotifications from './notifications/user-notifications'
 import SearchForm from './search-form'
+import ProjectsDropdown from './dropdown/projects-dropdown'
+import SortByDropdown from './dropdown/sort-by-dropdown'
 import ProjectTools from './table/project-tools/project-tools'
 
 function ProjectListRoot() {
@@ -32,6 +34,7 @@ function ProjectListPageContent() {
     error,
     isLoading,
     loadProgress,
+    searchText,
     setSearchText,
     selectedProjects,
   } = useProjectListContext()
@@ -41,44 +44,74 @@ function ProjectListPageContent() {
       <LoadingBranded loadProgress={loadProgress} />
     </div>
   ) : (
-    <div className="project-list-row row fill">
-      <div className="project-list-wrapper">
+    <div className="project-list-row fill">
+      <div className="project-list-wrapper clearfix">
         {error ? <DashApiError /> : ''}
         {totalProjectsCount > 0 ? (
           <>
-            <Col md={2} xs={3} className="project-list-sidebar-wrapper">
+            <div className="project-list-sidebar-wrapper hidden-xs">
               <aside className="project-list-sidebar">
-                <NewProjectButton />
+                <NewProjectButton id="new-project-button-sidebar" />
                 <SidebarFilters />
               </aside>
               <SurveyWidget />
-            </Col>
-            <Col md={10} xs={9} className="project-list-main">
+            </div>
+            <div className="project-list-main">
               <Row>
                 <Col xs={12}>
                   <UserNotifications />
                 </Col>
               </Row>
               <Row>
-                <Col md={7} xs={12}>
-                  <SearchForm onChange={setSearchText} />
+                <Col md={7} className="hidden-xs">
+                  <SearchForm
+                    inputValue={searchText}
+                    setInputValue={setSearchText}
+                  />
                 </Col>
-                <Col md={5} xs={12}>
+                <Col md={5}>
                   <div className="project-tools">
-                    {selectedProjects.length === 0 ? (
+                    <div className="hidden-xs">
+                      {selectedProjects.length === 0 ? (
+                        <CurrentPlanWidget />
+                      ) : (
+                        <ProjectTools />
+                      )}
+                    </div>
+                    <div className="visible-xs">
                       <CurrentPlanWidget />
-                    ) : (
-                      <ProjectTools />
-                    )}
+                    </div>
                   </div>
                 </Col>
               </Row>
+              <div className="visible-xs mt-1">
+                <div role="toolbar" className="projects-toolbar">
+                  <ProjectsDropdown />
+                  <SortByDropdown />
+                </div>
+              </div>
               <Row className="row-spaced">
                 <Col xs={12}>
-                  <ProjectListTable />
+                  <div className="card project-list-card">
+                    <div className="visible-xs pt-2 pb-3">
+                      <div className="clearfix">
+                        <NewProjectButton
+                          id="new-project-button-projects-table"
+                          className="pull-left me-2"
+                        />
+                        <SearchForm
+                          inputValue={searchText}
+                          setInputValue={setSearchText}
+                          className="overflow-hidden"
+                          formGroupProps={{ className: 'mb-0' }}
+                        />
+                      </div>
+                    </div>
+                    <ProjectListTable />
+                  </div>
                 </Col>
               </Row>
-            </Col>
+            </div>
           </>
         ) : (
           <Row className="row-spaced">

@@ -2,10 +2,10 @@ import { memo, useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import Icon from '../../../../../../shared/components/icon'
 import Tooltip from '../../../../../../shared/components/tooltip'
+import ArchiveProjectModal from '../../../modals/archive-project-modal'
 import useIsMounted from '../../../../../../shared/hooks/use-is-mounted'
 import { useProjectListContext } from '../../../../context/project-list-context'
 import { archiveProject } from '../../../../util/api'
-import ProjectsActionModal from '../../projects-action-modal'
 
 function ArchiveProjectsButton() {
   const { selectedProjects, updateProjectViewData, setSelectedProjects } =
@@ -51,12 +51,11 @@ function ArchiveProjectsButton() {
           <Icon type="inbox" />
         </button>
       </Tooltip>
-      <ProjectsActionModal
-        action="archive"
+      <ArchiveProjectModal
+        projects={selectedProjects}
         actionHandler={handleArchiveProjects}
         showModal={showModal}
         handleCloseModal={handleCloseModal}
-        projects={selectedProjects}
       />
     </>
   )

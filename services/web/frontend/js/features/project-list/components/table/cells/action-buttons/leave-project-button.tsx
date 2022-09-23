@@ -1,18 +1,19 @@
-import { useTranslation } from 'react-i18next'
 import { memo, useCallback, useMemo, useState } from 'react'
-import { Project } from '../../../../../../../../types/project/dashboard/api'
+import { useTranslation } from 'react-i18next'
 import Icon from '../../../../../../shared/components/icon'
 import Tooltip from '../../../../../../shared/components/tooltip'
+import LeaveProjectModal from '../../../modals/leave-project-modal'
 import { useProjectListContext } from '../../../../context/project-list-context'
 import useIsMounted from '../../../../../../shared/hooks/use-is-mounted'
-import ProjectsActionModal from '../../projects-action-modal'
 import { leaveProject } from '../../../../util/api'
+import { Project } from '../../../../../../../../types/project/dashboard/api'
 
 type LeaveProjectButtonProps = {
   project: Project
+  children: (text: string, handleOpenModal: () => void) => React.ReactElement
 }
 
-function LeaveProjectButton({ project }: LeaveProjectButtonProps) {
+function LeaveProjectButton({ project, children }: LeaveProjectButtonProps) {
   const { removeProjectFromView } = useProjectListContext()
   const { t } = useTranslation()
   const text = t('leave')
@@ -43,30 +44,41 @@ function LeaveProjectButton({ project }: LeaveProjectButtonProps) {
 
   return (
     <>
-      <Tooltip
-        key={`tooltip-leave-project-${project.id}`}
-        id={`tooltip-leave-project-${project.id}`}
-        description={text}
-        overlayProps={{ placement: 'top', trigger: ['hover', 'focus'] }}
-      >
-        <button
-          className="btn btn-link action-btn"
-          aria-label={text}
-          onClick={handleOpenModal}
-        >
-          <Icon type="sign-out" />
-        </button>
-      </Tooltip>
-
-      <ProjectsActionModal
-        action="leave"
+      {children(text, handleOpenModal)}
+      <LeaveProjectModal
+        projects={[project]}
         actionHandler={handleLeaveProject}
         showModal={showModal}
         handleCloseModal={handleCloseModal}
-        projects={[project]}
       />
     </>
   )
 }
 
+const LeaveProjectButtonTooltip = memo(function LeaveProjectButtonTooltip({
+  project,
+}: Pick<LeaveProjectButtonProps, 'project'>) {
+  return (
+    <LeaveProjectButton project={project}>
+      {(text, handleOpenModal) => (
+        <Tooltip
+          key={`tooltip-leave-project-${project.id}`}
+          id={`leave-project-${project.id}`}
+          description={text}
+          overlayProps={{ placement: 'top', trigger: ['hover', 'focus'] }}
+        >
+          <button
+            className="btn btn-link action-btn"
+            aria-label={text}
+            onClick={handleOpenModal}
+          >
+            <Icon type="sign-out" />
+          </button>
+        </Tooltip>
+      )}
+    </LeaveProjectButton>
+  )
+})
+
 export default memo(LeaveProjectButton)
+export { LeaveProjectButtonTooltip }

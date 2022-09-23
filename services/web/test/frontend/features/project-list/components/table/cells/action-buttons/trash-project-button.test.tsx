@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { fireEvent, screen } from '@testing-library/react'
-import TrashProjectButton from '../../../../../../../../frontend/js/features/project-list/components/table/cells/action-buttons/trash-project-button'
+import { TrashProjectButtonTooltip } from '../../../../../../../../frontend/js/features/project-list/components/table/cells/action-buttons/trash-project-button'
 import {
   archivedProject,
   trashedProject,
@@ -18,7 +18,7 @@ describe('<TrashProjectButton />', function () {
 
   it('renders tooltip for button', function () {
     renderWithProjectListContext(
-      <TrashProjectButton project={archivedProject} />
+      <TrashProjectButtonTooltip project={archivedProject} />
     )
     const btn = screen.getByLabelText('Trash')
     fireEvent.mouseOver(btn)
@@ -27,7 +27,7 @@ describe('<TrashProjectButton />', function () {
 
   it('does not render the button when project is trashed', function () {
     renderWithProjectListContext(
-      <TrashProjectButton project={trashedProject} />
+      <TrashProjectButtonTooltip project={trashedProject} />
     )
     expect(screen.queryByLabelText('Trash')).to.be.null
   })
@@ -41,7 +41,9 @@ describe('<TrashProjectButton />', function () {
       },
       { delay: 0 }
     )
-    renderWithProjectListContext(<TrashProjectButton project={project} />)
+    renderWithProjectListContext(
+      <TrashProjectButtonTooltip project={project} />
+    )
     const btn = screen.getByLabelText('Trash')
     fireEvent.click(btn)
     screen.getByText('Trash Projects')

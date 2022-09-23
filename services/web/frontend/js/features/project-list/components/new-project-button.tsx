@@ -7,8 +7,19 @@ import getMeta from '../../../utils/meta'
 import NewProjectButtonModal, {
   NewProjectButtonModalVariant,
 } from './new-project-button/new-project-button-modal'
+import { Nullable } from '../../../../../types/utils'
 
-function NewProjectButton({ buttonText }: { buttonText?: string }) {
+type NewProjectButtonProps = {
+  id: string
+  buttonText?: string
+  className?: string
+}
+
+function NewProjectButton({
+  id,
+  buttonText,
+  className,
+}: NewProjectButtonProps) {
   const { t } = useTranslation()
   const { templateLinks } = getMeta('ol-ExposedSettings') as ExposedSettings
   const [modal, setModal] =
@@ -16,7 +27,7 @@ function NewProjectButton({ buttonText }: { buttonText?: string }) {
 
   return (
     <>
-      <ControlledDropdown id="new-project-button">
+      <ControlledDropdown id={id} className={className}>
         <Dropdown.Toggle
           noCaret
           className="new-project-button"

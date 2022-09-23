@@ -18,7 +18,10 @@ export default function WelcomeMessage() {
         <Row>
           <Col md={4} mdOffset={4}>
             <div className="dropdown minimal-create-proj-dropdown">
-              <NewProjectButton buttonText={t('create_first_project')} />
+              <NewProjectButton
+                id="new-project-button-welcome"
+                buttonText={t('create_first_project')}
+              />
             </div>
           </Col>
         </Row>

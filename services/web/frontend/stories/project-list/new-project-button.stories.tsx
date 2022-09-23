@@ -62,7 +62,7 @@ export const Success = () => {
     )
   })
 
-  return <NewProjectButton />
+  return <NewProjectButton id="new-project-button-story" />
 }
 
 export const Error = () => {
@@ -83,7 +83,7 @@ export const Error = () => {
     )
   })
 
-  return <NewProjectButton />
+  return <NewProjectButton id="new-project-button-story" />
 }
 
 export default {

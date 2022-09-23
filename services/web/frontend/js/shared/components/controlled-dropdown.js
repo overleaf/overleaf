@@ -33,4 +33,5 @@ ControlledDropdown.propTypes = {
   children: PropTypes.any,
   defaultOpen: PropTypes.bool,
   id: PropTypes.string,
+  className: PropTypes.string,
 }

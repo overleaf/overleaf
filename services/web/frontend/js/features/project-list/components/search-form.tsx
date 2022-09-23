@@ -1,21 +1,35 @@
-import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Form, FormGroup, Col, FormControl } from 'react-bootstrap'
+import {
+  Form,
+  FormGroup,
+  FormGroupProps,
+  Col,
+  FormControl,
+} from 'react-bootstrap'
 import Icon from '../../../shared/components/icon'
 import * as eventTracking from '../../../infrastructure/event-tracking'
+import classnames from 'classnames'
 
-type SearchFormProps = {
-  onChange: (input: string) => void
+type SearchFormOwnProps = {
+  inputValue: string
+  setInputValue: (input: string) => void
+  formGroupProps?: FormGroupProps &
+    Omit<React.ComponentProps<'div'>, keyof FormGroupProps>
 }
 
-function SearchForm({ onChange }: SearchFormProps) {
-  const { t } = useTranslation()
-  const [input, setInput] = useState('')
-  const placeholder = `${t('search_projects')}…`
+type SearchFormProps = SearchFormOwnProps &
+  Omit<React.ComponentProps<typeof Form>, keyof SearchFormOwnProps>
 
-  useEffect(() => {
-    onChange(input)
-  }, [input, onChange])
+function SearchForm({
+  inputValue,
+  setInputValue,
+  formGroupProps,
+  ...props
+}: SearchFormProps) {
+  const { t } = useTranslation()
+  const placeholder = `${t('search_projects')}…`
+  const { className: formGroupClassName, ...restFormGroupProps } =
+    formGroupProps || {}
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -27,10 +41,10 @@ function SearchForm({ onChange }: SearchFormProps) {
       'project-search',
       'keydown'
     )
-    setInput(e.target.value)
+    setInputValue(e.target.value)
   }
 
-  const handleClear = () => setInput('')
+  const handleClear = () => setInputValue('')
 
   return (
     <Form
@@ -38,18 +52,25 @@ function SearchForm({ onChange }: SearchFormProps) {
       className="project-search"
       role="search"
       onSubmit={e => e.preventDefault()}
+      {...props}
     >
-      <FormGroup className="has-feedback has-feedback-left">
+      <FormGroup
+        className={classnames(
+          'has-feedback has-feedback-left',
+          formGroupClassName
+        )}
+        {...restFormGroupProps}
+      >
         <Col xs={12}>
           <FormControl
             type="text"
-            value={input}
+            value={inputValue}
             onChange={handleChange}
             placeholder={placeholder}
             aria-label={placeholder}
           />
           <Icon type="search" className="form-control-feedback-left" />
-          {input.length ? (
+          {inputValue.length ? (
             <div className="form-control-feedback">
               <button
                 type="button"

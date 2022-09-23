@@ -188,6 +188,9 @@ cite {
 .text-lowercase {
   text-transform: lowercase;
 }
+.text-uppercase {
+  text-transform: uppercase;
+}
 
 // Contextual backgrounds
 // For now we'll leave these alongside the text classes until v4 when we can
@@ -301,7 +304,7 @@ dd {
 
 // Abbreviations and acronyms
 abbr[title],
-// Add data-* attribute to help out our tooltip plugin, per https://github.com/twbs/bootstrap/issues/5257
+  // Add data-* attribute to help out our tooltip plugin, per https://github.com/twbs/bootstrap/issues/5257
 abbr[data-original-title] {
   cursor: help;
   border-bottom: 1px dotted @abbr-border-color;

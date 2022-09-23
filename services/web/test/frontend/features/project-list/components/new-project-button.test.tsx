@@ -17,7 +17,7 @@ describe('<NewProjectButton />', function () {
       ],
     })
 
-    render(<NewProjectButton />)
+    render(<NewProjectButton id="test" />)
 
     const newProjectButton = screen.getByRole('button', {
       name: 'New Project',

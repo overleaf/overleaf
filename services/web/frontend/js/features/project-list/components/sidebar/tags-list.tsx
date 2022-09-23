@@ -1,95 +1,31 @@
 import _ from 'lodash'
-import { useCallback, useState } from 'react'
 import { Button } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
-import { Tag } from '../../../../../../app/src/Features/Tags/types'
 import ColorManager from '../../../../ide/colors/ColorManager'
 import Icon from '../../../../shared/components/icon'
 import {
   UNCATEGORIZED_KEY,
   useProjectListContext,
 } from '../../context/project-list-context'
-import CreateTagModal from './create-tag-modal'
-import DeleteTagModal from './delete-tag-modal'
-import RenameTagModal from './rename-tag-modal'
+import useTag from '../../hooks/use-tag'
 
 export default function TagsList() {
   const { t } = useTranslation()
+  const { tags, untaggedProjectsCount, selectedTagId, selectTag } =
+    useProjectListContext()
   const {
-    tags,
-    untaggedProjectsCount,
-    selectedTagId,
-    selectTag,
-    addTag,
-    renameTag,
-    deleteTag,
-  } = useProjectListContext()
-
-  const [creatingTag, setCreatingTag] = useState<boolean>(false)
-  const [renamingTag, setRenamingTag] = useState<Tag>()
-  const [deletingTag, setDeletingTag] = useState<Tag>()
-
-  const handleSelectTag = useCallback(
-    (e, tagId) => {
-      e.preventDefault()
-      selectTag(tagId)
-    },
-    [selectTag]
-  )
-
-  const openCreateTagModal = useCallback(() => {
-    setCreatingTag(true)
-  }, [setCreatingTag])
-
-  const onCreate = useCallback(
-    (tag: Tag) => {
-      setCreatingTag(false)
-      addTag(tag)
-    },
-    [addTag]
-  )
-
-  const handleRenameTag = useCallback(
-    (e, tagId) => {
-      e.preventDefault()
-      const tag = _.find(tags, ['_id', tagId])
-      if (tag) {
-        setRenamingTag(tag)
-      }
-    },
-    [tags, setRenamingTag]
-  )
-
-  const onRename = useCallback(
-    (tagId: string, newTagName: string) => {
-      renameTag(tagId, newTagName)
-      setRenamingTag(undefined)
-    },
-    [renameTag, setRenamingTag]
-  )
-
-  const handleDeleteTag = useCallback(
-    (e, tagId) => {
-      e.preventDefault()
-      const tag = _.find(tags, ['_id', tagId])
-      if (tag) {
-        setDeletingTag(tag)
-      }
-    },
-    [tags, setDeletingTag]
-  )
-
-  const onDelete = useCallback(
-    tagId => {
-      deleteTag(tagId)
-      setDeletingTag(undefined)
-    },
-    [deleteTag, setDeletingTag]
-  )
+    handleSelectTag,
+    openCreateTagModal,
+    handleRenameTag,
+    handleDeleteTag,
+    CreateTagModal,
+    RenameTagModal,
+    DeleteTagModal,
+  } = useTag()
 
   return (
     <>
-      <li className="separator">
+      <li role="separator" className="separator">
         <h2>{t('tags_slash_folders')}</h2>
       </li>
       <li className="tag">
@@ -106,7 +42,9 @@ export default function TagsList() {
           >
             <Button
               className="tag-name"
-              onClick={e => handleSelectTag(e, tag._id)}
+              onClick={e =>
+                handleSelectTag(e as unknown as React.MouseEvent, tag._id)
+              }
             >
               <span
                 style={{
@@ -169,21 +107,9 @@ export default function TagsList() {
           <span className="subdued"> ({untaggedProjectsCount})</span>
         </Button>
       </li>
-      <CreateTagModal
-        show={creatingTag}
-        onCreate={onCreate}
-        onClose={() => setCreatingTag(false)}
-      />
-      <RenameTagModal
-        tag={renamingTag}
-        onRename={onRename}
-        onClose={() => setRenamingTag(undefined)}
-      />
-      <DeleteTagModal
-        tag={deletingTag}
-        onDelete={onDelete}
-        onClose={() => setDeletingTag(undefined)}
-      />
+      <CreateTagModal id="create-tag-modal" />
+      <RenameTagModal id="delete-tag-modal" />
+      <DeleteTagModal id="rename-tag-modal" />
     </>
   )
 }

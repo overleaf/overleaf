@@ -2,10 +2,10 @@ import { memo, useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import Icon from '../../../../../../shared/components/icon'
 import Tooltip from '../../../../../../shared/components/tooltip'
+import TrashProjectModal from '../../../modals/trash-project-modal'
 import useIsMounted from '../../../../../../shared/hooks/use-is-mounted'
 import { useProjectListContext } from '../../../../context/project-list-context'
 import { trashProject } from '../../../../util/api'
-import ProjectsActionModal from '../../projects-action-modal'
 
 function TrashProjectsButton() {
   const { selectedProjects, setSelectedProjects, updateProjectViewData } =
@@ -52,12 +52,11 @@ function TrashProjectsButton() {
           <Icon type="trash" />
         </button>
       </Tooltip>
-      <ProjectsActionModal
-        action="trash"
+      <TrashProjectModal
+        projects={selectedProjects}
         actionHandler={handleTrashProjects}
         showModal={showModal}
         handleCloseModal={handleCloseModal}
-        projects={selectedProjects}
       />
     </>
   )

@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import sinon from 'sinon'
-import DownloadProjectButton from '../../../../../../../../frontend/js/features/project-list/components/table/cells/action-buttons/download-project-button'
+import { DownloadProjectButtonTooltip } from '../../../../../../../../frontend/js/features/project-list/components/table/cells/action-buttons/download-project-button'
 import { projectsData } from '../../../../fixtures/projects-data'
 
 describe('<DownloadProjectButton />', function () {
@@ -13,7 +13,7 @@ describe('<DownloadProjectButton />', function () {
       value: { assign: locationStub },
     })
 
-    render(<DownloadProjectButton project={projectsData[0]} />)
+    render(<DownloadProjectButtonTooltip project={projectsData[0]} />)
   })
 
   afterEach(function () {

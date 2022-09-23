@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { fireEvent, screen } from '@testing-library/react'
-import DeleteProjectButton from '../../../../../../../../frontend/js/features/project-list/components/table/cells/action-buttons/delete-project-button'
+import { DeleteProjectButtonTooltip } from '../../../../../../../../frontend/js/features/project-list/components/table/cells/action-buttons/delete-project-button'
 import {
   archiveableProject,
   trashedAndNotOwnedProject,
@@ -20,7 +20,7 @@ describe('<DeleteProjectButton />', function () {
   it('renders tooltip for button', function () {
     window.user_id = trashedProject?.owner?.id
     renderWithProjectListContext(
-      <DeleteProjectButton project={trashedProject} />
+      <DeleteProjectButtonTooltip project={trashedProject} />
     )
     const btn = screen.getByLabelText('Delete')
     fireEvent.mouseOver(btn)
@@ -30,7 +30,7 @@ describe('<DeleteProjectButton />', function () {
   it('does not render button when trashed and not owner', function () {
     window.user_id = '123abc'
     renderWithProjectListContext(
-      <DeleteProjectButton project={trashedAndNotOwnedProject} />
+      <DeleteProjectButtonTooltip project={trashedAndNotOwnedProject} />
     )
     const btn = screen.queryByLabelText('Delete')
     expect(btn).to.be.null
@@ -38,7 +38,7 @@ describe('<DeleteProjectButton />', function () {
 
   it('does not render the button when project is current', function () {
     renderWithProjectListContext(
-      <DeleteProjectButton project={archiveableProject} />
+      <DeleteProjectButtonTooltip project={archiveableProject} />
     )
     expect(screen.queryByLabelText('Delete')).to.be.null
   })
@@ -53,7 +53,9 @@ describe('<DeleteProjectButton />', function () {
       },
       { delay: 0 }
     )
-    renderWithProjectListContext(<DeleteProjectButton project={project} />)
+    renderWithProjectListContext(
+      <DeleteProjectButtonTooltip project={project} />
+    )
     const btn = screen.getByLabelText('Delete')
     fireEvent.click(btn)
     screen.getByText('Delete Projects')

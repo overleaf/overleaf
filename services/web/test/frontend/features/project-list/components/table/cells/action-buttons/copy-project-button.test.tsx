@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { fireEvent, screen } from '@testing-library/react'
-import CopyProjectButton from '../../../../../../../../frontend/js/features/project-list/components/table/cells/action-buttons/copy-project-button'
+import { CopyProjectButtonTooltip } from '../../../../../../../../frontend/js/features/project-list/components/table/cells/action-buttons/copy-project-button'
 import {
   archivedProject,
   copyableProject,
@@ -18,7 +18,7 @@ describe('<CopyProjectButton />', function () {
   })
   it('renders tooltip for button', function () {
     renderWithProjectListContext(
-      <CopyProjectButton project={copyableProject} />
+      <CopyProjectButtonTooltip project={copyableProject} />
     )
     const btn = screen.getByLabelText('Copy')
     fireEvent.mouseOver(btn)
@@ -27,13 +27,15 @@ describe('<CopyProjectButton />', function () {
 
   it('does not render the button when project is archived', function () {
     renderWithProjectListContext(
-      <CopyProjectButton project={archivedProject} />
+      <CopyProjectButtonTooltip project={archivedProject} />
     )
     expect(screen.queryByLabelText('Copy')).to.be.null
   })
 
   it('does not render the button when project is trashed', function () {
-    renderWithProjectListContext(<CopyProjectButton project={trashedProject} />)
+    renderWithProjectListContext(
+      <CopyProjectButtonTooltip project={trashedProject} />
+    )
     expect(screen.queryByLabelText('Copy')).to.be.null
   })
 
@@ -46,7 +48,7 @@ describe('<CopyProjectButton />', function () {
       { delay: 0 }
     )
     renderWithProjectListContext(
-      <CopyProjectButton project={copyableProject} />
+      <CopyProjectButtonTooltip project={copyableProject} />
     )
     const btn = screen.getByLabelText('Copy')
     fireEvent.click(btn)

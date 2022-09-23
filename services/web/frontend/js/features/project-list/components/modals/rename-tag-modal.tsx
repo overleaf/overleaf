@@ -4,77 +4,79 @@ import { useTranslation } from 'react-i18next'
 import { Tag } from '../../../../../../app/src/Features/Tags/types'
 import AccessibleModal from '../../../../shared/components/accessible-modal'
 import useAsync from '../../../../shared/hooks/use-async'
-import { createTag } from '../../util/api'
+import { renameTag } from '../../util/api'
 import { MAX_TAG_LENGTH } from '../../util/tag'
 
-type CreateTagModalProps = {
-  show: boolean
-  onCreate: (tag: Tag) => void
+type RenameTagModalProps = {
+  id: string
+  tag?: Tag
+  onRename: (tagId: string, newTagName: string) => void
   onClose: () => void
 }
 
-export default function CreateTagModal({
-  show,
-  onCreate,
+export default function RenameTagModal({
+  id,
+  tag,
+  onRename,
   onClose,
-}: CreateTagModalProps) {
+}: RenameTagModalProps) {
   const { t } = useTranslation()
-  const { isError, runAsync, status } = useAsync<Tag>()
+  const { isLoading, isError, runAsync } = useAsync()
 
-  const [tagName, setTagName] = useState<string>()
+  const [newTagName, setNewTagName] = useState<string>()
   const [validationError, setValidationError] = useState<string>()
 
-  const runCreateTag = useCallback(() => {
-    if (tagName) {
-      runAsync(createTag(tagName))
-        .then(tag => onCreate(tag))
-        .catch(console.error)
-    }
-  }, [runAsync, tagName, onCreate])
+  const runRenameTag = useCallback(
+    (tagId: string) => {
+      if (newTagName) {
+        runAsync(renameTag(tagId, newTagName))
+          .then(() => onRename(tagId, newTagName))
+          .catch(console.error)
+      }
+    },
+    [runAsync, newTagName, onRename]
+  )
 
   const handleSubmit = useCallback(
     e => {
       e.preventDefault()
-      runCreateTag()
+      if (tag) {
+        runRenameTag(tag._id)
+      }
     },
-    [runCreateTag]
+    [tag, runRenameTag]
   )
 
   useEffect(() => {
-    if (tagName && tagName.length > MAX_TAG_LENGTH) {
+    if (newTagName && newTagName.length > MAX_TAG_LENGTH) {
       setValidationError(
         t('tag_name_cannot_exceed_characters', { maxLength: MAX_TAG_LENGTH })
       )
     } else if (validationError) {
       setValidationError(undefined)
     }
-  }, [tagName, t, validationError])
+  }, [newTagName, t, validationError])
 
-  if (!show) {
+  if (!tag) {
     return null
   }
 
   return (
-    <AccessibleModal
-      show
-      animation
-      onHide={onClose}
-      id="rename-tag-modal"
-      backdrop="static"
-    >
+    <AccessibleModal show animation onHide={onClose} id={id} backdrop="static">
       <Modal.Header closeButton>
-        <Modal.Title>{t('create_new_folder')}</Modal.Title>
+        <Modal.Title>{t('rename_folder')}</Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
-        <Form name="createTagForm" onSubmit={handleSubmit}>
+        <Form name="renameTagForm" onSubmit={handleSubmit}>
           <input
             className="form-control"
             type="text"
-            placeholder="New Tag Name"
+            placeholder="Tag Name"
             name="new-tag-name"
+            value={newTagName === undefined ? tag.name : newTagName}
             required
-            onChange={e => setTagName(e.target.value)}
+            onChange={e => setNewTagName(e.target.value)}
           />
         </Form>
       </Modal.Body>
@@ -92,17 +94,15 @@ export default function CreateTagModal({
             </span>
           </div>
         )}
-        <Button onClick={onClose} disabled={status === 'pending'}>
+        <Button onClick={onClose} disabled={isLoading}>
           {t('cancel')}
         </Button>
         <Button
-          onClick={() => runCreateTag()}
+          onClick={() => runRenameTag(tag._id)}
           bsStyle="primary"
-          disabled={
-            status === 'pending' || !tagName?.length || !!validationError
-          }
+          disabled={isLoading || !newTagName?.length || !!validationError}
         >
-          {status === 'pending' ? t('creating') + '…' : t('create')}
+          {isLoading ? <>{t('renaming')} &hellip;</> : t('rename')}
         </Button>
       </Modal.Footer>
     </AccessibleModal>

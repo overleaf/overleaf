@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { fireEvent, screen } from '@testing-library/react'
-import ArchiveProjectButton from '../../../../../../../../frontend/js/features/project-list/components/table/cells/action-buttons/archive-project-button'
+import { ArchiveProjectButtonTooltip } from '../../../../../../../../frontend/js/features/project-list/components/table/cells/action-buttons/archive-project-button'
 import {
   archiveableProject,
   archivedProject,
@@ -18,7 +18,7 @@ describe('<ArchiveProjectButton />', function () {
 
   it('renders tooltip for button', function () {
     renderWithProjectListContext(
-      <ArchiveProjectButton project={archiveableProject} />
+      <ArchiveProjectButtonTooltip project={archiveableProject} />
     )
     const btn = screen.getByLabelText('Archive')
     fireEvent.mouseOver(btn)
@@ -27,7 +27,7 @@ describe('<ArchiveProjectButton />', function () {
 
   it('opens the modal when clicked', function () {
     renderWithProjectListContext(
-      <ArchiveProjectButton project={archiveableProject} />
+      <ArchiveProjectButtonTooltip project={archiveableProject} />
     )
     const btn = screen.getByLabelText('Archive')
     fireEvent.click(btn)
@@ -37,7 +37,7 @@ describe('<ArchiveProjectButton />', function () {
 
   it('does not render the button when already archived', function () {
     renderWithProjectListContext(
-      <ArchiveProjectButton project={archivedProject} />
+      <ArchiveProjectButtonTooltip project={archivedProject} />
     )
     expect(screen.queryByLabelText('Archive')).to.be.null
   })
@@ -51,7 +51,9 @@ describe('<ArchiveProjectButton />', function () {
       },
       { delay: 0 }
     )
-    renderWithProjectListContext(<ArchiveProjectButton project={project} />)
+    renderWithProjectListContext(
+      <ArchiveProjectButtonTooltip project={project} />
+    )
     const btn = screen.getByLabelText('Archive')
     fireEvent.click(btn)
     screen.getByText('Archive Projects')

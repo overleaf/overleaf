@@ -71,6 +71,7 @@ type ProjectListContextValue = {
   deleteTag: (tagId: string) => void
   updateProjectViewData: (project: Project) => void
   removeProjectFromView: (project: Project) => void
+  searchText: string
   setSearchText: React.Dispatch<React.SetStateAction<string>>
   selectedProjects: Project[]
   setSelectedProjects: React.Dispatch<React.SetStateAction<Project[]>>
@@ -292,6 +293,7 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       selectFilter,
       selectedProjects,
       selectTag,
+      searchText,
       setSearchText,
       setSelectedProjects,
       setSort,
@@ -316,6 +318,7 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       selectFilter,
       selectedProjects,
       selectTag,
+      searchText,
       setSearchText,
       setSelectedProjects,
       setSort,

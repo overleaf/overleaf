@@ -8,9 +8,16 @@ import { untrashProject } from '../../../../util/api'
 
 type UntrashProjectButtonProps = {
   project: Project
+  children: (
+    text: string,
+    untrashProject: () => Promise<void>
+  ) => React.ReactElement
 }
 
-function UntrashProjectButton({ project }: UntrashProjectButtonProps) {
+function UntrashProjectButton({
+  project,
+  children,
+}: UntrashProjectButtonProps) {
   const { t } = useTranslation()
   const text = t('untrash')
   const { updateProjectViewData } = useProjectListContext()
@@ -24,22 +31,33 @@ function UntrashProjectButton({ project }: UntrashProjectButtonProps) {
 
   if (!project.trashed) return null
 
-  return (
-    <Tooltip
-      key={`tooltip-untrash-project-${project.id}`}
-      id={`tooltip-untrash-project-${project.id}`}
-      description={text}
-      overlayProps={{ placement: 'top', trigger: ['hover', 'focus'] }}
-    >
-      <button
-        className="btn btn-link action-btn"
-        aria-label={text}
-        onClick={handleUntrashProject}
-      >
-        <Icon type="reply" />
-      </button>
-    </Tooltip>
-  )
+  return children(text, handleUntrashProject)
 }
 
+const UntrashProjectButtonTooltip = memo(function UntrashProjectButtonTooltip({
+  project,
+}: Pick<UntrashProjectButtonProps, 'project'>) {
+  return (
+    <UntrashProjectButton project={project}>
+      {(text, handleUntrashProject) => (
+        <Tooltip
+          key={`tooltip-untrash-project-${project.id}`}
+          id={`untrash-project-${project.id}`}
+          description={text}
+          overlayProps={{ placement: 'top', trigger: ['hover', 'focus'] }}
+        >
+          <button
+            className="btn btn-link action-btn"
+            aria-label={text}
+            onClick={handleUntrashProject}
+          >
+            <Icon type="reply" />
+          </button>
+        </Tooltip>
+      )}
+    </UntrashProjectButton>
+  )
+})
+
 export default memo(UntrashProjectButton)
+export { UntrashProjectButtonTooltip }

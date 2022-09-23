@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
-import ProjectsActionModal from '../../../../../../frontend/js/features/project-list/components/table/projects-action-modal'
+import ProjectsActionModal from '../../../../../../frontend/js/features/project-list/components/modals/projects-action-modal'
 import { projectsData } from '../../fixtures/projects-data'
 import {
   resetProjectListContextFetch,

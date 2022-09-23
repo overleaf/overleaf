@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { fireEvent, screen } from '@testing-library/react'
 import fetchMock from 'fetch-mock'
-import UntrashProjectButton from '../../../../../../../../frontend/js/features/project-list/components/table/cells/action-buttons/untrash-project-button'
+import { UntrashProjectButtonTooltip } from '../../../../../../../../frontend/js/features/project-list/components/table/cells/action-buttons/untrash-project-button'
 import {
   archiveableProject,
   trashedProject,
@@ -22,7 +22,7 @@ describe('<UntrashProjectButton />', function () {
 
   it('renders tooltip for button', function () {
     renderWithProjectListContext(
-      <UntrashProjectButton project={trashedProject} />
+      <UntrashProjectButtonTooltip project={trashedProject} />
     )
     const btn = screen.getByLabelText('Restore')
     fireEvent.mouseOver(btn)
@@ -31,7 +31,7 @@ describe('<UntrashProjectButton />', function () {
 
   it('does not render the button when project is current', function () {
     renderWithProjectListContext(
-      <UntrashProjectButton project={archiveableProject} />
+      <UntrashProjectButtonTooltip project={archiveableProject} />
     )
     expect(screen.queryByLabelText('Restore')).to.be.null
   })
@@ -45,7 +45,9 @@ describe('<UntrashProjectButton />', function () {
       },
       { delay: 0 }
     )
-    renderWithProjectListContext(<UntrashProjectButton project={project} />)
+    renderWithProjectListContext(
+      <UntrashProjectButtonTooltip project={project} />
+    )
     const btn = screen.getByLabelText('Restore')
     fireEvent.click(btn)
 

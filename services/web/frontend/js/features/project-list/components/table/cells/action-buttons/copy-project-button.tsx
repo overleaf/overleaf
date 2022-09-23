@@ -1,18 +1,19 @@
-import { useTranslation } from 'react-i18next'
 import { memo, useCallback, useState } from 'react'
-import { Project } from '../../../../../../../../types/project/dashboard/api'
+import { useTranslation } from 'react-i18next'
 import Icon from '../../../../../../shared/components/icon'
 import Tooltip from '../../../../../../shared/components/tooltip'
 import CloneProjectModal from '../../../../../clone-project-modal/components/clone-project-modal'
 import useIsMounted from '../../../../../../shared/hooks/use-is-mounted'
 import { useProjectListContext } from '../../../../context/project-list-context'
 import * as eventTracking from '../../../../../../infrastructure/event-tracking'
+import { Project } from '../../../../../../../../types/project/dashboard/api'
 
 type CopyButtonProps = {
   project: Project
+  children: (text: string, handleOpenModal: () => void) => React.ReactElement
 }
 
-function CopyProjectButton({ project }: CopyButtonProps) {
+function CopyProjectButton({ project, children }: CopyButtonProps) {
   const { addClonedProjectToViewData } = useProjectListContext()
   const { t } = useTranslation()
   const text = t('copy')
@@ -46,21 +47,7 @@ function CopyProjectButton({ project }: CopyButtonProps) {
 
   return (
     <>
-      <Tooltip
-        key={`tooltip-copy-project-${project.id}`}
-        id={`tooltip-copy-project-${project.id}`}
-        description={text}
-        overlayProps={{ placement: 'top', trigger: ['hover', 'focus'] }}
-      >
-        <button
-          className="btn btn-link action-btn"
-          aria-label={text}
-          onClick={handleOpenModal}
-        >
-          <Icon type="files-o" />
-        </button>
-      </Tooltip>
-
+      {children(text, handleOpenModal)}
       <CloneProjectModal
         show={showModal}
         handleHide={handleCloseModal}
@@ -72,4 +59,30 @@ function CopyProjectButton({ project }: CopyButtonProps) {
   )
 }
 
+const CopyProjectButtonTooltip = memo(function CopyProjectButtonTooltip({
+  project,
+}: Pick<CopyButtonProps, 'project'>) {
+  return (
+    <CopyProjectButton project={project}>
+      {(text, handleOpenModal) => (
+        <Tooltip
+          key={`tooltip-copy-project-${project.id}`}
+          id={`copy-project-${project.id}`}
+          description={text}
+          overlayProps={{ placement: 'top', trigger: ['hover', 'focus'] }}
+        >
+          <button
+            className="btn btn-link action-btn"
+            aria-label={text}
+            onClick={handleOpenModal}
+          >
+            <Icon type="files-o" />
+          </button>
+        </Tooltip>
+      )}
+    </CopyProjectButton>
+  )
+})
+
 export default memo(CopyProjectButton)
+export { CopyProjectButtonTooltip }

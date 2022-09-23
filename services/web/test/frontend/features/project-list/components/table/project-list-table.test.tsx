@@ -81,30 +81,30 @@ describe('<ProjectListTable />', function () {
       .getByRole('cell', { name: currentProjects[0].name })
       .closest('tr')!
     within(row1).getByText('You')
-    within(row1).getByText('a day ago by Jean-Luc Picard')
+    within(row1).getAllByText('a day ago by Jean-Luc Picard', { exact: false })
     const row2 = screen
       .getByRole('cell', { name: currentProjects[1].name })
       .closest('tr')!
     within(row2).getByText('Jean-Luc Picard')
-    within(row2).getByText('7 days ago by Jean-Luc Picard')
+    within(row2).getAllByText('7 days ago by Jean-Luc Picard')
     const row3 = screen
       .getByRole('cell', { name: currentProjects[2].name })
       .closest('tr')!
     within(row3).getByText('worf@overleaf.com')
-    within(row3).getByText('a month ago by worf@overleaf.com')
+    within(row3).getAllByText('a month ago by worf@overleaf.com')
     // link sharing project
     const row4 = screen
       .getByRole('cell', { name: currentProjects[3].name })
       .closest('tr')!
     within(row4).getByText('La Forge')
     within(row4).getByText('Link sharing')
-    within(row4).getByText('2 months ago by La Forge')
+    within(row4).getAllByText('2 months ago by La Forge')
     // link sharing read only, so it will not show an owner
     const row5 = screen
       .getByRole('cell', { name: currentProjects[4].name })
       .closest('tr')!
     within(row5).getByText('Link sharing')
-    within(row5).getByText('2 years ago')
+    within(row5).getAllByText('2 years ago')
 
     // Action Column
     // temporary count tests until we add filtering for archived/trashed

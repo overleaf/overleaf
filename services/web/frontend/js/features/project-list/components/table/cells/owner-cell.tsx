@@ -7,9 +7,14 @@ import { Project } from '../../../../../../../types/project/dashboard/api'
 type LinkSharingIconProps = {
   prependSpace: boolean
   project: Project
+  className?: string
 }
 
-function LinkSharingIcon({ project, prependSpace }: LinkSharingIconProps) {
+function LinkSharingIcon({
+  project,
+  prependSpace,
+  className,
+}: LinkSharingIconProps) {
   const { t } = useTranslation()
   return (
     <Tooltip
@@ -19,7 +24,7 @@ function LinkSharingIcon({ project, prependSpace }: LinkSharingIconProps) {
       overlayProps={{ placement: 'right', trigger: ['hover', 'focus'] }}
     >
       {/* OverlayTrigger won't fire unless icon is wrapped in a span */}
-      <span>
+      <span className={className}>
         {prependSpace ? ' ' : ''}
         <Icon
           type="link"
@@ -42,7 +47,11 @@ export default function OwnerCell({ project }: OwnerCellProps) {
     <>
       {ownerName}
       {project.source === 'token' ? (
-        <LinkSharingIcon project={project} prependSpace={!!project.owner} />
+        <LinkSharingIcon
+          className="hidden-xs"
+          project={project}
+          prependSpace={!!project.owner}
+        />
       ) : (
         ''
       )}

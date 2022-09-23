@@ -1,4 +1,3 @@
-import { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from 'react-bootstrap'
 import {
@@ -6,26 +5,24 @@ import {
   useProjectListContext,
 } from '../../context/project-list-context'
 import TagsList from './tags-list'
+import ProjectsFilterMenu from '../projects-filter-menu'
 
 type SidebarFilterProps = {
   filter: Filter
-  text: ReactNode
+  text: React.ReactNode
 }
-function SidebarFilter({ filter, text }: SidebarFilterProps) {
-  const {
-    filter: activeFilter,
-    selectFilter,
-    selectedTagId,
-  } = useProjectListContext()
+
+export function SidebarFilter({ filter, text }: SidebarFilterProps) {
+  const { selectFilter } = useProjectListContext()
 
   return (
-    <li
-      className={
-        selectedTagId === undefined && filter === activeFilter ? 'active' : ''
-      }
-    >
-      <Button onClick={() => selectFilter(filter)}>{text}</Button>
-    </li>
+    <ProjectsFilterMenu filter={filter}>
+      {isActive => (
+        <li className={isActive ? 'active' : ''}>
+          <Button onClick={() => selectFilter(filter)}>{text}</Button>
+        </li>
+      )}
+    </ProjectsFilterMenu>
   )
 }
 

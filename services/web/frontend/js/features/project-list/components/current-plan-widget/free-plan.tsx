@@ -13,6 +13,9 @@ function FreePlan() {
 
   return (
     <>
+      <span className="current-plan-label visible-xs">
+        <Trans i18nKey="free_plan_label" components={{ b: <strong /> }} />
+      </span>
       <Tooltip
         description={t('free_plan_tooltip')}
         id="free-plan"
@@ -20,7 +23,7 @@ function FreePlan() {
       >
         <a
           href="/learn/how-to/Overleaf_premium_features"
-          className="current-plan-label"
+          className="current-plan-label hidden-xs"
         >
           <Trans i18nKey="free_plan_label" components={{ b: <strong /> }} />{' '}
           <span className="info-badge" />
@@ -28,6 +31,7 @@ function FreePlan() {
       </Tooltip>{' '}
       <Button
         bsStyle="primary"
+        className="hidden-xs"
         href="/user/subscription/plans"
         onClick={handleClick}
       >

@@ -9,6 +9,17 @@ nav.navbar.navbar-default.navbar-main
 					aria-label="Toggle " + translate('navigation')
 				)
 					i.fa.fa-bars(aria-hidden="true")
+			if (usersBestSubscription && usersBestSubscription.type === 'free')
+				a.btn.btn-primary.pull-right.me-2.visible-xs(
+					href="/user/subscription/plans"
+					event-tracking="upgrade-button-click"
+					event-tracking-mb="true"
+					event-tracking-ga="subscription-funnel"
+					event-tracking-action="dashboard-top"
+					event-tracking-label="upgrade"
+					event-tracking-trigger="click"
+					event-segmentation='{"source": "dashboard-top"}'
+				) #{translate("upgrade")}
 			if settings.nav.custom_logo
 				a(href='/', aria-label=settings.appName, style='background-image:url("'+settings.nav.custom_logo+'")').navbar-brand
 			else if (nav.title)
@@ -57,9 +68,9 @@ nav.navbar.navbar-default.navbar-main
 					each item in ((splitTestVariants && (splitTestVariants['unified-navigation'] === 'show-unified-navigation')) ? nav.header_extras_unified : nav.header_extras)
 						-
 							if ((item.only_when_logged_in && getSessionUser())
-								|| (item.only_when_logged_out && (!getSessionUser()))
-								|| (!item.only_when_logged_out && !item.only_when_logged_in && !item.only_content_pages)
-								|| (item.only_content_pages && (typeof(suppressNavContentLinks) == "undefined" || !suppressNavContentLinks))
+											|| (item.only_when_logged_out && (!getSessionUser()))
+											|| (!item.only_when_logged_out && !item.only_when_logged_in && !item.only_content_pages)
+											|| (item.only_content_pages && (typeof(suppressNavContentLinks) == "undefined" || !suppressNavContentLinks))
 							){
 								var showNavItem = true
 							} else {
@@ -82,7 +93,7 @@ nav.navbar.navbar-default.navbar-main
 										each child in item.dropdown
 											if child.divider
 												li.divider
-											if child.splitTest 
+											if child.splitTest
 												if (splitTestVariants && (splitTestVariants[child.splitTest.name] === child.splitTest.variant))
 													li
 														if child.url
@@ -99,7 +110,7 @@ nav.navbar.navbar-default.navbar-main
 												li
 													if child.url
 														a(
-															href=child.url, 
+															href=child.url,
 															class=child.class,
 															event-tracking=child.event
 															event-tracking-mb="true"
