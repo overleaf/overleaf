@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Tag } from '../../../../../../app/src/Features/Tags/types'
 import AccessibleModal from '../../../../shared/components/accessible-modal'
 import useAsync from '../../../../shared/hooks/use-async'
+import { useProjectListContext } from '../../context/project-list-context'
 import { renameTag } from '../../util/api'
 import { MAX_TAG_LENGTH } from '../../util/tag'
 
@@ -20,8 +21,9 @@ export default function RenameTagModal({
   onRename,
   onClose,
 }: RenameTagModalProps) {
+  const { tags } = useProjectListContext()
   const { t } = useTranslation()
-  const { isLoading, isError, runAsync } = useAsync()
+  const { isLoading, isError, runAsync, status } = useAsync()
 
   const [newTagName, setNewTagName] = useState<string>()
   const [validationError, setValidationError] = useState<string>()
@@ -52,10 +54,16 @@ export default function RenameTagModal({
       setValidationError(
         t('tag_name_cannot_exceed_characters', { maxLength: MAX_TAG_LENGTH })
       )
+    } else if (
+      newTagName &&
+      newTagName !== tag?.name &&
+      tags.find(tag => tag.name === newTagName)
+    ) {
+      setValidationError(t('tag_name_is_already_used', { tagName: newTagName }))
     } else if (validationError) {
       setValidationError(undefined)
     }
-  }, [newTagName, t, validationError])
+  }, [newTagName, tags, tag?.name, t, validationError])
 
   if (!tag) {
     return null
@@ -100,7 +108,13 @@ export default function RenameTagModal({
         <Button
           onClick={() => runRenameTag(tag._id)}
           bsStyle="primary"
-          disabled={isLoading || !newTagName?.length || !!validationError}
+          disabled={
+            isLoading ||
+            status === 'pending' ||
+            newTagName === tag?.name ||
+            !newTagName?.length ||
+            !!validationError
+          }
         >
           {isLoading ? <>{t('renaming')} &hellip;</> : t('rename')}
         </Button>

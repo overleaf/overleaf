@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Tag } from '../../../../../../app/src/Features/Tags/types'
 import AccessibleModal from '../../../../shared/components/accessible-modal'
 import useAsync from '../../../../shared/hooks/use-async'
+import { useProjectListContext } from '../../context/project-list-context'
 import { createTag } from '../../util/api'
 import { MAX_TAG_LENGTH } from '../../util/tag'
 
@@ -20,6 +21,7 @@ export default function CreateTagModal({
   onCreate,
   onClose,
 }: CreateTagModalProps) {
+  const { tags } = useProjectListContext()
   const { t } = useTranslation()
   const { isError, runAsync, status } = useAsync<Tag>()
 
@@ -47,10 +49,12 @@ export default function CreateTagModal({
       setValidationError(
         t('tag_name_cannot_exceed_characters', { maxLength: MAX_TAG_LENGTH })
       )
+    } else if (tagName && tags.find(tag => tag.name === tagName)) {
+      setValidationError(t('tag_name_is_already_used', { tagName }))
     } else if (validationError) {
       setValidationError(undefined)
     }
-  }, [tagName, t, validationError])
+  }, [tagName, tags, t, validationError])
 
   if (!show) {
     return null

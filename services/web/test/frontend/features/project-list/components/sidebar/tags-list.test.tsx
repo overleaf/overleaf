@@ -104,6 +104,34 @@ describe('<TagsList />', function () {
       expect(createButton.hasAttribute('disabled')).to.be.true
     })
 
+    it('Create button is disabled with error message when tag name is too long', async function () {
+      const modal = screen.getAllByRole('dialog', { hidden: false })[0]
+      const input = within(modal).getByRole('textbox')
+      fireEvent.change(input, {
+        target: {
+          value: 'This is a very very very very very very long tag name',
+        },
+      })
+
+      const createButton = within(modal).getByRole('button', { name: 'Create' })
+      expect(createButton.hasAttribute('disabled')).to.be.true
+      screen.getByText('Tag name cannot exceed 50 characters')
+    })
+
+    it('Create button is disabled with error message when tag name is already used', async function () {
+      const modal = screen.getAllByRole('dialog', { hidden: false })[0]
+      const input = within(modal).getByRole('textbox')
+      fireEvent.change(input, {
+        target: {
+          value: 'Tag 1',
+        },
+      })
+
+      const createButton = within(modal).getByRole('button', { name: 'Create' })
+      expect(createButton.hasAttribute('disabled')).to.be.true
+      screen.getByText('Tag "Tag 1" already exists')
+    })
+
     it('filling the input and clicking Create sends a request', async function () {
       const modal = screen.getAllByRole('dialog', { hidden: false })[0]
       const input = within(modal).getByRole('textbox')
@@ -155,6 +183,40 @@ describe('<TagsList />', function () {
       const renameButton = within(modal).getByRole('button', { name: 'Rename' })
 
       expect(renameButton.hasAttribute('disabled')).to.be.true
+    })
+
+    it('Rename button is disabled with error message when tag name is too long', async function () {
+      const modal = screen.getAllByRole('dialog', { hidden: false })[0]
+      const input = within(modal).getByRole('textbox')
+      fireEvent.change(input, {
+        target: {
+          value: 'This is a very very very very very very long tag name',
+        },
+      })
+
+      const createButton = within(modal).getByRole('button', { name: 'Rename' })
+      expect(createButton.hasAttribute('disabled')).to.be.true
+      screen.getByText('Tag name cannot exceed 50 characters')
+    })
+
+    it('Rename button is disabled with no error message when tag name is unchanged', async function () {
+      const modal = screen.getAllByRole('dialog', { hidden: false })[0]
+      const createButton = within(modal).getByRole('button', { name: 'Rename' })
+      expect(createButton.hasAttribute('disabled')).to.be.true
+    })
+
+    it('Rename button is disabled with error message when tag name is already used', async function () {
+      const modal = screen.getAllByRole('dialog', { hidden: false })[0]
+      const input = within(modal).getByRole('textbox')
+      fireEvent.change(input, {
+        target: {
+          value: 'Another tag',
+        },
+      })
+
+      const createButton = within(modal).getByRole('button', { name: 'Rename' })
+      expect(createButton.hasAttribute('disabled')).to.be.true
+      screen.getByText('Tag "Another tag" already exists')
     })
 
     it('filling the input and clicking Rename sends a request', async function () {
