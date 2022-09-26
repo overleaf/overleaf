@@ -17,6 +17,7 @@ import SearchForm from './search-form'
 import ProjectsDropdown from './dropdown/projects-dropdown'
 import SortByDropdown from './dropdown/sort-by-dropdown'
 import ProjectTools from './table/project-tools/project-tools'
+import LoadMore from './load-more'
 
 function ProjectListRoot() {
   const { isReady } = useWaitForI18n()
@@ -109,6 +110,11 @@ function ProjectListPageContent() {
                     </div>
                     <ProjectListTable />
                   </div>
+                </Col>
+              </Row>
+              <Row className="row-spaced">
+                <Col xs={12}>
+                  <LoadMore />
                 </Col>
               </Row>
             </div>

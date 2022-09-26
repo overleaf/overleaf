@@ -663,6 +663,8 @@
   "tracked_change_added": "Added",
   "tracked_change_deleted": "Deleted",
   "show_all": "show all",
+  "show_all_uppercase": "Show all",
+  "show_all_projects": "Show all projects",
   "show_less": "show less",
   "dropbox_sync_error": "Sorry, there was a problem checking our Dropbox service. Please try again in a few moments.",
   "send": "Send",
@@ -1899,5 +1901,8 @@
   "thank_you_for_being_part_of_our_labs_program": "Thank you for being part of our Labs program, where you can have <0>early access to experimental features</0> and help us explore innovative ideas that help you work more quickly and effectively",
   "manage_labs_program_membership": "Manage Labs Program Membership",
   "current_experiments": "Current Experiments",
-  "overleaf_labs": "Overleaf Labs"
+  "overleaf_labs": "Overleaf Labs",
+  "show_x_more": "Show __x__ more",
+  "show_x_more_projects": "Show __x__ more projects",
+  "showing_x_out_of_n_projects": "Showing __x__ out of __n__ projects."
 }

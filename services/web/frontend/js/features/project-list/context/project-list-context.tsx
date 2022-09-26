@@ -21,6 +21,8 @@ import useAsync from '../../../shared/hooks/use-async'
 import { getProjects } from '../util/api'
 import sortProjects from '../util/sort-projects'
 
+const MAX_PROJECT_PER_PAGE = 20
+
 export type Filter = 'all' | 'owned' | 'shared' | 'archived' | 'trashed'
 type FilterMap = {
   [key in Filter]: Partial<Project> | ((project: Project) => boolean) // eslint-disable-line no-unused-vars
@@ -75,6 +77,10 @@ type ProjectListContextValue = {
   setSearchText: React.Dispatch<React.SetStateAction<string>>
   selectedProjects: Project[]
   setSelectedProjects: React.Dispatch<React.SetStateAction<Project[]>>
+  hiddenProjects: Project[]
+  loadMoreCount: number
+  showAllProjects: () => void
+  loadMoreProjects: () => void
 }
 
 export const ProjectListContext = createContext<
@@ -88,6 +94,8 @@ type ProjectListProviderProps = {
 export function ProjectListProvider({ children }: ProjectListProviderProps) {
   const [loadedProjects, setLoadedProjects] = useState<Project[]>([])
   const [visibleProjects, setVisibleProjects] = useState<Project[]>([])
+  const [hiddenProjects, setHiddenProjects] = useState<Project[]>([])
+  const [loadMoreCount, setLoadMoreCount] = useState<number>(0)
   const [loadProgress, setLoadProgress] = useState(20)
   const [totalProjectsCount, setTotalProjectsCount] = useState<number>(0)
   const [sort, setSort] = useState<Sort>({
@@ -168,7 +176,27 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       setLoadedProjects(loadedProjectsSorted)
     }
 
-    setVisibleProjects(filteredProjects)
+    if (filteredProjects.length > MAX_PROJECT_PER_PAGE) {
+      const visibleFilteredProjects = filteredProjects.slice(
+        0,
+        MAX_PROJECT_PER_PAGE
+      )
+      setVisibleProjects(visibleFilteredProjects)
+
+      const hiddenFilteredProjects =
+        filteredProjects.slice(MAX_PROJECT_PER_PAGE)
+      setHiddenProjects(hiddenFilteredProjects)
+
+      if (hiddenFilteredProjects.length > MAX_PROJECT_PER_PAGE) {
+        setLoadMoreCount(MAX_PROJECT_PER_PAGE)
+      } else {
+        setLoadMoreCount(hiddenFilteredProjects.length)
+      }
+    } else {
+      setHiddenProjects([])
+      setVisibleProjects(filteredProjects)
+      setLoadMoreCount(0)
+    }
   }, [
     loadedProjects,
     tags,
@@ -183,6 +211,26 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
   useEffect(() => {
     prevSortRef.current = sort
   }, [sort])
+
+  const showAllProjects = useCallback(() => {
+    setLoadMoreCount(0)
+    setVisibleProjects([...visibleProjects, ...hiddenProjects])
+    setHiddenProjects([])
+  }, [hiddenProjects, visibleProjects])
+
+  const loadMoreProjects = useCallback(() => {
+    const newVisibleProjects = [
+      ...visibleProjects,
+      ...hiddenProjects.slice(0, loadMoreCount),
+    ]
+    const newHiddenProjects = hiddenProjects.slice(loadMoreCount)
+
+    setVisibleProjects(newVisibleProjects)
+    setHiddenProjects(newHiddenProjects)
+    if (newHiddenProjects.length < MAX_PROJECT_PER_PAGE) {
+      setLoadMoreCount(newHiddenProjects.length)
+    }
+  }, [visibleProjects, hiddenProjects, loadMoreCount])
 
   const untaggedProjectsCount = useMemo(() => {
     const taggedProjectIds = _.uniq(_.flatten(tags.map(tag => tag.project_ids)))
@@ -304,6 +352,10 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       updateProjectViewData,
       visibleProjects,
       removeProjectFromView,
+      hiddenProjects,
+      loadMoreCount,
+      showAllProjects,
+      loadMoreProjects,
     }),
     [
       addTag,
@@ -329,6 +381,10 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       updateProjectViewData,
       visibleProjects,
       removeProjectFromView,
+      hiddenProjects,
+      loadMoreCount,
+      showAllProjects,
+      loadMoreProjects,
     ]
   )
 
