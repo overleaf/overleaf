@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Alert, Button, FormControl, Modal } from 'react-bootstrap'
+import React, { useState } from 'react'
+import { Alert, Button, Form, FormControl, Modal } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import useAsync from '../../../../shared/hooks/use-async'
 import {
@@ -54,6 +54,11 @@ function ModalContentNewProjectForm({ onCancel, template = 'none' }: Props) {
     setProjectName(e.currentTarget.value)
   }
 
+  const handleSubmit = (e: React.FormEvent<Form>) => {
+    e.preventDefault()
+    createNewProject()
+  }
+
   return (
     <>
       <Modal.Header closeButton>
@@ -64,14 +69,16 @@ function ModalContentNewProjectForm({ onCancel, template = 'none' }: Props) {
         {isError && (
           <Alert bsStyle="danger">{getUserFacingMessage(error)}</Alert>
         )}
-        <input
-          type="text"
-          className="form-control"
-          ref={autoFocusedRef}
-          placeholder={t('project_name')}
-          onChange={handleChangeName}
-          value={projectName}
-        />
+        <Form onSubmit={handleSubmit}>
+          <input
+            type="text"
+            className="form-control"
+            ref={autoFocusedRef}
+            placeholder={t('project_name')}
+            onChange={handleChangeName}
+            value={projectName}
+          />
+        </Form>
       </Modal.Body>
 
       <Modal.Footer>
