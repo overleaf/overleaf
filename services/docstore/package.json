@@ -23,6 +23,7 @@
     "@overleaf/settings": "^3.0.0",
     "async": "^3.2.2",
     "body-parser": "^1.19.0",
+    "bson": "^1.1.4",
     "bunyan": "^1.8.15",
     "celebrate": "^13.0.4",
     "express": "^4.17.1",

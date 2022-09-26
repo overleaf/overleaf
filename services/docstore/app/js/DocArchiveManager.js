@@ -9,6 +9,9 @@ const RangeManager = require('./RangeManager')
 const PersistorManager = require('./PersistorManager')
 const pMap = require('p-map')
 
+const Bson = require('bson')
+const BSON = new Bson()
+
 const PARALLEL_JOBS = Settings.parallelArchiveJobs
 const UN_ARCHIVE_BATCH_SIZE = Settings.unArchiveBatchSize
 
@@ -53,6 +56,19 @@ async function archiveDoc(projectId, docId) {
 
   if (doc.lines == null) {
     throw new Error('doc has no lines')
+  }
+
+  // warn about any oversized docs already in mongo
+  const linesSize = BSON.calculateObjectSize(doc.lines || {})
+  const rangesSize = BSON.calculateObjectSize(doc.ranges || {})
+  if (
+    linesSize > Settings.max_doc_length ||
+    rangesSize > Settings.max_doc_length
+  ) {
+    logger.warn(
+      { project_id: projectId, doc_id: doc._id, linesSize, rangesSize },
+      'large doc found when archiving project'
+    )
   }
 
   const json = JSON.stringify({
