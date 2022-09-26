@@ -1,6 +1,6 @@
 import { useRef, useEffect } from 'react'
 
-export function useRefWithAutoFocus<T extends HTMLElement = any>() {
+export function useRefWithAutoFocus<T extends HTMLElement = HTMLElement>() {
   const autoFocusedRef = useRef<T>(null)
 
   useEffect(() => {
@@ -11,7 +11,7 @@ export function useRefWithAutoFocus<T extends HTMLElement = any>() {
         }
       })
     }
-  }, [autoFocusedRef])
+  }, [])
 
   return { autoFocusedRef }
 }

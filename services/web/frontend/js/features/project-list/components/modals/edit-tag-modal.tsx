@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Button, Form, Modal } from 'react-bootstrap'
 import AccessibleModal from '../../../../shared/components/accessible-modal'
 import useAsync from '../../../../shared/hooks/use-async'
+import { useRefWithAutoFocus } from '../../../../shared/hooks/use-ref-with-auto-focus'
 import { deleteTag, renameTag } from '../../util/api'
 import { Tag } from '../../../../../../app/src/Features/Tags/types'
 
@@ -22,6 +23,7 @@ export default function EditTagModal({
   onClose,
 }: EditTagModalProps) {
   const { t } = useTranslation()
+  const { autoFocusedRef } = useRefWithAutoFocus<HTMLInputElement>()
   const {
     isLoading: isDeleteLoading,
     isError: isDeleteError,
@@ -79,6 +81,7 @@ export default function EditTagModal({
       <Modal.Body>
         <Form name="editTagRenameForm" onSubmit={handleSubmit}>
           <input
+            ref={autoFocusedRef}
             className="form-control"
             type="text"
             placeholder="Tag Name"

@@ -5,6 +5,7 @@ import { Tag } from '../../../../../../app/src/Features/Tags/types'
 import AccessibleModal from '../../../../shared/components/accessible-modal'
 import useAsync from '../../../../shared/hooks/use-async'
 import { useProjectListContext } from '../../context/project-list-context'
+import { useRefWithAutoFocus } from '../../../../shared/hooks/use-ref-with-auto-focus'
 import { createTag } from '../../util/api'
 import { MAX_TAG_LENGTH } from '../../util/tag'
 
@@ -24,6 +25,7 @@ export default function CreateTagModal({
   const { tags } = useProjectListContext()
   const { t } = useTranslation()
   const { isError, runAsync, status } = useAsync<Tag>()
+  const { autoFocusedRef } = useRefWithAutoFocus<HTMLInputElement>()
 
   const [tagName, setTagName] = useState<string>()
   const [validationError, setValidationError] = useState<string>()
@@ -69,6 +71,7 @@ export default function CreateTagModal({
       <Modal.Body>
         <Form name="createTagForm" onSubmit={handleSubmit}>
           <input
+            ref={autoFocusedRef}
             className="form-control"
             type="text"
             placeholder="New Tag Name"
@@ -102,7 +105,7 @@ export default function CreateTagModal({
             status === 'pending' || !tagName?.length || !!validationError
           }
         >
-          {status === 'pending' ? t('creating') + '…' : t('create')}
+          {status === 'pending' ? <>{t('creating')} &hellip;</> : t('create')}
         </Button>
       </Modal.Footer>
     </AccessibleModal>
