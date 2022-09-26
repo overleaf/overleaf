@@ -4,15 +4,19 @@ import fetchMock from 'fetch-mock'
 import sinon from 'sinon'
 import ProjectListRoot from '../../../../../frontend/js/features/project-list/components/project-list-root'
 import { renderWithProjectListContext } from '../helpers/render-with-context'
-import { currentProjects, trashedProjects } from '../fixtures/projects-data'
+import {
+  currentProjects,
+  owner,
+  trashedProjects,
+} from '../fixtures/projects-data'
 
-const userId = '624333f147cfd8002622a1d3'
+const userId = owner.id
 
 describe('<ProjectListRoot />', function () {
   const originalLocation = window.location
   const locationStub = sinon.stub()
 
-  beforeEach(function () {
+  beforeEach(async function () {
     window.metaAttributesCache = new Map()
     window.metaAttributesCache.set('ol-tags', [])
     window.metaAttributesCache.set('ol-ExposedSettings', { templateLinks: [] })
@@ -20,6 +24,12 @@ describe('<ProjectListRoot />', function () {
 
     Object.defineProperty(window, 'location', {
       value: { assign: locationStub },
+    })
+
+    renderWithProjectListContext(<ProjectListRoot />)
+    await fetchMock.flush(true)
+    await waitFor(() => {
+      screen.findByRole('table')
     })
   })
 
@@ -35,14 +45,6 @@ describe('<ProjectListRoot />', function () {
     let allCheckboxes: Array<HTMLInputElement> = []
     let actionsToolbar: HTMLElement
     let project1Id: string | null, project2Id: string | null
-
-    beforeEach(async function () {
-      renderWithProjectListContext(<ProjectListRoot />)
-      await fetchMock.flush(true)
-      await waitFor(() => {
-        screen.findByRole('table')
-      })
-    })
 
     describe('all projects', function () {
       beforeEach(function () {
@@ -247,7 +249,6 @@ describe('<ProjectListRoot />', function () {
 
   describe('search', function () {
     it('shows only projects based on the input', async function () {
-      renderWithProjectListContext(<ProjectListRoot />)
       await fetchMock.flush(true)
       await waitFor(() => {
         screen.findByRole('table')
@@ -262,6 +263,53 @@ describe('<ProjectListRoot />', function () {
 
       const results = screen.getAllByRole('row')
       expect(results.length).to.equal(2) // first is header
+    })
+  })
+
+  describe('copying project', function () {
+    it('correctly updates the view after copying a shared project', async function () {
+      const filterButton = screen.getAllByText('Shared with you')[0]
+      fireEvent.click(filterButton)
+
+      const tableRows = screen.getAllByRole('row')
+
+      const linkForProjectToCopy = within(tableRows[1]).getByRole('link')
+      const projectNameToCopy = linkForProjectToCopy.textContent
+      const copiedProjectName = `${projectNameToCopy} Copy`
+      fetchMock.post(`express:/project/:id/clone`, {
+        status: 200,
+        body: {
+          name: copiedProjectName,
+          lastUpdated: new Date(),
+          project_id: userId,
+          owner_ref: userId,
+          owner,
+          id: '6328e14abec0df019fce0be5',
+          lastUpdatedBy: owner,
+          accessLevel: 'owner',
+          source: 'owner',
+          trashed: false,
+          archived: false,
+        },
+      })
+      const copyButton = within(tableRows[1]).getAllByLabelText('Copy')[0]
+      fireEvent.click(copyButton)
+
+      // confirm in modal
+      // const copyConfirmButton = screen.getByText('Copy')
+      const copyConfirmButton = document.querySelector(
+        'button[type="submit"]'
+      ) as HTMLElement
+      fireEvent.click(copyConfirmButton)
+
+      await fetchMock.flush(true)
+      expect(fetchMock.done()).to.be.true
+
+      expect(screen.queryByText(copiedProjectName)).to.be.null
+
+      const yourProjectFilter = screen.getAllByText('Your Projects')[0]
+      fireEvent.click(yourProjectFilter)
+      screen.findByText(copiedProjectName)
     })
   })
 })

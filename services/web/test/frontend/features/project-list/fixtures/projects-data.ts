@@ -1,6 +1,13 @@
 import { Project } from '../../../../../types/project/dashboard/api'
 const moment = require('moment')
 
+export const owner = {
+  id: '624333f147cfd8002622a1d3',
+  email: 'riker@overleaf.com',
+  firstName: 'William',
+  lastName: 'Riker',
+}
+
 const users = {
   laforge: {
     id: '624371e98a21dd0026a5bfef',
@@ -14,12 +21,7 @@ const users = {
     firstName: 'Jean-Luc',
     lastName: 'Picard',
   },
-  riker: {
-    id: '624333f147cfd8002622a1d3',
-    email: 'riker@overleaf.com',
-    firstName: 'William',
-    lastName: 'Riker',
-  },
+  riker: owner,
   worf: {
     id: '624371708a21dd0026a5bf86',
     email: 'worf@overleaf.com',
@@ -77,7 +79,7 @@ export const archivedProject = <Project>{
 }
 
 export const trashedAndNotOwnedProject = <Project>{
-  id: '62d6d3721357e20a682110d5',
+  id: '63d6d3721357e20a682110d5',
   name: "Captain's logs very old (Trashed & Read Only & Not Owned)",
   lastUpdated: moment().subtract(11, 'year').toDate(),
   lastUpdatedBy: users.picard,

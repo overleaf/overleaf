@@ -342,6 +342,7 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
         source: 'owner',
         trashed: false,
         archived: false,
+        accessLevel: 'owner',
       }
 
       setLoadedProjects(loadedProjects => {
