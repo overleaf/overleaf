@@ -11,64 +11,44 @@ export function getProjects(sortBy: Sort): Promise<GetProjectsResponseBody> {
 
 export function createTag(tagName: string): Promise<Tag> {
   return postJSON(`/tag`, {
-    body: { name: tagName, _csrf: window.csrfToken },
+    body: { name: tagName },
   })
 }
 
 export function renameTag(tagId: string, newTagName: string) {
   return postJSON(`/tag/${tagId}/rename`, {
-    body: { name: newTagName, _csrf: window.csrfToken },
+    body: { name: newTagName },
   })
 }
 
 export function deleteTag(tagId: string) {
-  return deleteJSON(`/tag/${tagId}`, { body: { _csrf: window.csrfToken } })
+  return deleteJSON(`/tag/${tagId}`)
+}
+
+export function removeProjectFromTag(tagId: string, projectId: string) {
+  return deleteJSON(`/tag/${tagId}/project/${projectId}`)
 }
 
 export function archiveProject(projectId: string) {
-  return postJSON(`/project/${projectId}/archive`, {
-    body: {
-      _csrf: window.csrfToken,
-    },
-  })
+  return postJSON(`/project/${projectId}/archive`)
 }
 
 export function deleteProject(projectId: string) {
-  return deleteJSON(`/project/${projectId}`, {
-    body: {
-      _csrf: window.csrfToken,
-    },
-  })
+  return deleteJSON(`/project/${projectId}`)
 }
 
 export function leaveProject(projectId: string) {
-  return postJSON(`/project/${projectId}/leave`, {
-    body: {
-      _csrf: window.csrfToken,
-    },
-  })
+  return postJSON(`/project/${projectId}/leave`)
 }
 
 export function trashProject(projectId: string) {
-  return postJSON(`/project/${projectId}/trash`, {
-    body: {
-      _csrf: window.csrfToken,
-    },
-  })
+  return postJSON(`/project/${projectId}/trash`)
 }
 
 export function unarchiveProject(projectId: string) {
-  return deleteJSON(`/project/${projectId}/archive`, {
-    body: {
-      _csrf: window.csrfToken,
-    },
-  })
+  return deleteJSON(`/project/${projectId}/archive`)
 }
 
 export function untrashProject(projectId: string) {
-  return deleteJSON(`/project/${projectId}/trash`, {
-    body: {
-      _csrf: window.csrfToken,
-    },
-  })
+  return deleteJSON(`/project/${projectId}/trash`)
 }

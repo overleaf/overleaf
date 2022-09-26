@@ -1,4 +1,13 @@
-import _ from 'lodash'
+import {
+  cloneDeep,
+  concat,
+  filter as arrayFilter,
+  find,
+  flatten,
+  uniq,
+  uniqBy,
+  without,
+} from 'lodash'
 import {
   createContext,
   ReactNode,
@@ -73,6 +82,7 @@ type ProjectListContextValue = {
   deleteTag: (tagId: string) => void
   updateProjectViewData: (project: Project) => void
   removeProjectFromView: (project: Project) => void
+  removeProjectFromTagInView: (tagId: string, projectId: string) => void
   searchText: string
   setSearchText: React.Dispatch<React.SetStateAction<string>>
   selectedProjects: Project[]
@@ -146,9 +156,7 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
 
     if (selectedTagId !== undefined) {
       if (selectedTagId === UNCATEGORIZED_KEY) {
-        const taggedProjectIds = _.uniq(
-          _.flatten(tags.map(tag => tag.project_ids))
-        )
+        const taggedProjectIds = uniq(flatten(tags.map(tag => tag.project_ids)))
         filteredProjects = filteredProjects.filter(
           project =>
             !project.archived &&
@@ -156,7 +164,7 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
             !taggedProjectIds.includes(project.id)
         )
       } else {
-        const tag = _.find(tags, tag => tag._id === selectedTagId)
+        const tag = tags.find(tag => tag._id === selectedTagId)
         if (tag) {
           filteredProjects = filteredProjects.filter(project =>
             tag?.project_ids?.includes(project.id)
@@ -167,7 +175,7 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
         }
       }
     } else {
-      filteredProjects = _.filter(filteredProjects, filters[filter])
+      filteredProjects = arrayFilter(filteredProjects, filters[filter])
     }
 
     if (prevSortRef.current !== sort) {
@@ -233,7 +241,7 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
   }, [visibleProjects, hiddenProjects, loadMoreCount])
 
   const untaggedProjectsCount = useMemo(() => {
-    const taggedProjectIds = _.uniq(_.flatten(tags.map(tag => tag.project_ids)))
+    const taggedProjectIds = uniq(flatten(tags.map(tag => tag.project_ids)))
     return loadedProjects.filter(
       project =>
         !project.archived &&
@@ -259,13 +267,13 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
   )
 
   const addTag = useCallback((tag: Tag) => {
-    setTags(tags => _.uniqBy(_.concat(tags, [tag]), '_id'))
+    setTags(tags => uniqBy(concat(tags, [tag]), '_id'))
   }, [])
 
   const renameTag = useCallback((tagId: string, newTagName: string) => {
     setTags(tags => {
-      const newTags = _.cloneDeep(tags)
-      const tag = _.find(newTags, ['_id', tagId])
+      const newTags = cloneDeep(tags)
+      const tag = find(newTags, ['_id', tagId])
       if (tag) {
         tag.name = newTagName
       }
@@ -276,6 +284,21 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
   const deleteTag = useCallback(
     (tagId: string | null) => {
       setTags(tags => tags.filter(tag => tag._id !== tagId))
+    },
+    [setTags]
+  )
+
+  const removeProjectFromTagInView = useCallback(
+    (tagId: string, projectId: string) => {
+      setTags(tags => {
+        const updatedTags = [...tags]
+        for (const tag of updatedTags) {
+          if (tag._id === tagId) {
+            tag.project_ids = without(tag.project_ids || [], projectId)
+          }
+        }
+        return updatedTags
+      })
     },
     [setTags]
   )
@@ -334,8 +357,13 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       deleteTag,
       error,
       filter,
+      hiddenProjects,
       isLoading,
+      loadMoreCount,
+      loadMoreProjects,
       loadProgress,
+      removeProjectFromTagInView,
+      removeProjectFromView,
       renameTag,
       selectedTagId,
       selectFilter,
@@ -345,17 +373,13 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       setSearchText,
       setSelectedProjects,
       setSort,
+      showAllProjects,
       sort,
       tags,
       totalProjectsCount,
       untaggedProjectsCount,
       updateProjectViewData,
       visibleProjects,
-      removeProjectFromView,
-      hiddenProjects,
-      loadMoreCount,
-      showAllProjects,
-      loadMoreProjects,
     }),
     [
       addTag,
@@ -363,8 +387,13 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       deleteTag,
       error,
       filter,
+      hiddenProjects,
       isLoading,
+      loadMoreCount,
+      loadMoreProjects,
       loadProgress,
+      removeProjectFromTagInView,
+      removeProjectFromView,
       renameTag,
       selectedTagId,
       selectFilter,
@@ -374,17 +403,13 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       setSearchText,
       setSelectedProjects,
       setSort,
+      showAllProjects,
       sort,
       tags,
       totalProjectsCount,
       untaggedProjectsCount,
       updateProjectViewData,
       visibleProjects,
-      removeProjectFromView,
-      hiddenProjects,
-      loadMoreCount,
-      showAllProjects,
-      loadMoreProjects,
     ]
   )
 

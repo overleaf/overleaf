@@ -1,9 +1,10 @@
-import { useState, useRef } from 'react'
+import { useCallback, useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Tag } from '../../../../../../../app/src/Features/Tags/types'
 import ColorManager from '../../../../../ide/colors/ColorManager'
 import Icon from '../../../../../shared/components/icon'
 import { useProjectListContext } from '../../../context/project-list-context'
+import { removeProjectFromTag } from '../../../util/api'
 import classnames from 'classnames'
 
 type InlineTagsProps = {
@@ -19,14 +20,20 @@ function InlineTags({ projectId, ...props }: InlineTagsProps) {
       {tags
         .filter(tag => tag.project_ids?.includes(projectId))
         .map((tag, index) => (
-          <InlineTag tag={tag} key={index} />
+          <InlineTag tag={tag} projectId={projectId} key={index} />
         ))}
     </span>
   )
 }
 
-function InlineTag({ tag }: { tag: Tag }) {
+type InlineTagProps = {
+  tag: Tag
+  projectId: string
+}
+
+function InlineTag({ tag, projectId }: InlineTagProps) {
   const { t } = useTranslation()
+  const { selectTag, removeProjectFromTagInView } = useProjectListContext()
   const [classNames, setClassNames] = useState('')
   const tagLabelRef = useRef(null)
   const tagBtnRef = useRef<HTMLButtonElement>(null)
@@ -39,6 +46,13 @@ function InlineTag({ tag }: { tag: Tag }) {
     }
   }
 
+  const handleRemoveTag = useCallback(
+    async (tagId: string, projectId: string) => {
+      removeProjectFromTagInView(tagId, projectId)
+      await removeProjectFromTag(tagId, projectId)
+    },
+    [removeProjectFromTagInView]
+  )
   const handleCloseMouseOver = () => setClassNames('tag-label-close-hover')
   const handleCloseMouseOut = () => setClassNames('')
 
@@ -53,6 +67,7 @@ function InlineTag({ tag }: { tag: Tag }) {
         className="label label-default tag-label-name"
         aria-label={t('select_tag', { tagName: tag.name })}
         ref={tagBtnRef}
+        onClick={() => selectTag(tag._id)}
       >
         <span
           style={{
@@ -67,6 +82,7 @@ function InlineTag({ tag }: { tag: Tag }) {
       <button
         className="label label-default tag-label-remove"
         aria-label={t('remove_tag', { tagName: tag.name })}
+        onClick={() => handleRemoveTag(tag._id, projectId)}
         onMouseOver={handleCloseMouseOver}
         onMouseOut={handleCloseMouseOut}
       >
