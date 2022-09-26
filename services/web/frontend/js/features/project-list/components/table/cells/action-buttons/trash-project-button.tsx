@@ -32,11 +32,12 @@ function TrashProjectButton({ project, children }: TrashProjectButtonProps) {
 
   const handleTrashProject = useCallback(async () => {
     await trashProject(project.id)
-
-    // update view
-    project.trashed = true
-    project.archived = false
-    updateProjectViewData(project)
+    updateProjectViewData({
+      ...project,
+      trashed: true,
+      archived: false,
+      selected: false,
+    })
   }, [project, updateProjectViewData])
 
   if (project.trashed) return null

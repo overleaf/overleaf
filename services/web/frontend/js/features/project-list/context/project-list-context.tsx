@@ -81,7 +81,7 @@ type ProjectListContextValue = {
   addTag: (tag: Tag) => void
   renameTag: (tagId: string, newTagName: string) => void
   deleteTag: (tagId: string) => void
-  updateProjectViewData: (project: Project) => void
+  updateProjectViewData: (newProjectData: Project) => void
   removeProjectFromView: (project: Project) => void
   removeProjectFromTagInView: (tagId: string, projectId: string) => void
   searchText: string
@@ -245,11 +245,16 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
 
   const selectOrUnselectAllProjects = useCallback(
     checked => {
-      const projects = visibleProjects.map(project => {
-        project.selected = checked
-        return project
-      })
-      setVisibleProjects(projects)
+      const visibleProjectIds = visibleProjects.map(p => p.id)
+      setLoadedProjects(loadedProjects =>
+        loadedProjects.map(p => {
+          if (visibleProjectIds.includes(p.id)) {
+            return { ...p, selected: checked }
+          } else {
+            return p
+          }
+        })
+      )
     },
     [visibleProjects]
   )
@@ -321,39 +326,38 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
   const addClonedProjectToViewData = useCallback(
     project => {
       // clone API not using camelCase and does not return all data
-      project.id = project.project_id
+
       const owner = {
         id: project.owner?._id,
         email: project.owner?.email,
         firstName: project.owner?.first_name,
         lastName: project.owner?.last_name,
       }
-      project.owner = owner
-      project.lastUpdatedBy = project.owner
-      project.source = 'owner'
-      project.trashed = false
-      project.archived = false
-      loadedProjects.push(project)
-      const loadedProjectsSorted = sortProjects(loadedProjects, sort)
-      const visibleProjectsSorted = sortProjects(visibleProjects, sort)
-      setVisibleProjects(visibleProjectsSorted)
-      setLoadedProjects(loadedProjectsSorted)
+
+      const clonedProject = {
+        ...project,
+        id: project.project_id,
+        owner,
+        lastUpdatedBy: owner,
+        source: 'owner',
+        trashed: false,
+        archived: false,
+      }
+
+      setLoadedProjects(loadedProjects => {
+        return sortProjects([...loadedProjects, clonedProject], sort)
+      })
     },
-    [loadedProjects, visibleProjects, sort]
+    [sort]
   )
 
-  const updateProjectViewData = useCallback(
-    (project: Project) => {
-      const projects = loadedProjects.map((p: Project) => {
-        if (p.id === project.id) {
-          p = project
-        }
-        return p
-      })
-      setLoadedProjects(projects)
-    },
-    [loadedProjects]
-  )
+  const updateProjectViewData = useCallback((newProjectData: Project) => {
+    setLoadedProjects(loadedProjects => {
+      return loadedProjects.map((p: Project) =>
+        p.id === newProjectData.id ? { ...newProjectData } : p
+      )
+    })
+  }, [])
 
   const removeProjectFromView = useCallback(
     (project: Project) => {

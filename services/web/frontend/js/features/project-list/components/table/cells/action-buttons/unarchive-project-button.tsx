@@ -25,9 +25,7 @@ function UnarchiveProjectButton({
   const handleUnarchiveProject = useCallback(async () => {
     await unarchiveProject(project.id)
 
-    // update view
-    project.archived = false
-    updateProjectViewData(project)
+    updateProjectViewData({ ...project, archived: false, selected: false })
   }, [project, updateProjectViewData])
 
   if (!project.archived) return null

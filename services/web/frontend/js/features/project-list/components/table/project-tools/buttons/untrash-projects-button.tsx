@@ -11,10 +11,7 @@ function UntrashProjectsButton() {
   const handleUntrashProjects = useCallback(async () => {
     for (const [, project] of Object.entries(selectedProjects)) {
       await untrashProject(project.id)
-      // update view
-      project.trashed = false
-      project.selected = false
-      updateProjectViewData(project)
+      updateProjectViewData({ ...project, trashed: false, selected: false })
     }
   }, [selectedProjects, updateProjectViewData])
 

@@ -14,7 +14,8 @@ type CopyButtonProps = {
 }
 
 function CopyProjectButton({ project, children }: CopyButtonProps) {
-  const { addClonedProjectToViewData } = useProjectListContext()
+  const { addClonedProjectToViewData, updateProjectViewData } =
+    useProjectListContext()
   const { t } = useTranslation()
   const text = t('copy')
   const [showModal, setShowModal] = useState(false)
@@ -31,16 +32,17 @@ function CopyProjectButton({ project, children }: CopyButtonProps) {
   }, [isMounted])
 
   const handleAfterCloned = useCallback(
-    project => {
+    clonedProject => {
       eventTracking.send(
         'project-list-page-interaction',
         'project action',
         'Clone'
       )
-      addClonedProjectToViewData(project)
+      addClonedProjectToViewData(clonedProject)
+      updateProjectViewData({ ...project, selected: false })
       setShowModal(false)
     },
-    [addClonedProjectToViewData]
+    [addClonedProjectToViewData, project, updateProjectViewData]
   )
 
   if (project.archived || project.trashed) return null

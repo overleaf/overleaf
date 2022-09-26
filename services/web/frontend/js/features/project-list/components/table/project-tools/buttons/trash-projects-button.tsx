@@ -28,18 +28,19 @@ function TrashProjectsButton() {
   const handleTrashProjects = useCallback(async () => {
     for (const project of selectedProjects) {
       await trashProject(project.id)
-      // update view
-      project.trashed = true
-      project.archived = false
-      project.selected = false
-      updateProjectViewData(project)
+      updateProjectViewData({
+        ...project,
+        trashed: true,
+        archived: false,
+        selected: false,
+      })
     }
   }, [selectedProjects, updateProjectViewData])
 
   return (
     <>
       <Tooltip
-        id="tooltip-download-projects"
+        id="tooltip-trash-projects"
         description={text}
         overlayProps={{ placement: 'bottom', trigger: ['hover', 'focus'] }}
       >

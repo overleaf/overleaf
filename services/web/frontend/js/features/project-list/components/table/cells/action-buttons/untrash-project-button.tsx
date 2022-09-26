@@ -24,9 +24,7 @@ function UntrashProjectButton({
 
   const handleUntrashProject = useCallback(async () => {
     await untrashProject(project.id)
-    // update view
-    project.trashed = false
-    updateProjectViewData(project)
+    updateProjectViewData({ ...project, trashed: false, selected: false })
   }, [project, updateProjectViewData])
 
   if (!project.trashed) return null

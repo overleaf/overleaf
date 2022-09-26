@@ -28,17 +28,14 @@ function ArchiveProjectsButton() {
   const handleArchiveProjects = useCallback(async () => {
     for (const project of selectedProjects) {
       await archiveProject(project.id)
-      // update view
-      project.archived = true
-      project.selected = false
-      updateProjectViewData(project)
+      updateProjectViewData({ ...project, archived: true, selected: false })
     }
   }, [selectedProjects, updateProjectViewData])
 
   return (
     <>
       <Tooltip
-        id="tooltip-download-projects"
+        id="tooltip-archive-projects"
         description={text}
         overlayProps={{ placement: 'bottom', trigger: ['hover', 'focus'] }}
       >

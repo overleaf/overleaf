@@ -21,8 +21,7 @@ export default function ProjectListTableRow({
 
   const handleCheckboxChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      project.selected = event.target.checked
-      updateProjectViewData(project)
+      updateProjectViewData({ ...project, selected: event.target.checked })
     },
     [project, updateProjectViewData]
   )
