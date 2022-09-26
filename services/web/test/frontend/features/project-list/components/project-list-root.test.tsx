@@ -223,6 +223,25 @@ describe('<ProjectListRoot />', function () {
 
         expect(screen.queryByText('No projects')).to.be.null
       })
+
+      it('removes project from view when archiving', async function () {
+        fetchMock.post(`express:/project/:id/archive`, {
+          status: 200,
+        })
+
+        const untrashButton =
+          within(actionsToolbar).getByLabelText<HTMLInputElement>('Archive')
+        fireEvent.click(untrashButton)
+
+        const confirmButton = screen.getByText<HTMLInputElement>('Confirm')
+        fireEvent.click(confirmButton)
+        expect(confirmButton.disabled).to.be.true
+
+        await fetchMock.flush(true)
+        expect(fetchMock.done()).to.be.true
+
+        screen.getByText('No projects')
+      })
     })
   })
 

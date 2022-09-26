@@ -28,7 +28,12 @@ function ArchiveProjectsButton() {
   const handleArchiveProjects = useCallback(async () => {
     for (const project of selectedProjects) {
       await archiveProject(project.id)
-      updateProjectViewData({ ...project, archived: true, selected: false })
+      updateProjectViewData({
+        ...project,
+        archived: true,
+        selected: false,
+        trashed: false,
+      })
     }
   }, [selectedProjects, updateProjectViewData])
 
