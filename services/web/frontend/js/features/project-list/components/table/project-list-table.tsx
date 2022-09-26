@@ -21,19 +21,19 @@ const SortByButton = withContent(SortBtn)
 
 function ProjectListTable() {
   const { t } = useTranslation()
-  const { visibleProjects, sort, selectedProjects, setSelectedProjects } =
-    useProjectListContext()
+  const {
+    visibleProjects,
+    sort,
+    selectedProjects,
+    selectOrUnselectAllProjects,
+  } = useProjectListContext()
   const { handleSort } = useSort()
 
   const handleAllProjectsCheckboxChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      if (event.target.checked) {
-        setSelectedProjects(visibleProjects)
-      } else {
-        setSelectedProjects([])
-      }
+      selectOrUnselectAllProjects(event.target.checked)
     },
-    [setSelectedProjects, visibleProjects]
+    [selectOrUnselectAllProjects]
   )
 
   return (

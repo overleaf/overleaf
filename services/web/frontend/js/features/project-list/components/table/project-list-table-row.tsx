@@ -17,23 +17,14 @@ export default function ProjectListTableRow({
 }: ProjectListTableRowProps) {
   const { t } = useTranslation()
   const ownerName = getOwnerName(project)
-  const { selectedProjects, setSelectedProjects } = useProjectListContext()
+  const { updateProjectViewData } = useProjectListContext()
 
   const handleCheckboxChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      const checked = event.target.checked
-      setSelectedProjects(selectedProjects => {
-        let projects = [...selectedProjects]
-        if (checked) {
-          projects.push(project)
-        } else {
-          const projectId = event.target.getAttribute('data-project-id')
-          projects = projects.filter(p => p.id !== projectId)
-        }
-        return projects
-      })
+      project.selected = event.target.checked
+      updateProjectViewData(project)
     },
-    [project, setSelectedProjects]
+    [project, updateProjectViewData]
   )
 
   return (
@@ -42,7 +33,7 @@ export default function ProjectListTableRow({
         <input
           type="checkbox"
           id={`select-project-${project.id}`}
-          checked={selectedProjects.includes(project)}
+          checked={project.selected === true}
           onChange={handleCheckboxChange}
           data-project-id={project.id}
         />

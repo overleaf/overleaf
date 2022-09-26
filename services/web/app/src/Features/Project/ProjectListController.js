@@ -22,7 +22,7 @@ const UserController = require('../User/UserController')
 
 /** @typedef {import("./types").GetProjectsRequest} GetProjectsRequest */
 /** @typedef {import("./types").GetProjectsResponse} GetProjectsResponse */
-/** @typedef {import("../../../../types/project/dashboard/api").Project} Project */
+/** @typedef {import("../../../../types/project/dashboard/api").ProjectApi} ProjectApi */
 /** @typedef {import("../../../../types/project/dashboard/api").Filters} Filters */
 /** @typedef {import("../../../../types/project/dashboard/api").Page} Page */
 /** @typedef {import("../../../../types/project/dashboard/api").Sort} Sort */
@@ -308,7 +308,7 @@ async function getProjectsJson(req, res) {
  * @param {Filters} filters
  * @param {Sort} sort
  * @param {Page} page
- * @returns {Promise<{totalSize: number, projects: Project[]}>}
+ * @returns {Promise<{totalSize: number, projects: ProjectApi[]}>}
  * @private
  */
 async function _getProjects(

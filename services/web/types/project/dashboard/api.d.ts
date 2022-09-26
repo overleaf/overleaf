@@ -32,16 +32,21 @@ export type UserRef = {
   lastName: string
 }
 
-export type Project = {
+export type ProjectApi = {
   id: string
   name: string
   owner?: UserRef
-  lastUpdated: string
+  lastUpdated: Date
   lastUpdatedBy: UserRef | null
   archived: boolean
   trashed: boolean
   accessLevel: 'owner' | 'readWrite' | 'readOnly' | 'readAndWrite'
   source: 'owner' | 'invite' | 'token'
+}
+
+export type Project = ProjectApi & {
+  lastUpdated: string
+  selected?: boolean
 }
 
 export type GetProjectsResponseBody = {

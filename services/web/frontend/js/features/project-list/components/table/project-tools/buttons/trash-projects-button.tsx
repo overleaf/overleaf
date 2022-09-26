@@ -8,8 +8,7 @@ import { useProjectListContext } from '../../../../context/project-list-context'
 import { trashProject } from '../../../../util/api'
 
 function TrashProjectsButton() {
-  const { selectedProjects, setSelectedProjects, updateProjectViewData } =
-    useProjectListContext()
+  const { selectedProjects, updateProjectViewData } = useProjectListContext()
   const { t } = useTranslation()
   const text = t('trash')
 
@@ -32,10 +31,10 @@ function TrashProjectsButton() {
       // update view
       project.trashed = true
       project.archived = false
+      project.selected = false
       updateProjectViewData(project)
     }
-    setSelectedProjects([])
-  }, [selectedProjects, setSelectedProjects, updateProjectViewData])
+  }, [selectedProjects, updateProjectViewData])
 
   return (
     <>

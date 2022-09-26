@@ -8,8 +8,7 @@ import { useProjectListContext } from '../../../../context/project-list-context'
 import { archiveProject } from '../../../../util/api'
 
 function ArchiveProjectsButton() {
-  const { selectedProjects, updateProjectViewData, setSelectedProjects } =
-    useProjectListContext()
+  const { selectedProjects, updateProjectViewData } = useProjectListContext()
   const { t } = useTranslation()
   const text = t('archive')
 
@@ -31,10 +30,10 @@ function ArchiveProjectsButton() {
       await archiveProject(project.id)
       // update view
       project.archived = true
+      project.selected = false
       updateProjectViewData(project)
     }
-    setSelectedProjects([])
-  }, [selectedProjects, setSelectedProjects, updateProjectViewData])
+  }, [selectedProjects, updateProjectViewData])
 
   return (
     <>

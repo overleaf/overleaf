@@ -8,7 +8,7 @@ import {
   uniqBy,
   without,
 } from 'lodash'
-import {
+import React, {
   createContext,
   ReactNode,
   useCallback,
@@ -64,6 +64,7 @@ export const UNCATEGORIZED_KEY = 'uncategorized'
 
 type ProjectListContextValue = {
   addClonedProjectToViewData: (project: Project) => void
+  selectOrUnselectAllProjects: React.Dispatch<React.SetStateAction<boolean>>
   visibleProjects: Project[]
   totalProjectsCount: number
   error: Error | null
@@ -86,7 +87,6 @@ type ProjectListContextValue = {
   searchText: string
   setSearchText: React.Dispatch<React.SetStateAction<string>>
   selectedProjects: Project[]
-  setSelectedProjects: React.Dispatch<React.SetStateAction<Project[]>>
   hiddenProjects: Project[]
   loadMoreCount: number
   showAllProjects: () => void
@@ -122,7 +122,6 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
   >('project-list-selected-tag-id', undefined)
   const [tags, setTags] = useState<Tag[]>(getMeta('ol-tags', []) as Tag[])
   const [searchText, setSearchText] = useState('')
-  const [selectedProjects, setSelectedProjects] = useState<Project[]>([])
 
   const {
     isLoading: loading,
@@ -240,6 +239,21 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
     }
   }, [visibleProjects, hiddenProjects, loadMoreCount])
 
+  const selectedProjects = useMemo(() => {
+    return visibleProjects.filter(project => project.selected)
+  }, [visibleProjects])
+
+  const selectOrUnselectAllProjects = useCallback(
+    checked => {
+      const projects = visibleProjects.map(project => {
+        project.selected = checked
+        return project
+      })
+      setVisibleProjects(projects)
+    },
+    [visibleProjects]
+  )
+
   const untaggedProjectsCount = useMemo(() => {
     const taggedProjectIds = uniq(flatten(tags.map(tag => tag.project_ids)))
     return loadedProjects.filter(
@@ -254,9 +268,10 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
     (filter: Filter) => {
       setFilter(filter)
       setSelectedTagId(undefined)
-      setSelectedProjects([])
+      const selected = false
+      selectOrUnselectAllProjects(selected)
     },
-    [setFilter, setSelectedTagId]
+    [selectOrUnselectAllProjects, setFilter, setSelectedTagId]
   )
 
   const selectTag = useCallback(
@@ -354,6 +369,7 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
     () => ({
       addTag,
       addClonedProjectToViewData,
+      selectOrUnselectAllProjects,
       deleteTag,
       error,
       filter,
@@ -371,7 +387,6 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       selectTag,
       searchText,
       setSearchText,
-      setSelectedProjects,
       setSort,
       showAllProjects,
       sort,
@@ -384,6 +399,7 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
     [
       addTag,
       addClonedProjectToViewData,
+      selectOrUnselectAllProjects,
       deleteTag,
       error,
       filter,
@@ -401,7 +417,6 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       selectTag,
       searchText,
       setSearchText,
-      setSelectedProjects,
       setSort,
       showAllProjects,
       sort,

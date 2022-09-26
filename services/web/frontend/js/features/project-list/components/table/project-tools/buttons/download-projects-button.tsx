@@ -6,7 +6,8 @@ import * as eventTracking from '../../../../../../infrastructure/event-tracking'
 import { useProjectListContext } from '../../../../context/project-list-context'
 
 function DownloadProjectsButton() {
-  const { selectedProjects, setSelectedProjects } = useProjectListContext()
+  const { selectedProjects, selectOrUnselectAllProjects } =
+    useProjectListContext()
   const { t } = useTranslation()
   const text = t('download')
 
@@ -23,8 +24,9 @@ function DownloadProjectsButton() {
       `/project/download/zip?project_ids=${projectIds.join(',')}`
     )
 
-    setSelectedProjects([])
-  }, [projectIds, setSelectedProjects])
+    const selected = false
+    selectOrUnselectAllProjects(selected)
+  }, [projectIds, selectOrUnselectAllProjects])
 
   return (
     <Tooltip
