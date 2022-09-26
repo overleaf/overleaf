@@ -1,4 +1,5 @@
 import { SortingOrder } from '../../sorting-order'
+import { MergeAndOverride } from '../../utils'
 
 export type Page = {
   size: number
@@ -44,10 +45,13 @@ export type ProjectApi = {
   source: 'owner' | 'invite' | 'token'
 }
 
-export type Project = ProjectApi & {
-  lastUpdated: string
-  selected?: boolean
-}
+export type Project = MergeAndOverride<
+  ProjectApi,
+  {
+    lastUpdated: string
+    selected?: boolean
+  }
+>
 
 export type GetProjectsResponseBody = {
   totalSize: number

@@ -1,19 +1,25 @@
 import { memo } from 'react'
+import { ButtonGroup, ButtonToolbar } from 'react-bootstrap'
 import { useProjectListContext } from '../../../context/project-list-context'
 import ArchiveProjectsButton from './buttons/archive-projects-button'
 import DownloadProjectsButton from './buttons/download-projects-button'
 import TrashProjectsButton from './buttons/trash-projects-button'
+import UntrashProjectsButton from './buttons/untrash-projects-button'
 
 function ProjectTools() {
   const { filter } = useProjectListContext()
   return (
-    <div className="btn-toolbar" role="toolbar">
-      <div className="btn-group">
+    <ButtonToolbar>
+      <ButtonGroup>
         <DownloadProjectsButton />
         {filter !== 'archived' && <ArchiveProjectsButton />}
         {filter !== 'trashed' && <TrashProjectsButton />}
-      </div>
-    </div>
+      </ButtonGroup>
+
+      <ButtonGroup>
+        {filter === 'trashed' && <UntrashProjectsButton />}
+      </ButtonGroup>
+    </ButtonToolbar>
   )
 }
 

@@ -4,6 +4,7 @@ import fetchMock from 'fetch-mock'
 import sinon from 'sinon'
 import ProjectListRoot from '../../../../../frontend/js/features/project-list/components/project-list-root'
 import { renderWithProjectListContext } from '../helpers/render-with-context'
+import { currentProjects, trashedProjects } from '../fixtures/projects-data'
 
 const userId = '624333f147cfd8002622a1d3'
 
@@ -166,13 +167,24 @@ describe('<ProjectListRoot />', function () {
         fireEvent.click(filterButton)
 
         allCheckboxes = screen.getAllByRole<HTMLInputElement>('checkbox')
-        // first one is the select all checkbox
-        fireEvent.click(allCheckboxes[1])
+        // + 1 because of select all
+        expect(allCheckboxes.length).to.equal(trashedProjects.length + 1)
 
-        project1Id = allCheckboxes[1].getAttribute('data-project-id')
+        // first one is the select all checkbox
+        fireEvent.click(allCheckboxes[0])
+
+        const allCheckboxesChecked = allCheckboxes.filter(c => c.checked)
+        // + 1 because of select all
+        expect(allCheckboxesChecked.length).to.equal(trashedProjects.length + 1)
+
+        actionsToolbar = screen.getAllByRole('toolbar')[0]
       })
-      it('does not show the trash button in toolbar when archive view selected', function () {
+
+      it('only shows the download, archive, and restore buttons in top toolbar', function () {
         expect(screen.queryByLabelText('Trash')).to.be.null
+        within(actionsToolbar).queryByLabelText('Download')
+        within(actionsToolbar).queryByLabelText('Archive')
+        within(actionsToolbar).getByText('Restore') // no icon for this button
       })
 
       it('clears selected projects when filter changed', function () {
@@ -183,6 +195,54 @@ describe('<ProjectListRoot />', function () {
         const allCheckboxesChecked = allCheckboxes.filter(c => c.checked)
         expect(allCheckboxesChecked.length).to.equal(0)
       })
+
+      it('untrashes all the projects', async function () {
+        fetchMock.delete(`express:/project/:id/trash`, {
+          status: 200,
+        })
+
+        const untrashButton =
+          within(actionsToolbar).getByText<HTMLInputElement>('Restore')
+        fireEvent.click(untrashButton)
+
+        await fetchMock.flush(true)
+        expect(fetchMock.done()).to.be.true
+
+        screen.getByText('No projects')
+      })
+
+      it('only untrashes the selected projects', async function () {
+        // beforeEach selected all, so uncheck the 1st project
+        fireEvent.click(allCheckboxes[1])
+
+        const allCheckboxesChecked = allCheckboxes.filter(c => c.checked)
+        expect(allCheckboxesChecked.length).to.equal(trashedProjects.length - 1)
+
+        await fetchMock.flush(true)
+        expect(fetchMock.done()).to.be.true
+
+        expect(screen.queryByText('No projects')).to.be.null
+      })
+    })
+  })
+
+  describe('search', function () {
+    it('shows only projects based on the input', async function () {
+      renderWithProjectListContext(<ProjectListRoot />)
+      await fetchMock.flush(true)
+      await waitFor(() => {
+        screen.findByRole('table')
+      })
+
+      const input = screen.getAllByRole('textbox', {
+        name: /search projects/i,
+      })[0]
+      const value = currentProjects[0].name
+
+      fireEvent.change(input, { target: { value } })
+
+      const results = screen.getAllByRole('row')
+      expect(results.length).to.equal(2) // first is header
     })
   })
 })

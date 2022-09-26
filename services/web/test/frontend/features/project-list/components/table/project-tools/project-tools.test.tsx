@@ -11,7 +11,7 @@ describe('<ProjectListTable />', function () {
     resetProjectListContextFetch()
   })
 
-  it('renders the project tools', function () {
+  it('renders the project tools for the all projects filter', function () {
     renderWithProjectListContext(<ProjectTools />)
     expect(screen.getAllByRole('button').length).to.equal(3)
     screen.getByLabelText('Download')

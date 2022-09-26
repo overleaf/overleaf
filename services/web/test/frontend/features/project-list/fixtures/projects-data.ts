@@ -127,8 +127,13 @@ export const projectsData: Array<Project> = [
   },
   archivedProject,
   trashedProject,
+  trashedAndNotOwnedProject,
 ]
 
 export const currentProjects: Array<Project> = projectsData.filter(
   ({ archived, trashed }) => !archived && !trashed
+)
+
+export const trashedProjects: Array<Project> = projectsData.filter(
+  ({ trashed }) => trashed
 )
