@@ -59,7 +59,7 @@ async function plansPage(req, res) {
     await SplitTestHandler.promises.getAssignment(
       req,
       res,
-      'plans-page-layout-v2'
+      'plans-page-layout-v2-annual'
     )
 
   const newPlansPageVariantV2 =
