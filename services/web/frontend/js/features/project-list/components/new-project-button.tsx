@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Dropdown, MenuItem } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import { ExposedSettings } from '../../../../../types/exposed-settings'
+import type { PortalTemplate } from '../../../../../types/portal-template'
 import ControlledDropdown from '../../../shared/components/controlled-dropdown'
 import getMeta from '../../../utils/meta'
 import NewProjectButtonModal, {
@@ -24,6 +25,7 @@ function NewProjectButton({
   const { templateLinks } = getMeta('ol-ExposedSettings') as ExposedSettings
   const [modal, setModal] =
     useState<Nullable<NewProjectButtonModalVariant>>(null)
+  const portalTemplates = getMeta('ol-portalTemplates') as PortalTemplate[]
 
   return (
     <>
@@ -48,6 +50,22 @@ function NewProjectButton({
           <MenuItem onClick={() => setModal('import_from_github')}>
             {t('import_from_github')}
           </MenuItem>
+          {portalTemplates?.length > 0 ? (
+            <>
+              <MenuItem divider />
+              <MenuItem header>
+                {`${t('institution')} ${t('templates')}`}
+              </MenuItem>
+              {portalTemplates.map((portalTemplate, index) => (
+                <MenuItem
+                  key={`portal-template-${index}`}
+                  href={`${portalTemplate.url}#templates`}
+                >
+                  {portalTemplate.name}
+                </MenuItem>
+              ))}
+            </>
+          ) : null}
           <MenuItem divider />
           <MenuItem header>{t('templates')}</MenuItem>
           {templateLinks.map((templateLink, index) => (

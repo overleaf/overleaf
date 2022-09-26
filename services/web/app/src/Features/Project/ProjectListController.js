@@ -1,4 +1,5 @@
 const _ = require('lodash')
+const Settings = require('@overleaf/settings')
 const ProjectHelper = require('./ProjectHelper')
 const ProjectGetter = require('./ProjectGetter')
 const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
@@ -19,6 +20,17 @@ const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const UserPrimaryEmailCheckHandler = require('../User/UserPrimaryEmailCheckHandler')
 const UserController = require('../User/UserController')
 
+/** @typedef {import("./types").GetProjectsRequest} GetProjectsRequest */
+/** @typedef {import("./types").GetProjectsResponse} GetProjectsResponse */
+/** @typedef {import("../../../../types/project/dashboard/api").Project} Project */
+/** @typedef {import("../../../../types/project/dashboard/api").Filters} Filters */
+/** @typedef {import("../../../../types/project/dashboard/api").Page} Page */
+/** @typedef {import("../../../../types/project/dashboard/api").Sort} Sort */
+/** @typedef {import("./types").AllUsersProjects} AllUsersProjects */
+/** @typedef {import("./types").MongoProject} MongoProject */
+
+/** @typedef {import("../Tags/types").Tag} Tag */
+
 const _ssoAvailable = (affiliation, session, linkedInstitutionIds) => {
   if (!affiliation.institution) return false
 
@@ -38,16 +50,29 @@ const _ssoAvailable = (affiliation, session, linkedInstitutionIds) => {
   return false
 }
 
-/** @typedef {import("./types").GetProjectsRequest} GetProjectsRequest */
-/** @typedef {import("./types").GetProjectsResponse} GetProjectsResponse */
-/** @typedef {import("../../../../types/project/dashboard/api").Project} Project */
-/** @typedef {import("../../../../types/project/dashboard/api").Filters} Filters */
-/** @typedef {import("../../../../types/project/dashboard/api").Page} Page */
-/** @typedef {import("../../../../types/project/dashboard/api").Sort} Sort */
-/** @typedef {import("./types").AllUsersProjects} AllUsersProjects */
-/** @typedef {import("./types").MongoProject} MongoProject */
+const _buildPortalTemplatesList = affiliations => {
+  if (affiliations == null) {
+    affiliations = []
+  }
 
-/** @typedef {import("../Tags/types").Tag} Tag */
+  const portalTemplates = []
+  const uniqueAffiliations = _.uniqBy(affiliations, 'institution.id')
+  for (const aff of uniqueAffiliations) {
+    const hasSlug = aff.portal?.slug
+    const hasTemplates = aff.portal?.templates_count > 0
+
+    if (hasSlug && hasTemplates) {
+      const portalPath = aff.institution.isUniversity ? '/edu/' : '/org/'
+      const portalTemplateURL = Settings.siteUrl + portalPath + aff.portal?.slug
+
+      portalTemplates.push({
+        name: aff.institution.name,
+        url: portalTemplateURL,
+      })
+    }
+  }
+  return portalTemplates
+}
 
 /**
  * @param {import("express").Request} req
@@ -158,6 +183,8 @@ async function projectListReactPage(req, res, next) {
       return result
     })
 
+  const portalTemplates = _buildPortalTemplatesList(userAffiliations)
+
   const { allInReconfirmNotificationPeriods } = userEmailsData
 
   const notifications =
@@ -258,6 +285,7 @@ async function projectListReactPage(req, res, next) {
     allInReconfirmNotificationPeriods,
     survey,
     tags,
+    portalTemplates,
   })
 }
 
