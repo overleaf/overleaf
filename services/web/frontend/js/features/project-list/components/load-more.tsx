@@ -5,7 +5,7 @@ import { useProjectListContext } from '../context/project-list-context'
 export default function LoadMore() {
   const {
     visibleProjects,
-    hiddenProjects,
+    hiddenProjectsCount,
     loadMoreCount,
     showAllProjects,
     loadMoreProjects,
@@ -14,7 +14,7 @@ export default function LoadMore() {
 
   return (
     <div className="text-centered">
-      {hiddenProjects.length > 0 ? (
+      {hiddenProjectsCount > 0 ? (
         <Button
           bsStyle="info"
           className="project-list-load-more-button"
@@ -25,12 +25,12 @@ export default function LoadMore() {
         </Button>
       ) : null}
       <p>
-        {hiddenProjects.length > 0 ? (
+        {hiddenProjectsCount > 0 ? (
           <>
             <span aria-live="polite">
               {t('showing_x_out_of_n_projects', {
                 x: visibleProjects.length,
-                n: visibleProjects.length + hiddenProjects.length,
+                n: visibleProjects.length + hiddenProjectsCount,
               })}
             </span>{' '}
             <button

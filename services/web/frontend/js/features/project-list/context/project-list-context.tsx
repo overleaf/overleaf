@@ -87,7 +87,7 @@ type ProjectListContextValue = {
   searchText: string
   setSearchText: React.Dispatch<React.SetStateAction<string>>
   selectedProjects: Project[]
-  hiddenProjects: Project[]
+  hiddenProjectsCount: number
   loadMoreCount: number
   showAllProjects: () => void
   loadMoreProjects: () => void
@@ -104,7 +104,9 @@ type ProjectListProviderProps = {
 export function ProjectListProvider({ children }: ProjectListProviderProps) {
   const [loadedProjects, setLoadedProjects] = useState<Project[]>([])
   const [visibleProjects, setVisibleProjects] = useState<Project[]>([])
-  const [hiddenProjects, setHiddenProjects] = useState<Project[]>([])
+  const [maxVisibleProjects, setMaxVisibleProjects] =
+    useState(MAX_PROJECT_PER_PAGE)
+  const [hiddenProjectsCount, setHiddenProjectsCount] = useState(0)
   const [loadMoreCount, setLoadMoreCount] = useState<number>(0)
   const [loadProgress, setLoadProgress] = useState(20)
   const [totalProjectsCount, setTotalProjectsCount] = useState<number>(0)
@@ -183,29 +185,31 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       setLoadedProjects(loadedProjectsSorted)
     }
 
-    if (filteredProjects.length > MAX_PROJECT_PER_PAGE) {
+    if (filteredProjects.length > maxVisibleProjects) {
       const visibleFilteredProjects = filteredProjects.slice(
         0,
-        MAX_PROJECT_PER_PAGE
+        maxVisibleProjects
       )
+
+      const hiddenFilteredProjectsCount =
+        filteredProjects.slice(maxVisibleProjects).length
+
       setVisibleProjects(visibleFilteredProjects)
+      setHiddenProjectsCount(hiddenFilteredProjectsCount)
 
-      const hiddenFilteredProjects =
-        filteredProjects.slice(MAX_PROJECT_PER_PAGE)
-      setHiddenProjects(hiddenFilteredProjects)
-
-      if (hiddenFilteredProjects.length > MAX_PROJECT_PER_PAGE) {
+      if (hiddenFilteredProjectsCount > MAX_PROJECT_PER_PAGE) {
         setLoadMoreCount(MAX_PROJECT_PER_PAGE)
       } else {
-        setLoadMoreCount(hiddenFilteredProjects.length)
+        setLoadMoreCount(hiddenFilteredProjectsCount)
       }
     } else {
-      setHiddenProjects([])
       setVisibleProjects(filteredProjects)
       setLoadMoreCount(0)
+      setHiddenProjectsCount(0)
     }
   }, [
     loadedProjects,
+    maxVisibleProjects,
     tags,
     filter,
     setFilter,
@@ -221,23 +225,13 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
 
   const showAllProjects = useCallback(() => {
     setLoadMoreCount(0)
-    setVisibleProjects([...visibleProjects, ...hiddenProjects])
-    setHiddenProjects([])
-  }, [hiddenProjects, visibleProjects])
+    setHiddenProjectsCount(0)
+    setMaxVisibleProjects(maxVisibleProjects + hiddenProjectsCount)
+  }, [hiddenProjectsCount, maxVisibleProjects])
 
   const loadMoreProjects = useCallback(() => {
-    const newVisibleProjects = [
-      ...visibleProjects,
-      ...hiddenProjects.slice(0, loadMoreCount),
-    ]
-    const newHiddenProjects = hiddenProjects.slice(loadMoreCount)
-
-    setVisibleProjects(newVisibleProjects)
-    setHiddenProjects(newHiddenProjects)
-    if (newHiddenProjects.length < MAX_PROJECT_PER_PAGE) {
-      setLoadMoreCount(newHiddenProjects.length)
-    }
-  }, [visibleProjects, hiddenProjects, loadMoreCount])
+    setMaxVisibleProjects(maxVisibleProjects + loadMoreCount)
+  }, [maxVisibleProjects, loadMoreCount])
 
   const selectedProjects = useMemo(() => {
     return visibleProjects.filter(project => project.selected)
@@ -378,7 +372,7 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       deleteTag,
       error,
       filter,
-      hiddenProjects,
+      hiddenProjectsCount,
       isLoading,
       loadMoreCount,
       loadMoreProjects,
@@ -408,7 +402,7 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       deleteTag,
       error,
       filter,
-      hiddenProjects,
+      hiddenProjectsCount,
       isLoading,
       loadMoreCount,
       loadMoreProjects,

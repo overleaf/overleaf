@@ -139,3 +139,22 @@ export const currentProjects: Array<Project> = projectsData.filter(
 export const trashedProjects: Array<Project> = projectsData.filter(
   ({ trashed }) => trashed
 )
+
+export const makeLongProjectList = (listLength: number) => {
+  const longList = [...projectsData]
+  while (longList.length < listLength) {
+    longList.push(
+      Object.assign({}, copyableProject, {
+        id: `newProjectId${longList.length}`,
+      })
+    )
+  }
+
+  return {
+    fullList: longList,
+    currentList: longList.filter(
+      ({ archived, trashed }) => !archived && !trashed
+    ),
+    trashedList: longList.filter(({ trashed }) => trashed),
+  }
+}

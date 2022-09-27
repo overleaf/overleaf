@@ -4,11 +4,8 @@ import fetchMock from 'fetch-mock'
 import sinon from 'sinon'
 import ProjectListRoot from '../../../../../frontend/js/features/project-list/components/project-list-root'
 import { renderWithProjectListContext } from '../helpers/render-with-context'
-import {
-  currentProjects,
-  owner,
-  trashedProjects,
-} from '../fixtures/projects-data'
+import { owner, makeLongProjectList } from '../fixtures/projects-data'
+const { fullList, currentList, trashedList } = makeLongProjectList(40)
 
 const userId = owner.id
 
@@ -26,7 +23,9 @@ describe('<ProjectListRoot />', function () {
       value: { assign: locationStub },
     })
 
-    renderWithProjectListContext(<ProjectListRoot />)
+    renderWithProjectListContext(<ProjectListRoot />, {
+      projects: fullList,
+    })
     await fetchMock.flush(true)
     await waitFor(() => {
       screen.findByRole('table')
@@ -145,6 +144,41 @@ describe('<ProjectListRoot />', function () {
         expect(projectRequest2Url).to.equal(`/project/${project2Id}/trash`)
         expect(projectRequest2Headers?.method).to.equal('POST')
       })
+
+      it('only checks the projects that are viewable when there is a load more button', async function () {
+        // first one is the select all checkbox
+        fireEvent.click(allCheckboxes[0])
+
+        allCheckboxes = screen.getAllByRole<HTMLInputElement>('checkbox')
+        let checked = allCheckboxes.filter(c => c.checked)
+        expect(checked.length).to.equal(21) // max projects viewable by default is 20, and plus one for check all
+
+        const loadMoreButton = screen.getByLabelText('Show 17 more projects')
+        fireEvent.click(loadMoreButton)
+
+        allCheckboxes = screen.getAllByRole<HTMLInputElement>('checkbox')
+        expect(allCheckboxes.length).to.equal(currentList.length + 1)
+        checked = allCheckboxes.filter(c => c.checked)
+        expect(checked.length).to.equal(20) // remains same even after showing more
+      })
+
+      it('maintains viewable and selected projects after loading more and then selecting all', async function () {
+        const loadMoreButton = screen.getByLabelText('Show 17 more projects')
+        fireEvent.click(loadMoreButton)
+        // verify button gone
+        screen.getByText(
+          `Showing ${currentList.length} out of ${currentList.length} projects.`
+        )
+        // first one is the select all checkbox
+        fireEvent.click(allCheckboxes[0])
+        // verify button still gone
+        screen.getByText(
+          `Showing ${currentList.length} out of ${currentList.length} projects.`
+        )
+
+        allCheckboxes = screen.getAllByRole<HTMLInputElement>('checkbox')
+        expect(allCheckboxes.length).to.equal(currentList.length + 1)
+      })
     })
 
     describe('archived projects', function () {
@@ -170,14 +204,14 @@ describe('<ProjectListRoot />', function () {
 
         allCheckboxes = screen.getAllByRole<HTMLInputElement>('checkbox')
         // + 1 because of select all
-        expect(allCheckboxes.length).to.equal(trashedProjects.length + 1)
+        expect(allCheckboxes.length).to.equal(trashedList.length + 1)
 
         // first one is the select all checkbox
         fireEvent.click(allCheckboxes[0])
 
         const allCheckboxesChecked = allCheckboxes.filter(c => c.checked)
         // + 1 because of select all
-        expect(allCheckboxesChecked.length).to.equal(trashedProjects.length + 1)
+        expect(allCheckboxesChecked.length).to.equal(trashedList.length + 1)
 
         actionsToolbar = screen.getAllByRole('toolbar')[0]
       })
@@ -218,7 +252,7 @@ describe('<ProjectListRoot />', function () {
         fireEvent.click(allCheckboxes[1])
 
         const allCheckboxesChecked = allCheckboxes.filter(c => c.checked)
-        expect(allCheckboxesChecked.length).to.equal(trashedProjects.length - 1)
+        expect(allCheckboxesChecked.length).to.equal(trashedList.length - 1)
 
         await fetchMock.flush(true)
         expect(fetchMock.done()).to.be.true
@@ -257,7 +291,7 @@ describe('<ProjectListRoot />', function () {
       const input = screen.getAllByRole('textbox', {
         name: /search projects/i,
       })[0]
-      const value = currentProjects[0].name
+      const value = currentList[0].name
 
       fireEvent.change(input, { target: { value } })
 
