@@ -96,6 +96,7 @@ describe('ProjectController', function () {
     }
     this.CollaboratorsGetter = {
       userIsTokenMember: sinon.stub().callsArgWith(2, null, false),
+      isUserInvitedMemberOfProject: sinon.stub().callsArgWith(2, null, true),
     }
     this.ProjectEntityHandler = {}
     this.NotificationBuilder = {
@@ -1014,6 +1015,7 @@ describe('ProjectController', function () {
     })
 
     it('should add isRestrictedTokenMember', function (done) {
+      this.AuthorizationManager.isRestrictedUser.returns(false)
       this.res.render = (pageName, opts) => {
         opts.isRestrictedTokenMember.should.exist
         opts.isRestrictedTokenMember.should.equal(false)

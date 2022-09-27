@@ -118,6 +118,9 @@ async function getInvitedCollaboratorCount(projectId) {
 }
 
 async function isUserInvitedMemberOfProject(userId, projectId) {
+  if (!userId) {
+    return false
+  }
   const members = await getMemberIdsWithPrivilegeLevels(projectId)
   for (const member of members) {
     if (

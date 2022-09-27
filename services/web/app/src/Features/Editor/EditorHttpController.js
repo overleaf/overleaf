@@ -131,10 +131,16 @@ async function _buildJoinProjectView(req, projectId, userId) {
     userId,
     projectId
   )
+  const isInvitedMember =
+    await CollaboratorsGetter.promises.isUserInvitedMemberOfProject(
+      userId,
+      projectId
+    )
   const isRestrictedUser = AuthorizationManager.isRestrictedUser(
     userId,
     privilegeLevel,
-    isTokenMember
+    isTokenMember,
+    isInvitedMember
   )
   return {
     project: ProjectEditorHandler.buildProjectModelView(

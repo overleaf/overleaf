@@ -65,17 +65,19 @@ describe('AuthorizationManager', function () {
   describe('isRestrictedUser', function () {
     it('should produce the correct values', function () {
       const notRestrictedScenarios = [
-        [null, 'readAndWrite', false],
-        ['id', 'readAndWrite', true],
-        ['id', 'readOnly', false],
+        [null, 'readAndWrite', false, false],
+        ['id', 'readAndWrite', true, false],
+        ['id', 'readAndWrite', true, true],
+        ['id', 'readOnly', false, false],
+        ['id', 'readOnly', false, true],
       ]
       const restrictedScenarios = [
-        [null, 'readOnly', false],
-        ['id', 'readOnly', true],
-        [null, false, true],
-        [null, false, false],
-        ['id', false, true],
-        ['id', false, false],
+        [null, 'readOnly', false, false],
+        ['id', 'readOnly', true, false],
+        [null, false, true, false],
+        [null, false, false, false],
+        ['id', false, true, false],
+        ['id', false, false, false],
       ]
       for (const notRestrictedArgs of notRestrictedScenarios) {
         expect(

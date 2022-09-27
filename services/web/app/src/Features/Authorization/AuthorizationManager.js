@@ -11,12 +11,19 @@ const Errors = require('../Errors/Errors')
 const { hasAdminAccess } = require('../Helpers/AdminAuthorizationHelper')
 const Settings = require('@overleaf/settings')
 
-function isRestrictedUser(userId, privilegeLevel, isTokenMember) {
+function isRestrictedUser(
+  userId,
+  privilegeLevel,
+  isTokenMember,
+  isInvitedMember
+) {
   if (privilegeLevel === PrivilegeLevels.NONE) {
     return true
   }
   return (
-    privilegeLevel === PrivilegeLevels.READ_ONLY && (isTokenMember || !userId)
+    privilegeLevel === PrivilegeLevels.READ_ONLY &&
+    (isTokenMember || !userId) &&
+    !isInvitedMember
   )
 }
 
@@ -30,7 +37,17 @@ async function isRestrictedUserForProject(userId, projectId, token) {
     userId,
     projectId
   )
-  return isRestrictedUser(userId, privilegeLevel, isTokenMember)
+  const isInvitedMember =
+    await CollaboratorsGetter.promises.isUserInvitedMemberOfProject(
+      userId,
+      projectId
+    )
+  return isRestrictedUser(
+    userId,
+    privilegeLevel,
+    isTokenMember,
+    isInvitedMember
+  )
 }
 
 async function getPublicAccessLevel(projectId) {

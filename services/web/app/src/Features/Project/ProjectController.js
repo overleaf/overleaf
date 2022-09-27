@@ -833,6 +833,13 @@ const ProjectController = {
           }
           CollaboratorsGetter.userIsTokenMember(userId, projectId, cb)
         },
+        isInvitedMember(cb) {
+          CollaboratorsGetter.isUserInvitedMemberOfProject(
+            userId,
+            projectId,
+            cb
+          )
+        },
         brandVariation: [
           'project',
           (results, cb) => {
@@ -1060,6 +1067,7 @@ const ProjectController = {
           subscription,
           userIsMemberOfGroupSubscription,
           isTokenMember,
+          isInvitedMember,
           brandVariation,
           newSourceEditorAssignment,
           pdfjsAssignment,
@@ -1220,7 +1228,8 @@ const ProjectController = {
               isRestrictedTokenMember: AuthorizationManager.isRestrictedUser(
                 userId,
                 privilegeLevel,
-                isTokenMember
+                isTokenMember,
+                isInvitedMember
               ),
               languages: Settings.languages,
               learnedWords,

@@ -59,6 +59,7 @@ describe('EditorHttpController', function () {
         getInvitedMembersWithPrivilegeLevels: sinon
           .stub()
           .resolves(['members', 'mock']),
+        isUserInvitedMemberOfProject: sinon.stub().resolves(false),
       },
     }
     this.CollaboratorsHandler = {
@@ -234,7 +235,7 @@ describe('EditorHttpController', function () {
         this.req.query = { user_id: 'anonymous-user' }
         this.res.json.callsFake(() => done())
         this.AuthorizationManager.isRestrictedUser
-          .withArgs(null, 'readOnly', false)
+          .withArgs(null, 'readOnly', false, false)
           .returns(true)
         this.AuthorizationManager.promises.getPrivilegeLevelForProject
           .withArgs(null, this.project._id, this.token)
