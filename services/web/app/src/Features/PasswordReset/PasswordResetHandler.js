@@ -37,11 +37,17 @@ function generateAndEmailResetToken(email, callback) {
   })
 }
 
+function expirePasswordResetToken(token, callback) {
+  OneTimeTokenHandler.expireToken('password', token, err => {
+    return callback(err)
+  })
+}
+
 function getUserForPasswordResetToken(token, callback) {
-  OneTimeTokenHandler.getValueFromTokenAndExpire(
+  OneTimeTokenHandler.peekValueFromToken(
     'password',
     token,
-    (err, data) => {
+    (err, data, remainingUses) => {
       if (err != null) {
         if (err.name === 'NotFoundError') {
           return callback(null, null)
@@ -50,7 +56,7 @@ function getUserForPasswordResetToken(token, callback) {
         }
       }
       if (data == null || data.email == null) {
-        return callback(null, null)
+        return callback(null, null, remainingUses)
       }
       UserGetter.getUserByMainEmail(
         data.email,
@@ -59,20 +65,20 @@ function getUserForPasswordResetToken(token, callback) {
           if (err != null) {
             callback(err)
           } else if (user == null) {
-            callback(null, null)
+            callback(null, null, 0)
           } else if (
             data.user_id != null &&
             data.user_id === user._id.toString()
           ) {
-            callback(null, user)
+            callback(null, user, remainingUses)
           } else if (
             data.v1_user_id != null &&
             user.overleaf != null &&
             data.v1_user_id === user.overleaf.id
           ) {
-            callback(null, user)
+            callback(null, user, remainingUses)
           } else {
-            callback(null, null)
+            callback(null, null, 0)
           }
         }
       )
@@ -105,6 +111,8 @@ async function setNewUserPassword(token, password, auditLog) {
     password
   )
 
+  await PasswordResetHandler.promises.expirePasswordResetToken(token)
+
   return { found: true, reset, userId: user._id }
 }
 
@@ -114,11 +122,16 @@ const PasswordResetHandler = {
   setNewUserPassword: callbackify(setNewUserPassword),
 
   getUserForPasswordResetToken,
+
+  expirePasswordResetToken,
 }
 
 PasswordResetHandler.promises = {
   getUserForPasswordResetToken: promisify(
     PasswordResetHandler.getUserForPasswordResetToken
+  ),
+  expirePasswordResetToken: promisify(
+    PasswordResetHandler.expirePasswordResetToken
   ),
   setNewUserPassword,
 }

@@ -39,6 +39,10 @@ describe('PasswordResetController', function () {
           .stub()
           .resolves({ found: true, reset: true, userID: this.user_id }),
       },
+      getUserForPasswordResetToken: sinon
+        .stub()
+        .withArgs(this.token)
+        .yields(null, { _id: this.user_id }, 1),
     }
     this.UserSessionsManager = {
       promises: {
@@ -367,6 +371,28 @@ describe('PasswordResetController', function () {
           path.should.equal('/user/password/set')
           this.req.session.resetToken.should.equal(this.token)
           done()
+        }
+        this.PasswordResetController.renderSetPasswordForm(this.req, this.res)
+      })
+    })
+
+    describe('with expired token in query', function () {
+      beforeEach(function () {
+        this.req.query.passwordResetToken = this.token
+        this.PasswordResetHandler.getUserForPasswordResetToken = sinon
+          .stub()
+          .withArgs(this.token)
+          .yields(null, { _id: this.user_id }, 0)
+      })
+
+      it('should redirect to the reset request page with an error message', function (done) {
+        this.res.redirect = path => {
+          path.should.equal('/user/password/reset?error=token_expired')
+          this.req.session.should.not.have.property('resetToken')
+          done()
+        }
+        this.res.render = (templatePath, options) => {
+          done('should not render')
         }
         this.PasswordResetController.renderSetPasswordForm(this.req, this.res)
       })

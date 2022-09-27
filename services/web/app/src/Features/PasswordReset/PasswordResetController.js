@@ -78,6 +78,12 @@ async function setNewUserPassword(req, res, next) {
           key: 'invalid-password',
         },
       })
+    } else if (error.name === 'PasswordMustBeDifferentError') {
+      return res.status(400).json({
+        message: {
+          key: 'password-must-be-different',
+        },
+      })
     } else {
       return res.status(500).json({
         message: req.i18n.translate('error_performing_request'),
@@ -92,7 +98,15 @@ async function setNewUserPassword(req, res, next) {
 
 module.exports = {
   renderRequestResetForm(req, res) {
-    res.render('user/passwordReset', { title: 'reset_password' })
+    const errorQuery = req.query.error
+    let error = null
+    if (errorQuery === 'token_expired') {
+      error = 'password_reset_token_expired'
+    }
+    res.render('user/passwordReset', {
+      title: 'reset_password',
+      error,
+    })
   },
 
   requestReset(req, res, next) {
@@ -126,15 +140,23 @@ module.exports = {
 
   renderSetPasswordForm(req, res) {
     if (req.query.passwordResetToken != null) {
-      req.session.resetToken = req.query.passwordResetToken
-      let emailQuery = ''
-      if (typeof req.query.email === 'string') {
-        const email = EmailsHelper.parseEmail(req.query.email)
-        if (email) {
-          emailQuery = `?email=${encodeURIComponent(email)}`
+      return PasswordResetHandler.getUserForPasswordResetToken(
+        req.query.passwordResetToken,
+        (err, user, remainingUses) => {
+          if (err || !user || remainingUses <= 0) {
+            return res.redirect('/user/password/reset?error=token_expired')
+          }
+          req.session.resetToken = req.query.passwordResetToken
+          let emailQuery = ''
+          if (typeof req.query.email === 'string') {
+            const email = EmailsHelper.parseEmail(req.query.email)
+            if (email) {
+              emailQuery = `?email=${encodeURIComponent(email)}`
+            }
+          }
+          return res.redirect('/user/password/set' + emailQuery)
         }
-      }
-      return res.redirect('/user/password/set' + emailQuery)
+      )
     }
     if (req.session.resetToken == null) {
       return res.redirect('/user/password/reset')

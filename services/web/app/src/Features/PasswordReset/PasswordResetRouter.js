@@ -15,6 +15,9 @@ module.exports = {
 
     webRouter.get(
       '/user/password/reset',
+      validate({
+        query: { error: Joi.string() },
+      }),
       PasswordResetController.renderRequestResetForm
     )
     webRouter.post(
@@ -32,6 +35,13 @@ module.exports = {
 
     webRouter.get(
       '/user/password/set',
+      validate({
+        query: {
+          email: Joi.string().required(),
+          passwordResetToken: Joi.string(),
+        },
+      }),
+      rateLimit,
       PasswordResetController.renderSetPasswordForm
     )
     webRouter.post(

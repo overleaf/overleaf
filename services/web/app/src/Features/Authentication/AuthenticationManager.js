@@ -7,6 +7,7 @@ const {
   InvalidEmailError,
   InvalidPasswordError,
   ParallelLoginError,
+  PasswordMustBeDifferentError,
 } = require('./AuthenticationErrors')
 const util = require('util')
 const HaveIBeenPwned = require('./HaveIBeenPwned')
@@ -24,7 +25,7 @@ const _checkWriteResult = function (result, callback) {
 }
 
 const AuthenticationManager = {
-  authenticate(query, password, callback) {
+  _checkUserPassword(query, password, callback) {
     // Using Mongoose for legacy reasons here. The returned User instance
     // gets serialized into the session and there may be subtle differences
     // between the user returned by Mongoose vs mongodb (such as default values)
@@ -33,11 +34,27 @@ const AuthenticationManager = {
         return callback(error)
       }
       if (!user || !user.hashedPassword) {
-        return callback(null, null)
+        return callback(null, null, null)
       }
       bcrypt.compare(password, user.hashedPassword, function (error, match) {
         if (error) {
           return callback(error)
+        }
+        return callback(null, user, match)
+      })
+    })
+  },
+
+  authenticate(query, password, callback) {
+    AuthenticationManager._checkUserPassword(
+      query,
+      password,
+      (error, user, match) => {
+        if (error) {
+          return callback(error)
+        }
+        if (!user) {
+          return callback(null, null)
         }
         const update = { $inc: { loginEpoch: 1 } }
         if (!match) {
@@ -71,8 +88,8 @@ const AuthenticationManager = {
             )
           }
         )
-      })
-    })
+      }
+    )
   },
 
   validateEmail(email) {
@@ -182,31 +199,45 @@ const AuthenticationManager = {
     if (validationError) {
       return callback(validationError)
     }
-    this.hashPassword(password, function (error, hash) {
-      if (error) {
-        return callback(error)
-      }
-      db.users.updateOne(
-        {
-          _id: ObjectId(user._id.toString()),
-        },
-        {
-          $set: {
-            hashedPassword: hash,
-          },
-          $unset: {
-            password: true,
-          },
-        },
-        function (updateError, result) {
-          if (updateError) {
-            return callback(updateError)
-          }
-          _checkWriteResult(result, callback)
-          HaveIBeenPwned.checkPasswordForReuseInBackground(password)
+    // check if we can log in with this password. In which case we should reject it,
+    // because it is the same as the existing password.
+    AuthenticationManager._checkUserPassword(
+      { _id: user._id },
+      password,
+      (err, _user, match) => {
+        if (err) {
+          return callback(err)
         }
-      )
-    })
+        if (match) {
+          return callback(new PasswordMustBeDifferentError())
+        }
+        this.hashPassword(password, function (error, hash) {
+          if (error) {
+            return callback(error)
+          }
+          db.users.updateOne(
+            {
+              _id: ObjectId(user._id.toString()),
+            },
+            {
+              $set: {
+                hashedPassword: hash,
+              },
+              $unset: {
+                password: true,
+              },
+            },
+            function (updateError, result) {
+              if (updateError) {
+                return callback(updateError)
+              }
+              _checkWriteResult(result, callback)
+              HaveIBeenPwned.checkPasswordForReuseInBackground(password)
+            }
+          )
+        })
+      }
+    )
   },
 
   _passwordCharactersAreValid(password) {

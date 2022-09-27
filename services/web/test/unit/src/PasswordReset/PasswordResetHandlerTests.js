@@ -26,7 +26,8 @@ describe('PasswordResetHandler', function () {
     this.settings = { siteUrl: 'https://www.overleaf.com' }
     this.OneTimeTokenHandler = {
       getNewToken: sinon.stub(),
-      getValueFromTokenAndExpire: sinon.stub(),
+      peekValueFromToken: sinon.stub(),
+      expireToken: sinon.stub(),
     }
     this.UserGetter = {
       getUserByMainEmail: sinon.stub(),
@@ -188,7 +189,7 @@ describe('PasswordResetHandler', function () {
     })
     describe('when no data is found', function () {
       beforeEach(function () {
-        this.OneTimeTokenHandler.getValueFromTokenAndExpire.yields(null, null)
+        this.OneTimeTokenHandler.peekValueFromToken.yields(null, null)
       })
 
       it('should return found == false and reset == false', function () {
@@ -210,7 +211,7 @@ describe('PasswordResetHandler', function () {
 
     describe('when the token has a user_id and email', function () {
       beforeEach(function () {
-        this.OneTimeTokenHandler.getValueFromTokenAndExpire
+        this.OneTimeTokenHandler.peekValueFromToken
           .withArgs('password', this.token)
           .yields(null, {
             user_id: this.user._id,
@@ -219,6 +220,9 @@ describe('PasswordResetHandler', function () {
         this.AuthenticationManager.promises.setUserPassword
           .withArgs(this.user, this.password)
           .resolves(true)
+        this.OneTimeTokenHandler.expireToken = sinon
+          .stub()
+          .callsArgWith(2, null)
       })
 
       describe('when no user is found with this email', function () {
@@ -238,6 +242,7 @@ describe('PasswordResetHandler', function () {
               expect(err).to.not.exist
               expect(found).to.be.false
               expect(reset).to.be.false
+              expect(this.OneTimeTokenHandler.expireToken.callCount).to.equal(0)
               done()
             }
           )
@@ -249,6 +254,7 @@ describe('PasswordResetHandler', function () {
           this.UserGetter.getUserByMainEmail
             .withArgs(this.email)
             .yields(null, { _id: 'not-the-same', email: this.email })
+          this.OneTimeTokenHandler.expireToken.callsArgWith(2, null)
         })
 
         it('should return found == false and reset == false', function (done) {
@@ -261,6 +267,7 @@ describe('PasswordResetHandler', function () {
               expect(err).to.not.exist
               expect(found).to.be.false
               expect(reset).to.be.false
+              expect(this.OneTimeTokenHandler.expireToken.callCount).to.equal(0)
               done()
             }
           )
@@ -271,6 +278,9 @@ describe('PasswordResetHandler', function () {
         describe('success', function () {
           beforeEach(function () {
             this.UserGetter.getUserByMainEmail.yields(null, this.user)
+            this.OneTimeTokenHandler.expireToken = sinon
+              .stub()
+              .callsArgWith(2, null)
           })
 
           it('should update the user audit log', function (done) {
@@ -308,6 +318,20 @@ describe('PasswordResetHandler', function () {
             )
           })
 
+          it('should expire the token', function (done) {
+            this.PasswordResetHandler.setNewUserPassword(
+              this.token,
+              this.password,
+              this.auditLog,
+              (_err, _result) => {
+                expect(this.OneTimeTokenHandler.expireToken.called).to.equal(
+                  true
+                )
+                done()
+              }
+            )
+          })
+
           describe('when logged in', function () {
             beforeEach(function () {
               this.auditLog.initiatorId = this.user_id
@@ -335,6 +359,30 @@ describe('PasswordResetHandler', function () {
         })
 
         describe('errors', function () {
+          describe('via setUserPassword', function () {
+            beforeEach(function () {
+              this.PasswordResetHandler.promises.getUserForPasswordResetToken =
+                sinon.stub().withArgs(this.token).resolves(this.user)
+              this.AuthenticationManager.promises.setUserPassword
+                .withArgs(this.user, this.password)
+                .rejects()
+            })
+            it('should return the error', function (done) {
+              this.PasswordResetHandler.setNewUserPassword(
+                this.token,
+                this.password,
+                this.auditLog,
+                (error, _result) => {
+                  expect(error).to.exist
+                  expect(
+                    this.UserAuditLogHandler.promises.addEntry.callCount
+                  ).to.equal(1)
+                  done()
+                }
+              )
+            })
+          })
+
           describe('via UserAuditLogHandler', function () {
             beforeEach(function () {
               this.PasswordResetHandler.promises.getUserForPasswordResetToken =
@@ -367,7 +415,7 @@ describe('PasswordResetHandler', function () {
     describe('when the token has a v1_user_id and email', function () {
       beforeEach(function () {
         this.user.overleaf = { id: 184 }
-        this.OneTimeTokenHandler.getValueFromTokenAndExpire
+        this.OneTimeTokenHandler.peekValueFromToken
           .withArgs('password', this.token)
           .yields(null, {
             v1_user_id: this.user.overleaf.id,
@@ -376,6 +424,9 @@ describe('PasswordResetHandler', function () {
         this.AuthenticationManager.promises.setUserPassword
           .withArgs(this.user, this.password)
           .resolves(true)
+        this.OneTimeTokenHandler.expireToken = sinon
+          .stub()
+          .callsArgWith(2, null)
       })
 
       describe('when no user is reset with this email', function () {
@@ -394,6 +445,9 @@ describe('PasswordResetHandler', function () {
               const { reset, userId } = result
               expect(err).to.not.exist
               expect(reset).to.be.false
+              expect(this.OneTimeTokenHandler.expireToken.called).to.equal(
+                false
+              )
               done()
             }
           )
@@ -418,6 +472,9 @@ describe('PasswordResetHandler', function () {
               const { reset, userId } = result
               expect(err).to.not.exist
               expect(reset).to.be.false
+              expect(this.OneTimeTokenHandler.expireToken.called).to.equal(
+                false
+              )
               done()
             }
           )
@@ -441,6 +498,7 @@ describe('PasswordResetHandler', function () {
               expect(err).to.not.exist
               expect(reset).to.be.true
               expect(userId).to.equal(this.user._id)
+              expect(this.OneTimeTokenHandler.expireToken.called).to.equal(true)
               done()
             }
           )

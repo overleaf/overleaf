@@ -120,6 +120,12 @@ async function sendFormRequest(formEl, captchaResponse) {
   return postJSON(url, { body })
 }
 
+function hideFormElements(formEl) {
+  for (const e of formEl.elements) {
+    e.hidden = true
+  }
+}
+
 function showMessages(formEl, messageBag) {
   const messagesEl = formEl.querySelector('[data-ol-form-messages]')
   if (!messagesEl) return
@@ -138,6 +144,15 @@ function showMessages(formEl, messageBag) {
         .forEach(el => {
           el.hidden = false
         })
+      // Hide the form elements on specific message types
+      const hideOnError = formEl.attributes['data-ol-hide-on-error']
+      if (
+        hideOnError &&
+        hideOnError.value &&
+        hideOnError.value.match(message.key)
+      ) {
+        hideFormElements(formEl)
+      }
       return
     }
 

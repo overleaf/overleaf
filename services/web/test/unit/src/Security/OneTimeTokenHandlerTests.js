@@ -107,6 +107,90 @@ describe('OneTimeTokenHandler', function () {
     })
   })
 
+  describe('peekValueFromToken', function () {
+    describe('successfully', function () {
+      const data = 'some-mock-data'
+      beforeEach(function () {
+        this.db.tokens.findOneAndUpdate = sinon
+          .stub()
+          .yields(null, { value: { data } })
+        return this.OneTimeTokenHandler.peekValueFromToken(
+          'password',
+          'mock-token',
+          this.callback
+        )
+      })
+
+      it('should increment the peekCount', function () {
+        return this.db.tokens.findOneAndUpdate
+          .calledWith(
+            {
+              use: 'password',
+              token: 'mock-token',
+              expiresAt: { $gt: new Date() },
+              usedAt: { $exists: false },
+              peekCount: { $not: { $gte: this.OneTimeTokenHandler.MAX_PEEKS } },
+            },
+            {
+              $inc: { peekCount: 1 },
+            }
+          )
+          .should.equal(true)
+      })
+
+      it('should return the data', function () {
+        return this.callback.calledWith(null, data).should.equal(true)
+      })
+    })
+
+    describe('when a valid token is not found', function () {
+      beforeEach(function () {
+        this.db.tokens.findOneAndUpdate = sinon
+          .stub()
+          .yields(null, { value: null })
+        return this.OneTimeTokenHandler.peekValueFromToken(
+          'password',
+          'mock-token',
+          this.callback
+        )
+      })
+
+      it('should return a NotFoundError', function () {
+        return this.callback
+          .calledWith(sinon.match.instanceOf(Errors.NotFoundError))
+          .should.equal(true)
+      })
+    })
+  })
+
+  describe('expireToken', function () {
+    beforeEach(function () {
+      this.db.tokens.updateOne = sinon.stub().yields(null)
+      this.OneTimeTokenHandler.expireToken(
+        'password',
+        'mock-token',
+        this.callback
+      )
+    })
+
+    it('should expire the token', function () {
+      this.db.tokens.updateOne
+        .calledWith(
+          {
+            use: 'password',
+            token: 'mock-token',
+          },
+          {
+            $set: {
+              usedAt: new Date(),
+            },
+          }
+        )
+        .should.equal(true)
+      this.callback.calledWith(null).should.equal(true)
+    })
+  })
+
   describe('getValueFromTokenAndExpire', function () {
     describe('successfully', function () {
       beforeEach(function () {
@@ -128,6 +212,7 @@ describe('OneTimeTokenHandler', function () {
               token: 'mock-token',
               expiresAt: { $gt: new Date() },
               usedAt: { $exists: false },
+              peekCount: { $not: { $gte: this.OneTimeTokenHandler.MAX_PEEKS } },
             },
             {
               $set: { usedAt: new Date() },

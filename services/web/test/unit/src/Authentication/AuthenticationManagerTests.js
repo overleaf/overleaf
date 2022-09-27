@@ -180,7 +180,8 @@ describe('AuthenticationManager', function () {
           email: (this.email = 'USER@sharelatex.com'),
         }
         this.db.users.updateOne = sinon
-        this.User.findOne = sinon.stub().callsArgWith(2, null, this.user)
+        this.User.findOne = sinon.stub().callsArgWith(1, null, this.user)
+        this.bcrypt.compare = sinon.stub().callsArgWith(2, null, false)
         this.db.users.updateOne = sinon
           .stub()
           .callsArgWith(2, null, { modifiedCount: 1 })
@@ -603,17 +604,37 @@ describe('AuthenticationManager', function () {
   describe('setUserPassword', function () {
     beforeEach(function () {
       this.user_id = ObjectId()
-      this.user = {
-        _id: this.user_id,
-        email: 'user@example.com',
-      }
       this.password = 'banana'
       this.hashedPassword = 'asdkjfa;osiuvandf'
       this.salt = 'saltaasdfasdfasdf'
+      this.user = {
+        _id: this.user_id,
+        email: 'user@example.com',
+        hashedPassword: this.hashedPassword,
+      }
+      this.bcrypt.compare = sinon.stub().callsArgWith(2, null, false)
       this.bcrypt.genSalt = sinon.stub().callsArgWith(2, null, this.salt)
       this.bcrypt.hash = sinon.stub().callsArgWith(2, null, this.hashedPassword)
-      this.User.findOne = sinon.stub().callsArgWith(2, null, this.user)
+      this.User.findOne = sinon.stub().callsArgWith(1, null, this.user)
       this.db.users.updateOne = sinon.stub().callsArg(2)
+    })
+
+    describe('same as previous password', function () {
+      beforeEach(function () {
+        this.bcrypt.compare.callsArgWith(2, null, true)
+      })
+
+      it('should return an error', function (done) {
+        this.AuthenticationManager.setUserPassword(
+          this.user,
+          this.password,
+          err => {
+            expect(err).to.exist
+            expect(err.name).to.equal('PasswordMustBeDifferentError')
+            done()
+          }
+        )
+      })
     })
 
     describe('too long', function () {

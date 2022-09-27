@@ -227,8 +227,119 @@ describe('PasswordReset', function () {
         const auditLog = userHelper.getAuditLogWithoutNoise()
         expect(auditLog.length).to.equal(1)
       })
+
+      it('when the password is the same as current, should return 400 and log the change', async function () {
+        // send reset request
+        response = await userHelper.request.post('/user/password/set', {
+          form: {
+            passwordResetToken: token,
+            password: userHelper.getDefaultPassword(),
+          },
+          simple: false,
+        })
+        expect(response.statusCode).to.equal(400)
+        expect(JSON.parse(response.body).message.key).to.equal(
+          'password-must-be-different'
+        )
+        userHelper = await UserHelper.getUser({ email })
+
+        const auditLog = userHelper.getAuditLogWithoutNoise()
+        expect(auditLog.length).to.equal(1)
+      })
     })
   })
+
+  describe('multiple attempts to set the password, reaching attempt limit', async function () {
+    beforeEach(async function () {
+      response = await userHelper.request.get(
+        `/user/password/set?passwordResetToken=${token}&email=${email}`,
+        { simple: false }
+      )
+      expect(response.statusCode).to.equal(302)
+      expect(response.headers.location).to.equal(
+        `/user/password/set${emailQuery}`
+      )
+    })
+
+    it('should allow multiple attempts with same-password error, then deny further attempts', async function () {
+      const sendSamePasswordRequest = async function () {
+        return userHelper.request.post('/user/password/set', {
+          form: {
+            passwordResetToken: token,
+            password: userHelper.getDefaultPassword(),
+          },
+          simple: false,
+        })
+      }
+      // Three attempts at setting the password, all rejected for being the same as
+      // the current password
+      const response1 = await sendSamePasswordRequest()
+      expect(response1.statusCode).to.equal(400)
+      expect(JSON.parse(response1.body).message.key).to.equal(
+        'password-must-be-different'
+      )
+      const response2 = await sendSamePasswordRequest()
+      expect(response2.statusCode).to.equal(400)
+      expect(JSON.parse(response2.body).message.key).to.equal(
+        'password-must-be-different'
+      )
+      const response3 = await sendSamePasswordRequest()
+      expect(response3.statusCode).to.equal(400)
+      expect(JSON.parse(response3.body).message.key).to.equal(
+        'password-must-be-different'
+      )
+      // Fourth attempt is rejected because the token has been used too many times
+      const response4 = await sendSamePasswordRequest()
+      expect(response4.statusCode).to.equal(404)
+      expect(JSON.parse(response4.body).message.key).to.equal('token-expired')
+    })
+
+    it('should allow multiple attempts with same-password error, then set the password', async function () {
+      const sendSamePasswordRequest = async function () {
+        return userHelper.request.post('/user/password/set', {
+          form: {
+            passwordResetToken: token,
+            password: userHelper.getDefaultPassword(),
+          },
+          simple: false,
+        })
+      }
+      // Two attempts at setting the password, all rejected for being the same as
+      // the current password
+      const response1 = await sendSamePasswordRequest()
+      expect(response1.statusCode).to.equal(400)
+      expect(JSON.parse(response1.body).message.key).to.equal(
+        'password-must-be-different'
+      )
+      const response2 = await sendSamePasswordRequest()
+      expect(response2.statusCode).to.equal(400)
+      expect(JSON.parse(response2.body).message.key).to.equal(
+        'password-must-be-different'
+      )
+      // Third attempt is succeeds
+      const response3 = await userHelper.request.post('/user/password/set', {
+        form: {
+          passwordResetToken: token,
+          password: 'some-new-password',
+        },
+        simple: false,
+      })
+      expect(response3.statusCode).to.equal(200)
+      // Check the user and audit log
+      userHelper = await UserHelper.getUser({ email })
+      user = userHelper.user
+      expect(user.hashedPassword).to.exist
+      expect(user.password).to.not.exist
+      const auditLog = userHelper.getAuditLogWithoutNoise()
+      expect(auditLog).to.exist
+      expect(auditLog[0]).to.exist
+      expect(auditLog[0].initiatorId).to.equal(null)
+      expect(auditLog[0].operation).to.equal('reset-password')
+      expect(auditLog[0].ipAddress).to.equal('127.0.0.1')
+      expect(auditLog[0].timestamp).to.exist
+    })
+  })
+
   describe('without a valid token', function () {
     it('no token should redirect to page to re-request reset token', async function () {
       response = await userHelper.request.get(
@@ -238,7 +349,7 @@ describe('PasswordReset', function () {
       expect(response.statusCode).to.equal(302)
       expect(response.headers.location).to.equal('/user/password/reset')
     })
-    it('should return 404 for invalid tokens', async function () {
+    it('should show error for invalid tokens and return 404 if used', async function () {
       const invalidToken = 'not-real-token'
       response = await userHelper.request.get(
         `/user/password/set?&passwordResetToken=${invalidToken}&email=${email}`,
@@ -246,7 +357,7 @@ describe('PasswordReset', function () {
       )
       expect(response.statusCode).to.equal(302)
       expect(response.headers.location).to.equal(
-        `/user/password/set${emailQuery}`
+        `/user/password/reset?error=token_expired`
       )
       // send reset request
       response = await userHelper.request.post('/user/password/set', {

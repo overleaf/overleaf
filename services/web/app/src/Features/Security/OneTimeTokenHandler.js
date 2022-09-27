@@ -6,6 +6,8 @@ const { promisifyAll } = require('../../util/promises')
 const ONE_HOUR_IN_S = 60 * 60
 
 const OneTimeTokenHandler = {
+  MAX_PEEKS: 4,
+
   getNewToken(use, data, options, callback) {
     // options is optional
     if (!options) {
@@ -44,6 +46,7 @@ const OneTimeTokenHandler = {
         token,
         expiresAt: { $gt: now },
         usedAt: { $exists: false },
+        peekCount: { $not: { $gte: OneTimeTokenHandler.MAX_PEEKS } },
       },
       {
         $set: {
@@ -59,6 +62,53 @@ const OneTimeTokenHandler = {
           return callback(new Errors.NotFoundError('no token found'))
         }
         callback(null, token.data)
+      }
+    )
+  },
+
+  peekValueFromToken(use, token, callback) {
+    db.tokens.findOneAndUpdate(
+      {
+        use,
+        token,
+        expiresAt: { $gt: new Date() },
+        usedAt: { $exists: false },
+        peekCount: { $not: { $gte: OneTimeTokenHandler.MAX_PEEKS } },
+      },
+      {
+        $inc: { peekCount: 1 },
+      },
+      {
+        returnDocument: 'after',
+      },
+      function (error, result) {
+        if (error) {
+          return callback(error)
+        }
+        const token = result.value
+        if (!token) {
+          return callback(new Errors.NotFoundError('no token found'))
+        }
+        const remainingPeeks = OneTimeTokenHandler.MAX_PEEKS - token.peekCount
+        callback(null, token.data, remainingPeeks)
+      }
+    )
+  },
+
+  expireToken(use, token, callback) {
+    const now = new Date()
+    db.tokens.updateOne(
+      {
+        use,
+        token,
+      },
+      {
+        $set: {
+          usedAt: now,
+        },
+      },
+      error => {
+        callback(error)
       }
     )
   },
