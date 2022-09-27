@@ -10,6 +10,7 @@ const MODULE_PATH =
 describe('TpdsController', function () {
   beforeEach(function () {
     this.metadata = {
+      projectId: ObjectId(),
       entityId: ObjectId(),
       folderId: ObjectId(),
       entityType: 'doc',
@@ -74,6 +75,7 @@ describe('TpdsController', function () {
         json: payload => {
           expect(payload).to.deep.equal({
             status: 'applied',
+            projectId: this.metadata.projectId.toString(),
             entityId: this.metadata.entityId.toString(),
             folderId: this.metadata.folderId.toString(),
             entityType: this.metadata.entityType,

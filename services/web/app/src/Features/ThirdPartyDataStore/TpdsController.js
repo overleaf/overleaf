@@ -54,6 +54,7 @@ async function mergeUpdate(req, res) {
 
   const payload = {
     status: 'applied',
+    projectId: metadata.projectId.toString(),
     entityId: metadata.entityId.toString(),
     entityType: metadata.entityType,
     folderId: metadata.folderId.toString(),

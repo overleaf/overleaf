@@ -83,6 +83,7 @@ async function _mergeUpdate(userId, projectId, path, fsPath, source) {
       userId
     )
     return {
+      projectId,
       entityType: 'file',
       entityId: file._id,
       rev: file.rev,
@@ -97,6 +98,7 @@ async function _mergeUpdate(userId, projectId, path, fsPath, source) {
       source
     )
     return {
+      projectId,
       entityType: 'doc',
       entityId: doc._id,
       rev: doc.rev,
