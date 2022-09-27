@@ -21,4 +21,7 @@ export const Search = (args: any) => {
 export default {
   title: 'Project List / Project Search',
   component: SearchForm,
+  args: {
+    inputValue: '',
+  },
 }
