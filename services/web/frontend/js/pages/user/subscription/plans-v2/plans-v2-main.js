@@ -105,6 +105,7 @@ function selectViewFromHash() {
     if (view) {
       // make sure the selected view is valid
       if (document.querySelector(`[data-ol-plans-v2-view-tab="${view}"]`)) {
+        currentMonthlyAnnualSwitchValue = 'annual'
         selectTab(view)
         // clear the hash so it doesn't persist when switching plans
         window.location.hash = ''
