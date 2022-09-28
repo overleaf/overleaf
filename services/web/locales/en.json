@@ -1726,6 +1726,7 @@
   "search_replace_with": "Replace with",
   "search_replace_all": "Replace All",
   "search_search_for": "Search for",
+  "search_whole_word": "Whole word",
   "go_to_account_settings": "Go to Account Settings",
   "keep_your_account_safe": "Keep your account safe",
   "primary_email_check_question": "Is <0>__email__</0> still your email address?",
