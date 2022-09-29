@@ -1,10 +1,4 @@
 {
-  "show_all_uppercase": "Vis alle",
-  "show_all_projects": "Vis alle projekter",
-  "tag_name_is_already_used": "Tagget “__tagName__” findes allerede.",
-  "show_x_more": "Vis __x__ flere",
-  "show_x_more_projects": "Vis __x__ flere projekter",
-  "showing_x_out_of_n_projects": "Viser __x__ af __n__ projekter.",
   "faster_compiles_feedback_question": "Virkede den her kompilering anderledes end ellers?",
   "faster_compiles_feedback_seems_faster": "Hurtigere",
   "faster_compiles_feedback_seems_same": "Det samme",
@@ -537,6 +531,8 @@
   "tracked_change_added": "Tilføjet",
   "tracked_change_deleted": "Slettet",
   "show_all": "vis alle",
+  "show_all_uppercase": "Vis alle",
+  "show_all_projects": "Vis alle projekter",
   "show_less": "vis færre",
   "dropbox_sync_error": "Beklager, der skete en fejl mens vi checkede vores Dropbox tjeneste. Prøv igen om lidt.",
   "send": "Send",
@@ -1339,7 +1335,7 @@
   "galileo_promo_subtitle_2": "Galileo kan udløses i matematikmiljøer, i citationskommandoer og efter kommentarer.",
   "galileo_only_available_in_cm6": "Galileo er kun til stede i kildekodeskriveprogrammet.",
   "tag_name_cannot_exceed_characters": "Tag–navn kan være længere end __maxLength__ tegn",
-  "overleaf_labs": "Overleaf Labs",
+  "tag_name_is_already_used": "Tagget “__tagName__” findes allerede.",
   "labs_program_already_participating": "Du er indskrevet i Labs",
   "labs_program_not_participating": "Du er ikke indskrevet i Labs",
   "labs_program_benefits": "__appName__ leder altid efter nye måder at hjælpe brugere til at arbejde hurtigere og mere effektivt. Ved at være med i Overleaf Labs kan du deltage i eksperimenter der udforsker innovative idéer indenfor kollaborativt forfatterskab og udgivelse.",
@@ -1352,5 +1348,9 @@
   "galileo_is_part_of_overleaf_labs": "Galileo er et eksperiment i <0>Ovlerleaf Labs</0>",
   "thank_you_for_being_part_of_our_labs_program": "Tak fordi du er en del af vores Labs–program, hvor du kan få <0>tidlig adgang til eksperimentelle funktioner</0> og hjælpe os med at udforske innovative idéer, der hjælper dig til at arbejde hurtigere og mere effektivt",
   "manage_labs_program_membership": "Håndter Medlemskab I Labs–Programmer",
-  "current_experiments": "Nuværende Eksperimenter"
+  "current_experiments": "Nuværende Eksperimenter",
+  "overleaf_labs": "Overleaf Labs",
+  "show_x_more": "Vis __x__ flere",
+  "show_x_more_projects": "Vis __x__ flere projekter",
+  "showing_x_out_of_n_projects": "Viser __x__ af __n__ projekter."
 }
