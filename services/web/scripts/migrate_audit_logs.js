@@ -44,6 +44,18 @@ async function main(options) {
       },
       { _id: 1, auditLog: 1 }
     )
+
+    // most projects are processed after its owner has been processed, but only those
+    // users with an existing `auditLog` have been taken into consideration, leaving
+    // some projects orphan. This batched update processes all remaining projects.
+    await batchedUpdate(
+      'projects',
+      { auditLog: { $exists: true } },
+      async (x, projects) => {
+        await processProjectsBatch(projects, options)
+      },
+      { _id: 1, auditLog: 1 }
+    )
   }
 }
 
@@ -68,6 +80,16 @@ async function processUser(user, options) {
     { _id: 1, auditLog: 1 }
   )
   projects.forEach(project => processProject(project, options))
+}
+
+async function processProjectsBatch(projects, options) {
+  await promiseMapWithLimit(
+    options.writeConcurrency,
+    projects,
+    async project => {
+      await processProject(project, options)
+    }
+  )
 }
 
 async function processProject(project, options) {
