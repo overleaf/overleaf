@@ -72,7 +72,7 @@ function setUpSubscriptionTracking(linkEl) {
   }
 
   if (eventTrackingKey === DEFAULT_EVENT_TRACKING_KEY) {
-    eventTrackingSegmentation.PLANS_PAGE_LAYOUT_V2_ANNUAL =
+    eventTrackingSegmentation[PLANS_PAGE_LAYOUT_V2_ANNUAL] =
       plansPageV2SplitTestVariant
   }
 
