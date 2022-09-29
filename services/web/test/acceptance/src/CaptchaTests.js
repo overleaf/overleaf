@@ -79,7 +79,8 @@ describe('Captcha', function () {
     const { response, body } = await loginWithCaptcha('valid')
     expectSuccessfulLogin(response, body)
 
-    expect((await user.get()).auditLog.pop().info).to.deep.equal({
+    const auditLog = await user.getAuditLog()
+    expect(auditLog[0].info).to.deep.equal({
       captcha: 'solved',
       method: 'Password login',
     })
@@ -104,7 +105,8 @@ describe('Captcha', function () {
       const { response, body } = await loginWithCaptcha('')
       expectSuccessfulLogin(response, body)
 
-      expect((await user.get()).auditLog.pop().info).to.deep.equal({
+      const auditLog = await user.getAuditLog()
+      expect(auditLog[1].info).to.deep.equal({
         captcha: 'skipped',
         method: 'Password login',
       })

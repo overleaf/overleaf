@@ -84,6 +84,10 @@ describe('UserDeleter', function () {
       },
     }
 
+    this.UserAuditLogEntry = {
+      deleteMany: sinon.stub().returns({ exec: sinon.stub().resolves() }),
+    }
+
     this.UserDeleter = SandboxedModule.require(modulePath, {
       requires: {
         '../../models/User': { User },
@@ -96,6 +100,9 @@ describe('UserDeleter', function () {
         '../UserMembership/UserMembershipsHandler': this.UserMembershipsHandler,
         '../Project/ProjectDeleter': this.ProjectDeleter,
         '../Institutions/InstitutionsAPI': this.InstitutionsApi,
+        '../../models/UserAuditLogEntry': {
+          UserAuditLogEntry: this.UserAuditLogEntry,
+        },
       },
     })
   })
@@ -418,6 +425,15 @@ describe('UserDeleter', function () {
       for (const deletedUser of this.deletedUsers) {
         expect(deletedUser.user).to.be.undefined
         expect(deletedUser.save.called).to.be.true
+      }
+    })
+
+    it('deletes audit logs for all deleted users', async function () {
+      await this.UserDeleter.promises.expireDeletedUsersAfterDuration()
+      for (const deletedUser of this.deletedUsers) {
+        expect(this.UserAuditLogEntry.deleteMany).to.have.been.calledWith({
+          userId: deletedUser.deleterData.deletedUserId,
+        })
       }
     })
   })

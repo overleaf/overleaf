@@ -140,7 +140,9 @@ describe('ProjectDeleter', function () {
         destroyProject: sinon.stub().resolves(),
       },
     }
-
+    this.ProjectAuditLogEntry = {
+      deleteMany: sinon.stub().returns({ exec: sinon.stub().resolves() }),
+    }
     this.ProjectDeleter = SandboxedModule.require(modulePath, {
       requires: {
         '../../infrastructure/Features': this.Features,
@@ -160,6 +162,9 @@ describe('ProjectDeleter', function () {
         './ProjectDetailsHandler': this.ProjectDetailsHandler,
         '../../infrastructure/mongodb': { db: this.db, ObjectId },
         '../History/HistoryManager': this.HistoryManager,
+        '../../models/ProjectAuditLogEntry': {
+          ProjectAuditLogEntry: this.ProjectAuditLogEntry,
+        },
       },
     })
   })
@@ -499,6 +504,12 @@ describe('ProjectDeleter', function () {
         expect(
           this.ChatApiHandler.promises.destroyProject
         ).to.have.been.calledWith(this.deletedProjects[0].project._id)
+      })
+
+      it('should delete audit logs', async function () {
+        expect(this.ProjectAuditLogEntry.deleteMany).to.have.been.calledWith({
+          projectId: this.deletedProjects[0].project._id,
+        })
       })
     })
 

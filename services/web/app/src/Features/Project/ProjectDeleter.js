@@ -4,6 +4,7 @@ const { db, ObjectId } = require('../../infrastructure/mongodb')
 const { callbackify } = require('util')
 const { Project } = require('../../models/Project')
 const { DeletedProject } = require('../../models/DeletedProject')
+const { ProjectAuditLogEntry } = require('../../models/ProjectAuditLogEntry')
 const Errors = require('../Errors/Errors')
 const logger = require('@overleaf/logger')
 const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
@@ -349,6 +350,7 @@ async function expireDeletedProject(projectId) {
       await DeletedProject.deleteOne({
         'deleterData.deletedProjectId': projectId,
       })
+      await ProjectAuditLogEntry.deleteMany({ projectId })
       return
     }
     const deletedProject = await DeletedProject.findOne({
@@ -386,6 +388,7 @@ async function expireDeletedProject(projectId) {
       }),
       ChatApiHandler.promises.destroyProject(deletedProject.project._id),
       hardDeleteDeletedFiles(deletedProject.project._id),
+      ProjectAuditLogEntry.deleteMany({ projectId }),
     ])
 
     await DeletedProject.updateOne(

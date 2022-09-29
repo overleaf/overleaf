@@ -59,6 +59,7 @@ async function setupDb() {
   db.oauthAccessTokens = internalDb.collection('oauthAccessTokens')
   db.oauthApplications = internalDb.collection('oauthApplications')
   db.oauthAuthorizationCodes = internalDb.collection('oauthAuthorizationCodes')
+  db.projectAuditLogEntries = internalDb.collection('projectAuditLogEntries')
   db.projectHistoryFailures = internalDb.collection('projectHistoryFailures')
   db.projectHistoryLabels = internalDb.collection('projectHistoryLabels')
   db.projectHistoryMetaData = internalDb.collection('projectHistoryMetaData')
@@ -78,6 +79,7 @@ async function setupDb() {
   db.teamInvites = internalDb.collection('teamInvites')
   db.templates = internalDb.collection('templates')
   db.tokens = internalDb.collection('tokens')
+  db.userAuditLogEntries = internalDb.collection('userAuditLogEntries')
   db.users = internalDb.collection('users')
   db.userstubs = internalDb.collection('userstubs')
 }

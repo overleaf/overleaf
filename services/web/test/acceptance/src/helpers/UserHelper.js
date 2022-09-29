@@ -9,6 +9,9 @@ const moment = require('moment')
 const request = require('request-promise-native')
 const { db } = require('../../../../app/src/infrastructure/mongodb')
 const { ObjectId } = require('mongodb')
+const {
+  UserAuditLogEntry,
+} = require('../../../../app/src/models/UserAuditLogEntry')
 
 let globalUserNum = Settings.test.counterInit
 
@@ -200,6 +203,12 @@ class UserHelper {
     if (!user) {
       throw new Error(`no user found for args: ${JSON.stringify([...args])}`)
     }
+
+    user.auditLog = await UserAuditLogEntry.find(
+      { userId: user._id },
+      {},
+      { sort: { timestamp: 'asc' } }
+    ).exec()
 
     return new UserHelper(user)
   }

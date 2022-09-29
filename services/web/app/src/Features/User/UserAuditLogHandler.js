@@ -1,8 +1,6 @@
 const OError = require('@overleaf/o-error')
-const { User } = require('../../models/User')
+const { UserAuditLogEntry } = require('../../models/UserAuditLogEntry')
 const { callbackify } = require('util')
-
-const MAX_AUDIT_LOG_ENTRIES = 200
 
 function _canHaveNoInitiatorId(operation, info) {
   if (operation === 'reset-password') return true
@@ -38,25 +36,15 @@ async function addEntry(userId, operation, initiatorId, ipAddress, info = {}) {
     })
   }
 
-  const timestamp = new Date()
   const entry = {
+    userId,
     operation,
     initiatorId,
     info,
     ipAddress,
-    timestamp,
   }
-  const result = await User.updateOne(
-    { _id: userId },
-    {
-      $push: {
-        auditLog: { $each: [entry], $slice: -MAX_AUDIT_LOG_ENTRIES },
-      },
-    }
-  ).exec()
-  if (result.nModified === 0) {
-    throw new OError('user not found', { userId })
-  }
+
+  await UserAuditLogEntry.create(entry)
 }
 
 const UserAuditLogHandler = {

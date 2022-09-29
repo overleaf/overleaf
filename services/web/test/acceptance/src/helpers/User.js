@@ -44,14 +44,26 @@ class User {
     db.users.findOne({ _id: ObjectId(this._id) }, callback)
   }
 
-  getAuditLogWithoutNoise(callback) {
+  getAuditLog(callback) {
     this.get((error, user) => {
       if (error) return callback(error)
       if (!user) return callback(new Error('User not found'))
 
+      db.userAuditLogEntries
+        .find({ userId: ObjectId(this._id) })
+        .toArray((error, auditLog) => {
+          if (error) return callback(error)
+          callback(null, auditLog || [])
+        })
+    })
+  }
+
+  getAuditLogWithoutNoise(callback) {
+    this.getAuditLog((error, auditLog) => {
+      if (error) return callback(error)
       callback(
         null,
-        (user.auditLog || []).filter(entry => {
+        auditLog.filter(entry => {
           return entry.operation !== 'login'
         })
       )

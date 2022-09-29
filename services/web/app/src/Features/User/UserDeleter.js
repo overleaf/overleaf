@@ -3,6 +3,7 @@ const logger = require('@overleaf/logger')
 const moment = require('moment')
 const { User } = require('../../models/User')
 const { DeletedUser } = require('../../models/DeletedUser')
+const { UserAuditLogEntry } = require('../../models/UserAuditLogEntry')
 const NewsletterManager = require('../Newsletter/NewsletterManager')
 const ProjectDeleter = require('../Project/ProjectDeleter')
 const SubscriptionHandler = require('../Subscription/SubscriptionHandler')
@@ -87,7 +88,9 @@ async function expireDeletedUsersAfterDuration() {
   }
 
   for (let i = 0; i < deletedUsers.length; i++) {
-    await expireDeletedUser(deletedUsers[i].deleterData.deletedUserId)
+    const deletedUserId = deletedUsers[i].deleterData.deletedUserId
+    await expireDeletedUser(deletedUserId)
+    await UserAuditLogEntry.deleteMany({ userId: deletedUserId }).exec()
   }
 }
 

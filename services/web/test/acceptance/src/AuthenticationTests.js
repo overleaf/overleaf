@@ -59,18 +59,18 @@ describe('Authentication', function () {
     })
 
     it('should emit an user auditLog entry for the login', async function () {
-      const {
-        auditLog: [auditLogEntry],
-      } = await user.get()
+      const auditLog = await user.getAuditLog()
+      const auditLogEntry = auditLog[0]
       expect(auditLogEntry).to.exist
       expect(auditLogEntry.timestamp).to.exist
-      delete auditLogEntry.timestamp
-      expect(auditLogEntry).to.deep.equal({
-        operation: 'login',
-        ipAddress: '127.0.0.1',
-        initiatorId: ObjectId(user.id),
-        info: { method: 'Password login', captcha: 'solved' },
+      expect(auditLogEntry.initiatorId).to.deep.equal(ObjectId(user.id))
+      expect(auditLogEntry.userId).to.deep.equal(ObjectId(user.id))
+      expect(auditLogEntry.operation).to.equal('login')
+      expect(auditLogEntry.info).to.deep.equal({
+        method: 'Password login',
+        captcha: 'solved',
       })
+      expect(auditLogEntry.ipAddress).to.equal('127.0.0.1')
     })
   })
 

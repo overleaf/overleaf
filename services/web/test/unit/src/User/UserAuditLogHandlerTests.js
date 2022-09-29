@@ -2,7 +2,7 @@ const sinon = require('sinon')
 const { expect } = require('chai')
 const { ObjectId } = require('mongodb')
 const SandboxedModule = require('sandboxed-module')
-const { User } = require('../helpers/models/User')
+const { UserAuditLogEntry } = require('../helpers/models/UserAuditLogEntry')
 
 const MODULE_PATH = '../../../../app/src/Features/User/UserAuditLogHandler'
 
@@ -23,22 +23,22 @@ describe('UserAuditLogHandler', function () {
       },
       ip: '0:0:0:0',
     }
-    this.UserMock = sinon.mock(User)
+    this.UserAuditLogEntryMock = sinon.mock(UserAuditLogEntry)
     this.UserAuditLogHandler = SandboxedModule.require(MODULE_PATH, {
       requires: {
-        '../../models/User': { User },
+        '../../models/UserAuditLogEntry': { UserAuditLogEntry },
       },
     })
   })
 
   afterEach(function () {
-    this.UserMock.restore()
+    this.UserAuditLogEntryMock.restore()
   })
 
   describe('addEntry', function () {
     describe('success', function () {
       beforeEach(function () {
-        this.dbUpdate = this.UserMock.expects('updateOne')
+        this.dbUpdate = this.UserAuditLogEntryMock.expects('create')
           .chain('exec')
           .resolves({ nModified: 1 })
       })
@@ -50,7 +50,7 @@ describe('UserAuditLogHandler', function () {
           this.action.ip,
           this.action.info
         )
-        this.UserMock.verify()
+        this.UserAuditLogEntryMock.verify()
       })
 
       it('updates the log for password reset operation witout a initiatorId', async function () {
@@ -63,7 +63,7 @@ describe('UserAuditLogHandler', function () {
             this.action.info
           )
         )
-        this.UserMock.verify()
+        this.UserAuditLogEntryMock.verify()
       })
 
       it('updates the log for a email removal via script', async function () {
@@ -79,31 +79,11 @@ describe('UserAuditLogHandler', function () {
             }
           )
         )
-        this.UserMock.verify()
+        this.UserAuditLogEntryMock.verify()
       })
     })
 
     describe('errors', function () {
-      describe('when the user does not exist', function () {
-        beforeEach(function () {
-          this.UserMock.expects('updateOne')
-            .chain('exec')
-            .resolves({ nModified: 0 })
-        })
-
-        it('throws an error', async function () {
-          await expect(
-            this.UserAuditLogHandler.promises.addEntry(
-              this.userId,
-              this.action.operation,
-              this.action.initiatorId,
-              this.action.ip,
-              this.action.info
-            )
-          ).to.be.rejected
-        })
-      })
-
       describe('missing parameters', function () {
         it('throws an error when no operation', async function () {
           await expect(

@@ -1,7 +1,4 @@
-const OError = require('@overleaf/o-error')
-const { Project } = require('../../models/Project')
-
-const MAX_AUDIT_LOG_ENTRIES = 200
+const { ProjectAuditLogEntry } = require('../../models/ProjectAuditLogEntry')
 
 module.exports = {
   promises: {
@@ -19,22 +16,11 @@ module.exports = {
  * - message: a string detailing what happened
  */
 async function addEntry(projectId, operation, initiatorId, info = {}) {
-  const timestamp = new Date()
   const entry = {
+    projectId,
     operation,
     initiatorId,
-    timestamp,
     info,
   }
-  const result = await Project.updateOne(
-    { _id: projectId },
-    {
-      $push: {
-        auditLog: { $each: [entry], $slice: -MAX_AUDIT_LOG_ENTRIES },
-      },
-    }
-  ).exec()
-  if (result.nModified === 0) {
-    throw new OError('project not found', { projectId })
-  }
+  await ProjectAuditLogEntry.create(entry)
 }
