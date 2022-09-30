@@ -29,7 +29,9 @@ async function flushProjectToTpds(projectId) {
 }
 
 /**
- * Flush a project to TPDS if a flush is pending
+ * Flush a project to TPDS if a flush is pending.  This is called when
+ * projects are loaded in the editor and triggers a sync to dropbox for
+ * projects that were imported from Overleaf v1.
  */
 async function flushProjectToTpdsIfNeeded(projectId) {
   const project = await ProjectGetter.promises.getProject(projectId, {
@@ -92,6 +94,10 @@ async function _resetDeferredTpdsFlushCounter(project) {
 
 /**
  * Mark a project as pending a flush to TPDS.
+ * This was called as part of the import process for Overleaf v1 projects.
+ * We no longer use this method, but imported v1 projects have the
+ * deferredTpdsFlushCounter set and will trigger a flush when loaded in
+ * the editor.
  */
 async function deferProjectFlushToTpds(projectId) {
   await Project.updateOne(
