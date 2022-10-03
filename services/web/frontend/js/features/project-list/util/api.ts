@@ -41,6 +41,14 @@ export function leaveProject(projectId: string) {
   return postJSON(`/project/${projectId}/leave`)
 }
 
+export function renameProject(projectId: string, newName: string) {
+  return postJSON(`/project/${projectId}/rename`, {
+    body: {
+      newProjectName: newName,
+    },
+  })
+}
+
 export function trashProject(projectId: string) {
   return postJSON(`/project/${projectId}/trash`)
 }

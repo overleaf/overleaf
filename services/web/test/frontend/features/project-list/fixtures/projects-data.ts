@@ -145,6 +145,7 @@ export const makeLongProjectList = (listLength: number) => {
   while (longList.length < listLength) {
     longList.push(
       Object.assign({}, copyableProject, {
+        name: `Report (${longList.length})`,
         id: `newProjectId${longList.length}`,
       })
     )

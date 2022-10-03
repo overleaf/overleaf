@@ -4,6 +4,7 @@ import fetchMock from 'fetch-mock'
 import sinon from 'sinon'
 import ProjectListRoot from '../../../../../frontend/js/features/project-list/components/project-list-root'
 import { renderWithProjectListContext } from '../helpers/render-with-context'
+import * as eventTracking from '../../../../../frontend/js/infrastructure/event-tracking'
 import {
   owner,
   archivedProjects,
@@ -16,8 +17,11 @@ const userId = owner.id
 describe('<ProjectListRoot />', function () {
   const originalLocation = window.location
   const locationStub = sinon.stub()
+  let sendSpy: sinon.SinonSpy
 
   beforeEach(async function () {
+    global.localStorage.clear()
+    sendSpy = sinon.spy(eventTracking, 'send')
     window.metaAttributesCache = new Map()
     window.metaAttributesCache.set('ol-tags', [])
     window.metaAttributesCache.set('ol-ExposedSettings', { templateLinks: [] })
@@ -37,6 +41,7 @@ describe('<ProjectListRoot />', function () {
   })
 
   afterEach(function () {
+    sendSpy.restore()
     window.user_id = undefined
     fetchMock.reset()
     Object.defineProperty(window, 'location', {
@@ -316,15 +321,86 @@ describe('<ProjectListRoot />', function () {
         screen.getByText('No projects')
       })
     })
+
+    describe('project tools "More" dropdown', function () {
+      beforeEach(async function () {
+        const filterButton = screen.getAllByText('All Projects')[0]
+        fireEvent.click(filterButton)
+        allCheckboxes = screen.getAllByRole<HTMLInputElement>('checkbox')
+        // first one is the select all checkbox
+        fireEvent.click(allCheckboxes[2])
+        actionsToolbar = screen.getAllByRole('toolbar')[0]
+      })
+
+      it('does not show the dropdown when more than 1 project is selected', async function () {
+        await waitFor(() => {
+          within(actionsToolbar).getByText<HTMLElement>('More')
+        })
+        fireEvent.click(allCheckboxes[0])
+        expect(within(actionsToolbar).queryByText<HTMLElement>('More')).to.be
+          .null
+      })
+
+      it('opens the rename modal, validates name, and can rename the project', async function () {
+        fetchMock.post(`express:/project/:id/rename`, {
+          status: 200,
+        })
+
+        await waitFor(() => {
+          const moreDropdown =
+            within(actionsToolbar).getByText<HTMLElement>('More')
+          fireEvent.click(moreDropdown)
+        })
+
+        const renameButton = screen.getByText<HTMLInputElement>('Rename')
+        fireEvent.click(renameButton)
+
+        const modal = screen.getAllByRole('dialog')[0]
+
+        expect(sendSpy).to.be.calledOnce
+        expect(sendSpy).calledWith('project-list-page-interaction')
+
+        // same name
+        let confirmButton = within(modal).getByText<HTMLInputElement>('Rename')
+        expect(confirmButton.disabled).to.be.true
+        let input = screen.getByLabelText('New Name') as HTMLButtonElement
+        const oldName = input.value
+
+        // no name
+        let newProjectName = ''
+        input = screen.getByLabelText('New Name') as HTMLButtonElement
+        fireEvent.change(input, {
+          target: { value: newProjectName },
+        })
+        confirmButton = within(modal).getByText<HTMLInputElement>('Rename')
+        expect(confirmButton.disabled).to.be.true
+
+        // a valid name
+        newProjectName = 'A new project name'
+        input = screen.getByLabelText('New Name') as HTMLButtonElement
+        fireEvent.change(input, {
+          target: { value: newProjectName },
+        })
+
+        confirmButton = within(modal).getByText<HTMLInputElement>('Rename')
+        expect(confirmButton.disabled).to.be.false
+        fireEvent.click(confirmButton)
+
+        await fetchMock.flush(true)
+        expect(fetchMock.done()).to.be.true
+
+        screen.findByText(newProjectName)
+        expect(screen.queryByText(oldName)).to.be.null
+
+        const allCheckboxes = screen.getAllByRole<HTMLInputElement>('checkbox')
+        const allCheckboxesChecked = allCheckboxes.filter(c => c.checked)
+        expect(allCheckboxesChecked.length).to.equal(0)
+      })
+    })
   })
 
   describe('search', function () {
     it('shows only projects based on the input', async function () {
-      await fetchMock.flush(true)
-      await waitFor(() => {
-        screen.findByRole('table')
-      })
-
       const input = screen.getAllByRole('textbox', {
         name: /search projects/i,
       })[0]
