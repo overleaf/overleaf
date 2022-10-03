@@ -1,4 +1,5 @@
 {
+  "overleaf": "Overleaf",
   "faster_compiles_feedback_question": "Was this compile different than usual?",
   "faster_compiles_feedback_seems_faster": "Faster",
   "faster_compiles_feedback_seems_same": "Same",
