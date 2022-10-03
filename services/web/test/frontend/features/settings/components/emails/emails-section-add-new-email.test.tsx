@@ -95,6 +95,8 @@ describe('<EmailsSection />', function () {
 
   it('renders "Start adding your address" until a valid email is typed', async function () {
     fetchMock.get('/user/emails?ensureAffiliation=true', [])
+    fetchMock.get(`/institutions/domains?hostname=email.com&limit=1`, 200)
+    fetchMock.get(`/institutions/domains?hostname=email&limit=1`, 200)
     render(<EmailsSection />)
 
     const addAnotherEmailBtn = (await screen.findByRole('button', {
