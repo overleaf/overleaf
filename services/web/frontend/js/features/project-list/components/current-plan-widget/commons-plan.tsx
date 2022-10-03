@@ -6,24 +6,29 @@ type CommonsPlanProps = Pick<CommonsPlanSubscription, 'subscription' | 'plan'>
 
 function CommonsPlan({ subscription, plan }: CommonsPlanProps) {
   const { t } = useTranslation()
+  const currentPlanLabel = (
+    <Trans i18nKey="premium_plan_label" components={{ b: <strong /> }} />
+  )
 
   return (
-    <Tooltip
-      description={t('commons_plan_tooltip', {
-        plan: plan.name,
-        institution: subscription.name,
-      })}
-      id="commons-plan"
-      overlayProps={{ placement: 'bottom' }}
-    >
-      <a
-        href="/learn/how-to/Overleaf_premium_features"
-        className="current-plan-label"
+    <>
+      <span className="current-plan-label visible-xs">{currentPlanLabel}</span>
+      <Tooltip
+        description={t('commons_plan_tooltip', {
+          plan: plan.name,
+          institution: subscription.name,
+        })}
+        id="commons-plan"
+        overlayProps={{ placement: 'bottom' }}
       >
-        <Trans i18nKey="premium_plan_label" components={{ b: <strong /> }} />{' '}
-        <span className="info-badge" />
-      </a>
-    </Tooltip>
+        <a
+          href="/learn/how-to/Overleaf_premium_features"
+          className="current-plan-label hidden-xs"
+        >
+          {currentPlanLabel} <span className="info-badge" />
+        </a>
+      </Tooltip>
+    </>
   )
 }
 

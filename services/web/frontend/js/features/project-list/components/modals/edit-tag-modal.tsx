@@ -98,24 +98,32 @@ export default function EditTagModal({
           <div className="modal-footer-left">
             <Button
               onClick={() => runDeleteTag(tag._id)}
-              bsStyle="primary"
+              bsStyle="danger"
               disabled={isDeleteLoading || isRenameLoading}
             >
-              {isDeleteLoading ? <>{t('deleting')} &hellip;</> : t('delete')}
+              {isDeleteLoading ? (
+                <>{t('deleting')} &hellip;</>
+              ) : (
+                t('delete_folder')
+              )}
             </Button>
           </div>
           <Button
             onClick={onClose}
             disabled={isDeleteLoading || isRenameLoading}
           >
-            {t('cancel')}
+            {t('save_or_cancel-cancel')}
           </Button>
           <Button
             onClick={() => runRenameTag(tag._id)}
             bsStyle="primary"
             disabled={isRenameLoading || isDeleteLoading || !newTagName?.length}
           >
-            {isRenameLoading ? <>{t('saving')} &hellip;</> : t('save_changes')}
+            {isRenameLoading ? (
+              <>{t('saving')} &hellip;</>
+            ) : (
+              t('save_or_cancel-save')
+            )}
           </Button>
         </div>
         {(isDeleteError || isRenameError) && (
