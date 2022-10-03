@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/no-autofocus */
 import PropTypes from 'prop-types'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -83,6 +84,7 @@ export default function CloneProjectModalContent({
               required
               value={clonedProjectName}
               onChange={event => setClonedProjectName(event.target.value)}
+              autoFocus
             />
           </FormGroup>
         </form>
