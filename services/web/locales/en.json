@@ -1487,6 +1487,7 @@
   "get_free_stuff": "Get free stuff",
   "chat": "Chat",
   "your_message": "Your Message",
+  "your_message_to_collaborators": "Send a message to your collaborators",
   "loading": "Loading",
   "connecting": "Connecting",
   "recompile": "Recompile",

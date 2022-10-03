@@ -20,7 +20,7 @@ describe('<MessageInput />', function () {
       />
     )
 
-    screen.getByLabelText('Your Message')
+    screen.getByLabelText('Send a message to your collaborators')
   })
 
   it('sends a message after typing and hitting enter', function () {
@@ -47,7 +47,9 @@ describe('<MessageInput />', function () {
       />
     )
 
-    const input = screen.getByPlaceholderText('Your Message…')
+    const input = screen.getByPlaceholderText(
+      'Send a message to your collaborators…'
+    )
 
     fireEvent.click(input)
     expect(resetUnreadMessages).to.be.calledOnce

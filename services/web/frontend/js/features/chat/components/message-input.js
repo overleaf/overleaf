@@ -21,11 +21,11 @@ function MessageInput({ resetUnreadMessages, sendMessage }) {
   return (
     <form className="new-message">
       <label htmlFor="chat-input" className="sr-only">
-        {t('your_message')}
+        {t('your_message_to_collaborators')}
       </label>
       <textarea
         id="chat-input"
-        placeholder={`${t('your_message')}…`}
+        placeholder={`${t('your_message_to_collaborators')}…`}
         onKeyDown={handleKeyDown}
         onClick={resetUnreadMessages}
       />
