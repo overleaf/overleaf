@@ -90,7 +90,7 @@
     "@pollyjs/persister-fs": "^4.2.1",
     "@reach/tabs": "^0.15.0",
     "@replit/codemirror-emacs": "overleaf/codemirror-emacs#8640addc01bbe99fec0144993d012b6dfc57d6e2",
-    "@replit/codemirror-vim": "^6.0.2",
+    "@replit/codemirror-vim": "overleaf/codemirror-vim#76b21cf77b6c36755cc2be3b41dd17d4c847cc57",
     "@sentry/browser": "^7.8.1",
     "@uppy/core": "^1.15.0",
     "@uppy/dashboard": "^1.11.0",
