@@ -341,7 +341,7 @@ describe('<ProjectListRoot />', function () {
           .null
       })
 
-      it('opens the rename modal, validates name, and can rename the project', async function () {
+      it('opens the rename modal, and can rename the project, and view updated', async function () {
         fetchMock.post(`express:/project/:id/rename`, {
           status: 200,
         })
@@ -396,6 +396,54 @@ describe('<ProjectListRoot />', function () {
         const allCheckboxesChecked = allCheckboxes.filter(c => c.checked)
         expect(allCheckboxesChecked.length).to.equal(0)
       })
+
+      it('opens the copy modal, can copy the project, and view updated', async function () {
+        const tableRows = screen.getAllByRole('row')
+        const linkForProjectToCopy = within(tableRows[1]).getByRole('link')
+        const projectNameToCopy = linkForProjectToCopy.textContent || '' // needed for type checking
+        screen.findByText(projectNameToCopy) // make sure not just empty string
+        const copiedProjectName = `${projectNameToCopy} (Copy)`
+        fetchMock.post(`express:/project/:id/clone`, {
+          status: 200,
+          body: {
+            name: copiedProjectName,
+            lastUpdated: new Date(),
+            project_id: userId,
+            owner_ref: userId,
+            owner,
+            id: '6328e14abec0df019fce0be5',
+            lastUpdatedBy: owner,
+            accessLevel: 'owner',
+            source: 'owner',
+            trashed: false,
+            archived: false,
+          },
+        })
+
+        await waitFor(() => {
+          const moreDropdown =
+            within(actionsToolbar).getByText<HTMLElement>('More')
+          fireEvent.click(moreDropdown)
+        })
+
+        const copyButton =
+          within(actionsToolbar).getByText<HTMLInputElement>('Make a copy')
+        fireEvent.click(copyButton)
+
+        // confirm in modal
+        const copyConfirmButton = document.querySelector(
+          'button[type="submit"]'
+        ) as HTMLElement
+        fireEvent.click(copyConfirmButton)
+
+        await fetchMock.flush(true)
+        expect(fetchMock.done()).to.be.true
+
+        expect(sendSpy).to.be.calledOnce
+        expect(sendSpy).calledWith('project-list-page-interaction')
+
+        screen.findByText(copiedProjectName)
+      })
     })
   })
 
@@ -443,7 +491,6 @@ describe('<ProjectListRoot />', function () {
       fireEvent.click(copyButton)
 
       // confirm in modal
-      // const copyConfirmButton = screen.getByText('Copy')
       const copyConfirmButton = document.querySelector(
         'button[type="submit"]'
       ) as HTMLElement
@@ -451,6 +498,9 @@ describe('<ProjectListRoot />', function () {
 
       await fetchMock.flush(true)
       expect(fetchMock.done()).to.be.true
+
+      expect(sendSpy).to.be.calledOnce
+      expect(sendSpy).calledWith('project-list-page-interaction')
 
       expect(screen.queryByText(copiedProjectName)).to.be.null
 

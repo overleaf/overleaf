@@ -1904,5 +1904,6 @@
   "overleaf_labs": "Overleaf Labs",
   "show_x_more": "Show __x__ more",
   "show_x_more_projects": "Show __x__ more projects",
-  "showing_x_out_of_n_projects": "Showing __x__ out of __n__ projects."
+  "showing_x_out_of_n_projects": "Showing __x__ out of __n__ projects.",
+  "make_a_copy": "Make a copy"
 }
