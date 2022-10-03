@@ -4,14 +4,12 @@ import { Trans, useTranslation } from 'react-i18next'
 import { Button } from 'react-bootstrap'
 import PreviewLogEntryHeader from './preview-log-entry-header'
 import Icon from '../../../shared/components/icon'
-import getMeta from '../../../utils/meta'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import { useStopOnFirstError } from '../../../shared/hooks/use-stop-on-first-error'
 import StopOnFirstErrorBadge from '../../../shared/components/stop-on-first-error-badge'
 
 function PreviewLogsPaneMaxEntries({ totalEntries, entriesShown, hasErrors }) {
   const { t } = useTranslation()
-  const showStopOnFirstError = getMeta('ol-showStopOnFirstError')
   const { startCompile, stoppedOnFirstError, setAnimateCompileDropdownArrow } =
     useCompileContext()
   const { enableStopOnFirstError } = useStopOnFirstError({
@@ -34,57 +32,39 @@ function PreviewLogsPaneMaxEntries({ totalEntries, entriesShown, hasErrors }) {
       <PreviewLogEntryHeader level="raw" headerTitle={title} />
       <div className="log-entry-content">
         <div className="log-entry-formatted-content">
-          {showStopOnFirstError ? (
-            hasErrors && !stoppedOnFirstError ? (
-              <>
-                <p>
-                  <Icon type="lightbulb-o" />
-                  &nbsp;
-                  <strong>{t('tip')}: </strong>
-                  <Trans
-                    i18nKey="log_entry_maximum_entries_enable_stop_on_first_error"
-                    components={{
-                      button: (
-                        <Button
-                          bsSize="xs"
-                          bsStyle="info"
-                          onClick={handleEnableStopOnFirstErrorClick}
-                        />
-                      ),
-                      'learn-more-link': (
-                        // eslint-disable-next-line jsx-a11y/anchor-has-content
-                        <a href="https://www.overleaf.com/learn/latex/Questions/Tips_and_Tricks_for_Troubleshooting_LaTeX" />
-                      ),
-                    }}
-                  />{' '}
-                  <StopOnFirstErrorBadge placement="bottom" />
-                </p>
-                <p>{t('log_entry_maximum_entries_see_full_logs')}</p>
-              </>
-            ) : (
+          {hasErrors && !stoppedOnFirstError ? (
+            <>
               <p>
                 <Icon type="lightbulb-o" />
                 &nbsp;
                 <strong>{t('tip')}: </strong>
-                {t('log_entry_maximum_entries_see_full_logs')}
+                <Trans
+                  i18nKey="log_entry_maximum_entries_enable_stop_on_first_error"
+                  components={{
+                    button: (
+                      <Button
+                        bsSize="xs"
+                        bsStyle="info"
+                        onClick={handleEnableStopOnFirstErrorClick}
+                      />
+                    ),
+                    'learn-more-link': (
+                      // eslint-disable-next-line jsx-a11y/anchor-has-content
+                      <a href="https://www.overleaf.com/learn/latex/Questions/Tips_and_Tricks_for_Troubleshooting_LaTeX" />
+                    ),
+                  }}
+                />{' '}
+                <StopOnFirstErrorBadge placement="bottom" />
               </p>
-            )
+              <p>{t('log_entry_maximum_entries_see_full_logs')}</p>
+            </>
           ) : (
-            <>
+            <p>
               <Icon type="lightbulb-o" />
               &nbsp;
-              {hasErrors ? (
-                <Trans
-                  i18nKey="log_entry_maximum_entries_message"
-                  components={[<b />, <p />]} // eslint-disable-line react/jsx-key
-                />
-              ) : (
-                <Trans
-                  i18nKey="log_entry_maximum_entries_message_no_errors"
-                  components={[<b />]} // eslint-disable-line react/jsx-key
-                />
-              )}
-            </>
+              <strong>{t('tip')}: </strong>
+              {t('log_entry_maximum_entries_see_full_logs')}
+            </p>
           )}
         </div>
       </div>

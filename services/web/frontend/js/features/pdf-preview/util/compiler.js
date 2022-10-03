@@ -98,10 +98,9 @@ export default class DocumentCompiler {
         // use incremental compile for all users but revert to a full compile
         // if there was previously a server error
         incrementalCompilesEnabled: !this.error,
+        stopOnFirstError: options.stopOnFirstError,
       }
-      if (getMeta('ol-showStopOnFirstError')) {
-        body.stopOnFirstError = options.stopOnFirstError
-      }
+
       const data = await postJSON(
         `/project/${this.projectId}/compile?${params}`,
         { body, signal: this.signal }

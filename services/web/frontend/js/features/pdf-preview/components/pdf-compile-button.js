@@ -7,7 +7,6 @@ import classnames from 'classnames'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import { useStopOnFirstError } from '../../../shared/hooks/use-stop-on-first-error'
 import PdfCompileButtonInner from './pdf-compile-button-inner'
-import getMeta from '../../../utils/meta'
 
 function PdfCompileButton() {
   const {
@@ -30,7 +29,6 @@ function PdfCompileButton() {
     useStopOnFirstError({ eventSource: 'dropdown' })
 
   const { t } = useTranslation()
-  const showStopOnFirstError = getMeta('ol-showStopOnFirstError')
 
   return (
     <ControlledDropdown
@@ -95,23 +93,17 @@ function PdfCompileButton() {
           {t('ignore_validation_errors')}
         </MenuItem>
 
-        {showStopOnFirstError && (
-          <MenuItem header>{t('compile_error_handling')}</MenuItem>
-        )}
+        <MenuItem header>{t('compile_error_handling')}</MenuItem>
 
-        {showStopOnFirstError && (
-          <MenuItem onSelect={enableStopOnFirstError}>
-            <Icon type={stopOnFirstError ? 'check' : ''} fw />
-            {t('stop_on_first_error')}
-          </MenuItem>
-        )}
+        <MenuItem onSelect={enableStopOnFirstError}>
+          <Icon type={stopOnFirstError ? 'check' : ''} fw />
+          {t('stop_on_first_error')}
+        </MenuItem>
 
-        {showStopOnFirstError && (
-          <MenuItem onSelect={disableStopOnFirstError}>
-            <Icon type={!stopOnFirstError ? 'check' : ''} fw />
-            {t('try_to_compile_despite_errors')}
-          </MenuItem>
-        )}
+        <MenuItem onSelect={disableStopOnFirstError}>
+          <Icon type={!stopOnFirstError ? 'check' : ''} fw />
+          {t('try_to_compile_despite_errors')}
+        </MenuItem>
 
         <MenuItem divider />
 
