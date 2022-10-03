@@ -47,13 +47,8 @@ export default function ProjectListTableRow({
         <InlineTags className="hidden-xs" projectId={project.id} />
       </td>
       <td className="dash-cell-date-owner visible-xs pb-0">
-        <LastUpdatedCell project={project} />{' '}
-        {ownerName ? (
-          <>
-            — <span className="text-lowercase">{t('owned_by')}</span>{' '}
-            {ownerName}
-          </>
-        ) : null}
+        <LastUpdatedCell project={project} />
+        {ownerName ? <> — {t('owned_by_x', { x: ownerName })}</> : null}
       </td>
       <td className="dash-cell-owner hidden-xs">
         <OwnerCell project={project} />

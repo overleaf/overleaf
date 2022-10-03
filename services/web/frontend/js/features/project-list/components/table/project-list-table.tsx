@@ -9,7 +9,10 @@ import { Project } from '../../../../../../types/project/dashboard/api'
 
 function SortBtn({ onClick, text, iconType, screenReaderText }: SortBtnProps) {
   return (
-    <button className="btn-link table-header-sort-btn" onClick={onClick}>
+    <button
+      className="btn-link table-header-sort-btn hidden-xs"
+      onClick={onClick}
+    >
       {text}
       {iconType ? <Icon className="tablesort" type={iconType} /> : null}
       <span className="sr-only">{screenReaderText}</span>
@@ -38,9 +41,12 @@ function ProjectListTable() {
 
   return (
     <table className="project-dash-table">
-      <thead className="hidden-xs">
+      <thead className="sr-only-xs">
         <tr>
-          <th className="dash-cell-checkbox" aria-label={t('select_projects')}>
+          <th
+            className="dash-cell-checkbox hidden-xs"
+            aria-label={t('select_projects')}
+          >
             <input
               type="checkbox"
               id="project-list-table-select-all"
@@ -76,7 +82,13 @@ function ProjectListTable() {
             />
           </th>
           <th
-            className="dash-cell-owner"
+            className="dash-cell-date-owner visible-xs"
+            aria-label={`${t('date')} — ${t('owner')}`}
+          >
+            {`${t('date')} — ${t('owner')}`}
+          </th>
+          <th
+            className="dash-cell-owner hidden-xs"
             aria-label={t('owner')}
             aria-sort={
               sort.by === 'owner'
@@ -94,7 +106,7 @@ function ProjectListTable() {
             />
           </th>
           <th
-            className="dash-cell-date"
+            className="dash-cell-date hidden-xs"
             aria-label={t('last_modified')}
             aria-sort={
               sort.by === 'lastUpdated'
@@ -110,6 +122,9 @@ function ProjectListTable() {
               sort={sort}
               onClick={() => handleSort('lastUpdated')}
             />
+          </th>
+          <th className="dash-cell-tag visible-xs" aria-label={t('tags')}>
+            {t('tags')}
           </th>
           <th className="dash-cell-actions">{t('actions')}</th>
         </tr>

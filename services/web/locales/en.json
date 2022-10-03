@@ -1877,7 +1877,7 @@
   "history_entry_origin_dropbox": "via Dropbox",
   "sort_by_x": "Sort by __x__",
   "sort_by": "Sort by",
-  "owned_by": "Owned by",
+  "owned_by_x": "owned by __x__",
   "last_updated_date_by_x": "__lastUpdatedDate__ by __person__",
   "select_projects": "Select Projects",
   "ascending": "Ascending",
