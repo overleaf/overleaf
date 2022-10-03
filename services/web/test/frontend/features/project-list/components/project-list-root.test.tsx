@@ -4,7 +4,11 @@ import fetchMock from 'fetch-mock'
 import sinon from 'sinon'
 import ProjectListRoot from '../../../../../frontend/js/features/project-list/components/project-list-root'
 import { renderWithProjectListContext } from '../helpers/render-with-context'
-import { owner, makeLongProjectList } from '../fixtures/projects-data'
+import {
+  owner,
+  archivedProjects,
+  makeLongProjectList,
+} from '../fixtures/projects-data'
 const { fullList, currentList, trashedList } = makeLongProjectList(40)
 
 const userId = owner.id
@@ -191,9 +195,42 @@ describe('<ProjectListRoot />', function () {
         // first one is the select all checkbox
         fireEvent.click(allCheckboxes[1])
         project1Id = allCheckboxes[1].getAttribute('data-project-id')
+
+        actionsToolbar = screen.getAllByRole('toolbar')[0]
       })
+
       it('does not show the archive button in toolbar when archive view selected', function () {
         expect(screen.queryByLabelText('Archive')).to.be.null
+      })
+
+      it('restores all projects when selected', async function () {
+        fetchMock.delete(`express:/project/:id/archive`, {
+          status: 200,
+        })
+
+        const unarchiveButton =
+          within(actionsToolbar).getByText<HTMLInputElement>('Restore')
+        fireEvent.click(unarchiveButton)
+
+        await fetchMock.flush(true)
+        expect(fetchMock.done()).to.be.true
+
+        screen.getByText('No projects')
+      })
+
+      it('only unarchive the selected projects', async function () {
+        // beforeEach selected all, so uncheck the 1st project
+        fireEvent.click(allCheckboxes[1])
+
+        const allCheckboxesChecked = allCheckboxes.filter(c => c.checked)
+        expect(allCheckboxesChecked.length).to.equal(
+          archivedProjects.length - 1
+        )
+
+        await fetchMock.flush(true)
+        expect(fetchMock.done()).to.be.true
+
+        expect(screen.queryByText('No projects')).to.be.null
       })
     })
 

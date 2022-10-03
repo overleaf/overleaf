@@ -132,13 +132,13 @@ export const projectsData: Array<Project> = [
   trashedAndNotOwnedProject,
 ]
 
-export const currentProjects: Array<Project> = projectsData.filter(
+export const archivedProjects = projectsData.filter(({ archived }) => archived)
+
+export const currentProjects = projectsData.filter(
   ({ archived, trashed }) => !archived && !trashed
 )
 
-export const trashedProjects: Array<Project> = projectsData.filter(
-  ({ trashed }) => trashed
-)
+export const trashedProjects = projectsData.filter(({ trashed }) => trashed)
 
 export const makeLongProjectList = (listLength: number) => {
   const longList = [...projectsData]
