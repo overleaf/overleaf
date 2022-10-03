@@ -643,3 +643,30 @@
 .project-list-load-more-button {
   margin-bottom: @margin-sm;
 }
+
+.tag-dropdown-button {
+  display: block;
+  width: 100%;
+  font-weight: normal;
+  font-size: @font-size-base;
+  text-align: left;
+  color: @gray-dark;
+  background-color: transparent;
+  border-radius: unset;
+  border: none;
+  border-bottom: solid 1px transparent;
+  padding: 3px 20px;
+
+  &:active,
+  &:focus {
+    color: @gray-dark;
+    background-color: transparent;
+    text-decoration: none;
+    outline: none;
+  }
+
+  &:hover {
+    color: @white;
+    background-color: @ol-green;
+  }
+}

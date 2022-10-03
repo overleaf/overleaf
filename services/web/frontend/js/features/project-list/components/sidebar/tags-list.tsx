@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { sortBy } from 'lodash'
 import { Button } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import ColorManager from '../../../../ide/colors/ColorManager'
@@ -34,7 +34,7 @@ export default function TagsList() {
           <span className="name">{t('new_folder')}</span>
         </Button>
       </li>
-      {_.sortBy(tags, ['name']).map((tag, index) => {
+      {sortBy(tags, tag => tag.name.toLowerCase()).map((tag, index) => {
         return (
           <li
             className={`tag ${selectedTagId === tag._id ? 'active' : ''}`}

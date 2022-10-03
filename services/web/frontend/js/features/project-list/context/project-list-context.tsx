@@ -83,6 +83,7 @@ type ProjectListContextValue = {
   deleteTag: (tagId: string) => void
   updateProjectViewData: (newProjectData: Project) => void
   removeProjectFromView: (project: Project) => void
+  addProjectToTagInView: (tagId: string, projectId: string) => void
   removeProjectFromTagInView: (tagId: string, projectId: string) => void
   searchText: string
   setSearchText: React.Dispatch<React.SetStateAction<string>>
@@ -302,6 +303,21 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
     [setTags]
   )
 
+  const addProjectToTagInView = useCallback(
+    (tagId: string, projectId: string) => {
+      setTags(tags => {
+        const updatedTags = [...tags]
+        for (const tag of updatedTags) {
+          if (tag._id === tagId) {
+            tag.project_ids = uniq([...(tag.project_ids || []), projectId])
+          }
+        }
+        return updatedTags
+      })
+    },
+    [setTags]
+  )
+
   const removeProjectFromTagInView = useCallback(
     (tagId: string, projectId: string) => {
       setTags(tags => {
@@ -368,7 +384,7 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
     () => ({
       addTag,
       addClonedProjectToViewData,
-      selectOrUnselectAllProjects,
+      addProjectToTagInView,
       deleteTag,
       error,
       filter,
@@ -383,6 +399,7 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       selectedTagId,
       selectFilter,
       selectedProjects,
+      selectOrUnselectAllProjects,
       selectTag,
       searchText,
       setSearchText,
@@ -398,7 +415,7 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
     [
       addTag,
       addClonedProjectToViewData,
-      selectOrUnselectAllProjects,
+      addProjectToTagInView,
       deleteTag,
       error,
       filter,
@@ -413,6 +430,7 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       selectedTagId,
       selectFilter,
       selectedProjects,
+      selectOrUnselectAllProjects,
       selectTag,
       searchText,
       setSearchText,

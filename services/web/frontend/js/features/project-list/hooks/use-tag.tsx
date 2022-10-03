@@ -6,10 +6,18 @@ import RenameTagModal from '../components/modals/rename-tag-modal'
 import DeleteTagModal from '../components/modals/delete-tag-modal'
 import EditTagModal from '../components/modals/edit-tag-modal'
 import { find } from 'lodash'
+import { addProjectToTag } from '../util/api'
 
 function useTag() {
-  const { tags, selectTag, addTag, renameTag, deleteTag } =
-    useProjectListContext()
+  const {
+    tags,
+    selectTag,
+    addTag,
+    renameTag,
+    deleteTag,
+    selectedProjects,
+    addProjectToTagInView,
+  } = useProjectListContext()
   const [creatingTag, setCreatingTag] = useState<boolean>(false)
   const [renamingTag, setRenamingTag] = useState<Tag>()
   const [deletingTag, setDeletingTag] = useState<Tag>()
@@ -31,8 +39,12 @@ function useTag() {
     (tag: Tag) => {
       setCreatingTag(false)
       addTag(tag)
+      for (const selectedProject of selectedProjects) {
+        addProjectToTagInView(tag._id, selectedProject.id)
+        addProjectToTag(tag._id, selectedProject.id)
+      }
     },
-    [addTag]
+    [addTag, selectedProjects, addProjectToTagInView]
   )
 
   const handleRenameTag = useCallback(

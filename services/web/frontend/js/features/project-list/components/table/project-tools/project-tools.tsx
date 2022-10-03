@@ -4,6 +4,7 @@ import { useProjectListContext } from '../../../context/project-list-context'
 import ArchiveProjectsButton from './buttons/archive-projects-button'
 import DownloadProjectsButton from './buttons/download-projects-button'
 import ProjectToolsMoreDropdownButton from './buttons/project-tools-more-dropdown-button'
+import TagsDropdown from './buttons/tags-dropdown'
 import TrashProjectsButton from './buttons/trash-projects-button'
 import UnarchiveProjectsButton from './buttons/unarchive-projects-button'
 import UntrashProjectsButton from './buttons/untrash-projects-button'
@@ -22,6 +23,8 @@ function ProjectTools() {
         {filter === 'trashed' && <UntrashProjectsButton />}
         {filter === 'archived' && <UnarchiveProjectsButton />}
       </ButtonGroup>
+
+      {!['archived', 'trashed'].includes(filter) && <TagsDropdown />}
 
       {selectedProjects.length === 1 &&
         filter !== 'archived' &&

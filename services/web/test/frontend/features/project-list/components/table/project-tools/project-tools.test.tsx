@@ -13,9 +13,11 @@ describe('<ProjectListTable />', function () {
 
   it('renders the project tools for the all projects filter', function () {
     renderWithProjectListContext(<ProjectTools />)
-    expect(screen.getAllByRole('button').length).to.equal(3)
+    expect(screen.getAllByRole('button').length).to.equal(5)
     screen.getByLabelText('Download')
     screen.getByLabelText('Archive')
     screen.getByLabelText('Trash')
+    screen.getByTitle('Tags')
+    screen.getByRole('button', { name: 'Create New Folder' })
   })
 })

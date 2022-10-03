@@ -25,6 +25,10 @@ export function deleteTag(tagId: string) {
   return deleteJSON(`/tag/${tagId}`)
 }
 
+export function addProjectToTag(tagId: string, projectId: string) {
+  return postJSON(`/tag/${tagId}/project/${projectId}`)
+}
+
 export function removeProjectFromTag(tagId: string, projectId: string) {
   return deleteJSON(`/tag/${tagId}/project/${projectId}`)
 }
