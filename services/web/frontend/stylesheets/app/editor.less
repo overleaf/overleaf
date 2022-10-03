@@ -597,8 +597,31 @@ CodeMirror
   z-index: 10;
   display: flex;
   justify-content: space-between;
-  align-items: center;
   padding: 5px 10px;
+}
+
+.references-search-banner {
+  align-items: center;
+}
+
+.bibtex-hint-banner {
+  align-items: flex-start;
+
+  .bibtex-hint-close {
+    color: inherit;
+    margin-left: 10px;
+    font-size: 24px;
+    padding: 0;
+    line-height: 1;
+    border-radius: 0;
+
+    &,
+    &:hover,
+    &:focus,
+    &:active {
+      background-color: transparent;
+    }
+  }
 }
 
 // -- References Search Modal --
