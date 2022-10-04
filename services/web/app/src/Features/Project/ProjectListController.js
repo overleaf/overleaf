@@ -477,20 +477,18 @@ async function _injectProjectUsers(projects) {
 
   const users = {}
   for (const userId of userIds) {
-    const {
-      email,
-      first_name: firstName,
-      last_name: lastName,
-    } = await UserGetter.promises.getUser(userId, {
+    const user = await UserGetter.promises.getUser(userId, {
       first_name: 1,
       last_name: 1,
       email: 1,
     })
-    users[userId] = {
-      id: userId,
-      email,
-      firstName,
-      lastName,
+    if (user) {
+      users[userId] = {
+        id: userId,
+        email: user.email,
+        firstName: user.first_name,
+        lastName: user.last_name,
+      }
     }
   }
   for (const project of projects) {
