@@ -27,14 +27,22 @@ async function main(options) {
       { _id: ObjectId(options.projectId) },
       { _id: 1, auditLog: 1 }
     )
-    await processProject(project, options)
+    if (!project || !project.auditLog) {
+      console.error('unable to process project', project)
+      return
+    }
+    await processProjectsBatch([project], options)
   } else if (options.userId) {
     console.log('migrating userId=' + options.userId)
     const user = await db.users.findOne(
       { _id: ObjectId(options.userId) },
       { _id: 1, auditLog: 1 }
     )
-    await processUser(user, options)
+    if (!user || !user.auditLog) {
+      console.error('unable to process user', user)
+      return
+    }
+    await processUsersBatch([user], options)
   } else {
     await batchedUpdate(
       'users',
@@ -60,51 +68,54 @@ async function main(options) {
 }
 
 async function processUsersBatch(users, options) {
-  await promiseMapWithLimit(options.writeConcurrency, users, async user => {
-    await processUser(user, options)
-  })
-}
+  if (!users || users.length <= 0) {
+    return
+  }
 
-async function processUser(user, options) {
-  const entries = user.auditLog.map(log => ({ ...log, userId: user._id }))
+  const entries = users
+    .map(user => user.auditLog.map(log => ({ ...log, userId: user._id })))
+    .flat()
+
   if (!options.dryRun && entries?.length > 0) {
     await db.userAuditLogEntries.insertMany(entries)
   }
 
   if (!options.dryRun) {
-    await db.users.updateOne({ _id: user._id }, { $unset: { auditLog: 1 } })
+    const userIds = users.map(user => user._id)
+    await db.users.updateMany(
+      { _id: { $in: userIds } },
+      { $unset: { auditLog: 1 } }
+    )
   }
 
-  const projects = await db.projects.find(
-    { owner_ref: user._id, auditLog: { $exists: true } },
-    { _id: 1, auditLog: 1 }
-  )
-  projects.forEach(project => processProject(project, options))
+  await promiseMapWithLimit(options.writeConcurrency, users, async user => {
+    const projects = await db.projects.find(
+      { owner_ref: user._id, auditLog: { $exists: true } },
+      { _id: 1, auditLog: 1 }
+    )
+    await processProjectsBatch(projects, options)
+  })
 }
 
 async function processProjectsBatch(projects, options) {
-  await promiseMapWithLimit(
-    options.writeConcurrency,
-    projects,
-    async project => {
-      await processProject(project, options)
-    }
-  )
-}
+  if (!projects || projects.length <= 0) {
+    return
+  }
 
-async function processProject(project, options) {
-  const entries = project.auditLog.map(log => ({
-    ...log,
-    projectId: project._id,
-  }))
+  const entries = projects
+    .map(project =>
+      project.auditLog.map(log => ({ ...log, projectId: project._id }))
+    )
+    .flat()
 
   if (!options.dryRun && entries?.length > 0) {
     await db.projectAuditLogEntries.insertMany(entries)
   }
 
   if (!options.dryRun) {
-    await db.projects.updateOne(
-      { _id: project._id },
+    const projectIds = projects.map(project => project._id)
+    await db.projects.updateMany(
+      { _id: { $in: projectIds } },
       { $unset: { auditLog: 1 } }
     )
   }

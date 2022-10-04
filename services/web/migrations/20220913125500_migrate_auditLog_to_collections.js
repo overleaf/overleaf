@@ -4,7 +4,7 @@ exports.tags = ['server-ce', 'server-pro']
 
 exports.migrate = async () => {
   const options = {
-    writeConcurrency: 10,
+    writeConcurrency: 5,
     dryRun: false,
   }
   await runScript(options)
