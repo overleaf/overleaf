@@ -1213,7 +1213,6 @@
   "importing_and_merging_changes_in_github": "正在导入合并GitHub中的更改",
   "upgrade_for_faster_compiles": "升级以取得更快的编译速度，并增加您的超时限制。",
   "free_accounts_have_timeout_upgrade_to_increase": "免费帐户有一分钟的超时限制，而升级的帐户有四分钟的超时限制。",
-  "learn_how_to_make_documents_compile_quickly": "了解如何修复编译超时",
   "zh-CN": "中文",
   "cn": "中文 (简体)",
   "sync_to_github": "同步到 GitHub",

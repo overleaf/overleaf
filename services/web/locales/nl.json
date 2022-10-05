@@ -702,7 +702,6 @@
   "importing_and_merging_changes_in_github": "Veranderingen aan het importeren en toevoegen in GitHub",
   "upgrade_for_faster_compiles": "Upgrade om sneller te compileren en om de time-out limiet te verhogen.",
   "free_accounts_have_timeout_upgrade_to_increase": "Gratis accounts hebben een time-out van een minuut. Upgrade om de time-out limiet te verhogen.",
-  "learn_how_to_make_documents_compile_quickly": "Leer hoe je project sneller kan compileren",
   "zh-CN": "Chinees",
   "cn": "Chinees (vereenvoudigd)",
   "sync_to_github": "Synchroniseer met GitHub",

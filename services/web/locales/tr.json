@@ -441,7 +441,6 @@
   "importing_and_merging_changes_in_github": "Değişiklikler GitHub’a aktarılıyor",
   "upgrade_for_faster_compiles": "Daha hızlı derlemek ve derlemedeki süre aşımı limitini arttırmak için hesabınızı yükseltin",
   "free_accounts_have_timeout_upgrade_to_increase": "Ücretsiz hesaplar sadece bir dakikalık süre aşımı limitine sahiptir. Bunu arttırmak için hesabınızı yükseltin.",
-  "learn_how_to_make_documents_compile_quickly": "Dökümanınızın nasıl daha hızlı derlenebileceği hakkında bilgi edinin",
   "zh-CN": "Çince",
   "cn": "Çince (Basitleştirilmiş)",
   "sync_to_github": "GitHub ile senkronize et",

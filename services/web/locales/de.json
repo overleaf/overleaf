@@ -659,7 +659,6 @@
   "importing_and_merging_changes_in_github": "Änderungen werden in GitHub importiert und gemerged.",
   "upgrade_for_faster_compiles": "Upgrade für schnelleres Kompilieren und eine längere Timeoutlimite.",
   "free_accounts_have_timeout_upgrade_to_increase": "Kostenlose Benutzerkontos haben einen Timeout von einer Minute. Upgrade um deine Timeoutlimite zu erhöhen",
-  "learn_how_to_make_documents_compile_quickly": "Erfahre wie du dein Dokument schneller kompilieren lassen kannst.",
   "zh-CN": "Chinesisch",
   "cn": "Chinesisch (vereinfacht)",
   "sync_to_github": "Mit GitHub synchronisieren",

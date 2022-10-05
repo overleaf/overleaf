@@ -441,7 +441,6 @@
   "importing_and_merging_changes_in_github": "Importazione e unione modifiche in GitHub",
   "upgrade_for_faster_compiles": "Esegui l’upgrade per compilazioni più veloci e per aumentare il limite di timeout",
   "free_accounts_have_timeout_upgrade_to_increase": "Gli account gratuiti hanno un limite di timeout di un minuto. Esegui l’upgrade per aumentare il limite.",
-  "learn_how_to_make_documents_compile_quickly": "Impara a rendere le tue compilazioni più veloci.",
   "zh-CN": "Cinese",
   "cn": "Cinese (Semplificato)",
   "sync_to_github": "Sincronizza con GitHub",

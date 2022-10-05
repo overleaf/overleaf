@@ -392,7 +392,6 @@
   "importing_and_merging_changes_in_github": "Tuodaan ja yhdistetään muutoksia GitHubissa",
   "upgrade_for_faster_compiles": "Päivitä nopeampaan kääntämiseen ja lisää aikakatkaisun rajaa",
   "free_accounts_have_timeout_upgrade_to_increase": "Ilmaisilla tileillä on minuutin aikakatkaisu. Päivitä lisätäksesi aikakatkaisun rajaa.",
-  "learn_how_to_make_documents_compile_quickly": "Lue kuinka saat dokumenttisi kääntymään nopeammin",
   "zh-CN": "Kiina",
   "cn": "Kiina (Yksinkertainen)",
   "sync_to_github": "Synkronoi GitHubiin",

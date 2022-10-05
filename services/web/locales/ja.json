@@ -598,7 +598,6 @@
   "importing_and_merging_changes_in_github": "GitHubの変更をインポートおよび統合中",
   "upgrade_for_faster_compiles": "アップグレードしてすばやい編集、タイムアウト上限の引き上げ",
   "free_accounts_have_timeout_upgrade_to_increase": "無料アカウントは1分でタイムアウトします。アップグレードしてタイムアウトの上限を引き上げる。",
-  "learn_how_to_make_documents_compile_quickly": "ドキュメントをすばやく編集する方法を学ぶ",
   "zh-CN": "中国語",
   "cn": "中国語（簡体字）",
   "sync_to_github": "GitHubと同期",
