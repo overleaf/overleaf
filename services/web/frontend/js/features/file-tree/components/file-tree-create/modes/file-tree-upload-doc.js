@@ -189,7 +189,7 @@ export default function FileTreeUploadDoc() {
               // `%{browse}` is replaced with a link that opens the system file selection dialog.
               // TODO: 'drag_here' or 'drop_files_here_to_upload'?
               // dropHereOr: `${t('drag_here')} ${t('or')} %{browse}`,
-              dropPasteFiles: `Drag here or %{browseFiles}`,
+              dropPasteFiles: `Drag here, paste an image or file, or %{browseFiles}`,
               // Used as the label for the link that opens the system file selection dialog.
               // browseFiles: t('select_from_your_computer')
               browseFiles: 'select from your computer',
