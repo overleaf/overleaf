@@ -17,13 +17,14 @@ const TpdsQueueManager = require('./TpdsQueueManager')
 
 async function mergeUpdate(req, res) {
   metrics.inc('tpds.merge-update')
-  const { filePath, userId, projectName } = parseParams(req)
+  const { filePath, userId, projectId, projectName } = parseParams(req)
   const source = req.headers['x-sl-update-source'] || 'unknown'
 
   let metadata
   try {
     metadata = await TpdsUpdateHandler.promises.newUpdate(
       userId,
+      projectId,
       projectName,
       filePath,
       req,
@@ -70,11 +71,12 @@ async function mergeUpdate(req, res) {
 
 async function deleteUpdate(req, res) {
   metrics.inc('tpds.delete-update')
-  const { filePath, userId, projectName } = parseParams(req)
+  const { filePath, userId, projectId, projectName } = parseParams(req)
   const source = req.headers['x-sl-update-source'] || 'unknown'
 
   await TpdsUpdateHandler.promises.deleteUpdate(
     userId,
+    projectId,
     projectName,
     filePath,
     source
@@ -87,9 +89,11 @@ async function deleteUpdate(req, res) {
  */
 async function updateFolder(req, res) {
   const userId = req.body.userId
-  const { projectName, filePath } = splitPath(req.body.path)
+  const projectId = req.body.projectId
+  const { projectName, filePath } = splitPath(projectId, req.body.path)
   const metadata = await TpdsUpdateHandler.promises.createFolder(
     userId,
+    projectId,
     projectName,
     filePath
   )
@@ -147,14 +151,18 @@ async function getQueues(req, res, next) {
 
 function parseParams(req) {
   const userId = req.params.user_id
-  const { projectName, filePath } = splitPath(req.params[0])
-  return { filePath, userId, projectName }
+  const projectId = req.params.project_id
+  const { projectName, filePath } = splitPath(projectId, req.params[0])
+  return { filePath, userId, projectName, projectId }
 }
 
-function splitPath(path) {
+function splitPath(projectId, path) {
   let filePath, projectName
   path = Path.join('/', path)
-  if (path.substring(1).indexOf('/') === -1) {
+  if (projectId) {
+    filePath = path
+    projectName = ''
+  } else if (path.substring(1).indexOf('/') === -1) {
     filePath = '/'
     projectName = path.substring(1)
   } else {
@@ -163,7 +171,7 @@ function splitPath(path) {
     projectName = projectName.replace('/', '')
   }
 
-  return { projectName, filePath }
+  return { filePath, projectName }
 }
 
 module.exports = {

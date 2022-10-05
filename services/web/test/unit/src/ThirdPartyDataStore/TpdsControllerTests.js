@@ -63,14 +63,18 @@ describe('TpdsController', function () {
       this.projectName = 'projectName'
       this.path = '/here.txt'
       this.req = {
-        params: { 0: `${this.projectName}${this.path}`, user_id: this.user_id },
+        params: {
+          0: `${this.projectName}${this.path}`,
+          user_id: this.user_id,
+          project_id: '',
+        },
         headers: {
           'x-sl-update-source': (this.source = 'dropbox'),
         },
       }
     })
 
-    it('should process the update with the update receiver', function (done) {
+    it('should process the update with the update receiver by name', function (done) {
       const res = {
         json: payload => {
           expect(payload).to.deep.equal({
@@ -84,6 +88,7 @@ describe('TpdsController', function () {
           this.TpdsUpdateHandler.promises.newUpdate
             .calledWith(
               this.user_id,
+              '', // projectId
               this.projectName,
               this.path,
               this.req,
@@ -105,6 +110,34 @@ describe('TpdsController', function () {
         },
       }
       this.TpdsController.mergeUpdate(this.req, res)
+    })
+
+    it('should process the update with the update receiver by id', function (done) {
+      const path = '/here.txt'
+      const req = {
+        pause() {},
+        params: { 0: path, user_id: this.user_id, project_id: '123' },
+        session: {
+          destroy() {},
+        },
+        headers: {
+          'x-sl-update-source': (this.source = 'dropbox'),
+        },
+      }
+      const res = {
+        json: () => {
+          this.TpdsUpdateHandler.promises.newUpdate.should.have.been.calledWith(
+            this.user_id,
+            '123',
+            '', // projectName
+            '/here.txt',
+            req,
+            this.source
+          )
+          done()
+        },
+      }
+      this.TpdsController.mergeUpdate(req, res)
     })
 
     it('should return a 500 error when the update receiver fails', function (done) {
@@ -150,10 +183,10 @@ describe('TpdsController', function () {
   })
 
   describe('getting a delete update', function () {
-    it('should process the delete with the update receiver', function (done) {
+    it('should process the delete with the update receiver by name', function (done) {
       const path = '/projectName/here.txt'
       const req = {
-        params: { 0: path, user_id: this.user_id },
+        params: { 0: path, user_id: this.user_id, project_id: '' },
         session: {
           destroy() {},
         },
@@ -164,8 +197,40 @@ describe('TpdsController', function () {
       const res = {
         sendStatus: () => {
           this.TpdsUpdateHandler.promises.deleteUpdate
-            .calledWith(this.user_id, 'projectName', '/here.txt', this.source)
+            .calledWith(
+              this.user_id,
+              '',
+              'projectName',
+              '/here.txt',
+              this.source
+            )
             .should.equal(true)
+          done()
+        },
+      }
+      this.TpdsController.deleteUpdate(req, res)
+    })
+
+    it('should process the delete with the update receiver by id', function (done) {
+      const path = '/here.txt'
+      const req = {
+        params: { 0: path, user_id: this.user_id, project_id: '123' },
+        session: {
+          destroy() {},
+        },
+        headers: {
+          'x-sl-update-source': (this.source = 'dropbox'),
+        },
+      }
+      const res = {
+        sendStatus: () => {
+          this.TpdsUpdateHandler.promises.deleteUpdate.should.have.been.calledWith(
+            this.user_id,
+            '123',
+            '', // projectName
+            '/here.txt',
+            this.source
+          )
           done()
         },
       }

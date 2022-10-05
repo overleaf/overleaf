@@ -923,6 +923,16 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     AuthenticationController.requirePrivateApiAuth(),
     TpdsController.deleteUpdate
   )
+  privateApiRouter.post(
+    '/project/:project_id/user/:user_id/update/*',
+    AuthenticationController.requirePrivateApiAuth(),
+    TpdsController.mergeUpdate
+  )
+  privateApiRouter.delete(
+    '/project/:project_id/user/:user_id/update/*',
+    AuthenticationController.requirePrivateApiAuth(),
+    TpdsController.deleteUpdate
+  )
 
   privateApiRouter.post(
     '/project/:project_id/contents/*',

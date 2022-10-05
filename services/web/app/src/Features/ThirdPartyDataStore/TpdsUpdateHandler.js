@@ -19,8 +19,15 @@ const ROOT_DOC_TIMEOUT_LENGTH = 30 * 1000
 
 const rootDocResets = new BackgroundTaskTracker('root doc resets')
 
-async function newUpdate(userId, projectName, path, updateRequest, source) {
-  const project = await getOrCreateProject(userId, projectName)
+async function newUpdate(
+  userId,
+  projectId,
+  projectName,
+  path,
+  updateRequest,
+  source
+) {
+  const project = await getOrCreateProject(userId, projectId, projectName)
   if (project == null) {
     return null
   }
@@ -46,13 +53,20 @@ async function newUpdate(userId, projectName, path, updateRequest, source) {
   return metadata
 }
 
-async function deleteUpdate(userId, projectName, path, source) {
+async function deleteUpdate(userId, projectId, projectName, path, source) {
   logger.debug({ userId, filePath: path }, 'handling delete update from tpds')
-
-  const projects = await ProjectGetter.promises.findUsersProjectsByName(
-    userId,
-    projectName
-  )
+  let projects = []
+  if (projectId) {
+    const project = await findProjectByIdWithRWAccess(userId, projectId)
+    if (project) {
+      projects = [project]
+    }
+  } else {
+    projects = await ProjectGetter.promises.findUsersProjectsByName(
+      userId,
+      projectName
+    )
+  }
   const activeProjects = projects.filter(
     project => !ProjectHelper.isArchivedOrTrashed(project, userId)
   )
@@ -84,7 +98,29 @@ async function deleteUpdate(userId, projectName, path, source) {
   }
 }
 
-async function getOrCreateProject(userId, projectName) {
+async function getOrCreateProject(userId, projectId, projectName) {
+  if (projectId) {
+    return findProjectByIdWithRWAccess(userId, projectId)
+  } else {
+    return getOrCreateProjectByName(userId, projectName)
+  }
+}
+
+async function findProjectByIdWithRWAccess(userId, projectId) {
+  const allProjects = await ProjectGetter.promises.findAllUsersProjects(
+    userId,
+    'name archived trashed'
+  )
+  for (const projects of [allProjects.owned, allProjects.readAndWrite]) {
+    for (const project of projects) {
+      if (project._id.toString() === projectId) {
+        return project
+      }
+    }
+  }
+}
+
+async function getOrCreateProjectByName(userId, projectName) {
   const projects = await ProjectGetter.promises.findUsersProjectsByName(
     userId,
     projectName
@@ -144,8 +180,8 @@ async function handleDuplicateProjects(userId, projectName) {
     .create(projectName)
 }
 
-async function createFolder(userId, projectName, path) {
-  const project = await getOrCreateProject(userId, projectName)
+async function createFolder(userId, projectId, projectName, path) {
+  const project = await getOrCreateProject(userId, projectId, projectName)
   if (project == null) {
     return null
   }

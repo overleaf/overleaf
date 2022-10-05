@@ -78,6 +78,9 @@ describe('TpdsUpdateHandler', function () {
     this.ProjectGetter = {
       promises: {
         findUsersProjectsByName: sinon.stub(),
+        findAllUsersProjects: sinon
+          .stub()
+          .resolves({ owned: [this.projects.active1], readAndWrite: [] }),
       },
     }
     this.ProjectHelper = {
@@ -119,6 +122,26 @@ describe('TpdsUpdateHandler', function () {
   })
 
   describe('getting an update', function () {
+    describe('byId', function () {
+      describe('with no matching project', function () {
+        beforeEach(function () {
+          this.projectId = ObjectId().toString()
+        })
+        receiveUpdateById()
+        expectProjectNotCreated()
+        expectUpdateNotProcessed()
+      })
+
+      describe('with one matching active project', function () {
+        beforeEach(function () {
+          this.projectId = this.projects.active1._id.toString()
+        })
+        receiveUpdateById()
+        expectProjectNotCreated()
+        expectUpdateProcessed()
+      })
+    })
+
     describe('with no matching project', function () {
       setupMatchingProjects([])
       receiveUpdate()
@@ -183,6 +206,7 @@ describe('TpdsUpdateHandler', function () {
         await expect(
           this.TpdsUpdateHandler.promises.newUpdate(
             this.userId,
+            '', // projectId
             this.projectName,
             this.path,
             this.update,
@@ -195,6 +219,26 @@ describe('TpdsUpdateHandler', function () {
   })
 
   describe('getting a file delete', function () {
+    describe('byId', function () {
+      describe('with no matching project', function () {
+        beforeEach(function () {
+          this.projectId = ObjectId().toString()
+        })
+        receiveFileDeleteById()
+        expectDeleteNotProcessed()
+        expectProjectNotDeleted()
+      })
+
+      describe('with one matching active project', function () {
+        beforeEach(function () {
+          this.projectId = this.projects.active1._id.toString()
+        })
+        receiveFileDeleteById()
+        expectDeleteProcessed()
+        expectProjectNotDeleted()
+      })
+    })
+
     describe('with no matching project', function () {
       setupMatchingProjects([])
       receiveFileDelete()
@@ -342,6 +386,7 @@ describe('TpdsUpdateHandler', function () {
         await expect(
           this.TpdsUpdateHandler.promises.createFolder(
             this.userId,
+            this.projectId,
             this.projectName,
             this.path
           )
@@ -377,6 +422,7 @@ function receiveUpdate() {
   beforeEach(async function () {
     await this.TpdsUpdateHandler.promises.newUpdate(
       this.userId,
+      '', // projectId
       this.projectName,
       this.path,
       this.update,
@@ -385,13 +431,41 @@ function receiveUpdate() {
   })
 }
 
+function receiveUpdateById() {
+  beforeEach(function (done) {
+    this.TpdsUpdateHandler.newUpdate(
+      this.userId,
+      this.projectId,
+      '', // projectName
+      this.path,
+      this.update,
+      this.source,
+      done
+    )
+  })
+}
+
 function receiveFileDelete() {
   beforeEach(async function () {
     await this.TpdsUpdateHandler.promises.deleteUpdate(
       this.userId,
+      '', // projectId
       this.projectName,
       this.path,
       this.source
+    )
+  })
+}
+
+function receiveFileDeleteById() {
+  beforeEach(function (done) {
+    this.TpdsUpdateHandler.deleteUpdate(
+      this.userId,
+      this.projectId,
+      '', // projectName
+      this.path,
+      this.source,
+      done
     )
   })
 }
@@ -400,6 +474,7 @@ function receiveProjectDelete() {
   beforeEach(async function () {
     await this.TpdsUpdateHandler.promises.deleteUpdate(
       this.userId,
+      '', // projectId
       this.projectName,
       '/',
       this.source
@@ -411,6 +486,7 @@ function receiveFolderUpdate() {
   beforeEach(async function () {
     await this.TpdsUpdateHandler.promises.createFolder(
       this.userId,
+      this.projectId,
       this.projectName,
       this.folderPath
     )
