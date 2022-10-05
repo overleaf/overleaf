@@ -95,6 +95,9 @@ function TagsDropdown() {
                       ? handleRemoveTagFromSelectedProjects(e, tag._id)
                       : handleAddTagToSelectedProjects(e, tag._id)
                   }
+                  aria-label={t('add_or_remove_project_from_tag', {
+                    tagName: tag.name,
+                  })}
                 >
                   <Icon
                     type={
@@ -104,10 +107,8 @@ function TagsDropdown() {
                         ? 'minus-square-o'
                         : 'square-o'
                     }
-                  />
-                  <span className="sr-only">
-                    {t('add_or_remove_project_from_tag', { tagName: tag.name })}
-                  </span>
+                  />{' '}
+                  {tag.name}
                 </Button>
               </li>
             )
