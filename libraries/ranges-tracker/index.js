@@ -537,7 +537,6 @@ class RangesTracker {
           if (insertRemaining.length > 0) {
             change.op.i = insertRemaining
             change.op.p = Math.min(changeStart, opStart)
-            change.metadata.ts = metadata.ts
             movedChanges.push(change)
           } else {
             removeChanges.push(change)
