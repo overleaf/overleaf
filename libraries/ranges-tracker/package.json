@@ -1,0 +1,21 @@
+{
+  "name": "@overleaf/ranges-tracker",
+  "description": "Shared logic for syncing comments and tracked changes with operational transforms",
+  "main": "index.js",
+  "files": [
+    "index.js"
+  ],
+  "author": "Overleaf (https://www.overleaf.com)",
+  "private": true,
+  "scripts": {
+    "lint": "eslint --max-warnings 0 --format unix .",
+    "lint:fix": "eslint --fix .",
+    "format": "prettier --list-different $PWD/'**/*.js'",
+    "format:fix": "prettier --write $PWD/'**/*.js'",
+    "test": "mocha --recursive test/unit/src/",
+    "test:ci": "npm run test"
+  },
+  "devDependencies": {
+    "mocha": "^10.0.0"
+  }
+}

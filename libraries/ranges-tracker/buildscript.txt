@@ -1,0 +1,9 @@
+ranges-tracker
+--dependencies=None
+--docker-repos=gcr.io/overleaf-ops
+--env-add=
+--env-pass-through=
+--is-library=True
+--node-version=16.16.0
+--public-repo=False
+--script-version=4.1.0
