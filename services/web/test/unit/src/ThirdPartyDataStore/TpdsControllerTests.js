@@ -1,8 +1,10 @@
+const { ObjectId } = require('mongodb')
+const { expect } = require('chai')
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
-const { expect } = require('chai')
-const { ObjectId } = require('mongodb')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
+const MockResponse = require('../helpers/MockResponse')
+const MockRequest = require('../helpers/MockRequest')
 
 const MODULE_PATH =
   '../../../../app/src/Features/ThirdPartyDataStore/TpdsController.js'
@@ -44,6 +46,15 @@ describe('TpdsController', function () {
       conflict: sinon.stub(),
     }
 
+    this.newProject = { _id: ObjectId() }
+    this.ProjectCreationHandler = {
+      promises: { createBlankProject: sinon.stub().resolves(this.newProject) },
+    }
+    this.ProjectDetailsHandler = {
+      promises: {
+        generateUniqueName: sinon.stub().resolves('unique'),
+      },
+    }
     this.TpdsController = SandboxedModule.require(MODULE_PATH, {
       requires: {
         './TpdsUpdateHandler': this.TpdsUpdateHandler,
@@ -52,10 +63,40 @@ describe('TpdsController', function () {
         '../Authentication/SessionManager': this.SessionManager,
         '../Errors/HttpErrorHandler': this.HttpErrorHandler,
         './TpdsQueueManager': this.TpdsQueueManager,
+        '../Project/ProjectCreationHandler': this.ProjectCreationHandler,
+        '../Project/ProjectDetailsHandler': this.ProjectDetailsHandler,
       },
     })
 
     this.user_id = 'dsad29jlkjas'
+  })
+
+  describe('creating a project', function () {
+    it('should yield the new projects id', function (done) {
+      const res = new MockResponse()
+      const req = new MockRequest()
+      req.params.user_id = this.user_id
+      req.body = { projectName: 'foo' }
+      res.callback = err => {
+        if (err) done(err)
+        expect(res.body).to.equal(
+          JSON.stringify({ projectId: this.newProject._id.toString() })
+        )
+        expect(
+          this.ProjectDetailsHandler.promises.generateUniqueName
+        ).to.have.been.calledWith(this.user_id, 'foo')
+        expect(
+          this.ProjectCreationHandler.promises.createBlankProject
+        ).to.have.been.calledWith(
+          this.user_id,
+          'unique',
+          {},
+          { skipCreatingInTPDS: true }
+        )
+        done()
+      }
+      this.TpdsController.createProject(req, res)
+    })
   })
 
   describe('getting an update', function () {

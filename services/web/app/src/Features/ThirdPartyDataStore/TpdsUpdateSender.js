@@ -142,6 +142,33 @@ async function deleteEntity(params) {
   }
 }
 
+async function createProject(params) {
+  if (!tpdsUrl) return // Server CE/Pro
+
+  const { projectId, projectName, ownerId, userId } = params
+
+  const job = {
+    method: 'post',
+    headers: {
+      sl_project_id: projectId.toString(),
+      sl_all_user_ids: JSON.stringify([userId.toString()]),
+      sl_project_owner_user_id: ownerId.toString(),
+    },
+    uri: Path.join(
+      tpdsUrl,
+      'user',
+      userId.toString(),
+      'project',
+      'new',
+      encodeURIComponent(projectName)
+    ),
+    title: 'createProject',
+    sl_all_user_ids: JSON.stringify([userId]),
+  }
+
+  await enqueue(userId, 'standardHttpRequest', job)
+}
+
 async function deleteProject(params) {
   const { projectId } = params
   // deletion only applies to project archiver
@@ -274,6 +301,7 @@ const TpdsUpdateSender = {
   addEntity: callbackify(addEntity),
   addFile: callbackify(addFile),
   deleteEntity: callbackify(deleteEntity),
+  createProject: callbackify(createProject),
   deleteProject: callbackify(deleteProject),
   enqueue: callbackify(enqueue),
   moveEntity: callbackify(moveEntity),
@@ -283,6 +311,7 @@ const TpdsUpdateSender = {
     addEntity,
     addFile,
     deleteEntity,
+    createProject,
     deleteProject,
     enqueue,
     moveEntity,

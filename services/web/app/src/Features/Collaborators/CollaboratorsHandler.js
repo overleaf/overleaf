@@ -9,6 +9,7 @@ const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
 const TpdsProjectFlusher = require('../ThirdPartyDataStore/TpdsProjectFlusher')
 const CollaboratorsGetter = require('./CollaboratorsGetter')
 const Errors = require('../Errors/Errors')
+const TpdsUpdateSender = require('../ThirdPartyDataStore/TpdsUpdateSender')
 
 module.exports = {
   userIsTokenMember: callbackify(userIsTokenMember),
@@ -98,6 +99,8 @@ async function addUserIdToProject(
   privilegeLevel
 ) {
   const project = await ProjectGetter.promises.getProject(projectId, {
+    owner_ref: 1,
+    name: 1,
     collaberator_refs: 1,
     readOnly_refs: 1,
   })
@@ -126,6 +129,14 @@ async function addUserIdToProject(
   }
 
   await Project.updateOne({ _id: projectId }, { $addToSet: level }).exec()
+
+  // Ensure there is a dedicated folder for this "new" project.
+  await TpdsUpdateSender.promises.createProject({
+    projectId,
+    projectName: project.name,
+    ownerId: project.owner_ref,
+    userId,
+  })
 
   // Flush to TPDS in background to add files to collaborator's Dropbox
   TpdsProjectFlusher.promises.flushProjectToTpds(projectId).catch(err => {

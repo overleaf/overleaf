@@ -20,6 +20,8 @@ describe('CollaboratorsHandler', function () {
     this.addingUserId = ObjectId()
     this.project = {
       _id: ObjectId(),
+      owner_ref: this.addingUserId,
+      name: 'Foo',
     }
 
     this.archivedProject = {
@@ -46,6 +48,11 @@ describe('CollaboratorsHandler', function () {
         flushProjectToTpds: sinon.stub().resolves(),
       },
     }
+    this.TpdsUpdateSender = {
+      promises: {
+        createProject: sinon.stub().resolves(),
+      },
+    }
     this.ProjectGetter = {
       promises: {
         getProject: sinon.stub().resolves(this.project),
@@ -66,6 +73,7 @@ describe('CollaboratorsHandler', function () {
         '../Contacts/ContactManager': this.ContactManager,
         '../../models/Project': { Project },
         '../ThirdPartyDataStore/TpdsProjectFlusher': this.TpdsProjectFlusher,
+        '../ThirdPartyDataStore/TpdsUpdateSender': this.TpdsUpdateSender,
         '../Project/ProjectGetter': this.ProjectGetter,
         '../Project/ProjectHelper': this.ProjectHelper,
         './CollaboratorsGetter': this.CollaboratorsGetter,
@@ -210,6 +218,17 @@ describe('CollaboratorsHandler', function () {
           this.userId,
           'readOnly'
         )
+      })
+
+      it('should create the project folder in dropbox', function () {
+        expect(
+          this.TpdsUpdateSender.promises.createProject
+        ).to.have.been.calledWith({
+          projectId: this.project._id,
+          projectName: this.project.name,
+          ownerId: this.addingUserId,
+          userId: this.userId,
+        })
       })
 
       it('should flush the project to the TPDS', function () {

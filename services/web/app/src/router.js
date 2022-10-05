@@ -909,6 +909,11 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   )
 
   privateApiRouter.post(
+    '/user/:user_id/project/new',
+    AuthenticationController.requirePrivateApiAuth(),
+    TpdsController.createProject
+  )
+  privateApiRouter.post(
     '/tpds/folder-update',
     AuthenticationController.requirePrivateApiAuth(),
     TpdsController.updateFolder

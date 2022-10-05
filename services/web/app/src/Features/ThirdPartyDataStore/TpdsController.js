@@ -7,8 +7,28 @@ const Path = require('path')
 const metrics = require('@overleaf/metrics')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
 const SessionManager = require('../Authentication/SessionManager')
+const ProjectCreationHandler = require('../Project/ProjectCreationHandler')
+const ProjectDetailsHandler = require('../Project/ProjectDetailsHandler')
 const HttpErrorHandler = require('../Errors/HttpErrorHandler')
 const TpdsQueueManager = require('./TpdsQueueManager')
+
+async function createProject(req, res) {
+  const { user_id: userId } = req.params
+  let { projectName } = req.body
+  projectName = await ProjectDetailsHandler.promises.generateUniqueName(
+    userId,
+    projectName
+  )
+  const project = await ProjectCreationHandler.promises.createBlankProject(
+    userId,
+    projectName,
+    {},
+    { skipCreatingInTPDS: true }
+  )
+  res.json({
+    projectId: project._id.toString(),
+  })
+}
 
 // mergeUpdate and deleteUpdate are used by Dropbox, where the project is only
 // passed as the name, as the first part of the file path. They have to check
@@ -175,6 +195,7 @@ function splitPath(projectId, path) {
 }
 
 module.exports = {
+  createProject: expressify(createProject),
   mergeUpdate: expressify(mergeUpdate),
   deleteUpdate: expressify(deleteUpdate),
   updateFolder: expressify(updateFolder),

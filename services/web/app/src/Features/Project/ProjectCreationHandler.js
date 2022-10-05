@@ -15,6 +15,7 @@ const path = require('path')
 const { callbackify } = require('util')
 const _ = require('underscore')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
+const TpdsUpdateSender = require('../ThirdPartyDataStore/TpdsUpdateSender')
 
 const MONTH_NAMES = [
   'January',
@@ -35,9 +36,19 @@ const templateProjectDir = Features.hasFeature('saas')
   ? 'example-project'
   : 'example-project-sp'
 
-async function createBlankProject(ownerId, projectName, attributes = {}) {
+async function createBlankProject(
+  ownerId,
+  projectName,
+  attributes = {},
+  options
+) {
   const isImport = attributes && attributes.overleaf
-  const project = await _createBlankProject(ownerId, projectName, attributes)
+  const project = await _createBlankProject(
+    ownerId,
+    projectName,
+    attributes,
+    options
+  )
   const segmentation = _.pick(attributes, [
     'fromV1TemplateId',
     'fromV1TemplateVersionId',
@@ -131,7 +142,12 @@ async function _addExampleProjectFiles(ownerId, projectName, project) {
   )
 }
 
-async function _createBlankProject(ownerId, projectName, attributes = {}) {
+async function _createBlankProject(
+  ownerId,
+  projectName,
+  attributes = {},
+  { skipCreatingInTPDS = false } = {}
+) {
   metrics.inc('project-creation')
   const timer = new metrics.Timer('project-creation')
   await ProjectDetailsHandler.promises.validateProjectName(projectName)
@@ -171,6 +187,14 @@ async function _createBlankProject(ownerId, projectName, attributes = {}) {
   const user = await User.findById(ownerId, 'ace.spellCheckLanguage')
   project.spellCheckLanguage = user.ace.spellCheckLanguage
   await project.save()
+  if (!skipCreatingInTPDS) {
+    await TpdsUpdateSender.promises.createProject({
+      projectId: project._id,
+      projectName,
+      ownerId,
+      userId: ownerId,
+    })
+  }
   timer.done()
   return project
 }
