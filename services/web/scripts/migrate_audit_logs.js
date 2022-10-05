@@ -89,10 +89,12 @@ async function processUsersBatch(users, options) {
   }
 
   await promiseMapWithLimit(options.writeConcurrency, users, async user => {
-    const projects = await db.projects.find(
-      { owner_ref: user._id, auditLog: { $exists: true } },
-      { _id: 1, auditLog: 1 }
-    )
+    const projects = await db.projects
+      .find(
+        { owner_ref: user._id, auditLog: { $exists: true } },
+        { _id: 1, auditLog: 1 }
+      )
+      .toArray()
     await processProjectsBatch(projects, options)
   })
 }
