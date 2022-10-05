@@ -16,9 +16,9 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+import RangesTracker from '@overleaf/ranges-tracker'
 import EventEmitter from '../../utils/EventEmitter'
 import ShareJsDoc from './ShareJsDoc'
-import RangesTracker from '../review-panel/RangesTracker'
 let Document
 
 export default Document = (function () {
@@ -760,7 +760,7 @@ export default Document = (function () {
         ;({ track_changes_as } = this)
       }
       this.ranges.track_changes = track_changes_as != null
-      for (const op of Array.from(ops)) {
+      for (const op of this._filterOps(ops)) {
         this.ranges.applyOp(op, { user_id: track_changes_as })
       }
       if (old_id_seed != null) {
@@ -788,15 +788,25 @@ export default Document = (function () {
       this.ranges.changes = changes
       this.ranges.comments = comments
       this.ranges.track_changes = this.doc.track_changes
-      for (const op of Array.from(this.doc.getInflightOp() || [])) {
+      for (const op of this._filterOps(this.doc.getInflightOp() || [])) {
         this.ranges.setIdSeed(this.doc.track_changes_id_seeds.inflight)
         this.ranges.applyOp(op, { user_id: this.track_changes_as })
       }
-      for (const op of Array.from(this.doc.getPendingOp() || [])) {
+      for (const op of this._filterOps(this.doc.getPendingOp() || [])) {
         this.ranges.setIdSeed(this.doc.track_changes_id_seeds.pending)
         this.ranges.applyOp(op, { user_id: this.track_changes_as })
       }
       return this.emit('ranges:redraw')
+    }
+
+    _filterOps(ops) {
+      // Read-only token users can't see/edit comment, so we filter out comment
+      // ops to avoid highlighting comment ranges.
+      if (window.isRestrictedTokenMember) {
+        return ops.filter(op => op.c == null)
+      } else {
+        return ops
+      }
     }
   }
   Document.initClass()

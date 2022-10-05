@@ -19,6 +19,7 @@
     "@overleaf/logger": "^3.1.0",
     "@overleaf/metrics": "^4.0.0",
     "@overleaf/o-error": "^3.4.0",
+    "@overleaf/ranges-tracker": "*",
     "@overleaf/redis-wrapper": "^2.0.1",
     "@overleaf/settings": "^3.0.0",
     "async": "^3.2.2",

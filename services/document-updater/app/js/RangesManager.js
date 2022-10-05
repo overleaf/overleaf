@@ -11,7 +11,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let RangesManager
-const RangesTracker = require('./RangesTracker')
+const RangesTracker = require('@overleaf/ranges-tracker')
 const logger = require('@overleaf/logger')
 const Metrics = require('./Metrics')
 const _ = require('lodash')

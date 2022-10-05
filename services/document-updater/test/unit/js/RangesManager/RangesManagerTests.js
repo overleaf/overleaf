@@ -423,9 +423,8 @@ describe('RangesManager', function () {
     beforeEach(function () {
       this.RangesManager = SandboxedModule.require(modulePath, {
         requires: {
-          './RangesTracker': (this.RangesTracker = SandboxedModule.require(
-            '../../../../app/js/RangesTracker.js'
-          )),
+          '@overleaf/ranges-tracker': (this.RangesTracker =
+            SandboxedModule.require('@overleaf/ranges-tracker')),
         },
       })
 

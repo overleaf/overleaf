@@ -14,7 +14,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const text = require('../../../../app/js/sharejs/types/text')
-const RangesTracker = require('../../../../app/js/RangesTracker')
+const RangesTracker = require('@overleaf/ranges-tracker')
 
 describe('ShareJS text type', function () {
   beforeEach(function () {

@@ -14,10 +14,10 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+import RangesTracker from '@overleaf/ranges-tracker'
 import App from '../../../base'
 import EventEmitter from '../../../utils/EventEmitter'
 import ColorManager from '../../colors/ColorManager'
-import RangesTracker from '../RangesTracker'
 
 export default App.controller(
   'ReviewPanelController',
