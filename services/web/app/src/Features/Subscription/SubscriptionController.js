@@ -222,16 +222,6 @@ async function userSubscriptionPage(req, res) {
 
   const cancelButtonNewCopy = cancelButtonAssignment?.variant === 'new-copy'
 
-  const premiumFeaturesDiscoverabilityAssignment =
-    await SplitTestHandler.promises.getAssignment(
-      req,
-      res,
-      'premium-features-discoverability'
-    )
-
-  const premiumFeaturesDiscoverability =
-    premiumFeaturesDiscoverabilityAssignment?.variant === 'active'
-
   const data = {
     title: 'your_subscription',
     plans,
@@ -248,7 +238,6 @@ async function userSubscriptionPage(req, res) {
     currentInstitutionsWithLicence,
     groupPlanModalOptions,
     cancelButtonNewCopy,
-    premiumFeaturesDiscoverability,
   }
   res.render('subscriptions/dashboard', data)
 }
@@ -332,16 +321,6 @@ async function successfulSubscription(req, res) {
       user
     )
 
-  const premiumFeaturesDiscoverabilityAssignment =
-    await SplitTestHandler.promises.getAssignment(
-      req,
-      res,
-      'premium-features-discoverability'
-    )
-
-  const premiumFeaturesDiscoverability =
-    premiumFeaturesDiscoverabilityAssignment?.variant === 'active'
-
   const postCheckoutRedirect = req.session?.postCheckoutRedirect
 
   if (!personalSubscription) {
@@ -350,7 +329,6 @@ async function successfulSubscription(req, res) {
     res.render('subscriptions/successful_subscription', {
       title: 'thank_you',
       personalSubscription,
-      premiumFeaturesDiscoverability,
       postCheckoutRedirect,
     })
   }

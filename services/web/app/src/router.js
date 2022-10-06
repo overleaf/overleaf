@@ -79,10 +79,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   webRouter.get(
     '*',
     expressify(
-      SplitTestMiddleware.loadAssignmentsInLocals([
-        'unified-navigation',
-        'premium-features-discoverability',
-      ])
+      SplitTestMiddleware.loadAssignmentsInLocals(['unified-navigation'])
     )
   )
 
