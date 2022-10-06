@@ -38,6 +38,8 @@ function sentryReporter() {
             // Microsoft Outlook SafeLink crawler
             // https://forum.sentry.io/t/unhandledrejection-non-error-promise-rejection-captured-with-value/14062
             /Non-Error promise rejection captured with value: Object Not Found Matching Id/,
+            // Ignore CM6 error until upgraded
+            "Cannot read properties of undefined (reading 'length')",
           ],
 
           denyUrls: [
