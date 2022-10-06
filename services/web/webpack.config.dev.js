@@ -45,7 +45,12 @@ module.exports = merge(base, {
       filename: 'stylesheets/[name].css',
     }),
 
-    new ReactRefreshWebpackPlugin(),
+    new ReactRefreshWebpackPlugin({
+      exclude: [
+        /node_modules/, // default
+        /source-editor/, // avoid crashing the source editor
+      ],
+    }),
 
     // Disable React DevTools if DISABLE_REACT_DEVTOOLS is set to "true"
     process.env.DISABLE_REACT_DEVTOOLS === 'true' &&
