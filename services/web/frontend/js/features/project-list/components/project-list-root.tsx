@@ -45,81 +45,84 @@ function ProjectListPageContent() {
       <LoadingBranded loadProgress={loadProgress} />
     </div>
   ) : (
-    <div className="project-list-row fill">
-      <div className="project-list-wrapper clearfix">
-        {error ? <DashApiError /> : ''}
-        {totalProjectsCount > 0 ? (
-          <>
-            <div className="project-list-sidebar-wrapper hidden-xs">
-              <aside className="project-list-sidebar">
+    <div className="project-list-wrapper clearfix">
+      {totalProjectsCount > 0 ? (
+        <>
+          <div className="project-list-sidebar-wrapper-react hidden-xs">
+            <div className="project-list-sidebar-subwrapper">
+              <aside className="project-list-sidebar-react">
                 <NewProjectButton id="new-project-button-sidebar" />
                 <SidebarFilters />
               </aside>
               <SurveyWidget />
             </div>
-            <div className="project-list-main">
-              <Row>
-                <Col xs={12}>
-                  <UserNotifications />
-                </Col>
-              </Row>
-              <Row>
-                <Col md={7} className="hidden-xs">
-                  <SearchForm
-                    inputValue={searchText}
-                    setInputValue={setSearchText}
-                  />
-                </Col>
-                <Col md={5}>
-                  <div className="project-tools">
-                    <div className="hidden-xs">
-                      {selectedProjects.length === 0 ? (
-                        <CurrentPlanWidget />
-                      ) : (
-                        <ProjectTools />
-                      )}
-                    </div>
-                    <div className="visible-xs">
+          </div>
+          <div className="project-list-main-react">
+            {error ? <DashApiError /> : ''}
+            <Row>
+              <Col xs={12}>
+                <UserNotifications />
+              </Col>
+            </Row>
+            <Row>
+              <Col md={7} className="hidden-xs">
+                <SearchForm
+                  inputValue={searchText}
+                  setInputValue={setSearchText}
+                />
+              </Col>
+              <Col md={5}>
+                <div className="project-tools">
+                  <div className="hidden-xs">
+                    {selectedProjects.length === 0 ? (
                       <CurrentPlanWidget />
-                    </div>
+                    ) : (
+                      <ProjectTools />
+                    )}
                   </div>
-                </Col>
-              </Row>
-              <div className="visible-xs mt-1">
-                <div role="toolbar" className="projects-toolbar">
-                  <ProjectsDropdown />
-                  <SortByDropdown />
+                  <div className="visible-xs">
+                    <CurrentPlanWidget />
+                  </div>
                 </div>
+              </Col>
+            </Row>
+            <div className="visible-xs mt-1">
+              <div role="toolbar" className="projects-toolbar">
+                <ProjectsDropdown />
+                <SortByDropdown />
               </div>
-              <Row className="row-spaced">
-                <Col xs={12}>
-                  <div className="card project-list-card">
-                    <div className="visible-xs pt-2 pb-3">
-                      <div className="clearfix">
-                        <NewProjectButton
-                          id="new-project-button-projects-table"
-                          className="pull-left me-2"
-                        />
-                        <SearchForm
-                          inputValue={searchText}
-                          setInputValue={setSearchText}
-                          className="overflow-hidden"
-                          formGroupProps={{ className: 'mb-0' }}
-                        />
-                      </div>
-                    </div>
-                    <ProjectListTable />
-                  </div>
-                </Col>
-              </Row>
-              <Row className="row-spaced">
-                <Col xs={12}>
-                  <LoadMore />
-                </Col>
-              </Row>
             </div>
-          </>
-        ) : (
+            <Row className="row-spaced">
+              <Col xs={12}>
+                <div className="card project-list-card">
+                  <div className="visible-xs pt-2 pb-3">
+                    <div className="clearfix">
+                      <NewProjectButton
+                        id="new-project-button-projects-table"
+                        className="pull-left me-2"
+                      />
+                      <SearchForm
+                        inputValue={searchText}
+                        setInputValue={setSearchText}
+                        className="overflow-hidden"
+                        formGroupProps={{ className: 'mb-0' }}
+                      />
+                    </div>
+                  </div>
+                  <ProjectListTable />
+                </div>
+              </Col>
+            </Row>
+            <Row className="row-spaced">
+              <Col xs={12}>
+                <LoadMore />
+              </Col>
+            </Row>
+          </div>
+        </>
+      ) : (
+        <div className="project-list-welcome-wrapper">
+          {error ? <DashApiError /> : ''}
           <Row className="row-spaced">
             <Col
               xs={8}
@@ -131,8 +134,8 @@ function ProjectListPageContent() {
               <WelcomeMessage />
             </Col>
           </Row>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   )
 }
