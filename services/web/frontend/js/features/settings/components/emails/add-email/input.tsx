@@ -6,6 +6,7 @@ import {
   useState,
   useRef,
 } from 'react'
+import { Nullable } from '../../../../../../../types/utils'
 import { getJSON } from '../../../../../infrastructure/fetch-json'
 import useAbortController from '../../../../../shared/hooks/use-abort-controller'
 import domainBlocklist from '../../../domain-blocklist'

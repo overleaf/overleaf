@@ -3,6 +3,7 @@ import ExampleProjectModal from './example-project-modal'
 import UploadProjectModal from './upload-project-modal'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
 import { JSXElementConstructor } from 'react'
+import { Nullable } from '../../../../../../types/utils'
 
 export type NewProjectButtonModalVariant =
   | 'blank_project'
