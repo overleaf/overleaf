@@ -1,0 +1,178 @@
+volumes:
+  clsi-cache:
+  clsi-output:
+  filestore-public-files:
+  filestore-template-files:
+  filestore-uploads:
+  filestore-user-files:
+  mongo-data:
+  npm-cache:
+  redis-data:
+  sharelatex-data:
+  spelling-cache:
+  web-data:
+
+services:
+  chat:
+    build:
+      context: ..
+      dockerfile: services/chat/Dockerfile
+    env_file:
+      - dev.env
+    volumes:
+      - npm-cache:/root/.npm
+
+  clsi:
+    build:
+      context: ..
+      dockerfile: services/clsi/Dockerfile
+    env_file:
+      - dev.env
+    environment:
+      - DOCKER_RUNNER=true
+      - TEXLIVE_IMAGE=texlive-full # docker build texlive -t texlive-full
+      - COMPILES_HOST_DIR=${PWD}/compiles
+    user: root
+    volumes:
+      - npm-cache:/root/.npm
+      - ${PWD}/compiles:/overleaf/services/clsi/compiles
+      - ${DOCKER_SOCKET_PATH:-/var/run/docker.sock}:/var/run/docker.sock
+      - clsi-cache:/overleaf/services/clsi/cache
+      - clsi-output:/overleaf/services/clsi/output
+
+  contacts:
+    build:
+      context: ..
+      dockerfile: services/contacts/Dockerfile
+    env_file:
+      - dev.env
+    volumes:
+      - npm-cache:/root/.npm
+
+  docstore:
+    build:
+      context: ..
+      dockerfile: services/docstore/Dockerfile
+    env_file:
+      - dev.env
+    volumes:
+      - npm-cache:/root/.npm
+
+  document-updater:
+    build:
+      context: ..
+      dockerfile: services/document-updater/Dockerfile
+    env_file:
+      - dev.env
+    volumes:
+      - npm-cache:/root/.npm
+
+  filestore:
+    build:
+      context: ..
+      dockerfile: services/filestore/Dockerfile
+    env_file:
+      - dev.env
+#    environment:
+#      - ENABLE_CONVERSIONS=true
+    volumes:
+      - npm-cache:/root/.npm
+      - filestore-public-files:/overleaf/services/filestore/public_files
+      - filestore-template-files:/overleaf/services/filestore/template_files
+      - filestore-uploads:/overleaf/services/filestore/uploads
+      - filestore-user-files:/overleaf/services/filestore/user_files
+
+  mongo:
+    image: mongo:4.4
+    ports:
+      - "127.0.0.1:27017:27017" # for debugging
+    volumes:
+      - npm-cache:/root/.npm
+      - mongo-data:/data/db
+
+  notifications:
+    build:
+      context: ..
+      dockerfile: services/notifications/Dockerfile
+    env_file:
+      - dev.env
+    volumes:
+      - npm-cache:/root/.npm
+
+  real-time:
+    build:
+      context: ..
+      dockerfile: services/real-time/Dockerfile
+    env_file:
+      - dev.env
+    volumes:
+      - npm-cache:/root/.npm
+
+  redis:
+    image: redis:5
+    ports:
+      - "127.0.0.1:6379:6379" # for debugging
+    volumes:
+      - redis-data:/data
+
+  spelling:
+    build:
+      context: ..
+      dockerfile: services/spelling/Dockerfile
+    env_file:
+      - dev.env
+    volumes:
+      - npm-cache:/root/.npm
+      - spelling-cache:/overleaf/services/spelling/cache
+
+  track-changes:
+    build:
+      context: ..
+      dockerfile: services/track-changes/Dockerfile
+    env_file:
+      - dev.env
+    volumes:
+      - npm-cache:/root/.npm
+
+  web:
+    build:
+      context: ..
+      dockerfile: services/web/Dockerfile
+      target: dev
+    env_file:
+      - dev.env
+    environment:
+      - APP_NAME=Overleaf Community Edition
+      - ENABLED_LINKED_FILE_TYPES=project_file,project_output_file
+      - EMAIL_CONFIRMATION_DISABLED=true
+      - NODE_ENV=development
+      - SHARELATEX_ALLOW_PUBLIC_ACCESS=true
+    command: ["node", "app.js"]
+    volumes:
+      - npm-cache:/root/.npm
+      - sharelatex-data:/var/lib/sharelatex
+      - web-data:/overleaf/services/web/data
+    depends_on:
+      - mongo
+      - redis
+      - chat
+      - clsi
+      - contacts
+      - docstore
+      - document-updater
+      - filestore
+      - notifications
+      - real-time
+      - spelling
+
+  webpack:
+    build:
+      context: ..
+      dockerfile: services/web/Dockerfile
+      target: dev
+    command: ["npx", "webpack", "serve", "--config", "webpack.config.dev-env.js"]
+    ports:
+      - "127.0.0.1:80:3808"
+    volumes:
+      - npm-cache:/root/.npm
+      - ./webpack.config.dev-env.js:/overleaf/services/web/webpack.config.dev-env.js
