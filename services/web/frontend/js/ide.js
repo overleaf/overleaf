@@ -66,7 +66,6 @@ import './features/share-project-modal/controllers/react-share-project-modal-con
 import './features/source-editor/controllers/editor-switch-controller'
 import getMeta from './utils/meta'
 import { cleanupServiceWorker } from './utils/service-worker-cleanup'
-import { reportCM6Perf } from './infrastructure/cm6-performance'
 
 App.controller(
   'IdeController',
@@ -257,30 +256,10 @@ If the project has been renamed please look in your project list for a new proje
     })
 
     ide.editingSessionHeartbeat = () => {
-      eventTracking.editingSessionHeartbeat(() => {
-        const editorType = ide.editorManager.getEditorType()
-
-        const segmentation = {
-          editorType,
-        }
-
-        if (editorType === 'cm6') {
-          const cm6PerfData = reportCM6Perf()
-
-          // Ignore if no typing has happened
-          if (cm6PerfData.numberOfEntries > 0) {
-            segmentation.cm6PerfMax = cm6PerfData.max
-            segmentation.cm6PerfMean = cm6PerfData.mean
-            segmentation.cm6PerfMedian = cm6PerfData.median
-            segmentation.cm6PerfNinetyFifthPercentile =
-              cm6PerfData.ninetyFifthPercentile
-            segmentation.cm6PerfDocLength = cm6PerfData.docLength
-            segmentation.cm6PerfNumberOfEntries = cm6PerfData.numberOfEntries
-          }
-        }
-
-        return segmentation
-      })
+      const segmentation = {
+        editorType: ide.editorManager.getEditorType(),
+      }
+      eventTracking.editingSessionHeartbeat(segmentation)
     }
 
     $scope.$on('cursor:editor:update', () => {

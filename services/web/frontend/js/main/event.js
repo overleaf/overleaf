@@ -70,13 +70,11 @@ App.factory('eventTracking', function ($http, localStorage) {
       }
     },
 
-    editingSessionHeartbeat(segmentationCb = () => {}) {
-      sl_console.log('[Event] heartbeat trigger')
-
-      // If the next heartbeat is in the future, stop
-      if (nextHeartbeat > new Date()) return
-
-      const segmentation = segmentationCb()
+    editingSessionHeartbeat(segmentation) {
+      sl_console.log('[Event] heartbeat trigger', segmentation)
+      if (!(nextHeartbeat <= new Date())) {
+        return
+      }
 
       sl_console.log('[Event] send heartbeat request', segmentation)
       _sendEditingSessionHeartbeat(segmentation)
@@ -92,7 +90,7 @@ App.factory('eventTracking', function ($http, localStorage) {
           ? (heartbeatsSent - 2) * 60
           : 300
 
-      nextHeartbeat = moment().add(backoffSecs, 'seconds').toDate()
+      return (nextHeartbeat = moment().add(backoffSecs, 'seconds').toDate())
     },
 
     sendMB,

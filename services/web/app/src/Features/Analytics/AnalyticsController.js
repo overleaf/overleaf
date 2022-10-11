@@ -10,7 +10,7 @@ async function updateEditingSession(req, res, next) {
   }
   const userId = SessionManager.getLoggedInUserId(req.session)
   const { projectId } = req.params
-  const segmentation = req.body.segmentation || {}
+  const segmentation = _getSegmentation(req)
   let countryCode = null
 
   if (userId) {
@@ -43,6 +43,20 @@ function recordEvent(req, res, next) {
     req.body
   )
   res.sendStatus(202)
+}
+
+function _getSegmentation(req) {
+  const segmentation = req.body ? req.body.segmentation : null
+  const cleanedSegmentation = {}
+  if (
+    segmentation &&
+    segmentation.editorType &&
+    typeof segmentation.editorType === 'string' &&
+    segmentation.editorType.length < 100
+  ) {
+    cleanedSegmentation.editorType = segmentation.editorType
+  }
+  return cleanedSegmentation
 }
 
 module.exports = {
