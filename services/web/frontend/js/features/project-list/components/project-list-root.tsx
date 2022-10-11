@@ -54,7 +54,6 @@ function ProjectListPageContent() {
                 <NewProjectButton id="new-project-button-sidebar" />
                 <SidebarFilters />
               </aside>
-              <SurveyWidget />
             </div>
           </div>
           <div className="project-list-main-react">
@@ -118,6 +117,11 @@ function ProjectListPageContent() {
                 <LoadMore />
               </Col>
             </Row>
+          </div>
+          <div className="project-list-sidebar-survey-wrapper hidden-xs">
+            <div className="project-list-sidebar-survey-subwrapper">
+              <SurveyWidget />
+            </div>
           </div>
         </>
       ) : (

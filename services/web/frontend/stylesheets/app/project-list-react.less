@@ -1,3 +1,5 @@
+@project-list-sidebar-wrapper-flex: 0 0 15%;
+
 .project-list-react {
   overflow-x: hidden;
 
@@ -32,7 +34,7 @@
 
   .project-list-sidebar-wrapper-react {
     background-color: @sidebar-bg;
-    flex: 0 0 15%;
+    flex: @project-list-sidebar-wrapper-flex;
     min-height: calc(~'100vh -' @header-height);
 
     .project-list-sidebar-subwrapper {
@@ -693,5 +695,17 @@
   &:hover {
     color: @white;
     background-color: @ol-green;
+  }
+}
+
+.project-list-sidebar-survey-wrapper {
+  display: flex;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+
+  .project-list-sidebar-survey-subwrapper {
+    flex: @project-list-sidebar-wrapper-flex;
   }
 }
