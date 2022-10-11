@@ -36,6 +36,7 @@
     "cypress:run-ct": "SHARELATEX_CONFIG=$PWD/config/settings.webpack.js cypress run --component",
     "lezer-latex:generate": "if [ ! -d $(pwd)/modules/source-editor ]; then echo \"'source-editor' module is not available\"; exit 0; fi; node modules/source-editor/scripts/lezer-latex/generate.js",
     "lezer-latex:run": "node modules/source-editor/scripts/lezer-latex/run.mjs",
+    "lezer-latex:benchmark": "node modules/source-editor/scripts/lezer-latex/benchmark.mjs",
     "routes": "bin/routes",
     "local:nodemon": "set -a;. ../../config/dev-environment.env;. ../../config/local.env;. ../../config/local-dev.env;. ./docker-compose.common.env;. ./local-dev.env; set +a; echo $SHARELATEX_CONFIG; WEB_PORT=13000 LISTEN_ADDRESS=0.0.0.0 npm run nodemon",
     "local:webpack": "set -a;. ../../config/dev-environment.env;. ../../config/local.env;. ../../config/local-dev.env;. ./docker-compose.common.env;. ./local-dev.env; set +a; PORT=13808 SHARELATEX_CONFIG=$(pwd)/config/settings.webpack.js npm run webpack",
