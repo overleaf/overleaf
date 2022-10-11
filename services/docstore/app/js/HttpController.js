@@ -79,7 +79,14 @@ function getAllDocs(req, res, next) {
       if (error) {
         return next(error)
       }
-      res.json(_buildDocsArrayView(projectId, docs))
+      const docViews = _buildDocsArrayView(projectId, docs)
+      for (const docView of docViews) {
+        if (!docView.lines) {
+          logger.warn({ projectId, docId: docView._id }, 'missing doc lines')
+          docView.lines = []
+        }
+      }
+      res.json(docViews)
     }
   )
 }

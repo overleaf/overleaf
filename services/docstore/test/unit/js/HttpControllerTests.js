@@ -198,6 +198,45 @@ describe('HttpController', function () {
       })
     })
 
+    describe('with null lines', function () {
+      beforeEach(function () {
+        this.req.params = { project_id: this.projectId }
+        this.docs = [
+          {
+            _id: ObjectId(),
+            lines: null,
+            rev: 2,
+          },
+          {
+            _id: ObjectId(),
+            lines: ['mock', 'lines', 'two'],
+            rev: 4,
+          },
+        ]
+        this.DocManager.getAllNonDeletedDocs = sinon
+          .stub()
+          .callsArgWith(2, null, this.docs)
+        this.HttpController.getAllDocs(this.req, this.res, this.next)
+      })
+
+      it('should return the doc with fallback lines', function () {
+        this.res.json
+          .calledWith([
+            {
+              _id: this.docs[0]._id.toString(),
+              lines: [],
+              rev: this.docs[0].rev,
+            },
+            {
+              _id: this.docs[1]._id.toString(),
+              lines: this.docs[1].lines,
+              rev: this.docs[1].rev,
+            },
+          ])
+          .should.equal(true)
+      })
+    })
+
     describe('with a null doc', function () {
       beforeEach(function () {
         this.req.params = { project_id: this.projectId }
