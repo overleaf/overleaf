@@ -178,7 +178,6 @@ async function paymentPage(req, res) {
         currency,
         countryCode,
         plan,
-        showStudentPlan: req.query.ssp === 'true',
         recurlyConfig: JSON.stringify({
           currency,
           subdomain: Settings.apis.recurly.subdomain,

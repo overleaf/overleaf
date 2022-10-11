@@ -82,7 +82,7 @@ describe('start free trial button', function () {
           .should('eq', 'cypress-test')
         cy.get('@Open').should(
           'have.been.calledOnceWithExactly',
-          '/user/subscription/new?planCode=collaborator_free_trial_7_days&ssp=true&itm_campaign=cypress-test'
+          '/user/subscription/choose-your-plan?itm_campaign=cypress-test'
         )
         expect(onClickStub).to.be.called
       })

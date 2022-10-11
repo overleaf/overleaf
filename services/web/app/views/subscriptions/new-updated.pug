@@ -13,12 +13,6 @@ block content
 		.container(ng-controller="NewSubscriptionController" ng-cloak)
 			.row.card-group
 				.col-md-3.col-md-push-1
-					if showStudentPlan
-						a.btn-primary.btn.plansPageStudentLink(
-							href,
-							ng-click="switchToStudent()"
-						) #{translate("special_price_student")}
-
 					.card.card-first
 						.price-feature-description
 							h4(ng-if="planName") {{planName}}
