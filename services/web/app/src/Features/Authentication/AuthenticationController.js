@@ -106,7 +106,7 @@ const AuthenticationController = {
 
   finishLogin(user, req, res, next) {
     if (user === false) {
-      return res.redirect('/login')
+      return AsyncFormHelper.redirect(req, res, '/login')
     } // OAuth2 'state' mismatch
 
     if (Settings.adminOnlyLogin && !hasAdminAccess(user)) {
