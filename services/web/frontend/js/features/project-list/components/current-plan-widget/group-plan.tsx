@@ -28,12 +28,14 @@ function GroupPlan({ subscription, plan, remainingTrialDays }: GroupPlanProps) {
     <>
       <span className="current-plan-label visible-xs">{currentPlanLabel}</span>
       <Tooltip
-        description={t(
+        description={
           subscription.teamName != null
-            ? 'group_plan_with_name_tooltip'
-            : 'group_plan_tooltip',
-          { plan: plan.name, groupName: subscription.teamName }
-        )}
+            ? t('group_plan_with_name_tooltip', {
+                plan: plan.name,
+                groupName: subscription.teamName,
+              })
+            : t('group_plan_tooltip', { plan: plan.name })
+        }
         id="group-plan"
         overlayProps={{ placement: 'bottom' }}
       >
