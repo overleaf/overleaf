@@ -1236,6 +1236,7 @@ const ProjectController = {
               detachRole,
               metadata: { viewport: false },
               showUpgradePrompt,
+              fixedSizeDocument: true,
             })
             timer.done()
           }

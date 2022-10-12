@@ -23,6 +23,13 @@ html {
   height: 100%;
 }
 
+// Prevent potential for layout shifts on a page with fixed 100% height. This
+// can happen, for example, with the Grammarly extension in Firefox.
+html.fixed-size-document {
+  position: fixed;
+  width: 100%;
+}
+
 body {
   font-family: @font-family-base;
   font-size: @font-size-base;

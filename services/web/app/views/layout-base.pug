@@ -1,6 +1,7 @@
 doctype html
 html(
 	lang=(currentLngCode || 'en')
+	class=(fixedSizeDocument ? 'fixed-size-document' : undefined)
 )
 	- metadata = metadata || {}
 
