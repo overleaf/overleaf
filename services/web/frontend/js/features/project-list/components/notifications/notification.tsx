@@ -37,7 +37,11 @@ function Notification({
     <li className={classnames('notification-entry', className)} {...props}>
       <Alert bsStyle={bsStyle}>
         {children}
-        {onDismiss ? <Close onDismiss={handleDismiss} /> : null}
+        {onDismiss ? (
+          <div className="notification-close">
+            <Close onDismiss={handleDismiss} />
+          </div>
+        ) : null}
       </Alert>
     </li>
   )

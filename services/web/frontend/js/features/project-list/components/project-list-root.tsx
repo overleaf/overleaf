@@ -13,6 +13,7 @@ import SidebarFilters from './sidebar/sidebar-filters'
 import SurveyWidget from './survey-widget'
 import WelcomeMessage from './welcome-message'
 import LoadingBranded from '../../../shared/components/loading-branded'
+import SystemMessages from './notifications/system-messages'
 import UserNotifications from './notifications/user-notifications'
 import SearchForm from './search-form'
 import ProjectsDropdown from './dropdown/projects-dropdown'
@@ -51,107 +52,110 @@ function ProjectListPageContent() {
       <LoadingBranded loadProgress={loadProgress} />
     </div>
   ) : (
-    <div className="project-list-wrapper clearfix">
-      {totalProjectsCount > 0 ? (
-        <>
-          <div className="project-list-sidebar-wrapper-react hidden-xs">
-            <div className="project-list-sidebar-subwrapper">
-              <aside className="project-list-sidebar-react">
-                <NewProjectButton id="new-project-button-sidebar" />
-                <SidebarFilters />
-              </aside>
-            </div>
-          </div>
-          <div className="project-list-main-react">
-            {error ? <DashApiError /> : ''}
-            <Row>
-              <Col xs={12}>
-                <UserNotifications />
-              </Col>
-            </Row>
-            <Row>
-              <Col md={7} className="hidden-xs">
-                <SearchForm
-                  inputValue={searchText}
-                  setInputValue={setSearchText}
-                />
-              </Col>
-              <Col md={5}>
-                <div className="project-tools">
-                  <div className="hidden-xs">
-                    {selectedProjects.length === 0 ? (
-                      <CurrentPlanWidget />
-                    ) : (
-                      <ProjectTools />
-                    )}
-                  </div>
-                  <div className="visible-xs">
-                    <CurrentPlanWidget />
-                  </div>
-                </div>
-              </Col>
-            </Row>
-            <div className="visible-xs mt-1">
-              <div role="toolbar" className="projects-toolbar">
-                <ProjectsDropdown />
-                <SortByDropdown />
+    <>
+      <SystemMessages />
+      <div className="project-list-wrapper clearfix">
+        {totalProjectsCount > 0 ? (
+          <>
+            <div className="project-list-sidebar-wrapper-react hidden-xs">
+              <div className="project-list-sidebar-subwrapper">
+                <aside className="project-list-sidebar-react">
+                  <NewProjectButton id="new-project-button-sidebar" />
+                  <SidebarFilters />
+                </aside>
               </div>
             </div>
-            <Row className="row-spaced">
-              <Col xs={12}>
-                <div className="card project-list-card">
-                  <div className="visible-xs pt-2 pb-3">
-                    <div className="clearfix">
-                      <NewProjectButton
-                        id="new-project-button-projects-table"
-                        className="pull-left me-2"
-                      />
-                      <SearchForm
-                        inputValue={searchText}
-                        setInputValue={setSearchText}
-                        className="overflow-hidden"
-                        formGroupProps={{ className: 'mb-0' }}
-                      />
-                    </div>
-                  </div>
-                  <ProjectListTable />
-                </div>
-              </Col>
-            </Row>
-            <Row className="row-spaced">
-              <Col xs={12}>
-                <LoadMore />
-              </Col>
-            </Row>
-          </div>
-          <div className="project-list-sidebar-survey-wrapper hidden-xs">
-            <div className="project-list-sidebar-survey-subwrapper">
-              <SurveyWidget />
-            </div>
-          </div>
-        </>
-      ) : (
-        <div className="project-list-welcome-wrapper">
-          {error ? <DashApiError /> : ''}
-          <Row className="row-spaced">
-            <Col
-              xs={8}
-              xsOffset={2}
-              md={8}
-              mdOffset={2}
-              className="project-list-empty-col"
-            >
+            <div className="project-list-main-react">
+              {error ? <DashApiError /> : ''}
               <Row>
                 <Col xs={12}>
                   <UserNotifications />
                 </Col>
               </Row>
-              <WelcomeMessage />
-            </Col>
-          </Row>
-        </div>
-      )}
-    </div>
+              <Row>
+                <Col md={7} className="hidden-xs">
+                  <SearchForm
+                    inputValue={searchText}
+                    setInputValue={setSearchText}
+                  />
+                </Col>
+                <Col md={5}>
+                  <div className="project-tools">
+                    <div className="hidden-xs">
+                      {selectedProjects.length === 0 ? (
+                        <CurrentPlanWidget />
+                      ) : (
+                        <ProjectTools />
+                      )}
+                    </div>
+                    <div className="visible-xs">
+                      <CurrentPlanWidget />
+                    </div>
+                  </div>
+                </Col>
+              </Row>
+              <div className="visible-xs mt-1">
+                <div role="toolbar" className="projects-toolbar">
+                  <ProjectsDropdown />
+                  <SortByDropdown />
+                </div>
+              </div>
+              <Row className="row-spaced">
+                <Col xs={12}>
+                  <div className="card project-list-card">
+                    <div className="visible-xs pt-2 pb-3">
+                      <div className="clearfix">
+                        <NewProjectButton
+                          id="new-project-button-projects-table"
+                          className="pull-left me-2"
+                        />
+                        <SearchForm
+                          inputValue={searchText}
+                          setInputValue={setSearchText}
+                          className="overflow-hidden"
+                          formGroupProps={{ className: 'mb-0' }}
+                        />
+                      </div>
+                    </div>
+                    <ProjectListTable />
+                  </div>
+                </Col>
+              </Row>
+              <Row className="row-spaced">
+                <Col xs={12}>
+                  <LoadMore />
+                </Col>
+              </Row>
+            </div>
+            <div className="project-list-sidebar-survey-wrapper hidden-xs">
+              <div className="project-list-sidebar-survey-subwrapper">
+                <SurveyWidget />
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="project-list-welcome-wrapper">
+            {error ? <DashApiError /> : ''}
+            <Row className="row-spaced">
+              <Col
+                xs={8}
+                xsOffset={2}
+                md={8}
+                mdOffset={2}
+                className="project-list-empty-col"
+              >
+                <Row>
+                  <Col xs={12}>
+                    <UserNotifications />
+                  </Col>
+                </Row>
+                <WelcomeMessage />
+              </Col>
+            </Row>
+          </div>
+        )}
+      </div>
+    </>
   )
 }
 

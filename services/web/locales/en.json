@@ -1443,6 +1443,7 @@
   "address": "Address",
   "coupon_code": "Coupon code",
   "country": "Country",
+  "country_flag": "__country__ country flag",
   "billing_address": "Billing Address",
   "upgrade_now": "Upgrade Now",
   "state": "State",

@@ -18,6 +18,12 @@ block append meta
 	meta(name="ol-tags" data-type="json" content=tags)
 	meta(name="ol-portalTemplates" data-type="json" content=portalTemplates)
 	meta(name="ol-prefetchedProjectsBlob" data-type="json" content=prefetchedProjectsBlob)
+	if (suggestedLanguageSubdomainConfig)
+		meta(name="ol-suggestedLanguage" data-type="json" content=Object.assign(suggestedLanguageSubdomainConfig, {
+			lngName: translate(suggestedLanguageSubdomainConfig.lngCode),
+			imgUrl: buildImgPath("flags/24/" + suggestedLanguageSubdomainConfig.lngCode + ".png")
+		}))
+	meta(name="ol-currentUrl" data-type="string" content=currentUrl)
 
 block content
 	main.content.content-alt.project-list-react#project-list-root
