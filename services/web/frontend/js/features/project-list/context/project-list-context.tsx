@@ -103,14 +103,21 @@ type ProjectListProviderProps = {
 }
 
 export function ProjectListProvider({ children }: ProjectListProviderProps) {
-  const [loadedProjects, setLoadedProjects] = useState<Project[]>([])
+  const prefetchedProjectsBlob = getMeta('ol-prefetchedProjectsBlob')
+  const [loadedProjects, setLoadedProjects] = useState<Project[]>(
+    prefetchedProjectsBlob?.projects ?? []
+  )
   const [visibleProjects, setVisibleProjects] = useState<Project[]>([])
   const [maxVisibleProjects, setMaxVisibleProjects] =
     useState(MAX_PROJECT_PER_PAGE)
   const [hiddenProjectsCount, setHiddenProjectsCount] = useState(0)
   const [loadMoreCount, setLoadMoreCount] = useState<number>(0)
-  const [loadProgress, setLoadProgress] = useState(20)
-  const [totalProjectsCount, setTotalProjectsCount] = useState<number>(0)
+  const [loadProgress, setLoadProgress] = useState(
+    prefetchedProjectsBlob ? 100 : 20
+  )
+  const [totalProjectsCount, setTotalProjectsCount] = useState<number>(
+    prefetchedProjectsBlob?.totalSize ?? 0
+  )
   const [sort, setSort] = useState<Sort>({
     by: 'lastUpdated',
     order: 'desc',
@@ -131,10 +138,14 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
     isIdle,
     error,
     runAsync,
-  } = useAsync<GetProjectsResponseBody>()
+  } = useAsync<GetProjectsResponseBody>({
+    status: prefetchedProjectsBlob ? 'resolved' : 'pending',
+    data: prefetchedProjectsBlob,
+  })
   const isLoading = isIdle ? true : loading
 
   useEffect(() => {
+    if (prefetchedProjectsBlob) return
     setLoadProgress(40)
     runAsync(getProjects({ by: 'lastUpdated', order: 'desc' }))
       .then(data => {
@@ -145,7 +156,7 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       .finally(() => {
         setLoadProgress(100)
       })
-  }, [runAsync])
+  }, [prefetchedProjectsBlob, runAsync])
 
   useEffect(() => {
     let filteredProjects = [...loadedProjects]

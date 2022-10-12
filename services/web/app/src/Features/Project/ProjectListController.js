@@ -1,4 +1,5 @@
 const _ = require('lodash')
+const Metrics = require('@overleaf/metrics')
 const Settings = require('@overleaf/settings')
 const ProjectHelper = require('./ProjectHelper')
 const ProjectGetter = require('./ProjectGetter')
@@ -88,6 +89,10 @@ async function projectListReactPage(req, res, next) {
   let survey
 
   const userId = SessionManager.getLoggedInUserId(req.session)
+  const projectsBlobPending = _getProjects(userId).catch(err => {
+    logger.err({ err, userId }, 'projects listing in background failed')
+    return undefined
+  })
   const user = await User.findById(
     userId,
     'email emails features lastPrimaryEmailCheck signUpDate'
@@ -274,6 +279,14 @@ async function projectListReactPage(req, res, next) {
     delete req.session.saml
   }
 
+  const prefetchedProjectsBlob = await Promise.race([
+    projectsBlobPending,
+    Promise.resolve(undefined),
+  ])
+  Metrics.inc('project-list-prefetch-projects', 1, {
+    status: prefetchedProjectsBlob ? 'success' : 'too-slow',
+  })
+
   res.render('project/list-react', {
     title: 'your_projects',
     usersBestSubscription,
@@ -286,6 +299,7 @@ async function projectListReactPage(req, res, next) {
     survey,
     tags,
     portalTemplates,
+    prefetchedProjectsBlob,
   })
 }
 
@@ -317,14 +331,16 @@ async function _getProjects(
   sort = { by: 'lastUpdated', order: 'desc' },
   page = { size: 20 }
 ) {
-  const allProjects =
-    /** @type {AllUsersProjects} **/ await ProjectGetter.promises.findAllUsersProjects(
+  const [
+    /** @type {AllUsersProjects} **/ allProjects,
+    /** @type {Tag[]} **/ tags,
+  ] = await Promise.all([
+    ProjectGetter.promises.findAllUsersProjects(
       userId,
       'name lastUpdated lastUpdatedBy publicAccesLevel archived trashed owner_ref tokens'
-    )
-  const tags = /** @type {Tag[]} **/ await TagsHandler.promises.getAllTags(
-    userId
-  )
+    ),
+    TagsHandler.promises.getAllTags(userId),
+  ])
   const formattedProjects = _formatProjects(allProjects, userId)
   const filteredProjects = _applyFilters(
     formattedProjects,
@@ -475,20 +491,19 @@ async function _injectProjectUsers(projects) {
     }
   }
 
+  const projection = {
+    first_name: 1,
+    last_name: 1,
+    email: 1,
+  }
   const users = {}
-  for (const userId of userIds) {
-    const user = await UserGetter.promises.getUser(userId, {
-      first_name: 1,
-      last_name: 1,
-      email: 1,
-    })
-    if (user) {
-      users[userId] = {
-        id: userId,
-        email: user.email,
-        firstName: user.first_name,
-        lastName: user.last_name,
-      }
+  for (const user of await UserGetter.promises.getUsers(userIds, projection)) {
+    const userId = user._id.toString()
+    users[userId] = {
+      id: userId,
+      email: user.email,
+      firstName: user.first_name,
+      lastName: user.last_name,
     }
   }
   for (const project of projects) {

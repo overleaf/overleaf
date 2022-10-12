@@ -33,6 +33,9 @@ function normalizeQuery(query) {
 }
 
 function normalizeMultiQuery(query) {
+  if (query instanceof Set) {
+    query = Array.from(query)
+  }
   if (Array.isArray(query)) {
     return { _id: { $in: query.map(id => _getObjectIdInstance(id)) } }
   } else {
