@@ -2,6 +2,7 @@ import {
   ProjectListProvider,
   useProjectListContext,
 } from '../context/project-list-context'
+import * as eventTracking from '../../../infrastructure/event-tracking'
 import { Col, Row } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import useWaitForI18n from '../../../shared/hooks/use-wait-for-i18n'
@@ -18,6 +19,7 @@ import ProjectsDropdown from './dropdown/projects-dropdown'
 import SortByDropdown from './dropdown/sort-by-dropdown'
 import ProjectTools from './table/project-tools/project-tools'
 import LoadMore from './load-more'
+import { useEffect } from 'react'
 
 function ProjectListRoot() {
   const { isReady } = useWaitForI18n()
@@ -39,6 +41,10 @@ function ProjectListPageContent() {
     setSearchText,
     selectedProjects,
   } = useProjectListContext()
+
+  useEffect(() => {
+    eventTracking.sendMB('loads_v2_dash', {})
+  }, [])
 
   return isLoading ? (
     <div className="loading-container">
