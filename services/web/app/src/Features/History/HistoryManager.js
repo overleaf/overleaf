@@ -1,5 +1,5 @@
 const { callbackify } = require('util')
-const request = require('request-promise-native')
+const fetch = require('node-fetch')
 const settings = require('@overleaf/settings')
 const OError = require('@overleaf/o-error')
 const UserGetter = require('../User/UserGetter')
@@ -32,103 +32,131 @@ async function initializeProject() {
   ) {
     return
   }
-  try {
-    const body = await request.post({
-      url: `${settings.apis.project_history.url}/project`,
+  const response = await fetch(`${settings.apis.project_history.url}/project`, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+    },
+  })
+  if (!response.ok) {
+    throw new OError('failed to initialize project history', {
+      statusCode: response.status,
     })
-    const project = JSON.parse(body)
-    const overleafId = project && project.project && project.project.id
-    if (!overleafId) {
-      throw new Error('project-history did not provide an id', project)
-    }
-    return { overleaf_id: overleafId }
-  } catch (err) {
-    throw OError.tag(err, 'failed to initialize project history')
   }
+  const body = await response.json()
+  const overleafId = body && body.project && body.project.id
+  if (!overleafId) {
+    throw new OError('project-history did not provide an id', { body })
+  }
+  return { overleaf_id: overleafId }
 }
 
 async function flushProject(projectId) {
-  try {
-    await request.post({
-      url: `${settings.apis.project_history.url}/project/${projectId}/flush`,
-    })
-  } catch (err) {
-    throw OError.tag(err, 'failed to flush project to project history', {
+  const response = await fetch(
+    `${settings.apis.project_history.url}/project/${projectId}/flush`,
+    { method: 'POST' }
+  )
+  if (!response.ok) {
+    throw new OError('failed to flush project to project history', {
       projectId,
+      statusCode: response.status,
     })
   }
 }
 
 async function flushMigration(projectId) {
-  try {
-    await request.post({
-      url: `${settings.apis.project_history_importer.url}/project/${projectId}/flush`,
-    })
-  } catch (err) {
-    throw OError.tag(
-      err,
+  const response = await fetch(
+    `${settings.apis.project_history_importer.url}/project/${projectId}/flush`,
+    { method: 'POST' }
+  )
+  if (!response.ok) {
+    throw new OError(
       'failed to flush project migration to project history importer',
-      {
-        projectId,
-      }
+      { projectId, statusCode: response.status }
     )
   }
 }
 
 async function deleteProjectHistory(projectId) {
-  try {
-    await request.delete({
-      url: `${settings.apis.project_history.url}/project/${projectId}`,
-    })
-  } catch (err) {
-    throw OError.tag(err, 'failed to delete project history', {
+  const response = await fetch(
+    `${settings.apis.project_history.url}/project/${projectId}`,
+    { method: 'DELETE' }
+  )
+  if (!response.ok) {
+    throw new OError('failed to delete project history', {
       projectId,
+      statusCode: response.status,
     })
   }
 }
 
 async function resyncProject(projectId, options = {}) {
-  try {
-    const body = {}
-    if (options.force) {
-      body.force = options.force
+  const body = {}
+  if (options.force) {
+    body.force = options.force
+  }
+  if (options.origin) {
+    body.origin = options.origin
+  }
+  const response = await fetch(
+    `${settings.apis.project_history.url}/project/${projectId}/resync`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(6 * 60 * 1000),
     }
-    if (options.origin) {
-      body.origin = options.origin
-    }
-    await request.post({
-      url: `${settings.apis.project_history.url}/project/${projectId}/resync`,
-      json: body,
-      timeout: 6 * 60 * 1000,
+  )
+  if (!response.ok) {
+    throw new OError('failed to resync project history', {
+      projectId,
+      statusCode: response.status,
     })
-  } catch (err) {
-    throw OError.tag(err, 'failed to resync project history', { projectId })
   }
 }
 
 async function deleteProject(projectId, historyId) {
-  try {
-    const tasks = [
-      request.delete(
-        `${settings.apis.project_history.url}/project/${projectId}`
-      ),
-    ]
-    if (historyId != null) {
-      tasks.push(
-        request.delete({
-          url: `${settings.apis.v1_history.url}/projects/${historyId}`,
-          auth: {
-            user: settings.apis.v1_history.user,
-            pass: settings.apis.v1_history.pass,
-          },
-        })
-      )
-    }
-    await Promise.all(tasks)
-  } catch (err) {
-    throw OError.tag(err, 'failed to clear project history', {
+  const tasks = []
+  tasks.push(_deleteProjectInProjectHistory(projectId))
+  if (historyId != null) {
+    tasks.push(_deleteProjectInFullProjectHistory(historyId))
+  }
+  await Promise.all(tasks)
+}
+
+async function _deleteProjectInProjectHistory(projectId) {
+  const response = await fetch(
+    `${settings.apis.project_history.url}/project/${projectId}`,
+    { method: 'DELETE' }
+  )
+  if (!response.ok) {
+    throw new OError('failed to clear project history in project-history', {
       projectId,
+      statusCode: response.status,
+    })
+  }
+}
+
+async function _deleteProjectInFullProjectHistory(historyId) {
+  const response = await fetch(
+    `${settings.apis.v1_history.url}/projects/${historyId}`,
+    {
+      method: 'DELETE',
+      headers: {
+        Authorization:
+          'Basic ' +
+          Buffer.from(
+            `${settings.apis.v1_history.user}:${settings.apis.v1_history.pass}`
+          ).toString('base64'),
+      },
+    }
+  )
+  if (!response.ok) {
+    throw new OError('failed to clear project history', {
       historyId,
+      statusCode: response.status,
     })
   }
 }

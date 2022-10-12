@@ -25,7 +25,6 @@ describe('TpdsUpdateSender', function () {
     this.fakeUser = {
       _id: '12390i',
     }
-    this.requestQueuer = function (queue, meth, opts, callback) {}
     const memberIds = [userId, collaberatorRef, readOnlyRef]
     this.CollaboratorsGetter = {
       promises: {
@@ -33,7 +32,11 @@ describe('TpdsUpdateSender', function () {
       },
     }
     this.docstoreUrl = 'docstore.sharelatex.env'
-    this.request = sinon.stub().resolves()
+    this.response = {
+      ok: true,
+      json: sinon.stub(),
+    }
+    this.fetch = sinon.stub().resolves(this.response)
     this.settings = {
       siteUrl,
       apis: {
@@ -58,7 +61,7 @@ describe('TpdsUpdateSender', function () {
       requires: {
         mongodb: { ObjectId },
         '@overleaf/settings': this.settings,
-        'request-promise-native': this.request,
+        'node-fetch': this.fetch,
         '../Collaborators/CollaboratorsGetter': this.CollaboratorsGetter,
         '../User/UserGetter.js': this.UserGetter,
         '@overleaf/metrics': {
@@ -71,28 +74,30 @@ describe('TpdsUpdateSender', function () {
   describe('enqueue', function () {
     it('should not call request if there is no tpdsworker url', async function () {
       await this.TpdsUpdateSender.promises.enqueue(null, null, null)
-      this.request.should.not.have.been.called
+      this.fetch.should.not.have.been.called
     })
 
     it('should post the message to the tpdsworker', async function () {
-      this.settings.apis.tpdsworker = { url: 'www.tpdsworker.env' }
+      this.settings.apis.tpdsworker = { url: 'http://tpdsworker' }
       const group0 = 'myproject'
       const method0 = 'somemethod0'
       const job0 = 'do something'
       await this.TpdsUpdateSender.promises.enqueue(group0, method0, job0)
-      const args = this.request.firstCall.args[0]
-      args.json.group.should.equal(group0)
-      args.json.job.should.equal(job0)
-      args.json.method.should.equal(method0)
-      args.uri.should.equal(
-        'www.tpdsworker.env/enqueue/web_to_tpds_http_requests'
+      this.fetch.should.have.been.calledWith(
+        new URL('http://tpdsworker/enqueue/web_to_tpds_http_requests'),
+        sinon.match({ method: 'POST' })
       )
+      const opts = this.fetch.firstCall.args[1]
+      const body = JSON.parse(opts.body)
+      body.group.should.equal(group0)
+      body.job.should.equal(job0)
+      body.method.should.equal(method0)
     })
   })
 
   describe('sending updates', function () {
     beforeEach(function () {
-      this.settings.apis.tpdsworker = { url: 'www.tpdsworker.env' }
+      this.settings.apis.tpdsworker = { url: 'http://tpdsworker' }
     })
 
     it('queues a post the file with user and file id', async function () {
@@ -110,8 +115,8 @@ describe('TpdsUpdateSender', function () {
         group: group0,
         job: job0,
         method: method0,
-      } = this.request.firstCall.args[0].json
-      group0.should.equal(userId)
+      } = JSON.parse(this.fetch.firstCall.args[1].body)
+      group0.should.equal(userId.toString())
       method0.should.equal('pipeStreamFrom')
       job0.method.should.equal('post')
       job0.streamOrigin.should.equal(
@@ -122,19 +127,23 @@ describe('TpdsUpdateSender', function () {
       )}${encodeURIComponent(path)}`
       job0.uri.should.equal(expectedUrl)
       job0.headers.sl_all_user_ids.should.equal(JSON.stringify([userId]))
-      job0.headers.sl_project_owner_user_id.should.equal(userId)
+      job0.headers.sl_project_owner_user_id.should.equal(userId.toString())
 
-      const { group: group1, job: job1 } = this.request.secondCall.args[0].json
-      group1.should.equal(collaberatorRef)
+      const { group: group1, job: job1 } = JSON.parse(
+        this.fetch.secondCall.args[1].body
+      )
+      group1.should.equal(collaberatorRef.toString())
       job1.headers.sl_all_user_ids.should.equal(
         JSON.stringify([collaberatorRef])
       )
-      job1.headers.sl_project_owner_user_id.should.equal(userId)
+      job1.headers.sl_project_owner_user_id.should.equal(userId.toString())
 
-      const { group: group2, job: job2 } = this.request.thirdCall.args[0].json
-      group2.should.equal(readOnlyRef)
+      const { group: group2, job: job2 } = JSON.parse(
+        this.fetch.thirdCall.args[1].body
+      )
+      group2.should.equal(readOnlyRef.toString())
       job2.headers.sl_all_user_ids.should.equal(JSON.stringify([readOnlyRef]))
-      job2.headers.sl_project_owner_user_id.should.equal(userId)
+      job2.headers.sl_project_owner_user_id.should.equal(userId.toString())
 
       this.UserGetter.promises.getUsers.should.have.been.calledOnce.and.calledWith(
         {
@@ -164,12 +173,12 @@ describe('TpdsUpdateSender', function () {
         group: group0,
         job: job0,
         method: method0,
-      } = this.request.firstCall.args[0].json
+      } = JSON.parse(this.fetch.firstCall.args[1].body)
 
-      group0.should.equal(userId)
+      group0.should.equal(userId.toString())
       method0.should.equal('pipeStreamFrom')
       job0.method.should.equal('post')
-      const expectedUrl = `${thirdPartyDataStoreApiUrl}/user/${userId}/entity/${encodeURIComponent(
+      const expectedUrl = `${thirdPartyDataStoreApiUrl}/user/${userId.toString()}/entity/${encodeURIComponent(
         projectName
       )}${encodeURIComponent(path)}`
       job0.uri.should.equal(expectedUrl)
@@ -178,14 +187,18 @@ describe('TpdsUpdateSender', function () {
       )
       job0.headers.sl_all_user_ids.should.eql(JSON.stringify([userId]))
 
-      const { group: group1, job: job1 } = this.request.secondCall.args[0].json
-      group1.should.equal(collaberatorRef)
+      const { group: group1, job: job1 } = JSON.parse(
+        this.fetch.secondCall.args[1].body
+      )
+      group1.should.equal(collaberatorRef.toString())
       job1.headers.sl_all_user_ids.should.equal(
         JSON.stringify([collaberatorRef])
       )
 
-      const { group: group2, job: job2 } = this.request.thirdCall.args[0].json
-      group2.should.equal(readOnlyRef)
+      const { group: group2, job: job2 } = JSON.parse(
+        this.fetch.thirdCall.args[1].body
+      )
+      group2.should.equal(readOnlyRef.toString())
       job2.headers.sl_all_user_ids.should.equal(JSON.stringify([readOnlyRef]))
 
       this.UserGetter.promises.getUsers.should.have.been.calledOnce.and.calledWith(
@@ -214,9 +227,9 @@ describe('TpdsUpdateSender', function () {
         group: group0,
         job: job0,
         method: method0,
-      } = this.request.firstCall.args[0].json
+      } = JSON.parse(this.fetch.firstCall.args[1].body)
 
-      group0.should.equal(userId)
+      group0.should.equal(userId.toString())
       method0.should.equal('standardHttpRequest')
       job0.method.should.equal('delete')
       const expectedUrl = `${thirdPartyDataStoreApiUrl}/user/${userId}/entity/${encodeURIComponent(
@@ -226,14 +239,18 @@ describe('TpdsUpdateSender', function () {
       job0.uri.should.equal(expectedUrl)
       expect(job0.json).to.deep.equal({ subtreeEntityIds })
 
-      const { group: group1, job: job1 } = this.request.secondCall.args[0].json
-      group1.should.equal(collaberatorRef)
+      const { group: group1, job: job1 } = JSON.parse(
+        this.fetch.secondCall.args[1].body
+      )
+      group1.should.equal(collaberatorRef.toString())
       job1.headers.sl_all_user_ids.should.equal(
         JSON.stringify([collaberatorRef])
       )
 
-      const { group: group2, job: job2 } = this.request.thirdCall.args[0].json
-      group2.should.equal(readOnlyRef)
+      const { group: group2, job: job2 } = JSON.parse(
+        this.fetch.thirdCall.args[1].body
+      )
+      group2.should.equal(readOnlyRef.toString())
       job2.headers.sl_all_user_ids.should.equal(JSON.stringify([readOnlyRef]))
 
       this.UserGetter.promises.getUsers.should.have.been.calledOnce.and.calledWith(
@@ -262,9 +279,9 @@ describe('TpdsUpdateSender', function () {
         group: group0,
         job: job0,
         method: method0,
-      } = this.request.firstCall.args[0].json
+      } = JSON.parse(this.fetch.firstCall.args[1].body)
 
-      group0.should.equal(userId)
+      group0.should.equal(userId.toString())
       method0.should.equal('standardHttpRequest')
       job0.method.should.equal('put')
       job0.uri.should.equal(
@@ -274,14 +291,18 @@ describe('TpdsUpdateSender', function () {
       job0.json.endPath.should.equal(`/${projectName}/${endPath}`)
       job0.headers.sl_all_user_ids.should.eql(JSON.stringify([userId]))
 
-      const { group: group1, job: job1 } = this.request.secondCall.args[0].json
-      group1.should.equal(collaberatorRef)
+      const { group: group1, job: job1 } = JSON.parse(
+        this.fetch.secondCall.args[1].body
+      )
+      group1.should.equal(collaberatorRef.toString())
       job1.headers.sl_all_user_ids.should.equal(
         JSON.stringify([collaberatorRef])
       )
 
-      const { group: group2, job: job2 } = this.request.thirdCall.args[0].json
-      group2.should.equal(readOnlyRef)
+      const { group: group2, job: job2 } = JSON.parse(
+        this.fetch.thirdCall.args[1].body
+      )
+      group2.should.equal(readOnlyRef.toString())
       job2.headers.sl_all_user_ids.should.equal(JSON.stringify([readOnlyRef]))
 
       this.UserGetter.promises.getUsers.should.have.been.calledOnce.and.calledWith(
@@ -309,9 +330,9 @@ describe('TpdsUpdateSender', function () {
         group: group0,
         job: job0,
         method: method0,
-      } = this.request.firstCall.args[0].json
+      } = JSON.parse(this.fetch.firstCall.args[1].body)
 
-      group0.should.equal(userId)
+      group0.should.equal(userId.toString())
       method0.should.equal('standardHttpRequest')
       job0.method.should.equal('put')
       job0.uri.should.equal(
@@ -321,14 +342,18 @@ describe('TpdsUpdateSender', function () {
       job0.json.endPath.should.equal(newProjectName)
       job0.headers.sl_all_user_ids.should.eql(JSON.stringify([userId]))
 
-      const { group: group1, job: job1 } = this.request.secondCall.args[0].json
-      group1.should.equal(collaberatorRef)
+      const { group: group1, job: job1 } = JSON.parse(
+        this.fetch.secondCall.args[1].body
+      )
+      group1.should.equal(collaberatorRef.toString())
       job1.headers.sl_all_user_ids.should.equal(
         JSON.stringify([collaberatorRef])
       )
 
-      const { group: group2, job: job2 } = this.request.thirdCall.args[0].json
-      group2.should.equal(readOnlyRef)
+      const { group: group2, job: job2 } = JSON.parse(
+        this.fetch.thirdCall.args[1].body
+      )
+      group2.should.equal(readOnlyRef.toString())
       job2.headers.sl_all_user_ids.should.equal(JSON.stringify([readOnlyRef]))
 
       this.UserGetter.promises.getUsers.should.have.been.calledOnce.and.calledWith(
@@ -343,33 +368,34 @@ describe('TpdsUpdateSender', function () {
     })
 
     it('pollDropboxForUser', async function () {
-      await this.TpdsUpdateSender.promises.pollDropboxForUser(userId)
+      await this.TpdsUpdateSender.promises.pollDropboxForUser(userId.toString())
 
       const {
         group: group0,
         job: job0,
         method: method0,
-      } = this.request.firstCall.args[0].json
+      } = JSON.parse(this.fetch.firstCall.args[1].body)
 
-      group0.should.equal(userId)
+      group0.should.equal(userId.toString())
       method0.should.equal('standardHttpRequest')
 
       job0.method.should.equal('post')
       job0.uri.should.equal(`${thirdPartyDataStoreApiUrl}/user/poll`)
-      job0.json.user_ids[0].should.equal(userId)
+      job0.json.user_ids[0].should.equal(userId.toString())
     })
   })
   describe('deleteProject', function () {
     it('should not call request if there is no project archiver url', async function () {
       await this.TpdsUpdateSender.promises.deleteProject({ projectId })
-      this.request.should.not.have.been.called
+      this.fetch.should.not.have.been.called
     })
     it('should make a delete request to project archiver', async function () {
       this.settings.apis.project_archiver = { url: projectArchiverUrl }
       await this.TpdsUpdateSender.promises.deleteProject({ projectId })
-      const { uri, method } = this.request.firstCall.args[0]
-      method.should.equal('delete')
-      uri.should.equal(`${projectArchiverUrl}/project/${projectId}`)
+      this.fetch.should.have.been.calledWith(
+        `${projectArchiverUrl}/project/${projectId}`,
+        { method: 'DELETE' }
+      )
     })
   })
 })

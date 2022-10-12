@@ -1,7 +1,8 @@
-const request = require('request-promise-native')
+const fetch = require('node-fetch')
 const logger = require('@overleaf/logger')
 const Settings = require('@overleaf/settings')
 const Metrics = require('@overleaf/metrics')
+const OError = require('@overleaf/o-error')
 const DeviceHistory = require('./DeviceHistory')
 const AuthenticationController = require('../Authentication/AuthenticationController')
 const { expressify } = require('../../util/promises')
@@ -58,30 +59,26 @@ function validateCaptcha(action) {
       Metrics.inc('captcha', 1, { path: action, status: 'missing' })
       return respondInvalidCaptcha(req, res)
     }
-    const options = {
+
+    const response = await fetch(Settings.recaptcha.endpoint, {
       method: 'POST',
-      url: Settings.recaptcha.endpoint,
-      form: {
-        secret: Settings.recaptcha.secretKey,
-        response: reCaptchaResponse,
+      body: new URLSearchParams([
+        ['secret', Settings.recaptcha.secretKey],
+        ['response', reCaptchaResponse],
+      ]),
+      headers: {
+        Accept: 'application/json',
       },
-      json: true,
-    }
-    let body
-    try {
-      body = await request(options)
-    } catch (err) {
-      const response = err.response
-      if (response) {
-        logger.warn(
-          { statusCode: response.statusCode, body: err.body },
-          'failed recaptcha siteverify request'
-        )
-      }
+    })
+    const body = await response.json()
+    if (!response.ok) {
       Metrics.inc('captcha', 1, { path: action, status: 'error' })
-      return next(err)
+      throw new OError('failed recaptcha siteverify request', {
+        statusCode: response.status,
+        body,
+      })
     }
-    if (!body?.success) {
+    if (!body.success) {
       logger.warn(
         { statusCode: 200, body },
         'failed recaptcha siteverify request'

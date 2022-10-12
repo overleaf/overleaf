@@ -11,10 +11,11 @@ describe('HistoryManager', function () {
     this.AuthenticationController = {
       getLoggedInUserId: sinon.stub().returns(this.user_id),
     }
-    this.request = {
-      post: sinon.stub(),
-      delete: sinon.stub().resolves(),
+    this.response = {
+      ok: true,
+      json: sinon.stub(),
     }
+    this.fetch = sinon.stub().resolves(this.response)
     this.projectHistoryUrl = 'http://project_history.example.com'
     this.v1HistoryUrl = 'http://v1_history.example.com'
     this.v1HistoryUser = 'system'
@@ -45,7 +46,7 @@ describe('HistoryManager', function () {
 
     this.HistoryManager = SandboxedModule.require(MODULE_PATH, {
       requires: {
-        'request-promise-native': this.request,
+        'node-fetch': this.fetch,
         '@overleaf/settings': this.settings,
         '../User/UserGetter': this.UserGetter,
       },
@@ -61,18 +62,15 @@ describe('HistoryManager', function () {
       describe('project history returns a successful response', function () {
         beforeEach(async function () {
           this.overleaf_id = 1234
-          this.request.post.resolves(
-            JSON.stringify({ project: { id: this.overleaf_id } })
-          )
+          this.response.json.resolves({ project: { id: this.overleaf_id } })
           this.result = await this.HistoryManager.promises.initializeProject()
         })
 
         it('should call the project history api', function () {
-          this.request.post
-            .calledWith({
-              url: `${this.settings.apis.project_history.url}/project`,
-            })
-            .should.equal(true)
+          this.fetch.should.have.been.calledWithMatch(
+            `${this.settings.apis.project_history.url}/project`,
+            { method: 'POST' }
+          )
         })
 
         it('should return the overleaf id', function () {
@@ -82,7 +80,7 @@ describe('HistoryManager', function () {
 
       describe('project history returns a response without the project id', function () {
         it('should throw an error', async function () {
-          this.request.post.resolves(JSON.stringify({ project: {} }))
+          this.response.json.resolves({ project: {} })
           await expect(this.HistoryManager.promises.initializeProject()).to.be
             .rejected
         })
@@ -90,7 +88,7 @@ describe('HistoryManager', function () {
 
       describe('project history errors', function () {
         it('should propagate the error', async function () {
-          this.request.post.rejects(new Error('problem connecting'))
+          this.fetch.rejects(new Error('problem connecting'))
           await expect(this.HistoryManager.promises.initializeProject()).to.be
             .rejected
         })
@@ -267,19 +265,26 @@ describe('HistoryManager', function () {
     })
 
     it('should call the project-history service', async function () {
-      expect(this.request.delete).to.have.been.calledWith(
-        `${this.projectHistoryUrl}/project/${projectId}`
+      expect(this.fetch).to.have.been.calledWith(
+        `${this.projectHistoryUrl}/project/${projectId}`,
+        { method: 'DELETE' }
       )
     })
 
     it('should call the v1-history service', async function () {
-      expect(this.request.delete).to.have.been.calledWith({
-        url: `${this.v1HistoryUrl}/projects/${historyId}`,
-        auth: {
-          user: this.v1HistoryUser,
-          pass: this.v1HistoryPassword,
-        },
-      })
+      expect(this.fetch).to.have.been.calledWith(
+        `${this.v1HistoryUrl}/projects/${historyId}`,
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization:
+              'Basic ' +
+              Buffer.from(
+                `${this.v1HistoryUser}:${this.v1HistoryPassword}`
+              ).toString('base64'),
+          },
+        }
+      )
     })
   })
 })

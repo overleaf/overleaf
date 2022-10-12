@@ -4,7 +4,7 @@ const { callbackify } = require('util')
 const logger = require('@overleaf/logger')
 const metrics = require('@overleaf/metrics')
 const Path = require('path')
-const request = require('request-promise-native')
+const fetch = require('node-fetch')
 const settings = require('@overleaf/settings')
 
 const CollaboratorsGetter =
@@ -184,10 +184,17 @@ async function deleteProject(params) {
   metrics.inc('tpds.delete-project')
   // send the request directly to project archiver, bypassing third-party-datastore
   try {
-    await request({
-      uri: `${settings.apis.project_archiver.url}/project/${projectId}`,
-      method: 'delete',
-    })
+    const response = await fetch(
+      `${settings.apis.project_archiver.url}/project/${projectId}`,
+      { method: 'DELETE' }
+    )
+    if (!response.ok) {
+      logger.error(
+        { statusCode: response.status, project_id: projectId },
+        'error deleting project in third party datastore (project_archiver)'
+      )
+      return false
+    }
     return true
   } catch (err) {
     logger.error(
@@ -205,13 +212,20 @@ async function enqueue(group, method, job) {
     return
   }
   try {
-    const response = await request({
-      uri: `${tpdsWorkerUrl}/enqueue/web_to_tpds_http_requests`,
-      json: { group, job, method },
-      method: 'post',
-      timeout: 5 * 1000,
+    const url = new URL('/enqueue/web_to_tpds_http_requests', tpdsWorkerUrl)
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ group, job, method }),
+      signal: AbortSignal.timeout(5 * 1000),
     })
-    return response
+    if (!response.ok) {
+      // log error and continue
+      logger.error(
+        { statusCode: response.status, group, job, method },
+        'error enqueueing tpdsworker job'
+      )
+    }
   } catch (err) {
     // log error and continue
     logger.error({ err, group, job, method }, 'error enqueueing tpdsworker job')
@@ -293,7 +307,7 @@ async function pollDropboxForUser(userId) {
 
   // Queue poll requests in the user queue along with file updates, in order
   // to avoid race conditions between polling and updates.
-  return enqueue(userId, 'standardHttpRequest', job)
+  await enqueue(userId, 'standardHttpRequest', job)
 }
 
 const TpdsUpdateSender = {

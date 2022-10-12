@@ -63,7 +63,7 @@ describe('TemplatesManager', function () {
     this.FileWriter = { ensureDumpFolderExists: sinon.stub().callsArg(0) }
     this.TemplatesManager = SandboxedModule.require(modulePath, {
       requires: {
-        'request-promise-native': sinon.stub(),
+        'node-fetch': sinon.stub(),
         '../Uploads/ProjectUploadManager': this.ProjectUploadManager,
         '../Project/ProjectOptionsHandler': this.ProjectOptionsHandler,
         '../Project/ProjectRootDocManager': this.ProjectRootDocManager,

@@ -1,11 +1,21 @@
 const Settings = require('@overleaf/settings')
-const request = require('request-promise-native')
+const OError = require('@overleaf/o-error')
+const fetch = require('node-fetch')
 
 async function getQueues(userId) {
-  return request({
-    uri: `${Settings.apis.tpdsworker.url}/queues/${userId}`,
-    json: true,
-  })
+  const response = await fetch(
+    `${Settings.apis.tpdsworker.url}/queues/${userId}`,
+    {
+      headers: {
+        Accept: 'application/json',
+      },
+    }
+  )
+  if (!response.ok) {
+    throw new OError('failed to query TPDS queues for user', { userId })
+  }
+  const body = await response.json()
+  return body
 }
 
 module.exports = {

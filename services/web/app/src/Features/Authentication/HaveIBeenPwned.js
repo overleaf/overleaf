@@ -5,7 +5,7 @@
    happy path or via an error (message or attributes).
  */
 
-const request = require('request-promise-native')
+const fetch = require('node-fetch')
 const crypto = require('crypto')
 const Settings = require('@overleaf/settings')
 const Metrics = require('@overleaf/metrics')
@@ -37,15 +37,22 @@ async function getScoresForPrefix(prefix) {
     throw INVALID_PREFIX
   }
   try {
-    return await request({
-      uri: `${Settings.apis.haveIBeenPwned.url}/range/${prefix}`,
-      headers: {
-        'User-Agent': 'www.overleaf.com',
-        // Docs: https://haveibeenpwned.com/API/v3#PwnedPasswordsPadding
-        'Add-Padding': true,
-      },
-      timeout: Settings.apis.haveIBeenPwned.timeout,
-    })
+    const response = await fetch(
+      `${Settings.apis.haveIBeenPwned.url}/range/${prefix}`,
+      {
+        headers: {
+          'User-Agent': 'www.overleaf.com',
+          // Docs: https://haveibeenpwned.com/API/v3#PwnedPasswordsPadding
+          'Add-Padding': true,
+        },
+        signal: AbortSignal.timeout(Settings.apis.haveIBeenPwned.timeout),
+      }
+    )
+    if (!response.ok) {
+      throw API_ERROR
+    }
+    const body = await response.text()
+    return body
   } catch (_errorWithPotentialReferenceToPrefix) {
     // NOTE: Do not leak request details by passing the original error up.
     throw API_ERROR

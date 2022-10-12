@@ -22,7 +22,7 @@ const fs = require('fs')
 const util = require('util')
 const logger = require('@overleaf/logger')
 const request = require('request')
-const requestPromise = require('request-promise-native')
+const fetch = require('node-fetch')
 const settings = require('@overleaf/settings')
 const uuid = require('uuid')
 const Errors = require('../Errors/Errors')
@@ -168,26 +168,27 @@ const TemplatesManager = {
 
   promises: {
     async fetchFromV1(templateId) {
-      const { body, statusCode } = await requestPromise({
-        baseUrl: settings.apis.v1.url,
-        url: `/api/v2/templates/${templateId}`,
-        method: 'GET',
-        auth: {
-          user: settings.apis.v1.user,
-          pass: settings.apis.v1.pass,
-          sendImmediately: true,
+      const url = new URL(
+        `/api/v2/templates/${templateId}`,
+        settings.apis.v1.url
+      )
+      const response = await fetch(url, {
+        headers: {
+          Authorization:
+            'Basic ' +
+            Buffer.from(
+              `${settings.apis.v1.user}:${settings.apis.v1.pass}`
+            ).toString('base64'),
+          Accept: 'application/json',
         },
-        resolveWithFullResponse: true,
-        simple: false,
-        json: true,
-        timeout: settings.apis.v1.timeout,
+        signal: AbortSignal.timeout(settings.apis.v1.timeout),
       })
 
-      if (statusCode === 404) {
+      if (response.status === 404) {
         throw new Errors.NotFoundError()
       }
 
-      if (statusCode !== 200) {
+      if (response.status !== 200) {
         logger.warn(
           { templateId },
           "[TemplateMetrics] Couldn't fetch template data from v1"
@@ -195,6 +196,7 @@ const TemplatesManager = {
         throw new Error("Couldn't fetch template data from v1")
       }
 
+      const body = await response.json()
       return body
     },
   },

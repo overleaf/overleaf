@@ -296,6 +296,7 @@
     "mocha": "^8.4.0",
     "mock-fs": "^5.1.2",
     "nock": "^13.1.1",
+    "node-fetch": "^2.6.7",
     "pirates": "^4.0.1",
     "postcss-loader": "^6.2.1",
     "requirejs": "^2.3.6",
