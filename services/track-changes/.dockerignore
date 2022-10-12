@@ -1,7 +1,0 @@
-node_modules/*
-gitrev
-.git
-.gitignore
-.npm
-.nvmrc
-nodemon.json
