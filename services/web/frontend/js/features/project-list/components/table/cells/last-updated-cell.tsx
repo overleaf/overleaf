@@ -16,7 +16,8 @@ export default function LastUpdatedCell({ project }: LastUpdatedCellProps) {
         lastUpdatedDate: fromNowDate(project.lastUpdated),
         person: getUserName(project.lastUpdatedBy),
       }}
-      shouldUnescape
+      // eslint-disable-next-line react/jsx-boolean-value
+      shouldUnescape={true}
     />
   ) : (
     fromNowDate(project.lastUpdated)
