@@ -135,6 +135,11 @@ function ProjectListPageContent() {
               mdOffset={2}
               className="project-list-empty-col"
             >
+              <Row>
+                <Col xs={12}>
+                  <UserNotifications />
+                </Col>
+              </Row>
               <WelcomeMessage />
             </Col>
           </Row>

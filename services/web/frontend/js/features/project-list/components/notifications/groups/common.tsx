@@ -5,7 +5,6 @@ import Notification from '../notification'
 import Icon from '../../../../../shared/components/icon'
 import getMeta from '../../../../../utils/meta'
 import useAsyncDismiss from '../hooks/useAsyncDismiss'
-import { useProjectListContext } from '../../../context/project-list-context'
 import useAsync from '../../../../../shared/hooks/use-async'
 import { FetchError, postJSON } from '../../../../../infrastructure/fetch-json'
 import { ExposedSettings } from '../../../../../../../types/exposed-settings'
@@ -14,7 +13,6 @@ import { User } from '../../../../../../../types/user'
 
 function Common() {
   const { t } = useTranslation()
-  const { totalProjectsCount } = useProjectListContext()
   const { samlInitPath } = getMeta('ol-ExposedSettings') as ExposedSettings
   const notifications = getMeta('ol-notifications', []) as NotificationType[]
   const user = getMeta('ol-user', []) as Pick<User, 'features'>
@@ -33,7 +31,7 @@ function Common() {
     ).catch(console.error)
   }
 
-  if (!totalProjectsCount || !notifications.length) {
+  if (!notifications.length) {
     return null
   }
 
