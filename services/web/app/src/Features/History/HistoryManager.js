@@ -4,25 +4,6 @@ const settings = require('@overleaf/settings')
 const OError = require('@overleaf/o-error')
 const UserGetter = require('../User/UserGetter')
 
-module.exports = {
-  initializeProject: callbackify(initializeProject),
-  flushProject: callbackify(flushProject),
-  flushMigration: callbackify(flushMigration),
-  resyncProject: callbackify(resyncProject),
-  deleteProject: callbackify(deleteProject),
-  deleteProjectHistory: callbackify(deleteProjectHistory),
-  injectUserDetails: callbackify(injectUserDetails),
-  promises: {
-    initializeProject,
-    flushProject,
-    flushMigration,
-    resyncProject,
-    deleteProject,
-    injectUserDetails,
-    deleteProjectHistory,
-  },
-}
-
 async function initializeProject() {
   if (
     !(
@@ -61,19 +42,6 @@ async function flushProject(projectId) {
       projectId,
       statusCode: response.status,
     })
-  }
-}
-
-async function flushMigration(projectId) {
-  const response = await fetch(
-    `${settings.apis.project_history_importer.url}/project/${projectId}/flush`,
-    { method: 'POST' }
-  )
-  if (!response.ok) {
-    throw new OError(
-      'failed to flush project migration to project history importer',
-      { projectId, statusCode: response.status }
-    )
   }
 }
 
@@ -237,4 +205,21 @@ async function injectUserDetails(data) {
 function _userView(user) {
   const { _id, first_name: firstName, last_name: lastName, email } = user
   return { first_name: firstName, last_name: lastName, email, id: _id }
+}
+
+module.exports = {
+  initializeProject: callbackify(initializeProject),
+  flushProject: callbackify(flushProject),
+  resyncProject: callbackify(resyncProject),
+  deleteProject: callbackify(deleteProject),
+  deleteProjectHistory: callbackify(deleteProjectHistory),
+  injectUserDetails: callbackify(injectUserDetails),
+  promises: {
+    initializeProject,
+    flushProject,
+    resyncProject,
+    deleteProject,
+    injectUserDetails,
+    deleteProjectHistory,
+  },
 }
