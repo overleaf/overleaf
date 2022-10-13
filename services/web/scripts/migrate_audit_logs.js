@@ -12,6 +12,7 @@ async function main(options) {
     dryRun: process.env.DRY_RUN !== 'false',
     projectId: process.env.PROJECT_ID,
     userId: process.env.USER_ID,
+    skipUsersMigration: process.env.SKIP_USERS_MIGRATION === 'true',
     writeConcurrency: parseInt(process.env.WRITE_CONCURRENCY, 10) || 10,
     letUserDoubleCheckInputsFor: parseInt(
       process.env.LET_USER_DOUBLE_CHECK_INPUTS_FOR || 10 * 1000,
@@ -44,14 +45,16 @@ async function main(options) {
     }
     await processUsersBatch([user], options)
   } else {
-    await batchedUpdate(
-      'users',
-      { auditLog: { $exists: true } },
-      async (_, users) => {
-        await processUsersBatch(users, options)
-      },
-      { _id: 1, auditLog: 1 }
-    )
+    if (!options.skipUsersMigration) {
+      await batchedUpdate(
+        'users',
+        { auditLog: { $exists: true } },
+        async (_, users) => {
+          await processUsersBatch(users, options)
+        },
+        { _id: 1, auditLog: 1 }
+      )
+    }
 
     // most projects are processed after its owner has been processed, but only those
     // users with an existing `auditLog` have been taken into consideration, leaving
@@ -132,6 +135,7 @@ async function letUserDoubleCheckInputs(options) {
     VERBOSE_LOGGING: process.env.VERBOSE_LOGGING,
     BATCH_LAST_ID: process.env.BATCH_LAST_ID,
     BATCH_RANGE_END: process.env.BATCH_RANGE_END,
+    SKIP_USERS_MIGRATION: process.env.SKIP_USERS_MIGRATION,
   }
   console.error('Options:', JSON.stringify(allOptions, null, 2))
   console.error(
