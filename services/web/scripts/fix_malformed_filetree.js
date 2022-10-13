@@ -156,7 +156,7 @@ async function fixName(projectId, path) {
   const existingNames = new Set(array.map(x => x.name))
   const name = findUniqueName(existingNames)
   const result = await db.projects.updateOne(
-    { _id: projectId, [path]: { $exists: false } },
+    { _id: projectId, [path]: { $in: [null, ''] } },
     { $set: { [path]: name } }
   )
   return result.modifiedCount
