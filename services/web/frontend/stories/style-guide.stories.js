@@ -158,7 +158,7 @@ export const Buttons = () => {
         <Row>
           <Col md={8} mdOffset={2}>
             <h2>Buttons</h2>
-            <p>Our primary button is red:</p>
+            <p>Our primary button is green:</p>
             <p>
               <Button bsStyle="primary">Primary Button</Button>
             </p>
