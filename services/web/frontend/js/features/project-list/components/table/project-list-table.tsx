@@ -12,10 +12,10 @@ function SortBtn({ onClick, text, iconType, screenReaderText }: SortBtnProps) {
     <button
       className="btn-link table-header-sort-btn hidden-xs"
       onClick={onClick}
+      aria-label={screenReaderText}
     >
       {text}
       {iconType ? <Icon className="tablesort" type={iconType} /> : null}
-      <span className="sr-only">{screenReaderText}</span>
     </button>
   )
 }
@@ -41,6 +41,7 @@ function ProjectListTable() {
 
   return (
     <table className="project-dash-table">
+      <caption className="sr-only">{t('projects_list')}</caption>
       <thead className="sr-only-xs">
         <tr>
           <th
@@ -57,11 +58,9 @@ function ProjectListTable() {
               }
               disabled={visibleProjects.length === 0}
             />
-            <label
-              htmlFor="project-list-table-select-all"
-              aria-label={t('select_all_projects')}
-              className="sr-only"
-            />
+            <label htmlFor="project-list-table-select-all" className="sr-only">
+              {t('select_all_projects')}
+            </label>
           </th>
           <th
             className="dash-cell-name"
@@ -83,9 +82,9 @@ function ProjectListTable() {
           </th>
           <th
             className="dash-cell-date-owner visible-xs"
-            aria-label={`${t('date')} — ${t('owner')}`}
+            aria-label={t('date_and_owner')}
           >
-            {`${t('date')} — ${t('owner')}`}
+            {t('date_and_owner')}
           </th>
           <th
             className="dash-cell-owner hidden-xs"
@@ -126,7 +125,9 @@ function ProjectListTable() {
           <th className="dash-cell-tag visible-xs" aria-label={t('tags')}>
             {t('tags')}
           </th>
-          <th className="dash-cell-actions">{t('actions')}</th>
+          <th className="dash-cell-actions" aria-label={t('actions')}>
+            {t('actions')}
+          </th>
         </tr>
       </thead>
 

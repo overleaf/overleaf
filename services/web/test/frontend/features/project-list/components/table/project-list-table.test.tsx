@@ -58,9 +58,9 @@ describe('<ProjectListTable />', function () {
 
   it('renders buttons for sorting all sortable columns', function () {
     renderWithProjectListContext(<ProjectListTable />)
-    screen.getByText('Sort by Title')
-    screen.getByText('Sort by Owner')
-    screen.getByText('Reverse Last Modified sort order') // currently sorted
+    screen.getByRole('button', { name: 'Sort by Title' })
+    screen.getByRole('button', { name: 'Sort by Owner' })
+    screen.getByRole('button', { name: 'Reverse Last Modified sort order' }) // currently sorted
   })
 
   it('renders project title, owner, last modified, and action buttons', async function () {

@@ -36,11 +36,9 @@ export default function ProjectListTableRow({
           onChange={handleCheckboxChange}
           data-project-id={project.id}
         />
-        <label
-          htmlFor={`select-project-${project.id}`}
-          aria-label={t('select_project', { project: project.name })}
-          className="sr-only"
-        />
+        <label htmlFor={`select-project-${project.id}`} className="sr-only">
+          {t('select_project', { project: project.name })}
+        </label>
       </td>
       <td className="dash-cell-name">
         <a href={`/project/${project.id}`}>{project.name}</a>{' '}
