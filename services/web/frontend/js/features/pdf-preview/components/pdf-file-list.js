@@ -10,12 +10,16 @@ function PdfFileList({ fileList }) {
     return null
   }
 
+  function basename(file) {
+    return file.path.split('/').pop()
+  }
+
   return (
     <>
       <MenuItem header>{t('other_output_files')}</MenuItem>
 
       {fileList.top.map(file => (
-        <MenuItem download href={file.url} key={file.path}>
+        <MenuItem download={basename(file)} href={file.url} key={file.path}>
           <b>{file.path}</b>
         </MenuItem>
       ))}
@@ -25,7 +29,7 @@ function PdfFileList({ fileList }) {
       )}
 
       {fileList.other.map(file => (
-        <MenuItem download href={file.url} key={file.path}>
+        <MenuItem download={basename(file)} href={file.url} key={file.path}>
           <b>{file.path}</b>
         </MenuItem>
       ))}

@@ -44,6 +44,7 @@ http {
 
 	gzip on;
 	gzip_disable "msie6";
+	gzip_proxied any; # allow upstream server to compress.
 
 	client_max_body_size 50m;
 

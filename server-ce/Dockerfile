@@ -38,6 +38,7 @@ ADD server-ce/runit /etc/service
 # ---------------
 ADD server-ce/nginx/nginx.conf.template /etc/nginx/templates/nginx.conf.template
 ADD server-ce/nginx/sharelatex.conf /etc/nginx/sites-enabled/sharelatex.conf
+ADD server-ce/nginx/clsi-nginx.conf /etc/nginx/sites-enabled/clsi-nginx.conf
 
 
 # Configure log rotation
