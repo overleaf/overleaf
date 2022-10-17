@@ -2,7 +2,6 @@ import ReactDOM from 'react-dom'
 import PdfPreview from './pdf-preview'
 import { ContextRoot } from '../../../shared/context/root-context'
 import useWaitForI18n from '../../../shared/hooks/use-wait-for-i18n'
-import PdfPreviewDetachedRootSafariWarning from './pdf-preview-detached-root-safari-warning'
 
 function PdfPreviewDetachedRoot() {
   const { isReady } = useWaitForI18n()
@@ -13,7 +12,6 @@ function PdfPreviewDetachedRoot() {
 
   return (
     <ContextRoot>
-      <PdfPreviewDetachedRootSafariWarning />
       <PdfPreview />
     </ContextRoot>
   )
