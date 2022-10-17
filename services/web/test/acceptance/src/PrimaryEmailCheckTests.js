@@ -43,19 +43,18 @@ describe('PrimaryEmailCheck', function () {
   describe('redirections', function () {
     describe('when the user has signed up recently', function () {
       it("shouldn't be redirected from project list to the primary email check page", async function () {
-        const response = await userHelper.request.get(
-          '/project' + SPLIT_TEST_QUERY
-        )
-        expect(response.statusCode).to.equal(200)
+        const response = await userHelper.fetch('/project' + SPLIT_TEST_QUERY)
+        expect(response.status).to.equal(200)
       })
 
       it('should be redirected from the primary email check page to the project list', async function () {
-        const response = await userHelper.request.get(
-          '/user/emails/primary-email-check' + SPLIT_TEST_QUERY,
-          { simple: false }
+        const response = await userHelper.fetch(
+          '/user/emails/primary-email-check' + SPLIT_TEST_QUERY
         )
-        expect(response.statusCode).to.equal(302)
-        expect(response.headers.location).to.equal('/project')
+        expect(response.status).to.equal(302)
+        expect(response.headers.get('location')).to.equal(
+          UserHelper.url('/project').toString()
+        )
       })
     })
 
@@ -68,19 +67,18 @@ describe('PrimaryEmailCheck', function () {
       })
 
       it("shouldn't be redirected from project list to the primary email check page", async function () {
-        const response = await userHelper.request.get(
-          '/project' + SPLIT_TEST_QUERY
-        )
-        expect(response.statusCode).to.equal(200)
+        const response = await userHelper.fetch('/project' + SPLIT_TEST_QUERY)
+        expect(response.status).to.equal(200)
       })
 
       it('should be redirected from the primary email check page to the project list', async function () {
-        const response = await userHelper.request.get(
-          '/user/emails/primary-email-check' + SPLIT_TEST_QUERY,
-          { simple: false }
+        const response = await userHelper.fetch(
+          '/user/emails/primary-email-check' + SPLIT_TEST_QUERY
         )
-        expect(response.statusCode).to.equal(302)
-        expect(response.headers.location).to.equal('/project')
+        expect(response.status).to.equal(302)
+        expect(response.headers.get('location')).to.equal(
+          UserHelper.url('/project').toString()
+        )
       })
     })
 
@@ -100,19 +98,18 @@ describe('PrimaryEmailCheck', function () {
       })
 
       it("shouldn't be redirected from project list to the primary email check page", async function () {
-        const response = await userHelper.request.get(
-          '/project' + SPLIT_TEST_QUERY
-        )
-        expect(response.statusCode).to.equal(200)
+        const response = await userHelper.fetch('/project' + SPLIT_TEST_QUERY)
+        expect(response.status).to.equal(200)
       })
 
       it('should be redirected from the primary email check page to the project list', async function () {
-        const response = await userHelper.request.get(
-          '/user/emails/primary-email-check' + SPLIT_TEST_QUERY,
-          { simple: false }
+        const response = await userHelper.fetch(
+          '/user/emails/primary-email-check' + SPLIT_TEST_QUERY
         )
-        expect(response.statusCode).to.equal(302)
-        expect(response.headers.location).to.equal('/project')
+        expect(response.status).to.equal(302)
+        expect(response.headers.get('location')).to.equal(
+          UserHelper.url('/project').toString()
+        )
       })
     })
 
@@ -125,21 +122,18 @@ describe('PrimaryEmailCheck', function () {
       })
 
       it('should be redirected from project list to the primary email check page', async function () {
-        const response = await userHelper.request.get(
-          '/project' + SPLIT_TEST_QUERY,
-          { simple: false }
-        )
-        expect(response.statusCode).to.equal(302)
-        expect(response.headers.location).to.equal(
-          '/user/emails/primary-email-check'
+        const response = await userHelper.fetch('/project' + SPLIT_TEST_QUERY)
+        expect(response.status).to.equal(302)
+        expect(response.headers.get('location')).to.equal(
+          UserHelper.url('/user/emails/primary-email-check').toString()
         )
       })
 
       it('can visit the primary email check page', async function () {
-        const response = await userHelper.request.get(
+        const response = await userHelper.fetch(
           '/user/emails/primary-email-check'
         )
-        expect(response.statusCode).to.equal(200)
+        expect(response.status).to.equal(200)
       })
     })
   })
@@ -154,34 +148,32 @@ describe('PrimaryEmailCheck', function () {
         $set: { lastPrimaryEmailCheck: new Date(time) },
       })
 
-      checkResponse = await userHelper.request.post(
+      checkResponse = await userHelper.fetch(
         '/user/emails/primary-email-check' + SPLIT_TEST_QUERY,
-        {
-          form: {},
-          simple: false,
-        }
+        { method: 'POST' }
       )
     })
 
     it('should be redirected to the project list page', function () {
-      expect(checkResponse.statusCode).to.equal(302)
-      expect(checkResponse.headers.location).to.equal('/project')
+      expect(checkResponse.status).to.equal(302)
+      expect(checkResponse.headers.get('location')).to.equal(
+        UserHelper.url('/project').toString()
+      )
     })
 
     it("shouldn't be redirected from project list to the primary email check page any longer", async function () {
-      const response = await userHelper.request.get(
-        '/project' + SPLIT_TEST_QUERY
-      )
-      expect(response.statusCode).to.equal(200)
+      const response = await userHelper.fetch('/project' + SPLIT_TEST_QUERY)
+      expect(response.status).to.equal(200)
     })
 
     it('visiting the primary email check page should redirect to the project list page', async function () {
-      const response = await userHelper.request.get(
-        '/user/emails/primary-email-check',
-        { simple: false }
+      const response = await userHelper.fetch(
+        '/user/emails/primary-email-check'
       )
-      expect(response.statusCode).to.equal(302)
-      expect(response.headers.location).to.equal('/project')
+      expect(response.status).to.equal(302)
+      expect(response.headers.get('location')).to.equal(
+        UserHelper.url('/project').toString()
+      )
     })
   })
 })

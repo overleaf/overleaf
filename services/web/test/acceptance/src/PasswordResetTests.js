@@ -13,10 +13,9 @@ describe('PasswordReset', function () {
 
     // generate the token
     await userHelper.getCsrfToken()
-    response = await userHelper.request.post('/user/password/reset', {
-      form: {
-        email,
-      },
+    response = await userHelper.fetch('/user/password/reset', {
+      method: 'POST',
+      body: new URLSearchParams({ email }),
     })
 
     token = (
@@ -32,20 +31,20 @@ describe('PasswordReset', function () {
           email,
           password: userHelper.getDefaultPassword(),
         })
-        response = await userHelper.request.get(
-          `/user/password/set?passwordResetToken=${token}&email=${email}`,
-          { simple: false }
+        response = await userHelper.fetch(
+          `/user/password/set?passwordResetToken=${token}&email=${email}`
         )
-        expect(response.statusCode).to.equal(302)
-        expect(response.headers.location).to.equal(
-          `/user/password/set${emailQuery}`
+        expect(response.status).to.equal(302)
+        expect(response.headers.get('location')).to.equal(
+          UserHelper.url(`/user/password/set${emailQuery}`).toString()
         )
         // send reset request
-        response = await userHelper.request.post('/user/password/set', {
-          form: {
+        response = await userHelper.fetch('/user/password/set', {
+          method: 'POST',
+          body: new URLSearchParams({
             passwordResetToken: token,
             password: 'a-password',
-          },
+          }),
         })
         userHelper = await UserHelper.getUser({ email })
         user = userHelper.user
@@ -75,20 +74,20 @@ describe('PasswordReset', function () {
           email: otherUserEmail,
           password: userHelper.getDefaultPassword(),
         })
-        response = await userHelper.request.get(
-          `/user/password/set?passwordResetToken=${token}&email=${email}`,
-          { simple: false }
+        response = await userHelper.fetch(
+          `/user/password/set?passwordResetToken=${token}&email=${email}`
         )
-        expect(response.statusCode).to.equal(302)
-        expect(response.headers.location).to.equal(
-          `/user/password/set${emailQuery}`
+        expect(response.status).to.equal(302)
+        expect(response.headers.get('location')).to.equal(
+          UserHelper.url(`/user/password/set${emailQuery}`).toString()
         )
         // send reset request
-        response = await userHelper.request.post('/user/password/set', {
-          form: {
+        response = await userHelper.fetch('/user/password/set', {
+          method: 'POST',
+          body: new URLSearchParams({
             passwordResetToken: token,
             password: 'a-password',
-          },
+          }),
         })
         userHelper = await UserHelper.getUser({ email })
         user = userHelper.user
@@ -110,20 +109,20 @@ describe('PasswordReset', function () {
     })
     describe('when not logged in', function () {
       beforeEach(async function () {
-        response = await userHelper.request.get(
-          `/user/password/set?passwordResetToken=${token}&email=${email}`,
-          { simple: false }
+        response = await userHelper.fetch(
+          `/user/password/set?passwordResetToken=${token}&email=${email}`
         )
-        expect(response.statusCode).to.equal(302)
-        expect(response.headers.location).to.equal(
-          `/user/password/set${emailQuery}`
+        expect(response.status).to.equal(302)
+        expect(response.headers.get('location')).to.equal(
+          UserHelper.url(`/user/password/set${emailQuery}`).toString()
         )
         // send reset request
-        response = await userHelper.request.post('/user/password/set', {
-          form: {
+        response = await userHelper.fetch('/user/password/set', {
+          method: 'POST',
+          body: new URLSearchParams({
             passwordResetToken: token,
             password: 'a-password',
-          },
+          }),
         })
         userHelper = await UserHelper.getUser({ email })
         user = userHelper.user
@@ -144,24 +143,23 @@ describe('PasswordReset', function () {
     })
     describe('password checks', function () {
       beforeEach(async function () {
-        response = await userHelper.request.get(
-          `/user/password/set?passwordResetToken=${token}&email=${email}`,
-          { simple: false }
+        response = await userHelper.fetch(
+          `/user/password/set?passwordResetToken=${token}&email=${email}`
         )
-        expect(response.statusCode).to.equal(302)
-        expect(response.headers.location).to.equal(
-          `/user/password/set${emailQuery}`
+        expect(response.status).to.equal(302)
+        expect(response.headers.get('location')).to.equal(
+          UserHelper.url(`/user/password/set${emailQuery}`).toString()
         )
       })
       it('without a password should return 400 and not log the change', async function () {
         // send reset request
-        response = await userHelper.request.post('/user/password/set', {
-          form: {
+        response = await userHelper.fetch('/user/password/set', {
+          method: 'POST',
+          body: new URLSearchParams({
             passwordResetToken: token,
-          },
-          simple: false,
+          }),
         })
-        expect(response.statusCode).to.equal(400)
+        expect(response.status).to.equal(400)
         userHelper = await UserHelper.getUser({ email })
 
         const auditLog = userHelper.getAuditLogWithoutNoise()
@@ -170,14 +168,14 @@ describe('PasswordReset', function () {
 
       it('without a valid password should return 400 and not log the change', async function () {
         // send reset request
-        response = await userHelper.request.post('/user/password/set', {
-          form: {
+        response = await userHelper.fetch('/user/password/set', {
+          method: 'POST',
+          body: new URLSearchParams({
             passwordResetToken: token,
             password: 'short',
-          },
-          simple: false,
+          }),
         })
-        expect(response.statusCode).to.equal(400)
+        expect(response.status).to.equal(400)
         userHelper = await UserHelper.getUser({ email })
 
         const auditLog = userHelper.getAuditLogWithoutNoise()
@@ -187,41 +185,45 @@ describe('PasswordReset', function () {
       it('should flag email in password', async function () {
         const localPart = email.split('@').shift()
         // send bad password
-        response = await userHelper.request.post('/user/password/set', {
-          form: {
+        response = await userHelper.fetch('/user/password/set', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify({
             passwordResetToken: token,
             password: localPart,
             email,
-          },
-          json: true,
-          simple: false,
+          }),
         })
-        expect(response.statusCode).to.equal(400)
-        expect(response.body).to.deep.equal({
+        expect(response.status).to.equal(400)
+        const body = await response.json()
+        expect(body).to.deep.equal({
           message: { text: 'password contains part of email address' },
         })
       })
 
       it('should be able to retry after providing an invalid password', async function () {
         // send bad password
-        response = await userHelper.request.post('/user/password/set', {
-          form: {
+        response = await userHelper.fetch('/user/password/set', {
+          method: 'POST',
+          body: new URLSearchParams({
             passwordResetToken: token,
             password: 'short',
-          },
-          simple: false,
+          }),
         })
-        expect(response.statusCode).to.equal(400)
+        expect(response.status).to.equal(400)
 
         // send good password
-        response = await userHelper.request.post('/user/password/set', {
-          form: {
+        response = await userHelper.fetch('/user/password/set', {
+          method: 'POST',
+          body: new URLSearchParams({
             passwordResetToken: token,
             password: 'SomeThingVeryStrong!11',
-          },
-          simple: false,
+          }),
         })
-        expect(response.statusCode).to.equal(200)
+        expect(response.status).to.equal(200)
         userHelper = await UserHelper.getUser({ email })
 
         const auditLog = userHelper.getAuditLogWithoutNoise()
@@ -230,17 +232,16 @@ describe('PasswordReset', function () {
 
       it('when the password is the same as current, should return 400 and log the change', async function () {
         // send reset request
-        response = await userHelper.request.post('/user/password/set', {
-          form: {
+        response = await userHelper.fetch('/user/password/set', {
+          method: 'POST',
+          body: new URLSearchParams({
             passwordResetToken: token,
             password: userHelper.getDefaultPassword(),
-          },
-          simple: false,
+          }),
         })
-        expect(response.statusCode).to.equal(400)
-        expect(JSON.parse(response.body).message.key).to.equal(
-          'password-must-be-different'
-        )
+        expect(response.status).to.equal(400)
+        const body = await response.json()
+        expect(body.message.key).to.equal('password-must-be-different')
         userHelper = await UserHelper.getUser({ email })
 
         const auditLog = userHelper.getAuditLogWithoutNoise()
@@ -251,80 +252,81 @@ describe('PasswordReset', function () {
 
   describe('multiple attempts to set the password, reaching attempt limit', async function () {
     beforeEach(async function () {
-      response = await userHelper.request.get(
-        `/user/password/set?passwordResetToken=${token}&email=${email}`,
-        { simple: false }
+      response = await userHelper.fetch(
+        `/user/password/set?passwordResetToken=${token}&email=${email}`
       )
-      expect(response.statusCode).to.equal(302)
-      expect(response.headers.location).to.equal(
-        `/user/password/set${emailQuery}`
+      expect(response.status).to.equal(302)
+      expect(response.headers.get('location')).to.equal(
+        UserHelper.url(`/user/password/set${emailQuery}`).toString()
       )
     })
 
     it('should allow multiple attempts with same-password error, then deny further attempts', async function () {
       const sendSamePasswordRequest = async function () {
-        return userHelper.request.post('/user/password/set', {
-          form: {
+        return userHelper.fetch('/user/password/set', {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+          },
+          body: new URLSearchParams({
             passwordResetToken: token,
             password: userHelper.getDefaultPassword(),
-          },
-          simple: false,
+          }),
         })
       }
       // Three attempts at setting the password, all rejected for being the same as
       // the current password
       const response1 = await sendSamePasswordRequest()
-      expect(response1.statusCode).to.equal(400)
-      expect(JSON.parse(response1.body).message.key).to.equal(
-        'password-must-be-different'
-      )
+      expect(response1.status).to.equal(400)
+      const body1 = await response1.json()
+      expect(body1.message.key).to.equal('password-must-be-different')
       const response2 = await sendSamePasswordRequest()
-      expect(response2.statusCode).to.equal(400)
-      expect(JSON.parse(response2.body).message.key).to.equal(
-        'password-must-be-different'
-      )
+      expect(response2.status).to.equal(400)
+      const body2 = await response2.json()
+      expect(body2.message.key).to.equal('password-must-be-different')
       const response3 = await sendSamePasswordRequest()
-      expect(response3.statusCode).to.equal(400)
-      expect(JSON.parse(response3.body).message.key).to.equal(
-        'password-must-be-different'
-      )
+      expect(response3.status).to.equal(400)
+      const body3 = await response3.json()
+      expect(body3.message.key).to.equal('password-must-be-different')
       // Fourth attempt is rejected because the token has been used too many times
       const response4 = await sendSamePasswordRequest()
-      expect(response4.statusCode).to.equal(404)
-      expect(JSON.parse(response4.body).message.key).to.equal('token-expired')
+      expect(response4.status).to.equal(404)
+      const body4 = await response4.json()
+      expect(body4.message.key).to.equal('token-expired')
     })
 
     it('should allow multiple attempts with same-password error, then set the password', async function () {
       const sendSamePasswordRequest = async function () {
-        return userHelper.request.post('/user/password/set', {
-          form: {
+        return userHelper.fetch('/user/password/set', {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+          },
+          body: new URLSearchParams({
             passwordResetToken: token,
             password: userHelper.getDefaultPassword(),
-          },
-          simple: false,
+          }),
         })
       }
       // Two attempts at setting the password, all rejected for being the same as
       // the current password
       const response1 = await sendSamePasswordRequest()
-      expect(response1.statusCode).to.equal(400)
-      expect(JSON.parse(response1.body).message.key).to.equal(
-        'password-must-be-different'
-      )
+      expect(response1.status).to.equal(400)
+      const body1 = await response1.json()
+      expect(body1.message.key).to.equal('password-must-be-different')
       const response2 = await sendSamePasswordRequest()
-      expect(response2.statusCode).to.equal(400)
-      expect(JSON.parse(response2.body).message.key).to.equal(
-        'password-must-be-different'
-      )
+      expect(response2.status).to.equal(400)
+      const body2 = await response2.json()
+      expect(body2.message.key).to.equal('password-must-be-different')
       // Third attempt is succeeds
-      const response3 = await userHelper.request.post('/user/password/set', {
-        form: {
+      const response3 = await userHelper.fetch('/user/password/set', {
+        method: 'POST',
+        body: new URLSearchParams({
           passwordResetToken: token,
           password: 'some-new-password',
-        },
-        simple: false,
+        }),
       })
-      expect(response3.statusCode).to.equal(200)
+      expect(response3.status).to.equal(200)
       // Check the user and audit log
       userHelper = await UserHelper.getUser({ email })
       user = userHelper.user
@@ -342,83 +344,79 @@ describe('PasswordReset', function () {
 
   describe('without a valid token', function () {
     it('no token should redirect to page to re-request reset token', async function () {
-      response = await userHelper.request.get(
-        `/user/password/set?&email=${email}`,
-        { simple: false }
+      response = await userHelper.fetch(`/user/password/set?&email=${email}`)
+      expect(response.status).to.equal(302)
+      expect(response.headers.get('location')).to.equal(
+        UserHelper.url('/user/password/reset').toString()
       )
-      expect(response.statusCode).to.equal(302)
-      expect(response.headers.location).to.equal('/user/password/reset')
     })
     it('should show error for invalid tokens and return 404 if used', async function () {
       const invalidToken = 'not-real-token'
-      response = await userHelper.request.get(
-        `/user/password/set?&passwordResetToken=${invalidToken}&email=${email}`,
-        { simple: false }
+      response = await userHelper.fetch(
+        `/user/password/set?&passwordResetToken=${invalidToken}&email=${email}`
       )
-      expect(response.statusCode).to.equal(302)
-      expect(response.headers.location).to.equal(
-        `/user/password/reset?error=token_expired`
+      expect(response.status).to.equal(302)
+      expect(response.headers.get('location')).to.equal(
+        UserHelper.url('/user/password/reset?error=token_expired').toString()
       )
       // send reset request
-      response = await userHelper.request.post('/user/password/set', {
-        form: {
+      response = await userHelper.fetch('/user/password/set', {
+        method: 'POST',
+        body: new URLSearchParams({
           passwordResetToken: invalidToken,
           password: 'a-password',
-        },
-        simple: false,
+        }),
       })
-      expect(response.statusCode).to.equal(404)
+      expect(response.status).to.equal(404)
     })
   })
   describe('password reset', function () {
     it('should return 200 if email field is valid', async function () {
-      response = await userHelper.request.post(`/user/password/reset`, {
-        form: {
-          email,
-        },
+      response = await userHelper.fetch(`/user/password/reset`, {
+        method: 'POST',
+        body: new URLSearchParams({ email }),
       })
-      expect(response.statusCode).to.equal(200)
+      expect(response.status).to.equal(200)
     })
 
     it('should return 400 if email field is missing', async function () {
-      response = await userHelper.request.post(`/user/password/reset`, {
-        form: {
-          mail: email,
-        },
-        simple: false,
+      response = await userHelper.fetch(`/user/password/reset`, {
+        method: 'POST',
+        body: new URLSearchParams({ mail: email }),
       })
-      expect(response.statusCode).to.equal(400)
+      expect(response.status).to.equal(400)
     })
   })
   describe('password set', function () {
     it('should return 200 if password and passwordResetToken fields are valid', async function () {
-      response = await userHelper.request.post(`/user/password/set`, {
-        form: {
+      response = await userHelper.fetch(`/user/password/set`, {
+        method: 'POST',
+        body: new URLSearchParams({
           password: 'new-password',
           passwordResetToken: token,
-        },
+        }),
       })
-      expect(response.statusCode).to.equal(200)
+      expect(response.status).to.equal(200)
     })
 
     it('should return 400 if password field is missing', async function () {
-      response = await userHelper.request.post(`/user/password/set`, {
-        form: {
+      response = await userHelper.fetch(`/user/password/set`, {
+        method: 'POST',
+        body: new URLSearchParams({
           passwordResetToken: token,
-        },
-        simple: false,
+        }),
       })
-      expect(response.statusCode).to.equal(400)
+      expect(response.status).to.equal(400)
     })
 
     it('should return 400 if passwordResetToken field is missing', async function () {
-      response = await userHelper.request.post(`/user/password/set`, {
-        form: {
+      response = await userHelper.fetch(`/user/password/set`, {
+        method: 'POST',
+        body: new URLSearchParams({
           password: 'new-password',
-        },
-        simple: false,
+        }),
       })
-      expect(response.statusCode).to.equal(400)
+      expect(response.status).to.equal(400)
     })
   })
 })

@@ -668,15 +668,14 @@ describe('ProjectDuplicateNames', function () {
     })
     it('should handle characters that would cause an invalid regular expression', async function () {
       const projectName = 'Example (test'
-      response = await userHelper.request.post('/project/new', {
-        simple: false,
-        form: { projectName },
+      response = await userHelper.fetch('/project/new', {
+        method: 'POST',
+        body: new URLSearchParams([['projectName', projectName]]),
       })
-      expect(response.statusCode).to.equal(200) // can create project
-      response = await userHelper.request.get(
-        `/project/${JSON.parse(response.body).project_id}`
-      )
-      expect(response.statusCode).to.equal(200) // can open project
+      const body = await response.json()
+      expect(response.status).to.equal(200) // can create project
+      response = await userHelper.fetch(`/project/${body.project_id}`)
+      expect(response.status).to.equal(200) // can open project
     })
   })
 })

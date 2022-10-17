@@ -23,19 +23,19 @@ describe('PasswordUpdate', function () {
   })
   describe('success', function () {
     beforeEach(async function () {
-      response = await userHelper.request.post('/user/password/update', {
-        form: {
+      response = await userHelper.fetch('/user/password/update', {
+        method: 'POST',
+        body: new URLSearchParams({
           currentPassword: password,
           newPassword1: 'new-password',
           newPassword2: 'new-password',
-        },
-        simple: false,
+        }),
       })
       userHelper = await UserHelper.getUser({ email })
       user = userHelper.user
     })
     it('should return 200', async function () {
-      expect(response.statusCode).to.equal(200)
+      expect(response.status).to.equal(200)
     })
     it('should update the audit log', function () {
       const auditLog = userHelper.getAuditLogWithoutNoise()
@@ -50,17 +50,17 @@ describe('PasswordUpdate', function () {
   describe('errors', function () {
     describe('missing current password', function () {
       beforeEach(async function () {
-        response = await userHelper.request.post('/user/password/update', {
-          form: {
+        response = await userHelper.fetch('/user/password/update', {
+          method: 'POST',
+          body: new URLSearchParams({
             newPassword1: 'new-password',
             newPassword2: 'new-password',
-          },
-          simple: false,
+          }),
         })
         userHelper = await UserHelper.getUser({ email })
       })
       it('should return 500', async function () {
-        expect(response.statusCode).to.equal(500)
+        expect(response.status).to.equal(500)
       })
       it('should not update audit log', async function () {
         const auditLog = userHelper.getAuditLogWithoutNoise()
@@ -69,18 +69,18 @@ describe('PasswordUpdate', function () {
     })
     describe('wrong current password', function () {
       beforeEach(async function () {
-        response = await userHelper.request.post('/user/password/update', {
-          form: {
+        response = await userHelper.fetch('/user/password/update', {
+          method: 'POST',
+          body: new URLSearchParams({
             currentPassword: 'wrong-password',
             newPassword1: 'new-password',
             newPassword2: 'new-password',
-          },
-          simple: false,
+          }),
         })
         userHelper = await UserHelper.getUser({ email })
       })
       it('should return 400', async function () {
-        expect(response.statusCode).to.equal(400)
+        expect(response.status).to.equal(400)
       })
       it('should not update audit log', async function () {
         const auditLog = userHelper.getAuditLogWithoutNoise()
@@ -89,22 +89,26 @@ describe('PasswordUpdate', function () {
     })
     describe('newPassword1 does not match newPassword2', function () {
       beforeEach(async function () {
-        response = await userHelper.request.post('/user/password/update', {
-          form: {
+        response = await userHelper.fetch('/user/password/update', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify({
             currentPassword: password,
             newPassword1: 'new-password',
             newPassword2: 'oops-password',
-          },
-          json: true,
-          simple: false,
+          }),
         })
         userHelper = await UserHelper.getUser({ email })
       })
       it('should return 400', async function () {
-        expect(response.statusCode).to.equal(400)
+        expect(response.status).to.equal(400)
       })
       it('should return error message', async function () {
-        expect(response.body.message).to.equal('Passwords do not match')
+        const body = await response.json()
+        expect(body.message).to.equal('Passwords do not match')
       })
       it('should not update audit log', async function () {
         const auditLog = userHelper.getAuditLogWithoutNoise()
@@ -113,22 +117,26 @@ describe('PasswordUpdate', function () {
     })
     describe('new password is not valid', function () {
       beforeEach(async function () {
-        response = await userHelper.request.post('/user/password/update', {
-          form: {
+        response = await userHelper.fetch('/user/password/update', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify({
             currentPassword: password,
             newPassword1: 'short',
             newPassword2: 'short',
-          },
-          json: true,
-          simple: false,
+          }),
         })
         userHelper = await UserHelper.getUser({ email })
       })
       it('should return 400', async function () {
-        expect(response.statusCode).to.equal(400)
+        expect(response.status).to.equal(400)
       })
       it('should return error message', async function () {
-        expect(response.body.message).to.equal('password is too short')
+        const body = await response.json()
+        expect(body.message).to.equal('password is too short')
       })
       it('should not update audit log', async function () {
         const auditLog = userHelper.getAuditLogWithoutNoise()

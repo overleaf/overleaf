@@ -1,4 +1,5 @@
 const { expect } = require('chai')
+const { CookieJar } = require('tough-cookie')
 const AuthenticationManager = require('../../../../app/src/Features/Authentication/AuthenticationManager')
 const Settings = require('@overleaf/settings')
 const InstitutionsAPI = require('../../../../app/src/Features/Institutions/InstitutionsAPI')
@@ -6,7 +7,7 @@ const UserCreator = require('../../../../app/src/Features/User/UserCreator')
 const UserGetter = require('../../../../app/src/Features/User/UserGetter')
 const UserUpdater = require('../../../../app/src/Features/User/UserUpdater')
 const moment = require('moment')
-const request = require('request-promise-native')
+const fetch = require('node-fetch')
 const { db } = require('../../../../app/src/infrastructure/mongodb')
 const { ObjectId } = require('mongodb')
 const {
@@ -82,43 +83,33 @@ class UserHelper {
     // used to store mongo user object once created/loaded
     this.user = null
     // cookie jar
-    this.jar = request.jar()
-    // create new request instance
-    this.request = request.defaults({})
-    // initialize request instance with default options
-    this.setRequestDefaults({
-      baseUrl: UserHelper.baseUrl(),
-      followRedirect: false,
-      jar: this.jar,
-      resolveWithFullResponse: true,
-    })
+    this.jar = new CookieJar()
   }
 
-  /* Set defaults for request object. Applied over existing defaults.
-   * @param {object} [defaults]
-   */
-  setRequestDefaults(defaults = {}) {
-    // request-promise instance for making requests
-    this.request = this.request.defaults(defaults)
-  }
-
-  /**
-   * Make a request for the user and run expectations on the response.
-   * @param {object} [requestOptions] options to pass to request
-   * @param {object} [responseExpectations] expectations:
-   *   - {Int} statusCode the expected status code
-   *   - {RegEx} message a matcher for the message
-   */
-  async expectErrorOnRequest(requestOptions, responseExpectations) {
-    let error
-    try {
-      await this.request(requestOptions)
-    } catch (e) {
-      error = e
+  async fetch(url, opts = {}) {
+    url = UserHelper.url(url)
+    const headers = {}
+    const cookieString = this.jar.getCookieStringSync(url)
+    if (cookieString) {
+      headers.Cookie = cookieString
     }
-    expect(error).to.exist
-    expect(error.statusCode).to.equal(responseExpectations.statusCode)
-    expect(error.message).to.match(responseExpectations.message)
+    if (this._csrfToken) {
+      headers['x-csrf-token'] = this._csrfToken
+    }
+    const response = await fetch(url, {
+      redirect: 'manual',
+      ...opts,
+      headers: { ...headers, ...opts.headers },
+    })
+
+    // From https://www.npmjs.com/package/node-fetch#extract-set-cookie-header
+    const cookies = response.headers.raw()['set-cookie']
+    if (cookies != null) {
+      for (const cookie of cookies) {
+        this.jar.setCookieSync(cookie, url)
+      }
+    }
+    return response
   }
 
   /* async http api call methods */
@@ -128,12 +119,8 @@ class UserHelper {
    */
   async getCsrfToken() {
     // get csrf token from api and store
-    const response = await this.request.get('/dev/csrf')
-    this._csrfToken = response.body
-    // use csrf token for requests
-    this.setRequestDefaults({
-      headers: { 'x-csrf-token': this._csrfToken },
-    })
+    const response = await this.fetch('/dev/csrf')
+    this._csrfToken = await response.text()
   }
 
   /**
@@ -142,13 +129,11 @@ class UserHelper {
    * @returns {object} http response
    */
   async logout(options = {}) {
-    // do not throw exception on 302
-    options.simple = false
     // post logout
-    const response = await this.request.post('/logout', options)
+    const response = await this.fetch('/logout', { method: 'POST', ...options })
     if (
-      response.statusCode !== 302 ||
-      !response.headers.location.includes('/login')
+      response.status !== 302 ||
+      !response.headers.get('location').includes('/login')
     ) {
       throw new Error('logout failed')
     }
@@ -166,6 +151,13 @@ class UserHelper {
    */
   static baseUrl() {
     return `http://${process.env.HTTP_TEST_HOST || 'localhost'}:23000`
+  }
+
+  /**
+   * Generates a full URL given a path
+   */
+  static url(path) {
+    return new URL(path, UserHelper.baseUrl())
   }
 
   /* static async instantiation methods */
@@ -247,17 +239,30 @@ class UserHelper {
     const userHelper = new UserHelper()
     const loginPath = Settings.enableLegacyLogin ? '/login/legacy' : '/login'
     await userHelper.getCsrfToken()
-    const response = await userHelper.request.post(loginPath, {
-      json: {
+    const response = await userHelper.fetch(loginPath, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({
         'g-recaptcha-response': 'valid',
         ...userData,
-      },
+      }),
     })
-    if (response.statusCode !== 200 || response.body.redir !== '/project') {
+    if (!response.ok) {
       const error = new Error('login failed')
       error.response = response
       throw error
     }
+
+    const body = await response.json()
+    if (body.redir !== '/project') {
+      const error = new Error('login failed')
+      error.response = response
+      throw error
+    }
+
     userHelper.user = await UserGetter.promises.getUser({
       email: userData.email,
     })
@@ -274,10 +279,10 @@ class UserHelper {
    * @returns {Boolean}
    */
   async isLoggedIn() {
-    const response = await this.request.get('/user/sessions', {
-      followRedirect: true,
+    const response = await this.fetch('/user/sessions', {
+      redirect: 'follow',
     })
-    return response.request.path === '/user/sessions'
+    return !response.redirected
   }
 
   /**
@@ -292,8 +297,16 @@ class UserHelper {
     const userHelper = new UserHelper()
     await userHelper.getCsrfToken()
     userData = userHelper.getDefaultEmailPassword(userData)
-    options.json = userData
-    const { body } = await userHelper.request.post('/register', options)
+    const response = await userHelper.fetch('/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify(userData),
+      ...options,
+    })
+    const body = await response.json()
     if (body.message && body.message.type === 'error') {
       throw new Error(`register api error: ${body.message.text}`)
     }
@@ -321,14 +334,11 @@ class UserHelper {
   }
 
   async addEmail(email) {
-    const response = await this.request.post({
-      form: {
-        email,
-      },
-      simple: false,
-      uri: '/user/emails',
+    const response = await this.fetch('/user/emails', {
+      method: 'POST',
+      body: new URLSearchParams([['email', email]]),
     })
-    expect(response.statusCode).to.equal(204)
+    expect(response.status).to.equal(204)
   }
 
   async addEmailAndConfirm(userId, email) {
@@ -393,16 +403,12 @@ class UserHelper {
   }
 
   async confirmEmail(userId, email) {
-    let response
     // UserHelper.createUser does not create a confirmation token
-    response = await this.request.post({
-      form: {
-        email,
-      },
-      simple: false,
-      uri: '/user/emails/resend_confirmation',
+    let response = await this.fetch('/user/emails/resend_confirmation', {
+      method: 'POST',
+      body: new URLSearchParams([['email', email]]),
     })
-    expect(response.statusCode).to.equal(200)
+    expect(response.status).to.equal(200)
     const tokenData = await db.tokens
       .find({
         use: 'email_confirmation',
@@ -411,14 +417,11 @@ class UserHelper {
         usedAt: { $exists: false },
       })
       .next()
-    response = await this.request.post({
-      form: {
-        token: tokenData.token,
-      },
-      simple: false,
-      uri: '/user/emails/confirm',
+    response = await this.fetch('/user/emails/confirm', {
+      method: 'POST',
+      body: new URLSearchParams([['token', tokenData.token]]),
     })
-    expect(response.statusCode).to.equal(200)
+    expect(response.status).to.equal(200)
   }
 }
 
