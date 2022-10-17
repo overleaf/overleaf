@@ -217,6 +217,16 @@ describe('AuthenticationManager', function () {
     })
   })
 
+  describe('hashPassword', function () {
+    it('should block too long passwords', function (done) {
+      this.AuthenticationManager.hashPassword('x'.repeat(100), err => {
+        expect(err).to.exist
+        expect(err.message).to.equal('password is too long')
+        done()
+      })
+    })
+  })
+
   describe('authenticate', function () {
     describe('when the user exists in the database', function () {
       beforeEach(function () {
@@ -277,7 +287,7 @@ describe('AuthenticationManager', function () {
           this.user.hashedPassword = this.hashedPassword = 'asdfjadflasdf'
           this.bcrypt.compare = sinon.stub().callsArgWith(2, null, true)
           this.bcrypt.getRounds = sinon.stub().returns(1)
-          this.AuthenticationManager.setUserPassword = sinon
+          this.AuthenticationManager._setUserPasswordInMongo = sinon
             .stub()
             .callsArgWith(2, null)
           this.AuthenticationManager.authenticate(
@@ -305,7 +315,7 @@ describe('AuthenticationManager', function () {
         })
 
         it('should set the users password (with a higher number of rounds)', function () {
-          this.AuthenticationManager.setUserPassword
+          this.AuthenticationManager._setUserPasswordInMongo
             .calledWith(this.user, this.unencryptedPassword)
             .should.equal(true)
         })

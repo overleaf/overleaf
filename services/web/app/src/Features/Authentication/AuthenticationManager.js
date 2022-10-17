@@ -24,6 +24,17 @@ const _checkWriteResult = function (result, callback) {
   }
 }
 
+function _validatePasswordNotTooLong(password) {
+  // bcrypt has a hard limit of 72 characters.
+  if (password.length > 72) {
+    return new InvalidPasswordError({
+      message: 'password is too long',
+      info: { code: 'too_long' },
+    })
+  }
+  return null
+}
+
 const AuthenticationManager = {
   _checkUserPassword(query, password, callback) {
     // Using Mongoose for legacy reasons here. The returned User instance
@@ -140,6 +151,10 @@ const AuthenticationManager = {
         info: { code: 'too_long' },
       })
     }
+    const passwordLengthError = _validatePasswordNotTooLong(password)
+    if (passwordLengthError) {
+      return passwordLengthError
+    }
     if (
       !allowAnyChars &&
       !AuthenticationManager._passwordCharactersAreValid(password)
@@ -176,13 +191,18 @@ const AuthenticationManager = {
     // check current number of rounds and rehash if necessary
     const currentRounds = bcrypt.getRounds(hashedPassword)
     if (currentRounds < BCRYPT_ROUNDS) {
-      AuthenticationManager.setUserPassword(user, password, callback)
+      AuthenticationManager._setUserPasswordInMongo(user, password, callback)
     } else {
       callback()
     }
   },
 
   hashPassword(password, callback) {
+    // Double-check the size to avoid truncating in bcrypt.
+    const error = _validatePasswordNotTooLong(password)
+    if (error) {
+      return callback(error)
+    }
     bcrypt.genSalt(BCRYPT_ROUNDS, BCRYPT_MINOR_VERSION, function (error, salt) {
       if (error) {
         return callback(error)
@@ -211,33 +231,35 @@ const AuthenticationManager = {
         if (match) {
           return callback(new PasswordMustBeDifferentError())
         }
-        this.hashPassword(password, function (error, hash) {
-          if (error) {
-            return callback(error)
-          }
-          db.users.updateOne(
-            {
-              _id: ObjectId(user._id.toString()),
-            },
-            {
-              $set: {
-                hashedPassword: hash,
-              },
-              $unset: {
-                password: true,
-              },
-            },
-            function (updateError, result) {
-              if (updateError) {
-                return callback(updateError)
-              }
-              _checkWriteResult(result, callback)
-              HaveIBeenPwned.checkPasswordForReuseInBackground(password)
-            }
-          )
-        })
+        this._setUserPasswordInMongo(user, password, callback)
+        HaveIBeenPwned.checkPasswordForReuseInBackground(password)
       }
     )
+  },
+
+  _setUserPasswordInMongo(user, password, callback) {
+    this.hashPassword(password, function (error, hash) {
+      if (error) {
+        return callback(error)
+      }
+      db.users.updateOne(
+        { _id: ObjectId(user._id.toString()) },
+        {
+          $set: {
+            hashedPassword: hash,
+          },
+          $unset: {
+            password: true,
+          },
+        },
+        function (updateError, result) {
+          if (updateError) {
+            return callback(updateError)
+          }
+          _checkWriteResult(result, callback)
+        }
+      )
+    })
   },
 
   _passwordCharactersAreValid(password) {
