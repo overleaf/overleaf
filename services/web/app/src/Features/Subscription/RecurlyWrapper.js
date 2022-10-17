@@ -854,7 +854,7 @@ const RecurlyWrapper = {
     )
     RecurlyWrapper.apiRequest(
       {
-        url: `/subscriptions/${subscriptionId}/postpone?next_renewal_date=${nextRenewalDate}&bulk=false`,
+        url: `/subscriptions/${subscriptionId}/postpone?next_bill_date=${nextRenewalDate}&bulk=false`,
         method: 'put',
       },
       (error, response, responseBody) => {
