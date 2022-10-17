@@ -54,6 +54,12 @@
           color: @sidebar-color;
         }
 
+        button {
+          white-space: normal;
+          word-wrap: anywhere;
+          // prevents buttons from expanding sidebar width
+        }
+
         > .dropdown {
           width: 100%;
 
@@ -179,7 +185,6 @@
         position: relative;
         padding: @folders-tag-padding;
         display: @folders-tag-display;
-        white-space: normal;
         word-wrap: anywhere;
 
         span.name {
