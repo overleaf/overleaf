@@ -229,11 +229,9 @@ describe('SubscriptionViewModelBuilder', function () {
           })
           .resolves(this.recurlySubscription)
 
-        const requesterData = { id: this.user._id, ip: '1.2.3.4' }
         const usersBestSubscription =
           await this.SubscriptionViewModelBuilder.promises.getBestSubscription(
-            this.user,
-            requesterData
+            this.user
           )
 
         sinon.assert.calledWith(
@@ -244,8 +242,7 @@ describe('SubscriptionViewModelBuilder', function () {
         sinon.assert.calledWith(
           this.SubscriptionUpdater.promises.updateSubscriptionFromRecurly,
           this.recurlySubscription,
-          this.individualSubscriptionWithoutRecurly,
-          requesterData
+          this.individualSubscriptionWithoutRecurly
         )
         assert.deepEqual(usersBestSubscription, {
           type: 'individual',
