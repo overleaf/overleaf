@@ -1,4 +1,4 @@
-import { memo, useEffect, useState } from 'react'
+import { memo, useEffect, useRef, useState } from 'react'
 import { Alert, Modal } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import { Project } from '../../../../../../types/project/dashboard/api'
@@ -31,6 +31,8 @@ function ProjectsActionModal({
   const { t } = useTranslation()
   const [errors, setErrors] = useState<Array<any>>([])
   const [isProcessing, setIsProcessing] = useState(false)
+  const [projectsToDisplay, setProjectsToDisplay] = useState<Project[]>([])
+  const projectsRef = useRef<Project[]>([])
   const isMounted = useIsMounted()
 
   async function handleActionForProjects(projects: Array<Project>) {
@@ -64,8 +66,21 @@ function ProjectsActionModal({
         'project action',
         action
       )
+
+      if (projectsRef.current.length > 0) {
+        // maintain the original list in the display of the modal,
+        // even after some project actions have completed
+        setProjectsToDisplay(projectsRef.current)
+      } else {
+        projectsRef.current = projects
+        setProjectsToDisplay(projects)
+      }
+    } else {
+      projectsRef.current = []
     }
-  }, [action, showModal])
+  }, [action, projects, projectsRef, showModal])
+
+  const projectIdsRemainingToProcess = projects.map(p => p.id)
 
   return (
     <AccessibleModal
@@ -80,13 +95,21 @@ function ProjectsActionModal({
       </Modal.Header>
       <Modal.Body>
         {bodyTop}
-        <ul>
-          {projects.map(project => (
-            <li key={`projects-action-list-${project.id}`}>
+        <ul className="projects-action-list">
+          {projectsToDisplay.map(project => (
+            <li
+              key={`projects-action-list-${project.id}`}
+              className={
+                projectIdsRemainingToProcess.includes(project.id)
+                  ? ''
+                  : 'completed-project-action'
+              }
+            >
               <b>{project.name}</b>
             </li>
           ))}
         </ul>
+
         {bodyBottom}
       </Modal.Body>
       <Modal.Footer>

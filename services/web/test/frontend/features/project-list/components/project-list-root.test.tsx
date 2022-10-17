@@ -640,6 +640,91 @@ describe('<ProjectListRoot />', function () {
           screen.getByText(copiedProjectName)
         })
       })
+
+      describe('projects list in actions modal', function () {
+        let modal: HTMLElement
+        let projectsToProcess: any[]
+
+        function selectedProjectNames() {
+          projectsToProcess = []
+          // needs to be done ahead of opening modal
+
+          allCheckboxes = screen.getAllByRole<HTMLInputElement>('checkbox')
+          // update list so we know which are checked
+
+          const tableRows = screen.getAllByRole('row')
+
+          for (const [index, checkbox] of allCheckboxes.entries()) {
+            if (checkbox.checked) {
+              const linkForProjectToCopy = within(tableRows[index]).getByRole(
+                'link'
+              )
+              const projectNameToCopy = linkForProjectToCopy.textContent
+              projectsToProcess.push(projectNameToCopy)
+            }
+          }
+
+          expect(projectsToProcess.length > 0).to.be.true
+        }
+
+        function selectedMatchesDisplayed(expectedLength: number) {
+          selectedProjectNames()
+          // any action will work for check since they all use the same modal
+          const archiveButton = within(actionsToolbar).getByLabelText('Archive')
+          fireEvent.click(archiveButton)
+          modal = screen.getAllByRole('dialog')[0]
+
+          const listitems = within(modal).getAllByRole('listitem')
+          expect(listitems.length).to.equal(projectsToProcess.length)
+          expect(listitems.length).to.equal(expectedLength)
+
+          for (const projectName of projectsToProcess) {
+            within(modal).getByText(projectName)
+          }
+        }
+
+        beforeEach(function () {
+          allCheckboxes = screen.getAllByRole<HTMLInputElement>('checkbox')
+          // first one is the select all checkbox, just check 2 at first
+          fireEvent.click(allCheckboxes[1])
+          fireEvent.click(allCheckboxes[2])
+
+          actionsToolbar = screen.getAllByRole('toolbar')[0]
+        })
+
+        it('opens the modal with the 2 originally selected projects', function () {
+          selectedMatchesDisplayed(2)
+        })
+
+        it('shows correct list after closing modal, changing selecting, and reopening modal', async function () {
+          selectedMatchesDisplayed(2)
+
+          const cancelButton = screen.getByRole('button', { name: 'Cancel' })
+          fireEvent.click(cancelButton)
+          expect(screen.queryByRole('dialog', { hidden: false })).to.be.null
+          await screen.findAllByRole('checkbox')
+          fireEvent.click(allCheckboxes[3])
+          selectedMatchesDisplayed(3)
+        })
+
+        it('maintains original list even after some have been processed', async function () {
+          const totalProjectsToProcess = 2
+          selectedMatchesDisplayed(totalProjectsToProcess)
+          const button = screen.getByRole('button', { name: 'Confirm' })
+          fireEvent.click(button)
+          project1Id = allCheckboxes[1].getAttribute('data-project-id')
+          fetchMock.post('express:/project/:id/archive', {
+            status: 200,
+          })
+          fetchMock.post(`express:/${project2Id}/:id/archive`, {
+            status: 500,
+          })
+
+          await screen.findByRole('alert') // ensure that error was thrown for the 2nd project
+          const listitems = within(modal).getAllByRole('listitem')
+          expect(listitems.length).to.equal(totalProjectsToProcess)
+        })
+      })
     })
 
     describe('search', function () {

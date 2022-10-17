@@ -707,3 +707,23 @@
     flex: @project-list-sidebar-wrapper-flex;
   }
 }
+
+.projects-action-list {
+  list-style: none;
+
+  li:not(.completed-project-action) {
+    list-style-type: disc;
+  }
+
+  li.completed-project-action {
+    &:before {
+      display: inline-block;
+      content: '\f00c';
+      font-family: FontAwesome;
+      color: @ol-green;
+      width: 1.2em;
+      margin-left: -1.2em;
+      height: 0; // prevent slight vertical layout shift
+    }
+  }
+}
