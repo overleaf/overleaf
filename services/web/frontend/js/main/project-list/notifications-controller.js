@@ -23,19 +23,6 @@ App.controller('NotificationsController', function ($scope, $http) {
   }
 })
 
-App.controller(
-  'DismissableNotificationsController',
-  function ($scope, localStorage) {
-    $scope.shouldShowNotification =
-      localStorage('dismissed-back-to-school-2022') !== true
-
-    $scope.dismiss = () => {
-      localStorage('dismissed-back-to-school-2022', true)
-      $scope.shouldShowNotification = false
-    }
-  }
-)
-
 App.controller('ProjectInviteNotificationController', function ($scope, $http) {
   // Shortcuts for translation keys
   $scope.projectName = $scope.notification.messageOpts.projectName
