@@ -1522,6 +1522,26 @@ const ProjectEntityUpdateHandler = {
         }
       )
     }
+
+    // Avoid conflicts by processing renames in the reverse order. If we have
+    // the following starting situation:
+    //
+    // somefile.tex
+    // somefile.tex
+    // somefile.tex (1)
+    //
+    // somefile.tex would be processed first, and then somefile.tex (1),
+    // yielding the following renames:
+    //
+    // somefile.tex -> somefile.tex (1)
+    // somefile.tex (1) -> somefile.tex (2)
+    //
+    // When the first rename was decided, we didn't know that somefile.tex (1)
+    // existed, so that created a conflict. By processing renames in the
+    // reverse order, we start with the files that had the most extensive
+    // information about existing files.
+    renames.reverse()
+
     async.eachSeries(renames, doRename, callback)
   },
 
