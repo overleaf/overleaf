@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import useEventListener from '../../../shared/hooks/use-event-listener'
 import useDetachAction from '../../../shared/hooks/use-detach-action'
@@ -6,20 +6,39 @@ import useDetachAction from '../../../shared/hooks/use-detach-action'
 export default function useCompileTriggers() {
   const { startCompile, setChangedAt } = useCompileContext()
 
-  // recompile on key press
-  const startOrTriggerCompile = useDetachAction(
-    'start-compile',
-    startCompile,
-    'detacher',
-    'detached'
-  )
-  const compileHandler = useCallback(
+  const handleKeyDown = useCallback(
     event => {
-      startOrTriggerCompile(event.detail)
+      if (event.metaKey) {
+        switch (event.key) {
+          case 's':
+          case 'Enter':
+            event.preventDefault()
+            startCompile()
+            break
+        }
+      } else if (event.ctrlKey) {
+        switch (event.key) {
+          case '.':
+            event.preventDefault()
+            startCompile()
+            break
+        }
+      }
     },
-    [startOrTriggerCompile]
+    [startCompile]
   )
-  useEventListener('pdf:recompile', compileHandler)
+
+  const handleStartCompile = useCallback(() => {
+    startCompile()
+  }, [startCompile])
+  useEventListener('pdf:recompile', handleStartCompile)
+
+  useEffect(() => {
+    document.body.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.body.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [handleKeyDown])
 
   // record doc changes when notified by the editor
   const setOrTriggerChangedAt = useDetachAction(
