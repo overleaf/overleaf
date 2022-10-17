@@ -1,3 +1,4 @@
+process.env.MONGO_SOCKET_TIMEOUT = '300000'
 const { waitForDb } = require('../app/src/infrastructure/mongodb')
 const SAMLUserIdMigrationHandler = require('../modules/overleaf-integration/app/src/SAML/SAMLUserIdMigrationHandler')
 

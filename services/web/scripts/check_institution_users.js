@@ -1,3 +1,4 @@
+process.env.MONGO_SOCKET_TIMEOUT = '300000'
 // Run all the mongo queries on secondaries
 process.env.MONGO_CONNECTION_STRING =
   process.env.READ_ONLY_MONGO_CONNECTION_STRING
