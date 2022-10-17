@@ -340,7 +340,7 @@ function buildUsersSubscriptionViewModel(user, callback) {
  * @param {{_id: string}} user
  * @returns {Promise<Subscription>}
  */
-async function getBestSubscription(user) {
+async function getBestSubscription(user, requesterData = {}) {
   let [
     individualSubscription,
     memberGroupSubscriptions,
@@ -350,14 +350,19 @@ async function getBestSubscription(user) {
     SubscriptionLocator.promises.getMemberSubscriptions(user),
     InstitutionsGetter.promises.getCurrentInstitutionsWithLicence(user._id),
   ])
-  if (individualSubscription && !individualSubscription.recurly?.state) {
+  if (
+    individualSubscription &&
+    individualSubscription.recurlySubscription_id &&
+    !individualSubscription.recurly?.state
+  ) {
     const recurlySubscription = await RecurlyWrapper.promises.getSubscription(
       individualSubscription.recurlySubscription_id,
       { includeAccount: true }
     )
     await SubscriptionUpdater.promises.updateSubscriptionFromRecurly(
       recurlySubscription,
-      individualSubscription
+      individualSubscription,
+      requesterData
     )
     individualSubscription =
       await SubscriptionLocator.promises.getUsersSubscription(user)

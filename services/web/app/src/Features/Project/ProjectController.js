@@ -478,6 +478,7 @@ const ProjectController = {
           }
           SubscriptionViewModelBuilder.getBestSubscription(
             { _id: userId },
+            { id: userId, ip: req.ip },
             (err, subscription) => {
               if (err) {
                 // do not fail loading the project list when fetching the best subscription fails

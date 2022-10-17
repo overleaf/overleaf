@@ -27,6 +27,12 @@ describe('SubscriptionViewModelBuilder', function () {
       },
     }
 
+    this.individualCustomSubscription = {
+      planCode: this.planCode,
+      plan: this.plan,
+      recurlySubscription_id: this.recurlySubscription_id,
+    }
+
     this.groupPlanCode = 'group_collaborator_monthly'
     this.groupPlanFeatures = {
       compileGroup: 'priority',
@@ -123,6 +129,24 @@ describe('SubscriptionViewModelBuilder', function () {
     })
 
     describe('with a individual subscription only', function () {
+      it('should return a individual subscription when user has non-Recurly one', async function () {
+        this.SubscriptionLocator.promises.getUsersSubscription
+          .withArgs(this.user)
+          .resolves(this.individualCustomSubscription)
+
+        const usersBestSubscription =
+          await this.SubscriptionViewModelBuilder.promises.getBestSubscription(
+            this.user
+          )
+
+        assert.deepEqual(usersBestSubscription, {
+          type: 'individual',
+          subscription: this.individualCustomSubscription,
+          plan: this.plan,
+          remainingTrialDays: -1,
+        })
+      })
+
       it('should return a individual subscription when user has an active one', async function () {
         this.SubscriptionLocator.promises.getUsersSubscription
           .withArgs(this.user)
@@ -205,9 +229,11 @@ describe('SubscriptionViewModelBuilder', function () {
           })
           .resolves(this.recurlySubscription)
 
+        const requesterData = { id: this.user._id, ip: '1.2.3.4' }
         const usersBestSubscription =
           await this.SubscriptionViewModelBuilder.promises.getBestSubscription(
-            this.user
+            this.user,
+            requesterData
           )
 
         sinon.assert.calledWith(
@@ -218,7 +244,8 @@ describe('SubscriptionViewModelBuilder', function () {
         sinon.assert.calledWith(
           this.SubscriptionUpdater.promises.updateSubscriptionFromRecurly,
           this.recurlySubscription,
-          this.individualSubscriptionWithoutRecurly
+          this.individualSubscriptionWithoutRecurly,
+          requesterData
         )
         assert.deepEqual(usersBestSubscription, {
           type: 'individual',
