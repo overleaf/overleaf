@@ -6,6 +6,7 @@ import ProjectListRoot from '../../../../../frontend/js/features/project-list/co
 import { renderWithProjectListContext } from '../helpers/render-with-context'
 import * as eventTracking from '../../../../../frontend/js/infrastructure/event-tracking'
 import {
+  projectsData,
   owner,
   archivedProjects,
   makeLongProjectList,
@@ -23,7 +24,15 @@ describe('<ProjectListRoot />', function () {
     global.localStorage.clear()
     sendSpy = sinon.spy(eventTracking, 'send')
     window.metaAttributesCache = new Map()
-    window.metaAttributesCache.set('ol-tags', [])
+    this.tagId = '999fff999fff'
+    this.tagName = 'First tag name'
+    window.metaAttributesCache.set('ol-tags', [
+      {
+        _id: this.tagId,
+        name: this.tagName,
+        project_ids: [projectsData[0].id, projectsData[1].id],
+      },
+    ])
     window.metaAttributesCache.set('ol-ExposedSettings', {
       templateLinks: [],
     })
@@ -138,16 +147,16 @@ describe('<ProjectListRoot />', function () {
           fireEvent.click(confirmBtn)
           expect(confirmBtn.disabled).to.be.true
 
-          await fetchMock.flush(true)
-          expect(fetchMock.done()).to.be.true
-
-          const requests = fetchMock.calls()
-          const [projectRequest1Url, projectRequest1Headers] = requests[2]
-          expect(projectRequest1Url).to.equal(`/project/${project1Id}/archive`)
-          expect(projectRequest1Headers?.method).to.equal('POST')
-          const [projectRequest2Url, projectRequest2Headers] = requests[3]
-          expect(projectRequest2Url).to.equal(`/project/${project2Id}/archive`)
-          expect(projectRequest2Headers?.method).to.equal('POST')
+          await waitFor(
+            () =>
+              expect(fetchMock.called(`/project/${project1Id}/archive`)).to.be
+                .true
+          )
+          await waitFor(
+            () =>
+              expect(fetchMock.called(`/project/${project2Id}/archive`)).to.be
+                .true
+          )
         })
 
         it('opens trash modal for all selected projects and trashes all', async function () {
@@ -173,16 +182,16 @@ describe('<ProjectListRoot />', function () {
           fireEvent.click(confirmBtn)
           expect(confirmBtn.disabled).to.be.true
 
-          await fetchMock.flush(true)
-          expect(fetchMock.done()).to.be.true
-
-          const requests = fetchMock.calls()
-          const [projectRequest1Url, projectRequest1Headers] = requests[2]
-          expect(projectRequest1Url).to.equal(`/project/${project1Id}/trash`)
-          expect(projectRequest1Headers?.method).to.equal('POST')
-          const [projectRequest2Url, projectRequest2Headers] = requests[3]
-          expect(projectRequest2Url).to.equal(`/project/${project2Id}/trash`)
-          expect(projectRequest2Headers?.method).to.equal('POST')
+          await waitFor(
+            () =>
+              expect(fetchMock.called(`/project/${project1Id}/trash`)).to.be
+                .true
+          )
+          await waitFor(
+            () =>
+              expect(fetchMock.called(`/project/${project2Id}/trash`)).to.be
+                .true
+          )
         })
 
         it('only checks the projects that are viewable when there is a load more button', async function () {
@@ -354,6 +363,141 @@ describe('<ProjectListRoot />', function () {
         })
       })
 
+      describe('tags dropdown', function () {
+        beforeEach(async function () {
+          allCheckboxes = screen.getAllByRole<HTMLInputElement>('checkbox')
+          // first one is the select all checkbox
+          fireEvent.click(allCheckboxes[1])
+          fireEvent.click(allCheckboxes[2])
+          actionsToolbar = screen.getAllByRole('toolbar')[0]
+
+          this.newTagName = 'Some tag name'
+          this.newTagId = 'abc123def456'
+        })
+
+        it('opens the tags dropdown and creates a new tag', async function () {
+          fetchMock.post(`express:/tag`, {
+            status: 200,
+            body: {
+              _id: this.newTagId,
+              name: this.newTagName,
+              project_ids: [],
+            },
+          })
+          fetchMock.post(`express:/tag/:id/projects`, {
+            status: 204,
+          })
+
+          await waitFor(() => {
+            const tagsDropdown = within(actionsToolbar).getByLabelText('Tags')
+            fireEvent.click(tagsDropdown)
+          })
+          screen.getByText('Add to folder')
+
+          const newTagButton = screen.getByText('Create New Folder')
+          fireEvent.click(newTagButton)
+
+          const modal = screen.getAllByRole('dialog')[0]
+          const input = within(modal).getByRole<HTMLInputElement>('textbox')
+          fireEvent.change(input, {
+            target: { value: this.newTagName },
+          })
+          const createButton = within(modal).getByRole('button', {
+            name: 'Create',
+          })
+          fireEvent.click(createButton)
+
+          await waitFor(
+            () =>
+              expect(fetchMock.called('/tag', { name: this.newTagName })).to.be
+                .true
+          )
+          await waitFor(
+            () =>
+              expect(
+                fetchMock.called(`/tag/${this.newTagId}/projects`, {
+                  body: {
+                    projectIds: [projectsData[0].id, projectsData[1].id],
+                  },
+                })
+              ).to.be.true
+          )
+
+          screen.getByRole('button', { name: `${this.newTagName} (2)` })
+        })
+
+        it('opens the tags dropdown and remove a tag from selected projects', async function () {
+          const deleteProjectsFromTagMock = fetchMock.delete(
+            `express:/tag/:id/projects`,
+            {
+              status: 204,
+            }
+          )
+
+          screen.getByRole('button', { name: `${this.tagName} (2)` })
+
+          const tagsDropdown = within(actionsToolbar).getByLabelText('Tags')
+          fireEvent.click(tagsDropdown)
+          screen.getByText('Add to folder')
+
+          const tagButton = screen.getByLabelText(
+            `Add or remove project from tag ${this.tagName}`
+          )
+          fireEvent.click(tagButton)
+
+          await waitFor(
+            () =>
+              expect(
+                deleteProjectsFromTagMock.called(
+                  `/tag/${this.tagId}/projects`,
+                  {
+                    body: {
+                      projectIds: [projectsData[0].id, projectsData[1].id],
+                    },
+                  }
+                )
+              ).to.be.true
+          )
+
+          screen.getByRole('button', { name: `${this.tagName} (0)` })
+        })
+
+        it('select another project, opens the tags dropdown and add a tag only to the untagged project', async function () {
+          const addProjectsToTagMock = fetchMock.post(
+            `express:/tag/:id/projects`,
+            {
+              status: 204,
+            }
+          )
+
+          fireEvent.click(allCheckboxes[3])
+
+          screen.getByRole('button', { name: `${this.tagName} (2)` })
+
+          const tagsDropdown = within(actionsToolbar).getByLabelText('Tags')
+          fireEvent.click(tagsDropdown)
+          screen.getByText('Add to folder')
+
+          const tagButton = screen.getByLabelText(
+            `Add or remove project from tag ${this.tagName}`
+          )
+          fireEvent.click(tagButton)
+
+          await waitFor(
+            () =>
+              expect(
+                addProjectsToTagMock.called(`/tag/${this.tagId}/projects`, {
+                  body: {
+                    projectIds: [projectsData[2].id],
+                  },
+                })
+              ).to.be.true
+          )
+
+          screen.getByRole('button', { name: `${this.tagName} (3)` })
+        })
+      })
+
       describe('project tools "More" dropdown', function () {
         beforeEach(async function () {
           const filterButton = screen.getAllByText('All Projects')[0]
@@ -374,9 +518,12 @@ describe('<ProjectListRoot />', function () {
         })
 
         it('opens the rename modal, and can rename the project, and view updated', async function () {
-          fetchMock.post(`express:/project/:id/rename`, {
-            status: 200,
-          })
+          const renameProjectMock = fetchMock.post(
+            `express:/project/:id/rename`,
+            {
+              status: 200,
+            }
+          )
 
           await waitFor(() => {
             const moreDropdown =
@@ -384,7 +531,8 @@ describe('<ProjectListRoot />', function () {
             fireEvent.click(moreDropdown)
           })
 
-          const renameButton = screen.getByText<HTMLInputElement>('Rename')
+          const renameButton =
+            screen.getAllByText<HTMLInputElement>('Rename')[1] // first one is for the tag in the sidebar
           fireEvent.click(renameButton)
 
           const modal = screen.getAllByRole('dialog')[0]
@@ -419,8 +567,14 @@ describe('<ProjectListRoot />', function () {
           expect(confirmButton.disabled).to.be.false
           fireEvent.click(confirmButton)
 
-          await fetchMock.flush(true)
-          expect(fetchMock.done()).to.be.true
+          await waitFor(
+            () =>
+              expect(
+                renameProjectMock.called(
+                  `/project/${projectsData[1].id}/rename`
+                )
+              ).to.be.true
+          )
 
           screen.findByText(newProjectName)
           expect(screen.queryByText(oldName)).to.be.null
@@ -435,24 +589,27 @@ describe('<ProjectListRoot />', function () {
           const tableRows = screen.getAllByRole('row')
           const linkForProjectToCopy = within(tableRows[1]).getByRole('link')
           const projectNameToCopy = linkForProjectToCopy.textContent || '' // needed for type checking
-          screen.findByText(projectNameToCopy) // make sure not just empty string
+          screen.getByText(projectNameToCopy) // make sure not just empty string
           const copiedProjectName = `${projectNameToCopy} (Copy)`
-          fetchMock.post(`express:/project/:id/clone`, {
-            status: 200,
-            body: {
-              name: copiedProjectName,
-              lastUpdated: new Date(),
-              project_id: userId,
-              owner_ref: userId,
-              owner,
-              id: '6328e14abec0df019fce0be5',
-              lastUpdatedBy: owner,
-              accessLevel: 'owner',
-              source: 'owner',
-              trashed: false,
-              archived: false,
-            },
-          })
+          const cloneProjectMock = fetchMock.post(
+            `express:/project/:id/clone`,
+            {
+              status: 200,
+              body: {
+                name: copiedProjectName,
+                lastUpdated: new Date(),
+                project_id: userId,
+                owner_ref: userId,
+                owner,
+                id: '6328e14abec0df019fce0be5',
+                lastUpdatedBy: owner,
+                accessLevel: 'owner',
+                source: 'owner',
+                trashed: false,
+                archived: false,
+              },
+            }
+          )
 
           await waitFor(() => {
             const moreDropdown =
@@ -470,13 +627,17 @@ describe('<ProjectListRoot />', function () {
           ) as HTMLElement
           fireEvent.click(copyConfirmButton)
 
-          await fetchMock.flush(true)
-          expect(fetchMock.done()).to.be.true
+          await waitFor(
+            () =>
+              expect(
+                cloneProjectMock.called(`/project/${projectsData[1].id}/clone`)
+              ).to.be.true
+          )
 
           expect(sendSpy).to.be.calledOnce
           expect(sendSpy).calledWith('project-list-page-interaction')
 
-          screen.findByText(copiedProjectName)
+          screen.getByText(copiedProjectName)
         })
       })
     })

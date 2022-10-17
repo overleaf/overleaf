@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { fireEvent, screen } from '@testing-library/react'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { DeleteProjectButtonTooltip } from '../../../../../../../../frontend/js/features/project-list/components/table/cells/action-buttons/delete-project-button'
 import {
   archiveableProject,
@@ -46,8 +46,8 @@ describe('<DeleteProjectButton />', function () {
   it('opens the modal and deletes the project', async function () {
     window.user_id = trashedProject?.owner?.id
     const project = Object.assign({}, trashedProject)
-    fetchMock.delete(
-      `express:/project/${project.id}`,
+    const deleteProjectMock = fetchMock.delete(
+      `express:/project/:projectId`,
       {
         status: 200,
       },
@@ -64,14 +64,10 @@ describe('<DeleteProjectButton />', function () {
     const confirmBtn = screen.getByText('Confirm') as HTMLButtonElement
     fireEvent.click(confirmBtn)
     expect(confirmBtn.disabled).to.be.true
-    // verify trashed
-    await fetchMock.flush(true)
-    expect(fetchMock.done()).to.be.true
-    const requests = fetchMock.calls()
-    // first request is project list api in projectlistcontext
-    const [requestUrl, requestHeaders] = requests[1]
-    expect(requestUrl).to.equal(`/project/${project.id}`)
-    expect(requestHeaders?.method).to.equal('DELETE')
-    fetchMock.reset()
+
+    await waitFor(
+      () =>
+        expect(deleteProjectMock.called(`/project/${project.id}`)).to.be.true
+    )
   })
 })

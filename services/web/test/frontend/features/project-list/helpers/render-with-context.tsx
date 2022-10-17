@@ -24,6 +24,11 @@ export function renderWithProjectListContext(
     body: { projects, totalSize: projects.length },
   })
 
+  fetchMock.get('express:/system/messages', {
+    status: 200,
+    body: [],
+  })
+
   const ProjectListProviderWrapper = ({
     children,
   }: {

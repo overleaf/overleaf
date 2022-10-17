@@ -35,10 +35,26 @@ async function addProjectToTag(req, res) {
   res.status(204).end()
 }
 
+async function addProjectsToTag(req, res) {
+  const userId = SessionManager.getLoggedInUserId(req.session)
+  const { tagId } = req.params
+  const { projectIds } = req.body
+  await TagsHandler.promises.addProjectsToTag(userId, tagId, projectIds)
+  res.status(204).end()
+}
+
 async function removeProjectFromTag(req, res, next) {
   const userId = SessionManager.getLoggedInUserId(req.session)
   const { tagId, projectId } = req.params
   await TagsHandler.promises.removeProjectFromTag(userId, tagId, projectId)
+  res.status(204).end()
+}
+
+async function removeProjectsFromTag(req, res, next) {
+  const userId = SessionManager.getLoggedInUserId(req.session)
+  const { tagId } = req.params
+  const { projectIds } = req.body
+  await TagsHandler.promises.removeProjectsFromTag(userId, tagId, projectIds)
   res.status(204).end()
 }
 
@@ -65,7 +81,9 @@ module.exports = {
   getAllTags: expressify(getAllTags),
   createTag: expressify(createTag),
   addProjectToTag: expressify(addProjectToTag),
+  addProjectsToTag: expressify(addProjectsToTag),
   removeProjectFromTag: expressify(removeProjectFromTag),
+  removeProjectsFromTag: expressify(removeProjectsFromTag),
   deleteTag: expressify(deleteTag),
   renameTag: expressify(renameTag),
 }

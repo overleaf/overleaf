@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { fireEvent, screen } from '@testing-library/react'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { LeaveProjectButtonTooltip } from '../../../../../../../../frontend/js/features/project-list/components/table/cells/action-buttons/leave-project-button'
 import {
   trashedProject,
@@ -17,6 +17,7 @@ describe('<LeaveProjectButtton />', function () {
   afterEach(function () {
     resetProjectListContextFetch()
   })
+
   it('renders tooltip for button', function () {
     renderWithProjectListContext(
       <LeaveProjectButtonTooltip project={trashedAndNotOwnedProject} />
@@ -51,7 +52,7 @@ describe('<LeaveProjectButtton />', function () {
 
   it('opens the modal and leaves the project', async function () {
     const project = Object.assign({}, trashedAndNotOwnedProject)
-    fetchMock.post(
+    const leaveProjectMock = fetchMock.post(
       `express:/project/${project.id}/leave`,
       {
         status: 200,
@@ -69,14 +70,11 @@ describe('<LeaveProjectButtton />', function () {
     const confirmBtn = screen.getByText('Confirm') as HTMLButtonElement
     fireEvent.click(confirmBtn)
     expect(confirmBtn.disabled).to.be.true
-    // verify trashed
-    await fetchMock.flush(true)
-    expect(fetchMock.done()).to.be.true
-    const requests = fetchMock.calls()
-    // first request is project list api in projectlistcontext
-    const [requestUrl, requestHeaders] = requests[1]
-    expect(requestUrl).to.equal(`/project/${project.id}/leave`)
-    expect(requestHeaders?.method).to.equal('POST')
-    fetchMock.reset()
+
+    await waitFor(
+      () =>
+        expect(leaveProjectMock.called(`/project/${project.id}/leave`)).to.be
+          .true
+    )
   })
 })

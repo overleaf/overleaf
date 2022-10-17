@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { fireEvent, screen } from '@testing-library/react'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { UnarchiveProjectButtonTooltip } from '../../../../../../../../frontend/js/features/project-list/components/table/cells/action-buttons/unarchive-project-button'
 import {
   archiveableProject,
@@ -42,8 +42,8 @@ describe('<UnarchiveProjectButton />', function () {
 
   it('unarchive the project and updates the view data', async function () {
     const project = Object.assign({}, archivedProject)
-    fetchMock.delete(
-      `express:/project/${project.id}/archive`,
+    const unarchiveProjectMock = fetchMock.delete(
+      `express:/project/:projectId/archive`,
       {
         status: 200,
       },
@@ -55,7 +55,10 @@ describe('<UnarchiveProjectButton />', function () {
     const btn = screen.getByLabelText('Restore')
     fireEvent.click(btn)
 
-    await fetchMock.flush(true)
-    expect(fetchMock.done()).to.be.true
+    await waitFor(
+      () =>
+        expect(unarchiveProjectMock.called(`/project/${project.id}/archive`)).to
+          .be.true
+    )
   })
 })

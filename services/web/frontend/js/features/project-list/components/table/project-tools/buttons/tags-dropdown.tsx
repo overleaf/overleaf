@@ -6,7 +6,7 @@ import ControlledDropdown from '../../../../../../shared/components/controlled-d
 import Icon from '../../../../../../shared/components/icon'
 import { useProjectListContext } from '../../../../context/project-list-context'
 import useTag from '../../../../hooks/use-tag'
-import { addProjectToTag, removeProjectFromTag } from '../../../../util/api'
+import { addProjectsToTag, removeProjectsFromTag } from '../../../../util/api'
 
 function TagsDropdown() {
   const {
@@ -30,12 +30,14 @@ function TagsDropdown() {
     (e, tagId) => {
       e.preventDefault()
       const tag = tags.find(tag => tag._id === tagId)
+      const projectIds = []
       for (const selectedProject of selectedProjects) {
         if (!tag?.project_ids?.includes(selectedProject.id)) {
           addProjectToTagInView(tagId, selectedProject.id)
-          addProjectToTag(tagId, selectedProject.id)
+          projectIds.push(selectedProject.id)
         }
       }
+      addProjectsToTag(tagId, projectIds)
     },
     [tags, selectedProjects, addProjectToTagInView]
   )
@@ -45,8 +47,11 @@ function TagsDropdown() {
       e.preventDefault()
       for (const selectedProject of selectedProjects) {
         removeProjectFromTagInView(tagId, selectedProject.id)
-        removeProjectFromTag(tagId, selectedProject.id)
       }
+      removeProjectsFromTag(
+        tagId,
+        selectedProjects.map(project => project.id)
+      )
     },
     [selectedProjects, removeProjectFromTagInView]
   )
@@ -78,7 +83,11 @@ function TagsDropdown() {
   return (
     <>
       <ControlledDropdown id="tags">
-        <Dropdown.Toggle bsStyle="default" title={t('tags')}>
+        <Dropdown.Toggle
+          bsStyle="default"
+          title={t('tags')}
+          aria-label={t('tags')}
+        >
           <Icon type="folder-open" />
         </Dropdown.Toggle>
         <Dropdown.Menu className="dropdown-menu-right">

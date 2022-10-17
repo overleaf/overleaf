@@ -25,12 +25,24 @@ export function deleteTag(tagId: string) {
   return deleteJSON(`/tag/${tagId}`)
 }
 
-export function addProjectToTag(tagId: string, projectId: string) {
-  return postJSON(`/tag/${tagId}/project/${projectId}`)
+export function addProjectsToTag(tagId: string, projectIds: string[]) {
+  return postJSON(`/tag/${tagId}/projects`, {
+    body: {
+      projectIds,
+    },
+  })
 }
 
 export function removeProjectFromTag(tagId: string, projectId: string) {
   return deleteJSON(`/tag/${tagId}/project/${projectId}`)
+}
+
+export function removeProjectsFromTag(tagId: string, projectIds: string[]) {
+  return deleteJSON(`/tag/${tagId}/projects`, {
+    body: {
+      projectIds,
+    },
+  })
 }
 
 export function archiveProject(projectId: string) {

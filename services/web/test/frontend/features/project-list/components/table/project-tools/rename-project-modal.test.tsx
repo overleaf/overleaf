@@ -1,4 +1,4 @@
-import { fireEvent, screen, within } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { expect } from 'chai'
 import RenameProjectModal from '../../../../../../../frontend/js/features/project-list/components/modals/rename-project-modal'
 import {
@@ -9,14 +9,21 @@ import { currentProjects } from '../../../fixtures/projects-data'
 import fetchMock from 'fetch-mock'
 
 describe('<RenameProjectModal />', function () {
+  beforeEach(function () {
+    resetProjectListContextFetch()
+  })
+
   afterEach(function () {
     resetProjectListContextFetch()
   })
 
   it('renders the modal and validates new name', async function () {
-    fetchMock.post('express:/project/:projectId/rename', {
-      status: 200,
-    })
+    const renameProjectMock = fetchMock.post(
+      'express:/project/:projectId/rename',
+      {
+        status: 200,
+      }
+    )
     renderWithProjectListContext(
       <RenameProjectModal
         handleCloseModal={() => {}}
@@ -44,14 +51,21 @@ describe('<RenameProjectModal />', function () {
     fireEvent.click(submitButton)
     expect(submitButton.disabled).to.be.true
 
-    await fetchMock.flush(true)
-    expect(fetchMock.done()).to.be.true
+    await waitFor(
+      () =>
+        expect(
+          renameProjectMock.called(`/project/${currentProjects[0].id}/rename`)
+        ).to.be.true
+    )
   })
 
   it('shows error message from API', async function () {
-    fetchMock.post('express:/project/:projectId/rename', {
-      status: 500,
-    })
+    const postRenameMock = fetchMock.post(
+      'express:/project/:projectId/rename',
+      {
+        status: 500,
+      }
+    )
     renderWithProjectListContext(
       <RenameProjectModal
         handleCloseModal={() => {}}
@@ -70,8 +84,7 @@ describe('<RenameProjectModal />', function () {
     const submitButton = within(modal).getByText('Rename') as HTMLButtonElement
     fireEvent.click(submitButton)
 
-    await fetchMock.flush(true)
-    expect(fetchMock.done()).to.be.true
+    await waitFor(() => expect(postRenameMock.called()).to.be.true)
 
     screen.getByText('Something went wrong. Please try again.')
   })

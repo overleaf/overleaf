@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { fireEvent, screen } from '@testing-library/react'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { CopyProjectButtonTooltip } from '../../../../../../../../frontend/js/features/project-list/components/table/cells/action-buttons/copy-project-button'
 import {
   archivedProject,
@@ -16,6 +16,7 @@ describe('<CopyProjectButton />', function () {
   afterEach(function () {
     resetProjectListContextFetch()
   })
+
   it('renders tooltip for button', function () {
     renderWithProjectListContext(
       <CopyProjectButtonTooltip project={copyableProject} />
@@ -40,8 +41,8 @@ describe('<CopyProjectButton />', function () {
   })
 
   it('opens the modal and copies the project ', async function () {
-    fetchMock.post(
-      `express:/project/${copyableProject.id}/clone`,
+    const copyProjectMock = fetchMock.post(
+      `express:/project/:projectId/clone`,
       {
         status: 200,
       },
@@ -58,14 +59,11 @@ describe('<CopyProjectButton />', function () {
     const copyBtn = screen.getByText('Copy') as HTMLButtonElement
     fireEvent.click(copyBtn)
     expect(copyBtn.disabled).to.be.true
-    // verify cloned
-    await fetchMock.flush(true)
-    expect(fetchMock.done()).to.be.true
-    const requests = fetchMock.calls()
-    // first mock call is to get list of projects in projectlistcontext
-    const [requestUrl, requestHeaders] = requests[1]
-    expect(requestUrl).to.equal(`/project/${copyableProject.id}/clone`)
-    expect(requestHeaders?.method).to.equal('POST')
-    fetchMock.reset()
+
+    await waitFor(
+      () =>
+        expect(copyProjectMock.called(`/project/${copyableProject.id}/clone`))
+          .to.be.true
+    )
   })
 })

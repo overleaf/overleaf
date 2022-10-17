@@ -6,7 +6,7 @@ import RenameTagModal from '../components/modals/rename-tag-modal'
 import DeleteTagModal from '../components/modals/delete-tag-modal'
 import EditTagModal from '../components/modals/edit-tag-modal'
 import { find } from 'lodash'
-import { addProjectToTag } from '../util/api'
+import { addProjectsToTag } from '../util/api'
 
 function useTag() {
   const {
@@ -41,8 +41,11 @@ function useTag() {
       addTag(tag)
       for (const selectedProject of selectedProjects) {
         addProjectToTagInView(tag._id, selectedProject.id)
-        addProjectToTag(tag._id, selectedProject.id)
       }
+      addProjectsToTag(
+        tag._id,
+        selectedProjects.map(project => project.id)
+      )
     },
     [addTag, selectedProjects, addProjectToTagInView]
   )

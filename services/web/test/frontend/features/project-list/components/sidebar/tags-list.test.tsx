@@ -27,6 +27,7 @@ describe('<TagsList />', function () {
       name: 'New Tag',
       project_ids: [],
     })
+    fetchMock.post('express:/tag/:tagId/projects', 200)
     fetchMock.post('express:/tag/:tagId/rename', 200)
     fetchMock.delete('express:/tag/:tagId', 200)
 
@@ -145,7 +146,7 @@ describe('<TagsList />', function () {
 
       await fireEvent.click(createButton)
 
-      await waitFor(() => expect(fetchMock.called(`/tag`)))
+      await waitFor(() => expect(fetchMock.called(`/tag`)).to.be.true)
 
       expect(screen.queryByRole('dialog', { hidden: false })).to.be.null
 

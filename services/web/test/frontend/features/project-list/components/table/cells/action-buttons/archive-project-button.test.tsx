@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { fireEvent, screen } from '@testing-library/react'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { ArchiveProjectButtonTooltip } from '../../../../../../../../frontend/js/features/project-list/components/table/cells/action-buttons/archive-project-button'
 import {
   archiveableProject,
@@ -44,8 +44,8 @@ describe('<ArchiveProjectButton />', function () {
 
   it('should archive the projects', async function () {
     const project = Object.assign({}, archiveableProject)
-    fetchMock.post(
-      `express:/project/${project.id}/archive`,
+    const archiveProjectMock = fetchMock.post(
+      `express:/project/:projectId/archive`,
       {
         status: 200,
       },
@@ -62,14 +62,11 @@ describe('<ArchiveProjectButton />', function () {
     const confirmBtn = screen.getByText('Confirm') as HTMLButtonElement
     fireEvent.click(confirmBtn)
     expect(confirmBtn.disabled).to.be.true
-    // verify archived
-    await fetchMock.flush(true)
-    expect(fetchMock.done()).to.be.true
-    const requests = fetchMock.calls()
-    // first mock call is to get list of projects in projectlistcontext
-    const [requestUrl, requestHeaders] = requests[1]
-    expect(requestUrl).to.equal(`/project/${project.id}/archive`)
-    expect(requestHeaders?.method).to.equal('POST')
-    fetchMock.reset()
+
+    await waitFor(
+      () =>
+        expect(archiveProjectMock.called(`/project/${project.id}/archive`)).to
+          .be.true
+    )
   })
 })

@@ -791,6 +791,11 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
       maxRequests: 30,
       timeInterval: 60,
     }),
+    validate({
+      body: Joi.object({
+        name: Joi.string().required(),
+      }),
+    }),
     TagsController.createTag
   )
   webRouter.post(
@@ -800,6 +805,11 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
       endpointName: 'rename-tag',
       maxRequests: 30,
       timeInterval: 60,
+    }),
+    validate({
+      body: Joi.object({
+        name: Joi.string().required(),
+      }),
     }),
     TagsController.renameTag
   )
@@ -823,6 +833,21 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     }),
     TagsController.addProjectToTag
   )
+  webRouter.post(
+    '/tag/:tagId/projects',
+    AuthenticationController.requireLogin(),
+    RateLimiterMiddleware.rateLimit({
+      endpointName: 'add-projects-to-tag',
+      maxRequests: 30,
+      timeInterval: 60,
+    }),
+    validate({
+      body: Joi.object({
+        projectIds: Joi.array().items(Joi.string()).required(),
+      }),
+    }),
+    TagsController.addProjectsToTag
+  )
   webRouter.delete(
     '/tag/:tagId/project/:projectId',
     AuthenticationController.requireLogin(),
@@ -832,6 +857,21 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
       timeInterval: 60,
     }),
     TagsController.removeProjectFromTag
+  )
+  webRouter.delete(
+    '/tag/:tagId/projects',
+    AuthenticationController.requireLogin(),
+    RateLimiterMiddleware.rateLimit({
+      endpointName: 'remove-projects-from-tag',
+      maxRequests: 30,
+      timeInterval: 60,
+    }),
+    validate({
+      body: Joi.object({
+        projectIds: Joi.array().items(Joi.string()).required(),
+      }),
+    }),
+    TagsController.removeProjectsFromTag
   )
 
   webRouter.get(

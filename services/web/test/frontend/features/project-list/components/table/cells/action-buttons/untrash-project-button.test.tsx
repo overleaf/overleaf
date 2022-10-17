@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { fireEvent, screen } from '@testing-library/react'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import fetchMock from 'fetch-mock'
 import { UntrashProjectButtonTooltip } from '../../../../../../../../frontend/js/features/project-list/components/table/cells/action-buttons/untrash-project-button'
 import {
@@ -12,10 +12,6 @@ import {
 } from '../../../../helpers/render-with-context'
 
 describe('<UntrashProjectButton />', function () {
-  beforeEach(function () {
-    fetchMock.reset()
-  })
-
   afterEach(function () {
     resetProjectListContextFetch()
   })
@@ -38,8 +34,8 @@ describe('<UntrashProjectButton />', function () {
 
   it('untrashes the project and updates the view data', async function () {
     const project = Object.assign({}, trashedProject)
-    fetchMock.delete(
-      `express:/project/${project.id}/trash`,
+    const untrashProjectMock = fetchMock.delete(
+      `express:/project/:projectId/trash`,
       {
         status: 200,
       },
@@ -51,7 +47,10 @@ describe('<UntrashProjectButton />', function () {
     const btn = screen.getByLabelText('Restore')
     fireEvent.click(btn)
 
-    await fetchMock.flush(true)
-    expect(fetchMock.done()).to.be.true
+    await waitFor(
+      () =>
+        expect(untrashProjectMock.called(`/project/${project.id}/trash`)).to.be
+          .true
+    )
   })
 })

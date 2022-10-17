@@ -75,7 +75,7 @@ export default function CreateTagModal({
             className="form-control"
             type="text"
             placeholder="New Tag Name"
-            name="new-tag-name"
+            name="new-tag-form-name"
             required
             onChange={e => setTagName(e.target.value)}
           />

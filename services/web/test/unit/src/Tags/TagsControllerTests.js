@@ -14,7 +14,9 @@ describe('TagsController', function () {
     this.TagsHandler = {
       promises: {
         addProjectToTag: sinon.stub().resolves(),
+        addProjectsToTag: sinon.stub().resolves(),
         removeProjectFromTag: sinon.stub().resolves(),
+        removeProjectsFromTag: sinon.stub().resolves(),
         deleteTag: sinon.stub().resolves(),
         renameTag: sinon.stub().resolves(),
         createTag: sinon.stub().resolves(),
@@ -40,6 +42,7 @@ describe('TagsController', function () {
           _id: userId,
         },
       },
+      body: {},
     }
 
     this.res = {}
@@ -163,6 +166,30 @@ describe('TagsController', function () {
     })
   })
 
+  it('add projects to a tag', function (done) {
+    this.req.params.tagId = this.tagId = 'tag-id-123'
+    this.req.body.projectIds = this.projectIds = [
+      'project-id-123',
+      'project-id-234',
+    ]
+    this.req.session.user._id = this.userId = 'user-id-123'
+    this.TagsController.addProjectsToTag(this.req, {
+      status: code => {
+        assert.equal(code, 204)
+        sinon.assert.calledWith(
+          this.TagsHandler.promises.addProjectsToTag,
+          this.userId,
+          this.tagId,
+          this.projectIds
+        )
+        done()
+        return {
+          end: () => {},
+        }
+      },
+    })
+  })
+
   it('remove a project from a tag', function (done) {
     this.req.params.tagId = this.tagId = 'tag-id-123'
     this.req.params.projectId = this.projectId = 'project-id-123'
@@ -175,6 +202,30 @@ describe('TagsController', function () {
           this.userId,
           this.tagId,
           this.projectId
+        )
+        done()
+        return {
+          end: () => {},
+        }
+      },
+    })
+  })
+
+  it('remove projects from a tag', function (done) {
+    this.req.params.tagId = this.tagId = 'tag-id-123'
+    this.req.body.projectIds = this.projectIds = [
+      'project-id-123',
+      'project-id-234',
+    ]
+    this.req.session.user._id = this.userId = 'user-id-123'
+    this.TagsController.removeProjectsFromTag(this.req, {
+      status: code => {
+        assert.equal(code, 204)
+        sinon.assert.calledWith(
+          this.TagsHandler.promises.removeProjectsFromTag,
+          this.userId,
+          this.tagId,
+          this.projectIds
         )
         done()
         return {

@@ -79,6 +79,18 @@ function removeProjectFromTag(userId, tagId, projectId, callback) {
   Tag.updateOne(searchOps, deleteOperation, callback)
 }
 
+function removeProjectsFromTag(userId, tagId, projectIds, callback) {
+  if (!callback) {
+    callback = function () {}
+  }
+  const searchOps = {
+    _id: tagId,
+    user_id: userId,
+  }
+  const deleteOperation = { $pullAll: { project_ids: projectIds } }
+  Tag.updateOne(searchOps, deleteOperation, callback)
+}
+
 function addProjectToTag(userId, tagId, projectId, callback) {
   if (!callback) {
     callback = function () {}
@@ -88,6 +100,18 @@ function addProjectToTag(userId, tagId, projectId, callback) {
     user_id: userId,
   }
   const insertOperation = { $addToSet: { project_ids: projectId } }
+  Tag.findOneAndUpdate(searchOps, insertOperation, callback)
+}
+
+function addProjectsToTag(userId, tagId, projectIds, callback) {
+  if (!callback) {
+    callback = function () {}
+  }
+  const searchOps = {
+    _id: tagId,
+    user_id: userId,
+  }
+  const insertOperation = { $addToSet: { project_ids: { $each: projectIds } } }
   Tag.findOneAndUpdate(searchOps, insertOperation, callback)
 }
 
@@ -115,8 +139,10 @@ const TagsHandler = {
   renameTag,
   deleteTag,
   updateTagUserIds,
-  removeProjectFromTag,
   addProjectToTag,
+  addProjectsToTag,
+  removeProjectFromTag,
+  removeProjectsFromTag,
   addProjectToTagName,
   removeProjectFromAllTags,
 }
