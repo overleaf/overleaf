@@ -109,7 +109,6 @@ describe('<ProjectListTable />', function () {
     // Action Column
     // temporary count tests until we add filtering for archived/trashed
     const copyButtons = screen.getAllByLabelText('Copy')
-    screen.debug()
     expect(copyButtons.length).to.equal(currentProjects.length)
     const downloadButtons = screen.getAllByLabelText('Download')
     expect(downloadButtons.length).to.equal(currentProjects.length)

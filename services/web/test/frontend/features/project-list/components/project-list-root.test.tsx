@@ -517,25 +517,18 @@ describe('<ProjectListRoot />', function () {
             .null
         })
 
-        it('opens the rename modal, and can rename the project, and view updated', async function () {
-          const renameProjectMock = fetchMock.post(
-            `express:/project/:id/rename`,
-            {
-              status: 200,
-            }
-          )
-
-          await waitFor(() => {
-            const moreDropdown =
-              within(actionsToolbar).getByText<HTMLElement>('More')
-            fireEvent.click(moreDropdown)
-          })
+        it('validates the project name', async function () {
+          const moreDropdown = await within(
+            actionsToolbar
+          ).findByText<HTMLElement>('More')
+          fireEvent.click(moreDropdown)
 
           const renameButton =
             screen.getAllByText<HTMLInputElement>('Rename')[1] // first one is for the tag in the sidebar
           fireEvent.click(renameButton)
 
-          const modal = screen.getAllByRole('dialog')[0]
+          const modals = await screen.findAllByRole('dialog')
+          const modal = modals[0]
 
           expect(sendSpy).to.be.calledOnce
           expect(sendSpy).calledWith('project-list-page-interaction')
@@ -545,25 +538,47 @@ describe('<ProjectListRoot />', function () {
             within(modal).getByText<HTMLInputElement>('Rename')
           expect(confirmButton.disabled).to.be.true
           let input = screen.getByLabelText('New Name') as HTMLButtonElement
-          const oldName = input.value
 
           // no name
-          let newProjectName = ''
           input = screen.getByLabelText('New Name') as HTMLButtonElement
           fireEvent.change(input, {
-            target: { value: newProjectName },
+            target: { value: '' },
           })
           confirmButton = within(modal).getByText<HTMLInputElement>('Rename')
           expect(confirmButton.disabled).to.be.true
+        })
+
+        it('opens the rename modal, and can rename the project, and view updated', async function () {
+          const renameProjectMock = fetchMock.post(
+            `express:/project/:id/rename`,
+            {
+              status: 200,
+            }
+          )
+          const moreDropdown = await within(
+            actionsToolbar
+          ).findByText<HTMLElement>('More')
+          fireEvent.click(moreDropdown)
+
+          const renameButton =
+            screen.getAllByText<HTMLInputElement>('Rename')[1] // first one is for the tag in the sidebar
+          fireEvent.click(renameButton)
+
+          const modals = await screen.findAllByRole('dialog')
+          const modal = modals[0]
 
           // a valid name
-          newProjectName = 'A new project name'
-          input = screen.getByLabelText('New Name') as HTMLButtonElement
+          const newProjectName = 'A new project name'
+          const input = (await screen.findByLabelText(
+            'New Name'
+          )) as HTMLButtonElement
+          const oldName = input.value
           fireEvent.change(input, {
             target: { value: newProjectName },
           })
 
-          confirmButton = within(modal).getByText<HTMLInputElement>('Rename')
+          const confirmButton =
+            within(modal).getByText<HTMLInputElement>('Rename')
           expect(confirmButton.disabled).to.be.false
           fireEvent.click(confirmButton)
 
@@ -576,11 +591,13 @@ describe('<ProjectListRoot />', function () {
               ).to.be.true
           )
 
-          screen.findByText(newProjectName)
-          expect(screen.queryByText(oldName)).to.be.null
+          const table = await screen.findByRole('table')
+          within(table).getByText(newProjectName)
+          expect(within(table).queryByText(oldName)).to.be.null
 
-          const allCheckboxes =
-            screen.getAllByRole<HTMLInputElement>('checkbox')
+          const allCheckboxes = await within(
+            table
+          ).findAllByRole<HTMLInputElement>('checkbox')
           const allCheckboxesChecked = allCheckboxes.filter(c => c.checked)
           expect(allCheckboxesChecked.length).to.equal(0)
         })
