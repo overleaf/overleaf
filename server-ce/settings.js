@@ -206,6 +206,9 @@ const settings = {
   // when emails are sent out and in generated links:
   siteUrl: (siteUrl = process.env.SHARELATEX_SITE_URL || 'http://localhost'),
 
+  // Status page URL as displayed on the maintenance/500 pages.
+  statusPageUrl: process.env.SHARELATEX_STATUS_PAGE_URL,
+
   // The name this is used to describe your ShareLaTeX Installation
   appName: process.env.SHARELATEX_APP_NAME || 'ShareLaTeX (Community Edition)',
 
