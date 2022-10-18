@@ -33,7 +33,7 @@ function PdfCompileButtonInner({
     >
       <Button
         className="btn-recompile"
-        bsStyle="success"
+        bsStyle="primary"
         onClick={() => startCompile()}
         aria-label={compileButtonLabel}
         disabled={compiling}

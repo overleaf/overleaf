@@ -50,7 +50,7 @@ function PdfCompileButton() {
           'btn-recompile': true,
           'btn-recompile-animate': animateCompileDropdownArrow,
         })}
-        bsStyle="success"
+        bsStyle="primary"
         onAnimationEnd={() => {
           setAnimateCompileDropdownArrow(false)
         }}
