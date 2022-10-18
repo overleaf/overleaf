@@ -28,7 +28,7 @@ describe('<PdfLogsEntries/>', function () {
         findEntityByPath: cy.stub().as('findEntityByPath').returns(fakeEntity),
       },
       editorManager: {
-        openDoc: cy.stub().as('openDoc'),
+        openDoc: cy.spy().as('openDoc'),
       },
     }
 
