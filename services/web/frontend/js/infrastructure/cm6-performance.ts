@@ -6,16 +6,37 @@ const TIMER_MEASURE_NAME = 'CM6-Update'
 
 let latestDocLength = 0
 
+let performanceMeasureOptionsSupport = false
+
+// Check that performance.measure accepts an options object
+try {
+  const testMeasureName = 'featureTest'
+  performance.measure(testMeasureName, { start: performance.now() })
+  performance.clearMeasures(testMeasureName)
+  performanceMeasureOptionsSupport = true
+} catch (e) {}
+
 export function timedDispatch(dispatchFn: (tr: Transaction) => void) {
   return (tr: Transaction) => {
+    if (!performanceMeasureOptionsSupport) {
+      dispatchFn(tr)
+      return
+    }
+
     performance.mark(TIMER_START_NAME)
 
     dispatchFn(tr)
 
     performance.mark(TIMER_END_NAME)
 
-    if (tr.isUserEvent('input')) {
-      performance.measure(TIMER_MEASURE_NAME, TIMER_START_NAME, TIMER_END_NAME)
+    const userEventType = tr.annotation(Transaction.userEvent)
+
+    if (userEventType) {
+      performance.measure(TIMER_MEASURE_NAME, {
+        start: TIMER_START_NAME,
+        end: TIMER_END_NAME,
+        detail: { userEventType },
+      })
     }
 
     latestDocLength = tr.state.doc.length
@@ -55,6 +76,9 @@ export function reportCM6Perf() {
   ) as PerformanceMeasure[]
 
   const inputDurations = cm6Entries
+    .filter(({ detail }) =>
+      ['input', 'delete'].includes(detail.userEventType.split('.')[0])
+    )
     .map(({ duration }) => duration)
     .sort((a, b) => a - b)
 
