@@ -28,7 +28,7 @@ describe('<LeaveModalForm />', function () {
     )
 
     const emailInput = screen.getByLabelText('Email')
-    fireEvent.change(emailInput, { target: { value: 'foo@bar.com' } })
+    fireEvent.change(emailInput, { target: { value: 'FOO@bar.com' } })
 
     const passwordInput = screen.getByLabelText('Password')
     fireEvent.change(passwordInput, { target: { value: 'foobar' } })

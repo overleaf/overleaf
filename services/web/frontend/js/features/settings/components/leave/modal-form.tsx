@@ -64,7 +64,7 @@ function LeaveModalForm({
   useEffect(() => {
     setIsFormValid(
       !!email &&
-        email === userDefaultEmail &&
+        email.toLowerCase() === userDefaultEmail.toLowerCase() &&
         password.length > 0 &&
         confirmation
     )
