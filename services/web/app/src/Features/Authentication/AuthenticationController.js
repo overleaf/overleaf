@@ -196,9 +196,14 @@ const AuthenticationController = {
               status: 429,
             })
           }
+          const auditLog = {
+            ipAddress: req.ip,
+            info: { method: 'Password login' },
+          }
           AuthenticationManager.authenticate(
             { email },
             password,
+            auditLog,
             function (error, user) {
               if (error != null) {
                 if (error instanceof ParallelLoginError) {

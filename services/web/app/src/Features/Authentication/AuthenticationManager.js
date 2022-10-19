@@ -11,6 +11,8 @@ const {
 } = require('./AuthenticationErrors')
 const util = require('util')
 const HaveIBeenPwned = require('./HaveIBeenPwned')
+const UserAuditLogHandler = require('../User/UserAuditLogHandler')
+const logger = require('@overleaf/logger')
 
 const BCRYPT_ROUNDS = Settings.security.bcryptRounds || 12
 const BCRYPT_MINOR_VERSION = Settings.security.bcryptMinorVersion || 'a'
@@ -56,7 +58,11 @@ const AuthenticationManager = {
     })
   },
 
-  authenticate(query, password, callback) {
+  authenticate(query, password, auditLog, callback) {
+    if (typeof callback === 'undefined') {
+      callback = auditLog
+      auditLog = null
+    }
     AuthenticationManager._checkUserPassword(
       query,
       password,
@@ -83,7 +89,26 @@ const AuthenticationManager = {
               return callback(new ParallelLoginError())
             }
             if (!match) {
-              return callback(null, null)
+              if (!auditLog) {
+                return callback(null, null)
+              } else {
+                return UserAuditLogHandler.addEntry(
+                  user._id,
+                  'failed-password-match',
+                  user._id,
+                  auditLog.ipAddress,
+                  auditLog.info,
+                  err => {
+                    if (err) {
+                      logger.error(
+                        { userId: user._id, err, info: auditLog.info },
+                        'Error while adding AuditLog entry for failed-password-match'
+                      )
+                    }
+                    callback(null, null)
+                  }
+                )
+              }
             }
             AuthenticationManager.checkRounds(
               user,

@@ -76,9 +76,11 @@ describe('Authentication', function () {
 
   describe('failed login', function () {
     beforeEach('fetchCsrfToken', async function () {
+      await user.login()
+      await user.logout()
       await user.getCsrfToken()
     })
-    it('should return a 401', async function () {
+    it('should return a 401, and add an entry to the audit log', async function () {
       const {
         response: { statusCode },
       } = await user.doRequest('POST', {
@@ -90,6 +92,17 @@ describe('Authentication', function () {
         },
       })
       expect(statusCode).to.equal(401)
+      const auditLog = await user.getAuditLog()
+      const auditLogEntry = auditLog.pop()
+      expect(auditLogEntry).to.exist
+      expect(auditLogEntry.timestamp).to.exist
+      expect(auditLogEntry.initiatorId).to.deep.equal(ObjectId(user.id))
+      expect(auditLogEntry.userId).to.deep.equal(ObjectId(user.id))
+      expect(auditLogEntry.operation).to.equal('failed-password-match')
+      expect(auditLogEntry.info).to.deep.equal({
+        method: 'Password login',
+      })
+      expect(auditLogEntry.ipAddress).to.equal('127.0.0.1')
     })
   })
 })

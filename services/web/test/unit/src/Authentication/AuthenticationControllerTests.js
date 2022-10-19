@@ -333,7 +333,7 @@ describe('AuthenticationController', function () {
         this.LoginRateLimiter.processLoginRequest.callsArgWith(1, null, true)
         this.AuthenticationManager.authenticate = sinon
           .stub()
-          .callsArgWith(2, null, this.user)
+          .callsArgWith(3, null, this.user)
         this.req.sessionID = Math.random()
       })
 
@@ -361,7 +361,7 @@ describe('AuthenticationController', function () {
         beforeEach(function () {
           this.AuthenticationManager.authenticate = sinon
             .stub()
-            .callsArgWith(2, new AuthenticationErrors.ParallelLoginError())
+            .callsArgWith(3, new AuthenticationErrors.ParallelLoginError())
           this.AuthenticationController.doPassportLogin(
             this.req,
             this.req.body.email,
@@ -440,7 +440,7 @@ describe('AuthenticationController', function () {
         this.LoginRateLimiter.processLoginRequest.callsArgWith(1, null, true)
         this.AuthenticationManager.authenticate = sinon
           .stub()
-          .callsArgWith(2, null, null)
+          .callsArgWith(3, null, null)
         this.cb = sinon.stub()
         this.AuthenticationController.doPassportLogin(
           this.req,

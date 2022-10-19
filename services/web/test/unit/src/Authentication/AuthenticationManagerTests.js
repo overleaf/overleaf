@@ -30,6 +30,9 @@ describe('AuthenticationManager', function () {
         './HaveIBeenPwned': {
           checkPasswordForReuseInBackground: sinon.stub(),
         },
+        '../User/UserAuditLogHandler': (this.UserAuditLogHandler = {
+          addEntry: sinon.stub().callsArgWith(5, null),
+        }),
       },
     })
     this.callback = sinon.stub()
@@ -270,6 +273,8 @@ describe('AuthenticationManager', function () {
 
       describe('when the encrypted passwords do not match', function () {
         beforeEach(function () {
+          this.user.hashedPassword = this.hashedPassword = 'asdfjadflasdf'
+          this.bcrypt.compare = sinon.stub().callsArgWith(2, null, false)
           this.AuthenticationManager.authenticate(
             { email: this.email },
             this.unencryptedPassword,
@@ -279,6 +284,35 @@ describe('AuthenticationManager', function () {
 
         it('should not return the user', function () {
           this.callback.calledWith(null, null).should.equal(true)
+          this.UserAuditLogHandler.addEntry.callCount.should.equal(0)
+        })
+      })
+
+      describe('when the encrypted passwords do not match, with auditLog', function () {
+        beforeEach(function () {
+          this.user.hashedPassword = this.hashedPassword = 'asdfjadflasdf'
+          this.bcrypt.compare = sinon.stub().callsArgWith(2, null, false)
+          this.auditLog = { ipAddress: 'ip', info: { method: 'foo' } }
+          this.AuthenticationManager.authenticate(
+            { email: this.email },
+            this.unencryptedPassword,
+            this.auditLog,
+            this.callback
+          )
+        })
+
+        it('should not return the user, but add entry to audit log', function () {
+          this.callback.calledWith(null, null).should.equal(true)
+          this.UserAuditLogHandler.addEntry.callCount.should.equal(1)
+          this.UserAuditLogHandler.addEntry
+            .calledWith(
+              this.user._id,
+              'failed-password-match',
+              this.user._id,
+              this.auditLog.ipAddress,
+              this.auditLog.info
+            )
+            .should.equal(true)
         })
       })
 
