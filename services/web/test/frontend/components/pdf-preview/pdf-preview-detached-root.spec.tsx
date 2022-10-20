@@ -2,7 +2,9 @@ import sysendTestHelper from '../../helpers/sysend'
 import PdfPreviewDetachedRoot from '../../../../frontend/js/features/pdf-preview/components/pdf-preview-detached-root'
 import { User } from '../../../../types/user'
 
-describe('<PdfPreviewDetachedRoot/>', function () {
+// https://github.com/overleaf/internal/issues/10080
+// eslint-disable-next-line mocha/no-skipped-tests
+describe.skip('<PdfPreviewDetachedRoot/>', function () {
   beforeEach(function () {
     window.user = { id: 'user1' } as User
 
