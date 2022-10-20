@@ -28,17 +28,28 @@ function CopyProjectMenuItem() {
     }
   }, [isMounted])
 
-  const handleAfterCloned = (clonedProject: Project) => {
-    const project = selectedProjects[0]
-    eventTracking.send(
-      'project-list-page-interaction',
-      'project action',
-      'Clone'
-    )
-    addClonedProjectToViewData(clonedProject)
-    updateProjectViewData({ ...project, selected: false })
-    setShowModal(false)
-  }
+  const handleAfterCloned = useCallback(
+    (clonedProject: Project) => {
+      const project = selectedProjects[0]
+      eventTracking.send(
+        'project-list-page-interaction',
+        'project action',
+        'Clone'
+      )
+      addClonedProjectToViewData(clonedProject)
+      updateProjectViewData({ ...project, selected: false })
+
+      if (isMounted.current) {
+        setShowModal(false)
+      }
+    },
+    [
+      isMounted,
+      selectedProjects,
+      addClonedProjectToViewData,
+      updateProjectViewData,
+    ]
+  )
 
   if (selectedProjects.length !== 1) return null
 

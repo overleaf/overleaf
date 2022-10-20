@@ -82,9 +82,7 @@ describe('<ProjectListRoot />', function () {
         projects: fullList,
       })
       await fetchMock.flush(true)
-      await waitFor(() => {
-        screen.findByRole('table')
-      })
+      await screen.findByRole('table')
     })
 
     describe('checkboxes', function () {
@@ -125,15 +123,8 @@ describe('<ProjectListRoot />', function () {
         })
 
         it('opens archive modal for all selected projects and archives all', async function () {
-          fetchMock.post(
-            `express:/project/${project1Id}/archive`,
-            {
-              status: 200,
-            },
-            { delay: 0 }
-          )
-          fetchMock.post(
-            `express:/project/${project2Id}/archive`,
+          const archiveProjectMock = fetchMock.post(
+            `express:/project/:projectId/archive`,
             {
               status: 200,
             },
@@ -149,26 +140,21 @@ describe('<ProjectListRoot />', function () {
 
           await waitFor(
             () =>
-              expect(fetchMock.called(`/project/${project1Id}/archive`)).to.be
-                .true
+              expect(
+                archiveProjectMock.called(`/project/${project1Id}/archive`)
+              ).to.be.true
           )
           await waitFor(
             () =>
-              expect(fetchMock.called(`/project/${project2Id}/archive`)).to.be
-                .true
+              expect(
+                archiveProjectMock.called(`/project/${project2Id}/archive`)
+              ).to.be.true
           )
         })
 
         it('opens trash modal for all selected projects and trashes all', async function () {
-          fetchMock.post(
-            `express:/project/${project1Id}/trash`,
-            {
-              status: 200,
-            },
-            { delay: 0 }
-          )
-          fetchMock.post(
-            `express:/project/${project2Id}/trash`,
+          const trashProjectMock = fetchMock.post(
+            `express:/project/:projectId/trash`,
             {
               status: 200,
             },
@@ -184,13 +170,13 @@ describe('<ProjectListRoot />', function () {
 
           await waitFor(
             () =>
-              expect(fetchMock.called(`/project/${project1Id}/trash`)).to.be
-                .true
+              expect(trashProjectMock.called(`/project/${project1Id}/trash`)).to
+                .be.true
           )
           await waitFor(
             () =>
-              expect(fetchMock.called(`/project/${project2Id}/trash`)).to.be
-                .true
+              expect(trashProjectMock.called(`/project/${project2Id}/trash`)).to
+                .be.true
           )
         })
 
@@ -407,21 +393,16 @@ describe('<ProjectListRoot />', function () {
           })
           fireEvent.click(createButton)
 
-          await waitFor(
-            () =>
-              expect(fetchMock.called('/tag', { name: this.newTagName })).to.be
-                .true
-          )
-          await waitFor(
-            () =>
-              expect(
-                fetchMock.called(`/tag/${this.newTagId}/projects`, {
-                  body: {
-                    projectIds: [projectsData[0].id, projectsData[1].id],
-                  },
-                })
-              ).to.be.true
-          )
+          await fetchMock.flush(true)
+
+          expect(fetchMock.called('/tag', { name: this.newTagName })).to.be.true
+          expect(
+            fetchMock.called(`/tag/${this.newTagId}/projects`, {
+              body: {
+                projectIds: [projectsData[0].id, projectsData[1].id],
+              },
+            })
+          ).to.be.true
 
           screen.getByRole('button', { name: `${this.newTagName} (2)` })
         })
@@ -433,32 +414,26 @@ describe('<ProjectListRoot />', function () {
               status: 204,
             }
           )
-
           screen.getByRole('button', { name: `${this.tagName} (2)` })
 
           const tagsDropdown = within(actionsToolbar).getByLabelText('Tags')
           fireEvent.click(tagsDropdown)
-          screen.getByText('Add to folder')
+          within(actionsToolbar).getByText('Add to folder')
 
-          const tagButton = screen.getByLabelText(
+          const tagButton = within(actionsToolbar).getByLabelText(
             `Add or remove project from tag ${this.tagName}`
           )
           fireEvent.click(tagButton)
 
-          await waitFor(
-            () =>
-              expect(
-                deleteProjectsFromTagMock.called(
-                  `/tag/${this.tagId}/projects`,
-                  {
-                    body: {
-                      projectIds: [projectsData[0].id, projectsData[1].id],
-                    },
-                  }
-                )
-              ).to.be.true
-          )
+          await fetchMock.flush(true)
 
+          expect(
+            deleteProjectsFromTagMock.called(`/tag/${this.tagId}/projects`, {
+              body: {
+                projectIds: [projectsData[0].id, projectsData[1].id],
+              },
+            })
+          ).to.be.true
           screen.getByRole('button', { name: `${this.tagName} (0)` })
         })
 
@@ -476,24 +451,22 @@ describe('<ProjectListRoot />', function () {
 
           const tagsDropdown = within(actionsToolbar).getByLabelText('Tags')
           fireEvent.click(tagsDropdown)
-          screen.getByText('Add to folder')
+          within(actionsToolbar).getByText('Add to folder')
 
-          const tagButton = screen.getByLabelText(
+          const tagButton = within(actionsToolbar).getByLabelText(
             `Add or remove project from tag ${this.tagName}`
           )
           fireEvent.click(tagButton)
 
-          await waitFor(
-            () =>
-              expect(
-                addProjectsToTagMock.called(`/tag/${this.tagId}/projects`, {
-                  body: {
-                    projectIds: [projectsData[2].id],
-                  },
-                })
-              ).to.be.true
-          )
+          await fetchMock.flush(true)
 
+          expect(
+            addProjectsToTagMock.called(`/tag/${this.tagId}/projects`, {
+              body: {
+                projectIds: [projectsData[2].id],
+              },
+            })
+          ).to.be.true
           screen.getByRole('button', { name: `${this.tagName} (3)` })
         })
       })
@@ -561,7 +534,7 @@ describe('<ProjectListRoot />', function () {
           fireEvent.click(moreDropdown)
 
           const renameButton =
-            screen.getAllByText<HTMLInputElement>('Rename')[1] // first one is for the tag in the sidebar
+            within(actionsToolbar).getByText<HTMLInputElement>('Rename') // first one is for the tag in the sidebar
           fireEvent.click(renameButton)
 
           const modals = await screen.findAllByRole('dialog')
@@ -569,7 +542,7 @@ describe('<ProjectListRoot />', function () {
 
           // a valid name
           const newProjectName = 'A new project name'
-          const input = (await screen.findByLabelText(
+          const input = (await within(modal).findByLabelText(
             'New Name'
           )) as HTMLButtonElement
           const oldName = input.value
@@ -582,14 +555,11 @@ describe('<ProjectListRoot />', function () {
           expect(confirmButton.disabled).to.be.false
           fireEvent.click(confirmButton)
 
-          await waitFor(
-            () =>
-              expect(
-                renameProjectMock.called(
-                  `/project/${projectsData[1].id}/rename`
-                )
-              ).to.be.true
-          )
+          await fetchMock.flush(true)
+
+          expect(
+            renameProjectMock.called(`/project/${projectsData[1].id}/rename`)
+          ).to.be.true
 
           const table = await screen.findByRole('table')
           within(table).getByText(newProjectName)
@@ -644,12 +614,11 @@ describe('<ProjectListRoot />', function () {
           ) as HTMLElement
           fireEvent.click(copyConfirmButton)
 
-          await waitFor(
-            () =>
-              expect(
-                cloneProjectMock.called(`/project/${projectsData[1].id}/clone`)
-              ).to.be.true
-          )
+          await fetchMock.flush(true)
+
+          expect(
+            cloneProjectMock.called(`/project/${projectsData[1].id}/clone`)
+          ).to.be.true
 
           expect(sendSpy).to.be.calledOnce
           expect(sendSpy).calledWith('project-list-page-interaction')
@@ -716,9 +685,13 @@ describe('<ProjectListRoot />', function () {
         it('shows correct list after closing modal, changing selecting, and reopening modal', async function () {
           selectedMatchesDisplayed(2)
 
-          const cancelButton = screen.getByRole('button', { name: 'Cancel' })
+          const modal = screen.getAllByRole('dialog', { hidden: false })[0]
+          const cancelButton = within(modal).getByRole('button', {
+            name: 'Cancel',
+          })
           fireEvent.click(cancelButton)
           expect(screen.queryByRole('dialog', { hidden: false })).to.be.null
+
           await screen.findAllByRole('checkbox')
           fireEvent.click(allCheckboxes[3])
           selectedMatchesDisplayed(3)
@@ -733,7 +706,7 @@ describe('<ProjectListRoot />', function () {
           fetchMock.post('express:/project/:id/archive', {
             status: 200,
           })
-          fetchMock.post(`express:/${project2Id}/:id/archive`, {
+          fetchMock.post(`/project/${project2Id}/archive`, {
             status: 500,
           })
 
