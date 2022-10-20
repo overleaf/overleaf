@@ -1,4 +1,5 @@
 import { Transaction } from '@codemirror/state'
+import { EditorView } from '@codemirror/view'
 
 const TIMER_START_NAME = 'CM6-BeforeUpdate'
 const TIMER_END_NAME = 'CM6-AfterUpdate'
@@ -16,8 +17,20 @@ try {
   performanceMeasureOptionsSupport = true
 } catch (e) {}
 
-export function timedDispatch(dispatchFn: (tr: Transaction) => void) {
-  return (tr: Transaction) => {
+function isInputOrDelete(userEventType: string | undefined) {
+  return (
+    !!userEventType && ['input', 'delete'].includes(userEventType.split('.')[0])
+  )
+}
+
+export function timedDispatch() {
+  let userEventsSinceDomUpdateCount = 0
+
+  return (
+    view: EditorView,
+    tr: Transaction,
+    dispatchFn: (tr: Transaction) => void
+  ) => {
     if (!performanceMeasureOptionsSupport) {
       dispatchFn(tr)
       return
@@ -31,11 +44,22 @@ export function timedDispatch(dispatchFn: (tr: Transaction) => void) {
 
     const userEventType = tr.annotation(Transaction.userEvent)
 
-    if (userEventType) {
+    if (isInputOrDelete(userEventType)) {
+      ++userEventsSinceDomUpdateCount
+
       performance.measure(TIMER_MEASURE_NAME, {
         start: TIMER_START_NAME,
         end: TIMER_END_NAME,
-        detail: { userEventType },
+        detail: { userEventType, userEventsSinceDomUpdateCount },
+      })
+
+      // The `key` property ensures that the measurement task is only run once
+      // per measure phase
+      view.requestMeasure({
+        key: 'inputEventCounter',
+        read() {
+          userEventsSinceDomUpdateCount = 0
+        },
       })
     }
 
@@ -68,6 +92,10 @@ function calculate95thPercentile(sortedDurations: number[]) {
   return sortedDurations[index]
 }
 
+function calculateMax(numbers: number[]) {
+  return numbers.reduce((a, b) => Math.max(a, b), 0)
+}
+
 export function reportCM6Perf() {
   // Get entries triggered by keystrokes
   const cm6Entries = performance.getEntriesByName(
@@ -75,17 +103,21 @@ export function reportCM6Perf() {
     'measure'
   ) as PerformanceMeasure[]
 
-  const inputDurations = cm6Entries
-    .filter(({ detail }) =>
-      ['input', 'delete'].includes(detail.userEventType.split('.')[0])
-    )
+  const inputEvents = cm6Entries.filter(({ detail }) =>
+    isInputOrDelete(detail.userEventType)
+  )
+
+  const inputDurations = inputEvents
     .map(({ duration }) => duration)
     .sort((a, b) => a - b)
 
-  const max = inputDurations.reduce((a, b) => Math.max(a, b), 0)
+  const max = calculateMax(inputDurations)
   const mean = calculateMean(inputDurations)
   const median = calculateMedian(inputDurations)
   const ninetyFifthPercentile = calculate95thPercentile(inputDurations)
+  const maxUserEventsBetweenDomUpdates = calculateMax(
+    inputEvents.map(e => e.detail.userEventsSinceDomUpdateCount)
+  )
 
   performance.clearMeasures(TIMER_MEASURE_NAME)
 
@@ -94,6 +126,7 @@ export function reportCM6Perf() {
     mean,
     median,
     ninetyFifthPercentile,
+    maxUserEventsBetweenDomUpdates,
     docLength: latestDocLength,
     numberOfEntries: inputDurations.length,
   }

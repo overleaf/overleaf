@@ -276,6 +276,8 @@ If the project has been renamed please look in your project list for a new proje
               cm6PerfData.ninetyFifthPercentile
             segmentation.cm6PerfDocLength = cm6PerfData.docLength
             segmentation.cm6PerfNumberOfEntries = cm6PerfData.numberOfEntries
+            segmentation.cm6PerfMaxUserEventsBetweenDomUpdates =
+              cm6PerfData.maxUserEventsBetweenDomUpdates
           }
         }
 
