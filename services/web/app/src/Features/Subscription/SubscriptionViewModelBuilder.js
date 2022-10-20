@@ -352,6 +352,7 @@ async function getBestSubscription(user) {
   ])
   if (
     individualSubscription &&
+    !individualSubscription.customAccount &&
     individualSubscription.recurlySubscription_id &&
     !individualSubscription.recurly?.state
   ) {
