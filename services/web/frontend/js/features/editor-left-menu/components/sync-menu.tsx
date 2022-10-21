@@ -24,8 +24,8 @@ export default function SyncMenu() {
     <>
       <h4>{t('sync')}</h4>
       <ul className="list-unstyled nav">
-        {editorLeftMenuSync.map(({ import: importObject }) => (
-          <li key={Object.keys(importObject)[0]}>
+        {editorLeftMenuSync.map(({ import: importObject }, index) => (
+          <li key={`editor-left-menu-sync-${index}`}>
             <ModuleComponent Component={Object.values(importObject)[0]} />
           </li>
         ))}
