@@ -300,7 +300,7 @@
     "pirates": "^4.0.1",
     "postcss-loader": "^6.2.1",
     "requirejs": "^2.3.6",
-    "samlp": "^3.4.1",
+    "samlp": "^7.0.2",
     "sandboxed-module": "https://github.com/overleaf/node-sandboxed-module/archive/cafa2d60f17ce75cc023e6f296eb8de79d92d35d.tar.gz",
     "sinon": "^7.5.0",
     "sinon-chai": "^3.7.0",
