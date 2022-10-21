@@ -162,7 +162,7 @@
     "match-sorter": "^6.2.0",
     "mathjax": "^2.7.9",
     "method-override": "^2.3.3",
-    "minimist": "1.2.5",
+    "minimist": "^1.2.7",
     "mmmagic": "^0.5.3",
     "moment": "^2.29.4",
     "mongodb": "~3.6.0",
