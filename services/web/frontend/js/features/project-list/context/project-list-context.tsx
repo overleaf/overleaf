@@ -15,7 +15,6 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from 'react'
 import { Tag } from '../../../../../app/src/Features/Tags/types'
@@ -126,7 +125,6 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
     'project-list-filter',
     'all'
   )
-  const prevSortRef = useRef<Sort>(sort)
   const [selectedTagId, setSelectedTagId] = usePersistedState<
     string | undefined
   >('project-list-selected-tag-id', undefined)
@@ -158,14 +156,27 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       })
   }, [prefetchedProjectsBlob, runAsync])
 
+  // Search related effects
+  useEffect(() => {
+    if (!searchText.length) {
+      return
+    }
+
+    const filteredProjects = loadedProjects.filter(project =>
+      project.name.toLowerCase().includes(searchText.toLowerCase())
+    )
+
+    setVisibleProjects(filteredProjects)
+  }, [searchText, loadedProjects])
+
+  // Sort related effects
+  useEffect(() => {
+    setLoadedProjects(loadedProjects => sortProjects(loadedProjects, sort))
+  }, [sort])
+
+  // Filters/Tags and load more related effects
   useEffect(() => {
     let filteredProjects = [...loadedProjects]
-
-    if (searchText.length) {
-      filteredProjects = filteredProjects.filter(project =>
-        project.name.toLowerCase().includes(searchText.toLowerCase())
-      )
-    }
 
     if (selectedTagId !== undefined) {
       if (selectedTagId === UNCATEGORIZED_KEY) {
@@ -191,12 +202,7 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       filteredProjects = arrayFilter(filteredProjects, filters[filter])
     }
 
-    if (prevSortRef.current !== sort) {
-      filteredProjects = sortProjects(filteredProjects, sort)
-      const loadedProjectsSorted = sortProjects(loadedProjects, sort)
-      setLoadedProjects(loadedProjectsSorted)
-    }
-
+    // load more
     if (filteredProjects.length > maxVisibleProjects) {
       const visibleFilteredProjects = filteredProjects.slice(
         0,
@@ -220,20 +226,14 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       setHiddenProjectsCount(0)
     }
   }, [
+    filter,
     loadedProjects,
     maxVisibleProjects,
-    tags,
-    filter,
-    setFilter,
     selectedTagId,
+    setFilter,
     setSelectedTagId,
-    searchText,
-    sort,
+    tags,
   ])
-
-  useEffect(() => {
-    prevSortRef.current = sort
-  }, [sort])
 
   const showAllProjects = useCallback(() => {
     setLoadMoreCount(0)
