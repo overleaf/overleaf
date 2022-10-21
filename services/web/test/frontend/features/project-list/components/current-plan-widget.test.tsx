@@ -21,11 +21,9 @@ describe('<CurrentPlanWidget />', function () {
   })
 
   describe('free plan', function () {
-    let sendSpy: sinon.SinonSpy
     let sendMBSpy: sinon.SinonSpy
 
     beforeEach(function () {
-      sendSpy = sinon.spy(eventTracking, 'send')
       sendMBSpy = sinon.spy(eventTracking, 'sendMB')
 
       window.metaAttributesCache.set('ol-usersBestSubscription', {
@@ -36,7 +34,6 @@ describe('<CurrentPlanWidget />', function () {
     })
 
     afterEach(function () {
-      sendSpy.restore()
       sendMBSpy.restore()
     })
 
@@ -52,12 +49,6 @@ describe('<CurrentPlanWidget />', function () {
     it('clicks on upgrade button', function () {
       const upgradeLink = screen.getByRole('link', { name: /upgrade/i })
       fireEvent.click(upgradeLink)
-      expect(sendSpy).to.be.calledOnce
-      expect(sendSpy).calledWith(
-        'subscription-funnel',
-        'dashboard-top',
-        'upgrade'
-      )
       expect(sendMBSpy).to.be.calledOnce
       expect(sendMBSpy).calledWith('upgrade-button-click', {
         source: 'dashboard-top',

@@ -10,7 +10,6 @@ function FreePlan() {
   )
 
   const handleClick = () => {
-    eventTracking.send('subscription-funnel', 'dashboard-top', 'upgrade')
     eventTracking.sendMB('upgrade-button-click', { source: 'dashboard-top' })
   }
 
