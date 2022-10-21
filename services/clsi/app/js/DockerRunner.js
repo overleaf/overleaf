@@ -415,7 +415,7 @@ const DockerRunner = {
 
       logger.debug({ containerId }, 'attached to container')
 
-      const MAX_OUTPUT = 1024 * 1024 // limit output to 1MB
+      const MAX_OUTPUT = 1024 * 1024 * 2 // limit output to 2MB
       function createStringOutputStream(name) {
         return {
           data: '',
@@ -427,7 +427,7 @@ const DockerRunner = {
             if (this.data.length < MAX_OUTPUT) {
               this.data += data
             } else {
-              logger.error(
+              logger.info(
                 {
                   containerId,
                   length: this.data.length,
