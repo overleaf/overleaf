@@ -50,6 +50,7 @@
         padding-top: @content-margin-vertical;
         padding-bottom: @content-margin-vertical;
         color: @sidebar-color;
+
         .small {
           color: @sidebar-color;
         }
@@ -710,6 +711,43 @@
 
   .project-list-sidebar-survey-subwrapper {
     flex: @project-list-sidebar-wrapper-flex;
+
+    @media (max-width: @screen-xs-max) {
+      line-height: @mobile-action-element-height;
+    }
+  }
+
+  .project-list-sidebar-survey-dismiss {
+    position: relative;
+    z-index: 1;
+    float: right;
+  }
+
+  @media (max-width: @screen-xs-max) {
+    position: static;
+    display: block;
+    margin-top: @margin-sm;
+
+    .project-list-sidebar-survey {
+      font-size: unset;
+
+      &:before {
+        display: none;
+      }
+
+      .project-list-sidebar-survey-link {
+        display: inline-flex;
+        align-items: center;
+        min-width: @mobile-action-element-width;
+        min-height: @mobile-action-element-height;
+      }
+    }
+
+    .project-list-sidebar-survey-dismiss {
+      width: @mobile-action-element-width;
+      height: @mobile-action-element-height;
+      border: 0;
+    }
   }
 }
 

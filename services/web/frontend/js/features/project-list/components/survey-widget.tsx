@@ -19,24 +19,26 @@ export default function SurveyWidget() {
   }
 
   return (
-    <div className="project-list-sidebar-survey">
-      {survey.preText}&nbsp;
-      <a
-        className="project-list-sidebar-survey-link"
-        href={survey.url}
-        target="_blank"
-        rel="noreferrer noopener"
-      >
-        {survey.linkText}
-      </a>
+    <>
       <button
         className="project-list-sidebar-survey-dismiss"
         type="button"
         title="Dismiss Overleaf survey"
         onClick={dismissSurvey}
       >
-        <span aria-hidden> &times;</span>
+        <span aria-hidden>&times;</span>
       </button>
-    </div>
+      <div className="project-list-sidebar-survey">
+        {survey.preText}&nbsp;
+        <a
+          className="project-list-sidebar-survey-link"
+          href={survey.url}
+          target="_blank"
+          rel="noreferrer noopener"
+        >
+          {survey.linkText}
+        </a>
+      </div>
+    </>
   )
 }

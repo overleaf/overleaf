@@ -94,6 +94,11 @@ function ProjectListPageContent() {
                   </div>
                 </Col>
               </Row>
+              <div className="project-list-sidebar-survey-wrapper">
+                <div className="project-list-sidebar-survey-subwrapper">
+                  <SurveyWidget />
+                </div>
+              </div>
               <div className="visible-xs mt-1">
                 <div role="toolbar" className="projects-toolbar">
                   <ProjectsDropdown />
@@ -126,11 +131,6 @@ function ProjectListPageContent() {
                   <LoadMore />
                 </Col>
               </Row>
-            </div>
-            <div className="project-list-sidebar-survey-wrapper hidden-xs">
-              <div className="project-list-sidebar-survey-subwrapper">
-                <SurveyWidget />
-              </div>
             </div>
           </>
         ) : (
