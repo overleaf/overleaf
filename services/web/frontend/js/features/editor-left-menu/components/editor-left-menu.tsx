@@ -3,6 +3,7 @@ import ActionsMenu from './actions-menu'
 import HelpMenu from './help-menu'
 import { useLayoutContext } from '../../../shared/context/layout-context'
 import classNames from 'classnames'
+import SyncMenu from './sync-menu'
 
 export default function EditorLeftMenu() {
   const { leftMenuShown, setLeftMenuShown } = useLayoutContext()
@@ -15,6 +16,7 @@ export default function EditorLeftMenu() {
       >
         <DownloadMenu />
         <ActionsMenu />
+        <SyncMenu />
         <HelpMenu />
       </aside>
       {leftMenuShown ? (
