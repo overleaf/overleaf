@@ -389,14 +389,14 @@ function _formatProjects(projects, userId) {
   // Only add these formattedProjects if they're not already present, this gives us cascading access
   // from 'owner' => 'token-read-only'
   for (const project of tokenReadAndWrite) {
-    if (!_.find(formattedProjects, ['id', project._id.toString()])) {
+    if (!formattedProjects.some(p => p.id === project._id.toString())) {
       formattedProjects.push(
         _formatProjectInfo(project, 'readAndWrite', Sources.TOKEN, userId)
       )
     }
   }
   for (const project of tokenReadOnly) {
-    if (!_.find(formattedProjects, ['id', project._id.toString()])) {
+    if (!formattedProjects.some(p => p.id === project._id.toString())) {
       formattedProjects.push(
         _formatProjectInfo(project, 'readOnly', Sources.TOKEN, userId)
       )
@@ -458,7 +458,7 @@ function _formatProjectInfo(project, accessLevel, source, userId) {
   const trashed = ProjectHelper.isTrashed(project, userId) && !archived
 
   const model = {
-    id: project._id,
+    id: project._id.toString(),
     name: project.name,
     owner_ref: project.owner_ref,
     lastUpdated: project.lastUpdated,
