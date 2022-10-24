@@ -19,6 +19,9 @@ const entryPoints = {
   style: './frontend/stylesheets/style.less',
   'ieee-style': './frontend/stylesheets/ieee-style.less',
   'light-style': './frontend/stylesheets/light-style.less',
+  'main-style': './frontend/stylesheets/main-style.less',
+  'main-ieee-style': './frontend/stylesheets/main-ieee-style.less',
+  'main-light-style': './frontend/stylesheets/main-light-style.less',
 }
 
 // Add entrypoints for each "page"

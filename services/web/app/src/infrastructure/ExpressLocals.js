@@ -197,6 +197,11 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
     }
 
     res.locals.buildCssPath = function (themeModifier = '') {
+      if (
+        res.locals.splitTestVariants?.['design-system-updates'] === 'enabled'
+      ) {
+        themeModifier = `main-${themeModifier}`
+      }
       return res.locals.buildStylesheetPath(`${themeModifier}style.css`)
     }
 
