@@ -55,7 +55,6 @@
   "login_to_overleaf": "Faça o login no Overleaf",
   "login_with_email": "Entre com seu email",
   "login_with_service": "Logar com __service__",
-  "first_time_sl_user": "Primeira vez aqui como usuário do ShareLaTeX",
   "migrate_from_sl": "Migrar do ShareLaTeX",
   "dont_have_account": "Não tem uma conta?",
   "sl_extra_info_tooltip": "Por favor, faça o login no ShareLaTeX para mover sua conta para o Overleaf. Levará apenas alguns segundos. Se você tiver uma assinatura do ShareLaTeX, ela será automaticamente transferida para o Overleaf.",

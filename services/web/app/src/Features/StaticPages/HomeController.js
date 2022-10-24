@@ -44,30 +44,18 @@ module.exports = HomeController = {
   async home(req, res) {
     if (Features.hasFeature('homepage') && homepageExists) {
       try {
-        const highlightSSOAssignment =
-          await SplitTestHandler.promises.getAssignment(
-            req,
-            res,
-            'highlight-sso-2'
-          )
         const homeRegistration = await SplitTestHandler.promises.getAssignment(
           req,
           res,
           'home-registration'
         )
-        const highlightSSO = highlightSSOAssignment.variant === 'active'
         const removeRegistration = homeRegistration.variant
         return res.render('external/home/v2', {
-          highlightSSO,
           removeRegistration,
         })
       } catch (err) {
-        logger.error(
-          { err },
-          "error fetching 'highlight-sso-2' split test assignment"
-        )
+        logger.error({ err }, err.message)
         return res.render('external/home/v2', {
-          highlightSSO: false,
           removeRegistration: 'default',
         })
       }

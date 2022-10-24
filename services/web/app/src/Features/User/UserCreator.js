@@ -38,18 +38,12 @@ async function _addAffiliation(user, affiliationOptions) {
 
 async function recordRegistrationEvent(user) {
   try {
-    const highlightSSOAssignment =
-      await SplitTestHandler.promises.getAssignmentForUser(
-        user._id,
-        'highlight-sso-2'
-      )
     const homeRegistrationAssignment =
       await SplitTestHandler.promises.getAssignmentForUser(
         user._id,
         'home-registration'
       )
     const segmentation = {
-      highlightSSO: highlightSSOAssignment.variant === 'active',
       'home-registration': homeRegistrationAssignment.variant,
     }
     if (user.thirdPartyIdentifiers && user.thirdPartyIdentifiers.length > 0) {
