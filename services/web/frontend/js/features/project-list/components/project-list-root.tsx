@@ -95,9 +95,7 @@ function ProjectListPageContent() {
                 </Col>
               </Row>
               <div className="project-list-sidebar-survey-wrapper">
-                <div className="project-list-sidebar-survey-subwrapper">
-                  <SurveyWidget />
-                </div>
+                <SurveyWidget />
               </div>
               <div className="visible-xs mt-1">
                 <div role="toolbar" className="projects-toolbar">

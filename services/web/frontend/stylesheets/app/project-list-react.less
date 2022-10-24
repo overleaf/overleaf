@@ -703,19 +703,10 @@
 }
 
 .project-list-sidebar-survey-wrapper {
-  display: flex;
   position: fixed;
   bottom: 0;
   left: 0;
-  width: 100%;
-
-  .project-list-sidebar-survey-subwrapper {
-    flex: @project-list-sidebar-wrapper-flex;
-
-    @media (max-width: @screen-xs-max) {
-      line-height: @mobile-action-element-height;
-    }
-  }
+  width: 15%;
 
   .project-list-sidebar-survey-dismiss {
     position: relative;
@@ -724,9 +715,11 @@
   }
 
   @media (max-width: @screen-xs-max) {
+    line-height: @mobile-action-element-height;
     position: static;
     display: block;
     margin-top: @margin-sm;
+    width: initial;
 
     .project-list-sidebar-survey {
       font-size: unset;
