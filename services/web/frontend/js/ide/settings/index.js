@@ -3,3 +3,4 @@
 import './services/settings'
 import './controllers/SettingsController'
 import '../../features/dictionary/controllers/modal-controller'
+import '../../features/editor-left-menu/controllers/editor-left-menu-controller'

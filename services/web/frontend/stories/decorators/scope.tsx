@@ -166,12 +166,21 @@ const initialize = () => {
   return ide
 }
 
-export const ScopeDecorator = (Story: any) => {
+type ScopeDecoratorOptions = {
+  mockCompileOnLoad: boolean
+}
+
+export const ScopeDecorator = (
+  Story: any,
+  opts: ScopeDecoratorOptions = { mockCompileOnLoad: true }
+) => {
   // mock compile on load
   useFetchMock(fetchMock => {
-    mockCompile(fetchMock)
-    mockCompileError(fetchMock)
-    mockBuildFile(fetchMock)
+    if (opts.mockCompileOnLoad) {
+      mockCompile(fetchMock)
+      mockCompileError(fetchMock)
+      mockBuildFile(fetchMock)
+    }
   })
 
   // clear scopeWatchers on unmount

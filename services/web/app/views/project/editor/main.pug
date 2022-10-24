@@ -1,4 +1,7 @@
-include ./left-menu
+if editorLeftMenuReact
+	include ./left-menu-react
+else
+	include ./left-menu
 
 #chat-wrapper.full-size(
 	layout="chat",

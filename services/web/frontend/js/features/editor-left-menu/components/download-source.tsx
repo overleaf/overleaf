@@ -1,0 +1,20 @@
+import { useTranslation } from 'react-i18next'
+import { useProjectContext } from '../../../shared/context/project-context'
+import Icon from '../../../shared/components/icon'
+
+export default function DownloadSource() {
+  const { t } = useTranslation()
+  const { _id: projectId } = useProjectContext()
+
+  return (
+    <a
+      href={`/project/${projectId}/download/zip`}
+      target="_blank"
+      rel="noreferrer"
+    >
+      <Icon type="file-archive-o" modifier="2x" />
+      <br />
+      {t('source')}
+    </a>
+  )
+}

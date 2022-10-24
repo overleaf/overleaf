@@ -1041,6 +1041,21 @@ const ProjectController = {
             }
           )
         },
+        editorLeftMenuAssignment(cb) {
+          SplitTestHandler.getAssignment(
+            req,
+            res,
+            'editor-left-menu',
+            (error, assignment) => {
+              // do not fail editor load if assignment fails
+              if (error) {
+                cb(null, { variant: 'default' })
+              } else {
+                cb(null, assignment)
+              }
+            }
+          )
+        },
       },
       (
         err,
@@ -1057,6 +1072,7 @@ const ProjectController = {
           newSourceEditorAssignment,
           pdfjsAssignment,
           dictionaryEditorAssignment,
+          editorLeftMenuAssignment,
         }
       ) => {
         if (err != null) {
@@ -1138,6 +1154,9 @@ const ProjectController = {
               user.betaProgram ||
               shouldDisplayFeature('new_source_editor', false) // also allow override via ?new_source_editor=true
 
+            const editorLeftMenuReact =
+              editorLeftMenuAssignment?.variant === 'react'
+
             const showSymbolPalette =
               !Features.hasFeature('saas') ||
               (user.features && user.features.symbolPalette)
@@ -1173,6 +1192,7 @@ const ProjectController = {
               bodyClasses: ['editor'],
               project_id: project._id,
               projectName: project.name,
+              editorLeftMenuReact,
               user: {
                 id: userId,
                 email: user.email,
