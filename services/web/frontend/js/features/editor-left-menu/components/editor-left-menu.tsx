@@ -1,5 +1,6 @@
 import DownloadMenu from './download-menu'
 import ActionsMenu from './actions-menu'
+import HelpMenu from './help-menu'
 import { useLayoutContext } from '../../../shared/context/layout-context'
 import classNames from 'classnames'
 
@@ -14,6 +15,7 @@ export default function EditorLeftMenu() {
       >
         <DownloadMenu />
         <ActionsMenu />
+        <HelpMenu />
       </aside>
       {leftMenuShown ? (
         // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions

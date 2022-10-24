@@ -9,6 +9,8 @@ type Props = {
   }
   disabled?: boolean
   disabledAccesibilityText?: string
+  type?: 'button' | 'link'
+  href?: string
 }
 
 export default function LeftMenuButton({
@@ -17,6 +19,8 @@ export default function LeftMenuButton({
   icon,
   disabled = false,
   disabledAccesibilityText,
+  type = 'button',
+  href,
 }: PropsWithChildren<Props>) {
   if (disabled) {
     return (
@@ -30,10 +34,24 @@ export default function LeftMenuButton({
     )
   }
 
-  return (
-    <button onClick={onClick} className="left-menu-button">
-      <Icon type={icon.type} fw={icon.fw} />
-      <span>{children}</span>
-    </button>
-  )
+  if (type === 'button') {
+    return (
+      <button onClick={onClick} className="left-menu-button">
+        <Icon type={icon.type} fw={icon.fw} />
+        <span>{children}</span>
+      </button>
+    )
+  } else {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noreferrer"
+        className="left-menu-button"
+      >
+        <Icon type={icon.type} fw={icon.fw} />
+        <span>{children}</span>
+      </a>
+    )
+  }
 }
