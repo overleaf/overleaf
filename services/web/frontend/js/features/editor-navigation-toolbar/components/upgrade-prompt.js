@@ -12,7 +12,7 @@ function UpgradePrompt() {
   return (
     <a
       className="toolbar-header-upgrade-prompt btn btn-primary btn-xs"
-      href="/user/subscription/plans"
+      href="/user/subscription/plans?itm_referrer=editor-header-upgrade-prompt"
       target="_blank"
       onClick={handleClick}
     >

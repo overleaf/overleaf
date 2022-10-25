@@ -113,6 +113,10 @@ export function updateLinkTargets() {
       queryString.set('itm_content', itmContent)
     }
 
+    if (searchParams.get('itm_referrer')) {
+      queryString.set('itm_referrer', searchParams.get('itm_referrer'))
+    }
+
     el.href = `/user/subscription/new?${queryString.toString()}`
   })
 }

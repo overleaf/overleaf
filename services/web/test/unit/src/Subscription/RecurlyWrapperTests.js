@@ -599,6 +599,7 @@ describe('RecurlyWrapper', function () {
         },
         ITMCampaign: 'itm-campaign-value',
         ITMContent: 'itm-content-value',
+        ITMReferrer: 'itm-referrer-value',
       }
       this.subscription = {}
       this.recurlyTokenIds = {
@@ -656,6 +657,10 @@ describe('RecurlyWrapper', function () {
 		<custom_field>
 			<name>itm_content</name>
 			<value>itm-content-value</value>
+		</custom_field>
+		<custom_field>
+			<name>itm_referrer</name>
+			<value>itm-referrer-value</value>
 		</custom_field>
 	</custom_fields>
 </subscription>\

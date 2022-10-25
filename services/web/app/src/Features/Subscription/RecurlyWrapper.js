@@ -1064,6 +1064,12 @@ function getCustomFieldsFromSubscriptionDetails(subscriptionDetails) {
       value: subscriptionDetails.ITMContent,
     })
   }
+  if (subscriptionDetails.ITMReferrer) {
+    customFields.push({
+      name: 'itm_referrer',
+      value: subscriptionDetails.ITMReferrer,
+    })
+  }
   return { custom_field: customFields }
 }
 

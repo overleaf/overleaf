@@ -15,6 +15,7 @@ export default App.controller(
     window.plan_code = $location.search().planCode || ''
     window.ITMCampaign = $location.search().itm_campaign || ''
     window.ITMContent = $location.search().itm_content || ''
+    window.ITMReferrer = $location.search().itm_referrer || ''
 
     if (typeof recurly === 'undefined' || !recurly) {
       $scope.recurlyLoadError = true
@@ -45,7 +46,14 @@ export default App.controller(
         'subscription-form-switch-to-student',
         window.plan_code
       )
-      window.location = `/user/subscription/new?planCode=${planCode}&currency=${$scope.currencyCode}&cc=${$scope.data.coupon}&itm_campaign=${window.ITMCampaign}&itm_content=${window.ITMContent}`
+      window.location =
+        '/user/subscription/new' +
+        `?planCode=${planCode}` +
+        `&currency=${$scope.currencyCode}` +
+        `&cc=${$scope.data.coupon}` +
+        `&itm_campaign=${window.ITMCampaign}` +
+        `&itm_content=${window.ITMContent}` +
+        `&itm_referrer=${window.ITMReferrer}`
     }
 
     eventTracking.sendMB('payment-page-view', { plan: window.plan_code })
@@ -358,6 +366,7 @@ export default App.controller(
             },
             ITMCampaign: window.ITMCampaign,
             ITMContent: window.ITMContent,
+            ITMReferrer: window.ITMReferrer,
           },
         }
 

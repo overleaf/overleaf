@@ -97,7 +97,8 @@ async function plansPage(req, res) {
   res.render(template, {
     title: 'plans_and_pricing',
     plans,
-    itm_content: req.query && req.query.itm_content,
+    itm_content: req.query?.itm_content,
+    itm_referrer: req.query?.itm_referrer,
     itm_campaign: 'plans',
     recommendedCurrency,
     planFeatures,
@@ -260,6 +261,7 @@ async function interstitialPaymentPage(req, res) {
       title: 'subscribe',
       itm_content: req.query && req.query.itm_content,
       itm_campaign: req.query?.itm_campaign,
+      itm_referrer: req.query?.itm_referrer,
       recommendedCurrency,
       interstitialPaymentConfig,
       showSkipLink,
