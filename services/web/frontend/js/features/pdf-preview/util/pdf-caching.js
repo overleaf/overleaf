@@ -648,7 +648,8 @@ export async function fetchRange({
   preprocessFileOnce({ file, usageScore, cachedUrls })
   const startXRefTableRange =
     Math.floor(file.startXRefTable / PDF_JS_CHUNK_SIZE) * PDF_JS_CHUNK_SIZE
-  const prefetchXRefTable = startXRefTableRange > 0 && start === 0
+  const prefetchXRefTable =
+    prefetchingEnabled && startXRefTableRange > 0 && start === 0
   const prefetched = getMatchingChunks(file.prefetched, start, end)
 
   // Check that handling the range request won't trigger excessive sub-requests,
