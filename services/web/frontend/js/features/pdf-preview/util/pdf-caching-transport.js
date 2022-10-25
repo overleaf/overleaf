@@ -26,6 +26,8 @@ export function generatePdfCachingTransportFactory(PDFJS) {
     cachedBytes: 0,
     fetchedCount: 0,
     fetchedBytes: 0,
+    latencyComputeMax: 0,
+    latencyComputeTotal: 0,
     requestedCount: 0,
     requestedBytes: 0,
     oldUrlHitCount: 0,
@@ -118,6 +120,9 @@ export function generatePdfCachingTransportFactory(PDFJS) {
       // Be trigger-happy here until we reached a stable state of the feature.
       return null
     }
+    // Latency is collected per preview cycle.
+    metrics.latencyComputeMax = 0
+    metrics.latencyComputeTotal = 0
     return new PDFDataRangeTransport({
       url,
       pdfFile,

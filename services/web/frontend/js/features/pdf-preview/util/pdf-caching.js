@@ -583,6 +583,37 @@ function addPrefetchingChunks({
   dynamicChunks.sort(sortByStartASC)
 }
 
+class Timer {
+  constructor() {
+    this.max = 0
+    this.total = 0
+    this.lastStart = 0
+  }
+
+  startBlockingCompute() {
+    this.lastStart = performance.now()
+  }
+
+  finishBlockingCompute() {
+    if (this.lastStart === 0) return
+    const last = performance.now() - this.lastStart
+    if (last > this.max) {
+      this.max = last
+    }
+    this.total += last
+    this.lastStart = 0
+  }
+
+  reportInto(metrics) {
+    const max = Math.ceil(this.max)
+    const total = Math.ceil(this.total)
+    if (max > metrics.latencyComputeMax) {
+      metrics.latencyComputeMax = max
+    }
+    metrics.latencyComputeTotal += total
+  }
+}
+
 /**
  *
  * @param {string} url
@@ -612,6 +643,8 @@ export async function fetchRange({
   cachedUrlLookupEnabled,
   abortSignal,
 }) {
+  const timer = new Timer()
+  timer.startBlockingCompute()
   preprocessFileOnce({ file, usageScore, cachedUrls })
   const startXRefTableRange =
     Math.floor(file.startXRefTable / PDF_JS_CHUNK_SIZE) * PDF_JS_CHUNK_SIZE
@@ -650,6 +683,8 @@ export async function fetchRange({
   ) {
     // fall back to the original range request when no chunks are cached.
     // Exception: The first range should fetch the xref table as well.
+    timer.finishBlockingCompute()
+    timer.reportInto(metrics)
     trackDownloadStats(metrics, {
       size,
       cachedCount: 0,
@@ -728,6 +763,9 @@ export async function fetchRange({
   let fetchedBytes = 0
   const reassembledBlob = new Uint8Array(size)
 
+  // Pause while performing network IO
+  timer.finishBlockingCompute()
+
   const rawResponses = await Promise.all(
     requests.map(async ({ chunk, url, init }) => {
       try {
@@ -739,6 +777,7 @@ export async function fetchRange({
           metrics,
           cachedUrlLookupEnabled,
         })
+        timer.startBlockingCompute()
         const boundary = getMultipartBoundary(response, chunk)
         const blobFetchDate = getServerTime(response)
         const blobSize = getResponseSize(response)
@@ -761,7 +800,10 @@ export async function fetchRange({
             fetchedBytes += blobSize
           }
         }
-        const data = backFillObjectContext(chunk, await response.arrayBuffer())
+        timer.finishBlockingCompute()
+        const buf = await response.arrayBuffer()
+        timer.startBlockingCompute()
+        const data = backFillObjectContext(chunk, buf)
         if (!Array.isArray(chunk)) {
           return [{ chunk, data }]
         }
@@ -774,9 +816,13 @@ export async function fetchRange({
         })
       } catch (err) {
         throw OError.tag(err, 'cannot fetch chunk', { chunk, url, init })
+      } finally {
+        timer.finishBlockingCompute()
       }
     })
   )
+
+  timer.startBlockingCompute()
 
   rawResponses
     .flat() // flatten after splitting multipart responses
@@ -805,6 +851,8 @@ export async function fetchRange({
       reassembledBlob.set(data, insertPosition)
     })
 
+  timer.finishBlockingCompute()
+  timer.reportInto(metrics)
   trackDownloadStats(metrics, {
     size,
     cachedCount,

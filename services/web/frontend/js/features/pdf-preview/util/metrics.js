@@ -4,7 +4,7 @@ import { trackPdfDownloadEnabled } from './pdf-caching-flags'
 
 // VERSION should get incremented when making changes to caching behavior or
 //  adjusting metrics collection.
-const VERSION = 6
+const VERSION = 7
 
 // editing session id
 const EDITOR_SESSION_ID = uuid()
