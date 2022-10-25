@@ -16,6 +16,7 @@ const ClsiCookieManager = require('./ClsiCookieManager')(
 const Path = require('path')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
+const { callbackify } = require('../../util/promises')
 
 const COMPILE_TIMEOUT_MS = 10 * 60 * 1000
 
@@ -27,10 +28,20 @@ function getImageNameForProject(projectId, callback) {
   })
 }
 
-function getEnablePdfCaching(req, res, cb) {
+async function getPdfCachingMinChunkSize(req, res) {
+  const { variant } = await SplitTestHandler.promises.getAssignment(
+    req,
+    res,
+    'pdf-caching-min-chunk-size'
+  )
+  if (variant === 'default') return 1_000_000
+  return parseInt(variant, 10)
+}
+
+const getPdfCachingOptions = callbackify(async function (req, res) {
   if (!req.query.enable_pdf_caching) {
     // The frontend does not want to do pdf caching.
-    return cb(null, false)
+    return { enablePdfCaching: false }
   }
 
   // Use the query flags from the editor request for overriding the split test.
@@ -44,16 +55,22 @@ function getEnablePdfCaching(req, res, cb) {
   // Double check with the latest split test assignment.
   // We may need to turn off the feature on a short notice, without requiring
   //  all users to reload their editor page to disable the feature.
-  SplitTestHandler.getAssignment(
+  const { variant } = await SplitTestHandler.promises.getAssignment(
     editorReq,
     res,
-    'pdf-caching-mode',
-    (err, assignment) => {
-      if (err) return cb(null, false)
-      cb(null, assignment?.variant === 'enabled')
-    }
+    'pdf-caching-mode'
   )
-}
+  const enablePdfCaching = variant === 'enabled'
+  if (!enablePdfCaching) {
+    // Skip the lookup of the chunk size when caching is not enabled.
+    return { enablePdfCaching: false }
+  }
+  const pdfCachingMinChunkSize = await getPdfCachingMinChunkSize(editorReq, res)
+  return {
+    enablePdfCaching,
+    pdfCachingMinChunkSize,
+  }
+})
 
 module.exports = CompileController = {
   compile(req, res, next) {
@@ -91,9 +108,13 @@ module.exports = CompileController = {
       options.incrementalCompilesEnabled = true
     }
 
-    getEnablePdfCaching(req, res, (err, enablePdfCaching) => {
+    getPdfCachingOptions(req, res, (err, pdfCachingOptions) => {
       if (err) return next(err)
+      const { enablePdfCaching, pdfCachingMinChunkSize } = pdfCachingOptions
       options.enablePdfCaching = enablePdfCaching
+      if (enablePdfCaching) {
+        options.pdfCachingMinChunkSize = pdfCachingMinChunkSize
+      }
 
       CompileManager.compile(
         projectId,
@@ -149,6 +170,7 @@ module.exports = CompileController = {
             stats,
             timings,
             pdfDownloadDomain,
+            pdfCachingMinChunkSize,
           })
         }
       )

@@ -896,6 +896,7 @@ const ClsiManager = {
           compileGroup: options.compileGroup,
           enablePdfCaching:
             (Settings.enablePdfCaching && options.enablePdfCaching) || false,
+          pdfCachingMinChunkSize: options.pdfCachingMinChunkSize,
           flags,
           metricsMethod: options.compileGroup,
         },

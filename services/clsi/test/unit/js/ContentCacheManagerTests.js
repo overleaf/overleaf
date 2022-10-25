@@ -12,12 +12,14 @@ describe('ContentCacheManager', function () {
     ContentCacheManager = require(MODULE_PATH)
   })
   let contentRanges, newContentRanges, reclaimed
-  async function run(filePath, size) {
-    const result = await ContentCacheManager.promises.update(
+  async function run(filePath, pdfSize, pdfCachingMinChunkSize) {
+    const result = await ContentCacheManager.promises.update({
       contentDir,
       filePath,
-      size
-    )
+      pdfSize,
+      pdfCachingMinChunkSize,
+      compileTime: 1337,
+    })
     let newlyReclaimed
     ;({
       contentRanges,
@@ -78,16 +80,13 @@ describe('ContentCacheManager', function () {
       START_2 = MINIMAL.indexOf(RANGE_2)
       END_2 = START_2 + RANGE_2.byteLength
     })
-    async function runWithMinimal() {
-      await run(pdfPath, MINIMAL_SIZE)
+    async function runWithMinimal(pdfCachingMinChunkSize) {
+      await run(pdfPath, MINIMAL_SIZE, pdfCachingMinChunkSize)
     }
 
     describe('with two ranges qualifying', function () {
-      before(function () {
-        Settings.pdfCachingMinChunkSize = 500
-      })
       before(async function () {
-        await runWithMinimal()
+        await runWithMinimal(500)
       })
       it('should produce two ranges', function () {
         expect(contentRanges).to.have.length(2)
@@ -134,12 +133,8 @@ describe('ContentCacheManager', function () {
       })
 
       describe('when re-running with one range too small', function () {
-        before(function () {
-          Settings.pdfCachingMinChunkSize = 1024
-        })
-
         before(async function () {
-          await runWithMinimal()
+          await runWithMinimal(1024)
         })
 
         it('should produce one range', function () {
@@ -183,7 +178,7 @@ describe('ContentCacheManager', function () {
         describe('when re-running 5 more times', function () {
           for (let i = 0; i < 5; i++) {
             before(async function () {
-              await runWithMinimal()
+              await runWithMinimal(1024)
             })
           }
 

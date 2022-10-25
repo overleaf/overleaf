@@ -41,6 +41,14 @@ function parse(body, callback) {
         type: 'boolean',
       }
     )
+    response.pdfCachingMinChunkSize = _parseAttribute(
+      'pdfCachingMinChunkSize',
+      compile.options.pdfCachingMinChunkSize,
+      {
+        default: settings.pdfCachingMinChunkSize,
+        type: 'number',
+      }
+    )
     response.timeout = _parseAttribute('timeout', compile.options.timeout, {
       default: MAX_TIMEOUT,
       type: 'number',

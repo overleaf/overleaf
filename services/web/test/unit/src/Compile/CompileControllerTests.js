@@ -1,3 +1,4 @@
+/* eslint-disable mocha/handle-done-callback */
 const sinon = require('sinon')
 const { expect } = require('chai')
 const modulePath = '../../../../app/src/Features/Compile/CompileController.js'
@@ -97,7 +98,8 @@ describe('CompileController', function () {
       })
 
       describe('when clsi does not emit zone prefix', function () {
-        beforeEach(function () {
+        beforeEach(function (done) {
+          this.res.callback = done
           this.CompileController.compile(this.req, this.res, this.next)
         })
 
@@ -120,7 +122,8 @@ describe('CompileController', function () {
       })
 
       describe('when clsi emits a zone prefix', function () {
-        beforeEach(function () {
+        beforeEach(function (done) {
+          this.res.callback = done
           this.CompileManager.compile = sinon.stub().callsArgWith(
             3,
             null,
@@ -162,7 +165,8 @@ describe('CompileController', function () {
     })
 
     describe('when not an auto compile', function () {
-      beforeEach(function () {
+      beforeEach(function (done) {
+        this.res.callback = done
         this.CompileController.compile(this.req, this.res, this.next)
       })
 
@@ -173,14 +177,16 @@ describe('CompileController', function () {
       })
 
       it('should do the compile without the auto compile flag', function () {
-        this.CompileManager.compile
-          .calledWith(this.projectId, this.user_id, {
+        this.CompileManager.compile.should.have.been.calledWith(
+          this.projectId,
+          this.user_id,
+          {
             isAutoCompile: false,
             enablePdfCaching: false,
             fileLineErrors: false,
             stopOnFirstError: false,
-          })
-          .should.equal(true)
+          }
+        )
       })
 
       it('should set the content-type of the response to application/json', function () {
@@ -199,39 +205,45 @@ describe('CompileController', function () {
     })
 
     describe('when an auto compile', function () {
-      beforeEach(function () {
+      beforeEach(function (done) {
+        this.res.callback = done
         this.req.query = { auto_compile: 'true' }
         this.CompileController.compile(this.req, this.res, this.next)
       })
 
       it('should do the compile with the auto compile flag', function () {
-        this.CompileManager.compile
-          .calledWith(this.projectId, this.user_id, {
+        this.CompileManager.compile.should.have.been.calledWith(
+          this.projectId,
+          this.user_id,
+          {
             isAutoCompile: true,
             enablePdfCaching: false,
             fileLineErrors: false,
             stopOnFirstError: false,
-          })
-          .should.equal(true)
+          }
+        )
       })
     })
 
     describe('with the draft attribute', function () {
-      beforeEach(function () {
+      beforeEach(function (done) {
+        this.res.callback = done
         this.req.body = { draft: true }
         this.CompileController.compile(this.req, this.res, this.next)
       })
 
       it('should do the compile without the draft compile flag', function () {
-        this.CompileManager.compile
-          .calledWith(this.projectId, this.user_id, {
+        this.CompileManager.compile.should.have.been.calledWith(
+          this.projectId,
+          this.user_id,
+          {
             isAutoCompile: false,
             enablePdfCaching: false,
             draft: true,
             fileLineErrors: false,
             stopOnFirstError: false,
-          })
-          .should.equal(true)
+          }
+        )
       })
     })
   })

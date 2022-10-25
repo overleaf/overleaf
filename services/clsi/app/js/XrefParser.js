@@ -6,7 +6,7 @@ const MAX_XREF_FILE_SIZE = 1024 * 1024
 /**  Parse qpdf --show-xref output to get a table of xref entries
  *
  * @param {string} filePath
- * @param {integer} pdfFileSize
+ * @param {number} pdfFileSize
  * @returns
  */
 async function parseXrefTable(filePath, pdfFileSize) {

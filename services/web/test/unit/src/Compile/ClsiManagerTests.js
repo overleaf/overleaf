@@ -50,6 +50,7 @@ describe('ClsiManager', function () {
               url: 'https://clsipremium.example.com',
             },
           },
+          enablePdfCaching: true,
         }),
         '../../models/Project': {
           Project: this.Project,
@@ -642,6 +643,7 @@ describe('ClsiManager', function () {
               syncState: undefined,
               compileGroup: 'standard',
               enablePdfCaching: false,
+              pdfCachingMinChunkSize: undefined,
               flags: undefined,
               metricsMethod: 'standard',
               stopOnFirstError: false,
@@ -687,6 +689,8 @@ describe('ClsiManager', function () {
             timeout: 100,
             incrementalCompilesEnabled: true,
             compileGroup: 'priority',
+            enablePdfCaching: true,
+            pdfCachingMinChunkSize: 1337,
           },
           (err, request) => {
             if (err != null) {
@@ -737,7 +741,8 @@ describe('ClsiManager', function () {
               syncType: 'incremental',
               syncState: '01234567890abcdef',
               compileGroup: 'priority',
-              enablePdfCaching: false,
+              enablePdfCaching: true,
+              pdfCachingMinChunkSize: 1337,
               flags: undefined,
               metricsMethod: 'priority',
               stopOnFirstError: false,

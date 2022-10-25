@@ -49,11 +49,18 @@ if (Settings.pdfCachingEnableWorkerPool && workerpool.isMainThread) {
  *
  * @param {String} contentDir path to directory where content hash files are cached
  * @param {String} filePath the pdf file to scan for streams
- * @param {number} size the pdf size
+ * @param {number} pdfSize the pdf size
+ * @param {number} pdfCachingMinChunkSize per request threshold
  * @param {number} compileTime
  */
-async function update(contentDir, filePath, size, compileTime) {
-  if (size < Settings.pdfCachingMinChunkSize) {
+async function update({
+  contentDir,
+  filePath,
+  pdfSize,
+  pdfCachingMinChunkSize,
+  compileTime,
+}) {
+  if (pdfSize < pdfCachingMinChunkSize) {
     return {
       contentRanges: [],
       newContentRanges: [],
@@ -62,9 +69,21 @@ async function update(contentDir, filePath, size, compileTime) {
     }
   }
   if (Settings.pdfCachingEnableWorkerPool) {
-    return await updateOtherEventLoop(contentDir, filePath, size, compileTime)
+    return await updateOtherEventLoop({
+      contentDir,
+      filePath,
+      pdfSize,
+      pdfCachingMinChunkSize,
+      compileTime,
+    })
   } else {
-    return await updateSameEventLoop(contentDir, filePath, size, compileTime)
+    return await updateSameEventLoop({
+      contentDir,
+      filePath,
+      pdfSize,
+      pdfCachingMinChunkSize,
+      compileTime,
+    })
   }
 }
 
@@ -72,19 +91,29 @@ async function update(contentDir, filePath, size, compileTime) {
  *
  * @param {String} contentDir path to directory where content hash files are cached
  * @param {String} filePath the pdf file to scan for streams
- * @param {number} size the pdf size
+ * @param {number} pdfSize the pdf size
+ * @param {number} pdfCachingMinChunkSize per request threshold
  * @param {number} compileTime
  */
-async function updateOtherEventLoop(contentDir, filePath, size, compileTime) {
+async function updateOtherEventLoop({
+  contentDir,
+  filePath,
+  pdfSize,
+  pdfCachingMinChunkSize,
+  compileTime,
+}) {
   const workerLatencyInMs = 20
   // Prefer getting the timeout error from the worker vs timing out the worker.
   const timeout = getMaxOverhead(compileTime) + workerLatencyInMs
   try {
     return await WORKER_POOL.exec('updateSameEventLoop', [
-      contentDir,
-      filePath,
-      size,
-      compileTime,
+      {
+        contentDir,
+        filePath,
+        pdfSize,
+        pdfCachingMinChunkSize,
+        compileTime,
+      },
     ]).timeout(timeout)
   } catch (e) {
     if (e instanceof workerpool.Promise.TimeoutError) {
@@ -104,10 +133,17 @@ async function updateOtherEventLoop(contentDir, filePath, size, compileTime) {
  *
  * @param {String} contentDir path to directory where content hash files are cached
  * @param {String} filePath the pdf file to scan for streams
- * @param {number} size the pdf size
+ * @param {number} pdfSize the pdf size
+ * @param {number} pdfCachingMinChunkSize per request threshold
  * @param {number} compileTime
  */
-async function updateSameEventLoop(contentDir, filePath, size, compileTime) {
+async function updateSameEventLoop({
+  contentDir,
+  filePath,
+  pdfSize,
+  pdfCachingMinChunkSize,
+  compileTime,
+}) {
   const checkDeadline = getDeadlineChecker(compileTime)
   const contentRanges = []
   const newContentRanges = []
@@ -119,8 +155,7 @@ async function updateSameEventLoop(contentDir, filePath, size, compileTime) {
 
   const { xRefEntries, startXRefTable } = await parseXrefTable(
     filePath,
-    size,
-    checkDeadline
+    pdfSize
   )
 
   xRefEntries.sort((a, b) => {
@@ -147,7 +182,7 @@ async function updateSameEventLoop(contentDir, filePath, size, compileTime) {
     }
     const size = object.endOffset - object.offset
     object.size = size
-    if (size < Settings.pdfCachingMinChunkSize) {
+    if (size < pdfCachingMinChunkSize) {
       continue
     }
     uncompressedObjects.push({ object, idx: uncompressedObjects.length })

@@ -18,7 +18,7 @@ export function getPdfCachingMetrics() {
 }
 
 export function trackPdfDownload(response, compileTimeClientE2E, t0) {
-  const { timings } = response
+  const { timings, pdfCachingMinChunkSize } = response
 
   const deliveryLatencies = {
     compileTimeClientE2E,
@@ -41,6 +41,7 @@ export function trackPdfDownload(response, compileTimeClientE2E, t0) {
     if (trackPdfDownloadEnabled) {
       // Submit latency along with compile context.
       submitCompileMetrics({
+        pdfCachingMinChunkSize,
         ...deliveryLatencies,
         ...pdfCachingMetrics,
       })

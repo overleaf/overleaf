@@ -396,10 +396,13 @@ module.exports = OutputCacheManager = {
           request.metricsOpts
         )
         ContentCacheManager.update(
-          contentDir,
-          outputFilePath,
-          pdfSize,
-          timings.compile,
+          {
+            contentDir,
+            filePath: outputFilePath,
+            pdfSize,
+            pdfCachingMinChunkSize: request.pdfCachingMinChunkSize,
+            compileTime: timings.compile,
+          },
           function (err, result) {
             if (err && err instanceof NoXrefTableError) {
               return callback(null, err.message)
