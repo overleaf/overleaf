@@ -1168,6 +1168,7 @@ const ProjectController = {
               req.query && 'galileoFeatures' in req.query
                 ? req.query.galileoFeatures.split(',').map(f => f.trim())
                 : ['all']
+            const galileoPromptWords = req.query?.galileoPromptWords || ''
 
             const dictionaryEditorEnabled =
               !Features.hasFeature('saas') ||
@@ -1253,6 +1254,7 @@ const ProjectController = {
               showSymbolPalette,
               galileoEnabled,
               galileoFeatures,
+              galileoPromptWords,
               detachRole,
               metadata: { viewport: false },
               showUpgradePrompt,
