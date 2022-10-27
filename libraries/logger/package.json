@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@google-cloud/logging-bunyan": "^3.2.0",
-    "@overleaf/o-error": "^3.4.0",
+    "@overleaf/o-error": "*",
     "@sentry/node": "^6.13.2",
     "bunyan": "^1.8.14",
     "node-fetch": "^2.6.7"
@@ -31,6 +31,6 @@
     "sinon-chai": "^3.7.0"
   },
   "peerDependencies": {
-    "@overleaf/metrics": ">= 4.0.0"
+    "@overleaf/metrics": "*"
   }
 }

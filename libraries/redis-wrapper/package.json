@@ -23,7 +23,7 @@
   "peerDependencies": {
     "@overleaf/logger": "*",
     "@overleaf/metrics": "*",
-    "@overleaf/o-error": "^3.4.0"
+    "@overleaf/o-error": "*"
   },
   "dependencies": {
     "async": "^3.2.2",
@@ -31,7 +31,7 @@
   },
   "devDependencies": {
     "@overleaf/logger": "*",
-    "@overleaf/o-error": "^3.4.0",
+    "@overleaf/o-error": "*",
     "chai": "^4.3.6",
     "mocha": "^8.4.0",
     "sandboxed-module": "^2.0.4",
