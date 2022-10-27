@@ -96,7 +96,7 @@ function checkPasswordForReuseInBackground(password) {
 
   isPasswordReused(password)
     .then(isReused => {
-      Metrics.inc('password_re_use', 1, {
+      Metrics.inc('password_re_use', {
         status: isReused ? 're-used' : 'unique',
       })
     })
@@ -108,7 +108,7 @@ function checkPasswordForReuseInBackground(password) {
       err = new Error(err.message)
 
       logger.err({ err }, 'cannot check password for re-use')
-      Metrics.inc('password_re_use', 1, { status: 'failure' })
+      Metrics.inc('password_re_use', { status: 'failure' })
     })
 }
 
