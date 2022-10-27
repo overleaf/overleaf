@@ -24,6 +24,8 @@ const DrainManager = require('./app/js/DrainManager')
 const HealthCheckManager = require('./app/js/HealthCheckManager')
 const DeploymentManager = require('./app/js/DeploymentManager')
 
+const Path = require('path')
+
 // NOTE: debug is invoked for every blob that is put on the wire
 const socketIoLogger = {
   error(...message) {
@@ -62,8 +64,8 @@ const sessionSockets = new SessionSockets(
 Metrics.injectMetricsRoute(app)
 
 io.configure(function () {
-  io.enable('browser client minification')
-  io.enable('browser client etag')
+  // Don't use socket.io to serve client
+  io.disable('browser client')
 
   // Fix for Safari 5 error of "Error during WebSocket handshake: location mismatch"
   // See http://answers.dotcloud.com/question/578/problem-with-websocket-over-ssl-in-safari-with
@@ -79,6 +81,15 @@ io.configure(function () {
     'xhr-polling',
     'jsonp-polling',
   ])
+})
+
+// Serve socket.io.js client file from imported dist folder
+// The express sendFile method correctly handles conditional
+// requests using the last-modified time and etag (which is
+// a combination of mtime and size)
+const socketIOClientFolder = require('socket.io-client').dist
+app.get('/socket.io/socket.io.js', function (req, res) {
+  res.sendFile(Path.join(socketIOClientFolder, 'socket.io.min.js'))
 })
 
 // a 200 response on '/' is required for load balancer health checks
