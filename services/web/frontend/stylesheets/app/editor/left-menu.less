@@ -32,6 +32,33 @@
   }
 
   ul.nav {
+    .left-menu-button {
+      cursor: pointer;
+      padding: (@line-height-computed / 4);
+      font-weight: 700;
+      color: @link-color;
+      display: flex;
+      align-items: center;
+      width: 100%;
+      background-color: inherit;
+      border: none;
+
+      i {
+        margin-right: @margin-sm;
+        color: @gray;
+      }
+
+      &:hover,
+      &:active {
+        background-color: @link-color;
+        color: white;
+
+        i {
+          color: white;
+        }
+      }
+    }
+
     a {
       cursor: pointer;
       &:hover,
