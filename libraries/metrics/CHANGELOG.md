@@ -1,3 +1,7 @@
+## v4.1.0
+
+* Allows skipping the `sampleRate` argument.
+
 ## v4.0.0
 
 * Send unmodified request and response to logger.

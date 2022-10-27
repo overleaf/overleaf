@@ -100,6 +100,10 @@ function set(key, value, sampleRate = 1) {
 }
 
 function inc(key, sampleRate = 1, opts = {}) {
+  if (arguments.length === 2 && typeof sampleRate === 'object') {
+    opts = sampleRate
+  }
+
   key = buildPromKey(key)
   promWrapper.metric('counter', key).inc(opts)
   if (process.env.DEBUG_METRICS) {
@@ -108,6 +112,10 @@ function inc(key, sampleRate = 1, opts = {}) {
 }
 
 function count(key, count, sampleRate = 1, opts = {}) {
+  if (arguments.length === 3 && typeof sampleRate === 'object') {
+    opts = sampleRate
+  }
+
   key = buildPromKey(key)
   promWrapper.metric('counter', key).inc(opts, count)
   if (process.env.DEBUG_METRICS) {
@@ -124,6 +132,10 @@ function summary(key, value, opts = {}) {
 }
 
 function timing(key, timeSpan, sampleRate = 1, opts = {}) {
+  if (arguments.length === 3 && typeof sampleRate === 'object') {
+    opts = sampleRate
+  }
+
   key = buildPromKey('timer_' + key)
   promWrapper.metric('summary', key).observe(opts, timeSpan)
   if (process.env.DEBUG_METRICS) {
@@ -141,6 +153,21 @@ function histogram(key, value, buckets, opts = {}) {
 
 class Timer {
   constructor(key, sampleRate = 1, opts = {}, buckets) {
+    if (typeof sampleRate === 'object') {
+      // called with (key, opts, buckets)
+      if (arguments.length === 3) {
+        buckets = opts
+        opts = sampleRate
+      }
+
+      // called with (key, opts)
+      if (arguments.length === 2) {
+        opts = sampleRate
+      }
+
+      sampleRate = 1 // default value to pass to timing function
+    }
+
     this.start = new Date()
     key = buildPromKey(key)
     this.key = key
@@ -161,6 +188,10 @@ class Timer {
 }
 
 function gauge(key, value, sampleRate = 1, opts = {}) {
+  if (arguments.length === 3 && typeof sampleRate === 'object') {
+    opts = sampleRate
+  }
+
   key = buildPromKey(key)
   promWrapper
     .metric('gauge', key)
