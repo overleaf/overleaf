@@ -269,15 +269,26 @@ If the project has been renamed please look in your project list for a new proje
 
           // Ignore if no typing has happened
           if (cm6PerfData.numberOfEntries > 0) {
-            segmentation.cm6PerfMax = cm6PerfData.max
-            segmentation.cm6PerfMean = cm6PerfData.mean
-            segmentation.cm6PerfMedian = cm6PerfData.median
-            segmentation.cm6PerfNinetyFifthPercentile =
-              cm6PerfData.ninetyFifthPercentile
-            segmentation.cm6PerfDocLength = cm6PerfData.docLength
-            segmentation.cm6PerfNumberOfEntries = cm6PerfData.numberOfEntries
-            segmentation.cm6PerfMaxUserEventsBetweenDomUpdates =
-              cm6PerfData.maxUserEventsBetweenDomUpdates
+            const perfProps = [
+              'Max',
+              'Mean',
+              'Median',
+              'NinetyFifthPercentile',
+              'DocLength',
+              'NumberOfEntries',
+              'MaxUserEventsBetweenDomUpdates',
+              'Grammarly',
+              'SessionLength',
+              'Memory',
+            ]
+
+            for (const prop of perfProps) {
+              const perfValue =
+                cm6PerfData[prop.charAt(0).toLowerCase() + prop.slice(1)]
+              if (perfValue !== null) {
+                segmentation['cm6Perf' + prop] = perfValue
+              }
+            }
           }
         }
 

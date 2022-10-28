@@ -1,11 +1,14 @@
 import { Transaction } from '@codemirror/state'
 import { EditorView } from '@codemirror/view'
+import { round } from 'lodash'
+import grammarlyExtensionPresent from '../shared/utils/grammarly'
 
 const TIMER_START_NAME = 'CM6-BeforeUpdate'
 const TIMER_END_NAME = 'CM6-AfterUpdate'
 const TIMER_MEASURE_NAME = 'CM6-Update'
 
 let latestDocLength = 0
+const sessionStart = Date.now()
 
 let performanceMeasureOptionsSupport = false
 
@@ -15,6 +18,20 @@ try {
   performance.measure(testMeasureName, { start: performance.now() })
   performance.clearMeasures(testMeasureName)
   performanceMeasureOptionsSupport = true
+} catch (e) {}
+
+let performanceMemorySupport = false
+
+function measureMemoryUsage() {
+  // @ts-ignore
+  return performance.memory.usedJSHeapSize
+}
+
+try {
+  if ('memory' in window.performance) {
+    measureMemoryUsage()
+    performanceMemorySupport = true
+  }
 } catch (e) {}
 
 function isInputOrDelete(userEventType: string | undefined) {
@@ -111,15 +128,22 @@ export function reportCM6Perf() {
     .map(({ duration }) => duration)
     .sort((a, b) => a - b)
 
-  const max = calculateMax(inputDurations)
-  const mean = calculateMean(inputDurations)
-  const median = calculateMedian(inputDurations)
-  const ninetyFifthPercentile = calculate95thPercentile(inputDurations)
+  const max = round(calculateMax(inputDurations), 2)
+  const mean = round(calculateMean(inputDurations), 2)
+  const median = round(calculateMedian(inputDurations), 2)
+  const ninetyFifthPercentile = round(
+    calculate95thPercentile(inputDurations),
+    2
+  )
   const maxUserEventsBetweenDomUpdates = calculateMax(
     inputEvents.map(e => e.detail.userEventsSinceDomUpdateCount)
   )
+  const grammarly = grammarlyExtensionPresent()
+  const sessionLength = Math.floor((Date.now() - sessionStart) / 1000) // In seconds
 
   performance.clearMeasures(TIMER_MEASURE_NAME)
+
+  const memory = performanceMemorySupport ? measureMemoryUsage() : null
 
   return {
     max,
@@ -129,6 +153,9 @@ export function reportCM6Perf() {
     maxUserEventsBetweenDomUpdates,
     docLength: latestDocLength,
     numberOfEntries: inputDurations.length,
+    grammarly,
+    sessionLength,
+    memory,
   }
 }
 
