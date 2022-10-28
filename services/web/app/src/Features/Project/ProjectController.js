@@ -509,6 +509,24 @@ const ProjectController = {
             }
           )
         },
+        newJoinerSurveyBannerActive(cb) {
+          SplitTestHandler.getAssignment(
+            req,
+            res,
+            'new-joiner-survey-banner',
+            (err, assignment) => {
+              if (err) {
+                logger.warn(
+                  { err },
+                  'failed to get "new-joiner-survey-banner" split test assignment'
+                )
+                cb(null, false)
+              } else {
+                cb(null, assignment.variant === 'active')
+              }
+            }
+          )
+        },
         survey(cb) {
           SurveyHandler.getSurvey(userId, (err, survey) => {
             if (err) {
@@ -526,8 +544,13 @@ const ProjectController = {
           OError.tag(err, 'error getting data for project list page')
           return next(err)
         }
-        const { notifications, user, userEmailsData, primaryEmailCheckActive } =
-          results
+        const {
+          notifications,
+          user,
+          userEmailsData,
+          primaryEmailCheckActive,
+          newJoinerSurveyBannerActive,
+        } = results
 
         if (
           user &&
@@ -656,6 +679,12 @@ const ProjectController = {
           )
         }
 
+        const isNewJoiner =
+          user.signUpDate &&
+          Date.now() - user.signUpDate.getTime() < 1000 * 60 * 60 * 24
+        const shouldDisplayNewJoinerBanner =
+          newJoinerSurveyBannerActive && isNewJoiner
+
         ProjectController._injectProjectUsers(projects, (error, projects) => {
           if (error != null) {
             return next(error)
@@ -680,6 +709,7 @@ const ProjectController = {
             showThinFooter: true, // don't show the fat footer on the projects dashboard, as there's a fixed space available
             usersBestSubscription: results.usersBestSubscription,
             survey: results.survey,
+            shouldDisplayNewJoinerBanner,
           }
 
           const paidUser =
