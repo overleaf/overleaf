@@ -18,8 +18,7 @@ export default defineConfig({
     setupNodeEvents(on, config) {
       //
     },
-    specPattern:
-      './{test,modules/**/test}/frontend/components/**/*.spec.{js,ts,tsx}',
+    specPattern: './{test,modules/**/test}/frontend/**/*.spec.{js,ts,tsx}',
   },
   retries: {
     runMode: 3,
