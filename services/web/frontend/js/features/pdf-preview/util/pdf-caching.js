@@ -843,13 +843,36 @@ export async function fetchRange({
       //     | REQUESTED_RANGE |
       //                   | CHUNK |
       const offsetEnd = Math.max(chunk.end - end, 0)
+      const oldDataLength = data.length
       if (offsetStart > 0 || offsetEnd > 0) {
         // compute index positions for slice to handle case where offsetEnd=0
         const chunkSize = chunk.end - chunk.start
         data = data.subarray(offsetStart, chunkSize - offsetEnd)
       }
+      const newDataLength = data.length
       const insertPosition = Math.max(chunk.start - start, 0)
-      reassembledBlob.set(data, insertPosition)
+      try {
+        reassembledBlob.set(data, insertPosition)
+      } catch (err) {
+        const reassembledBlobLength = reassembledBlob.length
+        const trimmedChunk = {
+          start: chunk.start,
+          end: chunk.end,
+          hash: chunk.hash,
+          objectId: new TextDecoder().decode(chunk.objectId),
+        }
+        throw OError.tag(err, 'broken reassembly', {
+          start,
+          end,
+          chunk: trimmedChunk,
+          oldDataLength,
+          newDataLength,
+          offsetStart,
+          offsetEnd,
+          insertPosition,
+          reassembledBlobLength,
+        })
+      }
     })
 
   timer.finishBlockingCompute()
