@@ -5,6 +5,7 @@ import {
   useEffect,
   useReducer,
   useMemo,
+  useRef,
 } from 'react'
 import PropTypes from 'prop-types'
 import { v4 as uuid } from 'uuid'
@@ -17,8 +18,6 @@ import useBrowserWindow from '../../../shared/hooks/use-browser-window'
 import { useLayoutContext } from '../../../shared/context/layout-context'
 
 const PAGE_SIZE = 50
-
-const clientId = uuid()
 
 export function chatReducer(state, action) {
   switch (action.type) {
@@ -116,6 +115,7 @@ ChatContext.Provider.propTypes = {
 }
 
 export function ChatProvider({ children }) {
+  const clientId = useRef(uuid())
   const user = useUserContext({
     id: PropTypes.string.isRequired,
   })
@@ -197,7 +197,7 @@ export function ChatProvider({ children }) {
 
       const url = `/project/${projectId}/messages`
       postJSON(url, {
-        body: { content, client_id: clientId },
+        body: { content, client_id: clientId.current },
       }).catch(error => {
         dispatch({
           type: 'ERROR',
@@ -220,7 +220,7 @@ export function ChatProvider({ children }) {
     function receivedMessage(message) {
       // If the message is from the current client id, then we are receiving the sent message back from the socket.
       // Ignore it to prevent double message.
-      if (message.clientId === clientId) return
+      if (message.clientId === clientId.current) return
 
       dispatch({ type: 'RECEIVE_MESSAGE', message })
     }

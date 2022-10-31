@@ -3,9 +3,10 @@
 
 import { renderHook, act } from '@testing-library/react-hooks/dom'
 import { expect } from 'chai'
+import sinon from 'sinon'
 import fetchMock from 'fetch-mock'
 import EventEmitter from 'events'
-
+import uuid from 'uuid'
 import { useChatContext } from '../../../../../frontend/js/features/chat/context/chat-context'
 import {
   ChatProviders,
@@ -19,6 +20,7 @@ describe('ChatContext', function () {
     first_name: 'fake_user_first_name',
     email: 'fake@example.com',
   }
+  const uuidValue = '00000000-0000-0000-0000-000000000000'
 
   beforeEach(function () {
     fetchMock.reset()
@@ -28,12 +30,15 @@ describe('ChatContext', function () {
 
     window.metaAttributesCache = new Map()
     window.metaAttributesCache.set('ol-user', user)
+
+    this.stub = sinon.stub(uuid, 'v4').returns(uuidValue)
   })
 
   afterEach(function () {
     tearDownMathJaxStubs()
 
     window.metaAttributesCache = new Map()
+    this.stub.restore()
   })
 
   describe('socket connection', function () {
@@ -105,22 +110,25 @@ describe('ChatContext', function () {
       await waitForNextUpdate()
 
       // Send a message from the current user
-      result.current.sendMessage('sent message')
+      const sentMsg = 'sent message'
+      result.current.sendMessage(sentMsg)
 
-      // Receive a message from the current user
-      socket.emit('new-chat-message', {
-        id: 'msg_1',
-        content: 'received message',
-        timestamp: Date.now(),
-        user,
+      act(() => {
+        // Receive a message from the current user
+        socket.emit('new-chat-message', {
+          id: 'msg_1',
+          content: 'received message',
+          timestamp: Date.now(),
+          user,
+          clientId: uuidValue,
+        })
       })
 
-      // Expect that the sent message is shown, but the new message is not
-      const messageContents = result.current.messages.map(
-        ({ contents }) => contents[0]
-      )
-      expect(messageContents).to.include('sent message')
-      expect(messageContents).to.not.include('received message')
+      expect(result.current.messages).to.have.length(1)
+
+      const [message] = result.current.messages
+
+      expect(message.contents).to.deep.equal([sentMsg])
     })
 
     it('adds the new message from the current user if another message was received after sending', async function () {
@@ -134,44 +142,47 @@ describe('ChatContext', function () {
       await waitForNextUpdate()
 
       // Send a message from the current user
-      result.current.sendMessage('sent message from current user')
+      const sentMsg = 'sent message from current user'
+      result.current.sendMessage(sentMsg)
 
       const [sentMessageFromCurrentUser] = result.current.messages
-      expect(sentMessageFromCurrentUser.contents).to.deep.equal([
-        'sent message from current user',
-      ])
+      expect(sentMessageFromCurrentUser.contents).to.deep.equal([sentMsg])
+
+      const otherMsg = 'new message from other user'
 
       act(() => {
         // Receive a message from another user.
         socket.emit('new-chat-message', {
           id: 'msg_1',
-          content: 'new message from other user',
+          content: otherMsg,
           timestamp: Date.now(),
           user: {
             id: 'another_fake_user',
             first_name: 'another_fake_user_first_name',
             email: 'another_fake@example.com',
           },
+          clientId: '123',
         })
       })
 
       const [, messageFromOtherUser] = result.current.messages
-      expect(messageFromOtherUser.contents).to.deep.equal([
-        'new message from other user',
-      ])
+      expect(messageFromOtherUser.contents).to.deep.equal([otherMsg])
 
-      // Receive a message from the current user
-      socket.emit('new-chat-message', {
-        id: 'msg_2',
-        content: 'received message from current user',
-        timestamp: Date.now(),
-        user,
+      act(() => {
+        // Receive a message from the current user
+        socket.emit('new-chat-message', {
+          id: 'msg_2',
+          content: 'received message from current user',
+          timestamp: Date.now(),
+          user,
+          clientId: uuidValue,
+        })
       })
 
       // Since the current user didn't just send a message, it is now shown
-      const [, , receivedMessageFromCurrentUser] = result.current.messages
-      expect(receivedMessageFromCurrentUser.contents).to.deep.equal([
-        'received message from current user',
+      expect(result.current.messages).to.deep.equal([
+        sentMessageFromCurrentUser,
+        messageFromOtherUser,
       ])
     })
   })
