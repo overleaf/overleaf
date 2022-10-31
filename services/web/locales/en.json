@@ -1584,6 +1584,7 @@
   "link_institutional_email_get_started": "Link an institutional email address to your account to get started.",
   "looks_like_youre_at": "It looks like you’re at <0>__institutionName__</0>!",
   "add_affiliation": "Add Affiliation",
+  "are_you_affiliated_with_an_institution": "Are you affiliated with an institution?",
   "did_you_know_institution_providing_professional": "Did you know that __institutionName__ is providing <0>free __appName__ Professional features</0> to everyone at __institutionName__?",
   "add_email_to_claim_features": "Add an institutional email address to claim your features.",
   "please_change_primary_to_remove": "Please change your primary email in order to remove",

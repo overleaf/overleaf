@@ -10,6 +10,7 @@ import CurrentPlanWidget from './current-plan-widget/current-plan-widget'
 import NewProjectButton from './new-project-button'
 import ProjectListTable from './table/project-list-table'
 import SidebarFilters from './sidebar/sidebar-filters'
+import AddAffiliation, { useAddAffiliation } from './sidebar/add-affiliation'
 import SurveyWidget from './survey-widget'
 import WelcomeMessage from './welcome-message'
 import LoadingBranded from '../../../shared/components/loading-branded'
@@ -42,6 +43,7 @@ function ProjectListPageContent() {
     setSearchText,
     selectedProjects,
   } = useProjectListContext()
+  const { show: showAddAffiliationWidget } = useAddAffiliation()
 
   useEffect(() => {
     eventTracking.sendMB('loads_v2_dash', {})
@@ -62,6 +64,8 @@ function ProjectListPageContent() {
                 <aside className="project-list-sidebar-react">
                   <NewProjectButton id="new-project-button-sidebar" />
                   <SidebarFilters />
+                  {showAddAffiliationWidget && <hr />}
+                  <AddAffiliation />
                 </aside>
               </div>
             </div>

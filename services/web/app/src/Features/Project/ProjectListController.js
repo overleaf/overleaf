@@ -293,6 +293,7 @@ async function projectListReactPage(req, res, next) {
     notifications,
     notificationsInstitution,
     user,
+    userAffiliations,
     userEmails,
     reconfirmedViaSAML,
     allInReconfirmNotificationPeriods,
