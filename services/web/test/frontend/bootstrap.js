@@ -1,6 +1,6 @@
 // Run babel on tests to allow support for import/export statements in Node
 require('@babel/register')({
-  extensions: ['.ts', '.tsx', '.js', '.jsx'],
+  extensions: ['.ts', '.tsx', '.js', '.jsx', '.mjs'],
 })
 
 // Load JSDOM to mock the DOM in Node
