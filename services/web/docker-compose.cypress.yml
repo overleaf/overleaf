@@ -1,0 +1,12 @@
+services:
+  cypress:
+    image: cypress/included:10.9.0
+    volumes:
+      - ../../:/overleaf
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    working_dir: /overleaf/services/web
+    entrypoint: npm
+    user: "${DOCKER_USER:-1000:1000}"
+    environment:
+      - "DISPLAY=${DISPLAY:-:0}"
+#      - "DEBUG=cypress.*"

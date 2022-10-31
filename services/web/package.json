@@ -34,6 +34,8 @@
     "convert-themes": "node modules/source-editor/frontend/js/themes/convert.js",
     "cypress:open-ct": "SHARELATEX_CONFIG=$PWD/config/settings.webpack.js cypress open --component",
     "cypress:run-ct": "SHARELATEX_CONFIG=$PWD/config/settings.webpack.js cypress run --component",
+    "cypress:docker:open-ct": "DOCKER_USER=\"$(id -u):$(id -g)\" docker-compose -f docker-compose.cypress.yml run --rm cypress run cypress:open-ct",
+    "cypress:docker:run-ct": "DOCKER_USER=\"$(id -u):$(id -g)\" docker-compose -f docker-compose.cypress.yml run --rm cypress run cypress:run-ct",
     "lezer-latex:generate": "if [ ! -d $(pwd)/modules/source-editor ]; then echo \"'source-editor' module is not available\"; exit 0; fi; node modules/source-editor/scripts/lezer-latex/generate.js",
     "lezer-latex:run": "node modules/source-editor/scripts/lezer-latex/run.mjs",
     "lezer-latex:benchmark": "node modules/source-editor/scripts/lezer-latex/benchmark.mjs",
