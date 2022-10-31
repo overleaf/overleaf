@@ -20,7 +20,7 @@ const RedisStore = require('connect-redis')(session)
 const bodyParser = require('./BodyParserWrapper')
 const methodOverride = require('method-override')
 const cookieParser = require('cookie-parser')
-const bearerToken = require('express-bearer-token')
+const bearerTokenMiddleware = require('express-bearer-token')
 
 const passport = require('passport')
 const LocalStrategy = require('passport-local').Strategy
@@ -67,7 +67,7 @@ if (Settings.behindProxy) {
    * X-Original-Forwarded-For. Express expects all proxy IPs to be in a comma
    * separated list in X-Forwarded-For.
    */
-  app.use((req, res, next) => {
+  app.use(function getForwardedForHeader(req, res, next) {
     if (
       req.headers['x-original-forwarded-for'] &&
       req.headers['x-forwarded-for']
@@ -100,7 +100,7 @@ Object.defineProperty(app.request, 'ip', {
     return ip
   },
 })
-app.use(function (req, res, next) {
+app.use(function ignoreAbortedConnections(req, res, next) {
   if (req.destroyed) {
     // Request has been aborted already.
     return
@@ -115,7 +115,7 @@ app.use(function (req, res, next) {
 
 if (Settings.exposeHostname) {
   const HOSTNAME = require('os').hostname()
-  app.use((req, res, next) => {
+  app.use(function exposeHostname(req, res, next) {
     res.setHeader('X-Served-By', HOSTNAME)
     next()
   })
@@ -135,7 +135,8 @@ Modules.registerAppMiddleware(app)
 app.use(bodyParser.urlencoded({ extended: true, limit: '2mb' }))
 app.use(bodyParser.json({ limit: Settings.max_json_request_size }))
 app.use(methodOverride())
-app.use(bearerToken())
+// add explicit name for telemetry
+app.use(bearerTokenMiddleware())
 
 app.use(metrics.http.monitor(logger))
 
@@ -206,7 +207,7 @@ webRouter.use(translations.setLangBasedOnDomainMiddleware)
 
 if (Settings.cookieRollingSession) {
   // Measure expiry from last request, not last login
-  webRouter.use(function (req, res, next) {
+  webRouter.use(function touchSession(req, res, next) {
     if (!req.session.noSessionCallback) {
       req.session.touch()
       if (SessionManager.isUserLoggedIn(req.session)) {
@@ -229,7 +230,7 @@ expressLocals(webRouter, privateApiRouter, publicApiRouter)
 
 webRouter.use(SessionAutostartMiddleware.invokeCallbackMiddleware)
 
-webRouter.use(function (req, res, next) {
+webRouter.use(function checkIfSiteClosed(req, res, next) {
   if (Settings.siteIsOpen) {
     next()
   } else if (hasAdminAccess(SessionManager.getSessionUser(req.session))) {
@@ -239,7 +240,7 @@ webRouter.use(function (req, res, next) {
   }
 })
 
-webRouter.use(function (req, res, next) {
+webRouter.use(function checkIfEditorClosed(req, res, next) {
   if (Settings.editorIsOpen) {
     next()
   } else if (req.url.indexOf('/admin') === 0) {
@@ -253,7 +254,7 @@ webRouter.use(AuthenticationController.validateAdmin)
 
 // add security headers using Helmet
 const noCacheMiddleware = require('nocache')()
-webRouter.use(function (req, res, next) {
+webRouter.use(function addNoCacheHeader(req, res, next) {
   const isLoggedIn = SessionManager.isUserLoggedIn(req.session)
   const isProjectPage = !!req.path.match('^/project/[a-f0-9]{24}$')
   if (isLoggedIn || isProjectPage) {

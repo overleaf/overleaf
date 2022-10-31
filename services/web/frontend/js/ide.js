@@ -16,6 +16,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+import '../tracing'
 import App from './base'
 import FileTreeManager from './ide/file-tree/FileTreeManager'
 import LoadingManager from './ide/LoadingManager'
@@ -64,7 +65,6 @@ import './features/editor-navigation-toolbar/controllers/editor-navigation-toolb
 import './features/pdf-preview/controllers/pdf-preview-controller'
 import './features/share-project-modal/controllers/react-share-project-modal-controller'
 import './features/source-editor/controllers/editor-switch-controller'
-import getMeta from './utils/meta'
 import { cleanupServiceWorker } from './utils/service-worker-cleanup'
 import { reportCM6Perf } from './infrastructure/cm6-performance'
 

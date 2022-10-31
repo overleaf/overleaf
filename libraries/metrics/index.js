@@ -3,6 +3,7 @@ const os = require('os')
 const ExpressCompression = require('compression')
 const promClient = require('prom-client')
 const promWrapper = require('./prom_wrapper')
+const tracing = require('./tracing')
 
 const DEFAULT_APP_NAME = 'unknown'
 
@@ -29,6 +30,9 @@ function configure(opts = {}) {
  */
 function initialize(appName, opts = {}) {
   appName = appName || DEFAULT_APP_NAME
+  if (tracing.tracingEnabled()) {
+    tracing.initialize(appName)
+  }
   configure({ ...opts, appName })
   collectDefaultMetrics({ timeout: 5000, prefix: '' })
   promWrapper.setupSweeping()

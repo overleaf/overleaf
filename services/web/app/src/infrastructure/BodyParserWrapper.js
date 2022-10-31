@@ -14,7 +14,7 @@ function isBodyParserError(nextArg) {
 
 const wrapBodyParser = method => opts => {
   const middleware = bodyParser[method](opts)
-  return (req, res, next) => {
+  return function bodyParser(req, res, next) {
     middleware(req, res, nextArg => {
       if (isBodyParserError(nextArg)) {
         return HttpErrorHandler.handleErrorByStatusCode(

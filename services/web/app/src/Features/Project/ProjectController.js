@@ -1289,6 +1289,7 @@ const ProjectController = {
               metadata: { viewport: false },
               showUpgradePrompt,
               fixedSizeDocument: true,
+              useOpenTelemetry: Settings.useOpenTelemetryClient,
             })
             timer.done()
           }
