@@ -536,10 +536,10 @@ function addPrefetchingChunks({
     return
   }
 
-  let extra = []
+  let extraChunks = []
   if (prefetchXRefTable) {
     // Prefetch the dynamic chunks around the xref table.
-    extra = skipPrefetched(
+    extraChunks = skipPrefetched(
       getInterleavingDynamicChunks(
         getMatchingChunks(file.ranges, startXRefTableRange, file.size),
         startXRefTableRange,
@@ -552,7 +552,7 @@ function addPrefetchingChunks({
   }
   // Stop at the xref table range if present -- we may prefetch it early ^^^.
   const prefetchEnd = startXRefTableRange || file.size
-  extra = extra.concat(
+  extraChunks = extraChunks.concat(
     skipPrefetched(
       getInterleavingDynamicChunks(
         getMatchingChunks(file.ranges, end, prefetchEnd),
@@ -568,28 +568,49 @@ function addPrefetchingChunks({
   let sum =
     countBytes(dynamicChunks) +
     HEADER_OVERHEAD_PER_MULTI_PART_CHUNK * dynamicChunks.length
-  for (const chunk of extra) {
-    sum += chunk.end - chunk.start + HEADER_OVERHEAD_PER_MULTI_PART_CHUNK
-    if (sum > PDF_JS_CHUNK_SIZE) {
-      // Stop prefetching when the range is full.
+  for (const chunk of extraChunks) {
+    const downloadSize =
+      chunk.end - chunk.start + HEADER_OVERHEAD_PER_MULTI_PART_CHUNK
+    if (sum + downloadSize > PDF_JS_CHUNK_SIZE) {
+      // In prefetching this chunk we would exceed the bandwidth limit.
+      // Try to prefetch another (smaller) chunk.
+      continue
     }
     const sibling = dynamicChunks.find(
       sibling => sibling.end === chunk.start || sibling.start === chunk.end
     )
     if (sibling) {
-      // Just expand the chunk.
+      sum += downloadSize
+      // Just expand the existing dynamic chunk.
       sibling.start = Math.min(sibling.start, chunk.start)
       sibling.end = Math.max(sibling.end, chunk.end)
       continue
     }
-    if (dynamicChunks.length === MULTI_PART_THRESHOLD) {
-      // Stop prefetching when we would switch to a multipart request.
-      // (We continue in case we are already doing a multipart request.)
-      break
+    if (dynamicChunks.length > MULTI_PART_THRESHOLD) {
+      // We are already performing a multipart request. Add another part.
+    } else if (dynamicChunks.length < MULTI_PART_THRESHOLD) {
+      // We are not yet performing a multipart request. Add another request.
+    } else {
+      // In prefetching this chunk we would switch to a multipart request.
+      // Try to prefetch another (smaller) chunk.
+      continue
     }
+    sum += downloadSize
     dynamicChunks.push(chunk)
   }
   dynamicChunks.sort(sortByStartASC)
+
+  // Ensure that no chunks are overlapping.
+  let lastEnd = 0
+  for (const [idx, chunk] of dynamicChunks.entries()) {
+    if (chunk.start < lastEnd) {
+      throw new OError('detected overlapping dynamic chunks', {
+        chunk,
+        lastChunk: dynamicChunks[idx - 1],
+      })
+    }
+    lastEnd = chunk.end
+  }
 }
 
 class Timer {
