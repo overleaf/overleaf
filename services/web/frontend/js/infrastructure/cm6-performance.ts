@@ -5,19 +5,31 @@ import grammarlyExtensionPresent from '../shared/utils/grammarly'
 
 const TIMER_START_NAME = 'CM6-BeforeUpdate'
 const TIMER_END_NAME = 'CM6-AfterUpdate'
+const TIMER_DOM_UPDATE_NAME = 'CM6-DomUpdate'
 const TIMER_MEASURE_NAME = 'CM6-Update'
 
 let latestDocLength = 0
 const sessionStart = Date.now()
 
-let performanceMeasureOptionsSupport = false
+let performanceOptionsSupport = false
 
-// Check that performance.measure accepts an options object
+// Check that performance.mark and performance.measure accept an options object
 try {
-  const testMeasureName = 'featureTest'
-  performance.measure(testMeasureName, { start: performance.now() })
+  const testMarkName = 'featureTestMark'
+  performance.mark(testMarkName, {
+    startTime: performance.now(),
+    detail: { test: 1 },
+  })
+  performance.clearMarks(testMarkName)
+
+  const testMeasureName = 'featureTestMeasure'
+  performance.measure(testMeasureName, {
+    start: performance.now(),
+    detail: { test: 1 },
+  })
   performance.clearMeasures(testMeasureName)
-  performanceMeasureOptionsSupport = true
+
+  performanceOptionsSupport = true
 } catch (e) {}
 
 let performanceMemorySupport = false
@@ -40,15 +52,26 @@ function isInputOrDelete(userEventType: string | undefined) {
   )
 }
 
+// "keypress" is not strictly accurate; what we really mean is a user-initiated
+// event that either inserts or deletes exactly one character. This corresponds
+// to CM6 user event types input.type, delete.forward or delete.backward
+function isKeypress(userEventType: string | undefined) {
+  return (
+    !!userEventType &&
+    ['input.type', 'delete.forward', 'delete.backward'].includes(userEventType)
+  )
+}
+
 export function timedDispatch() {
   let userEventsSinceDomUpdateCount = 0
+  let keypressesSinceDomUpdateCount = 0
 
   return (
     view: EditorView,
     tr: Transaction,
     dispatchFn: (tr: Transaction) => void
   ) => {
-    if (!performanceMeasureOptionsSupport) {
+    if (!performanceOptionsSupport) {
       dispatchFn(tr)
       return
     }
@@ -64,6 +87,10 @@ export function timedDispatch() {
     if (isInputOrDelete(userEventType)) {
       ++userEventsSinceDomUpdateCount
 
+      if (isKeypress(userEventType)) {
+        ++keypressesSinceDomUpdateCount
+      }
+
       performance.measure(TIMER_MEASURE_NAME, {
         start: TIMER_START_NAME,
         end: TIMER_END_NAME,
@@ -75,7 +102,11 @@ export function timedDispatch() {
       view.requestMeasure({
         key: 'inputEventCounter',
         read() {
+          performance.mark(TIMER_DOM_UPDATE_NAME, {
+            detail: { keypressesSinceDomUpdateCount },
+          })
           userEventsSinceDomUpdateCount = 0
+          keypressesSinceDomUpdateCount = 0
         },
       })
     }
@@ -120,6 +151,10 @@ export function reportCM6Perf() {
     'measure'
   ) as PerformanceMeasure[]
 
+  performance.clearMeasures(TIMER_MEASURE_NAME)
+  performance.clearMarks(TIMER_START_NAME)
+  performance.clearMarks(TIMER_END_NAME)
+
   const inputEvents = cm6Entries.filter(({ detail }) =>
     isInputOrDelete(detail.userEventType)
   )
@@ -141,9 +176,39 @@ export function reportCM6Perf() {
   const grammarly = grammarlyExtensionPresent()
   const sessionLength = Math.floor((Date.now() - sessionStart) / 1000) // In seconds
 
-  performance.clearMeasures(TIMER_MEASURE_NAME)
-
   const memory = performanceMemorySupport ? measureMemoryUsage() : null
+
+  // Get entries for keypress counts between DOM updates
+  const domUpdateEntries = performance.getEntriesByName(
+    TIMER_DOM_UPDATE_NAME,
+    'mark'
+  ) as PerformanceMeasure[]
+
+  performance.clearMarks(TIMER_DOM_UPDATE_NAME)
+
+  let lags = 0
+  let nonLags = 0
+  let longestLag = 0
+  let totalKeypressCount = 0
+
+  for (const entry of domUpdateEntries) {
+    const keypressCount = entry.detail.keypressesSinceDomUpdateCount
+    if (keypressCount === 1) {
+      ++nonLags
+    } else if (keypressCount > 1) {
+      ++lags
+    }
+    if (keypressCount > longestLag) {
+      longestLag = keypressCount
+    }
+    totalKeypressCount += keypressCount
+  }
+
+  const meanLagsPerMeasure = round(lags / (lags + nonLags), 4)
+  const meanKeypressesPerMeasure = round(
+    totalKeypressCount / (lags + nonLags),
+    4
+  )
 
   return {
     max,
@@ -156,6 +221,11 @@ export function reportCM6Perf() {
     grammarly,
     sessionLength,
     memory,
+    lags,
+    nonLags,
+    longestLag,
+    meanLagsPerMeasure,
+    meanKeypressesPerMeasure,
   }
 }
 

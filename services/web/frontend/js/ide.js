@@ -280,6 +280,11 @@ If the project has been renamed please look in your project list for a new proje
               'Grammarly',
               'SessionLength',
               'Memory',
+              'Lags',
+              'NonLags',
+              'LongestLag',
+              'MeanLagsPerMeasure',
+              'MeanKeypressesPerMeasure',
             ]
 
             for (const prop of perfProps) {
