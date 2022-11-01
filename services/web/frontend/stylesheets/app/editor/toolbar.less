@@ -245,6 +245,8 @@
   margin-right: 5px;
   border-radius: @btn-border-radius-base;
   overflow: hidden;
+  background-color: @toggle-switch-bg;
+  padding: 2px;
 }
 
 .toggle-switch-label {
@@ -266,16 +268,12 @@
     height: 100%;
     line-height: 20px; // parent height minus border
     width: 100%;
-    padding: 0 15px;
-    background: linear-gradient(
-      to right,
-      @toggle-switch-bg 50%,
-      @toggle-switch-highlight-color 50%
-    );
-
+    padding: 0 8px;
     background-size: 200% 100%;
     background-position: 0 0;
     transition: background-position 0.12s ease-out;
+    font-size: 14px;
+    font-weight: bold;
   }
 }
 
@@ -290,7 +288,9 @@
     background-position: -100% 0;
   }
   color: @white;
-  font-weight: bold;
+  background-color: @toggle-switch-highlight-color;
+  border-radius: @btn-border-radius-base;
+  box-shadow: 0px 2px 4px rgba(30, 37, 48, 0.16);
 }
 
 .toggle-switch-input:checked:nth-child(2) + .toggle-switch-label {
@@ -308,10 +308,8 @@
   }
 
   .toggle-switch-label span {
-    padding: 1px 6px;
     background: none;
     transition: background 0.12s ease-out;
-    border-right: 1px solid @ol-blue-gray-2;
   }
 
   .toggle-switch-label:first-of-type span {
@@ -321,14 +319,6 @@
   .toggle-switch-label:last-of-type span {
     padding-right: 8px;
     border-right: none;
-  }
-
-  .toggle-switch-input + .toggle-switch-label {
-    background: @toggle-switch-bg;
-  }
-
-  .toggle-switch-input:checked + .toggle-switch-label {
-    background: @toggle-switch-highlight-color;
   }
 }
 
