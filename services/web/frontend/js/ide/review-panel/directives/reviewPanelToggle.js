@@ -42,10 +42,10 @@ export default App.directive('reviewPanelToggle', () => ({
   },
 
   template: `\
-<fieldset class="rp-toggle" ng-click="handleClick();">
+<fieldset class="input-switch" ng-click="handleClick();">
 <legend class="sr-only">{{description}}</legend>
-<input id="rp-toggle-{{$id}}" ng-disabled="isDisabled" type="checkbox" class="rp-toggle-hidden-input" ng-model="localModel" ng-change="onChange()" />
-<label for="rp-toggle-{{$id}}" class="rp-toggle-btn"></label>
+<input id="input-switch-{{$id}}" ng-disabled="isDisabled" type="checkbox" class="input-switch-hidden-input" ng-model="localModel" ng-change="onChange()" />
+<label for="input-switch-{{$id}}" class="input-switch-btn"></label>
 </fieldset>\
 `,
 }))

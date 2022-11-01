@@ -82,7 +82,6 @@
 			)
 				span.rp-tc-state-item-name(
 					ng-class="{ 'rp-tc-state-item-name-disabled' : reviewPanel.trackChangesOnForEveryone}"
-					style="color: hsl({{ member.hue }}, 70%, 40%);"
 					tooltip=translate('tc_switch_user_tip')
 					tooltip-placement="left"
 					tooltip-append-to-body="true"
@@ -96,7 +95,7 @@
 				)
 
 			li.rp-tc-state-separator
-			li.rp-tc-state-item.rp-tc-state-item-guests
+			li.rp-tc-state-item
 				span.rp-tc-state-item-name(
 					ng-class="{ 'rp-tc-state-item-name-disabled' : reviewPanel.trackChangesOnForEveryone}"
 					tooltip=translate('tc_switch_guests_tip')
