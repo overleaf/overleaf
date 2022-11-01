@@ -83,8 +83,6 @@ export function generatePdfCachingTransportFactory(PDFJS) {
             OError.getFullInfo(err).url === this.url
           ) {
             // Do not consider a 404 on the main pdf url as pdf caching failure.
-            // Still, bail out during the initial launch phase.
-            metrics.failedOnce = true
             throw new PDFJS.MissingPDFException()
           }
           metrics.failedCount++
