@@ -125,10 +125,19 @@ function backFillObjectContext(chunk, arrayBuffer) {
     return new Uint8Array(arrayBuffer)
   }
   const { size, objectId } = chunk
-  const header = Uint8Array.from(objectId)
   const fullBuffer = new Uint8Array(size)
-  fullBuffer.set(header, 0)
-  fullBuffer.set(new Uint8Array(arrayBuffer), objectId.length)
+  const sourceBuffer = new Uint8Array(arrayBuffer)
+  try {
+    fullBuffer.set(objectId, 0)
+    fullBuffer.set(sourceBuffer, objectId.byteLength)
+  } catch (err) {
+    throw OError.tag(err, 'broken back-filling of object-id', {
+      objectIdByteLength: objectId.byteLength,
+      fullBufferByteLength: fullBuffer.byteLength,
+      arrayBufferByteLength: arrayBuffer.byteLength,
+      sourceBufferByteLength: sourceBuffer.byteLength,
+    })
+  }
   return fullBuffer
 }
 
