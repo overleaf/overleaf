@@ -1,60 +1,15 @@
+@import 'colors.less';
+
 //
 // Variables
 // --------------------------------------------------
-
-@gray-darker: #252525;
-@gray-dark: #505050;
-@gray: #7a7a7a;
-@gray-light: #a4a4a4;
-@gray-lighter: #cfcfcf;
-@gray-lightest: #f0f0f0;
-@white: #ffffff;
-
-// Styleguide colors
-@ol-blue-gray-0: #f4f5f8;
-@ol-blue-gray-1: #e4e8ee;
-@ol-blue-gray-2: #9da7b7;
-@ol-blue-gray-3: #5d6879;
-@ol-blue-gray-4: #455265;
-@ol-blue-gray-5: #2c3645;
-@ol-blue-gray-6: #1e2530;
-
-@ol-green: #138a07;
-@ol-type-green: #107206;
-@ol-dark-green: #004a0e;
-@ol-darker-green: #083c03;
-@ol-blue: #3e70bb;
-@ol-dark-blue: #2857a1;
-@ol-red: #c9453e;
-@ol-dark-red: #a6312b;
-
-@blue: #405ebf;
-@blueDark: #040d2d;
-@green: #46a546;
-@red: #a93529;
-@yellow: #a1a729;
-@orange: #f89406;
-@orange-dark: #9e5e04;
-@pink: #c3325f;
-@purple: #7a43b6;
-
-@brand-primary: @ol-green;
-@brand-secondary: @ol-dark-green;
-@brand-success: @green;
-@brand-info: @ol-blue;
-@brand-warning: @orange;
-@brand-danger: @ol-red;
-
-@ol-type-color: @ol-blue-gray-3;
-@accent-color-primary: @ol-green;
-@accent-color-secondary: @ol-dark-green;
 
 @editor-header-logo-background: url(../../../public/img/ol-brand/overleaf-o-white.svg)
   center / contain no-repeat;
 @editor-loading-logo-padding-top: 115.44%;
 @editor-loading-logo-background-url: url(../../../public/img/ol-brand/overleaf-o-grey.svg);
 @editor-loading-logo-foreground-url: url(../../../public/img/ol-brand/overleaf-o.svg);
-@editor-search-count-color: @ol-blue-gray-4;
+@editor-search-count-color: @neutral-70;
 
 //== Scaffolding
 //
@@ -63,16 +18,16 @@
 //** Background color for `<body>`.
 @body-bg: #fff;
 //** Global text color on `<body>`.
-@text-color: @ol-type-color;
+@text-color: @content-secondary;
 
 //** Global textual link color.
-@link-color: @ol-blue;
-@link-active-color: @ol-dark-green;
+@link-color: @blue;
+@link-active-color: @green-darker;
 //** Link hover color set via `darken()` function.
-@link-hover-color: @ol-dark-blue;
+@link-hover-color: @blue-dark;
 
-@link-color-alt: @ol-type-green;
-@link-hover-color-alt: @ol-dark-green;
+@link-color-alt: @green-dark;
+@link-hover-color-alt: @green-darker;
 @hr-border-alt: @gray-lighter;
 
 //== Typography
@@ -106,7 +61,7 @@
 @headings-font-family: @font-family-serif;
 @headings-font-weight: 500;
 @headings-line-height: 1.35;
-@headings-color: @gray-dark;
+@headings-color: @content-primary;
 
 //-- Iconography
 //
@@ -152,11 +107,15 @@
 @border-radius-base: 3px;
 @border-radius-large: 5px;
 @border-radius-small: 2px;
-@border-width-base: 3px;
-@border-color-base: @ol-blue-gray-2;
+@border-width-base: 3px; // only used by plans and cards
+@border-size: 1.5px;
+@border-color-base: @neutral-40;
 
-@btn-switch-color: @ol-blue-gray-4;
-@btn-switch-hover-color: darken(@ol-blue-gray-4, 8%);
+//** Horizontal line color.
+@hr-border: @neutral-20;
+
+@btn-switch-color: @neutral-70;
+@btn-switch-hover-color: darken(@neutral-70, 8%);
 
 //** Global color for active items (e.g., navs or dropdowns).
 @component-active-color: #fff;
@@ -186,7 +145,7 @@
 @table-bg-active: @table-bg-hover;
 
 //** Border color for table and cell borders.
-@table-border-color: #ddd;
+@table-border-color: @neutral-20;
 
 //== Buttons
 //
@@ -195,19 +154,19 @@
 @btn-font-weight: 700;
 
 @btn-default-color: #fff;
-@btn-default-bg: @ol-blue-gray-4;
+@btn-default-bg: @neutral-70;
 @btn-default-border: transparent;
 
 @btn-primary-color: #fff;
-@btn-primary-bg: @ol-green;
+@btn-primary-bg: @green;
 @btn-primary-border: transparent;
 
 @btn-success-color: #fff;
-@btn-success-bg: @ol-green;
+@btn-success-bg: @green;
 @btn-success-border: transparent;
 
 @btn-info-color: #fff;
-@btn-info-bg: @ol-blue;
+@btn-info-bg: @blue;
 @btn-info-border: transparent;
 
 @btn-warning-color: #fff;
@@ -215,7 +174,7 @@
 @btn-warning-border: transparent;
 
 @btn-danger-color: #fff;
-@btn-danger-bg: @ol-red;
+@btn-danger-bg: @red;
 @btn-danger-border: transparent;
 
 @btn-link-disabled-color: @gray-light;
@@ -227,19 +186,21 @@
 //** `<input>` background color
 @input-bg: #fff;
 //** `<input disabled>` background color
-@input-bg-disabled: @gray-lighter;
+@input-bg-disabled: @color-disabled;
 
 //** Text color for `<input>`s
-@input-color: @ol-blue-gray-3;
+@input-color: @neutral-90;
 //** `<input>` border color
-@input-border: #ccc;
+@input-border: @neutral-40;
 //** `<input>` border radius
-@input-border-radius: unit(@line-height-base, em);
+@input-border-radius: 4px;
 //** Border color for inputs on focus
-@input-border-focus: #66afe9;
+@input-border-focus: @blue-50;
+//** Bordersize for inputs
+@input-border-size: @border-size;
 
 //** Placeholder text color
-@input-color-placeholder: @gray-light;
+@input-color-placeholder: @neutral-60;
 
 //** Default `.form-control` height
 @input-height-base: @line-height-computed + (@padding-base-vertical * 2) - 1;
@@ -392,16 +353,16 @@
 @navbar-collapse-max-height: 380px;
 
 @navbar-default-color: #fff;
-@navbar-default-bg: @ol-blue-gray-6;
+@navbar-default-bg: @neutral-90;
 @navbar-default-border: transparent;
 
 // Navbar links
 @navbar-default-link-color: #fff;
 @navbar-default-link-border-color: @navbar-default-link-color;
-@navbar-default-link-hover-color: @ol-green;
-@navbar-default-link-hover-bg: @ol-green;
+@navbar-default-link-hover-color: @green;
+@navbar-default-link-hover-bg: @green;
 @navbar-default-link-active-color: #fff;
-@navbar-default-link-active-bg: @ol-green;
+@navbar-default-link-active-bg: @green;
 @navbar-default-link-disabled-color: #ccc;
 @navbar-default-link-disabled-bg: transparent;
 
@@ -442,82 +403,54 @@
 //== Pills
 @nav-pills-link-color: @btn-default-bg;
 @nav-pills-link-hover-color: @nav-link-hover-bg;
-@nav-pills-link-hover-bg: darken(
-  @ol-blue-gray-4,
-  8%
-); // match button-variant mixin
+@nav-pills-link-hover-bg: darken(@neutral-70, 8%); // match button-variant mixin
 @nav-pills-border-radius: @border-radius-base;
-@nav-pills-active-link-hover-bg: @ol-dark-green;
+@nav-pills-active-link-hover-bg: @green-darker;
 @nav-pills-active-link-hover-color: @component-active-color;
 
 //== Pagination
 //
 //##
 
-@pagination-color: @ol-dark-green;
+@pagination-color: @green-darker;
 @pagination-bg: #fff;
 @pagination-border: @gray-lighter;
 
-@pagination-hover-color: @ol-dark-green;
+@pagination-hover-color: @green-darker;
 @pagination-hover-bg: @gray-lightest;
 @pagination-hover-border: @gray-lighter;
 
 @pagination-active-color: #fff;
-@pagination-active-bg: @ol-dark-green;
+@pagination-active-bg: @green-darker;
 @pagination-active-border: @gray-lighter;
 
 @pagination-disabled-color: @gray-dark;
 @pagination-disabled-bg: @gray-lightest;
 @pagination-disabled-border: @gray-lighter;
 
-//== Pager
-//
-//##
-
-@pager-bg: @pagination-bg;
-@pager-border: @pagination-border;
-@pager-border-radius: 15px;
-
-@pager-hover-bg: @pagination-hover-bg;
-
-@pager-active-bg: @pagination-active-bg;
-@pager-active-color: @pagination-active-color;
-
-@pager-disabled-color: @pagination-disabled-color;
-
 // Plans
-@table-hover-bg: @ol-blue-gray-0;
+@table-hover-bg: @neutral-10;
 @plans-non-highlighted: white;
-
-//== Jumbotron
-//
-//##
-
-@jumbotron-padding: 30px;
-@jumbotron-color: inherit;
-@jumbotron-bg: @gray-lighter;
-@jumbotron-heading-color: inherit;
-@jumbotron-font-size: ceil((@font-size-base * 1.5));
 
 //== Form states and alerts
 //
 //## Define colors for form feedback states and, by default, alerts.
 
-@state-success-text: darken(@brand-success, 20%);
+@state-success-text: @brand-success;
 @state-success-bg: lighten(@brand-success, 50%);
-@state-success-border: darken(@brand-success, 5%);
+@state-success-border: @brand-success;
 
-@state-info-text: darken(@brand-info, 20%);
+@state-info-text: @content-secondary;
 @state-info-bg: lighten(@brand-info, 47%);
-@state-info-border: darken(@brand-info, 7%);
+@state-info-border: @content-secondary;
 
-@state-warning-text: darken(@brand-warning, 10%);
+@state-warning-text: @brand-warning;
 @state-warning-bg: lighten(@brand-warning, 45%);
 @state-warning-border: @brand-warning;
 
-@state-danger-text: darken(@brand-danger, 10%);
+@state-danger-text: @brand-danger;
 @state-danger-bg: lighten(@brand-danger, 50%);
-@state-danger-border: darken(@brand-danger, 5%);
+@state-danger-border: @brand-danger;
 
 //== Tooltips
 //
@@ -646,8 +579,8 @@
 @alert-danger-text: #fff;
 @alert-danger-border: transparent;
 
-@alert-alt-bg: @ol-blue-gray-1;
-@alert-alt-text: @ol-type-color;
+@alert-alt-bg: @neutral-20;
+@alert-alt-text: @content-secondary;
 @alert-alt-border: transparent;
 
 //== Progress bars
@@ -661,75 +594,15 @@
 @progress-bar-color: #fff;
 
 //** Default progress bar color
-@progress-bar-bg: @ol-blue-gray-4;
+@progress-bar-bg: @neutral-70;
 //** Success progress bar color
-@progress-bar-success-bg: @ol-green;
+@progress-bar-success-bg: @green;
 //** Warning progress bar color
 @progress-bar-warning-bg: @brand-warning;
 //** Danger progress bar color
-@progress-bar-danger-bg: @ol-red;
+@progress-bar-danger-bg: @red;
 //** Info progress bar color
-@progress-bar-info-bg: @ol-blue;
-
-//== List group
-//
-//##
-
-//** Background color on `.list-group-item`
-@list-group-bg: #fff;
-//** `.list-group-item` border color
-@list-group-border: #ddd;
-//** List group border radius
-@list-group-border-radius: @border-radius-base;
-
-//** Background color of single list elements on hover
-@list-group-hover-bg: #f5f5f5;
-//** Text color of active list elements
-@list-group-active-color: @component-active-color;
-//** Background color of active list elements
-@list-group-active-bg: @component-active-bg;
-//** Border color of active list elements
-@list-group-active-border: @list-group-active-bg;
-@list-group-active-text-color: lighten(@list-group-active-bg, 40%);
-
-@list-group-link-color: #555;
-@list-group-link-heading-color: #333;
-
-//== Panels
-//
-//##
-
-@panel-bg: #fff;
-@panel-body-padding: 15px;
-@panel-border-radius: @border-radius-base;
-
-//** Border color for elements within panels
-@panel-inner-border: #ddd;
-@panel-footer-bg: #f5f5f5;
-
-@panel-default-text: @gray-dark;
-@panel-default-border: #ddd;
-@panel-default-heading-bg: #f5f5f5;
-
-@panel-primary-text: #fff;
-@panel-primary-border: @brand-primary;
-@panel-primary-heading-bg: @brand-primary;
-
-@panel-success-text: @state-success-text;
-@panel-success-border: @state-success-border;
-@panel-success-heading-bg: @state-success-bg;
-
-@panel-info-text: @state-info-text;
-@panel-info-border: @state-info-border;
-@panel-info-heading-bg: @state-info-bg;
-
-@panel-warning-text: @state-warning-text;
-@panel-warning-border: @state-warning-border;
-@panel-warning-heading-bg: @state-warning-bg;
-
-@panel-danger-text: @state-danger-text;
-@panel-danger-border: @state-danger-border;
-@panel-danger-heading-bg: @state-danger-bg;
+@progress-bar-info-bg: @blue;
 
 //== Thumbnails
 //
@@ -749,62 +622,6 @@
 //** Padding around the thumbnail caption
 @thumbnail-caption-padding: 9px;
 
-//== Wells
-//
-//##
-
-@well-bg: #f5f5f5;
-@well-border: darken(@well-bg, 7%);
-
-//== Badges
-//
-//##
-
-@badge-color: #fff;
-//** Linked badge text color on hover
-@badge-link-hover-color: #fff;
-@badge-bg: @gray-light;
-
-//** Badge text color in active nav link
-@badge-active-color: @link-color;
-//** Badge background color in active nav link
-@badge-active-bg: #fff;
-
-@badge-font-weight: bold;
-@badge-line-height: 1;
-@badge-border-radius: 10px;
-
-//== Breadcrumbs
-//
-//##
-
-@breadcrumb-padding-vertical: 8px;
-@breadcrumb-padding-horizontal: 15px;
-//** Breadcrumb background color
-@breadcrumb-bg: #f5f5f5;
-//** Breadcrumb text color
-@breadcrumb-color: #ccc;
-//** Text color of current page in the breadcrumb
-@breadcrumb-active-color: @gray-light;
-//** Textual separator for between breadcrumb elements
-@breadcrumb-separator: '/';
-
-//== Carousel
-//
-//##
-
-@carousel-text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
-
-@carousel-control-color: #fff;
-@carousel-control-width: 15%;
-@carousel-control-opacity: 0.5;
-@carousel-control-font-size: 20px;
-
-@carousel-indicator-active-bg: #fff;
-@carousel-indicator-border-color: #fff;
-
-@carousel-caption-color: #fff;
-
 //== Close
 //
 //##
@@ -812,21 +629,6 @@
 @close-font-weight: bold;
 @close-color: #000;
 @close-text-shadow: 0 1px 0 #fff;
-
-//== Code
-//
-//##
-
-@code-color: #c7254e;
-@code-bg: #f9f2f4;
-
-@kbd-color: #fff;
-@kbd-bg: #333;
-
-@pre-bg: #f5f5f5;
-@pre-color: @gray-dark;
-@pre-border-color: #ccc;
-@pre-scrollable-max-height: 340px;
 
 //== Type
 //
@@ -839,20 +641,17 @@
 //** Headings small color
 @headings-small-color: @gray-light;
 //** Blockquote small color
-@blockquote-small-color: @ol-blue-gray-3;
+@blockquote-small-color: @neutral-60;
 //** Blockquote font size
 @blockquote-font-size: (@font-size-base * 1.125);
 //** Blockquote border color
 @blockquote-border-color: @gray-lighter;
 //** Page header border color
-@page-header-border-color: @gray-lighter;
+@page-header-border-color: @hr-border;
 
 //== Miscellaneous
-@editor-search-count-color: @ol-blue-gray-4;
+@editor-search-count-color: @neutral-70;
 //##
-
-//** Horizontal line color.
-@hr-border: @ol-blue-gray-1;
 
 //** Horizontal offset for forms and lists.
 @component-offset-horizontal: 180px;
@@ -862,10 +661,10 @@
 @left-menu-width: 260px;
 @left-menu-animation-duration: 0.35s;
 
-@toolbar-border-color: @ol-blue-gray-5;
+@toolbar-border-color: @neutral-80;
 @toolbar-header-btn-border-color: @toolbar-border-color;
 @common-border-color: @gray-lighter;
-@editor-border-color: @ol-blue-gray-5;
+@editor-border-color: @neutral-80;
 
 @editor-dark-background-color: #333;
 @editor-dark-toolbar-border-color: #222;
@@ -876,14 +675,14 @@
 @footer-height: 50px;
 
 // Backgrounds
-@content-alt-bg-color: @ol-blue-gray-0;
+@content-alt-bg-color: @neutral-10;
 
 // Typography
-@text-small-color: @ol-type-color;
+@text-small-color: @content-secondary;
 
 // Navbar
-@navbar-title-color: @ol-blue-gray-1;
-@navbar-title-color-hover: @ol-blue-gray-2;
+@navbar-title-color: @neutral-20;
+@navbar-title-color-hover: @neutral-40;
 @navbar-default-padding-v: (@grid-gutter-width / 2);
 @navbar-default-padding-h: 10px;
 @navbar-default-padding: @navbar-default-padding-v @navbar-default-padding-h;
@@ -898,7 +697,7 @@
   (@padding-base-horizontal + 1) (@padding-base-vertical + 2);
 @navbar-subdued-color: #fff;
 @navbar-subdued-hover-bg: #fff;
-@navbar-subdued-hover-color: @ol-green;
+@navbar-subdued-hover-color: @green;
 @navbar-brand-image-url: url(../../../public/img/ol-brand/overleaf-white.svg);
 
 @dropdown-divider-margin: 6px;
@@ -916,29 +715,29 @@
 @card-box-shadow: none;
 
 // Project table
-@structured-list-link-color: @ol-blue;
-@structured-header-border-color: shade(@ol-blue-gray-1, 5%);
-@structured-list-border-color: @ol-blue-gray-1;
-@structured-list-hover-color: lighten(@ol-blue-gray-1, 5%);
+@structured-list-link-color: @blue;
+@structured-header-border-color: shade(@neutral-20, 5%);
+@structured-list-border-color: @neutral-20;
+@structured-list-hover-color: lighten(@neutral-20, 5%);
 @structured-list-line-height: 2.5;
 
 // Sidebar
-@sidebar-bg: @ol-blue-gray-5;
-@sidebar-color: @ol-blue-gray-2;
+@sidebar-bg: @neutral-80;
+@sidebar-color: @neutral-40;
 @sidebar-link-color: #fff;
 @sidebar-active-border-radius: 0;
-@sidebar-active-bg: @ol-blue-gray-6;
+@sidebar-active-bg: @neutral-90;
 @sidebar-active-color: #fff;
 @sidebar-active-font-weight: 700;
-@sidebar-hover-bg: @ol-blue-gray-4;
+@sidebar-hover-bg: @neutral-70;
 @sidebar-hover-text-decoration: none;
-@v2-dash-pane-bg: @ol-blue-gray-4;
+@v2-dash-pane-bg: @neutral-70;
 @v2-dash-pane-link-color: #fff;
 @v2-dash-pane-color: #fff;
-@v2-dash-pane-subdued-color: @ol-blue-gray-1;
+@v2-dash-pane-subdued-color: @neutral-20;
 @v2-dash-pane-toggle-color: #fff;
-@v2-dash-pane-btn-bg: @ol-blue-gray-5;
-@v2-dash-pane-btn-hover-bg: @ol-blue-gray-6;
+@v2-dash-pane-btn-bg: @neutral-80;
+@v2-dash-pane-btn-hover-bg: @neutral-90;
 
 @folders-menu-margin: 0 - (@grid-gutter-width / 2);
 @folders-menu-line-height: @structured-list-line-height;
@@ -950,7 +749,7 @@
 @folders-title-font-size: @font-size-small;
 @folders-title-font-weight: normal;
 @folders-title-line-height: @headings-line-height;
-@folders-title-color: @ol-blue-gray-2;
+@folders-title-color: @neutral-40;
 @folders-title-text-transform: uppercase;
 @folders-tag-padding: @folders-menu-item-v-padding 30px
   @folders-menu-item-v-padding @folders-menu-item-h-padding;
@@ -961,7 +760,7 @@
 @folders-tag-border-color: @folders-tag-menu-color;
 @folders-tag-menu-active-hover: rgba(0, 0, 0, 0.1);
 @folders-tag-menu-hover: rgba(0, 0, 0, 0.1);
-@info-badge-bg: @ol-blue;
+@info-badge-bg: @blue;
 // Progress bars
 @progress-border-radius: @line-height-computed;
 @progress-border-width: 0;
@@ -976,18 +775,18 @@
 
 // Editor header
 @ide-body-top-offset: 40px;
-@toolbar-header-bg-color: @ol-blue-gray-6;
+@toolbar-header-bg-color: @neutral-90;
 @toolbar-header-shadow: none;
 @toolbar-header-branded-btn-bg-color: transparent;
 @toolbar-btn-color: #fff;
 @toolbar-btn-hover-color: #fff;
-@toolbar-btn-hover-bg-color: @ol-blue-gray-5;
+@toolbar-btn-hover-bg-color: @neutral-80;
 @toolbar-btn-hover-text-shadow: none;
 @toolbar-btn-active-color: #fff;
-@toolbar-btn-active-bg-color: @ol-green;
+@toolbar-btn-active-bg-color: @green;
 @toolbar-btn-active-shadow: none;
 @toolbar-font-size: 13px;
-@toolbar-alt-bg-color: @ol-blue-gray-5;
+@toolbar-alt-bg-color: @neutral-80;
 @toolbar-icon-btn-color: #fff;
 @toolbar-icon-btn-hover-color: #fff;
 @toolbar-icon-btn-hover-shadow: none;
@@ -995,99 +794,99 @@
 @toolbar-border-bottom: 1px solid @toolbar-border-color;
 @toolbar-small-height: 32px;
 @toolbar-tall-height: 58px;
-@project-name-color: @ol-blue-gray-2;
-@project-rename-link-color: @ol-blue-gray-2;
-@project-rename-link-color-hover: @ol-blue-gray-1;
+@project-name-color: @neutral-40;
+@project-rename-link-color: @neutral-40;
+@project-rename-link-color-hover: @neutral-20;
 @global-alerts-padding: 7px;
 
 // Editor file-tree
-@file-tree-bg: @ol-blue-gray-4;
+@file-tree-bg: @neutral-70;
 @file-tree-line-height: 2.05;
 @file-tree-item-color: #fff;
 @file-tree-item-focus-color: @file-tree-item-color;
 @file-tree-item-selected-color: @file-tree-item-color;
-@file-tree-item-toggle-color: @ol-blue-gray-2;
-@file-tree-item-icon-color: @ol-blue-gray-2;
-@file-tree-item-input-color: @ol-blue-gray-5;
-@file-tree-item-folder-color: @ol-blue-gray-2;
-@file-tree-item-hover-bg: @ol-blue-gray-5;
-@file-tree-item-selected-bg: @ol-green;
-@file-tree-multiselect-bg: @ol-blue;
-@file-tree-multiselect-hover-bg: @ol-dark-blue;
-@file-tree-droppable-bg-color: @ol-blue-gray-2;
-@file-tree-error-color: @ol-blue-gray-1;
+@file-tree-item-toggle-color: @neutral-40;
+@file-tree-item-icon-color: @neutral-40;
+@file-tree-item-input-color: @neutral-80;
+@file-tree-item-folder-color: @neutral-40;
+@file-tree-item-hover-bg: @neutral-80;
+@file-tree-item-selected-bg: @green;
+@file-tree-multiselect-bg: @blue;
+@file-tree-multiselect-hover-bg: @blue-dark;
+@file-tree-droppable-bg-color: @neutral-40;
+@file-tree-error-color: @neutral-20;
 
 // File outline
 @outline-v-rhythm: 24px;
 @outline-h-rhythm: 24px;
 @outline-item-h-padding: @outline-h-rhythm * 0.25;
-@outline-line-guide-color: @ol-blue-gray-3;
-@outline-expand-collapse-color: @ol-blue-gray-2;
+@outline-line-guide-color: @neutral-60;
+@outline-expand-collapse-color: @neutral-40;
 @outline-no-items-color: @file-tree-item-color;
-@outline-header-hover-bg: @ol-blue-gray-6;
+@outline-header-hover-bg: @neutral-90;
 @outline-highlight-bg: tint(@file-tree-bg, 15%);
-@vertical-resizable-resizer-bg: @ol-blue-gray-5;
-@vertical-resizable-resizer-hover-bg: @ol-blue-gray-6;
+@vertical-resizable-resizer-bg: @neutral-80;
+@vertical-resizable-resizer-hover-bg: @neutral-90;
 
 // Editor resizers
-@editor-resizer-bg-color: @ol-blue-gray-5;
-@editor-resizer-bg-color-dragging: @ol-blue-gray-5;
-@editor-toggler-bg-color: darken(@ol-blue-gray-2, 15%);
-@editor-toggler-hover-bg-color: @ol-green;
+@editor-resizer-bg-color: @neutral-80;
+@editor-resizer-bg-color-dragging: @neutral-80;
+@editor-toggler-bg-color: darken(@neutral-40, 15%);
+@editor-toggler-hover-bg-color: @green;
 @synctex-controls-z-index: 6;
 @synctex-controls-padding: 0;
 
 // Editor toolbar
 @editor-toolbar-height: 32px;
-@editor-toolbar-bg: @ol-blue-gray-5;
+@editor-toolbar-bg: @neutral-80;
 
 // Toggle switch
-@toggle-switch-bg: @ol-blue-gray-1;
-@toggle-switch-highlight-color: @ol-green;
+@toggle-switch-bg: @neutral-20;
+@toggle-switch-highlight-color: @green;
 
 // Formatting buttons
 @formatting-btn-color: #fff;
-@formatting-btn-bg: @ol-blue-gray-5;
-@formatting-btn-border: @ol-blue-gray-4;
-@formatting-menu-bg: @ol-blue-gray-5;
+@formatting-btn-bg: @neutral-80;
+@formatting-btn-border: @neutral-70;
+@formatting-menu-bg: @neutral-80;
 
 // Chat
-@chat-bg: @ol-blue-gray-5;
-@chat-instructions-color: @ol-blue-gray-1;
+@chat-bg: @neutral-80;
+@chat-instructions-color: @neutral-20;
 @chat-message-color: #fff;
-@chat-message-date-color: @ol-blue-gray-2;
+@chat-message-date-color: @neutral-40;
 @chat-message-name-color: #fff;
 @chat-message-box-shadow: none;
 @chat-message-border-radius: @border-radius-large;
 @chat-message-padding: 5px 10px;
 @chat-message-weight: bold;
-@chat-new-message-bg: @ol-blue-gray-4;
-@chat-new-message-textarea-bg: @ol-blue-gray-1;
-@chat-new-message-textarea-color: @ol-blue-gray-6;
+@chat-new-message-bg: @neutral-70;
+@chat-new-message-textarea-bg: @neutral-20;
+@chat-new-message-textarea-color: @neutral-90;
 @chat-new-message-border-color: @editor-border-color;
 
 // PDF and logs
 @pdf-top-offset: @toolbar-small-height;
-@pdf-bg: @ol-blue-gray-1;
+@pdf-bg: @neutral-20;
 @pdfjs-bg: transparent;
 @pdf-page-shadow-color: rgba(0, 0, 0, 0.5);
-@logs-pane-bg: @ol-blue-gray-5;
+@logs-pane-bg: @neutral-80;
 @log-line-no-color: #fff;
-@log-hints-color: @ol-blue-gray-4;
+@log-hints-color: @neutral-70;
 
 // Tags
 @tag-border-radius: 9999px;
-@tag-color: @ol-blue-gray-4;
-@tag-bg-color: @ol-blue-gray-1;
-@tag-bg-hover-color: darken(@ol-blue-gray-1, 5%);
+@tag-color: @neutral-70;
+@tag-bg-color: @neutral-20;
+@tag-bg-hover-color: darken(@neutral-20, 5%);
 @tag-max-width: 150px;
 @tag-top-adjustment: 2px;
 @labels-font-size: 85%;
 
 // System messages
-@sys-msg-background: @ol-blue;
+@sys-msg-background: @blue;
 @sys-msg-color: #fff;
-@sys-msg-border: solid 1px lighten(@ol-blue, 10%);
+@sys-msg-border: solid 1px lighten(@blue, 10%);
 
 // Portals
 @black-alpha-strong: rgba(0, 0, 0, 0.8);
@@ -1095,20 +894,20 @@
 
 // v2 History
 @history-base-font-size: @font-size-small;
-@history-base-bg: @ol-blue-gray-1;
-@history-entry-label-bg-color: @ol-blue;
-@history-entry-pseudo-label-bg-color: @ol-green;
+@history-base-bg: @neutral-20;
+@history-entry-label-bg-color: @blue;
+@history-entry-pseudo-label-bg-color: @green;
 @history-entry-label-color: #fff;
 @history-entry-selected-label-bg-color: #fff;
-@history-entry-selected-label-color: @ol-blue;
-@history-entry-selected-pseudo-label-color: @ol-green;
-@history-entry-day-bg: @ol-blue-gray-1;
-@history-entry-day-color: @ol-blue-gray-3;
-@history-entry-selected-bg: @ol-green;
-@history-entry-handle-bg: darken(@ol-green, 10%);
+@history-entry-selected-label-color: @blue;
+@history-entry-selected-pseudo-label-color: @green;
+@history-entry-day-bg: @neutral-20;
+@history-entry-day-color: @neutral-60;
+@history-entry-selected-bg: @green;
+@history-entry-handle-bg: darken(@green, 10%);
 @history-entry-handle-height: 8px;
-@history-base-color: @ol-blue-gray-3;
-@history-highlight-color: @ol-type-color;
+@history-base-color: @neutral-60;
+@history-highlight-color: @content-secondary;
 @history-toolbar-bg-color: @editor-toolbar-bg;
 @history-toolbar-color: #fff;
 @history-file-badge-bg: rgba(255, 255, 255, 0.25);
@@ -1118,20 +917,20 @@
 @input-suggestion-v-offset: 4px;
 
 // Symbol Palette
-@symbol-palette-bg: @ol-blue-gray-4;
+@symbol-palette-bg: @neutral-70;
 @symbol-palette-color: #fff;
-@symbol-palette-header-background: @ol-blue-gray-5;
-@symbol-palette-item-bg: @ol-blue-gray-5;
+@symbol-palette-header-background: @neutral-80;
+@symbol-palette-item-bg: @neutral-80;
 @symbol-palette-item-color: #fff;
-@symbol-palette-selected-tab-bg: @ol-blue-gray-4;
+@symbol-palette-selected-tab-bg: @neutral-70;
 @symbol-palette-selected-tab-color: #fff;
-@symbol-palette-text-shadow-color: @ol-blue-gray-6;
+@symbol-palette-text-shadow-color: @neutral-90;
 
 // Galileo
-@galileo-bg: @ol-blue-gray-4;
+@galileo-bg: @neutral-70;
 @galileo-color: #fff;
-@galileo-header-background: @ol-blue-gray-5;
-@galileo-suggestion-background: @ol-blue-gray-3;
+@galileo-header-background: @neutral-80;
+@galileo-suggestion-background: @neutral-60;
 
 // Editor fonts
 @editor-font-lucida: 'Lucida Console', 'Source Code Pro', monospace;
