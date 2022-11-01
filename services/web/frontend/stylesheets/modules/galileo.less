@@ -33,14 +33,6 @@
     }
   }
 
-  .galileo-font-lucida {
-    font-family: @editor-font-lucida;
-  }
-
-  .galileo-font-monaco {
-    font-family: @editor-font-monaco;
-  }
-
   .galileo-body {
     padding: 0 @padding-sm @padding-xs @padding-sm;
     overflow-y: auto;
@@ -50,34 +42,6 @@
       .loading {
         text-align: center;
         margin: @margin-sm;
-      }
-    }
-
-    .galileo-suggestion {
-      background: @galileo-suggestion-background;
-      color: @galileo-color;
-      margin-top: @margin-xs;
-
-      .galileo-suggestion-body {
-        padding: @padding-xs;
-        max-height: @line-height-computed * 4; // 4 lines
-        overflow: hidden;
-
-        .galileo-suggestion-text {
-          white-space: break-spaces;
-        }
-      }
-
-      .galileo-suggestion-footer {
-        display: flex;
-        justify-content: space-between;
-        padding: @padding-xs;
-      }
-
-      .galileo-suggestion-footer-links {
-        display: flex;
-        align-items: flex-end;
-        gap: @padding-xs;
       }
     }
 
@@ -149,4 +113,40 @@
       text-decoration: none;
     }
   }
+}
+
+.galileo-suggestion {
+  background: @galileo-suggestion-background;
+  color: @galileo-color;
+  margin-top: @margin-xs;
+
+  .galileo-suggestion-body {
+    padding: @padding-xs;
+    max-height: @line-height-computed * 4; // 4 lines
+    overflow: hidden;
+  }
+
+  .galileo-suggestion-footer {
+    display: flex;
+    justify-content: space-between;
+    padding: @padding-xs;
+  }
+
+  .galileo-suggestion-footer-links {
+    display: flex;
+    align-items: flex-end;
+    gap: @padding-xs;
+  }
+}
+
+.galileo-suggestion-text {
+  white-space: break-spaces;
+}
+
+.galileo-font-lucida {
+  font-family: @editor-font-lucida;
+}
+
+.galileo-font-monaco {
+  font-family: @editor-font-monaco;
 }

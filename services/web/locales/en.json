@@ -1772,6 +1772,8 @@
   "galileo_feedback_detail": "Tell us more",
   "galileo_feedback_send_debug": "Share additional data",
   "galileo_feedback_send_debug_more": "Share the part of your document that was used to generate the suggestion",
+  "galileo_instruction_modal_title": "Ask Galileo to generate LaTeX",
+  "galileo_instruction_modal_input_placeholder": "e.g. add centered figure",
   "galileo_promo_shadow_text_title": "Math Suggestions",
   "galileo_promo_shadow_text_content": "Galileo will provide contextualized relevant formulae, definitions, etc.",
   "galileo_promo_autocomplete_title": "Citations",
