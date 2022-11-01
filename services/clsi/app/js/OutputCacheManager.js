@@ -425,8 +425,27 @@ module.exports = OutputCacheManager = {
               contentRanges,
               newContentRanges,
               reclaimedSpace,
+              overheadDeleteStaleHashes,
+              timedOutErr,
               startXRefTable,
             } = result
+
+            let status = 'success'
+            if (timedOutErr) {
+              // Soft failure: let the frontend use partial set of ranges.
+              logger.warn(
+                {
+                  err: timedOutErr,
+                  overheadDeleteStaleHashes,
+                  outputDir,
+                  stats,
+                  timings,
+                },
+                'pdf caching timed out - soft failure'
+              )
+              stats['pdf-caching-timed-out'] = 1
+              status = 'timed-out-soft-failure'
+            }
 
             if (enablePdfCachingDark) {
               // In dark mode we are doing the computation only and do not emit
@@ -449,7 +468,9 @@ module.exports = OutputCacheManager = {
               0
             )
             stats['pdf-caching-reclaimed-space'] = reclaimedSpace
-            callback(null, 'success')
+            timings['pdf-caching-overhead-delete-stale-hashes'] =
+              overheadDeleteStaleHashes
+            callback(null, status)
           }
         )
       } else {

@@ -102,7 +102,7 @@ async function updateOtherEventLoop({
   pdfCachingMinChunkSize,
   compileTime,
 }) {
-  const workerLatencyInMs = 20
+  const workerLatencyInMs = 100
   // Prefer getting the timeout error from the worker vs timing out the worker.
   const timeout = getMaxOverhead(compileTime) + workerLatencyInMs
   try {
@@ -145,13 +145,14 @@ async function updateSameEventLoop({
   compileTime,
 }) {
   const checkDeadline = getDeadlineChecker(compileTime)
-  const contentRanges = []
-  const newContentRanges = []
   // keep track of hashes expire old ones when they reach a generation > N.
   const tracker = await HashFileTracker.from(contentDir)
   tracker.updateAge()
-
   checkDeadline('after init HashFileTracker')
+
+  const [reclaimedSpace, overheadDeleteStaleHashes] =
+    await tracker.deleteStaleHashes(5)
+  checkDeadline('after delete stale hashes')
 
   const { xRefEntries, startXRefTable } = await parseXrefTable(
     filePath,
@@ -190,6 +191,9 @@ async function updateSameEventLoop({
 
   checkDeadline('after finding uncompressed')
 
+  let timedOutErr = null
+  const contentRanges = []
+  const newContentRanges = []
   const handle = await fs.promises.open(filePath)
   try {
     for (const { object, idx } of uncompressedObjects) {
@@ -225,24 +229,42 @@ async function updateSameEventLoop({
         end: object.endOffset,
         hash,
       }
-      contentRanges.push(range)
 
-      // Optimization: Skip writing of duplicate streams.
-      if (tracker.track(range)) continue
+      if (tracker.has(range.hash)) {
+        // Optimization: Skip writing of already seen hashes.
+        tracker.track(range)
+        contentRanges.push(range)
+        continue
+      }
 
       await writePdfStream(contentDir, hash, buffer)
-      checkDeadline('after write ' + idx)
+      tracker.track(range)
+      contentRanges.push(range)
       newContentRanges.push(range)
+      checkDeadline('after write ' + idx)
+    }
+  } catch (err) {
+    if (err instanceof TimedOutError) {
+      // Let the frontend use ranges that were processed so far.
+      timedOutErr = err
+    } else {
+      throw err
     }
   } finally {
     await handle.close()
-  }
 
-  // NOTE: Bailing out below does not make sense.
-  //       Let the next compile use the already written ranges.
-  const reclaimedSpace = await tracker.deleteStaleHashes(5)
-  await tracker.flush()
-  return { contentRanges, newContentRanges, reclaimedSpace, startXRefTable }
+    // Flush from both success and failure code path. This allows the next
+    //  cycle to complete faster as it can use the already written ranges.
+    await tracker.flush()
+  }
+  return {
+    contentRanges,
+    newContentRanges,
+    reclaimedSpace,
+    startXRefTable,
+    overheadDeleteStaleHashes,
+    timedOutErr,
+  }
 }
 
 function getStatePath(contentDir) {
@@ -266,13 +288,15 @@ class HashFileTracker {
     return new HashFileTracker(contentDir, state)
   }
 
+  has(hash) {
+    return this.hashAge.has(hash)
+  }
+
   track(range) {
-    const exists = this.hashAge.has(range.hash)
-    if (!exists) {
+    if (!this.hashSize.has(range.hash)) {
       this.hashSize.set(range.hash, range.end - range.start)
     }
     this.hashAge.set(range.hash, 0)
-    return exists
   }
 
   updateAge() {
@@ -318,12 +342,13 @@ class HashFileTracker {
   }
 
   async deleteStaleHashes(n) {
+    const t0 = Date.now()
     // delete any hash file older than N generations
     const hashes = this.findStale(n)
 
     let reclaimedSpace = 0
     if (hashes.length === 0) {
-      return reclaimedSpace
+      return [reclaimedSpace, Date.now() - t0]
     }
 
     await promiseMapWithLimit(10, hashes, async hash => {
@@ -332,7 +357,7 @@ class HashFileTracker {
       reclaimedSpace += this.hashSize.get(hash)
       this.hashSize.delete(hash)
     })
-    return reclaimedSpace
+    return [reclaimedSpace, Date.now() - t0]
   }
 }
 

@@ -30,6 +30,17 @@ function emitPdfStats(stats, timings, request) {
 function emitPdfCachingStats(stats, timings, request) {
   if (!stats['pdf-size']) return // double check
 
+  if (stats['pdf-caching-timed-out']) {
+    Metrics.inc('pdf-caching-timed-out', 1, request.metricsOpts)
+  }
+  if (timings['pdf-caching-overhead-delete-stale-hashes'] !== undefined) {
+    Metrics.summary(
+      'pdf-caching-overhead-delete-stale-hashes',
+      timings['pdf-caching-overhead-delete-stale-hashes'],
+      request.metricsOpts
+    )
+  }
+
   // How much extra time did we spent in PDF.js?
   Metrics.timing(
     'compute-pdf-caching',
