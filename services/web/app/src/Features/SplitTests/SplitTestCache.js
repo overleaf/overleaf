@@ -1,5 +1,4 @@
 const SplitTestManager = require('./SplitTestManager')
-const { SplitTest } = require('../../models/SplitTest')
 const { CacheLoader } = require('cache-flow')
 
 class SplitTestCache extends CacheLoader {
@@ -10,18 +9,19 @@ class SplitTestCache extends CacheLoader {
   }
 
   async load(name) {
-    return await SplitTestManager.getSplitTest({
+    const splitTest = await SplitTestManager.getSplitTest({
       name,
       archived: { $ne: true },
     })
+    return splitTest?.toObject()
   }
 
   serialize(value) {
-    return value ? value.toObject() : undefined
+    return value
   }
 
   deserialize(value) {
-    return new SplitTest(value)
+    return value
   }
 }
 

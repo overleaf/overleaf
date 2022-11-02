@@ -1,4 +1,5 @@
 const { SplitTest } = require('../../models/SplitTest')
+const SplitTestUtils = require('./SplitTestUtils')
 const OError = require('@overleaf/o-error')
 const _ = require('lodash')
 
@@ -89,7 +90,7 @@ async function updateSplitTestConfig(name, configuration) {
   if (splitTest.archived) {
     throw new OError('Cannot update an archived split test', { name })
   }
-  const lastVersion = splitTest.getCurrentVersion().toObject()
+  const lastVersion = SplitTestUtils.getCurrentVersion(splitTest).toObject()
   if (configuration.phase !== lastVersion.phase) {
     throw new OError(
       `Cannot update with different phase - use /switch-to-next-phase endpoint instead`
@@ -145,7 +146,7 @@ async function switchToNextPhase(name) {
       name,
     })
   }
-  const lastVersionCopy = splitTest.getCurrentVersion().toObject()
+  const lastVersionCopy = SplitTestUtils.getCurrentVersion(splitTest).toObject()
   lastVersionCopy.versionNumber++
   if (lastVersionCopy.phase === ALPHA_PHASE) {
     lastVersionCopy.phase = BETA_PHASE
@@ -189,13 +190,13 @@ async function revertToPreviousVersion(name, versionNumber) {
       `Cannot revert split test with ID '${name}' to previous version: split test must have at least 2 versions`
     )
   }
-  const previousVersion = splitTest.getVersion(versionNumber)
+  const previousVersion = SplitTestUtils.getVersion(splitTest, versionNumber)
   if (!previousVersion) {
     throw new OError(
       `Cannot revert split test with ID '${name}' to version number ${versionNumber}: version not found`
     )
   }
-  const lastVersion = splitTest.getCurrentVersion()
+  const lastVersion = SplitTestUtils.getCurrentVersion(splitTest)
   if (
     lastVersion.phase === RELEASE_PHASE &&
     previousVersion.phase !== RELEASE_PHASE
@@ -217,7 +218,8 @@ async function archive(name) {
     throw new OError(`Split test with ID '${name}' is already archived`)
   }
   splitTest.archived = true
-  const previousVersionCopy = splitTest.getCurrentVersion().toObject()
+  const previousVersionCopy =
+    SplitTestUtils.getCurrentVersion(splitTest).toObject()
   previousVersionCopy.versionNumber += 1
   previousVersionCopy.active = false
   splitTest.versions.push(previousVersionCopy)

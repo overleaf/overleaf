@@ -176,28 +176,31 @@ describe('SplitTestHandler', function () {
   })
 })
 
-function makeSplitTest(name, opts = {}) {
-  const {
+function makeSplitTest(
+  name,
+  {
     active = true,
     analyticsEnabled = active,
     phase = 'release',
     versionNumber = 1,
-  } = opts
-
+  } = {}
+) {
   return {
     name,
-    getCurrentVersion: sinon.stub().returns({
-      active,
-      analyticsEnabled,
-      phase,
-      versionNumber,
-      variants: [
-        {
-          name: 'variant-1',
-          rolloutPercent: 100,
-          rolloutStripes: [{ start: 0, end: 100 }],
-        },
-      ],
-    }),
+    versions: [
+      {
+        active,
+        analyticsEnabled,
+        phase,
+        versionNumber,
+        variants: [
+          {
+            name: 'variant-1',
+            rolloutPercent: 100,
+            rolloutStripes: [{ start: 0, end: 100 }],
+          },
+        ],
+      },
+    ],
   }
 }

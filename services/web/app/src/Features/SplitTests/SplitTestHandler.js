@@ -10,6 +10,7 @@ const { SplitTest } = require('../../models/SplitTest')
 const UserAnalyticsIdCache = require('../Analytics/UserAnalyticsIdCache')
 const { getAnalyticsIdFromMongoUser } = require('../Analytics/AnalyticsHelper')
 const Features = require('../../infrastructure/Features')
+const SplitTestUtils = require('./SplitTestUtils')
 
 const DEFAULT_VARIANT = 'default'
 const ALPHA_PHASE = 'alpha'
@@ -191,7 +192,7 @@ async function getActiveAssignmentsForUser(userId) {
  */
 async function _getVariantNames(splitTestName) {
   const splitTest = await SplitTestCache.get(splitTestName)
-  const currentVersion = splitTest?.getCurrentVersion()
+  const currentVersion = SplitTestUtils.getCurrentVersion(splitTest)
   if (currentVersion?.active) {
     return currentVersion.variants.map(v => v.name).concat([DEFAULT_VARIANT])
   } else {
@@ -208,7 +209,7 @@ async function _getAssignment(
   }
 
   const splitTest = await SplitTestCache.get(splitTestName)
-  const currentVersion = splitTest?.getCurrentVersion()
+  const currentVersion = SplitTestUtils.getCurrentVersion(splitTest)
   if (!currentVersion?.active) {
     return DEFAULT_ASSIGNMENT
   }
@@ -251,7 +252,7 @@ async function _getAssignment(
 }
 
 async function _getAssignmentMetadata(analyticsId, user, splitTest) {
-  const currentVersion = splitTest.getCurrentVersion()
+  const currentVersion = SplitTestUtils.getCurrentVersion(splitTest)
   const phase = currentVersion.phase
   if (
     (phase === ALPHA_PHASE && !user?.alphaProgram) ||
@@ -398,10 +399,10 @@ async function _getUser(id) {
 async function _loadSplitTestInfoInLocals(locals, splitTestName) {
   const splitTest = await SplitTestCache.get(splitTestName)
   if (splitTest) {
-    const phase = splitTest.getCurrentVersion().phase
+    const phase = SplitTestUtils.getCurrentVersion(splitTest).phase
     LocalsHelper.setSplitTestInfo(locals, splitTestName, {
       phase,
-      badgeInfo: splitTest.toObject().badgeInfo?.[phase],
+      badgeInfo: splitTest.badgeInfo?.[phase],
     })
   }
 }

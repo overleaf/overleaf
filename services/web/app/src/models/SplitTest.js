@@ -1,6 +1,5 @@
 const mongoose = require('../infrastructure/Mongoose')
 const { Schema } = mongoose
-const _ = require('lodash')
 
 const MIN_NAME_LENGTH = 3
 const MAX_NAME_LENGTH = 200
@@ -146,20 +145,6 @@ const SplitTestSchema = new Schema({
     required: false,
   },
 })
-
-SplitTestSchema.methods.getCurrentVersion = function () {
-  if (this.versions && this.versions.length > 0) {
-    return _.maxBy(this.versions, 'versionNumber')
-  } else {
-    return undefined
-  }
-}
-
-SplitTestSchema.methods.getVersion = function (versionNumber) {
-  return _.find(this.versions || [], {
-    versionNumber,
-  })
-}
 
 module.exports = {
   SplitTest: mongoose.model('SplitTest', SplitTestSchema),
