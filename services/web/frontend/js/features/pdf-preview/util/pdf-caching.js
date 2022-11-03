@@ -3,7 +3,14 @@ import OError from '@overleaf/o-error'
 const PDF_JS_CHUNK_SIZE = 128 * 1024
 const MAX_SUB_REQUEST_COUNT = 4
 const MAX_SUB_REQUEST_BYTES = 4 * PDF_JS_CHUNK_SIZE
-const HEADER_OVERHEAD_PER_MULTI_PART_CHUNK = 100
+const SAMPLE_NGINX_BOUNDARY = '00000000000000000001'
+const HEADER_OVERHEAD_PER_MULTI_PART_CHUNK = composeMultipartHeader({
+  boundary: SAMPLE_NGINX_BOUNDARY,
+  // Assume an upper bound of O(9GB) for the pdf size.
+  start: 9 * 1024 * 1024 * 1024,
+  end: 9 * 1024 * 1024 * 1024,
+  size: 9 * 1024 * 1024 * 1024,
+})
 const MULTI_PART_THRESHOLD = 4
 const INCREMENTAL_CACHE_SIZE = 1000
 // Download large chunks once the shard bandwidth exceeds 50% of their size.
@@ -66,10 +73,24 @@ function preprocessFileOnce({ file, usageScore, cachedUrls }) {
 /**
  * @param {Array} chunks
  */
-function countBytes(chunks) {
-  return chunks.reduce((totalBytes, chunk) => {
-    return totalBytes + (chunk.end - chunk.start)
-  }, 0)
+function estimateSizeOfMultipartResponse(chunks) {
+  /*
+  --boundary
+  HEADER
+  BLOB
+  --boundary
+  HEADER
+  BLOB
+  --boundary--
+   */
+  return (
+    chunks.reduce(
+      (totalBytes, chunk) =>
+        totalBytes +
+        HEADER_OVERHEAD_PER_MULTI_PART_CHUNK +
+        (chunk.end - chunk.start)
+    ) + ('\r\n' + SAMPLE_NGINX_BOUNDARY + '--').length
+  )
 }
 
 /**
@@ -351,6 +372,19 @@ function getMultipartBoundary(response, chunk) {
 }
 
 /**
+ * @param {string} boundary
+ * @param {number} start
+ * @param {number} end
+ * @param {number} size
+ * @return {string}
+ */
+function composeMultipartHeader({ boundary, start, end, size }) {
+  return `\r\n--${boundary}\r\nContent-Type: application/pdf\r\nContent-Range: bytes ${start}-${
+    end - 1
+  }/${size}\r\n\r\n`
+}
+
+/**
  * @param {Object} file
  * @param {Array} chunks
  * @param {Uint8Array} data
@@ -362,9 +396,12 @@ function resolveMultiPartResponses({ file, chunks, data, boundary, metrics }) {
   let offsetStart = 0
   const encoder = new TextEncoder()
   for (const chunk of chunks) {
-    const header = `\r\n--${boundary}\r\nContent-Type: application/pdf\r\nContent-Range: bytes ${
-      chunk.start
-    }-${chunk.end - 1}/${file.size}\r\n\r\n`
+    const header = composeMultipartHeader({
+      boundary,
+      start: chunk.start,
+      end: chunk.end,
+      size: file.size,
+    })
     const headerSize = header.length
 
     // Verify header content. A proxy might have tampered with it.
@@ -398,10 +435,27 @@ function resolveMultiPartResponses({ file, chunks, data, boundary, metrics }) {
 /**
  *
  * @param {Response} response
+ * @param {number} estimatedSize
+ * @param {RequestInit} init
  */
-function checkChunkResponse(response) {
+function checkChunkResponse(response, estimatedSize, init) {
   if (!(response.status === 206 || response.status === 200)) {
     throw new OError('non successful response status: ' + response.status)
+  }
+  const responseSize = getResponseSize(response)
+  if (!responseSize) {
+    throw new OError('content-length response header missing', {
+      responseHeaders: Object.fromEntries(response.headers.entries()),
+      requestHeader: init.headers,
+    })
+  }
+  if (responseSize > estimatedSize) {
+    throw new OError('response size exceeds estimate', {
+      estimatedSize,
+      responseSize,
+      responseHeaders: Object.fromEntries(response.headers.entries()),
+      requestHeader: init.headers,
+    })
   }
 }
 
@@ -414,11 +468,12 @@ function checkChunkResponse(response) {
  */
 export async function fallbackRequest({ url, start, end, abortSignal }) {
   try {
-    const response = await fetch(url, {
+    const init = {
       headers: { Range: `bytes=${start}-${end - 1}` },
       signal: abortSignal,
-    })
-    checkChunkResponse(response)
+    }
+    const response = await fetch(url, init)
+    checkChunkResponse(response, end - start, init)
     return await response.arrayBuffer()
   } catch (e) {
     throw OError.tag(e, 'fallback request failed', { url, start, end })
@@ -471,9 +526,9 @@ function skipPrefetched(chunks, prefetched, start, end) {
 }
 
 /**
- * @param {Object} chunk
+ * @param {Object|Object[]} chunk
  * @param {string} url
- * @param {Object} init
+ * @param {RequestInit} init
  * @param {Map<string, string>} cachedUrls
  * @param {Object} metrics
  * @param {boolean} cachedUrlLookupEnabled
@@ -507,7 +562,10 @@ async function fetchChunk({
     }
   }
   const response = await fetch(url, init)
-  checkChunkResponse(response)
+  const estimatedSize = Array.isArray(chunk)
+    ? estimateSizeOfMultipartResponse(chunk)
+    : chunk.end - chunk.start
+  checkChunkResponse(response, estimatedSize, init)
   if (chunk.hash) cachedUrls.set(chunk.hash, url)
   return response
 }
@@ -565,9 +623,7 @@ function addPrefetchingChunks({
     )
   )
 
-  let sum =
-    countBytes(dynamicChunks) +
-    HEADER_OVERHEAD_PER_MULTI_PART_CHUNK * dynamicChunks.length
+  let sum = estimateSizeOfMultipartResponse(dynamicChunks)
   for (const chunk of extraChunks) {
     const downloadSize =
       chunk.end - chunk.start + HEADER_OVERHEAD_PER_MULTI_PART_CHUNK
