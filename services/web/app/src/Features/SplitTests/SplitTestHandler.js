@@ -263,11 +263,7 @@ async function _getAssignmentMetadata(analyticsId, user, splitTest) {
     }
   }
   const userId = user?._id.toString()
-  const percentile = _getPercentile(
-    analyticsId || userId,
-    splitTest.name,
-    phase
-  )
+  const percentile = getPercentile(analyticsId || userId, splitTest.name, phase)
   const selectedVariantName = _getVariantFromPercentile(
     currentVersion.variants,
     percentile
@@ -280,7 +276,7 @@ async function _getAssignmentMetadata(analyticsId, user, splitTest) {
   }
 }
 
-function _getPercentile(analyticsId, splitTestName, splitTestPhase) {
+function getPercentile(analyticsId, splitTestName, splitTestPhase) {
   const hash = crypto
     .createHash('md5')
     .update(analyticsId + splitTestName + splitTestPhase)
@@ -408,6 +404,7 @@ async function _loadSplitTestInfoInLocals(locals, splitTestName) {
 }
 
 module.exports = {
+  getPercentile,
   getAssignment: callbackify(getAssignment),
   getAssignmentForMongoUser: callbackify(getAssignmentForMongoUser),
   getAssignmentForUser: callbackify(getAssignmentForUser),

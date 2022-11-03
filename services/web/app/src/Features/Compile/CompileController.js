@@ -141,7 +141,14 @@ module.exports = CompileController = {
             pdfDownloadDomain += outputUrlPrefix
           }
 
-          if (limits) {
+          if (
+            limits &&
+            SplitTestHandler.getPercentile(
+              AnalyticsManager.getIdsFromSession(req.session).analyticsId,
+              'compile-result-backend',
+              'release'
+            ) === 1
+          ) {
             // For a compile request to be sent to clsi we need limits.
             // If we get here without having the limits object populated, it is
             //  a reasonable assumption to make that nothing was compiled.
