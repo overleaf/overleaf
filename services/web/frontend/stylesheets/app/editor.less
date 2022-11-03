@@ -799,3 +799,31 @@ CodeMirror
     }
   }
 }
+
+.cm6-switch-away-survey {
+  padding: @padding-sm;
+  box-shadow: 5px 5px 6px rgba(0, 0, 0, 0.3);
+  background-color: @ol-blue;
+  width: 530px;
+  position: absolute;
+  right: @margin-sm;
+  bottom: @margin-xl;
+  z-index: @zindex-popover;
+
+  .btn.close {
+    background-color: @ol-blue;
+  }
+
+  .warning-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-right: 32px;
+  }
+
+  .warning-text {
+    padding-right: @alert-padding;
+    display: inline-block;
+    font-size: @font-size-small;
+  }
+}

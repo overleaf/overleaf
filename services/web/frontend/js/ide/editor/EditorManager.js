@@ -176,11 +176,20 @@ export default EditorManager = (function () {
         return false
       }
 
-      const sourceEditor = this.localStorage(
-        `editor.source_editor.${this.$scope.project_id}`
+      const hasSeenCM6SwitchAwaySurvey = this.localStorage(
+        'editor.has_seen_cm6_switch_away_survey'
       )
 
-      return sourceEditor === 'cm6' || sourceEditor == null
+      if (hasSeenCM6SwitchAwaySurvey) {
+        const sourceEditor = this.localStorage(
+          `editor.source_editor.${this.$scope.project_id}`
+        )
+
+        return sourceEditor === 'cm6' || sourceEditor == null
+      } else {
+        // force user to switch to cm6 if they haven't seen the switch away survey
+        return true
+      }
     }
 
     autoOpenDoc() {
