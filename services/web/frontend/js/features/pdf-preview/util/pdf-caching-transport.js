@@ -62,6 +62,10 @@ export function generatePdfCachingTransportFactory(PDFJS) {
         end,
         metrics,
       }
+      const is404onOutputPDF = err =>
+        err.message === 'non successful response status: 404' &&
+        OError.getFullInfo(err).url === this.url
+
       fetchRange({
         url: this.url,
         start,
@@ -78,10 +82,7 @@ export function generatePdfCachingTransportFactory(PDFJS) {
       })
         .catch(err => {
           if (abortSignal.aborted) return
-          if (
-            err.message === 'non successful response status: 404' &&
-            OError.getFullInfo(err).url === this.url
-          ) {
+          if (is404onOutputPDF(err)) {
             // Do not consider a 404 on the main pdf url as pdf caching failure.
             throw new PDFJS.MissingPDFException()
           }
@@ -93,7 +94,18 @@ export function generatePdfCachingTransportFactory(PDFJS) {
           err = OError.tag(err, 'optimized pdf download error', errorInfo)
           console.error(err)
           captureException(err, { tags: { fromPdfCaching: true } })
-          return fallbackRequest({ url: this.url, start, end, abortSignal })
+          return fallbackRequest({
+            url: this.url,
+            start,
+            end,
+            abortSignal,
+          }).catch(err => {
+            if (is404onOutputPDF(err)) {
+              // Do not consider a 404 on the main pdf url as pdf caching failure.
+              err = new PDFJS.MissingPDFException()
+            }
+            throw err
+          })
         })
         .then(blob => {
           if (abortSignal.aborted) return
