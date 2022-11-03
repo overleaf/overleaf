@@ -13,7 +13,11 @@ const DocUpdaterClient = require('./helpers/DocUpdaterClient')
 const DocUpdaterApp = require('./helpers/DocUpdaterApp')
 
 describe('Setting a document', function () {
+  let numberOfReceivedUpdates = 0
   before(function (done) {
+    DocUpdaterClient.subscribeToAppliedOps(() => {
+      numberOfReceivedUpdates++
+    })
     this.lines = ['one', 'two', 'three']
     this.version = 42
     this.update = {
@@ -45,6 +49,7 @@ describe('Setting a document', function () {
 
   describe('when the updated doc exists in the doc updater', function () {
     before(function (done) {
+      numberOfReceivedUpdates = 0
       this.project_id = DocUpdaterClient.randomId()
       this.doc_id = DocUpdaterClient.randomId()
       MockWebApi.insertDoc(this.project_id, this.doc_id, {
@@ -94,6 +99,10 @@ describe('Setting a document', function () {
 
     it('should return a 200 status code', function () {
       this.statusCode.should.equal(200)
+    })
+
+    it('should emit two updates (from sendUpdate and setDocLines)', function () {
+      expect(numberOfReceivedUpdates).to.equal(2)
     })
 
     it('should send the updated doc lines and version to the web api', function () {
@@ -146,12 +155,56 @@ describe('Setting a document', function () {
     it('should return the mongo rev in the json response', function () {
       this.body.should.deep.equal({ rev: '123' })
     })
+
+    describe('when doc has the same contents', function () {
+      beforeEach(function (done) {
+        numberOfReceivedUpdates = 0
+        DocUpdaterClient.setDocLines(
+          this.project_id,
+          this.doc_id,
+          this.newLines,
+          this.source,
+          this.user_id,
+          false,
+          (error, res, body) => {
+            if (error) {
+              return done(error)
+            }
+            this.statusCode = res.statusCode
+            this.body = body
+            done()
+          }
+        )
+      })
+
+      it('should not bump the version in doc updater', function (done) {
+        DocUpdaterClient.getDoc(
+          this.project_id,
+          this.doc_id,
+          (error, res, doc) => {
+            if (error) {
+              return done(error)
+            }
+            doc.version.should.equal(this.version + 2)
+            done()
+          }
+        )
+      })
+
+      it('should not emit any updates', function (done) {
+        setTimeout(() => {
+          expect(numberOfReceivedUpdates).to.equal(0)
+          done()
+        }, 100) // delay by 100ms: make sure we do not check too early!
+      })
+    })
   })
 
   describe('when the updated doc does not exist in the doc updater', function () {
     before(function (done) {
       this.project_id = DocUpdaterClient.randomId()
       this.doc_id = DocUpdaterClient.randomId()
+      numberOfReceivedUpdates = 0
       MockWebApi.insertDoc(this.project_id, this.doc_id, {
         lines: this.lines,
         version: this.version,
@@ -182,6 +235,10 @@ describe('Setting a document', function () {
 
     it('should return a 200 status code', function () {
       this.statusCode.should.equal(200)
+    })
+
+    it('should emit an update', function () {
+      expect(numberOfReceivedUpdates).to.equal(1)
     })
 
     it('should send the updated doc lines to the web api', function () {

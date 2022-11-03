@@ -229,7 +229,18 @@ module.exports = DocumentManager = {
             method: alreadyLoaded ? 'flush' : 'evict',
             path: source,
           })
-          UpdateManager.applyUpdate(projectId, docId, update, error => {
+          const applyUpdateIfNeeded = cb => {
+            if (op.length === 0) {
+              // Do not notify the frontend about a noop update.
+              // We still want to execute the callback code below
+              // to evict the doc if we loaded it into redis for
+              // this update, otherwise the doc would never be
+              // removed from redis.
+              return cb(null)
+            }
+            UpdateManager.applyUpdate(projectId, docId, update, cb)
+          }
+          applyUpdateIfNeeded(error => {
             if (error) {
               return callback(error)
             }

@@ -479,6 +479,88 @@ describe('DocumentManager', function () {
         this.DocumentManager.flushAndDeleteDoc = sinon.stub().callsArg(3)
       })
 
+      describe('when not loaded but with the same content', function () {
+        beforeEach(function () {
+          this.DiffCodec.diffAsShareJsOp = sinon.stub().yields(null, [])
+          this.DocumentManager.getDoc = sinon
+            .stub()
+            .yields(
+              null,
+              this.beforeLines,
+              this.version,
+              this.ranges,
+              this.pathname,
+              this.projectHistoryId,
+              this.unflushedTime,
+              false
+            )
+          this.DocumentManager.setDoc(
+            this.project_id,
+            this.doc_id,
+            this.beforeLines,
+            this.source,
+            this.user_id,
+            false,
+            this.callback
+          )
+        })
+
+        it('should not apply the diff as a ShareJS op', function () {
+          this.UpdateManager.applyUpdate.called.should.equal(false)
+        })
+
+        it('should increment the external update metric', function () {
+          this.Metrics.inc
+            .calledWith('external-update', 1, {
+              status: 'noop',
+              method: 'evict',
+              path: this.source,
+            })
+            .should.equal(true)
+        })
+
+        it('should flush and delete the doc from redis', function () {
+          this.DocumentManager.flushAndDeleteDoc
+            .calledWith(this.project_id, this.doc_id)
+            .should.equal(true)
+        })
+      })
+
+      describe('when already loaded with the same content', function () {
+        beforeEach(function () {
+          this.DiffCodec.diffAsShareJsOp = sinon.stub().yields(null, [])
+          this.DocumentManager.setDoc(
+            this.project_id,
+            this.doc_id,
+            this.beforeLines,
+            this.source,
+            this.user_id,
+            false,
+            this.callback
+          )
+        })
+
+        it('should not apply the diff as a ShareJS op', function () {
+          this.UpdateManager.applyUpdate.called.should.equal(false)
+        })
+
+        it('should increment the external update metric', function () {
+          this.Metrics.inc
+            .calledWith('external-update', 1, {
+              status: 'noop',
+              method: 'flush',
+              path: this.source,
+            })
+            .should.equal(true)
+        })
+
+        it('should flush the doc to Mongo', function () {
+          this.DocumentManager.flushDocIfLoaded
+            .calledWith(this.project_id, this.doc_id)
+            .should.equal(true)
+        })
+      })
+
       describe('when already loaded', function () {
         beforeEach(function () {
           this.DocumentManager.setDoc(
