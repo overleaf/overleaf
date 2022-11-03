@@ -1,20 +1,3 @@
-const opentelemetry = require('@opentelemetry/sdk-node')
-const {
-  getNodeAutoInstrumentations,
-} = require('@opentelemetry/auto-instrumentations-node')
-const {
-  diag,
-  DiagConsoleLogger,
-  DiagLogLevel,
-  trace,
-} = require('@opentelemetry/api')
-const { JaegerExporter } = require('@opentelemetry/exporter-jaeger')
-const { Resource } = require('@opentelemetry/resources')
-const {
-  SemanticResourceAttributes,
-} = require('@opentelemetry/semantic-conventions')
-const GCP = require('@google-cloud/opentelemetry-cloud-trace-exporter')
-
 let tracer
 
 function tracingEnabled() {
@@ -22,6 +5,23 @@ function tracingEnabled() {
 }
 
 function initialize(appName) {
+  const opentelemetry = require('@opentelemetry/sdk-node')
+  const {
+    getNodeAutoInstrumentations,
+  } = require('@opentelemetry/auto-instrumentations-node')
+  const {
+    diag,
+    DiagConsoleLogger,
+    DiagLogLevel,
+    trace,
+  } = require('@opentelemetry/api')
+  const { JaegerExporter } = require('@opentelemetry/exporter-jaeger')
+  const { Resource } = require('@opentelemetry/resources')
+  const {
+    SemanticResourceAttributes,
+  } = require('@opentelemetry/semantic-conventions')
+  const GCP = require('@google-cloud/opentelemetry-cloud-trace-exporter')
+
   diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.INFO)
 
   const resource = new Resource({

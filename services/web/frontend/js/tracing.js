@@ -7,7 +7,7 @@ import { ZoneContextManager } from '@opentelemetry/context-zone'
 import { registerInstrumentations } from '@opentelemetry/instrumentation'
 import { getWebAutoInstrumentations } from '@opentelemetry/auto-instrumentations-web'
 
-import getMeta from './js/utils/meta'
+import getMeta from './utils/meta'
 
 if (getMeta('ol-useOpenTelemetry')) {
   const resource = new Resource({
