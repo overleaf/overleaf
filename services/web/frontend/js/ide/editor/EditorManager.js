@@ -260,37 +260,39 @@ export default EditorManager = (function () {
         return
       }
 
-      // We're now either opening a new document or reloading a broken one.
-      this.$scope.editor.open_doc_id = doc.id
-      this.$scope.editor.open_doc_name = doc.name
+      this.$scope.$applyAsync(() => {
+        // We're now either opening a new document or reloading a broken one.
+        this.$scope.editor.open_doc_id = doc.id
+        this.$scope.editor.open_doc_name = doc.name
 
-      this.ide.localStorage(`doc.open_id.${this.$scope.project_id}`, doc.id)
-      this.ide.fileTreeManager.selectEntity(doc)
+        this.ide.localStorage(`doc.open_id.${this.$scope.project_id}`, doc.id)
+        this.ide.fileTreeManager.selectEntity(doc)
 
-      this.$scope.editor.opening = true
-      return this._openNewDocument(doc, (error, sharejs_doc) => {
-        if (error && error.message === 'another document was loaded') {
-          sl_console.log(
-            `[openDoc] another document was loaded while ${doc.id} was loading`
-          )
-          return
-        }
-        if (error != null) {
-          this.ide.showGenericMessageModal(
-            'Error opening document',
-            'Sorry, something went wrong opening this document. Please try again.'
-          )
-          return
-        }
+        this.$scope.editor.opening = true
+        return this._openNewDocument(doc, (error, sharejs_doc) => {
+          if (error && error.message === 'another document was loaded') {
+            sl_console.log(
+              `[openDoc] another document was loaded while ${doc.id} was loading`
+            )
+            return
+          }
+          if (error != null) {
+            this.ide.showGenericMessageModal(
+              'Error opening document',
+              'Sorry, something went wrong opening this document. Please try again.'
+            )
+            return
+          }
 
-        this._syncTrackChangesState(sharejs_doc)
+          this._syncTrackChangesState(sharejs_doc)
 
-        this.$scope.$broadcast('doc:opened')
+          this.$scope.$broadcast('doc:opened')
 
-        return this.$scope.$apply(() => {
-          this.$scope.editor.opening = false
-          this.$scope.editor.sharejs_doc = sharejs_doc
-          return done(true)
+          return this.$scope.$applyAsync(() => {
+            this.$scope.editor.opening = false
+            this.$scope.editor.sharejs_doc = sharejs_doc
+            return done(true)
+          })
         })
       })
     }
