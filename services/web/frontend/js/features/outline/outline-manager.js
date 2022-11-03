@@ -16,6 +16,13 @@ class OutlineManager {
     this.ignoreNextScroll = false
     this.ignoreNextCursorUpdate = false
 
+    scope.$watch('editor.newSourceEditor', (now, before) => {
+      if (before && !now) {
+        this.updateOutline()
+        this.broadcastChangeEvent()
+      }
+    })
+
     scope.$on('doc:after-opened', (ev, { isNewDoc }) => {
       if (isNewDoc) {
         // if a new doc is opened a cursor updates will be triggered before the
@@ -65,10 +72,25 @@ class OutlineManager {
     scope.$watch('editor.showRichText', () => {
       this.ignoreNextScroll = true
       this.ignoreNextCursorUpdate = true
+      if (this.shouldShowOutline()) {
+        this.updateOutline()
+        this.broadcastChangeEvent()
+      }
     })
   }
 
+  shouldShowOutline() {
+    if (this.scope.editor.showRichText) {
+      return true
+    }
+    return !this.scope.editor.newSourceEditor
+  }
+
   updateOutline() {
+    // Disable if using CM6
+    if (!this.shouldShowOutline()) {
+      return
+    }
     if (this.isTexFile) {
       const content = this.ide.editorManager.getCurrentDocValue()
       if (content) {
@@ -103,6 +125,10 @@ class OutlineManager {
   }
 
   broadcastChangeEvent() {
+    // Disable if using CM6
+    if (!this.shouldShowOutline()) {
+      return
+    }
     this.scope.$broadcast('outline-manager:outline-changed', {
       isTexFile: this.isTexFile,
       outline: this.outline,

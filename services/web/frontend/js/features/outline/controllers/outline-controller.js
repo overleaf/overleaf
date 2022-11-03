@@ -8,6 +8,23 @@ App.controller('OutlineController', function ($scope, ide, eventTracking) {
   $scope.outline = []
   $scope.eventTracking = eventTracking
 
+  function shouldShowOutline() {
+    if ($scope.editor.showRichText) {
+      return true
+    }
+    return !$scope.editor.newSourceEditor
+  }
+
+  $scope.show = shouldShowOutline()
+
+  $scope.$watch('editor.newSourceEditor', function () {
+    $scope.show = shouldShowOutline()
+  })
+
+  $scope.$watch('editor.showRichText', function () {
+    $scope.show = shouldShowOutline()
+  })
+
   $scope.$on('outline-manager:outline-changed', onOutlineChange)
 
   function onOutlineChange(e, outlineInfo) {
@@ -40,5 +57,6 @@ App.component(
     'eventTracking',
     'onToggle',
     'isTexFile',
+    'show',
   ])
 )

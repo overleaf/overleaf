@@ -55,6 +55,7 @@ describe('<OutlinePane />', function () {
         jumpToLine={jumpToLine}
         onToggle={onToggle}
         eventTracking={eventTracking}
+        show
       />
     )
 
@@ -70,6 +71,7 @@ describe('<OutlinePane />', function () {
         jumpToLine={jumpToLine}
         onToggle={onToggle}
         eventTracking={eventTracking}
+        show
       />
     )
 
@@ -98,6 +100,7 @@ describe('<OutlinePane />', function () {
         jumpToLine={jumpToLine}
         onToggle={onToggle}
         eventTracking={eventTracking}
+        show
       />
     )
 

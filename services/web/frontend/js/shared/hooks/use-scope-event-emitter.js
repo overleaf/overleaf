@@ -10,11 +10,11 @@ export default function useScopeEventEmitter(eventName, broadcast = true) {
   const { $scope } = useIdeContext()
 
   return useCallback(
-    detail => {
+    (...detail) => {
       if (broadcast) {
-        $scope.$broadcast(eventName, detail)
+        $scope.$broadcast(eventName, ...detail)
       } else {
-        $scope.$emit(eventName, detail)
+        $scope.$emit(eventName, ...detail)
       }
     },
     [$scope, eventName, broadcast]

@@ -107,6 +107,9 @@ OutlineItem.propTypes = {
     title: PropTypes.string.isRequired,
     level: PropTypes.number,
     children: PropTypes.array,
+    // Used for caching in CM6
+    from: PropTypes.number,
+    to: PropTypes.number,
   }).isRequired,
   jumpToLine: PropTypes.func.isRequired,
   highlightedLine: PropTypes.number,

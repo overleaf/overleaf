@@ -231,7 +231,7 @@ export default EditorManager = (function () {
       const done = isNewDoc => {
         const eventName = 'doc:after-opened'
         this.$scope.$broadcast(eventName, { isNewDoc })
-        window.dispatchEvent(new CustomEvent(eventName, { isNewDoc }))
+        window.dispatchEvent(new CustomEvent(eventName, { detail: isNewDoc }))
         if (options.gotoLine != null) {
           // allow Ace to display document before moving, delay until next tick
           // added delay to make this happen later that gotoStoredPosition in

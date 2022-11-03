@@ -16,6 +16,7 @@ const OutlinePane = React.memo(function OutlinePane({
   onToggle,
   eventTracking,
   highlightedLine,
+  show,
 }) {
   const { t } = useTranslation()
 
@@ -44,6 +45,12 @@ const OutlinePane = React.memo(function OutlinePane({
       eventTracking.sendMB(expanded ? 'outline-collapse' : 'outline-expand')
       setExpanded(!expanded)
     }
+  }
+
+  // NOTE: This flag is for disabling the rendering of the component. Used while
+  // both an Angular and React-based file outline is present in the code base.
+  if (!show) {
+    return null
   }
 
   return (
@@ -82,6 +89,7 @@ OutlinePane.propTypes = {
   onToggle: PropTypes.func.isRequired,
   eventTracking: PropTypes.object.isRequired,
   highlightedLine: PropTypes.number,
+  show: PropTypes.bool.isRequired,
 }
 
 export default withErrorBoundary(OutlinePane)
