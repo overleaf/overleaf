@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from 'react-bootstrap'
 import customLocalStorage from '../../../infrastructure/local-storage'
 import useScopeValue from '../../../shared/hooks/use-scope-value'
+import getMeta from '../../../utils/meta'
 
 type CM6SwitchAwaySurveyState = 'disabled' | 'enabled' | 'shown'
 
@@ -12,6 +13,11 @@ export default function CM6SwitchAwaySurvey() {
   const initialRichTextPreference = useRef<boolean>(richText)
 
   useEffect(() => {
+    // if cm6 is not available, don't show the survey
+    if (!getMeta('ol-showNewSourceEditorOption')) {
+      return
+    }
+
     // If the user has previously seen the survey, then don't show it again
     const hasSeenCM6SwitchAwaySurvey = customLocalStorage.getItem(
       'editor.has_seen_cm6_switch_away_survey'
