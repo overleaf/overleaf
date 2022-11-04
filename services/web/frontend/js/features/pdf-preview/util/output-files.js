@@ -167,6 +167,7 @@ function buildURL(file, pdfDownloadDomain) {
 }
 
 function normalizeFilePath(path, rootDocDirname) {
+  path = path.replace(/\/\//g, '/')
   path = path.replace(
     /^.*\/compiles\/[0-9a-f]{24}(-[0-9a-f]{24})?\/(\.\/)?/,
     ''
