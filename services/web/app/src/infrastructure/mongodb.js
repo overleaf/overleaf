@@ -45,6 +45,7 @@ async function setupDb() {
   db.docOps = internalDb.collection('docOps')
   db.docSnapshots = internalDb.collection('docSnapshots')
   db.docs = internalDb.collection('docs')
+  db.feedbacks = internalDb.collection('feedbacks')
   db.githubSyncEntityVersions = internalDb.collection(
     'githubSyncEntityVersions'
   )
