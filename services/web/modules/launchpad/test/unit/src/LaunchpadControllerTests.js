@@ -43,6 +43,8 @@ describe('LaunchpadController', function () {
         '../../../../app/src/models/User': { User: this.User },
         '../../../../app/src/Features/Authentication/AuthenticationController':
           (this.AuthenticationController = {}),
+        '../../../../app/src/Features/Authentication/AuthenticationManager':
+          (this.AuthenticationManager = {}),
         '../../../../app/src/Features/Authentication/SessionManager':
           (this.SessionManager = {}),
       },
@@ -346,6 +348,8 @@ describe('LaunchpadController', function () {
           .callsArgWith(1, null, this.user)
         this.User.updateOne = sinon.stub().callsArgWith(2, null)
         this.AuthenticationController.setRedirectInSession = sinon.stub()
+        this.AuthenticationManager.validateEmail = sinon.stub().returns(null)
+        this.AuthenticationManager.validatePassword = sinon.stub().returns(null)
         this.res.json = sinon.stub()
         this.next = sinon.stub()
         return this.LaunchpadController.registerAdmin(
@@ -465,6 +469,90 @@ describe('LaunchpadController', function () {
       })
     })
 
+    describe('when an invalid email is supplied', function () {
+      beforeEach(function () {
+        this._atLeastOneAdminExists.callsArgWith(0, null, false)
+        this.email = 'someone@example.com'
+        this.password = 'invalid password'
+        this.req.body.email = this.email
+        this.req.body.password = this.password
+        this.user = {
+          _id: 'abcdef',
+          email: this.email,
+        }
+        this.UserRegistrationHandler.registerNewUser = sinon.stub()
+        this.User.updateOne = sinon.stub()
+        this.AuthenticationController.setRedirectInSession = sinon.stub()
+        this.AuthenticationManager.validateEmail = sinon
+          .stub()
+          .returns(new Error('bad email'))
+        this.AuthenticationManager.validatePassword = sinon.stub().returns(null)
+        this.res.sendStatus = sinon.stub()
+        this.next = sinon.stub()
+        return this.LaunchpadController.registerAdmin(
+          this.req,
+          this.res,
+          this.next
+        )
+      })
+
+      it('should send a 400 response', function () {
+        this.res.status.callCount.should.equal(1)
+        this.res.status.calledWith(400).should.equal(true)
+        return this.res.json.calledWith({
+          message: { type: 'error', text: 'bad email' },
+        })
+      })
+
+      it('should not call registerNewUser', function () {
+        return this.UserRegistrationHandler.registerNewUser.callCount.should.equal(
+          0
+        )
+      })
+    })
+
+    describe('when an invalid password is supplied', function () {
+      beforeEach(function () {
+        this._atLeastOneAdminExists.callsArgWith(0, null, false)
+        this.email = 'someone@example.com'
+        this.password = 'invalid password'
+        this.req.body.email = this.email
+        this.req.body.password = this.password
+        this.user = {
+          _id: 'abcdef',
+          email: this.email,
+        }
+        this.UserRegistrationHandler.registerNewUser = sinon.stub()
+        this.User.updateOne = sinon.stub()
+        this.AuthenticationController.setRedirectInSession = sinon.stub()
+        this.AuthenticationManager.validateEmail = sinon.stub().returns(null)
+        this.AuthenticationManager.validatePassword = sinon
+          .stub()
+          .returns(new Error('bad password'))
+        this.res.sendStatus = sinon.stub()
+        this.next = sinon.stub()
+        return this.LaunchpadController.registerAdmin(
+          this.req,
+          this.res,
+          this.next
+        )
+      })
+
+      it('should send a 400 response', function () {
+        this.res.status.callCount.should.equal(1)
+        this.res.status.calledWith(400).should.equal(true)
+        return this.res.json.calledWith({
+          message: { type: 'error', text: 'bad password' },
+        })
+      })
+
+      it('should not call registerNewUser', function () {
+        return this.UserRegistrationHandler.registerNewUser.callCount.should.equal(
+          0
+        )
+      })
+    })
+
     describe('when there are already existing admins', function () {
       beforeEach(function () {
         this._atLeastOneAdminExists.callsArgWith(0, null, true)
@@ -479,6 +567,8 @@ describe('LaunchpadController', function () {
         this.UserRegistrationHandler.registerNewUser = sinon.stub()
         this.User.updateOne = sinon.stub()
         this.AuthenticationController.setRedirectInSession = sinon.stub()
+        this.AuthenticationManager.validateEmail = sinon.stub().returns(null)
+        this.AuthenticationManager.validatePassword = sinon.stub().returns(null)
         this.res.sendStatus = sinon.stub()
         this.next = sinon.stub()
         return this.LaunchpadController.registerAdmin(
@@ -489,8 +579,8 @@ describe('LaunchpadController', function () {
       })
 
       it('should send a 403 response', function () {
-        this.res.sendStatus.callCount.should.equal(1)
-        return this.res.sendStatus.calledWith(403).should.equal(true)
+        this.res.status.callCount.should.equal(1)
+        return this.res.status.calledWith(403).should.equal(true)
       })
 
       it('should not call registerNewUser', function () {
@@ -555,6 +645,8 @@ describe('LaunchpadController', function () {
           .callsArgWith(1, new Error('woops'))
         this.User.updateOne = sinon.stub()
         this.AuthenticationController.setRedirectInSession = sinon.stub()
+        this.AuthenticationManager.validateEmail = sinon.stub().returns(null)
+        this.AuthenticationManager.validatePassword = sinon.stub().returns(null)
         this.res.json = sinon.stub()
         this.next = sinon.stub()
         return this.LaunchpadController.registerAdmin(
@@ -601,6 +693,8 @@ describe('LaunchpadController', function () {
           .callsArgWith(1, null, this.user)
         this.User.updateOne = sinon.stub().callsArgWith(2, new Error('woops'))
         this.AuthenticationController.setRedirectInSession = sinon.stub()
+        this.AuthenticationManager.validateEmail = sinon.stub().returns(null)
+        this.AuthenticationManager.validatePassword = sinon.stub().returns(null)
         this.res.json = sinon.stub()
         this.next = sinon.stub()
         return this.LaunchpadController.registerAdmin(
@@ -645,6 +739,8 @@ describe('LaunchpadController', function () {
           .callsArgWith(1, null, this.user)
         this.User.updateOne = sinon.stub().callsArgWith(2, null)
         this.AuthenticationController.setRedirectInSession = sinon.stub()
+        this.AuthenticationManager.validateEmail = sinon.stub().returns(null)
+        this.AuthenticationManager.validatePassword = sinon.stub().returns(null)
         this.UserGetter.getUser = sinon
           .stub()
           .callsArgWith(1, null, { _id: '1234' })

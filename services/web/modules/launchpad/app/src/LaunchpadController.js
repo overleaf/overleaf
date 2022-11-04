@@ -23,6 +23,7 @@ const EmailHandler = require('../../../../app/src/Features/Email/EmailHandler')
 const _ = require('underscore')
 const UserGetter = require('../../../../app/src/Features/User/UserGetter')
 const { User } = require('../../../../app/src/models/User')
+const AuthenticationManager = require('../../../../app/src/Features/Authentication/AuthenticationManager')
 const AuthenticationController = require('../../../../app/src/Features/Authentication/AuthenticationController')
 const SessionManager = require('../../../../app/src/Features/Authentication/SessionManager')
 const {
@@ -222,7 +223,26 @@ module.exports = LaunchpadController = {
           { email: req.body.email },
           'already have at least one admin user, disallow'
         )
-        return res.sendStatus(403)
+        return res.status(403).json({
+          message: { type: 'error', text: 'admin user already exists' },
+        })
+      }
+
+      const invalidEmail = AuthenticationManager.validateEmail(email)
+      if (invalidEmail) {
+        return res
+          .status(400)
+          .json({ message: { type: 'error', text: invalidEmail.message } })
+      }
+
+      const invalidPassword = AuthenticationManager.validatePassword(
+        password,
+        email
+      )
+      if (invalidPassword) {
+        return res
+          .status(400)
+          .json({ message: { type: 'error', text: invalidPassword.message } })
       }
 
       const body = { email, password }
