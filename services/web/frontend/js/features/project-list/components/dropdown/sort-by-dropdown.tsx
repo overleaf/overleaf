@@ -47,13 +47,14 @@ function SortByDropdown() {
   return (
     <Dropdown
       id="projects-sort-dropdown"
-      className="ms-auto"
+      className="projects-sort-dropdown"
       pullRight
       open={isOpened}
       onToggle={open => setIsOpened(open)}
     >
       <Dropdown.Toggle bsSize="small" noCaret className="pe-0 btn-transparent">
-        {title} <Icon type="angle-down" />
+        <span className="text-truncate me-1">{title}</span>
+        <Icon type="angle-down" />
       </Dropdown.Toggle>
       <Dropdown.Menu className="projects-dropdown-menu">
         <MenuItem header>{t('sort_by')}:</MenuItem>

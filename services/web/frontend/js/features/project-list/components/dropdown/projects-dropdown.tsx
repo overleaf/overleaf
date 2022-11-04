@@ -78,7 +78,8 @@ function ProjectsDropdown() {
       onToggle={open => setIsOpened(open)}
     >
       <Dropdown.Toggle bsSize="large" noCaret className="ps-0 btn-transparent">
-        {title} <Icon type="angle-down" />
+        <span className="text-truncate me-1">{title}</span>
+        <Icon type="angle-down" />
       </Dropdown.Toggle>
       <Dropdown.Menu className="projects-dropdown-menu">
         <Item filter="all" text={t('all_projects')} onClick={handleClose} />
