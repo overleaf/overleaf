@@ -1,22 +1,22 @@
-import { useState } from 'react'
+import { ElementType } from 'react'
 import { useTranslation } from 'react-i18next'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 import getMeta from '../../../utils/meta'
 
+const components = importOverleafModules('editorLeftMenuSync') as {
+  import: { default: ElementType }
+  path: string
+}[]
+
 export default function SyncMenu() {
   const { t } = useTranslation()
   const anonymous = getMeta('ol-anonymous') as boolean | undefined
-  const [editorLeftMenuSync] = useState<any[]>(
-    () =>
-      getMeta('editorLeftMenuSync') ||
-      importOverleafModules('editorLeftMenuSync')
-  )
 
   if (anonymous === true || anonymous === undefined) {
     return null
   }
 
-  if (editorLeftMenuSync.length === 0) {
+  if (components.length === 0) {
     return null
   }
 
@@ -24,20 +24,12 @@ export default function SyncMenu() {
     <>
       <h4>{t('sync')}</h4>
       <ul className="list-unstyled nav">
-        {editorLeftMenuSync.map(({ import: importObject }, index) => (
-          <li key={`editor-left-menu-sync-${index}`}>
-            <ModuleComponent Component={Object.values(importObject)[0]} />
+        {components.map(({ import: { default: Component }, path }) => (
+          <li key={path}>
+            <Component />
           </li>
         ))}
       </ul>
     </>
   )
-}
-
-type ModuleComponentProps = {
-  Component: any
-}
-
-function ModuleComponent({ Component }: ModuleComponentProps) {
-  return <Component />
 }
