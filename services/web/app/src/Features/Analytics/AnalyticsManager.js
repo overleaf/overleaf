@@ -193,7 +193,10 @@ function _recordEvent(
 }
 
 function _setUserProperty({ analyticsId, propertyName, propertyValue }) {
-  if (!_isAttributeValid(propertyName) || !_isAttributeValid(propertyValue)) {
+  if (
+    !_isAttributeValid(propertyName) ||
+    !_isAttributeValueValid(propertyValue)
+  ) {
     return
   }
   Metrics.analyticsQueue.inc({
@@ -246,15 +249,29 @@ function _isAttributeValid(attribute) {
   return !attribute || /^[a-zA-Z0-9-_.:;,/]+$/.test(attribute)
 }
 
+function _isAttributeValueValid(attributeValue) {
+  return _isAttributeValid(attributeValue) || attributeValue instanceof Date
+}
+
+function _isSegmentationValueValid(attributeValue) {
+  // spaces are allowed for segmentation values
+  return !attributeValue || /^[a-zA-Z0-9-_.:;,/ ]+$/.test(attributeValue)
+}
+
 function _isSegmentationValid(segmentation) {
   if (!segmentation) {
     return true
   }
-  const hasAnyInvalidAttribute = [
-    ...Object.keys(segmentation),
-    ...Object.values(segmentation),
-  ].some(attribute => !_isAttributeValid(attribute))
-  return !hasAnyInvalidAttribute
+
+  const hasAnyInvalidKey = [...Object.keys(segmentation)].some(
+    key => !_isAttributeValid(key)
+  )
+
+  const hasAnyInvalidValue = [...Object.values(segmentation)].some(
+    value => !_isSegmentationValueValid(value)
+  )
+
+  return !hasAnyInvalidKey && !hasAnyInvalidValue
 }
 
 function getIdsFromSession(session) {

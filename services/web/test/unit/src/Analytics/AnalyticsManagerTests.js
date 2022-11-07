@@ -225,6 +225,20 @@ describe('AnalyticsManager', function () {
       })
     })
 
+    it('empty space in event segmentation value', async function () {
+      await this.AnalyticsManager.recordEventForUser(
+        this.fakeUserId,
+        'an_event',
+        { segment: 'a value with spaces' }
+      )
+      sinon.assert.calledWithMatch(this.analyticsEventsQueue.add, 'event', {
+        analyticsId: this.analyticsId,
+        event: 'an_event',
+        segmentation: { segment: 'a value with spaces' },
+        isLoggedIn: true,
+      })
+    })
+
     it('boolean field in event segmentation', async function () {
       await this.AnalyticsManager.recordEventForUser(
         this.fakeUserId,
