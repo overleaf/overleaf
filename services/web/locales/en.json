@@ -788,6 +788,8 @@
   "log_viewer_error": "There was a problem displaying this project’s compilation errors and logs.",
   "try_recompile_project_or_troubleshoot": "Please try recompiling the project from scratch, and if that doesn’t help, follow our <0>troubleshooting guide</0>.",
   "something_went_wrong_rendering_pdf": "Something went wrong while rendering this PDF.",
+  "something_went_wrong_rendering_pdf_expected": "There was an issue displaying this PDF. <0>Please recompile</0>",
+  "last_resort_trouble_shooting_guide": "If that doesn’t help, follow our <0>troubleshooting guide</0>.",
   "mendeley_reference_loading_error_expired": "Mendeley token expired, please re-link your account",
   "zotero_reference_loading_error_expired": "Zotero token expired, please re-link your account",
   "mendeley_reference_loading_error_forbidden": "Could not load references from Mendeley, please re-link your account and try again",

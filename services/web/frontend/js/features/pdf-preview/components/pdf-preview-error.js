@@ -10,7 +10,39 @@ import StopOnFirstErrorBadge from '../../../shared/components/stop-on-first-erro
 function PdfPreviewError({ error }) {
   const { t } = useTranslation()
 
+  const { startCompile } = useCompileContext()
+
   switch (error) {
+    case 'rendering-error-expected':
+      return (
+        <PdfLogEntry
+          headerTitle={t('pdf_rendering_error')}
+          formattedContent={
+            <>
+              <Trans i18nKey="something_went_wrong_rendering_pdf_expected">
+                <Button
+                  bsSize="xs"
+                  bsStyle="info"
+                  onClick={() => startCompile()}
+                />
+              </Trans>
+              <br />
+              <br />
+              <Trans i18nKey="last_resort_trouble_shooting_guide">
+                {
+                  // eslint-disable-next-line jsx-a11y/anchor-has-content
+                  <a
+                    href="/learn/how-to/Resolving_access%2C_loading%2C_and_display_problems"
+                    target="_blank"
+                  />
+                }
+              </Trans>
+            </>
+          }
+          level="warning"
+        />
+      )
+
     case 'rendering-error':
       return (
         <ErrorLogEntry title={t('pdf_rendering_error')}>
