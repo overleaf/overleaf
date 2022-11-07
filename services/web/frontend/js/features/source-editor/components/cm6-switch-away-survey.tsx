@@ -36,29 +36,33 @@ export default function CM6SwitchAwaySurvey() {
       return
     }
 
-    if (!newSourceEditor) {
+    if (!newSourceEditor && !richText) {
       setState('enabled')
+    } else {
+      setState('disabled')
     }
   }, [newSourceEditor, richText])
 
   useEffect(() => {
-    if (state === 'enabled') {
-      const handleKeyDown = () => {
-        const TIME_FOR_SURVEY_TO_APPEAR = 3000
+    const handleKeyDown = () => {
+      const TIME_FOR_SURVEY_TO_APPEAR = 3000
 
-        setTimeout(() => {
+      setTimeout(() => {
+        if (state === 'enabled') {
           setState('shown')
           customLocalStorage.setItem(
             'editor.has_seen_cm6_switch_away_survey',
             true
           )
-        }, TIME_FOR_SURVEY_TO_APPEAR)
-      }
-
-      // can't access the ace editor directly, so add the keydown event
-      // to window
-      window?.addEventListener('keydown', handleKeyDown, { once: true })
+        }
+      }, TIME_FOR_SURVEY_TO_APPEAR)
     }
+
+    // can't access the ace editor directly, so add the keydown event
+    // to window
+    window?.addEventListener('keydown', handleKeyDown, { once: true })
+
+    return () => window?.removeEventListener('keydown', handleKeyDown)
   }, [state])
 
   const handleClose = useCallback(() => {
