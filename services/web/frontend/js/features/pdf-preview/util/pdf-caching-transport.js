@@ -10,6 +10,9 @@ import {
   trackPdfDownloadEnabled,
 } from './pdf-caching-flags'
 
+// 30 seconds: The shutdown grace period of a clsi pre-emp instance.
+const STALE_OUTPUT_REQUEST_THRESHOLD_MS = 30 * 1000
+
 export function generatePdfCachingTransportFactory(PDFJS) {
   // NOTE: The custom transport can be used for tracking download volume.
   if (!enablePdfCaching && !trackPdfDownloadEnabled) {
@@ -47,6 +50,7 @@ export function generatePdfCachingTransportFactory(PDFJS) {
       this.pdfFile = pdfFile
       this.handleFetchError = handleFetchError
       this.abortController = abortController
+      this.startTime = performance.now()
     }
 
     abort() {
@@ -62,9 +66,24 @@ export function generatePdfCachingTransportFactory(PDFJS) {
         end,
         metrics,
       }
-      const is404onOutputPDF = err =>
-        err.message === 'non successful response status: 404' &&
+
+      const isStaleOutputRequest = () =>
+        performance.now() - this.startTime > STALE_OUTPUT_REQUEST_THRESHOLD_MS
+      const is404 = err => err.message === 'non successful response status: 404'
+      const isNetworkError = err => err.message === 'Failed to fetch'
+      const isFromOutputPDFRequest = err =>
         OError.getFullInfo(err).url === this.url
+
+      // Do not consider "expected 404s" and network errors as pdf caching
+      //  failures.
+      // "expected 404s" here include:
+      // - any stale download request
+      //   Example: The user returns to a browser tab after 1h and scrolls.
+      // - requests for the main output.pdf file
+      //   A fallback request would not be able to retrieve the PDF either.
+      const isExpectedError = err =>
+        (is404(err) || isNetworkError(err)) &&
+        (isStaleOutputRequest() || isFromOutputPDFRequest(err))
 
       fetchRange({
         url: this.url,
@@ -82,8 +101,7 @@ export function generatePdfCachingTransportFactory(PDFJS) {
       })
         .catch(err => {
           if (abortSignal.aborted) return
-          if (is404onOutputPDF(err)) {
-            // Do not consider a 404 on the main pdf url as pdf caching failure.
+          if (isExpectedError(err)) {
             throw new PDFJS.MissingPDFException()
           }
           metrics.failedCount++
@@ -100,8 +118,7 @@ export function generatePdfCachingTransportFactory(PDFJS) {
             end,
             abortSignal,
           }).catch(err => {
-            if (is404onOutputPDF(err)) {
-              // Do not consider a 404 on the main pdf url as pdf caching failure.
+            if (isExpectedError(err)) {
               err = new PDFJS.MissingPDFException()
             }
             throw err
