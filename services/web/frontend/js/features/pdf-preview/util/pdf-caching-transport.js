@@ -48,6 +48,8 @@ export function generatePdfCachingTransportFactory(PDFJS) {
       super(pdfFile.size, new Uint8Array())
       this.url = url
       this.pdfFile = pdfFile
+      // Clone the chunks as the objectId field is encoded to a Uint8Array.
+      this.pdfRanges = pdfFile.ranges.map(r => Object.assign({}, r))
       this.handleFetchError = handleFetchError
       this.abortController = abortController
       this.startTime = performance.now()
@@ -59,13 +61,20 @@ export function generatePdfCachingTransportFactory(PDFJS) {
 
     requestDataRange(start, end) {
       const abortSignal = this.abortController.signal
-      const errorInfo = {
-        pdfFile: this.pdfFile,
+      const getDebugInfo = () => ({
+        // Sentry does not serialize objects in twice nested objects.
+        // Move the ranges to the root level to see them in Sentry.
+        pdfRanges: this.pdfRanges,
+        pdfFile: Object.assign({}, this.pdfFile, {
+          ranges: '[extracted]',
+          // Hide prefetched chunks as these include binary blobs.
+          prefetched: this.pdfFile.prefetched?.length,
+        }),
         pdfUrl: this.url,
         start,
         end,
         metrics,
-      }
+      })
 
       const isStaleOutputRequest = () =>
         performance.now() - this.startTime > STALE_OUTPUT_REQUEST_THRESHOLD_MS
@@ -109,7 +118,7 @@ export function generatePdfCachingTransportFactory(PDFJS) {
           if (!enablePdfCaching) {
             throw err // This was a fallback request already. Do not retry.
           }
-          err = OError.tag(err, 'optimized pdf download error', errorInfo)
+          err = OError.tag(err, 'optimized pdf download error', getDebugInfo())
           console.error(err)
           captureException(err, { tags: { fromPdfCaching: true } })
           return fallbackRequest({
@@ -130,7 +139,7 @@ export function generatePdfCachingTransportFactory(PDFJS) {
         })
         .catch(err => {
           if (abortSignal.aborted) return
-          err = OError.tag(err, 'fatal pdf download error', errorInfo)
+          err = OError.tag(err, 'fatal pdf download error', getDebugInfo())
           console.error(err)
           if (!(err instanceof PDFJS.MissingPDFException)) {
             captureException(err, { tags: { fromPdfCaching: true } })
