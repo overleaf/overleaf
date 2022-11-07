@@ -192,23 +192,27 @@ function PdfJsViewer({ url, pdfFile }) {
       const handleTextlayerrendered = textLayer => {
         const pageElement = textLayer.source.textLayerDiv.closest('.page')
 
-        const doubleClickListener = event => {
-          const clickPosition = pdfJsWrapper.clickPosition(
-            event,
-            pageElement,
-            textLayer
-          )
+        if (!pageElement.dataset.listeningForDoubleClick) {
+          pageElement.dataset.listeningForDoubleClick = true
 
-          if (clickPosition) {
-            window.dispatchEvent(
-              new CustomEvent('synctex:sync-to-position', {
-                detail: clickPosition,
-              })
+          const doubleClickListener = event => {
+            const clickPosition = pdfJsWrapper.clickPosition(
+              event,
+              pageElement,
+              textLayer
             )
-          }
-        }
 
-        pageElement.addEventListener('dblclick', doubleClickListener)
+            if (clickPosition) {
+              window.dispatchEvent(
+                new CustomEvent('synctex:sync-to-position', {
+                  detail: clickPosition,
+                })
+              )
+            }
+          }
+
+          pageElement.addEventListener('dblclick', doubleClickListener)
+        }
       }
 
       pdfJsWrapper.eventBus.on('textlayerrendered', handleTextlayerrendered)
