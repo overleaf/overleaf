@@ -9,6 +9,7 @@ import {
   prefetchLargeEnabled,
   trackPdfDownloadEnabled,
 } from './pdf-caching-flags'
+import { isNetworkError } from '../../../utils/isNetworkError'
 
 // 30 seconds: The shutdown grace period of a clsi pre-emp instance.
 const STALE_OUTPUT_REQUEST_THRESHOLD_MS = 30 * 1000
@@ -79,7 +80,6 @@ export function generatePdfCachingTransportFactory(PDFJS) {
       const isStaleOutputRequest = () =>
         performance.now() - this.startTime > STALE_OUTPUT_REQUEST_THRESHOLD_MS
       const is404 = err => err.message === 'non successful response status: 404'
-      const isNetworkError = err => err.message === 'Failed to fetch'
       const isFromOutputPDFRequest = err =>
         OError.getFullInfo(err).url === this.url
 
