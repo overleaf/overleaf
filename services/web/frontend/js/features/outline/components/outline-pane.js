@@ -8,6 +8,7 @@ import Icon from '../../../shared/components/icon'
 import localStorage from '../../../infrastructure/local-storage'
 import withErrorBoundary from '../../../infrastructure/error-boundary'
 import { useProjectContext } from '../../../shared/context/project-context'
+import Tooltip from '../../../shared/components/tooltip'
 
 const OutlinePane = React.memo(function OutlinePane({
   isTexFile,
@@ -17,6 +18,7 @@ const OutlinePane = React.memo(function OutlinePane({
   eventTracking,
   highlightedLine,
   show,
+  isPartial = false,
 }) {
   const { t } = useTranslation()
 
@@ -67,6 +69,20 @@ const OutlinePane = React.memo(function OutlinePane({
             className="outline-caret-icon"
           />
           <h4 className="outline-header-name">{t('file_outline')}</h4>
+          {isPartial && (
+            <Tooltip
+              id="partial-outline"
+              description={t('partial_outline_warning')}
+              overlayProps={{ placement: 'top' }}
+            >
+              <span role="status">
+                <Icon
+                  type="exclamation-triangle"
+                  aria-label={t('partial_outline_warning')}
+                />
+              </span>
+            </Tooltip>
+          )}
         </button>
       </header>
       {expanded && isTexFile ? (
@@ -90,6 +106,7 @@ OutlinePane.propTypes = {
   eventTracking: PropTypes.object.isRequired,
   highlightedLine: PropTypes.number,
   show: PropTypes.bool.isRequired,
+  isPartial: PropTypes.bool,
 }
 
 export default withErrorBoundary(OutlinePane)

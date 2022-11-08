@@ -39,6 +39,11 @@ NonTexFile.args = {
   isTexFile: false,
 }
 
+export const PartialResult = args => <OutlinePane {...args} />
+PartialResult.args = {
+  isPartial: true,
+}
+
 export default {
   title: 'Editor / Outline',
   component: OutlinePane,

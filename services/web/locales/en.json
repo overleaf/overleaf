@@ -76,6 +76,7 @@
   "expand": "Expand",
   "collapse": "Collapse",
   "file_outline": "File outline",
+  "partial_outline_warning": "The File outline is out of date. It will update itself as you edit the document",
   "we_cant_find_any_sections_or_subsections_in_this_file": "We can’t find any sections or subsections in this file",
   "find_out_more_about_the_file_outline": "Find out more about the file outline",
   "invalid_institutional_email": "Your institution’s SSO service returned your email address as __email__, which is at an unexpected domain that we do not recognise as belonging to it. You may be able to change your primary email address via your user profile at your institution to one at your institution’s domain. Please contact your IT department if you have any questions.",
