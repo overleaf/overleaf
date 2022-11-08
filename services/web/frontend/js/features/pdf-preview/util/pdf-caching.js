@@ -440,7 +440,10 @@ function resolveMultiPartResponses({ file, chunks, data, boundary, metrics }) {
  */
 function checkChunkResponse(response, estimatedSize, init) {
   if (!(response.status === 206 || response.status === 200)) {
-    throw new OError('non successful response status: ' + response.status)
+    throw new OError('non successful response status: ' + response.status, {
+      responseHeaders: Object.fromEntries(response.headers.entries()),
+      requestHeader: init.headers,
+    })
   }
   const responseSize = getResponseSize(response)
   if (!responseSize) {
@@ -541,6 +544,10 @@ async function fetchChunk({
   metrics,
   cachedUrlLookupEnabled,
 }) {
+  const estimatedSize = Array.isArray(chunk)
+    ? estimateSizeOfMultipartResponse(chunk)
+    : chunk.end - chunk.start
+
   const oldUrl = cachedUrls.get(chunk.hash)
   if (cachedUrlLookupEnabled && chunk.hash && oldUrl && oldUrl !== url) {
     // When the clsi server id changes, the content id changes too and as a
@@ -549,6 +556,7 @@ async function fetchChunk({
     try {
       const response = await fetch(oldUrl, init)
       if (response.status === 200) {
+        checkChunkResponse(response, estimatedSize, init)
         metrics.oldUrlHitCount += 1
         return response
       }
@@ -562,9 +570,6 @@ async function fetchChunk({
     }
   }
   const response = await fetch(url, init)
-  const estimatedSize = Array.isArray(chunk)
-    ? estimateSizeOfMultipartResponse(chunk)
-    : chunk.end - chunk.start
   checkChunkResponse(response, estimatedSize, init)
   if (chunk.hash) cachedUrls.set(chunk.hash, url)
   return response

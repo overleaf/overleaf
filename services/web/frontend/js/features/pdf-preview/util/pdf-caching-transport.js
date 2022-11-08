@@ -120,7 +120,12 @@ export function generatePdfCachingTransportFactory(PDFJS) {
           }
           err = OError.tag(err, 'optimized pdf download error', getDebugInfo())
           console.error(err)
-          captureException(err, { tags: { fromPdfCaching: true } })
+          captureException(err, {
+            tags: {
+              fromPdfCaching: true,
+              isFromOutputPDFRequest: isFromOutputPDFRequest(err),
+            },
+          })
           return fallbackRequest({
             url: this.url,
             start,
@@ -142,7 +147,12 @@ export function generatePdfCachingTransportFactory(PDFJS) {
           err = OError.tag(err, 'fatal pdf download error', getDebugInfo())
           console.error(err)
           if (!(err instanceof PDFJS.MissingPDFException)) {
-            captureException(err, { tags: { fromPdfCaching: true } })
+            captureException(err, {
+              tags: {
+                fromPdfCaching: true,
+                isFromOutputPDFRequest: isFromOutputPDFRequest(err),
+              },
+            })
           }
           // Signal error for (subsequent) page load.
           this.handleFetchError(err)
