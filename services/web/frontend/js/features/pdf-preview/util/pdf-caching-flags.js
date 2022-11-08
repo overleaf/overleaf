@@ -5,8 +5,16 @@ if (!hasTextEncoder) {
   console.warn('TextEncoder is not available. Disabling pdf-caching.')
 }
 
+const isOpera =
+  Array.isArray(navigator.userAgentData?.brands) &&
+  navigator.userAgentData.brands.some(b => b.brand === 'Opera')
+if (isOpera) {
+  console.warn('Browser cache is limited in Opera. Disabling pdf-caching.')
+}
+
 function isFlagEnabled(flag) {
   if (!hasTextEncoder) return false
+  if (isOpera) return false
   return getMeta('ol-splitTestVariants')?.[flag] === 'enabled'
 }
 
