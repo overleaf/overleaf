@@ -111,6 +111,13 @@ export function generatePdfCachingTransportFactory(PDFJS) {
         .catch(err => {
           if (abortSignal.aborted) return
           if (isExpectedError(err)) {
+            if (is404(err)) {
+              // A regular pdf-js request would have seen this 404 as well.
+            } else {
+              // Flaky network, switch back to regular pdf-js requests.
+              metrics.failedCount++
+              metrics.failedOnce = true
+            }
             throw new PDFJS.MissingPDFException()
           }
           metrics.failedCount++
