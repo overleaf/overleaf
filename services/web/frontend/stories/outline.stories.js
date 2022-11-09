@@ -56,6 +56,7 @@ export default {
     outline: [],
     jumpToLine: () => {},
     onToggle: () => {},
+    show: true,
   },
   decorators: [ScopeDecorator],
 }
