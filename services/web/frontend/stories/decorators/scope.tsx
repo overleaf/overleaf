@@ -118,9 +118,28 @@ const initialize = () => {
 
   window.ExposedSettings = {
     appName: 'Overleaf',
+    cookieDomain: '.overleaf.stories',
+    dropboxAppName: 'Overleaf-Stories',
+    emailConfirmationDisabled: false,
+    enableSubscriptions: true,
+    hasAffiliationsFeature: false,
+    hasLinkUrlFeature: false,
+    hasLinkedProjectFileFeature: true,
+    hasLinkedProjectOutputFileFeature: true,
+    hasSamlFeature: true,
+    isOverleaf: true,
+    labsEnabled: true,
     maxEntitiesPerProject: 10,
     maxUploadSize: 5 * 1024 * 1024,
-    enableSubscriptions: true,
+    recaptchaDisabled: {
+      invite: true,
+      login: true,
+      passwordReset: true,
+      register: true,
+    },
+    sentryAllowedOriginRegex: '',
+    siteUrl: 'http://localhost',
+    templateLinks: [],
     textExtensions: [
       'tex',
       'latex',
@@ -152,7 +171,8 @@ const initialize = () => {
       'gv',
       'mf',
     ],
-  } as typeof window.ExposedSettings
+    validRootDocExtensions: ['tex', 'Rtex', 'ltx'],
+  }
 
   window.project_id = project._id
 
