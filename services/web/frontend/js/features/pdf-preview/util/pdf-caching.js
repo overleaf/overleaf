@@ -472,6 +472,7 @@ function checkChunkResponse(response, estimatedSize, init) {
 export async function fallbackRequest({ url, start, end, abortSignal }) {
   try {
     const init = {
+      cache: 'no-store',
       headers: { Range: `bytes=${start}-${end - 1}` },
       signal: abortSignal,
     }
@@ -809,7 +810,10 @@ export async function fetchRange({
       coalescedDynamicChunks.push({
         chunk: dynamicChunks[0],
         url,
-        init: { headers: { Range: `bytes=${byteRanges}` } },
+        init: {
+          cache: 'no-store',
+          headers: { Range: `bytes=${byteRanges}` },
+        },
       })
       break
     case dynamicChunks.length <= MULTI_PART_THRESHOLD:
@@ -820,7 +824,10 @@ export async function fetchRange({
         coalescedDynamicChunks.push({
           chunk,
           url,
-          init: { headers: { Range: `bytes=${chunk.start}-${chunk.end - 1}` } },
+          init: {
+            cache: 'no-store',
+            headers: { Range: `bytes=${chunk.start}-${chunk.end - 1}` },
+          },
         })
       })
       break
@@ -828,7 +835,10 @@ export async function fetchRange({
       coalescedDynamicChunks.push({
         chunk: dynamicChunks,
         url,
-        init: { headers: { Range: `bytes=${byteRanges}` } },
+        init: {
+          cache: 'no-store',
+          headers: { Range: `bytes=${byteRanges}` },
+        },
       })
   }
 
