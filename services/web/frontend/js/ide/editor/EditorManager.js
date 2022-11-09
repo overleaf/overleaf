@@ -176,6 +176,19 @@ export default EditorManager = (function () {
         return false
       }
 
+      // We will be restarting the survey later after some time
+      // Until then, we won't force user to use cm6 if they already use ace
+      const showCM6SwitchAwaySurvey = false
+
+      if (!showCM6SwitchAwaySurvey) {
+        const sourceEditor = this.localStorage(
+          `editor.source_editor.${this.$scope.project_id}`
+        )
+
+        return sourceEditor === 'cm6' || sourceEditor == null
+      }
+
+      // the key will be changed when we decided to restart the survey
       const hasSeenCM6SwitchAwaySurvey = this.localStorage(
         'editor.has_seen_cm6_switch_away_survey'
       )
