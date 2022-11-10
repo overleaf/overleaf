@@ -1,16 +1,15 @@
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import ContactUsModal from '../../../../../modules/support/frontend/js/components/contact-us-modal'
+import { useContactUsModal } from '../../../shared/hooks/use-contact-us-modal'
 import LeftMenuButton from './left-menu-button'
 
 export default function HelpContactUs() {
-  const [showModal, setShowModal] = useState(false)
+  const { modal, showModal } = useContactUsModal()
   const { t } = useTranslation()
 
   return (
     <>
       <LeftMenuButton
-        onClick={() => setShowModal(true)}
+        onClick={showModal}
         icon={{
           type: 'question',
           fw: true,
@@ -18,7 +17,7 @@ export default function HelpContactUs() {
       >
         {t('contact_us')}
       </LeftMenuButton>
-      <ContactUsModal show={showModal} handleHide={() => setShowModal(false)} />
+      {modal}
     </>
   )
 }

@@ -782,6 +782,7 @@ module.exports = {
     integrationLinkingWidgets: [],
     referenceLinkingWidgets: [],
     importProjectFromGithubModalWrapper: [],
+    editorLeftMenuSync: [],
   },
 
   moduleImportSequence: ['launchpad', 'server-ce-scripts', 'user-activate'],
