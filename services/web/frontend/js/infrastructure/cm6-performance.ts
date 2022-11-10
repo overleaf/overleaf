@@ -7,6 +7,7 @@ const TIMER_START_NAME = 'CM6-BeforeUpdate'
 const TIMER_END_NAME = 'CM6-AfterUpdate'
 const TIMER_DOM_UPDATE_NAME = 'CM6-DomUpdate'
 const TIMER_MEASURE_NAME = 'CM6-Update'
+const TIMER_KEYPRESS_MEASURE_NAME = 'CM6-Keypress-Measure'
 
 let latestDocLength = 0
 const sessionStart = Date.now()
@@ -65,6 +66,7 @@ function isKeypress(userEventType: string | undefined) {
 export function timedDispatch() {
   let userEventsSinceDomUpdateCount = 0
   let keypressesSinceDomUpdateCount = 0
+  const unpaintedKeypressStartTimes: number[] = []
 
   return (
     view: EditorView,
@@ -78,16 +80,21 @@ export function timedDispatch() {
 
     performance.mark(TIMER_START_NAME)
 
+    const userEventType = tr.annotation(Transaction.userEvent)
+    const eventIsKeypress = isKeypress(userEventType)
+
+    if (eventIsKeypress) {
+      unpaintedKeypressStartTimes.push(performance.now())
+    }
+
     dispatchFn(tr)
 
     performance.mark(TIMER_END_NAME)
 
-    const userEventType = tr.annotation(Transaction.userEvent)
-
     if (isInputOrDelete(userEventType)) {
       ++userEventsSinceDomUpdateCount
 
-      if (isKeypress(userEventType)) {
+      if (eventIsKeypress) {
         ++keypressesSinceDomUpdateCount
       }
 
@@ -107,6 +114,16 @@ export function timedDispatch() {
           })
           userEventsSinceDomUpdateCount = 0
           keypressesSinceDomUpdateCount = 0
+
+          const keypressEnd = performance.now()
+
+          for (const keypressStart of unpaintedKeypressStartTimes) {
+            performance.measure(TIMER_KEYPRESS_MEASURE_NAME, {
+              start: keypressStart,
+              end: keypressEnd,
+            })
+          }
+          unpaintedKeypressStartTimes.length = 0
         },
       })
     }
@@ -182,7 +199,7 @@ export function reportCM6Perf() {
   const domUpdateEntries = performance.getEntriesByName(
     TIMER_DOM_UPDATE_NAME,
     'mark'
-  ) as PerformanceMeasure[]
+  ) as PerformanceMark[]
 
   performance.clearMarks(TIMER_DOM_UPDATE_NAME)
 
@@ -210,6 +227,20 @@ export function reportCM6Perf() {
     4
   )
 
+  // Get entries triggered by keystrokes
+  const keypressPaintEntries = performance.getEntriesByName(
+    TIMER_KEYPRESS_MEASURE_NAME,
+    'measure'
+  ) as PerformanceMeasure[]
+
+  const keypressPaintDurations = keypressPaintEntries.map(
+    ({ duration }) => duration
+  )
+
+  const meanKeypressPaint = round(calculateMean(keypressPaintDurations), 2)
+
+  performance.clearMeasures(TIMER_KEYPRESS_MEASURE_NAME)
+
   return {
     max,
     mean,
@@ -226,6 +257,7 @@ export function reportCM6Perf() {
     longestLag,
     meanLagsPerMeasure,
     meanKeypressesPerMeasure,
+    meanKeypressPaint,
   }
 }
 

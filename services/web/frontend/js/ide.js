@@ -285,6 +285,7 @@ If the project has been renamed please look in your project list for a new proje
               'LongestLag',
               'MeanLagsPerMeasure',
               'MeanKeypressesPerMeasure',
+              'MeanKeypressPaint',
             ]
 
             for (const prop of perfProps) {
