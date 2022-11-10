@@ -147,7 +147,7 @@ describe('FSPersistorTests', function () {
                 persistor.sendStream(location, files.wombat, stream, {
                   sourceMd5: md5('wrong content'),
                 })
-              ).to.be.rejectedWith(Errors.WriteError, 'md5 hash mismatch')
+              ).to.be.rejectedWith(Errors.WriteError)
             })
 
             it('should not write the target file', async function () {
@@ -236,7 +236,7 @@ describe('FSPersistorTests', function () {
                 persistor.sendStream(location, files.wombat, stream, {
                   sourceMd5: md5('wrong content'),
                 })
-              ).to.be.rejectedWith(Errors.WriteError, 'md5 hash mismatch')
+              ).to.be.rejectedWith(Errors.WriteError)
             })
 
             it('should not update the target file', async function () {
