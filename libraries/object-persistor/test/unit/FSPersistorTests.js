@@ -1,356 +1,310 @@
-const sinon = require('sinon')
-const chai = require('chai')
-const { expect } = chai
+const crypto = require('crypto')
+const { expect } = require('chai')
+const mockFs = require('mock-fs')
+const fs = require('fs')
+const fsPromises = require('fs/promises')
+const Path = require('path')
+const StreamPromises = require('stream/promises')
 const SandboxedModule = require('sandboxed-module')
 const Errors = require('../../src/Errors')
-const StreamModule = require('stream')
 
 const MODULE_PATH = '../../src/FSPersistor.js'
 
 describe('FSPersistorTests', function () {
-  const stat = { size: 4, isFile: sinon.stub().returns(true) }
-  const fd = 1234
-  const writeStream = 'writeStream'
-  const remoteStream = 'remoteStream'
-  const location = '/foo'
-  const error = new Error('guru meditation error')
-  const md5 = 'ffffffff'
-
-  const files = ['animals/wombat.tex', 'vegetables/potato.tex']
-  const globs = [`${location}/${files[0]}`, `${location}/${files[1]}`]
-  const filteredFilenames = ['animals_wombat.tex', 'vegetables_potato.tex']
-  let fs,
-    fsPromises,
-    Stream,
-    StreamPromises,
-    FSPersistor,
-    glob,
-    readStream,
-    crypto,
-    Hash,
-    uuid,
-    tempFile
-
-  beforeEach(function () {
-    const randomNumber = Math.random().toString()
-    readStream = {
-      name: 'readStream',
-      on: sinon.stub().yields(),
-      pipe: sinon.stub(),
-    }
-    uuid = {
-      v1: () => randomNumber,
-    }
-    tempFile = `/tmp/${randomNumber}`
-    fs = {
-      createReadStream: sinon.stub().returns(readStream),
-      createWriteStream: sinon.stub().returns(writeStream),
-    }
-    fsPromises = {
-      unlink: sinon.stub().resolves(),
-      open: sinon.stub().resolves(fd),
-      stat: sinon.stub().resolves(stat),
-    }
-    glob = sinon.stub().yields(null, globs)
-    Stream = {
-      Transform: StreamModule.Transform,
-    }
-    StreamPromises = {
-      pipeline: sinon.stub().resolves(),
-    }
-    Hash = {
-      end: sinon.stub(),
-      read: sinon.stub().returns(md5),
-      digest: sinon.stub().returns(md5),
-      setEncoding: sinon.stub(),
-    }
-    crypto = {
-      createHash: sinon.stub().returns(Hash),
-    }
-    FSPersistor = new (SandboxedModule.require(MODULE_PATH, {
-      requires: {
-        './Errors': Errors,
-        fs,
-        'fs/promises': fsPromises,
-        glob,
-        stream: Stream,
-        'stream/promises': StreamPromises,
-        crypto,
-        'node-uuid': uuid,
-        // imported by PersistorHelper but otherwise unused here
-        '@overleaf/logger': {},
-      },
-      globals: { console },
-    }))({ paths: { uploadFolder: '/tmp' } })
+  const localFilePath = '/uploads/info.txt'
+  const localFileContents = Buffer.from('This information is critical', {
+    encoding: 'utf-8',
   })
+  const uploadFolder = '/tmp'
+  const location = '/bucket'
+  const files = {
+    wombat: 'animals/wombat.tex',
+    giraffe: 'animals/giraffe.tex',
+    potato: 'vegetables/potato.tex',
+  }
 
-  describe('sendFile', function () {
-    const localFilesystemPath = '/path/to/local/file'
-    it('should copy the file', async function () {
-      await FSPersistor.sendFile(location, files[0], localFilesystemPath)
-      expect(fs.createReadStream).to.have.been.calledWith(localFilesystemPath)
-      expect(fs.createWriteStream).to.have.been.calledWith(
-        `${location}/${filteredFilenames[0]}`
-      )
-      expect(StreamPromises.pipeline).to.have.been.calledWith(
-        readStream,
-        writeStream
-      )
-    })
+  const scenarios = [
+    {
+      description: 'default settings',
+      settings: { paths: { uploadFolder } },
+      fsPath: key => Path.join(location, key.replaceAll('/', '_')),
+    },
+    {
+      description: 'with useSubdirectories = true',
+      settings: { paths: { uploadFolder }, useSubdirectories: true },
+      fsPath: key => Path.join(location, key),
+    },
+  ]
 
-    it('should return an error if the file cannot be stored', async function () {
-      StreamPromises.pipeline.rejects(error)
-      await expect(
-        FSPersistor.sendFile(location, files[0], localFilesystemPath)
-      ).to.eventually.be.rejected.and.have.property('cause', error)
-    })
-  })
+  for (const scenario of scenarios) {
+    describe(scenario.description, function () {
+      let persistor
 
-  describe('sendStream', function () {
-    it('should write the stream to disk', async function () {
-      await FSPersistor.sendStream(location, files[0], remoteStream)
-      expect(StreamPromises.pipeline).to.have.been.calledWith(
-        remoteStream,
-        writeStream
-      )
-    })
+      beforeEach(function () {
+        const FSPersistor = SandboxedModule.require(MODULE_PATH, {
+          requires: {
+            'fs/promises': fsPromises,
+            'stream/promises': StreamPromises,
+            './Errors': Errors,
+          },
+        })
+        persistor = new FSPersistor(scenario.settings)
+      })
 
-    it('should delete the temporary file', async function () {
-      await FSPersistor.sendStream(location, files[0], remoteStream)
-      expect(fsPromises.unlink).to.have.been.calledWith(tempFile)
-    })
+      beforeEach(function () {
+        mockFs({
+          [localFilePath]: localFileContents,
+          [location]: {},
+          '/not-a-dir':
+            'This regular file is meant to prevent using this path as a directory',
+          '/directory/subdirectory': {},
+        })
+      })
 
-    it('should wrap the error from the filesystem', async function () {
-      StreamPromises.pipeline.rejects(error)
-      await expect(FSPersistor.sendStream(location, files[0], remoteStream))
-        .to.eventually.be.rejected.and.be.instanceOf(Errors.WriteError)
-        .and.have.property('cause', error)
-    })
+      afterEach(function () {
+        mockFs.restore()
+      })
 
-    it('should send the temporary file to the filestore', async function () {
-      await FSPersistor.sendStream(location, files[0], remoteStream)
-      expect(fs.createReadStream).to.have.been.calledWith(tempFile)
-    })
+      describe('sendFile', function () {
+        it('should copy the file', async function () {
+          await persistor.sendFile(location, files.wombat, localFilePath)
+          const contents = await fsPromises.readFile(
+            scenario.fsPath(files.wombat)
+          )
+          expect(contents.equals(localFileContents)).to.be.true
+        })
 
-    describe('when the md5 hash does not match', function () {
-      it('should return a write error', async function () {
-        await expect(
-          FSPersistor.sendStream(location, files[0], remoteStream, {
-            sourceMd5: '00000000',
+        it('should return an error if the file cannot be stored', async function () {
+          await expect(
+            persistor.sendFile('/not-a-dir', files.wombat, localFilePath)
+          ).to.be.rejectedWith(Errors.WriteError)
+        })
+      })
+
+      describe('sendStream', function () {
+        let stream
+
+        beforeEach(function () {
+          stream = fs.createReadStream(localFilePath)
+        })
+
+        it('should write the stream to disk', async function () {
+          await persistor.sendStream(location, files.wombat, stream)
+          const contents = await fsPromises.readFile(
+            scenario.fsPath(files.wombat)
+          )
+          expect(contents.equals(localFileContents)).to.be.true
+        })
+
+        it('should delete the temporary file', async function () {
+          await persistor.sendStream(location, files.wombat, stream)
+          const tempFiles = await fsPromises.readdir(uploadFolder)
+          expect(tempFiles).to.be.empty
+        })
+
+        it('should wrap the error from the filesystem', async function () {
+          await expect(
+            persistor.sendStream('/not-a-dir', files.wombat, stream)
+          ).to.be.rejectedWith(Errors.WriteError)
+        })
+
+        describe('when the md5 hash matches', function () {
+          it('should write the stream to disk', async function () {
+            await persistor.sendStream(location, files.wombat, stream, {
+              sourceMd5: md5(localFileContents),
+            })
+            const contents = await fsPromises.readFile(
+              scenario.fsPath(files.wombat)
+            )
+            expect(contents.equals(localFileContents)).to.be.true
           })
-        )
-          .to.eventually.be.rejected.and.be.an.instanceOf(Errors.WriteError)
-          .and.have.property('message', 'md5 hash mismatch')
-      })
+        })
 
-      it('deletes the copied file', async function () {
-        try {
-          await FSPersistor.sendStream(location, files[0], remoteStream, {
-            sourceMd5: '00000000',
+        describe('when the md5 hash does not match', function () {
+          let promise
+
+          beforeEach(function () {
+            promise = persistor.sendStream(location, files.wombat, stream, {
+              sourceMd5: md5('wrong content'),
+            })
           })
-        } catch (_) {}
-        expect(fsPromises.unlink).to.have.been.calledWith(
-          `${location}/${filteredFilenames[0]}`
-        )
+
+          it('should return a write error', async function () {
+            await expect(promise).to.be.rejectedWith(
+              Errors.WriteError,
+              'md5 hash mismatch'
+            )
+          })
+
+          it('deletes the copied file', async function () {
+            await expect(promise).to.be.rejected
+            await expect(
+              fsPromises.access(scenario.fsPath(files.wombat))
+            ).to.be.rejected
+          })
+        })
+      })
+
+      describe('getObjectStream', function () {
+        beforeEach(async function () {
+          await persistor.sendFile(location, files.wombat, localFilePath)
+        })
+
+        it('should return a string with the object contents', async function () {
+          const stream = await persistor.getObjectStream(location, files.wombat)
+          const contents = await streamToBuffer(stream)
+          expect(contents.equals(localFileContents)).to.be.true
+        })
+
+        it('should support ranges', async function () {
+          const stream = await persistor.getObjectStream(
+            location,
+            files.wombat,
+            {
+              start: 5,
+              end: 16,
+            }
+          )
+          const contents = await streamToBuffer(stream)
+          // end is inclusive in ranges, but exclusive in slice()
+          expect(contents.equals(localFileContents.slice(5, 17))).to.be.true
+        })
+
+        it('should give a NotFoundError if the file does not exist', async function () {
+          await expect(
+            persistor.getObjectStream(location, 'does-not-exist')
+          ).to.be.rejectedWith(Errors.NotFoundError)
+        })
+      })
+
+      describe('getObjectSize', function () {
+        beforeEach(async function () {
+          await persistor.sendFile(location, files.wombat, localFilePath)
+        })
+
+        it('should return the file size', async function () {
+          expect(
+            await persistor.getObjectSize(location, files.wombat)
+          ).to.equal(localFileContents.length)
+        })
+
+        it('should throw a NotFoundError if the file does not exist', async function () {
+          await expect(
+            persistor.getObjectSize(location, 'does-not-exist')
+          ).to.be.rejectedWith(Errors.NotFoundError)
+        })
+      })
+
+      describe('copyObject', function () {
+        beforeEach(async function () {
+          await persistor.sendFile(location, files.wombat, localFilePath)
+        })
+
+        it('Should copy the file to the new location', async function () {
+          await persistor.copyObject(location, files.wombat, files.potato)
+          const contents = await fsPromises.readFile(
+            scenario.fsPath(files.potato)
+          )
+          expect(contents.equals(localFileContents)).to.be.true
+        })
+      })
+
+      describe('deleteObject', function () {
+        beforeEach(async function () {
+          await persistor.sendFile(location, files.wombat, localFilePath)
+          await fsPromises.access(scenario.fsPath(files.wombat))
+        })
+
+        it('should delete the file', async function () {
+          await persistor.deleteObject(location, files.wombat)
+          await expect(
+            fsPromises.access(scenario.fsPath(files.wombat))
+          ).to.be.rejected
+        })
+
+        it("should ignore files that don't exist", async function () {
+          await persistor.deleteObject(location, 'does-not-exist')
+        })
+      })
+
+      describe('deleteDirectory', function () {
+        beforeEach(async function () {
+          for (const file of Object.values(files)) {
+            await persistor.sendFile(location, file, localFilePath)
+            await fsPromises.access(scenario.fsPath(file))
+          }
+        })
+
+        it('should delete all files under the directory', async function () {
+          await persistor.deleteDirectory(location, 'animals')
+          for (const file of [files.wombat, files.giraffe]) {
+            await expect(fsPromises.access(scenario.fsPath(file))).to.be
+              .rejected
+          }
+        })
+
+        it('should not delete files under other directoris', async function () {
+          await persistor.deleteDirectory(location, 'animals')
+          await fsPromises.access(scenario.fsPath(files.potato))
+        })
+
+        it("should ignore directories that don't exist", async function () {
+          await persistor.deleteDirectory(location, 'does-not-exist')
+          for (const file of Object.values(files)) {
+            await fsPromises.access(scenario.fsPath(file))
+          }
+        })
+      })
+
+      describe('checkIfObjectExists', function () {
+        beforeEach(async function () {
+          await persistor.sendFile(location, files.wombat, localFilePath)
+        })
+
+        it('should return true for existing files', async function () {
+          expect(
+            await persistor.checkIfObjectExists(location, files.wombat)
+          ).to.equal(true)
+        })
+
+        it('should return false for non-existing files', async function () {
+          expect(
+            await persistor.checkIfObjectExists(location, 'does-not-exist')
+          ).to.equal(false)
+        })
+      })
+
+      describe('directorySize', function () {
+        beforeEach(async function () {
+          for (const file of Object.values(files)) {
+            await persistor.sendFile(location, file, localFilePath)
+          }
+        })
+
+        it('should sum directory files size', async function () {
+          expect(await persistor.directorySize(location, 'animals')).to.equal(
+            2 * localFileContents.length
+          )
+        })
+
+        it('should return 0 on non-existing directories', async function () {
+          expect(
+            await persistor.directorySize(location, 'does-not-exist')
+          ).to.equal(0)
+        })
       })
     })
-  })
-
-  describe('getObjectStream', function () {
-    it('should use correct file location', async function () {
-      await FSPersistor.getObjectStream(location, files[0], {})
-      expect(fsPromises.open).to.have.been.calledWith(
-        `${location}/${filteredFilenames[0]}`
-      )
-    })
-
-    it('should pass the options to createReadStream', async function () {
-      await FSPersistor.getObjectStream(location, files[0], {
-        start: 0,
-        end: 8,
-      })
-      expect(fs.createReadStream).to.have.been.calledWith(null, {
-        start: 0,
-        end: 8,
-        fd,
-      })
-    })
-
-    it('should give a NotFoundError if the file does not exist', async function () {
-      const err = new Error()
-      err.code = 'ENOENT'
-      fsPromises.open.rejects(err)
-
-      await expect(FSPersistor.getObjectStream(location, files[0], {}))
-        .to.eventually.be.rejected.and.be.an.instanceOf(Errors.NotFoundError)
-        .and.have.property('cause', err)
-    })
-
-    it('should wrap any other error', async function () {
-      fsPromises.open.rejects(error)
-      await expect(FSPersistor.getObjectStream(location, files[0], {}))
-        .to.eventually.be.rejectedWith('failed to open file for streaming')
-        .and.be.an.instanceOf(Errors.ReadError)
-        .and.have.property('cause', error)
-    })
-  })
-
-  describe('getObjectSize', function () {
-    const badFilename = 'neenaw.tex'
-    const size = 65536
-    const noentError = new Error('not found')
-    noentError.code = 'ENOENT'
-
-    beforeEach(function () {
-      fsPromises.stat
-        .rejects(error)
-        .withArgs(`${location}/${filteredFilenames[0]}`)
-        .resolves({ size })
-        .withArgs(`${location}/${badFilename}`)
-        .rejects(noentError)
-    })
-
-    it('should return the file size', async function () {
-      expect(await FSPersistor.getObjectSize(location, files[0])).to.equal(size)
-    })
-
-    it('should throw a NotFoundError if the file does not exist', async function () {
-      await expect(
-        FSPersistor.getObjectSize(location, badFilename)
-      ).to.eventually.be.rejected.and.be.an.instanceOf(Errors.NotFoundError)
-    })
-
-    it('should wrap any other error', async function () {
-      await expect(FSPersistor.getObjectSize(location, 'raccoon'))
-        .to.eventually.be.rejected.and.be.an.instanceOf(Errors.ReadError)
-        .and.have.property('cause', error)
-    })
-  })
-
-  describe('copyObject', function () {
-    it('Should open the source for reading', async function () {
-      await FSPersistor.copyObject(location, files[0], files[1])
-      expect(fs.createReadStream).to.have.been.calledWith(
-        `${location}/${filteredFilenames[0]}`
-      )
-    })
-
-    it('Should open the target for writing', async function () {
-      await FSPersistor.copyObject(location, files[0], files[1])
-      expect(fs.createWriteStream).to.have.been.calledWith(
-        `${location}/${filteredFilenames[1]}`
-      )
-    })
-
-    it('Should pipe the source to the target', async function () {
-      await FSPersistor.copyObject(location, files[0], files[1])
-      expect(StreamPromises.pipeline).to.have.been.calledWith(
-        readStream,
-        writeStream
-      )
-    })
-  })
-
-  describe('deleteObject', function () {
-    it('Should call unlink with correct options', async function () {
-      await FSPersistor.deleteObject(location, files[0])
-      expect(fsPromises.unlink).to.have.been.calledWith(
-        `${location}/${filteredFilenames[0]}`
-      )
-    })
-
-    it('Should propagate the error', async function () {
-      fsPromises.unlink.rejects(error)
-      await expect(
-        FSPersistor.deleteObject(location, files[0])
-      ).to.eventually.be.rejected.and.have.property('cause', error)
-    })
-  })
-
-  describe('deleteDirectory', function () {
-    it('Should call glob with correct options', async function () {
-      await FSPersistor.deleteDirectory(location, files[0])
-      expect(glob).to.have.been.calledWith(
-        `${location}/${filteredFilenames[0]}_*`
-      )
-    })
-
-    it('Should call unlink on the returned files', async function () {
-      await FSPersistor.deleteDirectory(location, files[0])
-      for (const filename of globs) {
-        expect(fsPromises.unlink).to.have.been.calledWith(filename)
-      }
-    })
-
-    it('Should propagate the error', async function () {
-      glob.yields(error)
-      await expect(
-        FSPersistor.deleteDirectory(location, files[0])
-      ).to.eventually.be.rejected.and.have.property('cause', error)
-    })
-  })
-
-  describe('checkIfObjectExists', function () {
-    const badFilename = 'pototo'
-    const noentError = new Error('not found')
-    noentError.code = 'ENOENT'
-
-    beforeEach(function () {
-      fsPromises.stat
-        .rejects(error)
-        .withArgs(`${location}/${filteredFilenames[0]}`)
-        .resolves({})
-        .withArgs(`${location}/${badFilename}`)
-        .rejects(noentError)
-    })
-
-    it('Should call stat with correct options', async function () {
-      await FSPersistor.checkIfObjectExists(location, files[0])
-      expect(fsPromises.stat).to.have.been.calledWith(
-        `${location}/${filteredFilenames[0]}`
-      )
-    })
-
-    it('Should return true for existing files', async function () {
-      expect(
-        await FSPersistor.checkIfObjectExists(location, files[0])
-      ).to.equal(true)
-    })
-
-    it('Should return false for non-existing files', async function () {
-      expect(
-        await FSPersistor.checkIfObjectExists(location, badFilename)
-      ).to.equal(false)
-    })
-
-    it('should wrap the error if there is a problem', async function () {
-      await expect(FSPersistor.checkIfObjectExists(location, 'llama'))
-        .to.eventually.be.rejected.and.be.an.instanceOf(Errors.ReadError)
-        .and.have.property('cause', error)
-    })
-  })
-
-  describe('directorySize', function () {
-    it('should wrap the error', async function () {
-      glob.yields(error)
-      await expect(FSPersistor.directorySize(location, files[0]))
-        .to.eventually.be.rejected.and.be.an.instanceOf(Errors.ReadError)
-        .and.include({ cause: error })
-        .and.have.property('info')
-        .which.includes({ location, name: files[0] })
-    })
-
-    it('should filter the directory name', async function () {
-      await FSPersistor.directorySize(location, files[0])
-      expect(glob).to.have.been.calledWith(
-        `${location}/${filteredFilenames[0]}_*`
-      )
-    })
-
-    it('should sum directory files size', async function () {
-      expect(await FSPersistor.directorySize(location, files[0])).to.equal(
-        stat.size * files.length
-      )
-    })
-  })
+  }
 })
+
+function md5(str) {
+  return crypto.createHash('md5').update(str).digest('hex')
+}
+
+async function streamToBuffer(stream) {
+  const chunks = []
+  for await (const chunk of stream) {
+    chunks.push(chunk)
+  }
+  return Buffer.concat(chunks)
+}

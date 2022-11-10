@@ -2,7 +2,7 @@ const fs = require('fs')
 const fsPromises = require('fs/promises')
 const globCallbacks = require('glob')
 const uuid = require('node-uuid')
-const path = require('path')
+const Path = require('path')
 const { pipeline } = require('stream/promises')
 const { promisify } = require('util')
 
@@ -12,8 +12,6 @@ const PersistorHelper = require('./PersistorHelper')
 
 const glob = promisify(globCallbacks)
 
-const filterName = key => key.replace(/\//g, '_')
-
 module.exports = class FSPersistor extends AbstractPersistor {
   constructor(settings) {
     super()
@@ -22,13 +20,14 @@ module.exports = class FSPersistor extends AbstractPersistor {
   }
 
   async sendFile(location, target, source) {
-    const filteredTarget = filterName(target)
+    const fsPath = this._getFsPath(location, target)
 
     // actually copy the file (instead of moving it) to maintain consistent behaviour
     // between the different implementations
     try {
+      await this._ensureDirectoryExists(fsPath)
       const sourceStream = fs.createReadStream(source)
-      const targetStream = fs.createWriteStream(`${location}/${filteredTarget}`)
+      const targetStream = fs.createWriteStream(fsPath)
       await pipeline(sourceStream, targetStream)
     } catch (err) {
       throw PersistorHelper.wrapError(
@@ -41,17 +40,18 @@ module.exports = class FSPersistor extends AbstractPersistor {
   }
 
   async sendStream(location, target, sourceStream, opts = {}) {
-    const fsPath = await this._writeStream(sourceStream)
+    const tempFilePath = await this._writeStream(sourceStream)
     let sourceMd5 = opts.sourceMd5
     if (!sourceMd5) {
-      sourceMd5 = await FSPersistor._getFileMd5HashForPath(fsPath)
+      sourceMd5 = await _getFileMd5HashForPath(tempFilePath)
     }
 
     try {
-      await this.sendFile(location, target, fsPath)
+      await this.sendFile(location, target, tempFilePath)
       const destMd5 = await this.getObjectMd5Hash(location, target)
       if (sourceMd5 !== destMd5) {
-        await this._deleteFile(`${location}/${filterName(target)}`)
+        const fsPath = this._getFsPath(location, target)
+        await this._deleteFile(fsPath)
         throw new WriteError('md5 hash mismatch', {
           sourceMd5,
           destMd5,
@@ -60,21 +60,21 @@ module.exports = class FSPersistor extends AbstractPersistor {
         })
       }
     } finally {
-      await this._deleteFile(fsPath)
+      await this._deleteFile(tempFilePath)
     }
   }
 
   // opts may be {start: Number, end: Number}
-  async getObjectStream(location, name, opts) {
-    const filteredName = filterName(name)
+  async getObjectStream(location, name, opts = {}) {
+    const fsPath = this._getFsPath(location, name)
 
     try {
-      opts.fd = await fsPromises.open(`${location}/${filteredName}`, 'r')
+      opts.fd = await fsPromises.open(fsPath, 'r')
     } catch (err) {
       throw PersistorHelper.wrapError(
         err,
         'failed to open file for streaming',
-        { location, filteredName, opts },
+        { location, name, fsPath, opts },
         ReadError
       )
     }
@@ -88,10 +88,10 @@ module.exports = class FSPersistor extends AbstractPersistor {
   }
 
   async getObjectSize(location, filename) {
-    const fullPath = path.join(location, filterName(filename))
+    const fsPath = this._getFsPath(location, filename)
 
     try {
-      const stat = await fsPromises.stat(fullPath)
+      const stat = await fsPromises.stat(fsPath)
       return stat.size
     } catch (err) {
       throw PersistorHelper.wrapError(
@@ -104,9 +104,9 @@ module.exports = class FSPersistor extends AbstractPersistor {
   }
 
   async getObjectMd5Hash(location, filename) {
-    const fullPath = path.join(location, filterName(filename))
+    const fsPath = this._getFsPath(location, filename)
     try {
-      return await FSPersistor._getFileMd5HashForPath(fullPath)
+      return await _getFileMd5HashForPath(fsPath)
     } catch (err) {
       throw new ReadError(
         'unable to get md5 hash from file',
@@ -116,35 +116,34 @@ module.exports = class FSPersistor extends AbstractPersistor {
     }
   }
 
-  async copyObject(location, fromName, toName) {
-    const filteredFromName = filterName(fromName)
-    const filteredToName = filterName(toName)
+  async copyObject(location, source, target) {
+    const sourceFsPath = this._getFsPath(location, source)
+    const targetFsPath = this._getFsPath(location, target)
 
     try {
-      const sourceStream = fs.createReadStream(
-        `${location}/${filteredFromName}`
-      )
-      const targetStream = fs.createWriteStream(`${location}/${filteredToName}`)
+      await this._ensureDirectoryExists(targetFsPath)
+      const sourceStream = fs.createReadStream(sourceFsPath)
+      const targetStream = fs.createWriteStream(targetFsPath)
       await pipeline(sourceStream, targetStream)
     } catch (err) {
       throw PersistorHelper.wrapError(
         err,
         'failed to copy file',
-        { location, filteredFromName, filteredToName },
+        { location, source, target, sourceFsPath, targetFsPath },
         WriteError
       )
     }
   }
 
   async deleteObject(location, name) {
-    const filteredName = filterName(name)
+    const fsPath = this._getFsPath(location, name)
     try {
-      await fsPromises.unlink(`${location}/${filteredName}`)
+      await fsPromises.unlink(fsPath)
     } catch (err) {
       const wrappedError = PersistorHelper.wrapError(
         err,
         'failed to delete file',
-        { location, filteredName },
+        { location, name, fsPath },
         WriteError
       )
       if (!(wrappedError instanceof NotFoundError)) {
@@ -156,28 +155,31 @@ module.exports = class FSPersistor extends AbstractPersistor {
   }
 
   async deleteDirectory(location, name) {
-    const filteredName = filterName(name.replace(/\/$/, ''))
+    const fsPath = this._getFsPath(location, name)
 
     try {
-      await Promise.all(
-        (
-          await glob(`${location}/${filteredName}_*`)
-        ).map(file => fsPromises.unlink(file))
-      )
+      if (this.settings.useSubdirectories) {
+        await fsPromises.rm(fsPath, { recursive: true, force: true })
+      } else {
+        const files = await this._listDirectory(fsPath)
+        for (const file of files) {
+          await fsPromises.unlink(file)
+        }
+      }
     } catch (err) {
       throw PersistorHelper.wrapError(
         err,
         'failed to delete directory',
-        { location, filteredName },
+        { location, name, fsPath },
         WriteError
       )
     }
   }
 
   async checkIfObjectExists(location, name) {
-    const filteredName = filterName(name)
+    const fsPath = this._getFsPath(location, name)
     try {
-      const stat = await fsPromises.stat(`${location}/${filteredName}`)
+      const stat = await fsPromises.stat(fsPath)
       return !!stat
     } catch (err) {
       if (err.code === 'ENOENT') {
@@ -186,7 +188,7 @@ module.exports = class FSPersistor extends AbstractPersistor {
       throw PersistorHelper.wrapError(
         err,
         'failed to stat file',
-        { location, filteredName },
+        { location, name, fsPath },
         ReadError
       )
     }
@@ -194,11 +196,11 @@ module.exports = class FSPersistor extends AbstractPersistor {
 
   // note, does not recurse into subdirectories, as we use a flattened directory structure
   async directorySize(location, name) {
-    const filteredName = filterName(name.replace(/\/$/, ''))
+    const fsPath = this._getFsPath(location, name)
     let size = 0
 
     try {
-      const files = await glob(`${location}/${filteredName}_*`)
+      const files = await this._listDirectory(fsPath)
       for (const file of files) {
         try {
           const stat = await fsPromises.stat(file)
@@ -229,7 +231,7 @@ module.exports = class FSPersistor extends AbstractPersistor {
       key = uuid.v1()
     }
     key = key.replace(/\//g, '-')
-    return path.join(this.settings.paths.uploadFolder, key)
+    return Path.join(this.settings.paths.uploadFolder, key)
   }
 
   async _writeStream(stream, key) {
@@ -266,8 +268,28 @@ module.exports = class FSPersistor extends AbstractPersistor {
     }
   }
 
-  static async _getFileMd5HashForPath(fullPath) {
-    const stream = fs.createReadStream(fullPath)
-    return PersistorHelper.calculateStreamMd5(stream)
+  _getFsPath(location, key) {
+    key = key.replace(/\/$/, '')
+    if (!this.settings.useSubdirectories) {
+      key = key.replace(/\//g, '_')
+    }
+    return Path.join(location, key)
   }
+
+  async _listDirectory(path) {
+    if (this.settings.useSubdirectories) {
+      return await glob(Path.join(path, '**'))
+    } else {
+      return await glob(`${path}_*`)
+    }
+  }
+
+  async _ensureDirectoryExists(path) {
+    await fsPromises.mkdir(Path.dirname(path), { recursive: true })
+  }
+}
+
+async function _getFileMd5HashForPath(fullPath) {
+  const stream = fs.createReadStream(fullPath)
+  return PersistorHelper.calculateStreamMd5(stream)
 }

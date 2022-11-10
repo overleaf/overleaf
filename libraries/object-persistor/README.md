@@ -253,7 +253,8 @@ An object with the relevant configuration should be passed to the main function 
 
 ### FS-specific parameters
 
-- `path.uploadFolder` (required): Location for temporary files that are being uploaded
+- `paths.uploadFolder` (required): Location for temporary files that are being uploaded
+- `useSubdirectories`: If true, files will be stored in subdirectories on the filesystem. By default, the directory structure is flattened and slashes in the object keys are replaced with underscores.
 
 #### Notes
 
