@@ -1,8 +1,9 @@
 const chai = require('chai')
 const { expect } = chai
 const SandboxedModule = require('sandboxed-module')
+const StreamPromises = require('stream/promises')
 
-const modulePath = '../../src/PersistorFactory.js'
+const MODULE_PATH = '../../src/PersistorFactory.js'
 
 describe('PersistorManager', function () {
   let PersistorFactory, FSPersistor, S3Persistor, Settings, GcsPersistor
@@ -33,8 +34,9 @@ describe('PersistorManager', function () {
         info() {},
         err() {},
       },
+      'stream/promises': StreamPromises,
     }
-    PersistorFactory = SandboxedModule.require(modulePath, { requires })
+    PersistorFactory = SandboxedModule.require(MODULE_PATH, { requires })
   })
 
   it('should implement the S3 wrapped method when S3 is configured', function () {

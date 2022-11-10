@@ -5,7 +5,7 @@ const SandboxedModule = require('sandboxed-module')
 const Errors = require('../../src/Errors')
 const StreamModule = require('stream')
 
-const modulePath = '../../src/FSPersistor.js'
+const MODULE_PATH = '../../src/FSPersistor.js'
 
 describe('FSPersistorTests', function () {
   const stat = { size: 4, isFile: sinon.stub().returns(true) }
@@ -19,7 +19,17 @@ describe('FSPersistorTests', function () {
   const files = ['animals/wombat.tex', 'vegetables/potato.tex']
   const globs = [`${location}/${files[0]}`, `${location}/${files[1]}`]
   const filteredFilenames = ['animals_wombat.tex', 'vegetables_potato.tex']
-  let fs, stream, FSPersistor, glob, readStream, crypto, Hash, uuid, tempFile
+  let fs,
+    fsPromises,
+    Stream,
+    StreamPromises,
+    FSPersistor,
+    glob,
+    readStream,
+    crypto,
+    Hash,
+    uuid,
+    tempFile
 
   beforeEach(function () {
     const randomNumber = Math.random().toString()
@@ -35,14 +45,18 @@ describe('FSPersistorTests', function () {
     fs = {
       createReadStream: sinon.stub().returns(readStream),
       createWriteStream: sinon.stub().returns(writeStream),
-      unlink: sinon.stub().yields(),
-      open: sinon.stub().yields(null, fd),
-      stat: sinon.stub().yields(null, stat),
+    }
+    fsPromises = {
+      unlink: sinon.stub().resolves(),
+      open: sinon.stub().resolves(fd),
+      stat: sinon.stub().resolves(stat),
     }
     glob = sinon.stub().yields(null, globs)
-    stream = {
-      pipeline: sinon.stub().yields(),
+    Stream = {
       Transform: StreamModule.Transform,
+    }
+    StreamPromises = {
+      pipeline: sinon.stub().resolves(),
     }
     Hash = {
       end: sinon.stub(),
@@ -53,12 +67,14 @@ describe('FSPersistorTests', function () {
     crypto = {
       createHash: sinon.stub().returns(Hash),
     }
-    FSPersistor = new (SandboxedModule.require(modulePath, {
+    FSPersistor = new (SandboxedModule.require(MODULE_PATH, {
       requires: {
         './Errors': Errors,
         fs,
+        'fs/promises': fsPromises,
         glob,
-        stream,
+        stream: Stream,
+        'stream/promises': StreamPromises,
         crypto,
         'node-uuid': uuid,
         // imported by PersistorHelper but otherwise unused here
@@ -76,11 +92,14 @@ describe('FSPersistorTests', function () {
       expect(fs.createWriteStream).to.have.been.calledWith(
         `${location}/${filteredFilenames[0]}`
       )
-      expect(stream.pipeline).to.have.been.calledWith(readStream, writeStream)
+      expect(StreamPromises.pipeline).to.have.been.calledWith(
+        readStream,
+        writeStream
+      )
     })
 
     it('should return an error if the file cannot be stored', async function () {
-      stream.pipeline.yields(error)
+      StreamPromises.pipeline.rejects(error)
       await expect(
         FSPersistor.sendFile(location, files[0], localFilesystemPath)
       ).to.eventually.be.rejected.and.have.property('cause', error)
@@ -90,16 +109,19 @@ describe('FSPersistorTests', function () {
   describe('sendStream', function () {
     it('should write the stream to disk', async function () {
       await FSPersistor.sendStream(location, files[0], remoteStream)
-      expect(stream.pipeline).to.have.been.calledWith(remoteStream, writeStream)
+      expect(StreamPromises.pipeline).to.have.been.calledWith(
+        remoteStream,
+        writeStream
+      )
     })
 
     it('should delete the temporary file', async function () {
       await FSPersistor.sendStream(location, files[0], remoteStream)
-      expect(fs.unlink).to.have.been.calledWith(tempFile)
+      expect(fsPromises.unlink).to.have.been.calledWith(tempFile)
     })
 
     it('should wrap the error from the filesystem', async function () {
-      stream.pipeline.yields(error)
+      StreamPromises.pipeline.rejects(error)
       await expect(FSPersistor.sendStream(location, files[0], remoteStream))
         .to.eventually.be.rejected.and.be.instanceOf(Errors.WriteError)
         .and.have.property('cause', error)
@@ -127,7 +149,7 @@ describe('FSPersistorTests', function () {
             sourceMd5: '00000000',
           })
         } catch (_) {}
-        expect(fs.unlink).to.have.been.calledWith(
+        expect(fsPromises.unlink).to.have.been.calledWith(
           `${location}/${filteredFilenames[0]}`
         )
       })
@@ -137,7 +159,7 @@ describe('FSPersistorTests', function () {
   describe('getObjectStream', function () {
     it('should use correct file location', async function () {
       await FSPersistor.getObjectStream(location, files[0], {})
-      expect(fs.open).to.have.been.calledWith(
+      expect(fsPromises.open).to.have.been.calledWith(
         `${location}/${filteredFilenames[0]}`
       )
     })
@@ -157,7 +179,7 @@ describe('FSPersistorTests', function () {
     it('should give a NotFoundError if the file does not exist', async function () {
       const err = new Error()
       err.code = 'ENOENT'
-      fs.open.yields(err)
+      fsPromises.open.rejects(err)
 
       await expect(FSPersistor.getObjectStream(location, files[0], {}))
         .to.eventually.be.rejected.and.be.an.instanceOf(Errors.NotFoundError)
@@ -165,7 +187,7 @@ describe('FSPersistorTests', function () {
     })
 
     it('should wrap any other error', async function () {
-      fs.open.yields(error)
+      fsPromises.open.rejects(error)
       await expect(FSPersistor.getObjectStream(location, files[0], {}))
         .to.eventually.be.rejectedWith('failed to open file for streaming')
         .and.be.an.instanceOf(Errors.ReadError)
@@ -180,12 +202,12 @@ describe('FSPersistorTests', function () {
     noentError.code = 'ENOENT'
 
     beforeEach(function () {
-      fs.stat
-        .yields(error)
+      fsPromises.stat
+        .rejects(error)
         .withArgs(`${location}/${filteredFilenames[0]}`)
-        .yields(null, { size })
+        .resolves({ size })
         .withArgs(`${location}/${badFilename}`)
-        .yields(noentError)
+        .rejects(noentError)
     })
 
     it('should return the file size', async function () {
@@ -222,20 +244,23 @@ describe('FSPersistorTests', function () {
 
     it('Should pipe the source to the target', async function () {
       await FSPersistor.copyObject(location, files[0], files[1])
-      expect(stream.pipeline).to.have.been.calledWith(readStream, writeStream)
+      expect(StreamPromises.pipeline).to.have.been.calledWith(
+        readStream,
+        writeStream
+      )
     })
   })
 
   describe('deleteObject', function () {
     it('Should call unlink with correct options', async function () {
       await FSPersistor.deleteObject(location, files[0])
-      expect(fs.unlink).to.have.been.calledWith(
+      expect(fsPromises.unlink).to.have.been.calledWith(
         `${location}/${filteredFilenames[0]}`
       )
     })
 
     it('Should propagate the error', async function () {
-      fs.unlink.yields(error)
+      fsPromises.unlink.rejects(error)
       await expect(
         FSPersistor.deleteObject(location, files[0])
       ).to.eventually.be.rejected.and.have.property('cause', error)
@@ -253,7 +278,7 @@ describe('FSPersistorTests', function () {
     it('Should call unlink on the returned files', async function () {
       await FSPersistor.deleteDirectory(location, files[0])
       for (const filename of globs) {
-        expect(fs.unlink).to.have.been.calledWith(filename)
+        expect(fsPromises.unlink).to.have.been.calledWith(filename)
       }
     })
 
@@ -271,17 +296,17 @@ describe('FSPersistorTests', function () {
     noentError.code = 'ENOENT'
 
     beforeEach(function () {
-      fs.stat
-        .yields(error)
+      fsPromises.stat
+        .rejects(error)
         .withArgs(`${location}/${filteredFilenames[0]}`)
-        .yields(null, {})
+        .resolves({})
         .withArgs(`${location}/${badFilename}`)
-        .yields(noentError)
+        .rejects(noentError)
     })
 
     it('Should call stat with correct options', async function () {
       await FSPersistor.checkIfObjectExists(location, files[0])
-      expect(fs.stat).to.have.been.calledWith(
+      expect(fsPromises.stat).to.have.been.calledWith(
         `${location}/${filteredFilenames[0]}`
       )
     })

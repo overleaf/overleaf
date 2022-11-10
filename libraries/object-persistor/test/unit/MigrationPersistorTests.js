@@ -23,7 +23,13 @@ describe('MigrationPersistorTests', function () {
   const size = 33
   const md5 = 'ffffffff'
 
-  let Settings, Logger, Stream, MigrationPersistor, fileStream, newPersistor
+  let Settings,
+    Logger,
+    Stream,
+    StreamPromises,
+    MigrationPersistor,
+    fileStream,
+    newPersistor
 
   beforeEach(function () {
     fileStream = {
@@ -64,8 +70,11 @@ describe('MigrationPersistorTests', function () {
     }
 
     Stream = {
-      pipeline: sinon.stub().yields(),
       PassThrough: sinon.stub(),
+    }
+
+    StreamPromises = {
+      pipeline: sinon.stub().resolves(),
     }
 
     Logger = {
@@ -75,6 +84,7 @@ describe('MigrationPersistorTests', function () {
     MigrationPersistor = SandboxedModule.require(modulePath, {
       requires: {
         stream: Stream,
+        'stream/promises': StreamPromises,
         './Errors': Errors,
         '@overleaf/logger': Logger,
       },

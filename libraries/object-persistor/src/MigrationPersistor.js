@@ -1,10 +1,8 @@
 const AbstractPersistor = require('./AbstractPersistor')
 const Logger = require('@overleaf/logger')
 const Stream = require('stream')
-const { promisify } = require('util')
+const { pipeline } = require('stream/promises')
 const { NotFoundError, WriteError } = require('./Errors')
-
-const pipeline = promisify(Stream.pipeline)
 
 // Persistor that wraps two other persistors. Talks to the 'primary' by default,
 // but will fall back to an older persistor in the case of a not-found error.

@@ -1,13 +1,10 @@
 const fs = require('fs')
-const { promisify } = require('util')
-const Stream = require('stream')
+const { pipeline } = require('stream/promises')
 const { Storage } = require('@google-cloud/storage')
 const { WriteError, ReadError, NotFoundError } = require('./Errors')
 const asyncPool = require('tiny-async-pool')
 const AbstractPersistor = require('./AbstractPersistor')
 const PersistorHelper = require('./PersistorHelper')
-
-const pipeline = promisify(Stream.pipeline)
 
 module.exports = class GcsPersistor extends AbstractPersistor {
   constructor(settings) {

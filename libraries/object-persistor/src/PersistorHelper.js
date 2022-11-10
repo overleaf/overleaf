@@ -1,10 +1,8 @@
 const Crypto = require('crypto')
 const Stream = require('stream')
+const { pipeline } = require('stream/promises')
 const Logger = require('@overleaf/logger')
 const { WriteError, ReadError, NotFoundError } = require('./Errors')
-const { promisify } = require('util')
-
-const pipeline = promisify(Stream.pipeline)
 
 // Observes data that passes through and computes some metadata for it
 // - specifically, it computes the number of bytes transferred, and optionally

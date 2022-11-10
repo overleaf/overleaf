@@ -26,6 +26,7 @@ describe('GcsPersistorTests', function () {
     GcsNotFoundError,
     ReadStream,
     Stream,
+    StreamPromises,
     GcsBucket,
     GcsFile,
     GcsPersistor,
@@ -78,8 +79,11 @@ describe('GcsPersistorTests', function () {
     }
 
     Stream = {
-      pipeline: sinon.stub().yields(),
       Transform,
+    }
+
+    StreamPromises = {
+      pipeline: sinon.stub().resolves(),
     }
 
     GcsFile = {
@@ -136,6 +140,7 @@ describe('GcsPersistorTests', function () {
         './Errors': Errors,
         fs: Fs,
         stream: Stream,
+        'stream/promises': StreamPromises,
         crypto,
       },
       globals: { console, Buffer },
@@ -373,7 +378,7 @@ describe('GcsPersistorTests', function () {
       })
 
       it('should meter the stream and pass it to GCS', function () {
-        expect(Stream.pipeline).to.have.been.calledWith(
+        expect(StreamPromises.pipeline).to.have.been.calledWith(
           ReadStream,
           sinon.match.instanceOf(Transform),
           WriteStream
@@ -433,14 +438,9 @@ describe('GcsPersistorTests', function () {
     describe('when the upload fails', function () {
       let error
       beforeEach(async function () {
-        Stream.pipeline
-          .withArgs(
-            ReadStream,
-            sinon.match.instanceOf(Transform),
-            WriteStream,
-            sinon.match.any
-          )
-          .yields(genericError)
+        StreamPromises.pipeline
+          .withArgs(ReadStream, sinon.match.instanceOf(Transform), WriteStream)
+          .rejects(genericError)
         try {
           await GcsPersistor.sendStream(bucket, key, ReadStream)
         } catch (err) {
@@ -475,7 +475,7 @@ describe('GcsPersistorTests', function () {
       })
 
       it('should upload the stream via the meter', function () {
-        expect(Stream.pipeline).to.have.been.calledWith(
+        expect(StreamPromises.pipeline).to.have.been.calledWith(
           ReadStream,
           sinon.match.instanceOf(Transform),
           WriteStream

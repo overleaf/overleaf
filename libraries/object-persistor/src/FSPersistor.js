@@ -1,19 +1,16 @@
 const fs = require('fs')
-const glob = require('glob')
+const fsPromises = require('fs/promises')
+const globCallbacks = require('glob')
 const uuid = require('node-uuid')
 const path = require('path')
-const Stream = require('stream')
+const { pipeline } = require('stream/promises')
 const { promisify } = require('util')
 
 const AbstractPersistor = require('./AbstractPersistor')
 const { NotFoundError, ReadError, WriteError } = require('./Errors')
 const PersistorHelper = require('./PersistorHelper')
 
-const pipeline = promisify(Stream.pipeline)
-const fsUnlink = promisify(fs.unlink)
-const fsOpen = promisify(fs.open)
-const fsStat = promisify(fs.stat)
-const fsGlob = promisify(glob)
+const glob = promisify(globCallbacks)
 
 const filterName = key => key.replace(/\//g, '_')
 
@@ -72,7 +69,7 @@ module.exports = class FSPersistor extends AbstractPersistor {
     const filteredName = filterName(name)
 
     try {
-      opts.fd = await fsOpen(`${location}/${filteredName}`, 'r')
+      opts.fd = await fsPromises.open(`${location}/${filteredName}`, 'r')
     } catch (err) {
       throw PersistorHelper.wrapError(
         err,
@@ -94,7 +91,7 @@ module.exports = class FSPersistor extends AbstractPersistor {
     const fullPath = path.join(location, filterName(filename))
 
     try {
-      const stat = await fsStat(fullPath)
+      const stat = await fsPromises.stat(fullPath)
       return stat.size
     } catch (err) {
       throw PersistorHelper.wrapError(
@@ -142,7 +139,7 @@ module.exports = class FSPersistor extends AbstractPersistor {
   async deleteObject(location, name) {
     const filteredName = filterName(name)
     try {
-      await fsUnlink(`${location}/${filteredName}`)
+      await fsPromises.unlink(`${location}/${filteredName}`)
     } catch (err) {
       const wrappedError = PersistorHelper.wrapError(
         err,
@@ -164,8 +161,8 @@ module.exports = class FSPersistor extends AbstractPersistor {
     try {
       await Promise.all(
         (
-          await fsGlob(`${location}/${filteredName}_*`)
-        ).map(file => fsUnlink(file))
+          await glob(`${location}/${filteredName}_*`)
+        ).map(file => fsPromises.unlink(file))
       )
     } catch (err) {
       throw PersistorHelper.wrapError(
@@ -180,7 +177,7 @@ module.exports = class FSPersistor extends AbstractPersistor {
   async checkIfObjectExists(location, name) {
     const filteredName = filterName(name)
     try {
-      const stat = await fsStat(`${location}/${filteredName}`)
+      const stat = await fsPromises.stat(`${location}/${filteredName}`)
       return !!stat
     } catch (err) {
       if (err.code === 'ENOENT') {
@@ -201,10 +198,10 @@ module.exports = class FSPersistor extends AbstractPersistor {
     let size = 0
 
     try {
-      const files = await fsGlob(`${location}/${filteredName}_*`)
+      const files = await glob(`${location}/${filteredName}_*`)
       for (const file of files) {
         try {
-          const stat = await fsStat(file)
+          const stat = await fsPromises.stat(file)
           if (stat.isFile()) {
             size += stat.size
           }
@@ -261,7 +258,7 @@ module.exports = class FSPersistor extends AbstractPersistor {
       return
     }
     try {
-      await fsUnlink(fsPath)
+      await fsPromises.unlink(fsPath)
     } catch (err) {
       if (err.code !== 'ENOENT') {
         throw new WriteError('failed to delete file', { fsPath }, err)

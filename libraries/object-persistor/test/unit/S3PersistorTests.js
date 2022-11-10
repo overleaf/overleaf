@@ -1,10 +1,10 @@
 const sinon = require('sinon')
 const chai = require('chai')
 const { expect } = chai
-const modulePath = '../../src/S3Persistor.js'
 const SandboxedModule = require('sandboxed-module')
-
 const Errors = require('../../src/Errors')
+
+const MODULE_PATH = '../../src/S3Persistor.js'
 
 describe('S3PersistorTests', function () {
   const defaultS3Key = 'frog'
@@ -35,6 +35,7 @@ describe('S3PersistorTests', function () {
     Fs,
     ReadStream,
     Stream,
+    StreamPromises,
     S3Persistor,
     S3Client,
     S3ReadStream,
@@ -65,8 +66,11 @@ describe('S3PersistorTests', function () {
     }
 
     Stream = {
-      pipeline: sinon.stub().yields(),
       Transform,
+    }
+
+    StreamPromises = {
+      pipeline: sinon.stub().resolves(),
     }
 
     EmptyPromise = {
@@ -145,13 +149,14 @@ describe('S3PersistorTests', function () {
       warn: sinon.stub(),
     }
 
-    S3Persistor = new (SandboxedModule.require(modulePath, {
+    S3Persistor = new (SandboxedModule.require(MODULE_PATH, {
       requires: {
         'aws-sdk/clients/s3': S3,
         '@overleaf/logger': Logger,
         './Errors': Errors,
         fs: Fs,
         stream: Stream,
+        'stream/promises': StreamPromises,
         crypto,
       },
       globals: { console, Buffer },
