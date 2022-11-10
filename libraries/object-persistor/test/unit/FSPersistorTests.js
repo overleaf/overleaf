@@ -11,11 +11,14 @@ const Errors = require('../../src/Errors')
 const MODULE_PATH = '../../src/FSPersistor.js'
 
 describe('FSPersistorTests', function () {
-  const localFilePath = '/uploads/info.txt'
-  const localFileContents = Buffer.from('This information is critical', {
-    encoding: 'utf-8',
-  })
-  const uploadFolder = '/tmp'
+  const localFiles = {
+    '/uploads/info.txt': Buffer.from('This information is critical', {
+      encoding: 'utf-8',
+    }),
+    '/uploads/other.txt': Buffer.from('Some other content', {
+      encoding: 'utf-8',
+    }),
+  }
   const location = '/bucket'
   const files = {
     wombat: 'animals/wombat.tex',
@@ -26,12 +29,12 @@ describe('FSPersistorTests', function () {
   const scenarios = [
     {
       description: 'default settings',
-      settings: { paths: { uploadFolder } },
+      settings: {},
       fsPath: key => Path.join(location, key.replaceAll('/', '_')),
     },
     {
       description: 'with useSubdirectories = true',
-      settings: { paths: { uploadFolder }, useSubdirectories: true },
+      settings: { useSubdirectories: true },
       fsPath: key => Path.join(location, key),
     },
   ]
@@ -53,8 +56,7 @@ describe('FSPersistorTests', function () {
 
       beforeEach(function () {
         mockFs({
-          [localFilePath]: localFileContents,
-          [location]: {},
+          ...localFiles,
           '/not-a-dir':
             'This regular file is meant to prevent using this path as a directory',
           '/directory/subdirectory': {},
@@ -67,16 +69,16 @@ describe('FSPersistorTests', function () {
 
       describe('sendFile', function () {
         it('should copy the file', async function () {
-          await persistor.sendFile(location, files.wombat, localFilePath)
+          await persistor.sendFile(location, files.wombat, '/uploads/info.txt')
           const contents = await fsPromises.readFile(
             scenario.fsPath(files.wombat)
           )
-          expect(contents.equals(localFileContents)).to.be.true
+          expect(contents.equals(localFiles['/uploads/info.txt'])).to.be.true
         })
 
         it('should return an error if the file cannot be stored', async function () {
           await expect(
-            persistor.sendFile('/not-a-dir', files.wombat, localFilePath)
+            persistor.sendFile('/not-a-dir', files.wombat, '/uploads/info.txt')
           ).to.be.rejectedWith(Errors.WriteError)
         })
       })
@@ -84,76 +86,187 @@ describe('FSPersistorTests', function () {
       describe('sendStream', function () {
         let stream
 
-        beforeEach(function () {
-          stream = fs.createReadStream(localFilePath)
-        })
+        describe("when the file doesn't exist", function () {
+          beforeEach(function () {
+            stream = fs.createReadStream('/uploads/info.txt')
+          })
 
-        it('should write the stream to disk', async function () {
-          await persistor.sendStream(location, files.wombat, stream)
-          const contents = await fsPromises.readFile(
-            scenario.fsPath(files.wombat)
-          )
-          expect(contents.equals(localFileContents)).to.be.true
-        })
-
-        it('should delete the temporary file', async function () {
-          await persistor.sendStream(location, files.wombat, stream)
-          const tempFiles = await fsPromises.readdir(uploadFolder)
-          expect(tempFiles).to.be.empty
-        })
-
-        it('should wrap the error from the filesystem', async function () {
-          await expect(
-            persistor.sendStream('/not-a-dir', files.wombat, stream)
-          ).to.be.rejectedWith(Errors.WriteError)
-        })
-
-        describe('when the md5 hash matches', function () {
           it('should write the stream to disk', async function () {
-            await persistor.sendStream(location, files.wombat, stream, {
-              sourceMd5: md5(localFileContents),
-            })
+            await persistor.sendStream(location, files.wombat, stream)
             const contents = await fsPromises.readFile(
               scenario.fsPath(files.wombat)
             )
-            expect(contents.equals(localFileContents)).to.be.true
+            expect(contents.equals(localFiles['/uploads/info.txt'])).to.be.true
           })
-        })
 
-        describe('when the md5 hash does not match', function () {
-          let promise
+          it('should delete the temporary file', async function () {
+            await persistor.sendStream(location, files.wombat, stream)
+            const entries = await fsPromises.readdir(location)
+            const tempDirs = entries.filter(dir => dir.startsWith('tmp-'))
+            expect(tempDirs).to.be.empty
+          })
 
-          beforeEach(function () {
-            promise = persistor.sendStream(location, files.wombat, stream, {
-              sourceMd5: md5('wrong content'),
+          describe('on error', function () {
+            beforeEach(async function () {
+              await expect(
+                persistor.sendStream('/not-a-dir', files.wombat, stream)
+              ).to.be.rejectedWith(Errors.WriteError)
+            })
+
+            it('should not write the target file', async function () {
+              await expect(
+                fsPromises.access(scenario.fsPath(files.wombat))
+              ).to.be.rejected
+            })
+
+            it('should delete the temporary file', async function () {
+              await persistor.sendStream(location, files.wombat, stream)
+              const entries = await fsPromises.readdir(location)
+              const tempDirs = entries.filter(dir => dir.startsWith('tmp-'))
+              expect(tempDirs).to.be.empty
             })
           })
 
-          it('should return a write error', async function () {
-            await expect(promise).to.be.rejectedWith(
-              Errors.WriteError,
-              'md5 hash mismatch'
-            )
+          describe('when the md5 hash matches', function () {
+            it('should write the stream to disk', async function () {
+              await persistor.sendStream(location, files.wombat, stream, {
+                sourceMd5: md5(localFiles['/uploads/info.txt']),
+              })
+              const contents = await fsPromises.readFile(
+                scenario.fsPath(files.wombat)
+              )
+              expect(
+                contents.equals(localFiles['/uploads/info.txt'])
+              ).to.be.true
+            })
           })
 
-          it('deletes the copied file', async function () {
-            await expect(promise).to.be.rejected
-            await expect(
-              fsPromises.access(scenario.fsPath(files.wombat))
-            ).to.be.rejected
+          describe('when the md5 hash does not match', function () {
+            beforeEach(async function () {
+              await expect(
+                persistor.sendStream(location, files.wombat, stream, {
+                  sourceMd5: md5('wrong content'),
+                })
+              ).to.be.rejectedWith(Errors.WriteError, 'md5 hash mismatch')
+            })
+
+            it('should not write the target file', async function () {
+              await expect(
+                fsPromises.access(scenario.fsPath(files.wombat))
+              ).to.be.rejected
+            })
+
+            it('should delete the temporary file', async function () {
+              await persistor.sendStream(location, files.wombat, stream)
+              const entries = await fsPromises.readdir(location)
+              const tempDirs = entries.filter(dir => dir.startsWith('tmp-'))
+              expect(tempDirs).to.be.empty
+            })
+          })
+        })
+
+        describe('when the file already exists', function () {
+          let stream
+
+          beforeEach(async function () {
+            await persistor.sendFile(
+              location,
+              files.wombat,
+              '/uploads/info.txt'
+            )
+            stream = fs.createReadStream('/uploads/other.txt')
+          })
+
+          it('should write the stream to disk', async function () {
+            await persistor.sendStream(location, files.wombat, stream)
+            const contents = await fsPromises.readFile(
+              scenario.fsPath(files.wombat)
+            )
+            expect(contents.equals(localFiles['/uploads/other.txt'])).to.be.true
+          })
+
+          it('should delete the temporary file', async function () {
+            await persistor.sendStream(location, files.wombat, stream)
+            const entries = await fsPromises.readdir(location)
+            const tempDirs = entries.filter(dir => dir.startsWith('tmp-'))
+            expect(tempDirs).to.be.empty
+          })
+
+          describe('on error', function () {
+            beforeEach(async function () {
+              await expect(
+                persistor.sendStream('/not-a-dir', files.wombat, stream)
+              ).to.be.rejectedWith(Errors.WriteError)
+            })
+
+            it('should not update the target file', async function () {
+              const contents = await fsPromises.readFile(
+                scenario.fsPath(files.wombat)
+              )
+              expect(
+                contents.equals(localFiles['/uploads/info.txt'])
+              ).to.be.true
+            })
+
+            it('should delete the temporary file', async function () {
+              await persistor.sendStream(location, files.wombat, stream)
+              const entries = await fsPromises.readdir(location)
+              const tempDirs = entries.filter(dir => dir.startsWith('tmp-'))
+              expect(tempDirs).to.be.empty
+            })
+          })
+
+          describe('when the md5 hash matches', function () {
+            it('should write the stream to disk', async function () {
+              await persistor.sendStream(location, files.wombat, stream, {
+                sourceMd5: md5(localFiles['/uploads/other.txt']),
+              })
+              const contents = await fsPromises.readFile(
+                scenario.fsPath(files.wombat)
+              )
+              expect(
+                contents.equals(localFiles['/uploads/other.txt'])
+              ).to.be.true
+            })
+          })
+
+          describe('when the md5 hash does not match', function () {
+            beforeEach(async function () {
+              await expect(
+                persistor.sendStream(location, files.wombat, stream, {
+                  sourceMd5: md5('wrong content'),
+                })
+              ).to.be.rejectedWith(Errors.WriteError, 'md5 hash mismatch')
+            })
+
+            it('should not update the target file', async function () {
+              const contents = await fsPromises.readFile(
+                scenario.fsPath(files.wombat)
+              )
+              expect(
+                contents.equals(localFiles['/uploads/info.txt'])
+              ).to.be.true
+            })
+
+            it('should delete the temporary file', async function () {
+              await persistor.sendStream(location, files.wombat, stream)
+              const entries = await fsPromises.readdir(location)
+              const tempDirs = entries.filter(dir => dir.startsWith('tmp-'))
+              expect(tempDirs).to.be.empty
+            })
           })
         })
       })
 
       describe('getObjectStream', function () {
         beforeEach(async function () {
-          await persistor.sendFile(location, files.wombat, localFilePath)
+          await persistor.sendFile(location, files.wombat, '/uploads/info.txt')
         })
 
         it('should return a string with the object contents', async function () {
           const stream = await persistor.getObjectStream(location, files.wombat)
           const contents = await streamToBuffer(stream)
-          expect(contents.equals(localFileContents)).to.be.true
+          expect(contents.equals(localFiles['/uploads/info.txt'])).to.be.true
         })
 
         it('should support ranges', async function () {
@@ -167,7 +280,9 @@ describe('FSPersistorTests', function () {
           )
           const contents = await streamToBuffer(stream)
           // end is inclusive in ranges, but exclusive in slice()
-          expect(contents.equals(localFileContents.slice(5, 17))).to.be.true
+          expect(
+            contents.equals(localFiles['/uploads/info.txt'].slice(5, 17))
+          ).to.be.true
         })
 
         it('should give a NotFoundError if the file does not exist', async function () {
@@ -179,13 +294,13 @@ describe('FSPersistorTests', function () {
 
       describe('getObjectSize', function () {
         beforeEach(async function () {
-          await persistor.sendFile(location, files.wombat, localFilePath)
+          await persistor.sendFile(location, files.wombat, '/uploads/info.txt')
         })
 
         it('should return the file size', async function () {
           expect(
             await persistor.getObjectSize(location, files.wombat)
-          ).to.equal(localFileContents.length)
+          ).to.equal(localFiles['/uploads/info.txt'].length)
         })
 
         it('should throw a NotFoundError if the file does not exist', async function () {
@@ -197,7 +312,7 @@ describe('FSPersistorTests', function () {
 
       describe('copyObject', function () {
         beforeEach(async function () {
-          await persistor.sendFile(location, files.wombat, localFilePath)
+          await persistor.sendFile(location, files.wombat, '/uploads/info.txt')
         })
 
         it('Should copy the file to the new location', async function () {
@@ -205,13 +320,13 @@ describe('FSPersistorTests', function () {
           const contents = await fsPromises.readFile(
             scenario.fsPath(files.potato)
           )
-          expect(contents.equals(localFileContents)).to.be.true
+          expect(contents.equals(localFiles['/uploads/info.txt'])).to.be.true
         })
       })
 
       describe('deleteObject', function () {
         beforeEach(async function () {
-          await persistor.sendFile(location, files.wombat, localFilePath)
+          await persistor.sendFile(location, files.wombat, '/uploads/info.txt')
           await fsPromises.access(scenario.fsPath(files.wombat))
         })
 
@@ -230,7 +345,7 @@ describe('FSPersistorTests', function () {
       describe('deleteDirectory', function () {
         beforeEach(async function () {
           for (const file of Object.values(files)) {
-            await persistor.sendFile(location, file, localFilePath)
+            await persistor.sendFile(location, file, '/uploads/info.txt')
             await fsPromises.access(scenario.fsPath(file))
           }
         })
@@ -258,7 +373,7 @@ describe('FSPersistorTests', function () {
 
       describe('checkIfObjectExists', function () {
         beforeEach(async function () {
-          await persistor.sendFile(location, files.wombat, localFilePath)
+          await persistor.sendFile(location, files.wombat, '/uploads/info.txt')
         })
 
         it('should return true for existing files', async function () {
@@ -277,13 +392,13 @@ describe('FSPersistorTests', function () {
       describe('directorySize', function () {
         beforeEach(async function () {
           for (const file of Object.values(files)) {
-            await persistor.sendFile(location, file, localFilePath)
+            await persistor.sendFile(location, file, '/uploads/info.txt')
           }
         })
 
         it('should sum directory files size', async function () {
           expect(await persistor.directorySize(location, 'animals')).to.equal(
-            2 * localFileContents.length
+            2 * localFiles['/uploads/info.txt'].length
           )
         })
 
