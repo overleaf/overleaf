@@ -25,12 +25,12 @@ async function main() {
 
   if (emitUsers) {
     console.log(
-      `\nMigrated: ${result.migrated}\nNot migrated: ${result.notMigrated}\nMultiple Identifers: ${result.multipleIdentifiers}`
+      `\nMigrated: ${result.migrated}\nNot migrated: ${result.notMigrated}\nMultiple Identifiers: ${result.multipleIdentifiers}`
     )
   }
 
   console.log(
-    `\nMigrated: ${result.migrated.length}\nNot migrated: ${result.notMigrated.length}\nMultiple Identifers: ${result.multipleIdentifiers.length}`
+    `\nMigrated: ${result.migrated.length}\nNot migrated: ${result.notMigrated.length}\nMultiple Identifiers: ${result.multipleIdentifiers.length}`
   )
 
   process.exit()

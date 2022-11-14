@@ -4,7 +4,7 @@ const InstitutionsManager = require('../app/src/Features/Institutions/Institutio
 
 const institutionId = parseInt(process.argv[2])
 if (isNaN(institutionId)) throw new Error('No institution id')
-console.log('Upgrading users of institution', institutionId)
+console.log('Refreshing users at institution', institutionId)
 
 waitForDb()
   .then(main)
