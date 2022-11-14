@@ -84,6 +84,11 @@ export function LayoutProvider({ children }) {
   // whether to display the editor and preview side-by-side or full-width ("flat")
   const [pdfLayout, setPdfLayout] = useScopeValue('ui.pdfLayout')
 
+  // whether stylesheet on theme is loading
+  const [loadingStyleSheet, setLoadingStyleSheet] = useScopeValue(
+    'ui.loadingStyleSheet'
+  )
+
   // switch to either side-by-side or flat (full-width) layout
   const switchLayout = useCallback(() => {
     setPdfLayout(layout => {
@@ -157,10 +162,12 @@ export function LayoutProvider({ children }) {
       pdfLayout,
       pdfPreviewOpen,
       reviewPanelOpen,
+      loadingStyleSheet,
       setChatIsOpen,
       setLeftMenuShown,
       setPdfLayout,
       setReviewPanelOpen,
+      setLoadingStyleSheet,
       setView,
       switchLayout,
       view,
@@ -176,10 +183,12 @@ export function LayoutProvider({ children }) {
       pdfLayout,
       pdfPreviewOpen,
       reviewPanelOpen,
+      loadingStyleSheet,
       setChatIsOpen,
       setLeftMenuShown,
       setPdfLayout,
       setReviewPanelOpen,
+      setLoadingStyleSheet,
       setView,
       switchLayout,
       view,
