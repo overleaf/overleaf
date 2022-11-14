@@ -1,0 +1,4 @@
+mixin back-to-btns(settingsAnchor)
+	a.btn.btn-secondary.text-capitalize(href=`/user/settings${settingsAnchor ? '#' + settingsAnchor : '' }`) #{translate('back_to_account_settings')}
+	| 
+	a.btn.btn-secondary.text-capitalize(href='/project') #{translate('back_to_your_projects')}

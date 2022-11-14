@@ -27,12 +27,15 @@
 }
 
 // WebKit-style focus
-.tab-focus() {
+.tab-focus() when (@is-new-css = false) {
   // Default
   outline: thin dotted;
   // WebKit
   outline: 5px auto -webkit-focus-ring-color;
   outline-offset: -2px;
+}
+.tab-focus() when (@is-new-css = true) {
+  outline: none;
 }
 
 // Center-align a block level element
@@ -124,6 +127,9 @@
 .box-shadow(@shadow) {
   -webkit-box-shadow: @shadow; // iOS <4.3 & Android <4.1
   box-shadow: @shadow;
+}
+.box-shadow-button-input() {
+  box-shadow: 0px 0px 0px 2px rgba(50, 101, 178, 0.56);
 }
 
 // Transitions
@@ -543,6 +549,91 @@
   border-radius: @btn-border-radius-base;
 }
 
+.btn-bordered() {
+  color: @content-primary;
+  background-color: @white;
+  border-color: @border-color-base;
+
+  &:hover {
+    background-color: @btn-secondary-hover-bg-color;
+  }
+
+  &:focus {
+    color: @content-primary;
+    outline: none;
+  }
+
+  &:focus-visible,
+  &:active {
+    .box-shadow-button-input();
+    outline: none;
+  }
+
+  &:hover,
+  &:focus-visible,
+  &:active {
+    color: @content-primary;
+  }
+
+  &.disabled,
+  &[disabled],
+  fieldset[disabled] & {
+    &,
+    &:hover,
+    &:focus-visible,
+    &:active,
+    &.active {
+      background-color: @color-disabled;
+      border-color: @border-color-disabled;
+      color: @content-disabled;
+    }
+  }
+}
+
+.btn-borderless(@color: @white; @background: @green; @background-hover: @btn-primary-hover-bg-color) {
+  color: @color;
+  background-color: @background;
+  border-color: @background; // add a border that is same as background color so that the height matches the btn-bordered style
+
+  &:hover {
+    background-color: @background-hover;
+    border-color: @background-hover;
+  }
+
+  &:focus {
+    color: @color;
+    outline: none;
+  }
+
+  &:focus-visible,
+  &:active {
+    background-color: @background;
+    border-color: @background;
+    .box-shadow-button-input();
+    outline: none;
+  }
+
+  &:hover,
+  &:focus-visible,
+  &:active {
+    color: @color;
+  }
+
+  &.disabled,
+  &[disabled],
+  fieldset[disabled] & {
+    &,
+    &:hover,
+    &:focus-visible,
+    &:active,
+    &.active {
+      background-color: @color-disabled;
+      border-color: @color-disabled;
+      color: @content-disabled;
+    }
+  }
+}
+
 // Tables
 // -------------------------
 .table-row-variant(@state; @background) {
@@ -706,9 +797,17 @@
 
 // Button sizes
 // -------------------------
-.button-size(@padding-vertical; @padding-horizontal; @font-size; @line-height; @border-radius) {
+.button-size(@padding-vertical; @padding-horizontal; @font-size; @line-height; @border-radius)
+  when(@is-new-css = false) {
   // Remove 1px to make up for the extra px of border-bottom we've added
   padding: @padding-vertical - 1 @padding-horizontal @padding-vertical;
+  font-size: @font-size;
+  line-height: @line-height;
+  border-radius: @border-radius;
+}
+.button-size(@padding-vertical; @padding-horizontal; @font-size; @line-height; @border-radius)
+  when(@is-new-css = true) {
+  padding: @padding-vertical - @border-size @padding-horizontal;
   font-size: @font-size;
   line-height: @line-height;
   border-radius: @border-radius;
@@ -1117,7 +1216,7 @@
   // need to define as class for recurly UI
   border-color: @input-border-focus;
   outline: 0;
-  box-shadow: 0px 0px 0px 2px rgba(50, 101, 178, 0.56);
+  .box-shadow-button-input();
 }
 
 .form-control-focus() when (@is-new-css = true) {

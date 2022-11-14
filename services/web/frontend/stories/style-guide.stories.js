@@ -151,32 +151,70 @@ export const Headings = () => {
   )
 }
 
-export const Buttons = () => {
+export const Buttons = (args, { globals: { theme } }) => {
   return (
     <div className="content content-alt">
       <Grid>
         <Row>
           <Col md={8} mdOffset={2}>
             <h2>Buttons</h2>
-            <p>Our primary button is green:</p>
+
+            <h3>Primary Button</h3>
             <p>
               <Button bsStyle="primary">Primary Button</Button>
             </p>
-            <p>Our secondary button is blue:</p>
-            <p>
-              <Button bsStyle="info">Secondary Button</Button>
-            </p>
-            <p>All button styles</p>
-            <p />
+
+            <h3>Secondary Button</h3>
+            {theme.includes('main') ? (
+              <>
+                <p>
+                  <button className="btn btn-secondary">
+                    Secondary Button
+                  </button>
+                </p>
+                <h3>Deprecated Styles</h3>
+                <p>
+                  These are being transitioned to the new secondary style above
+                </p>
+              </>
+            ) : (
+              ''
+            )}
+            <p>Our secondary button is blue or dark gray:</p>
+            <div className="btn-toolbar">
+              <Button bsStyle="info">Info Button</Button>
+              <Button bsStyle="default">Default Button</Button>
+            </div>
+
+            <h3>All button styles</h3>
+            {theme.includes('main') ? (
+              <p>Includes styles being deprecated</p>
+            ) : (
+              ''
+            )}
             <div className="btn-toolbar">
               <Button bsStyle="primary">Primary</Button>
-              <Button bsStyle="info">Info (secondary)</Button>
+              {theme.includes('main') ? (
+                <button className="btn btn-secondary">Secondary</button>
+              ) : (
+                ''
+              )}
+              <Button bsStyle="info">Info</Button>
               <Button bsStyle="default">Default</Button>
               <Button bsStyle="success">Success</Button>
               <Button bsStyle="warning">Warning</Button>
               <Button bsStyle="danger">Danger</Button>
             </div>
-            <p />
+
+            <h3>Sizes</h3>
+            <div className="btn-toolbar">
+              <button className="btn btn-primary btn-xs">Extra Small</button>
+              <button className="btn btn-primary btn-sm">Small</button>
+              <button className="btn btn-primary">Default</button>
+              <button className="btn btn-primary btn-lg">Large</button>
+              <button className="btn btn-primary btn-xl">Extra Large</button>
+            </div>
+
             <h2>Hyperlinks</h2>
             <p>
               Hyperlinks are highlighted <a href="#">as shown</a>.

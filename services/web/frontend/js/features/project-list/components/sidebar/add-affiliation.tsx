@@ -24,7 +24,11 @@ function AddAffiliation() {
   return (
     <div className="text-centered user-profile">
       <p>{t('are_you_affiliated_with_an_institution')}</p>
-      <Button bsStyle="info" href="/user/settings">
+      <Button
+        bsStyle={null}
+        className="btn-secondary-info btn-secondary"
+        href="/user/settings"
+      >
         {t('add_affiliation')}
       </Button>
     </div>

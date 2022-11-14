@@ -1,4 +1,5 @@
 extends ../layout-marketing
+include ../_mixins/back_to_btns
 
 block content
 	main.content.content-alt#main-content
@@ -47,7 +48,7 @@ block content
 														rel="noopener noreferrer"
 													).btn.btn-primary.btn-lg #{translate("give_feedback")}
 												.form-group
-													button.btn.btn-info.btn-sm(
+													button.btn.btn-secondary-info.btn-secondary.btn-sm(
 														type="submit"
 														data-ol-disabled-inflight
 													)
@@ -68,6 +69,4 @@ block content
 														span(data-ol-inflight="idle") #{translate("beta_program_opt_in_action")}
 														span(hidden data-ol-inflight="pending") #{translate("joining")}…
 							.page-separator
-							a.btn.btn-default.text-capitalize(href='/user/settings') #{translate('back_to_account_settings')}
-							| 
-							a.btn.btn-default.text-capitalize(href='/project') #{translate('back_to_your_projects')}
+							+back-to-btns()

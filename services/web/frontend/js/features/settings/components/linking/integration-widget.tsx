@@ -108,7 +108,8 @@ function ActionButton({
   if (!hasFeature) {
     return (
       <Button
-        bsStyle="info"
+        bsStyle={null}
+        className="btn-secondary-info btn-secondary"
         href="/user/subscription/plans"
         onClick={trackUpgradeClick}
       >
@@ -123,7 +124,12 @@ function ActionButton({
     )
   } else {
     return (
-      <Button bsStyle="info" href={linkPath} disabled={disabled}>
+      <Button
+        bsStyle={null}
+        className="btn-secondary-info btn-secondary"
+        href={linkPath}
+        disabled={disabled}
+      >
         <span className="text-capitalize">{t('link')}</span>
       </Button>
     )
@@ -166,7 +172,12 @@ function UnlinkConfirmationModal({
       <Modal.Footer>
         <form action={unlinkPath} method="POST" className="form-inline">
           <input type="hidden" name="_csrf" value={getMeta('ol-csrfToken')} />
-          <Button onClick={handleCancel}>{t('cancel')}</Button>
+          <Button
+            className="btn-secondary-info btn-secondary"
+            onClick={handleCancel}
+          >
+            {t('cancel')}
+          </Button>
           <Button type="submit" bsStyle="danger">
             {t('unlink')}
           </Button>

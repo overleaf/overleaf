@@ -91,7 +91,7 @@
 @padding-small-vertical: 5px;
 @padding-small-horizontal: 10px;
 
-@padding-xs-vertical: 1px;
+@padding-xs-vertical: 1.5px;
 @padding-xs-horizontal: 8px;
 
 @padding-xs: 5px;
@@ -110,6 +110,7 @@
 @border-width-base: 3px; // only used by plans and cards
 @border-size: 1.5px;
 @border-color-base: @neutral-40;
+@border-color-disabled: @color-disabled;
 
 //** Horizontal line color.
 @hr-border: @neutral-20;
@@ -161,10 +162,6 @@
 @btn-primary-bg: @green;
 @btn-primary-border: transparent;
 
-@btn-success-color: #fff;
-@btn-success-bg: @green;
-@btn-success-border: transparent;
-
 @btn-info-color: #fff;
 @btn-info-bg: @blue;
 @btn-info-border: transparent;
@@ -191,7 +188,7 @@
 //** Text color for `<input>`s
 @input-color: @neutral-90;
 //** `<input>` border color
-@input-border: @neutral-40;
+@input-border: @border-color-base;
 //** `<input>` border radius
 @input-border-radius: 4px;
 //** Border color for inputs on focus
@@ -710,6 +707,8 @@
 @btn-border-radius-small: 9999px;
 @btn-border-width: 0;
 @btn-border-bottom-width: 0;
+@btn-primary-hover-bg-color: @green-dark;
+@btn-secondary-hover-bg-color: @neutral-20;
 
 // Cards
 @card-box-shadow: none;

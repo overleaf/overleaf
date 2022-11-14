@@ -124,7 +124,10 @@ function ActionButton({
     )
   } else {
     return (
-      <a href={linkPath} className="btn btn-info text-capitalize">
+      <a
+        href={linkPath}
+        className="btn btn-secondary-info btn-secondary text-capitalize"
+      >
         {t('link')}
       </a>
     )
@@ -159,7 +162,11 @@ function UnlinkConfirmModal({
       </Modal.Body>
 
       <Modal.Footer>
-        <Button bsStyle="default" onClick={handleHide}>
+        <Button
+          bsStyle={null}
+          className="btn-secondary-info btn-secondary"
+          onClick={handleHide}
+        >
           {t('cancel')}
         </Button>
         <Button bsStyle="danger" onClick={handleConfirmation}>
