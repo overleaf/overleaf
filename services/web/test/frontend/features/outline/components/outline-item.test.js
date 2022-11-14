@@ -54,6 +54,7 @@ describe('<OutlineItem />', function () {
         outlineItem={outlineItem}
         jumpToLine={jumpToLine}
         highlightedLine={1}
+        matchesHighlightedLine
       />
     )
 
@@ -71,6 +72,7 @@ describe('<OutlineItem />', function () {
         outlineItem={outlineItem}
         jumpToLine={jumpToLine}
         highlightedLine={2}
+        containsHighlightedLine
       />
     )
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, memo } from 'react'
 import PropTypes from 'prop-types'
 import scrollIntoViewIfNeeded from 'scroll-into-view-if-needed'
 import classNames from 'classnames'
@@ -6,15 +6,13 @@ import { useTranslation } from 'react-i18next'
 import OutlineList from './outline-list'
 import Icon from '../../../shared/components/icon'
 
-function getChildrenLines(children) {
-  return (children || [])
-    .map(child => {
-      return getChildrenLines(child.children).concat(child.line)
-    })
-    .flat()
-}
-
-function OutlineItem({ outlineItem, jumpToLine, highlightedLine }) {
+const OutlineItem = memo(function OutlineItem({
+  outlineItem,
+  jumpToLine,
+  highlightedLine,
+  matchesHighlightedLine,
+  containsHighlightedLine,
+}) {
   const { t } = useTranslation()
 
   const [expanded, setExpanded] = useState(true)
@@ -25,12 +23,8 @@ function OutlineItem({ outlineItem, jumpToLine, highlightedLine }) {
     'outline-item-no-children': !outlineItem.children,
   })
 
-  const hasHighlightedChild =
-    !expanded &&
-    getChildrenLines(outlineItem.children).includes(highlightedLine)
-
-  const isHighlighted =
-    highlightedLine === outlineItem.line || hasHighlightedChild
+  const hasHighlightedChild = !expanded && containsHighlightedLine
+  const isHighlighted = matchesHighlightedLine || hasHighlightedChild
 
   const itemLinkClasses = classNames('outline-item-link', {
     'outline-item-link-highlight': isHighlighted,
@@ -90,16 +84,21 @@ function OutlineItem({ outlineItem, jumpToLine, highlightedLine }) {
         </button>
       </div>
       {expanded && outlineItem.children ? (
+        // highlightedLine is only provided to this list if the list contains
+        // the highlighted line. This means that whenever the list does not
+        // contain the highlighted line, the props provided to it are the same
+        // and the component can be memoized.
         <OutlineList
           outline={outlineItem.children}
           jumpToLine={jumpToLine}
           isRoot={false}
-          highlightedLine={highlightedLine}
+          highlightedLine={containsHighlightedLine ? highlightedLine : null}
+          containsHighlightedLine={containsHighlightedLine}
         />
       ) : null}
     </li>
   )
-}
+})
 
 OutlineItem.propTypes = {
   outlineItem: PropTypes.exact({
@@ -113,6 +112,8 @@ OutlineItem.propTypes = {
   }).isRequired,
   jumpToLine: PropTypes.func.isRequired,
   highlightedLine: PropTypes.number,
+  matchesHighlightedLine: PropTypes.bool,
+  containsHighlightedLine: PropTypes.bool,
 }
 
 export default OutlineItem

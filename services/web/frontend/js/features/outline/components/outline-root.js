@@ -14,6 +14,7 @@ function OutlineRoot({ outline, jumpToLine, highlightedLine }) {
           jumpToLine={jumpToLine}
           isRoot
           highlightedLine={highlightedLine}
+          containsHighlightedLine
         />
       ) : (
         <div className="outline-body-no-elements">
