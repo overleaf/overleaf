@@ -30,7 +30,7 @@ include ./_current_plan_mixins
 				+current_plan()
 			.btn-toolbar
 				.btn-group(ng-hide="selectedProjects.length < 1")
-					a.btn.btn-default(
+					a.btn.btn-secondary(
 						href,
 						aria-label=translate('download'),
 						tooltip=translate('download'),
@@ -39,7 +39,7 @@ include ./_current_plan_mixins
 						ng-click="downloadSelectedProjects()"
 					)
 						i.fa.fa-cloud-download(aria-hidden="true")
-					a.btn.btn-default(
+					a.btn.btn-secondary(
 						href,
 						ng-if="filter !== 'archived'"
 						aria-label=translate("archive"),
@@ -49,7 +49,7 @@ include ./_current_plan_mixins
 						ng-click="openArchiveProjectsModal()"
 					)
 						i.fa.fa-inbox(aria-hidden="true")
-					a.btn.btn-default(
+					a.btn.btn-secondary(
 						href,
 						ng-if="filter !== 'trashed'"
 						aria-label=translate("trash"),
@@ -63,7 +63,7 @@ include ./_current_plan_mixins
 					ng-hide="selectedProjects.length < 1 || filter === 'archived' || filter === 'trashed'", 
 					dropdown
 				)
-					a.btn.btn-default.dropdown-toggle(
+					a.btn.btn-secondary.dropdown-toggle(
 						href,
 						data-toggle="dropdown",
 						dropdown-toggle,
@@ -102,7 +102,7 @@ include ./_current_plan_mixins
 					ng-hide="selectedProjects.length != 1  || filter === 'archived' || filter === 'trashed'", 
 					dropdown
 				)
-					a.btn.btn-default.dropdown-toggle(
+					a.btn.btn-secondary.dropdown-toggle(
 						href,
 						data-toggle="dropdown",
 						dropdown-toggle
@@ -121,7 +121,7 @@ include ./_current_plan_mixins
 							) #{translate("make_copy")}
 
 				.btn-group(ng-show="filter === 'archived' && selectedProjects.length > 0")
-					a.btn.btn-default(
+					a.btn.btn-secondary(
 						href,
 						data-original-title=translate("unarchive"),
 						data-toggle="tooltip",
@@ -130,7 +130,7 @@ include ./_current_plan_mixins
 					) #{translate("unarchive")}
 
 				.btn-group(ng-show="filter === 'trashed' && selectedProjects.length > 0")
-					a.btn.btn-default(
+					a.btn.btn-secondary(
 						href,
 						data-original-title=translate("untrash"),
 						data-toggle="tooltip",

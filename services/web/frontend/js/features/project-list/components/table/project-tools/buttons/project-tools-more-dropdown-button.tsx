@@ -9,7 +9,9 @@ function ProjectToolsMoreDropdownButton() {
   const { t } = useTranslation()
   return (
     <ControlledDropdown id="project-tools-more-dropdown">
-      <Dropdown.Toggle>{t('more')}</Dropdown.Toggle>
+      <Dropdown.Toggle bsStyle={null} className="btn-secondary">
+        {t('more')}
+      </Dropdown.Toggle>
       <Dropdown.Menu className="dropdown-menu-right">
         <RenameProjectMenuItem />
         <CopyProjectMenuItem />

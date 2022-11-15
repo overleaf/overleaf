@@ -15,7 +15,15 @@ function UntrashProjectsButton() {
     }
   }
 
-  return <Button onClick={handleUntrashProjects}>{t('untrash')}</Button>
+  return (
+    <Button
+      bsStyle={null}
+      className="btn-secondary"
+      onClick={handleUntrashProjects}
+    >
+      {t('untrash')}
+    </Button>
+  )
 }
 
 export default memo(UntrashProjectsButton)

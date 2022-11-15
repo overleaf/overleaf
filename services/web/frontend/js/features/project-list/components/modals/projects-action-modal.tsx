@@ -127,7 +127,7 @@ function ProjectsActionModal({
               {getUserFacingMessage(e.error)}
             </Alert>
           ))}
-        <button className="btn btn-default" onClick={handleCloseModal}>
+        <button className="btn btn-secondary" onClick={handleCloseModal}>
           {t('cancel')}
         </button>
         <button

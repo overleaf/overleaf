@@ -15,7 +15,15 @@ function UnarchiveProjectsButton() {
     }
   }
 
-  return <Button onClick={handleUnarchiveProjects}>{t('unarchive')}</Button>
+  return (
+    <Button
+      bsStyle={null}
+      className="btn-secondary"
+      onClick={handleUnarchiveProjects}
+    >
+      {t('unarchive')}
+    </Button>
+  )
 }
 
 export default memo(UnarchiveProjectsButton)

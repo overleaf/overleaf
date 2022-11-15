@@ -84,7 +84,8 @@ function TagsDropdown() {
     <>
       <ControlledDropdown id="tags">
         <Dropdown.Toggle
-          bsStyle="default"
+          bsStyle={null}
+          className="btn-secondary"
           title={t('tags')}
           aria-label={t('tags')}
         >

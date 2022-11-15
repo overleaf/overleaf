@@ -35,7 +35,7 @@ function DownloadProjectsButton() {
       overlayProps={{ placement: 'bottom', trigger: ['hover', 'focus'] }}
     >
       <button
-        className="btn btn-default"
+        className="btn btn-secondary"
         aria-label={text}
         onClick={handleDownloadProjects}
       >
