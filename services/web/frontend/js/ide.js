@@ -65,6 +65,7 @@ import './features/pdf-preview/controllers/pdf-preview-controller'
 import './features/share-project-modal/controllers/react-share-project-modal-controller'
 import './features/source-editor/controllers/editor-switch-controller'
 import './features/source-editor/controllers/cm6-switch-away-survey-controller'
+import './features/source-editor/controllers/grammarly-warning-controller'
 import { cleanupServiceWorker } from './utils/service-worker-cleanup'
 import { reportCM6Perf } from './infrastructure/cm6-performance'
 

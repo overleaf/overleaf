@@ -65,6 +65,8 @@ block content
 						span.sr-only #{translate("close")}
 					.system-message-content(ng-bind-html="htmlContent")
 
+			grammarly-warning()
+
 		include ./editor/main
 
 	script(type="text/ng-template", id="genericMessageModalTemplate")

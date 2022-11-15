@@ -827,3 +827,32 @@ CodeMirror
     font-size: @font-size-small;
   }
 }
+
+.grammarly-warning {
+  width: 500px;
+
+  &.alert.alert-info {
+    padding: @padding-sm;
+  }
+
+  .btn.close {
+    background-color: transparent;
+    color: @white;
+    opacity: 1;
+  }
+
+  .warning-content {
+    padding-right: @alert-padding;
+    font-size: @font-size-small;
+    margin-right: 32px;
+
+    .warning-link {
+      font-weight: 700;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
