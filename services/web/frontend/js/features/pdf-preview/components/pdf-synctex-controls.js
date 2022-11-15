@@ -68,7 +68,7 @@ function GoToPdfButton({
 }) {
   const { t } = useTranslation()
   const tooltipPlacement = isDetachLayout ? 'bottom' : 'right'
-  const buttonClasses = classNames('synctex-control', {
+  const buttonClasses = classNames('synctex-control', 'toolbar-btn-secondary', {
     'detach-synctex-control': !!isDetachLayout,
   })
 
