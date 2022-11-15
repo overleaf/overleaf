@@ -63,38 +63,37 @@ function isKeypress(userEventType: string | undefined) {
   )
 }
 
-export function timedDispatch() {
+export function dispatchTimer(): {
+  start: (tr: Transaction) => void
+  end: (tr: Transaction, view: EditorView) => void
+} {
+  if (!performanceOptionsSupport) {
+    return { start: () => {}, end: () => {} }
+  }
+
   let userEventsSinceDomUpdateCount = 0
   let keypressesSinceDomUpdateCount = 0
   const unpaintedKeypressStartTimes: number[] = []
 
-  return (
-    view: EditorView,
-    tr: Transaction,
-    dispatchFn: (tr: Transaction) => void
-  ) => {
-    if (!performanceOptionsSupport) {
-      dispatchFn(tr)
-      return
-    }
-
-    performance.mark(TIMER_START_NAME)
-
+  const start = (tr: Transaction) => {
     const userEventType = tr.annotation(Transaction.userEvent)
-    const eventIsKeypress = isKeypress(userEventType)
 
-    if (eventIsKeypress) {
+    if (isKeypress(userEventType)) {
       unpaintedKeypressStartTimes.push(performance.now())
     }
 
-    dispatchFn(tr)
+    performance.mark(TIMER_START_NAME)
+  }
 
+  const end = (tr: Transaction, view: EditorView) => {
     performance.mark(TIMER_END_NAME)
+
+    const userEventType = tr.annotation(Transaction.userEvent)
 
     if (isInputOrDelete(userEventType)) {
       ++userEventsSinceDomUpdateCount
 
-      if (eventIsKeypress) {
+      if (isKeypress(userEventType)) {
         ++keypressesSinceDomUpdateCount
       }
 
@@ -130,6 +129,8 @@ export function timedDispatch() {
 
     latestDocLength = tr.state.doc.length
   }
+
+  return { start, end }
 }
 
 function calculateMean(durations: number[]) {
