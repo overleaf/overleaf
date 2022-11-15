@@ -403,27 +403,28 @@ App.controller(
     if (isMonthlyCollab && stillInFreeTrial) {
       $scope.showExtendFreeTrial = true
     } else if (isMonthlyCollab && !stillInFreeTrial) {
-      $scope.showDowngradeToStudent = true
+      $scope.showDowngrade = true
     } else {
       $scope.showBasicCancel = true
     }
 
+    const planCode = 'paid-personal'
     const { currency, taxRate } = subscription.recurly
-    $scope.studentDisplayPrice = '...' // Placeholder while we talk to recurly
-    RecurlyPricing.loadDisplayPriceWithTax('student', currency, taxRate).then(
+    $scope.personalDisplayPrice = '...' // Placeholder while we talk to recurly
+    RecurlyPricing.loadDisplayPriceWithTax(planCode, currency, taxRate).then(
       price => {
-        $scope.studentDisplayPrice = price.total
+        $scope.personalDisplayPrice = price.total
       }
     )
 
-    $scope.downgradeToStudent = function () {
+    $scope.downgradeToPaidPersonal = function () {
       const body = {
-        plan_code: 'student',
+        plan_code: planCode,
         _csrf: window.csrfToken,
       }
       $scope.inflight = true
       return $http
-        .post(`${SUBSCRIPTION_URL}?origin=downgradeToStudent`, body)
+        .post(`${SUBSCRIPTION_URL}?origin=downgradeToPaidPersonal`, body)
         .then(() => location.reload())
         .catch(() => console.log('something went wrong changing plan'))
     }

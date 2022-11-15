@@ -100,11 +100,11 @@ div(ng-controller="RecurlySubscriptionController")
 			p
 				a(href, ng-click="cancelSubscription()", ng-disabled='inflight') #{translate("no_thanks_cancel_now")}
 
-		div(ng-show="showDowngradeToStudent")
+		div(ng-show="showDowngrade")
 			div(ng-controller="ChangePlanFormController")
-				p !{translate("interested_in_cheaper_plan",{price:'{{studentDisplayPrice}}'})}
+				p !{translate("interested_in_cheaper_personal_plan",{price:'{{personalDisplayPrice}}'})}
 				p
-					button(type="submit", ng-click="downgradeToStudent()", ng-disabled='inflight').btn.btn-success #{translate("yes_move_me_to_student_plan")}
+					button(type="submit", ng-click="downgradeToPaidPersonal()", ng-disabled='inflight').btn.btn-success #{translate("yes_move_me_to_personal_plan")}
 				p
 					a(href, ng-click="cancelSubscription()", ng-disabled='inflight')  #{translate("no_thanks_cancel_now")}
 

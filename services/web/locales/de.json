@@ -228,7 +228,6 @@
   "sure_you_want_to_cancel": "Willst du wirklich abbrechen?",
   "i_want_to_stay": "Ich möchte bleiben",
   "have_more_days_to_try": "Hol dir weitere <strong>__days__ Tage</strong> auf deiner Testversion!",
-  "interested_in_cheaper_plan": "Hättest du Interesse an einem billigeren <strong>__price__</strong> Studentenplan?",
   "session_expired_redirecting_to_login": "Sitzung abgelaufen. Du wirst in __seconds__ Sekunden auf die Anmeldungsseite umgeleitet",
   "maximum_files_uploaded_together": "Maximal __max__ Dateien zusammen hochgeladen",
   "too_many_files_uploaded_throttled_short_period": "Zu viele Dateien hochgeladen, deine Uploads wurden für kurze Zeit gedrosselt.",

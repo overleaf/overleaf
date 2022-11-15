@@ -168,7 +168,6 @@
   "sure_you_want_to_cancel": "キャンセルしてもよろしいですか？",
   "i_want_to_stay": "留まります",
   "have_more_days_to_try": "トライアルがまだ<strong>__days__ 日</strong>残っています！",
-  "interested_in_cheaper_plan": "よりお手頃な<strong>__price__</strong>生徒プランに興味がありますか？",
   "session_expired_redirecting_to_login": "セッション期限切れ。__seconds__秒後にログインぺージにリダイレクトします",
   "maximum_files_uploaded_together": "最大 __max__ファイルを一緒にアップロード",
   "too_many_files_uploaded_throttled_short_period": "あまりにも多くのファイルがアップロードされました。アップロードがしばらく調整されます。",
