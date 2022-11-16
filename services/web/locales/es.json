@@ -74,6 +74,7 @@
   "sure_you_want_to_cancel": "¿Seguro que quieres cancelar?",
   "i_want_to_stay": "Quiero seguir",
   "have_more_days_to_try": "¡Aquí tienes <strong>__days__ días</strong> más de prueba!",
+  "interested_in_cheaper_plan": "¿Te interesaría el plan de estudiante más barato por <strong>__price__</strong>?",
   "session_expired_redirecting_to_login": "La sesión ha caducado. Se te redirigirá a la página de inicio de sesión en __seconds__ segundos",
   "maximum_files_uploaded_together": "Máximo de archivos que se pueden subir a la vez: __max__",
   "too_many_files_uploaded_throttled_short_period": "Estás intentando subir demasiados archivos. Se te han limitado las subidas por un corto período de tiempo.",

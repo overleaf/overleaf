@@ -11,6 +11,7 @@
   "sure_you_want_to_cancel": "Sei sicuro di voler eliminare?",
   "i_want_to_stay": "Voglio rimanere",
   "have_more_days_to_try": "Hai altri <strong>__days__ giorni</strong> nel tuo Trial!",
+  "interested_in_cheaper_plan": "Saresti interessato nel piano economico da <strong>__price__</strong> per studenti?",
   "session_expired_redirecting_to_login": "Sessione scaduta. Redirezione alla pagina di login fra __seconds__ secondi",
   "maximum_files_uploaded_together": "Massimo __max__ file caricati insieme",
   "too_many_files_uploaded_throttled_short_period": "Troppi file caricati, i tuoi caricamenti sono stati limitati per un breve periodo.",

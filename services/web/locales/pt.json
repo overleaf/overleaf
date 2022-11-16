@@ -477,6 +477,7 @@
   "sure_you_want_to_cancel": "Você tem certeza que deseja cancelar?",
   "i_want_to_stay": "Quero ficar",
   "have_more_days_to_try": "Ganhe mais <strong>__days__ dias</strong> na sua Experimentação!",
+  "interested_in_cheaper_plan": "Você estaria interessado em um plano de estudante com <strong>__price__</strong> mais barato?",
   "session_expired_redirecting_to_login": "Sessão Expirada. Redirecionando para a página de login em __seconds__ segundos",
   "maximum_files_uploaded_together": "Máximo de __max__ arquivos enviados juntos",
   "too_many_files_uploaded_throttled_short_period": "Excesso de arquivos enviados, seus envios foram suprimidos por um curto tempo.",

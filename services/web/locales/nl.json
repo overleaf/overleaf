@@ -272,6 +272,7 @@
   "sure_you_want_to_cancel": "Weet je zeker dat je wilt annuleren?",
   "i_want_to_stay": "Ik wil blijven",
   "have_more_days_to_try": "Hier zijn <strong>__days__ dagen</strong> extra Proefperiode!",
+  "interested_in_cheaper_plan": "Zou je geïnteresseerd zijn in de goedkopere <strong>__price__</strong> studentenaanbieding?",
   "session_expired_redirecting_to_login": "Sessie verlopen. Doorsturen naar de inlog pagina in __seconds__ seconden.",
   "maximum_files_uploaded_together": "Maximum __max__ bestanden tegelijk geüplaod",
   "too_many_files_uploaded_throttled_short_period": "Teveel bestanden geüpload, je uploads zijn afgeknepen voor een korte periode.",

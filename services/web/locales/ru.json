@@ -107,6 +107,7 @@
   "sure_you_want_to_cancel": "Вы уверены, что хотите отменить подписку?",
   "i_want_to_stay": "Я хочу остаться",
   "have_more_days_to_try": "Продлите тестовый период ещё на <strong>__days__ дней</strong>!",
+  "interested_in_cheaper_plan": "Вас интересует более дешевый студенческий тариф: <strong>__price__</strong>?",
   "session_expired_redirecting_to_login": "Срок сессии истёк. Перенаправление на страницу входа через __seconds__ секунд(ы)",
   "maximum_files_uploaded_together": "Совместная загрузка до максимум __max__ файлов",
   "too_many_files_uploaded_throttled_short_period": "Слишком много файлов загружено за раз - на короткое время загрузка была приостановлена.",
