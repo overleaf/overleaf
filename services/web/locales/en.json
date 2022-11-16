@@ -1914,8 +1914,5 @@
   "show_x_more_projects": "Show __x__ more projects",
   "showing_x_out_of_n_projects": "Showing __x__ out of __n__ projects.",
   "make_a_copy": "Make a copy",
-  "projects_list": "Projects list",
-  "new_joiner_survey_text_1": "Are you new to Overleaf?",
-  "new_joiner_survey_text_2": "Tell us your first impressions for a chance to win 50 USD",
-  "take_survey": "Take Survey"
+  "projects_list": "Projects list"
 }

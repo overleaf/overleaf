@@ -1456,7 +1456,5 @@
   "tag_name_cannot_exceed_characters": "Taggnamnet får inte överstiga __maxLength__ tecken.",
   "save_changes": "Spara ändringar",
   "make_a_copy": "Gör en kopia",
-  "projects_list": "Förteckning över projekt",
-  "new_joiner_survey_text_1": "Är du ny på Overleaf?",
-  "new_joiner_survey_text_2": "Berätta om dina första intryck och ha en chans att vinna 50 USD."
+  "projects_list": "Förteckning över projekt"
 }

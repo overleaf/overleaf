@@ -38,13 +38,6 @@ App.controller(
       $scope.shouldShowSurveyLink = false
     }
 
-    $scope.shouldShowNewJoinerSurvey =
-      localStorage('dismissed-new-joiner-survey') !== true
-    $scope.dismissNewJoinerSurvey = () => {
-      localStorage('dismissed-new-joiner-survey', true)
-      $scope.shouldShowNewJoinerSurvey = false
-    }
-
     $timeout(() => recalculateProjectListHeight(), 10)
 
     $scope.$watch(
