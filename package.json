@@ -42,7 +42,6 @@
     "services/idp",
     "services/k8s-debugger",
     "services/notifications",
-    "services/project-archiver",
     "services/project-history",
     "services/real-time",
     "services/references",
