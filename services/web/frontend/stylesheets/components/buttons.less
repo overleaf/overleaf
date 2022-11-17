@@ -98,6 +98,16 @@
       .box-shadow(none);
     }
   }
+
+  &.disabled.btn-info,
+  &.disabled.btn-default,
+  &[disabled].btn-info,
+  &[disabled].btn-default,
+  fieldset[disabled].btn-info,
+  fieldset[disabled].btn-default & {
+    // style only for deprecated classes
+    .opacity(0.65);
+  }
 }
 
 // Alternate buttons
@@ -132,8 +142,11 @@
   .button-variant(@btn-warning-color; @btn-warning-bg; @btn-warning-border);
 }
 // Danger and error appear as red
-.btn-danger {
+.btn-danger when(@is-new-css = false) {
   .button-variant(@btn-danger-color; @btn-danger-bg; @btn-danger-border);
+}
+.btn-danger when(@is-new-css = true) {
+  .btn-borderless(@white, @red, @red-60);
 }
 // btn-secondary
 .btn-secondary when(@is-new-css = false) {

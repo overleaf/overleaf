@@ -68,7 +68,13 @@ function LeaveModalContent({
       </Modal.Body>
 
       <Modal.Footer>
-        <Button type="button" disabled={inFlight} onClick={handleHide}>
+        <Button
+          type="button"
+          disabled={inFlight}
+          onClick={handleHide}
+          bsStyle={null}
+          className="btn-secondary"
+        >
           {t('cancel')}
         </Button>
 
