@@ -102,12 +102,14 @@
     }
 
     &.log-btn {
+      border: none;
       margin-right: 3px;
 
       &.active {
         color: white;
         background-color: @link-color;
         box-shadow: @toolbar-icon-btn-hover-boxshadow;
+        opacity: 0.65;
 
         &:hover {
           color: white;
@@ -174,6 +176,9 @@
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
   }
+}
+
+.btn-recompile when (@is-new-css = false) {
   &[disabled],
   &[disabled].active,
   &[disabled]:hover,
@@ -181,6 +186,9 @@
     background-color: mix(@btn-primary-bg, @toolbar-alt-bg-color, 65%);
     .opacity(1);
   }
+}
+.btn-recompile when (@is-new-css = true) {
+  border: none;
 }
 
 .btn-recompile-label {
