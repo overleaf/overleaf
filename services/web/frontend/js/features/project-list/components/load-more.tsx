@@ -16,8 +16,8 @@ export default function LoadMore() {
     <div className="text-centered">
       {hiddenProjectsCount > 0 ? (
         <Button
-          bsStyle="info"
-          className="project-list-load-more-button"
+          bsStyle={null}
+          className="project-list-load-more-button btn-secondary-info btn-secondary"
           onClick={() => loadMoreProjects()}
           aria-label={t('show_x_more_projects', { x: loadMoreCount })}
         >

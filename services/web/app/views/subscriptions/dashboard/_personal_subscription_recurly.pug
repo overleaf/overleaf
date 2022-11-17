@@ -30,9 +30,9 @@ div(ng-controller="RecurlySubscriptionController")
 				include ./../_price_exceptions
 				p.pull-right
 				p
-					a(href=personalSubscription.recurly.billingDetailsLink, target="_blank").btn.btn-info #{translate("update_your_billing_details")}
+					a(href=personalSubscription.recurly.billingDetailsLink, target="_blank").btn.btn-secondary-info.btn-secondary #{translate("update_your_billing_details")}
 					| &nbsp;
-					a(href=personalSubscription.recurly.accountManagementLink, target="_blank").btn.btn-info #{translate("view_your_invoices")}
+					a(href=personalSubscription.recurly.accountManagementLink, target="_blank").btn.btn-secondary-info.btn-secondary #{translate("view_your_invoices")}
 					| &nbsp;
 					unless (cancelButtonNewCopy)
 						a(href, ng-click="switchToCancellationView()", ng-hide="recurlyLoadError", event-tracking='subscription-page-cancel-button-click', event-tracking-mb="true", event-tracking-trigger="click").btn.btn-danger !{translate("stop_your_subscription")}
@@ -47,14 +47,14 @@ div(ng-controller="RecurlySubscriptionController")
 				p !{translate("subscription_canceled_and_terminate_on_x", {terminateDate: personalSubscription.recurly.nextPaymentDueAt}, ['strong'])}
 				include ../_premium_features_link
 				p
-					a(href=personalSubscription.recurly.accountManagementLink, target="_blank").btn.btn-info #{translate("view_your_invoices")}
+					a(href=personalSubscription.recurly.accountManagementLink, target="_blank").btn.btn-secondary-info.btn-secondary #{translate("view_your_invoices")}
 					p: form(action="/user/subscription/reactivate",method="post")
 						input(type="hidden", name="_csrf", value=csrfToken)
 						input(type="submit",value="Reactivate your subscription").btn.btn-success
 			when "expired"
 				p !{translate("your_subscription_has_expired")}
 				p
-					a(href=personalSubscription.recurly.accountManagementLink, target="_blank").btn.btn-info #{translate("view_your_invoices")}
+					a(href=personalSubscription.recurly.accountManagementLink, target="_blank").btn.btn-secondary-info.btn-secondary #{translate("view_your_invoices")}
 					| &nbsp;
 					a(href="/user/subscription/plans").btn.btn-success !{translate("create_new_subscription")}
 			default
@@ -110,7 +110,7 @@ div(ng-controller="RecurlySubscriptionController")
 
 		div(ng-show="showBasicCancel")
 			p
-				a(href, ng-click="switchToDefaultView()").btn.btn-info #{translate("i_want_to_stay")}
+				a(href, ng-click="switchToDefaultView()").btn.btn-secondary-info.btn-secondary #{translate("i_want_to_stay")}
 			p
 				a(href, ng-click="cancelSubscription()", ng-disabled='inflight').btn.btn-primary #{translate("cancel_my_account")}
 
