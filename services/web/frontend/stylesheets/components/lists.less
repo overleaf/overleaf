@@ -27,7 +27,23 @@
 }
 
 .icon-bullet-list {
+  @icon-bullet-list-icon-size: 30px;
+  ul {
+    list-style: none;
+    padding-left: 20px;
+  }
+
   &.checked {
-    list-style-image: url('../../../public/img/fa-check-green.svg');
+    li {
+      background: url('../../../public/img/material-icon-circle-green.svg')
+        no-repeat left top;
+      background-size: @icon-bullet-list-icon-size @icon-bullet-list-icon-size;
+      min-height: @icon-bullet-list-icon-size;
+      margin-bottom: 18px;
+      padding-left: 42px;
+      &:first-line {
+        line-height: @icon-bullet-list-icon-size;
+      }
+    }
   }
 }
