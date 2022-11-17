@@ -57,6 +57,7 @@
   */
   blockquote {
     margin: 0;
+    position: relative;
     /*
       type.less sets <p> inline, so that quotation mark is inline
       but sometimes we have multiple <p>,
@@ -85,6 +86,36 @@
     img {
       margin-right: @margin-sm;
       margin-bottom: @margin-sm;
+    }
+  }
+  .quote-picture-bottom {
+    border: none;
+    color: @content-primary;
+    .h1 {
+      margin: 0 0 48px 0;
+    }
+    p:first-child {
+      &:before {
+        color: inherit;
+        font-size: inherit;
+        margin-right: 0;
+        vertical-align: 0;
+        line-height: inherit;
+        position: absolute;
+        top: (@line-height-computed / 2); // match quote padding
+        left: 3px;
+      }
+      &:after {
+        content: close-quote;
+      }
+    }
+    img {
+      height: 64px;
+      width: 64px;
+      margin-right: 16px;
+    }
+    .quote-by-position {
+      color: @content-secondary;
     }
   }
 
