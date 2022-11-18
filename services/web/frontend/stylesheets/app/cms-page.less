@@ -279,3 +279,36 @@
     max-width: 100%;
   }
 }
+
+.icon-with-content {
+  display: flex;
+
+  h2,
+  h3,
+  h4 {
+    margin-top: 15px;
+  }
+
+  .icon-container {
+    background-color: @green-10;
+    padding: 7.5px;
+    height: 56px;
+    width: 56px;
+    border-radius: 50%;
+    margin-right: 24px;
+    .icon-inner-container {
+      align-items: center;
+      border: @green-30 3.5px solid;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      height: 42px;
+      width: 42px;
+    }
+
+    i {
+      color: @green;
+      font-size: 21px;
+    }
+  }
+}
