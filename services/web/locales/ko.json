@@ -304,7 +304,6 @@
   "sure_you_want_to_cancel": "정말 취소 하시겠습니까?",
   "i_want_to_stay": "계속하겠습니다.",
   "have_more_days_to_try": "<strong>__days__ days</strong>일 더 사용해 보십시오!",
-  "interested_in_cheaper_plan": "저 저렴한  <strong>__price__</strong> student plan에 관심이 있습니까?",
   "session_expired_redirecting_to_login": "세션 종료. __seconds__ seconds 초 후 다시 로그인",
   "maximum_files_uploaded_together": "최대 __max__ 파일 업로드됨",
   "too_many_files_uploaded_throttled_short_period": "너무 많은 파일이 업로드되어 잠시 보류되었습니다.",
