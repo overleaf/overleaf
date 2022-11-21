@@ -928,9 +928,6 @@ define(['ace/ace','crypto-js/sha1'], function (_ignore, CryptoJSSHA1) {
       // All ops that are waiting for the server to acknowledge @inflightOp
       this.pendingOp = null;
       this.pendingCallbacks = [];
-
-      // Some recent ops, incase submitOp is called with an old op version number.
-      this.serverOps = {};
     }
 
     // Transform a server op by a client op, and vice versa.
@@ -1169,7 +1166,6 @@ define(['ace/ace','crypto-js/sha1'], function (_ignore, CryptoJSSHA1) {
               throw new Error('Invalid version from server');
             }
 
-            this.serverOps[this.version] = oldInflightOp;
             this.version++;
             this.emit('acknowledge', oldInflightOp);
             var _iteratorNormalCompletion13 = true;
@@ -1219,11 +1215,7 @@ define(['ace/ace','crypto-js/sha1'], function (_ignore, CryptoJSSHA1) {
 
           //    p "if: #{i @inflightOp} pending: #{i @pendingOp} doc '#{@snapshot}' op: #{i msg.op}"
 
-          var op = msg.op;
-
-          this.serverOps[this.version] = op;
-
-          var docOp = op;
+          var docOp = msg.op;
           if (this.inflightOp !== null) {
             var _Array$from9 = Array.from(this._xf(this.inflightOp, docOp));
 
