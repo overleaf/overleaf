@@ -1,0 +1,25 @@
+mixin studentCheckModal
+	script(type="text/ng-template", id="StudentCheckModalTemplate")
+		.modal-header
+			h3 #{translate("you_are_about_to_upgrade", {planName: translate("student_plan")})}
+		.modal-body
+			p.mb-0
+				| !{translate("the_overleaf_student_plan_is_for_students_using_overleaf_during_their_studies", {}, ['strong'])}.
+				br
+				| #{translate("not_a_student_question")}
+				| #{translate("try_out_one_of_our_plans_instead")}.
+		.modal-footer
+			button.btn.btn-default(
+				event-tracking-mb="true"
+				event-tracking="student-check-button-click"
+				event-tracking-trigger="click"
+				event-segmentation='{"button": "plans"}'
+				ng-click="browsePlans()"
+			) #{translate("browse_plans")}
+			button.btn.btn-success(
+				event-tracking-mb="true"
+				event-tracking="student-check-button-click"
+				event-tracking-trigger="click"
+				event-segmentation='{"button": "confirm"}'
+				ng-click="confirm()"
+			) #{translate("i_confirm_that_i_am_a_student")}

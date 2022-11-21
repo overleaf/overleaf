@@ -10,7 +10,14 @@ import getMeta from '../utils/meta'
 
 export default App.controller(
   'NewSubscriptionController',
-  function ($scope, MultiCurrencyPricing, $http, $location, eventTracking) {
+  function (
+    $scope,
+    $modal,
+    MultiCurrencyPricing,
+    $http,
+    $location,
+    eventTracking
+  ) {
     window.couponCode = $location.search().cc || ''
     window.plan_code = $location.search().planCode || ''
     window.ITMCampaign = $location.search().itm_campaign || ''
@@ -34,6 +41,18 @@ export default App.controller(
     $scope.allCurrencies = MultiCurrencyPricing.plans
     $scope.availableCurrencies = {}
     $scope.planCode = window.plan_code
+
+    const isStudentCheckModalEnabled =
+      getMeta('ol-splitTestVariants')?.['student-check-modal'] === 'enabled'
+
+    if (isStudentCheckModalEnabled && $scope.planCode.includes('student')) {
+      $modal.open({
+        templateUrl: 'StudentCheckModalTemplate',
+        controller: 'StudentCheckModalController',
+        backdrop: 'static',
+        size: 'dialog-centered',
+      })
+    }
 
     $scope.switchToStudent = function () {
       const currentPlanCode = window.plan_code
@@ -145,6 +164,7 @@ export default App.controller(
         })
         .done()
     }
+
     setupPricing()
 
     pricing.on('change', () => {
@@ -755,5 +775,30 @@ export default App.controller(
       { code: 'ZM', name: 'Zambia' },
       { code: 'ZW', name: 'Zimbabwe' },
     ]
+  }
+)
+
+App.controller(
+  'StudentCheckModalController',
+  function ($scope, $modalInstance, eventTracking) {
+    $modalInstance.rendered.then(() => {
+      eventTracking.sendMB('student-check-displayed')
+    })
+
+    $scope.browsePlans = () => {
+      if (document.referrer?.includes('/user/subscription/choose-your-plan')) {
+        // redirect to interstitial page with `itm_referrer` param
+        window.location.assign(
+          '/user/subscription/choose-your-plan?itm_referrer=student-status-declined'
+        )
+      } else {
+        // redirect to plans page with `itm_referrer` param
+        window.location.assign(
+          '/user/subscription/plans?itm_referrer=student-status-declined'
+        )
+      }
+    }
+
+    $scope.confirm = () => $modalInstance.dismiss('cancel')
   }
 )

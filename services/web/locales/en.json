@@ -1914,5 +1914,12 @@
   "show_x_more_projects": "Show __x__ more projects",
   "showing_x_out_of_n_projects": "Showing __x__ out of __n__ projects.",
   "make_a_copy": "Make a copy",
-  "projects_list": "Projects list"
+  "projects_list": "Projects list",
+  "you_are_about_to_upgrade": "You are about to upgrade to the __planName__",
+  "student_plan": "Student Plan",
+  "the_overleaf_student_plan_is_for_students_using_overleaf_during_their_studies": "The Overleaf Student plan is for <0>students using Overleaf during their studies</0>",
+  "not_a_student_question": "Not a student?",
+  "try_out_one_of_our_plans_instead": "Try out one of our plans instead",
+  "browse_plans": "Browse plans",
+  "i_confirm_that_i_am_a_student": "I confirm that I am a student"
 }

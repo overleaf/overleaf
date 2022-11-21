@@ -55,6 +55,7 @@ async function plansPage(req, res) {
     }
     return defaultValue
   }
+
   const newPlansPageAssignmentV2 =
     await SplitTestHandler.promises.getAssignment(
       req,
@@ -167,6 +168,12 @@ async function paymentPage(req, res) {
       const useRefreshedPaymentPage =
         refreshedPaymentPageAssignment &&
         refreshedPaymentPageAssignment.variant === 'refreshed-payment-page'
+
+      await SplitTestHandler.promises.getAssignment(
+        req,
+        res,
+        'student-check-modal'
+      )
 
       const template = useRefreshedPaymentPage
         ? 'subscriptions/new-refreshed'

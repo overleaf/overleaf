@@ -1,5 +1,7 @@
 extends ../layout
 
+include ./_new_mixins
+
 block append meta
 	meta(name="ol-countryCode" content=countryCode)
 	meta(name="ol-recurlyApiKey" content=settings.apis.recurly.publicKey)
@@ -351,3 +353,5 @@ block content
 	)
 		p !{translate("for_visa_mastercard_and_discover", {}, ['strong', 'strong', 'strong'])}
 		p !{translate("for_american_express", {}, ['strong', 'strong', 'strong'])}
+
+	+studentCheckModal
