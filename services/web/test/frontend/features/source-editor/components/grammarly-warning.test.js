@@ -29,7 +29,7 @@ describe('<GrammarlyWarning />', function () {
     grammarlyStub.returns(true)
     window.metaAttributesCache.set('ol-showNewSourceEditorOption', true)
 
-    renderWithEditorContext(<GrammarlyWarning />, {
+    renderWithEditorContext(<GrammarlyWarning delay={100} />, {
       scope: {
         editor: {
           newSourceEditor: true,
@@ -48,7 +48,7 @@ describe('<GrammarlyWarning />', function () {
     grammarlyStub.returns(false)
     window.metaAttributesCache.set('ol-showNewSourceEditorOption', true)
 
-    renderWithEditorContext(<GrammarlyWarning />, {
+    renderWithEditorContext(<GrammarlyWarning delay={100} />, {
       scope: {
         editor: {
           newSourceEditor: true,
@@ -70,7 +70,7 @@ describe('<GrammarlyWarning />', function () {
     localStorage.setItem('editor.has_dismissed_grammarly_warning', true)
     window.metaAttributesCache.set('ol-showNewSourceEditorOption', true)
 
-    renderWithEditorContext(<GrammarlyWarning />, {
+    renderWithEditorContext(<GrammarlyWarning delay={100} />, {
       scope: {
         editor: {
           newSourceEditor: true,
@@ -91,7 +91,7 @@ describe('<GrammarlyWarning />', function () {
     grammarlyStub.returns(true)
     window.metaAttributesCache.set('ol-showNewSourceEditorOption', false)
 
-    renderWithEditorContext(<GrammarlyWarning />)
+    renderWithEditorContext(<GrammarlyWarning delay={100} />)
 
     await waitFor(() => {
       expect(
@@ -106,7 +106,7 @@ describe('<GrammarlyWarning />', function () {
     grammarlyStub.returns(true)
     window.metaAttributesCache.set('ol-showNewSourceEditorOption', true)
 
-    renderWithEditorContext(<GrammarlyWarning />, {
+    renderWithEditorContext(<GrammarlyWarning delay={100} />, {
       scope: {
         editor: {
           newSourceEditor: false,
@@ -127,7 +127,7 @@ describe('<GrammarlyWarning />', function () {
     grammarlyStub.returns(true)
     window.metaAttributesCache.set('ol-showNewSourceEditorOption', true)
 
-    renderWithEditorContext(<GrammarlyWarning />, {
+    renderWithEditorContext(<GrammarlyWarning delay={100} />, {
       scope: {
         editor: {
           newSourceEditor: true,
@@ -149,7 +149,7 @@ describe('<GrammarlyWarning />', function () {
     grammarlyStub.returns(true)
     window.metaAttributesCache.set('ol-showNewSourceEditorOption', true)
 
-    renderWithEditorContext(<GrammarlyWarning />, {
+    renderWithEditorContext(<GrammarlyWarning delay={100} />, {
       scope: {
         editor: {
           newSourceEditor: true,

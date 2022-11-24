@@ -1,11 +1,16 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Button } from 'react-bootstrap'
+import { Nullable } from '../../../../../types/utils'
 import customLocalStorage from '../../../infrastructure/local-storage'
 import useScopeValue from '../../../shared/hooks/use-scope-value'
 import grammarlyExtensionPresent from '../../../shared/utils/grammarly'
 import getMeta from '../../../utils/meta'
 
-export default function GrammarlyWarning() {
+type GrammarlyWarningProps = {
+  delay: number
+}
+
+export default function GrammarlyWarning({ delay }: GrammarlyWarningProps) {
   const [show, setShow] = useState(false)
   const [newSourceEditor] = useScopeValue('editor.newSourceEditor')
   const [showRichText] = useScopeValue('editor.showRichText')
@@ -21,10 +26,29 @@ export default function GrammarlyWarning() {
       newSourceEditor &&
       !showRichText
 
+    let timeoutID: Nullable<number>
+
     if (showGrammarlyWarning) {
-      setShow(true)
+      const timeout = window.setTimeout(() => {
+        setShow(true)
+        timeoutID = null
+      }, delay)
+
+      timeoutID = timeout
     }
-  }, [grammarly, hasDismissedGrammarlyWarning, newSourceEditor, showRichText])
+
+    return () => {
+      if (timeoutID) {
+        clearTimeout(timeoutID)
+      }
+    }
+  }, [
+    grammarly,
+    hasDismissedGrammarlyWarning,
+    newSourceEditor,
+    showRichText,
+    delay,
+  ])
 
   const handleClose = useCallback(() => {
     setShow(false)

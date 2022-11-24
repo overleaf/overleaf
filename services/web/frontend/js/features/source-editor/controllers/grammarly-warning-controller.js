@@ -5,5 +5,5 @@ import GrammarlyWarning from '../components/grammarly-warning'
 
 App.component(
   'grammarlyWarning',
-  react2angular(rootContext.use(GrammarlyWarning))
+  react2angular(rootContext.use(GrammarlyWarning), ['delay'])
 )
