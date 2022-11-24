@@ -2,6 +2,7 @@ import { Button, Modal, Row, Col } from 'react-bootstrap'
 import PropTypes from 'prop-types'
 import { Trans, useTranslation } from 'react-i18next'
 import AccessibleModal from '../../../shared/components/accessible-modal'
+import HotkeysModalBottomText from './hotkeys-modal-bottom-text'
 
 export default function HotkeysModal({
   animation = true,
@@ -9,10 +10,16 @@ export default function HotkeysModal({
   show,
   isMac = false,
   trackChangesVisible = false,
+  newSourceEditor = false,
 }) {
   const { t } = useTranslation()
 
+  const goToLineSuffix = newSourceEditor ? 'Shift + L' : 'L'
   const ctrl = isMac ? 'Cmd' : 'Ctrl'
+
+  const modalTitle = newSourceEditor
+    ? `${t('hotkeys')} (Source editor)`
+    : `${t('hotkeys')} (Legacy source editor)`
 
   return (
     <AccessibleModal
@@ -22,10 +29,10 @@ export default function HotkeysModal({
       animation={animation}
     >
       <Modal.Header closeButton>
-        <Modal.Title>{t('hotkeys')}</Modal.Title>
+        <Modal.Title>{modalTitle}</Modal.Title>
       </Modal.Header>
 
-      <Modal.Body className="modal-hotkeys">
+      <Modal.Body className="hotkeys-modal">
         <h3>{t('common')}</h3>
 
         <Row>
@@ -70,7 +77,7 @@ export default function HotkeysModal({
           </Col>
           <Col xs={4}>
             <Hotkey
-              combination={`${ctrl} + L`}
+              combination={`${ctrl} + ${goToLineSuffix}`}
               description={t('hotkey_go_to_line')}
             />
           </Col>
@@ -186,6 +193,7 @@ export default function HotkeysModal({
             </Row>
           </>
         )}
+        <HotkeysModalBottomText />
       </Modal.Body>
 
       <Modal.Footer>
@@ -201,6 +209,7 @@ HotkeysModal.propTypes = {
   show: PropTypes.bool.isRequired,
   handleHide: PropTypes.func.isRequired,
   trackChangesVisible: PropTypes.bool,
+  newSourceEditor: PropTypes.bool,
 }
 
 function Hotkey({ combination, description }) {

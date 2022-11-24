@@ -15,7 +15,7 @@ describe('<HelpShowHotkeys />', function () {
     expect(screen.queryByRole('dialog')).to.equal(null)
     fireEvent.click(screen.getByRole('button', { name: 'Show Hotkeys' }))
     const modal = screen.getAllByRole('dialog')[0]
-    within(modal).getByText('Hotkeys')
+    within(modal).getByText('Hotkeys (Legacy source editor)')
     within(modal).getByText('Common')
   })
 })

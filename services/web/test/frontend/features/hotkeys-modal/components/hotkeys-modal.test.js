@@ -10,11 +10,23 @@ const modalProps = {
 }
 
 describe('<HotkeysModal />', function () {
-  it('renders the translated modal title', async function () {
-    const { baseElement } = render(<HotkeysModal {...modalProps} />)
+  it('renders the translated modal title on cm6', async function () {
+    const { baseElement } = render(
+      <HotkeysModal {...modalProps} newSourceEditor />
+    )
 
     expect(baseElement.querySelector('.modal-title').textContent).to.equal(
-      'Hotkeys'
+      'Hotkeys (Source editor)'
+    )
+  })
+
+  it('renders the translated modal title on ace', async function () {
+    const { baseElement } = render(
+      <HotkeysModal {...modalProps} newSourceEditor={false} />
+    )
+
+    expect(baseElement.querySelector('.modal-title').textContent).to.equal(
+      'Hotkeys (Legacy source editor)'
     )
   })
 
