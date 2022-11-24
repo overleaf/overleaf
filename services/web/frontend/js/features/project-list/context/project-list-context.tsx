@@ -15,6 +15,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react'
 import { Tag } from '../../../../../app/src/Features/Tags/types'
@@ -110,7 +111,7 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
   const [maxVisibleProjects, setMaxVisibleProjects] =
     useState(MAX_PROJECT_PER_PAGE)
   const [hiddenProjectsCount, setHiddenProjectsCount] = useState(0)
-  const [loadMoreCount, setLoadMoreCount] = useState<number>(0)
+  const [loadMoreCount, setLoadMoreCount] = useState(0)
   const [loadProgress, setLoadProgress] = useState(
     prefetchedProjectsBlob ? 100 : 20
   )
@@ -125,6 +126,7 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
     'project-list-filter',
     'all'
   )
+  const prevSortRef = useRef<Sort>(sort)
   const [selectedTagId, setSelectedTagId] = usePersistedState<
     string | undefined
   >('project-list-selected-tag-id', undefined)
@@ -156,27 +158,14 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       })
   }, [prefetchedProjectsBlob, runAsync])
 
-  // Search related effects
-  useEffect(() => {
-    if (!searchText.length) {
-      return
-    }
-
-    const filteredProjects = loadedProjects.filter(project =>
-      project.name.toLowerCase().includes(searchText.toLowerCase())
-    )
-
-    setVisibleProjects(filteredProjects)
-  }, [searchText, loadedProjects])
-
-  // Sort related effects
-  useEffect(() => {
-    setLoadedProjects(loadedProjects => sortProjects(loadedProjects, sort))
-  }, [sort])
-
-  // Filters/Tags and load more related effects
   useEffect(() => {
     let filteredProjects = [...loadedProjects]
+
+    if (searchText.length) {
+      filteredProjects = filteredProjects.filter(project =>
+        project.name.toLowerCase().includes(searchText.toLowerCase())
+      )
+    }
 
     if (selectedTagId !== undefined) {
       if (selectedTagId === UNCATEGORIZED_KEY) {
@@ -202,7 +191,12 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       filteredProjects = arrayFilter(filteredProjects, filters[filter])
     }
 
-    // load more
+    if (prevSortRef.current !== sort) {
+      filteredProjects = sortProjects(filteredProjects, sort)
+      const loadedProjectsSorted = sortProjects(loadedProjects, sort)
+      setLoadedProjects(loadedProjectsSorted)
+    }
+
     if (filteredProjects.length > maxVisibleProjects) {
       const visibleFilteredProjects = filteredProjects.slice(
         0,
@@ -226,14 +220,20 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       setHiddenProjectsCount(0)
     }
   }, [
-    filter,
     loadedProjects,
     maxVisibleProjects,
-    selectedTagId,
-    setFilter,
-    setSelectedTagId,
     tags,
+    filter,
+    setFilter,
+    selectedTagId,
+    setSelectedTagId,
+    searchText,
+    sort,
   ])
+
+  useEffect(() => {
+    prevSortRef.current = sort
+  }, [sort])
 
   const showAllProjects = useCallback(() => {
     setLoadMoreCount(0)
