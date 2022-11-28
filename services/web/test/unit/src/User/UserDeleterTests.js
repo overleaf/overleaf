@@ -88,6 +88,10 @@ describe('UserDeleter', function () {
       deleteMany: sinon.stub().returns({ exec: sinon.stub().resolves() }),
     }
 
+    this.Modules = {
+      promises: { hooks: { fire: sinon.stub().resolves() } },
+    }
+
     this.UserDeleter = SandboxedModule.require(modulePath, {
       requires: {
         '../../models/User': { User },
@@ -103,6 +107,7 @@ describe('UserDeleter', function () {
         '../../models/UserAuditLogEntry': {
           UserAuditLogEntry: this.UserAuditLogEntry,
         },
+        '../../infrastructure/Modules': this.Modules,
       },
     })
   })
@@ -192,6 +197,14 @@ describe('UserDeleter', function () {
             expect(
               this.InstitutionsApi.promises.deleteAffiliations
             ).to.have.been.calledWith(this.userId)
+          })
+
+          it('should fire the deleteUser hook for modules', async function () {
+            await this.UserDeleter.promises.deleteUser(this.userId)
+            expect(this.Modules.promises.hooks.fire).to.have.been.calledWith(
+              'deleteUser',
+              this.userId
+            )
           })
 
           it('should stop the user sessions', async function () {
@@ -486,6 +499,14 @@ describe('UserDeleter', function () {
     it('should save the record to mongo', async function () {
       await this.UserDeleter.promises.expireDeletedUser('giraffe')
       this.mockedDeletedUser.verify()
+    })
+
+    it('should fire the expireDeletedUser hook for modules', async function () {
+      await this.UserDeleter.promises.expireDeletedUser('giraffe')
+      expect(this.Modules.promises.hooks.fire).to.have.been.calledWith(
+        'expireDeletedUser',
+        'giraffe'
+      )
     })
 
     describe('when called as a callback', function () {

@@ -141,6 +141,11 @@ function attachHook(name, method) {
 }
 
 function fireHook(name, ...rest) {
+  // ensure that modules are loaded if we need to fire a hook
+  // this can happen if a script calls a method that fires a hook
+  if (!_modulesLoaded) {
+    loadModules()
+  }
   const adjustedLength = Math.max(rest.length, 1)
   const args = rest.slice(0, adjustedLength - 1)
   const callback = rest[adjustedLength - 1]
