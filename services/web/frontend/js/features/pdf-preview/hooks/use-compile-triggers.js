@@ -1,28 +1,31 @@
 import { useCallback, useEffect } from 'react'
-import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import useEventListener from '../../../shared/hooks/use-event-listener'
 import useDetachAction from '../../../shared/hooks/use-detach-action'
 
-export default function useCompileTriggers() {
-  const { startCompile, setChangedAt } = useCompileContext()
+export const startCompileKeypress = event => {
+  if (event.shiftKey || event.altKey) {
+    return false
+  }
 
+  if (event.ctrlKey) {
+    // Ctrl+s / Ctrl+Enter / Ctrl+.
+    if (event.key === 's' || event.key === 'Enter' || event.key === '.') {
+      return true
+    }
+  } else if (event.metaKey) {
+    // Cmd+s / Cmd+Enter
+    if (event.key === 's' || event.key === 'Enter') {
+      return true
+    }
+  }
+}
+
+export default function useCompileTriggers(startCompile, setChangedAt) {
   const handleKeyDown = useCallback(
     event => {
-      if (event.metaKey) {
-        switch (event.key) {
-          case 's':
-          case 'Enter':
-            event.preventDefault()
-            startCompile()
-            break
-        }
-      } else if (event.ctrlKey) {
-        switch (event.key) {
-          case '.':
-            event.preventDefault()
-            startCompile()
-            break
-        }
+      if (startCompileKeypress(event)) {
+        event.preventDefault()
+        startCompile()
       }
     },
     [startCompile]

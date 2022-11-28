@@ -242,30 +242,8 @@ App.directive(
 
         /* eslint-enable no-unused-vars */
 
-        scope.$watch('onSave', function (callback) {
-          if (callback != null) {
-            Vim.defineEx('write', 'w', callback)
-            editor.commands.addCommand({
-              name: 'save',
-              bindKey: {
-                win: 'Ctrl-S',
-                mac: 'Command-S',
-              },
-              exec: callback,
-              readOnly: true,
-            })
-            // Not technically 'save', but Ctrl-. recompiles in OL v1
-            // so maintain compatibility
-            return editor.commands.addCommand({
-              name: 'recompile_v1',
-              bindKey: {
-                win: 'Ctrl-.',
-                mac: 'Ctrl-.',
-              },
-              exec: callback,
-              readOnly: true,
-            })
-          }
+        Vim.defineEx('write', 'w', function () {
+          window.dispatchEvent(new Event('pdf:recompile'))
         })
         editor.commands.removeCommand('transposeletters')
         editor.commands.removeCommand('showSettingsMenu')

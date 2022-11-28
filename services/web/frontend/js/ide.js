@@ -387,24 +387,8 @@ If the project has been renamed please look in your project list for a new proje
       }
     })
 
-    $scope.recompileViaKey = () => {
-      if ($scope.recompile) {
-        $scope.recompile()
-      } else {
-        window.dispatchEvent(new CustomEvent('pdf:recompile'))
-      }
-    }
-
-    $scope.handleKeyDown = event => {
-      if (event.shiftKey || event.altKey) {
-        return
-      }
-
-      // Ctrl+s or Cmd+s => recompile
-      if (event.key === 's' && (event.metaKey || event.ctrlKey)) {
-        event.preventDefault()
-        $scope.recompileViaKey()
-      }
+    $scope.handleKeyDown = () => {
+      // unused?
     }
 
     try {

@@ -15,14 +15,8 @@ import { getPdfCachingMetrics } from '../util/metrics'
 function PdfJsViewer({ url, pdfFile }) {
   const { _id: projectId } = useProjectContext()
 
-  const {
-    setError,
-    firstRenderDone,
-    highlights,
-    position,
-    setPosition,
-    startCompile,
-  } = useCompileContext()
+  const { setError, firstRenderDone, highlights, position, setPosition } =
+    useCompileContext()
 
   // state values persisted in localStorage to restore on load
   const [scale, setScale] = usePersistedState(
@@ -372,24 +366,26 @@ function PdfJsViewer({ url, pdfFile }) {
       if (!initialised) {
         return
       }
-      if ((event.metaKey || event.ctrlKey) && event.key === '=') {
-        event.preventDefault()
-        setZoom('zoom-in')
-      } else if ((event.metaKey || event.ctrlKey) && event.key === '-') {
-        event.preventDefault()
-        setZoom('zoom-out')
-      } else if ((event.metaKey || event.ctrlKey) && event.key === '0') {
-        event.preventDefault()
-        setZoom('fit-width')
-      } else if (
-        (event.metaKey && (event.key === 's' || event.key === 'Enter')) ||
-        (event.ctrlKey && event.key === '.')
-      ) {
-        event.preventDefault()
-        startCompile()
+      if (event.metaKey || event.ctrlKey) {
+        switch (event.key) {
+          case '=':
+            event.preventDefault()
+            setZoom('zoom-in')
+            break
+
+          case '-':
+            event.preventDefault()
+            setZoom('zoom-out')
+            break
+
+          case '0':
+            event.preventDefault()
+            setZoom('fit-width')
+            break
+        }
       }
     },
-    [initialised, setZoom, startCompile]
+    [initialised, setZoom]
   )
 
   /* eslint-disable jsx-a11y/no-noninteractive-tabindex */
