@@ -61,6 +61,7 @@ async function setupDb() {
   db.oauthApplications = internalDb.collection('oauthApplications')
   db.oauthAuthorizationCodes = internalDb.collection('oauthAuthorizationCodes')
   db.projectAuditLogEntries = internalDb.collection('projectAuditLogEntries')
+  db.projectHistoryChunks = internalDb.collection('projectHistoryChunks')
   db.projectHistoryFailures = internalDb.collection('projectHistoryFailures')
   db.projectHistoryLabels = internalDb.collection('projectHistoryLabels')
   db.projectHistoryMetaData = internalDb.collection('projectHistoryMetaData')
