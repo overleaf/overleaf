@@ -123,7 +123,30 @@ const ProjectGetter = {
               tokenReadAndWrite: projects.tokenReadAndWrite || [],
               tokenReadOnly: projects.tokenReadOnly || [],
             }
-            callback(null, result)
+
+            // Remove duplicate projects. The order of result values is determined by the order they occur.
+            const tempAddedProjectsIds = new Set()
+            const filteredProjects = Object.entries(result).reduce(
+              (prev, current) => {
+                const [key, projects] = current
+
+                prev[key] = []
+
+                projects.forEach(project => {
+                  const projectId = project._id.toString()
+
+                  if (!tempAddedProjectsIds.has(projectId)) {
+                    prev[key].push(project)
+                    tempAddedProjectsIds.add(projectId)
+                  }
+                })
+
+                return prev
+              },
+              {}
+            )
+
+            callback(null, filteredProjects)
           }
         )
       }

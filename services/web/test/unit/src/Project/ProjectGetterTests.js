@@ -288,30 +288,64 @@ describe('ProjectGetter', function () {
   describe('findAllUsersProjects', function () {
     beforeEach(function () {
       this.fields = { mock: 'fields' }
+      this.projectOwned = { _id: 'mock-owned-projects' }
+      this.projectRW = { _id: 'mock-rw-projects' }
+      this.projectRO = { _id: 'mock-ro-projects' }
+      this.projectTokenRW = { _id: 'mock-token-rw-projects' }
+      this.projectTokenRO = { _id: 'mock-token-ro-projects' }
       this.Project.find
         .withArgs({ owner_ref: this.userId }, this.fields)
-        .yields(null, ['mock-owned-projects'])
+        .yields(null, [this.projectOwned])
+    })
+
+    it('should call the callback with all the projects', function () {
       this.CollaboratorsGetter.getProjectsUserIsMemberOf.yields(null, {
-        readAndWrite: ['mock-rw-projects'],
-        readOnly: ['mock-ro-projects'],
-        tokenReadAndWrite: ['mock-token-rw-projects'],
-        tokenReadOnly: ['mock-token-ro-projects'],
+        readAndWrite: [this.projectRW],
+        readOnly: [this.projectRO],
+        tokenReadAndWrite: [this.projectTokenRW],
+        tokenReadOnly: [this.projectTokenRO],
       })
       this.ProjectGetter.findAllUsersProjects(
         this.userId,
         this.fields,
         this.callback
       )
-    })
 
-    it('should call the callback with all the projects', function () {
       this.callback
         .calledWith(null, {
-          owned: ['mock-owned-projects'],
-          readAndWrite: ['mock-rw-projects'],
-          readOnly: ['mock-ro-projects'],
-          tokenReadAndWrite: ['mock-token-rw-projects'],
-          tokenReadOnly: ['mock-token-ro-projects'],
+          owned: [this.projectOwned],
+          readAndWrite: [this.projectRW],
+          readOnly: [this.projectRO],
+          tokenReadAndWrite: [this.projectTokenRW],
+          tokenReadOnly: [this.projectTokenRO],
+        })
+        .should.equal(true)
+    })
+
+    it('should remove duplicate projects', function () {
+      this.CollaboratorsGetter.getProjectsUserIsMemberOf.yields(null, {
+        readAndWrite: [this.projectRW, this.projectOwned],
+        readOnly: [this.projectRO, this.projectRW],
+        tokenReadAndWrite: [this.projectTokenRW, this.projectRO],
+        tokenReadOnly: [
+          this.projectTokenRW,
+          this.projectTokenRO,
+          this.projectRO,
+        ],
+      })
+      this.ProjectGetter.findAllUsersProjects(
+        this.userId,
+        this.fields,
+        this.callback
+      )
+
+      this.callback
+        .calledWith(null, {
+          owned: [this.projectOwned],
+          readAndWrite: [this.projectRW],
+          readOnly: [this.projectRO],
+          tokenReadAndWrite: [this.projectTokenRW],
+          tokenReadOnly: [this.projectTokenRO],
         })
         .should.equal(true)
     })
@@ -368,49 +402,61 @@ describe('ProjectGetter', function () {
 
   describe('findUsersProjectsByName', function () {
     it('should perform a case-insensitive search', function (done) {
+      this.project1 = { _id: 1, name: 'find me!' }
+      this.project2 = { _id: 2, name: 'not me!' }
+      this.project3 = { _id: 3, name: 'FIND ME!' }
+      this.project4 = { _id: 4, name: 'Find Me!' }
       this.Project.find
         .withArgs({ owner_ref: this.userId })
         .yields(null, [
-          { name: 'find me!' },
-          { name: 'not me!' },
-          { name: 'FIND ME!' },
-          { name: 'Find Me!' },
+          this.project1,
+          this.project2,
+          this.project3,
+          this.project4,
         ])
       this.ProjectGetter.findUsersProjectsByName(
         this.userId,
-        'find me!',
+        this.project1.name,
         (err, projects) => {
           if (err != null) {
             return done(err)
           }
-          projects
-            .map(project => project.name)
-            .should.have.members(['find me!', 'FIND ME!', 'Find Me!'])
+          const projectNames = projects.map(project => project.name)
+          expect(projectNames).to.have.members([
+            this.project1.name,
+            this.project3.name,
+            this.project4.name,
+          ])
           done()
         }
       )
     })
 
     it('should search collaborations as well', function (done) {
+      this.project1 = { _id: 1, name: 'find me!' }
+      this.project2 = { _id: 2, name: 'FIND ME!' }
+      this.project3 = { _id: 3, name: 'Find Me!' }
+      this.project4 = { _id: 4, name: 'find ME!' }
+      this.project5 = { _id: 5, name: 'FIND me!' }
       this.Project.find
         .withArgs({ owner_ref: this.userId })
-        .yields(null, [{ name: 'find me!' }])
+        .yields(null, [this.project1])
       this.CollaboratorsGetter.getProjectsUserIsMemberOf.yields(null, {
-        readAndWrite: [{ name: 'FIND ME!' }],
-        readOnly: [{ name: 'Find Me!' }],
-        tokenReadAndWrite: [{ name: 'find ME!' }],
-        tokenReadOnly: [{ name: 'FIND me!' }],
+        readAndWrite: [this.project2],
+        readOnly: [this.project3],
+        tokenReadAndWrite: [this.project4],
+        tokenReadOnly: [this.project5],
       })
       this.ProjectGetter.findUsersProjectsByName(
         this.userId,
-        'find me!',
+        this.project1.name,
         (err, projects) => {
           if (err != null) {
             return done(err)
           }
           expect(projects.map(project => project.name)).to.have.members([
-            'find me!',
-            'FIND ME!',
+            this.project1.name,
+            this.project2.name,
           ])
           done()
         }
