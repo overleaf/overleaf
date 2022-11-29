@@ -63,7 +63,6 @@ const aceDir = getModuleDirectory('ace-builds')
 const pdfjsVersions = ['pdfjs-dist210', 'pdfjs-dist213']
 
 const vendorDir = path.join(__dirname, 'frontend/js/vendor')
-const librariesDir = path.resolve(__dirname, '../../libraries')
 
 module.exports = {
   // Defines the "entry point(s)" for the application - i.e. the file which
@@ -96,7 +95,7 @@ module.exports = {
         test: /\.[jt]sx?$/,
         // Only compile application files (npm and vendored dependencies are in
         // ES5 already)
-        exclude: [/node_modules\/(?!react-dnd\/)/, vendorDir, librariesDir],
+        exclude: [/node_modules\/(?!react-dnd\/)/, vendorDir],
         use: [
           {
             loader: 'babel-loader',
@@ -222,6 +221,7 @@ module.exports = {
         `frontend/js/vendor/libs/${PackageVersions.lib('fineuploader')}`
       ),
     },
+    symlinks: false,
     extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
     fallback: {
       events: require.resolve('events'),
