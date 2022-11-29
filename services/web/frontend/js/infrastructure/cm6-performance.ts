@@ -2,6 +2,7 @@ import { Transaction } from '@codemirror/state'
 import { EditorView } from '@codemirror/view'
 import { round } from 'lodash'
 import grammarlyExtensionPresent from '../shared/utils/grammarly'
+import getMeta from '../utils/meta'
 
 const TIMER_START_NAME = 'CM6-BeforeUpdate'
 const TIMER_END_NAME = 'CM6-AfterUpdate'
@@ -44,6 +45,22 @@ try {
   if ('memory' in window.performance) {
     measureMemoryUsage()
     performanceMemorySupport = true
+  }
+} catch (e) {}
+
+let performanceLongtaskSupported = false
+let longTaskSinceLastReportCount = 0
+
+// Detect support for long task monitoring
+try {
+  if (PerformanceObserver.supportedEntryTypes.includes('longtask')) {
+    performanceLongtaskSupported = true
+
+    // Register observer for long task notifications
+    const observer = new PerformanceObserver(list => {
+      longTaskSinceLastReportCount += list.getEntries().length
+    })
+    observer.observe({ entryTypes: ['longtask'] })
   }
 } catch (e) {}
 
@@ -242,6 +259,16 @@ export function reportCM6Perf() {
 
   performance.clearMeasures(TIMER_KEYPRESS_MEASURE_NAME)
 
+  let longTasks = null
+
+  // Get long task entries (Chromium-based browsers only at time of writing)
+  if (performanceLongtaskSupported) {
+    longTasks = longTaskSinceLastReportCount
+    longTaskSinceLastReportCount = 0
+  }
+
+  const release = getMeta('ol-ExposedSettings')?.sentryRelease || null
+
   return {
     max,
     mean,
@@ -259,6 +286,8 @@ export function reportCM6Perf() {
     meanLagsPerMeasure,
     meanKeypressesPerMeasure,
     meanKeypressPaint,
+    longTasks,
+    release,
   }
 }
 
