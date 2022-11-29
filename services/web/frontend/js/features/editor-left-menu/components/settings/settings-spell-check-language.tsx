@@ -1,17 +1,17 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import getMeta from '../../../../utils/meta'
+import { useProjectSettingsContext } from '../../context/project-settings-context'
 import SettingsMenuSelect from './settings-menu-select'
 import type { Optgroup } from './settings-menu-select'
-
-type Language = {
-  name: string
-  code: string
-}
+import type { SpellCheckLanguage } from '../../../../../../types/project-settings'
 
 export default function SettingsSpellCheckLanguage() {
   const { t } = useTranslation()
-  const languages = getMeta('ol-languages') as Language[] | undefined
+  const languages = getMeta('ol-languages') as SpellCheckLanguage[] | undefined
+
+  const { spellCheckLanguage, setSpellCheckLanguage } =
+    useProjectSettingsContext()
 
   const optgroup: Optgroup = useMemo(
     () => ({
@@ -27,6 +27,8 @@ export default function SettingsSpellCheckLanguage() {
 
   return (
     <SettingsMenuSelect
+      onChange={setSpellCheckLanguage}
+      value={spellCheckLanguage}
       options={[{ value: '', label: t('off') }]}
       optgroup={optgroup}
       label={t('spell_check')}

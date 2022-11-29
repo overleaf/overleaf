@@ -1,11 +1,16 @@
 import { useTranslation } from 'react-i18next'
+import { FontFamily } from '../../../../../../modules/source-editor/frontend/js/extensions/theme'
+import { useProjectSettingsContext } from '../../context/project-settings-context'
 import SettingsMenuSelect from './settings-menu-select'
 
 export default function SettingsFontFamily() {
   const { t } = useTranslation()
+  const { fontFamily, setFontFamily } = useProjectSettingsContext()
 
   return (
-    <SettingsMenuSelect
+    <SettingsMenuSelect<FontFamily>
+      onChange={setFontFamily}
+      value={fontFamily}
       options={[
         {
           value: 'monaco',

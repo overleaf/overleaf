@@ -1,18 +1,22 @@
 import { useTranslation } from 'react-i18next'
+import { useProjectSettingsContext } from '../../context/project-settings-context'
 import SettingsMenuSelect from './settings-menu-select'
 
 export default function SettingsSyntaxValidation() {
   const { t } = useTranslation()
+  const { syntaxValidation, setSyntaxValidation } = useProjectSettingsContext()
 
   return (
-    <SettingsMenuSelect
+    <SettingsMenuSelect<boolean>
+      onChange={setSyntaxValidation}
+      value={syntaxValidation}
       options={[
         {
-          value: 'true',
+          value: true,
           label: t('on'),
         },
         {
-          value: 'false',
+          value: false,
           label: t('off'),
         },
       ]}

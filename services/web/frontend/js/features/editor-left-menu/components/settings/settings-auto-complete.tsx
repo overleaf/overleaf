@@ -1,18 +1,22 @@
 import { useTranslation } from 'react-i18next'
+import { useProjectSettingsContext } from '../../context/project-settings-context'
 import SettingsMenuSelect from './settings-menu-select'
 
 export default function SettingsAutoComplete() {
   const { t } = useTranslation()
+  const { autoComplete, setAutoComplete } = useProjectSettingsContext()
 
   return (
     <SettingsMenuSelect
+      onChange={setAutoComplete}
+      value={autoComplete}
       options={[
         {
-          value: 'true',
+          value: true,
           label: t('on'),
         },
         {
-          value: 'false',
+          value: false,
           label: t('off'),
         },
       ]}

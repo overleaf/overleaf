@@ -12,6 +12,7 @@ import { ChatProvider } from '../../features/chat/context/chat-context'
 import { ProjectProvider } from './project-context'
 import { SplitTestProvider } from './split-test-context'
 import { FileTreeDataProvider } from './file-tree-data-context'
+import { ProjectSettingsProvider } from '../../features/editor-left-menu/context/project-settings-context'
 
 export function ContextRoot({ children, ide, settings }) {
   return (
@@ -22,13 +23,15 @@ export function ContextRoot({ children, ide, settings }) {
             <FileTreeDataProvider>
               <DetachProvider>
                 <EditorProvider settings={settings}>
-                  <LayoutProvider>
-                    <LocalCompileProvider>
-                      <DetachCompileProvider>
-                        <ChatProvider>{children}</ChatProvider>
-                      </DetachCompileProvider>
-                    </LocalCompileProvider>
-                  </LayoutProvider>
+                  <ProjectSettingsProvider>
+                    <LayoutProvider>
+                      <LocalCompileProvider>
+                        <DetachCompileProvider>
+                          <ChatProvider>{children}</ChatProvider>
+                        </DetachCompileProvider>
+                      </LocalCompileProvider>
+                    </LayoutProvider>
+                  </ProjectSettingsProvider>
                 </EditorProvider>
               </DetachProvider>
             </FileTreeDataProvider>

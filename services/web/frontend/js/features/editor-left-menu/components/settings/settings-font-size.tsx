@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { useProjectSettingsContext } from '../../context/project-settings-context'
 import SettingsMenuSelect from './settings-menu-select'
 import type { Option } from './settings-menu-select'
 
@@ -10,9 +11,12 @@ const options: Array<Option> = sizes.map(size => ({
 
 export default function SettingsFontSize() {
   const { t } = useTranslation()
+  const { fontSize, setFontSize } = useProjectSettingsContext()
 
   return (
     <SettingsMenuSelect
+      onChange={setFontSize}
+      value={fontSize}
       options={options}
       label={t('font_size')}
       name="fontSize"

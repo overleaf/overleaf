@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import getMeta from '../../../../utils/meta'
+import { useProjectSettingsContext } from '../../context/project-settings-context'
 import SettingsMenuSelect from './settings-menu-select'
 import type { Option } from './settings-menu-select'
 
@@ -10,6 +11,7 @@ export default function SettingsEditorTheme() {
   const legacyEditorThemes = getMeta('ol-legacyEditorThemes') as
     | string[]
     | undefined
+  const { editorTheme, setEditorTheme } = useProjectSettingsContext()
 
   const options = useMemo(() => {
     const editorThemeOptions: Array<Option> =
@@ -36,9 +38,11 @@ export default function SettingsEditorTheme() {
 
   return (
     <SettingsMenuSelect
+      onChange={setEditorTheme}
+      value={editorTheme}
+      options={options}
       label={t('editor_theme')}
       name="editorTheme"
-      options={options}
     />
   )
 }
