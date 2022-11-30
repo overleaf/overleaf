@@ -274,6 +274,9 @@ module.exports = {
   maxEntitiesPerProject: 2000,
 
   maxUploadSize: 50 * 1024 * 1024, // 50 MB
+  multerOptions: {
+    preservePath: process.env.MULTER_PRESERVE_PATH,
+  },
 
   // start failing the health check if active handles exceeds this limit
   maxActiveHandles: process.env.MAX_ACTIVE_HANDLES

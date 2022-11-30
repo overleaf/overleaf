@@ -22,13 +22,19 @@ const SessionManager = require('../Authentication/SessionManager')
 const Settings = require('@overleaf/settings')
 const { InvalidZipFileError } = require('./ArchiveErrors')
 const multer = require('multer')
+const _ = require('lodash')
 
-const upload = multer({
-  dest: Settings.path.uploadFolder,
-  limits: {
-    fileSize: Settings.maxUploadSize,
-  },
-})
+const upload = multer(
+  _.defaultsDeep(
+    {
+      dest: Settings.path.uploadFolder,
+      limits: {
+        fileSize: Settings.maxUploadSize,
+      },
+    },
+    Settings.multerOptions
+  )
+)
 
 module.exports = ProjectUploadController = {
   uploadProject(req, res, next) {
