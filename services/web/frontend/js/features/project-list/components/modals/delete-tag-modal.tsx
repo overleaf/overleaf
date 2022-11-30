@@ -63,7 +63,7 @@ export default function DeleteTagModal({
         </Button>
         <Button
           onClick={() => runDeleteTag(tag._id)}
-          bsStyle="primary"
+          bsStyle="danger"
           disabled={isLoading}
         >
           {isLoading ? <>{t('deleting')} &hellip;</> : t('delete')}
