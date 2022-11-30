@@ -82,7 +82,9 @@
       &.green-dark,
       &.blue-gray-dark {
         .no-card * {
-          color: @white;
+          &:not(.btn) {
+            color: @white;
+          }
           a {
             text-decoration: underline;
           }
