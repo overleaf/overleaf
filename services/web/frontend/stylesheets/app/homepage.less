@@ -182,7 +182,7 @@
   }
 }
 
-.hp-login-btn {
+.hp-login-btn when(@is-new-css = false) {
   .login-btn;
   min-width: 220px;
 
@@ -193,6 +193,11 @@
   &:active {
     background-color: darken(@ol-blue-gray-3, 8%);
   }
+}
+
+.hp-login-btn when(@is-new-css = true) {
+  .login-btn;
+  min-width: 220px;
 }
 
 .hp-login-btn-large {

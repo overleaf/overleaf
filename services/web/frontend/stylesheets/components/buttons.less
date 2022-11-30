@@ -302,3 +302,19 @@ input[type='button'] {
     width: 100%;
   }
 }
+
+.login-btn when(@is-new-css = true) {
+  .btn;
+  .btn-secondary;
+  position: relative;
+  padding-left: 20px;
+  padding-right: 0;
+}
+
+.login-btn when(@is-new-css = false) {
+  .btn;
+  .btn-default;
+  position: relative;
+  padding-left: 20px;
+  padding-right: 0;
+}
