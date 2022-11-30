@@ -82,7 +82,9 @@ function ModalContentNewProjectForm({ onCancel, template = 'none' }: Props) {
       </Modal.Body>
 
       <Modal.Footer>
-        <Button onClick={onCancel}>{t('cancel')}</Button>
+        <Button bsStyle={null} className="btn-secondary" onClick={onCancel}>
+          {t('cancel')}
+        </Button>
         <Button
           bsStyle="primary"
           onClick={createNewProject}

@@ -105,7 +105,12 @@ export default function RenameTagModal({
             </span>
           </div>
         )}
-        <Button onClick={onClose} disabled={isLoading}>
+        <Button
+          bsStyle={null}
+          className="btn-secondary"
+          onClick={onClose}
+          disabled={isLoading}
+        >
           {t('cancel')}
         </Button>
         <Button

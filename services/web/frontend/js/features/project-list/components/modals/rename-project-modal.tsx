@@ -115,7 +115,13 @@ function RenameProjectModal({
             {getUserFacingMessage(error)}
           </Alert>
         )}
-        <Button onClick={handleCloseModal}>{t('cancel')}</Button>
+        <Button
+          bsStyle={null}
+          className="btn-secondary"
+          onClick={handleCloseModal}
+        >
+          {t('cancel')}
+        </Button>
         <Button
           form="rename-project-form"
           bsStyle="primary"
