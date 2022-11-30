@@ -1,7 +1,11 @@
+const Metrics = require('@overleaf/metrics')
 const Settings = require('@overleaf/settings')
 const { MongoClient, ObjectId } = require('mongodb')
 const OError = require('@overleaf/o-error')
-const { addConnectionDrainer } = require('./GracefulShutdown')
+const {
+  addConnectionDrainer,
+  addOptionalCleanupHandlerAfterDrainingConnections,
+} = require('./GracefulShutdown')
 
 if (
   typeof global.beforeEach === 'function' &&
@@ -32,6 +36,7 @@ async function waitForDb() {
 const db = {}
 async function setupDb() {
   const internalDb = (await clientPromise).db()
+  collectStatsForDb(internalDb, 'native')
 
   db.contacts = internalDb.collection('contacts')
   db.deletedFiles = internalDb.collection('deletedFiles')
@@ -115,6 +120,34 @@ async function getCollectionInternal(name) {
   return internalDb.collection(name)
 }
 
+function collectStatsForDb(internalDb, label) {
+  const collectOnce = () => {
+    for (const [name, server] of internalDb.s.topology.s.servers.entries()) {
+      const { availableConnectionCount, waitQueueSize } = server.s.pool
+      const { maxPoolSize } = server.s.pool.options
+      const opts = { status: `${label}:${name}` }
+      Metrics.gauge('mongo_connection_pool_max', maxPoolSize, 1, opts)
+      Metrics.gauge(
+        'mongo_connection_pool_available',
+        availableConnectionCount,
+        1,
+        opts
+      )
+      Metrics.gauge('mongo_connection_pool_waiting', waitQueueSize, 1, opts)
+    }
+  }
+  collectOnce() // init metrics
+  const intervalHandle = setInterval(collectOnce, 60_000)
+  addOptionalCleanupHandlerAfterDrainingConnections(
+    `collect mongo connection pool metrics (${label})`,
+    () => {
+      clearInterval(intervalHandle)
+      // collect one more time.
+      collectOnce()
+    }
+  )
+}
+
 module.exports = {
   db,
   ObjectId,
@@ -122,4 +155,5 @@ module.exports = {
   getCollectionInternal,
   dropTestDatabase,
   waitForDb,
+  collectStatsForDb,
 }
