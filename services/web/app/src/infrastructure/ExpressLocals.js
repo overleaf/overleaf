@@ -1,4 +1,5 @@
 const logger = require('@overleaf/logger')
+const Metrics = require('@overleaf/metrics')
 const Settings = require('@overleaf/settings')
 const querystring = require('querystring')
 const _ = require('lodash')
@@ -129,6 +130,10 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
         { user_id: userId, ip: req != null ? req.ip : undefined },
         'cdnBlocked for user, not using it and turning it off for future requets'
       )
+      Metrics.inc('no_cdn', 1, {
+        path: userId ? 'logged-in' : 'pre-login',
+        method: 'true',
+      })
       req.session.cdnBlocked = true
     }
     const host = req.headers && req.headers.host
