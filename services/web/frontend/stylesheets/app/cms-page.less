@@ -341,3 +341,13 @@
   left: 4px;
   bottom: 1px;
 }
+
+.vertically-center-col {
+  @media (min-width: @screen-sm-min) {
+    display: flex;
+
+    * {
+      align-self: center;
+    }
+  }
+}
