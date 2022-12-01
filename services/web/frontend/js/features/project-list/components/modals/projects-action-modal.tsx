@@ -95,14 +95,14 @@ function ProjectsActionModal({
       </Modal.Header>
       <Modal.Body>
         {bodyTop}
-        <ul className="projects-action-list">
+        <ul>
           {projectsToDisplay.map(project => (
             <li
               key={`projects-action-list-${project.id}`}
               className={
                 projectIdsRemainingToProcess.includes(project.id)
                   ? ''
-                  : 'completed-project-action'
+                  : 'list-style-check-green'
               }
             >
               <b>{project.name}</b>
