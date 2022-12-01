@@ -1,11 +1,10 @@
 const Metrics = require('@overleaf/metrics')
-const Settings = require('@overleaf/settings')
-const { MongoClient, ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb')
 const OError = require('@overleaf/o-error')
 const {
-  addConnectionDrainer,
   addOptionalCleanupHandlerAfterDrainingConnections,
 } = require('./GracefulShutdown')
+const { getNativeDb } = require('./Mongoose')
 
 if (
   typeof global.beforeEach === 'function' &&
@@ -15,15 +14,6 @@ if (
     'It looks like unit tests are running, but you are connecting to Mongo. Missing a stub?'
   )
 }
-
-const clientPromise = MongoClient.connect(
-  Settings.mongo.url,
-  Settings.mongo.options
-)
-addConnectionDrainer('mongodb', async () => {
-  const client = await clientPromise
-  client.close()
-})
 
 let setupDbPromise
 async function waitForDb() {
@@ -35,8 +25,8 @@ async function waitForDb() {
 
 const db = {}
 async function setupDb() {
-  const internalDb = (await clientPromise).db()
-  collectStatsForDb(internalDb, 'native')
+  const internalDb = await getNativeDb()
+  collectStatsForDb(internalDb, 'shared')
 
   db.contacts = internalDb.collection('contacts')
   db.deletedFiles = internalDb.collection('deletedFiles')
@@ -92,14 +82,14 @@ async function setupDb() {
 }
 
 async function getCollectionNames() {
-  const internalDb = (await clientPromise).db()
+  const internalDb = await getNativeDb()
 
   const collections = await internalDb.collections()
   return collections.map(collection => collection.collectionName)
 }
 
 async function dropTestDatabase() {
-  const internalDb = (await clientPromise).db()
+  const internalDb = await getNativeDb()
   const dbName = internalDb.databaseName
   const env = process.env.NODE_ENV
 
@@ -116,7 +106,7 @@ async function dropTestDatabase() {
  * WARNING: Consider using a pre-populated collection from `db` to avoid typos!
  */
 async function getCollectionInternal(name) {
-  const internalDb = (await clientPromise).db()
+  const internalDb = await getNativeDb()
   return internalDb.collection(name)
 }
 

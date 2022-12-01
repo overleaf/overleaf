@@ -2,7 +2,6 @@ const mongoose = require('mongoose')
 const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
 const { addConnectionDrainer } = require('./GracefulShutdown')
-const { collectStatsForDb } = require('./mongodb')
 
 if (
   typeof global.beforeEach === 'function' &&
@@ -60,8 +59,6 @@ async function getNativeDb() {
   const mongooseInstance = await connectionPromise
   return mongooseInstance.connection.db
 }
-
-getNativeDb().then(db => collectStatsForDb(db, 'mongoose'))
 
 mongoose.getNativeDb = getNativeDb
 mongoose.connectionPromise = connectionPromise
