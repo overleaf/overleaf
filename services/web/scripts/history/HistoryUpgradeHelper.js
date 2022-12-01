@@ -174,16 +174,11 @@ async function doUpgradeForNoneWithoutConversion(project) {
     // Logic originally from ProjectHistoryHandler.ensureHistoryExistsForProject
     // However sends a force resync project to project history instead
     // of a resync request to doc-updater
-    const historyId = await ProjectHistoryHandler.promises.getHistoryId(
-      projectId
-    )
-    if (!historyId) {
-      const history = await HistoryManager.promises.initializeProject()
-      if (history && history.overleaf_id) {
-        await ProjectHistoryHandler.promises.setHistoryId(
-          projectId,
-          history.overleaf_id
-        )
+    let historyId = await ProjectHistoryHandler.promises.getHistoryId(projectId)
+    if (historyId == null) {
+      historyId = await HistoryManager.promises.initializeProject()
+      if (historyId != null) {
+        await ProjectHistoryHandler.promises.setHistoryId(projectId, historyId)
       }
     }
     await HistoryManager.promises.resyncProject(projectId, {

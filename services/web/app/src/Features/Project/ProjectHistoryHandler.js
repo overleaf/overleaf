@@ -154,16 +154,16 @@ const ProjectHistoryHandler = {
         if (history_id != null) {
           return callback()
         } // history already exists, success
-        return HistoryManager.initializeProject(function (err, history) {
+        return HistoryManager.initializeProject(function (err, historyId) {
           if (err != null) {
             return callback(err)
           }
-          if (!(history != null ? history.overleaf_id : undefined)) {
+          if (historyId == null) {
             return callback(new Error('failed to initialize history id'))
           }
           return ProjectHistoryHandler.setHistoryId(
             project_id,
-            history.overleaf_id,
+            historyId,
             function (err) {
               if (err != null) {
                 return callback(err)

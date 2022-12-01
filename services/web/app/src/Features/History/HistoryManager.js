@@ -11,7 +11,7 @@ async function initializeProject() {
       settings.apis.project_history.initializeHistoryForNewProjects
     )
   ) {
-    return
+    return null
   }
   const response = await fetch(`${settings.apis.project_history.url}/project`, {
     method: 'POST',
@@ -25,11 +25,11 @@ async function initializeProject() {
     })
   }
   const body = await response.json()
-  const overleafId = body && body.project && body.project.id
-  if (!overleafId) {
+  const historyId = body && body.project && body.project.id
+  if (!historyId) {
     throw new OError('project-history did not provide an id', { body })
   }
-  return { overleaf_id: overleafId }
+  return historyId
 }
 
 async function flushProject(projectId) {

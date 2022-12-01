@@ -153,9 +153,11 @@ async function _createBlankProject(
   await ProjectDetailsHandler.promises.validateProjectName(projectName)
 
   if (!attributes.overleaf) {
-    const history = await HistoryManager.promises.initializeProject()
-    attributes.overleaf = {
-      history: { id: history ? history.overleaf_id : undefined },
+    const historyId = await HistoryManager.promises.initializeProject()
+    if (historyId != null) {
+      attributes.overleaf = {
+        history: { id: historyId },
+      }
     }
   }
 

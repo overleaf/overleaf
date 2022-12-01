@@ -60,7 +60,7 @@ describe('ProjectHistoryHandler', function () {
       this.newHistoryId = 123456789
       this.HistoryManager.initializeProject = sinon
         .stub()
-        .callsArgWith(0, null, { overleaf_id: this.newHistoryId })
+        .callsArgWith(0, null, this.newHistoryId)
       this.HistoryManager.flushProject = sinon.stub().callsArg(1)
       return (this.ProjectEntityUpdateHandler.resyncProjectHistory = sinon
         .stub()

@@ -74,7 +74,7 @@ describe('HistoryManager', function () {
         })
 
         it('should return the overleaf id', function () {
-          expect(this.result).to.deep.equal({ overleaf_id: this.overleaf_id })
+          expect(this.result).to.deep.equal(this.overleaf_id)
         })
       })
 

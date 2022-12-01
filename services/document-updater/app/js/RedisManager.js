@@ -244,10 +244,6 @@ module.exports = RedisManager = {
         return callback(new Errors.NotFoundError('document not found'))
       }
 
-      if (projectHistoryId != null) {
-        projectHistoryId = parseInt(projectHistoryId)
-      }
-
       if (docLines && version && !pathname) {
         metrics.inc('pathname', 1, {
           path: 'RedisManager.getDoc',

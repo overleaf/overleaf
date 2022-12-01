@@ -106,7 +106,7 @@ describe('RedisManager', function () {
 
     this.docId = 'doc-id-123'
     this.project_id = 'project-id-123'
-    this.projectHistoryId = 123
+    this.projectHistoryId = '123'
     this.callback = sinon.stub()
   })
 

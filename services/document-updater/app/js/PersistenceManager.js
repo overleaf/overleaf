@@ -99,7 +99,7 @@ function getDoc(projectId, docId, options = {}, _callback) {
         body.version,
         body.ranges,
         body.pathname,
-        body.projectHistoryId,
+        body.projectHistoryId?.toString(),
         body.projectHistoryType
       )
     } else if (res.statusCode === 404) {
