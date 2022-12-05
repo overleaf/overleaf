@@ -109,7 +109,7 @@ function ActionButton({
     return (
       <Button
         bsStyle={null}
-        className="btn-secondary-info btn-secondary"
+        className="btn-primary"
         href="/user/subscription/plans"
         onClick={trackUpgradeClick}
       >
