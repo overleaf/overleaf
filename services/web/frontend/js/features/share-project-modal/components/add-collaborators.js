@@ -141,7 +141,7 @@ export default function AddCollaborators() {
             <option value="readOnly">{t('read_only')}</option>
           </FormControl>
           <span>&nbsp;&nbsp;</span>
-          <Button type="submit" bsStyle="info">
+          <Button type="submit" bsStyle="primary">
             <Trans i18nKey="share" />
           </Button>
         </div>
