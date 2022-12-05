@@ -443,8 +443,8 @@ describe('CompileManager', function () {
             return done(err)
           }
           const args = this.ratelimiter.addCount.args[0][0]
-          args.throttle.should.equal(25)
-          args.subjectName.should.equal('everyone')
+          args.throttle.should.equal(12.5)
+          args.subjectName.should.be.oneOf(['everyone-b-one', 'everyone-b-two'])
           args.timeInterval.should.equal(20)
           args.endpointName.should.equal('auto_compile')
           canCompile.should.equal(true)

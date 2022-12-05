@@ -228,12 +228,13 @@ module.exports = CompileManager = {
     if (!isAutoCompile) {
       return callback(null, true)
     }
-    Metrics.inc(`auto-compile-${compileGroup}`)
+    const bucket = Math.random() > 0.5 ? 'b-one' : 'b-two'
+    Metrics.inc(`auto-compile-${compileGroup}`, 1, { method: bucket })
     const opts = {
       endpointName: 'auto_compile',
       timeInterval: 20,
-      subjectName: compileGroup,
-      throttle: Settings.rateLimit.autoCompile[compileGroup] || 25,
+      subjectName: `${compileGroup}-${bucket}`,
+      throttle: (Settings.rateLimit.autoCompile[compileGroup] || 25) / 2,
     }
     rateLimiter.addCount(opts, function (err, canCompile) {
       if (err) {
