@@ -139,7 +139,7 @@ function SSOAffiliationInfo({ userEmailData }: SSOAffiliationInfoProps) {
           <Col md={3} className="text-md-right">
             <EmailCell>
               <Button
-                bsStyle="info"
+                bsStyle="primary"
                 className="btn-sm btn-link-accounts"
                 disabled={linkAccountsButtonDisabled}
                 onClick={handleLinkAccountsButtonClick}
