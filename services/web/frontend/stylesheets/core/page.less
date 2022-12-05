@@ -16,4 +16,8 @@
     background-color: @blue-10;
     border-radius: 24px;
   }
+
+  video {
+    clip-path: inset(0 0); // fix Safari bug that will sometimes add border
+  }
 }
