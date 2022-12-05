@@ -112,7 +112,7 @@ const AdminController = {
   disconnectAllUsers: (req, res) => {
     logger.warn('disconecting everyone')
     const delay = (req.query && req.query.delay) > 0 ? req.query.delay : 10
-    this._sendDisconnectAllUsersMessage(delay)
+    AdminController._sendDisconnectAllUsersMessage(delay)
     return res.sendStatus(200)
   },
 
