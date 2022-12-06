@@ -21,6 +21,8 @@ const {
   addOptionalCleanupHandlerAfterDrainingConnections,
 } = require('./GracefulShutdown')
 
+const IEEE_BRAND_ID = Settings.ieeeBrandId
+
 let webpackManifest
 switch (process.env.NODE_ENV) {
   case 'production':
@@ -179,10 +181,8 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
 
     res.locals.moment = moment
 
-    const IEEE_BRAND_ID = 15
     res.locals.isIEEE = brandVariation =>
-      (brandVariation != null ? brandVariation.brand_id : undefined) ===
-      IEEE_BRAND_ID
+      brandVariation?.brand_id === IEEE_BRAND_ID
 
     res.locals.getCssThemeModifier = function (userSettings, brandVariation) {
       // Themes only exist in OL v2

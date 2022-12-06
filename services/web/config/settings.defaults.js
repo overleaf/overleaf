@@ -801,6 +801,9 @@ module.exports = {
   unsupportedBrowsers: {
     ie: '<=11',
   },
+
+  // ID of the IEEE brand in the rails app
+  ieeeBrandId: intFromEnv('IEEE_BRAND_ID', 15),
 }
 
 module.exports.mergeWith = function (overrides) {
