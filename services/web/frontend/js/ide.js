@@ -68,6 +68,7 @@ import './features/source-editor/controllers/cm6-switch-away-survey-controller'
 import './features/source-editor/controllers/grammarly-warning-controller'
 import { cleanupServiceWorker } from './utils/service-worker-cleanup'
 import { reportCM6Perf } from './infrastructure/cm6-performance'
+import { reportAcePerf } from './ide/editor/ace-performance'
 
 App.controller(
   'IdeController',
@@ -296,6 +297,27 @@ If the project has been renamed please look in your project list for a new proje
                 cm6PerfData[prop.charAt(0).toLowerCase() + prop.slice(1)]
               if (perfValue !== null) {
                 segmentation['cm6Perf' + prop] = perfValue
+              }
+            }
+          }
+        } else if (editorType === 'ace') {
+          const acePerfData = reportAcePerf()
+
+          if (acePerfData.numberOfEntries > 0) {
+            const perfProps = [
+              'NumberOfEntries',
+              'MeanKeypressPaint',
+              'Grammarly',
+              'SessionLength',
+              'Memory',
+              'Release',
+            ]
+
+            for (const prop of perfProps) {
+              const perfValue =
+                acePerfData[prop.charAt(0).toLowerCase() + prop.slice(1)]
+              if (perfValue !== null) {
+                segmentation['acePerf' + prop] = perfValue
               }
             }
           }

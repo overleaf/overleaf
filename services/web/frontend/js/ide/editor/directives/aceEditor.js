@@ -22,6 +22,10 @@ import '../../metadata/services/metadata'
 import '../../graphics/services/graphics'
 import '../../preamble/services/preamble'
 import '../../files/services/files'
+import {
+  initAcePerfListener,
+  tearDownAcePerfListener,
+} from '../ace-performance'
 let syntaxValidationEnabled
 const { EditSession } = ace.require('ace/edit_session')
 const ModeList = ace.require('ace/ext/modelist')
@@ -779,6 +783,8 @@ App.directive(
           // now attach session to editor
           editor.setSession(session)
 
+          initAcePerfListener(editor.textInput.getElement())
+
           const doc = session.getDocument()
           doc.on('change', onChange)
 
@@ -840,6 +846,9 @@ App.directive(
           tearDownSpellCheck()
           tearDownTrackChanges()
           tearDownUndo()
+
+          tearDownAcePerfListener(editor.textInput.getElement())
+
           sharejs_doc.detachFromAce()
           sharejs_doc.off('remoteop.recordRemote')
 
