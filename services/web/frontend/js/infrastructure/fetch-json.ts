@@ -76,6 +76,10 @@ export class FetchError extends OError {
     this.data = data
   }
 
+  getErrorMessageKey() {
+    return this.data?.message?.key as string | undefined
+  }
+
   getUserFacingMessage() {
     const statusCode = this.response?.status
     const defaultMessage = getErrorMessageForStatusCode(statusCode)
@@ -208,6 +212,18 @@ async function parseResponseBody(response: Response) {
   // response body ignored as content-type is either not set (e.g. 204
   // responses) or unsupported
   return {}
+}
+
+export function getErrorMessageKey(error: Error | null) {
+  if (!error) {
+    return undefined
+  }
+
+  if (error instanceof FetchError) {
+    return error.getErrorMessageKey()
+  }
+
+  return error.message
 }
 
 export function getUserFacingMessage(error: Error | null) {

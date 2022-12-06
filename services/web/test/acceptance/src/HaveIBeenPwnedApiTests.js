@@ -34,6 +34,7 @@ async function getMetricFailure() {
 }
 
 let user, previous
+
 async function resetPassword(password) {
   await user.getCsrfToken()
   await user.doRequest('POST', {
@@ -51,13 +52,15 @@ async function resetPassword(password) {
   await user.doRequest('GET', {
     url: `/user/password/set?passwordResetToken=${token}&email=${user.email}`,
   })
-  await user.doRequest('POST', {
+  const { response } = await user.doRequest('POST', {
     url: '/user/password/set',
     form: {
       passwordResetToken: token,
       password,
     },
   })
+
+  return response
 }
 
 describe('HaveIBeenPwnedApi', function () {
@@ -187,7 +190,15 @@ describe('HaveIBeenPwnedApi', function () {
       previous = await getMetricReUsed()
     })
     beforeEach('set password', async function () {
-      await resetPassword('aLeakedPassword42')
+      const response = await resetPassword('aLeakedPassword42')
+      expect(response.statusCode).to.equal(400)
+      expect(response.body).to.equal(
+        JSON.stringify({
+          message: {
+            key: 'password-must-be-strong',
+          },
+        })
+      )
       await letPasswordCheckRunInBackground()
     })
     it('should track the weak password', async function () {
@@ -208,7 +219,8 @@ describe('HaveIBeenPwnedApi', function () {
       previous = await getMetricUnique()
     })
     beforeEach('set password', async function () {
-      await resetPassword('a-strong-new-password')
+      const response = await resetPassword('a-strong-new-password')
+      expect(response.statusCode).to.equal(200)
       await letPasswordCheckRunInBackground()
     })
     it('should track the strong password', async function () {

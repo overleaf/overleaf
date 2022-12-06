@@ -5,6 +5,7 @@
    happy path or via an error (message or attributes).
  */
 
+const { callbackify } = require('util')
 const fetch = require('node-fetch')
 const crypto = require('crypto')
 const Settings = require('@overleaf/settings')
@@ -89,29 +90,43 @@ async function isPasswordReused(password) {
   return score > 0
 }
 
-function checkPasswordForReuseInBackground(password) {
+async function checkPasswordForReuse(password) {
   if (!Settings.apis.haveIBeenPwned.enabled) {
     return
   }
 
-  isPasswordReused(password)
-    .then(isReused => {
-      Metrics.inc('password_re_use', {
-        status: isReused ? 're-used' : 'unique',
-      })
-    })
-    .catch(err => {
-      // Make sure we do not leak any password details.
-      if (!CODED_ERROR_MESSAGES.includes(err.message)) {
-        err = new Error('hidden message')
-      }
-      err = new Error(err.message)
+  try {
+    const isReused = await isPasswordReused(password)
 
-      logger.err({ err }, 'cannot check password for re-use')
-      Metrics.inc('password_re_use', { status: 'failure' })
+    Metrics.inc('password_re_use', {
+      status: isReused ? 're-used' : 'unique',
     })
+
+    return isReused
+  } catch (err) {
+    let error = err
+    // Make sure we do not leak any password details.
+    if (!CODED_ERROR_MESSAGES.includes(err.message)) {
+      error = new Error('hidden message')
+    }
+    error = new Error(error.message)
+
+    Metrics.inc('password_re_use', { status: 'failure' })
+
+    throw error
+  }
+}
+
+function checkPasswordForReuseInBackground(password) {
+  checkPasswordForReuse(password).catch(error => {
+    logger.err({ error }, 'cannot check password for re-use')
+  })
 }
 
 module.exports = {
+  checkPasswordForReuse: callbackify(checkPasswordForReuse),
   checkPasswordForReuseInBackground,
+  promises: {
+    checkPasswordForReuse,
+  },
 }

@@ -84,6 +84,12 @@ async function setNewUserPassword(req, res, next) {
           key: 'password-must-be-different',
         },
       })
+    } else if (error.name === 'PasswordReusedError') {
+      return res.status(400).json({
+        message: {
+          key: 'password-must-be-strong',
+        },
+      })
     } else {
       return res.status(500).json({
         message: req.i18n.translate('error_performing_request'),

@@ -8,6 +8,7 @@ const {
   InvalidPasswordError,
   ParallelLoginError,
   PasswordMustBeDifferentError,
+  PasswordReusedError,
 } = require('./AuthenticationErrors')
 const util = require('util')
 const HaveIBeenPwned = require('./HaveIBeenPwned')
@@ -256,8 +257,22 @@ const AuthenticationManager = {
         if (match) {
           return callback(new PasswordMustBeDifferentError())
         }
-        this._setUserPasswordInMongo(user, password, callback)
-        HaveIBeenPwned.checkPasswordForReuseInBackground(password)
+
+        HaveIBeenPwned.checkPasswordForReuse(
+          password,
+          (error, isPasswordReused) => {
+            if (error) {
+              logger.err({ error }, 'cannot check password for re-use')
+            }
+
+            if (!error && isPasswordReused) {
+              return callback(new PasswordReusedError())
+            }
+
+            // password is strong enough or the validation with the service did not happen
+            this._setUserPasswordInMongo(user, password, callback)
+          }
+        )
       }
     )
   },

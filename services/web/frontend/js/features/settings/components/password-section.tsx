@@ -6,9 +6,10 @@ import {
   FormControl,
   FormGroup,
 } from 'react-bootstrap'
-import { useTranslation } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 import {
   getUserFacingMessage,
+  getErrorMessageKey,
   postJSON,
 } from '../../../infrastructure/fetch-json'
 import getMeta from '../../../utils/meta'
@@ -147,7 +148,26 @@ function PasswordForm() {
       ) : null}
       {isError ? (
         <FormGroup>
-          <Alert bsStyle="danger">{getUserFacingMessage(error)}</Alert>
+          <Alert bsStyle="danger">
+            {getErrorMessageKey(error) === 'password-must-be-strong' ? (
+              <>
+                <Trans
+                  i18nKey="password_was_detected_on_a_public_list_of_known_compromised_passwords"
+                  components={[
+                    /* eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key */
+                    <a
+                      href="https://haveibeenpwned.com"
+                      target="_blank"
+                      rel="noreferrer noopener"
+                    />,
+                  ]}
+                />
+                . {t('use_a_different_password')}
+              </>
+            ) : (
+              getUserFacingMessage(error)
+            )}
+          </Alert>
         </FormGroup>
       ) : null}
       <Button

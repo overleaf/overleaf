@@ -29,3 +29,12 @@ mixin customFormMessage(key, kind)
 			aria-live="polite"
 		)
 			block
+
+mixin customValidationMessage(key)
+	div.invalid-feedback.mt-2(
+		hidden,
+		data-ol-custom-form-message=key
+	)
+		i.fa.fa-fw.fa-warning.me-1(aria-hidden="true")
+		div
+			block

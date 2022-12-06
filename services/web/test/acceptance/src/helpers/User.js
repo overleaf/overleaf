@@ -157,25 +157,29 @@ class User {
   ensureUserExists(callback) {
     const filter = { email: this.email }
     const options = { upsert: true, new: true, setDefaultsOnInsert: true }
-    UserModel.findOneAndUpdate(filter, {}, options, (error, user) => {
-      if (error != null) {
-        return callback(error)
-      }
-      this.setExtraAttributes(user)
-      AuthenticationManager.setUserPasswordInV2(user, this.password, error => {
+
+    AuthenticationManager.hashPassword(
+      this.password,
+      (error, hashedPassword) => {
         if (error != null) {
-          if (error.name !== 'PasswordMustBeDifferentError') {
-            return callback(error)
-          }
+          return callback(error)
         }
-        this.mongoUpdate({ $set: { emails: this.emails } }, error => {
-          if (error != null) {
-            return callback(error)
+
+        UserModel.findOneAndUpdate(
+          filter,
+          { $set: { hashedPassword, emails: this.emails } },
+          options,
+          (error, user) => {
+            if (error != null) {
+              return callback(error)
+            }
+
+            this.setExtraAttributes(user)
+            callback(null, this.password)
           }
-          callback(null, this.password)
-        })
-      })
-    })
+        )
+      }
+    )
   }
 
   setFeatures(features, callback) {

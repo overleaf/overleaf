@@ -1,8 +1,8 @@
 export default function inputValidator(inputEl) {
-  const messageEl = document.createElement('span')
+  const messageEl = document.createElement('div')
   messageEl.className =
     inputEl.getAttribute('data-ol-validation-message-classes') ||
-    'small text-danger'
+    'small text-danger mt-2'
   messageEl.hidden = true
   inputEl.insertAdjacentElement('afterend', messageEl)
 

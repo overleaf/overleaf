@@ -748,5 +748,7 @@
   "zotero_reference_loading_error": "",
   "zotero_reference_loading_error_expired": "",
   "zotero_reference_loading_error_forbidden": "",
-  "zotero_sync_description": ""
+  "zotero_sync_description": "",
+  "use_a_different_password": "",
+  "password_was_detected_on_a_public_list_of_known_compromised_passwords": ""
 }

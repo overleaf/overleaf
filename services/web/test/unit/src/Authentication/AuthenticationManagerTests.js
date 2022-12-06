@@ -28,6 +28,7 @@ describe('AuthenticationManager', function () {
         '../User/UserGetter': (this.UserGetter = {}),
         './AuthenticationErrors': AuthenticationErrors,
         './HaveIBeenPwned': {
+          checkPasswordForReuse: sinon.stub().yields(null, false),
           checkPasswordForReuseInBackground: sinon.stub(),
         },
         '../User/UserAuditLogHandler': (this.UserAuditLogHandler = {

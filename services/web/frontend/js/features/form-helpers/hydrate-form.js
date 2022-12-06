@@ -153,11 +153,17 @@ function showMessages(formEl, messageBag) {
       ) {
         hideFormElements(formEl)
       }
+      // Hide any elements with specific `data-ol-hide-on-error-message` message
+      document
+        .querySelectorAll(`[data-ol-hide-on-error-message="${message.key}"]`)
+        .forEach(el => {
+          el.hidden = true
+        })
       return
     }
 
     const messageEl = document.createElement('div')
-    messageEl.className = classNames('alert', {
+    messageEl.className = classNames('alert mb-2', {
       'alert-danger': message.type === 'error',
       'alert-success': message.type !== 'error',
     })

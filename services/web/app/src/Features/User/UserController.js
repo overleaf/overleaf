@@ -103,6 +103,12 @@ async function changePassword(req, res, next) {
         res,
         req.i18n.translate('password_change_password_must_be_different')
       )
+    } else if (error.name === 'PasswordReusedError') {
+      return res.status(400).json({
+        message: {
+          key: 'password-must-be-strong',
+        },
+      })
     } else {
       throw error
     }
