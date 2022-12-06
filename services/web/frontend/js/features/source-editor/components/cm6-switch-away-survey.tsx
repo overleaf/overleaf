@@ -1,8 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from 'react-bootstrap'
-import customLocalStorage from '../../../infrastructure/local-storage'
 import useScopeValue from '../../../shared/hooks/use-scope-value'
 import getMeta from '../../../utils/meta'
+import {
+  hasSeenCM6SwitchAwaySurvey,
+  setHasSeenCM6SwitchAwaySurvey,
+} from '../utils/switch-away-survey'
+import { sendMB } from '../../../infrastructure/event-tracking'
 
 type CM6SwitchAwaySurveyState = 'disabled' | 'enabled' | 'shown'
 
@@ -13,21 +17,20 @@ export default function CM6SwitchAwaySurvey() {
   const initialRichTextPreference = useRef<boolean>(richText)
 
   useEffect(() => {
-    // if cm6 is not available, don't show the survey
+    // If cm6 is not available, don't show the survey
     if (!getMeta('ol-showNewSourceEditorOption')) {
       return
     }
 
-    // If the user has previously seen the survey, then don't show it again
-    const hasSeenCM6SwitchAwaySurvey = customLocalStorage.getItem(
-      'editor.has_seen_cm6_switch_away_survey'
-    )
-    if (hasSeenCM6SwitchAwaySurvey) return
+    // If the user has previously seen any switch-away survey, then don't show
+    // the current one
+    if (hasSeenCM6SwitchAwaySurvey()) return
 
     if (initialRichTextPreference.current) {
       if (!richText && newSourceEditor) {
-        // If user change from rich text to cm6, we remove the rich text preference
-        // so if user use rich text -> cm6 -> ace, we will show the survey
+        // If user change from rich text to cm6, we remove the rich text
+        // preference so if user use rich text -> cm6 -> ace, we will show the
+        // current survey
         initialRichTextPreference.current = false
       }
 
@@ -50,10 +53,7 @@ export default function CM6SwitchAwaySurvey() {
       setTimeout(() => {
         if (state === 'enabled') {
           setState('shown')
-          customLocalStorage.setItem(
-            'editor.has_seen_cm6_switch_away_survey',
-            true
-          )
+          setHasSeenCM6SwitchAwaySurvey()
         }
       }, TIME_FOR_SURVEY_TO_APPEAR)
     }
@@ -66,6 +66,11 @@ export default function CM6SwitchAwaySurvey() {
   }, [state])
 
   const handleClose = useCallback(() => {
+    setState('disabled')
+  }, [])
+
+  const handleFollowLink = useCallback(() => {
+    sendMB('cm6-switch-away-survey')
     setState('disabled')
   }, [])
 
@@ -93,11 +98,11 @@ export default function CM6SwitchAwaySurvey() {
         </div>
         <div style={{ display: 'inline-flex' }}>
           <a
-            href="https://forms.gle/aW5tMRASpQ7Snds6A"
+            href="https://forms.gle/Ygv8gLZ4N8LepQj56"
             className="btn btn-sm btn-info"
             target="_blank"
             rel="noreferrer"
-            onClick={handleClose}
+            onClick={handleFollowLink}
           >
             Take survey
           </a>

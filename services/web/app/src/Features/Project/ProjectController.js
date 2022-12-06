@@ -1260,6 +1260,7 @@ const ProjectController = {
               showUpgradePrompt,
               fixedSizeDocument: true,
               useOpenTelemetry: Settings.useOpenTelemetryClient,
+              showCM6SwitchAwaySurvey: Settings.showCM6SwitchAwaySurvey,
             })
             timer.done()
           }
