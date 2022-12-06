@@ -26,8 +26,8 @@ const ProjectHistoryHandler = {
     if (callback == null) {
       callback = function () {}
     }
-    if (!history_id || typeof history_id !== 'number') {
-      return callback(new Error('invalid history id'))
+    if (history_id == null) {
+      return callback(new Error('missing history id'))
     }
     // use $exists:false to prevent overwriting any existing history id, atomically
     return Project.updateOne(
@@ -154,32 +154,35 @@ const ProjectHistoryHandler = {
         if (history_id != null) {
           return callback()
         } // history already exists, success
-        return HistoryManager.initializeProject(function (err, historyId) {
-          if (err != null) {
-            return callback(err)
-          }
-          if (historyId == null) {
-            return callback(new Error('failed to initialize history id'))
-          }
-          return ProjectHistoryHandler.setHistoryId(
-            project_id,
-            historyId,
-            function (err) {
-              if (err != null) {
-                return callback(err)
-              }
-              return ProjectEntityUpdateHandler.resyncProjectHistory(
-                project_id,
-                function (err) {
-                  if (err != null) {
-                    return callback(err)
-                  }
-                  return HistoryManager.flushProject(project_id, callback)
-                }
-              )
+        return HistoryManager.initializeProject(
+          project_id,
+          function (err, historyId) {
+            if (err != null) {
+              return callback(err)
             }
-          )
-        })
+            if (historyId == null) {
+              return callback(new Error('failed to initialize history id'))
+            }
+            return ProjectHistoryHandler.setHistoryId(
+              project_id,
+              historyId,
+              function (err) {
+                if (err != null) {
+                  return callback(err)
+                }
+                return ProjectEntityUpdateHandler.resyncProjectHistory(
+                  project_id,
+                  function (err) {
+                    if (err != null) {
+                      return callback(err)
+                    }
+                    return HistoryManager.flushProject(project_id, callback)
+                  }
+                )
+              }
+            )
+          }
+        )
       }
     )
   },

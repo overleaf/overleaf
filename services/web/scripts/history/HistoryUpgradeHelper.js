@@ -176,7 +176,7 @@ async function doUpgradeForNoneWithoutConversion(project) {
     // of a resync request to doc-updater
     let historyId = await ProjectHistoryHandler.promises.getHistoryId(projectId)
     if (historyId == null) {
-      historyId = await HistoryManager.promises.initializeProject()
+      historyId = await HistoryManager.promises.initializeProject(projectId)
       if (historyId != null) {
         await ProjectHistoryHandler.promises.setHistoryId(projectId, historyId)
       }

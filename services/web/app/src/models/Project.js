@@ -88,7 +88,7 @@ const ProjectSchema = new Schema({
     token: { type: String },
     read_token: { type: String },
     history: {
-      id: { type: Number },
+      id: { type: Schema.Types.Mixed },
       display: { type: Boolean },
       upgradedAt: { type: Date },
       allowDowngrade: { type: Boolean },

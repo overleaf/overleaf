@@ -121,7 +121,7 @@ async function doUpgradeForNoneWithoutConversion(project) {
         projectId
       )
       if (historyId == null) {
-        historyId = await HistoryManager.promises.initializeProject()
+        historyId = await HistoryManager.promises.initializeProject(projectId)
         if (historyId != null) {
           await ProjectHistoryHandler.promises.setHistoryId(
             projectId,

@@ -152,33 +152,32 @@ async function _createBlankProject(
   const timer = new metrics.Timer('project-creation')
   await ProjectDetailsHandler.promises.validateProjectName(projectName)
 
-  if (!attributes.overleaf) {
-    const historyId = await HistoryManager.promises.initializeProject()
-    if (historyId != null) {
-      attributes.overleaf = {
-        history: { id: historyId },
-      }
-    }
-  }
-
   const rootFolder = new Folder({ name: 'rootFolder' })
 
   attributes.lastUpdatedBy = attributes.owner_ref = new ObjectId(ownerId)
   attributes.name = projectName
   const project = new Project(attributes)
 
-  Object.assign(project, attributes)
+  if (project.overleaf.history.id == null) {
+    const historyId = await HistoryManager.promises.initializeProject(
+      project._id
+    )
+    if (historyId != null) {
+      project.overleaf.history.id = historyId
+    }
+  }
 
   // only display full project history when the project has the overleaf history id attribute
   // (to allow scripted creation of projects without full project history)
-  const historyId = _.get(attributes, ['overleaf', 'history', 'id'])
+  const historyId = project.overleaf.history.id
   if (
     Features.hasFeature('history-v1') &&
     Settings.apis.project_history.displayHistoryForNewProjects &&
-    historyId
+    historyId != null
   ) {
     project.overleaf.history.display = true
   }
+
   if (Settings.currentImageName) {
     // avoid clobbering any imageName already set in attributes (e.g. importedImageName)
     if (!project.imageName) {

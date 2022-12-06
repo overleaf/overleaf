@@ -39,6 +39,7 @@ describe('ProjectHistoryHandler', function () {
       return Project
     })()
     this.project = new this.ProjectModel()
+    this.historyId = this.project._id.toString()
 
     this.callback = sinon.stub()
 
@@ -57,10 +58,9 @@ describe('ProjectHistoryHandler', function () {
 
   describe('starting history for an existing project', function () {
     beforeEach(function () {
-      this.newHistoryId = 123456789
       this.HistoryManager.initializeProject = sinon
         .stub()
-        .callsArgWith(0, null, this.newHistoryId)
+        .yields(null, this.historyId)
       this.HistoryManager.flushProject = sinon.stub().callsArg(1)
       return (this.ProjectEntityUpdateHandler.resyncProjectHistory = sinon
         .stub()
@@ -96,7 +96,7 @@ describe('ProjectHistoryHandler', function () {
         return this.ProjectModel.updateOne
           .calledWith(
             { _id: project_id, 'overleaf.history.id': { $exists: false } },
-            { 'overleaf.history.id': this.newHistoryId }
+            { 'overleaf.history.id': this.historyId }
           )
           .should.equal(true)
       })

@@ -8,6 +8,7 @@ const MODULE_PATH = '../../../../app/src/Features/History/HistoryManager'
 describe('HistoryManager', function () {
   beforeEach(function () {
     this.user_id = 'user-id-123'
+    this.historyId = ObjectId().toString()
     this.AuthenticationController = {
       getLoggedInUserId: sinon.stub().returns(this.user_id),
     }
@@ -61,9 +62,10 @@ describe('HistoryManager', function () {
 
       describe('project history returns a successful response', function () {
         beforeEach(async function () {
-          this.overleaf_id = 1234
-          this.response.json.resolves({ project: { id: this.overleaf_id } })
-          this.result = await this.HistoryManager.promises.initializeProject()
+          this.response.json.resolves({ project: { id: this.historyId } })
+          this.result = await this.HistoryManager.promises.initializeProject(
+            this.historyId
+          )
         })
 
         it('should call the project history api', function () {
@@ -74,23 +76,25 @@ describe('HistoryManager', function () {
         })
 
         it('should return the overleaf id', function () {
-          expect(this.result).to.deep.equal(this.overleaf_id)
+          expect(this.result).to.equal(this.historyId)
         })
       })
 
       describe('project history returns a response without the project id', function () {
         it('should throw an error', async function () {
           this.response.json.resolves({ project: {} })
-          await expect(this.HistoryManager.promises.initializeProject()).to.be
-            .rejected
+          await expect(
+            this.HistoryManager.promises.initializeProject(this.historyId)
+          ).to.be.rejected
         })
       })
 
       describe('project history errors', function () {
         it('should propagate the error', async function () {
           this.fetch.rejects(new Error('problem connecting'))
-          await expect(this.HistoryManager.promises.initializeProject()).to.be
-            .rejected
+          await expect(
+            this.HistoryManager.promises.initializeProject(this.historyId)
+          ).to.be.rejected
         })
       })
     })
@@ -98,8 +102,9 @@ describe('HistoryManager', function () {
     describe('with project history disabled', function () {
       it('should return without errors', async function () {
         this.settings.apis.project_history.initializeHistoryForNewProjects = false
-        await expect(this.HistoryManager.promises.initializeProject()).to.be
-          .fulfilled
+        await expect(
+          this.HistoryManager.promises.initializeProject(this.historyId)
+        ).to.be.fulfilled
       })
     })
   })
