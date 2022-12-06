@@ -1,6 +1,7 @@
 import { memo, useCallback } from 'react'
 import useScopeValue from '../../../shared/hooks/use-scope-value'
 import Tooltip from '../../../shared/components/tooltip'
+import { sendMB } from '../../../infrastructure/event-tracking'
 
 function Badge() {
   const content = (
@@ -43,9 +44,9 @@ function EditorSwitch() {
 
   const handleChange = useCallback(
     event => {
-      const choice = event.target.value
+      const editorType = event.target.value
 
-      switch (choice) {
+      switch (editorType) {
         case 'ace':
           setRichText(false)
           setNewSourceEditor(false)
@@ -60,6 +61,8 @@ function EditorSwitch() {
           setRichText(true)
           break
       }
+
+      sendMB('editor-switch-change', { editorType })
     },
     [setRichText, setNewSourceEditor]
   )
