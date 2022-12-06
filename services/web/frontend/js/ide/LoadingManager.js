@@ -17,6 +17,7 @@ class LoadingManager {
         this.$scope.$apply(() => {
           this.$scope.state.load_progress = 100
           this.$scope.state.loading = false
+          this.$scope.$emit('editor:loaded')
         })
       })
       // Note: this will only catch errors in from i18n setup. ConnectionManager

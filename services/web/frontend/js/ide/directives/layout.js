@@ -236,6 +236,12 @@ ng-click=\"handleClick()\">\
             .$applyAsync(() => (customTogglerEl.scope().isOpen = false))
         }
 
+        // Ensure editor resizes after loading. This is to handle the case where
+        // the window has been resized while the editor is loading
+        scope.$on('editor:loaded', () => {
+          ide.$timeout(() => layout.resizeAll())
+        })
+
         // Save state when exiting
         $(window).unload(() => {
           // Save only the state properties for the current layout, ignoring sublayouts inside it.
