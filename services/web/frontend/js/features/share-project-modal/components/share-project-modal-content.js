@@ -46,7 +46,8 @@ export default function ShareProjectModalContent({
           <Button
             type="button"
             onClick={cancel}
-            bsStyle="default"
+            bsStyle={null}
+            className="btn-secondary"
             disabled={inFlight}
           >
             <Trans i18nKey="close" />

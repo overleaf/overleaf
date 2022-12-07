@@ -27,7 +27,7 @@ function GoToCodeButton({
 }) {
   const { t } = useTranslation()
   const tooltipPlacement = isDetachLayout ? 'bottom' : 'right'
-  const buttonClasses = classNames('synctex-control', {
+  const buttonClasses = classNames('synctex-control', 'btn-secondary', {
     'detach-synctex-control': !!isDetachLayout,
   })
 
@@ -45,7 +45,7 @@ function GoToCodeButton({
       overlayProps={{ placement: tooltipPlacement }}
     >
       <Button
-        bsStyle="default"
+        bsStyle={null}
         bsSize="xs"
         onClick={() => syncToCode(position, 72)}
         disabled={syncToCodeInFlight}
@@ -68,9 +68,14 @@ function GoToPdfButton({
 }) {
   const { t } = useTranslation()
   const tooltipPlacement = isDetachLayout ? 'bottom' : 'right'
-  const buttonClasses = classNames('synctex-control', 'toolbar-btn-secondary', {
-    'detach-synctex-control': !!isDetachLayout,
-  })
+  const buttonClasses = classNames(
+    'synctex-control',
+    'btn-secondary',
+    'toolbar-btn-secondary',
+    {
+      'detach-synctex-control': !!isDetachLayout,
+    }
+  )
 
   let buttonIcon = null
   if (syncToPdfInFlight) {
@@ -86,7 +91,7 @@ function GoToPdfButton({
       overlayProps={{ placement: tooltipPlacement }}
     >
       <Button
-        bsStyle="default"
+        bsStyle={null}
         bsSize="xs"
         onClick={() => syncToPdf(cursorPosition)}
         disabled={syncToPdfInFlight || !cursorPosition || !hasSingleSelectedDoc}

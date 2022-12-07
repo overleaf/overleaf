@@ -54,7 +54,13 @@ function FileTreeModalDelete() {
           </Button>
         ) : (
           <>
-            <Button onClick={handleHide}>{t('cancel')}</Button>
+            <Button
+              bsStyle={null}
+              className="btn-secondary"
+              onClick={handleHide}
+            >
+              {t('cancel')}
+            </Button>
             <Button bsStyle="danger" onClick={handleDelete}>
               {t('delete')}
             </Button>

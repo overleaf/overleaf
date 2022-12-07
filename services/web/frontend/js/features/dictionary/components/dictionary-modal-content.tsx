@@ -90,7 +90,9 @@ export default function DictionaryModalContent({
       </Modal.Body>
 
       <Modal.Footer>
-        <Button onClick={handleHide}>{t('done')}</Button>
+        <Button bsStyle={null} className="btn-secondary" onClick={handleHide}>
+          {t('done')}
+        </Button>
       </Modal.Footer>
     </>
   )

@@ -123,7 +123,7 @@ script(type="text/ng-template", id="historyV2AddLabelModalTemplate")
 				| #{translate("history_new_label_added_at")} 
 				strong {{ update.meta.end_ts | formatDate:'ddd Do MMM YYYY, h:mm a' }}
 		.modal-footer
-			button.btn.btn-default(
+			button.btn.btn-secondary(
 				type="button"
 				ng-disabled="state.inflight"
 				ng-click="$dismiss()"

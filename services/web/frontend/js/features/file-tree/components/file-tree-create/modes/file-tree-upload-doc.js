@@ -248,7 +248,7 @@ function UploadConflicts({ cancel, conflicts, handleOverwrite }) {
           Overwrite
         </Button>
         &nbsp;
-        <Button bsStyle="primary" onClick={cancel}>
+        <Button bsStyle={null} className="btn-secondary" onClick={cancel}>
           Cancel
         </Button>
       </p>

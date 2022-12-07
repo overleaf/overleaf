@@ -197,7 +197,9 @@ export default function HotkeysModal({
       </Modal.Body>
 
       <Modal.Footer>
-        <Button onClick={handleHide}>{t('ok')}</Button>
+        <Button bsStyle={null} className="btn-secondary" onClick={handleHide}>
+          {t('ok')}
+        </Button>
       </Modal.Footer>
     </AccessibleModal>
   )

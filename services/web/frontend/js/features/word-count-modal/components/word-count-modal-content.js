@@ -76,7 +76,9 @@ export default function WordCountModalContent({ handleHide }) {
       </Modal.Body>
 
       <Modal.Footer>
-        <Button onClick={handleHide}>{t('done')}</Button>
+        <Button bsStyle={null} className="btn-secondary" onClick={handleHide}>
+          {t('done')}
+        </Button>
       </Modal.Footer>
     </>
   )

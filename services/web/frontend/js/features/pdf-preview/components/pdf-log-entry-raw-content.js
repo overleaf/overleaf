@@ -40,8 +40,8 @@ export default function PdfLogEntryRawContent({
         >
           <Button
             bsSize="xs"
-            bsStyle="default"
-            className="log-entry-btn-expand-collapse"
+            bsStyle={null}
+            className="log-entry-btn-expand-collapse btn-secondary"
             onClick={() => setExpanded(value => !value)}
           >
             {expanded ? (
