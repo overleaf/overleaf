@@ -63,7 +63,7 @@ script(type='text/ng-template', id='newFileModalTemplate')
 							p.text-center
 								a(href, ng-click="doUpload()").btn.btn-primary Overwrite
 								| &nbsp;
-								a(href, ng-click="cancel()").btn.btn-default Cancel
+								a(href, ng-click="cancel()").btn.btn-secondary Cancel
 						div(
 							fine-upload
 							endpoint="/project/{{ project_id }}/upload"
@@ -194,7 +194,7 @@ script(type='text/ng-template', id='newFileModalTemplate')
 			|	#{translate("project_approaching_file_limit")} ({{file_count}}/2000)
 		.alert.alert-warning.at-file-limit(ng-if="file_count >= 2000")
 			|	#{translate("project_has_too_many_files")}
-		button.btn.btn-default(
+		button.btn.btn-secondary(
 			ng-disabled="state.inflight"
 			ng-click="cancel()"
 		) #{translate("cancel")}

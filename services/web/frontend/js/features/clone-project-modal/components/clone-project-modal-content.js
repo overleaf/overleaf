@@ -97,7 +97,13 @@ export default function CloneProjectModalContent({
       </Modal.Body>
 
       <Modal.Footer>
-        <Button type="button" disabled={inFlight} onClick={handleHide}>
+        <Button
+          type="button"
+          bsStyle={null}
+          className="btn-secondary"
+          disabled={inFlight}
+          onClick={handleHide}
+        >
           {t('cancel')}
         </Button>
 

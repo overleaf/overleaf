@@ -22,10 +22,10 @@ function SwitchToEditorButton() {
 
   return (
     <Button
-      bsStyle="default"
+      bsStyle={null}
       bsSize="xs"
       onClick={handleClick}
-      className="switch-to-editor-btn"
+      className="switch-to-editor-btn btn-secondary"
     >
       <Icon type="code" className="me-1" />
       {t('switch_to_editor')}

@@ -47,7 +47,8 @@ export function FileTreeModalCreateFileFooterContent({
       )}
 
       <Button
-        bsStyle="default"
+        bsStyle={null}
+        className="btn-secondary"
         type="button"
         disabled={inFlight}
         onClick={cancel}

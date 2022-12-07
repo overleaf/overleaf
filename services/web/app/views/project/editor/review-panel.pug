@@ -615,7 +615,7 @@ script(type="text/ng-template", id="trackChangesUpgradeModalTemplate")
 			p(ng-show="project.owner._id != user.id"): strong #{translate("please_ask_the_project_owner_to_upgrade_to_track_changes")}
 
 	.modal-footer()
-		button.btn.btn-default(
+		button.btn.btn-secondary(
 			ng-click="cancel()"
 		)
 			span #{translate("close")}
@@ -634,7 +634,7 @@ script(type="text/ng-template", id="bulkActionsModalTemplate")
 		p(ng-if="isAccept") #{translate("bulk_accept_confirm", { nChanges: "{{ nChanges }}"})}
 		p(ng-if="!isAccept") #{translate("bulk_reject_confirm", { nChanges: "{{ nChanges }}"})}
 	.modal-footer()
-		button.btn.btn-default(
+		button.btn.btn-secondary(
 			ng-click="cancel()"
 		)
 			span #{translate("cancel")}
