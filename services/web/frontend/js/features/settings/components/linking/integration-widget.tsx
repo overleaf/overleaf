@@ -104,7 +104,13 @@ function ActionButton({
   disabled,
 }: ActionButtonProps) {
   const { t } = useTranslation()
-
+  const classNames = require('classnames')
+  const classes = classNames(
+    'btn',
+    'btn-secondary-info',
+    'btn-secondary',
+    'text-capitalize'
+  )
   if (!hasFeature) {
     return (
       <Button
@@ -124,14 +130,17 @@ function ActionButton({
     )
   } else {
     return (
-      <Button
-        bsStyle={null}
-        className="btn-secondary-info btn-secondary"
-        href={linkPath}
-        disabled={disabled}
-      >
-        <span className="text-capitalize">{t('link')}</span>
-      </Button>
+      <>
+        {disabled ? (
+          <button disabled className={classes}>
+            {t('link')}
+          </button>
+        ) : (
+          <a className={classes} href={linkPath}>
+            {t('link')}
+          </a>
+        )}
+      </>
     )
   }
 }
