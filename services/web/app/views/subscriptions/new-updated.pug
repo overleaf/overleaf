@@ -329,7 +329,7 @@ block content
 											p(ng-if="paymentMethod.value === 'paypal'") #{translate("paypal_upgrade")}
 
 											div.payment-submit
-												button.btn.btn-success.btn-block(
+												button.btn.btn-primary.btn-block(
 													ng-click="submit()"
 													ng-disabled="processing  || !isFormValid(simpleCCForm);"
 												)

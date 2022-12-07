@@ -39,7 +39,7 @@ export default function AddCollaboratorsUpgrade() {
           />
         ) : (
           <Button
-            bsStyle="success"
+            bsStyle="primary"
             onClick={() => {
               upgradePlan('project-sharing')
               setStartedFreeTrial(true)

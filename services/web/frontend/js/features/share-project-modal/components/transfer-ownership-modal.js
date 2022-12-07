@@ -69,7 +69,7 @@ export default function TransferOwnershipModal({ member, cancel }) {
           </Button>
           <Button
             type="button"
-            bsStyle="success"
+            bsStyle="primary"
             onClick={confirm}
             disabled={inflight}
           >

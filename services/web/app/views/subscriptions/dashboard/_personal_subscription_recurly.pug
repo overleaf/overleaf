@@ -50,13 +50,13 @@ div(ng-controller="RecurlySubscriptionController")
 					a(href=personalSubscription.recurly.accountManagementLink, target="_blank").btn.btn-secondary-info.btn-secondary #{translate("view_your_invoices")}
 					p: form(action="/user/subscription/reactivate",method="post")
 						input(type="hidden", name="_csrf", value=csrfToken)
-						input(type="submit",value="Reactivate your subscription").btn.btn-success
+						input(type="submit",value="Reactivate your subscription").btn.btn-primary
 			when "expired"
 				p !{translate("your_subscription_has_expired")}
 				p
 					a(href=personalSubscription.recurly.accountManagementLink, target="_blank").btn.btn-secondary-info.btn-secondary #{translate("view_your_invoices")}
 					| &nbsp;
-					a(href="/user/subscription/plans").btn.btn-success !{translate("create_new_subscription")}
+					a(href="/user/subscription/plans").btn.btn-primary !{translate("create_new_subscription")}
 			default
 				p !{translate("problem_with_subscription_contact_us")}
 
@@ -81,7 +81,7 @@ div(ng-controller="RecurlySubscriptionController")
 				span #{translate('reduce_costs_group_licenses')}
 				br
 				br
-				a.btn.btn-success(
+				a.btn.btn-primary(
 					href="#groups"
 					ng-click="openGroupPlanModal()"
 				) #{translate('change_to_group_plan')}
@@ -96,7 +96,7 @@ div(ng-controller="RecurlySubscriptionController")
 		div(ng-show="showExtendFreeTrial")
 			p !{translate("have_more_days_to_try", {days:14})}
 			p
-				button(type="submit", ng-click="extendTrial()", ng-disabled='inflight').btn.btn-success #{translate("ill_take_it")}
+				button(type="submit", ng-click="extendTrial()", ng-disabled='inflight').btn.btn-primary #{translate("ill_take_it")}
 			p
 				a(href, ng-click="cancelSubscription()", ng-disabled='inflight') #{translate("no_thanks_cancel_now")}
 
@@ -104,7 +104,7 @@ div(ng-controller="RecurlySubscriptionController")
 			div(ng-controller="ChangePlanFormController")
 				p !{translate("interested_in_cheaper_personal_plan",{price:'{{personalDisplayPrice}}'})}
 				p
-					button(type="submit", ng-click="downgradeToPaidPersonal()", ng-disabled='inflight').btn.btn-success #{translate("yes_move_me_to_personal_plan")}
+					button(type="submit", ng-click="downgradeToPaidPersonal()", ng-disabled='inflight').btn.btn-primary #{translate("yes_move_me_to_personal_plan")}
 				p
 					a(href, ng-click="cancelSubscription()", ng-disabled='inflight')  #{translate("no_thanks_cancel_now")}
 
@@ -129,7 +129,7 @@ script(type='text/ng-template', id='confirmChangePlanModalTemplate')
 			ng-disabled="inflight"
 			ng-click="cancel()"
 		) #{translate("cancel")}
-		button.btn.btn-success(
+		button.btn.btn-primary(
 			ng-disabled="inflight"
 			ng-click="confirmChangePlan()"
 		)
@@ -148,7 +148,7 @@ script(type='text/ng-template', id='cancelPendingPlanChangeModalTemplate')
 			ng-disabled="inflight"
 			ng-click="cancel()"
 		) #{translate("cancel")}
-		button.btn.btn-success(
+		button.btn.btn-primary(
 			ng-disabled="inflight"
 			ng-click="confirmCancelPendingPlanChange()"
 		)

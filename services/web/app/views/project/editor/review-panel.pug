@@ -601,13 +601,13 @@ script(type="text/ng-template", id="trackChangesUpgradeModalTemplate")
 
 		.row.text-center
 			div(ng-show="user.allowedFreeTrial" ng-controller="FreeTrialModalController")
-				a.btn.btn-success(
+				a.btn.btn-primary(
 					href
 					ng-click="startFreeTrial('track-changes')"
 					ng-show="project.owner._id == user.id"
 				) #{translate("try_it_for_free")}
 			div(ng-show="!user.allowedFreeTrial" ng-controller="UpgradeModalController")
-				a.btn.btn-success(
+				a.btn.btn-primary(
 					href
 					ng-click="upgradePlan('project-sharing')"
 					ng-show="project.owner._id == user.id"

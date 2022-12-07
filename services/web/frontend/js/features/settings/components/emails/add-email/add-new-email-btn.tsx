@@ -15,7 +15,7 @@ function AddNewEmailBtn({ email, disabled, ...props }: AddNewEmailColProps) {
   return (
     <Button
       bsSize="small"
-      bsStyle="success"
+      bsStyle="primary"
       disabled={disabled || !isValidEmail(email)}
       {...props}
     >

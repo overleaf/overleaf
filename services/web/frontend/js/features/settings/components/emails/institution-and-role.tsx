@@ -137,7 +137,7 @@ function InstitutionAndRole({ userEmailData }: InstitutionAndRoleProps) {
             </div>
             <Button
               bsSize="small"
-              bsStyle="success"
+              bsStyle="primary"
               type="submit"
               disabled={!role || !department || isLoading || state.isLoading}
             >

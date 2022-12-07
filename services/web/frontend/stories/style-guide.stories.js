@@ -201,7 +201,7 @@ export const Buttons = (args, { globals: { theme } }) => {
               )}
               <Button bsStyle="info">Info</Button>
               <Button bsStyle="default">Default</Button>
-              <Button bsStyle="success">Success</Button>
+              <Button bsStyle="primary">Success</Button>
               <Button bsStyle="warning">Warning</Button>
               <Button bsStyle="danger">Danger</Button>
             </div>

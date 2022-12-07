@@ -158,7 +158,7 @@ RemoveMemberAction.propTypes = {
 function ChangePrivilegesActions({ handleReset }) {
   return (
     <div className="text-center">
-      <Button type="submit" bsSize="sm" bsStyle="success">
+      <Button type="submit" bsSize="sm" bsStyle="primary">
         <Trans i18nKey="change_or_cancel-change" />
       </Button>
       <div className="text-sm">

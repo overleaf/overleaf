@@ -16,7 +16,7 @@ block content
 							.row
 								div.col-md-12
 									center
-										button.btn.btn-success(ng-click="completeAnnualUpgrade()", ng-disabled="inflight")
+										button.btn.btn-primary(ng-click="completeAnnualUpgrade()", ng-disabled="inflight")
 											span(ng-show="inflight") #{translate("processing")}
 											span(ng-hide="inflight") #{translate("move_to_annual_billing")} now
 

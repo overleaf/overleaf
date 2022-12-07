@@ -117,7 +117,7 @@ export default function FileViewHeader({ file, storeReferencesKeys }) {
         ))}
       {file.linkedFileData && permissionsLevel !== 'readOnly' && (
         <button
-          className="btn btn-success"
+          className="btn btn-primary"
           onClick={refreshFile}
           disabled={refreshing}
         >
