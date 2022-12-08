@@ -35,7 +35,7 @@ const buildConfig = () => {
   )
 
   // add entrypoints under '/' for pdfjs workers
-  const pdfjsVersions = ['pdfjs-dist210', 'pdfjs-dist213']
+  const pdfjsVersions = ['pdfjs-dist213', 'pdfjs-dist31']
   for (const name of pdfjsVersions) {
     addWorker(name, `${name}/legacy/build/pdf.worker.js`)
   }

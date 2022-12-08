@@ -54,6 +54,8 @@ export default class PDFJSWrapper {
       enableXfa: false, // default is false (2021-10-12), but set explicitly to be sure
       renderInteractiveForms: false,
       maxCanvasPixels: 8192 * 8192, // default is 4096 * 4096, increased for better resolution at high zoom levels
+      annotationMode: PDFJS.AnnotationMode?.ENABLE, // enable annotations but not forms
+      annotationEditorMode: PDFJS.AnnotationEditorType?.DISABLE, // disable annotation editing
     })
 
     linkService.setViewer(viewer)

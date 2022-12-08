@@ -60,7 +60,7 @@ function getModuleDirectory(moduleName) {
 const mathjaxDir = getModuleDirectory('mathjax')
 const aceDir = getModuleDirectory('ace-builds')
 
-const pdfjsVersions = ['pdfjs-dist210', 'pdfjs-dist213']
+const pdfjsVersions = ['pdfjs-dist213', 'pdfjs-dist31']
 
 const vendorDir = path.join(__dirname, 'frontend/js/vendor')
 

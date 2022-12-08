@@ -6,20 +6,20 @@ import 'core-js/stable/promise/all-settled' // polyfill for Promise.allSettled (
 import getMeta from '../../../utils/meta'
 import { createWorker } from '../../../utils/worker'
 
-async function importPDFJS210() {
-  const cMapUrl = '/js/pdfjs-dist210/cmaps/'
-  const standardFontDataUrl = '/fonts/pdfjs-dist210/'
-  const imageResourcesPath = '/images/pdfjs-dist210'
+async function importPDFJS31() {
+  const cMapUrl = '/js/pdfjs-dist31/cmaps/'
+  const standardFontDataUrl = '/fonts/pdfjs-dist31/'
+  const imageResourcesPath = '/images/pdfjs-dist31'
 
   const [PDFJS, PDFJSViewer] = await Promise.all([
-    import('pdfjs-dist210/legacy/build/pdf'),
-    import('pdfjs-dist210/legacy/web/pdf_viewer'),
-    import('pdfjs-dist210/legacy/web/pdf_viewer.css'),
+    import('pdfjs-dist31/legacy/build/pdf'),
+    import('pdfjs-dist31/legacy/web/pdf_viewer'),
+    import('pdfjs-dist31/legacy/web/pdf_viewer.css'),
   ])
 
   createWorker(() => {
     PDFJS.GlobalWorkerOptions.workerPort = new Worker(
-      new URL('pdfjs-dist210/legacy/build/pdf.worker.js', import.meta.url)
+      new URL('pdfjs-dist31/legacy/build/pdf.worker.js', import.meta.url)
     )
   })
 
@@ -66,8 +66,8 @@ async function importPDFJS() {
     case 'default':
       return importPDFJS213()
 
-    case '210':
-      return importPDFJS210()
+    case '318':
+      return importPDFJS31()
   }
 }
 
