@@ -1,15 +1,15 @@
 const logger = require('@overleaf/logger')
 const settings = require('@overleaf/settings')
 
-const mongodb = require('./app/js/mongodb')
+const { mongoClient } = require('./app/js/mongodb')
 const Server = require('./app/js/server')
 
 if (!module.parent) {
   // Called directly
   const port = settings.internal.chat.port
   const host = settings.internal.chat.host
-  mongodb
-    .waitForDb()
+  mongoClient
+    .connect()
     .then(() => {
       Server.server.listen(port, host, function (err) {
         if (err) {

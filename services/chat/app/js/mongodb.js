@@ -1,29 +1,16 @@
 const Settings = require('@overleaf/settings')
 const { MongoClient, ObjectId } = require('mongodb')
 
-const clientPromise = MongoClient.connect(
-  Settings.mongo.url,
-  Settings.mongo.options
-)
+const client = new MongoClient(Settings.mongo.url)
+const db = client.db()
 
-let setupDbPromise
-async function waitForDb() {
-  if (!setupDbPromise) {
-    setupDbPromise = setupDb()
-  }
-  await setupDbPromise
-}
-
-const db = {}
-async function setupDb() {
-  const internalDb = (await clientPromise).db()
-
-  db.messages = internalDb.collection('messages')
-  db.rooms = internalDb.collection('rooms')
+const collections = {
+  messages: db.collection('messages'),
+  rooms: db.collection('rooms'),
 }
 
 module.exports = {
-  db,
+  db: collections,
+  mongoClient: client,
   ObjectId,
-  waitForDb,
 }

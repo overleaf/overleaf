@@ -22,7 +22,7 @@
     "async": "^3.2.2",
     "body-parser": "^1.19.0",
     "express": "4.17.1",
-    "mongodb": "^3.6.0"
+    "mongodb": "^4.11.0"
   },
   "devDependencies": {
     "acorn": "^7.1.1",
