@@ -8,6 +8,9 @@ import TagsDropdown from './buttons/tags-dropdown'
 import TrashProjectsButton from './buttons/trash-projects-button'
 import UnarchiveProjectsButton from './buttons/unarchive-projects-button'
 import UntrashProjectsButton from './buttons/untrash-projects-button'
+import DeleteLeaveProjectsButton from './buttons/delete-leave-projects-button'
+import LeaveProjectsButton from './buttons/leave-projects-button'
+import DeleteProjectsButton from './buttons/delete-projects-button'
 
 function ProjectTools() {
   const { filter, selectedProjects } = useProjectListContext()
@@ -22,6 +25,16 @@ function ProjectTools() {
       <ButtonGroup>
         {filter === 'trashed' && <UntrashProjectsButton />}
         {filter === 'archived' && <UnarchiveProjectsButton />}
+      </ButtonGroup>
+
+      <ButtonGroup>
+        {filter === 'trashed' && (
+          <>
+            <LeaveProjectsButton />
+            <DeleteProjectsButton />
+            <DeleteLeaveProjectsButton />
+          </>
+        )}
       </ButtonGroup>
 
       {!['archived', 'trashed'].includes(filter) && <TagsDropdown />}

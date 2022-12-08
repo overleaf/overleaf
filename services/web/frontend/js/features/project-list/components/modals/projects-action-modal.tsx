@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef, useState } from 'react'
+import { memo, useEffect, useState } from 'react'
 import { Alert, Modal } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import { Project } from '../../../../../../types/project/dashboard/api'
@@ -9,13 +9,12 @@ import * as eventTracking from '../../../../infrastructure/event-tracking'
 
 type ProjectsActionModalProps = {
   title?: string
-  action: 'archive' | 'trash' | 'delete' | 'leave'
+  action: 'archive' | 'trash' | 'delete' | 'leave' | 'leaveOrDelete'
   actionHandler: (project: Project) => Promise<void>
   handleCloseModal: () => void
-  bodyTop?: React.ReactNode
-  bodyBottom?: React.ReactNode
   projects: Array<Project>
   showModal: boolean
+  children?: React.ReactNode
 }
 
 function ProjectsActionModal({
@@ -23,16 +22,13 @@ function ProjectsActionModal({
   action,
   actionHandler,
   handleCloseModal,
-  bodyTop,
-  bodyBottom,
   showModal,
   projects,
+  children,
 }: ProjectsActionModalProps) {
   const { t } = useTranslation()
   const [errors, setErrors] = useState<Array<any>>([])
   const [isProcessing, setIsProcessing] = useState(false)
-  const [projectsToDisplay, setProjectsToDisplay] = useState<Project[]>([])
-  const projectsRef = useRef<Project[]>([])
   const isMounted = useIsMounted()
 
   async function handleActionForProjects(projects: Array<Project>) {
@@ -66,21 +62,8 @@ function ProjectsActionModal({
         'project action',
         action
       )
-
-      if (projectsRef.current.length > 0) {
-        // maintain the original list in the display of the modal,
-        // even after some project actions have completed
-        setProjectsToDisplay(projectsRef.current)
-      } else {
-        projectsRef.current = projects
-        setProjectsToDisplay(projects)
-      }
-    } else {
-      projectsRef.current = []
     }
-  }, [action, projects, projectsRef, showModal])
-
-  const projectIdsRemainingToProcess = projects.map(p => p.id)
+  }, [action, showModal])
 
   return (
     <AccessibleModal
@@ -93,25 +76,7 @@ function ProjectsActionModal({
       <Modal.Header closeButton>
         <Modal.Title>{title}</Modal.Title>
       </Modal.Header>
-      <Modal.Body>
-        {bodyTop}
-        <ul>
-          {projectsToDisplay.map(project => (
-            <li
-              key={`projects-action-list-${project.id}`}
-              className={
-                projectIdsRemainingToProcess.includes(project.id)
-                  ? ''
-                  : 'list-style-check-green'
-              }
-            >
-              <b>{project.name}</b>
-            </li>
-          ))}
-        </ul>
-
-        {bodyBottom}
-      </Modal.Body>
+      <Modal.Body>{children}</Modal.Body>
       <Modal.Footer>
         {!isProcessing &&
           errors.length > 0 &&

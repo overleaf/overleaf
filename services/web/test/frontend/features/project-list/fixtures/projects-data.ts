@@ -1,4 +1,9 @@
 import { Project } from '../../../../../types/project/dashboard/api'
+import {
+  isDeletableProject,
+  isLeavableProject,
+} from '../../../../../frontend/js/features/project-list/util/project'
+
 const moment = require('moment')
 
 export const owner = {
@@ -157,5 +162,7 @@ export const makeLongProjectList = (listLength: number) => {
       ({ archived, trashed }) => !archived && !trashed
     ),
     trashedList: longList.filter(({ trashed }) => trashed),
+    leavableList: longList.filter(isLeavableProject),
+    deletableList: longList.filter(isDeletableProject),
   }
 }

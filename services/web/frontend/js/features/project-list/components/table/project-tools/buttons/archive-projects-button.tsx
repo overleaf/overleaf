@@ -6,6 +6,7 @@ import ArchiveProjectModal from '../../../modals/archive-project-modal'
 import useIsMounted from '../../../../../../shared/hooks/use-is-mounted'
 import { useProjectListContext } from '../../../../context/project-list-context'
 import { archiveProject } from '../../../../util/api'
+import { Project } from '../../../../../../../../types/project/dashboard/api'
 
 function ArchiveProjectsButton() {
   const { selectedProjects, updateProjectViewData } = useProjectListContext()
@@ -25,17 +26,16 @@ function ArchiveProjectsButton() {
     }
   }, [isMounted])
 
-  const handleArchiveProjects = useCallback(async () => {
-    for (const project of selectedProjects) {
-      await archiveProject(project.id)
-      updateProjectViewData({
-        ...project,
-        archived: true,
-        selected: false,
-        trashed: false,
-      })
-    }
-  }, [selectedProjects, updateProjectViewData])
+  const handleArchiveProject = async (project: Project) => {
+    await archiveProject(project.id)
+
+    updateProjectViewData({
+      ...project,
+      archived: true,
+      selected: false,
+      trashed: false,
+    })
+  }
 
   return (
     <>
@@ -54,7 +54,7 @@ function ArchiveProjectsButton() {
       </Tooltip>
       <ArchiveProjectModal
         projects={selectedProjects}
-        actionHandler={handleArchiveProjects}
+        actionHandler={handleArchiveProject}
         showModal={showModal}
         handleCloseModal={handleCloseModal}
       />

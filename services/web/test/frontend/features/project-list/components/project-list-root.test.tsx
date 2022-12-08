@@ -11,7 +11,9 @@ import {
   archivedProjects,
   makeLongProjectList,
 } from '../fixtures/projects-data'
-const { fullList, currentList, trashedList } = makeLongProjectList(40)
+
+const { fullList, currentList, trashedList, leavableList, deletableList } =
+  makeLongProjectList(40)
 
 const userId = owner.id
 
@@ -78,9 +80,10 @@ describe('<ProjectListRoot />', function () {
 
   describe('project table', function () {
     beforeEach(async function () {
-      renderWithProjectListContext(<ProjectListRoot />, {
+      const { unmount } = renderWithProjectListContext(<ProjectListRoot />, {
         projects: fullList,
       })
+      this.unmount = unmount
       await fetchMock.flush(true)
       await screen.findByRole('table')
     })
@@ -240,7 +243,7 @@ describe('<ProjectListRoot />', function () {
           })
 
           const unarchiveButton =
-            within(actionsToolbar).getByText<HTMLInputElement>('Restore')
+            within(actionsToolbar).getByText<HTMLButtonElement>('Restore')
           fireEvent.click(unarchiveButton)
 
           await fetchMock.flush(true)
@@ -284,7 +287,7 @@ describe('<ProjectListRoot />', function () {
           actionsToolbar = screen.getAllByRole('toolbar')[0]
         })
 
-        it('only shows the download, archive, and restore buttons in top toolbar', function () {
+        it('shows the download, archive, and restore buttons in top toolbar', function () {
           expect(screen.queryByLabelText('Trash')).to.be.null
           within(actionsToolbar).queryByLabelText('Download')
           within(actionsToolbar).queryByLabelText('Archive')
@@ -307,7 +310,7 @@ describe('<ProjectListRoot />', function () {
           })
 
           const untrashButton =
-            within(actionsToolbar).getByText<HTMLInputElement>('Restore')
+            within(actionsToolbar).getByText<HTMLButtonElement>('Restore')
           fireEvent.click(untrashButton)
 
           await fetchMock.flush(true)
@@ -330,22 +333,213 @@ describe('<ProjectListRoot />', function () {
         })
 
         it('removes project from view when archiving', async function () {
-          fetchMock.post(`express:/project/:id/archive`, {
-            status: 200,
-          })
+          fetchMock.post(
+            `express:/project/:id/archive`,
+            {
+              status: 200,
+            },
+            { repeat: trashedList.length }
+          )
 
-          const untrashButton =
-            within(actionsToolbar).getByLabelText<HTMLInputElement>('Archive')
-          fireEvent.click(untrashButton)
+          const archiveButton =
+            within(actionsToolbar).getByLabelText<HTMLButtonElement>('Archive')
+          fireEvent.click(archiveButton)
 
-          const confirmButton = screen.getByText<HTMLInputElement>('Confirm')
+          const confirmButton = screen.getByText<HTMLButtonElement>('Confirm')
           fireEvent.click(confirmButton)
           expect(confirmButton.disabled).to.be.true
 
           await fetchMock.flush(true)
           expect(fetchMock.done()).to.be.true
 
-          screen.getByText('No projects')
+          const calls = fetchMock.calls().map(([url]) => url)
+
+          trashedList.forEach(project => {
+            expect(calls).to.contain(`/project/${project.id}/archive`)
+          })
+        })
+
+        it('removes only selected projects from view when leaving', async function () {
+          // rerender content with different projects
+          this.unmount()
+          fetchMock.restore()
+
+          renderWithProjectListContext(<ProjectListRoot />, {
+            projects: leavableList,
+          })
+
+          await fetchMock.flush(true)
+          await screen.findByRole('table')
+
+          expect(leavableList.length).to.be.greaterThan(0)
+
+          fetchMock.post(
+            `express:/project/:id/leave`,
+            {
+              status: 200,
+            },
+            { repeat: leavableList.length }
+          )
+
+          allCheckboxes = screen.getAllByRole<HTMLInputElement>('checkbox')
+          // + 1 because of select all
+          expect(allCheckboxes.length).to.equal(leavableList.length + 1)
+
+          // first one is the select all checkbox
+          fireEvent.click(allCheckboxes[0])
+
+          actionsToolbar = screen.getAllByRole('toolbar')[0]
+
+          const toolbar = within(actionsToolbar)
+          expect(toolbar.queryByRole('button', { name: /delete/i })).to.be.null
+          expect(
+            toolbar.queryByRole('button', {
+              name: /delete \/ leave/i,
+            })
+          ).to.be.null
+
+          const leaveButton = toolbar.getByRole('button', {
+            name: /leave/i,
+          })
+          fireEvent.click(leaveButton)
+
+          const confirmButton = screen.getByText<HTMLButtonElement>('Confirm')
+          fireEvent.click(confirmButton)
+          expect(confirmButton.disabled).to.be.true
+
+          await fetchMock.flush(true)
+          expect(fetchMock.done()).to.be.true
+
+          const calls = fetchMock.calls().map(([url]) => url)
+          leavableList.forEach(project => {
+            expect(calls).to.contain(`/project/${project.id}/leave`)
+          })
+        })
+
+        it('removes only selected projects from view when deleting', async function () {
+          // rerender content with different projects
+          this.unmount()
+          fetchMock.restore()
+
+          renderWithProjectListContext(<ProjectListRoot />, {
+            projects: deletableList,
+          })
+
+          await fetchMock.flush(true)
+          await screen.findByRole('table')
+
+          expect(deletableList.length).to.be.greaterThan(0)
+
+          fetchMock.delete(
+            `express:/project/:id`,
+            {
+              status: 200,
+            },
+            { repeat: deletableList.length }
+          )
+
+          allCheckboxes = screen.getAllByRole<HTMLInputElement>('checkbox')
+          // + 1 because of select all
+          expect(allCheckboxes.length).to.equal(deletableList.length + 1)
+
+          // first one is the select all checkbox
+          fireEvent.click(allCheckboxes[0])
+
+          actionsToolbar = screen.getAllByRole('toolbar')[0]
+
+          const toolbar = within(actionsToolbar)
+          expect(toolbar.queryByRole('button', { name: /leave/i })).to.be.null
+          expect(
+            toolbar.queryByRole('button', {
+              name: /delete \/ leave/i,
+            })
+          ).to.be.null
+
+          const deleteButton = toolbar.getByRole('button', {
+            name: /delete/i,
+          })
+          fireEvent.click(deleteButton)
+
+          const confirmButton = screen.getByText<HTMLButtonElement>('Confirm')
+          fireEvent.click(confirmButton)
+          expect(confirmButton.disabled).to.be.true
+
+          await fetchMock.flush(true)
+          expect(fetchMock.done()).to.be.true
+
+          const calls = fetchMock.calls().map(([url]) => url)
+          deletableList.forEach(project => {
+            expect(calls).to.contain(`/project/${project.id}`)
+          })
+        })
+
+        it('removes only selected projects from view when deleting and leaving', async function () {
+          // rerender content with different projects
+          this.unmount()
+          fetchMock.restore()
+
+          const deletableAndLeavableList = [...deletableList, ...leavableList]
+
+          renderWithProjectListContext(<ProjectListRoot />, {
+            projects: deletableAndLeavableList,
+          })
+
+          await fetchMock.flush(true)
+          await screen.findByRole('table')
+
+          expect(deletableList.length).to.be.greaterThan(0)
+          expect(leavableList.length).to.be.greaterThan(0)
+
+          fetchMock
+            .delete(
+              `express:/project/:id`,
+              {
+                status: 200,
+              },
+              { repeat: deletableList.length }
+            )
+            .post(
+              `express:/project/:id/leave`,
+              {
+                status: 200,
+              },
+              { repeat: leavableList.length }
+            )
+
+          allCheckboxes = screen.getAllByRole<HTMLInputElement>('checkbox')
+          // + 1 because of select all
+          expect(allCheckboxes.length).to.equal(
+            deletableAndLeavableList.length + 1
+          )
+
+          // first one is the select all checkbox
+          fireEvent.click(allCheckboxes[0])
+
+          actionsToolbar = screen.getAllByRole('toolbar')[0]
+
+          const toolbar = within(actionsToolbar)
+          expect(toolbar.queryByRole('button', { name: 'Leave' })).to.be.null
+          expect(toolbar.queryByRole('button', { name: 'Delete' })).to.be.null
+
+          const deleteLeaveButton = toolbar.getByRole('button', {
+            name: /delete \/ leave/i,
+          })
+          fireEvent.click(deleteLeaveButton)
+
+          const confirmButton = screen.getByText<HTMLButtonElement>('Confirm')
+          fireEvent.click(confirmButton)
+          expect(confirmButton.disabled).to.be.true
+
+          await fetchMock.flush(true)
+          expect(fetchMock.done()).to.be.true
+
+          const calls = fetchMock.calls().map(([url]) => url)
+          deletableAndLeavableList.forEach(project => {
+            expect(calls).to.contain.oneOf([
+              `/project/${project.id}`,
+              `/project/${project.id}/leave`,
+            ])
+          })
         })
       })
 
@@ -497,7 +691,7 @@ describe('<ProjectListRoot />', function () {
           fireEvent.click(moreDropdown)
 
           const renameButton =
-            screen.getAllByText<HTMLInputElement>('Rename')[1] // first one is for the tag in the sidebar
+            screen.getAllByText<HTMLButtonElement>('Rename')[1] // first one is for the tag in the sidebar
           fireEvent.click(renameButton)
 
           const modals = await screen.findAllByRole('dialog')
@@ -508,7 +702,7 @@ describe('<ProjectListRoot />', function () {
 
           // same name
           let confirmButton =
-            within(modal).getByText<HTMLInputElement>('Rename')
+            within(modal).getByText<HTMLButtonElement>('Rename')
           expect(confirmButton.disabled).to.be.true
           let input = screen.getByLabelText('New Name') as HTMLButtonElement
 
@@ -517,7 +711,7 @@ describe('<ProjectListRoot />', function () {
           fireEvent.change(input, {
             target: { value: '' },
           })
-          confirmButton = within(modal).getByText<HTMLInputElement>('Rename')
+          confirmButton = within(modal).getByText<HTMLButtonElement>('Rename')
           expect(confirmButton.disabled).to.be.true
         })
 
@@ -534,7 +728,7 @@ describe('<ProjectListRoot />', function () {
           fireEvent.click(moreDropdown)
 
           const renameButton =
-            within(actionsToolbar).getByText<HTMLInputElement>('Rename') // first one is for the tag in the sidebar
+            within(actionsToolbar).getByText<HTMLButtonElement>('Rename') // first one is for the tag in the sidebar
           fireEvent.click(renameButton)
 
           const modals = await screen.findAllByRole('dialog')
@@ -551,7 +745,7 @@ describe('<ProjectListRoot />', function () {
           })
 
           const confirmButton =
-            within(modal).getByText<HTMLInputElement>('Rename')
+            within(modal).getByText<HTMLButtonElement>('Rename')
           expect(confirmButton.disabled).to.be.false
           fireEvent.click(confirmButton)
 
@@ -605,7 +799,7 @@ describe('<ProjectListRoot />', function () {
           })
 
           const copyButton =
-            within(actionsToolbar).getByText<HTMLInputElement>('Make a copy')
+            within(actionsToolbar).getByText<HTMLButtonElement>('Make a copy')
           fireEvent.click(copyButton)
 
           // confirm in modal

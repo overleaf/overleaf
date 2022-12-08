@@ -76,7 +76,7 @@ describe('<ProjectsActionModal />', function () {
     })
   })
 
-  it('should send an analytics even when opened', function () {
+  it('should send an analytics event when opened', function () {
     renderWithProjectListContext(
       <ProjectsActionModal
         action="archive"

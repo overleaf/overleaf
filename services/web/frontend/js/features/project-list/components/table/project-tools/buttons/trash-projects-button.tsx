@@ -6,6 +6,7 @@ import TrashProjectModal from '../../../modals/trash-project-modal'
 import useIsMounted from '../../../../../../shared/hooks/use-is-mounted'
 import { useProjectListContext } from '../../../../context/project-list-context'
 import { trashProject } from '../../../../util/api'
+import { Project } from '../../../../../../../../types/project/dashboard/api'
 
 function TrashProjectsButton() {
   const { selectedProjects, updateProjectViewData } = useProjectListContext()
@@ -25,17 +26,16 @@ function TrashProjectsButton() {
     }
   }, [isMounted])
 
-  const handleTrashProjects = useCallback(async () => {
-    for (const project of selectedProjects) {
-      await trashProject(project.id)
-      updateProjectViewData({
-        ...project,
-        trashed: true,
-        archived: false,
-        selected: false,
-      })
-    }
-  }, [selectedProjects, updateProjectViewData])
+  const handleTrashProject = async (project: Project) => {
+    await trashProject(project.id)
+
+    updateProjectViewData({
+      ...project,
+      trashed: true,
+      archived: false,
+      selected: false,
+    })
+  }
 
   return (
     <>
@@ -54,7 +54,7 @@ function TrashProjectsButton() {
       </Tooltip>
       <TrashProjectModal
         projects={selectedProjects}
-        actionHandler={handleTrashProjects}
+        actionHandler={handleTrashProject}
         showModal={showModal}
         handleCloseModal={handleCloseModal}
       />

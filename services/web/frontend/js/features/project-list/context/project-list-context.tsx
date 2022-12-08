@@ -29,6 +29,7 @@ import getMeta from '../../../utils/meta'
 import useAsync from '../../../shared/hooks/use-async'
 import { getProjects } from '../util/api'
 import sortProjects from '../util/sort-projects'
+import { isDeletableProject, isLeavableProject } from '../util/project'
 
 const MAX_PROJECT_PER_PAGE = 20
 
@@ -62,7 +63,7 @@ const filters: FilterMap = {
 
 export const UNCATEGORIZED_KEY = 'uncategorized'
 
-type ProjectListContextValue = {
+export type ProjectListContextValue = {
   addClonedProjectToViewData: (project: Project) => void
   selectOrUnselectAllProjects: React.Dispatch<React.SetStateAction<boolean>>
   visibleProjects: Project[]
@@ -92,6 +93,8 @@ type ProjectListContextValue = {
   loadMoreCount: number
   showAllProjects: () => void
   loadMoreProjects: () => void
+  hasLeavableProjectsSelected: boolean
+  hasDeletableProjectsSelected: boolean
 }
 
 export const ProjectListContext = createContext<
@@ -375,20 +378,26 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
 
   const updateProjectViewData = useCallback((newProjectData: Project) => {
     setLoadedProjects(loadedProjects => {
-      return loadedProjects.map((p: Project) =>
+      return loadedProjects.map(p =>
         p.id === newProjectData.id ? { ...newProjectData } : p
       )
     })
   }, [])
 
-  const removeProjectFromView = useCallback(
-    (project: Project) => {
-      const projects = loadedProjects.filter(
-        (p: Project) => p.id !== project.id
-      )
-      setLoadedProjects(projects)
-    },
-    [loadedProjects]
+  const removeProjectFromView = useCallback((project: Project) => {
+    setLoadedProjects(loadedProjects => {
+      return loadedProjects.filter(p => p.id !== project.id)
+    })
+  }, [])
+
+  const hasLeavableProjectsSelected = useMemo(
+    () => selectedProjects.some(isLeavableProject),
+    [selectedProjects]
+  )
+
+  const hasDeletableProjectsSelected = useMemo(
+    () => selectedProjects.some(isDeletableProject),
+    [selectedProjects]
   )
 
   const value = useMemo<ProjectListContextValue>(
@@ -399,6 +408,8 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       deleteTag,
       error,
       filter,
+      hasLeavableProjectsSelected,
+      hasDeletableProjectsSelected,
       hiddenProjectsCount,
       isLoading,
       loadMoreCount,
@@ -430,6 +441,8 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       deleteTag,
       error,
       filter,
+      hasLeavableProjectsSelected,
+      hasDeletableProjectsSelected,
       hiddenProjectsCount,
       isLoading,
       loadMoreCount,
