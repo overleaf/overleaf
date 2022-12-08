@@ -55,7 +55,7 @@
 //** Unit-less `line-height` for use in components like buttons.
 @line-height-base: 1.5625; // 20/14
 //** Computed "line-height" (`font-size` * `line-height`) for use with `margin`, `padding`, etc.
-@line-height-computed: floor((@font-size-base * @line-height-base)); // ~20px
+@line-height-computed: floor((@font-size-base * @line-height-base)); // ~25px
 
 //** By default, this inherits from the `<body>`.
 @headings-font-family: @font-family-serif;
@@ -91,7 +91,7 @@
 @padding-small-vertical: 5px;
 @padding-small-horizontal: 10px;
 
-@padding-xs-vertical: 1.5px;
+@padding-xs-vertical: @border-size; // border size is removed in .button-size mixin
 @padding-xs-horizontal: 8px;
 
 @padding-xs: 5px;
@@ -201,7 +201,7 @@
 @input-color-placeholder: @neutral-60;
 
 //** Default `.form-control` height
-@input-height-base: @line-height-computed + (@padding-base-vertical * 2) - 1;
+@input-height-base: @line-height-computed + (@padding-base-vertical * 2); // Make inputs at least the height of their button counterpart. buttons and inputs have same border height
 //** Large `.form-control` height
 @input-height-large: (
   ceil(@font-size-large * @line-height-large) + (@padding-large-vertical * 2) +
