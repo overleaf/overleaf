@@ -36,6 +36,10 @@
   }
 }
 
+.label when(@is-new-css = true) {
+  padding: 0.3em 0.6em;
+}
+
 // Colors
 // Contextual variations (linked labels get darker on :hover)
 
@@ -66,4 +70,19 @@
 .label-text {
   color: @ol-type-color;
   font-size: 100%;
+}
+
+.label-premium {
+  background-color: @neutral-20;
+  background-image: url('../../../public/img/material-icons/star-gradient.svg');
+  background-repeat: no-repeat;
+  background-position: 2px 2px;
+  border-radius: 4px;
+  color: @neutral-90;
+  display: inline-block;
+  font-size: 12px;
+  font-family: @font-family-sans-serif;
+  margin-left: 10px;
+  padding: 4px 4px 4px 20px;
+  vertical-align: middle;
 }

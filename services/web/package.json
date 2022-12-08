@@ -79,6 +79,8 @@
     "@codemirror/search": "^6.2.3",
     "@codemirror/state": "^6.1.4",
     "@codemirror/view": "^6.5.1",
+    "@contentful/rich-text-html-renderer": "^16.0.2",
+    "@contentful/rich-text-types": "^16.0.2",
     "@lezer/common": "^1.0.1",
     "@lezer/highlight": "^1.1.2",
     "@lezer/lr": "^1.2.4",
