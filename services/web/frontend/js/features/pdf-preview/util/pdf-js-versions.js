@@ -9,7 +9,7 @@ import { createWorker } from '../../../utils/worker'
 async function importPDFJS31() {
   const cMapUrl = '/js/pdfjs-dist31/cmaps/'
   const standardFontDataUrl = '/fonts/pdfjs-dist31/'
-  const imageResourcesPath = '/images/pdfjs-dist31'
+  const imageResourcesPath = '/images/pdfjs-dist31/'
 
   const [PDFJS, PDFJSViewer] = await Promise.all([
     import('pdfjs-dist31/legacy/build/pdf'),
@@ -35,7 +35,7 @@ async function importPDFJS31() {
 async function importPDFJS213() {
   const cMapUrl = '/js/pdfjs-dist213/cmaps/'
   const standardFontDataUrl = '/fonts/pdfjs-dist213/'
-  const imageResourcesPath = '/images/pdfjs-dist213'
+  const imageResourcesPath = '/images/pdfjs-dist213/'
 
   const [PDFJS, PDFJSViewer] = await Promise.all([
     import('pdfjs-dist213/legacy/build/pdf'),
