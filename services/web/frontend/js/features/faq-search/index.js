@@ -93,6 +93,10 @@ function setupSearch(formEl) {
   formEl.querySelectorAll('[data-ol-clear-search]').forEach(el => {
     el.addEventListener('click', handleClear)
   })
+  formEl.addEventListener('submit', evt => {
+    evt.preventDefault()
+    return false
+  })
   inputEl.addEventListener('input', _.debounce(handleChange, 100))
   inputEl.addEventListener('input', updateClearBtnVisibility)
 
