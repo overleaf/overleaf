@@ -108,7 +108,7 @@
     "@pollyjs/core": "^4.2.1",
     "@pollyjs/persister-fs": "^4.2.1",
     "@reach/tabs": "^0.15.0",
-    "@replit/codemirror-emacs": "overleaf/codemirror-emacs#8640addc01bbe99fec0144993d012b6dfc57d6e2",
+    "@replit/codemirror-emacs": "overleaf/codemirror-emacs#08370ec61411bdb60a83012293076781a5fdc0f5",
     "@replit/codemirror-vim": "overleaf/codemirror-vim#60a264e12bb0e1eccf8d16b760371949f69cedb9",
     "@sentry/browser": "^7.8.1",
     "@uppy/core": "^1.15.0",
