@@ -177,7 +177,7 @@
   "looks_like_logged_in_with_email": "Det ser ud til, at du allerede er logget ind i <b>__appName__</b> med emailen <b>__email__</b>.",
   "need_to_do_this_to_access_license": "Det er nødvendigt for, at du kan drage nytte af de fordele, som følger med den site licens, som tilhører <b>__institutionName__</b>.",
   "institutional_login_not_supported": "Din institution understøtter ikke <b>institutionel indlogning</b> endnu, men du kan stadig blive registreret med en institutionel email.",
-  "institutional_login_unknown": "Beklager, vi ved ikke hvilken institution har udstedt den email–adresse. Du kan kigge i vores <a href=\"__link__\">liste over institutioner</a> for at finde den, eller du kan bare registrere dig med din email–adresse og kodeord her.",
+  "institutional_login_unknown": "Beklager, vi ved ikke hvilken institution har udstedt den email–adresse. Du kan kigge i vores <a href=\"__link__\">liste over institutioner</a> for at finde den, eller du kan gøre brug af en af de andre muligheder herunder.",
   "link_account": "Forbind Konto",
   "link_accounts": "Forbind Kontoer",
   "link_accounts_and_add_email": "Forbind Kontoer og Tilføj Email",
