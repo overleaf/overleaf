@@ -200,6 +200,8 @@ async function setPublicAccessLevel(projectId, newAccessLevel) {
       { _id: projectId },
       { publicAccesLevel: newAccessLevel }
     ).exec()
+  } else {
+    throw new Errors.InvalidError('unexpected access level')
   }
 }
 

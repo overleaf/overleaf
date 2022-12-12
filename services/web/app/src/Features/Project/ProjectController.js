@@ -45,6 +45,8 @@ const SubscriptionViewModelBuilder = require('../Subscription/SubscriptionViewMo
 const SurveyHandler = require('../Survey/SurveyHandler')
 const { expressify } = require('../../util/promises')
 const ProjectListController = require('./ProjectListController')
+const ProjectAuditLogHandler = require('./ProjectAuditLogHandler')
+const PublicAccessLevels = require('../Authorization/PublicAccessLevels')
 
 /**
  * @typedef {import("./types").GetProjectsRequest} GetProjectsRequest
@@ -131,9 +133,21 @@ const ProjectController = {
 
   updateProjectAdminSettings(req, res, next) {
     const projectId = req.params.Project_id
+    const user = SessionManager.getSessionUser(req.session)
+    const publicAccessLevel = req.body.publicAccessLevel
+    const publicAccessLevels = [
+      PublicAccessLevels.READ_ONLY,
+      PublicAccessLevels.READ_AND_WRITE,
+      PublicAccessLevels.PRIVATE,
+      PublicAccessLevels.TOKEN_BASED,
+    ]
 
-    const jobs = []
-    if (req.body.publicAccessLevel != null) {
+    if (
+      req.body.publicAccessLevel != null &&
+      publicAccessLevels.includes(publicAccessLevel)
+    ) {
+      const jobs = []
+
       jobs.push(callback =>
         EditorController.setPublicAccessLevel(
           projectId,
@@ -141,14 +155,26 @@ const ProjectController = {
           callback
         )
       )
-    }
 
-    async.series(jobs, error => {
-      if (error != null) {
-        return next(error)
-      }
-      res.sendStatus(204)
-    })
+      jobs.push(callback =>
+        ProjectAuditLogHandler.addEntry(
+          projectId,
+          'toggle-access-level',
+          user._id,
+          { publicAccessLevel: req.body.publicAccessLevel, status: 'OK' },
+          callback
+        )
+      )
+
+      async.series(jobs, error => {
+        if (error != null) {
+          return next(error)
+        }
+        res.sendStatus(204)
+      })
+    } else {
+      res.sendStatus(500)
+    }
   },
 
   deleteProject(req, res) {

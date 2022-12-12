@@ -64,6 +64,7 @@ const logger = require('@overleaf/logger')
 const _ = require('underscore')
 const { expressify } = require('./util/promises')
 const { plainTextResponse } = require('./infrastructure/Response')
+const PublicAccessLevels = require('./Features/Authorization/PublicAccessLevels')
 
 module.exports = { initialize }
 
@@ -401,7 +402,13 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   )
   webRouter.post(
     '/project/:Project_id/settings',
-    validate({ body: Joi.object() }),
+    validate({
+      body: Joi.object({
+        publicAccessLevel: Joi.string()
+          .valid(PublicAccessLevels.PRIVATE, PublicAccessLevels.TOKEN_BASED)
+          .optional(),
+      }),
+    }),
     AuthorizationMiddleware.ensureUserCanWriteProjectSettings,
     ProjectController.updateProjectSettings
   )

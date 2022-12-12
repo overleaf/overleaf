@@ -1,9 +1,11 @@
 const { ProjectAuditLogEntry } = require('../../models/ProjectAuditLogEntry')
+const { callbackify } = require('../../util/promises')
 
 module.exports = {
   promises: {
     addEntry,
   },
+  addEntry: callbackify(addEntry), // callback version of adEntry
 }
 
 /**
