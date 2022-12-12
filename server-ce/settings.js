@@ -582,7 +582,9 @@ if (process.env.SHARELATEX_SAML_ENTRYPOINT) {
       identifierFormat: process.env.SHARELATEX_SAML_IDENTIFIER_FORMAT,
       attributeConsumingServiceIndex:
         process.env.SHARELATEX_SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX,
-      authnContext: process.env.SHARELATEX_SAML_AUTHN_CONTEXT,
+      authnContext:
+        process.env.SHARELATEX_SAML_AUTHN_CONTEXT &&
+        process.env.SHARELATEX_SAML_AUTHN_CONTEXT.split(','),
       authnRequestBinding: process.env.SHARELATEX_SAML_AUTHN_REQUEST_BINDING,
       validateInResponseTo: process.env.SHARELATEX_SAML_VALIDATE_IN_RESPONSE_TO,
       cacheProvider: process.env.SHARELATEX_SAML_CACHE_PROVIDER,
