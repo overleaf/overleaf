@@ -63,7 +63,7 @@ nav.navbar.navbar-default.navbar-main
 										a(href="/admin/survey") Manage Surveys
 
 					// loop over header_extras
-					each item in ((splitTestVariants && (splitTestVariants['unified-navigation'] === 'show-unified-navigation')) ? nav.header_extras_unified : nav.header_extras)
+					each item in nav.header_extras
 						-
 							if ((item.only_when_logged_in && getSessionUser())
 											|| (item.only_when_logged_out && (!getSessionUser()))
