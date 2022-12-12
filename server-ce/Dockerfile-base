@@ -8,6 +8,9 @@ FROM phusion/baseimage:focal-1.2.0
 # -----------------------------------
 ENV TEXMFVAR=/var/lib/sharelatex/tmp/texmf-var
 
+# Update to ensure dependencies are updated
+# ------------------------------------------
+ENV REBUILT_AFTER="2022-12-12"
 
 # Install dependencies
 # --------------------
