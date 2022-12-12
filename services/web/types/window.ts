@@ -28,5 +28,8 @@ declare global {
     isRestrictedTokenMember: boolean
     _reportCM6Perf: () => void
     _reportAcePerf: () => void
+    MathJax: {
+      Hub: Record<string, any>
+    }
   }
 }

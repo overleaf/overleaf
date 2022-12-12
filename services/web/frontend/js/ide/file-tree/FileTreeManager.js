@@ -292,6 +292,13 @@ export default FileTreeManager = class FileTreeManager {
     return this._findEntityByPathInFolder(this.$scope.rootFolder, path)
   }
 
+  getPreviewUrlByPath(path) {
+    const entity = this.findEntityByPath(path)
+    return entity
+      ? `/project/${this.$scope.project._id}/file/${entity.id}`
+      : null
+  }
+
   _findEntityByPathInFolder(folder, path) {
     if (path == null || folder == null) {
       return null

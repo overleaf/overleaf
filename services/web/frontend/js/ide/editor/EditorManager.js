@@ -24,6 +24,8 @@ import './controllers/SwitchToPDFButton'
 import getMeta from '../../utils/meta'
 import { hasSeenCM6SwitchAwaySurvey } from '../../features/source-editor/utils/switch-away-survey'
 
+const params = new URLSearchParams(window.location.search)
+
 let EditorManager
 
 export default EditorManager = (function () {
@@ -46,6 +48,7 @@ export default EditorManager = (function () {
         wantTrackChanges: false,
         docTooLongErrorShown: false,
         showRichText: this.showRichText(),
+        showVisual: this.showVisual(),
         newSourceEditor: this.newSourceEditor(),
         showSymbolPalette: false,
         toggleSymbolPalette: () => {
@@ -165,9 +168,24 @@ export default EditorManager = (function () {
     }
 
     showRichText() {
+      if (params.has('cm_visual')) {
+        return false
+      }
+
       return (
         this.localStorage(`editor.mode.${this.$scope.project_id}`) ===
         'rich-text'
+      )
+    }
+
+    showVisual() {
+      if (!params.has('cm_visual')) {
+        return false
+      }
+
+      return (
+        this.localStorage(`editor.visual-mode.${this.$scope.project_id}`) ===
+        'visual'
       )
     }
 

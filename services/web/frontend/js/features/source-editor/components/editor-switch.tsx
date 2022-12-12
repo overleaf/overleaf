@@ -3,6 +3,8 @@ import useScopeValue from '../../../shared/hooks/use-scope-value'
 import Tooltip from '../../../shared/components/tooltip'
 import { sendMB } from '../../../infrastructure/event-tracking'
 
+const params = new URLSearchParams(window.location.search)
+
 function Badge() {
   const content = (
     <>
@@ -42,6 +44,10 @@ function EditorSwitch() {
   )
   const [richText, setRichText] = useScopeValue('editor.showRichText')
 
+  const [visual, setVisual] = useScopeValue('editor.showVisual')
+
+  const richTextOrVisual = richText || visual
+
   const handleChange = useCallback(
     event => {
       const editorType = event.target.value
@@ -49,22 +55,31 @@ function EditorSwitch() {
       switch (editorType) {
         case 'ace':
           setRichText(false)
+          setVisual(false)
           setNewSourceEditor(false)
           break
 
         case 'cm6':
           setRichText(false)
+          setVisual(false)
           setNewSourceEditor(true)
           break
 
         case 'rich-text':
-          setRichText(true)
+          if (params.has('cm_visual')) {
+            setRichText(false)
+            setVisual(true)
+            setNewSourceEditor(true)
+          } else {
+            setRichText(true)
+            setVisual(false)
+          }
           break
       }
 
       sendMB('editor-switch-change', { editorType })
     },
-    [setRichText, setNewSourceEditor]
+    [setRichText, setVisual, setNewSourceEditor]
   )
 
   return (
@@ -80,7 +95,7 @@ function EditorSwitch() {
           value="cm6"
           id="editor-switch-cm6"
           className="toggle-switch-input"
-          checked={!richText && !!newSourceEditor}
+          checked={!richTextOrVisual && !!newSourceEditor}
           onChange={handleChange}
         />
         <label htmlFor="editor-switch-cm6" className="toggle-switch-label">
@@ -93,7 +108,7 @@ function EditorSwitch() {
           value="ace"
           id="editor-switch-ace"
           className="toggle-switch-input"
-          checked={!richText && !newSourceEditor}
+          checked={!richTextOrVisual && !newSourceEditor}
           onChange={handleChange}
         />
         <label htmlFor="editor-switch-ace" className="toggle-switch-label">
@@ -106,7 +121,7 @@ function EditorSwitch() {
           value="rich-text"
           id="editor-switch-rich-text"
           className="toggle-switch-input"
-          checked={!!richText}
+          checked={!!richTextOrVisual}
           onChange={handleChange}
         />
         <label
