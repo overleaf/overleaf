@@ -7,9 +7,6 @@
 @plans-v2-highlighted-text-height-mobile: 41px;
 @plans-v2-learn-more-link-color: hsl(206, 100%, 52%);
 @plans-v2-top-switch-group-width-mobile: 46%;
-@plans-v2-m-a-tooltip-arrow-z-index: 10;
-@plans-v2-m-a-tooltip-z-index: 20;
-@plans-v2-green-highlighted-text-z-index: 1;
 @plans-v2-discount-highlighted-text-z-index: 2;
 @plans-v2-table-sticky-header-z-index: 100;
 @plans-v2-table-border-radius: 20px;
@@ -230,7 +227,7 @@ button.plans-v2-btn-header {
   border-radius: 4px;
   left: 100%;
   top: 0;
-  z-index: @plans-v2-m-a-tooltip-z-index;
+  z-index: 0;
 
   &.plans-v2-m-a-tooltip-annual-selected {
     .tooltip-inner {
@@ -1029,7 +1026,6 @@ p.plans-v2-table-green-highlighted-text {
   color: @white;
   height: @plans-v2-highlighted-text-height-desktop;
   margin: 0;
-  z-index: @plans-v2-green-highlighted-text-z-index;
 
   @media (max-width: @screen-sm-max) {
     top: -1 * @plans-v2-highlighted-text-height-mobile;
