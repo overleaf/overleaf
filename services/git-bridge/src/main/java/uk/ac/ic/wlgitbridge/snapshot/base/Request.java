@@ -76,6 +76,13 @@ public abstract class Request<T extends Result> {
                 int sc = httpCause.getStatusCode();
                 if (sc == HttpServletResponse.SC_UNAUTHORIZED || sc == HttpServletResponse.SC_FORBIDDEN) {  // 401, 403
                     throw new ForbiddenException();
+                } else if (sc == 429) { // Too many requests
+                  throw new MissingRepositoryException(Arrays.asList(
+                    "Rate-limit exceeded. Please wait a while and try again.",
+                    "",
+                    "If this is unexpected, please contact us at support@overleaf.com, or",
+                    "see https://www.overleaf.com/help/342 for more information."
+                  ));
                 } else if (sc == HttpServletResponse.SC_CONFLICT) {  // 409
                     try {
                         JsonObject json = Instance.gson.fromJson(httpCause.getContent(), JsonObject.class);
