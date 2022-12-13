@@ -1,4 +1,6 @@
-const request = require('request').defaults({
+import Request from 'request'
+
+const request = Request.defaults({
   baseUrl: 'http://localhost:3010',
 })
 
@@ -14,7 +16,7 @@ async function asyncRequest(options) {
   })
 }
 
-async function sendGlobalMessage(projectId, userId, content) {
+export async function sendGlobalMessage(projectId, userId, content) {
   return asyncRequest({
     method: 'post',
     url: `/project/${projectId}/messages`,
@@ -25,7 +27,7 @@ async function sendGlobalMessage(projectId, userId, content) {
   })
 }
 
-async function getGlobalMessages(projectId) {
+export async function getGlobalMessages(projectId) {
   return asyncRequest({
     method: 'get',
     url: `/project/${projectId}/messages`,
@@ -33,7 +35,7 @@ async function getGlobalMessages(projectId) {
   })
 }
 
-async function sendMessage(projectId, threadId, userId, content) {
+export async function sendMessage(projectId, threadId, userId, content) {
   return asyncRequest({
     method: 'post',
     url: `/project/${projectId}/thread/${threadId}/messages`,
@@ -44,7 +46,7 @@ async function sendMessage(projectId, threadId, userId, content) {
   })
 }
 
-async function getThreads(projectId) {
+export async function getThreads(projectId) {
   return asyncRequest({
     method: 'get',
     url: `/project/${projectId}/threads`,
@@ -52,7 +54,7 @@ async function getThreads(projectId) {
   })
 }
 
-async function resolveThread(projectId, threadId, userId) {
+export async function resolveThread(projectId, threadId, userId) {
   return asyncRequest({
     method: 'post',
     url: `/project/${projectId}/thread/${threadId}/resolve`,
@@ -62,21 +64,21 @@ async function resolveThread(projectId, threadId, userId) {
   })
 }
 
-async function reopenThread(projectId, threadId) {
+export async function reopenThread(projectId, threadId) {
   return asyncRequest({
     method: 'post',
     url: `/project/${projectId}/thread/${threadId}/reopen`,
   })
 }
 
-async function deleteThread(projectId, threadId) {
+export async function deleteThread(projectId, threadId) {
   return asyncRequest({
     method: 'delete',
     url: `/project/${projectId}/thread/${threadId}`,
   })
 }
 
-async function editMessage(projectId, threadId, messageId, content) {
+export async function editMessage(projectId, threadId, messageId, content) {
   return asyncRequest({
     method: 'post',
     url: `/project/${projectId}/thread/${threadId}/messages/${messageId}/edit`,
@@ -86,7 +88,7 @@ async function editMessage(projectId, threadId, messageId, content) {
   })
 }
 
-async function editMessageWithUser(
+export async function editMessageWithUser(
   projectId,
   threadId,
   messageId,
@@ -103,30 +105,16 @@ async function editMessageWithUser(
   })
 }
 
-async function deleteMessage(projectId, threadId, messageId) {
+export async function deleteMessage(projectId, threadId, messageId) {
   return asyncRequest({
     method: 'delete',
     url: `/project/${projectId}/thread/${threadId}/messages/${messageId}`,
   })
 }
 
-async function destroyProject(projectId) {
+export async function destroyProject(projectId) {
   return asyncRequest({
     method: 'delete',
     url: `/project/${projectId}`,
   })
-}
-
-module.exports = {
-  sendGlobalMessage,
-  getGlobalMessages,
-  sendMessage,
-  getThreads,
-  resolveThread,
-  reopenThread,
-  deleteThread,
-  editMessage,
-  editMessageWithUser,
-  deleteMessage,
-  destroyProject,
 }

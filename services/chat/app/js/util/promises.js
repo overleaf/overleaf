@@ -3,10 +3,8 @@
  *
  * Any error will be passed to the error middlewares via `next()`
  */
-function expressify(fn) {
+export function expressify(fn) {
   return (req, res, next) => {
     fn(req, res, next).catch(next)
   }
 }
-
-module.exports = { expressify }

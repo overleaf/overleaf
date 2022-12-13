@@ -1,26 +1,26 @@
-const logger = require('@overleaf/logger')
-const MessageManager = require('./MessageManager')
-const MessageFormatter = require('./MessageFormatter')
-const ThreadManager = require('../Threads/ThreadManager')
-const { ObjectId } = require('../../mongodb')
-const { expressify } = require('../../util/promises')
+import logger from '@overleaf/logger'
+import * as MessageManager from './MessageManager.js'
+import * as MessageFormatter from './MessageFormatter.js'
+import * as ThreadManager from '../Threads/ThreadManager.js'
+import { ObjectId } from '../../mongodb.js'
+import { expressify } from '../../util/promises.js'
 
 const DEFAULT_MESSAGE_LIMIT = 50
 const MAX_MESSAGE_LENGTH = 10 * 1024 // 10kb, about 1,500 words
 
-async function getGlobalMessages(req, res) {
+export const getGlobalMessages = expressify(async (req, res) => {
   await _getMessages(ThreadManager.GLOBAL_THREAD, req, res)
-}
+})
 
-async function sendGlobalMessage(req, res) {
+export const sendGlobalMessage = expressify(async (req, res) => {
   await _sendMessage(ThreadManager.GLOBAL_THREAD, req, res)
-}
+})
 
-async function sendThreadMessage(req, res) {
+export const sendThreadMessage = expressify(async (req, res) => {
   await _sendMessage(req.params.threadId, req, res)
-}
+})
 
-async function getAllThreads(req, res) {
+export const getAllThreads = expressify(async (req, res) => {
   const { projectId } = req.params
   logger.debug({ projectId }, 'getting all threads')
   const rooms = await ThreadManager.findAllThreadRooms(projectId)
@@ -28,32 +28,32 @@ async function getAllThreads(req, res) {
   const messages = await MessageManager.findAllMessagesInRooms(roomIds)
   const threads = MessageFormatter.groupMessagesByThreads(rooms, messages)
   res.json(threads)
-}
+})
 
-async function resolveThread(req, res) {
+export const resolveThread = expressify(async (req, res) => {
   const { projectId, threadId } = req.params
   const { user_id: userId } = req.body
   logger.debug({ userId, projectId, threadId }, 'marking thread as resolved')
   await ThreadManager.resolveThread(projectId, threadId, userId)
   res.sendStatus(204)
-}
+})
 
-async function reopenThread(req, res) {
+export const reopenThread = expressify(async (req, res) => {
   const { projectId, threadId } = req.params
   logger.debug({ projectId, threadId }, 'reopening thread')
   await ThreadManager.reopenThread(projectId, threadId)
   res.sendStatus(204)
-}
+})
 
-async function deleteThread(req, res) {
+export const deleteThread = expressify(async (req, res) => {
   const { projectId, threadId } = req.params
   logger.debug({ projectId, threadId }, 'deleting thread')
   const roomId = await ThreadManager.deleteThread(projectId, threadId)
   await MessageManager.deleteAllMessagesInRoom(roomId)
   res.sendStatus(204)
-}
+})
 
-async function editMessage(req, res) {
+export const editMessage = expressify(async (req, res) => {
   const { content, userId } = req.body
   const { projectId, threadId, messageId } = req.params
   logger.debug({ projectId, threadId, messageId, content }, 'editing message')
@@ -69,17 +69,17 @@ async function editMessage(req, res) {
     return res.sendStatus(404)
   }
   res.sendStatus(204)
-}
+})
 
-async function deleteMessage(req, res) {
+export const deleteMessage = expressify(async (req, res) => {
   const { projectId, threadId, messageId } = req.params
   logger.debug({ projectId, threadId, messageId }, 'deleting message')
   const room = await ThreadManager.findOrCreateThread(projectId, threadId)
   await MessageManager.deleteMessage(room._id, messageId)
   res.sendStatus(204)
-}
+})
 
-async function destroyProject(req, res) {
+export const destroyProject = expressify(async (req, res) => {
   const { projectId } = req.params
   logger.debug({ projectId }, 'destroying project')
   const rooms = await ThreadManager.findAllThreadRoomsAndGlobalThread(projectId)
@@ -89,7 +89,7 @@ async function destroyProject(req, res) {
   logger.debug({ projectId }, 'deleting all threads in project')
   await ThreadManager.deleteAllThreadsInProject(projectId)
   res.sendStatus(204)
-}
+})
 
 async function _sendMessage(clientThreadId, req, res) {
   const { user_id: userId, content } = req.body
@@ -154,17 +154,4 @@ async function _getMessages(clientThreadId, req, res) {
   messages = MessageFormatter.formatMessagesForClientSide(messages)
   logger.debug({ projectId, messages }, 'got messages')
   res.status(200).send(messages)
-}
-
-module.exports = {
-  getGlobalMessages: expressify(getGlobalMessages),
-  sendGlobalMessage: expressify(sendGlobalMessage),
-  sendThreadMessage: expressify(sendThreadMessage),
-  getAllThreads: expressify(getAllThreads),
-  resolveThread: expressify(resolveThread),
-  reopenThread: expressify(reopenThread),
-  deleteThread: expressify(deleteThread),
-  editMessage: expressify(editMessage),
-  deleteMessage: expressify(deleteMessage),
-  destroyProject: expressify(destroyProject),
 }

@@ -13,7 +13,9 @@ const SHARELATEX_CONFIG = process.env.SHARELATEX_CONFIG
 let settings
 let settingsExist = false
 const defaultsPath =
+  pathIfExists(Path.join(CWD, 'config/settings.defaults.cjs')) ||
   pathIfExists(Path.join(CWD, 'config/settings.defaults.js')) ||
+  pathIfExists(Path.join(ENTRY_POINT_DIR, 'config/settings.defaults.cjs')) ||
   pathIfExists(Path.join(ENTRY_POINT_DIR, 'config/settings.defaults.js'))
 if (defaultsPath) {
   console.log(`Using default settings from ${defaultsPath}`)
@@ -25,6 +27,7 @@ if (defaultsPath) {
 
 const overridesPath =
   pathIfExists(SHARELATEX_CONFIG) ||
+  pathIfExists(Path.join(CWD, `config/settings.${NODE_ENV}.cjs`)) ||
   pathIfExists(Path.join(CWD, `config/settings.${NODE_ENV}.js`))
 if (overridesPath) {
   console.log(`Using settings from ${overridesPath}`)

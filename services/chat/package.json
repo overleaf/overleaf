@@ -3,6 +3,7 @@
   "description": "The backend API that powers Overleaf chat",
   "private": true,
   "main": "app.js",
+  "type": "module",
   "scripts": {
     "start": "node $NODE_APP_OPTIONS app.js",
     "test:acceptance": "npm run test:acceptance:_run -- --grep=$MOCHA_GREP",

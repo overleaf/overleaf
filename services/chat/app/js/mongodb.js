@@ -1,16 +1,12 @@
-const Settings = require('@overleaf/settings')
-const { MongoClient, ObjectId } = require('mongodb')
+import Settings from '@overleaf/settings'
+import { MongoClient } from 'mongodb'
 
-const client = new MongoClient(Settings.mongo.url)
-const db = client.db()
+export { ObjectId } from 'mongodb'
 
-const collections = {
-  messages: db.collection('messages'),
-  rooms: db.collection('rooms'),
-}
+export const mongoClient = new MongoClient(Settings.mongo.url)
+const mongoDb = mongoClient.db()
 
-module.exports = {
-  db: collections,
-  mongoClient: client,
-  ObjectId,
+export const db = {
+  messages: mongoDb.collection('messages'),
+  rooms: mongoDb.collection('rooms'),
 }

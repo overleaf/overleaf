@@ -1,11 +1,8 @@
-let ThreadManager
-const { db, ObjectId } = require('../../mongodb')
-const logger = require('@overleaf/logger')
-const metrics = require('@overleaf/metrics')
+import { db, ObjectId } from '../../mongodb.js'
 
-const GLOBAL_THREAD = 'GLOBAL'
+export const GLOBAL_THREAD = 'GLOBAL'
 
-async function findOrCreateThread(projectId, threadId) {
+export async function findOrCreateThread(projectId, threadId) {
   let query, update
   projectId = ObjectId(projectId.toString())
   if (threadId !== GLOBAL_THREAD) {
@@ -39,7 +36,7 @@ async function findOrCreateThread(projectId, threadId) {
   return result.value
 }
 
-async function findAllThreadRooms(projectId) {
+export async function findAllThreadRooms(projectId) {
   return db.rooms
     .find(
       {
@@ -54,7 +51,7 @@ async function findAllThreadRooms(projectId) {
     .toArray()
 }
 
-async function findAllThreadRoomsAndGlobalThread(projectId) {
+export async function findAllThreadRoomsAndGlobalThread(projectId) {
   return db.rooms
     .find(
       {
@@ -68,7 +65,7 @@ async function findAllThreadRoomsAndGlobalThread(projectId) {
     .toArray()
 }
 
-async function resolveThread(projectId, threadId, userId) {
+export async function resolveThread(projectId, threadId, userId) {
   await db.rooms.updateOne(
     {
       project_id: ObjectId(projectId.toString()),
@@ -85,7 +82,7 @@ async function resolveThread(projectId, threadId, userId) {
   )
 }
 
-async function reopenThread(projectId, threadId) {
+export async function reopenThread(projectId, threadId) {
   await db.rooms.updateOne(
     {
       project_id: ObjectId(projectId.toString()),
@@ -99,7 +96,7 @@ async function reopenThread(projectId, threadId) {
   )
 }
 
-async function deleteThread(projectId, threadId) {
+export async function deleteThread(projectId, threadId) {
   const room = await findOrCreateThread(projectId, threadId)
   await db.rooms.deleteOne({
     _id: room._id,
@@ -107,28 +104,8 @@ async function deleteThread(projectId, threadId) {
   return room._id
 }
 
-async function deleteAllThreadsInProject(projectId) {
+export async function deleteAllThreadsInProject(projectId) {
   await db.rooms.deleteMany({
     project_id: ObjectId(projectId.toString()),
   })
 }
-
-module.exports = ThreadManager = {
-  GLOBAL_THREAD,
-  findOrCreateThread,
-  findAllThreadRooms,
-  findAllThreadRoomsAndGlobalThread,
-  resolveThread,
-  reopenThread,
-  deleteThread,
-  deleteAllThreadsInProject,
-}
-;[
-  'findOrCreateThread',
-  'findAllThreadRooms',
-  'resolveThread',
-  'reopenThread',
-  'deleteThread',
-].map(method =>
-  metrics.timeAsyncMethod(ThreadManager, method, 'mongo.ThreadManager', logger)
-)

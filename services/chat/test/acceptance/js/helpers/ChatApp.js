@@ -1,9 +1,10 @@
-const { db } = require('../../../../app/js/mongodb')
-const app = require('../../../../app')
+import { server } from '../../../../app/js/server.js'
+
+export { db } from '../../../../app/js/mongodb.js'
 
 let serverPromise = null
 function startServer(resolve, reject) {
-  app.listen(3010, 'localhost', error => {
+  server.listen(3010, 'localhost', error => {
     if (error) {
       return reject(error)
     }
@@ -11,14 +12,9 @@ function startServer(resolve, reject) {
   })
 }
 
-async function ensureRunning() {
+export async function ensureRunning() {
   if (!serverPromise) {
     serverPromise = new Promise(startServer)
   }
   return serverPromise
-}
-
-module.exports = {
-  db,
-  ensureRunning,
 }

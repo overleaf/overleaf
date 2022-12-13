@@ -1,8 +1,8 @@
-const { ObjectId } = require('../../../app/js/mongodb')
-const { expect } = require('chai')
+import { ObjectId } from '../../../app/js/mongodb.js'
+import { expect } from 'chai'
 
-const ChatClient = require('./helpers/ChatClient')
-const ChatApp = require('./helpers/ChatApp')
+import * as ChatClient from './helpers/ChatClient.js'
+import * as ChatApp from './helpers/ChatApp.js'
 
 describe('Editing a message', async function () {
   let projectId, userId, threadId

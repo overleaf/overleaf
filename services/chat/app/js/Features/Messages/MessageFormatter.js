@@ -1,4 +1,4 @@
-function formatMessageForClientSide(message) {
+export function formatMessageForClientSide(message) {
   if (message._id) {
     message.id = message._id.toString()
     delete message._id
@@ -15,11 +15,11 @@ function formatMessageForClientSide(message) {
   return formattedMessage
 }
 
-function formatMessagesForClientSide(messages) {
+export function formatMessagesForClientSide(messages) {
   return messages.map(message => formatMessageForClientSide(message))
 }
 
-function groupMessagesByThreads(rooms, messages) {
+export function groupMessagesByThreads(rooms, messages) {
   let room, thread
   const roomsById = {}
   for (room of rooms) {
@@ -57,10 +57,4 @@ function groupMessagesByThreads(rooms, messages) {
   }
 
   return threads
-}
-
-module.exports = {
-  formatMessagesForClientSide,
-  formatMessageForClientSide,
-  groupMessagesByThreads,
 }

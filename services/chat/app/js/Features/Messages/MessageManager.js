@@ -1,9 +1,6 @@
-let MessageManager
-const { db, ObjectId } = require('../../mongodb')
-const metrics = require('@overleaf/metrics')
-const logger = require('@overleaf/logger')
+import { db, ObjectId } from '../../mongodb.js'
 
-async function createMessage(roomId, userId, content, timestamp) {
+export async function createMessage(roomId, userId, content, timestamp) {
   let newMessageOpts = {
     content,
     room_id: roomId,
@@ -16,7 +13,7 @@ async function createMessage(roomId, userId, content, timestamp) {
   return newMessageOpts
 }
 
-async function getMessages(roomId, limit, before) {
+export async function getMessages(roomId, limit, before) {
   let query = { room_id: roomId }
   if (before) {
     query.timestamp = { $lt: before }
@@ -25,7 +22,7 @@ async function getMessages(roomId, limit, before) {
   return db.messages.find(query).sort({ timestamp: -1 }).limit(limit).toArray()
 }
 
-async function findAllMessagesInRooms(roomIds) {
+export async function findAllMessagesInRooms(roomIds) {
   return db.messages
     .find({
       room_id: { $in: roomIds },
@@ -33,19 +30,25 @@ async function findAllMessagesInRooms(roomIds) {
     .toArray()
 }
 
-async function deleteAllMessagesInRoom(roomId) {
+export async function deleteAllMessagesInRoom(roomId) {
   await db.messages.deleteMany({
     room_id: roomId,
   })
 }
 
-async function deleteAllMessagesInRooms(roomIds) {
+export async function deleteAllMessagesInRooms(roomIds) {
   await db.messages.deleteMany({
     room_id: { $in: roomIds },
   })
 }
 
-async function updateMessage(roomId, messageId, userId, content, timestamp) {
+export async function updateMessage(
+  roomId,
+  messageId,
+  userId,
+  content,
+  timestamp
+) {
   const query = _ensureIdsAreObjectIds({
     _id: messageId,
     room_id: roomId,
@@ -62,7 +65,7 @@ async function updateMessage(roomId, messageId, userId, content, timestamp) {
   return res.modifiedCount === 1
 }
 
-async function deleteMessage(roomId, messageId) {
+export async function deleteMessage(roomId, messageId) {
   const query = _ensureIdsAreObjectIds({
     _id: messageId,
     room_id: roomId,
@@ -82,27 +85,3 @@ function _ensureIdsAreObjectIds(query) {
   }
   return query
 }
-
-module.exports = MessageManager = {
-  createMessage,
-  getMessages,
-  findAllMessagesInRooms,
-  deleteAllMessagesInRoom,
-  deleteAllMessagesInRooms,
-  updateMessage,
-  deleteMessage,
-}
-;[
-  'createMessage',
-  'getMessages',
-  'findAllMessagesInRooms',
-  'updateMessage',
-  'deleteMessage',
-].map(method =>
-  metrics.timeAsyncMethod(
-    MessageManager,
-    method,
-    'mongo.MessageManager',
-    logger
-  )
-)
