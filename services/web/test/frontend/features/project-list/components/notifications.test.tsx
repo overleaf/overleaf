@@ -27,6 +27,8 @@ import {
 } from '../../../../../types/project/dashboard/notification'
 import { DeepPartial } from '../../../../../types/utils'
 import { Project } from '../../../../../types/project/dashboard/api'
+import GroupsAndEnterpriseBanner from '../../../../../frontend/js/features/project-list/components/notifications/groups-and-enterprise-banner'
+import localStorage from '../../../../../frontend/js/infrastructure/local-storage'
 
 const renderWithinProjectListProvider = (Component: React.ComponentType) => {
   render(<Component />, {
@@ -638,6 +640,127 @@ describe('<UserNotifications />', function () {
       window.metaAttributesCache.set('ol-reconfirmedViaSAML', '')
       rerender(<ReconfirmationInfo />)
       expect(screen.queryByRole('alert')).to.be.null
+    })
+  })
+
+  describe('<GroupsAndEnterpriseBanner />', function () {
+    beforeEach(function () {
+      window.metaAttributesCache = window.metaAttributesCache || new Map()
+      localStorage.clear()
+      fetchMock.reset()
+
+      // at least one project is required to show some notifications
+      const projects = [{}] as Project[]
+      fetchMock.post(/\/api\/project/, {
+        status: 200,
+        body: {
+          projects,
+          totalSize: projects.length,
+        },
+      })
+    })
+
+    afterEach(function () {
+      fetchMock.reset()
+      window.metaAttributesCache = window.metaAttributesCache || new Map()
+    })
+
+    it('does not show the banner for users that are in group or are affiliated or assigned in the `default` variant', async function () {
+      window.metaAttributesCache.set('ol-showGroupsAndEnterpriseBanner', false)
+
+      renderWithinProjectListProvider(GroupsAndEnterpriseBanner)
+      await fetchMock.flush(true)
+
+      expect(screen.queryByRole('link', { name: 'Contact Sales' })).to.be.null
+    })
+
+    it('does not show the banner for users that have already dismissed it', async function () {
+      window.metaAttributesCache.set('ol-showGroupsAndEnterpriseBanner', true)
+      localStorage.setItem('has_dismissed_groups_and_enterprise_banner', true)
+
+      renderWithinProjectListProvider(GroupsAndEnterpriseBanner)
+      await fetchMock.flush(true)
+
+      expect(screen.queryByRole('link', { name: 'Contact Sales' })).to.be.null
+    })
+
+    describe('users that are not in group and are not affiliated', function () {
+      beforeEach(function () {
+        localStorage.clear()
+        fetchMock.reset()
+
+        // at least one project is required to show some notifications
+        const projects = [{}] as Project[]
+        fetchMock.post(/\/api\/project/, {
+          status: 200,
+          body: {
+            projects,
+            totalSize: projects.length,
+          },
+        })
+
+        window.metaAttributesCache.set('ol-showGroupsAndEnterpriseBanner', true)
+      })
+
+      afterEach(function () {
+        fetchMock.reset()
+        window.metaAttributesCache = window.metaAttributesCache || new Map()
+      })
+
+      after(function () {
+        localStorage.clear()
+      })
+
+      it('will show the correct text for the `save` split test variant', async function () {
+        window.metaAttributesCache.set(
+          'ol-groupsAndEnterpriseBannerVariant',
+          'save'
+        )
+
+        renderWithinProjectListProvider(GroupsAndEnterpriseBanner)
+        await fetchMock.flush(true)
+
+        screen.getByText(
+          /Groups, Companies and Research Organizations can save money with our Group and Enterprise plans — request information or a quote./
+        )
+        const link = screen.getByRole('link', { name: 'Contact Sales' })
+
+        expect(link.getAttribute('href')).to.equal(`/for/contact-sales`)
+      })
+
+      it('will show the correct text for the `did-you-know` split test variant', async function () {
+        window.metaAttributesCache.set(
+          'ol-groupsAndEnterpriseBannerVariant',
+          'did-you-know'
+        )
+
+        renderWithinProjectListProvider(GroupsAndEnterpriseBanner)
+        await fetchMock.flush(true)
+
+        screen.getByText(
+          'Did you know that Overleaf offers group and organization-wide subscription options? Request information or a quote.'
+        )
+        const link = screen.getByRole('link', { name: 'Contact Sales' })
+
+        expect(link.getAttribute('href')).to.equal(`/for/contact-sales`)
+      })
+
+      it('will show the correct text for the `empower` split test variant', async function () {
+        window.metaAttributesCache.set(
+          'ol-groupsAndEnterpriseBannerVariant',
+          'empower'
+        )
+
+        renderWithinProjectListProvider(GroupsAndEnterpriseBanner)
+        await fetchMock.flush(true)
+
+        screen.getByText(
+          'Empower your organization to work in Overleaf! Get a group or organizational plan.'
+        )
+        const link = screen.getByRole('link', { name: 'Contact Sales' })
+
+        expect(link.getAttribute('href')).to.equal(`/for/contact-sales`)
+      })
     })
   })
 })

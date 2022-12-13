@@ -517,6 +517,41 @@ const ProjectController = {
             }
           )
         },
+        userIsMemberOfGroupSubscription(cb) {
+          LimitationsManager.userIsMemberOfGroupSubscription(
+            currentUser,
+            (error, isMember) => {
+              if (error) {
+                logger.error(
+                  { err: error },
+                  'Failed to check whether user is a member of group subscription'
+                )
+                return cb(null, false)
+              }
+              cb(null, isMember)
+            }
+          )
+        },
+        groupsAndEnterpriseBannerAssignment(cb) {
+          SplitTestHandler.getAssignment(
+            req,
+            res,
+            'groups-and-enterprise-banner',
+            (err, assignment) => {
+              if (err) {
+                logger.warn(
+                  { err },
+                  'failed to get "groups-and-enterprise-banner" split test assignment'
+                )
+
+                const defaultAssignment = { variant: 'default' }
+                cb(null, defaultAssignment)
+              } else {
+                cb(null, assignment)
+              }
+            }
+          )
+        },
         primaryEmailCheckActive(cb) {
           SplitTestHandler.getAssignment(
             req,
@@ -552,8 +587,14 @@ const ProjectController = {
           OError.tag(err, 'error getting data for project list page')
           return next(err)
         }
-        const { notifications, user, userEmailsData, primaryEmailCheckActive } =
-          results
+        const {
+          notifications,
+          user,
+          userEmailsData,
+          primaryEmailCheckActive,
+          groupsAndEnterpriseBannerAssignment,
+          userIsMemberOfGroupSubscription,
+        } = results
 
         if (
           user &&
@@ -682,6 +723,17 @@ const ProjectController = {
           )
         }
 
+        const hasPaidAffiliation = userAffiliations.some(
+          affiliation => affiliation.licence && affiliation.licence !== 'free'
+        )
+
+        // groupsAndEnterpriseBannerAssignment.variant = 'default' | 'empower' | 'save' | 'did-you-know'
+        const showGroupsAndEnterpriseBanner =
+          groupsAndEnterpriseBannerAssignment.variant !== 'default' &&
+          Features.hasFeature('saas') &&
+          !userIsMemberOfGroupSubscription &&
+          !hasPaidAffiliation
+
         ProjectController._injectProjectUsers(projects, (error, projects) => {
           if (error != null) {
             return next(error)
@@ -706,6 +758,9 @@ const ProjectController = {
             showThinFooter: true, // don't show the fat footer on the projects dashboard, as there's a fixed space available
             usersBestSubscription: results.usersBestSubscription,
             survey: results.survey,
+            showGroupsAndEnterpriseBanner,
+            groupsAndEnterpriseBannerVariant:
+              groupsAndEnterpriseBannerAssignment.variant,
           }
 
           const paidUser =

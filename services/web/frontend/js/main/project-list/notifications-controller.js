@@ -1,4 +1,5 @@
 import App from '../../base'
+import getMeta from '../../utils/meta'
 
 const ExposedSettings = window.ExposedSettings
 App.controller('NotificationsController', function ($scope, $http) {
@@ -22,6 +23,29 @@ App.controller('NotificationsController', function ($scope, $http) {
     }).then(() => (notification.hide = true))
   }
 })
+
+App.controller(
+  'GroupsAndEnterpriseBannerController',
+  function ($scope, localStorage) {
+    $scope.hasDismissedGroupsAndEnterpriseBanner = localStorage(
+      'has_dismissed_groups_and_enterprise_banner'
+    )
+
+    $scope.dismiss = () => {
+      localStorage('has_dismissed_groups_and_enterprise_banner', true)
+      $scope.hasDismissedGroupsAndEnterpriseBanner = true
+    }
+
+    $scope.groupsAndEnterpriseBannerVariant = getMeta(
+      'ol-groupsAndEnterpriseBannerVariant'
+    )
+
+    $scope.isVariantValid =
+      $scope.groupsAndEnterpriseBannerVariant === 'save' ||
+      $scope.groupsAndEnterpriseBannerVariant === 'empower' ||
+      $scope.groupsAndEnterpriseBannerVariant === 'did-you-know'
+  }
+)
 
 App.controller('ProjectInviteNotificationController', function ($scope, $http) {
   // Shortcuts for translation keys

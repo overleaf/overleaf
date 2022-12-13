@@ -1940,5 +1940,9 @@
   "try_out_one_of_our_plans_instead": "Try out one of our plans instead",
   "browse_plans": "Browse plans",
   "i_confirm_that_i_am_a_student": "I confirm that I am a student",
-  "a_more_comprehensive_list_of_keyboard_shortcuts": "A more comprehensive list of keyboard shortcuts can be found in <0>this __appName__ project template</0>"
+  "a_more_comprehensive_list_of_keyboard_shortcuts": "A more comprehensive list of keyboard shortcuts can be found in <0>this __appName__ project template</0>",
+  "contact_sales": "Contact Sales",
+  "empower_your_organization_to_work_in_overleaf": "Empower your organization to work in __appName__! Get a group or organizational plan.",
+  "save_money_groups_companies_research_organizations_can_save_money": "<0>Save Money</0>! Groups, Companies and Research Organizations can save money with our Group and Enterprise plans — request information or a quote.",
+  "did_you_know_that_overleaf_offers": "Did you know that __appName__ offers group and organization-wide subscription options? Request information or a quote."
 }

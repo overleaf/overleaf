@@ -251,3 +251,35 @@ include ../../_mixins/reconfirm_affiliation
 			ng-if="userEmail.samlIdentifier && userEmail.samlIdentifier.providerId === reconfirmedViaSAML"
 		)
 			+reconfirmedAffiliationNotification()
+
+	if showGroupsAndEnterpriseBanner
+		- var eventSegmentation = '{"location": "dashboard-banner", "variant":"' + groupsAndEnterpriseBannerVariant + '" }'
+		ul.list-unstyled(
+			ng-controller="GroupsAndEnterpriseBannerController",
+			ng-cloak
+		)
+			li.notification-entry(
+				ng-if="isVariantValid && !hasDismissedGroupsAndEnterpriseBanner && projects.length > 0"
+				event-tracking="groups-and-enterprise-banner-prompt"
+				event-tracking-mb="true"
+				event-tracking-trigger="load"
+				event-segmentation=eventSegmentation
+			)
+				.alert.alert-info
+					.notification-body(ng-switch="groupsAndEnterpriseBannerVariant")
+						span(ng-switch-when="empower") #{translate("empower_your_organization_to_work_in_overleaf")}
+						span(ng-switch-when="save") !{translate("save_money_groups_companies_research_organizations_can_save_money", {}, ['strong'])}
+						span(ng-switch-when="did-you-know") #{translate("did_you_know_that_overleaf_offers")}
+					.notification-action
+						a.pull-right.btn.btn-sm.btn-info(
+							href="/for/contact-sales"
+							target="_blank"
+							event-tracking="groups-and-enterprise-banner-click"
+							event-tracking-mb="true"
+							event-tracking-trigger="click"
+							event-segmentation=eventSegmentation
+						) #{translate("contact_sales")}
+					.notification-close
+						button(ng-click="dismiss()").close.pull-right
+							span(aria-hidden="true") &times;
+							span.sr-only #{translate("close")}
