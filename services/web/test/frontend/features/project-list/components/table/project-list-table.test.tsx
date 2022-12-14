@@ -64,6 +64,8 @@ describe('<ProjectListTable />', function () {
   })
 
   it('renders project title, owner, last modified, and action buttons', async function () {
+    this.timeout(10000)
+
     renderWithProjectListContext(<ProjectListTable />)
     await fetchMock.flush(true)
 
