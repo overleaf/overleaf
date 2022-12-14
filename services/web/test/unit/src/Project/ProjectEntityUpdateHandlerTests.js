@@ -1632,7 +1632,11 @@ describe('ProjectEntityUpdateHandler', function () {
 
       it('finds the entity', function () {
         this.ProjectLocator.findElementByPath
-          .calledWith({ project_id: projectId, path: this.path })
+          .calledWith({
+            project_id: projectId,
+            path: this.path,
+            exactCaseMatch: true,
+          })
           .should.equal(true)
       })
 

@@ -1163,7 +1163,7 @@ const ProjectEntityUpdateHandler = {
   deleteEntityWithPath: wrapWithLock(
     (projectId, path, userId, source, callback) =>
       ProjectLocator.findElementByPath(
-        { project_id: projectId, path },
+        { project_id: projectId, path, exactCaseMatch: true },
         (err, element, type) => {
           if (err != null) {
             return callback(err)

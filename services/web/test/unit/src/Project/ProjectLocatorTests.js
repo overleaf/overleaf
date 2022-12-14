@@ -400,6 +400,19 @@ describe('ProjectLocator', function () {
       )
     })
 
+    it('should not return elements with a case-insensitive match when exactCaseMatch is true', function (done) {
+      const path = `${subFolder.name.toUpperCase()}/${secondSubFolder.name.toUpperCase()}/${subSubFile.name.toUpperCase()}`
+      this.locator.findElementByPath(
+        { project, path, exactCaseMatch: true },
+        (err, element, type, folder) => {
+          err.should.not.equal(undefined)
+          expect(element).to.be.undefined
+          expect(type).to.be.undefined
+          done()
+        }
+      )
+    })
+
     it('should take a file path and return the element for a nested folder', function (done) {
       const path = `${subFolder.name}/${secondSubFolder.name}`
       this.locator.findElementByPath(
