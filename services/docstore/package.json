@@ -27,11 +27,11 @@
     "bunyan": "^1.8.15",
     "celebrate": "^13.0.4",
     "express": "^4.17.1",
-    "mongodb": "^3.6.0",
+    "lodash": "^4.17.21",
+    "mongodb": "^4.11.0",
     "p-map": "^4.0.0",
     "request": "^2.88.2",
-    "streamifier": "^0.1.1",
-    "underscore": "~1.12.1"
+    "streamifier": "^0.1.1"
   },
   "devDependencies": {
     "@google-cloud/storage": "^5.1.2",

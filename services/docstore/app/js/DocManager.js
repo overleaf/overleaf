@@ -15,7 +15,7 @@ let DocManager
 const MongoManager = require('./MongoManager')
 const Errors = require('./Errors')
 const logger = require('@overleaf/logger')
-const _ = require('underscore')
+const _ = require('lodash')
 const DocArchive = require('./DocArchiveManager')
 const RangeManager = require('./RangeManager')
 const Settings = require('@overleaf/settings')
@@ -157,7 +157,7 @@ module.exports = DocManager = {
             )
             return callback(err)
           }
-          doc = _.extend(doc, archivedDoc)
+          Object.assign(doc, archivedDoc)
           callback(null, doc)
         })
       }

@@ -18,7 +18,6 @@ const modulePath = require('path').join(
   '../../../app/js/RangeManager'
 )
 const { ObjectId } = require('mongodb')
-const _ = require('underscore')
 
 describe('RangeManager', function () {
   beforeEach(function () {

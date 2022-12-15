@@ -30,7 +30,7 @@ SandboxedModule.configure({
   requires: {
     '@overleaf/logger': stubs.logger,
   },
-  globals: { Buffer, JSON, console, process },
+  globals: { Buffer, JSON, Math, console, process },
 })
 
 exports.mochaHooks = {

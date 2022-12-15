@@ -9,12 +9,7 @@ const Settings = {
     },
   },
 
-  mongo: {
-    options: {
-      useUnifiedTopology:
-        (process.env.MONGO_USE_UNIFIED_TOPOLOGY || 'true') === 'true',
-    },
-  },
+  mongo: {},
 
   docstore: {
     archiveOnSoftDelete: process.env.ARCHIVE_ON_SOFT_DELETE === 'true',

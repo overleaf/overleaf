@@ -15,7 +15,7 @@ const {
   Joi,
   errors: handleValidationErrors,
 } = require('celebrate')
-const mongodb = require('./app/js/mongodb')
+const { mongoClient } = require('./app/js/mongodb')
 const Errors = require('./app/js/Errors')
 const HttpController = require('./app/js/HttpController')
 
@@ -101,8 +101,8 @@ const { host } = Settings.internal.docstore
 
 if (!module.parent) {
   // Called directly
-  mongodb
-    .waitForDb()
+  mongoClient
+    .connect()
     .then(() => {
       const server = app.listen(port, host, function (err) {
         if (err) {

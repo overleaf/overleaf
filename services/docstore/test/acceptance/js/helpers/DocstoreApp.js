@@ -1,5 +1,4 @@
 const app = require('../../../../app')
-const { waitForDb } = require('../../../../app/js/mongodb')
 require('@overleaf/logger').logger.level('error')
 const settings = require('@overleaf/settings')
 
@@ -8,9 +7,6 @@ module.exports = {
   initing: false,
   callbacks: [],
   ensureRunning(callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
     if (this.running) {
       return callback()
     } else if (this.initing) {
@@ -18,20 +14,14 @@ module.exports = {
     }
     this.initing = true
     this.callbacks.push(callback)
-    waitForDb().then(() => {
-      return app.listen(settings.internal.docstore.port, 'localhost', error => {
-        if (error != null) {
-          throw error
-        }
-        this.running = true
-        return (() => {
-          const result = []
-          for (callback of Array.from(this.callbacks)) {
-            result.push(callback())
-          }
-          return result
-        })()
-      })
+    app.listen(settings.internal.docstore.port, 'localhost', error => {
+      if (error != null) {
+        throw error
+      }
+      this.running = true
+      for (callback of Array.from(this.callbacks)) {
+        callback()
+      }
     })
   },
 }

@@ -12,7 +12,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let RangeManager
-const _ = require('underscore')
+const _ = require('lodash')
 const { ObjectId } = require('./mongodb')
 
 module.exports = RangeManager = {

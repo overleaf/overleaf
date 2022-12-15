@@ -12,7 +12,7 @@
 const { db, ObjectId } = require('./mongodb')
 const request = require('request')
 const async = require('async')
-const _ = require('underscore')
+const _ = require('lodash')
 const crypto = require('crypto')
 const settings = require('@overleaf/settings')
 const { port } = settings.internal.docstore
