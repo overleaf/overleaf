@@ -44,15 +44,5 @@ services:
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
     user: node
-    depends_on:
-      mongo:
-        condition: service_healthy
     command: npm run --silent test:acceptance
-
-  mongo:
-    image: mongo:4.4.16
-    healthcheck:
-      test: "mongo --quiet localhost/test --eval 'quit(db.runCommand({ ping: 1 }).ok ? 0 : 1)'"
-      interval: 1s
-      retries: 20
 

@@ -1,6 +1,6 @@
 # This file was auto-generated, do not edit it directly.
 # Instead run bin/update_build_scripts from
-# https://github.com/sharelatex/sharelatex-dev-environment
+# https://github.com/overleaf/internal/
 
 FROM node:16.17.1 as base
 
@@ -24,7 +24,7 @@ COPY services/spelling/ /overleaf/services/spelling/
 
 FROM app
 RUN mkdir -p cache \
-    &&  chown node:node cache
+&&  chown node:node cache
 USER node
 
 CMD ["node", "--expose-gc", "app.js"]

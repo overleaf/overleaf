@@ -1,6 +1,6 @@
 spelling
 --data-dirs=cache
---dependencies=mongo
+--dependencies=
 --docker-repos=gcr.io/overleaf-ops
 --env-add=
 --env-pass-through=
