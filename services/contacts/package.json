@@ -2,12 +2,13 @@
   "name": "@overleaf/contacts",
   "description": "An API for tracking contacts of a user",
   "private": true,
+  "type": "module",
   "main": "app.js",
   "scripts": {
     "start": "node $NODE_APP_OPTIONS app.js",
-    "test:acceptance:_run": "mocha --recursive --reporter spec --timeout 15000 --exit $@ test/acceptance/js",
+    "test:acceptance:_run": "LOG_LEVEL=fatal mocha --loader=esmock --recursive --reporter spec --timeout 15000 --exit $@ test/acceptance/js",
     "test:acceptance": "npm run test:acceptance:_run -- --grep=$MOCHA_GREP",
-    "test:unit:_run": "mocha --recursive --reporter spec $@ test/unit/js",
+    "test:unit:_run": "LOG_LEVEL=fatal mocha --loader=esmock --recursive --reporter spec $@ test/unit/js",
     "test:unit": "npm run test:unit:_run -- --grep=$MOCHA_GREP",
     "nodemon": "nodemon --config nodemon.json",
     "lint": "eslint --max-warnings 0 --format unix .",
@@ -23,16 +24,16 @@
     "body-parser": "^1.19.0",
     "bunyan": "^1.8.15",
     "express": "^4.17.1",
-    "mongodb": "^3.6.0",
+    "mongodb": "^4.12.1",
     "request": "~2.88.2",
     "underscore": "~1.13.1"
   },
   "devDependencies": {
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
+    "esmock": "^2.1.0",
     "mocha": "^8.4.0",
-    "sandboxed-module": "~2.0.3",
     "sinon": "~9.0.1",
-    "timekeeper": "2.2.0"
+    "sinon-chai": "^3.7.0"
   }
 }

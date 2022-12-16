@@ -1,16 +1,6 @@
-/* eslint-disable
-    no-proto,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-let Errors
-function NotFoundError(message) {
-  const error = new Error(message)
-  error.name = 'NotFoundError'
-  error.__proto__ = NotFoundError.prototype
-  return error
+export class NotFoundError extends Error {
+  constructor(message) {
+    super(message)
+    this.name = 'NotFoundError'
+  }
 }
-NotFoundError.prototype.__proto__ = Error.prototype
-
-module.exports = Errors = { NotFoundError }

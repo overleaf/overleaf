@@ -1,100 +1,48 @@
-/* eslint-disable
-    camelcase,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-let HttpController
-const ContactManager = require('./ContactManager')
-const logger = require('@overleaf/logger')
+import logger from '@overleaf/logger'
+import * as ContactManager from './ContactManager.js'
+import { buildContactIds } from './contacts.js'
 
-module.exports = HttpController = {
-  addContact(req, res, next) {
-    const { user_id } = req.params
-    const { contact_id } = req.body
+const CONTACT_LIMIT = 50
 
-    if (contact_id == null || contact_id === '') {
-      res.status(400).send('contact_id should be a non-blank string')
-      return
-    }
+export function addContact(req, res, next) {
+  const { user_id: userId } = req.params
+  const { contact_id: contactId } = req.body
 
-    logger.debug({ user_id, contact_id }, 'adding contact')
+  if (contactId == null || contactId === '') {
+    res.status(400).send('contact_id should be a non-blank string')
+    return
+  }
 
-    return ContactManager.touchContact(user_id, contact_id, function (error) {
-      if (error != null) {
-        return next(error)
-      }
-      return ContactManager.touchContact(contact_id, user_id, function (error) {
-        if (error != null) {
-          return next(error)
-        }
-        return res.sendStatus(204)
+  logger.debug({ user_id: userId, contact_id: contactId }, 'adding contact')
+
+  Promise.all([
+    ContactManager.touchContact(userId, contactId),
+    ContactManager.touchContact(contactId, userId),
+  ])
+    .then(() => {
+      res.sendStatus(204)
+    })
+    .catch(error => {
+      next(error)
+    })
+}
+
+export function getContacts(req, res, next) {
+  const { user_id: userId } = req.params
+  const { limit } = req.query
+
+  const contactLimit =
+    limit == null ? CONTACT_LIMIT : Math.min(parseInt(limit, 10), CONTACT_LIMIT)
+
+  logger.debug({ user_id: userId }, 'getting contacts')
+
+  ContactManager.getContacts(userId)
+    .then(contacts => {
+      res.json({
+        contact_ids: buildContactIds(contacts, contactLimit),
       })
     })
-  },
-
-  CONTACT_LIMIT: 50,
-  getContacts(req, res, next) {
-    let limit
-    let { user_id } = req.params
-
-    if ((req.query != null ? req.query.limit : undefined) != null) {
-      limit = parseInt(req.query.limit, 10)
-    } else {
-      limit = HttpController.CONTACT_LIMIT
-    }
-    limit = Math.min(limit, HttpController.CONTACT_LIMIT)
-
-    logger.debug({ user_id }, 'getting contacts')
-
-    return ContactManager.getContacts(user_id, function (error, contact_dict) {
-      if (error != null) {
-        return next(error)
-      }
-
-      let contacts = []
-      const object = contact_dict || {}
-      for (user_id in object) {
-        const data = object[user_id]
-        contacts.push({
-          user_id,
-          n: data.n,
-          ts: data.ts,
-        })
-      }
-
-      HttpController._sortContacts(contacts)
-      contacts = contacts.slice(0, limit)
-      const contact_ids = contacts.map(contact => contact.user_id)
-
-      return res.status(200).send({
-        contact_ids,
-      })
+    .catch(error => {
+      next(error)
     })
-  },
-
-  _sortContacts(contacts) {
-    return contacts.sort(function (a, b) {
-      // Sort by decreasing count, descreasing timestamp.
-      // I.e. biggest count, and most recent at front.
-      if (a.n > b.n) {
-        return -1
-      } else if (a.n < b.n) {
-        return 1
-      } else {
-        if (a.ts > b.ts) {
-          return -1
-        } else if (a.ts < b.ts) {
-          return 1
-        } else {
-          return 0
-        }
-      }
-    })
-  },
 }

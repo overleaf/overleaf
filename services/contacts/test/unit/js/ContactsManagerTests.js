@@ -1,140 +1,97 @@
-/* eslint-disable
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const sinon = require('sinon')
-const chai = require('chai')
-const should = chai.should()
-const { expect } = chai
-const modulePath = '../../../app/js/ContactManager.js'
-const SandboxedModule = require('sandboxed-module')
-const { ObjectId } = require('mongodb')
-const tk = require('timekeeper')
+import sinon from 'sinon'
+import { expect } from 'chai'
+import esmock from 'esmock'
+import { ObjectId } from 'mongodb'
 
 describe('ContactManager', function () {
-  beforeEach(function () {
-    tk.freeze(Date.now())
-    this.ContactManager = SandboxedModule.require(modulePath, {
-      requires: {
-        './mongodb': {
-          db: (this.db = { contacts: {} }),
-          ObjectId,
-        },
+  beforeEach(async function () {
+    this.clock = sinon.useFakeTimers(new Date())
+
+    this.db = { contacts: {} }
+
+    this.ContactManager = await esmock('../../../app/js/ContactManager', {
+      '../../../app/js/mongodb': {
+        db: this.db,
+        ObjectId,
       },
     })
+
     this.user_id = ObjectId().toString()
     this.contact_id = ObjectId().toString()
-    return (this.callback = sinon.stub())
   })
 
   afterEach(function () {
-    return tk.reset()
+    this.clock.restore()
   })
 
   describe('touchContact', function () {
     beforeEach(function () {
-      this.db.contacts.updateOne = sinon.stub().callsArg(3)
+      this.db.contacts.updateOne = sinon.stub().resolves()
     })
 
     describe('with a valid user_id', function () {
-      beforeEach(function () {
-        return this.ContactManager.touchContact(
-          this.user_id,
-          (this.contact_id = 'mock_contact'),
-          this.callback
+      it('should increment the contact count and timestamp', async function () {
+        await expect(
+          this.ContactManager.touchContact(this.user_id, 'mock_contact')
+        ).not.to.be.rejected
+
+        expect(this.db.contacts.updateOne).to.be.calledWith(
+          {
+            user_id: sinon.match(o => o.toString() === this.user_id),
+          },
+          {
+            $inc: {
+              'contacts.mock_contact.n': 1,
+            },
+            $set: {
+              'contacts.mock_contact.ts': new Date(),
+            },
+          },
+          {
+            upsert: true,
+          }
         )
-      })
-
-      it('should increment the contact count and timestamp', function () {
-        this.db.contacts.updateOne
-          .calledWith(
-            {
-              user_id: sinon.match(
-                o => o.toString() === this.user_id.toString()
-              ),
-            },
-            {
-              $inc: {
-                'contacts.mock_contact.n': 1,
-              },
-              $set: {
-                'contacts.mock_contact.ts': new Date(),
-              },
-            },
-            {
-              upsert: true,
-            }
-          )
-          .should.equal(true)
-      })
-
-      return it('should call the callback', function () {
-        return this.callback.called.should.equal(true)
       })
     })
 
-    return describe('with an invalid user id', function () {
-      beforeEach(function () {
-        return this.ContactManager.touchContact(
-          'not-valid-object-id',
-          this.contact_id,
-          this.callback
+    describe('with an invalid user id', function () {
+      it('should be rejected', async function () {
+        await expect(
+          this.ContactManager.touchContact(
+            'not-valid-object-id',
+            this.contact_id
+          )
+        ).to.be.rejectedWith(
+          'Argument passed in must be a string of 12 bytes or a string of 24 hex characters or an integer'
         )
-      })
-
-      return it('should call the callback with an error', function () {
-        return this.callback.calledWith(sinon.match(Error)).should.equal(true)
       })
     })
   })
 
-  return describe('getContacts', function () {
+  describe('getContacts', function () {
     beforeEach(function () {
       this.user = {
         contacts: ['mock', 'contacts'],
       }
-      return (this.db.contacts.findOne = sinon
-        .stub()
-        .callsArgWith(1, null, this.user))
+      this.db.contacts.findOne = sinon.stub().resolves(this.user)
     })
 
     describe('with a valid user_id', function () {
-      beforeEach(function () {
-        return this.ContactManager.getContacts(this.user_id, this.callback)
-      })
+      it("should find the user's contacts", async function () {
+        await expect(
+          this.ContactManager.getContacts(this.user_id)
+        ).to.eventually.deep.equal(this.user.contacts)
 
-      it("should find the user's contacts", function () {
-        return this.db.contacts.findOne
-          .calledWith({
-            user_id: sinon.match(o => o.toString() === this.user_id.toString()),
-          })
-          .should.equal(true)
-      })
-
-      return it('should call the callback with the contacts', function () {
-        return this.callback
-          .calledWith(null, this.user.contacts)
-          .should.equal(true)
+        expect(this.db.contacts.findOne).to.be.calledWith({
+          user_id: sinon.match(o => o.toString() === this.user_id),
+        })
       })
     })
 
-    return describe('with an invalid user id', function () {
-      beforeEach(function () {
-        return this.ContactManager.getContacts(
-          'not-valid-object-id',
-          this.callback
-        )
-      })
-
-      return it('should call the callback with an error', function () {
-        return this.callback.calledWith(sinon.match(Error)).should.equal(true)
+    describe('with an invalid user id', function () {
+      it('should be rejected', async function () {
+        await expect(this.ContactManager.getContacts('not-valid-object-id')).to
+          .be.rejected
       })
     })
   })

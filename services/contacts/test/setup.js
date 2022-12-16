@@ -1,15 +1,7 @@
-const SandboxedModule = require('sandboxed-module')
+import chai from 'chai'
+import chaiAsPromised from 'chai-as-promised'
+import sinonChai from 'sinon-chai'
 
-SandboxedModule.configure({
-  requires: {
-    '@overleaf/logger': {
-      debug() {},
-      info() {},
-      log() {},
-      warn() {},
-      error() {},
-    },
-    '@overleaf/metrics': { timeAsyncMethod() {} },
-  },
-  globals: { Buffer, console, process },
-})
+chai.should()
+chai.use(chaiAsPromised)
+chai.use(sinonChai)
