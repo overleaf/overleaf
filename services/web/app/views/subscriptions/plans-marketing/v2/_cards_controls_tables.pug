@@ -10,9 +10,7 @@ include ./_mixins
 				event-tracking-trigger="click"
 				event-segmentation='{"button": "individual", "plans-page-layout-v2-annual": "new-plans-page"}'
 			)
-				a.btn.btn-default-outline(
-					href="#"
-				) #{translate("indvidual_plans")}
+				button.btn.btn-default-outline #{translate("indvidual_plans")}
 			li.plans-v2-top-switch-group(
 				data-ol-plans-v2-view-tab='group'
 				event-tracking="plans-page-toggle-plan"
@@ -20,7 +18,7 @@ include ./_mixins
 				event-tracking-trigger="click"
 				event-segmentation='{"button": "group", "plans-page-layout-v2-annual": "new-plans-page"}'
 			)
-				a.btn.btn-default-outline(
+				button.btn.btn-default-outline(
 					href="#"
 				)
 					span #{translate("group_plans")} 
@@ -32,7 +30,7 @@ include ./_mixins
 				event-tracking-trigger="click"
 				event-segmentation='{"button": "student", "plans-page-layout-v2-annual": "new-plans-page"}'
 			)
-				a.btn.btn-default-outline(
+				button.btn.btn-default-outline(
 					href="#"
 				) #{translate("student_plans")}
 

@@ -58,7 +58,7 @@ function setUpTabSwitching() {
   document.querySelectorAll('[data-ol-plans-v2-view-tab]').forEach(el => {
     const viewTab = el.getAttribute('data-ol-plans-v2-view-tab')
 
-    el.querySelector('a').addEventListener('click', function (e) {
+    el.querySelector('button').addEventListener('click', function (e) {
       e.preventDefault()
       eventTracking.send(
         'subscription-funnel',

@@ -201,13 +201,9 @@ mixin currency_dropdown
 mixin plan_switch(location)
 	ul.nav.nav-pills(class=(location === 'card' ? "above-cards" : ""))
 		li.active(data-ol-view-tab='monthly')
-			a.btn.btn-default-outline(
-				href="#"
-			) #{translate("monthly")}
+			button.btn-default-outline #{translate("monthly")}
 		li(data-ol-view-tab='annual' class=(location === 'card' ? "annual-saving-tooltip-container" : ""))
-			a.btn.btn-default-outline(
-				href="#"
-			) #{translate("annual")}
+			button.btn-default-outline #{translate("annual")}
 			if (location === 'card')
 				.tooltip.in.bottom.annual-saving-tooltip(
 					role="tooltip"
@@ -219,9 +215,7 @@ mixin plan_switch(location)
 						span(hidden data-ol-view="annual") #{translate("saving_20_percent")}
 						span(hidden data-ol-view="student") #{translate("save_20_percent_by_paying_annually")}
 		li(data-ol-view-tab='student')
-			a.btn.btn-default-outline(
-				href="#"
-			) #{translate("special_price_student")}
+			button.btn-default-outline #{translate("special_price_student")}
 
 mixin allCardsAndControls(controlsRowSpaced, listLocation)
 	- var location = listLocation ? 'card_' + listLocation : 'card'
