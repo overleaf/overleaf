@@ -8,23 +8,35 @@ function PdfViewerControls({ setZoom }) {
   return (
     <ButtonGroup>
       <Button
-        bsStyle="info"
+        bsStyle={null}
+        className="btn-secondary-info btn-secondary"
         bsSize="large"
         onClick={() => setZoom('fit-width')}
       >
         <Icon type="arrows-h" />
       </Button>
       <Button
-        bsStyle="info"
+        bsStyle={null}
+        className="btn-secondary-info btn-secondary"
         bsSize="large"
         onClick={() => setZoom('fit-height')}
       >
         <Icon type="arrows-v" />
       </Button>
-      <Button bsStyle="info" bsSize="large" onClick={() => setZoom('zoom-in')}>
+      <Button
+        bsStyle={null}
+        className="btn-secondary-info btn-secondary"
+        bsSize="large"
+        onClick={() => setZoom('zoom-in')}
+      >
         <Icon type="search-plus" />
       </Button>
-      <Button bsStyle="info" bsSize="large" onClick={() => setZoom('zoom-out')}>
+      <Button
+        bsStyle={null}
+        className="btn-secondary-info btn-secondary"
+        bsSize="large"
+        onClick={() => setZoom('zoom-out')}
+      >
         <Icon type="search-minus" />
       </Button>
     </ButtonGroup>

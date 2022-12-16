@@ -18,10 +18,10 @@ function PdfDownloadFilesButton() {
       disabled={compiling || !fileList}
     >
       <Dropdown.Toggle
-        className="dropdown-toggle"
+        className="dropdown-toggle btn-secondary-info btn-secondary"
         title={t('other_logs_and_files')}
         bsSize="small"
-        bsStyle="info"
+        bsStyle={null}
       />
       <Dropdown.Menu id="dropdown-files-logs-pane-list">
         <PdfFileList fileList={fileList} />
