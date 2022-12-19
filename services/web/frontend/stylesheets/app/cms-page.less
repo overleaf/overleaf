@@ -140,6 +140,9 @@
     .quote-by-position {
       color: @content-secondary;
     }
+    .quote-picture-and-person {
+      display: flex;
+    }
   }
 
   /*
@@ -343,6 +346,31 @@
 }
 
 .vertically-center-col {
+  // remove margin to better vertically align
+  // some elements need to be nested within a container, and others are directly within .no-card/.card
+  .card:first-child,
+  .no-card:first-child {
+    .cms-element-container {
+      > *:first-child {
+        margin-top: 0;
+      }
+    }
+    > *:first-child:not(.cms-element-container) {
+      margin-top: 0;
+    }
+  }
+  .card:last-child,
+  .no-card:last-child {
+    .cms-element-container {
+      > *:last-child {
+        margin-bottom: 0;
+      }
+    }
+    > *:last-child:not(.cms-element-container) {
+      margin-bottom: 0;
+    }
+  }
+
   @media (min-width: @screen-sm-min) {
     display: flex;
 
