@@ -40,7 +40,6 @@
     "services/github-sync",
     "services/history-v1",
     "services/idp",
-    "services/k8s-debugger",
     "services/notifications",
     "services/project-history",
     "services/real-time",
