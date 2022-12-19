@@ -80,7 +80,10 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   webRouter.get(
     '*',
     expressify(
-      SplitTestMiddleware.loadAssignmentsInLocals(['design-system-updates'])
+      SplitTestMiddleware.loadAssignmentsInLocals([
+        'design-system-updates',
+        'features-page',
+      ])
     )
   )
 

@@ -1,1 +1,6 @@
-p !{translate("get_most_subscription_by_checking_premium_features", {}, [{name: 'a', attrs: {href: '/learn/how-to/Overleaf_premium_features'}}])}
+- var featuresPageVariantNew = splitTestVariants && splitTestVariants['features-page'] && splitTestVariants['features-page'] === 'new'
+
+if featuresPageVariantNew
+    p !{translate("get_most_subscription_by_checking_features", {}, [{name: 'a', attrs: {href: '/about/features-overview'}}])}
+else
+    p !{translate("get_most_subscription_by_checking_premium_features", {}, [{name: 'a', attrs: {href: '/learn/how-to/Overleaf_premium_features'}}])}

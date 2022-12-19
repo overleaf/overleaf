@@ -1944,5 +1944,6 @@
   "contact_sales": "Contact Sales",
   "empower_your_organization_to_work_in_overleaf": "Empower your organization to work in __appName__! Get a group or organizational plan.",
   "save_money_groups_companies_research_organizations_can_save_money": "<0>Save Money</0>! Groups, Companies and Research Organizations can save money with our Group and Enterprise plans — request information or a quote.",
-  "did_you_know_that_overleaf_offers": "Did you know that __appName__ offers group and organization-wide subscription options? Request information or a quote."
+  "did_you_know_that_overleaf_offers": "Did you know that __appName__ offers group and organization-wide subscription options? Request information or a quote.",
+  "get_most_subscription_by_checking_features": "Get the most out of your __appName__ subscription by checking out <0>__appName__’s features</0>."
 }

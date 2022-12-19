@@ -1,6 +1,10 @@
 extends ../layout
 
 block content
+	- var featuresPageVariantNew = splitTestVariants && splitTestVariants['features-page'] && splitTestVariants['features-page'] === 'new'
+	- var featuresLink = featuresPageVariantNew ? "/about/features-overview" : "/learn/how-to/Overleaf_premium_features"
+	- var featuresTranslationKey = featuresPageVariantNew ? 'get_most_subscription_by_checking_features' : 'get_most_subscription_by_checking_premium_features'
+
 	main.content.content-alt#main-content
 		.container
 			.row
@@ -20,7 +24,7 @@ block content
 								a.btn.btn-primary.btn-large(href=`/manage/groups/${personalSubscription._id}/members`) #{translate("add_your_first_group_member_now")}
 						p.letter-from-founders
 							p #{translate("thanks_for_subscribing_you_help_sl", {planName:personalSubscription.plan.name})}
-							p !{translate("get_most_subscription_by_checking_premium_features", {}, [{name: 'a', attrs: {href: 'https://www.overleaf.com/learn/how-to/Overleaf_premium_features'}}])}
+							p !{translate(featuresTranslationKey, {}, [{name: 'a', attrs: {href: featuresLink}}])}
 							p #{translate("need_anything_contact_us_at")} 
 								a(href=`mailto:${settings.adminEmail}`, ng-non-bindable) #{settings.adminEmail}
 								| .

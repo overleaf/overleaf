@@ -1,3 +1,6 @@
+- var featuresPageVariantNew = splitTestVariants && splitTestVariants['features-page'] && splitTestVariants['features-page'] === 'new'
+- var featuresLink = featuresPageVariantNew ? "/about/features-overview" : "/learn/how-to/Overleaf_premium_features"
+
 mixin current_plan()
 	if (usersBestSubscription)
 		.text-right.pull-right.current-plan
@@ -21,7 +24,7 @@ mixin individual_plan_trial(subscription, plan, remainingTrialDays)
 	a.current-plan-label(
 		tooltip=translate('plan_tooltip', { plan: plan.name }),
 		tooltip-placement="bottom"
-		href="/learn/how-to/Overleaf_premium_features"
+		href=featuresLink
 	)
 		if (remainingTrialDays === 1)
 			| !{translate('trial_last_day')} 
@@ -34,7 +37,7 @@ mixin individual_plan_active(subscription, plan)
 	a.current-plan-label(
 		tooltip=translate('plan_tooltip', {plan: plan.name}),
 		tooltip-placement="bottom"
-		href="/learn/how-to/Overleaf_premium_features"
+		href=featuresLink
 	)
 		| !{translate('premium_plan_label')} 
 		span.info-badge
@@ -43,7 +46,7 @@ mixin group_plan_trial(subscription, plan, remainingTrialDays)
 	a.current-plan-label(
 		tooltip=translate(subscription.teamName != null ? 'group_plan_with_name_tooltip' : 'group_plan_tooltip', { plan: plan.name, groupName: subscription.teamName }),
 		tooltip-placement="bottom"
-		href="/learn/how-to/Overleaf_premium_features"
+		href=featuresLink
 	)
 		if (remainingTrialDays === 1)
 			| !{translate('trial_last_day')} 
@@ -56,7 +59,7 @@ mixin group_plan_active(subscription, plan)
 	a.current-plan-label(
 		tooltip=translate(subscription.teamName != null ? 'group_plan_with_name_tooltip' : 'group_plan_tooltip', { plan: plan.name, groupName: subscription.teamName }),
 		tooltip-placement="bottom"
-		href="/learn/how-to/Overleaf_premium_features"
+		href=featuresLink
 	)
 		| !{translate('premium_plan_label')} 
 		span.info-badge
@@ -65,7 +68,7 @@ mixin commons_plan(subscription, plan)
 	a.current-plan-label(
 		tooltip=translate('commons_plan_tooltip', { plan: plan.name, institution: subscription.name }),
 		tooltip-placement="bottom"
-		href="/learn/how-to/Overleaf_premium_features"
+		href=featuresLink
 	)
 		| !{translate('premium_plan_label')} 
 		span.info-badge
@@ -74,7 +77,7 @@ mixin free_plan()
 	a.current-plan-label(
 		tooltip=translate('free_plan_tooltip'),
 		tooltip-placement="bottom"
-		href="/learn/how-to/Overleaf_premium_features"
+		href=featuresLink
 	)
 		| !{translate('free_plan_label')} 
 		span.info-badge

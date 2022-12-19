@@ -1,3 +1,5 @@
+- var featuresPageVariant = splitTestVariants && splitTestVariants['features-page']
+
 footer.fat-footer.hidden-print
 	.fat-footer-container
 		.fat-footer-sections(class=hideFatFooter ? 'hidden' : undefined)
@@ -41,7 +43,10 @@ footer.fat-footer.hidden-print
 		
 				ul.list-unstyled
 					li
-						a(href="/learn/how-to/Overleaf_premium_features") #{translate('premium_features')}
+						if !featuresPageVariant || featuresPageVariant === 'default'
+							a(href="/learn/how-to/Overleaf_premium_features") #{translate('premium_features')}
+						else
+							a(href="/about/features-overview") #{translate('features')}
 					li
 						a(href="/user/subscription/plans?itm_referrer=footer-for-indv-groups") !{translate('for_individuals_and_groups')}
 					li
