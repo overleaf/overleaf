@@ -26,9 +26,8 @@
     "bunyan": "^1.8.15",
     "express": "4.17.1",
     "method-override": "^3.0.0",
-    "mongodb": "^3.6.0",
-    "request": "^2.88.2",
-    "underscore": "1.13.1"
+    "mongodb": "^4.11.0",
+    "request": "^2.88.2"
   },
   "devDependencies": {
     "chai": "^4.3.6",

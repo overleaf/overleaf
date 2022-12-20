@@ -14,7 +14,7 @@ const express = require('express')
 const app = express()
 const methodOverride = require('method-override')
 const bodyParser = require('body-parser')
-const mongodb = require('./app/js/mongodb')
+const { mongoClient } = require('./app/js/mongodb')
 const controller = require('./app/js/NotificationsController')
 
 metrics.memory.monitor(logger)
@@ -64,8 +64,8 @@ const port =
     x1 => x1.port
   ) || 3042
 
-mongodb
-  .waitForDb()
+mongoClient
+  .connect()
   .then(() => {
     app.listen(port, host, () =>
       logger.debug(`notifications starting up, listening on ${host}:${port}`)

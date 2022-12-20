@@ -13,7 +13,6 @@
 const { db, ObjectId } = require('./mongodb')
 const request = require('request')
 const async = require('async')
-const _ = require('underscore')
 const settings = require('@overleaf/settings')
 const { port } = settings.internal.notifications
 const logger = require('@overleaf/logger')
@@ -56,8 +55,7 @@ module.exports = {
             logger.err({ err }, e)
             return cb(e)
           }
-          const hasNotification = _.some(
-            body,
+          const hasNotification = body.some(
             notification =>
               notification.key === notification_key &&
               notification.user_id === user_id.toString()
