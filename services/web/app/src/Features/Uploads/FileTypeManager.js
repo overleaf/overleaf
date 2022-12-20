@@ -5,15 +5,19 @@ const { promisifyAll } = require('../../util/promises')
 const Settings = require('@overleaf/settings')
 
 const FileTypeManager = {
-  TEXT_EXTENSIONS: Settings.textExtensions.map(ext => `.${ext}`),
+  TEXT_EXTENSIONS: new Set(Settings.textExtensions.map(ext => `.${ext}`)),
 
-  IGNORE_EXTENSIONS: [
+  IGNORE_EXTENSIONS: new Set([
     '.dvi',
     '.aux',
     '.log',
     '.toc',
     '.out',
     '.pdfsync',
+    '.synctex', // synctex.gz is handled by the .gz extension
+    '.synctex(busy)',
+    '.fdb_latexmk',
+    '.fls',
     // Index and glossary files
     '.nlo',
     '.ind',
@@ -27,9 +31,12 @@ const FileTypeManager = {
     '.doc',
     '.docx',
     '.gz',
-  ],
+    '.swp',
+  ]),
 
-  IGNORE_FILENAMES: ['__MACOSX', '.git', '.gitignore'],
+  IGNORE_FILENAMES: new Set(['.gitignore']),
+
+  IGNORE_FOLDERS: new Set(['__MACOSX', '.git', '.texpadtmp', '.R']),
 
   MAX_TEXT_FILE_SIZE: 1 * 1024 * 1024, // 1 MB
 
@@ -116,15 +123,22 @@ const FileTypeManager = {
   shouldIgnore(path, callback) {
     const basename = Path.basename(path)
     const extension = Path.extname(basename).toLowerCase()
+    const folders = path.split('/')
     let ignore = false
     if (basename.startsWith('.') && basename !== '.latexmkrc') {
       ignore = true
     }
-    if (FileTypeManager.IGNORE_EXTENSIONS.includes(extension)) {
+    if (FileTypeManager.IGNORE_EXTENSIONS.has(extension)) {
       ignore = true
-    }
-    if (FileTypeManager.IGNORE_FILENAMES.includes(basename)) {
+    } else if (FileTypeManager.IGNORE_FILENAMES.has(basename)) {
       ignore = true
+    } else {
+      for (const folder of folders) {
+        if (FileTypeManager.IGNORE_FOLDERS.has(folder)) {
+          ignore = true
+          break
+        }
+      }
     }
     callback(null, ignore)
   },
@@ -133,7 +147,7 @@ const FileTypeManager = {
 function _isTextFilename(filename) {
   const extension = Path.extname(filename).toLowerCase()
   return (
-    FileTypeManager.TEXT_EXTENSIONS.includes(extension) ||
+    FileTypeManager.TEXT_EXTENSIONS.has(extension) ||
     filename.match(/^(\.)?latexmkrc$/)
   )
 }

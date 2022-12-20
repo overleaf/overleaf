@@ -351,6 +351,16 @@ describe('FileTypeManager', function () {
       })
     })
 
+    it('should ignore .git directories and contained files', function (done) {
+      this.FileTypeManager.shouldIgnore('path/.git/info', (err, ignore) => {
+        if (err) {
+          return done(err)
+        }
+        ignore.should.equal(true)
+        done()
+      })
+    })
+
     it('should not ignore .latexmkrc dotfile', function (done) {
       this.FileTypeManager.shouldIgnore('path/.latexmkrc', (err, ignore) => {
         if (err) {
@@ -363,6 +373,26 @@ describe('FileTypeManager', function () {
 
     it('should ignore __MACOSX', function (done) {
       this.FileTypeManager.shouldIgnore('path/__MACOSX', (err, ignore) => {
+        if (err) {
+          return done(err)
+        }
+        ignore.should.equal(true)
+        done()
+      })
+    })
+
+    it('should ignore synctex files', function (done) {
+      this.FileTypeManager.shouldIgnore('file.synctex', (err, ignore) => {
+        if (err) {
+          return done(err)
+        }
+        ignore.should.equal(true)
+        done()
+      })
+    })
+
+    it('should ignore synctex(busy) files', function (done) {
+      this.FileTypeManager.shouldIgnore('file.synctex(busy)', (err, ignore) => {
         if (err) {
           return done(err)
         }
