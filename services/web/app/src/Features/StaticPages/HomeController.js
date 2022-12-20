@@ -43,22 +43,7 @@ module.exports = HomeController = {
 
   async home(req, res) {
     if (Features.hasFeature('homepage') && homepageExists) {
-      try {
-        const homeRegistration = await SplitTestHandler.promises.getAssignment(
-          req,
-          res,
-          'home-registration'
-        )
-        const removeRegistration = homeRegistration.variant
-        return res.render('external/home/v2', {
-          removeRegistration,
-        })
-      } catch (err) {
-        logger.error({ err }, err.message)
-        return res.render('external/home/v2', {
-          removeRegistration: 'default',
-        })
-      }
+      return res.render('external/home/v2')
     } else {
       return res.redirect('/login')
     }

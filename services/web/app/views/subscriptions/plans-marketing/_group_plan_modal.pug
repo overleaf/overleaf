@@ -51,10 +51,7 @@ div.modal.fade(tabindex="-1" role="dialog" data-ol-group-plan-modal)
 												value=plan_code.code
 												data-ol-group-plan-code=plan_code.code
 											)
-											if (useNewPlanName && plan_code.code === 'collaborator')
-												span Standard
-											else
-												span #{plan_code.display}
+											span #{plan_code.display}
 								.form-group
 									label(for='size')
 										| Number of users

@@ -6,7 +6,6 @@ import PreviewLogEntryHeader from './preview-log-entry-header'
 import Icon from '../../../shared/components/icon'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import { useStopOnFirstError } from '../../../shared/hooks/use-stop-on-first-error'
-import StopOnFirstErrorBadge from '../../../shared/components/stop-on-first-error-badge'
 
 function PreviewLogsPaneMaxEntries({ totalEntries, entriesShown, hasErrors }) {
   const { t } = useTranslation()
@@ -54,7 +53,6 @@ function PreviewLogsPaneMaxEntries({ totalEntries, entriesShown, hasErrors }) {
                     ),
                   }}
                 />{' '}
-                <StopOnFirstErrorBadge placement="bottom" />
               </p>
               <p>{t('log_entry_maximum_entries_see_full_logs')}</p>
             </>

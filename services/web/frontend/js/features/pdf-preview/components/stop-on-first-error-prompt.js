@@ -4,7 +4,6 @@ import { Button } from 'react-bootstrap'
 import PdfLogEntry from './pdf-log-entry'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import { useStopOnFirstError } from '../../../shared/hooks/use-stop-on-first-error'
-import StopOnFirstErrorBadge from '../../../shared/components/stop-on-first-error-badge'
 
 export default function StopOnFirstErrorPrompt() {
   const { t } = useTranslation()
@@ -22,7 +21,6 @@ export default function StopOnFirstErrorPrompt() {
   return (
     <PdfLogEntry
       headerTitle={t('stop_on_first_error_enabled_title')}
-      headerIcon={<StopOnFirstErrorBadge placement="right" />}
       formattedContent={
         <>
           <Trans

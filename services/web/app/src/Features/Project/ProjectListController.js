@@ -124,26 +124,8 @@ async function projectListReactPage(req, res, next) {
       logger.err({ err: error, userId }, 'Failed to load the active survey')
     }
 
-    try {
-      const assignment = await SplitTestHandler.promises.getAssignment(
-        req,
-        res,
-        'primary-email-check'
-      )
-      const primaryEmailCheckActive = assignment.variant === 'active'
-
-      if (
-        user &&
-        primaryEmailCheckActive &&
-        UserPrimaryEmailCheckHandler.requiresPrimaryEmailCheck(user)
-      ) {
-        return res.redirect('/user/emails/primary-email-check')
-      }
-    } catch (error) {
-      logger.warn(
-        { err: error },
-        'failed to get "primary-email-check" split test assignment'
-      )
+    if (user && UserPrimaryEmailCheckHandler.requiresPrimaryEmailCheck(user)) {
+      return res.redirect('/user/emails/primary-email-check')
     }
   }
 

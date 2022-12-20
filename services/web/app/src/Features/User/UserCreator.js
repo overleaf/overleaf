@@ -7,7 +7,6 @@ const UserDeleter = require('./UserDeleter')
 const UserGetter = require('./UserGetter')
 const UserUpdater = require('./UserUpdater')
 const Analytics = require('../Analytics/AnalyticsManager')
-const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const UserOnboardingEmailManager = require('./UserOnboardingEmailManager')
 const UserPostRegistrationAnalyticsManager = require('./UserPostRegistrationAnalyticsManager')
 const OError = require('@overleaf/o-error')
@@ -38,13 +37,8 @@ async function _addAffiliation(user, affiliationOptions) {
 
 async function recordRegistrationEvent(user) {
   try {
-    const homeRegistrationAssignment =
-      await SplitTestHandler.promises.getAssignmentForUser(
-        user._id,
-        'home-registration'
-      )
     const segmentation = {
-      'home-registration': homeRegistrationAssignment.variant,
+      'home-registration': 'default',
     }
     if (user.thirdPartyIdentifiers && user.thirdPartyIdentifiers.length > 0) {
       segmentation.provider = user.thirdPartyIdentifiers[0].providerId

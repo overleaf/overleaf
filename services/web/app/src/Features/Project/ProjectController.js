@@ -552,24 +552,6 @@ const ProjectController = {
             }
           )
         },
-        primaryEmailCheckActive(cb) {
-          SplitTestHandler.getAssignment(
-            req,
-            res,
-            'primary-email-check',
-            (err, assignment) => {
-              if (err) {
-                logger.warn(
-                  { err },
-                  'failed to get "primary-email-check" split test assignment'
-                )
-                cb(null, false)
-              } else {
-                cb(null, assignment.variant === 'active')
-              }
-            }
-          )
-        },
         survey(cb) {
           SurveyHandler.getSurvey(userId, (err, survey) => {
             if (err) {
@@ -591,14 +573,12 @@ const ProjectController = {
           notifications,
           user,
           userEmailsData,
-          primaryEmailCheckActive,
           groupsAndEnterpriseBannerAssignment,
           userIsMemberOfGroupSubscription,
         } = results
 
         if (
           user &&
-          primaryEmailCheckActive &&
           UserPrimaryEmailCheckHandler.requiresPrimaryEmailCheck(user)
         ) {
           return res.redirect('/user/emails/primary-email-check')
@@ -997,37 +977,6 @@ const ProjectController = {
             }
           )
         },
-        dictionaryEditorAssignment(cb) {
-          SplitTestHandler.getAssignment(
-            req,
-            res,
-            'dictionary-editor',
-            {},
-            (error, assignment) => {
-              // do not fail editor load if assignment fails
-              if (error) {
-                cb(null, { variant: 'default' })
-              } else {
-                cb(null, assignment)
-              }
-            }
-          )
-        },
-        interstitialPaymentFromPaywallAssignment(cb) {
-          SplitTestHandler.getAssignment(
-            req,
-            res,
-            'interstitial-payment-from-paywall',
-            (error, assignment) => {
-              // do not fail editor load if assignment fails
-              if (error) {
-                cb(null, { variant: 'default' })
-              } else {
-                cb(null, assignment)
-              }
-            }
-          )
-        },
         latexLogParserAssignment(cb) {
           SplitTestHandler.getAssignment(
             req,
@@ -1043,25 +992,6 @@ const ProjectController = {
             }
           )
         },
-        compileTimeWarningAssignment: [
-          'user',
-          (results, cb) => {
-            if (results.user?.features?.compileTimeout <= 60) {
-              SplitTestHandler.getAssignment(
-                req,
-                res,
-                'compile-time-warning',
-                {},
-                () => {
-                  // do not fail editor load if assignment fails
-                  cb()
-                }
-              )
-            } else {
-              cb()
-            }
-          },
-        ],
         linkSharingUpgradePromptAssignment(cb) {
           SplitTestHandler.getAssignment(
             req,
@@ -1152,7 +1082,6 @@ const ProjectController = {
           brandVariation,
           newSourceEditorAssignment,
           pdfjsAssignment,
-          dictionaryEditorAssignment,
           editorLeftMenuAssignment,
         }
       ) => {
@@ -1251,10 +1180,6 @@ const ProjectController = {
                 : ['all']
             const galileoPromptWords = req.query?.galileoPromptWords || ''
 
-            const dictionaryEditorEnabled =
-              !Features.hasFeature('saas') ||
-              dictionaryEditorAssignment?.variant === 'enabled'
-
             // Persistent upgrade prompts
             // in header & in share project modal
             const showUpgradePrompt =
@@ -1329,7 +1254,6 @@ const ProjectController = {
               wsUrl,
               showSupport: Features.hasFeature('support'),
               pdfjsVariant: pdfjsAssignment.variant,
-              dictionaryEditorEnabled,
               debugPdfDetach,
               showNewSourceEditorOption,
               showSymbolPalette,

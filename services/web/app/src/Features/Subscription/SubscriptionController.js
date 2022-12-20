@@ -80,17 +80,6 @@ async function plansPage(req, res) {
 
   AnalyticsManager.recordEventForSession(req.session, 'plans-page-view')
 
-  const standardPlanNameAssignment =
-    await SplitTestHandler.promises.getAssignment(
-      req,
-      res,
-      'standard-plan-name'
-    )
-
-  const useNewPlanName =
-    standardPlanNameAssignment &&
-    standardPlanNameAssignment.variant === 'new-plan-name'
-
   const template = newPlansPageVariantV2
     ? 'subscriptions/plans-marketing-v2'
     : 'subscriptions/plans-marketing'
@@ -108,7 +97,6 @@ async function plansPage(req, res) {
     groupPlanModalOptions,
     groupPlanModalDefaults,
     newPlansPageVariantV2,
-    useNewPlanName,
     initialLocalizedGroupPrice:
       SubscriptionHelper.generateInitialLocalizedGroupPrice(
         recommendedCurrency
@@ -151,13 +139,6 @@ async function paymentPage(req, res) {
       if (recommendedCurrency && currency == null) {
         currency = recommendedCurrency
       }
-      const assignment = await SplitTestHandler.promises.getAssignment(
-        req,
-        res,
-        'payment-page'
-      )
-      const useUpdatedPaymentPage =
-        assignment && assignment.variant === 'updated-payment-page'
 
       const refreshedPaymentPageAssignment =
         await SplitTestHandler.promises.getAssignment(
@@ -177,9 +158,7 @@ async function paymentPage(req, res) {
 
       const template = useRefreshedPaymentPage
         ? 'subscriptions/new-refreshed'
-        : useUpdatedPaymentPage
-        ? 'subscriptions/new-updated'
-        : 'subscriptions/new'
+        : 'subscriptions/new-updated'
 
       res.render(template, {
         title: 'subscribe',

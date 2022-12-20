@@ -1,36 +1,15 @@
 const UserHelper = require('./helpers/UserHelper')
 const Settings = require('@overleaf/settings')
 const { expect } = require('chai')
-const SplitTestManager = require('../../../app/src/Features/SplitTests/SplitTestManager')
 const Features = require('../../../app/src/infrastructure/Features')
-
-// While the split test is in progress this must be appended to URLs during tests
-const SPLIT_TEST_QUERY = '?primary-email-check=active'
 
 describe('PrimaryEmailCheck', function () {
   let userHelper
 
-  // Create the primary-email-check split test because this is now required for the query string override to work. See
-  // https://github.com/overleaf/internal/pull/7545#discussion_r848575736
   before(async function () {
     if (!Features.hasFeature('saas')) {
       this.skip()
     }
-
-    await SplitTestManager.createSplitTest({
-      name: 'primary-email-check',
-      configuration: {
-        active: true,
-        analyticsEnabled: true,
-        phase: 'release',
-        variants: [
-          {
-            name: 'active',
-            rolloutPercent: 0,
-          },
-        ],
-      },
-    })
   })
 
   beforeEach(async function () {
@@ -43,13 +22,13 @@ describe('PrimaryEmailCheck', function () {
   describe('redirections', function () {
     describe('when the user has signed up recently', function () {
       it("shouldn't be redirected from project list to the primary email check page", async function () {
-        const response = await userHelper.fetch('/project' + SPLIT_TEST_QUERY)
+        const response = await userHelper.fetch('/project')
         expect(response.status).to.equal(200)
       })
 
       it('should be redirected from the primary email check page to the project list', async function () {
         const response = await userHelper.fetch(
-          '/user/emails/primary-email-check' + SPLIT_TEST_QUERY
+          '/user/emails/primary-email-check'
         )
         expect(response.status).to.equal(302)
         expect(response.headers.get('location')).to.equal(
@@ -67,13 +46,13 @@ describe('PrimaryEmailCheck', function () {
       })
 
       it("shouldn't be redirected from project list to the primary email check page", async function () {
-        const response = await userHelper.fetch('/project' + SPLIT_TEST_QUERY)
+        const response = await userHelper.fetch('/project')
         expect(response.status).to.equal(200)
       })
 
       it('should be redirected from the primary email check page to the project list', async function () {
         const response = await userHelper.fetch(
-          '/user/emails/primary-email-check' + SPLIT_TEST_QUERY
+          '/user/emails/primary-email-check'
         )
         expect(response.status).to.equal(302)
         expect(response.headers.get('location')).to.equal(
@@ -98,13 +77,13 @@ describe('PrimaryEmailCheck', function () {
       })
 
       it("shouldn't be redirected from project list to the primary email check page", async function () {
-        const response = await userHelper.fetch('/project' + SPLIT_TEST_QUERY)
+        const response = await userHelper.fetch('/project')
         expect(response.status).to.equal(200)
       })
 
       it('should be redirected from the primary email check page to the project list', async function () {
         const response = await userHelper.fetch(
-          '/user/emails/primary-email-check' + SPLIT_TEST_QUERY
+          '/user/emails/primary-email-check'
         )
         expect(response.status).to.equal(302)
         expect(response.headers.get('location')).to.equal(
@@ -122,7 +101,7 @@ describe('PrimaryEmailCheck', function () {
       })
 
       it('should be redirected from project list to the primary email check page', async function () {
-        const response = await userHelper.fetch('/project' + SPLIT_TEST_QUERY)
+        const response = await userHelper.fetch('/project')
         expect(response.status).to.equal(302)
         expect(response.headers.get('location')).to.equal(
           UserHelper.url('/user/emails/primary-email-check').toString()
@@ -149,7 +128,7 @@ describe('PrimaryEmailCheck', function () {
       })
 
       checkResponse = await userHelper.fetch(
-        '/user/emails/primary-email-check' + SPLIT_TEST_QUERY,
+        '/user/emails/primary-email-check',
         { method: 'POST' }
       )
     })
@@ -162,7 +141,7 @@ describe('PrimaryEmailCheck', function () {
     })
 
     it("shouldn't be redirected from project list to the primary email check page any longer", async function () {
-      const response = await userHelper.fetch('/project' + SPLIT_TEST_QUERY)
+      const response = await userHelper.fetch('/project')
       expect(response.status).to.equal(200)
     })
 

@@ -19,6 +19,7 @@ class User {
       {
         email: options.email || `acceptance-test-${count}@example.com`,
         createdAt: new Date(),
+        confirmedAt: options.confirmedAt,
       },
     ]
     this.email = this.emails[0].email

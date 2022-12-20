@@ -71,6 +71,9 @@ describe('ProjectController', function () {
     this.EditorController = { renameProject: sinon.stub() }
     this.InactiveProjectManager = { reactivateProjectIfRequired: sinon.stub() }
     this.ProjectUpdateHandler = { markAsOpened: sinon.stub() }
+    this.UserPrimaryEmailCheckHandler = {
+      requiresPrimaryEmailCheck: sinon.stub().returns(false),
+    }
     this.ProjectGetter = {
       findAllUsersProjects: sinon.stub(),
       getProject: sinon.stub(),
@@ -193,6 +196,8 @@ describe('ProjectController', function () {
         },
         '../Institutions/InstitutionsFeatures': this.InstitutionsFeatures,
         '../Survey/SurveyHandler': this.SurveyHandler,
+        '../User/UserPrimaryEmailCheckHandler':
+          this.UserPrimaryEmailCheckHandler,
         './ProjectAuditLogHandler': this.ProjectAuditLogHandler,
       },
     })

@@ -6,8 +6,12 @@ function requiresPrimaryEmailCheck({
   lastPrimaryEmailCheck,
   signUpDate,
 }) {
-  const hasExpired = date =>
-    Date.now() - date.getTime() > Settings.primary_email_check_expiration
+  const hasExpired = date => {
+    if (!date) {
+      return true
+    }
+    return Date.now() - date.getTime() > Settings.primary_email_check_expiration
+  }
 
   const primaryEmailConfirmedAt = emails.find(
     emailEntry => emailEntry.email === email

@@ -27,8 +27,8 @@ import { useIdeContext } from './ide-context'
 import { useProjectContext } from './project-context'
 import { useEditorContext } from './editor-context'
 import { buildFileList } from '../../features/pdf-preview/util/file-list'
-import { useSplitTestContext } from './split-test-context'
 import { useLayoutContext } from './layout-context'
+import { useUserContext } from './user-context'
 
 export const LocalCompileContext = createContext()
 
@@ -86,9 +86,9 @@ export function LocalCompileProvider({ children }) {
 
   const { _id: projectId, rootDocId } = useProjectContext()
 
-  const { splitTestVariants } = useSplitTestContext()
-
   const { pdfPreviewOpen } = useLayoutContext()
+
+  const { features } = useUserContext()
 
   // whether a compile is in progress
   const [compiling, setCompiling] = useState(false)
@@ -279,8 +279,7 @@ export function LocalCompileProvider({ children }) {
   }, [compiledOnce, currentDoc, compiler])
 
   useEffect(() => {
-    const compileTimeWarningEnabled =
-      splitTestVariants['compile-time-warning'] === 'show-upgrade-prompt'
+    const compileTimeWarningEnabled = features?.compileTimeout <= 60
 
     if (compileTimeWarningEnabled && compiling && isProjectOwner) {
       const timeout = window.setTimeout(() => {
@@ -291,7 +290,7 @@ export function LocalCompileProvider({ children }) {
         window.clearTimeout(timeout)
       }
     }
-  }, [compiling, isProjectOwner, splitTestVariants])
+  }, [compiling, isProjectOwner, features])
 
   // handle the data returned from a compile request
   // note: this should _only_ run when `data` changes,

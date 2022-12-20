@@ -73,6 +73,7 @@ describe('Sessions', function () {
       // set up second session for this user
       this.user2 = new User()
       this.user2.email = this.user1.email
+      this.user2.emails = this.user1.emails
       this.user2.password = this.user1.password
     })
 
@@ -197,9 +198,11 @@ describe('Sessions', function () {
       // set up second session for this user
       this.user2 = new User()
       this.user2.email = this.user1.email
+      this.user2.emails = this.user1.emails
       this.user2.password = this.user1.password
       this.user3 = new User()
       this.user3.email = this.user1.email
+      this.user3.emails = this.user1.emails
       this.user3.password = this.user1.password
     })
 
@@ -321,9 +324,11 @@ describe('Sessions', function () {
       // set up second session for this user
       this.user2 = new User()
       this.user2.email = this.user1.email
+      this.user2.emails = this.user1.emails
       this.user2.password = this.user1.password
       this.user3 = new User()
       this.user3.email = this.user1.email
+      this.user3.emails = this.user1.emails
       this.user3.password = this.user1.password
       async.series([this.user2.login.bind(this.user2)], done)
     })

@@ -105,6 +105,9 @@ export function EditorProviders({
     metadataManager,
   }
 
+  // Add details for useUserContext
+  window.metaAttributesCache.set('ol-user', { ...user, features })
+
   return (
     <SplitTestProvider>
       <IdeProvider ide={window._ide}>

@@ -275,7 +275,7 @@ describe('SubscriptionController', function () {
       describe('with a valid plan code', function () {
         it('should render the new subscription page', function (done) {
           this.res.render = (page, opts) => {
-            page.should.equal('subscriptions/new')
+            page.should.equal('subscriptions/new-updated')
             done()
           }
           this.SubscriptionController.paymentPage(this.req, this.res)

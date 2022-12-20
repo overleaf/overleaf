@@ -5,7 +5,6 @@ import { Button } from 'react-bootstrap'
 import PdfLogEntry from './pdf-log-entry'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import { useStopOnFirstError } from '../../../shared/hooks/use-stop-on-first-error'
-import StopOnFirstErrorBadge from '../../../shared/components/stop-on-first-error-badge'
 
 function PdfPreviewError({ error }) {
   const { t } = useTranslation()
@@ -254,7 +253,6 @@ function TimedOutLogEntry() {
                   />,
                 ]}
               />{' '}
-              <StopOnFirstErrorBadge placement="bottom" />
             </>
           )}
         </li>

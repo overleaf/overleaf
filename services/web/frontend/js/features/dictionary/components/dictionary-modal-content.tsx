@@ -2,7 +2,6 @@ import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert, Button, Modal } from 'react-bootstrap'
 import Icon from '../../../shared/components/icon'
-import SplitTestBadge from '../../../shared/components/split-test-badge'
 import Tooltip from '../../../shared/components/tooltip'
 import useAsync from '../../../shared/hooks/use-async'
 import { postJSON } from '../../../infrastructure/fetch-json'
@@ -38,17 +37,7 @@ export default function DictionaryModalContent({
   return (
     <>
       <Modal.Header closeButton>
-        <Modal.Title>
-          {t('edit_dictionary')}{' '}
-          <SplitTestBadge
-            splitTestName="dictionary-editor"
-            displayOnVariants={['enabled']}
-            tooltip={{
-              placement: 'bottom',
-              className: 'tooltip-wide',
-            }}
-          />
-        </Modal.Title>
+        <Modal.Title>{t('edit_dictionary')}</Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
