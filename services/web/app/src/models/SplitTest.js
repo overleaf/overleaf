@@ -140,6 +140,10 @@ const SplitTestSchema = new Schema({
     type: Boolean,
     required: false,
   },
+  archivedAt: {
+    type: Date,
+    required: false,
+  },
   badgeInfo: {
     type: BadgeInfoSchema,
     required: false,

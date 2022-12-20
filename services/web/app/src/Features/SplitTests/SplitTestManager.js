@@ -7,13 +7,39 @@ const ALPHA_PHASE = 'alpha'
 const BETA_PHASE = 'beta'
 const RELEASE_PHASE = 'release'
 
-async function getSplitTests({ name, activeOnly, archivedOnly }) {
+async function getSplitTests({ name, phase, type, activeOnly, archivedOnly }) {
   const filters = {}
   if (name && name !== '') {
     filters.name = { $regex: _.escapeRegExp(name) }
   }
   if (activeOnly) {
     filters.$where = 'this.versions[this.versions.length - 1].active === true'
+  }
+  if (type === 'split-test') {
+    const query =
+      'this.versions[this.versions.length - 1].analyticsEnabled === true'
+    if (filters.$where) {
+      filters.$where += `&& ${query}`
+    } else {
+      filters.$where = query
+    }
+  }
+  if (type === 'gradual-rollout') {
+    const query =
+      'this.versions[this.versions.length - 1].analyticsEnabled === false'
+    if (filters.$where) {
+      filters.$where += `&& ${query}`
+    } else {
+      filters.$where = query
+    }
+  }
+  if (['alpha', 'beta', 'release'].includes(phase)) {
+    const query = `this.versions[this.versions.length - 1].phase === "${phase}"`
+    if (filters.$where) {
+      filters.$where += `&& ${query}`
+    } else {
+      filters.$where = query
+    }
   }
   if (archivedOnly) {
     filters.archived = true
@@ -205,6 +231,7 @@ async function revertToPreviousVersion(name, versionNumber) {
   }
   const previousVersionCopy = previousVersion.toObject()
   previousVersionCopy.versionNumber = lastVersion.versionNumber + 1
+  previousVersionCopy.createdAt = new Date()
   splitTest.versions.push(previousVersionCopy)
   return _saveSplitTest(splitTest)
 }
@@ -218,11 +245,7 @@ async function archive(name) {
     throw new OError(`Split test with ID '${name}' is already archived`)
   }
   splitTest.archived = true
-  const previousVersionCopy =
-    SplitTestUtils.getCurrentVersion(splitTest).toObject()
-  previousVersionCopy.versionNumber += 1
-  previousVersionCopy.active = false
-  splitTest.versions.push(previousVersionCopy)
+  splitTest.archivedAt = new Date()
   return _saveSplitTest(splitTest)
 }
 
