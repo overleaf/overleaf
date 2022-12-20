@@ -7,14 +7,16 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const ASpellWorkerPool = require('./ASpellWorkerPool')
-const LRU = require('lru-cache')
-const logger = require('@overleaf/logger')
-const fs = require('fs')
-const settings = require('@overleaf/settings')
-const Path = require('path')
-const { promisify } = require('util')
-const OError = require('@overleaf/o-error')
+import fs from 'node:fs'
+import Path from 'node:path'
+import { promisify } from 'node:util'
+import LRU from 'lru-cache'
+import logger from '@overleaf/logger'
+import settings from '@overleaf/settings'
+import OError from '@overleaf/o-error'
+import { ASpellWorkerPool } from './ASpellWorkerPool.js'
+
+let ASPELL_TIMEOUT = 10000
 
 const OneMinute = 60 * 1000
 const opts = { max: 10000, maxAge: OneMinute * 60 * 10 }
@@ -22,6 +24,8 @@ const cache = new LRU(opts)
 
 const cacheFsPath = Path.resolve(settings.cacheDir, 'spell.cache')
 const cacheFsPathTmp = cacheFsPath + '.tmp'
+
+const WorkerPool = new ASpellWorkerPool()
 
 // load any existing cache
 try {
@@ -33,24 +37,31 @@ try {
   )
 }
 
-// write the cache every 30 minutes
-const cacheDump = setInterval(function () {
-  const dump = JSON.stringify(cache.dump())
-  return fs.writeFile(cacheFsPathTmp, dump, function (err) {
-    if (err != null) {
-      logger.debug(OError.tag(err, 'error writing cache file'))
-      fs.unlink(cacheFsPathTmp, () => {})
-    } else {
-      fs.rename(cacheFsPathTmp, cacheFsPath, err => {
-        if (err) {
-          logger.error(OError.tag(err, 'error renaming cache file'))
-        } else {
-          logger.debug({ len: dump.length, cacheFsPath }, 'wrote cache file')
-        }
-      })
-    }
-  })
-}, 30 * OneMinute)
+let cacheDumpInterval
+export function startCacheDump() {
+  // write the cache every 30 minutes
+  cacheDumpInterval = setInterval(function () {
+    const dump = JSON.stringify(cache.dump())
+    return fs.writeFile(cacheFsPathTmp, dump, function (err) {
+      if (err != null) {
+        logger.debug(OError.tag(err, 'error writing cache file'))
+        fs.unlink(cacheFsPathTmp, () => {})
+      } else {
+        fs.rename(cacheFsPathTmp, cacheFsPath, err => {
+          if (err) {
+            logger.error(OError.tag(err, 'error renaming cache file'))
+          } else {
+            logger.debug({ len: dump.length, cacheFsPath }, 'wrote cache file')
+          }
+        })
+      }
+    })
+  }, 30 * OneMinute)
+}
+
+export function stopCacheDump() {
+  clearInterval(cacheDumpInterval)
+}
 
 class ASpellRunner {
   checkWords(language, words, callback) {
@@ -159,33 +170,28 @@ class ASpellRunner {
     words = Object.keys(newWord)
 
     if (words.length) {
-      return WorkerPool.check(language, words, ASpell.ASPELL_TIMEOUT, callback)
+      return WorkerPool.check(language, words, ASPELL_TIMEOUT, callback)
     } else {
       return callback(null, '')
     }
   }
 }
 
-const ASpell = {
-  // The description of how to call aspell from another program can be found here:
-  // http://aspell.net/man-html/Through-A-Pipe.html
-  checkWords(language, words, callback) {
-    if (callback == null) {
-      callback = () => {}
-    }
-    const runner = new ASpellRunner()
-    return runner.checkWords(language, words, callback)
-  },
-  ASPELL_TIMEOUT: 10000,
+// The description of how to call aspell from another program can be found here:
+// http://aspell.net/man-html/Through-A-Pipe.html
+export function checkWords(language, words, callback) {
+  if (callback == null) {
+    callback = () => {}
+  }
+  const runner = new ASpellRunner()
+  return runner.checkWords(language, words, callback)
 }
 
-const promises = {
-  checkWords: promisify(ASpell.checkWords),
+export const promises = {
+  checkWords: promisify(checkWords),
 }
 
-ASpell.promises = promises
-
-module.exports = ASpell
-
-const WorkerPool = new ASpellWorkerPool()
-module.exports.cacheDump = cacheDump
+// for tests
+export function setTimeout(timeout) {
+  ASPELL_TIMEOUT = timeout
+}

@@ -1,5 +1,5 @@
-const { expect } = require('chai')
-const request = require('./helpers/request')
+import { expect } from 'chai'
+import * as request from './helpers/request.js'
 
 describe('/health_check', function () {
   it('should return 200', async function () {

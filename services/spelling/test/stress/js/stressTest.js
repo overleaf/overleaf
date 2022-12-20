@@ -13,9 +13,9 @@
 // send P correct words and Q incorrect words
 // generate incorrect words by qq+random
 
-const async = require('async')
-const request = require('request')
-const fs = require('fs')
+import fs from 'node:fs'
+import async from 'async'
+import request from 'request'
 
 // created with
 // aspell -d en dump master | aspell -l en expand | shuf -n 150000 > words.txt

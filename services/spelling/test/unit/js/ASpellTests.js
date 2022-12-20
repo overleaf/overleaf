@@ -8,22 +8,17 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const { expect, assert } = require('chai')
-const SandboxedModule = require('sandboxed-module')
+import { expect, assert } from 'chai'
+import esmock from 'esmock'
 
 describe('ASpell', function () {
-  beforeEach(function () {
-    return (this.ASpell = SandboxedModule.require('../../../app/js/ASpell', {
-      requires: {
-        '@overleaf/metrics': {
-          gauge() {},
-          inc() {},
-        },
+  beforeEach(async function () {
+    this.ASpell = await esmock('../../../app/js/ASpell', {
+      '@overleaf/metrics': {
+        gauge() {},
+        inc() {},
       },
-    }))
-  })
-  afterEach(function () {
-    clearInterval(this.ASpell.cacheDump)
+    })
   })
 
   describe('a correctly spelled word', function () {
@@ -114,7 +109,7 @@ describe('ASpell', function () {
   return describe('when the request times out', function () {
     beforeEach(function (done) {
       const words = __range__(0, 1000, true).map(i => 'abcdefg')
-      this.ASpell.ASPELL_TIMEOUT = 1
+      this.ASpell.setTimeout(1)
       this.start = Date.now()
       return this.ASpell.checkWords('en', words, (error, result) => {
         expect(error).to.exist
@@ -128,7 +123,7 @@ describe('ASpell', function () {
     // or the CI server.
     return it('should return in reasonable time', function () {
       const delta = Date.now() - this.start
-      return delta.should.be.below(this.ASpell.ASPELL_TIMEOUT + 1000)
+      return delta.should.be.below(1000)
     })
   })
 })

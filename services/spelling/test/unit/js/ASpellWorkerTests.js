@@ -1,45 +1,39 @@
-/* eslint-disable
-    no-undef
-*/
-const sinon = require('sinon')
-const { expect } = require('chai')
-const SandboxedModule = require('sandboxed-module')
-const EventEmitter = require('events')
+import sinon from 'sinon'
+import { expect } from 'chai'
+import esmock from 'esmock'
+import EventEmitter from 'events'
 
 describe('ASpellWorker', function () {
-  beforeEach(function () {
-    this.child_process = {}
-    return (this.ASpellWorker = SandboxedModule.require(
-      '../../../app/js/ASpellWorker',
-      {
-        requires: {
-          '@overleaf/metrics': {
-            gauge() {},
-            inc() {},
-          },
-          child_process: this.child_process,
-        },
-      }
-    ))
+  beforeEach(async function () {
+    this.pipe = {
+      stdout: new EventEmitter(),
+      stderr: { on: sinon.stub() },
+      stdin: { on: sinon.stub() },
+      on: sinon.stub(),
+      pid: 12345,
+    }
+    this.pipe.stdout.setEncoding = sinon.stub()
+    this.child_process = {
+      spawn: sinon.stub().returns(this.pipe),
+    }
+    const { ASpellWorker } = await esmock('../../../app/js/ASpellWorker', {
+      '@overleaf/metrics': {
+        gauge() {},
+        inc() {},
+      },
+      child_process: this.child_process,
+    })
+    this.ASpellWorker = ASpellWorker
   })
 
   describe('creating a worker', function () {
     beforeEach(function () {
-      this.pipe = {
-        stdout: new EventEmitter(),
-        stderr: { on: sinon.stub() },
-        stdin: { on: sinon.stub() },
-        on: sinon.stub(),
-        pid: 12345,
-      }
-      this.child_process.spawn = sinon.stub().returns(this.pipe)
-      this.pipe.stdout.setEncoding = sinon.stub()
-      worker = new this.ASpellWorker('en')
+      this.worker = new this.ASpellWorker('en')
     })
 
     describe('with normal aspell output', function () {
       beforeEach(function () {
-        this.callback = worker.callback = sinon.stub()
+        this.callback = this.worker.callback = sinon.stub()
         this.pipe.stdout.emit('data', '& hello\n')
         this.pipe.stdout.emit('data', '& world\n')
         this.pipe.stdout.emit('data', 'en\n')
@@ -56,7 +50,7 @@ describe('ASpellWorker', function () {
 
     describe('with the aspell end marker split across chunks', function () {
       beforeEach(function () {
-        this.callback = worker.callback = sinon.stub()
+        this.callback = this.worker.callback = sinon.stub()
         this.pipe.stdout.emit('data', '& hello\n')
         this.pipe.stdout.emit('data', '& world\ne')
         this.pipe.stdout.emit('data', 'n\n')
@@ -73,7 +67,7 @@ describe('ASpellWorker', function () {
 
     describe('with the aspell end marker newline split across chunks', function () {
       beforeEach(function () {
-        this.callback = worker.callback = sinon.stub()
+        this.callback = this.worker.callback = sinon.stub()
         this.pipe.stdout.emit('data', '& hello\n')
         this.pipe.stdout.emit('data', '& world\n')
         this.pipe.stdout.emit('data', 'en')
@@ -90,7 +84,7 @@ describe('ASpellWorker', function () {
 
     describe('with everything split across chunks', function () {
       beforeEach(function () {
-        this.callback = worker.callback = sinon.stub()
+        this.callback = this.worker.callback = sinon.stub()
         '& hello\n& world\nen\n& goodbye'.split('').forEach(x => {
           this.pipe.stdout.emit('data', x)
         })

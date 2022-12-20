@@ -1,10 +1,11 @@
-const { promisify } = require('util')
+import { promisify } from 'util'
+import Request from 'request'
 
-const PORT = 3005
+export const PORT = 3005
 
 const BASE_URL = `http://${process.env.HTTP_TEST_HOST || 'localhost'}:${PORT}`
 
-const request = require('request').defaults({
+const request = Request.defaults({
   baseUrl: BASE_URL,
   headers: {
     'Content-Type': 'application/json',
@@ -12,9 +13,6 @@ const request = require('request').defaults({
   followRedirect: false,
 })
 
-module.exports = {
-  PORT,
-  get: promisify(request.get),
-  post: promisify(request.post),
-  del: promisify(request.del),
-}
+export const get = promisify(request.get)
+export const post = promisify(request.post)
+export const del = promisify(request.del)

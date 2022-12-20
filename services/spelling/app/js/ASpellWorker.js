@@ -7,15 +7,15 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const childProcess = require('child_process')
-const logger = require('@overleaf/logger')
-const metrics = require('@overleaf/metrics')
-const _ = require('underscore')
-const OError = require('@overleaf/o-error')
+import childProcess from 'node:child_process'
+import logger from '@overleaf/logger'
+import metrics from '@overleaf/metrics'
+import _ from 'underscore'
+import OError from '@overleaf/o-error'
 
 const BATCH_SIZE = 100
 
-class ASpellWorker {
+export class ASpellWorker {
   constructor(language) {
     this.language = language
     this.count = 0
@@ -238,5 +238,3 @@ class ASpellWorker {
     return this.pipe.stdin.write(command + '\n')
   }
 }
-
-module.exports = ASpellWorker

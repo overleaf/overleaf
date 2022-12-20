@@ -1,5 +1,6 @@
-const App = require('../../../app.js')
-const { PORT } = require('./helpers/request')
+import { app } from '../../../app/js/server.js'
+import { PORT } from './helpers/request.js'
+
 before(function (done) {
-  return App.listen(PORT, 'localhost', done)
+  return app.listen(PORT, 'localhost', done)
 })

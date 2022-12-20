@@ -1,5 +1,5 @@
-const { expect } = require('chai')
-const request = require('./helpers/request')
+import { expect } from 'chai'
+import * as request from './helpers/request.js'
 
 const USER_ID = 101
 

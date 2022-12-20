@@ -3,12 +3,13 @@
   "description": "A JSON API wrapper around aspell",
   "private": true,
   "main": "app.js",
+  "type": "module",
   "scripts": {
     "compile:app": "([ -e app/coffee ] && coffee -m $COFFEE_OPTIONS -o app/js -c app/coffee || echo 'No CoffeeScript folder to compile') && ( [ -e app.coffee ] && coffee -m $COFFEE_OPTIONS -c app.coffee || echo 'No CoffeeScript app to compile')",
     "start": "node $NODE_APP_OPTIONS app.js",
-    "test:acceptance:_run": "mocha --recursive --reporter spec --timeout 15000 --exit $@ test/acceptance/js",
+    "test:acceptance:_run": "LOG_LEVEL=fatal mocha --loader=esmock --recursive --reporter spec --timeout 15000 --exit $@ test/acceptance/js",
     "test:acceptance": "npm run test:acceptance:_run -- --grep=$MOCHA_GREP",
-    "test:unit:_run": "mocha --recursive --reporter spec $@ test/unit/js",
+    "test:unit:_run": "LOG_LEVEL=fatal mocha --loader=esmock --recursive --reporter spec $@ test/unit/js",
     "test:unit": "npm run test:unit:_run -- --grep=$MOCHA_GREP",
     "compile:unit_tests": "[ ! -e test/unit/coffee ] &&  echo 'No unit tests to compile' || coffee -o test/unit/js -c test/unit/coffee",
     "compile:acceptance_tests": "[ ! -e test/acceptance/coffee ] && echo 'No acceptance tests to compile' || coffee -o test/acceptance/js -c test/acceptance/coffee",
@@ -37,8 +38,8 @@
   "devDependencies": {
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
+    "esmock": "^2.1.0",
     "mocha": "^8.4.0",
-    "sandboxed-module": "2.0.4",
     "sinon": "^9.2.4"
   }
 }

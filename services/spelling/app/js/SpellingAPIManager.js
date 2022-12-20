@@ -6,31 +6,26 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const ASpell = require('./ASpell')
-const { callbackify } = require('util')
-const OError = require('@overleaf/o-error')
+import { callbackify } from 'node:util'
+import OError from '@overleaf/o-error'
+import * as ASpell from './ASpell.js'
 
 // The max number of words checked in a single request
 const REQUEST_LIMIT = 10000
 
-const SpellingAPIManager = {}
+export const promises = {}
 
-const promises = {
-  async runRequest(token, request) {
-    if (!request.words) {
-      throw new OError('malformed JSON')
-    }
-    const lang = request.language || 'en'
+promises.runRequest = async (token, request) => {
+  if (!request.words) {
+    throw new OError('malformed JSON')
+  }
+  const lang = request.language || 'en'
 
-    // only the first 10K words are checked
-    const wordSlice = request.words.slice(0, REQUEST_LIMIT)
+  // only the first 10K words are checked
+  const wordSlice = request.words.slice(0, REQUEST_LIMIT)
 
-    const misspellings = await ASpell.promises.checkWords(lang, wordSlice)
-    return { misspellings }
-  },
+  const misspellings = await ASpell.promises.checkWords(lang, wordSlice)
+  return { misspellings }
 }
 
-SpellingAPIManager.runRequest = callbackify(promises.runRequest)
-SpellingAPIManager.promises = promises
-
-module.exports = SpellingAPIManager
+export const runRequest = callbackify(promises.runRequest)

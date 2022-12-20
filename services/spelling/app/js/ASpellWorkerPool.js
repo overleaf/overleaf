@@ -7,13 +7,13 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const ASpellWorker = require('./ASpellWorker')
-const _ = require('underscore')
-const logger = require('@overleaf/logger')
-const metrics = require('@overleaf/metrics')
-const OError = require('@overleaf/o-error')
+import _ from 'underscore'
+import logger from '@overleaf/logger'
+import metrics from '@overleaf/metrics'
+import OError from '@overleaf/o-error'
+import { ASpellWorker } from './ASpellWorker.js'
 
-class ASpellWorkerPool {
+export class ASpellWorkerPool {
   static initClass() {
     this.prototype.MAX_REQUESTS = 100 * 1024
     this.prototype.MAX_WORKERS = 32
@@ -112,5 +112,3 @@ class ASpellWorkerPool {
   }
 }
 ASpellWorkerPool.initClass()
-
-module.exports = ASpellWorkerPool

@@ -1,48 +1,38 @@
 /* eslint-disable
     handle-callback-err
 */
-const sinon = require('sinon')
-const { expect } = require('chai')
-const SandboxedModule = require('sandboxed-module')
-const modulePath = require('path').join(
-  __dirname,
-  '../../../app/js/SpellingAPIManager'
-)
+import sinon from 'sinon'
+import { expect } from 'chai'
+import esmock from 'esmock'
+
+const MODULE_PATH = '../../../app/js/SpellingAPIManager'
 
 const promiseStub = val => new Promise(resolve => resolve(val))
 
 describe('SpellingAPIManager', function () {
-  beforeEach(function () {
+  beforeEach(async function () {
     this.token = 'user-id-123'
-    this.ASpell = {}
-    this.SpellingAPIManager = SandboxedModule.require(modulePath, {
-      requires: {
-        './ASpell': this.ASpell,
-        '@overleaf/settings': { ignoredMisspellings: ['ShareLaTeX'] },
+    this.nonLearnedWords = ['some', 'words', 'htat', 'are', 'speled', 'rong']
+    this.allWords = this.nonLearnedWords
+    this.misspellings = [
+      { index: 2, suggestions: ['that'] },
+      { index: 4, suggestions: ['spelled'] },
+      { index: 5, suggestions: ['wrong', 'ring'] },
+    ]
+    this.misspellingsWithoutLearnedWords = this.misspellings.slice(0, 3)
+    this.ASpell = {
+      checkWords: sinon.stub().yields(null, this.misspellings),
+      promises: {
+        checkWords: sinon.stub().returns(promiseStub(this.misspellings)),
       },
+    }
+    this.SpellingAPIManager = await esmock(MODULE_PATH, {
+      '../../../app/js/ASpell.js': this.ASpell,
+      '@overleaf/settings': { ignoredMisspellings: ['ShareLaTeX'] },
     })
   })
 
   describe('runRequest', function () {
-    beforeEach(function () {
-      this.nonLearnedWords = ['some', 'words', 'htat', 'are', 'speled', 'rong']
-      this.allWords = this.nonLearnedWords
-      this.misspellings = [
-        { index: 2, suggestions: ['that'] },
-        { index: 4, suggestions: ['spelled'] },
-        { index: 5, suggestions: ['wrong', 'ring'] },
-      ]
-      this.misspellingsWithoutLearnedWords = this.misspellings.slice(0, 3)
-
-      this.ASpell.checkWords = (lang, word, callback) => {
-        callback(null, this.misspellings)
-      }
-      this.ASpell.promises = {
-        checkWords: sinon.stub().returns(promiseStub(this.misspellings)),
-      }
-      sinon.spy(this.ASpell, 'checkWords')
-    })
-
     describe('with sensible JSON', function () {
       beforeEach(function (done) {
         this.SpellingAPIManager.runRequest(
