@@ -6,13 +6,11 @@ const _ = require('lodash')
 const { URL } = require('url')
 const Path = require('path')
 const moment = require('moment')
-const pug = require('pug-runtime')
 const request = require('request')
 const Features = require('./Features')
 const SessionManager = require('../Features/Authentication/SessionManager')
 const PackageVersions = require('./PackageVersions')
 const Modules = require('./Modules')
-const SafeHTMLSubstitute = require('../Features/Helpers/SafeHTMLSubstitution')
 const {
   canRedirectToAdminDomain,
   hasAdminAccess,
@@ -20,6 +18,7 @@ const {
 const {
   addOptionalCleanupHandlerAfterDrainingConnections,
 } = require('./GracefulShutdown')
+const { translate } = require('../Features/Helpers/Translate')
 
 const IEEE_BRAND_ID = Settings.ieeeBrandId
 
@@ -76,8 +75,6 @@ function getWebpackAssets(entrypoint, section) {
   }
   return webpackManifest.entrypoints[entrypoint].assets[section] || []
 }
-
-const I18N_HTML_INJECTIONS = new Set()
 
 module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
   if (process.env.NODE_ENV === 'development') {
@@ -219,33 +216,8 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
   })
 
   webRouter.use(function (req, res, next) {
-    res.locals.translate = function (key, vars, components) {
-      vars = vars || {}
-
-      if (Settings.i18n.checkForHTMLInVars) {
-        Object.entries(vars).forEach(([field, value]) => {
-          if (pug.escape(value) !== value) {
-            const violationsKey = key + field
-            // do not flood the logs, log one sample per pod + key + field
-            if (!I18N_HTML_INJECTIONS.has(violationsKey)) {
-              logger.warn(
-                { key, field, value },
-                'html content in translations context vars'
-              )
-              I18N_HTML_INJECTIONS.add(violationsKey)
-            }
-          }
-        })
-      }
-
-      vars.appName = Settings.appName
-      const locale = req.i18n.translate(key, vars)
-      if (components) {
-        return SafeHTMLSubstitute.render(locale, components)
-      } else {
-        return locale
-      }
-    }
+    res.locals.translate = (key, vars, components) =>
+      translate(key, req, vars, components)
     // Don't include the query string parameters, otherwise Google
     // treats ?nocdn=true as the canonical version
     const parsedOriginalUrl = new URL(req.originalUrl, Settings.siteUrl)
