@@ -122,9 +122,7 @@ describe('Sending a message', async function () {
           null
         )
         expect(response.statusCode).to.equal(400)
-        // Exegesis is responding with validation errors. I can´t find a way to choose the validation error yet.
-        // expect(body).to.equal('No content provided')
-        expect(body.message).to.equal('Validation errors')
+        expect(body).to.equal('No content provided')
       })
     })
 

@@ -3,105 +3,24 @@ import * as MessageManager from './MessageManager.js'
 import * as MessageFormatter from './MessageFormatter.js'
 import * as ThreadManager from '../Threads/ThreadManager.js'
 import { ObjectId } from '../../mongodb.js'
+import { expressify } from '../../util/promises.js'
 
 const DEFAULT_MESSAGE_LIMIT = 50
 const MAX_MESSAGE_LENGTH = 10 * 1024 // 10kb, about 1,500 words
 
-async function readContext(context, req) {
-  req.body = context.requestBody
-  req.params = context.params.path
-  req.query = context.params.query
-  if (typeof req.params.projectId !== 'undefined') {
-    if (!ObjectId.isValid(req.params.projectId)) {
-      context.res.status(400).setBody('Invalid projectId')
-    }
-  }
-  if (typeof req.params.threadId !== 'undefined') {
-    if (!ObjectId.isValid(req.params.threadId)) {
-      context.res.status(400).setBody('Invalid threadId')
-    }
-  }
-}
-
-export async function callMessageHttpController(context, ControllerMethod) {
-  const req = {}
-  readContext(context, req)
-  if (context.res.statusCode !== 400) {
-    return await ControllerMethod(req, context.res)
-  } else {
-    return context.res.body
-  }
-}
-
-export async function getGlobalMessages(context) {
-  return await callMessageHttpController(context, _getGlobalMessages)
-}
-
-export async function sendGlobalMessage(context) {
-  return await callMessageHttpController(context, _sendGlobalMessage)
-}
-
-export async function sendMessage(context) {
-  return await callMessageHttpController(context, _sendThreadMessage)
-}
-
-export async function getThreads(context) {
-  return await callMessageHttpController(context, _getAllThreads)
-}
-
-export async function resolveThread(context) {
-  return await callMessageHttpController(context, _resolveThread)
-}
-
-export async function reopenThread(context) {
-  return await callMessageHttpController(context, _reopenThread)
-}
-
-export async function deleteThread(context) {
-  return await callMessageHttpController(context, _deleteThread)
-}
-
-export async function editMessage(context) {
-  return await callMessageHttpController(context, _editMessage)
-}
-
-export async function deleteMessage(context) {
-  return await callMessageHttpController(context, _deleteMessage)
-}
-
-export async function destroyProject(context) {
-  return await callMessageHttpController(context, _destroyProject)
-}
-
-export async function getStatus(context) {
-  const message = 'chat is alive'
-  context.res.status(200).setBody(message)
-  return message
-}
-
-const _getGlobalMessages = async (req, res) => {
+export const getGlobalMessages = expressify(async (req, res) => {
   await _getMessages(ThreadManager.GLOBAL_THREAD, req, res)
-}
+})
 
-async function _sendGlobalMessage(req, res) {
-  const { user_id: userId, content } = req.body
-  const { projectId } = req.params
-  return await _sendMessage(
-    userId,
-    projectId,
-    content,
-    ThreadManager.GLOBAL_THREAD,
-    res
-  )
-}
+export const sendGlobalMessage = expressify(async (req, res) => {
+  await _sendMessage(ThreadManager.GLOBAL_THREAD, req, res)
+})
 
-async function _sendThreadMessage(req, res) {
-  const { user_id: userId, content } = req.body
-  const { projectId, threadId } = req.params
-  return await _sendMessage(userId, projectId, content, threadId, res)
-}
+export const sendThreadMessage = expressify(async (req, res) => {
+  await _sendMessage(req.params.threadId, req, res)
+})
 
-const _getAllThreads = async (req, res) => {
+export const getAllThreads = expressify(async (req, res) => {
   const { projectId } = req.params
   logger.debug({ projectId }, 'getting all threads')
   const rooms = await ThreadManager.findAllThreadRooms(projectId)
@@ -109,32 +28,32 @@ const _getAllThreads = async (req, res) => {
   const messages = await MessageManager.findAllMessagesInRooms(roomIds)
   const threads = MessageFormatter.groupMessagesByThreads(rooms, messages)
   res.json(threads)
-}
+})
 
-const _resolveThread = async (req, res) => {
+export const resolveThread = expressify(async (req, res) => {
   const { projectId, threadId } = req.params
   const { user_id: userId } = req.body
   logger.debug({ userId, projectId, threadId }, 'marking thread as resolved')
   await ThreadManager.resolveThread(projectId, threadId, userId)
-  res.status(204)
-}
+  res.sendStatus(204)
+})
 
-const _reopenThread = async (req, res) => {
+export const reopenThread = expressify(async (req, res) => {
   const { projectId, threadId } = req.params
   logger.debug({ projectId, threadId }, 'reopening thread')
   await ThreadManager.reopenThread(projectId, threadId)
-  res.status(204)
-}
+  res.sendStatus(204)
+})
 
-const _deleteThread = async (req, res) => {
+export const deleteThread = expressify(async (req, res) => {
   const { projectId, threadId } = req.params
   logger.debug({ projectId, threadId }, 'deleting thread')
   const roomId = await ThreadManager.deleteThread(projectId, threadId)
   await MessageManager.deleteAllMessagesInRoom(roomId)
-  res.status(204)
-}
+  res.sendStatus(204)
+})
 
-const _editMessage = async (req, res) => {
+export const editMessage = expressify(async (req, res) => {
   const { content, userId } = req.body
   const { projectId, threadId, messageId } = req.params
   logger.debug({ projectId, threadId, messageId, content }, 'editing message')
@@ -147,21 +66,20 @@ const _editMessage = async (req, res) => {
     Date.now()
   )
   if (!found) {
-    res.status(404)
-    return
+    return res.sendStatus(404)
   }
-  res.status(204)
-}
+  res.sendStatus(204)
+})
 
-const _deleteMessage = async (req, res) => {
+export const deleteMessage = expressify(async (req, res) => {
   const { projectId, threadId, messageId } = req.params
   logger.debug({ projectId, threadId, messageId }, 'deleting message')
   const room = await ThreadManager.findOrCreateThread(projectId, threadId)
   await MessageManager.deleteMessage(room._id, messageId)
-  res.status(204)
-}
+  res.sendStatus(204)
+})
 
-const _destroyProject = async (req, res) => {
+export const destroyProject = expressify(async (req, res) => {
   const { projectId } = req.params
   logger.debug({ projectId }, 'destroying project')
   const rooms = await ThreadManager.findAllThreadRoomsAndGlobalThread(projectId)
@@ -170,24 +88,22 @@ const _destroyProject = async (req, res) => {
   await MessageManager.deleteAllMessagesInRooms(roomIds)
   logger.debug({ projectId }, 'deleting all threads in project')
   await ThreadManager.deleteAllThreadsInProject(projectId)
-  res.status(204)
-}
+  res.sendStatus(204)
+})
 
-async function _sendMessage(userId, projectId, content, clientThreadId, res) {
+async function _sendMessage(clientThreadId, req, res) {
+  const { user_id: userId, content } = req.body
+  const { projectId } = req.params
   if (!ObjectId.isValid(userId)) {
-    const message = 'Invalid userId'
-    res.status(400).setBody(message)
-    return message
+    return res.status(400).send('Invalid userId')
   }
   if (!content) {
-    const message = 'No content provided'
-    res.status(400).setBody(message)
-    return message
+    return res.status(400).send('No content provided')
   }
   if (content.length > MAX_MESSAGE_LENGTH) {
-    const message = `Content too long (> ${MAX_MESSAGE_LENGTH} bytes)`
-    res.status(400).setBody(message)
-    return message
+    return res
+      .status(400)
+      .send(`Content too long (> ${MAX_MESSAGE_LENGTH} bytes)`)
   }
   logger.debug(
     { clientThreadId, projectId, userId, content },
@@ -205,7 +121,7 @@ async function _sendMessage(userId, projectId, content, clientThreadId, res) {
   )
   message = MessageFormatter.formatMessageForClientSide(message)
   message.room_id = projectId
-  res.status(201).setBody(message)
+  res.status(201).send(message)
 }
 
 async function _getMessages(clientThreadId, req, res) {
@@ -237,5 +153,5 @@ async function _getMessages(clientThreadId, req, res) {
   let messages = await MessageManager.getMessages(threadObjectId, limit, before)
   messages = MessageFormatter.formatMessagesForClientSide(messages)
   logger.debug({ projectId, messages }, 'got messages')
-  res.status(200).setBody(messages)
+  res.status(200).send(messages)
 }

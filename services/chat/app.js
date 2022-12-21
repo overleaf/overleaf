@@ -1,14 +1,13 @@
 import logger from '@overleaf/logger'
 import settings from '@overleaf/settings'
 import { mongoClient } from './app/js/mongodb.js'
-import { createServer } from './app/js/server.js'
+import { server } from './app/js/server.js'
 
 const port = settings.internal.chat.port
 const host = settings.internal.chat.host
 mongoClient
   .connect()
-  .then(async () => {
-    const { server } = await createServer()
+  .then(() => {
     server.listen(port, host, function (err) {
       if (err) {
         logger.fatal({ err }, `Cannot bind to ${host}:${port}. Exiting.`)
