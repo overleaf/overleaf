@@ -7,12 +7,12 @@ const ALPHA_PHASE = 'alpha'
 const BETA_PHASE = 'beta'
 const RELEASE_PHASE = 'release'
 
-async function getSplitTests({ name, phase, type, activeOnly, archivedOnly }) {
+async function getSplitTests({ name, phase, type, active, archived }) {
   const filters = {}
   if (name && name !== '') {
     filters.name = { $regex: _.escapeRegExp(name) }
   }
-  if (activeOnly) {
+  if (active) {
     filters.$where = 'this.versions[this.versions.length - 1].active === true'
   }
   if (type === 'split-test') {
@@ -41,9 +41,9 @@ async function getSplitTests({ name, phase, type, activeOnly, archivedOnly }) {
       filters.$where = query
     }
   }
-  if (archivedOnly) {
+  if (archived === true) {
     filters.archived = true
-  } else {
+  } else if (archived === false) {
     filters.archived = { $ne: true }
   }
   try {
