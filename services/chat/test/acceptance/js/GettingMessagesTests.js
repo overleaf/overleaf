@@ -28,6 +28,9 @@ describe('Getting messages', async function () {
         content2
       )
       expect(response2.statusCode).to.equal(201)
+      const { response: response3, body } = await ChatClient.checkStatus()
+      expect(response3.statusCode).to.equal(200)
+      expect(body).to.equal('chat is alive')
     })
 
     it('should contain the messages and populated users when getting the messages', async function () {
