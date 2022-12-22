@@ -24,7 +24,9 @@ function CloneProjectModal({
       show={show}
       onHide={onHide}
       id="clone-project-modal"
-      backdrop="static"
+      // backdrop="static" will disable closing the modal by clicking
+      // outside of the modal element
+      backdrop={inFlight ? 'static' : undefined}
     >
       <CloneProjectModalContent
         handleHide={onHide}
