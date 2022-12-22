@@ -11,15 +11,16 @@ import type {
   ProjectCompiler,
 } from '../../../../../types/project-settings'
 import useScopeValue from '../../../shared/hooks/use-scope-value'
+import useSetProjectWideSettings from '../hooks/use-set-project-wide-settings'
 
 type ProjectSettingsContextValue = {
-  compiler: ProjectCompiler
+  compiler?: ProjectCompiler
   setCompiler: (compiler: ProjectCompiler) => void
-  imageName: string
+  imageName?: string
   setImageName: (imageName: string) => void
-  rootDocId: string
+  rootDocId?: string
   setRootDocId: (rootDocId: string) => void
-  spellCheckLanguage: string
+  spellCheckLanguage?: string
   setSpellCheckLanguage: (spellCheckLanguage: string) => void
   autoComplete: boolean
   setAutoComplete: (autoComplete: boolean) => void
@@ -50,13 +51,17 @@ export const ProjectSettingsContext = createContext<
 export function ProjectSettingsProvider({
   children,
 }: PropsWithChildren<Record<string, never>>) {
-  const [compiler, setCompiler] =
-    useScopeValue<ProjectCompiler>('project.compiler')
-  const [imageName, setImageName] = useScopeValue<string>('project.imageName')
-  const [rootDocId, setRootDocId] = useScopeValue<string>('project.rootDoc_id')
-  const [spellCheckLanguage, setSpellCheckLanguage] = useScopeValue<string>(
-    'project.spellCheckLanguage'
-  )
+  const {
+    compiler,
+    setCompiler,
+    imageName,
+    setImageName,
+    rootDocId,
+    setRootDocId,
+    spellCheckLanguage,
+    setSpellCheckLanguage,
+  } = useSetProjectWideSettings()
+
   const [autoComplete, setAutoComplete] = useScopeValue<boolean>(
     'settings.autoComplete'
   )
