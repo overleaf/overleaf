@@ -6,8 +6,10 @@ import { OverallThemeMeta } from '../../../../../types/project-settings'
 import { saveUserSettings } from '../utils/api'
 
 export default function useSetOverallTheme() {
-  const [loadingStyleSheet, setLoadingStyleSheet] = useScopeValue<boolean>('ui.loadingStyleSheet')
   const [chosenTheme, setChosenTheme] = useState<OverallThemeMeta | null>(null)
+  const [loadingStyleSheet, setLoadingStyleSheet] = useScopeValue<boolean>(
+    'ui.loadingStyleSheet'
+  )
   const [overallThemeScope, setOverallThemeScope] = useScopeValue<OverallTheme>(
     'settings.overallTheme'
   )
