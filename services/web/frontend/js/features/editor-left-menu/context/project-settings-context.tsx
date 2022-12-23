@@ -10,8 +10,8 @@ import type {
   PdfViewer,
   ProjectCompiler,
 } from '../../../../../types/project-settings'
-import useScopeValue from '../../../shared/hooks/use-scope-value'
 import useSetProjectWideSettings from '../hooks/use-set-project-wide-settings'
+import useSetUserWideSettings from '../hooks/use-set-user-wide-settings'
 
 type ProjectSettingsContextValue = {
   compiler?: ProjectCompiler
@@ -62,31 +62,28 @@ export function ProjectSettingsProvider({
     setSpellCheckLanguage,
   } = useSetProjectWideSettings()
 
-  const [autoComplete, setAutoComplete] = useScopeValue<boolean>(
-    'settings.autoComplete'
-  )
-  const [autoPairDelimiters, setAutoPairDelimiters] = useScopeValue<boolean>(
-    'settings.autoPairDelimiters'
-  )
-  const [syntaxValidation, setSyntaxValidation] = useScopeValue<boolean>(
-    'settings.syntaxValidation'
-  )
-  const [editorTheme, setEditorTheme] = useScopeValue<string>(
-    'settings.editorTheme'
-  )
-  const [overallTheme, setOverallTheme] = useScopeValue<OverallTheme>(
-    'settings.overallTheme'
-  )
-  const [mode, setMode] = useScopeValue<Keybindings>('settings.mode')
-  const [fontSize, setFontSize] = useScopeValue<string>('settings.fontSize')
-  const [fontFamily, setFontFamily] = useScopeValue<FontFamily>(
-    'settings.fontFamily'
-  )
-  const [lineHeight, setLineHeight] = useScopeValue<LineHeight>(
-    'settings.lineHeight'
-  )
-  const [pdfViewer, setPdfViewer] =
-    useScopeValue<PdfViewer>('settings.pdfViewer')
+  const {
+    autoComplete,
+    setAutoComplete,
+    autoPairDelimiters,
+    setAutoPairDelimiters,
+    syntaxValidation,
+    setSyntaxValidation,
+    editorTheme,
+    setEditorTheme,
+    overallTheme,
+    setOverallTheme,
+    mode,
+    setMode,
+    fontSize,
+    setFontSize,
+    fontFamily,
+    setFontFamily,
+    lineHeight,
+    setLineHeight,
+    pdfViewer,
+    setPdfViewer,
+  } = useSetUserWideSettings()
 
   const value: ProjectSettingsContextValue = useMemo(
     () => ({
