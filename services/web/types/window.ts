@@ -1,5 +1,6 @@
 import { ExposedSettings } from './exposed-settings'
 import { OAuthProviders } from './oauth-providers'
+import { OverallThemeMeta } from './project-settings'
 import { User } from './user'
 
 declare global {
@@ -31,5 +32,6 @@ declare global {
     MathJax: {
       Hub: Record<string, any>
     }
+    overallThemes: OverallThemeMeta[]
   }
 }

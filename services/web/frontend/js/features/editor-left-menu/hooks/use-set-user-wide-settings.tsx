@@ -2,30 +2,12 @@ import { useCallback } from 'react'
 import {
   FontFamily,
   LineHeight,
-  OverallTheme,
 } from '../../../../../modules/source-editor/frontend/js/extensions/theme'
 import { Keybindings, PdfViewer } from '../../../../../types/project-settings'
-import { postJSON } from '../../../infrastructure/fetch-json'
 import useScopeValue from '../../../shared/hooks/use-scope-value'
-
-type UserSettingsScope = {
-  pdfViewer: PdfViewer
-  autoComplete: boolean
-  autoPairDelimiters: boolean
-  syntaxValidation: boolean
-  editorTheme: string
-  overallTheme: OverallTheme
-  mode: Keybindings
-  fontSize: string
-  fontFamily: FontFamily
-  lineHeight: LineHeight
-}
-
-function saveUserSettings(data: Partial<UserSettingsScope>) {
-  postJSON('/user/settings', {
-    body: data,
-  })
-}
+import { saveUserSettings } from '../utils/api'
+import type { UserSettingsScope } from '../utils/api'
+import useSetOverallTheme from './use-set-overall-theme'
 
 export default function useSetUserWideSettings() {
   const [userSettings, setUserSettings] = useScopeValue<UserSettingsScope>(
@@ -33,6 +15,7 @@ export default function useSetUserWideSettings() {
     true
   )
 
+  const setOverallTheme = useSetOverallTheme()
   const setAutoComplete = useCallback(
     (autoComplete: boolean) => {
       if (userSettings.autoComplete !== autoComplete) {
@@ -68,17 +51,6 @@ export default function useSetUserWideSettings() {
       if (userSettings.editorTheme !== editorTheme) {
         setUserSettings({ ...userSettings, editorTheme })
         saveUserSettings({ editorTheme })
-      }
-    },
-    [userSettings, setUserSettings]
-  )
-
-  // TODO: business logic
-  const setOverallTheme = useCallback(
-    (overallTheme: OverallTheme) => {
-      if (userSettings.overallTheme !== overallTheme) {
-        setUserSettings({ ...userSettings, overallTheme })
-        saveUserSettings({ overallTheme })
       }
     },
     [userSettings, setUserSettings]
