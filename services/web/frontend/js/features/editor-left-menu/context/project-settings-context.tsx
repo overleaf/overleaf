@@ -11,7 +11,7 @@ import type {
   ProjectCompiler,
 } from '../../../../../types/project-settings'
 import useSetProjectWideSettings from '../hooks/use-set-project-wide-settings'
-import useSetUserWideSettings from '../hooks/use-set-user-wide-settings'
+import useUserWideSettings from '../hooks/use-user-wide-settings'
 
 type ProjectSettingsContextValue = {
   compiler?: ProjectCompiler
@@ -83,7 +83,7 @@ export function ProjectSettingsProvider({
     setLineHeight,
     pdfViewer,
     setPdfViewer,
-  } = useSetUserWideSettings()
+  } = useUserWideSettings()
 
   const value: ProjectSettingsContextValue = useMemo(
     () => ({
