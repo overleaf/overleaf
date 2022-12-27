@@ -25,7 +25,10 @@ export type UserSettingsScope = {
 
 export function saveUserSettings(data: Partial<UserSettingsScope>) {
   postJSON('/user/settings', {
-    body: data,
+    body: {
+      _csrf: window.csrfToken,
+      ...data,
+    },
   })
 }
 
@@ -41,6 +44,9 @@ export const saveProjectSettings = async (
   data: Partial<ProjectSettingsScope>
 ) => {
   await postJSON<never>(`/project/${projectId}/settings`, {
-    body: data,
+    body: {
+      _csrf: window.csrfToken,
+      ...data,
+    },
   })
 }
