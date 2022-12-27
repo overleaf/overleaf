@@ -12,6 +12,7 @@ import type {
 } from '../../../../../types/project-settings'
 import useSetProjectWideSettings from '../hooks/use-set-project-wide-settings'
 import useUserWideSettings from '../hooks/use-user-wide-settings'
+import useProjectWideSettingsSocketListener from '../hooks/use-project-wide-settings-socket-listener'
 
 type ProjectSettingsContextValue = {
   compiler?: ProjectCompiler
@@ -84,6 +85,8 @@ export function ProjectSettingsProvider({
     pdfViewer,
     setPdfViewer,
   } = useUserWideSettings()
+
+  useProjectWideSettingsSocketListener()
 
   const value: ProjectSettingsContextValue = useMemo(
     () => ({
