@@ -4,17 +4,25 @@ import { useProjectContext } from '../../../shared/context/project-context'
 import useScopeValue from '../../../shared/hooks/use-scope-value'
 import { saveProjectSettings, saveUserSettings } from '../utils/api'
 
-export default function useSetSpellCheckLanguage() {
+type UseSetSpellCheckLanguage = {
+  ignoreUpdates: boolean
+}
+
+export default function useSetSpellCheckLanguage({
+  ignoreUpdates,
+}: UseSetSpellCheckLanguage) {
   const [spellCheckLanguageScope, setSpellCheckLanguageScope] =
     useScopeValue<string>('project.spellCheckLanguage')
   const { _id: projectId } = useProjectContext()
 
   const setSpellCheckLanguage = useCallback(
     (spellCheckLanguage: string) => {
-      if (
-        spellCheckLanguageScope &&
+      const allowUpdate =
+        !ignoreUpdates &&
+        spellCheckLanguage &&
         spellCheckLanguage !== spellCheckLanguageScope
-      ) {
+
+      if (allowUpdate) {
         sendMB('setting-changed', {
           changedSetting: 'spellCheckLanguage',
           changedSettingVal: spellCheckLanguage,
@@ -27,7 +35,12 @@ export default function useSetSpellCheckLanguage() {
         saveUserSettings({ spellCheckLanguage })
       }
     },
-    [projectId, setSpellCheckLanguageScope, spellCheckLanguageScope]
+    [
+      projectId,
+      setSpellCheckLanguageScope,
+      spellCheckLanguageScope,
+      ignoreUpdates,
+    ]
   )
 
   return setSpellCheckLanguage

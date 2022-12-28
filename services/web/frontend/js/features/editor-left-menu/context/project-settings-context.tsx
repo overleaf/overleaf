@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo } from 'react'
+import { createContext, useContext, useMemo, useState } from 'react'
 import type { PropsWithChildren } from 'react'
 import type {
   FontFamily,
@@ -52,6 +52,8 @@ export const ProjectSettingsContext = createContext<
 export function ProjectSettingsProvider({
   children,
 }: PropsWithChildren<Record<string, never>>) {
+  const [ignoreUpdates, setIgnoreUpdates] = useState(false)
+
   const {
     compiler,
     setCompiler,
@@ -61,7 +63,7 @@ export function ProjectSettingsProvider({
     setRootDocId,
     spellCheckLanguage,
     setSpellCheckLanguage,
-  } = useSetProjectWideSettings()
+  } = useSetProjectWideSettings({ ignoreUpdates })
 
   const {
     autoComplete,
@@ -86,7 +88,9 @@ export function ProjectSettingsProvider({
     setPdfViewer,
   } = useUserWideSettings()
 
-  useProjectWideSettingsSocketListener()
+  useProjectWideSettingsSocketListener({
+    onListen: () => setIgnoreUpdates(true),
+  })
 
   const value: ProjectSettingsContextValue = useMemo(
     () => ({
