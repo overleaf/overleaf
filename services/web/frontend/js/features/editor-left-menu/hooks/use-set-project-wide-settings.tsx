@@ -4,6 +4,7 @@ import { useProjectContext } from '../../../shared/context/project-context'
 import useScopeValue from '../../../shared/hooks/use-scope-value'
 import { ProjectSettingsScope, saveProjectSettings } from '../utils/api'
 import useSetRootDocId from './use-set-root-doc-id'
+import useSetSpellCheckLanguage from './use-set-spell-check-language'
 
 // TODO: handle ignoreUpdates
 export default function useSetProjectWideSettings() {
@@ -35,16 +36,7 @@ export default function useSetProjectWideSettings() {
   )
 
   const setRootDocId = useSetRootDocId()
-
-  const setSpellCheckLanguage = useCallback(
-    (spellCheckLanguage: string) => {
-      if (project?.spellCheckLanguage) {
-        setProject({ ...project, spellCheckLanguage })
-        saveProjectSettings(projectId, { spellCheckLanguage })
-      }
-    },
-    [projectId, project, setProject]
-  )
+  const setSpellCheckLanguage = useSetSpellCheckLanguage()
 
   return {
     compiler: project?.compiler,

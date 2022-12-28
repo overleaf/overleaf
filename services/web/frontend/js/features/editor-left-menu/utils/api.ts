@@ -23,20 +23,26 @@ export type UserSettingsScope = {
   lineHeight: LineHeight
 }
 
-export function saveUserSettings(data: Partial<UserSettingsScope>) {
+export type ProjectSettingsScope = {
+  compiler: ProjectCompiler
+  imageName: string
+  rootDoc_id: string
+  spellCheckLanguage: string
+}
+
+type SaveUserSettings = Partial<
+  UserSettingsScope & {
+    spellCheckLanguage: ProjectSettingsScope['spellCheckLanguage']
+  }
+>
+
+export function saveUserSettings(data: SaveUserSettings) {
   postJSON('/user/settings', {
     body: {
       _csrf: window.csrfToken,
       ...data,
     },
   })
-}
-
-export type ProjectSettingsScope = {
-  compiler: ProjectCompiler
-  imageName: string
-  rootDoc_id: string
-  spellCheckLanguage: string
 }
 
 // server asks for "rootDocId" but client has "rootDoc_id"
