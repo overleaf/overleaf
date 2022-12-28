@@ -6,7 +6,10 @@ export default function useSaveUserSettings() {
   const [userSettingsScope, setUserSettingsScope] =
     useScopeValue<UserSettingsScope>('settings', true)
 
-  return <T,>(key: keyof UserSettingsScope, newSetting: T) => {
+  return <T extends UserSettingsScope[keyof UserSettingsScope]>(
+    key: keyof UserSettingsScope,
+    newSetting: T
+  ) => {
     const currentSetting = userSettingsScope[key]
 
     if (currentSetting !== newSetting) {
