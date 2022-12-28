@@ -11,7 +11,10 @@ export default function useSetSpellCheckLanguage() {
 
   const setSpellCheckLanguage = useCallback(
     (spellCheckLanguage: string) => {
-      if (spellCheckLanguageScope) {
+      if (
+        spellCheckLanguageScope &&
+        spellCheckLanguage !== spellCheckLanguageScope
+      ) {
         sendMB('setting-changed', {
           changedSetting: 'spellCheckLanguage',
           changedSettingVal: spellCheckLanguage,
