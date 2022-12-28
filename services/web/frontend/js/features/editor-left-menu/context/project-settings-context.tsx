@@ -23,25 +23,25 @@ type ProjectSettingsContextValue = {
   setRootDocId: (rootDocId: string) => void
   spellCheckLanguage?: string
   setSpellCheckLanguage: (spellCheckLanguage: string) => void
-  autoComplete: boolean
+  autoComplete?: boolean
   setAutoComplete: (autoComplete: boolean) => void
-  autoPairDelimiters: boolean
+  autoPairDelimiters?: boolean
   setAutoPairDelimiters: (autoPairDelimiters: boolean) => void
-  syntaxValidation: boolean
+  syntaxValidation?: boolean
   setSyntaxValidation: (syntaxValidation: boolean) => void
-  mode: Keybindings
+  mode?: Keybindings
   setMode: (mode: Keybindings) => void
-  editorTheme: string
+  editorTheme?: string
   setEditorTheme: (editorTheme: string) => void
-  overallTheme: OverallTheme
+  overallTheme?: OverallTheme
   setOverallTheme: (overallTheme: OverallTheme) => void
-  fontSize: string
+  fontSize?: string
   setFontSize: (fontSize: string) => void
-  fontFamily: FontFamily
+  fontFamily?: FontFamily
   setFontFamily: (fontFamily: FontFamily) => void
-  lineHeight: LineHeight
+  lineHeight?: LineHeight
   setLineHeight: (lineHeight: LineHeight) => void
-  pdfViewer: PdfViewer
+  pdfViewer?: PdfViewer
   setPdfViewer: (pdfViewer: PdfViewer) => void
 }
 

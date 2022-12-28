@@ -11,7 +11,7 @@ import type { UserSettingsScope } from '../utils/api'
 
 export default function useUserWideSettings() {
   const saveUserSettings = useSaveUserSettings()
-  const [userSettings] = useScopeValue<UserSettingsScope>('settings', true)
+  const [userSettings] = useScopeValue<UserSettingsScope | undefined>('settings', true)
 
   const setOverallTheme = useSetOverallTheme()
   const setAutoComplete = useCallback(
@@ -78,25 +78,25 @@ export default function useUserWideSettings() {
   )
 
   return {
-    autoComplete: userSettings.autoComplete,
+    autoComplete: userSettings?.autoComplete,
     setAutoComplete,
-    autoPairDelimiters: userSettings.autoPairDelimiters,
+    autoPairDelimiters: userSettings?.autoPairDelimiters,
     setAutoPairDelimiters,
-    syntaxValidation: userSettings.syntaxValidation,
+    syntaxValidation: userSettings?.syntaxValidation,
     setSyntaxValidation,
-    editorTheme: userSettings.editorTheme,
+    editorTheme: userSettings?.editorTheme,
     setEditorTheme,
-    overallTheme: userSettings.overallTheme,
+    overallTheme: userSettings?.overallTheme,
     setOverallTheme,
-    mode: userSettings.mode,
+    mode: userSettings?.mode,
     setMode,
-    fontSize: userSettings.fontSize,
+    fontSize: userSettings?.fontSize,
     setFontSize,
-    fontFamily: userSettings.fontFamily,
+    fontFamily: userSettings?.fontFamily,
     setFontFamily,
-    lineHeight: userSettings.lineHeight,
+    lineHeight: userSettings?.lineHeight,
     setLineHeight,
-    pdfViewer: userSettings.pdfViewer,
+    pdfViewer: userSettings?.pdfViewer,
     setPdfViewer,
   }
 }
