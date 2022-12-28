@@ -13,7 +13,10 @@ export default function useUserWideSettings() {
   const saveUserSettings = useSaveUserSettings()
 
   // this may be undefined on test environments
-  const [userSettings] = useScopeValue<UserSettingsScope | undefined>('settings', true)
+  const [userSettings] = useScopeValue<UserSettingsScope | undefined>(
+    'settings',
+    true
+  )
 
   const setOverallTheme = useSetOverallTheme()
   const setAutoComplete = useCallback(
