@@ -19,7 +19,7 @@ export default function useSetProjectWideSettings() {
     (compiler: ProjectCompiler) => {
       if (project?.compiler) {
         setProject({ ...project, compiler })
-        saveProjectSettings(projectId, { compiler })
+        saveProjectSettings({ projectId, compiler })
       }
     },
     [projectId, project, setProject]
@@ -29,7 +29,7 @@ export default function useSetProjectWideSettings() {
     (imageName: string) => {
       if (project?.imageName) {
         setProject({ ...project, imageName })
-        saveProjectSettings(projectId, { imageName })
+        saveProjectSettings({ projectId, imageName })
       }
     },
     [projectId, project, setProject]

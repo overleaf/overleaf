@@ -52,10 +52,14 @@ type ProjectSettingsRequestBody = Partial<
   }
 >
 
-export const saveProjectSettings = async (
-  projectId: string,
-  data: Partial<ProjectSettingsScope>
-) => {
+type SaveProjectSettings = {
+  projectId: string
+} & Partial<ProjectSettingsScope>
+
+export const saveProjectSettings = async ({
+  projectId,
+  ...data
+}: SaveProjectSettings) => {
   let reqData: ProjectSettingsRequestBody = {}
 
   if (data.rootDoc_id) {

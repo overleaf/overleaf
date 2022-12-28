@@ -19,7 +19,7 @@ export default function useSetRootDocId() {
 
       if (!disallowChange) {
         try {
-          await saveProjectSettings(projectId, { rootDoc_id: rootDocId })
+          await saveProjectSettings({ projectId, rootDoc_id: rootDocId })
           setRootDocIdScope(rootDocId)
         } catch (err) {
           // TODO: retry mechanism (max 10x before failed completely and rollback the old value)

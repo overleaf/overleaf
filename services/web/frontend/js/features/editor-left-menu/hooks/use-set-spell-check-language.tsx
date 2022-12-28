@@ -23,7 +23,7 @@ export default function useSetSpellCheckLanguage() {
         setSpellCheckLanguageScope(spellCheckLanguage)
 
         // save to both project setting and user setting
-        saveProjectSettings(projectId, { spellCheckLanguage })
+        saveProjectSettings({ projectId, spellCheckLanguage })
         saveUserSettings({ spellCheckLanguage })
       }
     },
