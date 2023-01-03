@@ -1,49 +1,36 @@
 import { createContext, useContext, useMemo } from 'react'
 import type { PropsWithChildren } from 'react'
-import type {
-  FontFamily,
-  LineHeight,
-  OverallTheme,
-} from '../../../../../modules/source-editor/frontend/js/extensions/theme'
-import type {
-  Keybindings,
-  PdfViewer,
-  ProjectCompiler,
-} from '../../../../../types/project-settings'
 import useSetProjectWideSettings from '../hooks/use-set-project-wide-settings'
 import useUserWideSettings from '../hooks/use-user-wide-settings'
 import useProjectWideSettingsSocketListener from '../hooks/use-project-wide-settings-socket-listener'
+import type { ProjectSettingsScope, UserSettingsScope } from '../utils/api'
 
-type ProjectSettingsContextValue = {
-  compiler?: ProjectCompiler
-  setCompiler: (compiler: ProjectCompiler) => void
-  imageName?: string
-  setImageName: (imageName: string) => void
-  rootDocId?: string
-  setRootDocId: (rootDocId: string) => void
-  spellCheckLanguage?: string
-  setSpellCheckLanguage: (spellCheckLanguage: string) => void
-  autoComplete?: boolean
-  setAutoComplete: (autoComplete: boolean) => void
-  autoPairDelimiters?: boolean
-  setAutoPairDelimiters: (autoPairDelimiters: boolean) => void
-  syntaxValidation?: boolean
-  setSyntaxValidation: (syntaxValidation: boolean) => void
-  mode?: Keybindings
-  setMode: (mode: Keybindings) => void
-  editorTheme?: string
-  setEditorTheme: (editorTheme: string) => void
-  overallTheme?: OverallTheme
-  setOverallTheme: (overallTheme: OverallTheme) => void
-  fontSize?: string
-  setFontSize: (fontSize: string) => void
-  fontFamily?: FontFamily
-  setFontFamily: (fontFamily: FontFamily) => void
-  lineHeight?: LineHeight
-  setLineHeight: (lineHeight: LineHeight) => void
-  pdfViewer?: PdfViewer
-  setPdfViewer: (pdfViewer: PdfViewer) => void
+type ProjectSettingsSetterContextValue = {
+  setCompiler: (compiler: ProjectSettingsScope['compiler']) => void
+  setImageName: (imageName: ProjectSettingsScope['imageName']) => void
+  setRootDocId: (rootDocId: ProjectSettingsScope['rootDoc_id']) => void
+  setSpellCheckLanguage: (
+    spellCheckLanguage: ProjectSettingsScope['spellCheckLanguage']
+  ) => void
+  setAutoComplete: (autoComplete: UserSettingsScope['autoComplete']) => void
+  setAutoPairDelimiters: (
+    autoPairDelimiters: UserSettingsScope['autoPairDelimiters']
+  ) => void
+  setSyntaxValidation: (
+    syntaxValidation: UserSettingsScope['syntaxValidation']
+  ) => void
+  setMode: (mode: UserSettingsScope['mode']) => void
+  setEditorTheme: (editorTheme: UserSettingsScope['editorTheme']) => void
+  setOverallTheme: (overallTheme: UserSettingsScope['overallTheme']) => void
+  setFontSize: (fontSize: UserSettingsScope['fontSize']) => void
+  setFontFamily: (fontFamily: UserSettingsScope['fontFamily']) => void
+  setLineHeight: (lineHeight: UserSettingsScope['lineHeight']) => void
+  setPdfViewer: (pdfViewer: UserSettingsScope['pdfViewer']) => void
 }
+
+type ProjectSettingsContextValue = Partial<ProjectSettingsScope> &
+  Partial<UserSettingsScope> &
+  ProjectSettingsSetterContextValue
 
 export const ProjectSettingsContext = createContext<
   ProjectSettingsContextValue | undefined
