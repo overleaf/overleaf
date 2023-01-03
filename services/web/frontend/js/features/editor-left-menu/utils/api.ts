@@ -26,7 +26,7 @@ export type UserSettingsScope = {
 export type ProjectSettingsScope = {
   compiler: ProjectCompiler
   imageName: string
-  rootDoc_id: string
+  rootDocId: string
   spellCheckLanguage: string
 }
 
@@ -45,13 +45,6 @@ export function saveUserSettings(data: SaveUserSettings) {
   })
 }
 
-// server asks for "rootDocId" but client has "rootDoc_id"
-type ProjectSettingsRequestBody = Partial<
-  Omit<ProjectSettingsScope, 'rootDoc_id'> & {
-    rootDocId: string
-  }
->
-
 type SaveProjectSettings = {
   projectId: string
 } & Partial<ProjectSettingsScope>
@@ -60,23 +53,10 @@ export const saveProjectSettings = async ({
   projectId,
   ...data
 }: SaveProjectSettings) => {
-  let reqData: ProjectSettingsRequestBody = {}
-
-  if (data.rootDoc_id) {
-    const val = data.rootDoc_id
-    delete data.rootDoc_id
-    reqData = {
-      ...data,
-      rootDocId: val,
-    }
-  } else {
-    reqData = data
-  }
-
   await postJSON<never>(`/project/${projectId}/settings`, {
     body: {
       _csrf: window.csrfToken,
-      ...reqData,
+      ...data,
     },
   })
 }

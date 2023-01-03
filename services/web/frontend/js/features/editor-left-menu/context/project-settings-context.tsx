@@ -8,7 +8,7 @@ import type { ProjectSettingsScope, UserSettingsScope } from '../utils/api'
 type ProjectSettingsSetterContextValue = {
   setCompiler: (compiler: ProjectSettingsScope['compiler']) => void
   setImageName: (imageName: ProjectSettingsScope['imageName']) => void
-  setRootDocId: (rootDocId: ProjectSettingsScope['rootDoc_id']) => void
+  setRootDocId: (rootDocId: ProjectSettingsScope['rootDocId']) => void
   setSpellCheckLanguage: (
     spellCheckLanguage: ProjectSettingsScope['spellCheckLanguage']
   ) => void

@@ -2,7 +2,7 @@ import { useCallback } from 'react'
 import { useProjectContext } from '../../../shared/context/project-context'
 import useScopeValue from '../../../shared/hooks/use-scope-value'
 import { type ProjectSettingsScope, saveProjectSettings } from '../utils/api'
-import useSetRootDocId from './use-set-root-doc-id'
+import useRootDocId from './use-root-doc-id'
 import useSetSpellCheckLanguage from './use-set-spell-check-language'
 
 export default function useProjectWideSettings() {
@@ -37,7 +37,7 @@ export default function useProjectWideSettings() {
     [projectId, project, setProject]
   )
 
-  const setRootDocId = useSetRootDocId()
+  const { setRootDocId, rootDocId } = useRootDocId()
   const setSpellCheckLanguage = useSetSpellCheckLanguage()
 
   return {
@@ -45,7 +45,7 @@ export default function useProjectWideSettings() {
     setCompiler,
     imageName: project?.imageName,
     setImageName,
-    rootDocId: project?.rootDoc_id,
+    rootDocId,
     setRootDocId,
     spellCheckLanguage: project?.spellCheckLanguage,
     setSpellCheckLanguage,

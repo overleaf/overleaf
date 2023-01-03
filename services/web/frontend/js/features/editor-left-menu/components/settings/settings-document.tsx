@@ -12,7 +12,7 @@ export default function SettingsDocument() {
   const { t } = useTranslation()
   const { permissionsLevel } = useEditorContext()
   const [docs] = useScopeValue<MainDocument[] | undefined>('docs')
-  const { rootDoc_id: rootDocId, setRootDocId } = useProjectSettingsContext()
+  const { rootDocId, setRootDocId } = useProjectSettingsContext()
 
   const validDocsOptions = useMemo(() => {
     const filteredDocs =
@@ -38,7 +38,7 @@ export default function SettingsDocument() {
       value={rootDocId}
       options={validDocsOptions}
       label={t('main_document')}
-      name="rootDoc_id"
+      name="rootDocId"
     />
   )
 }

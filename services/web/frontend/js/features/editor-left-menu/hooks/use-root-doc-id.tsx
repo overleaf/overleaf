@@ -4,29 +4,33 @@ import { useProjectContext } from '../../../shared/context/project-context'
 import useScopeValue from '../../../shared/hooks/use-scope-value'
 import { type ProjectSettingsScope, saveProjectSettings } from '../utils/api'
 
-export default function useSetRootDocId() {
-  const [rootDocIdScope, setRootDocIdScope] =
-    useScopeValue<ProjectSettingsScope['rootDoc_id']>('project.rootDoc_id')
+export default function useRootDocId() {
+  const [rootDocId, setRootDocId] =
+    useScopeValue<ProjectSettingsScope['rootDocId']>('project.rootDoc_id')
   const { permissionsLevel } = useEditorContext()
   const { _id: projectId } = useProjectContext()
 
-  const setRootDocId = useCallback(
-    async (rootDocId: ProjectSettingsScope['rootDoc_id']) => {
+  const setRootDocIdFunc = useCallback(
+    async (newRootDocId: ProjectSettingsScope['rootDocId']) => {
       const allowUpdate =
-        typeof rootDocIdScope !== 'undefined' &&
+        typeof rootDocId !== 'undefined' &&
         permissionsLevel !== 'readOnly' &&
-        rootDocIdScope !== rootDocId
+        rootDocId !== newRootDocId
 
       if (allowUpdate) {
         try {
-          await saveProjectSettings({ projectId, rootDoc_id: rootDocId })
-          setRootDocIdScope(rootDocId)
+          await saveProjectSettings({ projectId, rootDocId: newRootDocId })
+          setRootDocId(newRootDocId)
         } catch (err) {
           // TODO: retry mechanism (max 10x before failed completely and rollback the old value)
         }
       }
     },
-    [permissionsLevel, projectId, rootDocIdScope, setRootDocIdScope]
+    [permissionsLevel, projectId, rootDocId, setRootDocId]
   )
-  return setRootDocId
+
+  return {
+    rootDocId,
+    setRootDocId: setRootDocIdFunc,
+  }
 }
