@@ -21,63 +21,63 @@ export default function useUserWideSettings() {
   const setOverallTheme = useSetOverallTheme()
   const setAutoComplete = useCallback(
     (autoComplete: boolean) => {
-      saveUserSettings<boolean>('autoComplete', autoComplete)
+      saveUserSettings('autoComplete', autoComplete)
     },
     [saveUserSettings]
   )
 
   const setAutoPairDelimiters = useCallback(
     (autoPairDelimiters: boolean) => {
-      saveUserSettings<boolean>('autoPairDelimiters', autoPairDelimiters)
+      saveUserSettings('autoPairDelimiters', autoPairDelimiters)
     },
     [saveUserSettings]
   )
 
   const setSyntaxValidation = useCallback(
     (syntaxValidation: boolean) => {
-      saveUserSettings<boolean>('syntaxValidation', syntaxValidation)
+      saveUserSettings('syntaxValidation', syntaxValidation)
     },
     [saveUserSettings]
   )
 
   const setEditorTheme = useCallback(
     (editorTheme: string) => {
-      saveUserSettings<string>('editorTheme', editorTheme)
+      saveUserSettings('editorTheme', editorTheme)
     },
     [saveUserSettings]
   )
 
   const setMode = useCallback(
     (mode: Keybindings) => {
-      saveUserSettings<Keybindings>('mode', mode)
+      saveUserSettings('mode', mode)
     },
     [saveUserSettings]
   )
 
   const setFontSize = useCallback(
     (fontSize: string) => {
-      saveUserSettings<string>('fontSize', fontSize)
+      saveUserSettings('fontSize', fontSize)
     },
     [saveUserSettings]
   )
 
   const setFontFamily = useCallback(
     (fontFamily: FontFamily) => {
-      saveUserSettings<FontFamily>('fontFamily', fontFamily)
+      saveUserSettings('fontFamily', fontFamily)
     },
     [saveUserSettings]
   )
 
   const setLineHeight = useCallback(
     (lineHeight: LineHeight) => {
-      saveUserSettings<LineHeight>('lineHeight', lineHeight)
+      saveUserSettings('lineHeight', lineHeight)
     },
     [saveUserSettings]
   )
 
   const setPdfViewer = useCallback(
     (pdfViewer: PdfViewer) => {
-      saveUserSettings<PdfViewer>('pdfViewer', pdfViewer)
+      saveUserSettings('pdfViewer', pdfViewer)
     },
     [saveUserSettings]
   )
