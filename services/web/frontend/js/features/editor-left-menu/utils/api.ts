@@ -38,10 +38,7 @@ type SaveUserSettings = Partial<
 
 export function saveUserSettings(data: SaveUserSettings) {
   postJSON('/user/settings', {
-    body: {
-      _csrf: window.csrfToken,
-      ...data,
-    },
+    body: data,
   })
 }
 
@@ -54,9 +51,6 @@ export const saveProjectSettings = async ({
   ...data
 }: SaveProjectSettings) => {
   await postJSON<never>(`/project/${projectId}/settings`, {
-    body: {
-      _csrf: window.csrfToken,
-      ...data,
-    },
+    body: data,
   })
 }
