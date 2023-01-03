@@ -1,9 +1,9 @@
-import {
+import type {
   FontFamily,
   LineHeight,
   OverallTheme,
 } from '../../../../../modules/source-editor/frontend/js/extensions/theme'
-import {
+import type {
   Keybindings,
   PdfViewer,
   ProjectCompiler,
