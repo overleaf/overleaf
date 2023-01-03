@@ -2,15 +2,20 @@ import { useCallback } from 'react'
 import { sendMB } from '../../../infrastructure/event-tracking'
 import { useProjectContext } from '../../../shared/context/project-context'
 import useScopeValue from '../../../shared/hooks/use-scope-value'
-import { saveProjectSettings, saveUserSettings } from '../utils/api'
+import {
+  type ProjectSettingsScope,
+  saveProjectSettings,
+  saveUserSettings,
+} from '../utils/api'
 
 export default function useSetSpellCheckLanguage() {
-  const [spellCheckLanguageScope, setSpellCheckLanguageScope] =
-    useScopeValue<string>('project.spellCheckLanguage')
+  const [spellCheckLanguageScope, setSpellCheckLanguageScope] = useScopeValue<
+    ProjectSettingsScope['spellCheckLanguage']
+  >('project.spellCheckLanguage')
   const { _id: projectId } = useProjectContext()
 
   const setSpellCheckLanguage = useCallback(
-    (spellCheckLanguage: string) => {
+    (spellCheckLanguage: ProjectSettingsScope['spellCheckLanguage']) => {
       const allowUpdate =
         spellCheckLanguage && spellCheckLanguage !== spellCheckLanguageScope
 

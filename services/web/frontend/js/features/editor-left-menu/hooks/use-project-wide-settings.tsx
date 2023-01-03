@@ -1,8 +1,7 @@
 import { useCallback } from 'react'
-import { ProjectCompiler } from '../../../../../types/project-settings'
 import { useProjectContext } from '../../../shared/context/project-context'
 import useScopeValue from '../../../shared/hooks/use-scope-value'
-import { ProjectSettingsScope, saveProjectSettings } from '../utils/api'
+import { type ProjectSettingsScope, saveProjectSettings } from '../utils/api'
 import useSetRootDocId from './use-set-root-doc-id'
 import useSetSpellCheckLanguage from './use-set-spell-check-language'
 
@@ -15,7 +14,7 @@ export default function useProjectWideSettings() {
   const { _id: projectId } = useProjectContext()
 
   const setCompiler = useCallback(
-    (compiler: ProjectCompiler) => {
+    (compiler: ProjectSettingsScope['compiler']) => {
       const allowUpdate = project?.compiler
 
       if (allowUpdate) {
@@ -27,7 +26,7 @@ export default function useProjectWideSettings() {
   )
 
   const setImageName = useCallback(
-    (imageName: string) => {
+    (imageName: ProjectSettingsScope['imageName']) => {
       const allowUpdate = project?.imageName
 
       if (allowUpdate) {

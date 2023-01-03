@@ -1,9 +1,4 @@
 import { useCallback } from 'react'
-import {
-  FontFamily,
-  LineHeight,
-} from '../../../../../modules/source-editor/frontend/js/extensions/theme'
-import { Keybindings, PdfViewer } from '../../../../../types/project-settings'
 import useScopeValue from '../../../shared/hooks/use-scope-value'
 import useSetOverallTheme from './use-set-overall-theme'
 import useSaveUserSettings from './use-save-user-settings'
@@ -20,63 +15,63 @@ export default function useUserWideSettings() {
 
   const setOverallTheme = useSetOverallTheme()
   const setAutoComplete = useCallback(
-    (autoComplete: boolean) => {
+    (autoComplete: UserSettingsScope['autoComplete']) => {
       saveUserSettings('autoComplete', autoComplete)
     },
     [saveUserSettings]
   )
 
   const setAutoPairDelimiters = useCallback(
-    (autoPairDelimiters: boolean) => {
+    (autoPairDelimiters: UserSettingsScope['autoPairDelimiters']) => {
       saveUserSettings('autoPairDelimiters', autoPairDelimiters)
     },
     [saveUserSettings]
   )
 
   const setSyntaxValidation = useCallback(
-    (syntaxValidation: boolean) => {
+    (syntaxValidation: UserSettingsScope['syntaxValidation']) => {
       saveUserSettings('syntaxValidation', syntaxValidation)
     },
     [saveUserSettings]
   )
 
   const setEditorTheme = useCallback(
-    (editorTheme: string) => {
+    (editorTheme: UserSettingsScope['editorTheme']) => {
       saveUserSettings('editorTheme', editorTheme)
     },
     [saveUserSettings]
   )
 
   const setMode = useCallback(
-    (mode: Keybindings) => {
+    (mode: UserSettingsScope['mode']) => {
       saveUserSettings('mode', mode)
     },
     [saveUserSettings]
   )
 
   const setFontSize = useCallback(
-    (fontSize: string) => {
+    (fontSize: UserSettingsScope['fontSize']) => {
       saveUserSettings('fontSize', fontSize)
     },
     [saveUserSettings]
   )
 
   const setFontFamily = useCallback(
-    (fontFamily: FontFamily) => {
+    (fontFamily: UserSettingsScope['fontFamily']) => {
       saveUserSettings('fontFamily', fontFamily)
     },
     [saveUserSettings]
   )
 
   const setLineHeight = useCallback(
-    (lineHeight: LineHeight) => {
+    (lineHeight: UserSettingsScope['lineHeight']) => {
       saveUserSettings('lineHeight', lineHeight)
     },
     [saveUserSettings]
   )
 
   const setPdfViewer = useCallback(
-    (pdfViewer: PdfViewer) => {
+    (pdfViewer: UserSettingsScope['pdfViewer']) => {
       saveUserSettings('pdfViewer', pdfViewer)
     },
     [saveUserSettings]

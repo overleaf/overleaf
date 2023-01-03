@@ -1,18 +1,17 @@
 import { useCallback, useEffect, useState } from 'react'
 import _ from 'lodash'
-import { OverallTheme } from '../../../../../modules/source-editor/frontend/js/extensions/theme'
 import useScopeValue from '../../../shared/hooks/use-scope-value'
-import { OverallThemeMeta } from '../../../../../types/project-settings'
-import { saveUserSettings } from '../utils/api'
+import type { OverallThemeMeta } from '../../../../../types/project-settings'
+import { saveUserSettings, type UserSettingsScope } from '../utils/api'
 
 export default function useSetOverallTheme() {
   const [chosenTheme, setChosenTheme] = useState<OverallThemeMeta | null>(null)
   const [loadingStyleSheet, setLoadingStyleSheet] = useScopeValue<boolean>(
     'ui.loadingStyleSheet'
   )
-  const [overallThemeScope, setOverallThemeScope] = useScopeValue<OverallTheme>(
-    'settings.overallTheme'
-  )
+  const [overallThemeScope, setOverallThemeScope] = useScopeValue<
+    UserSettingsScope['overallTheme']
+  >('settings.overallTheme')
 
   useEffect(() => {
     const docHeadEl = document.querySelector('head')
@@ -45,7 +44,7 @@ export default function useSetOverallTheme() {
   }, [loadingStyleSheet, setLoadingStyleSheet, chosenTheme?.path])
 
   const setOverallTheme = useCallback(
-    (overallTheme: OverallTheme) => {
+    (overallTheme: UserSettingsScope['overallTheme']) => {
       if (overallThemeScope !== overallTheme) {
         const chosenTheme = _.find(
           window.overallThemes,

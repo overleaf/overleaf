@@ -1,5 +1,4 @@
 import { useCallback, useEffect } from 'react'
-import { ProjectCompiler } from '../../../../../types/project-settings'
 import { useIdeContext } from '../../../shared/context/ide-context'
 import useScopeValue from '../../../shared/hooks/use-scope-value'
 import type { ProjectSettingsScope } from '../utils/api'
@@ -12,7 +11,7 @@ export default function useProjectWideSettingsSocketListener() {
   >('project', true)
 
   const setCompiler = useCallback(
-    (compiler: ProjectCompiler) => {
+    (compiler: ProjectSettingsScope['compiler']) => {
       if (projectScope) {
         setProjectScope({ ...projectScope, compiler })
       }
@@ -21,7 +20,7 @@ export default function useProjectWideSettingsSocketListener() {
   )
 
   const setImageName = useCallback(
-    (imageName: string) => {
+    (imageName: ProjectSettingsScope['imageName']) => {
       if (projectScope) {
         setProjectScope({ ...projectScope, imageName })
       }
@@ -30,7 +29,7 @@ export default function useProjectWideSettingsSocketListener() {
   )
 
   const setSpellCheckLanguage = useCallback(
-    (spellCheckLanguage: string) => {
+    (spellCheckLanguage: ProjectSettingsScope['spellCheckLanguage']) => {
       if (projectScope) {
         setProjectScope({ ...projectScope, spellCheckLanguage })
       }
