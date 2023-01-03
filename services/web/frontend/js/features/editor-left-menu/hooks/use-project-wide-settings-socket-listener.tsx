@@ -2,51 +2,45 @@ import { useCallback, useEffect } from 'react'
 import { ProjectCompiler } from '../../../../../types/project-settings'
 import { useIdeContext } from '../../../shared/context/ide-context'
 import useScopeValue from '../../../shared/hooks/use-scope-value'
+import type { ProjectSettingsScope } from '../utils/api'
 
-type UseProjectWideSettingsSocketListener = {
-  onListen: () => void
-}
-
-export default function useProjectWideSettingsSocketListener({
-  onListen,
-}: UseProjectWideSettingsSocketListener) {
+export default function useProjectWideSettingsSocketListener() {
   const ide = useIdeContext()
 
-  const [compilerScope, setCompilerScope] =
-    useScopeValue<ProjectCompiler>('project.compiler')
-  const [imageNameScope, setImageNameScope] =
-    useScopeValue<string>('project.imageName')
-  const [spellCheckLanguageScope, setSpellCheckLanguageScope] =
-    useScopeValue<string>('project.spellCheckLanguage')
+  const [projectScope, setProjectScope] = useScopeValue<
+    ProjectSettingsScope | undefined
+  >('project', true)
 
   const setCompiler = useCallback(
     (compiler: ProjectCompiler) => {
-      onListen()
-      setCompilerScope(compiler)
+      if (projectScope) {
+        setProjectScope({ ...projectScope, compiler })
+      }
     },
-    [setCompilerScope, onListen]
+    [projectScope, setProjectScope]
   )
 
   const setImageName = useCallback(
     (imageName: string) => {
-      onListen()
-      setImageNameScope(imageName)
+      if (projectScope) {
+        setProjectScope({ ...projectScope, imageName })
+      }
     },
-    [setImageNameScope, onListen]
+    [projectScope, setProjectScope]
   )
 
   const setSpellCheckLanguage = useCallback(
     (spellCheckLanguage: string) => {
-      onListen()
-      setSpellCheckLanguageScope(spellCheckLanguage)
+      if (projectScope) {
+        setProjectScope({ ...projectScope, spellCheckLanguage })
+      }
     },
-    [setSpellCheckLanguageScope, onListen]
+    [projectScope, setProjectScope]
   )
 
   useEffect(() => {
     // data is not available on initial mounting
-    const dataAvailable =
-      compilerScope && imageNameScope && spellCheckLanguageScope
+    const dataAvailable = !!projectScope
 
     if (dataAvailable && ide?.socket) {
       ide.socket.on('compilerUpdated', setCompiler)
@@ -63,11 +57,9 @@ export default function useProjectWideSettingsSocketListener({
     }
   }, [
     ide?.socket,
-    compilerScope,
+    projectScope,
     setCompiler,
-    imageNameScope,
     setImageName,
-    spellCheckLanguageScope,
     setSpellCheckLanguage,
   ])
 }

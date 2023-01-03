@@ -4,11 +4,7 @@ import { useProjectContext } from '../../../shared/context/project-context'
 import useScopeValue from '../../../shared/hooks/use-scope-value'
 import { saveProjectSettings } from '../utils/api'
 
-type UseSetRootDocId = {
-  ignoreUpdates: boolean
-}
-
-export default function useSetRootDocId({ ignoreUpdates }: UseSetRootDocId) {
+export default function useSetRootDocId() {
   const [rootDocIdScope, setRootDocIdScope] =
     useScopeValue<string>('project.rootDoc_id')
   const { permissionsLevel } = useEditorContext()
@@ -17,7 +13,6 @@ export default function useSetRootDocId({ ignoreUpdates }: UseSetRootDocId) {
   const setRootDocId = useCallback(
     async (rootDocId: string) => {
       const allowUpdate =
-        !ignoreUpdates &&
         typeof rootDocIdScope !== 'undefined' &&
         permissionsLevel !== 'readOnly' &&
         rootDocIdScope !== rootDocId
@@ -31,13 +26,7 @@ export default function useSetRootDocId({ ignoreUpdates }: UseSetRootDocId) {
         }
       }
     },
-    [
-      permissionsLevel,
-      projectId,
-      rootDocIdScope,
-      setRootDocIdScope,
-      ignoreUpdates,
-    ]
+    [permissionsLevel, projectId, rootDocIdScope, setRootDocIdScope]
   )
   return setRootDocId
 }

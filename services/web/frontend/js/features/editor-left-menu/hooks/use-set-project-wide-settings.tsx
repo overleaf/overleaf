@@ -6,13 +6,7 @@ import { ProjectSettingsScope, saveProjectSettings } from '../utils/api'
 import useSetRootDocId from './use-set-root-doc-id'
 import useSetSpellCheckLanguage from './use-set-spell-check-language'
 
-type UseSetProjectWideSettings = {
-  ignoreUpdates: boolean
-}
-
-export default function useSetProjectWideSettings({
-  ignoreUpdates,
-}: UseSetProjectWideSettings) {
+export default function useSetProjectWideSettings() {
   // The value will be undefined on mount
   const [project, setProject] = useScopeValue<ProjectSettingsScope | undefined>(
     'project',
@@ -22,30 +16,30 @@ export default function useSetProjectWideSettings({
 
   const setCompiler = useCallback(
     (compiler: ProjectCompiler) => {
-      const allowUpdate = !ignoreUpdates && project?.compiler
+      const allowUpdate = project?.compiler
 
       if (allowUpdate) {
         setProject({ ...project, compiler })
         saveProjectSettings({ projectId, compiler })
       }
     },
-    [projectId, project, setProject, ignoreUpdates]
+    [projectId, project, setProject]
   )
 
   const setImageName = useCallback(
     (imageName: string) => {
-      const allowUpdate = !ignoreUpdates && project?.imageName
+      const allowUpdate = project?.imageName
 
       if (allowUpdate) {
         setProject({ ...project, imageName })
         saveProjectSettings({ projectId, imageName })
       }
     },
-    [projectId, project, setProject, ignoreUpdates]
+    [projectId, project, setProject]
   )
 
-  const setRootDocId = useSetRootDocId({ ignoreUpdates })
-  const setSpellCheckLanguage = useSetSpellCheckLanguage({ ignoreUpdates })
+  const setRootDocId = useSetRootDocId()
+  const setSpellCheckLanguage = useSetSpellCheckLanguage()
 
   return {
     compiler: project?.compiler,
