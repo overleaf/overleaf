@@ -6,7 +6,7 @@ import { ProjectSettingsScope, saveProjectSettings } from '../utils/api'
 import useSetRootDocId from './use-set-root-doc-id'
 import useSetSpellCheckLanguage from './use-set-spell-check-language'
 
-export default function useSetProjectWideSettings() {
+export default function useProjectWideSettings() {
   // The value will be undefined on mount
   const [project, setProject] = useScopeValue<ProjectSettingsScope | undefined>(
     'project',

@@ -1,6 +1,6 @@
 import { createContext, useContext, useMemo } from 'react'
 import type { PropsWithChildren } from 'react'
-import useSetProjectWideSettings from '../hooks/use-set-project-wide-settings'
+import useProjectWideSettings from '../hooks/use-project-wide-settings'
 import useUserWideSettings from '../hooks/use-user-wide-settings'
 import useProjectWideSettingsSocketListener from '../hooks/use-project-wide-settings-socket-listener'
 import type { ProjectSettingsScope, UserSettingsScope } from '../utils/api'
@@ -48,7 +48,7 @@ export function ProjectSettingsProvider({
     setRootDocId,
     spellCheckLanguage,
     setSpellCheckLanguage,
-  } = useSetProjectWideSettings()
+  } = useProjectWideSettings()
 
   const {
     autoComplete,
