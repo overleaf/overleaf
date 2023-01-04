@@ -3,33 +3,33 @@ import type { PropsWithChildren } from 'react'
 import useProjectWideSettings from '../hooks/use-project-wide-settings'
 import useUserWideSettings from '../hooks/use-user-wide-settings'
 import useProjectWideSettingsSocketListener from '../hooks/use-project-wide-settings-socket-listener'
-import type { ProjectSettingsScope, UserSettingsScope } from '../utils/api'
+import type { ProjectSettings, UserSettings } from '../utils/api'
 
 type ProjectSettingsSetterContextValue = {
-  setCompiler: (compiler: ProjectSettingsScope['compiler']) => void
-  setImageName: (imageName: ProjectSettingsScope['imageName']) => void
-  setRootDocId: (rootDocId: ProjectSettingsScope['rootDocId']) => void
+  setCompiler: (compiler: ProjectSettings['compiler']) => void
+  setImageName: (imageName: ProjectSettings['imageName']) => void
+  setRootDocId: (rootDocId: ProjectSettings['rootDocId']) => void
   setSpellCheckLanguage: (
-    spellCheckLanguage: ProjectSettingsScope['spellCheckLanguage']
+    spellCheckLanguage: ProjectSettings['spellCheckLanguage']
   ) => void
-  setAutoComplete: (autoComplete: UserSettingsScope['autoComplete']) => void
+  setAutoComplete: (autoComplete: UserSettings['autoComplete']) => void
   setAutoPairDelimiters: (
-    autoPairDelimiters: UserSettingsScope['autoPairDelimiters']
+    autoPairDelimiters: UserSettings['autoPairDelimiters']
   ) => void
   setSyntaxValidation: (
-    syntaxValidation: UserSettingsScope['syntaxValidation']
+    syntaxValidation: UserSettings['syntaxValidation']
   ) => void
-  setMode: (mode: UserSettingsScope['mode']) => void
-  setEditorTheme: (editorTheme: UserSettingsScope['editorTheme']) => void
-  setOverallTheme: (overallTheme: UserSettingsScope['overallTheme']) => void
-  setFontSize: (fontSize: UserSettingsScope['fontSize']) => void
-  setFontFamily: (fontFamily: UserSettingsScope['fontFamily']) => void
-  setLineHeight: (lineHeight: UserSettingsScope['lineHeight']) => void
-  setPdfViewer: (pdfViewer: UserSettingsScope['pdfViewer']) => void
+  setMode: (mode: UserSettings['mode']) => void
+  setEditorTheme: (editorTheme: UserSettings['editorTheme']) => void
+  setOverallTheme: (overallTheme: UserSettings['overallTheme']) => void
+  setFontSize: (fontSize: UserSettings['fontSize']) => void
+  setFontFamily: (fontFamily: UserSettings['fontFamily']) => void
+  setLineHeight: (lineHeight: UserSettings['lineHeight']) => void
+  setPdfViewer: (pdfViewer: UserSettings['pdfViewer']) => void
 }
 
-type ProjectSettingsContextValue = Partial<ProjectSettingsScope> &
-  Partial<UserSettingsScope> &
+type ProjectSettingsContextValue = Partial<ProjectSettings> &
+  Partial<UserSettings> &
   ProjectSettingsSetterContextValue
 
 export const ProjectSettingsContext = createContext<

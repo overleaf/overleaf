@@ -1,17 +1,19 @@
 import useScopeValue from '../../../shared/hooks/use-scope-value'
 import { sendMB } from '../../../infrastructure/event-tracking'
 import { saveUserSettings } from '../utils/api'
-import type { UserSettingsScope } from '../utils/api'
+import type { UserSettings } from '../utils/api'
 
 export default function useSaveUserSettings() {
-  const [userSettingsScope, setUserSettingsScope] =
-    useScopeValue<UserSettingsScope>('settings', true)
+  const [userSettings, setUserSettings] = useScopeValue<UserSettings>(
+    'settings',
+    true
+  )
 
   return (
-    key: keyof UserSettingsScope,
-    newSetting: UserSettingsScope[keyof UserSettingsScope]
+    key: keyof UserSettings,
+    newSetting: UserSettings[keyof UserSettings]
   ) => {
-    const currentSetting = userSettingsScope[key]
+    const currentSetting = userSettings[key]
 
     sendMB('setting-changed', {
       changedSetting: key,
@@ -19,7 +21,7 @@ export default function useSaveUserSettings() {
     })
 
     if (currentSetting !== newSetting) {
-      setUserSettingsScope({ ...userSettingsScope, [key]: newSetting })
+      setUserSettings({ ...userSettings, [key]: newSetting })
       saveUserSettings({ [key]: newSetting })
     }
   }

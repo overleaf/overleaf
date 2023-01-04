@@ -2,15 +2,15 @@ import { useCallback, useEffect, useState } from 'react'
 import _ from 'lodash'
 import useScopeValue from '../../../shared/hooks/use-scope-value'
 import type { OverallThemeMeta } from '../../../../../types/project-settings'
-import { saveUserSettings, type UserSettingsScope } from '../utils/api'
+import { saveUserSettings, type UserSettings } from '../utils/api'
 
 export default function useSetOverallTheme() {
   const [chosenTheme, setChosenTheme] = useState<OverallThemeMeta | null>(null)
   const [loadingStyleSheet, setLoadingStyleSheet] = useScopeValue<boolean>(
     'ui.loadingStyleSheet'
   )
-  const [overallThemeScope, setOverallThemeScope] = useScopeValue<
-    UserSettingsScope['overallTheme']
+  const [overallTheme, setOverallTheme] = useScopeValue<
+    UserSettings['overallTheme']
   >('settings.overallTheme')
 
   useEffect(() => {
@@ -43,24 +43,22 @@ export default function useSetOverallTheme() {
     }
   }, [loadingStyleSheet, setLoadingStyleSheet, chosenTheme?.path])
 
-  const setOverallTheme = useCallback(
-    (overallTheme: UserSettingsScope['overallTheme']) => {
-      if (overallThemeScope !== overallTheme) {
+  return useCallback(
+    (newOverallTheme: UserSettings['overallTheme']) => {
+      if (overallTheme !== newOverallTheme) {
         const chosenTheme = _.find(
           window.overallThemes,
-          theme => theme.val === overallTheme
+          theme => theme.val === newOverallTheme
         )
 
         if (chosenTheme) {
           setLoadingStyleSheet(true)
           setChosenTheme(chosenTheme)
-          setOverallThemeScope(overallTheme)
-          saveUserSettings({ overallTheme })
+          setOverallTheme(newOverallTheme)
+          saveUserSettings({ overallTheme: newOverallTheme })
         }
       }
     },
-    [overallThemeScope, setLoadingStyleSheet, setOverallThemeScope]
+    [overallTheme, setLoadingStyleSheet, setOverallTheme]
   )
-
-  return setOverallTheme
 }

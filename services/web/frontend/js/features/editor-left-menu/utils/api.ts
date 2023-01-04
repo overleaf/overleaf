@@ -10,7 +10,7 @@ import type {
 } from '../../../../../types/project-settings'
 import { postJSON } from '../../../infrastructure/fetch-json'
 
-export type UserSettingsScope = {
+export type UserSettings = {
   pdfViewer: PdfViewer
   autoComplete: boolean
   autoPairDelimiters: boolean
@@ -23,7 +23,7 @@ export type UserSettingsScope = {
   lineHeight: LineHeight
 }
 
-export type ProjectSettingsScope = {
+export type ProjectSettings = {
   compiler: ProjectCompiler
   imageName: string
   rootDocId: string
@@ -31,8 +31,8 @@ export type ProjectSettingsScope = {
 }
 
 type SaveUserSettings = Partial<
-  UserSettingsScope & {
-    spellCheckLanguage: ProjectSettingsScope['spellCheckLanguage']
+  UserSettings & {
+    spellCheckLanguage: ProjectSettings['spellCheckLanguage']
   }
 >
 
@@ -44,7 +44,7 @@ export function saveUserSettings(data: SaveUserSettings) {
 
 type SaveProjectSettings = {
   projectId: string
-} & Partial<ProjectSettingsScope>
+} & Partial<ProjectSettings>
 
 export const saveProjectSettings = async ({
   projectId,

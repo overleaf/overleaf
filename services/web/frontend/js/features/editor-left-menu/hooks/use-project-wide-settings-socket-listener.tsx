@@ -1,45 +1,46 @@
 import { useCallback, useEffect } from 'react'
 import { useIdeContext } from '../../../shared/context/ide-context'
 import useScopeValue from '../../../shared/hooks/use-scope-value'
-import type { ProjectSettingsScope } from '../utils/api'
+import type { ProjectSettings } from '../utils/api'
 
 export default function useProjectWideSettingsSocketListener() {
   const ide = useIdeContext()
 
-  const [projectScope, setProjectScope] = useScopeValue<
-    ProjectSettingsScope | undefined
-  >('project', true)
+  const [project, setProject] = useScopeValue<ProjectSettings | undefined>(
+    'project',
+    true
+  )
 
   const setCompiler = useCallback(
-    (compiler: ProjectSettingsScope['compiler']) => {
-      if (projectScope) {
-        setProjectScope({ ...projectScope, compiler })
+    (compiler: ProjectSettings['compiler']) => {
+      if (project) {
+        setProject({ ...project, compiler })
       }
     },
-    [projectScope, setProjectScope]
+    [project, setProject]
   )
 
   const setImageName = useCallback(
-    (imageName: ProjectSettingsScope['imageName']) => {
-      if (projectScope) {
-        setProjectScope({ ...projectScope, imageName })
+    (imageName: ProjectSettings['imageName']) => {
+      if (project) {
+        setProject({ ...project, imageName })
       }
     },
-    [projectScope, setProjectScope]
+    [project, setProject]
   )
 
   const setSpellCheckLanguage = useCallback(
-    (spellCheckLanguage: ProjectSettingsScope['spellCheckLanguage']) => {
-      if (projectScope) {
-        setProjectScope({ ...projectScope, spellCheckLanguage })
+    (spellCheckLanguage: ProjectSettings['spellCheckLanguage']) => {
+      if (project) {
+        setProject({ ...project, spellCheckLanguage })
       }
     },
-    [projectScope, setProjectScope]
+    [project, setProject]
   )
 
   useEffect(() => {
     // data is not available on initial mounting
-    const dataAvailable = !!projectScope
+    const dataAvailable = !!project
 
     if (dataAvailable && ide?.socket) {
       ide.socket.on('compilerUpdated', setCompiler)
@@ -54,11 +55,5 @@ export default function useProjectWideSettingsSocketListener() {
         )
       }
     }
-  }, [
-    ide?.socket,
-    projectScope,
-    setCompiler,
-    setImageName,
-    setSpellCheckLanguage,
-  ])
+  }, [ide?.socket, project, setCompiler, setImageName, setSpellCheckLanguage])
 }
