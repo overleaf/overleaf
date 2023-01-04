@@ -6,7 +6,7 @@ import {
   resetProjectListContextFetch,
 } from '../../../helpers/render-with-context'
 
-describe('<ProjectListTable />', function () {
+describe('<ProjectTools />', function () {
   afterEach(function () {
     resetProjectListContextFetch()
   })

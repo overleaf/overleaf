@@ -665,159 +665,196 @@ describe('<ProjectListRoot />', function () {
         })
       })
 
-      describe('project tools "More" dropdown', function () {
-        beforeEach(async function () {
-          const filterButton = screen.getAllByText('All Projects')[0]
-          fireEvent.click(filterButton)
-          allCheckboxes = screen.getAllByRole<HTMLInputElement>('checkbox')
-          // first one is the select all checkbox
-          fireEvent.click(allCheckboxes[2])
+      describe('project tools', function () {
+        it('renders download, archive, trash buttons followed by tags and "more" dropdowns when selecting an archived or trashed filter before selecting tag filter', function () {
+          const assertToolbarButtonsExists = () => {
+            within(actionsToolbar).getByLabelText(/download/i)
+            within(actionsToolbar).getByLabelText(/archive/i)
+            within(actionsToolbar).getByLabelText(/trash/i)
+            within(actionsToolbar).getByLabelText(/tags/i)
+            within(actionsToolbar).getByText(/more/i)
+          }
+
+          // Select archived projects
+          const [archivedProjectsButton] =
+            screen.getAllByText(/archived projects/i)
+          fireEvent.click(archivedProjectsButton)
+          const [tag] = screen.getAllByText(this.tagName)
+          fireEvent.click(tag)
+
+          allCheckboxes = screen.getAllByRole('checkbox')
+          fireEvent.click(allCheckboxes[1])
           actionsToolbar = screen.getAllByRole('toolbar')[0]
+
+          assertToolbarButtonsExists()
+
+          // select trashed projects
+          const [trashedProjectsButton] =
+            screen.getAllByText(/trashed projects/i)
+          fireEvent.click(trashedProjectsButton)
+          fireEvent.click(tag)
+
+          allCheckboxes = screen.getAllByRole('checkbox')
+          fireEvent.click(allCheckboxes[1])
+          actionsToolbar = screen.getAllByRole('toolbar')[0]
+
+          assertToolbarButtonsExists()
         })
 
-        it('does not show the dropdown when more than 1 project is selected', async function () {
-          await waitFor(() => {
-            within(actionsToolbar).getByText<HTMLElement>('More')
-          })
-          fireEvent.click(allCheckboxes[0])
-          expect(within(actionsToolbar).queryByText<HTMLElement>('More')).to.be
-            .null
-        })
-
-        it('validates the project name', async function () {
-          const moreDropdown = await within(
-            actionsToolbar
-          ).findByText<HTMLElement>('More')
-          fireEvent.click(moreDropdown)
-
-          const renameButton =
-            screen.getAllByText<HTMLButtonElement>('Rename')[1] // first one is for the tag in the sidebar
-          fireEvent.click(renameButton)
-
-          const modals = await screen.findAllByRole('dialog')
-          const modal = modals[0]
-
-          expect(sendSpy).to.be.calledOnce
-          expect(sendSpy).calledWith('project-list-page-interaction')
-
-          // same name
-          let confirmButton =
-            within(modal).getByText<HTMLButtonElement>('Rename')
-          expect(confirmButton.disabled).to.be.true
-          let input = screen.getByLabelText('New Name') as HTMLButtonElement
-
-          // no name
-          input = screen.getByLabelText('New Name') as HTMLButtonElement
-          fireEvent.change(input, {
-            target: { value: '' },
-          })
-          confirmButton = within(modal).getByText<HTMLButtonElement>('Rename')
-          expect(confirmButton.disabled).to.be.true
-        })
-
-        it('opens the rename modal, and can rename the project, and view updated', async function () {
-          const renameProjectMock = fetchMock.post(
-            `express:/project/:id/rename`,
-            {
-              status: 200,
-            }
-          )
-          const moreDropdown = await within(
-            actionsToolbar
-          ).findByText<HTMLElement>('More')
-          fireEvent.click(moreDropdown)
-
-          const renameButton =
-            within(actionsToolbar).getByText<HTMLButtonElement>('Rename') // first one is for the tag in the sidebar
-          fireEvent.click(renameButton)
-
-          const modals = await screen.findAllByRole('dialog')
-          const modal = modals[0]
-
-          // a valid name
-          const newProjectName = 'A new project name'
-          const input = (await within(modal).findByLabelText(
-            'New Name'
-          )) as HTMLButtonElement
-          const oldName = input.value
-          fireEvent.change(input, {
-            target: { value: newProjectName },
+        describe('"More" dropdown', function () {
+          beforeEach(async function () {
+            const filterButton = screen.getAllByText('All Projects')[0]
+            fireEvent.click(filterButton)
+            allCheckboxes = screen.getAllByRole<HTMLInputElement>('checkbox')
+            // first one is the select all checkbox
+            fireEvent.click(allCheckboxes[2])
+            actionsToolbar = screen.getAllByRole('toolbar')[0]
           })
 
-          const confirmButton =
-            within(modal).getByText<HTMLButtonElement>('Rename')
-          expect(confirmButton.disabled).to.be.false
-          fireEvent.click(confirmButton)
-
-          await fetchMock.flush(true)
-
-          expect(
-            renameProjectMock.called(`/project/${projectsData[1].id}/rename`)
-          ).to.be.true
-
-          const table = await screen.findByRole('table')
-          within(table).getByText(newProjectName)
-          expect(within(table).queryByText(oldName)).to.be.null
-
-          const allCheckboxes = await within(
-            table
-          ).findAllByRole<HTMLInputElement>('checkbox')
-          const allCheckboxesChecked = allCheckboxes.filter(c => c.checked)
-          expect(allCheckboxesChecked.length).to.equal(0)
-        })
-
-        it('opens the copy modal, can copy the project, and view updated', async function () {
-          const tableRows = screen.getAllByRole('row')
-          const linkForProjectToCopy = within(tableRows[1]).getByRole('link')
-          const projectNameToCopy = linkForProjectToCopy.textContent || '' // needed for type checking
-          screen.getByText(projectNameToCopy) // make sure not just empty string
-          const copiedProjectName = `${projectNameToCopy} (Copy)`
-          const cloneProjectMock = fetchMock.post(
-            `express:/project/:id/clone`,
-            {
-              status: 200,
-              body: {
-                name: copiedProjectName,
-                lastUpdated: new Date(),
-                project_id: userId,
-                owner_ref: userId,
-                owner,
-                id: '6328e14abec0df019fce0be5',
-                lastUpdatedBy: owner,
-                accessLevel: 'owner',
-                source: 'owner',
-                trashed: false,
-                archived: false,
-              },
-            }
-          )
-
-          await waitFor(() => {
-            const moreDropdown =
+          it('does not show the dropdown when more than 1 project is selected', async function () {
+            await waitFor(() => {
               within(actionsToolbar).getByText<HTMLElement>('More')
-            fireEvent.click(moreDropdown)
+            })
+            fireEvent.click(allCheckboxes[0])
+            expect(within(actionsToolbar).queryByText<HTMLElement>('More')).to
+              .be.null
           })
 
-          const copyButton =
-            within(actionsToolbar).getByText<HTMLButtonElement>('Make a copy')
-          fireEvent.click(copyButton)
+          it('validates the project name', async function () {
+            const moreDropdown = await within(
+              actionsToolbar
+            ).findByText<HTMLElement>('More')
+            fireEvent.click(moreDropdown)
 
-          // confirm in modal
-          const copyConfirmButton = document.querySelector(
-            'button[type="submit"]'
-          ) as HTMLElement
-          fireEvent.click(copyConfirmButton)
+            const renameButton =
+              screen.getAllByText<HTMLButtonElement>('Rename')[1] // first one is for the tag in the sidebar
+            fireEvent.click(renameButton)
 
-          await fetchMock.flush(true)
+            const modals = await screen.findAllByRole('dialog')
+            const modal = modals[0]
 
-          expect(
-            cloneProjectMock.called(`/project/${projectsData[1].id}/clone`)
-          ).to.be.true
+            expect(sendSpy).to.be.calledOnce
+            expect(sendSpy).calledWith('project-list-page-interaction')
 
-          expect(sendSpy).to.be.calledOnce
-          expect(sendSpy).calledWith('project-list-page-interaction')
+            // same name
+            let confirmButton =
+              within(modal).getByText<HTMLButtonElement>('Rename')
+            expect(confirmButton.disabled).to.be.true
+            let input = screen.getByLabelText('New Name') as HTMLButtonElement
 
-          screen.getByText(copiedProjectName)
+            // no name
+            input = screen.getByLabelText('New Name') as HTMLButtonElement
+            fireEvent.change(input, {
+              target: { value: '' },
+            })
+            confirmButton = within(modal).getByText<HTMLButtonElement>('Rename')
+            expect(confirmButton.disabled).to.be.true
+          })
+
+          it('opens the rename modal, and can rename the project, and view updated', async function () {
+            const renameProjectMock = fetchMock.post(
+              `express:/project/:id/rename`,
+              {
+                status: 200,
+              }
+            )
+            const moreDropdown = await within(
+              actionsToolbar
+            ).findByText<HTMLElement>('More')
+            fireEvent.click(moreDropdown)
+
+            const renameButton =
+              within(actionsToolbar).getByText<HTMLButtonElement>('Rename') // first one is for the tag in the sidebar
+            fireEvent.click(renameButton)
+
+            const modals = await screen.findAllByRole('dialog')
+            const modal = modals[0]
+
+            // a valid name
+            const newProjectName = 'A new project name'
+            const input = (await within(modal).findByLabelText(
+              'New Name'
+            )) as HTMLButtonElement
+            const oldName = input.value
+            fireEvent.change(input, {
+              target: { value: newProjectName },
+            })
+
+            const confirmButton =
+              within(modal).getByText<HTMLButtonElement>('Rename')
+            expect(confirmButton.disabled).to.be.false
+            fireEvent.click(confirmButton)
+
+            await fetchMock.flush(true)
+
+            expect(
+              renameProjectMock.called(`/project/${projectsData[1].id}/rename`)
+            ).to.be.true
+
+            const table = await screen.findByRole('table')
+            within(table).getByText(newProjectName)
+            expect(within(table).queryByText(oldName)).to.be.null
+
+            const allCheckboxes = await within(
+              table
+            ).findAllByRole<HTMLInputElement>('checkbox')
+            const allCheckboxesChecked = allCheckboxes.filter(c => c.checked)
+            expect(allCheckboxesChecked.length).to.equal(0)
+          })
+
+          it('opens the copy modal, can copy the project, and view updated', async function () {
+            const tableRows = screen.getAllByRole('row')
+            const linkForProjectToCopy = within(tableRows[1]).getByRole('link')
+            const projectNameToCopy = linkForProjectToCopy.textContent || '' // needed for type checking
+            screen.getByText(projectNameToCopy) // make sure not just empty string
+            const copiedProjectName = `${projectNameToCopy} (Copy)`
+            const cloneProjectMock = fetchMock.post(
+              `express:/project/:id/clone`,
+              {
+                status: 200,
+                body: {
+                  name: copiedProjectName,
+                  lastUpdated: new Date(),
+                  project_id: userId,
+                  owner_ref: userId,
+                  owner,
+                  id: '6328e14abec0df019fce0be5',
+                  lastUpdatedBy: owner,
+                  accessLevel: 'owner',
+                  source: 'owner',
+                  trashed: false,
+                  archived: false,
+                },
+              }
+            )
+
+            await waitFor(() => {
+              const moreDropdown =
+                within(actionsToolbar).getByText<HTMLElement>('More')
+              fireEvent.click(moreDropdown)
+            })
+
+            const copyButton =
+              within(actionsToolbar).getByText<HTMLButtonElement>('Make a copy')
+            fireEvent.click(copyButton)
+
+            // confirm in modal
+            const copyConfirmButton = document.querySelector(
+              'button[type="submit"]'
+            ) as HTMLElement
+            fireEvent.click(copyConfirmButton)
+
+            await fetchMock.flush(true)
+
+            expect(
+              cloneProjectMock.called(`/project/${projectsData[1].id}/clone`)
+            ).to.be.true
+
+            expect(sendSpy).to.be.calledOnce
+            expect(sendSpy).calledWith('project-list-page-interaction')
+
+            screen.getByText(copiedProjectName)
+          })
         })
       })
 

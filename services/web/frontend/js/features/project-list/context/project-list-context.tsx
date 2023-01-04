@@ -186,7 +186,6 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
             tag?.project_ids?.includes(project.id)
           )
         } else {
-          setFilter('all')
           setSelectedTagId(undefined)
         }
       }
@@ -290,9 +289,10 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
 
   const selectTag = useCallback(
     (tagId: string) => {
+      setFilter('all')
       setSelectedTagId(tagId)
     },
-    [setSelectedTagId]
+    [setSelectedTagId, setFilter]
   )
 
   const addTag = useCallback((tag: Tag) => {
