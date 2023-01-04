@@ -122,7 +122,8 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
 
     const cdnAvailable =
       Settings.cdn && Settings.cdn.web && !!Settings.cdn.web.host
-    const cdnBlocked = req.query.nocdn === 'true' || req.session.cdnBlocked
+    const cdnBlocked =
+      req.query.nocdn === 'true' || req.session.cdnBlocked || false
     const userId = SessionManager.getLoggedInUserId(req.session)
     if (cdnBlocked && req.session.cdnBlocked == null) {
       logger.debug(
@@ -135,6 +136,10 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
       })
       req.session.cdnBlocked = true
     }
+    Metrics.inc('cdn_blocked', 1, {
+      path: userId ? 'logged-in' : 'pre-login',
+      method: String(cdnBlocked),
+    })
     const host = req.headers && req.headers.host
     const isSmoke = host.slice(0, 5).toLowerCase() === 'smoke'
     if (cdnAvailable && !isSmoke && !cdnBlocked) {

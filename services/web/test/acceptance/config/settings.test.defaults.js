@@ -23,6 +23,11 @@ module.exports = {
     : ['example.com'],
 
   statusPageUrl: 'status.example.com',
+  cdn: {
+    web: {
+      host: 'cdn.example.com',
+    },
+  },
 
   apis: {
     linkedUrlProxy: {
