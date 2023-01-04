@@ -64,20 +64,6 @@ export async function resolveThread(projectId, threadId, userId) {
   })
 }
 
-export async function reopenThread(projectId, threadId) {
-  return asyncRequest({
-    method: 'post',
-    url: `/project/${projectId}/thread/${threadId}/reopen`,
-  })
-}
-
-export async function deleteThread(projectId, threadId) {
-  return asyncRequest({
-    method: 'delete',
-    url: `/project/${projectId}/thread/${threadId}`,
-  })
-}
-
 export async function editMessage(projectId, threadId, messageId, content) {
   return asyncRequest({
     method: 'post',
@@ -102,6 +88,28 @@ export async function editMessageWithUser(
       content,
       userId,
     },
+  })
+}
+
+export async function checkStatus() {
+  return asyncRequest({
+    method: 'get',
+    url: `/status`,
+    json: true,
+  })
+}
+
+export async function reopenThread(projectId, threadId) {
+  return asyncRequest({
+    method: 'post',
+    url: `/project/${projectId}/thread/${threadId}/reopen`,
+  })
+}
+
+export async function deleteThread(projectId, threadId) {
+  return asyncRequest({
+    method: 'delete',
+    url: `/project/${projectId}/thread/${threadId}`,
   })
 }
 
