@@ -12,6 +12,7 @@ declare global {
       interceptCompile: typeof interceptCompile
       interceptEvents: typeof interceptEvents
       interceptSpelling: typeof interceptSpelling
+      index: () => Chainable<number>
     }
   }
 }
@@ -19,3 +20,6 @@ declare global {
 Cypress.Commands.add('interceptCompile', interceptCompile)
 Cypress.Commands.add('interceptEvents', interceptEvents)
 Cypress.Commands.add('interceptSpelling', interceptSpelling)
+Cypress.Commands.add('index', { prevSubject: true }, subject => {
+  return cy.wrap(subject).invoke('index')
+})
