@@ -1,6 +1,8 @@
 import { EditorProviders } from '../../helpers/editor-providers'
 import PdfJsViewer from '../../../../frontend/js/features/pdf-preview/components/pdf-js-viewer'
 import { mockScope } from './scope'
+import { getContainerEl } from 'cypress/react'
+import { unmountComponentAtNode } from 'react-dom'
 
 describe('<PdfJSViewer/>', function () {
   beforeEach(function () {
@@ -52,7 +54,7 @@ describe('<PdfJSViewer/>', function () {
       </EditorProviders>
     )
 
-    cy.unmount()
+    cy.then(() => unmountComponentAtNode(getContainerEl()))
   })
 
   it('can be unmounted after loading a document', function () {
@@ -68,6 +70,6 @@ describe('<PdfJSViewer/>', function () {
 
     cy.findByLabelText('Page 1')
 
-    cy.unmount()
+    cy.then(() => unmountComponentAtNode(getContainerEl()))
   })
 })
