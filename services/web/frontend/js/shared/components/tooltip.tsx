@@ -1,28 +1,20 @@
+import type { FC, ReactNode } from 'react'
 import {
   OverlayTrigger,
   OverlayTriggerProps,
   Tooltip as BSTooltip,
 } from 'react-bootstrap'
 
-type OverlayTriggerCustomProps = {
+type OverlayProps = Omit<OverlayTriggerProps, 'overlay'> & {
   shouldUpdatePosition?: boolean // Not officially documented https://stackoverflow.com/a/43138470
-} & OverlayTriggerProps
-
-type TooltipProps = {
-  children: React.ReactNode
-  description: React.ReactNode
-  id: string
-  overlayProps?: Omit<OverlayTriggerCustomProps, 'overlay'>
-  tooltipProps?: BSTooltip.TooltipProps
 }
 
-function Tooltip({
-  id,
-  description,
-  children,
-  tooltipProps,
-  overlayProps,
-}: TooltipProps) {
+const Tooltip: FC<{
+  description: ReactNode
+  id: string
+  overlayProps?: OverlayProps
+  tooltipProps?: BSTooltip.TooltipProps
+}> = ({ id, description, children, tooltipProps, overlayProps }) => {
   return (
     <OverlayTrigger
       overlay={

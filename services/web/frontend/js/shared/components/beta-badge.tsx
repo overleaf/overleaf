@@ -1,24 +1,20 @@
+import type { FC, ReactNode } from 'react'
+import classnames from 'classnames'
 import Tooltip from './tooltip'
 import { OverlayTriggerProps } from 'react-bootstrap'
 
 type TooltipProps = {
   id: string
-  text: React.ReactNode
+  text: ReactNode
   placement?: OverlayTriggerProps['placement']
   className?: string
 }
 
-type BetaBadgeProps = {
+const BetaBadge: FC<{
   tooltip: TooltipProps
   url?: string
   phase?: string
-}
-
-function BetaBadge({
-  tooltip,
-  url = '/beta/participate',
-  phase = 'beta',
-}: BetaBadgeProps) {
+}> = ({ tooltip, url = '/beta/participate', phase = 'beta' }) => {
   let badgeClass
   switch (phase) {
     case 'release':
@@ -46,7 +42,7 @@ function BetaBadge({
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        className={`badge ${badgeClass}`}
+        className={classnames('badge', badgeClass)}
       >
         <span className="sr-only">{tooltip.text}</span>
       </a>

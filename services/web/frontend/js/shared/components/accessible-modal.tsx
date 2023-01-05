@@ -1,31 +1,30 @@
 import { useCallback } from 'react'
 import { Modal, ModalProps } from 'react-bootstrap'
 
-// a bootstrap Modal with its `aria-hidden` attribute removed. Visisble modals
-// should not have their `aria-hidden` attribute set but that's a bug in our
-// version of react-bootstrap.
-function AccessibleModal({ show, ...otherProps }: ModalProps) {
-  // use a callback ref to track the modal. This will re-run the function
-  // when the element node or any of the dependencies are updated
-  const setModalRef = useCallback(
+// A wrapper for the v0.33 React Bootstrap Modal component,
+// which ensures that the `aria-hidden` attribute is not set on the modal when it's visible,
+// and that role="dialog" is not duplicated.
+// https://github.com/react-bootstrap/react-bootstrap/issues/4790
+// There are other ARIA attributes on these modals which could be improved,
+// but this at least makes them accessible for tests.
+function AccessibleModal(props: ModalProps) {
+  const modalRef = useCallback(
     element => {
-      if (!element) return
-
-      const modalNode = element._modal && element._modal.modalNode
-      if (!modalNode) return
-
-      if (show) {
-        modalNode.removeAttribute('aria-hidden')
-      } else {
-        modalNode.setAttribute('aria-hidden', 'true')
+      const modalNode = element?._modal?.modalNode
+      if (modalNode) {
+        if (props.show) {
+          modalNode.removeAttribute('role')
+          modalNode.removeAttribute('aria-hidden')
+        } else {
+          // NOTE: possibly not ever used, as the modal is only rendered when shown
+          modalNode.setAttribute('aria-hidden', 'true')
+        }
       }
     },
-    // `show` is necessary as a dependency, but eslint thinks it is not
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [show]
+    [props.show]
   )
 
-  return <Modal show={show} {...otherProps} ref={setModalRef} />
+  return <Modal {...props} ref={modalRef} />
 }
 
 export default AccessibleModal
