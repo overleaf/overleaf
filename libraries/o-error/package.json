@@ -12,9 +12,9 @@
     "cause",
     "verror"
   ],
-  "main": "index.js",
+  "main": "index.cjs",
   "files": [
-    "index.js",
+    "index.cjs",
     "index.d.ts"
   ],
   "scripts": {
@@ -26,7 +26,7 @@
     "prepublishOnly": "npm run --silent declaration:build && npm run --silent declaration:check",
     "test": "mocha",
     "test:coverage": "nyc --reporter=lcov --reporter=text-summary npm run test",
-    "typecheck": "tsc --allowJs --checkJs --noEmit --moduleResolution node --strict --target ES6 *.js test/**/*.js",
+    "typecheck": "tsc --allowJs --checkJs --noEmit --moduleResolution node --strict --target ES6 *.cjs test/**/*.js",
     "update-readme": "doc/update-readme.js",
     "format": "prettier --list-different $PWD/'**/*.js'",
     "format:fix": "prettier --write $PWD/'**/*.js'",

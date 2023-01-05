@@ -221,7 +221,7 @@ module.exports = {
         `frontend/js/vendor/libs/${PackageVersions.lib('fineuploader')}`
       ),
     },
-    symlinks: false,
+    // symlinks: false, // enable this while using `npm link`
     extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
     fallback: {
       events: require.resolve('events'),
