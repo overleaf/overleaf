@@ -15,6 +15,9 @@ logger.initialize('chat')
 export async function createServer() {
   const app = express()
 
+  app.use(metrics.http.monitor(logger))
+  metrics.injectMetricsRoute(app)
+
   // See https://github.com/exegesis-js/exegesis/blob/master/docs/Options.md
   const options = {
     controllers: { messagesController },

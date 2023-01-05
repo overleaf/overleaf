@@ -99,6 +99,16 @@ export async function checkStatus() {
   })
 }
 
+export async function getMetric(matcher) {
+  const { body } = await asyncRequest({
+    method: 'get',
+    url: `/metrics`,
+  })
+  const found = body.split('\n').find(matcher)
+  if (!found) return 0
+  return parseInt(found.split(' ')[1], 0)
+}
+
 export async function reopenThread(projectId, threadId) {
   return asyncRequest({
     method: 'post',
