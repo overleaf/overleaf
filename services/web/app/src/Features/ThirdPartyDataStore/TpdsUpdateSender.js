@@ -235,16 +235,11 @@ async function enqueue(group, method, job) {
 async function getProjectUsersIds(projectId) {
   // get list of all user ids with access to project. project owner
   // will always be the first entry in the list.
-  const [ownerUserId, ...invitedUserIds] =
-    await CollaboratorsGetter.getInvitedMemberIds(projectId)
-  // if there are no invited users, always return the owner
-  if (!invitedUserIds.length) {
-    return [ownerUserId]
-  }
+  const userIds = await CollaboratorsGetter.getInvitedMemberIds(projectId)
   // filter invited users to only return those with dropbox linked
   const dropboxUsers = await UserGetter.getUsers(
     {
-      _id: { $in: invitedUserIds.map(id => ObjectId(id)) },
+      _id: { $in: userIds.map(id => ObjectId(id)) },
       'dropbox.access_token.uid': { $ne: null },
     },
     {
@@ -252,7 +247,7 @@ async function getProjectUsersIds(projectId) {
     }
   )
   const dropboxUserIds = dropboxUsers.map(user => user._id)
-  return [ownerUserId, ...dropboxUserIds]
+  return dropboxUserIds
 }
 
 async function moveEntity(params) {

@@ -25,10 +25,10 @@ describe('TpdsUpdateSender', function () {
     this.fakeUser = {
       _id: '12390i',
     }
-    const memberIds = [userId, collaberatorRef, readOnlyRef]
+    this.memberIds = [userId, collaberatorRef, readOnlyRef]
     this.CollaboratorsGetter = {
       promises: {
-        getInvitedMemberIds: sinon.stub().resolves(memberIds),
+        getInvitedMemberIds: sinon.stub().resolves(this.memberIds),
       },
     }
     this.docstoreUrl = 'docstore.sharelatex.env'
@@ -49,11 +49,19 @@ describe('TpdsUpdateSender', function () {
         },
       },
     }
-    const getUsers = sinon.stub().resolves(
-      memberIds.slice(1).map(userId => {
-        return { _id: userId }
+    const getUsers = sinon.stub()
+    getUsers
+      .withArgs({
+        _id: {
+          $in: this.memberIds,
+        },
+        'dropbox.access_token.uid': { $ne: null },
       })
-    )
+      .resolves(
+        this.memberIds.map(userId => {
+          return { _id: userId }
+        })
+      )
     this.UserGetter = {
       promises: { getUsers },
     }
@@ -144,16 +152,6 @@ describe('TpdsUpdateSender', function () {
       group2.should.equal(readOnlyRef.toString())
       job2.headers.sl_all_user_ids.should.equal(JSON.stringify([readOnlyRef]))
       job2.headers.sl_project_owner_user_id.should.equal(userId.toString())
-
-      this.UserGetter.promises.getUsers.should.have.been.calledOnce.and.calledWith(
-        {
-          _id: {
-            $in: [collaberatorRef, readOnlyRef],
-          },
-          'dropbox.access_token.uid': { $ne: null },
-        },
-        { _id: 1 }
-      )
     })
 
     it('post doc with stream origin of docstore', async function () {
@@ -200,16 +198,6 @@ describe('TpdsUpdateSender', function () {
       )
       group2.should.equal(readOnlyRef.toString())
       job2.headers.sl_all_user_ids.should.equal(JSON.stringify([readOnlyRef]))
-
-      this.UserGetter.promises.getUsers.should.have.been.calledOnce.and.calledWith(
-        {
-          _id: {
-            $in: [collaberatorRef, readOnlyRef],
-          },
-          'dropbox.access_token.uid': { $ne: null },
-        },
-        { _id: 1 }
-      )
     })
 
     it('deleting entity', async function () {
@@ -252,16 +240,6 @@ describe('TpdsUpdateSender', function () {
       )
       group2.should.equal(readOnlyRef.toString())
       job2.headers.sl_all_user_ids.should.equal(JSON.stringify([readOnlyRef]))
-
-      this.UserGetter.promises.getUsers.should.have.been.calledOnce.and.calledWith(
-        {
-          _id: {
-            $in: [collaberatorRef, readOnlyRef],
-          },
-          'dropbox.access_token.uid': { $ne: null },
-        },
-        { _id: 1 }
-      )
     })
 
     it('moving entity', async function () {
@@ -304,16 +282,6 @@ describe('TpdsUpdateSender', function () {
       )
       group2.should.equal(readOnlyRef.toString())
       job2.headers.sl_all_user_ids.should.equal(JSON.stringify([readOnlyRef]))
-
-      this.UserGetter.promises.getUsers.should.have.been.calledOnce.and.calledWith(
-        {
-          _id: {
-            $in: [collaberatorRef, readOnlyRef],
-          },
-          'dropbox.access_token.uid': { $ne: null },
-        },
-        { _id: 1 }
-      )
     })
 
     it('should be able to rename a project using the move entity func', async function () {
@@ -355,16 +323,6 @@ describe('TpdsUpdateSender', function () {
       )
       group2.should.equal(readOnlyRef.toString())
       job2.headers.sl_all_user_ids.should.equal(JSON.stringify([readOnlyRef]))
-
-      this.UserGetter.promises.getUsers.should.have.been.calledOnce.and.calledWith(
-        {
-          _id: {
-            $in: [collaberatorRef, readOnlyRef],
-          },
-          'dropbox.access_token.uid': { $ne: null },
-        },
-        { _id: 1 }
-      )
     })
 
     it('pollDropboxForUser', async function () {
@@ -397,5 +355,31 @@ describe('TpdsUpdateSender', function () {
         { method: 'DELETE' }
       )
     })
+  })
+
+  describe('user not linked to dropbox', function () {
+    beforeEach(function () {
+      this.UserGetter.promises.getUsers
+        .withArgs({
+          _id: {
+            $in: this.memberIds,
+          },
+          'dropbox.access_token.uid': { $ne: null },
+        })
+        .resolves([])
+    })
+  })
+
+  it('does not make request to tpds', async function () {
+    const fileId = '4545345'
+    const path = '/some/path/here.jpg'
+
+    await this.TpdsUpdateSender.promises.addFile({
+      projectId,
+      fileId,
+      path,
+      projectName,
+    })
+    this.fetch.should.not.have.been.called
   })
 })
