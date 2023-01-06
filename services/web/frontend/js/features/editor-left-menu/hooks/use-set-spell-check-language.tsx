@@ -1,5 +1,4 @@
 import { useCallback } from 'react'
-import { sendMB } from '../../../infrastructure/event-tracking'
 import { useProjectContext } from '../../../shared/context/project-context'
 import useScopeValue from '../../../shared/hooks/use-scope-value'
 import {
@@ -20,11 +19,6 @@ export default function useSetSpellCheckLanguage() {
         newSpellCheckLanguage && newSpellCheckLanguage !== spellCheckLanguage
 
       if (allowUpdate) {
-        sendMB('setting-changed', {
-          changedSetting: 'spellCheckLanguage',
-          changedSettingVal: newSpellCheckLanguage,
-        })
-
         setSpellCheckLanguage(newSpellCheckLanguage)
 
         // save to both project setting and user setting
@@ -32,7 +26,7 @@ export default function useSetSpellCheckLanguage() {
           projectId,
           spellCheckLanguage: newSpellCheckLanguage,
         })
-        saveUserSettings({ spellCheckLanguage: newSpellCheckLanguage })
+        saveUserSettings('spellCheckLanguage', newSpellCheckLanguage)
       }
     },
     [projectId, setSpellCheckLanguage, spellCheckLanguage]

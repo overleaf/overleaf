@@ -55,7 +55,7 @@ export default function useSetOverallTheme() {
           setLoadingStyleSheet(true)
           setChosenTheme(chosenTheme)
           setOverallTheme(newOverallTheme)
-          saveUserSettings({ overallTheme: newOverallTheme })
+          saveUserSettings('overallTheme', newOverallTheme)
         }
       }
     },

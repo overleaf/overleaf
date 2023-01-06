@@ -8,6 +8,7 @@ import type {
   PdfViewer,
   ProjectCompiler,
 } from '../../../../../types/project-settings'
+import { sendMB } from '../../../infrastructure/event-tracking'
 import { postJSON } from '../../../infrastructure/fetch-json'
 
 export type UserSettings = {
@@ -36,10 +37,18 @@ type SaveUserSettings = Partial<
   }
 >
 
-export function saveUserSettings(data: SaveUserSettings) {
+export function saveUserSettings(
+  key: keyof SaveUserSettings,
+  value: SaveUserSettings[keyof SaveUserSettings]
+) {
+  sendMB('setting-changed', {
+    changedSetting: key,
+    changedSettingVal: value,
+  })
+
   postJSON('/user/settings', {
     body: {
-      ...data,
+      [key]: value,
     },
   })
 }
