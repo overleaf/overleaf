@@ -1,40 +1,27 @@
 import { useCallback } from 'react'
-import { useProjectContext } from '../../../shared/context/project-context'
 import useScopeValue from '../../../shared/hooks/use-scope-value'
-import { type ProjectSettings, saveProjectSettings } from '../utils/api'
+import type { ProjectSettings } from '../utils/api'
 import useRootDocId from './use-root-doc-id'
+import useSaveProjectSettings from './use-save-project-settings'
 import useSetSpellCheckLanguage from './use-set-spell-check-language'
 
 export default function useProjectWideSettings() {
   // The value will be undefined on mount
-  const [project, setProject] = useScopeValue<ProjectSettings | undefined>(
-    'project',
-    true
-  )
-  const { _id: projectId } = useProjectContext()
+  const [project] = useScopeValue<ProjectSettings | undefined>('project', true)
+  const saveProjectSettings = useSaveProjectSettings()
 
   const setCompiler = useCallback(
-    (compiler: ProjectSettings['compiler']) => {
-      const allowUpdate = project?.compiler
-
-      if (allowUpdate) {
-        setProject({ ...project, compiler })
-        saveProjectSettings({ projectId, compiler })
-      }
+    (newCompiler: ProjectSettings['compiler']) => {
+      saveProjectSettings('compiler', newCompiler)
     },
-    [projectId, project, setProject]
+    [saveProjectSettings]
   )
 
   const setImageName = useCallback(
-    (imageName: ProjectSettings['imageName']) => {
-      const allowUpdate = project?.imageName
-
-      if (allowUpdate) {
-        setProject({ ...project, imageName })
-        saveProjectSettings({ projectId, imageName })
-      }
+    (newImageName: ProjectSettings['imageName']) => {
+      saveProjectSettings('imageName', newImageName)
     },
-    [projectId, project, setProject]
+    [saveProjectSettings]
   )
 
   const { setRootDocId, rootDocId } = useRootDocId()

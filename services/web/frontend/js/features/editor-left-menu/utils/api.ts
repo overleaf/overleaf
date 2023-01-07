@@ -53,14 +53,10 @@ export function saveUserSettings(
   })
 }
 
-type SaveProjectSettings = {
-  projectId: string
-} & Partial<ProjectSettings>
-
-export const saveProjectSettings = async ({
-  projectId,
-  ...data
-}: SaveProjectSettings) => {
+export const saveProjectSettings = async (
+  projectId: string,
+  data: Partial<ProjectSettings>
+) => {
   await postJSON<never>(`/project/${projectId}/settings`, {
     body: {
       ...data,

@@ -1,17 +1,13 @@
 import { useCallback } from 'react'
-import { useProjectContext } from '../../../shared/context/project-context'
 import useScopeValue from '../../../shared/hooks/use-scope-value'
-import {
-  type ProjectSettings,
-  saveProjectSettings,
-  saveUserSettings,
-} from '../utils/api'
+import { type ProjectSettings, saveUserSettings } from '../utils/api'
+import useSaveProjectSettings from './use-save-project-settings'
 
 export default function useSetSpellCheckLanguage() {
   const [spellCheckLanguage, setSpellCheckLanguage] = useScopeValue<
     ProjectSettings['spellCheckLanguage']
   >('project.spellCheckLanguage')
-  const { _id: projectId } = useProjectContext()
+  const saveProjectSettings = useSaveProjectSettings()
 
   return useCallback(
     (newSpellCheckLanguage: ProjectSettings['spellCheckLanguage']) => {
@@ -21,14 +17,15 @@ export default function useSetSpellCheckLanguage() {
       if (allowUpdate) {
         setSpellCheckLanguage(newSpellCheckLanguage)
 
-        // save to both project setting and user setting
-        saveProjectSettings({
-          projectId,
-          spellCheckLanguage: newSpellCheckLanguage,
-        })
+        // Save project settings is created from hooks because it will save the value on
+        // both server-side and client-side (angular scope)
+        saveProjectSettings('spellCheckLanguage', newSpellCheckLanguage)
+
+        // For user settings, we only need to save it on server-side,
+        // so we import the function directly without hooks
         saveUserSettings('spellCheckLanguage', newSpellCheckLanguage)
       }
     },
-    [projectId, setSpellCheckLanguage, spellCheckLanguage]
+    [setSpellCheckLanguage, spellCheckLanguage, saveProjectSettings]
   )
 }
