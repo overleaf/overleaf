@@ -50,7 +50,7 @@ export function saveUserSettings(
     body: {
       [key]: value,
     },
-  })
+  }).catch(console.error)
 }
 
 export const saveProjectSettings = async (
