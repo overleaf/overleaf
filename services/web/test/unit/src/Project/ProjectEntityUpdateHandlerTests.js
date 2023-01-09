@@ -76,6 +76,7 @@ describe('ProjectEntityUpdateHandler', function () {
     }
     this.DocumentUpdaterHandler = {
       flushDocToMongo: sinon.stub().yields(),
+      flushProjectToMongo: sinon.stub().yields(),
       updateProjectStructure: sinon.stub().yields(),
       setDocument: sinon.stub(),
       resyncProjectHistory: sinon.stub().yields(),
@@ -128,10 +129,7 @@ describe('ProjectEntityUpdateHandler', function () {
       addFile: sinon.stub().yields(),
       addDoc: sinon.stub(),
       deleteEntity: sinon.stub().yields(),
-      moveEntity: sinon.stub(),
-      promises: {
-        moveEntity: sinon.stub().resolves(),
-      },
+      moveEntity: sinon.stub().yields(),
     }
     this.FileStoreHandler = {
       copyFile: sinon.stub(),
@@ -1786,7 +1784,7 @@ describe('ProjectEntityUpdateHandler', function () {
     })
 
     it('notifies tpds', function () {
-      this.TpdsUpdateSender.promises.moveEntity
+      this.TpdsUpdateSender.moveEntity
         .calledWith({
           projectId,
           projectName: this.project_name,
@@ -1807,8 +1805,7 @@ describe('ProjectEntityUpdateHandler', function () {
           projectHistoryId,
           userId,
           this.changes,
-          this.source,
-          this.callback
+          this.source
         )
         .should.equal(true)
     })
@@ -1850,7 +1847,7 @@ describe('ProjectEntityUpdateHandler', function () {
       })
 
       it('notifies tpds', function () {
-        this.TpdsUpdateSender.promises.moveEntity
+        this.TpdsUpdateSender.moveEntity
           .calledWith({
             projectId,
             projectName: this.project_name,
@@ -1864,6 +1861,12 @@ describe('ProjectEntityUpdateHandler', function () {
           .should.equal(true)
       })
 
+      it('flushes the project in doc updater', function () {
+        this.DocumentUpdaterHandler.flushProjectToMongo.should.have.been.calledWith(
+          projectId
+        )
+      })
+
       it('sends the changes in project structure to the doc updater', function () {
         this.DocumentUpdaterHandler.updateProjectStructure
           .calledWith(
@@ -1871,8 +1874,7 @@ describe('ProjectEntityUpdateHandler', function () {
             projectHistoryId,
             userId,
             this.changes,
-            this.source,
-            this.callback
+            this.source
           )
           .should.equal(true)
       })

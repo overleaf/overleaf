@@ -1246,44 +1246,51 @@ const ProjectEntityUpdateHandler = {
       return callback(new Error('No entityType set'))
     }
     entityType = entityType.toLowerCase()
-    ProjectEntityMongoUpdateHandler.moveEntity(
-      projectId,
-      entityId,
-      destFolderId,
-      entityType,
-      (err, project, startPath, endPath, rev, changes) => {
-        if (err != null) {
-          return callback(err)
-        }
-        const projectHistoryId =
-          project.overleaf &&
-          project.overleaf.history &&
-          project.overleaf.history.id
-        // do not wait
-        TpdsUpdateSender.promises
-          .moveEntity({
-            projectId,
-            projectName: project.name,
-            startPath,
-            endPath,
-            rev,
-            entityId,
-            entityType,
-            folderId: destFolderId,
-          })
-          .catch(err => {
-            logger.error({ err }, 'error sending tpds update')
-          })
-        DocumentUpdaterHandler.updateProjectStructure(
-          projectId,
-          projectHistoryId,
-          userId,
-          changes,
-          source,
-          callback
-        )
+    DocumentUpdaterHandler.flushProjectToMongo(projectId, err => {
+      if (err) {
+        return callback(err)
       }
-    )
+      ProjectEntityMongoUpdateHandler.moveEntity(
+        projectId,
+        entityId,
+        destFolderId,
+        entityType,
+        (err, project, startPath, endPath, rev, changes) => {
+          if (err != null) {
+            return callback(err)
+          }
+          const projectHistoryId =
+            project.overleaf &&
+            project.overleaf.history &&
+            project.overleaf.history.id
+          TpdsUpdateSender.moveEntity(
+            {
+              projectId,
+              projectName: project.name,
+              startPath,
+              endPath,
+              rev,
+              entityId,
+              entityType,
+              folderId: destFolderId,
+            },
+            err => {
+              if (err) {
+                logger.error({ err }, 'error sending tpds update')
+              }
+              DocumentUpdaterHandler.updateProjectStructure(
+                projectId,
+                projectHistoryId,
+                userId,
+                changes,
+                source,
+                callback
+              )
+            }
+          )
+        }
+      )
+    })
   }),
 
   renameEntity: wrapWithLock(function (
@@ -1305,44 +1312,51 @@ const ProjectEntityUpdateHandler = {
     }
     entityType = entityType.toLowerCase()
 
-    ProjectEntityMongoUpdateHandler.renameEntity(
-      projectId,
-      entityId,
-      entityType,
-      newName,
-      (err, project, startPath, endPath, rev, changes) => {
-        if (err != null) {
-          return callback(err)
-        }
-        const projectHistoryId =
-          project.overleaf &&
-          project.overleaf.history &&
-          project.overleaf.history.id
-        // do not wait
-        TpdsUpdateSender.promises
-          .moveEntity({
-            projectId,
-            projectName: project.name,
-            startPath,
-            endPath,
-            rev,
-            entityId,
-            entityType,
-            folderId: null, // this means the folder has not changed
-          })
-          .catch(err => {
-            logger.error({ err }, 'error sending tpds update')
-          })
-        DocumentUpdaterHandler.updateProjectStructure(
-          projectId,
-          projectHistoryId,
-          userId,
-          changes,
-          source,
-          callback
-        )
+    DocumentUpdaterHandler.flushProjectToMongo(projectId, err => {
+      if (err) {
+        return callback(err)
       }
-    )
+      ProjectEntityMongoUpdateHandler.renameEntity(
+        projectId,
+        entityId,
+        entityType,
+        newName,
+        (err, project, startPath, endPath, rev, changes) => {
+          if (err != null) {
+            return callback(err)
+          }
+          const projectHistoryId =
+            project.overleaf &&
+            project.overleaf.history &&
+            project.overleaf.history.id
+          TpdsUpdateSender.moveEntity(
+            {
+              projectId,
+              projectName: project.name,
+              startPath,
+              endPath,
+              rev,
+              entityId,
+              entityType,
+              folderId: null, // this means the folder has not changed
+            },
+            err => {
+              if (err) {
+                logger.error({ err }, 'error sending tpds update')
+              }
+              DocumentUpdaterHandler.updateProjectStructure(
+                projectId,
+                projectHistoryId,
+                userId,
+                changes,
+                source,
+                callback
+              )
+            }
+          )
+        }
+      )
+    })
   }),
 
   // This doesn't directly update project structure but we need to take the lock
