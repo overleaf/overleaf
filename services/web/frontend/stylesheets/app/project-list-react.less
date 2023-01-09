@@ -33,9 +33,12 @@
   }
 
   .project-list-sidebar-wrapper-react {
+    position: relative;
     background-color: @sidebar-bg;
     flex: @project-list-sidebar-wrapper-flex;
     min-height: calc(~'100vh -' @header-height);
+    max-width: 320px;
+    min-width: 200px;
 
     .project-list-sidebar-subwrapper {
       display: flex;
@@ -722,6 +725,7 @@
 
 .project-list-sidebar-survey-wrapper {
   position: fixed;
+  z-index: 1;
   bottom: 0;
   left: 0;
   width: 15%;
