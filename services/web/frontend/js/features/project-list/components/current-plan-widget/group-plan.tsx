@@ -4,10 +4,15 @@ import Tooltip from '../../../../shared/components/tooltip'
 
 type GroupPlanProps = Pick<
   GroupPlanSubscription,
-  'subscription' | 'plan' | 'remainingTrialDays'
+  'subscription' | 'plan' | 'remainingTrialDays' | 'featuresPageURL'
 >
 
-function GroupPlan({ subscription, plan, remainingTrialDays }: GroupPlanProps) {
+function GroupPlan({
+  featuresPageURL,
+  subscription,
+  plan,
+  remainingTrialDays,
+}: GroupPlanProps) {
   const { t } = useTranslation()
   const currentPlanLabel =
     remainingTrialDays >= 0 ? (
@@ -39,10 +44,7 @@ function GroupPlan({ subscription, plan, remainingTrialDays }: GroupPlanProps) {
         id="group-plan"
         overlayProps={{ placement: 'bottom' }}
       >
-        <a
-          href="/learn/how-to/Overleaf_premium_features"
-          className="current-plan-label hidden-xs"
-        >
+        <a href={featuresPageURL} className="current-plan-label hidden-xs">
           {currentPlanLabel} <span className="info-badge" />
         </a>
       </Tooltip>

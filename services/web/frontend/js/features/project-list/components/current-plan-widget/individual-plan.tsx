@@ -4,10 +4,14 @@ import Tooltip from '../../../../shared/components/tooltip'
 
 type IndividualPlanProps = Pick<
   IndividualPlanSubscription,
-  'plan' | 'remainingTrialDays'
+  'plan' | 'remainingTrialDays' | 'featuresPageURL'
 >
 
-function IndividualPlan({ plan, remainingTrialDays }: IndividualPlanProps) {
+function IndividualPlan({
+  featuresPageURL,
+  plan,
+  remainingTrialDays,
+}: IndividualPlanProps) {
   const { t } = useTranslation()
   const currentPlanLabel =
     remainingTrialDays >= 0 ? (
@@ -32,10 +36,7 @@ function IndividualPlan({ plan, remainingTrialDays }: IndividualPlanProps) {
         id="individual-plan"
         overlayProps={{ placement: 'bottom' }}
       >
-        <a
-          href="/learn/how-to/Overleaf_premium_features"
-          className="current-plan-label hidden-xs"
-        >
+        <a href={featuresPageURL} className="current-plan-label hidden-xs">
           {currentPlanLabel} <span className="info-badge" />
         </a>
       </Tooltip>

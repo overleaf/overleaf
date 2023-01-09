@@ -1,6 +1,10 @@
-type FreePlanSubscription = {
-  type: 'free'
+type SubscriptionBase = {
+  featuresPageURL: string
 }
+
+export type FreePlanSubscription = {
+  type: 'free'
+} & SubscriptionBase
 
 type FreeSubscription = FreePlanSubscription
 
@@ -12,7 +16,7 @@ type PaidSubscriptionBase = {
     teamName?: string
     name: string
   }
-}
+} & SubscriptionBase
 
 export type IndividualPlanSubscription = {
   type: 'individual'

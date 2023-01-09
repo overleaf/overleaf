@@ -1,9 +1,12 @@
 import { useTranslation, Trans } from 'react-i18next'
 import { Button } from 'react-bootstrap'
+import { FreePlanSubscription } from '../../../../../../types/project/dashboard/subscription'
 import Tooltip from '../../../../shared/components/tooltip'
 import * as eventTracking from '../../../../infrastructure/event-tracking'
 
-function FreePlan() {
+type FreePlanProps = Pick<FreePlanSubscription, 'featuresPageURL'>
+
+function FreePlan({ featuresPageURL }: FreePlanProps) {
   const { t } = useTranslation()
   const currentPlanLabel = (
     <Trans i18nKey="free_plan_label" components={{ b: <strong /> }} />
@@ -21,10 +24,7 @@ function FreePlan() {
         id="free-plan"
         overlayProps={{ placement: 'bottom' }}
       >
-        <a
-          href="/learn/how-to/Overleaf_premium_features"
-          className="current-plan-label hidden-xs"
-        >
+        <a href={featuresPageURL} className="current-plan-label hidden-xs">
           {currentPlanLabel} <span className="info-badge" />
         </a>
       </Tooltip>{' '}

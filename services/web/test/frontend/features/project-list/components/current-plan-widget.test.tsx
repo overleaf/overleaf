@@ -243,4 +243,67 @@ describe('<CurrentPlanWidget />', function () {
       })
     })
   })
+
+  describe('features page split test', function () {
+    const variants = [
+      { name: 'default', link: '/learn/how-to/Overleaf_premium_features' },
+      { name: 'new', link: '/about/features-overview' },
+    ]
+
+    const plans = [
+      { type: 'free' },
+      {
+        type: 'individual',
+        plan: {
+          name: 'Abc',
+        },
+      },
+      {
+        type: 'group',
+        plan: {
+          name: 'Abc',
+        },
+        subscription: {
+          teamName: 'Example Team',
+          name: 'Example Name',
+        },
+      },
+      {
+        type: 'commons',
+        plan: {
+          name: 'Abc',
+        },
+        subscription: {
+          name: 'Example Name',
+        },
+      },
+    ]
+
+    for (const variant of variants) {
+      describe(`${variant.name} variant`, function () {
+        beforeEach(function () {
+          window.metaAttributesCache.set('ol-splitTestVariants', {
+            'features-page': variant.name,
+          })
+        })
+        afterEach(function () {
+          window.metaAttributesCache.delete('ol-splitTestVariants')
+        })
+
+        for (const plan of plans) {
+          it(`links to ${variant.name} features page on ${plan.type} plan`, function () {
+            window.metaAttributesCache.set('ol-usersBestSubscription', {
+              ...plan,
+            })
+            render(<CurrentPlanWidget />)
+
+            const links = screen.getAllByRole('link')
+            expect(links[0].getAttribute('href')).to.equal(variant.link)
+
+            window.metaAttributesCache.delete('ol-usersBestSubscription')
+          })
+        }
+      })
+    }
+  })
 })

@@ -2,9 +2,16 @@ import { useTranslation, Trans } from 'react-i18next'
 import { CommonsPlanSubscription } from '../../../../../../types/project/dashboard/subscription'
 import Tooltip from '../../../../shared/components/tooltip'
 
-type CommonsPlanProps = Pick<CommonsPlanSubscription, 'subscription' | 'plan'>
+type CommonsPlanProps = Pick<
+  CommonsPlanSubscription,
+  'subscription' | 'plan' | 'featuresPageURL'
+>
 
-function CommonsPlan({ subscription, plan }: CommonsPlanProps) {
+function CommonsPlan({
+  featuresPageURL,
+  subscription,
+  plan,
+}: CommonsPlanProps) {
   const { t } = useTranslation()
   const currentPlanLabel = (
     <Trans i18nKey="premium_plan_label" components={{ b: <strong /> }} />
@@ -21,10 +28,7 @@ function CommonsPlan({ subscription, plan }: CommonsPlanProps) {
         id="commons-plan"
         overlayProps={{ placement: 'bottom' }}
       >
-        <a
-          href="/learn/how-to/Overleaf_premium_features"
-          className="current-plan-label hidden-xs"
-        >
+        <a href={featuresPageURL} className="current-plan-label hidden-xs">
           {currentPlanLabel} <span className="info-badge" />
         </a>
       </Tooltip>

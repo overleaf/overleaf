@@ -20,10 +20,16 @@ function CurrentPlanWidget() {
   const isGroupPlan = type === 'group'
   const isCommonsPlan = type === 'commons'
 
+  const newFeaturesPageVariant =
+    getMeta('ol-splitTestVariants')?.['features-page'] === 'new'
+  const featuresPageURL = newFeaturesPageVariant
+    ? '/about/features-overview'
+    : '/learn/how-to/Overleaf_premium_features'
+
   let currentPlan
 
   if (isFreePlan) {
-    currentPlan = <FreePlan />
+    currentPlan = <FreePlan featuresPageURL={featuresPageURL} />
   }
 
   if (isIndividualPlan) {
@@ -31,6 +37,7 @@ function CurrentPlanWidget() {
       <IndividualPlan
         remainingTrialDays={usersBestSubscription.remainingTrialDays}
         plan={usersBestSubscription.plan}
+        featuresPageURL={featuresPageURL}
       />
     )
   }
@@ -41,6 +48,7 @@ function CurrentPlanWidget() {
         subscription={usersBestSubscription.subscription}
         remainingTrialDays={usersBestSubscription.remainingTrialDays}
         plan={usersBestSubscription.plan}
+        featuresPageURL={featuresPageURL}
       />
     )
   }
@@ -50,6 +58,7 @@ function CurrentPlanWidget() {
       <CommonsPlan
         subscription={usersBestSubscription.subscription}
         plan={usersBestSubscription.plan}
+        featuresPageURL={featuresPageURL}
       />
     )
   }
