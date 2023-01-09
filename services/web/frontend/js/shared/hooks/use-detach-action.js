@@ -1,27 +1,22 @@
 import { useCallback, useEffect } from 'react'
 import { useDetachContext } from '../context/detach-context'
 import getMeta from '../../utils/meta'
-import { DetachRole, DetachTargetRole, Message } from './use-detach-state'
 
 const debugPdfDetach = getMeta('ol-debugPdfDetach')
 
-function useDetachAction<
-  A,
-  S extends DetachRole,
-  T extends DetachTargetRole<S>
->(
-  actionName: string,
-  actionFunction: (...args: A[]) => void,
-  senderRole: S,
-  targetRole: T
+export default function useDetachAction(
+  actionName,
+  actionFunction,
+  senderRole,
+  targetRole
 ) {
   const { role, broadcastEvent, addEventHandler, deleteEventHandler } =
     useDetachContext()
 
-  const eventName: Message['event'] = `action-${actionName}`
+  const eventName = `action-${actionName}`
 
   const triggerFn = useCallback(
-    (...args: A[]) => {
+    (...args) => {
       if (role === senderRole) {
         broadcastEvent(eventName, { args })
       } else {
@@ -32,7 +27,7 @@ function useDetachAction<
   )
 
   const handleActionEvent = useCallback(
-    (message: Message<A>) => {
+    message => {
       if (message.event !== eventName) {
         return
       }
@@ -54,5 +49,3 @@ function useDetachAction<
 
   return triggerFn
 }
-
-export default useDetachAction

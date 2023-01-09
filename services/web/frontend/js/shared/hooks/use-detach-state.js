@@ -4,24 +4,12 @@ import getMeta from '../../utils/meta'
 
 const debugPdfDetach = getMeta('ol-debugPdfDetach')
 
-export type DetachRole = 'detacher' | 'detached'
-export type DetachTargetRole<T extends DetachRole> = T extends 'detacher'
-  ? 'detached'
-  : 'detacher'
-export type Message<DataArgs = unknown> = {
-  event: `${'action' | 'state'}-${string}`
-  data: {
-    args: DataArgs[]
-    value: unknown
-  }
-}
-
-function useDetachState<S extends DetachRole, T extends DetachTargetRole<S>>(
-  key: string,
-  defaultValue: unknown,
-  senderRole: S,
-  targetRole: T
-): [unknown, React.Dispatch<unknown>] {
+export default function useDetachState(
+  key,
+  defaultValue,
+  senderRole,
+  targetRole
+) {
   const [value, setValue] = useState(defaultValue)
 
   const {
@@ -32,7 +20,7 @@ function useDetachState<S extends DetachRole, T extends DetachTargetRole<S>>(
     deleteEventHandler,
   } = useDetachContext()
 
-  const eventName: Message['event'] = `state-${key}`
+  const eventName = `state-${key}`
 
   // lastDetachedConnectedAt is added as a dependency in order to re-broadcast
   // all states when a new detached tab connects
@@ -50,7 +38,7 @@ function useDetachState<S extends DetachRole, T extends DetachTargetRole<S>>(
   ])
 
   const handleStateEvent = useCallback(
-    (message: Message) => {
+    message => {
       if (message.event !== eventName) {
         return
       }
@@ -72,5 +60,3 @@ function useDetachState<S extends DetachRole, T extends DetachTargetRole<S>>(
 
   return [value, setValue]
 }
-
-export default useDetachState
