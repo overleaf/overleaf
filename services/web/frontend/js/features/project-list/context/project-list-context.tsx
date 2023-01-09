@@ -29,7 +29,11 @@ import getMeta from '../../../utils/meta'
 import useAsync from '../../../shared/hooks/use-async'
 import { getProjects } from '../util/api'
 import sortProjects from '../util/sort-projects'
-import { isDeletableProject, isLeavableProject } from '../util/project'
+import {
+  isArchivedOrTrashed,
+  isDeletableProject,
+  isLeavableProject,
+} from '../util/project'
 
 const MAX_PROJECT_PER_PAGE = 20
 
@@ -75,6 +79,7 @@ export type ProjectListContextValue = {
   setSort: React.Dispatch<React.SetStateAction<Sort>>
   tags: Tag[]
   untaggedProjectsCount: number
+  projectsPerTag: Record<Tag['_id'], Project[]>
   filter: Filter
   selectFilter: (filter: Filter) => void
   selectedTagId?: string | undefined
@@ -182,8 +187,8 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       } else {
         const tag = tags.find(tag => tag._id === selectedTagId)
         if (tag) {
-          filteredProjects = filteredProjects.filter(project =>
-            tag?.project_ids?.includes(project.id)
+          filteredProjects = filteredProjects.filter(
+            p => !isArchivedOrTrashed(p) && tag?.project_ids?.includes(p.id)
           )
         } else {
           setSelectedTagId(undefined)
@@ -275,6 +280,15 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
         !project.trashed &&
         !taggedProjectIds.includes(project.id)
     ).length
+  }, [tags, loadedProjects])
+
+  const projectsPerTag = useMemo(() => {
+    return tags.reduce<Record<Tag['_id'], Project[]>>((prev, curTag) => {
+      const tagProjects = loadedProjects.filter(p => {
+        return !isArchivedOrTrashed(p) && curTag.project_ids?.includes(p.id)
+      })
+      return { ...prev, [curTag._id]: tagProjects }
+    }, {})
   }, [tags, loadedProjects])
 
   const selectFilter = useCallback(
@@ -432,6 +446,7 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       totalProjectsCount,
       untaggedProjectsCount,
       updateProjectViewData,
+      projectsPerTag,
       visibleProjects,
     }),
     [
@@ -465,6 +480,7 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       totalProjectsCount,
       untaggedProjectsCount,
       updateProjectViewData,
+      projectsPerTag,
       visibleProjects,
     ]
   )

@@ -12,8 +12,14 @@ import {
   makeLongProjectList,
 } from '../fixtures/projects-data'
 
-const { fullList, currentList, trashedList, leavableList, deletableList } =
-  makeLongProjectList(40)
+const {
+  fullList,
+  currentList,
+  archivedList,
+  trashedList,
+  leavableList,
+  deletableList,
+} = makeLongProjectList(40)
 
 const userId = owner.id
 
@@ -540,6 +546,74 @@ describe('<ProjectListRoot />', function () {
               `/project/${project.id}/leave`,
             ])
           })
+        })
+      })
+
+      describe('tags', function () {
+        it('does not show archived or trashed project', async function () {
+          this.unmount()
+          fetchMock.restore()
+          window.metaAttributesCache.set('ol-tags', [
+            {
+              _id: this.tagId,
+              name: this.tagName,
+              project_ids: [
+                projectsData[0].id,
+                projectsData[1].id,
+                ...archivedList.map(p => p.id),
+                ...trashedList.map(p => p.id),
+              ],
+            },
+          ])
+
+          const trashProjectMock = fetchMock.post(
+            `express:/project/:projectId/trash`,
+            { status: 200 }
+          )
+
+          renderWithProjectListContext(<ProjectListRoot />, {
+            projects: fullList,
+          })
+
+          await screen.findByRole('table')
+
+          let visibleProjectsCount = 2
+          const [tagBtn] = screen.getAllByRole('button', {
+            name: `${this.tagName} (${visibleProjectsCount})`,
+          })
+          fireEvent.click(tagBtn)
+
+          const nonArchivedAndTrashedProjects = [
+            projectsData[0],
+            projectsData[1],
+          ]
+          nonArchivedAndTrashedProjects.forEach(p => {
+            screen.getByText(p.name)
+          })
+          const archivedAndTrashedProjects = [...archivedList, ...trashedList]
+          archivedAndTrashedProjects.forEach(p => {
+            expect(screen.queryByText(p.name)).to.be.null
+          })
+
+          const trashBtns = screen.getAllByRole('button', { name: 'Trash' })
+          for (const [index, trashBtn] of trashBtns.entries()) {
+            fireEvent.click(trashBtn)
+            fireEvent.click(screen.getByText<HTMLButtonElement>('Confirm'))
+            await waitFor(() => {
+              expect(
+                trashProjectMock.called(
+                  `/project/${projectsData[index].id}/trash`
+                )
+              ).to.be.true
+            })
+            expect(
+              screen.queryAllByText(projectsData[index].name)
+            ).to.have.length(0)
+
+            screen.getAllByRole('button', {
+              name: `${this.tagName} (${--visibleProjectsCount})`,
+            })
+          }
         })
       })
 

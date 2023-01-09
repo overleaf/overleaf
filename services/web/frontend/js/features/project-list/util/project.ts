@@ -20,3 +20,7 @@ export function isDeletableProject(project: Project) {
 export function isLeavableProject(project: Project) {
   return project.accessLevel !== 'owner' && project.trashed
 }
+
+export function isArchivedOrTrashed(project: Project) {
+  return project.archived || project.trashed
+}

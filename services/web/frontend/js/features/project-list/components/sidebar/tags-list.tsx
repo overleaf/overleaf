@@ -11,8 +11,13 @@ import useTag from '../../hooks/use-tag'
 
 export default function TagsList() {
   const { t } = useTranslation()
-  const { tags, untaggedProjectsCount, selectedTagId, selectTag } =
-    useProjectListContext()
+  const {
+    tags,
+    projectsPerTag,
+    untaggedProjectsCount,
+    selectedTagId,
+    selectTag,
+  } = useProjectListContext()
   const {
     handleSelectTag,
     openCreateTagModal,
@@ -34,11 +39,11 @@ export default function TagsList() {
           <span className="name">{t('new_folder')}</span>
         </Button>
       </li>
-      {sortBy(tags, tag => tag.name.toLowerCase()).map((tag, index) => {
+      {sortBy(tags, tag => tag.name.toLowerCase()).map(tag => {
         return (
           <li
             className={`tag ${selectedTagId === tag._id ? 'active' : ''}`}
-            key={index}
+            key={tag._id}
           >
             <Button
               className="tag-name"
@@ -59,7 +64,9 @@ export default function TagsList() {
               </span>
               <span className="name">
                 {tag.name}{' '}
-                <span className="subdued"> ({tag.project_ids?.length})</span>
+                <span className="subdued">
+                  ({projectsPerTag[tag._id].length})
+                </span>
               </span>
             </Button>
             <span className="dropdown tag-menu">

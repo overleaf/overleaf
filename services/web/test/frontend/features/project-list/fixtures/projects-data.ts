@@ -162,6 +162,7 @@ export const makeLongProjectList = (listLength: number) => {
       ({ archived, trashed }) => !archived && !trashed
     ),
     trashedList: longList.filter(({ trashed }) => trashed),
+    archivedList: longList.filter(({ archived }) => archived),
     leavableList: longList.filter(isLeavableProject),
     deletableList: longList.filter(isDeletableProject),
   }
