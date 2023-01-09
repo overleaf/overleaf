@@ -1,6 +1,6 @@
-import sysendTestHelper from '../../helpers/sysend'
 import { EditorProviders } from '../../helpers/editor-providers'
 import PdfPreviewHybridToolbar from '../../../../frontend/js/features/pdf-preview/components/pdf-preview-hybrid-toolbar'
+import { testDetachChannel } from '../../helpers/detach-channel'
 
 describe('<PdfPreviewHybridToolbar/>', function () {
   beforeEach(function () {
@@ -10,7 +10,6 @@ describe('<PdfPreviewHybridToolbar/>', function () {
 
   afterEach(function () {
     window.metaAttributesCache = new Map()
-    sysendTestHelper.resetHistory()
   })
 
   it('shows normal mode', function () {
@@ -47,8 +46,10 @@ describe('<PdfPreviewHybridToolbar/>', function () {
         <EditorProviders>
           <PdfPreviewHybridToolbar />
         </EditorProviders>
-      ).then(() => {
-        sysendTestHelper.receiveMessage({
+      )
+
+      cy.wrap(null).then(() => {
+        testDetachChannel.postMessage({
           role: 'detacher',
           event: 'connected',
         })
@@ -66,12 +67,14 @@ describe('<PdfPreviewHybridToolbar/>', function () {
         <EditorProviders>
           <PdfPreviewHybridToolbar />
         </EditorProviders>
-      ).then(() => {
-        sysendTestHelper.receiveMessage({
+      )
+
+      cy.wrap(null).then(() => {
+        testDetachChannel.postMessage({
           role: 'detacher',
           event: 'connected',
         })
-        sysendTestHelper.receiveMessage({
+        testDetachChannel.postMessage({
           role: 'detacher',
           event: 'closed',
         })

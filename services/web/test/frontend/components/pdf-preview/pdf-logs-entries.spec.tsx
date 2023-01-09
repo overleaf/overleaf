@@ -1,6 +1,6 @@
-import sysendTestHelper from '../../helpers/sysend'
 import { EditorProviders } from '../../helpers/editor-providers'
 import PdfLogsEntries from '../../../../frontend/js/features/pdf-preview/components/pdf-logs-entries'
+import { detachChannel, testDetachChannel } from '../../helpers/detach-channel'
 window.metaAttributesCache = new Map([['ol-debugPdfDetach', true]])
 
 describe('<PdfLogsEntries/>', function () {
@@ -38,7 +38,6 @@ describe('<PdfLogsEntries/>', function () {
 
   afterEach(function () {
     window.metaAttributesCache = new Map()
-    sysendTestHelper.resetHistory()
   })
 
   it('displays human readable hint', function () {
@@ -60,16 +59,13 @@ describe('<PdfLogsEntries/>', function () {
 
     cy.findByRole('button', {
       name: 'Navigate to log position in source code: main.tex, 9',
+    }).click()
+
+    cy.get('@findEntityByPath').should('be.calledOnce')
+    cy.get('@openDoc').should('be.calledOnceWith', fakeEntity, {
+      gotoLine: 9,
+      gotoColumn: 8,
     })
-      .click()
-      .then(() => {
-        expect(props.fileTreeManager.findEntityByPath).to.be.calledOnce
-        expect(props.editorManager.openDoc).to.be.calledOnce
-        expect(props.editorManager.openDoc).to.be.calledWith(fakeEntity, {
-          gotoLine: 9,
-          gotoColumn: 8,
-        })
-      })
   })
 
   it('opens doc via detached action', function () {
@@ -82,7 +78,7 @@ describe('<PdfLogsEntries/>', function () {
         <PdfLogsEntries entries={logEntries} />
       </EditorProviders>
     ).then(() => {
-      sysendTestHelper.receiveMessage({
+      testDetachChannel.postMessage({
         role: 'detached',
         event: 'action-sync-to-entry',
         data: {
@@ -95,13 +91,12 @@ describe('<PdfLogsEntries/>', function () {
           ],
         },
       })
+    })
 
-      expect(props.fileTreeManager.findEntityByPath).to.be.calledOnce
-      expect(props.editorManager.openDoc).to.be.calledOnce
-      expect(props.editorManager.openDoc).to.be.calledWith(fakeEntity, {
-        gotoLine: 7,
-        gotoColumn: 6,
-      })
+    cy.get('@findEntityByPath').should('be.calledOnce')
+    cy.get('@openDoc').should('be.calledOnceWith', fakeEntity, {
+      gotoLine: 7,
+      gotoColumn: 6,
     })
   })
 
@@ -116,27 +111,26 @@ describe('<PdfLogsEntries/>', function () {
       </EditorProviders>
     )
 
+    cy.spy(detachChannel, 'postMessage').as('postDetachMessage')
+
     cy.findByRole('button', {
       name: 'Navigate to log position in source code: main.tex, 9',
-    })
-      .click()
-      .then(() => {
-        expect(props.fileTreeManager.findEntityByPath).not.to.be.called
-        expect(props.editorManager.openDoc).not.to.be.called
+    }).click()
 
-        expect(sysendTestHelper.getLastBroacastMessage()).to.deep.equal({
-          role: 'detached',
-          event: 'action-sync-to-entry',
-          data: {
-            args: [
-              {
-                file: 'main.tex',
-                line: 9,
-                column: 8,
-              },
-            ],
+    cy.get('@findEntityByPath').should('not.be.called')
+    cy.get('@openDoc').should('not.be.called')
+    cy.get('@postDetachMessage').should('be.calledWith', {
+      role: 'detached',
+      event: 'action-sync-to-entry',
+      data: {
+        args: [
+          {
+            file: 'main.tex',
+            line: 9,
+            column: 8,
           },
-        })
-      })
+        ],
+      },
+    })
   })
 })

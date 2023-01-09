@@ -98,6 +98,16 @@ globalThis.ResizeObserver =
   window.ResizeObserver =
     require('@juggle/resize-observer').ResizeObserver
 
+// add stub for BroadcastChannel (unused in these tests)
+globalThis.BroadcastChannel =
+  global.BroadcastChannel =
+  window.BroadcastChannel =
+    class BroadcastChannel {
+      addEventListener(type, listener) {}
+      removeEventListener(type, listener) {}
+      postMessage(message) {}
+    }
+
 // node-fetch doesn't accept relative URL's: https://github.com/node-fetch/node-fetch/blob/master/docs/v2-LIMITS.md#known-differences
 const fetch = require('node-fetch')
 globalThis.fetch =

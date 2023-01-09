@@ -7,7 +7,6 @@ import {
   useState,
 } from 'react'
 import PropTypes from 'prop-types'
-import sysend from 'sysend'
 import getMeta from '../../utils/meta'
 import { buildUrlWithDetachRole } from '../utils/url-helper'
 import useCallbackHandlers from '../hooks/use-callback-handlers'
@@ -26,7 +25,12 @@ DetachContext.Provider.propTypes = {
 
 const debugPdfDetach = getMeta('ol-debugPdfDetach')
 
-const SYSEND_CHANNEL = `detach-${getMeta('ol-project_id')}`
+const projectId = getMeta('ol-project_id')
+export const detachChannelId = `detach-${projectId}`
+export const detachChannel =
+  'BroadcastChannel' in window
+    ? new BroadcastChannel(detachChannelId)
+    : undefined
 
 export function DetachProvider({ children }) {
   const [lastDetachedConnectedAt, setLastDetachedConnectedAt] = useState()
@@ -45,13 +49,20 @@ export function DetachProvider({ children }) {
   }, [role])
 
   useEffect(() => {
-    sysend.on(SYSEND_CHANNEL, message => {
-      if (debugPdfDetach) {
-        console.log(`Receiving:`, message)
+    if (detachChannel) {
+      const listener = event => {
+        if (debugPdfDetach) {
+          console.log(`Receiving:`, event.data)
+        }
+        callEventHandlers(event.data)
       }
-      callEventHandlers(message)
-    })
-    return () => sysend.off(SYSEND_CHANNEL)
+
+      detachChannel.addEventListener('message', listener)
+
+      return () => {
+        detachChannel.removeEventListener('message', listener)
+      }
+    }
   }, [callEventHandlers])
 
   const broadcastEvent = useCallback(
@@ -80,7 +91,8 @@ export function DetachProvider({ children }) {
       if (data) {
         message.data = data
       }
-      sysend.broadcast(SYSEND_CHANNEL, message)
+
+      detachChannel?.postMessage(message)
     },
     [role]
   )

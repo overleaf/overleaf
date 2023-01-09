@@ -1,7 +1,7 @@
-import sysendTestHelper from '../../helpers/sysend'
 import { EditorProviders } from '../../helpers/editor-providers'
 import DetachCompileButton from '../../../../frontend/js/features/pdf-preview/components/detach-compile-button'
 import { mockScope } from './scope'
+import { testDetachChannel } from '../../helpers/detach-channel'
 
 describe('<DetachCompileButton/>', function () {
   beforeEach(function () {
@@ -11,7 +11,6 @@ describe('<DetachCompileButton/>', function () {
 
   afterEach(function () {
     window.metaAttributesCache = new Map()
-    sysendTestHelper.resetHistory()
   })
 
   it('detacher mode and not linked: does not show button ', function () {
@@ -30,7 +29,7 @@ describe('<DetachCompileButton/>', function () {
     cy.findByRole('button', { name: 'Recompile' }).should('not.exist')
   })
 
-  it('detacher mode and linked: show button ', function () {
+  it('detacher mode and linked: show button', function () {
     cy.window().then(win => {
       win.metaAttributesCache = new Map([['ol-detachRole', 'detacher']])
     })
@@ -41,8 +40,10 @@ describe('<DetachCompileButton/>', function () {
       <EditorProviders scope={scope}>
         <DetachCompileButton />
       </EditorProviders>
-    ).then(() => {
-      sysendTestHelper.receiveMessage({
+    )
+
+    cy.wrap(null).then(() => {
+      testDetachChannel.postMessage({
         role: 'detached',
         event: 'connected',
       })
@@ -62,8 +63,10 @@ describe('<DetachCompileButton/>', function () {
       <EditorProviders scope={scope}>
         <DetachCompileButton />
       </EditorProviders>
-    ).then(() => {
-      sysendTestHelper.receiveMessage({
+    )
+
+    cy.wrap(null).then(() => {
+      testDetachChannel.postMessage({
         role: 'detacher',
         event: 'connected',
       })

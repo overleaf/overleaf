@@ -2,7 +2,6 @@
 /* eslint-disable react/prop-types */
 
 import { render } from '@testing-library/react'
-import { renderHook } from '@testing-library/react-hooks'
 import { ChatProvider } from '../../../frontend/js/features/chat/context/chat-context'
 import { EditorProviders } from './editor-providers'
 
@@ -19,14 +18,6 @@ export function renderWithEditorContext(
     wrapper: EditorProvidersWrapper,
     ...renderOptions,
   })
-}
-
-export function renderHookWithEditorContext(hook, contextProps) {
-  const EditorProvidersWrapper = ({ children }) => (
-    <EditorProviders {...contextProps}>{children}</EditorProviders>
-  )
-
-  return renderHook(hook, { wrapper: EditorProvidersWrapper })
 }
 
 export function ChatProviders({ children, ...props }) {

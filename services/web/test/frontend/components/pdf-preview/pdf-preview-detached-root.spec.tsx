@@ -1,10 +1,8 @@
-import sysendTestHelper from '../../helpers/sysend'
 import PdfPreviewDetachedRoot from '../../../../frontend/js/features/pdf-preview/components/pdf-preview-detached-root'
 import { User } from '../../../../types/user'
+import { detachChannel, testDetachChannel } from '../../helpers/detach-channel'
 
-// https://github.com/overleaf/internal/issues/10080
-// eslint-disable-next-line mocha/no-skipped-tests
-describe.skip('<PdfPreviewDetachedRoot/>', function () {
+describe('<PdfPreviewDetachedRoot/>', function () {
   beforeEach(function () {
     window.user = { id: 'user1' } as User
 
@@ -21,17 +19,18 @@ describe.skip('<PdfPreviewDetachedRoot/>', function () {
 
   afterEach(function () {
     window.metaAttributesCache = new Map()
-    sysendTestHelper.resetHistory()
   })
 
   it('syncs compiling state', function () {
-    cy.mount(<PdfPreviewDetachedRoot />).then(() => {
-      sysendTestHelper.receiveMessage({
+    cy.mount(<PdfPreviewDetachedRoot />)
+
+    cy.wrap(null).then(() => {
+      testDetachChannel.postMessage({
         role: 'detacher',
         event: 'connected',
       })
 
-      sysendTestHelper.receiveMessage({
+      testDetachChannel.postMessage({
         role: 'detacher',
         event: 'state-compiling',
         data: { value: true },
@@ -39,39 +38,41 @@ describe.skip('<PdfPreviewDetachedRoot/>', function () {
     })
 
     cy.findByRole('button', { name: 'Compiling…' })
-    cy.findByRole('button', { name: 'Recompile' })
-      .should('not.exist')
-      .then(() => {
-        sysendTestHelper.receiveMessage({
-          role: 'detacher',
-          event: 'state-compiling',
-          data: { value: false },
-        })
+    cy.findByRole('button', { name: 'Recompile' }).should('not.exist')
+    cy.wrap(null).then(() => {
+      testDetachChannel.postMessage({
+        role: 'detacher',
+        event: 'state-compiling',
+        data: { value: false },
       })
+    })
     cy.findByRole('button', { name: 'Recompile' })
     cy.findByRole('button', { name: 'Compiling…' }).should('not.exist')
   })
 
   it('sends a clear cache request when the button is pressed', function () {
-    cy.mount(<PdfPreviewDetachedRoot />).then(() => {
-      sysendTestHelper.receiveMessage({
+    cy.mount(<PdfPreviewDetachedRoot />)
+
+    cy.wrap(null).then(() => {
+      testDetachChannel.postMessage({
         role: 'detacher',
         event: 'state-showLogs',
         data: { value: true },
       })
     })
 
+    cy.spy(detachChannel, 'postMessage').as('postDetachMessage')
+
     cy.findByRole('button', { name: 'Clear cached files' })
       .should('not.be.disabled')
       .click()
-      .should(() => {
-        expect(sysendTestHelper.getLastBroacastMessage()).to.deep.equal({
-          role: 'detached',
-          event: 'action-clearCache',
-          data: {
-            args: [],
-          },
-        })
-      })
+
+    cy.get('@postDetachMessage').should('be.calledWith', {
+      role: 'detached',
+      event: 'action-clearCache',
+      data: {
+        args: [],
+      },
+    })
   })
 })
