@@ -550,9 +550,13 @@
 }
 
 .btn-bordered() {
-  color: @content-primary;
-  background-color: @white;
-  border-color: @border-color-base;
+  @btn-bordered-color: @content-primary;
+  @btn-bordered-background-color: @white;
+  @btn-bordered-border-color: @border-color-base;
+
+  color: @btn-bordered-color;
+  background-color: @btn-bordered-background-color;
+  border-color: @btn-bordered-border-color;
   border-width: @border-size;
 
   &:hover {
@@ -589,12 +593,23 @@
       color: @content-disabled;
     }
   }
+
+  &[data-ol-loading='true'] {
+    // use the default state colors when in a loading state
+    color: @btn-bordered-color!important;
+    background-color: @btn-bordered-background-color!important;
+    border-color: @btn-bordered-border-color!important;
+  }
 }
 
 .btn-borderless(@color: @white; @background: @brand-primary; @background-hover: @btn-primary-hover-bg-color) {
-  color: @color;
-  background-color: @background;
-  border-color: @background; // add a border that is same as background color so that the height matches the btn-bordered style
+  @btn-borderless-color: @color;
+  @btn-borderless-background-color: @background;
+  @btn-borderless-border-color: @background;
+
+  color: @btn-borderless-color;
+  background-color: @btn-borderless-background-color;
+  border-color: @btn-borderless-border-color; // add a border that is same as background color so that the height matches the btn-bordered style
   border-width: @border-size;
 
   &:hover {
@@ -633,6 +648,13 @@
       border-color: @color-disabled;
       color: @content-disabled;
     }
+  }
+
+  &[data-ol-loading='true'] {
+    // use the default state colors when in a loading state
+    color: @btn-borderless-color!important;
+    background-color: @btn-borderless-background-color!important;
+    border-color: @btn-borderless-border-color!important;
   }
 }
 

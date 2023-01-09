@@ -37,6 +37,7 @@ function PdfCompileButtonInner({
         onClick={() => startCompile()}
         aria-label={compileButtonLabel}
         disabled={compiling}
+        data-ol-loading={compiling}
       >
         <Icon type="refresh" spin={compiling} />
         <span className="toolbar-hide-medium toolbar-hide-small btn-recompile-label">
