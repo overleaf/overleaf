@@ -1,5 +1,3 @@
-@import '../../../frontend/stylesheets/core/variables.less';
-
 .admin-panel-pagination {
   display: flex;
   justify-content: center;
@@ -7,12 +5,10 @@
 
 .phase-badge {
   display: inline-block;
-  border-radius: @badge-border-radius;
   font-size: @font-size-small;
-  font-weight: @badge-font-weight;
-  line-height: @badge-line-height;
-  color: @badge-color;
   white-space: nowrap;
   text-align: center;
   padding: 3px 7px;
+  &:extend(.label);
+  &:extend(.label-info);
 }
