@@ -136,6 +136,7 @@ describe('<LayoutDropdownButton />', function () {
       sinon.assert.calledWith(sendMBSpy, 'project-layout-change', {
         layout: 'flat',
         view: 'editor',
+        page: '/detacher',
       })
     })
 

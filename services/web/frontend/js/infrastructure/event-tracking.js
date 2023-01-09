@@ -27,6 +27,10 @@ export function sendOnce(category, action, label, value) {
 }
 
 export function sendMB(key, segmentation = {}) {
+  if (!segmentation.page) {
+    segmentation.page = window.location.pathname
+  }
+
   sendBeacon(key, segmentation)
 
   if (typeof window.gtag !== 'function') return

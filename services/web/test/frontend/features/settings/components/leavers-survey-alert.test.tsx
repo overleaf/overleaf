@@ -75,7 +75,7 @@ describe('<LeaversSurveyAlert/>', function () {
       expect(sendMBSpy).to.be.calledOnce
       expect(sendMBSpy).calledWith(
         'institutional-leavers-survey-notification',
-        { type: 'view' }
+        { type: 'view', page: '/' }
       )
     })
 
@@ -84,7 +84,7 @@ describe('<LeaversSurveyAlert/>', function () {
       expect(sendMBSpy).to.be.calledTwice
       expect(sendMBSpy).calledWith(
         'institutional-leavers-survey-notification',
-        { type: 'click' }
+        { type: 'click', page: '/' }
       )
     })
 
@@ -93,7 +93,7 @@ describe('<LeaversSurveyAlert/>', function () {
       expect(sendMBSpy).to.be.calledTwice
       expect(sendMBSpy).calledWith(
         'institutional-leavers-survey-notification',
-        { type: 'close' }
+        { type: 'close', page: '/' }
       )
     })
   })

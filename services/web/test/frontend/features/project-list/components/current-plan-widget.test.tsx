@@ -52,6 +52,7 @@ describe('<CurrentPlanWidget />', function () {
       expect(sendMBSpy).to.be.calledOnce
       expect(sendMBSpy).calledWith('upgrade-button-click', {
         source: 'dashboard-top',
+        page: '/',
       })
     })
   })
@@ -245,6 +246,8 @@ describe('<CurrentPlanWidget />', function () {
   })
 
   describe('features page split test', function () {
+    let sendMBSpy: sinon.SinonSpy
+
     const variants = [
       { name: 'default', link: '/learn/how-to/Overleaf_premium_features' },
       { name: 'new', link: '/about/features-overview' },
@@ -279,6 +282,14 @@ describe('<CurrentPlanWidget />', function () {
       },
     ]
 
+    beforeEach(function () {
+      sendMBSpy = sinon.spy(eventTracking, 'sendMB')
+    })
+
+    afterEach(function () {
+      sendMBSpy.restore()
+    })
+
     for (const variant of variants) {
       describe(`${variant.name} variant`, function () {
         beforeEach(function () {
@@ -291,7 +302,7 @@ describe('<CurrentPlanWidget />', function () {
         })
 
         for (const plan of plans) {
-          it(`links to ${variant.name} features page on ${plan.type} plan`, function () {
+          it(`links to ${variant.name} features page on ${plan.type} plan and sends analytics event`, function () {
             window.metaAttributesCache.set('ol-usersBestSubscription', {
               ...plan,
             })
@@ -299,6 +310,14 @@ describe('<CurrentPlanWidget />', function () {
 
             const links = screen.getAllByRole('link')
             expect(links[0].getAttribute('href')).to.equal(variant.link)
+
+            fireEvent.click(links[0])
+            expect(sendMBSpy).to.be.calledOnce
+            expect(sendMBSpy).calledWith('features-page-link', {
+              splitTest: 'features-page',
+              splitTestVariant: variant.name,
+              page: '/',
+            })
 
             window.metaAttributesCache.delete('ol-usersBestSubscription')
           })
