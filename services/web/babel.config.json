@@ -11,5 +11,12 @@
     ["@babel/react", { "runtime": "automatic" }],
     "@babel/typescript"
   ],
-  "plugins": ["angularjs-annotate", "macros"]
+  "plugins": ["angularjs-annotate", "macros"],
+  "overrides": [
+    // treat .cjs files (e.g. libraries symlinked into node_modules) as commonjs
+    {
+      "test": "../../**/*.cjs",
+      "sourceType": "script"
+    }
+  ]
 }

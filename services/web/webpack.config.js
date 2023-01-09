@@ -91,10 +91,11 @@ module.exports = {
   module: {
     rules: [
       {
-        // Pass application JS/TS files through babel-loader, compiling to ES5
-        test: /\.[jt]sx?$/,
-        // Only compile application files (npm and vendored dependencies are in
-        // ES5 already)
+        // Pass application JS/TS files through babel-loader,
+        // transpiling to targets defined in browserslist
+        test: /\.([jt]sx?|[cm]js)$/,
+        // Only compile application files and specific dependencies
+        // (other npm and vendored dependencies must be in ES5 already)
         exclude: [/node_modules\/(?!(react-dnd|chart\.js)\/)/, vendorDir],
         use: [
           {
