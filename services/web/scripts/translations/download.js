@@ -37,7 +37,11 @@ async function run() {
 
       await fs.writeFile(
         path.join(__dirname, `/../../locales/${code}.json`),
-        JSON.stringify(lang.translation, null, 2) + '\n'
+        JSON.stringify(
+          lang.translation,
+          Object.keys(lang.translation).sort(),
+          2
+        ) + '\n'
       )
     }
   } catch (error) {

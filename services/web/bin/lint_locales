@@ -2,18 +2,19 @@
 
 set -e
 
-TEMPLATES_EXTENDING_META_BLOCK=$(\
+# Ensure all locale files are sorted.
+node scripts/translations/sort.js --check
+
+# Ensure no locales contain single quotes.
+LOCALES_WITH_SINGLE_QUOTE=$(\
   grep \
     --files-with-matches \
     --recursive locales/ \
     --regex "'" \
-  || echo "all-good"
+  || true
 )
-if [[ "$TEMPLATES_EXTENDING_META_BLOCK" == "all-good" ]]; then
-  exit 0
-fi
 
-for file in ${TEMPLATES_EXTENDING_META_BLOCK}; do
+for file in ${LOCALES_WITH_SINGLE_QUOTE}; do
   cat <<MSG >&2
 
 ERROR: $file contains a locale with a single quote.
