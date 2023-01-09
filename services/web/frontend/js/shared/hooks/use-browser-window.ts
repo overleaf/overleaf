@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 
 let titleIsFlashing = false
-let originalTitle
-let flashIntervalHandle
+let originalTitle = ''
+let flashIntervalHandle: ReturnType<typeof setInterval>
 
-function flashTitle(message) {
+function flashTitle(message: string) {
   if (document.hasFocus() || titleIsFlashing) {
     return
   }
@@ -30,11 +30,11 @@ function stopFlashingTitle() {
 
   clearInterval(flashIntervalHandle)
   window.document.title = originalTitle
-  originalTitle = undefined
+  originalTitle = ''
   titleIsFlashing = false
 }
 
-function setTitle(title) {
+function setTitle(title: string) {
   if (titleIsFlashing) {
     originalTitle = title
   } else {

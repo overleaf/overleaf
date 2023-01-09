@@ -1,11 +1,10 @@
 import { useEffect } from 'react'
 import { useIdeContext } from '../context/ide-context'
 
-/**
- * @param {string} eventName
- * @param {function} [listener]
- */
-export default function useScopeEventListener(eventName, listener) {
+export default function useScopeEventListener(
+  eventName: string,
+  listener: (...args: unknown[]) => void
+) {
   const { $scope } = useIdeContext()
 
   useEffect(() => {

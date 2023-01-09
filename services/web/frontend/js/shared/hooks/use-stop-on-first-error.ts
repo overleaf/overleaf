@@ -3,14 +3,23 @@ import { useDetachCompileContext as useCompileContext } from '../context/detach-
 import { useProjectContext } from '../context/project-context'
 import * as eventTracking from '../../infrastructure/event-tracking'
 
-export function useStopOnFirstError(opts = {}) {
+type UseStopOnFirstErrorProps = {
+  eventSource?: string
+}
+
+export function useStopOnFirstError(opts: UseStopOnFirstErrorProps = {}) {
   const { eventSource } = opts
   const { stopOnFirstError, setStopOnFirstError } = useCompileContext()
   const { _id: projectId } = useProjectContext()
 
+  type Opts = {
+    projectId: string
+    source?: UseStopOnFirstErrorProps['eventSource']
+  }
+
   const enableStopOnFirstError = useCallback(() => {
     if (!stopOnFirstError) {
-      const opts = { projectId }
+      const opts: Opts = { projectId }
       if (eventSource) {
         opts.source = eventSource
       }
@@ -20,7 +29,7 @@ export function useStopOnFirstError(opts = {}) {
   }, [eventSource, projectId, stopOnFirstError, setStopOnFirstError])
 
   const disableStopOnFirstError = useCallback(() => {
-    const opts = { projectId }
+    const opts: Opts = { projectId }
     if (eventSource) {
       opts.source = eventSource
     }

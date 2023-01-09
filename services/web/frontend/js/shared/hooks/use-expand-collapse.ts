@@ -3,13 +3,16 @@ import classNames from 'classnames'
 
 function useExpandCollapse({
   initiallyExpanded = false,
-  collapsedSize = '0',
+  collapsedSize = 0,
   dimension = 'height',
-  classes = {},
+  classes = { container: '', containerCollapsed: '' },
 } = {}) {
-  const ref = useRef()
+  const ref = useRef<{ scrollHeight: number; scrollWidth: number }>()
   const [isExpanded, setIsExpanded] = useState(initiallyExpanded)
-  const [sizing, setSizing] = useState({
+  const [sizing, setSizing] = useState<{
+    size: number | null
+    needsExpandCollapse: boolean | null
+  }>({
     size: null,
     needsExpandCollapse: null,
   })

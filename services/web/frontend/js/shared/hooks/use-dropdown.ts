@@ -5,7 +5,7 @@ export default function useDropdown(defaultOpen = false) {
   const [open, setOpen] = useState(defaultOpen)
 
   // store the dropdown node for use in the "click outside" event listener
-  const ref = useRef(null)
+  const ref = useRef<ReturnType<typeof findDOMNode>>(null)
 
   // react-bootstrap v0.x passes `component` instead of `node` to the ref callback
   const handleRef = useCallback(

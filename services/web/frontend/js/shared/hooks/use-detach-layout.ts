@@ -24,7 +24,7 @@ export default function useDetachLayout() {
   // redundant
   const [isRedundant, setIsRedundant] = useState(false)
 
-  const uiTimeoutRef = useRef()
+  const uiTimeoutRef = useRef<ReturnType<typeof setTimeout>>()
 
   useEffect(() => {
     if (debugPdfDetach) {
@@ -153,7 +153,7 @@ export default function useDetachLayout() {
     message => {
       if (role === 'detacher') {
         if (message.role === 'detacher') {
-          handleEventForDetacherFromDetacher(message)
+          handleEventForDetacherFromDetacher()
         } else if (message.role === 'detached') {
           handleEventForDetacherFromDetached(message)
         }
