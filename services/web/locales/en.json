@@ -1818,6 +1818,7 @@
   "user_management": "User management",
   "user_management_info": "Group plan admins have access to an admin panel where users can be added and removed easily. For site-wide plans, users are automatically upgraded when they register or add their email address to Overleaf (domain-based enrollment or SSO).",
   "user_not_found": "User not found",
+  "user_sessions": "User Sessions",
   "user_wants_you_to_see_project": "__username__ would like you to join __projectname__",
   "v1_badge": "V1 Badge",
   "v1_projects": "V1 Projects",
