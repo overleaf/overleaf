@@ -4,24 +4,13 @@ const rclient = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.documentupdater
 )
 const keys = Settings.redis.documentupdater.key_schema
-const ProjectFlusher = require('app/js/ProjectFlusher')
-const DocumentManager = require('app/js/DocumentManager')
+const ProjectFlusher = require('../app/js/ProjectFlusher')
+const DocumentManager = require('../app/js/DocumentManager')
+const { mongoClient, db, ObjectId } = require('../app/js/mongodb')
 const util = require('util')
 const flushAndDeleteDocWithLock = util.promisify(
   DocumentManager.flushAndDeleteDocWithLock
 )
-
-const { MongoClient, ObjectId } = require('mongodb')
-
-const clientPromise = MongoClient.connect(
-  Settings.mongo.url,
-  Settings.mongo.options
-)
-
-const db = {}
-clientPromise.then(client => {
-  db.docs = client.db().collection('docs')
-})
 
 async function fixDocsWithMissingProjectIds(dockeys, options) {
   const docIds = ProjectFlusher._extractIds(dockeys)
@@ -86,15 +75,13 @@ async function findAndProcessDocs(options) {
   } while (cursor !== '0')
 }
 
-clientPromise.then(client => {
-  findAndProcessDocs({ limit: 1000, dryRun: process.env.DRY_RUN !== 'false' })
-    .then(result => {
-      rclient.quit()
-      client.close()
-      console.log('DONE')
-    })
-    .catch(function (error) {
-      console.error(error)
-      process.exit(1)
-    })
-})
+findAndProcessDocs({ limit: 1000, dryRun: process.env.DRY_RUN !== 'false' })
+  .then(result => {
+    rclient.quit()
+    mongoClient.close()
+    console.log('DONE')
+  })
+  .catch(function (error) {
+    console.error(error)
+    process.exit(1)
+  })

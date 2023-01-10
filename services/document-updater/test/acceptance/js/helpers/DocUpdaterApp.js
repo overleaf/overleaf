@@ -9,7 +9,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const app = require('../../../../app')
-const { waitForDb } = require('../../../../app/js/mongodb')
 require('@overleaf/logger').logger.level('fatal')
 
 module.exports = {
@@ -27,20 +26,18 @@ module.exports = {
     }
     this.initing = true
     this.callbacks.push(callback)
-    waitForDb().then(() => {
-      return app.listen(3003, 'localhost', error => {
-        if (error != null) {
-          throw error
+    app.listen(3003, 'localhost', error => {
+      if (error != null) {
+        throw error
+      }
+      this.running = true
+      return (() => {
+        const result = []
+        for (callback of Array.from(this.callbacks)) {
+          result.push(callback())
         }
-        this.running = true
-        return (() => {
-          const result = []
-          for (callback of Array.from(this.callbacks)) {
-            result.push(callback())
-          }
-          return result
-        })()
-      })
+        return result
+      })()
     })
   },
 }

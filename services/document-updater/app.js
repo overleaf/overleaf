@@ -225,8 +225,8 @@ const host = Settings.internal.documentupdater.host || 'localhost'
 
 if (!module.parent) {
   // Called directly
-  mongodb
-    .waitForDb()
+  mongodb.mongoClient
+    .connect()
     .then(() => {
       app.listen(port, host, function (err) {
         if (err) {

@@ -4,27 +4,16 @@ const rclient = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.documentupdater
 )
 const keys = Settings.redis.documentupdater.key_schema
-const ProjectFlusher = require('app/js/ProjectFlusher')
-const RedisManager = require('app/js/RedisManager')
+const ProjectFlusher = require('../app/js/ProjectFlusher')
+const RedisManager = require('../app/js/RedisManager')
+const { mongoClient, db, ObjectId } = require('../app/js/mongodb')
 const util = require('util')
 const getDoc = util.promisify((projectId, docId, cb) =>
   RedisManager.getDoc(projectId, docId, (err, ...args) => cb(err, args))
 )
 const removeDocFromMemory = util.promisify(RedisManager.removeDocFromMemory)
-const { MongoClient, ObjectId } = require('mongodb')
-
-const clientPromise = MongoClient.connect(
-  Settings.mongo.url,
-  Settings.mongo.options
-)
 
 const summary = { totalDocs: 0, deletedDocs: 0, skippedDocs: 0 }
-
-const db = {}
-clientPromise.then(client => {
-  db.docs = client.db().collection('docs')
-  db.projects = client.db().collection('projects')
-})
 
 async function removeDeletedDocs(dockeys, options) {
   const docIds = ProjectFlusher._extractIds(dockeys)
@@ -159,15 +148,13 @@ async function findAndProcessDocs(options) {
   } while (cursor !== '0')
 }
 
-clientPromise.then(client => {
-  findAndProcessDocs({ limit: 1000, dryRun: process.env.DRY_RUN !== 'false' })
-    .then(result => {
-      rclient.quit()
-      client.close()
-      console.log('DONE')
-    })
-    .catch(function (error) {
-      console.error(error)
-      process.exit(1)
-    })
-})
+findAndProcessDocs({ limit: 1000, dryRun: process.env.DRY_RUN !== 'false' })
+  .then(result => {
+    rclient.quit()
+    mongoClient.close()
+    console.log('DONE')
+  })
+  .catch(function (error) {
+    console.error(error)
+    process.exit(1)
+  })

@@ -1,37 +1,25 @@
 const Settings = require('@overleaf/settings')
 const { MongoClient, ObjectId } = require('mongodb')
 
-const clientPromise = MongoClient.connect(
-  Settings.mongo.url,
-  Settings.mongo.options
-)
+const mongoClient = new MongoClient(Settings.mongo.url)
+const mongoDb = mongoClient.db()
+
+const db = {
+  docs: mongoDb.collection('docs'),
+  docSnapshots: mongoDb.collection('docSnapshots'),
+  projects: mongoDb.collection('projects'),
+}
 
 async function healthCheck() {
-  const internalDb = (await clientPromise).db()
-  const res = await internalDb.command({ ping: 1 })
+  const res = await mongoDb.command({ ping: 1 })
   if (!res.ok) {
     throw new Error('failed mongo ping')
   }
 }
 
-let setupDbPromise
-async function waitForDb() {
-  if (!setupDbPromise) {
-    setupDbPromise = setupDb()
-  }
-  await setupDbPromise
-}
-
-const db = {}
-async function setupDb() {
-  const internalDb = (await clientPromise).db()
-
-  db.docSnapshots = internalDb.collection('docSnapshots')
-}
-
 module.exports = {
   db,
   ObjectId,
+  mongoClient,
   healthCheck: require('util').callbackify(healthCheck),
-  waitForDb,
 }
