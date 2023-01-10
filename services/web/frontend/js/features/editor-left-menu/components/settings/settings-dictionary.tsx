@@ -10,7 +10,12 @@ export default function SettingsDictionary() {
   return (
     <div className="form-group left-menu-setting">
       <label htmlFor="dictionary">{t('dictionary')}</label>
-      <Button bsSize="xs" bsStyle="default" onClick={() => setShowModal(true)}>
+      <Button
+        className="btn-secondary"
+        bsSize="xs"
+        bsStyle={null}
+        onClick={() => setShowModal(true)}
+      >
         {t('edit')}
       </Button>
 
