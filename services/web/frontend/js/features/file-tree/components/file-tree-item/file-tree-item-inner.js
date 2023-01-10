@@ -10,10 +10,12 @@ import { useDraggable } from '../../contexts/file-tree-draggable'
 import FileTreeItemName from './file-tree-item-name'
 import FileTreeItemMenu from './file-tree-item-menu'
 import { useFileTreeSelectable } from '../../contexts/file-tree-selectable'
+import { useFileTreeActionable } from '../../contexts/file-tree-actionable'
 
 function FileTreeItemInner({ id, name, isSelected, icons }) {
   const { permissionsLevel } = useEditorContext(editorContextPropTypes)
   const { setContextMenuCoords } = useFileTreeMainContext()
+  const { isRenaming } = useFileTreeActionable()
 
   const { selectedEntityIds } = useFileTreeSelectable()
 
@@ -60,6 +62,7 @@ function FileTreeItemInner({ id, name, isSelected, icons }) {
       })}
       role="presentation"
       ref={dragRef}
+      draggable={!isRenaming}
       onContextMenu={handleContextMenu}
     >
       <div
