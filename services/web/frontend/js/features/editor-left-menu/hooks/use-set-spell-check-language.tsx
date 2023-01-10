@@ -12,7 +12,8 @@ export default function useSetSpellCheckLanguage() {
   return useCallback(
     (newSpellCheckLanguage: ProjectSettings['spellCheckLanguage']) => {
       const allowUpdate =
-        newSpellCheckLanguage && newSpellCheckLanguage !== spellCheckLanguage
+        spellCheckLanguage != null &&
+        newSpellCheckLanguage !== spellCheckLanguage
 
       if (allowUpdate) {
         setSpellCheckLanguage(newSpellCheckLanguage)
