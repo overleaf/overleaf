@@ -29,4 +29,10 @@ describe('EmailHelper', function () {
     expect(parseEmail(address)).to.equal(null)
     expect(parseEmail(address, true)).to.equal(null)
   })
+
+  it('should return null for a group of addresses', function () {
+    const address = 'Group name:test1@example.com,test2@example.com;'
+    expect(parseEmail(address)).to.equal(null)
+    expect(parseEmail(address, true)).to.equal(null)
+  })
 })

@@ -17,7 +17,7 @@ function parseEmail(email, parseRfcAddress = false) {
 
   if (parseRfcAddress) {
     const result = parseOneAddress(email)
-    if (!result) {
+    if (!result?.address) {
       return null
     }
     email = result.address
