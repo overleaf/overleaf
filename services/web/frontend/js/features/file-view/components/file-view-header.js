@@ -128,7 +128,7 @@ export default function FileViewHeader({ file, storeReferencesKeys }) {
       &nbsp;
       <a
         href={`/project/${projectId}/file/${file.id}`}
-        className="btn btn-info"
+        className="btn btn-secondary-info btn-secondary"
       >
         <Icon type="download" fw />
         &nbsp;
