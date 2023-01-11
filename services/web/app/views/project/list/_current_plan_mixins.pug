@@ -1,5 +1,5 @@
-- var featuresPageVariantNew = splitTestVariants && splitTestVariants['features-page'] && splitTestVariants['features-page'] === 'new'
-- var featuresLink = featuresPageVariantNew ? "/about/features-overview" : "/learn/how-to/Overleaf_premium_features"
+- var featuresPageVariant = splitTestVariants && splitTestVariants['features-page'] ? splitTestVariants['features-page'] : 'default' 
+- var featuresLink = featuresPageVariant === 'new' ? "/about/features-overview" : "/learn/how-to/Overleaf_premium_features"
 
 mixin current_plan()
 	if (usersBestSubscription)
@@ -25,6 +25,10 @@ mixin individual_plan_trial(subscription, plan, remainingTrialDays)
 		tooltip=translate('plan_tooltip', { plan: plan.name }),
 		tooltip-placement="bottom"
 		href=featuresLink
+		event-tracking="features-page-link"
+		event-tracking-mb="true"
+		event-tracking-trigger="click"
+		event-segmentation={splitTest:"features-page", splitTestVariant: featuresPageVariant}
 	)
 		if (remainingTrialDays === 1)
 			| !{translate('trial_last_day')} 
@@ -38,6 +42,10 @@ mixin individual_plan_active(subscription, plan)
 		tooltip=translate('plan_tooltip', {plan: plan.name}),
 		tooltip-placement="bottom"
 		href=featuresLink
+		event-tracking="features-page-link"
+		event-tracking-mb="true"
+		event-tracking-trigger="click"
+		event-segmentation={splitTest:"features-page", splitTestVariant: featuresPageVariant}
 	)
 		| !{translate('premium_plan_label')} 
 		span.info-badge
@@ -47,6 +55,10 @@ mixin group_plan_trial(subscription, plan, remainingTrialDays)
 		tooltip=translate(subscription.teamName != null ? 'group_plan_with_name_tooltip' : 'group_plan_tooltip', { plan: plan.name, groupName: subscription.teamName }),
 		tooltip-placement="bottom"
 		href=featuresLink
+		event-tracking="features-page-link"
+		event-tracking-mb="true"
+		event-tracking-trigger="click"
+		event-segmentation={splitTest:"features-page", splitTestVariant: featuresPageVariant}
 	)
 		if (remainingTrialDays === 1)
 			| !{translate('trial_last_day')} 
@@ -60,6 +72,10 @@ mixin group_plan_active(subscription, plan)
 		tooltip=translate(subscription.teamName != null ? 'group_plan_with_name_tooltip' : 'group_plan_tooltip', { plan: plan.name, groupName: subscription.teamName }),
 		tooltip-placement="bottom"
 		href=featuresLink
+		event-tracking="features-page-link"
+		event-tracking-mb="true"
+		event-tracking-trigger="click"
+		event-segmentation={splitTest:"features-page", splitTestVariant: featuresPageVariant}
 	)
 		| !{translate('premium_plan_label')} 
 		span.info-badge
@@ -69,6 +85,10 @@ mixin commons_plan(subscription, plan)
 		tooltip=translate('commons_plan_tooltip', { plan: plan.name, institution: subscription.name }),
 		tooltip-placement="bottom"
 		href=featuresLink
+		event-tracking="features-page-link"
+		event-tracking-mb="true"
+		event-tracking-trigger="click"
+		event-segmentation={splitTest:"features-page", splitTestVariant: featuresPageVariant}
 	)
 		| !{translate('premium_plan_label')} 
 		span.info-badge
@@ -78,6 +98,10 @@ mixin free_plan()
 		tooltip=translate('free_plan_tooltip'),
 		tooltip-placement="bottom"
 		href=featuresLink
+		event-tracking="features-page-link"
+		event-tracking-mb="true"
+		event-tracking-trigger="click"
+		event-segmentation={splitTest:"features-page", splitTestVariant: featuresPageVariant}
 	)
 		| !{translate('free_plan_label')} 
 		span.info-badge

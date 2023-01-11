@@ -44,9 +44,9 @@ footer.fat-footer.hidden-print
 				ul.list-unstyled
 					li
 						if !featuresPageVariant || featuresPageVariant === 'default'
-							a(href="/learn/how-to/Overleaf_premium_features") #{translate('premium_features')}
+							a(href="/learn/how-to/Overleaf_premium_features" event-tracking="features-page-link" event-tracking-mb="true" event-tracking-trigger="click" event-segmentation={splitTest: "features-page", splitTestVariant: "default", locationInPage: "footer"}) #{translate('premium_features')}
 						else
-							a(href="/about/features-overview") #{translate('features')}
+							a(href="/about/features-overview" event-tracking=" features-page-link" event-tracking-mb="true" event-tracking-trigger="click" event-segmentation={splitTest: "features-page", splitTestVariant: "new", locationInPage: "footer"}) #{translate('features')}
 					li
 						a(href="/user/subscription/plans?itm_referrer=footer-for-indv-groups") !{translate('for_individuals_and_groups')}
 					li

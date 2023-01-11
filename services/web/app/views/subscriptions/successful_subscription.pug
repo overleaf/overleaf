@@ -1,9 +1,10 @@
 extends ../layout
 
 block content
-	- var featuresPageVariantNew = splitTestVariants && splitTestVariants['features-page'] && splitTestVariants['features-page'] === 'new'
-	- var featuresLink = featuresPageVariantNew ? "/about/features-overview" : "/learn/how-to/Overleaf_premium_features"
-	- var featuresTranslationKey = featuresPageVariantNew ? 'get_most_subscription_by_checking_features' : 'get_most_subscription_by_checking_premium_features'
+	- var featuresPageVariant= splitTestVariants && splitTestVariants['features-page'] ? splitTestVariants['features-page'] : 'default'
+	- var featuresLink = featuresPageVariant === 'new' ? "/about/features-overview" : "/learn/how-to/Overleaf_premium_features"
+	- var featuresTranslationKey = featuresPageVariant === 'new' ? 'get_most_subscription_by_checking_features' : 'get_most_subscription_by_checking_premium_features'
+	- var featuresLinkSegmentation = {splitTest: 'features-page', splitTestVariant: featuresPageVariant}
 
 	main.content.content-alt#main-content
 		.container
@@ -24,7 +25,7 @@ block content
 								a.btn.btn-primary.btn-large(href=`/manage/groups/${personalSubscription._id}/members`) #{translate("add_your_first_group_member_now")}
 						p.letter-from-founders
 							p #{translate("thanks_for_subscribing_you_help_sl", {planName:personalSubscription.plan.name})}
-							p !{translate(featuresTranslationKey, {}, [{name: 'a', attrs: {href: featuresLink}}])}
+							p !{translate(featuresTranslationKey, {}, [{name: 'a', attrs: {href: featuresLink, 'event-tracking':'features-page-link', 'event-tracking-trigger': 'click', 'event-tracking-mb': 'true', 'event-segmentation': featuresLinkSegmentation}}])}
 							p #{translate("need_anything_contact_us_at")} 
 								a(href=`mailto:${settings.adminEmail}`, ng-non-bindable) #{settings.adminEmail}
 								| .
