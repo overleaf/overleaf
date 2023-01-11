@@ -142,7 +142,7 @@ module.exports = {
       },
       {
         // Load fonts
-        test: /\.(woff|woff2)$/,
+        test: /\.(woff2?|ttf|otf)$/,
         type: 'asset/resource',
         generator: {
           filename: 'fonts/[name]-[contenthash][ext]',

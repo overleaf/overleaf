@@ -81,7 +81,6 @@
     "@codemirror/view": "^6.7.1",
     "@contentful/rich-text-html-renderer": "^16.0.2",
     "@contentful/rich-text-types": "^16.0.2",
-    "@fontsource/noto-serif": "^4.5.11",
     "@google-cloud/bigquery": "^6.0.1",
     "@lezer/common": "^1.0.2",
     "@lezer/highlight": "^1.1.3",

@@ -1,0 +1,11 @@
+@font-face {
+  font-family: 'Noto Serif';
+  font-style: normal;
+  src: url('noto-serif/NotoSerif[wght].ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Noto Serif';
+  font-style: italic;
+  src: url('noto-serif/NotoSerif-Italic[wght].ttf') format('truetype');
+}
