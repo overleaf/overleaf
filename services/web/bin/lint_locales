@@ -5,6 +5,9 @@ set -e
 # Ensure all locale files are sorted.
 node scripts/translations/sort.js --check
 
+# Ensure all locales are still in use
+node scripts/translations/cleanupUnusedLocales.js --check
+
 # Ensure no locales contain single quotes.
 LOCALES_WITH_SINGLE_QUOTE=$(\
   grep \
