@@ -2,8 +2,8 @@ import { memo, useCallback } from 'react'
 import useScopeValue from '../../../shared/hooks/use-scope-value'
 import Tooltip from '../../../shared/components/tooltip'
 import { sendMB } from '../../../infrastructure/event-tracking'
-
-const params = new URLSearchParams(window.location.search)
+import getMeta from '../../../utils/meta'
+import SplitTestBadge from '../../../shared/components/split-test-badge'
 
 function Badge() {
   const content = (
@@ -66,7 +66,7 @@ function EditorSwitch() {
           break
 
         case 'rich-text':
-          if (params.has('cm_visual')) {
+          if (getMeta('ol-richTextVariant') === 'cm6') {
             setRichText(false)
             setVisual(true)
             setNewSourceEditor(true)
@@ -74,6 +74,7 @@ function EditorSwitch() {
             setRichText(true)
             setVisual(false)
           }
+
           break
       }
 
@@ -131,6 +132,10 @@ function EditorSwitch() {
           <span>Rich Text</span>
         </label>
       </fieldset>
+
+      {!!richTextOrVisual && (
+        <SplitTestBadge splitTestName="rich-text" displayOnVariants={['cm6']} />
+      )}
     </div>
   )
 }

@@ -1067,6 +1067,21 @@ const ProjectController = {
             }
           )
         },
+        richTextAssignment(cb) {
+          SplitTestHandler.getAssignment(
+            req,
+            res,
+            'rich-text',
+            (error, assignment) => {
+              // do not fail editor load if assignment fails
+              if (error) {
+                cb(null, { variant: 'default' })
+              } else {
+                cb(null, assignment)
+              }
+            }
+          )
+        },
       },
       (
         err,
@@ -1083,6 +1098,7 @@ const ProjectController = {
           newSourceEditorAssignment,
           pdfjsAssignment,
           editorLeftMenuAssignment,
+          richTextAssignment,
         }
       ) => {
         if (err != null) {
@@ -1266,6 +1282,7 @@ const ProjectController = {
               fixedSizeDocument: true,
               useOpenTelemetry: Settings.useOpenTelemetryClient,
               showCM6SwitchAwaySurvey: Settings.showCM6SwitchAwaySurvey,
+              richTextVariant: richTextAssignment.variant,
             })
             timer.done()
           }
