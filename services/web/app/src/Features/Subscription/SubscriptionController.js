@@ -104,8 +104,106 @@ async function plansPage(req, res) {
   })
 }
 
-// get to show the recurly.js page
 async function paymentPage(req, res) {
+  try {
+    const assignment = await SplitTestHandler.promises.getAssignment(
+      req,
+      res,
+      'subscription-pages-react'
+    )
+    // get to show the recurly.js page
+    if (assignment.variant === 'active') {
+      await _paymentReactPage(req, res)
+    } else {
+      await _paymentAngularPage(req, res)
+    }
+  } catch (error) {
+    logger.warn(
+      { err: error },
+      'failed to get "subscription-pages-react" split test assignment'
+    )
+    await _paymentAngularPage(req, res)
+  }
+}
+
+/**
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ * @returns {Promise<void>}
+ */
+async function _paymentReactPage(req, res) {
+  const user = SessionManager.getSessionUser(req.session)
+  const plan = PlansLocator.findLocalPlanInSettings(req.query.planCode)
+  if (!plan) {
+    return HttpErrorHandler.unprocessableEntity(req, res, 'Plan not found')
+  }
+  const hasSubscription =
+    await LimitationsManager.promises.userHasV1OrV2Subscription(user)
+  if (hasSubscription) {
+    res.redirect('/user/subscription?hasSubscription=true')
+  } else {
+    // LimitationsManager.userHasV2Subscription only checks Mongo. Double check with
+    // Recurly as well at this point (we don't do this most places for speed).
+    const valid =
+      await SubscriptionHandler.promises.validateNoSubscriptionInRecurly(
+        user._id
+      )
+    if (!valid) {
+      res.redirect('/user/subscription?hasSubscription=true')
+    } else {
+      let currency = null
+      if (req.query.currency) {
+        const queryCurrency = req.query.currency.toUpperCase()
+        if (GeoIpLookup.isValidCurrencyParam(queryCurrency)) {
+          currency = queryCurrency
+        }
+      }
+      const { currencyCode: recommendedCurrency, countryCode } =
+        await GeoIpLookup.promises.getCurrencyCode(
+          (req.query ? req.query.ip : undefined) || req.ip
+        )
+      if (recommendedCurrency && currency == null) {
+        currency = recommendedCurrency
+      }
+
+      const refreshedPaymentPageAssignment =
+        await SplitTestHandler.promises.getAssignment(
+          req,
+          res,
+          'payment-page-refresh'
+        )
+      const useRefreshedPaymentPage =
+        refreshedPaymentPageAssignment &&
+        refreshedPaymentPageAssignment.variant === 'refreshed-payment-page'
+
+      await SplitTestHandler.promises.getAssignment(
+        req,
+        res,
+        'student-check-modal'
+      )
+
+      // TODO
+      const template = useRefreshedPaymentPage
+        ? 'subscriptions/new-react'
+        : 'subscriptions/new-react'
+
+      res.render(template, {
+        title: 'subscribe',
+        currency,
+        countryCode,
+        plan,
+        recurlyConfig: JSON.stringify({
+          currency,
+          subdomain: Settings.apis.recurly.subdomain,
+        }),
+        showCouponField: !!req.query.scf,
+        showVatField: !!req.query.svf,
+      })
+    }
+  }
+}
+
+async function _paymentAngularPage(req, res) {
   const user = SessionManager.getSessionUser(req.session)
   const plan = PlansLocator.findLocalPlanInSettings(req.query.planCode)
   if (!plan) {
@@ -177,6 +275,84 @@ async function paymentPage(req, res) {
 }
 
 async function userSubscriptionPage(req, res) {
+  try {
+    const assignment = await SplitTestHandler.promises.getAssignment(
+      req,
+      res,
+      'subscription-pages-react'
+    )
+    if (assignment.variant === 'active') {
+      await _userSubscriptionReactPage(req, res)
+    } else {
+      await _userSubscriptionAngularPage(req, res)
+    }
+  } catch (error) {
+    logger.warn(
+      { err: error },
+      'failed to get "subscription-pages-react" split test assignment'
+    )
+    await _userSubscriptionAngularPage(req, res)
+  }
+}
+
+/**
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ * @returns {Promise<void>}
+ */
+async function _userSubscriptionReactPage(req, res) {
+  const user = SessionManager.getSessionUser(req.session)
+  const results =
+    await SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
+      user
+    )
+  const {
+    personalSubscription,
+    memberGroupSubscriptions,
+    managedGroupSubscriptions,
+    currentInstitutionsWithLicence,
+    managedInstitutions,
+    managedPublishers,
+    v1SubscriptionStatus,
+  } = results
+  const hasSubscription =
+    await LimitationsManager.promises.userHasV1OrV2Subscription(user)
+  const fromPlansPage = req.query.hasSubscription
+  const plans = SubscriptionViewModelBuilder.buildPlansList(
+    personalSubscription ? personalSubscription.plan : undefined
+  )
+
+  AnalyticsManager.recordEventForSession(req.session, 'subscription-page-view')
+
+  const cancelButtonAssignment = await SplitTestHandler.promises.getAssignment(
+    req,
+    res,
+    'subscription-cancel-button'
+  )
+
+  const cancelButtonNewCopy = cancelButtonAssignment?.variant === 'new-copy'
+
+  const data = {
+    title: 'your_subscription',
+    plans,
+    groupPlans: GroupPlansData,
+    user,
+    hasSubscription,
+    fromPlansPage,
+    personalSubscription,
+    memberGroupSubscriptions,
+    managedGroupSubscriptions,
+    managedInstitutions,
+    managedPublishers,
+    v1SubscriptionStatus,
+    currentInstitutionsWithLicence,
+    groupPlanModalOptions,
+    cancelButtonNewCopy,
+  }
+  res.render('subscriptions/dashboard-react', data)
+}
+
+async function _userSubscriptionAngularPage(req, res) {
   const user = SessionManager.getSessionUser(req.session)
   const results =
     await SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
@@ -302,6 +478,32 @@ async function createSubscription(req, res) {
 }
 
 async function successfulSubscription(req, res) {
+  try {
+    const assignment = await SplitTestHandler.promises.getAssignment(
+      req,
+      res,
+      'subscription-pages-react'
+    )
+    if (assignment.variant === 'active') {
+      await _successfulSubscriptionReact(req, res)
+    } else {
+      await _successfulSubscriptionAngular(req, res)
+    }
+  } catch (error) {
+    logger.warn(
+      { err: error },
+      'failed to get "subscription-pages-react" split test assignment'
+    )
+    await _successfulSubscriptionAngular(req, res)
+  }
+}
+
+/**
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ * @returns {Promise<void>}
+ */
+async function _successfulSubscriptionReact(req, res) {
   const user = SessionManager.getSessionUser(req.session)
   const { personalSubscription } =
     await SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
@@ -313,7 +515,27 @@ async function successfulSubscription(req, res) {
   if (!personalSubscription) {
     res.redirect('/user/subscription/plans')
   } else {
-    res.render('subscriptions/successful_subscription', {
+    res.render('subscriptions/successful-subscription-react', {
+      title: 'thank_you',
+      personalSubscription,
+      postCheckoutRedirect,
+    })
+  }
+}
+
+async function _successfulSubscriptionAngular(req, res) {
+  const user = SessionManager.getSessionUser(req.session)
+  const { personalSubscription } =
+    await SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
+      user
+    )
+
+  const postCheckoutRedirect = req.session?.postCheckoutRedirect
+
+  if (!personalSubscription) {
+    res.redirect('/user/subscription/plans')
+  } else {
+    res.render('subscriptions/successful-subscription', {
       title: 'thank_you',
       personalSubscription,
       postCheckoutRedirect,
@@ -337,8 +559,41 @@ function cancelSubscription(req, res, next) {
   })
 }
 
-function canceledSubscription(req, res, next) {
-  return res.render('subscriptions/canceled_subscription', {
+async function canceledSubscription(req, res, next) {
+  try {
+    const assignment = await SplitTestHandler.promises.getAssignment(
+      req,
+      res,
+      'subscription-pages-react'
+    )
+    if (assignment.variant === 'active') {
+      await _canceledSubscriptionReact(req, res, next)
+    } else {
+      await _canceledSubscriptionAngular(req, res, next)
+    }
+  } catch (error) {
+    logger.warn(
+      { err: error },
+      'failed to get "subscription-pages-react" split test assignment'
+    )
+    await _canceledSubscriptionAngular(req, res, next)
+  }
+}
+
+/**
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ * @param {import("express").NextFunction} next
+ * @returns {Promise<void>}
+ */
+function _canceledSubscriptionReact(req, res, next) {
+  return res.render('subscriptions/canceled-subscription-react', {
+    title: 'subscription_canceled',
+  })
+}
+
+function _canceledSubscriptionAngular(req, res, next) {
+  return res.render('subscriptions/canceled-subscription', {
     title: 'subscription_canceled',
   })
 }

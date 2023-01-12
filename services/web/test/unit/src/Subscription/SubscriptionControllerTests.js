@@ -399,7 +399,7 @@ describe('SubscriptionController', function () {
         }
       )
       this.res.render = (url, variables) => {
-        url.should.equal('subscriptions/successful_subscription')
+        url.should.equal('subscriptions/successful-subscription')
         assert.deepEqual(variables, {
           title: 'thank_you',
           personalSubscription: 'foo',

@@ -70,12 +70,19 @@ describe('UserMembershipController', function () {
       addUser: sinon.stub().yields(null, this.newUser),
       removeUser: sinon.stub().yields(null),
     }
+    this.SplitTestHandler = {
+      promises: {
+        getAssignment: sinon.stub().resolves({ variant: 'default' }),
+      },
+      getAssignment: sinon.stub().yields(null, { variant: 'default' }),
+    }
     return (this.UserMembershipController = SandboxedModule.require(
       modulePath,
       {
         requires: {
           './UserMembershipErrors': { UserIsManagerError },
           '../Authentication/SessionManager': this.SessionManager,
+          '../SplitTests/SplitTestHandler': this.SplitTestHandler,
           './UserMembershipHandler': this.UserMembershipHandler,
         },
       }
@@ -88,21 +95,20 @@ describe('UserMembershipController', function () {
       return (this.req.entityConfig = EntityConfigs.group)
     })
 
-    it('get users', function (done) {
-      return this.UserMembershipController.index(this.req, {
+    it('get users', async function () {
+      return await this.UserMembershipController.index(this.req, {
         render: () => {
           sinon.assert.calledWithMatch(
             this.UserMembershipHandler.getUsers,
             this.subscription,
             { modelName: 'Subscription' }
           )
-          return done()
         },
       })
     })
 
-    it('render group view', function (done) {
-      return this.UserMembershipController.index(this.req, {
+    it('render group view', async function () {
+      return await this.UserMembershipController.index(this.req, {
         render: (viewPath, viewParams) => {
           expect(viewPath).to.equal('user_membership/index')
           expect(viewParams.users).to.deep.equal(this.users)
@@ -111,14 +117,13 @@ describe('UserMembershipController', function () {
           expect(viewParams.paths.addMember).to.equal(
             `/manage/groups/${this.subscription._id}/invites`
           )
-          return done()
         },
       })
     })
 
-    it('render group managers view', function (done) {
+    it('render group managers view', async function () {
       this.req.entityConfig = EntityConfigs.groupManagers
-      return this.UserMembershipController.index(this.req, {
+      return await this.UserMembershipController.index(this.req, {
         render: (viewPath, viewParams) => {
           expect(viewPath).to.equal('user_membership/index')
           expect(viewParams.groupSize).to.equal(undefined)
@@ -127,22 +132,20 @@ describe('UserMembershipController', function () {
             'managers_management'
           )
           expect(viewParams.paths.exportMembers).to.be.undefined
-          return done()
         },
       })
     })
 
-    it('render institution view', function (done) {
+    it('render institution view', async function () {
       this.req.entity = this.institution
       this.req.entityConfig = EntityConfigs.institution
-      return this.UserMembershipController.index(this.req, {
+      return await this.UserMembershipController.index(this.req, {
         render: (viewPath, viewParams) => {
           expect(viewPath).to.equal('user_membership/index')
           expect(viewParams.name).to.equal('Test Institution Name')
           expect(viewParams.groupSize).to.equal(undefined)
           expect(viewParams.translations.title).to.equal('institution_account')
           expect(viewParams.paths.exportMembers).to.be.undefined
-          return done()
         },
       })
     })

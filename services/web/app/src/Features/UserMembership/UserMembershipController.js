@@ -16,42 +16,99 @@ const Errors = require('../Errors/Errors')
 const EmailHelper = require('../Helpers/EmailHelper')
 const { csvAttachment } = require('../../infrastructure/Response')
 const { UserIsManagerError } = require('./UserMembershipErrors')
+const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const CSVParser = require('json2csv').Parser
+const logger = require('@overleaf/logger')
+
+async function index(req, res, next) {
+  try {
+    const assignment = await SplitTestHandler.promises.getAssignment(
+      req,
+      res,
+      'subscription-pages-react'
+    )
+    if (assignment.variant === 'active') {
+      await _indexReact(req, res, next)
+    } else {
+      await _indexAngular(req, res, next)
+    }
+  } catch (error) {
+    logger.warn(
+      { err: error },
+      'failed to get "subscription-pages-react" split test assignment'
+    )
+    await _indexAngular(req, res, next)
+  }
+}
+
+function _indexReact(req, res, next) {
+  const { entity, entityConfig } = req
+  return entity.fetchV1Data(function (error, entity) {
+    if (error != null) {
+      return next(error)
+    }
+    return UserMembershipHandler.getUsers(
+      entity,
+      entityConfig,
+      function (error, users) {
+        let entityName
+        if (error != null) {
+          return next(error)
+        }
+        const entityPrimaryKey =
+          entity[entityConfig.fields.primaryKey].toString()
+        if (entityConfig.fields.name) {
+          entityName = entity[entityConfig.fields.name]
+        }
+        return res.render('user_membership/index-react', {
+          name: entityName,
+          users,
+          groupSize: entityConfig.hasMembersLimit
+            ? entity.membersLimit
+            : undefined,
+          translations: entityConfig.translations,
+          paths: entityConfig.pathsFor(entityPrimaryKey),
+        })
+      }
+    )
+  })
+}
+
+function _indexAngular(req, res, next) {
+  const { entity, entityConfig } = req
+  return entity.fetchV1Data(function (error, entity) {
+    if (error != null) {
+      return next(error)
+    }
+    return UserMembershipHandler.getUsers(
+      entity,
+      entityConfig,
+      function (error, users) {
+        let entityName
+        if (error != null) {
+          return next(error)
+        }
+        const entityPrimaryKey =
+          entity[entityConfig.fields.primaryKey].toString()
+        if (entityConfig.fields.name) {
+          entityName = entity[entityConfig.fields.name]
+        }
+        return res.render('user_membership/index', {
+          name: entityName,
+          users,
+          groupSize: entityConfig.hasMembersLimit
+            ? entity.membersLimit
+            : undefined,
+          translations: entityConfig.translations,
+          paths: entityConfig.pathsFor(entityPrimaryKey),
+        })
+      }
+    )
+  })
+}
 
 module.exports = {
-  index(req, res, next) {
-    const { entity, entityConfig } = req
-    return entity.fetchV1Data(function (error, entity) {
-      if (error != null) {
-        return next(error)
-      }
-      return UserMembershipHandler.getUsers(
-        entity,
-        entityConfig,
-        function (error, users) {
-          let entityName
-          if (error != null) {
-            return next(error)
-          }
-          const entityPrimaryKey =
-            entity[entityConfig.fields.primaryKey].toString()
-          if (entityConfig.fields.name) {
-            entityName = entity[entityConfig.fields.name]
-          }
-          return res.render('user_membership/index', {
-            name: entityName,
-            users,
-            groupSize: entityConfig.hasMembersLimit
-              ? entity.membersLimit
-              : undefined,
-            translations: entityConfig.translations,
-            paths: entityConfig.pathsFor(entityPrimaryKey),
-          })
-        }
-      )
-    })
-  },
-
+  index,
   add(req, res, next) {
     const { entity, entityConfig } = req
     const email = EmailHelper.parseEmail(req.body.email)
@@ -96,7 +153,6 @@ module.exports = {
       }
     )
   },
-
   remove(req, res, next) {
     const { entity, entityConfig } = req
     const { userId } = req.params
@@ -135,7 +191,6 @@ module.exports = {
       }
     )
   },
-
   exportCsv(req, res, next) {
     const { entity, entityConfig } = req
     const fields = ['email', 'last_logged_in_at', 'last_active_at']
@@ -152,14 +207,12 @@ module.exports = {
       }
     )
   },
-
   new(req, res, next) {
     return res.render('user_membership/new', {
       entityName: req.params.name,
       entityId: req.params.id,
     })
   },
-
   create(req, res, next) {
     const entityId = req.params.id
     const entityConfig = req.entityConfig

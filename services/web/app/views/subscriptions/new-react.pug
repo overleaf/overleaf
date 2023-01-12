@@ -1,0 +1,14 @@
+extends ../layout-marketing
+
+include ./_new_mixins
+
+block entrypointVar
+	- entrypoint = 'pages/user/subscription/new'
+
+block append meta
+	meta(name="ol-countryCode" content=countryCode)
+	meta(name="ol-recurlyApiKey" content=settings.apis.recurly.publicKey)
+	meta(name="ol-recommendedCurrency" content=String(currency).slice(0,3))
+
+block content
+	main.content.content-alt#subscription-new-root
