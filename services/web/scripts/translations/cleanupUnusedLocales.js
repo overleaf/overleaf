@@ -4,6 +4,7 @@ const { execSync } = require('child_process')
 
 const EN_JSON = Path.join(__dirname, '../../locales/en.json')
 const CHECK = process.argv.includes('--check')
+const SYNC_NON_EN = process.argv.includes('--sync-non-en')
 
 async function main() {
   const locales = JSON.parse(await fs.promises.readFile(EN_JSON, 'utf-8'))
@@ -82,6 +83,28 @@ async function main() {
       unusedKeys.push(key)
     }
   }
+
+  if (SYNC_NON_EN) {
+    if (CHECK) {
+      throw new Error('--check is incompatible with --sync-non-en')
+    }
+    const LOCALES = Path.join(__dirname, '../../locales')
+    for (const name of await fs.promises.readdir(LOCALES)) {
+      if (name === 'README.md') continue
+      if (name === 'en.json') continue
+      const path = Path.join(LOCALES, name)
+      const locales = JSON.parse(await fs.promises.readFile(path, 'utf-8'))
+      for (const key of Object.keys(locales)) {
+        if (!found.has(key)) {
+          delete locales[key]
+        }
+      }
+      const sorted =
+        JSON.stringify(locales, Object.keys(locales).sort(), 2) + '\n'
+      await fs.promises.writeFile(path, sorted)
+    }
+  }
+
   if (unusedKeys.length === 0) {
     return
   }
