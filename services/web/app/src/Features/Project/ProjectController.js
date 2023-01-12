@@ -996,21 +996,6 @@ const ProjectController = {
             }
           )
         },
-        linkSharingUpgradePromptAssignment(cb) {
-          SplitTestHandler.getAssignment(
-            req,
-            res,
-            'link-sharing-upgrade-prompt',
-            (error, assignment) => {
-              // do not fail editor load if assignment fails
-              if (error) {
-                cb(null, { variant: 'default' })
-              } else {
-                cb(null, assignment)
-              }
-            }
-          )
-        },
         trackPdfDownloadAssignment(cb) {
           SplitTestHandler.getAssignment(req, res, 'track-pdf-download', () => {
             // We'll pick up the assignment from the res.locals assignment.

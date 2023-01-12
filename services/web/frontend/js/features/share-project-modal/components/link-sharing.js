@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import PropTypes from 'prop-types'
 import { Button, Col, Row } from 'react-bootstrap'
-import { Trans, useTranslation } from 'react-i18next'
+import { Trans } from 'react-i18next'
 import Tooltip from '../../../shared/components/tooltip'
 import Icon from '../../../shared/components/icon'
 import { useShareProjectContext } from './share-project-modal'
@@ -10,9 +10,6 @@ import CopyLink from '../../../shared/components/copy-link'
 import { useProjectContext } from '../../../shared/context/project-context'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import { useUserContext } from '../../../shared/context/user-context'
-import StartFreeTrialButton from '../../../shared/components/start-free-trial-button'
-import { useSplitTestContext } from '../../../shared/context/split-test-context'
-import getMeta from '../../../utils/meta'
 
 export default function LinkSharing({ canAddCollaborators }) {
   const [inflight, setInflight] = useState(false)
@@ -129,7 +126,6 @@ function TokenBasedSharing({ setAccessLevel, inflight, canAddCollaborators }) {
         <span>&nbsp;&nbsp;</span>
         <LinkSharingInfo />
       </Col>
-      <LinkSharingUpgradePrompt canAddCollaborators={canAddCollaborators} />
       <Col xs={12} className="access-token-display-area">
         <div className="access-token-wrapper">
           <strong>
@@ -266,47 +262,4 @@ function LinkSharingInfo() {
       </a>
     </Tooltip>
   )
-}
-
-function LinkSharingUpgradePrompt({ canAddCollaborators }) {
-  const [startedFreeTrial, setStartedFreeTrial] = useState(false)
-  const { t } = useTranslation()
-  const { splitTestVariants } = useSplitTestContext()
-  const linkSharingUpgradePromptActive =
-    splitTestVariants['link-sharing-upgrade-prompt'] === 'active'
-  const showUpgradePrompt = getMeta('ol-showUpgradePrompt')
-
-  const showLinkSharingUpgradePrompt =
-    linkSharingUpgradePromptActive && showUpgradePrompt && canAddCollaborators
-
-  if (!showLinkSharingUpgradePrompt) {
-    return null
-  }
-
-  return (
-    <>
-      <Col xs={12} className="link-sharing-upgrade-prompt">
-        <p>
-          <Trans
-            i18nKey="premium_makes_collab_easier_with_features"
-            components={[<b />, <b />, <b />]} // eslint-disable-line react/jsx-key
-          />
-        </p>
-        <StartFreeTrialButton
-          buttonProps={{ bsStyle: 'success' }}
-          handleClick={() => setStartedFreeTrial(true)}
-          source="link-sharing"
-        />
-      </Col>
-      {startedFreeTrial && (
-        <p className="small teaser-refresh-label">
-          {t('refresh_page_after_starting_free_trial')}
-        </p>
-      )}
-    </>
-  )
-}
-
-LinkSharingUpgradePrompt.propTypes = {
-  canAddCollaborators: PropTypes.bool,
 }
