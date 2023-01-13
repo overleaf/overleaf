@@ -1,0 +1,41 @@
+{
+  "databaseUrl": "postgres://postgres:postgres@postgres/write_latex_dev",
+  "persistor": {
+    "s3": {
+      "endpoint": "http://s3:8080",
+      "pathStyle": "true"
+    },
+    "gcs": {
+      "unsignedUrls": "true",
+      "endpoint": {
+        "apiEndpoint": "fake-gcs:9090",
+        "apiScheme": "http",
+        "projectId": "fake"
+      }
+    }
+  },
+  "blobStore": {
+    "globalBucket": "overleaf-development-blobs",
+    "projectBucket": "overleaf-development-project-blobs"
+  },
+  "chunkStore": {
+    "bucket": "overleaf-development-chunks"
+  },
+  "zipStore": {
+    "bucket": "overleaf-development-zips"
+  },
+  "analytics": {
+    "bucket": "overleaf-development-analytics"
+  },
+  "useDeleteObjects": "false",
+  "mongo": {
+    "uri": "mongodb://mongo:27017/sharelatex"
+  },
+  "basicHttpAuth": {
+    "password": "password"
+  },
+  "jwtAuth": {
+    "key": "secureKey",
+    "algorithm": "HS256"
+  }
+}

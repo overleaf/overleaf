@@ -1,0 +1,40 @@
+{
+  "databaseUrl": "postgres://sharelatex:sharelatex@postgres/sharelatex",
+  "persistor": {
+    "backend": "gcs",
+    "gcs": {
+      "unsignedUrls": "true",
+      "endpoint": {
+        "apiEndpoint": "gcs:9090",
+        "apiScheme": "http",
+        "projectId": "fake"
+      }
+    }
+  },
+  "blobStore": {
+    "globalBucket": "overleaf-test-blobs",
+    "projectBucket": "overleaf-test-project-blobs"
+  },
+  "chunkStore": {
+    "bucket": "overleaf-test-chunks"
+  },
+  "zipStore": {
+    "bucket": "overleaf-test-zips"
+  },
+  "analytics": {
+    "bucket": "overleaf-test-analytics"
+  },
+  "maxDeleteKeys": "3",
+  "useDeleteObjects": "false",
+  "mongo": {
+    "uri": "mongodb://mongo:27017/sharelatex"
+  },
+  "basicHttpAuth": {
+    "password": "test"
+  },
+  "jwtAuth": {
+    "key": "testtest",
+    "algorithm": "HS256"
+  },
+  "maxFileUploadSize": "524288"
+}

@@ -1,0 +1,60 @@
+{
+  "databaseUrl": "HISTORY_CONNECTION_STRING",
+  "herokuDatabaseUrl": "DATABASE_URL",
+  "databasePoolMin": "DATABASE_POOL_MIN",
+  "databasePoolMax": "DATABASE_POOL_MAX",
+  "persistor": {
+    "backend": "PERSISTOR_BACKEND",
+    "s3": {
+      "key": "AWS_ACCESS_KEY_ID",
+      "secret": "AWS_SECRET_ACCESS_KEY",
+      "maxRetries": "S3_MAX_RETRIES",
+      "httpOptions": {
+        "timeout": "S3_TIMEOUT"
+      }
+    },
+    "gcs": {
+      "deletedBucketSuffix": "GCS_DELETED_BUCKET_SUFFIX",
+      "unlockBeforeDelete": "GCS_UNLOCK_BEFORE_DELETE",
+      "endpoint": {
+        "apiEndpoint": "GCS_API_ENDPOINT",
+        "apiScheme": "GCS_API_SCHEME",
+        "projectId": "GCS_PROJECT_ID"
+      }
+    },
+    "fallback": {
+      "backend": "PERSISTOR_FALLBACK_BACKEND",
+      "buckets": "PERSISTOR_BUCKET_MAPPING"
+    }
+  },
+  "blobStore": {
+    "globalBucket": "OVERLEAF_EDITOR_BLOBS_BUCKET",
+    "projectBucket": "OVERLEAF_EDITOR_PROJECT_BLOBS_BUCKET"
+  },
+  "chunkStore": {
+    "historyStoreConcurrency": "HISTORY_STORE_CONCURRENCY",
+    "bucket": "OVERLEAF_EDITOR_CHUNKS_BUCKET"
+  },
+  "zipStore": {
+    "bucket": "OVERLEAF_EDITOR_ZIPS_BUCKET",
+    "zipTimeoutMs": "ZIP_STORE_ZIP_TIMEOUT_MS"
+  },
+  "analytics": {
+    "bucket": "OVERLEAF_EDITOR_ANALYTICS_BUCKET"
+  },
+  "mongo": {
+    "uri": "MONGO_CONNECTION_STRING"
+  },
+  "basicHttpAuth": {
+    "password": "STAGING_PASSWORD",
+    "oldPassword": "BASIC_HTTP_AUTH_OLD_PASSWORD"
+  },
+  "jwtAuth": {
+    "key": "OT_JWT_AUTH_KEY",
+    "oldKey": "OT_JWT_AUTH_OLD_KEY",
+    "algorithm": "OT_JWT_AUTH_ALG"
+  },
+  "clusterWorkers": "CLUSTER_WORKERS",
+  "maxFileUploadSize": "MAX_FILE_UPLOAD_SIZE",
+  "httpsOnly": "HTTPS_ONLY"
+}

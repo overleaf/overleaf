@@ -1,0 +1,31 @@
+{
+  "name": "overleaf-editor-core",
+  "version": "1.0.0",
+  "description": "Library shared between the editor server and clients.",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha",
+    "format": "prettier --list-different $PWD/'**/*.js'",
+    "format:fix": "prettier --write $PWD/'**/*.js'",
+    "lint": "eslint --max-warnings 0 --format unix lib test && tsc",
+    "lint:fix": "eslint --fix lib test",
+    "test:ci": "npm run test",
+    "coverage": "istanbul cover _mocha"
+  },
+  "author": "team@overleaf.com",
+  "license": "Proprietary",
+  "private": true,
+  "devDependencies": {
+    "@types/bluebird": "^3.5.30",
+    "chai": "^3.3.0",
+    "istanbul": "^0.4.5",
+    "mocha": "^6.1.4",
+    "typescript": "^4.5.5"
+  },
+  "dependencies": {
+    "@overleaf/o-error": "*",
+    "bluebird": "^3.1.1",
+    "check-types": "^5.1.0",
+    "lodash": "^4.17.19"
+  }
+}

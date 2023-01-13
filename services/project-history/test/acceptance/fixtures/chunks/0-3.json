@@ -1,0 +1,74 @@
+{
+  "chunk": {
+    "history": {
+      "snapshot": {
+        "files": {
+          "bar.tex": {
+            "hash": "4f785a4c192155b240e3042b3a7388b47603f423",
+            "stringLength": 26
+          },
+          "main.tex": {
+            "hash": "f28571f561d198b87c24cc6a98b78e87b665e22d",
+            "stringLength": 20638,
+            "metadata": {
+              "main": true
+            }
+          }
+        }
+      },
+      "changes": [
+        {
+          "operations": [
+            {
+              "pathname": "main.tex",
+              "textOperation": [
+                1912,
+                "Hello world",
+                18726
+              ]
+            }
+          ],
+          "timestamp": "2017-12-04T10:23:35.633Z",
+          "authors": [
+            31
+          ]
+        },
+        {
+          "operations": [
+            {
+              "pathname": "bar.tex",
+              "newPathname": "foo.tex"
+            }
+          ],
+          "timestamp": "2017-12-04T10:27:26.874Z",
+          "authors": [
+            31
+          ]
+        },
+        {
+          "operations": [
+            {
+              "pathname": "foo.tex",
+              "textOperation": [
+                26,
+                "\n\nFour five six"
+              ]
+            }
+          ],
+          "timestamp": "2017-12-04T10:28:33.724Z",
+          "authors": [
+            31
+          ]
+        }
+      ]
+    },
+    "startVersion": 0
+  },
+  "authors": [
+    {
+      "id": 31,
+      "email": "james.allen@overleaf.com",
+      "name": "James"
+    }
+  ]
+}

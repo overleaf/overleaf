@@ -1,0 +1,29 @@
+{
+  "persistor": {
+    "backend": "s3",
+    "s3": {
+      "signedUrlExpiryInMs": "1800000",
+      "maxRetries": "1",
+      "httpOptions": {
+        "timeout": "8000"
+      }
+    },
+    "gcs": {
+      "signedUrlExpiryInMs": "1800000",
+      "deleteConcurrency": "50"
+    }
+  },
+  "chunkStore": {
+    "historyStoreConcurrency": "4"
+  },
+  "zipStore": {
+    "zipTimeoutMs": "360000"
+  },
+  "maxDeleteKeys": "1000",
+  "useDeleteObjects": "true",
+  "clusterWorkers": "1",
+  "maxFileUploadSize": "52428800",
+  "databasePoolMin": "2",
+  "databasePoolMax": "10",
+  "httpsOnly": "false"
+}
