@@ -10,7 +10,7 @@ const HEADER_OVERHEAD_PER_MULTI_PART_CHUNK = composeMultipartHeader({
   start: 9 * 1024 * 1024 * 1024,
   end: 9 * 1024 * 1024 * 1024,
   size: 9 * 1024 * 1024 * 1024,
-})
+}).length
 const MULTI_PART_THRESHOLD = 4
 const INCREMENTAL_CACHE_SIZE = 1000
 // Download large chunks once the shard bandwidth exceeds 50% of their size.
@@ -88,7 +88,8 @@ function estimateSizeOfMultipartResponse(chunks) {
       (totalBytes, chunk) =>
         totalBytes +
         HEADER_OVERHEAD_PER_MULTI_PART_CHUNK +
-        (chunk.end - chunk.start)
+        (chunk.end - chunk.start),
+      0
     ) + ('\r\n' + SAMPLE_NGINX_BOUNDARY + '--').length
   )
 }
