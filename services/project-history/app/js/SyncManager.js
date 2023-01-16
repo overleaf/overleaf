@@ -75,11 +75,16 @@ export function startHardResync(projectId, options, callback) {
         if (err) {
           return releaseLock(OError.tag(err))
         }
-        RedisManager.destroyDocUpdatesQueue(projectId, function (err) {
+        RedisManager.clearFirstOpTimestamp(projectId, function (err) {
           if (err) {
             return releaseLock(OError.tag(err))
           }
-          _startResyncWithoutLock(projectId, options, releaseLock)
+          RedisManager.destroyDocUpdatesQueue(projectId, function (err) {
+            if (err) {
+              return releaseLock(OError.tag(err))
+            }
+            _startResyncWithoutLock(projectId, options, releaseLock)
+          })
         })
       }),
     function (error) {

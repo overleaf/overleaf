@@ -82,10 +82,8 @@ export function processUpdatesForProject(projectId, callback) {
         OError.tag(error)
       }
       ErrorRecorder.record(projectId, queueSize, error, callback)
-      if (error == null) {
-        // clear the flush marker in the background if the queue was fully cleared
-        RedisManager.clearFirstOpTimestamp(projectId)
-      }
+      // clear the timestamp in the background if the queue is now empty
+      RedisManager.clearDanglingFirstOpTimestamp(projectId, () => {})
     }
   )
 }
