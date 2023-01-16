@@ -148,7 +148,9 @@ function Input({ onChange, handleAddNewEmail }: InputProps) {
   )
 
   useEffect(() => {
-    if (suggestion && inputValue && !suggestion.startsWith(inputValue)) {
+    if (!inputValue) {
+      setSuggestion(null)
+    } else if (suggestion && !suggestion.startsWith(inputValue)) {
       setSuggestion(null)
     }
   }, [suggestion, inputValue])

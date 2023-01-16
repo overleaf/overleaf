@@ -146,11 +146,11 @@ describe('<AddEmailInput/>', function () {
         ).to.equal(true)
       })
 
-      it('should clear the suggestion when the potential domain match is completely deleted', function () {
+      it('should clear the suggestion when the potential domain match is completely deleted', async function () {
+        await screen.findByText('user@domain.edu')
         fireEvent.change(screen.getByRole('textbox'), {
-          target: { value: 'user@' },
+          target: { value: '' },
         })
-        expect(onChangeStub.calledWith('user@')).to.equal(true)
         expect(screen.queryByText('user@domain.edu')).to.be.null
       })
 
