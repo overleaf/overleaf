@@ -40,7 +40,7 @@
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
     "disrequire": "^1.1.0",
-    "mocha": "^8.4.0",
+    "mocha": "^10.2.0",
     "mongodb": "^3.5.9",
     "sandboxed-module": "2.0.4",
     "sinon": "9.0.2",

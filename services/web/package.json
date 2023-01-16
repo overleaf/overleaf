@@ -309,7 +309,7 @@
     "less-plugin-autoprefix": "^2.0.0",
     "mensch": "^0.3.4",
     "mini-css-extract-plugin": "^2.6.0",
-    "mocha": "^8.4.0",
+    "mocha": "^10.2.0",
     "mock-fs": "^5.1.2",
     "nock": "^13.1.1",
     "node-fetch": "^2.6.7",
