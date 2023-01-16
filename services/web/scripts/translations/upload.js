@@ -40,9 +40,22 @@ async function pollUploadStatus(importId) {
   }
 }
 
-async function main() {
+async function uploadOnce() {
   const importId = await uploadLocales()
   await pollUploadStatus(importId)
+}
+
+async function main() {
+  try {
+    await uploadOnce()
+  } catch (err) {
+    console.error('--- upload failed once ---')
+    console.error(err)
+    console.error('--- upload failed once ---')
+    console.log('retrying upload in 30s')
+    await sleep(30_000)
+    await uploadOnce()
+  }
 }
 
 main().catch(error => {
