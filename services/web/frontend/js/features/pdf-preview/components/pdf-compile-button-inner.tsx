@@ -1,8 +1,11 @@
 import { Button } from 'react-bootstrap'
+import PropTypes from 'prop-types'
 import Tooltip from '../../../shared/components/tooltip'
 import Icon from '../../../shared/components/icon'
 import { useTranslation } from 'react-i18next'
-import { memo } from 'react'
+import { memo, useCallback } from 'react'
+import { useSplitTestContext } from '../../../shared/context/split-test-context'
+import * as eventTracking from '../../../infrastructure/event-tracking'
 
 const modifierKey = /Mac/i.test(navigator.platform) ? 'Cmd' : 'Ctrl'
 
@@ -17,7 +20,28 @@ function PdfCompileButtonInner({
 }: PdfCompileButtonInnerProps) {
   const { t } = useTranslation()
 
-  const compileButtonLabel = compiling ? t('compiling') + '…' : t('recompile')
+  const { splitTestVariants } = useSplitTestContext({
+    splitTestVariants: PropTypes.object,
+  })
+  const recompileButtonTextVariant = splitTestVariants['recompile-button-text']
+
+  let compileButtonLabel
+  if (compiling) {
+    compileButtonLabel = t('compiling') + '…'
+  } else if (splitTestVariants['recompile-button-text'] === 'recompile-pdf') {
+    compileButtonLabel = t('recompile') + ' PDF'
+  } else {
+    compileButtonLabel = t('recompile')
+  }
+
+  const handleRecompileButtonClick = useCallback(() => {
+    if (recompileButtonTextVariant != null) {
+      // Only send the event when the user is targeted by the
+      // recompile-button-text split test
+      eventTracking.sendMB('recompile-pdf-clicked')
+    }
+    startCompile()
+  }, [recompileButtonTextVariant, startCompile])
 
   return (
     <Tooltip
@@ -34,7 +58,7 @@ function PdfCompileButtonInner({
       <Button
         className="btn-recompile"
         bsStyle="primary"
-        onClick={() => startCompile()}
+        onClick={handleRecompileButtonClick}
         aria-label={compileButtonLabel}
         disabled={compiling}
         data-ol-loading={compiling}
