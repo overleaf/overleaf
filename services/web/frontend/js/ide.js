@@ -266,7 +266,7 @@ If the project has been renamed please look in your project list for a new proje
           editorType,
         }
 
-        if (editorType === 'cm6') {
+        if (editorType === 'cm6' || editorType === 'cm6-rich-text') {
           const cm6PerfData = reportCM6Perf()
 
           // Ignore if no typing has happened

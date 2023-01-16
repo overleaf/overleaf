@@ -162,7 +162,14 @@ export default EditorManager = (function () {
       if (!this.$scope.editor.sharejs_doc) {
         return null
       }
-      return this.$scope.editor.sharejs_doc.editorType()
+
+      let editorType = this.$scope.editor.sharejs_doc.editorType()
+
+      if (editorType === 'cm6' && this.$scope.editor.showVisual) {
+        editorType = 'cm6-rich-text'
+      }
+
+      return editorType
     }
 
     showRichText() {
