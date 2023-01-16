@@ -35,7 +35,7 @@ async function pollUploadStatus(importId) {
     await sleep(5000)
   }
   if (task.status === 'failed') {
-    console.error({ task })
+    console.error(JSON.stringify({ task }, null, 2))
     throw new Error('upload failed')
   }
 }
