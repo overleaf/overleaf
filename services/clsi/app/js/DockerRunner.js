@@ -480,7 +480,7 @@ const DockerRunner = {
     container.wait((error, res) => {
       if (error != null) {
         clearTimeout(timeoutId)
-        logger.error({ err: error, containerId }, 'error waiting for container')
+        logger.warn({ err: error, containerId }, 'error waiting for container')
         return callback(error)
       }
       if (timedOut) {
