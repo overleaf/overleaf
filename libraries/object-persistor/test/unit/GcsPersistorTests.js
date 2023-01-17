@@ -554,12 +554,13 @@ describe('GcsPersistorTests', function () {
 
   describe('deleteDirectory', function () {
     const directoryName = `${ObjectId()}/${ObjectId()}`
+    const directoryPrefix = `${directoryName}/`
     describe('with valid parameters', function () {
       beforeEach(async function () {
         GcsBucket.getFiles = sinon.stub()
         // set up multiple paginated calls to getFiles
         GcsBucket.getFiles
-          .withArgs({ directory: directoryName, autoPaginate: false })
+          .withArgs({ prefix: directoryPrefix, autoPaginate: false })
           .resolves([['aaa', 'bbb'], 'call-1'])
         GcsBucket.getFiles
           .withArgs('call-1')
@@ -571,7 +572,7 @@ describe('GcsPersistorTests', function () {
       it('should list the objects in the directory', function () {
         expect(Storage.prototype.bucket).to.have.been.calledWith(bucket)
         expect(GcsBucket.getFiles).to.have.been.calledWith({
-          directory: directoryName,
+          prefix: directoryPrefix,
           autoPaginate: false,
         })
         expect(GcsBucket.getFiles).to.have.been.calledWith('call-1')
@@ -615,7 +616,9 @@ describe('GcsPersistorTests', function () {
 
       it('should list the objects in the directory', function () {
         expect(Storage.prototype.bucket).to.have.been.calledWith(bucket)
-        expect(GcsBucket.getFiles).to.have.been.calledWith({ directory: key })
+        expect(GcsBucket.getFiles).to.have.been.calledWith({
+          prefix: `${key}/`,
+        })
       })
 
       it('should return the directory size', function () {
@@ -633,7 +636,9 @@ describe('GcsPersistorTests', function () {
 
       it('should list the objects in the directory', function () {
         expect(Storage.prototype.bucket).to.have.been.calledWith(bucket)
-        expect(GcsBucket.getFiles).to.have.been.calledWith({ directory: key })
+        expect(GcsBucket.getFiles).to.have.been.calledWith({
+          prefix: `${key}/`,
+        })
       })
 
       it('should return zero', function () {

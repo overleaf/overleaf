@@ -213,7 +213,8 @@ module.exports = class GcsPersistor extends AbstractPersistor {
   }
 
   async deleteDirectory(bucketName, key) {
-    let query = { directory: key, autoPaginate: false }
+    const prefix = ensurePrefixIsDirectory(key)
+    let query = { prefix, autoPaginate: false }
     do {
       try {
         const [files, nextQuery] = await this.storage
@@ -247,11 +248,12 @@ module.exports = class GcsPersistor extends AbstractPersistor {
 
   async directorySize(bucketName, key) {
     let files
+    const prefix = ensurePrefixIsDirectory(key)
 
     try {
       const [response] = await this.storage
         .bucket(bucketName)
-        .getFiles({ directory: key })
+        .getFiles({ prefix })
       files = response
     } catch (err) {
       throw PersistorHelper.wrapError(
@@ -300,4 +302,8 @@ module.exports = class GcsPersistor extends AbstractPersistor {
       )
     }
   }
+}
+
+function ensurePrefixIsDirectory(key) {
+  return key === '' || key.endsWith('/') ? key : `${key}/`
 }
