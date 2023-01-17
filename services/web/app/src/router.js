@@ -66,6 +66,7 @@ const _ = require('underscore')
 const { expressify } = require('./util/promises')
 const { plainTextResponse } = require('./infrastructure/Response')
 const PublicAccessLevels = require('./Features/Authorization/PublicAccessLevels')
+const UserContentDomainController = require('./Features/UserContentDomainCheck/UserContentDomainController')
 
 module.exports = { initialize }
 
@@ -1303,6 +1304,31 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     metrics.inc('client-side-error')
     res.sendStatus(204)
   })
+
+  webRouter.post(
+    '/record-user-content-domain-access-check-result',
+    validate({
+      body: Joi.object({
+        failed: Joi.number().min(0).max(6),
+        succeeded: Joi.number().min(0).max(6),
+      }),
+    }),
+    RateLimiterMiddleware.rateLimit({
+      endpointName: 'user-content-domain-a-c-r',
+      maxRequests: 15,
+      timeInterval: 60,
+    }),
+    UserContentDomainController.recordCheckResult
+  )
+  webRouter.post(
+    '/record-user-content-domain-fallback-usage',
+    RateLimiterMiddleware.rateLimit({
+      endpointName: 'user-content-domain-fb-u',
+      maxRequests: 15,
+      timeInterval: 60,
+    }),
+    UserContentDomainController.recordFallbackUsage
+  )
 
   webRouter.get(
     `/read/:token(${TokenAccessController.READ_ONLY_TOKEN_PATTERN})`,

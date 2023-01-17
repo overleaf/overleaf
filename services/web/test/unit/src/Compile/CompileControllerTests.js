@@ -62,6 +62,11 @@ describe('CompileController', function () {
           getAssignment: (this.getAssignment = sinon.stub().yields(null, {
             variant: 'default',
           })),
+          promises: {
+            getAssignment: sinon.stub().resolves({
+              variant: 'default',
+            }),
+          },
         },
         '../Analytics/AnalyticsManager': {
           recordEventForSession: sinon.stub(),

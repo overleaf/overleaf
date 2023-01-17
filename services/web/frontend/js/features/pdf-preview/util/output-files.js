@@ -3,6 +3,7 @@ import HumanReadableLogs from '../../../ide/human-readable-logs/HumanReadableLog
 import BibLogParser from '../../../ide/log-parser/bib-log-parser'
 import { v4 as uuid } from 'uuid'
 import { enablePdfCaching } from './pdf-caching-flags'
+import { fetchFromCompileDomain } from './fetchFromCompileDomain'
 
 // Warnings that may disappear after a second LaTeX pass
 const TRANSIENT_WARNING_REGEX = /^(Reference|Citation).+undefined on input line/
@@ -69,9 +70,10 @@ export const handleLogFiles = async (outputFiles, data, signal) => {
 
   if (logFile) {
     try {
-      const response = await fetch(buildURL(logFile, data.pdfDownloadDomain), {
-        signal,
-      })
+      const response = await fetchFromCompileDomain(
+        buildURL(logFile, data.pdfDownloadDomain),
+        { signal }
+      )
 
       result.log = await response.text()
 
@@ -99,9 +101,10 @@ export const handleLogFiles = async (outputFiles, data, signal) => {
 
   if (blgFile) {
     try {
-      const response = await fetch(buildURL(blgFile, data.pdfDownloadDomain), {
-        signal,
-      })
+      const response = await fetchFromCompileDomain(
+        buildURL(blgFile, data.pdfDownloadDomain),
+        { signal }
+      )
 
       const log = await response.text()
 
@@ -163,7 +166,7 @@ function buildURL(file, pdfDownloadDomain) {
     return `${pdfDownloadDomain}${file.url}`
   }
   // Go through web instead, which uses mongo for checking project access.
-  return file.url
+  return `${window.origin}${file.url}`
 }
 
 function normalizeFilePath(path, rootDocDirname) {

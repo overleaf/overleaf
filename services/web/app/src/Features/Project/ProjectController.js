@@ -1086,6 +1086,28 @@ const ProjectController = {
             }
           )
         },
+        userContentDomainAccessCheckAssigment(cb) {
+          SplitTestHandler.getAssignment(
+            req,
+            res,
+            'user-content-domain-access-check',
+            () => {
+              // We'll pick up the assignment from the res.locals assignment.
+              cb()
+            }
+          )
+        },
+        reportUserContentDomainAccessCheckErrorAssigment(cb) {
+          SplitTestHandler.getAssignment(
+            req,
+            res,
+            'report-user-content-domain-access-check-error',
+            () => {
+              // We'll pick up the assignment from the res.locals assignment.
+              cb()
+            }
+          )
+        },
         recompileButtonTextAssignment: [
           'user',
           (results, cb) => {

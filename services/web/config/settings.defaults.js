@@ -542,6 +542,7 @@ module.exports = {
 
   // Domain the client (pdfjs) should download the compiled pdf from
   pdfDownloadDomain: process.env.PDF_DOWNLOAD_DOMAIN, // "http://clsi-lb:3014"
+  compilesUserContentDomain: process.env.COMPILES_USER_CONTENT_DOMAIN,
 
   // By default turn on feature flag, can be overridden per request.
   enablePdfCaching: process.env.ENABLE_PDF_CACHING === 'true',
