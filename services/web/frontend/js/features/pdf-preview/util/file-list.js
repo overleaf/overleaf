@@ -34,14 +34,14 @@ export const buildFileList = (outputFiles, clsiServerId, compileGroup) => {
     // sort main files first, then alphabetical
     allFiles.sort((a, b) => {
       if (a.main && !b.main) {
-        return a
+        return -1
       }
 
       if (b.main && !a.main) {
-        return b
+        return 1
       }
 
-      return a.path.localeCompare(b.path)
+      return a.path.localeCompare(b.path, undefined, { numeric: true })
     })
 
     // group files into "top" and "other"
