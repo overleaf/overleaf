@@ -154,6 +154,7 @@
   overflow: hidden;
   position: relative;
   z-index: 10; // Prevent track changes showing over toolbar
+  justify-content: space-between;
 
   .btn-recompile-group {
     margin-right: -5px;
@@ -173,12 +174,26 @@
   &.toolbar-wrap {
     min-height: @editor-toolbar-height;
     height: unset; // Allow to grow if buttons wrap
-    flex-wrap: wrap;
-
-    .formatting-buttons {
-      flex-grow: 1 0 auto;
-      width: unset;
+    .toolbar-line-wrapper {
+      flex-wrap: wrap;
     }
+  }
+  .formatting-buttons {
+    flex: 1 1 auto;
+    width: unset;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .toolbar-pdf-right {
+    justify-content: flex-end;
+    flex: 0 0 auto;
+  }
+  .toolbar-line-wrapper {
+    display: flex;
+    flex: 1 1 auto;
+    flex-wrap: nowrap;
+    min-width: 0;
+    overflow: hidden;
   }
 }
 
