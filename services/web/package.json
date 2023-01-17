@@ -212,6 +212,7 @@
     "pug": "^3.0.1",
     "pug-runtime": "^3.0.1",
     "qrcode": "^1.4.4",
+    "rate-limiter-flexible": "^2.4.1",
     "react": "^17.0.2",
     "react-bootstrap": "^0.33.1",
     "react-chartjs-2": "^5.0.1",

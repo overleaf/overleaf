@@ -35,6 +35,7 @@ const PasswordResetRouter = require('./Features/PasswordReset/PasswordResetRoute
 const StaticPagesRouter = require('./Features/StaticPages/StaticPagesRouter')
 const ChatController = require('./Features/Chat/ChatController')
 const Modules = require('./infrastructure/Modules')
+const { RateLimiter } = require('./infrastructure/RateLimiter')
 const RateLimiterMiddleware = require('./Features/Security/RateLimiterMiddleware')
 const InactiveProjectController = require('./Features/InactiveData/InactiveProjectController')
 const ContactRouter = require('./Features/Contacts/ContactRouter')
@@ -67,6 +68,13 @@ const { plainTextResponse } = require('./infrastructure/Response')
 const PublicAccessLevels = require('./Features/Authorization/PublicAccessLevels')
 
 module.exports = { initialize }
+
+const rateLimiters = {
+  zipDownload: new RateLimiter('zip-download', {
+    points: 10,
+    duration: 60,
+  }),
+}
 
 function initialize(webRouter, privateApiRouter, publicApiRouter) {
   webRouter.use(unsupportedBrowserMiddleware)
@@ -721,11 +729,8 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
 
   webRouter.get(
     '/Project/:Project_id/download/zip',
-    RateLimiterMiddleware.rateLimit({
-      endpointName: 'zip-download',
+    RateLimiterMiddleware.rateLimitV2(rateLimiters.zipDownload, {
       params: ['Project_id'],
-      maxRequests: 10,
-      timeInterval: 60,
     }),
     AuthorizationMiddleware.ensureUserCanReadProject,
     ProjectDownloadsController.downloadProject

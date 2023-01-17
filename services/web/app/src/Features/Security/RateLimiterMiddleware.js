@@ -59,6 +59,44 @@ function rateLimit(opts) {
   }
 }
 
+function rateLimitV2(rateLimiter, opts = {}) {
+  const getUserId =
+    opts.getUserId || (req => SessionManager.getLoggedInUserId(req.session))
+  return function (req, res, next) {
+    const userId = getUserId(req) || req.ip
+    if (
+      settings.smokeTest &&
+      settings.smokeTest.userId &&
+      settings.smokeTest.userId.toString() === userId.toString()
+    ) {
+      // ignore smoke test user
+      return next()
+    }
+
+    let key
+    if (opts.ipOnly) {
+      key = req.ip
+    } else {
+      const params = (opts.params || []).map(p => req.params[p])
+      params.push(userId)
+      key = params.join(':')
+    }
+
+    rateLimiter
+      .consume(key)
+      .then(() => next())
+      .catch(err => {
+        if (err instanceof Error) {
+          next(err)
+        } else {
+          res.status(429) // Too many requests
+          res.write('Rate limit reached, please try again later')
+          res.end()
+        }
+      })
+  }
+}
+
 function loginRateLimit(req, res, next) {
   const { email } = req.body
   if (!email) {
@@ -81,6 +119,7 @@ function loginRateLimit(req, res, next) {
 
 const RateLimiterMiddleware = {
   rateLimit,
+  rateLimitV2,
   loginRateLimit,
 }
 
