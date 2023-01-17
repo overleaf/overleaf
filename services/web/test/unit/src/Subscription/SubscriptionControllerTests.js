@@ -523,8 +523,7 @@ describe('SubscriptionController', function () {
       })
     })
 
-    it('should handle 3DSecure errors', function (done) {
-      this.next = sinon.stub()
+    it('should handle 3DSecure errors/recurly transaction errors', function (done) {
       this.LimitationsManager.promises.userHasV1OrV2Subscription.resolves(false)
       this.SubscriptionHandler.promises.createSubscription.rejects(
         new SubscriptionErrors.RecurlyTransactionError({})
@@ -541,7 +540,6 @@ describe('SubscriptionController', function () {
     })
 
     it('should handle validation errors', function (done) {
-      this.next = sinon.stub()
       this.LimitationsManager.promises.userHasV1OrV2Subscription.resolves(false)
       this.SubscriptionHandler.promises.createSubscription.rejects(
         new Errors.InvalidError('invalid error test')
@@ -557,37 +555,20 @@ describe('SubscriptionController', function () {
       this.SubscriptionController.createSubscription(this.req, this.res)
     })
 
-    it('should handle recurly errors', function (done) {
+    it('should throw errors from createSubscription that are not handled', function (done) {
+      const genericError = new Error('generic error')
       this.LimitationsManager.promises.userHasV1OrV2Subscription.resolves(false)
-      this.SubscriptionHandler.promises.createSubscription.rejects(
-        new SubscriptionErrors.RecurlyTransactionError({})
-      )
+      this.SubscriptionHandler.promises.createSubscription.rejects(genericError)
 
-      this.HttpErrorHandler.unprocessableEntity = sinon.spy(
-        (req, res, info) => {
-          expect(req).to.exist
-          expect(res).to.exist
-          expect(info).to.deep.equal('Unknown transaction error')
+      this.SubscriptionController.createSubscription(
+        this.req,
+        this.res,
+        error => {
+          expect(error).to.be.instanceof(Error)
+          expect(error.message).to.equal(genericError.message)
           done()
         }
       )
-
-      this.SubscriptionController.createSubscription(this.req, this.res)
-    })
-
-    it('should handle invalid error', function (done) {
-      this.LimitationsManager.promises.userHasV1OrV2Subscription.resolves(false)
-      this.SubscriptionHandler.promises.createSubscription.rejects(
-        new Errors.InvalidError({})
-      )
-
-      this.HttpErrorHandler.unprocessableEntity = sinon.spy((req, res) => {
-        expect(req).to.exist
-        expect(res).to.exist
-        done()
-      })
-
-      this.SubscriptionController.createSubscription(this.req, this.res)
     })
   })
 

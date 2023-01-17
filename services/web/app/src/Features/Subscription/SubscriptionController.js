@@ -473,6 +473,7 @@ async function createSubscription(req, res) {
         { err, user_id: user._id },
         'something went wrong creating subscription'
       )
+      throw err
     }
   }
 }
