@@ -352,7 +352,17 @@ class HashFileTracker {
     }
 
     await promiseMapWithLimit(10, hashes, async hash => {
-      await fs.promises.unlink(Path.join(this.contentDir, hash))
+      try {
+        await fs.promises.unlink(Path.join(this.contentDir, hash))
+      } catch (err) {
+        if (err?.code === 'ENOENT') {
+          // Ignore already deleted entries. The previous cleanup cycle may have
+          //  been killed halfway through the deletion process, or before we
+          //  flushed the state to disk.
+        } else {
+          throw err
+        }
+      }
       this.hashAge.delete(hash)
       reclaimedSpace += this.hashSize.get(hash)
       this.hashSize.delete(hash)
