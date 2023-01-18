@@ -22,14 +22,14 @@ block content
 							p #{translate("cancel_personal_subscription_first")}
 							.alert.alert-danger(ng-show="cancel_error" ng-cloak) #{translate("something_went_wrong_canceling_your_subscription")}
 							p
-								a.btn.btn.btn-default(ng-click="keepPersonalSubscription()", ng-disabled="inflight") #{translate("not_now")}
+								a.btn.btn.btn-secondary(ng-click="keepPersonalSubscription()", ng-disabled="inflight") #{translate("not_now")}
 								| &nbsp;
 								a.btn.btn.btn-primary(ng-click="cancelPersonalSubscription()", ng-disabled="inflight") #{translate("cancel_your_subscription")}
 
 						div(ng-show="view =='teamInvite'")
 							p #{translate("join_team_explanation", {appName: appName})}
 							p
-								a.btn.btn-default(href="/project") #{translate("not_now")}
+								a.btn.btn-secondary(href="/project") #{translate("not_now")}
 								| &nbsp;
 								a.btn.btn.btn-primary(ng-click="joinTeam()", ng-disabled="inflight") #{translate("accept_invitation")} 
 
