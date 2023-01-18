@@ -1,0 +1,30 @@
+{
+  "persistor": {
+    "s3": {
+      "endpoint": "http://s3:8080",
+      "pathStyle": "true"
+    }
+  },
+  "blobStore": {
+    "globalBucket": "overleaf-blobs",
+    "projectBucket": "overleaf-project-blobs"
+  },
+  "chunkStore": {
+    "bucket": "overleaf-chunks"
+  },
+  "zipStore": {
+    "bucket": "overleaf-zips"
+  },
+  "analytics": {
+    "bucket": "overleaf-analytics"
+  },
+  "useDeleteObjects": "false",
+  "basicHttpAuth": {
+    "password": "password"
+  },
+  "jwtAuth": {
+    "key": "secureKey",
+    "algorithm": "HS256"
+  },
+  "mongo": {}
+}

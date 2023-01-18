@@ -273,9 +273,6 @@ const settings = {
       user: httpAuthUser,
       pass: httpAuthPass,
     },
-    project_history: {
-      enabled: false,
-    },
   },
   references: {},
   notifications: undefined,

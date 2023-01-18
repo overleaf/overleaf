@@ -20,6 +20,7 @@ const swaggerDoc = require('./api/swagger')
 const security = require('./api/app/security')
 const healthChecks = require('./api/controllers/health_checks')
 const { mongodb, loadGlobalBlobs } = require('./storage')
+const path = require('path')
 
 const app = express()
 module.exports = app
@@ -64,7 +65,7 @@ function setupSwagger() {
       app.use(middleware.swaggerValidator())
       app.use(
         middleware.swaggerRouter({
-          controllers: './api/controllers',
+          controllers: path.join(__dirname, 'api/controllers'),
           useStubs: app.get('env') === 'development',
         })
       )
