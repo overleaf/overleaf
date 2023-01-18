@@ -987,6 +987,7 @@
   "official": "Official",
   "ok": "OK",
   "on": "On",
+  "on_free_plan_upgrade_to_access_features": "You are on the __appName__ Free plan. Upgrade to access these <0>Premium Features</0>",
   "one_collaborator": "Only one collaborator",
   "one_free_collab": "One free collaborator",
   "online_latex_editor": "Online LaTeX Editor",

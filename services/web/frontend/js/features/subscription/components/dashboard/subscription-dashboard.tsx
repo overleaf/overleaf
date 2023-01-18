@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import getMeta from '../../../../utils/meta'
 import InstitutionMemberships from './institution-memberships'
+import FreePlan from './free-plan'
 import PremiumFeaturesLink from './premium-features-link'
 
 function SubscriptionDashboard() {
@@ -18,7 +19,7 @@ function SubscriptionDashboard() {
             </div>
 
             <InstitutionMemberships memberships={institutionMemberships} />
-            {hasDisplayedSubscription ? <PremiumFeaturesLink /> : <></>}
+            {hasDisplayedSubscription ? <PremiumFeaturesLink /> : <FreePlan />}
           </div>
         </div>
       </div>
