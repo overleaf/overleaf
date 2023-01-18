@@ -10,7 +10,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import fs from 'fs'
-import { v1 as uuid } from 'uuid'
+import { randomUUID } from 'crypto'
 import path from 'path'
 import Url from 'url'
 import _ from 'lodash'
@@ -42,7 +42,10 @@ export function bufferOnDisk(inStream, fileId, consumeOutStream, callback) {
   // capture the stream url for logging
   const url = inStream.uri && Url.format(inStream.uri)
 
-  const fsPath = path.join(Settings.path.uploadFolder, uuid() + `-${fileId}`)
+  const fsPath = path.join(
+    Settings.path.uploadFolder,
+    randomUUID() + `-${fileId}`
+  )
 
   let cleaningUp = false
   const cleanup = _.once((streamError, res) => {

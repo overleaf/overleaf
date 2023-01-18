@@ -10,7 +10,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import fs from 'fs'
-import { v1 as uuid } from 'uuid'
+import { randomUUID } from 'crypto'
 import Path from 'path'
 import logger from '@overleaf/logger'
 import OError from '@overleaf/o-error'
@@ -27,7 +27,7 @@ export function createStub(fsPath, fileId, fileSize, fileHash, callback) {
   callback = _.once(callback)
   const newFsPath = Path.join(
     Settings.path.uploadFolder,
-    uuid() + `-${fileId}-stub`
+    randomUUID() + `-${fileId}-stub`
   )
   const writeStream = fs.createWriteStream(newFsPath)
   writeStream.on('error', function (error) {

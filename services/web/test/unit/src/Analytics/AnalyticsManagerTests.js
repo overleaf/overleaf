@@ -279,8 +279,8 @@ describe('AnalyticsManager', function () {
             },
           },
           './UserAnalyticsIdCache': {},
-          uuid: {
-            v4: () => this.analyticsId,
+          crypto: {
+            randomUUID: () => this.analyticsId,
           },
         },
       })

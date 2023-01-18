@@ -88,8 +88,8 @@ describe('TemplatesManager', function () {
             host: this.v1Url,
           },
         },
-        uuid: {
-          v4: () => this.uuid,
+        crypto: {
+          randomUUID: () => this.uuid,
         },
         request: this.request,
         fs: this.fs,

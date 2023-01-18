@@ -24,7 +24,7 @@ const logger = require('@overleaf/logger')
 const request = require('request')
 const fetch = require('node-fetch')
 const settings = require('@overleaf/settings')
-const uuid = require('uuid')
+const crypto = require('crypto')
 const Errors = require('../Errors/Errors')
 const _ = require('underscore')
 
@@ -59,7 +59,7 @@ const TemplatesManager = {
       }
 
       const projectName = ProjectDetailsHandler.fixProjectName(templateName)
-      const dumpPath = `${settings.path.dumpFolder}/${uuid.v4()}`
+      const dumpPath = `${settings.path.dumpFolder}/${crypto.randomUUID()}`
       const writeStream = fs.createWriteStream(dumpPath)
       const attributes = {
         fromV1TemplateId: templateId,

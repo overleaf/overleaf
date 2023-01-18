@@ -13,7 +13,7 @@
 const fs = require('fs')
 const OError = require('@overleaf/o-error')
 const logger = require('@overleaf/logger')
-const uuid = require('uuid')
+const crypto = require('crypto')
 const _ = require('underscore')
 const Settings = require('@overleaf/settings')
 const request = require('request')
@@ -82,7 +82,9 @@ const FileWriter = {
       callback = function () {}
     }
     callback = _.once(callback)
-    const fsPath = `${Settings.path.dumpFolder}/${identifier}_${uuid.v4()}`
+    const fsPath = `${
+      Settings.path.dumpFolder
+    }/${identifier}_${crypto.randomUUID()}`
     return FileWriter.ensureDumpFolderExists(function (error) {
       if (error != null) {
         return callback(error)
@@ -106,7 +108,9 @@ const FileWriter = {
     }
     options = options || {}
 
-    const fsPath = `${Settings.path.dumpFolder}/${identifier}_${uuid.v4()}`
+    const fsPath = `${
+      Settings.path.dumpFolder
+    }/${identifier}_${crypto.randomUUID()}`
 
     stream.pause()
 

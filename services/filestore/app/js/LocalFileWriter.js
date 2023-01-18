@@ -1,5 +1,5 @@
 const fs = require('fs')
-const uuid = require('node-uuid')
+const crypto = require('crypto')
 const path = require('path')
 const Stream = require('stream')
 const { callbackify, promisify } = require('util')
@@ -49,7 +49,7 @@ async function deleteFile(fsPath) {
 
 function _getPath(key) {
   if (key == null) {
-    key = uuid.v1()
+    key = crypto.randomUUID()
   }
   key = key.replace(/\//g, '-')
   return path.join(Settings.path.uploadFolder, key)
