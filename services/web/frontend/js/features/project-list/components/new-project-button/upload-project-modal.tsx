@@ -41,6 +41,7 @@ function UploadProjectModal({ onHide }: UploadProjectModalProps) {
         },
         limit: 1,
         fieldName: 'qqfile', // "qqfile" is needed for our express multer middleware
+        timeout: 120000,
       })
       .on('file-added', () => {
         // this function can be invoked multiple times depending on maxNumberOfFiles
