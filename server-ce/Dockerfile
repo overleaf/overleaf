@@ -53,7 +53,11 @@ COPY server-ce/init_scripts/ /etc/my_init.d/
 
 # Copy app settings files
 # -----------------------
-COPY server-ce/settings.js /etc/sharelatex/settings.js
+COPY server-ce/config/settings.js /etc/sharelatex/settings.js
+
+# Copy history-v1 files
+# -----------------------
+COPY server-ce/config/production.json /overleaf/services/history-v1/config/production.json
 
 # Copy grunt thin wrapper
 # -----------------------

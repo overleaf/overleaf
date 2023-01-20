@@ -5,14 +5,20 @@ set -e -o pipefail
 # https://github.com/phusion/baseimage-docker#centrally-defining-your-own-environment-variables
 
 WEB_API_PASSWORD_FILE=/etc/container_environment/WEB_API_PASSWORD
+STAGING_PASSWORD_FILE=/etc/container_environment/STAGING_PASSWORD # HTTP auth for history-v1
+V1_HISTORY_PASSWORD_FILE=/etc/container_environment/V1_HISTORY_PASSWORD
 CRYPTO_RANDOM_FILE=/etc/container_environment/CRYPTO_RANDOM
 
-if [ ! -f "$WEB_API_PASSWORD_FILE" ] || [ ! -f "$CRYPTO_RANDOM_FILE" ]; then
+if [ ! -f "$WEB_API_PASSWORD_FILE" ] || [ ! -f "$STAGING_PASSWORD_FILE" ] || [ ! -f "$CRYPTO_RANDOM_FILE" ]; then
 
     echo "generating random secrets"
 
     SECRET=$(dd if=/dev/urandom bs=1 count=32 2>/dev/null | base64 -w 0 | rev | cut -b 2- | rev | tr -d '\n+/')
     echo ${SECRET} > ${WEB_API_PASSWORD_FILE}
+
+    SECRET=$(dd if=/dev/urandom bs=1 count=32 2>/dev/null | base64 -w 0 | rev | cut -b 2- | rev | tr -d '\n+/')
+    echo ${SECRET} > ${STAGING_PASSWORD_FILE}
+    echo ${SECRET} > ${V1_HISTORY_PASSWORD_FILE}
 
     SECRET=$(dd if=/dev/urandom bs=1 count=32 2>/dev/null | base64 -w 0 | rev | cut -b 2- | rev | tr -d '\n+/')
     echo ${SECRET} > ${CRYPTO_RANDOM_FILE}

@@ -6,9 +6,6 @@ const publicRegistrationModuleAvailable =
 
 const supportModuleAvailable = Settings.moduleImportSequence.includes('support')
 
-const historyV1ModuleAvailable =
-  Settings.moduleImportSequence.includes('history-v1')
-
 const trackChangesModuleAvailable =
   Settings.moduleImportSequence.includes('track-changes')
 
@@ -71,8 +68,6 @@ const Features = {
         return Boolean(Settings.oauth)
       case 'templates-server-pro':
         return !Settings.overleaf
-      case 'history-v1':
-        return historyV1ModuleAvailable
       case 'affiliations':
       case 'analytics':
         return Boolean(_.get(Settings, ['apis', 'v1', 'url']))

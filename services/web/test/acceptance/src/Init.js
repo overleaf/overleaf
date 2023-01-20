@@ -27,11 +27,11 @@ MockFilestoreApi.initialize(23009, mockOpts)
 MockNotificationsApi.initialize(23042, mockOpts)
 MockSpellingApi.initialize(23005, mockOpts)
 MockHaveIBeenPwnedApi.initialize(1337, mockOpts)
+MockProjectHistoryApi.initialize(23054, mockOpts)
+MockV1HistoryApi.initialize(23100, mockOpts)
 
 if (Features.hasFeature('saas')) {
   MockAnalyticsApi.initialize(23050, mockOpts)
-  MockProjectHistoryApi.initialize(23054, mockOpts)
   MockV1Api.initialize(25000, mockOpts)
-  MockV1HistoryApi.initialize(23100, mockOpts)
   MockThirdPartyDataStoreApi.initialize(23002, mockOpts)
 }

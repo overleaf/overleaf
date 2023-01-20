@@ -1,0 +1,28 @@
+{
+  "persistor": {
+    "backend": "fs",
+    "useSubdirectories": true
+  },
+  "blobStore": {
+    "globalBucket": "/var/lib/sharelatex/history/overleaf-blobs",
+    "projectBucket": "/var/lib/sharelatex/history/overleaf-project-blobs"
+  },
+  "chunkStore": {
+    "bucket": "/var/lib/sharelatex/history/overleaf-chunks"
+  },
+  "zipStore": {
+    "bucket": "/var/lib/sharelatex/history/overleaf-zips"
+  },
+  "analytics": {
+    "bucket": "/var/lib/sharelatex/history/overleaf-analytics"
+  },
+  "basicHttpAuth": {
+    "password": "password"
+  },
+  "useDeleteObjects": "false",
+  "jwtAuth": {
+    "key": "secureKey",
+    "algorithm": "HS256"
+  },
+  "mongo": {}
+}

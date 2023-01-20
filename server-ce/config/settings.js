@@ -151,6 +151,20 @@ const settings = {
     api: redisConfig,
     pubsub: redisConfig,
     project_history: redisConfig,
+
+    project_history_migration: {
+      host: redisConfig.host,
+      port: redisConfig.port,
+      password: redisConfig.password,
+      maxRetriesPerRequest: parseInt(
+        process.env.REDIS_MAX_RETRIES_PER_REQUEST || '20'
+      ),
+      key_schema: {
+        projectHistoryOps({ projectId }) {
+          return `ProjectHistory:Ops:{${projectId}}` // NOTE: the extra braces are intentional
+        },
+      },
+    },
   },
 
   // File storage
@@ -273,6 +287,17 @@ const settings = {
       user: httpAuthUser,
       pass: httpAuthPass,
     },
+    project_history: {
+      sendProjectStructureOps: true,
+      initializeHistoryForNewProjects: true,
+      displayHistoryForNewProjects: true,
+      url: 'http://localhost:3054',
+    },
+    v1_history: {
+      url: 'http://localhost:3100/api',
+      user: 'staging',
+      pass: process.env.STAGING_PASSWORD,
+    }
   },
   references: {},
   notifications: undefined,

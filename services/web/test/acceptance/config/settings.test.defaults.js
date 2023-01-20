@@ -76,6 +76,17 @@ module.exports = {
     notifications: {
       url: 'http://localhost:23042',
     },
+    project_history: {
+      sendProjectStructureOps: true,
+      initializeHistoryForNewProjects: true,
+      displayHistoryForNewProjects: true,
+      url: `http://localhost:23054`,
+    },
+    v1_history: {
+      url: `http://localhost:23100/api`,
+      user: 'overleaf',
+      pass: 'password',
+    },
     webpack: {
       url: 'http://localhost:23808',
     },
