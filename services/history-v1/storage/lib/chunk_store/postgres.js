@@ -199,7 +199,6 @@ async function deleteChunk(projectId, chunkId) {
 async function deleteProjectChunks(projectId) {
   projectId = parseInt(projectId, 10)
   assert.integer(projectId, 'bad projectId')
-  assert.integer(projectId, 'bad projectId')
 
   knex.transaction(async tx => {
     await _deleteChunks(knex, { doc_id: projectId })
@@ -208,6 +207,9 @@ async function deleteProjectChunks(projectId) {
 
 async function _deleteChunks(tx, whereClause) {
   const rows = await tx('chunks').returning('*').where(whereClause).del()
+  if (rows.length === 0) {
+    return
+  }
 
   const oldChunks = rows.map(row => ({
     doc_id: row.doc_id,
