@@ -312,6 +312,32 @@ async function projectListReactPage(req, res, next) {
     !userIsMemberOfGroupSubscription &&
     !hasPaidAffiliation
 
+  let newUsersMicroSurveyAssignment
+
+  try {
+    newUsersMicroSurveyAssignment =
+      await SplitTestHandler.promises.getAssignment(
+        req,
+        res,
+        'new-users-micro-survey'
+      )
+  } catch (error) {
+    logger.error(
+      { err: error },
+      'failed to get "new-users-micro-survey" split test assignment'
+    )
+  }
+
+  const SEVEN_DAYS = 1000 * 60 * 60 * 24 * 7
+
+  const isUserLessThanSevenDaysOld =
+    user.signUpDate && Date.now() - user.signUpDate.getTime() < SEVEN_DAYS
+
+  const showNewUsersMicroSurvey =
+    Features.hasFeature('saas') &&
+    (newUsersMicroSurveyAssignment?.variant ?? 'default') === 'enabled' &&
+    isUserLessThanSevenDaysOld
+
   res.render('project/list-react', {
     title: 'your_projects',
     usersBestSubscription,
@@ -329,6 +355,7 @@ async function projectListReactPage(req, res, next) {
     showGroupsAndEnterpriseBanner,
     groupsAndEnterpriseBannerVariant:
       groupsAndEnterpriseBannerAssignment?.variant ?? 'default',
+    showNewUsersMicroSurvey,
   })
 }
 
