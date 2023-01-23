@@ -29,12 +29,15 @@ const USER_ID = process.env.USER_ID
 const CONVERT_LARGE_DOCS_TO_FILE =
   process.env.CONVERT_LARGE_DOCS_TO_FILE === 'true'
 
-const { ObjectId, ReadPreference } = require('mongodb')
+const { ObjectId } = require('mongodb')
 const { db, waitForDb } = require('../../app/src/infrastructure/mongodb')
 const { promiseMapWithLimit } = require('../../app/src/util/promises')
 const { batchedUpdate } = require('../helpers/batchedUpdate')
-const ProjectHistoryController = require('../../modules/admin-panel/app/src/ProjectHistoryController')
-const HistoryUpgradeHelper = require('./HistoryUpgradeHelper')
+const {
+  anyDocHistoryExists,
+  anyDocHistoryIndexExists,
+  doUpgradeForNoneWithConversion,
+} = require('../../modules/history-migration/app/src/HistoryUpgradeHelper')
 
 console.log({
   DRY_RUN,
@@ -111,99 +114,49 @@ async function processProject(project) {
       }
     }
   }
-  const anyDocHistory = await anyDocHistoryExists(project)
-  if (anyDocHistory) {
-    return await doUpgradeForNoneWithConversion(project)
-  }
-  const anyDocHistoryIndex = await anyDocHistoryIndexExists(project)
-  if (anyDocHistoryIndex) {
-    return await doUpgradeForNoneWithConversion(project)
-  }
-}
-
-async function doUpgradeForNoneWithConversion(project) {
   if (RESULT.failed >= MAX_FAILURES) {
     return
   }
   if (MAX_UPGRADES_TO_ATTEMPT && RESULT.attempted >= MAX_UPGRADES_TO_ATTEMPT) {
     return
   }
-  RESULT.attempted += 1
-  const projectId = project._id
-  // migrateProjectHistory expects project id as a string
-  const projectIdString = project._id.toString()
-  if (!DRY_RUN) {
-    try {
-      if (CONVERT_LARGE_DOCS_TO_FILE) {
-        const convertedDocCount =
-          await HistoryUpgradeHelper.convertLargeDocsToFile(projectId, USER_ID)
-        console.log(
-          `converted ${convertedDocCount} large docs to binary files for project ${projectId}`
-        )
-      }
-      await ProjectHistoryController.migrateProjectHistory(projectIdString, {
+  const anyDocHistoryOrIndex =
+    (await anyDocHistoryExists(project)) ||
+    (await anyDocHistoryIndexExists(project))
+  if (anyDocHistoryOrIndex) {
+    RESULT.attempted += 1
+    if (DRY_RUN) {
+      return
+    }
+    const result = await doUpgradeForNoneWithConversion(project, {
+      migrationOptions: {
         archiveOnFailure: ARCHIVE_ON_FAILURE,
         fixInvalidCharacters: FIX_INVALID_CHARACTERS,
         forceNewHistoryOnFailure: FORCE_NEW_HISTORY_ON_FAILURE,
         importZipFilePath: IMPORT_ZIP_FILE_PATH,
         cutoffDate: CUTOFF_DATE,
-      })
-    } catch (err) {
-      // if migrateProjectHistory fails, it cleans up by deleting
-      // the history and unsetting the history id
-      // therefore a failed project will still look like a 'None with conversion' project
-      RESULT.failed += 1
-      console.error(`project ${projectId} FAILED with error: `, err)
-      // We set a failed flag so future runs of the script don't automatically retry
-      await db.projects.updateOne(
-        { _id: projectId },
-        {
-          $set: {
-            'overleaf.history.conversionFailed': true,
-          },
-        }
+      },
+      convertLargeDocsToFile: CONVERT_LARGE_DOCS_TO_FILE,
+      userId: USER_ID,
+      reason: `${SCRIPT_VERSION}`,
+    })
+    if (result.convertedDocCount) {
+      console.log(
+        `project ${project._id} converted ${result.convertedDocCount} docs to filestore`
       )
-      return
     }
-    await db.projects.updateOne(
-      { _id: projectId },
-      {
-        $set: {
-          'overleaf.history.upgradeReason': `none-with-conversion/${SCRIPT_VERSION}`,
-        },
-        $unset: {
-          'overleaf.history.upgradeFailed': true,
-          'overleaf.history.conversionFailed': true,
-        },
+    if (result.error) {
+      console.error(`project ${project._id} FAILED with error: `, result.error)
+      RESULT.failed += 1
+    } else if (result.upgraded) {
+      if (VERBOSE_LOGGING) {
+        console.log(
+          `project ${project._id} converted and upgraded to full project history`
+        )
       }
-    )
-  }
-  if (VERBOSE_LOGGING) {
-    console.log(
-      `project ${projectId} converted and upgraded to full project history`
-    )
-  }
-  RESULT.projectsUpgraded += 1
-}
-
-async function anyDocHistoryExists(project) {
-  return await db.docHistory.findOne(
-    { project_id: { $eq: project._id } },
-    {
-      projection: { _id: 1 },
-      readPreference: ReadPreference.SECONDARY,
+      RESULT.projectsUpgraded += 1
     }
-  )
-}
-
-async function anyDocHistoryIndexExists(project) {
-  return await db.docHistoryIndex.findOne(
-    { project_id: { $eq: project._id } },
-    {
-      projection: { _id: 1 },
-      readPreference: ReadPreference.SECONDARY,
-    }
-  )
+  }
 }
 
 async function main() {

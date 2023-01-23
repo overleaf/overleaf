@@ -1,12 +1,12 @@
 const { ReadPreference, ObjectId } = require('mongodb')
-const { db } = require('../../app/src/infrastructure/mongodb')
+const { db } = require('../../../../app/src/infrastructure/mongodb')
 const Settings = require('@overleaf/settings')
 
-const ProjectHistoryHandler = require('../../app/src/Features/Project/ProjectHistoryHandler')
-const HistoryManager = require('../../app/src/Features/History/HistoryManager')
-const ProjectHistoryController = require('../../modules/admin-panel/app/src/ProjectHistoryController')
-const ProjectEntityHandler = require('../../app/src/Features/Project/ProjectEntityHandler')
-const ProjectEntityUpdateHandler = require('../../app/src/Features/Project/ProjectEntityUpdateHandler')
+const ProjectHistoryHandler = require('../../../../app/src/Features/Project/ProjectHistoryHandler')
+const HistoryManager = require('../../../../app/src/Features/History/HistoryManager')
+const ProjectHistoryController = require('../../../admin-panel/app/src/ProjectHistoryController')
+const ProjectEntityHandler = require('../../../../app/src/Features/Project/ProjectEntityHandler')
+const ProjectEntityUpdateHandler = require('../../../../app/src/Features/Project/ProjectEntityUpdateHandler')
 
 // Timestamp of when 'Enable history for SL in background' release
 const ID_WHEN_FULL_PROJECT_HISTORY_ENABLED = '5a8d8a370000000000000000'
@@ -15,6 +15,21 @@ const OBJECT_ID_WHEN_FULL_PROJECT_HISTORY_ENABLED = new ObjectId(
 )
 const DATETIME_WHEN_FULL_PROJECT_HISTORY_ENABLED =
   OBJECT_ID_WHEN_FULL_PROJECT_HISTORY_ENABLED.getTimestamp()
+
+async function countProjects(query = {}) {
+  const count = await db.projects.count(query)
+  return count
+}
+
+async function countDocHistory(query = {}) {
+  const count = await db.docHistory.count(query)
+  return count
+}
+
+async function findProjects(query = {}, projection = {}) {
+  const projects = await db.projects.find(query).project(projection).toArray()
+  return projects
+}
 
 async function determineProjectHistoryType(project) {
   if (project.overleaf && project.overleaf.history) {
@@ -212,18 +227,28 @@ async function doUpgradeForNoneWithoutConversion(project) {
   return result
 }
 
-async function doUpgradeForNoneWithConversion(project) {
+async function doUpgradeForNoneWithConversion(project, options = {}) {
   const result = {}
   const projectId = project._id
   // migrateProjectHistory expects project id as a string
   const projectIdString = project._id.toString()
   try {
-    await ProjectHistoryController.migrateProjectHistory(projectIdString)
+    if (options.convertLargeDocsToFile) {
+      result.convertedDocCount = await convertLargeDocsToFile(
+        projectId,
+        options.userId
+      )
+    }
+    await ProjectHistoryController.migrateProjectHistory(
+      projectIdString,
+      options.migrationOptions
+    )
   } catch (err) {
     // if migrateProjectHistory fails, it cleans up by deleting
     // the history and unsetting the history id
     // therefore a failed project will still look like a 'None with conversion' project
     result.error = err
+    // We set a failed flag so future runs of the script don't automatically retry
     await db.projects.updateOne(
       { _id: projectId },
       {
@@ -238,7 +263,8 @@ async function doUpgradeForNoneWithConversion(project) {
     { _id: projectId },
     {
       $set: {
-        'overleaf.history.upgradeReason': `none-with-conversion`,
+        'overleaf.history.upgradeReason':
+          `none-with-conversion` + options.reason ? `/${options.reason}` : ``,
       },
       $unset: {
         'overleaf.history.upgradeFailed': true,
@@ -328,6 +354,9 @@ function docIsTooLarge(estimatedSize, lines, maxDocLength) {
 }
 
 module.exports = {
+  countProjects,
+  countDocHistory,
+  findProjects,
   determineProjectHistoryType,
   getUpgradeFunctionForType,
   upgradeProject,

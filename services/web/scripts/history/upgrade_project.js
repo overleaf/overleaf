@@ -1,6 +1,8 @@
 const { ReadPreference, ObjectId } = require('mongodb')
 const { db, waitForDb } = require('../../app/src/infrastructure/mongodb')
-const { upgradeProject } = require('./HistoryUpgradeHelper')
+const {
+  upgradeProject,
+} = require('../../modules/history-migration/app/src/HistoryUpgradeHelper')
 
 async function processProject(project) {
   const result = await upgradeProject(project)

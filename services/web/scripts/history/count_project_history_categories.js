@@ -11,7 +11,10 @@ process.env.MONGO_SOCKET_TIMEOUT =
 
 const { promiseMapWithLimit } = require('../../app/src/util/promises')
 const { batchedUpdate } = require('../helpers/batchedUpdate')
-const { determineProjectHistoryType } = require('./HistoryUpgradeHelper')
+const {
+  determineProjectHistoryType,
+  countProjects,
+} = require('../../modules/history-migration/app/src/HistoryUpgradeHelper')
 
 const COUNT = {
   V2: 0,
@@ -22,6 +25,8 @@ const COUNT = {
   NoneWithTemporaryHistory: 0,
   UpgradeFailed: 0,
   ConversionFailed: 0,
+  MigratedProjects: 0,
+  TotalProjects: 0,
 }
 
 async function processBatch(_, projects) {
@@ -60,6 +65,10 @@ async function main() {
     projection,
     options
   )
+  COUNT.MigratedProjects = await countProjects({
+    'overleaf.history.display': true,
+  })
+  COUNT.TotalProjects = await countProjects()
   console.log('Final')
   console.log(COUNT)
 }

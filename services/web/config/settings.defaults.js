@@ -789,7 +789,12 @@ module.exports = {
     editorLeftMenuSync: [],
   },
 
-  moduleImportSequence: ['launchpad', 'server-ce-scripts', 'user-activate'],
+  moduleImportSequence: [
+    'launchpad',
+    'server-ce-scripts',
+    'user-activate',
+    'history-migration',
+  ],
 
   csp: {
     enabled: process.env.CSP_ENABLED === 'true',
