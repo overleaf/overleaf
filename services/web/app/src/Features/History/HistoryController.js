@@ -13,6 +13,7 @@ const ProjectEntityUpdateHandler = require('../Project/ProjectEntityUpdateHandle
 const RestoreManager = require('./RestoreManager')
 const { pipeline } = require('stream')
 const { prepareZipAttachment } = require('../../infrastructure/Response')
+const Features = require('../../infrastructure/Features')
 
 module.exports = HistoryController = {
   selectHistoryApi(req, res, next) {
@@ -344,10 +345,20 @@ module.exports = HistoryController = {
         pass: settings.apis.v1_history.pass,
       },
       json: true,
-      method: 'post',
       url,
     }
-    request(options, function (err, response, body) {
+
+    if (!Features.hasFeature('saas')) {
+      const getReq = request({ ...options, method: 'get' })
+      getReq.pipe(res)
+      getReq.on('error', function (err) {
+        logger.error({ url, err }, 'history API error')
+        next(err)
+      })
+      return
+    }
+
+    request({ ...options, method: 'post' }, function (err, response, body) {
       if (err) {
         OError.tag(err, 'history API error', {
           v1ProjectId,

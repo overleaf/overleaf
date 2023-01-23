@@ -34,6 +34,10 @@ describe('HistoryController', function () {
           (this.ProjectEntityUpdateHandler = {}),
         '../User/UserGetter': (this.UserGetter = {}),
         './RestoreManager': (this.RestoreManager = {}),
+        '../../infrastructure/Features': (this.Features = sinon
+          .stub()
+          .withArgs('saas')
+          .returns(true)),
       },
     })
     return (this.settings.apis = {
