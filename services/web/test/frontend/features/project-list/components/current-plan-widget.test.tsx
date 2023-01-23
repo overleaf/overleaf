@@ -53,6 +53,8 @@ describe('<CurrentPlanWidget />', function () {
       expect(sendMBSpy).calledWith('upgrade-button-click', {
         source: 'dashboard-top',
         page: '/',
+        'project-dashboard-react': 'enabled',
+        'is-dashboard-sidebar-hidden': false,
       })
     })
   })

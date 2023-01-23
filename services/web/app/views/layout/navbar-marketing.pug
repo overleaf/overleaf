@@ -9,14 +9,15 @@ nav.navbar.navbar-default.navbar-main
 					aria-label="Toggle " + translate('navigation')
 				)
 					i.fa.fa-bars(aria-hidden="true")
-			if (usersBestSubscription && usersBestSubscription.type === 'free')
+			- var enableUpgradeButton = projectDashboardReact && usersBestSubscription && usersBestSubscription.type === 'free'
+			if (enableUpgradeButton)
 				a.btn.btn-primary.pull-right.me-2.visible-xs(
 					href="/user/subscription/plans"
 					event-tracking="upgrade-button-click"
 					event-tracking-mb="true"
 					event-tracking-label="upgrade"
 					event-tracking-trigger="click"
-					event-segmentation='{"source": "dashboard-top"}'
+					event-segmentation='{"source": "dashboard-top", "project-dashboard-react": "enabled", "is-dashboard-sidebar-hidden": "true"}'
 				) #{translate("upgrade")}
 			if settings.nav.custom_logo
 				a(href='/', aria-label=settings.appName, style='background-image:url("'+settings.nav.custom_logo+'")').navbar-brand

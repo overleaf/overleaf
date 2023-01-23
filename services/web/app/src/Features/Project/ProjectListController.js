@@ -355,6 +355,7 @@ async function projectListReactPage(req, res, next) {
     showGroupsAndEnterpriseBanner,
     groupsAndEnterpriseBannerVariant:
       groupsAndEnterpriseBannerAssignment?.variant ?? 'default',
+    projectDashboardReact: true, // used in navbar
     showNewUsersMicroSurvey,
   })
 }

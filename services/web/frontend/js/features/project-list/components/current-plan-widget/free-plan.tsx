@@ -14,7 +14,11 @@ function FreePlan({ featuresPageURL }: FreePlanProps) {
   )
 
   const handleClick = () => {
-    eventTracking.sendMB('upgrade-button-click', { source: 'dashboard-top' })
+    eventTracking.sendMB('upgrade-button-click', {
+      source: 'dashboard-top',
+      'project-dashboard-react': 'enabled',
+      'is-dashboard-sidebar-hidden': false,
+    })
   }
 
   const featuresPageVariant = getMeta('ol-splitTestVariants')?.['features-page']
