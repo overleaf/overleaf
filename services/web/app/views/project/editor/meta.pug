@@ -37,6 +37,8 @@ meta(name="ol-useOpenTelemetry" data-type="boolean" content=useOpenTelemetry)
 meta(name="ol-showSupport", data-type="boolean" content=showSupport)
 meta(name="ol-showCM6SwitchAwaySurvey", data-type="boolean" content=showCM6SwitchAwaySurvey)
 meta(name="ol-richTextVariant" content=richTextVariant)
+if (richTextVariant === 'cm6')
+	meta(name="ol-mathJax3Path" content=mathJax3Path)
 
 - var fileActionI18n = ['edited', 'renamed', 'created', 'deleted'].reduce((acc, i) => {acc[i] = translate('file_action_' + i); return acc}, {})
 meta(name="ol-fileActionI18n" data-type="json" content=fileActionI18n)

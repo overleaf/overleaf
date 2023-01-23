@@ -180,6 +180,7 @@
     "marked": "^4.1.0",
     "match-sorter": "^6.2.0",
     "mathjax": "^2.7.9",
+    "mathjax-3": "npm:mathjax@^3.2.2",
     "method-override": "^2.3.3",
     "minimist": "^1.2.7",
     "mmmagic": "^0.5.3",

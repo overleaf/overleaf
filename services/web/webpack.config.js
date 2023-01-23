@@ -58,6 +58,7 @@ function getModuleDirectory(moduleName) {
 }
 
 const mathjaxDir = getModuleDirectory('mathjax')
+const mathjax3Dir = getModuleDirectory('mathjax-3')
 const aceDir = getModuleDirectory('ace-builds')
 
 const pdfjsVersions = ['pdfjs-dist213', 'pdfjs-dist31']
@@ -257,6 +258,22 @@ module.exports = {
     // Copy the required files for loading MathJax from MathJax NPM package
     new CopyPlugin({
       patterns: [
+        // https://www.npmjs.com/package/mathjax#user-content-hosting-your-own-copy-of-the-mathjax-components
+        {
+          from: 'es5/tex-svg-full.js',
+          to: 'js/libs/mathjax3/es5',
+          context: mathjax3Dir,
+        },
+        {
+          from: 'es5/input/tex/extensions/**/*.js',
+          to: 'js/libs/mathjax3',
+          context: mathjax3Dir,
+        },
+        {
+          from: 'es5/ui/**/*',
+          to: 'js/libs/mathjax3',
+          context: mathjax3Dir,
+        },
         { from: 'MathJax.js', to: 'js/libs/mathjax', context: mathjaxDir },
         { from: 'config/**/*', to: 'js/libs/mathjax', context: mathjaxDir },
         {

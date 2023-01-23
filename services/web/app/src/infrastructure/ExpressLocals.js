@@ -179,6 +179,12 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
       }
     )}`
 
+    res.locals.mathJax3Path = `/js/libs/mathjax3/es5/tex-svg-full.js?${querystring.stringify(
+      {
+        v: require('mathjax-3/package.json').version,
+      }
+    )}`
+
     res.locals.lib = PackageVersions.lib
 
     res.locals.moment = moment

@@ -7,6 +7,7 @@ let configured = false
 
 export function configureMathJax() {
   if (configured) return
+  if (getMeta('ol-mathJax3Path')) return
   if (!mathJaxLoaded()) return
 
   const inlineMath = [['\\(', '\\)']]
