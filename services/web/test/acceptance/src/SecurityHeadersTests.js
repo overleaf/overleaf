@@ -19,32 +19,38 @@ const request = require('./helpers/request')
 
 const assert_has_common_headers = function (response) {
   const { headers } = response
-  assert.equal(headers['x-download-options'], 'noopen')
-  assert.equal(headers['x-xss-protection'], '1; mode=block')
-  return assert.equal(headers['referrer-policy'], 'origin-when-cross-origin')
+  assert.include(headers, {
+    'x-download-options': 'noopen',
+    'x-xss-protection': '0',
+    'cross-origin-resource-policy': 'same-origin',
+    'cross-origin-opener-policy': 'same-origin',
+    'x-content-type-options': 'nosniff',
+    'x-permitted-cross-domain-policies': 'none',
+    'referrer-policy': 'origin-when-cross-origin',
+  })
+  assert.isUndefined(headers['cross-origin-embedder-policy'])
 }
 
 const assert_has_cache_headers = function (response) {
-  const { headers } = response
-  assert.equal(headers['surrogate-control'], 'no-store')
-  assert.equal(
-    headers['cache-control'],
-    'no-store, no-cache, must-revalidate, proxy-revalidate'
-  )
-  assert.equal(headers.pragma, 'no-cache')
-  return assert.equal(headers.expires, '0')
+  assert.include(response.headers, {
+    'surrogate-control': 'no-store',
+    'cache-control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+    pragma: 'no-cache',
+    expires: '0',
+  })
 }
 
 const assert_has_no_cache_headers = function (response) {
-  const { headers } = response
-  assert.isUndefined(headers['surrogate-control'])
-  assert.isUndefined(headers['cache-control'])
-  assert.isUndefined(headers.pragma)
-  return assert.isUndefined(headers.expires)
+  assert.doesNotHaveAnyKeys(response.headers, [
+    'surrogate-control',
+    'cache-control',
+    'pragma',
+    'expires',
+  ])
 }
+
 const assert_has_asset_caching_headers = function (response) {
-  const { headers } = response
-  assert.equal(headers['cache-control'], 'public, max-age=31536000')
+  assert.equal(response.headers['cache-control'], 'public, max-age=31536000')
 }
 
 describe('SecurityHeaders', function () {

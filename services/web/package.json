@@ -164,7 +164,7 @@
     "fuse.js": "^3.0.0",
     "globby": "^5.0.0",
     "handlebars": "^4.7.7",
-    "helmet": "^3.22.0",
+    "helmet": "^6.0.1",
     "http-proxy": "^1.18.1",
     "i18next": "^19.6.3",
     "i18next-fs-backend": "^1.0.7",

@@ -269,6 +269,14 @@ webRouter.use(
     dnsPrefetchControl: false,
     referrerPolicy: { policy: 'origin-when-cross-origin' },
     hsts: false,
+    // Disabled because it's impractical to include every resource via CORS or
+    // with the magic CORP header
+    crossOriginEmbedderPolicy: false,
+    // Disabled because it's not a security header and has possibly-unwanted
+    // effects
+    originAgentCluster: false,
+    // We have custom handling for CSP below, so Helmet's default is disabled
+    contentSecurityPolicy: false,
   })
 )
 
