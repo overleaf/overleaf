@@ -195,9 +195,9 @@ export default EditorManager = (function () {
     }
 
     newSourceEditor() {
-      // only use the new source editor if the option to switch is available
-      if (!getMeta('ol-showNewSourceEditorOption')) {
-        return false
+      // Use the new source editor if the legacy editor is disabled
+      if (!getMeta('ol-showLegacySourceEditor')) {
+        return true
       }
 
       const storedPrefIsCM6 = () => {

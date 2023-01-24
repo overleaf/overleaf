@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from 'react-bootstrap'
 import useScopeValue from '../../../shared/hooks/use-scope-value'
-import getMeta from '../../../utils/meta'
 import {
   hasSeenCM6SwitchAwaySurvey,
   setHasSeenCM6SwitchAwaySurvey,
@@ -17,11 +16,6 @@ export default function CM6SwitchAwaySurvey() {
   const initialRichTextPreference = useRef<boolean>(richText)
 
   useEffect(() => {
-    // If cm6 is not available, don't show the survey
-    if (!getMeta('ol-showNewSourceEditorOption')) {
-      return
-    }
-
     // If the user has previously seen any switch-away survey, then don't show
     // the current one
     if (hasSeenCM6SwitchAwaySurvey()) return

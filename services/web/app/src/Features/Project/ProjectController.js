@@ -981,16 +981,15 @@ const ProjectController = {
             }
           )
         },
-        newSourceEditorAssignment(cb) {
+        legacySourceEditorAssignment(cb) {
           SplitTestHandler.getAssignment(
             req,
             res,
-            'source-editor',
-            {},
+            'source-editor-legacy',
             (error, assignment) => {
               // do not fail editor load if assignment fails
               if (error) {
-                cb(null)
+                cb(null, { variant: 'default' })
               } else {
                 cb(null, assignment)
               }
@@ -1159,7 +1158,7 @@ const ProjectController = {
           isTokenMember,
           isInvitedMember,
           brandVariation,
-          newSourceEditorAssignment,
+          legacySourceEditorAssignment,
           pdfjsAssignment,
           editorLeftMenuAssignment,
           richTextAssignment,
@@ -1239,10 +1238,10 @@ const ProjectController = {
 
             const detachRole = req.params.detachRole
 
-            const showNewSourceEditorOption =
-              newSourceEditorAssignment?.variant === 'codemirror' ||
-              user.betaProgram ||
-              shouldDisplayFeature('new_source_editor', false) // also allow override via ?new_source_editor=true
+            const showLegacySourceEditor =
+              legacySourceEditorAssignment.variant === 'default' ||
+              // Also allow override via legacy_source_editor=true in query string
+              shouldDisplayFeature('legacy_source_editor')
 
             const editorLeftMenuReact =
               editorLeftMenuAssignment?.variant === 'react'
@@ -1335,7 +1334,7 @@ const ProjectController = {
               showSupport: Features.hasFeature('support'),
               pdfjsVariant: pdfjsAssignment.variant,
               debugPdfDetach,
-              showNewSourceEditorOption,
+              showLegacySourceEditor,
               showSymbolPalette,
               galileoEnabled,
               galileoFeatures,

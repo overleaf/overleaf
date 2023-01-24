@@ -38,6 +38,8 @@ function Badge() {
   )
 }
 
+const showLegacySourceEditor: boolean = getMeta('ol-showLegacySourceEditor')
+
 function EditorSwitch() {
   const [newSourceEditor, setNewSourceEditor] = useScopeValue(
     'editor.newSourceEditor'
@@ -103,18 +105,22 @@ function EditorSwitch() {
           <span>Source</span>
         </label>
 
-        <input
-          type="radio"
-          name="editor"
-          value="ace"
-          id="editor-switch-ace"
-          className="toggle-switch-input"
-          checked={!richTextOrVisual && !newSourceEditor}
-          onChange={handleChange}
-        />
-        <label htmlFor="editor-switch-ace" className="toggle-switch-label">
-          <span>Source (legacy)</span>
-        </label>
+        {showLegacySourceEditor ? (
+          <>
+            <input
+              type="radio"
+              name="editor"
+              value="ace"
+              id="editor-switch-ace"
+              className="toggle-switch-input"
+              checked={!richTextOrVisual && !newSourceEditor}
+              onChange={handleChange}
+            />
+            <label htmlFor="editor-switch-ace" className="toggle-switch-label">
+              <span>Source (legacy)</span>
+            </label>
+          </>
+        ) : null}
 
         <input
           type="radio"

@@ -4,7 +4,6 @@ import { Nullable } from '../../../../../types/utils'
 import customLocalStorage from '../../../infrastructure/local-storage'
 import useScopeValue from '../../../shared/hooks/use-scope-value'
 import grammarlyExtensionPresent from '../../../shared/utils/grammarly'
-import getMeta from '../../../utils/meta'
 
 type GrammarlyWarningProps = {
   delay: number
@@ -54,10 +53,6 @@ export default function GrammarlyWarning({ delay }: GrammarlyWarningProps) {
     setShow(false)
     customLocalStorage.setItem('editor.has_dismissed_grammarly_warning', true)
   }, [])
-
-  if (!getMeta('ol-showNewSourceEditorOption')) {
-    return null
-  }
 
   if (!show) {
     return null
