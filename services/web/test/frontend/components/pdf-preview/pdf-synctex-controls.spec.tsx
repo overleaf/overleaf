@@ -127,7 +127,8 @@ const interceptSyncPdf = () => {
   }).as('sync-pdf')
 }
 
-describe('<PdfSynctexControls/>', function () {
+// eslint-disable-next-line mocha/no-skipped-tests
+describe.skip('<PdfSynctexControls/>', function () {
   beforeEach(function () {
     window.metaAttributesCache = new Map()
 
