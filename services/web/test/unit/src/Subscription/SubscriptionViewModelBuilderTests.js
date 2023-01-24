@@ -22,7 +22,7 @@ describe('SubscriptionViewModelBuilder', function () {
       planCode: this.planCode,
       plan: this.plan,
       recurlySubscription_id: this.recurlySubscription_id,
-      recurly: {
+      recurlyStatus: {
         state: 'active',
       },
     }
@@ -46,7 +46,7 @@ describe('SubscriptionViewModelBuilder', function () {
     this.groupSubscription = {
       planCode: this.groupPlanCode,
       plan: this.plan,
-      recurly: {
+      recurlyStatus: {
         state: 'active',
       },
     }
@@ -168,7 +168,7 @@ describe('SubscriptionViewModelBuilder', function () {
       it('should return a individual subscription with remaining free trial days', async function () {
         const threeDaysLater = new Date()
         threeDaysLater.setDate(threeDaysLater.getDate() + 3)
-        this.individualSubscription.recurly.trialEndsAt = threeDaysLater
+        this.individualSubscription.recurlyStatus.trialEndsAt = threeDaysLater
         this.SubscriptionLocator.promises.getUsersSubscription
           .withArgs(this.user)
           .resolves(this.individualSubscription)
@@ -189,7 +189,7 @@ describe('SubscriptionViewModelBuilder', function () {
       it('should return a individual subscription with free trial on last day', async function () {
         const threeHoursLater = new Date()
         threeHoursLater.setTime(threeHoursLater.getTime() + 3 * 60 * 60 * 1000)
-        this.individualSubscription.recurly.trialEndsAt = threeHoursLater
+        this.individualSubscription.recurlyStatus.trialEndsAt = threeHoursLater
         this.SubscriptionLocator.promises.getUsersSubscription
           .withArgs(this.user)
           .resolves(this.individualSubscription)

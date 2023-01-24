@@ -249,7 +249,7 @@ async function updateSubscriptionFromRecurly(
 
   subscription.recurlySubscription_id = recurlySubscription.uuid
   subscription.planCode = updatedPlanCode
-  subscription.recurly = {
+  subscription.recurlyStatus = {
     state: recurlySubscription.state,
     trialStartedAt: recurlySubscription.trial_started_at,
     trialEndsAt: recurlySubscription.trial_ends_at,
