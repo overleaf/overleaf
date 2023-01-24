@@ -361,4 +361,7 @@ module.exports = {
   getUpgradeFunctionForType,
   upgradeProject,
   convertLargeDocsToFile,
+  anyDocHistoryExists,
+  anyDocHistoryIndexExists,
+  doUpgradeForNoneWithConversion,
 }
