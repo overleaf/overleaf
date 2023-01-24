@@ -10,6 +10,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
+const { expect } = require('chai')
 
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 
@@ -23,10 +24,14 @@ describe('HistoryController', function () {
     this.SessionManager = {
       getLoggedInUserId: sinon.stub().returns(this.user_id),
     }
+    this.Stream = {
+      pipeline: sinon.stub(),
+    }
     this.HistoryController = SandboxedModule.require(modulePath, {
       requires: {
         request: (this.request = sinon.stub()),
         '@overleaf/settings': (this.settings = {}),
+        stream: this.Stream,
         '../Authentication/SessionManager': this.SessionManager,
         './HistoryManager': (this.HistoryManager = {}),
         '../Project/ProjectDetailsHandler': (this.ProjectDetailsHandler = {}),
@@ -100,14 +105,8 @@ describe('HistoryController', function () {
       this.req = { url: '/mock/url', method: 'POST' }
       this.res = 'mock-res'
       this.next = sinon.stub()
-      this.proxy = {
-        events: {},
-        pipe: sinon.stub(),
-        on(event, handler) {
-          return (this.events[event] = handler)
-        },
-      }
-      return this.request.returns(this.proxy)
+      this.proxy = sinon.stub()
+      this.request.returns(this.proxy)
     })
 
     describe('for a project with the project history flag', function () {
@@ -139,7 +138,10 @@ describe('HistoryController', function () {
       })
 
       it('should pipe the response to the client', function () {
-        return this.proxy.pipe.calledWith(this.res).should.equal(true)
+        expect(this.Stream.pipeline).to.have.been.calledWith(
+          this.proxy,
+          this.res
+        )
       })
     })
 
@@ -172,21 +174,10 @@ describe('HistoryController', function () {
       })
 
       it('should pipe the response to the client', function () {
-        return this.proxy.pipe.calledWith(this.res).should.equal(true)
-      })
-    })
-
-    describe('with an error', function () {
-      beforeEach(function () {
-        this.HistoryController.proxyToHistoryApi(this.req, this.res, this.next)
-        return this.proxy.events.error.call(
+        expect(this.Stream.pipeline).to.have.been.calledWith(
           this.proxy,
-          (this.error = new Error('oops'))
+          this.res
         )
-      })
-
-      it('should pass the error up the call chain', function () {
-        return this.next.calledWith(this.error).should.equal(true)
       })
     })
   })

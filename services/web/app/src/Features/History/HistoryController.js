@@ -53,10 +53,11 @@ module.exports = HistoryController = {
         'X-User-Id': userId,
       },
     })
-    getReq.pipe(res)
-    getReq.on('error', function (err) {
-      logger.warn({ url, err }, 'history API error')
-      next(err)
+    pipeline(getReq, res, function (err) {
+      if (err) {
+        logger.warn({ url, err }, 'history API error')
+        next(err)
+      }
     })
   },
 
@@ -350,10 +351,12 @@ module.exports = HistoryController = {
 
     if (!Features.hasFeature('saas')) {
       const getReq = request({ ...options, method: 'get' })
-      getReq.pipe(res)
-      getReq.on('error', function (err) {
-        logger.error({ url, err }, 'history API error')
-        next(err)
+
+      pipeline(getReq, res, function (err) {
+        if (err) {
+          logger.error({ url, err }, 'history API error')
+          next(err)
+        }
       })
       return
     }
