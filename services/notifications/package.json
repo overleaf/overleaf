@@ -24,7 +24,7 @@
     "async": "^3.2.2",
     "body-parser": "^1.19.0",
     "bunyan": "^1.8.15",
-    "express": "4.17.1",
+    "express": "^4.18.2",
     "method-override": "^3.0.0",
     "mongodb": "^4.11.0",
     "request": "^2.88.2"

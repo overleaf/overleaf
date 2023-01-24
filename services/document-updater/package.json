@@ -26,7 +26,7 @@
     "body-parser": "^1.19.0",
     "bunyan": "^1.8.15",
     "diff-match-patch": "https://github.com/overleaf/diff-match-patch/archive/89805f9c671a77a263fc53461acd62aa7498f688.tar.gz",
-    "express": "4.17.1",
+    "express": "^4.18.2",
     "lodash": "^4.17.21",
     "mongodb": "^4.11.0",
     "request": "^2.88.2",

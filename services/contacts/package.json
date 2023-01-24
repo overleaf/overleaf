@@ -23,7 +23,7 @@
     "async": "^3.2.2",
     "body-parser": "^1.19.0",
     "bunyan": "^1.8.15",
-    "express": "^4.17.1",
+    "express": "^4.18.2",
     "mongodb": "^4.12.1",
     "request": "~2.88.2",
     "underscore": "~1.13.1"
