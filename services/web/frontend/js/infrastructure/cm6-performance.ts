@@ -179,6 +179,31 @@ function calculateMax(numbers: number[]) {
   return numbers.reduce((a, b) => Math.max(a, b), 0)
 }
 
+function clearCM6Perf(type: string) {
+  switch (type) {
+    case 'measure':
+      performance.clearMeasures(TIMER_MEASURE_NAME)
+      performance.clearMarks(TIMER_START_NAME)
+      performance.clearMarks(TIMER_END_NAME)
+      break
+
+    case 'dom':
+      performance.clearMarks(TIMER_DOM_UPDATE_NAME)
+      break
+
+    case 'keypress':
+      performance.clearMeasures(TIMER_KEYPRESS_MEASURE_NAME)
+      break
+  }
+}
+
+// clear performance measures and marks when switching between Source and Rich Text
+window.addEventListener('editor:visual-switch', () => {
+  clearCM6Perf('measure')
+  clearCM6Perf('dom')
+  clearCM6Perf('keypress')
+})
+
 export function reportCM6Perf() {
   // Get entries triggered by keystrokes
   const cm6Entries = performance.getEntriesByName(
@@ -186,9 +211,7 @@ export function reportCM6Perf() {
     'measure'
   ) as PerformanceMeasure[]
 
-  performance.clearMeasures(TIMER_MEASURE_NAME)
-  performance.clearMarks(TIMER_START_NAME)
-  performance.clearMarks(TIMER_END_NAME)
+  clearCM6Perf('measure')
 
   const inputEvents = cm6Entries.filter(({ detail }) =>
     isInputOrDelete(detail.userEventType)
@@ -219,7 +242,7 @@ export function reportCM6Perf() {
     'mark'
   ) as PerformanceMark[]
 
-  performance.clearMarks(TIMER_DOM_UPDATE_NAME)
+  clearCM6Perf('dom')
 
   let lags = 0
   let nonLags = 0
@@ -257,7 +280,7 @@ export function reportCM6Perf() {
 
   const meanKeypressPaint = round(calculateMean(keypressPaintDurations), 2)
 
-  performance.clearMeasures(TIMER_KEYPRESS_MEASURE_NAME)
+  clearCM6Perf('keypress')
 
   let longTasks = null
 
