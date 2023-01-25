@@ -19,14 +19,11 @@ const MessageContent: FC<{ content: string }> = ({ content }) => {
 
       // MathJax v2 typesetting
       if (window.MathJax?.Hub) {
+        const { Hub } = window.MathJax
+
         const timeout = setTimeout(() => {
           configureMathJax()
-
-          window.MathJax.Hub.Queue([
-            'Typeset',
-            window.MathJax.Hub,
-            root.current,
-          ])
+          Hub.Queue(['Typeset', Hub, root.current])
         }, 0)
 
         return () => clearTimeout(timeout)
