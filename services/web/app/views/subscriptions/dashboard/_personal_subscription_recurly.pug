@@ -19,7 +19,7 @@ div(ng-controller="RecurlySubscriptionController")
 						| !{translate("additional_licenses", {additionalLicenses: personalSubscription.recurly.additionalLicenses, totalLicenses: personalSubscription.recurly.totalLicenses}, ['strong', 'strong'])}
 					| &nbsp;
 					a(href, ng-click="switchToChangePlanView()", ng-if="showChangePlanButton") !{translate("change_plan")}.
-				if (personalSubscription.pendingPlan)
+				if (personalSubscription.pendingPlan && personalSubscription.pendingPlan.name != personalSubscription.plan.name)
 					p #{translate("want_change_to_apply_before_plan_end")}
 				else if (personalSubscription.plan.groupPlan)
 					p !{translate("contact_support_to_change_group_subscription", {}, [{ name: "a", attrs: { href: "/contact"}}])}
