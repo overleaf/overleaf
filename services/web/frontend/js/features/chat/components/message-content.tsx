@@ -1,9 +1,9 @@
 import { useRef, useEffect, type FC } from 'react'
 // @ts-ignore
 import Linkify from 'react-linkify'
-import { loadMathJax } from '../../../../../modules/source-editor/frontend/js/utils/mathjax'
 import useIsMounted from '../../../shared/hooks/use-is-mounted'
 import { configureMathJax } from '../../mathjax/configure'
+import { loadMathJax } from '../../mathjax/load-mathjax'
 
 const MessageContent: FC<{ content: string }> = ({ content }) => {
   const root = useRef<HTMLDivElement | null>(null)
