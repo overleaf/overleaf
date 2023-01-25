@@ -87,7 +87,7 @@ function EditorSwitch() {
 
   return (
     <div className="editor-toggle-switch">
-      <Badge />
+      {showLegacySourceEditor ? <Badge /> : null}
 
       <fieldset className="toggle-switch">
         <legend className="sr-only">Editor mode.</legend>
