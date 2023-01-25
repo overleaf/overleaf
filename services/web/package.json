@@ -148,6 +148,7 @@
     "core-js": "^3.6.2",
     "crypto-js": "^3.1.9-1",
     "csurf": "^1.11.0",
+    "csv": "^6.2.5",
     "d3": "^3.5.16",
     "dateformat": "1.0.4-1.2.3",
     "daterangepicker": "https://github.com/overleaf/daterangepicker/archive/e496d2d44ca53e208c930e4cb4bcf29bcefa4550.tar.gz",
