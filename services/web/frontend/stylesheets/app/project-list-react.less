@@ -730,20 +730,22 @@
   left: 0;
   width: 15%;
 
-  .project-list-sidebar-survey-dismiss {
-    position: relative;
-    z-index: 1;
-    float: right;
+  .alert-info-alt {
+    font-size: @font-size-small;
+    margin-bottom: 0;
+
+    a {
+      text-decoration: none;
+    }
   }
 
   @media (max-width: @screen-xs-max) {
-    line-height: @mobile-action-element-height;
     position: static;
     display: block;
     margin-top: @margin-sm;
     width: initial;
 
-    .project-list-sidebar-survey {
+    .alert-info-alt {
       font-size: unset;
 
       &:before {
@@ -751,17 +753,12 @@
       }
 
       .project-list-sidebar-survey-link {
-        display: inline-flex;
+        display: block;
         align-items: center;
         min-width: @mobile-action-element-width;
         min-height: @mobile-action-element-height;
+        padding-top: @padding-md;
       }
-    }
-
-    .project-list-sidebar-survey-dismiss {
-      width: @mobile-action-element-width;
-      height: @mobile-action-element-height;
-      border: 0;
     }
   }
 }
