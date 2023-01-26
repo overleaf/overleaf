@@ -174,7 +174,7 @@
     "jose": "^4.3.8",
     "jquery": "^2.2.4",
     "json2csv": "^4.3.3",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "lodash": "^4.17.19",
     "lru-cache": "^7.10.1",
     "mailchimp-api-v3": "^1.12.0",
