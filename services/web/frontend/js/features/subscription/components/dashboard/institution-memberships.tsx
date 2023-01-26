@@ -1,5 +1,6 @@
 import { Trans } from 'react-i18next'
 import { Institution } from '../../../../../../types/institution'
+import PremiumFeaturesLink from './premium-features-link'
 
 type InstitutionMembershipsProps = {
   memberships?: Array<Institution>
@@ -43,6 +44,7 @@ function InstitutionMemberships({ memberships }: InstitutionMembershipsProps) {
             <hr />
           </div>
         ))}
+        {memberships.length > 0 && <PremiumFeaturesLink />}
       </div>
     </>
   )

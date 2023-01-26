@@ -28,18 +28,22 @@ function PremiumFeaturesLink() {
 
   if (featuresPageVariant === 'new') {
     return (
-      <Trans
-        i18nKey="get_most_subscription_by_checking_features"
-        components={[featuresPageLink]}
-      />
+      <p>
+        <Trans
+          i18nKey="get_most_subscription_by_checking_features"
+          components={[featuresPageLink]}
+        />
+      </p>
     )
   }
 
   return (
-    <Trans
-      i18nKey="get_most_subscription_by_checking_premium_features"
-      components={[featuresPageLink]}
-    />
+    <p>
+      <Trans
+        i18nKey="get_most_subscription_by_checking_premium_features"
+        components={[featuresPageLink]}
+      />
+    </p>
   )
 }
 

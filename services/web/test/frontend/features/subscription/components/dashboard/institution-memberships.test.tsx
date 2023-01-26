@@ -55,4 +55,11 @@ describe('<InstitutionMemberships />', function () {
       'Sorry, something went wrong. Subscription information related to institutional affiliations may not be displayed. Please try again later.'
     )
   })
+
+  it('renders the "Get the most out of your" subscription text when a user has a subscription', function () {
+    render(<InstitutionMemberships memberships={memberships} />)
+    screen.getByText('Get the most out of your', {
+      exact: false,
+    })
+  })
 })

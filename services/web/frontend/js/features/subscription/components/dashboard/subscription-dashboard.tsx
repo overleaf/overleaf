@@ -2,12 +2,15 @@ import { useTranslation } from 'react-i18next'
 import getMeta from '../../../../utils/meta'
 import InstitutionMemberships from './institution-memberships'
 import FreePlan from './free-plan'
-import PremiumFeaturesLink from './premium-features-link'
+import PersonalSubscription from './personal-subscription'
 
 function SubscriptionDashboard() {
   const { t } = useTranslation()
   const institutionMemberships = getMeta('ol-currentInstitutionsWithLicence')
-  const hasDisplayedSubscription = institutionMemberships?.length > 0
+  const subscription = getMeta('ol-subscription')
+
+  const hasDisplayedSubscription =
+    institutionMemberships?.length > 0 || subscription
 
   return (
     <div className="container">
@@ -19,7 +22,8 @@ function SubscriptionDashboard() {
             </div>
 
             <InstitutionMemberships memberships={institutionMemberships} />
-            {hasDisplayedSubscription ? <PremiumFeaturesLink /> : <FreePlan />}
+            <PersonalSubscription subscription={subscription} />
+            {!hasDisplayedSubscription && <FreePlan />}
           </div>
         </div>
       </div>

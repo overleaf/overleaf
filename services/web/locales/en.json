@@ -1137,6 +1137,7 @@
   "quoted_text_in": "Quoted text in",
   "raw_logs": "Raw logs",
   "raw_logs_description": "Raw logs from the LaTeX compiler",
+  "reactivate_subscription": "Reactivate your subscription",
   "read_only": "Read Only",
   "read_only_token": "Read-Only Token",
   "read_write_token": "Read-Write Token",
