@@ -230,7 +230,7 @@
     "recurly": "^4.0.0",
     "referer-parser": "0.0.3",
     "request": "^2.88.2",
-    "requestretry": "^6.0.0",
+    "requestretry": "^7.1.0",
     "rimraf": "2.2.6",
     "rolling-rate-limiter": "^0.2.10",
     "sanitize-html": "^1.27.1",

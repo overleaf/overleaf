@@ -42,7 +42,7 @@
     "overleaf-editor-core": "*",
     "redis": "~0.10.1",
     "request": "^2.88.2",
-    "requestretry": "^1.12.2"
+    "requestretry": "^7.1.0"
   },
   "devDependencies": {
     "chai": "^4.3.6",

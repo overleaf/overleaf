@@ -36,7 +36,7 @@
     "mongodb": "^3.6.0",
     "redis": "~0.10.1",
     "request": "~2.88.2",
-    "requestretry": "^4.1.0",
+    "requestretry": "^7.1.0",
     "s3-streams": "^0.4.0",
     "underscore": "~1.13.1",
     "yazl": "^2.5.1"
