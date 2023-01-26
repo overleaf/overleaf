@@ -38,7 +38,7 @@ const SubscriptionSchema = new Schema({
       },
     },
   },
-  recurly: {
+  recurlyStatus: {
     state: {
       type: String,
     },

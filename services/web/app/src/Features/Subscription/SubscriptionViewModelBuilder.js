@@ -193,6 +193,7 @@ function buildUsersSubscriptionViewModel(user, callback) {
       // Subscription DB object contains a recurly property, used to cache trial info
       // on the project-list. However, this can cause the wrong template to render,
       // if we do not have any subscription data from Recurly (recurlySubscription)
+      // TODO: Delete this workaround once recurly cache property name migration rolled out.
       if (personalSubscription) {
         delete personalSubscription.recurly
       }
@@ -354,7 +355,7 @@ async function getBestSubscription(user) {
     individualSubscription &&
     !individualSubscription.customAccount &&
     individualSubscription.recurlySubscription_id &&
-    !individualSubscription.recurly?.state
+    !individualSubscription.recurlyStatus?.state
   ) {
     const recurlySubscription = await RecurlyWrapper.promises.getSubscription(
       individualSubscription.recurlySubscription_id,
@@ -480,7 +481,7 @@ function _isPlanEqualOrBetter(planA, planB) {
 
 function _getRemainingTrialDays(subscription) {
   const now = new Date()
-  const trialEndDate = subscription.recurly?.trialEndsAt
+  const trialEndDate = subscription.recurlyStatus?.trialEndsAt
   return trialEndDate && trialEndDate > now
     ? Math.ceil(
         (trialEndDate.getTime() - now.getTime()) / (24 * 60 * 60 * 1000)
