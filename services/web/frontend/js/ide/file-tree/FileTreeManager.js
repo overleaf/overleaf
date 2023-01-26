@@ -293,10 +293,21 @@ export default FileTreeManager = class FileTreeManager {
   }
 
   getPreviewUrlByPath(path) {
-    const entity = this.findEntityByPath(path)
-    return entity
-      ? `/project/${this.$scope.project._id}/file/${entity.id}`
-      : null
+    for (const extension of [
+      '',
+      '.png',
+      '.jpg',
+      '.jpeg',
+      '.PNG',
+      '.JPG',
+      '.JPEG',
+    ]) {
+      const entity = this.findEntityByPath(path + extension)
+      if (entity) {
+        return `/project/${this.$scope.project._id}/file/${entity.id}`
+      }
+    }
+    return null
   }
 
   _findEntityByPathInFolder(folder, path) {
