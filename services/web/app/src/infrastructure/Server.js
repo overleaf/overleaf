@@ -272,6 +272,9 @@ webRouter.use(
     // Disabled because it's impractical to include every resource via CORS or
     // with the magic CORP header
     crossOriginEmbedderPolicy: false,
+    // We need to be able to share the context of some popups. For example,
+    // when Recurly opens Paypal in a popup.
+    crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
     // Disabled because it's not a security header and has possibly-unwanted
     // effects
     originAgentCluster: false,

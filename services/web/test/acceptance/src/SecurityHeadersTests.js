@@ -23,7 +23,7 @@ const assert_has_common_headers = function (response) {
     'x-download-options': 'noopen',
     'x-xss-protection': '0',
     'cross-origin-resource-policy': 'same-origin',
-    'cross-origin-opener-policy': 'same-origin',
+    'cross-origin-opener-policy': 'same-origin-allow-popups',
     'x-content-type-options': 'nosniff',
     'x-permitted-cross-domain-policies': 'none',
     'referrer-policy': 'origin-when-cross-origin',
