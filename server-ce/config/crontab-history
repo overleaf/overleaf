@@ -1,0 +1,3 @@
+*/20 * * * *  root  /overleaf/cron/project-history-periodic-flush.sh >> /var/log/sharelatex/cron-project-history-periodic-flush.log 2>&1
+30 * * * *    root  /overleaf/cron/project-history-retry-soft.sh >> /var/log/sharelatex/project-history-retry-soft.log 2>&1
+45 * * * *    root  /overleaf/cron/project-history-retry-hard.sh >> /var/log/sharelatex/project-history-retry-hard.log 2>&1

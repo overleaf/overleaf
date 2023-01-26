@@ -46,6 +46,11 @@ ADD server-ce/nginx/clsi-nginx.conf /etc/nginx/sites-enabled/clsi-nginx.conf
 ADD server-ce/logrotate/sharelatex /etc/logrotate.d/sharelatex
 RUN chmod 644 /etc/logrotate.d/sharelatex
 
+# Configure cron tasks
+# ----------------------
+ADD server-ce/cron /overleaf/cron
+ADD server-ce/config/crontab* /etc/cron.d
+
 
 # Copy Phusion Image startup scripts to its location
 # --------------------------------------------------
