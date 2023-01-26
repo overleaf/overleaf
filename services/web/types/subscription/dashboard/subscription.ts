@@ -7,7 +7,10 @@ type Plan = {
   annual?: boolean
   features: object
   hideFromUsers?: boolean
-  featureDescription: object[]
+  featureDescription?: object[]
+  groupPlan?: boolean
+  membersLimit?: number
+  membersLimitAddOn?: string
 }
 
 type SubscriptionState = 'active' | 'canceled' | 'expired'

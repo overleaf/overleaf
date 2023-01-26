@@ -11,10 +11,12 @@ import {
 describe('<PersonalSubscription />', function () {
   beforeEach(function () {
     window.metaAttributesCache = new Map()
+    window.recurly = {}
   })
 
   afterEach(function () {
     window.metaAttributesCache = new Map()
+    delete window.recurly
   })
 
   describe('no subscription', function () {
@@ -74,7 +76,10 @@ describe('<PersonalSubscription />', function () {
     })
 
     it('renders error message when an unknown subscription state', function () {
-      const withStateDeleted = Object.assign({}, annualActiveSubscription)
+      const withStateDeleted = Object.assign(
+        {},
+        JSON.parse(JSON.stringify(annualActiveSubscription))
+      )
       withStateDeleted.recurly.state = undefined
       render(
         <SubscriptionDashboardProvider>
@@ -103,6 +108,37 @@ describe('<PersonalSubscription />', function () {
         exact: false,
       })
       expect(invoiceLinks.length).to.equal(2)
+    })
+  })
+
+  describe('Recurly JS', function () {
+    const recurlyFailedToLoadText =
+      'Sorry, there was an error talking to our payment provider. Please try again in a few moments. If you are using any ad or script blocking extensions in your browser, you may need to temporarily disable them.'
+
+    it('shows an alert and hides "Change plan" option when Recurly did not load', function () {
+      delete window.recurly
+      render(
+        <SubscriptionDashboardProvider>
+          <PersonalSubscription subscription={annualActiveSubscription} />
+        </SubscriptionDashboardProvider>
+      )
+
+      screen.getByRole('alert')
+      screen.getByText(recurlyFailedToLoadText)
+
+      expect(screen.queryByText('Change plan')).to.be.null
+    })
+
+    it('should not show an alert and should show "Change plan" option when Recurly did load', function () {
+      render(
+        <SubscriptionDashboardProvider>
+          <PersonalSubscription subscription={annualActiveSubscription} />
+        </SubscriptionDashboardProvider>
+      )
+
+      expect(screen.queryByRole('alert')).to.be.null
+
+      screen.getByText('Change plan')
     })
   })
 })

@@ -31,5 +31,6 @@ declare global {
     _reportAcePerf: () => void
     MathJax: Record<string, any>
     overallThemes: OverallThemeMeta[]
+    recurly?: object
   }
 }

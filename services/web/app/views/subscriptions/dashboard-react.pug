@@ -3,6 +3,9 @@ extends ../layout-marketing
 block entrypointVar
 	- entrypoint = 'pages/user/subscription/dashboard'
 
+block head-scripts
+	script(type="text/javascript", nonce=scriptNonce, src="https://js.recurly.com/v4/recurly.js")
+
 block append meta
 	meta(name="ol-managedInstitutions", data-type="json", content=managedInstitutions)
 	meta(name="ol-planCodesChangingAtTermEnd", data-type="json", content=plans.planCodesChangingAtTermEnd)

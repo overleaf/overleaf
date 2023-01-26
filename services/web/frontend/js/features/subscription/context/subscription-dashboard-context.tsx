@@ -1,6 +1,10 @@
 import { createContext, ReactNode, useContext, useMemo, useState } from 'react'
 
 type SubscriptionDashboardContextValue = {
+  recurlyLoadError: boolean
+  setRecurlyLoadError: React.Dispatch<React.SetStateAction<boolean>>
+  showCancellation: boolean
+  setShowCancellation: React.Dispatch<React.SetStateAction<boolean>>
   showChangePersonalPlan: boolean
   setShowChangePersonalPlan: React.Dispatch<React.SetStateAction<boolean>>
 }
@@ -14,14 +18,27 @@ export function SubscriptionDashboardProvider({
 }: {
   children: ReactNode
 }) {
+  const [recurlyLoadError, setRecurlyLoadError] = useState(false)
+  const [showCancellation, setShowCancellation] = useState(false)
   const [showChangePersonalPlan, setShowChangePersonalPlan] = useState(false)
 
   const value = useMemo<SubscriptionDashboardContextValue>(
     () => ({
+      recurlyLoadError,
+      setRecurlyLoadError,
+      showCancellation,
+      setShowCancellation,
       showChangePersonalPlan,
       setShowChangePersonalPlan,
     }),
-    [showChangePersonalPlan, setShowChangePersonalPlan]
+    [
+      recurlyLoadError,
+      setRecurlyLoadError,
+      showCancellation,
+      setShowCancellation,
+      showChangePersonalPlan,
+      setShowChangePersonalPlan,
+    ]
   )
 
   return (
