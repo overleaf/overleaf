@@ -38,10 +38,14 @@ export async function fetchFromCompileDomain(url: string, init: RequestInit) {
   }
 }
 
-function withFallbackCompileDomain(url: string) {
+export function swapDomain(url: string, domain: string) {
   const u = new URL(url)
-  u.hostname = new URL(getMeta('ol-fallbackCompileDomain')).hostname
+  u.hostname = new URL(domain).hostname
   return u.href
+}
+
+function withFallbackCompileDomain(url: string) {
+  return swapDomain(url, getMeta('ol-fallbackCompileDomain'))
 }
 
 function recordFallbackUsage() {

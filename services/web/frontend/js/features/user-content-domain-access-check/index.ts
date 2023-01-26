@@ -204,12 +204,24 @@ export async function checkUserContentDomainAccess() {
       body: { failed, succeeded: cases.length - failed },
     })
   } catch (e) {}
+
+  return failed === 0
+}
+
+let accessCheckPassed = false
+
+export function userContentDomainAccessCheckPassed() {
+  return accessCheckPassed
 }
 
 export function scheduleUserContentDomainAccessCheck() {
   sleep(INITIAL_DELAY_MS).then(() => {
-    checkUserContentDomainAccess().catch(err => {
-      captureException(err)
-    })
+    checkUserContentDomainAccess()
+      .then(ok => {
+        accessCheckPassed = ok
+      })
+      .catch(err => {
+        captureException(err)
+      })
   })
 }

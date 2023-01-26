@@ -58,9 +58,21 @@ const getSplitTestOptions = callbackify(async function (req, res) {
       ? Settings.compilesUserContentDomain
       : Settings.pdfDownloadDomain
 
+  const { variant: hybridDomainVariant } =
+    await SplitTestHandler.promises.getAssignment(
+      editorReq,
+      res,
+      'pdf-download-domain-hybrid'
+    )
+  const enableHybridPdfDownload = hybridDomainVariant === 'enabled'
+
   if (!req.query.enable_pdf_caching) {
     // The frontend does not want to do pdf caching.
-    return { pdfDownloadDomain, enablePdfCaching: false }
+    return {
+      pdfDownloadDomain,
+      enableHybridPdfDownload,
+      enablePdfCaching: false,
+    }
   }
 
   // Double check with the latest split test assignment.
@@ -74,10 +86,19 @@ const getSplitTestOptions = callbackify(async function (req, res) {
   const enablePdfCaching = variant === 'enabled'
   if (!enablePdfCaching) {
     // Skip the lookup of the chunk size when caching is not enabled.
-    return { pdfDownloadDomain, enablePdfCaching: false }
+    return {
+      pdfDownloadDomain,
+      enableHybridPdfDownload,
+      enablePdfCaching: false,
+    }
   }
   const pdfCachingMinChunkSize = await getPdfCachingMinChunkSize(editorReq, res)
-  return { pdfDownloadDomain, enablePdfCaching, pdfCachingMinChunkSize }
+  return {
+    pdfDownloadDomain,
+    enableHybridPdfDownload,
+    enablePdfCaching,
+    pdfCachingMinChunkSize,
+  }
 })
 
 module.exports = CompileController = {
@@ -118,8 +139,12 @@ module.exports = CompileController = {
 
     getSplitTestOptions(req, res, (err, splitTestOptions) => {
       if (err) return next(err)
-      let { enablePdfCaching, pdfCachingMinChunkSize, pdfDownloadDomain } =
-        splitTestOptions
+      let {
+        enablePdfCaching,
+        pdfCachingMinChunkSize,
+        pdfDownloadDomain,
+        enableHybridPdfDownload,
+      } = splitTestOptions
       options.enablePdfCaching = enablePdfCaching
       if (enablePdfCaching) {
         options.pdfCachingMinChunkSize = pdfCachingMinChunkSize
@@ -186,6 +211,7 @@ module.exports = CompileController = {
             timings,
             pdfDownloadDomain,
             pdfCachingMinChunkSize,
+            enableHybridPdfDownload,
           })
         }
       )
