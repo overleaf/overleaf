@@ -3,8 +3,6 @@ import '../../../features/plans/group-plan-modal'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import getMeta from '../../../utils/meta'
 
-const PLANS_PAGE_LAYOUT_V2_ANNUAL = 'plans-page-layout-v2-annual'
-
 let currentView = 'monthly'
 let currentCurrencyCode = getMeta('ol-recommendedCurrency')
 
@@ -16,24 +14,28 @@ function selectView(view) {
       el.classList.remove('active')
     }
   })
+
   document.querySelectorAll('[data-ol-view]').forEach(el => {
     el.hidden = el.getAttribute('data-ol-view') !== view
   })
+
   updateAnnualSavingBanner(view)
   currentView = view
   updateLinkTargets()
 }
 
 function setUpViewSwitching(liEl) {
-  const plansPageV2SplitTestVariant =
-    getMeta('ol-splitTestVariants')?.[PLANS_PAGE_LAYOUT_V2_ANNUAL] ?? 'default'
+  const plansPageLayoutV3Variant =
+    getMeta('ol-splitTestVariants')?.['plans-page-layout-v3'] ?? 'default'
+
   const view = liEl.getAttribute('data-ol-view-tab')
+
   liEl.querySelector('button').addEventListener('click', function (e) {
     e.preventDefault()
     eventTracking.send('subscription-funnel', 'plans-page', `${view}-prices`)
     eventTracking.sendMB('plans-page-toggle', {
       button: view,
-      PLANS_PAGE_LAYOUT_V2_ANNUAL: plansPageV2SplitTestVariant,
+      'plans-page-layout-v3': plansPageLayoutV3Variant,
     })
     selectView(view)
   })
@@ -41,6 +43,7 @@ function setUpViewSwitching(liEl) {
 
 function setUpCurrencySwitching(linkEl) {
   const currencyCode = linkEl.getAttribute('data-ol-currencyCode-switch')
+
   linkEl.addEventListener('click', function (e) {
     e.preventDefault()
     document.querySelectorAll('[data-ol-currencyCode]').forEach(el => {
@@ -53,18 +56,22 @@ function setUpCurrencySwitching(linkEl) {
 }
 
 function setUpSubscriptionTracking(linkEl) {
-  const plansPageV2SplitTestVariant =
-    getMeta('ol-splitTestVariants')?.[PLANS_PAGE_LAYOUT_V2_ANNUAL] ?? 'default'
+  const plansPageLayoutV3Variant =
+    getMeta('ol-splitTestVariants')?.['plans-page-layout-v3'] ?? 'default'
+
   const plan =
     linkEl.getAttribute('data-ol-tracking-plan') ||
     linkEl.getAttribute('data-ol-start-new-subscription')
+
   const location = linkEl.getAttribute('data-ol-location')
   const period = linkEl.getAttribute('data-ol-item-view') || currentView
 
   const DEFAULT_EVENT_TRACKING_KEY = 'plans-page-click'
+
   const eventTrackingKey =
     linkEl.getAttribute('data-ol-event-tracking-key') ||
     DEFAULT_EVENT_TRACKING_KEY
+
   const eventTrackingSegmentation = {
     button: plan,
     location,
@@ -72,8 +79,7 @@ function setUpSubscriptionTracking(linkEl) {
   }
 
   if (eventTrackingKey === DEFAULT_EVENT_TRACKING_KEY) {
-    eventTrackingSegmentation[PLANS_PAGE_LAYOUT_V2_ANNUAL] =
-      plansPageV2SplitTestVariant
+    eventTrackingSegmentation['plans-page-layout-v3'] = plansPageLayoutV3Variant
   }
 
   linkEl.addEventListener('click', function () {
@@ -131,6 +137,23 @@ function updateAnnualSavingBanner(view) {
   }
 }
 
+function makeAnnualViewAsDefault() {
+  const plansPageLayoutV3Variant =
+    getMeta('ol-splitTestVariants')?.['plans-page-layout-v3'] ?? 'default'
+
+  // there are a handful of html elements that will switch between monthly and annual view
+  // with the `hidden` attribute.
+  // On the variant `old-plans-page-annual`, we want annual as the default.
+  // So, instead of changing the pugfiles directly, we change the default with this
+  if (plansPageLayoutV3Variant === 'old-plans-page-annual') {
+    document.querySelectorAll('[data-ol-view]').forEach(el => {
+      const view = el.getAttribute('data-ol-view')
+
+      el.hidden = view !== 'annual'
+    })
+  }
+}
+
 function selectViewFromHash() {
   try {
     const params = new URLSearchParams(window.location.hash.substring(1))
@@ -159,3 +182,6 @@ updateLinkTargets()
 
 selectViewFromHash()
 window.addEventListener('hashchange', selectViewFromHash)
+
+// only for `old-plans-page-annual` variant of the `plans-page-layout-v3` split test
+makeAnnualViewAsDefault()

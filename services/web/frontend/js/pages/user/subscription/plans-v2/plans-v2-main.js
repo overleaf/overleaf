@@ -19,7 +19,7 @@ import { updateLinkTargets } from '../plans'
 // There's some difference between the monthly and annual UI
 // and since monthly-annual switch is disabled for the group tab,
 // we need to introduce a new variable to store the information
-let currentMonthlyAnnualSwitchValue = 'monthly'
+let currentMonthlyAnnualSwitchValue = 'annual'
 
 function selectTab(viewTab) {
   document.querySelectorAll('[data-ol-plans-v2-view-tab]').forEach(el => {
@@ -105,6 +105,7 @@ function selectViewFromHash() {
     if (view) {
       // make sure the selected view is valid
       if (document.querySelector(`[data-ol-plans-v2-view-tab="${view}"]`)) {
+        // set annual as the default
         currentMonthlyAnnualSwitchValue = 'annual'
         selectTab(view)
         // clear the hash so it doesn't persist when switching plans
@@ -119,14 +120,14 @@ function selectViewFromHash() {
 document
   .querySelector('[data-ol-plans-v2-m-a-switch]')
   .addEventListener('click', () => {
-    const isAnnualPricing = document.querySelector(
+    const isMonthlyPricing = document.querySelector(
       '[data-ol-plans-v2-m-a-switch] input[type="checkbox"]'
     ).checked
 
-    if (isAnnualPricing) {
-      currentMonthlyAnnualSwitchValue = 'annual'
-    } else {
+    if (isMonthlyPricing) {
       currentMonthlyAnnualSwitchValue = 'monthly'
+    } else {
+      currentMonthlyAnnualSwitchValue = 'annual'
     }
 
     switchMonthlyAnnual(currentMonthlyAnnualSwitchValue)

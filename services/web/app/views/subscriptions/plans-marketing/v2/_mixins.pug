@@ -344,7 +344,7 @@ mixin group_plans_license_picker()
 				event-tracking-mb="true"
 				event-tracking-trigger="click"
 				event-tracking-element="select"
-				event-segmentation='{"plans-page-layout-v2-annual": "new-plans-page"}'
+				event-segmentation='{"plans-page-layout-v3": "new-plans-page"}'
 			)
 				option(value="2") 2
 				option(value="3") 3
@@ -364,7 +364,7 @@ mixin group_plans_license_picker()
 					event-tracking-mb="true"
 					event-tracking-trigger="click"
 					event-tracking-element="checkbox"
-					event-segmentation='{"plans-page-layout-v2-annual": "new-plans-page"}'
+					event-segmentation='{"plans-page-layout-v3": "new-plans-page"}'
 				)
 				span #{translate("apply_educational_discount")}
 			//- will only appear on screen width >= 768px (using CSS)
@@ -573,10 +573,21 @@ mixin table_sticky_header_all(plansV2Config)
 		+plans_v2_table_sticky_header(true, plansV2Config.student)
 
 mixin monthly_annual_switch(initialState, eventTracking, eventSegmentation)
-	- var monthlyAnnualToggleChecked = initialState === 'annual'
+	- var monthlyAnnualToggleChecked = initialState === 'monthly'
 	.row
 		.col-md-4.col-md-offset-4.text-centered.plans-v2-m-a-switch-container(data-ol-plans-v2-m-a-switch-container)
-			span.underline(data-ol-plans-v2-m-a-switch-text='monthly') #{translate("monthly")}
+			.plans-v2-m-a-switch-annual-text-container
+				span.underline(data-ol-plans-v2-m-a-switch-text='annual') #{translate("annual")}
+				.tooltip.in.left.plans-v2-m-a-tooltip(
+					role="tooltip"
+					data-ol-plans-v2-m-a-tooltip
+					class=monthlyAnnualToggleChecked ? 'plans-v2-m-a-tooltip-monthly-selected' : ''
+				)
+					.tooltip-arrow
+					.tooltip-inner
+						span(hidden=!monthlyAnnualToggleChecked data-ol-tooltip-period='monthly') #{translate("save_20_percent_by_paying_annually")}
+						span(hidden=monthlyAnnualToggleChecked data-ol-tooltip-period='annual') #{translate("saving_20_percent")}
+
 			label.plans-v2-m-a-switch(data-ol-plans-v2-m-a-switch)
 				input(
 					type="checkbox"
@@ -590,14 +601,4 @@ mixin monthly_annual_switch(initialState, eventTracking, eventSegmentation)
 					event-segmentation=eventSegmentation
 				)
 				span
-			.plans-v2-m-a-switch-annual-text-container
-				span(data-ol-plans-v2-m-a-switch-text='annual') #{translate("annual")}
-				.tooltip.in.right.plans-v2-m-a-tooltip(
-					role="tooltip"
-					data-ol-plans-v2-m-a-tooltip
-					class=monthlyAnnualToggleChecked ? 'plans-v2-m-a-tooltip-annual-selected' : ''
-				)
-					.tooltip-arrow
-					.tooltip-inner
-						span(hidden=monthlyAnnualToggleChecked data-ol-tooltip-period='monthly') #{translate("save_20_percent_by_paying_annually")}
-						span(hidden=!monthlyAnnualToggleChecked data-ol-tooltip-period='annual') #{translate("saving_20_percent")}
+			span(data-ol-plans-v2-m-a-switch-text='monthly') #{translate("monthly")}

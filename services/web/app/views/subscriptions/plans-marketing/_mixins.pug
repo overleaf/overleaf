@@ -217,11 +217,33 @@ mixin plan_switch(location)
 		li(data-ol-view-tab='student')
 			button.btn-default-outline #{translate("special_price_student")}
 
+mixin plan_switch_annual_default(location)
+	ul.nav.nav-pills(class=(location === 'card' ? "above-cards" : ""))
+		li.active(data-ol-view-tab='annual' class=(location === 'card' ? "annual-saving-tooltip-container" : ""))
+			button.btn-default-outline #{translate("annual")}
+			if (location === 'card')
+				.tooltip.in.bottom.annual-saving-tooltip.annual-selected.green-background(
+					role="tooltip"
+					data-ol-annual-saving-tooltip
+				)
+					.tooltip-arrow
+					.tooltip-inner
+						span(data-ol-view="annual") #{translate("saving_20_percent")}
+						span(hidden data-ol-view="monthly") #{translate("save_20_percent_by_paying_annually")}
+						span(hidden data-ol-view="student") #{translate("save_20_percent_by_paying_annually")}
+		li(data-ol-view-tab='monthly')
+			button.btn-default-outline #{translate("monthly")}
+		li(data-ol-view-tab='student')
+			button.btn-default-outline #{translate("special_price_student")}
+
 mixin allCardsAndControls(controlsRowSpaced, listLocation)
 	- var location = listLocation ? 'card_' + listLocation : 'card'
 	.row.top-switch(class=(controlsRowSpaced ? "row-spaced" : ""))
 		.col-md-6.col-md-offset-3
-			+plan_switch(location)
+			if (plansPageLayoutV3Variant === 'old-plans-page-annual')
+				+plan_switch_annual_default(location)
+			else
+				+plan_switch(location)
 		.col-md-2.text-right
 			+currency_dropdown
 

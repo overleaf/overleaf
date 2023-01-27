@@ -12,7 +12,7 @@ export function toggleMonthlyAnnualSwitching(
   containerEl.classList.toggle('disabled', view === 'group')
 
   checkbox.disabled = view === 'group'
-  checkbox.checked = currentMonthlyAnnualSwitchValue === 'annual'
+  checkbox.checked = currentMonthlyAnnualSwitchValue === 'monthly'
 
   switchMonthlyAnnual(currentMonthlyAnnualSwitchValue)
 }
@@ -20,8 +20,8 @@ export function toggleMonthlyAnnualSwitching(
 export function switchMonthlyAnnual(currentMonthlyAnnualSwitchValue) {
   const el = document.querySelector('[data-ol-plans-v2-m-a-tooltip]')
   el.classList.toggle(
-    'plans-v2-m-a-tooltip-annual-selected',
-    currentMonthlyAnnualSwitchValue === 'annual'
+    'plans-v2-m-a-tooltip-monthly-selected',
+    currentMonthlyAnnualSwitchValue === 'monthly'
   )
 
   document.querySelectorAll('[data-ol-tooltip-period]').forEach(el => {
@@ -51,7 +51,7 @@ function changeMonthlyAnnualTooltipPosition() {
   const el = document.querySelector('[data-ol-plans-v2-m-a-tooltip]')
 
   el.classList.toggle('bottom', smallScreen)
-  el.classList.toggle('right', !smallScreen)
+  el.classList.toggle('left', !smallScreen)
 }
 
 // click event listener for monthly-annual switch

@@ -118,6 +118,7 @@
         white-space: unset;
         padding: 4px 8px;
         font-size: 14px;
+        width: 100%;
       }
     }
   }
@@ -183,6 +184,10 @@ button.plans-v2-btn-header {
   }
 
   input + span {
+    background-color: @ol-green;
+  }
+
+  input:checked + span {
     background-color: @ol-blue-gray-4;
   }
 
@@ -225,17 +230,17 @@ button.plans-v2-btn-header {
   width: auto;
   padding: @padding-xs @padding-sm;
   border-radius: 4px;
-  left: 100%;
+  right: 110%;
   top: 0;
   z-index: 0;
 
-  &.plans-v2-m-a-tooltip-annual-selected {
+  &.tooltip.in.left {
     .tooltip-inner {
       background-color: @ol-green;
     }
 
     .tooltip-arrow {
-      border-right-color: @ol-green;
+      border-left-color: @ol-green;
     }
   }
 
@@ -244,20 +249,22 @@ button.plans-v2-btn-header {
   }
 
   @media (max-width: @screen-xs-max) {
-    left: -121%;
+    right: -31%;
     top: unset;
 
-    &.plans-v2-m-a-tooltip-annual-selected {
-      left: -33%;
-
+    &.tooltip.in.bottom {
       .tooltip-inner {
         background-color: @ol-green;
       }
 
       .tooltip-arrow {
-        border-right-color: unset;
+        border-left-color: unset;
         border-bottom-color: @ol-green;
       }
+    }
+
+    &.plans-v2-m-a-tooltip-monthly-selected {
+      right: -119%;
     }
 
     span {

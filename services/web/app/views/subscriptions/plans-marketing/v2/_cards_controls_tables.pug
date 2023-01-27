@@ -8,7 +8,7 @@ include ./_mixins
 				event-tracking="plans-page-toggle-plan"
 				event-tracking-mb="true"
 				event-tracking-trigger="click"
-				event-segmentation='{"button": "individual", "plans-page-layout-v2-annual": "new-plans-page"}'
+				event-segmentation='{"button": "individual", "plans-page-layout-v3": "new-plans-page"}'
 			)
 				button.btn.btn-default-outline #{translate("indvidual_plans")}
 			li.plans-v2-top-switch-group(
@@ -16,7 +16,7 @@ include ./_mixins
 				event-tracking="plans-page-toggle-plan"
 				event-tracking-mb="true"
 				event-tracking-trigger="click"
-				event-segmentation='{"button": "group", "plans-page-layout-v2-annual": "new-plans-page"}'
+				event-segmentation='{"button": "group", "plans-page-layout-v3": "new-plans-page"}'
 			)
 				button.btn.btn-default-outline(
 					href="#"
@@ -28,13 +28,13 @@ include ./_mixins
 				event-tracking="plans-page-toggle-plan"
 				event-tracking-mb="true"
 				event-tracking-trigger="click"
-				event-segmentation='{"button": "student", "plans-page-layout-v2-annual": "new-plans-page"}'
+				event-segmentation='{"button": "student", "plans-page-layout-v3": "new-plans-page"}'
 			)
 				button.btn.btn-default-outline(
 					href="#"
 				) #{translate("student_plans")}
 
-+monthly_annual_switch("annual", "plans-page-toggle-period", '{"plans-page-layout-v2-annual": "new-plans-page"}')
++monthly_annual_switch("annual", "plans-page-toggle-period", '{"plans-page-layout-v3": "new-plans-page"}')
 
 .row(hidden data-ol-plans-v2-license-picker-container)
 	.col-sm-12
