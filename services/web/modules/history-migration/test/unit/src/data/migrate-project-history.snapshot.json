@@ -1,0 +1,50 @@
+[
+  [
+    "ProjectHistory:Ops:{611bd20c5d76a3c1bd0c7c13}",
+    "{\"file\":\"60f6e92c6c14d84fb7a71ae1\",\"pathname\":\"/_deleted/60f6e92c6c14d84fb7a71ae1/testing.tex\",\"meta\":{\"user_id\":null,\"ts\":\"2021-07-20T15:18:04.000Z\",\"origin\":{\"kind\":\"history-migration\"}},\"projectHistoryId\":123,\"url\":\"http://filestore.test/611bd20c5d76a3c1bd0c7c13/60f6e92c6c14d84fb7a71ae1\"}"
+  ],
+  [
+    "ProjectHistory:Ops:{611bd20c5d76a3c1bd0c7c13}",
+    "{\"file\":\"60f6e92c6c14d84fb7a71ae1\",\"pathname\":\"/_deleted/60f6e92c6c14d84fb7a71ae1/testing.tex\",\"new_pathname\":\"\",\"meta\":{\"user_id\":null,\"ts\":\"2021-02-01T00:00:00.000Z\",\"origin\":{\"kind\":\"history-migration\"}},\"projectHistoryId\":123}"
+  ],
+  [
+    "ProjectHistory:Ops:{611bd20c5d76a3c1bd0c7c13}",
+    "{\"doc\":\"611bd20c5d76a3c1bd0c7c15\",\"pathname\":\"/main.tex\",\"meta\":{\"user_id\":null,\"ts\":\"2021-08-17T15:13:16.000Z\",\"origin\":{\"kind\":\"history-migration\"}},\"projectHistoryId\":123,\"docLines\":\"\\\\documentclass{article}\\n\\\\usepackage[utf8]{inputenc}\\n\\n\\\\title{My Test Project}\\n\\\\author{alf.eaton+dev }\\n\\\\date{7 2021}\\n\\n\\\\usepackage{natbib}\\n\\\\usepackage{graphicx}\\n\\n\\\\begin{document}\\n\\n\\\\maketitle\\n\\n\\\\section{Introduction}\\nThere is a theory which states that if ever anyone discovers exactly what the Universe is for and why it is here, it will instantly disappear and be replaced by something even more bizarre and inexplicable.\\nThere is another theory which states that this has already happened.\\n\\n\\\\begin{figure}[h!]\\n\\\\centering\\n\\\\includegraphics[scale=1.7]{universe}\\n\\\\caption{The Universe}\\n\\\\label{fig:universe}\\n\\\\end{figure}\\n\\n\\\\section{Conclusion}\\n``I always thought something was fundamentally wrong with the universe'' \\\\citep{adams1995hitchhiker}\\n\\n\\\\bibliographystyle{plain}\\n\\\\bibliography{references}\\n\\\\end{document}\\n\"}"
+  ],
+  [
+    "ProjectHistory:Ops:{611bd20c5d76a3c1bd0c7c13}",
+    "{\"doc\":\"611bd20c5d76a3c1bd0c7c17\",\"pathname\":\"/references.bib\",\"meta\":{\"user_id\":null,\"ts\":\"2021-08-17T15:13:16.000Z\",\"origin\":{\"kind\":\"history-migration\"}},\"projectHistoryId\":123,\"docLines\":\"this is the contents of references.bib\"}"
+  ],
+  [
+    "ProjectHistory:Ops:{611bd20c5d76a3c1bd0c7c13}",
+    "{\"file\":\"611bd20c5d76a3c1bd0c7c19\",\"pathname\":\"/universe.jpg\",\"meta\":{\"user_id\":null,\"ts\":\"2021-08-17T15:13:16.000Z\",\"origin\":{\"kind\":\"history-migration\"}},\"projectHistoryId\":123,\"url\":\"http://filestore.test/611bd20c5d76a3c1bd0c7c13/611bd20c5d76a3c1bd0c7c19\"}"
+  ],
+  [
+    "ProjectHistory:Ops:{611bd20c5d76a3c1bd0c7c13}",
+    "{\"doc\":\"611bd20c5d76a3c1bd0c7c15\",\"op\":[{\"p\":487,\"i\":\"\\n\\nAdding some text here.\"}],\"v\":1,\"lastV\":0,\"meta\":{\"user_id\":\"611572e24bff88527f61dccd\",\"ts\":1629213228148,\"pathname\":\"/main.tex\",\"doc_length\":805,\"origin\":{\"kind\":\"history-migration\"}},\"projectHistoryId\":123}"
+  ],
+  [
+    "ProjectHistory:Ops:{611bd20c5d76a3c1bd0c7c13}",
+    "{\"doc\":\"611bd20c5d76a3c1bd0c7c15\",\"op\":[{\"p\":678,\"d\":\" something\"}],\"v\":2,\"lastV\":1,\"meta\":{\"user_id\":\"611572e24bff88527f61dccd\",\"ts\":1629213235181,\"pathname\":\"/main.tex\",\"doc_length\":829,\"origin\":{\"kind\":\"history-migration\"}},\"projectHistoryId\":123}"
+  ],
+  [
+    "ProjectHistory:Ops:{611bd20c5d76a3c1bd0c7c13}",
+    "{\"doc\":\"611bd20c5d76a3c1bd0c7c15\",\"op\":[{\"d\":\" \",\"p\":722},{\"i\":\"\\n\",\"p\":722}],\"v\":3,\"lastV\":2,\"meta\":{\"user_id\":\"611572e24bff88527f61dccd\",\"ts\":1629213239472,\"pathname\":\"/main.tex\",\"doc_length\":819,\"origin\":{\"kind\":\"history-migration\"}},\"projectHistoryId\":123}"
+  ],
+  [
+    "ProjectHistory:Ops:{611bd20c5d76a3c1bd0c7c13}",
+    "{\"doc\":\"611bd20c5d76a3c1bd0c7c15\",\"op\":[{\"p\":750,\"i\":\"\\n\\nAdding some text after deleting some text.\"}],\"v\":7,\"lastV\":6,\"meta\":{\"user_id\":\"611572e24bff88527f61dccd\",\"ts\":1629213241498,\"pathname\":\"/main.tex\",\"doc_length\":819,\"origin\":{\"kind\":\"history-migration\"}},\"projectHistoryId\":123}"
+  ],
+  [
+    "ProjectHistory:Ops:{611bd20c5d76a3c1bd0c7c13}",
+    "{\"doc\":\"611bd24ee64281c13303d6b9\",\"pathname\":\"/a folder/a subfolder/a renamed file in a subfolder.tex\",\"meta\":{\"user_id\":null,\"ts\":\"2021-08-17T15:14:22.000Z\",\"origin\":{\"kind\":\"history-migration\"}},\"projectHistoryId\":123,\"docLines\":\"\"}"
+  ],
+  [
+    "ProjectHistory:Ops:{611bd20c5d76a3c1bd0c7c13}",
+    "{\"doc\":\"611bd24ee64281c13303d6b9\",\"op\":[{\"p\":0,\"i\":\"Adding some content to the file in the subfolder.\"}],\"v\":2,\"lastV\":1,\"meta\":{\"user_id\":\"611572e24bff88527f61dccd\",\"ts\":1629213266076,\"pathname\":\"/a folder/a subfolder/a renamed file in a subfolder.tex\",\"doc_length\":0,\"origin\":{\"kind\":\"history-migration\"}},\"projectHistoryId\":123}"
+  ],
+  [
+    "ProjectHistory:Ops:{611bd20c5d76a3c1bd0c7c13}",
+    "{\"file\":\"611bd2bce64281c13303d6bb\",\"pathname\":\"/images/overleaf-white.svg\",\"meta\":{\"user_id\":null,\"ts\":\"2021-08-17T15:16:12.000Z\",\"origin\":{\"kind\":\"history-migration\"}},\"projectHistoryId\":123,\"url\":\"http://filestore.test/611bd20c5d76a3c1bd0c7c13/611bd2bce64281c13303d6bb\"}"
+  ]
+]

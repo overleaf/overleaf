@@ -20,7 +20,7 @@ const { ReadPreference, ObjectId } = require('mongodb')
 const { db, waitForDb } = require('../../app/src/infrastructure/mongodb')
 const { promiseMapWithLimit } = require('../../app/src/util/promises')
 const { batchedUpdate } = require('../helpers/batchedUpdate')
-const ProjectHistoryController = require('../../modules/admin-panel/app/src/ProjectHistoryController')
+const ProjectHistoryController = require('../../modules/history-migration/app/src/ProjectHistoryController')
 
 console.log({
   DRY_RUN,

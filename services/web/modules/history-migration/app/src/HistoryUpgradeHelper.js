@@ -4,7 +4,7 @@ const Settings = require('@overleaf/settings')
 
 const ProjectHistoryHandler = require('../../../../app/src/Features/Project/ProjectHistoryHandler')
 const HistoryManager = require('../../../../app/src/Features/History/HistoryManager')
-const ProjectHistoryController = require('../../../admin-panel/app/src/ProjectHistoryController')
+const ProjectHistoryController = require('./ProjectHistoryController')
 const ProjectEntityHandler = require('../../../../app/src/Features/Project/ProjectEntityHandler')
 const ProjectEntityUpdateHandler = require('../../../../app/src/Features/Project/ProjectEntityUpdateHandler')
 

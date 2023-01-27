@@ -5,6 +5,7 @@ const {
   countProjects,
   countDocHistory,
   upgradeProject,
+  findProjects,
 } = require('../../modules/history-migration/app/src/HistoryUpgradeHelper')
 const { waitForDb } = require('../../app/src/infrastructure/mongodb')
 const minimist = require('minimist')
@@ -50,7 +51,7 @@ async function findProjectsToMigrate() {
   }
 
   // Get a list of projects to migrate
-  const projectsToMigrate = findProjectsToMigrate(
+  const projectsToMigrate = await findProjects(
     { 'overleaf.history.display': { $ne: true } },
     { _id: 1, overleaf: 1 }
   )
@@ -108,6 +109,7 @@ async function main() {
     process.exit(0)
   }
   await migrateProjects(projectsToMigrate)
+  console.log('Done.')
 }
 
 waitForDb()
