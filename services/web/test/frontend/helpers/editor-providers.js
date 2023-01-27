@@ -52,6 +52,7 @@ export function EditorProviders({
     findEntityByPath: () => null,
     getEntityPath: () => '',
     getRootDocDirname: () => '',
+    getPreviewUrlByPath: path => path,
   },
   editorManager = {
     getCurrentDocId: () => 'foo',
