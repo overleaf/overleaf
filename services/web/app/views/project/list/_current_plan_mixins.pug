@@ -108,9 +108,5 @@ mixin free_plan()
 		|  
 	a.btn.btn-primary(
 		href="/user/subscription/plans?itm_referrer=project-dashboard-upgrade-prompt"
-		event-tracking="upgrade-button-click"
-		event-tracking-mb="true"
-		event-tracking-label="upgrade"
-		event-tracking-trigger="click"
-		event-segmentation='{"source": "dashboard-top", "project-dashboard-react": "default", "is-dashboard-sidebar-hidden": "false"}'
+		ng-click="sendUpgradeButtonClickEvent()"
 	) Upgrade

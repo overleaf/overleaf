@@ -18,6 +18,7 @@ function FreePlan({ featuresPageURL }: FreePlanProps) {
       source: 'dashboard-top',
       'project-dashboard-react': 'enabled',
       'is-dashboard-sidebar-hidden': false,
+      'is-screen-width-less-than-768px': false,
     })
   }
 

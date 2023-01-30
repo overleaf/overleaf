@@ -821,6 +821,16 @@ App.controller(
     $scope.downloadSelectedProjects = () =>
       $scope.downloadProjectsById($scope.getSelectedProjectIds())
 
+    $scope.sendUpgradeButtonClickEvent = () => {
+      eventTracking.sendMB('upgrade-button-click', {
+        source: 'dashboard-top',
+        'project-dashboard-react': 'default',
+        'is-dashboard-sidebar-hidden': false,
+        'is-screen-width-less-than-768px':
+          window.matchMedia('(max-width: 767px)').matches,
+      })
+    }
+
     $scope.downloadProjectsById = function (projectIds) {
       let path
       eventTracking.send(

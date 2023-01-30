@@ -17,7 +17,7 @@ nav.navbar.navbar-default.navbar-main
 					event-tracking-mb="true"
 					event-tracking-label="upgrade"
 					event-tracking-trigger="click"
-					event-segmentation='{"source": "dashboard-top", "project-dashboard-react": "enabled", "is-dashboard-sidebar-hidden": "true"}'
+					event-segmentation='{"source": "dashboard-top", "project-dashboard-react": "enabled", "is-dashboard-sidebar-hidden": "true", "is-screen-width-less-than-768px": "true"}'
 				) #{translate("upgrade")}
 			if settings.nav.custom_logo
 				a(href='/', aria-label=settings.appName, style='background-image:url("'+settings.nav.custom_logo+'")').navbar-brand
