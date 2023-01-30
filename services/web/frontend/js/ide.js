@@ -481,9 +481,7 @@ If the project has been renamed please look in your project list for a new proje
 )
 
 cleanupServiceWorker()
-if (isSplitTestEnabled('user-content-domain-access-check')) {
-  scheduleUserContentDomainAccessCheck()
-}
+scheduleUserContentDomainAccessCheck()
 
 angular.module('SharelatexApp').config(function ($provide) {
   $provide.decorator('$browser', [

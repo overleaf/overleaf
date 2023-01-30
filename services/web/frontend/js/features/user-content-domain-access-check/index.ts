@@ -10,6 +10,7 @@ import { captureException } from '../../infrastructure/error-reporter'
 import { postJSON } from '../../infrastructure/fetch-json'
 import isSplitTestEnabled from '../../utils/isSplitTestEnabled'
 
+const MAX_CHECKS_PER_PAGE_LOAD = 3
 const INITIAL_DELAY_MS = 30_000
 const DELAY_BETWEEN_PROBES_MS = 1_000
 const TIMEOUT_MS = 30_000
@@ -180,12 +181,18 @@ export async function checkUserContentDomainAccess() {
   }
 
   let failed = 0
+  const epochBeforeCheck = networkEpoch
   for (const { url, init, estimatedSize, hash, chunks } of cases) {
     await sleep(DELAY_BETWEEN_PROBES_MS)
 
     try {
       await singleCheck(url, init, estimatedSize, hash, chunks)
     } catch (err: any) {
+      if (!navigator.onLine || epochBeforeCheck !== networkEpoch) {
+        // It is very likely that the request failed because we are offline or
+        //  the network connection changed just now.
+        return false
+      }
       failed++
       OError.tag(err, 'user-content-domain-access-check failed', {
         url,
@@ -214,8 +221,45 @@ export function userContentDomainAccessCheckPassed() {
   return accessCheckPassed
 }
 
+let networkEpoch = performance.now()
+window.addEventListener('offline', () => {
+  // We are offline. Abort any scheduled check.
+  clearTimeout(lastScheduledCheck)
+  accessCheckPassed = false
+  networkEpoch = performance.now()
+})
+window.addEventListener('online', () => {
+  // We are online again. Schedule another check for this network.
+  accessCheckPassed = false
+  networkEpoch = performance.now()
+  scheduleUserContentDomainAccessCheck()
+})
+try {
+  // Note: navigator.connection is not available on Firefox and Safari.
+  // Docs: https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation
+  navigator.connection.addEventListener('change', () => {
+    // The network changed. Schedule another check for it.
+    accessCheckPassed = false
+    networkEpoch = performance.now()
+    scheduleUserContentDomainAccessCheck()
+  })
+} catch (e) {}
+
+let lastScheduledCheck: number
+let remainingChecks = MAX_CHECKS_PER_PAGE_LOAD
 export function scheduleUserContentDomainAccessCheck() {
-  sleep(INITIAL_DELAY_MS).then(() => {
+  if (!isSplitTestEnabled('user-content-domain-access-check')) return
+  clearTimeout(lastScheduledCheck)
+  const networkEpochBeforeDelay = networkEpoch
+  lastScheduledCheck = window.setTimeout(() => {
+    if (!window.navigator.onLine || networkEpochBeforeDelay !== networkEpoch) {
+      // Must be online for more than INITIAL_DELAY_MS before we check.
+      // We want to avoid false-positives from flaky network connections.
+      // Try again in INITIAL_DELAY_MS.
+      return scheduleUserContentDomainAccessCheck()
+    }
+    if (accessCheckPassed) return
+    if (remainingChecks-- <= 0) return
     checkUserContentDomainAccess()
       .then(ok => {
         accessCheckPassed = ok
@@ -223,5 +267,5 @@ export function scheduleUserContentDomainAccessCheck() {
       .catch(err => {
         captureException(err)
       })
-  })
+  }, INITIAL_DELAY_MS)
 }
