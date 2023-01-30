@@ -1,29 +1,36 @@
 const EditorHttpController = require('./EditorHttpController')
 const AuthenticationController = require('../Authentication/AuthenticationController')
 const AuthorizationMiddleware = require('../Authorization/AuthorizationMiddleware')
+const { RateLimiter } = require('../../infrastructure/RateLimiter')
 const RateLimiterMiddleware = require('../Security/RateLimiterMiddleware')
+
+const rateLimiters = {
+  addDocToProject: new RateLimiter('add-doc-to-project', {
+    points: 30,
+    duration: 60,
+  }),
+  addFolderToProject: new RateLimiter('add-folder-to-project', {
+    points: 60,
+    duration: 60,
+  }),
+  joinProject: new RateLimiter('join-project', { points: 45, duration: 60 }),
+}
 
 module.exports = {
   apply(webRouter, privateApiRouter) {
     webRouter.post(
       '/project/:Project_id/doc',
       AuthorizationMiddleware.ensureUserCanWriteProjectContent,
-      RateLimiterMiddleware.rateLimit({
-        endpointName: 'add-doc-to-project',
+      RateLimiterMiddleware.rateLimit(rateLimiters.addDocToProject, {
         params: ['Project_id'],
-        maxRequests: 30,
-        timeInterval: 60,
       }),
       EditorHttpController.addDoc
     )
     webRouter.post(
       '/project/:Project_id/folder',
       AuthorizationMiddleware.ensureUserCanWriteProjectContent,
-      RateLimiterMiddleware.rateLimit({
-        endpointName: 'add-folder-to-project',
+      RateLimiterMiddleware.rateLimit(rateLimiters.addFolderToProject, {
         params: ['Project_id'],
-        maxRequests: 60,
-        timeInterval: 60,
       }),
       EditorHttpController.addFolder
     )
@@ -61,11 +68,8 @@ module.exports = {
     privateApiRouter.post(
       '/project/:Project_id/join',
       AuthenticationController.requirePrivateApiAuth(),
-      RateLimiterMiddleware.rateLimit({
-        endpointName: 'join-project',
+      RateLimiterMiddleware.rateLimit(rateLimiters.joinProject, {
         params: ['Project_id'],
-        maxRequests: 45,
-        timeInterval: 60,
       }),
       EditorHttpController.joinProject
     )

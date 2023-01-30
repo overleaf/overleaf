@@ -1,28 +1,37 @@
 const AuthenticationController = require('./../Authentication/AuthenticationController')
 const AnalyticsController = require('./AnalyticsController')
 const AnalyticsProxy = require('./AnalyticsProxy')
-const RateLimiterMiddleware = require('./../Security/RateLimiterMiddleware')
+const { RateLimiter } = require('../../infrastructure/RateLimiter')
+const RateLimiterMiddleware = require('../Security/RateLimiterMiddleware')
 const { expressify } = require('../../util/promises')
+
+const rateLimiters = {
+  recordEvent: new RateLimiter('analytics-record-event', {
+    points: 200,
+    duration: 60,
+  }),
+  updateEditingSession: new RateLimiter('analytics-update-editing-session', {
+    points: 20,
+    duration: 60,
+  }),
+  uniExternalCollabProxy: new RateLimiter(
+    'analytics-uni-external-collab-proxy',
+    { points: 20, duration: 60 }
+  ),
+}
 
 module.exports = {
   apply(webRouter, privateApiRouter, publicApiRouter) {
     webRouter.post(
       '/event/:event([a-z0-9-_]+)',
-      RateLimiterMiddleware.rateLimit({
-        endpointName: 'analytics-record-event',
-        maxRequests: 200,
-        timeInterval: 60,
-      }),
+      RateLimiterMiddleware.rateLimit(rateLimiters.recordEvent),
       AnalyticsController.recordEvent
     )
 
     webRouter.put(
       '/editingSession/:projectId',
-      RateLimiterMiddleware.rateLimit({
-        endpointName: 'analytics-update-editing-session',
+      RateLimiterMiddleware.rateLimit(rateLimiters.updateEditingSession, {
         params: ['projectId'],
-        maxRequests: 20,
-        timeInterval: 60,
       }),
       expressify(AnalyticsController.updateEditingSession)
     )
@@ -30,11 +39,7 @@ module.exports = {
     publicApiRouter.use(
       '/analytics/uniExternalCollaboration',
       AuthenticationController.requirePrivateApiAuth(),
-      RateLimiterMiddleware.rateLimit({
-        endpointName: 'analytics-uni-external-collab-proxy',
-        maxRequests: 20,
-        timeInterval: 60,
-      }),
+      RateLimiterMiddleware.rateLimit(rateLimiters.uniExternalCollabProxy),
       AnalyticsProxy.call('/uniExternalCollaboration')
     )
   },

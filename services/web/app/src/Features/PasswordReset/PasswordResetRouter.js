@@ -1,16 +1,19 @@
 const PasswordResetController = require('./PasswordResetController')
 const AuthenticationController = require('../Authentication/AuthenticationController')
 const CaptchaMiddleware = require('../../Features/Captcha/CaptchaMiddleware')
+const { RateLimiter } = require('../../infrastructure/RateLimiter')
 const RateLimiterMiddleware = require('../Security/RateLimiterMiddleware')
 const { Joi, validate } = require('../../infrastructure/Validation')
 
+const rateLimiter = new RateLimiter('password_reset_rate_limit', {
+  points: 6,
+  duration: 60,
+})
+
 module.exports = {
   apply(webRouter) {
-    const rateLimit = RateLimiterMiddleware.rateLimit({
-      endpointName: 'password_reset_rate_limit',
+    const rateLimit = RateLimiterMiddleware.rateLimit(rateLimiter, {
       ipOnly: true,
-      maxRequests: 6,
-      timeInterval: 60,
     })
 
     webRouter.get(
@@ -69,4 +72,6 @@ module.exports = {
       PasswordResetController.requestReset
     )
   },
+
+  rateLimiter,
 }

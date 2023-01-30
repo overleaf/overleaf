@@ -232,7 +232,6 @@
     "request": "^2.88.2",
     "requestretry": "^7.1.0",
     "rimraf": "2.2.6",
-    "rolling-rate-limiter": "^0.2.10",
     "sanitize-html": "^1.27.1",
     "scroll-into-view-if-needed": "^2.2.25",
     "tsscmp": "^1.0.6",

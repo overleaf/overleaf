@@ -1,14 +1,11 @@
 const { expect } = require('chai')
-const RateLimiter = require('../../../app/src/infrastructure/RateLimiter')
+const PasswordResetRouter = require('../../../app/src/Features/PasswordReset/PasswordResetRouter')
 const UserHelper = require('./helpers/UserHelper')
 
 describe('PasswordUpdate', function () {
   let email, password, response, user, userHelper
   afterEach(async function () {
-    await RateLimiter.promises.clearRateLimit(
-      'password_reset_rate_limit',
-      '127.0.0.1'
-    )
+    await PasswordResetRouter.rateLimiter.delete('127.0.0.1')
   })
   beforeEach(async function () {
     userHelper = new UserHelper()

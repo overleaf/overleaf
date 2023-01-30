@@ -1,17 +1,3 @@
-/* eslint-disable
-    camelcase,
-    n/handle-callback-err,
-    max-len,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 let CollaboratorsInviteController
 const OError = require('@overleaf/o-error')
 const ProjectGetter = require('../Project/ProjectGetter')
@@ -25,73 +11,84 @@ const EmailHelper = require('../Helpers/EmailHelper')
 const EditorRealTimeController = require('../Editor/EditorRealTimeController')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const SessionManager = require('../Authentication/SessionManager')
-const rateLimiter = require('../../infrastructure/RateLimiter')
+const { RateLimiter } = require('../../infrastructure/RateLimiter')
+
+// This rate limiter allows a different number of requests depending on the
+// number of callaborators a user is allowed. This is implemented by providing
+// a number of points (P) and consuming c = floor(P / maxRequests) on each
+// request. We'd like (maxRequests + 1) requests to trigger the rate limit, so
+// one constrait that we have is that c * (maxRequests + 1) > P. This is
+// achieved if P = M^2 where M is the largest value possible for maxRequests.
+//
+// In the present case, we allow 10 requests per collaborator per 30 minutes,
+// with a maximum of 200 requests, so P = 200^2 = 40000.
+const RATE_LIMIT_POINTS = 40000
+const rateLimiter = new RateLimiter('invite-to-project-by-user-id', {
+  points: RATE_LIMIT_POINTS,
+  duration: 60 * 30,
+})
 
 module.exports = CollaboratorsInviteController = {
   getAllInvites(req, res, next) {
     const projectId = req.params.Project_id
     logger.debug({ projectId }, 'getting all active invites for project')
-    return CollaboratorsInviteHandler.getAllInvites(
+    CollaboratorsInviteHandler.getAllInvites(
       projectId,
       function (err, invites) {
-        if (err != null) {
+        if (err) {
           OError.tag(err, 'error getting invites for project', {
             projectId,
           })
           return next(err)
         }
-        return res.json({ invites })
+        res.json({ invites })
       }
     )
   },
 
   _checkShouldInviteEmail(email, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
     if (Settings.restrictInvitesToExistingAccounts === true) {
       logger.debug({ email }, 'checking if user exists with this email')
-      return UserGetter.getUserByAnyEmail(
-        email,
-        { _id: 1 },
-        function (err, user) {
-          if (err != null) {
-            return callback(err)
-          }
-          const userExists =
-            user != null && (user != null ? user._id : undefined) != null
-          return callback(null, userExists)
+      UserGetter.getUserByAnyEmail(email, { _id: 1 }, function (err, user) {
+        if (err) {
+          return callback(err)
         }
-      )
+        const userExists = user?._id != null
+        callback(null, userExists)
+      })
     } else {
-      return callback(null, true)
+      callback(null, true)
     }
   },
 
-  _checkRateLimit(user_id, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    return LimitationsManager.allowedNumberOfCollaboratorsForUser(
-      user_id,
-      function (err, collabLimit) {
-        if (collabLimit == null) {
-          collabLimit = 1
-        }
-        if (err != null) {
+  _checkRateLimit(userId, callback) {
+    LimitationsManager.allowedNumberOfCollaboratorsForUser(
+      userId,
+      (err, collabLimit) => {
+        if (err) {
           return callback(err)
         }
-        if (collabLimit === -1) {
+        if (collabLimit == null || collabLimit === 0) {
+          collabLimit = 1
+        } else if (collabLimit < 0 || collabLimit > 20) {
           collabLimit = 20
         }
-        collabLimit = collabLimit * 10
-        const opts = {
-          endpointName: 'invite-to-project-by-user-id',
-          timeInterval: 60 * 30,
-          subjectName: user_id,
-          throttle: collabLimit,
-        }
-        return rateLimiter.addCount(opts, callback)
+
+        // Consume enough points to hit the rate limit at 10 * collabLimit
+        const maxRequests = 10 * collabLimit
+        const points = Math.floor(RATE_LIMIT_POINTS / maxRequests)
+        rateLimiter
+          .consume(userId, points)
+          .then(() => {
+            callback(null, true)
+          })
+          .catch(err => {
+            if (err instanceof Error) {
+              callback(err)
+            } else {
+              callback(null, false)
+            }
+          })
       }
     )
   },
@@ -109,107 +106,103 @@ module.exports = CollaboratorsInviteController = {
       return res.json({ invite: null, error: 'cannot_invite_self' })
     }
     logger.debug({ projectId, email, sendingUserId }, 'inviting to project')
-    return LimitationsManager.canAddXCollaborators(
-      projectId,
-      1,
-      (error, allowed) => {
-        let privileges
-        if (error != null) {
-          return next(error)
-        }
-        if (!allowed) {
-          logger.debug(
-            { projectId, email, sendingUserId },
-            'not allowed to invite more users to project'
-          )
-          return res.json({ invite: null })
-        }
-        ;({ email, privileges } = req.body)
-        email = EmailHelper.parseEmail(email, true)
-        if (email == null || email === '') {
-          logger.debug(
-            { projectId, email, sendingUserId },
-            'invalid email address'
-          )
-          return res.status(400).json({ errorReason: 'invalid_email' })
-        }
-        return CollaboratorsInviteController._checkRateLimit(
-          sendingUserId,
-          function (error, underRateLimit) {
-            if (error != null) {
-              return next(error)
-            }
-            if (!underRateLimit) {
-              return res.sendStatus(429)
-            }
-            return CollaboratorsInviteController._checkShouldInviteEmail(
-              email,
-              function (err, shouldAllowInvite) {
-                if (err != null) {
-                  OError.tag(
-                    err,
-                    'error checking if we can invite this email address',
-                    {
-                      email,
-                      projectId,
-                      sendingUserId,
-                    }
-                  )
-                  return next(err)
-                }
-                if (!shouldAllowInvite) {
-                  logger.debug(
-                    { email, projectId, sendingUserId },
-                    'not allowed to send an invite to this email address'
-                  )
-                  return res.json({
-                    invite: null,
-                    error: 'cannot_invite_non_user',
-                  })
-                }
-                return CollaboratorsInviteHandler.inviteToProject(
-                  projectId,
-                  sendingUser,
-                  email,
-                  privileges,
-                  function (err, invite) {
-                    if (err != null) {
-                      OError.tag(err, 'error creating project invite', {
-                        projectId,
-                        email,
-                        sendingUserId,
-                      })
-                      return next(err)
-                    }
-                    logger.debug(
-                      { projectId, email, sendingUserId },
-                      'invite created'
-                    )
-                    EditorRealTimeController.emitToRoom(
-                      projectId,
-                      'project:membership:changed',
-                      { invites: true }
-                    )
-                    return res.json({ invite })
+    LimitationsManager.canAddXCollaborators(projectId, 1, (error, allowed) => {
+      let privileges
+      if (error) {
+        return next(error)
+      }
+      if (!allowed) {
+        logger.debug(
+          { projectId, email, sendingUserId },
+          'not allowed to invite more users to project'
+        )
+        return res.json({ invite: null })
+      }
+      ;({ email, privileges } = req.body)
+      email = EmailHelper.parseEmail(email, true)
+      if (email == null || email === '') {
+        logger.debug(
+          { projectId, email, sendingUserId },
+          'invalid email address'
+        )
+        return res.status(400).json({ errorReason: 'invalid_email' })
+      }
+      CollaboratorsInviteController._checkRateLimit(
+        sendingUserId,
+        function (error, underRateLimit) {
+          if (error) {
+            return next(error)
+          }
+          if (!underRateLimit) {
+            return res.sendStatus(429)
+          }
+          CollaboratorsInviteController._checkShouldInviteEmail(
+            email,
+            function (err, shouldAllowInvite) {
+              if (err) {
+                OError.tag(
+                  err,
+                  'error checking if we can invite this email address',
+                  {
+                    email,
+                    projectId,
+                    sendingUserId,
                   }
                 )
+                return next(err)
               }
-            )
-          }
-        )
-      }
-    )
+              if (!shouldAllowInvite) {
+                logger.debug(
+                  { email, projectId, sendingUserId },
+                  'not allowed to send an invite to this email address'
+                )
+                return res.json({
+                  invite: null,
+                  error: 'cannot_invite_non_user',
+                })
+              }
+              CollaboratorsInviteHandler.inviteToProject(
+                projectId,
+                sendingUser,
+                email,
+                privileges,
+                function (err, invite) {
+                  if (err) {
+                    OError.tag(err, 'error creating project invite', {
+                      projectId,
+                      email,
+                      sendingUserId,
+                    })
+                    return next(err)
+                  }
+                  logger.debug(
+                    { projectId, email, sendingUserId },
+                    'invite created'
+                  )
+                  EditorRealTimeController.emitToRoom(
+                    projectId,
+                    'project:membership:changed',
+                    { invites: true }
+                  )
+                  res.json({ invite })
+                }
+              )
+            }
+          )
+        }
+      )
+    })
   },
 
   revokeInvite(req, res, next) {
     const projectId = req.params.Project_id
     const inviteId = req.params.invite_id
     logger.debug({ projectId, inviteId }, 'revoking invite')
-    return CollaboratorsInviteHandler.revokeInvite(
+    CollaboratorsInviteHandler.revokeInvite(
       projectId,
       inviteId,
       function (err) {
-        if (err != null) {
+        if (err) {
           OError.tag(err, 'error revoking invite', {
             projectId,
             inviteId,
@@ -221,7 +214,7 @@ module.exports = CollaboratorsInviteController = {
           'project:membership:changed',
           { invites: true }
         )
-        return res.sendStatus(201)
+        res.sendStatus(201)
       }
     )
   },
@@ -231,28 +224,28 @@ module.exports = CollaboratorsInviteController = {
     const inviteId = req.params.invite_id
     logger.debug({ projectId, inviteId }, 'resending invite')
     const sendingUser = SessionManager.getSessionUser(req.session)
-    return CollaboratorsInviteController._checkRateLimit(
+    CollaboratorsInviteController._checkRateLimit(
       sendingUser._id,
       function (error, underRateLimit) {
-        if (error != null) {
+        if (error) {
           return next(error)
         }
         if (!underRateLimit) {
           return res.sendStatus(429)
         }
-        return CollaboratorsInviteHandler.resendInvite(
+        CollaboratorsInviteHandler.resendInvite(
           projectId,
           sendingUser,
           inviteId,
           function (err) {
-            if (err != null) {
+            if (err) {
               OError.tag(err, 'error resending invite', {
                 projectId,
                 inviteId,
               })
               return next(err)
             }
-            return res.sendStatus(201)
+            res.sendStatus(201)
           }
         )
       }
@@ -264,15 +257,15 @@ module.exports = CollaboratorsInviteController = {
     const { token } = req.params
     const _renderInvalidPage = function () {
       logger.debug({ projectId }, 'invite not valid, rendering not-valid page')
-      return res.render('project/invite/not-valid', { title: 'Invalid Invite' })
+      res.render('project/invite/not-valid', { title: 'Invalid Invite' })
     }
     // check if the user is already a member of the project
     const currentUser = SessionManager.getSessionUser(req.session)
-    return CollaboratorsGetter.isUserInvitedMemberOfProject(
+    CollaboratorsGetter.isUserInvitedMemberOfProject(
       currentUser._id,
       projectId,
       function (err, isMember) {
-        if (err != null) {
+        if (err) {
           OError.tag(err, 'error checking if user is member of project', {
             projectId,
           })
@@ -286,11 +279,11 @@ module.exports = CollaboratorsInviteController = {
           return res.redirect(`/project/${projectId}`)
         }
         // get the invite
-        return CollaboratorsInviteHandler.getInviteByToken(
+        CollaboratorsInviteHandler.getInviteByToken(
           projectId,
           token,
           function (err, invite) {
-            if (err != null) {
+            if (err) {
               OError.tag(err, 'error getting invite by token', {
                 projectId,
               })
@@ -302,11 +295,11 @@ module.exports = CollaboratorsInviteController = {
               return _renderInvalidPage()
             }
             // check the user who sent the invite exists
-            return UserGetter.getUser(
+            UserGetter.getUser(
               { _id: invite.sendingUserId },
               { email: 1, first_name: 1, last_name: 1 },
               function (err, owner) {
-                if (err != null) {
+                if (err) {
                   OError.tag(err, 'error getting project owner', {
                     projectId,
                   })
@@ -317,11 +310,11 @@ module.exports = CollaboratorsInviteController = {
                   return _renderInvalidPage()
                 }
                 // fetch the project name
-                return ProjectGetter.getProject(
+                ProjectGetter.getProject(
                   projectId,
                   {},
                   function (err, project) {
-                    if (err != null) {
+                    if (err) {
                       OError.tag(err, 'error getting project', {
                         projectId,
                       })
@@ -332,7 +325,7 @@ module.exports = CollaboratorsInviteController = {
                       return _renderInvalidPage()
                     }
                     // finally render the invite
-                    return res.render('project/invite/show', {
+                    res.render('project/invite/show', {
                       invite,
                       project,
                       owner,
@@ -356,12 +349,12 @@ module.exports = CollaboratorsInviteController = {
       { projectId, userId: currentUser._id },
       'got request to accept invite'
     )
-    return CollaboratorsInviteHandler.acceptInvite(
+    CollaboratorsInviteHandler.acceptInvite(
       projectId,
       token,
       currentUser,
       function (err) {
-        if (err != null) {
+        if (err) {
           OError.tag(err, 'error accepting invite by token', {
             projectId,
             token,
@@ -381,9 +374,9 @@ module.exports = CollaboratorsInviteController = {
           }
         )
         if (req.xhr) {
-          return res.sendStatus(204) //  Done async via project page notification
+          res.sendStatus(204) //  Done async via project page notification
         } else {
-          return res.redirect(`/project/${projectId}`)
+          res.redirect(`/project/${projectId}`)
         }
       }
     )

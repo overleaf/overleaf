@@ -6,7 +6,7 @@ const nodemailer = require('nodemailer')
 const sesTransport = require('nodemailer-ses-transport')
 const mandrillTransport = require('nodemailer-mandrill-transport')
 const OError = require('@overleaf/o-error')
-const RateLimiter = require('../../infrastructure/RateLimiter')
+const { RateLimiter } = require('../../infrastructure/RateLimiter')
 const _ = require('lodash')
 
 const EMAIL_SETTINGS = Settings.email || {}
@@ -19,6 +19,11 @@ module.exports = {
 }
 
 const client = getClient()
+
+const rateLimiter = new RateLimiter('send_email', {
+  points: 100,
+  duration: 3 * 60 * 60,
+})
 
 function getClient() {
   let client
@@ -106,12 +111,14 @@ async function checkCanSendEmail(options) {
     // email not sent from user, not rate limited
     return true
   }
-  const opts = {
-    endpointName: 'send_email',
-    timeInterval: 60 * 60 * 3,
-    subjectName: options.sendingUser_id,
-    throttle: 100,
+  try {
+    await rateLimiter.consume(options.sendingUser_id)
+  } catch (err) {
+    if (err instanceof Error) {
+      throw err
+    } else {
+      return false
+    }
   }
-  const allowed = await RateLimiter.promises.addCount(opts)
-  return allowed
+  return true
 }

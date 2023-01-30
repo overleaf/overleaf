@@ -9,7 +9,7 @@ const logger = require('@overleaf/logger')
 const request = require('request')
 const Settings = require('@overleaf/settings')
 const SessionManager = require('../Authentication/SessionManager')
-const RateLimiter = require('../../infrastructure/RateLimiter')
+const { RateLimiter } = require('../../infrastructure/RateLimiter')
 const ClsiCookieManager = require('./ClsiCookieManager')(
   Settings.apis.clsi?.backendGroupName
 )
@@ -19,6 +19,11 @@ const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const { callbackify } = require('../../util/promises')
 
 const COMPILE_TIMEOUT_MS = 10 * 60 * 1000
+
+const pdfDownloadRateLimiter = new RateLimiter('full-pdf-download', {
+  points: 1000,
+  duration: 60 * 60,
+})
 
 function getImageNameForProject(projectId, callback) {
   ProjectGetter.getProject(projectId, { imageName: 1 }, (err, project) => {
@@ -297,13 +302,18 @@ module.exports = CompileController = {
       if (isPdfjsPartialDownload) {
         callback(null, true)
       } else {
-        const rateLimitOpts = {
-          endpointName: 'full-pdf-download',
-          throttle: 1000,
-          subjectName: req.ip,
-          timeInterval: 60 * 60,
-        }
-        RateLimiter.addCount(rateLimitOpts, callback)
+        pdfDownloadRateLimiter
+          .consume(req.ip)
+          .then(() => {
+            callback(null, true)
+          })
+          .catch(err => {
+            if (err instanceof Error) {
+              callback(err)
+            } else {
+              callback(null, false)
+            }
+          })
       }
     }
 

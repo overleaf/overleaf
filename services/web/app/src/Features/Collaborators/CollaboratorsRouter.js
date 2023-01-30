@@ -3,10 +3,26 @@ const AuthenticationController = require('../Authentication/AuthenticationContro
 const AuthorizationMiddleware = require('../Authorization/AuthorizationMiddleware')
 const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
 const CollaboratorsInviteController = require('./CollaboratorsInviteController')
+const { RateLimiter } = require('../../infrastructure/RateLimiter')
 const RateLimiterMiddleware = require('../Security/RateLimiterMiddleware')
 const CaptchaMiddleware = require('../Captcha/CaptchaMiddleware')
 const AnalyticsRegistrationSourceMiddleware = require('../Analytics/AnalyticsRegistrationSourceMiddleware')
 const { Joi, validate } = require('../../infrastructure/Validation')
+
+const rateLimiters = {
+  inviteToProjectByProjectId: new RateLimiter(
+    'invite-to-project-by-project-id',
+    { points: 100, duration: 60 * 10 }
+  ),
+  inviteToProjectByIp: new RateLimiter('invite-to-project-by-ip', {
+    points: 100,
+    duration: 60 * 10,
+  }),
+  resendInvite: new RateLimiter('resend-invite', {
+    points: 200,
+    duration: 60 * 10,
+  }),
+}
 
 module.exports = {
   apply(webRouter) {
@@ -66,17 +82,11 @@ module.exports = {
     // invites
     webRouter.post(
       '/project/:Project_id/invite',
-      RateLimiterMiddleware.rateLimit({
-        endpointName: 'invite-to-project-by-project-id',
+      RateLimiterMiddleware.rateLimit(rateLimiters.inviteToProjectByProjectId, {
         params: ['Project_id'],
-        maxRequests: 100,
-        timeInterval: 60 * 10,
       }),
-      RateLimiterMiddleware.rateLimit({
-        endpointName: 'invite-to-project-by-ip',
+      RateLimiterMiddleware.rateLimit(rateLimiters.inviteToProjectByIp, {
         ipOnly: true,
-        maxRequests: 100,
-        timeInterval: 60 * 10,
       }),
       CaptchaMiddleware.validateCaptcha('invite'),
       AuthenticationController.requireLogin(),
@@ -100,11 +110,8 @@ module.exports = {
 
     webRouter.post(
       '/project/:Project_id/invite/:invite_id/resend',
-      RateLimiterMiddleware.rateLimit({
-        endpointName: 'resend-invite',
+      RateLimiterMiddleware.rateLimit(rateLimiters.resendInvite, {
         params: ['Project_id'],
-        maxRequests: 200,
-        timeInterval: 60 * 10,
       }),
       AuthenticationController.requireLogin(),
       AuthorizationMiddleware.ensureUserCanAdminProject,

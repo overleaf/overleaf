@@ -1,24 +1,35 @@
-const RateLimiter = require('../../infrastructure/RateLimiter')
+const { RateLimiter } = require('../../infrastructure/RateLimiter')
 const { promisifyAll } = require('../../util/promises')
 
-const ONE_MIN = 60
-const ATTEMPT_LIMIT = 10
+const rateLimiter = new RateLimiter('login', {
+  points: 10,
+  duration: 120,
+})
 
 function processLoginRequest(email, callback) {
-  const opts = {
-    endpointName: 'login',
-    throttle: ATTEMPT_LIMIT,
-    timeInterval: ONE_MIN * 2,
-    subjectName: email,
-  }
-  RateLimiter.addCount(opts, (err, shouldAllow) => callback(err, shouldAllow))
+  rateLimiter
+    .consume(email)
+    .then(() => {
+      callback(null, true)
+    })
+    .catch(err => {
+      if (err instanceof Error) {
+        callback(err)
+      } else {
+        callback(null, false)
+      }
+    })
 }
 
 function recordSuccessfulLogin(email, callback) {
-  if (callback == null) {
-    callback = function () {}
-  }
-  RateLimiter.clearRateLimit('login', email, callback)
+  rateLimiter
+    .delete(email)
+    .then(() => {
+      callback()
+    })
+    .catch(err => {
+      callback(err)
+    })
 }
 
 const LoginRateLimiter = {

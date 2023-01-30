@@ -1,15 +1,20 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const UserMembershipMiddleware = require('./UserMembershipMiddleware')
 const UserMembershipController = require('./UserMembershipController')
 const SubscriptionGroupController = require('../Subscription/SubscriptionGroupController')
 const TeamInvitesController = require('../Subscription/TeamInvitesController')
+const { RateLimiter } = require('../../infrastructure/RateLimiter')
 const RateLimiterMiddleware = require('../Security/RateLimiterMiddleware')
+
+const rateLimiters = {
+  createTeamInvite: new RateLimiter('create-team-invite', {
+    points: 200,
+    duration: 60,
+  }),
+  exportTeamCsv: new RateLimiter('export-team-csv', {
+    points: 30,
+    duration: 60,
+  }),
+}
 
 module.exports = {
   apply(webRouter) {
@@ -22,11 +27,7 @@ module.exports = {
     webRouter.post(
       '/manage/groups/:id/invites',
       UserMembershipMiddleware.requireGroupManagementAccess,
-      RateLimiterMiddleware.rateLimit({
-        endpointName: 'create-team-invite',
-        maxRequests: 200,
-        timeInterval: 60,
-      }),
+      RateLimiterMiddleware.rateLimit(rateLimiters.createTeamInvite),
       TeamInvitesController.createInvite
     )
     webRouter.delete(
@@ -42,11 +43,7 @@ module.exports = {
     webRouter.get(
       '/manage/groups/:id/members/export',
       UserMembershipMiddleware.requireGroupManagementAccess,
-      RateLimiterMiddleware.rateLimit({
-        endpointName: 'export-team-csv',
-        maxRequests: 30,
-        timeInterval: 60,
-      }),
+      RateLimiterMiddleware.rateLimit(rateLimiters.exportTeamCsv),
       UserMembershipController.exportCsv
     )
 

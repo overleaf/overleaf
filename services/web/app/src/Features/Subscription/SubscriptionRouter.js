@@ -2,8 +2,14 @@ const AuthenticationController = require('../Authentication/AuthenticationContro
 const SubscriptionController = require('./SubscriptionController')
 const SubscriptionGroupController = require('./SubscriptionGroupController')
 const TeamInvitesController = require('./TeamInvitesController')
+const { RateLimiter } = require('../../infrastructure/RateLimiter')
 const RateLimiterMiddleware = require('../Security/RateLimiterMiddleware')
 const Settings = require('@overleaf/settings')
+
+const teamInviteRateLimiter = new RateLimiter('team-invite', {
+  points: 10,
+  duration: 60,
+})
 
 module.exports = {
   apply(webRouter, privateApiRouter, publicApiRouter) {
@@ -64,11 +70,7 @@ module.exports = {
     webRouter.put(
       '/subscription/invites/:token/',
       AuthenticationController.requireLogin(),
-      RateLimiterMiddleware.rateLimit({
-        endpointName: 'team-invite',
-        maxRequests: 10,
-        timeInterval: 60,
-      }),
+      RateLimiterMiddleware.rateLimit(teamInviteRateLimiter),
       TeamInvitesController.acceptInvite
     )
 

@@ -20,7 +20,12 @@ describe('CompileController', function () {
     this.CompileManager = { compile: sinon.stub() }
     this.ClsiManager = {}
     this.UserGetter = { getUser: sinon.stub() }
-    this.RateLimiter = { addCount: sinon.stub() }
+    this.rateLimiter = {
+      consume: sinon.stub().resolves(),
+    }
+    this.RateLimiter = {
+      RateLimiter: sinon.stub().returns(this.rateLimiter),
+    }
     this.settings = {
       apis: {
         clsi: {
@@ -357,7 +362,6 @@ describe('CompileController', function () {
     describe('when downloading for embedding', function () {
       beforeEach(function () {
         this.CompileController.proxyToClsi = sinon.stub()
-        this.RateLimiter.addCount.callsArgWith(1, null, true)
         this.CompileController.downloadPdf(this.req, this.res, this.next)
       })
 
@@ -398,7 +402,6 @@ describe('CompileController', function () {
       beforeEach(function () {
         this.req.params.build_id = this.buildId = '1234-5678'
         this.CompileController.proxyToClsi = sinon.stub()
-        this.RateLimiter.addCount.callsArgWith(1, null, true)
         this.CompileController.downloadPdf(this.req, this.res, this.next)
       })
 
@@ -418,9 +421,8 @@ describe('CompileController', function () {
     describe('when the pdf is not going to be used in pdfjs viewer', function () {
       it('should check the rate limiter when pdfng is not set', function (done) {
         this.req.query = {}
-        this.RateLimiter.addCount.callsArgWith(1, null, true)
         this.CompileController.proxyToClsi = (projectId, url) => {
-          this.RateLimiter.addCount.args[0][0].throttle.should.equal(1000)
+          expect(this.rateLimiter.consume).to.have.been.called
           done()
         }
         this.CompileController.downloadPdf(this.req, this.res)
@@ -428,9 +430,8 @@ describe('CompileController', function () {
 
       it('should check the rate limiter when pdfng is false', function (done) {
         this.req.query = { pdfng: false }
-        this.RateLimiter.addCount.callsArgWith(1, null, true)
         this.CompileController.proxyToClsi = (projectId, url) => {
-          this.RateLimiter.addCount.args[0][0].throttle.should.equal(1000)
+          expect(this.rateLimiter.consume).to.have.been.called
           done()
         }
         this.CompileController.downloadPdf(this.req, this.res)

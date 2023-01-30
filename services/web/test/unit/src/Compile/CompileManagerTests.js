@@ -1,12 +1,17 @@
 const { expect } = require('chai')
 const sinon = require('sinon')
-const modulePath = '../../../../app/src/Features/Compile/CompileManager.js'
 const SandboxedModule = require('sandboxed-module')
+
+const MODULE_PATH = '../../../../app/src/Features/Compile/CompileManager.js'
 
 describe('CompileManager', function () {
   beforeEach(function () {
-    this.rateLimitGetStub = sinon.stub()
-    this.ratelimiter = { addCount: sinon.stub() }
+    this.rateLimiter = {
+      consume: sinon.stub().resolves(),
+    }
+    this.RateLimiter = {
+      RateLimiter: sinon.stub().returns(this.rateLimiter),
+    }
     this.timer = {
       done: sinon.stub(),
     }
@@ -14,7 +19,7 @@ describe('CompileManager', function () {
       Timer: sinon.stub().returns(this.timer),
       inc: sinon.stub(),
     }
-    this.CompileManager = SandboxedModule.require(modulePath, {
+    this.CompileManager = SandboxedModule.require(MODULE_PATH, {
       requires: {
         '@overleaf/settings': (this.settings = {
           apis: { clsi: { defaultBackendClass: 'e2' } },
@@ -28,7 +33,7 @@ describe('CompileManager', function () {
         '../Project/ProjectGetter': (this.ProjectGetter = {}),
         '../User/UserGetter': (this.UserGetter = {}),
         './ClsiManager': (this.ClsiManager = {}),
-        '../../infrastructure/RateLimiter': this.ratelimiter,
+        '../../infrastructure/RateLimiter': this.RateLimiter,
         '@overleaf/metrics': this.Metrics,
         '../SplitTests/SplitTestHandler': {
           getAssignmentForMongoUser: (this.getAssignmentForMongoUser = sinon
@@ -419,7 +424,6 @@ describe('CompileManager', function () {
 
   describe('_checkIfAutoCompileLimitHasBeenHit', function () {
     it('should be able to compile if it is not an autocompile', function (done) {
-      this.ratelimiter.addCount.callsArgWith(2, null, true)
       this.CompileManager._checkIfAutoCompileLimitHasBeenHit(
         false,
         'everyone',
@@ -433,8 +437,7 @@ describe('CompileManager', function () {
       )
     })
 
-    it('should be able to compile if rate limit has remianing', function (done) {
-      this.ratelimiter.addCount.callsArgWith(1, null, true)
+    it('should be able to compile if rate limit has remaining', function (done) {
       this.CompileManager._checkIfAutoCompileLimitHasBeenHit(
         true,
         'everyone',
@@ -442,11 +445,7 @@ describe('CompileManager', function () {
           if (err) {
             return done(err)
           }
-          const args = this.ratelimiter.addCount.args[0][0]
-          args.throttle.should.equal(12.5)
-          args.subjectName.should.be.oneOf(['everyone-b-one', 'everyone-b-two'])
-          args.timeInterval.should.equal(20)
-          args.endpointName.should.equal('auto_compile')
+          expect(this.rateLimiter.consume).to.have.been.calledWith('global')
           canCompile.should.equal(true)
           done()
         }
@@ -454,7 +453,7 @@ describe('CompileManager', function () {
     })
 
     it('should be not able to compile if rate limit has no remianing', function (done) {
-      this.ratelimiter.addCount.callsArgWith(1, null, false)
+      this.rateLimiter.consume.rejects({ remainingPoints: 0 })
       this.CompileManager._checkIfAutoCompileLimitHasBeenHit(
         true,
         'everyone',
@@ -469,7 +468,7 @@ describe('CompileManager', function () {
     })
 
     it('should return false if there is an error in the rate limit', function (done) {
-      this.ratelimiter.addCount.callsArgWith(1, 'error')
+      this.rateLimiter.consume.rejects(new Error('BOOM!'))
       this.CompileManager._checkIfAutoCompileLimitHasBeenHit(
         true,
         'everyone',

@@ -1,31 +1,21 @@
-const OError = require('@overleaf/o-error')
 const Settings = require('@overleaf/settings')
-const RateLimiter = require('../../../../app/src/infrastructure/RateLimiter')
-
-async function clearRateLimit(endpointName, subject) {
-  try {
-    await RateLimiter.promises.clearRateLimit(endpointName, subject)
-  } catch (err) {
-    throw new OError(
-      'error clearing rate limit',
-      { endpointName, subject },
-      err
-    )
-  }
-}
+const {
+  overleafLoginRateLimiter,
+  openProjectRateLimiter,
+} = require('../../../../app/src/infrastructure/RateLimiter')
+const LoginRateLimiter = require('../../../../app/src/Features/Security/LoginRateLimiter')
 
 async function clearLoginRateLimit() {
-  await clearRateLimit('login', Settings.smokeTest.user)
+  await LoginRateLimiter.promises.recordSuccessfulLogin(Settings.smokeTest.user)
 }
 
 async function clearOverleafLoginRateLimit() {
   if (!Settings.overleaf) return
-  await clearRateLimit('overleaf-login', Settings.smokeTest.rateLimitSubject)
+  await overleafLoginRateLimiter.delete(Settings.smokeTest.rateLimitSubject)
 }
 
 async function clearOpenProjectRateLimit() {
-  await clearRateLimit(
-    'open-project',
+  await openProjectRateLimiter.delete(
     `${Settings.smokeTest.projectId}:${Settings.smokeTest.userId}`
   )
 }

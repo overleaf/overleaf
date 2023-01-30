@@ -1,15 +1,3 @@
-/* eslint-disable
-    n/handle-callback-err,
-    max-len,
-    no-return-assign,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 const { expect } = require('chai')
@@ -21,113 +9,76 @@ const modulePath = require('path').join(
 describe('LoginRateLimiter', function () {
   beforeEach(function () {
     this.email = 'bob@bob.com'
+    this.rateLimiter = {
+      consume: sinon.stub().resolves(),
+      delete: sinon.stub().resolves(),
+    }
     this.RateLimiter = {
-      clearRateLimit: sinon.stub(),
-      addCount: sinon.stub(),
+      RateLimiter: sinon.stub().withArgs('login').returns(this.rateLimiter),
     }
 
-    return (this.LoginRateLimiter = SandboxedModule.require(modulePath, {
+    this.LoginRateLimiter = SandboxedModule.require(modulePath, {
       requires: {
         '../../infrastructure/RateLimiter': this.RateLimiter,
       },
-    }))
+    })
   })
 
   describe('processLoginRequest', function () {
-    beforeEach(function () {
-      return (this.RateLimiter.addCount = sinon
-        .stub()
-        .callsArgWith(1, null, true))
-    })
-
-    it('should call RateLimiter.addCount', function (done) {
-      return this.LoginRateLimiter.processLoginRequest(
-        this.email,
-        (err, allow) => {
-          this.RateLimiter.addCount.callCount.should.equal(1)
-          expect(
-            this.RateLimiter.addCount.lastCall.args[0].endpointName
-          ).to.equal('login')
-          expect(
-            this.RateLimiter.addCount.lastCall.args[0].subjectName
-          ).to.equal(this.email)
-          return done()
+    it('should consume points', function (done) {
+      this.LoginRateLimiter.processLoginRequest(this.email, (err, allow) => {
+        if (err) {
+          return done(err)
         }
-      )
+        expect(this.rateLimiter.consume).to.have.been.calledWith(this.email)
+        done()
+      })
     })
 
     describe('when login is allowed', function () {
-      beforeEach(function () {
-        return (this.RateLimiter.addCount = sinon
-          .stub()
-          .callsArgWith(1, null, true))
-      })
-
       it('should call pass allow=true', function (done) {
-        return this.LoginRateLimiter.processLoginRequest(
-          this.email,
-          (err, allow) => {
-            expect(err).to.equal(null)
-            expect(allow).to.equal(true)
-            return done()
-          }
-        )
+        this.LoginRateLimiter.processLoginRequest(this.email, (err, allow) => {
+          expect(err).to.equal(null)
+          expect(allow).to.equal(true)
+          done()
+        })
       })
     })
 
     describe('when login is blocked', function () {
       beforeEach(function () {
-        return (this.RateLimiter.addCount = sinon
-          .stub()
-          .callsArgWith(1, null, false))
+        this.rateLimiter.consume.rejects({ remainingPoints: 0 })
       })
 
       it('should call pass allow=false', function (done) {
-        return this.LoginRateLimiter.processLoginRequest(
-          this.email,
-          (err, allow) => {
-            expect(err).to.equal(null)
-            expect(allow).to.equal(false)
-            return done()
-          }
-        )
+        this.LoginRateLimiter.processLoginRequest(this.email, (err, allow) => {
+          expect(err).to.equal(null)
+          expect(allow).to.equal(false)
+          done()
+        })
       })
     })
 
-    describe('when addCount produces an error', function () {
+    describe('when consume produces an error', function () {
       beforeEach(function () {
-        return (this.RateLimiter.addCount = sinon
-          .stub()
-          .callsArgWith(1, new Error('woops')))
+        this.rateLimiter.consume.rejects(new Error('woops'))
       })
 
       it('should produce an error', function (done) {
-        return this.LoginRateLimiter.processLoginRequest(
-          this.email,
-          (err, allow) => {
-            expect(err).to.not.equal(null)
-            expect(err).to.be.instanceof(Error)
-            return done()
-          }
-        )
+        this.LoginRateLimiter.processLoginRequest(this.email, (err, allow) => {
+          expect(err).to.not.equal(null)
+          expect(err).to.be.instanceof(Error)
+          done()
+        })
       })
     })
   })
 
   describe('recordSuccessfulLogin', function () {
-    beforeEach(function () {
-      return (this.RateLimiter.clearRateLimit = sinon
-        .stub()
-        .callsArgWith(2, null))
-    })
-
-    it('should call clearRateLimit', function (done) {
-      return this.LoginRateLimiter.recordSuccessfulLogin(this.email, () => {
-        this.RateLimiter.clearRateLimit.callCount.should.equal(1)
-        this.RateLimiter.clearRateLimit
-          .calledWith('login', this.email)
-          .should.equal(true)
-        return done()
+    it('should clear the rate limit', function (done) {
+      this.LoginRateLimiter.recordSuccessfulLogin(this.email, () => {
+        expect(this.rateLimiter.delete).to.have.been.calledWith(this.email)
+        done()
       })
     })
   })

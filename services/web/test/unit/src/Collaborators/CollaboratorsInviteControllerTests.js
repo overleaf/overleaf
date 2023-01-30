@@ -33,7 +33,12 @@ describe('CollaboratorsInviteController', function () {
       },
     }
 
-    this.RateLimiter = { addCount: sinon.stub }
+    this.rateLimiter = {
+      consume: sinon.stub().resolves(),
+    }
+    this.RateLimiter = {
+      RateLimiter: sinon.stub().returns(this.rateLimiter),
+    }
 
     this.LimitationsManager = {}
     this.UserGetter = {
@@ -1322,11 +1327,12 @@ describe('CollaboratorsInviteController', function () {
     })
 
     it('should callback with `true` when rate limit under', function (done) {
-      this.RateLimiter.addCount = sinon.stub().callsArgWith(1, null, true)
       return this.CollaboratorsInviteController._checkRateLimit(
         this.sendingUserId,
         (err, result) => {
-          this.RateLimiter.addCount.called.should.equal(true)
+          expect(this.rateLimiter.consume).to.have.been.calledWith(
+            this.sendingUserId
+          )
           result.should.equal(true)
           return done()
         }
@@ -1334,51 +1340,59 @@ describe('CollaboratorsInviteController', function () {
     })
 
     it('should callback with `false` when rate limit hit', function (done) {
-      this.RateLimiter.addCount = sinon.stub().callsArgWith(1, null, false)
+      this.rateLimiter.consume.rejects({ remainingPoints: 0 })
       return this.CollaboratorsInviteController._checkRateLimit(
         this.sendingUserId,
         (err, result) => {
-          this.RateLimiter.addCount.called.should.equal(true)
+          expect(this.rateLimiter.consume).to.have.been.calledWith(
+            this.sendingUserId
+          )
           result.should.equal(false)
           return done()
         }
       )
     })
 
-    it('should call rate limiter with 10x the collaborators', function (done) {
-      this.RateLimiter.addCount = sinon.stub().callsArgWith(1, null, true)
-      return this.CollaboratorsInviteController._checkRateLimit(
+    it('should allow 10x the collaborators', function (done) {
+      this.CollaboratorsInviteController._checkRateLimit(
         this.sendingUserId,
         (err, result) => {
-          this.RateLimiter.addCount.args[0][0].throttle.should.equal(170)
+          expect(this.rateLimiter.consume).to.have.been.calledWith(
+            this.sendingUserId,
+            Math.floor(40000 / 170)
+          )
           return done()
         }
       )
     })
 
-    it('should call rate limiter with 200 when collaborators is -1', function (done) {
+    it('should allow 200 requests when collaborators is -1', function (done) {
       this.LimitationsManager.allowedNumberOfCollaboratorsForUser
         .withArgs(this.sendingUserId)
         .yields(null, -1)
-      this.RateLimiter.addCount = sinon.stub().callsArgWith(1, null, true)
-      return this.CollaboratorsInviteController._checkRateLimit(
+      this.CollaboratorsInviteController._checkRateLimit(
         this.sendingUserId,
         (err, result) => {
-          this.RateLimiter.addCount.args[0][0].throttle.should.equal(200)
+          expect(this.rateLimiter.consume).to.have.been.calledWith(
+            this.sendingUserId,
+            Math.floor(40000 / 200)
+          )
           return done()
         }
       )
     })
 
-    it('should call rate limiter with 10 when user has no collaborators set', function (done) {
+    it('should allow 10 requests when user has no collaborators set', function (done) {
       this.LimitationsManager.allowedNumberOfCollaboratorsForUser
         .withArgs(this.sendingUserId)
         .yields(null)
-      this.RateLimiter.addCount = sinon.stub().callsArgWith(1, null, true)
       return this.CollaboratorsInviteController._checkRateLimit(
         this.sendingUserId,
         (err, result) => {
-          this.RateLimiter.addCount.args[0][0].throttle.should.equal(10)
+          expect(this.rateLimiter.consume).to.have.been.calledWith(
+            this.sendingUserId,
+            Math.floor(40000 / 10)
+          )
           return done()
         }
       )

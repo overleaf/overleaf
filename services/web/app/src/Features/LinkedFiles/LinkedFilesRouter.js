@@ -1,17 +1,19 @@
-/* eslint-disable
-    max-len,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const AuthorizationMiddleware = require('../Authorization/AuthorizationMiddleware')
 const AuthenticationController = require('../Authentication/AuthenticationController')
+const { RateLimiter } = require('../../infrastructure/RateLimiter')
 const RateLimiterMiddleware = require('../Security/RateLimiterMiddleware')
 const LinkedFilesController = require('./LinkedFilesController')
+
+const rateLimiters = {
+  createLinkedFile: new RateLimiter('create-linked-file', {
+    points: 100,
+    duration: 60,
+  }),
+  refreshLinkedFile: new RateLimiter('refresh-linked-file', {
+    points: 100,
+    duration: 60,
+  }),
+}
 
 module.exports = {
   apply(webRouter) {
@@ -19,24 +21,18 @@ module.exports = {
       '/project/:project_id/linked_file',
       AuthenticationController.requireLogin(),
       AuthorizationMiddleware.ensureUserCanWriteProjectContent,
-      RateLimiterMiddleware.rateLimit({
-        endpointName: 'create-linked-file',
+      RateLimiterMiddleware.rateLimit(rateLimiters.createLinkedFile, {
         params: ['project_id'],
-        maxRequests: 100,
-        timeInterval: 60,
       }),
       LinkedFilesController.createLinkedFile
     )
 
-    return webRouter.post(
+    webRouter.post(
       '/project/:project_id/linked_file/:file_id/refresh',
       AuthenticationController.requireLogin(),
       AuthorizationMiddleware.ensureUserCanWriteProjectContent,
-      RateLimiterMiddleware.rateLimit({
-        endpointName: 'refresh-linked-file',
+      RateLimiterMiddleware.rateLimit(rateLimiters.refreshLinkedFile, {
         params: ['project_id'],
-        maxRequests: 100,
-        timeInterval: 60,
       }),
       LinkedFilesController.refreshLinkedFile
     )

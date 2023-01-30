@@ -10,10 +10,11 @@ const MODULE_PATH = path.join(
 
 describe('EmailSender', function () {
   beforeEach(function () {
+    this.rateLimiter = {
+      consume: sinon.stub().resolves(),
+    }
     this.RateLimiter = {
-      promises: {
-        addCount: sinon.stub(),
-      },
+      RateLimiter: sinon.stub().returns(this.rateLimiter),
     }
 
     this.Settings = {
@@ -93,7 +94,7 @@ describe('EmailSender', function () {
 
     it('should not send an email when the rate limiter says no', async function () {
       this.opts.sendingUser_id = '12321312321'
-      this.RateLimiter.promises.addCount.resolves(false)
+      this.rateLimiter.consume.rejects({ remainingPoints: 0 })
       await expect(this.EmailSender.promises.sendEmail(this.opts)).to.be
         .rejected
       expect(this.sesClient.sendMail).not.to.have.been.called
@@ -101,7 +102,6 @@ describe('EmailSender', function () {
 
     it('should send the email when the rate limtier says continue', async function () {
       this.opts.sendingUser_id = '12321312321'
-      this.RateLimiter.promises.addCount.resolves(true)
       await this.EmailSender.promises.sendEmail(this.opts)
       expect(this.sesClient.sendMail).to.have.been.called
     })
@@ -109,7 +109,7 @@ describe('EmailSender', function () {
     it('should not check the rate limiter when there is no sendingUser_id', async function () {
       this.EmailSender.sendEmail(this.opts, () => {
         expect(this.sesClient.sendMail).to.have.been.called
-        expect(this.RateLimiter.promises.addCount).not.to.have.been.called
+        expect(this.rateLimiter.consume).not.to.have.been.called
       })
     })
 

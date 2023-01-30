@@ -7,7 +7,7 @@ const ProjectRootDocManager = require('../Project/ProjectRootDocManager')
 const UserGetter = require('../User/UserGetter')
 const ClsiManager = require('./ClsiManager')
 const Metrics = require('@overleaf/metrics')
-const rateLimiter = require('../../infrastructure/RateLimiter')
+const { RateLimiter } = require('../../infrastructure/RateLimiter')
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const { getAnalyticsIdFromMongoUser } = require('../Analytics/AnalyticsHelper')
 
@@ -228,23 +228,19 @@ module.exports = CompileManager = {
     if (!isAutoCompile) {
       return callback(null, true)
     }
-    const bucket = Math.random() > 0.5 ? 'b-one' : 'b-two'
-    Metrics.inc(`auto-compile-${compileGroup}`, 1, { method: bucket })
-    const opts = {
-      endpointName: 'auto_compile',
-      timeInterval: 20,
-      subjectName: `${compileGroup}-${bucket}`,
-      throttle: (Settings.rateLimit.autoCompile[compileGroup] || 25) / 2,
-    }
-    rateLimiter.addCount(opts, function (err, canCompile) {
-      if (err) {
-        canCompile = false
-      }
-      if (!canCompile) {
+    Metrics.inc(`auto-compile-${compileGroup}`)
+    const rateLimiter = getAutoCompileRateLimiter(compileGroup)
+    rateLimiter
+      .consume('global')
+      .then(() => {
+        callback(null, true)
+      })
+      .catch(() => {
+        // Don't differentiate between errors and rate limits. Silently trigger
+        // the rate limit if there's an error consuming the points.
         Metrics.inc(`auto-compile-${compileGroup}-limited`)
-      }
-      callback(null, canCompile)
-    })
+        callback(null, false)
+      })
   },
 
   _getCompileBackendClassDetails(owner, compileGroup, callback) {
@@ -286,4 +282,17 @@ module.exports = CompileManager = {
       )
     })
   },
+}
+
+const autoCompileRateLimiters = new Map()
+function getAutoCompileRateLimiter(compileGroup) {
+  let rateLimiter = autoCompileRateLimiters.get(compileGroup)
+  if (rateLimiter == null) {
+    rateLimiter = new RateLimiter(`auto-compile:${compileGroup}`, {
+      points: Settings.rateLimit.autoCompile[compileGroup] || 25,
+      duration: 20,
+    })
+    autoCompileRateLimiters.set(compileGroup, rateLimiter)
+  }
+  return rateLimiter
 }

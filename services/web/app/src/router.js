@@ -35,7 +35,10 @@ const PasswordResetRouter = require('./Features/PasswordReset/PasswordResetRoute
 const StaticPagesRouter = require('./Features/StaticPages/StaticPagesRouter')
 const ChatController = require('./Features/Chat/ChatController')
 const Modules = require('./infrastructure/Modules')
-const { RateLimiter } = require('./infrastructure/RateLimiter')
+const {
+  RateLimiter,
+  openProjectRateLimiter,
+} = require('./infrastructure/RateLimiter')
 const RateLimiterMiddleware = require('./Features/Security/RateLimiterMiddleware')
 const InactiveProjectController = require('./Features/InactiveData/InactiveProjectController')
 const ContactRouter = require('./Features/Contacts/ContactRouter')
@@ -67,8 +70,6 @@ const { expressify } = require('./util/promises')
 const { plainTextResponse } = require('./infrastructure/Response')
 const PublicAccessLevels = require('./Features/Authorization/PublicAccessLevels')
 const UserContentDomainController = require('./Features/UserContentDomainCheck/UserContentDomainController')
-
-module.exports = { initialize }
 
 const rateLimiters = {
   addEmail: new RateLimiter('add-email', {
@@ -166,10 +167,6 @@ const rateLimiters = {
     points: 30,
     duration: 60,
   }),
-  openProject: new RateLimiter('open-project', {
-    points: 15,
-    duration: 60,
-  }),
   readAndWriteToken: new RateLimiter('read-and-write-token', {
     points: 15,
     duration: 60,
@@ -206,6 +203,17 @@ const rateLimiters = {
     points: 10,
     duration: 60,
   }),
+  userContentDomainAccessCheckResult: new RateLimiter(
+    'user-content-domain-a-c-r',
+    {
+      points: 15,
+      duration: 60,
+    }
+  ),
+  userContentDomainFallbackUsage: new RateLimiter('user-content-fb-u', {
+    points: 15,
+    duration: 60,
+  }),
 }
 
 function initialize(webRouter, privateApiRouter, publicApiRouter) {
@@ -231,7 +239,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   webRouter.post(
     '/login/can-skip-captcha',
     // Keep in sync with the overleaf-login options.
-    RateLimiterMiddleware.rateLimitV2(rateLimiters.canSkipCaptcha),
+    RateLimiterMiddleware.rateLimit(rateLimiters.canSkipCaptcha),
     CaptchaMiddleware.canSkipCaptcha
   )
 
@@ -310,7 +318,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   webRouter.post(
     '/user/password/update',
     AuthenticationController.requireLogin(),
-    RateLimiterMiddleware.rateLimitV2(rateLimiters.changePassword),
+    RateLimiterMiddleware.rateLimit(rateLimiters.changePassword),
     UserController.changePassword
   )
   webRouter.get(
@@ -322,13 +330,13 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   webRouter.get('/user/emails/confirm', UserEmailsController.showConfirm)
   webRouter.post(
     '/user/emails/confirm',
-    RateLimiterMiddleware.rateLimitV2(rateLimiters.confirmEmail),
+    RateLimiterMiddleware.rateLimit(rateLimiters.confirmEmail),
     UserEmailsController.confirm
   )
   webRouter.post(
     '/user/emails/resend_confirmation',
     AuthenticationController.requireLogin(),
-    RateLimiterMiddleware.rateLimitV2(rateLimiters.resendConfirmation),
+    RateLimiterMiddleware.rateLimit(rateLimiters.resendConfirmation),
     UserEmailsController.resendConfirmation
   )
 
@@ -348,13 +356,13 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     webRouter.post(
       '/user/emails',
       AuthenticationController.requireLogin(),
-      RateLimiterMiddleware.rateLimitV2(rateLimiters.addEmail),
+      RateLimiterMiddleware.rateLimit(rateLimiters.addEmail),
       UserEmailsController.add
     )
     webRouter.post(
       '/user/emails/delete',
       AuthenticationController.requireLogin(),
-      RateLimiterMiddleware.rateLimitV2(rateLimiters.deleteEmail),
+      RateLimiterMiddleware.rateLimit(rateLimiters.deleteEmail),
       UserEmailsController.remove
     )
     webRouter.post(
@@ -365,7 +373,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     webRouter.post(
       '/user/emails/endorse',
       AuthenticationController.requireLogin(),
-      RateLimiterMiddleware.rateLimitV2(rateLimiters.endorseEmail),
+      RateLimiterMiddleware.rateLimit(rateLimiters.endorseEmail),
       UserEmailsController.endorse
     )
   }
@@ -408,7 +416,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
 
   webRouter.post(
     '/user/delete',
-    RateLimiterMiddleware.rateLimitV2(rateLimiters.deleteUser),
+    RateLimiterMiddleware.rateLimit(rateLimiters.deleteUser),
     AuthenticationController.requireLogin(),
     UserController.tryDeleteUser
   )
@@ -451,19 +459,19 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   webRouter.get(
     '/project',
     AuthenticationController.requireLogin(),
-    RateLimiterMiddleware.rateLimitV2(rateLimiters.openDashboard),
+    RateLimiterMiddleware.rateLimit(rateLimiters.openDashboard),
     ProjectController.projectListPage
   )
   webRouter.post(
     '/project/new',
     AuthenticationController.requireLogin(),
-    RateLimiterMiddleware.rateLimitV2(rateLimiters.createProject),
+    RateLimiterMiddleware.rateLimit(rateLimiters.createProject),
     ProjectController.newProject
   )
   webRouter.post(
     '/api/project',
     AuthenticationController.requireLogin(),
-    RateLimiterMiddleware.rateLimitV2(rateLimiters.getProjects),
+    RateLimiterMiddleware.rateLimit(rateLimiters.getProjects),
     ProjectListController.getProjectsJson
   )
 
@@ -475,7 +483,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   ]) {
     webRouter.get(
       route,
-      RateLimiterMiddleware.rateLimitV2(rateLimiters.openProject, {
+      RateLimiterMiddleware.rateLimit(openProjectRateLimiter, {
         params: ['Project_id'],
       }),
       AuthenticationController.validateUserSession(),
@@ -514,7 +522,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
 
   webRouter.post(
     '/project/:Project_id/compile',
-    RateLimiterMiddleware.rateLimitV2(rateLimiters.compileProjectHttp, {
+    RateLimiterMiddleware.rateLimit(rateLimiters.compileProjectHttp, {
       params: ['Project_id'],
     }),
     AuthorizationMiddleware.ensureUserCanReadProject,
@@ -562,7 +570,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   )
 
   // Align with limits defined in CompileController.downloadPdf
-  const rateLimiterMiddlewareOutputFiles = RateLimiterMiddleware.rateLimitV2(
+  const rateLimiterMiddlewareOutputFiles = RateLimiterMiddleware.rateLimit(
     rateLimiters.miscOutputDownload,
     { params: ['Project_id'] }
   )
@@ -753,7 +761,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   )
   webRouter.get(
     '/project/:project_id/version/:version/zip',
-    RateLimiterMiddleware.rateLimitV2(rateLimiters.downloadProjectRevision),
+    RateLimiterMiddleware.rateLimit(rateLimiters.downloadProjectRevision),
     AuthorizationMiddleware.blockRestrictedUserFromProject,
     AuthorizationMiddleware.ensureUserCanReadProject,
     HistoryController.downloadZipOfVersion
@@ -805,7 +813,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
 
   webRouter.get(
     '/Project/:Project_id/download/zip',
-    RateLimiterMiddleware.rateLimitV2(rateLimiters.zipDownload, {
+    RateLimiterMiddleware.rateLimit(rateLimiters.zipDownload, {
       params: ['Project_id'],
     }),
     AuthorizationMiddleware.ensureUserCanReadProject,
@@ -814,7 +822,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   webRouter.get(
     '/project/download/zip',
     AuthenticationController.requireLogin(),
-    RateLimiterMiddleware.rateLimitV2(rateLimiters.multipleProjectsZipDownload),
+    RateLimiterMiddleware.rateLimit(rateLimiters.multipleProjectsZipDownload),
     AuthorizationMiddleware.ensureUserCanReadMultipleProjects,
     ProjectDownloadsController.downloadMultipleProjects
   )
@@ -873,7 +881,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   webRouter.post(
     '/tag',
     AuthenticationController.requireLogin(),
-    RateLimiterMiddleware.rateLimitV2(rateLimiters.createTag),
+    RateLimiterMiddleware.rateLimit(rateLimiters.createTag),
     validate({
       body: Joi.object({
         name: Joi.string().required(),
@@ -884,7 +892,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   webRouter.post(
     '/tag/:tagId/rename',
     AuthenticationController.requireLogin(),
-    RateLimiterMiddleware.rateLimitV2(rateLimiters.renameTag),
+    RateLimiterMiddleware.rateLimit(rateLimiters.renameTag),
     validate({
       body: Joi.object({
         name: Joi.string().required(),
@@ -895,19 +903,19 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   webRouter.delete(
     '/tag/:tagId',
     AuthenticationController.requireLogin(),
-    RateLimiterMiddleware.rateLimitV2(rateLimiters.deleteTag),
+    RateLimiterMiddleware.rateLimit(rateLimiters.deleteTag),
     TagsController.deleteTag
   )
   webRouter.post(
     '/tag/:tagId/project/:projectId',
     AuthenticationController.requireLogin(),
-    RateLimiterMiddleware.rateLimitV2(rateLimiters.addProjectToTag),
+    RateLimiterMiddleware.rateLimit(rateLimiters.addProjectToTag),
     TagsController.addProjectToTag
   )
   webRouter.post(
     '/tag/:tagId/projects',
     AuthenticationController.requireLogin(),
-    RateLimiterMiddleware.rateLimitV2(rateLimiters.addProjectsToTag),
+    RateLimiterMiddleware.rateLimit(rateLimiters.addProjectsToTag),
     validate({
       body: Joi.object({
         projectIds: Joi.array().items(Joi.string()).required(),
@@ -918,13 +926,13 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   webRouter.delete(
     '/tag/:tagId/project/:projectId',
     AuthenticationController.requireLogin(),
-    RateLimiterMiddleware.rateLimitV2(rateLimiters.removeProjectFromTag),
+    RateLimiterMiddleware.rateLimit(rateLimiters.removeProjectFromTag),
     TagsController.removeProjectFromTag
   )
   webRouter.delete(
     '/tag/:tagId/projects',
     AuthenticationController.requireLogin(),
-    RateLimiterMiddleware.rateLimitV2(rateLimiters.removeProjectsFromTag),
+    RateLimiterMiddleware.rateLimit(rateLimiters.removeProjectsFromTag),
     validate({
       body: Joi.object({
         projectIds: Joi.array().items(Joi.string()).required(),
@@ -1083,20 +1091,20 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     '/project/:project_id/messages',
     AuthorizationMiddleware.blockRestrictedUserFromProject,
     AuthorizationMiddleware.ensureUserCanReadProject,
-    RateLimiterMiddleware.rateLimitV2(rateLimiters.sendChatMessage),
+    RateLimiterMiddleware.rateLimit(rateLimiters.sendChatMessage),
     ChatController.sendMessage
   )
 
   webRouter.post(
     '/project/:Project_id/references/index',
     AuthorizationMiddleware.ensureUserCanReadProject,
-    RateLimiterMiddleware.rateLimitV2(rateLimiters.indexProjectReferences),
+    RateLimiterMiddleware.rateLimit(rateLimiters.indexProjectReferences),
     ReferencesController.index
   )
   webRouter.post(
     '/project/:Project_id/references/indexAll',
     AuthorizationMiddleware.ensureUserCanReadProject,
-    RateLimiterMiddleware.rateLimitV2(rateLimiters.indexAllProjectReferences),
+    RateLimiterMiddleware.rateLimit(rateLimiters.indexAllProjectReferences),
     ReferencesController.indexAll
   )
 
@@ -1141,7 +1149,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   )
   publicApiRouter.post(
     '/api/institutions/confirm_university_domain',
-    RateLimiterMiddleware.rateLimitV2(rateLimiters.confirmUniversityDomain),
+    RateLimiterMiddleware.rateLimit(rateLimiters.confirmUniversityDomain),
     AuthenticationController.requirePrivateApiAuth(),
     InstitutionsController.confirmDomain
   )
@@ -1260,7 +1268,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
 
   webRouter.get(
     '/status/compiler/:Project_id',
-    RateLimiterMiddleware.rateLimitV2(rateLimiters.statusCompiler),
+    RateLimiterMiddleware.rateLimit(rateLimiters.statusCompiler),
     AuthorizationMiddleware.ensureUserCanReadProject,
     function (req, res) {
       const projectId = req.params.Project_id
@@ -1336,26 +1344,22 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
         succeeded: Joi.number().min(0).max(6),
       }),
     }),
-    RateLimiterMiddleware.rateLimit({
-      endpointName: 'user-content-domain-a-c-r',
-      maxRequests: 15,
-      timeInterval: 60,
-    }),
+    RateLimiterMiddleware.rateLimit(
+      rateLimiters.userContentDomainAccessCheckResult
+    ),
     UserContentDomainController.recordCheckResult
   )
   webRouter.post(
     '/record-user-content-domain-fallback-usage',
-    RateLimiterMiddleware.rateLimit({
-      endpointName: 'user-content-domain-fb-u',
-      maxRequests: 15,
-      timeInterval: 60,
-    }),
+    RateLimiterMiddleware.rateLimit(
+      rateLimiters.userContentDomainFallbackUsage
+    ),
     UserContentDomainController.recordFallbackUsage
   )
 
   webRouter.get(
     `/read/:token(${TokenAccessController.READ_ONLY_TOKEN_PATTERN})`,
-    RateLimiterMiddleware.rateLimitV2(rateLimiters.readOnlyToken),
+    RateLimiterMiddleware.rateLimit(rateLimiters.readOnlyToken),
     AnalyticsRegistrationSourceMiddleware.setSource(
       'collaboration',
       'link-sharing'
@@ -1366,7 +1370,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
 
   webRouter.get(
     `/:token(${TokenAccessController.READ_AND_WRITE_TOKEN_PATTERN})`,
-    RateLimiterMiddleware.rateLimitV2(rateLimiters.readAndWriteToken),
+    RateLimiterMiddleware.rateLimit(rateLimiters.readAndWriteToken),
     AnalyticsRegistrationSourceMiddleware.setSource(
       'collaboration',
       'link-sharing'
@@ -1377,13 +1381,13 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
 
   webRouter.post(
     `/:token(${TokenAccessController.READ_AND_WRITE_TOKEN_PATTERN})/grant`,
-    RateLimiterMiddleware.rateLimitV2(rateLimiters.grantTokenAccessReadWrite),
+    RateLimiterMiddleware.rateLimit(rateLimiters.grantTokenAccessReadWrite),
     TokenAccessController.grantTokenAccessReadAndWrite
   )
 
   webRouter.post(
     `/read/:token(${TokenAccessController.READ_ONLY_TOKEN_PATTERN})/grant`,
-    RateLimiterMiddleware.rateLimitV2(rateLimiters.grantTokenAccessReadOnly),
+    RateLimiterMiddleware.rateLimit(rateLimiters.grantTokenAccessReadOnly),
     TokenAccessController.grantTokenAccessReadOnly
   )
 
@@ -1391,3 +1395,5 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
 
   webRouter.get('*', ErrorController.notFound)
 }
+
+module.exports = { initialize, rateLimiters }
