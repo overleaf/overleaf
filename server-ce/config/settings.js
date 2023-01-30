@@ -211,6 +211,8 @@ const settings = {
     clsiCacheDir: Path.join(DATA_DIR, 'cache'),
     // Where to write the output files to disk after running LaTeX
     outputDir: Path.join(DATA_DIR, 'output'),
+    // Where to write intermediate file for full project history migration
+    projectHistories: Path.join(DATA_DIR, 'projectHistories'),
   },
 
   // Server Config
