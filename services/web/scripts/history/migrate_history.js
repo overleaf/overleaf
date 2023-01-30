@@ -88,7 +88,7 @@ async function migrateProjects(projectsToMigrate) {
     console.log(`Migrating project: ${project._id}`)
     try {
       const result = await upgradeProject(project._id)
-      console.log(`migration result: ${JSON.stringify(result)}`)
+      console.log('migration result', result)
       projectsMigrated++
     } catch (err) {
       projectsFailed++
