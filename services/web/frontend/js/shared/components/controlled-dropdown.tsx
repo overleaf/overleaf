@@ -1,14 +1,38 @@
-import { Children, cloneElement, type FC, isValidElement } from 'react'
+import React, {
+  Children,
+  cloneElement,
+  type FC,
+  isValidElement,
+  useCallback,
+} from 'react'
 import { Dropdown, DropdownProps } from 'react-bootstrap'
 import useDropdown from '../hooks/use-dropdown'
 
-const ControlledDropdown: FC<
-  DropdownProps & { defaultOpen?: boolean }
-> = props => {
-  const dropdownProps = useDropdown(Boolean(props.defaultOpen))
+type ControlledDropdownProps = DropdownProps & {
+  defaultOpen?: boolean
+  onMainButtonClick?: (dropdownOpen: boolean) => void
+}
+
+const ControlledDropdown: FC<ControlledDropdownProps> = ({
+  defaultOpen,
+  onMainButtonClick,
+  ...props
+}) => {
+  const { onClick, ...dropdownProps } = useDropdown(Boolean(defaultOpen))
+
+  const handleClick = useCallback(
+    (e: React.MouseEvent<Dropdown, MouseEvent>) => {
+      onClick(e)
+
+      if (onMainButtonClick) {
+        onMainButtonClick(dropdownProps.open)
+      }
+    },
+    [onClick, onMainButtonClick, dropdownProps.open]
+  )
 
   return (
-    <Dropdown {...props} {...dropdownProps}>
+    <Dropdown {...props} {...dropdownProps} onClick={handleClick}>
       {Children.map(props.children, child => {
         if (!isValidElement(child)) {
           return child
