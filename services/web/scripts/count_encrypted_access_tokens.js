@@ -5,6 +5,9 @@ process.env.MONGO_SOCKET_TIMEOUT =
 const { ReadPreference } = require('mongodb')
 const { db, waitForDb } = require('../app/src/infrastructure/mongodb')
 const _ = require('lodash')
+const {
+  formatTokenUsageStats,
+} = require('@overleaf/access-token-encryptor/scripts/helpers/format-usage-stats')
 
 const CASES = {
   users: {
@@ -57,22 +60,7 @@ async function main() {
     Object.assign(STATS, stats)
   }
 
-  const prettyStats = []
-  const sortedStats = Object.entries(STATS).sort((a, b) =>
-    a[0] > b[0] ? 1 : -1
-  )
-  const totalByName = {}
-  for (const [key, n] of sortedStats) {
-    const [name, version, collectionName, path, label] = key.split(':')
-    totalByName[name] = (totalByName[name] || 0) + n
-    prettyStats.push({ name, version, collectionName, path, label, n })
-  }
-  for (const row of prettyStats) {
-    row.percentage = ((100 * row.n) / totalByName[row.name])
-      .toFixed(2)
-      .padStart(6)
-  }
-  console.table(prettyStats)
+  formatTokenUsageStats()
 }
 
 main()

@@ -13,8 +13,12 @@
   },
   "author": "",
   "license": "AGPL-3.0-only",
+  "dependencies": {
+    "lodash": "^4.17.21"
+  },
   "peerDependencies": {
-    "@overleaf/logger": "*"
+    "@overleaf/logger": "*",
+    "mongodb": "*"
   },
   "devDependencies": {
     "@overleaf/logger": "*",

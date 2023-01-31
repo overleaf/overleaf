@@ -97,6 +97,7 @@
     "@opentelemetry/sdk-trace-base": "^1.2.0",
     "@opentelemetry/sdk-trace-web": "^1.2.0",
     "@opentelemetry/semantic-conventions": "^1.2.0",
+    "@overleaf/access-token-encryptor": "*",
     "@overleaf/logger": "*",
     "@overleaf/metrics": "*",
     "@overleaf/o-error": "*",
