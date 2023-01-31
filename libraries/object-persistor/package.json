@@ -25,7 +25,7 @@
     "@google-cloud/storage": "^6.9.0",
     "@overleaf/o-error": "*",
     "aws-sdk": "^2.718.0",
-    "fast-crc32c": "https://github.com/overleaf/node-fast-crc32c/archive/aae6b2a4c7a7a159395df9cc6c38dfde702d6f51.tar.gz",
+    "fast-crc32c": "overleaf/node-fast-crc32c#aae6b2a4c7a7a159395df9cc6c38dfde702d6f51",
     "glob": "^7.1.6",
     "range-parser": "^1.2.1",
     "tiny-async-pool": "^1.1.0"
