@@ -77,6 +77,7 @@ function PersonalSubscription({
           <strong>{t('payment_provider_unreachable_error')}</strong>
         </div>
       )}
+      <hr />
     </>
   )
 }

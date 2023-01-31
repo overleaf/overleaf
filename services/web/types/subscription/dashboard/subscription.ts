@@ -62,3 +62,7 @@ export type Subscription = {
   }
   pendingPlan?: Plan
 }
+
+export type GroupSubscription = Subscription & {
+  teamName: string
+}

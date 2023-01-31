@@ -25,6 +25,13 @@ function buildHostedLink(type) {
   return `/user/subscription/recurly/${type}`
 }
 
+// Downgrade from Mongoose object, so we can add custom attributes to object
+function serializeMongooseObject(object) {
+  return object && typeof object.toObject === 'function'
+    ? object.toObject()
+    : object
+}
+
 async function getRedirectToHostedPage(userId, pageType) {
   if (!['billing-details', 'account-management'].includes(pageType)) {
     throw new InvalidError('unexpected page type')
@@ -178,13 +185,13 @@ function buildUsersSubscriptionViewModel(user, callback) {
         recurlyCoupons = []
       }
 
-      if (
-        personalSubscription &&
-        typeof personalSubscription.toObject === 'function'
-      ) {
-        // Downgrade from Mongoose object, so we can add a recurly and plan attribute
-        personalSubscription = personalSubscription.toObject()
-      }
+      personalSubscription = serializeMongooseObject(personalSubscription)
+      memberGroupSubscriptions = memberGroupSubscriptions.map(
+        serializeMongooseObject
+      )
+      managedGroupSubscriptions = managedGroupSubscriptions.map(
+        serializeMongooseObject
+      )
 
       if (plan != null) {
         personalSubscription.plan = plan
@@ -306,7 +313,11 @@ function buildUsersSubscriptionViewModel(user, callback) {
       }
 
       for (const memberGroupSubscription of memberGroupSubscriptions) {
-        if (memberGroupSubscription.manager_ids?.includes(user._id)) {
+        if (
+          memberGroupSubscription.manager_ids?.some(
+            id => id.toString() === user._id.toString()
+          )
+        ) {
           memberGroupSubscription.userIsGroupManager = true
         }
         if (memberGroupSubscription.teamNotice) {
@@ -318,7 +329,11 @@ function buildUsersSubscriptionViewModel(user, callback) {
       }
 
       for (const managedGroupSubscription of managedGroupSubscriptions) {
-        if (managedGroupSubscription.member_ids?.includes(user._id)) {
+        if (
+          managedGroupSubscription.member_ids?.some(
+            id => id.toString() === user._id.toString()
+          )
+        ) {
           managedGroupSubscription.userIsGroupMember = true
         }
         buildGroupSubscriptionForView(managedGroupSubscription)
