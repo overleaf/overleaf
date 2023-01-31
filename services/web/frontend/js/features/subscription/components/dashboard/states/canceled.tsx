@@ -2,7 +2,7 @@ import { useTranslation, Trans } from 'react-i18next'
 import { Subscription } from '../../../../../../../types/subscription/dashboard/subscription'
 import PremiumFeaturesLink from '../premium-features-link'
 
-export function CanceledSubsciption({
+export function CanceledSubscription({
   subscription,
 }: {
   subscription: Subscription

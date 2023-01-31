@@ -9,7 +9,7 @@ import { PendingPlanChange } from './pending-plan-change'
 import { TrialEnding } from './trial-ending'
 import { ChangePlan } from './change-plan'
 
-export function ActiveSubsciption({
+export function ActiveSubscription({
   subscription,
 }: {
   subscription: Subscription
@@ -66,11 +66,20 @@ export function ActiveSubsciption({
             </button>
           )}
       </p>
-      {subscription.pendingPlan && (
-        <p>{t('want_change_to_apply_before_plan_end')}</p>
-      )}
+      {/* && personalSubscription.pendingPlan.name != personalSubscription.plan.name */}
+      {subscription.pendingPlan &&
+        subscription.pendingPlan.name !== subscription.plan.name && (
+          <p>{t('want_change_to_apply_before_plan_end')}</p>
+        )}
       {/* TODO: groupPlan */}
-      <TrialEnding subscription={subscription} />
+      {subscription.recurly.trial_ends_at &&
+        subscription.recurly.trialEndsAtFormatted && (
+          <TrialEnding
+            trialEndsAt={subscription.recurly.trial_ends_at}
+            trialEndsAtFormatted={subscription.recurly.trialEndsAtFormatted}
+          />
+        )}
+
       <p>
         <Trans
           i18nKey="next_payment_of_x_collectected_on_y"

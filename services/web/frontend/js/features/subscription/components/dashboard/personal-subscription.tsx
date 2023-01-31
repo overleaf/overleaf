@@ -1,9 +1,9 @@
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Subscription } from '../../../../../../types/subscription/dashboard/subscription'
-import { ActiveSubsciption } from './states/active/active'
-import { CanceledSubsciption } from './states/canceled'
-import { ExpiredSubsciption } from './states/expired'
+import { ActiveSubscription } from './states/active/active'
+import { CanceledSubscription } from './states/canceled'
+import { ExpiredSubscription } from './states/expired'
 import { useSubscriptionDashboardContext } from '../../context/subscription-dashboard-context'
 
 function PastDueSubscriptionAlert({
@@ -30,19 +30,18 @@ function PastDueSubscriptionAlert({
 
 function PersonalSubscriptionStates({
   subscription,
-  state,
 }: {
   subscription: Subscription
-  state?: string
 }) {
   const { t } = useTranslation()
+  const state = subscription?.recurly?.state
 
   if (state === 'active') {
-    return <ActiveSubsciption subscription={subscription} />
+    return <ActiveSubscription subscription={subscription} />
   } else if (state === 'canceled') {
-    return <CanceledSubsciption subscription={subscription} />
+    return <CanceledSubscription subscription={subscription} />
   } else if (state === 'expired') {
-    return <ExpiredSubsciption subscription={subscription} />
+    return <ExpiredSubscription subscription={subscription} />
   } else {
     return <>{t('problem_with_subscription_contact_us')}</>
   }
@@ -56,7 +55,6 @@ function PersonalSubscription({
   const { t } = useTranslation()
   const { recurlyLoadError, setRecurlyLoadError } =
     useSubscriptionDashboardContext()
-  const state = subscription?.recurly?.state
 
   useEffect(() => {
     if (typeof window.recurly === 'undefined' || !window.recurly) {
@@ -71,7 +69,7 @@ function PersonalSubscription({
       {subscription.recurly.account.has_past_due_invoice._ === 'true' && (
         <PastDueSubscriptionAlert subscription={subscription} />
       )}
-      <PersonalSubscriptionStates subscription={subscription} state={state} />
+      <PersonalSubscriptionStates subscription={subscription} />
       {recurlyLoadError && (
         <div className="alert alert-warning" role="alert">
           <strong>{t('payment_provider_unreachable_error')}</strong>

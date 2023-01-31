@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react'
-import { ExpiredSubsciption } from '../../../../../../../frontend/js/features/subscription/components/dashboard/states/expired'
+import { ExpiredSubscription } from '../../../../../../../frontend/js/features/subscription/components/dashboard/states/expired'
 import { pastDueExpiredSubscription } from '../../../fixtures/subscriptions'
 
-describe('<ExpiredSubsciption />', function () {
+describe('<ExpiredSubscription />', function () {
   beforeEach(function () {
     window.metaAttributesCache = new Map()
   })
@@ -12,7 +12,7 @@ describe('<ExpiredSubsciption />', function () {
   })
 
   it('renders the invoices link', function () {
-    render(<ExpiredSubsciption subscription={pastDueExpiredSubscription} />)
+    render(<ExpiredSubscription subscription={pastDueExpiredSubscription} />)
 
     screen.getByText('View Your Invoices', {
       exact: false,

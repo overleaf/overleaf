@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { fireEvent, render, screen } from '@testing-library/react'
 import * as eventTracking from '../../../../../../../frontend/js/infrastructure/event-tracking'
-import { ActiveSubsciption } from '../../../../../../../frontend/js/features/subscription/components/dashboard/states/active/active'
+import { ActiveSubscription } from '../../../../../../../frontend/js/features/subscription/components/dashboard/states/active/active'
 import { SubscriptionDashboardProvider } from '../../../../../../../frontend/js/features/subscription/context/subscription-dashboard-context'
 import { Subscription } from '../../../../../../../types/subscription/dashboard/subscription'
 import {
@@ -61,7 +61,7 @@ describe('<ActiveSubscription />', function () {
   it('renders the dash annual active subscription', function () {
     render(
       <SubscriptionDashboardProvider>
-        <ActiveSubsciption subscription={annualActiveSubscription} />
+        <ActiveSubscription subscription={annualActiveSubscription} />
       </SubscriptionDashboardProvider>
     )
     expectedInActiveSubscription(annualActiveSubscription)
@@ -70,7 +70,7 @@ describe('<ActiveSubscription />', function () {
   it('shows change plan UI when button clicked', function () {
     render(
       <SubscriptionDashboardProvider>
-        <ActiveSubsciption subscription={annualActiveSubscription} />
+        <ActiveSubscription subscription={annualActiveSubscription} />
       </SubscriptionDashboardProvider>
     )
 
@@ -87,7 +87,7 @@ describe('<ActiveSubscription />', function () {
   it('notes when user is changing plan at end of current plan term', function () {
     render(
       <SubscriptionDashboardProvider>
-        <ActiveSubsciption subscription={pendingSubscriptionChange} />
+        <ActiveSubscription subscription={pendingSubscriptionChange} />
       </SubscriptionDashboardProvider>
     )
 
@@ -99,12 +99,16 @@ describe('<ActiveSubscription />', function () {
     screen.getByText(' at the end of the current billing period', {
       exact: false,
     })
+
+    screen.getByText(
+      'If you wish this change to apply before the end of your current billing period, please contact us.'
+    )
   })
 
   it('does not show "Change plan" option for group plans', function () {
     render(
       <SubscriptionDashboardProvider>
-        <ActiveSubsciption subscription={groupActiveSubscription} />
+        <ActiveSubscription subscription={groupActiveSubscription} />
       </SubscriptionDashboardProvider>
     )
 
@@ -123,7 +127,7 @@ describe('<ActiveSubscription />', function () {
 
     render(
       <SubscriptionDashboardProvider>
-        <ActiveSubsciption subscription={activePastDueSubscription} />
+        <ActiveSubscription subscription={activePastDueSubscription} />
       </SubscriptionDashboardProvider>
     )
 
@@ -134,7 +138,7 @@ describe('<ActiveSubscription />', function () {
   it('shows the pending license change message when plan change is pending', function () {
     render(
       <SubscriptionDashboardProvider>
-        <ActiveSubsciption
+        <ActiveSubscription
           subscription={groupActiveSubscriptionWithPendingLicenseChange}
         />
       </SubscriptionDashboardProvider>
@@ -144,29 +148,23 @@ describe('<ActiveSubscription />', function () {
       exact: false,
     })
 
-    if (
-      !groupActiveSubscriptionWithPendingLicenseChange.recurly
-        .pendingAdditionalLicenses
-    ) {
-      throw Error('not expected test data')
-    }
     screen.getByText(
       groupActiveSubscriptionWithPendingLicenseChange.recurly
-        .pendingAdditionalLicenses
+        .pendingAdditionalLicenses!
     )
 
     screen.getByText('additional license(s) for a total of', { exact: false })
 
-    if (
-      !groupActiveSubscriptionWithPendingLicenseChange.recurly
-        .pendingTotalLicenses
-    ) {
-      throw Error('not expected test data')
-    }
     screen.getByText(
       groupActiveSubscriptionWithPendingLicenseChange.recurly
-        .pendingTotalLicenses
+        .pendingTotalLicenses!
     )
+
+    expect(
+      screen.queryByText(
+        'If you wish this change to apply before the end of your current billing period, please contact us.'
+      )
+    ).to.be.null
   })
 
   it('shows the pending license change message when plan change is not pending', function () {
@@ -178,7 +176,7 @@ describe('<ActiveSubscription />', function () {
 
     render(
       <SubscriptionDashboardProvider>
-        <ActiveSubsciption subscription={subscription} />
+        <ActiveSubscription subscription={subscription} />
       </SubscriptionDashboardProvider>
     )
 
@@ -186,9 +184,6 @@ describe('<ActiveSubscription />', function () {
       exact: false,
     })
 
-    if (!subscription.recurly.additionalLicenses) {
-      throw Error('not expected test data')
-    }
     screen.getByText(subscription.recurly.additionalLicenses)
 
     screen.getByText('additional license(s) for a total of', { exact: false })
@@ -199,15 +194,13 @@ describe('<ActiveSubscription />', function () {
   it('shows when trial ends and first payment collected', function () {
     render(
       <SubscriptionDashboardProvider>
-        <ActiveSubsciption subscription={trialSubscription} />
+        <ActiveSubscription subscription={trialSubscription} />
       </SubscriptionDashboardProvider>
     )
     screen.getByText('You’re on a free trial which ends on', { exact: false })
-    if (!trialSubscription.recurly.trialEndsAtFormatted) {
-      throw new Error('not expected test data')
-    }
+
     const endDate = screen.getAllByText(
-      trialSubscription.recurly.trialEndsAtFormatted
+      trialSubscription.recurly.trialEndsAtFormatted!
     )
     expect(endDate.length).to.equal(2)
   })
@@ -215,7 +208,7 @@ describe('<ActiveSubscription />', function () {
   it('shows cancel UI and sends event', function () {
     render(
       <SubscriptionDashboardProvider>
-        <ActiveSubsciption subscription={annualActiveSubscription} />
+        <ActiveSubscription subscription={annualActiveSubscription} />
       </SubscriptionDashboardProvider>
     )
     // before button clicked

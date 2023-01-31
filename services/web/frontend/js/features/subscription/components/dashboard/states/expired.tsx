@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { Subscription } from '../../../../../../../types/subscription/dashboard/subscription'
 
-export function ExpiredSubsciption({
+export function ExpiredSubscription({
   subscription,
 }: {
   subscription: Subscription
