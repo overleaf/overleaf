@@ -10,12 +10,12 @@ const ProjectEntityUpdateHandler = require('../../../../app/src/Features/Project
 const DocumentUpdaterHandler = require('../../../../app/src/Features/DocumentUpdater/DocumentUpdaterHandler')
 
 // Timestamp of when 'Enable history for SL in background' release
-const ID_WHEN_FULL_PROJECT_HISTORY_ENABLED = '5a8d8a370000000000000000'
-const OBJECT_ID_WHEN_FULL_PROJECT_HISTORY_ENABLED = new ObjectId(
-  ID_WHEN_FULL_PROJECT_HISTORY_ENABLED
-)
+const ID_WHEN_FULL_PROJECT_HISTORY_ENABLED =
+  Settings.apis.project_history?.idWhenFullProjectHistoryEnabled // was '5a8d8a370000000000000000'
 const DATETIME_WHEN_FULL_PROJECT_HISTORY_ENABLED =
-  OBJECT_ID_WHEN_FULL_PROJECT_HISTORY_ENABLED.getTimestamp()
+  ID_WHEN_FULL_PROJECT_HISTORY_ENABLED
+    ? new ObjectId(ID_WHEN_FULL_PROJECT_HISTORY_ENABLED).getTimestamp()
+    : null
 
 async function countProjects(query = {}) {
   const count = await db.projects.count(query)
@@ -285,9 +285,13 @@ async function doUpgradeForNoneWithConversion(project, options = {}) {
 // Util
 
 function projectCreatedAfterFullProjectHistoryEnabled(project) {
-  return (
-    project._id.getTimestamp() >= DATETIME_WHEN_FULL_PROJECT_HISTORY_ENABLED
-  )
+  if (DATETIME_WHEN_FULL_PROJECT_HISTORY_ENABLED == null) {
+    return false
+  } else {
+    return (
+      project._id.getTimestamp() >= DATETIME_WHEN_FULL_PROJECT_HISTORY_ENABLED
+    )
+  }
 }
 
 async function shouldPreserveHistory(project) {
