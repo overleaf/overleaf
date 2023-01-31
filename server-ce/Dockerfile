@@ -49,8 +49,8 @@ RUN chmod 644 /etc/logrotate.d/sharelatex
 # Configure cron tasks
 # ----------------------
 ADD server-ce/cron /overleaf/cron
-ADD server-ce/config/crontab* /etc/cron.d
-
+ADD server-ce/config/crontab-history /etc/cron.d/crontab-history
+RUN chmod 600 /etc/cron.d/crontab-history
 
 # Copy Phusion Image startup scripts to its location
 # --------------------------------------------------
