@@ -7,6 +7,7 @@ const HistoryManager = require('../../../../app/src/Features/History/HistoryMana
 const ProjectHistoryController = require('./ProjectHistoryController')
 const ProjectEntityHandler = require('../../../../app/src/Features/Project/ProjectEntityHandler')
 const ProjectEntityUpdateHandler = require('../../../../app/src/Features/Project/ProjectEntityUpdateHandler')
+const DocumentUpdaterHandler = require('../../../../app/src/Features/DocumentUpdater/DocumentUpdaterHandler')
 
 // Timestamp of when 'Enable history for SL in background' release
 const ID_WHEN_FULL_PROJECT_HISTORY_ENABLED = '5a8d8a370000000000000000'
@@ -196,6 +197,11 @@ async function doUpgradeForNoneWithoutConversion(project) {
         await ProjectHistoryHandler.promises.setHistoryId(projectId, historyId)
       }
     }
+    // tell document updater to clear the docs, they will be reloaded with any new history id
+    await DocumentUpdaterHandler.promises.flushProjectToMongoAndDelete(
+      projectId
+    )
+    // now resync the project
     await HistoryManager.promises.resyncProject(projectId, {
       force: true,
       origin: { kind: 'history-migration' },
