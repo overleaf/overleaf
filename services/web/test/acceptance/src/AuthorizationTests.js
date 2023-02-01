@@ -633,6 +633,10 @@ describe('Authorization', function () {
   })
 
   describe('public read-write project', function () {
+    /**
+     * Note: this is a test for the legacy "public access" feature.
+     * See documentation comment in `Authorization/PublicAccessLevels`
+     * */
     beforeEach(function (done) {
       this.owner.createProject('public-rw-project', (error, projectId) => {
         if (error != null) {
@@ -693,6 +697,10 @@ describe('Authorization', function () {
   })
 
   describe('public read-only project', function () {
+    /**
+     * Note: this is a test for the legacy "public access" feature.
+     * See documentation comment in `Authorization/PublicAccessLevels`
+     * */
     beforeEach(function (done) {
       this.owner.createProject('public-ro-project', (error, projectId) => {
         if (error != null) {

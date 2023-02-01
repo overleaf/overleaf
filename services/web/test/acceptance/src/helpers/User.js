@@ -624,19 +624,13 @@ class User {
   }
 
   makePublic(projectId, level, callback) {
-    this.request.post(
-      {
-        url: `/project/${projectId}/settings/admin`,
-        json: {
-          publicAccessLevel: level,
-        },
-      },
-      (error, response, body) => {
-        if (error != null) {
-          return callback(error)
-        }
-        callback(null)
-      }
+    // A fudge, to get around the fact that `readOnly` and `readAndWrite` are now disallowed
+    // via the API, but we still need to test the behaviour of projects with these values set.
+    db.projects.updateOne(
+      { _id: ObjectId(projectId) },
+      // NOTE: Yes, there is a typo in the db schema.
+      { $set: { publicAccesLevel: level } },
+      callback
     )
   }
 

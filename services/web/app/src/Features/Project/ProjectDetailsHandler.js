@@ -181,18 +181,11 @@ function fixProjectName(name) {
 }
 
 async function setPublicAccessLevel(projectId, newAccessLevel) {
-  // DEPRECATED: `READ_ONLY` and `READ_AND_WRITE` are still valid in, but should no longer
-  // be passed here. Remove after token-based access has been live for a while
   if (
     projectId != null &&
     newAccessLevel != null &&
     _.include(
-      [
-        PublicAccessLevels.READ_ONLY,
-        PublicAccessLevels.READ_AND_WRITE,
-        PublicAccessLevels.PRIVATE,
-        PublicAccessLevels.TOKEN_BASED,
-      ],
+      [PublicAccessLevels.PRIVATE, PublicAccessLevels.TOKEN_BASED],
       newAccessLevel
     )
   ) {

@@ -443,7 +443,7 @@ describe('ProjectDetailsHandler', function () {
 
   describe('setPublicAccessLevel', function () {
     beforeEach(function () {
-      this.accessLevel = 'readOnly'
+      this.accessLevel = 'tokenBased'
     })
 
     it('should update the project with the new level', async function () {
