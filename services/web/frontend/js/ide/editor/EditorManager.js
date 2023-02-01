@@ -195,6 +195,11 @@ export default EditorManager = (function () {
     }
 
     newSourceEditor() {
+      // the new source editor is not available at the moment in CE
+      if (!getMeta('ol-hasNewSourceEditor')) {
+        return false
+      }
+
       // Use the new source editor if the legacy editor is disabled
       if (!getMeta('ol-showLegacySourceEditor')) {
         return true
