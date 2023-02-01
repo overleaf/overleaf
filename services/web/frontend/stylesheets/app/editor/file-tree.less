@@ -477,6 +477,18 @@
   padding-top: 20px;
 }
 
+.modal-new-file--body-conflict {
+  background-color: @red-10;
+  border: 1px dashed @red-50;
+  min-height: 400px;
+  border-radius: 3px;
+  color: @neutral-90;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: @padding-sm;
+}
+
 .modal-footer {
   .approaching-file-limit {
     font-weight: bold;
@@ -491,8 +503,24 @@
   font-family: inherit;
 }
 
-.modal-new-file--body-upload .uppy-size--md {
-  .uppy-Dashboard-AddFiles-title {
-    font-size: inherit;
+.modal-new-file--body-upload .uppy-Dashboard {
+  .uppy-Dashboard-inner {
+    border: none;
+  }
+
+  .uppy-Dashboard-dropFilesHereHint {
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+
+  .uppy-Dashboard-AddFiles {
+    margin: 0;
+    border: 1px dashed @neutral-60;
+    height: 100%;
+    .uppy-Dashboard-AddFiles-title {
+      font-size: inherit;
+    }
   }
 }

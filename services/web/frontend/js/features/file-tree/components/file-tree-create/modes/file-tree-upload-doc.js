@@ -1,5 +1,5 @@
-import { Trans } from 'react-i18next'
-import { Alert, Button } from 'react-bootstrap'
+import { Trans, useTranslation } from 'react-i18next'
+import { Button } from 'react-bootstrap'
 import { useCallback, useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import Uppy from '@uppy/core'
@@ -225,13 +225,15 @@ UploadErrorMessage.propTypes = {
 }
 
 function UploadConflicts({ cancel, conflicts, handleOverwrite }) {
+  const { t } = useTranslation()
+
   return (
-    <Alert bsStyle="warning" className="small">
-      <p className="text-center">
-        The following files already exist in this project:
+    <div className="small modal-new-file--body-conflict">
+      <p className="text-center mb-0">
+        {t('the_following_files_already_exist_in_this_project')}
       </p>
 
-      <ul className="text-center list-unstyled row-spaced-small">
+      <ul className="text-center list-unstyled row-spaced-small mt-1">
         {conflicts.map((conflict, index) => (
           <li key={index}>
             <strong>{conflict.meta.name}</strong>
@@ -240,19 +242,19 @@ function UploadConflicts({ cancel, conflicts, handleOverwrite }) {
       </ul>
 
       <p className="text-center row-spaced-small">
-        Do you want to overwrite them?
+        {t('do_you_want_to_overwrite_them')}
       </p>
 
       <p className="text-center">
-        <Button bsStyle="primary" onClick={handleOverwrite}>
-          Overwrite
+        <Button bsStyle={null} className="btn-secondary" onClick={cancel}>
+          {t('cancel')}
         </Button>
         &nbsp;
-        <Button bsStyle={null} className="btn-secondary" onClick={cancel}>
-          Cancel
+        <Button bsStyle="danger" onClick={handleOverwrite}>
+          {t('overwrite')}
         </Button>
       </p>
-    </Alert>
+    </div>
   )
 }
 UploadConflicts.propTypes = {
