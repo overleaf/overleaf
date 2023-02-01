@@ -73,6 +73,7 @@
   "all_packages_and_templates": "All the packages and <0>__templatesLink__</0> you need",
   "all_premium_features": "All premium features",
   "all_premium_features_including": "All premium features, including:",
+  "all_prices_displayed_are_in_currency": "All prices displayed are in __recommendedCurrency__.",
   "all_projects": "All Projects",
   "all_templates": "All Templates",
   "already_have_sl_account": "Already have an __appName__ account?",

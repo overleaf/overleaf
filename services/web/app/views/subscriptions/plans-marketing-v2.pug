@@ -25,7 +25,10 @@ block content
 					include ./plans-marketing/v2/_cards_controls_tables
 					.row.row-spaced-large.text-centered
 						.col-xs-12
-							p.text-centered #{translate("subject_to_additional_vat")}
+							p.text-centered
+								strong #{translate("all_prices_displayed_are_in_currency", {recommendedCurrency})}
+								| &nbsp;
+								span #{translate("subject_to_additional_vat")}
 							i.fa.fa-cc-mastercard.fa-2x(aria-hidden="true") &nbsp;
 							span.sr-only Mastercard accepted
 							i.fa.fa-cc-visa.fa-2x(aria-hidden="true") &nbsp;
