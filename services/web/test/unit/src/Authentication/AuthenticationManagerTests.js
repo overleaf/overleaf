@@ -12,6 +12,7 @@ describe('AuthenticationManager', function () {
   beforeEach(function () {
     tk.freeze(Date.now())
     this.settings = { security: { bcryptRounds: 4 } }
+    this.metrics = { inc: sinon.stub().returns() }
     this.AuthenticationManager = SandboxedModule.require(modulePath, {
       requires: {
         '../../models/User': {
@@ -34,6 +35,7 @@ describe('AuthenticationManager', function () {
         '../User/UserAuditLogHandler': (this.UserAuditLogHandler = {
           addEntry: sinon.stub().callsArgWith(5, null),
         }),
+        '@overleaf/metrics': this.metrics,
       },
     })
     this.callback = sinon.stub()
@@ -63,6 +65,7 @@ describe('AuthenticationManager', function () {
         }
         this.user.hashedPassword = this.testPassword
         this.User.findOne = sinon.stub().callsArgWith(1, null, this.user)
+        this.metrics.inc.reset()
       })
 
       describe('when the hashed password matches', function () {
@@ -98,6 +101,12 @@ describe('AuthenticationManager', function () {
         it('should return the user', function () {
           this.callback.calledWith(null, this.user).should.equal(true)
         })
+
+        it('should send metrics', function () {
+          expect(
+            this.metrics.inc.calledWith('check-password', { status: 'success' })
+          ).to.equal(true)
+        })
       })
 
       describe('when the encrypted passwords do not match', function () {
@@ -127,6 +136,10 @@ describe('AuthenticationManager', function () {
 
         it('should not return the user', function () {
           this.callback.calledWith(null, null).should.equal(true)
+        })
+
+        it('should not send metrics', function () {
+          expect(this.metrics.inc.called).to.equal(false)
         })
       })
 
@@ -240,6 +253,7 @@ describe('AuthenticationManager', function () {
         }
         this.unencryptedPassword = 'banana'
         this.User.findOne = sinon.stub().callsArgWith(1, null, this.user)
+        this.metrics.inc.reset()
       })
 
       describe('when the hashed password matches', function () {
@@ -267,6 +281,14 @@ describe('AuthenticationManager', function () {
             .should.equal(true)
         })
 
+        it('should send metrics', function () {
+          expect(
+            this.metrics.inc.calledWith('check-password', {
+              status: 'too_short',
+            })
+          ).to.equal(true)
+        })
+
         it('should return the user', function () {
           this.callback.calledWith(null, this.user).should.equal(true)
         })
@@ -281,6 +303,10 @@ describe('AuthenticationManager', function () {
             this.unencryptedPassword,
             this.callback
           )
+        })
+
+        it('should not send metrics', function () {
+          expect(this.metrics.inc.called).to.equal(false)
         })
 
         it('should not return the user', function () {
@@ -649,7 +675,7 @@ describe('AuthenticationManager', function () {
   describe('setUserPassword', function () {
     beforeEach(function () {
       this.user_id = ObjectId()
-      this.password = 'banana'
+      this.password = 'bananagram'
       this.hashedPassword = 'asdkjfa;osiuvandf'
       this.salt = 'saltaasdfasdfasdf'
       this.user = {

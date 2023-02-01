@@ -444,7 +444,7 @@ module.exports = {
   // opts are from http://antelle.github.io/passfield
   passwordStrengthOptions: {
     length: {
-      min: 6,
+      min: 8,
       // Bcrypt does not support longer passwords than that.
       max: 72,
     },

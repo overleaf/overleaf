@@ -14,6 +14,7 @@ const util = require('util')
 const HaveIBeenPwned = require('./HaveIBeenPwned')
 const UserAuditLogHandler = require('../User/UserAuditLogHandler')
 const logger = require('@overleaf/logger')
+const Metrics = require('@overleaf/metrics')
 
 const BCRYPT_ROUNDS = Settings.security.bcryptRounds || 12
 const BCRYPT_MINOR_VERSION = Settings.security.bcryptMinorVersion || 'a'
@@ -38,6 +39,14 @@ function _validatePasswordNotTooLong(password) {
   return null
 }
 
+function _metricsForSuccessfulPasswordMatch(password) {
+  const validationResult = AuthenticationManager.validatePassword(password)
+  const status =
+    validationResult === null ? 'success' : validationResult?.info?.code
+  Metrics.inc('check-password', { status })
+  return null
+}
+
 const AuthenticationManager = {
   _checkUserPassword(query, password, callback) {
     // Using Mongoose for legacy reasons here. The returned User instance
@@ -53,6 +62,9 @@ const AuthenticationManager = {
       bcrypt.compare(password, user.hashedPassword, function (error, match) {
         if (error) {
           return callback(error)
+        }
+        if (match) {
+          _metricsForSuccessfulPasswordMatch(password)
         }
         return callback(null, user, match)
       })
@@ -157,7 +169,7 @@ const AuthenticationManager = {
       }
     }
     allowAnyChars = !!allowAnyChars
-    min = min || 6
+    min = min || 8
     max = max || 72
 
     // we don't support passwords > 72 characters in length, because bcrypt truncates them

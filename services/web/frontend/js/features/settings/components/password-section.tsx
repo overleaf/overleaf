@@ -128,7 +128,7 @@ function PasswordForm() {
         label={t('new_password')}
         value={newPassword1}
         handleChange={handleNewPassword1Change}
-        minLength={passwordStrengthOptions?.length?.min || 6}
+        minLength={passwordStrengthOptions?.length?.min || 8}
         autoComplete="new-password"
       />
       <PasswordFormGroup
