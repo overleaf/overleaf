@@ -60,7 +60,7 @@ async function main() {
     Object.assign(STATS, stats)
   }
 
-  formatTokenUsageStats()
+  formatTokenUsageStats(STATS)
 }
 
 main()
