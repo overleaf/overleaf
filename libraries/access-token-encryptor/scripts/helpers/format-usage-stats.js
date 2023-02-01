@@ -14,7 +14,14 @@ function formatTokenUsageStats(STATS) {
       .toFixed(2)
       .padStart(6)
   }
-  console.table(prettyStats)
+
+  if (prettyStats.length === 0) {
+    console.warn('---')
+    console.warn('Found 0 access tokens.')
+    console.warn('---')
+  } else {
+    console.table(prettyStats)
+  }
 }
 
 module.exports = { formatTokenUsageStats }
