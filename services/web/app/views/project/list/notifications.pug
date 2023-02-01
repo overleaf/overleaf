@@ -283,33 +283,3 @@ include ../../_mixins/reconfirm_affiliation
 						button(ng-click="dismiss()").close.pull-right
 							span(aria-hidden="true") &times;
 							span.sr-only #{translate("close")}
-
-	if showNewUsersMicroSurvey
-		ul.list-unstyled(
-			ng-controller="NewUsersMicroSurveyController",
-			ng-cloak
-		)
-			li.notification-entry(
-				ng-if="!hasDismissedNewUsersMicroSurvey"
-				event-tracking="new-users-micro-survey-prompt"
-				event-tracking-mb="true"
-				event-tracking-trigger="load"
-				event-segmentation='{"project-dashboard-react": "default"}'
-			)
-				.alert.alert-info
-					.notification-body
-						| !{translate("help_us_improve_overleaf_by_answering_a_two_question_survey", {}, ['strong'])}
-					.notification-action
-						a.pull-right.btn.btn-sm.btn-info(
-							ng-click="dismiss()"
-							href="https://docs.google.com/forms/d/e/1FAIpQLSdN23eSbaGkl96-LkNiIW1QCVdhAQEnSGrEhbuuZgNQ5-Qvog/viewform?usp=sf_link"
-							target="_blank"
-							event-tracking="new-users-micro-survey-click"
-							event-tracking-mb="true"
-							event-tracking-trigger="click"
-							event-segmentation='{"project-dashboard-react": "default"}'
-						) #{translate("take_survey")}
-					.notification-close
-						button(ng-click="dismiss()").close.pull-right
-							span(aria-hidden="true") &times;
-							span.sr-only #{translate("close")}

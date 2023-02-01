@@ -47,22 +47,6 @@ App.controller(
   }
 )
 
-App.controller(
-  'NewUsersMicroSurveyController',
-  function ($scope, localStorage) {
-    $scope.hasDismissedNewUsersMicroSurvey = localStorage(
-      'has_dismissed_new_users_micro_survey'
-    )
-
-    $scope.dismiss = () => {
-      localStorage('has_dismissed_new_users_micro_survey', true)
-      $scope.hasDismissedNewUsersMicroSurvey = true
-    }
-
-    $scope.newUsersMicroSurveyVariant = getMeta('ol-newUsersMicroSurvey')
-  }
-)
-
 App.controller('ProjectInviteNotificationController', function ($scope, $http) {
   // Shortcuts for translation keys
   $scope.projectName = $scope.notification.messageOpts.projectName
