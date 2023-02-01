@@ -233,7 +233,7 @@
     "request": "^2.88.2",
     "requestretry": "^7.1.0",
     "rimraf": "2.2.6",
-    "sanitize-html": "^1.27.1",
+    "sanitize-html": "^2.8.1",
     "scroll-into-view-if-needed": "^2.2.25",
     "tsscmp": "^1.0.6",
     "underscore": "^1.13.1",
