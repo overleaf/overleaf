@@ -39,7 +39,7 @@ export default function TagsList() {
           <span className="name">{t('new_folder')}</span>
         </Button>
       </li>
-      {sortBy(tags, tag => tag.name.toLowerCase()).map(tag => {
+      {sortBy(tags, tag => tag.name?.toLowerCase()).map(tag => {
         return (
           <li
             className={`tag ${selectedTagId === tag._id ? 'active' : ''}`}

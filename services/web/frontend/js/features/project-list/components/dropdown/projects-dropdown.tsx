@@ -66,7 +66,7 @@ function ProjectsDropdown() {
       const tag = tags.find(({ _id: id }) => id === selectedTagId)
 
       if (tag) {
-        setTitle(tag.name)
+        setTitle(tag.name ?? '')
       }
     }
   }, [filter, tags, selectedTagId, t])

@@ -138,7 +138,14 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
   const [selectedTagId, setSelectedTagId] = usePersistedState<
     string | undefined
   >('project-list-selected-tag-id', undefined)
-  const [tags, setTags] = useState<Tag[]>(getMeta('ol-tags', []) as Tag[])
+
+  const olTags: Tag[] = getMeta('ol-tags', [])
+
+  const [tags, setTags] = useState<Tag[]>(() =>
+    // `tag.name` data may be null for some old users
+    olTags.map(tag => ({ ...tag, name: tag.name ?? '' }))
+  )
+
   const [searchText, setSearchText] = useState('')
 
   const {
