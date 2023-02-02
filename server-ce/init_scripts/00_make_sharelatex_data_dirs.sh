@@ -22,8 +22,8 @@ chown www-data:www-data /var/lib/sharelatex/data/template_files
 mkdir -p /var/lib/sharelatex/data/history
 chown www-data:www-data /var/lib/sharelatex/data/history
 
-mkdir -p /var/lib/sharelatex/data/projectHistories
-chown www-data:www-data /var/lib/sharelatex/data/projectHistories
+mkdir -p /var/lib/sharelatex/tmp/projectHistories
+chown www-data:www-data /var/lib/sharelatex/tmp/projectHistories
 
 mkdir -p /var/lib/sharelatex/tmp/dumpFolder
 chown www-data:www-data /var/lib/sharelatex/tmp/dumpFolder
