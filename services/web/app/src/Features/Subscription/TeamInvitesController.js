@@ -72,8 +72,8 @@ module.exports = {
 
             const hasIndividualRecurlySubscription =
               personalSubscription &&
-              !personalSubscription.planCode.match(/(free|trial)/) &&
               personalSubscription.groupPlan === false &&
+              personalSubscription.recurlyStatus?.state !== 'canceled' &&
               personalSubscription.recurlySubscription_id &&
               personalSubscription.recurlySubscription_id !== ''
 
