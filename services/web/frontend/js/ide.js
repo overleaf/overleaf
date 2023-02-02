@@ -70,7 +70,6 @@ import { cleanupServiceWorker } from './utils/service-worker-cleanup'
 import { reportCM6Perf } from './infrastructure/cm6-performance'
 import { reportAcePerf } from './ide/editor/ace-performance'
 import { scheduleUserContentDomainAccessCheck } from './features/user-content-domain-access-check'
-import isSplitTestEnabled from './utils/isSplitTestEnabled'
 
 App.controller(
   'IdeController',

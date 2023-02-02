@@ -8,10 +8,19 @@ import getMeta from '../../utils/meta'
 import OError from '@overleaf/o-error'
 import { captureException } from '../../infrastructure/error-reporter'
 import { postJSON } from '../../infrastructure/fetch-json'
-import isSplitTestEnabled from '../../utils/isSplitTestEnabled'
+import {
+  isSplitTestEnabled,
+  parseIntFromSplitTest,
+} from '../../utils/splitTestUtils'
 
-const MAX_CHECKS_PER_PAGE_LOAD = 3
-const INITIAL_DELAY_MS = 30_000
+const MAX_CHECKS_PER_PAGE_LOAD = parseIntFromSplitTest(
+  'user-content-domain-access-check-max-checks',
+  3
+)
+const INITIAL_DELAY_MS = parseIntFromSplitTest(
+  'user-content-domain-access-check-delay',
+  30_000
+)
 const DELAY_BETWEEN_PROBES_MS = 1_000
 const TIMEOUT_MS = 30_000
 const FULL_SIZE = 739

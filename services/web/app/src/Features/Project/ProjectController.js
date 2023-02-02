@@ -1081,6 +1081,28 @@ const ProjectController = {
             }
           )
         },
+        userContentDomainAccessCheckDelayAssigment(cb) {
+          SplitTestHandler.getAssignment(
+            req,
+            res,
+            'user-content-domain-access-check-delay',
+            () => {
+              // We'll pick up the assignment from the res.locals assignment.
+              cb()
+            }
+          )
+        },
+        userContentDomainAccessCheckMaxChecksAssigment(cb) {
+          SplitTestHandler.getAssignment(
+            req,
+            res,
+            'user-content-domain-access-check-max-checks',
+            () => {
+              // We'll pick up the assignment from the res.locals assignment.
+              cb()
+            }
+          )
+        },
         reportUserContentDomainAccessCheckErrorAssigment(cb) {
           SplitTestHandler.getAssignment(
             req,
