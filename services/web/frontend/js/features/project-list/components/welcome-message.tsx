@@ -38,6 +38,7 @@ export default function WelcomeMessage() {
             <div className="dropdown minimal-create-proj-dropdown">
               <NewProjectButton
                 id="new-project-button-welcome"
+                menuClassName="minimal-create-proj-dropdown-menu"
                 buttonText={t('create_first_project')}
                 trackingKey="welcome-page-create-first-project-click"
               />

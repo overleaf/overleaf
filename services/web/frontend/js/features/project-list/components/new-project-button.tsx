@@ -30,6 +30,7 @@ type NewProjectButtonProps = {
   id: string
   buttonText?: string
   className?: string
+  menuClassName?: string
   trackingKey?: string
 }
 
@@ -37,6 +38,7 @@ function NewProjectButton({
   id,
   buttonText,
   className,
+  menuClassName,
   trackingKey,
 }: NewProjectButtonProps) {
   const { t } = useTranslation()
@@ -146,7 +148,7 @@ function NewProjectButton({
         >
           {buttonText || t('new_project')}
         </Dropdown.Toggle>
-        <Dropdown.Menu>
+        <Dropdown.Menu className={menuClassName}>
           <MenuItem
             onClick={e =>
               handleModalMenuClick(e, {
