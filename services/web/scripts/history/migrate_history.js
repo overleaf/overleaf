@@ -100,11 +100,7 @@ async function migrateProjects(projectsToMigrate) {
       console.error(err)
     }
   }
-
-  console.log('Migration complete')
-  console.log('==================')
-  console.log('Projects migrated: ', projectsMigrated)
-  console.log('Projects failed: ', projectsFailed)
+  return { projectsMigrated, projectsFailed }
 }
 
 async function main() {
@@ -113,8 +109,15 @@ async function main() {
     console.log('Dry run, exiting')
     process.exit(0)
   }
-  await migrateProjects(projectsToMigrate)
+  const { projectsMigrated, projectsFailed } = await migrateProjects(
+    projectsToMigrate
+  )
+  console.log('Migration complete')
+  console.log('==================')
+  console.log('Projects migrated: ', projectsMigrated)
+  console.log('Projects failed: ', projectsFailed)
   console.log('Done.')
+  process.exit(projectsFailed > 0 ? 1 : 0)
 }
 
 waitForDb()
