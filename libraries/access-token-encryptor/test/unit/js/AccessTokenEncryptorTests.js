@@ -72,18 +72,20 @@ describe('AccessTokenEncryptor', function () {
       })
     })
 
-    it('should decrypt an 2015 string to get the same object', function (done) {
+    it('should not be able to decrypt 2015 string', function (done) {
       this.encryptor.decryptToJson(this.encrypted2015, (err, decrypted) => {
-        expect(err).to.be.null
-        expect(decrypted).to.deep.equal(this.testObject)
+        expect(err).to.exist
+        expect(err.message).to.equal('token scheme v1 is not supported anymore')
+        expect(decrypted).to.not.exist
         done()
       })
     })
 
-    it('should decrypt an 2016 string to get the same object', function (done) {
+    it('should not be able to decrypt a 2016 string', function (done) {
       this.encryptor.decryptToJson(this.encrypted2016, (err, decrypted) => {
-        expect(err).to.be.null
-        expect(decrypted).to.deep.equal(this.testObject)
+        expect(err).to.exist
+        expect(err.message).to.equal('token scheme v1 is not supported anymore')
+        expect(decrypted).to.not.exist
         done()
       })
     })
