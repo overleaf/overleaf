@@ -132,14 +132,22 @@ export async function checkUserContentDomainAccess() {
   const userId = `0${randomHex(12).slice(1)}`
   const buildId = genBuildId()
   const zone = pickZone()
-  const urls = [
-    `${getMeta(
-      'ol-compilesUserContentDomain'
-    )}/zone/${zone}/project/${projectId}/user/${userId}/build/${buildId}/output/output.pdf`,
-    `${getMeta(
-      'ol-compilesUserContentDomain'
-    )}/zone/${zone}/project/${projectId}/build/${buildId}/output/output.pdf`,
-  ]
+  const urls = []
+  if (getMeta('ol-user_id')) {
+    // Logged-in user
+    urls.push(
+      `${getMeta(
+        'ol-compilesUserContentDomain'
+      )}/zone/${zone}/project/${projectId}/user/${userId}/build/${buildId}/output/output.pdf`
+    )
+  } else {
+    // Anonymous user
+    urls.push(
+      `${getMeta(
+        'ol-compilesUserContentDomain'
+      )}/zone/${zone}/project/${projectId}/build/${buildId}/output/output.pdf`
+    )
+  }
 
   const cases = []
   for (const url of urls) {
