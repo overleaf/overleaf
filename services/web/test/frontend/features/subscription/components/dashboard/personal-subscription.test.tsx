@@ -11,11 +11,13 @@ import {
 describe('<PersonalSubscription />', function () {
   beforeEach(function () {
     window.metaAttributesCache = new Map()
+    // @ts-ignore
     window.recurly = {}
   })
 
   afterEach(function () {
     window.metaAttributesCache = new Map()
+    // @ts-ignore
     delete window.recurly
   })
 
@@ -116,6 +118,7 @@ describe('<PersonalSubscription />', function () {
       'Sorry, there was an error talking to our payment provider. Please try again in a few moments. If you are using any ad or script blocking extensions in your browser, you may need to temporarily disable them.'
 
     it('shows an alert and hides "Change plan" option when Recurly did not load', function () {
+      // @ts-ignore
       delete window.recurly
       render(
         <SubscriptionDashboardProvider>

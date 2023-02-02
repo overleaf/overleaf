@@ -1,17 +1,5 @@
 import { Nullable } from '../../utils'
-
-type Plan = {
-  planCode: string
-  name: string
-  price_in_cents: number
-  annual?: boolean
-  features: object
-  hideFromUsers?: boolean
-  featureDescription?: object[]
-  groupPlan?: boolean
-  membersLimit?: number
-  membersLimitAddOn?: string
-}
+import { Plan } from '../plan'
 
 type SubscriptionState = 'active' | 'canceled' | 'expired'
 

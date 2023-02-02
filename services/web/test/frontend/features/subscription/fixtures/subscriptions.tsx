@@ -28,7 +28,6 @@ export const annualActiveSubscription: Subscription = {
     name: 'Standard (Collaborator) Annual',
     price_in_cents: 21900,
     annual: true,
-    features: {},
     featureDescription: [],
   },
   recurly: {
@@ -68,7 +67,6 @@ export const pastDueExpiredSubscription: Subscription = {
     name: 'Standard (Collaborator) Annual',
     price_in_cents: 21900,
     annual: true,
-    features: {},
     featureDescription: [],
   },
   recurly: {
@@ -108,7 +106,6 @@ export const canceledSubscription: Subscription = {
     name: 'Standard (Collaborator) Annual',
     price_in_cents: 21900,
     annual: true,
-    features: {},
     featureDescription: [],
   },
   recurly: {
@@ -148,7 +145,6 @@ export const pendingSubscriptionChange: Subscription = {
     name: 'Standard (Collaborator) Annual',
     price_in_cents: 21900,
     annual: true,
-    features: {},
     featureDescription: [],
   },
   recurly: {
@@ -175,7 +171,6 @@ export const pendingSubscriptionChange: Subscription = {
     name: 'Professional Annual',
     price_in_cents: 42900,
     annual: true,
-    features: {},
     featureDescription: [],
   },
 }
@@ -198,7 +193,6 @@ export const groupActiveSubscription: GroupSubscription = {
     hideFromUsers: true,
     price_in_cents: 129000,
     annual: true,
-    features: {},
     groupPlan: true,
     membersLimit: 10,
     membersLimitAddOn: 'additional-license',
@@ -243,7 +237,6 @@ export const groupActiveSubscriptionWithPendingLicenseChange: GroupSubscription 
       hideFromUsers: true,
       price_in_cents: 129000,
       annual: true,
-      features: {},
       groupPlan: true,
       membersLimit: 10,
       membersLimitAddOn: 'additional-license',
@@ -286,7 +279,6 @@ export const groupActiveSubscriptionWithPendingLicenseChange: GroupSubscription 
       hideFromUsers: true,
       price_in_cents: 129000,
       annual: true,
-      features: {},
       groupPlan: true,
       membersLimit: 10,
       membersLimitAddOn: 'additional-license',
@@ -308,7 +300,6 @@ export const trialSubscription: Subscription = {
     planCode: 'paid-personal_free_trial_7_days',
     name: 'Personal',
     price_in_cents: 1500,
-    features: {},
     featureDescription: [],
     hideFromUsers: true,
   },

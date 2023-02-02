@@ -175,38 +175,22 @@ async function _paymentReactPage(req, res) {
         currency = recommendedCurrency
       }
 
-      const refreshedPaymentPageAssignment =
-        await SplitTestHandler.promises.getAssignment(
-          req,
-          res,
-          'payment-page-refresh'
-        )
-      const useRefreshedPaymentPage =
-        refreshedPaymentPageAssignment &&
-        refreshedPaymentPageAssignment.variant === 'refreshed-payment-page'
-
       await SplitTestHandler.promises.getAssignment(
         req,
         res,
         'student-check-modal'
       )
 
-      // TODO
-      const template = useRefreshedPaymentPage
-        ? 'subscriptions/new-react'
-        : 'subscriptions/new-react'
-
-      res.render(template, {
+      res.render('subscriptions/new-react', {
         title: 'subscribe',
         currency,
         countryCode,
         plan,
-        recurlyConfig: JSON.stringify({
-          currency,
-          subdomain: Settings.apis.recurly.subdomain,
-        }),
+        couponCode: req.query.cc,
         showCouponField: !!req.query.scf,
-        showVatField: !!req.query.svf,
+        itm_campaign: req.query.itm_campaign,
+        itm_content: req.query.itm_content,
+        itm_referrer: req.query.itm_referrer,
       })
     }
   }
