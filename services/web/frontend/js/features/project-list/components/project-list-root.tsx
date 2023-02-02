@@ -129,8 +129,9 @@ function ProjectListPageContent() {
             {error ? <DashApiError /> : ''}
             <Row className="row-spaced">
               <Col
-                xs={8}
-                xsOffset={2}
+                xs={12}
+                sm={10}
+                smOffset={1}
                 md={8}
                 mdOffset={2}
                 className="project-list-empty-col"
