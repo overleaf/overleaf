@@ -17,15 +17,20 @@ nginx_template_file="${nginx_templates_dir}/nginx.conf.template"
 nginx_config_file="${nginx_dir}/nginx.conf"
 
 if [ -f "${nginx_template_file}" ]; then
-  export NGINX_WORKER_PROCESSES="${NGINX_WORKER_PROCESSES:-4}"
+  export NGINX_KEEPALIVE_TIMEOUT="${NGINX_KEEPALIVE_TIMEOUT:-65}"
   export NGINX_WORKER_CONNECTIONS="${NGINX_WORKER_CONNECTIONS:-768}"
+  export NGINX_WORKER_PROCESSES="${NGINX_WORKER_PROCESSES:-4}"
 
   echo "Nginx: generating config file from template"
 
   # Note the single-quotes, they are important.
   # This is a pass-list of env-vars that envsubst
   # should operate on.
-  envsubst '${NGINX_WORKER_PROCESSES} ${NGINX_WORKER_CONNECTIONS}' \
+  envsubst '
+    ${NGINX_KEEPALIVE_TIMEOUT}
+    ${NGINX_WORKER_CONNECTIONS}
+    ${NGINX_WORKER_PROCESSES}
+  ' \
     < "${nginx_template_file}" \
     > "${nginx_config_file}"
 
