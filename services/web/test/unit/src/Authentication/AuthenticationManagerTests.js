@@ -672,6 +672,52 @@ describe('AuthenticationManager', function () {
     })
   })
 
+  describe('_validatePasswordNotTooSimilar', function () {
+    beforeEach(function () {
+      this.metrics.inc.reset()
+    })
+
+    it('should return an error when the password is too similar to email', function () {
+      const password = 'someuser1234'
+      const email = 'someuser@example.com'
+      const error = this.AuthenticationManager._validatePasswordNotTooSimilar(
+        password,
+        email
+      )
+      expect(error).to.exist
+    })
+
+    it('should return an error when the password is re-arranged elements of the email', function () {
+      const password = 'su2oe1em3re'
+      const email = 'someuser@example.com'
+      const error = this.AuthenticationManager._validatePasswordNotTooSimilar(
+        password,
+        email
+      )
+      expect(error).to.exist
+    })
+
+    it('should return nothing when the password different from email', function () {
+      const password = '58WyLvr'
+      const email = 'someuser@example.com'
+      const error = this.AuthenticationManager._validatePasswordNotTooSimilar(
+        password,
+        email
+      )
+      expect(error).to.not.exist
+    })
+
+    it('should return nothing when the password is much longer than parts of the email', function () {
+      const password = new Array(30).fill('a').join('')
+      const email = 'a@cd.com'
+      const error = this.AuthenticationManager._validatePasswordNotTooSimilar(
+        password,
+        email
+      )
+      expect(error).to.not.exist
+    })
+  })
+
   describe('setUserPassword', function () {
     beforeEach(function () {
       this.user_id = ObjectId()
@@ -813,8 +859,45 @@ describe('AuthenticationManager', function () {
       })
     })
 
+    describe('password too similar to email', function () {
+      beforeEach(function () {
+        this.user.email = 'foobarbazquux@example.com'
+        this.password = 'foobarbaz'
+        this.metrics.inc.reset()
+      })
+
+      it('should send a metric when the password is too similar to the email', function (done) {
+        this.AuthenticationManager.setUserPassword(
+          this.user,
+          this.password,
+          err => {
+            expect(err).to.not.exist
+            expect(
+              this.metrics.inc.calledWith('password-too-similar-to-email')
+            ).to.equal(true)
+            done()
+          }
+        )
+      })
+
+      it('should send a metric when the password is too similar to the email, regardless of case', function (done) {
+        this.AuthenticationManager.setUserPassword(
+          this.user,
+          this.password.toUpperCase(),
+          err => {
+            expect(err).to.not.exist
+            expect(
+              this.metrics.inc.calledWith('password-too-similar-to-email')
+            ).to.equal(true)
+            done()
+          }
+        )
+      })
+    })
+
     describe('successful password set attempt', function () {
       beforeEach(function () {
+        this.metrics.inc.reset()
         this.UserGetter.getUser = sinon.stub().yields(null, { overleaf: null })
         this.AuthenticationManager.setUserPassword(
           this.user,
@@ -841,6 +924,12 @@ describe('AuthenticationManager', function () {
       it('should hash the password', function () {
         this.bcrypt.genSalt.calledWith(4).should.equal(true)
         this.bcrypt.hash.calledWith(this.password, this.salt).should.equal(true)
+      })
+
+      it('should not send a metric for password-too-similar-to-email', function () {
+        expect(
+          this.metrics.inc.calledWith('password-too-similar-to-email')
+        ).to.equal(false)
       })
 
       it('should call the callback', function () {

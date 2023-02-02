@@ -14,10 +14,21 @@ const util = require('util')
 const HaveIBeenPwned = require('./HaveIBeenPwned')
 const UserAuditLogHandler = require('../User/UserAuditLogHandler')
 const logger = require('@overleaf/logger')
+const DiffHelper = require('../Helpers/DiffHelper')
 const Metrics = require('@overleaf/metrics')
 
 const BCRYPT_ROUNDS = Settings.security.bcryptRounds || 12
 const BCRYPT_MINOR_VERSION = Settings.security.bcryptMinorVersion || 'a'
+const MAX_SIMILARITY = 0.7
+
+function _exceedsMaximumLengthRatio(password, maxSimilarity, value) {
+  const passwordLength = password.length
+  const lengthBoundSimilarity = (maxSimilarity / 2) * passwordLength
+  const valueLength = value.length
+  return (
+    passwordLength >= 10 * valueLength && valueLength < lengthBoundSimilarity
+  )
+}
 
 const _checkWriteResult = function (result, callback) {
   // for MongoDB
@@ -203,6 +214,7 @@ const AuthenticationManager = {
       })
     }
     if (typeof email === 'string' && email !== '') {
+      // TODO: remove this check once the password-too-similar check below is active
       const startOfEmail = email.split('@')[0]
       if (
         password.indexOf(email) !== -1 ||
@@ -212,6 +224,18 @@ const AuthenticationManager = {
           message: 'password contains part of email address',
           info: { code: 'contains_email' },
         })
+      }
+      try {
+        const passwordTooSimilarError =
+          AuthenticationManager._validatePasswordNotTooSimilar(password, email)
+        if (passwordTooSimilarError) {
+          Metrics.inc('password-too-similar-to-email')
+        }
+      } catch (error) {
+        logger.error(
+          { error },
+          'error while checking password similarity to email'
+        )
       }
     }
     return null
@@ -341,6 +365,33 @@ const AuthenticationManager = {
       }
     }
     return true
+  },
+
+  /**
+   * Check if the password is similar to (parts of) the email address.
+   * For now, this merely sends a metric when the password and
+   * email address are deemed to be too similar to each other.
+   * Later we will reject passwords that fail this check.
+   *
+   * This logic was borrowed from the django project:
+   * https://github.com/django/django/blob/fa3afc5d86f1f040922cca2029d6a34301597a70/django/contrib/auth/password_validation.py#L159-L214
+   */
+  _validatePasswordNotTooSimilar(password, email) {
+    password = password.toLowerCase()
+    email = email.toLowerCase()
+    const stringsToCheck = [email].concat(email.split(/\W+/))
+    for (const emailPart of stringsToCheck) {
+      if (!_exceedsMaximumLengthRatio(password, MAX_SIMILARITY, emailPart)) {
+        const similarity = DiffHelper.stringSimilarity(password, emailPart)
+        if (similarity > MAX_SIMILARITY) {
+          logger.warn(
+            { email, emailPart, similarity, maxSimilarity: MAX_SIMILARITY },
+            'Password too similar to email'
+          )
+          return new Error('password is too similar to email')
+        }
+      }
+    }
   },
 }
 
