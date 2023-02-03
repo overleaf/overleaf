@@ -9,8 +9,12 @@ function PdfPreviewErrorBoundaryFallback({ type }) {
     <Trans
       i18nKey="try_recompile_project_or_troubleshoot"
       components={[
-        // eslint-disable-next-line react/jsx-key, jsx-a11y/anchor-has-content, jsx-a11y/anchor-is-valid
-        <a href="/learn/how-to/Resolving_access%2C_loading%2C_and_display_problems" />,
+        // eslint-disable-next-line jsx-a11y/anchor-has-content
+        <a
+          href="/learn/how-to/Resolving_access%2C_loading%2C_and_display_problems"
+          target="_blank"
+          key="troubleshooting-link"
+        />,
       ]}
     />
   )
