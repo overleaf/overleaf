@@ -129,7 +129,6 @@ function ProjectListPageContent() {
             {error ? <DashApiError /> : ''}
             <Row className="row-spaced">
               <Col
-                xs={12}
                 sm={10}
                 smOffset={1}
                 md={8}
