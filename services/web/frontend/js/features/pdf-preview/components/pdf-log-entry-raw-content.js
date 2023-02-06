@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useResizeObserver } from '../hooks/use-resize-observer'
+import { useResizeObserver } from '../../../shared/hooks/use-resize-observer'
 import { useTranslation } from 'react-i18next'
 import classNames from 'classnames'
 import { Button } from 'react-bootstrap'

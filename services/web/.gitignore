@@ -33,6 +33,9 @@ ehthumbs.db
 Icon?
 Thumbs.db
 
+# allow "icons"
+![Ii]cons
+
 node_modules/*
 data/*
 coverage

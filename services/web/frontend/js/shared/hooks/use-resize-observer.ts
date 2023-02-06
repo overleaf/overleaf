@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useRef } from 'react'
 
-export const useResizeObserver = handleResize => {
-  const resizeRef = useRef(null)
+export const useResizeObserver = (handleResize: (element: Element) => void) => {
+  const resizeRef = useRef<{
+    element: Element
+    observer: ResizeObserver
+  } | null>(null)
 
   const elementRef = useCallback(
-    element => {
+    (element: Element | null) => {
       if (element && 'ResizeObserver' in window) {
         if (resizeRef.current) {
           resizeRef.current.observer.unobserve(resizeRef.current.element)
