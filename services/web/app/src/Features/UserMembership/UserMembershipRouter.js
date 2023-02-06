@@ -22,7 +22,7 @@ module.exports = {
     webRouter.get(
       '/manage/groups/:id/members',
       UserMembershipMiddleware.requireGroupManagementAccess,
-      UserMembershipController.index
+      UserMembershipController.manageGroupMembers
     )
     webRouter.post(
       '/manage/groups/:id/invites',
@@ -51,7 +51,7 @@ module.exports = {
     webRouter.get(
       '/manage/groups/:id/managers',
       UserMembershipMiddleware.requireGroupManagersManagementAccess,
-      UserMembershipController.index
+      UserMembershipController.manageGroupManagers
     )
     webRouter.post(
       '/manage/groups/:id/managers',
@@ -68,7 +68,7 @@ module.exports = {
     webRouter.get(
       '/manage/institutions/:id/managers',
       UserMembershipMiddleware.requireInstitutionManagementAccess,
-      UserMembershipController.index
+      UserMembershipController.manageInstitutionManagers
     )
     webRouter.post(
       '/manage/institutions/:id/managers',
@@ -85,7 +85,7 @@ module.exports = {
     webRouter.get(
       '/manage/publishers/:id/managers',
       UserMembershipMiddleware.requirePublisherManagementAccess,
-      UserMembershipController.index
+      UserMembershipController.managePublisherManagers
     )
     webRouter.post(
       '/manage/publishers/:id/managers',

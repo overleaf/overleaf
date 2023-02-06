@@ -96,7 +96,7 @@ describe('UserMembershipController', function () {
     })
 
     it('get users', async function () {
-      return await this.UserMembershipController.index(this.req, {
+      return await this.UserMembershipController.manageGroupMembers(this.req, {
         render: () => {
           sinon.assert.calledWithMatch(
             this.UserMembershipHandler.getUsers,
@@ -108,7 +108,7 @@ describe('UserMembershipController', function () {
     })
 
     it('render group view', async function () {
-      return await this.UserMembershipController.index(this.req, {
+      return await this.UserMembershipController.manageGroupMembers(this.req, {
         render: (viewPath, viewParams) => {
           expect(viewPath).to.equal('user_membership/index')
           expect(viewParams.users).to.deep.equal(this.users)
@@ -123,7 +123,7 @@ describe('UserMembershipController', function () {
 
     it('render group managers view', async function () {
       this.req.entityConfig = EntityConfigs.groupManagers
-      return await this.UserMembershipController.index(this.req, {
+      return await this.UserMembershipController.manageGroupManagers(this.req, {
         render: (viewPath, viewParams) => {
           expect(viewPath).to.equal('user_membership/index')
           expect(viewParams.groupSize).to.equal(undefined)
@@ -139,15 +139,20 @@ describe('UserMembershipController', function () {
     it('render institution view', async function () {
       this.req.entity = this.institution
       this.req.entityConfig = EntityConfigs.institution
-      return await this.UserMembershipController.index(this.req, {
-        render: (viewPath, viewParams) => {
-          expect(viewPath).to.equal('user_membership/index')
-          expect(viewParams.name).to.equal('Test Institution Name')
-          expect(viewParams.groupSize).to.equal(undefined)
-          expect(viewParams.translations.title).to.equal('institution_account')
-          expect(viewParams.paths.exportMembers).to.be.undefined
-        },
-      })
+      return await this.UserMembershipController.manageInstitutionManagers(
+        this.req,
+        {
+          render: (viewPath, viewParams) => {
+            expect(viewPath).to.equal('user_membership/index')
+            expect(viewParams.name).to.equal('Test Institution Name')
+            expect(viewParams.groupSize).to.equal(undefined)
+            expect(viewParams.translations.title).to.equal(
+              'institution_account'
+            )
+            expect(viewParams.paths.exportMembers).to.be.undefined
+          },
+        }
+      )
     })
   })
 

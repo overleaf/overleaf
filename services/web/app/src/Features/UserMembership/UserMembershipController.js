@@ -20,7 +20,7 @@ const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const CSVParser = require('json2csv').Parser
 const logger = require('@overleaf/logger')
 
-async function index(req, res, next) {
+async function manageGroupMembers(req, res, next) {
   try {
     const assignment = await SplitTestHandler.promises.getAssignment(
       req,
@@ -28,7 +28,7 @@ async function index(req, res, next) {
       'subscription-pages-react'
     )
     if (assignment.variant === 'active') {
-      await _indexReact(req, res, next)
+      await _manageGroupMembersReact(req, res, next)
     } else {
       await _indexAngular(req, res, next)
     }
@@ -41,7 +41,85 @@ async function index(req, res, next) {
   }
 }
 
-function _indexReact(req, res, next) {
+async function manageGroupManagers(req, res, next) {
+  try {
+    const assignment = await SplitTestHandler.promises.getAssignment(
+      req,
+      res,
+      'subscription-pages-react'
+    )
+    if (assignment.variant === 'active') {
+      await _renderManagersPage(
+        req,
+        res,
+        next,
+        'user_membership/group-managers-react'
+      )
+    } else {
+      await _indexAngular(req, res, next)
+    }
+  } catch (error) {
+    logger.warn(
+      { err: error },
+      'failed to get "subscription-pages-react" split test assignment'
+    )
+    await _indexAngular(req, res, next)
+  }
+}
+
+async function manageInstitutionManagers(req, res, next) {
+  try {
+    const assignment = await SplitTestHandler.promises.getAssignment(
+      req,
+      res,
+      'subscription-pages-react'
+    )
+    if (assignment.variant === 'active') {
+      await _renderManagersPage(
+        req,
+        res,
+        next,
+        'user_membership/institution-managers-react'
+      )
+    } else {
+      await _indexAngular(req, res, next)
+    }
+  } catch (error) {
+    logger.warn(
+      { err: error },
+      'failed to get "subscription-pages-react" split test assignment'
+    )
+    await _indexAngular(req, res, next)
+  }
+}
+
+async function managePublisherManagers(req, res, next) {
+  try {
+    const assignment = await SplitTestHandler.promises.getAssignment(
+      req,
+      res,
+      'subscription-pages-react'
+    )
+    if (assignment.variant === 'active') {
+      await _renderManagersPage(
+        req,
+        res,
+        next,
+        'user_membership/publisher-managers-react'
+      )
+    } else {
+      await _indexAngular(req, res, next)
+    }
+  } catch (error) {
+    logger.warn(
+      { err: error },
+      'failed to get "subscription-pages-react" split test assignment'
+    )
+    await _indexAngular(req, res, next)
+  }
+}
+
+async function _manageGroupMembersReact(req, res, next) {
   const { entity, entityConfig } = req
   return entity.fetchV1Data(function (error, entity) {
     if (error != null) {
@@ -60,14 +138,40 @@ function _indexReact(req, res, next) {
         if (entityConfig.fields.name) {
           entityName = entity[entityConfig.fields.name]
         }
-        return res.render('user_membership/index-react', {
+        return res.render('user_membership/group-members-react', {
+          name: entityName,
+          groupId: entityPrimaryKey,
+          users,
+          groupSize: entity.membersLimit,
+        })
+      }
+    )
+  })
+}
+
+async function _renderManagersPage(req, res, next, template) {
+  const { entity, entityConfig } = req
+  return entity.fetchV1Data(function (error, entity) {
+    if (error != null) {
+      return next(error)
+    }
+    return UserMembershipHandler.getUsers(
+      entity,
+      entityConfig,
+      function (error, users) {
+        let entityName
+        if (error != null) {
+          return next(error)
+        }
+        const entityPrimaryKey =
+          entity[entityConfig.fields.primaryKey].toString()
+        if (entityConfig.fields.name) {
+          entityName = entity[entityConfig.fields.name]
+        }
+        return res.render(template, {
           name: entityName,
           users,
-          groupSize: entityConfig.hasMembersLimit
-            ? entity.membersLimit
-            : undefined,
-          translations: entityConfig.translations,
-          paths: entityConfig.pathsFor(entityPrimaryKey),
+          groupId: entityPrimaryKey,
         })
       }
     )
@@ -108,7 +212,10 @@ function _indexAngular(req, res, next) {
 }
 
 module.exports = {
-  index,
+  manageGroupMembers,
+  manageGroupManagers,
+  manageInstitutionManagers,
+  managePublisherManagers,
   add(req, res, next) {
     const { entity, entityConfig } = req
     const email = EmailHelper.parseEmail(req.body.email)

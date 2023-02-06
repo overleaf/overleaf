@@ -1,0 +1,12 @@
+extends ../layout-marketing
+
+block entrypointVar
+	- entrypoint = 'pages/user/subscription/group-management/group-managers'
+
+block append meta
+	meta(name="ol-users", data-type="json", content=users)
+	meta(name="ol-groupId", data-type="string", content=groupId)
+	meta(name="ol-groupName", data-type="string", content=name)
+
+block content
+	main.content.content-alt#subscription-manage-group-root
