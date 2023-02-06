@@ -238,7 +238,6 @@ module.exports.prom = promClient
 module.exports.register = promWrapper.registry
 
 module.exports.http = require('./http')
-module.exports.mongodb = require('./mongodb')
 module.exports.open_sockets = require('./open_sockets')
 module.exports.event_loop = require('./event_loop')
 module.exports.memory = require('./memory')

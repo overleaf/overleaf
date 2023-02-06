@@ -20,13 +20,8 @@ const HttpController = require('./app/js/HttpController')
 const mongodb = require('./app/js/mongodb')
 const async = require('async')
 
-const Path = require('path')
 const bodyParser = require('body-parser')
 
-Metrics.mongodb.monitor(
-  Path.resolve(__dirname, '/node_modules/mongodb'),
-  logger
-)
 Metrics.event_loop.monitor(logger, 100)
 
 const app = express()
