@@ -56,12 +56,12 @@ export function SubscriptionDashboardProvider({
   const hasDisplayedSubscription =
     institutionMemberships?.length > 0 ||
     personalSubscription ||
-    managedGroupSubscriptions
+    managedGroupSubscriptions?.length > 0
 
   useEffect(() => {
     if (!isRecurlyLoaded()) {
       setRecurlyLoadError(true)
-    } else {
+    } else if (recurlyApiKey) {
       recurly.configure(recurlyApiKey)
     }
   }, [recurlyApiKey, setRecurlyLoadError])
