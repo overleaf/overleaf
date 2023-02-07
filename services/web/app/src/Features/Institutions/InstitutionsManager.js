@@ -244,10 +244,7 @@ const InstitutionsManager = {
       const userIds = affiliations.map(affiliation =>
         ObjectId(affiliation.user_id)
       )
-      Subscription.find({
-        admin_id: userIds,
-        planCode: { $not: /trial/ },
-      })
+      Subscription.find({ admin_id: userIds })
         .populate('admin_id', 'email')
         .exec(callback)
     })
