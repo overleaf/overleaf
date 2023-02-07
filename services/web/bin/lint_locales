@@ -8,6 +8,27 @@ node scripts/translations/sort.js --check
 # Ensure all locales are still in use
 node scripts/translations/cleanupUnusedLocales.js --check
 
+# Ensure all locales used in the frontend are tracked
+OUTPUT=data/dumpFolder/i18next-scanner
+trap "rm -rf $OUTPUT" EXIT
+npx i18next-scanner --output "$OUTPUT"
+ACTUAL=frontend/extracted-translations.json
+EXPECTED="$OUTPUT/frontend/extracted-translations.json"
+if ! diff "$ACTUAL" "$EXPECTED"; then
+  cat <<MSG >&2
+
+services/web/frontend/extracted-translations.json is not up-to-date.
+
+---
+Try running:
+
+  internal$ bin/run web npm run extract-translations
+
+---
+MSG
+  exit 1
+fi
+
 # Ensure no locales contain single quotes.
 LOCALES_WITH_SINGLE_QUOTE=$(\
   grep \

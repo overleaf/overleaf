@@ -6,12 +6,23 @@ const EN_JSON = Path.join(__dirname, '../../locales/en.json')
 const CHECK = process.argv.includes('--check')
 const SYNC_NON_EN = process.argv.includes('--sync-non-en')
 
+const COUNT_SUFFIXES = [
+  '_plural',
+  '_zero',
+  '_one',
+  '_two',
+  '_few',
+  '_many',
+  '_other',
+]
+
 async function main() {
   const locales = JSON.parse(await fs.promises.readFile(EN_JSON, 'utf-8'))
 
   const src = execSync(
     // - find all the app source files in web
     //   - exclude data files
+    //   - exclude list of locales used in frontend
     //   - exclude locales files
     //   - exclude public assets
     //   - exclude third-party dependencies
@@ -19,6 +30,7 @@ async function main() {
     `
     find . -type f \
       -not -path './data/*' \
+      -not -path './frontend/extracted-translations.json' \
       -not -path './locales/*' \
       -not -path './public/*' \
       -not -path '*node_modules/*' \
@@ -75,6 +87,9 @@ async function main() {
   let m
   while ((m = matcher.exec(src))) {
     found.add(m[0])
+    for (const suffix of COUNT_SUFFIXES) {
+      found.add(m[0] + suffix)
+    }
   }
 
   const unusedKeys = []
