@@ -1295,11 +1295,11 @@ async function migrateProjectHistory(projectId, options = {}) {
           throw error
         }
       }
-      // set the display to v2 history
       logger.debug(
         { projectId },
         'Switching on full project history display for project'
       )
+      // Set the display to v2 history but allow downgrading (second argument allowDowngrade = true)
       await ProjectHistoryHandler.promises.upgradeHistory(projectId, true)
     } catch (error) {
       // delete the history id again if something failed?

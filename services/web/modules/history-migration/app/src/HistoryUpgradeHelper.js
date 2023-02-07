@@ -18,12 +18,12 @@ const DATETIME_WHEN_FULL_PROJECT_HISTORY_ENABLED =
     : null
 
 async function countProjects(query = {}) {
-  const count = await db.projects.count(query)
+  const count = await db.projects.countDocuments(query)
   return count
 }
 
 async function countDocHistory(query = {}) {
-  const count = await db.docHistory.count(query)
+  const count = await db.docHistory.countDocuments(query)
   return count
 }
 

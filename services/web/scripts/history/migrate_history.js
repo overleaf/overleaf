@@ -9,6 +9,16 @@ const {
 } = require('../../modules/history-migration/app/src/HistoryUpgradeHelper')
 const { waitForDb } = require('../../app/src/infrastructure/mongodb')
 const minimist = require('minimist')
+const fs = require('fs')
+const util = require('util')
+const logger = require('@overleaf/logger')
+logger.initialize('history-migration')
+// disable logging to stdout from internal modules
+logger.logger.streams = []
+
+const DEFAULT_OUTPUT_FILE = `history-migration-${new Date()
+  .toISOString()
+  .replace(/[:.]/g, '_')}.log`
 
 const argv = minimist(process.argv.slice(2), {
   boolean: [
@@ -18,6 +28,7 @@ const argv = minimist(process.argv.slice(2), {
     'retry-failed',
     'archive-on-failure',
   ],
+  string: ['output'],
   alias: {
     verbose: 'v',
     'dry-run': 'd',
@@ -26,12 +37,15 @@ const argv = minimist(process.argv.slice(2), {
     'archive-on-failure': 'a',
   },
   default: {
+    output: DEFAULT_OUTPUT_FILE,
     'write-concurrency': 10,
     'batch-size': 100,
     'max-upgrades-to-attempt': false,
     'max-failures': 50,
   },
 })
+
+let INTERRUPT = false
 
 async function findProjectsToMigrate() {
   console.log('History Migration Statistics')
@@ -79,27 +93,92 @@ async function findProjectsToMigrate() {
   return projectsToMigrate
 }
 
+function createProgressBar() {
+  const startTime = new Date()
+  return function progressBar(current, total, msg) {
+    const barLength = 20
+    const percentage = Math.floor((current / total) * 100)
+    const bar = '='.repeat(percentage / (100 / barLength))
+    const empty = ' '.repeat(barLength - bar.length)
+    const elapsed = new Date() - startTime
+    // convert elapsed time to hours, minutes, seconds
+    const ss = Math.floor((elapsed / 1000) % 60)
+      .toString()
+      .padStart(2, '0')
+    const mm = Math.floor((elapsed / (1000 * 60)) % 60)
+      .toString()
+      .padStart(2, '0')
+    const hh = Math.floor(elapsed / (1000 * 60 * 60))
+      .toString()
+      .padStart(2, '0')
+    process.stdout.write(
+      `\r${hh}:${mm}:${ss} |${bar}${empty}| ${percentage}% (${current}/${total}) ${msg}`
+    )
+  }
+}
+
 async function migrateProjects(projectsToMigrate) {
   let projectsMigrated = 0
   let projectsFailed = 0
 
   console.log('Starting migration...')
+  // send log output for each migration to a file
+  const output = fs.createWriteStream(argv.output, { flags: 'a' })
+  console.log(`Writing log output to ${argv.output}`)
+  const logger = new console.Console({ stdout: output })
+  function logJson(obj) {
+    logger.log(JSON.stringify(obj))
+  }
+  // throttle progress reporting to 2x per second
+  const progressBar = createProgressBar()
+  let i = 0
+  const N = projectsToMigrate.length
+  const progressBarTimer = setInterval(() => {
+    progressBar(
+      i,
+      N,
+      `Migrated: ${projectsMigrated}, Failed: ${projectsFailed}`
+    )
+  }, 500)
   for (const project of projectsToMigrate) {
-    console.log(`Migrating project: ${project._id}`)
+    const startTime = new Date()
     try {
+      if (INTERRUPT) {
+        break
+      }
       const result = await upgradeProject(project._id)
       if (result.error) {
-        console.error('migration failed', result)
+        logJson({
+          project_id: project._id,
+          result,
+          stack: result.error.stack,
+          startTime,
+          endTime: new Date(),
+        })
         projectsFailed++
       } else {
-        console.log('migration result', result)
+        logJson({
+          project_id: project._id,
+          result,
+          startTime,
+          endTime: new Date(),
+        })
         projectsMigrated++
       }
     } catch (err) {
       projectsFailed++
-      console.error(err)
+      logJson({
+        project_id: project._id,
+        exception: util.inspect(err),
+        startTime,
+        endTime: new Date(),
+      })
     }
+    i++
   }
+  clearInterval(progressBarTimer)
+  progressBar(i, N, `Migrated: ${projectsMigrated}, Failed: ${projectsFailed}`)
+  process.stdout.write('\n')
   return { projectsMigrated, projectsFailed }
 }
 
@@ -112,13 +191,28 @@ async function main() {
   const { projectsMigrated, projectsFailed } = await migrateProjects(
     projectsToMigrate
   )
-  console.log('Migration complete')
-  console.log('==================')
   console.log('Projects migrated: ', projectsMigrated)
   console.log('Projects failed: ', projectsFailed)
+  if (projectsFailed > 0) {
+    console.log(`Log output written to ${argv.output}`)
+    console.log('Please check the log for errors.')
+  }
+  if (INTERRUPT) {
+    console.log('Migration interrupted, please run again to continue.')
+  } else if (projectsFailed === 0) {
+    console.log(`All projects migrated successfully.`)
+  }
   console.log('Done.')
   process.exit(projectsFailed > 0 ? 1 : 0)
 }
+
+// Upgrading history is not atomic, if we quit out mid-initialisation
+// then history could get into a broken state
+// Instead, skip any unprocessed projects and exit() at end of the batch.
+process.on('SIGINT', function () {
+  console.log('\nCaught SIGINT, waiting for in process upgrades to complete')
+  INTERRUPT = true
+})
 
 waitForDb()
   .then(main)
