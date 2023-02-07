@@ -1,5 +1,6 @@
 import { Nullable } from '../../utils'
 import { Plan } from '../plan'
+import { User } from '../../../types/user'
 
 type SubscriptionState = 'active' | 'canceled' | 'expired'
 
@@ -53,4 +54,10 @@ export type Subscription = {
 
 export type GroupSubscription = Subscription & {
   teamName: string
+}
+
+export type ManagedGroupSubscription = Omit<GroupSubscription, 'admin_id'> & {
+  userIsGroupMember: boolean
+  planLevelName: string
+  admin_id: User
 }

@@ -8,6 +8,8 @@ import { CancelSubscription } from './cancel-subscription'
 import { PendingPlanChange } from './pending-plan-change'
 import { TrialEnding } from './trial-ending'
 import { ChangePlan } from './change-plan'
+import { PendingAdditionalLicenses } from './pending-additional-licenses'
+import { ContactSupportToChangeGroupPlan } from './contact-support-to-change-group-plan'
 
 export function ActiveSubscription({
   subscription,
@@ -38,40 +40,32 @@ export function ActiveSubscription({
         )}
         {!subscription.pendingPlan &&
           subscription.recurly.additionalLicenses > 0 && (
-            <>
-              {' '}
-              <Trans
-                i18nKey="additional_licenses"
-                values={{
-                  additionalLicenses: subscription.recurly.additionalLicenses,
-                  totalLicenses: subscription.recurly.totalLicenses,
-                }}
-                components={[
-                  // eslint-disable-next-line react/jsx-key
-                  <strong />,
-                  // eslint-disable-next-line react/jsx-key
-                  <strong />,
-                ]}
-              />
-            </>
-          )}{' '}
+            <PendingAdditionalLicenses
+              additionalLicenses={subscription.recurly.additionalLicenses}
+              totalLicenses={subscription.recurly.totalLicenses}
+            />
+          )}
         {!recurlyLoadError &&
           !subscription.groupPlan &&
           subscription.recurly.account.has_past_due_invoice._ !== 'true' && (
-            <button
-              className="btn-inline-link"
-              onClick={() => setShowChangePersonalPlan(true)}
-            >
-              {t('change_plan')}
-            </button>
+            <>
+              {' '}
+              <button
+                className="btn-inline-link"
+                onClick={() => setShowChangePersonalPlan(true)}
+              >
+                {t('change_plan')}
+              </button>
+            </>
           )}
       </p>
-      {/* && personalSubscription.pendingPlan.name != personalSubscription.plan.name */}
       {subscription.pendingPlan &&
         subscription.pendingPlan.name !== subscription.plan.name && (
           <p>{t('want_change_to_apply_before_plan_end')}</p>
         )}
-      {/* TODO: groupPlan */}
+      {(!subscription.pendingPlan ||
+        subscription.pendingPlan.name === subscription.plan.name) &&
+        subscription.plan.groupPlan && <ContactSupportToChangeGroupPlan />}
       {subscription.recurly.trial_ends_at &&
         subscription.recurly.trialEndsAtFormatted && (
           <TrialEnding

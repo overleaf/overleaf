@@ -25,7 +25,7 @@ describe('<PersonalSubscription />', function () {
     it('returns empty container', function () {
       const { container } = render(
         <SubscriptionDashboardProvider>
-          <PersonalSubscription subscription={undefined} />
+          <PersonalSubscription />
         </SubscriptionDashboardProvider>
       )
       expect(container.firstChild).to.be.null
@@ -34,9 +34,13 @@ describe('<PersonalSubscription />', function () {
 
   describe('subscription states  ', function () {
     it('renders the active dash', function () {
+      window.metaAttributesCache.set(
+        'ol-subscription',
+        annualActiveSubscription
+      )
       render(
         <SubscriptionDashboardProvider>
-          <PersonalSubscription subscription={annualActiveSubscription} />
+          <PersonalSubscription />
         </SubscriptionDashboardProvider>
       )
 
@@ -44,9 +48,10 @@ describe('<PersonalSubscription />', function () {
     })
 
     it('renders the canceled dash', function () {
+      window.metaAttributesCache.set('ol-subscription', canceledSubscription)
       render(
         <SubscriptionDashboardProvider>
-          <PersonalSubscription subscription={canceledSubscription} />
+          <PersonalSubscription />
         </SubscriptionDashboardProvider>
       )
       screen.getByText(
@@ -69,9 +74,13 @@ describe('<PersonalSubscription />', function () {
     })
 
     it('renders the expired dash', function () {
+      window.metaAttributesCache.set(
+        'ol-subscription',
+        pastDueExpiredSubscription
+      )
       render(
         <SubscriptionDashboardProvider>
-          <PersonalSubscription subscription={pastDueExpiredSubscription} />
+          <PersonalSubscription />
         </SubscriptionDashboardProvider>
       )
       screen.getByText('Your subscription has expired.')
@@ -83,9 +92,10 @@ describe('<PersonalSubscription />', function () {
         JSON.parse(JSON.stringify(annualActiveSubscription))
       )
       withStateDeleted.recurly.state = undefined
+      window.metaAttributesCache.set('ol-subscription', withStateDeleted)
       render(
         <SubscriptionDashboardProvider>
-          <PersonalSubscription subscription={withStateDeleted} />
+          <PersonalSubscription />
         </SubscriptionDashboardProvider>
       )
       screen.getByText(
@@ -96,9 +106,13 @@ describe('<PersonalSubscription />', function () {
 
   describe('past due subscription', function () {
     it('renders error alert', function () {
+      window.metaAttributesCache.set(
+        'ol-subscription',
+        pastDueExpiredSubscription
+      )
       render(
         <SubscriptionDashboardProvider>
-          <PersonalSubscription subscription={pastDueExpiredSubscription} />
+          <PersonalSubscription />
         </SubscriptionDashboardProvider>
       )
       screen.getByRole('alert')
@@ -120,9 +134,13 @@ describe('<PersonalSubscription />', function () {
     it('shows an alert and hides "Change plan" option when Recurly did not load', function () {
       // @ts-ignore
       delete window.recurly
+      window.metaAttributesCache.set(
+        'ol-subscription',
+        annualActiveSubscription
+      )
       render(
         <SubscriptionDashboardProvider>
-          <PersonalSubscription subscription={annualActiveSubscription} />
+          <PersonalSubscription />
         </SubscriptionDashboardProvider>
       )
 
@@ -133,9 +151,13 @@ describe('<PersonalSubscription />', function () {
     })
 
     it('should not show an alert and should show "Change plan" option when Recurly did load', function () {
+      window.metaAttributesCache.set(
+        'ol-subscription',
+        annualActiveSubscription
+      )
       render(
         <SubscriptionDashboardProvider>
-          <PersonalSubscription subscription={annualActiveSubscription} />
+          <PersonalSubscription />
         </SubscriptionDashboardProvider>
       )
 

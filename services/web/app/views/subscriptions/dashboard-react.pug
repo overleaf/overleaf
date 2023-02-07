@@ -9,8 +9,9 @@ block head-scripts
 block append meta
 	meta(name="ol-managedInstitutions", data-type="json", content=managedInstitutions)
 	meta(name="ol-managedGroupSubscriptions", data-type="json" content=managedGroupSubscriptions)
-	meta(name="ol-planCodesChangingAtTermEnd", data-type="json", content=plans.planCodesChangingAtTermEnd)
+	meta(name="ol-planCodesChangingAtTermEnd", data-type="json", content=planCodesChangingAtTermEnd)
 	meta(name="ol-currentInstitutionsWithLicence", data-type="json" content=currentInstitutionsWithLicence)
+	meta(name="ol-plans", data-type="json" content=plans)
 	if (personalSubscription && personalSubscription.recurly)
 		meta(name="ol-recurlyApiKey" content=settings.apis.recurly.publicKey)
 		meta(name="ol-subscription" data-type="json" content=personalSubscription)

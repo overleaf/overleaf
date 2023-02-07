@@ -1,15 +1,14 @@
 import { Trans } from 'react-i18next'
 import { Institution } from '../../../../../../types/institution'
+import { useSubscriptionDashboardContext } from '../../context/subscription-dashboard-context'
 import PremiumFeaturesLink from './premium-features-link'
 
-type InstitutionMembershipsProps = {
-  memberships?: Array<Institution>
-}
+function InstitutionMemberships() {
+  const { institutionMemberships } = useSubscriptionDashboardContext()
 
-function InstitutionMemberships({ memberships }: InstitutionMembershipsProps) {
   // memberships is undefined when data failed to load. If user has no memberships, then an empty array is returned
 
-  if (!memberships) {
+  if (!institutionMemberships) {
     return (
       <div className="alert alert-warning">
         <p>
@@ -24,7 +23,7 @@ function InstitutionMemberships({ memberships }: InstitutionMembershipsProps) {
   return (
     <>
       <div>
-        {memberships.map((institution: Institution) => (
+        {institutionMemberships.map((institution: Institution) => (
           <div key={`${institution.id}`}>
             <Trans
               i18nKey="you_are_on_x_plan_as_a_confirmed_member_of_institution_y"
@@ -44,7 +43,7 @@ function InstitutionMemberships({ memberships }: InstitutionMembershipsProps) {
             <hr />
           </div>
         ))}
-        {memberships.length > 0 && <PremiumFeaturesLink />}
+        {institutionMemberships.length > 0 && <PremiumFeaturesLink />}
       </div>
     </>
   )

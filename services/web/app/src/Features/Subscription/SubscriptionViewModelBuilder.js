@@ -531,9 +531,36 @@ function buildGroupSubscriptionForView(groupSubscription) {
   }
 }
 
+function buildPlansListForSubscriptionDash(currentPlan) {
+  const allPlansData = buildPlansList(currentPlan)
+  const plans = []
+  // only list individual and visible plans for "change plans" UI
+  if (allPlansData.studentAccounts) {
+    plans.push(
+      ...allPlansData.studentAccounts.filter(plan => !plan.hideFromUsers)
+    )
+  }
+  if (allPlansData.individualMonthlyPlans) {
+    plans.push(
+      ...allPlansData.individualMonthlyPlans.filter(plan => !plan.hideFromUsers)
+    )
+  }
+  if (allPlansData.individualAnnualPlans) {
+    plans.push(
+      ...allPlansData.individualAnnualPlans.filter(plan => !plan.hideFromUsers)
+    )
+  }
+
+  return {
+    plans,
+    planCodesChangingAtTermEnd: allPlansData.planCodesChangingAtTermEnd,
+  }
+}
+
 module.exports = {
   buildUsersSubscriptionViewModel,
   buildPlansList,
+  buildPlansListForSubscriptionDash,
   getBestSubscription: callbackify(getBestSubscription),
   promises: {
     buildUsersSubscriptionViewModel: promisify(buildUsersSubscriptionViewModel),

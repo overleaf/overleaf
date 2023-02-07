@@ -1,12 +1,12 @@
 import { expect } from 'chai'
 import { render, screen } from '@testing-library/react'
-import ManagedGroupSubscriptions, {
-  ManagedGroupSubscription,
-} from '../../../../../../frontend/js/features/subscription/components/dashboard/managed-group-subscriptions'
 import {
   groupActiveSubscription,
   groupActiveSubscriptionWithPendingLicenseChange,
 } from '../../fixtures/subscriptions'
+import ManagedGroupSubscriptions from '../../../../../../frontend/js/features/subscription/components/dashboard/managed-group-subscriptions'
+import { ManagedGroupSubscription } from '../../../../../../types/subscription/dashboard/subscription'
+import { SubscriptionDashboardProvider } from '../../../../../../frontend/js/features/subscription/context/subscription-dashboard-context'
 
 const managedGroupSubscriptions: ManagedGroupSubscription[] = [
   {
@@ -39,8 +39,14 @@ describe('<ManagedGroupSubscriptions />', function () {
   })
 
   it('renders all managed group subscriptions', function () {
+    window.metaAttributesCache.set(
+      'ol-managedGroupSubscriptions',
+      managedGroupSubscriptions
+    )
     render(
-      <ManagedGroupSubscriptions subscriptions={managedGroupSubscriptions} />
+      <SubscriptionDashboardProvider>
+        <ManagedGroupSubscriptions />
+      </SubscriptionDashboardProvider>
     )
 
     const elements = screen.getAllByText('You are a', {
@@ -85,7 +91,11 @@ describe('<ManagedGroupSubscriptions />', function () {
   })
 
   it('renders nothing when there are no group memberships', function () {
-    render(<ManagedGroupSubscriptions subscriptions={undefined} />)
+    render(
+      <SubscriptionDashboardProvider>
+        <ManagedGroupSubscriptions />
+      </SubscriptionDashboardProvider>
+    )
     const elements = screen.queryAllByText('You are a', {
       exact: false,
     })

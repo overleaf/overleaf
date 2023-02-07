@@ -1,6 +1,7 @@
 import { expect } from 'chai'
 import { render, screen } from '@testing-library/react'
 import InstitutionMemberships from '../../../../../../frontend/js/features/subscription/components/dashboard/institution-memberships'
+import { SubscriptionDashboardProvider } from '../../../../../../frontend/js/features/subscription/context/subscription-dashboard-context'
 
 const memberships = [
   {
@@ -35,7 +36,16 @@ describe('<InstitutionMemberships />', function () {
   })
 
   it('renders all insitutions with license', function () {
-    render(<InstitutionMemberships memberships={memberships} />)
+    window.metaAttributesCache.set(
+      'ol-currentInstitutionsWithLicence',
+      memberships
+    )
+
+    render(
+      <SubscriptionDashboardProvider>
+        <InstitutionMemberships />
+      </SubscriptionDashboardProvider>
+    )
 
     const elements = screen.getAllByText('You are on our', {
       exact: false,
@@ -50,14 +60,27 @@ describe('<InstitutionMemberships />', function () {
   })
 
   it('renders error message when failed to check commons licenses', function () {
-    render(<InstitutionMemberships memberships={undefined} />)
+    render(
+      <SubscriptionDashboardProvider>
+        <InstitutionMemberships />
+      </SubscriptionDashboardProvider>
+    )
     screen.getByText(
       'Sorry, something went wrong. Subscription information related to institutional affiliations may not be displayed. Please try again later.'
     )
   })
 
   it('renders the "Get the most out of your" subscription text when a user has a subscription', function () {
-    render(<InstitutionMemberships memberships={memberships} />)
+    window.metaAttributesCache.set(
+      'ol-currentInstitutionsWithLicence',
+      memberships
+    )
+
+    render(
+      <SubscriptionDashboardProvider>
+        <InstitutionMemberships />
+      </SubscriptionDashboardProvider>
+    )
     screen.getByText('Get the most out of your', {
       exact: false,
     })

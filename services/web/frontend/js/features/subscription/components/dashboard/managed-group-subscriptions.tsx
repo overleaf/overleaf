@@ -1,29 +1,17 @@
 import { Trans, useTranslation } from 'react-i18next'
-import { GroupSubscription } from '../../../../../../types/subscription/dashboard/subscription'
-import { User } from '../../../../../../types/user'
+import { useSubscriptionDashboardContext } from '../../context/subscription-dashboard-context'
 
-export type ManagedGroupSubscription = Omit<GroupSubscription, 'admin_id'> & {
-  userIsGroupMember: boolean
-  planLevelName: string
-  admin_id: User
-}
-
-type ManagedGroupSubscriptionsProps = {
-  subscriptions?: ManagedGroupSubscription[]
-}
-
-export default function ManagedGroupSubscriptions({
-  subscriptions,
-}: ManagedGroupSubscriptionsProps) {
+export default function ManagedGroupSubscriptions() {
   const { t } = useTranslation()
+  const { managedGroupSubscriptions } = useSubscriptionDashboardContext()
 
-  if (!subscriptions) {
+  if (!managedGroupSubscriptions) {
     return null
   }
 
   return (
     <>
-      {subscriptions.map(subscription => (
+      {managedGroupSubscriptions.map(subscription => (
         <div key={`managed-group-${subscription._id}`}>
           <p>
             {subscription.userIsGroupMember ? (

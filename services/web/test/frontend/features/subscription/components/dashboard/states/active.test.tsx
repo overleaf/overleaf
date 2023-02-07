@@ -12,12 +12,14 @@ import {
   trialSubscription,
 } from '../../../fixtures/subscriptions'
 import sinon from 'sinon'
+import { plans } from '../../../fixtures/plans'
 
 describe('<ActiveSubscription />', function () {
   let sendMBSpy: sinon.SinonSpy
 
   beforeEach(function () {
     window.metaAttributesCache = new Map()
+    window.metaAttributesCache.set('ol-plans', plans)
     sendMBSpy = sinon.spy(eventTracking, 'sendMB')
   })
 
@@ -77,11 +79,13 @@ describe('<ActiveSubscription />', function () {
     const button = screen.getByRole('button', { name: 'Change plan' })
     fireEvent.click(button)
 
-    // confirm main dash UI UI still shown
-    expectedInActiveSubscription(annualActiveSubscription)
+    // confirm main dash UI still shown
+    screen.getByText('You are currently subscribed to the', { exact: false })
 
-    // TODO: add change plan UI
-    screen.getByText('change subscription placeholder', { exact: false })
+    screen.getByRole('heading', { name: 'Change plan' })
+    expect(
+      screen.getAllByRole('button', { name: 'Change to this plan' }).length > 0
+    ).to.be.true
   })
 
   it('notes when user is changing plan at end of current plan term', function () {
@@ -103,17 +107,10 @@ describe('<ActiveSubscription />', function () {
     screen.getByText(
       'If you wish this change to apply before the end of your current billing period, please contact us.'
     )
-  })
 
-  it('does not show "Change plan" option for group plans', function () {
-    render(
-      <SubscriptionDashboardProvider>
-        <ActiveSubscription subscription={groupActiveSubscription} />
-      </SubscriptionDashboardProvider>
-    )
-
-    const changePlan = screen.queryByRole('button', { name: 'Change plan' })
-    expect(changePlan).to.be.null
+    expect(screen.queryByRole('link', { name: 'contact support' })).to.be.null
+    expect(screen.queryByText('if you wish to change your group subscription.'))
+      .to.be.null
   })
 
   it('does not show "Change plan" option when past due', function () {
@@ -233,5 +230,30 @@ describe('<ActiveSubscription />', function () {
     )
 
     screen.getByText('We’d love you to stay')
+  })
+
+  describe('group plans', function () {
+    it('does not show "Change plan" option for group plans', function () {
+      render(
+        <SubscriptionDashboardProvider>
+          <ActiveSubscription subscription={groupActiveSubscription} />
+        </SubscriptionDashboardProvider>
+      )
+
+      const changePlan = screen.queryByRole('button', { name: 'Change plan' })
+      expect(changePlan).to.be.null
+    })
+
+    it('shows contact support message for group plan change requests', function () {
+      render(
+        <SubscriptionDashboardProvider>
+          <ActiveSubscription subscription={groupActiveSubscription} />
+        </SubscriptionDashboardProvider>
+      )
+      screen.getByRole('link', { name: 'contact support' })
+      screen.getByText('if you wish to change your group subscription.', {
+        exact: false,
+      })
+    })
   })
 })
