@@ -1,6 +1,8 @@
 // raise mongo timeout to 1hr if otherwise unspecified
 process.env.MONGO_SOCKET_TIMEOUT =
   parseInt(process.env.MONGO_SOCKET_TIMEOUT, 10) || 3600000
+
+const VERSION = '0.9.0-cli'
 const {
   countProjects,
   countDocHistory,
@@ -24,12 +26,16 @@ const DEFAULT_OUTPUT_FILE = `history-migration-${new Date()
 const argv = minimist(process.argv.slice(2), {
   boolean: [
     'verbose',
+    'fix-invalid-characters',
+    'convert-large-docs-to-file',
+    'import-broken-history-as-zip',
+    'force-upgrade-on-failure',
     'dry-run',
     'use-query-hint',
     'retry-failed',
     'archive-on-failure',
   ],
-  string: ['output'],
+  string: ['output', 'user-id'],
   alias: {
     verbose: 'v',
     output: 'o',
@@ -153,13 +159,23 @@ async function migrateProjects(projectsToMigrate) {
     )
   }, 500)
 
+  const options = {
+    migrationOptions: {
+      archiveOnFailure: argv['import-broken-history-as-zip'],
+      fixInvalidCharacters: argv['fix-invalid-characters'],
+      forceNewHistoryOnFailure: argv['force-upgrade-on-failure'],
+    },
+    convertLargeDocsToFile: argv['convert-large-docs-to-file'],
+    userId: argv['user-id'],
+    reason: VERSION,
+  }
   async function _migrateProject(project) {
     if (INTERRUPT) {
       return // don't start any new jobs if we're shutting down
     }
     const startTime = new Date()
     try {
-      const result = await upgradeProject(project._id)
+      const result = await upgradeProject(project._id, options)
       i++
       if (INTERRUPT && limit.activeCount > 1) {
         // an interrupt was requested while this job was running
