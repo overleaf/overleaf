@@ -1,8 +1,14 @@
-import { render, fireEvent, screen } from '@testing-library/react'
+import { fireEvent, screen } from '@testing-library/react'
 import { expect } from 'chai'
+import fetchMock from 'fetch-mock'
 import NewProjectButton from '../../../../../frontend/js/features/project-list/components/new-project-button'
+import { renderWithProjectListContext } from '../helpers/render-with-context'
 
 describe('<NewProjectButton />', function () {
+  beforeEach(function () {
+    fetchMock.reset()
+  })
+
   describe('for every user (affiliated and non-affiliated)', function () {
     beforeEach(function () {
       window.metaAttributesCache.set('ol-ExposedSettings', {
@@ -18,7 +24,7 @@ describe('<NewProjectButton />', function () {
         ],
       })
 
-      render(<NewProjectButton id="test" />)
+      renderWithProjectListContext(<NewProjectButton id="test" />)
 
       const newProjectButton = screen.getByRole('button', {
         name: 'New Project',
@@ -100,7 +106,7 @@ describe('<NewProjectButton />', function () {
     })
 
     it('shows the correct dropdown menu', function () {
-      render(<NewProjectButton id="test" />)
+      renderWithProjectListContext(<NewProjectButton id="test" />)
 
       const newProjectButton = screen.getByRole('button', {
         name: 'New Project',

@@ -217,13 +217,21 @@ input.project-list-table-select-item[type='checkbox'] {
   text-align: center;
 }
 
-.user-profile {
+.add-affiliation-mobile-wrapper {
+  padding: @padding-md 0;
+}
+
+.add-affiliation {
   .progress {
     height: @line-height-computed / 2;
     margin-bottom: @line-height-computed / 4;
   }
   p {
     margin-bottom: @line-height-computed / 4;
+  }
+  &.is-mobile p {
+    font-size: 12px;
+    white-space: normal;
   }
 }
 

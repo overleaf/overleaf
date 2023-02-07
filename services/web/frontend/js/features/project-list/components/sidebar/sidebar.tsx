@@ -1,6 +1,6 @@
 import NewProjectButton from '../new-project-button'
 import SidebarFilters from './sidebar-filters'
-import AddAffiliation, { useAddAffiliation } from './add-affiliation'
+import AddAffiliation, { useAddAffiliation } from '../add-affiliation'
 import { usePersistedResize } from '../../../../shared/hooks/use-resize'
 
 function Sidebar() {

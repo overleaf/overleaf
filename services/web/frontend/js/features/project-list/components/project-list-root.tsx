@@ -104,6 +104,7 @@ function ProjectListPageContent() {
                         <NewProjectButton
                           id="new-project-button-projects-table"
                           className="pull-left me-2"
+                          showAddAffiliationWidget
                         />
                         <SearchForm
                           inputValue={searchText}

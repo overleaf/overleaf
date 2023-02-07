@@ -2,7 +2,7 @@ import { screen, waitFor } from '@testing-library/react'
 import { expect } from 'chai'
 import fetchMock from 'fetch-mock'
 import { renderWithProjectListContext } from '../../helpers/render-with-context'
-import AddAffiliation from '../../../../../../frontend/js/features/project-list/components/sidebar/add-affiliation'
+import AddAffiliation from '../../../../../../frontend/js/features/project-list/components/add-affiliation'
 import { Affiliation } from '../../../../../../types/affiliation'
 
 describe('Add affiliation widget', function () {
@@ -54,7 +54,9 @@ describe('Add affiliation widget', function () {
     window.metaAttributesCache.set('ol-ExposedSettings', { isOverleaf: true })
     window.metaAttributesCache.set('ol-userAffiliations', [])
 
-    renderWithProjectListContext(<AddAffiliation />, { projects: [] })
+    renderWithProjectListContext(<AddAffiliation />, {
+      projects: [],
+    })
 
     await fetchMock.flush(true)
     await waitFor(() => expect(fetchMock.called('/api/project')))
