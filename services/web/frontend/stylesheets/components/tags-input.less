@@ -21,10 +21,8 @@
 
 .tags-input .tags {
   .form-control;
-  border-radius: 3px; /* overriding .form-control */
   -moz-appearance: textfield;
   -webkit-appearance: textfield;
-  padding: 3px;
   overflow: hidden;
   word-wrap: break-word;
   cursor: text;
@@ -33,12 +31,18 @@
   display: flex;
   flex-wrap: wrap;
 }
-.tags-input .tags.focused,
-.tags-input .tags:focus-within {
+.tags-input .tags when(@is-new-css = false) {
+  padding: 3px;
+  border-radius: 3px; /* overriding .form-control */
+}
+.tags-input .tags:focus-within when(@is-new-css = false) {
   outline: none;
   -webkit-box-shadow: 0 0 3px 1px rgba(5, 139, 242, 0.6);
   -moz-box-shadow: 0 0 3px 1px rgba(5, 139, 242, 0.6);
   box-shadow: 0 0 3px 1px rgba(5, 139, 242, 0.6);
+}
+.tags-input .tags:focus-within when(@is-new-css = true) {
+  &:extend(.input-focus-style);
 }
 .tags-input .tags .tag-list {
   margin: 0;
@@ -75,12 +79,17 @@
 .tags-input .tags .input {
   border: 0;
   outline: none;
-  margin: 2px;
-  padding: 0;
-  padding-left: 5px;
   flex-grow: 1;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.tags-input .tags .input when(@is-new-css = false) {
+  margin: 2px;
+  padding: 0;
+  padding-left: 5px;
+}
+.tags-input .tags .input when(@is-new-css = true) {
+  .placeholder();
 }
 .tags-input .tags .input.invalid-tag {
   color: @brand-danger;
