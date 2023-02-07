@@ -1,8 +1,7 @@
 import { expect } from 'chai'
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, screen } from '@testing-library/react'
 import * as eventTracking from '../../../../../../../../frontend/js/infrastructure/event-tracking'
 import { ActiveSubscription } from '../../../../../../../../frontend/js/features/subscription/components/dashboard/states/active/active'
-import { SubscriptionDashboardProvider } from '../../../../../../../../frontend/js/features/subscription/context/subscription-dashboard-context'
 import { Subscription } from '../../../../../../../../types/subscription/dashboard/subscription'
 import {
   annualActiveSubscription,
@@ -13,22 +12,20 @@ import {
 } from '../../../../fixtures/subscriptions'
 import sinon from 'sinon'
 import { plans } from '../../../../fixtures/plans'
+import {
+  cleanUpContext,
+  renderWithSubscriptionDashContext,
+} from '../../../../helpers/render-with-subscription-dash-context'
 
 describe('<ActiveSubscription />', function () {
   let sendMBSpy: sinon.SinonSpy
 
   beforeEach(function () {
-    window.metaAttributesCache = new Map()
-    window.metaAttributesCache.set('ol-plans', plans)
-    // @ts-ignore
-    window.recurly = {}
     sendMBSpy = sinon.spy(eventTracking, 'sendMB')
   })
 
   afterEach(function () {
-    window.metaAttributesCache = new Map()
-    // @ts-ignore
-    delete window.recurly
+    cleanUpContext()
     sendMBSpy.restore()
   })
 
@@ -64,21 +61,26 @@ describe('<ActiveSubscription />', function () {
     screen.getByRole('link', { name: 'View Your Invoices' })
   }
 
-  it('renders the dash annual active subscription', function () {
-    render(
-      <SubscriptionDashboardProvider>
-        <ActiveSubscription subscription={annualActiveSubscription} />
-      </SubscriptionDashboardProvider>
+  function renderActiveSubscription(subscription: Subscription) {
+    const renderOptions = {
+      metaTags: [
+        { name: 'ol-plans', value: plans },
+        { name: 'ol-subscription', value: subscription },
+      ],
+    }
+    renderWithSubscriptionDashContext(
+      <ActiveSubscription subscription={subscription} />,
+      renderOptions
     )
+  }
+
+  it('renders the dash annual active subscription', function () {
+    renderActiveSubscription(annualActiveSubscription)
     expectedInActiveSubscription(annualActiveSubscription)
   })
 
   it('shows change plan UI when button clicked', function () {
-    render(
-      <SubscriptionDashboardProvider>
-        <ActiveSubscription subscription={annualActiveSubscription} />
-      </SubscriptionDashboardProvider>
-    )
+    renderActiveSubscription(annualActiveSubscription)
 
     const button = screen.getByRole('button', { name: 'Change plan' })
     fireEvent.click(button)
@@ -93,11 +95,7 @@ describe('<ActiveSubscription />', function () {
   })
 
   it('notes when user is changing plan at end of current plan term', function () {
-    render(
-      <SubscriptionDashboardProvider>
-        <ActiveSubscription subscription={pendingSubscriptionChange} />
-      </SubscriptionDashboardProvider>
-    )
+    renderActiveSubscription(pendingSubscriptionChange)
 
     expectedInActiveSubscription(pendingSubscriptionChange)
 
@@ -126,24 +124,14 @@ describe('<ActiveSubscription />', function () {
 
     activePastDueSubscription.recurly.account.has_past_due_invoice._ = 'true'
 
-    render(
-      <SubscriptionDashboardProvider>
-        <ActiveSubscription subscription={activePastDueSubscription} />
-      </SubscriptionDashboardProvider>
-    )
+    renderActiveSubscription(activePastDueSubscription)
 
     const changePlan = screen.queryByRole('button', { name: 'Change plan' })
     expect(changePlan).to.be.null
   })
 
   it('shows the pending license change message when plan change is pending', function () {
-    render(
-      <SubscriptionDashboardProvider>
-        <ActiveSubscription
-          subscription={groupActiveSubscriptionWithPendingLicenseChange}
-        />
-      </SubscriptionDashboardProvider>
-    )
+    renderActiveSubscription(groupActiveSubscriptionWithPendingLicenseChange)
 
     screen.getByText('Your subscription is changing to include', {
       exact: false,
@@ -175,11 +163,7 @@ describe('<ActiveSubscription />', function () {
       subscription.recurly.totalLicenses +
       subscription.recurly.additionalLicenses
 
-    render(
-      <SubscriptionDashboardProvider>
-        <ActiveSubscription subscription={subscription} />
-      </SubscriptionDashboardProvider>
-    )
+    renderActiveSubscription(subscription)
 
     screen.getByText('Your subscription includes', {
       exact: false,
@@ -193,11 +177,7 @@ describe('<ActiveSubscription />', function () {
   })
 
   it('shows when trial ends and first payment collected', function () {
-    render(
-      <SubscriptionDashboardProvider>
-        <ActiveSubscription subscription={trialSubscription} />
-      </SubscriptionDashboardProvider>
-    )
+    renderActiveSubscription(trialSubscription)
     screen.getByText('You’re on a free trial which ends on', { exact: false })
 
     const endDate = screen.getAllByText(
@@ -207,11 +187,7 @@ describe('<ActiveSubscription />', function () {
   })
 
   it('shows cancel UI and sends event', function () {
-    render(
-      <SubscriptionDashboardProvider>
-        <ActiveSubscription subscription={annualActiveSubscription} />
-      </SubscriptionDashboardProvider>
-    )
+    renderActiveSubscription(annualActiveSubscription)
     // before button clicked
     screen.getByText(
       'Your subscription will remain active until the end of your billing period',
@@ -238,22 +214,14 @@ describe('<ActiveSubscription />', function () {
 
   describe('group plans', function () {
     it('does not show "Change plan" option for group plans', function () {
-      render(
-        <SubscriptionDashboardProvider>
-          <ActiveSubscription subscription={groupActiveSubscription} />
-        </SubscriptionDashboardProvider>
-      )
+      renderActiveSubscription(groupActiveSubscription)
 
       const changePlan = screen.queryByRole('button', { name: 'Change plan' })
       expect(changePlan).to.be.null
     })
 
     it('shows contact support message for group plan change requests', function () {
-      render(
-        <SubscriptionDashboardProvider>
-          <ActiveSubscription subscription={groupActiveSubscription} />
-        </SubscriptionDashboardProvider>
-      )
+      renderActiveSubscription(groupActiveSubscription)
       screen.getByRole('link', { name: 'contact support' })
       screen.getByText('if you wish to change your group subscription.', {
         exact: false,

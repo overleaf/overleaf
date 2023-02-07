@@ -1,6 +1,5 @@
 import { expect } from 'chai'
-import { fireEvent, render, screen } from '@testing-library/react'
-import { SubscriptionDashboardProvider } from '../../../../../../../../../frontend/js/features/subscription/context/subscription-dashboard-context'
+import { fireEvent, screen } from '@testing-library/react'
 import { ChangePlan } from '../../../../../../../../../frontend/js/features/subscription/components/dashboard/states/active/change-plan/change-plan'
 import { plans } from '../../../../../fixtures/plans'
 import {
@@ -8,38 +7,38 @@ import {
   pendingSubscriptionChange,
 } from '../../../../../fixtures/subscriptions'
 import { ActiveSubscription } from '../../../../../../../../../frontend/js/features/subscription/components/dashboard/states/active/active'
+import {
+  cleanUpContext,
+  renderWithSubscriptionDashContext,
+} from '../../../../../helpers/render-with-subscription-dash-context'
 
 describe('<ChangePlan />', function () {
-  beforeEach(function () {
-    window.metaAttributesCache = new Map()
-    window.metaAttributesCache.set('ol-plans', plans)
-    // @ts-ignore
-    window.recurly = {}
-  })
+  const plansMetaTag = { name: 'ol-plans', value: plans }
+  const renderOptions = { metaTags: [plansMetaTag] }
 
   afterEach(function () {
-    window.metaAttributesCache = new Map()
-    // @ts-ignore
-    delete window.recurly
+    cleanUpContext()
   })
 
   it('does not render the UI when showChangePersonalPlan is false', function () {
     window.metaAttributesCache.delete('ol-plans')
-    const { container } = render(
-      <SubscriptionDashboardProvider>
-        <ChangePlan />
-      </SubscriptionDashboardProvider>
+    const { container } = renderWithSubscriptionDashContext(
+      <ChangePlan />,
+      renderOptions
     )
 
     expect(container.firstChild).to.be.null
   })
 
   it('renders the individual plans table', function () {
-    window.metaAttributesCache.set('ol-subscription', annualActiveSubscription)
-    render(
-      <SubscriptionDashboardProvider>
-        <ActiveSubscription subscription={annualActiveSubscription} />
-      </SubscriptionDashboardProvider>
+    renderWithSubscriptionDashContext(
+      <ActiveSubscription subscription={annualActiveSubscription} />,
+      {
+        metaTags: [
+          { name: 'ol-subscription', value: annualActiveSubscription },
+          plansMetaTag,
+        ],
+      }
     )
 
     const button = screen.getByRole('button', { name: 'Change plan' })
@@ -59,11 +58,14 @@ describe('<ChangePlan />', function () {
   })
 
   it('renders the change to group plan UI', function () {
-    window.metaAttributesCache.set('ol-subscription', annualActiveSubscription)
-    render(
-      <SubscriptionDashboardProvider>
-        <ActiveSubscription subscription={annualActiveSubscription} />
-      </SubscriptionDashboardProvider>
+    renderWithSubscriptionDashContext(
+      <ActiveSubscription subscription={annualActiveSubscription} />,
+      {
+        metaTags: [
+          { name: 'ol-subscription', value: annualActiveSubscription },
+          plansMetaTag,
+        ],
+      }
     )
 
     const button = screen.getByRole('button', { name: 'Change plan' })
@@ -73,11 +75,14 @@ describe('<ChangePlan />', function () {
   })
 
   it('renders "Your new plan" and "Keep current plan" when there is a pending plan change', function () {
-    window.metaAttributesCache.set('ol-subscription', pendingSubscriptionChange)
-    render(
-      <SubscriptionDashboardProvider>
-        <ActiveSubscription subscription={pendingSubscriptionChange} />
-      </SubscriptionDashboardProvider>
+    renderWithSubscriptionDashContext(
+      <ActiveSubscription subscription={pendingSubscriptionChange} />,
+      {
+        metaTags: [
+          { name: 'ol-subscription', value: pendingSubscriptionChange },
+          plansMetaTag,
+        ],
+      }
     )
 
     const button = screen.getByRole('button', { name: 'Change plan' })
@@ -88,12 +93,14 @@ describe('<ChangePlan />', function () {
   })
 
   it('does not render when Recurly did not load', function () {
-    // @ts-ignore
-    delete window.recurly
-    const { container } = render(
-      <SubscriptionDashboardProvider>
-        <ActiveSubscription subscription={annualActiveSubscription} />
-      </SubscriptionDashboardProvider>
+    const { container } = renderWithSubscriptionDashContext(
+      <ActiveSubscription subscription={annualActiveSubscription} />,
+      {
+        metaTags: [
+          { name: 'ol-subscription', value: annualActiveSubscription },
+          plansMetaTag,
+        ],
+      }
     )
     expect(container).not.to.be.null
   })
