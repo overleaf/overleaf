@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
-import { Plan } from '../../../../../../../../types/subscription/plan'
-import { useSubscriptionDashboardContext } from '../../../../context/subscription-dashboard-context'
+import { Plan } from '../../../../../../../../../types/subscription/plan'
+import Icon from '../../../../../../../shared/components/icon'
+import { useSubscriptionDashboardContext } from '../../../../../context/subscription-dashboard-context'
 
 function ChangeToPlanButton({ plan }: { plan: Plan }) {
   const { t } = useTranslation()
@@ -47,15 +48,17 @@ function ChangePlanButton({ plan }: { plan: Plan }) {
     return <KeepCurrentPlanButton plan={plan} />
   } else if (isCurrentPlanForUser && !personalSubscription.pendingPlan) {
     return (
-      <button className="btn btn-secondary disabled">{t('your_plan')}</button>
+      <b>
+        <Icon type="check" /> {t('your_plan')}
+      </b>
     )
   } else if (
     personalSubscription?.pendingPlan?.planCode?.split('_')[0] === plan.planCode
   ) {
     return (
-      <button className="btn btn-secondary disabled">
-        {t('your_new_plan')}
-      </button>
+      <b>
+        <Icon type="check" /> {t('your_new_plan')}
+      </b>
     )
   } else {
     return <ChangeToPlanButton plan={plan} />
@@ -91,27 +94,21 @@ function PlansRows({ plans }: { plans: Array<Plan> }) {
   )
 }
 
-export function ChangePlan() {
+export function IndividualPlansTable({ plans }: { plans: Array<Plan> }) {
   const { t } = useTranslation()
-  const { plans, showChangePersonalPlan } = useSubscriptionDashboardContext()
-
-  if (!showChangePersonalPlan || !plans) return null
 
   return (
-    <>
-      <h2>{t('change_plan')}</h2>
-      <table className="table">
-        <thead>
-          <tr>
-            <th>{t('name')}</th>
-            <th>{t('price')}</th>
-            <th />
-          </tr>
-        </thead>
-        <tbody>
-          <PlansRows plans={plans} />
-        </tbody>
-      </table>
-    </>
+    <table className="table">
+      <thead>
+        <tr>
+          <th>{t('name')}</th>
+          <th>{t('price')}</th>
+          <th />
+        </tr>
+      </thead>
+      <tbody>
+        <PlansRows plans={plans} />
+      </tbody>
+    </table>
   )
 }

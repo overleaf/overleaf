@@ -2,6 +2,7 @@ import { ExposedSettings } from './exposed-settings'
 import { OAuthProviders } from './oauth-providers'
 import { OverallThemeMeta } from './project-settings'
 import { User } from './user'
+import 'recurly__recurly-js'
 
 declare global {
   // eslint-disable-next-line no-unused-vars

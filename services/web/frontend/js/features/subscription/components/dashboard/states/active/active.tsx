@@ -7,7 +7,7 @@ import { CancelSubscriptionButton } from './cancel-subscription-button'
 import { CancelSubscription } from './cancel-subscription'
 import { PendingPlanChange } from './pending-plan-change'
 import { TrialEnding } from './trial-ending'
-import { ChangePlan } from './change-plan'
+import { ChangePlan } from './change-plan/change-plan'
 import { PendingAdditionalLicenses } from './pending-additional-licenses'
 import { ContactSupportToChangeGroupPlan } from './contact-support-to-change-group-plan'
 
@@ -36,14 +36,20 @@ export function ActiveSubscription({
           ]}
         />
         {subscription.pendingPlan && (
-          <PendingPlanChange subscription={subscription} />
+          <>
+            {' '}
+            <PendingPlanChange subscription={subscription} />
+          </>
         )}
         {!subscription.pendingPlan &&
           subscription.recurly.additionalLicenses > 0 && (
-            <PendingAdditionalLicenses
-              additionalLicenses={subscription.recurly.additionalLicenses}
-              totalLicenses={subscription.recurly.totalLicenses}
-            />
+            <>
+              {' '}
+              <PendingAdditionalLicenses
+                additionalLicenses={subscription.recurly.additionalLicenses}
+                totalLicenses={subscription.recurly.totalLicenses}
+              />
+            </>
           )}
         {!recurlyLoadError &&
           !subscription.groupPlan &&

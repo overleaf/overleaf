@@ -8,21 +8,18 @@ export function PendingAdditionalLicenses({
   totalLicenses: number
 }) {
   return (
-    <>
-      {' '}
-      <Trans
-        i18nKey="additional_licenses"
-        values={{
-          additionalLicenses,
-          totalLicenses,
-        }}
-        components={[
-          // eslint-disable-next-line react/jsx-key
-          <strong />,
-          // eslint-disable-next-line react/jsx-key
-          <strong />,
-        ]}
-      />
-    </>
+    <Trans
+      i18nKey="additional_licenses"
+      values={{
+        additionalLicenses,
+        totalLicenses,
+      }}
+      components={[
+        // eslint-disable-next-line react/jsx-key
+        <strong />,
+        // eslint-disable-next-line react/jsx-key
+        <strong />,
+      ]}
+    />
   )
 }

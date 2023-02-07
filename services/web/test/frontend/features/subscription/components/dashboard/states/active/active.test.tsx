@@ -1,18 +1,18 @@
 import { expect } from 'chai'
 import { fireEvent, render, screen } from '@testing-library/react'
-import * as eventTracking from '../../../../../../../frontend/js/infrastructure/event-tracking'
-import { ActiveSubscription } from '../../../../../../../frontend/js/features/subscription/components/dashboard/states/active/active'
-import { SubscriptionDashboardProvider } from '../../../../../../../frontend/js/features/subscription/context/subscription-dashboard-context'
-import { Subscription } from '../../../../../../../types/subscription/dashboard/subscription'
+import * as eventTracking from '../../../../../../../../frontend/js/infrastructure/event-tracking'
+import { ActiveSubscription } from '../../../../../../../../frontend/js/features/subscription/components/dashboard/states/active/active'
+import { SubscriptionDashboardProvider } from '../../../../../../../../frontend/js/features/subscription/context/subscription-dashboard-context'
+import { Subscription } from '../../../../../../../../types/subscription/dashboard/subscription'
 import {
   annualActiveSubscription,
   groupActiveSubscription,
   groupActiveSubscriptionWithPendingLicenseChange,
   pendingSubscriptionChange,
   trialSubscription,
-} from '../../../fixtures/subscriptions'
+} from '../../../../fixtures/subscriptions'
 import sinon from 'sinon'
-import { plans } from '../../../fixtures/plans'
+import { plans } from '../../../../fixtures/plans'
 
 describe('<ActiveSubscription />', function () {
   let sendMBSpy: sinon.SinonSpy
@@ -20,11 +20,15 @@ describe('<ActiveSubscription />', function () {
   beforeEach(function () {
     window.metaAttributesCache = new Map()
     window.metaAttributesCache.set('ol-plans', plans)
+    // @ts-ignore
+    window.recurly = {}
     sendMBSpy = sinon.spy(eventTracking, 'sendMB')
   })
 
   afterEach(function () {
     window.metaAttributesCache = new Map()
+    // @ts-ignore
+    delete window.recurly
     sendMBSpy.restore()
   })
 
@@ -117,7 +121,7 @@ describe('<ActiveSubscription />', function () {
     // account is likely in expired state, but be sure to not show option if state is still active
     const activePastDueSubscription = Object.assign(
       {},
-      annualActiveSubscription
+      JSON.parse(JSON.stringify(annualActiveSubscription))
     )
 
     activePastDueSubscription.recurly.account.has_past_due_invoice._ = 'true'

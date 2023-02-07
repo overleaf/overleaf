@@ -1,4 +1,11 @@
-import { createContext, ReactNode, useContext, useMemo, useState } from 'react'
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import {
   ManagedGroupSubscription,
   Subscription,
@@ -43,6 +50,12 @@ export function SubscriptionDashboardProvider({
     institutionMemberships?.length > 0 ||
     personalSubscription ||
     managedGroupSubscriptions
+
+  useEffect(() => {
+    if (typeof window.recurly === 'undefined' || !window.recurly) {
+      setRecurlyLoadError(true)
+    }
+  }, [setRecurlyLoadError])
 
   const value = useMemo<SubscriptionDashboardContextValue>(
     () => ({

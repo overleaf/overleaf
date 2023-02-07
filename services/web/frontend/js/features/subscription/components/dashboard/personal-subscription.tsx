@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Subscription } from '../../../../../../types/subscription/dashboard/subscription'
 import { ActiveSubscription } from './states/active/active'
@@ -49,14 +48,8 @@ function PersonalSubscriptionStates({
 
 function PersonalSubscription() {
   const { t } = useTranslation()
-  const { personalSubscription, recurlyLoadError, setRecurlyLoadError } =
+  const { personalSubscription, recurlyLoadError } =
     useSubscriptionDashboardContext()
-
-  useEffect(() => {
-    if (typeof window.recurly === 'undefined' || !window.recurly) {
-      setRecurlyLoadError(true)
-    }
-  })
 
   if (!personalSubscription) return null
 
