@@ -17,6 +17,7 @@ type Features = {
 
 export type Plan = {
   annual?: boolean
+  displayPrice?: string
   featureDescription?: Record<string, unknown>[]
   features?: Features
   groupPlan?: boolean

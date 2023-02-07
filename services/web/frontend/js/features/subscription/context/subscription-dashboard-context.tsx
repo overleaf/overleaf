@@ -13,6 +13,8 @@ import {
 import { Plan } from '../../../../../types/subscription/plan'
 import { Institution } from '../../../../../types/institution'
 import getMeta from '../../../utils/meta'
+import { loadDisplayPriceWithTaxPromise } from '../util/recurly-pricing'
+import { isRecurlyLoaded } from '../util/is-recurly-loaded'
 
 type SubscriptionDashboardContextValue = {
   hasDisplayedSubscription: boolean
@@ -20,6 +22,7 @@ type SubscriptionDashboardContextValue = {
   managedGroupSubscriptions: Array<ManagedGroupSubscription>
   personalSubscription?: Subscription
   plans: Array<Plan>
+  queryingIndividualPlansData: boolean
   recurlyLoadError: boolean
   setRecurlyLoadError: React.Dispatch<React.SetStateAction<boolean>>
   showCancellation: boolean
@@ -40,11 +43,15 @@ export function SubscriptionDashboardProvider({
   const [recurlyLoadError, setRecurlyLoadError] = useState(false)
   const [showCancellation, setShowCancellation] = useState(false)
   const [showChangePersonalPlan, setShowChangePersonalPlan] = useState(false)
+  const [plans, setPlans] = useState([])
+  const [queryingIndividualPlansData, setQueryingIndividualPlansData] =
+    useState(true)
 
-  const plans = getMeta('ol-plans')
+  const plansWithoutDisplayPrice = getMeta('ol-plans')
   const institutionMemberships = getMeta('ol-currentInstitutionsWithLicence')
   const personalSubscription = getMeta('ol-subscription')
   const managedGroupSubscriptions = getMeta('ol-managedGroupSubscriptions')
+  const recurlyApiKey = getMeta('ol-recurlyApiKey')
 
   const hasDisplayedSubscription =
     institutionMemberships?.length > 0 ||
@@ -52,10 +59,37 @@ export function SubscriptionDashboardProvider({
     managedGroupSubscriptions
 
   useEffect(() => {
-    if (typeof window.recurly === 'undefined' || !window.recurly) {
+    if (!isRecurlyLoaded()) {
       setRecurlyLoadError(true)
+    } else {
+      recurly.configure(recurlyApiKey)
     }
-  }, [setRecurlyLoadError])
+  }, [recurlyApiKey, setRecurlyLoadError])
+
+  useEffect(() => {
+    if (isRecurlyLoaded() && plansWithoutDisplayPrice && personalSubscription) {
+      const { currency, taxRate } = personalSubscription.recurly
+      const fetchPlansDisplayPrices = async () => {
+        for (const plan of plansWithoutDisplayPrice) {
+          try {
+            const priceData = await loadDisplayPriceWithTaxPromise(
+              plan.planCode,
+              currency,
+              taxRate
+            )
+            if (priceData?.totalForDisplay) {
+              plan.displayPrice = priceData.totalForDisplay
+            }
+          } catch (error) {
+            console.error(error)
+          }
+        }
+        setPlans(plansWithoutDisplayPrice)
+        setQueryingIndividualPlansData(false)
+      }
+      fetchPlansDisplayPrices().catch(console.error)
+    }
+  }, [personalSubscription, plansWithoutDisplayPrice])
 
   const value = useMemo<SubscriptionDashboardContextValue>(
     () => ({
@@ -64,6 +98,7 @@ export function SubscriptionDashboardProvider({
       managedGroupSubscriptions,
       personalSubscription,
       plans,
+      queryingIndividualPlansData,
       recurlyLoadError,
       setRecurlyLoadError,
       showCancellation,
@@ -77,6 +112,7 @@ export function SubscriptionDashboardProvider({
       managedGroupSubscriptions,
       personalSubscription,
       plans,
+      queryingIndividualPlansData,
       recurlyLoadError,
       setRecurlyLoadError,
       showCancellation,

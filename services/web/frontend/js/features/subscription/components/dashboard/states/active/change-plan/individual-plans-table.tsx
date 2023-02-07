@@ -74,7 +74,7 @@ function PlansRow({ plan }: { plan: Plan }) {
         <strong>{plan.name}</strong>
       </td>
       <td>
-        {/* todo: {{ displayPrice }} */}/ {plan.annual ? t('year') : t('month')}
+        {plan.displayPrice} / {plan.annual ? t('year') : t('month')}
       </td>
       <td>
         <ChangePlanButton plan={plan} />
@@ -96,9 +96,13 @@ function PlansRows({ plans }: { plans: Array<Plan> }) {
 
 export function IndividualPlansTable({ plans }: { plans: Array<Plan> }) {
   const { t } = useTranslation()
+  const { recurlyLoadError, showChangePersonalPlan } =
+    useSubscriptionDashboardContext()
+
+  if (!showChangePersonalPlan || !plans || recurlyLoadError) return null
 
   return (
-    <table className="table">
+    <table className="table table-vertically-centered-cells">
       <thead>
         <tr>
           <th>{t('name')}</th>

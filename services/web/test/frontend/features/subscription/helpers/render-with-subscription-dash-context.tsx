@@ -1,11 +1,13 @@
 import { render } from '@testing-library/react'
 import { SubscriptionDashboardProvider } from '../../../../../frontend/js/features/subscription/context/subscription-dashboard-context'
+import { plans } from '../fixtures/plans'
 
 export function renderWithSubscriptionDashContext(
   component: React.ReactElement,
   options?: {
     metaTags?: { name: string; value: string | object | Array<object> }[]
     recurlyNotLoaded?: boolean
+    queryingRecurly?: boolean
   }
 ) {
   const SubscriptionDashboardProviderWrapper = ({
@@ -23,7 +25,41 @@ export function renderWithSubscriptionDashContext(
 
   if (!options?.recurlyNotLoaded) {
     // @ts-ignore
-    window.recurly = {}
+    global.recurly = {
+      configure: () => {},
+      Pricing: {
+        Subscription: () => {
+          return {
+            plan: (planCode: string) => {
+              const plan = plans.find(p => p.planCode === planCode)
+
+              const response = {
+                next: {
+                  total: plan?.price_in_cents
+                    ? plan.price_in_cents / 100
+                    : undefined,
+                },
+              }
+              return {
+                currency: () => {
+                  return {
+                    catch: () => {
+                      return {
+                        done: (callback: (response: object) => void) => {
+                          if (!options?.queryingRecurly) {
+                            return callback(response)
+                          }
+                        },
+                      }
+                    },
+                  }
+                },
+              }
+            },
+          }
+        },
+      },
+    }
   }
 
   return render(component, {
@@ -33,6 +69,6 @@ export function renderWithSubscriptionDashContext(
 
 export function cleanUpContext() {
   // @ts-ignore
-  delete window.recurly
+  delete global.recurly
   window.metaAttributesCache = new Map()
 }

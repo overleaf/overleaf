@@ -79,7 +79,7 @@ describe('<ActiveSubscription />', function () {
     expectedInActiveSubscription(annualActiveSubscription)
   })
 
-  it('shows change plan UI when button clicked', function () {
+  it('shows change plan UI when button clicked', async function () {
     renderActiveSubscription(annualActiveSubscription)
 
     const button = screen.getByRole('button', { name: 'Change plan' })
@@ -88,7 +88,7 @@ describe('<ActiveSubscription />', function () {
     // confirm main dash UI still shown
     screen.getByText('You are currently subscribed to the', { exact: false })
 
-    screen.getByRole('heading', { name: 'Change plan' })
+    await screen.findByRole('heading', { name: 'Change plan' })
     expect(
       screen.getAllByRole('button', { name: 'Change to this plan' }).length > 0
     ).to.be.true
