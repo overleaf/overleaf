@@ -1,0 +1,11 @@
+#!/bin/sh
+
+cd /overleaf/services/track-changes && node scripts/flush_all.js >> /var/log/sharelatex/track-changes.log 2>&1
+
+EXIT_CODE="$?"
+if [ $EXIT_CODE -ne 0 ]
+then
+  echo "track-changes/scripts/flush_all.js failed with exit code $EXIT_CODE"
+fi
+
+exit 0

@@ -52,9 +52,10 @@ ADD server-ce/cron /overleaf/cron
 ADD server-ce/config/crontab-history /etc/cron.d/crontab-history
 RUN chmod 600 /etc/cron.d/crontab-history
 
-# Copy Phusion Image startup scripts to its location
-# --------------------------------------------------
+# Copy Phusion Image startup and shutdown scripts to their locations
+# ------------------------------------------------------------------
 COPY server-ce/init_scripts/ /etc/my_init.d/
+COPY server-ce/init_preshutdown_scripts/ /etc/my_init.pre_shutdown.d/
 
 # Copy app settings files
 # -----------------------
