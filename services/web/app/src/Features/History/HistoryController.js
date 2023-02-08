@@ -54,7 +54,9 @@ module.exports = HistoryController = {
       },
     })
     pipeline(getReq, res, function (err) {
-      if (err) {
+      // If the downstream request is cancelled, we get an
+      // ERR_STREAM_PREMATURE_CLOSE.
+      if (err && err.code !== 'ERR_STREAM_PREMATURE_CLOSE') {
         logger.warn({ url, err }, 'history API error')
         next(err)
       }
@@ -353,7 +355,9 @@ module.exports = HistoryController = {
       const getReq = request({ ...options, method: 'get' })
 
       pipeline(getReq, res, function (err) {
-        if (err) {
+        // If the downstream request is cancelled, we get an
+        // ERR_STREAM_PREMATURE_CLOSE.
+        if (err && err.code !== 'ERR_STREAM_PREMATURE_CLOSE') {
           logger.error({ url, err }, 'history API error')
           next(err)
         }
@@ -433,7 +437,9 @@ module.exports = HistoryController = {
               res.status(response.statusCode)
               prepareZipAttachment(res, `${name}.zip`)
               pipeline(response, res, err => {
-                if (err) {
+                // If the downstream request is cancelled, we get an
+                // ERR_STREAM_PREMATURE_CLOSE.
+                if (err && err.code !== 'ERR_STREAM_PREMATURE_CLOSE') {
                   logger.warn(
                     { err, v1ProjectId, version, retryAttempt },
                     'history s3 proxying error'
