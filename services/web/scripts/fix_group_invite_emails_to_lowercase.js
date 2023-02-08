@@ -18,7 +18,7 @@ async function processBatch(_, subscriptions) {
     if (anyInviteEmailHasUppercaseChars(subscription)) {
       console.log('fixing emails in group invites for', subscription._id)
       if (!DRY_RUN) {
-        db.subscriptions.updateOne({ _id: subscription._id }, [
+        await db.subscriptions.updateOne({ _id: subscription._id }, [
           {
             $set: {
               teamInvites: {
