@@ -776,6 +776,12 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
   font-family: @font-family-sans-serif;
   padding: 4px 15px 5px;
 
+  @media (min-width: (@screen-xs-max+1)) {
+    .hidden-desktop {
+      display: none;
+    }
+  }
+
   @media (max-width: @screen-sm-max) {
     font-size: @font-size-small;
   }

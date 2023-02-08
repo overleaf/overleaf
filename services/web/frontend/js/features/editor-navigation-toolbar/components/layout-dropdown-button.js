@@ -168,7 +168,7 @@ function LayoutDropdownButton() {
               />
             }
             icon={<IconSplit />}
-            text={t('editor_and_pdf')}
+            text={<Trans i18nKey="editor_and_pdf">&</Trans>}
           />
 
           <LayoutMenuItem
