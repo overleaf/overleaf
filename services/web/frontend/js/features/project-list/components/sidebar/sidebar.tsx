@@ -1,6 +1,7 @@
 import NewProjectButton from '../new-project-button'
 import SidebarFilters from './sidebar-filters'
 import AddAffiliation, { useAddAffiliation } from '../add-affiliation'
+import SurveyWidget from '../survey-widget'
 import { usePersistedResize } from '../../../../shared/hooks/use-resize'
 
 function Sidebar() {
@@ -25,6 +26,9 @@ function Sidebar() {
           {showAddAffiliationWidget && <hr />}
           <AddAffiliation />
         </aside>
+        <div className="project-list-sidebar-survey-wrapper">
+          <SurveyWidget />
+        </div>
       </div>
       <div
         {...getHandleProps({

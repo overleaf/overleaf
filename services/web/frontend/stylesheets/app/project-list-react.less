@@ -1,8 +1,6 @@
 @project-list-sidebar-wrapper-flex: 0 0 15%;
 
 .project-list-react {
-  overflow-x: hidden;
-
   body > .content& {
     padding-top: @header-height;
     padding-bottom: 0;
@@ -46,7 +44,7 @@
       height: 100%;
 
       .project-list-sidebar-react {
-        height: 100%;
+        flex-grow: 1;
         padding-left: 15px;
         padding-right: 15px;
         -ms-overflow-style: -ms-autohiding-scrollbar;
@@ -81,6 +79,7 @@
 
   .project-list-main-react {
     max-width: 100%;
+    overflow-x: hidden;
     padding: @content-margin-vertical @grid-gutter-width / 2;
   }
 
@@ -724,11 +723,8 @@
 }
 
 .project-list-sidebar-survey-wrapper {
-  position: fixed;
-  z-index: 1;
+  position: sticky;
   bottom: 0;
-  left: 0;
-  width: 15%;
 
   .alert-info-alt {
     font-size: @font-size-small;
@@ -741,9 +737,7 @@
 
   @media (max-width: @screen-xs-max) {
     position: static;
-    display: block;
     margin-top: @margin-sm;
-    width: initial;
 
     .alert-info-alt {
       font-size: unset;
