@@ -15,6 +15,7 @@ import CompanyDetails from './company-details'
 import CouponCode from './coupon-code'
 import TosAgreementNotice from './tos-agreement-notice'
 import SubmitButton from './submit-button'
+import ThreeDSecure from './three-d-secure'
 import getMeta from '../../../../../utils/meta'
 import { postJSON } from '../../../../../infrastructure/fetch-json'
 import * as eventTracking from '../../../../../infrastructure/event-tracking'
@@ -215,6 +216,22 @@ function CheckoutPanel() {
     )
   }
 
+  const handleThreeDToken = (token: TokenPayload) => {
+    // on SCA verification success: show payment UI in processing mode and
+    // resubmit the payment with the new token final success or error will be
+    // handled by `completeSubscription`
+    completeSubscription(null, undefined, token)
+    setGenericError('')
+    setThreeDSecureActionTokenId(undefined)
+    setIsProcessing(true)
+  }
+
+  const handleThreeDError = (error: RecurlyError) => {
+    // on SCA verification error: show payment UI with the error message
+    setGenericError(`Error: ${error.message}`)
+    setThreeDSecureActionTokenId(undefined)
+  }
+
   const handlePaymentMethod = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPaymentMethod(e.target.value)
   }
@@ -265,6 +282,13 @@ function CheckoutPanel() {
 
   return (
     <>
+      {threeDSecureActionTokenId && (
+        <ThreeDSecure
+          actionTokenId={threeDSecureActionTokenId}
+          onToken={handleThreeDToken}
+          onError={handleThreeDError}
+        />
+      )}
       <div className={classnames({ hidden: threeDSecureActionTokenId })}>
         <PriceSwitchHeader
           planCode={plan.planCode}

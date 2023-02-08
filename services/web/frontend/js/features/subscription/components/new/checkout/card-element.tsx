@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FormGroup, ControlLabel } from 'react-bootstrap'
-import classnames from 'classnames'
 import { CardElementChangeState } from '../../../../../../../types/recurly/elements'
 import { ElementsInstance } from 'recurly__recurly-js'
+import classnames from 'classnames'
 
 type CardElementProps = {
   className?: string
