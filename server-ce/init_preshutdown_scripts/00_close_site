@@ -1,0 +1,23 @@
+#!/bin/sh
+
+SITE_MAINTENANCE_FILE_BAK="$SITE_MAINTENANCE_FILE.bak.shutdown
+
+mv "${SITE_MAINTENANCE_FILE}" "${SITE_MAINTENANCE_FILE_BAK}"
+echo "closed" > "${SITE_MAINTENANCE_FILE}"
+
+# status file is polled every 5 seconds
+sleep 5
+
+# giving a grace period of 5 seconds for users before disconnecting them and start shutting down
+cd /overleaf/services/web && node scripts/disconnect_all_users.js 5 >> /var/log/sharelatex/web.log 2>&1
+
+EXIT_CODE="$?"
+if [ $EXIT_CODE -ne 0 ]
+then
+  echo "scripts/disconnect_all_users.js failed with exit code $EXIT_CODE"
+fi
+
+# wait for disconnection
+sleep 5
+
+exit 0

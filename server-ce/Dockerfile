@@ -70,6 +70,11 @@ COPY server-ce/config/production.json /overleaf/services/history-v1/config/produ
 ADD server-ce/bin/grunt /usr/local/bin/grunt
 RUN chmod +x /usr/local/bin/grunt
 
+# File that controls open|closed status of the site
+# -------------------------------------------------
+ENV SITE_MAINTENANCE_FILE "/etc/sharelatex/site_status"
+RUN touch $SITE_MAINTENANCE_FILE
+
 # Set Environment Variables
 # --------------------------------
 ENV SHARELATEX_CONFIG /etc/sharelatex/settings.js

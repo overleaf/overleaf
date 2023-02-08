@@ -14,6 +14,7 @@ metrics.initialize(process.env.METRICS_APP_NAME || 'web')
 const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
 const PlansLocator = require('./app/src/Features/Subscription/PlansLocator')
+const SiteAdminHandler = require('./app/src/infrastructure/SiteAdminHandler')
 logger.initialize(process.env.METRICS_APP_NAME || 'web')
 logger.logger.serializers.user =
   require('./app/src/infrastructure/LoggerSerializers').user
@@ -77,6 +78,9 @@ if (!module.parent) {
       process.exit(1)
     })
 }
+
+// monitor site maintenance file
+SiteAdminHandler.initialise()
 
 // handle SIGTERM for graceful shutdown in kubernetes
 process.on('SIGTERM', function (signal) {
