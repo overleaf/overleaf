@@ -1212,7 +1212,9 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   })
 
   publicApiRouter.get('/status', (req, res) => {
-    if (!Settings.siteIsOpen) {
+    if (Settings.shuttingDown) {
+      res.sendStatus(503) // Service unavailable
+    } else if (!Settings.siteIsOpen) {
       plainTextResponse(res, 'web site is closed (web)')
     } else if (!Settings.editorIsOpen) {
       plainTextResponse(res, 'web editor is closed (web)')
