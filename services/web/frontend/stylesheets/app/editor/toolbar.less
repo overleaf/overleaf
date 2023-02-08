@@ -282,6 +282,11 @@
   pointer-events: none;
 }
 
+.toggle-switch-input:disabled + .toggle-switch-label {
+  color: @gray-lighter;
+  cursor: not-allowed;
+}
+
 .toggle-switch-input:checked + .toggle-switch-label {
   span {
     background-position: -100% 0;

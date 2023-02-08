@@ -4,6 +4,7 @@ import Tooltip from '../../../shared/components/tooltip'
 import { sendMB } from '../../../infrastructure/event-tracking'
 import getMeta from '../../../utils/meta'
 import SplitTestBadge from '../../../shared/components/split-test-badge'
+import isValidTeXFile from '../../../main/is-valid-tex-file'
 
 function Badge() {
   const content = (
@@ -48,7 +49,9 @@ function EditorSwitch() {
 
   const [visual, setVisual] = useScopeValue('editor.showVisual')
 
-  const richTextOrVisual = richText || visual
+  const [docName] = useScopeValue('editor.open_doc_name')
+  const richTextAvailable = isValidTeXFile(docName)
+  const richTextOrVisual = richText || (richTextAvailable && visual)
 
   const handleChange = useCallback(
     event => {
@@ -130,6 +133,7 @@ function EditorSwitch() {
           className="toggle-switch-input"
           checked={!!richTextOrVisual}
           onChange={handleChange}
+          disabled={!richTextAvailable}
         />
         <label
           htmlFor="editor-switch-rich-text"
