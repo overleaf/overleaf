@@ -26,6 +26,8 @@ async function main() {
     //   - exclude locales files
     //   - exclude public assets
     //   - exclude third-party dependencies
+    //   - exclude scripts
+    //   - exclude tests
     // - read all the source files
     `
     find . -type f \
@@ -33,8 +35,9 @@ async function main() {
       -not -path './frontend/extracted-translations.json' \
       -not -path './locales/*' \
       -not -path './public/*' \
-      -not -path '*node_modules/*' \
-      -not -path ./scripts/ukamf/ukfederation-metadata.xml \
+      -not -path '*/node_modules/*' \
+      -not -path '*/scripts/*' \
+      -not -path '*/tests/*' \
     | xargs cat
     `,
     {
