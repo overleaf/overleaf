@@ -4,11 +4,16 @@ const middleware = require('i18next-http-middleware')
 const path = require('path')
 const Settings = require('@overleaf/settings')
 const { URL } = require('url')
+const pug = require('pug-runtime')
+const logger = require('@overleaf/logger')
+const SafeHTMLSubstitution = require('../Features/Helpers/SafeHTMLSubstitution')
 
 const fallbackLanguageCode = Settings.i18n.defaultLng || 'en'
 const availableLanguageCodes = []
 const availableHosts = new Map()
 const subdomainConfigs = new Map()
+const I18N_HTML_INJECTIONS = new Set()
+
 Object.values(Settings.i18n.subdomainLang || {}).forEach(function (spec) {
   availableLanguageCodes.push(spec.lngCode)
   // prebuild a host->lngCode mapping for the usage at runtime in the
@@ -50,6 +55,10 @@ i18n
       // Disable nesting in interpolated values, preventing user input
       // injection via another nested value
       skipOnVariables: true,
+
+      defaultVariables: {
+        appName: Settings.appName,
+      },
     },
 
     preload: availableLanguageCodes,
@@ -83,7 +92,33 @@ function setLangBasedOnDomainMiddleware(req, res, next) {
 
   // Decorate req.i18n with translate function alias for backwards
   // compatibility usage in requests
-  req.i18n.translate = req.i18n.t
+  req.i18n.translate = (key, vars, components) => {
+    vars = vars || {}
+
+    if (Settings.i18n.checkForHTMLInVars) {
+      Object.entries(vars).forEach(([field, value]) => {
+        if (pug.escape(value) !== value) {
+          const violationsKey = key + field
+          // do not flood the logs, log one sample per pod + key + field
+          if (!I18N_HTML_INJECTIONS.has(violationsKey)) {
+            logger.warn(
+              { key, field, value },
+              'html content in translations context vars'
+            )
+            I18N_HTML_INJECTIONS.add(violationsKey)
+          }
+        }
+      })
+    }
+
+    const locale = req.i18n.t(key, vars)
+    if (components) {
+      return SafeHTMLSubstitution.render(locale, components)
+    } else {
+      return locale
+    }
+  }
+
   next()
 }
 

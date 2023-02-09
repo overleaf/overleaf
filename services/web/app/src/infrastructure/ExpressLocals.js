@@ -18,7 +18,6 @@ const {
 const {
   addOptionalCleanupHandlerAfterDrainingConnections,
 } = require('./GracefulShutdown')
-const { translate } = require('../Features/Helpers/Translate')
 
 const IEEE_BRAND_ID = Settings.ieeeBrandId
 
@@ -227,8 +226,8 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
   })
 
   webRouter.use(function (req, res, next) {
-    res.locals.translate = (key, vars, components) =>
-      translate(key, req, vars, components)
+    res.locals.translate = req.i18n.translate
+
     // Don't include the query string parameters, otherwise Google
     // treats ?nocdn=true as the canonical version
     const parsedOriginalUrl = new URL(req.originalUrl, Settings.siteUrl)
