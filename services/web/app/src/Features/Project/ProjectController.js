@@ -48,10 +48,6 @@ const ProjectListController = require('./ProjectListController')
 const ProjectAuditLogHandler = require('./ProjectAuditLogHandler')
 const PublicAccessLevels = require('../Authorization/PublicAccessLevels')
 
-// We want the recompile-button-text split test to only target users who have
-// signed up recently.
-const RECOMPILE_BUTTON_SPLIT_TEST_MIN_SIGNUP_DATE = new Date('2023-01-16')
-
 /**
  * @typedef {import("./types").GetProjectsRequest} GetProjectsRequest
  * @typedef {import("./types").GetProjectsResponse} GetProjectsResponse
@@ -1114,27 +1110,6 @@ const ProjectController = {
             }
           )
         },
-        recompileButtonTextAssignment: [
-          'user',
-          (results, cb) => {
-            if (
-              results.user.signUpDate <
-              RECOMPILE_BUTTON_SPLIT_TEST_MIN_SIGNUP_DATE
-            ) {
-              return cb()
-            }
-            SplitTestHandler.getAssignment(
-              req,
-              res,
-              'recompile-button-text',
-              {},
-              () => {
-                // do not fail editor load if assignment fails
-                cb()
-              }
-            )
-          },
-        ],
       },
       (
         err,
