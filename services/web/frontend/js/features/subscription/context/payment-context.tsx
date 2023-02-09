@@ -8,6 +8,7 @@ import {
   useContext,
   createContext,
 } from 'react'
+import { currencies, CurrencyCode, CurrencySymbol } from '../data/currency'
 import { useTranslation } from 'react-i18next'
 import getMeta from '../../../utils/meta'
 import * as eventTracking from '../../../infrastructure/event-tracking'
@@ -33,14 +34,12 @@ function usePayment({ publicKey }: RecurlyOptions) {
     'ol-couponCode',
     ''
   )
-  const currencySymbols: Record<
-    PaymentContextValue['currencyCode'],
-    PaymentContextValue['currencySymbol']
-  > = getMeta('ol-currencySymbols')
-  const initiallySelectedCurrencyCode: string = getMeta(
+  const initiallySelectedCurrencyCode: CurrencyCode = getMeta(
     'ol-recommendedCurrency'
   )
+  const planCode: string = getMeta('ol-planCode')
 
+  const [planName, setPlanName] = useState(plan.name)
   const [recurlyLoading, setRecurlyLoading] = useState(true)
   const [recurlyLoadError, setRecurlyLoadError] = useState(false)
   const [recurlyPrice, setRecurlyPrice] = useState<{
@@ -83,12 +82,12 @@ function usePayment({ publicKey }: RecurlyOptions) {
   const pricing = useRef<SubscriptionPricingInstanceCustom>()
 
   const limitedCurrencyCodes = Array.from(
-    new Set([initiallySelectedCurrencyCode, 'USD', 'EUR', 'GBP'])
+    new Set<CurrencyCode>([initiallySelectedCurrencyCode, 'USD', 'EUR', 'GBP'])
   )
   const limitedCurrencies = limitedCurrencyCodes.reduce((prev, cur) => {
-    return { ...prev, [cur]: currencySymbols[cur] }
-  }, {} as Record<string, string>)
-  const currencySymbol = limitedCurrencies[currencyCode]
+    return { ...prev, [cur]: currencies[cur] }
+  }, {} as Partial<typeof currencies>)
+  const currencySymbol = limitedCurrencies[currencyCode] as CurrencySymbol
 
   useLayoutEffect(() => {
     if (typeof recurly === 'undefined' || !recurly) {
@@ -96,11 +95,11 @@ function usePayment({ publicKey }: RecurlyOptions) {
       return
     }
 
-    eventTracking.sendMB('payment-page-view', { plan: plan.planCode })
+    eventTracking.sendMB('payment-page-view', { plan: planCode })
     eventTracking.send(
       'subscription-funnel',
       'subscription-form-viewed',
-      plan.planCode
+      planCode
     )
 
     recurly.configure({ publicKey })
@@ -111,7 +110,7 @@ function usePayment({ publicKey }: RecurlyOptions) {
       setRecurlyLoading(true)
 
       pricing.current
-        ?.plan(plan.planCode, { quantity: 1 })
+        ?.plan(planCode, { quantity: 1 })
         .address({
           first_name: '',
           last_name: '',
@@ -146,7 +145,7 @@ function usePayment({ publicKey }: RecurlyOptions) {
     initialCountry,
     initialCouponCode,
     initiallySelectedCurrencyCode,
-    plan.planCode,
+    planCode,
     publicKey,
     t,
   ])
@@ -154,6 +153,11 @@ function usePayment({ publicKey }: RecurlyOptions) {
   useEffect(() => {
     pricing.current?.on('change', function () {
       if (!pricing.current) return
+
+      const planName = pricing.current.items.plan?.name
+      if (planName) {
+        setPlanName(planName)
+      }
 
       const trialLength = pricing.current.items.plan?.trial?.length
       setTrialLength(trialLength)
@@ -167,14 +171,6 @@ function usePayment({ publicKey }: RecurlyOptions) {
       setMonthlyBilling(monthlyBilling)
 
       setTaxes(pricing.current.price.taxes)
-
-      // TODO availableCurrencies for preview section (limitedCurrencies is implemented)
-      // for (const currencyCode in pricing.items.plan.price) {
-      //   if (MultiCurrencyPricing.plans[currencyCode]) {
-      //     $scope.availableCurrencies[currencyCode] =
-      //       MultiCurrencyPricing.plans[currencyCode]
-      //   }
-      // }
 
       const couponData = (() => {
         if (pricing.current.items.coupon?.discount.type === 'percent') {
@@ -262,9 +258,8 @@ function usePayment({ publicKey }: RecurlyOptions) {
     []
   )
 
-  // TODO - for preview panel
   const changeCurrency = useCallback(
-    (newCurrency: string) => {
+    (newCurrency: CurrencyCode) => {
       setRecurlyLoading(true)
       setCurrencyCode(newCurrency)
 
@@ -293,6 +288,8 @@ function usePayment({ publicKey }: RecurlyOptions) {
       pricingFormState,
       setPricingFormState,
       plan,
+      planCode,
+      planName,
       pricing,
       recurlyLoading,
       recurlyLoadError,
@@ -315,6 +312,8 @@ function usePayment({ publicKey }: RecurlyOptions) {
       pricingFormState,
       setPricingFormState,
       plan,
+      planCode,
+      planName,
       pricing,
       recurlyLoading,
       recurlyLoadError,

@@ -2,6 +2,7 @@ import countries from '../../data/countries'
 import { Plan } from '../../../../../../types/subscription/plan'
 import { SubscriptionPricingStateTax } from 'recurly__recurly-js'
 import { SubscriptionPricingInstanceCustom } from '../../../../../../types/recurly/pricing/subscription'
+import { currencies, CurrencyCode, CurrencySymbol } from '../../data/currency'
 
 export type PricingFormState = {
   first_name: string
@@ -18,20 +19,19 @@ export type PricingFormState = {
 }
 
 export type PaymentContextValue = {
-  currencyCode: string
+  currencyCode: CurrencyCode
   setCurrencyCode: React.Dispatch<
     React.SetStateAction<PaymentContextValue['currencyCode']>
   >
-  currencySymbol: string
-  limitedCurrencies: Record<
-    PaymentContextValue['currencyCode'],
-    PaymentContextValue['currencySymbol']
-  >
+  currencySymbol: CurrencySymbol
+  limitedCurrencies: Partial<typeof currencies>
   pricingFormState: PricingFormState
   setPricingFormState: React.Dispatch<
     React.SetStateAction<PaymentContextValue['pricingFormState']>
   >
   plan: Plan
+  planCode: string
+  planName: string
   pricing: React.MutableRefObject<SubscriptionPricingInstanceCustom | undefined>
   recurlyLoading: boolean
   recurlyLoadError: boolean
@@ -62,6 +62,6 @@ export type PaymentContextValue = {
   trialLength: number | undefined
   applyVatNumber: (vatNumber: PricingFormState['vat_number']) => void
   addCoupon: (coupon: PricingFormState['coupon']) => void
-  changeCurrency: (newCurrency: string) => void
+  changeCurrency: (newCurrency: CurrencyCode) => void
   updateCountry: (country: PricingFormState['country']) => void
 }

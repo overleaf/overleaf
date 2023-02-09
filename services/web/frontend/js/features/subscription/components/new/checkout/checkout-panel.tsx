@@ -34,7 +34,8 @@ function CheckoutPanel() {
   const { t } = useTranslation()
   const {
     couponError,
-    plan,
+    planCode,
+    planName,
     pricingFormState,
     pricing,
     recurlyLoadError,
@@ -150,7 +151,7 @@ function CheckoutPanel() {
           eventTracking.send(
             'subscription-funnel',
             'subscription-submission-success',
-            plan.planCode
+            planCode
           )
           window.location.assign('/user/subscription/thank-you')
         } catch (error) {
@@ -173,7 +174,7 @@ function CheckoutPanel() {
       ITMReferrer,
       isAddCompanyDetailsChecked,
       isPayPalPaymentMethod,
-      plan.planCode,
+      planCode,
       pricing,
       pricingFormState,
       t,
@@ -184,7 +185,7 @@ function CheckoutPanel() {
 
   useEffect(() => {
     payPal.current = recurly.PayPal({
-      display: { displayName: plan.name },
+      display: { displayName: planName },
     })
 
     payPal.current.on('token', token => {
@@ -202,7 +203,7 @@ function CheckoutPanel() {
     return () => {
       payPalCopy.destroy()
     }
-  }, [completeSubscription, plan.name])
+  }, [completeSubscription, planName])
 
   const handleCardChange = useCallback((state: CardElementChangeState) => {
     setCardIsValid(state.valid)
@@ -291,7 +292,7 @@ function CheckoutPanel() {
       )}
       <div className={classnames({ hidden: threeDSecureActionTokenId })}>
         <PriceSwitchHeader
-          planCode={plan.planCode}
+          planCode={planCode}
           planCodes={[
             'student-annual',
             'student-monthly',

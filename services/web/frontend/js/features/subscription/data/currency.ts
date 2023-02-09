@@ -12,4 +12,6 @@ export const currencies = <const>{
   SGD: '$',
 }
 
-export type CurrencyCode = keyof typeof currencies
+type Currency = typeof currencies
+export type CurrencyCode = keyof Currency
+export type CurrencySymbol = Currency[CurrencyCode]

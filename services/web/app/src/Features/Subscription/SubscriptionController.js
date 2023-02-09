@@ -186,6 +186,7 @@ async function _paymentReactPage(req, res) {
         currency,
         countryCode,
         plan,
+        planCode: req.query.planCode,
         couponCode: req.query.cc,
         showCouponField: !!req.query.scf,
         itm_campaign: req.query.itm_campaign,

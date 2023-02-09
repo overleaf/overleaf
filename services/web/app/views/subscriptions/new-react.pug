@@ -14,7 +14,7 @@ block append meta
 	meta(name="ol-recurlyApiKey" content=settings.apis.recurly.publicKey)
 	meta(name="ol-recommendedCurrency" content=String(currency).slice(0, 3))
 	meta(name="ol-plan" data-type="json" content=plan)
-	meta(name="ol-currencySymbols" data-type="json" content=settings.groupPlanModalOptions.currencySymbols)
+	meta(name="ol-planCode" data-type="string" content=planCode)
 	meta(name="ol-showCouponField" data-type="boolean" content=showCouponField)
 	meta(name="ol-couponCode" content=couponCode)
 	meta(name="ol-itm_campaign" content=itm_campaign)
@@ -28,7 +28,7 @@ block content
 	main.content.content-alt#subscription-new-root
 
 	script(type="text/javascript", nonce=scriptNonce).
-		ga('send', 'event', 'pageview', 'payment_form', "#{plan_code}")
+		ga('send', 'event', 'pageview', 'payment_form', "#{planCode}")
 
 	script(
 		type="text/ng-template"
