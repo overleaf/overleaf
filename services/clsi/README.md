@@ -25,7 +25,6 @@ The CLSI can be configured through the following environment variables:
 * `DOCKER_RUNTIME` -
 * `FILESTORE_DOMAIN_OVERRIDE` - The url for the filestore service e.g.`http://$FILESTORE_HOST:3009`
 * `FILESTORE_PARALLEL_FILE_DOWNLOADS` - Number of parallel file downloads
-* `FILESTORE_PARALLEL_SQL_QUERY_LIMIT` - Number of parallel SQL queries
 * `LISTEN_ADDRESS` - The address for the RESTful service to listen on. Set to `0.0.0.0` to listen on all network interfaces
 * `PROCESS_LIFE_SPAN_LIMIT_MS` - Process life span limit in milliseconds
 * `SENTRY_DSN` - Sentry [Data Source Name](https://docs.sentry.io/product/sentry-basics/dsn-explainer/)

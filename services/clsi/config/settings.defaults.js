@@ -49,7 +49,6 @@ module.exports = {
   smokeTest: process.env.SMOKE_TEST || false,
   project_cache_length_ms: 1000 * 60 * 60 * 24,
   parallelFileDownloads: process.env.FILESTORE_PARALLEL_FILE_DOWNLOADS || 1,
-  parallelSqlQueryLimit: process.env.FILESTORE_PARALLEL_SQL_QUERY_LIMIT || 1,
   filestoreDomainOveride: process.env.FILESTORE_DOMAIN_OVERRIDE,
   texliveImageNameOveride: process.env.TEX_LIVE_IMAGE_NAME_OVERRIDE,
   texliveOpenoutAny: process.env.TEXLIVE_OPENOUT_ANY,
