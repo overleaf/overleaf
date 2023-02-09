@@ -27,6 +27,7 @@ describe('RedisManager', function () {
       lrange: sinon.stub(),
       lrem: sinon.stub(),
       srem: sinon.stub(),
+      del: sinon.stub(),
     }
     this.rclient.multi = sinon.stub().returns(this.rclient)
     this.RedisWrapper = {
@@ -38,6 +39,9 @@ describe('RedisManager', function () {
           key_schema: {
             projectHistoryOps({ project_id }) {
               return `Project:HistoryOps:${project_id}`
+            },
+            projectHistoryFirstOpTimestamp({ project_id }) {
+              return `ProjectHistory:FirstOpTimestamp:{${project_id}}`
             },
           },
         },
@@ -129,6 +133,12 @@ describe('RedisManager', function () {
           1,
           this.json_updates[1]
         )
+        .should.equal(true)
+    })
+
+    it('should clear the first op timestamp', function () {
+      return this.rclient.del
+        .calledWith(`ProjectHistory:FirstOpTimestamp:{${this.project_id}}`)
         .should.equal(true)
     })
 

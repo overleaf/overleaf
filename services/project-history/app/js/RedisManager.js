@@ -234,6 +234,7 @@ _mocks.deleteAppliedDocUpdates = (project_id, updates, callback) => {
       status: 'lrem',
     })
     multi.lrem(Keys.projectHistoryOps({ project_id }), 1, update)
+    multi.del(Keys.projectHistoryFirstOpTimestamp({ project_id }))
   }
   multi.exec(callback)
 }
@@ -247,7 +248,11 @@ export function destroyDocUpdatesQueue(project_id, callback) {
   if (callback == null) {
     callback = function () {}
   }
-  return rclient.del(Keys.projectHistoryOps({ project_id }), callback)
+  return rclient.del(
+    Keys.projectHistoryOps({ project_id }),
+    Keys.projectHistoryFirstOpTimestamp({ project_id }),
+    callback
+  )
 }
 
 // iterate over keys asynchronously using redis scan (non-blocking)
