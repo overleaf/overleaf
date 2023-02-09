@@ -1,3 +1,4 @@
+import Metrics from '@overleaf/metrics'
 import Settings from '@overleaf/settings'
 import { MongoClient } from 'mongodb'
 
@@ -10,3 +11,5 @@ export const db = {
   messages: mongoDb.collection('messages'),
   rooms: mongoDb.collection('rooms'),
 }
+
+Metrics.mongodb.monitor(mongoClient)

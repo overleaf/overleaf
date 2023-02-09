@@ -1,3 +1,4 @@
+const Metrics = require('@overleaf/metrics')
 const Settings = require('@overleaf/settings')
 const { MongoClient, ObjectId } = require('mongodb')
 
@@ -16,6 +17,8 @@ async function healthCheck() {
     throw new Error('failed mongo ping')
   }
 }
+
+Metrics.mongodb.monitor(mongoClient)
 
 module.exports = {
   db,
