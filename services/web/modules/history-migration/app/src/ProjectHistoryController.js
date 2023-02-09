@@ -919,9 +919,12 @@ async function buildUpdates(
  * @returns {Promise<void>}
  */
 async function deleteProjectHistory(projectId) {
-  await HistoryManager.promises.deleteProjectHistory(projectId)
+  // look up the history id from the project
+  const historyId = await ProjectHistoryHandler.promises.getHistoryId(projectId)
+  // delete the history from project-history and history-v1
+  await HistoryManager.promises.deleteProject(projectId, historyId)
   // TODO: send a message to document-updater?
-  await ProjectHistoryHandler.unsetHistory(projectId)
+  await ProjectHistoryHandler.promises.unsetHistory(projectId)
 }
 
 /**
