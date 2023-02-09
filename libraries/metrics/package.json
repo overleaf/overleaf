@@ -20,7 +20,7 @@
     "@opentelemetry/sdk-node": "^0.28.0",
     "@opentelemetry/semantic-conventions": "^1.2.0",
     "compression": "^1.7.4",
-    "prom-client": "^11.1.3",
+    "prom-client": "^14.1.1",
     "yn": "^3.1.1"
   },
   "devDependencies": {

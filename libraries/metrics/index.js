@@ -24,11 +24,16 @@ function configure(opts = {}) {
   }
 }
 
+let initialized = false
+
 /**
  * Configure the metrics module and start the default metrics collectors and
  * profiling agents.
  */
 function initialize(appName, opts = {}) {
+  if (initialized) {
+    return
+  }
   appName = appName || DEFAULT_APP_NAME
   if (tracing.tracingEnabled()) {
     tracing.initialize(appName)
@@ -72,6 +77,7 @@ function initialize(appName, opts = {}) {
   }
 
   inc('process_startup')
+  initialized = true
 }
 
 function registerDestructor(func) {
@@ -84,9 +90,16 @@ function injectMetricsRoute(app) {
     ExpressCompression({
       level: parseInt(process.env.METRICS_COMPRESSION_LEVEL || '1', 10),
     }),
-    function (req, res) {
+    function (req, res, next) {
       res.set('Content-Type', promWrapper.registry.contentType)
-      res.end(promWrapper.registry.metrics())
+      promWrapper.registry
+        .metrics()
+        .then(metrics => {
+          res.end(metrics)
+        })
+        .catch(err => {
+          next(err)
+        })
     }
   )
 }
@@ -103,70 +116,70 @@ function set(key, value, sampleRate = 1) {
   console.log('counts are not currently supported')
 }
 
-function inc(key, sampleRate = 1, opts = {}) {
+function inc(key, sampleRate = 1, labels = {}) {
   if (arguments.length === 2 && typeof sampleRate === 'object') {
-    opts = sampleRate
+    labels = sampleRate
   }
 
   key = buildPromKey(key)
-  promWrapper.metric('counter', key).inc(opts)
+  promWrapper.metric('counter', key, labels).inc(labels)
   if (process.env.DEBUG_METRICS) {
-    console.log('doing inc', key, opts)
+    console.log('doing inc', key, labels)
   }
 }
 
-function count(key, count, sampleRate = 1, opts = {}) {
+function count(key, count, sampleRate = 1, labels = {}) {
   if (arguments.length === 3 && typeof sampleRate === 'object') {
-    opts = sampleRate
+    labels = sampleRate
   }
 
   key = buildPromKey(key)
-  promWrapper.metric('counter', key).inc(opts, count)
+  promWrapper.metric('counter', key, labels).inc(labels, count)
   if (process.env.DEBUG_METRICS) {
-    console.log('doing count/inc', key, opts)
+    console.log('doing count/inc', key, labels)
   }
 }
 
-function summary(key, value, opts = {}) {
+function summary(key, value, labels = {}) {
   key = buildPromKey(key)
-  promWrapper.metric('summary', key).observe(opts, value)
+  promWrapper.metric('summary', key, labels).observe(labels, value)
   if (process.env.DEBUG_METRICS) {
-    console.log('doing summary', key, value, opts)
+    console.log('doing summary', key, value, labels)
   }
 }
 
-function timing(key, timeSpan, sampleRate = 1, opts = {}) {
+function timing(key, timeSpan, sampleRate = 1, labels = {}) {
   if (arguments.length === 3 && typeof sampleRate === 'object') {
-    opts = sampleRate
+    labels = sampleRate
   }
 
   key = buildPromKey('timer_' + key)
-  promWrapper.metric('summary', key).observe(opts, timeSpan)
+  promWrapper.metric('summary', key, labels).observe(labels, timeSpan)
   if (process.env.DEBUG_METRICS) {
-    console.log('doing timing', key, opts)
+    console.log('doing timing', key, labels)
   }
 }
 
-function histogram(key, value, buckets, opts = {}) {
+function histogram(key, value, buckets, labels = {}) {
   key = buildPromKey('histogram_' + key)
-  promWrapper.metric('histogram', key, buckets).observe(opts, value)
+  promWrapper.metric('histogram', key, labels, buckets).observe(labels, value)
   if (process.env.DEBUG_METRICS) {
-    console.log('doing histogram', key, buckets, opts)
+    console.log('doing histogram', key, buckets, labels)
   }
 }
 
 class Timer {
-  constructor(key, sampleRate = 1, opts = {}, buckets) {
+  constructor(key, sampleRate = 1, labels = {}, buckets) {
     if (typeof sampleRate === 'object') {
-      // called with (key, opts, buckets)
+      // called with (key, labels, buckets)
       if (arguments.length === 3) {
-        buckets = opts
-        opts = sampleRate
+        buckets = labels
+        labels = sampleRate
       }
 
-      // called with (key, opts)
+      // called with (key, labels)
       if (arguments.length === 2) {
-        opts = sampleRate
+        labels = sampleRate
       }
 
       sampleRate = 1 // default value to pass to timing function
@@ -176,40 +189,37 @@ class Timer {
     key = buildPromKey(key)
     this.key = key
     this.sampleRate = sampleRate
-    this.opts = opts
+    this.labels = labels
     this.buckets = buckets
   }
 
   done() {
     const timeSpan = new Date() - this.start
     if (this.buckets) {
-      histogram(this.key, timeSpan, this.buckets, this.opts)
+      histogram(this.key, timeSpan, this.buckets, this.labels)
     } else {
-      timing(this.key, timeSpan, this.sampleRate, this.opts)
+      timing(this.key, timeSpan, this.sampleRate, this.labels)
     }
     return timeSpan
   }
 }
 
-function gauge(key, value, sampleRate = 1, opts = {}) {
+function gauge(key, value, sampleRate = 1, labels = {}) {
   if (arguments.length === 3 && typeof sampleRate === 'object') {
-    opts = sampleRate
+    labels = sampleRate
   }
 
   key = buildPromKey(key)
-  promWrapper
-    .metric('gauge', key)
-    .set({ status: opts.status }, sanitizeValue(value))
+  promWrapper.metric('gauge', key, labels).set(labels, sanitizeValue(value))
   if (process.env.DEBUG_METRICS) {
-    console.log('doing gauge', key, opts)
+    console.log('doing gauge', key, labels)
   }
 }
 
-function globalGauge(key, value, sampleRate = 1, opts = {}) {
+function globalGauge(key, value, sampleRate = 1, labels = {}) {
   key = buildPromKey(key)
-  promWrapper
-    .metric('gauge', key)
-    .set({ host: 'global', status: opts.status }, sanitizeValue(value))
+  labels = { host: 'global', ...labels }
+  promWrapper.metric('gauge', key, labels).set(labels, sanitizeValue(value))
 }
 
 function close() {

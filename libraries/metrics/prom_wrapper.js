@@ -1,16 +1,10 @@
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS205: Consider reworking code to avoid use of IIFEs
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+const logger = require('@overleaf/logger')
 const prom = require('prom-client')
 const registry = require('prom-client').register
 const metrics = new Map()
 
-const optsKey = function (opts) {
-  let keys = Object.keys(opts)
+const labelsKey = function (labels) {
+  let keys = Object.keys(labels)
   if (keys.length === 0) {
     return ''
   }
@@ -18,31 +12,20 @@ const optsKey = function (opts) {
   keys = keys.sort()
 
   let hash = ''
-  for (const key of Array.from(keys)) {
+  for (const key of keys) {
     if (hash.length) {
       hash += ','
     }
-    hash += `${key}:${opts[key]}`
+    hash += `${key}:${labels[key]}`
   }
 
   return hash
 }
 
-const extendOpts = function (opts, labelNames) {
-  // Make a clone in order to be able to re-use opts for other kinds of metrics.
-  opts = Object.assign({}, opts)
-  for (const label of Array.from(labelNames)) {
-    if (!opts[label]) {
-      opts[label] = ''
-    }
-  }
-  return opts
-}
-
-const optsAsArgs = function (opts, labelNames) {
+const labelsAsArgs = function (labels, labelNames) {
   const args = []
-  for (const label of Array.from(labelNames)) {
-    args.push(opts[label] || '')
+  for (const label of labelNames) {
+    args.push(labels[label] || '')
   }
   return args
 }
@@ -51,74 +34,68 @@ const PromWrapper = {
   ttlInMinutes: 0,
   registry,
 
-  metric(type, name, buckets) {
-    return metrics.get(name) || new MetricWrapper(type, name, buckets)
+  metric(type, name, labels, buckets) {
+    return metrics.get(name) || new MetricWrapper(type, name, labels, buckets)
   },
 
   collectDefaultMetrics: prom.collectDefaultMetrics,
 }
 
 class MetricWrapper {
-  constructor(type, name, buckets) {
+  constructor(type, name, labels, buckets) {
     metrics.set(name, this)
     this.name = name
     this.instances = new Map()
     this.lastAccess = new Date()
-    this.metric = (() => {
-      switch (type) {
-        case 'counter':
-          return new prom.Counter({
-            name,
-            help: name,
-            labelNames: ['status', 'method', 'path'],
-          })
-        case 'histogram':
-          return new prom.Histogram({
-            name,
-            help: name,
-            labelNames: [
-              'path',
-              'status_code',
-              'method',
-              'collection',
-              'query',
-            ],
-            buckets,
-          })
-        case 'summary':
-          return new prom.Summary({
-            name,
-            help: name,
-            maxAgeSeconds: 60,
-            ageBuckets: 10,
-            labelNames: [
-              'path',
-              'status_code',
-              'method',
-              'collection',
-              'query',
-            ],
-          })
-        case 'gauge':
-          return new prom.Gauge({
-            name,
-            help: name,
-            labelNames: ['host', 'status'],
-          })
-      }
-    })()
+
+    const labelNames = labels ? Object.keys(labels) : []
+    switch (type) {
+      case 'counter':
+        this.metric = new prom.Counter({
+          name,
+          help: name,
+          labelNames,
+        })
+        break
+      case 'histogram':
+        this.metric = new prom.Histogram({
+          name,
+          help: name,
+          labelNames,
+          buckets,
+        })
+        break
+      case 'summary':
+        this.metric = new prom.Summary({
+          name,
+          help: name,
+          maxAgeSeconds: 60,
+          ageBuckets: 10,
+          labelNames,
+        })
+        break
+      case 'gauge':
+        this.metric = new prom.Gauge({
+          name,
+          help: name,
+          labelNames,
+        })
+        break
+      default:
+        throw new Error(`Unknown metric type: ${type}`)
+    }
   }
 
-  inc(opts, value) {
-    return this._execMethod('inc', opts, value)
+  inc(labels, value) {
+    this._execMethod('inc', labels, value)
   }
 
-  observe(opts, value) {
-    return this._execMethod('observe', opts, value)
+  observe(labels, value) {
+    this._execMethod('observe', labels, value)
   }
 
-  set(opts, value) {
-    return this._execMethod('set', opts, value)
+  set(labels, value) {
+    this._execMethod('set', labels, value)
   }
 
   sweep() {
@@ -130,12 +107,12 @@ class MetricWrapper {
           console.log(
             'Sweeping stale metric instance',
             this.name,
-            { opts: instance.opts },
+            { labels: instance.labels },
             key
           )
         }
-        return this.metric.remove(
-          ...Array.from(optsAsArgs(instance.opts, this.metric.labelNames) || [])
+        this.metric.remove(
+          ...labelsAsArgs(instance.labels, this.metric.labelNames)
         )
       }
     })
@@ -146,18 +123,24 @@ class MetricWrapper {
         console.log('Sweeping stale metric', this.name, thresh, this.lastAccess)
       }
       metrics.delete(this.name)
-      return registry.removeSingleMetric(this.name)
+      registry.removeSingleMetric(this.name)
     }
   }
 
-  _execMethod(method, opts, value) {
-    opts = extendOpts(opts, this.metric.labelNames)
-    const key = optsKey(opts)
+  _execMethod(method, labels, value) {
+    const key = labelsKey(labels)
     if (key !== '') {
-      this.instances.set(key, { time: new Date(), opts })
+      this.instances.set(key, { time: new Date(), labels })
     }
     this.lastAccess = new Date()
-    return this.metric[method](opts, value)
+    try {
+      this.metric[method](labels, value)
+    } catch (err) {
+      logger.warn(
+        { err, metric: this.metric.name, labels },
+        'failed to record metric'
+      )
+    }
   }
 }
 
@@ -182,8 +165,8 @@ PromWrapper.setupSweeping = function () {
       // eslint-disable-next-line no-console
       console.log('Sweeping metrics')
     }
-    return metrics.forEach((metric, key) => {
-      return metric.sweep()
+    metrics.forEach((metric, key) => {
+      metric.sweep()
     })
   }, 60000)
 
