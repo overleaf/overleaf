@@ -97,6 +97,11 @@ ENV SHARELATEX_HISTORY_CHUNKS_BUCKET "/var/lib/sharelatex/data/history/overleaf-
 ENV SHARELATEX_HISTORY_ZIPS_BUCKET "/var/lib/sharelatex/data/history/overleaf-zips"
 ENV SHARELATEX_HISTORY_ANALYTICS_BUCKET "/var/lib/sharelatex/data/history/overleaf-analytics"
 
+# Phusion Image timeouts before sending SIGKILL to processes
+# ----------------------------------------------------------
+ENV KILL_PROCESS_TIMEOUT 55
+ENV KILL_ALL_PROCESSES_TIMEOUT 55
+
 ENV NODE_ENV "production"
 ENV LOG_LEVEL "info"
 
