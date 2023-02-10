@@ -167,31 +167,6 @@ const settings = {
     },
   },
 
-  // File storage
-  // ------------
-
-  // ShareLaTeX can store binary files like images either locally or in Amazon
-  // S3. The default is locally:
-  filestore: {
-    backend: 'fs',
-    stores: {
-      user_files: Path.join(DATA_DIR, 'user_files'),
-      template_files: Path.join(DATA_DIR, 'template_files'),
-    },
-  },
-
-  // To use Amazon S3 as a storage backend, comment out the above config, and
-  // uncomment the following, filling in your key, secret, and bucket name:
-  //
-  // filestore:
-  // 	backend: "s3"
-  // 	stores:
-  // 		user_files: "BUCKET_NAME"
-  // 	s3:
-  // 		key: "AWS_KEY"
-  // 		secret: "AWS_SECRET"
-  //
-
   trackchanges: {
     continueOnError: true,
   },
@@ -299,7 +274,7 @@ const settings = {
       url: 'http://localhost:3100/api',
       user: 'staging',
       pass: process.env.STAGING_PASSWORD,
-    }
+    },
   },
   references: {},
   notifications: undefined,
@@ -747,10 +722,12 @@ if (process.env.SHARELATEX_TEMPLATES_USER_ID) {
 if (process.env.SHARELATEX_PROXY_LEARN != null) {
   settings.proxyLearn = parse(process.env.SHARELATEX_PROXY_LEARN)
   if (settings.proxyLearn) {
-    settings.nav.header_extras = [{
-      url: '/learn',
-      text: 'documentation',
-    }].concat(settings.nav.header_extras || [])
+    settings.nav.header_extras = [
+      {
+        url: '/learn',
+        text: 'documentation',
+      },
+    ].concat(settings.nav.header_extras || [])
   }
 }
 
@@ -760,6 +737,41 @@ if (process.env.SHARELATEX_ELASTICSEARCH_URL != null) {
   settings.references.elasticsearch = {
     host: process.env.SHARELATEX_ELASTICSEARCH_URL,
   }
+}
+
+// filestore
+switch (process.env.SHARELATEX_FILESTORE_BACKEND) {
+  case 's3':
+    settings.filestore = {
+      backend: 's3',
+      stores: {
+        user_files: process.env.SHARELATEX_FILESTORE_USER_FILES_BUCKET_NAME,
+        template_files:
+          process.env.SHARELATEX_FILESTORE_TEMPLATE_FILES_BUCKET_NAME,
+      },
+      s3: {
+        key:
+          process.env.SHARELATEX_FILESTORE_S3_ACCESS_KEY_ID ||
+          process.env.AWS_ACCESS_KEY_ID,
+        secret:
+          process.env.SHARELATEX_FILESTORE_S3_SECRET_ACCESS_KEY ||
+          process.env.AWS_ACCESS_KEY_ID,
+        endpoint: process.env.SHARELATEX_FILESTORE_S3_ENDPOINT,
+        pathStyle: process.env.SHARELATEX_FILESTORE_S3_PATH_STYLE === 'true',
+        region:
+          process.env.SHARELATEX_FILESTORE_S3_REGION ||
+          process.env.AWS_DEFAULT_REGION,
+      },
+    }
+    break
+  default:
+    settings.filestore = {
+      backend: 'fs',
+      stores: {
+        user_files: Path.join(DATA_DIR, 'user_files'),
+        template_files: Path.join(DATA_DIR, 'template_files'),
+      },
+    }
 }
 
 // With lots of incoming and outgoing HTTP connections to different services,

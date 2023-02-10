@@ -361,7 +361,7 @@ module.exports = class S3Persistor extends AbstractPersistor {
       options.s3ForcePathStyle = true
     }
 
-    for (const opt of ['httpOptions', 'maxRetries']) {
+    for (const opt of ['httpOptions', 'maxRetries', 'region']) {
       if (this.settings[opt]) {
         options[opt] = this.settings[opt]
       }
