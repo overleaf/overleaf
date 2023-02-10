@@ -1,0 +1,50 @@
+{
+  "databaseUrl": "HISTORY_CONNECTION_STRING",
+  "herokuDatabaseUrl": "DATABASE_URL",
+  "databasePoolMin": "DATABASE_POOL_MIN",
+  "databasePoolMax": "DATABASE_POOL_MAX",
+  "persistor": {
+    "backend": "SHARELATEX_HISTORY_BACKEND",
+    "s3": {
+      "key": "SHARELATEX_HISTORY_S3_ACCESS_KEY_ID",
+      "secret": "SHARELATEX_HISTORY_S3_SECRET_ACCESS_KEY",
+      "maxRetries": "SHARELATEX_HISTORY_S3_MAX_RETRIES",
+      "endpoint": "SHARELATEX_HISTORY_S3_ENDPOINT",
+      "pathStyle": "SHARELATEX_HISTORY_S3_PATH_STYLE",
+      "region": "SHARELATEX_HISTORY_S3_REGION",
+      "httpOptions": {
+        "timeout": "SHARELATEX_HISTORY_S3_TIMEOUT"
+      }
+    }
+  },
+  "blobStore": {
+    "globalBucket": "SHARELATEX_HISTORY_BLOBS_BUCKET",
+    "projectBucket": "SHARELATEX_HISTORY_PROJECT_BLOBS_BUCKET"
+  },
+  "chunkStore": {
+    "historyStoreConcurrency": "HISTORY_STORE_CONCURRENCY",
+    "bucket": "SHARELATEX_HISTORY_CHUNKS_BUCKET"
+  },
+  "zipStore": {
+    "bucket": "SHARELATEX_HISTORY_ZIPS_BUCKET",
+    "zipTimeoutMs": "ZIP_STORE_ZIP_TIMEOUT_MS"
+  },
+  "analytics": {
+    "bucket": "SHARELATEX_HISTORY_ANALYTICS_BUCKET"
+  },
+  "mongo": {
+    "uri": "MONGO_CONNECTION_STRING"
+  },
+  "basicHttpAuth": {
+    "password": "STAGING_PASSWORD",
+    "oldPassword": "BASIC_HTTP_AUTH_OLD_PASSWORD"
+  },
+  "jwtAuth": {
+    "key": "OT_JWT_AUTH_KEY",
+    "oldKey": "OT_JWT_AUTH_OLD_KEY",
+    "algorithm": "OT_JWT_AUTH_ALG"
+  },
+  "clusterWorkers": "CLUSTER_WORKERS",
+  "maxFileUploadSize": "MAX_FILE_UPLOAD_SIZE",
+  "httpsOnly": "HTTPS_ONLY"
+}

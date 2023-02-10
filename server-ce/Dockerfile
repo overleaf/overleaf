@@ -64,6 +64,7 @@ COPY server-ce/config/settings.js /etc/sharelatex/settings.js
 # Copy history-v1 files
 # -----------------------
 COPY server-ce/config/production.json /overleaf/services/history-v1/config/production.json
+COPY server-ce/config/custom-environment-variables.json /overleaf/services/history-v1/config/custom-environment-variables.json
 
 # Copy grunt thin wrapper
 # -----------------------
@@ -88,6 +89,13 @@ ENV OPTIMISE_PDF "true"
 
 ENV SHARELATEX_FPH_INITIALIZE_NEW_PROJECTS "true"
 ENV SHARELATEX_FPH_DISPLAY_NEW_PROJECTS "true"
+
+ENV SHARELATEX_HISTORY_BACKEND "fs"
+ENV SHARELATEX_HISTORY_BLOBS_BUCKET "/var/lib/sharelatex/data/history/overleaf-blobs"
+ENV SHARELATEX_HISTORY_PROJECT_BLOBS_BUCKET "/var/lib/sharelatex/data/history/overleaf-project-blobs"
+ENV SHARELATEX_HISTORY_CHUNKS_BUCKET "/var/lib/sharelatex/data/history/overleaf-chunks"
+ENV SHARELATEX_HISTORY_ZIPS_BUCKET "/var/lib/sharelatex/data/history/overleaf-zips"
+ENV SHARELATEX_HISTORY_ANALYTICS_BUCKET "/var/lib/sharelatex/data/history/overleaf-analytics"
 
 ENV NODE_ENV "production"
 ENV LOG_LEVEL "info"

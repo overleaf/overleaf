@@ -755,7 +755,7 @@ switch (process.env.SHARELATEX_FILESTORE_BACKEND) {
           process.env.AWS_ACCESS_KEY_ID,
         secret:
           process.env.SHARELATEX_FILESTORE_S3_SECRET_ACCESS_KEY ||
-          process.env.AWS_ACCESS_KEY_ID,
+          process.env.AWS_SECRET_ACCESS_KEY,
         endpoint: process.env.SHARELATEX_FILESTORE_S3_ENDPOINT,
         pathStyle: process.env.SHARELATEX_FILESTORE_S3_PATH_STYLE === 'true',
         region:
