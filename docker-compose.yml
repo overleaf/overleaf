@@ -16,6 +16,7 @@ services:
         links:
             - mongo
             - redis
+        stop_grace_period: 60s    
         volumes:
             - ~/sharelatex_data:/var/lib/sharelatex
             ########################################################################
@@ -45,6 +46,11 @@ services:
             # temporary fix for LuaLaTex compiles
             # see https://github.com/overleaf/overleaf/issues/695
             TEXMFVAR: /var/lib/sharelatex/tmp/texmf-var
+            
+            # Give children processes delay to timeout
+            KILL_PROCESS_TIMEOUT: 60
+            # Give all other processes (such as those which have been forked) delay to timeout
+            KILL_ALL_PROCESSES_TIMEOUT: 60
 
             ## Set for SSL via nginx-proxy
             #VIRTUAL_HOST: 103.112.212.22
