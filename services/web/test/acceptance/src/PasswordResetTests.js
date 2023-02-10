@@ -200,7 +200,7 @@ describe('PasswordReset', function () {
         expect(response.status).to.equal(400)
         const body = await response.json()
         expect(body).to.deep.equal({
-          message: { text: 'password contains part of email address' },
+          message: { text: 'Password cannot contain parts of email address' },
         })
       })
 
