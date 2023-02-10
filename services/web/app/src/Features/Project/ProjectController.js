@@ -1204,6 +1204,7 @@ const ProjectController = {
             const detachRole = req.params.detachRole
 
             const showLegacySourceEditor =
+              !Features.hasFeature('saas') ||
               legacySourceEditorAssignment.variant === 'default' ||
               // Also allow override via legacy_source_editor=true in query string
               shouldDisplayFeature('legacy_source_editor')

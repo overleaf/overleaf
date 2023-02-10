@@ -49,11 +49,13 @@
 				else
 					.toolbar.toolbar-editor
 
-				div(ng-if="editor.newSourceEditor")
-					if moduleIncludesAvailable('editor:source-editor')
-						!= moduleIncludes('editor:source-editor', locals)
-				div(ng-if="!editor.newSourceEditor")
+				if !moduleIncludesAvailable('editor:source-editor')
 					include ./source-editor
+				else
+					div(ng-if="editor.newSourceEditor")
+						!= moduleIncludes('editor:source-editor', locals)
+					div(ng-if="!editor.newSourceEditor")
+						include ./source-editor
 
 				if !isRestrictedTokenMember
 							include ./review-panel
