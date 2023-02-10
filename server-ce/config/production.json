@@ -4,17 +4,17 @@
     "useSubdirectories": true
   },
   "blobStore": {
-    "globalBucket": "/var/lib/sharelatex/history/overleaf-blobs",
-    "projectBucket": "/var/lib/sharelatex/history/overleaf-project-blobs"
+    "globalBucket": "/var/lib/sharelatex/data/history/overleaf-blobs",
+    "projectBucket": "/var/lib/sharelatex/data/history/overleaf-project-blobs"
   },
   "chunkStore": {
-    "bucket": "/var/lib/sharelatex/history/overleaf-chunks"
+    "bucket": "/var/lib/sharelatex/data/history/overleaf-chunks"
   },
   "zipStore": {
-    "bucket": "/var/lib/sharelatex/history/overleaf-zips"
+    "bucket": "/var/lib/sharelatex/data/history/overleaf-zips"
   },
   "analytics": {
-    "bucket": "/var/lib/sharelatex/history/overleaf-analytics"
+    "bucket": "/var/lib/sharelatex/data/history/overleaf-analytics"
   },
   "basicHttpAuth": {
     "password": "password"
