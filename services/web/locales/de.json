@@ -646,7 +646,6 @@
   "ip_address": "IP-Adresse",
   "is_email_affiliated": "Ist deine E-Mail-Adresse mit einer Institution verbunden?",
   "is_longer_than_n_characters": "mindestens __n__ Zeichen lang ist",
-  "is_not_a_common_or_obvious_password_as_defined_by_the_have_i_been_pwned_database": "ist nicht auf der Liste der meist verwendeten Passwörter, siehe <0>Have I been Pwned</0>",
   "it": "Italienisch",
   "ja": "Japanisch",
   "january": "Januar",
