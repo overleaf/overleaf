@@ -535,6 +535,8 @@ module.exports = {
 
   // site should be open by default
   siteIsOpen: process.env.SITE_OPEN !== 'false',
+  // status file for closing/opening the site at run-time, polled every 5s
+  siteMaintenanceFile: process.env.SITE_MAINTENANCE_FILE,
 
   // Use a single compile directory for all users in a project
   // (otherwise each user has their own directory)
