@@ -6,6 +6,24 @@ import { postJSON } from '../../../infrastructure/fetch-json'
 let useFallbackDomainUntil = performance.now()
 const ONE_HOUR_IN_MS = 1000 * 60 * 60
 
+class MaybeBlockedByProxyError extends OError {}
+
+function checkForBlockingByProxy(res: Response) {
+  const statusCode = res.status
+  switch (statusCode) {
+    case 200: // full response
+    case 206: // range response
+    case 404: // file not found
+    case 416: // range not found
+      return
+    default:
+      throw new MaybeBlockedByProxyError('request might be blocked by proxy', {
+        res,
+        statusCode,
+      })
+  }
+}
+
 export async function fetchFromCompileDomain(url: string, init: RequestInit) {
   const userContentDomain = getMeta('ol-compilesUserContentDomain')
   let isUserContentDomain =
@@ -17,9 +35,18 @@ export async function fetchFromCompileDomain(url: string, init: RequestInit) {
     url = withFallbackCompileDomain(url)
   }
   try {
-    return await fetch(url, init)
+    const res = await fetch(url, init)
+    if (isUserContentDomain) {
+      // Only throw a MaybeBlockedByProxyError when the request will be retried
+      //  on the fallback domain below.
+      checkForBlockingByProxy(res)
+    }
+    return res
   } catch (err) {
-    if (isNetworkError(err) && isUserContentDomain) {
+    if (
+      (isNetworkError(err) || err instanceof MaybeBlockedByProxyError) &&
+      isUserContentDomain
+    ) {
       try {
         const res = await fetch(withFallbackCompileDomain(url), init)
         // Only switch to the fallback when fetch does not throw there as well.
