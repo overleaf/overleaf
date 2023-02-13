@@ -1,6 +1,8 @@
 const UpdatesManager = require('../app/js/UpdatesManager')
+const { waitForDb } = require('../app/js/mongodb')
 
 async function main() {
+  await waitForDb()
   return new Promise((resolve, reject) => {
     const limit = -1
     console.log('Flushing all updates')
