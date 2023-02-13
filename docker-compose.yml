@@ -16,7 +16,7 @@ services:
         links:
             - mongo
             - redis
-        stop_grace_period: 60s    
+        stop_grace_period: 60s
         volumes:
             - ~/sharelatex_data:/var/lib/sharelatex
             ########################################################################
