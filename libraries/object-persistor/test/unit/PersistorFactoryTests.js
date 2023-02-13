@@ -10,6 +10,10 @@ describe('PersistorManager', function () {
 
   beforeEach(function () {
     FSPersistor = class {
+      constructor(settings) {
+        this.settings = settings
+      }
+
       wrappedMethod() {
         return 'FSPersistor'
       }
@@ -58,6 +62,20 @@ describe('PersistorManager', function () {
 
     expect(PersistorFactory(Settings)).to.respondTo('wrappedMethod')
     expect(PersistorFactory(Settings).wrappedMethod()).to.equal('FSPersistor')
+  })
+
+  it('should forward useSubdirectories=true to FSPersistor', function () {
+    Settings.backend = 'fs'
+    Settings.useSubdirectories = true
+
+    expect(PersistorFactory(Settings).settings.useSubdirectories).to.be.true
+  })
+
+  it('should forward useSubdirectories=false to FSPersistor', function () {
+    Settings.backend = 'fs'
+    Settings.useSubdirectories = false
+
+    expect(PersistorFactory(Settings).settings.useSubdirectories).to.be.false
   })
 
   it('should throw an error when the backend is not configured', function () {

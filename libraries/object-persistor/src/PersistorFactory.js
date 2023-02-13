@@ -14,6 +14,7 @@ function getPersistor(backend, settings) {
       )
     case 'fs':
       return new FSPersistor({
+        useSubdirectories: settings.useSubdirectories,
         paths: settings.paths,
         Metrics: settings.Metrics,
       })
