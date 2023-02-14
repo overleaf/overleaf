@@ -231,7 +231,7 @@ export async function checkUserContentDomainAccess(
         failed,
         succeeded: cases.length - failed,
         isOldDomain:
-          compileDomainOrigin === getMeta('ol-compilesUserContentDomain'),
+          compileDomainOrigin === getMeta('ol-fallbackCompileDomain'),
       },
     })
   } catch (e) {}
