@@ -1,38 +1,42 @@
-aside.editor-sidebar.full-size(
-	ng-show="ui.view != 'history'"
-	vertical-resizable-panes="outline-resizer"
-	vertical-resizable-panes-toggled-externally-on="outline-toggled"
-	vertical-resizable-panes-default-size="350"
-	vertical-resizable-panes-min-size="32"
-	vertical-resizable-panes-max-size="'75%'"
-	vertical-resizable-panes-resize-on="left-pane-resize-all"
-)
+aside.editor-sidebar.full-size
 
-	.file-tree(
-		ng-controller="ReactFileTreeController"
-		vertical-resizable-top
+	.resizable-side-bar(
+		ng-show="ui.view != 'history'"
+		vertical-resizable-panes="outline-resizer"
+		vertical-resizable-panes-toggled-externally-on="outline-toggled"
+		vertical-resizable-panes-default-size="350"
+		vertical-resizable-panes-min-size="32"
+		vertical-resizable-panes-max-size="'75%'"
+		vertical-resizable-panes-resize-on="left-pane-resize-all"
 	)
-		file-tree-root(
-			on-select="onSelect"
-			on-init="onInit"
-			is-connected="isConnected"
-			ref-providers="refProviders"
-			reindex-references="reindexReferences"
-			set-ref-provider-enabled="setRefProviderEnabled"
-			set-started-free-trial="setStartedFreeTrial"
-		)
 
-	.outline-container(
-		vertical-resizable-bottom
-		ng-controller="OutlineController"
-	)
-		outline-pane(
-			is-tex-file="isTexFile"
-			outline="outline"
-			project-id="project_id"
-			jump-to-line="jumpToLine"
-			on-toggle="onToggle"
-			event-tracking="eventTracking"
-			highlighted-line="highlightedLine"
-			show="show"
+		.file-tree(
+			ng-controller="ReactFileTreeController"
+			vertical-resizable-top
 		)
+			file-tree-root(
+				on-select="onSelect"
+				on-init="onInit"
+				is-connected="isConnected"
+				ref-providers="refProviders"
+				reindex-references="reindexReferences"
+				set-ref-provider-enabled="setRefProviderEnabled"
+				set-started-free-trial="setStartedFreeTrial"
+			)
+
+		.outline-container(
+			vertical-resizable-bottom
+			ng-controller="OutlineController"
+		)
+			outline-pane(
+				is-tex-file="isTexFile"
+				outline="outline"
+				project-id="project_id"
+				jump-to-line="jumpToLine"
+				on-toggle="onToggle"
+				event-tracking="eventTracking"
+				highlighted-line="highlightedLine"
+				show="show"
+			)
+
+	documentation-button

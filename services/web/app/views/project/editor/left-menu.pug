@@ -238,7 +238,12 @@ aside#left-menu.full-size(
 			)
 		if showSupport
 			li
-				a(href='/learn', target="_blank")
+				a(
+					href='/learn', target="_blank"
+					event-tracking="left-menu-documentation-click "
+					event-tracking-mb="true"
+					event-tracking-trigger="click"
+				)
 					i.fa.fa-book.fa-fw
 					| &nbsp;&nbsp; #{translate('documentation')}
 			li

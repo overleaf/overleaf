@@ -1051,6 +1051,21 @@ const ProjectController = {
             }
           )
         },
+        editorDocumentationButton(cb) {
+          SplitTestHandler.getAssignment(
+            req,
+            res,
+            'documentation-on-editor',
+            (error, assignment) => {
+              // do not fail editor load if assignment fails
+              if (error) {
+                cb(null, { variant: 'default' })
+              } else {
+                cb(null, assignment)
+              }
+            }
+          )
+        },
         richTextAssignment(cb) {
           SplitTestHandler.getAssignment(
             req,

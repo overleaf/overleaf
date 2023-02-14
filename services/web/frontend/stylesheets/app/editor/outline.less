@@ -15,7 +15,29 @@
   opacity: 0.5;
 }
 
+.documentation-btn.outline-header-expand-collapse-btn {
+  justify-content: space-between;
+  padding-right: 0;
+}
+
+.documentation-btn .btn {
+  padding-right: 0;
+}
+
+.documentation-link {
+  display: flex;
+  margin-left: 0.5em;
+}
+
 .outline-header {
+  .toolbar-small-mixin;
+  .toolbar-alt-mixin;
+  display: flex;
+  flex-shrink: 0;
+  border-bottom: 1px solid @toolbar-border-color;
+  border-top: 1px solid @toolbar-border-color;
+}
+.outline-footer {
   .toolbar-small-mixin;
   .toolbar-alt-mixin;
   display: flex;
