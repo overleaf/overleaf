@@ -7,6 +7,7 @@ import {
   FetchError,
   postJSON,
 } from '../../../infrastructure/fetch-json'
+import MaterialIcon from '../../../shared/components/material-icon'
 import Tooltip from '../../../shared/components/tooltip'
 import useWaitForI18n from '../../../shared/hooks/use-wait-for-i18n'
 import getMeta from '../../../utils/meta'
@@ -145,7 +146,15 @@ export default function GroupMembers() {
     <div className="container">
       <Row>
         <Col md={10} mdOffset={1}>
-          <h1>{groupName || t('group_subscription')}</h1>
+          <h1>
+            <a href="/user/subscription" className="back-btn">
+              <MaterialIcon
+                type="arrow_back"
+                accessibilityLabel={t('back_to_subscription')}
+              />
+            </a>{' '}
+            {groupName || t('group_subscription')}
+          </h1>
           <div className="card">
             <div className="page-header">
               <div className="pull-right">

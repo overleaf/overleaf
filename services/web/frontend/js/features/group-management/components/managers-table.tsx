@@ -6,6 +6,7 @@ import {
   FetchError,
   postJSON,
 } from '../../../infrastructure/fetch-json'
+import MaterialIcon from '../../../shared/components/material-icon'
 import Tooltip from '../../../shared/components/tooltip'
 import getMeta from '../../../utils/meta'
 import { parseEmails } from '../utils/emails'
@@ -136,7 +137,15 @@ export function ManagersTable({
     <div className="container">
       <Row>
         <Col md={10} mdOffset={1}>
-          <h1>{groupName || translations.title}</h1>
+          <h1>
+            <a href="/user/subscription" className="back-btn">
+              <MaterialIcon
+                type="arrow_back"
+                accessibilityLabel={t('back_to_subscription')}
+              />
+            </a>{' '}
+            {groupName || translations.title}
+          </h1>
           <div className="card">
             <div className="page-header">
               <div className="pull-right">
