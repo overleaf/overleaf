@@ -82,6 +82,11 @@ describe('SubscriptionViewModelBuilder', function () {
         getCurrentInstitutionsWithLicence: sinon.stub().resolves(),
       },
     }
+    this.InstitutionsManager = {
+      promises: {
+        fetchV1Data: sinon.stub().resolves(),
+      },
+    }
     this.RecurlyWrapper = {
       promises: {
         getSubscription: sinon.stub().resolves(),
@@ -100,6 +105,7 @@ describe('SubscriptionViewModelBuilder', function () {
         '@overleaf/settings': this.Settings,
         './SubscriptionLocator': this.SubscriptionLocator,
         '../Institutions/InstitutionsGetter': this.InstitutionsGetter,
+        '../Institutions/InstitutionsManager': this.InstitutionsManager,
         './RecurlyWrapper': this.RecurlyWrapper,
         './SubscriptionUpdater': this.SubscriptionUpdater,
         './PlansLocator': this.PlansLocator,

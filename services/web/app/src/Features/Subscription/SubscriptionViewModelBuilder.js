@@ -6,12 +6,13 @@ const SubscriptionLocator = require('./SubscriptionLocator')
 const SubscriptionUpdater = require('./SubscriptionUpdater')
 const V1SubscriptionManager = require('./V1SubscriptionManager')
 const InstitutionsGetter = require('../Institutions/InstitutionsGetter')
+const InstitutionsManager = require('../Institutions/InstitutionsManager')
 const PublishersGetter = require('../Publishers/PublishersGetter')
 const sanitizeHtml = require('sanitize-html')
 const _ = require('underscore')
 const async = require('async')
 const SubscriptionHelper = require('./SubscriptionHelper')
-const { callbackify, promisify } = require('../../util/promises')
+const { callbackify } = require('../../util/promises')
 const {
   InvalidError,
   NotFoundError,
@@ -65,291 +66,283 @@ async function getRedirectToHostedPage(userId, pageType) {
   ].join('')
 }
 
-function buildUsersSubscriptionViewModel(user, callback) {
-  async.auto(
-    {
-      personalSubscription(cb) {
-        SubscriptionLocator.getUsersSubscription(user, cb)
-      },
-      recurlySubscription: [
-        'personalSubscription',
-        ({ personalSubscription }, cb) => {
-          if (
-            personalSubscription == null ||
-            personalSubscription.recurlySubscription_id == null ||
-            personalSubscription.recurlySubscription_id === ''
-          ) {
-            return cb(null, null)
-          }
-          RecurlyWrapper.getSubscription(
-            personalSubscription.recurlySubscription_id,
-            { includeAccount: true },
-            cb
-          )
-        },
-      ],
-      recurlyCoupons: [
-        'recurlySubscription',
-        ({ recurlySubscription }, cb) => {
-          if (!recurlySubscription) {
-            return cb(null, null)
-          }
-          const accountId = recurlySubscription.account.account_code
-          RecurlyWrapper.getAccountActiveCoupons(accountId, cb)
-        },
-      ],
-      plan: [
-        'personalSubscription',
-        ({ personalSubscription }, cb) => {
-          if (personalSubscription == null) {
-            return cb()
-          }
-          const plan = PlansLocator.findLocalPlanInSettings(
-            personalSubscription.planCode
-          )
-          if (plan == null) {
-            return cb(
-              new Error(
-                `No plan found for planCode '${personalSubscription.planCode}'`
-              )
-            )
-          }
-          cb(null, plan)
-        },
-      ],
-      memberGroupSubscriptions(cb) {
-        SubscriptionLocator.getMemberSubscriptions(user, cb)
-      },
-      managedGroupSubscriptions(cb) {
-        SubscriptionLocator.getManagedGroupSubscriptions(user, cb)
-      },
-      currentInstitutionsWithLicence(cb) {
-        InstitutionsGetter.getCurrentInstitutionsWithLicence(
-          user._id,
-          (error, institutions) => {
-            if (error instanceof V1ConnectionError) {
-              return cb(null, false)
-            }
-            cb(null, institutions)
-          }
-        )
-      },
-      managedInstitutions(cb) {
-        InstitutionsGetter.getManagedInstitutions(user._id, cb)
-      },
-      managedPublishers(cb) {
-        PublishersGetter.getManagedPublishers(user._id, cb)
-      },
-      v1SubscriptionStatus(cb) {
-        V1SubscriptionManager.getSubscriptionStatusFromV1(
-          user._id,
-          (error, status, v1Id) => {
-            if (error) {
-              return cb(error)
-            }
-            cb(null, status)
-          }
-        )
-      },
+async function buildUsersSubscriptionViewModel(user) {
+  let {
+    personalSubscription,
+    memberGroupSubscriptions,
+    managedGroupSubscriptions,
+    currentInstitutionsWithLicence,
+    managedInstitutions,
+    managedPublishers,
+    v1SubscriptionStatus,
+    recurlySubscription,
+    recurlyCoupons,
+    plan,
+  } = await async.auto({
+    personalSubscription(cb) {
+      SubscriptionLocator.getUsersSubscription(user, cb)
     },
-    (err, results) => {
-      if (err) {
-        return callback(err)
-      }
-      let {
-        personalSubscription,
-        memberGroupSubscriptions,
-        managedGroupSubscriptions,
-        currentInstitutionsWithLicence,
-        managedInstitutions,
-        managedPublishers,
-        v1SubscriptionStatus,
-        recurlySubscription,
-        recurlyCoupons,
-        plan,
-      } = results
-
-      if (memberGroupSubscriptions == null) {
-        memberGroupSubscriptions = []
-      }
-      if (managedGroupSubscriptions == null) {
-        managedGroupSubscriptions = []
-      }
-      if (managedInstitutions == null) {
-        managedInstitutions = []
-      }
-      if (v1SubscriptionStatus == null) {
-        v1SubscriptionStatus = {}
-      }
-      if (recurlyCoupons == null) {
-        recurlyCoupons = []
-      }
-
-      personalSubscription = serializeMongooseObject(personalSubscription)
-      memberGroupSubscriptions = memberGroupSubscriptions.map(
-        serializeMongooseObject
-      )
-      managedGroupSubscriptions = managedGroupSubscriptions.map(
-        serializeMongooseObject
-      )
-
-      if (plan != null) {
-        personalSubscription.plan = plan
-      }
-
-      // Subscription DB object contains a recurly property, used to cache trial info
-      // on the project-list. However, this can cause the wrong template to render,
-      // if we do not have any subscription data from Recurly (recurlySubscription)
-      // TODO: Delete this workaround once recurly cache property name migration rolled out.
-      if (personalSubscription) {
-        delete personalSubscription.recurly
-      }
-
-      if (personalSubscription && recurlySubscription) {
-        const tax = recurlySubscription.tax_in_cents || 0
-        // Some plans allow adding more seats than the base plan provides.
-        // This is recorded as a subscription add on.
-        // Note: tax_in_cents already includes the tax for any addon.
-        let addOnPrice = 0
-        let additionalLicenses = 0
+    recurlySubscription: [
+      'personalSubscription',
+      ({ personalSubscription }, cb) => {
         if (
-          plan.membersLimitAddOn &&
-          Array.isArray(recurlySubscription.subscription_add_ons)
+          personalSubscription == null ||
+          personalSubscription.recurlySubscription_id == null ||
+          personalSubscription.recurlySubscription_id === ''
         ) {
-          recurlySubscription.subscription_add_ons.forEach(addOn => {
-            if (addOn.add_on_code === plan.membersLimitAddOn) {
-              addOnPrice += addOn.quantity * addOn.unit_amount_in_cents
-              additionalLicenses += addOn.quantity
-            }
-          })
+          return cb(null, null)
         }
-        const totalLicenses = (plan.membersLimit || 0) + additionalLicenses
-        personalSubscription.recurly = {
-          tax,
-          taxRate: recurlySubscription.tax_rate
-            ? parseFloat(recurlySubscription.tax_rate._)
-            : 0,
-          billingDetailsLink: buildHostedLink('billing-details'),
-          accountManagementLink: buildHostedLink('account-management'),
-          additionalLicenses,
-          totalLicenses,
-          nextPaymentDueAt: SubscriptionFormatters.formatDate(
-            recurlySubscription.current_period_ends_at
-          ),
-          currency: recurlySubscription.currency,
-          state: recurlySubscription.state,
-          trialEndsAtFormatted: SubscriptionFormatters.formatDate(
-            recurlySubscription.trial_ends_at
-          ),
-          trial_ends_at: recurlySubscription.trial_ends_at,
-          activeCoupons: recurlyCoupons,
-          account: recurlySubscription.account,
+        RecurlyWrapper.getSubscription(
+          personalSubscription.recurlySubscription_id,
+          { includeAccount: true },
+          cb
+        )
+      },
+    ],
+    recurlyCoupons: [
+      'recurlySubscription',
+      ({ recurlySubscription }, cb) => {
+        if (!recurlySubscription) {
+          return cb(null, null)
         }
-        if (recurlySubscription.pending_subscription) {
-          const pendingPlan = PlansLocator.findLocalPlanInSettings(
-            recurlySubscription.pending_subscription.plan.plan_code
-          )
-          if (pendingPlan == null) {
-            return callback(
-              new Error(
-                `No plan found for planCode '${personalSubscription.planCode}'`
-              )
+        const accountId = recurlySubscription.account.account_code
+        RecurlyWrapper.getAccountActiveCoupons(accountId, cb)
+      },
+    ],
+    plan: [
+      'personalSubscription',
+      ({ personalSubscription }, cb) => {
+        if (personalSubscription == null) {
+          return cb()
+        }
+        const plan = PlansLocator.findLocalPlanInSettings(
+          personalSubscription.planCode
+        )
+        if (plan == null) {
+          return cb(
+            new Error(
+              `No plan found for planCode '${personalSubscription.planCode}'`
             )
+          )
+        }
+        cb(null, plan)
+      },
+    ],
+    memberGroupSubscriptions(cb) {
+      SubscriptionLocator.getMemberSubscriptions(user, cb)
+    },
+    managedGroupSubscriptions(cb) {
+      SubscriptionLocator.getManagedGroupSubscriptions(user, cb)
+    },
+    currentInstitutionsWithLicence(cb) {
+      InstitutionsGetter.getCurrentInstitutionsWithLicence(
+        user._id,
+        (error, institutions) => {
+          if (error instanceof V1ConnectionError) {
+            return cb(null, false)
           }
-          let pendingAdditionalLicenses = 0
-          let pendingAddOnTax = 0
-          let pendingAddOnPrice = 0
-          if (recurlySubscription.pending_subscription.subscription_add_ons) {
-            if (
-              pendingPlan.membersLimitAddOn &&
-              Array.isArray(
-                recurlySubscription.pending_subscription.subscription_add_ons
-              )
-            ) {
-              recurlySubscription.pending_subscription.subscription_add_ons.forEach(
-                addOn => {
-                  if (addOn.add_on_code === pendingPlan.membersLimitAddOn) {
-                    pendingAddOnPrice +=
-                      addOn.quantity * addOn.unit_amount_in_cents
-                    pendingAdditionalLicenses += addOn.quantity
-                  }
-                }
-              )
-            }
-            // Need to calculate tax ourselves as we don't get tax amounts for pending subs
-            pendingAddOnTax =
-              personalSubscription.recurly.taxRate * pendingAddOnPrice
+          cb(null, institutions)
+        }
+      )
+    },
+    managedInstitutions(cb) {
+      InstitutionsGetter.getManagedInstitutions(user._id, cb)
+    },
+    managedPublishers(cb) {
+      PublishersGetter.getManagedPublishers(user._id, cb)
+    },
+    v1SubscriptionStatus(cb) {
+      V1SubscriptionManager.getSubscriptionStatusFromV1(
+        user._id,
+        (error, status, v1Id) => {
+          if (error) {
+            return cb(error)
           }
-          const pendingSubscriptionTax =
-            personalSubscription.recurly.taxRate *
-            recurlySubscription.pending_subscription.unit_amount_in_cents
-          personalSubscription.recurly.displayPrice =
-            SubscriptionFormatters.formatPrice(
-              recurlySubscription.pending_subscription.unit_amount_in_cents +
-                pendingAddOnPrice +
-                pendingAddOnTax +
-                pendingSubscriptionTax,
-              recurlySubscription.currency
-            )
-          personalSubscription.recurly.currentPlanDisplayPrice =
-            SubscriptionFormatters.formatPrice(
-              recurlySubscription.unit_amount_in_cents + addOnPrice + tax,
-              recurlySubscription.currency
-            )
-          const pendingTotalLicenses =
-            (pendingPlan.membersLimit || 0) + pendingAdditionalLicenses
-          personalSubscription.recurly.pendingAdditionalLicenses =
-            pendingAdditionalLicenses
-          personalSubscription.recurly.pendingTotalLicenses =
-            pendingTotalLicenses
-          personalSubscription.pendingPlan = pendingPlan
-        } else {
-          personalSubscription.recurly.displayPrice =
-            SubscriptionFormatters.formatPrice(
-              recurlySubscription.unit_amount_in_cents + addOnPrice + tax,
-              recurlySubscription.currency
-            )
+          cb(null, status)
         }
-      }
+      )
+    },
+  })
 
-      for (const memberGroupSubscription of memberGroupSubscriptions) {
-        if (
-          memberGroupSubscription.manager_ids?.some(
-            id => id.toString() === user._id.toString()
-          )
-        ) {
-          memberGroupSubscription.userIsGroupManager = true
-        }
-        if (memberGroupSubscription.teamNotice) {
-          memberGroupSubscription.teamNotice = sanitizeHtml(
-            memberGroupSubscription.teamNotice
-          )
-        }
-        buildGroupSubscriptionForView(memberGroupSubscription)
-      }
+  if (memberGroupSubscriptions == null) {
+    memberGroupSubscriptions = []
+  }
+  if (managedGroupSubscriptions == null) {
+    managedGroupSubscriptions = []
+  }
+  if (managedInstitutions == null) {
+    managedInstitutions = []
+  }
+  if (v1SubscriptionStatus == null) {
+    v1SubscriptionStatus = {}
+  }
+  if (recurlyCoupons == null) {
+    recurlyCoupons = []
+  }
 
-      for (const managedGroupSubscription of managedGroupSubscriptions) {
-        if (
-          managedGroupSubscription.member_ids?.some(
-            id => id.toString() === user._id.toString()
-          )
-        ) {
-          managedGroupSubscription.userIsGroupMember = true
-        }
-        buildGroupSubscriptionForView(managedGroupSubscription)
-      }
+  personalSubscription = serializeMongooseObject(personalSubscription)
+  memberGroupSubscriptions = memberGroupSubscriptions.map(
+    serializeMongooseObject
+  )
+  managedGroupSubscriptions = managedGroupSubscriptions.map(
+    serializeMongooseObject
+  )
+  managedInstitutions = managedInstitutions.map(serializeMongooseObject)
+  await Promise.all(
+    managedInstitutions.map(InstitutionsManager.promises.fetchV1Data)
+  )
 
-      callback(null, {
-        personalSubscription,
-        managedGroupSubscriptions,
-        memberGroupSubscriptions,
-        currentInstitutionsWithLicence,
-        managedInstitutions,
-        managedPublishers,
-        v1SubscriptionStatus,
+  if (plan != null) {
+    personalSubscription.plan = plan
+  }
+
+  // Subscription DB object contains a recurly property, used to cache trial info
+  // on the project-list. However, this can cause the wrong template to render,
+  // if we do not have any subscription data from Recurly (recurlySubscription)
+  // TODO: Delete this workaround once recurly cache property name migration rolled out.
+  if (personalSubscription) {
+    delete personalSubscription.recurly
+  }
+
+  if (personalSubscription && recurlySubscription) {
+    const tax = recurlySubscription.tax_in_cents || 0
+    // Some plans allow adding more seats than the base plan provides.
+    // This is recorded as a subscription add on.
+    // Note: tax_in_cents already includes the tax for any addon.
+    let addOnPrice = 0
+    let additionalLicenses = 0
+    if (
+      plan.membersLimitAddOn &&
+      Array.isArray(recurlySubscription.subscription_add_ons)
+    ) {
+      recurlySubscription.subscription_add_ons.forEach(addOn => {
+        if (addOn.add_on_code === plan.membersLimitAddOn) {
+          addOnPrice += addOn.quantity * addOn.unit_amount_in_cents
+          additionalLicenses += addOn.quantity
+        }
       })
     }
-  )
+    const totalLicenses = (plan.membersLimit || 0) + additionalLicenses
+    personalSubscription.recurly = {
+      tax,
+      taxRate: recurlySubscription.tax_rate
+        ? parseFloat(recurlySubscription.tax_rate._)
+        : 0,
+      billingDetailsLink: buildHostedLink('billing-details'),
+      accountManagementLink: buildHostedLink('account-management'),
+      additionalLicenses,
+      totalLicenses,
+      nextPaymentDueAt: SubscriptionFormatters.formatDate(
+        recurlySubscription.current_period_ends_at
+      ),
+      currency: recurlySubscription.currency,
+      state: recurlySubscription.state,
+      trialEndsAtFormatted: SubscriptionFormatters.formatDate(
+        recurlySubscription.trial_ends_at
+      ),
+      trial_ends_at: recurlySubscription.trial_ends_at,
+      activeCoupons: recurlyCoupons,
+      account: recurlySubscription.account,
+    }
+    if (recurlySubscription.pending_subscription) {
+      const pendingPlan = PlansLocator.findLocalPlanInSettings(
+        recurlySubscription.pending_subscription.plan.plan_code
+      )
+      if (pendingPlan == null) {
+        throw new Error(
+          `No plan found for planCode '${personalSubscription.planCode}'`
+        )
+      }
+      let pendingAdditionalLicenses = 0
+      let pendingAddOnTax = 0
+      let pendingAddOnPrice = 0
+      if (recurlySubscription.pending_subscription.subscription_add_ons) {
+        if (
+          pendingPlan.membersLimitAddOn &&
+          Array.isArray(
+            recurlySubscription.pending_subscription.subscription_add_ons
+          )
+        ) {
+          recurlySubscription.pending_subscription.subscription_add_ons.forEach(
+            addOn => {
+              if (addOn.add_on_code === pendingPlan.membersLimitAddOn) {
+                pendingAddOnPrice += addOn.quantity * addOn.unit_amount_in_cents
+                pendingAdditionalLicenses += addOn.quantity
+              }
+            }
+          )
+        }
+        // Need to calculate tax ourselves as we don't get tax amounts for pending subs
+        pendingAddOnTax =
+          personalSubscription.recurly.taxRate * pendingAddOnPrice
+      }
+      const pendingSubscriptionTax =
+        personalSubscription.recurly.taxRate *
+        recurlySubscription.pending_subscription.unit_amount_in_cents
+      personalSubscription.recurly.displayPrice =
+        SubscriptionFormatters.formatPrice(
+          recurlySubscription.pending_subscription.unit_amount_in_cents +
+            pendingAddOnPrice +
+            pendingAddOnTax +
+            pendingSubscriptionTax,
+          recurlySubscription.currency
+        )
+      personalSubscription.recurly.currentPlanDisplayPrice =
+        SubscriptionFormatters.formatPrice(
+          recurlySubscription.unit_amount_in_cents + addOnPrice + tax,
+          recurlySubscription.currency
+        )
+      const pendingTotalLicenses =
+        (pendingPlan.membersLimit || 0) + pendingAdditionalLicenses
+      personalSubscription.recurly.pendingAdditionalLicenses =
+        pendingAdditionalLicenses
+      personalSubscription.recurly.pendingTotalLicenses = pendingTotalLicenses
+      personalSubscription.pendingPlan = pendingPlan
+    } else {
+      personalSubscription.recurly.displayPrice =
+        SubscriptionFormatters.formatPrice(
+          recurlySubscription.unit_amount_in_cents + addOnPrice + tax,
+          recurlySubscription.currency
+        )
+    }
+  }
+
+  for (const memberGroupSubscription of memberGroupSubscriptions) {
+    if (
+      memberGroupSubscription.manager_ids?.some(
+        id => id.toString() === user._id.toString()
+      )
+    ) {
+      memberGroupSubscription.userIsGroupManager = true
+    }
+    if (memberGroupSubscription.teamNotice) {
+      memberGroupSubscription.teamNotice = sanitizeHtml(
+        memberGroupSubscription.teamNotice
+      )
+    }
+    buildGroupSubscriptionForView(memberGroupSubscription)
+  }
+
+  for (const managedGroupSubscription of managedGroupSubscriptions) {
+    if (
+      managedGroupSubscription.member_ids?.some(
+        id => id.toString() === user._id.toString()
+      )
+    ) {
+      managedGroupSubscription.userIsGroupMember = true
+    }
+    buildGroupSubscriptionForView(managedGroupSubscription)
+  }
+
+  return {
+    personalSubscription,
+    managedGroupSubscriptions,
+    memberGroupSubscriptions,
+    currentInstitutionsWithLicence,
+    managedInstitutions,
+    managedPublishers,
+    v1SubscriptionStatus,
+  }
 }
 
 /**
@@ -558,12 +551,12 @@ function buildPlansListForSubscriptionDash(currentPlan) {
 }
 
 module.exports = {
-  buildUsersSubscriptionViewModel,
+  buildUsersSubscriptionViewModel: callbackify(buildUsersSubscriptionViewModel),
   buildPlansList,
   buildPlansListForSubscriptionDash,
   getBestSubscription: callbackify(getBestSubscription),
   promises: {
-    buildUsersSubscriptionViewModel: promisify(buildUsersSubscriptionViewModel),
+    buildUsersSubscriptionViewModel,
     getRedirectToHostedPage,
     getBestSubscription,
   },

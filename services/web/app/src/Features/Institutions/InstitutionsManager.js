@@ -2,6 +2,8 @@ const async = require('async')
 const { callbackify, promisify } = require('util')
 const { ObjectId } = require('mongodb')
 const Settings = require('@overleaf/settings')
+const logger = require('@overleaf/logger')
+const fetch = require('node-fetch')
 const {
   getInstitutionAffiliations,
   getConfirmedInstitutionAffiliations,
@@ -341,11 +343,32 @@ const notifyUser = (
     callback
   )
 
+async function fetchV1Data(institution) {
+  const url = `${Settings.apis.v1.url}/universities/list/${institution.v1Id}`
+  try {
+    const response = await fetch(url, {
+      signal: AbortSignal.timeout(Settings.apis.v1.timeout),
+    })
+    const data = await response.json()
+
+    institution.name = data?.name
+    institution.countryCode = data?.country_code
+    institution.departments = data?.departments
+    institution.portalSlug = data?.portal_slug
+  } catch (error) {
+    logger.err(
+      { model: 'Institution', v1Id: institution.v1Id, error },
+      '[fetchV1DataError]'
+    )
+  }
+}
+
 InstitutionsManager.promises = {
   checkInstitutionUsers,
   clearInstitutionNotifications: promisify(
     InstitutionsManager.clearInstitutionNotifications
   ),
+  fetchV1Data,
 }
 
 module.exports = InstitutionsManager

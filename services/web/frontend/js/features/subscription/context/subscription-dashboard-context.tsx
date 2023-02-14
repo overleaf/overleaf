@@ -1,6 +1,7 @@
 import {
   createContext,
   ReactNode,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -11,6 +12,7 @@ import {
   Subscription,
 } from '../../../../../types/subscription/dashboard/subscription'
 import { Plan } from '../../../../../types/subscription/plan'
+import { Institution as ManagedInstitution } from '../components/dashboard/managed-institutions'
 import { Institution } from '../../../../../types/institution'
 import getMeta from '../../../utils/meta'
 import { loadDisplayPriceWithTaxPromise } from '../util/recurly-pricing'
@@ -18,10 +20,12 @@ import { isRecurlyLoaded } from '../util/is-recurly-loaded'
 
 type SubscriptionDashboardContextValue = {
   hasDisplayedSubscription: boolean
-  institutionMemberships?: Array<Institution>
-  managedGroupSubscriptions: Array<ManagedGroupSubscription>
+  institutionMemberships?: Institution[]
+  managedGroupSubscriptions: ManagedGroupSubscription[]
+  managedInstitutions: ManagedInstitution[]
+  updateManagedInstitution: (institution: ManagedInstitution) => void
   personalSubscription?: Subscription
-  plans: Array<Plan>
+  plans: Plan[]
   queryingIndividualPlansData: boolean
   recurlyLoadError: boolean
   setRecurlyLoadError: React.Dispatch<React.SetStateAction<boolean>>
@@ -51,12 +55,16 @@ export function SubscriptionDashboardProvider({
   const institutionMemberships = getMeta('ol-currentInstitutionsWithLicence')
   const personalSubscription = getMeta('ol-subscription')
   const managedGroupSubscriptions = getMeta('ol-managedGroupSubscriptions')
+  const [managedInstitutions, setManagedInstitutions] = useState<
+    ManagedInstitution[]
+  >(getMeta('ol-managedInstitutions'))
   const recurlyApiKey = getMeta('ol-recurlyApiKey')
 
   const hasDisplayedSubscription =
     institutionMemberships?.length > 0 ||
     personalSubscription ||
-    managedGroupSubscriptions?.length > 0
+    managedGroupSubscriptions?.length > 0 ||
+    managedInstitutions?.length > 0
 
   useEffect(() => {
     if (!isRecurlyLoaded()) {
@@ -91,11 +99,26 @@ export function SubscriptionDashboardProvider({
     }
   }, [personalSubscription, plansWithoutDisplayPrice])
 
+  const updateManagedInstitution = useCallback(
+    (institution: ManagedInstitution) => {
+      setManagedInstitutions(institutions => {
+        return [
+          ...(institutions || []).map(i =>
+            i.v1Id === institution.v1Id ? institution : i
+          ),
+        ]
+      })
+    },
+    []
+  )
+
   const value = useMemo<SubscriptionDashboardContextValue>(
     () => ({
       hasDisplayedSubscription,
       institutionMemberships,
       managedGroupSubscriptions,
+      managedInstitutions,
+      updateManagedInstitution,
       personalSubscription,
       plans,
       queryingIndividualPlansData,
@@ -110,6 +133,8 @@ export function SubscriptionDashboardProvider({
       hasDisplayedSubscription,
       institutionMemberships,
       managedGroupSubscriptions,
+      managedInstitutions,
+      updateManagedInstitution,
       personalSubscription,
       plans,
       queryingIndividualPlansData,

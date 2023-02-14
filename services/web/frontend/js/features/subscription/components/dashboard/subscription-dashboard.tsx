@@ -3,6 +3,7 @@ import InstitutionMemberships from './institution-memberships'
 import FreePlan from './free-plan'
 import PersonalSubscription from './personal-subscription'
 import ManagedGroupSubscriptions from './managed-group-subscriptions'
+import ManagedInstitutions from './managed-institutions'
 import { useSubscriptionDashboardContext } from '../../context/subscription-dashboard-context'
 
 function SubscriptionDashboard() {
@@ -20,6 +21,7 @@ function SubscriptionDashboard() {
 
             <PersonalSubscription />
             <ManagedGroupSubscriptions />
+            <ManagedInstitutions />
             <InstitutionMemberships />
             {!hasDisplayedSubscription && <FreePlan />}
           </div>
