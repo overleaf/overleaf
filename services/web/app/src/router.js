@@ -214,6 +214,10 @@ const rateLimiters = {
     points: 15,
     duration: 60,
   }),
+  userContentDomainMaxAccessChecksHit: new RateLimiter('user-content-mach', {
+    points: 15,
+    duration: 60,
+  }),
 }
 
 function initialize(webRouter, privateApiRouter, publicApiRouter) {
@@ -1357,6 +1361,13 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
       rateLimiters.userContentDomainFallbackUsage
     ),
     UserContentDomainController.recordFallbackUsage
+  )
+  webRouter.post(
+    '/record-user-content-domain-max-access-checks-hit',
+    RateLimiterMiddleware.rateLimit(
+      rateLimiters.userContentDomainMaxAccessChecksHit
+    ),
+    UserContentDomainController.recordMaxAccessChecksHit
   )
 
   webRouter.get(

@@ -278,6 +278,9 @@ export function scheduleUserContentDomainAccessCheck() {
       return scheduleUserContentDomainAccessCheck()
     }
     if (accessCheckPassed) return
+    if (remainingChecks === 0) {
+      recordMaxAccessChecksHit()
+    }
     if (remainingChecks-- <= 0) return
     checkUserContentDomainAccess()
       .then(ok => {
@@ -287,4 +290,8 @@ export function scheduleUserContentDomainAccessCheck() {
         captureException(err)
       })
   }, INITIAL_DELAY_MS)
+}
+
+function recordMaxAccessChecksHit() {
+  postJSON('/record-user-content-domain-max-access-checks-hit').catch(() => {})
 }
