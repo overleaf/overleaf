@@ -2,13 +2,13 @@ import { useTranslation } from 'react-i18next'
 import { Button } from 'react-bootstrap'
 import Icon from '../../../../../shared/components/icon'
 
-type CardSubmitButtonProps = {
+type SubmitButtonProps = {
   isProcessing: boolean
   isFormValid: boolean
   children: React.ReactNode
 }
 
-function SubmitButton(props: CardSubmitButtonProps) {
+function SubmitButton(props: SubmitButtonProps) {
   const { t } = useTranslation()
 
   return (

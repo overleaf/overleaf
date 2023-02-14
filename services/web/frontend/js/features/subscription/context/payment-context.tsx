@@ -333,7 +333,9 @@ function usePayment({ publicKey }: RecurlyOptions) {
   return { value }
 }
 
-const PaymentContext = createContext<PaymentContextValue | undefined>(undefined)
+export const PaymentContext = createContext<PaymentContextValue | undefined>(
+  undefined
+)
 
 type PaymentProviderProps = {
   publicKey: string
