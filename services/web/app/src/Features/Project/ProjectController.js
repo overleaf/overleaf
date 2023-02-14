@@ -1066,6 +1066,17 @@ const ProjectController = {
             }
           )
         },
+        accessCheckForOldCompileDomainAssigment(cb) {
+          SplitTestHandler.getAssignment(
+            req,
+            res,
+            'access-check-for-old-compile-domain',
+            () => {
+              // We'll pick up the assignment from the res.locals assignment.
+              cb()
+            }
+          )
+        },
         userContentDomainAccessCheckAssigment(cb) {
           SplitTestHandler.getAssignment(
             req,

@@ -206,7 +206,7 @@ const rateLimiters = {
   userContentDomainAccessCheckResult: new RateLimiter(
     'user-content-domain-a-c-r',
     {
-      points: 15,
+      points: 30,
       duration: 60,
     }
   ),
@@ -1348,6 +1348,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
       body: Joi.object({
         failed: Joi.number().min(0).max(6),
         succeeded: Joi.number().min(0).max(6),
+        isOldDomain: Joi.boolean().default(false),
       }),
     }),
     RateLimiterMiddleware.rateLimit(

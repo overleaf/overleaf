@@ -126,7 +126,9 @@ async function singleCheck(
   }
 }
 
-export async function checkUserContentDomainAccess() {
+export async function checkUserContentDomainAccess(
+  compileDomainOrigin: string
+) {
   // Note: The ids are zero prefixed. No actual user/project uses these ids.
   // mongo-id 000000000000000000000000 -> 1970-01-01T00:00:00.000Z
   // mongo-id 000000010000000000000000 -> 1970-01-01T00:00:01.000Z
@@ -141,16 +143,12 @@ export async function checkUserContentDomainAccess() {
   if (getMeta('ol-user_id')) {
     // Logged-in user
     urls.push(
-      `${getMeta(
-        'ol-compilesUserContentDomain'
-      )}/zone/${zone}/project/${projectId}/user/${userId}/build/${buildId}/output/output.pdf`
+      `${compileDomainOrigin}/zone/${zone}/project/${projectId}/user/${userId}/build/${buildId}/output/output.pdf`
     )
   } else {
     // Anonymous user
     urls.push(
-      `${getMeta(
-        'ol-compilesUserContentDomain'
-      )}/zone/${zone}/project/${projectId}/build/${buildId}/output/output.pdf`
+      `${compileDomainOrigin}/zone/${zone}/project/${projectId}/build/${buildId}/output/output.pdf`
     )
   }
 
@@ -216,7 +214,9 @@ export async function checkUserContentDomainAccess() {
         if (
           isSplitTestEnabled('report-user-content-domain-access-check-error')
         ) {
-          captureException(err)
+          captureException(err, {
+            tags: { compileDomain: new URL(compileDomainOrigin).hostname },
+          })
         } else {
           console.error(OError.getFullStack(err), OError.getFullInfo(err))
         }
@@ -227,7 +227,12 @@ export async function checkUserContentDomainAccess() {
 
   try {
     await postJSON('/record-user-content-domain-access-check-result', {
-      body: { failed, succeeded: cases.length - failed },
+      body: {
+        failed,
+        succeeded: cases.length - failed,
+        isOldDomain:
+          compileDomainOrigin === getMeta('ol-compilesUserContentDomain'),
+      },
     })
   } catch (e) {}
 
@@ -282,7 +287,12 @@ export function scheduleUserContentDomainAccessCheck() {
       recordMaxAccessChecksHit()
     }
     if (remainingChecks-- <= 0) return
-    checkUserContentDomainAccess()
+    if (isSplitTestEnabled('access-check-for-old-compile-domain')) {
+      checkUserContentDomainAccess(getMeta('ol-fallbackCompileDomain')).catch(
+        () => {}
+      )
+    }
+    checkUserContentDomainAccess(getMeta('ol-compilesUserContentDomain'))
       .then(ok => {
         accessCheckPassed = ok
       })
