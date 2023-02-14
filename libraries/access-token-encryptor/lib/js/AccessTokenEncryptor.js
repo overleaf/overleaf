@@ -1,88 +1,165 @@
+const { promisify } = require('util')
 const crypto = require('crypto')
-const logger = require('@overleaf/logger')
 
 const ALGORITHM = 'aes-256-ctr'
 
-const keyFn32 = (password, salt, keyLength, callback) =>
-  crypto.pbkdf2(password, salt, 10000, 32, 'sha1', callback)
+const cryptoHkdf = promisify(crypto.hkdf)
+const cryptoPbkdf2 = promisify(crypto.pbkdf2)
+const cryptoRandomBytes = promisify(crypto.randomBytes)
+
+class AbstractAccessTokenScheme {
+  constructor(cipherLabel, cipherPassword) {
+    this.cipherLabel = cipherLabel
+    this.cipherPassword = cipherPassword
+  }
+
+  /**
+   * @param {Object} json
+   * @return {Promise<string>}
+   */
+  async encryptJson(json) {
+    throw new Error('encryptJson is not implemented')
+  }
+
+  /**
+   * @param {string} encryptedJson
+   * @return {Promise<Object>}
+   */
+  async decryptToJson(encryptedJson) {
+    throw new Error('decryptToJson is not implemented')
+  }
+}
+
+class AccessTokenSchemeWithGenericKeyFn extends AbstractAccessTokenScheme {
+  /**
+   * @param {Buffer} salt
+   * @return {Promise<Buffer>}
+   */
+  async keyFn(salt) {
+    throw new Error('keyFn is not implemented')
+  }
+
+  async encryptJson(json) {
+    const plainText = JSON.stringify(json)
+
+    const bytes = await cryptoRandomBytes(32)
+    const salt = bytes.slice(0, 16)
+    const iv = bytes.slice(16, 32)
+    const key = await this.keyFn(salt)
+
+    const cipher = crypto.createCipheriv(ALGORITHM, key, iv)
+    const cipherText =
+      cipher.update(plainText, 'utf8', 'base64') + cipher.final('base64')
+
+    return [
+      this.cipherLabel,
+      salt.toString('hex'),
+      cipherText,
+      iv.toString('hex'),
+    ].join(':')
+  }
+
+  async decryptToJson(encryptedJson) {
+    const [, salt, cipherText, iv] = encryptedJson.split(':', 4)
+    const key = await this.keyFn(Buffer.from(salt, 'hex'))
+
+    const decipher = crypto.createDecipheriv(
+      ALGORITHM,
+      key,
+      Buffer.from(iv, 'hex')
+    )
+    const plainText =
+      decipher.update(cipherText, 'base64', 'utf8') + decipher.final('utf8')
+    try {
+      return JSON.parse(plainText)
+    } catch (e) {
+      throw new Error('error decrypting token')
+    }
+  }
+}
+
+class AccessTokenSchemeV2 extends AccessTokenSchemeWithGenericKeyFn {
+  async keyFn(salt) {
+    return cryptoPbkdf2(this.cipherPassword, salt, 10000, 32, 'sha1')
+  }
+}
+
+class AccessTokenSchemeV3 extends AccessTokenSchemeWithGenericKeyFn {
+  async keyFn(salt) {
+    const optionalInfo = ''
+    return cryptoHkdf('sha512', this.cipherPassword, salt, optionalInfo, 32)
+  }
+}
 
 class AccessTokenEncryptor {
   constructor(settings) {
-    this.settings = settings
-    this.cipherLabel = this.settings.cipherLabel
-    if (this.cipherLabel && this.cipherLabel.match(/:/)) {
-      throw Error('cipherLabel must not contain a colon (:)')
+    this.schemeByCipherLabel = new Map()
+    for (const cipherLabel of Object.keys(settings.cipherPasswords)) {
+      if (!cipherLabel) {
+        throw new Error('cipherLabel cannot be empty')
+      }
+      if (cipherLabel.match(/:/)) {
+        throw new Error(
+          `cipherLabel must not contain a colon (:), got ${cipherLabel}`
+        )
+      }
+      const [cipherLabelNoVersion, version] = cipherLabel.split('-')
+      if (!version) {
+        throw new Error(
+          `cipherLabel must contain version suffix (e.g. 2042.1-v42), got ${cipherLabel}`
+        )
+      }
+
+      const cipherPassword = settings.cipherPasswords[cipherLabel]
+      if (!cipherPassword) {
+        throw new Error(`cipherPasswords['${cipherLabel}'] is missing`)
+      }
+      if (cipherPassword.length < 16) {
+        throw new Error(`cipherPasswords['${cipherLabel}'] is too short`)
+      }
+
+      let scheme, schemeNoVersion
+      switch (version) {
+        case 'v2':
+          scheme = new AccessTokenSchemeV2(cipherLabel, cipherPassword)
+          schemeNoVersion = new AccessTokenSchemeV2(
+            cipherLabelNoVersion,
+            cipherPassword
+          )
+          break
+        case 'v3':
+          scheme = new AccessTokenSchemeV3(cipherLabel, cipherPassword)
+          schemeNoVersion = new AccessTokenSchemeV3(
+            cipherLabelNoVersion,
+            cipherPassword
+          )
+          break
+        default:
+          throw new Error(`unknown version '${version}' for ${cipherLabel}`)
+      }
+      this.schemeByCipherLabel.set(cipherLabel, scheme)
+      this.schemeByCipherLabel.set(cipherLabelNoVersion, schemeNoVersion)
     }
 
-    this.cipherPassword = this.settings.cipherPasswords[this.cipherLabel]
-    if (!this.cipherPassword) {
-      throw Error('cipherPassword not set')
-    }
-    if (this.cipherPassword.length < 16) {
-      throw Error('cipherPassword too short')
+    this.defaultScheme = this.schemeByCipherLabel.get(settings.cipherLabel)
+    if (!this.defaultScheme) {
+      throw new Error(`unknown default cipherLabel ${settings.cipherLabel}`)
     }
   }
 
   encryptJson(json, callback) {
-    const string = JSON.stringify(json)
-    crypto.randomBytes(32, (err, bytes) => {
-      if (err) {
-        return callback(err)
-      }
-      const salt = bytes.slice(0, 16)
-      const iv = bytes.slice(16, 32)
-
-      keyFn32(this.cipherPassword, salt, 32, (err, key) => {
-        if (err) {
-          logger.err({ err }, 'error getting Fn key')
-          return callback(err)
-        }
-
-        const cipher = crypto.createCipheriv(ALGORITHM, key, iv)
-        const crypted =
-          cipher.update(string, 'utf8', 'base64') + cipher.final('base64')
-
-        callback(
-          null,
-          `${this.cipherLabel}:${salt.toString('hex')}:${crypted}:${iv.toString(
-            'hex'
-          )}`
-        )
-      })
-    })
+    this.defaultScheme.encryptJson(json).then(s => callback(null, s), callback)
   }
 
   decryptToJson(encryptedJson, callback) {
-    const [label, salt, cipherText, iv] = encryptedJson.split(':', 4)
-    const password = this.settings.cipherPasswords[label]
-    if (!password || password.length < 16) {
-      return callback(new Error('invalid password'))
-    }
-    if (!iv) {
-      return callback(new Error('token scheme v1 is not supported anymore'))
-    }
-
-    keyFn32(password, Buffer.from(salt, 'hex'), 32, (err, key) => {
-      let json
-      if (err) {
-        logger.err({ err }, 'error getting Fn key')
-        return callback(err)
-      }
-
-      const decipher = crypto.createDecipheriv(
-        ALGORITHM,
-        key,
-        Buffer.from(iv, 'hex')
+    const [label] = encryptedJson.split(':', 1)
+    const scheme = this.schemeByCipherLabel.get(label)
+    if (!scheme) {
+      return callback(
+        new Error('unknown access-token-encryptor label ' + label)
       )
-      const dec =
-        decipher.update(cipherText, 'base64', 'utf8') + decipher.final('utf8')
-      try {
-        json = JSON.parse(dec)
-      } catch (e) {
-        return callback(new Error('error decrypting token'))
-      }
-      callback(null, json)
-    })
+    }
+    scheme.decryptToJson(encryptedJson).then(o => callback(null, o), callback)
   }
 }
 
