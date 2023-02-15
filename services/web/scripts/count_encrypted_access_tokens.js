@@ -42,7 +42,8 @@ async function count(collectionName, paths) {
       if (!blob) continue
       // Schema: LABEL-VERSION:SALT:CIPHERTEXT:IV
       const [label] = blob.split(':')
-      const [, version] = label.split('-')
+      let [, version] = label.split('-')
+      version = version || 'v2'
 
       const key = [name, version, collectionName, path, label].join(':')
       stats[key] = (stats[key] || 0) + 1
