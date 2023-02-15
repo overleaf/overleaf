@@ -40,9 +40,9 @@ async function count(collectionName, paths) {
     for (const [name, path] of Object.entries(paths)) {
       const blob = _.get(doc, path)
       if (!blob) continue
-      // Schema: LABEL:SALT:CIPHERTEXT:IV
-      const [label, , , iv] = blob.split(':', 4)
-      const version = iv ? 'v2' : 'v1'
+      // Schema: LABEL-VERSION:SALT:CIPHERTEXT:IV
+      const [label] = blob.split(':')
+      const [, version] = label.split('-')
 
       const key = [name, version, collectionName, path, label].join(':')
       stats[key] = (stats[key] || 0) + 1
