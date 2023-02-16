@@ -484,6 +484,17 @@ describe('AuthenticationManager', function () {
 
     describe('password length', function () {
       describe('with the default password length options', function () {
+        beforeEach(function () {
+          this.metrics.inc.reset()
+        })
+
+        it('should send a metric', function () {
+          this.AuthenticationManager.validatePassword('foo')
+          expect(this.metrics.inc.calledWith('try-validate-password')).to.equal(
+            true
+          )
+        })
+
         it('should reject passwords that are too short', function () {
           const result1 = this.AuthenticationManager.validatePassword('')
           expect(result1).to.be.an.instanceOf(
@@ -694,6 +705,21 @@ describe('AuthenticationManager', function () {
         password,
         email
       )
+      expect(error).to.exist
+    })
+
+    it('should send a metric with a rounded similarity score when password is too similar to email', function () {
+      const password = 'su2oe1em3re'
+      const email = 'someuser@example.com'
+      const error = this.AuthenticationManager._validatePasswordNotTooSimilar(
+        password,
+        email
+      )
+      expect(
+        this.metrics.inc.calledWith('password-validation-similarity', 1, {
+          similarity: 0.7,
+        })
+      ).to.equal(true)
       expect(error).to.exist
     })
 

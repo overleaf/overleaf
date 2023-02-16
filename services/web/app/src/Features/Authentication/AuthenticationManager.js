@@ -171,6 +171,8 @@ const AuthenticationManager = {
       })
     }
 
+    Metrics.inc('try-validate-password')
+
     let allowAnyChars, min, max
     if (Settings.passwordStrengthOptions) {
       allowAnyChars = Settings.passwordStrengthOptions.allowAnyChars === true
@@ -380,18 +382,29 @@ const AuthenticationManager = {
     password = password.toLowerCase()
     email = email.toLowerCase()
     const stringsToCheck = [email].concat(email.split(/\W+/))
+    let largestSimilarity = 0
+    let err = null
     for (const emailPart of stringsToCheck) {
       if (!_exceedsMaximumLengthRatio(password, MAX_SIMILARITY, emailPart)) {
         const similarity = DiffHelper.stringSimilarity(password, emailPart)
+        const similarityOneDecimalPlace = Math.floor(similarity * 10) / 10
+        largestSimilarity = Math.max(
+          largestSimilarity,
+          similarityOneDecimalPlace
+        )
         if (similarity > MAX_SIMILARITY) {
           logger.warn(
             { email, emailPart, similarity, maxSimilarity: MAX_SIMILARITY },
             'Password too similar to email'
           )
-          return new Error('password is too similar to email')
+          err = new Error('password is too similar to email')
         }
       }
     }
+    Metrics.inc('password-validation-similarity', 1, {
+      similarity: largestSimilarity,
+    })
+    return err
   },
 }
 
