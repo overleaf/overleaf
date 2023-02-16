@@ -60,7 +60,7 @@ const overrides = {
   twoFactorAuthentication: {
     accessTokenEncryptorOptions: {
       cipherPasswords: {
-        '2023.1-v3': 'this-is-just-a-test-secret',
+        '2023.1-v3': 'this-is-a-weak-secret-for-tests-web-2023.1-v3',
       },
     },
   },
