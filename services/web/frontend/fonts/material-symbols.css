@@ -1,7 +1,7 @@
 @font-face {
   font-family: 'Material Symbols Rounded';
   font-style: normal;
-  font-weight: 400;
+  font-weight: 100 700;
   font-display: block;
   src: url('material-symbols/MaterialSymbolsRounded[FILL,GRAD,opsz,wght].woff2')
     format('woff2');
@@ -20,6 +20,6 @@
   white-space: nowrap;
   word-wrap: normal;
   direction: ltr;
-  -webkit-font-feature-settings: 'liga';
+  font-feature-settings: 'liga';
   -webkit-font-smoothing: antialiased;
 }
