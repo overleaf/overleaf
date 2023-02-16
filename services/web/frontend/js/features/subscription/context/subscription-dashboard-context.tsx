@@ -19,15 +19,23 @@ import { loadDisplayPriceWithTaxPromise } from '../util/recurly-pricing'
 import { isRecurlyLoaded } from '../util/is-recurly-loaded'
 
 type SubscriptionDashboardContextValue = {
+  handleCloseModal: () => void
+  handleOpenModal: (modalIdToOpen: string, planCode?: string) => void
   hasDisplayedSubscription: boolean
   institutionMemberships?: Institution[]
   managedGroupSubscriptions: ManagedGroupSubscription[]
   managedInstitutions: ManagedInstitution[]
   updateManagedInstitution: (institution: ManagedInstitution) => void
+  modalIdShown?: string
   personalSubscription?: Subscription
   plans: Plan[]
+  planCodeToChangeTo?: string
   queryingIndividualPlansData: boolean
   recurlyLoadError: boolean
+  setModalIdShown: React.Dispatch<React.SetStateAction<string | undefined>>
+  setPlanCodeToChangeTo: React.Dispatch<
+    React.SetStateAction<string | undefined>
+  >
   setRecurlyLoadError: React.Dispatch<React.SetStateAction<boolean>>
   showCancellation: boolean
   setShowCancellation: React.Dispatch<React.SetStateAction<boolean>>
@@ -44,12 +52,16 @@ export function SubscriptionDashboardProvider({
 }: {
   children: ReactNode
 }) {
+  const [modalIdShown, setModalIdShown] = useState<string | undefined>()
   const [recurlyLoadError, setRecurlyLoadError] = useState(false)
   const [showCancellation, setShowCancellation] = useState(false)
   const [showChangePersonalPlan, setShowChangePersonalPlan] = useState(false)
   const [plans, setPlans] = useState([])
   const [queryingIndividualPlansData, setQueryingIndividualPlansData] =
     useState(true)
+  const [planCodeToChangeTo, setPlanCodeToChangeTo] = useState<
+    string | undefined
+  >()
 
   const plansWithoutDisplayPrice = getMeta('ol-plans')
   const institutionMemberships = getMeta('ol-currentInstitutionsWithLicence')
@@ -111,18 +123,36 @@ export function SubscriptionDashboardProvider({
     },
     []
   )
+  const handleCloseModal = useCallback(() => {
+    setModalIdShown('')
+    setPlanCodeToChangeTo(undefined)
+  }, [setModalIdShown, setPlanCodeToChangeTo])
+
+  const handleOpenModal = useCallback(
+    (id, planCode) => {
+      setModalIdShown(id)
+      setPlanCodeToChangeTo(planCode)
+    },
+    [setModalIdShown, setPlanCodeToChangeTo]
+  )
 
   const value = useMemo<SubscriptionDashboardContextValue>(
     () => ({
+      handleCloseModal,
+      handleOpenModal,
       hasDisplayedSubscription,
       institutionMemberships,
       managedGroupSubscriptions,
       managedInstitutions,
       updateManagedInstitution,
+      modalIdShown,
       personalSubscription,
       plans,
+      planCodeToChangeTo,
       queryingIndividualPlansData,
       recurlyLoadError,
+      setModalIdShown,
+      setPlanCodeToChangeTo,
       setRecurlyLoadError,
       showCancellation,
       setShowCancellation,
@@ -130,15 +160,21 @@ export function SubscriptionDashboardProvider({
       setShowChangePersonalPlan,
     }),
     [
+      handleCloseModal,
+      handleOpenModal,
       hasDisplayedSubscription,
       institutionMemberships,
       managedGroupSubscriptions,
       managedInstitutions,
       updateManagedInstitution,
+      modalIdShown,
       personalSubscription,
       plans,
+      planCodeToChangeTo,
       queryingIndividualPlansData,
       recurlyLoadError,
+      setModalIdShown,
+      setPlanCodeToChangeTo,
       setRecurlyLoadError,
       showCancellation,
       setShowCancellation,

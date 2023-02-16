@@ -3,37 +3,33 @@ import { Plan } from '../../../../../../../../../types/subscription/plan'
 import Icon from '../../../../../../../shared/components/icon'
 import { useSubscriptionDashboardContext } from '../../../../../context/subscription-dashboard-context'
 
-function ChangeToPlanButton({ plan }: { plan: Plan }) {
+function ChangeToPlanButton({ planCode }: { planCode: string }) {
   const { t } = useTranslation()
-  // for when the user selected to change a plan, but the plan change is still pending
+  const { handleOpenModal } = useSubscriptionDashboardContext()
+
+  const handleClick = () => {
+    handleOpenModal('change-to-plan', planCode)
+  }
+
   return (
-    <form>
-      {/* todo: ng-model="plan_code" */}
-      <input type="hidden" name="plan_code" value={plan.planCode} />
-      {/* todo: handle submit changePlan */}
-      <input
-        type="submit"
-        value={t('change_to_this_plan')}
-        className="btn btn-primary"
-      />
-    </form>
+    <button className="btn btn-primary" onClick={handleClick}>
+      {t('change_to_this_plan')}
+    </button>
   )
 }
 
 function KeepCurrentPlanButton({ plan }: { plan: Plan }) {
   const { t } = useTranslation()
-  // for when the user selected to change a plan, but the plan change is still pending
+  const { handleOpenModal } = useSubscriptionDashboardContext()
+
+  const handleClick = () => {
+    handleOpenModal('keep-current-plan')
+  }
+
   return (
-    <form>
-      {/* todo: ng-model="plan_code" */}
-      <input type="hidden" name="plan_code" value={plan.planCode} />
-      {/* todo: handle submit cancelPendingPlanChange */}
-      <input
-        type="submit"
-        value={t('keep_current_plan')}
-        className="btn btn-primary"
-      />
-    </form>
+    <button className="btn btn-primary" onClick={handleClick}>
+      {t('keep_current_plan')}
+    </button>
   )
 }
 
@@ -61,7 +57,7 @@ function ChangePlanButton({ plan }: { plan: Plan }) {
       </b>
     )
   } else {
-    return <ChangeToPlanButton plan={plan} />
+    return <ChangeToPlanButton planCode={plan.planCode} />
   }
 }
 

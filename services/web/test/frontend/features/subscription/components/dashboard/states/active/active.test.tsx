@@ -1,7 +1,6 @@
 import { expect } from 'chai'
 import { fireEvent, screen } from '@testing-library/react'
 import * as eventTracking from '../../../../../../../../frontend/js/infrastructure/event-tracking'
-import { ActiveSubscription } from '../../../../../../../../frontend/js/features/subscription/components/dashboard/states/active/active'
 import { Subscription } from '../../../../../../../../types/subscription/dashboard/subscription'
 import {
   annualActiveSubscription,
@@ -11,11 +10,8 @@ import {
   trialSubscription,
 } from '../../../../fixtures/subscriptions'
 import sinon from 'sinon'
-import { plans } from '../../../../fixtures/plans'
-import {
-  cleanUpContext,
-  renderWithSubscriptionDashContext,
-} from '../../../../helpers/render-with-subscription-dash-context'
+import { cleanUpContext } from '../../../../helpers/render-with-subscription-dash-context'
+import { renderActiveSubscription } from '../../../../helpers/render-active-subscription'
 
 describe('<ActiveSubscription />', function () {
   let sendMBSpy: sinon.SinonSpy
@@ -59,19 +55,6 @@ describe('<ActiveSubscription />', function () {
 
     screen.getByRole('link', { name: 'Update Your Billing Details' })
     screen.getByRole('link', { name: 'View Your Invoices' })
-  }
-
-  function renderActiveSubscription(subscription: Subscription) {
-    const renderOptions = {
-      metaTags: [
-        { name: 'ol-plans', value: plans },
-        { name: 'ol-subscription', value: subscription },
-      ],
-    }
-    renderWithSubscriptionDashContext(
-      <ActiveSubscription subscription={subscription} />,
-      renderOptions
-    )
   }
 
   it('renders the dash annual active subscription', function () {
