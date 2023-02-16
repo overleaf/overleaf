@@ -19,11 +19,6 @@ import { Profiler } from './Profiler.js'
 
 const keys = Settings.redis.lock.key_schema
 
-const PROJECT_HISTORY = {
-  ENABLED: 'enabled',
-  NOT_ENABLED: 'not-enabled',
-}
-
 export const REDIS_READ_BATCH_SIZE = 500
 
 /**
@@ -41,25 +36,28 @@ export function getRawUpdates(projectId, batchSize, callback) {
       if (error != null) {
         return callback(OError.tag(error))
       }
-      RedisManager.parseDocUpdates(rawUpdates, (error, updates) => {
+
+      let updates
+      try {
+        updates = RedisManager.parseDocUpdates(rawUpdates)
+      } catch (error) {
+        return callback(OError.tag(error))
+      }
+
+      _getHistoryId(projectId, updates, (error, historyId) => {
         if (error != null) {
           return callback(OError.tag(error))
         }
-        _getHistoryId(projectId, updates, (error, historyId) => {
-          if (error != null) {
-            return callback(OError.tag(error))
-          }
-          HistoryStoreManager.getMostRecentChunk(
-            projectId,
-            historyId,
-            (error, chunk) => {
-              if (error != null) {
-                return callback(OError.tag(error))
-              }
-              callback(null, { project_id: projectId, chunk, updates })
+        HistoryStoreManager.getMostRecentChunk(
+          projectId,
+          historyId,
+          (error, chunk) => {
+            if (error != null) {
+              return callback(OError.tag(error))
             }
-          )
-        })
+            callback(null, { project_id: projectId, chunk, updates })
+          }
+        )
       })
     }
   )
@@ -175,16 +173,11 @@ _mocks._countAndProcessUpdates = (
         (updates, cb) => {
           _processUpdatesBatch(projectId, updates, extendLock, cb)
         },
-        (error, isProjectHistoryEnabled) => {
-          // We can error before it is known whether project history is enabled
-          // for the project, so this key has 3 values.
-          const enabled = isProjectHistoryEnabled || 'unknown'
-          // This metrics key tries to convet that processing is not atomic.
-          // Some updates may have been processed even if there was an error.
-          const success = error != null ? 'with-error' : 'without-error'
-          metrics.gauge(`updates.${enabled}.${success}`, queueSize)
-          metrics.count(`updates.${enabled}.${success}`, queueSize)
-          callback(error, queueSize)
+        error => {
+          if (error) {
+            return callback(error)
+          }
+          callback(null, queueSize)
         }
       )
     } else {
@@ -210,14 +203,14 @@ function _processUpdatesBatch(projectId, updates, extendLock, callback) {
         { projectId },
         'discarding updates as project does not use history'
       )
-      return callback(null, PROJECT_HISTORY.NOT_ENABLED)
+      return callback()
     }
 
     _processUpdates(projectId, historyId, updates, extendLock, error => {
       if (error != null) {
-        return callback(OError.tag(error), PROJECT_HISTORY.ENABLED)
+        return callback(OError.tag(error))
       }
-      callback(null, PROJECT_HISTORY.ENABLED)
+      callback()
     })
   })
 }
