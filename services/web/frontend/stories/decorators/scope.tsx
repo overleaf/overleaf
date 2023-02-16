@@ -98,7 +98,7 @@ const initialize = () => {
       findEntityByPath: () => null,
       getEntityPath: () => null,
       getRootDocDirname: () => undefined,
-      getPreviewUrlByPath: () => undefined,
+      getPreviewByPath: () => null,
     },
     editorManager: {
       getCurrentDocId: () => 'foo',

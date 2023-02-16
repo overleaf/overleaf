@@ -52,7 +52,7 @@ export function EditorProviders({
     findEntityByPath: () => null,
     getEntityPath: () => '',
     getRootDocDirname: () => '',
-    getPreviewUrlByPath: path => path,
+    getPreviewByPath: path => ({ url: path, extension: 'png' }),
   },
   editorManager = {
     getCurrentDocId: () => 'foo',
