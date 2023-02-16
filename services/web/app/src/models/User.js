@@ -167,7 +167,7 @@ const UserSchema = new Schema({
   twoFactorAuthentication: {
     createdAt: { type: Date },
     enrolledAt: { type: Date },
-    secret: { type: String },
+    secretEncrypted: { type: String },
   },
   onboardingEmailSentAt: { type: Date },
   splitTests: Schema.Types.Mixed,

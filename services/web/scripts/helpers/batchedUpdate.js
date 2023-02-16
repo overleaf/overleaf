@@ -1,18 +1,27 @@
 const { ReadPreference, ObjectId } = require('mongodb')
 const { db, waitForDb } = require('../../app/src/infrastructure/mongodb')
 
-const BATCH_DESCENDING = process.env.BATCH_DESCENDING === 'true'
-const BATCH_SIZE = parseInt(process.env.BATCH_SIZE, 10) || 1000
-const VERBOSE_LOGGING = process.env.VERBOSE_LOGGING === 'true'
+let BATCH_DESCENDING
+let BATCH_SIZE
+let VERBOSE_LOGGING
 let BATCH_LAST_ID
-if (process.env.BATCH_LAST_ID) {
-  BATCH_LAST_ID = ObjectId(process.env.BATCH_LAST_ID)
-} else if (process.env.BATCH_RANGE_START) {
-  BATCH_LAST_ID = ObjectId(process.env.BATCH_RANGE_START)
-}
 let BATCH_RANGE_END
-if (process.env.BATCH_RANGE_END) {
-  BATCH_RANGE_END = ObjectId(process.env.BATCH_RANGE_END)
+refreshGlobalOptionsForBatchedUpdate()
+
+function refreshGlobalOptionsForBatchedUpdate(options = {}) {
+  options = Object.assign({}, options, process.env)
+
+  BATCH_DESCENDING = options.BATCH_DESCENDING === 'true'
+  BATCH_SIZE = parseInt(options.BATCH_SIZE, 10) || 1000
+  VERBOSE_LOGGING = options.VERBOSE_LOGGING === 'true'
+  if (options.BATCH_LAST_ID) {
+    BATCH_LAST_ID = ObjectId(options.BATCH_LAST_ID)
+  } else if (options.BATCH_RANGE_START) {
+    BATCH_LAST_ID = ObjectId(options.BATCH_RANGE_START)
+  }
+  if (options.BATCH_RANGE_END) {
+    BATCH_RANGE_END = ObjectId(options.BATCH_RANGE_END)
+  }
 }
 
 async function getNextBatch(collection, query, maxId, projection, options) {
@@ -56,13 +65,15 @@ async function batchedUpdate(
   query,
   update,
   projection,
-  options
+  findOptions,
+  batchedUpdateOptions
 ) {
+  refreshGlobalOptionsForBatchedUpdate(batchedUpdateOptions)
   await waitForDb()
   const collection = db[collectionName]
 
-  options = options || {}
-  options.readPreference = ReadPreference.SECONDARY
+  findOptions = findOptions || {}
+  findOptions.readPreference = ReadPreference.SECONDARY
 
   projection = projection || { _id: 1 }
   let nextBatch
@@ -74,7 +85,7 @@ async function batchedUpdate(
       query,
       maxId,
       projection,
-      options
+      findOptions
     )).length
   ) {
     maxId = nextBatch[nextBatch.length - 1]._id
