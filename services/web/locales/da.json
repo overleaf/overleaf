@@ -292,7 +292,7 @@
   "edit_dictionary_empty": "Din tilpassede ordbog er tom.",
   "edit_dictionary_remove": "Fjern fra ordbog",
   "editing": "Redigering",
-  "editor_and_pdf": "Skrivevindue og PDF",
+  "editor_and_pdf": "Skrivevindue <0></0> PDF",
   "editor_disconected_click_to_reconnect": "Skriveprogrammets forbindelse afbrudt, klik hvor som helst for at forbinde igen.",
   "editor_only_hide_pdf": "Kun skrivevindue <0>(gem PDF)</0>",
   "editor_resources": "Læringsmidler til skriveprogrammet",
