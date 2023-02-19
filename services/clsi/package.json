@@ -1,5 +1,6 @@
 {
   "name": "@overleaf/clsi",
+  "version" : "0.1.4",
   "description": "A Node.js implementation of the CLSI LaTeX web-API",
   "private": true,
   "main": "app.js",

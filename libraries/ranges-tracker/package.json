@@ -1,5 +1,6 @@
 {
   "name": "@overleaf/ranges-tracker",
+  "version": "1.0.0",
   "description": "Shared logic for syncing comments and tracked changes with operational transforms",
   "main": "index.cjs",
   "files": [

@@ -1,5 +1,6 @@
 {
   "name": "@overleaf/web",
+  "version": "0.1.4",
   "description": "The HTTP front end for Overleaf",
   "private": true,
   "main": "app.js",

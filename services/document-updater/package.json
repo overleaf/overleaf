@@ -1,5 +1,6 @@
 {
   "name": "@overleaf/document-updater",
+  "version": "0.1.4",
   "description": "An API for applying incoming updates to documents in real-time",
   "private": true,
   "main": "app.js",

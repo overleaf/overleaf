@@ -1,5 +1,6 @@
 {
   "name": "@overleaf/notifications",
+  "version": "0.0.1",
   "description": "An API to handle user notifications",
   "private": true,
   "main": "app.js",

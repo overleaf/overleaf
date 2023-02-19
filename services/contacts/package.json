@@ -1,5 +1,6 @@
 {
   "name": "@overleaf/contacts",
+  "version": "0.1.0",
   "description": "An API for tracking contacts of a user",
   "private": true,
   "type": "module",

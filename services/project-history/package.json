@@ -1,5 +1,6 @@
 {
   "name": "@overleaf/project-history",
+  "version": "2.0.0",
   "description": "An API for saving and compressing individual document updates into a browseable history",
   "private": true,
   "main": "app.js",

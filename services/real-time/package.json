@@ -1,5 +1,6 @@
 {
   "name": "@overleaf/real-time",
+  "version": "0.1.4",
   "description": "The socket.io layer of Overleaf for real-time editor interactions",
   "private": true,
   "main": "app.js",

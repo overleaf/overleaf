@@ -1,5 +1,6 @@
 {
   "name": "@overleaf/docstore",
+  "version": "0.1.2",
   "description": "A CRUD API for handling text documents in projects",
   "private": true,
   "main": "app.js",

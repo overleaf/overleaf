@@ -1,5 +1,6 @@
 {
   "name": "@overleaf/filestore",
+  "version": "0.1.4",
   "description": "An API for CRUD operations on binary files stored in S3",
   "private": true,
   "main": "app.js",

@@ -1,5 +1,6 @@
 {
   "name": "@overleaf/track-changes",
+  "version": "0.1.4",
   "description": "An API for saving and compressing individual document updates into a browsable history",
   "private": true,
   "main": "app.js",
