@@ -113,6 +113,7 @@
     "@reach/tabs": "^0.15.0",
     "@replit/codemirror-emacs": "overleaf/codemirror-emacs#3f235870d4fa83069df855d6588569865c31e220",
     "@replit/codemirror-vim": "overleaf/codemirror-vim#77876ac3390f5a6642e04348c0afbe9f0878ec25",
+    "@replit/codemirror-indentation-markers": "^6.3.0",
     "@sentry/browser": "^7.8.1",
     "@uppy/core": "^1.15.0",
     "@uppy/dashboard": "^1.11.0",
