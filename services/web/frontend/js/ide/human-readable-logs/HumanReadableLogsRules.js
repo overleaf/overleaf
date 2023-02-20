@@ -1,4 +1,5 @@
 /* eslint-disable no-useless-escape */
+import packageSuggestions from './HumanReadableLogsPackageSuggestions'
 
 const rules = [
   {
@@ -44,6 +45,15 @@ const rules = [
   {
     ruleId: 'hint_undefined_control_sequence',
     regexToMatch: /Undefined control sequence/,
+    contentRegex: /^l\.[0-9]+\s*(\\\S+)/,
+    improvedTitle: (currentTitle, details) => {
+      if (details?.length && packageSuggestions.has(details[0])) {
+        const command = details[0]
+        const suggestion = packageSuggestions.get(command)
+        return `${suggestion.command} is missing.`
+      }
+      return currentTitle
+    },
   },
   {
     ruleId: 'hint_file_not_found',

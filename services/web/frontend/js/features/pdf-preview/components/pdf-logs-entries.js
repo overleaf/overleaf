@@ -53,6 +53,7 @@ function PdfLogsEntries({ entries, hasErrors }) {
           rawContent={logEntry.content}
           logType={logEntry.type}
           level={logEntry.level}
+          contentDetails={logEntry.contentDetails}
           entryAriaLabel={t('log_entry_description', {
             level: logEntry.level,
           })}

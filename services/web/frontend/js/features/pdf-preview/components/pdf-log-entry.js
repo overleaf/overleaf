@@ -19,12 +19,13 @@ function PdfLogEntry({
   showCloseButton = false,
   entryAriaLabel = null,
   customClass,
+  contentDetails,
   onSourceLocationClick,
   onClose,
 }) {
   if (ruleId && HumanReadableLogsHints[ruleId]) {
     const hint = HumanReadableLogsHints[ruleId]
-    formattedContent = hint.formattedContent
+    formattedContent = hint.formattedContent(contentDetails)
     extraInfoURL = hint.extraInfoURL
   }
 
@@ -84,6 +85,7 @@ PdfLogEntry.propTypes = {
   showSourceLocationLink: PropTypes.bool,
   showCloseButton: PropTypes.bool,
   entryAriaLabel: PropTypes.string,
+  contentDetails: PropTypes.arrayOf(PropTypes.string),
   onSourceLocationClick: PropTypes.func,
   onClose: PropTypes.func,
 }

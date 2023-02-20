@@ -35,6 +35,18 @@ export default {
             ruleDetails.newMessage
           )
         }
+        if (ruleDetails.contentRegex) {
+          const match = entry.content.match(ruleDetails.contentRegex)
+          if (match) {
+            entry.contentDetails = match.slice(1)
+          }
+        }
+        if (entry.contentDetails && ruleDetails.improvedTitle) {
+          entry.message = ruleDetails.improvedTitle(
+            entry.message,
+            entry.contentDetails
+          )
+        }
         // suppress any entries that are known to cascade from previous error types
         if (ruleDetails.cascadesFrom != null) {
           for (type of ruleDetails.cascadesFrom) {
