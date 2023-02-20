@@ -6,33 +6,20 @@ import redis from '@overleaf/redis-wrapper'
 import metrics from '@overleaf/metrics'
 import OError from '@overleaf/o-error'
 
-/**
- * Maximum size taken from the redis queue, to prevent project history
- * consuming unbounded amounts of memory
- */
-export const RAW_UPDATE_SIZE_THRESHOLD = 4 * 1024 * 1024
+// maximum size taken from the redis queue, to prevent project history
+// consuming unbounded amounts of memory
+let RAW_UPDATE_SIZE_THRESHOLD = 4 * 1024 * 1024
 
-/**
- * Batch size when reading updates from Redis
- */
-export const RAW_UPDATES_BATCH_SIZE = 50
+// maximum length of ops (insertion and deletions) to process in a single
+// iteration
+let MAX_UPDATE_OP_LENGTH = 1024
 
-/**
- * Maximum length of ops (insertion and deletions) to process in a single
- * iteration
- */
-export const MAX_UPDATE_OP_LENGTH = 1024
-
-/**
- * Warn if we exceed this raw update size, the final compressed updates we
- * send could be smaller than this
- */
+// warn if we exceed this raw update size, the final compressed updates we send
+// could be smaller than this
 const WARN_RAW_UPDATE_SIZE = 1024 * 1024
 
-/**
- * Maximum number of new docs to process in a single iteration
- */
-export const MAX_NEW_DOC_CONTENT_COUNT = 32
+// maximum number of new docs to process in a single iteration
+let MAX_NEW_DOC_CONTENT_COUNT = 32
 
 const CACHE_TTL_IN_SECONDS = 3600
 
@@ -45,31 +32,10 @@ async function countUnprocessedUpdates(projectId) {
   return updates
 }
 
-async function* getRawUpdates(projectId) {
+async function getOldestDocUpdates(projectId, batchSize) {
   const key = Keys.projectHistoryOps({ project_id: projectId })
-  let start = 0
-  while (true) {
-    const stop = start + RAW_UPDATES_BATCH_SIZE - 1
-    const updates = await rclient.lrange(key, start, stop)
-    for (const update of updates) {
-      yield update
-    }
-    if (updates.length < RAW_UPDATES_BATCH_SIZE) {
-      return
-    }
-    start += RAW_UPDATES_BATCH_SIZE
-  }
-}
-
-async function getOldestDocUpdates(projectId, maxUpdates) {
-  const rawUpdates = []
-  for await (const rawUpdate of getRawUpdates(projectId)) {
-    rawUpdates.push(rawUpdate)
-    if (rawUpdates.length >= maxUpdates) {
-      break
-    }
-  }
-  return rawUpdates
+  const updates = await rclient.lrange(key, 0, batchSize - 1)
+  return updates
 }
 
 export function parseDocUpdates(jsonUpdates) {
@@ -77,83 +43,113 @@ export function parseDocUpdates(jsonUpdates) {
 }
 
 async function getUpdatesInBatches(projectId, batchSize, runner) {
-  let currentBatch = new Batch(projectId, batchSize)
-  for await (const rawUpdate of getRawUpdates(projectId)) {
-    let update
-    try {
-      update = JSON.parse(rawUpdate)
-    } catch (error) {
-      throw OError.tag(error, 'failed to parse updates', {
-        projectId,
-        update,
-      })
+  let moreBatches = true
+
+  while (moreBatches) {
+    let rawUpdates = await getOldestDocUpdates(projectId, batchSize)
+
+    moreBatches = rawUpdates.length === batchSize
+
+    if (rawUpdates.length === 0) {
+      return
     }
 
-    const fitsInCurrentBatch = currentBatch.add(rawUpdate, update)
-    if (!fitsInCurrentBatch) {
-      const nextBatch = new Batch(projectId, batchSize)
-      nextBatch.add(rawUpdate, update)
-      await currentBatch.process(runner)
-      currentBatch = nextBatch
+    // don't process any more batches if we are single stepping
+    if (batchSize === 1) {
+      moreBatches = false
     }
-  }
-  if (!currentBatch.isEmpty()) {
-    await currentBatch.process(runner)
-  }
-}
 
-class Batch {
-  constructor(projectId, maxUpdates) {
-    this.projectId = projectId
-    this.maxUpdates = maxUpdates
-    this.rawUpdates = []
-    this.updates = []
-    this.totalRawUpdatesSize = 0
-    this.totalDocContentCount = 0
-    this.totalOpLength = 0
-  }
-
-  add(rawUpdate, update) {
-    const rawUpdateSize = rawUpdate.length
-    const docContentCount = update.resyncDocContent ? 1 : 0
-    const opLength = update?.op?.length || 1
-    if (
-      this.updates.length > 0 &&
-      (this.updates.length >= this.maxUpdates ||
-        this.totalRawUpdatesSize + rawUpdateSize > RAW_UPDATE_SIZE_THRESHOLD ||
-        this.totalDocContentCount + docContentCount >
-          MAX_NEW_DOC_CONTENT_COUNT ||
-        this.totalOpLength + opLength > MAX_UPDATE_OP_LENGTH)
-    ) {
-      return false
+    // consume the updates up to a maximum total number of bytes
+    // ensuring that at least one update will be processed (we may
+    // exceed RAW_UPDATE_SIZE_THRESHOLD is the first update is bigger
+    // than that).
+    let totalRawUpdatesSize = 0
+    const updatesToProcess = []
+    for (const rawUpdate of rawUpdates) {
+      const nextTotalSize = totalRawUpdatesSize + rawUpdate.length
+      if (
+        updatesToProcess.length > 0 &&
+        nextTotalSize > RAW_UPDATE_SIZE_THRESHOLD
+      ) {
+        // stop consuming updates if we have at least one and the
+        // next update would exceed the size threshold
+        break
+      } else {
+        updatesToProcess.push(rawUpdate)
+        totalRawUpdatesSize += rawUpdate.length
+      }
     }
-    this.rawUpdates.push(rawUpdate)
-    this.updates.push(update)
-    this.totalRawUpdatesSize += rawUpdateSize
-    this.totalDocContentCount += docContentCount
-    this.totalOpLength += opLength
-    return true
-  }
 
-  isEmpty() {
-    return this.updates.length === 0
-  }
+    // if we hit the size limit above, only process the updates up to that point
+    if (updatesToProcess.length < rawUpdates.length) {
+      moreBatches = true // process remaining raw updates in the next iteration
+      rawUpdates = updatesToProcess
+    }
 
-  async process(runner) {
-    metrics.timing('redis.incoming.bytes', this.totalRawUpdatesSize, 1)
-    if (this.totalRawUpdatesSize > WARN_RAW_UPDATE_SIZE) {
-      const rawUpdateSizes = this.rawUpdates.map(rawUpdate => rawUpdate.length)
+    metrics.timing('redis.incoming.bytes', totalRawUpdatesSize, 1)
+    if (totalRawUpdatesSize > WARN_RAW_UPDATE_SIZE) {
+      const rawUpdateSizes = rawUpdates.map(rawUpdate => rawUpdate.length)
       logger.warn(
-        {
-          projectId: this.projectId,
-          totalRawUpdatesSize: this.totalRawUpdatesSize,
-          rawUpdateSizes,
-        },
+        { projectId, totalRawUpdatesSize, rawUpdateSizes },
         'large raw update size'
       )
     }
-    await runner(this.updates)
-    await deleteAppliedDocUpdates(this.projectId, this.rawUpdates)
+
+    let updates
+    try {
+      updates = parseDocUpdates(rawUpdates)
+    } catch (error) {
+      throw OError.tag(error, 'failed to parse updates', {
+        projectId,
+        updates,
+      })
+    }
+
+    // consume the updates up to a maximum number of ops (insertions and deletions)
+    let totalOpLength = 0
+    let updatesToProcessCount = 0
+    let totalDocContentCount = 0
+    for (const parsedUpdate of updates) {
+      if (parsedUpdate.resyncDocContent) {
+        totalDocContentCount++
+      }
+      if (totalDocContentCount > MAX_NEW_DOC_CONTENT_COUNT) {
+        break
+      }
+      const nextTotalOpLength = totalOpLength + (parsedUpdate?.op?.length || 1)
+      if (
+        updatesToProcessCount > 0 &&
+        nextTotalOpLength > MAX_UPDATE_OP_LENGTH
+      ) {
+        break
+      } else {
+        totalOpLength = nextTotalOpLength
+        updatesToProcessCount++
+      }
+    }
+
+    // if we hit the op limit above, only process the updates up to that point
+    if (updatesToProcessCount < updates.length) {
+      logger.debug(
+        {
+          projectId,
+          updatesToProcessCount,
+          updates_count: updates.length,
+          totalOpLength,
+        },
+        'restricting number of ops to be processed'
+      )
+      moreBatches = true
+      // there is a 1:1 mapping between rawUpdates and updates
+      // which we need to preserve here to ensure we only
+      // delete the updates that are actually processed
+      rawUpdates = rawUpdates.slice(0, updatesToProcessCount)
+      updates = updates.slice(0, updatesToProcessCount)
+    }
+
+    logger.debug({ projectId }, 'retrieved raw updates from redis')
+    await runner(updates)
+    await deleteAppliedDocUpdates(projectId, rawUpdates)
   }
 }
 
@@ -326,6 +322,19 @@ async function setCachedHistoryId(projectId, historyId) {
 async function clearCachedHistoryId(projectId) {
   const key = Keys.projectHistoryCachedHistoryId({ project_id: projectId })
   await rclient.del(key)
+}
+
+// for tests
+export function setMaxUpdateOpLength(value) {
+  MAX_UPDATE_OP_LENGTH = value
+}
+
+export function setRawUpdateSizeThreshold(value) {
+  RAW_UPDATE_SIZE_THRESHOLD = value
+}
+
+export function setMaxNewDocContentCount(value) {
+  MAX_NEW_DOC_CONTENT_COUNT = value
 }
 
 // EXPORTS
