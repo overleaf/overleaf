@@ -9,8 +9,7 @@ describe('formatPriceForDisplayData', function () {
     window.metaAttributesCache = new Map()
   })
   it('should handle no tax rate', function () {
-    window.metaAttributesCache.set('ol-recommendedCurrency', 'USD')
-    const data = formatPriceForDisplayData('1000', 0)
+    const data = formatPriceForDisplayData('1000', 0, 'USD')
     expect(data).to.deep.equal({
       totalForDisplay: '$1000',
       totalAsNumber: 1000,
@@ -22,8 +21,7 @@ describe('formatPriceForDisplayData', function () {
   })
 
   it('should handle a tax rate', function () {
-    window.metaAttributesCache.set('ol-recommendedCurrency', 'EUR')
-    const data = formatPriceForDisplayData('380', 0.2)
+    const data = formatPriceForDisplayData('380', 0.2, 'EUR')
     expect(data).to.deep.equal({
       totalForDisplay: '€456',
       totalAsNumber: 456,
@@ -34,8 +32,7 @@ describe('formatPriceForDisplayData', function () {
   })
 
   it('should handle total with cents', function () {
-    window.metaAttributesCache.set('ol-recommendedCurrency', 'EUR')
-    const data = formatPriceForDisplayData('8', 0.2)
+    const data = formatPriceForDisplayData('8', 0.2, 'EUR')
     expect(data).to.deep.equal({
       totalForDisplay: '€9.60',
       totalAsNumber: 9.6,

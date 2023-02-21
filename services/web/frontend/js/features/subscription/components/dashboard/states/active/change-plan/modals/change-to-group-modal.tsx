@@ -98,6 +98,13 @@ export function ChangeToGroupModal() {
     setGroupPlanToChangeToCode(defaultPlanOption)
   }, [personalSubscription, setGroupPlanToChangeToCode])
 
+  function handleGetInTouchButton() {
+    handleCloseModal()
+
+    // @ts-ignore
+    $('[data-ol-contact-form-modal="contact-us"]').modal()
+  }
+
   if (
     modalIdShown !== modalId ||
     !groupPlans ||
@@ -256,10 +263,7 @@ export function ChangeToGroupModal() {
           <hr className="thin" />
           <button className="btn btn-primary btn-lg">{t('upgrade_now')}</button>
           <hr className="thin" />
-          <button
-            className="btn-inline-link"
-            data-ol-open-contact-form-for-more-than-50-licenses
-          >
+          <button className="btn-inline-link" onClick={handleGetInTouchButton}>
             <Trans i18nKey="need_more_than_x_licenses" values={{ x: 50 }} />{' '}
             {t('please_get_in_touch')}
           </button>
