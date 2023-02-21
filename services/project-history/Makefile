@@ -1,6 +1,6 @@
 # This file was auto-generated, do not edit it directly.
 # Instead run bin/update_build_scripts from
-# https://github.com/sharelatex/sharelatex-dev-environment
+# https://github.com/overleaf/internal/
 
 BUILD_NUMBER ?= local
 BRANCH_NAME ?= $(shell git rev-parse --abbrev-ref HEAD)
@@ -83,6 +83,9 @@ ifneq (,$(wildcard test/acceptance/js/scripts/pre-run))
 	$(DOCKER_COMPOSE_TEST_ACCEPTANCE) run --rm test_acceptance test/acceptance/js/scripts/pre-run
 endif
 
+benchmarks:
+	$(DOCKER_COMPOSE_TEST_ACCEPTANCE) run --rm test_acceptance npm run benchmarks
+
 build:
 	docker build --pull --tag ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) \
 		--tag gcr.io/overleaf-ops/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) \
@@ -97,4 +100,4 @@ publish:
 	docker push $(DOCKER_REPO)/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
 
 
-.PHONY: clean test test_unit test_acceptance test_clean build publish
+.PHONY: clean test test_unit test_acceptance test_clean benchmarks build publish

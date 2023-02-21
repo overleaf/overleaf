@@ -1,6 +1,6 @@
 # This file was auto-generated, do not edit it directly.
 # Instead run bin/update_build_scripts from
-# https://github.com/sharelatex/sharelatex-dev-environment
+# https://github.com/overleaf/internal/
 
 FROM node:16.17.1 as base
 
@@ -24,7 +24,7 @@ COPY services/filestore/ /overleaf/services/filestore/
 
 FROM app
 RUN mkdir -p uploads user_files template_files \
-    &&  chown node:node uploads user_files template_files
+&&  chown node:node uploads user_files template_files
 USER node
 
 CMD ["node", "--expose-gc", "app.js"]
