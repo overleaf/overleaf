@@ -17,6 +17,7 @@
 @import './editor/outline.less';
 @import './editor/logs.less';
 @import './editor/dictionary.less';
+@import './editor/compile-button.less';
 
 @ui-layout-toggler-def-height: 50px;
 @ui-resizer-size: 7px;
@@ -154,21 +155,6 @@
   overflow: hidden;
   position: relative;
   z-index: 10; // Prevent track changes showing over toolbar
-
-  .btn-recompile-group {
-    margin-right: -5px;
-    border-radius: @btn-border-radius-base 0 0 @btn-border-radius-base;
-    margin-left: 6px;
-    &.btn-recompile-group-has-changes {
-      // prettier-ignore
-      #gradient > .striped(@color: rgba(255, 255, 255, 0.2), @angle: -45deg);
-      background-size: @stripe-width @stripe-width;
-      .animation(pdf-toolbar-stripes 2s linear infinite);
-    }
-    .btn-recompile {
-      border-radius: @btn-border-radius-base 0 0 @btn-border-radius-base;
-    }
-  }
 }
 
 .loading-screen {

@@ -9,12 +9,20 @@ type OverlayProps = Omit<OverlayTriggerProps, 'overlay'> & {
   shouldUpdatePosition?: boolean // Not officially documented https://stackoverflow.com/a/43138470
 }
 
-const Tooltip: FC<{
+export type TooltipProps = {
   description: ReactNode
   id: string
   overlayProps?: OverlayProps
   tooltipProps?: BSTooltip.TooltipProps
-}> = ({ id, description, children, tooltipProps, overlayProps }) => {
+}
+
+const Tooltip: FC<TooltipProps> = ({
+  id,
+  description,
+  children,
+  tooltipProps,
+  overlayProps,
+}) => {
   return (
     <OverlayTrigger
       overlay={

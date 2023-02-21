@@ -1,9 +1,9 @@
 import { EditorProviders } from '../../helpers/editor-providers'
-import DetachCompileButton from '../../../../frontend/js/features/pdf-preview/components/detach-compile-button'
+import DetachCompileButtonWrapper from '../../../../frontend/js/features/pdf-preview/components/detach-compile-button-wrapper'
 import { mockScope } from './scope'
 import { testDetachChannel } from '../../helpers/detach-channel'
 
-describe('<DetachCompileButton/>', function () {
+describe('<DetachCompileButtonWrapper />', function () {
   beforeEach(function () {
     cy.interceptCompile()
     cy.interceptEvents()
@@ -22,7 +22,7 @@ describe('<DetachCompileButton/>', function () {
 
     cy.mount(
       <EditorProviders scope={scope}>
-        <DetachCompileButton />
+        <DetachCompileButtonWrapper />
       </EditorProviders>
     )
 
@@ -38,7 +38,7 @@ describe('<DetachCompileButton/>', function () {
 
     cy.mount(
       <EditorProviders scope={scope}>
-        <DetachCompileButton />
+        <DetachCompileButtonWrapper />
       </EditorProviders>
     )
 
@@ -61,7 +61,7 @@ describe('<DetachCompileButton/>', function () {
 
     cy.mount(
       <EditorProviders scope={scope}>
-        <DetachCompileButton />
+        <DetachCompileButtonWrapper />
       </EditorProviders>
     )
 

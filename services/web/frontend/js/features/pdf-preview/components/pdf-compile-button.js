@@ -1,12 +1,12 @@
-import { Dropdown, MenuItem } from 'react-bootstrap'
-import Icon from '../../../shared/components/icon'
-import ControlledDropdown from '../../../shared/components/controlled-dropdown'
 import { useTranslation } from 'react-i18next'
 import { memo } from 'react'
-import classnames from 'classnames'
+import classNames from 'classnames'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import { useStopOnFirstError } from '../../../shared/hooks/use-stop-on-first-error'
-import PdfCompileButtonInner from './pdf-compile-button-inner'
+import SplitMenu from '../../../shared/components/split-menu'
+import Icon from '../../../shared/components/icon'
+
+const modifierKey = /Mac/i.test(navigator.platform) ? 'Cmd' : 'Ctrl'
 
 function PdfCompileButton() {
   const {
@@ -30,100 +30,115 @@ function PdfCompileButton() {
 
   const { t } = useTranslation()
 
+  const compileButtonLabel = compiling ? `${t('compiling')}…` : t('recompile')
+  const tooltipElement = (
+    <>
+      {t('recompile_pdf')}{' '}
+      <span className="keyboard-shortcut">({modifierKey} + Enter)</span>
+    </>
+  )
+
+  const dropdownToggleClassName = classNames({
+    'detach-compile-button-animate': animateCompileDropdownArrow,
+    'btn-striped-animated': hasChanges,
+  })
+
+  const buttonClassName = classNames({
+    'btn-striped-animated': hasChanges,
+  })
+
   return (
-    <ControlledDropdown
-      className={classnames({
-        'toolbar-item': true,
-        'btn-recompile-group': true,
-        'btn-recompile-group-has-changes': hasChanges,
-      })}
-      id="pdf-recompile-dropdown"
+    <SplitMenu
+      bsStyle="primary"
+      bsSize="xs"
+      disabled={compiling}
+      button={{
+        tooltip: {
+          description: tooltipElement,
+          id: 'logs-toggle',
+          tooltipProps: { className: 'keyboard-tooltip' },
+          overlayProps: { delayShow: 500 },
+        },
+        icon: { type: 'refresh', spin: compiling },
+        onClick: () => startCompile(),
+        text: compileButtonLabel,
+        className: buttonClassName,
+      }}
+      dropdownToggle={{
+        'aria-label': t('toggle_compile_options_menu'),
+        handleAnimationEnd: () => setAnimateCompileDropdownArrow(false),
+        className: dropdownToggleClassName,
+      }}
+      dropdown={{
+        id: 'pdf-recompile-dropdown',
+      }}
     >
-      <PdfCompileButtonInner
-        startCompile={startCompile}
-        compiling={compiling}
-      />
+      <SplitMenu.Item header>{t('auto_compile')}</SplitMenu.Item>
 
-      <Dropdown.Toggle
-        aria-label={t('toggle_compile_options_menu')}
-        className={classnames({
-          'btn-recompile': true,
-          'btn-recompile-animate': animateCompileDropdownArrow,
-        })}
-        bsStyle="primary"
-        onAnimationEnd={() => {
-          setAnimateCompileDropdownArrow(false)
-        }}
-      />
+      <SplitMenu.Item onSelect={() => setAutoCompile(true)}>
+        <Icon type={autoCompile ? 'check' : ''} fw />
+        {t('on')}
+      </SplitMenu.Item>
 
-      <Dropdown.Menu>
-        <MenuItem header>{t('auto_compile')}</MenuItem>
+      <SplitMenu.Item onSelect={() => setAutoCompile(false)}>
+        <Icon type={!autoCompile ? 'check' : ''} fw />
+        {t('off')}
+      </SplitMenu.Item>
 
-        <MenuItem onSelect={() => setAutoCompile(true)}>
-          <Icon type={autoCompile ? 'check' : ''} fw />
-          {t('on')}
-        </MenuItem>
+      <SplitMenu.Item header>{t('compile_mode')}</SplitMenu.Item>
 
-        <MenuItem onSelect={() => setAutoCompile(false)}>
-          <Icon type={!autoCompile ? 'check' : ''} fw />
-          {t('off')}
-        </MenuItem>
+      <SplitMenu.Item onSelect={() => setDraft(false)}>
+        <Icon type={!draft ? 'check' : ''} fw />
+        {t('normal')}
+      </SplitMenu.Item>
 
-        <MenuItem header>{t('compile_mode')}</MenuItem>
+      <SplitMenu.Item onSelect={() => setDraft(true)}>
+        <Icon type={draft ? 'check' : ''} fw />
+        {t('fast')} <span className="subdued">[draft]</span>
+      </SplitMenu.Item>
 
-        <MenuItem onSelect={() => setDraft(false)}>
-          <Icon type={!draft ? 'check' : ''} fw />
-          {t('normal')}
-        </MenuItem>
+      <SplitMenu.Item header>Syntax Checks</SplitMenu.Item>
 
-        <MenuItem onSelect={() => setDraft(true)}>
-          <Icon type={draft ? 'check' : ''} fw />
-          {t('fast')} <span className="subdued">[draft]</span>
-        </MenuItem>
+      <SplitMenu.Item onSelect={() => setStopOnValidationError(true)}>
+        <Icon type={stopOnValidationError ? 'check' : ''} fw />
+        {t('stop_on_validation_error')}
+      </SplitMenu.Item>
 
-        <MenuItem header>Syntax Checks</MenuItem>
+      <SplitMenu.Item onSelect={() => setStopOnValidationError(false)}>
+        <Icon type={!stopOnValidationError ? 'check' : ''} fw />
+        {t('ignore_validation_errors')}
+      </SplitMenu.Item>
 
-        <MenuItem onSelect={() => setStopOnValidationError(true)}>
-          <Icon type={stopOnValidationError ? 'check' : ''} fw />
-          {t('stop_on_validation_error')}
-        </MenuItem>
+      <SplitMenu.Item header>{t('compile_error_handling')}</SplitMenu.Item>
 
-        <MenuItem onSelect={() => setStopOnValidationError(false)}>
-          <Icon type={!stopOnValidationError ? 'check' : ''} fw />
-          {t('ignore_validation_errors')}
-        </MenuItem>
+      <SplitMenu.Item onSelect={enableStopOnFirstError}>
+        <Icon type={stopOnFirstError ? 'check' : ''} fw />
+        {t('stop_on_first_error')}
+      </SplitMenu.Item>
 
-        <MenuItem header>{t('compile_error_handling')}</MenuItem>
+      <SplitMenu.Item onSelect={disableStopOnFirstError}>
+        <Icon type={!stopOnFirstError ? 'check' : ''} fw />
+        {t('try_to_compile_despite_errors')}
+      </SplitMenu.Item>
 
-        <MenuItem onSelect={enableStopOnFirstError}>
-          <Icon type={stopOnFirstError ? 'check' : ''} fw />
-          {t('stop_on_first_error')}
-        </MenuItem>
+      <SplitMenu.Item divider />
 
-        <MenuItem onSelect={disableStopOnFirstError}>
-          <Icon type={!stopOnFirstError ? 'check' : ''} fw />
-          {t('try_to_compile_despite_errors')}
-        </MenuItem>
+      <SplitMenu.Item
+        onSelect={() => stopCompile()}
+        disabled={!compiling}
+        aria-disabled={!compiling}
+      >
+        {t('stop_compile')}
+      </SplitMenu.Item>
 
-        <MenuItem divider />
-
-        <MenuItem
-          onSelect={() => stopCompile()}
-          disabled={!compiling}
-          aria-disabled={!compiling}
-        >
-          {t('stop_compile')}
-        </MenuItem>
-
-        <MenuItem
-          onSelect={() => recompileFromScratch()}
-          disabled={compiling}
-          aria-disabled={compiling}
-        >
-          {t('recompile_from_scratch')}
-        </MenuItem>
-      </Dropdown.Menu>
-    </ControlledDropdown>
+      <SplitMenu.Item
+        onSelect={() => recompileFromScratch()}
+        disabled={compiling}
+        aria-disabled={compiling}
+      >
+        {t('recompile_from_scratch')}
+      </SplitMenu.Item>
+    </SplitMenu>
   )
 }
 

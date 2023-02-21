@@ -595,10 +595,13 @@
   }
 
   &[data-ol-loading='true'] {
-    // use the default state colors when in a loading state
-    color: @btn-bordered-color!important;
-    background-color: @btn-bordered-background-color!important;
-    border-color: @btn-bordered-border-color!important;
+    &,
+    &:hover {
+      // use the default state colors when in a loading state
+      color: @btn-bordered-color!important;
+      background-color: @btn-bordered-background-color!important;
+      border-color: @btn-bordered-border-color!important;
+    }
   }
 }
 
@@ -651,10 +654,13 @@
   }
 
   &[data-ol-loading='true'] {
-    // use the default state colors when in a loading state
-    color: @btn-borderless-color!important;
-    background-color: @btn-borderless-background-color!important;
-    border-color: @btn-borderless-border-color!important;
+    &,
+    &:hover {
+      // use the default state colors when in a loading state
+      color: @btn-borderless-color!important;
+      background-color: @btn-borderless-background-color!important;
+      border-color: @btn-borderless-border-color;
+    }
   }
 }
 

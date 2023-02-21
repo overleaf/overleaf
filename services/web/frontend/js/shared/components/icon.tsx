@@ -8,7 +8,7 @@ type IconOwnProps = {
   accessibilityLabel?: string
 }
 
-type IconProps = IconOwnProps &
+export type IconProps = IconOwnProps &
   Omit<React.ComponentProps<'i'>, keyof IconOwnProps>
 
 function Icon({
