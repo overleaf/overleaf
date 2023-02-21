@@ -2,9 +2,10 @@ import { useTranslation } from 'react-i18next'
 import LoadingSpinner from '../../../../../../../shared/components/loading-spinner'
 import { useSubscriptionDashboardContext } from '../../../../../context/subscription-dashboard-context'
 import { ChangeToGroupPlan } from './change-to-group-plan'
-import { ConfirmChangePlanModal } from './confirm-change-plan-modal'
+import { ConfirmChangePlanModal } from './modals/confirm-change-plan-modal'
 import { IndividualPlansTable } from './individual-plans-table'
-import { KeepCurrentPlanModal } from './keep-current-plan-modal'
+import { KeepCurrentPlanModal } from './modals/keep-current-plan-modal'
+import { ChangeToGroupModal } from './modals/change-to-group-modal'
 
 export function ChangePlan() {
   const { t } = useTranslation()
@@ -32,6 +33,7 @@ export function ChangePlan() {
         <ChangeToGroupPlan />
         <ConfirmChangePlanModal />
         <KeepCurrentPlanModal />
+        <ChangeToGroupModal />
       </>
     )
   }

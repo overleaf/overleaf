@@ -1,6 +1,6 @@
 import { ActiveSubscription } from '../../../../../frontend/js/features/subscription/components/dashboard/states/active/active'
 import { Subscription } from '../../../../../types/subscription/dashboard/subscription'
-import { plans } from '../fixtures/plans'
+import { groupPlans, plans } from '../fixtures/plans'
 import { renderWithSubscriptionDashContext } from './render-with-subscription-dash-context'
 
 export function renderActiveSubscription(
@@ -11,6 +11,10 @@ export function renderActiveSubscription(
     metaTags: [
       ...tags,
       { name: 'ol-plans', value: plans },
+      {
+        name: 'ol-groupPlans',
+        value: groupPlans,
+      },
       { name: 'ol-subscription', value: subscription },
       {
         name: 'ol-recommendedCurrency',

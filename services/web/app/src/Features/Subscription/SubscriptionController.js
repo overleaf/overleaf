@@ -289,6 +289,15 @@ async function userSubscriptionPage(req, res) {
   }
 }
 
+function formatGroupPlansDataForDash() {
+  return {
+    plans: [...groupPlanModalOptions.plan_codes],
+    sizes: [...groupPlanModalOptions.sizes],
+    usages: [...groupPlanModalOptions.usages],
+    priceByUsageTypeAndSize: JSON.parse(JSON.stringify(GroupPlansData)),
+  }
+}
+
 /**
  * @param {import("express").Request} req
  * @param {import("express").Response} res
@@ -327,11 +336,12 @@ async function _userSubscriptionReactPage(req, res) {
 
   const cancelButtonNewCopy = cancelButtonAssignment?.variant === 'new-copy'
 
+  const groupPlansDataForDash = formatGroupPlansDataForDash()
+
   const data = {
     title: 'your_subscription',
     plans: plansData?.plans,
     planCodesChangingAtTermEnd: plansData?.planCodesChangingAtTermEnd,
-    groupPlans: GroupPlansData,
     user,
     hasSubscription,
     fromPlansPage,
@@ -342,8 +352,8 @@ async function _userSubscriptionReactPage(req, res) {
     managedPublishers,
     v1SubscriptionStatus,
     currentInstitutionsWithLicence,
-    groupPlanModalOptions,
     cancelButtonNewCopy,
+    groupPlans: groupPlansDataForDash,
   }
   res.render('subscriptions/dashboard-react', data)
 }

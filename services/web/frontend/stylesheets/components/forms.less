@@ -32,6 +32,16 @@ label {
   display: inline-block;
   margin-bottom: 5px;
   font-weight: bold;
+
+  // also update .legend-as-label if changes are made to label
+}
+
+.legend-as-label {
+  // display a legend like a label
+  &:extend(label);
+  font-size: @font-size-base;
+  color: @text-color;
+  border: 0;
 }
 
 // Normalize form controls

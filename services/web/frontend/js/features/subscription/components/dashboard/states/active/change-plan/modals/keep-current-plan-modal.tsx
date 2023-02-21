@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { Modal } from 'react-bootstrap'
 import { useTranslation, Trans } from 'react-i18next'
-import { postJSON } from '../../../../../../../infrastructure/fetch-json'
-import AccessibleModal from '../../../../../../../shared/components/accessible-modal'
-import { useSubscriptionDashboardContext } from '../../../../../context/subscription-dashboard-context'
-import { cancelPendingSubscriptionChangeUrl } from '../../../../../data/subscription-url'
+import { SubscriptionDashModalIds } from '../../../../../../../../../../types/subscription/dashboard/modal-ids'
+import { postJSON } from '../../../../../../../../infrastructure/fetch-json'
+import AccessibleModal from '../../../../../../../../shared/components/accessible-modal'
+import { useSubscriptionDashboardContext } from '../../../../../../context/subscription-dashboard-context'
+import { cancelPendingSubscriptionChangeUrl } from '../../../../../../data/subscription-url'
 
 export function KeepCurrentPlanModal() {
-  const modalId = 'keep-current-plan'
+  const modalId: SubscriptionDashModalIds = 'keep-current-plan'
   const [error, setError] = useState(false)
   const [inflight, setInflight] = useState(false)
   const { t } = useTranslation()

@@ -17,22 +17,36 @@ import { Institution } from '../../../../../types/institution'
 import getMeta from '../../../utils/meta'
 import { loadDisplayPriceWithTaxPromise } from '../util/recurly-pricing'
 import { isRecurlyLoaded } from '../util/is-recurly-loaded'
+import { SubscriptionDashModalIds } from '../../../../../types/subscription/dashboard/modal-ids'
 
 type SubscriptionDashboardContextValue = {
+  groupPlanToChangeToCode?: string
+  groupPlanToChangeToSize: string
+  groupPlanToChangeToUsage?: string
   handleCloseModal: () => void
-  handleOpenModal: (modalIdToOpen: string, planCode?: string) => void
+  handleOpenModal: (
+    modalIdToOpen: SubscriptionDashModalIds,
+    planCode?: string
+  ) => void
   hasDisplayedSubscription: boolean
   institutionMemberships?: Institution[]
   managedGroupSubscriptions: ManagedGroupSubscription[]
   managedInstitutions: ManagedInstitution[]
   updateManagedInstitution: (institution: ManagedInstitution) => void
-  modalIdShown?: string
+  modalIdShown?: SubscriptionDashModalIds
   personalSubscription?: Subscription
   plans: Plan[]
   planCodeToChangeTo?: string
   queryingIndividualPlansData: boolean
   recurlyLoadError: boolean
-  setModalIdShown: React.Dispatch<React.SetStateAction<string | undefined>>
+  setGroupPlanToChangeToCode: React.Dispatch<
+    React.SetStateAction<string | undefined>
+  >
+  setGroupPlanToChangeToSize: React.Dispatch<React.SetStateAction<string>>
+  setGroupPlanToChangeToUsage: React.Dispatch<React.SetStateAction<string>>
+  setModalIdShown: React.Dispatch<
+    React.SetStateAction<SubscriptionDashModalIds | undefined>
+  >
   setPlanCodeToChangeTo: React.Dispatch<
     React.SetStateAction<string | undefined>
   >
@@ -52,7 +66,9 @@ export function SubscriptionDashboardProvider({
 }: {
   children: ReactNode
 }) {
-  const [modalIdShown, setModalIdShown] = useState<string | undefined>()
+  const [modalIdShown, setModalIdShown] = useState<
+    SubscriptionDashModalIds | undefined
+  >()
   const [recurlyLoadError, setRecurlyLoadError] = useState(false)
   const [showCancellation, setShowCancellation] = useState(false)
   const [showChangePersonalPlan, setShowChangePersonalPlan] = useState(false)
@@ -62,6 +78,12 @@ export function SubscriptionDashboardProvider({
   const [planCodeToChangeTo, setPlanCodeToChangeTo] = useState<
     string | undefined
   >()
+  const [groupPlanToChangeToSize, setGroupPlanToChangeToSize] = useState('10')
+  const [groupPlanToChangeToCode, setGroupPlanToChangeToCode] = useState<
+    string | undefined
+  >()
+  const [groupPlanToChangeToUsage, setGroupPlanToChangeToUsage] =
+    useState('enterprise')
 
   const plansWithoutDisplayPrice = getMeta('ol-plans')
   const institutionMemberships = getMeta('ol-currentInstitutionsWithLicence')
@@ -124,7 +146,7 @@ export function SubscriptionDashboardProvider({
     []
   )
   const handleCloseModal = useCallback(() => {
-    setModalIdShown('')
+    setModalIdShown(undefined)
     setPlanCodeToChangeTo(undefined)
   }, [setModalIdShown, setPlanCodeToChangeTo])
 
@@ -138,6 +160,9 @@ export function SubscriptionDashboardProvider({
 
   const value = useMemo<SubscriptionDashboardContextValue>(
     () => ({
+      groupPlanToChangeToCode,
+      groupPlanToChangeToSize,
+      groupPlanToChangeToUsage,
       handleCloseModal,
       handleOpenModal,
       hasDisplayedSubscription,
@@ -151,6 +176,9 @@ export function SubscriptionDashboardProvider({
       planCodeToChangeTo,
       queryingIndividualPlansData,
       recurlyLoadError,
+      setGroupPlanToChangeToCode,
+      setGroupPlanToChangeToSize,
+      setGroupPlanToChangeToUsage,
       setModalIdShown,
       setPlanCodeToChangeTo,
       setRecurlyLoadError,
@@ -160,6 +188,9 @@ export function SubscriptionDashboardProvider({
       setShowChangePersonalPlan,
     }),
     [
+      groupPlanToChangeToCode,
+      groupPlanToChangeToSize,
+      groupPlanToChangeToUsage,
       handleCloseModal,
       handleOpenModal,
       hasDisplayedSubscription,
@@ -173,6 +204,9 @@ export function SubscriptionDashboardProvider({
       planCodeToChangeTo,
       queryingIndividualPlansData,
       recurlyLoadError,
+      setGroupPlanToChangeToCode,
+      setGroupPlanToChangeToSize,
+      setGroupPlanToChangeToUsage,
       setModalIdShown,
       setPlanCodeToChangeTo,
       setRecurlyLoadError,

@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { ChangePlan } from '../../../../../../../../../frontend/js/features/subscription/components/dashboard/states/active/change-plan/change-plan'
-import { plans } from '../../../../../fixtures/plans'
+import { groupPlans, plans } from '../../../../../fixtures/plans'
 import {
   annualActiveSubscription,
   pendingSubscriptionChange,
@@ -320,6 +320,106 @@ describe('<ChangePlan />', function () {
           .getByRole('button', { name: 'Revert scheduled plan change' })
           .getAttribute('disabled')
       ).to.not.exist
+    })
+  })
+
+  describe('Change to group plan modal', function () {
+    const standardPlanCollaboratorText = '10 collaborators per project'
+    const professionalPlanCollaboratorText = 'Unlimited collaborators'
+    it('open group plan modal "Change to a group plan" clicked', async function () {
+      renderActiveSubscription(annualActiveSubscription)
+
+      const button = screen.getByRole('button', { name: 'Change plan' })
+      fireEvent.click(button)
+
+      const buttonGroupModal = await screen.findByRole('button', {
+        name: 'Change to a group plan',
+      })
+      fireEvent.click(buttonGroupModal)
+
+      const modal = await screen.findByRole('dialog')
+
+      within(modal).getByText('Customize your group subscription')
+      within(modal).getByText('Save 30% or more')
+      within(modal).getByText('Each user will have access to:')
+      within(modal).getByText('All premium features')
+      within(modal).getByText('Sync with Dropbox and GitHub')
+      within(modal).getByText('Full document history')
+      within(modal).getByText('plus more')
+
+      within(modal).getByText(standardPlanCollaboratorText)
+      expect(within(modal).queryByText(professionalPlanCollaboratorText)).to.be
+        .null
+
+      const plans = within(modal).getByRole('group')
+      const planOptions = within(plans).getAllByRole('radio')
+      expect(planOptions.length).to.equal(groupPlans.plans.length)
+
+      const sizeSelect = within(modal).getByRole('combobox')
+      const sizeOption = within(sizeSelect).getAllByRole('option')
+      expect(sizeOption.length).to.equal(groupPlans.sizes.length)
+      within(modal).getByText(
+        'Overleaf offers a 40% educational discount for groups of 10 or more.'
+      )
+
+      within(modal).getByRole('checkbox')
+      within(modal).getByText(
+        'This license is for educational purposes (applies to students or faculty using Overleaf for teaching)'
+      )
+
+      within(modal).getByText(
+        'Your new subscription will be billed immediately to your current payment method.'
+      )
+
+      within(modal).getByRole('button', { name: 'Upgrade Now' })
+
+      within(modal).getByRole('button', {
+        name: 'Need more than 50 licenses? Please get in touch',
+      })
+    })
+
+    it('changes the collaborator count when the plan changes', async function () {
+      renderActiveSubscription(annualActiveSubscription)
+
+      const button = screen.getByRole('button', { name: 'Change plan' })
+      fireEvent.click(button)
+
+      const buttonGroupModal = await screen.findByRole('button', {
+        name: 'Change to a group plan',
+      })
+      fireEvent.click(buttonGroupModal)
+
+      const modal = await screen.findByRole('dialog')
+      const professionalPlanOption =
+        within(modal).getByLabelText('Professional')
+      fireEvent.click(professionalPlanOption)
+
+      within(modal).getByText(professionalPlanCollaboratorText)
+      expect(within(modal).queryByText(standardPlanCollaboratorText)).to.be.null
+    })
+
+    it('shows educational discount applied when input checked', async function () {
+      const discountAppliedText = '40% educational discount applied!'
+      const discountNotAppliedText =
+        'The educational discount is available for groups of 10 or more'
+      renderActiveSubscription(annualActiveSubscription)
+
+      const button = screen.getByRole('button', { name: 'Change plan' })
+      fireEvent.click(button)
+
+      const buttonGroupModal = await screen.findByRole('button', {
+        name: 'Change to a group plan',
+      })
+      fireEvent.click(buttonGroupModal)
+
+      const modal = await screen.findByRole('dialog')
+
+      const educationInput = within(modal).getByLabelText(
+        'This license is for educational purposes (applies to students or faculty using Overleaf for teaching)'
+      )
+      fireEvent.click(educationInput)
+      within(modal).getByText(discountAppliedText)
+      expect(within(modal).queryByText(discountNotAppliedText)).to.be.null
     })
   })
 })

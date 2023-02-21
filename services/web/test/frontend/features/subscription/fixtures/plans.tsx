@@ -1,3 +1,4 @@
+import { GroupPlans } from '../../../../../types/subscription/dashboard/group-plans'
 import { Plan } from '../../../../../types/subscription/plan'
 
 const features = {
@@ -213,3 +214,17 @@ export const plans = [
   ...individualMonthlyPlans,
   ...individualAnnualPlans,
 ]
+
+export const groupPlans: GroupPlans = {
+  plans: [
+    {
+      display: 'Standard',
+      code: 'collaborator',
+    },
+    {
+      display: 'Professional',
+      code: 'professional',
+    },
+  ],
+  sizes: ['2', '3', '4', '5', '10', '20', '50'],
+}
