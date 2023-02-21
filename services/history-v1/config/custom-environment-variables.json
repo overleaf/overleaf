@@ -39,9 +39,6 @@
     "bucket": "OVERLEAF_EDITOR_ZIPS_BUCKET",
     "zipTimeoutMs": "ZIP_STORE_ZIP_TIMEOUT_MS"
   },
-  "analytics": {
-    "bucket": "OVERLEAF_EDITOR_ANALYTICS_BUCKET"
-  },
   "mongo": {
     "uri": "MONGO_CONNECTION_STRING"
   },

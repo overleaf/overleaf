@@ -24,9 +24,6 @@
   "zipStore": {
     "bucket": "overleaf-development-zips"
   },
-  "analytics": {
-    "bucket": "overleaf-development-analytics"
-  },
   "useDeleteObjects": "false",
   "mongo": {
     "uri": "mongodb://mongo:27017/sharelatex"

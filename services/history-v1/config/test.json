@@ -21,9 +21,6 @@
   "zipStore": {
     "bucket": "overleaf-test-zips"
   },
-  "analytics": {
-    "bucket": "overleaf-test-analytics"
-  },
   "maxDeleteKeys": "3",
   "useDeleteObjects": "false",
   "mongo": {

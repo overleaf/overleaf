@@ -29,9 +29,6 @@
     "bucket": "SHARELATEX_HISTORY_ZIPS_BUCKET",
     "zipTimeoutMs": "ZIP_STORE_ZIP_TIMEOUT_MS"
   },
-  "analytics": {
-    "bucket": "SHARELATEX_HISTORY_ANALYTICS_BUCKET"
-  },
   "mongo": {
     "uri": "MONGO_CONNECTION_STRING"
   },

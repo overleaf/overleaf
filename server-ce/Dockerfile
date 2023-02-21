@@ -95,7 +95,6 @@ ENV SHARELATEX_HISTORY_BLOBS_BUCKET "/var/lib/sharelatex/data/history/overleaf-b
 ENV SHARELATEX_HISTORY_PROJECT_BLOBS_BUCKET "/var/lib/sharelatex/data/history/overleaf-project-blobs"
 ENV SHARELATEX_HISTORY_CHUNKS_BUCKET "/var/lib/sharelatex/data/history/overleaf-chunks"
 ENV SHARELATEX_HISTORY_ZIPS_BUCKET "/var/lib/sharelatex/data/history/overleaf-zips"
-ENV SHARELATEX_HISTORY_ANALYTICS_BUCKET "/var/lib/sharelatex/data/history/overleaf-analytics"
 
 # Phusion Image timeouts before sending SIGKILL to processes
 # ----------------------------------------------------------
