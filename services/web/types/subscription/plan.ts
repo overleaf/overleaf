@@ -28,3 +28,12 @@ export type Plan = {
   planCode: string
   price_in_cents: number
 }
+
+export type PriceForDisplayData = {
+  totalForDisplay: string
+  totalAsNumber: number
+  subtotal: string
+  tax: string
+  includesTax: boolean
+  perUserDisplayPrice?: string
+}

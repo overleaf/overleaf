@@ -228,3 +228,202 @@ export const groupPlans: GroupPlans = {
   ],
   sizes: ['2', '3', '4', '5', '10', '20', '50'],
 }
+
+export const groupPriceByUsageTypeAndSize = {
+  educational: {
+    professional: {
+      EUR: {
+        '2': {
+          price_in_cents: 51600,
+        },
+        '3': {
+          price_in_cents: 77400,
+        },
+        '4': {
+          price_in_cents: 103200,
+        },
+        '5': {
+          price_in_cents: 129000,
+        },
+        '10': {
+          price_in_cents: 143000,
+        },
+        '20': {
+          price_in_cents: 264000,
+        },
+        '50': {
+          price_in_cents: 605000,
+        },
+      },
+      USD: {
+        '2': {
+          price_in_cents: 55800,
+        },
+        '3': {
+          price_in_cents: 83700,
+        },
+        '4': {
+          price_in_cents: 111600,
+        },
+        '5': {
+          price_in_cents: 139500,
+        },
+        '10': {
+          price_in_cents: 155000,
+        },
+        '20': {
+          price_in_cents: 286000,
+        },
+        '50': {
+          price_in_cents: 655000,
+        },
+      },
+    },
+    collaborator: {
+      EUR: {
+        '2': {
+          price_in_cents: 25000,
+        },
+        '3': {
+          price_in_cents: 37500,
+        },
+        '4': {
+          price_in_cents: 50000,
+        },
+        '5': {
+          price_in_cents: 62500,
+        },
+        '10': {
+          price_in_cents: 69000,
+        },
+        '20': {
+          price_in_cents: 128000,
+        },
+        '50': {
+          price_in_cents: 295000,
+        },
+      },
+      USD: {
+        '2': {
+          price_in_cents: 27800,
+        },
+        '3': {
+          price_in_cents: 41700,
+        },
+        '4': {
+          price_in_cents: 55600,
+        },
+        '5': {
+          price_in_cents: 69500,
+        },
+        '10': {
+          price_in_cents: 77000,
+        },
+        '20': {
+          price_in_cents: 142000,
+        },
+        '50': {
+          price_in_cents: 325000,
+        },
+      },
+    },
+  },
+  enterprise: {
+    professional: {
+      EUR: {
+        '2': {
+          price_in_cents: 51600,
+        },
+        '3': {
+          price_in_cents: 77400,
+        },
+        '4': {
+          price_in_cents: 103200,
+        },
+        '5': {
+          price_in_cents: 129000,
+        },
+        '10': {
+          price_in_cents: 239000,
+        },
+        '20': {
+          price_in_cents: 442000,
+        },
+        '50': {
+          price_in_cents: 1010000,
+        },
+      },
+      USD: {
+        '2': {
+          price_in_cents: 55800,
+        },
+        '3': {
+          price_in_cents: 83700,
+        },
+        '4': {
+          price_in_cents: 111600,
+        },
+        '5': {
+          price_in_cents: 139500,
+        },
+        '10': {
+          price_in_cents: 259000,
+        },
+        '20': {
+          price_in_cents: 478000,
+        },
+        '50': {
+          price_in_cents: 1095000,
+        },
+      },
+    },
+    collaborator: {
+      EUR: {
+        '2': {
+          price_in_cents: 25000,
+        },
+        '3': {
+          price_in_cents: 37500,
+        },
+        '4': {
+          price_in_cents: 50000,
+        },
+        '5': {
+          price_in_cents: 62500,
+        },
+        '10': {
+          price_in_cents: 116000,
+        },
+        '20': {
+          price_in_cents: 214000,
+        },
+        '50': {
+          price_in_cents: 490000,
+        },
+      },
+      USD: {
+        '2': {
+          price_in_cents: 27800,
+        },
+        '3': {
+          price_in_cents: 41700,
+        },
+        '4': {
+          price_in_cents: 55600,
+        },
+        '5': {
+          price_in_cents: 69500,
+        },
+        '10': {
+          price_in_cents: 129000,
+        },
+        '20': {
+          price_in_cents: 238000,
+        },
+        '50': {
+          price_in_cents: 545000,
+        },
+      },
+    },
+  },
+}

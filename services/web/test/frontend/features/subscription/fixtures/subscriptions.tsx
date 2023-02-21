@@ -51,6 +51,83 @@ export const annualActiveSubscription: Subscription = {
   },
 }
 
+export const annualActiveSubscriptionEuro: Subscription = {
+  manager_ids: ['abc123'],
+  member_ids: [],
+  invited_emails: [],
+  groupPlan: false,
+  membersLimit: 0,
+  _id: 'def456',
+  admin_id: 'abc123',
+  teamInvites: [],
+  planCode: 'collaborator-annual',
+  recurlySubscription_id: 'ghi789',
+  plan: {
+    planCode: 'collaborator-annual',
+    name: 'Standard (Collaborator) Annual',
+    price_in_cents: 21900,
+    annual: true,
+    featureDescription: [],
+  },
+  recurly: {
+    tax: 4296,
+    taxRate: 0.24,
+    billingDetailsLink: '/user/subscription/recurly/billing-details',
+    accountManagementLink: '/user/subscription/recurly/account-management',
+    additionalLicenses: 0,
+    totalLicenses: 0,
+    nextPaymentDueAt,
+    currency: 'EUR',
+    state: 'active',
+    trialEndsAtFormatted: null,
+    trial_ends_at: null,
+    activeCoupons: [],
+    account: {
+      has_canceled_subscription: { _: 'false', $: { type: 'boolean' } },
+      has_past_due_invoice: { _: 'false', $: { type: 'boolean' } },
+    },
+    displayPrice: '€221.96',
+  },
+}
+
+export const annualActiveSubscriptionPro: Subscription = {
+  manager_ids: ['abc123'],
+  member_ids: [],
+  invited_emails: [],
+  groupPlan: false,
+  membersLimit: 0,
+  _id: 'def456',
+  admin_id: 'abc123',
+  teamInvites: [],
+  planCode: 'professional',
+  recurlySubscription_id: 'ghi789',
+  plan: {
+    planCode: 'professional',
+    name: 'Professional',
+    price_in_cents: 4500,
+    featureDescription: [],
+  },
+  recurly: {
+    tax: 0,
+    taxRate: 0,
+    billingDetailsLink: '/user/subscription/recurly/billing-details',
+    accountManagementLink: '/user/subscription/recurly/account-management',
+    additionalLicenses: 0,
+    totalLicenses: 0,
+    nextPaymentDueAt,
+    currency: 'USD',
+    state: 'active',
+    trialEndsAtFormatted: null,
+    trial_ends_at: null,
+    activeCoupons: [],
+    account: {
+      has_canceled_subscription: { _: 'false', $: { type: 'boolean' } },
+      has_past_due_invoice: { _: 'false', $: { type: 'boolean' } },
+    },
+    displayPrice: '$42.00',
+  },
+}
+
 export const pastDueExpiredSubscription: Subscription = {
   manager_ids: ['abc123'],
   member_ids: [],

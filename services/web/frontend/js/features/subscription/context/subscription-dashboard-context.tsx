@@ -11,11 +11,17 @@ import {
   ManagedGroupSubscription,
   Subscription,
 } from '../../../../../types/subscription/dashboard/subscription'
-import { Plan } from '../../../../../types/subscription/plan'
+import {
+  Plan,
+  PriceForDisplayData,
+} from '../../../../../types/subscription/plan'
 import { Institution as ManagedInstitution } from '../components/dashboard/managed-institutions'
 import { Institution } from '../../../../../types/institution'
 import getMeta from '../../../utils/meta'
-import { loadDisplayPriceWithTaxPromise } from '../util/recurly-pricing'
+import {
+  loadDisplayPriceWithTaxPromise,
+  loadGroupDisplayPriceWithTaxPromise,
+} from '../util/recurly-pricing'
 import { isRecurlyLoaded } from '../util/is-recurly-loaded'
 import { SubscriptionDashModalIds } from '../../../../../types/subscription/dashboard/modal-ids'
 
@@ -23,6 +29,8 @@ type SubscriptionDashboardContextValue = {
   groupPlanToChangeToCode?: string
   groupPlanToChangeToSize: string
   groupPlanToChangeToUsage?: string
+  groupPlanToChangeToPrice?: PriceForDisplayData
+  groupPlanToChangeToPriceError?: boolean
   handleCloseModal: () => void
   handleOpenModal: (
     modalIdToOpen: SubscriptionDashModalIds,
@@ -37,6 +45,7 @@ type SubscriptionDashboardContextValue = {
   personalSubscription?: Subscription
   plans: Plan[]
   planCodeToChangeTo?: string
+  queryingGroupPlanToChangeToPrice: boolean
   queryingIndividualPlansData: boolean
   recurlyLoadError: boolean
   setGroupPlanToChangeToCode: React.Dispatch<
@@ -84,6 +93,14 @@ export function SubscriptionDashboardProvider({
   >()
   const [groupPlanToChangeToUsage, setGroupPlanToChangeToUsage] =
     useState('enterprise')
+  const [
+    queryingGroupPlanToChangeToPrice,
+    setQueryingGroupPlanToChangeToPrice,
+  ] = useState(false)
+  const [groupPlanToChangeToPrice, setGroupPlanToChangeToPrice] =
+    useState<PriceForDisplayData>()
+  const [groupPlanToChangeToPriceError, setGroupPlanToChangeToPriceError] =
+    useState(false)
 
   const plansWithoutDisplayPrice = getMeta('ol-plans')
   const institutionMemberships = getMeta('ol-currentInstitutionsWithLicence')
@@ -133,6 +150,44 @@ export function SubscriptionDashboardProvider({
     }
   }, [personalSubscription, plansWithoutDisplayPrice])
 
+  useEffect(() => {
+    if (
+      isRecurlyLoaded() &&
+      groupPlanToChangeToCode &&
+      groupPlanToChangeToSize &&
+      groupPlanToChangeToUsage &&
+      personalSubscription
+    ) {
+      setQueryingGroupPlanToChangeToPrice(true)
+
+      const { currency, taxRate } = personalSubscription.recurly
+      const fetchGroupDisplayPrice = async () => {
+        setGroupPlanToChangeToPriceError(false)
+        let priceData
+        try {
+          priceData = await loadGroupDisplayPriceWithTaxPromise(
+            groupPlanToChangeToCode,
+            currency,
+            taxRate,
+            groupPlanToChangeToSize,
+            groupPlanToChangeToUsage
+          )
+        } catch (e) {
+          console.error(e)
+          setGroupPlanToChangeToPriceError(true)
+        }
+        setQueryingGroupPlanToChangeToPrice(false)
+        setGroupPlanToChangeToPrice(priceData)
+      }
+      fetchGroupDisplayPrice()
+    }
+  }, [
+    groupPlanToChangeToUsage,
+    groupPlanToChangeToSize,
+    personalSubscription,
+    groupPlanToChangeToCode,
+  ])
+
   const updateManagedInstitution = useCallback(
     (institution: ManagedInstitution) => {
       setManagedInstitutions(institutions => {
@@ -145,6 +200,7 @@ export function SubscriptionDashboardProvider({
     },
     []
   )
+
   const handleCloseModal = useCallback(() => {
     setModalIdShown(undefined)
     setPlanCodeToChangeTo(undefined)
@@ -161,6 +217,8 @@ export function SubscriptionDashboardProvider({
   const value = useMemo<SubscriptionDashboardContextValue>(
     () => ({
       groupPlanToChangeToCode,
+      groupPlanToChangeToPrice,
+      groupPlanToChangeToPriceError,
       groupPlanToChangeToSize,
       groupPlanToChangeToUsage,
       handleCloseModal,
@@ -174,6 +232,7 @@ export function SubscriptionDashboardProvider({
       personalSubscription,
       plans,
       planCodeToChangeTo,
+      queryingGroupPlanToChangeToPrice,
       queryingIndividualPlansData,
       recurlyLoadError,
       setGroupPlanToChangeToCode,
@@ -189,6 +248,8 @@ export function SubscriptionDashboardProvider({
     }),
     [
       groupPlanToChangeToCode,
+      groupPlanToChangeToPrice,
+      groupPlanToChangeToPriceError,
       groupPlanToChangeToSize,
       groupPlanToChangeToUsage,
       handleCloseModal,
@@ -202,6 +263,7 @@ export function SubscriptionDashboardProvider({
       personalSubscription,
       plans,
       planCodeToChangeTo,
+      queryingGroupPlanToChangeToPrice,
       queryingIndividualPlansData,
       recurlyLoadError,
       setGroupPlanToChangeToCode,

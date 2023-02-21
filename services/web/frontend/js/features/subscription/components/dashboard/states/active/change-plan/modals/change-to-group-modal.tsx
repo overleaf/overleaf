@@ -3,9 +3,11 @@ import { Modal } from 'react-bootstrap'
 import { useTranslation, Trans } from 'react-i18next'
 import { GroupPlans } from '../../../../../../../../../../types/subscription/dashboard/group-plans'
 import { Subscription } from '../../../../../../../../../../types/subscription/dashboard/subscription'
+import { PriceForDisplayData } from '../../../../../../../../../../types/subscription/plan'
 import AccessibleModal from '../../../../../../../../shared/components/accessible-modal'
 import getMeta from '../../../../../../../../utils/meta'
 import { useSubscriptionDashboardContext } from '../../../../../../context/subscription-dashboard-context'
+import GenericErrorAlert from '../../../../generic-error-alert'
 
 const educationalPercentDiscount = 40
 const groupSizeForEducationalDiscount = 10
@@ -53,21 +55,66 @@ function EducationDiscountAppliedOrNot({ groupSize }: { groupSize: string }) {
   )
 }
 
-function GroupPrice() {
+function GroupPrice({
+  groupPlanToChangeToPrice,
+  queryingGroupPlanToChangeToPrice,
+}: {
+  groupPlanToChangeToPrice?: PriceForDisplayData
+  queryingGroupPlanToChangeToPrice: boolean
+}) {
   const { t } = useTranslation()
+
+  const totalPrice =
+    !queryingGroupPlanToChangeToPrice &&
+    groupPlanToChangeToPrice?.totalForDisplay
+      ? groupPlanToChangeToPrice.totalForDisplay
+      : '…'
+
+  const perUserPrice =
+    !queryingGroupPlanToChangeToPrice &&
+    groupPlanToChangeToPrice?.perUserDisplayPrice
+      ? groupPlanToChangeToPrice.perUserDisplayPrice
+      : '…'
+
   return (
     <>
       <span aria-hidden>
-        X <span className="small">/ {t('year')}</span>
+        {totalPrice} <span className="small">/ {t('year')}</span>
       </span>
       <span className="sr-only">
-        {/* TODO: price */}
-        <Trans i18nKey="x_price_per_year" values={{ price: '$X' }} />
+        {queryingGroupPlanToChangeToPrice ? (
+          t('loading_prices')
+        ) : (
+          <Trans
+            i18nKey="x_price_per_year"
+            values={{ price: groupPlanToChangeToPrice?.totalForDisplay }}
+          />
+        )}
       </span>
+
       <br />
+
       <span className="circle-subtext">
-        {/* TODO: price */}
-        <Trans i18nKey="x_price_per_user" values={{ price: '$X' }} />
+        <span aria-hidden>
+          <Trans
+            i18nKey="x_price_per_user"
+            values={{
+              price: perUserPrice,
+            }}
+          />
+        </span>
+        <span className="sr-only">
+          {queryingGroupPlanToChangeToPrice ? (
+            t('loading_prices')
+          ) : (
+            <Trans
+              i18nKey="x_price_per_user"
+              values={{
+                price: perUserPrice,
+              }}
+            />
+          )}
+        </span>
       </span>
     </>
   )
@@ -78,10 +125,13 @@ export function ChangeToGroupModal() {
   const { t } = useTranslation()
   const {
     groupPlanToChangeToCode,
+    groupPlanToChangeToPrice,
+    groupPlanToChangeToPriceError,
     groupPlanToChangeToSize,
     groupPlanToChangeToUsage,
     handleCloseModal,
     modalIdShown,
+    queryingGroupPlanToChangeToPrice,
     setGroupPlanToChangeToCode,
     setGroupPlanToChangeToSize,
     setGroupPlanToChangeToUsage,
@@ -100,8 +150,6 @@ export function ChangeToGroupModal() {
 
   function handleGetInTouchButton() {
     handleCloseModal()
-
-    // @ts-ignore
     $('[data-ol-contact-form-modal="contact-us"]').modal()
   }
 
@@ -142,10 +190,16 @@ export function ChangeToGroupModal() {
 
       <Modal.Body>
         <div className="container-fluid plans group-subscription-modal">
+          {groupPlanToChangeToPriceError && <GenericErrorAlert />}
           <div className="row">
             <div className="col-md-6 text-center">
               <div className="circle circle-lg">
-                <GroupPrice />
+                <GroupPrice
+                  groupPlanToChangeToPrice={groupPlanToChangeToPrice}
+                  queryingGroupPlanToChangeToPrice={
+                    queryingGroupPlanToChangeToPrice
+                  }
+                />
               </div>
               <p>{t('each_user_will_have_access_to')}:</p>
               <ul className="list-unstyled">
@@ -257,11 +311,34 @@ export function ChangeToGroupModal() {
 
       <Modal.Footer>
         <div className="text-center">
+          {groupPlanToChangeToPrice?.includesTax && (
+            <p>
+              <Trans
+                i18nKey="total_with_subtotal_and_tax"
+                values={{
+                  total: groupPlanToChangeToPrice.totalForDisplay,
+                  subtotal: groupPlanToChangeToPrice.subtotal,
+                  tax: groupPlanToChangeToPrice.tax,
+                }}
+                components={[
+                  /* eslint-disable-next-line react/jsx-key */
+                  <strong />,
+                ]}
+              />
+            </p>
+          )}
           <p>
             <strong>{t('new_subscription_will_be_billed_immediately')}</strong>
           </p>
           <hr className="thin" />
-          <button className="btn btn-primary btn-lg">{t('upgrade_now')}</button>
+          <button
+            className="btn btn-primary btn-lg"
+            disabled={
+              queryingGroupPlanToChangeToPrice || !groupPlanToChangeToPrice
+            }
+          >
+            {t('upgrade_now')}
+          </button>
           <hr className="thin" />
           <button className="btn-inline-link" onClick={handleGetInTouchButton}>
             <Trans i18nKey="need_more_than_x_licenses" values={{ x: 50 }} />{' '}

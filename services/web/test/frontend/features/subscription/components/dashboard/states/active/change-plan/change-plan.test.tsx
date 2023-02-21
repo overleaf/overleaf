@@ -1,9 +1,12 @@
 import { expect } from 'chai'
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { ChangePlan } from '../../../../../../../../../frontend/js/features/subscription/components/dashboard/states/active/change-plan/change-plan'
 import { groupPlans, plans } from '../../../../../fixtures/plans'
 import {
   annualActiveSubscription,
+  annualActiveSubscriptionEuro,
+  annualActiveSubscriptionPro,
   pendingSubscriptionChange,
 } from '../../../../../fixtures/subscriptions'
 import { ActiveSubscription } from '../../../../../../../../../frontend/js/features/subscription/components/dashboard/states/active/active'
@@ -326,9 +329,11 @@ describe('<ChangePlan />', function () {
   describe('Change to group plan modal', function () {
     const standardPlanCollaboratorText = '10 collaborators per project'
     const professionalPlanCollaboratorText = 'Unlimited collaborators'
-    it('open group plan modal "Change to a group plan" clicked', async function () {
-      renderActiveSubscription(annualActiveSubscription)
+    const educationInputLabel =
+      'This license is for educational purposes (applies to students or faculty using Overleaf for teaching)'
 
+    let modal: HTMLElement
+    async function openModal() {
       const button = screen.getByRole('button', { name: 'Change plan' })
       fireEvent.click(button)
 
@@ -337,10 +342,19 @@ describe('<ChangePlan />', function () {
       })
       fireEvent.click(buttonGroupModal)
 
-      const modal = await screen.findByRole('dialog')
+      modal = await screen.findByRole('dialog')
+    }
+
+    it('open group plan modal "Change to a group plan" clicked', async function () {
+      renderActiveSubscription(annualActiveSubscription)
+      await openModal()
 
       within(modal).getByText('Customize your group subscription')
       within(modal).getByText('Save 30% or more')
+
+      within(modal).getByText('$1290 per year')
+      expect(within(modal).getAllByText('$129 per user').length).to.equal(2)
+
       within(modal).getByText('Each user will have access to:')
       within(modal).getByText('All premium features')
       within(modal).getByText('Sync with Dropbox and GitHub')
@@ -354,15 +368,23 @@ describe('<ChangePlan />', function () {
       const plans = within(modal).getByRole('group')
       const planOptions = within(plans).getAllByRole('radio')
       expect(planOptions.length).to.equal(groupPlans.plans.length)
+      const standardPlanRadioInput = within(modal).getByLabelText(
+        'Standard'
+      ) as HTMLInputElement
+      expect(standardPlanRadioInput.checked).to.be.true
 
-      const sizeSelect = within(modal).getByRole('combobox')
+      const sizeSelect = within(modal).getByRole('combobox') as HTMLInputElement
+      expect(sizeSelect.value).to.equal('10')
       const sizeOption = within(sizeSelect).getAllByRole('option')
       expect(sizeOption.length).to.equal(groupPlans.sizes.length)
       within(modal).getByText(
         'Overleaf offers a 40% educational discount for groups of 10 or more.'
       )
 
-      within(modal).getByRole('checkbox')
+      const educationalCheckbox = within(modal).getByRole(
+        'checkbox'
+      ) as HTMLInputElement
+      expect(educationalCheckbox.checked).to.be.false
       within(modal).getByText(
         'This license is for educational purposes (applies to students or faculty using Overleaf for teaching)'
       )
@@ -370,6 +392,8 @@ describe('<ChangePlan />', function () {
       within(modal).getByText(
         'Your new subscription will be billed immediately to your current payment method.'
       )
+
+      expect(within(modal).queryByText('tax', { exact: false })).to.be.null
 
       within(modal).getByRole('button', { name: 'Upgrade Now' })
 
@@ -380,46 +404,121 @@ describe('<ChangePlan />', function () {
 
     it('changes the collaborator count when the plan changes', async function () {
       renderActiveSubscription(annualActiveSubscription)
+      await openModal()
 
-      const button = screen.getByRole('button', { name: 'Change plan' })
-      fireEvent.click(button)
-
-      const buttonGroupModal = await screen.findByRole('button', {
-        name: 'Change to a group plan',
-      })
-      fireEvent.click(buttonGroupModal)
-
-      const modal = await screen.findByRole('dialog')
       const professionalPlanOption =
         within(modal).getByLabelText('Professional')
       fireEvent.click(professionalPlanOption)
 
-      within(modal).getByText(professionalPlanCollaboratorText)
+      await within(modal).findByText(professionalPlanCollaboratorText)
       expect(within(modal).queryByText(standardPlanCollaboratorText)).to.be.null
     })
 
-    it('shows educational discount applied when input checked', async function () {
+    it('shows educational discount applied when input checked and also notes if not enough users to get discount', async function () {
       const discountAppliedText = '40% educational discount applied!'
       const discountNotAppliedText =
         'The educational discount is available for groups of 10 or more'
       renderActiveSubscription(annualActiveSubscription)
 
-      const button = screen.getByRole('button', { name: 'Change plan' })
-      fireEvent.click(button)
+      await openModal()
 
-      const buttonGroupModal = await screen.findByRole('button', {
-        name: 'Change to a group plan',
-      })
-      fireEvent.click(buttonGroupModal)
-
-      const modal = await screen.findByRole('dialog')
-
-      const educationInput = within(modal).getByLabelText(
-        'This license is for educational purposes (applies to students or faculty using Overleaf for teaching)'
-      )
+      const educationInput = within(modal).getByLabelText(educationInputLabel)
       fireEvent.click(educationInput)
-      within(modal).getByText(discountAppliedText)
+      await within(modal).findByText(discountAppliedText)
       expect(within(modal).queryByText(discountNotAppliedText)).to.be.null
+
+      const sizeSelect = within(modal).getByRole('combobox') as HTMLInputElement
+      await userEvent.selectOptions(sizeSelect, [screen.getByText('5')])
+      await within(modal).findByText(discountNotAppliedText)
+      expect(within(modal).queryByText(discountAppliedText)).to.be.null
+    })
+
+    it('shows total with tax when tax applied', async function () {
+      renderActiveSubscription(annualActiveSubscriptionEuro, undefined, 'EUR')
+
+      await openModal()
+
+      within(modal).getByText('Total:', { exact: false })
+      expect(
+        within(modal).getAllByText('€1438.40', { exact: false }).length
+      ).to.equal(3)
+      within(modal).getByText('(€1160.00 + €278.40 tax) per year', {
+        exact: false,
+      })
+    })
+
+    it('changes the price when options change', async function () {
+      renderActiveSubscription(annualActiveSubscription)
+
+      await openModal()
+
+      within(modal).getByText('$1290 per year')
+      within(modal).getAllByText('$129 per user')
+
+      // plan type (pro collab)
+      let standardPlanRadioInput = within(modal).getByLabelText(
+        'Standard'
+      ) as HTMLInputElement
+      expect(standardPlanRadioInput.checked).to.be.true
+      let professionalPlanRadioInput = within(modal).getByLabelText(
+        'Professional'
+      ) as HTMLInputElement
+      expect(professionalPlanRadioInput.checked).to.be.false
+
+      fireEvent.click(professionalPlanRadioInput)
+
+      standardPlanRadioInput = within(modal).getByLabelText(
+        'Standard'
+      ) as HTMLInputElement
+      expect(standardPlanRadioInput.checked).to.be.false
+      professionalPlanRadioInput = within(modal).getByLabelText(
+        'Professional'
+      ) as HTMLInputElement
+      expect(professionalPlanRadioInput.checked).to.be.true
+
+      await within(modal).findByText('$2590 per year')
+      await within(modal).findAllByText('$259 per user')
+
+      // user count
+      let sizeSelect = within(modal).getByRole('combobox') as HTMLInputElement
+      expect(sizeSelect.value).to.equal('10')
+      await userEvent.selectOptions(sizeSelect, [screen.getByText('5')])
+      sizeSelect = within(modal).getByRole('combobox') as HTMLInputElement
+      expect(sizeSelect.value).to.equal('5')
+
+      await within(modal).findByText('$1395 per year')
+      await within(modal).findAllByText('$279 per user')
+
+      // usage (enterprise or educational)
+      let educationInput = within(modal).getByLabelText(
+        educationInputLabel
+      ) as HTMLInputElement
+      expect(educationInput.checked).to.be.false
+      fireEvent.click(educationInput)
+      educationInput = within(modal).getByLabelText(
+        educationInputLabel
+      ) as HTMLInputElement
+      expect(educationInput.checked).to.be.true
+
+      // make sure doesn't change price until back at min user to qualify
+      await within(modal).findByText('$1395 per year')
+      await within(modal).findAllByText('$279 per user')
+
+      await userEvent.selectOptions(sizeSelect, [screen.getByText('10')])
+
+      await within(modal).findByText('$1550 per year')
+      await within(modal).findAllByText('$155 per user')
+    })
+
+    it('has pro as the default group plan type if user is on a pro plan', async function () {
+      renderActiveSubscription(annualActiveSubscriptionPro)
+
+      await openModal()
+
+      const standardPlanRadioInput = within(modal).getByLabelText(
+        'Professional'
+      ) as HTMLInputElement
+      expect(standardPlanRadioInput.checked).to.be.true
     })
   })
 })

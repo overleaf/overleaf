@@ -5,9 +5,11 @@ import { renderWithSubscriptionDashContext } from './render-with-subscription-da
 
 export function renderActiveSubscription(
   subscription: Subscription,
-  tags: { name: string; value: string | object | Array<object> }[] = []
+  tags: { name: string; value: string | object | Array<object> }[] = [],
+  currencyCode?: string
 ) {
   const renderOptions = {
+    currencyCode,
     metaTags: [
       ...tags,
       { name: 'ol-plans', value: plans },
@@ -18,7 +20,7 @@ export function renderActiveSubscription(
       { name: 'ol-subscription', value: subscription },
       {
         name: 'ol-recommendedCurrency',
-        value: 'USD',
+        value: currencyCode || 'USD',
       },
     ],
   }
