@@ -26,9 +26,9 @@ import { isRecurlyLoaded } from '../util/is-recurly-loaded'
 import { SubscriptionDashModalIds } from '../../../../../types/subscription/dashboard/modal-ids'
 
 type SubscriptionDashboardContextValue = {
-  groupPlanToChangeToCode?: string
+  groupPlanToChangeToCode: string
   groupPlanToChangeToSize: string
-  groupPlanToChangeToUsage?: string
+  groupPlanToChangeToUsage: string
   groupPlanToChangeToPrice?: PriceForDisplayData
   groupPlanToChangeToPriceError?: boolean
   handleCloseModal: () => void
@@ -48,9 +48,7 @@ type SubscriptionDashboardContextValue = {
   queryingGroupPlanToChangeToPrice: boolean
   queryingIndividualPlansData: boolean
   recurlyLoadError: boolean
-  setGroupPlanToChangeToCode: React.Dispatch<
-    React.SetStateAction<string | undefined>
-  >
+  setGroupPlanToChangeToCode: React.Dispatch<React.SetStateAction<string>>
   setGroupPlanToChangeToSize: React.Dispatch<React.SetStateAction<string>>
   setGroupPlanToChangeToUsage: React.Dispatch<React.SetStateAction<string>>
   setModalIdShown: React.Dispatch<
@@ -88,9 +86,8 @@ export function SubscriptionDashboardProvider({
     string | undefined
   >()
   const [groupPlanToChangeToSize, setGroupPlanToChangeToSize] = useState('10')
-  const [groupPlanToChangeToCode, setGroupPlanToChangeToCode] = useState<
-    string | undefined
-  >()
+  const [groupPlanToChangeToCode, setGroupPlanToChangeToCode] =
+    useState('collaborator')
   const [groupPlanToChangeToUsage, setGroupPlanToChangeToUsage] =
     useState('enterprise')
   const [

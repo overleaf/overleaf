@@ -1,13 +1,16 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Modal } from 'react-bootstrap'
 import { useTranslation, Trans } from 'react-i18next'
 import { GroupPlans } from '../../../../../../../../../../types/subscription/dashboard/group-plans'
 import { Subscription } from '../../../../../../../../../../types/subscription/dashboard/subscription'
 import { PriceForDisplayData } from '../../../../../../../../../../types/subscription/plan'
+import { postJSON } from '../../../../../../../../infrastructure/fetch-json'
 import AccessibleModal from '../../../../../../../../shared/components/accessible-modal'
 import getMeta from '../../../../../../../../utils/meta'
 import { useSubscriptionDashboardContext } from '../../../../../../context/subscription-dashboard-context'
 import GenericErrorAlert from '../../../../generic-error-alert'
+import { subscriptionUpdateUrl } from '../../../../../../data/subscription-url'
+import { getRecurlyGroupPlanCode } from '../../../../../../util/recurly-group-plan-code'
 
 const educationalPercentDiscount = 40
 const groupSizeForEducationalDiscount = 10
@@ -138,14 +141,34 @@ export function ChangeToGroupModal() {
   } = useSubscriptionDashboardContext()
   const groupPlans: GroupPlans = getMeta('ol-groupPlans')
   const personalSubscription: Subscription = getMeta('ol-subscription')
+  const [error, setError] = useState(false)
+  const [inflight, setInflight] = useState(false)
+
+  async function upgrade() {
+    setError(false)
+    setInflight(true)
+
+    try {
+      await postJSON(subscriptionUpdateUrl, {
+        body: {
+          plan_code: getRecurlyGroupPlanCode(
+            groupPlanToChangeToCode,
+            groupPlanToChangeToSize,
+            groupPlanToChangeToUsage
+          ),
+        },
+      })
+      window.location.reload()
+    } catch (e) {
+      setError(true)
+      setInflight(false)
+    }
+  }
 
   useEffect(() => {
-    const defaultPlanOption = personalSubscription.plan.planCode.includes(
-      'professional'
-    )
-      ? 'professional'
-      : 'collaborator'
-    setGroupPlanToChangeToCode(defaultPlanOption)
+    if (personalSubscription.plan.planCode.includes('professional')) {
+      setGroupPlanToChangeToCode('professional')
+    }
   }, [personalSubscription, setGroupPlanToChangeToCode])
 
   function handleGetInTouchButton() {
@@ -331,13 +354,22 @@ export function ChangeToGroupModal() {
             <strong>{t('new_subscription_will_be_billed_immediately')}</strong>
           </p>
           <hr className="thin" />
+          {error && (
+            <div className="alert alert-danger" aria-live="polite">
+              {t('generic_something_went_wrong')}. {t('try_again')}.{' '}
+              {t('generic_if_problem_continues_contact_us')}.
+            </div>
+          )}
           <button
             className="btn btn-primary btn-lg"
             disabled={
-              queryingGroupPlanToChangeToPrice || !groupPlanToChangeToPrice
+              queryingGroupPlanToChangeToPrice ||
+              !groupPlanToChangeToPrice ||
+              inflight
             }
+            onClick={upgrade}
           >
-            {t('upgrade_now')}
+            {!inflight ? t('upgrade_now') : t('processing_uppercase') + '…'}
           </button>
           <hr className="thin" />
           <button className="btn-inline-link" onClick={handleGetInTouchButton}>

@@ -18,7 +18,7 @@ import sinon from 'sinon'
 import fetchMock from 'fetch-mock'
 import {
   cancelPendingSubscriptionChangeUrl,
-  subscriptionUrl,
+  subscriptionUpdateUrl,
 } from '../../../../../../../../../frontend/js/features/subscription/data/subscription-url'
 import { renderActiveSubscription } from '../../../../../helpers/render-active-subscription'
 
@@ -183,7 +183,7 @@ describe('<ChangePlan />', function () {
         status: 200,
       }
       fetchMock.post(
-        `${subscriptionUrl}?origin=confirmChangePlan`,
+        `${subscriptionUpdateUrl}?origin=confirmChangePlan`,
         endPointResponse
       )
 
@@ -221,7 +221,7 @@ describe('<ChangePlan />', function () {
         status: 500,
       }
       fetchMock.post(
-        `${subscriptionUrl}?origin=confirmChangePlan`,
+        `${subscriptionUpdateUrl}?origin=confirmChangePlan`,
         endPointResponse
       )
 
@@ -519,6 +519,49 @@ describe('<ChangePlan />', function () {
         'Professional'
       ) as HTMLInputElement
       expect(standardPlanRadioInput.checked).to.be.true
+    })
+
+    it('submits the changes and reloads the page', async function () {
+      const endPointResponse = {
+        status: 200,
+      }
+      fetchMock.post(subscriptionUpdateUrl, endPointResponse)
+
+      renderActiveSubscription(annualActiveSubscriptionPro)
+
+      await openModal()
+
+      const buttonConfirm = screen.getByRole('button', { name: 'Upgrade Now' })
+      fireEvent.click(buttonConfirm)
+
+      screen.getByText('processing', { exact: false })
+
+      // // page is reloaded on success
+      await waitFor(() => {
+        expect(reloadStub).to.have.been.called
+      })
+    })
+
+    it('shows message if error after submitting form', async function () {
+      const endPointResponse = {
+        status: 500,
+      }
+      fetchMock.post(subscriptionUpdateUrl, endPointResponse)
+
+      renderActiveSubscription(annualActiveSubscriptionPro)
+
+      await openModal()
+
+      const buttonConfirm = screen.getByRole('button', { name: 'Upgrade Now' })
+      fireEvent.click(buttonConfirm)
+
+      screen.getByText('processing', { exact: false })
+
+      await screen.findByText('Sorry, something went wrong. ', { exact: false })
+      await screen.findByText('Please try again. ', { exact: false })
+      await screen.findByText('If the problem continues please contact us.', {
+        exact: false,
+      })
     })
   })
 })

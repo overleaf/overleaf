@@ -1,6 +1,7 @@
 import { SubscriptionPricingState } from '@recurly/recurly-js'
 import { PriceForDisplayData } from '../../../../../types/subscription/plan'
 import { currencies, CurrencyCode } from '../data/currency'
+import { getRecurlyGroupPlanCode } from './recurly-group-plan-code'
 
 function queryRecurlyPlanPrice(planCode: string, currency: CurrencyCode) {
   return new Promise(resolve => {
@@ -79,7 +80,7 @@ export async function loadGroupDisplayPriceWithTaxPromise(
 ) {
   if (!recurly) return
 
-  const planCode = `group_${groupPlanCode}_${size}_${usage}`
+  const planCode = getRecurlyGroupPlanCode(groupPlanCode, size, usage)
   const price = await loadDisplayPriceWithTaxPromise(
     planCode,
     currencyCode,

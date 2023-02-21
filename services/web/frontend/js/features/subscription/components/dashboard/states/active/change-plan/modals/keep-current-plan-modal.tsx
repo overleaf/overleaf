@@ -21,11 +21,11 @@ export function KeepCurrentPlanModal() {
 
     try {
       await postJSON(cancelPendingSubscriptionChangeUrl)
+      window.location.reload()
     } catch (e) {
       setError(true)
       setInflight(false)
     }
-    window.location.reload()
   }
 
   if (modalIdShown !== modalId || !personalSubscription) return null
@@ -44,7 +44,7 @@ export function KeepCurrentPlanModal() {
 
       <Modal.Body>
         {error && (
-          <div className="alert alert-warning">
+          <div className="alert alert-danger" aria-live="polite">
             {t('generic_something_went_wrong')}. {t('try_again')}.{' '}
             {t('generic_if_problem_continues_contact_us')}.
           </div>
