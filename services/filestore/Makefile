@@ -92,6 +92,7 @@ build:
 		|| echo 'nothing cached'
 	docker build \
 	 	--pull \
+		--build-arg BUILDKIT_INLINE_CACHE=1 \
 		--tag gcr.io/overleaf-ops/$(PROJECT_NAME):$(BRANCH_NAME)-deps \
 		--cache-from gcr.io/overleaf-ops/$(PROJECT_NAME):$(BRANCH_NAME)-deps \
 		--cache-from gcr.io/overleaf-ops/$(PROJECT_NAME):main-deps \
