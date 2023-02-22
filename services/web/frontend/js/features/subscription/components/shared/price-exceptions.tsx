@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next'
-import { Subscription } from '../../../../../../types/subscription/dashboard/subscription'
+import { RecurlySubscription } from '../../../../../../types/subscription/dashboard/subscription'
 
 type PriceExceptionsProps = {
-  subscription: Subscription
+  subscription: RecurlySubscription
 }
 
 export function PriceExceptions({ subscription }: PriceExceptionsProps) {
