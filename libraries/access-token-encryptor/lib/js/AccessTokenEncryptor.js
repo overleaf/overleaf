@@ -4,7 +4,6 @@ const crypto = require('crypto')
 const ALGORITHM = 'aes-256-ctr'
 
 const cryptoHkdf = promisify(crypto.hkdf)
-const cryptoPbkdf2 = promisify(crypto.pbkdf2)
 const cryptoRandomBytes = promisify(crypto.randomBytes)
 
 class AbstractAccessTokenScheme {
@@ -78,12 +77,6 @@ class AccessTokenSchemeWithGenericKeyFn extends AbstractAccessTokenScheme {
   }
 }
 
-class AccessTokenSchemeV2 extends AccessTokenSchemeWithGenericKeyFn {
-  async keyFn(salt) {
-    return cryptoPbkdf2(this.cipherPassword, salt, 10000, 32, 'sha1')
-  }
-}
-
 class AccessTokenSchemeV3 extends AccessTokenSchemeWithGenericKeyFn {
   async keyFn(salt) {
     const optionalInfo = ''
@@ -103,7 +96,7 @@ class AccessTokenEncryptor {
           `cipherLabel must not contain a colon (:), got ${cipherLabel}`
         )
       }
-      const [cipherLabelNoVersion, version] = cipherLabel.split('-')
+      const [, version] = cipherLabel.split('-')
       if (!version) {
         throw new Error(
           `cipherLabel must contain version suffix (e.g. 2042.1-v42), got ${cipherLabel}`
@@ -118,27 +111,15 @@ class AccessTokenEncryptor {
         throw new Error(`cipherPasswords['${cipherLabel}'] is too short`)
       }
 
-      let scheme, schemeNoVersion
+      let scheme
       switch (version) {
-        case 'v2':
-          scheme = new AccessTokenSchemeV2(cipherLabel, cipherPassword)
-          schemeNoVersion = new AccessTokenSchemeV2(
-            cipherLabelNoVersion,
-            cipherPassword
-          )
-          break
         case 'v3':
           scheme = new AccessTokenSchemeV3(cipherLabel, cipherPassword)
-          schemeNoVersion = new AccessTokenSchemeV3(
-            cipherLabelNoVersion,
-            cipherPassword
-          )
           break
         default:
           throw new Error(`unknown version '${version}' for ${cipherLabel}`)
       }
       this.schemeByCipherLabel.set(cipherLabel, scheme)
-      this.schemeByCipherLabel.set(cipherLabelNoVersion, schemeNoVersion)
     }
 
     this.defaultScheme = this.schemeByCipherLabel.get(settings.cipherLabel)
