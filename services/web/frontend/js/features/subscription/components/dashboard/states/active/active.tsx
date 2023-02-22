@@ -96,7 +96,7 @@ export function ActiveSubscription({
         />
       </p>
       <PremiumFeaturesLink />
-      <PriceExceptions />
+      <PriceExceptions subscription={subscription} />
       <p>
         <a
           href={subscription.recurly.billingDetailsLink}

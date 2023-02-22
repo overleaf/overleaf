@@ -12,6 +12,7 @@ import {
 import sinon from 'sinon'
 import { cleanUpContext } from '../../../../helpers/render-with-subscription-dash-context'
 import { renderActiveSubscription } from '../../../../helpers/render-active-subscription'
+import { cloneDeep } from 'lodash'
 
 describe('<ActiveSubscription />', function () {
   let sendMBSpy: sinon.SinonSpy
@@ -167,6 +168,22 @@ describe('<ActiveSubscription />', function () {
       trialSubscription.recurly.trialEndsAtFormatted!
     )
     expect(endDate.length).to.equal(2)
+  })
+
+  it('shows current discounts', function () {
+    const subscriptionWithActiveCoupons = cloneDeep(annualActiveSubscription)
+    subscriptionWithActiveCoupons.recurly.activeCoupons = [
+      {
+        name: 'fake coupon name',
+      },
+    ]
+    renderActiveSubscription(subscriptionWithActiveCoupons)
+    screen.getByText(
+      /this does not include your current discounts, which will be applied automatically before your next payment/i
+    )
+    screen.getByText(
+      subscriptionWithActiveCoupons.recurly.activeCoupons[0].name
+    )
   })
 
   it('shows cancel UI and sends event', function () {
