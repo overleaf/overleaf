@@ -197,29 +197,49 @@ async function deleteProjectChunks(projectId) {
  */
 async function getOldChunksBatch(count, minAgeSecs) {
   const maxUpdatedAt = new Date(Date.now() - minAgeSecs * 1000)
-  const cursor = mongodb.chunks.find(
-    {
-      state: { $in: ['deleted', 'pending'] },
-      updatedAt: { $lt: maxUpdatedAt },
-    },
-    {
-      limit: count,
-      projection: { _id: 1, projectId: 1 },
+  const batch = []
+
+  // We need to fetch one state at a time to take advantage of the partial
+  // indexes on the chunks collection.
+  //
+  // Mongo 6.0 allows partial indexes that use the $in operator. When we reach
+  // that Mongo version, we can create a partial index on both the deleted and
+  // pending states and simplify this logic a bit.
+  for (const state of ['deleted', 'pending']) {
+    if (count === 0) {
+      // There's no more space in the batch
+      break
     }
-  )
-  return await cursor
-    .map(record => ({
-      chunkId: record._id,
-      projectId: record.projectId,
-    }))
-    .toArray()
+
+    const cursor = mongodb.chunks
+      .find(
+        { state, updatedAt: { $lt: maxUpdatedAt } },
+        {
+          limit: count,
+          projection: { _id: 1, projectId: 1 },
+        }
+      )
+      .map(record => ({
+        chunkId: record._id.toString(),
+        projectId: record.projectId.toString(),
+      }))
+
+    for await (const record of cursor) {
+      batch.push(record)
+      count -= 1
+    }
+  }
+  return batch
 }
 
 /**
  * Delete a batch of old chunks from the database
  */
 async function deleteOldChunks(chunkIds) {
-  await mongodb.chunks.deleteMany({ _id: { $in: chunkIds }, state: 'deleted' })
+  await mongodb.chunks.deleteMany({
+    _id: { $in: chunkIds.map(ObjectId) },
+    state: { $in: ['deleted', 'pending'] },
+  })
 }
 
 /**
