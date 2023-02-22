@@ -12,12 +12,49 @@ describe('<SubscriptionDashboard />', function () {
   })
 
   describe('Free Plan', function () {
-    it('does not render the "Get the most out of your" subscription text', function () {
+    beforeEach(function () {
       renderWithSubscriptionDashContext(<SubscriptionDashboard />)
+    })
+
+    it('does not render the "Get the most out of your" subscription text', function () {
       const text = screen.queryByText('Get the most out of your', {
         exact: false,
       })
       expect(text).to.be.null
+    })
+
+    it('does not render the contact support message', function () {
+      const text = screen.queryByText(
+        `You’re on an Overleaf Paid plan. Contact`,
+        {
+          exact: false,
+        }
+      )
+      expect(text).to.be.null
+    })
+  })
+
+  describe('Custom subscription', function () {
+    it('renders the contact support message', function () {
+      renderWithSubscriptionDashContext(<SubscriptionDashboard />, {
+        metaTags: [
+          {
+            name: 'ol-currentInstitutionsWithLicence',
+            value: [],
+          },
+          {
+            name: 'ol-hasSubscription',
+            value: true,
+          },
+        ],
+      })
+
+      screen.getByText(`You’re on an Overleaf Paid plan.`, {
+        exact: false,
+      })
+      screen.getByText(`Contact support`, {
+        exact: false,
+      })
     })
   })
 })

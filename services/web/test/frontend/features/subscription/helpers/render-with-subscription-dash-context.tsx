@@ -6,7 +6,10 @@ import { groupPriceByUsageTypeAndSize, plans } from '../fixtures/plans'
 export function renderWithSubscriptionDashContext(
   component: React.ReactElement,
   options?: {
-    metaTags?: { name: string; value: string | object | Array<object> }[]
+    metaTags?: {
+      name: string
+      value: string | object | Array<object> | boolean
+    }[]
     recurlyNotLoaded?: boolean
     queryingRecurly?: boolean
     currencyCode?: string

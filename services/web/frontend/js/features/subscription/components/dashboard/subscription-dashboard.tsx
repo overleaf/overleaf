@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import ContactSupport from './contact-support-for-custom-subscription'
 import GroupSubscriptionMemberships from './group-subscription-memberships'
 import InstitutionMemberships from './institution-memberships'
 import FreePlan from './free-plan'
@@ -10,7 +11,8 @@ import { useSubscriptionDashboardContext } from '../../context/subscription-dash
 
 function SubscriptionDashboard() {
   const { t } = useTranslation()
-  const { hasDisplayedSubscription } = useSubscriptionDashboardContext()
+  const { hasDisplayedSubscription, hasSubscription } =
+    useSubscriptionDashboardContext()
 
   return (
     <div className="container">
@@ -27,7 +29,8 @@ function SubscriptionDashboard() {
             <ManagedPublishers />
             <GroupSubscriptionMemberships />
             <InstitutionMemberships />
-            {!hasDisplayedSubscription && <FreePlan />}
+            {!hasDisplayedSubscription &&
+              (hasSubscription ? <ContactSupport /> : <FreePlan />)}
           </div>
         </div>
       </div>

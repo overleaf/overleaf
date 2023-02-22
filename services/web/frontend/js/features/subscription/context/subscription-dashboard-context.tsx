@@ -47,6 +47,7 @@ type SubscriptionDashboardContextValue = {
   updateManagedInstitution: (institution: ManagedInstitution) => void
   modalIdShown?: SubscriptionDashModalIds
   personalSubscription?: Subscription
+  hasSubscription: boolean
   plans: Plan[]
   planCodeToChangeTo?: string
   queryingGroupPlanToChangeToPrice: boolean
@@ -121,6 +122,7 @@ export function SubscriptionDashboardProvider({
     ManagedInstitution[]
   >(getMeta('ol-managedInstitutions'))
   const managedPublishers = getMeta('ol-managedPublishers')
+  const hasSubscription = getMeta('ol-hasSubscription')
   const recurlyApiKey = getMeta('ol-recurlyApiKey')
 
   const hasDisplayedSubscription = Boolean(
@@ -247,6 +249,7 @@ export function SubscriptionDashboardProvider({
       updateManagedInstitution,
       modalIdShown,
       personalSubscription,
+      hasSubscription,
       plans,
       planCodeToChangeTo,
       queryingGroupPlanToChangeToPrice,
@@ -282,6 +285,7 @@ export function SubscriptionDashboardProvider({
       updateManagedInstitution,
       modalIdShown,
       personalSubscription,
+      hasSubscription,
       plans,
       planCodeToChangeTo,
       queryingGroupPlanToChangeToPrice,

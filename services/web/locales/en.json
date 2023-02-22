@@ -1687,6 +1687,7 @@
   "you_are_a_manager_of_publisher_x": "You are a <0>manager</0> of <0>__publisherName__</0>",
   "you_are_a_manager_of_x_plan_as_member_of_group_subscription_y_administered_by_z": "You are a <1>manager</1> of the <0>__planName__</0> group subscription <1>__groupName__</1> administered by <1>__adminEmail__</1>",
   "you_are_about_to_upgrade": "You are about to upgrade to the __planName__",
+  "you_are_on_a_paid_plan_contact_support_to_find_out_more": "You’re on an __appName__ Paid plan. <0>Contact support</0> to find out more.",
   "you_are_on_x_plan_as_a_confirmed_member_of_institution_y": "You are on our <0>__planName__</0> plan as a <1>confirmed member</1> of <1>__institutionName__</1>",
   "you_are_on_x_plan_as_member_of_group_subscription_y_administered_by_z": "You are on our <0>__planName__</0> plan as a <1>member</1> of the group subscription <1>__groupName__</1> administered by <1>__adminEmail__</1>",
   "you_can_now_log_in_sso": "You can now log in through your institution and may receive <0>free __appName__ Professional features</0>!",
