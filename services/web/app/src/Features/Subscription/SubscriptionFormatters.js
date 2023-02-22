@@ -19,7 +19,7 @@ module.exports = {
     if (!currency) {
       currency = 'USD'
     }
-    let string = priceInCents + ''
+    let string = String(Math.round(priceInCents))
     if (string.length === 2) {
       string = `0${string}`
     }
