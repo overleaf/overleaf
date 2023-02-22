@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { fireEvent, screen } from '@testing-library/react'
 import * as eventTracking from '../../../../../../../../frontend/js/infrastructure/event-tracking'
-import { Subscription } from '../../../../../../../../types/subscription/dashboard/subscription'
+import { RecurlySubscription } from '../../../../../../../../types/subscription/dashboard/subscription'
 import {
   annualActiveSubscription,
   groupActiveSubscription,
@@ -26,7 +26,7 @@ describe('<ActiveSubscription />', function () {
     sendMBSpy.restore()
   })
 
-  function expectedInActiveSubscription(subscription: Subscription) {
+  function expectedInActiveSubscription(subscription: RecurlySubscription) {
     // sentence broken up by bolding
     screen.getByText('You are currently subscribed to the', { exact: false })
     screen.getByText(subscription.plan.name, { exact: false })

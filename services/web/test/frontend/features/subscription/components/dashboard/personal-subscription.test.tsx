@@ -4,6 +4,7 @@ import PersonalSubscription from '../../../../../../frontend/js/features/subscri
 import {
   annualActiveSubscription,
   canceledSubscription,
+  customSubscription,
   pastDueExpiredSubscription,
 } from '../../fixtures/subscriptions'
 import {
@@ -22,6 +23,18 @@ describe('<PersonalSubscription />', function () {
         <PersonalSubscription />
       )
       expect(container.firstChild).to.be.null
+    })
+  })
+
+  describe('custom subscription', function () {
+    it('displays contact support message', function () {
+      renderWithSubscriptionDashContext(<PersonalSubscription />, {
+        metaTags: [{ name: 'ol-subscription', value: customSubscription }],
+      })
+
+      screen.getByText('Please', { exact: false })
+      screen.getByText('contact support', { exact: false })
+      screen.getByText('to make changes to your plan', { exact: false })
     })
   })
 
@@ -44,7 +57,7 @@ describe('<PersonalSubscription />', function () {
         'Your subscription has been canceled and will terminate on',
         { exact: false }
       )
-      screen.getByText(canceledSubscription.recurly.nextPaymentDueAt, {
+      screen.getByText(canceledSubscription.recurly!.nextPaymentDueAt, {
         exact: false,
       })
 

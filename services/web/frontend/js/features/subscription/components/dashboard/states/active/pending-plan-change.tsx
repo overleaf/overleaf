@@ -1,10 +1,10 @@
 import { Trans } from 'react-i18next'
-import { Subscription } from '../../../../../../../../types/subscription/dashboard/subscription'
+import { RecurlySubscription } from '../../../../../../../../types/subscription/dashboard/subscription'
 
 export function PendingPlanChange({
   subscription,
 }: {
-  subscription: Subscription
+  subscription: RecurlySubscription
 }) {
   if (!subscription.pendingPlan) return null
 

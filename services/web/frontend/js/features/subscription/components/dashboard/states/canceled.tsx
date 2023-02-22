@@ -1,11 +1,11 @@
 import { useTranslation, Trans } from 'react-i18next'
-import { Subscription } from '../../../../../../../types/subscription/dashboard/subscription'
+import { RecurlySubscription } from '../../../../../../../types/subscription/dashboard/subscription'
 import PremiumFeaturesLink from '../premium-features-link'
 
 export function CanceledSubscription({
   subscription,
 }: {
-  subscription: Subscription
+  subscription: RecurlySubscription
 }) {
   const { t } = useTranslation()
 

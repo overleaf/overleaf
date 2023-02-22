@@ -1,6 +1,7 @@
 import {
+  CustomSubscription,
   GroupSubscription,
-  Subscription,
+  RecurlySubscription,
 } from '../../../../../types/subscription/dashboard/subscription'
 const dateformat = require('dateformat')
 const today = new Date()
@@ -12,7 +13,7 @@ const sevenDaysFromTodayFormatted = dateformat(
   'dS mmmm yyyy'
 )
 
-export const annualActiveSubscription: Subscription = {
+export const annualActiveSubscription: RecurlySubscription = {
   manager_ids: ['abc123'],
   member_ids: [],
   invited_emails: [],
@@ -51,7 +52,7 @@ export const annualActiveSubscription: Subscription = {
   },
 }
 
-export const annualActiveSubscriptionEuro: Subscription = {
+export const annualActiveSubscriptionEuro: RecurlySubscription = {
   manager_ids: ['abc123'],
   member_ids: [],
   invited_emails: [],
@@ -90,7 +91,7 @@ export const annualActiveSubscriptionEuro: Subscription = {
   },
 }
 
-export const annualActiveSubscriptionPro: Subscription = {
+export const annualActiveSubscriptionPro: RecurlySubscription = {
   manager_ids: ['abc123'],
   member_ids: [],
   invited_emails: [],
@@ -128,7 +129,7 @@ export const annualActiveSubscriptionPro: Subscription = {
   },
 }
 
-export const pastDueExpiredSubscription: Subscription = {
+export const pastDueExpiredSubscription: RecurlySubscription = {
   manager_ids: ['abc123'],
   member_ids: [],
   invited_emails: [],
@@ -167,7 +168,7 @@ export const pastDueExpiredSubscription: Subscription = {
   },
 }
 
-export const canceledSubscription: Subscription = {
+export const canceledSubscription: RecurlySubscription = {
   manager_ids: ['abc123'],
   member_ids: [],
   invited_emails: [],
@@ -206,7 +207,7 @@ export const canceledSubscription: Subscription = {
   },
 }
 
-export const pendingSubscriptionChange: Subscription = {
+export const pendingSubscriptionChange: RecurlySubscription = {
   manager_ids: ['abc123'],
   member_ids: [],
   invited_emails: [],
@@ -362,7 +363,7 @@ export const groupActiveSubscriptionWithPendingLicenseChange: GroupSubscription 
     },
   }
 
-export const trialSubscription: Subscription = {
+export const trialSubscription: RecurlySubscription = {
   manager_ids: ['abc123'],
   member_ids: [],
   invited_emails: [],
@@ -409,4 +410,25 @@ export const trialSubscription: Subscription = {
     },
     displayPrice: '$14.00',
   },
+}
+
+export const customSubscription: CustomSubscription = {
+  manager_ids: ['abc123'],
+  member_ids: [],
+  invited_emails: [],
+  groupPlan: false,
+  membersLimit: 0,
+  _id: 'def456',
+  admin_id: 'abc123',
+  teamInvites: [],
+  planCode: 'collaborator-annual',
+  recurlySubscription_id: 'ghi789',
+  plan: {
+    planCode: 'collaborator-annual',
+    name: 'Standard (Collaborator) Annual',
+    price_in_cents: 21900,
+    annual: true,
+    featureDescription: [],
+  },
+  customAccount: true,
 }

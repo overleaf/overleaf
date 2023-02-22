@@ -8,9 +8,10 @@ import {
   useState,
 } from 'react'
 import {
+  CustomSubscription,
   ManagedGroupSubscription,
   MemberGroupSubscription,
-  Subscription,
+  RecurlySubscription,
 } from '../../../../../types/subscription/dashboard/subscription'
 import {
   Plan,
@@ -46,7 +47,7 @@ type SubscriptionDashboardContextValue = {
   managedPublishers: ManagedPublisher[]
   updateManagedInstitution: (institution: ManagedInstitution) => void
   modalIdShown?: SubscriptionDashModalIds
-  personalSubscription?: Subscription
+  personalSubscription?: RecurlySubscription | CustomSubscription
   hasSubscription: boolean
   plans: Plan[]
   planCodeToChangeTo?: string
@@ -111,7 +112,7 @@ export function SubscriptionDashboardProvider({
   const institutionMemberships: Institution[] = getMeta(
     'ol-currentInstitutionsWithLicence'
   )
-  const personalSubscription: Subscription = getMeta('ol-subscription')
+  const personalSubscription = getMeta('ol-subscription')
   const managedGroupSubscriptions: ManagedGroupSubscription[] = getMeta(
     'ol-managedGroupSubscriptions'
   )
@@ -143,7 +144,11 @@ export function SubscriptionDashboardProvider({
   }, [recurlyApiKey, setRecurlyLoadError])
 
   useEffect(() => {
-    if (isRecurlyLoaded() && plansWithoutDisplayPrice && personalSubscription) {
+    if (
+      isRecurlyLoaded() &&
+      plansWithoutDisplayPrice &&
+      personalSubscription?.recurly
+    ) {
       const { currency, taxRate } = personalSubscription.recurly
       const fetchPlansDisplayPrices = async () => {
         for (const plan of plansWithoutDisplayPrice) {
@@ -173,7 +178,7 @@ export function SubscriptionDashboardProvider({
       groupPlanToChangeToCode &&
       groupPlanToChangeToSize &&
       groupPlanToChangeToUsage &&
-      personalSubscription
+      personalSubscription?.recurly
     ) {
       setQueryingGroupPlanToChangeToPrice(true)
 

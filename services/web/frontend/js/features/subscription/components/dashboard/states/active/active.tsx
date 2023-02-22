@@ -2,7 +2,7 @@ import { useTranslation, Trans } from 'react-i18next'
 import PremiumFeaturesLink from '../../premium-features-link'
 import { PriceExceptions } from '../../../shared/price-exceptions'
 import { useSubscriptionDashboardContext } from '../../../../context/subscription-dashboard-context'
-import { Subscription } from '../../../../../../../../types/subscription/dashboard/subscription'
+import { RecurlySubscription } from '../../../../../../../../types/subscription/dashboard/subscription'
 import { CancelSubscriptionButton } from './cancel-subscription-button'
 import { CancelSubscription } from './cancel-subscription'
 import { PendingPlanChange } from './pending-plan-change'
@@ -14,7 +14,7 @@ import { ContactSupportToChangeGroupPlan } from './contact-support-to-change-gro
 export function ActiveSubscription({
   subscription,
 }: {
-  subscription: Subscription
+  subscription: RecurlySubscription
 }) {
   const { t } = useTranslation()
   const { recurlyLoadError, setShowChangePersonalPlan, showCancellation } =

@@ -1090,6 +1090,7 @@
   "please_compile_pdf_before_word_count": "Please compile your project before performing a word count",
   "please_confirm_email": "Please confirm your email __emailAddress__ by clicking on the link in the confirmation email ",
   "please_confirm_your_email_before_making_it_default": "Please confirm your email before making it the primary.",
+  "please_contact_support_to_makes_change_to_your_plan": "Please <0>contact support</0> to make changes to your plan",
   "please_enter_email": "Please enter your email address",
   "please_get_in_touch": "Please get in touch",
   "please_link_before_making_primary": "Please confirm your email by linking to your institutional account before making it the primary email.",

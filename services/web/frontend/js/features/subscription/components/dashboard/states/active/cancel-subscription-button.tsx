@@ -1,12 +1,12 @@
 import { useTranslation, Trans } from 'react-i18next'
 import * as eventTracking from '../../../../../../infrastructure/event-tracking'
-import { Subscription } from '../../../../../../../../types/subscription/dashboard/subscription'
+import { RecurlySubscription } from '../../../../../../../../types/subscription/dashboard/subscription'
 import { useSubscriptionDashboardContext } from '../../../../context/subscription-dashboard-context'
 
 export function CancelSubscriptionButton({
   subscription,
 }: {
-  subscription: Subscription
+  subscription: RecurlySubscription
 }) {
   const { t } = useTranslation()
   const { recurlyLoadError, setShowCancellation } =

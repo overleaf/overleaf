@@ -7,6 +7,7 @@ block head-scripts
 	script(type="text/javascript", nonce=scriptNonce, src="https://js.recurly.com/v4/recurly.js")
 
 block append meta
+	meta(name="ol-subscription" data-type="json" content=personalSubscription)
 	meta(name="ol-managedGroupSubscriptions" data-type="json" content=managedGroupSubscriptions)
 	meta(name="ol-memberGroupSubscriptions" data-type="json" content=memberGroupSubscriptions)
 	meta(name="ol-managedInstitutions" data-type="json" content=managedInstitutions)
@@ -17,7 +18,6 @@ block append meta
 	meta(name="ol-plans", data-type="json" content=plans)
 	if (personalSubscription && personalSubscription.recurly)
 		meta(name="ol-recurlyApiKey" content=settings.apis.recurly.publicKey)
-		meta(name="ol-subscription" data-type="json" content=personalSubscription)
 		meta(name="ol-recommendedCurrency" content=personalSubscription.recurly.currency)
 		meta(name="ol-groupPlans" data-type="json" content=groupPlans)
 

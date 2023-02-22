@@ -1,5 +1,5 @@
-import { useTranslation } from 'react-i18next'
-import { Subscription } from '../../../../../../types/subscription/dashboard/subscription'
+import { Trans, useTranslation } from 'react-i18next'
+import { RecurlySubscription } from '../../../../../../types/subscription/dashboard/subscription'
 import { ActiveSubscription } from './states/active/active'
 import { CanceledSubscription } from './states/canceled'
 import { ExpiredSubscription } from './states/expired'
@@ -8,7 +8,7 @@ import { useSubscriptionDashboardContext } from '../../context/subscription-dash
 function PastDueSubscriptionAlert({
   subscription,
 }: {
-  subscription: Subscription
+  subscription: RecurlySubscription
 }) {
   const { t } = useTranslation()
   return (
@@ -30,10 +30,10 @@ function PastDueSubscriptionAlert({
 function PersonalSubscriptionStates({
   subscription,
 }: {
-  subscription: Subscription
+  subscription: RecurlySubscription
 }) {
   const { t } = useTranslation()
-  const state = subscription?.recurly?.state
+  const state = subscription?.recurly.state
 
   if (state === 'active') {
     return <ActiveSubscription subscription={subscription} />
@@ -53,13 +53,26 @@ function PersonalSubscription() {
 
   if (!personalSubscription) return null
 
+  if (!('recurly' in personalSubscription)) {
+    return (
+      <p>
+        <Trans
+          i18nKey="please_contact_support_to_makes_change_to_your_plan"
+          components={[<a href="/contact" />]} // eslint-disable-line react/jsx-key, jsx-a11y/anchor-has-content
+        />
+      </p>
+    )
+  }
+
   return (
     <>
       {personalSubscription.recurly.account.has_past_due_invoice._ ===
         'true' && (
         <PastDueSubscriptionAlert subscription={personalSubscription} />
       )}
-      <PersonalSubscriptionStates subscription={personalSubscription} />
+      <PersonalSubscriptionStates
+        subscription={personalSubscription as RecurlySubscription}
+      />
       {recurlyLoadError && (
         <div className="alert alert-warning" role="alert">
           <strong>{t('payment_provider_unreachable_error')}</strong>

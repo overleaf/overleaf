@@ -1,12 +1,13 @@
 import { useTranslation } from 'react-i18next'
-import { Subscription } from '../../../../../../../types/subscription/dashboard/subscription'
+import { RecurlySubscription } from '../../../../../../../types/subscription/dashboard/subscription'
 
 export function ExpiredSubscription({
   subscription,
 }: {
-  subscription: Subscription
+  subscription: RecurlySubscription
 }) {
   const { t } = useTranslation()
+
   return (
     <>
       <p>{t('your_subscription_has_expired')}</p>

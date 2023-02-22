@@ -1,10 +1,10 @@
 import { ActiveSubscription } from '../../../../../frontend/js/features/subscription/components/dashboard/states/active/active'
-import { Subscription } from '../../../../../types/subscription/dashboard/subscription'
+import { RecurlySubscription } from '../../../../../types/subscription/dashboard/subscription'
 import { groupPlans, plans } from '../fixtures/plans'
 import { renderWithSubscriptionDashContext } from './render-with-subscription-dash-context'
 
 export function renderActiveSubscription(
-  subscription: Subscription,
+  subscription: RecurlySubscription,
   tags: { name: string; value: string | object | Array<object> }[] = [],
   currencyCode?: string
 ) {
