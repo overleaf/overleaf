@@ -15,8 +15,9 @@ import {
   Plan,
   PriceForDisplayData,
 } from '../../../../../types/subscription/plan'
-import { Institution as ManagedInstitution } from '../components/dashboard/managed-institutions'
 import { Institution } from '../../../../../types/institution'
+import { Institution as ManagedInstitution } from '../components/dashboard/managed-institutions'
+import { Publisher as ManagedPublisher } from '../components/dashboard/managed-publishers'
 import getMeta from '../../../utils/meta'
 import {
   loadDisplayPriceWithTaxPromise,
@@ -40,6 +41,7 @@ type SubscriptionDashboardContextValue = {
   institutionMemberships?: Institution[]
   managedGroupSubscriptions: ManagedGroupSubscription[]
   managedInstitutions: ManagedInstitution[]
+  managedPublishers: ManagedPublisher[]
   updateManagedInstitution: (institution: ManagedInstitution) => void
   modalIdShown?: SubscriptionDashModalIds
   personalSubscription?: Subscription
@@ -106,13 +108,15 @@ export function SubscriptionDashboardProvider({
   const [managedInstitutions, setManagedInstitutions] = useState<
     ManagedInstitution[]
   >(getMeta('ol-managedInstitutions'))
+  const managedPublishers = getMeta('ol-managedPublishers')
   const recurlyApiKey = getMeta('ol-recurlyApiKey')
 
   const hasDisplayedSubscription =
     institutionMemberships?.length > 0 ||
     personalSubscription ||
     managedGroupSubscriptions?.length > 0 ||
-    managedInstitutions?.length > 0
+    managedInstitutions?.length > 0 ||
+    managedPublishers?.length > 0
 
   useEffect(() => {
     if (!isRecurlyLoaded()) {
@@ -224,6 +228,7 @@ export function SubscriptionDashboardProvider({
       institutionMemberships,
       managedGroupSubscriptions,
       managedInstitutions,
+      managedPublishers,
       updateManagedInstitution,
       modalIdShown,
       personalSubscription,
@@ -255,6 +260,7 @@ export function SubscriptionDashboardProvider({
       institutionMemberships,
       managedGroupSubscriptions,
       managedInstitutions,
+      managedPublishers,
       updateManagedInstitution,
       modalIdShown,
       personalSubscription,

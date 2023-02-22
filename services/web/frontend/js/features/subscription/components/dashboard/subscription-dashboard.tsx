@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import InstitutionMemberships from './institution-memberships'
 import FreePlan from './free-plan'
+import ManagedPublishers from './managed-publishers'
 import PersonalSubscription from './personal-subscription'
 import ManagedGroupSubscriptions from './managed-group-subscriptions'
 import ManagedInstitutions from './managed-institutions'
@@ -22,6 +23,7 @@ function SubscriptionDashboard() {
             <PersonalSubscription />
             <ManagedGroupSubscriptions />
             <ManagedInstitutions />
+            <ManagedPublishers />
             <InstitutionMemberships />
             {!hasDisplayedSubscription && <FreePlan />}
           </div>

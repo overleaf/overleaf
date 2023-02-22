@@ -1,5 +1,5 @@
 import { useSubscriptionDashboardContext } from '../../context/subscription-dashboard-context'
-import ManagedInstitution from './managed_institution'
+import ManagedInstitution from './managed-institution'
 
 export type Institution = {
   v1Id: number

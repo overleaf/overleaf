@@ -191,6 +191,10 @@ async function buildUsersSubscriptionViewModel(user) {
   await Promise.all(
     managedInstitutions.map(InstitutionsManager.promises.fetchV1Data)
   )
+  managedPublishers = managedPublishers.map(serializeMongooseObject)
+  await Promise.all(
+    managedPublishers.map(PublishersGetter.promises.fetchV1Data)
+  )
 
   if (plan != null) {
     personalSubscription.plan = plan
