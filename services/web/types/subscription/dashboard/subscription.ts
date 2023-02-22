@@ -1,3 +1,4 @@
+import { CurrencyCode } from '../../../frontend/js/features/subscription/data/currency'
 import { Nullable } from '../../utils'
 import { Plan } from '../plan'
 import { User } from '../../../types/user'
@@ -24,7 +25,7 @@ export type Subscription = {
     additionalLicenses: number
     totalLicenses: number
     nextPaymentDueAt: string
-    currency: string
+    currency: CurrencyCode
     state?: SubscriptionState
     trialEndsAtFormatted: Nullable<string>
     trial_ends_at: Nullable<string>
@@ -53,11 +54,18 @@ export type Subscription = {
 }
 
 export type GroupSubscription = Subscription & {
-  teamName: string
+  teamName?: string
+  teamNotice?: string
 }
 
 export type ManagedGroupSubscription = Omit<GroupSubscription, 'admin_id'> & {
   userIsGroupMember: boolean
+  planLevelName: string
+  admin_id: User
+}
+
+export type MemberGroupSubscription = Omit<GroupSubscription, 'admin_id'> & {
+  userIsGroupManager: boolean
   planLevelName: string
   admin_id: User
 }

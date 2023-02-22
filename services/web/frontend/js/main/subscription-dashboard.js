@@ -335,7 +335,7 @@ App.controller(
           _csrf: window.csrfToken,
         },
       })
-        .then(() => location.reload())
+        .then(() => window.location.reload())
         .catch(() => console.log('something went wrong changing plan'))
     }
 

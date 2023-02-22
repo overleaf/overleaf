@@ -9,6 +9,7 @@ import {
 } from 'react'
 import {
   ManagedGroupSubscription,
+  MemberGroupSubscription,
   Subscription,
 } from '../../../../../types/subscription/dashboard/subscription'
 import {
@@ -40,6 +41,7 @@ type SubscriptionDashboardContextValue = {
   hasDisplayedSubscription: boolean
   institutionMemberships?: Institution[]
   managedGroupSubscriptions: ManagedGroupSubscription[]
+  memberGroupSubscriptions: MemberGroupSubscription[]
   managedInstitutions: ManagedInstitution[]
   managedPublishers: ManagedPublisher[]
   updateManagedInstitution: (institution: ManagedInstitution) => void
@@ -64,6 +66,8 @@ type SubscriptionDashboardContextValue = {
   setShowCancellation: React.Dispatch<React.SetStateAction<boolean>>
   showChangePersonalPlan: boolean
   setShowChangePersonalPlan: React.Dispatch<React.SetStateAction<boolean>>
+  leavingGroupId?: string
+  setLeavingGroupId: React.Dispatch<React.SetStateAction<string | undefined>>
 }
 
 export const SubscriptionDashboardContext = createContext<
@@ -100,23 +104,33 @@ export function SubscriptionDashboardProvider({
     useState<PriceForDisplayData>()
   const [groupPlanToChangeToPriceError, setGroupPlanToChangeToPriceError] =
     useState(false)
+  const [leavingGroupId, setLeavingGroupId] = useState<string | undefined>()
 
   const plansWithoutDisplayPrice = getMeta('ol-plans')
-  const institutionMemberships = getMeta('ol-currentInstitutionsWithLicence')
-  const personalSubscription = getMeta('ol-subscription')
-  const managedGroupSubscriptions = getMeta('ol-managedGroupSubscriptions')
+  const institutionMemberships: Institution[] = getMeta(
+    'ol-currentInstitutionsWithLicence'
+  )
+  const personalSubscription: Subscription = getMeta('ol-subscription')
+  const managedGroupSubscriptions: ManagedGroupSubscription[] = getMeta(
+    'ol-managedGroupSubscriptions'
+  )
+  const memberGroupSubscriptions: MemberGroupSubscription[] = getMeta(
+    'ol-memberGroupSubscriptions'
+  )
   const [managedInstitutions, setManagedInstitutions] = useState<
     ManagedInstitution[]
   >(getMeta('ol-managedInstitutions'))
   const managedPublishers = getMeta('ol-managedPublishers')
   const recurlyApiKey = getMeta('ol-recurlyApiKey')
 
-  const hasDisplayedSubscription =
+  const hasDisplayedSubscription = Boolean(
     institutionMemberships?.length > 0 ||
-    personalSubscription ||
-    managedGroupSubscriptions?.length > 0 ||
-    managedInstitutions?.length > 0 ||
-    managedPublishers?.length > 0
+      personalSubscription ||
+      memberGroupSubscriptions?.length > 0 ||
+      managedGroupSubscriptions?.length > 0 ||
+      managedInstitutions?.length > 0 ||
+      managedPublishers?.length > 0
+  )
 
   useEffect(() => {
     if (!isRecurlyLoaded()) {
@@ -227,6 +241,7 @@ export function SubscriptionDashboardProvider({
       hasDisplayedSubscription,
       institutionMemberships,
       managedGroupSubscriptions,
+      memberGroupSubscriptions,
       managedInstitutions,
       managedPublishers,
       updateManagedInstitution,
@@ -247,6 +262,8 @@ export function SubscriptionDashboardProvider({
       setShowCancellation,
       showChangePersonalPlan,
       setShowChangePersonalPlan,
+      leavingGroupId,
+      setLeavingGroupId,
     }),
     [
       groupPlanToChangeToCode,
@@ -259,6 +276,7 @@ export function SubscriptionDashboardProvider({
       hasDisplayedSubscription,
       institutionMemberships,
       managedGroupSubscriptions,
+      memberGroupSubscriptions,
       managedInstitutions,
       managedPublishers,
       updateManagedInstitution,
@@ -279,6 +297,8 @@ export function SubscriptionDashboardProvider({
       setShowCancellation,
       showChangePersonalPlan,
       setShowChangePersonalPlan,
+      leavingGroupId,
+      setLeavingGroupId,
     ]
   )
 
