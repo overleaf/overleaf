@@ -1680,6 +1680,7 @@
   "year": "year",
   "yes_move_me_to_personal_plan": "Yes, move me to the Personal plan",
   "yes_that_is_correct": "Yes, that’s correct",
+  "you_already_have_a_subscription": "You already have a subscription",
   "you_and_collaborators_get_access_to": "You and your project collaborators get access to",
   "you_and_collaborators_get_access_to_info": "These features are available to you and your collaborators (other Overleaf users that you invite to your projects).",
   "you_are_a_manager_and_member_of_x_plan_as_member_of_group_subscription_y_administered_by_z": "You are a <1>manager</1> and <1>member</1> of the <0>__planName__</0> group subscription <1>__groupName__</1> administered by <1>__adminEmail__</1>",
