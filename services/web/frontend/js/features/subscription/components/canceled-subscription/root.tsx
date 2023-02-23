@@ -1,4 +1,5 @@
 import useWaitForI18n from '../../../../shared/hooks/use-wait-for-i18n'
+import CanceledSubscription from './canceled'
 
 function Root() {
   const { isReady } = useWaitForI18n()
@@ -7,7 +8,7 @@ function Root() {
     return null
   }
 
-  return <h2>React Subscription Canceled</h2>
+  return <CanceledSubscription />
 }
 
 export default Root
