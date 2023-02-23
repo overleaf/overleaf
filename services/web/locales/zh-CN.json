@@ -1176,6 +1176,7 @@
   "work_with_word_users_blurb": "__appName__ 是如此易于上手以至于您可以邀请非LaTeX的合作者来直接对您的LaTeX文档做出贡献。他们一开始就可以工作，并且随着接下来的使用能够不费力地学会少量的LaTeX知识。",
   "x_price_for_first_month": "首月 <0>__price__</0>",
   "x_price_for_first_year": "首年 <0>__price__</0>",
+  "x_price_per_year": "每年 <0>__price__</0>",
   "year": "年",
   "you_can_now_log_in_sso": "您现在可以通过您的机构登录，并可以获得<0>免费的 __appName__ 专业功能！",
   "you_can_opt_in_and_out_of_the_program_at_any_time_on_this_page": "您可以随时在此页面上选择加入或退出该计划",

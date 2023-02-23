@@ -1182,6 +1182,7 @@
   "work_with_word_users_blurb": "__appName__ est si simple à prendre en main que vous pourrez inviter vos collègues qui n’utilisent pas LaTeX à venir contribuer directement dans vos documents LaTeX. Ils·elles seront productif·ve·s dès le premier jour et pourront apprendre des éléments de LaTeX au fil de l’eau.",
   "x_price_for_first_month": "<0>__price__</0> pour votre premier mois",
   "x_price_for_first_year": "<0>__price__</0> pour votre première année",
+  "x_price_per_year": "<0>__price__</0> par an",
   "year": "année",
   "you_can_now_log_in_sso": "Vous pouvez maintenant vous connecter via votre établissement pour potentiellement bénéficier de <0>fonctionnalités professionnelles __appName__ gratuites</0> !",
   "you_can_opt_in_and_out_of_the_program_at_any_time_on_this_page": "Vous pouvez rejoindre ou quitter le programme à tout moment depuis cette page",
