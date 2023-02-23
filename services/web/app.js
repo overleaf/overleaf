@@ -71,7 +71,9 @@ if (!module.parent) {
         // wait until the process is ready before monitoring the event loop
         metrics.event_loop.monitor(logger)
       })
-      QueueWorkers.start()
+      if (process.env.QUEUE_PROCESSING_ENABLED === 'true') {
+        QueueWorkers.start()
+      }
     })
     .catch(err => {
       logger.fatal({ err }, 'Cannot connect to mongo. Exiting.')
