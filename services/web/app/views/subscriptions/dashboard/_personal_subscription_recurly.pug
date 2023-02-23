@@ -102,7 +102,7 @@ div(ng-controller="RecurlySubscriptionController")
 
 		div(ng-show="showDowngrade")
 			div(ng-controller="ChangePlanFormController")
-				p !{translate("interested_in_cheaper_personal_plan",{price:'{{personalDisplayPrice}}'})}
+				p !{translate("interested_in_cheaper_personal_plan", {price:'{{personalDisplayPrice}}'}, ['strong'] )}
 				p
 					button(type="submit", ng-click="downgradeToPaidPersonal()", ng-disabled='inflight').btn.btn-primary #{translate("yes_move_me_to_personal_plan")}
 				p

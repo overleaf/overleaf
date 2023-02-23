@@ -432,3 +432,90 @@ export const customSubscription: CustomSubscription = {
   },
   customAccount: true,
 }
+
+export const trialCollaboratorSubscription: RecurlySubscription = {
+  manager_ids: ['abc123'],
+  member_ids: [],
+  invited_emails: [],
+  groupPlan: false,
+  membersLimit: 0,
+  _id: 'def456',
+  admin_id: 'abc123',
+  teamInvites: [],
+  planCode: 'collaborator_free_trial_7_days',
+  recurlySubscription_id: 'ghi789',
+  plan: {
+    planCode: 'collaborator_free_trial_7_days',
+    name: 'Standard (Collaborator)',
+    price_in_cents: 2300,
+    featureDescription: [],
+    hideFromUsers: true,
+  },
+  recurly: {
+    tax: 0,
+    taxRate: 0,
+    billingDetailsLink: '/user/subscription/recurly/billing-details',
+    accountManagementLink: '/user/subscription/recurly/account-management',
+    additionalLicenses: 0,
+    totalLicenses: 0,
+    nextPaymentDueAt: sevenDaysFromTodayFormatted,
+    currency: 'USD',
+    state: 'active',
+    trialEndsAtFormatted: sevenDaysFromTodayFormatted,
+    trial_ends_at: new Date(sevenDaysFromToday).toString(),
+    activeCoupons: [],
+    account: {
+      has_canceled_subscription: {
+        _: 'false',
+        $: {
+          type: 'boolean',
+        },
+      },
+      has_past_due_invoice: {
+        _: 'false',
+        $: {
+          type: 'boolean',
+        },
+      },
+    },
+    displayPrice: '$21.00',
+  },
+}
+
+export const monthlyActiveCollaborator: RecurlySubscription = {
+  manager_ids: ['abc123'],
+  member_ids: [],
+  invited_emails: [],
+  groupPlan: false,
+  membersLimit: 0,
+  _id: 'def456',
+  admin_id: 'abc123',
+  teamInvites: [],
+  planCode: 'collaborator',
+  recurlySubscription_id: 'ghi789',
+  plan: {
+    planCode: 'collaborator',
+    name: 'Standard (Collaborator)',
+    price_in_cents: 212300900,
+    featureDescription: [],
+  },
+  recurly: {
+    tax: 0,
+    taxRate: 0,
+    billingDetailsLink: '/user/subscription/recurly/billing-details',
+    accountManagementLink: '/user/subscription/recurly/account-management',
+    additionalLicenses: 0,
+    totalLicenses: 0,
+    nextPaymentDueAt,
+    currency: 'USD',
+    state: 'active',
+    trialEndsAtFormatted: null,
+    trial_ends_at: null,
+    activeCoupons: [],
+    account: {
+      has_canceled_subscription: { _: 'false', $: { type: 'boolean' } },
+      has_past_due_invoice: { _: 'false', $: { type: 'boolean' } },
+    },
+    displayPrice: '$21.00',
+  },
+}

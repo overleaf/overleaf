@@ -1,15 +1,10 @@
 import { Trans } from 'react-i18next'
 
 export function TrialEnding({
-  trialEndsAt,
   trialEndsAtFormatted,
 }: {
-  trialEndsAt: string
   trialEndsAtFormatted: string
 }) {
-  const endDate = new Date(trialEndsAt)
-  if (endDate.getTime() < Date.now()) return null
-
   return (
     <p>
       <Trans

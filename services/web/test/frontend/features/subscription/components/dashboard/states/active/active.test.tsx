@@ -1,18 +1,25 @@
 import { expect } from 'chai'
-import { fireEvent, screen } from '@testing-library/react'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import * as eventTracking from '../../../../../../../../frontend/js/infrastructure/event-tracking'
 import { RecurlySubscription } from '../../../../../../../../types/subscription/dashboard/subscription'
 import {
   annualActiveSubscription,
   groupActiveSubscription,
   groupActiveSubscriptionWithPendingLicenseChange,
+  monthlyActiveCollaborator,
   pendingSubscriptionChange,
+  trialCollaboratorSubscription,
   trialSubscription,
 } from '../../../../fixtures/subscriptions'
 import sinon from 'sinon'
 import { cleanUpContext } from '../../../../helpers/render-with-subscription-dash-context'
 import { renderActiveSubscription } from '../../../../helpers/render-active-subscription'
 import { cloneDeep } from 'lodash'
+import fetchMock from 'fetch-mock'
+import {
+  cancelSubscriptionUrl,
+  extendTrialUrl,
+} from '../../../../../../../../frontend/js/features/subscription/data/subscription-url'
 
 describe('<ActiveSubscription />', function () {
   let sendMBSpy: sinon.SinonSpy
@@ -186,30 +193,220 @@ describe('<ActiveSubscription />', function () {
     )
   })
 
-  it('shows cancel UI and sends event', function () {
-    renderActiveSubscription(annualActiveSubscription)
-    // before button clicked
-    screen.getByText(
-      'Your subscription will remain active until the end of your billing period',
-      { exact: false }
-    )
-    const dates = screen.getAllByText(
-      annualActiveSubscription.recurly.nextPaymentDueAt,
-      {
-        exact: false,
-      }
-    )
-    expect(dates.length).to.equal(2)
+  describe('cancel plan', function () {
+    const locationStub = sinon.stub()
+    const reloadStub = sinon.stub()
+    const originalLocation = window.location
 
-    const button = screen.getByRole('button', {
-      name: 'Cancel Your Subscription',
+    beforeEach(function () {
+      Object.defineProperty(window, 'location', {
+        value: { assign: locationStub, reload: reloadStub },
+      })
     })
-    fireEvent.click(button)
-    expect(sendMBSpy).to.be.calledOnceWith(
-      'subscription-page-cancel-button-click'
-    )
 
-    screen.getByText('We’d love you to stay')
+    afterEach(function () {
+      Object.defineProperty(window, 'location', {
+        value: originalLocation,
+      })
+      fetchMock.reset()
+    })
+
+    function showConfirmCancelUI() {
+      const button = screen.getByRole('button', {
+        name: 'Cancel Your Subscription',
+      })
+      fireEvent.click(button)
+    }
+
+    it('shows cancel UI and sends event', function () {
+      renderActiveSubscription(annualActiveSubscription)
+      // before button clicked
+      screen.getByText(
+        'Your subscription will remain active until the end of your billing period',
+        { exact: false }
+      )
+      const dates = screen.getAllByText(
+        annualActiveSubscription.recurly.nextPaymentDueAt,
+        {
+          exact: false,
+        }
+      )
+      expect(dates.length).to.equal(2)
+
+      showConfirmCancelUI()
+
+      expect(sendMBSpy).to.be.calledOnceWith(
+        'subscription-page-cancel-button-click'
+      )
+
+      screen.getByText('We’d love you to stay')
+      screen.getByRole('button', { name: 'Cancel my subscription' })
+    })
+
+    it('cancels subscription and redirects page', async function () {
+      const endPointResponse = {
+        status: 200,
+      }
+      fetchMock.post(cancelSubscriptionUrl, endPointResponse)
+      renderActiveSubscription(annualActiveSubscription)
+      showConfirmCancelUI()
+      const button = screen.getByRole('button', {
+        name: 'Cancel my subscription',
+      })
+      fireEvent.click(button)
+      await waitFor(() => {
+        expect(locationStub).to.have.been.called
+      })
+      sinon.assert.calledWithMatch(locationStub, '/user/subscription/canceled')
+    })
+
+    it('shows an error message if canceling subscription failed', async function () {
+      const endPointResponse = {
+        status: 500,
+      }
+      fetchMock.post(cancelSubscriptionUrl, endPointResponse)
+      renderActiveSubscription(annualActiveSubscription)
+      showConfirmCancelUI()
+      const button = screen.getByRole('button', {
+        name: 'Cancel my subscription',
+      })
+      fireEvent.click(button)
+      await screen.findByText('Sorry, something went wrong. ', {
+        exact: false,
+      })
+      screen.getByText('Please try again. ', { exact: false })
+      screen.getByText('If the problem continues please contact us.', {
+        exact: false,
+      })
+    })
+
+    it('disables cancels subscription button after clicking and updates text', async function () {
+      renderActiveSubscription(annualActiveSubscription)
+      showConfirmCancelUI()
+      screen.getByRole('button', {
+        name: 'I want to stay',
+      })
+      const button = screen.getByRole('button', {
+        name: 'Cancel my subscription',
+      })
+      fireEvent.click(button)
+
+      const cancelButtton = screen.getByRole('button', {
+        name: 'Processing…',
+      }) as HTMLButtonElement
+      expect(cancelButtton.disabled).to.be.true
+
+      expect(screen.queryByText('Cancel my subscription')).to.be.null
+    })
+
+    describe('extend trial', function () {
+      const cancelButtonText = 'No thanks, I still want to cancel'
+      const extendTrialButtonText = 'I’ll take it!'
+      it('shows alternate cancel subscription button text for cancel button and option to extend trial', function () {
+        renderActiveSubscription(trialCollaboratorSubscription)
+        showConfirmCancelUI()
+        screen.getByText('Have another', { exact: false })
+        screen.getByText('14 days', { exact: false })
+        screen.getByText('on your Trial!', { exact: false })
+        screen.getByRole('button', {
+          name: cancelButtonText,
+        })
+        screen.getByRole('button', {
+          name: extendTrialButtonText,
+        })
+      })
+
+      it('disables both buttons and updates text for when trial button clicked', function () {
+        renderActiveSubscription(trialCollaboratorSubscription)
+        showConfirmCancelUI()
+        const extendTrialButton = screen.getByRole('button', {
+          name: extendTrialButtonText,
+        })
+        fireEvent.click(extendTrialButton)
+
+        const buttons = screen.getAllByRole('button')
+        expect(buttons.length).to.equal(2)
+        expect(buttons[0].getAttribute('disabled')).to.equal('')
+        expect(buttons[1].getAttribute('disabled')).to.equal('')
+        screen.getByRole('button', {
+          name: cancelButtonText,
+        })
+        screen.getByRole('button', {
+          name: 'Processing…',
+        })
+      })
+
+      it('disables both buttons and updates text for when cancel button clicked', function () {
+        renderActiveSubscription(trialCollaboratorSubscription)
+        showConfirmCancelUI()
+        const cancelButtton = screen.getByRole('button', {
+          name: cancelButtonText,
+        })
+        fireEvent.click(cancelButtton)
+
+        const buttons = screen.getAllByRole('button')
+        expect(buttons.length).to.equal(2)
+        expect(buttons[0].getAttribute('disabled')).to.equal('')
+        expect(buttons[1].getAttribute('disabled')).to.equal('')
+        screen.getByRole('button', {
+          name: 'Processing…',
+        })
+        screen.getByRole('button', {
+          name: extendTrialButtonText,
+        })
+      })
+
+      it('does not show option to extend trial when not a collaborator trial', function () {
+        const trialPlan = cloneDeep(trialCollaboratorSubscription)
+        trialPlan.plan.planCode = 'anotherplan'
+        renderActiveSubscription(trialPlan)
+        showConfirmCancelUI()
+        expect(
+          screen.queryByRole('button', {
+            name: extendTrialButtonText,
+          })
+        ).to.be.null
+      })
+
+      it('does not show option to extend trial when a collaborator trial but does not expire in 7 days', function () {
+        const trialPlan = cloneDeep(trialCollaboratorSubscription)
+        trialPlan.recurly.trial_ends_at = null
+        renderActiveSubscription(trialPlan)
+        showConfirmCancelUI()
+        expect(
+          screen.queryByRole('button', {
+            name: extendTrialButtonText,
+          })
+        ).to.be.null
+      })
+
+      it('reloads page after the succesful request to extend trial', async function () {
+        const endPointResponse = {
+          status: 200,
+        }
+        fetchMock.put(extendTrialUrl, endPointResponse)
+        renderActiveSubscription(trialCollaboratorSubscription)
+        showConfirmCancelUI()
+        const extendTrialButton = screen.getByRole('button', {
+          name: extendTrialButtonText,
+        })
+        fireEvent.click(extendTrialButton)
+        // page is reloaded on success
+        await waitFor(() => {
+          expect(reloadStub).to.have.been.called
+        })
+      })
+    })
+
+    describe('downgrade plan', function () {
+      it('shows alternate cancel subscription button text', function () {
+        renderActiveSubscription(monthlyActiveCollaborator)
+        showConfirmCancelUI()
+        screen.getByRole('button', {
+          name: 'No thanks, I still want to cancel',
+        })
+      })
+    })
   })
 
   describe('group plans', function () {
