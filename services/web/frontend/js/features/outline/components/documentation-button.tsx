@@ -33,36 +33,28 @@ function DocumentationButton() {
   function handleDocumentationLinkClick() {
     sendMB('file-tree-documentation-click')
   }
+
+  if (!showDocumentationButton) return null
+
   return (
-    <div className="outline-pane">
-      {showDocumentationButton ? (
-        <header className="outline-footer">
-          <div className="outline-header-expand-collapse-btn documentation-btn">
-            <a
-              href="/learn"
-              target="_blank"
-              rel="noreferrer"
-              className="documentation-link"
-              onClick={handleDocumentationLinkClick}
-            >
-              <Icon
-                type="question-circle"
-                className="outline-caret-icon"
-                style={{ color: 'white' }}
-              />
-              <h4 className="outline-header-name">{documentationButtonText}</h4>
-            </a>
-            <Button bsStyle="link">
-              <Icon
-                style={{ color: 'white' }}
-                type="times"
-                onClick={handleCloseClick}
-                className="outline-caret-icon"
-              />
-            </Button>
-          </div>
-        </header>
-      ) : null}
+    <div className="documentation-btn-container">
+      <a
+        href="/learn"
+        target="_blank"
+        rel="noreferrer"
+        className="documentation-link"
+        onClick={handleDocumentationLinkClick}
+      >
+        <Icon type="question-circle" className="outline-caret-icon" />
+        <h4 className="outline-header-name">{documentationButtonText}</h4>
+      </a>
+      <Button bsStyle="link" className="documentation-close">
+        <Icon
+          type="times"
+          onClick={handleCloseClick}
+          className="outline-caret-icon "
+        />
+      </Button>
     </div>
   )
 }
