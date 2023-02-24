@@ -511,7 +511,6 @@
   "institutional_login_not_supported": "Din institution understøtter ikke <b>institutionel indlogning</b> endnu, men du kan stadig blive registreret med en institutionel email.",
   "institutional_login_unknown": "Beklager, vi ved ikke hvilken institution har udstedt den email–adresse. Du kan kigge i vores <a href=\"__link__\">liste over institutioner</a> for at finde den, eller du kan gøre brug af en af de andre muligheder herunder.",
   "integrations": "Integrationer",
-  "invalid": "Ugyldigt",
   "invalid_element_name": "Dit projekt kunne ikke kopieres på grund af filnavne med ugyldige tegn (såsom asteriske, skråstrege eller styringstegn). Du kan prøve igen, hvis du ændrer navnet på de filer.",
   "invalid_email": "En email adresse er forkert",
   "invalid_file_name": "Ugyldigt filnavn",

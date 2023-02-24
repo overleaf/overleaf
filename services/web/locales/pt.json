@@ -357,7 +357,6 @@
   "institution": "Instituição",
   "institution_account": "Conta Institucional",
   "institution_and_role": "Instituição e papel",
-  "invalid": "Inválido",
   "invalid_element_name": "Não pode copiar o seu projeto porque os arquivos contém caracteres inválidos (como asterisco, barras ou caracteres de controle). Por favor, renomeie os arquivos e tente novamente.",
   "invalid_email": "Algum email está inválido",
   "invalid_file_name": "Nome de Arquivo Inválido",

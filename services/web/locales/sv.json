@@ -495,7 +495,6 @@
   "institution_and_role": "Institution och befattning",
   "institutional": "Institutionell",
   "institutional_login_not_supported": "Ditt universitet stöder ännu inte <b>institutionell inloggning</b>, men du kan fortfarande registrera dig med din institutionella e-post-adress.",
-  "invalid": "Ogiltigt",
   "invalid_element_name": "Projektet kunde inte kopieras på grund av filnamn som innehåller ogiltiga tecken (t.ex. asterisker, snedstreck eller kontrolltecken). Byt namn på filerna och försök igen.",
   "invalid_email": "En e-postadress är inte giltig",
   "invalid_file_name": "Ogiltigt filnamn",
