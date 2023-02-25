@@ -523,7 +523,6 @@
   "institutional": "Institutionnel",
   "institutional_login_not_supported": "Votre université ne supporte pas encore la <b>connexion institutionnelle</b>, mais vous pouvez toujours vous inscrire avec votre adresse courriel institutionnelle.",
   "institutional_login_unknown": "Désolé, nous ne connaissons pas l’établissement qui a délivré cette adresse courriel. Vous pouvez consulter notre <a href=\"__link__\">liste d’établissements</a> pour trouver le vôtre, ou vous pouvez simplement vous inscrire en utilisant votre adresse courriel ici.",
-  "invalid": "Invalide",
   "invalid_element_name": "Impossible de copier votre projet en raison de certains fichiers qui contiennent des caractères invalides\n\ntels que des astérisques, des barres obliques ou des caractères de contrôle. Veuillez renommer les fichiers concernés et\n\nessayer à nouveau.",
   "invalid_email": "Une adresse courriel est invalide",
   "invalid_file_name": "Nom de fichier invalide",

@@ -519,7 +519,6 @@
   "institutional": "机构",
   "institutional_login_not_supported": "您的大学还不支持<b>机构登录</b>，但您仍然可以通过机构电子邮件注册。",
   "institutional_login_unknown": "抱歉，我们不知道是哪个机构发的那个电子邮件地址。您可以浏览我们的\n<a href=\"__link__\">机构列表</a> 找到您的机构，也可以在此处使用您的电子邮件地址和密码注册。",
-  "invalid": "无效的",
   "invalid_element_name": "无法复制项目，因为文件名包含无效字符,（如星号、斜杠或控制字符）。请重命名文件并重试。",
   "invalid_email": "有未验证的邮箱",
   "invalid_file_name": "文件名无效",
