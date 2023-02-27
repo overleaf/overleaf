@@ -77,7 +77,7 @@ const AuthenticationManager = {
         if (match) {
           _metricsForSuccessfulPasswordMatch(password)
         }
-        return callback(null, user, match)
+        callback(null, user, match)
       })
     })
   },

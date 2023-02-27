@@ -5,7 +5,6 @@
 // Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -27,14 +26,14 @@ module.exports = SystemMessageManager = {
     if (callback == null) {
       callback = function () {}
     }
-    return SystemMessage.find({}, callback)
+    SystemMessage.find({}, callback)
   },
 
   clearMessages(callback) {
     if (callback == null) {
       callback = function () {}
     }
-    return SystemMessage.deleteMany({}, callback)
+    SystemMessage.deleteMany({}, callback)
   },
 
   createMessage(content, callback) {
@@ -42,7 +41,7 @@ module.exports = SystemMessageManager = {
       callback = function () {}
     }
     const message = new SystemMessage({ content })
-    return message.save(callback)
+    message.save(callback)
   },
 
   refreshCache() {

@@ -6,7 +6,6 @@
 // Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -53,7 +52,7 @@ const TemplatesManager = {
       logger.warn({ err }, 'error getting zip from template API')
       return callback(err)
     })
-    return FileWriter.ensureDumpFolderExists(function (err) {
+    FileWriter.ensureDumpFolderExists(function (err) {
       if (err != null) {
         return callback(err)
       }
@@ -73,7 +72,7 @@ const TemplatesManager = {
           )
           return callback(new Error('get zip failed'))
         }
-        return ProjectUploadManager.createProjectFromZipArchiveWithName(
+        ProjectUploadManager.createProjectFromZipArchiveWithName(
           user_id,
           projectName,
           dumpPath,
@@ -85,7 +84,7 @@ const TemplatesManager = {
               })
               return callback(err)
             }
-            return async.series(
+            async.series(
               [
                 cb => TemplatesManager._setCompiler(project._id, compiler, cb),
                 cb => TemplatesManager._setImage(project._id, imageName, cb),
@@ -110,7 +109,7 @@ const TemplatesManager = {
                   fromV1TemplateId: templateId,
                   fromV1TemplateVersionId: templateVersionId,
                 }
-                return Project.updateOne(
+                Project.updateOne(
                   { _id: project._id },
                   update,
                   {},
@@ -118,7 +117,7 @@ const TemplatesManager = {
                     if (err != null) {
                       return callback(err)
                     }
-                    return callback(null, project)
+                    callback(null, project)
                   }
                 )
               }
@@ -126,7 +125,7 @@ const TemplatesManager = {
           }
         )
       })
-      return zipReq.pipe(writeStream)
+      zipReq.pipe(writeStream)
     })
   },
 
@@ -134,32 +133,28 @@ const TemplatesManager = {
     if (compiler == null) {
       return callback()
     }
-    return ProjectOptionsHandler.setCompiler(project_id, compiler, callback)
+    ProjectOptionsHandler.setCompiler(project_id, compiler, callback)
   },
 
   _setImage(project_id, imageName, callback) {
     if (!imageName) {
       imageName = 'wl_texlive:2018.1'
     }
-    return ProjectOptionsHandler.setImageName(project_id, imageName, callback)
+    ProjectOptionsHandler.setImageName(project_id, imageName, callback)
   },
 
   _setMainFile(project_id, mainFile, callback) {
     if (mainFile == null) {
       return callback()
     }
-    return ProjectRootDocManager.setRootDocFromName(
-      project_id,
-      mainFile,
-      callback
-    )
+    ProjectRootDocManager.setRootDocFromName(project_id, mainFile, callback)
   },
 
   _setBrandVariationId(project_id, brandVariationId, callback) {
     if (brandVariationId == null) {
       return callback()
     }
-    return ProjectOptionsHandler.setBrandVariationId(
+    ProjectOptionsHandler.setBrandVariationId(
       project_id,
       brandVariationId,
       callback

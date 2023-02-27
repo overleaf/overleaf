@@ -18,7 +18,7 @@ function allocate(
   }
 
   const query = { referal_id: referalId }
-  return User.findOne(query, { _id: 1 }, function (error, user) {
+  User.findOne(query, { _id: 1 }, function (error, user) {
     if (error != null) {
       return callback(error)
     }

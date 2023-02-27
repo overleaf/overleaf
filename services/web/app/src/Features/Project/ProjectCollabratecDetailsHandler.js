@@ -8,7 +8,6 @@
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -27,7 +26,7 @@ module.exports = ProjectCollabratecDetailsHandler = {
     if (callback == null) {
       callback = function () {}
     }
-    return ProjectCollabratecDetailsHandler.setCollabratecUsers(
+    ProjectCollabratecDetailsHandler.setCollabratecUsers(
       project_id,
       [{ user_id, collabratec_document_id, collabratec_privategroup_id }],
       callback
@@ -53,11 +52,11 @@ module.exports = ProjectCollabratecDetailsHandler = {
         },
       },
     }
-    return Project.findOne(query, { _id: 1 }, function (err, project) {
+    Project.findOne(query, { _id: 1 }, function (err, project) {
       if (err != null) {
         callback(err)
       }
-      return callback(null, project != null)
+      callback(null, project != null)
     })
   },
 
@@ -96,7 +95,7 @@ module.exports = ProjectCollabratecDetailsHandler = {
         },
       },
     }
-    return Project.updateOne(query, update, callback)
+    Project.updateOne(query, update, callback)
   },
 
   setCollabratecUsers(project_id, collabratec_users, callback) {
@@ -122,7 +121,7 @@ module.exports = ProjectCollabratecDetailsHandler = {
       }
     }
     const update = { $set: { collabratecUsers: collabratec_users } }
-    return Project.updateOne({ _id: project_id }, update, callback)
+    Project.updateOne({ _id: project_id }, update, callback)
   },
 
   unlinkCollabratecUserProject(project_id, user_id, callback) {
@@ -144,7 +143,7 @@ module.exports = ProjectCollabratecDetailsHandler = {
         },
       },
     }
-    return Project.updateOne(query, update, callback)
+    Project.updateOne(query, update, callback)
   },
 
   updateCollabratecUserIds(old_user_id, new_user_id, callback) {
@@ -160,6 +159,6 @@ module.exports = ProjectCollabratecDetailsHandler = {
     }
     const query = { 'collabratecUsers.user_id': old_user_id }
     const update = { $set: { 'collabratecUsers.$.user_id': new_user_id } }
-    return Project.updateMany(query, update, callback)
+    Project.updateMany(query, update, callback)
   },
 }

@@ -6,7 +6,6 @@
 // Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -24,7 +23,7 @@ const { ObjectId } = require('mongodb')
 const MILISECONDS_IN_DAY = 86400000
 module.exports = InactiveProjectManager = {
   reactivateProjectIfRequired(project_id, callback) {
-    return ProjectGetter.getProject(
+    ProjectGetter.getProject(
       project_id,
       { active: true },
       function (err, project) {
@@ -43,14 +42,14 @@ module.exports = InactiveProjectManager = {
           return callback()
         }
 
-        return DocstoreManager.unarchiveProject(project_id, function (err) {
+        DocstoreManager.unarchiveProject(project_id, function (err) {
           if (err != null) {
             OError.tag(err, 'error reactivating project in docstore', {
               project_id,
             })
             return callback(err)
           }
-          return ProjectUpdateHandler.markAsActive(project_id, callback)
+          ProjectUpdateHandler.markAsActive(project_id, callback)
         })
       }
     )
@@ -113,11 +112,11 @@ module.exports = InactiveProjectManager = {
       cb => DocstoreManager.archiveProject(project_id, cb),
       cb => ProjectUpdateHandler.markAsInactive(project_id, cb),
     ]
-    return async.series(jobs, function (err) {
+    async.series(jobs, function (err) {
       if (err != null) {
         logger.warn({ err, project_id }, 'error deactivating project')
       }
-      return callback(err)
+      callback(err)
     })
   },
 }

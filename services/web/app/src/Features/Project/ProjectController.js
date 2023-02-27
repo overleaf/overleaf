@@ -200,9 +200,9 @@ const ProjectController = {
 
     ProjectDeleter.archiveProject(projectId, userId, function (err) {
       if (err != null) {
-        return next(err)
+        next(err)
       } else {
-        return res.sendStatus(200)
+        res.sendStatus(200)
       }
     })
   },
@@ -213,9 +213,9 @@ const ProjectController = {
 
     ProjectDeleter.unarchiveProject(projectId, userId, function (err) {
       if (err != null) {
-        return next(err)
+        next(err)
       } else {
-        return res.sendStatus(200)
+        res.sendStatus(200)
       }
     })
   },
@@ -226,9 +226,9 @@ const ProjectController = {
 
     ProjectDeleter.trashProject(projectId, userId, function (err) {
       if (err != null) {
-        return next(err)
+        next(err)
       } else {
-        return res.sendStatus(200)
+        res.sendStatus(200)
       }
     })
   },
@@ -239,9 +239,9 @@ const ProjectController = {
 
     ProjectDeleter.untrashProject(projectId, userId, function (err) {
       if (err != null) {
-        return next(err)
+        next(err)
       } else {
-        return res.sendStatus(200)
+        res.sendStatus(200)
       }
     })
   },
@@ -490,7 +490,7 @@ const ProjectController = {
                 // and does async.series
                 const allInReconfirmNotificationPeriods =
                   (results && results[0]) || []
-                return cb(null, {
+                cb(null, {
                   list: fullEmails,
                   allInReconfirmNotificationPeriods,
                 })
@@ -1394,7 +1394,7 @@ const ProjectController = {
             status: 'success',
           })
         }
-        return callback(null, user)
+        callback(null, user)
       }
     )
   },

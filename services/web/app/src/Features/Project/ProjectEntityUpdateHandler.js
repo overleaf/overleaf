@@ -927,7 +927,7 @@ const ProjectEntityUpdateHandler = {
               }
             )
           } else if (existingFile) {
-            return ProjectEntityUpdateHandler._replaceFile(
+            ProjectEntityUpdateHandler._replaceFile(
               projectId,
               existingFile._id,
               fsPath,

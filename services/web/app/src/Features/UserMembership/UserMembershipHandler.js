@@ -8,7 +8,6 @@
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -33,7 +32,7 @@ const UserMembershipHandler = {
       callback = function () {}
     }
     const query = buildEntityQuery(entityId, entityConfig)
-    return EntityModels[entityConfig.modelName].findOne(query, callback)
+    EntityModels[entityConfig.modelName].findOne(query, callback)
   },
 
   createEntity(entityId, entityConfig, callback) {
@@ -41,7 +40,7 @@ const UserMembershipHandler = {
       callback = function () {}
     }
     const data = buildEntityQuery(entityId, entityConfig)
-    return EntityModels[entityConfig.modelName].create(data, callback)
+    EntityModels[entityConfig.modelName].create(data, callback)
   },
 
   getUsers(entity, entityConfig, callback) {
@@ -49,7 +48,7 @@ const UserMembershipHandler = {
       callback = function () {}
     }
     const attributes = entityConfig.fields.read
-    return getPopulatedListOfMembers(entity, attributes, callback)
+    getPopulatedListOfMembers(entity, attributes, callback)
   },
 
   addUser(entity, entityConfig, email, callback) {
@@ -57,7 +56,7 @@ const UserMembershipHandler = {
       callback = function () {}
     }
     const attribute = entityConfig.fields.write
-    return UserGetter.getUserByAnyEmail(email, function (error, user) {
+    UserGetter.getUserByAnyEmail(email, function (error, user) {
       if (error != null) {
         return callback(error)
       }
@@ -70,7 +69,7 @@ const UserMembershipHandler = {
         return callback(error)
       }
 
-      return addUserToEntity(entity, attribute, user, error =>
+      addUserToEntity(entity, attribute, user, error =>
         callback(error, UserMembershipViewModel.build(user))
       )
     })
@@ -84,7 +83,7 @@ const UserMembershipHandler = {
     if (entity.admin_id != null ? entity.admin_id.equals(userId) : undefined) {
       return callback(new UserIsManagerError())
     }
-    return removeUserFromEntity(entity, attribute, userId, callback)
+    removeUserFromEntity(entity, attribute, userId, callback)
   },
 }
 
@@ -107,7 +106,7 @@ function getPopulatedListOfMembers(entity, attributes, callback) {
     }
   }
 
-  return async.map(userObjects, UserMembershipViewModel.buildAsync, callback)
+  async.map(userObjects, UserMembershipViewModel.buildAsync, callback)
 }
 
 function addUserToEntity(entity, attribute, user, callback) {
@@ -116,7 +115,7 @@ function addUserToEntity(entity, attribute, user, callback) {
   }
   const fieldUpdate = {}
   fieldUpdate[attribute] = user._id
-  return entity.updateOne({ $addToSet: fieldUpdate }, callback)
+  entity.updateOne({ $addToSet: fieldUpdate }, callback)
 }
 
 function removeUserFromEntity(entity, attribute, userId, callback) {
@@ -125,7 +124,7 @@ function removeUserFromEntity(entity, attribute, userId, callback) {
   }
   const fieldUpdate = {}
   fieldUpdate[attribute] = userId
-  return entity.updateOne({ $pull: fieldUpdate }, callback)
+  entity.updateOne({ $pull: fieldUpdate }, callback)
 }
 
 function buildEntityQuery(entityId, entityConfig, loggedInUser) {

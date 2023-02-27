@@ -30,7 +30,7 @@ module.exports = {
         featuresChanged = _featuresChanged(features, docBeforeUpdate.features)
       }
 
-      return callback(err, features, featuresChanged)
+      callback(err, features, featuresChanged)
     })
   },
 
@@ -41,7 +41,7 @@ module.exports = {
       if (docBeforeUpdate) {
         featuresChanged = _featuresChanged(features, docBeforeUpdate.features)
       }
-      return callback(err, featuresChanged)
+      callback(err, featuresChanged)
     })
   },
 

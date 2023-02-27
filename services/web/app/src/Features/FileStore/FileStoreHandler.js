@@ -133,7 +133,7 @@ const FileStoreHandler = {
         'error in file stream'
       )
     )
-    return callback(null, readStream)
+    callback(null, readStream)
   },
 
   getFileSize(projectId, fileId, callback) {
@@ -168,14 +168,14 @@ const FileStoreHandler = {
       uri: this._buildUrl(projectId, fileId),
       timeout: FIVE_MINS_IN_MS,
     }
-    return request(opts, function (err, response) {
+    request(opts, function (err, response) {
       if (err) {
         logger.warn(
           { err, projectId, fileId },
           'something went wrong deleting file from filestore'
         )
       }
-      return callback(err)
+      callback(err)
     })
   },
 
@@ -217,7 +217,7 @@ const FileStoreHandler = {
       uri: this._buildUrl(newProjectId, newFileId),
       timeout: FIVE_MINS_IN_MS,
     }
-    return request(opts, function (err, response) {
+    request(opts, function (err, response) {
       if (err) {
         OError.tag(
           err,
@@ -229,10 +229,10 @@ const FileStoreHandler = {
             newFileId,
           }
         )
-        return callback(err)
+        callback(err)
       } else if (response.statusCode >= 200 && response.statusCode < 300) {
         // successful response
-        return callback(null, opts.uri)
+        callback(null, opts.uri)
       } else {
         err = new OError(
           `non-ok response from filestore for copyFile: ${response.statusCode}`,
@@ -241,7 +241,7 @@ const FileStoreHandler = {
             statusCode: response.statusCode,
           }
         )
-        return callback(err)
+        callback(err)
       }
     })
   },

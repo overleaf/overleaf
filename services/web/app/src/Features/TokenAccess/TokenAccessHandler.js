@@ -138,9 +138,9 @@ const TokenAccessHandler = {
               { projectId: project._id },
               'read-and-write token match on numeric section, but not on full token'
             )
-            return callback(null, null)
+            callback(null, null)
           } else {
-            return callback(null, project)
+            callback(null, project)
           }
         } catch (error) {
           err = error
@@ -148,7 +148,7 @@ const TokenAccessHandler = {
             { projectId: project._id, cryptoErr: err },
             'error comparing tokens'
           )
-          return callback(null, null)
+          callback(null, null)
         }
       }
     )
@@ -160,7 +160,7 @@ const TokenAccessHandler = {
     } else if (tokenType === TokenAccessHandler.TOKEN_TYPES.READ_AND_WRITE) {
       TokenAccessHandler.getProjectByReadAndWriteToken(token, callback)
     } else {
-      return callback(new Error('invalid token type'))
+      callback(new Error('invalid token type'))
     }
   },
 
@@ -237,7 +237,7 @@ const TokenAccessHandler = {
         return callback(null, false, false)
       }
       // TODO: think about cleaning up this interface and its usage in AuthorizationManager
-      return callback(
+      callback(
         null,
         tokenType === TokenAccessHandler.TOKEN_TYPES.READ_AND_WRITE &&
           TokenAccessHandler.ANONYMOUS_READ_AND_WRITE_ENABLED,

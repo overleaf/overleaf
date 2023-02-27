@@ -6,7 +6,6 @@
 // Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -34,7 +33,7 @@ const UserMembershipsHandler = {
     }
 
     // remove the user from all entities types
-    return async.map(
+    async.map(
       entityConfigs,
       (entityConfig, innerCallback) =>
         UserMembershipsHandler.removeUserFromEntities(
@@ -52,7 +51,7 @@ const UserMembershipsHandler = {
     }
     const removeOperation = { $pull: {} }
     removeOperation.$pull[entityConfig.fields.write] = userId
-    return EntityModels[entityConfig.modelName].updateMany(
+    EntityModels[entityConfig.modelName].updateMany(
       {},
       removeOperation,
       callback
@@ -65,7 +64,7 @@ const UserMembershipsHandler = {
     }
     const query = Object.assign({}, entityConfig.baseQuery)
     query[entityConfig.fields.access] = userId
-    return EntityModels[entityConfig.modelName].find(
+    EntityModels[entityConfig.modelName].find(
       query,
       function (error, entities) {
         if (entities == null) {
@@ -74,7 +73,7 @@ const UserMembershipsHandler = {
         if (error != null) {
           return callback(error)
         }
-        return async.mapSeries(
+        async.mapSeries(
           entities,
           (entity, cb) => entity.fetchV1Data(cb),
           callback

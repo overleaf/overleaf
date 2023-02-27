@@ -20,7 +20,7 @@ const Errors = require('../Errors/Errors')
 
 module.exports = TeamInvitesHandler = {
   getInvite(token, callback) {
-    return Subscription.findOne(
+    Subscription.findOne(
       { 'teamInvites.token': token },
       function (err, subscription) {
         if (err) {
@@ -41,7 +41,7 @@ module.exports = TeamInvitesHandler = {
     if (!email) {
       return callback(new Error('invalid email'))
     }
-    return UserGetter.getUser(teamManagerId, function (error, teamManager) {
+    UserGetter.getUser(teamManagerId, function (error, teamManager) {
       if (error) {
         return callback(error)
       }

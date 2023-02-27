@@ -59,14 +59,14 @@ function createSubscription(
         if (error) {
           return callback(error)
         }
-        return SubscriptionUpdater.syncSubscription(
+        SubscriptionUpdater.syncSubscription(
           recurlySubscription,
           user._id,
           function (error) {
             if (error) {
               return callback(error)
             }
-            return callback()
+            callback()
           }
         )
       }
@@ -85,9 +85,9 @@ function updateSubscription(user, planCode, couponCode, callback) {
         )
       }
       if (!hasSubscription) {
-        return callback()
+        callback()
       } else {
-        return async.series(
+        async.series(
           [
             function (cb) {
               if (!couponCode) {
@@ -316,7 +316,7 @@ function attemptPaypalInvoiceCollection(recurlyAccountCode, callback) {
 }
 
 function extendTrial(subscription, daysToExend, callback) {
-  return RecurlyWrapper.extendTrial(
+  RecurlyWrapper.extendTrial(
     subscription.recurlySubscription_id,
     daysToExend,
     callback
