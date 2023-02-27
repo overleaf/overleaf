@@ -11,24 +11,24 @@ function Canceled() {
           <div className="card">
             <div className="page-header">
               <h2>{t('subscription_canceled')}</h2>
-              <Alert bsStyle="info">
-                <p>
-                  {t('to_modify_your_subscription_go_to')}&nbsp;
-                  <a href="/user/subscription" rel="noopener noreferrer">
-                    {t('manage_subscription')}.
-                  </a>
-                </p>
-              </Alert>
+            </div>
+            <Alert bsStyle="info">
               <p>
-                <a
-                  className="btn btn-primary"
-                  href="/project"
-                  rel="noopener noreferrer"
-                >
-                  &lt; {t('back_to_your_projects')}
+                {t('to_modify_your_subscription_go_to')}&nbsp;
+                <a href="/user/subscription" rel="noopener noreferrer">
+                  {t('manage_subscription')}.
                 </a>
               </p>
-            </div>
+            </Alert>
+            <p>
+              <a
+                className="btn btn-primary"
+                href="/project"
+                rel="noopener noreferrer"
+              >
+                &lt; {t('back_to_your_projects')}
+              </a>
+            </p>
           </div>
         </Col>
       </Row>
