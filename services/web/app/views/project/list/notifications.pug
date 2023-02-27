@@ -267,12 +267,13 @@ include ../../_mixins/reconfirm_affiliation
 			)
 				.alert.alert-info
 					.notification-body(ng-switch="groupsAndEnterpriseBannerVariant")
-						span(ng-switch-when="empower") #{translate("empower_your_organization_to_work_in_overleaf")}
-						span(ng-switch-when="save") !{translate("save_money_groups_companies_research_organizations_can_save_money", {}, ['strong'])}
 						span(ng-switch-when="did-you-know") #{translate("did_you_know_that_overleaf_offers")}
+						span(ng-switch-when="on-premise") Overleaf On-Premises: Does your company want to keep its data within its firewall? Overleaf offers Server Pro, an on-premises solution for companies. Get in touch to learn more.
+						span(ng-switch-when="people") Other people at your company may already be using Overleaf. Save money with Overleaf group and company-wide subscriptions. Request more information.
+						span(ng-switch-when="FOMO") Why do Fortune 500 companies and top research institutions trust Overleaf to streamline their collaboration? Get in touch to learn more.
 					.notification-action
 						a.pull-right.btn.btn-sm.btn-info(
-							href="/for/contact-sales"
+							href="/for/contact-sales{{urlVariantSuffix}}"
 							target="_blank"
 							event-tracking="groups-and-enterprise-banner-click"
 							event-tracking-mb="true"

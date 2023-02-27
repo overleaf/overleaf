@@ -532,26 +532,6 @@ const ProjectController = {
             }
           )
         },
-        groupsAndEnterpriseBannerAssignment(cb) {
-          SplitTestHandler.getAssignment(
-            req,
-            res,
-            'groups-and-enterprise-banner',
-            (err, assignment) => {
-              if (err) {
-                logger.warn(
-                  { err },
-                  'failed to get "groups-and-enterprise-banner" split test assignment'
-                )
-
-                const defaultAssignment = { variant: 'default' }
-                cb(null, defaultAssignment)
-              } else {
-                cb(null, assignment)
-              }
-            }
-          )
-        },
         survey(cb) {
           SurveyHandler.getSurvey(userId, (err, survey) => {
             if (err) {
@@ -573,7 +553,6 @@ const ProjectController = {
           notifications,
           user,
           userEmailsData,
-          groupsAndEnterpriseBannerAssignment,
           userIsMemberOfGroupSubscription,
         } = results
 
@@ -707,12 +686,14 @@ const ProjectController = {
           affiliation => affiliation.licence && affiliation.licence !== 'free'
         )
 
-        // groupsAndEnterpriseBannerAssignment.variant = 'default' | 'empower' | 'save' | 'did-you-know'
         const showGroupsAndEnterpriseBanner =
-          groupsAndEnterpriseBannerAssignment.variant !== 'default' &&
           Features.hasFeature('saas') &&
           !userIsMemberOfGroupSubscription &&
           !hasPaidAffiliation
+
+        const groupsAndEnterpriseBannerVariant =
+          showGroupsAndEnterpriseBanner &&
+          _.sample(['did-you-know', 'on-premise', 'people', 'FOMO'])
 
         ProjectController._injectProjectUsers(projects, (error, projects) => {
           if (error != null) {
@@ -739,8 +720,7 @@ const ProjectController = {
             usersBestSubscription: results.usersBestSubscription,
             survey: results.survey,
             showGroupsAndEnterpriseBanner,
-            groupsAndEnterpriseBannerVariant:
-              groupsAndEnterpriseBannerAssignment.variant,
+            groupsAndEnterpriseBannerVariant,
           }
 
           const paidUser =

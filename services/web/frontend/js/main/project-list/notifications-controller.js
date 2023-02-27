@@ -40,10 +40,15 @@ App.controller(
       'ol-groupsAndEnterpriseBannerVariant'
     )
 
-    $scope.isVariantValid =
-      $scope.groupsAndEnterpriseBannerVariant === 'save' ||
-      $scope.groupsAndEnterpriseBannerVariant === 'empower' ||
-      $scope.groupsAndEnterpriseBannerVariant === 'did-you-know'
+    const valid = ['did-you-know', 'on-premise', 'people', 'FOMO']
+
+    $scope.isVariantValid = valid.includes(
+      $scope.groupsAndEnterpriseBannerVariant
+    )
+
+    $scope.urlVariantSuffix = $scope.isVariantValid
+      ? `-${valid.indexOf($scope.groupsAndEnterpriseBannerVariant) + 1}`
+      : ''
   }
 )
 

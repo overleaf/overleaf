@@ -17,7 +17,6 @@ const NotificationsHandler = require('../Notifications/NotificationsHandler')
 const Modules = require('../../infrastructure/Modules')
 const { OError, V1ConnectionError } = require('../Errors/Errors')
 const { User } = require('../../models/User')
-const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const UserPrimaryEmailCheckHandler = require('../User/UserPrimaryEmailCheckHandler')
 const UserController = require('../User/UserController')
 const LimitationsManager = require('../Subscription/LimitationsManager')
@@ -270,25 +269,7 @@ async function projectListReactPage(req, res, next) {
     status: prefetchedProjectsBlob ? 'success' : 'too-slow',
   })
 
-  let showGroupsAndEnterpriseBanner = false
-  let groupsAndEnterpriseBannerAssignment
-
-  try {
-    groupsAndEnterpriseBannerAssignment =
-      await SplitTestHandler.promises.getAssignment(
-        req,
-        res,
-        'groups-and-enterprise-banner'
-      )
-  } catch (error) {
-    logger.error(
-      { err: error },
-      'failed to get "groups-and-enterprise-banner" split test assignment'
-    )
-  }
-
   let userIsMemberOfGroupSubscription = false
-
   try {
     const userIsMemberOfGroupSubscriptionPromise =
       await LimitationsManager.promises.userIsMemberOfGroupSubscription(user)
@@ -306,11 +287,14 @@ async function projectListReactPage(req, res, next) {
     affiliation => affiliation.licence && affiliation.licence !== 'free'
   )
 
-  showGroupsAndEnterpriseBanner =
-    (groupsAndEnterpriseBannerAssignment?.variant ?? 'default') !== 'default' &&
+  const showGroupsAndEnterpriseBanner =
     Features.hasFeature('saas') &&
     !userIsMemberOfGroupSubscription &&
     !hasPaidAffiliation
+
+  const groupsAndEnterpriseBannerVariant =
+    showGroupsAndEnterpriseBanner &&
+    _.sample(['did-you-know', 'on-premise', 'people', 'FOMO'])
 
   res.render('project/list-react', {
     title: 'your_projects',
@@ -327,8 +311,7 @@ async function projectListReactPage(req, res, next) {
     portalTemplates,
     prefetchedProjectsBlob,
     showGroupsAndEnterpriseBanner,
-    groupsAndEnterpriseBannerVariant:
-      groupsAndEnterpriseBannerAssignment?.variant ?? 'default',
+    groupsAndEnterpriseBannerVariant,
     projectDashboardReact: true, // used in navbar
   })
 }

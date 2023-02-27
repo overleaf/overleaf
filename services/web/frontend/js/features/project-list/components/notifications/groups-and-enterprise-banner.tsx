@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect } from 'react'
 import Notification from './notification'
 import * as eventTracking from '../../../../infrastructure/event-tracking'
 import getMeta from '../../../../utils/meta'
@@ -6,74 +6,58 @@ import customLocalStorage from '../../../../infrastructure/local-storage'
 import { useProjectListContext } from '../../context/project-list-context'
 import { Trans, useTranslation } from 'react-i18next'
 
-type GroupsAndEnterpriseBannerVariant =
-  | 'default'
-  | 'empower'
-  | 'save'
-  | 'did-you-know'
+const variants = ['did-you-know', 'on-premise', 'people', 'FOMO'] as const
+type GroupsAndEnterpriseBannerVariant = typeof variants[number]
+
+let viewEventSent = false
 
 export default function GroupsAndEnterpriseBanner() {
   const { t } = useTranslation()
   const { totalProjectsCount } = useProjectListContext()
-  const showGroupsAndEnterpriseBanner = getMeta(
+
+  const showGroupsAndEnterpriseBanner: boolean = getMeta(
     'ol-showGroupsAndEnterpriseBanner'
-  ) as boolean
-  const groupsAndEnterpriseBannerVariant = getMeta(
-    'ol-groupsAndEnterpriseBannerVariant'
-  ) as GroupsAndEnterpriseBannerVariant
-
-  const eventTrackingSegmentation = useMemo(
-    () => ({
-      location: 'dashboard-banner-react',
-      variant: groupsAndEnterpriseBannerVariant,
-      page: '/project',
-    }),
-    [groupsAndEnterpriseBannerVariant]
   )
+  const groupsAndEnterpriseBannerVariant: GroupsAndEnterpriseBannerVariant =
+    getMeta('ol-groupsAndEnterpriseBannerVariant')
 
-  const hasDismissedGroupsAndEnterpriseBanner = customLocalStorage.getItem(
-    'has_dismissed_groups_and_enterprise_banner'
-  )
+  const hasDismissedGroupsAndEnterpriseBanner = hasRecentlyDismissedBanner()
+
+  const contactSalesUrl = `/for/contact-sales-${
+    variants.indexOf(groupsAndEnterpriseBannerVariant) + 1
+  }`
+
+  const shouldRenderBanner =
+    showGroupsAndEnterpriseBanner &&
+    totalProjectsCount !== 0 &&
+    !hasDismissedGroupsAndEnterpriseBanner &&
+    isVariantValid(groupsAndEnterpriseBannerVariant)
 
   const handleClose = useCallback(() => {
     customLocalStorage.setItem(
       'has_dismissed_groups_and_enterprise_banner',
-      true
+      new Date()
     )
   }, [])
 
   const handleClickContact = useCallback(() => {
-    eventTracking.sendMB(
-      'groups-and-enterprise-banner-click',
-      eventTrackingSegmentation
-    )
-  }, [eventTrackingSegmentation])
+    eventTracking.sendMB('groups-and-enterprise-banner-click', {
+      location: 'dashboard-banner-react',
+      variant: groupsAndEnterpriseBannerVariant,
+    })
+  }, [groupsAndEnterpriseBannerVariant])
 
   useEffect(() => {
-    eventTracking.sendMB(
-      'groups-and-enterprise-banner-prompt',
-      eventTrackingSegmentation
-    )
-  }, [eventTrackingSegmentation])
+    if (!viewEventSent && shouldRenderBanner) {
+      eventTracking.sendMB('groups-and-enterprise-banner-prompt', {
+        location: 'dashboard-banner-react',
+        variant: groupsAndEnterpriseBannerVariant,
+      })
+      viewEventSent = true
+    }
+  }, [shouldRenderBanner, groupsAndEnterpriseBannerVariant])
 
-  if (
-    totalProjectsCount === 0 ||
-    hasDismissedGroupsAndEnterpriseBanner ||
-    !showGroupsAndEnterpriseBanner
-  ) {
-    return null
-  }
-
-  // `getText` function has no default switch case since the whole notification
-  // should not be rendered if the `groupsAndEnterpriseBannerVariant` is not valid
-  if (!isVariantValid(groupsAndEnterpriseBannerVariant)) {
-    return null
-  }
-
-  // this shouldn't ever happens since the value of `showGroupsAndEnterpriseBanner` should be false
-  // if `groupsAndEnterpriseBannerVariant` is 'default'
-  // but just adding this check as an extra measure
-  if (groupsAndEnterpriseBannerVariant === 'default') {
+  if (!shouldRenderBanner) {
     return null
   }
 
@@ -85,8 +69,9 @@ export default function GroupsAndEnterpriseBanner() {
       <Notification.Action>
         <a
           className="pull-right btn btn-info btn-sm"
-          href="/for/contact-sales"
+          href={contactSalesUrl}
           target="_blank"
+          rel="noreferrer"
           onClick={handleClickContact}
         >
           {t('contact_sales')}
@@ -97,26 +82,35 @@ export default function GroupsAndEnterpriseBanner() {
 }
 
 function isVariantValid(variant: GroupsAndEnterpriseBannerVariant) {
-  return (
-    variant === 'empower' || variant === 'save' || variant === 'did-you-know'
-  )
+  return variants.includes(variant)
 }
 
 function getText(variant: GroupsAndEnterpriseBannerVariant) {
   switch (variant) {
-    case 'empower':
-      return <Trans i18nKey="empower_your_organization_to_work_in_overleaf" />
-    case 'save':
-      return (
-        <Trans
-          i18nKey="save_money_groups_companies_research_organizations_can_save_money"
-          components={
-            /* eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key */
-            [<strong />]
-          }
-        />
-      )
     case 'did-you-know':
       return <Trans i18nKey="did_you_know_that_overleaf_offers" />
+    case 'on-premise':
+      return 'Overleaf On-Premises: Does your company want to keep its data within its firewall? Overleaf offers Server Pro, an on-premises solution for companies. Get in touch to learn more.'
+    case 'people':
+      return 'Other people at your company may already be using Overleaf. Save money with Overleaf group and company-wide subscriptions. Request more information.'
+    case 'FOMO':
+      return 'Why do Fortune 500 companies and top research institutions trust Overleaf to streamline their collaboration? Get in touch to learn more.'
   }
+}
+
+function hasRecentlyDismissedBanner() {
+  const dismissed = customLocalStorage.getItem(
+    'has_dismissed_groups_and_enterprise_banner'
+  )
+  // previous banner set this to 'true', which shouldn't hide the new banner
+  if (!dismissed || dismissed === 'true') {
+    return false
+  }
+
+  const dismissedDate = new Date(dismissed)
+  const recentlyDismissedCutoff = new Date()
+  recentlyDismissedCutoff.setDate(recentlyDismissedCutoff.getDate() - 30) // 30 days
+
+  // once the dismissedDate passes the cut off mark, banner will be shown again
+  return dismissedDate > recentlyDismissedCutoff
 }

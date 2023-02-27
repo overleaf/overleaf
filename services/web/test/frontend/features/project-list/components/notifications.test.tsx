@@ -658,6 +658,11 @@ describe('<UserNotifications />', function () {
           totalSize: projects.length,
         },
       })
+
+      window.metaAttributesCache.set(
+        'ol-groupsAndEnterpriseBannerVariant',
+        'did-you-know'
+      )
     })
 
     afterEach(function () {
@@ -665,7 +670,7 @@ describe('<UserNotifications />', function () {
       window.metaAttributesCache = window.metaAttributesCache || new Map()
     })
 
-    it('does not show the banner for users that are in group or are affiliated or assigned in the `default` variant', async function () {
+    it('does not show the banner for users that are in group or are affiliated', async function () {
       window.metaAttributesCache.set('ol-showGroupsAndEnterpriseBanner', false)
 
       renderWithinProjectListProvider(GroupsAndEnterpriseBanner)
@@ -674,9 +679,41 @@ describe('<UserNotifications />', function () {
       expect(screen.queryByRole('link', { name: 'Contact Sales' })).to.be.null
     })
 
-    it('does not show the banner for users that have already dismissed it', async function () {
+    it('shows the banner for users that have dismissed the previous banners', async function () {
       window.metaAttributesCache.set('ol-showGroupsAndEnterpriseBanner', true)
       localStorage.setItem('has_dismissed_groups_and_enterprise_banner', true)
+
+      renderWithinProjectListProvider(GroupsAndEnterpriseBanner)
+      await fetchMock.flush(true)
+
+      expect(screen.queryByRole('link', { name: 'Contact Sales' })).to.not.be
+        .null
+    })
+
+    it('shows the banner for users that have dismissed the banner more than 30 days ago', async function () {
+      const dismissed = new Date()
+      dismissed.setDate(dismissed.getDate() - 31) // 31 days
+      window.metaAttributesCache.set('ol-showGroupsAndEnterpriseBanner', true)
+      localStorage.setItem(
+        'has_dismissed_groups_and_enterprise_banner',
+        dismissed
+      )
+
+      renderWithinProjectListProvider(GroupsAndEnterpriseBanner)
+      await fetchMock.flush(true)
+
+      expect(screen.queryByRole('link', { name: 'Contact Sales' })).to.not.be
+        .null
+    })
+
+    it('does not show the banner for users that have dismissed the banner within the last 30 days', async function () {
+      const dismissed = new Date()
+      dismissed.setDate(dismissed.getDate() - 29) // 29 days
+      window.metaAttributesCache.set('ol-showGroupsAndEnterpriseBanner', true)
+      localStorage.setItem(
+        'has_dismissed_groups_and_enterprise_banner',
+        dismissed
+      )
 
       renderWithinProjectListProvider(GroupsAndEnterpriseBanner)
       await fetchMock.flush(true)
@@ -711,24 +748,7 @@ describe('<UserNotifications />', function () {
         localStorage.clear()
       })
 
-      it('will show the correct text for the `save` split test variant', async function () {
-        window.metaAttributesCache.set(
-          'ol-groupsAndEnterpriseBannerVariant',
-          'save'
-        )
-
-        renderWithinProjectListProvider(GroupsAndEnterpriseBanner)
-        await fetchMock.flush(true)
-
-        screen.getByText(
-          /Groups, Companies and Research Organizations can save money with our Group and Enterprise plans — request information or a quote./
-        )
-        const link = screen.getByRole('link', { name: 'Contact Sales' })
-
-        expect(link.getAttribute('href')).to.equal(`/for/contact-sales`)
-      })
-
-      it('will show the correct text for the `did-you-know` split test variant', async function () {
+      it('will show the correct text for the `did-you-know` variant', async function () {
         window.metaAttributesCache.set(
           'ol-groupsAndEnterpriseBannerVariant',
           'did-you-know'
@@ -742,24 +762,58 @@ describe('<UserNotifications />', function () {
         )
         const link = screen.getByRole('link', { name: 'Contact Sales' })
 
-        expect(link.getAttribute('href')).to.equal(`/for/contact-sales`)
+        expect(link.getAttribute('href')).to.equal(`/for/contact-sales-1`)
       })
 
-      it('will show the correct text for the `empower` split test variant', async function () {
+      it('will show the correct text for the `on-premise` variant', async function () {
         window.metaAttributesCache.set(
           'ol-groupsAndEnterpriseBannerVariant',
-          'empower'
+          'on-premise'
         )
 
         renderWithinProjectListProvider(GroupsAndEnterpriseBanner)
         await fetchMock.flush(true)
 
         screen.getByText(
-          'Empower your organization to work in Overleaf! Get a group or organizational plan.'
+          'Overleaf On-Premises: Does your company want to keep its data within its firewall? Overleaf offers Server Pro, an on-premises solution for companies. Get in touch to learn more.'
         )
         const link = screen.getByRole('link', { name: 'Contact Sales' })
 
-        expect(link.getAttribute('href')).to.equal(`/for/contact-sales`)
+        expect(link.getAttribute('href')).to.equal(`/for/contact-sales-2`)
+      })
+
+      it('will show the correct text for the `people` variant', async function () {
+        window.metaAttributesCache.set(
+          'ol-groupsAndEnterpriseBannerVariant',
+          'people'
+        )
+
+        renderWithinProjectListProvider(GroupsAndEnterpriseBanner)
+        await fetchMock.flush(true)
+
+        screen.getByText(
+          'Other people at your company may already be using Overleaf. Save money with Overleaf group and company-wide subscriptions. Request more information.'
+        )
+        const link = screen.getByRole('link', { name: 'Contact Sales' })
+
+        expect(link.getAttribute('href')).to.equal(`/for/contact-sales-3`)
+      })
+
+      it('will show the correct text for the `FOMO` variant', async function () {
+        window.metaAttributesCache.set(
+          'ol-groupsAndEnterpriseBannerVariant',
+          'FOMO'
+        )
+
+        renderWithinProjectListProvider(GroupsAndEnterpriseBanner)
+        await fetchMock.flush(true)
+
+        screen.getByText(
+          'Why do Fortune 500 companies and top research institutions trust Overleaf to streamline their collaboration? Get in touch to learn more.'
+        )
+        const link = screen.getByRole('link', { name: 'Contact Sales' })
+
+        expect(link.getAttribute('href')).to.equal(`/for/contact-sales-4`)
       })
     })
   })
