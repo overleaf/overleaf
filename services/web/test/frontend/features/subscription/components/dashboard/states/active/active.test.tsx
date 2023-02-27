@@ -19,6 +19,7 @@ import fetchMock from 'fetch-mock'
 import {
   cancelSubscriptionUrl,
   extendTrialUrl,
+  subscriptionUpdateUrl,
 } from '../../../../../../../../frontend/js/features/subscription/data/subscription-url'
 
 describe('<ActiveSubscription />', function () {
@@ -380,7 +381,7 @@ describe('<ActiveSubscription />', function () {
         ).to.be.null
       })
 
-      it('reloads page after the succesful request to extend trial', async function () {
+      it('reloads page after the successful request to extend trial', async function () {
         const endPointResponse = {
           status: 200,
         }
@@ -399,11 +400,102 @@ describe('<ActiveSubscription />', function () {
     })
 
     describe('downgrade plan', function () {
-      it('shows alternate cancel subscription button text', function () {
+      const cancelButtonText = 'No thanks, I still want to cancel'
+      const downgradeButtonText = 'Yes, move me to the Personal plan'
+      it('shows alternate cancel subscription button text', async function () {
         renderActiveSubscription(monthlyActiveCollaborator)
         showConfirmCancelUI()
+        await screen.findByRole('button', {
+          name: cancelButtonText,
+        })
         screen.getByRole('button', {
-          name: 'No thanks, I still want to cancel',
+          name: downgradeButtonText,
+        })
+        screen.getByText('Would you be interested in the cheaper', {
+          exact: false,
+        })
+        screen.getByText('Personal plan?', {
+          exact: false,
+        })
+      })
+
+      it('disables both buttons and updates text for when trial button clicked', async function () {
+        renderActiveSubscription(monthlyActiveCollaborator)
+        showConfirmCancelUI()
+        const downgradeButton = await screen.findByRole('button', {
+          name: downgradeButtonText,
+        })
+        fireEvent.click(downgradeButton)
+
+        const buttons = screen.getAllByRole('button')
+        expect(buttons.length).to.equal(2)
+        expect(buttons[0].getAttribute('disabled')).to.equal('')
+        expect(buttons[1].getAttribute('disabled')).to.equal('')
+        screen.getByRole('button', {
+          name: cancelButtonText,
+        })
+        screen.getByRole('button', {
+          name: 'Processing…',
+        })
+      })
+
+      it('disables both buttons and updates text for when cancel button clicked', async function () {
+        renderActiveSubscription(monthlyActiveCollaborator)
+        showConfirmCancelUI()
+        const cancelButtton = await screen.findByRole('button', {
+          name: cancelButtonText,
+        })
+        fireEvent.click(cancelButtton)
+
+        const buttons = screen.getAllByRole('button')
+        expect(buttons.length).to.equal(2)
+        expect(buttons[0].getAttribute('disabled')).to.equal('')
+        expect(buttons[1].getAttribute('disabled')).to.equal('')
+        screen.getByRole('button', {
+          name: 'Processing…',
+        })
+        screen.getByRole('button', {
+          name: downgradeButtonText,
+        })
+      })
+
+      it('does not show option to downgrade when not a collaborator plan', function () {
+        const trialPlan = cloneDeep(monthlyActiveCollaborator)
+        trialPlan.plan.planCode = 'anotherplan'
+        renderActiveSubscription(trialPlan)
+        showConfirmCancelUI()
+        expect(
+          screen.queryByRole('button', {
+            name: downgradeButtonText,
+          })
+        ).to.be.null
+      })
+
+      it('does not show option to extend trial when on a collaborator trial', function () {
+        const trialPlan = cloneDeep(trialCollaboratorSubscription)
+        renderActiveSubscription(trialPlan)
+        showConfirmCancelUI()
+        expect(
+          screen.queryByRole('button', {
+            name: downgradeButtonText,
+          })
+        ).to.be.null
+      })
+
+      it('reloads page after the successful request to downgrade plan', async function () {
+        const endPointResponse = {
+          status: 200,
+        }
+        fetchMock.post(subscriptionUpdateUrl, endPointResponse)
+        renderActiveSubscription(monthlyActiveCollaborator)
+        showConfirmCancelUI()
+        const downgradeButton = await screen.findByRole('button', {
+          name: downgradeButtonText,
+        })
+        fireEvent.click(downgradeButton)
+        // page is reloaded on success
+        await waitFor(() => {
+          expect(reloadStub).to.have.been.called
         })
       })
     })

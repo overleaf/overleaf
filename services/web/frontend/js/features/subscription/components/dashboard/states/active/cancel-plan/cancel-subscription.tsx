@@ -1,5 +1,7 @@
 import { Trans, useTranslation } from 'react-i18next'
+import { Plan } from '../../../../../../../../../types/subscription/plan'
 import { postJSON } from '../../../../../../../infrastructure/fetch-json'
+import LoadingSpinner from '../../../../../../../shared/components/loading-spinner'
 import useAsync from '../../../../../../../shared/hooks/use-async'
 import { useSubscriptionDashboardContext } from '../../../../../context/subscription-dashboard-context'
 import {
@@ -10,7 +12,10 @@ import canExtendTrial from '../../../../../util/can-extend-trial'
 import showDowngradeOption from '../../../../../util/show-downgrade-option'
 import ActionButtonText from '../../../action-button-text'
 import GenericErrorAlert from '../../../generic-error-alert'
+import DowngradePlanButton from './downgrade-plan-button'
 import ExtendTrialButton from './extend-trial-button'
+
+const planCodeToDowngradeTo = 'paid-personal'
 
 function ConfirmCancelSubscriptionButton({
   buttonClass,
@@ -45,13 +50,17 @@ function NotCancelOption({
   isButtonDisabled,
   isLoadingSecondaryAction,
   isSuccessSecondaryAction,
+  planToDowngradeTo,
   showExtendFreeTrial,
+  showDowngrade,
   runAsyncSecondaryAction,
 }: {
   isButtonDisabled: boolean
   isLoadingSecondaryAction: boolean
   isSuccessSecondaryAction: boolean
+  planToDowngradeTo?: Plan
   showExtendFreeTrial: boolean
+  showDowngrade: boolean
   runAsyncSecondaryAction: (promise: Promise<unknown>) => Promise<unknown>
 }) {
   const { t } = useTranslation()
@@ -85,6 +94,34 @@ function NotCancelOption({
     )
   }
 
+  if (showDowngrade && planToDowngradeTo) {
+    return (
+      <>
+        <p>
+          <Trans
+            i18nKey="interested_in_cheaper_personal_plan"
+            values={{
+              price: planToDowngradeTo.displayPrice,
+            }}
+            components={[
+              // eslint-disable-next-line react/jsx-key
+              <strong />,
+            ]}
+          />
+        </p>
+        <p>
+          <DowngradePlanButton
+            isButtonDisabled={isButtonDisabled}
+            isLoadingSecondaryAction={isLoadingSecondaryAction}
+            isSuccessSecondaryAction={isSuccessSecondaryAction}
+            planToDowngradeTo={planToDowngradeTo}
+            runAsyncSecondaryAction={runAsyncSecondaryAction}
+          />
+        </p>
+      </>
+    )
+  }
+
   function handleKeepPlan() {
     setShowCancellation(false)
   }
@@ -103,8 +140,7 @@ function NotCancelOption({
 
 export function CancelSubscription() {
   const { t } = useTranslation()
-  const { personalSubscription } = useSubscriptionDashboardContext()
-
+  const { personalSubscription, plans } = useSubscriptionDashboardContext()
   const {
     isLoading: isLoadingCancel,
     isError: isErrorCancel,
@@ -117,7 +153,6 @@ export function CancelSubscription() {
     isSuccess: isSuccessSecondaryAction,
     runAsync: runAsyncSecondaryAction,
   } = useAsync()
-
   const isButtonDisabled =
     isLoadingCancel ||
     isLoadingSecondaryAction ||
@@ -125,6 +160,18 @@ export function CancelSubscription() {
     isSuccessCancel
 
   if (!personalSubscription || !('recurly' in personalSubscription)) return null
+
+  const showDowngrade = showDowngradeOption(
+    personalSubscription.plan.planCode,
+    personalSubscription.plan.groupPlan,
+    personalSubscription.recurly.trial_ends_at
+  )
+  const planToDowngradeTo = plans.find(
+    plan => plan.planCode === planCodeToDowngradeTo
+  )
+  if (showDowngrade && !planToDowngradeTo) {
+    return <LoadingSpinner />
+  }
 
   async function handleCancelSubscription() {
     try {
@@ -136,12 +183,6 @@ export function CancelSubscription() {
   }
 
   const showExtendFreeTrial = canExtendTrial(
-    personalSubscription.plan.planCode,
-    personalSubscription.plan.groupPlan,
-    personalSubscription.recurly.trial_ends_at
-  )
-
-  const showDowngrade = showDowngradeOption(
     personalSubscription.plan.planCode,
     personalSubscription.plan.groupPlan,
     personalSubscription.recurly.trial_ends_at
@@ -164,9 +205,11 @@ export function CancelSubscription() {
 
       <NotCancelOption
         showExtendFreeTrial={showExtendFreeTrial}
+        showDowngrade={showDowngrade}
         isButtonDisabled={isButtonDisabled}
         isLoadingSecondaryAction={isLoadingSecondaryAction}
         isSuccessSecondaryAction={isSuccessSecondaryAction}
+        planToDowngradeTo={planToDowngradeTo}
         runAsyncSecondaryAction={runAsyncSecondaryAction}
       />
 
