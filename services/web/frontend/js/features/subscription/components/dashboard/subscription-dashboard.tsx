@@ -9,7 +9,6 @@ import ManagedGroupSubscriptions from './managed-group-subscriptions'
 import ManagedInstitutions from './managed-institutions'
 import { useSubscriptionDashboardContext } from '../../context/subscription-dashboard-context'
 import getMeta from '../../../../utils/meta'
-import { Alert } from 'react-bootstrap'
 
 function SubscriptionDashboard() {
   const { t } = useTranslation()
@@ -23,9 +22,9 @@ function SubscriptionDashboard() {
       <div className="row">
         <div className="col-md-8 col-md-offset-2">
           {fromPlansPage && (
-            <Alert bsStyle="warning">
+            <div className="alert alert-warning" aria-live="polite">
               {t('you_already_have_a_subscription')}
-            </Alert>
+            </div>
           )}
           <div className="card">
             <div className="page-header">
