@@ -29,38 +29,34 @@ export const REDIS_READ_BATCH_SIZE = 500
 export const _mocks = {}
 
 export function getRawUpdates(projectId, batchSize, callback) {
-  RedisManager.getOldestDocUpdates(
-    projectId,
-    batchSize,
-    (error, rawUpdates) => {
+  RedisManager.getRawUpdatesBatch(projectId, batchSize, (error, batch) => {
+    if (error != null) {
+      return callback(OError.tag(error))
+    }
+
+    let updates
+    try {
+      updates = RedisManager.parseDocUpdates(batch.rawUpdates)
+    } catch (error) {
+      return callback(OError.tag(error))
+    }
+
+    _getHistoryId(projectId, updates, (error, historyId) => {
       if (error != null) {
         return callback(OError.tag(error))
       }
-
-      let updates
-      try {
-        updates = RedisManager.parseDocUpdates(rawUpdates)
-      } catch (error) {
-        return callback(OError.tag(error))
-      }
-
-      _getHistoryId(projectId, updates, (error, historyId) => {
-        if (error != null) {
-          return callback(OError.tag(error))
-        }
-        HistoryStoreManager.getMostRecentChunk(
-          projectId,
-          historyId,
-          (error, chunk) => {
-            if (error != null) {
-              return callback(OError.tag(error))
-            }
-            callback(null, { project_id: projectId, chunk, updates })
+      HistoryStoreManager.getMostRecentChunk(
+        projectId,
+        historyId,
+        (error, chunk) => {
+          if (error != null) {
+            return callback(OError.tag(error))
           }
-        )
-      })
-    }
-  )
+          callback(null, { project_id: projectId, chunk, updates })
+        }
+      )
+    })
+  })
 }
 
 // Process all updates for a project, only check project-level information once
