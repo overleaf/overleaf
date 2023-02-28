@@ -475,6 +475,7 @@ export const trialCollaboratorSubscription: RecurlySubscription = {
     trial_ends_at: new Date(sevenDaysFromToday).toString(),
     activeCoupons: [],
     account: {
+      email: 'foo@example.com',
       has_canceled_subscription: {
         _: 'false',
         $: {
@@ -523,6 +524,7 @@ export const monthlyActiveCollaborator: RecurlySubscription = {
     trial_ends_at: null,
     activeCoupons: [],
     account: {
+      email: 'foo@example.com',
       has_canceled_subscription: { _: 'false', $: { type: 'boolean' } },
       has_past_due_invoice: { _: 'false', $: { type: 'boolean' } },
     },

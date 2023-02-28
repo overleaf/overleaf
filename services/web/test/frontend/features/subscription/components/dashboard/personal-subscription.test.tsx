@@ -16,7 +16,10 @@ import {
   cleanUpContext,
   renderWithSubscriptionDashContext,
 } from '../../helpers/render-with-subscription-dash-context'
+import { reactivateSubscriptionUrl } from '../../../../../../frontend/js/features/subscription/data/subscription-url'
+import * as locationModule from '../../../../../../frontend/js/shared/components/location'
 import fetchMock from 'fetch-mock'
+import sinon from 'sinon'
 
 describe('<PersonalSubscription />', function () {
   afterEach(function () {
@@ -76,6 +79,37 @@ describe('<PersonalSubscription />', function () {
 
       screen.getByRole('link', { name: 'View Your Invoices' })
       screen.getByRole('button', { name: 'Reactivate your subscription' })
+    })
+
+    it('reactivates canceled plan', async function () {
+      const reload = sinon.stub(locationModule, 'reload')
+
+      renderWithSubscriptionDashContext(<PersonalSubscription />, {
+        metaTags: [{ name: 'ol-subscription', value: canceledSubscription }],
+      })
+
+      const reactivateBtn = screen.getByRole<HTMLButtonElement>('button', {
+        name: 'Reactivate your subscription',
+      })
+
+      // 1st click - fail
+      fetchMock.postOnce(reactivateSubscriptionUrl, 400)
+      fireEvent.click(reactivateBtn)
+      expect(reactivateBtn.disabled).to.be.true
+      await fetchMock.flush(true)
+      expect(reactivateBtn.disabled).to.be.false
+      expect(reload).not.to.have.been.called
+      fetchMock.reset()
+
+      // 2nd click - success
+      fetchMock.postOnce(reactivateSubscriptionUrl, 200)
+      fireEvent.click(reactivateBtn)
+      await fetchMock.flush(true)
+      expect(reload).to.have.been.calledOnce
+      expect(reactivateBtn.disabled).to.be.true
+      fetchMock.reset()
+
+      reload.restore()
     })
 
     it('renders the expired dash', function () {

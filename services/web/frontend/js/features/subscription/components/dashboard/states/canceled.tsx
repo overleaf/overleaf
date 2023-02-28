@@ -1,6 +1,7 @@
 import { useTranslation, Trans } from 'react-i18next'
 import { RecurlySubscription } from '../../../../../../../types/subscription/dashboard/subscription'
 import PremiumFeaturesLink from '../premium-features-link'
+import ReactivateSubscription from '../reactivate-subscription'
 
 export function CanceledSubscription({
   subscription,
@@ -46,12 +47,7 @@ export function CanceledSubscription({
           {t('view_your_invoices')}
         </a>
       </p>
-      <form action="/user/subscription/reactivate" method="POST">
-        <input type="hidden" name="_csrf" value={window.csrfToken} />
-        <button type="submit" className="btn btn-primary">
-          {t('reactivate_subscription')}
-        </button>
-      </form>
+      <ReactivateSubscription />
     </>
   )
 }

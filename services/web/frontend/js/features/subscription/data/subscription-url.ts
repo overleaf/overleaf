@@ -4,3 +4,4 @@ export const cancelPendingSubscriptionChangeUrl =
 export const cancelSubscriptionUrl = '/user/subscription/cancel'
 export const redirectAfterCancelSubscriptionUrl = '/user/subscription/canceled'
 export const extendTrialUrl = '/user/subscription/extend'
+export const reactivateSubscriptionUrl = '/user/subscription/reactivate'
