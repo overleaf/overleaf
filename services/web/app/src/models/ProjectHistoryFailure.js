@@ -15,7 +15,7 @@ const ProjectHistoryFailureSchema = new Schema(
     resyncAttempts: Number,
     requestCount: Number,
   },
-  { collection: 'projectHistoryFailures' }
+  { collection: 'projectHistoryFailures', minimize: false }
 )
 
 exports.ProjectHistoryFailure = mongoose.model(

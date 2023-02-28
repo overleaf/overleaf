@@ -54,8 +54,8 @@ async function updateImage(image, projectIds) {
     { _id: { $in: projectIds.map(ObjectId) } },
     { $set: { imageName: `quay.io/sharelatex/${image}` } }
   ).exec()
-  console.log(`Found ${res.n} out of ${projectIds.length} projects`)
-  console.log(`Modified ${res.nModified} projects`)
+  console.log(`Found ${res.matchedCount} out of ${projectIds.length} projects`)
+  console.log(`Modified ${res.modifiedCount} projects`)
 }
 
 main()

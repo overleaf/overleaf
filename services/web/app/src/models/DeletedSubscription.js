@@ -23,7 +23,7 @@ const DeletedSubscriptionSchema = new Schema(
     deleterData: DeleterDataSchema,
     subscription: SubscriptionSchema,
   },
-  { collection: 'deletedSubscriptions' }
+  { collection: 'deletedSubscriptions', minimize: false }
 )
 
 exports.DeletedSubscription = mongoose.model(

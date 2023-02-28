@@ -12,7 +12,7 @@ const DocSnapshotSchema = new Schema(
     ranges: Schema.Types.Mixed,
     ts: Date,
   },
-  { collection: 'docSnapshots' }
+  { collection: 'docSnapshots', minimize: false }
 )
 
 exports.DocSnapshot = mongoose.model('DocSnapshot', DocSnapshotSchema)

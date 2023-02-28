@@ -18,7 +18,7 @@ const ProjectHistoryHandler = {
         if (err) {
           return callback(err)
         }
-        if (result.n === 0) {
+        if (result.matchedCount === 0) {
           return callback(new Error('history exists'))
         }
         callback()
@@ -57,7 +57,7 @@ const ProjectHistoryHandler = {
           return callback(err)
         }
         // return an error if overleaf.history.id wasn't present
-        if (result.n === 0) {
+        if (result.matchedCount === 0) {
           return callback(new Error('history not upgraded'))
         }
         callback()
@@ -76,7 +76,7 @@ const ProjectHistoryHandler = {
         if (err) {
           return callback(err)
         }
-        if (result.n === 0) {
+        if (result.matchedCount === 0) {
           return callback(new Error('history not downgraded'))
         }
         callback()
@@ -94,7 +94,7 @@ const ProjectHistoryHandler = {
         if (err) {
           return callback(err)
         }
-        if (result.n === 0) {
+        if (result.matchedCount === 0) {
           return callback(new Error('migration flag not set'))
         }
         callback()

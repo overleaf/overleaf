@@ -506,7 +506,7 @@ describe('CollaboratorsHandler', function () {
           }
         )
         .chain('exec')
-        .resolves({ n: 1 })
+        .resolves({ matchedCount: 1 })
       await this.CollaboratorsHandler.promises.setCollaboratorPrivilegeLevel(
         this.projectId,
         this.userId,
@@ -530,7 +530,7 @@ describe('CollaboratorsHandler', function () {
           }
         )
         .chain('exec')
-        .resolves({ n: 1 })
+        .resolves({ matchedCount: 1 })
       await this.CollaboratorsHandler.promises.setCollaboratorPrivilegeLevel(
         this.projectId,
         this.userId,
@@ -539,7 +539,9 @@ describe('CollaboratorsHandler', function () {
     })
 
     it('throws a NotFoundError if the project or collaborator does not exist', async function () {
-      this.ProjectMock.expects('updateOne').chain('exec').resolves({ n: 0 })
+      this.ProjectMock.expects('updateOne')
+        .chain('exec')
+        .resolves({ matchedCount: 0 })
       await expect(
         this.CollaboratorsHandler.promises.setCollaboratorPrivilegeLevel(
           this.projectId,

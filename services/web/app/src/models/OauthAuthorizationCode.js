@@ -14,6 +14,7 @@ const OauthAuthorizationCodeSchema = new Schema(
   },
   {
     collection: 'oauthAuthorizationCodes',
+    minimize: false,
   }
 )
 

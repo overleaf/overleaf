@@ -12,20 +12,14 @@ if (
   )
 }
 
+mongoose.set('autoIndex', false)
+mongoose.set('strictQuery', false)
+
 const connectionPromise = mongoose.connect(
   Settings.mongo.url,
-  Object.assign(
-    {
-      // mongoose specific config
-      config: { autoIndex: false },
-      // mongoose defaults to false, native driver defaults to true
-      useNewUrlParser: true,
-      // use the equivalent `findOneAndUpdate` methods of the native driver
-      useFindAndModify: false,
-    },
-    Settings.mongo.options
-  )
+  Settings.mongo.options
 )
+
 addConnectionDrainer('mongoose', async () => {
   await connectionPromise
   await mongoose.disconnect()

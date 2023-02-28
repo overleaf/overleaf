@@ -14,7 +14,7 @@ const DeletedFileSchema = new Schema(
     },
     deletedAt: { type: Date },
   },
-  { collection: 'deletedFiles' }
+  { collection: 'deletedFiles', minimize: false }
 )
 
 exports.DeletedFile = mongoose.model('DeletedFile', DeletedFileSchema)

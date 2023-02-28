@@ -109,7 +109,7 @@ const AuthenticationManager = {
             if (err) {
               return callback(err)
             }
-            if (result.nModified !== 1) {
+            if (result.modifiedCount !== 1) {
               return callback(new ParallelLoginError())
             }
             if (!match) {

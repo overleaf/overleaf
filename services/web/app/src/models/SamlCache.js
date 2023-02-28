@@ -8,6 +8,7 @@ const SamlCacheSchema = new Schema(
   },
   {
     collection: 'samlCache',
+    minimize: false,
   }
 )
 

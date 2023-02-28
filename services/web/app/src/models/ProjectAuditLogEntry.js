@@ -11,6 +11,7 @@ const ProjectAuditLogEntrySchema = new Schema(
   },
   {
     collection: 'projectAuditLogEntries',
+    minimize: false,
   }
 )
 

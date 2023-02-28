@@ -234,7 +234,7 @@ async function setCollaboratorPrivilegeLevel(
     }
   }
   const mongoResponse = await Project.updateOne(query, update).exec()
-  if (mongoResponse.n === 0) {
+  if (mongoResponse.matchedCount === 0) {
     throw new Errors.NotFoundError('project or collaborator not found')
   }
 }

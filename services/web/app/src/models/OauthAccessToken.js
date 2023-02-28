@@ -15,6 +15,7 @@ const OauthAccessTokenSchema = new Schema(
   },
   {
     collection: 'oauthAccessTokens',
+    minimize: false,
   }
 )
 

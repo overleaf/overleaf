@@ -17,7 +17,7 @@ describe('AuthenticationManager', function () {
       requires: {
         '../../models/User': {
           User: (this.User = {
-            updateOne: sinon.stub().callsArgWith(3, null, { nModified: 1 }),
+            updateOne: sinon.stub().callsArgWith(3, null, { modifiedCount: 1 }),
           }),
         },
         '../../infrastructure/mongodb': {
@@ -99,7 +99,7 @@ describe('AuthenticationManager', function () {
         })
 
         it('should return the user', function () {
-          this.callback.calledWith(null, this.user).should.equal(true)
+          this.callback.should.have.been.calledWith(null, this.user)
         })
 
         it('should send metrics', function () {
@@ -147,7 +147,7 @@ describe('AuthenticationManager', function () {
         beforeEach(function () {
           this.User.updateOne = sinon
             .stub()
-            .callsArgWith(3, null, { nModified: 0 })
+            .callsArgWith(3, null, { modifiedCount: 0 })
         })
 
         describe('correct password', function () {
@@ -171,7 +171,9 @@ describe('AuthenticationManager', function () {
 
         describe('bad password', function () {
           beforeEach(function (done) {
-            this.User.updateOne = sinon.stub().yields(null, { nModified: 0 })
+            this.User.updateOne = sinon
+              .stub()
+              .yields(null, { modifiedCount: 0 })
             this.AuthenticationManager.authenticate(
               { email: this.email },
               'notthecorrectpassword',

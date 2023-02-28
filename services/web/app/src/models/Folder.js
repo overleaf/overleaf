@@ -4,9 +4,12 @@ const { FileSchema } = require('./File')
 
 const { Schema } = mongoose
 
-const FolderSchema = new Schema({
-  name: { type: String, default: 'new folder' },
-})
+const FolderSchema = new Schema(
+  {
+    name: { type: String, default: 'new folder' },
+  },
+  { minimize: false }
+)
 
 FolderSchema.add({
   docs: [DocSchema],

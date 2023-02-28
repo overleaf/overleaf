@@ -13,6 +13,7 @@ const OauthApplicationSchema = new Schema(
   },
   {
     collection: 'oauthApplications',
+    minimize: false,
   }
 )
 

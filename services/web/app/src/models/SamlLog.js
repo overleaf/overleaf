@@ -14,6 +14,7 @@ const SamlLogSchema = new Schema(
   },
   {
     collection: 'samlLogs',
+    minimize: false,
   }
 )
 

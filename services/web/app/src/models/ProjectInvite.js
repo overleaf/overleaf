@@ -27,6 +27,7 @@ const ProjectInviteSchema = new Schema(
   },
   {
     collection: 'projectInvites',
+    minimize: false,
   }
 )
 

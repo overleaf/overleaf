@@ -26,7 +26,7 @@ const DeletedProjectSchema = new Schema(
     deleterData: DeleterDataSchema,
     project: ProjectSchema,
   },
-  { collection: 'deletedProjects' }
+  { collection: 'deletedProjects', minimize: false }
 )
 
 exports.DeletedProject = mongoose.model('DeletedProject', DeletedProjectSchema)

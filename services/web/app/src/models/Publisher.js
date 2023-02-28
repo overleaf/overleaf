@@ -5,10 +5,13 @@ const settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
 const request = require('request')
 
-const PublisherSchema = new Schema({
-  slug: { type: String, required: true },
-  managerIds: [{ type: ObjectId, ref: 'User' }],
-})
+const PublisherSchema = new Schema(
+  {
+    slug: { type: String, required: true },
+    managerIds: [{ type: ObjectId, ref: 'User' }],
+  },
+  { minimize: false }
+)
 
 // fetch publisher's (brand on v1) data from v1 API. Errors are ignored
 PublisherSchema.method('fetchV1Data', function (callback) {

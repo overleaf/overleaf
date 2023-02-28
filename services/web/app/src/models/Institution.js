@@ -5,14 +5,17 @@ const settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
 const request = require('request')
 
-const InstitutionSchema = new Schema({
-  v1Id: { type: Number, required: true },
-  managerIds: [{ type: ObjectId, ref: 'User' }],
-  metricsEmail: {
-    optedOutUserIds: [{ type: ObjectId, ref: 'User' }],
-    lastSent: { type: Date },
+const InstitutionSchema = new Schema(
+  {
+    v1Id: { type: Number, required: true },
+    managerIds: [{ type: ObjectId, ref: 'User' }],
+    metricsEmail: {
+      optedOutUserIds: [{ type: ObjectId, ref: 'User' }],
+      lastSent: { type: Date },
+    },
   },
-})
+  { minimize: false }
+)
 
 // fetch institution's data from v1 API. Errors are ignored
 InstitutionSchema.method('fetchV1Data', function (callback) {

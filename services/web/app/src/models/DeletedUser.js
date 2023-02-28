@@ -23,7 +23,7 @@ const DeletedUserSchema = new Schema(
     deleterData: DeleterDataSchema,
     user: UserSchema,
   },
-  { collection: 'deletedUsers' }
+  { collection: 'deletedUsers', minimize: false }
 )
 
 exports.DeletedUser = mongoose.model('DeletedUser', DeletedUserSchema)

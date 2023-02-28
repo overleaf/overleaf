@@ -40,6 +40,7 @@ const SurveySchema = new Schema(
   },
   {
     collection: 'surveys',
+    minimize: false,
   }
 )
 

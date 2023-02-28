@@ -75,7 +75,7 @@ describe('ProjectHistoryHandler', function () {
           .callsArgWith(1, null, this.project)
         this.ProjectModel.updateOne = sinon
           .stub()
-          .callsArgWith(2, null, { n: 1 })
+          .callsArgWith(2, null, { matchedCount: 1 })
         return this.ProjectHistoryHandler.ensureHistoryExistsForProject(
           project_id,
           this.callback

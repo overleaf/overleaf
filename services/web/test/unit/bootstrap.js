@@ -46,7 +46,16 @@ const SandboxedModule = require('sandboxed-module')
 SandboxedModule.configure({
   ignoreMissing: true,
   requires: getSandboxedModuleRequires(),
-  globals: { AbortSignal, Buffer, Promise, console, process, URL },
+  globals: {
+    AbortSignal,
+    Buffer,
+    Promise,
+    console,
+    process,
+    URL,
+    TextEncoder,
+    TextDecoder,
+  },
 })
 
 function getSandboxedModuleRequires() {

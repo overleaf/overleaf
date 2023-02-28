@@ -96,59 +96,62 @@ const VersionSchema = new Schema(
   { _id: false }
 )
 
-const SplitTestSchema = new Schema({
-  name: {
-    type: String,
-    minLength: MIN_NAME_LENGTH,
-    maxlength: MAX_NAME_LENGTH,
-    required: true,
-    unique: true,
-    validate: {
-      validator: function (input) {
-        return input !== null && NAME_REGEX.test(input)
+const SplitTestSchema = new Schema(
+  {
+    name: {
+      type: String,
+      minLength: MIN_NAME_LENGTH,
+      maxlength: MAX_NAME_LENGTH,
+      required: true,
+      unique: true,
+      validate: {
+        validator: function (input) {
+          return input !== null && NAME_REGEX.test(input)
+        },
+        message: `invalid, must match: ${NAME_REGEX}`,
       },
-      message: `invalid, must match: ${NAME_REGEX}`,
+    },
+    versions: [VersionSchema],
+    forbidReleasePhase: {
+      type: Boolean,
+      required: false,
+    },
+    description: {
+      type: String,
+      required: false,
+    },
+    expectedEndDate: {
+      type: Date,
+      required: false,
+    },
+    ticketUrl: {
+      type: String,
+      required: false,
+    },
+    reportsUrls: {
+      type: [String],
+      required: false,
+      default: [],
+    },
+    winningVariant: {
+      type: String,
+      required: false,
+    },
+    archived: {
+      type: Boolean,
+      required: false,
+    },
+    archivedAt: {
+      type: Date,
+      required: false,
+    },
+    badgeInfo: {
+      type: BadgeInfoSchema,
+      required: false,
     },
   },
-  versions: [VersionSchema],
-  forbidReleasePhase: {
-    type: Boolean,
-    required: false,
-  },
-  description: {
-    type: String,
-    required: false,
-  },
-  expectedEndDate: {
-    type: Date,
-    required: false,
-  },
-  ticketUrl: {
-    type: String,
-    required: false,
-  },
-  reportsUrls: {
-    type: [String],
-    required: false,
-    default: [],
-  },
-  winningVariant: {
-    type: String,
-    required: false,
-  },
-  archived: {
-    type: Boolean,
-    required: false,
-  },
-  archivedAt: {
-    type: Date,
-    required: false,
-  },
-  badgeInfo: {
-    type: BadgeInfoSchema,
-    required: false,
-  },
-})
+  { minimize: false }
+)
 
 module.exports = {
   SplitTest: mongoose.model('SplitTest', SplitTestSchema),

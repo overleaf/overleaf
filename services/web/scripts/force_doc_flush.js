@@ -27,7 +27,7 @@ async function main() {
   })
   if (!DRY_RUN) {
     console.log(`updating doc ${DOC_ID} in mongo for project ${PROJECT_ID}`)
-    const { result } = await db.docs.updateOne(
+    const result = await db.docs.updateOne(
       { _id: ObjectId(DOC_ID), project_id: ObjectId(PROJECT_ID) },
       {
         $set: { lines, version, ranges },
@@ -38,7 +38,11 @@ async function main() {
       }
     )
     console.log('mongo result', result)
-    if (result.n !== 1 || result.nModified !== 1 || result.ok !== 1) {
+    if (
+      result.matchedCount !== 1 ||
+      result.modifiedCount !== 1 ||
+      !result.acknowledged
+    ) {
       throw new Error('unexpected result from mongo update')
     }
     console.log(`deleting doc ${DOC_ID} from redis for project ${PROJECT_ID}`)

@@ -40,7 +40,7 @@ describe('UserAuditLogHandler', function () {
       beforeEach(function () {
         this.dbUpdate = this.UserAuditLogEntryMock.expects('create')
           .chain('exec')
-          .resolves({ nModified: 1 })
+          .resolves({ modifiedCount: 1 })
       })
       it('writes a log', async function () {
         await this.UserAuditLogHandler.promises.addEntry(

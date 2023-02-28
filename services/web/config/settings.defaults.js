@@ -88,9 +88,7 @@ module.exports = {
   mongo: {
     options: {
       appname: 'web',
-      useUnifiedTopology:
-        (process.env.MONGO_USE_UNIFIED_TOPOLOGY || 'true') === 'true',
-      poolSize: parseInt(process.env.MONGO_POOL_SIZE, 10) || 10,
+      maxPoolSize: parseInt(process.env.MONGO_POOL_SIZE, 10) || 100,
       serverSelectionTimeoutMS:
         parseInt(process.env.MONGO_SERVER_SELECTION_TIMEOUT, 10) || 60000,
       socketTimeoutMS: parseInt(process.env.MONGO_SOCKET_TIMEOUT, 10) || 60000,

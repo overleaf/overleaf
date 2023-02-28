@@ -35,9 +35,11 @@ describe('UserCreator', function () {
         }),
         './UserUpdater': (this.UserUpdater = {
           promises: {
-            addAffiliationForNewUser: sinon
-              .stub()
-              .resolves({ n: 1, nModified: 1, ok: 1 }),
+            addAffiliationForNewUser: sinon.stub().resolves({
+              matchedCount: 1,
+              modifiedCount: 1,
+              acknowledged: true,
+            }),
             updateUser: sinon.stub().resolves(),
           },
         }),
