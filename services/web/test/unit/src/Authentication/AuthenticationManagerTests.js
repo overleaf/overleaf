@@ -683,6 +683,62 @@ describe('AuthenticationManager', function () {
     })
   })
 
+  describe('_validatePasswordNotContainsEmailSubstrings', function () {
+    it('should return nothing for a dissimilar password', function () {
+      const password = 'fublmqgaeohhvd8'
+      const email = 'someuser@example.com'
+      const error =
+        this.AuthenticationManager._validatePasswordNotContainsEmailSubstrings(
+          password,
+          email
+        )
+      expect(error).to.not.exist
+    })
+
+    it('should return an error for password that is same as email', function () {
+      const email = 'someuser@example.com'
+      const error =
+        this.AuthenticationManager._validatePasswordNotContainsEmailSubstrings(
+          email,
+          email
+        )
+      expect(error).to.exist
+    })
+
+    it('should return an error for a password with a substring of email', function () {
+      const password = 'cooluser1253'
+      const email = 'somecooluser@example.com'
+      const error =
+        this.AuthenticationManager._validatePasswordNotContainsEmailSubstrings(
+          password,
+          email
+        )
+      expect(error).to.exist
+    })
+
+    it('should return an error for a password with a substring of email, regardless of case', function () {
+      const password = 'coOLUSer1253'
+      const email = 'somecooluser@example.com'
+      const error =
+        this.AuthenticationManager._validatePasswordNotContainsEmailSubstrings(
+          password,
+          email
+        )
+      expect(error).to.exist
+    })
+
+    it('should return nothing for a password containing first two characters of email', function () {
+      const password = 'lmgaesopxzqg'
+      const email = 'someuser@example.com'
+      const error =
+        this.AuthenticationManager._validatePasswordNotContainsEmailSubstrings(
+          password,
+          email
+        )
+      expect(error).to.not.exist
+    })
+  })
+
   describe('_validatePasswordNotTooSimilar', function () {
     beforeEach(function () {
       this.metrics.inc.reset()
@@ -921,6 +977,30 @@ describe('AuthenticationManager', function () {
       })
     })
 
+    describe('password contains substring of email', function () {
+      beforeEach(function () {
+        this.user.email = 'somecooluser@example.com'
+        this.password = 'somecoolfhzxk'
+        this.metrics.inc.reset()
+      })
+
+      it('should send a metric when the password contains substring of the email', function (done) {
+        this.AuthenticationManager.setUserPassword(
+          this.user,
+          this.password,
+          err => {
+            expect(err).to.not.exist
+            expect(
+              this.metrics.inc.calledWith(
+                'password-contains-substring-of-email'
+              )
+            ).to.equal(true)
+            done()
+          }
+        )
+      })
+    })
+
     describe('successful password set attempt', function () {
       beforeEach(function () {
         this.metrics.inc.reset()
@@ -955,6 +1035,12 @@ describe('AuthenticationManager', function () {
       it('should not send a metric for password-too-similar-to-email', function () {
         expect(
           this.metrics.inc.calledWith('password-too-similar-to-email')
+        ).to.equal(false)
+      })
+
+      it('should not send a metric for password-contains-substring-of-email', function () {
+        expect(
+          this.metrics.inc.calledWith('password-contains-substring-of-email')
         ).to.equal(false)
       })
 

@@ -216,18 +216,15 @@ const AuthenticationManager = {
       })
     }
     if (typeof email === 'string' && email !== '') {
-      // TODO: remove this check once the password-too-similar check below is active
-      const startOfEmail = email.split('@')[0]
-      if (
-        password.indexOf(email) !== -1 ||
-        password.indexOf(startOfEmail) !== -1
-      ) {
-        return new InvalidPasswordError({
-          message: 'password contains part of email address',
-          info: { code: 'contains_email' },
-        })
-      }
       try {
+        const substringError =
+          AuthenticationManager._validatePasswordNotContainsEmailSubstrings(
+            password,
+            email
+          )
+        if (substringError) {
+          Metrics.inc('password-contains-substring-of-email')
+        }
         const passwordTooSimilarError =
           AuthenticationManager._validatePasswordNotTooSimilar(password, email)
         if (passwordTooSimilarError) {
@@ -238,6 +235,17 @@ const AuthenticationManager = {
           { error },
           'error while checking password similarity to email'
         )
+      }
+      // TODO: remove this check once the password-too-similar checks are active?
+      const startOfEmail = email.split('@')[0]
+      if (
+        password.indexOf(email) !== -1 ||
+        password.indexOf(startOfEmail) !== -1
+      ) {
+        return new InvalidPasswordError({
+          message: 'password contains part of email address',
+          info: { code: 'contains_email' },
+        })
       }
     }
     return null
@@ -405,6 +413,27 @@ const AuthenticationManager = {
       similarity: largestSimilarity,
     })
     return err
+  },
+
+  _validatePasswordNotContainsEmailSubstrings(password, email) {
+    password = password.toLowerCase()
+    email = email.toLowerCase()
+    const chunkLength = 4
+
+    if (email.length < chunkLength) {
+      return
+    }
+
+    let chunk
+    for (let i = 0; i <= email.length - chunkLength; i++) {
+      chunk = email.slice(i, i + chunkLength)
+      if (password.indexOf(chunk) !== -1) {
+        return new InvalidPasswordError({
+          message: 'password contains part of email address',
+          info: { code: 'contains_email' },
+        })
+      }
+    }
   },
 }
 
