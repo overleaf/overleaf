@@ -24,10 +24,10 @@ function PriceSummary() {
   return (
     <>
       <hr />
-      <div className="price-summary">
+      <div className="price-summary" data-testid="price-summary">
         <h4>{t('payment_summary')}</h4>
         <div className="small">
-          <div className="price-summary-line">
+          <div className="price-summary-line" data-testid="price-summary-plan">
             <span>{planName}</span>
             <span>
               {currencySymbol}
@@ -35,7 +35,10 @@ function PriceSummary() {
             </span>
           </div>
           {coupon && (
-            <div className="price-summary-line">
+            <div
+              className="price-summary-line"
+              data-testid="price-summary-coupon"
+            >
               <span>{coupon.name}</span>
               <span aria-hidden>
                 &ndash;{currencySymbol}
@@ -49,7 +52,7 @@ function PriceSummary() {
             </div>
           )}
           {rate > 0 && (
-            <div className="price-summary-line">
+            <div className="price-summary-line" data-testid="price-summary-vat">
               <span>
                 {t('vat')} {rate * 100}%
               </span>
@@ -59,7 +62,10 @@ function PriceSummary() {
               </span>
             </div>
           )}
-          <div className="price-summary-line price-summary-total-line">
+          <div
+            className="price-summary-line price-summary-total-line"
+            data-testid="price-summary-total"
+          >
             <b>{monthlyBilling ? t('total_per_month') : t('total_per_year')}</b>
             <b>
               {currencySymbol}

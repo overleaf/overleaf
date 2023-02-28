@@ -339,7 +339,7 @@ export const PaymentContext = createContext<PaymentContextValue | undefined>(
 
 type PaymentProviderProps = {
   publicKey: string
-  children: React.ReactNode
+  children?: React.ReactNode
 }
 
 export function PaymentProvider({ publicKey, ...props }: PaymentProviderProps) {

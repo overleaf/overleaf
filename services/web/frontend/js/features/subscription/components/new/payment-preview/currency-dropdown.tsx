@@ -26,7 +26,7 @@ function CurrencyDropdown(props: DropdownProps) {
           >
             {currency === currencyCode && (
               <span className="change-currency-dropdown-selected-icon">
-                <Icon type="check" />
+                <Icon type="check" accessibilityLabel={t('selected')} />
               </span>
             )}
             {currency} ({symbol})

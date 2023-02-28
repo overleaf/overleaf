@@ -18,6 +18,7 @@ import SubmitButton from './submit-button'
 import ThreeDSecure from './three-d-secure'
 import getMeta from '../../../../../utils/meta'
 import { postJSON } from '../../../../../infrastructure/fetch-json'
+import { assign } from '../../../../../shared/components/location'
 import * as eventTracking from '../../../../../infrastructure/event-tracking'
 import classnames from 'classnames'
 import {
@@ -153,7 +154,7 @@ function CheckoutPanel() {
             'subscription-submission-success',
             planCode
           )
-          window.location.assign('/user/subscription/thank-you')
+          assign('/user/subscription/thank-you')
         } catch (error) {
           setIsProcessing(false)
 
@@ -184,6 +185,8 @@ function CheckoutPanel() {
   const payPal = useRef<PayPalInstance>()
 
   useEffect(() => {
+    if (!recurly) return
+
     payPal.current = recurly.PayPal({
       display: { displayName: planName },
     })
@@ -304,6 +307,7 @@ function CheckoutPanel() {
           onSubmit={handleSubmit}
           onChange={handleFormValidation}
           ref={formRef}
+          data-testid="checkout-form"
         >
           {genericError && (
             <Alert bsStyle="warning" className="small">

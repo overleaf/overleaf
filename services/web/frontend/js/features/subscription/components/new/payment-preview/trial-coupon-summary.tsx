@@ -14,7 +14,9 @@ function TrialCouponSummary() {
   return (
     <>
       <hr className="thin" />
-      <div className="trial-coupon-summary">{children}</div>
+      <div className="trial-coupon-summary" data-testid="trial-coupon-summary">
+        {children}
+      </div>
     </>
   )
 }

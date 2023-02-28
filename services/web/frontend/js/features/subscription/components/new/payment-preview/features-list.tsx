@@ -11,7 +11,7 @@ function FeaturesList({ features }: FeaturesListProps) {
   return (
     <>
       <div className="text-small">{t('all_premium_features_including')}</div>
-      <ul className="small">
+      <ul className="small" data-testid="features-list">
         {features.compileTimeout > 1 && (
           <li>{t('increased_compile_timeout')}</li>
         )}

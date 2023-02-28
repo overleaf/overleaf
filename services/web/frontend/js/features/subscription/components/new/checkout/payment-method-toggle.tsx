@@ -11,7 +11,10 @@ function PaymentMethodToggle(props: PaymentMethodToggleProps) {
   const { t } = useTranslation()
 
   return (
-    <FormGroup className="payment-method-toggle">
+    <FormGroup
+      className="payment-method-toggle"
+      data-testid="payment-method-toggle"
+    >
       <hr className="thin" />
       <div className="radio">
         <Col xs={8}>
