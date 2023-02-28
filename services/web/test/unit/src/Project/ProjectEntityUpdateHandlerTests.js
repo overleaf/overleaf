@@ -1913,6 +1913,43 @@ describe('ProjectEntityUpdateHandler', function () {
         this.callback.calledWithMatch(errorMatcher).should.equal(true)
       })
     })
+
+    describe('renaming an entity with a non-string value', function () {
+      beforeEach(function () {
+        this.project_name = 'project name'
+        this.startPath = '/folder/a.tex'
+        this.endPath = '/folder/b.tex'
+        this.rev = 2
+        this.changes = { newDocs: ['old-doc'], newFiles: ['old-file'] }
+        this.newDocName = ['hello']
+        this.ProjectEntityMongoUpdateHandler.renameEntity.yields(
+          null,
+          this.project,
+          this.startPath,
+          this.endPath,
+          this.rev,
+          this.changes
+        )
+
+        this.ProjectEntityUpdateHandler.renameEntity(
+          projectId,
+          docId,
+          'doc',
+          this.newDocName,
+          userId,
+          this.source,
+          this.callback
+        )
+      })
+
+      it('returns an error', function () {
+        const errorMatcher = sinon.match.instanceOf(Error)
+        this.callback.calledWithMatch(errorMatcher).should.equal(true)
+        expect(
+          this.ProjectEntityMongoUpdateHandler.renameEntity.called
+        ).to.equal(false)
+      })
+    })
   })
 
   describe('resyncProjectHistory', function () {

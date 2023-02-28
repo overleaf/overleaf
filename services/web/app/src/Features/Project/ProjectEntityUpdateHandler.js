@@ -1302,6 +1302,19 @@ const ProjectEntityUpdateHandler = {
     source,
     callback
   ) {
+    if (!newName || typeof newName !== 'string') {
+      const err = new OError('invalid newName value', {
+        value: newName,
+        type: typeof newName,
+        projectId,
+        entityId,
+        entityType,
+        userId,
+        source,
+      })
+      logger.error({ err }, 'Invalid newName passed to renameEntity')
+      return callback(err)
+    }
     if (!SafePath.isCleanFilename(newName)) {
       return callback(new Errors.InvalidNameError('invalid element name'))
     }
