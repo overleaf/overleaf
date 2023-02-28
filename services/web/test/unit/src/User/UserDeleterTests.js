@@ -92,10 +92,15 @@ describe('UserDeleter', function () {
       promises: { hooks: { fire: sinon.stub().resolves() } },
     }
 
+    this.Feedback = {
+      deleteMany: sinon.stub().returns({ exec: sinon.stub().resolves() }),
+    }
+
     this.UserDeleter = SandboxedModule.require(modulePath, {
       requires: {
         '../../models/User': { User },
         '../../models/DeletedUser': { DeletedUser },
+        '../../models/Feedback': { Feedback: this.Feedback },
         '../Newsletter/NewsletterManager': this.NewsletterManager,
         './UserSessionsManager': this.UserSessionsManager,
         '../Subscription/SubscriptionHandler': this.SubscriptionHandler,
@@ -467,7 +472,7 @@ describe('UserDeleter', function () {
       this.mockedDeletedUser.expects('save').resolves()
 
       this.DeletedUserMock.expects('findOne')
-        .withArgs({ 'deleterData.deletedUserId': 'giraffe' })
+        .withArgs({ 'deleterData.deletedUserId': this.userId })
         .chain('exec')
         .resolves(this.deletedUser)
     })
@@ -477,41 +482,48 @@ describe('UserDeleter', function () {
     })
 
     it('should find the user by user ID', async function () {
-      await this.UserDeleter.promises.expireDeletedUser('giraffe')
+      await this.UserDeleter.promises.expireDeletedUser(this.userId)
       this.DeletedUserMock.verify()
     })
 
     it('should remove the user data from mongo', async function () {
-      await this.UserDeleter.promises.expireDeletedUser('giraffe')
+      await this.UserDeleter.promises.expireDeletedUser(this.userId)
       expect(this.deletedUser.user).not.to.exist
     })
 
     it('should remove the IP address from mongo', async function () {
-      await this.UserDeleter.promises.expireDeletedUser('giraffe')
+      await this.UserDeleter.promises.expireDeletedUser(this.userId)
       expect(this.deletedUser.deleterData.ipAddress).not.to.exist
     })
 
     it('should not delete other deleterData fields', async function () {
-      await this.UserDeleter.promises.expireDeletedUser('giraffe')
+      await this.UserDeleter.promises.expireDeletedUser(this.userId)
       expect(this.deletedUser.deleterData.deletedUserId).to.equal(this.userId)
     })
 
     it('should save the record to mongo', async function () {
-      await this.UserDeleter.promises.expireDeletedUser('giraffe')
+      await this.UserDeleter.promises.expireDeletedUser(this.userId)
       this.mockedDeletedUser.verify()
     })
 
     it('should fire the expireDeletedUser hook for modules', async function () {
-      await this.UserDeleter.promises.expireDeletedUser('giraffe')
+      await this.UserDeleter.promises.expireDeletedUser(this.userId)
       expect(this.Modules.promises.hooks.fire).to.have.been.calledWith(
         'expireDeletedUser',
-        'giraffe'
+        this.userId
       )
+    })
+
+    it('should delete Feeback', async function () {
+      await this.UserDeleter.promises.expireDeletedUser(this.userId)
+      expect(this.Feedback.deleteMany).to.have.been.calledWith({
+        userId: this.userId,
+      })
     })
 
     describe('when called as a callback', function () {
       it('should expire the user', function (done) {
-        this.UserDeleter.expireDeletedUser('giraffe', err => {
+        this.UserDeleter.expireDeletedUser(this.userId, err => {
           expect(err).not.to.exist
           this.DeletedUserMock.verify()
           this.mockedDeletedUser.verify()

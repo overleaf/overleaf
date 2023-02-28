@@ -4,6 +4,7 @@ const moment = require('moment')
 const { User } = require('../../models/User')
 const { DeletedUser } = require('../../models/DeletedUser')
 const { UserAuditLogEntry } = require('../../models/UserAuditLogEntry')
+const { Feedback } = require('../../models/Feedback')
 const NewsletterManager = require('../Newsletter/NewsletterManager')
 const ProjectDeleter = require('../Project/ProjectDeleter')
 const SubscriptionHandler = require('../Subscription/SubscriptionHandler')
@@ -69,6 +70,8 @@ async function expireDeletedUser(userId) {
   const deletedUser = await DeletedUser.findOne({
     'deleterData.deletedUserId': userId,
   }).exec()
+
+  await Feedback.deleteMany({ userId }).exec()
 
   deletedUser.user = undefined
   deletedUser.deleterData.deleterIpAddress = undefined
