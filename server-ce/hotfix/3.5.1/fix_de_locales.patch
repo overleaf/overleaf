@@ -1,0 +1,10 @@
+--- services/web/locales/de.json
++++ services/web/locales/de.json
+@@ -348,7 +348,6 @@
+   "edit_dictionary_empty": "Dein benutzerdefiniertes Wörterbuch ist leer.",
+   "edit_dictionary_remove": "Aus Wörterbuch entfernen",
+   "editing": "Bearbeitung",
+-  "editor_and_pdf": "Editor &amp; PDF",
+   "editor_disconected_click_to_reconnect": "Editor wurde getrennt",
+   "editor_only_hide_pdf": "Nur Editor <0>(PDF ausblenden)</0>",
+   "editor_resources": "Editor-Literatur",
