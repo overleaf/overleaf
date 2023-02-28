@@ -16,7 +16,7 @@ type SplitMenuBsStyle = Extract<BsStyle, 'primary' | 'secondary' | 'danger'>
 type SplitMenuBsSize = Extract<BsSize, 'md' | 'sm' | 'xs'>
 
 type SplitMenuButtonProps = {
-  tooltip?: TooltipProps
+  tooltip?: Omit<TooltipProps, 'children'>
   bsStyle?: SplitMenuBsStyle
   text: string
   icon?: IconProps
