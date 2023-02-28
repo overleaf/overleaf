@@ -4,6 +4,7 @@ import { ActiveSubscription } from './states/active/active'
 import { CanceledSubscription } from './states/canceled'
 import { ExpiredSubscription } from './states/expired'
 import { useSubscriptionDashboardContext } from '../../context/subscription-dashboard-context'
+import PersonalSubscriptionRecurlySyncEmail from './personal-subscription-recurly-sync-email'
 
 function PastDueSubscriptionAlert({
   subscription,
@@ -79,6 +80,7 @@ function PersonalSubscription() {
         </div>
       )}
       <hr />
+      <PersonalSubscriptionRecurlySyncEmail />
     </>
   )
 }

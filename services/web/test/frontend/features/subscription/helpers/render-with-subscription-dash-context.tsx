@@ -2,6 +2,7 @@ import { render } from '@testing-library/react'
 import _ from 'lodash'
 import { SubscriptionDashboardProvider } from '../../../../../frontend/js/features/subscription/context/subscription-dashboard-context'
 import { groupPriceByUsageTypeAndSize, plans } from '../fixtures/plans'
+import fetchMock from 'fetch-mock'
 
 export function renderWithSubscriptionDashContext(
   component: React.ReactElement,
@@ -89,4 +90,5 @@ export function cleanUpContext() {
   // @ts-ignore
   delete global.recurly
   window.metaAttributesCache = new Map()
+  fetchMock.reset()
 }

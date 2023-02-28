@@ -3,6 +3,7 @@ import {
   GroupSubscription,
   RecurlySubscription,
 } from '../../../../../types/subscription/dashboard/subscription'
+
 const dateformat = require('dateformat')
 const today = new Date()
 const oneYearFromToday = new Date().setFullYear(today.getFullYear() + 1)
@@ -45,6 +46,7 @@ export const annualActiveSubscription: RecurlySubscription = {
     trial_ends_at: null,
     activeCoupons: [],
     account: {
+      email: 'fake@example.com',
       has_canceled_subscription: { _: 'false', $: { type: 'boolean' } },
       has_past_due_invoice: { _: 'false', $: { type: 'boolean' } },
     },
@@ -84,6 +86,7 @@ export const annualActiveSubscriptionEuro: RecurlySubscription = {
     trial_ends_at: null,
     activeCoupons: [],
     account: {
+      email: 'fake@example.com',
       has_canceled_subscription: { _: 'false', $: { type: 'boolean' } },
       has_past_due_invoice: { _: 'false', $: { type: 'boolean' } },
     },
@@ -122,6 +125,7 @@ export const annualActiveSubscriptionPro: RecurlySubscription = {
     trial_ends_at: null,
     activeCoupons: [],
     account: {
+      email: 'fake@example.com',
       has_canceled_subscription: { _: 'false', $: { type: 'boolean' } },
       has_past_due_invoice: { _: 'false', $: { type: 'boolean' } },
     },
@@ -161,6 +165,7 @@ export const pastDueExpiredSubscription: RecurlySubscription = {
     trial_ends_at: null,
     activeCoupons: [],
     account: {
+      email: 'fake@example.com',
       has_canceled_subscription: { _: 'false', $: { type: 'boolean' } },
       has_past_due_invoice: { _: 'true', $: { type: 'boolean' } },
     },
@@ -200,6 +205,7 @@ export const canceledSubscription: RecurlySubscription = {
     trial_ends_at: null,
     activeCoupons: [],
     account: {
+      email: 'fake@example.com',
       has_canceled_subscription: { _: 'true', $: { type: 'boolean' } },
       has_past_due_invoice: { _: 'false', $: { type: 'boolean' } },
     },
@@ -239,6 +245,7 @@ export const pendingSubscriptionChange: RecurlySubscription = {
     trial_ends_at: null,
     activeCoupons: [],
     account: {
+      email: 'fake@example.com',
       has_canceled_subscription: { _: 'false', $: { type: 'boolean' } },
       has_past_due_invoice: { _: 'false', $: { type: 'boolean' } },
     },
@@ -289,6 +296,7 @@ export const groupActiveSubscription: GroupSubscription = {
     trial_ends_at: null,
     activeCoupons: [],
     account: {
+      email: 'fake@example.com',
       has_canceled_subscription: { _: 'false', $: { type: 'boolean' } },
       has_past_due_invoice: { _: 'false', $: { type: 'boolean' } },
     },
@@ -333,6 +341,7 @@ export const groupActiveSubscriptionWithPendingLicenseChange: GroupSubscription 
       trial_ends_at: null,
       activeCoupons: [],
       account: {
+        email: 'fake@example.com',
         has_canceled_subscription: {
           _: 'false',
           $: {
@@ -395,6 +404,7 @@ export const trialSubscription: RecurlySubscription = {
     trial_ends_at: new Date(sevenDaysFromToday).toString(),
     activeCoupons: [],
     account: {
+      email: 'fake@example.com',
       has_canceled_subscription: {
         _: 'false',
         $: {

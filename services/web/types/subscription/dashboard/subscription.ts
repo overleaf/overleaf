@@ -19,6 +19,7 @@ type Recurly = {
   trial_ends_at: Nullable<string>
   activeCoupons: any[] // TODO: confirm type in array
   account: {
+    email: string
     // data via Recurly API
     has_canceled_subscription: {
       _: 'false' | 'true'

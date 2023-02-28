@@ -1,5 +1,10 @@
 import { expect } from 'chai'
-import { screen } from '@testing-library/react'
+import {
+  screen,
+  fireEvent,
+  waitForElementToBeRemoved,
+  within,
+} from '@testing-library/react'
 import PersonalSubscription from '../../../../../../frontend/js/features/subscription/components/dashboard/personal-subscription'
 import {
   annualActiveSubscription,
@@ -11,6 +16,7 @@ import {
   cleanUpContext,
   renderWithSubscriptionDashContext,
 } from '../../helpers/render-with-subscription-dash-context'
+import fetchMock from 'fetch-mock'
 
 describe('<PersonalSubscription />', function () {
   afterEach(function () {
@@ -144,5 +150,46 @@ describe('<PersonalSubscription />', function () {
 
       screen.getByText('Change plan')
     })
+  })
+
+  it('shows different recurly email address section', async function () {
+    fetchMock.post('/user/subscription/account/email', 200)
+    const usersEmail = 'foo@example.com'
+    renderWithSubscriptionDashContext(<PersonalSubscription />, {
+      metaTags: [
+        { name: 'ol-subscription', value: annualActiveSubscription },
+        { name: 'ol-usersEmail', value: usersEmail },
+      ],
+    })
+
+    const billingText = screen.getByText(
+      /your billing email address is currently/i
+    ).textContent
+    expect(billingText).to.contain(
+      `Your billing email address is currently ${annualActiveSubscription.recurly.account.email}.` +
+        ` If needed you can update your billing address to ${usersEmail}`
+    )
+
+    const submitBtn = screen.getByRole<HTMLButtonElement>('button', {
+      name: /update/i,
+    })
+    expect(submitBtn.disabled).to.be.false
+    fireEvent.click(submitBtn)
+    expect(submitBtn.disabled).to.be.true
+    expect(
+      screen.getByRole<HTMLButtonElement>('button', { name: /updating/i })
+        .disabled
+    ).to.be.true
+
+    await waitForElementToBeRemoved(() =>
+      screen.getByText(/your billing email address is currently/i)
+    )
+
+    within(screen.getByRole('alert')).getByText(
+      /your billing email address was successfully updated/i
+    )
+
+    expect(screen.queryByRole('button', { name: /update/i })).to.be.null
+    expect(screen.queryByRole('button', { name: /updating/i })).to.be.null
   })
 })

@@ -20,32 +20,32 @@ function InstitutionMemberships() {
     )
   }
 
+  if (!institutionMemberships.length) return null
+
   return (
-    <>
-      <div>
-        {institutionMemberships.map((institution: Institution) => (
-          <div key={`${institution.id}`}>
-            <Trans
-              i18nKey="you_are_on_x_plan_as_a_confirmed_member_of_institution_y"
-              values={{
-                planName: 'Professional',
-                institutionName: institution.name || '',
-              }}
-              components={[
-                // eslint-disable-next-line react/jsx-key, jsx-a11y/anchor-has-content
-                <a href="/user/subscription/plans" rel="noopener" />,
-                // eslint-disable-next-line react/jsx-key
-                <strong />,
-                // eslint-disable-next-line react/jsx-key
-                <strong />,
-              ]}
-            />
-            <hr />
-          </div>
-        ))}
-        {institutionMemberships.length > 0 && <PremiumFeaturesLink />}
-      </div>
-    </>
+    <div>
+      {institutionMemberships.map((institution: Institution) => (
+        <div key={`${institution.id}`}>
+          <Trans
+            i18nKey="you_are_on_x_plan_as_a_confirmed_member_of_institution_y"
+            values={{
+              planName: 'Professional',
+              institutionName: institution.name || '',
+            }}
+            components={[
+              // eslint-disable-next-line react/jsx-key, jsx-a11y/anchor-has-content
+              <a href="/user/subscription/plans" rel="noopener" />,
+              // eslint-disable-next-line react/jsx-key
+              <strong />,
+              // eslint-disable-next-line react/jsx-key
+              <strong />,
+            ]}
+          />
+          <hr />
+        </div>
+      ))}
+      <PremiumFeaturesLink />
+    </div>
   )
 }
 
