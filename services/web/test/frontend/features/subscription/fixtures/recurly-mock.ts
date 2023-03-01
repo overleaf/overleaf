@@ -154,7 +154,9 @@ export class ThreeDSecureBase {
   on(_eventName = 'change', _callback: () => void) {}
 
   attach(el: HTMLElement) {
-    el.textContent = '3D challenge content'
+    const div = document.createElement('div')
+    div.appendChild(document.createTextNode('3D challenge content'))
+    el.appendChild(div)
   }
 }
 

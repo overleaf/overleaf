@@ -4,6 +4,9 @@ import {
 } from '../../fixtures/recurly-mock'
 import { PaymentProvider } from '../../../../../../frontend/js/features/subscription/context/payment-context'
 import { plans } from '../../fixtures/plans'
+import PaymentPreviewPanel from '../../../../../../frontend/js/features/subscription/components/new/payment-preview/payment-preview-panel'
+import CheckoutPanel from '../../../../../../frontend/js/features/subscription/components/new/checkout/checkout-panel'
+import { fillForm } from '../../helpers/payment'
 
 describe('common recurly validations', function () {
   beforeEach(function () {
@@ -38,5 +41,28 @@ describe('common recurly validations', function () {
       expect(win.recurly.configure).to.be.calledOnce
       expect(win.recurly.Pricing.Subscription).to.be.calledOnce
     })
+  })
+
+  it('shows three d secure challenge content only once when changing currency', function () {
+    cy.intercept('POST', 'user/subscription/create', {
+      statusCode: 404,
+      body: {
+        threeDSecureActionTokenId: '123',
+      },
+    })
+
+    cy.mount(
+      <PaymentProvider publicKey="0000">
+        <PaymentPreviewPanel />
+        <CheckoutPanel />
+      </PaymentProvider>
+    )
+    cy.findByTestId('checkout-form').within(() => fillForm())
+    cy.findByRole('button', { name: /upgrade now/i }).click()
+    cy.findByRole('button', { name: /change currency/i }).click()
+    cy.findByRole('menu').within(() => {
+      cy.findByRole('menuitem', { name: /gbp/i }).click()
+    })
+    cy.findAllByText('3D challenge content').should('have.length', 1)
   })
 })

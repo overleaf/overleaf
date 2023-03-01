@@ -12,7 +12,7 @@ type ThreeDSecureProps = {
 function ThreeDSecure({ actionTokenId, onToken, onError }: ThreeDSecureProps) {
   const { t } = useTranslation()
   const container = useRef<HTMLDivElement>(null)
-  const recurlyContainer = useRef<HTMLDivElement>(null)
+  const recurlyContainer = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     // scroll the UI into view (timeout needed to make sure the element is
@@ -36,6 +36,10 @@ function ThreeDSecure({ actionTokenId, onToken, onError }: ThreeDSecureProps) {
     threeDSecure.on('token', onToken)
     threeDSecure.on('error', onError)
     threeDSecure.attach(recurlyContainer.current)
+
+    return () => {
+      recurlyContainer.current = null
+    }
   }, [actionTokenId, onToken, onError])
 
   return (

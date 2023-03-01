@@ -15,7 +15,7 @@ function CardElement({ className, elements, onChange }: CardElementProps) {
   const { t } = useTranslation()
   const [showCardElementInvalid, setShowCardElementInvalid] =
     useState<boolean>()
-  const cardRef = useRef<HTMLDivElement>(null)
+  const cardRef = useRef<HTMLDivElement | null>(null)
 
   // Card initialization
   useEffect(() => {
@@ -38,6 +38,10 @@ function CardElement({ className, elements, onChange }: CardElementProps) {
       setShowCardElementInvalid(!state.focus && !state.empty && !state.valid)
       onChange(state)
     })
+
+    return () => {
+      cardRef.current = null
+    }
   }, [elements, onChange])
 
   return (

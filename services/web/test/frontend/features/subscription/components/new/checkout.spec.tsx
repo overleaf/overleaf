@@ -6,6 +6,7 @@ import {
   defaultSubscription,
   ElementsBase,
 } from '../../fixtures/recurly-mock'
+import { fillForm } from '../../helpers/payment'
 import { cloneDeep } from 'lodash'
 import { TokenHandler, RecurlyError } from 'recurly__recurly-js'
 
@@ -15,19 +16,6 @@ function CheckoutPanelWithPaymentProvider() {
       <CheckoutPanel />
     </PaymentProvider>
   )
-}
-
-function fillForm() {
-  cy.findByTestId('test-card-element').within(() => {
-    cy.get('input').each(el => {
-      cy.wrap(el).type('123', { delay: 0 })
-    })
-  })
-  cy.findByLabelText(/first name/i).type('123', { delay: 0 })
-  cy.findByLabelText(/last name/i).type('123', { delay: 0 })
-  cy.findByLabelText('Address').type('123', { delay: 0 })
-  cy.findByLabelText(/postal code/i).type('123', { delay: 0 })
-  cy.findByLabelText(/country/i).select('Bulgaria')
 }
 
 describe('checkout panel', function () {
@@ -158,10 +146,10 @@ describe('checkout panel', function () {
       expect(win.recurly.token).to.be.calledOnceWith(
         Cypress.sinon.match.instanceOf(ElementsBase),
         {
-          first_name: '123',
-          last_name: '123',
-          postal_code: '123',
-          address1: '123',
+          first_name: '1',
+          last_name: '1',
+          postal_code: '1',
+          address1: '1',
           address2: '',
           state: '',
           city: '',
@@ -330,7 +318,7 @@ describe('checkout panel', function () {
     })
   })
 
-  describe('3D challenge', function () {
+  describe('3DS challenge', function () {
     it('shows three d secure challenge', function () {
       cy.intercept('POST', 'user/subscription/create', {
         statusCode: 404,
