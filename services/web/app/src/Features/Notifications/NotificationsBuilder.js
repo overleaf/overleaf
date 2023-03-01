@@ -245,6 +245,9 @@ NotificationsBuilder.promises = {
   dropboxDuplicateProjectNames(userId) {
     return promisifyAll(dropboxDuplicateProjectNames(userId))
   },
+  ipMatcherAffiliation: function (userId) {
+    return promisifyAll(ipMatcherAffiliation(userId))
+  },
 }
 
 module.exports = NotificationsBuilder

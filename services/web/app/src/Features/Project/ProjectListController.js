@@ -20,6 +20,7 @@ const { User } = require('../../models/User')
 const UserPrimaryEmailCheckHandler = require('../User/UserPrimaryEmailCheckHandler')
 const UserController = require('../User/UserController')
 const LimitationsManager = require('../Subscription/LimitationsManager')
+const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
 
 /** @typedef {import("./types").GetProjectsRequest} GetProjectsRequest */
 /** @typedef {import("./types").GetProjectsResponse} GetProjectsResponse */
@@ -281,6 +282,19 @@ async function projectListReactPage(req, res, next) {
       { err: error },
       'Failed to check whether user is a member of group subscription'
     )
+  }
+
+  // in v2 add notifications for matching university IPs
+  if (Settings.overleaf != null && req.ip !== user.lastLoginIp) {
+    NotificationsBuilder.promises
+      .ipMatcherAffiliation(user._id)
+      .create(req.ip)
+      .catch(err => {
+        logger.error(
+          { err },
+          'failed to create institutional IP match notification'
+        )
+      })
   }
 
   const hasPaidAffiliation = userAffiliations.some(
