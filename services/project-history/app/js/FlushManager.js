@@ -28,37 +28,18 @@ export function flushIfOld(project_id, cutoffTime, callback) {
       if (err != null) {
         return callback(OError.tag(err))
       }
-      // in the normal case, the flush marker will be set with the
-      // timestamp of the oldest operation in the queue by docupdater
-      if (firstOpTimestamp != null) {
-        if (firstOpTimestamp < cutoffTime) {
-          logger.debug(
-            { project_id, firstOpTimestamp, cutoffTime },
-            'flushing old project'
-          )
-          return UpdatesProcessor.processUpdatesForProject(
-            project_id,
-            (
-              err // always clear the flush marker after processing the project
-            ) =>
-              RedisManager.clearFirstOpTimestamp(project_id, function (e) {
-                if (e != null) {
-                  logger.error(
-                    { project_id, flushErr: e },
-                    'failed to clear flush marker'
-                  )
-                }
-                if (err) {
-                  OError.tag(err)
-                }
-                return callback(err)
-              })
-          ) // return the original error from processUpdatesFromProject
-        } else {
-          return callback()
-        }
+      // In the normal case, the flush marker will be set with the
+      // timestamp of the oldest operation in the queue by docupdater.
+      // If the marker is not set for any reason, we flush it anyway
+      // for safety.
+      if (!firstOpTimestamp || firstOpTimestamp < cutoffTime) {
+        logger.debug(
+          { project_id, firstOpTimestamp, cutoffTime },
+          'flushing old project'
+        )
+        return UpdatesProcessor.processUpdatesForProject(project_id, callback)
       } else {
-        return RedisManager.setFirstOpTimestamp(project_id, callback)
+        return callback()
       }
     }
   )

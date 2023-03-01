@@ -209,7 +209,7 @@ describe('Flushing old queues', function () {
         )
       })
 
-      it('sets the timestamp and does not flush the project history queue', function (done) {
+      it('flushes the project history queue anyway', function (done) {
         request.post(
           {
             url: `http://localhost:3054/flush/old?maxAge=${3 * 3600}`,
@@ -220,8 +220,8 @@ describe('Flushing old queues', function () {
             }
             expect(res.statusCode).to.equal(200)
             assert(
-              !this.flushCall.isDone(),
-              'did not make calls to history service to store updates'
+              this.flushCall.isDone(),
+              'made calls to history service to store updates'
             )
             ProjectHistoryClient.getFirstOpTimestamp(
               this.projectId,
@@ -229,10 +229,7 @@ describe('Flushing old queues', function () {
                 if (err) {
                   return done(err)
                 }
-                expect(parseInt(result, 10)).to.be.within(
-                  this.startDate,
-                  Date.now()
-                )
+                expect(result).to.be.null
                 done()
               }
             )
