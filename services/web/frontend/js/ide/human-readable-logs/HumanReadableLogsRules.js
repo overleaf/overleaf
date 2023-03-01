@@ -45,7 +45,8 @@ const rules = [
   {
     ruleId: 'hint_undefined_control_sequence',
     regexToMatch: /Undefined control sequence/,
-    contentRegex: /^l\.[0-9]+\s*(\\\S+)/,
+    contentRegex:
+      /^(?:l\.[0-9]+|<(?:recently read|inserted text|to be read again)>)\s*(\\\S+)/,
     improvedTitle: (currentTitle, details) => {
       if (details?.length && packageSuggestions.has(details[0])) {
         const command = details[0]
