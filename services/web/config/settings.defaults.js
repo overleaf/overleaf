@@ -786,6 +786,7 @@ module.exports = {
     integrationLinkingWidgets: [],
     referenceLinkingWidgets: [],
     importProjectFromGithubModalWrapper: [],
+    importProjectFromGithubMenu: [],
     editorLeftMenuSync: [],
   },
 
