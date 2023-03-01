@@ -124,6 +124,7 @@ const initialize = () => {
   window.user = user
 
   window.ExposedSettings = {
+    adminEmail: 'placeholder@example.com',
     appName: 'Overleaf',
     cookieDomain: '.overleaf.stories',
     dropboxAppName: 'Overleaf-Stories',

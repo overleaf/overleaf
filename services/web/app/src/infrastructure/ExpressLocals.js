@@ -367,6 +367,7 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
     res.locals.ExposedSettings = {
       isOverleaf: Settings.overleaf != null,
       appName: Settings.appName,
+      adminEmail: Settings.adminEmail,
       dropboxAppName:
         Settings.apis.thirdPartyDataStore?.dropboxAppName || 'Overleaf',
       hasSamlBeta: req.session.samlBeta,

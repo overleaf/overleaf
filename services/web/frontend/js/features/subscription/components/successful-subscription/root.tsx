@@ -1,4 +1,6 @@
 import useWaitForI18n from '../../../../shared/hooks/use-wait-for-i18n'
+import { SubscriptionDashboardProvider } from '../../context/subscription-dashboard-context'
+import SuccessfulSubscription from './successful-subscription'
 
 function Root() {
   const { isReady } = useWaitForI18n()
@@ -7,7 +9,11 @@ function Root() {
     return null
   }
 
-  return <h2>React Subscription Success</h2>
+  return (
+    <SubscriptionDashboardProvider>
+      <SuccessfulSubscription />
+    </SubscriptionDashboardProvider>
+  )
 }
 
 export default Root

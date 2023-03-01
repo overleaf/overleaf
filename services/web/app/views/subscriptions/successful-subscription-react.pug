@@ -3,5 +3,9 @@ extends ../layout-marketing
 block entrypointVar
 	- entrypoint = 'pages/user/subscription/successful-subscription'
 
+block append meta
+	meta(name="ol-subscription" data-type="json" content=personalSubscription)
+	meta(name="ol-postCheckoutRedirect" content=postCheckoutRedirect)
+
 block content
 	main.content.content-alt#subscription-success-root
