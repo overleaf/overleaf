@@ -1,4 +1,3 @@
-const Metrics = require('@overleaf/metrics')
 const { ObjectId } = require('mongodb')
 const OError = require('@overleaf/o-error')
 const { getNativeDb } = require('./Mongoose')
@@ -23,7 +22,6 @@ async function waitForDb() {
 const db = {}
 async function setupDb() {
   const internalDb = await getNativeDb()
-  Metrics.mongodb.monitor(internalDb)
 
   db.contacts = internalDb.collection('contacts')
   db.deletedFiles = internalDb.collection('deletedFiles')

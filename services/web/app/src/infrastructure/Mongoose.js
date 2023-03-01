@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const Settings = require('@overleaf/settings')
+const Metrics = require('@overleaf/metrics')
 const logger = require('@overleaf/logger')
 const { addConnectionDrainer } = require('./GracefulShutdown')
 
@@ -19,6 +20,10 @@ const connectionPromise = mongoose.connect(
   Settings.mongo.url,
   Settings.mongo.options
 )
+
+connectionPromise.then(mongooseInstance => {
+  Metrics.mongodb.monitor(mongooseInstance.connection.client)
+})
 
 addConnectionDrainer('mongoose', async () => {
   await connectionPromise
