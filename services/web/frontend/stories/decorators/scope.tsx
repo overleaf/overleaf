@@ -36,8 +36,11 @@ const initialize = () => {
       {
         _id: 'root-folder-id',
         name: 'rootFolder',
-        docs: [],
-        fileRefs: [],
+        docs: [
+          { _id: 'test-file-id', name: 'testfile.tex' },
+          { _id: 'test-bib-file-id', name: 'testsources.bib' },
+        ],
+        fileRefs: [{ _id: 'test-image-id', name: 'frog.jpg' }],
         folders: [],
       },
     ],
@@ -63,7 +66,7 @@ const initialize = () => {
     $broadcast: () => {},
     $root: {
       _references: {
-        keys: [],
+        keys: ['bibkeyExample'],
       },
     },
     ui: {
@@ -115,7 +118,9 @@ const initialize = () => {
     metadataManager: {
       metadata: {
         state: {
-          documents: {},
+          documents: {
+            'test-file-id': { labels: ['sec:section-label'], packages: [] },
+          },
         },
       },
     },
