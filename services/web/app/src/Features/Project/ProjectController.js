@@ -1061,6 +1061,21 @@ const ProjectController = {
             }
           )
         },
+        onboardingVideoTourAssignment(cb) {
+          SplitTestHandler.getAssignment(
+            req,
+            res,
+            'onboarding-video-tour',
+            (error, assignment) => {
+              // do not fail editor load if assignment fails
+              if (error) {
+                cb(null, { variant: 'default' })
+              } else {
+                cb(null, assignment)
+              }
+            }
+          )
+        },
         accessCheckForOldCompileDomainAssigment(cb) {
           SplitTestHandler.getAssignment(
             req,
@@ -1133,6 +1148,7 @@ const ProjectController = {
           pdfjsAssignment,
           editorLeftMenuAssignment,
           richTextAssignment,
+          onboardingVideoTourAssignment,
         }
       ) => {
         if (err != null) {
@@ -1240,6 +1256,12 @@ const ProjectController = {
               !userIsMemberOfGroupSubscription &&
               !userHasInstitutionLicence
 
+            const showOnboardingVideoTour =
+              Features.hasFeature('saas') &&
+              userId &&
+              onboardingVideoTourAssignment.variant === 'active' &&
+              req.session.justRegistered
+
             const template =
               detachRole === 'detached'
                 ? 'project/editor_detached'
@@ -1318,6 +1340,7 @@ const ProjectController = {
               useOpenTelemetry: Settings.useOpenTelemetryClient,
               showCM6SwitchAwaySurvey: Settings.showCM6SwitchAwaySurvey,
               richTextVariant: richTextAssignment.variant,
+              showOnboardingVideoTour,
             })
             timer.done()
           }
