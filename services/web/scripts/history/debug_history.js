@@ -252,7 +252,7 @@ async function rewindDoc(projectId, docId) {
     for (let i = update.op.length - 1; i >= 0; i--) {
       const op = update.op[i]
       if (op.broken === true) {
-        log.op('skipped', op)
+        log.op('skipped', content, op)
         continue
       }
       try {
