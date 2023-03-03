@@ -1,6 +1,7 @@
 // Script to debug the track-changes history of the documents in a project.
 // Usage:
 //   node debug_history.js --project-id=<project_id>
+//   node debug_history.js --all   # to check all unmigrated projects
 //
 // Example output:
 //   $ node scripts/debug_history.js  --project-id=63ff3adc06177192f18a6b38
@@ -13,7 +14,11 @@
 //   truncating to content length","op":{"p":32,"d":6},"contentLength":24}]}],"status":"failed"}
 
 /* eslint-disable camelcase */
-const { waitForDb } = require('../../../track-changes/app/js/mongodb')
+const TrackChangesMongoDb = require('../../../track-changes/app/js/mongodb')
+const { waitForDb } = require('../../app/src/infrastructure/mongodb')
+const {
+  findProjects,
+} = require('../../modules/history-migration/app/src/HistoryUpgradeHelper')
 const PackManager = require('../../../track-changes/app/js/PackManager')
 const {
   packsAreDuplicated,
@@ -32,13 +37,14 @@ logger.initialize('debug-history')
 logger.logger.streams = []
 
 const options = {
-  boolean: ['verbose', 'raw', 'help'],
+  boolean: ['all', 'verbose', 'raw', 'help'],
   string: ['project-id'],
   alias: {
     'project-id': 'p',
     verbose: 'v',
     raw: 'r',
     help: 'h',
+    all: 'a',
   },
   default: {},
 }
@@ -46,7 +52,7 @@ const argv = minimist(process.argv.slice(2), options)
 
 function usage() {
   console.log(
-    `Usage: ${process.argv[1]} [--project-id=<project_id>] [--verbose] [--raw]`
+    `Usage: ${process.argv[1]} [--project-id=<project_id> | --all] [--verbose] [--raw]`
   )
   process.exit(1)
 }
@@ -270,40 +276,51 @@ async function rewindDoc(projectId, docId) {
 }
 
 async function main() {
-  const projectId = argv['project-id']
-  if (!projectId || argv.help) {
+  // Get a list of projects to migrate
+  let projectIds = []
+  if (argv.all) {
+    const projectsToMigrate = await findProjects(
+      { 'overleaf.history.display': { $ne: true } },
+      { _id: 1, overleaf: 1 }
+    )
+    projectIds = projectsToMigrate.map(p => p._id.toString())
+    console.log('Unmigrated projects', projectIds.length)
+  } else if (argv['project-id']) {
+    projectIds = [argv['project-id']]
+  } else {
     usage()
     process.exit(1)
   }
-  const docIds = await PackManager.promises.findAllDocsInProject(projectId)
-  if (!docIds.length) {
-    console.log('No docs found for project', projectId)
-    process.exit(0)
-  }
   let errorCount = 0
-  for (const docId of docIds) {
-    const result = await rewindDoc(projectId, docId)
-    const failed = result.filter(r => r.status === 'failed')
-    errorCount += failed.length
-    if (argv.verbose) {
-      console.log(JSON.stringify({ projectId, docId, result }, null, 2))
-    } else {
-      console.log(
-        'project',
-        projectId,
-        'docId',
-        docId,
-        failed.length === 0 ? 'OK' : 'FAILED'
-      )
-      for (const f of failed) {
-        console.log(JSON.stringify(f))
+  for (const projectId of projectIds) {
+    const docIds = await PackManager.promises.findAllDocsInProject(projectId)
+    if (!docIds.length) {
+      console.log('No docs found for project', projectId)
+    }
+    let projectErrorCount = 0
+    for (const docId of docIds) {
+      const result = await rewindDoc(projectId, docId)
+      const failed = result.filter(r => r.status === 'failed')
+      errorCount += failed.length
+      if (argv.verbose) {
+        console.log(JSON.stringify({ projectId, docId, result }, null, 2))
+      } else if (failed.length > 0) {
+        console.log('project', projectId, 'docId', docId, 'FAILED')
+        for (const f of failed) {
+          console.log(JSON.stringify(f))
+        }
+        projectErrorCount += failed.length
       }
+    }
+    if (projectErrorCount === 0 && !argv.verbose) {
+      console.log('project', projectId, 'docs', docIds.length, 'OK')
     }
   }
   process.exit(errorCount > 0 ? 1 : 0)
 }
 
 waitForDb()
+  .then(TrackChangesMongoDb.waitForDb)
   .then(main)
   .catch(err => {
     console.error(err)
