@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { Alert, AlertProps } from 'react-bootstrap'
 import Body from './body'
 import Action from './action'
-import Close from './close'
 import classnames from 'classnames'
+import { useTranslation } from 'react-i18next'
 
 type NotificationProps = {
   bsStyle: AlertProps['bsStyle']
@@ -20,6 +20,7 @@ function Notification({
   ...props
 }: NotificationProps) {
   const [show, setShow] = useState(true)
+  const { t } = useTranslation()
 
   const handleDismiss = () => {
     if (onDismiss) {
@@ -35,13 +36,12 @@ function Notification({
 
   return (
     <li className={classnames('notification-entry', className)} {...props}>
-      <Alert bsStyle={bsStyle}>
-        {children}
-        {onDismiss ? (
-          <div className="notification-close">
-            <Close onDismiss={handleDismiss} />
-          </div>
-        ) : null}
+      <Alert
+        bsStyle={bsStyle}
+        onDismiss={onDismiss ? handleDismiss : undefined}
+        closeLabel={t('close')}
+      >
+        <div className="notification-entry-content">{children}</div>
       </Alert>
     </li>
   )
