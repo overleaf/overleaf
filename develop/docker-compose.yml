@@ -10,6 +10,7 @@ volumes:
   sharelatex-data:
   spelling-cache:
   web-data:
+  history-v1-buckets:
 
 services:
   chat:
@@ -71,6 +72,22 @@ services:
       - filestore-uploads:/overleaf/services/filestore/uploads
       - filestore-user-files:/overleaf/services/filestore/user_files
 
+  history-v1:
+    build:
+      context: ..
+      dockerfile: services/history-v1/Dockerfile
+    env_file:
+        - dev.env
+    environment:
+      OVERLEAF_EDITOR_ANALYTICS_BUCKET: "/buckets/analytics"
+      OVERLEAF_EDITOR_BLOBS_BUCKET: "/buckets/blobs"
+      OVERLEAF_EDITOR_CHUNKS_BUCKET: "/buckets/chunks"
+      OVERLEAF_EDITOR_PROJECT_BLOBS_BUCKET: "/buckets/project_blobs"
+      OVERLEAF_EDITOR_ZIPS_BUCKET: "/buckets/zips"
+      PERSISTOR_BACKEND: fs
+    volumes:
+        - history-v1-buckets:/buckets
+
   mongo:
     image: mongo:4.4
     ports:
@@ -84,6 +101,13 @@ services:
       dockerfile: services/notifications/Dockerfile
     env_file:
       - dev.env
+
+  project-history:
+    build:
+      context: ..
+      dockerfile: services/project-history/Dockerfile
+    env_file:
+        - dev.env
 
   real-time:
     build:
@@ -141,7 +165,9 @@ services:
       - docstore
       - document-updater
       - filestore
+      - history-v1
       - notifications
+      - project-history
       - real-time
       - spelling
 

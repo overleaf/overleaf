@@ -10,6 +10,9 @@ WORKDIR /overleaf/services/history-v1
 # (see https://googleapis.dev/nodejs/storage/latest/File.html#createWriteStream)
 RUN mkdir /home/node/.config && chown node:node /home/node/.config
 
+# fs persistor needs a writable folder as a target for the mounted volume
+RUN mkdir /buckets && chown node:node /buckets
+
 FROM base as app
 
 COPY package.json package-lock.json /overleaf/

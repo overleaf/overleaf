@@ -65,6 +65,20 @@ services:
       - ../services/filestore/app.js:/overleaf/services/filestore/app.js
       - ../services/filestore/config:/overleaf/services/filestore/config
 
+  history-v1:
+    command: [ "npm", "run", "nodemon" ]
+    environment:
+      - NODE_APP_OPTIONS=--inspect=0.0.0.0:9229
+    ports:
+      - "127.0.0.1:9239:9229"
+    volumes:
+      - ../services/history-v1/api:/overleaf/services/history-v1/api
+      - ../services/history-v1/app.js:/overleaf/services/history-v1/app.js
+      - ../services/history-v1/config:/overleaf/services/history-v1/config
+      - ../services/history-v1/storage:/overleaf/services/history-v1/storage
+      - ../services/history-v1/knexfile.js:/overleaf/services/history-v1/knexfile.js
+      - ../services/history-v1/migrations:/overleaf/services/history-v1/migrations
+
   notifications:
     command: ["npm", "run", "nodemon"]
     environment:
@@ -75,6 +89,17 @@ services:
       - ../services/notifications/app:/overleaf/services/notifications/app
       - ../services/notifications/app.js:/overleaf/services/notifications/app.js
       - ../services/notifications/config:/overleaf/services/notifications/config
+
+  project-history:
+    command: [ "npm", "run", "nodemon" ]
+    environment:
+      - NODE_APP_OPTIONS=--inspect=0.0.0.0:9229
+    ports:
+      - "127.0.0.1:9240:9229"
+    volumes:
+      - ../services/project-history/app:/overleaf/services/project-history/app
+      - ../services/project-history/app.js:/overleaf/services/project-history/app.js
+      - ../services/project-history/config:/overleaf/services/project-history/config
 
   real-time:
     command: ["npm", "run", "nodemon"]

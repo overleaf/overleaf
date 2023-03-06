@@ -204,6 +204,12 @@ module.exports = {
       backendGroupName: undefined,
       defaultBackendClass: process.env.CLSI_DEFAULT_BACKEND_CLASS || 'e2',
     },
+    project_history: {
+      sendProjectStructureOps: true,
+      initializeHistoryForNewProjects: true,
+      displayHistoryForNewProjects: true,
+      url: `http://${process.env.PROJECT_HISTORY_HOST || 'localhost'}:3054`,
+    },
     realTime: {
       url: `http://${process.env.REALTIME_HOST || 'localhost'}:3026`,
     },
