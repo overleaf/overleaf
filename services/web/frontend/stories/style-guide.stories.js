@@ -234,7 +234,6 @@ export const Alerts = () => {
           <Col md={8} mdOffset={2}>
             <h2>Alerts</h2>
 
-            <h3>Non-dismissible alerts</h3>
             <Alert bsStyle="danger">
               An <code>.alert-danger</code> alert
             </Alert>
@@ -245,21 +244,6 @@ export const Alerts = () => {
               An <code>.alert-info</code> alert
             </Alert>
             <Alert bsStyle="warning">
-              An <code>.alert-warning</code> alert
-            </Alert>
-
-            <hr />
-            <h3>Dismissible alerts</h3>
-            <Alert bsStyle="danger" onDismiss={() => {}}>
-              An <code>.alert-danger</code> alert
-            </Alert>
-            <Alert bsStyle="success" onDismiss={() => {}}>
-              An <code>.alert-success</code> alert
-            </Alert>
-            <Alert bsStyle="info" onDismiss={() => {}}>
-              An <code>.alert-info</code> alert
-            </Alert>
-            <Alert bsStyle="warning" onDismiss={() => {}}>
               An <code>.alert-warning</code> alert
             </Alert>
           </Col>
