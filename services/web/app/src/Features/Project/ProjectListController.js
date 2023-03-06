@@ -262,9 +262,15 @@ async function projectListPage(req, res, next) {
     delete req.session.saml
   }
 
+  function fakeDelay() {
+    return new Promise(resolve => {
+      setTimeout(() => resolve(undefined), 0)
+    })
+  }
+
   const prefetchedProjectsBlob = await Promise.race([
     projectsBlobPending,
-    Promise.resolve(undefined),
+    fakeDelay(),
   ])
   Metrics.inc('project-list-prefetch-projects', 1, {
     status: prefetchedProjectsBlob ? 'success' : 'too-slow',
@@ -286,15 +292,16 @@ async function projectListPage(req, res, next) {
 
   // in v2 add notifications for matching university IPs
   if (Settings.overleaf != null && req.ip !== user.lastLoginIp) {
-    NotificationsBuilder.promises
-      .ipMatcherAffiliation(user._id)
-      .create(req.ip)
-      .catch(err => {
-        logger.error(
-          { err },
-          'failed to create institutional IP match notification'
-        )
-      })
+    try {
+      await NotificationsBuilder.promises
+        .ipMatcherAffiliation(user._id)
+        .create(req.ip)
+    } catch (err) {
+      logger.error(
+        { err },
+        'failed to create institutional IP match notification'
+      )
+    }
   }
 
   const hasPaidAffiliation = userAffiliations.some(
