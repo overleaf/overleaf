@@ -82,7 +82,7 @@ const _buildPortalTemplatesList = affiliations => {
  * @param {import("express").NextFunction} next
  * @returns {Promise<void>}
  */
-async function projectListReactPage(req, res, next) {
+async function projectListPage(req, res, next) {
   // can have two values:
   // - undefined - when there's no "saas" feature or couldn't get subscription data
   // - object - the subscription data object
@@ -601,6 +601,6 @@ function _hasActiveFilter(filters) {
 }
 
 module.exports = {
-  projectListReactPage: expressify(projectListReactPage),
+  projectListPage: expressify(projectListPage),
   getProjectsJson: expressify(getProjectsJson),
 }

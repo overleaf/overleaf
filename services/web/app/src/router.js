@@ -464,7 +464,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     '/project',
     AuthenticationController.requireLogin(),
     RateLimiterMiddleware.rateLimit(rateLimiters.openDashboard),
-    ProjectController.projectListPage
+    ProjectListController.projectListPage
   )
   webRouter.post(
     '/project/new',

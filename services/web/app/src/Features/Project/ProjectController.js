@@ -43,8 +43,6 @@ const { hasAdminAccess } = require('../Helpers/AdminAuthorizationHelper')
 const InstitutionsFeatures = require('../Institutions/InstitutionsFeatures')
 const SubscriptionViewModelBuilder = require('../Subscription/SubscriptionViewModelBuilder')
 const SurveyHandler = require('../Survey/SurveyHandler')
-const { expressify } = require('../../util/promises')
-const ProjectListController = require('./ProjectListController')
 const ProjectAuditLogHandler = require('./ProjectAuditLogHandler')
 const PublicAccessLevels = require('../Authorization/PublicAccessLevels')
 
@@ -408,28 +406,7 @@ const ProjectController = {
     })
   },
 
-  async projectListPage(req, res, next) {
-    try {
-      const assignment = await SplitTestHandler.promises.getAssignment(
-        req,
-        res,
-        'project-dashboard-react'
-      )
-      if (assignment.variant === 'enabled') {
-        ProjectListController.projectListReactPage(req, res, next)
-      } else {
-        ProjectController._projectListAngularPage(req, res, next)
-      }
-    } catch (error) {
-      logger.warn(
-        { err: error },
-        'failed to get "project-dashboard-react" split test assignment'
-      )
-      ProjectController._projectListAngularPage(req, res, next)
-    }
-  },
-
-  _projectListAngularPage(req, res, next) {
+  projectListPage(req, res, next) {
     const timer = new metrics.Timer('project-list')
     const userId = SessionManager.getLoggedInUserId(req.session)
     const currentUser = SessionManager.getSessionUser(req.session)
@@ -1636,9 +1613,5 @@ const LEGACY_THEME_LIST = [
   'vibrant_ink',
   'xcode',
 ]
-
-ProjectController.projectListPage = expressify(
-  ProjectController.projectListPage
-)
 
 module.exports = ProjectController
