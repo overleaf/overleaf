@@ -1,5 +1,9 @@
 import '@testing-library/cypress/add-commands'
-import { interceptCompile } from './compile'
+import {
+  interceptCompile,
+  waitForCompile,
+  interceptDeferredCompile,
+} from './compile'
 import { interceptEvents } from './events'
 import { interceptSpelling } from './spelling'
 
@@ -12,6 +16,8 @@ declare global {
       interceptCompile: typeof interceptCompile
       interceptEvents: typeof interceptEvents
       interceptSpelling: typeof interceptSpelling
+      waitForCompile: typeof waitForCompile
+      interceptDeferredCompile: typeof interceptDeferredCompile
       index: () => Chainable<number>
     }
   }
@@ -20,6 +26,8 @@ declare global {
 Cypress.Commands.add('interceptCompile', interceptCompile)
 Cypress.Commands.add('interceptEvents', interceptEvents)
 Cypress.Commands.add('interceptSpelling', interceptSpelling)
+Cypress.Commands.add('waitForCompile', waitForCompile)
+Cypress.Commands.add('interceptDeferredCompile', interceptDeferredCompile)
 Cypress.Commands.add('index', { prevSubject: true }, subject => {
   return cy.wrap(subject).invoke('index')
 })

@@ -77,7 +77,7 @@ const WithSelectedEntities = ({
 }
 
 const interceptSyncCodeAsync = () => {
-  const output: { resolve: () => void } = {
+  const deferred: { resolve: () => void } = {
     resolve: () => {
       // do nothing
     },
@@ -85,7 +85,7 @@ const interceptSyncCodeAsync = () => {
 
   cy.intercept('/project/*/sync/code?*', req => {
     return new Promise(resolve => {
-      output.resolve = () => {
+      deferred.resolve = () => {
         req.reply({
           body: { pdf: cloneDeep(mockHighlights) },
         })
@@ -94,7 +94,7 @@ const interceptSyncCodeAsync = () => {
     })
   }).as('sync-code')
 
-  return output
+  return deferred
 }
 
 const interceptSyncPdfAsync = () => {
@@ -127,12 +127,10 @@ const interceptSyncPdf = () => {
   }).as('sync-pdf')
 }
 
-// eslint-disable-next-line mocha/no-skipped-tests
-describe.skip('<PdfSynctexControls/>', function () {
+describe('<PdfSynctexControls/>', function () {
   beforeEach(function () {
     window.metaAttributesCache = new Map()
-
-    cy.interceptCompile()
+    window.metaAttributesCache.set('ol-preventCompileOnLoad', false)
     cy.interceptEvents()
   })
 
@@ -141,6 +139,8 @@ describe.skip('<PdfSynctexControls/>', function () {
   })
 
   it('handles clicks on sync buttons', function () {
+    cy.interceptCompile()
+
     const scope = mockScope()
 
     cy.mount(
@@ -150,6 +150,8 @@ describe.skip('<PdfSynctexControls/>', function () {
         <PdfSynctexControls />
       </EditorProviders>
     )
+
+    cy.waitForCompile()
 
     cy.get('.synctex-control-icon').should('have.length', 2)
 
@@ -162,7 +164,7 @@ describe.skip('<PdfSynctexControls/>', function () {
       )
     })
 
-    cy.wait('@compile').then(() => {
+    cy.wrap(null).then(() => {
       setDetachedPosition(mockPosition)
     })
 
@@ -190,6 +192,8 @@ describe.skip('<PdfSynctexControls/>', function () {
   })
 
   it('disables button when multiple entities are selected', function () {
+    cy.interceptCompile()
+
     const scope = mockScope()
 
     cy.mount(
@@ -202,12 +206,16 @@ describe.skip('<PdfSynctexControls/>', function () {
       </EditorProviders>
     )
 
+    cy.waitForCompile()
+
     cy.findByRole('button', { name: 'Go to code location in PDF' }).should(
       'be.disabled'
     )
   })
 
   it('disables button when a file is selected', function () {
+    cy.interceptCompile()
+
     const scope = mockScope()
 
     cy.mount(
@@ -217,6 +225,8 @@ describe.skip('<PdfSynctexControls/>', function () {
         <PdfSynctexControls />
       </EditorProviders>
     )
+
+    cy.waitForCompile()
 
     cy.findByRole('button', { name: 'Go to code location in PDF' }).should(
       'be.disabled'
@@ -229,6 +239,8 @@ describe.skip('<PdfSynctexControls/>', function () {
     })
 
     it('does not have go to PDF location button nor arrow icon', function () {
+      cy.interceptCompile()
+
       const scope = mockScope()
 
       cy.mount(
@@ -238,6 +250,8 @@ describe.skip('<PdfSynctexControls/>', function () {
           <PdfSynctexControls />
         </EditorProviders>
       )
+
+      cy.waitForCompile()
 
       cy.findByRole('button', { name: /^Go to PDF location in code/ }).should(
         'not.exist'
@@ -247,6 +261,8 @@ describe.skip('<PdfSynctexControls/>', function () {
     })
 
     it('send set highlights action', function () {
+      cy.interceptCompile()
+
       const scope = mockScope()
 
       cy.mount(
@@ -257,7 +273,7 @@ describe.skip('<PdfSynctexControls/>', function () {
         </EditorProviders>
       )
 
-      cy.wait('@compile')
+      cy.waitForCompile()
 
       // mock editor cursor position update
       cy.window().then(win => {
@@ -302,6 +318,7 @@ describe.skip('<PdfSynctexControls/>', function () {
     })
 
     it('reacts to sync to code action', function () {
+      cy.interceptCompile()
       interceptSyncPdf()
 
       const scope = mockScope()
@@ -312,7 +329,9 @@ describe.skip('<PdfSynctexControls/>', function () {
           <WithSelectedEntities mockSelectedEntities={mockSelectedEntities} />
           <PdfSynctexControls />
         </EditorProviders>
-      ).then(() => {
+      )
+
+      cy.waitForCompile().then(() => {
         testDetachChannel.postMessage({
           role: 'detached',
           event: 'action-sync-to-code',
@@ -332,6 +351,8 @@ describe.skip('<PdfSynctexControls/>', function () {
     })
 
     it('does not have go to code location button nor arrow icon', function () {
+      cy.interceptCompile()
+
       const scope = mockScope()
 
       cy.mount(
@@ -341,6 +362,8 @@ describe.skip('<PdfSynctexControls/>', function () {
         </EditorProviders>
       )
 
+      cy.waitForCompile()
+
       cy.findByRole('button', {
         name: 'Go to code location in PDF',
       }).should('not.exist')
@@ -349,6 +372,8 @@ describe.skip('<PdfSynctexControls/>', function () {
     })
 
     it('send go to code line action', function () {
+      cy.interceptCompile()
+
       const scope = mockScope()
 
       cy.mount(
@@ -357,7 +382,7 @@ describe.skip('<PdfSynctexControls/>', function () {
         </EditorProviders>
       )
 
-      cy.wait('@compile').then(() => {
+      cy.waitForCompile().then(() => {
         testDetachChannel.postMessage({
           role: 'detacher',
           event: `state-position`,
@@ -394,6 +419,8 @@ describe.skip('<PdfSynctexControls/>', function () {
     })
 
     it('update inflight state', function () {
+      cy.interceptCompile()
+
       const scope = mockScope()
 
       cy.mount(
@@ -403,7 +430,7 @@ describe.skip('<PdfSynctexControls/>', function () {
         </EditorProviders>
       )
 
-      cy.wrap(null).then(() => {
+      cy.waitForCompile().then(() => {
         testDetachChannel.postMessage({
           role: 'detacher',
           event: `state-position`,

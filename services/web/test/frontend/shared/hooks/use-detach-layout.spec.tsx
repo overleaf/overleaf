@@ -34,12 +34,13 @@ const DetachLayoutTest = () => {
   )
 }
 
-// eslint-disable-next-line mocha/no-skipped-tests
-describe.skip('useDetachLayout', function () {
+describe('useDetachLayout', function () {
   beforeEach(function () {
     window.metaAttributesCache = new Map()
+    window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
     cy.stub(window, 'open').as('openWindow')
     cy.stub(window, 'close').as('closeWindow')
+    cy.interceptEvents()
   })
 
   afterEach(function () {

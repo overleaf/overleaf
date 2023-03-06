@@ -11,9 +11,9 @@ describe('<PdfPreviewDetachedRoot/>', function () {
       ['ol-project_id', 'project1'],
       ['ol-detachRole', 'detached'],
       ['ol-projectName', 'Project Name'],
+      ['ol-preventCompileOnLoad', true],
     ])
 
-    cy.interceptCompile()
     cy.interceptEvents()
   })
 
@@ -22,6 +22,8 @@ describe('<PdfPreviewDetachedRoot/>', function () {
   })
 
   it('syncs compiling state', function () {
+    cy.interceptCompile()
+
     cy.mount(<PdfPreviewDetachedRoot />)
 
     cy.wrap(null).then(() => {
@@ -51,6 +53,8 @@ describe('<PdfPreviewDetachedRoot/>', function () {
   })
 
   it('sends a clear cache request when the button is pressed', function () {
+    cy.interceptCompile()
+
     cy.mount(<PdfPreviewDetachedRoot />)
 
     cy.wrap(null).then(() => {

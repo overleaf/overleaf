@@ -22,11 +22,18 @@ const Layout: FC<{ layout: string; view?: string }> = ({ layout, view }) => {
 
 describe('<PdfPreview/>', function () {
   beforeEach(function () {
-    cy.interceptCompile()
+    window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
     cy.interceptEvents()
   })
 
+  afterEach(function () {
+    window.metaAttributesCache = new Map()
+  })
+
   it('renders the PDF preview', function () {
+    window.metaAttributesCache.set('ol-preventCompileOnLoad', false)
+    cy.interceptCompile('compile')
+
     const scope = mockScope()
 
     cy.mount(
@@ -38,13 +45,14 @@ describe('<PdfPreview/>', function () {
     )
 
     // wait for "compile on load" to finish
-    cy.findByRole('button', { name: 'Compiling…' })
-    cy.wait('@compile')
+    cy.waitForCompile({ pdf: true })
+
     cy.findByRole('button', { name: 'Recompile' })
-    cy.wait('@compile-pdf')
   })
 
   it('runs a compile when the Recompile button is pressed', function () {
+    cy.interceptCompile()
+
     const scope = mockScope()
 
     cy.mount(
@@ -54,29 +62,19 @@ describe('<PdfPreview/>', function () {
         </div>
       </EditorProviders>
     )
-
-    // wait for "compile on load" to finish
-    cy.findByRole('button', { name: 'Compiling…' })
-    cy.wait('@compile')
-    cy.wait('@compile-pdf')
-
-    cy.interceptCompile('recompile')
 
     // press the Recompile button => compile
     cy.findByRole('button', { name: 'Recompile' }).click()
 
-    // wait for "recompile" to finish
-    // cy.findByRole('button', { name: 'Compiling…' })
-    cy.wait('@recompile-pdf')
-    cy.wait('@recompile-log')
-    cy.wait('@recompile-blg')
-
-    cy.findByRole('button', { name: 'Recompile' })
+    // wait for compile to finish
+    cy.waitForCompile({ pdf: true })
 
     cy.contains('Your Paper')
   })
 
   it('runs a compile on `pdf:recompile` event', function () {
+    cy.interceptCompile()
+
     const scope = mockScope()
 
     cy.mount(
@@ -86,112 +84,80 @@ describe('<PdfPreview/>', function () {
         </div>
       </EditorProviders>
     )
-
-    // wait for "compile on load" to finish
-    cy.findByRole('button', { name: 'Compiling…' })
-    cy.wait('@compile')
-    cy.wait('@compile-pdf')
-
-    cy.interceptCompile('recompile')
 
     cy.window().then(win => {
       win.dispatchEvent(new CustomEvent('pdf:recompile'))
     })
 
-    // wait for "recompile" to finish
-    // cy.findByRole('button', { name: 'Compiling…' })
-    cy.wait('@recompile')
+    // wait for compile to finish
+    cy.waitForCompile({ pdf: true })
 
-    cy.findByRole('button', { name: 'Recompile' })
-
-    cy.wait('@recompile-pdf')
     cy.contains('Your Paper')
   })
 
   it('does not compile while compiling', function () {
-    let compileResolve: (value?: unknown) => void
     let counter = 0
+    cy.interceptDeferredCompile(() => counter++).then(
+      resolveDeferredCompile => {
+        const scope = mockScope()
 
-    const promise = new Promise(resolve => {
-      compileResolve = resolve
-    })
+        cy.mount(
+          <EditorProviders scope={scope}>
+            <div className="pdf-viewer">
+              <PdfPreview />
+            </div>
+          </EditorProviders>
+        )
 
-    cy.intercept(
-      'POST',
-      '/project/project123/compile?auto_compile=true',
-      req => {
-        counter++
+        // start compiling
+        cy.findByRole('button', { name: 'Recompile' })
+          .click()
+          .then(() => {
+            cy.findByRole('button', { name: 'Compiling…' })
 
-        promise.then(() => {
-          req.reply({
-            body: {
-              status: 'success',
-              clsiServerId: 'foo',
-              compileGroup: 'priority',
-              pdfDownloadDomain: 'https://clsi.test-overleaf.com',
-              outputFiles: [
-                {
-                  path: 'output.pdf',
-                  build: '123',
-                  url: '/build/123/output.pdf',
-                  type: 'pdf',
-                },
-                {
-                  path: 'output.log',
-                  build: '123',
-                  url: '/build/123/output.log',
-                  type: 'log',
-                },
-              ],
-            },
+            // trigger a recompile
+            cy.window().then(win => {
+              win.dispatchEvent(new CustomEvent('pdf:recompile'))
+            })
+
+            // finish the original compile
+            resolveDeferredCompile()
+
+            // wait for the original compile to finish
+            cy.waitForCompile({ pdf: true })
+
+            // NOTE: difficult to assert that a second request won't be sent, at some point
+            expect(counter).to.equal(1)
           })
-        })
-
-        return promise
       }
-    ).as('compile')
-
-    const scope = mockScope()
-
-    cy.mount(
-      <EditorProviders scope={scope}>
-        <div className="pdf-viewer">
-          <PdfPreview />
-        </div>
-      </EditorProviders>
-    ).then(() => {
-      cy.findByRole('button', { name: 'Compiling…' })
-
-      cy.window().then(win => {
-        win.dispatchEvent(new CustomEvent('pdf:recompile'))
-      })
-
-      compileResolve()
-
-      cy.findByRole('button', { name: 'Recompile' })
-
-      cy.contains('Your Paper').should(() => {
-        expect(counter).to.equal(1)
-      })
-    })
+    )
   })
 
   it('disables compile button while compile is running', function () {
-    const scope = mockScope()
+    cy.interceptDeferredCompile().then(resolveDeferredCompile => {
+      const scope = mockScope()
 
-    cy.mount(
-      <EditorProviders scope={scope}>
-        <div className="pdf-viewer">
-          <PdfPreview />
-        </div>
-      </EditorProviders>
-    )
+      cy.mount(
+        <EditorProviders scope={scope}>
+          <div className="pdf-viewer">
+            <PdfPreview />
+          </div>
+        </EditorProviders>
+      )
 
-    cy.findByRole('button', { name: 'Compiling…' }).should('be.disabled')
-    cy.findByRole('button', { name: 'Recompile' }).should('not.be.disabled')
+      cy.findByRole('button', { name: 'Recompile' }).click()
+      cy.findByRole('button', { name: 'Compiling…' })
+        .should('be.disabled')
+        .then(resolveDeferredCompile)
+
+      cy.waitForCompile()
+      cy.findByRole('button', { name: 'Recompile' }).should('not.be.disabled')
+    })
   })
 
   it('runs a compile on doc change if autocompile is enabled', function () {
+    cy.interceptCompile()
+
     const scope = mockScope()
 
     cy.mount(
@@ -201,11 +167,6 @@ describe('<PdfPreview/>', function () {
         </div>
       </EditorProviders>
     )
-
-    // wait for "compile on load" to finish
-    cy.findByRole('button', { name: 'Compiling…' })
-    cy.wait('@compile')
-    cy.findByRole('button', { name: 'Recompile' })
 
     cy.window().then(win => {
       cy.clock()
@@ -216,16 +177,21 @@ describe('<PdfPreview/>', function () {
       // fire a doc:changed event => compile
       win.dispatchEvent(new CustomEvent('doc:changed'))
 
+      // wait enough time for the compile to start
       cy.tick(6000) // > AUTO_COMPILE_DEBOUNCE
 
       cy.clock().invoke('restore')
     })
 
-    cy.findByRole('button', { name: 'Compiling…' })
+    // wait for compile to finish
+    cy.waitForCompile({ pdf: true })
+
     cy.findByRole('button', { name: 'Recompile' })
   })
 
   it('does not run a compile on doc change if autocompile is disabled', function () {
+    cy.interceptCompile()
+
     const scope = mockScope()
 
     cy.mount(
@@ -236,10 +202,6 @@ describe('<PdfPreview/>', function () {
       </EditorProviders>
     )
 
-    // wait for "compile on load" to finish
-    cy.findByRole('button', { name: 'Compiling…' })
-    cy.findByRole('button', { name: 'Recompile' })
-
     cy.window().then(win => {
       cy.clock()
 
@@ -249,15 +211,19 @@ describe('<PdfPreview/>', function () {
       // fire a doc:changed event => no compile
       win.dispatchEvent(new CustomEvent('doc:changed'))
 
-      cy.tick(5000) // AUTO_COMPILE_DEBOUNCE
+      // wait enough time for the compile to start
+      cy.tick(6000) // AUTO_COMPILE_DEBOUNCE
 
       cy.clock().invoke('restore')
     })
 
+    // NOTE: difficult to assert that a request hasn't been sent
     cy.findByRole('button', { name: 'Recompile' })
   })
 
   it('does not run a compile on doc change if autocompile is blocked by syntax check', function () {
+    cy.interceptCompile()
+
     const scope = mockScope()
     // enable linting in the editor
     scope.settings.syntaxValidation = true
@@ -272,10 +238,6 @@ describe('<PdfPreview/>', function () {
       </EditorProviders>
     )
 
-    // wait for "compile on load" to finish
-    cy.findByRole('button', { name: 'Compiling…' })
-    cy.findByRole('button', { name: 'Recompile' })
-
     cy.window().then(win => {
       cy.clock()
 
@@ -288,16 +250,21 @@ describe('<PdfPreview/>', function () {
       // fire a doc:changed event => no compile
       win.dispatchEvent(new CustomEvent('doc:changed'))
 
-      cy.tick(5000) // AUTO_COMPILE_DEBOUNCE
+      // wait enough time for the compile to start
+      cy.tick(6000) // AUTO_COMPILE_DEBOUNCE
 
       cy.clock().invoke('restore')
     })
 
+    // NOTE: difficult to assert that a request hasn't been sent
     cy.findByRole('button', { name: 'Recompile' })
+
     cy.findByText('Code check failed')
   })
 
   it('does not run a compile on doc change if the PDF preview is not open', function () {
+    cy.interceptCompile()
+
     const scope = mockScope()
 
     cy.mount(
@@ -309,11 +276,6 @@ describe('<PdfPreview/>', function () {
       </EditorProviders>
     )
 
-    // wait for "compile on load" to finish
-    cy.findByRole('button', { name: 'Compiling…' })
-    cy.wait('@compile')
-    cy.findByRole('button', { name: 'Recompile' })
-
     cy.window().then(win => {
       cy.clock()
 
@@ -323,15 +285,17 @@ describe('<PdfPreview/>', function () {
       // fire a doc:changed event => compile
       win.dispatchEvent(new CustomEvent('doc:changed'))
 
+      // wait enough time for the compile to start
       cy.tick(6000) // > AUTO_COMPILE_DEBOUNCE
 
       cy.clock().invoke('restore')
     })
 
+    // NOTE: difficult to assert that a request hasn't been sent
     cy.findByRole('button', { name: 'Recompile' })
   })
 
-  describe('displays error messages', function () {
+  describe('error messages', function () {
     const compileErrorStatuses = {
       'clear-cache':
         'Sorry, something went wrong and your project could not be compiled. Please try again in a few moments.',
@@ -355,7 +319,7 @@ describe('<PdfPreview/>', function () {
 
     for (const [status, message] of Object.entries(compileErrorStatuses)) {
       it(`displays error message for '${status}' status`, function () {
-        cy.intercept('POST', '/project/*/compile?*', {
+        cy.intercept('POST', '/project/*/compile*', {
           body: {
             status,
             clsiServerId: 'foo',
@@ -373,86 +337,86 @@ describe('<PdfPreview/>', function () {
           </EditorProviders>
         )
 
-        // wait for "compile on load" to finish
-        cy.findByRole('button', { name: 'Compiling…' })
-        cy.findByRole('button', { name: 'Recompile' })
-
+        cy.findByRole('button', { name: 'Recompile' }).click()
+        cy.wait('@compile')
         cy.findByText(message)
       })
     }
+  })
 
-    it('displays expandable raw logs', function () {
-      const scope = mockScope()
+  it('displays expandable raw logs', function () {
+    cy.interceptCompile()
 
-      cy.mount(
-        <EditorProviders scope={scope}>
-          <div className="pdf-viewer">
-            <PdfPreview />
-          </div>
-        </EditorProviders>
-      )
+    const scope = mockScope()
 
-      // wait for "compile on load" to finish
-      cy.findByRole('button', { name: 'Compiling…' })
-      cy.findByRole('button', { name: 'Recompile' })
+    cy.mount(
+      <EditorProviders scope={scope}>
+        <div className="pdf-viewer">
+          <PdfPreview />
+        </div>
+      </EditorProviders>
+    )
 
-      cy.findByRole('button', { name: 'View logs' }).click()
-      cy.findByRole('button', { name: 'View PDF' })
+    cy.findByRole('button', { name: 'Recompile' }).click()
+    cy.waitForCompile({ pdf: true })
 
-      cy.findByRole('button', { name: 'Expand' }).click()
-      cy.findByRole('button', { name: 'Collapse' }).click()
-    })
+    cy.findByRole('button', { name: 'View logs' }).click()
+    cy.findByRole('button', { name: 'View PDF' })
 
-    it('displays error messages if there were validation problems', function () {
-      const validationProblems = {
-        sizeCheck: {
-          resources: [
-            { path: 'foo/bar', kbSize: 76221 },
-            { path: 'bar/baz', kbSize: 2342 },
-          ],
-        },
-        mainFile: true,
-        conflictedPaths: [
-          {
-            path: 'foo/bar',
-          },
-          {
-            path: 'foo/baz',
-          },
+    cy.findByRole('button', { name: 'Expand' }).click()
+    cy.findByRole('button', { name: 'Collapse' }).click()
+  })
+
+  it('displays error messages if there were validation problems', function () {
+    const validationProblems = {
+      sizeCheck: {
+        resources: [
+          { path: 'foo/bar', kbSize: 76221 },
+          { path: 'bar/baz', kbSize: 2342 },
         ],
-      }
-
-      cy.intercept('POST', '/project/*/compile?*', {
-        body: {
-          status: 'validation-problems',
-          validationProblems,
-          clsiServerId: 'foo',
-          compileGroup: 'priority',
+      },
+      mainFile: true,
+      conflictedPaths: [
+        {
+          path: 'foo/bar',
         },
-      }).as('compile')
+        {
+          path: 'foo/baz',
+        },
+      ],
+    }
 
-      const scope = mockScope()
+    cy.intercept('POST', '/project/*/compile*', {
+      body: {
+        status: 'validation-problems',
+        validationProblems,
+        clsiServerId: 'foo',
+        compileGroup: 'priority',
+      },
+    }).as('compile')
 
-      cy.mount(
-        <EditorProviders scope={scope}>
-          <div className="pdf-viewer">
-            <PdfPreview />
-          </div>
-        </EditorProviders>
-      )
+    const scope = mockScope()
 
-      // wait for "compile on load" to finish
-      cy.findByRole('button', { name: 'Compiling…' })
-      cy.findByRole('button', { name: 'Recompile' })
+    cy.mount(
+      <EditorProviders scope={scope}>
+        <div className="pdf-viewer">
+          <PdfPreview />
+        </div>
+      </EditorProviders>
+    )
 
-      cy.wait('@compile')
+    cy.findByRole('button', { name: 'Recompile' }).click()
+    cy.wait('@compile')
 
-      cy.findByText('Project too large')
-      cy.findByText('Unknown main document')
-      cy.findByText('Conflicting Paths Found')
-    })
+    cy.findByText('Project too large')
+    cy.findByText('Unknown main document')
+    cy.findByText('Conflicting Paths Found')
+  })
 
+  describe('clear cache', function () {
     it('sends a clear cache request when the button is pressed', function () {
+      cy.interceptCompile()
+
       const scope = mockScope()
 
       cy.mount(
@@ -463,16 +427,15 @@ describe('<PdfPreview/>', function () {
         </EditorProviders>
       )
 
-      // wait for "compile on load" to finish
-      cy.findByRole('button', { name: 'Compiling…' })
-      cy.findByRole('button', { name: 'Recompile' })
+      cy.findByRole('button', { name: 'Recompile' }).click()
+      cy.waitForCompile({ pdf: true })
 
       cy.findByRole('button', { name: 'View logs' }).click()
       cy.findByRole('button', { name: 'Clear cached files' }).should(
         'not.be.disabled'
       )
 
-      cy.intercept('DELETE', 'project/*/output?*', {
+      cy.intercept('DELETE', '/project/*/output*', {
         statusCode: 204,
         delay: 100,
       }).as('clear-cache')
@@ -489,6 +452,8 @@ describe('<PdfPreview/>', function () {
     })
 
     it('handle "recompile from scratch"', function () {
+      cy.interceptCompile()
+
       const scope = mockScope()
 
       cy.mount(
@@ -499,10 +464,13 @@ describe('<PdfPreview/>', function () {
         </EditorProviders>
       )
 
-      // wait for "compile on load" to finish
-      cy.findByRole('button', { name: 'Compiling…' })
-      cy.wait('@compile')
-      cy.findByRole('button', { name: 'Recompile' })
+      cy.findByRole('button', { name: 'Recompile' }).click()
+      cy.waitForCompile({ pdf: true })
+      cy.interceptCompile('recompile')
+      cy.intercept('DELETE', '/project/*/output*', {
+        statusCode: 204,
+        delay: 100,
+      }).as('clear-cache')
 
       // show the logs UI
       cy.findByRole('button', { name: 'View logs' }).click()
@@ -510,13 +478,6 @@ describe('<PdfPreview/>', function () {
       cy.findByRole('button', { name: 'Clear cached files' }).should(
         'not.be.disabled'
       )
-
-      cy.interceptCompile()
-
-      cy.intercept('DELETE', 'project/*/output?*', {
-        statusCode: 204,
-        delay: 100,
-      }).as('clear-cache')
 
       // TODO: open the menu?
       cy.findByRole('menuitem', {
@@ -530,14 +491,19 @@ describe('<PdfPreview/>', function () {
 
       cy.findByRole('button', { name: 'Compiling…' })
       cy.wait('@clear-cache')
+
+      // wait for recompile from scratch to finish
+      cy.waitForCompile({ pdf: true, prefix: 'recompile' })
+
       cy.findByRole('button', { name: 'Recompile' })
-
-      cy.wait('@compile')
-      cy.wait('@compile-pdf')
     })
+  })
 
+  describe('invalid URLs and broken PDFs', function () {
     it('shows an error for an invalid URL', function () {
-      cy.intercept('/build/*/output.pdf?*', {
+      cy.interceptCompile()
+
+      cy.intercept('/build/*/output.pdf*', {
         statusCode: 500,
         body: {
           message: 'something awful happened',
@@ -555,6 +521,8 @@ describe('<PdfPreview/>', function () {
         </EditorProviders>
       )
 
+      cy.findByRole('button', { name: 'Recompile' }).click()
+      cy.waitForCompile()
       cy.wait('@compile-pdf-error')
 
       cy.contains('Something went wrong while rendering this PDF.')
@@ -565,7 +533,9 @@ describe('<PdfPreview/>', function () {
     })
 
     it('shows an error for a corrupt PDF', function () {
-      cy.intercept('/build/*/output.pdf?*', {
+      cy.interceptCompile()
+
+      cy.intercept('/build/*/output.pdf*', {
         fixture: 'build/output-corrupt.pdf,null',
       }).as('compile-pdf-corrupt')
 
@@ -579,6 +549,8 @@ describe('<PdfPreview/>', function () {
         </EditorProviders>
       )
 
+      cy.findByRole('button', { name: 'Recompile' }).click()
+      cy.waitForCompile()
       cy.wait('@compile-pdf-corrupt')
 
       cy.contains('Something went wrong while rendering this PDF.')
@@ -591,9 +563,11 @@ describe('<PdfPreview/>', function () {
 
   describe('human readable logs', function () {
     it('shows human readable hint for undefined reference errors', function () {
-      cy.intercept('/build/*/output.log?*', {
+      cy.interceptCompile()
+
+      cy.intercept('/build/*/output.log*', {
         fixture: 'build/output-human-readable.log',
-      }).as('log')
+      }).as('compile-log')
 
       const scope = mockScope()
 
@@ -605,7 +579,8 @@ describe('<PdfPreview/>', function () {
         </EditorProviders>
       )
 
-      cy.wait('@log')
+      cy.findByRole('button', { name: 'Recompile' }).click()
+      cy.waitForCompile()
       cy.findByRole('button', { name: 'View logs' }).click()
 
       cy.findByText(
@@ -622,9 +597,10 @@ describe('<PdfPreview/>', function () {
     })
 
     it('does not show human readable hint when no undefined reference errors', function () {
+      cy.interceptCompile()
       cy.intercept('/build/*/output.log?*', {
         fixture: 'build/output-undefined-references.log',
-      }).as('log')
+      }).as('compile-log')
 
       const scope = mockScope()
 
@@ -636,7 +612,8 @@ describe('<PdfPreview/>', function () {
         </EditorProviders>
       )
 
-      cy.wait('@log')
+      cy.findByRole('button', { name: 'Recompile' }).click()
+      cy.waitForCompile()
       cy.findByRole('button', { name: 'View logs' }).click()
 
       cy.findByText(

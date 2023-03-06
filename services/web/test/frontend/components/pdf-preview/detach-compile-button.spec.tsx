@@ -5,7 +5,7 @@ import { testDetachChannel } from '../../helpers/detach-channel'
 
 describe('<DetachCompileButtonWrapper />', function () {
   beforeEach(function () {
-    cy.interceptCompile()
+    window.metaAttributesCache = new Map()
     cy.interceptEvents()
   })
 
@@ -14,6 +14,8 @@ describe('<DetachCompileButtonWrapper />', function () {
   })
 
   it('detacher mode and not linked: does not show button ', function () {
+    cy.interceptCompile()
+
     cy.window().then(win => {
       win.metaAttributesCache = new Map([['ol-detachRole', 'detacher']])
     })
@@ -25,11 +27,15 @@ describe('<DetachCompileButtonWrapper />', function () {
         <DetachCompileButtonWrapper />
       </EditorProviders>
     )
+
+    cy.waitForCompile()
 
     cy.findByRole('button', { name: 'Recompile' }).should('not.exist')
   })
 
   it('detacher mode and linked: show button', function () {
+    cy.interceptCompile()
+
     cy.window().then(win => {
       win.metaAttributesCache = new Map([['ol-detachRole', 'detacher']])
     })
@@ -41,6 +47,8 @@ describe('<DetachCompileButtonWrapper />', function () {
         <DetachCompileButtonWrapper />
       </EditorProviders>
     )
+
+    cy.waitForCompile()
 
     cy.wrap(null).then(() => {
       testDetachChannel.postMessage({
@@ -53,6 +61,8 @@ describe('<DetachCompileButtonWrapper />', function () {
   })
 
   it('not detacher mode and linked: does not show button ', function () {
+    cy.interceptCompile()
+
     cy.window().then(win => {
       win.metaAttributesCache = new Map([['ol-detachRole', 'detached']])
     })
@@ -64,6 +74,8 @@ describe('<DetachCompileButtonWrapper />', function () {
         <DetachCompileButtonWrapper />
       </EditorProviders>
     )
+
+    cy.waitForCompile()
 
     cy.wrap(null).then(() => {
       testDetachChannel.postMessage({
