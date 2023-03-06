@@ -168,7 +168,7 @@ describe('ProjectListController', function () {
     this.res = {}
   })
 
-  describe('projectListReactPage', function () {
+  describe('projectListPage', function () {
     beforeEach(function () {
       this.projects = [
         { _id: 1, lastUpdated: 1, owner_ref: 'user-1' },
@@ -201,7 +201,7 @@ describe('ProjectListController', function () {
         pageName.should.equal('project/list-react')
         done()
       }
-      this.ProjectListController.projectListReactPage(this.req, this.res)
+      this.ProjectListController.projectListPage(this.req, this.res)
     })
 
     it('should send the tags', function (done) {
@@ -209,7 +209,7 @@ describe('ProjectListController', function () {
         opts.tags.length.should.equal(this.tags.length)
         done()
       }
-      this.ProjectListController.projectListReactPage(this.req, this.res)
+      this.ProjectListController.projectListPage(this.req, this.res)
     })
 
     it('should create trigger ip matcher notifications', function (done) {
@@ -221,7 +221,7 @@ describe('ProjectListController', function () {
         )
         done()
       }
-      this.ProjectListController.projectListReactPage(this.req, this.res)
+      this.ProjectListController.projectListPage(this.req, this.res)
     })
 
     it('should send the projects', function (done) {
@@ -235,7 +235,7 @@ describe('ProjectListController', function () {
         )
         done()
       }
-      this.ProjectListController.projectListReactPage(this.req, this.res)
+      this.ProjectListController.projectListPage(this.req, this.res)
     })
 
     it('should send the user', function (done) {
@@ -243,7 +243,7 @@ describe('ProjectListController', function () {
         opts.user.should.deep.equal(this.user)
         done()
       }
-      this.ProjectListController.projectListReactPage(this.req, this.res)
+      this.ProjectListController.projectListPage(this.req, this.res)
     })
 
     it('should inject the users', function (done) {
@@ -270,7 +270,7 @@ describe('ProjectListController', function () {
           )
         done()
       }
-      this.ProjectListController.projectListReactPage(this.req, this.res)
+      this.ProjectListController.projectListPage(this.req, this.res)
     })
 
     it("should send the user's best subscription when saas feature present", function (done) {
@@ -279,7 +279,7 @@ describe('ProjectListController', function () {
         expect(opts.usersBestSubscription).to.deep.include({ type: 'free' })
         done()
       }
-      this.ProjectListController.projectListReactPage(this.req, this.res)
+      this.ProjectListController.projectListPage(this.req, this.res)
     })
 
     it('should not return a best subscription without saas feature', function (done) {
@@ -288,7 +288,7 @@ describe('ProjectListController', function () {
         expect(opts.usersBestSubscription).to.be.undefined
         done()
       }
-      this.ProjectListController.projectListReactPage(this.req, this.res)
+      this.ProjectListController.projectListPage(this.req, this.res)
     })
 
     describe('With Institution SSO feature', function () {
@@ -323,7 +323,7 @@ describe('ProjectListController', function () {
             templateKey: 'notification_institution_sso_available',
           })
         }
-        this.ProjectListController.projectListReactPage(this.req, this.res)
+        this.ProjectListController.projectListPage(this.req, this.res)
       })
       it('should show a linked notification', function () {
         this.req.session.saml = {
@@ -340,7 +340,7 @@ describe('ProjectListController', function () {
             templateKey: 'notification_institution_sso_linked',
           })
         }
-        this.ProjectListController.projectListReactPage(this.req, this.res)
+        this.ProjectListController.projectListPage(this.req, this.res)
       })
       it('should show a linked another email notification', function () {
         // when they request to link an email but the institution returns
@@ -361,7 +361,7 @@ describe('ProjectListController', function () {
             universityName: this.institutionName,
           },
         }
-        this.ProjectListController.projectListReactPage(this.req, this.res)
+        this.ProjectListController.projectListPage(this.req, this.res)
       })
 
       it('should show a notification when intent was to register via SSO but account existed', function () {
@@ -382,7 +382,7 @@ describe('ProjectListController', function () {
             name: 'Example University',
           },
         }
-        this.ProjectListController.projectListReactPage(this.req, this.res)
+        this.ProjectListController.projectListPage(this.req, this.res)
       })
 
       it('should not show a register notification if the flow was abandoned', function () {
@@ -400,7 +400,7 @@ describe('ProjectListController', function () {
             name: 'Example University',
           },
         }
-        this.ProjectListController.projectListReactPage(this.req, this.res)
+        this.ProjectListController.projectListPage(this.req, this.res)
       })
 
       it('should show error notification', function () {
@@ -417,7 +417,7 @@ describe('ProjectListController', function () {
           institutionEmail: this.institutionEmail,
           error: new Errors.SAMLAlreadyLinkedError(),
         }
-        this.ProjectListController.projectListReactPage(this.req, this.res)
+        this.ProjectListController.projectListPage(this.req, this.res)
       })
 
       describe('for an unconfirmed domain for an SSO institution', function () {
@@ -442,7 +442,7 @@ describe('ProjectListController', function () {
           this.res.render = (pageName, opts) => {
             expect(opts.notificationsInstitution.length).to.equal(0)
           }
-          this.ProjectListController.projectListReactPage(this.req, this.res)
+          this.ProjectListController.projectListPage(this.req, this.res)
         })
       })
       describe('when linking/logging in initiated on institution side', function () {
@@ -464,7 +464,7 @@ describe('ProjectListController', function () {
               universityName: this.institutionName,
             },
           }
-          this.ProjectListController.projectListReactPage(this.req, this.res)
+          this.ProjectListController.projectListPage(this.req, this.res)
         })
       })
       describe('Institution with SSO beta testable', function () {
@@ -495,7 +495,7 @@ describe('ProjectListController', function () {
               templateKey: 'notification_institution_sso_available',
             })
           }
-          this.ProjectListController.projectListReactPage(this.req, this.res)
+          this.ProjectListController.projectListPage(this.req, this.res)
         })
         it('should not show institution SSO available notification when not on a beta testing session', function () {
           this.req.session.samlBeta = false
@@ -507,7 +507,7 @@ describe('ProjectListController', function () {
               templateKey: 'notification_institution_sso_available',
             })
           }
-          this.ProjectListController.projectListReactPage(this.req, this.res)
+          this.ProjectListController.projectListPage(this.req, this.res)
         })
       })
     })
@@ -526,7 +526,7 @@ describe('ProjectListController', function () {
             templateKey: 'notification_institution_sso_available',
           })
         }
-        this.ProjectListController.projectListReactPage(this.req, this.res)
+        this.ProjectListController.projectListPage(this.req, this.res)
       })
     })
   })
@@ -562,7 +562,7 @@ describe('ProjectListController', function () {
         pageName.should.equal('project/list-react')
         done()
       }
-      this.ProjectListController.projectListReactPage(this.req, this.res)
+      this.ProjectListController.projectListPage(this.req, this.res)
     })
 
     it('should omit one of the projects', function (done) {
@@ -577,7 +577,7 @@ describe('ProjectListController', function () {
         )
         done()
       }
-      this.ProjectListController.projectListReactPage(this.req, this.res)
+      this.ProjectListController.projectListPage(this.req, this.res)
     })
   })
 })
