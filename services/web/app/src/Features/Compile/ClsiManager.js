@@ -134,7 +134,14 @@ const ClsiManager = {
       url: compilerUrl,
       method: 'POST',
     }
-    ClsiManager._makeRequest(projectId, userId, compileGroup, opts, callback)
+    ClsiManager._makeRequest(
+      projectId,
+      userId,
+      compileGroup,
+      compileBackendClass,
+      opts,
+      callback
+    )
   },
 
   deleteAuxFiles(projectId, userId, options, clsiserverid, callback) {
@@ -156,6 +163,7 @@ const ClsiManager = {
       projectId,
       userId,
       compileGroup,
+      compileBackendClass,
       opts,
       clsiserverid,
       clsiErr => {
@@ -283,13 +291,17 @@ const ClsiManager = {
     projectId,
     userId,
     compileGroup,
+    compileBackendClass,
     opts,
     clsiserverid,
     callback
   ) {
     if (clsiserverid) {
       // ignore cookies and newBackend, go straight to the clsi node
-      opts.qs = Object.assign({ compileGroup, clsiserverid }, opts.qs)
+      opts.qs = Object.assign(
+        { compileGroup, compileBackendClass, clsiserverid },
+        opts.qs
+      )
       request(opts, (err, response, body) => {
         if (err) {
           return callback(
@@ -299,11 +311,25 @@ const ClsiManager = {
         callback(null, response, body)
       })
     } else {
-      ClsiManager._makeRequest(projectId, userId, compileGroup, opts, callback)
+      ClsiManager._makeRequest(
+        projectId,
+        userId,
+        compileGroup,
+        compileBackendClass,
+        opts,
+        callback
+      )
     }
   },
 
-  _makeRequest(projectId, userId, compileGroup, opts, callback) {
+  _makeRequest(
+    projectId,
+    userId,
+    compileGroup,
+    compileBackendClass,
+    opts,
+    callback
+  ) {
     async.series(
       {
         currentBackend(cb) {
@@ -312,6 +338,7 @@ const ClsiManager = {
             projectId,
             userId,
             compileGroup,
+            compileBackendClass,
             (err, jar, clsiServerId) => {
               if (err != null) {
                 return callback(
@@ -338,6 +365,7 @@ const ClsiManager = {
                   projectId,
                   userId,
                   compileGroup,
+                  compileBackendClass,
                   response,
                   clsiServerId,
                   (err, newClsiServerId) => {
@@ -373,6 +401,7 @@ const ClsiManager = {
             projectId,
             userId,
             compileGroup,
+            compileBackendClass,
             opts,
             (err, response, body) => {
               if (err != null) {
@@ -419,7 +448,14 @@ const ClsiManager = {
     )
   },
 
-  _makeNewBackendRequest(projectId, userId, compileGroup, baseOpts, callback) {
+  _makeNewBackendRequest(
+    projectId,
+    userId,
+    compileGroup,
+    compileBackendClass,
+    baseOpts,
+    callback
+  ) {
     if (Settings.apis.clsi_new == null || Settings.apis.clsi_new.url == null) {
       return callback()
     }
@@ -434,6 +470,7 @@ const ClsiManager = {
       projectId,
       userId,
       compileGroup,
+      compileBackendClass,
       (err, jar, clsiServerId) => {
         if (err != null) {
           return callback(
@@ -458,6 +495,7 @@ const ClsiManager = {
             projectId,
             userId,
             compileGroup,
+            compileBackendClass,
             response,
             clsiServerId,
             err => {
@@ -521,6 +559,7 @@ const ClsiManager = {
       projectId,
       userId,
       compileGroup,
+      compileBackendClass,
       opts,
       (err, response, body, clsiServerId) => {
         if (err != null) {
@@ -938,6 +977,7 @@ const ClsiManager = {
         projectId,
         userId,
         compileGroup,
+        compileBackendClass,
         opts,
         clsiserverid,
         (err, response, body) => {

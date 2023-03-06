@@ -39,7 +39,13 @@ module.exports = function (backendGroup) {
       }
     },
 
-    _getServerId(project_id, user_id, compileGroup, callback) {
+    _getServerId(
+      project_id,
+      user_id,
+      compileGroup,
+      compileBackendClass,
+      callback
+    ) {
       if (callback == null) {
         callback = function () {}
       }
@@ -54,6 +60,7 @@ module.exports = function (backendGroup) {
               project_id,
               user_id,
               compileGroup,
+              compileBackendClass,
               callback
             )
           } else {
@@ -63,14 +70,23 @@ module.exports = function (backendGroup) {
       )
     },
 
-    _populateServerIdViaRequest(project_id, user_id, compileGroup, callback) {
+    _populateServerIdViaRequest(
+      project_id,
+      user_id,
+      compileGroup,
+      compileBackendClass,
+      callback
+    ) {
       if (callback == null) {
         callback = function () {}
       }
       const u = new URL(
         `${Settings.apis.clsi.url}/project/${project_id}/status`
       )
-      u.search = new URLSearchParams({ compileGroup }).toString()
+      u.search = new URLSearchParams({
+        compileGroup,
+        compileBackendClass,
+      }).toString()
       request.post(u.href, (err, res, body) => {
         if (err != null) {
           OError.tag(err, 'error getting initial server id for project', {
@@ -82,6 +98,7 @@ module.exports = function (backendGroup) {
           project_id,
           user_id,
           compileGroup,
+          compileBackendClass,
           res,
           null,
           function (err, serverId) {
@@ -106,11 +123,11 @@ module.exports = function (backendGroup) {
       return cookies != null ? cookies[Settings.clsiCookie.key] : undefined
     },
 
-    checkIsLoadSheddingEvent(clsiserverid, compileGroup) {
+    checkIsLoadSheddingEvent(clsiserverid, compileGroup, compileBackendClass) {
       request.get(
         {
           url: `${Settings.apis.clsi.url}/instance-state`,
-          qs: { clsiserverid, compileGroup },
+          qs: { clsiserverid, compileGroup, compileBackendClass },
         },
         (err, res, body) => {
           if (err) {
@@ -139,6 +156,7 @@ module.exports = function (backendGroup) {
       project_id,
       user_id,
       compileGroup,
+      compileBackendClass,
       response,
       previous,
       callback
@@ -162,7 +180,11 @@ module.exports = function (backendGroup) {
         // Initial assignment of a user+project or after clearing cache.
         Metrics.inc('clsi-lb-assign-initial-backend')
       } else {
-        this.checkIsLoadSheddingEvent(previous, compileGroup)
+        this.checkIsLoadSheddingEvent(
+          previous,
+          compileGroup,
+          compileBackendClass
+        )
       }
       if (rclient_secondary != null) {
         this._setServerIdInRedis(
@@ -200,7 +222,13 @@ module.exports = function (backendGroup) {
       return rclient.del(this.buildKey(project_id, user_id), callback)
     },
 
-    getCookieJar(project_id, user_id, compileGroup, callback) {
+    getCookieJar(
+      project_id,
+      user_id,
+      compileGroup,
+      compileBackendClass,
+      callback
+    ) {
       if (callback == null) {
         callback = function () {}
       }
@@ -211,6 +239,7 @@ module.exports = function (backendGroup) {
         project_id,
         user_id,
         compileGroup,
+        compileBackendClass,
         (err, serverId) => {
           if (err != null) {
             OError.tag(err, 'error getting server id', {

@@ -69,6 +69,7 @@ describe('ClsiCookieManager', function () {
         this.project_id,
         this.user_id,
         '',
+        'e2',
         (err, serverId) => {
           this.redis.get
             .calledWith(`clsiserver:${this.project_id}:${this.user_id}`)
@@ -106,6 +107,7 @@ describe('ClsiCookieManager', function () {
         this.project_id,
         this.user_id,
         '',
+        'e2',
         (err, serverId) => {
           this.ClsiCookieManager._populateServerIdViaRequest
             .calledWith(this.project_id, this.user_id)
@@ -130,12 +132,14 @@ describe('ClsiCookieManager', function () {
         this.project_id,
         this.user_id,
         'standard',
+        'e2',
         (err, serverId) => {
           const args = this.ClsiCookieManager.setServerId.args[0]
           args[0].should.equal(this.project_id)
           args[1].should.equal(this.user_id)
           args[2].should.equal('standard')
-          args[3].should.deep.equal(this.response)
+          args[3].should.equal('e2')
+          args[4].should.deep.equal(this.response)
           return done()
         }
       )
@@ -146,6 +150,7 @@ describe('ClsiCookieManager', function () {
         this.project_id,
         this.user_id,
         '',
+        'e2',
         (err, serverId) => {
           serverId.should.equal('clsi-9')
           return done()
@@ -167,6 +172,7 @@ describe('ClsiCookieManager', function () {
         this.project_id,
         this.user_id,
         'standard',
+        'e2',
         this.response,
         null,
         err => {
@@ -190,6 +196,7 @@ describe('ClsiCookieManager', function () {
         this.project_id,
         this.user_id,
         'standard',
+        'e2',
         this.response,
         null,
         err => {
@@ -208,6 +215,7 @@ describe('ClsiCookieManager', function () {
         this.project_id,
         this.user_id,
         'standard',
+        'e2',
         this.response,
         null,
         (err, serverId) => {
@@ -229,6 +237,7 @@ describe('ClsiCookieManager', function () {
         this.project_id,
         this.user_id,
         'standard',
+        'e2',
         this.response,
         null,
         (err, serverId) => {
@@ -246,6 +255,7 @@ describe('ClsiCookieManager', function () {
         this.project_id,
         this.user_id,
         'standard',
+        'e2',
         this.response,
         null,
         (err, serverId) => {
@@ -276,6 +286,7 @@ describe('ClsiCookieManager', function () {
         this.project_id,
         this.user_id,
         'standard',
+        'e2',
         this.response,
         null,
         (err, serverId) => {
@@ -304,6 +315,7 @@ describe('ClsiCookieManager', function () {
         this.project_id,
         this.user_id,
         '',
+        'e2',
         (err, jar) => {
           jar._jar.store.idx['clsi.example.com']['/'][
             this.settings.clsiCookie.key
@@ -328,6 +340,7 @@ describe('ClsiCookieManager', function () {
         this.project_id,
         this.user_id,
         '',
+        'e2',
         (err, jar) => {
           assert.deepEqual(jar, realRequst.jar())
           return done()

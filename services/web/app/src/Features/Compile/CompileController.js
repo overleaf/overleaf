@@ -644,6 +644,7 @@ function _getPersistenceOptions(
       projectId,
       userId,
       compileGroup,
+      compileBackendClass,
       (err, jar) => {
         callback(err, { jar, qs: { compileGroup, compileBackendClass } })
       }
