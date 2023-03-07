@@ -1,0 +1,92 @@
+--- services/track-changes/app/js/DiffGenerator.js
++++ services/track-changes/app/js/DiffGenerator.js
+@@ -63,6 +63,7 @@ module.exports = DiffGenerator = {
+       if (p > max_p) {
+         logger.warn({ max_p, p }, 'truncating position to content length')
+         p = max_p
++        op.p = p // fix out of range offsets to avoid invalid history exports in ZipManager
+       }
+
+       const textToBeRemoved = content.slice(p, p + op.i.length)
+@@ -74,6 +75,9 @@ module.exports = DiffGenerator = {
+
+       return content.slice(0, p) + content.slice(p + op.i.length)
+     } else if (op.d != null) {
++      if (op.p > content.length) {
++        op.p = content.length // fix out of range offsets to avoid invalid history exports in ZipManager
++      }
+       return content.slice(0, op.p) + op.d + content.slice(op.p)
+     } else {
+       return content
+
+--- services/web/modules/history-migration/app/src/HistoryUpgradeHelper.js
++++ services/web/modules/history-migration/app/src/HistoryUpgradeHelper.js
+@@ -107,6 +107,15 @@ async function upgradeProject(project, options) {
+   if (!upgradeFn) {
+     return { error: 'unsupported history type' }
+   }
++  if (options.forceClean) {
++    try {
++      const projectId = project._id
++      // delete any existing history stored in the mongo backend
++      await HistoryManager.promises.deleteProject(projectId, projectId)
++    } catch (err) {
++      // failed to delete existing history, but we can try to continue
++    }
++  }
+   const result = await upgradeFn(project, options)
+   result.historyType = historyType
+   return result
+
+--- services/web/scripts/history/migrate_history.js
++++ services/web/scripts/history/migrate_history.js
+@@ -2,6 +2,25 @@
+ process.env.MONGO_SOCKET_TIMEOUT =
+   parseInt(process.env.MONGO_SOCKET_TIMEOUT, 10) || 3600000
+
++const fs = require('fs')
++
++if (fs.existsSync('/etc/container_environment.json')) {
++  try {
++    const envData = JSON.parse(
++      fs.readFileSync('/etc/container_environment.json', 'utf8')
++    )
++    for (const [key, value] of Object.entries(envData)) {
++      process.env[key] = value
++    }
++  } catch (err) {
++    console.error(
++      'cannot read /etc/container_environment.json, the script needs to be run as root',
++      err
++    )
++    process.exit(1)
++  }
++}
++
+ const VERSION = '0.9.0-cli'
+ const {
+   countProjects,
+@@ -11,7 +30,6 @@ const {
+ } = require('../../modules/history-migration/app/src/HistoryUpgradeHelper')
+ const { waitForDb } = require('../../app/src/infrastructure/mongodb')
+ const minimist = require('minimist')
+-const fs = require('fs')
+ const util = require('util')
+ const pLimit = require('p-limit')
+ const logger = require('@overleaf/logger')
+@@ -34,6 +52,7 @@ const argv = minimist(process.argv.slice(2), {
+     'use-query-hint',
+     'retry-failed',
+     'archive-on-failure',
++    'force-clean',
+   ],
+   string: ['output', 'user-id'],
+   alias: {
+@@ -168,6 +187,7 @@ async function migrateProjects(projectsToMigrate) {
+     convertLargeDocsToFile: argv['convert-large-docs-to-file'],
+     userId: argv['user-id'],
+     reason: VERSION,
++    forceClean: argv['force-clean'],
+   }
+   async function _migrateProject(project) {
+     if (INTERRUPT) {
