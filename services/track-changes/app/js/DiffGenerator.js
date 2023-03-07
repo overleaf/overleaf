@@ -63,6 +63,7 @@ module.exports = DiffGenerator = {
       if (p > max_p) {
         logger.warn({ max_p, p }, 'truncating position to content length')
         p = max_p
+        op.p = p // fix out of range offsets to avoid invalid history exports in ZipManager
       }
 
       const textToBeRemoved = content.slice(p, p + op.i.length)
@@ -74,6 +75,9 @@ module.exports = DiffGenerator = {
 
       return content.slice(0, p) + content.slice(p + op.i.length)
     } else if (op.d != null) {
+      if (op.p > content.length) {
+        op.p = content.length // fix out of range offsets to avoid invalid history exports in ZipManager
+      }
       return content.slice(0, op.p) + op.d + content.slice(op.p)
     } else {
       return content

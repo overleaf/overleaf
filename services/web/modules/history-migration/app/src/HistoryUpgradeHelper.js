@@ -107,6 +107,15 @@ async function upgradeProject(project, options) {
   if (!upgradeFn) {
     return { error: 'unsupported history type' }
   }
+  if (options.forceClean) {
+    try {
+      const projectId = project._id
+      // delete any existing history stored in the mongo backend
+      await HistoryManager.promises.deleteProject(projectId, projectId)
+    } catch (err) {
+      // failed to delete existing history, but we can try to continue
+    }
+  }
   const result = await upgradeFn(project, options)
   result.historyType = historyType
   return result
