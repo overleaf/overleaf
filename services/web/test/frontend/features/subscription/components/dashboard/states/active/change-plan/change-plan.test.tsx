@@ -1,7 +1,6 @@
 import { expect } from 'chai'
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { ChangePlan } from '../../../../../../../../../frontend/js/features/subscription/components/dashboard/states/active/change-plan/change-plan'
 import { groupPlans, plans } from '../../../../../fixtures/plans'
 import {
   annualActiveSubscription,
@@ -22,7 +21,7 @@ import {
 } from '../../../../../../../../../frontend/js/features/subscription/data/subscription-url'
 import { renderActiveSubscription } from '../../../../../helpers/render-active-subscription'
 
-describe('<ChangePlan />', function () {
+describe('<ChangePlanModal />', function () {
   let reloadStub: () => void
   const originalLocation = window.location
   const plansMetaTag = { name: 'ol-plans', value: plans }
@@ -40,15 +39,6 @@ describe('<ChangePlan />', function () {
     Object.defineProperty(window, 'location', {
       value: originalLocation,
     })
-  })
-
-  it('does not render the UI when showChangePersonalPlan is false', function () {
-    window.metaAttributesCache.delete('ol-plans')
-    const { container } = renderWithSubscriptionDashContext(<ChangePlan />, {
-      metaTags: [plansMetaTag],
-    })
-
-    expect(container.firstChild).to.be.null
   })
 
   it('renders the individual plans table and group plans UI', async function () {

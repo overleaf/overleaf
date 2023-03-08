@@ -92,10 +92,9 @@ function PlansRows({ plans }: { plans: Array<Plan> }) {
 
 export function IndividualPlansTable({ plans }: { plans: Array<Plan> }) {
   const { t } = useTranslation()
-  const { recurlyLoadError, showChangePersonalPlan } =
-    useSubscriptionDashboardContext()
+  const { recurlyLoadError } = useSubscriptionDashboardContext()
 
-  if (!showChangePersonalPlan || !plans || recurlyLoadError) return null
+  if (!plans || recurlyLoadError) return null
 
   return (
     <table className="table table-vertically-centered-cells">

@@ -3,3 +3,4 @@ export type SubscriptionDashModalIds =
   | 'change-to-group'
   | 'keep-current-plan'
   | 'leave-group'
+  | 'change-plan'

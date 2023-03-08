@@ -7,10 +7,13 @@ import { CancelSubscriptionButton } from './cancel-subscription-button'
 import { CancelSubscription } from './cancel-plan/cancel-subscription'
 import { PendingPlanChange } from './pending-plan-change'
 import { TrialEnding } from './trial-ending'
-import { ChangePlan } from './change-plan/change-plan'
 import { PendingAdditionalLicenses } from './pending-additional-licenses'
 import { ContactSupportToChangeGroupPlan } from './contact-support-to-change-group-plan'
 import isInFreeTrial from '../../../../util/is-in-free-trial'
+import { ChangePlanModal } from './change-plan/modals/change-plan-modal'
+import { ConfirmChangePlanModal } from './change-plan/modals/confirm-change-plan-modal'
+import { KeepCurrentPlanModal } from './change-plan/modals/keep-current-plan-modal'
+import { ChangeToGroupModal } from './change-plan/modals/change-to-group-modal'
 
 export function ActiveSubscription({
   subscription,
@@ -18,7 +21,7 @@ export function ActiveSubscription({
   subscription: RecurlySubscription
 }) {
   const { t } = useTranslation()
-  const { recurlyLoadError, setShowChangePersonalPlan, showCancellation } =
+  const { recurlyLoadError, setModalIdShown, showCancellation } =
     useSubscriptionDashboardContext()
 
   if (showCancellation) return <CancelSubscription />
@@ -59,7 +62,7 @@ export function ActiveSubscription({
               {' '}
               <button
                 className="btn-inline-link"
-                onClick={() => setShowChangePersonalPlan(true)}
+                onClick={() => setModalIdShown('change-plan')}
               >
                 {t('change_plan')}
               </button>
@@ -120,7 +123,10 @@ export function ActiveSubscription({
         <CancelSubscriptionButton subscription={subscription} />
       )}
 
-      <ChangePlan />
+      <ChangePlanModal />
+      <ConfirmChangePlanModal />
+      <KeepCurrentPlanModal />
+      <ChangeToGroupModal />
     </>
   )
 }

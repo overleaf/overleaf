@@ -83,7 +83,7 @@ th {
   }
 }
 
-// Bordered version
+// Bordered versions
 //
 // Add borders all around the table and between all the columns.
 
@@ -231,5 +231,15 @@ table {
         }
       }
     }
+  }
+}
+
+.table-outlined-container {
+  border: @border-width-sm solid @table-border-color;
+  padding: @padding-sm @padding-sm 0 @padding-sm;
+  border-radius: @border-radius-base-new;
+
+  table {
+    margin-bottom: 0;
   }
 }

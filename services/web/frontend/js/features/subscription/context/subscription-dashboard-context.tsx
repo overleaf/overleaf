@@ -66,8 +66,6 @@ type SubscriptionDashboardContextValue = {
   setRecurlyLoadError: React.Dispatch<React.SetStateAction<boolean>>
   showCancellation: boolean
   setShowCancellation: React.Dispatch<React.SetStateAction<boolean>>
-  showChangePersonalPlan: boolean
-  setShowChangePersonalPlan: React.Dispatch<React.SetStateAction<boolean>>
   leavingGroupId?: string
   setLeavingGroupId: React.Dispatch<React.SetStateAction<string | undefined>>
 }
@@ -86,7 +84,6 @@ export function SubscriptionDashboardProvider({
   >()
   const [recurlyLoadError, setRecurlyLoadError] = useState(false)
   const [showCancellation, setShowCancellation] = useState(false)
-  const [showChangePersonalPlan, setShowChangePersonalPlan] = useState(false)
   const [plans, setPlans] = useState([])
   const [queryingIndividualPlansData, setQueryingIndividualPlansData] =
     useState(true)
@@ -268,8 +265,6 @@ export function SubscriptionDashboardProvider({
       setRecurlyLoadError,
       showCancellation,
       setShowCancellation,
-      showChangePersonalPlan,
-      setShowChangePersonalPlan,
       leavingGroupId,
       setLeavingGroupId,
     }),
@@ -304,8 +299,6 @@ export function SubscriptionDashboardProvider({
       setRecurlyLoadError,
       showCancellation,
       setShowCancellation,
-      showChangePersonalPlan,
-      setShowChangePersonalPlan,
       leavingGroupId,
       setLeavingGroupId,
     ]
