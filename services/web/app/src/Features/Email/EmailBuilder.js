@@ -491,8 +491,8 @@ templates.userOnboardingEmail = NoCTAEmailTemplate({
       `${collaboratorsLink}: One of the key features of Overleaf is the ability to share projects and collaborate on them with other users. Find out how to share your projects with your colleagues in this quick how-to guide.`,
       `${onboardingSurveyLink} to help us make Overleaf even better!`,
       'Thanks again for using Overleaf :)',
-      `John`,
-      `Dr. John Hammersley <br />Co-founder & CEO <br />${siteLink}<hr>`,
+      `Lee`,
+      `Lee Shalit<br />CEO<br />${siteLink}<hr>`,
       `You're receiving this email because you've recently signed up for an Overleaf account. If you've previously subscribed to emails about product offers and company news and events, you can unsubscribe ${userSettingsLink}.`,
     ]
   },
