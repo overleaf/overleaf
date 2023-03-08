@@ -24,7 +24,9 @@ function FileTreeItemMenuItems() {
         <MenuItem onClick={startRenaming}>{t('rename')}</MenuItem>
       ) : null}
       {downloadPath ? (
-        <MenuItem href={downloadPath}>{t('download')}</MenuItem>
+        <MenuItem href={downloadPath} download>
+          {t('download')}
+        </MenuItem>
       ) : null}
       {canDelete ? (
         <MenuItem onClick={startDeleting}>{t('delete')}</MenuItem>
