@@ -29,11 +29,7 @@ If you're looking for something to work on, have a look at the [open issues](htt
 Security
 --------
 
-Please do not publish security vulnerabilities publicly until we've had a chance
-to address them. All security related issues/patches should be sent directly to
-security@overleaf.com where we will attempt to address them quickly. If you're
-unsure whether something is a security issue or not, then please be cautious and
-contact us at security@overleaf.com first.
+Please see [our security policy](https://github.com/overleaf/overleaf/security/policy) if you would like to report a potential security vulnerability.
 
 Contributor License Agreement
 -----------------------------
