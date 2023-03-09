@@ -232,27 +232,13 @@ async function _paymentAngularPage(req, res) {
         currency = recommendedCurrency
       }
 
-      const refreshedPaymentPageAssignment =
-        await SplitTestHandler.promises.getAssignment(
-          req,
-          res,
-          'payment-page-refresh'
-        )
-      const useRefreshedPaymentPage =
-        refreshedPaymentPageAssignment &&
-        refreshedPaymentPageAssignment.variant === 'refreshed-payment-page'
-
       await SplitTestHandler.promises.getAssignment(
         req,
         res,
         'student-check-modal'
       )
 
-      const template = useRefreshedPaymentPage
-        ? 'subscriptions/new-refreshed'
-        : 'subscriptions/new-updated'
-
-      res.render(template, {
+      res.render('subscriptions/new-refreshed', {
         title: 'subscribe',
         currency,
         countryCode,

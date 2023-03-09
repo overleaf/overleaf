@@ -37,7 +37,7 @@ export default App.controller(
 
     $scope.recurlyLoadError = false
     $scope.currencyCode = MultiCurrencyPricing.currencyCode
-    $scope.initiallySelectedCurrencyCode = MultiCurrencyPricing.currencyCode // track for payment-page-refreshed
+    $scope.initiallySelectedCurrencyCode = MultiCurrencyPricing.currencyCode
     $scope.allCurrencies = MultiCurrencyPricing.plans
     $scope.availableCurrencies = {}
     $scope.planCode = window.plan_code
@@ -188,7 +188,6 @@ export default App.controller(
         }
       }
 
-      // abridged list for payment-page-refreshed split test
       $scope.limitedCurrencies = {}
       const limitedCurrencyCodes = ['USD', 'EUR', 'GBP']
       if (
@@ -263,30 +262,26 @@ export default App.controller(
       $scope.ui.showCurrencyDropdown = true
     }
 
-    // This check is just so we don't load this on the default checkout variant
-    const newCardInputElement = document.querySelector('#recurly-card-input')
     const elements = recurly.Elements()
-    if (newCardInputElement) {
-      const card = elements.CardElement({
-        displayIcon: true,
-        style: {
-          inputType: 'mobileSelect',
-          fontColor: '#5d6879',
-          placeholder: {},
-          invalid: {
-            fontColor: '#a93529',
-          },
+    const card = elements.CardElement({
+      displayIcon: true,
+      style: {
+        inputType: 'mobileSelect',
+        fontColor: '#5d6879',
+        placeholder: {},
+        invalid: {
+          fontColor: '#a93529',
         },
+      },
+    })
+    card.attach('#recurly-card-input')
+    card.on('change', state => {
+      $scope.$applyAsync(() => {
+        $scope.showCardElementInvalid =
+          !state.focus && !state.empty && !state.valid
+        $scope.cardIsValid = state.valid
       })
-      card.attach('#recurly-card-input')
-      card.on('change', state => {
-        $scope.$applyAsync(() => {
-          $scope.showCardElementInvalid =
-            !state.focus && !state.empty && !state.valid
-          $scope.cardIsValid = state.valid
-        })
-      })
-    }
+    })
 
     $scope.applyVatNumber = () =>
       pricing
@@ -322,11 +317,7 @@ export default App.controller(
       if ($scope.paymentMethod.value === 'paypal') {
         return $scope.data.country !== ''
       } else {
-        if (newCardInputElement) {
-          return form.$valid && $scope.cardIsValid
-        } else {
-          return form.$valid
-        }
+        return form.$valid && $scope.cardIsValid
       }
     }
 
@@ -452,11 +443,7 @@ export default App.controller(
           delete tokenData.company
           delete tokenData.vat_number
         }
-        if (newCardInputElement) {
-          recurly.token(elements, tokenData, completeSubscription)
-        } else {
-          recurly.token(tokenData, completeSubscription)
-        }
+        recurly.token(elements, tokenData, completeSubscription)
       }
     }
 
