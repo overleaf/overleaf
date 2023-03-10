@@ -64,6 +64,12 @@ async function plansPage(req, res) {
       res,
       'plans-page-layout-v3'
     )
+
+    if (plansPageLayoutV3Assignment.variant === 'old-plans-page-annual') {
+      plansPageLayoutV3Assignment.variant = 'old-plans-page-annual-fixed'
+      res.locals.splitTestVariants['plans-page-layout-v3'] =
+        'old-plans-page-annual-fixed'
+    }
   } catch (error) {
     logger.error(
       { err: error },
@@ -73,7 +79,7 @@ async function plansPage(req, res) {
 
   let currentView = 'monthly'
   if (
-    plansPageLayoutV3Assignment.variant === 'old-plans-page-annual' ||
+    plansPageLayoutV3Assignment.variant === 'old-plans-page-annual-fixed' ||
     plansPageLayoutV3Assignment.variant === 'new-plans-page'
   ) {
     currentView = 'annual'
