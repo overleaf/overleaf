@@ -3,8 +3,14 @@ import '../../../features/plans/group-plan-modal'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import getMeta from '../../../utils/meta'
 
-let currentView = 'monthly'
+let currentView = getMeta('ol-currentView')
 let currentCurrencyCode = getMeta('ol-recommendedCurrency')
+const plansPageLayoutV3Variant =
+  getMeta('ol-splitTestVariants')?.['plans-page-layout-v3'] ?? 'default'
+
+if (window.location.href.includes('validate-pre-rendering=true')) {
+  validatePreRendering()
+}
 
 function selectView(view) {
   document.querySelectorAll('[data-ol-view-tab]').forEach(el => {
@@ -25,9 +31,6 @@ function selectView(view) {
 }
 
 function setUpViewSwitching(liEl) {
-  const plansPageLayoutV3Variant =
-    getMeta('ol-splitTestVariants')?.['plans-page-layout-v3'] ?? 'default'
-
   const view = liEl.getAttribute('data-ol-view-tab')
 
   liEl.querySelector('button').addEventListener('click', function (e) {
@@ -137,23 +140,6 @@ function updateAnnualSavingBanner(view) {
   }
 }
 
-function makeAnnualViewAsDefault() {
-  const plansPageLayoutV3Variant =
-    getMeta('ol-splitTestVariants')?.['plans-page-layout-v3'] ?? 'default'
-
-  // there are a handful of html elements that will switch between monthly and annual view
-  // with the `hidden` attribute.
-  // On the variant `old-plans-page-annual`, we want annual as the default.
-  // So, instead of changing the pugfiles directly, we change the default with this
-  if (plansPageLayoutV3Variant === 'old-plans-page-annual') {
-    document.querySelectorAll('[data-ol-view]').forEach(el => {
-      const view = el.getAttribute('data-ol-view')
-
-      el.hidden = view !== 'annual'
-    })
-  }
-}
-
 function selectViewFromHash() {
   try {
     const params = new URLSearchParams(window.location.hash.substring(1))
@@ -171,6 +157,37 @@ function selectViewFromHash() {
   }
 }
 
+function validatePreRendering() {
+  document.querySelectorAll('[data-ol-view-tab]').forEach(el => {
+    console.assert(
+      (el.getAttribute('data-ol-view-tab') === currentView) ===
+        el.classList.contains('active'),
+      el
+    )
+  })
+
+  document.querySelectorAll('[data-ol-view]').forEach(el => {
+    console.assert(
+      (el.hidden === el.getAttribute('data-ol-view')) !== currentView,
+      el
+    )
+  })
+
+  const plansPageLayoutV3Variant = getMeta('ol-splitTestVariants')?.[
+    'plans-page-layout-v3'
+  ]
+  if (plansPageLayoutV3Variant !== 'new-plans-page') {
+    const tooltipEl = document.querySelector('[data-ol-annual-saving-tooltip]')
+    console.assert(
+      (currentView === 'annual') ===
+        tooltipEl.classList.contains('annual-selected'),
+      tooltipEl
+    )
+  }
+
+  console.log('validated pre-rendering')
+}
+
 document.querySelectorAll('[data-ol-view-tab]').forEach(setUpViewSwitching)
 document
   .querySelectorAll('[data-ol-currencyCode-switch]')
@@ -182,6 +199,3 @@ updateLinkTargets()
 
 selectViewFromHash()
 window.addEventListener('hashchange', selectViewFromHash)
-
-// only for `old-plans-page-annual` variant of the `plans-page-layout-v3` split test
-makeAnnualViewAsDefault()

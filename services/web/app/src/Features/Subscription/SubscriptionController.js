@@ -71,6 +71,14 @@ async function plansPage(req, res) {
     )
   }
 
+  let currentView = 'monthly'
+  if (
+    plansPageLayoutV3Assignment.variant === 'old-plans-page-annual' ||
+    plansPageLayoutV3Assignment.variant === 'new-plans-page'
+  ) {
+    currentView = 'annual'
+  }
+
   const showNewPlansPage =
     plansPageLayoutV3Assignment.variant === 'new-plans-page'
 
@@ -95,6 +103,7 @@ async function plansPage(req, res) {
 
   res.render(template, {
     title: 'plans_and_pricing',
+    currentView,
     plans,
     itm_content: req.query?.itm_content,
     itm_referrer: req.query?.itm_referrer,

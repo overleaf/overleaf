@@ -11,6 +11,7 @@ block append meta
 	meta(name="ol-groupPlans" data-type="json" content=groupPlans)
 	meta(name="ol-currencySymbols" data-type="json" content=groupPlanModalOptions.currencySymbols)
 	meta(name="ol-itm_content" content=itm_content)
+	meta(name="ol-currentView" content=currentView)
 
 block content
 	main.content.content-alt#main-content
@@ -69,11 +70,11 @@ block content
 						.col-md-3.text-right
 							+currency_dropdown
 					.row(event-tracking="features-table-viewed" event-tracking-ga="subscription-funnel" event-tracking-trigger="scroll" event-tracking-send-once="true" event-tracking-label="exp-")
-						.col-sm-12(data-ol-view='monthly')
+						.col-sm-12(hidden=(currentView !== 'monthly') data-ol-view='monthly')
 							+table_premium
-						.col-sm-12(hidden data-ol-view='annual')
+						.col-sm-12(hidden=(currentView !== 'annual') data-ol-view='annual')
 							+table_premium
-						.col-sm-12(hidden data-ol-view='student')
+						.col-sm-12(hidden=(currentView !== 'student') data-ol-view='student')
 							+table_student
 
 					include ./plans-marketing/_quotes

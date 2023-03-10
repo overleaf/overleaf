@@ -4,16 +4,16 @@ mixin btn_buy_collaborator(location)
 		data-ol-start-new-subscription='collaborator'
 		data-ol-location=location
 	)
-		span(data-ol-view='monthly') #{translate("start_free_trial")}
-		span(hidden data-ol-view='annual') #{translate("buy_now")}
+		span(hidden=(currentView !== 'monthly') data-ol-view='monthly') #{translate("start_free_trial")}
+		span(hidden=(currentView !== 'annual') data-ol-view='annual') #{translate("buy_now")}
 mixin btn_buy_personal(location)
 	a.btn.btn-primary(
 		data-ol-start-new-subscription='paid-personal'
 		data-ol-tracking-plan='personal'
 		data-ol-location=location
 	)
-		span(data-ol-view='monthly') #{translate("start_free_trial")}
-		span(hidden data-ol-view='annual') #{translate("buy_now")}
+		span(hidden=(currentView !== 'monthly') data-ol-view='monthly') #{translate("start_free_trial")}
+		span(hidden=(currentView !== 'annual') data-ol-view='annual') #{translate("buy_now")}
 mixin btn_buy_free(location)
 	a.btn.btn-primary(
 		data-ol-has-custom-href
@@ -28,8 +28,8 @@ mixin btn_buy_professional(location)
 		data-ol-start-new-subscription='professional'
 		data-ol-location=location
 	)
-		span(data-ol-view='monthly') #{translate("start_free_trial")}
-		span(hidden data-ol-view='annual') #{translate("buy_now")}
+		span(hidden=(currentView !== 'monthly') data-ol-view='monthly') #{translate("start_free_trial")}
+		span(hidden=(currentView !== 'annual') data-ol-view='annual') #{translate("buy_now")}
 mixin btn_buy_student(location, plan)
 	if plan == 'annual'
 		a.btn.btn-primary(
@@ -141,15 +141,15 @@ mixin gen_localized_undiscounted_price_for_plan_view(plan)
 
 
 mixin gen_localized_price_for_plan(plan)
-	div(data-ol-view='monthly')
+	div(hidden=(currentView !== 'monthly') data-ol-view='monthly')
 		+gen_localized_price_for_plan_view(plan, 'monthly')
 		span.small /mo
-	div(hidden data-ol-view='annual')
+	div(hidden=(currentView !== 'annual') data-ol-view='annual')
 		+gen_localized_price_for_plan_view(plan, 'annual')
 		span.small /yr
 
 mixin gen_localized_undiscounted_price_for_plan(plan)
-	div(hidden data-ol-view='annual')
+	div(hidden=(currentView !== 'annual') data-ol-view='annual')
 		strike.undiscounted-price.small
 			span.sr-only Price reduced from
 			+gen_localized_undiscounted_price_for_plan_view(plan)
@@ -211,9 +211,9 @@ mixin plan_switch(location)
 				)
 					.tooltip-arrow
 					.tooltip-inner
-						span(data-ol-view="monthly") #{translate("save_20_percent_by_paying_annually")}
-						span(hidden data-ol-view="annual") #{translate("saving_20_percent")}
-						span(hidden data-ol-view="student") #{translate("save_20_percent_by_paying_annually")}
+						span(hidden=(currentView !== 'monthly') data-ol-view='monthly') #{translate("save_20_percent_by_paying_annually")}
+						span(hidden=(currentView !== 'annual') data-ol-view='annual') #{translate("saving_20_percent")}
+						span(hidden=(currentView !== 'student') data-ol-view='student') #{translate("save_20_percent_by_paying_annually")}
 		li(data-ol-view-tab='student')
 			button.btn-default-outline #{translate("special_price_student")}
 
@@ -228,9 +228,9 @@ mixin plan_switch_annual_default(location)
 				)
 					.tooltip-arrow
 					.tooltip-inner
-						span(data-ol-view="annual") #{translate("saving_20_percent")}
-						span(hidden data-ol-view="monthly") #{translate("save_20_percent_by_paying_annually")}
-						span(hidden data-ol-view="student") #{translate("save_20_percent_by_paying_annually")}
+						span(hidden=(currentView !== 'annual') data-ol-view='annual') #{translate("saving_20_percent")}
+						span(hidden=(currentView !== 'monthly') data-ol-view='monthly') #{translate("save_20_percent_by_paying_annually")}
+						span(hidden=(currentView !== 'student') data-ol-view='student') #{translate("save_20_percent_by_paying_annually")}
 		li(data-ol-view-tab='monthly')
 			button.btn-default-outline #{translate("monthly")}
 		li(data-ol-view-tab='student')
@@ -285,7 +285,7 @@ mixin allCardsAndControls(controlsRowSpaced, listLocation)
 									+price_professional_undiscounted
 								+features_professional(location)
 
-				.card-group.text-centered(hidden data-ol-view='student')
+				.card-group.text-centered(hidden=(currentView !== 'student') data-ol-view='student')
 					.col-md-4
 						.card.card-first
 							.card-header
