@@ -78,12 +78,13 @@ html(
 	block foot-scripts
 		each file in entrypointScripts(entrypoint)
 			script(type="text/javascript", nonce=scriptNonce, src=file)
-		script(type="text/javascript", nonce=scriptNonce).
-			//- Look for bundle
-			var cdnBlocked = typeof Frontend === 'undefined'
-			//- Prevent loops
-			var noCdnAlreadyInUrl = window.location.href.indexOf("nocdn=true") != -1
-			if (cdnBlocked && !noCdnAlreadyInUrl && navigator.userAgent.indexOf("Googlebot") == -1) {
-				//- Set query param, server will not set CDN url
-				window.location.search += "&nocdn=true";
-			}
+	
+	script(type="text/javascript", nonce=scriptNonce).
+		//- Look for bundle
+		var cdnBlocked = typeof Frontend === 'undefined'
+		//- Prevent loops
+		var noCdnAlreadyInUrl = window.location.href.indexOf("nocdn=true") != -1
+		if (cdnBlocked && !noCdnAlreadyInUrl && navigator.userAgent.indexOf("Googlebot") == -1) {
+			//- Set query param, server will not set CDN url
+			window.location.search += "&nocdn=true";
+		}
