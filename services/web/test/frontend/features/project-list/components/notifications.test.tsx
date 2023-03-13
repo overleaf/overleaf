@@ -438,7 +438,7 @@ describe('<UserNotifications />', function () {
       fetchMock.delete(`/notifications/${institution._id}`, 200)
 
       screen.getByRole('alert')
-      screen.getByText(/you’ve tried to login with/i)
+      screen.getByText(/you’ve tried to log in with/i)
       screen.getByText(
         /in order to match your institutional metadata, your account is associated with/i
       )
