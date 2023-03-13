@@ -99,9 +99,15 @@ export const handleLogFiles = async (outputFiles, data, signal) => {
     }
   }
 
-  const blgFile = outputFiles.get('output.blg')
+  const blgFiles = []
 
-  if (blgFile) {
+  for (const [filename, file] of outputFiles) {
+    if (filename.endsWith('.blg')) {
+      blgFiles.push(file)
+    }
+  }
+
+  for (const blgFile of blgFiles) {
     try {
       const response = await fetchFromCompileDomain(
         buildURL(blgFile, data.pdfDownloadDomain, data.enableHybridPdfDownload),
