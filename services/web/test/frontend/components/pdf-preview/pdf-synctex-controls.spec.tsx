@@ -76,60 +76,10 @@ const WithSelectedEntities = ({
   return null
 }
 
-const interceptSyncCodeAsync = () => {
-  const deferred: { resolve: () => void } = {
-    resolve: () => {
-      // do nothing
-    },
-  }
-
-  cy.intercept('/project/*/sync/code?*', req => {
-    return new Promise(resolve => {
-      deferred.resolve = () => {
-        req.reply({
-          body: { pdf: cloneDeep(mockHighlights) },
-        })
-        resolve()
-      }
-    })
-  }).as('sync-code')
-
-  return deferred
-}
-
-const interceptSyncPdfAsync = () => {
-  const output: { resolve: () => void } = {
-    resolve: () => {
-      // do nothing
-    },
-  }
-
-  cy.intercept('/project/*/sync/pdf?*', req => {
-    return new Promise(resolve => {
-      output.resolve = () => {
-        req.reply({
-          body: { code: [{ file: 'main.tex', line: 100 }] },
-          delay: 1,
-        })
-        resolve()
-      }
-    })
-  }).as('sync-pdf')
-
-  return output
-}
-
-const interceptSyncPdf = () => {
-  cy.intercept('/project/*/sync/pdf?*', req => {
-    req.reply({
-      body: { code: [{ file: 'main.tex', line: 100 }] },
-    })
-  }).as('sync-pdf')
-}
-
 describe('<PdfSynctexControls/>', function () {
   beforeEach(function () {
     window.metaAttributesCache = new Map()
+    window.metaAttributesCache.set('ol-project_id', 'test-project')
     window.metaAttributesCache.set('ol-preventCompileOnLoad', false)
     cy.interceptEvents()
   })
@@ -168,27 +118,35 @@ describe('<PdfSynctexControls/>', function () {
       setDetachedPosition(mockPosition)
     })
 
-    const syncCode = interceptSyncCodeAsync()
+    cy.interceptAsync({ pathname: '/project/*/sync/code' }, 'sync-code').then(
+      syncCodeResponse => {
+        cy.findByRole('button', { name: 'Go to code location in PDF' }).click()
+        cy.findByRole('button', { name: 'Go to code location in PDF' })
+          .should('be.disabled')
+          .then(() => {
+            syncCodeResponse.resolve({
+              body: { pdf: cloneDeep(mockHighlights) },
+            })
+          })
 
-    cy.findByRole('button', { name: 'Go to code location in PDF' }).click()
-    cy.findByRole('button', { name: 'Go to code location in PDF' })
-      .should('be.disabled')
-      .then(() => {
-        syncCode.resolve()
-      })
+        cy.wait('@sync-code')
+      }
+    )
 
-    cy.wait('@sync-code')
+    cy.interceptAsync({ pathname: '/project/*/sync/pdf' }, 'sync-pdf').then(
+      syncPdfResponse => {
+        cy.findByRole('button', { name: /^Go to PDF location in code/ }).click()
+        cy.findByRole('button', { name: /^Go to PDF location in code/ })
+          .should('be.disabled')
+          .then(() => {
+            syncPdfResponse.resolve({
+              body: { code: [{ file: 'main.tex', line: 100 }] },
+            })
+          })
 
-    const syncPdf = interceptSyncPdfAsync()
-
-    cy.findByRole('button', { name: /^Go to PDF location in code/ }).click()
-    cy.findByRole('button', { name: /^Go to PDF location in code/ })
-      .should('be.disabled')
-      .then(() => {
-        syncPdf.resolve()
-      })
-
-    cy.wait('@sync-pdf')
+        cy.wait('@sync-pdf')
+      }
+    )
   })
 
   it('disables button when multiple entities are selected', function () {
@@ -286,23 +244,27 @@ describe('<PdfSynctexControls/>', function () {
 
       cy.spy(detachChannel, 'postMessage').as('postDetachMessage')
 
-      const syncing = interceptSyncCodeAsync()
+      cy.interceptAsync({ pathname: '/project/*/sync/code' }, 'sync-code').then(
+        syncCodeResponse => {
+          cy.findByRole('button', {
+            name: 'Go to code location in PDF',
+          })
+            .should('not.be.disabled')
+            .click()
 
-      cy.findByRole('button', {
-        name: 'Go to code location in PDF',
-      })
-        .should('not.be.disabled')
-        .click()
+          cy.findByRole('button', {
+            name: 'Go to code location in PDF',
+          })
+            .should('be.disabled')
+            .then(() => {
+              syncCodeResponse.resolve({
+                body: { pdf: cloneDeep(mockHighlights) },
+              })
+            })
 
-      cy.findByRole('button', {
-        name: 'Go to code location in PDF',
-      })
-        .should('be.disabled')
-        .then(() => {
-          syncing.resolve()
-        })
-
-      cy.wait('@sync-code')
+          cy.wait('@sync-code')
+        }
+      )
 
       cy.findByRole('button', {
         name: 'Go to code location in PDF',
@@ -319,7 +281,6 @@ describe('<PdfSynctexControls/>', function () {
 
     it('reacts to sync to code action', function () {
       cy.interceptCompile()
-      interceptSyncPdf()
 
       const scope = mockScope()
 
@@ -331,17 +292,23 @@ describe('<PdfSynctexControls/>', function () {
         </EditorProviders>
       )
 
-      cy.waitForCompile().then(() => {
-        testDetachChannel.postMessage({
-          role: 'detached',
-          event: 'action-sync-to-code',
-          data: {
-            args: [mockPosition],
-          },
-        })
-      })
+      cy.waitForCompile()
 
-      cy.wait('@sync-pdf')
+      cy.interceptAsync({ pathname: '/project/*/sync/pdf' }, 'sync-pdf')
+        .then(syncPdfResponse => {
+          syncPdfResponse.resolve({
+            body: { code: [{ file: 'main.tex', line: 100 }] },
+          })
+
+          testDetachChannel.postMessage({
+            role: 'detached',
+            event: 'action-sync-to-code',
+            data: {
+              args: [mockPosition],
+            },
+          })
+        })
+        .wait('@sync-pdf')
     })
   })
 

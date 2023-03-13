@@ -45,7 +45,7 @@ const outputFiles = () => {
 
 export const interceptCompile = (prefix = 'compile', times = 1) => {
   cy.intercept(
-    { method: 'POST', url: '/project/*/compile*', times },
+    { method: 'POST', pathname: '/project/*/compile', times },
     {
       body: {
         status: 'success',
@@ -58,17 +58,17 @@ export const interceptCompile = (prefix = 'compile', times = 1) => {
   ).as(`${prefix}`)
 
   cy.intercept(
-    { url: '/build/*/output.pdf*', times },
+    { pathname: '/build/*/output.pdf', times },
     { fixture: 'build/output.pdf,null' }
   ).as(`${prefix}-pdf`)
 
   cy.intercept(
-    { url: '/build/*/output.log*', times },
+    { pathname: '/build/*/output.log', times },
     { fixture: 'build/output.log' }
   ).as(`${prefix}-log`)
 
   cy.intercept(
-    { url: '/build/*/output.blg*', times },
+    { pathname: '/build/*/output.blg', times },
     { fixture: 'build/output.blg' }
   ).as(`${prefix}-blg`)
 }
@@ -134,17 +134,17 @@ export const interceptDeferredCompile = (beforeResponse?: () => void) => {
   ).as('compile')
 
   cy.intercept(
-    { url: '/build/*/output.pdf*', times: 1 },
+    { pathname: '/build/*/output.pdf', times: 1 },
     { fixture: 'build/output.pdf,null' }
   ).as(`compile-pdf`)
 
   cy.intercept(
-    { url: '/build/*/output.log*', times: 1 },
+    { pathname: '/build/*/output.log', times: 1 },
     { fixture: 'build/output.log' }
   ).as(`compile-log`)
 
   cy.intercept(
-    { url: '/build/*/output.blg*', times: 1 },
+    { pathname: '/build/*/output.blg', times: 1 },
     { fixture: 'build/output.blg' }
   ).as(`compile-blg`)
 
