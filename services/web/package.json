@@ -289,6 +289,7 @@
     "css-loader": "^6.7.1",
     "css-minimizer-webpack-plugin": "^3.4.1",
     "cypress": "12.2.0",
+    "cypress-plugin-tab": "^1.0.5",
     "es6-promise": "^4.2.8",
     "escodegen": "^2.0.0",
     "eslint-config-standard-jsx": "^11.0.0-0",
