@@ -13,7 +13,7 @@ export function addContact(req, res, next) {
     return
   }
 
-  logger.debug({ user_id: userId, contact_id: contactId }, 'adding contact')
+  logger.debug({ userId, contactId }, 'adding contact')
 
   Promise.all([
     ContactManager.touchContact(userId, contactId),
@@ -34,7 +34,7 @@ export function getContacts(req, res, next) {
   const contactLimit =
     limit == null ? CONTACT_LIMIT : Math.min(parseInt(limit, 10), CONTACT_LIMIT)
 
-  logger.debug({ user_id: userId }, 'getting contacts')
+  logger.debug({ userId }, 'getting contacts')
 
   ContactManager.getContacts(userId)
     .then(contacts => {
