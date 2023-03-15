@@ -54,7 +54,7 @@ const generateIncorrectWords = function (n) {
   return words
 }
 
-const make_request = function (correctWords, incorrectWords, callback) {
+const makeRequest = function (correctWords, incorrectWords, callback) {
   let i, j, w
   let i1
   let j1
@@ -142,7 +142,7 @@ const make_request = function (correctWords, incorrectWords, callback) {
 const q = async.queue(
   (task, callback) =>
     setTimeout(
-      () => make_request(task.correct, task.incorrect, callback),
+      () => makeRequest(task.correct, task.incorrect, callback),
       Math.random() * 100
     ),
 
