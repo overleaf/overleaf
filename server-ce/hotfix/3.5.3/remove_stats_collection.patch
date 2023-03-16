@@ -1,0 +1,16 @@
+--- services/web/scripts/history/migrate_history.js
++++ services/web/scripts/history/migrate_history.js
+@@ -110,14 +110,6 @@ async function findProjectsToMigrate() {
+     process.exit(1)
+   }
+
+-  // Find the total number of history records for the projects we need to migrate
+-  let docHistoryCount = 0
+-  for await (const project of projectsToMigrate) {
+-    const count = await countDocHistory({ project_id: project._id })
+-    docHistoryCount += count
+-  }
+-
+-  console.log('Total history records to migrate:', docHistoryCount)
+   return projectsToMigrate
+ }
