@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -16,23 +15,23 @@ const { db, ObjectId } = require('./mongodb')
 const metrics = require('@overleaf/metrics')
 
 module.exports = Notifications = {
-  getUserNotifications(user_id, callback) {
+  getUserNotifications(userId, callback) {
     if (callback == null) {
       callback = function () {}
     }
     const query = {
-      user_id: ObjectId(user_id),
+      user_id: ObjectId(userId),
       templateKey: { $exists: true },
     }
     db.notifications.find(query).toArray(callback)
   },
 
-  _countExistingNotifications(user_id, notification, callback) {
+  _countExistingNotifications(userId, notification, callback) {
     if (callback == null) {
       callback = function () {}
     }
     const query = {
-      user_id: ObjectId(user_id),
+      user_id: ObjectId(userId),
       key: notification.key,
     }
     return db.notifications.count(query, function (err, count) {
@@ -43,9 +42,9 @@ module.exports = Notifications = {
     })
   },
 
-  addNotification(user_id, notification, callback) {
+  addNotification(userId, notification, callback) {
     return this._countExistingNotifications(
-      user_id,
+      userId,
       notification,
       function (err, count) {
         if (err != null) {
@@ -55,7 +54,7 @@ module.exports = Notifications = {
           return callback()
         }
         const doc = {
-          user_id: ObjectId(user_id),
+          user_id: ObjectId(userId),
           key: notification.key,
           messageOpts: notification.messageOpts,
           templateKey: notification.templateKey,
@@ -71,7 +70,7 @@ module.exports = Notifications = {
           } catch (error) {
             err = error
             logger.error(
-              { user_id, expires: notification.expires },
+              { userId, expires: notification.expires },
               'error converting `expires` field to Date'
             )
             return callback(err)
@@ -87,26 +86,26 @@ module.exports = Notifications = {
     )
   },
 
-  removeNotificationId(user_id, notification_id, callback) {
+  removeNotificationId(userId, notificationId, callback) {
     const searchOps = {
-      user_id: ObjectId(user_id),
-      _id: ObjectId(notification_id),
+      user_id: ObjectId(userId),
+      _id: ObjectId(notificationId),
     }
     const updateOperation = { $unset: { templateKey: true, messageOpts: true } }
     db.notifications.updateOne(searchOps, updateOperation, callback)
   },
 
-  removeNotificationKey(user_id, notification_key, callback) {
+  removeNotificationKey(userId, notificationKey, callback) {
     const searchOps = {
-      user_id: ObjectId(user_id),
-      key: notification_key,
+      user_id: ObjectId(userId),
+      key: notificationKey,
     }
     const updateOperation = { $unset: { templateKey: true } }
     db.notifications.updateOne(searchOps, updateOperation, callback)
   },
 
-  removeNotificationByKeyOnly(notification_key, callback) {
-    const searchOps = { key: notification_key }
+  removeNotificationByKeyOnly(notificationKey, callback) {
+    const searchOps = { key: notificationKey }
     const updateOperation = { $unset: { templateKey: true } }
     db.notifications.updateOne(searchOps, updateOperation, callback)
   },
@@ -128,8 +127,8 @@ module.exports = Notifications = {
   },
 
   // hard delete of doc, rather than removing the templateKey
-  deleteNotificationByKeyOnly(notification_key, callback) {
-    const searchOps = { key: notification_key }
+  deleteNotificationByKeyOnly(notificationKey, callback) {
+    const searchOps = { key: notificationKey }
     db.notifications.deleteOne(searchOps, callback)
   },
 }

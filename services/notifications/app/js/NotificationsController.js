@@ -1,6 +1,3 @@
-/* eslint-disable
-    camelcase,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -16,7 +13,7 @@ const metrics = require('@overleaf/metrics')
 module.exports = {
   getUserNotifications(req, res, next) {
     logger.debug(
-      { user_id: req.params.user_id },
+      { userId: req.params.user_id },
       'getting user unread notifications'
     )
     metrics.inc('getUserNotifications')
@@ -31,7 +28,7 @@ module.exports = {
 
   addNotification(req, res) {
     logger.debug(
-      { user_id: req.params.user_id, notification: req.body },
+      { userId: req.params.user_id, notification: req.body },
       'adding notification'
     )
     metrics.inc('addNotification')
@@ -51,8 +48,8 @@ module.exports = {
   removeNotificationId(req, res, next) {
     logger.debug(
       {
-        user_id: req.params.user_id,
-        notification_id: req.params.notification_id,
+        userId: req.params.user_id,
+        notificationId: req.params.notification_id,
       },
       'mark id notification as read'
     )
@@ -69,7 +66,7 @@ module.exports = {
 
   removeNotificationKey(req, res, next) {
     logger.debug(
-      { user_id: req.params.user_id, notification_key: req.body.key },
+      { userId: req.params.user_id, notificationKey: req.body.key },
       'mark key notification as read'
     )
     metrics.inc('removeNotificationKey')
@@ -84,10 +81,10 @@ module.exports = {
   },
 
   removeNotificationByKeyOnly(req, res, next) {
-    const notification_key = req.params.key
-    logger.debug({ notification_key }, 'mark notification as read by key only')
+    const notificationKey = req.params.key
+    logger.debug({ notificationKey }, 'mark notification as read by key only')
     metrics.inc('removeNotificationKey')
-    return Notifications.removeNotificationByKeyOnly(notification_key, err => {
+    return Notifications.removeNotificationByKeyOnly(notificationKey, err => {
       if (err) return next(err)
       res.sendStatus(200)
     })

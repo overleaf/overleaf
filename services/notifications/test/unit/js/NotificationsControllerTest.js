@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-return-assign,
     no-unused-vars,
 */
@@ -15,9 +14,9 @@ const modulePath = '../../../app/js/NotificationsController.js'
 const SandboxedModule = require('sandboxed-module')
 const assert = require('assert')
 
-const user_id = '51dc93e6fb625a261300003b'
-const notification_id = 'fb625a26f09d'
-const notification_key = 'my-notification-key'
+const userId = '51dc93e6fb625a261300003b'
+const notificationId = 'fb625a26f09d'
+const notificationKey = 'my-notification-key'
 
 describe('Notifications Controller', function () {
   beforeEach(function () {
@@ -34,7 +33,7 @@ describe('Notifications Controller', function () {
 
     return (this.stubbedNotification = [
       {
-        key: notification_key,
+        key: notificationKey,
         messageOpts: 'some info',
         templateKey: 'template-key',
       },
@@ -48,14 +47,14 @@ describe('Notifications Controller', function () {
         .callsArgWith(1, null, this.stubbedNotification)
       const req = {
         params: {
-          user_id,
+          user_id: userId,
         },
       }
       return this.controller.getUserNotifications(req, {
         json: result => {
           result.should.equal(this.stubbedNotification)
           this.notifications.getUserNotifications
-            .calledWith(user_id)
+            .calledWith(userId)
             .should.equal(true)
           return done()
         },
@@ -68,14 +67,14 @@ describe('Notifications Controller', function () {
       this.notifications.addNotification = sinon.stub().callsArgWith(2)
       const req = {
         params: {
-          user_id,
+          user_id: userId,
         },
         body: this.stubbedNotification,
       }
       return this.controller.addNotification(req, {
         sendStatus: code => {
           this.notifications.addNotification
-            .calledWith(user_id, this.stubbedNotification)
+            .calledWith(userId, this.stubbedNotification)
             .should.equal(true)
           code.should.equal(200)
           return done()
@@ -89,14 +88,14 @@ describe('Notifications Controller', function () {
       this.notifications.removeNotificationId = sinon.stub().callsArgWith(2)
       const req = {
         params: {
-          user_id,
-          notification_id,
+          user_id: userId,
+          notification_id: notificationId,
         },
       }
       return this.controller.removeNotificationId(req, {
         sendStatus: code => {
           this.notifications.removeNotificationId
-            .calledWith(user_id, notification_id)
+            .calledWith(userId, notificationId)
             .should.equal(true)
           code.should.equal(200)
           return done()
@@ -110,14 +109,14 @@ describe('Notifications Controller', function () {
       this.notifications.removeNotificationKey = sinon.stub().callsArgWith(2)
       const req = {
         params: {
-          user_id,
+          user_id: userId,
         },
-        body: { key: notification_key },
+        body: { key: notificationKey },
       }
       return this.controller.removeNotificationKey(req, {
         sendStatus: code => {
           this.notifications.removeNotificationKey
-            .calledWith(user_id, notification_key)
+            .calledWith(userId, notificationKey)
             .should.equal(true)
           code.should.equal(200)
           return done()
@@ -133,13 +132,13 @@ describe('Notifications Controller', function () {
         .callsArgWith(1)
       const req = {
         params: {
-          key: notification_key,
+          key: notificationKey,
         },
       }
       return this.controller.removeNotificationByKeyOnly(req, {
         sendStatus: code => {
           this.notifications.removeNotificationByKeyOnly
-            .calledWith(notification_key)
+            .calledWith(notificationKey)
             .should.equal(true)
           code.should.equal(200)
           return done()

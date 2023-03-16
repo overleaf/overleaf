@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-dupe-keys,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -19,27 +18,27 @@ const logger = require('@overleaf/logger')
 
 module.exports = {
   check(callback) {
-    const user_id = ObjectId()
+    const userId = ObjectId()
     const cleanupNotifications = callback =>
-      db.notifications.remove({ user_id }, callback)
+      db.notifications.remove({ user_id: userId }, callback)
 
-    let notification_key = `smoke-test-notification-${ObjectId()}`
+    let notificationKey = `smoke-test-notification-${ObjectId()}`
     const getOpts = endPath => ({
-      url: `http://localhost:${port}/user/${user_id}${endPath}`,
+      url: `http://localhost:${port}/user/${userId}${endPath}`,
       timeout: 5000,
     })
     logger.debug(
-      { user_id, opts: getOpts(), key: notification_key, user_id },
+      { userId, opts: getOpts(), key: notificationKey, userId },
       'Health Check: running'
     )
     const jobs = [
       function (cb) {
         const opts = getOpts('/')
         opts.json = {
-          key: notification_key,
+          key: notificationKey,
           messageOpts: '',
           templateKey: 'f4g5',
-          user_id,
+          user_id: userId,
         }
         return request.post(opts, cb)
       },
@@ -57,14 +56,14 @@ module.exports = {
           }
           const hasNotification = body.some(
             notification =>
-              notification.key === notification_key &&
-              notification.user_id === user_id.toString()
+              notification.key === notificationKey &&
+              notification.user_id === userId.toString()
           )
           if (hasNotification) {
             return cb(null, body)
           } else {
             logger.err(
-              { body, notification_key },
+              { body, notificationKey },
               'Health Check: notification not in response'
             )
             return cb(new Error('notification not found in response'))
@@ -77,11 +76,11 @@ module.exports = {
         logger.err({ err }, 'Health Check: error running health check')
         return cleanupNotifications(() => callback(err))
       } else {
-        const notification_id = body[1][0]._id
-        notification_key = body[1][0].key
-        let opts = getOpts(`/notification/${notification_id}`)
+        const notificationId = body[1][0]._id
+        notificationKey = body[1][0].key
+        let opts = getOpts(`/notification/${notificationId}`)
         logger.debug(
-          { notification_id, notification_key },
+          { notificationId, notificationKey },
           'Health Check: doing cleanup'
         )
         return request.del(opts, function (err, res, body) {
@@ -94,7 +93,7 @@ module.exports = {
             return callback(err)
           }
           opts = getOpts('')
-          opts.json = { key: notification_key }
+          opts.json = { key: notificationKey }
           return request.del(opts, function (err, res, body) {
             if (err != null) {
               logger.err(
