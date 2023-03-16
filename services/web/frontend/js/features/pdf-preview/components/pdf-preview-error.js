@@ -5,6 +5,7 @@ import { Button } from 'react-bootstrap'
 import PdfLogEntry from './pdf-log-entry'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import { useStopOnFirstError } from '../../../shared/hooks/use-stop-on-first-error'
+import getMeta from '../../../utils/meta'
 
 function PdfPreviewError({ error }) {
   const { t } = useTranslation()
@@ -12,6 +13,32 @@ function PdfPreviewError({ error }) {
   const { startCompile } = useCompileContext()
 
   switch (error) {
+    case 'rendering-error-new-domain':
+      return (
+        <PdfLogEntry
+          headerTitle={t('pdf_rendering_error')}
+          formattedContent={
+            <Trans
+              i18nKey="new_compile_domain_trouble_shooting"
+              values={{
+                compilesUserContentDomain: new URL(
+                  getMeta('ol-compilesUserContentDomain')
+                ).hostname,
+              }}
+              components={[
+                <code key="domain" />,
+                /* eslint-disable-next-line jsx-a11y/anchor-has-content */
+                <a
+                  href="/learn/how-to/Resolving_access%2C_loading%2C_and_display_problems"
+                  target="_blank"
+                  key="troubleshooting-link"
+                />,
+              ]}
+            />
+          }
+          level="warning"
+        />
+      )
     case 'rendering-error-expected':
       return (
         <PdfLogEntry

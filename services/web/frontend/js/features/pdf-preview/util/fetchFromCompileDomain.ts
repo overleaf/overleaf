@@ -2,13 +2,14 @@ import { isNetworkError } from '../../../utils/isNetworkError'
 import getMeta from '../../../utils/meta'
 import OError from '@overleaf/o-error'
 import { postJSON } from '../../../infrastructure/fetch-json'
+import { isSplitTestEnabled } from '../../../utils/splitTestUtils'
 
 let useFallbackDomainUntil = performance.now()
 const ONE_HOUR_IN_MS = 1000 * 60 * 60
 
 class MaybeBlockedByProxyError extends OError {}
 
-function checkForBlockingByProxy(res: Response) {
+function checkForBlockingByProxy(url: string, res: Response) {
   const statusCode = res.status
   switch (statusCode) {
     case 200: // full response
@@ -19,18 +20,26 @@ function checkForBlockingByProxy(res: Response) {
     default:
       throw new MaybeBlockedByProxyError('request might be blocked by proxy', {
         res,
+        url,
         statusCode,
       })
   }
 }
 
-export async function fetchFromCompileDomain(url: string, init: RequestInit) {
+export function isURLOnUserContentDomain(url: string) {
   const userContentDomain = getMeta('ol-compilesUserContentDomain')
-  let isUserContentDomain =
+  return (
     userContentDomain &&
+    url &&
     new URL(url).hostname === new URL(userContentDomain).hostname
+  )
+}
 
-  if (useFallbackDomainUntil > performance.now()) {
+export async function fetchFromCompileDomain(url: string, init: RequestInit) {
+  let isUserContentDomain = isURLOnUserContentDomain(url)
+  const fallbackAllowed = !isSplitTestEnabled('force-new-compile-domain')
+
+  if (fallbackAllowed && useFallbackDomainUntil > performance.now()) {
     isUserContentDomain = false
     url = withFallbackCompileDomain(url)
   }
@@ -39,13 +48,14 @@ export async function fetchFromCompileDomain(url: string, init: RequestInit) {
     if (isUserContentDomain) {
       // Only throw a MaybeBlockedByProxyError when the request will be retried
       //  on the fallback domain below.
-      checkForBlockingByProxy(res)
+      checkForBlockingByProxy(url, res)
     }
     return res
   } catch (err) {
     if (
-      (isNetworkError(err) || err instanceof MaybeBlockedByProxyError) &&
-      isUserContentDomain
+      fallbackAllowed &&
+      isUserContentDomain &&
+      (isNetworkError(err) || err instanceof MaybeBlockedByProxyError)
     ) {
       try {
         const res = await fetch(withFallbackCompileDomain(url), init)

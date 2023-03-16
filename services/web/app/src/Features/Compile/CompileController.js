@@ -58,8 +58,15 @@ const getSplitTestOptions = callbackify(async function (req, res) {
       res,
       'pdf-download-domain'
     )
+  const { variant: forceNewDomainVariant } =
+    await SplitTestHandler.promises.getAssignment(
+      editorReq,
+      res,
+      'force-new-compile-domain'
+    )
   const pdfDownloadDomain =
-    domainVariant === 'user' && Settings.compilesUserContentDomain
+    (domainVariant === 'user' || forceNewDomainVariant === 'enabled') &&
+    Settings.compilesUserContentDomain
       ? Settings.compilesUserContentDomain
       : Settings.pdfDownloadDomain
 
@@ -77,6 +84,7 @@ const getSplitTestOptions = callbackify(async function (req, res) {
       pdfDownloadDomain,
       enableHybridPdfDownload,
       enablePdfCaching: false,
+      forceNewDomainVariant,
     }
   }
 
@@ -95,6 +103,7 @@ const getSplitTestOptions = callbackify(async function (req, res) {
       pdfDownloadDomain,
       enableHybridPdfDownload,
       enablePdfCaching: false,
+      forceNewDomainVariant,
     }
   }
   const pdfCachingMinChunkSize = await getPdfCachingMinChunkSize(editorReq, res)
@@ -103,6 +112,7 @@ const getSplitTestOptions = callbackify(async function (req, res) {
     enableHybridPdfDownload,
     enablePdfCaching,
     pdfCachingMinChunkSize,
+    forceNewDomainVariant,
   }
 })
 
@@ -149,6 +159,7 @@ module.exports = CompileController = {
         pdfCachingMinChunkSize,
         pdfDownloadDomain,
         enableHybridPdfDownload,
+        forceNewDomainVariant,
       } = splitTestOptions
       options.enablePdfCaching = enablePdfCaching
       if (enablePdfCaching) {
@@ -217,6 +228,7 @@ module.exports = CompileController = {
             pdfDownloadDomain,
             pdfCachingMinChunkSize,
             enableHybridPdfDownload,
+            forceNewDomainVariant,
           })
         }
       )

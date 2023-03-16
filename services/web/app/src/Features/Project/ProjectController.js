@@ -1064,6 +1064,17 @@ const ProjectController = {
             }
           )
         },
+        forceNewDomainAssignment(cb) {
+          SplitTestHandler.getAssignment(
+            req,
+            res,
+            'force-new-compile-domain',
+            () => {
+              // We'll pick up the assignment from the res.locals assignment.
+              cb()
+            }
+          )
+        },
         userContentDomainAccessCheckAssigment(cb) {
           SplitTestHandler.getAssignment(
             req,

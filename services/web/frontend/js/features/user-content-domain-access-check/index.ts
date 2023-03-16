@@ -239,22 +239,28 @@ export async function checkUserContentDomainAccess(
   return failed === 0
 }
 
-let accessCheckPassed = false
+const ACCESS_CHECK_PASSED = 'passed'
+const ACCESS_CHECK_PENDING = 'pending'
+const ACCESS_CHECK_FAILED = 'failed'
+let accessCheckStatus = ACCESS_CHECK_PENDING
 
 export function userContentDomainAccessCheckPassed() {
-  return accessCheckPassed
+  return accessCheckStatus === ACCESS_CHECK_PASSED
+}
+export function userContentDomainAccessCheckFailed() {
+  return accessCheckStatus === ACCESS_CHECK_FAILED
 }
 
 let networkEpoch = performance.now()
 window.addEventListener('offline', () => {
   // We are offline. Abort any scheduled check.
   clearTimeout(lastScheduledCheck)
-  accessCheckPassed = false
+  accessCheckStatus = ACCESS_CHECK_PENDING
   networkEpoch = performance.now()
 })
 window.addEventListener('online', () => {
   // We are online again. Schedule another check for this network.
-  accessCheckPassed = false
+  accessCheckStatus = ACCESS_CHECK_PENDING
   networkEpoch = performance.now()
   scheduleUserContentDomainAccessCheck()
 })
@@ -263,7 +269,7 @@ try {
   // Docs: https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation
   navigator.connection.addEventListener('change', () => {
     // The network changed. Schedule another check for it.
-    accessCheckPassed = false
+    accessCheckStatus = ACCESS_CHECK_PENDING
     networkEpoch = performance.now()
     scheduleUserContentDomainAccessCheck()
   })
@@ -282,7 +288,7 @@ export function scheduleUserContentDomainAccessCheck() {
       // Try again in INITIAL_DELAY_MS.
       return scheduleUserContentDomainAccessCheck()
     }
-    if (accessCheckPassed) return
+    if (userContentDomainAccessCheckPassed()) return
     if (remainingChecks === 0) {
       recordMaxAccessChecksHit()
     }
@@ -294,7 +300,7 @@ export function scheduleUserContentDomainAccessCheck() {
     }
     checkUserContentDomainAccess(getMeta('ol-compilesUserContentDomain'))
       .then(ok => {
-        accessCheckPassed = ok
+        accessCheckStatus = ok ? ACCESS_CHECK_PASSED : ACCESS_CHECK_FAILED
       })
       .catch(err => {
         captureException(err)

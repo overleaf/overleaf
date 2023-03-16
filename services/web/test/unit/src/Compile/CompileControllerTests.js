@@ -127,6 +127,7 @@ describe('CompileController', function () {
               ],
               pdfDownloadDomain: 'https://compiles.overleaf.test',
               enableHybridPdfDownload: false,
+              forceNewDomainVariant: 'default',
             })
           )
         })
@@ -170,6 +171,7 @@ describe('CompileController', function () {
               ],
               pdfDownloadDomain: 'https://compiles.overleaf.test/zone/b',
               enableHybridPdfDownload: false,
+              forceNewDomainVariant: 'default',
             })
           )
         })
@@ -212,6 +214,7 @@ describe('CompileController', function () {
             status: this.status,
             outputFiles: this.outputFiles,
             enableHybridPdfDownload: false,
+            forceNewDomainVariant: 'default',
           })
         )
       })

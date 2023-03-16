@@ -449,6 +449,7 @@ export function resolveMultiPartResponses({
 export function checkChunkResponse(response, estimatedSize, init) {
   if (!(response.status === 206 || response.status === 200)) {
     throw new OError('non successful response status: ' + response.status, {
+      statusCode: response.status,
       responseHeaders: Object.fromEntries(response.headers.entries()),
       requestHeader: init.headers,
     })

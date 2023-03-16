@@ -10,6 +10,8 @@ import {
   trackPdfDownloadEnabled,
 } from './pdf-caching-flags'
 import { isNetworkError } from '../../../utils/isNetworkError'
+import { isSplitTestEnabled } from '../../../utils/splitTestUtils'
+import { isURLOnUserContentDomain } from './fetchFromCompileDomain'
 
 // 30 seconds: The shutdown grace period of a clsi pre-emp instance.
 const STALE_OUTPUT_REQUEST_THRESHOLD_MS = 30 * 1000
@@ -76,10 +78,13 @@ export function generatePdfCachingTransportFactory(PDFJS) {
         end,
         metrics,
       })
+      const isExpectedFailureOnNewCompileDomain = err =>
+        isSplitTestEnabled('force-new-compile-domain') &&
+        isURLOnUserContentDomain(OError.getFullInfo(err).url)
 
       const isStaleOutputRequest = () =>
         performance.now() - this.startTime > STALE_OUTPUT_REQUEST_THRESHOLD_MS
-      const is404 = err => err.message === 'non successful response status: 404'
+      const is404 = err => OError.getFullInfo(err).statusCode === 404
       const isFromOutputPDFRequest = err =>
         OError.getFullInfo(err).url === this.url
 
@@ -91,8 +96,9 @@ export function generatePdfCachingTransportFactory(PDFJS) {
       // - requests for the main output.pdf file
       //   A fallback request would not be able to retrieve the PDF either.
       const isExpectedError = err =>
-        (is404(err) || isNetworkError(err)) &&
-        (isStaleOutputRequest() || isFromOutputPDFRequest(err))
+        ((is404(err) || isNetworkError(err)) &&
+          (isStaleOutputRequest() || isFromOutputPDFRequest(err))) ||
+        isExpectedFailureOnNewCompileDomain(err)
 
       fetchRange({
         url: this.url,
@@ -113,12 +119,17 @@ export function generatePdfCachingTransportFactory(PDFJS) {
           if (isExpectedError(err)) {
             if (is404(err)) {
               // A regular pdf-js request would have seen this 404 as well.
+            } else if (isExpectedFailureOnNewCompileDomain(err)) {
+              // A regular pdf-js request would have seen this proxy-error as well.
             } else {
               // Flaky network, switch back to regular pdf-js requests.
               metrics.failedCount++
               metrics.failedOnce = true
             }
-            throw new PDFJS.MissingPDFException()
+            throw OError.tag(new PDFJS.MissingPDFException(), 'caching', {
+              statusCode: OError.getFullInfo(err).statusCode,
+              url: OError.getFullInfo(err).url,
+            })
           }
           metrics.failedCount++
           metrics.failedOnce = true
@@ -140,7 +151,10 @@ export function generatePdfCachingTransportFactory(PDFJS) {
             abortSignal,
           }).catch(err => {
             if (isExpectedError(err)) {
-              err = new PDFJS.MissingPDFException()
+              throw OError.tag(new PDFJS.MissingPDFException(), 'fallback', {
+                statusCode: OError.getFullInfo(err).statusCode,
+                url: OError.getFullInfo(err).url,
+              })
             }
             throw err
           })
