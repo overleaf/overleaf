@@ -4,6 +4,7 @@ import { fireEvent, screen, render, waitFor } from '@testing-library/react'
 import fetchMock, { FetchMockStatic } from 'fetch-mock'
 
 import LeaveModalForm from '../../../../../../frontend/js/features/settings/components/leave/modal-form'
+import * as useLocationModule from '../../../../../../frontend/js/shared/hooks/use-location'
 
 describe('<LeaveModalForm />', function () {
   beforeEach(function () {
@@ -51,27 +52,23 @@ describe('<LeaveModalForm />', function () {
     let setInFlight: sinon.SinonStub
     let setIsFormValid: sinon.SinonStub
     let deleteMock: FetchMockStatic
-    let locationStub: sinon.SinonStub
-    const originalLocation = window.location
+    let assignStub: sinon.SinonStub
 
     beforeEach(function () {
       setInFlight = sinon.stub()
       setIsFormValid = sinon.stub()
       deleteMock = fetchMock.post('/user/delete', 200)
-      locationStub = sinon.stub()
-      Object.defineProperty(window, 'location', {
-        value: {
-          assign: locationStub,
-        },
+      assignStub = sinon.stub()
+      this.locationStub = sinon.stub(useLocationModule, 'useLocation').returns({
+        assign: assignStub,
+        reload: sinon.stub(),
       })
       window.metaAttributesCache.set('ol-ExposedSettings', { isOverleaf: true })
     })
 
     afterEach(function () {
       fetchMock.reset()
-      Object.defineProperty(window, 'location', {
-        value: originalLocation,
-      })
+      this.locationStub.restore()
     })
 
     it('with valid form', async function () {
@@ -91,8 +88,8 @@ describe('<LeaveModalForm />', function () {
       await waitFor(() => {
         sinon.assert.calledTwice(setInFlight)
         sinon.assert.calledWithMatch(setInFlight, false)
-        sinon.assert.calledOnce(locationStub)
-        sinon.assert.calledWithMatch(locationStub, '/login')
+        sinon.assert.calledOnce(assignStub)
+        sinon.assert.calledWith(assignStub, '/login')
       })
     })
 

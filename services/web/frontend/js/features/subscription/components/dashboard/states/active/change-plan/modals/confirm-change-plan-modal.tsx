@@ -7,6 +7,7 @@ import AccessibleModal from '../../../../../../../../shared/components/accessibl
 import getMeta from '../../../../../../../../utils/meta'
 import { useSubscriptionDashboardContext } from '../../../../../../context/subscription-dashboard-context'
 import { subscriptionUpdateUrl } from '../../../../../../data/subscription-url'
+import { useLocation } from '../../../../../../../../shared/hooks/use-location'
 
 export function ConfirmChangePlanModal() {
   const modalId: SubscriptionDashModalIds = 'change-to-plan'
@@ -16,6 +17,7 @@ export function ConfirmChangePlanModal() {
   const { handleCloseModal, modalIdShown, plans, planCodeToChangeTo } =
     useSubscriptionDashboardContext()
   const planCodesChangingAtTermEnd = getMeta('ol-planCodesChangingAtTermEnd')
+  const location = useLocation()
 
   async function handleConfirmChange() {
     setError(false)
@@ -27,7 +29,7 @@ export function ConfirmChangePlanModal() {
           plan_code: planCodeToChangeTo,
         },
       })
-      window.location.reload()
+      location.reload()
     } catch (e) {
       setError(true)
       setInflight(false)

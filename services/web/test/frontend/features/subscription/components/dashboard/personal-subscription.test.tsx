@@ -17,9 +17,9 @@ import {
   renderWithSubscriptionDashContext,
 } from '../../helpers/render-with-subscription-dash-context'
 import { reactivateSubscriptionUrl } from '../../../../../../frontend/js/features/subscription/data/subscription-url'
-import * as locationModule from '../../../../../../frontend/js/shared/components/location'
 import fetchMock from 'fetch-mock'
 import sinon from 'sinon'
+import * as useLocationModule from '../../../../../../frontend/js/shared/hooks/use-location'
 
 describe('<PersonalSubscription />', function () {
   afterEach(function () {
@@ -48,6 +48,20 @@ describe('<PersonalSubscription />', function () {
   })
 
   describe('subscription states  ', function () {
+    let reloadStub: sinon.SinonStub
+
+    beforeEach(function () {
+      reloadStub = sinon.stub()
+      this.locationStub = sinon.stub(useLocationModule, 'useLocation').returns({
+        assign: sinon.stub(),
+        reload: reloadStub,
+      })
+    })
+
+    afterEach(function () {
+      this.locationStub.restore()
+    })
+
     it('renders the active dash', function () {
       renderWithSubscriptionDashContext(<PersonalSubscription />, {
         metaTags: [
@@ -82,8 +96,6 @@ describe('<PersonalSubscription />', function () {
     })
 
     it('reactivates canceled plan', async function () {
-      const reload = sinon.stub(locationModule, 'reload')
-
       renderWithSubscriptionDashContext(<PersonalSubscription />, {
         metaTags: [{ name: 'ol-subscription', value: canceledSubscription }],
       })
@@ -98,18 +110,16 @@ describe('<PersonalSubscription />', function () {
       expect(reactivateBtn.disabled).to.be.true
       await fetchMock.flush(true)
       expect(reactivateBtn.disabled).to.be.false
-      expect(reload).not.to.have.been.called
+      expect(reloadStub).not.to.have.been.called
       fetchMock.reset()
 
       // 2nd click - success
       fetchMock.postOnce(reactivateSubscriptionUrl, 200)
       fireEvent.click(reactivateBtn)
       await fetchMock.flush(true)
-      expect(reload).to.have.been.calledOnce
+      expect(reloadStub).to.have.been.calledOnce
       expect(reactivateBtn.disabled).to.be.true
       fetchMock.reset()
-
-      reload.restore()
     })
 
     it('renders the expired dash', function () {

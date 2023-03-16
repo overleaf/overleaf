@@ -21,6 +21,7 @@ import {
   extendTrialUrl,
   subscriptionUpdateUrl,
 } from '../../../../../../../../frontend/js/features/subscription/data/subscription-url'
+import * as useLocationModule from '../../../../../../../../frontend/js/shared/hooks/use-location'
 
 describe('<ActiveSubscription />', function () {
   let sendMBSpy: sinon.SinonSpy
@@ -195,20 +196,18 @@ describe('<ActiveSubscription />', function () {
   })
 
   describe('cancel plan', function () {
-    const locationStub = sinon.stub()
+    const assignStub = sinon.stub()
     const reloadStub = sinon.stub()
-    const originalLocation = window.location
 
     beforeEach(function () {
-      Object.defineProperty(window, 'location', {
-        value: { assign: locationStub, reload: reloadStub },
+      this.locationStub = sinon.stub(useLocationModule, 'useLocation').returns({
+        assign: assignStub,
+        reload: reloadStub,
       })
     })
 
     afterEach(function () {
-      Object.defineProperty(window, 'location', {
-        value: originalLocation,
-      })
+      this.locationStub.restore()
       fetchMock.reset()
     })
 
@@ -256,9 +255,9 @@ describe('<ActiveSubscription />', function () {
       })
       fireEvent.click(button)
       await waitFor(() => {
-        expect(locationStub).to.have.been.called
+        expect(assignStub).to.have.been.called
       })
-      sinon.assert.calledWithMatch(locationStub, '/user/subscription/canceled')
+      sinon.assert.calledWithMatch(assignStub, '/user/subscription/canceled')
     })
 
     it('shows an error message if canceling subscription failed', async function () {

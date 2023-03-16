@@ -2,6 +2,7 @@ import App from '../../../base'
 import { react2angular } from 'react2angular'
 import EditorCloneProjectModalWrapper from '../components/editor-clone-project-modal-wrapper'
 import { rootContext } from '../../../shared/context/root-context'
+import { assign } from '../../../shared/components/location'
 
 export default App.controller(
   'LeftMenuCloneProjectModalController',
@@ -21,7 +22,7 @@ export default App.controller(
     }
 
     $scope.openProject = project => {
-      window.location.assign(`/project/${project.project_id}`)
+      assign(`/project/${project.project_id}`)
     }
   }
 )

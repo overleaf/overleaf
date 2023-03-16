@@ -2,18 +2,19 @@ import sinon from 'sinon'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import UploadProjectModal from '../../../../../../frontend/js/features/project-list/components/new-project-button/upload-project-modal'
 import { expect } from 'chai'
+import * as useLocationModule from '../../../../../../frontend/js/shared/hooks/use-location'
 
 describe('<UploadProjectModal />', function () {
   const originalWindowCSRFToken = window.csrfToken
-  const locationStub = sinon.stub()
-  const originalLocation = window.location
   const maxUploadSize = 10 * 1024 * 1024 // 10 MB
 
+  let assignStub: sinon.SinonStub
+
   beforeEach(function () {
-    Object.defineProperty(window, 'location', {
-      value: {
-        assign: locationStub,
-      },
+    assignStub = sinon.stub()
+    this.locationStub = sinon.stub(useLocationModule, 'useLocation').returns({
+      assign: assignStub,
+      reload: sinon.stub(),
     })
     window.metaAttributesCache.set('ol-ExposedSettings', {
       maxUploadSize,
@@ -22,13 +23,9 @@ describe('<UploadProjectModal />', function () {
   })
 
   afterEach(function () {
-    Object.defineProperty(window, 'location', {
-      value: originalLocation,
-    })
+    this.locationStub.restore()
     window.metaAttributesCache = new Map()
     window.csrfToken = originalWindowCSRFToken
-
-    locationStub.reset()
   })
 
   it('uploads a dropped file', async function () {
@@ -66,8 +63,8 @@ describe('<UploadProjectModal />', function () {
     )
 
     await waitFor(() => {
-      sinon.assert.calledOnce(locationStub)
-      sinon.assert.calledWith(locationStub, `/project/${projectId}`)
+      sinon.assert.calledOnce(assignStub)
+      sinon.assert.calledWith(assignStub, `/project/${projectId}`)
     })
 
     xhr.restore()
@@ -146,7 +143,7 @@ describe('<UploadProjectModal />', function () {
     )
 
     await waitFor(() => {
-      sinon.assert.notCalled(locationStub)
+      sinon.assert.notCalled(assignStub)
       screen.getByText('Upload failed')
     })
 

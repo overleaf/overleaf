@@ -4,6 +4,7 @@ import { Project } from '../../../../../../../../types/project/dashboard/api'
 import Icon from '../../../../../../shared/components/icon'
 import Tooltip from '../../../../../../shared/components/tooltip'
 import * as eventTracking from '../../../../../../infrastructure/event-tracking'
+import { useLocation } from '../../../../../../shared/hooks/use-location'
 
 type DownloadProjectButtonProps = {
   project: Project
@@ -16,6 +17,7 @@ function DownloadProjectButton({
 }: DownloadProjectButtonProps) {
   const { t } = useTranslation()
   const text = t('download')
+  const location = useLocation()
 
   const downloadProject = useCallback(() => {
     eventTracking.send(
@@ -23,8 +25,8 @@ function DownloadProjectButton({
       'project action',
       'Download Zip'
     )
-    window.location.assign(`/project/${project.id}/download/zip`)
-  }, [project])
+    location.assign(`/project/${project.id}/download/zip`)
+  }, [project, location])
 
   return children(text, downloadProject)
 }

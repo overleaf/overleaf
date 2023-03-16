@@ -78,6 +78,7 @@ describe('user role and institution', function () {
       hasAffiliationsFeature: true,
     })
     fetchMock.reset()
+    fetchMock.get('/user/emails?ensureAffiliation=true', [])
   })
 
   afterEach(function () {
@@ -120,7 +121,9 @@ describe('user role and institution', function () {
 
   it('fetches institution data and replaces departments dropdown on add/change', async function () {
     const userEmailData = userData1
-    fetchMock.get('/user/emails?ensureAffiliation=true', [userEmailData])
+    fetchMock.get('/user/emails?ensureAffiliation=true', [userEmailData], {
+      overwriteRoutes: true,
+    })
     render(<EmailsSection />)
 
     await fetchMock.flush(true)
@@ -149,7 +152,9 @@ describe('user role and institution', function () {
 
   it('adds new role and department', async function () {
     fetchMock
-      .get('/user/emails?ensureAffiliation=true', [userData1])
+      .get('/user/emails?ensureAffiliation=true', [userData1], {
+        overwriteRoutes: true,
+      })
       .get(/\/institutions\/list/, { departments: [] })
       .post('/user/emails/endorse', 200)
     render(<EmailsSection />)

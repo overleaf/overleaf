@@ -15,6 +15,7 @@ import {
   groupActiveSubscription,
   groupActiveSubscriptionWithPendingLicenseChange,
 } from '../../fixtures/subscriptions'
+import * as useLocationModule from '../../../../../../frontend/js/shared/hooks/use-location'
 
 const userId = 'fff999fff999'
 const memberGroupSubscriptions: MemberGroupSubscription[] = [
@@ -71,13 +72,13 @@ describe('<GroupSubscriptionMemberships />', function () {
   })
 
   describe('opens leave group modal when button is clicked', function () {
-    let reloadStub: () => void
-    const originalLocation = window.location
+    let reloadStub: sinon.SinonStub
 
     beforeEach(function () {
       reloadStub = sinon.stub()
-      Object.defineProperty(window, 'location', {
-        value: { reload: reloadStub },
+      this.locationStub = sinon.stub(useLocationModule, 'useLocation').returns({
+        assign: sinon.stub(),
+        reload: reloadStub,
       })
 
       render(
@@ -99,9 +100,7 @@ describe('<GroupSubscriptionMemberships />', function () {
     })
 
     afterEach(function () {
-      Object.defineProperty(window, 'location', {
-        value: originalLocation,
-      })
+      this.locationStub.restore()
     })
 
     it('close the modal', function () {

@@ -7,6 +7,7 @@ import _ from 'lodash'
 /* global recurly */
 import App from '../base'
 import getMeta from '../utils/meta'
+import { assign } from '../shared/components/location'
 
 export default App.controller(
   'NewSubscriptionController',
@@ -775,14 +776,12 @@ App.controller(
     $scope.browsePlans = () => {
       if (document.referrer?.includes('/user/subscription/choose-your-plan')) {
         // redirect to interstitial page with `itm_referrer` param
-        window.location.assign(
+        assign(
           '/user/subscription/choose-your-plan?itm_referrer=student-status-declined'
         )
       } else {
         // redirect to plans page with `itm_referrer` param
-        window.location.assign(
-          '/user/subscription/plans?itm_referrer=student-status-declined'
-        )
+        assign('/user/subscription/plans?itm_referrer=student-status-declined')
       }
     }
 

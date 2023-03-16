@@ -76,21 +76,20 @@ describe('<EmailsSection />', function () {
     fetchMock.get('/user/emails?ensureAffiliation=true', [])
     render(<EmailsSection />)
 
-    await fetchMock.flush(true)
-
-    screen.getByRole('button', { name: /add another email/i })
+    await screen.findByRole('button', { name: /add another email/i })
   })
 
   it('renders input', async function () {
     fetchMock.get('/user/emails?ensureAffiliation=true', [])
     render(<EmailsSection />)
+    await fetchMock.flush(true)
 
-    const addAnotherEmailBtn = (await screen.findByRole('button', {
+    const button = await screen.findByRole<HTMLButtonElement>('button', {
       name: /add another email/i,
-    })) as HTMLButtonElement
-    fireEvent.click(addAnotherEmailBtn)
+    })
+    fireEvent.click(button)
 
-    screen.getByLabelText(/email/i)
+    await screen.findByLabelText(/email/i)
   })
 
   it('renders "Start adding your address" until a valid email is typed', async function () {
@@ -98,22 +97,21 @@ describe('<EmailsSection />', function () {
     fetchMock.get(`/institutions/domains?hostname=email.com&limit=1`, 200)
     fetchMock.get(`/institutions/domains?hostname=email&limit=1`, 200)
     render(<EmailsSection />)
+    await fetchMock.flush(true)
 
-    const addAnotherEmailBtn = (await screen.findByRole('button', {
+    const button = await screen.findByRole<HTMLButtonElement>('button', {
       name: /add another email/i,
-    })) as HTMLButtonElement
-    fireEvent.click(addAnotherEmailBtn)
+    })
+    fireEvent.click(button)
 
     const input = screen.getByLabelText(/email/i)
 
     // initially the text is displayed and the "add email" button disabled
     screen.getByText('Start by adding your email address.')
     expect(
-      (
-        screen.getByRole('button', {
-          name: /add new email/i,
-        }) as HTMLButtonElement
-      ).disabled
+      screen.getByRole<HTMLButtonElement>('button', {
+        name: /add new email/i,
+      }).disabled
     ).to.be.true
 
     // no changes while writing the email address
@@ -122,11 +120,9 @@ describe('<EmailsSection />', function () {
     })
     screen.getByText('Start by adding your email address.')
     expect(
-      (
-        screen.getByRole('button', {
-          name: /add new email/i,
-        }) as HTMLButtonElement
-      ).disabled
+      screen.getByRole<HTMLButtonElement>('button', {
+        name: /add new email/i,
+      }).disabled
     ).to.be.true
 
     // the text is removed when the complete email address is typed, and the "add button" is reenabled
@@ -135,11 +131,9 @@ describe('<EmailsSection />', function () {
     })
     expect(screen.queryByText('Start by adding your email address.')).to.be.null
     expect(
-      (
-        screen.getByRole('button', {
-          name: /add new email/i,
-        }) as HTMLButtonElement
-      ).disabled
+      screen.getByRole<HTMLButtonElement>('button', {
+        name: /add new email/i,
+      }).disabled
     ).to.be.false
   })
 
@@ -147,10 +141,10 @@ describe('<EmailsSection />', function () {
     fetchMock.get('/user/emails?ensureAffiliation=true', [])
     render(<EmailsSection />)
 
-    const addAnotherEmailBtn = (await screen.findByRole('button', {
+    const button = await screen.findByRole<HTMLButtonElement>('button', {
       name: /add another email/i,
-    })) as HTMLButtonElement
-    fireEvent.click(addAnotherEmailBtn)
+    })
+    fireEvent.click(button)
 
     screen.getByRole('button', { name: /add new email/i })
   })
@@ -159,15 +153,16 @@ describe('<EmailsSection />', function () {
     fetchMock.get('/user/emails?ensureAffiliation=true', [])
     render(<EmailsSection />)
 
+    const addAnotherEmailBtn = await screen.findByRole<HTMLButtonElement>(
+      'button',
+      { name: /add another email/i }
+    )
+
     await fetchMock.flush(true)
     resetFetchMock()
     fetchMock
       .get('/user/emails?ensureAffiliation=true', [userEmailData])
       .post('/user/emails', 200)
-
-    const addAnotherEmailBtn = await screen.findByRole('button', {
-      name: /add another email/i,
-    })
 
     fireEvent.click(addAnotherEmailBtn)
     const input = screen.getByLabelText(/email/i)
@@ -176,9 +171,9 @@ describe('<EmailsSection />', function () {
       target: { value: userEmailData.email },
     })
 
-    const submitBtn = screen.getByRole('button', {
+    const submitBtn = screen.getByRole<HTMLButtonElement>('button', {
       name: /add new email/i,
-    }) as HTMLButtonElement
+    })
 
     expect(submitBtn.disabled).to.be.false
 
@@ -199,15 +194,16 @@ describe('<EmailsSection />', function () {
     fetchMock.get('/user/emails?ensureAffiliation=true', [])
     render(<EmailsSection />)
 
+    const addAnotherEmailBtn = await screen.findByRole<HTMLButtonElement>(
+      'button',
+      { name: /add another email/i }
+    )
+
     await fetchMock.flush(true)
     resetFetchMock()
     fetchMock
       .get('/user/emails?ensureAffiliation=true', [])
       .post('/user/emails', 400)
-
-    const addAnotherEmailBtn = screen.getByRole('button', {
-      name: /add another email/i,
-    })
 
     fireEvent.click(addAnotherEmailBtn)
     const input = screen.getByLabelText(/email/i)
@@ -216,9 +212,9 @@ describe('<EmailsSection />', function () {
       target: { value: userEmailData.email },
     })
 
-    const submitBtn = screen.getByRole('button', {
+    const submitBtn = screen.getByRole<HTMLButtonElement>('button', {
       name: /add new email/i,
-    }) as HTMLButtonElement
+    })
 
     expect(submitBtn.disabled).to.be.false
 
@@ -237,15 +233,15 @@ describe('<EmailsSection />', function () {
     fetchMock.get('/user/emails?ensureAffiliation=true', [])
     render(<EmailsSection />)
 
+    const button = await screen.findByRole<HTMLButtonElement>('button', {
+      name: /add another email/i,
+    })
+
     await fetchMock.flush(true)
     fetchMock.reset()
     fetchMock.get('express:/institutions/domains', institutionDomainData)
 
-    await userEvent.click(
-      screen.getByRole('button', {
-        name: /add another email/i,
-      })
-    )
+    await userEvent.click(button)
 
     const input = screen.getByLabelText(/email/i)
     fireEvent.change(input, {
@@ -261,26 +257,26 @@ describe('<EmailsSection />', function () {
     fetchMock.get('/user/emails?ensureAffiliation=true', [])
     render(<EmailsSection />)
 
+    const button = await screen.findByRole<HTMLButtonElement>('button', {
+      name: /add another email/i,
+    })
+
     await fetchMock.flush(true)
     resetFetchMock()
 
-    await userEvent.click(
-      screen.getByRole('button', {
-        name: /add another email/i,
-      })
-    )
+    await userEvent.click(button)
 
     await userEvent.type(screen.getByLabelText(/email/i), userEmailData.email)
 
     await userEvent.click(screen.getByRole('button', { name: /let us know/i }))
 
-    const universityInput = screen.getByRole('textbox', {
+    const universityInput = screen.getByRole<HTMLInputElement>('textbox', {
       name: /university/i,
-    }) as HTMLInputElement
+    })
 
     expect(universityInput.disabled).to.be.true
 
-    fetchMock.get(/\/institutions\/list/, [
+    fetchMock.get('/institutions/list?country_code=de', [
       {
         id: userEmailData.affiliation.institution.id,
         name: userEmailData.affiliation.institution.name,
@@ -306,7 +302,7 @@ describe('<EmailsSection />', function () {
     // Select the university from dropdown
     await userEvent.click(universityInput)
     await userEvent.click(
-      screen.getByText(userEmailData.affiliation.institution.name)
+      await screen.findByText(userEmailData.affiliation.institution.name)
     )
 
     const roleInput = screen.getByRole('textbox', { name: /role/i })
@@ -354,10 +350,14 @@ describe('<EmailsSection />', function () {
     fetchMock.get('/user/emails?ensureAffiliation=true', [])
     render(<EmailsSection />)
 
+    const button = await screen.findByRole<HTMLButtonElement>('button', {
+      name: /add another email/i,
+    })
+
     await fetchMock.flush(true)
     resetFetchMock()
 
-    fetchMock.get(/\/institutions\/list/, [
+    fetchMock.get('/institutions/list?country_code=de', [
       {
         id: 1,
         name: 'University of Bonn',
@@ -369,34 +369,30 @@ describe('<EmailsSection />', function () {
     ])
 
     // open "add new email" section and click "let us know" to open the Country/University form
-    await userEvent.click(
-      screen.getByRole('button', {
-        name: /add another email/i,
-      })
-    )
+    await userEvent.click(button)
     await userEvent.type(screen.getByLabelText(/email/i), userEmailData.email)
     await userEvent.click(screen.getByRole('button', { name: /let us know/i }))
 
     // select a country
-    const countryInput = screen.getByRole('textbox', {
+    const countryInput = screen.getByRole<HTMLInputElement>('textbox', {
       name: /country/i,
-    }) as HTMLInputElement
+    })
     await userEvent.click(countryInput)
     await userEvent.type(countryInput, 'Germ')
     await userEvent.click(await screen.findByText('Germany'))
 
     // match several universities on initial typing
-    const universityInput = screen.getByRole('textbox', {
+    const universityInput = screen.getByRole<HTMLInputElement>('textbox', {
       name: /university/i,
-    }) as HTMLInputElement
+    })
     await userEvent.click(universityInput)
     await userEvent.type(universityInput, 'bo')
-    screen.getByText('University of Bonn')
-    screen.getByText('Bochum institute of Science')
+    await screen.findByText('University of Bonn')
+    await screen.findByText('Bochum institute of Science')
 
     // match a single university when typing to refine the search
     await userEvent.type(universityInput, 'nn')
-    screen.getByText('University of Bonn')
+    await screen.findByText('University of Bonn')
     expect(screen.queryByText('Bochum institute of Science')).to.be.null
   })
 
@@ -407,22 +403,22 @@ describe('<EmailsSection />', function () {
     fetchMock.get('/user/emails?ensureAffiliation=true', [])
     render(<EmailsSection />)
 
+    const button = await screen.findByRole<HTMLButtonElement>('button', {
+      name: /add another email/i,
+    })
+
     await fetchMock.flush(true)
     resetFetchMock()
 
-    await userEvent.click(
-      screen.getByRole('button', {
-        name: /add another email/i,
-      })
-    )
+    await userEvent.click(button)
 
     await userEvent.type(screen.getByLabelText(/email/i), userEmailData.email)
 
     await userEvent.click(screen.getByRole('button', { name: /let us know/i }))
 
-    const universityInput = screen.getByRole('textbox', {
+    const universityInput = screen.getByRole<HTMLInputElement>('textbox', {
       name: /university/i,
-    }) as HTMLInputElement
+    })
 
     expect(universityInput.disabled).to.be.true
 
@@ -510,6 +506,10 @@ describe('<EmailsSection />', function () {
     fetchMock.get('/user/emails?ensureAffiliation=true', [])
     render(<EmailsSection />)
 
+    const button = await screen.findByRole<HTMLButtonElement>('button', {
+      name: /add another email/i,
+    })
+
     await fetchMock.flush(true)
     fetchMock.reset()
     fetchMock.get(
@@ -517,11 +517,7 @@ describe('<EmailsSection />', function () {
       institutionDomainDataCopy
     )
 
-    await userEvent.click(
-      screen.getByRole('button', {
-        name: /add another email/i,
-      })
-    )
+    await userEvent.click(button)
 
     await userEvent.type(
       screen.getByLabelText(/email/i),
@@ -583,6 +579,10 @@ describe('<EmailsSection />', function () {
     fetchMock.get('/user/emails?ensureAffiliation=true', [])
     render(<EmailsSection />)
 
+    const button = await screen.findByRole<HTMLButtonElement>('button', {
+      name: /add another email/i,
+    })
+
     await fetchMock.flush(true)
     fetchMock.reset()
     fetchMock.get(
@@ -590,11 +590,7 @@ describe('<EmailsSection />', function () {
       institutionDomainDataCopy
     )
 
-    await userEvent.click(
-      screen.getByRole('button', {
-        name: /add another email/i,
-      })
-    )
+    await userEvent.click(button)
 
     await userEvent.type(
       screen.getByLabelText(/email/i),

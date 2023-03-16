@@ -5,6 +5,7 @@ import { UserEmailsProvider } from '../../../../../frontend/js/features/settings
 import { LeaversSurveyAlert } from '../../../../../frontend/js/features/settings/components/leavers-survey-alert'
 import * as eventTracking from '../../../../../frontend/js/infrastructure/event-tracking'
 import localStorage from '../../../../../frontend/js/infrastructure/local-storage'
+import fetchMock from 'fetch-mock'
 
 function renderWithProvider() {
   render(<LeaversSurveyAlert />, {
@@ -15,6 +16,14 @@ function renderWithProvider() {
 }
 
 describe('<LeaversSurveyAlert/>', function () {
+  beforeEach(function () {
+    fetchMock.get('/user/emails?ensureAffiliation=true', [])
+  })
+
+  afterEach(function () {
+    fetchMock.reset()
+  })
+
   it('should render before the expiration date', function () {
     const tomorrow = Date.now() + 1000 * 60 * 60 * 24
     localStorage.setItem('showInstitutionalLeaversSurveyUntil', tomorrow)

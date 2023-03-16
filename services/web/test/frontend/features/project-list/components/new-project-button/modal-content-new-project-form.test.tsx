@@ -3,23 +3,21 @@ import { expect } from 'chai'
 import fetchMock from 'fetch-mock'
 import sinon from 'sinon'
 import ModalContentNewProjectForm from '../../../../../../frontend/js/features/project-list/components/new-project-button/modal-content-new-project-form'
+import * as useLocationModule from '../../../../../../frontend/js/shared/hooks/use-location'
 
 describe('<ModalContentNewProjectForm />', function () {
-  const locationStub = sinon.stub()
-  const originalLocation = window.location
+  let assignStub: sinon.SinonStub
 
   beforeEach(function () {
-    Object.defineProperty(window, 'location', {
-      value: {
-        assign: locationStub,
-      },
+    assignStub = sinon.stub()
+    this.locationStub = sinon.stub(useLocationModule, 'useLocation').returns({
+      assign: assignStub,
+      reload: sinon.stub(),
     })
   })
 
   afterEach(function () {
-    Object.defineProperty(window, 'location', {
-      value: originalLocation,
-    })
+    this.locationStub.restore()
     fetchMock.reset()
   })
 
@@ -52,8 +50,8 @@ describe('<ModalContentNewProjectForm />', function () {
     expect(newProjectMock.called()).to.be.true
 
     await waitFor(() => {
-      sinon.assert.calledOnce(locationStub)
-      sinon.assert.calledWith(locationStub, `/project/${projectId}`)
+      sinon.assert.calledOnce(assignStub)
+      sinon.assert.calledWith(assignStub, `/project/${projectId}`)
     })
   })
 
@@ -131,7 +129,7 @@ describe('<ModalContentNewProjectForm />', function () {
       Feugiat in fermentum posuere urna nec. Elementum eu facilisis sed odio morbi quis commodo. Vel fringilla est ullamcorper eget nulla facilisi. Nunc sed blandit libero volutpat sed cras ornare arcu dui. Tortor id aliquet lectus proin nibh nisl condimentum id venenatis. Sapien pellentesque habitant morbi tristique senectus et. Quam elementum pulvinar etiam non quam lacus suspendisse faucibus. Sem nulla pharetra diam sit amet nisl suscipit adipiscing bibendum. Porttitor leo a diam sollicitudin tempor id. In iaculis nunc sed augue.
       Velit euismod in pellentesque massa placerat duis ultricies lacus sed. Dictum fusce ut placerat orci nulla pellentesque dignissim enim. Dui id ornare arcu odio. Dignissim cras tincidunt lobortis feugiat vivamus at augue. Non tellus orci ac auctor. Egestas fringilla phasellus faucibus scelerisque eleifend donec. Nisi vitae suscipit tellus mauris a diam maecenas. Orci dapibus ultrices in iaculis nunc sed. Facilisi morbi tempus iaculis urna id volutpat lacus laoreet non. Aliquam etiam erat velit scelerisque in dictum. Sed enim ut sem viverra. Eleifend donec pretium vulputate sapien nec sagittis. Quisque egestas diam in arcu cursus euismod quis. Faucibus a pellentesque sit amet porttitor eget dolor. Elementum facilisis leo vel fringilla. Pellentesque habitant morbi tristique senectus et netus. Viverra tellus in hac habitasse platea dictumst vestibulum. Tincidunt nunc pulvinar sapien et ligula ullamcorper malesuada proin. Sit amet porttitor eget dolor morbi non. Neque egestas congue quisque egestas.
       Convallis posuere morbi leo urna molestie at. Posuere sollicitudin aliquam ultrices sagittis orci. Lacus vestibulum sed arcu non odio. Sit amet dictum sit amet. Nunc scelerisque viverra mauris in aliquam sem fringilla ut morbi. Vestibulum morbi blandit cursus risus at ultrices mi. Purus gravida quis blandit turpis cursus. Diam maecenas sed enim ut. Senectus et netus et malesuada fames ac turpis. Massa tempor nec feugiat nisl pretium fusce id velit. Mollis nunc sed id semper. Elit sed vulputate mi sit. Vitae et leo duis ut diam. Pellentesque sit amet porttitor eget dolor morbi non arcu risus.
-      Mi quis hendrerit dolor magna eget est lorem. Quam vulputate dignissim suspendisse in est ante in nibh. Nisi porta lorem mollis aliquam. Duis tristique sollicitudin nibh sit amet commodo nulla facilisi nullam. Euismod nisi porta lorem mollis aliquam ut porttitor leo a. Tempus imperdiet nulla malesuada pellentesque elit eget. Amet nisl purus in mollis nunc sed id. Id velit ut tortor pretium viverra suspendisse. Integer quis auctor elit sed. Tortor at risus viverra adipiscing. Ac auctor augue mauris augue neque gravida in. Lacus laoreet non curabitur gravida arcu ac tortor dignissim convallis. A diam sollicitudin tempor id eu nisl nunc mi. Tellus id interdum velit laoreet id donec. Lacus vestibulum sed arcu non odio euismod lacinia. Tellus at urna condimentum mattis.      
+      Mi quis hendrerit dolor magna eget est lorem. Quam vulputate dignissim suspendisse in est ante in nibh. Nisi porta lorem mollis aliquam. Duis tristique sollicitudin nibh sit amet commodo nulla facilisi nullam. Euismod nisi porta lorem mollis aliquam ut porttitor leo a. Tempus imperdiet nulla malesuada pellentesque elit eget. Amet nisl purus in mollis nunc sed id. Id velit ut tortor pretium viverra suspendisse. Integer quis auctor elit sed. Tortor at risus viverra adipiscing. Ac auctor augue mauris augue neque gravida in. Lacus laoreet non curabitur gravida arcu ac tortor dignissim convallis. A diam sollicitudin tempor id eu nisl nunc mi. Tellus id interdum velit laoreet id donec. Lacus vestibulum sed arcu non odio euismod lacinia. Tellus at urna condimentum mattis.
       `,
       },
     })

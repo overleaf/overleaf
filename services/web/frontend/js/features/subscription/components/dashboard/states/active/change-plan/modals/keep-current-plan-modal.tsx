@@ -6,12 +6,14 @@ import { postJSON } from '../../../../../../../../infrastructure/fetch-json'
 import AccessibleModal from '../../../../../../../../shared/components/accessible-modal'
 import { useSubscriptionDashboardContext } from '../../../../../../context/subscription-dashboard-context'
 import { cancelPendingSubscriptionChangeUrl } from '../../../../../../data/subscription-url'
+import { useLocation } from '../../../../../../../../shared/hooks/use-location'
 
 export function KeepCurrentPlanModal() {
   const modalId: SubscriptionDashModalIds = 'keep-current-plan'
   const [error, setError] = useState(false)
   const [inflight, setInflight] = useState(false)
   const { t } = useTranslation()
+  const location = useLocation()
   const { modalIdShown, handleCloseModal, personalSubscription } =
     useSubscriptionDashboardContext()
 
@@ -21,7 +23,7 @@ export function KeepCurrentPlanModal() {
 
     try {
       await postJSON(cancelPendingSubscriptionChangeUrl)
-      window.location.reload()
+      location.reload()
     } catch (e) {
       setError(true)
       setInflight(false)

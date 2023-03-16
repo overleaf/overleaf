@@ -125,6 +125,7 @@ describe('UserActivateRegister', function () {
       const body = JSON.parse(req.body)
       if (body.email === 'abc@gmail.com') return endPointResponse1
       else if (body.email === 'def@gmail.com') return endPointResponse2
+      else return 500
     })
     const registerInput = screen.getByLabelText('emails to register')
     const registerButton = screen.getByRole('button', { name: /register/i })

@@ -20,25 +20,25 @@ import {
   subscriptionUpdateUrl,
 } from '../../../../../../../../../frontend/js/features/subscription/data/subscription-url'
 import { renderActiveSubscription } from '../../../../../helpers/render-active-subscription'
+import * as useLocationModule from '../../../../../../../../../frontend/js/shared/hooks/use-location'
 
 describe('<ChangePlanModal />', function () {
-  let reloadStub: () => void
-  const originalLocation = window.location
   const plansMetaTag = { name: 'ol-plans', value: plans }
+
+  let reloadStub: sinon.SinonStub
 
   beforeEach(function () {
     reloadStub = sinon.stub()
-    Object.defineProperty(window, 'location', {
-      value: { reload: reloadStub },
+    this.locationStub = sinon.stub(useLocationModule, 'useLocation').returns({
+      assign: sinon.stub(),
+      reload: reloadStub,
     })
   })
 
   afterEach(function () {
     cleanUpContext()
     fetchMock.reset()
-    Object.defineProperty(window, 'location', {
-      value: originalLocation,
-    })
+    this.locationStub.restore()
   })
 
   it('renders the individual plans table and group plans UI', async function () {

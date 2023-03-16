@@ -33,6 +33,11 @@ describe('<EmailsRow/>', function () {
       samlInitPath: '/saml',
       hasSamlBeta: true,
     })
+    fetchMock.get('/user/emails?ensureAffiliation=true', [])
+  })
+
+  afterEach(function () {
+    fetchMock.reset()
   })
 
   describe('with unaffiliated email data', function () {

@@ -8,6 +8,7 @@ import { postJSON } from '../../../../../../infrastructure/fetch-json'
 import { UserEmailData } from '../../../../../../../../types/user-email'
 import { ExposedSettings } from '../../../../../../../../types/exposed-settings'
 import { Institution } from '../../../../../../../../types/institution'
+import { useLocation } from '../../../../../../shared/hooks/use-location'
 
 type ReconfirmAffiliationProps = {
   email: UserEmailData['email']
@@ -24,6 +25,7 @@ function ReconfirmAffiliation({
   const [hasSent, setHasSent] = useState(false)
   const [isPending, setIsPending] = useState(false)
   const ssoEnabled = institution.ssoEnabled
+  const location = useLocation()
 
   useEffect(() => {
     if (isSuccess) {
@@ -34,7 +36,7 @@ function ReconfirmAffiliation({
   const handleRequestReconfirmation = () => {
     if (ssoEnabled) {
       setIsPending(true)
-      window.location.assign(
+      location.assign(
         `${samlInitPath}?university_id=${institution.id}&reconfirm=/project`
       )
     } else {

@@ -3,6 +3,7 @@ import sinon from 'sinon'
 import { fireEvent, render, screen, within } from '@testing-library/react'
 import * as eventTracking from '../../../../../../frontend/js/infrastructure/event-tracking'
 import PremiumFeaturesLink from '../../../../../../frontend/js/features/subscription/components/dashboard/premium-features-link'
+import * as useLocationModule from '../../../../../../frontend/js/shared/hooks/use-location'
 
 describe('<PremiumFeaturesLink />', function () {
   const originalLocation = window.location
@@ -17,14 +18,16 @@ describe('<PremiumFeaturesLink />', function () {
   beforeEach(function () {
     window.metaAttributesCache = new Map()
     sendMBSpy = sinon.spy(eventTracking, 'sendMB')
+    this.locationStub = sinon.stub(useLocationModule, 'useLocation').returns({
+      assign: sinon.stub(),
+      reload: sinon.stub(),
+    })
   })
 
   afterEach(function () {
     window.metaAttributesCache = new Map()
     sendMBSpy.restore()
-    Object.defineProperty(window, 'location', {
-      value: originalLocation,
-    })
+    this.locationStub.restore()
   })
 
   for (const variant of variants) {

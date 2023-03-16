@@ -4,6 +4,7 @@ import { useTranslation, Trans } from 'react-i18next'
 import { postJSON, FetchError } from '../../../../infrastructure/fetch-json'
 import getMeta from '../../../../utils/meta'
 import LeaveModalFormError from './modal-form-error'
+import { useLocation } from '../../../../shared/hooks/use-location'
 
 export type LeaveModalFormProps = {
   setInFlight: Dispatch<SetStateAction<boolean>>
@@ -18,6 +19,7 @@ function LeaveModalForm({
 }: LeaveModalFormProps) {
   const { t } = useTranslation()
   const userDefaultEmail = getMeta('ol-usersEmail') as string
+  const location = useLocation()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -53,7 +55,7 @@ function LeaveModalForm({
       },
     })
       .then(() => {
-        window.location.assign('/login')
+        location.assign('/login')
       })
       .catch(setError)
       .finally(() => {

@@ -4,18 +4,22 @@ import sinon from 'sinon'
 import { expect } from 'chai'
 import ActionsCopyProject from '../../../../../frontend/js/features/editor-left-menu/components/actions-copy-project'
 import { renderWithEditorContext } from '../../../helpers/render-with-context'
-import * as locationModule from '../../../../../frontend/js/shared/components/location'
 import { waitFor } from '@testing-library/react'
+import * as useLocationModule from '../../../../../frontend/js/shared/hooks/use-location'
 
 describe('<ActionsCopyProject />', function () {
   let assignStub
 
   beforeEach(function () {
-    assignStub = sinon.stub(locationModule, 'assign')
+    assignStub = sinon.stub()
+    this.locationStub = sinon.stub(useLocationModule, 'useLocation').returns({
+      assign: assignStub,
+      reload: sinon.stub(),
+    })
   })
 
   afterEach(function () {
-    assignStub.restore()
+    this.locationStub.restore()
     fetchMock.reset()
   })
 

@@ -11,6 +11,7 @@ import {
   archivedProjects,
   makeLongProjectList,
 } from '../fixtures/projects-data'
+import * as useLocationModule from '../../../../../frontend/js/shared/hooks/use-location'
 
 const {
   fullList,
@@ -24,9 +25,8 @@ const {
 const userId = owner.id
 
 describe('<ProjectListRoot />', function () {
-  const originalLocation = window.location
-  const locationStub = sinon.stub()
   let sendSpy: sinon.SinonSpy
+  let assignStub: sinon.SinonStub
 
   beforeEach(async function () {
     global.localStorage.clear()
@@ -48,9 +48,10 @@ describe('<ProjectListRoot />', function () {
       { email: 'test@overleaf.com', default: true },
     ])
     window.user_id = userId
-
-    Object.defineProperty(window, 'location', {
-      value: { assign: locationStub },
+    assignStub = sinon.stub()
+    this.locationStub = sinon.stub(useLocationModule, 'useLocation').returns({
+      assign: assignStub,
+      reload: sinon.stub(),
     })
   })
 
@@ -58,9 +59,7 @@ describe('<ProjectListRoot />', function () {
     sendSpy.restore()
     window.user_id = undefined
     fetchMock.reset()
-    Object.defineProperty(window, 'location', {
-      value: originalLocation,
-    })
+    this.locationStub.restore()
   })
 
   describe('welcome page', function () {
@@ -117,11 +116,11 @@ describe('<ProjectListRoot />', function () {
           fireEvent.click(downloadButton)
 
           await waitFor(() => {
-            expect(locationStub).to.have.been.called
+            expect(assignStub).to.have.been.called
           })
 
           sinon.assert.calledWithMatch(
-            locationStub,
+            assignStub,
             `/project/download/zip?project_ids=${project1Id},${project2Id}`
           )
 

@@ -14,6 +14,7 @@ import ActionButtonText from '../../../action-button-text'
 import GenericErrorAlert from '../../../generic-error-alert'
 import DowngradePlanButton from './downgrade-plan-button'
 import ExtendTrialButton from './extend-trial-button'
+import { useLocation } from '../../../../../../../shared/hooks/use-location'
 
 const planCodeToDowngradeTo = 'paid-personal'
 
@@ -140,6 +141,7 @@ function NotCancelOption({
 
 export function CancelSubscription() {
   const { t } = useTranslation()
+  const location = useLocation()
   const { personalSubscription, plans } = useSubscriptionDashboardContext()
   const {
     isLoading: isLoadingCancel,
@@ -176,7 +178,7 @@ export function CancelSubscription() {
   async function handleCancelSubscription() {
     try {
       await runAsyncCancel(postJSON(cancelSubscriptionUrl))
-      window.location.assign(redirectAfterCancelSubscriptionUrl)
+      location.assign(redirectAfterCancelSubscriptionUrl)
     } catch (e) {
       console.error(e)
     }

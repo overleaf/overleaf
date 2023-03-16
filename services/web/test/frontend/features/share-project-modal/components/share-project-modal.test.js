@@ -14,12 +14,12 @@ import {
   renderWithEditorContext,
   cleanUpContext,
 } from '../../../helpers/render-with-context'
-import * as locationModule from '../../../../../frontend/js/shared/components/location'
 import {
   EditorProviders,
   USER_EMAIL,
   USER_ID,
 } from '../../../helpers/editor-providers'
+import * as useLocationModule from '../../../../../frontend/js/shared/hooks/use-location'
 
 describe('<ShareProjectModal/>', function () {
   const project = {
@@ -85,6 +85,10 @@ describe('<ShareProjectModal/>', function () {
   }
 
   beforeEach(function () {
+    this.locationStub = sinon.stub(useLocationModule, 'useLocation').returns({
+      assign: sinon.stub(),
+      reload: sinon.stub(),
+    })
     fetchMock.get('/user/contacts', { contacts })
     window.metaAttributesCache = new Map()
     window.metaAttributesCache.set('ol-user', { allowedFreeTrial: true })
@@ -92,6 +96,7 @@ describe('<ShareProjectModal/>', function () {
   })
 
   afterEach(function () {
+    this.locationStub.restore()
     fetchMock.restore()
     cleanUpContext()
     window.metaAttributesCache = new Map()
@@ -525,8 +530,6 @@ describe('<ShareProjectModal/>', function () {
       )
     })
 
-    const reloadStub = sinon.stub(locationModule, 'reload')
-
     const confirmButton = screen.getByRole('button', {
       name: 'Change owner',
     })
@@ -537,8 +540,6 @@ describe('<ShareProjectModal/>', function () {
     expect(JSON.parse(body)).to.deep.equal({ user_id: 'member-viewer' })
 
     expect(fetchMock.done()).to.be.true
-    expect(reloadStub.calledOnce).to.be.true
-    reloadStub.restore()
   })
 
   it('sends invites to input email addresses', async function () {

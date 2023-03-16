@@ -11,6 +11,7 @@ import { useSubscriptionDashboardContext } from '../../../../../../context/subsc
 import GenericErrorAlert from '../../../../generic-error-alert'
 import { subscriptionUpdateUrl } from '../../../../../../data/subscription-url'
 import { getRecurlyGroupPlanCode } from '../../../../../../util/recurly-group-plan-code'
+import { useLocation } from '../../../../../../../../shared/hooks/use-location'
 
 const educationalPercentDiscount = 40
 const groupSizeForEducationalDiscount = 10
@@ -143,6 +144,7 @@ export function ChangeToGroupModal() {
   const personalSubscription: Subscription = getMeta('ol-subscription')
   const [error, setError] = useState(false)
   const [inflight, setInflight] = useState(false)
+  const location = useLocation()
 
   async function upgrade() {
     setError(false)
@@ -158,7 +160,7 @@ export function ChangeToGroupModal() {
           ),
         },
       })
-      window.location.reload()
+      location.reload()
     } catch (e) {
       setError(true)
       setInflight(false)

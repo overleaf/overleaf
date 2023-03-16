@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { putJSON } from '../../../../../../../infrastructure/fetch-json'
 import { extendTrialUrl } from '../../../../../data/subscription-url'
 import ActionButtonText from '../../../action-button-text'
+import { useLocation } from '../../../../../../../shared/hooks/use-location'
 
 export default function ExtendTrialButton({
   isButtonDisabled,
@@ -16,11 +17,12 @@ export default function ExtendTrialButton({
 }) {
   const { t } = useTranslation()
   const buttonText = t('ill_take_it')
+  const location = useLocation()
 
   async function handleExtendTrial() {
     try {
       await runAsyncSecondaryAction(putJSON(extendTrialUrl))
-      window.location.reload()
+      location.reload()
     } catch (e) {
       console.error(e)
     }

@@ -29,6 +29,7 @@ import { DeepPartial } from '../../../../../types/utils'
 import { Project } from '../../../../../types/project/dashboard/api'
 import GroupsAndEnterpriseBanner from '../../../../../frontend/js/features/project-list/components/notifications/groups-and-enterprise-banner'
 import localStorage from '../../../../../frontend/js/infrastructure/local-storage'
+import * as useLocationModule from '../../../../../frontend/js/shared/hooks/use-location'
 
 const renderWithinProjectListProvider = (Component: React.ComponentType) => {
   render(<Component />, {
@@ -548,22 +549,22 @@ describe('<UserNotifications />', function () {
   })
 
   describe('<Affiliation/>', function () {
-    const locationStub = sinon.stub()
-    const originalLocation = window.location
+    let assignStub: sinon.SinonStub
+
     beforeEach(function () {
       window.metaAttributesCache = window.metaAttributesCache || new Map()
       window.metaAttributesCache.set('ol-ExposedSettings', exposedSettings)
-      Object.defineProperty(window, 'location', {
-        value: { assign: locationStub },
+      assignStub = sinon.stub()
+      this.locationStub = sinon.stub(useLocationModule, 'useLocation').returns({
+        assign: assignStub,
+        reload: sinon.stub(),
       })
       fetchMock.reset()
     })
 
     afterEach(function () {
       window.metaAttributesCache = new Map()
-      Object.defineProperty(window, 'location', {
-        value: originalLocation,
-      })
+      this.locationStub.restore()
       fetchMock.reset()
     })
 
@@ -619,9 +620,9 @@ describe('<UserNotifications />', function () {
       fireEvent.click(
         screen.getByRole('button', { name: /confirm affiliation/i })
       )
-      sinon.assert.calledOnce(locationStub)
+      sinon.assert.calledOnce(assignStub)
       sinon.assert.calledWithMatch(
-        locationStub,
+        assignStub,
         `${exposedSettings.samlInitPath}?university_id=${professionalUserData.affiliation.institution.id}&reconfirm=/project`
       )
     })

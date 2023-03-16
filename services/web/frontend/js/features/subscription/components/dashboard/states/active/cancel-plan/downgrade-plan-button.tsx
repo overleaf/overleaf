@@ -3,6 +3,7 @@ import { Plan } from '../../../../../../../../../types/subscription/plan'
 import { postJSON } from '../../../../../../../infrastructure/fetch-json'
 import { subscriptionUpdateUrl } from '../../../../../data/subscription-url'
 import ActionButtonText from '../../../action-button-text'
+import { useLocation } from '../../../../../../../shared/hooks/use-location'
 
 export default function DowngradePlanButton({
   isButtonDisabled,
@@ -18,6 +19,7 @@ export default function DowngradePlanButton({
   runAsyncSecondaryAction: (promise: Promise<unknown>) => Promise<unknown>
 }) {
   const { t } = useTranslation()
+  const location = useLocation()
   const buttonText = t('yes_move_me_to_personal_plan')
 
   async function handleDowngradePlan() {
@@ -27,7 +29,7 @@ export default function DowngradePlanButton({
           body: { plan_code: planToDowngradeTo.planCode },
         })
       )
-      window.location.reload()
+      location.reload()
     } catch (e) {
       console.error(e)
     }

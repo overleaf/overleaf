@@ -4,6 +4,7 @@ import { Trans, useTranslation } from 'react-i18next'
 import { DomainInfo } from './input'
 import { ExposedSettings } from '../../../../../../../types/exposed-settings'
 import getMeta from '../../../../../utils/meta'
+import { useLocation } from '../../../../../shared/hooks/use-location'
 
 type SSOLinkingInfoProps = {
   domainInfo: DomainInfo
@@ -13,13 +14,16 @@ type SSOLinkingInfoProps = {
 function SsoLinkingInfo({ domainInfo, email }: SSOLinkingInfoProps) {
   const { samlInitPath } = getMeta('ol-ExposedSettings') as ExposedSettings
   const { t } = useTranslation()
+  const location = useLocation()
 
   const [linkAccountsButtonDisabled, setLinkAccountsButtonDisabled] =
     useState(false)
 
   function handleLinkAccountsButtonClick() {
     setLinkAccountsButtonDisabled(true)
-    window.location.href = `${samlInitPath}?university_id=${domainInfo.university.id}&auto=/user/settings&email=${email}`
+    location.assign(
+      `${samlInitPath}?university_id=${domainInfo.university.id}&auto=/user/settings&email=${email}`
+    )
   }
 
   return (

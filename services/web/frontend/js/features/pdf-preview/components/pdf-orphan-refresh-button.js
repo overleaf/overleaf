@@ -1,14 +1,16 @@
 import { Button } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
-import { memo } from 'react'
+import { memo, useCallback } from 'react'
 import { buildUrlWithDetachRole } from '../../../shared/utils/url-helper'
-
-const redirect = function () {
-  window.location = buildUrlWithDetachRole(null).toString()
-}
+import { useLocation } from '../../../shared/hooks/use-location'
 
 function PdfOrphanRefreshButton() {
   const { t } = useTranslation()
+  const location = useLocation()
+
+  const redirect = useCallback(() => {
+    location.assign(buildUrlWithDetachRole(null).toString())
+  }, [location])
 
   return (
     <Button

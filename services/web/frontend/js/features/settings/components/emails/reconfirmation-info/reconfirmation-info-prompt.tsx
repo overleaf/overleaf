@@ -9,6 +9,7 @@ import getMeta from '../../../../../utils/meta'
 import { ExposedSettings } from '../../../../../../../types/exposed-settings'
 import { ssoAvailableForInstitution } from '../../../utils/sso'
 import Icon from '../../../../../shared/components/icon'
+import { useLocation } from '../../../../../shared/hooks/use-location'
 
 type ReconfirmationInfoPromptProps = {
   email: string
@@ -29,6 +30,7 @@ function ReconfirmationInfoPrompt({
   const [isPending, setIsPending] = useState(false)
   const [hasSent, setHasSent] = useState(false)
   const ssoAvailable = Boolean(ssoAvailableForInstitution(institution))
+  const location = useLocation()
 
   useEffect(() => {
     setUserEmailsContextLoading(isLoading)
@@ -43,7 +45,7 @@ function ReconfirmationInfoPrompt({
   const handleRequestReconfirmation = () => {
     if (ssoAvailable) {
       setIsPending(true)
-      window.location.assign(
+      location.assign(
         `${samlInitPath}?university_id=${institution.id}&reconfirm=/user/settings`
       )
     } else {

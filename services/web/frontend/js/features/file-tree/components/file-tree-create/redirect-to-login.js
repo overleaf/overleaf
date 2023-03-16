@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { Trans } from 'react-i18next'
 import { useProjectContext } from '../../../../shared/context/project-context'
+import { useLocation } from '../../../../shared/hooks/use-location'
 
 // handle "not-logged-in" errors by redirecting to the login page
 export default function RedirectToLogin() {
   const { _id: projectId } = useProjectContext(projectContextPropTypes)
-
   const [secondsToRedirect, setSecondsToRedirect] = useState(10)
+  const location = useLocation()
 
   useEffect(() => {
     setSecondsToRedirect(10)
@@ -16,7 +17,7 @@ export default function RedirectToLogin() {
       setSecondsToRedirect(value => {
         if (value === 0) {
           window.clearInterval(timer)
-          window.location.assign(`/login?redir=/project/${projectId}`)
+          location.assign(`/login?redir=/project/${projectId}`)
           return 0
         }
 
@@ -27,7 +28,7 @@ export default function RedirectToLogin() {
     return () => {
       window.clearInterval(timer)
     }
-  }, [projectId])
+  }, [projectId, location])
 
   return (
     <Trans

@@ -34,7 +34,7 @@ type SSOProviderProps = {
 }
 
 export function SSOProvider({ children }: SSOProviderProps) {
-  const isMountedRef = useIsMounted()
+  const isMounted = useIsMounted()
   const oauthProviders = getMeta('ol-oauthProviders', {}) as OAuthProviders
   const thirdPartyIds = getMeta('ol-thirdPartyIds') as ThirdPartyIds
 
@@ -66,14 +66,14 @@ export function SSOProvider({ children }: SSOProviderProps) {
       }
 
       return postJSON('/user/oauth-unlink', { body, signal }).then(() => {
-        if (isMountedRef.current) {
+        if (isMounted.current) {
           setSubscriptions(subs =>
             set(cloneDeep(subs), `${providerId}.linked`, false)
           )
         }
       })
     },
-    [isMountedRef, subscriptions]
+    [isMounted, subscriptions]
   )
 
   const value = useMemo<SSOContextValue>(

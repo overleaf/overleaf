@@ -7,6 +7,7 @@ import {
   postJSON,
 } from '../../../../infrastructure/fetch-json'
 import { useRefWithAutoFocus } from '../../../../shared/hooks/use-ref-with-auto-focus'
+import { useLocation } from '../../../../shared/hooks/use-location'
 
 type NewProjectData = {
   project_id: string
@@ -29,6 +30,7 @@ function ModalContentNewProjectForm({ onCancel, template = 'none' }: Props) {
   const { autoFocusedRef } = useRefWithAutoFocus<HTMLInputElement>()
   const [projectName, setProjectName] = useState('')
   const { isLoading, isError, error, runAsync } = useAsync<NewProjectData>()
+  const location = useLocation()
 
   const createNewProject = () => {
     runAsync(
@@ -42,7 +44,7 @@ function ModalContentNewProjectForm({ onCancel, template = 'none' }: Props) {
     )
       .then(data => {
         if (data.project_id) {
-          window.location.assign(`/project/${data.project_id}`)
+          location.assign(`/project/${data.project_id}`)
         }
       })
       .catch(() => {})

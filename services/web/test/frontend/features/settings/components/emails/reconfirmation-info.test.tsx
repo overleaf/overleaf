@@ -13,6 +13,7 @@ import ReconfirmationInfo from '../../../../../../frontend/js/features/settings/
 import { ssoUserData } from '../../fixtures/test-user-email-data'
 import { UserEmailData } from '../../../../../../types/user-email'
 import { UserEmailsProvider } from '../../../../../../frontend/js/features/settings/context/user-email-context'
+import * as useLocationModule from '../../../../../../frontend/js/shared/hooks/use-location'
 
 function renderReconfirmationInfo(data: UserEmailData) {
   return render(
@@ -23,13 +24,21 @@ function renderReconfirmationInfo(data: UserEmailData) {
 }
 
 describe('<ReconfirmationInfo/>', function () {
+  let assignStub: sinon.SinonStub
+
   beforeEach(function () {
     window.metaAttributesCache = window.metaAttributesCache || new Map()
     fetchMock.get('/user/emails?ensureAffiliation=true', [])
+    assignStub = sinon.stub()
+    this.locationStub = sinon.stub(useLocationModule, 'useLocation').returns({
+      assign: assignStub,
+      reload: sinon.stub(),
+    })
   })
 
   afterEach(function () {
     fetchMock.reset()
+    this.locationStub.restore()
   })
 
   describe('reconfirmed via SAML', function () {
@@ -54,17 +63,10 @@ describe('<ReconfirmationInfo/>', function () {
 
   describe('in reconfirm notification period', function () {
     let inReconfirmUserData: UserEmailData
-    const locationStub = sinon.stub()
-    const originalLocation = window.location
 
     beforeEach(function () {
       window.metaAttributesCache.set('ol-ExposedSettings', {
         samlInitPath: '/saml',
-      })
-      Object.defineProperty(window, 'location', {
-        value: {
-          assign: locationStub,
-        },
       })
 
       inReconfirmUserData = cloneDeep(ssoUserData)
@@ -75,9 +77,6 @@ describe('<ReconfirmationInfo/>', function () {
 
     afterEach(function () {
       window.metaAttributesCache = new Map()
-      Object.defineProperty(window, 'location', {
-        value: originalLocation,
-      })
     })
 
     it('renders prompt', function () {
@@ -119,9 +118,9 @@ describe('<ReconfirmationInfo/>', function () {
         await waitFor(() => {
           expect(confirmButton.disabled).to.be.true
         })
-        sinon.assert.calledOnce(locationStub)
+        sinon.assert.calledOnce(assignStub)
         sinon.assert.calledWithMatch(
-          locationStub,
+          assignStub,
           '/saml/init?university_id=2&reconfirm=/user/settings'
         )
       })
@@ -137,9 +136,9 @@ describe('<ReconfirmationInfo/>', function () {
 
       it('sends and resends confirmation email', async function () {
         renderReconfirmationInfo(inReconfirmUserData)
-        const confirmButton = screen.getByRole('button', {
+        const confirmButton = (await screen.findByRole('button', {
           name: 'Confirm Affiliation',
-        }) as HTMLButtonElement
+        })) as HTMLButtonElement
 
         await waitFor(() => {
           expect(confirmButton.disabled).to.be.false
@@ -152,20 +151,21 @@ describe('<ReconfirmationInfo/>', function () {
         expect(fetchMock.called()).to.be.true
 
         // the confirmation text should now be displayed
-        screen.getByText(/Please check your email inbox to confirm/)
+        await screen.findByText(/Please check your email inbox to confirm/)
 
         // try the resend button
         fetchMock.resetHistory()
-        const resendButton = screen.getByRole('button', {
+        const resendButton = await screen.findByRole('button', {
           name: 'Resend confirmation email',
-        }) as HTMLButtonElement
+        })
 
         fireEvent.click(resendButton)
 
-        screen.getByText(/Sending/)
+        // commented out as it's already gone by this point
+        // await screen.findByText(/Sending/)
         expect(fetchMock.called()).to.be.true
         await waitForElementToBeRemoved(() => screen.getByText(/Sending/))
-        screen.getByRole('button', {
+        await screen.findByRole('button', {
           name: 'Resend confirmation email',
         })
       })

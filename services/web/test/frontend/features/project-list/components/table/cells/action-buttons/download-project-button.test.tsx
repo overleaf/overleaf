@@ -3,23 +3,22 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import sinon from 'sinon'
 import { DownloadProjectButtonTooltip } from '../../../../../../../../frontend/js/features/project-list/components/table/cells/action-buttons/download-project-button'
 import { projectsData } from '../../../../fixtures/projects-data'
+import * as useLocationModule from '../../../../../../../../frontend/js/shared/hooks/use-location'
 
 describe('<DownloadProjectButton />', function () {
-  const originalLocation = window.location
-  const locationStub = sinon.stub()
+  let assignStub: sinon.SinonStub
 
   beforeEach(function () {
-    Object.defineProperty(window, 'location', {
-      value: { assign: locationStub },
+    assignStub = sinon.stub()
+    this.locationStub = sinon.stub(useLocationModule, 'useLocation').returns({
+      assign: assignStub,
+      reload: sinon.stub(),
     })
-
     render(<DownloadProjectButtonTooltip project={projectsData[0]} />)
   })
 
   afterEach(function () {
-    Object.defineProperty(window, 'location', {
-      value: originalLocation,
-    })
+    this.locationStub.restore()
   })
 
   it('renders tooltip for button', function () {
@@ -33,13 +32,13 @@ describe('<DownloadProjectButton />', function () {
     fireEvent.click(btn)
 
     await waitFor(() => {
-      expect(locationStub).to.have.been.called
+      expect(assignStub).to.have.been.called
     })
 
-    sinon.assert.calledOnce(locationStub)
+    sinon.assert.calledOnce(assignStub)
 
     sinon.assert.calledWithMatch(
-      locationStub,
+      assignStub,
       `/project/${projectsData[0].id}/download/zip`
     )
   })

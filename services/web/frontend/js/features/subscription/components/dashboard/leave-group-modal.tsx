@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { deleteJSON } from '../../../../infrastructure/fetch-json'
 import AccessibleModal from '../../../../shared/components/accessible-modal'
 import { useSubscriptionDashboardContext } from '../../context/subscription-dashboard-context'
+import { useLocation } from '../../../../shared/hooks/use-location'
 
 export const LEAVE_GROUP_MODAL_ID = 'leave-group'
 
@@ -12,6 +13,7 @@ export default function LeaveGroupModal() {
   const { handleCloseModal, modalIdShown, leavingGroupId } =
     useSubscriptionDashboardContext()
   const [inflight, setInflight] = useState(false)
+  const location = useLocation()
 
   const handleConfirmLeaveGroup = useCallback(async () => {
     if (!leavingGroupId) {
@@ -22,12 +24,12 @@ export default function LeaveGroupModal() {
       const params = new URLSearchParams()
       params.set('subscriptionId', leavingGroupId)
       await deleteJSON(`/subscription/group/user?${params}`)
-      window.location.reload()
+      location.reload()
     } catch (error) {
       console.log('something went wrong', error)
       setInflight(false)
     }
-  }, [leavingGroupId])
+  }, [location, leavingGroupId])
 
   if (modalIdShown !== LEAVE_GROUP_MODAL_ID || !leavingGroupId) {
     return null

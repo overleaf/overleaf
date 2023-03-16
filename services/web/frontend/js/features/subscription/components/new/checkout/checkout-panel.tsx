@@ -18,7 +18,6 @@ import SubmitButton from './submit-button'
 import ThreeDSecure from './three-d-secure'
 import getMeta from '../../../../../utils/meta'
 import { postJSON } from '../../../../../infrastructure/fetch-json'
-import { assign } from '../../../../../shared/components/location'
 import * as eventTracking from '../../../../../infrastructure/event-tracking'
 import classnames from 'classnames'
 import {
@@ -30,6 +29,7 @@ import {
 import { PricingFormState } from '../../../context/types/payment-context-value'
 import { CreateError } from '../../../../../../../types/subscription/api'
 import { CardElementChangeState } from '../../../../../../../types/recurly/elements'
+import { useLocation } from '../../../../../shared/hooks/use-location'
 
 function CheckoutPanel() {
   const { t } = useTranslation()
@@ -59,6 +59,7 @@ function CheckoutPanel() {
   const [formIsValid, setFormIsValid] = useState<boolean>()
   const [threeDSecureActionTokenId, setThreeDSecureActionTokenId] =
     useState<string>()
+  const location = useLocation()
 
   const isCreditCardPaymentMethod = paymentMethod === 'credit_card'
   const isPayPalPaymentMethod = paymentMethod === 'paypal'
@@ -154,7 +155,7 @@ function CheckoutPanel() {
             'subscription-submission-success',
             planCode
           )
-          assign('/user/subscription/thank-you')
+          location.assign('/user/subscription/thank-you')
         } catch (error) {
           setIsProcessing(false)
 
@@ -175,6 +176,7 @@ function CheckoutPanel() {
       ITMReferrer,
       isAddCompanyDetailsChecked,
       isPayPalPaymentMethod,
+      location,
       planCode,
       pricing,
       pricingFormState,
