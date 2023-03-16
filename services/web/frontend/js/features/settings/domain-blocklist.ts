@@ -1,4 +1,4 @@
-const domainBlocklist = new Set(['overleaf.com'])
+const domainBlocklist = ['overleaf.com']
 const commonTLDs = [
   'br',
   'cn',
@@ -54,8 +54,8 @@ const commonDomains = [
 
 for (const domain of commonDomains) {
   for (const tld of commonTLDs) {
-    domainBlocklist.add(`${domain}.${tld}`)
+    domainBlocklist.push(`${domain}.${tld}`)
   }
 }
 
-export default domainBlocklist
+export default domainBlocklist as ReadonlyArray<typeof domainBlocklist[number]>

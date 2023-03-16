@@ -84,6 +84,9 @@ function Input({ onChange, handleAddNewEmail }: InputProps) {
         setMatchedDomain(cachedDomain)
         return
       }
+      if (domainBlocklist.some(d => domain.endsWith(d))) {
+        return
+      }
       const query = `?hostname=${domain}&limit=1`
       getJSON<Nullable<DomainInfo[]>>(`/institutions/domains${query}`, {
         signal,
@@ -92,7 +95,7 @@ function Input({ onChange, handleAddNewEmail }: InputProps) {
           if (!(data && data[0])) {
             return
           }
-          if (domainBlocklist.has(data[0].hostname)) {
+          if (domainBlocklist.some(d => data[0].hostname.endsWith(d))) {
             return
           }
           const hostname = data[0]?.hostname

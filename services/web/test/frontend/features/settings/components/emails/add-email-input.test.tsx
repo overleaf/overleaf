@@ -10,6 +10,7 @@ import fetchMock from 'fetch-mock'
 import Input, {
   clearDomainCache,
 } from '../../../../../../frontend/js/features/settings/components/emails/add-email/input'
+import domainBlocklist from '../../../../../../frontend/js/features/settings/domain-blocklist'
 
 const testInstitutionData = [
   { university: { id: 124 }, hostname: 'domain.edu' },
@@ -215,19 +216,40 @@ describe('<AddEmailInput/>', function () {
     })
 
     describe('when there is a match for a blocklisted domain', function () {
-      beforeEach(function () {
+      const [blockedDomain] = domainBlocklist
+
+      afterEach(function () {
+        clearDomainCache()
+        fetchMock.reset()
+      })
+
+      it('should not render the suggestion with blocked domain', async function () {
         const blockedInstitution = [
-          { university: { id: 1 }, hostname: 'overleaf.com' },
+          { university: { id: 1 }, hostname: blockedDomain },
         ]
         fetchMock.get('express:/institutions/domains', blockedInstitution)
         fireEvent.change(screen.getByRole('textbox'), {
-          target: { value: 'user@o' },
+          target: { value: `user@${blockedDomain.split('.')[0]}` },
         })
+        await fetchMock.flush(true)
+        expect(screen.queryByText(`user@${blockedDomain}`)).to.be.null
       })
 
-      it('should not render the suggestion', async function () {
+      it('should not render the suggestion with blocked domain having a subdomain', async function () {
+        const blockedInstitution = [
+          {
+            university: { id: 1 },
+            hostname: `subdomain.${blockedDomain}`,
+          },
+        ]
+        fetchMock.get('express:/institutions/domains', blockedInstitution)
+        fireEvent.change(screen.getByRole('textbox'), {
+          target: {
+            value: `user@subdomain.${blockedDomain.split('.')[0]}`,
+          },
+        })
         await fetchMock.flush(true)
-        expect(screen.queryByText('user@overleaf.com')).to.be.null
+        expect(screen.queryByText(`user@subdomain.${blockedDomain}`)).to.be.null
       })
     })
 
