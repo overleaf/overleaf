@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-return-assign,
     no-unused-vars,
 */
@@ -32,110 +31,110 @@ describe('RangeManager', function () {
 
   describe('jsonRangesToMongo', function () {
     it('should convert ObjectIds and dates to proper objects', function () {
-      const change_id = ObjectId().toString()
-      const comment_id = ObjectId().toString()
-      const user_id = ObjectId().toString()
-      const thread_id = ObjectId().toString()
+      const changeId = ObjectId().toString()
+      const commentId = ObjectId().toString()
+      const userId = ObjectId().toString()
+      const threadId = ObjectId().toString()
       const ts = new Date().toJSON()
       return this.RangeManager.jsonRangesToMongo({
         changes: [
           {
-            id: change_id,
+            id: changeId,
             op: { i: 'foo', p: 3 },
             metadata: {
-              user_id,
+              user_id: userId,
               ts,
             },
           },
         ],
         comments: [
           {
-            id: comment_id,
-            op: { c: 'foo', p: 3, t: thread_id },
+            id: commentId,
+            op: { c: 'foo', p: 3, t: threadId },
           },
         ],
       }).should.deep.equal({
         changes: [
           {
-            id: ObjectId(change_id),
+            id: ObjectId(changeId),
             op: { i: 'foo', p: 3 },
             metadata: {
-              user_id: ObjectId(user_id),
+              user_id: ObjectId(userId),
               ts: new Date(ts),
             },
           },
         ],
         comments: [
           {
-            id: ObjectId(comment_id),
-            op: { c: 'foo', p: 3, t: ObjectId(thread_id) },
+            id: ObjectId(commentId),
+            op: { c: 'foo', p: 3, t: ObjectId(threadId) },
           },
         ],
       })
     })
 
     it('should leave malformed ObjectIds as they are', function () {
-      const change_id = 'foo'
-      const comment_id = 'bar'
-      const user_id = 'baz'
+      const changeId = 'foo'
+      const commentId = 'bar'
+      const userId = 'baz'
       return this.RangeManager.jsonRangesToMongo({
         changes: [
           {
-            id: change_id,
+            id: changeId,
             metadata: {
-              user_id,
+              user_id: userId,
             },
           },
         ],
         comments: [
           {
-            id: comment_id,
+            id: commentId,
           },
         ],
       }).should.deep.equal({
         changes: [
           {
-            id: change_id,
+            id: changeId,
             metadata: {
-              user_id,
+              user_id: userId,
             },
           },
         ],
         comments: [
           {
-            id: comment_id,
+            id: commentId,
           },
         ],
       })
     })
 
     return it('should be consistent when transformed through json -> mongo -> json', function () {
-      const change_id = ObjectId().toString()
-      const comment_id = ObjectId().toString()
-      const user_id = ObjectId().toString()
-      const thread_id = ObjectId().toString()
+      const changeId = ObjectId().toString()
+      const commentId = ObjectId().toString()
+      const userId = ObjectId().toString()
+      const threadId = ObjectId().toString()
       const ts = new Date().toJSON()
       const ranges1 = {
         changes: [
           {
-            id: change_id,
+            id: changeId,
             op: { i: 'foo', p: 3 },
             metadata: {
-              user_id,
+              user_id: userId,
               ts,
             },
           },
         ],
         comments: [
           {
-            id: comment_id,
-            op: { c: 'foo', p: 3, t: thread_id },
+            id: commentId,
+            op: { c: 'foo', p: 3, t: threadId },
           },
         ],
       }
-      const ranges1_copy = JSON.parse(JSON.stringify(ranges1)) // jsonRangesToMongo modifies in place
+      const ranges1Copy = JSON.parse(JSON.stringify(ranges1)) // jsonRangesToMongo modifies in place
       const ranges2 = JSON.parse(
-        JSON.stringify(this.RangeManager.jsonRangesToMongo(ranges1_copy))
+        JSON.stringify(this.RangeManager.jsonRangesToMongo(ranges1Copy))
       )
       return ranges1.should.deep.equal(ranges2)
     })

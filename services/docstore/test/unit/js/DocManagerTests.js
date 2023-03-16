@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-dupe-keys,
     no-return-assign,
     no-unused-vars,
@@ -254,11 +253,7 @@ describe('DocManager', function () {
           inS3: true,
         }
         this.MongoManager.findDoc.yields(null, this.doc)
-        this.DocArchiveManager.unarchiveDoc = (
-          project_id,
-          doc_id,
-          callback
-        ) => {
+        this.DocArchiveManager.unarchiveDoc = (projectId, docId, callback) => {
           this.doc.inS3 = false
           return callback()
         }
@@ -497,8 +492,8 @@ describe('DocManager', function () {
           it('should log a warning', function () {
             expect(this.logger.warn).to.have.been.calledWith(
               sinon.match({
-                project_id: this.project_id,
-                doc_id: this.doc_id,
+                projectId: this.project_id,
+                docId: this.doc_id,
                 err: this.err,
               }),
               'archiving a single doc in the background failed'

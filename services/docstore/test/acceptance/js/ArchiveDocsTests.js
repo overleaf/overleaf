@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -113,10 +112,10 @@ describe('Archiving', function () {
             return DocstoreClient.getS3Doc(
               this.project_id,
               doc._id,
-              (error, s3_doc) => {
+              (error, s3Doc) => {
                 if (error) return callback(error)
-                s3_doc.lines.should.deep.equal(doc.lines)
-                s3_doc.ranges.should.deep.equal(doc.ranges)
+                s3Doc.lines.should.deep.equal(doc.lines)
+                s3Doc.ranges.should.deep.equal(doc.ranges)
                 callback()
               }
             )
@@ -130,8 +129,8 @@ describe('Archiving', function () {
       before(function (done) {
         return DocstoreClient.getAllDocs(
           this.project_id,
-          (error, res, fetched_docs) => {
-            this.fetched_docs = fetched_docs
+          (error, res, fetchedDocs) => {
+            this.fetched_docs = fetchedDocs
             if (error != null) {
               throw error
             }
@@ -231,12 +230,12 @@ describe('Archiving', function () {
       return DocstoreClient.getS3Doc(
         this.project_id,
         this.doc._id,
-        (error, s3_doc) => {
+        (error, s3Doc) => {
           if (error != null) {
             throw error
           }
-          s3_doc.lines.should.deep.equal(this.doc.lines)
-          s3_doc.ranges.should.deep.equal(this.doc.ranges)
+          s3Doc.lines.should.deep.equal(this.doc.lines)
+          s3Doc.ranges.should.deep.equal(this.doc.ranges)
           return done()
         }
       )
@@ -246,8 +245,8 @@ describe('Archiving', function () {
       beforeEach(function (done) {
         return DocstoreClient.getAllDocs(
           this.project_id,
-          (error, res, fetched_docs) => {
-            this.fetched_docs = fetched_docs
+          (error, res, fetchedDocs) => {
+            this.fetched_docs = fetchedDocs
             if (error != null) {
               throw error
             }
@@ -291,8 +290,8 @@ describe('Archiving', function () {
         beforeEach(function (done) {
           DocstoreClient.getAllDocs(
             this.project_id,
-            (error, res, fetched_docs) => {
-              this.fetched_docs = fetched_docs
+            (error, res, fetchedDocs) => {
+              this.fetched_docs = fetchedDocs
               if (error) {
                 return done(error)
               }
@@ -375,18 +374,14 @@ describe('Archiving', function () {
     })
 
     it('should set the doc in s3 correctly', function (done) {
-      DocstoreClient.getS3Doc(
-        this.project_id,
-        this.doc._id,
-        (error, s3_doc) => {
-          if (error) {
-            return done(error)
-          }
-          s3_doc.lines.should.deep.equal(this.doc.lines)
-          s3_doc.ranges.should.deep.equal(this.doc.ranges)
-          done()
+      DocstoreClient.getS3Doc(this.project_id, this.doc._id, (error, s3Doc) => {
+        if (error) {
+          return done(error)
         }
-      )
+        s3Doc.lines.should.deep.equal(this.doc.lines)
+        s3Doc.ranges.should.deep.equal(this.doc.ranges)
+        done()
+      })
     })
   })
 
@@ -395,12 +390,12 @@ describe('Archiving', function () {
       this.project_id = ObjectId()
       this.timeout(1000 * 30)
       const quarterMegInBytes = 250000
-      const big_line = require('crypto')
+      const bigLine = require('crypto')
         .randomBytes(quarterMegInBytes)
         .toString('hex')
       this.doc = {
         _id: ObjectId(),
-        lines: [big_line, big_line, big_line, big_line],
+        lines: [bigLine, bigLine, bigLine, bigLine],
         ranges: {},
         version: 2,
       }
@@ -446,12 +441,12 @@ describe('Archiving', function () {
       return DocstoreClient.getS3Doc(
         this.project_id,
         this.doc._id,
-        (error, s3_doc) => {
+        (error, s3Doc) => {
           if (error != null) {
             throw error
           }
-          s3_doc.lines.should.deep.equal(this.doc.lines)
-          s3_doc.ranges.should.deep.equal(this.doc.ranges)
+          s3Doc.lines.should.deep.equal(this.doc.lines)
+          s3Doc.ranges.should.deep.equal(this.doc.ranges)
           return done()
         }
       )
@@ -461,8 +456,8 @@ describe('Archiving', function () {
       before(function (done) {
         return DocstoreClient.getAllDocs(
           this.project_id,
-          (error, res, fetched_docs) => {
-            this.fetched_docs = fetched_docs
+          (error, res, fetchedDocs) => {
+            this.fetched_docs = fetchedDocs
             if (error != null) {
               throw error
             }
@@ -920,12 +915,12 @@ describe('Archiving', function () {
       return DocstoreClient.getS3Doc(
         this.project_id,
         this.doc._id,
-        (error, s3_doc) => {
+        (error, s3Doc) => {
           if (error != null) {
             throw error
           }
-          s3_doc.lines.should.deep.equal(this.doc.lines)
-          s3_doc.ranges.should.deep.equal(this.doc.ranges)
+          s3Doc.lines.should.deep.equal(this.doc.lines)
+          s3Doc.ranges.should.deep.equal(this.doc.ranges)
           return done()
         }
       )
@@ -935,8 +930,8 @@ describe('Archiving', function () {
       before(function (done) {
         return DocstoreClient.getAllDocs(
           this.project_id,
-          (error, res, fetched_docs) => {
-            this.fetched_docs = fetched_docs
+          (error, res, fetchedDocs) => {
+            this.fetched_docs = fetchedDocs
             if (error != null) {
               throw error
             }
@@ -1039,13 +1034,13 @@ describe('Archiving', function () {
       return DocstoreClient.getS3Doc(
         this.project_id,
         this.doc._id,
-        (error, s3_doc) => {
+        (error, s3Doc) => {
           if (error != null) {
             throw error
           }
-          s3_doc.lines.should.deep.equal(this.doc.lines)
+          s3Doc.lines.should.deep.equal(this.doc.lines)
           const ranges = JSON.parse(JSON.stringify(this.doc.ranges)) // ObjectId -> String
-          s3_doc.ranges.should.deep.equal(ranges)
+          s3Doc.ranges.should.deep.equal(ranges)
           return done()
         }
       )
@@ -1055,8 +1050,8 @@ describe('Archiving', function () {
       before(function (done) {
         return DocstoreClient.getAllDocs(
           this.project_id,
-          (error, res, fetched_docs) => {
-            this.fetched_docs = fetched_docs
+          (error, res, fetchedDocs) => {
+            this.fetched_docs = fetchedDocs
             if (error != null) {
               throw error
             }
@@ -1136,12 +1131,12 @@ describe('Archiving', function () {
       return DocstoreClient.getS3Doc(
         this.project_id,
         this.doc._id,
-        (error, s3_doc) => {
+        (error, s3Doc) => {
           if (error != null) {
             throw error
           }
-          s3_doc.lines.should.deep.equal(this.doc.lines)
-          s3_doc.ranges.should.deep.equal(this.doc.ranges)
+          s3Doc.lines.should.deep.equal(this.doc.lines)
+          s3Doc.ranges.should.deep.equal(this.doc.ranges)
           return done()
         }
       )
@@ -1151,8 +1146,8 @@ describe('Archiving', function () {
       before(function (done) {
         return DocstoreClient.getAllDocs(
           this.project_id,
-          (error, res, fetched_docs) => {
-            this.fetched_docs = fetched_docs
+          (error, res, fetchedDocs) => {
+            this.fetched_docs = fetchedDocs
             if (error != null) {
               throw error
             }
@@ -1202,8 +1197,8 @@ describe('Archiving', function () {
               }
               DocstoreClient.getAllDocs(
                 this.project_id,
-                (error, res, fetched_docs) => {
-                  this.fetched_docs = fetched_docs
+                (error, res, fetchedDocs) => {
+                  this.fetched_docs = fetchedDocs
                   if (error != null) {
                     throw error
                   }

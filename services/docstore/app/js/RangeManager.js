@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-return-assign,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -16,19 +15,19 @@ const _ = require('lodash')
 const { ObjectId } = require('./mongodb')
 
 module.exports = RangeManager = {
-  shouldUpdateRanges(doc_ranges, incoming_ranges) {
-    if (incoming_ranges == null) {
+  shouldUpdateRanges(docRanges, incomingRanges) {
+    if (incomingRanges == null) {
       throw new Error('expected incoming_ranges')
     }
 
     // If the ranges are empty, we don't store them in the DB, so set
     // doc_ranges to an empty object as default, since this is was the
     // incoming_ranges will be for an empty range set.
-    if (doc_ranges == null) {
-      doc_ranges = {}
+    if (docRanges == null) {
+      docRanges = {}
     }
 
-    return !_.isEqual(doc_ranges, incoming_ranges)
+    return !_.isEqual(docRanges, incomingRanges)
   },
 
   jsonRangesToMongo(ranges) {

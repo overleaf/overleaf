@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-dupe-keys,
     no-undef,
 */
@@ -25,7 +24,7 @@ module.exports = DocManager = {
   // collection (which is all that this collection contains). In future, we should
   // migrate this version property to be part of the docs collection, to guarantee
   // consitency between lines and version when writing/reading, and for a simpler schema.
-  _getDoc(project_id, doc_id, filter, callback) {
+  _getDoc(projectId, docId, filter, callback) {
     if (filter == null) {
       filter = {}
     }
@@ -36,45 +35,37 @@ module.exports = DocManager = {
       return callback(new Error('must include inS3 when getting doc'))
     }
 
-    return MongoManager.findDoc(
-      project_id,
-      doc_id,
-      filter,
-      function (err, doc) {
-        if (err != null) {
-          return callback(err)
-        } else if (doc == null) {
-          return callback(
-            new Errors.NotFoundError(
-              `No such doc: ${doc_id} in project ${project_id}`
-            )
+    return MongoManager.findDoc(projectId, docId, filter, function (err, doc) {
+      if (err != null) {
+        return callback(err)
+      } else if (doc == null) {
+        return callback(
+          new Errors.NotFoundError(
+            `No such doc: ${docId} in project ${projectId}`
           )
-        } else if (doc != null ? doc.inS3 : undefined) {
-          return DocArchive.unarchiveDoc(project_id, doc_id, function (err) {
-            if (err != null) {
-              logger.err({ err, project_id, doc_id }, 'error unarchiving doc')
-              return callback(err)
+        )
+      } else if (doc != null ? doc.inS3 : undefined) {
+        return DocArchive.unarchiveDoc(projectId, docId, function (err) {
+          if (err != null) {
+            logger.err({ err, projectId, docId }, 'error unarchiving doc')
+            return callback(err)
+          }
+          return DocManager._getDoc(projectId, docId, filter, callback)
+        })
+      } else {
+        if (filter.version) {
+          return MongoManager.getDocVersion(docId, function (error, version) {
+            if (error != null) {
+              return callback(error)
             }
-            return DocManager._getDoc(project_id, doc_id, filter, callback)
+            doc.version = version
+            return callback(err, doc)
           })
         } else {
-          if (filter.version) {
-            return MongoManager.getDocVersion(
-              doc_id,
-              function (error, version) {
-                if (error != null) {
-                  return callback(error)
-                }
-                doc.version = version
-                return callback(err, doc)
-              }
-            )
-          } else {
-            return callback(err, doc)
-          }
+          return callback(err, doc)
         }
       }
-    )
+    })
   },
 
   isDocDeleted(projectId, docId, callback) {
@@ -99,13 +90,13 @@ module.exports = DocManager = {
     )
   },
 
-  getFullDoc(project_id, doc_id, callback) {
+  getFullDoc(projectId, docId, callback) {
     if (callback == null) {
       callback = function () {}
     }
     return DocManager._getDoc(
-      project_id,
-      doc_id,
+      projectId,
+      docId,
       {
         lines: true,
         rev: true,
@@ -124,10 +115,10 @@ module.exports = DocManager = {
   },
 
   // returns the doc without any version information
-  _peekRawDoc(project_id, doc_id, callback) {
+  _peekRawDoc(projectId, docId, callback) {
     MongoManager.findDoc(
-      project_id,
-      doc_id,
+      projectId,
+      docId,
       {
         lines: true,
         rev: true,
@@ -141,7 +132,7 @@ module.exports = DocManager = {
         if (doc == null) {
           return callback(
             new Errors.NotFoundError(
-              `No such doc: ${doc_id} in project ${project_id}`
+              `No such doc: ${docId} in project ${projectId}`
             )
           )
         }
@@ -149,10 +140,10 @@ module.exports = DocManager = {
           return callback(null, doc)
         }
         // skip the unarchiving to mongo when getting a doc
-        DocArchive.getDoc(project_id, doc_id, function (err, archivedDoc) {
+        DocArchive.getDoc(projectId, docId, function (err, archivedDoc) {
           if (err != null) {
             logger.err(
-              { err, project_id, doc_id },
+              { err, projectId, docId },
               'error getting doc from archive'
             )
             return callback(err)
@@ -166,8 +157,8 @@ module.exports = DocManager = {
 
   // get the doc from mongo if possible, or from the persistent store otherwise,
   // without unarchiving it (avoids unnecessary writes to mongo)
-  peekDoc(project_id, doc_id, callback) {
-    DocManager._peekRawDoc(project_id, doc_id, (err, doc) => {
+  peekDoc(projectId, docId, callback) {
+    DocManager._peekRawDoc(projectId, docId, (err, doc) => {
       if (err) {
         return callback(err)
       }
@@ -187,13 +178,13 @@ module.exports = DocManager = {
     })
   },
 
-  getDocLines(project_id, doc_id, callback) {
+  getDocLines(projectId, docId, callback) {
     if (callback == null) {
       callback = function () {}
     }
     return DocManager._getDoc(
-      project_id,
-      doc_id,
+      projectId,
+      docId,
       { lines: true, inS3: true },
       function (err, doc) {
         if (err != null) {
@@ -204,20 +195,20 @@ module.exports = DocManager = {
     )
   },
 
-  getAllDeletedDocs(project_id, filter, callback) {
-    MongoManager.getProjectsDeletedDocs(project_id, filter, callback)
+  getAllDeletedDocs(projectId, filter, callback) {
+    MongoManager.getProjectsDeletedDocs(projectId, filter, callback)
   },
 
-  getAllNonDeletedDocs(project_id, filter, callback) {
+  getAllNonDeletedDocs(projectId, filter, callback) {
     if (callback == null) {
       callback = function () {}
     }
-    return DocArchive.unArchiveAllDocs(project_id, function (error) {
+    return DocArchive.unArchiveAllDocs(projectId, function (error) {
       if (error != null) {
         return callback(error)
       }
       return MongoManager.getProjectsDocs(
-        project_id,
+        projectId,
         { include_deleted: false },
         filter,
         function (error, docs) {
@@ -225,7 +216,7 @@ module.exports = DocManager = {
             return callback(error)
           } else if (docs == null) {
             return callback(
-              new Errors.NotFoundError(`No docs for project ${project_id}`)
+              new Errors.NotFoundError(`No docs for project ${projectId}`)
             )
           } else {
             return callback(null, docs)
@@ -235,7 +226,7 @@ module.exports = DocManager = {
     })
   },
 
-  updateDoc(project_id, doc_id, lines, version, ranges, callback) {
+  updateDoc(projectId, docId, lines, version, ranges, callback) {
     if (callback == null) {
       callback = function () {}
     }
@@ -244,8 +235,8 @@ module.exports = DocManager = {
     }
 
     return DocManager._getDoc(
-      project_id,
-      doc_id,
+      projectId,
+      docId,
       {
         version: true,
         rev: true,
@@ -258,7 +249,7 @@ module.exports = DocManager = {
         let updateLines, updateRanges, updateVersion
         if (err != null && !(err instanceof Errors.NotFoundError)) {
           logger.err(
-            { project_id, doc_id, err },
+            { projectId, docId, err },
             'error getting document for update'
           )
           return callback(err)
@@ -289,22 +280,19 @@ module.exports = DocManager = {
             if (updateRanges) {
               update.ranges = ranges
             }
-            logger.debug(
-              { project_id, doc_id },
-              'updating doc lines and ranges'
-            )
+            logger.debug({ projectId, docId }, 'updating doc lines and ranges')
 
             modified = true
             rev += 1 // rev will be incremented in mongo by MongoManager.upsertIntoDocCollection
             return MongoManager.upsertIntoDocCollection(
-              project_id,
-              doc_id,
+              projectId,
+              docId,
               update,
               cb
             )
           } else {
             logger.debug(
-              { project_id, doc_id },
+              { projectId, docId },
               'doc lines have not changed - not updating'
             )
             return cb()
@@ -315,18 +303,18 @@ module.exports = DocManager = {
           if (updateVersion) {
             logger.debug(
               {
-                project_id,
-                doc_id,
+                projectId,
+                docId,
                 oldVersion: doc != null ? doc.version : undefined,
                 newVersion: version,
               },
               'updating doc version'
             )
             modified = true
-            return MongoManager.setDocVersion(doc_id, version, cb)
+            return MongoManager.setDocVersion(docId, version, cb)
           } else {
             logger.debug(
-              { project_id, doc_id, version },
+              { projectId, docId, version },
               'doc version has not changed - not updating'
             )
             return cb()
@@ -348,33 +336,33 @@ module.exports = DocManager = {
     )
   },
 
-  patchDoc(project_id, doc_id, meta, callback) {
+  patchDoc(projectId, docId, meta, callback) {
     const projection = { _id: 1, deleted: true }
-    MongoManager.findDoc(project_id, doc_id, projection, (error, doc) => {
+    MongoManager.findDoc(projectId, docId, projection, (error, doc) => {
       if (error != null) {
         return callback(error)
       }
       if (!doc) {
         return callback(
           new Errors.NotFoundError(
-            `No such project/doc to delete: ${project_id}/${doc_id}`
+            `No such project/doc to delete: ${projectId}/${docId}`
           )
         )
       }
 
       if (meta.deleted && Settings.docstore.archiveOnSoftDelete) {
         // The user will not read this doc anytime soon. Flush it out of mongo.
-        DocArchive.archiveDoc(project_id, doc_id, err => {
+        DocArchive.archiveDoc(projectId, docId, err => {
           if (err) {
             logger.warn(
-              { project_id, doc_id, err },
+              { projectId, docId, err },
               'archiving a single doc in the background failed'
             )
           }
         })
       }
 
-      MongoManager.patchDoc(project_id, doc_id, meta, callback)
+      MongoManager.patchDoc(projectId, docId, meta, callback)
     })
   },
 }

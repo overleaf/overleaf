@@ -48,10 +48,7 @@ async function archiveDoc(projectId, docId) {
     return
   }
 
-  logger.debug(
-    { project_id: projectId, doc_id: doc._id },
-    'sending doc to persistor'
-  )
+  logger.debug({ projectId, docId: doc._id }, 'sending doc to persistor')
   const key = `${projectId}/${doc._id}`
 
   if (doc.lines == null) {
@@ -66,7 +63,7 @@ async function archiveDoc(projectId, docId) {
     rangesSize > Settings.max_doc_length
   ) {
     logger.warn(
-      { project_id: projectId, doc_id: doc._id, linesSize, rangesSize },
+      { projectId, docId: doc._id, linesSize, rangesSize },
       'large doc found when archiving project'
     )
   }

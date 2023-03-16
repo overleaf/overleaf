@@ -1,6 +1,3 @@
-/* eslint-disable
-    camelcase,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -20,9 +17,9 @@ const logger = require('@overleaf/logger')
 
 module.exports = {
   check(callback) {
-    const doc_id = ObjectId()
-    const project_id = ObjectId(settings.docstore.healthCheck.project_id)
-    const url = `http://localhost:${port}/project/${project_id}/doc/${doc_id}`
+    const docId = ObjectId()
+    const projectId = ObjectId(settings.docstore.healthCheck.project_id)
+    const url = `http://localhost:${port}/project/${projectId}/doc/${docId}`
     const lines = [
       'smoke test - delete me',
       `${crypto.randomBytes(32).toString('hex')}`,
@@ -31,7 +28,7 @@ module.exports = {
       url,
       timeout: 3000,
     })
-    logger.debug({ lines, url, doc_id, project_id }, 'running health check')
+    logger.debug({ lines, url, docId, projectId }, 'running health check')
     const jobs = [
       function (cb) {
         const opts = getOpts()
@@ -51,7 +48,7 @@ module.exports = {
             return cb(new Error(`status code not 200, its ${res.statusCode}`))
           } else if (
             _.isEqual(body != null ? body.lines : undefined, lines) &&
-            (body != null ? body._id : undefined) === doc_id.toString()
+            (body != null ? body._id : undefined) === docId.toString()
           ) {
             return cb()
           } else {
@@ -63,8 +60,8 @@ module.exports = {
           }
         })
       },
-      cb => db.docs.deleteOne({ _id: doc_id, project_id }, cb),
-      cb => db.docOps.deleteOne({ doc_id }, cb),
+      cb => db.docs.deleteOne({ _id: docId, project_id: projectId }, cb),
+      cb => db.docOps.deleteOne({ doc_id: docId }, cb),
     ]
     return async.series(jobs, callback)
   },

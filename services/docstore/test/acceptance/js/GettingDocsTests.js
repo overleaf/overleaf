@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -70,10 +69,10 @@ describe('Getting a doc', function () {
 
   describe('when the doc does not exist', function () {
     return it('should return a 404', function (done) {
-      const missing_doc_id = ObjectId()
+      const missingDocId = ObjectId()
       return DocstoreClient.getDoc(
         this.project_id,
-        missing_doc_id,
+        missingDocId,
         {},
         (error, res, doc) => {
           if (error) return done(error)
