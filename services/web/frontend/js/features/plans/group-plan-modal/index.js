@@ -113,7 +113,7 @@ document.querySelectorAll('[data-ol-open-group-plan-modal]').forEach(el => {
     eventTracking.sendMB('plans-page-click', {
       button: 'group',
       location,
-      period: 'annual',
+      'billing-period': 'annual',
     })
     showGroupPlanModal()
   })

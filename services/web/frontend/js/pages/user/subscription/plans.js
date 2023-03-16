@@ -31,10 +31,10 @@ function selectView(view) {
 }
 
 function setUpViewSwitching(liEl) {
-  const view = liEl.getAttribute('data-ol-view-tab')
-
   liEl.querySelector('button').addEventListener('click', function (e) {
     e.preventDefault()
+
+    const view = liEl.getAttribute('data-ol-view-tab')
     eventTracking.send('subscription-funnel', 'plans-page', `${view}-prices`)
     eventTracking.sendMB('plans-page-toggle', {
       button: view,
@@ -45,10 +45,10 @@ function setUpViewSwitching(liEl) {
 }
 
 function setUpCurrencySwitching(linkEl) {
-  const currencyCode = linkEl.getAttribute('data-ol-currencyCode-switch')
-
   linkEl.addEventListener('click', function (e) {
     e.preventDefault()
+
+    const currencyCode = linkEl.getAttribute('data-ol-currencyCode-switch')
     document.querySelectorAll('[data-ol-currencyCode]').forEach(el => {
       el.hidden = el.getAttribute('data-ol-currencyCode') !== currencyCode
     })
@@ -59,33 +59,34 @@ function setUpCurrencySwitching(linkEl) {
 }
 
 function setUpSubscriptionTracking(linkEl) {
-  const plansPageLayoutV3Variant =
-    getMeta('ol-splitTestVariants')?.['plans-page-layout-v3'] ?? 'default'
-
-  const plan =
-    linkEl.getAttribute('data-ol-tracking-plan') ||
-    linkEl.getAttribute('data-ol-start-new-subscription')
-
-  const location = linkEl.getAttribute('data-ol-location')
-  const period = linkEl.getAttribute('data-ol-item-view') || currentView
-
-  const DEFAULT_EVENT_TRACKING_KEY = 'plans-page-click'
-
-  const eventTrackingKey =
-    linkEl.getAttribute('data-ol-event-tracking-key') ||
-    DEFAULT_EVENT_TRACKING_KEY
-
-  const eventTrackingSegmentation = {
-    button: plan,
-    location,
-    period,
-  }
-
-  if (eventTrackingKey === DEFAULT_EVENT_TRACKING_KEY) {
-    eventTrackingSegmentation['plans-page-layout-v3'] = plansPageLayoutV3Variant
-  }
-
   linkEl.addEventListener('click', function () {
+    const plansPageLayoutV3Variant =
+      getMeta('ol-splitTestVariants')?.['plans-page-layout-v3'] ?? 'default'
+
+    const plan =
+      linkEl.getAttribute('data-ol-tracking-plan') ||
+      linkEl.getAttribute('data-ol-start-new-subscription')
+
+    const location = linkEl.getAttribute('data-ol-location')
+    const period = linkEl.getAttribute('data-ol-item-view') || currentView
+
+    const DEFAULT_EVENT_TRACKING_KEY = 'plans-page-click'
+
+    const eventTrackingKey =
+      linkEl.getAttribute('data-ol-event-tracking-key') ||
+      DEFAULT_EVENT_TRACKING_KEY
+
+    const eventTrackingSegmentation = {
+      button: plan,
+      location,
+      'billing-period': period,
+    }
+
+    if (eventTrackingKey === DEFAULT_EVENT_TRACKING_KEY) {
+      eventTrackingSegmentation['plans-page-layout-v3'] =
+        plansPageLayoutV3Variant
+    }
+
     const customLabel = linkEl.getAttribute('data-ol-tracking-label')
     const computedLabel = currentView === 'annual' ? `${plan}_annual` : plan
     const label = customLabel || computedLabel
