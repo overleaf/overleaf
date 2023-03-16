@@ -213,9 +213,13 @@ export default class PDFJSWrapper {
       destArray,
     })
 
-    // scroll the page down by an extra few pixels to account for the pdf.js viewer page border
+    // scroll the page left and down by an extra few pixels to account for the pdf.js viewer page border
+    const pageIndex = this.viewer.currentPageNumber - 1
+    const pageView = this.viewer.getPageView(pageIndex)
+    const offset = parseFloat(getComputedStyle(pageView.div).borderWidth)
     this.viewer.container.scrollBy({
-      top: -9,
+      top: -offset,
+      left: -offset,
     })
   }
 
