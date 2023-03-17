@@ -114,6 +114,7 @@ describe('AnalyticsManager', function () {
         'fr',
         { key: '<alert>' }
       )
+      sinon.assert.called(this.logger.info)
       sinon.assert.notCalled(this.analyticsEditingSessionQueue.add)
     })
 
@@ -122,6 +123,7 @@ describe('AnalyticsManager', function () {
         this.fakeUserId,
         'not an event!'
       )
+      sinon.assert.called(this.logger.info)
       sinon.assert.notCalled(this.analyticsEventsQueue.add)
     })
 
@@ -131,6 +133,7 @@ describe('AnalyticsManager', function () {
         'an_event',
         { not_a: 'Valid Segmentation!' }
       )
+      sinon.assert.called(this.logger.info)
       sinon.assert.notCalled(this.analyticsEventsQueue.add)
     })
 
@@ -140,6 +143,7 @@ describe('AnalyticsManager', function () {
         'an invalid property',
         'a_value'
       )
+      sinon.assert.called(this.logger.info)
       sinon.assert.notCalled(this.analyticsUserPropertiesQueue.add)
     })
 
@@ -149,6 +153,7 @@ describe('AnalyticsManager', function () {
         'a_property',
         'an invalid value'
       )
+      sinon.assert.called(this.logger.info)
       sinon.assert.notCalled(this.analyticsUserPropertiesQueue.add)
     })
   })
@@ -157,6 +162,7 @@ describe('AnalyticsManager', function () {
     it('identifyUser', function () {
       const analyticsId = 'bd101c4c-722f-4204-9e2d-8303e5d9c120'
       this.AnalyticsManager.identifyUser(this.fakeUserId, analyticsId, true)
+      sinon.assert.notCalled(this.logger.info)
       sinon.assert.calledWithMatch(
         this.Queues.createScheduledJob,
         'analytics-events',
@@ -180,6 +186,7 @@ describe('AnalyticsManager', function () {
         event,
         null
       )
+      sinon.assert.notCalled(this.logger.info)
       sinon.assert.calledWithMatch(this.analyticsEventsQueue.add, 'event', {
         analyticsId: this.analyticsId,
         event,
@@ -198,6 +205,7 @@ describe('AnalyticsManager', function () {
         countryCode,
         segmentation
       )
+      sinon.assert.notCalled(this.logger.info)
       sinon.assert.calledWithMatch(
         this.analyticsEditingSessionQueue.add,
         'editing-session',
@@ -217,6 +225,7 @@ describe('AnalyticsManager', function () {
         'an_event',
         { compileTime: timings?.compileE2E }
       )
+      sinon.assert.notCalled(this.logger.info)
       sinon.assert.calledWithMatch(this.analyticsEventsQueue.add, 'event', {
         analyticsId: this.analyticsId,
         event: 'an_event',
@@ -231,10 +240,26 @@ describe('AnalyticsManager', function () {
         'an_event',
         { segment: 'a value with spaces' }
       )
+      sinon.assert.notCalled(this.logger.info)
       sinon.assert.calledWithMatch(this.analyticsEventsQueue.add, 'event', {
         analyticsId: this.analyticsId,
         event: 'an_event',
         segmentation: { segment: 'a value with spaces' },
+        isLoggedIn: true,
+      })
+    })
+
+    it('percent sign in event segmentation value', async function () {
+      await this.AnalyticsManager.recordEventForUser(
+        this.fakeUserId,
+        'an_event',
+        { segment: 'a value with escaped comma %2C' }
+      )
+      sinon.assert.notCalled(this.logger.info)
+      sinon.assert.calledWithMatch(this.analyticsEventsQueue.add, 'event', {
+        analyticsId: this.analyticsId,
+        event: 'an_event',
+        segmentation: { segment: 'a value with escaped comma %2C' },
         isLoggedIn: true,
       })
     })
@@ -245,6 +270,7 @@ describe('AnalyticsManager', function () {
         'an_event',
         { isAutoCompile: false }
       )
+      sinon.assert.notCalled(this.logger.info)
       sinon.assert.calledWithMatch(this.analyticsEventsQueue.add, 'event', {
         analyticsId: this.analyticsId,
         event: 'an_event',

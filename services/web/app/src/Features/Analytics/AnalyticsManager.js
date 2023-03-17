@@ -6,7 +6,7 @@ const Queues = require('../../infrastructure/Queues')
 const crypto = require('crypto')
 const _ = require('lodash')
 const { expressify } = require('../../util/promises')
-const { logger } = require('@overleaf/logger')
+const logger = require('@overleaf/logger')
 const { getAnalyticsIdFromMongoUser } = require('./AnalyticsHelper')
 
 const analyticsEventsQueue = Queues.getQueue('analytics-events')
@@ -132,6 +132,10 @@ function updateEditingSession(userId, projectId, countryCode, segmentation) {
     return
   }
   if (!_isSegmentationValid(segmentation)) {
+    logger.info(
+      { userId, projectId, segmentation },
+      'rejecting analytics editing session due to bad segmentation'
+    )
     return
   }
   Metrics.analyticsQueue.inc({
@@ -165,9 +169,17 @@ function _recordEvent(
   { delay } = {}
 ) {
   if (!_isAttributeValid(event)) {
+    logger.info(
+      { analyticsId, event, segmentation },
+      'rejecting analytics event due to bad event name'
+    )
     return
   }
   if (!_isSegmentationValid(segmentation)) {
+    logger.info(
+      { analyticsId, event, segmentation },
+      'rejecting analytics event due to bad segmentation'
+    )
     return
   }
   Metrics.analyticsQueue.inc({ status: 'adding', event_type: 'event' })
@@ -193,10 +205,18 @@ function _recordEvent(
 }
 
 function _setUserProperty({ analyticsId, propertyName, propertyValue }) {
-  if (
-    !_isAttributeValid(propertyName) ||
-    !_isAttributeValueValid(propertyValue)
-  ) {
+  if (!_isAttributeValid(propertyName)) {
+    logger.info(
+      { analyticsId, propertyName, propertyValue },
+      'rejecting analytics user property due to bad name'
+    )
+    return
+  }
+  if (!_isAttributeValueValid(propertyValue)) {
+    logger.info(
+      { analyticsId, propertyName, propertyValue },
+      'rejecting analytics user property due to bad value'
+    )
     return
   }
   Metrics.analyticsQueue.inc({
@@ -254,8 +274,8 @@ function _isAttributeValueValid(attributeValue) {
 }
 
 function _isSegmentationValueValid(attributeValue) {
-  // spaces are allowed for segmentation values
-  return !attributeValue || /^[a-zA-Z0-9-_.:;,/ ]+$/.test(attributeValue)
+  // spaces and %-escaped values are allowed for segmentation values
+  return !attributeValue || /^[a-zA-Z0-9-_.:;,/ %]+$/.test(attributeValue)
 }
 
 function _isSegmentationValid(segmentation) {

@@ -2,14 +2,14 @@ const App = require('../../../../app.js')
 const QueueWorkers = require('../../../../app/src/infrastructure/QueueWorkers')
 const MongoHelper = require('./MongoHelper')
 const RedisHelper = require('./RedisHelper')
-const { logger } = require('@overleaf/logger')
+const logger = require('@overleaf/logger')
 const Settings = require('@overleaf/settings')
 const MockReCAPTCHAApi = require('../mocks/MockReCaptchaApi')
 const {
   gracefulShutdown,
 } = require('../../../../app/src/infrastructure/GracefulShutdown')
 
-logger.level('error')
+logger.logger.level('error')
 
 MongoHelper.initialize()
 RedisHelper.initialize()
