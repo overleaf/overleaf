@@ -747,7 +747,7 @@ describe('AuthenticationManager', function () {
     })
 
     it('should return an error when the password is too similar to email', function () {
-      const password = 'someuser1234'
+      const password = '12someuser34'
       const email = 'someuser@example.com'
       const error = this.AuthenticationManager._validatePasswordNotTooSimilar(
         password,
@@ -757,13 +757,25 @@ describe('AuthenticationManager', function () {
     })
 
     it('should return an error when the password is re-arranged elements of the email', function () {
-      const password = 'su2oe1em3re'
-      const email = 'someuser@example.com'
-      const error = this.AuthenticationManager._validatePasswordNotTooSimilar(
-        password,
-        email
-      )
-      expect(error).to.exist
+      const badPasswords = [
+        'su2oe1em3oolc',
+        'someone.cool',
+        'someonecool',
+        'cool.someone',
+        'coolsomeone',
+        'example.com',
+        'examplecom',
+        'com.example',
+        'comexample',
+      ]
+      const email = 'someone.cool@example.com'
+      for (const password of badPasswords) {
+        const error = this.AuthenticationManager._validatePasswordNotTooSimilar(
+          password,
+          email
+        )
+        expect(error).to.exist
+      }
     })
 
     it('should send a metric with a rounded similarity score when password is too similar to email', function () {
@@ -908,6 +920,23 @@ describe('AuthenticationManager', function () {
       })
     })
 
+    describe('email contains password', function () {
+      let user, password
+      beforeEach(function () {
+        password = 'somedomain'
+        user = { _id: 'some-user-id', email: 'someuser@somedomain.com' }
+      })
+
+      it('should reject the password', function (done) {
+        this.AuthenticationManager.setUserPassword(user, password, err => {
+          expect(err).to.exist
+          expect(err.name).to.equal('InvalidPasswordError')
+          expect(err?.info?.code).to.equal('contains_email')
+          done()
+        })
+      })
+    })
+
     describe('too short', function () {
       beforeEach(function () {
         this.settings.passwordStrengthOptions = {
@@ -946,7 +975,7 @@ describe('AuthenticationManager', function () {
     describe('password too similar to email', function () {
       beforeEach(function () {
         this.user.email = 'foobarbazquux@example.com'
-        this.password = 'foobarbaz'
+        this.password = 'foo21barbaz'
         this.metrics.inc.reset()
       })
 

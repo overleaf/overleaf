@@ -239,8 +239,9 @@ const AuthenticationManager = {
       // TODO: remove this check once the password-too-similar checks are active?
       const startOfEmail = email.split('@')[0]
       if (
-        password.indexOf(email) !== -1 ||
-        password.indexOf(startOfEmail) !== -1
+        password.includes(email) ||
+        password.includes(startOfEmail) ||
+        email.includes(password)
       ) {
         return new InvalidPasswordError({
           message: 'password contains part of email address',
@@ -389,7 +390,9 @@ const AuthenticationManager = {
   _validatePasswordNotTooSimilar(password, email) {
     password = password.toLowerCase()
     email = email.toLowerCase()
-    const stringsToCheck = [email].concat(email.split(/\W+/))
+    const stringsToCheck = [email]
+      .concat(email.split(/\W+/))
+      .concat(email.split(/@/))
     let largestSimilarity = 0
     let err = null
     for (const emailPart of stringsToCheck) {
