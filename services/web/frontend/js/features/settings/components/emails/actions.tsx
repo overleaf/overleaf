@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import MakePrimary from './actions/make-primary'
+import MakePrimary from './actions/make-primary/make-primary'
 import Remove from './actions/remove'
 import useAsync from '../../../../shared/hooks/use-async'
 import { useUserEmailsContext } from '../../context/user-email-context'

@@ -2,6 +2,7 @@ import {
   render,
   screen,
   waitForElementToBeRemoved,
+  within,
   fireEvent,
 } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -160,45 +161,74 @@ describe('email actions - make primary', function () {
     })
   })
 
-  it('shows loader when making email primary and removes button', async function () {
-    fetchMock
-      .get('/user/emails?ensureAffiliation=true', [userEmailData])
-      .post('/user/emails/default', 200)
-    const userEmailDataCopy = { ...userEmailData }
-    render(<EmailsSection />)
+  describe('make an email primary', function () {
+    const confirmPrimaryEmail = async () => {
+      const button = await screen.findByRole('button', {
+        name: /make primary/i,
+      })
+      fireEvent.click(button)
 
-    const button = await screen.findByRole('button', { name: /make primary/i })
-    fireEvent.click(button)
+      const withinModal = within(screen.getByRole('dialog'))
+      fireEvent.click(withinModal.getByRole('button', { name: /confirm/i }))
+      expect(screen.queryByRole('dialog')).to.be.null
 
-    expect(screen.queryByRole('button', { name: /make primary/i })).to.be.null
+      await waitForElementToBeRemoved(() =>
+        screen.getByRole('button', { name: /sending/i, hidden: true })
+      )
+    }
 
-    userEmailDataCopy.default = true
+    it('shows confirmation modal and closes it', async function () {
+      fetchMock.get('/user/emails?ensureAffiliation=true', [userEmailData])
+      render(<EmailsSection />)
 
-    await waitForElementToBeRemoved(() =>
-      screen.getByRole('button', { name: /sending/i })
-    )
+      const button = await screen.findByRole('button', {
+        name: /make primary/i,
+      })
+      fireEvent.click(button)
 
-    expect(
-      screen.queryByText(/an error has occurred while performing your request/i)
-    ).to.be.null
-    expect(screen.queryByRole('button', { name: /make primary/i })).to.be.null
-  })
+      const withinModal = within(screen.getByRole('dialog'))
+      withinModal.getByText(
+        /do you want to change your primary email address to .*/i
+      )
+      withinModal.getByText(
+        /this will be the email address to use if you log in with an email address and password/i
+      )
+      withinModal.getByText(
+        /important .* notifications will be sent to this email address/i
+      )
+      withinModal.getByRole('button', { name: /confirm/i })
 
-  it('shows error when making email primary', async function () {
-    fetchMock
-      .get('/user/emails?ensureAffiliation=true', [userEmailData])
-      .post('/user/emails/default', 503)
-    render(<EmailsSection />)
+      fireEvent.click(withinModal.getByRole('button', { name: /cancel/i }))
+      expect(screen.queryByRole('dialog')).to.be.null
+    })
 
-    const button = await screen.findByRole('button', { name: /make primary/i })
-    fireEvent.click(button)
+    it('shows loader and removes button', async function () {
+      fetchMock
+        .get('/user/emails?ensureAffiliation=true', [userEmailData])
+        .post('/user/emails/default', 200)
+      render(<EmailsSection />)
 
-    await waitForElementToBeRemoved(() =>
-      screen.getByRole('button', { name: /sending/i })
-    )
+      await confirmPrimaryEmail()
 
-    screen.getByText(/sorry, something went wrong/i)
-    screen.getByRole('button', { name: /make primary/i })
+      expect(
+        screen.queryByText(
+          /an error has occurred while performing your request/i
+        )
+      ).to.be.null
+      expect(screen.queryByRole('button', { name: /make primary/i })).to.be.null
+    })
+
+    it('shows error', async function () {
+      fetchMock
+        .get('/user/emails?ensureAffiliation=true', [userEmailData])
+        .post('/user/emails/default', 503)
+      render(<EmailsSection />)
+
+      await confirmPrimaryEmail()
+
+      screen.getByText(/sorry, something went wrong/i)
+      await screen.findByRole('button', { name: /make primary/i })
+    })
   })
 })
 
