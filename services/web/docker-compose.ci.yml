@@ -74,8 +74,10 @@ services:
         CYPRESS_IMAGE: $CYPRESS_IMAGE
     working_dir: /overleaf/services/web
     entrypoint: bash
+    environment:
+      CYPRESS_SPEC_PATTERN: ${CYPRESS_SPEC_PATTERN:-}
     volumes:
-      - ./cypress/results:/overleaf/services/web/cypress/results/
+      - ${CYPRESS_RESULTS:-./cypress/results}:/overleaf/services/web/cypress/results/
     command:
       - "-c"
       - "if npm run cypress:run-ct; then exit 0; else mkdir -p ./cypress/results && touch ./cypress/results/.cypress_fail; fi;"
