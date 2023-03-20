@@ -1,0 +1,10 @@
+--- services/web/app/src/Features/Project/ProjectController.js
++++ services/web/app/src/Features/Project/ProjectController.js
+@@ -535,6 +535,7 @@ const ProjectController = {
+
+         if (
+           user &&
++          Features.hasFeature('saas') &&
+           UserPrimaryEmailCheckHandler.requiresPrimaryEmailCheck(user)
+         ) {
+           return res.redirect('/user/emails/primary-email-check')

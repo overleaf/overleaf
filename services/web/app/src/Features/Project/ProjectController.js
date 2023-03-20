@@ -535,6 +535,7 @@ const ProjectController = {
 
         if (
           user &&
+          Features.hasFeature('saas') &&
           UserPrimaryEmailCheckHandler.requiresPrimaryEmailCheck(user)
         ) {
           return res.redirect('/user/emails/primary-email-check')
