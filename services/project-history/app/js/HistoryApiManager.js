@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -13,11 +12,11 @@
 import * as WebApiManager from './WebApiManager.js'
 import logger from '@overleaf/logger'
 
-export function shouldUseProjectHistory(project_id, callback) {
+export function shouldUseProjectHistory(projectId, callback) {
   if (callback == null) {
     callback = function () {}
   }
-  return WebApiManager.getHistoryId(project_id, (error, historyId) =>
+  return WebApiManager.getHistoryId(projectId, (error, historyId) =>
     callback(error, historyId != null)
   )
 }

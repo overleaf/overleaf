@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-undef,
     no-unused-vars,
 */
@@ -52,7 +51,7 @@ describe('FileTree Diffs', function () {
 
       return ProjectHistoryClient.initializeProject(
         this.historyId,
-        (error, ol_project) => {
+        (error, olProject) => {
           if (error != null) {
             throw error
           }

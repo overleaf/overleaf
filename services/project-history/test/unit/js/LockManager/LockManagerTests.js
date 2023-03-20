@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     mocha/no-nested-tests,
     no-return-assign,
     no-undef,

@@ -1,6 +1,3 @@
-/* eslint-disable
-    camelcase,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -16,14 +13,14 @@ import metrics from '@overleaf/metrics'
 import OError from '@overleaf/o-error'
 import { db } from './mongodb.js'
 
-export function record(project_id, queueSize, error, callback) {
+export function record(projectId, queueSize, error, callback) {
   if (callback == null) {
     callback = function () {}
   }
   const _callback = function (mongoError) {
     if (mongoError != null) {
       logger.error(
-        { project_id, mongoError },
+        { projectId, mongoError },
         'failed to change project statues in mongo'
       )
     }
@@ -38,12 +35,12 @@ export function record(project_id, queueSize, error, callback) {
       ts: new Date(),
     }
     logger.debug(
-      { project_id, errorRecord },
+      { projectId, errorRecord },
       'recording failed attempt to process updates'
     )
     return db.projectHistoryFailures.updateOne(
       {
-        project_id,
+        project_id: projectId,
       },
       {
         $set: errorRecord,
@@ -64,20 +61,23 @@ export function record(project_id, queueSize, error, callback) {
       _callback
     )
   } else {
-    return db.projectHistoryFailures.deleteOne({ project_id }, _callback)
+    return db.projectHistoryFailures.deleteOne(
+      { project_id: projectId },
+      _callback
+    )
   }
 }
 
-export function setForceDebug(project_id, state, callback) {
+export function setForceDebug(projectId, state, callback) {
   if (state == null) {
     state = true
   }
   if (callback == null) {
     callback = function () {}
   }
-  logger.debug({ project_id, state }, 'setting forceDebug state for project')
+  logger.debug({ projectId, state }, 'setting forceDebug state for project')
   return db.projectHistoryFailures.updateOne(
-    { project_id },
+    { project_id: projectId },
     { $set: { forceDebug: state } },
     { upsert: true },
     callback
@@ -86,13 +86,13 @@ export function setForceDebug(project_id, state, callback) {
 
 // we only record the sync start time, and not the end time, because the
 // record should be cleared on success.
-export function recordSyncStart(project_id, callback) {
+export function recordSyncStart(projectId, callback) {
   if (callback == null) {
     callback = function () {}
   }
   return db.projectHistoryFailures.updateOne(
     {
-      project_id,
+      project_id: projectId,
     },
     {
       $currentDate: {
@@ -116,19 +116,19 @@ export function recordSyncStart(project_id, callback) {
   )
 }
 
-export function getFailureRecord(project_id, callback) {
+export function getFailureRecord(projectId, callback) {
   if (callback == null) {
     callback = function () {}
   }
-  return db.projectHistoryFailures.findOne({ project_id }, callback)
+  return db.projectHistoryFailures.findOne({ project_id: projectId }, callback)
 }
 
-export function getLastFailure(project_id, callback) {
+export function getLastFailure(projectId, callback) {
   if (callback == null) {
     callback = function () {}
   }
   return db.projectHistoryFailures.findOneAndUpdate(
-    { project_id },
+    { project_id: projectId },
     { $inc: { requestCount: 1 } }, // increment the request count every time we check the last failure
     { projection: { error: 1, ts: 1 } },
     (err, result) => callback(err, result && result.value)

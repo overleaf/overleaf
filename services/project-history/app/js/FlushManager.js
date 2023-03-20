@@ -1,6 +1,3 @@
-/* eslint-disable
-    camelcase,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -18,12 +15,12 @@ import * as RedisManager from './RedisManager.js'
 import * as UpdatesProcessor from './UpdatesProcessor.js'
 import * as ErrorRecorder from './ErrorRecorder.js'
 
-export function flushIfOld(project_id, cutoffTime, callback) {
+export function flushIfOld(projectId, cutoffTime, callback) {
   if (callback == null) {
     callback = function () {}
   }
   return RedisManager.getFirstOpTimestamp(
-    project_id,
+    projectId,
     function (err, firstOpTimestamp) {
       if (err != null) {
         return callback(OError.tag(err))
@@ -34,10 +31,10 @@ export function flushIfOld(project_id, cutoffTime, callback) {
       // for safety.
       if (!firstOpTimestamp || firstOpTimestamp < cutoffTime) {
         logger.debug(
-          { project_id, firstOpTimestamp, cutoffTime },
+          { projectId, firstOpTimestamp, cutoffTime },
           'flushing old project'
         )
-        return UpdatesProcessor.processUpdatesForProject(project_id, callback)
+        return UpdatesProcessor.processUpdatesForProject(projectId, callback)
       } else {
         return callback()
       }
@@ -81,7 +78,7 @@ export function flushOldOps(options, callback) {
         const startTime = new Date()
         let count = 0
         const jobs = projectIds.map(
-          project_id =>
+          projectId =>
             function (cb) {
               const timeTaken = new Date() - startTime
               count++
@@ -101,14 +98,14 @@ export function flushOldOps(options, callback) {
                 logger.debug({ count }, 'background retries hit limit')
                 return cb(new OError('hit limit'))
               }
-              if (failedProjects.has(project_id)) {
+              if (failedProjects.has(projectId)) {
                 // skip failed projects
                 return setTimeout(cb, options.queueDelay || 100) // pause between flushes
               }
-              return flushIfOld(project_id, cutoffTime, function (err) {
+              return flushIfOld(projectId, cutoffTime, function (err) {
                 if (err != null) {
                   logger.warn(
-                    { project_id, flushErr: err },
+                    { projectId, flushErr: err },
                     'error flushing old project'
                   )
                 }

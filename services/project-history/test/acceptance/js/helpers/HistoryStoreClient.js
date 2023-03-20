@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -14,13 +13,13 @@ import { expect } from 'chai'
 import request from 'request'
 import Settings from '@overleaf/settings'
 
-export function getLatestContent(ol_project_id, callback) {
+export function getLatestContent(olProjectId, callback) {
   if (callback == null) {
     callback = function () {}
   }
   return request.get(
     {
-      url: `${Settings.overleaf.history.host}/projects/${ol_project_id}/latest/content`,
+      url: `${Settings.overleaf.history.host}/projects/${olProjectId}/latest/content`,
       auth: {
         user: Settings.overleaf.history.user,
         pass: Settings.overleaf.history.pass,

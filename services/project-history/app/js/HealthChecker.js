@@ -1,6 +1,3 @@
-/* eslint-disable
-    camelcase,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -20,9 +17,9 @@ import * as LockManager from './LockManager.js'
 const { port } = settings.internal.history
 
 export function check(callback) {
-  const project_id = ObjectId(settings.history.healthCheck.project_id)
-  const url = `http://localhost:${port}/project/${project_id}`
-  logger.debug({ project_id }, 'running health check')
+  const projectId = ObjectId(settings.history.healthCheck.project_id)
+  const url = `http://localhost:${port}/project/${projectId}`
+  logger.debug({ projectId }, 'running health check')
   const jobs = [
     cb =>
       request.get(
@@ -30,7 +27,7 @@ export function check(callback) {
         function (err, res, body) {
           if (err != null) {
             OError.tag(err, 'error checking lock for health check', {
-              project_id,
+              project_id: projectId,
             })
             logger.err(err)
             return cb(err)
@@ -46,7 +43,9 @@ export function check(callback) {
         { url: `${url}/flush`, timeout: 10000 },
         function (err, res, body) {
           if (err != null) {
-            OError.tag(err, 'error flushing for health check', { project_id })
+            OError.tag(err, 'error flushing for health check', {
+              project_id: projectId,
+            })
             logger.err(err)
             return cb(err)
           } else if ((res != null ? res.statusCode : undefined) !== 204) {
@@ -62,7 +61,7 @@ export function check(callback) {
         function (err, res, body) {
           if (err != null) {
             OError.tag(err, 'error getting updates for health check', {
-              project_id,
+              project_id: projectId,
             })
             logger.err(err)
             return cb(err)

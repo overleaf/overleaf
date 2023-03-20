@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     mocha/no-nested-tests,
     no-return-assign,
     no-undef,
@@ -67,8 +66,8 @@ describe('UpdatesProcessor', function () {
       redis: {
         lock: {
           key_schema: {
-            projectHistoryLock({ project_id }) {
-              return `ProjectHistoryLock:${project_id}`
+            projectHistoryLock({ project_id: projectId }) {
+              return `ProjectHistoryLock:${projectId}`
             },
           },
         },

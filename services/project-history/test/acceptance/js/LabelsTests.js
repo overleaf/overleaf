@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-undef,
     no-unused-vars,
 */
@@ -39,7 +38,7 @@ describe('Labels', function () {
 
       return ProjectHistoryClient.initializeProject(
         this.historyId,
-        (error, ol_project) => {
+        (error, olProject) => {
           if (error != null) {
             throw error
           }
@@ -48,7 +47,7 @@ describe('Labels', function () {
             .get(`/project/${this.project_id}/details`)
             .reply(200, {
               name: 'Test Project',
-              overleaf: { history: { id: ol_project.id } },
+              overleaf: { history: { id: olProject.id } },
             })
 
           MockHistoryStore()
@@ -139,11 +138,11 @@ describe('Labels', function () {
   })
 
   it('can transfer ownership of labels', function (done) {
-    const from_user = ObjectId().toString()
-    const to_user = ObjectId().toString()
+    const fromUser = ObjectId().toString()
+    const toUser = ObjectId().toString()
     return ProjectHistoryClient.createLabel(
       this.project_id,
-      from_user,
+      fromUser,
       7,
       this.comment,
       this.created_at,
@@ -153,7 +152,7 @@ describe('Labels', function () {
         }
         return ProjectHistoryClient.createLabel(
           this.project_id,
-          from_user,
+          fromUser,
           7,
           this.comment2,
           this.created_at,
@@ -162,8 +161,8 @@ describe('Labels', function () {
               throw error
             }
             return ProjectHistoryClient.transferLabelOwnership(
-              from_user,
-              to_user,
+              fromUser,
+              toUser,
               error => {
                 if (error != null) {
                   throw error
@@ -180,14 +179,14 @@ describe('Labels', function () {
                         comment: label.comment,
                         version: label.version,
                         created_at: label.created_at,
-                        user_id: to_user,
+                        user_id: toUser,
                       },
                       {
                         id: label2.id,
                         comment: label2.comment,
                         version: label2.version,
                         created_at: label2.created_at,
-                        user_id: to_user,
+                        user_id: toUser,
                       },
                     ])
                     return done()

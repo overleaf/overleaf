@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -15,12 +14,12 @@ import logger from '@overleaf/logger'
 import Settings from '@overleaf/settings'
 import OError from '@overleaf/o-error'
 
-export function getDocument(project_id, doc_id, callback) {
+export function getDocument(projectId, docId, callback) {
   if (callback == null) {
     callback = function () {}
   }
-  const url = `${Settings.apis.documentupdater.url}/project/${project_id}/doc/${doc_id}`
-  logger.debug({ project_id, doc_id }, 'getting doc from document updater')
+  const url = `${Settings.apis.documentupdater.url}/project/${projectId}/doc/${docId}`
+  logger.debug({ projectId, docId }, 'getting doc from document updater')
   return request.get(url, function (error, res, body) {
     if (error != null) {
       return callback(OError.tag(error))
@@ -33,33 +32,33 @@ export function getDocument(project_id, doc_id, callback) {
         return callback(error)
       }
       logger.debug(
-        { project_id, doc_id, version: body.version },
+        { projectId, docId, version: body.version },
         'got doc from document updater'
       )
       return callback(null, body.lines.join('\n'), body.version)
     } else {
       error = new OError(
         `doc updater returned a non-success status code: ${res.statusCode}`,
-        { project_id, doc_id, url }
+        { project_id: projectId, doc_id: docId, url }
       )
       return callback(error)
     }
   })
 }
 
-export function setDocument(project_id, doc_id, content, user_id, callback) {
+export function setDocument(projectId, docId, content, userId, callback) {
   if (callback == null) {
     callback = function () {}
   }
-  const url = `${Settings.apis.documentupdater.url}/project/${project_id}/doc/${doc_id}`
-  logger.debug({ project_id, doc_id }, 'setting doc in document updater')
+  const url = `${Settings.apis.documentupdater.url}/project/${projectId}/doc/${docId}`
+  logger.debug({ projectId, docId }, 'setting doc in document updater')
   return request.post(
     {
       url,
       json: {
         lines: content.split('\n'),
         source: 'restore',
-        user_id,
+        user_id: userId,
         undoing: true,
       },
     },
@@ -72,7 +71,7 @@ export function setDocument(project_id, doc_id, content, user_id, callback) {
       } else {
         error = new OError(
           `doc updater returned a non-success status code: ${res.statusCode}`,
-          { project_id, doc_id, url }
+          { project_id: projectId, doc_id: docId, url }
         )
         return callback(error)
       }

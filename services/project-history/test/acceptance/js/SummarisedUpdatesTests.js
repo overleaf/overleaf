@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-undef,
     no-unused-vars,
 */
@@ -42,7 +41,7 @@ describe('Summarized updates', function () {
 
       return ProjectHistoryClient.initializeProject(
         this.historyId,
-        (error, ol_project) => {
+        (error, olProject) => {
           if (error != null) {
             throw error
           }
@@ -50,7 +49,7 @@ describe('Summarized updates', function () {
             .get(`/project/${this.projectId}/details`)
             .reply(200, {
               name: 'Test Project',
-              overleaf: { history: { id: ol_project.id } },
+              overleaf: { history: { id: olProject.id } },
             })
 
           MockHistoryStore()

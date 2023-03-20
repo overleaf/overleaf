@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-undef,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -23,9 +22,9 @@ const MockWeb = () => nock('http://localhost:3000')
 
 describe('Health Check', function () {
   beforeEach(function (done) {
-    const project_id = ObjectId()
+    const projectId = ObjectId()
     const historyId = ObjectId().toString()
-    settings.history.healthCheck = { project_id }
+    settings.history.healthCheck = { project_id: projectId }
     return ProjectHistoryApp.ensureRunning(error => {
       if (error != null) {
         throw error
@@ -45,7 +44,7 @@ describe('Health Check', function () {
           },
         })
       MockWeb()
-        .get(`/project/${project_id}/details`)
+        .get(`/project/${projectId}/details`)
         .reply(200, {
           name: 'Test Project',
           overleaf: {
