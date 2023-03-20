@@ -1,7 +1,14 @@
+import { ElementType } from 'react'
 import { useTranslation } from 'react-i18next'
 import getMeta from '../../../utils/meta'
+import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 import ActionsCopyProject from './actions-copy-project'
 import ActionsWordCount from './actions-word-count'
+
+const components = importOverleafModules('editorLeftMenuManageTemplate') as {
+  import: { default: ElementType }
+  path: string
+}[]
 
 export default function ActionsMenu() {
   const { t } = useTranslation()
@@ -18,6 +25,11 @@ export default function ActionsMenu() {
         <li>
           <ActionsCopyProject />
         </li>
+        {components.map(({ import: { default: Component }, path }) => (
+          <li key={path}>
+            <Component />
+          </li>
+        ))}
         <li>
           <ActionsWordCount />
         </li>

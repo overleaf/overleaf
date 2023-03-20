@@ -1314,6 +1314,9 @@ const ProjectController = {
               gitBridgePublicBaseUrl: Settings.gitBridgePublicBaseUrl,
               wsUrl,
               showSupport: Features.hasFeature('support'),
+              showTemplatesServerPro: Features.hasFeature(
+                'templates-server-pro'
+              ),
               pdfjsVariant: pdfjsAssignment.variant,
               debugPdfDetach,
               showLegacySourceEditor,

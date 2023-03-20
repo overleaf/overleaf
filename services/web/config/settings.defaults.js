@@ -794,6 +794,7 @@ module.exports = {
     importProjectFromGithubModalWrapper: [],
     importProjectFromGithubMenu: [],
     editorLeftMenuSync: [],
+    editorLeftMenuManageTemplate: [],
   },
 
   moduleImportSequence: [
