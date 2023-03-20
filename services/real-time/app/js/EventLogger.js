@@ -1,6 +1,3 @@
-/* eslint-disable
-    camelcase,
-*/
 let EventLogger
 const logger = require('@overleaf/logger')
 const metrics = require('@overleaf/metrics')
@@ -26,12 +23,12 @@ module.exports = EventLogger = {
     }
   },
 
-  checkEventOrder(channel, message_id) {
-    if (typeof message_id !== 'string') {
+  checkEventOrder(channel, messageId) {
+    if (typeof messageId !== 'string') {
       return
     }
     let result
-    if (!(result = message_id.match(/^(.*)-(\d+)$/))) {
+    if (!(result = messageId.match(/^(.*)-(\d+)$/))) {
       return
     }
     const key = result[1]
@@ -48,12 +45,12 @@ module.exports = EventLogger = {
     }
     if (count === previous) {
       metrics.inc(`event.${channel}.duplicate`)
-      logger.warn({ channel, message_id }, 'duplicate event')
+      logger.warn({ channel, messageId }, 'duplicate event')
       return 'duplicate'
     } else {
       metrics.inc(`event.${channel}.out-of-order`)
       logger.warn(
-        { channel, message_id, key, previous, count },
+        { channel, messageId, key, previous, count },
         'out of order event'
       )
       return 'out-of-order'

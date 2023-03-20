@@ -1,6 +1,3 @@
-/* eslint-disable
-    camelcase,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -31,16 +28,21 @@ module.exports = FixturesManager = {
     if (!options.project) {
       options.project = { name: 'Test Project' }
     }
-    const { project_id, user_id, privilegeLevel, project, publicAccess } =
-      options
+    const {
+      project_id: projectId,
+      user_id: userId,
+      privilegeLevel,
+      project,
+      publicAccess,
+    } = options
 
     const privileges = {}
-    privileges[user_id] = privilegeLevel
+    privileges[userId] = privilegeLevel
     if (publicAccess) {
       privileges['anonymous-user'] = publicAccess
     }
 
-    MockWebServer.createMockProject(project_id, privileges, project)
+    MockWebServer.createMockProject(projectId, privileges, project)
     return MockWebServer.run(error => {
       if (error != null) {
         throw error
@@ -48,7 +50,7 @@ module.exports = FixturesManager = {
       return RealTimeClient.setSession(
         {
           user: {
-            _id: user_id,
+            _id: userId,
             first_name: 'Joe',
             last_name: 'Bloggs',
           },
@@ -58,8 +60,8 @@ module.exports = FixturesManager = {
             throw error
           }
           return callback(null, {
-            project_id,
-            user_id,
+            project_id: projectId,
+            user_id: userId,
             privilegeLevel,
             project,
           })
@@ -68,7 +70,7 @@ module.exports = FixturesManager = {
     })
   },
 
-  setUpDoc(project_id, options, callback) {
+  setUpDoc(projectId, options, callback) {
     if (options == null) {
       options = {}
     }
@@ -87,9 +89,9 @@ module.exports = FixturesManager = {
     if (!options.ops) {
       options.ops = ['mock', 'ops']
     }
-    const { doc_id, lines, version, ops, ranges } = options
+    const { doc_id: docId, lines, version, ops, ranges } = options
 
-    MockDocUpdaterServer.createMockDoc(project_id, doc_id, {
+    MockDocUpdaterServer.createMockDoc(projectId, docId, {
       lines,
       version,
       ops,
@@ -99,7 +101,13 @@ module.exports = FixturesManager = {
       if (error != null) {
         throw error
       }
-      return callback(null, { project_id, doc_id, lines, version, ops })
+      return callback(null, {
+        project_id: projectId,
+        doc_id: docId,
+        lines,
+        version,
+        ops,
+      })
     })
   },
 

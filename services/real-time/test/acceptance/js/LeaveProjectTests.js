@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-throw-literal,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -37,9 +36,9 @@ describe('leaveProject', function () {
                   name: 'Test Project',
                 },
               },
-              (e, { project_id, user_id }) => {
-                this.project_id = project_id
-                this.user_id = user_id
+              (e, { project_id: projectId, user_id: userId }) => {
+                this.project_id = projectId
+                this.user_id = userId
                 return cb()
               }
             )
@@ -93,8 +92,8 @@ describe('leaveProject', function () {
             return FixturesManager.setUpDoc(
               this.project_id,
               { lines: this.lines, version: this.version, ops: this.ops },
-              (e, { doc_id }) => {
-                this.doc_id = doc_id
+              (e, { doc_id: docId }) => {
+                this.doc_id = docId
                 return cb(e)
               }
             )
@@ -184,9 +183,9 @@ describe('leaveProject', function () {
                   name: 'Test Project',
                 },
               },
-              (e, { project_id, user_id }) => {
-                this.project_id = project_id
-                this.user_id = user_id
+              (e, { project_id: projectId, user_id: userId }) => {
+                this.project_id = projectId
+                this.user_id = userId
                 return cb()
               }
             )
@@ -214,8 +213,8 @@ describe('leaveProject', function () {
             return FixturesManager.setUpDoc(
               this.project_id,
               { lines: this.lines, version: this.version, ops: this.ops },
-              (e, { doc_id }) => {
-                this.doc_id = doc_id
+              (e, { doc_id: docId }) => {
+                this.doc_id = docId
                 return cb(e)
               }
             )

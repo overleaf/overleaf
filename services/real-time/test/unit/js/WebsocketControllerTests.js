@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-return-assign,
     no-throw-literal,
     no-unused-vars,
@@ -317,8 +316,8 @@ describe('WebsocketController', function () {
       this.clientsInRoom = []
       this.io = {
         sockets: {
-          clients: room_id => {
-            if (room_id !== this.project_id) {
+          clients: roomId => {
+            if (roomId !== this.project_id) {
               throw 'expected room_id to be project_id'
             }
             return this.clientsInRoom
@@ -396,8 +395,8 @@ describe('WebsocketController', function () {
         this.clientsInRoom = ['mock-remaining-client']
         this.io = {
           sockets: {
-            clients: room_id => {
-              if (room_id !== this.project_id) {
+            clients: roomId => {
+              if (roomId !== this.project_id) {
                 throw 'expected room_id to be project_id'
               }
               return this.clientsInRoom
@@ -600,11 +599,11 @@ describe('WebsocketController', function () {
       })
 
       return it('should call the callback with the escaped lines', function () {
-        const escaped_lines = this.callback.args[0][1]
-        const escaped_word = escaped_lines.pop()
-        escaped_word.should.equal('rÃ¤ksmÃ¶rgÃ¥s')
+        const escapedLines = this.callback.args[0][1]
+        const escapedWord = escapedLines.pop()
+        escapedWord.should.equal('rÃ¤ksmÃ¶rgÃ¥s')
         // Check that unescaping works
-        return decodeURIComponent(escape(escaped_word)).should.equal(
+        return decodeURIComponent(escape(escapedWord)).should.equal(
           'räksmörgås'
         )
       })
@@ -623,10 +622,10 @@ describe('WebsocketController', function () {
       })
 
       return it('should call the callback with the encoded comment', function () {
-        const encoded_comments = this.callback.args[0][4]
-        const encoded_comment = encoded_comments.comments.pop()
-        const encoded_comment_text = encoded_comment.op.c
-        return encoded_comment_text.should.equal('rÃ¤ksmÃ¶rgÃ¥s')
+        const encodedComments = this.callback.args[0][4]
+        const encodedComment = encodedComments.comments.pop()
+        const encodedCommentText = encodedComment.op.c
+        return encodedCommentText.should.equal('rÃ¤ksmÃ¶rgÃ¥s')
       })
     })
 
@@ -641,10 +640,10 @@ describe('WebsocketController', function () {
           this.callback
         )
 
-        const encoded_changes = this.callback.args[0][4]
-        const encoded_change = encoded_changes.changes.pop()
-        const encoded_change_text = encoded_change.op.i
-        return encoded_change_text.should.equal('rÃ¤ksmÃ¶rgÃ¥s')
+        const encodedChanges = this.callback.args[0][4]
+        const encodedChange = encodedChanges.changes.pop()
+        const encodedChangeText = encodedChange.op.i
+        return encodedChangeText.should.equal('rÃ¤ksmÃ¶rgÃ¥s')
       })
 
       return it('should call the callback with the encoded delete change', function () {
@@ -657,10 +656,10 @@ describe('WebsocketController', function () {
           this.callback
         )
 
-        const encoded_changes = this.callback.args[0][4]
-        const encoded_change = encoded_changes.changes.pop()
-        const encoded_change_text = encoded_change.op.d
-        return encoded_change_text.should.equal('rÃ¤ksmÃ¶rgÃ¥s')
+        const encodedChanges = this.callback.args[0][4]
+        const encodedChange = encodedChanges.changes.pop()
+        const encodedChangeText = encodedChange.op.d
+        return encodedChangeText.should.equal('rÃ¤ksmÃ¶rgÃ¥s')
       })
     })
 
@@ -746,11 +745,7 @@ describe('WebsocketController', function () {
         this.AuthorizationManager.assertClientCanViewProjectAndDoc.yields(
           new Error()
         )
-        this.DocumentUpdaterManager.checkDocument = (
-          project_id,
-          doc_id,
-          cb
-        ) => {
+        this.DocumentUpdaterManager.checkDocument = (projectId, docId, cb) => {
           this.client.disconnected = true
           cb()
         }
@@ -790,11 +785,7 @@ describe('WebsocketController', function () {
         this.AuthorizationManager.assertClientCanViewProjectAndDoc.yields(
           new Error()
         )
-        this.DocumentUpdaterManager.checkDocument = (
-          project_id,
-          doc_id,
-          cb
-        ) => {
+        this.DocumentUpdaterManager.checkDocument = (projectId, docId, cb) => {
           this.DocumentUpdaterManager.checkDocument = sinon.stub().yields()
           this.WebsocketController.joinDoc(
             this.client,
@@ -838,11 +829,7 @@ describe('WebsocketController', function () {
         this.AuthorizationManager.assertClientCanViewProjectAndDoc.yields(
           new Error()
         )
-        this.DocumentUpdaterManager.checkDocument = (
-          project_id,
-          doc_id,
-          cb
-        ) => {
+        this.DocumentUpdaterManager.checkDocument = (projectId, docId, cb) => {
           this.WebsocketController.leaveDoc(this.client, this.doc_id, () => {})
           cb()
         }
@@ -873,7 +860,7 @@ describe('WebsocketController', function () {
 
     describe('when the client disconnects while RoomManager.joinDoc is running', function () {
       beforeEach(function () {
-        this.RoomManager.joinDoc = (client, doc_id, cb) => {
+        this.RoomManager.joinDoc = (client, docId, cb) => {
           this.client.disconnected = true
           return cb()
         }
@@ -909,8 +896,8 @@ describe('WebsocketController', function () {
     return describe('when the client disconnects while DocumentUpdaterManager.getDocument is running', function () {
       beforeEach(function () {
         this.DocumentUpdaterManager.getDocument = (
-          project_id,
-          doc_id,
+          projectId,
+          docId,
           fromVersion,
           callback
         ) => {
@@ -1524,9 +1511,9 @@ describe('WebsocketController', function () {
         this.logger.warn.called.should.equal(true)
         return this.logger.warn.args[0].should.deep.equal([
           {
-            user_id: this.user_id,
-            project_id: this.project_id,
-            doc_id: this.doc_id,
+            userId: this.user_id,
+            projectId: this.project_id,
+            docId: this.doc_id,
             updateSize: 7372835,
           },
           'update is too large',

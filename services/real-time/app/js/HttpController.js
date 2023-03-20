@@ -1,7 +1,3 @@
-/* eslint-disable
-    camelcase,
-*/
-
 let HttpController
 module.exports = HttpController = {
   // The code in this controller is hard to unit test because of a lot of
@@ -10,25 +6,25 @@ module.exports = HttpController = {
   // and for checking internal state in acceptance tests. The acceptances tests
   // should provide appropriate coverage.
   _getConnectedClientView(ioClient) {
-    const client_id = ioClient.id
+    const clientId = ioClient.id
     const {
-      project_id,
-      user_id,
-      first_name,
-      last_name,
+      project_id: projectId,
+      user_id: userId,
+      first_name: firstName,
+      last_name: lastName,
       email,
-      connected_time,
+      connected_time: connectedTime,
     } = ioClient.ol_context
     const client = {
-      client_id,
-      project_id,
-      user_id,
-      first_name,
-      last_name,
+      client_id: clientId,
+      project_id: projectId,
+      user_id: userId,
+      first_name: firstName,
+      last_name: lastName,
       email,
-      connected_time,
+      connected_time: connectedTime,
     }
-    client.rooms = Object.keys(ioClient.manager.roomClients[client_id] || {})
+    client.rooms = Object.keys(ioClient.manager.roomClients[clientId] || {})
       // drop the namespace
       .filter(room => room !== '')
       // room names are composed as '<NAMESPACE>/<ROOM>' and the default
@@ -45,9 +41,9 @@ module.exports = HttpController = {
   },
 
   getConnectedClient(req, res) {
-    const { client_id } = req.params
+    const { client_id: clientId } = req.params
     const io = req.app.get('io')
-    const ioClient = io.sockets.sockets[client_id]
+    const ioClient = io.sockets.sockets[clientId]
     if (!ioClient) {
       res.sendStatus(404)
       return

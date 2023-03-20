@@ -44,9 +44,7 @@ There is additional meta-data that UserItems and SessionItems may use to skip
   UserItem: { hasOwnProject: true, setup(cb) { cb(null, { project_id, ... }) }}
   SessionItem: { needsOwnProject: true }
  */
-/* eslint-disable
-    camelcase,
-*/
+
 const { expect } = require('chai')
 const async = require('async')
 
@@ -58,11 +56,11 @@ const Keys = settings.redis.documentupdater.key_schema
 const redis = require('@overleaf/redis-wrapper')
 const rclient = redis.createClient(settings.redis.pubsub)
 
-function getPendingUpdates(doc_id, cb) {
-  rclient.lrange(Keys.pendingUpdates({ doc_id }), 0, 10, cb)
+function getPendingUpdates(docId, cb) {
+  rclient.lrange(Keys.pendingUpdates({ doc_id: docId }), 0, 10, cb)
 }
-function cleanupPreviousUpdates(doc_id, cb) {
-  rclient.del(Keys.pendingUpdates({ doc_id }), cb)
+function cleanupPreviousUpdates(docId, cb) {
+  rclient.del(Keys.pendingUpdates({ doc_id: docId }), cb)
 }
 
 describe('MatrixTests', function () {
@@ -72,10 +70,10 @@ describe('MatrixTests', function () {
   before(function setupPrivateProject(done) {
     FixturesManager.setUpEditorSession(
       { privilegeLevel: 'owner' },
-      (err, { project_id, doc_id }) => {
+      (err, { project_id: projectId, doc_id: docId }) => {
         if (err) return done(err)
-        privateProjectId = project_id
-        privateDocId = doc_id
+        privateProjectId = projectId
+        privateDocId = docId
         privateClient = RealTimeClient.connect()
         privateClient.on('connectionAccepted', () => {
           privateClient.emit(
@@ -96,9 +94,9 @@ describe('MatrixTests', function () {
       {
         publicAccess: 'readAndWrite',
       },
-      (err, { project_id, doc_id }) => {
-        readWriteProjectId = project_id
-        readWriteDocId = doc_id
+      (err, { project_id: projectId, doc_id: docId }) => {
+        readWriteProjectId = projectId
+        readWriteDocId = docId
         done(err)
       }
     )
@@ -118,11 +116,11 @@ describe('MatrixTests', function () {
 
     registered: {
       setup(cb) {
-        const user_id = FixturesManager.getRandomId()
+        const userId = FixturesManager.getRandomId()
         RealTimeClient.setSession(
           {
             user: {
-              _id: user_id,
+              _id: userId,
               first_name: 'Joe',
               last_name: 'Bloggs',
             },
@@ -130,7 +128,7 @@ describe('MatrixTests', function () {
           err => {
             if (err) return cb(err)
             cb(null, {
-              user_id,
+              user_id: userId,
               client: RealTimeClient.connect(),
             })
           }
@@ -142,12 +140,12 @@ describe('MatrixTests', function () {
       setup(cb) {
         FixturesManager.setUpEditorSession(
           { privilegeLevel: 'owner' },
-          (err, { project_id, user_id, doc_id }) => {
+          (err, { project_id: projectId, user_id: userId, doc_id: docId }) => {
             if (err) return cb(err)
             cb(null, {
-              user_id,
-              project_id,
-              doc_id,
+              user_id: userId,
+              project_id: projectId,
+              doc_id: docId,
               client: RealTimeClient.connect(),
             })
           }

@@ -1,6 +1,3 @@
-/* eslint-disable
-    camelcase,
-*/
 const metrics = require('@overleaf/metrics')
 const logger = require('@overleaf/logger')
 const settings = require('@overleaf/settings')
@@ -184,7 +181,7 @@ module.exports = Router = {
       metrics.inc('socket-io.connection', 1, { status: client.transport })
       metrics.gauge('socket-io.clients', io.sockets.clients().length)
 
-      logger.debug({ session, client_id: client.id }, 'client connected')
+      logger.debug({ session, clientId: client.id }, 'client connected')
 
       let user
       if (session && session.passport && session.passport.user) {
@@ -230,11 +227,11 @@ module.exports = Router = {
             disconnect: 1,
           })
         }
-        const { project_id, anonymousAccessToken } = data
+        const { project_id: projectId, anonymousAccessToken } = data
         // only allow connection to a single project
         if (
           client.ol_current_project_id &&
-          project_id !== client.ol_current_project_id
+          projectId !== client.ol_current_project_id
         ) {
           return Router._handleError(
             callback,
@@ -244,18 +241,18 @@ module.exports = Router = {
             { disconnect: 1 }
           )
         }
-        client.ol_current_project_id = project_id
+        client.ol_current_project_id = projectId
         if (anonymousAccessToken) {
           user.anonymousAccessToken = anonymousAccessToken
         }
         WebsocketController.joinProject(
           client,
           user,
-          project_id,
+          projectId,
           function (err, ...args) {
             if (err) {
               Router._handleError(callback, err, client, 'joinProject', {
-                project_id,
+                project_id: projectId,
                 user_id: user._id,
               })
             } else {
@@ -281,7 +278,7 @@ module.exports = Router = {
       // doc_id, fromVersion, callback
       // doc_id, options, callback
       // doc_id, fromVersion, options, callback
-      client.on('joinDoc', function (doc_id, fromVersion, options, callback) {
+      client.on('joinDoc', function (docId, fromVersion, options, callback) {
         if (typeof fromVersion === 'function' && !options) {
           callback = fromVersion
           fromVersion = -1
@@ -310,7 +307,7 @@ module.exports = Router = {
         }
         try {
           Joi.assert(
-            { doc_id, fromVersion, options },
+            { doc_id: docId, fromVersion, options },
             Joi.object({
               doc_id: JOI_OBJECT_ID,
               fromVersion: Joi.number().integer(),
@@ -324,13 +321,13 @@ module.exports = Router = {
         }
         WebsocketController.joinDoc(
           client,
-          doc_id,
+          docId,
           fromVersion,
           options,
           function (err, ...args) {
             if (err) {
               Router._handleError(callback, err, client, 'joinDoc', {
-                doc_id,
+                doc_id: docId,
                 fromVersion,
               })
             } else {
@@ -340,21 +337,21 @@ module.exports = Router = {
         )
       })
 
-      client.on('leaveDoc', function (doc_id, callback) {
+      client.on('leaveDoc', function (docId, callback) {
         if (typeof callback !== 'function') {
           return Router._handleInvalidArguments(client, 'leaveDoc', arguments)
         }
         try {
-          Joi.assert(doc_id, JOI_OBJECT_ID)
+          Joi.assert(docId, JOI_OBJECT_ID)
         } catch (error) {
           return Router._handleError(callback, error, client, 'joinDoc', {
             disconnect: 1,
           })
         }
-        WebsocketController.leaveDoc(client, doc_id, function (err, ...args) {
+        WebsocketController.leaveDoc(client, docId, function (err, ...args) {
           if (err) {
             Router._handleError(callback, err, client, 'leaveDoc', {
-              doc_id,
+              doc_id: docId,
             })
           } else {
             callback(null, ...args)
@@ -421,7 +418,7 @@ module.exports = Router = {
         }
       )
 
-      client.on('applyOtUpdate', function (doc_id, update, callback) {
+      client.on('applyOtUpdate', function (docId, update, callback) {
         if (typeof callback !== 'function') {
           return Router._handleInvalidArguments(
             client,
@@ -431,7 +428,7 @@ module.exports = Router = {
         }
         try {
           Joi.assert(
-            { doc_id, update },
+            { doc_id: docId, update },
             Joi.object({
               doc_id: JOI_OBJECT_ID,
               update: Joi.object().required(),
@@ -444,12 +441,12 @@ module.exports = Router = {
         }
         WebsocketController.applyOtUpdate(
           client,
-          doc_id,
+          docId,
           update,
           function (err) {
             if (err) {
               Router._handleError(callback, err, client, 'applyOtUpdate', {
-                doc_id,
+                doc_id: docId,
                 update,
               })
             } else {

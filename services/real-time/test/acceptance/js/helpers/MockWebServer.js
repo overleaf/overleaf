@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-return-assign,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -18,41 +17,41 @@ module.exports = MockWebServer = {
   projects: {},
   privileges: {},
 
-  createMockProject(project_id, privileges, project) {
-    MockWebServer.privileges[project_id] = privileges
-    return (MockWebServer.projects[project_id] = project)
+  createMockProject(projectId, privileges, project) {
+    MockWebServer.privileges[projectId] = privileges
+    return (MockWebServer.projects[projectId] = project)
   },
 
-  joinProject(project_id, user_id, callback) {
+  joinProject(projectId, userId, callback) {
     if (callback == null) {
       callback = function () {}
     }
     return callback(
       null,
-      MockWebServer.projects[project_id],
-      MockWebServer.privileges[project_id][user_id] ||
-        MockWebServer.privileges[project_id]['anonymous-user']
+      MockWebServer.projects[projectId],
+      MockWebServer.privileges[projectId][userId] ||
+        MockWebServer.privileges[projectId]['anonymous-user']
     )
   },
 
   joinProjectRequest(req, res, next) {
-    const { project_id } = req.params
-    const { user_id } = req.query
-    if (project_id === '404404404404404404404404') {
+    const { project_id: projectId } = req.params
+    const { user_id: userId } = req.query
+    if (projectId === '404404404404404404404404') {
       // not-found
       return res.status(404).send()
     }
-    if (project_id === '403403403403403403403403') {
+    if (projectId === '403403403403403403403403') {
       // forbidden
       return res.status(403).send()
     }
-    if (project_id === '429429429429429429429429') {
+    if (projectId === '429429429429429429429429') {
       // rate-limited
       return res.status(429).send()
     } else {
       return MockWebServer.joinProject(
-        project_id,
-        user_id,
+        projectId,
+        userId,
         (error, project, privilegeLevel) => {
           if (error != null) {
             return next(error)

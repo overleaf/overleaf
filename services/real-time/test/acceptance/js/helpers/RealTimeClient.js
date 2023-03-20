@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-return-assign,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -87,23 +86,23 @@ module.exports = Client = {
     )
   },
 
-  getConnectedClient(client_id, callback) {
+  getConnectedClient(clientId, callback) {
     if (callback == null) {
       callback = function () {}
     }
     return request.get(
       {
-        url: `http://localhost:3026/clients/${client_id}`,
+        url: `http://localhost:3026/clients/${clientId}`,
         json: true,
       },
       (error, response, data) => callback(error, data)
     )
   },
 
-  disconnectClient(client_id, callback) {
+  disconnectClient(clientId, callback) {
     request.post(
       {
-        url: `http://localhost:3026/client/${client_id}/disconnect`,
+        url: `http://localhost:3026/client/${clientId}/disconnect`,
       },
       (error, response, data) => callback(error, data)
     )

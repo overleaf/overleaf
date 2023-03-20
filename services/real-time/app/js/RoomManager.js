@@ -1,6 +1,3 @@
-/* eslint-disable
-    camelcase,
-*/
 const logger = require('@overleaf/logger')
 const metrics = require('@overleaf/metrics')
 const { EventEmitter } = require('events')
@@ -20,16 +17,16 @@ const RoomEvents = new EventEmitter() // emits {project,doc}-active and {project
 // The pubsub side is handled by ChannelManager
 
 module.exports = {
-  joinProject(client, project_id, callback) {
-    this.joinEntity(client, 'project', project_id, callback)
+  joinProject(client, projectId, callback) {
+    this.joinEntity(client, 'project', projectId, callback)
   },
 
-  joinDoc(client, doc_id, callback) {
-    this.joinEntity(client, 'doc', doc_id, callback)
+  joinDoc(client, docId, callback) {
+    this.joinEntity(client, 'doc', docId, callback)
   },
 
-  leaveDoc(client, doc_id) {
-    this.leaveEntity(client, 'doc', doc_id)
+  leaveDoc(client, docId) {
+    this.leaveEntity(client, 'doc', docId)
   },
 
   leaveProjectAndDocs(client) {

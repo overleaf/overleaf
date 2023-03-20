@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-return-assign,
     no-useless-escape,
 */
@@ -43,8 +42,8 @@ describe('SafeJsonParse', function () {
 
     return it('should return an error on oversized data', function (done) {
       // we have a 2k overhead on top of max size
-      const big_blob = Array(16 * 1024).join('A')
-      const data = `{\"foo\": \"${big_blob}\"}`
+      const bigBlob = Array(16 * 1024).join('A')
+      const data = `{\"foo\": \"${bigBlob}\"}`
       this.Settings.maxUpdateSize = 2 * 1024
       return this.SafeJsonParse.parse(data, (error, parsed) => {
         this.logger.error.called.should.equal(false)

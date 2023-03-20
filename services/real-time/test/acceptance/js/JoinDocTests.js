@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-return-assign,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -35,9 +34,9 @@ describe('joinDoc', function () {
               {
                 privilegeLevel: 'readAndWrite',
               },
-              (e, { project_id, user_id }) => {
-                this.project_id = project_id
-                this.user_id = user_id
+              (e, { project_id: projectId, user_id: userId }) => {
+                this.project_id = projectId
+                this.user_id = userId
                 return cb(e)
               }
             )
@@ -52,8 +51,8 @@ describe('joinDoc', function () {
                 ops: this.ops,
                 ranges: this.ranges,
               },
-              (e, { doc_id }) => {
-                this.doc_id = doc_id
+              (e, { doc_id: docId }) => {
+                this.doc_id = docId
                 return cb(e)
               }
             )
@@ -123,9 +122,9 @@ describe('joinDoc', function () {
               {
                 privilegeLevel: 'readOnly',
               },
-              (e, { project_id, user_id }) => {
-                this.project_id = project_id
-                this.user_id = user_id
+              (e, { project_id: projectId, user_id: userId }) => {
+                this.project_id = projectId
+                this.user_id = userId
                 return cb(e)
               }
             )
@@ -140,8 +139,8 @@ describe('joinDoc', function () {
                 ops: this.ops,
                 ranges: this.ranges,
               },
-              (e, { doc_id }) => {
-                this.doc_id = doc_id
+              (e, { doc_id: docId }) => {
+                this.doc_id = docId
                 return cb(e)
               }
             )
@@ -211,9 +210,9 @@ describe('joinDoc', function () {
               {
                 privilegeLevel: 'owner',
               },
-              (e, { project_id, user_id }) => {
-                this.project_id = project_id
-                this.user_id = user_id
+              (e, { project_id: projectId, user_id: userId }) => {
+                this.project_id = projectId
+                this.user_id = userId
                 return cb(e)
               }
             )
@@ -228,8 +227,8 @@ describe('joinDoc', function () {
                 ops: this.ops,
                 ranges: this.ranges,
               },
-              (e, { doc_id }) => {
-                this.doc_id = doc_id
+              (e, { doc_id: docId }) => {
+                this.doc_id = docId
                 return cb(e)
               }
             )
@@ -303,9 +302,9 @@ describe('joinDoc', function () {
               {
                 privilegeLevel: 'owner',
               },
-              (e, { project_id, user_id }) => {
-                this.project_id = project_id
-                this.user_id = user_id
+              (e, { project_id: projectId, user_id: userId }) => {
+                this.project_id = projectId
+                this.user_id = userId
                 return cb(e)
               }
             )
@@ -320,8 +319,8 @@ describe('joinDoc', function () {
                 ops: this.ops,
                 ranges: this.ranges,
               },
-              (e, { doc_id }) => {
-                this.doc_id = doc_id
+              (e, { doc_id: docId }) => {
+                this.doc_id = docId
                 return cb(e)
               }
             )
@@ -389,9 +388,9 @@ describe('joinDoc', function () {
               {
                 privilegeLevel: 'readAndWrite',
               },
-              (e, { project_id, user_id }) => {
-                this.project_id = project_id
-                this.user_id = user_id
+              (e, { project_id: projectId, user_id: userId }) => {
+                this.project_id = projectId
+                this.user_id = userId
                 return cb(e)
               }
             )
@@ -406,8 +405,8 @@ describe('joinDoc', function () {
                 ops: this.ops,
                 ranges: this.ranges,
               },
-              (e, { doc_id }) => {
-                this.doc_id = doc_id
+              (e, { doc_id: docId }) => {
+                this.doc_id = docId
                 return cb(e)
               }
             )
@@ -479,9 +478,9 @@ describe('joinDoc', function () {
               {
                 privilegeLevel: 'readAndWrite',
               },
-              (e, { project_id, user_id }) => {
-                this.project_id = project_id
-                this.user_id = user_id
+              (e, { project_id: projectId, user_id: userId }) => {
+                this.project_id = projectId
+                this.user_id = userId
                 return cb(e)
               }
             )
@@ -496,8 +495,8 @@ describe('joinDoc', function () {
                 ops: this.ops,
                 ranges: this.ranges,
               },
-              (e, { doc_id }) => {
-                this.doc_id = doc_id
+              (e, { doc_id: docId }) => {
+                this.doc_id = docId
                 return cb(e)
               }
             )
@@ -570,9 +569,9 @@ describe('joinDoc', function () {
               {
                 privilegeLevel: 'readAndWrite',
               },
-              (e, { project_id, user_id }) => {
-                this.project_id = project_id
-                this.user_id = user_id
+              (e, { project_id: projectId, user_id: userId }) => {
+                this.project_id = projectId
+                this.user_id = userId
                 return cb(e)
               }
             )
@@ -587,8 +586,8 @@ describe('joinDoc', function () {
                 ops: this.ops,
                 ranges: this.ranges,
               },
-              (e, { doc_id }) => {
-                this.doc_id = doc_id
+              (e, { doc_id: docId }) => {
+                this.doc_id = docId
                 return cb(e)
               }
             )

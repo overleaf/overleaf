@@ -1,6 +1,3 @@
-/* eslint-disable
-    camelcase,
-*/
 const request = require('request')
 const OError = require('@overleaf/o-error')
 const settings = require('@overleaf/settings')
@@ -13,10 +10,10 @@ const {
 } = require('./Errors')
 
 module.exports = {
-  joinProject(project_id, user, callback) {
-    const user_id = user._id
-    logger.debug({ project_id, user_id }, 'sending join project request to web')
-    const url = `${settings.apis.web.url}/project/${project_id}/join`
+  joinProject(projectId, user, callback) {
+    const userId = user._id
+    logger.debug({ projectId, userId }, 'sending join project request to web')
+    const url = `${settings.apis.web.url}/project/${projectId}/join`
     const headers = {}
     if (user.anonymousAccessToken) {
       headers['x-sl-anonymous-access-token'] = user.anonymousAccessToken
@@ -24,7 +21,7 @@ module.exports = {
     request.post(
       {
         url,
-        qs: { user_id },
+        qs: { user_id: userId },
         auth: {
           user: settings.apis.web.user,
           pass: settings.apis.web.pass,

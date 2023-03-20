@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -30,10 +29,10 @@ describe('clientTracking', function () {
                 privilegeLevel: 'owner',
                 project: { name: 'Test Project' },
               },
-              (error, { user_id, project_id }) => {
+              (error, { user_id: userId, project_id: projectId }) => {
                 if (error) return done(error)
-                this.user_id = user_id
-                this.project_id = project_id
+                this.user_id = userId
+                this.project_id = projectId
                 return cb()
               }
             )
@@ -43,8 +42,8 @@ describe('clientTracking', function () {
             return FixturesManager.setUpDoc(
               this.project_id,
               { lines: this.lines, version: this.version, ops: this.ops },
-              (e, { doc_id }) => {
-                this.doc_id = doc_id
+              (e, { doc_id: docId }) => {
+                this.doc_id = docId
                 return cb(e)
               }
             )
@@ -155,10 +154,10 @@ describe('clientTracking', function () {
                 project: { name: 'Test Project' },
                 publicAccess: 'readAndWrite',
               },
-              (error, { user_id, project_id }) => {
+              (error, { user_id: userId, project_id: projectId }) => {
                 if (error) return done(error)
-                this.user_id = user_id
-                this.project_id = project_id
+                this.user_id = userId
+                this.project_id = projectId
                 return cb()
               }
             )
@@ -168,8 +167,8 @@ describe('clientTracking', function () {
             return FixturesManager.setUpDoc(
               this.project_id,
               { lines: this.lines, version: this.version, ops: this.ops },
-              (e, { doc_id }) => {
-                this.doc_id = doc_id
+              (e, { doc_id: docId }) => {
+                this.doc_id = docId
                 return cb(e)
               }
             )

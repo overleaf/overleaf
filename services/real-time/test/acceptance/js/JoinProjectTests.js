@@ -1,6 +1,3 @@
-/* eslint-disable
-    camelcase,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -30,9 +27,9 @@ describe('joinProject', function () {
                   name: 'Test Project',
                 },
               },
-              (e, { project_id, user_id }) => {
-                this.project_id = project_id
-                this.user_id = user_id
+              (e, { project_id: projectId, user_id: userId }) => {
+                this.project_id = projectId
+                this.user_id = userId
                 return cb(e)
               }
             )
@@ -127,9 +124,9 @@ describe('joinProject', function () {
                   name: 'Test Project',
                 },
               },
-              (e, { project_id, user_id }) => {
-                this.project_id = project_id
-                this.user_id = user_id
+              (e, { project_id: projectId, user_id: userId }) => {
+                this.project_id = projectId
+                this.user_id = userId
                 return cb(e)
               }
             )
@@ -189,9 +186,9 @@ describe('joinProject', function () {
                   name: 'Test Project',
                 },
               },
-              (e, { project_id, user_id }) => {
-                this.project_id = project_id
-                this.user_id = user_id
+              (e, { project_id: projectId, user_id: userId }) => {
+                this.project_id = projectId
+                this.user_id = userId
                 cb(e)
               }
             )
@@ -251,9 +248,9 @@ describe('joinProject', function () {
                   name: 'Test Project',
                 },
               },
-              (e, { project_id, user_id }) => {
-                this.project_id = project_id
-                this.user_id = user_id
+              (e, { project_id: projectId, user_id: userId }) => {
+                this.project_id = projectId
+                this.user_id = userId
                 cb(e)
               }
             )
@@ -346,9 +343,9 @@ describe('joinProject', function () {
                   name: 'Other Project',
                 },
               },
-              (e, { project_id, user_id }) => {
-                this.other_project_id = project_id
-                this.other_user_id = user_id
+              (e, { project_id: projectId, user_id: userId }) => {
+                this.other_project_id = projectId
+                this.other_user_id = userId
                 return cb(e)
               }
             )
@@ -363,9 +360,9 @@ describe('joinProject', function () {
                   name: 'Test Project',
                 },
               },
-              (e, { project_id, user_id }) => {
-                this.project_id = project_id
-                this.user_id = user_id
+              (e, { project_id: projectId, user_id: userId }) => {
+                this.project_id = projectId
+                this.user_id = userId
                 return cb(e)
               }
             )

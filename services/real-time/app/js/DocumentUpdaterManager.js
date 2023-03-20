@@ -1,6 +1,3 @@
-/* eslint-disable
-    camelcase,
-*/
 const request = require('request')
 const _ = require('underscore')
 const OError = require('@overleaf/o-error')
@@ -20,11 +17,11 @@ const rclient = require('@overleaf/redis-wrapper').createClient(
 const Keys = settings.redis.documentupdater.key_schema
 
 const DocumentUpdaterManager = {
-  getDocument(project_id, doc_id, fromVersion, callback) {
+  getDocument(projectId, docId, fromVersion, callback) {
     const timer = new metrics.Timer('get-document')
-    const url = `${settings.apis.documentupdater.url}/project/${project_id}/doc/${doc_id}?fromVersion=${fromVersion}`
+    const url = `${settings.apis.documentupdater.url}/project/${projectId}/doc/${docId}?fromVersion=${fromVersion}`
     logger.debug(
-      { project_id, doc_id, fromVersion },
+      { projectId, docId, fromVersion },
       'getting doc from document updater'
     )
     request.get(url, function (err, res, body) {
@@ -35,7 +32,7 @@ const DocumentUpdaterManager = {
       }
       if (res.statusCode >= 200 && res.statusCode < 300) {
         logger.debug(
-          { project_id, doc_id },
+          { projectId, docId },
           'got doc from document document updater'
         )
         try {
@@ -56,18 +53,18 @@ const DocumentUpdaterManager = {
     })
   },
 
-  checkDocument(project_id, doc_id, callback) {
+  checkDocument(projectId, docId, callback) {
     // in this call fromVersion = -1 means get document without docOps
-    DocumentUpdaterManager.getDocument(project_id, doc_id, -1, callback)
+    DocumentUpdaterManager.getDocument(projectId, docId, -1, callback)
   },
 
-  flushProjectToMongoAndDelete(project_id, callback) {
+  flushProjectToMongoAndDelete(projectId, callback) {
     // this method is called when the last connected user leaves the project
-    logger.debug({ project_id }, 'deleting project from document updater')
+    logger.debug({ projectId }, 'deleting project from document updater')
     const timer = new metrics.Timer('delete.mongo.project')
     // flush the project in the background when all users have left
     const url =
-      `${settings.apis.documentupdater.url}/project/${project_id}?background=true` +
+      `${settings.apis.documentupdater.url}/project/${projectId}?background=true` +
       (settings.shutDownInProgress ? '&shutdown=true' : '')
     request.del(url, function (err, res) {
       timer.done()
@@ -75,7 +72,7 @@ const DocumentUpdaterManager = {
         OError.tag(err, 'error deleting project from document updater')
         callback(err)
       } else if (res.statusCode >= 200 && res.statusCode < 300) {
-        logger.debug({ project_id }, 'deleted project from document updater')
+        logger.debug({ projectId }, 'deleted project from document updater')
         callback(null)
       } else {
         callback(
@@ -97,7 +94,7 @@ const DocumentUpdaterManager = {
     }
   },
 
-  queueChange(project_id, doc_id, change, callback) {
+  queueChange(projectId, docId, change, callback) {
     const allowedKeys = [
       'doc',
       'op',
@@ -122,11 +119,11 @@ const DocumentUpdaterManager = {
     // record metric for each update added to queue
     metrics.summary('redis.pendingUpdates', updateSize, { status: 'push' })
 
-    const doc_key = `${project_id}:${doc_id}`
+    const docKey = `${projectId}:${docId}`
     // Push onto pendingUpdates for doc_id first, because once the doc updater
     // gets an entry on pending-updates-list, it starts processing.
     rclient.rpush(
-      Keys.pendingUpdates({ doc_id }),
+      Keys.pendingUpdates({ doc_id: docId }),
       jsonChange,
       function (error) {
         if (error) {
@@ -134,7 +131,7 @@ const DocumentUpdaterManager = {
           return callback(error)
         }
         const queueKey = DocumentUpdaterManager._getPendingUpdateListKey()
-        rclient.rpush(queueKey, doc_key, function (error) {
+        rclient.rpush(queueKey, docKey, function (error) {
           if (error) {
             error = new OError('error pushing doc_id into redis')
               .withInfo({ queueKey })

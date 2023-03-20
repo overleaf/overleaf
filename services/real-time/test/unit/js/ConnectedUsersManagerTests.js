@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-return-assign,
     no-unused-vars,
 */
@@ -25,11 +24,11 @@ describe('ConnectedUsersManager', function () {
       redis: {
         realtime: {
           key_schema: {
-            clientsInProject({ project_id }) {
-              return `clients_in_project:${project_id}`
+            clientsInProject({ project_id: projectId }) {
+              return `clients_in_project:${projectId}`
             },
-            connectedUser({ project_id, client_id }) {
-              return `connected_user:${project_id}:${client_id}`
+            connectedUser({ project_id: projectId, client_id: clientId }) {
+              return `connected_user:${projectId}:${clientId}`
             },
           },
         },

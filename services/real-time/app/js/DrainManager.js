@@ -39,7 +39,7 @@ module.exports = {
       if (!this.RECONNECTED_CLIENTS[client.id]) {
         this.RECONNECTED_CLIENTS[client.id] = true
         logger.debug(
-          { client_id: client.id },
+          { clientId: client.id },
           'Asking client to reconnect gracefully'
         )
         client.emit('reconnectGracefully')

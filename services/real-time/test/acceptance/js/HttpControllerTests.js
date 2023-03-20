@@ -1,6 +1,3 @@
-/* eslint-disable
-    camelcase,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -20,10 +17,10 @@ const FixturesManager = require('./helpers/FixturesManager')
 describe('HttpControllerTests', function () {
   describe('without a user', function () {
     return it('should return 404 for the client view', function (done) {
-      const client_id = 'not-existing'
+      const clientId = 'not-existing'
       return request.get(
         {
-          url: `/clients/${client_id}`,
+          url: `/clients/${clientId}`,
           json: true,
         },
         (error, response, data) => {
@@ -46,9 +43,9 @@ describe('HttpControllerTests', function () {
               {
                 privilegeLevel: 'owner',
               },
-              (error, { project_id, user_id }) => {
-                this.project_id = project_id
-                this.user_id = user_id
+              (error, { project_id: projectId, user_id: userId }) => {
+                this.project_id = projectId
+                this.user_id = userId
                 return cb(error)
               }
             )
@@ -58,8 +55,8 @@ describe('HttpControllerTests', function () {
             return FixturesManager.setUpDoc(
               this.project_id,
               {},
-              (error, { doc_id }) => {
-                this.doc_id = doc_id
+              (error, { doc_id: docId }) => {
+                this.doc_id = docId
                 return cb(error)
               }
             )

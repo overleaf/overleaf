@@ -1,6 +1,3 @@
-/* eslint-disable
-    camelcase,
-*/
 const { NotAuthorizedError } = require('./Errors')
 
 let AuthorizationManager
@@ -29,39 +26,39 @@ module.exports = AuthorizationManager = {
     }
   },
 
-  assertClientCanViewProjectAndDoc(client, doc_id, callback) {
+  assertClientCanViewProjectAndDoc(client, docId, callback) {
     AuthorizationManager.assertClientCanViewProject(client, function (error) {
       if (error) {
         return callback(error)
       }
-      AuthorizationManager._assertClientCanAccessDoc(client, doc_id, callback)
+      AuthorizationManager._assertClientCanAccessDoc(client, docId, callback)
     })
   },
 
-  assertClientCanEditProjectAndDoc(client, doc_id, callback) {
+  assertClientCanEditProjectAndDoc(client, docId, callback) {
     AuthorizationManager.assertClientCanEditProject(client, function (error) {
       if (error) {
         return callback(error)
       }
-      AuthorizationManager._assertClientCanAccessDoc(client, doc_id, callback)
+      AuthorizationManager._assertClientCanAccessDoc(client, docId, callback)
     })
   },
 
-  _assertClientCanAccessDoc(client, doc_id, callback) {
-    if (client.ol_context[`doc:${doc_id}`] === 'allowed') {
+  _assertClientCanAccessDoc(client, docId, callback) {
+    if (client.ol_context[`doc:${docId}`] === 'allowed') {
       callback(null)
     } else {
       callback(new NotAuthorizedError())
     }
   },
 
-  addAccessToDoc(client, doc_id, callback) {
-    client.ol_context[`doc:${doc_id}`] = 'allowed'
+  addAccessToDoc(client, docId, callback) {
+    client.ol_context[`doc:${docId}`] = 'allowed'
     callback(null)
   },
 
-  removeAccessToDoc(client, doc_id, callback) {
-    delete client.ol_context[`doc:${doc_id}`]
+  removeAccessToDoc(client, docId, callback) {
+    delete client.ol_context[`doc:${docId}`]
     callback(null)
   },
 }

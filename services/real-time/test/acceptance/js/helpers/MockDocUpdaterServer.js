@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-return-assign,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -17,26 +16,26 @@ const express = require('express')
 module.exports = MockDocUpdaterServer = {
   docs: {},
 
-  createMockDoc(project_id, doc_id, data) {
-    return (MockDocUpdaterServer.docs[`${project_id}:${doc_id}`] = data)
+  createMockDoc(projectId, docId, data) {
+    return (MockDocUpdaterServer.docs[`${projectId}:${docId}`] = data)
   },
 
-  getDocument(project_id, doc_id, fromVersion, callback) {
+  getDocument(projectId, docId, fromVersion, callback) {
     if (callback == null) {
       callback = function () {}
     }
-    return callback(null, MockDocUpdaterServer.docs[`${project_id}:${doc_id}`])
+    return callback(null, MockDocUpdaterServer.docs[`${projectId}:${docId}`])
   },
 
   deleteProject: sinon.stub().callsArg(1),
 
   getDocumentRequest(req, res, next) {
-    const { project_id, doc_id } = req.params
+    const { project_id: projectId, doc_id: docId } = req.params
     let { fromVersion } = req.query
     fromVersion = parseInt(fromVersion, 10)
     return MockDocUpdaterServer.getDocument(
-      project_id,
-      doc_id,
+      projectId,
+      docId,
       fromVersion,
       (error, data) => {
         if (error != null) {
@@ -51,8 +50,8 @@ module.exports = MockDocUpdaterServer = {
   },
 
   deleteProjectRequest(req, res, next) {
-    const { project_id } = req.params
-    return MockDocUpdaterServer.deleteProject(project_id, error => {
+    const { project_id: projectId } = req.params
+    return MockDocUpdaterServer.deleteProject(projectId, error => {
       if (error != null) {
         return next(error)
       }

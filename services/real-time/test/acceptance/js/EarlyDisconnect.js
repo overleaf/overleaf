@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-return-assign,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -34,8 +33,8 @@ describe('EarlyDisconnect', function () {
       // slow down web-api requests to force the race condition
       let joinProject
       this.actualWebAPIjoinProject = joinProject = MockWebServer.joinProject
-      return (MockWebServer.joinProject = (project_id, user_id, cb) =>
-        setTimeout(() => joinProject(project_id, user_id, cb), 300))
+      return (MockWebServer.joinProject = (projectId, userId, cb) =>
+        setTimeout(() => joinProject(projectId, userId, cb), 300))
     })
 
     after(function () {
@@ -53,9 +52,9 @@ describe('EarlyDisconnect', function () {
                   name: 'Test Project',
                 },
               },
-              (e, { project_id, user_id }) => {
-                this.project_id = project_id
-                this.user_id = user_id
+              (e, { project_id: projectId, user_id: userId }) => {
+                this.project_id = projectId
+                this.user_id = userId
                 return cb()
               }
             )
@@ -114,9 +113,9 @@ describe('EarlyDisconnect', function () {
                   name: 'Test Project',
                 },
               },
-              (e, { project_id, user_id }) => {
-                this.project_id = project_id
-                this.user_id = user_id
+              (e, { project_id: projectId, user_id: userId }) => {
+                this.project_id = projectId
+                this.user_id = userId
                 return cb()
               }
             )
@@ -144,8 +143,8 @@ describe('EarlyDisconnect', function () {
             return FixturesManager.setUpDoc(
               this.project_id,
               { lines: this.lines, version: this.version, ops: this.ops },
-              (e, { doc_id }) => {
-                this.doc_id = doc_id
+              (e, { doc_id: docId }) => {
+                this.doc_id = docId
                 return cb(e)
               }
             )
@@ -202,9 +201,9 @@ describe('EarlyDisconnect', function () {
                   name: 'Test Project',
                 },
               },
-              (e, { project_id, user_id }) => {
-                this.project_id = project_id
-                this.user_id = user_id
+              (e, { project_id: projectId, user_id: userId }) => {
+                this.project_id = projectId
+                this.user_id = userId
                 return cb()
               }
             )
@@ -232,8 +231,8 @@ describe('EarlyDisconnect', function () {
             return FixturesManager.setUpDoc(
               this.project_id,
               { lines: this.lines, version: this.version, ops: this.ops },
-              (e, { doc_id }) => {
-                this.doc_id = doc_id
+              (e, { doc_id: docId }) => {
+                this.doc_id = docId
                 return cb(e)
               }
             )

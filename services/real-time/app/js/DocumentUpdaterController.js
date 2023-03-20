@@ -1,6 +1,3 @@
-/* eslint-disable
-    camelcase,
-*/
 const logger = require('@overleaf/logger')
 const settings = require('@overleaf/settings')
 const RedisClientManager = require('./RedisClientManager')
@@ -49,18 +46,15 @@ module.exports = DocumentUpdaterController = {
 
   handleRoomUpdates(rclientSubList) {
     const roomEvents = RoomManager.eventSource()
-    roomEvents.on('doc-active', function (doc_id) {
+    roomEvents.on('doc-active', function (docId) {
       const subscribePromises = rclientSubList.map(rclient =>
-        ChannelManager.subscribe(rclient, 'applied-ops', doc_id)
+        ChannelManager.subscribe(rclient, 'applied-ops', docId)
       )
-      RoomManager.emitOnCompletion(
-        subscribePromises,
-        `doc-subscribed-${doc_id}`
-      )
+      RoomManager.emitOnCompletion(subscribePromises, `doc-subscribed-${docId}`)
     })
-    roomEvents.on('doc-empty', doc_id =>
+    roomEvents.on('doc-empty', docId =>
       rclientSubList.map(rclient =>
-        ChannelManager.unsubscribe(rclient, 'applied-ops', doc_id)
+        ChannelManager.unsubscribe(rclient, 'applied-ops', docId)
       )
     )
   },
@@ -104,9 +98,9 @@ module.exports = DocumentUpdaterController = {
     })
   },
 
-  _applyUpdateFromDocumentUpdater(io, doc_id, update) {
+  _applyUpdateFromDocumentUpdater(io, docId, update) {
     let client
-    const clientList = io.sockets.clients(doc_id)
+    const clientList = io.sockets.clients(docId)
     // avoid unnecessary work if no clients are connected
     if (clientList.length === 0) {
       return
@@ -114,7 +108,7 @@ module.exports = DocumentUpdaterController = {
     // send updates to clients
     logger.debug(
       {
-        doc_id,
+        docId,
         version: update.v,
         source: update.meta && update.meta.source,
         socketIoClients: clientList.map(client => client.id),
@@ -129,7 +123,7 @@ module.exports = DocumentUpdaterController = {
         if (client.publicId === update.meta.source) {
           logger.debug(
             {
-              doc_id,
+              docId,
               version: update.v,
               source: update.meta.source,
             },
@@ -140,10 +134,10 @@ module.exports = DocumentUpdaterController = {
           // Duplicate ops should just be sent back to sending client for acknowledgement
           logger.debug(
             {
-              doc_id,
+              docId,
               version: update.v,
               source: update.meta.source,
-              client_id: client.id,
+              clientId: client.id,
             },
             'distributing update to collaborator'
           )
@@ -155,7 +149,7 @@ module.exports = DocumentUpdaterController = {
       metrics.inc('socket-io.duplicate-clients', 0.1)
       logger.debug(
         {
-          doc_id,
+          docId,
           socketIoClients: clientList.map(client => client.id),
         },
         'discarded duplicate clients'
@@ -163,10 +157,10 @@ module.exports = DocumentUpdaterController = {
     }
   },
 
-  _processErrorFromDocumentUpdater(io, doc_id, error, message) {
-    for (const client of io.sockets.clients(doc_id)) {
+  _processErrorFromDocumentUpdater(io, docId, error, message) {
+    for (const client of io.sockets.clients(docId)) {
       logger.warn(
-        { err: error, doc_id, client_id: client.id },
+        { err: error, docId, clientId: client.id },
         'error from document updater, disconnecting client'
       )
       client.emit('otUpdateError', error, message)

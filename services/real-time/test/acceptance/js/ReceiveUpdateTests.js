@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -36,10 +35,10 @@ describe('receiveUpdate', function () {
               privilegeLevel: 'owner',
               project: { name: 'Test Project' },
             },
-            (error, { user_id, project_id }) => {
+            (error, { user_id: userId, project_id: projectId }) => {
               if (error) return done(error)
-              this.user_id = user_id
-              this.project_id = project_id
+              this.user_id = userId
+              this.project_id = projectId
               return cb()
             }
           )
@@ -49,8 +48,8 @@ describe('receiveUpdate', function () {
           return FixturesManager.setUpDoc(
             this.project_id,
             { lines: this.lines, version: this.version, ops: this.ops },
-            (e, { doc_id }) => {
-              this.doc_id = doc_id
+            (e, { doc_id: docId }) => {
+              this.doc_id = docId
               return cb(e)
             }
           )
@@ -100,13 +99,10 @@ describe('receiveUpdate', function () {
               privilegeLevel: 'owner',
               project: { name: 'Test Project' },
             },
-            (
-              error,
-              { user_id: user_id_second, project_id: project_id_second }
-            ) => {
+            (error, { user_id: userIdSecond, project_id: projectIdSecond }) => {
               if (error) return done(error)
-              this.user_id_second = user_id_second
-              this.project_id_second = project_id_second
+              this.user_id_second = userIdSecond
+              this.project_id_second = projectIdSecond
               return cb()
             }
           )
@@ -116,8 +112,8 @@ describe('receiveUpdate', function () {
           return FixturesManager.setUpDoc(
             this.project_id_second,
             { lines: this.lines, version: this.version, ops: this.ops },
-            (e, { doc_id: doc_id_second }) => {
-              this.doc_id_second = doc_id_second
+            (e, { doc_id: docIdSecond }) => {
+              this.doc_id_second = docIdSecond
               return cb(e)
             }
           )

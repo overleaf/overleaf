@@ -1,6 +1,3 @@
-/* eslint-disable
-    camelcase,
-*/
 const WebsocketLoadBalancer = require('./WebsocketLoadBalancer')
 const DrainManager = require('./DrainManager')
 const logger = require('@overleaf/logger')
@@ -37,15 +34,15 @@ module.exports = {
 
   disconnectClient(req, res, next) {
     const io = req.app.get('io')
-    const { client_id } = req.params
-    const client = io.sockets.sockets[client_id]
+    const { client_id: clientId } = req.params
+    const client = io.sockets.sockets[clientId]
 
     if (!client) {
-      logger.debug({ client_id }, 'api: client already disconnected')
+      logger.debug({ clientId }, 'api: client already disconnected')
       res.sendStatus(404)
       return
     }
-    logger.info({ client_id }, 'api: requesting client disconnect')
+    logger.info({ clientId }, 'api: requesting client disconnect')
     client.on('disconnect', () => res.sendStatus(204))
     client.disconnect()
   },

@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-return-assign,
     no-unused-vars,
 */
@@ -28,8 +27,8 @@ describe('DocumentUpdaterManager', function () {
       redis: {
         documentupdater: {
           key_schema: {
-            pendingUpdates({ doc_id }) {
-              return `PendingUpdates:${doc_id}`
+            pendingUpdates({ doc_id: docId }) {
+              return `PendingUpdates:${docId}`
             },
           },
         },

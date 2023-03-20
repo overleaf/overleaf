@@ -1,6 +1,3 @@
-/* eslint-disable
-    camelcase,
-*/
 const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
 const RedisClientManager = require('./RedisClientManager')
@@ -28,8 +25,8 @@ module.exports = WebsocketLoadBalancer = {
   rclientPubList: RedisClientManager.createClientList(Settings.redis.pubsub),
   rclientSubList: RedisClientManager.createClientList(Settings.redis.pubsub),
 
-  emitToRoom(room_id, message, ...payload) {
-    if (!room_id) {
+  emitToRoom(roomId, message, ...payload) {
+    if (!roomId) {
       logger.warn(
         { message, payload },
         'no room_id provided, ignoring emitToRoom'
@@ -37,17 +34,17 @@ module.exports = WebsocketLoadBalancer = {
       return
     }
     const data = JSON.stringify({
-      room_id,
+      room_id: roomId,
       message,
       payload,
     })
     logger.debug(
-      { room_id, message, payload, length: data.length },
+      { roomId, message, payload, length: data.length },
       'emitting to room'
     )
 
     this.rclientPubList.map(rclientPub =>
-      ChannelManager.publish(rclientPub, 'editor-events', room_id, data)
+      ChannelManager.publish(rclientPub, 'editor-events', roomId, data)
     )
   },
 
@@ -74,18 +71,18 @@ module.exports = WebsocketLoadBalancer = {
 
   handleRoomUpdates(rclientSubList) {
     const roomEvents = RoomManager.eventSource()
-    roomEvents.on('project-active', function (project_id) {
+    roomEvents.on('project-active', function (projectId) {
       const subscribePromises = rclientSubList.map(rclient =>
-        ChannelManager.subscribe(rclient, 'editor-events', project_id)
+        ChannelManager.subscribe(rclient, 'editor-events', projectId)
       )
       RoomManager.emitOnCompletion(
         subscribePromises,
-        `project-subscribed-${project_id}`
+        `project-subscribed-${projectId}`
       )
     })
-    roomEvents.on('project-empty', project_id =>
+    roomEvents.on('project-empty', projectId =>
       rclientSubList.map(rclient =>
-        ChannelManager.unsubscribe(rclient, 'editor-events', project_id)
+        ChannelManager.unsubscribe(rclient, 'editor-events', projectId)
       )
     )
   },
@@ -107,8 +104,8 @@ module.exports = WebsocketLoadBalancer = {
           {
             channel,
             message: message.message,
-            room_id: message.room_id,
-            message_id: message._id,
+            roomId: message.room_id,
+            messageId: message._id,
             socketIoClients: clientList.map(client => client.id),
           },
           'refreshing client list'
@@ -128,7 +125,7 @@ module.exports = WebsocketLoadBalancer = {
           }
         }
 
-        const is_restricted_message =
+        const isRestrictedMessage =
           !RESTRICTED_USER_MESSAGE_TYPE_PASS_LIST.includes(message.message)
 
         // send messages only to unique clients (due to duplicate entries in io.sockets.clients)
@@ -136,7 +133,7 @@ module.exports = WebsocketLoadBalancer = {
           .clients(message.room_id)
           .filter(
             client =>
-              !(is_restricted_message && client.ol_context.is_restricted_user)
+              !(isRestrictedMessage && client.ol_context.is_restricted_user)
           )
 
         // avoid unnecessary work if no clients are connected
@@ -147,8 +144,8 @@ module.exports = WebsocketLoadBalancer = {
           {
             channel,
             message: message.message,
-            room_id: message.room_id,
-            message_id: message._id,
+            roomId: message.room_id,
+            messageId: message._id,
             socketIoClients: clientList.map(client => client.id),
           },
           'distributing event to clients'
