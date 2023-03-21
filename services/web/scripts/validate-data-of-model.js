@@ -1,5 +1,4 @@
-const { getNextBatch } = require('./helpers/batchedUpdate')
-const { db, waitForDb } = require('../app/src/infrastructure/mongodb')
+const { batchedUpdateWithResultHandling } = require('./helpers/batchedUpdate')
 
 const MODEL_NAME = process.argv.pop()
 const Model = require(`../app/src/models/${MODEL_NAME}`)[MODEL_NAME]
@@ -14,34 +13,11 @@ function processBatch(batch) {
   }
 }
 
-async function main() {
-  await waitForDb()
-  const collection = db[Model.collection.name]
-
-  const query = {}
-  const projection = {}
-
-  let nextBatch
-  let processed = 0
-  let maxId
-  while (
-    (nextBatch = await getNextBatch(collection, query, maxId, projection))
-      .length
-  ) {
-    processBatch(nextBatch)
-
-    maxId = nextBatch[nextBatch.length - 1]._id
-    processed += nextBatch.length
-    console.error(maxId, processed)
-  }
-  console.error('done')
-}
-
-main()
-  .then(() => {
-    process.exit(0)
-  })
-  .catch(error => {
-    console.error({ error })
-    process.exit(1)
-  })
+batchedUpdateWithResultHandling(
+  Model.collection.name,
+  {},
+  async (_, nextBatch) => {
+    await processBatch(nextBatch)
+  },
+  {}
+)

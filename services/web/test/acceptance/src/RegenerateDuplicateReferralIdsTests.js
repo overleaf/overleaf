@@ -110,7 +110,7 @@ describe('RegenerateDuplicateReferralIds', function () {
     let { stderr: stdErr, stdout: stdOut } = result
     stdErr = stdErr.split('\n').filter(filterOutput)
     stdOut = stdOut.split('\n').filter(filterOutput)
-    expect(stdErr).to.deep.equal([
+    expect(stdErr).to.include.members([
       `Completed batch ending ${firstBatch[BATCH_SIZE - 1]}`,
       `Completed batch ending ${secondBatch[BATCH_SIZE - 1]}`,
       `Completed batch ending ${thirdBatch[BATCH_SIZE - 1]}`,
@@ -118,7 +118,7 @@ describe('RegenerateDuplicateReferralIds', function () {
       'Done.',
       '',
     ])
-    expect(stdOut.filter(filterOutput)).to.deep.equal([
+    expect(stdOut.filter(filterOutput)).to.include.members([
       // only duplicates
       `Running update on batch with ids ${JSON.stringify(firstBatch)}`,
       'Got duplicates from looking at batch.',

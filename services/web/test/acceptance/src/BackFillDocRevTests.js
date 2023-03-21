@@ -5,9 +5,9 @@ const logger = require('@overleaf/logger/logging-manager')
 const { expect } = require('chai')
 
 describe('BackFillDocRevTests', function () {
-  const docId1 = ObjectId.createFromTime(1)
-  const docId2 = ObjectId.createFromTime(2)
-  const docId3 = ObjectId.createFromTime(3)
+  const docId1 = ObjectId()
+  const docId2 = ObjectId()
+  const docId3 = ObjectId()
 
   beforeEach('insert docs', async function () {
     await db.docs.insertMany([
@@ -21,17 +21,30 @@ describe('BackFillDocRevTests', function () {
     let result
     try {
       result = await promisify(exec)(
-        ['node', 'scripts/back_fill_doc_rev', dryRun].join(' ')
+        [
+          'VERBOSE_LOGGING=true',
+          'node',
+          'scripts/back_fill_doc_rev',
+          dryRun,
+        ].join(' ')
       )
     } catch (error) {
       // dump details like exit code, stdErr and stdOut
       logger.error({ error }, 'script failed')
       throw error
     }
-    const { stdout: stdOut, stderr: stdErr } = result
+    const { stdout: stdOut } = result
 
     expect(stdOut).to.include('rev missing 2 | deleted=true 1')
-    expect(stdErr).to.include(`Completed batch ending ${docId2}`)
+    expect(stdOut).to.match(
+      new RegExp(`Running update on batch with ids .+${docId1}`)
+    )
+    expect(stdOut).to.match(
+      new RegExp(`Running update on batch with ids .+${docId2}`)
+    )
+    expect(stdOut).to.not.match(
+      new RegExp(`Running update on batch with ids .+${docId3}`)
+    )
   }
 
   describe('dry-run=true', function () {

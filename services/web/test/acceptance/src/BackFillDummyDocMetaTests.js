@@ -10,10 +10,6 @@ const DUMMY_TIME = new Date('2021-04-12T00:00:00.000Z')
 const ONE_DAY_IN_S = 60 * 60 * 24
 const BATCH_SIZE = 3
 
-function getSecondsFromObjectId(id) {
-  return id.getTimestamp().getTime() / 1000
-}
-
 function getObjectIdFromDate(date) {
   const seconds = new Date(date).getTime() / 1000
   return ObjectId.createFromTime(seconds)
@@ -137,87 +133,21 @@ describe('BackFillDummyDocMeta', function () {
     stdErr = stdErr.split('\n')
     stdOut = stdOut.split('\n').filter(filterOutput)
 
-    const oneDayFromProjectId9InSeconds =
-      getSecondsFromObjectId(projectIds[9]) + ONE_DAY_IN_S
-    const oneDayFromProjectId9AsObjectId = getObjectIdFromDate(
-      1000 * oneDayFromProjectId9InSeconds
-    )
-    let overlappingPartStdOut
-    let overlappingPartStdErr
-    if (dryRun) {
-      // In dry-run, the previous id will get processed again as the name has not been updated.
-      overlappingPartStdOut = [
-        `Back filling dummy meta data for ["${docIds[9]}","${docIds[10]}"]`,
-        `Orphaned deleted doc ${docIds[9]} (no deletedProjects entry)`,
-        `Orphaned deleted doc ${docIds[10]} (no deletedProjects entry)`,
-      ]
-      overlappingPartStdErr = [
-        `Processed 11 until ${oneDayFromProjectId9AsObjectId}`,
-      ]
-    } else {
-      // Outside dry-run, the previous id will not match again as the `name` has been back-filled.
-      overlappingPartStdOut = [
-        `Back filling dummy meta data for ["${docIds[10]}"]`,
-        `Orphaned deleted doc ${docIds[10]} (no deletedProjects entry)`,
-      ]
-      overlappingPartStdErr = [
-        `Processed 10 until ${oneDayFromProjectId9AsObjectId}`,
-      ]
-    }
-
-    expect(stdOut.filter(filterOutput)).to.deep.equal([
-      `Back filling dummy meta data for ["${docIds[0]}"]`,
+    expect(stdOut.filter(filterOutput)).to.include.members([
       `Orphaned deleted doc ${docIds[0]} (no deletedProjects entry)`,
-      `Back filling dummy meta data for ["${docIds[1]}"]`,
       `Orphaned deleted doc ${docIds[1]} (no deletedProjects entry)`,
-      `Back filling dummy meta data for ["${docIds[2]}"]`,
       `Orphaned deleted doc ${docIds[2]} (failed hard deletion)`,
-      `Back filling dummy meta data for ["${docIds[3]}"]`,
       `Missing deletedDoc for ${docIds[3]}`,
-      // two docs in the same project
-      `Back filling dummy meta data for ["${docIds[4]}","${docIds[11]}"]`,
       `Found deletedDoc for ${docIds[4]}`,
       `Found deletedDoc for ${docIds[11]}`,
-      // 7,8,9 are on the same day, but exceed the batch size of 2
-      `Back filling dummy meta data for ["${docIds[7]}","${docIds[8]}","${docIds[9]}"]`,
       `Orphaned deleted doc ${docIds[7]} (no deletedProjects entry)`,
       `Orphaned deleted doc ${docIds[8]} (no deletedProjects entry)`,
       `Orphaned deleted doc ${docIds[9]} (no deletedProjects entry)`,
-      // Potential double processing
-      ...overlappingPartStdOut,
-      '',
+      `Orphaned deleted doc ${docIds[10]} (no deletedProjects entry)`,
     ])
-    expect(stdErr.filter(filterOutput)).to.deep.equal([
-      `Options: {`,
-      `  "dryRun": ${options.DRY_RUN},`,
-      `  "cacheSize": ${options.CACHE_SIZE},`,
-      `  "firstProjectId": "${options.FIRST_PROJECT_ID}",`,
-      `  "incrementByS": ${options.INCREMENT_BY_S},`,
-      `  "batchSize": ${options.BATCH_SIZE},`,
-      `  "stopAtS": ${options.STOP_AT_S},`,
-      `  "letUserDoubleCheckInputsFor": ${options.LET_USER_DOUBLE_CHECK_INPUTS_FOR}`,
-      '}',
-      'Waiting for you to double check inputs for 1 ms',
-      `Processed 1 until ${getObjectIdFromDate('2021-04-02T00:00:00.000Z')}`,
-      `Processed 2 until ${getObjectIdFromDate('2021-04-03T00:00:00.000Z')}`,
-      `Processed 2 until ${getObjectIdFromDate('2021-04-04T00:00:00.000Z')}`,
-      `Processed 2 until ${getObjectIdFromDate('2021-04-05T00:00:00.000Z')}`,
-      `Processed 2 until ${getObjectIdFromDate('2021-04-06T00:00:00.000Z')}`,
-      `Processed 2 until ${getObjectIdFromDate('2021-04-07T00:00:00.000Z')}`,
-      `Processed 2 until ${getObjectIdFromDate('2021-04-08T00:00:00.000Z')}`,
-      `Processed 2 until ${getObjectIdFromDate('2021-04-09T00:00:00.000Z')}`,
-      `Processed 2 until ${getObjectIdFromDate('2021-04-10T00:00:00.000Z')}`,
-      `Processed 2 until ${getObjectIdFromDate('2021-04-11T00:00:00.000Z')}`,
-      `Processed 3 until ${getObjectIdFromDate('2021-04-12T00:00:00.000Z')}`,
-      `Processed 4 until ${getObjectIdFromDate('2021-04-13T00:00:00.000Z')}`,
-      `Processed 6 until ${getObjectIdFromDate('2021-04-14T00:00:00.000Z')}`,
-      `Processed 6 until ${getObjectIdFromDate('2021-04-15T00:00:00.000Z')}`,
-      `Processed 6 until ${getObjectIdFromDate('2021-04-16T00:00:00.000Z')}`,
-      // 7,8,9,10 are on the same day, but exceed the batch size of 3
+    expect(stdErr.filter(filterOutput)).to.include.members([
       `Processed 9 until ${projectIds[9]}`,
-      ...overlappingPartStdErr,
       'Done.',
-      '',
     ])
   }
 

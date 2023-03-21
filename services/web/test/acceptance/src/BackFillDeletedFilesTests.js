@@ -75,7 +75,7 @@ describe('BackFillDeletedFiles', function () {
     let result
     try {
       result = await promisify(exec)(
-        ['LET_USER_DOUBLE_CHECK_INPUTS_FOR=1']
+        ['LET_USER_DOUBLE_CHECK_INPUTS_FOR=1', 'VERBOSE_LOGGING=true']
           .concat(['node', 'scripts/back_fill_deleted_files'])
           .concat(args)
           .join(' ')
@@ -85,9 +85,23 @@ describe('BackFillDeletedFiles', function () {
       logger.error({ error }, 'script failed')
       throw error
     }
-    const { stderr: stdErr } = result
+    const { stdout: stdOut } = result
 
-    expect(stdErr).to.include(`Completed batch ending ${projectId5}`)
+    expect(stdOut).to.match(
+      new RegExp(`Running update on batch with ids .+${projectId1}`)
+    )
+    expect(stdOut).to.match(
+      new RegExp(`Running update on batch with ids .+${projectId2}`)
+    )
+    expect(stdOut).to.not.match(
+      new RegExp(`Running update on batch with ids .+${projectId3}`)
+    )
+    expect(stdOut).to.not.match(
+      new RegExp(`Running update on batch with ids .+${projectId4}`)
+    )
+    expect(stdOut).to.match(
+      new RegExp(`Running update on batch with ids .+${projectId5}`)
+    )
   }
 
   function checkAreFilesBackFilled() {
