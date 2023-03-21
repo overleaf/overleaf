@@ -80,7 +80,7 @@ function updateSubscription(user, planCode, couponCode, callback) {
     function (err, hasSubscription, subscription) {
       if (err) {
         logger.warn(
-          { err, user_id: user._id, hasSubscription },
+          { err, userId: user._id, hasSubscription },
           'there was an error checking user v2 subscription'
         )
       }
@@ -183,7 +183,7 @@ function cancelSubscription(user, callback) {
     function (err, hasSubscription, subscription) {
       if (err) {
         logger.warn(
-          { err, user_id: user._id, hasSubscription },
+          { err, userId: user._id, hasSubscription },
           'there was an error checking user v2 subscription'
         )
       }
@@ -220,7 +220,7 @@ function reactivateSubscription(user, callback) {
     function (err, hasSubscription, subscription) {
       if (err) {
         logger.warn(
-          { err, user_id: user._id, hasSubscription },
+          { err, userId: user._id, hasSubscription },
           'there was an error checking user v2 subscription'
         )
       }

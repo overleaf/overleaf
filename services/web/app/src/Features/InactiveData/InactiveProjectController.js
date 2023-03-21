@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     max-len,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -33,8 +32,8 @@ module.exports = {
   },
 
   deactivateProject(req, res) {
-    const { project_id } = req.params
-    return InactiveProjectManager.deactivateProject(project_id, function (err) {
+    const { project_id: projectId } = req.params
+    return InactiveProjectManager.deactivateProject(projectId, function (err) {
       if (err != null) {
         return res.sendStatus(500)
       } else {

@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     max-len,
     no-return-assign,
     no-unused-vars,
@@ -73,8 +72,8 @@ describe('ExportsHandler', function () {
       beforeEach(function (done) {
         return this.ExportsHandler.exportProject(
           this.export_params,
-          (error, export_data) => {
-            this.callback(error, export_data)
+          (error, exportData) => {
+            this.callback(error, exportData)
             return done()
           }
         )
@@ -106,8 +105,8 @@ describe('ExportsHandler', function () {
           .yields(new Error('cannot export project without root doc'))
         return this.ExportsHandler.exportProject(
           this.export_params,
-          (error, export_data) => {
-            this.callback(error, export_data)
+          (error, exportData) => {
+            this.callback(error, exportData)
             return done()
           }
         )
@@ -126,8 +125,8 @@ describe('ExportsHandler', function () {
           .yields(null, { forwardResponse: this.error_json })
         return this.ExportsHandler.exportProject(
           this.export_params,
-          (error, export_data) => {
-            this.callback(error, export_data)
+          (error, exportData) => {
+            this.callback(error, exportData)
             return done()
           }
         )
@@ -188,8 +187,8 @@ describe('ExportsHandler', function () {
       beforeEach(function (done) {
         return this.ExportsHandler._buildExport(
           this.export_params,
-          (error, export_data) => {
-            this.callback(error, export_data)
+          (error, exportData) => {
+            this.callback(error, exportData)
             return done()
           }
         )
@@ -206,7 +205,7 @@ describe('ExportsHandler', function () {
       })
 
       it('should return export data', function () {
-        const expected_export_data = {
+        const expectedExportData = {
           project: {
             id: this.project_id,
             rootDocPath: this.rootDocPath,
@@ -239,7 +238,7 @@ describe('ExportsHandler', function () {
           },
         }
         return this.callback
-          .calledWith(null, expected_export_data)
+          .calledWith(null, expectedExportData)
           .should.equal(true)
       })
     })
@@ -252,15 +251,15 @@ describe('ExportsHandler', function () {
         this.export_params.last_name = this.custom_last_name
         return this.ExportsHandler._buildExport(
           this.export_params,
-          (error, export_data) => {
-            this.callback(error, export_data)
+          (error, exportData) => {
+            this.callback(error, exportData)
             return done()
           }
         )
       })
 
       it('should send the data from the user input', function () {
-        const expected_export_data = {
+        const expectedExportData = {
           project: {
             id: this.project_id,
             rootDocPath: this.rootDocPath,
@@ -293,7 +292,7 @@ describe('ExportsHandler', function () {
           },
         }
         return this.callback
-          .calledWith(null, expected_export_data)
+          .calledWith(null, expectedExportData)
           .should.equal(true)
       })
     })
@@ -305,8 +304,8 @@ describe('ExportsHandler', function () {
           .yields(new Error('project not found'))
         return this.ExportsHandler._buildExport(
           this.export_params,
-          (error, export_data) => {
-            this.callback(error, export_data)
+          (error, exportData) => {
+            this.callback(error, exportData)
             return done()
           }
         )
@@ -326,8 +325,8 @@ describe('ExportsHandler', function () {
             .yields(null, [null, { fileSystem: 'other.tex' }])
           return this.ExportsHandler._buildExport(
             this.export_params,
-            (error, export_data) => {
-              this.callback(error, export_data)
+            (error, exportData) => {
+              this.callback(error, exportData)
               return done()
             }
           )
@@ -340,7 +339,7 @@ describe('ExportsHandler', function () {
         })
 
         it('should return export data', function () {
-          const expected_export_data = {
+          const expectedExportData = {
             project: {
               id: this.project_id,
               rootDocPath: 'other.tex',
@@ -373,7 +372,7 @@ describe('ExportsHandler', function () {
             },
           }
           return this.callback
-            .calledWith(null, expected_export_data)
+            .calledWith(null, expectedExportData)
             .should.equal(true)
         })
       })
@@ -389,8 +388,8 @@ describe('ExportsHandler', function () {
             .yields(null, [null, { fileSystem: 'other.tex' }])
           return this.ExportsHandler._buildExport(
             this.export_params,
-            (error, export_data) => {
-              this.callback(error, export_data)
+            (error, exportData) => {
+              this.callback(error, exportData)
               return done()
             }
           )
@@ -403,7 +402,7 @@ describe('ExportsHandler', function () {
         })
 
         it('should return export data', function () {
-          const expected_export_data = {
+          const expectedExportData = {
             project: {
               id: this.project_id,
               rootDocPath: 'other.tex',
@@ -436,7 +435,7 @@ describe('ExportsHandler', function () {
             },
           }
           return this.callback
-            .calledWith(null, expected_export_data)
+            .calledWith(null, expectedExportData)
             .should.equal(true)
         })
       })
@@ -448,8 +447,8 @@ describe('ExportsHandler', function () {
             .yields(null, [null, null])
           return this.ExportsHandler._buildExport(
             this.export_params,
-            (error, export_data) => {
-              this.callback(error, export_data)
+            (error, exportData) => {
+              this.callback(error, exportData)
               return done()
             }
           )
@@ -468,8 +467,8 @@ describe('ExportsHandler', function () {
           .yields(new Error('user not found'))
         return this.ExportsHandler._buildExport(
           this.export_params,
-          (error, export_data) => {
-            this.callback(error, export_data)
+          (error, exportData) => {
+            this.callback(error, exportData)
             return done()
           }
         )
@@ -487,8 +486,8 @@ describe('ExportsHandler', function () {
           .yields(new Error('project history call failed'))
         return this.ExportsHandler._buildExport(
           this.export_params,
-          (error, export_data) => {
-            this.callback(error, export_data)
+          (error, exportData) => {
+            this.callback(error, exportData)
             return done()
           }
         )
@@ -523,8 +522,8 @@ describe('ExportsHandler', function () {
         this.stubRequest.post = this.stubPost
         return this.ExportsHandler._requestExport(
           this.export_data,
-          (error, export_v1_id) => {
-            this.callback(error, export_v1_id)
+          (error, exportV1Id) => {
+            this.callback(error, exportV1Id)
             return done()
           }
         )
@@ -556,8 +555,8 @@ describe('ExportsHandler', function () {
           .yields(new Error('export request failed'))
         return this.ExportsHandler._requestExport(
           this.export_data,
-          (error, export_v1_id) => {
-            this.callback(error, export_v1_id)
+          (error, exportV1Id) => {
+            this.callback(error, exportV1Id)
             return done()
           }
         )
@@ -577,8 +576,8 @@ describe('ExportsHandler', function () {
           .yields(null, { statusCode: this.error_code }, this.error_json)
         return this.ExportsHandler._requestExport(
           this.export_data,
-          (error, export_v1_id) => {
-            this.callback(error, export_v1_id)
+          (error, exportV1Id) => {
+            this.callback(error, exportV1Id)
             return done()
           }
         )

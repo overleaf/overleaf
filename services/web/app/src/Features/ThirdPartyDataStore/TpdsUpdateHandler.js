@@ -89,7 +89,7 @@ async function deleteUpdate(userId, projectId, projectName, path, source) {
   const project = activeProjects[0]
   if (path === '/') {
     logger.debug(
-      { userId, filePath: path, projectName, project_id: project._id },
+      { userId, filePath: path, projectName, projectId: project._id },
       'project found for delete update, path is root so marking project as deleted'
     )
     await ProjectDeleter.promises.markAsDeletedByExternalSource(project._id)

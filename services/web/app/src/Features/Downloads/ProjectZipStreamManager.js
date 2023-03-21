@@ -121,7 +121,7 @@ module.exports = ProjectZipStreamManager = {
           (error, stream) => {
             if (error) {
               logger.warn(
-                { err: error, projectId, file_id: file._id },
+                { err: error, projectId, fileId: file._id },
                 'something went wrong adding file to zip archive'
               )
               return cb(error)

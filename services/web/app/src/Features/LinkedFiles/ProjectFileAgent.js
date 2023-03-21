@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     n/handle-callback-err,
     max-len,
     no-unused-vars,
@@ -33,52 +32,52 @@ const {
 
 module.exports = ProjectFileAgent = {
   createLinkedFile(
-    project_id,
+    projectId,
     linkedFileData,
     name,
-    parent_folder_id,
-    user_id,
+    parentFolderId,
+    userId,
     callback
   ) {
     if (!this._canCreate(linkedFileData)) {
       return callback(new AccessDeniedError())
     }
     return this._go(
-      project_id,
+      projectId,
       linkedFileData,
       name,
-      parent_folder_id,
-      user_id,
+      parentFolderId,
+      userId,
       callback
     )
   },
 
   refreshLinkedFile(
-    project_id,
+    projectId,
     linkedFileData,
     name,
-    parent_folder_id,
-    user_id,
+    parentFolderId,
+    userId,
     callback
   ) {
     return this._go(
-      project_id,
+      projectId,
       linkedFileData,
       name,
-      parent_folder_id,
-      user_id,
+      parentFolderId,
+      userId,
       callback
     )
   },
 
-  _prepare(project_id, linkedFileData, user_id, callback) {
+  _prepare(projectId, linkedFileData, userId, callback) {
     if (callback == null) {
       callback = function () {}
     }
     return this._checkAuth(
-      project_id,
+      projectId,
       linkedFileData,
-      user_id,
+      userId,
       (err, allowed) => {
         if (err != null) {
           return callback(err)
@@ -94,12 +93,12 @@ module.exports = ProjectFileAgent = {
     )
   },
 
-  _go(project_id, linkedFileData, name, parent_folder_id, user_id, callback) {
+  _go(projectId, linkedFileData, name, parentFolderId, userId, callback) {
     linkedFileData = this._sanitizeData(linkedFileData)
     return this._prepare(
-      project_id,
+      projectId,
       linkedFileData,
-      user_id,
+      userId,
       (err, linkedFileData) => {
         if (err != null) {
           return callback(err)
@@ -109,26 +108,26 @@ module.exports = ProjectFileAgent = {
         }
         return this._getEntity(
           linkedFileData,
-          user_id,
-          (err, source_project, entity, type) => {
+          userId,
+          (err, sourceProject, entity, type) => {
             if (err != null) {
               return callback(err)
             }
             if (type === 'doc') {
               return DocstoreManager.getDoc(
-                source_project._id,
+                sourceProject._id,
                 entity._id,
                 function (err, lines) {
                   if (err != null) {
                     return callback(err)
                   }
                   return LinkedFilesHandler.importContent(
-                    project_id,
+                    projectId,
                     lines.join('\n'),
                     linkedFileData,
                     name,
-                    parent_folder_id,
-                    user_id,
+                    parentFolderId,
+                    userId,
                     function (err, file) {
                       if (err != null) {
                         return callback(err)
@@ -140,7 +139,7 @@ module.exports = ProjectFileAgent = {
               ) // Created
             } else if (type === 'file') {
               return FileStoreHandler.getFileStream(
-                source_project._id,
+                sourceProject._id,
                 entity._id,
                 null,
                 function (err, fileStream) {
@@ -148,12 +147,12 @@ module.exports = ProjectFileAgent = {
                     return callback(err)
                   }
                   return LinkedFilesHandler.importFromStream(
-                    project_id,
+                    projectId,
                     fileStream,
                     linkedFileData,
                     name,
-                    parent_folder_id,
-                    user_id,
+                    parentFolderId,
+                    userId,
                     function (err, file) {
                       if (err != null) {
                         return callback(err)
@@ -172,27 +171,27 @@ module.exports = ProjectFileAgent = {
     )
   },
 
-  _getEntity(linkedFileData, current_user_id, callback) {
+  _getEntity(linkedFileData, currentUserId, callback) {
     if (callback == null) {
       callback = function () {}
     }
     callback = _.once(callback)
-    const { source_entity_path } = linkedFileData
+    const { source_entity_path: sourceEntityPath } = linkedFileData
     return this._getSourceProject(linkedFileData, function (err, project) {
       if (err != null) {
         return callback(err)
       }
-      const source_project_id = project._id
+      const sourceProjectId = project._id
       return DocumentUpdaterHandler.flushProjectToMongo(
-        source_project_id,
+        sourceProjectId,
         function (err) {
           if (err != null) {
             return callback(err)
           }
           return ProjectLocator.findElementByPath(
             {
-              project_id: source_project_id,
-              path: source_entity_path,
+              project_id: sourceProjectId,
+              path: sourceEntityPath,
               exactCaseMatch: true,
             },
             function (err, entity, type) {
@@ -234,7 +233,7 @@ module.exports = ProjectFileAgent = {
 
   _getSourceProject: LinkedFilesHandler.getSourceProject,
 
-  _checkAuth(project_id, data, current_user_id, callback) {
+  _checkAuth(projectId, data, currentUserId, callback) {
     if (callback == null) {
       callback = function () {}
     }
@@ -247,7 +246,7 @@ module.exports = ProjectFileAgent = {
         return callback(err)
       }
       return AuthorizationManager.canUserReadProject(
-        current_user_id,
+        currentUserId,
         project._id,
         null,
         function (err, canRead) {

@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     max-len,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -35,7 +34,7 @@ const TemplatesManager = {
     templateId,
     templateName,
     templateVersionId,
-    user_id,
+    userId,
     imageName,
     _callback
   ) {
@@ -73,7 +72,7 @@ const TemplatesManager = {
           return callback(new Error('get zip failed'))
         }
         ProjectUploadManager.createProjectFromZipArchiveWithName(
-          user_id,
+          userId,
           projectName,
           dumpPath,
           attributes,
@@ -129,33 +128,33 @@ const TemplatesManager = {
     })
   },
 
-  _setCompiler(project_id, compiler, callback) {
+  _setCompiler(projectId, compiler, callback) {
     if (compiler == null) {
       return callback()
     }
-    ProjectOptionsHandler.setCompiler(project_id, compiler, callback)
+    ProjectOptionsHandler.setCompiler(projectId, compiler, callback)
   },
 
-  _setImage(project_id, imageName, callback) {
+  _setImage(projectId, imageName, callback) {
     if (!imageName) {
       imageName = 'wl_texlive:2018.1'
     }
-    ProjectOptionsHandler.setImageName(project_id, imageName, callback)
+    ProjectOptionsHandler.setImageName(projectId, imageName, callback)
   },
 
-  _setMainFile(project_id, mainFile, callback) {
+  _setMainFile(projectId, mainFile, callback) {
     if (mainFile == null) {
       return callback()
     }
-    ProjectRootDocManager.setRootDocFromName(project_id, mainFile, callback)
+    ProjectRootDocManager.setRootDocFromName(projectId, mainFile, callback)
   },
 
-  _setBrandVariationId(project_id, brandVariationId, callback) {
+  _setBrandVariationId(projectId, brandVariationId, callback) {
     if (brandVariationId == null) {
       return callback()
     }
     ProjectOptionsHandler.setBrandVariationId(
-      project_id,
+      projectId,
       brandVariationId,
       callback
     )

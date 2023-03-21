@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     n/handle-callback-err,
     max-len,
     no-unused-vars,
@@ -23,7 +22,7 @@ const Errors = require('../Errors/Errors')
 const moment = require('moment')
 
 module.exports = RestoreManager = {
-  restoreDocFromDeletedDoc(user_id, project_id, doc_id, name, callback) {
+  restoreDocFromDeletedDoc(userId, projectId, docId, name, callback) {
     // This is the legacy method for restoring a doc from the SL track-changes/deletedDocs system.
     // It looks up the deleted doc's contents, and then creates a new doc with the same content.
     // We don't actually remove the deleted doc entry, just create a new one from its lines.
@@ -31,8 +30,8 @@ module.exports = RestoreManager = {
       callback = function () {}
     }
     return ProjectEntityHandler.getDoc(
-      project_id,
-      doc_id,
+      projectId,
+      docId,
       { include_deleted: true },
       function (error, lines) {
         if (error != null) {
@@ -40,12 +39,12 @@ module.exports = RestoreManager = {
         }
         const addDocWithName = (name, callback) =>
           EditorController.addDoc(
-            project_id,
+            projectId,
             null,
             name,
             lines,
             'restore',
-            user_id,
+            userId,
             callback
           )
         return RestoreManager._addEntityWithUniqueName(
@@ -57,12 +56,12 @@ module.exports = RestoreManager = {
     )
   },
 
-  restoreFileFromV2(user_id, project_id, version, pathname, callback) {
+  restoreFileFromV2(userId, projectId, version, pathname, callback) {
     if (callback == null) {
       callback = function () {}
     }
     return RestoreManager._writeFileVersionToDisk(
-      project_id,
+      projectId,
       version,
       pathname,
       function (error, fsPath) {
@@ -76,17 +75,17 @@ module.exports = RestoreManager = {
           dirname = ''
         }
         return RestoreManager._findOrCreateFolder(
-          project_id,
+          projectId,
           dirname,
-          function (error, parent_folder_id) {
+          function (error, parentFolderId) {
             if (error != null) {
               return callback(error)
             }
             const addEntityWithName = (name, callback) =>
               FileSystemImportManager.addEntity(
-                user_id,
-                project_id,
-                parent_folder_id,
+                userId,
+                projectId,
+                parentFolderId,
                 name,
                 fsPath,
                 false,
@@ -103,12 +102,12 @@ module.exports = RestoreManager = {
     )
   },
 
-  _findOrCreateFolder(project_id, dirname, callback) {
+  _findOrCreateFolder(projectId, dirname, callback) {
     if (callback == null) {
       callback = function () {}
     }
     return EditorController.mkdirp(
-      project_id,
+      projectId,
       dirname,
       function (error, newFolders, lastFolder) {
         if (error != null) {
@@ -145,13 +144,13 @@ module.exports = RestoreManager = {
     })
   },
 
-  _writeFileVersionToDisk(project_id, version, pathname, callback) {
+  _writeFileVersionToDisk(projectId, version, pathname, callback) {
     if (callback == null) {
       callback = function () {}
     }
     const url = `${
       Settings.apis.project_history.url
-    }/project/${project_id}/version/${version}/${encodeURIComponent(pathname)}`
-    return FileWriter.writeUrlToDisk(project_id, url, callback)
+    }/project/${projectId}/version/${version}/${encodeURIComponent(pathname)}`
+    return FileWriter.writeUrlToDisk(projectId, url, callback)
   },
 }

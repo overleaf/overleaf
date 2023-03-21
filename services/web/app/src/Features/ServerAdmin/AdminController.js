@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     n/handle-callback-err,
     max-len
 */
@@ -144,8 +143,8 @@ const AdminController = {
   },
 
   pollDropboxForUser(req, res) {
-    const { user_id } = req.body
-    return TpdsUpdateSender.pollDropboxForUser(user_id, () =>
+    const { user_id: userId } = req.body
+    return TpdsUpdateSender.pollDropboxForUser(userId, () =>
       res.sendStatus(200)
     )
   },

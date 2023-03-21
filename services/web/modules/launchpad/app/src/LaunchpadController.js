@@ -185,7 +185,7 @@ module.exports = LaunchpadController = {
 
               AuthenticationController.setRedirectInSession(req, '/launchpad')
               logger.debug(
-                { email, user_id: user._id, authMethod },
+                { email, userId: user._id, authMethod },
                 'created first admin account'
               )
 
@@ -244,7 +244,7 @@ module.exports = LaunchpadController = {
           return next(err)
         }
 
-        logger.debug({ user_id: user._id }, 'making user an admin')
+        logger.debug({ userId: user._id }, 'making user an admin')
         User.updateOne(
           { _id: user._id },
           {
@@ -262,7 +262,7 @@ module.exports = LaunchpadController = {
             }
 
             logger.debug(
-              { email, user_id: user._id },
+              { email, userId: user._id },
               'created first admin account'
             )
             res.json({ redir: '/launchpad' })

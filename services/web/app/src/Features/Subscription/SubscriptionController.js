@@ -451,7 +451,7 @@ async function createSubscription(req, res) {
     await LimitationsManager.promises.userHasV1OrV2Subscription(user)
 
   if (hasSubscription) {
-    logger.warn({ user_id: user._id }, 'user already has subscription')
+    logger.warn({ userId: user._id }, 'user already has subscription')
     return res.sendStatus(409) // conflict
   }
 
@@ -477,7 +477,7 @@ async function createSubscription(req, res) {
       )
     } else {
       logger.warn(
-        { err, user_id: user._id },
+        { err, userId: user._id },
         'something went wrong creating subscription'
       )
       throw err
@@ -553,7 +553,7 @@ async function _successfulSubscriptionAngular(req, res) {
 
 function cancelSubscription(req, res, next) {
   const user = SessionManager.getSessionUser(req.session)
-  logger.debug({ user_id: user._id }, 'canceling subscription')
+  logger.debug({ userId: user._id }, 'canceling subscription')
   SubscriptionHandler.cancelSubscription(user, function (err) {
     if (err) {
       OError.tag(err, 'something went wrong canceling subscription', {
@@ -627,12 +627,12 @@ function updateSubscription(req, res, next) {
   if (planCode == null) {
     const err = new Error('plan_code is not defined')
     logger.warn(
-      { user_id: user._id, err, planCode, origin, body: req.body },
+      { userId: user._id, err, planCode, origin, body: req.body },
       '[Subscription] error in updateSubscription form'
     )
     return next(err)
   }
-  logger.debug({ planCode, user_id: user._id }, 'updating subscription')
+  logger.debug({ planCode, userId: user._id }, 'updating subscription')
   SubscriptionHandler.updateSubscription(user, planCode, null, function (err) {
     if (err) {
       OError.tag(err, 'something went wrong updating subscription', {
@@ -646,7 +646,7 @@ function updateSubscription(req, res, next) {
 
 function cancelPendingSubscriptionChange(req, res, next) {
   const user = SessionManager.getSessionUser(req.session)
-  logger.debug({ user_id: user._id }, 'canceling pending subscription change')
+  logger.debug({ userId: user._id }, 'canceling pending subscription change')
   SubscriptionHandler.cancelPendingSubscriptionChange(user, function (err) {
     if (err) {
       OError.tag(
@@ -678,7 +678,7 @@ function updateAccountEmailAddress(req, res, next) {
 
 function reactivateSubscription(req, res, next) {
   const user = SessionManager.getSessionUser(req.session)
-  logger.debug({ user_id: user._id }, 'reactivating subscription')
+  logger.debug({ userId: user._id }, 'reactivating subscription')
   SubscriptionHandler.reactivateSubscription(user, function (err) {
     if (err) {
       OError.tag(err, 'something went wrong reactivating subscription', {
@@ -775,7 +775,7 @@ function processUpgradeToAnnualPlan(req, res, next) {
   const couponCode = Settings.coupon_codes.upgradeToAnnualPromo[planName]
   const annualPlanName = `${planName}-annual`
   logger.debug(
-    { user_id: user._id, planName: annualPlanName },
+    { userId: user._id, planName: annualPlanName },
     'user is upgrading to annual billing with discount'
   )
   return SubscriptionHandler.updateSubscription(

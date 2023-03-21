@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     max-len,
     no-return-assign,
     no-unused-vars,
@@ -55,19 +54,19 @@ describe('ProjectZipStreamManager', function () {
         }
 
         this.ProjectZipStreamManager.createZipStreamForProject = (
-          project_id,
+          projectId,
           callback
         ) => {
-          callback(null, this.zip_streams[project_id])
+          callback(null, this.zip_streams[projectId])
           setTimeout(() => {
-            return this.zip_streams[project_id].emit('end')
+            return this.zip_streams[projectId].emit('end')
           })
           return 0
         }
         sinon.spy(this.ProjectZipStreamManager, 'createZipStreamForProject')
 
-        this.ProjectGetter.getProject = (project_id, fields, callback) => {
-          return callback(null, { name: this.project_names[project_id] })
+        this.ProjectGetter.getProject = (projectId, fields, callback) => {
+          return callback(null, { name: this.project_names[projectId] })
         }
         sinon.spy(this.ProjectGetter, 'getProject')
 
@@ -95,26 +94,26 @@ describe('ProjectZipStreamManager', function () {
       })
 
       it('should get a zip stream for all of the projects', function () {
-        return Array.from(this.project_ids).map(project_id =>
+        return Array.from(this.project_ids).map(projectId =>
           this.ProjectZipStreamManager.createZipStreamForProject
-            .calledWith(project_id)
+            .calledWith(projectId)
             .should.equal(true)
         )
       })
 
       it('should get the names of each project', function () {
-        return Array.from(this.project_ids).map(project_id =>
+        return Array.from(this.project_ids).map(projectId =>
           this.ProjectGetter.getProject
-            .calledWith(project_id, { name: true })
+            .calledWith(projectId, { name: true })
             .should.equal(true)
         )
       })
 
       it('should add all of the projects to the zip', function () {
-        return Array.from(this.project_ids).map(project_id =>
+        return Array.from(this.project_ids).map(projectId =>
           this.archive.append
-            .calledWith(this.zip_streams[project_id], {
-              name: this.project_names[project_id] + '.zip',
+            .calledWith(this.zip_streams[projectId], {
+              name: this.project_names[projectId] + '.zip',
             })
             .should.equal(true)
         )
@@ -132,18 +131,18 @@ describe('ProjectZipStreamManager', function () {
         }
 
         this.ProjectZipStreamManager.createZipStreamForProject = (
-          project_id,
+          projectId,
           callback
         ) => {
-          callback(null, this.zip_streams[project_id])
+          callback(null, this.zip_streams[projectId])
           setTimeout(() => {
-            this.zip_streams[project_id].emit('end')
+            this.zip_streams[projectId].emit('end')
           })
         }
         sinon.spy(this.ProjectZipStreamManager, 'createZipStreamForProject')
 
-        this.ProjectGetter.getProject = (project_id, fields, callback) => {
-          const name = this.project_names[project_id]
+        this.ProjectGetter.getProject = (projectId, fields, callback) => {
+          const name = this.project_names[projectId]
           callback(null, name ? { name } : undefined)
         }
         sinon.spy(this.ProjectGetter, 'getProject')
@@ -170,9 +169,9 @@ describe('ProjectZipStreamManager', function () {
       })
 
       it('should get the names of each project', function () {
-        this.project_ids.map(project_id =>
+        this.project_ids.map(projectId =>
           this.ProjectGetter.getProject
-            .calledWith(project_id, { name: true })
+            .calledWith(projectId, { name: true })
             .should.equal(true)
         )
       })
@@ -379,10 +378,10 @@ describe('ProjectZipStreamManager', function () {
       this.ProjectEntityHandler.getAllFiles = sinon
         .stub()
         .callsArgWith(1, null, this.files)
-      this.FileStoreHandler.getFileStream = (project_id, file_id, ...rest) => {
+      this.FileStoreHandler.getFileStream = (projectId, fileId, ...rest) => {
         const obj = rest[0],
           callback = rest[1]
-        return callback(null, this.streams[file_id])
+        return callback(null, this.streams[fileId])
       }
       sinon.spy(this.FileStoreHandler, 'getFileStream')
       this.ProjectZipStreamManager.addAllFilesToArchive(

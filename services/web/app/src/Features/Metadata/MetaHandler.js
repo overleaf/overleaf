@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     n/handle-callback-err,
     max-len,
     no-cond-assign,
@@ -82,19 +81,19 @@ module.exports = MetaHandler = {
     let pkg
     const docMeta = { labels: [], packages: {} }
     const packages = []
-    const label_re = MetaHandler.labelRegex()
-    const package_re = MetaHandler.usepackageRegex()
-    const req_package_re = MetaHandler.ReqPackageRegex()
+    const labelRe = MetaHandler.labelRegex()
+    const packageRe = MetaHandler.usepackageRegex()
+    const reqPackageRe = MetaHandler.ReqPackageRegex()
     for (const line of Array.from(lines)) {
       let labelMatch
       let clean, messy, packageMatch
-      while ((labelMatch = label_re.exec(line))) {
+      while ((labelMatch = labelRe.exec(line))) {
         let label
         if ((label = labelMatch[1])) {
           docMeta.labels.push(label)
         }
       }
-      while ((packageMatch = package_re.exec(line))) {
+      while ((packageMatch = packageRe.exec(line))) {
         if ((messy = packageMatch[1])) {
           for (pkg of Array.from(messy.split(','))) {
             if ((clean = pkg.trim())) {
@@ -103,7 +102,7 @@ module.exports = MetaHandler = {
           }
         }
       }
-      while ((packageMatch = req_package_re.exec(line))) {
+      while ((packageMatch = reqPackageRe.exec(line))) {
         if ((messy = packageMatch[1])) {
           for (pkg of Array.from(messy.split(','))) {
             if ((clean = pkg.trim())) {

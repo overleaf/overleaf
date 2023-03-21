@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     n/handle-callback-err,
     max-len,
     no-return-assign,
@@ -83,10 +82,10 @@ describe('ProjectUpdateHandler', function () {
 
   describe('markAsOpened', function () {
     it('should send an update to mongo', function (done) {
-      const project_id = 'project_id'
-      return this.handler.markAsOpened(project_id, err => {
+      const projectId = 'project_id'
+      return this.handler.markAsOpened(projectId, err => {
         const args = this.ProjectModel.updateOne.args[0]
-        args[0]._id.should.equal(project_id)
+        args[0]._id.should.equal(projectId)
         const date = args[1].lastOpened + ''
         const now = Date.now() + ''
         date.substring(0, 5).should.equal(now.substring(0, 5))
@@ -97,10 +96,10 @@ describe('ProjectUpdateHandler', function () {
 
   describe('markAsInactive', function () {
     it('should send an update to mongo', function (done) {
-      const project_id = 'project_id'
-      return this.handler.markAsInactive(project_id, err => {
+      const projectId = 'project_id'
+      return this.handler.markAsInactive(projectId, err => {
         const args = this.ProjectModel.updateOne.args[0]
-        args[0]._id.should.equal(project_id)
+        args[0]._id.should.equal(projectId)
         args[1].active.should.equal(false)
         return done()
       })
@@ -109,10 +108,10 @@ describe('ProjectUpdateHandler', function () {
 
   describe('markAsActive', function () {
     it('should send an update to mongo', function (done) {
-      const project_id = 'project_id'
-      return this.handler.markAsActive(project_id, err => {
+      const projectId = 'project_id'
+      return this.handler.markAsActive(projectId, err => {
         const args = this.ProjectModel.updateOne.args[0]
-        args[0]._id.should.equal(project_id)
+        args[0]._id.should.equal(projectId)
         args[1].active.should.equal(true)
         return done()
       })

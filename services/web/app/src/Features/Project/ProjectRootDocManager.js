@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     n/handle-callback-err,
     max-len,
     no-unused-vars,
@@ -27,11 +26,11 @@ const _ = require('underscore')
 const { promisifyAll } = require('../../util/promises')
 
 module.exports = ProjectRootDocManager = {
-  setRootDocAutomatically(project_id, callback) {
+  setRootDocAutomatically(projectId, callback) {
     if (callback == null) {
       callback = function () {}
     }
-    return ProjectEntityHandler.getAllDocs(project_id, function (error, docs) {
+    return ProjectEntityHandler.getAllDocs(projectId, function (error, docs) {
       if (error != null) {
         return callback(error)
       }
@@ -55,11 +54,11 @@ module.exports = ProjectRootDocManager = {
           }
       )
 
-      return async.series(jobs, function (root_doc_id) {
-        if (root_doc_id != null) {
+      return async.series(jobs, function (rootDocId) {
+        if (rootDocId != null) {
           return ProjectEntityUpdateHandler.setRootDoc(
-            project_id,
-            root_doc_id,
+            projectId,
+            rootDocId,
             callback
           )
         } else {
@@ -130,14 +129,14 @@ module.exports = ProjectRootDocManager = {
     return null
   },
 
-  setRootDocFromName(project_id, rootDocName, callback) {
+  setRootDocFromName(projectId, rootDocName, callback) {
     if (callback == null) {
       callback = function () {}
     }
     return ProjectEntityHandler.getAllDocPathsFromProjectById(
-      project_id,
+      projectId,
       function (error, docPaths) {
-        let doc_id, path
+        let docId, path
         if (error != null) {
           return callback(error)
         }
@@ -148,28 +147,28 @@ module.exports = ProjectRootDocManager = {
           rootDocName = `/${rootDocName}`
         }
         // find the root doc from the filename
-        let root_doc_id = null
-        for (doc_id in docPaths) {
+        let rootDocId = null
+        for (docId in docPaths) {
           // docpaths have a leading / so allow matching "folder/filename" and "/folder/filename"
-          path = docPaths[doc_id]
+          path = docPaths[docId]
           if (path === rootDocName) {
-            root_doc_id = doc_id
+            rootDocId = docId
           }
         }
         // try a basename match if there was no match
-        if (!root_doc_id) {
-          for (doc_id in docPaths) {
-            path = docPaths[doc_id]
+        if (!rootDocId) {
+          for (docId in docPaths) {
+            path = docPaths[docId]
             if (Path.basename(path) === Path.basename(rootDocName)) {
-              root_doc_id = doc_id
+              rootDocId = docId
             }
           }
         }
         // set the root doc id if we found a match
-        if (root_doc_id != null) {
+        if (rootDocId != null) {
           return ProjectEntityUpdateHandler.setRootDoc(
-            project_id,
-            root_doc_id,
+            projectId,
+            rootDocId,
             callback
           )
         } else {
@@ -179,12 +178,12 @@ module.exports = ProjectRootDocManager = {
     )
   },
 
-  ensureRootDocumentIsSet(project_id, callback) {
+  ensureRootDocumentIsSet(projectId, callback) {
     if (callback == null) {
       callback = function () {}
     }
     return ProjectGetter.getProject(
-      project_id,
+      projectId,
       { rootDoc_id: 1 },
       function (error, project) {
         if (error != null) {
@@ -198,7 +197,7 @@ module.exports = ProjectRootDocManager = {
           return callback()
         } else {
           return ProjectRootDocManager.setRootDocAutomatically(
-            project_id,
+            projectId,
             callback
           )
         }
@@ -210,9 +209,9 @@ module.exports = ProjectRootDocManager = {
    * @param {ObjectId | string} project_id
    * @param {Function} callback
    */
-  ensureRootDocumentIsValid(project_id, callback) {
+  ensureRootDocumentIsValid(projectId, callback) {
     ProjectGetter.getProjectWithoutDocLines(
-      project_id,
+      projectId,
       function (error, project) {
         if (error != null) {
           return callback(error)
@@ -227,9 +226,9 @@ module.exports = ProjectRootDocManager = {
             project.rootDoc_id,
             (err, docPath) => {
               if (docPath) return callback()
-              ProjectEntityUpdateHandler.unsetRootDoc(project_id, () =>
+              ProjectEntityUpdateHandler.unsetRootDoc(projectId, () =>
                 ProjectRootDocManager.setRootDocAutomatically(
-                  project_id,
+                  projectId,
                   callback
                 )
               )
@@ -237,7 +236,7 @@ module.exports = ProjectRootDocManager = {
           )
         } else {
           return ProjectRootDocManager.setRootDocAutomatically(
-            project_id,
+            projectId,
             callback
           )
         }

@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     n/handle-callback-err,
     max-len,
     no-unused-vars,
@@ -23,16 +22,16 @@ const async = require('async')
 
 module.exports = ChatController = {
   sendMessage(req, res, next) {
-    const { project_id } = req.params
-    const { content, client_id } = req.body
-    const user_id = SessionManager.getLoggedInUserId(req.session)
-    if (user_id == null) {
+    const { project_id: projectId } = req.params
+    const { content, client_id: clientId } = req.body
+    const userId = SessionManager.getLoggedInUserId(req.session)
+    if (userId == null) {
       const err = new Error('no logged-in user')
       return next(err)
     }
     return ChatApiHandler.sendGlobalMessage(
-      project_id,
-      user_id,
+      projectId,
+      userId,
       content,
       function (err, message) {
         if (err != null) {
@@ -45,9 +44,9 @@ module.exports = ChatController = {
               return next(err)
             }
             message.user = UserInfoController.formatPersonalInfo(user)
-            message.clientId = client_id
+            message.clientId = clientId
             EditorRealTimeController.emitToRoom(
-              project_id,
+              projectId,
               'new-chat-message',
               message
             )
@@ -59,10 +58,10 @@ module.exports = ChatController = {
   },
 
   getMessages(req, res, next) {
-    const { project_id } = req.params
+    const { project_id: projectId } = req.params
     const { query } = req
     return ChatApiHandler.getGlobalMessages(
-      project_id,
+      projectId,
       query.limit,
       query.before,
       function (err, messages) {
@@ -86,42 +85,42 @@ module.exports = ChatController = {
     // There will be a lot of repitition of user_ids, so first build a list
     // of unique ones to perform db look ups on, then use these to populate the
     // user fields
-    let message, thread, thread_id, user_id
+    let message, thread, threadId, userId
     if (callback == null) {
       callback = function () {}
     }
-    const user_ids = {}
-    for (thread_id in threads) {
-      thread = threads[thread_id]
+    const userIds = {}
+    for (threadId in threads) {
+      thread = threads[threadId]
       if (thread.resolved) {
-        user_ids[thread.resolved_by_user_id] = true
+        userIds[thread.resolved_by_user_id] = true
       }
       for (message of Array.from(thread.messages)) {
-        user_ids[message.user_id] = true
+        userIds[message.user_id] = true
       }
     }
 
     const jobs = []
     const users = {}
-    for (user_id in user_ids) {
-      const _ = user_ids[user_id]
-      ;(user_id =>
+    for (userId in userIds) {
+      const _ = userIds[userId]
+      ;(userId =>
         jobs.push(cb =>
-          UserInfoManager.getPersonalInfo(user_id, function (error, user) {
+          UserInfoManager.getPersonalInfo(userId, function (error, user) {
             if (error != null) return cb(error)
             user = UserInfoController.formatPersonalInfo(user)
-            users[user_id] = user
+            users[userId] = user
             cb()
           })
-        ))(user_id)
+        ))(userId)
     }
 
     return async.series(jobs, function (error) {
       if (error != null) {
         return callback(error)
       }
-      for (thread_id in threads) {
-        thread = threads[thread_id]
+      for (threadId in threads) {
+        thread = threads[threadId]
         if (thread.resolved) {
           thread.resolved_by_user = users[thread.resolved_by_user_id]
         }

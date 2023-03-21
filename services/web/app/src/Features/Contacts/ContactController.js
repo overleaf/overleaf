@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     max-len,
     no-unused-vars,
 */
@@ -21,16 +20,16 @@ const Modules = require('../../infrastructure/Modules')
 
 module.exports = ContactsController = {
   getContacts(req, res, next) {
-    const user_id = SessionManager.getLoggedInUserId(req.session)
+    const userId = SessionManager.getLoggedInUserId(req.session)
     return ContactManager.getContactIds(
-      user_id,
+      userId,
       { limit: 50 },
-      function (error, contact_ids) {
+      function (error, contactIds) {
         if (error != null) {
           return next(error)
         }
         return UserGetter.getUsers(
-          contact_ids,
+          contactIds,
           {
             email: 1,
             first_name: 1,
@@ -44,9 +43,9 @@ module.exports = ContactsController = {
 
             // UserGetter.getUsers may not preserve order so put them back in order
             const positions = {}
-            for (let i = 0; i < contact_ids.length; i++) {
-              const contact_id = contact_ids[i]
-              positions[contact_id] = i
+            for (let i = 0; i < contactIds.length; i++) {
+              const contactId = contactIds[i]
+              positions[contactId] = i
             }
             contacts.sort(
               (a, b) =>
@@ -61,14 +60,14 @@ module.exports = ContactsController = {
 
             return Modules.hooks.fire(
               'getContacts',
-              user_id,
+              userId,
               contacts,
-              function (error, additional_contacts) {
+              function (error, additionalContacts) {
                 if (error != null) {
                   return next(error)
                 }
                 contacts = contacts.concat(
-                  ...Array.from(additional_contacts || [])
+                  ...Array.from(additionalContacts || [])
                 )
                 return res.json({
                   contacts,

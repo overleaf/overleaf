@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     max-len,
     no-return-assign,
     no-unused-vars,
@@ -22,23 +21,23 @@ const modulePath = require('path').join(
 )
 
 describe('ExportsController', function () {
-  const project_id = '123njdskj9jlk'
-  const user_id = '123nd3ijdks'
-  const brand_variation_id = 22
+  const projectId = '123njdskj9jlk'
+  const userId = '123nd3ijdks'
+  const brandVariationId = 22
   const firstName = 'first'
   const lastName = 'last'
   const title = 'title'
   const description = 'description'
   const author = 'author'
   const license = 'other'
-  const show_source = true
+  const showSource = true
 
   beforeEach(function () {
     this.handler = { getUserNotifications: sinon.stub().callsArgWith(1) }
     this.req = {
       params: {
-        project_id,
-        brand_variation_id,
+        project_id: projectId,
+        brand_variation_id: brandVariationId,
       },
       body: {
         firstName,
@@ -46,7 +45,7 @@ describe('ExportsController', function () {
       },
       session: {
         user: {
-          _id: user_id,
+          _id: userId,
         },
       },
       i18n: {
@@ -77,9 +76,9 @@ describe('ExportsController', function () {
         .stub()
         .yields(null, { iAmAnExport: true, v1_id: 897 })
       const expected = {
-        project_id,
-        user_id,
-        brand_variation_id,
+        project_id: projectId,
+        user_id: userId,
+        brand_variation_id: brandVariationId,
         first_name: firstName,
         last_name: lastName,
       }
@@ -101,9 +100,9 @@ describe('ExportsController', function () {
         message: 'RESUBMISSION',
       })
       const expected = {
-        project_id,
-        user_id,
-        brand_variation_id,
+        project_id: projectId,
+        user_id: userId,
+        brand_variation_id: brandVariationId,
         first_name: firstName,
         last_name: lastName,
       }
@@ -134,16 +133,16 @@ describe('ExportsController', function () {
         .stub()
         .yields(null, { iAmAnExport: true, v1_id: 897 })
       const expected = {
-        project_id,
-        user_id,
-        brand_variation_id,
+        project_id: projectId,
+        user_id: userId,
+        brand_variation_id: brandVariationId,
         first_name: firstName,
         last_name: lastName,
         title,
         description,
         author,
         license,
-        show_source,
+        show_source: showSource,
       }
       return this.controller.exportProject(this.req, {
         json: body => {
@@ -184,7 +183,7 @@ describe('ExportsController', function () {
 }`
     )
 
-    this.req.params = { project_id, export_id: 897 }
+    this.req.params = { project_id: projectId, export_id: 897 }
     return this.controller.exportStatus(this.req, {
       json: body => {
         expect(body).to.deep.equal({

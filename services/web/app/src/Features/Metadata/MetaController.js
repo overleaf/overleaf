@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     max-len,
     no-unused-vars,
 */
@@ -19,53 +18,49 @@ const logger = require('@overleaf/logger')
 
 module.exports = MetaController = {
   getMetadata(req, res, next) {
-    const { project_id } = req.params
-    logger.debug({ project_id }, 'getting all labels for project')
+    const { project_id: projectId } = req.params
+    logger.debug({ projectId }, 'getting all labels for project')
     return MetaHandler.getAllMetaForProject(
-      project_id,
+      projectId,
       function (err, projectMeta) {
         if (err != null) {
           OError.tag(
             err,
             '[MetaController] error getting all labels from project',
             {
-              project_id,
+              project_id: projectId,
             }
           )
           return next(err)
         }
-        return res.json({ projectId: project_id, projectMeta })
+        return res.json({ projectId, projectMeta })
       }
     )
   },
 
   broadcastMetadataForDoc(req, res, next) {
-    const { project_id } = req.params
-    const { doc_id } = req.params
+    const { project_id: projectId } = req.params
+    const { doc_id: docId } = req.params
     const { broadcast } = req.body
-    logger.debug({ project_id, doc_id, broadcast }, 'getting labels for doc')
-    return MetaHandler.getMetaForDoc(
-      project_id,
-      doc_id,
-      function (err, docMeta) {
-        if (err != null) {
-          OError.tag(err, '[MetaController] error getting labels from doc', {
-            project_id,
-            doc_id,
-          })
-          return next(err)
-        }
-        // default to broadcasting, unless explicitly disabled (for backwards compatibility)
-        if (broadcast !== false) {
-          EditorRealTimeController.emitToRoom(project_id, 'broadcastDocMeta', {
-            docId: doc_id,
-            meta: docMeta,
-          })
-          return res.sendStatus(200)
-        } else {
-          return res.json({ docId: doc_id, meta: docMeta })
-        }
+    logger.debug({ projectId, docId, broadcast }, 'getting labels for doc')
+    return MetaHandler.getMetaForDoc(projectId, docId, function (err, docMeta) {
+      if (err != null) {
+        OError.tag(err, '[MetaController] error getting labels from doc', {
+          project_id: projectId,
+          doc_id: docId,
+        })
+        return next(err)
       }
-    )
+      // default to broadcasting, unless explicitly disabled (for backwards compatibility)
+      if (broadcast !== false) {
+        EditorRealTimeController.emitToRoom(projectId, 'broadcastDocMeta', {
+          docId,
+          meta: docMeta,
+        })
+        return res.sendStatus(200)
+      } else {
+        return res.json({ docId, meta: docMeta })
+      }
+    })
   },
 }

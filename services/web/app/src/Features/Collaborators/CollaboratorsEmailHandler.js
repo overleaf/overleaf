@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     n/handle-callback-err,
     max-len,
 */
@@ -19,8 +18,8 @@ module.exports = CollaboratorsEmailHandler = {
     )
   },
 
-  notifyUserOfProjectInvite(project_id, email, invite, sendingUser, callback) {
-    Project.findOne({ _id: project_id })
+  notifyUserOfProjectInvite(projectId, email, invite, sendingUser, callback) {
+    Project.findOne({ _id: projectId })
       .select('name owner_ref')
       .populate('owner_ref')
       .exec(function (err, project) {

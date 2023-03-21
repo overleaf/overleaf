@@ -624,7 +624,7 @@ function _loginAsyncHandlers(req, user, anonymousAnalyticsId, isNewUser) {
   Analytics.identifyUser(user._id, anonymousAnalyticsId, isNewUser)
 
   logger.debug(
-    { email: user.email, user_id: user._id.toString() },
+    { email: user.email, userId: user._id.toString() },
     'successful log in'
   )
 

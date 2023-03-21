@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     max-len,
     no-unused-vars,
 */
@@ -35,8 +34,8 @@ describe('RestoringFiles', function () {
       return this.owner.createProject(
         'example-project',
         { template: 'example' },
-        (error, project_id) => {
-          this.project_id = project_id
+        (error, projectId) => {
+          this.project_id = projectId
           if (error != null) {
             throw error
           }
@@ -94,11 +93,11 @@ describe('RestoringFiles', function () {
         if (error != null) {
           throw error
         }
-        const restored_doc = _.find(
+        const restoredDoc = _.find(
           project.rootFolder[0].docs,
           doc => doc.name === 'main.tex'
         )
-        expect(restored_doc._id.toString()).to.equal(this.restored_doc_id)
+        expect(restoredDoc._id.toString()).to.equal(this.restored_doc_id)
         expect(this.doc._id).to.not.equal(this.restored_doc_id)
         expect(
           MockDocstoreApi.docs[this.project_id][this.restored_doc_id].lines

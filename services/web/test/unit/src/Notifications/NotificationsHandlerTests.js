@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     n/handle-callback-err,
     max-len,
     no-return-assign,
@@ -22,8 +21,8 @@ const modulePath = require('path').join(
 const _ = require('underscore')
 
 describe('NotificationsHandler', function () {
-  const user_id = '123nd3ijdks'
-  const notification_id = '123njdskj9jlk'
+  const userId = '123nd3ijdks'
+  const notificationId = '123njdskj9jlk'
   const notificationUrl = 'notification.sharelatex.testing'
 
   beforeEach(function () {
@@ -40,7 +39,7 @@ describe('NotificationsHandler', function () {
 
   describe('getUserNotifications', function () {
     it('should get unread notifications', function (done) {
-      const stubbedNotifications = [{ _id: notification_id, user_id }]
+      const stubbedNotifications = [{ _id: notificationId, user_id: userId }]
       this.request.callsArgWith(
         1,
         null,
@@ -48,11 +47,11 @@ describe('NotificationsHandler', function () {
         stubbedNotifications
       )
       return this.handler.getUserNotifications(
-        user_id,
+        userId,
         (err, unreadNotifications) => {
           stubbedNotifications.should.deep.equal(unreadNotifications)
           const getOpts = {
-            uri: `${notificationUrl}/user/${user_id}`,
+            uri: `${notificationUrl}/user/${userId}`,
             json: true,
             timeout: 1000,
             method: 'GET',
@@ -66,7 +65,7 @@ describe('NotificationsHandler', function () {
     it('should return empty arrays if there are no notifications', function () {
       this.request.callsArgWith(1, null, { statusCode: 200 }, null)
       return this.handler.getUserNotifications(
-        user_id,
+        userId,
         (err, unreadNotifications) => {
           return unreadNotifications.length.should.equal(0)
         }
@@ -80,9 +79,9 @@ describe('NotificationsHandler', function () {
     })
 
     it('should send a delete request when a delete has been received to mark a notification', function (done) {
-      return this.handler.markAsReadWithKey(user_id, this.key, () => {
+      return this.handler.markAsReadWithKey(userId, this.key, () => {
         const opts = {
-          uri: `${notificationUrl}/user/${user_id}`,
+          uri: `${notificationUrl}/user/${userId}`,
           json: {
             key: this.key,
           },
@@ -105,14 +104,14 @@ describe('NotificationsHandler', function () {
 
     it('should post the message over', function (done) {
       return this.handler.createNotification(
-        user_id,
+        userId,
         this.key,
         this.templateKey,
         this.messageOpts,
         this.expiry,
         () => {
           const args = this.request.args[0][0]
-          args.uri.should.equal(`${notificationUrl}/user/${user_id}`)
+          args.uri.should.equal(`${notificationUrl}/user/${userId}`)
           args.timeout.should.equal(1000)
           const expectedJson = {
             key: this.key,
@@ -136,14 +135,14 @@ describe('NotificationsHandler', function () {
 
       it('should post the message over with expiry field', function (done) {
         return this.handler.createNotification(
-          user_id,
+          userId,
           this.key,
           this.templateKey,
           this.messageOpts,
           this.expiry,
           () => {
             const args = this.request.args[0][0]
-            args.uri.should.equal(`${notificationUrl}/user/${user_id}`)
+            args.uri.should.equal(`${notificationUrl}/user/${userId}`)
             args.timeout.should.equal(1000)
             const expectedJson = {
               key: this.key,

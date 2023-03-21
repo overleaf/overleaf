@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     max-len,
     no-unused-vars,
 */
@@ -16,9 +15,9 @@ const logger = require('@overleaf/logger')
 
 module.exports = {
   getProjectDetails(req, res, next) {
-    const { project_id } = req.params
+    const { project_id: projectId } = req.params
     return ProjectDetailsHandler.getDetails(
-      project_id,
+      projectId,
       function (err, projDetails) {
         if (err != null) {
           return next(err)

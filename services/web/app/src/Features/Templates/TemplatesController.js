@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     max-len,
     no-unused-vars,
 */
@@ -47,7 +46,7 @@ module.exports = TemplatesController = {
   },
 
   createProjectFromV1Template(req, res, next) {
-    const user_id = SessionManager.getLoggedInUserId(req.session)
+    const userId = SessionManager.getLoggedInUserId(req.session)
     return TemplatesManager.createProjectFromV1Template(
       req.body.brandVariationId,
       req.body.compiler,
@@ -55,7 +54,7 @@ module.exports = TemplatesController = {
       req.body.templateId,
       req.body.templateName,
       req.body.templateVersionId,
-      user_id,
+      userId,
       req.body.imageName,
       function (err, project) {
         if (err != null) {

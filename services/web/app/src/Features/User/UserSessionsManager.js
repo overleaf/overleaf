@@ -88,10 +88,7 @@ const UserSessionsManager = {
       }
       sessionKeys = _.filter(sessionKeys, k => !_.contains(exclude, k))
       if (sessionKeys.length === 0) {
-        logger.debug(
-          { user_id: user._id },
-          'no other sessions found, returning'
-        )
+        logger.debug({ userId: user._id }, 'no other sessions found, returning')
         return callback(null, [])
       }
 
@@ -152,13 +149,13 @@ const UserSessionsManager = {
       )
       if (keysToDelete.length === 0) {
         logger.debug(
-          { user_id: user._id },
+          { userId: user._id },
           'no sessions in UserSessions set to delete, returning'
         )
         return callback(null)
       }
       logger.debug(
-        { user_id: user._id, count: keysToDelete.length },
+        { userId: user._id, count: keysToDelete.length },
         'deleting sessions for user'
       )
 

@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     max-len,
     no-unused-vars,
 */
@@ -21,23 +20,23 @@ const { prepareZipAttachment } = require('../../infrastructure/Response')
 
 module.exports = ProjectDownloadsController = {
   downloadProject(req, res, next) {
-    const project_id = req.params.Project_id
+    const projectId = req.params.Project_id
     Metrics.inc('zip-downloads')
     return DocumentUpdaterHandler.flushProjectToMongo(
-      project_id,
+      projectId,
       function (error) {
         if (error != null) {
           return next(error)
         }
         return ProjectGetter.getProject(
-          project_id,
+          projectId,
           { name: true },
           function (error, project) {
             if (error != null) {
               return next(error)
             }
             return ProjectZipStreamManager.createZipStreamForProject(
-              project_id,
+              projectId,
               function (error, stream) {
                 if (error != null) {
                   return next(error)
@@ -53,23 +52,23 @@ module.exports = ProjectDownloadsController = {
   },
 
   downloadMultipleProjects(req, res, next) {
-    const project_ids = req.query.project_ids.split(',')
+    const projectIds = req.query.project_ids.split(',')
     Metrics.inc('zip-downloads-multiple')
     return DocumentUpdaterHandler.flushMultipleProjectsToMongo(
-      project_ids,
+      projectIds,
       function (error) {
         if (error != null) {
           return next(error)
         }
         return ProjectZipStreamManager.createZipStreamForMultipleProjects(
-          project_ids,
+          projectIds,
           function (error, stream) {
             if (error != null) {
               return next(error)
             }
             prepareZipAttachment(
               res,
-              `Overleaf Projects (${project_ids.length} items).zip`
+              `Overleaf Projects (${projectIds.length} items).zip`
             )
             return stream.pipe(res)
           }

@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     max-len,
     no-unused-vars,
 */
@@ -39,11 +38,11 @@ const upload = multer(
 module.exports = ProjectUploadController = {
   uploadProject(req, res, next) {
     const timer = new metrics.Timer('project-upload')
-    const user_id = SessionManager.getLoggedInUserId(req.session)
+    const userId = SessionManager.getLoggedInUserId(req.session)
     const { originalname, path } = req.file
     const name = Path.basename(originalname, '.zip')
     return ProjectUploadManager.createProjectFromZipArchive(
-      user_id,
+      userId,
       name,
       path,
       function (error, project) {
@@ -76,11 +75,11 @@ module.exports = ProjectUploadController = {
     const timer = new metrics.Timer('file-upload')
     const name = req.file != null ? req.file.originalname : undefined
     const path = req.file != null ? req.file.path : undefined
-    const project_id = req.params.Project_id
-    const { folder_id } = req.query
+    const projectId = req.params.Project_id
+    const { folder_id: folderId } = req.query
     if (name == null || name.length === 0 || name.length > 150) {
       logger.err(
-        { projectId: project_id, fileName: name },
+        { projectId, fileName: name },
         'bad name when trying to upload file'
       )
       return res.status(422).json({
@@ -88,12 +87,12 @@ module.exports = ProjectUploadController = {
         error: 'invalid_filename',
       })
     }
-    const user_id = SessionManager.getLoggedInUserId(req.session)
+    const userId = SessionManager.getLoggedInUserId(req.session)
 
     return FileSystemImportManager.addEntity(
-      user_id,
-      project_id,
-      folder_id,
+      userId,
+      projectId,
+      folderId,
       name,
       path,
       true,
@@ -104,10 +103,10 @@ module.exports = ProjectUploadController = {
           logger.error(
             {
               err: error,
-              projectId: project_id,
+              projectId,
               filePath: path,
               fileName: name,
-              folderId: folder_id,
+              folderId,
             },
             'error uploading file'
           )

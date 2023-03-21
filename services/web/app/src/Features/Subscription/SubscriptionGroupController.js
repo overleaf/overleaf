@@ -8,7 +8,7 @@ function removeUserFromGroup(req, res, next) {
   const subscription = req.entity
   const userToRemoveId = req.params.user_id
   logger.debug(
-    { subscriptionId: subscription._id, userToRemove_id: userToRemoveId },
+    { subscriptionId: subscription._id, userToRemoveId },
     'removing user from group subscription'
   )
   SubscriptionGroupHandler.removeUserFromGroup(
@@ -44,7 +44,7 @@ function removeSelfFromGroup(req, res, next) {
         function (error) {
           if (error) {
             logger.err(
-              { err: error, userToRemove_id: userToRemoveId, subscriptionId },
+              { err: error, userToRemoveId, subscriptionId },
               'error removing self from group'
             )
             return res.sendStatus(500)

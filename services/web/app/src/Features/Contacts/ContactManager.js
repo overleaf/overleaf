@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     n/handle-callback-err,
     max-len,
     no-unused-vars,
@@ -18,14 +17,14 @@ const request = require('request')
 const settings = require('@overleaf/settings')
 
 module.exports = ContactManager = {
-  getContactIds(user_id, options, callback) {
+  getContactIds(userId, options, callback) {
     if (options == null) {
       options = { limits: 50 }
     }
     if (callback == null) {
       callback = function () {}
     }
-    const url = `${settings.apis.contacts.url}/user/${user_id}/contacts`
+    const url = `${settings.apis.contacts.url}/user/${userId}/contacts`
     return request.get(
       {
         url,
@@ -45,7 +44,7 @@ module.exports = ContactManager = {
         } else {
           error = new OError(
             `contacts api responded with non-success code: ${res.statusCode}`,
-            { user_id }
+            { user_id: userId }
           )
           return callback(error)
         }
@@ -53,16 +52,16 @@ module.exports = ContactManager = {
     )
   },
 
-  addContact(user_id, contact_id, callback) {
+  addContact(userId, contactId, callback) {
     if (callback == null) {
       callback = function () {}
     }
-    const url = `${settings.apis.contacts.url}/user/${user_id}/contacts`
+    const url = `${settings.apis.contacts.url}/user/${userId}/contacts`
     return request.post(
       {
         url,
         json: {
-          contact_id,
+          contact_id: contactId,
         },
         jar: false,
       },
@@ -79,8 +78,8 @@ module.exports = ContactManager = {
           error = new OError(
             `contacts api responded with non-success code: ${res.statusCode}`,
             {
-              user_id,
-              contact_id,
+              user_id: userId,
+              contact_id: contactId,
             }
           )
           return callback(error)

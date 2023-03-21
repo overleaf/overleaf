@@ -1419,7 +1419,7 @@ describe('AuthenticationController', function () {
       it('should log the successful login', function () {
         this.logger.debug
           .calledWith(
-            { email: this.user.email, user_id: this.user._id.toString() },
+            { email: this.user.email, userId: this.user._id.toString() },
             'successful log in'
           )
           .should.equal(true)

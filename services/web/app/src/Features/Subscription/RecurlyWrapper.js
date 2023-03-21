@@ -43,7 +43,7 @@ const RecurlyWrapper = {
     checkAccountExists(cache, next) {
       const { user } = cache
       logger.debug(
-        { user_id: user._id },
+        { userId: user._id },
         'checking if recurly account exists for user'
       )
       RecurlyWrapper.apiRequest(
@@ -66,16 +66,13 @@ const RecurlyWrapper = {
           if (response.statusCode === 404) {
             // actually not an error in this case, just no existing account
             logger.debug(
-              { user_id: user._id },
+              { userId: user._id },
               'user does not currently exist in recurly, proceed'
             )
             cache.userExists = false
             return next(null, cache)
           }
-          logger.debug(
-            { user_id: user._id },
-            'user appears to exist in recurly'
-          )
+          logger.debug({ userId: user._id }, 'user appears to exist in recurly')
           RecurlyWrapper._parseAccountXml(
             responseBody,
             function (err, account) {
@@ -158,7 +155,7 @@ const RecurlyWrapper = {
     createBillingInfo(cache, next) {
       const { user } = cache
       const { recurlyTokenIds } = cache
-      logger.debug({ user_id: user._id }, 'creating billing info in recurly')
+      logger.debug({ userId: user._id }, 'creating billing info in recurly')
       const accountCode = cache?.account?.account_code
       if (!accountCode) {
         return next(new Error('no account code at createBillingInfo stage'))
@@ -211,7 +208,7 @@ const RecurlyWrapper = {
       const { user } = cache
       const { subscriptionDetails } = cache
       logger.debug(
-        { user_id: user._id },
+        { userId: user._id },
         'setting billing address and company info in recurly'
       )
       const accountCode = cache?.account?.account_code
@@ -279,7 +276,7 @@ const RecurlyWrapper = {
     createSubscription(cache, next) {
       const { user } = cache
       const { subscriptionDetails } = cache
-      logger.debug({ user_id: user._id }, 'creating subscription in recurly')
+      logger.debug({ userId: user._id }, 'creating subscription in recurly')
       const data = {
         plan_code: subscriptionDetails.plan_code,
         currency: subscriptionDetails.currencyCode,
@@ -344,7 +341,7 @@ const RecurlyWrapper = {
     callback
   ) {
     logger.debug(
-      { user_id: user._id },
+      { userId: user._id },
       'starting process of creating paypal subscription'
     )
     // We use `async.waterfall` to run each of these actions in sequence
@@ -374,7 +371,7 @@ const RecurlyWrapper = {
           return callback(err)
         }
         logger.debug(
-          { user_id: user._id },
+          { userId: user._id },
           'done creating paypal subscription for user'
         )
         callback(null, result.subscription)
@@ -444,7 +441,7 @@ const RecurlyWrapper = {
   createSubscription(user, subscriptionDetails, recurlyTokenIds, callback) {
     const { isPaypal } = subscriptionDetails
     logger.debug(
-      { user_id: user._id, isPaypal },
+      { userId: user._id, isPaypal },
       'setting up subscription in recurly'
     )
     const fn = isPaypal

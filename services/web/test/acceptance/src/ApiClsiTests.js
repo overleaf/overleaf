@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     max-len,
     no-unused-vars,
     n/no-deprecated-api,
@@ -17,7 +16,7 @@ const request = require('./helpers/request')
 const Settings = require('@overleaf/settings')
 
 const auth = Buffer.from('sharelatex:password').toString('base64')
-const authed_request = request.defaults({
+const authedRequest = request.defaults({
   headers: {
     Authorization: `Basic ${auth}`,
   },
@@ -52,7 +51,7 @@ describe('ApiClsiTests', function () {
 
     describe('valid request', function () {
       it('returns success and a list of output files', function (done) {
-        return authed_request.post(
+        return authedRequest.post(
           {
             uri: '/api/clsi/compile/abcd',
             json: this.compileSpec,
@@ -108,7 +107,7 @@ describe('ApiClsiTests', function () {
   describe('get output', function () {
     describe('valid file', function () {
       it('returns the file', function (done) {
-        return authed_request.get(
+        return authedRequest.get(
           '/api/clsi/compile/abcd/build/1234/output/project.pdf',
           (error, response, body) => {
             if (error != null) {
@@ -124,7 +123,7 @@ describe('ApiClsiTests', function () {
 
     describe('invalid file', function () {
       it('returns 404', function (done) {
-        return authed_request.get(
+        return authedRequest.get(
           '/api/clsi/compile/abcd/build/1234/output/project.aux',
           (error, response, body) => {
             if (error != null) {

@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     max-len,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -16,42 +15,43 @@ const logger = require('@overleaf/logger')
 
 module.exports = {
   exportProject(req, res, next) {
-    const { project_id, brand_variation_id } = req.params
-    const user_id = SessionManager.getLoggedInUserId(req.session)
-    const export_params = {
-      project_id,
-      brand_variation_id,
-      user_id,
+    const { project_id: projectId, brand_variation_id: brandVariationId } =
+      req.params
+    const userId = SessionManager.getLoggedInUserId(req.session)
+    const exportParams = {
+      project_id: projectId,
+      brand_variation_id: brandVariationId,
+      user_id: userId,
     }
 
     if (req.body) {
       if (req.body.firstName) {
-        export_params.first_name = req.body.firstName.trim()
+        exportParams.first_name = req.body.firstName.trim()
       }
       if (req.body.lastName) {
-        export_params.last_name = req.body.lastName.trim()
+        exportParams.last_name = req.body.lastName.trim()
       }
       // additional parameters for gallery exports
       if (req.body.title) {
-        export_params.title = req.body.title.trim()
+        exportParams.title = req.body.title.trim()
       }
       if (req.body.description) {
-        export_params.description = req.body.description.trim()
+        exportParams.description = req.body.description.trim()
       }
       if (req.body.author) {
-        export_params.author = req.body.author.trim()
+        exportParams.author = req.body.author.trim()
       }
       if (req.body.license) {
-        export_params.license = req.body.license.trim()
+        exportParams.license = req.body.license.trim()
       }
       if (req.body.showSource != null) {
-        export_params.show_source = req.body.showSource
+        exportParams.show_source = req.body.showSource
       }
     }
 
     return ExportsHandler.exportProject(
-      export_params,
-      function (err, export_data) {
+      exportParams,
+      function (err, exportData) {
         if (err != null) {
           if (err.forwardResponse != null) {
             logger.debug(
@@ -66,24 +66,24 @@ module.exports = {
         }
         logger.debug(
           {
-            user_id,
-            project_id,
-            brand_variation_id,
-            export_v1_id: export_data.v1_id,
+            userId,
+            projectId,
+            brandVariationId,
+            exportV1Id: exportData.v1_id,
           },
           'exported project'
         )
         return res.json({
-          export_v1_id: export_data.v1_id,
-          message: export_data.message,
+          export_v1_id: exportData.v1_id,
+          message: exportData.message,
         })
       }
     )
   },
 
   exportStatus(req, res) {
-    const { export_id } = req.params
-    return ExportsHandler.fetchExport(export_id, function (err, export_json) {
+    const { export_id: exportId } = req.params
+    return ExportsHandler.fetchExport(exportId, function (err, exportJson) {
       let json
       if (err != null) {
         json = {
@@ -93,34 +93,34 @@ module.exports = {
         res.json({ export_json: json })
         return err
       }
-      const parsed_export = JSON.parse(export_json)
+      const parsedExport = JSON.parse(exportJson)
       json = {
-        status_summary: parsed_export.status_summary,
-        status_detail: parsed_export.status_detail,
-        partner_submission_id: parsed_export.partner_submission_id,
-        v2_user_email: parsed_export.v2_user_email,
-        v2_user_first_name: parsed_export.v2_user_first_name,
-        v2_user_last_name: parsed_export.v2_user_last_name,
-        title: parsed_export.title,
-        token: parsed_export.token,
+        status_summary: parsedExport.status_summary,
+        status_detail: parsedExport.status_detail,
+        partner_submission_id: parsedExport.partner_submission_id,
+        v2_user_email: parsedExport.v2_user_email,
+        v2_user_first_name: parsedExport.v2_user_first_name,
+        v2_user_last_name: parsedExport.v2_user_last_name,
+        title: parsedExport.title,
+        token: parsedExport.token,
       }
       return res.json({ export_json: json })
     })
   },
 
   exportDownload(req, res, next) {
-    const { type, export_id } = req.params
+    const { type, export_id: exportId } = req.params
 
     SessionManager.getLoggedInUserId(req.session)
     return ExportsHandler.fetchDownload(
-      export_id,
+      exportId,
       type,
-      function (err, export_file_url) {
+      function (err, exportFileUrl) {
         if (err != null) {
           return next(err)
         }
 
-        return res.redirect(export_file_url)
+        return res.redirect(exportFileUrl)
       }
     )
   },

@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     max-len,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -22,19 +21,19 @@ const { ObjectId } = require('mongodb')
 
 const MILISECONDS_IN_DAY = 86400000
 module.exports = InactiveProjectManager = {
-  reactivateProjectIfRequired(project_id, callback) {
+  reactivateProjectIfRequired(projectId, callback) {
     ProjectGetter.getProject(
-      project_id,
+      projectId,
       { active: true },
       function (err, project) {
         if (err != null) {
           OError.tag(err, 'error getting project', {
-            project_id,
+            project_id: projectId,
           })
           return callback(err)
         }
         logger.debug(
-          { project_id, active: project.active },
+          { projectId, active: project.active },
           'seeing if need to reactivate project'
         )
 
@@ -42,14 +41,14 @@ module.exports = InactiveProjectManager = {
           return callback()
         }
 
-        DocstoreManager.unarchiveProject(project_id, function (err) {
+        DocstoreManager.unarchiveProject(projectId, function (err) {
           if (err != null) {
             OError.tag(err, 'error reactivating project in docstore', {
-              project_id,
+              project_id: projectId,
             })
             return callback(err)
           }
-          ProjectUpdateHandler.markAsActive(project_id, callback)
+          ProjectUpdateHandler.markAsActive(projectId, callback)
         })
       }
     )
@@ -85,7 +84,7 @@ module.exports = InactiveProjectManager = {
               function (err) {
                 if (err) {
                   logger.err(
-                    { project_id: project._id, err },
+                    { projectId: project._id, err },
                     'unable to deactivate project'
                   )
                 }
@@ -106,15 +105,15 @@ module.exports = InactiveProjectManager = {
       })
   },
 
-  deactivateProject(project_id, callback) {
-    logger.debug({ project_id }, 'deactivating inactive project')
+  deactivateProject(projectId, callback) {
+    logger.debug({ projectId }, 'deactivating inactive project')
     const jobs = [
-      cb => DocstoreManager.archiveProject(project_id, cb),
-      cb => ProjectUpdateHandler.markAsInactive(project_id, cb),
+      cb => DocstoreManager.archiveProject(projectId, cb),
+      cb => ProjectUpdateHandler.markAsInactive(projectId, cb),
     ]
     async.series(jobs, function (err) {
       if (err != null) {
-        logger.warn({ err, project_id }, 'error deactivating project')
+        logger.warn({ err, projectId }, 'error deactivating project')
       }
       callback(err)
     })

@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     n/handle-callback-err,
     max-len,
 */
@@ -17,11 +16,11 @@ const User = require('./helpers/User')
 const request = require('./helpers/request')
 const settings = require('@overleaf/settings')
 
-const joinProject = (user_id, project_id, callback) =>
+const joinProject = (userId, projectId, callback) =>
   request.post(
     {
-      url: `/project/${project_id}/join`,
-      qs: { user_id },
+      url: `/project/${projectId}/join`,
+      qs: { user_id: userId },
       auth: {
         user: settings.apis.web.user,
         pass: settings.apis.web.pass,
@@ -42,16 +41,13 @@ describe('ProjectFeatures', function () {
 
   describe('with private project', function () {
     beforeEach(function (done) {
-      return this.owner.createProject(
-        'private-project',
-        (error, project_id) => {
-          if (error != null) {
-            return done(error)
-          }
-          this.project_id = project_id
-          return done()
+      return this.owner.createProject('private-project', (error, projectId) => {
+        if (error != null) {
+          return done(error)
         }
-      )
+        this.project_id = projectId
+        return done()
+      })
     })
 
     describe('with an upgraded account', function () {

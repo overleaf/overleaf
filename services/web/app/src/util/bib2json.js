@@ -49,7 +49,7 @@ function BibtexParser(arg0, allowedKeys) {
     let parser = new BibtexParser(accumulator, allowedKeys)
     parser.parse(arg0)
     return {
-      entries: entries,
+      entries,
       errors: parser.getErrors(),
     }
   }

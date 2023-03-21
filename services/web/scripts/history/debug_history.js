@@ -170,14 +170,14 @@ function rewindOp(content, op, log) {
     // is the case with this op, and shift p back appropriately to match
     // ShareJS if so.
     let { p } = op
-    const max_p = content.length - op.i.length
-    if (p > max_p) {
+    const maxP = content.length - op.i.length
+    if (p > maxP) {
       log.opError(
         'invalid offset rewinding insert, truncating to content length',
         content,
         op
       )
-      p = max_p
+      p = maxP
     }
     const textToBeRemoved = content.slice(p, p + op.i.length)
     if (op.i !== textToBeRemoved) {

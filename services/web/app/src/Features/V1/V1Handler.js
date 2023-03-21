@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     max-len,
     no-unused-vars,
 */
@@ -55,13 +54,13 @@ module.exports = V1Handler = {
     )
   },
 
-  doPasswordReset(v1_user_id, password, callback) {
+  doPasswordReset(v1UserId, password, callback) {
     return V1Api.request(
       {
         method: 'POST',
         url: '/api/v1/sharelatex/reset_password',
         json: {
-          user_id: v1_user_id,
+          user_id: v1UserId,
           password,
         },
         expectedStatusCodes: [200],
@@ -69,13 +68,13 @@ module.exports = V1Handler = {
       function (err, response, body) {
         if (err != null) {
           OError.tag(err, 'error while talking to v1 password reset api', {
-            v1_user_id,
+            v1_user_id: v1UserId,
           })
           return callback(err, false)
         }
         if ([200].includes(response.statusCode)) {
           logger.debug(
-            { v1_user_id, changed: true },
+            { v1UserId, changed: true },
             'got success response from v1 password reset api'
           )
           return callback(null, true)

@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     n/handle-callback-err,
     max-len,
     no-unused-vars,
@@ -25,14 +24,14 @@ const {
 } = require('./LinkedFilesErrors')
 
 module.exports = LinkedFilesHandler = {
-  getFileById(project_id, file_id, callback) {
+  getFileById(projectId, fileId, callback) {
     if (callback == null) {
       callback = function () {}
     }
     ProjectLocator.findElement(
       {
-        project_id,
-        element_id: file_id,
+        project_id: projectId,
+        element_id: fileId,
         type: 'file',
       },
       function (err, file, path, parentFolder) {
@@ -83,69 +82,65 @@ module.exports = LinkedFilesHandler = {
   },
 
   importFromStream(
-    project_id,
+    projectId,
     readStream,
     linkedFileData,
     name,
-    parent_folder_id,
-    user_id,
+    parentFolderId,
+    userId,
     callback
   ) {
     if (callback == null) {
       callback = function () {}
     }
     callback = _.once(callback)
-    FileWriter.writeStreamToDisk(
-      project_id,
-      readStream,
-      function (err, fsPath) {
-        if (err != null) {
-          return callback(err)
-        }
-        EditorController.upsertFile(
-          project_id,
-          parent_folder_id,
-          name,
-          fsPath,
-          linkedFileData,
-          'upload',
-          user_id,
-          (err, file) => {
-            if (err != null) {
-              return callback(err)
-            }
-            callback(null, file)
-          }
-        )
-      }
-    )
-  },
-
-  importContent(
-    project_id,
-    content,
-    linkedFileData,
-    name,
-    parent_folder_id,
-    user_id,
-    callback
-  ) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    callback = _.once(callback)
-    FileWriter.writeContentToDisk(project_id, content, function (err, fsPath) {
+    FileWriter.writeStreamToDisk(projectId, readStream, function (err, fsPath) {
       if (err != null) {
         return callback(err)
       }
       EditorController.upsertFile(
-        project_id,
-        parent_folder_id,
+        projectId,
+        parentFolderId,
         name,
         fsPath,
         linkedFileData,
         'upload',
-        user_id,
+        userId,
+        (err, file) => {
+          if (err != null) {
+            return callback(err)
+          }
+          callback(null, file)
+        }
+      )
+    })
+  },
+
+  importContent(
+    projectId,
+    content,
+    linkedFileData,
+    name,
+    parentFolderId,
+    userId,
+    callback
+  ) {
+    if (callback == null) {
+      callback = function () {}
+    }
+    callback = _.once(callback)
+    FileWriter.writeContentToDisk(projectId, content, function (err, fsPath) {
+      if (err != null) {
+        return callback(err)
+      }
+      EditorController.upsertFile(
+        projectId,
+        parentFolderId,
+        name,
+        fsPath,
+        linkedFileData,
+        'upload',
+        userId,
         (err, file) => {
           if (err != null) {
             return callback(err)

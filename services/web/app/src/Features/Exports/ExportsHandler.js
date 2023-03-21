@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     n/handle-callback-err,
     max-len,
     no-unused-vars,
@@ -27,59 +26,59 @@ request = request.defaults()
 settings = require('@overleaf/settings')
 
 module.exports = ExportsHandler = {
-  exportProject(export_params, callback) {
+  exportProject(exportParams, callback) {
     if (callback == null) {
       callback = function () {}
     }
     return ExportsHandler._buildExport(
-      export_params,
-      function (err, export_data) {
+      exportParams,
+      function (err, exportData) {
         if (err != null) {
           return callback(err)
         }
-        return ExportsHandler._requestExport(export_data, function (err, body) {
+        return ExportsHandler._requestExport(exportData, function (err, body) {
           if (err != null) {
             return callback(err)
           }
-          export_data.v1_id = body.exportId
-          export_data.message = body.message
+          exportData.v1_id = body.exportId
+          exportData.message = body.message
           // TODO: possibly store the export data in Mongo
-          return callback(null, export_data)
+          return callback(null, exportData)
         })
       }
     )
   },
 
-  _buildExport(export_params, callback) {
+  _buildExport(exportParams, callback) {
     if (callback == null) {
       callback = function () {}
     }
     const {
-      project_id,
-      user_id,
-      brand_variation_id,
+      project_id: projectId,
+      user_id: userId,
+      brand_variation_id: brandVariationId,
       title,
       description,
       author,
       license,
-      show_source,
-    } = export_params
+      show_source: showSource,
+    } = exportParams
     const jobs = {
       project(cb) {
-        return ProjectGetter.getProject(project_id, cb)
+        return ProjectGetter.getProject(projectId, cb)
       },
       // TODO: when we update async, signature will change from (cb, results) to (results, cb)
       rootDoc: [
         'project',
         (results, cb) =>
           ProjectRootDocManager.ensureRootDocumentIsValid(
-            project_id,
+            projectId,
             function (error) {
               if (error != null) {
                 return callback(error)
               }
               return ProjectLocator.findRootDoc(
-                { project: results.project, project_id },
+                { project: results.project, project_id: projectId },
                 cb
               )
             }
@@ -87,19 +86,19 @@ module.exports = ExportsHandler = {
       ],
       user(cb) {
         return UserGetter.getUser(
-          user_id,
+          userId,
           { first_name: 1, last_name: 1, email: 1, overleaf: 1 },
           cb
         )
       },
       historyVersion(cb) {
         return ProjectHistoryHandler.ensureHistoryExistsForProject(
-          project_id,
+          projectId,
           function (error) {
             if (error != null) {
               return callback(error)
             }
-            return ExportsHandler._requestVersion(project_id, cb)
+            return ExportsHandler._requestVersion(projectId, cb)
           }
         )
       },
@@ -108,9 +107,9 @@ module.exports = ExportsHandler = {
     return async.auto(jobs, function (err, results) {
       if (err != null) {
         OError.tag(err, 'error building project export', {
-          project_id,
-          user_id,
-          brand_variation_id,
+          project_id: projectId,
+          user_id: userId,
+          brand_variation_id: brandVariationId,
         })
         return callback(err)
       }
@@ -118,19 +117,19 @@ module.exports = ExportsHandler = {
       const { project, rootDoc, user, historyVersion } = results
       if (!rootDoc || rootDoc[1] == null) {
         err = new OError('cannot export project without root doc', {
-          project_id,
+          project_id: projectId,
         })
         return callback(err)
       }
 
-      if (export_params.first_name && export_params.last_name) {
-        user.first_name = export_params.first_name
-        user.last_name = export_params.last_name
+      if (exportParams.first_name && exportParams.last_name) {
+        user.first_name = exportParams.first_name
+        user.last_name = exportParams.last_name
       }
 
-      const export_data = {
+      const exportData = {
         project: {
-          id: project_id,
+          id: projectId,
           rootDocPath: rootDoc[1] != null ? rootDoc[1].fileSystem : undefined,
           historyId: project.overleaf?.history?.id,
           historyVersion,
@@ -143,11 +142,11 @@ module.exports = ExportsHandler = {
             description,
             author,
             license,
-            showSource: show_source,
+            showSource,
           },
         },
         user: {
-          id: user_id,
+          id: userId,
           firstName: user.first_name,
           lastName: user.last_name,
           email: user.email,
@@ -155,17 +154,17 @@ module.exports = ExportsHandler = {
           v1UserId: user.overleaf != null ? user.overleaf.id : undefined,
         },
         destination: {
-          brandVariationId: brand_variation_id,
+          brandVariationId,
         },
         options: {
           callbackUrl: null,
         }, // for now, until we want v1 to call us back
       }
-      return callback(null, export_data)
+      return callback(null, exportData)
     })
   },
 
-  _requestExport(export_data, callback) {
+  _requestExport(exportData, callback) {
     if (callback == null) {
       callback = function () {}
     }
@@ -173,20 +172,20 @@ module.exports = ExportsHandler = {
       {
         url: `${settings.apis.v1.url}/api/v1/sharelatex/exports`,
         auth: { user: settings.apis.v1.user, pass: settings.apis.v1.pass },
-        json: export_data,
+        json: exportData,
         timeout: settings.apis.v1.timeout,
       },
       function (err, res, body) {
         if (err != null) {
           OError.tag(err, 'error making request to v1 export', {
-            export: export_data,
+            export: exportData,
           })
           return callback(err)
         } else if (res.statusCode >= 200 && res.statusCode < 300) {
           return callback(null, body)
         } else {
           logger.warn(
-            { export: export_data },
+            { export: exportData },
             `v1 export returned failure; forwarding: ${body}`
           )
           // pass the v1 error along for the publish modal to handle
@@ -197,19 +196,19 @@ module.exports = ExportsHandler = {
     )
   },
 
-  _requestVersion(project_id, callback) {
+  _requestVersion(projectId, callback) {
     if (callback == null) {
       callback = function () {}
     }
     return request.get(
       {
-        url: `${settings.apis.project_history.url}/project/${project_id}/version`,
+        url: `${settings.apis.project_history.url}/project/${projectId}/version`,
         json: true,
       },
       function (err, res, body) {
         if (err != null) {
           OError.tag(err, 'error making request to project history', {
-            project_id,
+            project_id: projectId,
           })
           return callback(err)
         } else if (res.statusCode >= 200 && res.statusCode < 300) {
@@ -217,7 +216,7 @@ module.exports = ExportsHandler = {
         } else {
           err = new OError(
             `project history version returned a failure status code: ${res.statusCode}`,
-            { project_id }
+            { project_id: projectId }
           )
           return callback(err)
         }
@@ -225,20 +224,20 @@ module.exports = ExportsHandler = {
     )
   },
 
-  fetchExport(export_id, callback) {
+  fetchExport(exportId, callback) {
     if (callback == null) {
       callback = function () {}
     }
     return request.get(
       {
-        url: `${settings.apis.v1.url}/api/v1/sharelatex/exports/${export_id}`,
+        url: `${settings.apis.v1.url}/api/v1/sharelatex/exports/${exportId}`,
         auth: { user: settings.apis.v1.user, pass: settings.apis.v1.pass },
         timeout: settings.apis.v1.timeout,
       },
       function (err, res, body) {
         if (err != null) {
           OError.tag(err, 'error making request to v1 export', {
-            export: export_id,
+            export: exportId,
           })
           return callback(err)
         } else if (res.statusCode >= 200 && res.statusCode < 300) {
@@ -246,7 +245,7 @@ module.exports = ExportsHandler = {
         } else {
           err = new OError(
             `v1 export returned a failure status code: ${res.statusCode}`,
-            { export: export_id }
+            { export: exportId }
           )
           return callback(err)
         }
@@ -254,20 +253,20 @@ module.exports = ExportsHandler = {
     )
   },
 
-  fetchDownload(export_id, type, callback) {
+  fetchDownload(exportId, type, callback) {
     if (callback == null) {
       callback = function () {}
     }
     return request.get(
       {
-        url: `${settings.apis.v1.url}/api/v1/sharelatex/exports/${export_id}/${type}_url`,
+        url: `${settings.apis.v1.url}/api/v1/sharelatex/exports/${exportId}/${type}_url`,
         auth: { user: settings.apis.v1.user, pass: settings.apis.v1.pass },
         timeout: settings.apis.v1.timeout,
       },
       function (err, res, body) {
         if (err != null) {
           OError.tag(err, 'error making request to v1 export', {
-            export: export_id,
+            export: exportId,
           })
           return callback(err)
         } else if (res.statusCode >= 200 && res.statusCode < 300) {
@@ -275,7 +274,7 @@ module.exports = ExportsHandler = {
         } else {
           err = new OError(
             `v1 export returned a failure status code: ${res.statusCode}`,
-            { export: export_id }
+            { export: exportId }
           )
           return callback(err)
         }

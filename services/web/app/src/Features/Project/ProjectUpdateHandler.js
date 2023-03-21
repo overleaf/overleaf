@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     n/handle-callback-err,
     no-unused-vars,
 */
@@ -55,8 +54,8 @@ const ProjectUpdateHandler = {
     Project.updateOne(conditions, update, {}, callback)
   },
 
-  markAsOpened(project_id, callback) {
-    const conditions = { _id: project_id }
+  markAsOpened(projectId, callback) {
+    const conditions = { _id: projectId }
     const update = { lastOpened: Date.now() }
     Project.updateOne(conditions, update, {}, function (err) {
       if (callback != null) {
@@ -65,8 +64,8 @@ const ProjectUpdateHandler = {
     })
   },
 
-  markAsInactive(project_id, callback) {
-    const conditions = { _id: project_id }
+  markAsInactive(projectId, callback) {
+    const conditions = { _id: projectId }
     const update = { active: false }
     Project.updateOne(conditions, update, {}, function (err) {
       if (callback != null) {
@@ -75,8 +74,8 @@ const ProjectUpdateHandler = {
     })
   },
 
-  markAsActive(project_id, callback) {
-    const conditions = { _id: project_id }
+  markAsActive(projectId, callback) {
+    const conditions = { _id: projectId }
     const update = { active: true }
     Project.updateOne(conditions, update, {}, function (err) {
       if (callback != null) {

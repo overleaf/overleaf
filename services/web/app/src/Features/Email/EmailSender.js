@@ -78,7 +78,7 @@ async function sendEmail(options) {
     if (!canContinue) {
       logger.debug(
         {
-          sendingUser_id: options.sendingUser_id,
+          sendingUserId: options.sendingUser_id,
           to: options.to,
           subject: options.subject,
           canContinue,

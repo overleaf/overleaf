@@ -190,7 +190,7 @@ async function deleteProject(params) {
     )
     if (!response.ok) {
       logger.error(
-        { statusCode: response.status, project_id: projectId },
+        { statusCode: response.status, projectId },
         'error deleting project in third party datastore (project_archiver)'
       )
       return false

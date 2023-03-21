@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     max-len,
     no-unused-vars,
 */
@@ -24,20 +23,20 @@ const RND = crypto.randomBytes(4).toString('hex') // generate a random key for t
 let COUNT = 0
 
 module.exports = EditorRealTimeController = {
-  emitToRoom(room_id, message, ...payload) {
+  emitToRoom(roomId, message, ...payload) {
     // create a unique message id using a counter
-    const message_id = `web:${HOST}:${RND}-${COUNT++}`
+    const messageId = `web:${HOST}:${RND}-${COUNT++}`
     let channel
-    if (room_id === 'all' || !Settings.publishOnIndividualChannels) {
+    if (roomId === 'all' || !Settings.publishOnIndividualChannels) {
       channel = 'editor-events'
     } else {
-      channel = `editor-events:${room_id}`
+      channel = `editor-events:${roomId}`
     }
     const blob = JSON.stringify({
-      room_id,
+      room_id: roomId,
       message,
       payload,
-      _id: message_id,
+      _id: messageId,
     })
     Metrics.summary('redis.publish.editor-events', blob.length, {
       status: message,

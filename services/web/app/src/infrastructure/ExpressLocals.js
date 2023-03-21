@@ -126,7 +126,7 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
     const userId = SessionManager.getLoggedInUserId(req.session)
     if (cdnBlocked && req.session.cdnBlocked == null) {
       logger.debug(
-        { user_id: userId, ip: req != null ? req.ip : undefined },
+        { userId, ip: req != null ? req.ip : undefined },
         'cdnBlocked for user, not using it and turning it off for future requets'
       )
       Metrics.inc('no_cdn', 1, {

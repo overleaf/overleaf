@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     max-len,
     no-unused-vars,
 */
@@ -65,9 +64,9 @@ module.exports = LinkedFilesController = {
   },
 
   createLinkedFile(req, res, next) {
-    const { project_id } = req.params
-    const { name, provider, data, parent_folder_id } = req.body
-    const user_id = SessionManager.getLoggedInUserId(req.session)
+    const { project_id: projectId } = req.params
+    const { name, provider, data, parent_folder_id: parentFolderId } = req.body
+    const userId = SessionManager.getLoggedInUserId(req.session)
 
     const Agent = LinkedFilesController._getAgent(provider)
     if (Agent == null) {
@@ -77,11 +76,11 @@ module.exports = LinkedFilesController = {
     data.provider = provider
 
     return Agent.createLinkedFile(
-      project_id,
+      projectId,
       data,
       name,
-      parent_folder_id,
-      user_id,
+      parentFolderId,
+      userId,
       function (err, newFileId) {
         if (err != null) {
           return LinkedFilesController.handleError(err, req, res, next)
@@ -92,12 +91,12 @@ module.exports = LinkedFilesController = {
   },
 
   refreshLinkedFile(req, res, next) {
-    const { project_id, file_id } = req.params
-    const user_id = SessionManager.getLoggedInUserId(req.session)
+    const { project_id: projectId, file_id: fileId } = req.params
+    const userId = SessionManager.getLoggedInUserId(req.session)
 
     return LinkedFilesHandler.getFileById(
-      project_id,
-      file_id,
+      projectId,
+      fileId,
       function (err, file, path, parentFolder) {
         if (err != null) {
           return next(err)
@@ -114,18 +113,18 @@ module.exports = LinkedFilesController = {
           return res.sendStatus(409)
         }
         const { provider } = linkedFileData
-        const parent_folder_id = parentFolder._id
+        const parentFolderId = parentFolder._id
         const Agent = LinkedFilesController._getAgent(provider)
         if (Agent == null) {
           return res.sendStatus(400)
         }
 
         return Agent.refreshLinkedFile(
-          project_id,
+          projectId,
           linkedFileData,
           name,
-          parent_folder_id,
-          user_id,
+          parentFolderId,
+          userId,
           function (err, newFileId) {
             if (err != null) {
               return LinkedFilesController.handleError(err, req, res, next)
