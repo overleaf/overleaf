@@ -263,6 +263,16 @@ module.exports = DocManager = {
           updateVersion = true
           updateRanges = true
         } else {
+          if (doc.version > version) {
+            // Reject update when the version was decremented.
+            // Potential reasons: racing flush, broken history.
+            return callback(
+              new Errors.DocVersionDecrementedError('rejecting stale update', {
+                updateVersion: version,
+                flushedVersion: doc.version,
+              })
+            )
+          }
           updateLines = !_.isEqual(doc.lines, lines)
           updateVersion = doc.version !== version
           updateRanges = RangeManager.shouldUpdateRanges(doc.ranges, ranges)

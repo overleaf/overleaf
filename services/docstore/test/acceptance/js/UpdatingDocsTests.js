@@ -179,6 +179,43 @@ describe('Applying updates to a doc', function () {
     })
   })
 
+  describe('when the version was decremented', function () {
+    beforeEach(function (done) {
+      DocstoreClient.updateDoc(
+        this.project_id,
+        this.doc_id,
+        this.newLines,
+        this.version - 1,
+        this.newRanges,
+        (error, res, body) => {
+          if (error) return done(error)
+          this.res = res
+          this.body = body
+          done()
+        }
+      )
+    })
+
+    it('should return 409', function () {
+      this.res.statusCode.should.equal(409)
+    })
+
+    it('should not update the doc in the API', function (done) {
+      DocstoreClient.getDoc(
+        this.project_id,
+        this.doc_id,
+        {},
+        (error, res, doc) => {
+          if (error) return done(error)
+          doc.lines.should.deep.equal(this.originalLines)
+          doc.version.should.equal(this.version)
+          doc.ranges.should.deep.equal(this.originalRanges)
+          done()
+        }
+      )
+    })
+  })
+
   describe('when the ranges have changed', function () {
     beforeEach(function (done) {
       return DocstoreClient.updateDoc(

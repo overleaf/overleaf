@@ -796,6 +796,26 @@ describe('DocManager', function () {
       })
     })
 
+    describe('when the version was decremented', function () {
+      beforeEach(function () {
+        this.DocManager._getDoc = sinon.stub().yields(null, this.doc)
+        this.DocManager.updateDoc(
+          this.project_id,
+          this.doc_id,
+          this.newDocLines,
+          this.version - 1,
+          this.originalRanges,
+          this.callback
+        )
+      })
+
+      it('should return an error', function () {
+        this.callback.should.have.been.calledWith(
+          sinon.match.instanceOf(Errors.DocVersionDecrementedError)
+        )
+      })
+    })
+
     describe('when the doc lines have not changed', function () {
       beforeEach(function () {
         this.DocManager._getDoc = sinon.stub().callsArgWith(3, null, this.doc)
