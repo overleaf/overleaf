@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-undef,
     no-unused-vars,
 */
@@ -268,11 +267,11 @@ describe('Archiving updates', function () {
           if (error != null) {
             throw error
           }
-          const pack_id = index.packs[0]._id
+          const packId = index.packs[0]._id
           return TrackChangesClient.getS3Doc(
             this.project_id,
             this.doc_id,
-            pack_id,
+            packId,
             (error, doc) => {
               if (error) return done(error)
               doc.n.should.equal(1024)

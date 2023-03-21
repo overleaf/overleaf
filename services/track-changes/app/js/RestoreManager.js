@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -16,24 +15,24 @@ const DiffManager = require('./DiffManager')
 const logger = require('@overleaf/logger')
 
 module.exports = RestoreManager = {
-  restoreToBeforeVersion(project_id, doc_id, version, user_id, callback) {
+  restoreToBeforeVersion(projectId, docId, version, userId, callback) {
     if (callback == null) {
       callback = function () {}
     }
-    logger.debug({ project_id, doc_id, version, user_id }, 'restoring document')
+    logger.debug({ projectId, docId, version, userId }, 'restoring document')
     return DiffManager.getDocumentBeforeVersion(
-      project_id,
-      doc_id,
+      projectId,
+      docId,
       version,
       function (error, content) {
         if (error != null) {
           return callback(error)
         }
         return DocumentUpdaterManager.setDocument(
-          project_id,
-          doc_id,
+          projectId,
+          docId,
           content,
-          user_id,
+          userId,
           function (error) {
             if (error != null) {
               return callback(error)

@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-return-assign,
     no-unused-vars,
 */
@@ -35,8 +34,8 @@ describe('UpdatesManager', function () {
           redis: {
             lock: {
               key_schema: {
-                historyLock({ doc_id }) {
-                  return `HistoryLock:${doc_id}`
+                historyLock({ doc_id: docId }) {
+                  return `HistoryLock:${docId}`
                 },
               },
             },
@@ -457,7 +456,7 @@ describe('UpdatesManager', function () {
         ]
         this.redisArray = this.updates.slice()
         this.RedisManager.getOldestDocUpdates = (
-          doc_id,
+          docId,
           batchSize,
           callback
         ) => {
@@ -672,9 +671,9 @@ describe('UpdatesManager', function () {
     })
 
     it('should process the doc ops for the each doc_id', function () {
-      return Array.from(this.doc_ids).map(doc_id =>
+      return Array.from(this.doc_ids).map(docId =>
         this.UpdatesManager._processUncompressedUpdatesForDocWithLock
-          .calledWith(this.project_id, doc_id, this.temporary)
+          .calledWith(this.project_id, docId, this.temporary)
           .should.equal(true)
       )
     })
@@ -887,11 +886,11 @@ describe('UpdatesManager', function () {
         this.user_info[this.user_id_1] = { email: 'user1@sharelatex.com' }
         this.user_info[this.user_id_2] = { email: 'user2@sharelatex.com' }
 
-        this.WebApiManager.getUserInfo = (user_id, callback) => {
+        this.WebApiManager.getUserInfo = (userId, callback) => {
           if (callback == null) {
             callback = function () {}
           }
-          return callback(null, this.user_info[user_id])
+          return callback(null, this.user_info[userId])
         }
         sinon.spy(this.WebApiManager, 'getUserInfo')
 
@@ -961,11 +960,11 @@ describe('UpdatesManager', function () {
             op: 'mock-op-2',
           },
         ]
-        this.WebApiManager.getUserInfo = (user_id, callback) => {
+        this.WebApiManager.getUserInfo = (userId, callback) => {
           if (callback == null) {
             callback = function () {}
           }
-          return callback(null, this.user_info[user_id])
+          return callback(null, this.user_info[userId])
         }
         sinon.spy(this.WebApiManager, 'getUserInfo')
 

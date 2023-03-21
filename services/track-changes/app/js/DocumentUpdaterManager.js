@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -17,12 +16,12 @@ const Settings = require('@overleaf/settings')
 const Errors = require('./Errors')
 
 module.exports = DocumentUpdaterManager = {
-  _requestDocument(project_id, doc_id, url, callback) {
+  _requestDocument(projectId, docId, url, callback) {
     if (callback == null) {
       callback = function () {}
     }
 
-    logger.debug({ project_id, doc_id }, 'getting doc from document updater')
+    logger.debug({ projectId, docId }, 'getting doc from document updater')
     return request.get(url, function (error, res, body) {
       if (error != null) {
         return callback(error)
@@ -35,7 +34,7 @@ module.exports = DocumentUpdaterManager = {
           return callback(error)
         }
         logger.debug(
-          { project_id, doc_id, version: body.version },
+          { projectId, docId, version: body.version },
           'got doc from document updater'
         )
         return callback(null, body.lines.join('\n'), body.version)
@@ -44,14 +43,14 @@ module.exports = DocumentUpdaterManager = {
           `doc updater returned a non-success status code: ${res.statusCode}`
         )
         logger.error(
-          { err: error, project_id, doc_id, url },
+          { err: error, projectId, docId, url },
           'error accessing doc updater'
         )
         if (res.statusCode === 404) {
           return callback(
             new Errors.NotFoundError('doc not found', {
-              projectId: project_id,
-              docId: doc_id,
+              projectId,
+              docId,
             })
           )
         } else {
@@ -61,29 +60,29 @@ module.exports = DocumentUpdaterManager = {
     })
   },
 
-  getDocument(project_id, doc_id, callback) {
-    const url = `${Settings.apis.documentupdater.url}/project/${project_id}/doc/${doc_id}`
-    DocumentUpdaterManager._requestDocument(project_id, doc_id, url, callback)
+  getDocument(projectId, docId, callback) {
+    const url = `${Settings.apis.documentupdater.url}/project/${projectId}/doc/${docId}`
+    DocumentUpdaterManager._requestDocument(projectId, docId, url, callback)
   },
 
-  peekDocument(project_id, doc_id, callback) {
-    const url = `${Settings.apis.documentupdater.url}/project/${project_id}/doc/${doc_id}/peek`
-    DocumentUpdaterManager._requestDocument(project_id, doc_id, url, callback)
+  peekDocument(projectId, docId, callback) {
+    const url = `${Settings.apis.documentupdater.url}/project/${projectId}/doc/${docId}/peek`
+    DocumentUpdaterManager._requestDocument(projectId, docId, url, callback)
   },
 
-  setDocument(project_id, doc_id, content, user_id, callback) {
+  setDocument(projectId, docId, content, userId, callback) {
     if (callback == null) {
       callback = function () {}
     }
-    const url = `${Settings.apis.documentupdater.url}/project/${project_id}/doc/${doc_id}`
-    logger.debug({ project_id, doc_id }, 'setting doc in document updater')
+    const url = `${Settings.apis.documentupdater.url}/project/${projectId}/doc/${docId}`
+    logger.debug({ projectId, docId }, 'setting doc in document updater')
     return request.post(
       {
         url,
         json: {
           lines: content.split('\n'),
           source: 'restore',
-          user_id,
+          user_id: userId,
           undoing: true,
         },
       },
@@ -98,7 +97,7 @@ module.exports = DocumentUpdaterManager = {
             `doc updater returned a non-success status code: ${res.statusCode}`
           )
           logger.error(
-            { err: error, project_id, doc_id, url },
+            { err: error, projectId, docId, url },
             'error accessing doc updater'
           )
           return callback(error)
@@ -111,11 +110,11 @@ module.exports = DocumentUpdaterManager = {
 module.exports.promises = {
   // peekDocument returns two arguments so we can't use util.promisify, which only handles a single argument, we need
   // to treat this it as a special case.
-  peekDocument: (project_id, doc_id) => {
+  peekDocument: (projectId, docId) => {
     return new Promise((resolve, reject) => {
       DocumentUpdaterManager.peekDocument(
-        project_id,
-        doc_id,
+        projectId,
+        docId,
         (err, content, version) => {
           if (err) {
             reject(err)

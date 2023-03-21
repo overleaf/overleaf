@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -32,25 +31,25 @@ const s3 = new aws.S3({
 const S3_BUCKET = Settings.trackchanges.stores.doc_history
 
 module.exports = TrackChangesClient = {
-  flushAndGetCompressedUpdates(project_id, doc_id, callback) {
+  flushAndGetCompressedUpdates(projectId, docId, callback) {
     if (callback == null) {
       callback = function () {}
     }
-    return TrackChangesClient.flushDoc(project_id, doc_id, error => {
+    return TrackChangesClient.flushDoc(projectId, docId, error => {
       if (error != null) {
         return callback(error)
       }
-      return TrackChangesClient.getCompressedUpdates(doc_id, callback)
+      return TrackChangesClient.getCompressedUpdates(docId, callback)
     })
   },
 
-  flushDoc(project_id, doc_id, callback) {
+  flushDoc(projectId, docId, callback) {
     if (callback == null) {
       callback = function () {}
     }
     return request.post(
       {
-        url: `http://localhost:3015/project/${project_id}/doc/${doc_id}/flush`,
+        url: `http://localhost:3015/project/${projectId}/doc/${docId}/flush`,
       },
       (error, response, body) => {
         response.statusCode.should.equal(204)
@@ -59,13 +58,13 @@ module.exports = TrackChangesClient = {
     )
   },
 
-  flushProject(project_id, callback) {
+  flushProject(projectId, callback) {
     if (callback == null) {
       callback = function () {}
     }
     return request.post(
       {
-        url: `http://localhost:3015/project/${project_id}/flush`,
+        url: `http://localhost:3015/project/${projectId}/flush`,
       },
       (error, response, body) => {
         response.statusCode.should.equal(204)
@@ -74,35 +73,35 @@ module.exports = TrackChangesClient = {
     )
   },
 
-  getCompressedUpdates(doc_id, callback) {
+  getCompressedUpdates(docId, callback) {
     if (callback == null) {
       callback = function () {}
     }
     return db.docHistory
-      .find({ doc_id: ObjectId(doc_id) })
+      .find({ doc_id: ObjectId(docId) })
       .sort({ 'meta.end_ts': 1 })
       .toArray(callback)
   },
 
-  getProjectMetaData(project_id, callback) {
+  getProjectMetaData(projectId, callback) {
     if (callback == null) {
       callback = function () {}
     }
     return db.projectHistoryMetaData.findOne(
       {
-        project_id: ObjectId(project_id),
+        project_id: ObjectId(projectId),
       },
       callback
     )
   },
 
-  setPreserveHistoryForProject(project_id, callback) {
+  setPreserveHistoryForProject(projectId, callback) {
     if (callback == null) {
       callback = function () {}
     }
     return db.projectHistoryMetaData.updateOne(
       {
-        project_id: ObjectId(project_id),
+        project_id: ObjectId(projectId),
       },
       {
         $set: { preserveHistory: true },
@@ -114,19 +113,19 @@ module.exports = TrackChangesClient = {
     )
   },
 
-  pushRawUpdates(project_id, doc_id, updates, callback) {
+  pushRawUpdates(projectId, docId, updates, callback) {
     if (callback == null) {
       callback = function () {}
     }
     return rclient.sadd(
-      Keys.docsWithHistoryOps({ project_id }),
-      doc_id,
+      Keys.docsWithHistoryOps({ project_id: projectId }),
+      docId,
       error => {
         if (error != null) {
           return callback(error)
         }
         return rclient.rpush(
-          Keys.uncompressedHistoryOps({ doc_id }),
+          Keys.uncompressedHistoryOps({ doc_id: docId }),
           ...Array.from(Array.from(updates).map(u => JSON.stringify(u))),
           callback
         )
@@ -134,13 +133,13 @@ module.exports = TrackChangesClient = {
     )
   },
 
-  getDiff(project_id, doc_id, from, to, callback) {
+  getDiff(projectId, docId, from, to, callback) {
     if (callback == null) {
       callback = function () {}
     }
     return request.get(
       {
-        url: `http://localhost:3015/project/${project_id}/doc/${doc_id}/diff?from=${from}&to=${to}`,
+        url: `http://localhost:3015/project/${projectId}/doc/${docId}/diff?from=${from}&to=${to}`,
       },
       (error, response, body) => {
         if (error) return callback(error)
@@ -150,13 +149,13 @@ module.exports = TrackChangesClient = {
     )
   },
 
-  getUpdates(project_id, options, callback) {
+  getUpdates(projectId, options, callback) {
     if (callback == null) {
       callback = function () {}
     }
     return request.get(
       {
-        url: `http://localhost:3015/project/${project_id}/updates?before=${options.before}&min_count=${options.min_count}`,
+        url: `http://localhost:3015/project/${projectId}/updates?before=${options.before}&min_count=${options.min_count}`,
       },
       (error, response, body) => {
         if (error) return callback(error)
@@ -166,9 +165,9 @@ module.exports = TrackChangesClient = {
     )
   },
 
-  exportProject(project_id, callback) {
+  exportProject(projectId, callback) {
     request.get(
-      { url: `http://localhost:3015/project/${project_id}/export`, json: true },
+      { url: `http://localhost:3015/project/${projectId}/export`, json: true },
       (error, response, updates) => {
         if (error) return callback(error)
         response.statusCode.should.equal(200)
@@ -177,15 +176,15 @@ module.exports = TrackChangesClient = {
     )
   },
 
-  restoreDoc(project_id, doc_id, version, user_id, callback) {
+  restoreDoc(projectId, docId, version, userId, callback) {
     if (callback == null) {
       callback = function () {}
     }
     return request.post(
       {
-        url: `http://localhost:3015/project/${project_id}/doc/${doc_id}/version/${version}/restore`,
+        url: `http://localhost:3015/project/${projectId}/doc/${docId}/version/${version}/restore`,
         headers: {
-          'X-User-Id': user_id,
+          'X-User-Id': userId,
         },
       },
       (error, response, body) => {
@@ -196,13 +195,13 @@ module.exports = TrackChangesClient = {
     )
   },
 
-  pushDocHistory(project_id, doc_id, callback) {
+  pushDocHistory(projectId, docId, callback) {
     if (callback == null) {
       callback = function () {}
     }
     return request.post(
       {
-        url: `http://localhost:3015/project/${project_id}/doc/${doc_id}/push`,
+        url: `http://localhost:3015/project/${projectId}/doc/${docId}/push`,
       },
       (error, response, body) => {
         response.statusCode.should.equal(204)
@@ -211,13 +210,13 @@ module.exports = TrackChangesClient = {
     )
   },
 
-  pullDocHistory(project_id, doc_id, callback) {
+  pullDocHistory(projectId, docId, callback) {
     if (callback == null) {
       callback = function () {}
     }
     return request.post(
       {
-        url: `http://localhost:3015/project/${project_id}/doc/${doc_id}/pull`,
+        url: `http://localhost:3015/project/${projectId}/doc/${docId}/pull`,
       },
       (error, response, body) => {
         response.statusCode.should.equal(204)
@@ -250,13 +249,13 @@ module.exports = TrackChangesClient = {
     })
   },
 
-  getS3Doc(project_id, doc_id, pack_id, callback) {
+  getS3Doc(projectId, docId, packId, callback) {
     if (callback == null) {
       callback = function () {}
     }
     const params = {
       Bucket: S3_BUCKET,
-      Key: `${project_id}/changes-${doc_id}/pack-${pack_id}`,
+      Key: `${projectId}/changes-${docId}/pack-${packId}`,
     }
 
     return s3.getObject(params, (error, data) => {
@@ -276,13 +275,13 @@ module.exports = TrackChangesClient = {
     })
   },
 
-  removeS3Doc(project_id, doc_id, callback) {
+  removeS3Doc(projectId, docId, callback) {
     if (callback == null) {
       callback = function () {}
     }
     let params = {
       Bucket: S3_BUCKET,
-      Prefix: `${project_id}/changes-${doc_id}`,
+      Prefix: `${projectId}/changes-${docId}`,
     }
 
     return s3.listObjects(params, (error, data) => {

@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     mocha/no-nested-tests,
     no-return-assign,
     no-undef,
@@ -152,7 +151,7 @@ describe('LockManager', function () {
       beforeEach(function (done) {
         const startTime = Date.now()
         this.LockManager.LOCK_TEST_INTERVAL = 5
-        this.LockManager.tryLock = function (doc_id, callback) {
+        this.LockManager.tryLock = function (docId, callback) {
           if (callback == null) {
             callback = function () {}
           }

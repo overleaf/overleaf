@@ -115,7 +115,7 @@ module.exports = LockManager = {
         if (result != null && result !== 1) {
           // successful unlock should release exactly one key
           logger.error(
-            { key, lockValue, redis_err: err, redis_result: result },
+            { key, lockValue, redisErr: err, redisResult: result },
             'unlocking error'
           )
           return callback(new Error('tried to release timed out lock'))

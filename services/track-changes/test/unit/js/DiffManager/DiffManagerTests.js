@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-return-assign,
     no-unused-vars,
 */
@@ -239,8 +238,8 @@ describe('DiffManager', function () {
       beforeEach(function () {
         let retried = false
         this.DiffManager._tryGetDocumentBeforeVersion = (
-          project_id,
-          doc_id,
+          projectId,
+          docId,
           version,
           callback
         ) => {

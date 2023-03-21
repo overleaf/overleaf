@@ -1,6 +1,3 @@
-/* eslint-disable
-    camelcase,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -19,9 +16,9 @@ const LockManager = require('./LockManager')
 
 module.exports = {
   check(callback) {
-    const project_id = ObjectId(settings.trackchanges.healthCheck.project_id)
-    const url = `http://localhost:${port}/project/${project_id}`
-    logger.debug({ project_id }, 'running health check')
+    const projectId = ObjectId(settings.trackchanges.healthCheck.project_id)
+    const url = `http://localhost:${port}/project/${projectId}`
+    logger.debug({ projectId }, 'running health check')
     const jobs = [
       cb =>
         request.get(
@@ -29,7 +26,7 @@ module.exports = {
           function (err, res, body) {
             if (err != null) {
               logger.err(
-                { err, project_id },
+                { err, projectId },
                 'error checking lock for health check'
               )
               return cb(err)
@@ -47,7 +44,7 @@ module.exports = {
           { url: `${url}/flush`, timeout: 10000 },
           function (err, res, body) {
             if (err != null) {
-              logger.err({ err, project_id }, 'error flushing for health check')
+              logger.err({ err, projectId }, 'error flushing for health check')
               return cb(err)
             } else if ((res != null ? res.statusCode : undefined) !== 204) {
               return cb(
@@ -64,7 +61,7 @@ module.exports = {
           function (err, res, body) {
             if (err != null) {
               logger.err(
-                { err, project_id },
+                { err, projectId },
                 'error getting updates for health check'
               )
               return cb(err)

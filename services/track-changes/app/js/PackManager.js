@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -69,8 +68,8 @@ module.exports = PackManager = {
   MAX_COUNT: 1024,
 
   insertCompressedUpdates(
-    project_id,
-    doc_id,
+    projectId,
+    docId,
     lastUpdate,
     newUpdates,
     temporary,
@@ -113,8 +112,8 @@ module.exports = PackManager = {
     }
 
     return PackManager.flushCompressedUpdates(
-      project_id,
-      doc_id,
+      projectId,
+      docId,
       lastUpdate,
       updatesToFlush,
       temporary,
@@ -123,8 +122,8 @@ module.exports = PackManager = {
           return callback(error)
         }
         return PackManager.insertCompressedUpdates(
-          project_id,
-          doc_id,
+          projectId,
+          docId,
           null,
           updatesRemaining,
           temporary,
@@ -135,8 +134,8 @@ module.exports = PackManager = {
   },
 
   flushCompressedUpdates(
-    project_id,
-    doc_id,
+    projectId,
+    docId,
     lastUpdate,
     newUpdates,
     temporary,
@@ -167,8 +166,8 @@ module.exports = PackManager = {
 
     if (canAppend) {
       return PackManager.appendUpdatesToExistingPack(
-        project_id,
-        doc_id,
+        projectId,
+        docId,
         lastUpdate,
         newUpdates,
         temporary,
@@ -176,8 +175,8 @@ module.exports = PackManager = {
       )
     } else {
       return PackManager.insertUpdatesIntoNewPack(
-        project_id,
-        doc_id,
+        projectId,
+        docId,
         newUpdates,
         temporary,
         callback
@@ -185,13 +184,7 @@ module.exports = PackManager = {
     }
   },
 
-  insertUpdatesIntoNewPack(
-    project_id,
-    doc_id,
-    newUpdates,
-    temporary,
-    callback
-  ) {
+  insertUpdatesIntoNewPack(projectId, docId, newUpdates, temporary, callback) {
     if (callback == null) {
       callback = function () {}
     }
@@ -200,8 +193,8 @@ module.exports = PackManager = {
     const n = newUpdates.length
     const sz = BSON.calculateObjectSize(newUpdates)
     const newPack = {
-      project_id: ObjectId(project_id.toString()),
-      doc_id: ObjectId(doc_id.toString()),
+      project_id: ObjectId(projectId.toString()),
+      doc_id: ObjectId(docId.toString()),
       pack: newUpdates,
       n,
       sz,
@@ -218,7 +211,7 @@ module.exports = PackManager = {
       newPack.last_checked = new Date(Date.now() + 30 * DAYS) // never check temporary packs
     }
     logger.debug(
-      { project_id, doc_id, newUpdates },
+      { projectId, docId, newUpdates },
       'inserting updates into new pack'
     )
     return db.docHistory.insertOne(newPack, function (err) {
@@ -229,14 +222,14 @@ module.exports = PackManager = {
       if (temporary) {
         return callback()
       } else {
-        return PackManager.updateIndex(project_id, doc_id, callback)
+        return PackManager.updateIndex(projectId, docId, callback)
       }
     })
   },
 
   appendUpdatesToExistingPack(
-    project_id,
-    doc_id,
+    projectId,
+    docId,
     lastUpdate,
     newUpdates,
     temporary,
@@ -251,8 +244,8 @@ module.exports = PackManager = {
     const sz = BSON.calculateObjectSize(newUpdates)
     const query = {
       _id: lastUpdate._id,
-      project_id: ObjectId(project_id.toString()),
-      doc_id: ObjectId(doc_id.toString()),
+      project_id: ObjectId(projectId.toString()),
+      doc_id: ObjectId(docId.toString()),
       pack: { $exists: true },
     }
     const update = {
@@ -272,7 +265,7 @@ module.exports = PackManager = {
       update.$set.expiresAt = new Date(Date.now() + 7 * DAYS)
     }
     logger.debug(
-      { project_id, doc_id, lastUpdate, newUpdates },
+      { projectId, docId, lastUpdate, newUpdates },
       'appending updates to existing pack'
     )
     Metrics.inc(`append-pack-${temporary ? 'temporary' : 'permanent'}`)
@@ -281,18 +274,18 @@ module.exports = PackManager = {
 
   // Retrieve all changes for a document
 
-  getOpsByVersionRange(project_id, doc_id, fromVersion, toVersion, callback) {
+  getOpsByVersionRange(projectId, docId, fromVersion, toVersion, callback) {
     if (callback == null) {
       callback = function () {}
     }
     return PackManager.loadPacksByVersionRange(
-      project_id,
-      doc_id,
+      projectId,
+      docId,
       fromVersion,
       toVersion,
       function (error) {
         if (error) return callback(error)
-        const query = { doc_id: ObjectId(doc_id.toString()) }
+        const query = { doc_id: ObjectId(docId.toString()) }
         if (toVersion != null) {
           query.v = { $lte: toVersion }
         }
@@ -335,14 +328,8 @@ module.exports = PackManager = {
     )
   },
 
-  loadPacksByVersionRange(
-    project_id,
-    doc_id,
-    fromVersion,
-    toVersion,
-    callback
-  ) {
-    return PackManager.getIndex(doc_id, function (err, indexResult) {
+  loadPacksByVersionRange(projectId, docId, fromVersion, toVersion, callback) {
+    return PackManager.getIndex(docId, function (err, indexResult) {
       let pack
       if (err != null) {
         return callback(err)
@@ -369,8 +356,8 @@ module.exports = PackManager = {
       })()
       if (neededIds.length) {
         return PackManager.fetchPacksIfNeeded(
-          project_id,
-          doc_id,
+          projectId,
+          docId,
           neededIds,
           callback
         )
@@ -380,20 +367,17 @@ module.exports = PackManager = {
     })
   },
 
-  fetchPacksIfNeeded(project_id, doc_id, pack_ids, callback) {
+  fetchPacksIfNeeded(projectId, docId, packIds, callback) {
     let id
     return db.docHistory
-      .find(
-        { _id: { $in: pack_ids.map(ObjectId) } },
-        { projection: { _id: 1 } }
-      )
+      .find({ _id: { $in: packIds.map(ObjectId) } }, { projection: { _id: 1 } })
       .toArray(function (err, loadedPacks) {
         if (err != null) {
           return callback(err)
         }
         const allPackIds = (() => {
           const result1 = []
-          for (id of Array.from(pack_ids)) {
+          for (id of Array.from(packIds)) {
             result1.push(id.toString())
           }
           return result1
@@ -403,7 +387,7 @@ module.exports = PackManager = {
         )
         const packIdsToFetch = _.difference(allPackIds, loadedPackIds)
         logger.debug(
-          { project_id, doc_id, loadedPackIds, allPackIds, packIdsToFetch },
+          { projectId, docId, loadedPackIds, allPackIds, packIdsToFetch },
           'analysed packs'
         )
         if (packIdsToFetch.length === 0) {
@@ -412,27 +396,26 @@ module.exports = PackManager = {
         return async.eachLimit(
           packIdsToFetch,
           4,
-          (pack_id, cb) =>
-            MongoAWS.unArchivePack(project_id, doc_id, pack_id, cb),
+          (packId, cb) => MongoAWS.unArchivePack(projectId, docId, packId, cb),
           function (err) {
             if (err != null) {
               return callback(err)
             }
-            logger.debug({ project_id, doc_id }, 'done unarchiving')
+            logger.debug({ projectId, docId }, 'done unarchiving')
             return callback()
           }
         )
       })
   },
 
-  findAllDocsInProject(project_id, callback) {
+  findAllDocsInProject(projectId, callback) {
     const docIdSet = new Set()
     async.series(
       [
         cb => {
           db.docHistory
             .find(
-              { project_id: ObjectId(project_id) },
+              { project_id: ObjectId(projectId) },
               { projection: { pack: false } }
             )
             .toArray((err, packs) => {
@@ -445,7 +428,7 @@ module.exports = PackManager = {
         },
         cb => {
           db.docHistoryIndex
-            .find({ project_id: ObjectId(project_id) })
+            .find({ project_id: ObjectId(projectId) })
             .toArray((err, indexes) => {
               if (err) return callback(err)
               indexes.forEach(index => {
@@ -514,9 +497,9 @@ module.exports = PackManager = {
       })
   },
 
-  makeProjectIterator(project_id, before, callback) {
+  makeProjectIterator(projectId, before, callback) {
     PackManager._findPacks(
-      { project_id: ObjectId(project_id) },
+      { project_id: ObjectId(projectId) },
       { 'meta.end_ts': -1 },
       function (err, allPacks) {
         if (err) return callback(err)
@@ -528,9 +511,9 @@ module.exports = PackManager = {
     )
   },
 
-  makeDocIterator(doc_id, callback) {
+  makeDocIterator(docId, callback) {
     PackManager._findPacks(
-      { doc_id: ObjectId(doc_id) },
+      { doc_id: ObjectId(docId) },
       { v: -1 },
       function (err, allPacks) {
         if (err) return callback(err)
@@ -539,13 +522,13 @@ module.exports = PackManager = {
     )
   },
 
-  getPackById(project_id, doc_id, pack_id, callback) {
-    return db.docHistory.findOne({ _id: pack_id }, function (err, pack) {
+  getPackById(projectId, docId, packId, callback) {
+    return db.docHistory.findOne({ _id: packId }, function (err, pack) {
       if (err != null) {
         return callback(err)
       }
       if (pack == null) {
-        return MongoAWS.unArchivePack(project_id, doc_id, pack_id, callback)
+        return MongoAWS.unArchivePack(projectId, docId, packId, callback)
       } else if (pack.expiresAt != null && pack.temporary === false) {
         // we only need to touch the TTL when listing the changes in the project
         // because diffs on individual documents are always done after that
@@ -573,24 +556,24 @@ module.exports = PackManager = {
 
   // Manage docHistoryIndex collection
 
-  getIndex(doc_id, callback) {
+  getIndex(docId, callback) {
     return db.docHistoryIndex.findOne(
-      { _id: ObjectId(doc_id.toString()) },
+      { _id: ObjectId(docId.toString()) },
       callback
     )
   },
 
-  getPackFromIndex(doc_id, pack_id, callback) {
+  getPackFromIndex(docId, packId, callback) {
     return db.docHistoryIndex.findOne(
-      { _id: ObjectId(doc_id.toString()), 'packs._id': pack_id },
+      { _id: ObjectId(docId.toString()), 'packs._id': packId },
       { projection: { 'packs.$': 1 } },
       callback
     )
   },
 
-  getLastPackFromIndex(doc_id, callback) {
+  getLastPackFromIndex(docId, callback) {
     return db.docHistoryIndex.findOne(
-      { _id: ObjectId(doc_id.toString()) },
+      { _id: ObjectId(docId.toString()) },
       { projection: { packs: { $slice: -1 } } },
       function (err, indexPack) {
         if (err != null) {
@@ -604,8 +587,8 @@ module.exports = PackManager = {
     )
   },
 
-  getIndexWithKeys(doc_id, callback) {
-    return PackManager.getIndex(doc_id, function (err, index) {
+  getIndexWithKeys(docId, callback) {
+    return PackManager.getIndex(docId, function (err, index) {
       if (err != null) {
         return callback(err)
       }
@@ -621,10 +604,10 @@ module.exports = PackManager = {
     })
   },
 
-  initialiseIndex(project_id, doc_id, callback) {
+  initialiseIndex(projectId, docId, callback) {
     return PackManager.findCompletedPacks(
-      project_id,
-      doc_id,
+      projectId,
+      docId,
       function (err, packs) {
         // console.log 'err', err, 'packs', packs, packs?.length
         if (err != null) {
@@ -634,8 +617,8 @@ module.exports = PackManager = {
           return callback()
         }
         return PackManager.insertPacksIntoIndexWithLock(
-          project_id,
-          doc_id,
+          projectId,
+          docId,
           packs,
           callback
         )
@@ -643,11 +626,11 @@ module.exports = PackManager = {
     )
   },
 
-  updateIndex(project_id, doc_id, callback) {
+  updateIndex(projectId, docId, callback) {
     // find all packs prior to current pack
     return PackManager.findUnindexedPacks(
-      project_id,
-      doc_id,
+      projectId,
+      docId,
       function (err, newPacks) {
         if (err != null) {
           return callback(err)
@@ -656,15 +639,15 @@ module.exports = PackManager = {
           return callback()
         }
         return PackManager.insertPacksIntoIndexWithLock(
-          project_id,
-          doc_id,
+          projectId,
+          docId,
           newPacks,
           function (err) {
             if (err != null) {
               return callback(err)
             }
             logger.debug(
-              { project_id, doc_id, newPacks },
+              { projectId, docId, newPacks },
               'added new packs to index'
             )
             return callback()
@@ -674,9 +657,9 @@ module.exports = PackManager = {
     )
   },
 
-  findCompletedPacks(project_id, doc_id, callback) {
+  findCompletedPacks(projectId, docId, callback) {
     const query = {
-      doc_id: ObjectId(doc_id.toString()),
+      doc_id: ObjectId(docId.toString()),
       expiresAt: { $exists: false },
     }
     return db.docHistory
@@ -700,9 +683,9 @@ module.exports = PackManager = {
       })
   },
 
-  findPacks(project_id, doc_id, callback) {
+  findPacks(projectId, docId, callback) {
     const query = {
-      doc_id: ObjectId(doc_id.toString()),
+      doc_id: ObjectId(docId.toString()),
       expiresAt: { $exists: false },
     }
     return db.docHistory
@@ -722,14 +705,14 @@ module.exports = PackManager = {
       })
   },
 
-  findUnindexedPacks(project_id, doc_id, callback) {
-    return PackManager.getIndexWithKeys(doc_id, function (err, indexResult) {
+  findUnindexedPacks(projectId, docId, callback) {
+    return PackManager.getIndexWithKeys(docId, function (err, indexResult) {
       if (err != null) {
         return callback(err)
       }
       return PackManager.findCompletedPacks(
-        project_id,
-        doc_id,
+        projectId,
+        docId,
         function (err, historyPacks) {
           let pack
           if (err != null) {
@@ -770,7 +753,7 @@ module.exports = PackManager = {
           })()
           if (newPacks.length) {
             logger.debug(
-              { project_id, doc_id, n: newPacks.length },
+              { projectId, docId, n: newPacks.length },
               'found new packs'
             )
           }
@@ -780,13 +763,13 @@ module.exports = PackManager = {
     })
   },
 
-  insertPacksIntoIndexWithLock(project_id, doc_id, newPacks, callback) {
+  insertPacksIntoIndexWithLock(projectId, docId, newPacks, callback) {
     return LockManager.runWithLock(
-      keys.historyIndexLock({ doc_id }),
+      keys.historyIndexLock({ doc_id: docId }),
       releaseLock =>
         PackManager._insertPacksIntoIndex(
-          project_id,
-          doc_id,
+          projectId,
+          docId,
           newPacks,
           releaseLock
         ),
@@ -794,11 +777,11 @@ module.exports = PackManager = {
     )
   },
 
-  _insertPacksIntoIndex(project_id, doc_id, newPacks, callback) {
+  _insertPacksIntoIndex(projectId, docId, newPacks, callback) {
     return db.docHistoryIndex.updateOne(
-      { _id: ObjectId(doc_id.toString()) },
+      { _id: ObjectId(docId.toString()) },
       {
-        $setOnInsert: { project_id: ObjectId(project_id.toString()) },
+        $setOnInsert: { project_id: ObjectId(projectId.toString()) },
         $push: {
           packs: { $each: newPacks, $sort: { v: 1 } },
         },
@@ -812,14 +795,14 @@ module.exports = PackManager = {
 
   // Archiving packs to S3
 
-  archivePack(project_id, doc_id, pack_id, callback) {
+  archivePack(projectId, docId, packId, callback) {
     const clearFlagOnError = function (err, cb) {
       if (err != null) {
         // clear the inS3 flag on error
         return PackManager.clearPackAsArchiveInProgress(
-          project_id,
-          doc_id,
-          pack_id,
+          projectId,
+          docId,
+          packId,
           function (err2) {
             if (err2 != null) {
               return cb(err2)
@@ -834,42 +817,27 @@ module.exports = PackManager = {
     return async.series(
       [
         cb =>
-          PackManager.checkArchiveNotInProgress(
-            project_id,
-            doc_id,
-            pack_id,
-            cb
-          ),
+          PackManager.checkArchiveNotInProgress(projectId, docId, packId, cb),
         cb =>
-          PackManager.markPackAsArchiveInProgress(
-            project_id,
-            doc_id,
-            pack_id,
-            cb
-          ),
+          PackManager.markPackAsArchiveInProgress(projectId, docId, packId, cb),
         cb =>
-          MongoAWS.archivePack(project_id, doc_id, pack_id, err =>
+          MongoAWS.archivePack(projectId, docId, packId, err =>
             clearFlagOnError(err, cb)
           ),
         cb =>
-          PackManager.checkArchivedPack(project_id, doc_id, pack_id, err =>
+          PackManager.checkArchivedPack(projectId, docId, packId, err =>
             clearFlagOnError(err, cb)
           ),
-        cb => PackManager.markPackAsArchived(project_id, doc_id, pack_id, cb),
+        cb => PackManager.markPackAsArchived(projectId, docId, packId, cb),
         cb =>
-          PackManager.setTTLOnArchivedPack(
-            project_id,
-            doc_id,
-            pack_id,
-            callback
-          ),
+          PackManager.setTTLOnArchivedPack(projectId, docId, packId, callback),
       ],
       callback
     )
   },
 
-  checkArchivedPack(project_id, doc_id, pack_id, callback) {
-    return db.docHistory.findOne({ _id: pack_id }, function (err, pack) {
+  checkArchivedPack(projectId, docId, packId, callback) {
+    return db.docHistory.findOne({ _id: packId }, function (err, pack) {
       if (err != null) {
         return callback(err)
       }
@@ -877,9 +845,9 @@ module.exports = PackManager = {
         return callback(new Error('pack not found'))
       }
       return MongoAWS.readArchivedPack(
-        project_id,
-        doc_id,
-        pack_id,
+        projectId,
+        docId,
+        packId,
         function (err, result) {
           if (err) return callback(err)
           delete result.last_checked
@@ -917,8 +885,8 @@ module.exports = PackManager = {
   },
   // Extra methods to test archive/unarchive for a doc_id
 
-  pushOldPacks(project_id, doc_id, callback) {
-    return PackManager.findPacks(project_id, doc_id, function (err, packs) {
+  pushOldPacks(projectId, docId, callback) {
+    return PackManager.findPacks(projectId, docId, function (err, packs) {
       if (err != null) {
         return callback(err)
       }
@@ -926,18 +894,18 @@ module.exports = PackManager = {
         return callback()
       }
       return PackManager.processOldPack(
-        project_id,
-        doc_id,
+        projectId,
+        docId,
         packs[0]._id,
         callback
       )
     })
   },
 
-  pullOldPacks(project_id, doc_id, callback) {
+  pullOldPacks(projectId, docId, callback) {
     return PackManager.loadPacksByVersionRange(
-      project_id,
-      doc_id,
+      projectId,
+      docId,
       null,
       null,
       callback
@@ -946,21 +914,16 @@ module.exports = PackManager = {
 
   // Processing old packs via worker
 
-  processOldPack(project_id, doc_id, pack_id, callback) {
+  processOldPack(projectId, docId, packId, callback) {
     const markAsChecked = err =>
-      PackManager.markPackAsChecked(
-        project_id,
-        doc_id,
-        pack_id,
-        function (err2) {
-          if (err2 != null) {
-            return callback(err2)
-          }
-          return callback(err)
+      PackManager.markPackAsChecked(projectId, docId, packId, function (err2) {
+        if (err2 != null) {
+          return callback(err2)
         }
-      )
-    logger.debug({ project_id, doc_id }, 'processing old packs')
-    return db.docHistory.findOne({ _id: pack_id }, function (err, pack) {
+        return callback(err)
+      })
+    logger.debug({ projectId, docId }, 'processing old packs')
+    return db.docHistory.findOne({ _id: packId }, function (err, pack) {
       if (err != null) {
         return markAsChecked(err)
       }
@@ -971,8 +934,8 @@ module.exports = PackManager = {
         return callback()
       } // return directly
       return PackManager.finaliseIfNeeded(
-        project_id,
-        doc_id,
+        projectId,
+        docId,
         pack._id,
         pack,
         function (err) {
@@ -980,15 +943,15 @@ module.exports = PackManager = {
             return markAsChecked(err)
           }
           return PackManager.updateIndexIfNeeded(
-            project_id,
-            doc_id,
+            projectId,
+            docId,
             function (err) {
               if (err != null) {
                 return markAsChecked(err)
               }
               return PackManager.findUnarchivedPacks(
-                project_id,
-                doc_id,
+                projectId,
+                docId,
                 function (err, unarchivedPacks) {
                   if (err != null) {
                     return markAsChecked(err)
@@ -999,7 +962,7 @@ module.exports = PackManager = {
                       : undefined)
                   ) {
                     logger.debug(
-                      { project_id, doc_id },
+                      { projectId, docId },
                       'no packs need archiving'
                     )
                     return markAsChecked()
@@ -1007,12 +970,12 @@ module.exports = PackManager = {
                   return async.eachSeries(
                     unarchivedPacks,
                     (pack, cb) =>
-                      PackManager.archivePack(project_id, doc_id, pack._id, cb),
+                      PackManager.archivePack(projectId, docId, pack._id, cb),
                     function (err) {
                       if (err != null) {
                         return markAsChecked(err)
                       }
-                      logger.debug({ project_id, doc_id }, 'done processing')
+                      logger.debug({ projectId, docId }, 'done processing')
                       return markAsChecked()
                     }
                   )
@@ -1025,88 +988,80 @@ module.exports = PackManager = {
     })
   },
 
-  finaliseIfNeeded(project_id, doc_id, pack_id, pack, callback) {
+  finaliseIfNeeded(projectId, docId, packId, pack, callback) {
     const sz = pack.sz / (1024 * 1024) // in fractions of a megabyte
     const n = pack.n / 1024 // in fraction of 1024 ops
     const age = (Date.now() - pack.meta.end_ts) / DAYS
     if (age < 30) {
       // always keep if less than 1 month old
-      logger.debug(
-        { project_id, doc_id, pack_id, age },
-        'less than 30 days old'
-      )
+      logger.debug({ projectId, docId, packId, age }, 'less than 30 days old')
       return callback()
     }
     // compute an archiving threshold which decreases for each month of age
-    const archive_threshold = 30 / age
-    if (sz > archive_threshold || n > archive_threshold || age > 90) {
+    const archiveThreshold = 30 / age
+    if (sz > archiveThreshold || n > archiveThreshold || age > 90) {
       logger.debug(
-        { project_id, doc_id, pack_id, age, archive_threshold, sz, n },
+        { projectId, docId, packId, age, archiveThreshold, sz, n },
         'meets archive threshold'
       )
       return PackManager.markPackAsFinalisedWithLock(
-        project_id,
-        doc_id,
-        pack_id,
+        projectId,
+        docId,
+        packId,
         callback
       )
     } else {
       logger.debug(
-        { project_id, doc_id, pack_id, age, archive_threshold, sz, n },
+        { projectId, docId, packId, age, archiveThreshold, sz, n },
         'does not meet archive threshold'
       )
       return callback()
     }
   },
 
-  markPackAsFinalisedWithLock(project_id, doc_id, pack_id, callback) {
+  markPackAsFinalisedWithLock(projectId, docId, packId, callback) {
     return LockManager.runWithLock(
-      keys.historyLock({ doc_id }),
+      keys.historyLock({ doc_id: docId }),
       releaseLock =>
-        PackManager._markPackAsFinalised(
-          project_id,
-          doc_id,
-          pack_id,
-          releaseLock
-        ),
+        PackManager._markPackAsFinalised(projectId, docId, packId, releaseLock),
       callback
     )
   },
 
-  _markPackAsFinalised(project_id, doc_id, pack_id, callback) {
-    logger.debug({ project_id, doc_id, pack_id }, 'marking pack as finalised')
+  _markPackAsFinalised(projectId, docId, packId, callback) {
+    logger.debug({ projectId, docId, packId }, 'marking pack as finalised')
     return db.docHistory.updateOne(
-      { _id: pack_id },
+      { _id: packId },
       { $set: { finalised: true } },
       callback
     )
   },
 
-  updateIndexIfNeeded(project_id, doc_id, callback) {
-    logger.debug({ project_id, doc_id }, 'archiving old packs')
-    return PackManager.getIndexWithKeys(doc_id, function (err, index) {
+  updateIndexIfNeeded(projectId, docId, callback) {
+    logger.debug({ projectId, docId }, 'archiving old packs')
+    return PackManager.getIndexWithKeys(docId, function (err, index) {
       if (err != null) {
         return callback(err)
       }
       if (index == null) {
-        return PackManager.initialiseIndex(project_id, doc_id, callback)
+        return PackManager.initialiseIndex(projectId, docId, callback)
       } else {
-        return PackManager.updateIndex(project_id, doc_id, callback)
+        return PackManager.updateIndex(projectId, docId, callback)
       }
     })
   },
 
-  markPackAsChecked(project_id, doc_id, pack_id, callback) {
-    logger.debug({ project_id, doc_id, pack_id }, 'marking pack as checked')
+  markPackAsChecked(projectId, docId, packId, callback) {
+    logger.debug({ projectId, docId, packId }, 'marking pack as checked')
     return db.docHistory.updateOne(
-      { _id: pack_id },
+      { _id: packId },
       { $currentDate: { last_checked: true } },
       callback
     )
   },
 
-  findUnarchivedPacks(project_id, doc_id, callback) {
-    return PackManager.getIndex(doc_id, function (err, indexResult) {
+  findUnarchivedPacks(projectId, docId, callback) {
+    return PackManager.getIndex(docId, function (err, indexResult) {
       if (err != null) {
         return callback(err)
       }
@@ -1123,7 +1078,7 @@ module.exports = PackManager = {
       })()
       if (unArchivedPacks.length) {
         logger.debug(
-          { project_id, doc_id, n: unArchivedPacks.length },
+          { projectId, docId, n: unArchivedPacks.length },
           'find unarchived packs'
         )
       }
@@ -1133,41 +1088,37 @@ module.exports = PackManager = {
 
   // Archive locking flags
 
-  checkArchiveNotInProgress(project_id, doc_id, pack_id, callback) {
+  checkArchiveNotInProgress(projectId, docId, packId, callback) {
     logger.debug(
-      { project_id, doc_id, pack_id },
+      { projectId, docId, packId },
       'checking if archive in progress'
     )
-    return PackManager.getPackFromIndex(
-      doc_id,
-      pack_id,
-      function (err, result) {
-        if (err != null) {
-          return callback(err)
-        }
-        if (result == null) {
-          return callback(new Error('pack not found in index'))
-        }
-        if (result.inS3) {
-          return callback(new Error('pack archiving already done'))
-        } else if (result.inS3 != null) {
-          return callback(new Error('pack archiving already in progress'))
-        } else {
-          return callback()
-        }
+    return PackManager.getPackFromIndex(docId, packId, function (err, result) {
+      if (err != null) {
+        return callback(err)
       }
-    )
+      if (result == null) {
+        return callback(new Error('pack not found in index'))
+      }
+      if (result.inS3) {
+        return callback(new Error('pack archiving already done'))
+      } else if (result.inS3 != null) {
+        return callback(new Error('pack archiving already in progress'))
+      } else {
+        return callback()
+      }
+    })
   },
 
-  markPackAsArchiveInProgress(project_id, doc_id, pack_id, callback) {
+  markPackAsArchiveInProgress(projectId, docId, packId, callback) {
     logger.debug(
-      { project_id, doc_id },
+      { projectId, docId },
       'marking pack as archive in progress status'
     )
     return db.docHistoryIndex.findOneAndUpdate(
       {
-        _id: ObjectId(doc_id.toString()),
-        packs: { $elemMatch: { _id: pack_id, inS3: { $exists: false } } },
+        _id: ObjectId(docId.toString()),
+        packs: { $elemMatch: { _id: packId, inS3: { $exists: false } } },
       },
       { $set: { 'packs.$.inS3': false } },
       { projection: { 'packs.$': 1 } },
@@ -1179,7 +1130,7 @@ module.exports = PackManager = {
           return callback(new Error('archive is already in progress'))
         }
         logger.debug(
-          { project_id, doc_id, pack_id },
+          { projectId, docId, packId },
           'marked as archive in progress'
         )
         return callback()
@@ -1187,27 +1138,27 @@ module.exports = PackManager = {
     )
   },
 
-  clearPackAsArchiveInProgress(project_id, doc_id, pack_id, callback) {
+  clearPackAsArchiveInProgress(projectId, docId, packId, callback) {
     logger.debug(
-      { project_id, doc_id, pack_id },
+      { projectId, docId, packId },
       'clearing as archive in progress'
     )
     return db.docHistoryIndex.updateOne(
       {
-        _id: ObjectId(doc_id.toString()),
-        packs: { $elemMatch: { _id: pack_id, inS3: false } },
+        _id: ObjectId(docId.toString()),
+        packs: { $elemMatch: { _id: packId, inS3: false } },
       },
       { $unset: { 'packs.$.inS3': true } },
       callback
     )
   },
 
-  markPackAsArchived(project_id, doc_id, pack_id, callback) {
-    logger.debug({ project_id, doc_id, pack_id }, 'marking pack as archived')
+  markPackAsArchived(projectId, docId, packId, callback) {
+    logger.debug({ projectId, docId, packId }, 'marking pack as archived')
     return db.docHistoryIndex.findOneAndUpdate(
       {
-        _id: ObjectId(doc_id.toString()),
-        packs: { $elemMatch: { _id: pack_id, inS3: false } },
+        _id: ObjectId(docId.toString()),
+        packs: { $elemMatch: { _id: packId, inS3: false } },
       },
       { $set: { 'packs.$.inS3': true } },
       { projection: { 'packs.$': 1 } },
@@ -1218,21 +1169,21 @@ module.exports = PackManager = {
         if (!result.value) {
           return callback(new Error('archive is not marked as progress'))
         }
-        logger.debug({ project_id, doc_id, pack_id }, 'marked as archived')
+        logger.debug({ projectId, docId, packId }, 'marked as archived')
         return callback()
       }
     )
   },
 
-  setTTLOnArchivedPack(project_id, doc_id, pack_id, callback) {
+  setTTLOnArchivedPack(projectId, docId, packId, callback) {
     return db.docHistory.updateOne(
-      { _id: pack_id },
+      { _id: packId },
       { $set: { expiresAt: new Date(Date.now() + 1 * DAYS) } },
       function (err) {
         if (err) {
           return callback(err)
         }
-        logger.debug({ project_id, doc_id, pack_id }, 'set expiry on pack')
+        logger.debug({ projectId, docId, packId }, 'set expiry on pack')
         return callback()
       }
     )

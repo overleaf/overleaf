@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -16,12 +15,12 @@ const WebApiManager = require('./WebApiManager')
 const logger = require('@overleaf/logger')
 
 module.exports = UpdateTrimmer = {
-  shouldTrimUpdates(project_id, callback) {
+  shouldTrimUpdates(projectId, callback) {
     if (callback == null) {
       callback = function () {}
     }
     return MongoManager.getProjectMetaData(
-      project_id,
+      projectId,
       function (error, metadata) {
         if (error != null) {
           return callback(error)
@@ -30,22 +29,22 @@ module.exports = UpdateTrimmer = {
           return callback(null, false)
         } else {
           return WebApiManager.getProjectDetails(
-            project_id,
+            projectId,
             function (error, details) {
               if (error != null) {
                 return callback(error)
               }
-              logger.debug({ project_id, details }, 'got details')
+              logger.debug({ projectId, details }, 'got details')
               if (details?.features?.versioning) {
                 return MongoManager.setProjectMetaData(
-                  project_id,
+                  projectId,
                   { preserveHistory: true },
                   function (error) {
                     if (error != null) {
                       return callback(error)
                     }
                     return MongoManager.upgradeHistory(
-                      project_id,
+                      projectId,
                       function (error) {
                         if (error != null) {
                           return callback(error)

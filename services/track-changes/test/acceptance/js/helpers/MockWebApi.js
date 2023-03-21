@@ -1,6 +1,3 @@
-/* eslint-disable
-    camelcase,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -18,18 +15,18 @@ module.exports = MockWebApi = {
 
   projects: {},
 
-  getUserInfo(user_id, callback) {
+  getUserInfo(userId, callback) {
     if (callback == null) {
       callback = function () {}
     }
-    return callback(null, this.users[user_id] || null)
+    return callback(null, this.users[userId] || null)
   },
 
-  getProjectDetails(project_id, callback) {
+  getProjectDetails(projectId, callback) {
     if (callback == null) {
       callback = function () {}
     }
-    return callback(null, this.projects[project_id])
+    return callback(null, this.projects[projectId])
   },
 
   run() {

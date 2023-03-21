@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-undef,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -19,21 +18,21 @@ app.use(bodyParser.json())
 module.exports = MockDocUpdaterApi = {
   docs: {},
 
-  getDoc(project_id, doc_id, callback) {
+  getDoc(projectId, docId, callback) {
     if (callback == null) {
       callback = function () {}
     }
-    return callback(null, this.docs[doc_id])
+    return callback(null, this.docs[docId])
   },
 
-  setDoc(project_id, doc_id, lines, user_id, undoing, callback) {
+  setDoc(projectId, docId, lines, userId, undoing, callback) {
     if (callback == null) {
       callback = function () {}
     }
-    if (!this.docs[doc_id]) {
-      this.docs[doc_id] = {}
+    if (!this.docs[docId]) {
+      this.docs[docId] = {}
     }
-    this.docs[doc_id].lines = lines
+    this.docs[docId].lines = lines
     return callback()
   },
 

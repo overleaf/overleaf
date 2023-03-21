@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -19,13 +18,13 @@ const metrics = require('@overleaf/metrics')
 const logger = require('@overleaf/logger')
 
 module.exports = MongoManager = {
-  getLastCompressedUpdate(doc_id, callback) {
+  getLastCompressedUpdate(docId, callback) {
     if (callback == null) {
       callback = function () {}
     }
     return db.docHistory
       .find(
-        { doc_id: ObjectId(doc_id.toString()) },
+        { doc_id: ObjectId(docId.toString()) },
         // only return the last entry in a pack
         { projection: { pack: { $slice: -1 } } }
       )
@@ -39,7 +38,7 @@ module.exports = MongoManager = {
       })
   },
 
-  peekLastCompressedUpdate(doc_id, callback) {
+  peekLastCompressedUpdate(docId, callback) {
     // under normal use we pass back the last update as
     // callback(null,update,version).
     //
@@ -50,7 +49,7 @@ module.exports = MongoManager = {
       callback = function () {}
     }
     return MongoManager.getLastCompressedUpdate(
-      doc_id,
+      docId,
       function (error, update) {
         if (error != null) {
           return callback(error)
@@ -79,7 +78,7 @@ module.exports = MongoManager = {
           }
         } else {
           return PackManager.getLastPackFromIndex(
-            doc_id,
+            docId,
             function (error, pack) {
               if (error != null) {
                 return callback(error)
@@ -98,41 +97,41 @@ module.exports = MongoManager = {
     )
   },
 
-  backportProjectId(project_id, doc_id, callback) {
+  backportProjectId(projectId, docId, callback) {
     if (callback == null) {
       callback = function () {}
     }
     return db.docHistory.updateMany(
       {
-        doc_id: ObjectId(doc_id.toString()),
+        doc_id: ObjectId(docId.toString()),
         project_id: { $exists: false },
       },
       {
-        $set: { project_id: ObjectId(project_id.toString()) },
+        $set: { project_id: ObjectId(projectId.toString()) },
       },
       callback
     )
   },
 
-  getProjectMetaData(project_id, callback) {
+  getProjectMetaData(projectId, callback) {
     if (callback == null) {
       callback = function () {}
     }
     return db.projectHistoryMetaData.findOne(
       {
-        project_id: ObjectId(project_id.toString()),
+        project_id: ObjectId(projectId.toString()),
       },
       callback
     )
   },
 
-  setProjectMetaData(project_id, metadata, callback) {
+  setProjectMetaData(projectId, metadata, callback) {
     if (callback == null) {
       callback = function () {}
     }
     return db.projectHistoryMetaData.updateOne(
       {
-        project_id: ObjectId(project_id),
+        project_id: ObjectId(projectId),
       },
       {
         $set: metadata,
@@ -144,14 +143,14 @@ module.exports = MongoManager = {
     )
   },
 
-  upgradeHistory(project_id, callback) {
+  upgradeHistory(projectId, callback) {
     // preserve the project's existing history
     if (callback == null) {
       callback = function () {}
     }
     return db.docHistory.updateMany(
       {
-        project_id: ObjectId(project_id),
+        project_id: ObjectId(projectId),
         temporary: true,
         expiresAt: { $exists: true },
       },

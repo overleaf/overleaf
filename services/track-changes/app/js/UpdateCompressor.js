@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     new-cap,
     no-throw-literal,
     no-unused-vars,
@@ -16,8 +15,8 @@ let oneMinute, twoMegabytes, UpdateCompressor
 const strInject = (s1, pos, s2) => s1.slice(0, pos) + s2 + s1.slice(pos)
 const strRemove = (s1, pos, length) => s1.slice(0, pos) + s1.slice(pos + length)
 
-const { diff_match_patch } = require('../lib/diff_match_patch')
-const dmp = new diff_match_patch()
+const { diff_match_patch: diffMatchPatch } = require('../lib/diff_match_patch')
+const dmp = new diffMatchPatch()
 
 module.exports = UpdateCompressor = {
   NOOP: 'noop',
@@ -254,8 +253,8 @@ module.exports = UpdateCompressor = {
       firstOp.p === secondOp.p
     ) {
       offset = firstOp.p
-      const diff_ops = this.diffAsShareJsOps(firstOp.d, secondOp.i)
-      if (diff_ops.length === 0) {
+      const diffOps = this.diffAsShareJsOps(firstOp.d, secondOp.i)
+      if (diffOps.length === 0) {
         return [
           {
             // Noop
@@ -272,7 +271,7 @@ module.exports = UpdateCompressor = {
           },
         ]
       } else {
-        return diff_ops.map(function (op) {
+        return diffOps.map(function (op) {
           op.p += offset
           return {
             meta: {

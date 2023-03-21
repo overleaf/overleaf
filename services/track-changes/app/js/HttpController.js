@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -28,12 +27,12 @@ module.exports = HttpController = {
     if (next == null) {
       next = function () {}
     }
-    const { doc_id } = req.params
-    const { project_id } = req.params
-    logger.debug({ project_id, doc_id }, 'compressing doc history')
+    const { doc_id: docId } = req.params
+    const { project_id: projectId } = req.params
+    logger.debug({ projectId, docId }, 'compressing doc history')
     return UpdatesManager.processUncompressedUpdatesWithLock(
-      project_id,
-      doc_id,
+      projectId,
+      docId,
       function (error) {
         if (error != null) {
           return next(error)
@@ -47,10 +46,10 @@ module.exports = HttpController = {
     if (next == null) {
       next = function () {}
     }
-    const { project_id } = req.params
-    logger.debug({ project_id }, 'compressing project history')
+    const { project_id: projectId } = req.params
+    logger.debug({ projectId }, 'compressing project history')
     return UpdatesManager.processUncompressedUpdatesForProject(
-      project_id,
+      projectId,
       function (error) {
         if (error != null) {
           return next(error)
@@ -114,12 +113,12 @@ module.exports = HttpController = {
     if (next == null) {
       next = function () {}
     }
-    const { doc_id } = req.params
-    const { project_id } = req.params
-    logger.debug({ project_id, doc_id }, 'checking doc history')
+    const { doc_id: docId } = req.params
+    const { project_id: projectId } = req.params
+    logger.debug({ projectId, docId }, 'checking doc history')
     return DiffManager.getDocumentBeforeVersion(
-      project_id,
-      doc_id,
+      projectId,
+      docId,
       1,
       function (error, document, rewoundUpdates) {
         if (error != null) {
@@ -147,8 +146,8 @@ module.exports = HttpController = {
     if (next == null) {
       next = function () {}
     }
-    const { doc_id } = req.params
-    const { project_id } = req.params
+    const { doc_id: docId } = req.params
+    const { project_id: projectId } = req.params
 
     if (req.query.from != null) {
       from = parseInt(req.query.from, 10)
@@ -161,10 +160,10 @@ module.exports = HttpController = {
       to = null
     }
 
-    logger.debug({ project_id, doc_id, from, to }, 'getting diff')
+    logger.debug({ projectId, docId, from, to }, 'getting diff')
     return DiffManager.getDiff(
-      project_id,
-      doc_id,
+      projectId,
+      docId,
       from,
       to,
       function (error, diff) {
@@ -177,22 +176,22 @@ module.exports = HttpController = {
   },
 
   getUpdates(req, res, next) {
-    let before, min_count
+    let before, minCount
     if (next == null) {
       next = function () {}
     }
-    const { project_id } = req.params
+    const { project_id: projectId } = req.params
 
     if (req.query.before != null) {
       before = parseInt(req.query.before, 10)
     }
     if (req.query.min_count != null) {
-      min_count = parseInt(req.query.min_count, 10)
+      minCount = parseInt(req.query.min_count, 10)
     }
 
     return UpdatesManager.getSummarizedProjectUpdates(
-      project_id,
-      { before, min_count },
+      projectId,
+      { before, min_count: minCount },
       function (error, updates, nextBeforeTimestamp) {
         if (error != null) {
           return next(error)
@@ -233,10 +232,10 @@ module.exports = HttpController = {
     //  - updates can weight MBs for insert/delete of full doc
     //  - multiple updates form a pack
     // Flush updates per pack onto the wire.
-    const { project_id } = req.params
-    logger.debug({ project_id }, 'exporting project history')
+    const { project_id: projectId } = req.params
+    logger.debug({ projectId }, 'exporting project history')
     UpdatesManager.exportProject(
-      project_id,
+      projectId,
       function (err, { updates, userIds }, confirmWrite) {
         const abortStreaming = req.destroyed || res.finished || res.destroyed
         if (abortStreaming) {
@@ -246,7 +245,7 @@ module.exports = HttpController = {
         }
         const hasStartedStreamingResponse = res.headersSent
         if (err) {
-          logger.error({ project_id, err }, 'export failed')
+          logger.error({ projectId, err }, 'export failed')
           if (!hasStartedStreamingResponse) {
             // Generate a nice 500
             return next(err)
@@ -294,14 +293,14 @@ module.exports = HttpController = {
     if (next == null) {
       next = function () {}
     }
-    let { doc_id, project_id, version } = req.params
-    const user_id = req.headers['x-user-id']
+    let { doc_id: docId, project_id: projectId, version } = req.params
+    const userId = req.headers['x-user-id']
     version = parseInt(version, 10)
     return RestoreManager.restoreToBeforeVersion(
-      project_id,
-      doc_id,
+      projectId,
+      docId,
       version,
-      user_id,
+      userId,
       function (error) {
         if (error != null) {
           return next(error)
@@ -315,10 +314,10 @@ module.exports = HttpController = {
     if (next == null) {
       next = function () {}
     }
-    const { project_id } = req.params
-    const { doc_id } = req.params
-    logger.debug({ project_id, doc_id }, 'pushing all finalised changes to s3')
-    return PackManager.pushOldPacks(project_id, doc_id, function (error) {
+    const { project_id: projectId } = req.params
+    const { doc_id: docId } = req.params
+    logger.debug({ projectId, docId }, 'pushing all finalised changes to s3')
+    return PackManager.pushOldPacks(projectId, docId, function (error) {
       if (error != null) {
         return next(error)
       }
@@ -330,10 +329,10 @@ module.exports = HttpController = {
     if (next == null) {
       next = function () {}
     }
-    const { project_id } = req.params
-    const { doc_id } = req.params
-    logger.debug({ project_id, doc_id }, 'pulling all packs from s3')
-    return PackManager.pullOldPacks(project_id, doc_id, function (error) {
+    const { project_id: projectId } = req.params
+    const { doc_id: docId } = req.params
+    logger.debug({ projectId, docId }, 'pulling all packs from s3')
+    return PackManager.pullOldPacks(projectId, docId, function (error) {
       if (error != null) {
         return next(error)
       }

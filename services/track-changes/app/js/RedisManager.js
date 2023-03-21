@@ -1,6 +1,3 @@
-/* eslint-disable
-    camelcase,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -19,11 +16,11 @@ const Keys = Settings.redis.history.key_schema
 const async = require('async')
 
 module.exports = RedisManager = {
-  getOldestDocUpdates(doc_id, batchSize, callback) {
+  getOldestDocUpdates(docId, batchSize, callback) {
     if (callback == null) {
       callback = function () {}
     }
-    const key = Keys.uncompressedHistoryOps({ doc_id })
+    const key = Keys.uncompressedHistoryOps({ doc_id: docId })
     return rclient.lrange(key, 0, batchSize - 1, callback)
   },
 
@@ -42,14 +39,14 @@ module.exports = RedisManager = {
     return callback(null, rawUpdates)
   },
 
-  deleteAppliedDocUpdates(project_id, doc_id, docUpdates, callback) {
+  deleteAppliedDocUpdates(projectId, docId, docUpdates, callback) {
     if (callback == null) {
       callback = function () {}
     }
     const multi = rclient.multi()
     // Delete all the updates which have been applied (exact match)
     for (const update of Array.from(docUpdates || [])) {
-      multi.lrem(Keys.uncompressedHistoryOps({ doc_id }), 1, update)
+      multi.lrem(Keys.uncompressedHistoryOps({ doc_id: docId }), 1, update)
     }
     return multi.exec(function (error, results) {
       if (error != null) {
@@ -58,8 +55,8 @@ module.exports = RedisManager = {
       // It's ok to delete the doc_id from the set here. Even though the list
       // of updates may not be empty, we will continue to process it until it is.
       return rclient.srem(
-        Keys.docsWithHistoryOps({ project_id }),
-        doc_id,
+        Keys.docsWithHistoryOps({ project_id: projectId }),
+        docId,
         function (error) {
           if (error != null) {
             return callback(error)
@@ -70,11 +67,14 @@ module.exports = RedisManager = {
     })
   },
 
-  getDocIdsWithHistoryOps(project_id, callback) {
+  getDocIdsWithHistoryOps(projectId, callback) {
     if (callback == null) {
       callback = function () {}
     }
-    return rclient.smembers(Keys.docsWithHistoryOps({ project_id }), callback)
+    return rclient.smembers(
+      Keys.docsWithHistoryOps({ project_id: projectId }),
+      callback
+    )
   },
 
   // iterate over keys asynchronously using redis scan (non-blocking)
@@ -139,12 +139,12 @@ module.exports = RedisManager = {
     }
     return RedisManager._getKeys(
       Keys.docsWithHistoryOps({ project_id: '*' }),
-      function (error, project_keys) {
+      function (error, projectKeys) {
         if (error != null) {
           return callback(error)
         }
-        const project_ids = RedisManager._extractIds(project_keys)
-        return callback(error, project_ids)
+        const projectIds = RedisManager._extractIds(projectKeys)
+        return callback(error, projectIds)
       }
     )
   },
@@ -157,12 +157,12 @@ module.exports = RedisManager = {
     }
     return RedisManager._getKeys(
       Keys.uncompressedHistoryOps({ doc_id: '*' }),
-      function (error, doc_keys) {
+      function (error, docKeys) {
         if (error != null) {
           return callback(error)
         }
-        const doc_ids = RedisManager._extractIds(doc_keys)
-        return callback(error, doc_ids)
+        const docIds = RedisManager._extractIds(docKeys)
+        return callback(error, docIds)
       }
     )
   },

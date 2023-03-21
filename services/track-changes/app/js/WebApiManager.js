@@ -1,6 +1,3 @@
-/* eslint-disable
-    camelcase,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -58,21 +55,21 @@ module.exports = WebApiManager = {
     )
   },
 
-  getUserInfo(user_id, callback) {
+  getUserInfo(userId, callback) {
     if (callback == null) {
       callback = function () {}
     }
-    const url = `/user/${user_id}/personal_info`
-    logger.debug({ user_id }, 'getting user info from web')
+    const url = `/user/${userId}/personal_info`
+    logger.debug({ userId }, 'getting user info from web')
     return WebApiManager.sendRequest(url, function (error, body) {
       let user
       if (error != null) {
-        logger.error({ err: error, user_id, url }, 'error accessing web')
+        logger.error({ err: error, userId, url }, 'error accessing web')
         return callback(error)
       }
 
       if (body === null) {
-        logger.error({ user_id, url }, 'no user found')
+        logger.error({ userId, url }, 'no user found')
         return callback(null, null)
       }
       try {
@@ -90,16 +87,16 @@ module.exports = WebApiManager = {
     })
   },
 
-  getProjectDetails(project_id, callback) {
+  getProjectDetails(projectId, callback) {
     if (callback == null) {
       callback = function () {}
     }
-    const url = `/project/${project_id}/details`
-    logger.debug({ project_id }, 'getting project details from web')
+    const url = `/project/${projectId}/details`
+    logger.debug({ projectId }, 'getting project details from web')
     return WebApiManager.sendRequest(url, function (error, body) {
       let project
       if (error != null) {
-        logger.error({ err: error, project_id, url }, 'error accessing web')
+        logger.error({ err: error, projectId, url }, 'error accessing web')
         return callback(error)
       }
 

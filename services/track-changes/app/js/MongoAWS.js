@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-return-assign,
     no-unused-vars,
 */
@@ -25,7 +24,7 @@ const Metrics = require('@overleaf/metrics')
 
 const DAYS = 24 * 3600 * 1000 // one day in milliseconds
 
-const createStream = function (streamConstructor, project_id, doc_id, pack_id) {
+const createStream = function (streamConstructor, projectId, docId, packId) {
   const AWS_CONFIG = {
     accessKeyId: settings.trackchanges.s3.key,
     secretAccessKey: settings.trackchanges.s3.secret,
@@ -35,12 +34,12 @@ const createStream = function (streamConstructor, project_id, doc_id, pack_id) {
 
   return streamConstructor(new AWS.S3(AWS_CONFIG), {
     Bucket: settings.trackchanges.stores.doc_history,
-    Key: project_id + '/changes-' + doc_id + '/pack-' + pack_id,
+    Key: projectId + '/changes-' + docId + '/pack-' + packId,
   })
 }
 
 module.exports = MongoAWS = {
-  archivePack(project_id, doc_id, pack_id, _callback) {
+  archivePack(projectId, docId, packId, _callback) {
     if (_callback == null) {
       _callback = function () {}
     }
@@ -50,23 +49,23 @@ module.exports = MongoAWS = {
     }
 
     const query = {
-      _id: ObjectId(pack_id),
-      doc_id: ObjectId(doc_id),
+      _id: ObjectId(packId),
+      doc_id: ObjectId(docId),
     }
 
-    if (project_id == null) {
+    if (projectId == null) {
       return callback(new Error('invalid project id'))
     }
-    if (doc_id == null) {
+    if (docId == null) {
       return callback(new Error('invalid doc id'))
     }
-    if (pack_id == null) {
+    if (packId == null) {
       return callback(new Error('invalid pack id'))
     }
 
-    logger.debug({ project_id, doc_id, pack_id }, 'uploading data to s3')
+    logger.debug({ projectId, docId, packId }, 'uploading data to s3')
 
-    const upload = createStream(S3S.WriteStream, project_id, doc_id, pack_id)
+    const upload = createStream(S3S.WriteStream, projectId, docId, packId)
 
     return db.docHistory.findOne(query, function (err, result) {
       if (err != null) {
@@ -81,15 +80,15 @@ module.exports = MongoAWS = {
       const uncompressedData = JSON.stringify(result)
       if (uncompressedData.indexOf('\u0000') !== -1) {
         const error = new Error('null bytes found in upload')
-        logger.error({ err: error, project_id, doc_id, pack_id }, error.message)
+        logger.error({ err: error, projectId, docId, packId }, error.message)
         return callback(error)
       }
       return zlib.gzip(uncompressedData, function (err, buf) {
         logger.debug(
           {
-            project_id,
-            doc_id,
-            pack_id,
+            projectId,
+            docId,
+            packId,
             origSize: uncompressedData.length,
             newSize: buf.length,
           },
@@ -101,10 +100,7 @@ module.exports = MongoAWS = {
         upload.on('error', err => callback(err))
         upload.on('finish', function () {
           Metrics.inc('archive-pack')
-          logger.debug(
-            { project_id, doc_id, pack_id },
-            'upload to s3 completed'
-          )
+          logger.debug({ projectId, docId, packId }, 'upload to s3 completed')
           return callback(null)
         })
         upload.write(buf)
@@ -113,7 +109,7 @@ module.exports = MongoAWS = {
     })
   },
 
-  readArchivedPack(project_id, doc_id, pack_id, _callback) {
+  readArchivedPack(projectId, docId, packId, _callback) {
     if (_callback == null) {
       _callback = function () {}
     }
@@ -122,19 +118,19 @@ module.exports = MongoAWS = {
       return (_callback = function () {})
     }
 
-    if (project_id == null) {
+    if (projectId == null) {
       return callback(new Error('invalid project id'))
     }
-    if (doc_id == null) {
+    if (docId == null) {
       return callback(new Error('invalid doc id'))
     }
-    if (pack_id == null) {
+    if (packId == null) {
       return callback(new Error('invalid pack id'))
     }
 
-    logger.debug({ project_id, doc_id, pack_id }, 'downloading data from s3')
+    logger.debug({ projectId, docId, packId }, 'downloading data from s3')
 
-    const download = createStream(S3S.ReadStream, project_id, doc_id, pack_id)
+    const download = createStream(S3S.ReadStream, projectId, docId, packId)
 
     const inputStream = download
       .on('open', obj => 1)
@@ -144,7 +140,7 @@ module.exports = MongoAWS = {
     gunzip.setEncoding('utf8')
     gunzip.on('error', function (err) {
       logger.debug(
-        { project_id, doc_id, pack_id, err },
+        { projectId, docId, packId, err },
         'error uncompressing gzip stream'
       )
       return callback(err)
@@ -155,10 +151,7 @@ module.exports = MongoAWS = {
     outputStream.on('error', err => callback(err))
     outputStream.on('end', function () {
       let object
-      logger.debug(
-        { project_id, doc_id, pack_id },
-        'download from s3 completed'
-      )
+      logger.debug({ projectId, docId, packId }, 'download from s3 completed')
       try {
         object = JSON.parse(parts.join(''))
       } catch (e) {
@@ -177,14 +170,14 @@ module.exports = MongoAWS = {
     return outputStream.on('data', data => parts.push(data))
   },
 
-  unArchivePack(project_id, doc_id, pack_id, callback) {
+  unArchivePack(projectId, docId, packId, callback) {
     if (callback == null) {
       callback = function () {}
     }
     return MongoAWS.readArchivedPack(
-      project_id,
-      doc_id,
-      pack_id,
+      projectId,
+      docId,
+      packId,
       function (err, object) {
         if (err != null) {
           return callback(err)
@@ -192,10 +185,7 @@ module.exports = MongoAWS = {
         Metrics.inc('unarchive-pack')
         // allow the object to expire, we can always retrieve it again
         object.expiresAt = new Date(Date.now() + 7 * DAYS)
-        logger.debug(
-          { project_id, doc_id, pack_id },
-          'inserting object from s3'
-        )
+        logger.debug({ projectId, docId, packId }, 'inserting object from s3')
         return db.docHistory.insertOne(object, (err, confirmation) => {
           if (err) return callback(err)
           object._id = confirmation.insertedId

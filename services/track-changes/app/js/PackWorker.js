@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -14,7 +13,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let LIMIT, pending
-let project_id, doc_id
+let projectId, docId
 const { callbackify } = require('util')
 const Settings = require('@overleaf/settings')
 const async = require('async')
@@ -48,8 +47,8 @@ if (!source.match(/^[0-9]+$/)) {
   const result = (() => {
     const result1 = []
     for (const line of Array.from(file.toString().split('\n'))) {
-      ;[project_id, doc_id] = Array.from(line.split(' '))
-      result1.push({ doc_id, project_id })
+      ;[projectId, docId] = Array.from(line.split(' '))
+      result1.push({ doc_id: docId, project_id: projectId })
     }
     return result1
   })()
@@ -108,12 +107,12 @@ const processUpdates = pending =>
     pending,
     function (result, callback) {
       let _id
-      ;({ _id, project_id, doc_id } = result)
+      ;({ _id, project_id: projectId, doc_id: docId } = result)
       COUNT++
-      logger.debug({ project_id, doc_id }, `processing ${COUNT}/${TOTAL}`)
-      if (project_id == null || doc_id == null) {
+      logger.debug({ projectId, docId }, `processing ${COUNT}/${TOTAL}`)
+      if (projectId == null || docId == null) {
         logger.debug(
-          { project_id, doc_id },
+          { projectId, docId },
           'skipping pack, missing project/doc id'
         )
         return callback()
@@ -138,9 +137,9 @@ const processUpdates = pending =>
         return setTimeout(() => callback(err, result), DOCUMENT_PACK_DELAY)
       }
       if (_id == null) {
-        return PackManager.pushOldPacks(project_id, doc_id, handler)
+        return PackManager.pushOldPacks(projectId, docId, handler)
       } else {
-        return PackManager.processOldPack(project_id, doc_id, _id, handler)
+        return PackManager.processOldPack(projectId, docId, _id, handler)
       }
     },
     function (err, results) {

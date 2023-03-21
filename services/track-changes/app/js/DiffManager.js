@@ -1,6 +1,3 @@
-/* eslint-disable
-    camelcase,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -17,15 +14,15 @@ const DiffGenerator = require('./DiffGenerator')
 const logger = require('@overleaf/logger')
 
 module.exports = DiffManager = {
-  getLatestDocAndUpdates(project_id, doc_id, fromVersion, callback) {
+  getLatestDocAndUpdates(projectId, docId, fromVersion, callback) {
     // Get updates last, since then they must be ahead and it
     // might be possible to rewind to the same version as the doc.
     if (callback == null) {
       callback = function () {}
     }
     return DocumentUpdaterManager.getDocument(
-      project_id,
-      doc_id,
+      projectId,
+      docId,
       function (error, content, version) {
         if (error != null) {
           return callback(error)
@@ -35,8 +32,8 @@ module.exports = DiffManager = {
           return callback(null, content, version, [])
         }
         return UpdatesManager.getDocUpdatesWithUserInfo(
-          project_id,
-          doc_id,
+          projectId,
+          docId,
           { from: fromVersion },
           function (error, updates) {
             if (error != null) {
@@ -49,13 +46,13 @@ module.exports = DiffManager = {
     )
   },
 
-  getDiff(project_id, doc_id, fromVersion, toVersion, callback) {
+  getDiff(projectId, docId, fromVersion, toVersion, callback) {
     if (callback == null) {
       callback = function () {}
     }
     return DiffManager.getDocumentBeforeVersion(
-      project_id,
-      doc_id,
+      projectId,
+      docId,
       fromVersion,
       function (error, startingContent, updates) {
         let diff
@@ -85,7 +82,7 @@ module.exports = DiffManager = {
     )
   },
 
-  getDocumentBeforeVersion(project_id, doc_id, version, _callback) {
+  getDocumentBeforeVersion(projectId, docId, version, _callback) {
     // Whichever order we get the latest document and the latest updates,
     // there is potential for updates to be applied between them so that
     // they do not return the same 'latest' versions.
@@ -100,7 +97,7 @@ module.exports = DiffManager = {
       if (error != null) {
         if (error.retry && retries > 0) {
           logger.warn(
-            { error, project_id, doc_id, version, retries },
+            { error, projectId, docId, version, retries },
             'retrying getDocumentBeforeVersion'
           )
           return retry()
@@ -115,25 +112,25 @@ module.exports = DiffManager = {
     return (retry = function () {
       retries--
       return DiffManager._tryGetDocumentBeforeVersion(
-        project_id,
-        doc_id,
+        projectId,
+        docId,
         version,
         callback
       )
     })()
   },
 
-  _tryGetDocumentBeforeVersion(project_id, doc_id, version, callback) {
+  _tryGetDocumentBeforeVersion(projectId, docId, version, callback) {
     if (callback == null) {
       callback = function () {}
     }
     logger.debug(
-      { project_id, doc_id, version },
+      { projectId, docId, version },
       'getting document before version'
     )
     return DiffManager.getLatestDocAndUpdates(
-      project_id,
-      doc_id,
+      projectId,
+      docId,
       version,
       function (error, content, version, updates) {
         let startingContent
