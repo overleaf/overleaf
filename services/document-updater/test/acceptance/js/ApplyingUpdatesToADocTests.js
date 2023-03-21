@@ -1,6 +1,3 @@
-/* eslint-disable
-    camelcase,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -14,13 +11,13 @@ const sinon = require('sinon')
 const { expect } = require('chai')
 const async = require('async')
 const Settings = require('@overleaf/settings')
-const rclient_history = require('@overleaf/redis-wrapper').createClient(
+const rclientHistory = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.history
 ) // note: this is track changes, not project-history
-const rclient_project_history = require('@overleaf/redis-wrapper').createClient(
+const rclientProjectHistory = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.project_history
 )
-const rclient_du = require('@overleaf/redis-wrapper').createClient(
+const rclientDU = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.documentupdater
 )
 const Keys = Settings.redis.documentupdater.key_schema
@@ -100,7 +97,7 @@ describe('Applying updates to a doc', function () {
     })
 
     it('should push the applied updates to the track changes api', function (done) {
-      rclient_history.lrange(
+      rclientHistory.lrange(
         HistoryKeys.uncompressedHistoryOps({ doc_id: this.doc_id }),
         0,
         -1,
@@ -109,7 +106,7 @@ describe('Applying updates to a doc', function () {
             throw error
           }
           JSON.parse(updates[0]).op.should.deep.equal(this.update.op)
-          return rclient_history.sismember(
+          return rclientHistory.sismember(
             HistoryKeys.docsWithHistoryOps({ project_id: this.project_id }),
             this.doc_id,
             (error, result) => {
@@ -126,7 +123,7 @@ describe('Applying updates to a doc', function () {
     })
 
     it('should push the applied updates to the project history changes api', function (done) {
-      rclient_project_history.lrange(
+      rclientProjectHistory.lrange(
         ProjectHistoryKeys.projectHistoryOps({ project_id: this.project_id }),
         0,
         -1,
@@ -142,7 +139,7 @@ describe('Applying updates to a doc', function () {
     })
 
     it('should set the first op timestamp', function (done) {
-      rclient_project_history.get(
+      rclientProjectHistory.get(
         ProjectHistoryKeys.projectHistoryFirstOpTimestamp({
           project_id: this.project_id,
         }),
@@ -179,7 +176,7 @@ describe('Applying updates to a doc', function () {
       })
 
       return it('should not change the first op timestamp', function (done) {
-        rclient_project_history.get(
+        rclientProjectHistory.get(
           ProjectHistoryKeys.projectHistoryFirstOpTimestamp({
             project_id: this.project_id,
           }),
@@ -250,14 +247,14 @@ describe('Applying updates to a doc', function () {
     })
 
     it('should push the applied updates to the track changes api', function (done) {
-      rclient_history.lrange(
+      rclientHistory.lrange(
         HistoryKeys.uncompressedHistoryOps({ doc_id: this.doc_id }),
         0,
         -1,
         (error, updates) => {
           if (error) return done(error)
           JSON.parse(updates[0]).op.should.deep.equal(this.update.op)
-          return rclient_history.sismember(
+          return rclientHistory.sismember(
             HistoryKeys.docsWithHistoryOps({ project_id: this.project_id }),
             this.doc_id,
             (error, result) => {
@@ -272,7 +269,7 @@ describe('Applying updates to a doc', function () {
     })
 
     return it('should push the applied updates to the project history changes api', function (done) {
-      rclient_project_history.lrange(
+      rclientProjectHistory.lrange(
         ProjectHistoryKeys.projectHistoryOps({ project_id: this.project_id }),
         0,
         -1,
@@ -336,7 +333,7 @@ describe('Applying updates to a doc', function () {
     })
 
     it('should not push any applied updates to the track changes api', function (done) {
-      rclient_history.lrange(
+      rclientHistory.lrange(
         HistoryKeys.uncompressedHistoryOps({ doc_id: this.doc_id }),
         0,
         -1,
@@ -350,7 +347,7 @@ describe('Applying updates to a doc', function () {
     })
 
     return it('should push the applied updates to the project history changes api', function (done) {
-      rclient_project_history.lrange(
+      rclientProjectHistory.lrange(
         ProjectHistoryKeys.projectHistoryOps({ project_id: this.project_id }),
         0,
         -1,
@@ -442,7 +439,7 @@ describe('Applying updates to a doc', function () {
       })
 
       it('should push the applied updates to the track changes api', function (done) {
-        rclient_history.lrange(
+        rclientHistory.lrange(
           HistoryKeys.uncompressedHistoryOps({ doc_id: this.doc_id }),
           0,
           -1,
@@ -454,7 +451,7 @@ describe('Applying updates to a doc', function () {
               appliedUpdate.op.should.deep.equal(updates[i].op)
             }
 
-            return rclient_history.sismember(
+            return rclientHistory.sismember(
               HistoryKeys.docsWithHistoryOps({ project_id: this.project_id }),
               this.doc_id,
               (error, result) => {
@@ -469,7 +466,7 @@ describe('Applying updates to a doc', function () {
       })
 
       return it('should store the doc ops in the correct order', function (done) {
-        rclient_du.lrange(
+        rclientDU.lrange(
           Keys.docOps({ doc_id: this.doc_id }),
           0,
           -1,

@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -17,7 +16,7 @@ const Keys = Settings.redis.history.key_schema
 const logger = require('@overleaf/logger')
 
 module.exports = HistoryRedisManager = {
-  recordDocHasHistoryOps(project_id, doc_id, ops, callback) {
+  recordDocHasHistoryOps(projectId, docId, ops, callback) {
     if (ops == null) {
       ops = []
     }
@@ -27,13 +26,10 @@ module.exports = HistoryRedisManager = {
     if (ops.length === 0) {
       return callback(new Error('cannot push no ops')) // This should never be called with no ops, but protect against a redis error if we sent an empty array to rpush
     }
-    logger.debug(
-      { project_id, doc_id },
-      'marking doc in project for history ops'
-    )
+    logger.debug({ projectId, docId }, 'marking doc in project for history ops')
     return rclient.sadd(
-      Keys.docsWithHistoryOps({ project_id }),
-      doc_id,
+      Keys.docsWithHistoryOps({ project_id: projectId }),
+      docId,
       function (error) {
         if (error != null) {
           return callback(error)

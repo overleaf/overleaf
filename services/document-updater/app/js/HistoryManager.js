@@ -1,6 +1,3 @@
-/* eslint-disable
-    camelcase,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -20,25 +17,25 @@ const RedisManager = require('./RedisManager')
 const metrics = require('./Metrics')
 
 module.exports = HistoryManager = {
-  flushDocChangesAsync(project_id, doc_id) {
+  flushDocChangesAsync(projectId, docId) {
     if (
       (Settings.apis != null ? Settings.apis.trackchanges : undefined) == null
     ) {
       logger.warn(
-        { doc_id },
+        { docId },
         'track changes API is not configured, so not flushing'
       )
       return
     }
     if (Settings.disableTrackChanges) {
-      logger.debug({ doc_id }, 'track changes is disabled, so not flushing')
+      logger.debug({ docId }, 'track changes is disabled, so not flushing')
       return
     }
     return RedisManager.getHistoryType(
-      doc_id,
+      docId,
       function (err, projectHistoryType) {
         if (err != null) {
-          logger.warn({ err, doc_id }, 'error getting history type')
+          logger.warn({ err, docId }, 'error getting history type')
         }
         // if there's an error continue and flush to track-changes for safety
         if (
@@ -46,25 +43,25 @@ module.exports = HistoryManager = {
           projectHistoryType === 'project-history'
         ) {
           return logger.debug(
-            { doc_id, projectHistoryType },
+            { docId, projectHistoryType },
             'skipping track-changes flush'
           )
         } else {
           metrics.inc('history-flush', 1, { status: 'track-changes' })
-          const url = `${Settings.apis.trackchanges.url}/project/${project_id}/doc/${doc_id}/flush`
+          const url = `${Settings.apis.trackchanges.url}/project/${projectId}/doc/${docId}/flush`
           logger.debug(
-            { project_id, doc_id, url, projectHistoryType },
+            { projectId, docId, url, projectHistoryType },
             'flushing doc in track changes api'
           )
           return request.post(url, function (error, res, body) {
             if (error != null) {
               return logger.error(
-                { error, doc_id, project_id },
+                { error, docId, projectId },
                 'track changes doc to track changes api'
               )
             } else if (res.statusCode < 200 && res.statusCode >= 300) {
               return logger.error(
-                { doc_id, project_id },
+                { docId, projectId },
                 `track changes api returned a failure status code: ${res.statusCode}`
               )
             }
@@ -75,19 +72,19 @@ module.exports = HistoryManager = {
   },
 
   // flush changes in the background
-  flushProjectChangesAsync(project_id) {
+  flushProjectChangesAsync(projectId) {
     if (!Settings.apis?.project_history?.enabled) {
       return
     }
     return HistoryManager.flushProjectChanges(
-      project_id,
+      projectId,
       { background: true },
       function () {}
     )
   },
 
   // flush changes and callback (for when we need to know the queue is flushed)
-  flushProjectChanges(project_id, options, callback) {
+  flushProjectChanges(projectId, options, callback) {
     if (callback == null) {
       callback = function () {}
     }
@@ -95,26 +92,26 @@ module.exports = HistoryManager = {
       return callback()
     }
     if (options.skip_history_flush) {
-      logger.debug({ project_id }, 'skipping flush of project history')
+      logger.debug({ projectId }, 'skipping flush of project history')
       return callback()
     }
     metrics.inc('history-flush', 1, { status: 'project-history' })
-    const url = `${Settings.apis.project_history.url}/project/${project_id}/flush`
+    const url = `${Settings.apis.project_history.url}/project/${projectId}/flush`
     const qs = {}
     if (options.background) {
       qs.background = true
     } // pass on the background flush option if present
-    logger.debug({ project_id, url, qs }, 'flushing doc in project history api')
+    logger.debug({ projectId, url, qs }, 'flushing doc in project history api')
     return request.post({ url, qs }, function (error, res, body) {
       if (error != null) {
         logger.error(
-          { error, project_id },
+          { error, projectId },
           'project history doc to track changes api'
         )
         return callback(error)
       } else if (res.statusCode < 200 && res.statusCode >= 300) {
         logger.error(
-          { project_id },
+          { projectId },
           `project history api returned a failure status code: ${res.statusCode}`
         )
         return callback(error)
@@ -128,11 +125,11 @@ module.exports = HistoryManager = {
   FLUSH_PROJECT_EVERY_N_OPS: 500,
 
   recordAndFlushHistoryOps(
-    project_id,
-    doc_id,
+    projectId,
+    docId,
     ops,
-    doc_ops_length,
-    project_ops_length,
+    docOpsLength,
+    projectOpsLength,
     callback
   ) {
     if (ops == null) {
@@ -149,7 +146,7 @@ module.exports = HistoryManager = {
     if (Settings.apis?.project_history?.enabled) {
       if (
         HistoryManager.shouldFlushHistoryOps(
-          project_ops_length,
+          projectOpsLength,
           ops.length,
           HistoryManager.FLUSH_PROJECT_EVERY_N_OPS
         )
@@ -157,18 +154,18 @@ module.exports = HistoryManager = {
         // Do this in the background since it uses HTTP and so may be too
         // slow to wait for when processing a doc update.
         logger.debug(
-          { project_ops_length, project_id },
+          { projectOpsLength, projectId },
           'flushing project history api'
         )
-        HistoryManager.flushProjectChangesAsync(project_id)
+        HistoryManager.flushProjectChangesAsync(projectId)
       }
     }
 
     // if the doc_ops_length is undefined it means the project is not using track-changes
     // so we can bail out here
-    if (Settings.disableTrackChanges || typeof doc_ops_length === 'undefined') {
+    if (Settings.disableTrackChanges || typeof docOpsLength === 'undefined') {
       logger.debug(
-        { project_id, doc_id },
+        { projectId, docId },
         'skipping flush to track-changes, only using project-history'
       )
       return callback()
@@ -176,8 +173,8 @@ module.exports = HistoryManager = {
 
     // record updates for track-changes
     return HistoryRedisManager.recordDocHasHistoryOps(
-      project_id,
-      doc_id,
+      projectId,
+      docId,
       ops,
       function (error) {
         if (error != null) {
@@ -185,7 +182,7 @@ module.exports = HistoryManager = {
         }
         if (
           HistoryManager.shouldFlushHistoryOps(
-            doc_ops_length,
+            docOpsLength,
             ops.length,
             HistoryManager.FLUSH_DOC_EVERY_N_OPS
           )
@@ -193,17 +190,17 @@ module.exports = HistoryManager = {
           // Do this in the background since it uses HTTP and so may be too
           // slow to wait for when processing a doc update.
           logger.debug(
-            { doc_ops_length, doc_id, project_id },
+            { docOpsLength, docId, projectId },
             'flushing track changes api'
           )
-          HistoryManager.flushDocChangesAsync(project_id, doc_id)
+          HistoryManager.flushDocChangesAsync(projectId, docId)
         }
         return callback()
       }
     )
   },
 
-  shouldFlushHistoryOps(length, ops_length, threshold) {
+  shouldFlushHistoryOps(length, opsLength, threshold) {
     if (!length) {
       return false
     } // don't flush unless we know the length
@@ -211,7 +208,7 @@ module.exports = HistoryManager = {
     // Find out which 'block' (i.e. 0-99, 100-199) we were in before and after pushing these
     // ops. If we've changed, then we've gone over a multiple of 100 and should flush.
     // (Most of the time, we will only hit 100 and then flushing will put us back to 0)
-    const previousLength = length - ops_length
+    const previousLength = length - opsLength
     const prevBlock = Math.floor(previousLength / threshold)
     const newBlock = Math.floor(length / threshold)
     return newBlock !== prevBlock
@@ -219,9 +216,9 @@ module.exports = HistoryManager = {
 
   MAX_PARALLEL_REQUESTS: 4,
 
-  resyncProjectHistory(project_id, projectHistoryId, docs, files, callback) {
+  resyncProjectHistory(projectId, projectHistoryId, docs, files, callback) {
     return ProjectHistoryRedisManager.queueResyncProjectStructure(
-      project_id,
+      projectId,
       projectHistoryId,
       docs,
       files,
@@ -232,7 +229,7 @@ module.exports = HistoryManager = {
         const DocumentManager = require('./DocumentManager')
         const resyncDoc = (doc, cb) => {
           DocumentManager.resyncDocContentsWithLock(
-            project_id,
+            projectId,
             doc.doc,
             doc.path,
             cb

@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-return-assign,
     no-unused-vars,
 */
@@ -15,8 +14,8 @@ const sinon = require('sinon')
 const assert = require('assert')
 const path = require('path')
 const modulePath = path.join(__dirname, '../../../../app/js/LockManager.js')
-const project_id = 1234
-const doc_id = 5678
+const projectId = 1234
+const docId = 5678
 const SandboxedModule = require('sandboxed-module')
 
 describe('LockManager - releasing the lock', function () {
@@ -34,8 +33,8 @@ describe('LockManager - releasing the lock', function () {
         redis: {
           lock: {
             key_schema: {
-              blockingKey({ doc_id }) {
-                return `Blocking:${doc_id}`
+              blockingKey({ doc_id: docId }) {
+                return `Blocking:${docId}`
               },
             },
           },
@@ -61,7 +60,7 @@ describe('LockManager - releasing the lock', function () {
   describe('when the lock is current', function () {
     beforeEach(function () {
       this.client.eval = sinon.stub().yields(null, 1)
-      return this.LockManager.releaseLock(doc_id, this.lockValue, this.callback)
+      return this.LockManager.releaseLock(docId, this.lockValue, this.callback)
     })
 
     it('should clear the data from redis', function () {
@@ -69,7 +68,7 @@ describe('LockManager - releasing the lock', function () {
         .calledWith(
           this.LockManager.unlockScript,
           1,
-          `Blocking:${doc_id}`,
+          `Blocking:${docId}`,
           this.lockValue
         )
         .should.equal(true)
@@ -83,7 +82,7 @@ describe('LockManager - releasing the lock', function () {
   return describe('when the lock has expired', function () {
     beforeEach(function () {
       this.client.eval = sinon.stub().yields(null, 0)
-      return this.LockManager.releaseLock(doc_id, this.lockValue, this.callback)
+      return this.LockManager.releaseLock(docId, this.lockValue, this.callback)
     })
 
     return it('should return an error if the lock has expired', function () {

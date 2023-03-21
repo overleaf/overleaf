@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-return-assign,
     no-unused-vars,
 */
@@ -122,8 +121,8 @@ describe('Flushing a doc to Mongo', function () {
         .stub(MockWebApi, 'setDocument')
         .callsFake(
           (
-            project_id,
-            doc_id,
+            projectId,
+            docId,
             lines,
             version,
             ranges,

@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-return-assign,
     no-unused-vars,
 */
@@ -66,9 +65,9 @@ describe('ProjectManager - flushProject', function () {
     })
 
     it('should flush each doc in the project', function () {
-      return Array.from(this.doc_ids).map(doc_id =>
+      return Array.from(this.doc_ids).map(docId =>
         this.DocumentManager.flushDocIfLoadedWithLock
-          .calledWith(this.project_id, doc_id)
+          .calledWith(this.project_id, docId)
           .should.equal(true)
       )
     })
@@ -89,11 +88,11 @@ describe('ProjectManager - flushProject', function () {
         .stub()
         .callsArgWith(1, null, this.doc_ids)
       this.DocumentManager.flushDocIfLoadedWithLock = sinon.spy(
-        (project_id, doc_id, callback) => {
+        (projectId, docId, callback) => {
           if (callback == null) {
             callback = function () {}
           }
-          if (doc_id === 'doc-id-1') {
+          if (docId === 'doc-id-1') {
             return callback(
               (this.error = new Error('oops, something went wrong'))
             )
@@ -112,9 +111,9 @@ describe('ProjectManager - flushProject', function () {
     })
 
     it('should still flush each doc in the project', function () {
-      return Array.from(this.doc_ids).map(doc_id =>
+      return Array.from(this.doc_ids).map(docId =>
         this.DocumentManager.flushDocIfLoadedWithLock
-          .calledWith(this.project_id, doc_id)
+          .calledWith(this.project_id, docId)
           .should.equal(true)
       )
     })

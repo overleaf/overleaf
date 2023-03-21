@@ -443,7 +443,7 @@ module.exports = RedisManager = {
             docId,
             version: newVersion,
             hash: newHash,
-            op_versions: opVersions,
+            opVersions,
           },
           'updating doc in redis'
         )

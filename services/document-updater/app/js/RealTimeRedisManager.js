@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -32,10 +31,18 @@ let COUNT = 0
 const MAX_OPS_PER_ITERATION = 8 // process a limited number of ops for safety
 
 module.exports = RealTimeRedisManager = {
-  getPendingUpdatesForDoc(doc_id, callback) {
+  getPendingUpdatesForDoc(docId, callback) {
     const multi = rclient.multi()
-    multi.lrange(Keys.pendingUpdates({ doc_id }), 0, MAX_OPS_PER_ITERATION - 1)
-    multi.ltrim(Keys.pendingUpdates({ doc_id }), MAX_OPS_PER_ITERATION, -1)
+    multi.lrange(
+      Keys.pendingUpdates({ doc_id: docId }),
+      0,
+      MAX_OPS_PER_ITERATION - 1
+    )
+    multi.ltrim(
+      Keys.pendingUpdates({ doc_id: docId }),
+      MAX_OPS_PER_ITERATION,
+      -1
+    )
     return multi.exec(function (error, replys) {
       let jsonUpdate
       if (error != null) {
@@ -62,15 +69,15 @@ module.exports = RealTimeRedisManager = {
     })
   },
 
-  getUpdatesLength(doc_id, callback) {
-    return rclient.llen(Keys.pendingUpdates({ doc_id }), callback)
+  getUpdatesLength(docId, callback) {
+    return rclient.llen(Keys.pendingUpdates({ doc_id: docId }), callback)
   },
 
   sendData(data) {
     // create a unique message id using a counter
-    const message_id = `doc:${HOST}:${RND}-${COUNT++}`
+    const messageId = `doc:${HOST}:${RND}-${COUNT++}`
     if (data != null) {
-      data._id = message_id
+      data._id = messageId
     }
 
     const blob = JSON.stringify(data)

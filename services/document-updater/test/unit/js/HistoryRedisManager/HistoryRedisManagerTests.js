@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-return-assign,
     no-unused-vars,
 */
@@ -30,11 +29,11 @@ describe('HistoryRedisManager', function () {
           redis: {
             history: (this.settings = {
               key_schema: {
-                uncompressedHistoryOps({ doc_id }) {
-                  return `UncompressedHistoryOps:${doc_id}`
+                uncompressedHistoryOps({ doc_id: docId }) {
+                  return `UncompressedHistoryOps:${docId}`
                 },
-                docsWithHistoryOps({ project_id }) {
-                  return `DocsWithHistoryOps:${project_id}`
+                docsWithHistoryOps({ project_id: projectId }) {
+                  return `DocsWithHistoryOps:${projectId}`
                 },
               },
             }),

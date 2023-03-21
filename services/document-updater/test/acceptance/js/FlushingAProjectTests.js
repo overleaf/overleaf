@@ -1,6 +1,3 @@
-/* eslint-disable
-    camelcase,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -19,14 +16,14 @@ const DocUpdaterApp = require('./helpers/DocUpdaterApp')
 
 describe('Flushing a project', function () {
   before(function (done) {
-    let doc_id0, doc_id1
+    let docId0, docId1
     this.project_id = DocUpdaterClient.randomId()
     this.docs = [
       {
-        id: (doc_id0 = DocUpdaterClient.randomId()),
+        id: (docId0 = DocUpdaterClient.randomId()),
         lines: ['one', 'two', 'three'],
         update: {
-          doc: doc_id0,
+          doc: docId0,
           op: [
             {
               i: 'one and a half\n',
@@ -38,10 +35,10 @@ describe('Flushing a project', function () {
         updatedLines: ['one', 'one and a half', 'two', 'three'],
       },
       {
-        id: (doc_id1 = DocUpdaterClient.randomId()),
+        id: (docId1 = DocUpdaterClient.randomId()),
         lines: ['four', 'five', 'six'],
         update: {
-          doc: doc_id1,
+          doc: docId1,
           op: [
             {
               i: 'four and a half\n',

@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -14,9 +13,9 @@ const sinon = require('sinon')
 const assert = require('assert')
 const path = require('path')
 const modulePath = path.join(__dirname, '../../../../app/js/LockManager.js')
-const project_id = 1234
-const doc_id = 5678
-const blockingKey = `Blocking:${doc_id}`
+const projectId = 1234
+const docId = 5678
+const blockingKey = `Blocking:${docId}`
 const SandboxedModule = require('sandboxed-module')
 
 describe('LockManager - checking the lock', function () {
@@ -48,7 +47,7 @@ describe('LockManager - checking the lock', function () {
 
   it('should return true if the key does not exists', function (done) {
     existsStub.yields(null, '0')
-    return LockManager.checkLock(doc_id, (err, free) => {
+    return LockManager.checkLock(docId, (err, free) => {
       if (err) return done(err)
       free.should.equal(true)
       return done()
@@ -57,7 +56,7 @@ describe('LockManager - checking the lock', function () {
 
   return it('should return false if the key does exists', function (done) {
     existsStub.yields(null, '1')
-    return LockManager.checkLock(doc_id, (err, free) => {
+    return LockManager.checkLock(docId, (err, free) => {
       if (err) return done(err)
       free.should.equal(false)
       return done()

@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     mocha/no-identical-title,
     no-return-assign,
 */
@@ -381,28 +380,35 @@ describe('ShareJS text type', function () {
             (() => {
               const result1 = []
               for (const op2 of Array.from(OPS)) {
-                const op1_t = transform(op1, op2, 'left')
-                const op2_t = transform(op2, op1, 'right')
+                const op1T = transform(op1, op2, 'left')
+                const op2T = transform(op2, op1, 'right')
 
                 const rt12 = new RangesTracker()
                 const snapshot12 = applySnapshot(
                   applySnapshot(SNAPSHOT, [op1]),
-                  op2_t
+                  op2T
                 )
                 applyRanges(rt12, [op1])
-                applyRanges(rt12, op2_t)
+                applyRanges(rt12, op2T)
 
                 const rt21 = new RangesTracker()
                 const snapshot21 = applySnapshot(
                   applySnapshot(SNAPSHOT, [op2]),
-                  op1_t
+                  op1T
                 )
                 applyRanges(rt21, [op2])
-                applyRanges(rt21, op1_t)
+                applyRanges(rt21, op1T)
 
                 if (snapshot12 !== snapshot21) {
                   console.error(
-                    { op1, op2, op1_t, op2_t, snapshot12, snapshot21 },
+                    {
+                      op1,
+                      op2,
+                      op1T,
+                      op2T,
+                      snapshot12,
+                      snapshot21,
+                    },
                     'Ops are not consistent'
                   )
                   throw new Error('OT is inconsistent')
@@ -415,8 +421,8 @@ describe('ShareJS text type', function () {
                     {
                       op1,
                       op2,
-                      op1_t,
-                      op2_t,
+                      op1T,
+                      op2T,
                       rt12_comments: rt12.comments,
                       rt21_comments: rt21.comments,
                     },

@@ -1,6 +1,3 @@
-/* eslint-disable
-    camelcase,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -14,7 +11,7 @@ const express = require('express')
 const app = express()
 
 module.exports = MockTrackChangesApi = {
-  flushDoc(doc_id, callback) {
+  flushDoc(docId, callback) {
     if (callback == null) {
       callback = function () {}
     }

@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-return-assign,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -15,25 +14,17 @@ let SnapshotManager
 const { db, ObjectId } = require('./mongodb')
 
 module.exports = SnapshotManager = {
-  recordSnapshot(
-    project_id,
-    doc_id,
-    version,
-    pathname,
-    lines,
-    ranges,
-    callback
-  ) {
+  recordSnapshot(projectId, docId, version, pathname, lines, ranges, callback) {
     try {
-      project_id = ObjectId(project_id)
-      doc_id = ObjectId(doc_id)
+      projectId = ObjectId(projectId)
+      docId = ObjectId(docId)
     } catch (error) {
       return callback(error)
     }
     db.docSnapshots.insertOne(
       {
-        project_id,
-        doc_id,
+        project_id: projectId,
+        doc_id: docId,
         version,
         lines,
         pathname,

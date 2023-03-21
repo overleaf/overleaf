@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -41,16 +40,16 @@ module.exports = DeleteQueueManager = {
       startTime - options.min_delete_age + 100 * (Math.random() - 0.5)
     let count = 0
 
-    const flushProjectIfNotModified = (project_id, flushTimestamp, cb) =>
+    const flushProjectIfNotModified = (projectId, flushTimestamp, cb) =>
       ProjectManager.getProjectDocsTimestamps(
-        project_id,
+        projectId,
         function (err, timestamps) {
           if (err != null) {
             return callback(err)
           }
           if (timestamps.length === 0) {
             logger.debug(
-              { project_id },
+              { projectId },
               'skipping flush of queued project - no timestamps'
             )
             return cb()
@@ -60,22 +59,19 @@ module.exports = DeleteQueueManager = {
             if (timestamp > flushTimestamp) {
               metrics.inc('queued-delete-skipped')
               logger.debug(
-                { project_id, timestamps, flushTimestamp },
+                { projectId, timestamps, flushTimestamp },
                 'found newer timestamp, will skip delete'
               )
               return cb()
             }
           }
-          logger.debug(
-            { project_id, flushTimestamp },
-            'flushing queued project'
-          )
+          logger.debug({ projectId, flushTimestamp }, 'flushing queued project')
           return ProjectManager.flushAndDeleteProjectWithLocks(
-            project_id,
+            projectId,
             { skip_history_flush: false },
             function (err) {
               if (err != null) {
-                logger.err({ project_id, err }, 'error flushing queued project')
+                logger.err({ projectId, err }, 'error flushing queued project')
               }
               metrics.inc('queued-delete-completed')
               return cb(null, true)
@@ -96,17 +92,17 @@ module.exports = DeleteQueueManager = {
       }
       return RedisManager.getNextProjectToFlushAndDelete(
         cutoffTime,
-        function (err, project_id, flushTimestamp, queueLength) {
+        function (err, projectId, flushTimestamp, queueLength) {
           if (err != null) {
             return callback(err, count)
           }
-          if (project_id == null) {
+          if (projectId == null) {
             return callback(null, count)
           }
-          logger.debug({ project_id, queueLength }, 'flushing queued project')
+          logger.debug({ projectId, queueLength }, 'flushing queued project')
           metrics.globalGauge('queued-flush-backlog', queueLength)
           return flushProjectIfNotModified(
-            project_id,
+            projectId,
             flushTimestamp,
             function (err, flushed) {
               if (err) {

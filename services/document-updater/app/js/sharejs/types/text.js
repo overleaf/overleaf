@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-return-assign,
     no-undef,
 */
@@ -46,12 +45,10 @@ const checkValidComponent = function (c) {
     throw new Error('component missing position field')
   }
 
-  const i_type = typeof c.i
-  const d_type = typeof c.d
-  const c_type = typeof c.c
-  if (
-    !((i_type === 'string') ^ (d_type === 'string') ^ (c_type === 'string'))
-  ) {
+  const iType = typeof c.i
+  const dType = typeof c.d
+  const cType = typeof c.c
+  if (!((iType === 'string') ^ (dType === 'string') ^ (cType === 'string'))) {
     throw new Error('component needs an i, d or c field')
   }
 
@@ -296,11 +293,11 @@ text._tc = transformComponent = function (dest, c, otherC, side) {
     if (otherC.i != null) {
       if (c.p < otherC.p && otherC.p < c.p + c.c.length) {
         const offset = otherC.p - c.p
-        const new_c =
+        const newC =
           c.c.slice(0, +(offset - 1) + 1 || undefined) +
           otherC.i +
           c.c.slice(offset)
-        append(dest, { c: new_c, p: c.p, t: c.t })
+        append(dest, { c: newC, p: c.p, t: c.t })
       } else {
         append(dest, {
           c: c.c,

@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -92,20 +91,20 @@ const ProjectFlusher = {
     return ProjectFlusher._getKeys(
       docUpdaterKeys.docsInProject({ project_id: '*' }),
       options.limit,
-      function (error, project_keys) {
+      function (error, projectKeys) {
         if (error != null) {
           logger.err({ err: error }, 'error getting keys for flushing')
           return callback(error)
         }
-        const project_ids = ProjectFlusher._extractIds(project_keys)
+        const projectIds = ProjectFlusher._extractIds(projectKeys)
         if (options.dryRun) {
-          return callback(null, project_ids)
+          return callback(null, projectIds)
         }
         const jobs = _.map(
-          project_ids,
-          project_id => cb =>
+          projectIds,
+          projectId => cb =>
             ProjectManager.flushAndDeleteProjectWithLocks(
-              project_id,
+              projectId,
               { background: true },
               cb
             )
@@ -118,9 +117,9 @@ const ProjectFlusher = {
             const failure = []
             _.each(results, function (result, i) {
               if (result.error != null) {
-                return failure.push(project_ids[i])
+                return failure.push(projectIds[i])
               } else {
-                return success.push(project_ids[i])
+                return success.push(projectIds[i])
               }
             })
             logger.info(

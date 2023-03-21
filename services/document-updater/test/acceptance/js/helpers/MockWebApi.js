@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-return-assign,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -23,7 +22,7 @@ module.exports = MockWebApi = {
     return (this.docs = {})
   },
 
-  insertDoc(project_id, doc_id, doc) {
+  insertDoc(projectId, docId, doc) {
     if (doc.version == null) {
       doc.version = 0
     }
@@ -31,12 +30,12 @@ module.exports = MockWebApi = {
       doc.lines = []
     }
     doc.pathname = '/a/b/c.tex'
-    return (this.docs[`${project_id}:${doc_id}`] = doc)
+    return (this.docs[`${projectId}:${docId}`] = doc)
   },
 
   setDocument(
-    project_id,
-    doc_id,
+    projectId,
+    docId,
     lines,
     version,
     ranges,
@@ -48,8 +47,8 @@ module.exports = MockWebApi = {
       callback = function () {}
     }
     const doc =
-      this.docs[`${project_id}:${doc_id}`] ||
-      (this.docs[`${project_id}:${doc_id}`] = {})
+      this.docs[`${projectId}:${docId}`] ||
+      (this.docs[`${projectId}:${docId}`] = {})
     doc.lines = lines
     doc.version = version
     doc.ranges = ranges
@@ -59,11 +58,11 @@ module.exports = MockWebApi = {
     return callback(null)
   },
 
-  getDocument(project_id, doc_id, callback) {
+  getDocument(projectId, docId, callback) {
     if (callback == null) {
       callback = function () {}
     }
-    return callback(null, this.docs[`${project_id}:${doc_id}`])
+    return callback(null, this.docs[`${projectId}:${docId}`])
   },
 
   run() {

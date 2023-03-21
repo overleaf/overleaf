@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-return-assign,
     no-undef,
 */
@@ -46,9 +45,9 @@ const checkValidComponent = function (c) {
     throw new Error('component missing position field')
   }
 
-  const i_type = typeof c.i
-  const d_type = typeof c.d
-  if (!((i_type === 'string') ^ (d_type === 'string'))) {
+  const iType = typeof c.i
+  const dType = typeof c.d
+  if (!((iType === 'string') ^ (dType === 'string'))) {
     throw new Error('component needs an i or d field')
   }
 

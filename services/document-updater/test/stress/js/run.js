@@ -1,7 +1,5 @@
 /* eslint-disable
-    camelcase,
     no-return-assign,
-    no-undef,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -149,16 +147,16 @@ class StressTestClient {
     } else {
       assert(update.op.op.length === 1)
       this.counts.remote_updates++
-      let external_op = update.op.op[0]
+      let externalOp = update.op.op[0]
       if (this.inflight_op != null) {
         this.counts.conflicts++
-        this.inflight_op = transform(this.inflight_op, external_op)
-        external_op = transform(external_op, this.inflight_op)
+        this.inflight_op = transform(this.inflight_op, externalOp)
+        externalOp = transform(externalOp, this.inflight_op)
       }
-      if (external_op.p < this.pos) {
-        this.pos += external_op.i.length
+      if (externalOp.p < this.pos) {
+        this.pos += externalOp.i.length
       }
-      return (this.content = insert(this.content, external_op.p, external_op.i))
+      return (this.content = insert(this.content, externalOp.p, externalOp.i))
     }
   }
 
@@ -198,7 +196,7 @@ class StressTestClient {
             `[${new Date()}] \t[${this.client_id.slice(
               0,
               4
-            )}] ERROR: Invalid response from get doc (${doc_id})`,
+            )}] ERROR: Invalid response from get doc (${this.doc_id})`,
             body
           )
         }
@@ -272,7 +270,7 @@ class StressTestClient {
   }
 }
 
-const checkDocument = function (project_id, doc_id, clients, callback) {
+const checkDocument = function (projectId, docId, clients, callback) {
   if (callback == null) {
     callback = function () {}
   }
@@ -280,11 +278,11 @@ const checkDocument = function (project_id, doc_id, clients, callback) {
   return async.parallel(jobs, callback)
 }
 
-const printSummary = function (doc_id, clients) {
+const printSummary = function (docId, clients) {
   const slot = require('cluster-key-slot')
   const now = new Date()
   console.log(
-    `[${now}] [${doc_id.slice(0, 4)} (slot: ${slot(doc_id)})] ${
+    `[${now}] [${docId.slice(0, 4)} (slot: ${slot(docId)})] ${
       clients.length
     } clients...`
   )
@@ -315,13 +313,13 @@ const CLIENT_COUNT = parseInt(process.argv[2], 10)
 const UPDATE_DELAY = parseInt(process.argv[3], 10)
 const SAMPLE_INTERVAL = parseInt(process.argv[4], 10)
 
-for (const doc_and_project_id of Array.from(process.argv.slice(5))) {
-  ;(function (doc_and_project_id) {
-    const [project_id, doc_id] = Array.from(doc_and_project_id.split(':'))
-    console.log({ project_id, doc_id })
+for (const docAndProjectId of Array.from(process.argv.slice(5))) {
+  ;(function (docAndProjectId) {
+    const [projectId, docId] = Array.from(docAndProjectId.split(':'))
+    console.log({ projectId, docId })
     return DocUpdaterClient.setDocLines(
-      project_id,
-      doc_id,
+      projectId,
+      docId,
       [new Array(CLIENT_COUNT + 2).join('a')],
       null,
       null,
@@ -329,63 +327,59 @@ for (const doc_and_project_id of Array.from(process.argv.slice(5))) {
         if (error != null) {
           throw error
         }
-        return DocUpdaterClient.getDoc(
-          project_id,
-          doc_id,
-          (error, res, body) => {
-            let runBatch
-            if (error != null) {
-              throw error
-            }
-            if (body.lines == null) {
-              return console.error(
-                `[${new Date()}] ERROR: Invalid response from get doc (${doc_id})`,
-                body
-              )
-            }
-            const content = body.lines.join('\n')
-            const { version } = body
+        return DocUpdaterClient.getDoc(projectId, docId, (error, res, body) => {
+          let runBatch
+          if (error != null) {
+            throw error
+          }
+          if (body.lines == null) {
+            return console.error(
+              `[${new Date()}] ERROR: Invalid response from get doc (${docId})`,
+              body
+            )
+          }
+          const content = body.lines.join('\n')
+          const { version } = body
 
-            const clients = []
-            for (
-              let pos = 1, end = CLIENT_COUNT, asc = end >= 1;
-              asc ? pos <= end : pos >= end;
-              asc ? pos++ : pos--
-            ) {
-              ;(function (pos) {
-                const client = new StressTestClient({
-                  doc_id,
-                  project_id,
-                  content,
-                  pos,
-                  version,
-                  updateDelay: UPDATE_DELAY,
-                })
-                return clients.push(client)
-              })(pos)
-            }
+          const clients = []
+          for (
+            let pos = 1, end = CLIENT_COUNT, asc = end >= 1;
+            asc ? pos <= end : pos >= end;
+            asc ? pos++ : pos--
+          ) {
+            ;(function (pos) {
+              const client = new StressTestClient({
+                doc_id: docId,
+                project_id: projectId,
+                content,
+                pos,
+                version,
+                updateDelay: UPDATE_DELAY,
+              })
+              return clients.push(client)
+            })(pos)
+          }
 
-            return (runBatch = function () {
-              const jobs = clients.map(
-                client => cb =>
-                  client.runForNUpdates(SAMPLE_INTERVAL / UPDATE_DELAY, cb)
-              )
-              return async.parallel(jobs, error => {
+          return (runBatch = function () {
+            const jobs = clients.map(
+              client => cb =>
+                client.runForNUpdates(SAMPLE_INTERVAL / UPDATE_DELAY, cb)
+            )
+            return async.parallel(jobs, error => {
+              if (error != null) {
+                throw error
+              }
+              printSummary(docId, clients)
+              return checkDocument(projectId, docId, clients, error => {
                 if (error != null) {
                   throw error
                 }
-                printSummary(doc_id, clients)
-                return checkDocument(project_id, doc_id, clients, error => {
-                  if (error != null) {
-                    throw error
-                  }
-                  return runBatch()
-                })
+                return runBatch()
               })
-            })()
-          }
-        )
+            })
+          })()
+        })
       }
     )
-  })(doc_and_project_id)
+  })(docAndProjectId)
 }

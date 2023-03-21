@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -30,8 +29,8 @@ util.inherits(ShareJsModel, EventEmitter)
 const MAX_AGE_OF_OP = 80
 
 module.exports = ShareJsUpdateManager = {
-  getNewShareJsModel(project_id, doc_id, lines, version) {
-    const db = new ShareJsDB(project_id, doc_id, lines, version)
+  getNewShareJsModel(projectId, docId, lines, version) {
+    const db = new ShareJsDB(projectId, docId, lines, version)
     const model = new ShareJsModel(db, {
       maxDocLength: Settings.max_doc_length,
       maximumAge: MAX_AGE_OF_OP,
@@ -40,11 +39,11 @@ module.exports = ShareJsUpdateManager = {
     return model
   },
 
-  applyUpdate(project_id, doc_id, update, lines, version, callback) {
+  applyUpdate(projectId, docId, update, lines, version, callback) {
     if (callback == null) {
       callback = function () {}
     }
-    logger.debug({ project_id, doc_id, update }, 'applying sharejs updates')
+    logger.debug({ projectId, docId, update }, 'applying sharejs updates')
     const jobs = []
     // record the update version before it is modified
     const incomingUpdateVersion = update.v
@@ -53,23 +52,23 @@ module.exports = ShareJsUpdateManager = {
     // getting stuck due to queued callbacks (line 260 of sharejs/server/model.coffee)
     // This adds a small but hopefully acceptable overhead (~12ms per 1000 updates on
     // my 2009 MBP).
-    const model = this.getNewShareJsModel(project_id, doc_id, lines, version)
+    const model = this.getNewShareJsModel(projectId, docId, lines, version)
     this._listenForOps(model)
-    const doc_key = Keys.combineProjectIdAndDocId(project_id, doc_id)
-    return model.applyOp(doc_key, update, function (error) {
+    const docKey = Keys.combineProjectIdAndDocId(projectId, docId)
+    return model.applyOp(docKey, update, function (error) {
       if (error != null) {
         if (error === 'Op already submitted') {
           metrics.inc('sharejs.already-submitted')
           logger.debug(
-            { project_id, doc_id, update },
+            { projectId, docId, update },
             'op has already been submitted'
           )
           update.dup = true
-          ShareJsUpdateManager._sendOp(project_id, doc_id, update)
+          ShareJsUpdateManager._sendOp(projectId, docId, update)
         } else if (/^Delete component/.test(error)) {
           metrics.inc('sharejs.delete-mismatch')
           logger.debug(
-            { project_id, doc_id, update, shareJsErr: error },
+            { projectId, docId, update, shareJsErr: error },
             'sharejs delete does not match'
           )
           error = new Errors.DeleteMismatchError(
@@ -81,8 +80,8 @@ module.exports = ShareJsUpdateManager = {
           return callback(error)
         }
       }
-      logger.debug({ project_id, doc_id, error }, 'applied update')
-      return model.getSnapshot(doc_key, (error, data) => {
+      logger.debug({ projectId, docId, error }, 'applied update')
+      return model.getSnapshot(docKey, (error, data) => {
         if (error != null) {
           return callback(error)
         }
@@ -93,7 +92,7 @@ module.exports = ShareJsUpdateManager = {
             'blocking persistence of ShareJs update: doc size exceeds limits'
           )
           logger.error(
-            { project_id, doc_id, err, docSizeBefore, docSizeAfter },
+            { projectId, docId, err, docSizeBefore, docSizeAfter },
             err.message
           )
           metrics.inc('sharejs.other-error')
@@ -115,23 +114,25 @@ module.exports = ShareJsUpdateManager = {
           null,
           docLines,
           data.v,
-          model.db.appliedOps[doc_key] || []
+          model.db.appliedOps[docKey] || []
         )
       })
     })
   },
 
   _listenForOps(model) {
-    return model.on('applyOp', function (doc_key, opData) {
-      const [project_id, doc_id] = Array.from(
-        Keys.splitProjectIdAndDocId(doc_key)
-      )
-      return ShareJsUpdateManager._sendOp(project_id, doc_id, opData)
+    return model.on('applyOp', function (docKey, opData) {
+      const [projectId, docId] = Array.from(Keys.splitProjectIdAndDocId(docKey))
+      return ShareJsUpdateManager._sendOp(projectId, docId, opData)
     })
   },
 
-  _sendOp(project_id, doc_id, op) {
-    return RealTimeRedisManager.sendData({ project_id, doc_id, op })
+  _sendOp(projectId, docId, op) {
+    return RealTimeRedisManager.sendData({
+      project_id: projectId,
+      doc_id: docId,
+      op,
+    })
   },
 
   _computeHash(content) {

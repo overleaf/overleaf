@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-undef,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -231,7 +230,7 @@ json.api = {
             // no change to structure
             continue
           }
-          const to_remove = []
+          const toRemove = []
           for (i = 0; i < this._listeners.length; i++) {
             // Transform a dummy op by the incoming op to work out what
             // should happen to the listener.
@@ -240,7 +239,7 @@ json.api = {
             const xformed = this.type.transformComponent([], dummy, c, 'left')
             if (xformed.length === 0) {
               // The op was transformed to noop, so we should delete the listener.
-              to_remove.push(i)
+              toRemove.push(i)
             } else if (xformed.length === 1) {
               // The op remained, so grab its new path into the listener.
               l.path = xformed[0].p
@@ -250,11 +249,11 @@ json.api = {
               )
             }
           }
-          to_remove.sort((a, b) => b - a)
+          toRemove.sort((a, b) => b - a)
           result.push(
             (() => {
               const result1 = []
-              for (i of Array.from(to_remove)) {
+              for (i of Array.from(toRemove)) {
                 result1.push(this._listeners.splice(i, 1))
               }
               return result1
@@ -268,14 +267,14 @@ json.api = {
       return (() => {
         const result = []
         for (const c of Array.from(op)) {
-          const match_path =
+          const matchPath =
             c.na === undefined ? c.p.slice(0, c.p.length - 1) : c.p
           result.push(
             (() => {
               const result1 = []
               for (const { path, event, cb } of Array.from(this._listeners)) {
                 let common
-                if (pathEquals(path, match_path)) {
+                if (pathEquals(path, matchPath)) {
                   switch (event) {
                     case 'insert':
                       if (c.li !== undefined && c.ld === undefined) {
@@ -326,19 +325,19 @@ json.api = {
                       result1.push(undefined)
                   }
                 } else if (
-                  (common = this.type.commonPath(match_path, path)) != null
+                  (common = this.type.commonPath(matchPath, path)) != null
                 ) {
                   if (event === 'child op') {
                     if (
-                      match_path.length === path.length &&
+                      matchPath.length === path.length &&
                       path.length === common
                     ) {
                       throw new Error(
                         "paths match length and have commonality, but aren't equal?"
                       )
                     }
-                    const child_path = c.p.slice(common + 1)
-                    result1.push(cb(child_path, c))
+                    const childPath = c.p.slice(common + 1)
+                    result1.push(cb(childPath, c))
                   } else {
                     result1.push(undefined)
                   }

@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-return-assign,
     no-unused-vars,
 */
@@ -84,11 +83,11 @@ describe('RangesManager', function () {
 
       return it('should return the modified the comments and changes', function () {
         this.callback.called.should.equal(true)
-        const [error, entries, ranges_were_collapsed] = Array.from(
+        const [error, entries, rangesWereCollapsed] = Array.from(
           this.callback.args[0]
         )
         expect(error).to.be.null
-        expect(ranges_were_collapsed).to.equal(false)
+        expect(rangesWereCollapsed).to.equal(false)
         entries.comments[0].op.should.deep.equal({
           c: 'three ',
           p: 8,
@@ -347,10 +346,10 @@ describe('RangesManager', function () {
 
       return it('should return ranges_were_collapsed == true', function () {
         this.callback.called.should.equal(true)
-        const [error, entries, ranges_were_collapsed] = Array.from(
+        const [error, entries, rangesWereCollapsed] = Array.from(
           this.callback.args[0]
         )
-        return expect(ranges_were_collapsed).to.equal(true)
+        return expect(rangesWereCollapsed).to.equal(true)
       })
     })
 
@@ -411,10 +410,10 @@ describe('RangesManager', function () {
 
       return it('should return ranges_were_collapsed == true', function () {
         this.callback.called.should.equal(true)
-        const [error, entries, ranges_were_collapsed] = Array.from(
+        const [error, entries, rangesWereCollapsed] = Array.from(
           this.callback.args[0]
         )
-        return expect(ranges_were_collapsed).to.equal(true)
+        return expect(rangesWereCollapsed).to.equal(true)
       })
     })
   })

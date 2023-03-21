@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -51,15 +50,15 @@ module.exports = DispatchManager = {
           if (result == null) {
             return callback()
           }
-          const [list_name, doc_key] = Array.from(result)
-          const [project_id, doc_id] = Array.from(
-            Keys.splitProjectIdAndDocId(doc_key)
+          const [listName, docKey] = Array.from(result)
+          const [projectId, docId] = Array.from(
+            Keys.splitProjectIdAndDocId(docKey)
           )
           // Dispatch this in the background
           const backgroundTask = cb =>
             UpdateManager.processOutstandingUpdatesWithLock(
-              project_id,
-              doc_id,
+              projectId,
+              docId,
               function (error) {
                 // log everything except OpRangeNotAvailable errors, these are normal
                 if (error != null) {
@@ -69,12 +68,12 @@ module.exports = DispatchManager = {
                     error instanceof Errors.DeleteMismatchError
                   if (logAsDebug) {
                     logger.debug(
-                      { err: error, project_id, doc_id },
+                      { err: error, projectId, docId },
                       'error processing update'
                     )
                   } else {
                     logger.error(
-                      { err: error, project_id, doc_id },
+                      { err: error, projectId, docId },
                       'error processing update'
                     )
                   }

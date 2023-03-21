@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -17,9 +16,9 @@ const RedisManager = require('./RedisManager')
 const Errors = require('./Errors')
 
 module.exports = ShareJsDB = class ShareJsDB {
-  constructor(project_id, doc_id, lines, version) {
-    this.project_id = project_id
-    this.doc_id = doc_id
+  constructor(projectId, docId, lines, version) {
+    this.project_id = projectId
+    this.doc_id = docId
     this.lines = lines
     this.version = version
     this.appliedOps = {}
@@ -28,7 +27,7 @@ module.exports = ShareJsDB = class ShareJsDB {
     this.writeOp = this._writeOp.bind(this)
   }
 
-  getOps(doc_key, start, end, callback) {
+  getOps(docKey, start, end, callback) {
     if (start === end) {
       return callback(null, [])
     }
@@ -40,27 +39,25 @@ module.exports = ShareJsDB = class ShareJsDB {
       end = -1
     }
 
-    const [project_id, doc_id] = Array.from(
-      Keys.splitProjectIdAndDocId(doc_key)
-    )
-    return RedisManager.getPreviousDocOps(doc_id, start, end, callback)
+    const [projectId, docId] = Array.from(Keys.splitProjectIdAndDocId(docKey))
+    return RedisManager.getPreviousDocOps(docId, start, end, callback)
   }
 
-  _writeOp(doc_key, opData, callback) {
-    if (this.appliedOps[doc_key] == null) {
-      this.appliedOps[doc_key] = []
+  _writeOp(docKey, opData, callback) {
+    if (this.appliedOps[docKey] == null) {
+      this.appliedOps[docKey] = []
     }
-    this.appliedOps[doc_key].push(opData)
+    this.appliedOps[docKey].push(opData)
     return callback()
   }
 
-  getSnapshot(doc_key, callback) {
+  getSnapshot(docKey, callback) {
     if (
-      doc_key !== Keys.combineProjectIdAndDocId(this.project_id, this.doc_id)
+      docKey !== Keys.combineProjectIdAndDocId(this.project_id, this.doc_id)
     ) {
       return callback(
         new Errors.NotFoundError(
-          `unexpected doc_key ${doc_key}, expected ${Keys.combineProjectIdAndDocId(
+          `unexpected doc_key ${docKey}, expected ${Keys.combineProjectIdAndDocId(
             this.project_id,
             this.doc_id
           )}`

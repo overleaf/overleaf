@@ -1,6 +1,3 @@
-/* eslint-disable
-    camelcase,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -22,7 +19,7 @@ module.exports = RangesManager = {
   MAX_COMMENTS: 500,
   MAX_CHANGES: 2000,
 
-  applyUpdate(project_id, doc_id, entries, updates, newDocLines, callback) {
+  applyUpdate(projectId, docId, entries, updates, newDocLines, callback) {
     let error
     if (entries == null) {
       entries = {}
@@ -72,7 +69,7 @@ module.exports = RangesManager = {
     } catch (error2) {
       error = error2
       logger.error(
-        { err: error, project_id, doc_id, newDocLines, updates },
+        { err: error, projectId, docId, newDocLines, updates },
         'error validating ranges'
       )
       return callback(error)
@@ -95,8 +92,8 @@ module.exports = RangesManager = {
     const response = RangesManager._getRanges(rangesTracker)
     logger.debug(
       {
-        project_id,
-        doc_id,
+        projectId,
+        docId,
         changesCount:
           response.changes != null ? response.changes.length : undefined,
         commentsCount:
@@ -108,26 +105,26 @@ module.exports = RangesManager = {
     return callback(null, response, rangesWereCollapsed)
   },
 
-  acceptChanges(change_ids, ranges, callback) {
+  acceptChanges(changeIds, ranges, callback) {
     if (callback == null) {
       callback = function () {}
     }
     const { changes, comments } = ranges
-    logger.debug(`accepting ${change_ids.length} changes in ranges`)
+    logger.debug(`accepting ${changeIds.length} changes in ranges`)
     const rangesTracker = new RangesTracker(changes, comments)
-    rangesTracker.removeChangeIds(change_ids)
+    rangesTracker.removeChangeIds(changeIds)
     const response = RangesManager._getRanges(rangesTracker)
     return callback(null, response)
   },
 
-  deleteComment(comment_id, ranges, callback) {
+  deleteComment(commentId, ranges, callback) {
     if (callback == null) {
       callback = function () {}
     }
     const { changes, comments } = ranges
-    logger.debug({ comment_id }, 'deleting comment in ranges')
+    logger.debug({ commentId }, 'deleting comment in ranges')
     const rangesTracker = new RangesTracker(changes, comments)
-    rangesTracker.removeCommentId(comment_id)
+    rangesTracker.removeCommentId(commentId)
     const response = RangesManager._getRanges(rangesTracker)
     return callback(null, response)
   },

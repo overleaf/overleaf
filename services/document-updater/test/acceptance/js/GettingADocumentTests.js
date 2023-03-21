@@ -1,6 +1,3 @@
-/* eslint-disable
-    camelcase,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -220,7 +217,7 @@ describe('Getting a document', function () {
       ])
       sinon
         .stub(MockWebApi, 'getDocument')
-        .callsFake((project_id, doc_id, callback) => {
+        .callsFake((projectId, docId, callback) => {
           if (callback == null) {
             callback = function () {}
           }
@@ -255,7 +252,7 @@ describe('Getting a document', function () {
       ])
       sinon
         .stub(MockWebApi, 'getDocument')
-        .callsFake((project_id, doc_id, callback) => {
+        .callsFake((projectId, docId, callback) => {
           if (callback == null) {
             callback = function () {}
           }
