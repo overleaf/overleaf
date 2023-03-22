@@ -1,7 +1,7 @@
 .card {
   background-color: white;
   border-radius: @border-radius-base;
-  box-shadow: @card-box-shadow;
+  box-shadow: none;
   padding: @line-height-computed;
   .page-header {
     margin: 0 0 1.5625rem;
@@ -29,6 +29,16 @@
   }
   > :last-child {
     margin-bottom: 0;
+  }
+
+  &.card-drop-shadow {
+    box-shadow: @card-box-shadow;
+    background-color: white;
+
+    > hr {
+      margin-left: -@line-height-computed;
+      margin-right: -@line-height-computed;
+    }
   }
 }
 
