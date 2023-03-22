@@ -1054,6 +1054,21 @@ const ProjectController = {
             }
           )
         },
+        historyViewAssignment(cb) {
+          SplitTestHandler.getAssignment(
+            req,
+            res,
+            'history-view',
+            (error, assignment) => {
+              // do not fail editor load if assignment fails
+              if (error) {
+                cb(null, { variant: 'default' })
+              } else {
+                cb(null, assignment)
+              }
+            }
+          )
+        },
         accessCheckForOldCompileDomainAssigment(cb) {
           SplitTestHandler.getAssignment(
             req,
@@ -1138,6 +1153,7 @@ const ProjectController = {
           editorLeftMenuAssignment,
           richTextAssignment,
           onboardingVideoTourAssignment,
+          historyViewAssignment,
         }
       ) => {
         if (err != null) {
@@ -1333,6 +1349,7 @@ const ProjectController = {
               showCM6SwitchAwaySurvey: Settings.showCM6SwitchAwaySurvey,
               richTextVariant: richTextAssignment.variant,
               showOnboardingVideoTour,
+              historyViewReact: historyViewAssignment.variant === 'react',
             })
             timer.done()
           }

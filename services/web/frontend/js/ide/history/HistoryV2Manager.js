@@ -36,6 +36,7 @@ import './components/historyLabel'
 import './components/historyFileTree'
 import './components/historyFileEntity'
 import { paywallPrompt } from '../../../../frontend/js/main/account-upgrade'
+import getMeta from '../../utils/meta'
 let HistoryManager
 
 export default HistoryManager = (function () {
@@ -124,6 +125,10 @@ export default HistoryManager = (function () {
       )
     }
 
+    isReact() {
+      return getMeta('ol-splitTestVariants')?.['history-view'] === 'react'
+    }
+
     hardReset() {
       this.$scope.history = {
         isV2: true,
@@ -153,6 +158,7 @@ export default HistoryManager = (function () {
         showOnlyLabels: this._getShowOnlyLabelsUserPref(),
         labels: null,
         loadingFileTree: true,
+        isReact: this.isReact(),
       }
       const _deregisterFeatureWatcher = this.$scope.$watch(
         'project.features.versioning',

@@ -42,6 +42,7 @@ export default describe('HistoryV2Manager', function () {
       showOnlyLabels: false,
       labels: null,
       loadingFileTree: true,
+      isReact: false,
     }
 
     this.sampleUpdates = [
