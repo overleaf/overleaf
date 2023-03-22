@@ -1,3 +1,4 @@
+const { db } = require('../app/src/infrastructure/mongodb')
 const { batchedUpdate } = require('./helpers/batchedUpdate')
 
 const DRY_RUN = !process.argv.includes('--dry-run=false')
@@ -15,9 +16,9 @@ async function main(DRY_RUN) {
   await batchedUpdate(
     'docs',
     { rev: { $exists: false } },
-    async (docsCollection, docs) => {
+    async docs => {
       if (!DRY_RUN) {
-        await docsCollection.updateMany(
+        await db.docs.updateMany(
           {
             _id: { $in: docs.map(doc => doc._id) },
             rev: { $exists: false },

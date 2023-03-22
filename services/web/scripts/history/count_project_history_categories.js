@@ -29,7 +29,7 @@ const COUNT = {
   TotalProjects: 0,
 }
 
-async function processBatch(_, projects) {
+async function processBatch(projects) {
   await promiseMapWithLimit(WRITE_CONCURRENCY, projects, processProject)
   console.log(COUNT)
 }

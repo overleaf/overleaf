@@ -49,7 +49,7 @@ async function main() {
   console.log('Final')
 }
 
-async function processBatch(_, projects) {
+async function processBatch(projects) {
   await promiseMapWithLimit(WRITE_CONCURRENCY, projects, processProject)
 }
 

@@ -49,7 +49,7 @@ async function main(options) {
       await batchedUpdate(
         'users',
         { auditLog: { $exists: true } },
-        async (_, users) => {
+        async users => {
           await processUsersBatch(users, options)
         },
         { _id: 1, auditLog: 1 }
@@ -62,7 +62,7 @@ async function main(options) {
     await batchedUpdate(
       'projects',
       { auditLog: { $exists: true } },
-      async (x, projects) => {
+      async projects => {
         await processProjectsBatch(projects, options)
       },
       { _id: 1, auditLog: 1 }

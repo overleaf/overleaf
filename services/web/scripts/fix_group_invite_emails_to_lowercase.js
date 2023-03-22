@@ -13,7 +13,7 @@ function anyInviteEmailHasUppercaseChars(subscription) {
   })
 }
 
-async function processBatch(_, subscriptions) {
+async function processBatch(subscriptions) {
   for (const subscription of subscriptions) {
     if (anyInviteEmailHasUppercaseChars(subscription)) {
       console.log('fixing emails in group invites for', subscription._id)

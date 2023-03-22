@@ -161,7 +161,7 @@ async function batchedUpdate(
       }
 
       if (typeof update === 'function') {
-        await update(collection, nextBatch)
+        await update(nextBatch)
       } else {
         await performUpdate(collection, nextBatch, update)
       }

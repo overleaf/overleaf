@@ -32,7 +32,7 @@ const RESULT = {
   continueFrom: null,
 }
 
-async function processBatch(_, rooms) {
+async function processBatch(rooms) {
   if (rooms.length && rooms[0]._id) {
     RESULT.continueFrom = rooms[0]._id
   }

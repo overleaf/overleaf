@@ -24,14 +24,14 @@ async function main(options) {
     'projects',
     // array is not empty ~ array has one item
     { 'deletedFiles.0': { $exists: true } },
-    async (x, projects) => {
-      await processBatch(x, projects, options)
+    async projects => {
+      await processBatch(projects, options)
     },
     { _id: 1, deletedFiles: 1 }
   )
 }
 
-async function processBatch(_, projects, options) {
+async function processBatch(projects, options) {
   await promiseMapWithLimit(
     options.writeConcurrency,
     projects,

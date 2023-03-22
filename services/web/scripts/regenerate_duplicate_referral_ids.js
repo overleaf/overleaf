@@ -59,7 +59,7 @@ async function rewriteDuplicates(duplicateReferralIds) {
   )
 }
 
-async function processBatch(_, users) {
+async function processBatch(users) {
   const uniqueReferalIdsInBatch = Array.from(
     new Set(users.map(user => user.referal_id))
   )

@@ -2,6 +2,7 @@ const _ = require('lodash')
 
 const WRITE_CONCURRENCY = parseInt(process.env.WRITE_CONCURRENCY, 10) || 10
 
+const { db } = require('../app/src/infrastructure/mongodb')
 const { batchedUpdate } = require('./helpers/batchedUpdate')
 const { promiseMapWithLimit } = require('../app/src/util/promises')
 
@@ -25,13 +26,13 @@ async function main(STAGE) {
       await batchedUpdate(
         'projects',
         { [FIELD]: true },
-        async function performUpdate(collection, nextBatch) {
+        async function performUpdate(nextBatch) {
           await promiseMapWithLimit(
             WRITE_CONCURRENCY,
             nextBatch,
             async project => {
               try {
-                await upgradeFieldToArray({ collection, project, FIELD })
+                await upgradeFieldToArray({ project, FIELD })
               } catch (err) {
                 console.error(project._id, err)
                 throw err
@@ -67,8 +68,8 @@ if (require.main === module) {
     })
 }
 
-async function upgradeFieldToArray({ collection, project, FIELD }) {
-  return collection.updateOne(
+async function upgradeFieldToArray({ project, FIELD }) {
+  return db.projects.updateOne(
     { _id: project._id },
     {
       $set: { [FIELD]: getAllUserIds(project) },

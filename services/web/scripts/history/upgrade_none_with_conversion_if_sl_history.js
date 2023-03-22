@@ -68,7 +68,7 @@ const RESULT = {
 
 let INTERRUPT = false
 
-async function processBatch(_, projects) {
+async function processBatch(projects) {
   if (projects.length && projects[0]._id) {
     RESULT.continueFrom = projects[0]._id
   }

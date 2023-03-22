@@ -42,7 +42,7 @@ if (!process.env.BATCH_LAST_ID) {
   process.env.BATCH_LAST_ID = ID_WHEN_FULL_PROJECT_HISTORY_ENABLED
 }
 
-async function processBatch(_, projects) {
+async function processBatch(projects) {
   await promiseMapWithLimit(WRITE_CONCURRENCY, projects, processProject)
   console.log(RESULT)
 }
