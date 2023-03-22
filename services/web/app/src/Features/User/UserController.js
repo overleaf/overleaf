@@ -102,6 +102,12 @@ async function changePassword(req, res, next) {
           res,
           req.i18n.translate('invalid_password_contains_email')
         )
+      } else if (error?.info?.code === 'too_similar') {
+        return HttpErrorHandler.badRequest(
+          req,
+          res,
+          req.i18n.translate('invalid_password_too_similar')
+        )
       } else {
         return HttpErrorHandler.badRequest(req, res, error.message)
       }

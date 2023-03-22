@@ -28,6 +28,12 @@ async function setNewUserPassword(req, res, next) {
           text: req.i18n.translate('invalid_password_contains_email'),
         },
       })
+    } else if (err?.info?.code === 'too_similar') {
+      return res.status(400).json({
+        message: {
+          text: req.i18n.translate('invalid_password_too_similar'),
+        },
+      })
     } else {
       return res.status(400).json({
         message: { text: err.message },

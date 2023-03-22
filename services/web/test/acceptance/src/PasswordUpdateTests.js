@@ -9,7 +9,7 @@ describe('PasswordUpdate', function () {
   })
   beforeEach(async function () {
     userHelper = new UserHelper()
-    email = userHelper.getDefaultEmail()
+    email = 'somecooluser@example.com'
     password = 'old-password'
     userHelper = await UserHelper.createUser({ email, password })
     userHelper = await UserHelper.loginUser({
@@ -134,6 +134,36 @@ describe('PasswordUpdate', function () {
       it('should return error message', async function () {
         const body = await response.json()
         expect(body.message).to.equal('password is too short')
+      })
+      it('should not update audit log', async function () {
+        const auditLog = userHelper.getAuditLogWithoutNoise()
+        expect(auditLog).to.deep.equal([])
+      })
+    })
+    describe('new password is too similar to email', function () {
+      beforeEach(async function () {
+        response = await userHelper.fetch('/user/password/update', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify({
+            currentPassword: password,
+            newPassword1: 'coolusersome123',
+            newPassword2: 'coolusersome123',
+          }),
+        })
+        userHelper = await UserHelper.getUser({ email })
+      })
+      it('should return 400', async function () {
+        expect(response.status).to.equal(400)
+      })
+      it('should return error message', async function () {
+        const body = await response.json()
+        expect(body.message).to.equal(
+          'Password is too similar to email address'
+        )
       })
       it('should not update audit log', async function () {
         const auditLog = userHelper.getAuditLogWithoutNoise()

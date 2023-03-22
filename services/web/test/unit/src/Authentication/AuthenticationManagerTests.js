@@ -685,62 +685,6 @@ describe('AuthenticationManager', function () {
     })
   })
 
-  describe('_validatePasswordNotContainsEmailSubstrings', function () {
-    it('should return nothing for a dissimilar password', function () {
-      const password = 'fublmqgaeohhvd8'
-      const email = 'someuser@example.com'
-      const error =
-        this.AuthenticationManager._validatePasswordNotContainsEmailSubstrings(
-          password,
-          email
-        )
-      expect(error).to.not.exist
-    })
-
-    it('should return an error for password that is same as email', function () {
-      const email = 'someuser@example.com'
-      const error =
-        this.AuthenticationManager._validatePasswordNotContainsEmailSubstrings(
-          email,
-          email
-        )
-      expect(error).to.exist
-    })
-
-    it('should return an error for a password with a substring of email', function () {
-      const password = 'cooluser1253'
-      const email = 'somecooluser@example.com'
-      const error =
-        this.AuthenticationManager._validatePasswordNotContainsEmailSubstrings(
-          password,
-          email
-        )
-      expect(error).to.exist
-    })
-
-    it('should return an error for a password with a substring of email, regardless of case', function () {
-      const password = 'coOLUSer1253'
-      const email = 'somecooluser@example.com'
-      const error =
-        this.AuthenticationManager._validatePasswordNotContainsEmailSubstrings(
-          password,
-          email
-        )
-      expect(error).to.exist
-    })
-
-    it('should return nothing for a password containing first two characters of email', function () {
-      const password = 'lmgaesopxzqg'
-      const email = 'someuser@example.com'
-      const error =
-        this.AuthenticationManager._validatePasswordNotContainsEmailSubstrings(
-          password,
-          email
-        )
-      expect(error).to.not.exist
-    })
-  })
-
   describe('_validatePasswordNotTooSimilar', function () {
     beforeEach(function () {
       this.metrics.inc.reset()
@@ -776,21 +720,6 @@ describe('AuthenticationManager', function () {
         )
         expect(error).to.exist
       }
-    })
-
-    it('should send a metric with a rounded similarity score when password is too similar to email', function () {
-      const password = 'su2oe1em3re'
-      const email = 'someuser@example.com'
-      const error = this.AuthenticationManager._validatePasswordNotTooSimilar(
-        password,
-        email
-      )
-      expect(
-        this.metrics.inc.calledWith('password-validation-similarity', 1, {
-          similarity: 0.7,
-        })
-      ).to.equal(true)
-      expect(error).to.exist
     })
 
     it('should return nothing when the password different from email', function () {
@@ -979,12 +908,13 @@ describe('AuthenticationManager', function () {
         this.metrics.inc.reset()
       })
 
-      it('should send a metric when the password is too similar to the email', function (done) {
+      it('should produce an error when the password is too similar to the email', function (done) {
         this.AuthenticationManager.setUserPassword(
           this.user,
           this.password,
           err => {
-            expect(err).to.not.exist
+            expect(err).to.exist
+            expect(err?.info?.code).to.equal('too_similar')
             expect(
               this.metrics.inc.calledWith('password-too-similar-to-email')
             ).to.equal(true)
@@ -993,38 +923,15 @@ describe('AuthenticationManager', function () {
         )
       })
 
-      it('should send a metric when the password is too similar to the email, regardless of case', function (done) {
+      it('should produce an error when the password is too similar to the email, regardless of case', function (done) {
         this.AuthenticationManager.setUserPassword(
           this.user,
           this.password.toUpperCase(),
           err => {
-            expect(err).to.not.exist
+            expect(err).to.exist
+            expect(err?.info?.code).to.equal('too_similar')
             expect(
               this.metrics.inc.calledWith('password-too-similar-to-email')
-            ).to.equal(true)
-            done()
-          }
-        )
-      })
-    })
-
-    describe('password contains substring of email', function () {
-      beforeEach(function () {
-        this.user.email = 'somecooluser@example.com'
-        this.password = 'somecoolfhzxk'
-        this.metrics.inc.reset()
-      })
-
-      it('should send a metric when the password contains substring of the email', function (done) {
-        this.AuthenticationManager.setUserPassword(
-          this.user,
-          this.password,
-          err => {
-            expect(err).to.not.exist
-            expect(
-              this.metrics.inc.calledWith(
-                'password-contains-substring-of-email'
-              )
             ).to.equal(true)
             done()
           }
@@ -1069,14 +976,9 @@ describe('AuthenticationManager', function () {
         ).to.equal(false)
       })
 
-      it('should not send a metric for password-contains-substring-of-email', function () {
-        expect(
-          this.metrics.inc.calledWith('password-contains-substring-of-email')
-        ).to.equal(false)
-      })
-
       it('should call the callback', function () {
         this.callback.called.should.equal(true)
+        expect(this.callback.lastCall.args[0]).to.not.be.instanceOf(Error)
       })
     })
   })
