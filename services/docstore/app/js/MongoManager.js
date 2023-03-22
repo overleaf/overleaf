@@ -85,23 +85,57 @@ function getNonDeletedArchivedProjectDocs(projectId, maxResults, callback) {
     .toArray(callback)
 }
 
-function upsertIntoDocCollection(projectId, docId, updates, callback) {
-  const update = {
-    $set: updates,
-    $inc: {
-      rev: 1,
-    },
-    $unset: {
-      inS3: true,
-    },
+function upsertIntoDocCollection(
+  projectId,
+  docId,
+  previousRev,
+  updates,
+  callback
+) {
+  if (previousRev) {
+    db.docs.updateOne(
+      {
+        _id: ObjectId(docId),
+        project_id: ObjectId(projectId),
+        rev: previousRev,
+      },
+      {
+        $set: updates,
+        $inc: {
+          rev: 1,
+        },
+        $unset: {
+          inS3: true,
+        },
+      },
+      (err, result) => {
+        if (err) return callback(err)
+        if (result.matchedCount !== 1) {
+          return callback(new Errors.DocRevValueError())
+        }
+        callback()
+      }
+    )
+  } else {
+    db.docs.insertOne(
+      {
+        _id: ObjectId(docId),
+        project_id: ObjectId(projectId),
+        rev: 1,
+        ...updates,
+      },
+      err => {
+        if (err) {
+          if (err.code === 11000) {
+            // duplicate doc _id
+            return callback(new Errors.DocRevValueError())
+          }
+          return callback(err)
+        }
+        callback()
+      }
+    )
   }
-  update.$set.project_id = ObjectId(projectId)
-  db.docs.updateOne(
-    { _id: ObjectId(docId) },
-    update,
-    { upsert: true },
-    callback
-  )
 }
 
 function patchDoc(projectId, docId, meta, callback) {

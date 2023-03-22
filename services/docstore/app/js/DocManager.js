@@ -227,6 +227,38 @@ module.exports = DocManager = {
   },
 
   updateDoc(projectId, docId, lines, version, ranges, callback) {
+    DocManager._tryUpdateDoc(
+      projectId,
+      docId,
+      lines,
+      version,
+      ranges,
+      (err, modified, rev) => {
+        if (err && err instanceof Errors.DocRevValueError) {
+          // Another updateDoc call was racing with ours.
+          // Retry once in a bit.
+          logger.warn(
+            { projectId, docId, err },
+            'detected concurrent updateDoc call'
+          )
+          setTimeout(() => {
+            DocManager._tryUpdateDoc(
+              projectId,
+              docId,
+              lines,
+              version,
+              ranges,
+              callback
+            )
+          }, 100 + Math.random() * 100)
+        } else {
+          callback(err, modified, rev)
+        }
+      }
+    )
+  },
+
+  _tryUpdateDoc(projectId, docId, lines, version, ranges, callback) {
     if (callback == null) {
       callback = function () {}
     }
@@ -297,6 +329,7 @@ module.exports = DocManager = {
             return MongoManager.upsertIntoDocCollection(
               projectId,
               docId,
+              doc?.rev,
               update,
               cb
             )

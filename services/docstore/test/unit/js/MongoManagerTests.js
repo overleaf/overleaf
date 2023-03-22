@@ -13,6 +13,7 @@ describe('MongoManager', function () {
     this.db = {
       docs: {
         updateOne: sinon.stub().yields(null, { matchedCount: 1 }),
+        insertOne: sinon.stub().yields(null),
       },
       docOps: {},
     }
@@ -32,6 +33,7 @@ describe('MongoManager', function () {
     })
     this.projectId = ObjectId().toString()
     this.docId = ObjectId().toString()
+    this.rev = 42
     this.callback = sinon.stub()
     this.stubbedErr = new Error('hello world')
   })
@@ -215,7 +217,6 @@ describe('MongoManager', function () {
 
   describe('upsertIntoDocCollection', function () {
     beforeEach(function () {
-      this.db.docs.updateOne.yields(this.stubbedErr)
       this.oldRev = 77
     })
 
@@ -223,26 +224,80 @@ describe('MongoManager', function () {
       this.MongoManager.upsertIntoDocCollection(
         this.projectId,
         this.docId,
+        this.oldRev,
         { lines: this.lines },
         err => {
-          assert.equal(err, this.stubbedErr)
+          assert.equal(err, null)
           const args = this.db.docs.updateOne.args[0]
-          assert.deepEqual(args[0], { _id: ObjectId(this.docId) })
+          assert.deepEqual(args[0], {
+            _id: ObjectId(this.docId),
+            project_id: ObjectId(this.projectId),
+            rev: this.oldRev,
+          })
           assert.equal(args[1].$set.lines, this.lines)
           assert.equal(args[1].$inc.rev, 1)
-          assert.deepEqual(args[1].$set.project_id, ObjectId(this.projectId))
           done()
         }
       )
     })
 
-    it('should return the error', function (done) {
+    it('should handle update error', function (done) {
+      this.db.docs.updateOne.yields(this.stubbedErr)
       this.MongoManager.upsertIntoDocCollection(
         this.projectId,
         this.docId,
+        this.rev,
         { lines: this.lines },
         err => {
           err.should.equal(this.stubbedErr)
+          done()
+        }
+      )
+    })
+
+    it('should insert without a previous rev', function (done) {
+      this.MongoManager.upsertIntoDocCollection(
+        this.projectId,
+        this.docId,
+        null,
+        { lines: this.lines, ranges: this.ranges },
+        err => {
+          expect(this.db.docs.insertOne).to.have.been.calledWith({
+            _id: ObjectId(this.docId),
+            project_id: ObjectId(this.projectId),
+            rev: 1,
+            lines: this.lines,
+            ranges: this.ranges,
+          })
+          expect(err).to.not.exist
+          done()
+        }
+      )
+    })
+
+    it('should handle generic insert error', function (done) {
+      this.db.docs.insertOne.yields(this.stubbedErr)
+      this.MongoManager.upsertIntoDocCollection(
+        this.projectId,
+        this.docId,
+        null,
+        { lines: this.lines, ranges: this.ranges },
+        err => {
+          expect(err).to.equal(this.stubbedErr)
+          done()
+        }
+      )
+    })
+
+    it('should handle duplicate insert error', function (done) {
+      this.db.docs.insertOne.yields({ code: 11000 })
+      this.MongoManager.upsertIntoDocCollection(
+        this.projectId,
+        this.docId,
+        null,
+        { lines: this.lines, ranges: this.ranges },
+        err => {
+          expect(err).to.be.instanceof(Errors.DocRevValueError)
           done()
         }
       )
