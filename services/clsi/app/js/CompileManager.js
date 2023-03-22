@@ -106,7 +106,7 @@ async function doCompile(request) {
     {
       projectId: request.project_id,
       userId: request.user_id,
-      time_taken: Date.now() - writeToDiskTimer.start,
+      timeTaken: Date.now() - writeToDiskTimer.start,
     },
     'written files to disk'
   )
@@ -248,7 +248,7 @@ async function doCompile(request) {
     {
       projectId: request.project_id,
       userId: request.user_id,
-      time_taken: ts,
+      timeTaken: ts,
       stats,
       timings,
       loadavg,

@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-return-assign,
 */
 // TODO: This file was created by bulk-decaffeinate.

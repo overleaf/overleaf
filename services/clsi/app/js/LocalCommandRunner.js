@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-return-assign,
     no-unused-vars,
 */
@@ -22,7 +21,7 @@ logger.debug('using standard command runner')
 
 module.exports = CommandRunner = {
   run(
-    project_id,
+    projectId,
     command,
     directory,
     image,
@@ -36,7 +35,7 @@ module.exports = CommandRunner = {
     command = Array.from(command).map(arg =>
       arg.toString().replace('$COMPILE_DIR', directory)
     )
-    logger.debug({ project_id, command, directory }, 'running command')
+    logger.debug({ projectId, command, directory }, 'running command')
     logger.warn('timeouts and sandboxing are not enabled with CommandRunner')
 
     // merge environment settings
@@ -62,7 +61,7 @@ module.exports = CommandRunner = {
 
     proc.on('error', function (err) {
       logger.err(
-        { err, project_id, command, directory },
+        { err, projectId, command, directory },
         'error running command'
       )
       return callback(err)
@@ -70,7 +69,7 @@ module.exports = CommandRunner = {
 
     proc.on('close', function (code, signal) {
       let err
-      logger.debug({ code, signal, project_id }, 'command exited')
+      logger.debug({ code, signal, projectId }, 'command exited')
       if (signal === 'SIGTERM') {
         // signal from kill method below
         err = new Error('terminated')

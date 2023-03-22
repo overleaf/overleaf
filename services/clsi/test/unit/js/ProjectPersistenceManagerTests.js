@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-return-assign,
     no-unused-vars,
 */
@@ -104,9 +103,9 @@ describe('ProjectPersistenceManager', function () {
     })
 
     it('should clear each expired project', function () {
-      return Array.from(this.project_ids).map(project_id =>
+      return Array.from(this.project_ids).map(projectId =>
         this.ProjectPersistenceManager.clearProjectFromCache
-          .calledWith(project_id)
+          .calledWith(projectId)
           .should.equal(true)
       )
     })

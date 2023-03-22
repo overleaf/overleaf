@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-return-assign,
     no-unused-vars,
 */
@@ -56,18 +55,18 @@ const compare = function (originalPath, generatedPath, callback) {
   if (callback == null) {
     callback = function () {}
   }
-  const diff_file = `${fixturePath(generatedPath)}-diff.png`
+  const diffFile = `${fixturePath(generatedPath)}-diff.png`
   const proc = ChildProcess.exec(
     `compare -metric mae ${fixturePath(originalPath)} ${fixturePath(
       generatedPath
-    )} ${diff_file}`
+    )} ${diffFile}`
   )
   let stderr = ''
   proc.stderr.on('data', chunk => (stderr += chunk))
   return proc.on('exit', () => {
     if (stderr.trim() === '0 (0)') {
       // remove output diff if test matches expected image
-      fs.unlink(diff_file, err => {
+      fs.unlink(diffFile, err => {
         if (err) {
           throw err
         }
@@ -97,25 +96,25 @@ const checkPdfInfo = function (pdfPath, callback) {
   })
 }
 
-const compareMultiplePages = function (project_id, callback) {
+const compareMultiplePages = function (projectId, callback) {
   if (callback == null) {
     callback = function () {}
   }
-  function compareNext(page_no, callback) {
-    const path = `tmp/${project_id}-source-${page_no}.png`
+  function compareNext(pageNo, callback) {
+    const path = `tmp/${projectId}-source-${pageNo}.png`
     return fs.stat(fixturePath(path), (error, stat) => {
       if (error != null) {
         return callback()
       } else {
         return compare(
-          `tmp/${project_id}-source-${page_no}.png`,
-          `tmp/${project_id}-generated-${page_no}.png`,
+          `tmp/${projectId}-source-${pageNo}.png`,
+          `tmp/${projectId}-generated-${pageNo}.png`,
           (error, same) => {
             if (error != null) {
               throw error
             }
             same.should.equal(true)
-            return compareNext(page_no + 1, callback)
+            return compareNext(pageNo + 1, callback)
           }
         )
       }
@@ -124,33 +123,33 @@ const compareMultiplePages = function (project_id, callback) {
   return compareNext(0, callback)
 }
 
-const comparePdf = function (project_id, example_dir, callback) {
+const comparePdf = function (projectId, exampleDir, callback) {
   if (callback == null) {
     callback = function () {}
   }
   console.log('CONVERT')
-  console.log(`tmp/${project_id}.pdf`, `tmp/${project_id}-generated.png`)
+  console.log(`tmp/${projectId}.pdf`, `tmp/${projectId}-generated.png`)
   return convertToPng(
-    `tmp/${project_id}.pdf`,
-    `tmp/${project_id}-generated.png`,
+    `tmp/${projectId}.pdf`,
+    `tmp/${projectId}-generated.png`,
     error => {
       if (error != null) {
         throw error
       }
       return convertToPng(
-        `examples/${example_dir}/output.pdf`,
-        `tmp/${project_id}-source.png`,
+        `examples/${exampleDir}/output.pdf`,
+        `tmp/${projectId}-source.png`,
         error => {
           if (error != null) {
             throw error
           }
           return fs.stat(
-            fixturePath(`tmp/${project_id}-source-0.png`),
+            fixturePath(`tmp/${projectId}-source-0.png`),
             (error, stat) => {
               if (error != null) {
                 return compare(
-                  `tmp/${project_id}-source.png`,
-                  `tmp/${project_id}-generated.png`,
+                  `tmp/${projectId}-source.png`,
+                  `tmp/${projectId}-generated.png`,
                   (error, same) => {
                     if (error != null) {
                       throw error
@@ -160,7 +159,7 @@ const comparePdf = function (project_id, example_dir, callback) {
                   }
                 )
               } else {
-                return compareMultiplePages(project_id, error => {
+                return compareMultiplePages(projectId, error => {
                   if (error != null) {
                     throw error
                   }
@@ -175,25 +174,20 @@ const comparePdf = function (project_id, example_dir, callback) {
   )
 }
 
-const downloadAndComparePdf = function (
-  project_id,
-  example_dir,
-  url,
-  callback
-) {
+const downloadAndComparePdf = function (projectId, exampleDir, url, callback) {
   if (callback == null) {
     callback = function () {}
   }
-  const writeStream = fs.createWriteStream(fixturePath(`tmp/${project_id}.pdf`))
+  const writeStream = fs.createWriteStream(fixturePath(`tmp/${projectId}.pdf`))
   request.get(url).pipe(writeStream)
-  console.log('writing file out', fixturePath(`tmp/${project_id}.pdf`))
+  console.log('writing file out', fixturePath(`tmp/${projectId}.pdf`))
   return writeStream.on('close', () => {
-    return checkPdfInfo(`tmp/${project_id}.pdf`, (error, optimised) => {
+    return checkPdfInfo(`tmp/${projectId}.pdf`, (error, optimised) => {
       if (error != null) {
         throw error
       }
       optimised.should.equal(true)
-      return comparePdf(project_id, example_dir, callback)
+      return comparePdf(projectId, exampleDir, callback)
     })
   })
 }
@@ -214,11 +208,11 @@ describe('Example Documents', function () {
     fsExtra.remove(fixturePath('tmp'), done)
   })
 
-  return Array.from(fs.readdirSync(fixturePath('examples'))).map(example_dir =>
-    (example_dir =>
-      describe(example_dir, function () {
+  return Array.from(fs.readdirSync(fixturePath('examples'))).map(exampleDir =>
+    (exampleDir =>
+      describe(exampleDir, function () {
         before(function () {
-          return (this.project_id = Client.randomId() + '_' + example_dir)
+          return (this.project_id = Client.randomId() + '_' + exampleDir)
         })
 
         it('should generate the correct pdf', function (done) {
@@ -226,7 +220,7 @@ describe('Example Documents', function () {
           return Client.compileDirectory(
             this.project_id,
             fixturePath('examples'),
-            example_dir,
+            exampleDir,
             4242,
             (error, res, body) => {
               if (
@@ -242,7 +236,7 @@ describe('Example Documents', function () {
               const pdf = Client.getOutputFile(body, 'pdf')
               return downloadAndComparePdf(
                 this.project_id,
-                example_dir,
+                exampleDir,
                 pdf.url,
                 done
               )
@@ -255,7 +249,7 @@ describe('Example Documents', function () {
           return Client.compileDirectory(
             this.project_id,
             fixturePath('examples'),
-            example_dir,
+            exampleDir,
             4242,
             (error, res, body) => {
               if (
@@ -271,14 +265,14 @@ describe('Example Documents', function () {
               const pdf = Client.getOutputFile(body, 'pdf')
               return downloadAndComparePdf(
                 this.project_id,
-                example_dir,
+                exampleDir,
                 pdf.url,
                 done
               )
             }
           )
         })
-      }))(example_dir)
+      }))(exampleDir)
   )
 })
 

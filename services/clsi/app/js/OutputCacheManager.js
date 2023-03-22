@@ -584,7 +584,7 @@ module.exports = OutputCacheManager = {
           // cache directory is empty
           return cleanupAll(callback)
         }
-        logger.error({ err, project_id: cacheRoot }, 'error clearing cache')
+        logger.error({ err, projectId: cacheRoot }, 'error clearing cache')
         return callback(err)
       }
 

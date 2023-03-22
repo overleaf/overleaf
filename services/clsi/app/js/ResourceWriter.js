@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-return-assign,
     no-unused-vars,
     no-useless-escape,
@@ -34,7 +33,7 @@ module.exports = ResourceWriter = {
     }
     if (request.syncType === 'incremental') {
       logger.debug(
-        { project_id: request.project_id, user_id: request.user_id },
+        { projectId: request.project_id, userId: request.user_id },
         'incremental sync'
       )
       return ResourceStateManager.checkProjectStateMatches(
@@ -79,7 +78,7 @@ module.exports = ResourceWriter = {
       )
     }
     logger.debug(
-      { project_id: request.project_id, user_id: request.user_id },
+      { projectId: request.project_id, userId: request.user_id },
       'full sync'
     )
     UrlCache.createProjectDir(request.project_id, error => {
@@ -109,7 +108,7 @@ module.exports = ResourceWriter = {
     })
   },
 
-  saveIncrementalResourcesToDisk(project_id, resources, basePath, callback) {
+  saveIncrementalResourcesToDisk(projectId, resources, basePath, callback) {
     if (callback == null) {
       callback = function () {}
     }
@@ -121,7 +120,7 @@ module.exports = ResourceWriter = {
         (resource => {
           return callback =>
             ResourceWriter._writeResourceToDisk(
-              project_id,
+              projectId,
               resource,
               basePath,
               callback
@@ -140,7 +139,7 @@ module.exports = ResourceWriter = {
       if (error != null) {
         return callback(error)
       }
-      const { project_id, resources } = request
+      const { project_id: projectId, resources } = request
       ResourceWriter._removeExtraneousFiles(
         request,
         resources,
@@ -153,7 +152,7 @@ module.exports = ResourceWriter = {
             (resource => {
               return callback =>
                 ResourceWriter._writeResourceToDisk(
-                  project_id,
+                  projectId,
                   resource,
                   basePath,
                   callback
@@ -210,40 +209,40 @@ module.exports = ResourceWriter = {
         for (const file of Array.from(outputFiles || [])) {
           ;(function (file) {
             const { path } = file
-            let should_delete = true
+            let shouldDelete = true
             if (
               path.match(/^output\./) ||
               path.match(/\.aux$/) ||
               path.match(/^cache\//)
             ) {
               // knitr cache
-              should_delete = false
+              shouldDelete = false
             }
             if (path.match(/^output-.*/)) {
               // Tikz cached figures (default case)
-              should_delete = false
+              shouldDelete = false
             }
             if (path.match(/\.(pdf|dpth|md5)$/)) {
               // Tikz cached figures (by extension)
-              should_delete = false
+              shouldDelete = false
             }
             if (
               path.match(/\.(pygtex|pygstyle)$/) ||
               path.match(/(^|\/)_minted-[^\/]+\//)
             ) {
               // minted files/directory
-              should_delete = false
+              shouldDelete = false
             }
             if (
               path.match(/\.md\.tex$/) ||
               path.match(/(^|\/)_markdown_[^\/]+\//)
             ) {
               // markdown files/directory
-              should_delete = false
+              shouldDelete = false
             }
             if (path.match(/-eps-converted-to\.pdf$/)) {
               // Epstopdf generated files
-              should_delete = false
+              shouldDelete = false
             }
             if (
               path === 'output.pdf' ||
@@ -253,13 +252,13 @@ module.exports = ResourceWriter = {
               path === 'output.stdout' ||
               path === 'output.stderr'
             ) {
-              should_delete = true
+              shouldDelete = true
             }
             if (path === 'output.tex') {
               // created by TikzManager if present in output files
-              should_delete = true
+              shouldDelete = true
             }
-            if (should_delete) {
+            if (shouldDelete) {
               return jobs.push(callback =>
                 ResourceWriter._deleteFileIfNotDirectory(
                   Path.join(basePath, path),
@@ -311,7 +310,7 @@ module.exports = ResourceWriter = {
     })
   },
 
-  _writeResourceToDisk(project_id, resource, basePath, callback) {
+  _writeResourceToDisk(projectId, resource, basePath, callback) {
     if (callback == null) {
       callback = function () {}
     }
@@ -332,7 +331,7 @@ module.exports = ResourceWriter = {
             // TODO: Don't overwrite file if it hasn't been modified
             if (resource.url != null) {
               return UrlCache.downloadUrlToFile(
-                project_id,
+                projectId,
                 resource.url,
                 path,
                 resource.modified,
@@ -341,9 +340,9 @@ module.exports = ResourceWriter = {
                     logger.err(
                       {
                         err,
-                        project_id,
+                        projectId,
                         path,
-                        resource_url: resource.url,
+                        resourceUrl: resource.url,
                         modified: resource.modified,
                       },
                       'error downloading file for resources'

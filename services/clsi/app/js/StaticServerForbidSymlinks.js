@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     no-cond-assign,
     no-unused-vars,
     n/no-deprecated-api,
@@ -23,11 +22,11 @@ module.exports = ForbidSymlinks = function (staticFn, root, options) {
   const expressStatic = staticFn(root, options)
   const basePath = Path.resolve(root)
   return function (req, res, next) {
-    let file, project_id, result
+    let file, projectId, result
     const path = req.url
     // check that the path is of the form /project_id_or_name/path/to/file.log
     if ((result = path.match(/^\/?([a-zA-Z0-9_-]+)\/(.*)/))) {
-      project_id = result[1]
+      projectId = result[1]
       file = result[2]
     } else {
       logger.warn({ path }, 'unrecognized file request')
@@ -41,7 +40,7 @@ module.exports = ForbidSymlinks = function (staticFn, root, options) {
       }
     }
     // check that the requested path is normalized
-    const requestedFsPath = `${basePath}/${project_id}/${file}`
+    const requestedFsPath = `${basePath}/${projectId}/${file}`
     if (requestedFsPath !== Path.normalize(requestedFsPath)) {
       logger.error(
         { path: requestedFsPath },
@@ -61,7 +60,7 @@ module.exports = ForbidSymlinks = function (staticFn, root, options) {
               requestedFsPath,
               realFsPath,
               path: req.params[0],
-              project_id: req.params.project_id,
+              projectId: req.params.project_id,
             },
             'error checking file access'
           )
@@ -73,7 +72,7 @@ module.exports = ForbidSymlinks = function (staticFn, root, options) {
             requestedFsPath,
             realFsPath,
             path: req.params[0],
-            project_id: req.params.project_id,
+            projectId: req.params.project_id,
           },
           'trying to access a different file (symlink), aborting'
         )

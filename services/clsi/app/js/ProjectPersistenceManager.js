@@ -1,6 +1,3 @@
-/* eslint-disable
-    camelcase,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -105,8 +102,8 @@ module.exports = ProjectPersistenceManager = {
     })
   },
 
-  markProjectAsJustAccessed(project_id, callback) {
-    LAST_ACCESS.set(project_id, Date.now())
+  markProjectAsJustAccessed(projectId, callback) {
+    LAST_ACCESS.set(projectId, Date.now())
     callback()
   },
 
@@ -116,25 +113,25 @@ module.exports = ProjectPersistenceManager = {
     }
     return ProjectPersistenceManager._findExpiredProjectIds(function (
       error,
-      project_ids
+      projectIds
     ) {
       if (error != null) {
         return callback(error)
       }
-      logger.debug({ project_ids }, 'clearing expired projects')
-      const jobs = Array.from(project_ids || []).map(project_id =>
+      logger.debug({ projectIds }, 'clearing expired projects')
+      const jobs = Array.from(projectIds || []).map(projectId =>
         (
-          project_id => callback =>
+          projectId => callback =>
             ProjectPersistenceManager.clearProjectFromCache(
-              project_id,
+              projectId,
               function (err) {
                 if (err != null) {
-                  logger.error({ err, project_id }, 'error clearing project')
+                  logger.error({ err, projectId }, 'error clearing project')
                 }
                 return callback()
               }
             )
-        )(project_id)
+        )(projectId)
       )
       return async.series(jobs, function (error) {
         if (error != null) {
@@ -148,17 +145,17 @@ module.exports = ProjectPersistenceManager = {
     })
   }, // ignore any errors from deleting directories
 
-  clearProject(project_id, user_id, callback) {
+  clearProject(projectId, userId, callback) {
     if (callback == null) {
       callback = function () {}
     }
-    logger.debug({ project_id, user_id }, 'clearing project for user')
-    return CompileManager.clearProject(project_id, user_id, function (error) {
+    logger.debug({ projectId, userId }, 'clearing project for user')
+    return CompileManager.clearProject(projectId, userId, function (error) {
       if (error != null) {
         return callback(error)
       }
       return ProjectPersistenceManager.clearProjectFromCache(
-        project_id,
+        projectId,
         function (error) {
           if (error != null) {
             return callback(error)
@@ -169,22 +166,22 @@ module.exports = ProjectPersistenceManager = {
     })
   },
 
-  clearProjectFromCache(project_id, callback) {
+  clearProjectFromCache(projectId, callback) {
     if (callback == null) {
       callback = function () {}
     }
-    logger.debug({ project_id }, 'clearing project from cache')
-    return UrlCache.clearProject(project_id, function (error) {
+    logger.debug({ projectId }, 'clearing project from cache')
+    return UrlCache.clearProject(projectId, function (error) {
       if (error != null) {
-        logger.err({ error, project_id }, 'error clearing project from cache')
+        logger.err({ error, projectId }, 'error clearing project from cache')
         return callback(error)
       }
       return ProjectPersistenceManager._clearProjectFromDatabase(
-        project_id,
+        projectId,
         function (error) {
           if (error != null) {
             logger.err(
-              { error, project_id },
+              { error, projectId },
               'error clearing project from database'
             )
           }
@@ -194,8 +191,8 @@ module.exports = ProjectPersistenceManager = {
     })
   },
 
-  _clearProjectFromDatabase(project_id, callback) {
-    LAST_ACCESS.delete(project_id)
+  _clearProjectFromDatabase(projectId, callback) {
+    LAST_ACCESS.delete(projectId)
     callback()
   },
 
