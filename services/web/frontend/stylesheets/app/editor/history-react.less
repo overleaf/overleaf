@@ -1,0 +1,22 @@
+@changesListWidth: 320px;
+
+.history-react {
+  .point-in-time-panel {
+    .full-size;
+    margin-right: @changesListWidth;
+  }
+
+  .change-list {
+    border-left: 1px solid @editor-border-color;
+    height: 100%;
+    width: @changesListWidth;
+    position: absolute;
+    right: 0;
+  }
+
+  .editor-dark {
+    .change-list {
+      border-color: @editor-dark-toolbar-border-color;
+    }
+  }
+}
