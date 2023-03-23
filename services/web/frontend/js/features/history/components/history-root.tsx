@@ -12,8 +12,8 @@ export default function HistoryRoot() {
         ? createPortal(<HistoryFileTree />, fileTreeContainer)
         : null}
       <div className="history-react">
-        <ChangeList />
         <Editor />
+        <ChangeList />
       </div>
     </>
   )

@@ -3,9 +3,13 @@ import Main from './main'
 
 function Editor() {
   return (
-    <div className="point-in-time-panel">
-      <Toolbar />
-      <Main />
+    <div className="doc-panel">
+      <div className="history-header toolbar-container">
+        <Toolbar />
+      </div>
+      <div className="doc-container">
+        <Main />
+      </div>
     </div>
   )
 }

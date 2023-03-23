@@ -4,8 +4,12 @@ import Main from './main'
 function ChangeList() {
   return (
     <aside className="change-list">
-      <ToggleSwitch />
-      <Main />
+      <div className="history-header toggle-switch-container">
+        <ToggleSwitch />
+      </div>
+      <div className="version-list-container">
+        <Main />
+      </div>
     </aside>
   )
 }
