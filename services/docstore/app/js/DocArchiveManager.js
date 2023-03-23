@@ -172,7 +172,7 @@ async function destroyProject(projectId) {
 
 async function _streamToBuffer(projectId, docId, stream) {
   const chunks = []
-  let size
+  let size = 0
   let logged = false
   const logIfTooLarge = finishedReading => {
     if (size <= Settings.max_doc_length) return
