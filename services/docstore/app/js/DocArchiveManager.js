@@ -136,8 +136,7 @@ async function getDoc(projectId, docId) {
     })
   }
 
-  const json = buffer.toString()
-  return _deserializeArchivedDoc(json)
+  return _deserializeArchivedDoc(buffer)
 }
 
 // get the doc and unarchive it to mongo
@@ -199,8 +198,8 @@ async function _streamToBuffer(projectId, docId, stream) {
   })
 }
 
-function _deserializeArchivedDoc(json) {
-  const doc = JSON.parse(json)
+function _deserializeArchivedDoc(buffer) {
+  const doc = JSON.parse(buffer)
 
   const result = {}
   if (doc.schema_v === 1 && doc.lines != null) {
