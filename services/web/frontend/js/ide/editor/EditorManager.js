@@ -281,14 +281,19 @@ export default EditorManager = (function () {
           // allow Ace to display document before moving, delay until next tick
           // added delay to make this happen later that gotoStoredPosition in
           // CursorPositionManager
-          return setTimeout(() => this.jumpToLine(options), 0)
-        } else if (options.gotoOffset != null) {
-          return setTimeout(() => {
-            return this.$scope.$broadcast(
-              'editor:gotoOffset',
-              options.gotoOffset
+          setTimeout(() => this.jumpToLine(options))
+          // when opening a doc in CM6, jump to the line again after a stored scroll position has been restored
+          if (isNewDoc) {
+            window.addEventListener(
+              'editor:scroll-position-restored',
+              () => this.jumpToLine(options),
+              { once: true }
             )
-          }, 0)
+          }
+        } else if (options.gotoOffset != null) {
+          setTimeout(() => {
+            this.$scope.$broadcast('editor:gotoOffset', options.gotoOffset)
+          })
         }
       }
 
