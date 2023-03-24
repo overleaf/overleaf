@@ -268,6 +268,8 @@ describe('<ShareProjectModal/>', function () {
   })
 
   it('only shows read-only token link to restricted token members', async function () {
+    window.metaAttributesCache.set('ol-isRestrictedTokenMember', true)
+
     renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
       isRestrictedTokenMember: true,
       scope: { project: { ...project, publicAccesLevel: 'tokenBased' } },

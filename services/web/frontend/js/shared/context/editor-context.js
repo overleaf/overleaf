@@ -11,6 +11,8 @@ import useBrowserWindow from '../hooks/use-browser-window'
 import { useIdeContext } from './ide-context'
 import { useProjectContext } from './project-context'
 import { useDetachContext } from './detach-context'
+import getMeta from '../../utils/meta'
+import { useUserContext } from './user-context'
 
 export const EditorContext = createContext()
 
@@ -47,7 +49,7 @@ EditorContext.Provider.propTypes = {
 
 export function EditorProvider({ children, settings }) {
   const ide = useIdeContext()
-
+  const { id: userId } = useUserContext()
   const { role } = useDetachContext()
 
   const { owner, features } = useProjectContext({
@@ -170,8 +172,8 @@ export function EditorProvider({ children, settings }) {
       loading,
       renameProject,
       permissionsLevel,
-      isProjectOwner: owner?._id === window.user.id,
-      isRestrictedTokenMember: window.isRestrictedTokenMember,
+      isProjectOwner: owner?._id === userId,
+      isRestrictedTokenMember: getMeta('ol-isRestrictedTokenMember'),
       showSymbolPalette,
       toggleSymbolPalette,
       insertSymbol,
@@ -185,10 +187,11 @@ export function EditorProvider({ children, settings }) {
     [
       cobranding,
       features?.compileGroup,
+      owner,
+      userId,
       loading,
       renameProject,
       permissionsLevel,
-      owner?._id,
       showSymbolPalette,
       toggleSymbolPalette,
       insertSymbol,
