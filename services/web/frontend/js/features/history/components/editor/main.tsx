@@ -1,5 +1,9 @@
+import { useHistoryContext } from '../../context/history-context'
+
 function Main() {
-  return <div>Main (editor)</div>
+  const { fileSelection } = useHistoryContext()
+
+  return <div>Main (editor). File: {fileSelection?.pathname || 'not set'}</div>
 }
 
 export default Main
