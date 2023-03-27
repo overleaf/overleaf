@@ -49,6 +49,7 @@ RUN chmod +x /opt/envsubst
 
 COPY conf/envsubst_template.json envsubst_template.json
 COPY start.sh start.sh
+COPY server-pro-start.sh server-pro-start.sh
 
 RUN mkdir conf
 RUN chown node:node conf
