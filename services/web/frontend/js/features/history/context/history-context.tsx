@@ -6,6 +6,7 @@ import { HistoryContextValue } from './types/history-context-value'
 import { Update, UpdateSelection } from '../services/types/update'
 import { FileSelection } from '../services/types/file'
 import { diffFiles, fetchUpdates } from '../services/api'
+import { renamePathnameKey, isFileRenamed } from '../utils/file-tree'
 
 function useHistory() {
   const { view } = useLayoutContext()
@@ -68,16 +69,15 @@ function useHistory() {
 
     diffFiles(projectId, fromV, toV).then(({ diff: files }) => {
       // TODO Infer default file sensibly
-      let pathname = null
-      for (const file of files) {
-        if (file.pathname.endsWith('.tex')) {
-          pathname = file.pathname
-          break
-        } else if (!pathname) {
-          pathname = file.pathname
+      const pathname = null
+      const newFiles = files.map(file => {
+        if (isFileRenamed(file) && file.newPathname) {
+          return renamePathnameKey(file)
         }
-      }
-      setFileSelection({ files, pathname })
+
+        return file
+      })
+      setFileSelection({ files: newFiles, pathname })
     })
   }, [updateSelection, projectId])
 

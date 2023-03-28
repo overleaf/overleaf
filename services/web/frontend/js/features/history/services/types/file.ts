@@ -12,7 +12,8 @@ export interface FileRemoved extends FileUnchanged {
 }
 
 export interface FileRenamed extends FileUnchanged {
-  newPathname: string
+  newPathname?: string
+  oldPathname?: string
   operation: 'renamed'
 }
 
