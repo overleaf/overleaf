@@ -275,7 +275,7 @@ module.exports = {
 
   robotsNoindex: process.env.ROBOTS_NOINDEX === 'true' || false,
 
-  maxEntitiesPerProject: 2000,
+  maxEntitiesPerProject: parseInt(process.env.MAX_ENTITIES_PER_PROJECT || '2000', 10),
 
   maxUploadSize: 50 * 1024 * 1024, // 50 MB
   multerOptions: {
