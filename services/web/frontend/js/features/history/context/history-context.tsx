@@ -20,8 +20,6 @@ function useHistory() {
   const [nextBeforeTimestamp, setNextBeforeTimestamp] =
     useState<HistoryContextValue['nextBeforeTimestamp']>(null)
   const [atEnd, setAtEnd] = useState<HistoryContextValue['atEnd']>(false)
-  const [showOnlyLabels, setShowOnlyLabels] =
-    useState<HistoryContextValue['showOnlyLabels']>(false)
   const [userHasFullFeature, setUserHasFullFeature] =
     useState<HistoryContextValue['userHasFullFeature']>(undefined)
   const [freeHistoryLimitHit, setFreeHistoryLimitHit] =
@@ -44,12 +42,8 @@ function useHistory() {
   })
   /* eslint-enable no-unused-vars */
 
-  const {
-    isLoading: loading,
-    error,
-    data,
-    runAsync,
-  } = useAsync<{ updates: Update[] }>()
+  const { isLoading, isError, error, data, runAsync } =
+    useAsync<{ updates: Update[] }>()
   const updates = useMemo(() => data?.updates ?? [], [data?.updates])
   const loadingFileTree = true
 
@@ -92,13 +86,13 @@ function useHistory() {
     () => ({
       atEnd,
       error,
+      isError,
+      isLoading,
       freeHistoryLimitHit,
-      loading,
       labels,
       loadingFileTree,
       nextBeforeTimestamp,
       selection,
-      showOnlyLabels,
       updates,
       userHasFullFeature,
       viewMode,
@@ -111,13 +105,13 @@ function useHistory() {
     [
       atEnd,
       error,
+      isError,
+      isLoading,
       freeHistoryLimitHit,
-      loading,
       labels,
       loadingFileTree,
       nextBeforeTimestamp,
       selection,
-      showOnlyLabels,
       updates,
       userHasFullFeature,
       viewMode,

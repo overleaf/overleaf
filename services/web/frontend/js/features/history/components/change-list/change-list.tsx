@@ -1,15 +1,21 @@
+import usePersistedState from '../../../../shared/hooks/use-persisted-state'
 import ToggleSwitch from './toggle-switch'
 import Main from './main'
-import { useState } from 'react'
+import { useHistoryContext } from '../../context/history-context'
 
 function ChangeList() {
-  // eslint-disable-next-line no-unused-vars
-  const [labelsOnly, setLabelsOnly] = useState(false)
+  const { projectId, isError } = useHistoryContext()
+  const [labelsOnly, setLabelsOnly] = usePersistedState(
+    `history.userPrefs.showOnlyLabels.${projectId}`,
+    false
+  )
 
   return (
     <aside className="change-list">
       <div className="history-header toggle-switch-container">
-        <ToggleSwitch />
+        {!isError && (
+          <ToggleSwitch labelsOnly={labelsOnly} setLabelsOnly={setLabelsOnly} />
+        )}
       </div>
       <div className="version-list-container">
         <Main />

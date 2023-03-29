@@ -7,13 +7,13 @@ export type HistoryContextValue = {
   updates: Update[]
   viewMode: string
   nextBeforeTimestamp: Nullable<number>
-  loading: boolean
   atEnd: boolean
   userHasFullFeature: boolean | undefined
   freeHistoryLimitHit: boolean
   selection: Selection
+  isError: boolean
+  isLoading: boolean
   error: Nullable<unknown>
-  showOnlyLabels: boolean
   labels: Nullable<unknown>
   loadingFileTree: boolean
   projectId: string
