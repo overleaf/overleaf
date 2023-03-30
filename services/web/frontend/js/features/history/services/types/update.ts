@@ -1,15 +1,4 @@
-interface User {
-  first_name: string
-  last_name: string
-  email: string
-  id: string
-}
-
-interface UpdateMeta {
-  users: User[]
-  start_ts: number
-  end_ts: number
-}
+import { Meta } from './shared'
 
 interface UpdateLabel {
   id: string
@@ -33,7 +22,7 @@ interface ProjectOp {
 export interface Update {
   fromV: number
   toV: number
-  meta: UpdateMeta
+  meta: Meta
   labels?: Label[]
   pathnames: string[]
   project_ops: ProjectOp[]

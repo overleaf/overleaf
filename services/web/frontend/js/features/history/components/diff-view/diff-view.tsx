@@ -1,7 +1,7 @@
 import Toolbar from './toolbar'
 import Main from './main'
 
-function Editor() {
+function DiffView() {
   return (
     <div className="doc-panel">
       <div className="history-header toolbar-container">
@@ -14,4 +14,4 @@ function Editor() {
   )
 }
 
-export default Editor
+export default DiffView

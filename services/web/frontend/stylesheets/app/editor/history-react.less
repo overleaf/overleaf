@@ -34,6 +34,17 @@ history-root {
 
     .doc-container {
       flex: 1;
+      overflow-y: auto;
+
+      .document-diff-container {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+
+        .cm-editor {
+          height: 100%;
+        }
+      }
     }
   }
 
@@ -53,5 +64,11 @@ history-root {
     span {
       display: block;
     }
+  }
+
+  .history-loading-panel {
+    padding-top: 10rem;
+    font-family: @font-family-serif;
+    text-align: center;
   }
 }

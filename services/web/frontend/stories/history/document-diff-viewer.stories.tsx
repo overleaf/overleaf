@@ -1,8 +1,7 @@
 import { ScopeDecorator } from '../decorators/scope'
-import DocumentDiffViewer, {
-  Highlight,
-} from '../../js/features/history/components/editor/document-diff-viewer'
+import DocumentDiffViewer from '../../js/features/history/components/diff-view/document-diff-viewer'
 import React from 'react'
+import { Highlight } from '../../js/features/history/services/types/doc'
 
 export default {
   title: 'History / Document Diff Viewer',

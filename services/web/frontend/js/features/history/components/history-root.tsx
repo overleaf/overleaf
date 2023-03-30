@@ -1,5 +1,5 @@
 import ChangeList from './change-list/change-list'
-import Editor from './editor/editor'
+import DiffView from './diff-view/diff-view'
 import { useLayoutContext } from '../../../shared/context/layout-context'
 import { useHistoryContext } from '../context/history-context'
 
@@ -13,7 +13,7 @@ export default function HistoryRoot() {
 
   return (
     <div className="history-react">
-      <Editor />
+      <DiffView />
       <ChangeList />
     </div>
   )

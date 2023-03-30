@@ -1,6 +1,6 @@
 import { StateEffect, StateField } from '@codemirror/state'
 import { Decoration, EditorView, hoverTooltip, Tooltip } from '@codemirror/view'
-import { Highlight } from '../editor/document-diff-viewer'
+import { Highlight } from '../services/types/doc'
 
 export const setHighlightsEffect = StateEffect.define<Highlight[]>()
 

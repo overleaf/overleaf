@@ -1,6 +1,7 @@
 import { getJSON } from '../../../infrastructure/fetch-json'
 import { FileDiff } from './types/file'
 import { Update } from './types/update'
+import { DocDiffResponse } from './types/doc'
 
 const BATCH_SIZE = 10
 
@@ -26,4 +27,20 @@ export function diffFiles(projectId: string, fromV: number, toV: number) {
   const queryParamsSerialized = new URLSearchParams(queryParams).toString()
   const diffUrl = `/project/${projectId}/filetree/diff?${queryParamsSerialized}`
   return getJSON<{ diff: FileDiff[] }>(diffUrl)
+}
+
+export function diffDoc(
+  projectId: string,
+  fromV: number,
+  toV: number,
+  pathname: string
+) {
+  const queryParams: Record<string, string> = {
+    from: fromV.toString(),
+    to: toV.toString(),
+    pathname,
+  }
+  const queryParamsSerialized = new URLSearchParams(queryParams).toString()
+  const diffUrl = `/project/${projectId}/diff?${queryParamsSerialized}`
+  return getJSON<DocDiffResponse>(diffUrl)
 }
