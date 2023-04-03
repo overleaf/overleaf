@@ -9,6 +9,7 @@ const moment = require('moment')
 const request = require('request')
 const Features = require('./Features')
 const SessionManager = require('../Features/Authentication/SessionManager')
+const SplitTestMiddleware = require('../Features/SplitTests/SplitTestMiddleware')
 const PackageVersions = require('./PackageVersions')
 const Modules = require('./Modules')
 const {
@@ -18,6 +19,7 @@ const {
 const {
   addOptionalCleanupHandlerAfterDrainingConnections,
 } = require('./GracefulShutdown')
+const { expressify } = require('../util/promises')
 
 const IEEE_BRAND_ID = Settings.ieeeBrandId
 
@@ -76,6 +78,15 @@ function getWebpackAssets(entrypoint, section) {
 }
 
 module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
+  webRouter.use(
+    expressify(
+      SplitTestMiddleware.loadAssignmentsInLocals([
+        'design-system-updates',
+        'features-page',
+      ])
+    )
+  )
+
   if (process.env.NODE_ENV === 'development') {
     // In the dev-env, delay requests until we fetched the manifest once.
     webRouter.use(function (req, res, next) {
