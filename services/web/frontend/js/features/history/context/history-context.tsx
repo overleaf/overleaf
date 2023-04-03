@@ -42,8 +42,9 @@ function useHistory() {
   })
   /* eslint-enable no-unused-vars */
 
-  const { isLoading, isError, error, data, runAsync } =
-    useAsync<{ updates: Update[] }>()
+  const { isLoading, isError, error, data, runAsync } = useAsync<{
+    updates: Update[]
+  }>()
   const updates = useMemo(() => data?.updates ?? [], [data?.updates])
   const loadingFileTree = true
 

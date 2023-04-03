@@ -1,12 +1,3 @@
-aside.editor-sidebar.full-size#history-file-tree(
-	ng-controller="ReactFileTreeController"
+aside.editor-sidebar.full-size.file-tree#history-file-tree(
 	ng-show="history.isReact && ui.view == 'history'"
 )
-	.history-file-tree-inner.file-tree
-		history-file-tree-react(
-			on-select="onSelect"
-			ref-providers="refProviders"
-			reindex-references="reindexReferences"
-			set-ref-provider-enabled="setRefProviderEnabled"
-			set-started-free-trial="setStartedFreeTrial"
-		)
