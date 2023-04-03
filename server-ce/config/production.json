@@ -1,5 +1,6 @@
 {
   "persistor": {
+    "backend": "fs",
     "useSubdirectories": true
   },
   "basicHttpAuth": {
@@ -7,8 +8,17 @@
   },
   "useDeleteObjects": "false",
   "jwtAuth": {
-    "key": "secureKey",
     "algorithm": "HS256"
   },
-  "mongo": {}
+  "mongo": {},
+  "blobStore": {
+    "globalBucket": "/var/lib/sharelatex/data/history/overleaf-global-blobs",
+    "projectBucket": "/var/lib/sharelatex/data/history/overleaf-project-blobs"
+  },
+  "chunkStore": {
+    "bucket": "/var/lib/sharelatex/data/history/overleaf-chunks"
+  },
+  "zipStore": {
+    "bucket": "/var/lib/sharelatex/data/history/overleaf-zips"
+  }
 }

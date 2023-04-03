@@ -235,6 +235,11 @@ module.exports = {
     recurly: {},
   },
 
+  jwt: {
+    key: process.env.OT_JWT_AUTH_KEY,
+    algorithm: process.env.OT_JWT_AUTH_ALG || 'HS256',
+  },
+
   splitTests: [],
 
   // Where your instance of ShareLaTeX can be found publically. Used in emails

@@ -90,10 +90,6 @@ ENV OPTIMISE_PDF "true"
 ENV SHARELATEX_FPH_INITIALIZE_NEW_PROJECTS "true"
 ENV SHARELATEX_FPH_DISPLAY_NEW_PROJECTS "true"
 
-ENV SHARELATEX_HISTORY_BACKEND "fs"
-ENV SHARELATEX_HISTORY_PROJECT_BLOBS_BUCKET "/var/lib/sharelatex/data/history/overleaf-project-blobs"
-ENV SHARELATEX_HISTORY_CHUNKS_BUCKET "/var/lib/sharelatex/data/history/overleaf-chunks"
-
 # Phusion Image timeouts before sending SIGKILL to processes
 # ----------------------------------------------------------
 ENV KILL_PROCESS_TIMEOUT 55
