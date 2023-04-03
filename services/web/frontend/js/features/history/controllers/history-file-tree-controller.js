@@ -5,11 +5,5 @@ import HistoryFileTree from '../components/history-file-tree'
 
 App.component(
   'historyFileTreeReact',
-  react2angular(rootContext.use(HistoryFileTree), [
-    'refProviders',
-    'setRefProviderEnabled',
-    'setStartedFreeTrial',
-    'reindexReferences',
-    'onSelect',
-  ])
+  react2angular(rootContext.use(HistoryFileTree))
 )

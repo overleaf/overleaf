@@ -19,16 +19,7 @@ function Main() {
   return (
     <>
       {fileTreeContainer
-        ? createPortal(
-            <HistoryFileTree
-              onSelect={() => {}}
-              refProviders={{}}
-              reindexReferences={() => {}}
-              setRefProviderEnabled={() => {}}
-              setStartedFreeTrial={() => {}}
-            />,
-            fileTreeContainer
-          )
+        ? createPortal(<HistoryFileTree />, fileTreeContainer)
         : null}
       <div className="history-react">
         <DiffView />

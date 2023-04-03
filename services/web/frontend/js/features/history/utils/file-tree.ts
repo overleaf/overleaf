@@ -48,14 +48,11 @@ export function reducePathsToTree(
   return currentFileTree
 }
 
-type HistoryFileTree = {
+export type HistoryFileTree = {
   docs?: Doc[]
   folders: HistoryFileTree[]
   name: string
-  // `id` and `fileRefs` are both required from react file tree.
-  // TODO: update react file tree to make the data optional so we can delete these keys
-  id: ''
-  fileRefs: []
+  _id: string
 }
 
 export function fileTreeDiffToFileTreeData(
@@ -68,7 +65,7 @@ export function fileTreeDiffToFileTreeData(
   for (const file of fileTreeDiff) {
     if (file.type === 'file') {
       docs.push({
-        _id: '',
+        _id: file.pathname as string,
         name: file.name ?? '',
       })
     } else if (file.type === 'folder') {
@@ -83,8 +80,7 @@ export function fileTreeDiffToFileTreeData(
     docs,
     folders,
     name: currentFolderName,
-    id: '',
-    fileRefs: [],
+    _id: currentFolderName,
   }
 }
 
