@@ -387,3 +387,14 @@
     flex-direction: column-reverse;
   }
 }
+
+.row-within-card {
+  .no-card {
+    > :first-child {
+      margin-top: 0;
+    }
+    > :last-child {
+      margin-bottom: 0;
+    }
+  }
+}
