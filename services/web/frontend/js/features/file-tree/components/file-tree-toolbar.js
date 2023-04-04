@@ -43,7 +43,7 @@ function FileTreeToolbarLeft() {
         description={t('new_file')}
         overlayProps={{ placement: 'bottom' }}
       >
-        <Button onClick={startCreatingDocOrFile}>
+        <Button onClick={startCreatingDocOrFile} bsStyle={null}>
           <Icon type="file" fw accessibilityLabel={t('new_file')} />
         </Button>
       </Tooltip>
@@ -52,7 +52,7 @@ function FileTreeToolbarLeft() {
         description={t('new_folder')}
         overlayProps={{ placement: 'bottom' }}
       >
-        <Button onClick={startCreatingFolder}>
+        <Button onClick={startCreatingFolder} bsStyle={null}>
           <Icon type="folder" fw accessibilityLabel={t('new_folder')} />
         </Button>
       </Tooltip>

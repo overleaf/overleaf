@@ -49,6 +49,7 @@ function TagsList({ onTagClick, onEditClick }: TagsListProps) {
                 onEditClick()
               }}
               className="btn-transparent edit-btn me-2"
+              bsStyle={null}
             >
               <Icon type="pencil" fw />
             </Button>

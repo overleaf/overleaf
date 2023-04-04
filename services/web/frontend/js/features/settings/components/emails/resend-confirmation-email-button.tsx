@@ -48,6 +48,7 @@ function ResendConfirmationEmailButton({
         className="btn-inline-link"
         disabled={state.isLoading}
         onClick={handleResendConfirmationEmail}
+        bsStyle={null}
       >
         {t('resend_confirmation_email')}
       </Button>

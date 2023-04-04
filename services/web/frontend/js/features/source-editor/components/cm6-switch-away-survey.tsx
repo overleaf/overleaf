@@ -79,6 +79,7 @@ export default function CM6SwitchAwaySurvey() {
         data-dismiss="alert"
         aria-label="Close"
         onClick={handleClose}
+        bsStyle={null}
       >
         <span aria-hidden="true">&times;</span>
       </Button>

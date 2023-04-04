@@ -70,7 +70,9 @@ function FileTreeModalError() {
       </Modal.Body>
 
       <Modal.Footer>
-        <Button onClick={handleHide}>{t('ok')}</Button>
+        <Button onClick={handleHide} bsStyle="primary">
+          {t('ok')}
+        </Button>
       </Modal.Footer>
     </Modal>
   )

@@ -19,7 +19,9 @@ export function SidebarFilter({ filter, text }: SidebarFilterProps) {
     <ProjectsFilterMenu filter={filter}>
       {isActive => (
         <li className={isActive ? 'active' : ''}>
-          <Button onClick={() => selectFilter(filter)}>{text}</Button>
+          <Button onClick={() => selectFilter(filter)} bsStyle={null}>
+            {text}
+          </Button>
         </li>
       )}
     </ProjectsFilterMenu>

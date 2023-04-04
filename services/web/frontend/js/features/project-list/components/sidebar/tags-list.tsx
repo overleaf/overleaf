@@ -34,7 +34,11 @@ export default function TagsList() {
         <h2>{t('tags_slash_folders')}</h2>
       </li>
       <li className="tag">
-        <Button className="tag-name" onClick={openCreateTagModal}>
+        <Button
+          className="tag-name"
+          onClick={openCreateTagModal}
+          bsStyle={null}
+        >
           <Icon type="plus" />
           <span className="name">{t('new_folder')}</span>
         </Button>
@@ -50,6 +54,7 @@ export default function TagsList() {
               onClick={e =>
                 handleSelectTag(e as unknown as React.MouseEvent, tag._id)
               }
+              bsStyle={null}
             >
               <span
                 style={{
@@ -109,6 +114,7 @@ export default function TagsList() {
         <Button
           className="tag-name"
           onClick={() => selectTag(UNCATEGORIZED_KEY)}
+          bsStyle={null}
         >
           <span className="name">{t('uncategorized')}</span>
           <span className="subdued"> ({untaggedProjectsCount})</span>

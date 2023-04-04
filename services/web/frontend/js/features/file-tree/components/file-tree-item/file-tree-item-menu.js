@@ -42,6 +42,7 @@ function FileTreeItemMenu({ id }) {
         id={`menu-button-${id}`}
         onClick={withoutPropagation(handleClick)}
         ref={menuButtonRef}
+        bsStyle={null}
       >
         <Icon type="ellipsis-v" accessibilityLabel={t('menu')} />
       </Button>

@@ -14,7 +14,7 @@ function UniversityName({ name, onClick }: UniversityNameProps) {
       {name}
       <span className="small">
         {' '}
-        <Button className="btn-inline-link" onClick={onClick}>
+        <Button className="btn-inline-link" onClick={onClick} bsStyle={null}>
           {t('change')}
         </Button>
       </span>

@@ -110,7 +110,9 @@ function UploadProjectModal({ onHide }: UploadProjectModalProps) {
       </Modal.Body>
 
       <Modal.Footer>
-        <Button onClick={onHide}>{t('cancel')}</Button>
+        <Button onClick={onHide} bsStyle={null} className="btn-secondary">
+          {t('cancel')}
+        </Button>
       </Modal.Footer>
     </AccessibleModal>
   )

@@ -111,6 +111,8 @@ export default function EditTagModal({
           <Button
             onClick={onClose}
             disabled={isDeleteLoading || isRenameLoading}
+            bsStyle={null}
+            className="btn-secondary"
           >
             {t('save_or_cancel-cancel')}
           </Button>

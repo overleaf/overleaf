@@ -65,6 +65,7 @@ export default function GrammarlyWarning({ delay }: GrammarlyWarningProps) {
         data-dismiss="alert"
         aria-label="Close"
         onClick={handleClose}
+        bsStyle={null}
       >
         <span aria-hidden="true">&times;</span>
       </Button>
