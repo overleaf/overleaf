@@ -3,13 +3,12 @@ import classNames from 'classnames'
 import HistoryFileTreeDoc from './history-file-tree-doc'
 import HistoryFileTreeFolder from './history-file-tree-folder'
 import { fileCollator } from '../../../file-tree/util/file-collator'
-import type { Doc } from '../../../../../../types/doc'
 import type { ReactNode } from 'react'
-import type { HistoryFileTree } from '../../utils/file-tree'
+import type { HistoryFileTree, HistoryDoc } from '../../utils/file-tree'
 
 type HistoryFileTreeFolderListProps = {
   folders: HistoryFileTree[]
-  docs: Doc[]
+  docs: HistoryDoc[]
   rootClassName?: string
   children?: ReactNode
 }
@@ -33,7 +32,14 @@ export default function HistoryFileTreeFolderList({
         )
       })}
       {docs.sort(compareFunction).map(doc => {
-        return <HistoryFileTreeDoc key={doc._id} name={doc.name} id={doc._id} />
+        return (
+          <HistoryFileTreeDoc
+            key={doc._id}
+            name={doc.name}
+            id={doc._id}
+            operation={doc.operation}
+          />
+        )
       })}
       {children}
     </ul>
@@ -41,8 +47,8 @@ export default function HistoryFileTreeFolderList({
 }
 
 function compareFunction(
-  one: HistoryFileTree | Doc,
-  two: HistoryFileTree | Doc
+  one: HistoryFileTree | HistoryDoc,
+  two: HistoryFileTree | HistoryDoc
 ) {
   return fileCollator.compare(one.name, two.name)
 }

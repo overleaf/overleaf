@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import type { Doc } from '../../../../../types/doc'
 import type { FileDiff, FileRenamed } from '../services/types/file'
+import type { DiffOperation } from '../services/types/file-tree'
 
 // `Partial` because the `reducePathsToTree` function was copied directly
 // from a javascript file without proper type system and the logic is not typescript-friendly.
@@ -12,7 +13,7 @@ type FileTreeEntity = Partial<{
   newPathname: string
   pathname: string
   children: FileTreeEntity[]
-  operation: 'edited' | 'added' | 'renamed' | 'removed'
+  operation: DiffOperation
 }>
 
 export function reducePathsToTree(
@@ -48,8 +49,10 @@ export function reducePathsToTree(
   return currentFileTree
 }
 
+export type HistoryDoc = Doc & Pick<FileTreeEntity, 'operation'>
+
 export type HistoryFileTree = {
-  docs?: Doc[]
+  docs?: HistoryDoc[]
   folders: HistoryFileTree[]
   name: string
   _id: string
@@ -60,13 +63,14 @@ export function fileTreeDiffToFileTreeData(
   currentFolderName = 'rootFolder' // default value from angular version
 ): HistoryFileTree {
   const folders: HistoryFileTree[] = []
-  const docs: Doc[] = []
+  const docs: HistoryDoc[] = []
 
   for (const file of fileTreeDiff) {
     if (file.type === 'file') {
       docs.push({
-        _id: file.pathname as string,
+        _id: file.pathname ?? '',
         name: file.name ?? '',
+        operation: file.operation,
       })
     } else if (file.type === 'folder') {
       if (file.children) {
