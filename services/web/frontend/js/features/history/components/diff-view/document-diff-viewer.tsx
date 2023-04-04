@@ -2,19 +2,17 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import withErrorBoundary from '../../../../infrastructure/error-boundary'
 import { ErrorBoundaryFallback } from '../../../../shared/components/error-boundary-fallback'
 import { EditorState, Extension } from '@codemirror/state'
-import { EditorView } from '@codemirror/view'
-import { lineNumbers } from '../../../../../../modules/source-editor/frontend/js/extensions/line-numbers'
+import { EditorView, lineNumbers } from '@codemirror/view'
 import { indentationMarkers } from '@replit/codemirror-indentation-markers'
 import { highlights, setHighlightsEffect } from '../../extensions/highlights'
 import useScopeValue from '../../../../shared/hooks/use-scope-value'
-import {
-  FontFamily,
-  LineHeight,
-  OverallTheme,
-} from '../../../../../../modules/source-editor/frontend/js/extensions/theme'
 import { theme, Options } from '../../extensions/theme'
 import { indentUnit } from '@codemirror/language'
 import { Highlight } from '../../services/types/doc'
+
+type FontFamily = 'monaco' | 'lucida'
+type LineHeight = 'compact' | 'normal' | 'wide'
+type OverallTheme = '' | 'light-'
 
 function extensions(themeOptions: Options): Extension[] {
   return [
