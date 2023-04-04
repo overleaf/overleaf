@@ -271,7 +271,7 @@ const settings = {
       url: 'http://localhost:3054',
     },
     v1_history: {
-      url: 'http://localhost:3100/api',
+      url: process.env.V1_HISTORY_URL || 'http://localhost:3100/api',
       user: 'staging',
       pass: process.env.STAGING_PASSWORD,
     },
