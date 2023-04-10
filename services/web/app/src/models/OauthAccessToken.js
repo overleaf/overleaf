@@ -12,6 +12,7 @@ const OauthAccessTokenSchema = new Schema(
     refreshTokenExpiresAt: Date,
     scope: String,
     user_id: { type: ObjectId, ref: 'User' },
+    expiresAt: Date,
   },
   {
     collection: 'oauthAccessTokens',
