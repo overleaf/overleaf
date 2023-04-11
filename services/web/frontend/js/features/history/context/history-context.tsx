@@ -1,30 +1,52 @@
-import { createContext, useContext, useEffect, useState, useMemo } from 'react'
-import { useIdeContext } from '../../../shared/context/ide-context'
+import {
+  createContext,
+  useContext,
+  useCallback,
+  useEffect,
+  useState,
+  useMemo,
+  useRef,
+} from 'react'
 import { useLayoutContext } from '../../../shared/context/layout-context'
-import useAsync from '../../../shared/hooks/use-async'
+import { useUserContext } from '../../../shared/context/user-context'
+import { useProjectContext } from '../../../shared/context/project-context'
 import { HistoryContextValue } from './types/history-context-value'
-import { Update, UpdateSelection } from '../services/types/update'
-import { FileSelection } from '../services/types/file'
-import { diffFiles, fetchUpdates } from '../services/api'
+import { diffFiles, fetchLabels, fetchUpdates } from '../services/api'
 import { renamePathnameKey, isFileRenamed } from '../utils/file-tree'
+import { loadLabels } from '../utils/label'
+import ColorManager from '../../../ide/colors/ColorManager'
+import moment from 'moment'
+import * as eventTracking from '../../../infrastructure/event-tracking'
+import { cloneDeep } from 'lodash'
+import { LoadedUpdate, Update, UpdateSelection } from '../services/types/update'
+import { FileSelection } from '../services/types/file'
+import { Nullable } from '../../../../../types/utils'
 
 function useHistory() {
   const { view } = useLayoutContext()
-  const ide = useIdeContext()
-  const projectId = ide.project_id
+  const user = useUserContext()
+  const project = useProjectContext()
+  const userId = user.id
+  const projectId = project._id
+  const projectOwnerId = project.owner?._id
   const [updateSelection, setUpdateSelection] =
     useState<UpdateSelection | null>(null)
   const [fileSelection, setFileSelection] = useState<FileSelection | null>(null)
-  /* eslint-disable no-unused-vars */
-  const [viewMode, setViewMode] = useState<HistoryContextValue['viewMode']>('')
+  const [updates, setUpdates] = useState<LoadedUpdate[]>([])
+  const [loadingFileTree, setLoadingFileTree] =
+    useState<HistoryContextValue['loadingFileTree']>(true)
   const [nextBeforeTimestamp, setNextBeforeTimestamp] =
-    useState<HistoryContextValue['nextBeforeTimestamp']>(null)
+    useState<HistoryContextValue['nextBeforeTimestamp']>()
   const [atEnd, setAtEnd] = useState<HistoryContextValue['atEnd']>(false)
-  const [userHasFullFeature, setUserHasFullFeature] =
-    useState<HistoryContextValue['userHasFullFeature']>(undefined)
   const [freeHistoryLimitHit, setFreeHistoryLimitHit] =
     useState<HistoryContextValue['freeHistoryLimitHit']>(false)
   const [labels, setLabels] = useState<HistoryContextValue['labels']>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState(null)
+  /* eslint-disable no-unused-vars */
+  const [viewMode, setViewMode] = useState<HistoryContextValue['viewMode']>('')
+  const [userHasFullFeature, setUserHasFullFeature] =
+    useState<HistoryContextValue['userHasFullFeature']>(undefined)
   const [selection, setSelection] = useState<HistoryContextValue['selection']>({
     docs: {},
     pathname: null,
@@ -42,18 +64,110 @@ function useHistory() {
   })
   /* eslint-enable no-unused-vars */
 
-  const { isLoading, isError, error, data, runAsync } = useAsync<{
-    updates: Update[]
-  }>()
-  const updates = useMemo(() => data?.updates ?? [], [data?.updates])
-  const loadingFileTree = true
+  const fetchNextBatchOfUpdates = useCallback(() => {
+    const loadUpdates = (updatesData: Update[]) => {
+      const dateTimeNow = new Date()
+      const timestamp24hoursAgo = dateTimeNow.setDate(dateTimeNow.getDate() - 1)
+      let previousUpdate = updates[updates.length - 1]
+      let cutOffIndex: Nullable<number> = null
+
+      let loadedUpdates: LoadedUpdate[] = cloneDeep(updatesData)
+      for (const [index, update] of loadedUpdates.entries()) {
+        for (const user of update.meta.users) {
+          if (user) {
+            user.hue = ColorManager.getHueForUserId(user.id)
+          }
+        }
+        if (
+          !previousUpdate ||
+          !moment(previousUpdate.meta.end_ts).isSame(update.meta.end_ts, 'day')
+        ) {
+          update.meta.first_in_day = true
+        }
+
+        previousUpdate = update
+
+        if (userHasFullFeature && update.meta.end_ts < timestamp24hoursAgo) {
+          cutOffIndex = index || 1 // Make sure that we show at least one entry (to allow labelling).
+          setFreeHistoryLimitHit(true)
+          if (projectOwnerId === userId) {
+            eventTracking.send(
+              'subscription-funnel',
+              'editor-click-feature',
+              'history'
+            )
+            eventTracking.sendMB('paywall-prompt', {
+              'paywall-type': 'history',
+            })
+          }
+          break
+        }
+      }
+
+      if (!userHasFullFeature && cutOffIndex != null) {
+        loadedUpdates = loadedUpdates.slice(0, cutOffIndex)
+      }
+
+      setUpdates(updates.concat(loadedUpdates))
+
+      // TODO first load
+    }
+
+    if (atEnd) return
+
+    const updatesPromise = fetchUpdates(projectId, nextBeforeTimestamp)
+    const labelsPromise = labels == null ? fetchLabels(projectId) : null
+
+    setIsLoading(true)
+    Promise.all([updatesPromise, labelsPromise])
+      .then(([{ updates: updatesData, nextBeforeTimestamp }, labels]) => {
+        const lastUpdateToV = updatesData.length ? updatesData[0].toV : null
+
+        if (labels) {
+          setLabels(loadLabels(labels, lastUpdateToV))
+        }
+
+        loadUpdates(updatesData)
+        setNextBeforeTimestamp(nextBeforeTimestamp)
+        if (
+          nextBeforeTimestamp == null ||
+          freeHistoryLimitHit ||
+          !updates.length
+        ) {
+          setAtEnd(true)
+        }
+        if (!updates.length) {
+          setLoadingFileTree(false)
+        }
+      })
+      .catch(error => {
+        setError(error)
+        setAtEnd(true)
+        setLoadingFileTree(false)
+      })
+      .finally(() => {
+        setIsLoading(false)
+      })
+  }, [
+    atEnd,
+    freeHistoryLimitHit,
+    labels,
+    nextBeforeTimestamp,
+    projectId,
+    projectOwnerId,
+    userId,
+    userHasFullFeature,
+    updates,
+  ])
 
   // Initial load when the History tab is active
+  const initialFetch = useRef(false)
   useEffect(() => {
-    if (view === 'history') {
-      runAsync(fetchUpdates(projectId)).catch(console.error)
+    if (view === 'history' && !initialFetch.current) {
+      fetchNextBatchOfUpdates()
+      initialFetch.current = true
     }
-  }, [view, projectId, runAsync])
+  }, [view, fetchNextBatchOfUpdates])
 
   // Load files when the update selection changes
   useEffect(() => {
@@ -87,7 +201,6 @@ function useHistory() {
     () => ({
       atEnd,
       error,
-      isError,
       isLoading,
       freeHistoryLimitHit,
       labels,
@@ -106,7 +219,6 @@ function useHistory() {
     [
       atEnd,
       error,
-      isError,
       isLoading,
       freeHistoryLimitHit,
       labels,

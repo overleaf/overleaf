@@ -1,3 +1,5 @@
+import { Nullable } from '../../../../../../types/utils'
+
 export interface User {
   first_name: string
   last_name: string
@@ -6,7 +8,16 @@ export interface User {
 }
 
 export interface Meta {
-  users: User[]
+  users: Nullable<User>[]
   start_ts: number
   end_ts: number
+  origin?: {
+    kind:
+      | 'dropbox'
+      | 'upload'
+      | 'git-bridge'
+      | 'github'
+      | 'history-resync'
+      | 'history-migration'
+  }
 }

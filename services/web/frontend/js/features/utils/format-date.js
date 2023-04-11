@@ -11,8 +11,8 @@ moment.updateLocale('en', {
   },
 })
 
-export function formatTime(date) {
-  return moment(date).format('h:mm a')
+export function formatTime(date, format = 'h:mm a') {
+  return moment(date).format(format)
 }
 
 export function relativeDate(date) {

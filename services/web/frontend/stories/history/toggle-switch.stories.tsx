@@ -31,7 +31,7 @@ export default {
     (Story: React.ComponentType) => (
       <div className="history-react">
         <div className="change-list">
-          <div className="history-header toggle-switch-container">
+          <div className="history-header history-toggle-switch-container">
             <Story />
           </div>
         </div>

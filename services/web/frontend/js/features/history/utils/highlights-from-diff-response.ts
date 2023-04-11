@@ -33,7 +33,7 @@ export function highlightsFromDiffResponse(chunks: DocDiffChunk[]) {
           // There doesn't seem to be a convenient way to make this translatable
           label: `Added by ${name} on ${date}`,
           range,
-          hue: ColorManager.getHueForUserId(user.id),
+          hue: ColorManager.getHueForUserId(user?.id),
         })
       } else if (isDeletion) {
         highlights.push({
@@ -41,7 +41,7 @@ export function highlightsFromDiffResponse(chunks: DocDiffChunk[]) {
           // There doesn't seem to be a convenient way to make this translatable
           label: `Deleted by ${name} on ${date}`,
           range,
-          hue: ColorManager.getHueForUserId(user.id),
+          hue: ColorManager.getHueForUserId(user?.id),
         })
       }
     }

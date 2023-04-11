@@ -1,20 +1,24 @@
 import { Nullable } from '../../../../../../types/utils'
-import { Update, UpdateSelection } from '../../services/types/update'
+import {
+  Label,
+  LoadedUpdate,
+  PseudoCurrentStateLabel,
+  UpdateSelection,
+} from '../../services/types/update'
 import { Selection } from '../../../../../../types/history/selection'
 import { FileSelection } from '../../services/types/file'
 
 export type HistoryContextValue = {
-  updates: Update[]
+  updates: LoadedUpdate[]
   viewMode: string
-  nextBeforeTimestamp: Nullable<number>
+  nextBeforeTimestamp: number | undefined
   atEnd: boolean
   userHasFullFeature: boolean | undefined
   freeHistoryLimitHit: boolean
   selection: Selection
-  isError: boolean
   isLoading: boolean
   error: Nullable<unknown>
-  labels: Nullable<unknown>
+  labels: Nullable<Array<Label | PseudoCurrentStateLabel>>
   loadingFileTree: boolean
   projectId: string
   fileSelection: FileSelection | null
