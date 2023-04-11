@@ -40,25 +40,29 @@
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
     height: 100%;
-    color: @white;
     padding-top: 0;
     padding-bottom: 0;
 
     &.btn-primary {
-      border-right: 1px solid @green-10;
+      border-right: 1px solid fade(@neutral-90, 16%);
     }
 
     // on new css, btn-secondary already has a border
     &.btn-secondary when (@is-new-css = false) {
-      border-right: 1px solid @neutral-10;
+      border-right: 1px solid fade(@ol-blue-gray-6, 16%);
     }
 
     &.btn-danger {
-      border-right: 1px solid @red-10;
+      border-right: 1px solid fade(@neutral-90, 16%);
     }
 
     &[disabled] when (@is-new-css = false) {
       opacity: 1;
+    }
+
+    &.no-left-radius {
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
     }
   }
 

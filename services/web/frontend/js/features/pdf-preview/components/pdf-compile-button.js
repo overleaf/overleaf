@@ -45,6 +45,7 @@ function PdfCompileButton() {
 
   const buttonClassName = classNames({
     'btn-striped-animated': hasChanges,
+    'no-left-radius': true,
   })
 
   return (
