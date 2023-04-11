@@ -410,6 +410,8 @@
   "invalid_email": "",
   "invalid_file_name": "",
   "invalid_filename": "",
+  "invalid_password_contains_email": "",
+  "invalid_password_too_similar": "",
   "invalid_request": "",
   "invite_more_collabs": "",
   "invite_not_accepted": "",

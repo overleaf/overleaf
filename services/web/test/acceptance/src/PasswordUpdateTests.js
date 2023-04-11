@@ -133,7 +133,43 @@ describe('PasswordUpdate', function () {
       })
       it('should return error message', async function () {
         const body = await response.json()
-        expect(body.message).to.equal('password is too short')
+        expect(body.message).to.deep.equal({
+          type: 'error',
+          key: 'password-too-short',
+          text: 'Password too short, minimum 8',
+        })
+      })
+      it('should not update audit log', async function () {
+        const auditLog = userHelper.getAuditLogWithoutNoise()
+        expect(auditLog).to.deep.equal([])
+      })
+    })
+    describe('new password contains part of email', function () {
+      beforeEach(async function () {
+        response = await userHelper.fetch('/user/password/update', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify({
+            currentPassword: password,
+            newPassword1: 'somecooluser123',
+            newPassword2: 'somecooluser123',
+          }),
+        })
+        userHelper = await UserHelper.getUser({ email })
+      })
+      it('should return 400', async function () {
+        expect(response.status).to.equal(400)
+      })
+      it('should return error message', async function () {
+        const body = await response.json()
+        expect(body.message).to.deep.equal({
+          key: 'password-contains-email',
+          type: 'error',
+          text: 'Password cannot contain parts of email address',
+        })
       })
       it('should not update audit log', async function () {
         const auditLog = userHelper.getAuditLogWithoutNoise()
@@ -161,9 +197,11 @@ describe('PasswordUpdate', function () {
       })
       it('should return error message', async function () {
         const body = await response.json()
-        expect(body.message).to.equal(
-          'Password is too similar to email address'
-        )
+        expect(body.message).to.deep.equal({
+          key: 'password-too-similar',
+          type: 'error',
+          text: 'Password is too similar to parts of email address',
+        })
       })
       it('should not update audit log', async function () {
         const auditLog = userHelper.getAuditLogWithoutNoise()

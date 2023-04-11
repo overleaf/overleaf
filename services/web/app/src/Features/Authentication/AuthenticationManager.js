@@ -402,6 +402,48 @@ const AuthenticationManager = {
       }
     }
   },
+
+  getMessageForInvalidPasswordError(error, req) {
+    const errorCode = error?.info?.code
+    const message = {
+      type: 'error',
+    }
+    switch (errorCode) {
+      case 'not_set':
+        message.key = 'password-not-set'
+        message.text = req.i18n.translate('invalid_password_not_set')
+        break
+      case 'invalid_character':
+        message.key = 'password-invalid-character'
+        message.text = req.i18n.translate('invalid_password_invalid_character')
+        break
+      case 'contains_email':
+        message.key = 'password-contains-email'
+        message.text = req.i18n.translate('invalid_password_contains_email')
+        break
+      case 'too_similar':
+        message.key = 'password-too-similar'
+        message.text = req.i18n.translate('invalid_password_too_similar')
+        break
+      case 'too_short':
+        message.key = 'password-too-short'
+        message.text = req.i18n.translate('invalid_password_too_short', {
+          minLength: Settings.passwordStrengthOptions?.length?.min || 8,
+        })
+        break
+      case 'too_long':
+        message.key = 'password-too-long'
+        message.text = req.i18n.translate('invalid_password_too_long', {
+          maxLength: Settings.passwordStrengthOptions?.length?.max || 72,
+        })
+        break
+      default:
+        logger.error({ err: error }, 'Unknown password validation error code')
+        message.text = req.i18n.translate('invalid_password')
+        break
+    }
+    return message
+  },
 }
 
 AuthenticationManager.promises = {

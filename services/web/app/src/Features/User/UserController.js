@@ -96,21 +96,11 @@ async function changePassword(req, res, next) {
     )
   } catch (error) {
     if (error.name === 'InvalidPasswordError') {
-      if (error?.info?.code === 'contains_email') {
-        return HttpErrorHandler.badRequest(
-          req,
-          res,
-          req.i18n.translate('invalid_password_contains_email')
-        )
-      } else if (error?.info?.code === 'too_similar') {
-        return HttpErrorHandler.badRequest(
-          req,
-          res,
-          req.i18n.translate('invalid_password_too_similar')
-        )
-      } else {
-        return HttpErrorHandler.badRequest(req, res, error.message)
-      }
+      const message = AuthenticationManager.getMessageForInvalidPasswordError(
+        error,
+        req
+      )
+      return res.status(400).json({ message })
     } else if (error.name === 'PasswordMustBeDifferentError') {
       return HttpErrorHandler.badRequest(
         req,

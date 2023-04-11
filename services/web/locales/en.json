@@ -751,7 +751,7 @@
   "invalid_password_not_set": "Password is required",
   "invalid_password_too_long": "Maximum password length __maxLength__ exceeded",
   "invalid_password_too_short": "Password too short, minimum __minLength__",
-  "invalid_password_too_similar": "Password is too similar to email address",
+  "invalid_password_too_similar": "Password is too similar to parts of email address",
   "invalid_request": "Invalid Request. Please correct the data and try again.",
   "invalid_zip_file": "Invalid zip file",
   "invite_more_collabs": "Invite more collaborators",

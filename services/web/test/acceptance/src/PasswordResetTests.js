@@ -200,7 +200,11 @@ describe('PasswordReset', function () {
         expect(response.status).to.equal(400)
         const body = await response.json()
         expect(body).to.deep.equal({
-          message: { text: 'Password cannot contain parts of email address' },
+          message: {
+            type: 'error',
+            key: 'password-contains-email',
+            text: 'Password cannot contain parts of email address',
+          },
         })
       })
 
@@ -223,7 +227,11 @@ describe('PasswordReset', function () {
         expect(response.status).to.equal(400)
         const body = await response.json()
         expect(body).to.deep.equal({
-          message: { text: 'Password is too similar to email address' },
+          message: {
+            type: 'error',
+            key: 'password-too-similar',
+            text: 'Password is too similar to parts of email address',
+          },
         })
       })
 

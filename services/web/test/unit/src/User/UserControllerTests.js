@@ -61,6 +61,9 @@ describe('UserController', function () {
         authenticate: sinon.stub(),
         setUserPassword: sinon.stub(),
       },
+      getMessageForInvalidPasswordError: sinon
+        .stub()
+        .returns({ type: 'error', key: 'some-key' }),
     }
     this.UserUpdater = {
       changeEmailAddress: sinon.stub(),
@@ -771,18 +774,21 @@ describe('UserController', function () {
         //   .returns({ message: 'validation-error' })
         const err = new Error('bad')
         err.name = 'InvalidPasswordError'
+        const message = {
+          type: 'error',
+          key: 'some-message-key',
+        }
+        this.AuthenticationManager.getMessageForInvalidPasswordError.returns(
+          message
+        )
         this.AuthenticationManager.promises.setUserPassword.rejects(err)
         this.AuthenticationManager.promises.authenticate.resolves({})
         this.req.body = {
           newPassword1: 'newpass',
           newPassword2: 'newpass',
         }
-        this.HttpErrorHandler.badRequest.callsFake(() => {
-          expect(this.HttpErrorHandler.badRequest).to.have.been.calledWith(
-            this.req,
-            this.res,
-            err.message
-          )
+        this.res.json.callsFake(result => {
+          expect(result.message).to.deep.equal(message)
           this.AuthenticationManager.promises.setUserPassword.callCount.should.equal(
             1
           )
