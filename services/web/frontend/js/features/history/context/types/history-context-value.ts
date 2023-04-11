@@ -7,10 +7,11 @@ import {
 } from '../../services/types/update'
 import { Selection } from '../../../../../../types/history/selection'
 import { FileSelection } from '../../services/types/file'
+import { ViewMode } from '../../services/types/view-mode'
 
 export type HistoryContextValue = {
   updates: LoadedUpdate[]
-  viewMode: string
+  viewMode: ViewMode
   nextBeforeTimestamp: number | undefined
   atEnd: boolean
   userHasFullFeature: boolean | undefined

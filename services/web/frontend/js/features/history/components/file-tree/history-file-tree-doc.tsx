@@ -1,26 +1,30 @@
 import HistoryFileTreeItem from './history-file-tree-item'
 import iconTypeFromName from '../../../file-tree/util/icon-type-from-name'
 import Icon from '../../../../shared/components/icon'
-import { useSelectableEntity } from '../../context/history-file-tree-selectable'
-import { DiffOperation } from '../../services/types/file-tree'
+import { useFileTreeItemSelection } from '../../context/hooks/use-file-tree-item-selection'
+import { DiffOperation } from '../../services/types/diff-operation'
+import classNames from 'classnames'
 
 type HistoryFileTreeDocProps = {
   name: string
-  id: string
+  pathname: string
   operation?: DiffOperation
 }
 
 export default function HistoryFileTreeDoc({
   name,
-  id,
+  pathname,
   operation,
 }: HistoryFileTreeDocProps) {
-  const { props: selectableEntityProps } = useSelectableEntity(id)
+  const { isSelected, onClick } = useFileTreeItemSelection(pathname)
 
   return (
     <li
       role="treeitem"
-      {...selectableEntityProps}
+      className={classNames({ selected: isSelected })}
+      onClick={onClick}
+      onKeyDown={onClick}
+      aria-selected={isSelected}
       aria-label={name}
       tabIndex={0}
     >

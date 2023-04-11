@@ -1,7 +1,6 @@
 import _ from 'lodash'
-import type { Doc } from '../../../../../types/doc'
 import type { FileDiff, FileRenamed } from '../services/types/file'
-import type { DiffOperation } from '../services/types/file-tree'
+import type { DiffOperation } from '../services/types/diff-operation'
 
 // `Partial` because the `reducePathsToTree` function was copied directly
 // from a javascript file without proper type system and the logic is not typescript-friendly.
@@ -49,13 +48,15 @@ export function reducePathsToTree(
   return currentFileTree
 }
 
-export type HistoryDoc = Doc & Pick<FileTreeEntity, 'operation'>
+export type HistoryDoc = {
+  pathname: string
+  name: string
+} & Pick<FileTreeEntity, 'operation'>
 
 export type HistoryFileTree = {
   docs?: HistoryDoc[]
   folders: HistoryFileTree[]
   name: string
-  _id: string
 }
 
 export function fileTreeDiffToFileTreeData(
@@ -68,7 +69,7 @@ export function fileTreeDiffToFileTreeData(
   for (const file of fileTreeDiff) {
     if (file.type === 'file') {
       docs.push({
-        _id: file.pathname ?? '',
+        pathname: file.pathname ?? '',
         name: file.name ?? '',
         operation: file.operation,
       })
@@ -84,7 +85,6 @@ export function fileTreeDiffToFileTreeData(
     docs,
     folders,
     name: currentFolderName,
-    _id: currentFolderName,
   }
 }
 

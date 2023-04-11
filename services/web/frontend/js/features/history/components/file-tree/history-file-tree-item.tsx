@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { DiffOperation } from '../../services/types/file-tree'
+import { DiffOperation } from '../../services/types/diff-operation'
 
 type FileTreeItemProps = {
   name: string

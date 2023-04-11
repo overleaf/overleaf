@@ -24,7 +24,7 @@ export default function HistoryFileTreeFolderList({
       {folders.sort(compareFunction).map(folder => {
         return (
           <HistoryFileTreeFolder
-            key={folder._id}
+            key={folder.name}
             name={folder.name}
             folders={folder.folders}
             docs={folder.docs ?? []}
@@ -34,9 +34,9 @@ export default function HistoryFileTreeFolderList({
       {docs.sort(compareFunction).map(doc => {
         return (
           <HistoryFileTreeDoc
-            key={doc._id}
+            key={doc.pathname}
             name={doc.name}
-            id={doc._id}
+            pathname={doc.pathname}
             operation={doc.operation}
           />
         )

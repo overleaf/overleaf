@@ -1,7 +1,5 @@
 import _ from 'lodash'
-import { useCallback } from 'react'
 import { useHistoryContext } from '../context/history-context'
-import { HistoryFileTreeSelectableProvider } from '../context/history-file-tree-selectable'
 import {
   fileTreeDiffToFileTreeData,
   reducePathsToTree,
@@ -9,16 +7,7 @@ import {
 import HistoryFileTreeFolderList from './file-tree/history-file-tree-folder-list'
 
 export default function HistoryFileTree() {
-  const { fileSelection, setFileSelection } = useHistoryContext()
-
-  const handleSelectFile = useCallback(
-    (pathname: string) => {
-      if (fileSelection) {
-        setFileSelection({ files: fileSelection.files, pathname })
-      }
-    },
-    [fileSelection, setFileSelection]
-  )
+  const { fileSelection } = useHistoryContext()
 
   if (!fileSelection) {
     return null
@@ -29,14 +18,12 @@ export default function HistoryFileTree() {
   const mappedFileTree = fileTreeDiffToFileTreeData(fileTree)
 
   return (
-    <HistoryFileTreeSelectableProvider onSelectFile={handleSelectFile}>
-      <HistoryFileTreeFolderList
-        folders={mappedFileTree.folders}
-        docs={mappedFileTree.docs ?? []}
-        rootClassName="file-tree-list"
-      >
-        <li className="bottom-buffer" />
-      </HistoryFileTreeFolderList>
-    </HistoryFileTreeSelectableProvider>
+    <HistoryFileTreeFolderList
+      folders={mappedFileTree.folders}
+      docs={mappedFileTree.docs ?? []}
+      rootClassName="file-tree-list"
+    >
+      <li className="bottom-buffer" />
+    </HistoryFileTreeFolderList>
   )
 }

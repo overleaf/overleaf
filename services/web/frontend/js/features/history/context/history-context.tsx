@@ -14,6 +14,7 @@ import { HistoryContextValue } from './types/history-context-value'
 import { diffFiles, fetchLabels, fetchUpdates } from '../services/api'
 import { renamePathnameKey, isFileRenamed } from '../utils/file-tree'
 import { loadLabels } from '../utils/label'
+import { autoSelectFile } from '../utils/auto-select-file'
 import ColorManager from '../../../ide/colors/ColorManager'
 import moment from 'moment'
 import * as eventTracking from '../../../infrastructure/event-tracking'
@@ -35,6 +36,9 @@ function useHistory() {
   const [updates, setUpdates] = useState<LoadedUpdate[]>([])
   const [loadingFileTree, setLoadingFileTree] =
     useState<HistoryContextValue['loadingFileTree']>(true)
+  // eslint-disable-next-line no-unused-vars
+  const [viewMode, setViewMode] =
+    useState<HistoryContextValue['viewMode']>('point_in_time')
   const [nextBeforeTimestamp, setNextBeforeTimestamp] =
     useState<HistoryContextValue['nextBeforeTimestamp']>()
   const [atEnd, setAtEnd] = useState<HistoryContextValue['atEnd']>(false)
@@ -43,8 +47,7 @@ function useHistory() {
   const [labels, setLabels] = useState<HistoryContextValue['labels']>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
-  /* eslint-disable no-unused-vars */
-  const [viewMode, setViewMode] = useState<HistoryContextValue['viewMode']>('')
+  // eslint-disable-next-line no-unused-vars
   const [userHasFullFeature, setUserHasFullFeature] =
     useState<HistoryContextValue['userHasFullFeature']>(undefined)
   const [selection, setSelection] = useState<HistoryContextValue['selection']>({
@@ -177,8 +180,14 @@ function useHistory() {
     const { fromV, toV } = updateSelection.update
 
     diffFiles(projectId, fromV, toV).then(({ diff: files }) => {
+      const defaultSelection = autoSelectFile(
+        files,
+        selection,
+        viewMode,
+        updates
+      )
       // TODO Infer default file sensibly
-      const pathname = null
+      const pathname = defaultSelection.pathname
       const newFiles = files.map(file => {
         if (isFileRenamed(file) && file.newPathname) {
           return renamePathnameKey(file)
@@ -188,14 +197,33 @@ function useHistory() {
       })
       setFileSelection({ files: newFiles, pathname })
     })
-  }, [updateSelection, projectId])
+  }, [updateSelection, projectId, selection, updates, viewMode])
 
-  // Set update selection if there isn't one
   useEffect(() => {
+    // Set update selection if there isn't one
     if (updates.length && !updateSelection) {
-      setUpdateSelection({ update: updates[0], comparing: false })
+      setUpdateSelection({
+        update: {
+          ...updates[0],
+          // Set fromV and toV for initial load as the latest version
+          // This is to mimic angular history behaviour when selecting default pathname on initial history load
+          fromV: updates[0].toV,
+        },
+        comparing: false,
+      })
     }
-  }, [setUpdateSelection, updateSelection, updates])
+
+    // Set default selection if there isn't one
+    if (updates.length && selection.range.fromV === null) {
+      setSelection({
+        ...selection,
+        range: {
+          fromV: updates[0].toV,
+          toV: updates[0].toV,
+        },
+      })
+    }
+  }, [setUpdateSelection, updateSelection, updates, selection])
 
   const value = useMemo<HistoryContextValue>(
     () => ({

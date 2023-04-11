@@ -1,10 +1,11 @@
+import { FileDiff } from '../../frontend/js/features/history/services/types/file'
 import { Nullable } from '../utils'
 
 type Docs = Record<string, unknown>
 
 interface Range {
-  fromV: Nullable<unknown>
-  toV: Nullable<unknown>
+  fromV: Nullable<number>
+  toV: Nullable<number>
 }
 
 interface HoveredRange {
@@ -18,6 +19,6 @@ export interface Selection {
   range: Range
   hoveredRange: HoveredRange
   diff: Nullable<unknown>
-  files: unknown[]
+  files: FileDiff[]
   file: Nullable<unknown>
 }

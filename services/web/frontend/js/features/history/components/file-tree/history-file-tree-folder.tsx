@@ -5,13 +5,12 @@ import HistoryFileTreeItem from './history-file-tree-item'
 import HistoryFileTreeFolderList from './history-file-tree-folder-list'
 
 import Icon from '../../../../shared/components/icon'
-import type { Doc } from '../../../../../../types/doc'
-import type { HistoryFileTree } from '../../utils/file-tree'
+import type { HistoryDoc, HistoryFileTree } from '../../utils/file-tree'
 
 type HistoryFileTreeFolderProps = {
   name: string
   folders: HistoryFileTree[]
-  docs: Doc[]
+  docs: HistoryDoc[]
 }
 
 export default function HistoryFileTreeFolder({
