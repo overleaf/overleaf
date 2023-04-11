@@ -11,6 +11,7 @@ const UserAnalyticsIdCache = require('../Analytics/UserAnalyticsIdCache')
 const { getAnalyticsIdFromMongoUser } = require('../Analytics/AnalyticsHelper')
 const Features = require('../../infrastructure/Features')
 const SplitTestUtils = require('./SplitTestUtils')
+const Settings = require('@overleaf/settings')
 
 const DEFAULT_VARIANT = 'default'
 const ALPHA_PHASE = 'alpha'
@@ -49,7 +50,7 @@ const DEFAULT_ASSIGNMENT = {
  */
 async function getAssignment(req, res, splitTestName, { sync = false } = {}) {
   if (!Features.hasFeature('saas')) {
-    return DEFAULT_ASSIGNMENT
+    return _getNonSaasAssignment(splitTestName)
   }
 
   const query = req.query || {}
@@ -107,7 +108,7 @@ async function getAssignmentForUser(
   { sync = false } = {}
 ) {
   if (!Features.hasFeature('saas')) {
-    return DEFAULT_ASSIGNMENT
+    return _getNonSaasAssignment(splitTestName)
   }
 
   const analyticsId = await UserAnalyticsIdCache.get(userId)
@@ -131,7 +132,7 @@ async function getAssignmentForMongoUser(
   { sync = false } = {}
 ) {
   if (!Features.hasFeature('saas')) {
-    return DEFAULT_ASSIGNMENT
+    return _getNonSaasAssignment(splitTestName)
   }
 
   return _getAssignment(splitTestName, {
@@ -401,6 +402,18 @@ async function _loadSplitTestInfoInLocals(locals, splitTestName) {
       badgeInfo: splitTest.badgeInfo?.[phase],
     })
   }
+}
+
+function _getNonSaasAssignment(splitTestName) {
+  if (Settings.splitTestOverrides?.[splitTestName]) {
+    return {
+      variant: Settings.splitTestOverrides?.[splitTestName],
+      analytics: {
+        segmentation: {},
+      },
+    }
+  }
+  return DEFAULT_ASSIGNMENT
 }
 
 module.exports = {

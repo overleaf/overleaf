@@ -2,7 +2,9 @@ const Path = require('path')
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 const { ObjectId } = require('mongodb')
-const { expect } = require('chai')
+const { assert, expect } = require('chai')
+const MockRequest = require('../helpers/MockRequest')
+const MockResponse = require('../helpers/MockResponse')
 
 const MODULE_PATH = Path.join(
   __dirname,
@@ -39,6 +41,17 @@ describe('SplitTestHandler', function () {
     for (const splitTest of this.splitTests) {
       this.SplitTestCache.get.withArgs(splitTest.name).resolves(splitTest)
     }
+    this.Settings = {
+      moduleImportSequence: [],
+      overleaf: {},
+    }
+    this.AnalyticsManager = {
+      getIdsFromSession: sinon.stub(),
+    }
+    this.LocalsHelper = {
+      setSplitTestVariant: sinon.stub(),
+      setSplitTestInfo: sinon.stub(),
+    }
 
     this.SplitTestHandler = SandboxedModule.require(MODULE_PATH, {
       requires: {
@@ -46,10 +59,14 @@ describe('SplitTestHandler', function () {
         './SplitTestCache': this.SplitTestCache,
         '../../models/SplitTest': { SplitTest: this.SplitTest },
         '../User/UserUpdater': {},
-        '../Analytics/AnalyticsManager': {},
-        './LocalsHelper': {},
+        '../Analytics/AnalyticsManager': this.AnalyticsManager,
+        './LocalsHelper': this.LocalsHelper,
+        '@overleaf/settings': this.Settings,
       },
     })
+
+    this.req = new MockRequest()
+    this.res = new MockResponse()
   })
 
   describe('with an existing user', function () {
@@ -172,6 +189,72 @@ describe('SplitTestHandler', function () {
           versionNumber: 2,
         },
       })
+    })
+  })
+
+  describe('with settings overrides', function () {
+    beforeEach(function () {
+      this.Settings.splitTestOverrides = {
+        'my-test-name': 'foo-1',
+      }
+    })
+
+    it('should not use the override when in SaaS mode', async function () {
+      this.AnalyticsManager.getIdsFromSession.returns({
+        userId: 'abc123abc123',
+      })
+      this.SplitTestCache.get.returns({
+        name: 'my-test-name',
+        versions: [
+          {
+            versionNumber: 0,
+            active: true,
+            variants: [
+              {
+                name: '100-percent-variant',
+                rolloutPercent: 100,
+                rolloutStripes: [{ start: 0, end: 100 }],
+              },
+            ],
+          },
+        ],
+      })
+
+      const assignment = await this.SplitTestHandler.promises.getAssignment(
+        this.req,
+        this.res,
+        'my-test-name'
+      )
+
+      assert.equal('100-percent-variant', assignment.variant)
+    })
+
+    it('should use the override when not in SaaS mode', async function () {
+      this.Settings.splitTestOverrides = {
+        'my-test-name': 'foo-1',
+      }
+      this.Settings.overleaf = undefined
+
+      const assignment = await this.SplitTestHandler.promises.getAssignment(
+        this.req,
+        this.res,
+        'my-test-name'
+      )
+
+      assert.equal('foo-1', assignment.variant)
+    })
+
+    it('should use default when not in SaaS mode and no override is provided', async function () {
+      this.Settings.splitTestOverrides = {}
+      this.Settings.overleaf = undefined
+
+      const assignment = await this.SplitTestHandler.promises.getAssignment(
+        this.req,
+        this.res,
+        'my-test-name'
+      )
+
+      assert.equal('default', assignment.variant)
     })
   })
 })
