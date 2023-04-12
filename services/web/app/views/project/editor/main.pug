@@ -44,7 +44,9 @@ else
 				include ./editor
 
 				if (historyViewReact)
-					history-root
+					history-root(
+						ng-if="ui.view == 'history'"
+					)
 				else
 					include ./history
 
