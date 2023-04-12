@@ -31,6 +31,7 @@ async function main() {
     // - read all the source files
     `
     find . -type f \
+      -not -path './cypress/results/*' \
       -not -path './data/*' \
       -not -path './frontend/extracted-translations.json' \
       -not -path './locales/*' \
@@ -38,7 +39,7 @@ async function main() {
       -not -path '*/node_modules/*' \
       -not -path '*/scripts/*' \
       -not -path '*/tests/*' \
-    | xargs cat
+      -exec cat {} +
     `,
     {
       // run from services/web directory
