@@ -1,6 +1,7 @@
 import { getJSON } from '../../../infrastructure/fetch-json'
 import { FileDiff } from './types/file'
-import { Label, Update } from './types/update'
+import { Update } from './types/update'
+import { Label } from './types/label'
 import { DocDiffResponse } from './types/doc'
 
 const BATCH_SIZE = 10

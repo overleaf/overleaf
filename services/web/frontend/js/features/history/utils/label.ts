@@ -1,16 +1,18 @@
 import { orderBy } from 'lodash'
-import { Label, PseudoCurrentStateLabel } from '../services/types/update'
+import {
+  LoadedLabel,
+  Label,
+  PseudoCurrentStateLabel,
+} from '../services/types/label'
 import { Nullable } from '../../../../../types/utils'
 
 export const isPseudoLabel = (
-  label: Label | PseudoCurrentStateLabel
+  label: LoadedLabel
 ): label is PseudoCurrentStateLabel => {
   return (label as PseudoCurrentStateLabel).isPseudoCurrentStateLabel === true
 }
 
-const sortLabelsByVersionAndDate = (
-  labels: Array<Label | PseudoCurrentStateLabel>
-) => {
+const sortLabelsByVersionAndDate = (labels: LoadedLabel[]) => {
   return orderBy(
     labels,
     ['isPseudoCurrentStateLabel', 'version', 'created_at'],
@@ -18,9 +20,7 @@ const sortLabelsByVersionAndDate = (
   )
 }
 
-const deletePseudoCurrentStateLabelIfExistent = (
-  labels: Array<Label | PseudoCurrentStateLabel>
-) => {
+const deletePseudoCurrentStateLabelIfExistent = (labels: LoadedLabel[]) => {
   if (labels.length && isPseudoLabel(labels[0])) {
     const [, ...rest] = labels
     return rest
@@ -29,7 +29,7 @@ const deletePseudoCurrentStateLabelIfExistent = (
 }
 
 const addPseudoCurrentStateLabelIfNeeded = (
-  labels: Array<Label | PseudoCurrentStateLabel>,
+  labels: LoadedLabel[],
   mostRecentVersion: Nullable<number>
 ) => {
   if (!labels.length || labels[0].version !== mostRecentVersion) {

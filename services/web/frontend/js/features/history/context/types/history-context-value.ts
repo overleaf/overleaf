@@ -1,10 +1,6 @@
 import { Nullable } from '../../../../../../types/utils'
-import {
-  Label,
-  LoadedUpdate,
-  PseudoCurrentStateLabel,
-  UpdateSelection,
-} from '../../services/types/update'
+import { LoadedUpdate, UpdateSelection } from '../../services/types/update'
+import { LoadedLabel } from '../../services/types/label'
 import { Selection } from '../../../../../../types/history/selection'
 import { FileSelection } from '../../services/types/file'
 import { ViewMode } from '../../services/types/view-mode'
@@ -19,7 +15,7 @@ export type HistoryContextValue = {
   selection: Selection
   isLoading: boolean
   error: Nullable<unknown>
-  labels: Nullable<Array<Label | PseudoCurrentStateLabel>>
+  labels: Nullable<LoadedLabel[]>
   loadingFileTree: boolean
   projectId: string
   fileSelection: FileSelection | null

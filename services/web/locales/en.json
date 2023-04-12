@@ -1285,6 +1285,7 @@
   "save_x_percent_or_more": "Save __percent__% or more",
   "saved_bibtex_appended_to_galileo_bib": "The <strong>__citeKey__</strong> cite key has been added to the <strong>__galileoBib__</strong> file in your project.",
   "saved_bibtex_to_new_galileo_bib": "The <strong>__citeKey__</strong> cite key has been copied into a new <strong>__galileoBib__</strong> file in your project. Include this file in your project using the appropriate method for your citation package.",
+  "saved_by": "Saved by",
   "saving": "Saving",
   "saving_20_percent": "Saving 20%!",
   "saving_notification_with_seconds": "Saving __docname__... (__seconds__ seconds of unsaved changes)",

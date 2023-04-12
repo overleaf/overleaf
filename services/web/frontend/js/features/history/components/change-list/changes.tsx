@@ -3,21 +3,21 @@ import { getProjectOpDoc } from '../../utils/history-details'
 import { LoadedUpdate } from '../../services/types/update'
 
 type ChangesProps = {
-  pathNames: LoadedUpdate['pathnames']
+  pathnames: LoadedUpdate['pathnames']
   projectOps: LoadedUpdate['project_ops']
 }
 
-function Changes({ pathNames, projectOps }: ChangesProps) {
+function Changes({ pathnames, projectOps }: ChangesProps) {
   const { t } = useTranslation()
 
   return (
     <ol className="history-version-changes">
-      {pathNames.map(pathName => (
-        <li key={pathName}>
+      {pathnames.map(pathname => (
+        <li key={pathname}>
           <div className="history-version-change-action">
             {t('file_action_edited')}
           </div>
-          <div className="history-version-change-doc">{pathName}</div>
+          <div className="history-version-change-doc">{pathname}</div>
         </li>
       ))}
       {projectOps.map((op, index) => (

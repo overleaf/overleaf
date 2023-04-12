@@ -3,11 +3,8 @@ import { Nullable } from '../../../../../types/utils'
 import { User } from '../services/types/shared'
 import { ProjectOp } from '../services/types/update'
 
-export const getUserColor = (
-  user?: Nullable<{ id: string; _id?: never } | { id?: never; _id: string }>
-) => {
-  const curUserId = user?.id || user?._id
-  const hue = ColorManager.getHueForUserId(curUserId) || 100
+export const getUserColor = (user?: Nullable<{ id: string }>) => {
+  const hue = ColorManager.getHueForUserId(user?.id) || 100
 
   return `hsl(${hue}, 70%, 50%)`
 }

@@ -1,24 +1,6 @@
 import { Meta, User } from './shared'
+import { Label } from './label'
 import { Nullable } from '../../../../../../types/utils'
-
-interface UpdateLabel {
-  id: string
-  comment: string
-  version: number
-  user_id: string
-  created_at: string
-}
-
-export interface Label extends UpdateLabel {
-  user_display_name: string
-}
-
-export interface PseudoCurrentStateLabel {
-  id: '1'
-  isPseudoCurrentStateLabel: true
-  version: Nullable<number>
-  created_at: string
-}
 
 export interface ProjectOp {
   add?: { pathname: string }
@@ -36,7 +18,7 @@ export interface Update {
   project_ops: ProjectOp[]
 }
 
-interface LoadedUpdateMetaUser extends User {
+export interface LoadedUpdateMetaUser extends User {
   hue?: number
 }
 

@@ -80,8 +80,8 @@ history-root {
   }
 
   .history-version-details {
-    padding-top: 6px;
-    padding-bottom: 6px;
+    padding-top: 8px;
+    padding-bottom: 8px;
 
     &:hover {
       cursor: pointer;
@@ -92,8 +92,11 @@ history-root {
   .history-version-metadata-time {
     display: block;
     margin-bottom: 4px;
-    font-weight: bold;
     color: @neutral-90;
+
+    &:last-child {
+      margin-bottom: initial;
+    }
   }
 
   .history-version-metadata-users,
@@ -131,7 +134,8 @@ history-root {
   .history-version-day,
   .history-version-change-action,
   .history-version-metadata-users,
-  .history-version-origin {
+  .history-version-origin,
+  .history-version-saved-by {
     color: @neutral-70;
   }
 
@@ -145,28 +149,20 @@ history-root {
   }
 
   .history-version-badge {
-    display: inline-flex;
-    align-items: center;
-    overflow: hidden;
-    height: 24px;
-    margin-bottom: 3px;
+    margin-bottom: 4px;
     margin-right: 10px;
-    padding: 4px;
-    white-space: nowrap;
-    color: @ol-blue-gray-6;
-    background-color: @neutral-20;
-    border-radius: 4px;
-
-    &-comment {
-      margin-left: 2px;
-    }
   }
 
-  .history-version-label-delete-btn {
-    .reset-button;
-    marigin-left: 8px;
-    padding: 4px;
-    font-size: 24px;
+  .history-version-saved-by {
+    margin-bottom: 4px;
+
+    &-label {
+      margin-right: 8px;
+    }
+
+    &:last-child {
+      margin-bottom: initial;
+    }
   }
 
   .history-loading-panel {

@@ -1,9 +1,10 @@
-import LabelBadges from './label-badges'
+import TagTooltip from './tag-tooltip'
 import Changes from './changes'
 import MetadataUsersList from './metadata-users-list'
 import Origin from './origin'
 import { useUserContext } from '../../../../shared/context/user-context'
 import { relativeDate, formatTime } from '../../../utils/format-date'
+import { orderBy } from 'lodash'
 import { LoadedUpdate } from '../../services/types/update'
 
 type HistoryEntryProps = {
@@ -12,6 +13,7 @@ type HistoryEntryProps = {
 
 function HistoryVersion({ update }: HistoryEntryProps) {
   const { id: currentUserId } = useUserContext()
+  const orderedLabels = orderBy(update.labels, ['created_at'], ['desc'])
 
   return (
     <div>
@@ -21,26 +23,24 @@ function HistoryVersion({ update }: HistoryEntryProps) {
         </time>
       )}
       <div className="history-version-details">
-        <div>
-          <time className="history-version-metadata-time">
-            {formatTime(update.meta.end_ts, 'Do MMMM, h:mm a')}
-          </time>
-          <LabelBadges
-            labels={update.labels}
+        <time className="history-version-metadata-time">
+          <b>{formatTime(update.meta.end_ts, 'Do MMMM, h:mm a')}</b>
+        </time>
+        {orderedLabels.map(label => (
+          <TagTooltip
+            key={label.id}
             showTooltip
             currentUserId={currentUserId}
+            label={label}
           />
-          <Changes
-            pathNames={update.pathnames}
-            projectOps={update.project_ops}
-          />
-          <MetadataUsersList
-            users={update.meta.users}
-            origin={update.meta.origin}
-            currentUserId={currentUserId}
-          />
-          <Origin origin={update.meta.origin} />
-        </div>
+        ))}
+        <Changes pathnames={update.pathnames} projectOps={update.project_ops} />
+        <MetadataUsersList
+          users={update.meta.users}
+          origin={update.meta.origin}
+          currentUserId={currentUserId}
+        />
+        <Origin origin={update.meta.origin} />
       </div>
     </div>
   )

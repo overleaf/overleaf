@@ -1,0 +1,32 @@
+.badge-new {
+  @padding: 4px;
+  display: inline-flex;
+  align-items: center;
+  overflow: hidden;
+  height: 24px;
+  padding: @padding;
+  white-space: nowrap;
+  color: @ol-blue-gray-6;
+  background-color: @neutral-20;
+  border-radius: 4px;
+
+  &:hover {
+    background-color: @neutral-30;
+  }
+
+  &-comment {
+    margin-left: 2px;
+  }
+
+  &-close {
+    .reset-button;
+    width: 24px;
+    margin-left: 4px;
+    margin-right: -@padding;
+    font-size: 24px;
+
+    &:hover {
+      background-color: @neutral-40;
+    }
+  }
+}
