@@ -1,5 +1,6 @@
 import { Button } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
+import MaterialIcon from '../../../shared/components/material-icon'
 import { getTagColor } from '../util/tag'
 import MenuItemButton from './dropdown/menu-item-button'
 import Icon from '../../../shared/components/icon'
@@ -65,9 +66,7 @@ function TagsList({ onTagClick, onEditClick }: TagsListProps) {
                 color: getTagColor(tag),
               }}
             >
-              <Icon
-                type={selectedTagId === tag._id ? 'folder-open' : 'folder'}
-              />
+              <MaterialIcon type="label" style={{ verticalAlign: 'sub' }} />
             </span>
             <span>
               {tag.name}{' '}
@@ -100,7 +99,7 @@ function TagsList({ onTagClick, onEditClick }: TagsListProps) {
       >
         <span className="tag-item menu-item-button-text">
           <Icon type="plus" className="me-2" />
-          <span>{t('new_folder')}</span>
+          <span>{t('new_tag')}</span>
         </span>
       </MenuItemButton>
       <CreateTagModal id="create-tag-modal-dropdown" disableCustomColor />

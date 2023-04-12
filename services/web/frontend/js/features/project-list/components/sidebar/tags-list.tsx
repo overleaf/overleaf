@@ -2,6 +2,7 @@ import { sortBy } from 'lodash'
 import { Button } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import Icon from '../../../../shared/components/icon'
+import MaterialIcon from '../../../../shared/components/material-icon'
 import {
   UNCATEGORIZED_KEY,
   useProjectListContext,
@@ -31,7 +32,7 @@ export default function TagsList() {
   return (
     <>
       <li role="separator" className="separator">
-        <h2>{t('tags_slash_folders')}</h2>
+        <h2>{t('tags')}</h2>
       </li>
       <li className="tag">
         <Button
@@ -40,7 +41,7 @@ export default function TagsList() {
           bsStyle={null}
         >
           <Icon type="plus" />
-          <span className="name">{t('new_folder')}</span>
+          <span className="name">{t('new_tag')}</span>
         </Button>
       </li>
       {sortBy(tags, tag => tag.name?.toLowerCase()).map(tag => {
@@ -61,9 +62,7 @@ export default function TagsList() {
                   color: getTagColor(tag),
                 }}
               >
-                <Icon
-                  type={selectedTagId === tag._id ? 'folder-open' : 'folder'}
-                />
+                <MaterialIcon type="label" style={{ verticalAlign: 'sub' }} />
               </span>
               <span className="name">
                 {tag.name}{' '}

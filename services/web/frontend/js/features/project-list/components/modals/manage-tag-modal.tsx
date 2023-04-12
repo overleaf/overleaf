@@ -79,7 +79,7 @@ export function ManageTagModal({
   return (
     <AccessibleModal show animation onHide={onClose} id={id} backdrop="static">
       <Modal.Header closeButton>
-        <Modal.Title>{t('edit_folder')}</Modal.Title>
+        <Modal.Title>{t('edit_tag')}</Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
@@ -97,7 +97,7 @@ export function ManageTagModal({
             />
           </FormGroup>
           <FormGroup aria-hidden="true">
-            <ControlLabel>{t('folder_color')}</ControlLabel>:<br />
+            <ControlLabel>{t('tag_color')}</ControlLabel>:<br />
             <ColorPicker disableCustomColor />
           </FormGroup>
         </Form>
@@ -114,7 +114,7 @@ export function ManageTagModal({
               {isDeleteLoading ? (
                 <>{t('deleting')} &hellip;</>
               ) : (
-                t('delete_folder')
+                t('delete_tag')
               )}
             </Button>
           </div>

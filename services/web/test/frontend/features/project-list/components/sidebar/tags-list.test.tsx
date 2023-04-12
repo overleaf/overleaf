@@ -43,10 +43,10 @@ describe('<TagsList />', function () {
 
   it('displays the tags list', function () {
     screen.getByRole('heading', {
-      name: 'Tags/Folders',
+      name: 'Tags',
     })
     screen.getByRole('button', {
-      name: 'New Folder',
+      name: 'New Tag',
     })
     screen.getByRole('button', {
       name: 'Tag 1 (1)',
@@ -82,7 +82,7 @@ describe('<TagsList />', function () {
   describe('Create modal', function () {
     beforeEach(async function () {
       const newTagButton = screen.getByRole('button', {
-        name: 'New Folder',
+        name: 'New Tag',
       })
 
       await fireEvent.click(newTagButton)
@@ -90,7 +90,7 @@ describe('<TagsList />', function () {
 
     it('modal is open', async function () {
       const modal = screen.getAllByRole('dialog', { hidden: false })[0]
-      within(modal).getByRole('heading', { name: 'Create New Folder' })
+      within(modal).getByRole('heading', { name: 'Create new tag' })
     })
 
     it('click on cancel closes the modal', async function () {
@@ -171,7 +171,7 @@ describe('<TagsList />', function () {
 
     it('modal is open', async function () {
       const modal = screen.getAllByRole('dialog', { hidden: false })[0]
-      within(modal).getByRole('heading', { name: 'Edit Folder' })
+      within(modal).getByRole('heading', { name: 'Edit Tag' })
     })
 
     it('click on cancel closes the modal', async function () {
@@ -264,7 +264,7 @@ describe('<TagsList />', function () {
 
     it('modal is open', async function () {
       const modal = screen.getAllByRole('dialog', { hidden: false })[0]
-      within(modal).getByRole('heading', { name: 'Delete Folder' })
+      within(modal).getByRole('heading', { name: 'Delete Tag' })
     })
 
     it('click on Cancel closes the modal', async function () {

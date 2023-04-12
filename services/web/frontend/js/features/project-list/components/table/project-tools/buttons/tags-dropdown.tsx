@@ -4,6 +4,7 @@ import { Button, Dropdown } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import ControlledDropdown from '../../../../../../shared/components/controlled-dropdown'
 import Icon from '../../../../../../shared/components/icon'
+import MaterialIcon from '../../../../../../shared/components/material-icon'
 import { useProjectListContext } from '../../../../context/project-list-context'
 import useTag from '../../../../hooks/use-tag'
 import { addProjectsToTag, removeProjectsFromTag } from '../../../../util/api'
@@ -90,11 +91,11 @@ function TagsDropdown() {
           title={t('tags')}
           aria-label={t('tags')}
         >
-          <Icon type="folder-open" />
+          <MaterialIcon type="label" style={{ verticalAlign: 'sub' }} />
         </Dropdown.Toggle>
         <Dropdown.Menu className="dropdown-menu-right">
           <li className="dropdown-header" role="heading" aria-level={3}>
-            {t('add_to_folder')}
+            {t('add_to_tag')}
           </li>
           {sortBy(tags, tag => tag.name?.toLowerCase()).map(tag => {
             return (
@@ -137,7 +138,7 @@ function TagsDropdown() {
               className="tag-dropdown-button"
               onClick={handleOpenCreateTagModal}
             >
-              {t('create_new_folder')}
+              {t('create_new_tag')}
             </Button>
           </li>
         </Dropdown.Menu>

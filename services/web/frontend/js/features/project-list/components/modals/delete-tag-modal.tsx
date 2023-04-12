@@ -40,11 +40,11 @@ export default function DeleteTagModal({
   return (
     <AccessibleModal show animation onHide={onClose} id={id} backdrop="static">
       <Modal.Header closeButton>
-        <Modal.Title>{t('delete_folder')}</Modal.Title>
+        <Modal.Title>{t('delete_tag')}</Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
-        {t('about_to_delete_folder')}
+        {t('about_to_delete_tag')}
         <ul>
           <li>{tag.name}</li>
         </ul>

@@ -18,6 +18,6 @@ describe('<ProjectTools />', function () {
     screen.getByLabelText('Archive')
     screen.getByLabelText('Trash')
     screen.getByTitle('Tags')
-    screen.getByRole('button', { name: 'Create New Folder' })
+    screen.getByRole('button', { name: 'Create new tag' })
   })
 })

@@ -70,7 +70,7 @@ export default function CreateTagModal({
   return (
     <AccessibleModal show animation onHide={onClose} id={id} backdrop="static">
       <Modal.Header closeButton>
-        <Modal.Title>{t('create_new_folder')}</Modal.Title>
+        <Modal.Title>{t('create_new_tag')}</Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
@@ -80,14 +80,14 @@ export default function CreateTagModal({
               ref={autoFocusedRef}
               className="form-control"
               type="text"
-              placeholder="New Tag Name"
+              placeholder={t('new_tag_name')}
               name="new-tag-form-name"
               required
               onChange={e => setTagName(e.target.value)}
             />
           </FormGroup>
           <FormGroup aria-hidden="true">
-            <ControlLabel>{t('folder_color')}</ControlLabel>:{' '}
+            <ControlLabel>{t('tag_color')}</ControlLabel>:{' '}
             <div>
               <ColorPicker disableCustomColor={disableCustomColor} />
             </div>

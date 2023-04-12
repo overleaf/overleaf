@@ -99,7 +99,7 @@ function ProjectsDropdown() {
           text={t('trashed_projects')}
           onClick={handleClose}
         />
-        <MenuItem header>{t('tags_slash_folders')}:</MenuItem>
+        <MenuItem header>{t('tags')}:</MenuItem>
         <TagsList onTagClick={handleClose} onEditClick={handleClose} />
       </Dropdown.Menu>
     </Dropdown>

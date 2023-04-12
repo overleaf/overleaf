@@ -645,9 +645,9 @@ describe('<ProjectListRoot />', function () {
             const tagsDropdown = within(actionsToolbar).getByLabelText('Tags')
             fireEvent.click(tagsDropdown)
           })
-          screen.getByText('Add to folder')
+          screen.getByText('Add to tag')
 
-          const newTagButton = screen.getByText('Create New Folder')
+          const newTagButton = screen.getByText('Create new tag')
           fireEvent.click(newTagButton)
 
           const modal = screen.getAllByRole('dialog')[0]
@@ -685,7 +685,7 @@ describe('<ProjectListRoot />', function () {
 
           const tagsDropdown = within(actionsToolbar).getByLabelText('Tags')
           fireEvent.click(tagsDropdown)
-          within(actionsToolbar).getByText('Add to folder')
+          within(actionsToolbar).getByText('Add to tag')
 
           const tagButton = within(actionsToolbar).getByLabelText(
             `Add or remove project from tag ${this.tagName}`
@@ -718,7 +718,7 @@ describe('<ProjectListRoot />', function () {
 
           const tagsDropdown = within(actionsToolbar).getByLabelText('Tags')
           fireEvent.click(tagsDropdown)
-          within(actionsToolbar).getByText('Add to folder')
+          within(actionsToolbar).getByText('Add to tag')
 
           const tagButton = within(actionsToolbar).getByLabelText(
             `Add or remove project from tag ${this.tagName}`
