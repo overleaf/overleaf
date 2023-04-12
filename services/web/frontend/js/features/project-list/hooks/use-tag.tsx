@@ -2,9 +2,9 @@ import { useState, useCallback } from 'react'
 import { useProjectListContext } from '../context/project-list-context'
 import { Tag } from '../../../../../app/src/Features/Tags/types'
 import CreateTagModal from '../components/modals/create-tag-modal'
-import RenameTagModal from '../components/modals/rename-tag-modal'
+import { EditTagModal } from '../components/modals/edit-tag-modal'
 import DeleteTagModal from '../components/modals/delete-tag-modal'
-import EditTagModal from '../components/modals/edit-tag-modal'
+import { ManageTagModal } from '../components/modals/manage-tag-modal'
 import { find } from 'lodash'
 import { addProjectsToTag } from '../util/api'
 
@@ -13,15 +13,14 @@ function useTag() {
     tags,
     selectTag,
     addTag,
-    renameTag,
+    updateTag,
     deleteTag,
     selectedProjects,
     addProjectToTagInView,
   } = useProjectListContext()
   const [creatingTag, setCreatingTag] = useState<boolean>(false)
-  const [renamingTag, setRenamingTag] = useState<Tag>()
-  const [deletingTag, setDeletingTag] = useState<Tag>()
   const [editingTag, setEditingTag] = useState<Tag>()
+  const [deletingTag, setDeletingTag] = useState<Tag>()
 
   const handleSelectTag = useCallback(
     (e: React.MouseEvent, tagId: string) => {
@@ -50,23 +49,23 @@ function useTag() {
     [addTag, selectedProjects, addProjectToTagInView]
   )
 
-  const handleRenameTag = useCallback(
+  const handleEditTag = useCallback(
     (e, tagId) => {
       e.preventDefault()
       const tag = find(tags, ['_id', tagId])
       if (tag) {
-        setRenamingTag(tag)
+        setEditingTag(tag)
       }
     },
-    [tags, setRenamingTag]
+    [tags, setEditingTag]
   )
 
-  const onRename = useCallback(
-    (tagId: string, newTagName: string) => {
-      renameTag(tagId, newTagName)
-      setRenamingTag(undefined)
+  const onUpdate = useCallback(
+    (tagId: string, newTagName: string, newTagColor?: string) => {
+      updateTag(tagId, newTagName, newTagColor)
+      setEditingTag(undefined)
     },
-    [renameTag, setRenamingTag]
+    [updateTag, setEditingTag]
   )
 
   const handleDeleteTag = useCallback(
@@ -88,7 +87,7 @@ function useTag() {
     [deleteTag, setDeletingTag]
   )
 
-  const handleEditTag = useCallback(
+  const handleManageTag = useCallback(
     (e, tagId) => {
       e.preventDefault()
       const tag = find(tags, ['_id', tagId])
@@ -99,15 +98,15 @@ function useTag() {
     [tags, setEditingTag]
   )
 
-  const onEditRename = useCallback(
-    (tagId: string, newTagName: string) => {
-      renameTag(tagId, newTagName)
+  const onManageEdit = useCallback(
+    (tagId: string, newTagName: string, newTagColor?: string) => {
+      updateTag(tagId, newTagName, newTagColor)
       setEditingTag(undefined)
     },
-    [renameTag, setEditingTag]
+    [updateTag, setEditingTag]
   )
 
-  const onEditDelete = useCallback(
+  const onManageDelete = useCallback(
     (tagId: string) => {
       deleteTag(tagId)
       setEditingTag(undefined)
@@ -115,24 +114,31 @@ function useTag() {
     [deleteTag, setEditingTag]
   )
 
-  function CreateModal({ id }: { id: string }) {
+  function CreateModal({
+    id,
+    disableCustomColor,
+  }: {
+    id: string
+    disableCustomColor?: boolean
+  }) {
     return (
       <CreateTagModal
         id={id}
         show={creatingTag}
         onCreate={onCreate}
         onClose={() => setCreatingTag(false)}
+        disableCustomColor={disableCustomColor}
       />
     )
   }
 
-  function RenameModal({ id }: { id: string }) {
+  function EditModal({ id }: { id: string }) {
     return (
-      <RenameTagModal
+      <EditTagModal
         id={id}
-        tag={renamingTag}
-        onRename={onRename}
-        onClose={() => setRenamingTag(undefined)}
+        tag={editingTag}
+        onEdit={onUpdate}
+        onClose={() => setEditingTag(undefined)}
       />
     )
   }
@@ -148,13 +154,13 @@ function useTag() {
     )
   }
 
-  function EditModal({ id }: { id: string }) {
+  function ManageModal({ id }: { id: string }) {
     return (
-      <EditTagModal
+      <ManageTagModal
         id={id}
         tag={editingTag}
-        onRename={onEditRename}
-        onDelete={onEditDelete}
+        onEdit={onManageEdit}
+        onDelete={onManageDelete}
         onClose={() => setEditingTag(undefined)}
       />
     )
@@ -163,13 +169,13 @@ function useTag() {
   return {
     handleSelectTag,
     openCreateTagModal,
-    handleRenameTag,
-    handleDeleteTag,
     handleEditTag,
+    handleDeleteTag,
+    handleManageTag,
     CreateTagModal: CreateModal,
-    RenameTagModal: RenameModal,
-    DeleteTagModal: DeleteModal,
     EditTagModal: EditModal,
+    DeleteTagModal: DeleteModal,
+    ManageTagModal: ManageModal,
   }
 }
 

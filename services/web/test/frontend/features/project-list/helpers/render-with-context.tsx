@@ -1,6 +1,7 @@
 import { render } from '@testing-library/react'
 import fetchMock from 'fetch-mock'
 import React from 'react'
+import { ColorPickerProvider } from '../../../../../frontend/js/features/project-list/context/color-picker-context'
 import { ProjectListProvider } from '../../../../../frontend/js/features/project-list/context/project-list-context'
 import { Project } from '../../../../../types/project/dashboard/api'
 import { projectsData } from '../fixtures/projects-data'
@@ -33,7 +34,11 @@ export function renderWithProjectListContext(
     children,
   }: {
     children: React.ReactNode
-  }) => <ProjectListProvider>{children}</ProjectListProvider>
+  }) => (
+    <ProjectListProvider>
+      <ColorPickerProvider>{children}</ColorPickerProvider>
+    </ProjectListProvider>
+  )
 
   return render(component, {
     wrapper: ProjectListProviderWrapper,

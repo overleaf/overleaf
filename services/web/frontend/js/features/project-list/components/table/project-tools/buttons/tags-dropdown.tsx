@@ -7,6 +7,7 @@ import Icon from '../../../../../../shared/components/icon'
 import { useProjectListContext } from '../../../../context/project-list-context'
 import useTag from '../../../../hooks/use-tag'
 import { addProjectsToTag, removeProjectsFromTag } from '../../../../util/api'
+import { getTagColor } from '../../../../util/tag'
 
 function TagsDropdown() {
   const {
@@ -117,6 +118,13 @@ function TagsDropdown() {
                         ? 'minus-square-o'
                         : 'square-o'
                     }
+                    className="tag-checkbox"
+                  />{' '}
+                  <span
+                    className="tag-dot"
+                    style={{
+                      backgroundColor: getTagColor(tag),
+                    }}
                   />{' '}
                   {tag.name}
                 </Button>

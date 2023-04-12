@@ -799,9 +799,9 @@ describe('<ProjectListRoot />', function () {
             ).findByText<HTMLElement>('More')
             fireEvent.click(moreDropdown)
 
-            const renameButton =
-              screen.getAllByText<HTMLButtonElement>('Rename')[1] // first one is for the tag in the sidebar
-            fireEvent.click(renameButton)
+            const editButton =
+              screen.getAllByText<HTMLButtonElement>('Rename')[0]
+            fireEvent.click(editButton)
 
             const modals = await screen.findAllByRole('dialog')
             const modal = modals[0]
@@ -837,7 +837,7 @@ describe('<ProjectListRoot />', function () {
             fireEvent.click(moreDropdown)
 
             const renameButton =
-              within(actionsToolbar).getByText<HTMLButtonElement>('Rename') // first one is for the tag in the sidebar
+              within(actionsToolbar).getByText<HTMLButtonElement>('Rename')
             fireEvent.click(renameButton)
 
             const modals = await screen.findAllByRole('dialog')

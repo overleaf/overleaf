@@ -13,7 +13,7 @@ describe('TagsHandler', function () {
     this.userId = ObjectId().toString()
     this.callback = sinon.stub()
 
-    this.tag = { user_id: this.userId, name: 'some name' }
+    this.tag = { user_id: this.userId, name: 'some name', color: '#3399CC' }
     this.tagId = ObjectId().toString()
     this.projectId = ObjectId().toString()
 
@@ -54,11 +54,13 @@ describe('TagsHandler', function () {
         this.TagsHandler.createTag(
           this.tag.user_id,
           this.tag.name,
+          this.tag.color,
           (err, resultTag) => {
             expect(err).to.not.exist
             this.TagMock.verify()
             expect(resultTag.user_id).to.equal(this.tag.user_id)
             expect(resultTag.name).to.equal(this.tag.name)
+            expect(resultTag.color).to.equal(this.tag.color)
             done()
           }
         )
@@ -70,6 +72,7 @@ describe('TagsHandler', function () {
         this.TagsHandler.createTag(
           this.tag.user_id,
           'this is a tag that is very very very very very very long',
+          undefined,
           err => {
             expect(err.message).to.equal('Exceeded max tag length')
             done()
@@ -96,11 +99,13 @@ describe('TagsHandler', function () {
         this.TagsHandler.createTag(
           this.tag.user_id,
           this.tag.name,
+          this.tag.color,
           (err, resultTag) => {
             expect(err).to.not.exist
             this.TagMock.verify()
             expect(resultTag.user_id).to.equal(this.tag.user_id)
             expect(resultTag.name).to.equal(this.tag.name)
+            expect(resultTag.color).to.equal(this.tag.color)
             done()
           }
         )

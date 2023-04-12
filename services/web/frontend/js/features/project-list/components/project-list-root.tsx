@@ -2,6 +2,7 @@ import {
   ProjectListProvider,
   useProjectListContext,
 } from '../context/project-list-context'
+import { ColorPickerProvider } from '../context/color-picker-context'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import { Col, Row } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
@@ -27,7 +28,9 @@ function ProjectListRoot() {
 
   return isReady ? (
     <ProjectListProvider>
-      <ProjectListPageContent />
+      <ColorPickerProvider>
+        <ProjectListPageContent />
+      </ColorPickerProvider>
     </ProjectListProvider>
   ) : null
 }

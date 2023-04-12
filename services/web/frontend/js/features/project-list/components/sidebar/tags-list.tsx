@@ -1,13 +1,13 @@
 import { sortBy } from 'lodash'
 import { Button } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
-import ColorManager from '../../../../ide/colors/ColorManager'
 import Icon from '../../../../shared/components/icon'
 import {
   UNCATEGORIZED_KEY,
   useProjectListContext,
 } from '../../context/project-list-context'
 import useTag from '../../hooks/use-tag'
+import { getTagColor } from '../../util/tag'
 
 export default function TagsList() {
   const { t } = useTranslation()
@@ -21,10 +21,10 @@ export default function TagsList() {
   const {
     handleSelectTag,
     openCreateTagModal,
-    handleRenameTag,
+    handleEditTag,
     handleDeleteTag,
     CreateTagModal,
-    RenameTagModal,
+    EditTagModal,
     DeleteTagModal,
   } = useTag()
 
@@ -58,9 +58,7 @@ export default function TagsList() {
             >
               <span
                 style={{
-                  color: `hsl(${ColorManager.getHueForTagId(
-                    tag._id
-                  )}, 70%, 45%)`,
+                  color: getTagColor(tag),
                 }}
               >
                 <Icon
@@ -87,10 +85,10 @@ export default function TagsList() {
               <ul className="dropdown-menu dropdown-menu-right" role="menu">
                 <li>
                   <Button
-                    onClick={e => handleRenameTag(e, tag._id)}
+                    onClick={e => handleEditTag(e, tag._id)}
                     className="tag-action"
                   >
-                    {t('rename')}
+                    {t('edit')}
                   </Button>
                 </li>
                 <li>
@@ -121,8 +119,8 @@ export default function TagsList() {
         </Button>
       </li>
       <CreateTagModal id="create-tag-modal" />
-      <RenameTagModal id="delete-tag-modal" />
-      <DeleteTagModal id="rename-tag-modal" />
+      <EditTagModal id="edit-tag-modal" />
+      <DeleteTagModal id="delete-tag-modal" />
     </>
   )
 }

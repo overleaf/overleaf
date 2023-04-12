@@ -23,8 +23,8 @@ async function getAllTags(req, res) {
 
 async function createTag(req, res) {
   const userId = SessionManager.getLoggedInUserId(req.session)
-  const { name } = req.body
-  const tag = await TagsHandler.promises.createTag(userId, name)
+  const { name, color } = req.body
+  const tag = await TagsHandler.promises.createTag(userId, name, color)
   res.json(tag)
 }
 
@@ -76,6 +76,18 @@ async function renameTag(req, res) {
   res.status(204).end()
 }
 
+async function editTag(req, res) {
+  const userId = SessionManager.getLoggedInUserId(req.session)
+  const { tagId } = req.params
+  const name = req.body?.name
+  const color = req.body?.color
+  if (!name) {
+    return res.status(400).end()
+  }
+  await TagsHandler.promises.editTag(userId, tagId, name, color)
+  res.status(204).end()
+}
+
 module.exports = {
   apiGetAllTags: expressify(apiGetAllTags),
   getAllTags: expressify(getAllTags),
@@ -86,4 +98,5 @@ module.exports = {
   removeProjectsFromTag: expressify(removeProjectsFromTag),
   deleteTag: expressify(deleteTag),
   renameTag: expressify(renameTag),
+  editTag: expressify(editTag),
 }

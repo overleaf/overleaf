@@ -18,6 +18,7 @@ describe('TagsController', function () {
         removeProjectFromTag: sinon.stub().resolves(),
         removeProjectsFromTag: sinon.stub().resolves(),
         deleteTag: sinon.stub().resolves(),
+        editTag: sinon.stub().resolves(),
         renameTag: sinon.stub().resolves(),
         createTag: sinon.stub().resolves(),
       },
@@ -66,23 +67,49 @@ describe('TagsController', function () {
     })
   })
 
-  it('create a tag', function (done) {
-    this.tag = { mock: 'tag' }
-    this.TagsHandler.promises.createTag = sinon.stub().resolves(this.tag)
-    this.req.session.user._id = this.userId = 'user-id-123'
-    this.req.body = { name: (this.name = 'tag-name') }
-    this.TagsController.createTag(this.req, {
-      json: () => {
-        sinon.assert.calledWith(
-          this.TagsHandler.promises.createTag,
-          this.userId,
-          this.name
-        )
-        done()
-        return {
-          end: () => {},
-        }
-      },
+  describe('create a tag', function (done) {
+    it('without a color', function (done) {
+      this.tag = { mock: 'tag' }
+      this.TagsHandler.promises.createTag = sinon.stub().resolves(this.tag)
+      this.req.session.user._id = this.userId = 'user-id-123'
+      this.req.body = { name: (this.name = 'tag-name') }
+      this.TagsController.createTag(this.req, {
+        json: () => {
+          sinon.assert.calledWith(
+            this.TagsHandler.promises.createTag,
+            this.userId,
+            this.name
+          )
+          done()
+          return {
+            end: () => {},
+          }
+        },
+      })
+    })
+
+    it('with a color', function (done) {
+      this.tag = { mock: 'tag' }
+      this.TagsHandler.promises.createTag = sinon.stub().resolves(this.tag)
+      this.req.session.user._id = this.userId = 'user-id-123'
+      this.req.body = {
+        name: (this.name = 'tag-name'),
+        color: (this.color = '#123456'),
+      }
+      this.TagsController.createTag(this.req, {
+        json: () => {
+          sinon.assert.calledWith(
+            this.TagsHandler.promises.createTag,
+            this.userId,
+            this.name,
+            this.color
+          )
+          done()
+          return {
+            end: () => {},
+          }
+        },
+      })
     })
   })
 
@@ -105,22 +132,47 @@ describe('TagsController', function () {
     })
   })
 
-  describe('rename a tag', function () {
+  describe('edit a tag', function () {
     beforeEach(function () {
       this.req.params.tagId = this.tagId = 'tag-id-123'
       this.req.session.user._id = this.userId = 'user-id-123'
     })
 
-    it('with a name', function (done) {
-      this.req.body = { name: (this.name = 'new-name') }
-      this.TagsController.renameTag(this.req, {
+    it('with a name and no color', function (done) {
+      this.req.body = {
+        name: (this.name = 'new-name'),
+      }
+      this.TagsController.editTag(this.req, {
         status: code => {
           assert.equal(code, 204)
           sinon.assert.calledWith(
-            this.TagsHandler.promises.renameTag,
+            this.TagsHandler.promises.editTag,
             this.userId,
             this.tagId,
             this.name
+          )
+          done()
+          return {
+            end: () => {},
+          }
+        },
+      })
+    })
+
+    it('with a name and color', function (done) {
+      this.req.body = {
+        name: (this.name = 'new-name'),
+        color: (this.color = '#FF0011'),
+      }
+      this.TagsController.editTag(this.req, {
+        status: code => {
+          assert.equal(code, 204)
+          sinon.assert.calledWith(
+            this.TagsHandler.promises.editTag,
+            this.userId,
+            this.tagId,
+            this.name,
+            this.color
           )
           done()
           return {

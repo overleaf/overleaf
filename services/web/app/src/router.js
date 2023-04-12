@@ -878,6 +878,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     validate({
       body: Joi.object({
         name: Joi.string().required(),
+        color: Joi.string(),
       }),
     }),
     TagsController.createTag
@@ -892,6 +893,18 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
       }),
     }),
     TagsController.renameTag
+  )
+  webRouter.post(
+    '/tag/:tagId/edit',
+    AuthenticationController.requireLogin(),
+    RateLimiterMiddleware.rateLimit(rateLimiters.renameTag),
+    validate({
+      body: Joi.object({
+        name: Joi.string().required(),
+        color: Joi.string(),
+      }),
+    }),
+    TagsController.editTag
   )
   webRouter.delete(
     '/tag/:tagId',

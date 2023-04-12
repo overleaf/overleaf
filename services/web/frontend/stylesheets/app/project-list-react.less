@@ -721,6 +721,21 @@
     color: @white;
     background-color: @ol-green;
   }
+
+  .tag-checkbox {
+    width: 16px;
+  }
+
+  .tag-dot {
+    display: inline-block;
+    position: relative;
+    border: 1px solid #ffffff;
+    width: 14px;
+    height: 14px;
+    border-radius: 7px;
+    text-align: center;
+    top: 1px;
+  }
 }
 
 .project-list-sidebar-survey-wrapper {
@@ -755,5 +770,82 @@
         padding-top: @padding-md;
       }
     }
+  }
+}
+
+.color-picker-item {
+  height: 28px;
+  width: 28px;
+  cursor: pointer;
+  position: relative;
+  outline: none;
+  border-radius: 4px;
+  margin: 0 14px 0 0;
+  display: inline-block;
+  vertical-align: middle;
+
+  &.more-button {
+    border: 1px solid @gray-dark;
+
+    .color-picker-more {
+      color: @gray-dark;
+      margin: 6px 0 0 7px;
+
+      @media (max-width: @screen-xs-max) {
+        margin: 8px 0 0 9px;
+      }
+    }
+
+    .color-picker-more-open {
+      color: @gray-dark;
+      margin: 5px 0 0 5px;
+
+      @media (max-width: @screen-xs-max) {
+        margin: 7px 0 0 7px;
+      }
+    }
+  }
+
+  .color-picker-item-icon {
+    margin: 6px 0 0 6px;
+    color: @white;
+  }
+
+  @media (max-width: @screen-xs-max) {
+    height: 32px;
+    width: 32px;
+    margin: 24px 24px;
+
+    .color-picker-item-icon {
+      margin: 8px 0 0 8px;
+      color: @white;
+    }
+  }
+}
+
+.color-picker-more-wrapper {
+  position: relative;
+  display: inline-block;
+
+  .custom-picker {
+    position: absolute;
+
+    @media (max-width: @screen-xs-max) {
+      top: 56px;
+      left: 24px;
+    }
+  }
+
+  .custom-picker when(@is-new-css = false) {
+    // to prevent the primary button from overlapping when disabled due to the opacity property
+    z-index: 100 !important;
+  }
+
+  .popover-backdrop {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
   }
 }

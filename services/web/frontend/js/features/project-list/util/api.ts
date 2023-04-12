@@ -9,15 +9,19 @@ export function getProjects(sortBy: Sort): Promise<GetProjectsResponseBody> {
   return postJSON('/api/project', { body: { sort: sortBy } })
 }
 
-export function createTag(tagName: string): Promise<Tag> {
+export function createTag(name: string, color?: string): Promise<Tag> {
   return postJSON(`/tag`, {
-    body: { name: tagName },
+    body: { name, color },
   })
 }
 
-export function renameTag(tagId: string, newTagName: string) {
-  return postJSON(`/tag/${tagId}/rename`, {
-    body: { name: newTagName },
+export function editTag(
+  tagId: string,
+  newTagName: string,
+  newTagColor?: string
+) {
+  return postJSON(`/tag/${tagId}/edit`, {
+    body: { name: newTagName, color: newTagColor },
   })
 }
 

@@ -7,14 +7,14 @@ function getAllTags(userId, callback) {
   Tag.find({ user_id: userId }, callback)
 }
 
-function createTag(userId, name, callback) {
+function createTag(userId, name, color, callback) {
   if (!callback) {
     callback = function () {}
   }
   if (name.length > MAX_TAG_LENGTH) {
     return callback(new Error('Exceeded max tag length'))
   }
-  Tag.create({ user_id: userId, name }, function (err, tag) {
+  Tag.create({ user_id: userId, name, color }, function (err, tag) {
     // on duplicate key error return existing tag
     if (err && err.code === 11000) {
       return Tag.findOne({ user_id: userId, name }, callback)
@@ -38,6 +38,25 @@ function renameTag(userId, tagId, name, callback) {
     {
       $set: {
         name,
+      },
+    },
+    callback
+  )
+}
+
+function editTag(userId, tagId, name, color, callback) {
+  if (name.length > MAX_TAG_LENGTH) {
+    return callback(new Error('Exceeded max tag length'))
+  }
+  Tag.updateOne(
+    {
+      _id: tagId,
+      user_id: userId,
+    },
+    {
+      $set: {
+        name,
+        color,
       },
     },
     callback
@@ -137,6 +156,7 @@ const TagsHandler = {
   getAllTags,
   createTag,
   renameTag,
+  editTag,
   deleteTag,
   updateTagUserIds,
   addProjectToTag,

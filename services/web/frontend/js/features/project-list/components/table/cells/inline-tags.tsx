@@ -1,11 +1,11 @@
 import { useCallback, useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Tag } from '../../../../../../../app/src/Features/Tags/types'
-import ColorManager from '../../../../../ide/colors/ColorManager'
 import Icon from '../../../../../shared/components/icon'
 import { useProjectListContext } from '../../../context/project-list-context'
 import { removeProjectFromTag } from '../../../util/api'
 import classnames from 'classnames'
+import { getTagColor } from '../../../util/tag'
 
 type InlineTagsProps = {
   projectId: string
@@ -71,7 +71,7 @@ function InlineTag({ tag, projectId }: InlineTagProps) {
       >
         <span
           style={{
-            color: `hsl(${ColorManager.getHueForTagId(tag._id)}, 70%, 45%)`,
+            color: getTagColor(tag),
           }}
         >
           <Icon type="circle" aria-hidden="true" />

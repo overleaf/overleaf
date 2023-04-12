@@ -85,7 +85,7 @@ export type ProjectListContextValue = {
   selectedTagId?: string | undefined
   selectTag: (tagId: string) => void
   addTag: (tag: Tag) => void
-  renameTag: (tagId: string, newTagName: string) => void
+  updateTag: (tagId: string, newTagName: string, newTagColor?: string) => void
   deleteTag: (tagId: string) => void
   updateProjectViewData: (newProjectData: Project) => void
   removeProjectFromView: (project: Project) => void
@@ -138,6 +138,7 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
   const [selectedTagId, setSelectedTagId] = usePersistedState<
     string | undefined
   >('project-list-selected-tag-id', undefined)
+  const [showCustomPicker, setShowCustomPicker] = useState(false)
 
   const olTags: Tag[] = getMeta('ol-tags', [])
 
@@ -320,16 +321,20 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
     setTags(tags => uniqBy(concat(tags, [tag]), '_id'))
   }, [])
 
-  const renameTag = useCallback((tagId: string, newTagName: string) => {
-    setTags(tags => {
-      const newTags = cloneDeep(tags)
-      const tag = find(newTags, ['_id', tagId])
-      if (tag) {
-        tag.name = newTagName
-      }
-      return newTags
-    })
-  }, [])
+  const updateTag = useCallback(
+    (tagId: string, newTagName: string, newTagColor?: string) => {
+      setTags(tags => {
+        const newTags = cloneDeep(tags)
+        const tag = find(newTags, ['_id', tagId])
+        if (tag) {
+          tag.name = newTagName
+          tag.color = newTagColor
+        }
+        return newTags
+      })
+    },
+    []
+  )
 
   const deleteTag = useCallback(
     (tagId: string | null) => {
@@ -438,7 +443,6 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       loadProgress,
       removeProjectFromTagInView,
       removeProjectFromView,
-      renameTag,
       selectedTagId,
       selectFilter,
       selectedProjects,
@@ -446,13 +450,16 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       selectTag,
       searchText,
       setSearchText,
+      setShowCustomPicker,
       setSort,
       showAllProjects,
+      showCustomPicker,
       sort,
       tags,
       totalProjectsCount,
       untaggedProjectsCount,
       updateProjectViewData,
+      updateTag,
       projectsPerTag,
       visibleProjects,
     }),
@@ -472,7 +479,6 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       loadProgress,
       removeProjectFromTagInView,
       removeProjectFromView,
-      renameTag,
       selectedTagId,
       selectFilter,
       selectedProjects,
@@ -480,13 +486,16 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       selectTag,
       searchText,
       setSearchText,
+      setShowCustomPicker,
       setSort,
       showAllProjects,
+      showCustomPicker,
       sort,
       tags,
       totalProjectsCount,
       untaggedProjectsCount,
       updateProjectViewData,
+      updateTag,
       projectsPerTag,
       visibleProjects,
     ]
