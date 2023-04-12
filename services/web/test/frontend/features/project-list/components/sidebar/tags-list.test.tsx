@@ -43,7 +43,7 @@ describe('<TagsList />', function () {
 
   it('displays the tags list', function () {
     screen.getByRole('heading', {
-      name: 'Tags',
+      name: 'Organize Projects',
     })
     screen.getByRole('button', {
       name: 'New Tag',

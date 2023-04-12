@@ -2,6 +2,8 @@ import Icon from '../../../../shared/components/icon'
 import useSelectColor from '../../hooks/use-select-color'
 import { SketchPicker } from 'react-color'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import Tooltip from '../../../../shared/components/tooltip'
 
 const PRESET_COLORS: ReadonlyArray<string> = [
   '#A7B1C2',
@@ -39,6 +41,7 @@ function ColorPickerItem({ color }: ColorPickerItemProps) {
 }
 
 function MoreButton() {
+  const { t } = useTranslation()
   const {
     selectedColor,
     selectColor,
@@ -70,13 +73,19 @@ function MoreButton() {
             : 'white',
         }}
       >
-        {isCustomColorSelected ? (
-          <Icon type="check" className="color-picker-item-icon" />
-        ) : showCustomPicker ? (
-          <Icon type="chevron-down" className="color-picker-more-open" />
-        ) : (
-          <Icon type="plus" className="color-picker-more" />
-        )}
+        <Tooltip
+          id="tooltip-color-picker-plus"
+          description={t('choose_a_custom_color')}
+          overlayProps={{ delay: 0, placement: 'bottom' }}
+        >
+          {isCustomColorSelected ? (
+            <Icon type="check" className="color-picker-item-icon" />
+          ) : showCustomPicker ? (
+            <Icon type="chevron-down" className="color-picker-more-open" />
+          ) : (
+            <Icon type="plus" className="color-picker-more" />
+          )}
+        </Tooltip>
       </div>
       {showCustomPicker && (
         <>

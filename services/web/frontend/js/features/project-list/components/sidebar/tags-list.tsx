@@ -32,7 +32,7 @@ export default function TagsList() {
   return (
     <>
       <li role="separator" className="separator">
-        <h2>{t('tags')}</h2>
+        <h2>{t('organize_projects')}</h2>
       </li>
       <li className="tag">
         <Button
@@ -103,20 +103,22 @@ export default function TagsList() {
           </li>
         )
       })}
-      <li
-        className={`tag untagged ${
-          selectedTagId === UNCATEGORIZED_KEY ? 'active' : ''
-        }`}
-      >
-        <Button
-          className="tag-name"
-          onClick={() => selectTag(UNCATEGORIZED_KEY)}
-          bsStyle={null}
+      {tags.length > 0 && (
+        <li
+          className={`tag untagged ${
+            selectedTagId === UNCATEGORIZED_KEY ? 'active' : ''
+          }`}
         >
-          <span className="name">{t('uncategorized')}</span>
-          <span className="subdued"> ({untaggedProjectsCount})</span>
-        </Button>
-      </li>
+          <Button
+            className="tag-name"
+            onClick={() => selectTag(UNCATEGORIZED_KEY)}
+            bsStyle={null}
+          >
+            <span className="name">{t('uncategorized')}</span>
+            <span className="subdued"> ({untaggedProjectsCount})</span>
+          </Button>
+        </li>
+      )}
       <CreateTagModal id="create-tag-modal" />
       <EditTagModal id="edit-tag-modal" />
       <DeleteTagModal id="delete-tag-modal" />
