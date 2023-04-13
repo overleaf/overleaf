@@ -15,10 +15,10 @@ async function main() {
     FILE_NAMES_TO_RESTORE.includes(doc.name)
   )
   for (const deletedDoc of docsToRestore) {
-    const newDoc = await ProjectEntityRestoreHandler.restoreDeletedDoc(
+    const newDoc = await ProjectEntityRestoreHandler.promises.restoreDeletedDoc(
       PROJECT_ID,
       deletedDoc._id,
-      deletedDoc.id,
+      deletedDoc.name,
       DEVELOPER_USER_ID
     )
     console.log(newDoc)
