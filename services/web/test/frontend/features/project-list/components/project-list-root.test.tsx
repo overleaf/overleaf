@@ -25,12 +25,12 @@ const {
 const userId = owner.id
 
 describe('<ProjectListRoot />', function () {
-  let sendSpy: sinon.SinonSpy
+  let sendMBSpy: sinon.SinonSpy
   let assignStub: sinon.SinonStub
 
   beforeEach(async function () {
     global.localStorage.clear()
-    sendSpy = sinon.spy(eventTracking, 'send')
+    sendMBSpy = sinon.spy(eventTracking, 'sendMB')
     window.metaAttributesCache = new Map()
     this.tagId = '999fff999fff'
     this.tagName = 'First tag name'
@@ -56,7 +56,7 @@ describe('<ProjectListRoot />', function () {
   })
 
   afterEach(function () {
-    sendSpy.restore()
+    sendMBSpy.restore()
     window.user_id = undefined
     fetchMock.reset()
     this.locationStub.restore()
@@ -806,8 +806,15 @@ describe('<ProjectListRoot />', function () {
             const modals = await screen.findAllByRole('dialog')
             const modal = modals[0]
 
-            expect(sendSpy).to.be.calledOnce
-            expect(sendSpy).calledWith('project-list-page-interaction')
+            expect(sendMBSpy).to.have.been.calledTwice
+            expect(sendMBSpy).to.have.been.calledWith('loads_v2_dash')
+            expect(sendMBSpy).to.have.been.calledWith(
+              'project-list-page-interaction',
+              {
+                action: 'rename',
+                page: '/',
+              }
+            )
 
             // same name
             let confirmButton =
@@ -922,8 +929,15 @@ describe('<ProjectListRoot />', function () {
               cloneProjectMock.called(`/project/${projectsData[1].id}/clone`)
             ).to.be.true
 
-            expect(sendSpy).to.be.calledOnce
-            expect(sendSpy).calledWith('project-list-page-interaction')
+            expect(sendMBSpy).to.have.been.calledTwice
+            expect(sendMBSpy).to.have.been.calledWith('loads_v2_dash')
+            expect(sendMBSpy).to.have.been.calledWith(
+              'project-list-page-interaction',
+              {
+                action: 'clone',
+                page: '/',
+              }
+            )
 
             screen.getByText(copiedProjectName)
           })
@@ -1072,8 +1086,15 @@ describe('<ProjectListRoot />', function () {
         await fetchMock.flush(true)
         expect(fetchMock.done()).to.be.true
 
-        expect(sendSpy).to.be.calledOnce
-        expect(sendSpy).calledWith('project-list-page-interaction')
+        expect(sendMBSpy).to.have.been.calledTwice
+        expect(sendMBSpy).to.have.been.calledWith('loads_v2_dash')
+        expect(sendMBSpy).to.have.been.calledWith(
+          'project-list-page-interaction',
+          {
+            action: 'clone',
+            page: '/',
+          }
+        )
 
         expect(screen.queryByText(copiedProjectName)).to.be.null
 

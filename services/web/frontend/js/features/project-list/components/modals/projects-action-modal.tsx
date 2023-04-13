@@ -57,11 +57,7 @@ function ProjectsActionModal({
 
   useEffect(() => {
     if (showModal) {
-      eventTracking.send(
-        'project-list-page-interaction',
-        'project action',
-        action
-      )
+      eventTracking.sendMB('project-list-page-interaction', { action })
     }
   }, [action, showModal])
 

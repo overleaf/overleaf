@@ -31,11 +31,7 @@ function CopyProjectMenuItem() {
   const handleAfterCloned = useCallback(
     (clonedProject: Project) => {
       const project = selectedProjects[0]
-      eventTracking.send(
-        'project-list-page-interaction',
-        'project action',
-        'Clone'
-      )
+      eventTracking.sendMB('project-list-page-interaction', { action: 'clone' })
       addClonedProjectToViewData(clonedProject)
       updateProjectViewData({ ...project, selected: false })
 

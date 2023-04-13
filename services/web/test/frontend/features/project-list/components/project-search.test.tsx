@@ -6,12 +6,16 @@ import * as eventTracking from '../../../../../frontend/js/infrastructure/event-
 import fetchMock from 'fetch-mock'
 
 describe('Project list search form', function () {
+  let sendMBSpy: sinon.SinonSpy
+
   beforeEach(function () {
+    sendMBSpy = sinon.spy(eventTracking, 'sendMB')
     fetchMock.reset()
   })
 
   afterEach(function () {
     fetchMock.reset()
+    sendMBSpy.restore()
   })
 
   it('renders the search form', function () {
@@ -38,19 +42,18 @@ describe('Project list search form', function () {
 
   it('changes text', function () {
     const setInputValueMock = sinon.stub()
-    const sendSpy = sinon.spy(eventTracking, 'send')
 
     render(<SearchForm inputValue="" setInputValue={setInputValueMock} />)
     const input = screen.getByRole('textbox', { name: /search projects/i })
     const value = 'abc'
 
     fireEvent.change(input, { target: { value } })
-    expect(sendSpy).to.be.calledOnceWith(
-      'project-list-page-interaction',
-      'project-search',
-      'keydown'
-    )
+
+    expect(sendMBSpy).to.have.been.calledOnce
+    expect(sendMBSpy).to.have.been.calledWith('project-list-page-interaction', {
+      action: 'search',
+      page: '/',
+    })
     expect(setInputValueMock).to.be.calledWith(value)
-    sendSpy.restore()
   })
 })

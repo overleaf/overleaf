@@ -34,11 +34,9 @@ function RenameProjectModal({
 
   useEffect(() => {
     if (showModal) {
-      eventTracking.send(
-        'project-list-page-interaction',
-        'project action',
-        'Rename'
-      )
+      eventTracking.sendMB('project-list-page-interaction', {
+        action: 'rename',
+      })
     }
   }, [showModal])
 

@@ -20,11 +20,9 @@ function DownloadProjectButton({
   const location = useLocation()
 
   const downloadProject = useCallback(() => {
-    eventTracking.send(
-      'project-list-page-interaction',
-      'project action',
-      'Download Zip'
-    )
+    eventTracking.sendMB('project-list-page-interaction', {
+      action: 'downloadZip',
+    })
     location.assign(`/project/${project.id}/download/zip`)
   }, [project, location])
 

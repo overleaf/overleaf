@@ -16,25 +16,23 @@ describe('<CurrentPlanWidget />', function () {
   const paidPlanTooltipMessage =
     /click to find out how to make the most of your overleaf premium features/i
 
+  let sendMBSpy: sinon.SinonSpy
+
   beforeEach(function () {
+    sendMBSpy = sinon.spy(eventTracking, 'sendMB')
     window.metaAttributesCache = window.metaAttributesCache || new Map()
+  })
+  afterEach(function () {
+    sendMBSpy.restore()
   })
 
   describe('free plan', function () {
-    let sendMBSpy: sinon.SinonSpy
-
     beforeEach(function () {
-      sendMBSpy = sinon.spy(eventTracking, 'sendMB')
-
       window.metaAttributesCache.set('ol-usersBestSubscription', {
         type: 'free',
       })
 
       render(<CurrentPlanWidget />)
-    })
-
-    afterEach(function () {
-      sendMBSpy.restore()
     })
 
     it('shows text and tooltip on mouseover', function () {
@@ -249,8 +247,6 @@ describe('<CurrentPlanWidget />', function () {
   })
 
   describe('features page split test', function () {
-    let sendMBSpy: sinon.SinonSpy
-
     const variants = [
       { name: 'default', link: '/learn/how-to/Overleaf_premium_features' },
       { name: 'new', link: '/about/features-overview' },
@@ -284,14 +280,6 @@ describe('<CurrentPlanWidget />', function () {
         },
       },
     ]
-
-    beforeEach(function () {
-      sendMBSpy = sinon.spy(eventTracking, 'sendMB')
-    })
-
-    afterEach(function () {
-      sendMBSpy.restore()
-    })
 
     for (const variant of variants) {
       describe(`${variant.name} variant`, function () {

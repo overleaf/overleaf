@@ -36,11 +36,7 @@ function SearchForm({
       HTMLInputElement & Omit<FormControl, keyof HTMLInputElement>
     >
   ) => {
-    eventTracking.send(
-      'project-list-page-interaction',
-      'project-search',
-      'keydown'
-    )
+    eventTracking.sendMB('project-list-page-interaction', { action: 'search' })
     setInputValue(e.target.value)
   }
 

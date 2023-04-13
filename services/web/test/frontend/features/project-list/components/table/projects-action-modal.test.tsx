@@ -11,14 +11,14 @@ import * as eventTracking from '../../../../../../frontend/js/infrastructure/eve
 
 describe('<ProjectsActionModal />', function () {
   const actionHandler = sinon.stub().resolves({})
-  let sendSpy: sinon.SinonSpy
+  let sendMBSpy: sinon.SinonSpy
 
   beforeEach(function () {
-    sendSpy = sinon.spy(eventTracking, 'send')
+    sendMBSpy = sinon.spy(eventTracking, 'sendMB')
   })
 
   afterEach(function () {
-    sendSpy.restore()
+    sendMBSpy.restore()
     resetProjectListContextFetch()
   })
 
@@ -87,11 +87,10 @@ describe('<ProjectsActionModal />', function () {
       />
     )
 
-    sinon.assert.calledWith(
-      sendSpy,
-      'project-list-page-interaction',
-      'project action',
-      'archive'
-    )
+    expect(sendMBSpy).to.have.been.calledOnce
+    expect(sendMBSpy).to.have.been.calledWith('project-list-page-interaction', {
+      action: 'archive',
+      page: '/',
+    })
   })
 })

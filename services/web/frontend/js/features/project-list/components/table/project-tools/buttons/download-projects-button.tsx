@@ -16,11 +16,9 @@ function DownloadProjectsButton() {
   const projectIds = selectedProjects.map(p => p.id)
 
   const handleDownloadProjects = useCallback(() => {
-    eventTracking.send(
-      'project-list-page-interaction',
-      'project action',
-      'Download Zip'
-    )
+    eventTracking.sendMB('project-list-page-interaction', {
+      action: 'downloadZips',
+    })
 
     location.assign(`/project/download/zip?project_ids=${projectIds.join(',')}`)
 
