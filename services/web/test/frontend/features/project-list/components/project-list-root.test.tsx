@@ -813,10 +813,9 @@ describe('<ProjectListRoot />', function () {
             let confirmButton =
               within(modal).getByText<HTMLButtonElement>('Rename')
             expect(confirmButton.disabled).to.be.true
-            let input = screen.getByLabelText('New Name') as HTMLButtonElement
 
             // no name
-            input = screen.getByLabelText('New Name') as HTMLButtonElement
+            const input = screen.getByLabelText('New Name') as HTMLButtonElement
             fireEvent.change(input, {
               target: { value: '' },
             })
