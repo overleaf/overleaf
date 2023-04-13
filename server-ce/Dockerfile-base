@@ -10,7 +10,7 @@ ENV TEXMFVAR=/var/lib/sharelatex/tmp/texmf-var
 
 # Update to ensure dependencies are updated
 # ------------------------------------------
-ENV REBUILT_AFTER="2022-12-12"
+ENV REBUILT_AFTER="2023-03-13"
 
 # Install dependencies
 # --------------------
