@@ -668,7 +668,7 @@ module.exports = {
     enabled: false,
   },
 
-  compileBodySizeLimitMb: process.env.COMPILE_BODY_SIZE_LIMIT_MB || 5,
+  compileBodySizeLimitMb: process.env.COMPILE_BODY_SIZE_LIMIT_MB || 7,
 
   textExtensions: defaultTextExtensions.concat(
     parseTextExtensions(process.env.ADDITIONAL_TEXT_EXTENSIONS)
