@@ -1,7 +1,7 @@
 import { CurrencyCode } from '../../../frontend/js/features/subscription/data/currency'
 import { Nullable } from '../../utils'
 import { Plan } from '../plan'
-import { User } from '../../../types/user'
+import { User } from '../../user'
 
 type SubscriptionState = 'active' | 'canceled' | 'expired'
 

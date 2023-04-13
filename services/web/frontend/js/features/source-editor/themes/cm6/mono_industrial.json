@@ -1,0 +1,83 @@
+{
+  "theme": {
+    ".cm-gutters": {
+      "backgroundColor": "transparent",
+      "borderRightColor": "transparent",
+      "background": "#1d2521",
+      "color": "#C5C9C9"
+    },
+    "&": {
+      "backgroundColor": "#222C28",
+      "color": "#FFFFFF"
+    },
+    ".cm-cursor, .cm-dropCursor": {
+      "color": "#FFFFFF"
+    },
+    "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection, .cm-searchMatch.cm-searchMatch.cm-searchMatch-selected": {
+      "background": "rgba(145, 153, 148, 0.40)"
+    },
+    "&.cm-focused .cm-matchingBracket, &.cm-focused .cm-nonmatchingBracket": {
+      "margin": 0,
+      "outline": "1px solid rgba(102, 108, 104, 0.50)"
+    },
+    ".cm-activeLine": {
+      "background": "rgba(12, 13, 12, 0.25)"
+    },
+    ".cm-activeLineGutter": {
+      "backgroundColor": "rgba(12, 13, 12, 0.25)"
+    },
+    ".cm-selectionMatch.cm-selectionMatch, .cm-searchMatch.cm-searchMatch": {
+      "outline": "1px solid rgba(145, 153, 148, 0.40)",
+      "margin": 0
+    },
+    ".cm-foldPlaceholder": {
+      "backgroundColor": "#A8B3AB",
+      "borderColor": "#FFFFFF"
+    }
+  },
+  "highlightStyle": {
+    ".tok-string": {
+      "backgroundColor": "#151C19",
+      "color": "#FFFFFF"
+    },
+    ".tok-keyword": {
+      "color": "#A39E64"
+    },
+    ".tok-labelName": {
+      "color": "#E98800"
+    },
+    ".tok-literal": {
+      "color": "#E98800"
+    },
+    ".tok-function": {
+      "color": "#A8B3AB"
+    },
+    ".tok-operator": {
+      "color": "#A8B3AB"
+    },
+    ".tok-attributeValue": {
+      "color": "#648BD2"
+    },
+    ".tok-invalid": {
+      "color": "#FFFFFF",
+      "backgroundColor": "rgba(153, 0, 0, 0.68)"
+    },
+    ".tok-typeName": {
+      "color": "#C23B00"
+    },
+    ".tok-variableName": {
+      "color": "#648BD2"
+    },
+    ".tok-comment": {
+      "color": "#666C68",
+      "backgroundColor": "#151C19"
+    },
+    ".tok-attributeName": {
+      "color": "#909993"
+    },
+    ".tok-tagName": {
+      "color": "#A65EFF"
+    }
+  },
+  "dark": true
+}

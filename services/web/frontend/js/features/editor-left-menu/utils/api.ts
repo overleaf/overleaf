@@ -2,7 +2,7 @@ import type {
   FontFamily,
   LineHeight,
   OverallTheme,
-} from '../../../../../modules/source-editor/frontend/js/extensions/theme'
+} from '../../source-editor/extensions/theme'
 import type {
   Keybindings,
   PdfViewer,

@@ -1,0 +1,87 @@
+{
+  "theme": {
+    ".cm-gutters": {
+      "backgroundColor": "transparent",
+      "borderRightColor": "transparent",
+      "background": "#e8e8e8",
+      "color": "#333"
+    },
+    "&": {
+      "backgroundColor": "#f3f2f3",
+      "color": "rgba(15, 0, 9, 1.0)"
+    },
+    ".cm-cursor, .cm-dropCursor": {
+      "borderLeft": "2px solid #100011"
+    },
+    "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection, .cm-searchMatch.cm-searchMatch.cm-searchMatch-selected": {
+      "background": "rgba(100, 5, 208, 0.27)"
+    },
+    "&.cm-focused .cm-matchingBracket, &.cm-focused .cm-nonmatchingBracket": {
+      "margin": 0,
+      "outline": "1px solid rgba(0, 0, 0, 0.33)"
+    },
+    ".cm-activeLine": {
+      "background": "rgb(232, 242, 254)"
+    },
+    ".cm-activeLineGutter": {
+      "backgroundColor": "rgb(232, 242, 254)"
+    },
+    ".cm-selectionMatch.cm-selectionMatch, .cm-searchMatch.cm-searchMatch": {
+      "outline": "1px solid rgba(100, 5, 208, 0.27)",
+      "margin": 0
+    },
+    ".cm-foldPlaceholder": {
+      "backgroundColor": "rgba(2, 95, 73, 0.97)",
+      "borderColor": "rgba(15, 0, 9, 1.0)"
+    }
+  },
+  "highlightStyle": {
+    ".tok-keyword": {
+      "color": "#674Aa8",
+      "rbackgroundColor": "rgba(163, 170, 216, 0.055)"
+    },
+    ".tok-literal": {
+      "color": "rgba(2, 95, 105, 1.0)",
+      "rbackgroundColor": "rgba(127, 34, 153, 0.063)"
+    },
+    ".tok-typeName": {
+      "color": "rgba(123, 92, 191, 1.0)",
+      "rbackgroundColor": "rgba(139, 93, 223, 0.051)"
+    },
+    ".tok-invalid": {
+      "color": "#DFDFD5",
+      "rbackgroundColor": "#CC1B27"
+    },
+    ".tok-string": {
+      "color": "#5a5f9b",
+      "rbackgroundColor": "rgba(170, 175, 219, 0.035)"
+    },
+    ".tok-comment": {
+      "fontStyle": "italic",
+      "color": "rgba(64, 79, 80, 0.67)",
+      "rbackgroundColor": "rgba(95, 15, 255, 0.0078)"
+    },
+    ".tok-function": {
+      "color": "rgba(2, 95, 73, 0.97)",
+      "rbackgroundColor": "rgba(34, 255, 73, 0.12)"
+    },
+    ".tok-attributeValue": {
+      "color": "rgba(51, 150, 159, 0.87)",
+      "rbackgroundColor": "rgba(5, 214, 249, 0.043)",
+      "fontStyle": "italic"
+    },
+    ".tok-variableName": {
+      "color": "#316fcf",
+      "rbackgroundColor": "rgba(58, 175, 255, 0.039)"
+    },
+    ".tok-attributeName": {
+      "color": "rgba(73, 70, 194, 0.93)",
+      "rbackgroundColor": "rgba(73, 134, 194, 0.035)"
+    },
+    ".tok-tagName": {
+      "color": "#3976a2",
+      "rbackgroundColor": "rgba(73, 166, 210, 0.039)"
+    }
+  },
+  "dark": false
+}

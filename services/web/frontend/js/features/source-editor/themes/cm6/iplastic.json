@@ -1,0 +1,87 @@
+{
+  "theme": {
+    ".cm-gutters": {
+      "backgroundColor": "transparent",
+      "borderRightColor": "transparent",
+      "background": "#dddddd",
+      "color": "#666666"
+    },
+    "&": {
+      "backgroundColor": "#eeeeee",
+      "color": "#333333"
+    },
+    ".cm-cursor, .cm-dropCursor": {
+      "color": "#333"
+    },
+    "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection, .cm-searchMatch.cm-searchMatch.cm-searchMatch-selected": {
+      "background": "#BAD6FD"
+    },
+    "&.cm-focused .cm-matchingBracket, &.cm-focused .cm-nonmatchingBracket": {
+      "margin": 0,
+      "background": "#FFF799",
+      "outline": "1px solid #49483E"
+    },
+    ".cm-activeLine": {
+      "background": "#e5e5e5"
+    },
+    ".cm-activeLineGutter": {
+      "backgroundColor": "#eeeeee"
+    },
+    ".cm-selectionMatch.cm-selectionMatch, .cm-searchMatch.cm-searchMatch": {
+      "borderRadius": "4px",
+      "outline": "1px solid #555555",
+      "margin": 0
+    },
+    ".cm-foldPlaceholder": {
+      "backgroundColor": "#464646",
+      "borderColor": "#F8F8F2"
+    }
+  },
+  "highlightStyle": {
+    ".tok-tagName": {
+      "color": "#0000FF"
+    },
+    ".tok-keyword": {
+      "color": "#0000FF"
+    },
+    ".tok-typeName": {
+      "color": "#3333fc",
+      "fontWeight": "700"
+    },
+    ".tok-punctuation": {
+      "color": "#000"
+    },
+    ".tok-labelName": {
+      "color": "#333333",
+      "fontWeight": "700"
+    },
+    ".tok-literal": {
+      "color": "#0066FF",
+      "fontWeight": "100"
+    },
+    ".tok-invalid": {
+      "color": "#F8F8F0",
+      "backgroundColor": "#F92672"
+    },
+    ".tok-function": {
+      "color": "#3366cc",
+      "fontStyle": "italic"
+    },
+    ".tok-attributeName": {
+      "color": "#3366cc",
+      "fontStyle": "italic"
+    },
+    ".tok-attributeValue": {
+      "color": "#2469E0",
+      "fontStyle": "italic"
+    },
+    ".tok-string": {
+      "color": "#a55f03"
+    },
+    ".tok-comment": {
+      "color": "#777777",
+      "fontStyle": "italic"
+    }
+  },
+  "dark": false
+}

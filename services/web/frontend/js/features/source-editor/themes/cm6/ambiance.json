@@ -1,0 +1,79 @@
+{
+  "theme": {
+    ".cm-gutters": {
+      "backgroundColor": "#3d3d3d",
+      "borderRightColor": "transparent",
+      "backgroundImage": "linear-gradient(left, #3D3D3D, #333)",
+      "backgroundRepeat": "repeat-x",
+      "borderRight": "1px solid #4d4d4d",
+      "textShadow": "0px 1px 1px #4d4d4d",
+      "color": "#222"
+    },
+    ".cm-activeLineGutter": {
+      "backgroundColor": "#3F3F3F"
+    },
+    "&": {
+      "color": "#E6E1DC",
+      "backgroundColor": "#202020"
+    },
+    ".cm-cursor, .cm-dropCursor": {
+      "borderLeft": "1px solid #7991E8"
+    },
+    "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection, .cm-searchMatch.cm-searchMatch.cm-searchMatch-selected": {
+      "background": "rgba(221, 240, 255, 0.20)"
+    },
+    ".cm-selectionMatch.cm-selectionMatch, .cm-searchMatch.cm-searchMatch": {
+      "borderRadius": 0,
+      "boxShadow": "0 0 4px black",
+      "outline": "8px solid #3f475d",
+      "margin": 0,
+      "outline-width": "2px"
+    },
+    "&.cm-focused .cm-matchingBracket, &.cm-focused .cm-nonmatchingBracket": {
+      "margin": 0,
+      "outline": "1px solid rgba(255, 255, 255, 0.25)"
+    },
+    ".cm-activeLine": {
+      "background": "rgba(255, 255, 255, 0.031)"
+    }
+  },
+  "highlightStyle": {
+    ".tok-keyword": {
+      "color": "#cda869"
+    },
+    ".tok-operator": {
+      "color": "#fa8d6a"
+    },
+    ".tok-string": {
+      "color": "#8f9d6a"
+    },
+    ".tok-labelName": {
+      "color": "#CF7EA9"
+    },
+    ".tok-literal": {
+      "color": "#78CF8A"
+    },
+    ".tok-invalid": {
+      "textDecoration": "underline",
+      "fontStyle": "italic",
+      "color": "#D2A8A1"
+    },
+    ".tok-regexp": {
+      "color": "#DAD085"
+    },
+    ".tok-comment": {
+      "fontStyle": "italic",
+      "color": "#555"
+    },
+    ".tok-typeName": {
+      "color": "#aac6e3"
+    },
+    ".tok-attributeValue": {
+      "color": "#9999cc"
+    },
+    ".tok-variableName": {
+      "color": "#9b859d"
+    }
+  },
+  "dark": true
+}

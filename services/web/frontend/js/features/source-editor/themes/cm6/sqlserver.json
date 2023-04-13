@@ -1,0 +1,86 @@
+{
+  "theme": {
+    ".cm-gutters": {
+      "backgroundColor": "transparent",
+      "borderRightColor": "transparent",
+      "background": "#ebebeb",
+      "color": "#333",
+      "overflow": "hidden"
+    },
+    "&": {
+      "backgroundColor": "#FFFFFF",
+      "color": "black"
+    },
+    ".cm-cursor, .cm-dropCursor": {
+      "color": "black"
+    },
+    "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection, .cm-searchMatch.cm-searchMatch.cm-searchMatch-selected": {
+      "background": "rgb(181, 213, 255)"
+    },
+    "&.cm-focused .cm-matchingBracket, &.cm-focused .cm-nonmatchingBracket": {
+      "margin": 0,
+      "outline": "1px solid rgb(192, 192, 192)"
+    },
+    ".cm-activeLine": {
+      "background": "rgba(0, 0, 0, 0.07)"
+    },
+    ".cm-activeLineGutter": {
+      "backgroundColor": "#dcdcdc"
+    },
+    ".cm-selectionMatch.cm-selectionMatch, .cm-searchMatch.cm-searchMatch": {
+      "background": "rgb(250, 250, 255)",
+      "outline": "1px solid rgb(200, 200, 250)",
+      "margin": 0
+    }
+  },
+  "highlightStyle": {
+    ".tok-string": {
+      "color": "#FF0000"
+    },
+    ".tok-keyword": {
+      "color": "#0000FF"
+    },
+    ".tok-number": {
+      "color": "black"
+    },
+    ".tok-typeName": {
+      "color": "#11B7BE"
+    },
+    ".tok-operator": {
+      "color": "#808080"
+    },
+    ".tok-paren": {
+      "color": "#808080"
+    },
+    ".tok-punctuation": {
+      "color": "#808080"
+    },
+    ".tok-literal": {
+      "color": "black"
+    },
+    ".tok-invalid": {
+      "backgroundColor": "rgb(153, 0, 0)",
+      "color": "white"
+    },
+    ".tok-class": {
+      "color": "#008080"
+    },
+    ".tok-attributeValue": {
+      "fontStyle": "italic",
+      "color": "rgb(49, 132, 149)"
+    },
+    ".tok-comment": {
+      "color": "#008000"
+    },
+    ".tok-heading": {
+      "color": "rgb(12, 7, 255)"
+    },
+    ".tok-list": {
+      "color": "rgb(185, 6, 144)"
+    },
+    ".tok-attributeName": {
+      "color": "#994409"
+    }
+  },
+  "dark": false
+}

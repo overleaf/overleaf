@@ -1,0 +1,59 @@
+{
+  "theme": {
+    ".cm-gutters": {
+      "backgroundColor": "transparent",
+      "borderRightColor": "transparent",
+      "background": "#ebebeb",
+      "borderRight": "1px solid rgb(159, 159, 159)",
+      "color": "rgb(136, 136, 136)"
+    },
+    "&": {
+      "backgroundColor": "#FFFFFF",
+      "color": "black"
+    },
+    ".cm-foldPlaceholder": {
+      "backgroundColor": "rgb(60, 76, 114)"
+    },
+    ".cm-cursor, .cm-dropCursor": {
+      "color": "black"
+    },
+    "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection, .cm-searchMatch.cm-searchMatch.cm-searchMatch-selected": {
+      "background": "rgb(181, 213, 255)"
+    },
+    "&.cm-focused .cm-matchingBracket, &.cm-focused .cm-nonmatchingBracket": {
+      "margin": 0,
+      "outline": "1px solid rgb(192, 192, 192)"
+    },
+    ".cm-activeLineGutter": {
+      "backgroundColor": "#DADADA"
+    },
+    ".cm-selectionMatch.cm-selectionMatch, .cm-searchMatch.cm-searchMatch": {
+      "outline": "1px solid rgb(181, 213, 255)",
+      "margin": 0
+    }
+  },
+  "highlightStyle": {
+    ".tok-typeName": {
+      "color": "rgb(127, 0, 127)"
+    },
+    ".tok-keyword": {
+      "color": "rgb(127, 0, 85)"
+    },
+    ".tok-attributeValue": {
+      "color": "rgb(127, 0, 85)"
+    },
+    ".tok-string": {
+      "color": "rgb(42, 0, 255)"
+    },
+    ".tok-comment": {
+      "color": "rgb(113, 150, 130)"
+    },
+    ".tok-literal": {
+      "color": "darkblue"
+    },
+    ".tok-attributeName": {
+      "color": "rgb(127, 0, 127)"
+    }
+  },
+  "dark": false
+}

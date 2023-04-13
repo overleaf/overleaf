@@ -1,9 +1,6 @@
 const fs = require('fs')
 const path = require('path')
-const modulePath = path.resolve(
-  __dirname,
-  '../modules/source-editor/scripts/lezer-latex/generate.js'
-)
+const modulePath = path.resolve(__dirname, '../scripts/lezer-latex/generate.js')
 
 try {
   fs.accessSync(modulePath, fs.constants.W_OK)

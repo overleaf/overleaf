@@ -1,0 +1,662 @@
+// Track environments
+
+@context elementContext from "./tokens.mjs"
+
+// External tokens must be defined before normal @tokens to take precedence
+// over them.
+
+@external tokens verbTokenizer from "./tokens.mjs" {
+    VerbContent
+}
+
+@external tokens lstinlineTokenizer from "./tokens.mjs" {
+    LstInlineContent
+}
+
+@external tokens literalArgTokenizer from "./tokens.mjs" {
+    LiteralArgContent
+}
+
+@external tokens spaceDelimitedLiteralArgTokenizer from "./tokens.mjs" {
+    SpaceDelimitedLiteralArgContent
+}
+
+@external tokens verbatimTokenizer from "./tokens.mjs" {
+    VerbatimContent
+}
+
+@external tokens mathDelimiterTokenizer from "./tokens.mjs" {
+    MathDelimiter
+}
+
+// external tokenizer to read control sequence names including @ signs
+// (which are often used in TeX definitions).
+@external tokens csnameTokenizer from "./tokens.mjs" {
+    Csname
+}
+
+@external tokens trailingContentTokenizer from "./tokens.mjs" {
+    TrailingWhitespaceOnly,
+    TrailingContent
+}
+
+// It doesn't seem to be possible to access specialized tokens in the context tracker.
+// They have id's which are not exported in the latex.terms.js file.
+// This is a workaround:  use an external specializer to explicitly choose the terms
+// to use for the specialized tokens.
+@external specialize {CtrlSeq} specializeCtrlSeq from "./tokens.mjs" {
+    Begin,
+    End,
+    RefCtrlSeq,
+    RefStarrableCtrlSeq,
+    CiteCtrlSeq,
+    CiteStarrableCtrlSeq,
+    LabelCtrlSeq,
+    MathTextCtrlSeq,
+    HboxCtrlSeq,
+    TitleCtrlSeq,
+    DocumentClassCtrlSeq,
+    UsePackageCtrlSeq,
+    HrefCtrlSeq,
+    VerbCtrlSeq,
+    LstInlineCtrlSeq,
+    IncludeGraphicsCtrlSeq,
+    CaptionCtrlSeq,
+    DefCtrlSeq,
+    LeftCtrlSeq,
+    RightCtrlSeq,
+    NewCommandCtrlSeq,
+    RenewCommandCtrlSeq,
+    NewEnvironmentCtrlSeq,
+    RenewEnvironmentCtrlSeq,
+    // services/web/frontend/js/features/outline/outline-parser.js
+    BookCtrlSeq,
+    PartCtrlSeq,
+    ChapterCtrlSeq,
+    SectionCtrlSeq,
+    SubSectionCtrlSeq,
+    SubSubSectionCtrlSeq,
+    ParagraphCtrlSeq,
+    SubParagraphCtrlSeq,
+    InputCtrlSeq,
+    IncludeCtrlSeq,
+    ItemCtrlSeq,
+    CenteringCtrlSeq,
+    BibliographyCtrlSeq,
+    BibliographyStyleCtrlSeq,
+    AuthorCtrlSeq
+}
+
+@external specialize {EnvName} specializeEnvName from "./tokens.mjs" {
+    DocumentEnvName,
+    TabularEnvName,
+    EquationEnvName,
+    EquationArrayEnvName,
+    VerbatimEnvName,
+    TikzPictureEnvName,
+    FigureEnvName,
+    ListEnvName
+}
+
+@external specialize {CtrlSym} specializeCtrlSym from "./tokens.mjs" {
+    OpenParenCtrlSym,
+    CloseParenCtrlSym,
+    OpenBracketCtrlSym,
+    CloseBracketCtrlSym
+}
+
+@tokens {
+    CtrlSeq { "\\" $[a-zA-Z]+ }
+    CtrlSym { "\\" ![a-zA-Z] }
+
+    // tokens for paragraphs
+    Whitespace { $[ \t]+ }
+    NewLine { "\n" }
+    BlankLine { "\n" "\n"+ }
+    Normal { ![\\{}\[\]$&#^_% \t\n] ![\\{}\[\]$&#^_%\t\n]* }  // allow ~ space in normal text
+    @precedence { CtrlSeq, CtrlSym, BlankLine, NewLine, Whitespace, Normal }
+
+    OpenBrace[closedBy=CloseBrace] { "{" }
+    CloseBrace[openedBy=OpenBrace] { "}" }
+    OpenBracket[closedBy=CloseBracket] { "[" }
+    CloseBracket[openedBy=OpenBracket] { "]" }
+
+    Comment { "%" ![\n]* "\n"? }
+
+    Dollar { "$" }
+
+    Number { $[0-9]+ ("." $[0-9]*)? }
+    MathSpecialChar { $[^_=<>()\-+/*]+ }  // FIXME not all of these are special
+    MathChar { ![0-9^_=<>()\-+/*\\{}\[\]\n$%&]+ }
+
+    @precedence { Number, MathSpecialChar, MathChar }
+
+    Ampersand { "&" }
+
+    EnvName {  $[a-zA-Z]+ $[*]? }
+}
+
+@top LaTeX {
+    Text
+}
+
+@skip { Comment }
+
+// TEXT MODE
+
+optionalWhitespace {
+    !argument Whitespace
+}
+
+OptionalArgument {
+    !argument OpenBracket ShortOptionalArg CloseBracket
+}
+
+TextArgument {
+    !argument OpenBrace LongArg CloseBrace
+}
+
+SectioningArgument {
+    !argument OpenBrace LongArg CloseBrace
+}
+
+LabelArgument {
+    !argument ShortTextArgument
+}
+
+RefArgument {
+    !argument ShortTextArgument
+}
+
+BibKeyArgument {
+    !argument ShortTextArgument
+}
+
+PackageArgument {
+    !argument ShortTextArgument
+}
+
+UrlArgument {
+    OpenBrace LiteralArgContent CloseBrace
+}
+
+FilePathArgument {
+    OpenBrace LiteralArgContent CloseBrace
+}
+
+BareFilePathArgument {
+    Whitespace SpaceDelimitedLiteralArgContent
+}
+
+DefinitionArgument {
+    !argument NewLine? Whitespace* OpenBrace DefinitionFragment CloseBrace
+}
+
+argument[@isGroup="$Argument"] {
+      TextArgument
+    | SectioningArgument
+    | LabelArgument
+    | RefArgument
+    | BibKeyArgument
+    | PackageArgument
+    | UrlArgument
+    | FilePathArgument
+    | BareFilePathArgument
+    | DefinitionArgument
+}
+
+MacroParameter {
+    "#" ("1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9")
+}
+
+// The autocompletion code in services/web/frontend/js/features/source-editor/utils/tree-operations/commands.ts
+// depends on following the `KnownCommand { Command { CommandCtrlSeq [args] } }`
+// structure
+KnownCommand {
+    Title {
+        TitleCtrlSeq optionalWhitespace? OptionalArgument? TextArgument
+    } |
+    Author {
+        AuthorCtrlSeq optionalWhitespace? OptionalArgument? optionalWhitespace? TextArgument
+    } |
+    DocumentClass {
+        DocumentClassCtrlSeq optionalWhitespace? OptionalArgument?
+        DocumentClassArgument { ShortTextArgument }
+    } |
+    BibliographyCommand {
+        BibliographyCtrlSeq optionalWhitespace?
+        BibliographyArgument { ShortTextArgument }
+    } |
+    BibliographyStyleCommand {
+        BibliographyStyleCtrlSeq optionalWhitespace?
+        BibliographyStyleArgument { ShortTextArgument }
+    } |
+    UsePackage {
+        UsePackageCtrlSeq optionalWhitespace? OptionalArgument?
+        PackageArgument
+    } |
+    HrefCommand {
+        HrefCtrlSeq optionalWhitespace? UrlArgument ShortTextArgument
+    } |
+    VerbCommand {
+        VerbCtrlSeq VerbContent
+    } |
+    LstInlineCommand {
+        LstInlineCtrlSeq optionalWhitespace? OptionalArgument? LstInlineContent
+    } |
+    IncludeGraphics {
+        IncludeGraphicsCtrlSeq optionalWhitespace? OptionalArgument?
+        IncludeGraphicsArgument { FilePathArgument }
+    } |
+    Caption {
+        CaptionCtrlSeq optionalWhitespace? OptionalArgument? TextArgument
+    } |
+    Label {
+        LabelCtrlSeq optionalWhitespace? LabelArgument
+    } |
+    Ref {
+        (RefCtrlSeq | RefStarrableCtrlSeq "*"?) optionalWhitespace? OptionalArgument? optionalWhitespace? OptionalArgument? optionalWhitespace? RefArgument
+    } |
+    Cite {
+        (CiteCtrlSeq | CiteStarrableCtrlSeq "*"?) optionalWhitespace? OptionalArgument? optionalWhitespace? OptionalArgument? optionalWhitespace? BibKeyArgument
+    } |
+    Def {
+        // allow more general Csname argument to \def commands, since other symbols such as '@' are often used in definitions
+        DefCtrlSeq (Csname | CtrlSym) MacroParameter* optionalWhitespace? DefinitionArgument
+    } |
+    Hbox {
+        HboxCtrlSeq optionalWhitespace? TextArgument
+    } |
+    Left {
+        LeftCtrlSeq optionalWhitespace?
+    } |
+    Right {
+        RightCtrlSeq optionalWhitespace?
+    } |
+    NewCommand {
+        NewCommandCtrlSeq optionalWhitespace?
+        (Csname | OpenBrace LiteralArgContent CloseBrace)
+        (OptionalArgument)*
+        DefinitionArgument
+    } |
+    RenewCommand {
+        RenewCommandCtrlSeq optionalWhitespace?
+        (Csname | OpenBrace LiteralArgContent CloseBrace)
+        (OptionalArgument)*
+        DefinitionArgument
+    } |
+    NewEnvironment {
+        NewEnvironmentCtrlSeq optionalWhitespace?
+        (OpenBrace LiteralArgContent CloseBrace)
+        (OptionalArgument)*
+        DefinitionArgument
+        DefinitionArgument
+    } |
+    RenewEnvironment {
+        RenewEnvironmentCtrlSeq optionalWhitespace?
+        (Csname | OpenBrace LiteralArgContent CloseBrace)
+        (OptionalArgument)*
+        DefinitionArgument
+        DefinitionArgument
+    } |
+    Input {
+        InputCtrlSeq InputArgument { ( FilePathArgument | BareFilePathArgument ) }
+    } |
+    Include {
+        IncludeCtrlSeq IncludeArgument { FilePathArgument }
+    } |
+    Centering {
+        CenteringCtrlSeq
+    } |
+    Item {
+        ItemCtrlSeq optionalWhitespace?
+    }
+}
+
+UnknownCommand {
+      (CtrlSeq !argument Whitespace (OptionalArgument | TextArgument)+)
+    | ((CtrlSeq | MathTextCtrlSeq) (OptionalArgument | TextArgument)+)
+    | CtrlSeq Whitespace?
+    | CtrlSym
+}
+
+Command {
+      KnownCommand
+    | UnknownCommand
+}
+
+textBase {
+    ( Command
+    | DollarMath
+    | BracketMath
+    | ParenMath
+    | NewLine
+    | Normal
+    | Whitespace
+    | Ampersand
+    )
+}
+
+textWithBrackets {
+    ( textBase
+    | OpenBracket
+    | CloseBracket
+    )
+}
+
+textWithEnvironmentsAndBlankLines {
+    ( BlankLine
+    | KnownEnvironment
+    | Environment
+    | textWithBrackets
+    )
+}
+
+textWithGroupsEnvironmentsAndBlankLines {
+    textWithEnvironmentsAndBlankLines
+    | Group<Text>
+}
+
+Content<Element> {
+    Element
+}
+
+SectioningCommand<Command> {
+    Command optionalWhitespace? "*"? optionalWhitespace? OptionalArgument? optionalWhitespace? SectioningArgument
+}
+
+documentSection<Command, Next> {
+    SectioningCommand<Command> Content<(sectionText | !section Next)*>
+}
+Book[@isGroup="$SectioningCommand"] { documentSection<BookCtrlSeq, Part | Chapter | Section | SubSection | SubSubSection | Paragraph | SubParagraph> }
+Part[@isGroup="$SectioningCommand"] { documentSection<PartCtrlSeq, Chapter | Section | SubSection | SubSubSection | Paragraph | SubParagraph> }
+Chapter[@isGroup="$SectioningCommand"] { documentSection<ChapterCtrlSeq, Section | SubSection | SubSubSection | Paragraph | SubParagraph> }
+Section[@isGroup="$SectioningCommand"] { documentSection<SectionCtrlSeq, SubSection | SubSubSection | Paragraph | SubParagraph> }
+SubSection[@isGroup="$SectioningCommand"] { documentSection<SubSectionCtrlSeq, SubSubSection | Paragraph | SubParagraph> }
+SubSubSection[@isGroup="$SectioningCommand"] { documentSection<SubSubSectionCtrlSeq, Paragraph | SubParagraph> }
+Paragraph[@isGroup="$SectioningCommand"] { documentSection<ParagraphCtrlSeq, SubParagraph> }
+SubParagraph[@isGroup="$SectioningCommand"] { SectioningCommand<SubParagraphCtrlSeq> Content<sectionText*> }
+
+sectioningCommand {
+    Book | Part | Chapter | Section | SubSection | SubSubSection | Paragraph | SubParagraph
+}
+
+sectionText {
+    !section (
+        textWithGroupsEnvironmentsAndBlankLines
+    )+
+}
+
+Text {
+   ( sectionText
+    | sectioningCommand)+
+}
+
+LongArg {
+    ( textWithBrackets
+    | NonEmptyGroup<LongArg>
+    | KnownEnvironment
+    | Environment
+    | BlankLine
+    | "#" // macro character
+    | "_" | "^" // other math chars
+    )*
+}
+
+ShortTextArgument {
+    OpenBrace ShortArg CloseBrace
+}
+
+ShortArg {
+    ( textWithBrackets
+    | NonEmptyGroup<ShortArg>
+    | "#" // macro character
+    | "_" | "^" // other math chars
+    )*
+}
+
+ShortOptionalArg {
+    ( textBase
+    | NonEmptyGroup<ShortOptionalArg>
+    | "#" // macro character
+    )*
+}
+
+TikzPictureContent {  /// same as Text but with added allowed characters
+    ( textWithEnvironmentsAndBlankLines
+    | NonEmptyGroup<TikzPictureContent>
+    | "#" // macro character
+    | "_" | "^" // other math chars
+    )+
+}
+
+DefinitionFragment {
+    ( KnownCommand
+    | CtrlSeq optionalWhitespace?
+    | CtrlSym
+    | Begin
+    | End
+    | NonEmptyGroup<DefinitionFragment>
+    | Dollar
+    | OpenParenCtrlSym
+    | CloseParenCtrlSym
+    | OpenBracketCtrlSym
+    | CloseBracketCtrlSym
+    | BlankLine
+    | NewLine
+    | Normal
+    | Whitespace
+    | OpenBracket
+    | CloseBracket
+    | "#" // macro character
+    | Ampersand // for tables
+    | "_" | "^" // other math chars
+    | SectioningCommand<
+        BookCtrlSeq |
+        PartCtrlSeq |
+        ChapterCtrlSeq |
+        SectionCtrlSeq |
+        SubSectionCtrlSeq |
+        SubSubSectionCtrlSeq |
+        ParagraphCtrlSeq |
+        SubParagraphCtrlSeq
+      >
+    )*
+
+}
+
+KnownEnvironment {
+    ( DocumentEnvironment
+    | TabularEnvironment
+    | EquationEnvironment
+    | EquationArrayEnvironment
+    | VerbatimEnvironment
+    | TikzPictureEnvironment
+    | FigureEnvironment
+    | ListEnvironment
+    )
+}
+
+BeginEnv<name> {
+  Begin
+  EnvNameGroup<name>
+  OptionalArgument?
+  (!argument TextArgument)*
+}
+
+EndEnv<name> {
+  End
+  EnvNameGroup<name>
+}
+
+DocumentEnvironment[@isGroup="$Environment"] {
+    BeginEnv<DocumentEnvName>
+    Content<Text>
+    EndEnv<DocumentEnvName>
+    (TrailingWhitespaceOnly | TrailingContent)?
+}
+
+TabularEnvironment[@isGroup="$Environment"] {
+    BeginEnv<TabularEnvName>
+    Content<TabularContent {
+        (textWithGroupsEnvironmentsAndBlankLines)+
+    }>
+    EndEnv<TabularEnvName>
+}
+
+EquationEnvironment[@isGroup="$Environment"] {
+    BeginEnv<EquationEnvName>
+    Content<Math?>
+    EndEnv<EquationEnvName>
+}
+
+EquationArrayEnvironment[@isGroup="$Environment"] {
+    BeginEnv<EquationArrayEnvName>
+    Content<Math?>
+    EndEnv<EquationArrayEnvName>
+}
+
+VerbatimEnvironment[@isGroup="$Environment"] {
+    BeginEnv<VerbatimEnvName>
+    Content<VerbatimContent>
+    EndEnv<VerbatimEnvName>
+}
+
+TikzPictureEnvironment[@isGroup="$Environment"] {
+    BeginEnv<TikzPictureEnvName>
+    Content<TikzPictureContent>
+    EndEnv<TikzPictureEnvName>
+}
+
+FigureEnvironment[@isGroup="$Environment"] {
+    BeginEnv<FigureEnvName>
+    Content<Text>
+    EndEnv<FigureEnvName>
+}
+
+ListEnvironment[@isGroup="$Environment"] {
+    BeginEnv<ListEnvName>
+    Content<Text>
+    EndEnv<ListEnvName>
+}
+
+EnvNameGroup<name> {
+    OpenBrace name CloseBrace
+}
+
+Environment[@isGroup="$Environment"] {
+    BeginEnv<EnvName>
+    Content<Text>
+    EndEnv<EnvName>
+}
+
+Group<GroupContent> {
+    OpenBrace GroupContent? CloseBrace
+}
+
+NonEmptyGroup<GroupContent> {
+    OpenBrace GroupContent CloseBrace
+}
+
+///  MATH MODE
+
+DollarMath {
+  Dollar (InlineMath | DisplayMath) Dollar
+}
+
+InlineMath {
+    Math
+}
+
+DisplayMath {
+    Dollar Math? Dollar
+}
+
+
+OpenParenMath[closedBy=CloseParenMath] {
+    OpenParenCtrlSym
+}
+
+CloseParenMath[openedBy=OpenParenMath] {
+    CloseParenCtrlSym
+}
+
+// alternative syntax \( math \) for inline math, it is the same as $ math $
+ParenMath {
+    OpenParenMath
+    Math?
+    CloseParenMath
+}
+
+OpenBracketMath[closedBy=CloseBracketMath] {
+    OpenBracketCtrlSym
+}
+
+CloseBracketMath[openedBy=OpenBracketMath] {
+    CloseBracketCtrlSym
+}
+
+// alternative syntax \[ math \] for display math, it is the same as $$ math $$
+BracketMath {
+    OpenBracketMath
+    Math?
+    CloseBracketMath
+}
+
+// FIXME: we should have separate math modes for inline and display math,
+// because display math can contain blank lines while inline math cannot.
+
+Math {
+    ( MathTextCommand
+    | MathCommand
+    | MathCtrlSym
+    | MathGroup
+    | MathDelimitedGroup
+    | MathSpecialChar
+    | Number
+    | NewLine
+    | KnownEnvironment
+    | Environment
+    | MathChar
+    | OpenBracket
+    | CloseBracket
+    | Ampersand
+    | Label {
+        LabelCtrlSeq optionalWhitespace? OptionalArgument? LabelArgument
+    }
+    )+
+}
+
+MathTextCommand {
+    (MathTextCtrlSeq | HboxCtrlSeq) optionalWhitespace? "*"? TextArgument
+}
+
+MathCommand { CtrlSeq }
+
+MathCtrlSym { CtrlSym }
+
+MathGroup {
+    OpenBrace Math? CloseBrace
+}
+
+MathDelimitedGroup {
+    MathOpening Math? MathClosing
+}
+
+// FIXME: we have the same problem with specialize on \left,\right as the delimiters
+MathOpening {
+    LeftCtrlSeq optionalWhitespace? MathDelimiter
+}
+
+MathClosing {
+    RightCtrlSeq optionalWhitespace? MathDelimiter
+}
+
+// NOTE: precedence works differently for rules and token, in the rule
+// you have to give a specifier !foo which is defined in the @precedence
+// block here.
+
+@precedence {
+    section @left,
+    argument @left  // make CtrlSeq arguments left associative
+}

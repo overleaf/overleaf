@@ -6,5 +6,5 @@ modules/**/frontend/js/vendor
 public/js
 public/minjs
 frontend/stylesheets/components/nvd3.less
-modules/source-editor/frontend/js/lezer-latex/latex.mjs
-modules/source-editor/frontend/js/lezer-latex/latex.terms.mjs
+frontend/js/features/source-editor/lezer-latex/latex.mjs
+frontend/js/features/source-editor/lezer-latex/latex.terms.mjs

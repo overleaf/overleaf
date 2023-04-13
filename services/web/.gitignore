@@ -92,10 +92,10 @@ cypress/results/
 !modules/history-migration/test/unit/src/data/track-changes-project.zip
 
 # Ace themes for conversion
-modules/source-editor/frontend/js/themes/ace/
+frontend/js/features/source-editor/themes/ace/
 
 # Compiled parser files
-modules/source-editor/frontend/js/lezer-latex/latex.mjs
-modules/source-editor/frontend/js/lezer-latex/latex.terms.mjs
+frontend/js/features/source-editor/lezer-latex/latex.mjs
+frontend/js/features/source-editor/lezer-latex/latex.terms.mjs
 
 !**/fixtures/**/*.log

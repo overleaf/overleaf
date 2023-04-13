@@ -1,0 +1,75 @@
+{
+  "theme": {
+    ".cm-gutters": {
+      "backgroundColor": "transparent",
+      "borderRightColor": "transparent",
+      "background": "#e8e8e8",
+      "color": "#333"
+    },
+    "&": {
+      "backgroundColor": "#FFFFFF",
+      "color": "black"
+    },
+    ".cm-foldPlaceholder": {
+      "backgroundColor": "#757AD8"
+    },
+    ".cm-cursor, .cm-dropCursor": {
+      "color": "black"
+    },
+    "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection, .cm-searchMatch.cm-searchMatch.cm-searchMatch-selected": {
+      "background": "rgb(181, 213, 255)"
+    },
+    "&.cm-focused .cm-matchingBracket, &.cm-focused .cm-nonmatchingBracket": {
+      "margin": 0,
+      "outline": "1px solid rgb(192, 192, 192)"
+    },
+    ".cm-activeLine": {
+      "background": "rgba(0, 0, 0, 0.07)"
+    },
+    ".cm-activeLineGutter": {
+      "backgroundColor": "#DCDCDC"
+    },
+    ".cm-selectionMatch.cm-selectionMatch, .cm-searchMatch.cm-searchMatch": {
+      "background": "rgb(250, 250, 255)",
+      "outline": "1px solid rgb(200, 200, 250)",
+      "margin": 0
+    }
+  },
+  "highlightStyle": {
+    ".tok-typeName": {
+      "color": "blue"
+    },
+    ".tok-keyword": {
+      "color": "blue"
+    },
+    ".tok-literal": {
+      "color": "rgb(0, 0, 205)"
+    },
+    ".tok-invalid": {
+      "backgroundColor": "rgb(153, 0, 0)",
+      "color": "white"
+    },
+    ".tok-operator": {
+      "color": "rgb(104, 118, 135)"
+    },
+    ".tok-string": {
+      "color": "#00F"
+    },
+    ".tok-comment": {
+      "color": "rgb(76, 136, 107)"
+    },
+    ".tok-attributeValue": {
+      "color": "#06F"
+    },
+    ".tok-function": {
+      "color": "#00F"
+    },
+    ".tok-heading": {
+      "color": "rgb(12, 7, 255)"
+    },
+    ".tok-list": {
+      "color": "rgb(185, 6, 144)"
+    }
+  },
+  "dark": false
+}

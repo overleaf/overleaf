@@ -1,4 +1,4 @@
-import { OverallTheme } from '../modules/source-editor/frontend/js/extensions/theme'
+import { OverallTheme } from '../frontend/js/features/source-editor/extensions/theme'
 
 export type AllowedImageName = {
   imageDesc: string

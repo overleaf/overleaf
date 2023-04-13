@@ -4,5 +4,5 @@ modules/**/scripts
 frontend/js/vendor
 modules/**/frontend/js/vendor
 /public/
-modules/source-editor/frontend/js/lezer-latex/latex.mjs
-modules/source-editor/frontend/js/lezer-latex/latex.terms.mjs
+frontend/js/features/source-editor/lezer-latex/latex.mjs
+frontend/js/features/source-editor/lezer-latex/latex.terms.mjs

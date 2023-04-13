@@ -1,0 +1,13 @@
+import { createRequiredParameterApplier } from './apply'
+import { classNames } from './data/class-names'
+import { Completions } from './types'
+
+export function buildClassCompletions(completions: Completions) {
+  for (const item of classNames) {
+    completions.classes.push({
+      type: 'pkg',
+      label: item,
+      apply: createRequiredParameterApplier(item),
+    })
+  }
+}

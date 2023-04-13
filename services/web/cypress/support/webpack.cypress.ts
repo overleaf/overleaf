@@ -31,7 +31,7 @@ const buildConfig = () => {
   // add entrypoint under '/' for latex-linter worker
   addWorker(
     'latex-linter-worker',
-    '../../modules/source-editor/frontend/js/languages/latex/linter/latex-linter.worker.js'
+    '../../frontend/js/features/source-editor/languages/latex/linter/latex-linter.worker.js'
   )
 
   // add entrypoints under '/' for pdfjs workers

@@ -1,6 +1,6 @@
 import EventEmitter from '../frontend/js/utils/EventEmitter'
 import { ShareDoc } from './share-doc'
-import { EditorFacade } from '../modules/source-editor/frontend/js/extensions/realtime'
+import { EditorFacade } from '../frontend/js/features/source-editor/extensions/realtime'
 import {
   AnyOperation,
   Change,

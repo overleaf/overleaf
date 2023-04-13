@@ -1,0 +1,61 @@
+{
+  "theme": {
+    ".cm-gutters": {
+      "backgroundColor": "transparent",
+      "borderRightColor": "transparent"
+    },
+    ".cm-activeLineGutter": {
+      "backgroundColor": "#3C3836"
+    },
+    "&": {
+      "color": "#EBDAB4",
+      "backgroundColor": "#1D2021"
+    },
+    "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection, .cm-searchMatch.cm-searchMatch.cm-searchMatch-selected": {
+      "background": "rgba(179, 101, 57, 0.75)"
+    },
+    ".cm-activeLine": {
+      "background": "#3C3836"
+    },
+    ".cm-selectionMatch.cm-selectionMatch, .cm-searchMatch.cm-searchMatch": {
+      "borderRadius": 0,
+      "outline": "8px solid #3f475d",
+      "margin": 0,
+      "outline-width": "2px"
+    },
+    "&.cm-focused .cm-matchingBracket, &.cm-focused .cm-nonmatchingBracket": {
+      "margin": 0
+    }
+  },
+  "highlightStyle": {
+    ".tok-keyword": {
+      "color": "#8ec07c"
+    },
+    ".tok-comment": {
+      "fontStyle": "italic",
+      "color": "#928375"
+    },
+    ".tok-attributeValue": {
+      "color": "#84A598"
+    },
+    ".tok-variableName": {
+      "color": "#D2879B"
+    },
+    ".tok-labelName": {
+      "color": "#C2859A"
+    },
+    ".tok-literal": {
+      "color": "#C2859A"
+    },
+    ".tok-string": {
+      "color": "#B8BA37"
+    },
+    ".tok-typeName": {
+      "color": "#8FBF7F"
+    },
+    ".tok-operator": {
+      "color": "#EBDAB4"
+    }
+  },
+  "dark": true
+}
