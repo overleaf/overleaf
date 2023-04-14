@@ -139,13 +139,13 @@ export default function HotkeysModal({
           </Col>
           <Col xs={4}>
             <Hotkey
-              combination="Tab / Up / Down"
+              combination="Up / Down"
               description={t('hotkey_select_candidate')}
             />
           </Col>
           <Col xs={4}>
             <Hotkey
-              combination="Enter"
+              combination="Enter / Tab"
               description={t('hotkey_insert_candidate')}
             />
           </Col>
