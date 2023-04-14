@@ -10,6 +10,7 @@ type BadgeProps = MergeAndOverride<
     closeButton?: boolean
     onClose?: (e: React.MouseEvent<HTMLButtonElement>) => void
     closeBtnProps?: React.ComponentProps<'button'>
+    size?: 'sm'
   }
 >
 
@@ -20,6 +21,7 @@ function Badge({
   closeButton = false,
   onClose,
   closeBtnProps,
+  size,
   ...rest
 }: BadgeProps) {
   return (

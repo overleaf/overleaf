@@ -20,7 +20,9 @@ export default function FileTreeItem({
         <button className="item-name-button">
           <span className="item-name-button-text">{name}</span>
           {operation ? (
-            <Badge className="item-name-button-badge">{operation}</Badge>
+            <Badge className="item-name-button-badge" size="sm">
+              {operation}
+            </Badge>
           ) : null}
         </button>
       </div>

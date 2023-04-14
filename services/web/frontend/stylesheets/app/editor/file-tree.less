@@ -119,9 +119,7 @@
       }
 
       .entity > .entity-name > button {
-        background-color: transparent;
-        border: 0;
-        padding: 0;
+        .reset-button;
         &:focus {
           outline: none;
         }
@@ -140,15 +138,9 @@
 
           .item-name-button-badge {
             text-transform: capitalize;
-            height: 20px;
-            font-size: @font-size-extra-small;
 
             &:hover {
               background-color: @neutral-20;
-            }
-
-            .badge-new-comment {
-              margin-left: 0;
             }
           }
         }
