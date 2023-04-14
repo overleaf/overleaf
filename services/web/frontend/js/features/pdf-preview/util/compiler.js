@@ -20,6 +20,7 @@ export default class DocumentCompiler {
     projectId,
     rootDocId,
     setChangedAt,
+    setSavedAt,
     setCompiling,
     setData,
     setFirstRenderDone,
@@ -32,6 +33,7 @@ export default class DocumentCompiler {
     this.projectId = projectId
     this.rootDocId = rootDocId
     this.setChangedAt = setChangedAt
+    this.setSavedAt = setSavedAt
     this.setCompiling = setCompiling
     this.setData = setData
     this.setFirstRenderDone = setFirstRenderDone
@@ -83,6 +85,7 @@ export default class DocumentCompiler {
     try {
       // reset values
       this.setChangedAt(0) // TODO: wait for doc:saved?
+      this.setSavedAt(0)
       this.validationIssues = undefined
 
       window.dispatchEvent(new CustomEvent('flush-changes')) // TODO: wait for this?

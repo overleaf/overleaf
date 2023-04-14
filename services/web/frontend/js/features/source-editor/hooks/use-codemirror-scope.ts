@@ -56,7 +56,8 @@ function useCodeMirrorScope(view: EditorView) {
 
   // set up scope listeners
 
-  const { logEntryAnnotations, uncompiled, compiling } = useCompileContext()
+  const { logEntryAnnotations, editedSinceCompileStarted, compiling } =
+    useCompileContext()
 
   const [loadingThreads] = useScopeValue<boolean>('loadingThreads')
 
@@ -394,7 +395,7 @@ function useCodeMirrorScope(view: EditorView) {
   // the project "changed at" date is reset at the start of the compile, i.e. "the project hasn't changed",
   // but we don't want to display the compile log diagnostics from the previous compile.
   const enableCompileLogLinter =
-    !syntaxValidation || (!uncompiled && !compiling)
+    !syntaxValidation || (!editedSinceCompileStarted && !compiling)
 
   // store enableCompileLogLinter in a ref for use in useEffect
   const enableCompileLogLinterRef = useRef(enableCompileLogLinter)

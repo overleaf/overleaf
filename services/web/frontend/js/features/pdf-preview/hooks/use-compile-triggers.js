@@ -20,7 +20,11 @@ export const startCompileKeypress = event => {
   }
 }
 
-export default function useCompileTriggers(startCompile, setChangedAt) {
+export default function useCompileTriggers(
+  startCompile,
+  setChangedAt,
+  setSavedAt
+) {
   const handleKeyDown = useCallback(
     event => {
       if (startCompileKeypress(event)) {
@@ -54,5 +58,16 @@ export default function useCompileTriggers(startCompile, setChangedAt) {
     setOrTriggerChangedAt(Date.now())
   }, [setOrTriggerChangedAt])
   useEventListener('doc:changed', setChangedAtHandler)
-  useEventListener('doc:saved', setChangedAtHandler) // TODO: store this separately?
+
+  // record when the server acknowledges saving changes
+  const setOrTriggerSavedAt = useDetachAction(
+    'set-saved-at',
+    setSavedAt,
+    'detacher',
+    'detached'
+  )
+  const setSavedAtHandler = useCallback(() => {
+    setOrTriggerSavedAt(Date.now())
+  }, [setOrTriggerSavedAt])
+  useEventListener('doc:saved', setSavedAtHandler)
 }

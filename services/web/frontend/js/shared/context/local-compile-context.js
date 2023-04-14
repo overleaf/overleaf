@@ -123,8 +123,12 @@ export function LocalCompileProvider({ children }) {
     setPdfUrl(pdfFile?.pdfUrl)
   }, [pdfFile, setPdfDownloadUrl, setPdfUrl])
 
-  // the project is considered to be "uncompiled" if a doc has changed since the last compile started
+  // the project is considered to be "uncompiled" if a doc has changed, or finished saving, since the last compile started.
   const [uncompiled, setUncompiled] = useScopeValue('pdf.uncompiled')
+
+  // whether a doc has been edited since the last compile started
+  const [editedSinceCompileStarted, setEditedSinceCompileStarted] =
+    useState(false)
 
   // the id of the CLSI server which ran the compile
   const [clsiServerId, setClsiServerId] = useState()
@@ -223,8 +227,11 @@ export function LocalCompileProvider({ children }) {
   // whether syntax validation is enabled globally
   const [syntaxValidation] = useScopeValue('settings.syntaxValidation')
 
-  // the timestamp that a doc was last changed or saved
+  // the timestamp that a doc was last changed
   const [changedAt, setChangedAt] = useState(0)
+
+  // the timestamp that a doc was last saved
+  const [savedAt, setSavedAt] = useState(0)
 
   const { signal } = useAbortController()
 
@@ -246,6 +253,7 @@ export function LocalCompileProvider({ children }) {
       projectId,
       rootDocId,
       setChangedAt,
+      setSavedAt,
       setCompiling,
       setData,
       setFirstRenderDone,
@@ -272,10 +280,13 @@ export function LocalCompileProvider({ children }) {
     compiler.setOption('stopOnFirstError', stopOnFirstError)
   }, [compiler, stopOnFirstError])
 
-  // pass the "uncompiled" value up into the scope for use outside this context provider
   useEffect(() => {
-    setUncompiled(changedAt > 0)
-  }, [setUncompiled, changedAt])
+    setUncompiled(changedAt > 0 || savedAt > 0)
+  }, [setUncompiled, changedAt, savedAt])
+
+  useEffect(() => {
+    setEditedSinceCompileStarted(changedAt > 0)
+  }, [setEditedSinceCompileStarted, changedAt])
 
   // always compile the PDF once after opening the project, after the doc has loaded
   useEffect(() => {
@@ -468,13 +479,13 @@ export function LocalCompileProvider({ children }) {
   // call the debounced autocompile function if the project is available for auto-compiling and it has changed
   useEffect(() => {
     if (canAutoCompile) {
-      if (changedAt > 0) {
+      if (changedAt > 0 || savedAt > 0) {
         compiler.debouncedAutoCompile()
       }
     } else {
       compiler.debouncedAutoCompile.cancel()
     }
-  }, [compiler, canAutoCompile, changedAt])
+  }, [compiler, canAutoCompile, changedAt, savedAt])
 
   // cancel debounced recompile on unmount
   useEffect(() => {
@@ -533,6 +544,7 @@ export function LocalCompileProvider({ children }) {
       compiling,
       deliveryLatencies,
       draft,
+      editedSinceCompileStarted,
       error,
       fileList,
       forceNewDomainVariant,
@@ -573,6 +585,7 @@ export function LocalCompileProvider({ children }) {
       validationIssues,
       firstRenderDone,
       setChangedAt,
+      setSavedAt,
       cleanupCompileResult,
     }),
     [
@@ -585,6 +598,7 @@ export function LocalCompileProvider({ children }) {
       compiling,
       deliveryLatencies,
       draft,
+      editedSinceCompileStarted,
       error,
       fileList,
       forceNewDomainVariant,
@@ -620,6 +634,7 @@ export function LocalCompileProvider({ children }) {
       validationIssues,
       firstRenderDone,
       setChangedAt,
+      setSavedAt,
       cleanupCompileResult,
       setShowLogs,
       toggleLogs,

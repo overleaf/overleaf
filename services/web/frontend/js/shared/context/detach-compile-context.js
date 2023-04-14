@@ -30,6 +30,7 @@ export function DetachCompileProvider({ children }) {
     compiling: _compiling,
     deliveryLatencies: _deliveryLatencies,
     draft: _draft,
+    editedSinceCompileStarted: _editedSinceCompileStarted,
     error: _error,
     fileList: _fileList,
     forceNewDomainVariant: _forceNewDomainVariant,
@@ -69,6 +70,7 @@ export function DetachCompileProvider({ children }) {
     startCompile: _startCompile,
     stopCompile: _stopCompile,
     setChangedAt: _setChangedAt,
+    setSavedAt: _setSavedAt,
     clearCache: _clearCache,
   } = localCompileContext
 
@@ -224,6 +226,12 @@ export function DetachCompileProvider({ children }) {
     'detacher',
     'detached'
   )
+  const [editedSinceCompileStarted] = useDetachStateWatcher(
+    'editedSinceCompileStarted',
+    _editedSinceCompileStarted,
+    'detacher',
+    'detached'
+  )
   const [validationIssues] = useDetachStateWatcher(
     'validationIssues',
     _validationIssues,
@@ -345,6 +353,12 @@ export function DetachCompileProvider({ children }) {
     'detached',
     'detacher'
   )
+  const setSavedAt = useDetachAction(
+    'setSavedAt',
+    _setSavedAt,
+    'detached',
+    'detacher'
+  )
   const clearCache = useDetachAction(
     'clearCache',
     _clearCache,
@@ -352,7 +366,7 @@ export function DetachCompileProvider({ children }) {
     'detacher'
   )
 
-  useCompileTriggers(startCompile, setChangedAt)
+  useCompileTriggers(startCompile, setChangedAt, setSavedAt)
   useEffect(() => {
     // Sync the split test variant across the editor and pdf-detach.
     const variants = getMeta('ol-splitTestVariants') || {}
@@ -370,6 +384,7 @@ export function DetachCompileProvider({ children }) {
       compiling,
       deliveryLatencies,
       draft,
+      editedSinceCompileStarted,
       error,
       fileList,
       forceNewDomainVariant,
@@ -423,6 +438,7 @@ export function DetachCompileProvider({ children }) {
       deliveryLatencies,
       draft,
       error,
+      editedSinceCompileStarted,
       fileList,
       forceNewDomainVariant,
       hasChanges,
