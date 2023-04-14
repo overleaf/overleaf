@@ -8,6 +8,13 @@ import {
 import { EmacsHandler } from '@replit/codemirror-emacs'
 import { CodeMirror } from '@replit/codemirror-vim'
 import { foldCode, toggleFold, unfoldCode } from '@codemirror/language'
+import {
+  cursorToBeginningOfVisualLine,
+  cursorToEndOfVisualLine,
+  selectRestOfVisualLine,
+  selectToBeginningOfVisualLine,
+  selectToEndOfVisualLine,
+} from './visual-line-selection'
 
 const hasNonEmptySelection = (cm: CodeMirror): boolean => {
   const selections = cm.getSelections()
@@ -132,6 +139,18 @@ const customiseEmacsOnce = () => {
   })
   EmacsHandler.bindKey('C-s', 'openSearch')
   EmacsHandler.bindKey('C-r', 'openSearch')
+  EmacsHandler.bindKey('C-a', {
+    command: 'goOrSelect',
+    args: [cursorToBeginningOfVisualLine, selectToBeginningOfVisualLine],
+  })
+  EmacsHandler.bindKey('C-e', {
+    command: 'goOrSelect',
+    args: [cursorToEndOfVisualLine, selectToEndOfVisualLine],
+  })
+  EmacsHandler.bindKey('C-k', {
+    command: 'killLine',
+    args: selectRestOfVisualLine,
+  })
 }
 
 const options = [

@@ -19,6 +19,10 @@ import { changeCase, duplicateSelection } from '../commands/ranges'
 import { selectOccurrence } from '../commands/select'
 import { cloneSelectionVertically } from '../commands/cursor'
 import { dispatchEditorEvent } from './changes/change-manager'
+import {
+  deleteToVisualLineEnd,
+  deleteToVisualLineStart,
+} from './visual-line-selection'
 
 export const shortcuts = () => {
   const toggleReviewPanel = () => {
@@ -167,6 +171,14 @@ export const shortcuts = () => {
       mac: 'Ctrl-ArrowRight',
       run: cursorSyntaxRight,
       shift: selectSyntaxRight,
+    },
+    {
+      mac: 'Mod-Backspace',
+      run: deleteToVisualLineStart,
+    },
+    {
+      mac: 'Mod-Delete',
+      run: deleteToVisualLineEnd,
     },
   ]
 

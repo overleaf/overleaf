@@ -62,6 +62,12 @@ const ignoredDefaultKeybindings = new Set([
   'Mod-Alt-\\',
 ])
 
+const ignoredDefaultMacKeybindings = new Set([
+  // We replace these with our custom visual-line versions
+  'Mod-Backspace',
+  'Mod-Delete',
+])
+
 const moduleExtensions: Array<() => Extension> = importOverleafModules(
   'sourceEditorExtensions'
 ).map((item: { import: { extension: Extension } }) => item.import.extension)
@@ -92,7 +98,15 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
     ...defaultKeymap.filter(
       // We only filter on keys, so if the keybinding doesn't have a key,
       // allow it
-      item => !item.key || !ignoredDefaultKeybindings.has(item.key)
+      item => {
+        if (item.key && ignoredDefaultKeybindings.has(item.key)) {
+          return false
+        }
+        if (item.mac && ignoredDefaultMacKeybindings.has(item.mac)) {
+          return false
+        }
+        return true
+      }
     ),
     ...historyKeymap,
     ...lintKeymap,
