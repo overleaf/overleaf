@@ -1540,6 +1540,8 @@
   "toolbar_format_bold": "Format Bold",
   "toolbar_format_italic": "Format Italic",
   "toolbar_increase_indent": "Increase Indent",
+  "toolbar_insert_citation": "Insert Citation",
+  "toolbar_insert_cross_reference": "Insert Cross-reference",
   "toolbar_insert_display_math": "Insert Display Math",
   "toolbar_insert_figure": "Insert Figure",
   "toolbar_insert_inline_math": "Insert Inline Math",

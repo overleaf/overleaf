@@ -60,6 +60,22 @@ export const insertTable: Command = view => {
   return true
 }
 
+export const insertCite: Command = view => {
+  const { state, dispatch } = view
+  const pos = state.selection.main.anchor
+  const template = snippets.cite
+  snippet(template)({ state, dispatch }, { label: 'Cite' }, pos, pos)
+  return true
+}
+
+export const insertRef: Command = view => {
+  const { state, dispatch } = view
+  const pos = state.selection.main.anchor
+  const template = snippets.ref
+  snippet(template)({ state, dispatch }, { label: 'Ref' }, pos, pos)
+  return true
+}
+
 export const indentDecrease: Command = view => {
   if (minimumListDepthForSelection(view.state) < 2) {
     return false

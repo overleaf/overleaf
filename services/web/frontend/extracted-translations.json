@@ -867,6 +867,8 @@
   "toolbar_format_bold": "",
   "toolbar_format_italic": "",
   "toolbar_increase_indent": "",
+  "toolbar_insert_citation": "",
+  "toolbar_insert_cross_reference": "",
   "toolbar_insert_display_math": "",
   "toolbar_insert_figure": "",
   "toolbar_insert_inline_math": "",

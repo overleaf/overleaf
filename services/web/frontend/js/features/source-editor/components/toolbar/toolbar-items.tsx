@@ -130,6 +130,18 @@ export const ToolbarItems: FC<{
             icon="link"
           />
           <ToolbarButton
+            id="toolbar-ref"
+            label={t('toolbar_insert_cross_reference')}
+            command={commands.insertRef}
+            icon="tag"
+          />
+          <ToolbarButton
+            id="toolbar-cite"
+            label={t('toolbar_insert_citation')}
+            command={commands.insertCite}
+            icon="book"
+          />
+          <ToolbarButton
             id="toolbar-add-comment"
             label={t('toolbar_add_comment')}
             command={addComment}
