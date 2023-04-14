@@ -3,6 +3,7 @@ import type { HistoryContextValue } from '../../../../../frontend/js/features/hi
 import type { FileDiff } from '../../../../../frontend/js/features/history/services/types/file'
 import { autoSelectFile } from '../../../../../frontend/js/features/history/utils/auto-select-file'
 import type { User } from '../../../../../frontend/js/features/history/services/types/shared'
+import { UpdateSelection } from '../../../../../frontend/js/features/history/services/types/update'
 
 describe('autoSelectFile', function () {
   const historyUsers: User[] = [
@@ -14,24 +15,8 @@ describe('autoSelectFile', function () {
     },
   ]
 
-  const emptySelection: HistoryContextValue['selection'] = {
-    docs: {},
-    pathname: null,
-    range: {
-      fromV: null,
-      toV: null,
-    },
-    hoveredRange: {
-      fromV: null,
-      toV: null,
-    },
-    diff: null,
-    files: [],
-    file: null,
-  }
-
-  describe('for `point_in_time` view mode', function () {
-    const viewMode: HistoryContextValue['viewMode'] = 'point_in_time'
+  describe('for comparing version with previous', function () {
+    const comparing = false
 
     it('return the file with `edited` as the last operation', function () {
       const files: FileDiff[] = [
@@ -55,14 +40,6 @@ describe('autoSelectFile', function () {
           operation: 'edited',
         },
       ]
-
-      const selection: HistoryContextValue['selection'] = {
-        ...emptySelection,
-        range: {
-          fromV: 26,
-          toV: 26,
-        },
-      }
 
       const updates: HistoryContextValue['updates'] = [
         {
@@ -283,15 +260,16 @@ describe('autoSelectFile', function () {
         },
       ]
 
-      const defaultSelection = autoSelectFile(
-        files,
-        selection,
-        viewMode,
-        updates
-      )
+      const updateSelection: UpdateSelection = {
+        update: updates[0],
+        comparing,
+      }
 
-      expect(defaultSelection.pathname).to.equal('newfolder1/newfile10.tex')
+      const pathname = autoSelectFile(files, updateSelection, updates)
+
+      expect(pathname).to.equal('newfolder1/newfile10.tex')
     })
+
     it('return file with `added` operation on highest `atV` value if no other operation is available on the latest `updates` entry', function () {
       const files: FileDiff[] = [
         {
@@ -311,14 +289,6 @@ describe('autoSelectFile', function () {
           operation: 'added',
         },
       ]
-
-      const selection: HistoryContextValue['selection'] = {
-        ...emptySelection,
-        range: {
-          fromV: 4,
-          toV: 4,
-        },
-      }
 
       const updates: HistoryContextValue['updates'] = [
         {
@@ -360,14 +330,14 @@ describe('autoSelectFile', function () {
         },
       ]
 
-      const defaultSelection = autoSelectFile(
-        files,
-        selection,
-        viewMode,
-        updates
-      )
+      const updateSelection: UpdateSelection = {
+        update: updates[0],
+        comparing,
+      }
 
-      expect(defaultSelection.pathname).to.equal('newfile1.tex')
+      const pathname = autoSelectFile(files, updateSelection, updates)
+
+      expect(pathname).to.equal('newfile1.tex')
     })
 
     it('return the last non-`removed` operation with the highest `atV` value', function () {
@@ -389,14 +359,6 @@ describe('autoSelectFile', function () {
           operation: 'added',
         },
       ]
-
-      const selection: HistoryContextValue['selection'] = {
-        ...emptySelection,
-        range: {
-          fromV: 7,
-          toV: 7,
-        },
-      }
 
       const updates: HistoryContextValue['updates'] = [
         {
@@ -469,14 +431,14 @@ describe('autoSelectFile', function () {
         },
       ]
 
-      const defaultSelection = autoSelectFile(
-        files,
-        selection,
-        viewMode,
-        updates
-      )
+      const updateSelection: UpdateSelection = {
+        update: updates[0],
+        comparing,
+      }
 
-      expect(defaultSelection.pathname).to.equal('main3.tex')
+      const pathname = autoSelectFile(files, updateSelection, updates)
+
+      expect(pathname).to.equal('main3.tex')
     })
 
     it('if `removed` is the last operation, and no other operation is available on the latest `updates` entry, with `main.tex` available as a file name somewhere in the file tree, return `main.tex`', function () {
@@ -497,14 +459,6 @@ describe('autoSelectFile', function () {
           deletedAtV: 10,
         },
       ]
-
-      const selection: HistoryContextValue['selection'] = {
-        ...emptySelection,
-        range: {
-          fromV: 11,
-          toV: 11,
-        },
-      }
 
       const updates: HistoryContextValue['updates'] = [
         {
@@ -648,14 +602,14 @@ describe('autoSelectFile', function () {
         },
       ]
 
-      const defaultSelection = autoSelectFile(
-        files,
-        selection,
-        viewMode,
-        updates
-      )
+      const updateSelection: UpdateSelection = {
+        update: updates[0],
+        comparing,
+      }
 
-      expect(defaultSelection.pathname).to.equal('main.tex')
+      const pathname = autoSelectFile(files, updateSelection, updates)
+
+      expect(pathname).to.equal('main.tex')
     })
 
     it('if `removed` is the last operation, and no other operation is available on the latest `updates` entry, with `main.tex` is not available as a file name somewhere in the file tree, return any tex file based on ascending alphabetical order', function () {
@@ -670,14 +624,6 @@ describe('autoSelectFile', function () {
           pathname: 'file2.tex',
         },
       ]
-
-      const selection: HistoryContextValue['selection'] = {
-        ...emptySelection,
-        range: {
-          fromV: 8,
-          toV: 8,
-        },
-      }
 
       const updates: HistoryContextValue['updates'] = [
         {
@@ -764,14 +710,14 @@ describe('autoSelectFile', function () {
         },
       ]
 
-      const defaultSelection = autoSelectFile(
-        files,
-        selection,
-        viewMode,
-        updates
-      )
+      const updateSelection: UpdateSelection = {
+        update: updates[0],
+        comparing,
+      }
 
-      expect(defaultSelection.pathname).to.equal('certainly_not_main.tex')
+      const pathname = autoSelectFile(files, updateSelection, updates)
+
+      expect(pathname).to.equal('certainly_not_main.tex')
     })
   })
 })

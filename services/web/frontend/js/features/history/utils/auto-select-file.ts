@@ -5,23 +5,6 @@ import type { FileDiff } from '../services/types/file'
 import type { DiffOperation } from '../services/types/diff-operation'
 import type { Update } from '../services/types/update'
 
-function selectFile(
-  file: Nullable<FileDiff>,
-  selection: HistoryContextValue['selection']
-) {
-  if (file === null) {
-    return selection
-  }
-
-  const newSelection = {
-    ...selection,
-    pathname: file.pathname,
-    file,
-  }
-
-  return newSelection
-}
-
 function getUpdateForVersion(
   version: Update['toV'],
   updates: HistoryContextValue['updates']
@@ -35,13 +18,19 @@ type FileWithOps = {
 }
 
 function getFilesWithOps(
-  viewMode: HistoryContextValue['viewMode'],
-  selection: HistoryContextValue['selection'],
+  files: FileDiff[],
+  updateSelection: HistoryContextValue['updateSelection'],
   updates: HistoryContextValue['updates']
 ): FileWithOps[] {
-  if (selection.range.toV && viewMode === 'point_in_time') {
+  if (!updateSelection) {
+    return []
+  }
+  if (updateSelection.update.toV && !updateSelection.comparing) {
     const filesWithOps: FileWithOps[] = []
-    const currentUpdate = getUpdateForVersion(selection.range.toV, updates)
+    const currentUpdate = getUpdateForVersion(
+      updateSelection.update.toV,
+      updates
+    )
 
     if (currentUpdate !== null) {
       for (const pathname of currentUpdate.pathnames) {
@@ -80,7 +69,7 @@ function getFilesWithOps(
     return filesWithOps
   } else {
     const filesWithOps = _.reduce(
-      selection.files,
+      files,
       (curFilesWithOps, file) => {
         if ('operation' in file) {
           curFilesWithOps.push({
@@ -106,13 +95,12 @@ const orderedOpTypes: DiffOperation[] = [
 
 export function autoSelectFile(
   files: FileDiff[],
-  selection: HistoryContextValue['selection'],
-  viewMode: HistoryContextValue['viewMode'],
+  updateSelection: HistoryContextValue['updateSelection'],
   updates: HistoryContextValue['updates']
 ) {
   let fileToSelect: Nullable<FileDiff> = null
 
-  const filesWithOps = getFilesWithOps(viewMode, selection, updates)
+  const filesWithOps = getFilesWithOps(files, updateSelection, updates)
   for (const opType of orderedOpTypes) {
     const fileWithMatchingOpType = _.find(filesWithOps, {
       operation: opType,
@@ -148,5 +136,5 @@ export function autoSelectFile(
     }
   }
 
-  return selectFile(fileToSelect, selection)
+  return fileToSelect.pathname
 }

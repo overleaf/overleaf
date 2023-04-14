@@ -37,8 +37,6 @@ function useHistory() {
   const [loadingFileTree, setLoadingFileTree] =
     useState<HistoryContextValue['loadingFileTree']>(true)
   // eslint-disable-next-line no-unused-vars
-  const [viewMode, setViewMode] =
-    useState<HistoryContextValue['viewMode']>('point_in_time')
   const [nextBeforeTimestamp, setNextBeforeTimestamp] =
     useState<HistoryContextValue['nextBeforeTimestamp']>()
   const [atEnd, setAtEnd] = useState<HistoryContextValue['atEnd']>(false)
@@ -50,21 +48,6 @@ function useHistory() {
   // eslint-disable-next-line no-unused-vars
   const [userHasFullFeature, setUserHasFullFeature] =
     useState<HistoryContextValue['userHasFullFeature']>(undefined)
-  const [selection, setSelection] = useState<HistoryContextValue['selection']>({
-    docs: {},
-    pathname: null,
-    range: {
-      fromV: null,
-      toV: null,
-    },
-    hoveredRange: {
-      fromV: null,
-      toV: null,
-    },
-    diff: null,
-    files: [],
-    file: null,
-  })
   /* eslint-enable no-unused-vars */
 
   const fetchNextBatchOfUpdates = useCallback(() => {
@@ -180,14 +163,7 @@ function useHistory() {
     const { fromV, toV } = updateSelection.update
 
     diffFiles(projectId, fromV, toV).then(({ diff: files }) => {
-      const defaultSelection = autoSelectFile(
-        files,
-        selection,
-        viewMode,
-        updates
-      )
-      // TODO Infer default file sensibly
-      const pathname = defaultSelection.pathname
+      const pathname = autoSelectFile(files, updateSelection, updates)
       const newFiles = files.map(file => {
         if (isFileRenamed(file) && file.newPathname) {
           return renamePathnameKey(file)
@@ -197,33 +173,17 @@ function useHistory() {
       })
       setFileSelection({ files: newFiles, pathname })
     })
-  }, [updateSelection, projectId, selection, updates, viewMode])
+  }, [updateSelection, projectId, updates])
 
   useEffect(() => {
     // Set update selection if there isn't one
     if (updates.length && !updateSelection) {
       setUpdateSelection({
-        update: {
-          ...updates[0],
-          // Set fromV and toV for initial load as the latest version
-          // This is to mimic angular history behaviour when selecting default pathname on initial history load
-          fromV: updates[0].toV,
-        },
+        update: updates[0],
         comparing: false,
       })
     }
-
-    // Set default selection if there isn't one
-    if (updates.length && selection.range.fromV === null) {
-      setSelection({
-        ...selection,
-        range: {
-          fromV: updates[0].toV,
-          toV: updates[0].toV,
-        },
-      })
-    }
-  }, [setUpdateSelection, updateSelection, updates, selection])
+  }, [setUpdateSelection, updateSelection, updates])
 
   const value = useMemo<HistoryContextValue>(
     () => ({
@@ -234,10 +194,8 @@ function useHistory() {
       labels,
       loadingFileTree,
       nextBeforeTimestamp,
-      selection,
       updates,
       userHasFullFeature,
-      viewMode,
       projectId,
       fileSelection,
       setFileSelection,
@@ -252,10 +210,8 @@ function useHistory() {
       labels,
       loadingFileTree,
       nextBeforeTimestamp,
-      selection,
       updates,
       userHasFullFeature,
-      viewMode,
       projectId,
       fileSelection,
       setFileSelection,
