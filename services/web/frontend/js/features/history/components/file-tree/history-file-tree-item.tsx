@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
-import { DiffOperation } from '../../services/types/diff-operation'
+import type { DiffOperation } from '../../services/types/diff-operation'
+import Badge from '../../../../shared/components/badge'
 
 type FileTreeItemProps = {
   name: string
@@ -17,11 +18,9 @@ export default function FileTreeItem({
       <div className="entity-name entity-name-react" role="presentation">
         {icons}
         <button className="item-name-button">
-          <span>{name}</span>
+          <span className="item-name-button-text">{name}</span>
           {operation ? (
-            <span className="history-file-entity-operation-badge">
-              {operation}
-            </span>
+            <Badge className="item-name-button-badge">{operation}</Badge>
           ) : null}
         </button>
       </div>

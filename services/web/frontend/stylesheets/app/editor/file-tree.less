@@ -131,6 +131,26 @@
           text-overflow: ellipsis;
           text-align: left;
           padding-right: 32px;
+          font-weight: normal;
+
+          .item-name-button-text {
+            display: inline-flex;
+            margin-right: 5px;
+          }
+
+          .item-name-button-badge {
+            text-transform: capitalize;
+            height: 20px;
+            font-size: @font-size-extra-small;
+
+            &:hover {
+              background-color: @neutral-20;
+            }
+
+            .badge-new-comment {
+              margin-left: 0;
+            }
+          }
         }
       }
 
