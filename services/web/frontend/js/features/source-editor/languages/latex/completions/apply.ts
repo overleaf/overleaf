@@ -7,6 +7,7 @@ import {
 } from '@codemirror/autocomplete'
 import { EditorView } from '@codemirror/view'
 import { prepareSnippetTemplate } from '../snippets'
+import { ancestorNodeOfType } from '../../../utils/tree-query'
 
 // from https://github.com/codemirror/autocomplete/blob/main/src/closebrackets.ts
 export const nextChar = (doc: Text, pos: number) => {
@@ -39,11 +40,31 @@ export const createCommandApplier =
     view.dispatch(insertCompletionText(view.state, text, from, to))
   }
 
+const longestCommonPrefix = (...strs: string[]) => {
+  if (strs.length === 0) {
+    return 0
+  }
+  const minLength = Math.min(...strs.map(str => str.length))
+  for (let i = 0; i < minLength; ++i) {
+    for (let j = 1; j < strs.length; ++j) {
+      if (strs[j][i] !== strs[0][i]) {
+        return i
+      }
+    }
+  }
+  return minLength
+}
+
 // apply a completed required parameter, adding a closing brace and extending the range if needed
 export const createRequiredParameterApplier =
   (text: string) =>
   (view: EditorView, completion: Completion, from: number, to: number) => {
     const { doc } = view.state
+    const argumentNode = ancestorNodeOfType(view.state, from, '$Argument')
+    const isWellFormedArgumentNode =
+      argumentNode &&
+      argumentNode.getChild('OpenBrace') &&
+      argumentNode.getChild('CloseBrace')
 
     // add a closing brace if needed
     if (nextChar(doc, to) !== '}') {
@@ -51,10 +72,21 @@ export const createRequiredParameterApplier =
         text += '}'
       }
 
-      // extend over subsequent text that isn't a brace, space, or comma
-      const match = doc.sliceString(to, doc.lineAt(from).to).match(/^[^}\s,]+/)
-      if (match) {
-        to += match[0].length
+      if (isWellFormedArgumentNode) {
+        // extend over subsequent text that isn't a brace, space, or comma
+        const match = doc
+          .sliceString(to, Math.min(doc.lineAt(from).to, argumentNode.to))
+          .match(/^[^}\s,]+/)
+        if (match) {
+          to += match[0].length
+        }
+      } else {
+        // Ensure we don't swallow a closing brace
+        const restOfLine = doc
+          .sliceString(to, Math.min(doc.lineAt(from).to, from + text.length))
+          .split('}')[0]
+
+        to += longestCommonPrefix(text.slice(to - from), restOfLine)
       }
     }
 
