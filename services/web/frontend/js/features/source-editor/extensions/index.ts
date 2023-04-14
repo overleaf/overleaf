@@ -38,7 +38,7 @@ import { thirdPartyExtensions } from './third-party-extensions'
 import { lineNumbers } from './line-numbers'
 import { highlightActiveLine } from './highlight-active-line'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
-import { emptyLineFiller } from './empty-line-filler'
+// import { emptyLineFiller } from './empty-line-filler'
 import { goToLinePanel } from './go-to-line'
 import { parserWatcher } from './wait-for-parser'
 import { drawSelection } from './draw-selection'
@@ -123,7 +123,8 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   spelling(options.spelling),
   shortcuts(),
   symbolPalette(),
-  emptyLineFiller(), // NOTE: must be before `trackChanges`
+  // TODO: re-enable this once incompatibility with @codemirror/view is fixed
+  // emptyLineFiller(), // NOTE: must be before `trackChanges`
   trackChanges(options.currentDoc, options.changeManager),
   visual(options.currentDoc, options.visual),
   verticalOverflow(),

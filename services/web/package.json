@@ -78,7 +78,7 @@
     "@codemirror/lint": "^6.2.0",
     "@codemirror/search": "^6.3.0",
     "@codemirror/state": "^6.2.0",
-    "@codemirror/view": "^6.9.3",
+    "@codemirror/view": "^6.9.4",
     "@contentful/rich-text-html-renderer": "^16.0.2",
     "@contentful/rich-text-types": "^16.0.2",
     "@google-cloud/bigquery": "^6.0.1",
