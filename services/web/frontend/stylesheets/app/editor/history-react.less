@@ -35,16 +35,6 @@ history-root {
     .doc-container {
       flex: 1;
       overflow-y: auto;
-
-      .document-diff-container {
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-
-        .cm-editor {
-          height: 100%;
-        }
-      }
     }
   }
 
@@ -195,5 +185,31 @@ history-root {
     &:last-child {
       margin-bottom: initial;
     }
+  }
+}
+
+.document-diff-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+
+  .cm-viewer-container,
+  .cm-editor {
+    height: 100%;
+  }
+
+  .previous-highlight-button,
+  .next-highlight-button {
+    position: absolute;
+    right: 16px;
+  }
+
+  .previous-highlight-button {
+    top: 16px;
+  }
+
+  .next-highlight-button {
+    bottom: 16px;
   }
 }

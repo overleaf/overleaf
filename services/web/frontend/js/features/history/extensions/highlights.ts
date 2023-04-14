@@ -73,7 +73,7 @@ const tooltip = (view: EditorView, pos: number, side: any): Tooltip | null => {
   }
 }
 
-const highlightsField = StateField.define<Highlight[]>({
+export const highlightsField = StateField.define<Highlight[]>({
   create() {
     return []
   },

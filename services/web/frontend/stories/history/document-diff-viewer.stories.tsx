@@ -39,6 +39,12 @@ const highlights: Highlight[] = [
     hue: 200,
     label: 'Added by Wombat on Friday',
   },
+  {
+    type: 'addition',
+    range: { from: 1770, to: 1780 },
+    hue: 200,
+    label: 'Added by Wombat on Tuesday',
+  },
 ]
 
 const content = `\\documentclass{article}
@@ -84,6 +90,42 @@ Once you're familiar with the editor, you can find various project settings in t
     \\end{itemize}
     \\item The numbers starts at 1 with each use of the \\text{enumerate} environment
 \\end{enumerate}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 \\bibliographystyle{alpha}
 \\bibliography{sample}
