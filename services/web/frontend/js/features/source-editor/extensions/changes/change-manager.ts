@@ -63,8 +63,8 @@ export const createChangeManager = (
       )
 
       if (coords) {
-        const y = coords.top - contentRect.top - editorPaddingTop
-        const height = coords.bottom - coords.top
+        const y = Math.round(coords.top - contentRect.top - editorPaddingTop)
+        const height = Math.round(coords.bottom - coords.top)
 
         entry.screenPos = { y, height, editorPaddingTop }
       }
@@ -442,8 +442,7 @@ export const createChangeManager = (
     window.removeEventListener('review-panel:event', reviewPanelEventListener)
   }
 
-  let lastUpdatedTopPaddingAt = 0
-  const PADDING_GEOMETRY_CHANGE_INTERVAL = 50
+  let ignoreGeometryChangesUntil = 0
 
   return {
     initialize() {
@@ -452,8 +451,18 @@ export const createChangeManager = (
     },
     handleUpdate(update: ViewUpdate) {
       if (updateSetsVerticalOverflow(update)) {
-        lastUpdatedTopPaddingAt = Date.now()
+        ignoreGeometryChangesUntil = Date.now() + 50 // ignore changes for 50ms
+      } else if (
+        (update.geometryChanged || update.viewportChanged) &&
+        Date.now() < ignoreGeometryChangesUntil
+      ) {
+        // Ignore a change to the editor geometry that occurs immediately after
+        // an update to the vertical padding because otherwise it triggers
+        // another update to the padding and so on ad infinitum. This is not an
+        // ideal way to handle this but I couldn't see another way.
+        return
       }
+
       if (
         update.docChanged ||
         update.focusChanged ||
@@ -461,17 +470,6 @@ export const createChangeManager = (
         update.selectionSet ||
         update.geometryChanged
       ) {
-        // Ignore a change to the editor geometry that occurs immediately after
-        // an update to the vertical padding because otherwise it triggers
-        // another update to the padding and so on ad infinitum. This is not an
-        // ideal way to handle this but I couldn't see another way.
-        if (
-          update.geometryChanged &&
-          Date.now() - lastUpdatedTopPaddingAt <
-            PADDING_GEOMETRY_CHANGE_INTERVAL
-        ) {
-          return
-        }
         dispatchFocusChangedEvent(update.state)
       }
     },

@@ -1,5 +1,6 @@
 import {
   Extension,
+  Facet,
   StateEffect,
   StateField,
   TransactionSpec,
@@ -10,6 +11,8 @@ export function verticalOverflow(): Extension {
   return [
     overflowPaddingState,
     minimumBottomPaddingState,
+    bottomPadding,
+    topPadding,
     contentAttributes,
     bottomPaddingPlugin,
     topPaddingPlugin,
@@ -132,19 +135,36 @@ const bottomPaddingPlugin = ViewPlugin.define(view => {
   }
 })
 
-// Set a style attribute on the contentDOM containing the calculated top and bottom padding.
-// This value will be concatenated with style values from any other extensions.
-const contentAttributes = EditorView.contentAttributes.compute(
+const topPaddingFacet = Facet.define<number>()
+const topPadding = topPaddingFacet.compute([overflowPaddingState], state => {
+  return state.field(overflowPaddingState).top
+})
+
+const bottomPaddingFacet = Facet.define<number>({
+  combine(values) {
+    return [Math.max(...values)]
+  },
+})
+const bottomPadding = bottomPaddingFacet.computeN(
   [overflowPaddingState, minimumBottomPaddingState],
   state => {
-    const overflowPadding = state.field(overflowPaddingState)
-    const minimumBottomPadding = state.field(minimumBottomPaddingState)
+    return [
+      state.field(minimumBottomPaddingState),
+      state.field(overflowPaddingState).bottom,
+    ]
+  }
+)
 
-    const bottomPadding = Math.max(minimumBottomPadding, overflowPadding.bottom)
-
-    return {
-      style: `padding-top: ${overflowPadding.top}px; padding-bottom: ${bottomPadding}px;`,
-    }
+// Set a style attribute on the contentDOM containing the calculated top and bottom padding.
+// This value will be concatenated with style values from any other extensions.
+// TODO: use elements instead?
+const contentAttributes = EditorView.contentAttributes.compute(
+  [topPaddingFacet, bottomPaddingFacet],
+  state => {
+    const [top] = state.facet(topPaddingFacet)
+    const [bottom] = state.facet(bottomPaddingFacet)
+    const style = `padding-top: ${top}px; padding-bottom: ${bottom}px;`
+    return { style }
   }
 )
 
