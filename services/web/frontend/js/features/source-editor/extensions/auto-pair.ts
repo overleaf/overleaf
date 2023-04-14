@@ -1,7 +1,6 @@
 import { keymap } from '@codemirror/view'
 import { Compartment, Prec, TransactionSpec } from '@codemirror/state'
-import { closeBrackets, closeBracketsKeymap } from '@codemirror/autocomplete'
-import { closePrefixedBrackets } from './close-prefixed-brackets'
+import { closeBrackets, closeBracketsKeymap } from './close-brackets'
 
 const autoPairConf = new Compartment()
 
@@ -23,7 +22,6 @@ const createAutoPair = (enabled: boolean) => {
   }
 
   return [
-    closePrefixedBrackets(),
     closeBrackets(),
     // NOTE: using Prec.highest as this needs to run before the default Backspace handler
     Prec.highest(keymap.of(closeBracketsKeymap)),

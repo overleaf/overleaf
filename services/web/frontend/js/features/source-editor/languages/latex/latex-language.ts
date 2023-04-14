@@ -9,6 +9,7 @@ import {
   findClosingFoldComment,
   getFoldRange,
 } from '../../utils/tree-query'
+import { closeBracketConfig } from './close-bracket-config'
 
 const styleOverrides: Record<string, any> = {
   DocumentClassCtrlSeq: t.keyword,
@@ -173,18 +174,6 @@ export const LaTeXLanguage = LRLanguage.define({
   }),
   languageData: {
     commentTokens: { line: '%' },
-    closeBrackets: { brackets: ['[', '{'] },
-    closePrefixedBrackets: {
-      brackets: {
-        // $$ will produce $$ $$, but we set a single closing $ sign as the value
-        // because inserting $ will already have added a closing bracket.
-        $$: '$',
-        $: '$',
-        '\\(': '\\)',
-        '\\[': '\\]',
-        '\\$': false,
-        '\\{': false,
-      },
-    },
+    closeBrackets: closeBracketConfig,
   },
 })
