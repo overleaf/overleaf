@@ -3,7 +3,7 @@ import { Highlight } from '../services/types/doc'
 import { EditorView, ViewPlugin, ViewUpdate } from '@codemirror/view'
 import { highlightsField } from './highlights'
 import { throttle, isEqual } from 'lodash'
-import { updateHasEffect } from '../../../../../modules/source-editor/frontend/js/utils/effects'
+import { updateHasEffect } from '../../source-editor/utils/effects'
 
 export type HighlightLocations = {
   before: number
