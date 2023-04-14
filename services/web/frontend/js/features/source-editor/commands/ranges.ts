@@ -212,11 +212,27 @@ function getParentNode(
   assoc: 0 | 1 | -1 = 1
 ): SyntaxNode | undefined {
   const tree = ensureSyntaxTree(state, 1000)
-  let node: SyntaxNode | undefined | null =
-    typeof position === 'number'
-      ? tree?.resolveInner(position, assoc)
-      : position
-  node = node?.parent
+  let node: SyntaxNode | undefined | null = null
+  if (typeof position === 'number') {
+    node = tree?.resolveInner(position, assoc)?.parent
+    // HACK: Spaces after UnknownCommands (and other commands without arguments)
+    // are included in the Command node. So we have to adjust for that here.
+    const preceedingCharacter = state.sliceDoc(
+      Math.max(0, position - 1),
+      position
+    )
+    if (
+      preceedingCharacter === ' ' &&
+      ['UnknownCommand', 'Item', 'Left', 'Right'].some(name =>
+        node?.type.is(name)
+      )
+    ) {
+      node = ancestorOfNodeWithType(node, 'Command')?.parent
+    }
+  } else {
+    node = position?.parent
+  }
+
   while (
     ['LongArg', 'TextArgument', 'OpenBrace', 'CloseBrace'].includes(
       node?.type.name || ''

@@ -161,5 +161,23 @@ describe('toggleRanges', function () {
         expect(cm).line(1).to.equal('\\textbf{\\textit{this <is} my} range>')
       })
     })
+
+    describe('when range is after a command', function () {
+      it('still formats list items', function () {
+        const cm = new CodemirrorTestSession([
+          '\\begin{itemize}',
+          '    \\item <My item>',
+          '\\end{itemize}',
+        ])
+        cm.applyCommand(BOLD_COMMAND)
+        expect(cm).line(2).to.equal('    \\item \\textbf{<My item>}')
+      })
+
+      it('still formats after command', function () {
+        const cm = new CodemirrorTestSession(['\\noindent <My paragraph>'])
+        cm.applyCommand(BOLD_COMMAND)
+        expect(cm).line(1).to.equal('\\noindent \\textbf{<My paragraph>}')
+      })
+    })
   })
 })
