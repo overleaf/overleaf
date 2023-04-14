@@ -32,6 +32,9 @@ const mountEditor = (content: string) => {
       </EditorProviders>
     </Container>
   )
+
+  // wait for the content to be parsed and revealed
+  cy.get('.cm-content').should('have.css', 'opacity', '1')
 }
 
 describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {

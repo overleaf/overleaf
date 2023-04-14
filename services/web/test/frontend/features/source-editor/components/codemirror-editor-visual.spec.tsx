@@ -34,6 +34,9 @@ describe('<CodeMirrorEditor/> in Rich Text mode', function () {
       </Container>
     )
 
+    // wait for the content to be parsed and revealed
+    cy.get('.cm-content').should('have.css', 'opacity', '1')
+
     cy.get('.cm-line').eq(0).click().as('first-line')
     cy.get('.cm-line').eq(1).as('second-line')
     cy.get('.cm-line').eq(2).as('third-line')
