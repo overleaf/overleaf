@@ -48,6 +48,7 @@ import { foldingKeymap } from './folding-keymap'
 import { inlineBackground } from './inline-background'
 import { fontLoad } from './font-load'
 import { indentationMarkers } from './indentation-markers'
+import { codemirrorDevTools } from '../languages/latex/codemirror-dev-tools'
 
 const ignoredDefaultKeybindings = new Set([
   // NOTE: disable "Mod-Enter" as it's used for "Compile"
@@ -133,6 +134,7 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   scrollOneLine(),
   fontLoad(),
   inlineBackground(options.visual.visual),
+  codemirrorDevTools(),
   exceptionLogger(),
   moduleExtensions.map(extension => extension()),
   thirdPartyExtensions(),

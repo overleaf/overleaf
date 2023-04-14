@@ -3,7 +3,6 @@ import { shortcuts } from './shortcuts'
 import { linting } from './linting'
 import { LanguageSupport, indentUnit } from '@codemirror/language'
 import { CompletionSource } from '@codemirror/autocomplete'
-import { debugPanel } from './debug-panel'
 import { openAutocomplete } from './open-autocomplete'
 import { metadata } from './metadata'
 import {
@@ -35,7 +34,6 @@ export const latex = () => {
     latexIndentService(),
     linting(),
     metadata(),
-    debugPanel(),
     openAutocomplete(),
     ...completionSources.map(completionSource =>
       LaTeXLanguage.data.of({
