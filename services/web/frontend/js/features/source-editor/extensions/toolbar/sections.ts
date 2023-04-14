@@ -134,6 +134,7 @@ export const setSectionHeadingLevel = (view: EditorView, level: string) => {
           changes,
         }
       }
-    })
+    }),
+    { scrollIntoView: true }
   )
 }

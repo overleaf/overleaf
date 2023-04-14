@@ -87,7 +87,8 @@ const wrapRangesInList =
     view.dispatch(
       view.state.changeByRange(range =>
         wrapRangeInList(view.state, range, environment)
-      )
+      ),
+      { scrollIntoView: true }
     )
     return true
   }
@@ -182,7 +183,8 @@ const unwrapRangesFromList =
     view.dispatch(
       view.state.changeByRange(range =>
         unwrapRangeFromList(view.state, range, environment)
-      )
+      ),
+      { scrollIntoView: true }
     )
     return true
   }
@@ -306,7 +308,8 @@ export const toggleListForRanges =
     view.dispatch(
       view.state.changeByRange(range =>
         toggleListForRange(view, range, environment)
-      )
+      ),
+      { scrollIntoView: true }
     )
   }
 

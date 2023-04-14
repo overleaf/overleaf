@@ -67,7 +67,8 @@ export const wrapRanges =
             },
           ],
         }
-      })
+      }),
+      { scrollIntoView: true }
     )
     return true
   }
@@ -753,7 +754,8 @@ export function toggleRanges(command: string) {
 
         // Shouldn't happen, but default to just wrapping the content
         return wrapRangeInCommand(view.state, range, command)
-      })
+      }),
+      { scrollIntoView: true }
     )
     return true
   }
