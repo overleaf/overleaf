@@ -46,6 +46,8 @@ const SurveyHandler = require('../Survey/SurveyHandler')
 const ProjectAuditLogHandler = require('./ProjectAuditLogHandler')
 const PublicAccessLevels = require('../Authorization/PublicAccessLevels')
 
+const VISUAL_EDITOR_NAMING_SPLIT_TEST_MIN_SIGNUP_DATE = new Date('2023-04-17')
+
 /**
  * @typedef {import("./types").GetProjectsRequest} GetProjectsRequest
  * @typedef {import("./types").GetProjectsResponse} GetProjectsResponse
@@ -903,21 +905,60 @@ const ProjectController = {
             }
           )
         },
-        legacySourceEditorAssignment(cb) {
-          SplitTestHandler.getAssignment(
-            req,
-            res,
-            'source-editor-legacy',
-            (error, assignment) => {
-              // do not fail editor load if assignment fails
-              if (error) {
-                cb(null, { variant: 'default' })
-              } else {
-                cb(null, assignment)
-              }
+        participatingInVisualEditorNamingTest: [
+          'user',
+          (results, cb) => {
+            const isNewUser =
+              results.user.signUpDate >=
+              VISUAL_EDITOR_NAMING_SPLIT_TEST_MIN_SIGNUP_DATE
+            cb(null, isNewUser)
+          },
+        ],
+        visualEditorNameAssignment: [
+          'participatingInVisualEditorNamingTest',
+          (results, cb) => {
+            if (!results.participatingInVisualEditorNamingTest) {
+              cb(null, { variant: 'default' })
+            } else {
+              SplitTestHandler.getAssignment(
+                req,
+                res,
+                'visual-editor-name',
+                (error, assignment) => {
+                  if (error) {
+                    cb(null, { variant: 'default' })
+                  } else {
+                    cb(null, assignment)
+                  }
+                }
+              )
             }
-          )
-        },
+          },
+        ],
+        legacySourceEditorAssignment: [
+          'participatingInVisualEditorNamingTest',
+          'visualEditorNameAssignment',
+          (results, cb) => {
+            // Hide Ace for people in the Rich Text naming test
+            if (results.participatingInVisualEditorNamingTest) {
+              cb(null, { variant: 'true' })
+            } else {
+              SplitTestHandler.getAssignment(
+                req,
+                res,
+                'source-editor-legacy',
+                (error, assignment) => {
+                  // do not fail editor load if assignment fails
+                  if (error) {
+                    cb(null, { variant: 'default' })
+                  } else {
+                    cb(null, assignment)
+                  }
+                }
+              )
+            }
+          },
+        ],
         pdfjsAssignment(cb) {
           SplitTestHandler.getAssignment(
             req,
@@ -1148,6 +1189,8 @@ const ProjectController = {
           isTokenMember,
           isInvitedMember,
           brandVariation,
+          visualEditorNameAssignment,
+          participatingInVisualEditorNamingTest,
           legacySourceEditorAssignment,
           pdfjsAssignment,
           editorLeftMenuAssignment,
@@ -1271,6 +1314,11 @@ const ProjectController = {
               detachRole === 'detached'
                 ? 'project/editor_detached'
                 : 'project/editor'
+
+            const isParticipatingInVisualEditorNamingTest =
+              Features.hasFeature('saas') &&
+              participatingInVisualEditorNamingTest
+
             res.render(template, {
               title: project.name,
               priority_title: true,
@@ -1336,6 +1384,8 @@ const ProjectController = {
               ),
               pdfjsVariant: pdfjsAssignment.variant,
               debugPdfDetach,
+              isParticipatingInVisualEditorNamingTest,
+              visualEditorNameVariant: visualEditorNameAssignment.variant,
               showLegacySourceEditor,
               showSymbolPalette,
               galileoEnabled,

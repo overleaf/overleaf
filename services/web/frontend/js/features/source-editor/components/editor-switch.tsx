@@ -41,12 +41,22 @@ function Badge() {
 }
 
 const showLegacySourceEditor: boolean = getMeta('ol-showLegacySourceEditor')
+const visualEditorNameVariant: string = getMeta('ol-visualEditorNameVariant')
+const isParticipatingInVisualEditorNamingTest: boolean = getMeta(
+  'ol-isParticipatingInVisualEditorNamingTest'
+)
 
 function EditorSwitch() {
   const [newSourceEditor, setNewSourceEditor] = useScopeValue(
     'editor.newSourceEditor'
   )
   const [richText, setRichText] = useScopeValue('editor.showRichText')
+  const sourceName =
+    visualEditorNameVariant === 'code-visual'
+      ? 'Code Editor'
+      : visualEditorNameVariant === 'source-visual'
+      ? 'Source Editor'
+      : 'Source'
 
   const [visual, setVisual] = useScopeValue('editor.showVisual')
 
@@ -106,7 +116,7 @@ function EditorSwitch() {
           onChange={handleChange}
         />
         <label htmlFor="editor-switch-cm6" className="toggle-switch-label">
-          <span>Source</span>
+          <span>{sourceName}</span>
         </label>
 
         {showLegacySourceEditor ? (
@@ -133,7 +143,7 @@ function EditorSwitch() {
         />
       </fieldset>
 
-      {!!richTextOrVisual && (
+      {!!richTextOrVisual && !isParticipatingInVisualEditorNamingTest && (
         <SplitTestBadge splitTestName="rich-text" displayOnVariants={['cm6']} />
       )}
     </div>
@@ -146,6 +156,9 @@ const RichTextToggle: FC<{
   handleChange: (event: ChangeEvent<HTMLInputElement>) => void
 }> = ({ checked, disabled, handleChange }) => {
   const { t } = useTranslation()
+
+  const richTextName =
+    visualEditorNameVariant === 'default' ? 'Rich Text' : 'Visual Editor'
 
   const toggle = (
     <span>
@@ -160,7 +173,7 @@ const RichTextToggle: FC<{
         disabled={disabled}
       />
       <label htmlFor="editor-switch-rich-text" className="toggle-switch-label">
-        <span>Rich Text</span>
+        <span>{richTextName}</span>
       </label>
     </span>
   )
