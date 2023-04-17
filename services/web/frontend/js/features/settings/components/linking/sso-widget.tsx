@@ -112,13 +112,17 @@ function ActionButton({
   const { t } = useTranslation()
   if (unlinkRequestInflight) {
     return (
-      <Button bsStyle="danger" disabled>
+      <Button className="btn-danger-ghost" bsStyle={null} disabled>
         {t('unlinking')}
       </Button>
     )
   } else if (accountIsLinked) {
     return (
-      <Button bsStyle="danger" onClick={onUnlinkClick}>
+      <Button
+        className="btn-danger-ghost"
+        bsStyle={null}
+        onClick={onUnlinkClick}
+      >
         {t('unlink')}
       </Button>
     )
@@ -169,7 +173,11 @@ function UnlinkConfirmModal({
         >
           {t('cancel')}
         </Button>
-        <Button bsStyle="danger" onClick={handleConfirmation}>
+        <Button
+          className="btn-danger-ghost"
+          bsStyle={null}
+          onClick={handleConfirmation}
+        >
           {t('unlink')}
         </Button>
       </Modal.Footer>

@@ -117,7 +117,12 @@ function ActionButton({
     )
   } else if (linked) {
     return (
-      <Button bsStyle="danger" onClick={handleUnlinkClick} disabled={disabled}>
+      <Button
+        className="btn-danger-ghost"
+        onClick={handleUnlinkClick}
+        bsStyle={null}
+        disabled={disabled}
+      >
         {t('unlink')}
       </Button>
     )
@@ -186,7 +191,7 @@ function UnlinkConfirmationModal({
           >
             {t('cancel')}
           </Button>
-          <Button type="submit" bsStyle="danger">
+          <Button type="submit" className="btn-danger-ghost" bsStyle={null}>
             {t('unlink')}
           </Button>
         </form>

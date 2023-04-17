@@ -148,6 +148,17 @@
 .btn-danger when(@is-new-css = true) {
   .btn-borderless(@white, @red, @red-60);
 }
+// Danger Ghost and error appear as light red with no border
+.btn-danger-ghost when (@is-new-css = false) {
+  .button-variant(@btn-danger-ghost-color; @btn-danger-ghost-bg; @btn-danger-ghost-border);
+  // hover for ghost acts different from typical variants, as it's default state has no bg
+  &:hover {
+    background-color: @red-10;
+  }
+}
+.btn-danger-ghost when (@is-new-css = true) {
+  .btn-borderless(@red-50, @btn-danger-ghost-bg, @red-10);
+}
 // btn-secondary
 .btn-secondary when(@is-new-css = false) {
   &:not(.btn-secondary-info) {
