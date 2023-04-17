@@ -216,7 +216,9 @@ async function projectListPage(req, res, next) {
       if (samlSession.linked) {
         notificationsInstitution.push({
           email: samlSession.institutionEmail,
-          institutionName: samlSession.linked.universityName,
+          institutionName:
+            samlSession.linked.universityName ||
+            samlSession.linked.providerName,
           templateKey: 'notification_institution_sso_linked',
         })
       }
