@@ -17,7 +17,7 @@ type Diff = {
 
 function Main() {
   const { t } = useTranslation()
-  const { projectId, updateSelection, fileSelection } = useHistoryContext()
+  const { projectId, selection } = useHistoryContext()
   const { isLoading, runAsync, data } = useAsync<DocDiffResponse>()
   let diff: Diff | undefined
   if (data?.diff) {
@@ -28,16 +28,18 @@ function Main() {
     }
   }
 
+  const { updateRange, pathname } = selection
+
   useEffect(() => {
-    if (!updateSelection || !fileSelection || !fileSelection.pathname) {
+    if (!updateRange || !pathname) {
       return
     }
 
-    const { fromV, toV } = updateSelection.update
+    const { fromV, toV } = updateRange
 
     // TODO: Error handling
-    runAsync(diffDoc(projectId, fromV, toV, fileSelection.pathname))
-  }, [fileSelection, projectId, runAsync, updateSelection])
+    runAsync(diffDoc(projectId, fromV, toV, pathname))
+  }, [projectId, runAsync, pathname, updateRange])
 
   if (isLoading) {
     return (

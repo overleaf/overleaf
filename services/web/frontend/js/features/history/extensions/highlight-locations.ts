@@ -73,11 +73,6 @@ const plugin = ViewPlugin.fromClass(
       const oldLocations = this.view.state.field(highlightLocationsField)
       const newLocations = calculateHighlightLocations(this.view)
 
-      console.log(
-        'dispatchIfChanged, changed is',
-        !isEqual(oldLocations, newLocations)
-      )
-
       if (!isEqual(oldLocations, newLocations)) {
         this.view.dispatch({
           effects: setHighlightLocationsEffect.of(newLocations),

@@ -9,9 +9,12 @@ export interface ProjectOp {
   atV: number
 }
 
-export interface Update {
+export interface UpdateRange {
   fromV: number
   toV: number
+}
+
+export interface Update extends UpdateRange {
   meta: Meta
   labels: Label[]
   pathnames: string[]
@@ -31,9 +34,4 @@ interface LoadedUpdateMeta extends Meta {
 
 export interface LoadedUpdate extends Update {
   meta: LoadedUpdateMeta
-}
-
-export interface UpdateSelection {
-  update: Update
-  comparing: boolean
 }

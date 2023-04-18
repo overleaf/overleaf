@@ -19,7 +19,7 @@ function ChangeList() {
         )}
       </div>
       {!error && (
-        <div className="version-list-container">
+        <div className="history-version-list-container">
           {labelsOnly ? <LabelsList /> : <AllHistoryList />}
         </div>
       )}

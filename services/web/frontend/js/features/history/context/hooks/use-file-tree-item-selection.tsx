@@ -1,25 +1,19 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback } from 'react'
 import { useHistoryContext } from '../history-context'
 
 export function useFileTreeItemSelection(pathname: string) {
-  const { fileSelection, setFileSelection } = useHistoryContext()
+  const { selection, setSelection } = useHistoryContext()
 
   const handleClick = useCallback(() => {
-    if (!fileSelection) {
-      return
-    }
-    if (pathname !== fileSelection.pathname) {
-      setFileSelection({
-        files: fileSelection.files,
+    if (pathname !== selection.pathname) {
+      setSelection({
+        ...selection,
         pathname,
       })
     }
-  }, [fileSelection, pathname, setFileSelection])
+  }, [pathname, selection, setSelection])
 
-  const isSelected = useMemo(
-    () => fileSelection?.pathname === pathname,
-    [fileSelection, pathname]
-  )
+  const isSelected = selection.pathname === pathname
 
   return { isSelected, onClick: handleClick }
 }

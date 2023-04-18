@@ -6,6 +6,9 @@ import { useUserContext } from '../../../../shared/context/user-context'
 import { relativeDate, formatTime } from '../../../utils/format-date'
 import { orderBy } from 'lodash'
 import { LoadedUpdate } from '../../services/types/update'
+import { useHistoryContext } from '../../context/history-context'
+import classNames from 'classnames'
+import { updateIsSelected } from '../../utils/history-details'
 
 type HistoryEntryProps = {
   update: LoadedUpdate
@@ -15,16 +18,46 @@ function HistoryVersion({ update }: HistoryEntryProps) {
   const { id: currentUserId } = useUserContext()
   const orderedLabels = orderBy(update.labels, ['created_at'], ['desc'])
 
+  const { selection, setSelection } = useHistoryContext()
+
+  const selected = updateIsSelected(update, selection)
+
+  function compare() {
+    const { updateRange } = selection
+    if (!updateRange) {
+      return
+    }
+    const fromV = Math.min(update.fromV, updateRange.fromV)
+    const toV = Math.max(update.toV, updateRange.toV)
+
+    setSelection({
+      updateRange: { fromV, toV },
+      comparing: true,
+      files: [],
+      pathname: null,
+    })
+  }
+
   return (
-    <div>
+    <div className={classNames({ 'history-version-selected': selected })}>
       {update.meta.first_in_day && (
         <time className="history-version-day">
           {relativeDate(update.meta.end_ts)}
         </time>
       )}
+      {/* TODO: Sort out accessibility for this */}
+      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
       <div
         className="history-version-details"
         data-testid="history-version-details"
+        onClick={() =>
+          setSelection({
+            updateRange: update,
+            comparing: false,
+            files: [],
+            pathname: null,
+          })
+        }
       >
         <time className="history-version-metadata-time">
           <b>{formatTime(update.meta.end_ts, 'Do MMMM, h:mm a')}</b>
@@ -44,6 +77,18 @@ function HistoryVersion({ update }: HistoryEntryProps) {
           currentUserId={currentUserId}
         />
         <Origin origin={update.meta.origin} />
+        {selection.comparing ? null : (
+          <div>
+            <button
+              onClick={event => {
+                event.stopPropagation()
+                compare()
+              }}
+            >
+              Compare
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )

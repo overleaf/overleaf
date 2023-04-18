@@ -3,7 +3,6 @@ import type { HistoryContextValue } from '../../../../../frontend/js/features/hi
 import type { FileDiff } from '../../../../../frontend/js/features/history/services/types/file'
 import { autoSelectFile } from '../../../../../frontend/js/features/history/utils/auto-select-file'
 import type { User } from '../../../../../frontend/js/features/history/services/types/shared'
-import { UpdateSelection } from '../../../../../frontend/js/features/history/services/types/update'
 
 describe('autoSelectFile', function () {
   const historyUsers: User[] = [
@@ -260,12 +259,7 @@ describe('autoSelectFile', function () {
         },
       ]
 
-      const updateSelection: UpdateSelection = {
-        update: updates[0],
-        comparing,
-      }
-
-      const pathname = autoSelectFile(files, updateSelection, updates)
+      const pathname = autoSelectFile(files, updates[0], comparing, updates)
 
       expect(pathname).to.equal('newfolder1/newfile10.tex')
     })
@@ -330,12 +324,7 @@ describe('autoSelectFile', function () {
         },
       ]
 
-      const updateSelection: UpdateSelection = {
-        update: updates[0],
-        comparing,
-      }
-
-      const pathname = autoSelectFile(files, updateSelection, updates)
+      const pathname = autoSelectFile(files, updates[0], comparing, updates)
 
       expect(pathname).to.equal('newfile1.tex')
     })
@@ -431,12 +420,7 @@ describe('autoSelectFile', function () {
         },
       ]
 
-      const updateSelection: UpdateSelection = {
-        update: updates[0],
-        comparing,
-      }
-
-      const pathname = autoSelectFile(files, updateSelection, updates)
+      const pathname = autoSelectFile(files, updates[0], comparing, updates)
 
       expect(pathname).to.equal('main3.tex')
     })
@@ -602,12 +586,7 @@ describe('autoSelectFile', function () {
         },
       ]
 
-      const updateSelection: UpdateSelection = {
-        update: updates[0],
-        comparing,
-      }
-
-      const pathname = autoSelectFile(files, updateSelection, updates)
+      const pathname = autoSelectFile(files, updates[0], comparing, updates)
 
       expect(pathname).to.equal('main.tex')
     })
@@ -710,12 +689,7 @@ describe('autoSelectFile', function () {
         },
       ]
 
-      const updateSelection: UpdateSelection = {
-        update: updates[0],
-        comparing,
-      }
-
-      const pathname = autoSelectFile(files, updateSelection, updates)
+      const pathname = autoSelectFile(files, updates[0], comparing, updates)
 
       expect(pathname).to.equal('certainly_not_main.tex')
     })

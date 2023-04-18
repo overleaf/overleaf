@@ -39,6 +39,8 @@ history-root {
   }
 
   .change-list {
+    display: flex;
+    flex-direction: column;
     width: @versions-list-width;
     font-size: @font-size-small;
     border-left: 1px solid @history-react-separator-color;
@@ -51,6 +53,11 @@ history-root {
     span {
       display: block;
     }
+  }
+
+  .history-version-list-container {
+    flex: 1;
+    overflow-y: auto;
   }
 
   .history-toggle-switch-container,
@@ -77,6 +84,10 @@ history-root {
       cursor: pointer;
       background-color: @neutral-10;
     }
+  }
+
+  .history-version-selected {
+    background-color: @green-10;
   }
 
   .history-version-metadata-time {

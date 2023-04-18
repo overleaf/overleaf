@@ -17,9 +17,10 @@ export function fetchUpdates(projectId: string, before?: number) {
 
   const queryParamsSerialized = new URLSearchParams(queryParams).toString()
   const updatesURL = `/project/${projectId}/updates?${queryParamsSerialized}`
-  return getJSON<{ updates: Update[]; nextBeforeTimestamp?: number }>(
-    updatesURL
-  )
+  return getJSON<{
+    updates: Update[]
+    nextBeforeTimestamp?: number
+  }>(updatesURL)
 }
 
 export function fetchLabels(projectId: string) {

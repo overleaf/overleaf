@@ -30,8 +30,3 @@ export type FileDiff =
   | FileEdited
   | FileRenamed
   | FileUnchanged
-
-export interface FileSelection {
-  files: FileDiff[]
-  pathname: string | null
-}

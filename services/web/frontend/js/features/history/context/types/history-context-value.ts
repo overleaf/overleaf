@@ -1,7 +1,7 @@
 import { Nullable } from '../../../../../../types/utils'
-import { LoadedUpdate, UpdateSelection } from '../../services/types/update'
+import { LoadedUpdate } from '../../services/types/update'
 import { LoadedLabel } from '../../services/types/label'
-import { FileSelection } from '../../services/types/file'
+import { Selection } from '../../services/types/selection'
 
 export type HistoryContextValue = {
   updates: LoadedUpdate[]
@@ -18,8 +18,6 @@ export type HistoryContextValue = {
   setLabels: React.Dispatch<React.SetStateAction<HistoryContextValue['labels']>>
   loadingFileTree: boolean
   projectId: string
-  fileSelection: FileSelection | null
-  setFileSelection: (fileSelection: FileSelection) => void
-  updateSelection: UpdateSelection | null
-  setUpdateSelection: (updateSelection: UpdateSelection) => void
+  selection: Selection
+  setSelection: (selection: Selection) => void
 }

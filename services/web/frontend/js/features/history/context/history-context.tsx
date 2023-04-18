@@ -19,9 +19,9 @@ import ColorManager from '../../../ide/colors/ColorManager'
 import moment from 'moment'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import { cloneDeep } from 'lodash'
-import { LoadedUpdate, Update, UpdateSelection } from '../services/types/update'
-import { FileSelection } from '../services/types/file'
+import { LoadedUpdate, Update } from '../services/types/update'
 import { Nullable } from '../../../../../types/utils'
+import { Selection } from '../services/types/selection'
 
 function useHistory() {
   const { view } = useLayoutContext()
@@ -30,9 +30,14 @@ function useHistory() {
   const userId = user.id
   const projectId = project._id
   const projectOwnerId = project.owner?._id
-  const [updateSelection, setUpdateSelection] =
-    useState<UpdateSelection | null>(null)
-  const [fileSelection, setFileSelection] = useState<FileSelection | null>(null)
+
+  const [selection, setSelection] = useState<Selection>({
+    updateRange: null,
+    comparing: false,
+    files: [],
+    pathname: null,
+  })
+
   const [updates, setUpdates] = useState<LoadedUpdate[]>([])
   const [loadingFileTree, setLoadingFileTree] =
     useState<HistoryContextValue['loadingFileTree']>(true)
@@ -158,15 +163,17 @@ function useHistory() {
     }
   }, [view, fetchNextBatchOfUpdates])
 
+  const { updateRange, comparing } = selection
+
   // Load files when the update selection changes
   useEffect(() => {
-    if (!updateSelection) {
+    if (!updateRange) {
       return
     }
-    const { fromV, toV } = updateSelection.update
+    const { fromV, toV } = updateRange
 
     diffFiles(projectId, fromV, toV).then(({ diff: files }) => {
-      const pathname = autoSelectFile(files, updateSelection, updates)
+      const pathname = autoSelectFile(files, updateRange, comparing, updates)
       const newFiles = files.map(file => {
         if (isFileRenamed(file) && file.newPathname) {
           return renamePathnameKey(file)
@@ -174,19 +181,21 @@ function useHistory() {
 
         return file
       })
-      setFileSelection({ files: newFiles, pathname })
+      setSelection({ updateRange, comparing, files: newFiles, pathname })
     })
-  }, [updateSelection, projectId, updates])
+  }, [updateRange, projectId, updates, comparing])
 
   useEffect(() => {
     // Set update selection if there isn't one
-    if (updates.length && !updateSelection) {
-      setUpdateSelection({
-        update: updates[0],
+    if (updates.length && !updateRange) {
+      setSelection({
+        updateRange: updates[0],
         comparing: false,
+        files: [],
+        pathname: null,
       })
     }
-  }, [setUpdateSelection, updateSelection, updates])
+  }, [updateRange, updates])
 
   const value = useMemo<HistoryContextValue>(
     () => ({
@@ -202,10 +211,8 @@ function useHistory() {
       setUpdates,
       userHasFullFeature,
       projectId,
-      fileSelection,
-      setFileSelection,
-      updateSelection,
-      setUpdateSelection,
+      selection,
+      setSelection,
     }),
     [
       atEnd,
@@ -220,10 +227,8 @@ function useHistory() {
       setUpdates,
       userHasFullFeature,
       projectId,
-      fileSelection,
-      setFileSelection,
-      updateSelection,
-      setUpdateSelection,
+      selection,
+      setSelection,
     ]
   )
 
