@@ -1,6 +1,9 @@
 const minimist = require('minimist')
-const { ReadPreference } = require('mongodb')
-const { waitForDb, db } = require('../../app/src/infrastructure/mongodb')
+const {
+  waitForDb,
+  db,
+  READ_PREFERENCE_SECONDARY,
+} = require('../../app/src/infrastructure/mongodb')
 
 async function main() {
   const opts = parseArgs()
@@ -49,7 +52,7 @@ async function countAccessTokens(applicationId) {
     {
       oauthApplication_id: applicationId,
     },
-    { readPreference: ReadPreference.secondary }
+    { readPreference: READ_PREFERENCE_SECONDARY }
   )
 }
 
@@ -58,7 +61,7 @@ async function countAuthorizationCodes(applicationId) {
     {
       oauthApplication_id: applicationId,
     },
-    { readPreference: ReadPreference.secondary }
+    { readPreference: READ_PREFERENCE_SECONDARY }
   )
 }
 

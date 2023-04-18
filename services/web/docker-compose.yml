@@ -90,6 +90,7 @@ services:
 
   mongo:
     image: mongo:4.4.16
+    command: --replSet overleaf
 
   ldap:
     restart: always

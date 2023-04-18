@@ -1,7 +1,12 @@
 const DocstoreManager = require('../app/src/Features/Docstore/DocstoreManager')
 const { promisify } = require('util')
-const { ObjectId, ReadPreference } = require('mongodb')
-const { db, waitForDb } = require('../app/src/infrastructure/mongodb')
+const { ObjectId } = require('mongodb')
+const {
+  db,
+  waitForDb,
+  READ_PREFERENCE_PRIMARY,
+  READ_PREFERENCE_SECONDARY,
+} = require('../app/src/infrastructure/mongodb')
 const { promiseMapWithLimit } = require('../app/src/util/promises')
 const { getHardDeletedProjectIds } = require('./delete_orphaned_data_helper')
 const sleep = promisify(setTimeout)
@@ -52,7 +57,7 @@ async function main() {
       },
     }
     const docs = await db.docs
-      .find(query, { readPreference: ReadPreference.SECONDARY })
+      .find(query, { readPreference: READ_PREFERENCE_SECONDARY })
       .project({ project_id: 1 })
       .sort({ project_id: 1 })
       .limit(BATCH_SIZE)
@@ -97,7 +102,7 @@ async function getProjectDocs(projectId) {
       { project_id: projectId },
       {
         projection: { _id: 1 },
-        readPreference: ReadPreference.PRIMARY,
+        readPreference: READ_PREFERENCE_PRIMARY,
       }
     )
     .toArray()

@@ -2,8 +2,11 @@ const TEN_MINUTES = 1000 * 60 * 10
 process.env.MONGO_SOCKET_TIMEOUT =
   process.env.MONGO_SOCKET_TIMEOUT || TEN_MINUTES.toString()
 
-const { ReadPreference } = require('mongodb')
-const { db, waitForDb } = require('../app/src/infrastructure/mongodb')
+const {
+  db,
+  waitForDb,
+  READ_PREFERENCE_SECONDARY,
+} = require('../app/src/infrastructure/mongodb')
 const _ = require('lodash')
 const {
   formatTokenUsageStats,
@@ -32,7 +35,7 @@ async function count(collectionName, paths) {
   const cursor = collection.find(
     {},
     {
-      readPreference: ReadPreference.SECONDARY,
+      readPreference: READ_PREFERENCE_SECONDARY,
       projection,
     }
   )

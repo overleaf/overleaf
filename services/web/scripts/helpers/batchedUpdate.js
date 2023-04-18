@@ -1,5 +1,9 @@
-const { ReadPreference, ObjectId } = require('mongodb')
-const { db, waitForDb } = require('../../app/src/infrastructure/mongodb')
+const { ObjectId } = require('mongodb')
+const {
+  db,
+  waitForDb,
+  READ_PREFERENCE_SECONDARY,
+} = require('../../app/src/infrastructure/mongodb')
 
 const ONE_MONTH_IN_MS = 1000 * 60 * 60 * 24 * 31
 let ID_EDGE_PAST
@@ -129,7 +133,7 @@ async function batchedUpdate(
   refreshGlobalOptionsForBatchedUpdate(batchedUpdateOptions)
 
   findOptions = findOptions || {}
-  findOptions.readPreference = ReadPreference.SECONDARY
+  findOptions.readPreference = READ_PREFERENCE_SECONDARY
 
   projection = projection || { _id: 1 }
   let nextBatch

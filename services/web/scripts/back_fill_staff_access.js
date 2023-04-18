@@ -1,5 +1,8 @@
-const { db, waitForDb } = require('../app/src/infrastructure/mongodb')
-const { ReadPreference } = require('mongodb')
+const {
+  db,
+  waitForDb,
+  READ_PREFERENCE_SECONDARY,
+} = require('../app/src/infrastructure/mongodb')
 const UserSessionsManager = require('../app/src/Features/User/UserSessionsManager')
 
 const COMMIT = process.argv.includes('--commit')
@@ -46,7 +49,7 @@ async function main() {
           email: 1,
           staffAccess: 1,
         },
-        readPreference: ReadPreference.SECONDARY,
+        readPreference: READ_PREFERENCE_SECONDARY,
       }
     )
     .toArray()

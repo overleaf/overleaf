@@ -1,5 +1,8 @@
-const { ReadPreference } = require('mongodb')
-const { db, waitForDb } = require('../app/src/infrastructure/mongodb')
+const {
+  db,
+  waitForDb,
+  READ_PREFERENCE_SECONDARY,
+} = require('../app/src/infrastructure/mongodb')
 const { extname } = require('node:path')
 
 const FILE_TYPES = [
@@ -22,7 +25,10 @@ async function main() {
   await waitForDb()
   const projects = db.projects.find(
     {},
-    { projection: { rootFolder: 1 }, readPreference: ReadPreference.SECONDARY }
+    {
+      projection: { rootFolder: 1 },
+      readPreference: READ_PREFERENCE_SECONDARY,
+    }
   )
   let projectsProcessed = 0
   const result = new Map(FILE_TYPES.map(fileType => [fileType, 0]))

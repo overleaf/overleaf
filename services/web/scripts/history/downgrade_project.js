@@ -5,8 +5,12 @@ process.env.MONGO_SOCKET_TIMEOUT =
 
 const PROJECT_ID = process.env.PROJECT_ID
 
-const { ReadPreference, ObjectId } = require('mongodb')
-const { db, waitForDb } = require('../../app/src/infrastructure/mongodb')
+const { ObjectId } = require('mongodb')
+const {
+  db,
+  waitForDb,
+  READ_PREFERENCE_SECONDARY,
+} = require('../../app/src/infrastructure/mongodb')
 const ProjectHistoryHandler = require('../../app/src/Features/Project/ProjectHistoryHandler')
 
 console.log({
@@ -43,7 +47,7 @@ async function shouldPreserveHistory(project) {
         { preserveHistory: { $eq: true } },
       ],
     },
-    { readPreference: ReadPreference.SECONDARY }
+    { readPreference: READ_PREFERENCE_SECONDARY }
   )
 }
 

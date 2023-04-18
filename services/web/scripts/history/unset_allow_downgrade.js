@@ -1,6 +1,10 @@
 const { promisify } = require('util')
-const { ObjectId, ReadPreference } = require('mongodb')
-const { db, waitForDb } = require('../../app/src/infrastructure/mongodb')
+const { ObjectId } = require('mongodb')
+const {
+  db,
+  waitForDb,
+  READ_PREFERENCE_SECONDARY,
+} = require('../../app/src/infrastructure/mongodb')
 const sleep = promisify(setTimeout)
 const _ = require('lodash')
 
@@ -63,7 +67,7 @@ async function main(options) {
       'overleaf.history.allowDowngrade': true,
     }
     const projects = await db.projects
-      .find(query, { readPreference: ReadPreference.SECONDARY })
+      .find(query, { readPreference: READ_PREFERENCE_SECONDARY })
       .project({ _id: 1 })
       .limit(options.batchSize)
       .toArray()

@@ -79,6 +79,13 @@ test_acceptance_clean:
 	$(DOCKER_COMPOSE_TEST_ACCEPTANCE) down -v -t 0
 
 test_acceptance_pre_run:
+	$(DOCKER_COMPOSE_TEST_ACCEPTANCE) up -d mongo
+	$(DOCKER_COMPOSE_TEST_ACCEPTANCE) exec -T mongo sh -c ' \
+		while ! mongo --eval "db.version()" > /dev/null; do \
+			echo "Waiting for Mongo..."; \
+			sleep 1; \
+		done; \
+		mongo --eval "rs.initiate({ _id: \"overleaf\", members: [ { _id: 0, host: \"mongo:27017\" } ] })"'
 ifneq (,$(wildcard test/acceptance/js/scripts/pre-run))
 	$(DOCKER_COMPOSE_TEST_ACCEPTANCE) run --rm test_acceptance test/acceptance/js/scripts/pre-run
 endif

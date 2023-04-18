@@ -1,5 +1,8 @@
-const { ReadPreference } = require('mongodb')
-const { db } = require('../app/src/infrastructure/mongodb')
+const {
+  db,
+  READ_PREFERENCE_PRIMARY,
+  READ_PREFERENCE_SECONDARY,
+} = require('../app/src/infrastructure/mongodb')
 const { promiseMapWithLimit } = require('../app/src/util/promises')
 
 async function getDeletedProject(projectId, readPreference) {
@@ -57,14 +60,14 @@ async function checkProjectExistsWithReadPreference(projectId, readPreference) {
 async function checkProjectExistsOnPrimary(projectId) {
   return await checkProjectExistsWithReadPreference(
     projectId,
-    ReadPreference.PRIMARY
+    READ_PREFERENCE_PRIMARY
   )
 }
 
 async function checkProjectExistsOnSecondary(projectId) {
   return await checkProjectExistsWithReadPreference(
     projectId,
-    ReadPreference.SECONDARY
+    READ_PREFERENCE_SECONDARY
   )
 }
 

@@ -113,7 +113,7 @@ async function insertPendingChunk(projectId, chunk) {
 /**
  * Record that a new chunk was created.
  */
-async function confirmCreate(projectId, chunk, chunkId) {
+async function confirmCreate(projectId, chunk, chunkId, mongoOpts = {}) {
   assert.mongoId(projectId, 'bad projectId')
   assert.instance(chunk, Chunk, 'bad chunk')
   assert.mongoId(chunkId, 'bad chunkId')
@@ -126,7 +126,8 @@ async function confirmCreate(projectId, chunk, chunkId) {
         projectId: ObjectId(projectId),
         state: 'pending',
       },
-      { $set: { state: 'active', updatedAt: new Date() } }
+      { $set: { state: 'active', updatedAt: new Date() } },
+      mongoOpts
     )
   } catch (err) {
     if (err.code === DUPLICATE_KEY_ERROR_CODE) {
@@ -155,8 +156,8 @@ async function confirmUpdate(projectId, oldChunkId, newChunk, newChunkId) {
   const session = mongodb.client.startSession()
   try {
     await session.withTransaction(async () => {
-      await deleteChunk(projectId, oldChunkId)
-      await confirmCreate(projectId, newChunk, newChunkId)
+      await deleteChunk(projectId, oldChunkId, { session })
+      await confirmCreate(projectId, newChunk, newChunkId, { session })
     })
   } finally {
     await session.endSession()
@@ -170,13 +171,14 @@ async function confirmUpdate(projectId, oldChunkId, newChunk, newChunkId) {
  * @param {number} chunkId
  * @return {Promise}
  */
-async function deleteChunk(projectId, chunkId) {
+async function deleteChunk(projectId, chunkId, mongoOpts = {}) {
   assert.mongoId(projectId, 'bad projectId')
   assert.mongoId(chunkId, 'bad chunkId')
 
   await mongodb.chunks.updateOne(
     { _id: ObjectId(chunkId), projectId: ObjectId(projectId) },
-    { $set: { state: 'deleted', updatedAt: new Date() } }
+    { $set: { state: 'deleted', updatedAt: new Date() } },
+    mongoOpts
   )
 }
 

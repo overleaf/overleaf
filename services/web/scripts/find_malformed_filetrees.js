@@ -1,11 +1,17 @@
-const { ReadPreference } = require('mongodb')
-const { db, waitForDb } = require('../app/src/infrastructure/mongodb')
+const {
+  db,
+  waitForDb,
+  READ_PREFERENCE_SECONDARY,
+} = require('../app/src/infrastructure/mongodb')
 
 async function main() {
   await waitForDb()
   const projects = db.projects.find(
     {},
-    { projection: { rootFolder: 1 }, readPreference: ReadPreference.SECONDARY }
+    {
+      projection: { rootFolder: 1 },
+      readPreference: READ_PREFERENCE_SECONDARY,
+    }
   )
   let projectsProcessed = 0
   for await (const project of projects) {

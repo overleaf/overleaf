@@ -1,5 +1,8 @@
-const { ReadPreference, ObjectId } = require('mongodb')
-const { db } = require('../../../../app/src/infrastructure/mongodb')
+const { ObjectId } = require('mongodb')
+const {
+  db,
+  READ_PREFERENCE_SECONDARY,
+} = require('../../../../app/src/infrastructure/mongodb')
 const Settings = require('@overleaf/settings')
 
 const ProjectHistoryHandler = require('../../../../app/src/Features/Project/ProjectHistoryHandler')
@@ -311,7 +314,7 @@ async function shouldPreserveHistory(project) {
         { preserveHistory: { $eq: true } },
       ],
     },
-    { readPreference: ReadPreference.SECONDARY }
+    { readPreference: READ_PREFERENCE_SECONDARY }
   )
 }
 
@@ -320,7 +323,7 @@ async function anyDocHistoryExists(project) {
     { project_id: { $eq: project._id } },
     {
       projection: { _id: 1 },
-      readPreference: ReadPreference.SECONDARY,
+      readPreference: READ_PREFERENCE_SECONDARY,
     }
   )
 }
@@ -330,7 +333,7 @@ async function anyDocHistoryIndexExists(project) {
     { project_id: { $eq: project._id } },
     {
       projection: { _id: 1 },
-      readPreference: ReadPreference.SECONDARY,
+      readPreference: READ_PREFERENCE_SECONDARY,
     }
   )
 }

@@ -4,8 +4,10 @@ const BATCH_SIZE = parseInt(process.env.BATCH_SIZE, 10) || 100
 // persist fallback in order to keep batchedUpdate in-sync
 process.env.BATCH_SIZE = BATCH_SIZE
 
-const { ReadPreference } = require('mongodb')
-const { db } = require('../app/src/infrastructure/mongodb')
+const {
+  db,
+  READ_PREFERENCE_SECONDARY,
+} = require('../app/src/infrastructure/mongodb')
 const { promiseMapWithLimit } = require('../app/src/util/promises')
 const TokenGenerator = require('../app/src/Features/TokenGenerator/TokenGenerator')
 const { batchedUpdate } = require('./helpers/batchedUpdate')
@@ -24,7 +26,7 @@ async function rewriteDuplicates(duplicateReferralIds) {
             { referal_id: referralId },
             {
               projection: { _id: 1 },
-              readPreference: ReadPreference.SECONDARY,
+              readPreference: READ_PREFERENCE_SECONDARY,
             }
           )
           .toArray()
@@ -74,7 +76,7 @@ async function processBatch(users) {
     .find(
       { referal_id: { $in: uniqueReferalIdsInBatch } },
       {
-        readPreference: ReadPreference.SECONDARY,
+        readPreference: READ_PREFERENCE_SECONDARY,
         projection: { _id: true },
       }
     )

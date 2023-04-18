@@ -14,8 +14,10 @@ process.env.BATCH_SIZE = BATCH_SIZE
 process.env.MONGO_SOCKET_TIMEOUT =
   parseInt(process.env.MONGO_SOCKET_TIMEOUT, 10) || 3600000
 
-const { ReadPreference } = require('mongodb')
-const { db } = require('../../app/src/infrastructure/mongodb')
+const {
+  db,
+  READ_PREFERENCE_SECONDARY,
+} = require('../../app/src/infrastructure/mongodb')
 const { promiseMapWithLimit } = require('../../app/src/util/promises')
 const { batchedUpdate } = require('../helpers/batchedUpdate')
 const ProjectHistoryHandler = require('../../app/src/Features/Project/ProjectHistoryHandler')
@@ -172,7 +174,7 @@ async function anyDocHistoryExists(project) {
     { project_id: { $eq: project._id } },
     {
       projection: { _id: 1 },
-      readPreference: ReadPreference.SECONDARY,
+      readPreference: READ_PREFERENCE_SECONDARY,
     }
   )
 }
@@ -182,7 +184,7 @@ async function anyDocHistoryIndexExists(project) {
     { project_id: { $eq: project._id } },
     {
       projection: { _id: 1 },
-      readPreference: ReadPreference.SECONDARY,
+      readPreference: READ_PREFERENCE_SECONDARY,
     }
   )
 }

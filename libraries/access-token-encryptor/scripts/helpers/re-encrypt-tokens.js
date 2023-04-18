@@ -56,7 +56,7 @@ async function reEncryptTokensInCollection({
   const cursor = collection.find(
     {},
     {
-      readPreference: ReadPreference.SECONDARY,
+      readPreference: ReadPreference.secondaryPreferred,
       projection,
     }
   )

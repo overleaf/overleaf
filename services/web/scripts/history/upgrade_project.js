@@ -1,5 +1,9 @@
-const { ReadPreference, ObjectId } = require('mongodb')
-const { db, waitForDb } = require('../../app/src/infrastructure/mongodb')
+const { ObjectId } = require('mongodb')
+const {
+  db,
+  waitForDb,
+  READ_PREFERENCE_SECONDARY,
+} = require('../../app/src/infrastructure/mongodb')
 const {
   upgradeProject,
 } = require('../../modules/history-migration/app/src/HistoryUpgradeHelper')
@@ -20,7 +24,7 @@ async function main() {
   }
   const options = {
     projection,
-    readPreference: ReadPreference.SECONDARY,
+    readPreference: READ_PREFERENCE_SECONDARY,
   }
   const project = await db.projects.findOne(query, options)
   if (project) {

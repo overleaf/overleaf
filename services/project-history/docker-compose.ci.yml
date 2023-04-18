@@ -52,6 +52,7 @@ services:
 
   mongo:
     image: mongo:4.4.16
+    command: --replSet overleaf
     healthcheck:
       test: "mongo --quiet localhost/test --eval 'quit(db.runCommand({ ping: 1 }).ok ? 0 : 1)'"
       interval: 1s
