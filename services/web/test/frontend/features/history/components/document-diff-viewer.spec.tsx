@@ -144,4 +144,37 @@ describe('document diff viewer', function () {
     cy.get('.previous-highlight-button').should('have.length', 1)
     cy.get('.next-highlight-button').should('have.length', 1)
   })
+
+  it('scrolls to first change', function () {
+    const scope = mockScope()
+    const finalHighlightOnly = highlights.slice(-1)
+
+    cy.mount(
+      <Container>
+        <EditorProviders scope={scope}>
+          <DocumentDiffViewer doc={doc} highlights={finalHighlightOnly} />
+        </EditorProviders>
+      </Container>
+    )
+
+    cy.get('.cm-scroller').first().invoke('scrollTop').should('not.equal', 0)
+    cy.get('.ol-addition-marker')
+      .first()
+      .then($marker => {
+        cy.get('.cm-content')
+          .first()
+          .then($content => {
+            const contentRect = $content[0].getBoundingClientRect()
+            const markerRect = $marker[0].getBoundingClientRect()
+            expect(markerRect.top).to.be.within(
+              contentRect.top,
+              contentRect.bottom
+            )
+            expect(markerRect.bottom).to.be.within(
+              contentRect.top,
+              contentRect.bottom
+            )
+          })
+      })
+  })
 })

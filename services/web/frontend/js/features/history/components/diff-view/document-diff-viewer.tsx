@@ -1,7 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import withErrorBoundary from '../../../../infrastructure/error-boundary'
 import { ErrorBoundaryFallback } from '../../../../shared/components/error-boundary-fallback'
-import { EditorState, Extension } from '@codemirror/state'
+import {
+  EditorSelection,
+  EditorState,
+  Extension,
+  StateEffect,
+} from '@codemirror/state'
 import { EditorView, lineNumbers } from '@codemirror/view'
 import { indentationMarkers } from '@replit/codemirror-indentation-markers'
 import { highlights, setHighlightsEffect } from '../../extensions/highlights'
@@ -100,9 +105,18 @@ function DocumentDiffViewer({
   const { before, after } = highlightLocations
 
   useEffect(() => {
+    const effects: StateEffect<unknown>[] = [setHighlightsEffect.of(highlights)]
+    if (highlights.length > 0) {
+      const { from, to } = highlights[0].range
+      effects.push(
+        EditorView.scrollIntoView(EditorSelection.range(from, to), {
+          y: 'center',
+        })
+      )
+    }
     view.dispatch({
       changes: { from: 0, to: view.state.doc.length, insert: doc },
-      effects: setHighlightsEffect.of(highlights),
+      effects,
     })
   }, [doc, highlights, view])
 

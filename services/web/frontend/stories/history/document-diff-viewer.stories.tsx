@@ -3,23 +3,6 @@ import DocumentDiffViewer from '../../js/features/history/components/diff-view/d
 import React from 'react'
 import { Highlight } from '../../js/features/history/services/types/doc'
 
-export default {
-  title: 'History / Document Diff Viewer',
-  component: DocumentDiffViewer,
-  decorators: [
-    ScopeDecorator,
-    (Story: React.ComponentType) => (
-      <div style={{ height: '90vh' }}>
-        <Story />
-      </div>
-    ),
-  ],
-}
-
-export const Highlights = () => {
-  return <DocumentDiffViewer doc={content} highlights={highlights} />
-}
-
 const highlights: Highlight[] = [
   {
     type: 'addition',
@@ -47,7 +30,7 @@ const highlights: Highlight[] = [
   },
 ]
 
-const content = `\\documentclass{article}
+const doc = `\\documentclass{article}
 
 % Language setting
 % Replace \`english' with e.g. \`spanish' to change the document language
@@ -131,3 +114,38 @@ Once you're familiar with the editor, you can find various project settings in t
 \\bibliography{sample}
 
 \\end{document}`
+
+export default {
+  title: 'History / Document Diff Viewer',
+  component: DocumentDiffViewer,
+  args: { doc, highlights },
+  argTypes: {
+    doc: {
+      table: { disable: true },
+    },
+    highlights: {
+      table: { disable: true },
+    },
+  },
+  decorators: [
+    ScopeDecorator,
+    (Story: React.ComponentType) => (
+      <div style={{ height: '90vh' }}>
+        <Story />
+      </div>
+    ),
+  ],
+}
+
+export const Highlights = (
+  args: React.ComponentProps<typeof DocumentDiffViewer>
+) => {
+  return <DocumentDiffViewer {...args} />
+}
+
+export const ScrollToFirstHighlight = (
+  args: React.ComponentProps<typeof DocumentDiffViewer>
+) => {
+  const lastHighlightOnly = args.highlights.slice(-1)
+  return <DocumentDiffViewer {...args} highlights={lastHighlightOnly} />
+}
