@@ -105,6 +105,7 @@ describe('ProjectStructureChanges', function () {
       {
         uri: 'project/new/upload',
         formData: {
+          name: zipFilename,
           qqfile: zipFile,
         },
       },

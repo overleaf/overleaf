@@ -189,6 +189,7 @@ describe('ProjectDuplicateNames', function () {
                 qqfilename: 'frog.jpg',
               },
               formData: {
+                name: 'frog.jpg',
                 qqfile: {
                   value: fs.createReadStream(
                     Path.join(__dirname, '/../files/1pixel.png')

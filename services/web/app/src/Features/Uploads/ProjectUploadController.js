@@ -39,8 +39,8 @@ module.exports = ProjectUploadController = {
   uploadProject(req, res, next) {
     const timer = new metrics.Timer('project-upload')
     const userId = SessionManager.getLoggedInUserId(req.session)
-    const { originalname, path } = req.file
-    const name = Path.basename(originalname, '.zip')
+    const { path } = req.file
+    const name = Path.basename(req.body.name, '.zip')
     return ProjectUploadManager.createProjectFromZipArchive(
       userId,
       name,
@@ -73,7 +73,7 @@ module.exports = ProjectUploadController = {
 
   uploadFile(req, res, next) {
     const timer = new metrics.Timer('file-upload')
-    const name = req.file != null ? req.file.originalname : undefined
+    const name = req.body.name
     const path = req.file != null ? req.file.path : undefined
     const projectId = req.params.Project_id
     const { folder_id: folderId } = req.query

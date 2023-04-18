@@ -61,7 +61,9 @@ describe('ProjectUploadController', function () {
       this.name = 'filename.zip'
       this.req.file = {
         path: this.path,
-        originalname: this.name,
+      }
+      this.req.body = {
+        name: this.name,
       }
       this.req.session = {
         user: {
@@ -165,7 +167,9 @@ describe('ProjectUploadController', function () {
       this.name = 'filename.png'
       this.req.file = {
         path: this.path,
-        originalname: this.name,
+      }
+      this.req.body = {
+        name: this.name,
       }
       this.req.session = {
         user: {
@@ -257,7 +261,7 @@ describe('ProjectUploadController', function () {
 
     describe('with an invalid filename', function () {
       beforeEach(function () {
-        this.req.file.originalname = ''
+        this.req.body.name = ''
         return this.ProjectUploadController.uploadFile(this.req, this.res)
       })
 

@@ -492,6 +492,7 @@ class User {
           folder_id: String(folderId),
         },
         formData: {
+          name,
           qqfile: {
             value: imageFile,
             options: {
