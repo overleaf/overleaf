@@ -1,6 +1,6 @@
 import { EditorView } from '@codemirror/view'
 import { Annotation, Compartment, TransactionSpec } from '@codemirror/state'
-import { defaultHighlightStyle, syntaxHighlighting } from '@codemirror/language'
+import { syntaxHighlighting } from '@codemirror/language'
 import { classHighlighter } from './class-highlighter'
 
 const optionsThemeConf = new Compartment()
@@ -263,8 +263,6 @@ const loadSelectedTheme = async (editorTheme: string) => {
 
   return [
     EditorView.theme(theme, { dark }),
-    highlightStyle
-      ? EditorView.theme(highlightStyle, { dark })
-      : syntaxHighlighting(defaultHighlightStyle, { fallback: true }), // use the default highlight style if none is provided
+    EditorView.theme(highlightStyle, { dark }),
   ]
 }
