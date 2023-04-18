@@ -128,6 +128,31 @@
   }
 }
 
+@top-picks-banner-extra-width: 50px;
+.top-picks-banner {
+  padding: 0px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+
+  @media (min-width: (@screen-lg-min + @top-picks-banner-extra-width)) {
+    width: @container-lg + @top-picks-banner-extra-width;
+  }
+
+  @media (max-width: (@screen-lg-min + @top-picks-banner-extra-width - 1)) {
+    border-radius: 0;
+  }
+}
+
+.gallery-top-pick-badge {
+  margin-left: @margin-sm;
+  &:extend(.label);
+  &:extend(.label-primary);
+  cursor: default;
+  font-size: 14px;
+  padding: 3px 8px;
+}
+
 /* Media Queries */
 @media (max-width: @screen-xs-max) {
   .gallery-container {
