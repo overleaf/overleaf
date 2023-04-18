@@ -40,7 +40,7 @@ const singleLineHighlighter = ViewPlugin.fromClass(
     }
 
     update(update: ViewUpdate) {
-      if (update.docChanged || update.selectionSet) {
+      if (update.geometryChanged || update.selectionSet) {
         this.decorations = this.getDeco(update.view)
       }
     }
