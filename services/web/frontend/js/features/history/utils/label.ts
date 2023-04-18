@@ -12,6 +12,10 @@ export const isPseudoLabel = (
   return (label as PseudoCurrentStateLabel).isPseudoCurrentStateLabel === true
 }
 
+export const isLabel = (label: LoadedLabel): label is Label => {
+  return !isPseudoLabel(label)
+}
+
 const sortLabelsByVersionAndDate = (labels: LoadedLabel[]) => {
   return orderBy(
     labels,

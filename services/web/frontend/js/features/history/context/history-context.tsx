@@ -97,6 +97,9 @@ function useHistory() {
       setUpdates(updates.concat(loadedUpdates))
 
       // TODO first load
+      // if (firstLoad) {
+      //   _handleHistoryUIStateChange()
+      // }
     }
 
     if (atEnd) return
@@ -192,9 +195,11 @@ function useHistory() {
       isLoading,
       freeHistoryLimitHit,
       labels,
+      setLabels,
       loadingFileTree,
       nextBeforeTimestamp,
       updates,
+      setUpdates,
       userHasFullFeature,
       projectId,
       fileSelection,
@@ -208,9 +213,11 @@ function useHistory() {
       isLoading,
       freeHistoryLimitHit,
       labels,
+      setLabels,
       loadingFileTree,
       nextBeforeTimestamp,
       updates,
+      setUpdates,
       userHasFullFeature,
       projectId,
       fileSelection,

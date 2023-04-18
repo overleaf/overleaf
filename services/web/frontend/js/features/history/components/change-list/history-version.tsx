@@ -22,7 +22,10 @@ function HistoryVersion({ update }: HistoryEntryProps) {
           {relativeDate(update.meta.end_ts)}
         </time>
       )}
-      <div className="history-version-details">
+      <div
+        className="history-version-details"
+        data-testid="history-version-details"
+      >
         <time className="history-version-metadata-time">
           <b>{formatTime(update.meta.end_ts, 'Do MMMM, h:mm a')}</b>
         </time>

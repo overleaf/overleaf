@@ -27,7 +27,11 @@ function LabelsList() {
   return (
     <>
       {versionWithLabels.map(({ version, labels }) => (
-        <div key={version} className="history-version-details">
+        <div
+          key={version}
+          className="history-version-details"
+          data-testid="history-version-details"
+        >
           {labels.map(label => (
             <Fragment key={label.id}>
               <TagTooltip

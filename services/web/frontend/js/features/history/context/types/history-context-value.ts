@@ -5,6 +5,9 @@ import { FileSelection } from '../../services/types/file'
 
 export type HistoryContextValue = {
   updates: LoadedUpdate[]
+  setUpdates: React.Dispatch<
+    React.SetStateAction<HistoryContextValue['updates']>
+  >
   nextBeforeTimestamp: number | undefined
   atEnd: boolean
   userHasFullFeature: boolean | undefined
@@ -12,6 +15,7 @@ export type HistoryContextValue = {
   isLoading: boolean
   error: Nullable<unknown>
   labels: Nullable<LoadedLabel[]>
+  setLabels: React.Dispatch<React.SetStateAction<HistoryContextValue['labels']>>
   loadingFileTree: boolean
   projectId: string
   fileSelection: FileSelection | null

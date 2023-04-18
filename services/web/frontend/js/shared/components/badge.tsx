@@ -7,7 +7,7 @@ type BadgeProps = MergeAndOverride<
     prepend?: React.ReactNode
     children: React.ReactNode
     className?: string
-    showCloseButton?: boolean
+    closeButton?: boolean
     onClose?: (e: React.MouseEvent<HTMLButtonElement>) => void
     closeBtnProps?: React.ComponentProps<'button'>
   }
@@ -17,7 +17,7 @@ function Badge({
   prepend,
   children,
   className,
-  showCloseButton = false,
+  closeButton = false,
   onClose,
   closeBtnProps,
   ...rest
@@ -26,7 +26,7 @@ function Badge({
     <span className={classnames('badge-new', className)} {...rest}>
       {prepend}
       <span className="badge-new-comment">{children}</span>
-      {showCloseButton && (
+      {closeButton && (
         <button
           type="button"
           className="badge-new-close"
