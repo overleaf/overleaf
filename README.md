@@ -41,8 +41,8 @@ If you are upgrading from a previous version of Overleaf, please see the [Releas
 
 ## Overleaf Docker Image
 
-This repo contains two dockerfiles, `Dockerfile-base`, which builds the
-`sharelatex/sharelatex-base` image, and `Dockerfile` which builds the
+This repo contains two dockerfiles, [`Dockerfile-base`](server-ce/Dockerfile-base), which builds the
+`sharelatex/sharelatex-base` image, and [`Dockerfile`](server-ce/Dockerfile) which builds the
 `sharelatex/sharelatex` (or "community") image.
 
 The Base image generally contains the basic dependencies like `wget` and
