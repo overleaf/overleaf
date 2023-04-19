@@ -1,6 +1,14 @@
 const TIMESTAMP_GROUP_SIZE = 5 * 60 * 1000 // 5 minutes
 
-export function appendMessage(messageList, message) {
+export function appendMessage(messageList, message, uniqueMessageIds) {
+  if (uniqueMessageIds.includes(message.id)) {
+    return { messages: messageList, uniqueMessageIds }
+  }
+
+  uniqueMessageIds = uniqueMessageIds.slice(0)
+
+  uniqueMessageIds.push(message.id)
+
   const lastMessage = messageList[messageList.length - 1]
 
   const shouldGroup =
@@ -12,7 +20,7 @@ export function appendMessage(messageList, message) {
     message.timestamp - lastMessage.timestamp < TIMESTAMP_GROUP_SIZE
 
   if (shouldGroup) {
-    return messageList.slice(0, messageList.length - 1).concat({
+    messageList = messageList.slice(0, messageList.length - 1).concat({
       ...lastMessage,
       // the `id` is updated to the latest received content when a new
       // message is appended or prepended
@@ -21,21 +29,30 @@ export function appendMessage(messageList, message) {
       contents: lastMessage.contents.concat(message.content),
     })
   } else {
-    return messageList.slice(0).concat({
+    messageList = messageList.slice(0).concat({
       id: message.id,
       user: message.user,
       timestamp: message.timestamp,
       contents: [message.content],
     })
   }
+
+  return { messages: messageList, uniqueMessageIds }
 }
 
-export function prependMessages(messageList, messages) {
+export function prependMessages(messageList, messages, uniqueMessageIds) {
   const listCopy = messageList.slice(0)
+
+  uniqueMessageIds = uniqueMessageIds.slice(0)
+
   messages
     .slice(0)
     .reverse()
     .forEach(message => {
+      if (uniqueMessageIds.includes(message.id)) {
+        return
+      }
+      uniqueMessageIds.push(message.id)
       const firstMessage = listCopy[0]
       const shouldGroup =
         firstMessage &&
@@ -57,5 +74,6 @@ export function prependMessages(messageList, messages) {
         })
       }
     })
-  return listCopy
+
+  return { messages: listCopy, uniqueMessageIds }
 }

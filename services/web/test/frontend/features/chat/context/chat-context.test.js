@@ -50,6 +50,10 @@ describe('ChatContext', function () {
       fetchMock.post('express:/project/:projectId/messages', 200)
     })
 
+    afterEach(function () {
+      fetchMock.reset()
+    })
+
     it('subscribes when mounted', function () {
       const socket = new EventEmitter()
       renderChatContextHook({ socket })
@@ -93,6 +97,108 @@ describe('ChatContext', function () {
           email: 'another_fake@example.com',
         },
       })
+
+      const message = result.current.messages[0]
+      expect(message.id).to.equal('msg_1')
+      expect(message.contents).to.deep.equal(['new message'])
+    })
+
+    it('deduplicate messages from preloading', async function () {
+      // Mock socket: we only need to emit events, not mock actual connections
+      const socket = new EventEmitter()
+      const { result, waitForNextUpdate } = renderChatContextHook({
+        socket,
+      })
+
+      fetchMock.get(
+        'express:/project/:projectId/messages',
+        [
+          {
+            id: 'msg_1',
+            content: 'new message',
+            timestamp: Date.now(),
+            user: {
+              id: 'another_fake_user',
+              first_name: 'another_fake_user_first_name',
+              email: 'another_fake@example.com',
+            },
+          },
+        ],
+        { overwriteRoutes: true }
+      )
+
+      // Mock message being received from another user
+      socket.emit('new-chat-message', {
+        id: 'msg_1',
+        content: 'new message',
+        timestamp: Date.now(),
+        user: {
+          id: 'another_fake_user',
+          first_name: 'another_fake_user_first_name',
+          email: 'another_fake@example.com',
+        },
+      })
+
+      // Check if received the message ID
+      expect(result.current.messages).to.have.length(1)
+
+      // Wait until initial messages have loaded
+      result.current.loadInitialMessages()
+      await waitForNextUpdate()
+
+      // Check if there are no message duplication
+      expect(result.current.messages).to.have.length(1)
+
+      const message = result.current.messages[0]
+      expect(message.id).to.equal('msg_1')
+      expect(message.contents).to.deep.equal(['new message'])
+    })
+
+    it('deduplicate messages from websocket', async function () {
+      // Mock socket: we only need to emit events, not mock actual connections
+      const socket = new EventEmitter()
+      const { result, waitForNextUpdate } = renderChatContextHook({
+        socket,
+      })
+
+      fetchMock.get(
+        'express:/project/:projectId/messages',
+        [
+          {
+            id: 'msg_1',
+            content: 'new message',
+            timestamp: Date.now(),
+            user: {
+              id: 'another_fake_user',
+              first_name: 'another_fake_user_first_name',
+              email: 'another_fake@example.com',
+            },
+          },
+        ],
+        { overwriteRoutes: true }
+      )
+
+      // Wait until initial messages have loaded
+      result.current.loadInitialMessages()
+      await waitForNextUpdate()
+
+      // Check if received the message ID
+      expect(result.current.messages).to.have.length(1)
+
+      // Mock message being received from another user
+      socket.emit('new-chat-message', {
+        id: 'msg_1',
+        content: 'new message',
+        timestamp: Date.now(),
+        user: {
+          id: 'another_fake_user',
+          first_name: 'another_fake_user_first_name',
+          email: 'another_fake@example.com',
+        },
+      })
+
+      // Check if there are no message duplication
+      expect(result.current.messages).to.have.length(1)
 
       const message = result.current.messages[0]
       expect(message.id).to.equal('msg_1')

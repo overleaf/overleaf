@@ -43,7 +43,11 @@ describe('prependMessages()', function () {
 
   it('to an empty list', function () {
     const messages = createTestMessages()
-    expect(prependMessages([], messages)).to.deep.equal([
+    const uniqueMessageIds = []
+
+    expect(
+      prependMessages([], messages, uniqueMessageIds).messages
+    ).to.deep.equal([
       {
         id: messages[0].id,
         timestamp: messages[0].timestamp,
@@ -54,16 +58,21 @@ describe('prependMessages()', function () {
   })
 
   describe('when the messages to prepend are from the same user', function () {
-    let list, messages
+    let list, messages, uniqueMessageIds
 
     beforeEach(function () {
       list = createTestMessageList()
       messages = createTestMessages()
       messages[0].user = testUser // makes all the messages have the same author
+      uniqueMessageIds = []
     })
 
     it('when the prepended messages are close in time, contents should be merged into the same message', function () {
-      const result = prependMessages(createTestMessageList(), messages)
+      const result = prependMessages(
+        createTestMessageList(),
+        messages,
+        uniqueMessageIds
+      ).messages
       expect(result.length).to.equal(list.length + 1)
       expect(result[0]).to.deep.equal({
         id: messages[0].id,
@@ -75,7 +84,11 @@ describe('prependMessages()', function () {
 
     it('when the prepended messages are separated in time, each message is prepended', function () {
       messages[0].timestamp = messages[1].timestamp - 6 * 60 * 1000 // 6 minutes before the next message
-      const result = prependMessages(createTestMessageList(), messages)
+      const result = prependMessages(
+        createTestMessageList(),
+        messages,
+        uniqueMessageIds
+      ).messages
       expect(result.length).to.equal(list.length + 2)
       expect(result[0]).to.deep.equal({
         id: messages[0].id,
@@ -93,16 +106,21 @@ describe('prependMessages()', function () {
   })
 
   describe('when the messages to prepend are from different users', function () {
-    let list, messages
+    let list, messages, uniqueMessageIds
 
     beforeEach(function () {
       list = createTestMessageList()
       messages = createTestMessages()
+      uniqueMessageIds = []
     })
 
     it('should prepend separate messages to the list', function () {
       messages[0].user = otherUser
-      const result = prependMessages(createTestMessageList(), messages)
+      const result = prependMessages(
+        createTestMessageList(),
+        messages,
+        uniqueMessageIds
+      ).messages
       expect(result.length).to.equal(list.length + 2)
       expect(result[0]).to.deep.equal({
         id: messages[0].id,
@@ -123,8 +141,13 @@ describe('prependMessages()', function () {
     const list = createTestMessageList()
     const messages = createTestMessages()
     messages[0].user = messages[1].user = list[0].user
+    const uniqueMessageIds = []
 
-    const result = prependMessages(createTestMessageList(), messages)
+    const result = prependMessages(
+      createTestMessageList(),
+      messages,
+      uniqueMessageIds
+    ).messages
     expect(result.length).to.equal(list.length)
     expect(result[0]).to.deep.equal({
       id: messages[0].id,
@@ -147,7 +170,11 @@ describe('appendMessage()', function () {
 
   it('to an empty list', function () {
     const testMessage = createTestMessage()
-    expect(appendMessage([], testMessage)).to.deep.equal([
+    const uniqueMessageIds = []
+
+    expect(
+      appendMessage([], testMessage, uniqueMessageIds).messages
+    ).to.deep.equal([
       {
         id: 'appended_message',
         timestamp: testMessage.timestamp,
@@ -158,17 +185,18 @@ describe('appendMessage()', function () {
   })
 
   describe('messages appended shortly after the last message on the list', function () {
-    let list, message
+    let list, message, uniqueMessageIds
 
     beforeEach(function () {
       list = createTestMessageList()
       message = createTestMessage()
       message.timestamp = list[1].timestamp + 6 * 1000 // 6 seconds after the last message in the list
+      uniqueMessageIds = []
     })
 
     describe('when the author is the same as the last message', function () {
       it('should append the content to the last message', function () {
-        const result = appendMessage(list, message)
+        const result = appendMessage(list, message, uniqueMessageIds).messages
         expect(result.length).to.equal(list.length)
         expect(result[1].contents).to.deep.equal(
           list[1].contents.concat(message.content)
@@ -176,7 +204,7 @@ describe('appendMessage()', function () {
       })
 
       it('should update the last message timestamp', function () {
-        const result = appendMessage(list, message)
+        const result = appendMessage(list, message, uniqueMessageIds).messages
         expect(result[1].timestamp).to.equal(message.timestamp)
       })
     })
@@ -187,7 +215,7 @@ describe('appendMessage()', function () {
       })
 
       it('should append the new message to the list', function () {
-        const result = appendMessage(list, message)
+        const result = appendMessage(list, message, uniqueMessageIds).messages
         expect(result.length).to.equal(list.length + 1)
         expect(result[2]).to.deep.equal({
           id: 'appended_message',
@@ -200,16 +228,17 @@ describe('appendMessage()', function () {
   })
 
   describe('messages appended later after the last message on the list', function () {
-    let list, message
+    let list, message, uniqueMessageIds
 
     beforeEach(function () {
       list = createTestMessageList()
       message = createTestMessage()
       message.timestamp = list[1].timestamp + 6 * 60 * 1000 // 6 minutes after the last message in the list
+      uniqueMessageIds = []
     })
 
     it('when the author is the same as the last message, should be appended as new message', function () {
-      const result = appendMessage(list, message)
+      const result = appendMessage(list, message, uniqueMessageIds).messages
       expect(result.length).to.equal(3)
       expect(result[2]).to.deep.equal({
         id: 'appended_message',
@@ -222,7 +251,7 @@ describe('appendMessage()', function () {
     it('when the author is the different than the last message, should be appended as new message', function () {
       message.user = otherUser
 
-      const result = appendMessage(list, message)
+      const result = appendMessage(list, message, uniqueMessageIds).messages
       expect(result.length).to.equal(3)
       expect(result[2]).to.deep.equal({
         id: 'appended_message',

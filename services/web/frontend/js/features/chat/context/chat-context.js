@@ -38,7 +38,11 @@ export function chatReducer(state, action) {
       return {
         ...state,
         status: 'idle',
-        messages: prependMessages(state.messages, action.messages),
+        ...prependMessages(
+          state.messages,
+          action.messages,
+          state.uniqueMessageIds
+        ),
         lastTimestamp: action.messages[0] ? action.messages[0].timestamp : null,
         atEnd: action.messages.length < PAGE_SIZE,
       }
@@ -46,22 +50,30 @@ export function chatReducer(state, action) {
     case 'SEND_MESSAGE':
       return {
         ...state,
-        messages: appendMessage(state.messages, {
-          // Messages are sent optimistically, so don't have an id (used for
-          // React keys). The uuid is valid for this session, and ensures all
-          // messages have an id. It will be overwritten by the actual ids on
-          // refresh
-          id: uuid(),
-          user: action.user,
-          content: action.content,
-          timestamp: Date.now(),
-        }),
+        ...appendMessage(
+          state.messages,
+          {
+            // Messages are sent optimistically, so don't have an id (used for
+            // React keys). The uuid is valid for this session, and ensures all
+            // messages have an id. It will be overwritten by the actual ids on
+            // refresh
+            id: uuid(),
+            user: action.user,
+            content: action.content,
+            timestamp: Date.now(),
+          },
+          state.uniqueMessageIds
+        ),
       }
 
     case 'RECEIVE_MESSAGE':
       return {
         ...state,
-        messages: appendMessage(state.messages, action.message),
+        ...appendMessage(
+          state.messages,
+          action.message,
+          state.uniqueMessageIds
+        ),
         unreadMessageCount: state.unreadMessageCount + 1,
       }
 
@@ -94,6 +106,7 @@ const initialState = {
   atEnd: false,
   unreadMessageCount: 0,
   error: null,
+  uniqueMessageIds: [],
 }
 
 export const ChatContext = createContext()
