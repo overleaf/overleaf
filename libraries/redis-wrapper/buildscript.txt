@@ -4,6 +4,6 @@ redis-wrapper
 --env-add=
 --env-pass-through=
 --is-library=True
---node-version=16.17.1
+--node-version=18.16.0
 --public-repo=False
 --script-version=4.1.0

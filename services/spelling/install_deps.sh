@@ -3,7 +3,7 @@
 set -ex
 
 # Prefer Debian packages over Ubuntu packages
-echo 'APT::Default-Release "buster";' >/etc/apt/apt.conf.d/default-release
+echo 'APT::Default-Release "bullseye";' >/etc/apt/apt.conf.d/default-release
 
 # The following aspell packages exist in Ubuntu but not Debian:
 # aspell-af, aspell-id, aspell-nr, aspell-ns, aspell-st, aspell-tn, aspell-ts, aspell-xh
@@ -11,11 +11,5 @@ echo "deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ focal main universe" > 
 echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ focal main universe" > /etc/apt/sources.list.d/focal-ports-arm.list
 apt-key adv --no-tty --keyserver keyserver.ubuntu.com --recv-keys 3B4FE6ACC0B21F32
 
-# aspell-pt-pt is broken in buster, we'll obtain it from bullseye
-echo "deb http://deb.debian.org/debian bullseye main" > /etc/apt/sources.list.d/bullseye.list
-
 apt-get update
-apt-get install -y aspell aspell-en aspell-af aspell-ar aspell-ar-large aspell-bg aspell-br aspell-ca aspell-cs aspell-cy aspell-da aspell-de aspell-de-1901 aspell-el aspell-eo aspell-es aspell-et aspell-eu-es aspell-fa aspell-fo aspell-fr aspell-ga aspell-gl-minimos aspell-hr aspell-hsb aspell-id aspell-it aspell-kk aspell-ku aspell-lt aspell-lv aspell-nl aspell-no aspell-nr aspell-ns  aspell-pa aspell-pl aspell-pt-br aspell-ro aspell-ru aspell-sk aspell-sl aspell-st aspell-sv aspell-tl aspell-tn aspell-ts aspell-xh
-
-# aspell-pt-pt is broken in buster. Install it from bullseye
-apt-get install -y -t bullseye aspell-pt-pt
+apt-get install -y aspell aspell-en aspell-af aspell-ar aspell-ar-large aspell-bg aspell-br aspell-ca aspell-cs aspell-cy aspell-da aspell-de aspell-de-1901 aspell-el aspell-eo aspell-es aspell-et aspell-eu-es aspell-fa aspell-fo aspell-fr aspell-ga aspell-gl-minimos aspell-hr aspell-hsb aspell-id aspell-it aspell-kk aspell-ku aspell-lt aspell-lv aspell-nl aspell-no aspell-nr aspell-ns  aspell-pa aspell-pl aspell-pt-br aspell-pt-pt aspell-ro aspell-ru aspell-sk aspell-sl aspell-st aspell-sv aspell-tl aspell-tn aspell-ts aspell-xh
