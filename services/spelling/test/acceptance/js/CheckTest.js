@@ -27,26 +27,7 @@ describe('checking words', function () {
     it('should return the list of misspellings', async function () {
       const body = JSON.parse(response.body)
       expect(body).to.deep.equal({
-        misspellings: [
-          {
-            index: 0,
-            suggestions: [
-              'anther',
-              'another',
-              'anthers',
-              'panther',
-              'anathema',
-              'anthem',
-              'nether',
-              "anther's",
-              'ante',
-              'neither',
-              'norther',
-              'ether',
-              'other',
-            ],
-          },
-        ],
+        misspellings: [{ index: 0, suggestions: ['anther', 'another'] }],
       })
     })
   })
