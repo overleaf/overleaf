@@ -185,7 +185,7 @@ const staticTheme = EditorView.theme({
     userSelect: 'none',
   },
   // make cursor visible with reduced opacity when the editor is not focused
-  '&:not(.cm-focused) .cm-cursor': {
+  '&:not(.cm-focused) > .cm-scroller > .cm-cursorLayer .cm-cursor': {
     display: 'block',
     opacity: 0.2,
   },

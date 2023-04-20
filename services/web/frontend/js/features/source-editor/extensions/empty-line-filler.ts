@@ -68,8 +68,8 @@ export const emptyLineFiller = () => {
     ),
     EditorView.baseTheme({
       '.ol-cm-filler': {
-        display: 'inline-block',
-        width: '4px',
+        display: 'inline',
+        padding: '2px',
       },
     }),
   ]

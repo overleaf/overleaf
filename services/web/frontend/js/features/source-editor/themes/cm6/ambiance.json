@@ -19,7 +19,7 @@
     ".cm-cursor, .cm-dropCursor": {
       "borderLeft": "1px solid #7991E8"
     },
-    "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection, .cm-searchMatch.cm-searchMatch.cm-searchMatch-selected": {
+    "&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection, .cm-searchMatch.cm-searchMatch.cm-searchMatch-selected": {
       "background": "rgba(221, 240, 255, 0.20)"
     },
     ".cm-selectionMatch.cm-selectionMatch, .cm-searchMatch.cm-searchMatch": {

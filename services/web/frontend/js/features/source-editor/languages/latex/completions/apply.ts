@@ -1,10 +1,12 @@
-import { codePointAt, codePointSize, Text } from '@codemirror/state'
 import {
-  clearSnippet,
-  Completion,
-  insertCompletionText,
-  snippet,
-} from '@codemirror/autocomplete'
+  codePointAt,
+  codePointSize,
+  EditorSelection,
+  EditorState,
+  Text,
+  TransactionSpec,
+} from '@codemirror/state'
+import { clearSnippet, Completion, snippet } from '@codemirror/autocomplete'
 import { EditorView } from '@codemirror/view'
 import { prepareSnippetTemplate } from '../snippets'
 import { ancestorNodeOfType } from '../../../utils/tree-query'
@@ -20,6 +22,42 @@ export const prevChar = (doc: Text, pos: number) => {
   return codePointSize(codePointAt(prev, 0)) === prev.length
     ? prev
     : prev.slice(1)
+}
+
+// from https://github.com/codemirror/autocomplete/blob/6.4.2/src/completion.ts
+// forked due to an issue with `to` in https://github.com/codemirror/autocomplete/commit/a4cce022daea903c8b9ffcb7ca2fb598b17bfb66
+export function insertCompletionText(
+  state: EditorState,
+  text: string,
+  from: number,
+  to: number
+): TransactionSpec {
+  return {
+    ...state.changeByRange(range => {
+      if (range === state.selection.main) {
+        return {
+          changes: { from, to, insert: text },
+          range: EditorSelection.cursor(from + text.length),
+        }
+      }
+      if (!range.empty) {
+        return { range }
+      }
+      const len = to - from
+      if (
+        len &&
+        state.sliceDoc(range.from - len, range.from) !==
+          state.sliceDoc(from, to)
+      ) {
+        return { range }
+      }
+      return {
+        changes: { from: range.from - len, to: range.from, insert: text },
+        range: EditorSelection.cursor(range.from - len + text.length),
+      }
+    }),
+    userEvent: 'input.complete',
+  }
 }
 
 // Apply a completed command, removing any subsequent closing brace, optionally

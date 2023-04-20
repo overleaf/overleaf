@@ -57,7 +57,7 @@ const themeMapping = new Map([
   ['.ace_cursor', '.cm-cursor, .cm-dropCursor'],
   [
     '.ace_marker-layer .ace_selection',
-    '&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection, .cm-searchMatch.cm-searchMatch.cm-searchMatch-selected',
+    '&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection, .cm-searchMatch.cm-searchMatch.cm-searchMatch-selected',
   ],
   [
     '.ace_marker-layer .ace_selected-word',
