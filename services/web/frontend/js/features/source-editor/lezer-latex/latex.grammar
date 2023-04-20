@@ -263,7 +263,7 @@ KnownCommand {
     } |
     Def {
         // allow more general Csname argument to \def commands, since other symbols such as '@' are often used in definitions
-        DefCtrlSeq (Csname | CtrlSym) MacroParameter* optionalWhitespace? DefinitionArgument
+        DefCtrlSeq (Csname | CtrlSym) optionalWhitespace? MacroParameter* optionalWhitespace? DefinitionArgument
     } |
     Hbox {
         HboxCtrlSeq optionalWhitespace? TextArgument
