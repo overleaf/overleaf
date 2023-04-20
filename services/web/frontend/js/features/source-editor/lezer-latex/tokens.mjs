@@ -65,6 +65,7 @@ import {
   BibliographyStyleCtrlSeq,
   CenteringCtrlSeq,
   ListEnvName,
+  MaketitleCtrlSeq,
 } from './latex.terms.mjs'
 
 function nameChar(ch) {
@@ -635,6 +636,7 @@ const otherKnowncommands = {
   '\\centering': CenteringCtrlSeq,
   '\\bibliography': BibliographyCtrlSeq,
   '\\bibliographystyle': BibliographyStyleCtrlSeq,
+  '\\maketitle': MaketitleCtrlSeq,
 }
 // specializer for control sequences
 // return new tokens for specific control sequences

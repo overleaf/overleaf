@@ -1,7 +1,8 @@
 import { EditorView, ViewPlugin } from '@codemirror/view'
 import { EditorSelection } from '@codemirror/state'
-import { findDocumentEnvironment } from '../../utils/tree-operations/environments'
+import { findStartOfDocumentContent } from '../../utils/tree-operations/environments'
 import { syntaxTree } from '@codemirror/language'
+import { extendForwardsOverEmptyLines } from './selection'
 export const skipPreambleWithCursor = ViewPlugin.define((view: EditorView) => {
   let checkedOnce = false
   return {
@@ -21,10 +22,16 @@ export const skipPreambleWithCursor = ViewPlugin.define((view: EditorView) => {
           )
         ) {
           setTimeout(() => {
-            const position = findDocumentEnvironment(view.state)
+            const position =
+              extendForwardsOverEmptyLines(
+                update.state.doc,
+                update.state.doc.lineAt(
+                  findStartOfDocumentContent(update.state) ?? 0
+                )
+              ) + 1
             view.dispatch({
               selection: EditorSelection.cursor(
-                Math.min(position ? position + 1 : 0, update.state.doc.length)
+                Math.min(position, update.state.doc.length)
               ),
             })
           }, 0)

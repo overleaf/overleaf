@@ -731,6 +731,23 @@ export const atomicDecorations = (options: Options) => {
               return false
             }
           }
+        } else if (nodeRef.type.is('Maketitle')) {
+          if (shouldDecorate(state, nodeRef)) {
+            const line = state.doc.lineAt(nodeRef.from)
+            const from = extendBackwardsOverEmptyLines(state.doc, line)
+            const to = extendForwardsOverEmptyLines(state.doc, line)
+
+            if (shouldDecorate(state, { from, to })) {
+              decorations.push(
+                Decoration.replace({
+                  widget: new MakeTitleWidget(preamble),
+                  block: true,
+                }).range(from, to)
+              )
+            }
+
+            return false
+          }
         } else if (nodeRef.type.is('Item')) {
           // only decorate \item inside a list
           if (currentListEnvironment) {
@@ -823,23 +840,6 @@ export const atomicDecorations = (options: Options) => {
                       widget: new TeXWidget(),
                     }).range(nodeRef.from, nodeRef.to)
                   )
-                  return false
-                }
-              } else if (commandName === '\\maketitle') {
-                if (shouldDecorate(state, nodeRef)) {
-                  const line = state.doc.lineAt(nodeRef.from)
-                  const from = extendBackwardsOverEmptyLines(state.doc, line)
-                  const to = extendForwardsOverEmptyLines(state.doc, line)
-
-                  if (shouldDecorate(state, { from, to })) {
-                    decorations.push(
-                      Decoration.replace({
-                        widget: new MakeTitleWidget(preamble),
-                        block: true,
-                      }).range(from, to)
-                    )
-                  }
-
                   return false
                 }
               } else if (hasCharacterSubstitution(commandName)) {

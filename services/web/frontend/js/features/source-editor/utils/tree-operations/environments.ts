@@ -1,6 +1,6 @@
 import { ensureSyntaxTree } from '@codemirror/language'
 import { EditorState } from '@codemirror/state'
-import { SyntaxNode, SyntaxNodeRef } from '@lezer/common'
+import { SyntaxNode, SyntaxNodeRef, Tree } from '@lezer/common'
 import { previousSiblingIs } from './common'
 import { NodeIntersectsChangeFn, ProjectionItem } from './projection'
 
@@ -138,21 +138,69 @@ export const cursorIsAtEndEnvironment = (
   }
 }
 
-export const findDocumentEnvironment = (state: EditorState): number | null => {
-  const tree = ensureSyntaxTree(state, state.doc.length, HUNDRED_MS)
-  let position: number | null = null
+const findStartOfDocumentEnvironment = (tree: Tree): number | null => {
+  const docEnvironment = findNodeInDocument(tree, 'DocumentEnvironment')
+  return docEnvironment?.getChild('Content')?.from || null
+}
+
+const findStartOfAbstractEnvironment = (
+  tree: Tree,
+  state: EditorState
+): number | null => {
+  const abstractEnvironment = findNodeInDocument(
+    tree,
+    (nodeRef: SyntaxNodeRef) => {
+      return Boolean(
+        nodeRef.type.is('$Environment') &&
+          getEnvironmentName(nodeRef.node, state) === 'abstract'
+      )
+    }
+  )
+  return abstractEnvironment?.getChild('Content')?.from || null
+}
+
+const findMaketitleCommand = (tree: Tree): number | null => {
+  const maketitle = findNodeInDocument(tree, 'Maketitle')
+  return maketitle?.to ?? null
+}
+
+const findNodeInDocument = (
+  tree: Tree,
+  predicate: number | string | ((node: SyntaxNodeRef) => boolean)
+): SyntaxNode | null => {
+  let node: SyntaxNode | null = null
+  const predicateFn =
+    typeof predicate !== 'function'
+      ? (nodeRef: SyntaxNodeRef) => {
+          return nodeRef.type.is(predicate)
+        }
+      : predicate
   tree?.iterate({
     enter(nodeRef) {
-      if (position !== null) {
+      if (node !== null) {
         return false
       }
-      if (nodeRef.type.is('DocumentEnvironment')) {
-        position = nodeRef.node.getChild('Content')?.from || null
+      if (predicateFn(nodeRef)) {
+        node = nodeRef.node
         return false
       }
     },
   })
-  return position
+  return node
+}
+
+export const findStartOfDocumentContent = (
+  state: EditorState
+): number | null => {
+  const tree = ensureSyntaxTree(state, state.doc.length, HUNDRED_MS)
+  if (!tree) {
+    return null
+  }
+  return (
+    findStartOfAbstractEnvironment(tree, state) ??
+    findMaketitleCommand(tree) ??
+    findStartOfDocumentEnvironment(tree)
+  )
 }
 
 /**

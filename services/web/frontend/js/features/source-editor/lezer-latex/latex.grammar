@@ -84,7 +84,8 @@
     CenteringCtrlSeq,
     BibliographyCtrlSeq,
     BibliographyStyleCtrlSeq,
-    AuthorCtrlSeq
+    AuthorCtrlSeq,
+    MaketitleCtrlSeq
 }
 
 @external specialize {EnvName} specializeEnvName from "./tokens.mjs" {
@@ -310,6 +311,9 @@ KnownCommand {
     } |
     Item {
         ItemCtrlSeq optionalWhitespace?
+    } |
+    Maketitle {
+        MaketitleCtrlSeq optionalWhitespace?
     }
 }
 
