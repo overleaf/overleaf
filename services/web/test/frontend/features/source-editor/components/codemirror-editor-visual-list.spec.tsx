@@ -283,4 +283,26 @@ describe('<CodeMirrorEditor/> lists in Rich Text mode', function () {
       expect(win.getSelection()?.toString()).to.equal('Two')
     })
   })
+
+  it('uses autocomplete to create an list item', function () {
+    const content = [
+      '\\begin{itemize}',
+      '\\item first',
+      '',
+      '\\end{itemize}',
+    ].join('\n')
+    mountEditor(content)
+
+    cy.get('.cm-line')
+      .eq(2)
+      .click()
+      .type('\\ite')
+      .type('{enter}')
+      .type('second')
+
+    cy.get('.cm-content').should(
+      'have.text',
+      ['\\begin{itemize}', ' first', ' second', '\\end{itemize}'].join('')
+    )
+  })
 })

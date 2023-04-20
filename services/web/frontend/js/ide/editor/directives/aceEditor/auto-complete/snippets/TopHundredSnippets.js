@@ -26,13 +26,13 @@ export default [
   },
   {
     caption: '\\item',
-    snippet: '\\item',
+    snippet: '\\item ',
     meta: 'cmd',
     score: 3.800886892251021,
   },
   {
     caption: '\\item[]',
-    snippet: '\\item[$1]',
+    snippet: '\\item[$1] ',
     meta: 'cmd',
     score: 3.800886892251021,
   },
