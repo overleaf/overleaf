@@ -8,24 +8,22 @@ type FileTreeItemProps = {
   icons: ReactNode
 }
 
-export default function FileTreeItem({
+export default function HistoryFileTreeItem({
   name,
   operation,
   icons,
 }: FileTreeItemProps) {
   return (
-    <div className="entity" role="presentation">
-      <div className="entity-name entity-name-react" role="presentation">
-        {icons}
-        <button className="item-name-button">
-          <span className="item-name-button-text">{name}</span>
-          {operation ? (
-            <Badge className="item-name-button-badge" size="sm">
-              {operation}
-            </Badge>
-          ) : null}
-        </button>
-      </div>
+    <div className="history-file-tree-item" role="presentation">
+      {icons}
+      <button className="history-file-tree-item-button">
+        <span className="history-file-tree-item-button-text">{name}</span>
+        {operation ? (
+          <Badge className="history-file-tree-item-button-badge" size="sm">
+            {operation}
+          </Badge>
+        ) : null}
+      </button>
     </div>
   )
 }

@@ -27,6 +27,7 @@ export default function HistoryFileTreeFolder({
       <button
         onClick={() => setExpanded(!expanded)}
         aria-label={expanded ? t('collapse') : t('expand')}
+        className="history-file-tree-folder-button"
       >
         <Icon
           type={expanded ? 'angle-down' : 'angle-right'}

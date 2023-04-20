@@ -224,3 +224,133 @@ history-root {
     bottom: 16px;
   }
 }
+
+.history-file-tree {
+  display: flex !important; // To work around jQuery layout's inline styles
+  flex-direction: column;
+  flex-grow: 1;
+  max-height: 100%;
+
+  ul.history-file-tree-list {
+    margin: 0;
+    overflow-x: hidden;
+    height: 100%;
+    flex-grow: 1;
+    position: relative;
+    overflow-y: auto;
+
+    .history-file-tree-item > ul,
+    ul[role='tree'] {
+      margin-left: 22px;
+    }
+
+    li.bottom-buffer {
+      min-height: @line-height-computed;
+    }
+
+    li {
+      line-height: @file-tree-line-height;
+      position: relative;
+
+      &:focus {
+        outline: none;
+      }
+
+      .history-file-tree-item {
+        color: @file-tree-item-color;
+        cursor: pointer;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: clip;
+        user-select: none;
+
+        &:focus {
+          outline: none;
+        }
+
+        &:hover {
+          background-color: @file-tree-item-hover-bg;
+
+          // When the entity is a subfolder, the DOM element is "indented" via margin-left. This makes the
+          // element not fill the entire file-tree width (as it's spaced from the left-hand side via margin)
+          // and, in consequence, the background gets clipped. The ::before pseudo-selector is used to fill
+          // the empty space.
+          .fake-full-width-bg(@file-tree-item-hover-bg);
+        }
+
+        .history-file-tree-folder-button,
+        .history-file-tree-item-button {
+          .reset-button;
+
+          &:focus {
+            outline: none;
+          }
+        }
+
+        .history-file-tree-item-button {
+          width: 100%;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          text-align: left;
+          padding-right: 40px;
+          font-weight: normal;
+          display: inline-flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-between;
+
+          .history-file-tree-item-button-text {
+            display: inline-flex;
+            margin-right: 5px;
+          }
+
+          .history-file-tree-item-button-badge {
+            text-transform: capitalize;
+
+            &:hover {
+              background-color: @neutral-20;
+            }
+          }
+        }
+      }
+
+      i.fa {
+        color: @file-tree-item-icon-color;
+        font-size: 14px;
+
+        &.file-tree-icon {
+          margin-right: 4px;
+          margin-left: 8px;
+        }
+
+        &.file-tree-folder-icon {
+          margin-right: 4px;
+        }
+
+        &.file-tree-expand-icon {
+          margin-left: 8px;
+        }
+      }
+
+      i.fa-folder-open,
+      i.fa-folder {
+        color: @file-tree-item-folder-color;
+        font-size: 14px;
+      }
+    }
+
+    li.selected > .history-file-tree-item {
+      color: @file-tree-item-selected-color;
+      background-color: @file-tree-item-selected-bg;
+      font-weight: bold;
+
+      > div > i.fa,
+      > button > i.fa,
+      > i.fa {
+        color: @file-tree-item-selected-color;
+      }
+
+      .fake-full-width-bg(@file-tree-item-selected-bg);
+    }
+  }
+}

@@ -119,7 +119,9 @@
       }
 
       .entity > .entity-name > button {
-        .reset-button;
+        background-color: transparent;
+        border: 0;
+        padding: 0;
         &:focus {
           outline: none;
         }
@@ -129,20 +131,6 @@
           text-overflow: ellipsis;
           text-align: left;
           padding-right: 32px;
-          font-weight: normal;
-
-          .item-name-button-text {
-            display: inline-flex;
-            margin-right: 5px;
-          }
-
-          .item-name-button-badge {
-            text-transform: capitalize;
-
-            &:hover {
-              background-color: @neutral-20;
-            }
-          }
         }
       }
 
