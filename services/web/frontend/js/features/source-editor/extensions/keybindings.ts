@@ -8,6 +8,7 @@ import {
 import { EmacsHandler } from '@replit/codemirror-emacs'
 import { CodeMirror } from '@replit/codemirror-vim'
 import { foldCode, toggleFold, unfoldCode } from '@codemirror/language'
+import { EditorView } from '@codemirror/view'
 import {
   cursorToBeginningOfVisualLine,
   cursorToEndOfVisualLine,
@@ -174,7 +175,16 @@ const options = [
     load: () =>
       import('@replit/codemirror-emacs').then(m => {
         customiseEmacsOnce()
-        return m.emacs()
+        return [
+          m.emacs(),
+          EditorView.domEventHandlers({
+            keydown(event) {
+              if (event.ctrlKey && event.key === 's') {
+                event.stopPropagation()
+              }
+            },
+          }),
+        ]
       }),
   },
 ]
