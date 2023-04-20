@@ -1,7 +1,7 @@
 import ColorManager from '../../../ide/colors/ColorManager'
 import { Nullable } from '../../../../../types/utils'
 import { User } from '../services/types/shared'
-import { ProjectOp, UpdateRange } from '../services/types/update'
+import { ProjectOp, Version } from '../services/types/update'
 import { Selection } from '../services/types/selection'
 
 export const getUserColor = (user?: Nullable<{ id: string }>) => {
@@ -37,10 +37,20 @@ export const getProjectOpDoc = (projectOp: ProjectOp) => {
   return ''
 }
 
-export const updateIsSelected = (update: UpdateRange, selection: Selection) => {
+type UpdateIsSelectedArg = {
+  fromV: Version
+  toV: Version
+  selection: Selection
+}
+
+export const updateIsSelected = ({
+  fromV,
+  toV,
+  selection,
+}: UpdateIsSelectedArg) => {
   return (
     selection.updateRange &&
-    update.fromV >= selection.updateRange.fromV &&
-    update.toV <= selection.updateRange.toV
+    fromV >= selection.updateRange.fromV &&
+    toV <= selection.updateRange.toV
   )
 }

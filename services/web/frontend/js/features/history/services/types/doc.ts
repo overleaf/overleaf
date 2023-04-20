@@ -24,3 +24,11 @@ export interface Highlight {
   range: Range
   type: 'addition' | 'deletion'
 }
+
+export type Diff = {
+  binary: boolean
+  docDiff?: {
+    doc: string
+    highlights: Highlight[]
+  }
+}

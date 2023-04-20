@@ -3,10 +3,10 @@ import type { Nullable } from '../../../../../types/utils'
 import type { HistoryContextValue } from '../context/types/history-context-value'
 import type { FileDiff } from '../services/types/file'
 import type { DiffOperation } from '../services/types/diff-operation'
-import type { LoadedUpdate, UpdateRange } from '../services/types/update'
+import type { LoadedUpdate, Version } from '../services/types/update'
 
 function getUpdateForVersion(
-  version: LoadedUpdate['toV'],
+  version: Version,
   updates: HistoryContextValue['updates']
 ): Nullable<LoadedUpdate> {
   return updates.filter(update => update.toV === version)?.[0] ?? null
@@ -19,13 +19,13 @@ type FileWithOps = {
 
 function getFilesWithOps(
   files: FileDiff[],
-  updateRange: UpdateRange,
+  toV: Version,
   comparing: boolean,
   updates: HistoryContextValue['updates']
 ): FileWithOps[] {
-  if (updateRange.toV && !comparing) {
+  if (toV && !comparing) {
     const filesWithOps: FileWithOps[] = []
-    const currentUpdate = getUpdateForVersion(updateRange.toV, updates)
+    const currentUpdate = getUpdateForVersion(toV, updates)
 
     if (currentUpdate !== null) {
       for (const pathname of currentUpdate.pathnames) {
@@ -90,13 +90,13 @@ const orderedOpTypes: DiffOperation[] = [
 
 export function autoSelectFile(
   files: FileDiff[],
-  updateRange: UpdateRange,
+  toV: Version,
   comparing: boolean,
   updates: HistoryContextValue['updates']
 ) {
   let fileToSelect: Nullable<FileDiff> = null
 
-  const filesWithOps = getFilesWithOps(files, updateRange, comparing, updates)
+  const filesWithOps = getFilesWithOps(files, toV, comparing, updates)
   for (const opType of orderedOpTypes) {
     const fileWithMatchingOpType = _.find(filesWithOps, {
       operation: opType,

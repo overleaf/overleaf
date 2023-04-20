@@ -2,19 +2,25 @@ import { Meta, User } from './shared'
 import { Label } from './label'
 import { Nullable } from '../../../../../../types/utils'
 
+export type Version = number
+
 export interface ProjectOp {
   add?: { pathname: string }
   rename?: { pathname: string; newPathname: string }
   remove?: { pathname: string }
-  atV: number
+  atV: Version
 }
 
 export interface UpdateRange {
-  fromV: number
-  toV: number
+  fromV: Version
+  toV: Version
+  fromVTimestamp: number
+  toVTimestamp: number
 }
 
-export interface Update extends UpdateRange {
+export interface Update {
+  fromV: Version
+  toV: Version
   meta: Meta
   labels: Label[]
   pathnames: string[]

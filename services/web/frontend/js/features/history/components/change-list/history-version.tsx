@@ -20,7 +20,11 @@ function HistoryVersion({ update }: HistoryEntryProps) {
 
   const { selection, setSelection } = useHistoryContext()
 
-  const selected = updateIsSelected(update, selection)
+  const selected = updateIsSelected({
+    fromV: update.fromV,
+    toV: update.toV,
+    selection,
+  })
 
   function compare() {
     const { updateRange } = selection
@@ -29,9 +33,14 @@ function HistoryVersion({ update }: HistoryEntryProps) {
     }
     const fromV = Math.min(update.fromV, updateRange.fromV)
     const toV = Math.max(update.toV, updateRange.toV)
+    const fromVTimestamp = Math.min(
+      update.meta.end_ts,
+      updateRange.fromVTimestamp
+    )
+    const toVTimestamp = Math.max(update.meta.end_ts, updateRange.toVTimestamp)
 
     setSelection({
-      updateRange: { fromV, toV },
+      updateRange: { fromV, toV, fromVTimestamp, toVTimestamp },
       comparing: true,
       files: [],
       pathname: null,
@@ -52,7 +61,12 @@ function HistoryVersion({ update }: HistoryEntryProps) {
         data-testid="history-version-details"
         onClick={() =>
           setSelection({
-            updateRange: update,
+            updateRange: {
+              fromV: update.fromV,
+              toV: update.toV,
+              fromVTimestamp: update.meta.end_ts,
+              toVTimestamp: update.meta.end_ts,
+            },
             comparing: false,
             files: [],
             pathname: null,

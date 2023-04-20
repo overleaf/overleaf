@@ -259,7 +259,7 @@ describe('autoSelectFile', function () {
         },
       ]
 
-      const pathname = autoSelectFile(files, updates[0], comparing, updates)
+      const pathname = autoSelectFile(files, updates[0].toV, comparing, updates)
 
       expect(pathname).to.equal('newfolder1/newfile10.tex')
     })
@@ -324,7 +324,7 @@ describe('autoSelectFile', function () {
         },
       ]
 
-      const pathname = autoSelectFile(files, updates[0], comparing, updates)
+      const pathname = autoSelectFile(files, updates[0].toV, comparing, updates)
 
       expect(pathname).to.equal('newfile1.tex')
     })
@@ -420,7 +420,7 @@ describe('autoSelectFile', function () {
         },
       ]
 
-      const pathname = autoSelectFile(files, updates[0], comparing, updates)
+      const pathname = autoSelectFile(files, updates[0].toV, comparing, updates)
 
       expect(pathname).to.equal('main3.tex')
     })
@@ -586,7 +586,7 @@ describe('autoSelectFile', function () {
         },
       ]
 
-      const pathname = autoSelectFile(files, updates[0], comparing, updates)
+      const pathname = autoSelectFile(files, updates[0].toV, comparing, updates)
 
       expect(pathname).to.equal('main.tex')
     })
@@ -689,7 +689,7 @@ describe('autoSelectFile', function () {
         },
       ]
 
-      const pathname = autoSelectFile(files, updates[0], comparing, updates)
+      const pathname = autoSelectFile(files, updates[0].toV, comparing, updates)
 
       expect(pathname).to.equal('certainly_not_main.tex')
     })

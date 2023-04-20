@@ -53,7 +53,6 @@ function useHistory() {
   // eslint-disable-next-line no-unused-vars
   const [userHasFullFeature, setUserHasFullFeature] =
     useState<HistoryContextValue['userHasFullFeature']>(undefined)
-  /* eslint-enable no-unused-vars */
 
   const fetchNextBatchOfUpdates = useCallback(() => {
     const loadUpdates = (updatesData: Update[]) => {
@@ -173,7 +172,12 @@ function useHistory() {
     const { fromV, toV } = updateRange
 
     diffFiles(projectId, fromV, toV).then(({ diff: files }) => {
-      const pathname = autoSelectFile(files, updateRange, comparing, updates)
+      const pathname = autoSelectFile(
+        files,
+        updateRange.toV,
+        comparing,
+        updates
+      )
       const newFiles = files.map(file => {
         if (isFileRenamed(file) && file.newPathname) {
           return renamePathnameKey(file)
@@ -189,7 +193,12 @@ function useHistory() {
     // Set update selection if there isn't one
     if (updates.length && !updateRange) {
       setSelection({
-        updateRange: updates[0],
+        updateRange: {
+          fromV: updates[0].fromV,
+          toV: updates[0].toV,
+          fromVTimestamp: updates[0].meta.end_ts,
+          toVTimestamp: updates[0].meta.end_ts,
+        },
         comparing: false,
         files: [],
         pathname: null,

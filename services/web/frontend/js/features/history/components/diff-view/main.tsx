@@ -1,45 +1,15 @@
-import { useHistoryContext } from '../../context/history-context'
-import { diffDoc } from '../../services/api'
-import { useEffect } from 'react'
-import { DocDiffResponse, Highlight } from '../../services/types/doc'
-import { highlightsFromDiffResponse } from '../../utils/highlights-from-diff-response'
+import { Nullable } from '../../../../../../types/utils'
+import { Diff } from '../../services/types/doc'
 import DocumentDiffViewer from './document-diff-viewer'
-import useAsync from '../../../../shared/hooks/use-async'
 import { useTranslation } from 'react-i18next'
 
-type Diff = {
-  binary: boolean
-  docDiff?: {
-    doc: string
-    highlights: Highlight[]
-  }
+type MainProps = {
+  diff: Nullable<Diff>
+  isLoading: boolean
 }
 
-function Main() {
+function Main({ diff, isLoading }: MainProps) {
   const { t } = useTranslation()
-  const { projectId, selection } = useHistoryContext()
-  const { isLoading, runAsync, data } = useAsync<DocDiffResponse>()
-  let diff: Diff | undefined
-  if (data?.diff) {
-    if ('binary' in data.diff) {
-      diff = { binary: true }
-    } else {
-      diff = { binary: false, docDiff: highlightsFromDiffResponse(data.diff) }
-    }
-  }
-
-  const { updateRange, pathname } = selection
-
-  useEffect(() => {
-    if (!updateRange || !pathname) {
-      return
-    }
-
-    const { fromV, toV } = updateRange
-
-    // TODO: Error handling
-    runAsync(diffDoc(projectId, fromV, toV, pathname))
-  }, [projectId, runAsync, pathname, updateRange])
 
   if (isLoading) {
     return (
