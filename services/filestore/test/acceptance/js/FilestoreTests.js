@@ -13,9 +13,11 @@ const streamifier = require('streamifier')
 chai.use(require('chai-as-promised'))
 const { ObjectId } = require('mongodb')
 const tk = require('timekeeper')
+const ChildProcess = require('child_process')
 
 const fsWriteFile = promisify(fs.writeFile)
 const fsStat = promisify(fs.stat)
+const exec = promisify(ChildProcess.exec)
 const msleep = promisify(setTimeout)
 
 if (!process.env.AWS_ACCESS_KEY_ID) {
@@ -40,24 +42,19 @@ describe('Filestore', function () {
   async function expectNoSockets() {
     try {
       await msleep(1000)
-      const stdout = await fs.promises.readFile('/proc/net/tcp', 'utf8')
+      const { stdout } = await exec('ss -tnH')
+
       const badSockets = []
-      const lines = stdout.split('\n').map(line => line.trim().split(/\s+/))
-      const header = lines.shift()
-      if (header[4] === 'tx_queue' && header[5] === 'rx_queue') {
-        for (const socket of lines) {
-          if (
-            socket.length > 5 &&
-            socket[4] !== '00000000:00000000' && // ensure the socket queues are empty
-            !seenSockets.includes(socket)
-          ) {
-            console.log('socket still has data', socket)
-            badSockets.push(socket)
-            seenSockets.push(socket)
-          }
+      for (const socket of stdout.split('\n')) {
+        const fields = socket.split(' ').filter(part => part !== '')
+        if (
+          fields.length > 2 &&
+          parseInt(fields[1]) &&
+          !seenSockets.includes(socket)
+        ) {
+          badSockets.push(socket)
+          seenSockets.push(socket)
         }
-      } else {
-        throw new Error('unexpected format in /proc/net/tcp')
       }
 
       if (badSockets.length) {

@@ -2,7 +2,7 @@
 # Instead run bin/update_build_scripts from
 # https://github.com/overleaf/internal/
 
-FROM node:18.16.0 as base
+FROM node:16.17.1 as base
 
 WORKDIR /overleaf/services/notifications
 
