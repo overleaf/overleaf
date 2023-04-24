@@ -158,16 +158,13 @@ describe('emacs keybindings', { scrollBehavior: false }, function () {
     cy.interceptEvents()
     cy.interceptSpelling()
 
-    // Make a short doc that will fit entirely into the dom tree, so that
-    // index() corresponds to line number - 1
     const shortDoc = `
 \\documentclass{article}
 \\begin{document}
 contentLine1
 contentLine2
 contentLine3
-\\end{document}
-`
+\\end{document}`
 
     const scope = mockScope(shortDoc)
     scope.settings.mode = 'emacs'
@@ -188,7 +185,7 @@ contentLine3
   })
 
   it('emulates search behaviour', function () {
-    activeEditorLine().index().should('equal', 1)
+    activeEditorLine().should('have.text', '\\documentclass{article}')
 
     // Search should be closed
     cy.findByRole('search').should('have.length', 0)
@@ -217,7 +214,7 @@ contentLine3
     cy.findByRole('search').should('have.length', 0)
 
     // Cursor should be back to where the search originated from
-    activeEditorLine().index().should('equal', 1)
+    activeEditorLine().should('have.text', '\\documentclass{article}')
 
     // Invoke C-r
     cy.get('@line').type('{ctrl}r')
@@ -243,11 +240,11 @@ contentLine3
   })
 
   it('should jump between start and end with M-S-, and M-S-.', function () {
-    activeEditorLine().index().should('equal', 1)
+    activeEditorLine().should('have.text', '\\documentclass{article}')
     activeEditorLine().type('{alt}{shift},')
-    activeEditorLine().index().should('equal', 0)
+    activeEditorLine().should('have.text', '')
     activeEditorLine().type('{alt}{shift}.')
-    activeEditorLine().index().should('equal', 7)
+    activeEditorLine().should('have.text', '\\end{document}')
   })
 
   it('can enter characters', function () {
@@ -307,11 +304,11 @@ contentLine3
   it('can move around in normal mode', function () {
     // Move cursor up
     cy.get('@line').type('k')
-    activeEditorLine().index().should('equal', 0)
+    activeEditorLine().should('have.text', '')
 
     // Move cursor down
     cy.get('@line').type('j')
-    activeEditorLine().index().should('equal', 2)
+    activeEditorLine().should('have.text', '\\begin{document}')
 
     // Move the cursor left, insert 1, move it right, insert a 2
     cy.get('@line')

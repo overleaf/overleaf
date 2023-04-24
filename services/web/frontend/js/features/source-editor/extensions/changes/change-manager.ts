@@ -342,7 +342,10 @@ export const createChangeManager = (
           view.contentDOM.clientHeight - padding.top - padding.bottom
         const paddingNeeded = height - contentHeight
 
-        if (overflowTop !== padding.top || paddingNeeded !== padding.bottom) {
+        if (
+          overflowTop !== editorVerticalTopPadding(view) ||
+          paddingNeeded !== padding.bottom
+        ) {
           view.dispatch(
             setVerticalOverflow({
               top: overflowTop,
@@ -456,7 +459,7 @@ export const createChangeManager = (
         (update.geometryChanged || update.viewportChanged) &&
         Date.now() < ignoreGeometryChangesUntil
       ) {
-        // Ignore a change to the editor geometry that occurs immediately after
+        // Ignore a change to the editor geometry or viewport that occurs immediately after
         // an update to the vertical padding because otherwise it triggers
         // another update to the padding and so on ad infinitum. This is not an
         // ideal way to handle this but I couldn't see another way.

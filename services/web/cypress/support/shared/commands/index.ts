@@ -20,7 +20,6 @@ declare global {
       interceptSpelling: typeof interceptSpelling
       waitForCompile: typeof waitForCompile
       interceptDeferredCompile: typeof interceptDeferredCompile
-      index: () => Chainable<number>
     }
   }
 }
@@ -31,6 +30,3 @@ Cypress.Commands.add('interceptEvents', interceptEvents)
 Cypress.Commands.add('interceptSpelling', interceptSpelling)
 Cypress.Commands.add('waitForCompile', waitForCompile)
 Cypress.Commands.add('interceptDeferredCompile', interceptDeferredCompile)
-Cypress.Commands.add('index', { prevSubject: true }, subject => {
-  return cy.wrap(subject).invoke('index')
-})

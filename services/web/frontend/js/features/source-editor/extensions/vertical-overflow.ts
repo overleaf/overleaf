@@ -5,7 +5,13 @@ import {
   StateField,
   TransactionSpec,
 } from '@codemirror/state'
-import { EditorView, ViewPlugin, ViewUpdate } from '@codemirror/view'
+import {
+  Decoration,
+  EditorView,
+  ViewPlugin,
+  ViewUpdate,
+  WidgetType,
+} from '@codemirror/view'
 
 export function verticalOverflow(): Extension {
   return [
@@ -14,6 +20,7 @@ export function verticalOverflow(): Extension {
     bottomPadding,
     topPadding,
     contentAttributes,
+    topPaddingDecoration,
     bottomPaddingPlugin,
     topPaddingPlugin,
   ]
@@ -155,16 +162,54 @@ const bottomPadding = bottomPaddingFacet.computeN(
   }
 )
 
-// Set a style attribute on the contentDOM containing the calculated top and bottom padding.
+// Set a style attribute on the contentDOM containing the calculated bottom padding.
 // This value will be concatenated with style values from any other extensions.
-// TODO: use elements instead?
 const contentAttributes = EditorView.contentAttributes.compute(
-  [topPaddingFacet, bottomPaddingFacet],
+  [bottomPaddingFacet],
+  state => {
+    const [bottom] = state.facet(bottomPaddingFacet)
+    const style = `padding-bottom: ${bottom}px;`
+    return { style }
+  }
+)
+
+class TopPaddingWidget extends WidgetType {
+  constructor(private readonly height: number) {
+    super()
+    this.height = height
+  }
+
+  toDOM(view: EditorView): HTMLElement {
+    const element = document.createElement('div')
+    element.style.height = this.height + 'px'
+    return element
+  }
+
+  get estimatedHeight() {
+    return this.height
+  }
+
+  eq(widget: TopPaddingWidget) {
+    return this.height === widget.height
+  }
+
+  updateDOM(element: HTMLElement): boolean {
+    element.style.height = this.height + 'px'
+    return true
+  }
+}
+
+const topPaddingDecoration = EditorView.decorations.compute(
+  [topPaddingFacet],
   state => {
     const [top] = state.facet(topPaddingFacet)
-    const [bottom] = state.facet(bottomPaddingFacet)
-    const style = `padding-top: ${top}px; padding-bottom: ${bottom}px;`
-    return { style }
+
+    return Decoration.set([
+      Decoration.widget({
+        widget: new TopPaddingWidget(top),
+        block: true,
+      }).range(0),
+    ])
   }
 )
 
