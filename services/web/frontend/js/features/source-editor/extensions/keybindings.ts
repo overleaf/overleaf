@@ -137,9 +137,13 @@ const customiseEmacsOnce = () => {
         emacsSearchCloseListener
       )
     },
+    save() {
+      window.dispatchEvent(new Event('pdf:recompile'))
+    },
   })
   EmacsHandler.bindKey('C-s', 'openSearch')
   EmacsHandler.bindKey('C-r', 'openSearch')
+  EmacsHandler.bindKey('C-x C-s', 'save')
   EmacsHandler.bindKey('C-a', {
     command: 'goOrSelect',
     args: [cursorToBeginningOfVisualLine, selectToBeginningOfVisualLine],
