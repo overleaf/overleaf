@@ -1,7 +1,7 @@
 import { Nullable } from '../../../../../../types/utils'
 import { Diff } from '../../services/types/doc'
 import DocumentDiffViewer from './document-diff-viewer'
-import { useTranslation } from 'react-i18next'
+import LoadingSpinner from '../../../../shared/components/loading-spinner'
 
 type MainProps = {
   diff: Nullable<Diff>
@@ -9,16 +9,8 @@ type MainProps = {
 }
 
 function Main({ diff, isLoading }: MainProps) {
-  const { t } = useTranslation()
-
   if (isLoading) {
-    return (
-      <div className="history-loading-panel">
-        <i className="fa fa-spin fa-refresh" />
-        &nbsp;&nbsp;
-        {t('loading')}…
-      </div>
-    )
+    return <LoadingSpinner />
   }
 
   if (!diff) {

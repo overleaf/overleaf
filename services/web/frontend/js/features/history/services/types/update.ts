@@ -41,3 +41,8 @@ interface LoadedUpdateMeta extends Meta {
 export interface LoadedUpdate extends Update {
   meta: LoadedUpdateMeta
 }
+
+export type FetchUpdatesResponse = {
+  updates: Update[]
+  nextBeforeTimestamp?: number
+}

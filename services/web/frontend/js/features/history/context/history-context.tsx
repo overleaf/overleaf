@@ -19,9 +19,43 @@ import ColorManager from '../../../ide/colors/ColorManager'
 import moment from 'moment'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import { cloneDeep } from 'lodash'
-import { LoadedUpdate, Update } from '../services/types/update'
+import {
+  FetchUpdatesResponse,
+  LoadedUpdate,
+  Update,
+} from '../services/types/update'
 import { Nullable } from '../../../../../types/utils'
 import { Selection } from '../services/types/selection'
+
+// Allow testing of infinite scrolling by providing query string parameters to
+// limit the number of updates returned in a batch and apply a delay
+function limitUpdates(
+  promise: Promise<FetchUpdatesResponse>
+): Promise<FetchUpdatesResponse> {
+  const queryParams = new URLSearchParams(window.location.search)
+  const maxBatchSizeParam = queryParams.get('history-max-updates')
+  const delayParam = queryParams.get('history-updates-delay')
+  if (delayParam === null && maxBatchSizeParam === null) {
+    return promise
+  }
+  return promise.then(response => {
+    let { updates, nextBeforeTimestamp } = response
+    const maxBatchSize = maxBatchSizeParam ? parseInt(maxBatchSizeParam, 10) : 0
+    const delay = delayParam ? parseInt(delayParam, 10) : 0
+    if (maxBatchSize > 0 && updates) {
+      updates = updates.slice(0, maxBatchSize)
+      nextBeforeTimestamp = updates[updates.length - 1].fromV
+    }
+    const limitedResponse = { updates, nextBeforeTimestamp }
+    if (delay > 0) {
+      return new Promise(resolve => {
+        window.setTimeout(() => resolve(limitedResponse), delay)
+      })
+    } else {
+      return limitedResponse
+    }
+  })
+}
 
 function useHistory() {
   const { view } = useLayoutContext()
@@ -38,17 +72,17 @@ function useHistory() {
     pathname: null,
   })
 
-  const [updates, setUpdates] = useState<LoadedUpdate[]>([])
-  const [loadingFileTree, setLoadingFileTree] =
-    useState<HistoryContextValue['loadingFileTree']>(true)
-  // eslint-disable-next-line no-unused-vars
-  const [nextBeforeTimestamp, setNextBeforeTimestamp] =
-    useState<HistoryContextValue['nextBeforeTimestamp']>()
-  const [atEnd, setAtEnd] = useState<HistoryContextValue['atEnd']>(false)
-  const [freeHistoryLimitHit, setFreeHistoryLimitHit] =
-    useState<HistoryContextValue['freeHistoryLimitHit']>(false)
+  const [updatesInfo, setUpdatesInfo] = useState<
+    HistoryContextValue['updatesInfo']
+  >({
+    updates: [],
+    atEnd: false,
+    freeHistoryLimitHit: false,
+    nextBeforeTimestamp: undefined,
+  })
   const [labels, setLabels] = useState<HistoryContextValue['labels']>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const [loadingState, setLoadingState] =
+    useState<HistoryContextValue['loadingState']>('loadingInitial')
   const [error, setError] = useState(null)
   // eslint-disable-next-line no-unused-vars
   const [userHasFullFeature, setUserHasFullFeature] =
@@ -58,6 +92,7 @@ function useHistory() {
     const loadUpdates = (updatesData: Update[]) => {
       const dateTimeNow = new Date()
       const timestamp24hoursAgo = dateTimeNow.setDate(dateTimeNow.getDate() - 1)
+      let { updates, freeHistoryLimitHit } = updatesInfo
       let previousUpdate = updates[updates.length - 1]
       let cutOffIndex: Nullable<number> = null
 
@@ -79,7 +114,7 @@ function useHistory() {
 
         if (userHasFullFeature && update.meta.end_ts < timestamp24hoursAgo) {
           cutOffIndex = index || 1 // Make sure that we show at least one entry (to allow labelling).
-          setFreeHistoryLimitHit(true)
+          freeHistoryLimitHit = true
           if (projectOwnerId === userId) {
             eventTracking.send(
               'subscription-funnel',
@@ -98,20 +133,19 @@ function useHistory() {
         loadedUpdates = loadedUpdates.slice(0, cutOffIndex)
       }
 
-      setUpdates(updates.concat(loadedUpdates))
-
-      // TODO first load
-      // if (firstLoad) {
-      //   _handleHistoryUIStateChange()
-      // }
+      return { updates: updates.concat(loadedUpdates), freeHistoryLimitHit }
     }
 
-    if (atEnd) return
+    if (updatesInfo.atEnd || loadingState === 'loadingUpdates') return
 
-    const updatesPromise = fetchUpdates(projectId, nextBeforeTimestamp)
+    const updatesPromise = limitUpdates(
+      fetchUpdates(projectId, updatesInfo.nextBeforeTimestamp)
+    )
     const labelsPromise = labels == null ? fetchLabels(projectId) : null
 
-    setIsLoading(true)
+    setLoadingState(
+      loadingState === 'ready' ? 'loadingUpdates' : 'loadingInitial'
+    )
     Promise.all([updatesPromise, labelsPromise])
       .then(([{ updates: updatesData, nextBeforeTimestamp }, labels]) => {
         const lastUpdateToV = updatesData.length ? updatesData[0].toV : null
@@ -120,37 +154,33 @@ function useHistory() {
           setLabels(loadLabels(labels, lastUpdateToV))
         }
 
-        loadUpdates(updatesData)
-        setNextBeforeTimestamp(nextBeforeTimestamp)
-        if (
-          nextBeforeTimestamp == null ||
-          freeHistoryLimitHit ||
-          !updates.length
-        ) {
-          setAtEnd(true)
-        }
-        if (!updates.length) {
-          setLoadingFileTree(false)
-        }
+        const { updates, freeHistoryLimitHit } = loadUpdates(updatesData)
+
+        const atEnd =
+          nextBeforeTimestamp == null || freeHistoryLimitHit || !updates.length
+
+        setUpdatesInfo({
+          updates,
+          freeHistoryLimitHit,
+          atEnd,
+          nextBeforeTimestamp,
+        })
       })
       .catch(error => {
         setError(error)
-        setAtEnd(true)
-        setLoadingFileTree(false)
+        setUpdatesInfo({ ...updatesInfo, atEnd: true })
       })
       .finally(() => {
-        setIsLoading(false)
+        setLoadingState('ready')
       })
   }, [
-    atEnd,
-    freeHistoryLimitHit,
+    loadingState,
     labels,
-    nextBeforeTimestamp,
     projectId,
     projectOwnerId,
     userId,
     userHasFullFeature,
-    updates,
+    updatesInfo,
   ])
 
   // Initial load when the History tab is active
@@ -163,6 +193,7 @@ function useHistory() {
   }, [view, fetchNextBatchOfUpdates])
 
   const { updateRange, comparing } = selection
+  const { updates } = updatesInfo
 
   // Load files when the update selection changes
   useEffect(() => {
@@ -190,7 +221,7 @@ function useHistory() {
   }, [updateRange, projectId, updates, comparing])
 
   useEffect(() => {
-    // Set update selection if there isn't one
+    // Set update range if there isn't one and updates have loaded
     if (updates.length && !updateRange) {
       setSelection({
         updateRange: {
@@ -208,36 +239,30 @@ function useHistory() {
 
   const value = useMemo<HistoryContextValue>(
     () => ({
-      atEnd,
       error,
-      isLoading,
-      freeHistoryLimitHit,
+      loadingState,
+      updatesInfo,
+      setUpdatesInfo,
       labels,
       setLabels,
-      loadingFileTree,
-      nextBeforeTimestamp,
-      updates,
-      setUpdates,
       userHasFullFeature,
       projectId,
       selection,
       setSelection,
+      fetchNextBatchOfUpdates,
     }),
     [
-      atEnd,
       error,
-      isLoading,
-      freeHistoryLimitHit,
+      loadingState,
+      updatesInfo,
+      setUpdatesInfo,
       labels,
       setLabels,
-      loadingFileTree,
-      nextBeforeTimestamp,
-      updates,
-      setUpdates,
       userHasFullFeature,
       projectId,
       selection,
       setSelection,
+      fetchNextBatchOfUpdates,
     ]
   )
 

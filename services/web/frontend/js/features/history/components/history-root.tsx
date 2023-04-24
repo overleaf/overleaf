@@ -3,15 +3,12 @@ import DiffView from './diff-view/diff-view'
 import { HistoryProvider, useHistoryContext } from '../context/history-context'
 import { createPortal } from 'react-dom'
 import HistoryFileTree from './history-file-tree'
+import LoadingSpinner from '../../../shared/components/loading-spinner'
 
 const fileTreeContainer = document.getElementById('history-file-tree')
 
 function Main() {
-  const { updates } = useHistoryContext()
-
-  if (updates.length === 0) {
-    return null
-  }
+  const { loadingState } = useHistoryContext()
 
   return (
     <>
@@ -19,8 +16,14 @@ function Main() {
         ? createPortal(<HistoryFileTree />, fileTreeContainer)
         : null}
       <div className="history-react">
-        <DiffView />
-        <ChangeList />
+        {loadingState === 'loadingInitial' ? (
+          <LoadingSpinner />
+        ) : (
+          <>
+            <DiffView />
+            <ChangeList />
+          </>
+        )}
       </div>
     </>
   )

@@ -4,20 +4,22 @@ import { LoadedLabel } from '../../services/types/label'
 import { Selection } from '../../services/types/selection'
 
 export type HistoryContextValue = {
-  updates: LoadedUpdate[]
-  setUpdates: React.Dispatch<
-    React.SetStateAction<HistoryContextValue['updates']>
+  updatesInfo: {
+    updates: LoadedUpdate[]
+    atEnd: boolean
+    nextBeforeTimestamp: number | undefined
+    freeHistoryLimitHit: boolean
+  }
+  setUpdatesInfo: React.Dispatch<
+    React.SetStateAction<HistoryContextValue['updatesInfo']>
   >
-  nextBeforeTimestamp: number | undefined
-  atEnd: boolean
   userHasFullFeature: boolean | undefined
-  freeHistoryLimitHit: boolean
-  isLoading: boolean
+  loadingState: 'loadingInitial' | 'loadingUpdates' | 'ready'
   error: Nullable<unknown>
   labels: Nullable<LoadedLabel[]>
   setLabels: React.Dispatch<React.SetStateAction<HistoryContextValue['labels']>>
-  loadingFileTree: boolean
   projectId: string
   selection: Selection
   setSelection: (selection: Selection) => void
+  fetchNextBatchOfUpdates: () => void
 }

@@ -20,7 +20,7 @@ type TagProps = {
 function Tag({ label, currentUserId, ...props }: TagProps) {
   const { t } = useTranslation()
   const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const { projectId, updates, setUpdates, labels, setLabels } =
+  const { projectId, updatesInfo, setUpdatesInfo, labels, setLabels } =
     useHistoryContext()
   const { isLoading, isSuccess, isError, error, runAsync } = useAsync()
   const isPseudoCurrentStateLabel = isPseudoLabel(label)
@@ -36,7 +36,7 @@ function Tag({ label, currentUserId, ...props }: TagProps) {
   const handleModalExited = () => {
     if (!isSuccess) return
 
-    const tempUpdates = [...updates]
+    const tempUpdates = [...updatesInfo.updates]
     for (const [i, update] of tempUpdates.entries()) {
       if (update.toV === label.version) {
         tempUpdates[i] = {
@@ -47,7 +47,7 @@ function Tag({ label, currentUserId, ...props }: TagProps) {
       }
     }
 
-    setUpdates(tempUpdates)
+    setUpdatesInfo({ ...updatesInfo, updates: tempUpdates })
 
     if (labels) {
       const nonPseudoLabels = labels.filter(isLabel)

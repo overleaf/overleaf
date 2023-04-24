@@ -1,8 +1,8 @@
 import { expect } from 'chai'
-import type { HistoryContextValue } from '../../../../../frontend/js/features/history/context/types/history-context-value'
 import type { FileDiff } from '../../../../../frontend/js/features/history/services/types/file'
 import { autoSelectFile } from '../../../../../frontend/js/features/history/utils/auto-select-file'
 import type { User } from '../../../../../frontend/js/features/history/services/types/shared'
+import { LoadedUpdate } from '../../../../../frontend/js/features/history/services/types/update'
 
 describe('autoSelectFile', function () {
   const historyUsers: User[] = [
@@ -40,7 +40,7 @@ describe('autoSelectFile', function () {
         },
       ]
 
-      const updates: HistoryContextValue['updates'] = [
+      const updates: LoadedUpdate[] = [
         {
           fromV: 25,
           toV: 26,
@@ -284,7 +284,7 @@ describe('autoSelectFile', function () {
         },
       ]
 
-      const updates: HistoryContextValue['updates'] = [
+      const updates: LoadedUpdate[] = [
         {
           fromV: 0,
           toV: 4,
@@ -349,7 +349,7 @@ describe('autoSelectFile', function () {
         },
       ]
 
-      const updates: HistoryContextValue['updates'] = [
+      const updates: LoadedUpdate[] = [
         {
           fromV: 4,
           toV: 7,
@@ -444,7 +444,7 @@ describe('autoSelectFile', function () {
         },
       ]
 
-      const updates: HistoryContextValue['updates'] = [
+      const updates: LoadedUpdate[] = [
         {
           fromV: 9,
           toV: 11,
@@ -604,7 +604,7 @@ describe('autoSelectFile', function () {
         },
       ]
 
-      const updates: HistoryContextValue['updates'] = [
+      const updates: LoadedUpdate[] = [
         {
           fromV: 7,
           toV: 8,

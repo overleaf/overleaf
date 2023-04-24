@@ -1,13 +1,12 @@
 import _ from 'lodash'
 import type { Nullable } from '../../../../../types/utils'
-import type { HistoryContextValue } from '../context/types/history-context-value'
 import type { FileDiff } from '../services/types/file'
 import type { DiffOperation } from '../services/types/diff-operation'
 import type { LoadedUpdate, Version } from '../services/types/update'
 
 function getUpdateForVersion(
   version: Version,
-  updates: HistoryContextValue['updates']
+  updates: LoadedUpdate[]
 ): Nullable<LoadedUpdate> {
   return updates.filter(update => update.toV === version)?.[0] ?? null
 }
@@ -21,7 +20,7 @@ function getFilesWithOps(
   files: FileDiff[],
   toV: Version,
   comparing: boolean,
-  updates: HistoryContextValue['updates']
+  updates: LoadedUpdate[]
 ): FileWithOps[] {
   if (toV && !comparing) {
     const filesWithOps: FileWithOps[] = []
@@ -92,7 +91,7 @@ export function autoSelectFile(
   files: FileDiff[],
   toV: Version,
   comparing: boolean,
-  updates: HistoryContextValue['updates']
+  updates: LoadedUpdate[]
 ) {
   let fileToSelect: Nullable<FileDiff> = null
 

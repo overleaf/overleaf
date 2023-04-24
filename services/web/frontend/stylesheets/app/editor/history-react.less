@@ -60,6 +60,21 @@ history-root {
     overflow-y: auto;
   }
 
+  .history-all-versions-scroller {
+    overflow-y: auto;
+    height: 100%;
+  }
+
+  .history-all-versions-container {
+    position: relative;
+  }
+
+  .history-versions-bottom {
+    position: absolute;
+    height: 8em;
+    bottom: 0;
+  }
+
   .history-toggle-switch-container,
   .history-version-day,
   .history-version-details {
@@ -164,6 +179,23 @@ history-root {
     &:last-child {
       margin-bottom: initial;
     }
+  }
+
+  .loading {
+    padding-top: 10rem;
+    font-family: @font-family-serif;
+    text-align: center;
+  }
+
+  & > .loading {
+    flex: 1;
+  }
+
+  .history-all-versions-scroller .loading {
+    position: sticky;
+    bottom: 0;
+    padding: @line-height-computed / 2 0;
+    background-color: @gray-lightest;
   }
 
   .history-loading-panel {
