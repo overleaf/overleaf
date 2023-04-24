@@ -677,6 +677,20 @@ public class Bridge {
         );
     }
 
+    /**
+     * Delete a project's data
+     */
+    public void deleteProject(String projectName) {
+      Log.info("[{}] deleting project", projectName);
+      dbStore.deleteProject(projectName);
+      try {
+        repoStore.remove(projectName);
+      } catch (IOException e) {
+        Log.warn("Failed to delete repository for project {}: {}", projectName, e);
+      }
+      swapStore.remove(projectName);
+    }
+
     /* PRIVATE */
 
     /**

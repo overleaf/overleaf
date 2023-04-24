@@ -148,6 +148,7 @@ public class GitBridgeServer {
         HandlerCollection handlers = new HandlerList();
         handlers.addHandler(initResourceHandler());
         handlers.addHandler(new PostbackHandler(bridge));
+        handlers.addHandler(new ProjectDeletionHandler(bridge));
         handlers.addHandler(new DefaultHandler());
 
         api.setHandler(handlers);

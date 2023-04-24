@@ -41,4 +41,8 @@ public interface DBStore {
      */
     void setLastAccessedTime(String projectName, Timestamp time);
 
+    /**
+     * Delete the metadata associated with the given project.
+     */
+    void deleteProject(String projectName);
 }

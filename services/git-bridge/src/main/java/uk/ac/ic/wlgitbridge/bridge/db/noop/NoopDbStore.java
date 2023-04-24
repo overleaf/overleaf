@@ -72,4 +72,7 @@ public class NoopDbStore implements DBStore {
     public String getSwapCompression(String projectName) {
         return null;
     }
+
+    @Override
+    public void deleteProject(String projectName) {}
 }

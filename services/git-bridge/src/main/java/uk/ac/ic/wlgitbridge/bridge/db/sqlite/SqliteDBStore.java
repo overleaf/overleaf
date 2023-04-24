@@ -112,17 +112,23 @@ public class SqliteDBStore implements DBStore {
 
     @Override
     public void swap(String projectName, String compressionMethod) {
-      update(new UpdateSwap(projectName, compressionMethod));
+        update(new UpdateSwap(projectName, compressionMethod));
     }
 
     @Override
     public void restore(String projectName) {
-      update(new UpdateRestore(projectName));
+        update(new UpdateRestore(projectName));
     }
 
     @Override
     public String getSwapCompression(String projectName) {
         return query(new GetSwapCompression(projectName));
+    }
+
+    @Override
+    public void deleteProject(String projectName) {
+        update(new DeleteAllFilesInProjectSQLUpdate(projectName));
+        update(new DeleteProjectSQLUpdate(projectName));
     }
 
     private Connection openConnectionTo(File dbFile) {

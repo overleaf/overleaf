@@ -71,15 +71,15 @@ public class SqliteDBStoreTest {
 
     @Test
     public void swapAndRestore() {
-      String projectName = "something";
-      String compression = "bzip2";
-      dbStore.setLatestVersionForProject(projectName, 42);
-      dbStore.swap(projectName, compression);
-      assertNull(dbStore.getOldestUnswappedProject());
-      assertEquals(dbStore.getSwapCompression(projectName), compression);
-      // and restore
-      dbStore.restore(projectName);
-      assertEquals(dbStore.getSwapCompression(projectName), null);
+        String projectName = "something";
+        String compression = "bzip2";
+        dbStore.setLatestVersionForProject(projectName, 42);
+        dbStore.swap(projectName, compression);
+        assertNull(dbStore.getOldestUnswappedProject());
+        assertEquals(dbStore.getSwapCompression(projectName), compression);
+        // and restore
+        dbStore.restore(projectName);
+        assertEquals(dbStore.getSwapCompression(projectName), null);
     }
 
     @Test
@@ -160,4 +160,14 @@ public class SqliteDBStoreTest {
         assertEquals(ProjectState.SWAPPED, dbStore.getProjectState("asdf"));
     }
 
+    @Test
+    public void testDeleteProject() {
+        dbStore.setLatestVersionForProject("project1", 1);
+        dbStore.setLatestVersionForProject("project2", 1);
+        assertEquals(ProjectState.PRESENT, dbStore.getProjectState("project1"));
+        assertEquals(ProjectState.PRESENT, dbStore.getProjectState("project2"));
+        dbStore.deleteProject("project1");
+        assertEquals(ProjectState.NOT_PRESENT, dbStore.getProjectState("project1"));
+        assertEquals(ProjectState.PRESENT, dbStore.getProjectState("project2"));
+    }
 }
