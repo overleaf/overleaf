@@ -43,12 +43,10 @@ export const shortcuts = () => {
   const keyBindings: KeyBinding[] = [
     {
       key: 'Tab',
-      preventDefault: true,
       run: indentMore,
     },
     {
       key: 'Shift-Tab',
-      preventDefault: true,
       run: indentLess,
     },
     {

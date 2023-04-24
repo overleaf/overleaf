@@ -1,7 +1,6 @@
 import { Prec } from '@codemirror/state'
 import { keymap } from '@codemirror/view'
 import { wrapRanges } from '../../commands/ranges'
-import { indentLess, indentMore } from '@codemirror/commands'
 
 export const shortcuts = () => {
   return Prec.high(
@@ -17,16 +16,6 @@ export const shortcuts = () => {
         mac: 'Mod-i',
         preventDefault: true,
         run: wrapRanges('_', '_'),
-      },
-      {
-        key: 'Tab',
-        preventDefault: true,
-        run: indentMore,
-      },
-      {
-        key: 'Shift-Tab',
-        preventDefault: true,
-        run: indentLess,
       },
     ])
   )

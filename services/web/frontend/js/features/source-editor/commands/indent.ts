@@ -3,6 +3,9 @@ import { getIndentUnit, indentString, indentUnit } from '@codemirror/language'
 import { EditorView } from '@codemirror/view'
 
 export const indentMore = (view: EditorView) => {
+  if (view.state.readOnly) {
+    return false
+  }
   view.dispatch(
     view.state.changeByRange(range => {
       const doc = view.state.doc
