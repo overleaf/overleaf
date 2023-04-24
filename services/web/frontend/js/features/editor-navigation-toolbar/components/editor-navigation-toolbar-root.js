@@ -78,7 +78,10 @@ const EditorNavigationToolbarRoot = React.memo(
     }, [chatIsOpen, setChatIsOpen, markMessagesAsRead])
 
     const toggleReviewPanelOpen = useCallback(
-      () => setReviewPanelOpen(value => !value),
+      event => {
+        event.preventDefault()
+        setReviewPanelOpen(value => !value)
+      },
       [setReviewPanelOpen]
     )
 

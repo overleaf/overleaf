@@ -724,7 +724,8 @@ export default App.controller(
       return $scope.toggleReviewPanel()
     }
 
-    $scope.addNewComment = function () {
+    $scope.addNewComment = function (e) {
+      e.preventDefault()
       $scope.$broadcast('comment:start_adding')
       return $scope.toggleReviewPanel()
     }

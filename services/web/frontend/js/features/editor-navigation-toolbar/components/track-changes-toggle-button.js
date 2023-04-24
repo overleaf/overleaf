@@ -11,7 +11,7 @@ function TrackChangesToggleButton({ trackChangesIsOpen, disabled, onClick }) {
 
   return (
     <div className="toolbar-item">
-      <button disabled={disabled} className={classes} onClick={onClick}>
+      <button disabled={disabled} className={classes} onMouseDown={onClick}>
         <i className="review-icon" />
         <p className="toolbar-label">{t('review')}</p>
       </button>

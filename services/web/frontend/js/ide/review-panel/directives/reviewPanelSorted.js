@@ -146,12 +146,11 @@ export default App.directive('reviewPanelSorted', $timeout => ({
           visibility: 'visible',
         })
         focused_entry.$indicator_el.css({ top: focused_entry_top })
-        // use screenPos.height and screenPos.editorPaddingTop if set
+        // use screenPos.height if set
         screenPosHeight = focusedEntryScreenPos.height ?? line_height
         positionLayoutEl(
           focused_entry.$callout_el,
-          focusedEntryScreenPos.y +
-            (focusedEntryScreenPos.editorPaddingTop ?? 0),
+          focusedEntryScreenPos.y,
           focused_entry_top,
           screenPosHeight
         )

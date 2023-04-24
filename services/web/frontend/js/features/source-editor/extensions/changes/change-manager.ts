@@ -13,7 +13,7 @@ import { debounce } from 'lodash'
 
 // With less than this number of entries, don't bother culling to avoid
 // little UI jumps when scrolling.
-const CULL_AFTER = 100
+const CULL_AFTER = Infinity // Note: was 100 but couldn't scroll to see items outside the viewport
 
 export const dispatchEditorEvent = (type: string, payload?: unknown) => {
   window.setTimeout(() => {
@@ -291,24 +291,25 @@ export const createChangeManager = (
         acceptChanges(payload)
         view.dispatch(buildChangeMarkers())
         broadcastChange()
-        dispatchFocusChangedEvent(view.state)
         break
       }
 
       case 'changes:reject': {
         view.dispatch(rejectChanges(payload))
-        dispatchFocusChangedEvent(view.state)
+        broadcastChange()
         break
       }
 
       case 'comment:select_line': {
         selectCurrentLine()
+        broadcastChange()
         break
       }
 
       case 'comment:add': {
         addComment(payload.offset, payload.length, payload.threadId)
         collapseSelection()
+        broadcastChange()
         break
       }
 
@@ -329,9 +330,6 @@ export const createChangeManager = (
       case 'loaded_threads': {
         view.dispatch(buildChangeMarkers())
         broadcastChange()
-        window.setTimeout(() => {
-          dispatchFocusChangedEvent(view.state)
-        }, 0)
         break
       }
 
@@ -359,12 +357,9 @@ export const createChangeManager = (
     }
   }
 
-  /**
-   *
-   */
-  const broadcastChange = () => {
+  const broadcastChange = debounce(() => {
     dispatchEditorEvent('track-changes:changed')
-  }
+  }, 50)
 
   /**
    * When the editor content, focus, size, viewport or selection changes,
@@ -450,9 +445,13 @@ export const createChangeManager = (
   return {
     initialize() {
       addListeners()
-      dispatchEditorEvent('track-changes:changed')
+      broadcastChange()
     },
     handleUpdate(update: ViewUpdate) {
+      if (update.geometryChanged && !update.docChanged) {
+        broadcastChange()
+      }
+
       if (updateSetsVerticalOverflow(update)) {
         ignoreGeometryChangesUntil = Date.now() + 50 // ignore changes for 50ms
       } else if (
