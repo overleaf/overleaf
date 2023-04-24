@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import withErrorBoundary from '../../../../infrastructure/error-boundary'
 import { ErrorBoundaryFallback } from '../../../../shared/components/error-boundary-fallback'
 import {
@@ -22,6 +22,7 @@ import {
 } from '../../extensions/highlight-locations'
 import Icon from '../../../../shared/components/icon'
 import { useTranslation } from 'react-i18next'
+import { inlineBackground } from '../../../source-editor/extensions/inline-background'
 
 type FontFamily = 'monaco' | 'lucida'
 type LineHeight = 'compact' | 'normal' | 'wide'
@@ -37,6 +38,7 @@ function extensions(themeOptions: Options): Extension[] {
     highlights(),
     highlightLocations(),
     theme(themeOptions),
+    inlineBackground(false),
   ]
 }
 
@@ -66,8 +68,8 @@ function DocumentDiffViewer({
     })
   })
 
-  const view = useRef(
-    new EditorView({
+  const [view] = useState<EditorView>(() => {
+    return new EditorView({
       state,
       dispatch: tr => {
         view.update([tr])
@@ -76,7 +78,7 @@ function DocumentDiffViewer({
         }
       },
     })
-  ).current
+  })
 
   const highlightLocations = state.field(highlightLocationsField)
 

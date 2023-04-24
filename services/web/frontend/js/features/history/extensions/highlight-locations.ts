@@ -1,7 +1,7 @@
 import { EditorSelection, StateEffect, StateField } from '@codemirror/state'
 import { Highlight } from '../services/types/doc'
 import { EditorView, ViewPlugin, ViewUpdate } from '@codemirror/view'
-import { highlightsField } from './highlights'
+import { highlightDecorationsField } from './highlights'
 import { throttle, isEqual } from 'lodash'
 import { updateHasEffect } from '../../source-editor/utils/effects'
 
@@ -31,7 +31,8 @@ function calculateHighlightLocations(view: EditorView): HighlightLocations {
   let next
   let previous
 
-  const highlights = view.state.field(highlightsField) || []
+  const highlights =
+    view.state.field(highlightDecorationsField).highlights || []
 
   if (highlights.length === 0) {
     return { before: 0, after: 0 }
