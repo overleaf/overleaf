@@ -45,7 +45,11 @@ async function getRecurlyPlanAddOns(plan) {
   })
   const result = []
   for await (const addOn of addOns.each()) {
-    result.push(addOn)
+    if (addOn.code === 'additional-license') {
+      result.push(addOn)
+    } else {
+      console.error('UNRECOGNISED ADD-ON CODE', plan.code, addOn.code)
+    }
   }
   return result
 }
@@ -131,7 +135,17 @@ async function updatePlanAddOn(plan, localAddOn) {
   }
   const planCodeId = `code-${plan.code}`
   const addOnId = 'code-additional-license'
-  const originalPlanAddOn = await client.getPlanAddOn(planCodeId, addOnId)
+  let originalPlanAddOn
+  try {
+    originalPlanAddOn = await client.getPlanAddOn(planCodeId, addOnId)
+  } catch (error) {
+    if (error instanceof recurly.errors.NotFoundError) {
+      console.error('plan add-on not found', planCodeId, addOnId)
+      return
+    } else {
+      throw error
+    }
+  }
   const changes = _.differenceWith(
     localAddOn.currencies,
     originalPlanAddOn.currencies,
@@ -146,7 +160,7 @@ async function updatePlanAddOn(plan, localAddOn) {
   const planAddOnUpdate = { currencies: localAddOn.currencies }
   try {
     if (DRY_RUN) {
-      console.error('skipping update to additional licencse for', planCodeId)
+      console.error('skipping update to additional license for', planCodeId)
       return
     }
     const newPlanAddOn = await client.updatePlanAddOn(
