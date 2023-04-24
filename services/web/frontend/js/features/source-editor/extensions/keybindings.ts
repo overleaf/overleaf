@@ -198,6 +198,10 @@ export const keybindings = () => {
 export const setKeybindings = async (
   selectedKeybindings = 'default'
 ): Promise<TransactionSpec> => {
+  if (selectedKeybindings === 'none') {
+    selectedKeybindings = 'default'
+  }
+
   const selectedOption = options.find(
     option => option.name === selectedKeybindings
   )
