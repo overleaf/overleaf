@@ -122,7 +122,7 @@ const lineIndentDecoration = (indent: number) =>
   Decoration.line({
     attributes: {
       // style: `text-indent: ${indent}ch hanging`, // "hanging" would be ideal, when browsers support it
-      style: `text-indent: -${indent}ch; padding-left: calc(${indent}ch + 4px)`, // add 4px to account for existing padding-left
+      style: `text-indent: -${indent}ch; padding-left: calc(${indent}ch + 6px)`, // add 6px to account for existing padding-left
     },
   })
 
