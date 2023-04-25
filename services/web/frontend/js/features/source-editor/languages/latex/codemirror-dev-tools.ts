@@ -16,10 +16,11 @@ import {
 import { syntaxTree } from '@codemirror/language'
 import { toggleVisualEffect } from '../../extensions/visual/visual'
 import { hasLanguageLoadedEffect } from '../../extensions/language'
+import customLocalStorage from '../../../../infrastructure/local-storage'
 
-// to enable: window.localStorage.setItem('cm6-dev-tools', 'on')
+// to enable: window.localStorage.setItem('cm6-dev-tools', '"on"')
 // to disable: window.localStorage.removeItem('cm6-dev-tools')
-const enabled = window.localStorage.getItem('cm6-dev-tools') === 'on'
+const enabled = customLocalStorage.getItem('cm6-dev-tools') === 'on'
 
 const devToolsConf = new Compartment()
 
@@ -71,10 +72,10 @@ const devToolsButton = ViewPlugin.define(view => {
 })
 
 const isActive = () =>
-  window.localStorage.getItem('cm6-dev-tools-active') === 'on'
+  customLocalStorage.getItem('cm6-dev-tools-active') === 'on'
 
 const toggleDevTools = () => {
-  window.localStorage.setItem('cm6-dev-tools-active', isActive() ? 'off' : 'on')
+  customLocalStorage.setItem('cm6-dev-tools-active', isActive() ? 'off' : 'on')
 
   return {
     effects: devToolsConf.reconfigure(createExtension()),
