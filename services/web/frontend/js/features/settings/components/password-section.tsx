@@ -162,17 +162,17 @@ function PasswordForm() {
                     />,
                   ]}
                 />
-                . {t('use_a_different_password')}
+                . {t('use_a_different_password')}.
               </>
             ) : getErrorMessageKey(error) === 'password-contains-email' ? (
               <>
                 {t('invalid_password_contains_email')}.{' '}
-                {t('use_a_different_password')}
+                {t('use_a_different_password')}.
               </>
             ) : getErrorMessageKey(error) === 'password-too-similar' ? (
               <>
                 {t('invalid_password_too_similar')}.{' '}
-                {t('use_a_different_password')}
+                {t('use_a_different_password')}.
               </>
             ) : (
               getUserFacingMessage(error)
