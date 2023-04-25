@@ -177,7 +177,7 @@ describe('SubscriptionController', function () {
     describe('groupPlanModal data', function () {
       it('should pass local currency if valid', function (done) {
         this.res.render = (page, opts) => {
-          page.should.equal('subscriptions/plans-marketing')
+          page.should.equal('subscriptions/plans-marketing-v2')
           opts.groupPlanModalDefaults.currency.should.equal('GBP')
           done()
         }
@@ -189,7 +189,7 @@ describe('SubscriptionController', function () {
 
       it('should fallback to USD when valid', function (done) {
         this.res.render = (page, opts) => {
-          page.should.equal('subscriptions/plans-marketing')
+          page.should.equal('subscriptions/plans-marketing-v2')
           opts.groupPlanModalDefaults.currency.should.equal('USD')
           done()
         }
@@ -201,7 +201,7 @@ describe('SubscriptionController', function () {
 
       it('should pass valid options for group plan modal and discard invalid', function (done) {
         this.res.render = (page, opts) => {
-          page.should.equal('subscriptions/plans-marketing')
+          page.should.equal('subscriptions/plans-marketing-v2')
           opts.groupPlanModalDefaults.size.should.equal('42')
           opts.groupPlanModalDefaults.plan_code.should.equal('collaborator')
           opts.groupPlanModalDefaults.currency.should.equal('GBP')

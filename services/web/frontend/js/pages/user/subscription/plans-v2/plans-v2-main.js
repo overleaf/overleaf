@@ -13,7 +13,69 @@ import {
   updateMainGroupPlanPricing,
 } from './plans-v2-group-plan'
 import { setUpGroupSubscriptionButtonAction } from './plans-v2-subscription-button'
-import { updateLinkTargets } from '../plans'
+import getMeta from '../../../../utils/meta'
+
+const currentCurrencyCode = getMeta('ol-recommendedCurrency')
+
+function setUpSubscriptionTracking(linkEl) {
+  linkEl.addEventListener('click', function () {
+    const plan =
+      linkEl.getAttribute('data-ol-tracking-plan') ||
+      linkEl.getAttribute('data-ol-start-new-subscription')
+
+    const location = linkEl.getAttribute('data-ol-location')
+    const period = linkEl.getAttribute('data-ol-item-view')
+
+    const DEFAULT_EVENT_TRACKING_KEY = 'plans-page-click'
+
+    const eventTrackingKey =
+      linkEl.getAttribute('data-ol-event-tracking-key') ||
+      DEFAULT_EVENT_TRACKING_KEY
+
+    const eventTrackingSegmentation = {
+      button: plan,
+      location,
+      'billing-period': period,
+    }
+
+    eventTracking.sendMB('plans-page-start-trial') // deprecated by plans-page-click
+    eventTracking.sendMB(eventTrackingKey, eventTrackingSegmentation)
+  })
+}
+
+const searchParams = new URLSearchParams(window.location.search)
+
+export function updateLinkTargets() {
+  document.querySelectorAll('[data-ol-start-new-subscription]').forEach(el => {
+    if (el.hasAttribute('data-ol-has-custom-href')) return
+
+    const plan = el.getAttribute('data-ol-start-new-subscription')
+    const view = el.getAttribute('data-ol-item-view')
+    const suffix = view === 'annual' ? `-annual` : `_free_trial_7_days`
+    const planCode = `${plan}${suffix}`
+
+    const location = el.getAttribute('data-ol-location')
+    const itmCampaign = searchParams.get('itm_campaign') || 'plans'
+    const itmContent =
+      itmCampaign === 'plans' ? location : searchParams.get('itm_content')
+
+    const queryString = new URLSearchParams({
+      planCode,
+      currency: currentCurrencyCode,
+      itm_campaign: itmCampaign,
+    })
+
+    if (itmContent) {
+      queryString.set('itm_content', itmContent)
+    }
+
+    if (searchParams.get('itm_referrer')) {
+      queryString.set('itm_referrer', searchParams.get('itm_referrer'))
+    }
+
+    el.href = `/user/subscription/new?${queryString.toString()}`
+  })
+}
 
 // We need this mutable variable because the group tab only have annual.
 // There's some difference between the monthly and annual UI
@@ -132,6 +194,10 @@ document
 
     switchMonthlyAnnual(currentMonthlyAnnualSwitchValue)
   })
+
+document
+  .querySelectorAll('[data-ol-start-new-subscription]')
+  .forEach(setUpSubscriptionTracking)
 
 setUpTabSwitching()
 setUpGroupPlanPricingChange()

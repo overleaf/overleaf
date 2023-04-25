@@ -56,37 +56,7 @@ async function plansPage(req, res) {
     return defaultValue
   }
 
-  let plansPageLayoutV3Assignment = { variant: 'default' }
-
-  try {
-    plansPageLayoutV3Assignment = await SplitTestHandler.promises.getAssignment(
-      req,
-      res,
-      'plans-page-layout-v3'
-    )
-
-    if (plansPageLayoutV3Assignment.variant === 'old-plans-page-annual') {
-      plansPageLayoutV3Assignment.variant = 'old-plans-page-annual-fixed'
-      res.locals.splitTestVariants['plans-page-layout-v3'] =
-        'old-plans-page-annual-fixed'
-    }
-  } catch (error) {
-    logger.error(
-      { err: error },
-      'failed to get "plans-page-layout-v3" split test assignment'
-    )
-  }
-
-  let currentView = 'monthly'
-  if (
-    plansPageLayoutV3Assignment.variant === 'old-plans-page-annual-fixed' ||
-    plansPageLayoutV3Assignment.variant === 'new-plans-page'
-  ) {
-    currentView = 'annual'
-  }
-
-  const showNewPlansPage =
-    plansPageLayoutV3Assignment.variant === 'new-plans-page'
+  const currentView = 'annual'
 
   let defaultGroupPlanModalCurrency = 'USD'
   if (validGroupPlanModalOptions.currency.includes(recommendedCurrency)) {
@@ -94,20 +64,14 @@ async function plansPage(req, res) {
   }
   const groupPlanModalDefaults = {
     plan_code: getDefault('plan', 'plan_code', 'collaborator'),
-    size: getDefault('number', 'size', showNewPlansPage ? '2' : '10'),
+    size: getDefault('number', 'size', '2'),
     currency: getDefault('currency', 'currency', defaultGroupPlanModalCurrency),
     usage: getDefault('usage', 'usage', 'enterprise'),
   }
 
-  AnalyticsManager.recordEventForSession(req.session, 'plans-page-view', {
-    'plans-page-layout-v3': plansPageLayoutV3Assignment.variant,
-  })
+  AnalyticsManager.recordEventForSession(req.session, 'plans-page-view')
 
-  const template = showNewPlansPage
-    ? 'subscriptions/plans-marketing-v2'
-    : 'subscriptions/plans-marketing'
-
-  res.render(template, {
+  res.render('subscriptions/plans-marketing-v2', {
     title: 'plans_and_pricing',
     currentView,
     plans,
@@ -120,7 +84,6 @@ async function plansPage(req, res) {
     groupPlans: GroupPlansData,
     groupPlanModalOptions,
     groupPlanModalDefaults,
-    plansPageLayoutV3Variant: plansPageLayoutV3Assignment.variant,
     initialLocalizedGroupPrice:
       SubscriptionHelper.generateInitialLocalizedGroupPrice(
         recommendedCurrency

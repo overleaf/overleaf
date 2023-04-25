@@ -17,9 +17,7 @@ const config = {
       },
     },
     eventTrackingKey: 'plans-page-click',
-    additionalEventSegmentation: {
-      'plans-page-layout-v3': 'new-plans-page',
-    },
+    additionalEventSegmentation: {},
   },
   group: {
     tableHead: {
@@ -35,9 +33,7 @@ const config = {
       },
     },
     eventTrackingKey: 'plans-page-click',
-    additionalEventSegmentation: {
-      'plans-page-layout-v3': 'new-plans-page',
-    },
+    additionalEventSegmentation: {},
   },
   student: {
     baseColspan: 2,
@@ -60,9 +56,7 @@ const config = {
       },
     },
     eventTrackingKey: 'plans-page-click',
-    additionalEventSegmentation: {
-      'plans-page-layout-v3': 'new-plans-page',
-    },
+    additionalEventSegmentation: {},
   },
 }
 

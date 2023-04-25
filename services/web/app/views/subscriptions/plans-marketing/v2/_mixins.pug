@@ -1,3 +1,15 @@
+mixin features_premium
+	li &nbsp;
+	li
+		strong #{translate('all_premium_features')}
+	li #{translate('sync_dropbox_github')}
+	li #{translate('full_doc_history')}
+	li #{translate('track_changes')}
+	li + #{translate('more').toLowerCase()}
+
+mixin gen_localized_price_for_plan_view(plan, view)
+	span #{settings.localizedPlanPricing[recommendedCurrency][plan][view]}
+
 mixin plans_v2_table(period, config)
 	- var baseColspan = config.baseColspan || 1
 	- var maxColumn = config.maxColumn || 4
@@ -344,7 +356,6 @@ mixin group_plans_license_picker()
 				event-tracking-mb="true"
 				event-tracking-trigger="click"
 				event-tracking-element="select"
-				event-segmentation='{"plans-page-layout-v3": "new-plans-page"}'
 			)
 				option(value="2") 2
 				option(value="3") 3
@@ -364,7 +375,6 @@ mixin group_plans_license_picker()
 					event-tracking-mb="true"
 					event-tracking-trigger="click"
 					event-tracking-element="checkbox"
-					event-segmentation='{"plans-page-layout-v3": "new-plans-page"}'
 				)
 				span #{translate("apply_educational_discount")}
 			//- will only appear on screen width >= 768px (using CSS)
