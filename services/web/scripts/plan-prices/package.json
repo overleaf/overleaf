@@ -9,6 +9,8 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "csv": "^6.2.10",
+    "minimist": "^1.2.8",
     "xlsx": "^0.18.5"
   }
 }
