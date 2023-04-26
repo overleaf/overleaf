@@ -170,6 +170,7 @@ test_frontend_ct_modules:
 # Acceptance tests
 #
 
+# Keep in sync with TEST_ACCEPTANCE_MONGO_INIT in Makefile.module
 TEST_ACCEPTANCE_MONGO_INIT := \
 	$(DOCKER_COMPOSE) up -d mongo; \
 	$(DOCKER_COMPOSE) exec -T mongo sh -c ' \

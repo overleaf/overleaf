@@ -27,6 +27,16 @@ DOCKER_COMPOSE_TEST_UNIT := \
 	export COMPOSE_PROJECT_NAME=unit_test_$(BUILD_DIR_NAME)_$(MODULE_NAME) \
 	&& $(DOCKER_COMPOSE)
 
+# Keep in sync with TEST_ACCEPTANCE_MONGO_INIT in Makefile
+TEST_ACCEPTANCE_MONGO_INIT := \
+	$(DOCKER_COMPOSE_TEST_ACCEPTANCE) up -d mongo; \
+	$(DOCKER_COMPOSE_TEST_ACCEPTANCE) exec -T mongo sh -c ' \
+		while ! mongo --eval "db.version()" > /dev/null; do \
+			echo "Waiting for Mongo..."; \
+			sleep 1; \
+		done; \
+		mongo --eval "rs.initiate({ _id: \"overleaf\", members: [ { _id: 0, host: \"mongo:27017\" } ] })"'
+
 ifeq (,$(wildcard test/unit))
 test_unit:
 
@@ -58,6 +68,7 @@ test_acceptance_server_pro: export BASE_CONFIG = $(CFG_SERVER_PRO)
 
 $(ALL_TEST_ACCEPTANCE_VARIANTS):
 	$(MAKE) --no-print-directory clean_test_acceptance
+	$(TEST_ACCEPTANCE_MONGO_INIT)
 	${DOCKER_COMPOSE_TEST_ACCEPTANCE} run --rm test_acceptance npm -q run test:acceptance:run_dir -- ${MOCHA_ARGS} $(MODULE_DIR)/test/acceptance/src
 	$(MAKE) --no-print-directory clean_test_acceptance
 
