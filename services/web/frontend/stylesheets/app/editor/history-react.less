@@ -83,6 +83,7 @@ history-root {
 
   .history-version-day {
     position: sticky;
+    z-index: 1;
     top: 0;
     display: block;
     padding-top: 12px;
@@ -92,6 +93,8 @@ history-root {
   }
 
   .history-version-details {
+    display: flex;
+    align-items: flex-start;
     padding-top: 8px;
     padding-bottom: 8px;
 
@@ -169,12 +172,8 @@ history-root {
     margin-right: 10px;
   }
 
-  .history-version-saved-by {
+  .history-version-label {
     margin-bottom: 4px;
-
-    &-label {
-      margin-right: 8px;
-    }
 
     &:last-child {
       margin-bottom: initial;
@@ -196,6 +195,40 @@ history-root {
     bottom: 0;
     padding: @line-height-computed / 2 0;
     background-color: @gray-lightest;
+  }
+
+  .history-version-saved-by {
+    &-label {
+      margin-right: 8px;
+    }
+  }
+
+  .dropdown.open {
+    .history-version-dropdown-menu-btn {
+      background-color: rgba(@neutral-90, 0.08);
+      box-shadow: initial;
+    }
+  }
+
+  .history-version-dropdown-menu-btn {
+    @size: 30px;
+    padding: 0;
+    width: @size;
+    height: @size;
+    font-size: @font-size-small;
+    color: @neutral-90;
+    background-color: transparent;
+
+    &:hover,
+    &:active {
+      z-index: initial;
+      background-color: rgba(@neutral-90, 0.08);
+      box-shadow: initial;
+    }
+  }
+
+  .history-version-main-details {
+    flex: 1;
   }
 
   .history-loading-panel {
@@ -238,6 +271,19 @@ history-root {
 
     &:last-child {
       margin-bottom: initial;
+    }
+  }
+}
+
+.history-version-dropdown-menu {
+  [role='menuitem'] {
+    padding: 10px 12px;
+    color: @neutral-90;
+
+    &:hover,
+    &:focus {
+      color: @neutral-90;
+      background-color: @neutral-10;
     }
   }
 }

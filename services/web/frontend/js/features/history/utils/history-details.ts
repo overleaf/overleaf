@@ -43,14 +43,15 @@ type UpdateIsSelectedArg = {
   selection: Selection
 }
 
-export const updateIsSelected = ({
+export const isUpdateSelected = ({
   fromV,
   toV,
   selection,
 }: UpdateIsSelectedArg) => {
-  return (
-    selection.updateRange &&
-    fromV >= selection.updateRange.fromV &&
-    toV <= selection.updateRange.toV
-  )
+  if (selection.updateRange) {
+    return (
+      fromV >= selection.updateRange.fromV && toV <= selection.updateRange.toV
+    )
+  }
+  return false
 }

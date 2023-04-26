@@ -62,3 +62,5 @@ export const loadLabels = (
 
   return labelsWithPseudoLabelIfNeeded
 }
+
+export const updateLabels = () => {}

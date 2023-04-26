@@ -20,6 +20,9 @@ export type HistoryContextValue = {
   setLabels: React.Dispatch<React.SetStateAction<HistoryContextValue['labels']>>
   projectId: string
   selection: Selection
-  setSelection: (selection: Selection) => void
+  setSelection: React.Dispatch<
+    React.SetStateAction<HistoryContextValue['selection']>
+  >
   fetchNextBatchOfUpdates: () => void
+  resetSelection: () => void
 }

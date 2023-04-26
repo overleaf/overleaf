@@ -6,14 +6,15 @@ import { HistoryProvider } from '../../../../../frontend/js/features/history/con
 import { updates } from '../fixtures/updates'
 import { labels } from '../fixtures/labels'
 
-const mountChangeList = (scope: Record<string, unknown> = {}) => {
+const mountWithEditorProviders = (
+  component: React.ReactNode,
+  scope: Record<string, unknown> = {}
+) => {
   cy.mount(
     <EditorProviders scope={scope}>
       <HistoryProvider>
         <div style={{ display: 'flex', justifyContent: 'center' }}>
-          <div className="history-react">
-            <ChangeList />
-          </div>
+          <div className="history-react">{component}</div>
         </div>
       </HistoryProvider>
     </EditorProviders>
@@ -23,7 +24,9 @@ const mountChangeList = (scope: Record<string, unknown> = {}) => {
 describe('change list', function () {
   describe('toggle switch', function () {
     it('renders switch buttons', function () {
-      cy.mount(<ToggleSwitch labelsOnly={false} setLabelsOnly={() => {}} />)
+      mountWithEditorProviders(
+        <ToggleSwitch labelsOnly={false} setLabelsOnly={() => {}} />
+      )
 
       cy.findByLabelText(/all history/i)
       cy.findByLabelText(/labels/i)
@@ -40,7 +43,7 @@ describe('change list', function () {
         )
       }
 
-      cy.mount(<ToggleSwitchWrapped labelsOnly={false} />)
+      mountWithEditorProviders(<ToggleSwitchWrapped labelsOnly={false} />)
 
       cy.findByLabelText(/all history/i).as('all-history')
       cy.findByLabelText(/labels/i).as('labels')
@@ -76,7 +79,7 @@ describe('change list', function () {
     })
 
     it('renders tags', function () {
-      mountChangeList(scope)
+      mountWithEditorProviders(<ChangeList />, scope)
       waitForData()
 
       cy.findByLabelText(/all history/i).click({ force: true })
@@ -141,7 +144,7 @@ describe('change list', function () {
     })
 
     it('deletes tag', function () {
-      mountChangeList(scope)
+      mountWithEditorProviders(<ChangeList />, scope)
       waitForData()
 
       cy.findByLabelText(/all history/i).click({ force: true })

@@ -1,14 +1,18 @@
 import { useState } from 'react'
 import ToggleSwitchComponent from '../../js/features/history/components/change-list/toggle-switch'
+import { ScopeDecorator } from '../decorators/scope'
+import { HistoryProvider } from '../../js/features/history/context/history-context'
 
 export const LabelsOnlyToggleSwitch = () => {
   const [labelsOnly, setLabelsOnly] = useState(false)
 
   return (
-    <ToggleSwitchComponent
-      labelsOnly={labelsOnly}
-      setLabelsOnly={setLabelsOnly}
-    />
+    <HistoryProvider>
+      <ToggleSwitchComponent
+        labelsOnly={labelsOnly}
+        setLabelsOnly={setLabelsOnly}
+      />
+    </HistoryProvider>
   )
 }
 
@@ -28,6 +32,7 @@ export default {
     },
   },
   decorators: [
+    ScopeDecorator,
     (Story: React.ComponentType) => (
       <div className="history-react">
         <div className="change-list">

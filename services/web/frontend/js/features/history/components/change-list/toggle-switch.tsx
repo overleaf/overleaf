@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { useHistoryContext } from '../../context/history-context'
 
 type ToggleSwitchProps = {
   labelsOnly: boolean
@@ -9,6 +10,15 @@ type ToggleSwitchProps = {
 
 function ToggleSwitch({ labelsOnly, setLabelsOnly }: ToggleSwitchProps) {
   const { t } = useTranslation()
+  const { resetSelection, selection } = useHistoryContext()
+
+  const handleChange = (isLabelsOnly: boolean) => {
+    if (selection.comparing) {
+      resetSelection()
+    }
+
+    setLabelsOnly(isLabelsOnly)
+  }
 
   return (
     <fieldset className="toggle-switch">
@@ -17,7 +27,7 @@ function ToggleSwitch({ labelsOnly, setLabelsOnly }: ToggleSwitchProps) {
         type="radio"
         name="labels-only-toggle-switch"
         checked={!labelsOnly}
-        onChange={() => setLabelsOnly(false)}
+        onChange={() => handleChange(false)}
         className="toggle-switch-input"
         id="toggle-switch-all-history"
       />
@@ -31,7 +41,7 @@ function ToggleSwitch({ labelsOnly, setLabelsOnly }: ToggleSwitchProps) {
         type="radio"
         name="labels-only-toggle-switch"
         checked={labelsOnly}
-        onChange={() => setLabelsOnly(true)}
+        onChange={() => handleChange(true)}
         className="toggle-switch-input"
         id="toggle-switch-labels"
       />

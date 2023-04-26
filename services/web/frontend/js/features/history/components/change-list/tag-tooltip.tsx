@@ -1,14 +1,17 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Alert, Modal } from 'react-bootstrap'
-import { useHistoryContext } from '../../context/history-context'
+import { Modal } from 'react-bootstrap'
 import Icon from '../../../../shared/components/icon'
 import Tooltip from '../../../../shared/components/tooltip'
 import Badge from '../../../../shared/components/badge'
 import AccessibleModal from '../../../../shared/components/accessible-modal'
+import ModalError from './modal-error'
+import useAbortController from '../../../../shared/hooks/use-abort-controller'
 import useAsync from '../../../../shared/hooks/use-async'
-import { deleteJSON } from '../../../../infrastructure/fetch-json'
-import { isLabel, isPseudoLabel, loadLabels } from '../../utils/label'
+import useAddOrRemoveLabels from '../../hooks/use-add-or-remove-labels'
+import { useHistoryContext } from '../../context/history-context'
+import { deleteLabel } from '../../services/api'
+import { isPseudoLabel } from '../../utils/label'
 import { formatDate } from '../../../../utils/dates'
 import { LoadedLabel } from '../../services/types/label'
 
@@ -20,9 +23,10 @@ type TagProps = {
 function Tag({ label, currentUserId, ...props }: TagProps) {
   const { t } = useTranslation()
   const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const { projectId, updatesInfo, setUpdatesInfo, labels, setLabels } =
-    useHistoryContext()
-  const { isLoading, isSuccess, isError, error, runAsync } = useAsync()
+  const { projectId } = useHistoryContext()
+  const { signal } = useAbortController()
+  const { removeUpdateLabel } = useAddOrRemoveLabels()
+  const { isLoading, isSuccess, isError, error, reset, runAsync } = useAsync()
   const isPseudoCurrentStateLabel = isPseudoLabel(label)
   const isOwnedByCurrentUser = !isPseudoCurrentStateLabel
     ? label.user_id === currentUserId
@@ -36,35 +40,18 @@ function Tag({ label, currentUserId, ...props }: TagProps) {
   const handleModalExited = () => {
     if (!isSuccess) return
 
-    const tempUpdates = [...updatesInfo.updates]
-    for (const [i, update] of tempUpdates.entries()) {
-      if (update.toV === label.version) {
-        tempUpdates[i] = {
-          ...update,
-          labels: update.labels.filter(({ id }) => id !== label.id),
-        }
-        break
-      }
+    if (!isPseudoCurrentStateLabel) {
+      removeUpdateLabel(label)
     }
 
-    setUpdatesInfo({ ...updatesInfo, updates: tempUpdates })
-
-    if (labels) {
-      const nonPseudoLabels = labels.filter(isLabel)
-      const filteredLabels = nonPseudoLabels.filter(({ id }) => id !== label.id)
-      setLabels(loadLabels(filteredLabels, tempUpdates[0].toV))
-    }
-
-    setShowDeleteModal(false)
+    reset()
 
     // TODO _handleHistoryUIStateChange
   }
 
   const localDeleteHandler = () => {
-    runAsync(deleteJSON(`/project/${projectId}/labels/${label.id}`))
-      .then(() => {
-        setShowDeleteModal(false)
-      })
+    runAsync(deleteLabel(projectId, label.id, signal))
+      .then(() => setShowDeleteModal(false))
       .catch(console.error)
   }
 
@@ -103,16 +90,7 @@ function Tag({ label, currentUserId, ...props }: TagProps) {
             <Modal.Title>{t('history_delete_label')}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            {isError ? (
-              responseError.response.status === 400 &&
-              responseError?.data?.message ? (
-                <Alert bsStyle="danger">{responseError.data.message}</Alert>
-              ) : (
-                <Alert bsStyle="danger">
-                  {t('generic_something_went_wrong')}
-                </Alert>
-              )
-            ) : null}
+            {isError && <ModalError error={responseError} />}
             <p>
               {t('history_are_you_sure_delete_label')}&nbsp;
               <strong>"{label.comment}"</strong>?

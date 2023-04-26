@@ -57,6 +57,13 @@ function limitUpdates(
   })
 }
 
+const selectionInitialState: Selection = {
+  updateRange: null,
+  comparing: false,
+  files: [],
+  pathname: null,
+}
+
 function useHistory() {
   const { view } = useLayoutContext()
   const user = useUserContext()
@@ -65,12 +72,7 @@ function useHistory() {
   const projectId = project._id
   const projectOwnerId = project.owner?._id
 
-  const [selection, setSelection] = useState<Selection>({
-    updateRange: null,
-    comparing: false,
-    files: [],
-    pathname: null,
-  })
+  const [selection, setSelection] = useState<Selection>(selectionInitialState)
 
   const [updatesInfo, setUpdatesInfo] = useState<
     HistoryContextValue['updatesInfo']
@@ -183,6 +185,10 @@ function useHistory() {
     updatesInfo,
   ])
 
+  const resetSelection = useCallback(() => {
+    setSelection(selectionInitialState)
+  }, [])
+
   // Initial load when the History tab is active
   const initialFetch = useRef(false)
   useEffect(() => {
@@ -250,6 +256,7 @@ function useHistory() {
       selection,
       setSelection,
       fetchNextBatchOfUpdates,
+      resetSelection,
     }),
     [
       error,
@@ -263,6 +270,7 @@ function useHistory() {
       selection,
       setSelection,
       fetchNextBatchOfUpdates,
+      resetSelection,
     ]
   )
 

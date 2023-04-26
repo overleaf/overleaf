@@ -1,4 +1,8 @@
-import { getJSON } from '../../../infrastructure/fetch-json'
+import {
+  deleteJSON,
+  getJSON,
+  postJSON,
+} from '../../../infrastructure/fetch-json'
 import { FileDiff } from './types/file'
 import { FetchUpdatesResponse } from './types/update'
 import { Label } from './types/label'
@@ -23,6 +27,22 @@ export function fetchUpdates(projectId: string, before?: number) {
 export function fetchLabels(projectId: string) {
   const labelsURL = `/project/${projectId}/labels`
   return getJSON<Label[]>(labelsURL)
+}
+
+export function addLabel(
+  projectId: string,
+  body: { comment: string; version: number },
+  signal?: AbortSignal
+) {
+  return postJSON(`/project/${projectId}/labels`, { body, signal })
+}
+
+export function deleteLabel(
+  projectId: string,
+  labelId: string,
+  signal?: AbortSignal
+) {
+  return deleteJSON(`/project/${projectId}/labels/${labelId}`, { signal })
 }
 
 export function diffFiles(projectId: string, fromV: number, toV: number) {
