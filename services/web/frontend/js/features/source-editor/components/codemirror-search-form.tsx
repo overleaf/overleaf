@@ -225,7 +225,13 @@ const CodeMirrorSearchForm: FC = () => {
       role="search"
     >
       <div className="ol-cm-search-controls">
-        <InputGroup bsSize="small" className="ol-cm-search-input-group">
+        <InputGroup
+          bsSize="small"
+          className={classnames('ol-cm-search-input-group', {
+            'ol-cm-search-input-error':
+              query.regexp && isInvalidRegExp(query.search),
+          })}
+        >
           <FormControl
             type="text"
             name="search"
@@ -417,6 +423,15 @@ const CodeMirrorSearchForm: FC = () => {
       </div>
     </form>
   )
+}
+
+function isInvalidRegExp(source: string) {
+  try {
+    RegExp(source)
+    return false
+  } catch {
+    return true
+  }
 }
 
 export default CodeMirrorSearchForm

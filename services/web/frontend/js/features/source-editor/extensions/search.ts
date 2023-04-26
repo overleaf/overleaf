@@ -164,6 +164,8 @@ export const search = () => {
         background: 'var(--ol-blue-gray-1)',
         '--ol-cm-search-form-focus-shadow':
           'inset 0 1px 1px rgb(0 0 0 / 8%), 0 0 8px rgb(102 175 233 / 60%)',
+        '--ol-cm-search-form-error-shadow':
+          'inset 0 1px 1px rgb(0 0 0 / 8%), 0 0 8px var(--input-shadow-danger-color)',
       },
       '.ol-cm-search-controls': {
         display: 'grid',
@@ -216,6 +218,12 @@ export const search = () => {
         '&:focus-within': {
           borderColor: 'var(--input-border-focus)',
           boxShadow: 'var(--ol-cm-search-form-focus-shadow)',
+        },
+      },
+      '.ol-cm-search-input-group.ol-cm-search-input-error': {
+        '&:focus-within': {
+          borderColor: 'var(--input-border-danger)',
+          boxShadow: 'var(--ol-cm-search-form-error-shadow)',
         },
       },
       '.input-group .ol-cm-search-form-input': {
