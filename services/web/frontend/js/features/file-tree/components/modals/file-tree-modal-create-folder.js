@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 
 import { Button, Modal } from 'react-bootstrap'
@@ -20,6 +20,13 @@ function FileTreeModalCreateFolder() {
 
   const { isCreatingFolder, inFlight, finishCreatingFolder, cancel, error } =
     useFileTreeActionable()
+
+  useEffect(() => {
+    if (!isCreatingFolder) {
+      // clear the input when the modal is closed
+      setName('')
+    }
+  }, [isCreatingFolder])
 
   if (!isCreatingFolder) return null // the modal will not be rendered; return early
 
