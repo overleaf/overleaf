@@ -221,6 +221,25 @@ App.factory('MultiCurrencyPricing', function () {
           annual: '$519',
         },
       },
+      INR: {
+        symbol: '₹',
+        student: {
+          monthly: '₹219',
+          annual: '₹2199',
+        },
+        personal: {
+          monthly: '₹339',
+          annual: '₹2999',
+        },
+        collaborator: {
+          monthly: '₹499',
+          annual: '₹4599',
+        },
+        professional: {
+          monthly: '₹999',
+          annual: '₹9599',
+        },
+      },
     },
   }
 })

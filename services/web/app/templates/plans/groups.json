@@ -139,6 +139,29 @@
           "price_in_cents": 525000
         }
       },
+      "INR": {
+        "2": {
+          "price_in_cents": 1343800
+        },
+        "3": {
+          "price_in_cents": 2015700
+        },
+        "4": {
+          "price_in_cents": 2687600
+        },
+        "5": {
+          "price_in_cents": 3359500
+        },
+        "10": {
+          "price_in_cents": 3743000
+        },
+        "20": {
+          "price_in_cents": 6910000
+        },
+        "50": {
+          "price_in_cents": 15835000
+        }
+      },
       "NOK": {
         "2": {
           "price_in_cents": 401600
@@ -392,6 +415,29 @@
         },
         "50": {
           "price_in_cents": 260000
+        }
+      },
+      "INR": {
+        "2": {
+          "price_in_cents": 643800
+        },
+        "3": {
+          "price_in_cents": 965700
+        },
+        "4": {
+          "price_in_cents": 1287600
+        },
+        "5": {
+          "price_in_cents": 1609500
+        },
+        "10": {
+          "price_in_cents": 1793000
+        },
+        "20": {
+          "price_in_cents": 3310000
+        },
+        "50": {
+          "price_in_cents": 7585000
         }
       },
       "NOK": {
@@ -651,6 +697,29 @@
           "price_in_cents": 875000
         }
       },
+      "INR": {
+        "2": {
+          "price_in_cents": 1343800
+        },
+        "3": {
+          "price_in_cents": 2015700
+        },
+        "4": {
+          "price_in_cents": 2687600
+        },
+        "5": {
+          "price_in_cents": 3359500
+        },
+        "10": {
+          "price_in_cents": 6239000
+        },
+        "20": {
+          "price_in_cents": 11518000
+        },
+        "50": {
+          "price_in_cents": 26395000
+        }
+      },
       "NOK": {
         "2": {
           "price_in_cents": 401600
@@ -904,6 +973,29 @@
         },
         "50": {
           "price_in_cents": 435000
+        }
+      },
+      "INR": {
+        "2": {
+          "price_in_cents": 643800
+        },
+        "3": {
+          "price_in_cents": 965700
+        },
+        "4": {
+          "price_in_cents": 1287600
+        },
+        "5": {
+          "price_in_cents": 1609500
+        },
+        "10": {
+          "price_in_cents": 2989000
+        },
+        "20": {
+          "price_in_cents": 5518000
+        },
+        "50": {
+          "price_in_cents": 12645000
         }
       },
       "NOK": {
