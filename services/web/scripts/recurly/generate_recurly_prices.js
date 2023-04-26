@@ -46,7 +46,7 @@ function computePrices(plan) {
       unitAmount: parseInt(prices[currency], 10),
     })
   }
-  return result
+  return _.sortBy(result, 'currency')
 }
 
 // Handle prices for license add-ons associated with group plans
@@ -106,7 +106,7 @@ function generate(inputFile, outputFile) {
   const input = fs.readFileSync(inputFile, 'utf8')
   const rawRecords = csv.parse(input, { columns: true })
   // transform the raw records into the output format
-  const plans = rawRecords.map(transformRecordToPlan)
+  const plans = _.sortBy(rawRecords, 'plan_code').map(transformRecordToPlan)
   const output = JSON.stringify(plans, null, 2)
   fs.writeFileSync(outputFile, output)
 }

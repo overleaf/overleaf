@@ -35,7 +35,7 @@ async function getRecurlyPlans() {
     }
     result.push(plan)
   }
-  return result
+  return _.sortBy(result, 'code')
 }
 
 async function getRecurlyPlanAddOns(plan) {
