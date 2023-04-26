@@ -11,11 +11,10 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let Client
+const express = require('express')
 const request = require('request')
 const fs = require('fs')
 const Settings = require('@overleaf/settings')
-
-const host = 'localhost'
 
 module.exports = Client = {
   host: Settings.apis.clsi.url,
@@ -59,14 +58,27 @@ module.exports = Client = {
     return null
   },
 
-  runServer(port, directory) {
-    const express = require('express')
+  runFakeFilestoreService(directory) {
     const app = express()
     app.use(express.static(directory))
-    console.log('starting test server on', port, host)
-    return app.listen(port, host).on('error', error => {
-      console.error('error starting server:', error.message)
-      return process.exit(1)
+    this.startFakeFilestoreApp(app)
+  },
+
+  startFakeFilestoreApp(app) {
+    let server
+    before(function (done) {
+      server = app.listen(error => {
+        if (error) {
+          done(new Error('error starting server: ' + error.message))
+        } else {
+          const addr = server.address()
+          Settings.filestoreDomainOveride = `http://localhost:${addr.port}`
+          done()
+        }
+      })
+    })
+    after(function (done) {
+      server.close(done)
     })
   },
 
@@ -132,7 +144,7 @@ module.exports = Client = {
     )
   },
 
-  compileDirectory(projectId, baseDirectory, directory, serverPort, callback) {
+  compileDirectory(projectId, baseDirectory, directory, callback) {
     if (callback == null) {
       callback = function () {}
     }
@@ -179,7 +191,7 @@ module.exports = Client = {
         ) {
           resources.push({
             path: entity,
-            url: `http://${host}:${serverPort}/${directory}/${entity}`,
+            url: `http://filestore/${directory}/${entity}`,
             modified: stat.mtime,
           })
         }

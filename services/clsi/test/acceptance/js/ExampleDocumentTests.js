@@ -197,9 +197,9 @@ const downloadAndComparePdf = function (projectId, exampleDir, url, callback) {
     .catch(callback)
 }
 
-Client.runServer(4242, fixturePath('examples'))
-
 describe('Example Documents', function () {
+  Client.runFakeFilestoreService(fixturePath('examples'))
+
   before(function (done) {
     ClsiApp.ensureRunning(done)
   })
@@ -226,7 +226,6 @@ describe('Example Documents', function () {
             this.project_id,
             fixturePath('examples'),
             exampleDir,
-            4242,
             (error, res, body) => {
               if (
                 error ||
@@ -255,7 +254,6 @@ describe('Example Documents', function () {
             this.project_id,
             fixturePath('examples'),
             exampleDir,
-            4242,
             (error, res, body) => {
               if (
                 error ||

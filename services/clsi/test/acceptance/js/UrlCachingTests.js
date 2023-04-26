@@ -9,26 +9,39 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+const express = require('express')
 const Path = require('path')
 const Client = require('./helpers/Client')
 const sinon = require('sinon')
 const ClsiApp = require('./helpers/ClsiApp')
 
-const host = 'localhost'
-
 const Server = {
   run() {
-    const express = require('express')
     const app = express()
 
     const staticServer = express.static(Path.join(__dirname, '../fixtures/'))
+
+    const alreadyFailed = new Map()
+    app.get('/fail/:times/:id', (req, res) => {
+      this.getFile(req.url)
+
+      const soFar = alreadyFailed.get(req.params.id) || 0
+      const wanted = parseInt(req.params.times, 10)
+      if (soFar < wanted) {
+        alreadyFailed.set(req.params.id, soFar + 1)
+        res.status(503).end()
+      } else {
+        res.send('THE CONTENT')
+      }
+    })
+
     app.get('/:random_id/*', (req, res, next) => {
       this.getFile(req.url)
       req.url = `/${req.params[0]}`
       return staticServer(req, res, next)
     })
 
-    return app.listen(31415, host)
+    Client.startFakeFilestoreApp(app)
   },
 
   getFile() {},
@@ -38,9 +51,76 @@ const Server = {
   },
 }
 
-Server.run()
-
 describe('Url Caching', function () {
+  Server.run()
+
+  describe('Retries', function () {
+    before(function (done) {
+      this.project_id = Client.randomId()
+      this.happyFile = `${Server.randomId()}/lion.png`
+      this.retryFileOnce = `fail/1/${Server.randomId()}`
+      this.retryFileTwice = `fail/2/${Server.randomId()}`
+      this.fatalFile = `fail/42/${Server.randomId()}`
+      this.request = {
+        resources: [
+          {
+            path: 'main.tex',
+            content: `\
+\\documentclass{article}
+\\usepackage{graphicx}
+\\begin{document}
+\\includegraphics{lion.png}
+\\end{document}\
+`,
+          },
+          {
+            path: 'lion.png',
+            url: `http://filestore/${this.happyFile}`,
+          },
+          {
+            path: 'foo.tex',
+            url: `http://filestore/${this.retryFileOnce}`,
+          },
+          {
+            path: 'foo.tex',
+            url: `http://filestore/${this.retryFileTwice}`,
+          },
+          {
+            path: 'foo.tex',
+            url: `http://filestore/${this.fatalFile}`,
+          },
+        ],
+      }
+
+      sinon.spy(Server, 'getFile')
+      ClsiApp.ensureRunning(() => {
+        Client.compile(this.project_id, this.request, (error, res, body) => {
+          this.error = error
+          this.res = res
+          this.body = body
+          done()
+        })
+      })
+    })
+
+    after(function () {
+      Server.getFile.restore()
+    })
+
+    function expectNFilestoreRequests(file, count) {
+      Server.getFile.args.filter(a => a[0] === file).should.have.length(count)
+    }
+
+    it('should download the happy file once', function () {
+      expectNFilestoreRequests(`/${this.happyFile}`, 1)
+    })
+    it('should retry the download of the unhappy files', function () {
+      expectNFilestoreRequests(`/${this.retryFileOnce}`, 2)
+      expectNFilestoreRequests(`/${this.retryFileTwice}`, 3)
+      expectNFilestoreRequests(`/${this.fatalFile}`, 3)
+    })
+  })
+
   describe('Downloading an image for the first time', function () {
     before(function (done) {
       this.project_id = Client.randomId()
@@ -59,7 +139,7 @@ describe('Url Caching', function () {
           },
           {
             path: 'lion.png',
-            url: `http://${host}:31415/${this.file}`,
+            url: `http://filestore/${this.file}`,
           },
         ],
       }
@@ -106,7 +186,7 @@ describe('Url Caching', function () {
           },
           (this.image_resource = {
             path: 'lion.png',
-            url: `http://${host}:31415/${this.file}`,
+            url: `http://filestore/${this.file}`,
             modified: Date.now(),
           }),
         ],
@@ -161,7 +241,7 @@ describe('Url Caching', function () {
           },
           (this.image_resource = {
             path: 'lion.png',
-            url: `http://${host}:31415/${this.file}`,
+            url: `http://filestore/${this.file}`,
             modified: (this.last_modified = Date.now()),
           }),
         ],
@@ -217,7 +297,7 @@ describe('Url Caching', function () {
           },
           (this.image_resource = {
             path: 'lion.png',
-            url: `http://${host}:31415/${this.file}`,
+            url: `http://filestore/${this.file}`,
             modified: (this.last_modified = Date.now()),
           }),
         ],
@@ -273,7 +353,7 @@ describe('Url Caching', function () {
           },
           (this.image_resource = {
             path: 'lion.png',
-            url: `http://${host}:31415/${this.file}`,
+            url: `http://filestore/${this.file}`,
             modified: (this.last_modified = Date.now()),
           }),
         ],
@@ -329,7 +409,7 @@ describe('Url Caching', function () {
           },
           (this.image_resource = {
             path: 'lion.png',
-            url: `http://${host}:31415/${this.file}`,
+            url: `http://filestore/${this.file}`,
             modified: (this.last_modified = Date.now()),
           }),
         ],
