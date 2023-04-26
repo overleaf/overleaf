@@ -13,7 +13,8 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const Client = require('./helpers/Client')
-const request = require('request')
+const fetch = require('node-fetch')
+const { pipeline } = require('stream')
 const fs = require('fs')
 const fsExtra = require('fs-extra')
 const ChildProcess = require('child_process')
@@ -175,21 +176,25 @@ const comparePdf = function (projectId, exampleDir, callback) {
 }
 
 const downloadAndComparePdf = function (projectId, exampleDir, url, callback) {
-  if (callback == null) {
-    callback = function () {}
-  }
-  const writeStream = fs.createWriteStream(fixturePath(`tmp/${projectId}.pdf`))
-  request.get(url).pipe(writeStream)
-  console.log('writing file out', fixturePath(`tmp/${projectId}.pdf`))
-  return writeStream.on('close', () => {
-    return checkPdfInfo(`tmp/${projectId}.pdf`, (error, optimised) => {
-      if (error != null) {
-        throw error
+  fetch(url)
+    .then(res => {
+      if (!res.ok) {
+        return callback(new Error('non success response: ' + res.statusText))
       }
-      optimised.should.equal(true)
-      return comparePdf(projectId, exampleDir, callback)
+
+      const dest = fs.createWriteStream(fixturePath(`tmp/${projectId}.pdf`))
+      pipeline(res.body, dest, err => {
+        if (err) return callback(err)
+
+        checkPdfInfo(`tmp/${projectId}.pdf`, (err, optimised) => {
+          if (err) return callback(err)
+
+          optimised.should.equal(true)
+          comparePdf(projectId, exampleDir, callback)
+        })
+      })
     })
-  })
+    .catch(callback)
 }
 
 Client.runServer(4242, fixturePath('examples'))
