@@ -28,7 +28,6 @@ const LocalStrategy = require('passport-local').Strategy
 const oneDayInMilliseconds = 86400000
 const ReferalConnect = require('../Features/Referal/ReferalConnect')
 const RedirectManager = require('./RedirectManager')
-const ProxyManager = require('./ProxyManager')
 const translations = require('./Translations')
 const Views = require('./Views')
 const Features = require('./Features')
@@ -145,7 +144,6 @@ if (Settings.blockCrossOriginRequests) {
 }
 
 RedirectManager.apply(webRouter)
-ProxyManager.apply(publicApiRouter)
 
 webRouter.use(cookieParser(Settings.security.sessionSecret))
 SessionAutostartMiddleware.applyInitialMiddleware(webRouter)

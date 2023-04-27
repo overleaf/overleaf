@@ -312,7 +312,20 @@ class MockV1Api extends AbstractMockApi {
       }
     })
 
-    this.app.get('/universities/list', (req, res) => res.json([]))
+    this.app.get('/universities/list', (req, res) => {
+      if (req.query.country_code === 'en') {
+        res.json([
+          {
+            id: 1337,
+            name: 'Institution 1337',
+            country_code: 'en',
+            departments: [],
+          },
+        ])
+      } else {
+        res.json([])
+      }
+    })
 
     this.app.get('/universities/list/:id', (req, res) =>
       res.json({
@@ -321,7 +334,27 @@ class MockV1Api extends AbstractMockApi {
       })
     )
 
-    this.app.get('/university/domains', (req, res) => res.json([]))
+    this.app.get('/university/domains', (req, res) => {
+      if (req.query.hostname === 'overleaf.com') {
+        res.json([
+          {
+            id: 42,
+            hostname: 'overleaf.com',
+            department: 'Overleaf',
+            confirmed: true,
+            university: {
+              id: 1337,
+              name: 'Institution 1337',
+              departments: [],
+              ssoBeta: false,
+              ssoEnabled: false,
+            },
+          },
+        ])
+      } else {
+        res.json([])
+      }
+    })
 
     this.app.put('/api/v1/sharelatex/users/:id/email', (req, res) => {
       const { email } = req.body && req.body.user
