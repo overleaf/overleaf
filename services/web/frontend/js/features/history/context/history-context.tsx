@@ -42,7 +42,7 @@ function limitUpdates(
     let { updates, nextBeforeTimestamp } = response
     const maxBatchSize = maxBatchSizeParam ? parseInt(maxBatchSizeParam, 10) : 0
     const delay = delayParam ? parseInt(delayParam, 10) : 0
-    if (maxBatchSize > 0 && updates) {
+    if (maxBatchSize > 0 && updates.length > maxBatchSize) {
       updates = updates.slice(0, maxBatchSize)
       nextBeforeTimestamp = updates[updates.length - 1].fromV
     }
