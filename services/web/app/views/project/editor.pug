@@ -66,6 +66,8 @@ block content
 					.system-message-content(ng-bind-html="htmlContent")
 
 			grammarly-warning(delay=10000)
+			if hasFeature('saas')
+				legacy-editor-warning(delay=10000)
 
 		include ./editor/main
 

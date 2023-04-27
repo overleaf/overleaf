@@ -67,6 +67,7 @@ import './features/share-project-modal/controllers/react-share-project-modal-con
 import './features/source-editor/controllers/editor-switch-controller'
 import './features/source-editor/controllers/cm6-switch-away-survey-controller'
 import './features/source-editor/controllers/grammarly-warning-controller'
+import './features/source-editor/controllers/legacy-editor-warning-controller'
 import './features/outline/controllers/documentation-button-controller'
 import './features/onboarding/controllers/onboarding-video-tour-modal-controller'
 import './features/history/controllers/history-controller'
