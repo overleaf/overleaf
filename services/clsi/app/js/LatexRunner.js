@@ -112,7 +112,7 @@ function _writeLogOutput(projectId, directory, output, callback) {
     if (content && content.length > 0) {
       fs.writeFile(file, content, err => {
         if (err) {
-          logger.error({ projectId, file }, 'error writing log file') // don't fail on error
+          logger.error({ err, projectId, file }, 'error writing log file') // don't fail on error
         }
         cb()
       })
