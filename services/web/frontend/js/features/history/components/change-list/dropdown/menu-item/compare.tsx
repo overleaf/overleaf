@@ -44,7 +44,6 @@ function Compare({
       },
       comparing: true,
       files: [],
-      pathname: null,
     })
   }
 

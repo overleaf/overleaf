@@ -1,22 +1,20 @@
+import classNames from 'classnames'
 import HistoryFileTreeItem from './history-file-tree-item'
 import iconTypeFromName from '../../../file-tree/util/icon-type-from-name'
 import Icon from '../../../../shared/components/icon'
 import { useFileTreeItemSelection } from '../../context/hooks/use-file-tree-item-selection'
-import { DiffOperation } from '../../services/types/diff-operation'
-import classNames from 'classnames'
+import type { FileDiff } from '../../services/types/file'
 
 type HistoryFileTreeDocProps = {
+  file: FileDiff
   name: string
-  pathname: string
-  operation?: DiffOperation
 }
 
 export default function HistoryFileTreeDoc({
+  file,
   name,
-  pathname,
-  operation,
 }: HistoryFileTreeDocProps) {
-  const { isSelected, onClick } = useFileTreeItemSelection(pathname)
+  const { isSelected, onClick } = useFileTreeItemSelection(file)
 
   return (
     <li
@@ -30,7 +28,7 @@ export default function HistoryFileTreeDoc({
     >
       <HistoryFileTreeItem
         name={name}
-        operation={operation}
+        operation={'operation' in file ? file.operation : undefined}
         icons={
           <Icon
             type={iconTypeFromName(name)}

@@ -33,12 +33,7 @@ export default function HistoryFileTreeFolderList({
       })}
       {docs.sort(compareFunction).map(doc => {
         return (
-          <HistoryFileTreeDoc
-            key={doc.pathname}
-            name={doc.name}
-            pathname={doc.pathname}
-            operation={doc.operation}
-          />
+          <HistoryFileTreeDoc key={doc.pathname} name={doc.name} file={doc} />
         )
       })}
       {children}

@@ -1,8 +1,14 @@
-import Toolbar from '../../../../../frontend/js/features/history/components/diff-view/toolbar'
+import Toolbar from '../../../../../frontend/js/features/history/components/diff-view/toolbar/toolbar'
+import { HistoryProvider } from '../../../../../frontend/js/features/history/context/history-context'
 import { HistoryContextValue } from '../../../../../frontend/js/features/history/context/types/history-context-value'
 import { Diff } from '../../../../../frontend/js/features/history/services/types/doc'
+import { EditorProviders } from '../../../helpers/editor-providers'
 
 describe('history toolbar', function () {
+  const editorProvidersScope = {
+    ui: { view: 'history', pdfLayout: 'sideBySide', chatOpen: true },
+  }
+
   const diff: Diff = {
     binary: false,
     docDiff: {
@@ -42,20 +48,26 @@ describe('history toolbar', function () {
           pathname: 'frog.jpg',
         },
       ],
-      pathname: 'main.tex',
+      selectedFile: {
+        pathname: 'main.tex',
+      },
     }
 
     cy.mount(
-      <div className="history-react">
-        <Toolbar diff={diff} selection={selection} />
-      </div>
+      <EditorProviders scope={editorProvidersScope}>
+        <HistoryProvider>
+          <div className="history-react">
+            <Toolbar diff={diff} selection={selection} />
+          </div>
+        </HistoryProvider>
+      </EditorProviders>
     )
 
     cy.get('.history-react-toolbar').within(() => {
       cy.get('div:first-child').contains('Viewing 13th April')
     })
 
-    cy.get('.history-react-toolbar-changes').contains('1 change in main.tex')
+    cy.get('.history-react-toolbar-file-info').contains('1 change in main.tex')
   })
 
   it('renders comparing mode', function () {
@@ -81,13 +93,19 @@ describe('history toolbar', function () {
           operation: 'added',
         },
       ],
-      pathname: 'main.tex',
+      selectedFile: {
+        pathname: 'main.tex',
+      },
     }
 
     cy.mount(
-      <div className="history-react">
-        <Toolbar diff={diff} selection={selection} />
-      </div>
+      <EditorProviders scope={editorProvidersScope}>
+        <HistoryProvider>
+          <div className="history-react">
+            <Toolbar diff={diff} selection={selection} />
+          </div>
+        </HistoryProvider>
+      </EditorProviders>
     )
 
     cy.get('.history-react-toolbar').within(() => {

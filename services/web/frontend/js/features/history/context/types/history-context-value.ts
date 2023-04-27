@@ -3,6 +3,12 @@ import { LoadedUpdate } from '../../services/types/update'
 import { LoadedLabel } from '../../services/types/label'
 import { Selection } from '../../services/types/selection'
 
+type LoadingState =
+  | 'loadingInitial'
+  | 'loadingUpdates'
+  | 'restoringFile'
+  | 'ready'
+
 export type HistoryContextValue = {
   updatesInfo: {
     updates: LoadedUpdate[]
@@ -14,7 +20,10 @@ export type HistoryContextValue = {
     React.SetStateAction<HistoryContextValue['updatesInfo']>
   >
   userHasFullFeature: boolean | undefined
-  loadingState: 'loadingInitial' | 'loadingUpdates' | 'ready'
+  loadingState: LoadingState
+  setLoadingState: React.Dispatch<
+    React.SetStateAction<HistoryContextValue['loadingState']>
+  >
   error: Nullable<unknown>
   labels: Nullable<LoadedLabel[]>
   setLabels: React.Dispatch<React.SetStateAction<HistoryContextValue['labels']>>

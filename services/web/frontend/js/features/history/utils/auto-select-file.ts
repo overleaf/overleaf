@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import type { Nullable } from '../../../../../types/utils'
 import type { FileDiff } from '../services/types/file'
-import type { DiffOperation } from '../services/types/diff-operation'
+import type { FileOperation } from '../services/types/file-operation'
 import type { LoadedUpdate, Version } from '../services/types/update'
 
 function getUpdateForVersion(
@@ -13,7 +13,7 @@ function getUpdateForVersion(
 
 type FileWithOps = {
   pathname: FileDiff['pathname']
-  operation: DiffOperation
+  operation: FileOperation
 }
 
 function getFilesWithOps(
@@ -80,7 +80,7 @@ function getFilesWithOps(
   }
 }
 
-const orderedOpTypes: DiffOperation[] = [
+const orderedOpTypes: FileOperation[] = [
   'edited',
   'added',
   'renamed',
@@ -92,7 +92,7 @@ export function autoSelectFile(
   toV: Version,
   comparing: boolean,
   updates: LoadedUpdate[]
-) {
+): FileDiff {
   let fileToSelect: Nullable<FileDiff> = null
 
   const filesWithOps = getFilesWithOps(files, toV, comparing, updates)
@@ -131,5 +131,5 @@ export function autoSelectFile(
     }
   }
 
-  return fileToSelect.pathname
+  return fileToSelect
 }

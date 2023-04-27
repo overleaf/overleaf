@@ -5,5 +5,5 @@ export interface Selection {
   updateRange: UpdateRange | null
   comparing: boolean
   files: FileDiff[]
-  pathname: string | null
+  selectedFile?: FileDiff
 }

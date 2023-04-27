@@ -24,7 +24,6 @@ function HistoryVersionDetails({
         updateRange: { fromV, toV, fromVTimestamp, toVTimestamp },
         comparing: false,
         files: [],
-        pathname: null,
       })
     }
   }

@@ -1,7 +1,7 @@
-import Toolbar from './toolbar'
+import { useEffect, useState } from 'react'
+import Toolbar from './toolbar/toolbar'
 import Main from './main'
 import { Diff, DocDiffResponse } from '../../services/types/doc'
-import { useEffect, useState } from 'react'
 import { Nullable } from '../../../../../../types/utils'
 import { useHistoryContext } from '../../context/history-context'
 import { diffDoc } from '../../services/api'
@@ -14,35 +14,37 @@ function DiffView() {
 
   const { isLoading, runAsync } = useAsync<DocDiffResponse>()
 
-  const { updateRange, pathname } = selection
+  const { updateRange, selectedFile } = selection
 
   useEffect(() => {
-    if (!updateRange || !pathname) {
+    if (!updateRange || !selectedFile?.pathname) {
       return
     }
 
     const { fromV, toV } = updateRange
 
     // TODO: Error handling
-    runAsync(diffDoc(projectId, fromV, toV, pathname)).then(data => {
-      let diff: Diff | undefined
+    runAsync(diffDoc(projectId, fromV, toV, selectedFile.pathname)).then(
+      data => {
+        let diff: Diff | undefined
 
-      if (!data?.diff) {
-        setDiff(null)
-      }
-
-      if ('binary' in data.diff) {
-        diff = { binary: true }
-      } else {
-        diff = {
-          binary: false,
-          docDiff: highlightsFromDiffResponse(data.diff),
+        if (!data?.diff) {
+          setDiff(null)
         }
-      }
 
-      setDiff(diff)
-    })
-  }, [projectId, runAsync, updateRange, pathname])
+        if ('binary' in data.diff) {
+          diff = { binary: true }
+        } else {
+          diff = {
+            binary: false,
+            docDiff: highlightsFromDiffResponse(data.diff),
+          }
+        }
+
+        setDiff(diff)
+      }
+    )
+  }, [projectId, runAsync, updateRange, selectedFile])
 
   return (
     <div className="doc-panel">

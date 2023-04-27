@@ -1,19 +1,20 @@
 import { useCallback } from 'react'
 import { useHistoryContext } from '../history-context'
+import type { FileDiff } from '../../services/types/file'
 
-export function useFileTreeItemSelection(pathname: string) {
+export function useFileTreeItemSelection(file: FileDiff) {
   const { selection, setSelection } = useHistoryContext()
 
   const handleClick = useCallback(() => {
-    if (pathname !== selection.pathname) {
+    if (file.pathname !== selection.selectedFile?.pathname) {
       setSelection({
         ...selection,
-        pathname,
+        selectedFile: file,
       })
     }
-  }, [pathname, selection, setSelection])
+  }, [file, selection, setSelection])
 
-  const isSelected = selection.pathname === pathname
+  const isSelected = selection.selectedFile?.pathname === file.pathname
 
   return { isSelected, onClick: handleClick }
 }

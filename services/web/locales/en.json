@@ -1252,6 +1252,7 @@
   "resolve": "Resolve",
   "resolved_comments": "Resolved comments",
   "restore": "Restore",
+  "restore_file": "Restore file",
   "restore_to_any_older_version": "Restore to any older version",
   "restore_to_before_these_changes": "Restore to before these changes",
   "restoring": "Restoring",

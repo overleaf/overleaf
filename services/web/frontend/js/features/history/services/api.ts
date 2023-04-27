@@ -3,10 +3,11 @@ import {
   getJSON,
   postJSON,
 } from '../../../infrastructure/fetch-json'
-import { FileDiff } from './types/file'
+import { FileDiff, FileRemoved } from './types/file'
 import { FetchUpdatesResponse } from './types/update'
 import { Label } from './types/label'
 import { DocDiffResponse } from './types/doc'
+import { RestoreFileResponse } from './types/restore-file'
 
 const BATCH_SIZE = 10
 
@@ -69,4 +70,13 @@ export function diffDoc(
   const queryParamsSerialized = new URLSearchParams(queryParams).toString()
   const diffUrl = `/project/${projectId}/diff?${queryParamsSerialized}`
   return getJSON<DocDiffResponse>(diffUrl)
+}
+
+export function restoreFile(projectId: string, selectedFile: FileRemoved) {
+  return postJSON<RestoreFileResponse>(`/project/${projectId}/restore_file`, {
+    body: {
+      version: selectedFile.deletedAtV,
+      pathname: selectedFile.pathname,
+    },
+  })
 }

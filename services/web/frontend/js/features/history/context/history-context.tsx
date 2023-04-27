@@ -12,7 +12,8 @@ import { useUserContext } from '../../../shared/context/user-context'
 import { useProjectContext } from '../../../shared/context/project-context'
 import { HistoryContextValue } from './types/history-context-value'
 import { diffFiles, fetchLabels, fetchUpdates } from '../services/api'
-import { renamePathnameKey, isFileRenamed } from '../utils/file-tree'
+import { renamePathnameKey } from '../utils/file-tree'
+import { isFileRenamed } from '../utils/file-diff'
 import { loadLabels } from '../utils/label'
 import { autoSelectFile } from '../utils/auto-select-file'
 import ColorManager from '../../../ide/colors/ColorManager'
@@ -61,7 +62,6 @@ const selectionInitialState: Selection = {
   updateRange: null,
   comparing: false,
   files: [],
-  pathname: null,
 }
 
 function useHistory() {
@@ -209,7 +209,7 @@ function useHistory() {
     const { fromV, toV } = updateRange
 
     diffFiles(projectId, fromV, toV).then(({ diff: files }) => {
-      const pathname = autoSelectFile(
+      const selectedFile = autoSelectFile(
         files,
         updateRange.toV,
         comparing,
@@ -222,7 +222,12 @@ function useHistory() {
 
         return file
       })
-      setSelection({ updateRange, comparing, files: newFiles, pathname })
+      setSelection({
+        updateRange,
+        comparing,
+        files: newFiles,
+        selectedFile,
+      })
     })
   }, [updateRange, projectId, updates, comparing])
 
@@ -238,7 +243,6 @@ function useHistory() {
         },
         comparing: false,
         files: [],
-        pathname: null,
       })
     }
   }, [updateRange, updates])
@@ -247,6 +251,7 @@ function useHistory() {
     () => ({
       error,
       loadingState,
+      setLoadingState,
       updatesInfo,
       setUpdatesInfo,
       labels,
@@ -261,6 +266,7 @@ function useHistory() {
     [
       error,
       loadingState,
+      setLoadingState,
       updatesInfo,
       setUpdatesInfo,
       labels,

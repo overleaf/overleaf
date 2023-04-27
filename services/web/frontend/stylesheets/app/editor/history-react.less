@@ -252,12 +252,19 @@ history-root {
 
   .history-react-toolbar {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    width: 100%;
+
+    .history-react-toolbar-file-info {
+      flex: 1;
+      text-align: right;
+    }
 
     .history-react-toolbar-time {
       font-weight: 700;
+    }
+
+    .history-react-toolbar-restore-file-button {
+      margin-left: 5px;
     }
   }
 }
@@ -391,6 +398,10 @@ history-root {
           .history-file-tree-item-button-text {
             display: inline-flex;
             margin-right: 5px;
+
+            &.strikethrough {
+              text-decoration: line-through;
+            }
           }
 
           .history-file-tree-item-button-badge {
