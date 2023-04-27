@@ -18,6 +18,7 @@ const ProjectGetter = require('../Project/ProjectGetter')
 const ProjectUpdateHandler = require('../Project/ProjectUpdateHandler')
 const { Project } = require('../../models/Project')
 const { ObjectId } = require('mongodb')
+const { READ_PREFERENCE_SECONDARY } = require('../../infrastructure/mongodb')
 
 const MILISECONDS_IN_DAY = 86400000
 module.exports = InactiveProjectManager = {
@@ -71,7 +72,7 @@ module.exports = InactiveProjectManager = {
       .select('_id')
       .sort({ _id: 1 })
       .limit(limit)
-      .read('secondary')
+      .read(READ_PREFERENCE_SECONDARY)
       .exec(function (err, projects) {
         if (err != null) {
           logger.err({ err }, 'could not get projects for deactivating')

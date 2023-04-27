@@ -12,10 +12,10 @@ if (
   )
 }
 
-const READ_PREFERENCE_PRIMARY = ReadPreference.primary
+const READ_PREFERENCE_PRIMARY = ReadPreference.primary.mode
 const READ_PREFERENCE_SECONDARY = Settings.mongo.hasSecondaries
-  ? ReadPreference.secondary
-  : ReadPreference.secondaryPreferred
+  ? ReadPreference.secondary.mode
+  : ReadPreference.secondaryPreferred.mode
 
 let setupDbPromise
 async function waitForDb() {

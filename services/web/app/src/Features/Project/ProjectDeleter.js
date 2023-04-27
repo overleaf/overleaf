@@ -20,6 +20,7 @@ const TpdsUpdateSender = require('../ThirdPartyDataStore/TpdsUpdateSender')
 const ChatApiHandler = require('../Chat/ChatApiHandler')
 const moment = require('moment')
 const { promiseMapWithLimit } = require('../../util/promises')
+const { READ_PREFERENCE_SECONDARY } = require('../../infrastructure/mongodb')
 
 const EXPIRE_PROJECTS_AFTER_DAYS = 90
 const PROJECT_EXPIRATION_BATCH_SIZE = 10000
@@ -94,7 +95,7 @@ async function expireDeletedProjectsAfterDuration() {
     { 'deleterData.deletedProjectId': 1 }
   )
     .limit(PROJECT_EXPIRATION_BATCH_SIZE)
-    .read('secondary')
+    .read(READ_PREFERENCE_SECONDARY)
   const projectIds = _.shuffle(
     deletedProjects.map(
       deletedProject => deletedProject.deleterData.deletedProjectId

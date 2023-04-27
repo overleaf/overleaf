@@ -6,7 +6,7 @@ const tk = require('timekeeper')
 const moment = require('moment')
 const { Project } = require('../helpers/models/Project')
 const { DeletedProject } = require('../helpers/models/DeletedProject')
-const { ObjectId } = require('mongodb')
+const { ObjectId, ReadPreference } = require('mongodb')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 
 describe('ProjectDeleter', function () {
@@ -160,7 +160,11 @@ describe('ProjectDeleter', function () {
         '../Collaborators/CollaboratorsGetter': this.CollaboratorsGetter,
         '../Docstore/DocstoreManager': this.DocstoreManager,
         './ProjectDetailsHandler': this.ProjectDetailsHandler,
-        '../../infrastructure/mongodb': { db: this.db, ObjectId },
+        '../../infrastructure/mongodb': {
+          db: this.db,
+          ObjectId,
+          READ_PREFERENCE_SECONDARY: ReadPreference.secondaryPreferred.mode,
+        },
         '../History/HistoryManager': this.HistoryManager,
         '../../models/ProjectAuditLogEntry': {
           ProjectAuditLogEntry: this.ProjectAuditLogEntry,

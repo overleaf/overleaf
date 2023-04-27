@@ -20,7 +20,7 @@ const modulePath = path.join(
   '../../../../app/src/Features/InactiveData/InactiveProjectManager'
 )
 const { expect } = require('chai')
-const { ObjectId } = require('mongodb')
+const { ObjectId, ReadPreference } = require('mongodb')
 
 describe('InactiveProjectManager', function () {
   beforeEach(function () {
@@ -42,6 +42,10 @@ describe('InactiveProjectManager', function () {
         '../Project/ProjectUpdateHandler': this.ProjectUpdateHandler,
         '../Project/ProjectGetter': this.ProjectGetter,
         '../../models/Project': {},
+        '../../infrastructure/mongodb': {
+          ObjectId,
+          READ_PREFERENCE_SECONDARY: ReadPreference.secondaryPreferred.mode,
+        },
       },
     })
     return (this.project_id = '1234')
