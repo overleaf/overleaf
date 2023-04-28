@@ -221,7 +221,7 @@ contentLine3
 
     // Search should now be open at first match
     cy.findByRole('search').should('have.length', 1)
-    cy.contains(`1 of 3`)
+    cy.contains(`0 of 3`)
 
     // Repeated C-r should go to previous match
     cy.get('@search-input').type('{ctrl}r')

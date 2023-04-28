@@ -126,6 +126,11 @@ export const search = () => {
 
     // select a match while searching
     EditorView.updateListener.of(update => {
+      // if the search panel wasn't open, don't select a match
+      if (!searchPanelOpen(update.startState)) {
+        return
+      }
+
       for (const tr of update.transactions) {
         // avoid changing the selection and viewport when switching between files
         if (tr.annotation(restoreSearchQueryAnnotation)) {
