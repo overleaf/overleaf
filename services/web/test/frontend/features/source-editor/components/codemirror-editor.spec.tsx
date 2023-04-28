@@ -441,6 +441,24 @@ describe('<CodeMirrorEditor/>', { scrollBehavior: false }, function () {
     cy.get('@replace-input').clear()
     cy.should('not.contain.text', 'abcde')
 
+    // replace all within selection
+    cy.get('@search-input').clear().type('contentLine')
+    cy.get('.ol-cm-search-form-position').should('have.text', '1 of 100')
+    cy.get('.cm-line')
+      .eq(27)
+      .should('contain.text', 'contentLine 0')
+      .click()
+      .type('{shift}{downArrow}{downArrow}{downArrow}')
+    cy.findByLabelText('Within selection').click()
+    cy.get('.ol-cm-search-form-position').should('have.text', '1 of 3')
+    cy.get('@replace-input').clear().type('contentedLine')
+    cy.findByRole('button', { name: /replace all/i }).click()
+    cy.get('.cm-line:contains("contentedLine")').should('have.length', 3)
+    cy.findByLabelText('Within selection').click()
+    cy.get('.ol-cm-search-form-position').should('have.text', '2 of 97')
+    cy.get('@search-input').clear()
+    cy.get('@replace-input').clear()
+
     // close the search form, to clear the stored query
     cy.findByRole('button', { name: 'Close' }).click()
   })
@@ -465,9 +483,11 @@ describe('<CodeMirrorEditor/>', { scrollBehavior: false }, function () {
       cy.get('[type="checkbox"][name="caseSensitive"]').as('case-sensitive')
       cy.get('[type="checkbox"][name="regexp"]').as('regexp')
       cy.get('[type="checkbox"][name="wholeWord"]').as('whole-word')
+      cy.get('[type="checkbox"][name="withinSelection"]').as('within-selection')
       cy.get('label').contains('Aa').as('case-sensitive-label')
       cy.get('label').contains('[.*]').as('regexp-label')
       cy.get('label').contains('W').as('whole-word-label')
+      cy.findByLabelText('Within selection').as('within-selection-label')
       cy.findByRole('button', { name: 'Replace' }).as('replace')
       cy.findByRole('button', { name: 'Replace All' }).as('replace-all')
       cy.findByRole('button', { name: 'next' }).as('find-next')
@@ -480,6 +500,7 @@ describe('<CodeMirrorEditor/>', { scrollBehavior: false }, function () {
       cy.get('@case-sensitive').should('be.focused').tab()
       cy.get('@regexp').should('be.focused').tab()
       cy.get('@whole-word').should('be.focused').tab()
+      cy.get('@within-selection').should('be.focused').tab()
       cy.get('@find-next').should('be.focused').tab()
       cy.get('@find-previous').should('be.focused').tab()
       cy.get('@replace').should('be.focused').tab()
@@ -491,6 +512,7 @@ describe('<CodeMirrorEditor/>', { scrollBehavior: false }, function () {
       cy.get('@replace').should('be.focused').tab({ shift: true })
       cy.get('@find-previous').should('be.focused').tab({ shift: true })
       cy.get('@find-next').should('be.focused').tab({ shift: true })
+      cy.get('@within-selection').should('be.focused').tab({ shift: true })
       cy.get('@whole-word').should('be.focused').tab({ shift: true })
       cy.get('@regexp').should('be.focused').tab({ shift: true })
       cy.get('@case-sensitive').should('be.focused').tab({ shift: true })
@@ -501,6 +523,7 @@ describe('<CodeMirrorEditor/>', { scrollBehavior: false }, function () {
         '@case-sensitive-label',
         '@regexp-label',
         '@whole-word-label',
+        '@within-selection-label',
       ]) {
         // Toggle when clicked, then focus the search input
         cy.get(option).click().should('have.class', 'checked')

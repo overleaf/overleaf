@@ -195,20 +195,6 @@ const staticTheme = EditorView.theme({
     marginLeft: '-1px', // half the border width
     borderLeftColor: 'inherit',
   },
-  // set the default "selection match" style
-  '.cm-selectionMatch, .cm-searchMatch': {
-    backgroundColor: 'transparent',
-    outlineOffset: '-1px',
-  },
-  // make sure selectionMatch inside searchMatch doesn't have a background colour
-  '.cm-searchMatch .cm-selectionMatch': {
-    backgroundColor: 'transparent !important',
-  },
-  // Match the height of search matches to selection matches
-  '.cm-searchMatch': {
-    paddingTop: 'var(--half-leading)',
-    paddingBottom: 'var(--half-leading)',
-  },
   // remove border from hover tooltips (e.g. cursor highlights)
   '.cm-tooltip-hover': {
     border: 'none',

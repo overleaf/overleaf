@@ -1,17 +1,19 @@
 import { createPortal } from 'react-dom'
 import CodeMirrorSearchForm from './codemirror-search-form'
 import { useCodeMirrorViewContext } from './codemirror-editor'
+import { getPanel } from '@codemirror/view'
+import { createSearchPanel } from '@codemirror/search'
 
 function CodeMirrorSearch() {
   const view = useCodeMirrorViewContext()
 
-  const dom = view.dom.querySelector('.ol-cm-search')
+  const panel = getPanel(view, createSearchPanel)
 
-  if (!dom) {
+  if (!panel) {
     return null
   }
 
-  return createPortal(<CodeMirrorSearchForm />, dom)
+  return createPortal(<CodeMirrorSearchForm />, panel.dom)
 }
 
 export default CodeMirrorSearch

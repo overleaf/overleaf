@@ -21,10 +21,16 @@ import Tooltip from '../../../shared/components/tooltip'
 import Icon from '../../../shared/components/icon'
 import classnames from 'classnames'
 import useScopeValue from '../../../shared/hooks/use-scope-value'
+import { getStoredSelection, setStoredSelection } from '../extensions/search'
 
 const MAX_MATCH_COUNT = 1000
 
-type ActiveSearchOption = 'caseSensitive' | 'regexp' | 'wholeWord' | null
+type ActiveSearchOption =
+  | 'caseSensitive'
+  | 'regexp'
+  | 'wholeWord'
+  | 'withinSelection'
+  | null
 
 const CodeMirrorSearchForm: FC = () => {
   const view = useCodeMirrorViewContext()
@@ -42,6 +48,7 @@ const CodeMirrorSearchForm: FC = () => {
   const caseSensitiveId = 'caseSensitive' + idSuffix
   const regexpId = 'regexp' + idSuffix
   const wholeWordId = 'wholeWord' + idSuffix
+  const withinSelectionId = 'withinSelection' + idSuffix
 
   const { t } = useTranslation()
 
@@ -114,11 +121,18 @@ const CodeMirrorSearchForm: FC = () => {
         regexp: data.regexp === 'on',
         literal: true,
         wholeWord: data.wholeWord === 'on',
+        scope: getStoredSelection(view.state)?.ranges,
       })
 
       view.dispatch({ effects: setSearchQuery.of(query) })
     }
   }, [view])
+
+  const handleWithinSelectionChange = useCallback(() => {
+    const storedSelection = getStoredSelection(state)
+    view.dispatch(setStoredSelection(storedSelection ? null : state.selection))
+    handleChange()
+  }, [handleChange, state, view])
 
   const handleFormKeyDown = useCallback(
     event => {
@@ -308,6 +322,27 @@ const CodeMirrorSearchForm: FC = () => {
               </label>
             </Tooltip>
           </InputGroup.Button>
+
+          <InputGroup.Button>
+            <Tooltip
+              id="search-within-selection"
+              description={t('search_within_selection')}
+            >
+              <label
+                className={classnames(
+                  'btn btn-sm btn-default ol-cm-search-input-button',
+                  {
+                    checked: !!query.scope,
+                    focused: activeSearchOption === 'withinSelection',
+                  }
+                )}
+                htmlFor={withinSelectionId}
+                aria-label={t('search_within_selection')}
+              >
+                <Icon type="align-left" fw />
+              </label>
+            </Tooltip>
+          </InputGroup.Button>
         </InputGroup>
 
         <InputGroup
@@ -360,6 +395,17 @@ const CodeMirrorSearchForm: FC = () => {
             onChange={handleChange}
             onClick={focusSearchBox}
             onFocus={() => setActiveSearchOption('wholeWord')}
+            onBlur={() => setActiveSearchOption(null)}
+          />
+
+          <input
+            id={withinSelectionId}
+            name="withinSelection"
+            type="checkbox"
+            checked={!!query.scope}
+            onChange={handleWithinSelectionChange}
+            onClick={focusSearchBox}
+            onFocus={() => setActiveSearchOption('withinSelection')}
             onBlur={() => setActiveSearchOption(null)}
           />
         </div>

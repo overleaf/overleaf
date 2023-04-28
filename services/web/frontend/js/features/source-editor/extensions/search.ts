@@ -1,28 +1,27 @@
 import {
-  searchKeymap,
   search as searchExtension,
   setSearchQuery,
   getSearchQuery,
   openSearchPanel,
   SearchQuery,
   searchPanelOpen,
+  searchKeymap,
+  highlightSelectionMatches,
+  togglePanel,
 } from '@codemirror/search'
-import { EditorView, keymap, ViewPlugin } from '@codemirror/view'
+import { Decoration, EditorView, keymap, ViewPlugin } from '@codemirror/view'
 import {
   Annotation,
+  Compartment,
+  EditorSelection,
   EditorState,
   SelectionRange,
+  StateEffect,
+  StateField,
   TransactionSpec,
 } from '@codemirror/state'
-import { highlightSelectionMatches } from './highlight-selection-matches'
 
 const restoreSearchQueryAnnotation = Annotation.define<boolean>()
-
-const ignoredSearchKeybindings = new Set([
-  // This keybinding causes issues with entering @ on certain keyboard layouts
-  // https://github.com/overleaf/internal/issues/12119
-  'Alt-g',
-])
 
 const selectNextMatch = (query: SearchQuery, state: EditorState) => {
   if (!query.valid) {
@@ -41,6 +40,69 @@ const selectNextMatch = (query: SearchQuery, state: EditorState) => {
   return result.done ? null : result.value
 }
 
+const storedSelectionEffect = StateEffect.define<EditorSelection | null>()
+
+const storedSelectionState = StateField.define<EditorSelection | null>({
+  create() {
+    return null
+  },
+  update(value, tr) {
+    if (value) {
+      value = value.map(tr.changes)
+    }
+
+    for (const effect of tr.effects) {
+      if (effect.is(storedSelectionEffect)) {
+        value = effect.value
+      } else if (effect.is(togglePanel) && effect.value === false) {
+        value = null // clear the stored selection when closing the search panel
+      }
+    }
+
+    return value
+  },
+  provide(f) {
+    return [
+      EditorView.decorations.from(f, selection => {
+        if (!selection) {
+          return Decoration.none
+        }
+        const decorations = selection.ranges
+          .filter(range => !range.empty)
+          .map(range =>
+            Decoration.mark({
+              class: 'ol-cm-stored-selection',
+            }).range(range.from, range.to)
+          )
+        return Decoration.set(decorations)
+      }),
+    ]
+  },
+})
+
+export const getStoredSelection = (state: EditorState) =>
+  state.field(storedSelectionState)
+
+export const setStoredSelection = (selection: EditorSelection | null) => {
+  return {
+    effects: [
+      storedSelectionEffect.of(selection),
+      // TODO: only disable selection highlighting if the current selection is a search match
+      highlightSelectionMatchesConf.reconfigure(
+        selection ? [] : highlightSelectionMatchesExtension
+      ),
+    ],
+  }
+}
+
+const highlightSelectionMatchesConf = new Compartment()
+
+const highlightSelectionMatchesExtension = highlightSelectionMatches({
+  wholeWords: true,
+})
+
+// store the search query for use when switching between files
+// TODO: move this into EditorContext?
 let searchQuery: SearchQuery | null
 
 export const search = () => {
@@ -48,14 +110,13 @@ export const search = () => {
 
   return [
     // keymap for search
-    keymap.of(
-      searchKeymap.filter(
-        item => !item.key || !ignoredSearchKeybindings.has(item.key)
-      )
-    ),
+    keymap.of(searchKeymap),
 
     // highlight text which matches the current selection
-    highlightSelectionMatches(),
+    highlightSelectionMatchesConf.of(highlightSelectionMatchesExtension),
+
+    // a stored selection for use in "within selection" searches
+    storedSelectionState,
 
     // a wrapper round `search`, which creates a custom panel element and passes it to React by dispatching an event
     searchExtension({
@@ -284,6 +345,22 @@ export const search = () => {
       },
       '.ol-cm-search-replace-buttons': {
         order: 4,
+      },
+      '.ol-cm-stored-selection': {
+        background: 'rgba(125, 125, 125, 0.1)',
+        paddingTop: 'var(--half-leading)',
+        paddingBottom: 'var(--half-leading)',
+      },
+      // set the default "match" style
+      '.cm-selectionMatch, .cm-searchMatch': {
+        backgroundColor: 'transparent',
+        outlineOffset: '-1px',
+        paddingTop: 'var(--half-leading)',
+        paddingBottom: 'var(--half-leading)',
+      },
+      // make sure selectionMatch inside searchMatch doesn't have a background colour
+      '.cm-searchMatch .cm-selectionMatch': {
+        backgroundColor: 'transparent !important',
       },
     }),
   ]

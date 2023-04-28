@@ -748,6 +748,7 @@
   "search_replace_with": "",
   "search_search_for": "",
   "search_whole_word": "",
+  "search_within_selection": "",
   "select_a_file": "",
   "select_a_payment_method": "",
   "select_a_project": "",
