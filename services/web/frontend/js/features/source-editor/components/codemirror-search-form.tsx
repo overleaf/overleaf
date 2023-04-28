@@ -412,14 +412,16 @@ const CodeMirrorSearchForm: FC = () => {
       </div>
 
       <div className="ol-cm-search-form-close">
-        <button
-          className="close"
-          onClick={() => closeSearchPanel(view)}
-          type="button"
-          aria-label={t('close')}
-        >
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <Tooltip id="search-close" description={<>{t('close')} (Esc)</>}>
+          <button
+            className="close"
+            onClick={() => closeSearchPanel(view)}
+            type="button"
+            aria-label={t('close')}
+          >
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </Tooltip>
       </div>
     </form>
   )
