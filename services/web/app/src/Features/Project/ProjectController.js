@@ -1275,9 +1275,11 @@ const ProjectController = {
 
             const showLegacySourceEditor =
               !Features.hasFeature('saas') ||
-              legacySourceEditorAssignment.variant === 'default' ||
-              // Also allow override via legacy_source_editor=true in query string
-              shouldDisplayFeature('legacy_source_editor')
+              // Allow override via legacy_source_editor=true in query string
+              shouldDisplayFeature('legacy_source_editor') ||
+              // Hide Ace for beta users
+              (!user.betaProgram &&
+                legacySourceEditorAssignment.variant === 'default')
 
             const editorLeftMenuReact =
               editorLeftMenuAssignment?.variant === 'react'
