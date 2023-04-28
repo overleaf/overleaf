@@ -1,20 +1,25 @@
 import { markdown as markdownLanguage } from '@codemirror/lang-markdown'
 import { shortcuts } from './shortcuts'
 import { languages } from '../index'
-import { Extension } from '@codemirror/state'
 import { Strikethrough } from '@lezer/markdown'
-import { HighlightStyle, syntaxHighlighting } from '@codemirror/language'
+import {
+  HighlightStyle,
+  LanguageSupport,
+  syntaxHighlighting,
+} from '@codemirror/language'
 import { tags } from '@lezer/highlight'
 
-export const markdown = (): Extension => {
-  return [
-    markdownLanguage({
-      codeLanguages: languages,
-      extensions: [Strikethrough],
-    }),
+export const markdown = () => {
+  const { language, support } = markdownLanguage({
+    codeLanguages: languages,
+    extensions: [Strikethrough],
+  })
+
+  return new LanguageSupport(language, [
+    support,
     shortcuts(),
     syntaxHighlighting(markdownHighlightStyle),
-  ]
+  ])
 }
 
 const markdownHighlightStyle = HighlightStyle.define([

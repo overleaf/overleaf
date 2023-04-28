@@ -53,7 +53,6 @@ export const languages = [
   LanguageDescription.of({
     name: 'markdown',
     extensions: ['md', 'markdown'],
-    // @ts-ignore TODO: find out how to add support extensions
     load: () => {
       return import('./markdown').then(m => m.markdown())
     },
