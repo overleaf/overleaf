@@ -14,7 +14,7 @@ function run(cmd) {
   // https://nodejs.org/docs/latest-v12.x/api/child_process.html#child_process_options_stdio
   // Pipe stdin from /dev/null, store stdout, pipe stderr to /dev/null.
   return execSync(cmd, {
-    stdio: ['ignore', 'pipe', 'ignore'],
+    stdio: ['ignore', 'pipe', 'pipe'],
   }).toString()
 }
 
@@ -158,6 +158,76 @@ describe('ServerCEScripts', function () {
       )
 
       expect(await getTagNames()).to.deep.equal([newName])
+    })
+  })
+
+  describe('change-compile-timeout', function () {
+    let userA, userB
+    beforeEach('login', async function () {
+      userA = new User()
+      await userA.login()
+
+      userB = new User()
+      await userB.login()
+    })
+
+    async function getCompileTimeout(user) {
+      const { compileTimeout } = await user.getFeatures()
+      return compileTimeout
+    }
+
+    let userATimeout, userBTimeout
+    beforeEach('fetch current state', async function () {
+      userATimeout = await getCompileTimeout(userA)
+      userBTimeout = await getCompileTimeout(userB)
+    })
+
+    describe('happy path', function () {
+      let newUserATimeout
+      beforeEach('run script on user a', function () {
+        newUserATimeout = userATimeout - 1
+        run(
+          `node modules/server-ce-scripts/scripts/change-compile-timeout --user-id=${userA.id} --compile-timeout=${newUserATimeout}`
+        )
+      })
+
+      it('should change the timeout for user a', async function () {
+        const actual = await getCompileTimeout(userA)
+        expect(actual).to.not.equal(userATimeout)
+        expect(actual).to.equal(newUserATimeout)
+      })
+
+      it('should leave the timeout for user b as is', async function () {
+        expect(await getCompileTimeout(userB)).to.equal(userBTimeout)
+      })
+    })
+
+    describe('bad options', function () {
+      it('should reject zero timeout', async function () {
+        try {
+          run(
+            `node modules/server-ce-scripts/scripts/change-compile-timeout --user-id=${userA.id} --compile-timeout=0`
+          )
+          expect.fail('should error out')
+        } catch (err) {
+          expect(err.stderr.toString()).to.include('positive number of seconds')
+        }
+        expect(await getCompileTimeout(userA)).to.equal(userATimeout)
+        expect(await getCompileTimeout(userB)).to.equal(userBTimeout)
+      })
+
+      it('should reject a 20min timeout', async function () {
+        try {
+          run(
+            `node modules/server-ce-scripts/scripts/change-compile-timeout --user-id=${userA.id} --compile-timeout=1200`
+          )
+          expect.fail('should error out')
+        } catch (err) {
+          expect(err.stderr.toString()).to.include('below 10 minutes')
+        }
+        expect(await getCompileTimeout(userA)).to.equal(userATimeout)
+        expect(await getCompileTimeout(userB)).to.equal(userBTimeout)
+      })
     })
   })
 })
