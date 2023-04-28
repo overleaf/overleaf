@@ -42,10 +42,12 @@ describe('Filestore', function () {
   async function expectNoSockets() {
     try {
       await msleep(1000)
-      const { stdout } = await exec('ss -tnH')
+      const { stdout } = await exec('ss -tn')
+      const lines = stdout.split('\n')
+      const header = lines.shift()
 
       const badSockets = []
-      for (const socket of stdout.split('\n')) {
+      for (const socket of lines) {
         const fields = socket.split(' ').filter(part => part !== '')
         if (
           fields.length > 2 &&
@@ -62,6 +64,7 @@ describe('Filestore', function () {
         console.error(
           'ERR: Sockets still have receive buffer after connection closed'
         )
+        console.error(header)
         for (const socket of badSockets) {
           // eslint-disable-next-line no-console
           console.error(socket)
