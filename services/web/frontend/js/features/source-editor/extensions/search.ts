@@ -8,7 +8,12 @@ import {
   searchPanelOpen,
 } from '@codemirror/search'
 import { EditorView, keymap, ViewPlugin } from '@codemirror/view'
-import { Annotation, EditorState, TransactionSpec } from '@codemirror/state'
+import {
+  Annotation,
+  EditorState,
+  SelectionRange,
+  TransactionSpec,
+} from '@codemirror/state'
 import { highlightSelectionMatches } from './highlight-selection-matches'
 
 const restoreSearchQueryAnnotation = Annotation.define<boolean>()
@@ -55,6 +60,23 @@ export const search = () => {
     // a wrapper round `search`, which creates a custom panel element and passes it to React by dispatching an event
     searchExtension({
       literal: true,
+      // centre the search match if it was outside the visible area
+      scrollToMatch: (range: SelectionRange, view: EditorView) => {
+        const coords = {
+          from: view.coordsAtPos(range.from),
+          to: view.coordsAtPos(range.to),
+        }
+        const scrollRect = view.scrollDOM.getBoundingClientRect()
+        const strategy =
+          (coords.from && coords.from.top < scrollRect.top) ||
+          (coords.to && coords.to.bottom > scrollRect.bottom)
+            ? 'center'
+            : 'nearest'
+
+        return EditorView.scrollIntoView(range, {
+          y: strategy,
+        })
+      },
       createPanel: () => {
         const dom = document.createElement('div')
         dom.className = 'ol-cm-search'
