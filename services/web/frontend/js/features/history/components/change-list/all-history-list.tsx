@@ -2,15 +2,27 @@ import { Fragment, useEffect, useRef, useState } from 'react'
 import { useHistoryContext } from '../../context/history-context'
 import HistoryVersion from './history-version'
 import LoadingSpinner from '../../../../shared/components/loading-spinner'
+import { OwnerPaywallPrompt } from './owner-paywall-prompt'
+import { NonOwnerPaywallPrompt } from './non-owner-paywall-prompt'
 
 function AllHistoryList() {
-  const { updatesInfo, loadingState, fetchNextBatchOfUpdates } =
-    useHistoryContext()
-  const { updates, atEnd } = updatesInfo
+  const {
+    updatesInfo,
+    loadingState,
+    fetchNextBatchOfUpdates,
+    currentUserIsOwner,
+  } = useHistoryContext()
+  const { visibleUpdateCount, updates, atEnd } = updatesInfo
   const scrollerRef = useRef<HTMLDivElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   const intersectionObserverRef = useRef<IntersectionObserver | null>(null)
   const [bottomVisible, setBottomVisible] = useState(false)
+  const showPaywall =
+    loadingState === 'ready' && updatesInfo.freeHistoryLimitHit
+  const showOwnerPaywall = showPaywall && currentUserIsOwner
+  const showNonOwnerPaywall = showPaywall && !currentUserIsOwner
+  const visibleUpdates =
+    visibleUpdateCount === null ? updates : updates.slice(0, visibleUpdateCount)
 
   // Create an intersection observer that watches for any part of an element
   // positioned at the bottom of the list to be visible
@@ -63,15 +75,23 @@ function AllHistoryList() {
     <div ref={scrollerRef} className="history-all-versions-scroller">
       <div className="history-all-versions-container">
         <div ref={bottomRef} className="history-versions-bottom" />
-        {updates.map((update, index) => (
+        {visibleUpdates.map((update, index) => (
           <Fragment key={`${update.fromV}_${update.toV}`}>
             {update.meta.first_in_day && index > 0 && (
               <hr className="history-version-divider" />
             )}
-            <HistoryVersion update={update} />
+            <HistoryVersion
+              update={update}
+              faded={
+                updatesInfo.freeHistoryLimitHit &&
+                index === visibleUpdates.length - 1
+              }
+            />
           </Fragment>
         ))}
       </div>
+      {showOwnerPaywall ? <OwnerPaywallPrompt /> : null}
+      {showNonOwnerPaywall ? <NonOwnerPaywallPrompt /> : null}
       {loadingState === 'ready' ? null : <LoadingSpinner />}
     </div>
   )

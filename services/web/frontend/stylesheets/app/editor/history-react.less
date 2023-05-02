@@ -1,5 +1,6 @@
 @versions-list-width: 320px;
 @history-toolbar-height: 40px;
+@history-change-list-padding: 16px;
 
 history-root {
   height: 100%;
@@ -78,7 +79,7 @@ history-root {
   .history-toggle-switch-container,
   .history-version-day,
   .history-version-details {
-    padding: 0 16px;
+    padding: 0 @history-change-list-padding;
   }
 
   .history-version-day {
@@ -98,7 +99,7 @@ history-root {
     padding-top: 8px;
     padding-bottom: 8px;
 
-    &:hover {
+    &.history-version-selectable:hover {
       cursor: pointer;
       background-color: @neutral-10;
     }
@@ -266,6 +267,36 @@ history-root {
     .history-react-toolbar-restore-file-button {
       margin-left: 5px;
     }
+  }
+
+  .history-paywall-prompt {
+    padding: @history-change-list-padding;
+
+    .history-feature-list {
+      list-style: none;
+      padding-left: 8px;
+
+      li {
+        margin-bottom: 16px;
+      }
+    }
+
+    button {
+      width: 100%;
+    }
+  }
+
+  .history-version-faded .history-version-details {
+    max-height: 6em;
+    .mask-image(linear-gradient(black 35%, transparent));
+    overflow: hidden;
+  }
+
+  .history-paywall-heading {
+    .premium-text;
+    font-family: inherit;
+    font-size: 20px;
+    font-weight: 700;
   }
 }
 

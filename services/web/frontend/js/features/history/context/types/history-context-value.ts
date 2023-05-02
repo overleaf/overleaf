@@ -12,6 +12,7 @@ type LoadingState =
 export type HistoryContextValue = {
   updatesInfo: {
     updates: LoadedUpdate[]
+    visibleUpdateCount: Nullable<number>
     atEnd: boolean
     nextBeforeTimestamp: number | undefined
     freeHistoryLimitHit: boolean
@@ -19,7 +20,8 @@ export type HistoryContextValue = {
   setUpdatesInfo: React.Dispatch<
     React.SetStateAction<HistoryContextValue['updatesInfo']>
   >
-  userHasFullFeature: boolean | undefined
+  userHasFullFeature: boolean
+  currentUserIsOwner: boolean
   loadingState: LoadingState
   setLoadingState: React.Dispatch<
     React.SetStateAction<HistoryContextValue['loadingState']>

@@ -5,11 +5,13 @@ import { UpdateRange } from '../../services/types/update'
 type HistoryVersionDetailsProps = {
   children: React.ReactNode
   selected: boolean
+  selectable: boolean
 } & UpdateRange
 
 function HistoryVersionDetails({
   children,
   selected,
+  selectable,
   fromV,
   toV,
   fromVTimestamp,
@@ -34,9 +36,10 @@ function HistoryVersionDetails({
     <div
       className={classnames('history-version-details', {
         'history-version-selected': selected,
+        'history-version-selectable': selectable,
       })}
       data-testid="history-version-details"
-      onClick={handleSelect}
+      onClick={selectable ? handleSelect : undefined}
     >
       {children}
     </div>

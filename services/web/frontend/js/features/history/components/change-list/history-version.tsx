@@ -10,12 +10,14 @@ import { isVersionSelected } from '../../utils/history-details'
 import { relativeDate, formatTime } from '../../../utils/format-date'
 import { orderBy } from 'lodash'
 import { LoadedUpdate } from '../../services/types/update'
+import classNames from 'classnames'
 
 type HistoryEntryProps = {
   update: LoadedUpdate
+  faded: boolean
 }
 
-function HistoryVersion({ update }: HistoryEntryProps) {
+function HistoryVersion({ update, faded }: HistoryEntryProps) {
   const { id: currentUserId } = useUserContext()
   const { projectId, selection } = useHistoryContext()
 
@@ -23,7 +25,12 @@ function HistoryVersion({ update }: HistoryEntryProps) {
   const selected = isVersionSelected(selection, update.fromV, update.toV)
 
   return (
-    <div>
+    <div
+      data-testid="history-version"
+      className={classNames({
+        'history-version-faded': faded,
+      })}
+    >
       {update.meta.first_in_day && (
         <time className="history-version-day">
           {relativeDate(update.meta.end_ts)}
@@ -35,6 +42,7 @@ function HistoryVersion({ update }: HistoryEntryProps) {
         fromVTimestamp={update.meta.end_ts}
         toVTimestamp={update.meta.end_ts}
         selected={selected}
+        selectable={!faded}
       >
         <div className="history-version-main-details">
           <time className="history-version-metadata-time">
@@ -59,15 +67,17 @@ function HistoryVersion({ update }: HistoryEntryProps) {
           />
           <Origin origin={update.meta.origin} />
         </div>
-        <HistoryVersionDropdown
-          id={`${update.fromV}_${update.toV}`}
-          projectId={projectId}
-          isComparing={selection.comparing}
-          isSelected={selected}
-          fromV={update.fromV}
-          toV={update.toV}
-          updateMetaEndTimestamp={update.meta.end_ts}
-        />
+        {faded ? null : (
+          <HistoryVersionDropdown
+            id={`${update.fromV}_${update.toV}`}
+            projectId={projectId}
+            isComparing={selection.comparing}
+            isSelected={selected}
+            fromV={update.fromV}
+            toV={update.toV}
+            updateMetaEndTimestamp={update.meta.end_ts}
+          />
+        )}
       </HistoryVersionDetails>
     </div>
   )

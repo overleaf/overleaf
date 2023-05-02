@@ -24,6 +24,10 @@ export const USER_EMAIL = 'testuser@example.com'
 export function EditorProviders({
   user = { id: USER_ID, email: USER_EMAIL },
   projectId = PROJECT_ID,
+  projectOwner = {
+    _id: '124abd',
+    email: 'owner@example.com',
+  },
   rootDocId = '_root_doc_id',
   socket = {
     on: sinon.stub(),
@@ -77,10 +81,7 @@ export function EditorProviders({
     project: {
       _id: window.project_id,
       name: PROJECT_NAME,
-      owner: {
-        _id: '124abd',
-        email: 'owner@example.com',
-      },
+      owner: projectOwner,
       features,
       rootDoc_id: rootDocId,
       rootFolder,

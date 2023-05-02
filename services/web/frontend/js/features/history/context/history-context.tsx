@@ -18,14 +18,12 @@ import { loadLabels } from '../utils/label'
 import { autoSelectFile } from '../utils/auto-select-file'
 import ColorManager from '../../../ide/colors/ColorManager'
 import moment from 'moment'
-import * as eventTracking from '../../../infrastructure/event-tracking'
 import { cloneDeep } from 'lodash'
 import {
   FetchUpdatesResponse,
   LoadedUpdate,
   Update,
 } from '../services/types/update'
-import { Nullable } from '../../../../../types/utils'
 import { Selection } from '../services/types/selection'
 
 // Allow testing of infinite scrolling by providing query string parameters to
@@ -71,6 +69,10 @@ function useHistory() {
   const userId = user.id
   const projectId = project._id
   const projectOwnerId = project.owner?._id
+  const userHasFullFeature = Boolean(
+    project.features?.versioning || user.isAdmin
+  )
+  const currentUserIsOwner = projectOwnerId === userId
 
   const [selection, setSelection] = useState<Selection>(selectionInitialState)
 
@@ -78,6 +80,7 @@ function useHistory() {
     HistoryContextValue['updatesInfo']
   >({
     updates: [],
+    visibleUpdateCount: null,
     atEnd: false,
     freeHistoryLimitHit: false,
     nextBeforeTimestamp: undefined,
@@ -86,19 +89,15 @@ function useHistory() {
   const [loadingState, setLoadingState] =
     useState<HistoryContextValue['loadingState']>('loadingInitial')
   const [error, setError] = useState(null)
-  // eslint-disable-next-line no-unused-vars
-  const [userHasFullFeature, setUserHasFullFeature] =
-    useState<HistoryContextValue['userHasFullFeature']>(undefined)
 
   const fetchNextBatchOfUpdates = useCallback(() => {
     const loadUpdates = (updatesData: Update[]) => {
       const dateTimeNow = new Date()
       const timestamp24hoursAgo = dateTimeNow.setDate(dateTimeNow.getDate() - 1)
-      let { updates, freeHistoryLimitHit } = updatesInfo
+      let { updates, freeHistoryLimitHit, visibleUpdateCount } = updatesInfo
       let previousUpdate = updates[updates.length - 1]
-      let cutOffIndex: Nullable<number> = null
 
-      let loadedUpdates: LoadedUpdate[] = cloneDeep(updatesData)
+      const loadedUpdates: LoadedUpdate[] = cloneDeep(updatesData)
       for (const [index, update] of loadedUpdates.entries()) {
         for (const user of update.meta.users) {
           if (user) {
@@ -114,28 +113,24 @@ function useHistory() {
 
         previousUpdate = update
 
-        if (userHasFullFeature && update.meta.end_ts < timestamp24hoursAgo) {
-          cutOffIndex = index || 1 // Make sure that we show at least one entry (to allow labelling).
+        if (
+          !userHasFullFeature &&
+          visibleUpdateCount === null &&
+          update.meta.end_ts < timestamp24hoursAgo
+        ) {
+          // Make sure that we show at least one entry (to allow labelling), and
+          // load one extra update that is displayed but faded out above the
+          // paywall
+          visibleUpdateCount = index + 1
           freeHistoryLimitHit = true
-          if (projectOwnerId === userId) {
-            eventTracking.send(
-              'subscription-funnel',
-              'editor-click-feature',
-              'history'
-            )
-            eventTracking.sendMB('paywall-prompt', {
-              'paywall-type': 'history',
-            })
-          }
-          break
         }
       }
 
-      if (!userHasFullFeature && cutOffIndex != null) {
-        loadedUpdates = loadedUpdates.slice(0, cutOffIndex)
+      return {
+        updates: updates.concat(loadedUpdates),
+        visibleUpdateCount,
+        freeHistoryLimitHit,
       }
-
-      return { updates: updates.concat(loadedUpdates), freeHistoryLimitHit }
     }
 
     if (updatesInfo.atEnd || loadingState === 'loadingUpdates') return
@@ -156,13 +151,15 @@ function useHistory() {
           setLabels(loadLabels(labels, lastUpdateToV))
         }
 
-        const { updates, freeHistoryLimitHit } = loadUpdates(updatesData)
+        const { updates, visibleUpdateCount, freeHistoryLimitHit } =
+          loadUpdates(updatesData)
 
         const atEnd =
           nextBeforeTimestamp == null || freeHistoryLimitHit || !updates.length
 
         setUpdatesInfo({
           updates,
+          visibleUpdateCount,
           freeHistoryLimitHit,
           atEnd,
           nextBeforeTimestamp,
@@ -175,15 +172,7 @@ function useHistory() {
       .finally(() => {
         setLoadingState('ready')
       })
-  }, [
-    loadingState,
-    labels,
-    projectId,
-    projectOwnerId,
-    userId,
-    userHasFullFeature,
-    updatesInfo,
-  ])
+  }, [loadingState, labels, projectId, userHasFullFeature, updatesInfo])
 
   const resetSelection = useCallback(() => {
     setSelection(selectionInitialState)
@@ -257,6 +246,7 @@ function useHistory() {
       labels,
       setLabels,
       userHasFullFeature,
+      currentUserIsOwner,
       projectId,
       selection,
       setSelection,
@@ -272,6 +262,7 @@ function useHistory() {
       labels,
       setLabels,
       userHasFullFeature,
+      currentUserIsOwner,
       projectId,
       selection,
       setSelection,

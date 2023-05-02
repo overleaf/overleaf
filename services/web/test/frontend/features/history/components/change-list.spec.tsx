@@ -1,17 +1,22 @@
 import { useState } from 'react'
 import ToggleSwitch from '../../../../../frontend/js/features/history/components/change-list/toggle-switch'
 import ChangeList from '../../../../../frontend/js/features/history/components/change-list/change-list'
-import { EditorProviders } from '../../../helpers/editor-providers'
+import {
+  EditorProviders,
+  USER_EMAIL,
+  USER_ID,
+} from '../../../helpers/editor-providers'
 import { HistoryProvider } from '../../../../../frontend/js/features/history/context/history-context'
 import { updates } from '../fixtures/updates'
 import { labels } from '../fixtures/labels'
 
 const mountWithEditorProviders = (
   component: React.ReactNode,
-  scope: Record<string, unknown> = {}
+  scope: Record<string, unknown> = {},
+  props: Record<string, unknown> = {}
 ) => {
   cy.mount(
-    <EditorProviders scope={scope}>
+    <EditorProviders scope={scope} {...props}>
       <HistoryProvider>
         <div style={{ display: 'flex', justifyContent: 'center' }}>
           <div className="history-react">{component}</div>
@@ -79,7 +84,13 @@ describe('change list', function () {
     })
 
     it('renders tags', function () {
-      mountWithEditorProviders(<ChangeList />, scope)
+      mountWithEditorProviders(<ChangeList />, scope, {
+        user: {
+          id: USER_ID,
+          email: USER_EMAIL,
+          isAdmin: true,
+        },
+      })
       waitForData()
 
       cy.findByLabelText(/all history/i).click({ force: true })
@@ -144,7 +155,13 @@ describe('change list', function () {
     })
 
     it('deletes tag', function () {
-      mountWithEditorProviders(<ChangeList />, scope)
+      mountWithEditorProviders(<ChangeList />, scope, {
+        user: {
+          id: USER_ID,
+          email: USER_EMAIL,
+          isAdmin: true,
+        },
+      })
       waitForData()
 
       cy.findByLabelText(/all history/i).click({ force: true })
@@ -187,6 +204,8 @@ describe('change list', function () {
           cy.contains(/sorry, something went wrong/i)
         })
       })
+      cy.findByText(labelToDelete).should('have.length', 1)
+
       cy.intercept('DELETE', '/project/*/labels/*', {
         statusCode: 204,
       }).as('delete')
@@ -195,6 +214,191 @@ describe('change list', function () {
       })
       cy.wait('@delete')
       cy.findByText(labelToDelete).should('not.exist')
+    })
+  })
+
+  describe('paywall', function () {
+    const now = Date.now()
+    const oneMinuteAgo = now - 60 * 1000
+    const justOverADayAgo = now - 25 * 60 * 60 * 1000
+    const twoDaysAgo = now - 48 * 60 * 60 * 1000
+
+    const updates = {
+      updates: [
+        {
+          fromV: 3,
+          toV: 4,
+          meta: {
+            users: [
+              {
+                first_name: 'john.doe',
+                last_name: '',
+                email: 'john.doe@test.com',
+                id: '1',
+              },
+            ],
+            start_ts: oneMinuteAgo,
+            end_ts: oneMinuteAgo,
+          },
+          labels: [],
+          pathnames: [],
+          project_ops: [{ add: { pathname: 'name.tex' }, atV: 3 }],
+        },
+        {
+          fromV: 1,
+          toV: 3,
+          meta: {
+            users: [
+              {
+                first_name: 'bobby.lapointe',
+                last_name: '',
+                email: 'bobby.lapointe@test.com',
+                id: '2',
+              },
+            ],
+            start_ts: justOverADayAgo,
+            end_ts: justOverADayAgo - 10 * 1000,
+          },
+          labels: [],
+          pathnames: ['main.tex'],
+          project_ops: [],
+        },
+        {
+          fromV: 0,
+          toV: 1,
+          meta: {
+            users: [
+              {
+                first_name: 'john.doe',
+                last_name: '',
+                email: 'john.doe@test.com',
+                id: '1',
+              },
+            ],
+            start_ts: twoDaysAgo,
+            end_ts: twoDaysAgo,
+          },
+          labels: [
+            {
+              id: 'label1',
+              comment: 'tag-1',
+              version: 0,
+              user_id: USER_ID,
+              created_at: justOverADayAgo,
+            },
+          ],
+          pathnames: [],
+          project_ops: [{ add: { pathname: 'main.tex' }, atV: 0 }],
+        },
+      ],
+    }
+
+    const labels = [
+      {
+        id: 'label1',
+        comment: 'tag-1',
+        version: 0,
+        user_id: USER_ID,
+        created_at: justOverADayAgo,
+        user_display_name: 'john.doe',
+      },
+    ]
+
+    const waitForData = () => {
+      cy.wait('@updates')
+      cy.wait('@labels')
+      cy.wait('@diff')
+    }
+
+    beforeEach(function () {
+      cy.intercept('GET', '/project/*/updates*', {
+        body: updates,
+      }).as('updates')
+      cy.intercept('GET', '/project/*/labels', {
+        body: labels,
+      }).as('labels')
+      cy.intercept('GET', '/project/*/filetree/diff*', {
+        body: { diff: [{ pathname: 'main.tex' }, { pathname: 'name.tex' }] },
+      }).as('diff')
+    })
+
+    it('shows non-owner paywall', function () {
+      const scope = {
+        ui: {
+          view: 'history',
+          pdfLayout: 'sideBySide',
+          chatOpen: true,
+        },
+      }
+
+      mountWithEditorProviders(<ChangeList />, scope, {
+        user: {
+          id: USER_ID,
+          email: USER_EMAIL,
+          isAdmin: false,
+        },
+      })
+
+      waitForData()
+
+      cy.get('.history-paywall-prompt').should('have.length', 1)
+      cy.findAllByTestId('history-version').should('have.length', 2)
+      cy.get('.history-paywall-prompt button').should('not.exist')
+    })
+
+    it('shows owner paywall', function () {
+      const scope = {
+        ui: {
+          view: 'history',
+          pdfLayout: 'sideBySide',
+          chatOpen: true,
+        },
+      }
+
+      mountWithEditorProviders(<ChangeList />, scope, {
+        user: {
+          id: USER_ID,
+          email: USER_EMAIL,
+          isAdmin: false,
+        },
+        projectOwner: {
+          _id: USER_ID,
+          email: USER_EMAIL,
+        },
+      })
+
+      waitForData()
+
+      cy.get('.history-paywall-prompt').should('have.length', 1)
+      cy.findAllByTestId('history-version').should('have.length', 2)
+      cy.get('.history-paywall-prompt button').should('have.length', 1)
+    })
+
+    it('shows all labels in free tier', function () {
+      const scope = {
+        ui: {
+          view: 'history',
+          pdfLayout: 'sideBySide',
+          chatOpen: true,
+        },
+      }
+
+      mountWithEditorProviders(<ChangeList />, scope, {
+        user: {
+          id: USER_ID,
+          email: USER_EMAIL,
+          isAdmin: false,
+        },
+        projectOwner: {
+          _id: USER_ID,
+          email: USER_EMAIL,
+        },
+      })
+
+      waitForData()
+
+      cy.findByLabelText(/labels/i).click({ force: true })
+      cy.get('.history-version-label').should('have.length', 1)
     })
   })
 })

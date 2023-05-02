@@ -25,6 +25,7 @@ export const projectShape = {
     references: PropTypes.bool,
     mendeley: PropTypes.bool,
     zotero: PropTypes.bool,
+    versioning: PropTypes.bool,
   }),
   publicAccessLevel: PropTypes.string,
   tokens: PropTypes.shape({

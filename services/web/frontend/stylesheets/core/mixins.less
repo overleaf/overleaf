@@ -448,6 +448,25 @@
   filter: e(%('progid:DXImageTransform.Microsoft.gradient(enabled = false)'));
 }
 
+.mask-image(@gradient) {
+  // It has to be this way round, otherwise Less removes the prefixed version, for some reason
+  mask-image: @gradient;
+  -webkit-mask-image: @gradient;
+}
+
+.premium-background {
+  background-image: @premium-gradient;
+}
+
+.premium-text {
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: @white; // Fallback
+  background-color: @blue-70; // Fallback
+  .premium-background;
+}
+
 // Retina images
 //
 // Short retina mixin for setting background-image and -size

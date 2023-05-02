@@ -44,6 +44,7 @@ function LabelsList() {
             fromVTimestamp={fromVTimestamp}
             toVTimestamp={toVTimestamp}
             selected={selected}
+            selectable
           >
             <div className="history-version-main-details">
               {labels.map(label => (
