@@ -5,7 +5,7 @@ import type { FileDiff } from '../../services/types/file'
 export function useFileTreeItemSelection(file: FileDiff) {
   const { selection, setSelection } = useHistoryContext()
 
-  const handleClick = useCallback(() => {
+  const handleEvent = useCallback(() => {
     if (file.pathname !== selection.selectedFile?.pathname) {
       setSelection({
         ...selection,
@@ -14,7 +14,20 @@ export function useFileTreeItemSelection(file: FileDiff) {
     }
   }, [file, selection, setSelection])
 
+  const handleClick = useCallback(() => {
+    handleEvent()
+  }, [handleEvent])
+
+  const handleKeyDown = useCallback(
+    event => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        handleEvent()
+      }
+    },
+    [handleEvent]
+  )
+
   const isSelected = selection.selectedFile?.pathname === file.pathname
 
-  return { isSelected, onClick: handleClick }
+  return { isSelected, handleClick, handleKeyDown }
 }

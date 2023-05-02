@@ -14,14 +14,15 @@ export default function HistoryFileTreeDoc({
   file,
   name,
 }: HistoryFileTreeDocProps) {
-  const { isSelected, onClick } = useFileTreeItemSelection(file)
+  const { isSelected, handleClick, handleKeyDown } =
+    useFileTreeItemSelection(file)
 
   return (
     <li
       role="treeitem"
       className={classNames({ selected: isSelected })}
-      onClick={onClick}
-      onKeyDown={onClick}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
       aria-selected={isSelected}
       aria-label={name}
       tabIndex={0}
