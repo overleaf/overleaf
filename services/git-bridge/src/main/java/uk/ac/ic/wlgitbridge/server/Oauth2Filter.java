@@ -32,9 +32,12 @@ public class Oauth2Filter implements Filter {
 
     private final Oauth2 oauth2;
 
-    public Oauth2Filter(SnapshotApi snapshotApi, Oauth2 oauth2) {
+    private final boolean isUserPasswordEnabled;
+
+    public Oauth2Filter(SnapshotApi snapshotApi, Oauth2 oauth2, boolean isUserPasswordEnabled) {
         this.snapshotApi = snapshotApi;
         this.oauth2 = oauth2;
+        this.isUserPasswordEnabled = isUserPasswordEnabled;
     }
 
     @Override
@@ -151,42 +154,49 @@ public class Oauth2Filter implements Filter {
                         if (split.length == 2) {
                             String username = split[0];
                             String password = split[1];
-                            String accessToken = null;
-                            if (username.length() > 0) {
-                                capturedUsername = username;
-                            }
-                            try {
-                                accessToken = new PasswordTokenRequest(
+
+                            final Credential cred = new Credential.Builder(
+                                BearerToken.authorizationHeaderAccessMethod()
+                            ).build();
+
+                            if(username.equals("git")) {
+                                Log.debug("[{}] username is 'git', skipping password grant flow", projectName);
+                                cred.setAccessToken(password);
+                            } else if (this.isUserPasswordEnabled) {
+                                String accessToken = null;
+                                if (username.length() > 0) {
+                                    capturedUsername = username;
+                                }
+                                try {
+                                    accessToken = new PasswordTokenRequest(
                                         Instance.httpTransport,
                                         Instance.jsonFactory,
                                         new GenericUrl(
-                                                oauth2.getOauth2Server()
-                                                        + "/oauth/token?client_ip="
-                                                        + clientIp
+                                    oauth2.getOauth2Server()
+                                            + "/oauth/token?client_ip="
+                                            + clientIp
                                         ),
                                         username,
                                         password
-                                ).setClientAuthentication(
-                                        new ClientParametersAuthentication(
-                                                oauth2.getOauth2ClientID(),
-                                                oauth2.getOauth2ClientSecret()
-                                        )
-                                ).execute().getAccessToken();
-                            } catch (TokenResponseException e) {
-                                handleNeedAuthorization(projectName, capturedUsername, e.getStatusCode(), request, response);
-                                return;
+                                    ).setClientAuthentication(
+                                      new ClientParametersAuthentication(
+                                        oauth2.getOauth2ClientID(),
+                                        oauth2.getOauth2ClientSecret()
+                                      )
+                                    ).execute().getAccessToken();
+                                } catch (TokenResponseException e) {
+                                    handleNeedAuthorization(projectName, capturedUsername, e.getStatusCode(), request, response);
+                                    return;
+                                }
+                                cred.setAccessToken(accessToken);
                             }
-                            final Credential cred = new Credential.Builder(
-                                    BearerToken.authorizationHeaderAccessMethod(
-                                    )
-                            ).build();
-                            cred.setAccessToken(accessToken);
-                            servletRequest.setAttribute(ATTRIBUTE_KEY, cred);
 
+                            servletRequest.setAttribute(ATTRIBUTE_KEY, cred);
                             filterChain.doFilter(
-                                    servletRequest,
-                                    servletResponse
+                                servletRequest,
+                                servletResponse
                             );
+
                         } else {
                             handleNeedAuthorization(projectName, capturedUsername, 0, request, response);
                         }

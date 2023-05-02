@@ -92,6 +92,7 @@ public class ConfigTest {
                 "    \"oauth2ClientSecret\": \"<oauth2ClientSecret>\",\n" +
                 "    \"oauth2Server\": \"https://www.overleaf.com\"\n" +
                 "  },\n" +
+                "  \"userPasswordEnabled\": false,\n" +
                 "  \"repoStore\": null,\n" +
                 "  \"swapStore\": null,\n" +
                 "  \"swapJob\": null,\n" +

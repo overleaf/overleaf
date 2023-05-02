@@ -166,7 +166,11 @@ public class GitBridgeServer {
         final ServletContextHandler servletContextHandler =
                 new ServletContextHandler(ServletContextHandler.SESSIONS);
         if (config.isUsingOauth2()) {
-            Filter filter = new Oauth2Filter(snapshotApi, config.getOauth2());
+            Filter filter = new Oauth2Filter(
+                    snapshotApi,
+                    config.getOauth2(),
+                    config.isUserPasswordEnabled()
+            );
             servletContextHandler.addFilter(
                     new FilterHolder(filter),
                     "/*",

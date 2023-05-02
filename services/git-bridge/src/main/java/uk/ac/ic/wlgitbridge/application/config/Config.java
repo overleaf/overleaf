@@ -31,6 +31,7 @@ public class Config implements JSONSource {
                 config.postbackURL,
                 config.serviceName,
                 Oauth2.asSanitised(config.oauth2),
+                config.userPasswordEnabled,
                 config.repoStore,
                 SwapStoreConfig.sanitisedCopy(config.swapStore),
                 config.swapJob,
@@ -47,6 +48,7 @@ public class Config implements JSONSource {
     private String serviceName;
     @Nullable
     private Oauth2 oauth2;
+    private boolean userPasswordEnabled;
     @Nullable
     private RepoStoreConfig repoStore;
     @Nullable
@@ -75,6 +77,7 @@ public class Config implements JSONSource {
             String postbackURL,
             String serviceName,
             Oauth2 oauth2,
+            boolean userPasswordEnabled,
             RepoStoreConfig repoStore,
             SwapStoreConfig swapStore,
             SwapJobConfig swapJob,
@@ -88,6 +91,7 @@ public class Config implements JSONSource {
         this.postbackURL = postbackURL;
         this.serviceName = serviceName;
         this.oauth2 = oauth2;
+        this.userPasswordEnabled = userPasswordEnabled;
         this.repoStore = repoStore;
         this.swapStore = swapStore;
         this.swapJob = swapJob;
@@ -118,6 +122,7 @@ public class Config implements JSONSource {
             postbackURL += "/";
         }
         oauth2 = new Gson().fromJson(configObject.get("oauth2"), Oauth2.class);
+        userPasswordEnabled = getOptionalString(configObject, "userPasswordEnabled").equals("true");
         repoStore = new Gson().fromJson(
                 configObject.get("repoStore"), RepoStoreConfig.class);
         swapStore = new Gson().fromJson(
@@ -171,6 +176,10 @@ public class Config implements JSONSource {
 
     public boolean isUsingOauth2() {
         return oauth2 != null;
+    }
+
+    public boolean isUserPasswordEnabled() {
+        return userPasswordEnabled;
     }
 
     public Oauth2 getOauth2() {
