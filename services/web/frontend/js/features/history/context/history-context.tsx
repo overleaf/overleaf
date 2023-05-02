@@ -187,12 +187,13 @@ function useHistory() {
     }
   }, [view, fetchNextBatchOfUpdates])
 
-  const { updateRange, comparing } = selection
+  const { updateRange, comparing, files } = selection
   const { updates } = updatesInfo
+  const filesEmpty = files.length === 0
 
   // Load files when the update selection changes
   useEffect(() => {
-    if (!updateRange) {
+    if (!updateRange || !filesEmpty) {
       return
     }
     const { fromV, toV } = updateRange
@@ -222,7 +223,7 @@ function useHistory() {
       .catch(error => {
         setError(error)
       })
-  }, [updateRange, projectId, updates, comparing, setError])
+  }, [updateRange, projectId, updates, comparing, setError, filesEmpty])
 
   useEffect(() => {
     // Set update range if there isn't one and updates have loaded
