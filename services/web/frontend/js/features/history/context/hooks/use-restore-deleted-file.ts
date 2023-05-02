@@ -4,6 +4,7 @@ import { useLayoutContext } from '../../../../shared/context/layout-context'
 import useAsync from '../../../../shared/hooks/use-async'
 import { restoreFile } from '../../services/api'
 import { isFileRemoved } from '../../utils/file-diff'
+import { waitFor } from '../../utils/wait-for'
 import { useHistoryContext } from '../history-context'
 import type { HistoryContextValue } from '../types/history-context-value'
 
@@ -22,10 +23,13 @@ export function useRestoreDeletedFile() {
 
       await runAsync(
         restoreFile(projectId, selectedFile)
-          .then(data => {
+          .then(async data => {
             const { id, type } = data
 
-            const entity = ide.fileTreeManager.findEntityById(id)
+            const entity = await waitFor(
+              () => ide.fileTreeManager.findEntityById(id),
+              3000
+            )
 
             if (type === 'doc') {
               ide.editorManager.openDoc(entity)
