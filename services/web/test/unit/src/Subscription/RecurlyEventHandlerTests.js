@@ -12,6 +12,7 @@ describe('RecurlyEventHandler', function () {
         account_code: this.userId,
       },
       subscription: {
+        uuid: '8435ad98c1ce45da99b07f6a6a2e780f',
         plan: {
           plan_code: 'collaborator-annual',
         },
@@ -50,6 +51,7 @@ describe('RecurlyEventHandler', function () {
         plan_code: this.planCode,
         quantity: 1,
         is_trial: true,
+        subscriptionId: this.eventData.subscription.uuid,
       }
     )
     sinon.assert.calledWith(
@@ -102,6 +104,7 @@ describe('RecurlyEventHandler', function () {
         plan_code: this.planCode,
         quantity: 3,
         is_trial: false,
+        subscriptionId: this.eventData.subscription.uuid,
       }
     )
     sinon.assert.calledWith(
@@ -133,6 +136,7 @@ describe('RecurlyEventHandler', function () {
         plan_code: this.planCode,
         quantity: 1,
         is_trial: true,
+        subscriptionId: this.eventData.subscription.uuid,
       }
     )
     sinon.assert.calledWith(
@@ -169,6 +173,7 @@ describe('RecurlyEventHandler', function () {
         plan_code: this.planCode,
         quantity: 1,
         is_trial: true,
+        subscriptionId: this.eventData.subscription.uuid,
       }
     )
     sinon.assert.calledWith(
@@ -199,6 +204,7 @@ describe('RecurlyEventHandler', function () {
         plan_code: this.planCode,
         quantity: 1,
         is_trial: true,
+        subscriptionId: this.eventData.subscription.uuid,
       }
     )
     sinon.assert.calledWith(
@@ -234,6 +240,7 @@ describe('RecurlyEventHandler', function () {
         plan_code: this.planCode,
         quantity: 1,
         is_trial: true,
+        subscriptionId: this.eventData.subscription.uuid,
       }
     )
   })
@@ -250,27 +257,47 @@ describe('RecurlyEventHandler', function () {
       {
         plan_code: this.planCode,
         quantity: 1,
+        subscriptionId: this.eventData.subscription.uuid,
       }
     )
   })
 
   it('with paid_charge_invoice_notification', function () {
+    const invoice = {
+      invoice_number: 1234,
+      currency: 'USD',
+      state: 'paid',
+      total_in_cents: 720,
+      tax_in_cents: 12,
+      address: {
+        country: 'Liurnia',
+      },
+      collection_method: 'automatic',
+      subscription_ids: ['abcd1234', 'defa3214'],
+    }
     this.RecurlyEventHandler.sendRecurlyAnalyticsEvent(
       'paid_charge_invoice_notification',
       {
         account: {
           account_code: this.userId,
         },
-        invoice: {
-          state: 'paid',
-          total_in_cents: 720,
-        },
+        invoice,
       }
     )
     sinon.assert.calledWith(
       this.AnalyticsManager.recordEventForUser,
       this.userId,
-      'subscription-invoice-collected'
+      'subscription-invoice-collected',
+      {
+        invoiceNumber: invoice.invoice_number,
+        currency: invoice.currency,
+        totalInCents: invoice.total_in_cents,
+        taxInCents: invoice.tax_in_cents,
+        country: invoice.address.country,
+        collectionMethod: invoice.collection_method,
+        subscriptionId1: invoice.subscription_ids[0],
+        subscriptionId2: invoice.subscription_ids[1],
+      }
     )
   })
 

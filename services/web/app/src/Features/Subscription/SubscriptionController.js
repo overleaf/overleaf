@@ -69,7 +69,9 @@ async function plansPage(req, res) {
     usage: getDefault('usage', 'usage', 'enterprise'),
   }
 
-  AnalyticsManager.recordEventForSession(req.session, 'plans-page-view')
+  AnalyticsManager.recordEventForSession(req.session, 'plans-page-view', {
+    currency: recommendedCurrency,
+  })
 
   res.render('subscriptions/plans-marketing-v2', {
     title: 'plans_and_pricing',

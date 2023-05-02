@@ -76,7 +76,10 @@ export default App.controller(
         `&itm_referrer=${window.ITMReferrer}`
     }
 
-    eventTracking.sendMB('payment-page-view', { plan: window.plan_code })
+    eventTracking.sendMB('payment-page-view', {
+      plan: window.plan_code,
+      currency: $scope.currencyCode,
+    })
     eventTracking.send(
       'subscription-funnel',
       'subscription-form-viewed',

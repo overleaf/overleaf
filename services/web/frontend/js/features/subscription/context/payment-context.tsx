@@ -95,7 +95,10 @@ function usePayment({ publicKey }: RecurlyOptions) {
       return
     }
 
-    eventTracking.sendMB('payment-page-view', { plan: planCode })
+    eventTracking.sendMB('payment-page-view', {
+      plan: planCode,
+      currency: currencyCode,
+    })
     eventTracking.send(
       'subscription-funnel',
       'subscription-form-viewed',
@@ -147,6 +150,7 @@ function usePayment({ publicKey }: RecurlyOptions) {
     initiallySelectedCurrencyCode,
     planCode,
     publicKey,
+    currencyCode,
     t,
   ])
 
