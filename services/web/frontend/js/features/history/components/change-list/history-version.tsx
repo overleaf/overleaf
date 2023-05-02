@@ -6,7 +6,7 @@ import Origin from './origin'
 import HistoryVersionDropdown from './dropdown/history-version-dropdown'
 import { useUserContext } from '../../../../shared/context/user-context'
 import { useHistoryContext } from '../../context/history-context'
-import { isUpdateSelected } from '../../utils/history-details'
+import { isVersionSelected } from '../../utils/history-details'
 import { relativeDate, formatTime } from '../../../utils/format-date'
 import { orderBy } from 'lodash'
 import { LoadedUpdate } from '../../services/types/update'
@@ -20,11 +20,7 @@ function HistoryVersion({ update }: HistoryEntryProps) {
   const { projectId, selection } = useHistoryContext()
 
   const orderedLabels = orderBy(update.labels, ['created_at'], ['desc'])
-  const selected = isUpdateSelected({
-    fromV: update.fromV,
-    toV: update.toV,
-    selection,
-  })
+  const selected = isVersionSelected(selection, update.fromV, update.toV)
 
   return (
     <div>

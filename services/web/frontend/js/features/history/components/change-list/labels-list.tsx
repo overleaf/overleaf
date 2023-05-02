@@ -5,15 +5,15 @@ import UserNameWithColoredBadge from './user-name-with-colored-badge'
 import LabelDropdown from './dropdown/label-dropdown'
 import { useHistoryContext } from '../../context/history-context'
 import { useUserContext } from '../../../../shared/context/user-context'
-import { isUpdateSelected } from '../../utils/history-details'
+import { isVersionSelected } from '../../utils/history-details'
 import { isPseudoLabel } from '../../utils/label'
-import { formatTime } from '../../../utils/format-date'
+import { formatTime, isoToUnix } from '../../../utils/format-date'
 import { groupBy, orderBy } from 'lodash'
 import { LoadedLabel } from '../../services/types/label'
 
 function LabelsList() {
   const { t } = useTranslation()
-  const { updatesInfo, labels, projectId, selection } = useHistoryContext()
+  const { labels, projectId, selection } = useHistoryContext()
   const { id: currentUserId } = useUserContext()
 
   let versionWithLabels: { version: number; labels: LoadedLabel[] }[] = []
@@ -29,25 +29,20 @@ function LabelsList() {
   return (
     <>
       {versionWithLabels.map(({ version, labels }) => {
-        const selected = isUpdateSelected({
-          fromV: version,
-          toV: version,
-          selection,
-        })
+        const selected = isVersionSelected(selection, version)
 
-        const update = updatesInfo.updates.find(update => {
-          return update.labels.some(label => label.version === version)
-        })
-
-        if (!update) return null
+        // first label
+        const fromVTimestamp = isoToUnix(labels[labels.length - 1].created_at)
+        // most recent label
+        const toVTimestamp = isoToUnix(labels[0].created_at)
 
         return (
           <HistoryVersionDetails
             key={version}
             fromV={version}
             toV={version}
-            fromVTimestamp={update.meta.end_ts}
-            toVTimestamp={update.meta.end_ts}
+            fromVTimestamp={fromVTimestamp}
+            toVTimestamp={toVTimestamp}
             selected={selected}
           >
             <div className="history-version-main-details">
@@ -82,7 +77,7 @@ function LabelsList() {
               id={version.toString()}
               projectId={projectId}
               version={version}
-              updateMetaEndTimestamp={update.meta.end_ts}
+              updateMetaEndTimestamp={toVTimestamp}
               isComparing={selection.comparing}
               isSelected={selected}
             />

@@ -1,15 +1,9 @@
 import _ from 'lodash'
+import { getUpdateForVersion } from './history-details'
 import type { Nullable } from '../../../../../types/utils'
 import type { FileDiff } from '../services/types/file'
 import type { FileOperation } from '../services/types/file-operation'
 import type { LoadedUpdate, Version } from '../services/types/update'
-
-function getUpdateForVersion(
-  version: Version,
-  updates: LoadedUpdate[]
-): Nullable<LoadedUpdate> {
-  return updates.filter(update => update.toV === version)?.[0] ?? null
-}
 
 type FileWithOps = {
   pathname: FileDiff['pathname']
@@ -26,7 +20,7 @@ function getFilesWithOps(
     const filesWithOps: FileWithOps[] = []
     const currentUpdate = getUpdateForVersion(toV, updates)
 
-    if (currentUpdate !== null) {
+    if (currentUpdate) {
       for (const pathname of currentUpdate.pathnames) {
         filesWithOps.push({
           pathname,

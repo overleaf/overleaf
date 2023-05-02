@@ -18,3 +18,12 @@ export function formatTime(date, format = 'h:mm a') {
 export function relativeDate(date) {
   return moment(date).calendar()
 }
+
+/**
+ * @param {string} isoTimestamp
+ * @returns {number}
+ */
+export function isoToUnix(isoTimestamp) {
+  const unixTimestamp = Date.parse(isoTimestamp) / 1000
+  return unixTimestamp
+}

@@ -1,7 +1,7 @@
 import ColorManager from '../../../ide/colors/ColorManager'
 import { Nullable } from '../../../../../types/utils'
 import { User } from '../services/types/shared'
-import { ProjectOp, Version } from '../services/types/update'
+import { LoadedUpdate, ProjectOp, Version } from '../services/types/update'
 import { Selection } from '../services/types/selection'
 
 export const getUserColor = (user?: Nullable<{ id: string }>) => {
@@ -37,21 +37,37 @@ export const getProjectOpDoc = (projectOp: ProjectOp) => {
   return ''
 }
 
-type UpdateIsSelectedArg = {
-  fromV: Version
+export function isVersionSelected(
+  selection: Selection,
+  version: Version
+): boolean
+// eslint-disable-next-line no-redeclare
+export function isVersionSelected(
+  selection: Selection,
+  fromV: Version,
   toV: Version
-  selection: Selection
-}
-
-export const isUpdateSelected = ({
-  fromV,
-  toV,
-  selection,
-}: UpdateIsSelectedArg) => {
+): boolean
+// eslint-disable-next-line no-redeclare
+export function isVersionSelected(
+  selection: Selection,
+  ...args: [Version] | [Version, Version]
+): boolean {
   if (selection.updateRange) {
-    return (
-      fromV >= selection.updateRange.fromV && toV <= selection.updateRange.toV
-    )
+    let [fromV, toV] = args
+    toV = toV ?? fromV
+
+    if (selection.comparing) {
+      // compare mode
+      return (
+        fromV >= selection.updateRange.fromV && toV <= selection.updateRange.toV
+      )
+    } else {
+      // single version mode
+      return toV === selection.updateRange.toV
+    }
   }
   return false
 }
+
+export const getUpdateForVersion = (version: number, updates: LoadedUpdate[]) =>
+  updates.find(update => update.toV === version)
