@@ -4,7 +4,7 @@ import { Alert } from 'react-bootstrap'
 // Using this workaround due to inconsistent and improper error responses from the server
 type ModalErrorProps = {
   error: {
-    response: Response
+    response?: Response
     data?: {
       message?: string
     }
@@ -14,7 +14,7 @@ type ModalErrorProps = {
 function ModalError({ error }: ModalErrorProps) {
   const { t } = useTranslation()
 
-  if (error.response.status === 400 && error?.data?.message) {
+  if (error.response?.status === 400 && error.data?.message) {
     return <Alert bsStyle="danger">{error.data.message}</Alert>
   }
 

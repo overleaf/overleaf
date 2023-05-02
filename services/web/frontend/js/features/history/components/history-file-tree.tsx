@@ -7,13 +7,13 @@ import {
 import HistoryFileTreeFolderList from './file-tree/history-file-tree-folder-list'
 
 export default function HistoryFileTree() {
-  const { files } = useHistoryContext().selection
+  const { selection, error } = useHistoryContext()
 
-  const fileTree = _.reduce(files, reducePathsToTree, [])
+  const fileTree = _.reduce(selection.files, reducePathsToTree, [])
 
   const mappedFileTree = fileTreeDiffToFileTreeData(fileTree)
 
-  return (
+  return error ? null : (
     <HistoryFileTreeFolderList
       folders={mappedFileTree.folders}
       docs={mappedFileTree.docs ?? []}

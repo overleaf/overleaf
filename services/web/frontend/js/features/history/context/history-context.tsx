@@ -88,7 +88,7 @@ function useHistory() {
   const [labels, setLabels] = useState<HistoryContextValue['labels']>(null)
   const [loadingState, setLoadingState] =
     useState<HistoryContextValue['loadingState']>('loadingInitial')
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<HistoryContextValue['error']>(null)
 
   const fetchNextBatchOfUpdates = useCallback(() => {
     const loadUpdates = (updatesData: Update[]) => {
@@ -197,28 +197,32 @@ function useHistory() {
     }
     const { fromV, toV } = updateRange
 
-    diffFiles(projectId, fromV, toV).then(({ diff: files }) => {
-      const selectedFile = autoSelectFile(
-        files,
-        updateRange.toV,
-        comparing,
-        updates
-      )
-      const newFiles = files.map(file => {
-        if (isFileRenamed(file) && file.newPathname) {
-          return renamePathnameKey(file)
-        }
+    diffFiles(projectId, fromV, toV)
+      .then(({ diff: files }) => {
+        const selectedFile = autoSelectFile(
+          files,
+          updateRange.toV,
+          comparing,
+          updates
+        )
+        const newFiles = files.map(file => {
+          if (isFileRenamed(file) && file.newPathname) {
+            return renamePathnameKey(file)
+          }
 
-        return file
+          return file
+        })
+        setSelection({
+          updateRange,
+          comparing,
+          files: newFiles,
+          selectedFile,
+        })
       })
-      setSelection({
-        updateRange,
-        comparing,
-        files: newFiles,
-        selectedFile,
+      .catch(error => {
+        setError(error)
       })
-    })
-  }, [updateRange, projectId, updates, comparing])
+  }, [updateRange, projectId, updates, comparing, setError])
 
   useEffect(() => {
     // Set update range if there isn't one and updates have loaded
@@ -239,6 +243,7 @@ function useHistory() {
   const value = useMemo<HistoryContextValue>(
     () => ({
       error,
+      setError,
       loadingState,
       setLoadingState,
       updatesInfo,
@@ -255,6 +260,7 @@ function useHistory() {
     }),
     [
       error,
+      setError,
       loadingState,
       setLoadingState,
       updatesInfo,

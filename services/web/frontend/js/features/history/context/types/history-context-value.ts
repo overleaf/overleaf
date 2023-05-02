@@ -27,6 +27,7 @@ export type HistoryContextValue = {
     React.SetStateAction<HistoryContextValue['loadingState']>
   >
   error: Nullable<unknown>
+  setError: React.Dispatch<React.SetStateAction<HistoryContextValue['error']>>
   labels: Nullable<LoadedLabel[]>
   setLabels: React.Dispatch<React.SetStateAction<HistoryContextValue['labels']>>
   projectId: string

@@ -7,12 +7,13 @@ import { useHistoryContext } from '../../context/history-context'
 import { diffDoc } from '../../services/api'
 import { highlightsFromDiffResponse } from '../../utils/highlights-from-diff-response'
 import useAsync from '../../../../shared/hooks/use-async'
+import ErrorMessage from '../error-message'
 
 function DiffView() {
   const [diff, setDiff] = useState<Nullable<Diff>>(null)
   const { selection, projectId } = useHistoryContext()
 
-  const { isLoading, runAsync } = useAsync<DocDiffResponse>()
+  const { isLoading, runAsync, error } = useAsync<DocDiffResponse>()
 
   const { updateRange, selectedFile } = selection
 
@@ -23,9 +24,8 @@ function DiffView() {
 
     const { fromV, toV } = updateRange
 
-    // TODO: Error handling
-    runAsync(diffDoc(projectId, fromV, toV, selectedFile.pathname)).then(
-      data => {
+    runAsync(diffDoc(projectId, fromV, toV, selectedFile.pathname))
+      .then(data => {
         let diff: Diff | undefined
 
         if (!data?.diff) {
@@ -42,18 +42,24 @@ function DiffView() {
         }
 
         setDiff(diff)
-      }
-    )
+      })
+      .catch(console.error)
   }, [projectId, runAsync, updateRange, selectedFile])
 
   return (
     <div className="doc-panel">
-      <div className="history-header toolbar-container">
-        <Toolbar diff={diff} selection={selection} />
-      </div>
-      <div className="doc-container">
-        <Main diff={diff} isLoading={isLoading} />
-      </div>
+      {error ? (
+        <ErrorMessage />
+      ) : (
+        <>
+          <div className="history-header toolbar-container">
+            <Toolbar diff={diff} selection={selection} />
+          </div>
+          <div className="doc-container">
+            <Main diff={diff} isLoading={isLoading} />
+          </div>
+        </>
+      )}
     </div>
   )
 }

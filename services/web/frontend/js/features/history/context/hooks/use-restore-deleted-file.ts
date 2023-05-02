@@ -9,7 +9,7 @@ import type { HistoryContextValue } from '../types/history-context-value'
 
 export function useRestoreDeletedFile() {
   const { runAsync } = useAsync()
-  const { setLoadingState, projectId } = useHistoryContext()
+  const { setLoadingState, projectId, setError } = useHistoryContext()
   const ide = useIdeContext()
   const { setView } = useLayoutContext()
 
@@ -35,6 +35,7 @@ export function useRestoreDeletedFile() {
 
             setView('editor')
           })
+          .catch(error => setError(error))
           .finally(() => {
             setLoadingState('ready')
           })
