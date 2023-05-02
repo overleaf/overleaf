@@ -32,7 +32,7 @@ function Badge() {
         href="https://forms.gle/GmSs6odZRKRp3VX98"
         target="_blank"
         rel="noopener noreferrer"
-        className="badge info-badge"
+        className="info-badge"
       >
         <span className="sr-only">{content}</span>
       </a>
