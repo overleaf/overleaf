@@ -74,13 +74,8 @@ const theme = EditorView.baseTheme({
     paddingBottom: 'var(--half-leading)',
     backgroundColor: 'hsl(var(--hue), 70%, 85%)',
   },
-  '.ol-deletion-marker': {
+  '.ol-cm-deletion-marker': {
     textDecoration: 'line-through',
-  },
-  '&.overall-theme-dark .ol-deletion-marker': {
-    color: 'hsl(var(--hue), 100%, 60%)',
-  },
-  '&.overall-theme-light .ol-deletion-marker': {
     color: 'hsl(var(--hue), 70%, 40%)',
   },
   '.cm-tooltip-hover': {
