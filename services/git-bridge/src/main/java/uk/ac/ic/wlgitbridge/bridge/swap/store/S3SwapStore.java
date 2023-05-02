@@ -83,4 +83,8 @@ public class S3SwapStore implements SwapStore {
         s3.deleteObject(del);
     }
 
+    @Override
+    public boolean isSafe() {
+      return true;
+    }
 }

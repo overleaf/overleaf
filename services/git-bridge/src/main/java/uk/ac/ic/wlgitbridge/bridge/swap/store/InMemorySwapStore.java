@@ -51,4 +51,8 @@ public class InMemorySwapStore implements SwapStore {
         store.remove(projectName);
     }
 
+    @Override
+    public boolean isSafe() {
+      return false;
+    }
 }

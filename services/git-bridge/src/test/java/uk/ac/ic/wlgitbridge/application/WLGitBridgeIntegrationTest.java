@@ -21,6 +21,7 @@ import org.asynchttpclient.*;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -657,6 +658,11 @@ public class WLGitBridgeIntegrationTest {
 
         }
 
+    // We skip this test because it now hangs. It relies on the in-memory swap
+    // job, but we disable the swap job when the noop or in-memory swap store
+    // are configured. We do that for safety. Such a configuration in a
+    // production environment would lead to data loss.
+    @Ignore
     @Test
     public void wlgbCanSwapProjects(
     ) throws IOException, GitAPIException, InterruptedException {

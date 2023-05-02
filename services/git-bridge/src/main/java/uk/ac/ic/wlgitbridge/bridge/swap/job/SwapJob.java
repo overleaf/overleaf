@@ -4,6 +4,7 @@ import uk.ac.ic.wlgitbridge.bridge.db.DBStore;
 import uk.ac.ic.wlgitbridge.bridge.lock.ProjectLock;
 import uk.ac.ic.wlgitbridge.bridge.repo.RepoStore;
 import uk.ac.ic.wlgitbridge.bridge.swap.store.SwapStore;
+import uk.ac.ic.wlgitbridge.util.Log;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -60,16 +61,20 @@ public interface SwapJob {
             DBStore dbStore,
             SwapStore swapStore
     ) {
-        if (cfg.isPresent()) {
-            return new SwapJobImpl(
-                    cfg.get(),
-                    lock,
-                    repoStore,
-                    dbStore,
-                    swapStore
-            );
+        if (!cfg.isPresent()) {
+            return new NoopSwapJob();
         }
-        return new NoopSwapJob();
+        if (!swapStore.isSafe()) {
+            Log.warn("Swap store '{}' is not safe; disabling swap job", swapStore.getClass().getSimpleName());
+            return new NoopSwapJob();
+        }
+        return new SwapJobImpl(
+                cfg.get(),
+                lock,
+                repoStore,
+                dbStore,
+                swapStore
+        );
     }
 
     /**

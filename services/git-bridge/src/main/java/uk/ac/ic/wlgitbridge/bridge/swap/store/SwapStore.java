@@ -41,4 +41,11 @@ public interface SwapStore {
 
     void remove(String projectName);
 
+    /**
+     * Returns true if the swap store safely persists swapped projects.
+     *
+     * Fake swap stores should return false.
+     */
+    boolean isSafe();
+
 }

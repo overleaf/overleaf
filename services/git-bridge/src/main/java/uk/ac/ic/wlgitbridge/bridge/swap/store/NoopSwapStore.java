@@ -25,4 +25,8 @@ public class NoopSwapStore implements SwapStore {
     @Override
     public void remove(String projectName) {}
 
+    @Override
+    public boolean isSafe() {
+      return false;
+    }
 }
