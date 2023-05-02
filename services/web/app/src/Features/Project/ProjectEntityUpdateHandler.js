@@ -1396,8 +1396,13 @@ const ProjectEntityUpdateHandler = {
             return callback(error)
           }
 
-          let { docs, files, folders } =
-            ProjectEntityHandler.getAllEntitiesFromProject(project)
+          let docs, files, folders
+          try {
+            ;({ docs, files, folders } =
+              ProjectEntityHandler.getAllEntitiesFromProject(project))
+          } catch (error) {
+            return callback(error)
+          }
           // _checkFileTree() must be passed the folders before docs and
           // files
           ProjectEntityUpdateHandler._checkFiletree(
@@ -1489,7 +1494,11 @@ const ProjectEntityUpdateHandler = {
           // the case only because getAllEntitiesFromProject() returns folders
           // in that order and resyncProjectHistory() calls us with the folders
           // first.
-          adjustPathsAfterFolderRename(entity.path, newPath)
+          try {
+            adjustPathsAfterFolderRename(entity.path, newPath)
+          } catch (error) {
+            return callback(error)
+          }
         }
       }
 

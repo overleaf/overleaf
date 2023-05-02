@@ -2374,6 +2374,24 @@ describe('ProjectEntityUpdateHandler', function () {
         ).to.have.been.calledWith(projectId, projectHistoryId, docs, files)
       })
     })
+
+    describe('a project with an invalid file tree', function () {
+      beforeEach(function () {
+        this.callback = sinon.stub()
+        this.ProjectGetter.getProject.yields(null, this.project)
+        this.ProjectEntityHandler.getAllEntitiesFromProject.throws()
+        this.ProjectEntityUpdateHandler.resyncProjectHistory(
+          projectId,
+          this.callback
+        )
+      })
+
+      it('calls the callback with an error', function () {
+        expect(this.callback).to.have.been.calledWith(
+          sinon.match.instanceOf(Error)
+        )
+      })
+    })
   })
 
   describe('_cleanUpEntity', function () {

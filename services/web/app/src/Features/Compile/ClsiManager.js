@@ -717,7 +717,12 @@ const ClsiManager = {
   },
 
   getContentFromDocUpdaterIfMatch(projectId, project, options, callback) {
-    const projectStateHash = ClsiStateManager.computeHash(project, options)
+    let projectStateHash
+    try {
+      projectStateHash = ClsiStateManager.computeHash(project, options)
+    } catch (err) {
+      return callback(err)
+    }
     DocumentUpdaterHandler.getProjectDocsIfMatch(
       projectId,
       projectStateHash,
@@ -763,7 +768,16 @@ const ClsiManager = {
     docUpdaterDocs,
     callback
   ) {
-    const docPath = ProjectEntityHandler.getAllDocPathsFromProject(project)
+    let docPath
+    try {
+      docPath = ProjectEntityHandler.getAllDocPathsFromProject(project)
+    } catch (err) {
+      return callback(
+        OError.tag(err, 'Failed to get all doc paths from project', {
+          projectId,
+        })
+      )
+    }
     const docs = {}
     for (const doc of docUpdaterDocs || []) {
       const path = docPath[doc._id]

@@ -264,6 +264,190 @@ describe('ProjectEntityHandler', function () {
     })
   })
 
+  describe('with an invalid file tree', function () {
+    beforeEach(function () {
+      this.project.rootFolder = [
+        {
+          docs: [
+            (this.doc1 = {
+              name: null, // invalid doc name
+              _id: 'doc1_id',
+            }),
+          ],
+          fileRefs: [
+            (this.file1 = {
+              rev: 1,
+              _id: 'file1_id',
+              name: null, // invalid file name
+            }),
+          ],
+          folders: [
+            (this.folder1 = {
+              name: null, // invalid folder name
+              docs: [
+                (this.doc2 = {
+                  name: 'doc2',
+                  _id: 'doc2_id',
+                }),
+              ],
+              fileRefs: [
+                (this.file2 = {
+                  rev: 2,
+                  name: 'file2',
+                  _id: 'file2_id',
+                }),
+              ],
+              folders: null,
+            }),
+            null, // invalid folder
+          ],
+        },
+      ]
+      this.ProjectGetter.getProjectWithoutDocLines = sinon
+        .stub()
+        .yields(null, this.project)
+    })
+
+    describe('getAllDocs', function () {
+      beforeEach(function () {
+        this.docs = [
+          {
+            _id: this.doc1._id,
+            lines: (this.lines1 = ['one']),
+            rev: (this.rev1 = 1),
+          },
+          {
+            _id: this.doc2._id,
+            lines: (this.lines2 = ['two']),
+            rev: (this.rev2 = 2),
+          },
+        ]
+        this.DocstoreManager.getAllDocs = sinon
+          .stub()
+          .callsArgWith(1, null, this.docs)
+        this.ProjectEntityHandler.getAllDocs(projectId, this.callback)
+      })
+
+      it('should get the doc lines and rev from the docstore', function () {
+        this.DocstoreManager.getAllDocs.calledWith(projectId).should.equal(true)
+      })
+
+      it('should call the callback with an error', function () {
+        this.callback.should.have.been.calledWith(sinon.match.defined)
+      })
+    })
+
+    describe('getAllFiles', function () {
+      beforeEach(function () {
+        this.callback = sinon.stub()
+        this.ProjectEntityHandler.getAllFiles(projectId, this.callback)
+      })
+
+      it('should call the callback with and error', function () {
+        this.callback.should.have.been.calledWith(sinon.match.defined)
+      })
+    })
+
+    describe('getDocPathByProjectIdAndDocId', function () {
+      beforeEach(function () {
+        this.callback = sinon.stub()
+      })
+      it('should call the callback with an error for an existing doc id at the root level', function () {
+        this.ProjectEntityHandler.getDocPathByProjectIdAndDocId(
+          projectId,
+          this.doc1._id,
+          this.callback
+        )
+        this.callback.should.have.been.calledWith(sinon.match.instanceOf(Error))
+      })
+
+      it('should call the callback with an error for an existing doc id nested within a folder', function () {
+        this.ProjectEntityHandler.getDocPathByProjectIdAndDocId(
+          projectId,
+          this.doc2._id,
+          this.callback
+        )
+        this.callback.should.have.been.calledWith(sinon.match.instanceOf(Error))
+      })
+
+      it('should call the callback with an error for a non-existing doc', function () {
+        this.ProjectEntityHandler.getDocPathByProjectIdAndDocId(
+          projectId,
+          'non-existing-id',
+          this.callback
+        )
+        this.callback.should.have.been.calledWith(sinon.match.instanceOf(Error))
+      })
+
+      it('should call the callback with an error for an existing file', function () {
+        this.ProjectEntityHandler.getDocPathByProjectIdAndDocId(
+          projectId,
+          this.file1._id,
+          this.callback
+        )
+        this.callback.should.have.been.calledWith(sinon.match.instanceOf(Error))
+      })
+    })
+
+    describe('_getAllFolders', function () {
+      beforeEach(function () {
+        this.callback = sinon.stub()
+        this.ProjectEntityHandler._getAllFolders(projectId, this.callback)
+      })
+
+      it('should get the project without the docs lines', function () {
+        this.ProjectGetter.getProjectWithoutDocLines
+          .calledWith(projectId)
+          .should.equal(true)
+      })
+
+      it('should call the callback with an error', function () {
+        this.callback.should.have.been.calledWith(sinon.match.defined)
+      })
+    })
+
+    describe('getAllEntities', function () {
+      beforeEach(function () {
+        this.ProjectGetter.getProject = sinon.stub().yields(null, this.project)
+        this.callback = sinon.stub()
+        this.ProjectEntityHandler.getAllEntities(projectId, this.callback)
+      })
+
+      it('should call the callback with an error', function () {
+        this.callback.should.have.been.calledWith(sinon.match.defined)
+      })
+    })
+
+    describe('getAllDocPathsFromProjectById', function () {
+      beforeEach(function () {
+        this.callback = sinon.stub()
+        this.ProjectEntityHandler.getAllDocPathsFromProjectById(
+          projectId,
+          this.callback
+        )
+      })
+
+      it('should call the callback with an error', function () {
+        this.callback.should.have.been.calledWith(sinon.match.defined)
+      })
+    })
+
+    describe('getDocPathFromProjectByDocId', function () {
+      beforeEach(function () {
+        this.callback = sinon.stub()
+        this.ProjectEntityHandler.getDocPathFromProjectByDocId(
+          projectId,
+          this.doc1._id,
+          this.callback
+        )
+      })
+
+      it('should call the callback with an error', function () {
+        this.callback.should.have.been.calledWith(sinon.match.defined)
+      })
+    })
+  })
+
   describe('getDoc', function () {
     beforeEach(function () {
       this.lines = ['mock', 'doc', 'lines']

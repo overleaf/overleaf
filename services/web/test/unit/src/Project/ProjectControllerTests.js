@@ -1558,6 +1558,17 @@ describe('ProjectController', function () {
       }
       this.ProjectController.projectEntitiesJson(this.req, this.res, this.next)
     })
+
+    it('should call next with an error if the project file tree is invalid', function (done) {
+      this.ProjectEntityHandler.getAllEntitiesFromProject = sinon
+        .stub()
+        .throws()
+      this.next = err => {
+        expect(err).to.be.an.instanceof(Error)
+        done()
+      }
+      this.ProjectController.projectEntitiesJson(this.req, this.res, this.next)
+    })
   })
 
   describe('_buildProjectViewModel', function () {

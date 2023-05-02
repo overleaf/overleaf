@@ -394,8 +394,13 @@ const ProjectController = {
       if (err != null) {
         return next(err)
       }
-      const { docs, files } =
-        ProjectEntityHandler.getAllEntitiesFromProject(project)
+      let docs, files
+      try {
+        ;({ docs, files } =
+          ProjectEntityHandler.getAllEntitiesFromProject(project))
+      } catch (err) {
+        return next(err)
+      }
       const entities = docs
         .concat(files)
         // Sort by path ascending
