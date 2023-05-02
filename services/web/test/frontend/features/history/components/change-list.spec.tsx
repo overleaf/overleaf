@@ -398,7 +398,9 @@ describe('change list', function () {
       waitForData()
 
       cy.findByLabelText(/labels/i).click({ force: true })
-      cy.get('.history-version-label').should('have.length', 1)
+
+      // One pseudo-label for the current state, one for our label
+      cy.get('.history-version-label').should('have.length', 2)
     })
   })
 })
