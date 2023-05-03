@@ -22,8 +22,12 @@ import Icon from '../../../shared/components/icon'
 import classnames from 'classnames'
 import useScopeValue from '../../../shared/hooks/use-scope-value'
 import { getStoredSelection, setStoredSelection } from '../extensions/search'
+import { debounce } from 'lodash'
+import { EditorState } from '@codemirror/state'
 
-const MAX_MATCH_COUNT = 1000
+const MATCH_COUNT_DEBOUNCE_WAIT = 100 // the amount of ms to wait before counting matches
+const MAX_MATCH_COUNT = 999 // the maximum number of matches to count
+const MAX_MATCH_TIME = 100 // the maximum amount of ms allowed for counting matches
 
 type ActiveSearchOption =
   | 'caseSensitive'
@@ -31,6 +35,12 @@ type ActiveSearchOption =
   | 'wholeWord'
   | 'withinSelection'
   | null
+
+type MatchPositions = {
+  current: number | null
+  total: number
+  interrupted: boolean
+}
 
 const CodeMirrorSearchForm: FC = () => {
   const view = useCodeMirrorViewContext()
@@ -52,10 +62,7 @@ const CodeMirrorSearchForm: FC = () => {
 
   const { t } = useTranslation()
 
-  const [position, setPosition] = useState<{
-    current: number
-    total: number
-  } | null>(null)
+  const [position, setPosition] = useState<MatchPositions | null>(null)
 
   const formRef = useRef<HTMLFormElement | null>(null)
   const inputRef = useRef<HTMLInputElement | null>(null)
@@ -80,34 +87,7 @@ const CodeMirrorSearchForm: FC = () => {
   }, [])
 
   useEffect(() => {
-    const { from, to } = state.selection.main
-
-    const query = getSearchQuery(state)
-
-    if (query.valid) {
-      const cursor = query.getCursor(state.doc) as SearchCursor
-
-      let total = 0
-      let current = 0
-
-      while (!cursor.next().done) {
-        total++
-
-        if (total >= MAX_MATCH_COUNT) {
-          break
-        }
-
-        const item = cursor.value
-
-        if (current === 0 && item.from === from && item.to === to) {
-          current = total
-        }
-      }
-
-      setPosition({ current, total })
-    } else {
-      setPosition(null)
-    }
+    buildPosition(state, setPosition)
   }, [state])
 
   const handleChange = useCallback(() => {
@@ -435,9 +415,9 @@ const CodeMirrorSearchForm: FC = () => {
 
           {position !== null && (
             <div className="ol-cm-search-form-position">
-              {position.total === MAX_MATCH_COUNT
-                ? `${position.current} ${t('of')} ${MAX_MATCH_COUNT}+`
-                : `${position.current} ${t('of')} ${position.total}`}
+              {position.current === null ? '?' : position.current} {t('of')}{' '}
+              {position.total}
+              {position.interrupted && '+'}
             </div>
           )}
         </div>
@@ -483,3 +463,60 @@ function isInvalidRegExp(source: string) {
 }
 
 export default CodeMirrorSearchForm
+
+const buildPosition = debounce(
+  (
+    state: EditorState,
+    setPosition: (position: MatchPositions | null) => void
+  ) => {
+    const { main } = state.selection
+
+    const query = getSearchQuery(state)
+
+    if (!query.valid) {
+      return setPosition(null)
+    }
+
+    const cursor = query.getCursor(state.doc) as SearchCursor
+
+    const startTime = Date.now()
+
+    let total = 0
+    let current = null
+
+    while (!cursor.next().done) {
+      total++
+
+      // if there are too many matches, bail out
+      if (total >= MAX_MATCH_COUNT) {
+        return setPosition({
+          current,
+          total,
+          interrupted: true,
+        })
+      }
+
+      const { from, to } = cursor.value
+
+      if (current === null && main.from === from && main.to === to) {
+        current = total
+      }
+
+      // if finding matches is taking too long, bail out
+      if (Date.now() - startTime > MAX_MATCH_TIME) {
+        return setPosition({
+          current,
+          total,
+          interrupted: true,
+        })
+      }
+    }
+
+    setPosition({
+      current: current ?? 0,
+      total,
+      interrupted: false,
+    })
+  },
+  MATCH_COUNT_DEBOUNCE_WAIT
+)
