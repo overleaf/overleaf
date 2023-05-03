@@ -102,6 +102,10 @@ export const enterNode = (
       return
     }
 
+    if (ctrlSeq.type.is('$CtrlSym')) {
+      return
+    }
+
     const optionalArguments = commandNode.getChildren('OptionalArgument')
     const commandArguments = commandNode.getChildren('$Argument')
     const text = state.doc.sliceString(ctrlSeq.from, ctrlSeq.to)
