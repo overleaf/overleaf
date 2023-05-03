@@ -124,6 +124,27 @@ export const shortcuts = () => {
       preventDefault: true,
       run: cloneSelectionVertically(true, false),
     },
+    // duplicates of the above commands, allowing Ctrl on macOS for backwards compatibility
+    {
+      mac: 'Ctrl-Alt-ArrowUp',
+      preventDefault: true,
+      run: cloneSelectionVertically(false, true),
+    },
+    {
+      mac: 'Ctrl-Alt-ArrowDown',
+      preventDefault: true,
+      run: cloneSelectionVertically(true, true),
+    },
+    {
+      mac: 'Ctrl-Alt-Shift-ArrowUp',
+      preventDefault: true,
+      run: cloneSelectionVertically(false, false),
+    },
+    {
+      mac: 'Ctrl-Alt-Shift-ArrowDown',
+      preventDefault: true,
+      run: cloneSelectionVertically(true, false),
+    },
     {
       key: 'Ctrl-Alt-ArrowLeft',
       preventDefault: true,
