@@ -1,5 +1,5 @@
 import { environments, snippet } from './data/environments'
-import { customSnippetCompletion, createCommandApplier } from './apply'
+import { applySnippet, extendOverUnpairedClosingBrace } from './apply'
 import { Completion, CompletionContext } from '@codemirror/autocomplete'
 import { Completions } from './types'
 
@@ -8,31 +8,31 @@ import { Completions } from './types'
  */
 export function buildEnvironmentCompletions(completions: Completions) {
   for (const [item, snippet] of environments) {
-    completions.commands.push(
-      customSnippetCompletion(
-        snippet,
-        {
-          type: 'env',
-          label: `\\begin{${item}} …`,
-        },
-        // clear snippet for some environments after inserting
-        item === 'itemize' || item === 'enumerate'
-      )
-    )
+    // clear snippet for some environments after inserting
+    const clear =
+      item === 'abstract' || item === 'itemize' || item === 'enumerate'
+    completions.commands.push({
+      type: 'env',
+      label: `\\begin{${item}} …`,
+      apply: applySnippet(snippet, clear),
+      extend: extendOverUnpairedClosingBrace,
+    })
   }
 }
 
 /**
  * A `begin` environment completion with a snippet, for the current context
  */
-export function customBeginCompletion(name: string) {
+export function customBeginCompletion(name: string): Completion | null {
   if (environments.has(name)) {
     return null
   }
 
-  return customSnippetCompletion(snippet(name), {
+  return {
     label: `\\begin{${name}} …`,
-  })
+    apply: applySnippet(snippet(name)),
+    extend: extendOverUnpairedClosingBrace,
+  }
 }
 
 /**
@@ -61,7 +61,6 @@ export function customEndCompletions(context: CompletionContext): Completion[] {
     completions.push({
       label: env,
       boost: boost++, // environments opened later rank higher
-      apply: createCommandApplier(env),
     })
   }
 

@@ -1,4 +1,4 @@
-import { createRequiredParameterApplier } from './apply'
+import { extendRequiredParameter } from './apply'
 import { Completions } from './types'
 import { metadataState } from '../../../extensions/language'
 import { CompletionContext } from '@codemirror/autocomplete'
@@ -26,7 +26,7 @@ export function buildLabelCompletions(
     completions.labels.push({
       type: 'label',
       label,
-      apply: createRequiredParameterApplier(label),
+      extend: extendRequiredParameter,
     })
   }
 }

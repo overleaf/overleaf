@@ -3,6 +3,8 @@ import { EditorProviders } from '../../../helpers/editor-providers'
 import CodemirrorEditor from '../../../../../frontend/js/features/source-editor/components/codemirror-editor'
 import { mockScope } from '../helpers/mock-scope'
 
+const isMac = /Mac/.test(window.navigator?.platform)
+
 const Container: FC = ({ children }) => (
   <div style={{ width: 785, height: 785 }}>{children}</div>
 )
@@ -110,7 +112,7 @@ ${'long line '.repeat(200)}`
   it('has no active line highlight when there is a selection', function () {
     // Put the cursor on a blank line
     cy.get('.cm-line').eq(1).click().as('line')
-    cy.get('@line').type('{ctrl}A')
+    cy.get('@line').type(isMac ? '{cmd}A' : '{ctrl}A')
 
     cy.get('.cm-activeLine').should('not.exist')
   })

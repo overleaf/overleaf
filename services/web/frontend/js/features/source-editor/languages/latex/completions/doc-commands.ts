@@ -1,4 +1,4 @@
-import { customSnippetCompletion } from './apply'
+import { applySnippet, extendOverUnpairedClosingBrace } from './apply'
 import { Completion, CompletionContext } from '@codemirror/autocomplete'
 import { documentCommands } from '../document-commands'
 import { Command } from '../../../utils/tree-operations/commands'
@@ -16,19 +16,19 @@ export function customCommandCompletions(
       .filter(Boolean)
   )
 
-  const output = []
+  const output: Completion[] = []
 
   const items = countCommandUsage(context)
 
   for (const item of items.values()) {
     if (!existingCommands.has(commandNameFromLabel(item.label))) {
-      output.push(
-        customSnippetCompletion(item.snippet, {
-          type: 'cmd',
-          label: item.label,
-          boost: item.count - 10,
-        })
-      )
+      output.push({
+        type: 'cmd',
+        label: item.label,
+        boost: item.count - 10,
+        apply: applySnippet(item.snippet),
+        extend: extendOverUnpairedClosingBrace,
+      })
     }
   }
 

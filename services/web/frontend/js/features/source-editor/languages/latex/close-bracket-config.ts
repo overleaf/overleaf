@@ -1,12 +1,9 @@
-import { CloseBracketConfig } from '../../extensions/close-brackets'
+import { EditorState, SelectionRange, Text } from '@codemirror/state'
 import {
-  codePointAt,
-  codePointSize,
-  EditorState,
-  SelectionRange,
-  Text,
-} from '@codemirror/state'
-import { completionStatus } from '@codemirror/autocomplete'
+  CloseBracketConfig,
+  completionStatus,
+  prevChar,
+} from '@codemirror/autocomplete'
 
 export const closeBracketConfig: CloseBracketConfig = {
   brackets: ['$', '$$', '[', '{', '('],
@@ -88,13 +85,6 @@ export const closeBracketConfig: CloseBracketConfig = {
         return open + close
     }
   },
-}
-
-function prevChar(doc: Text, pos: number) {
-  const prev = doc.sliceString(pos - 2, pos)
-  return codePointSize(codePointAt(prev, 0)) === prev.length
-    ? prev
-    : prev.slice(1)
 }
 
 function countSurroundingCharacters(doc: Text, pos: number, insert: string) {

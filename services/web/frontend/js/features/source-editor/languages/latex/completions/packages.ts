@@ -1,7 +1,7 @@
 import {
-  customSnippetCompletion,
-  createRequiredParameterApplier,
-  createCommandApplier,
+  applySnippet,
+  extendOverUnpairedClosingBrace,
+  extendRequiredParameter,
 } from './apply'
 import { packageNames } from './data/package-names'
 import { Completions } from './types'
@@ -29,12 +29,12 @@ export function buildPackageCompletions(
       uniquePackageNames.add(packageName)
 
       for (const item of commands) {
-        completions.commands.push(
-          customSnippetCompletion(item.snippet, {
-            type: item.meta,
-            label: item.caption,
-          })
-        )
+        completions.commands.push({
+          type: item.meta,
+          label: item.caption,
+          apply: applySnippet(item.snippet),
+          extend: extendOverUnpairedClosingBrace,
+        })
       }
     }
   }
@@ -47,7 +47,7 @@ export function buildPackageCompletions(
       completions.packages.push({
         type: 'pkg',
         label: item,
-        apply: createRequiredParameterApplier(item),
+        extend: extendRequiredParameter,
       })
 
       const label = `\\usepackage{${item}}`
@@ -56,19 +56,19 @@ export function buildPackageCompletions(
       completions.commands.push({
         type: 'pkg',
         label,
-        apply: createCommandApplier(label),
+        extend: extendOverUnpairedClosingBrace,
       })
     }
   }
 
   // empty \\usepackage{…} snippet
-  completions.commands.push(
-    customSnippetCompletion('\\usepackage{#{}}', {
-      type: 'pkg',
-      label: '\\usepackage{}',
-      boost: 10,
-    })
-  )
+  completions.commands.push({
+    type: 'pkg',
+    label: '\\usepackage{}',
+    boost: 10,
+    apply: applySnippet('\\usepackage{#{}}'),
+    extend: extendOverUnpairedClosingBrace,
+  })
 }
 
 const findExistingPackageNames = (context: CompletionContext) => {

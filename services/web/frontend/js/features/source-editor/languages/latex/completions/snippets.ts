@@ -1,6 +1,6 @@
 import topHundredSnippets from './data/top-hundred-snippets'
 import snippets from './data/snippets'
-import { customSnippetCompletion } from './apply'
+import { applySnippet, extendOverUnpairedClosingBrace } from './apply'
 import { Completions } from './types'
 
 /**
@@ -8,21 +8,21 @@ import { Completions } from './types'
  */
 export function buildSnippetCompletions(completions: Completions) {
   for (const item of topHundredSnippets) {
-    completions.commands.push(
-      customSnippetCompletion(item.snippet, {
-        type: item.meta,
-        label: item.caption,
-        boost: item.score,
-      })
-    )
+    completions.commands.push({
+      type: item.meta,
+      label: item.caption,
+      boost: item.score,
+      apply: applySnippet(item.snippet),
+      extend: extendOverUnpairedClosingBrace,
+    })
   }
 
   for (const item of snippets) {
-    completions.commands.push(
-      customSnippetCompletion(item.snippet, {
-        type: item.type,
-        label: item.label,
-      })
-    )
+    completions.commands.push({
+      type: item.type,
+      label: item.label,
+      apply: applySnippet(item.snippet),
+      extend: extendOverUnpairedClosingBrace,
+    })
   }
 }

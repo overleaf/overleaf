@@ -4,7 +4,7 @@
 import { CompletionContext } from '@codemirror/autocomplete'
 import { Completions } from './types'
 import { metadataState } from '../../../extensions/language'
-import { createRequiredParameterApplier } from './apply'
+import { extendRequiredParameter } from './apply'
 
 export function buildReferenceCompletions(
   completions: Completions,
@@ -20,7 +20,7 @@ export function buildReferenceCompletions(
     completions.references.push({
       type: 'reference',
       label: reference,
-      apply: createRequiredParameterApplier(reference),
+      extend: extendRequiredParameter,
     })
   }
 }
