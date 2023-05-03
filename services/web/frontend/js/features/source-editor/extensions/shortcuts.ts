@@ -50,25 +50,22 @@ export const shortcuts = () => {
       run: indentLess,
     },
     {
-      key: 'Ctrl-y',
-      mac: 'Mod-y',
+      key: 'Mod-y',
       preventDefault: true,
       run: redo,
     },
     {
-      key: 'Ctrl-Shift-z',
+      key: 'Mod-Shift-z',
       preventDefault: true,
       run: redo,
     },
     {
-      key: 'Ctrl-Shift-/',
-      mac: 'Mod-Shift-/',
+      key: 'Mod-Shift-/',
       preventDefault: true,
       run: toggleLineComment,
     },
     {
-      key: 'Ctrl-ß',
-      mac: 'Mod-ß',
+      key: 'Mod-ß',
       preventDefault: true,
       run: toggleLineComment,
     },
@@ -88,46 +85,42 @@ export const shortcuts = () => {
       run: changeCase(false), // lowercase
     },
     {
-      key: 'Ctrl-d',
-      mac: 'Mod-d',
+      key: 'Mod-d',
       preventDefault: true,
       run: deleteLine,
     },
     {
-      key: 'Ctrl-j',
-      mac: 'Mod-j',
+      key: 'Mod-j',
       preventDefault: true,
       run: toggleReviewPanel,
     },
     {
-      key: 'Ctrl-Shift-c',
-      mac: 'Mod-Shift-c',
+      key: 'Mod-Shift-c',
       preventDefault: true,
       run: addNewCommentFromKbdShortcut,
     },
     {
-      key: 'Ctrl-Shift-a',
-      mac: 'Mod-Shift-a',
+      key: 'Mod-Shift-a',
       preventDefault: true,
       run: toggleTrackChangesFromKbdShortcut,
     },
     {
-      key: 'Ctrl-Alt-ArrowUp',
+      key: 'Mod-Alt-ArrowUp',
       preventDefault: true,
       run: cloneSelectionVertically(false, true),
     },
     {
-      key: 'Ctrl-Alt-ArrowDown',
+      key: 'Mod-Alt-ArrowDown',
       preventDefault: true,
       run: cloneSelectionVertically(true, true),
     },
     {
-      key: 'Ctrl-Alt-Shift-ArrowUp',
+      key: 'Mod-Alt-Shift-ArrowUp',
       preventDefault: true,
       run: cloneSelectionVertically(false, false),
     },
     {
-      key: 'Ctrl-Alt-Shift-ArrowDown',
+      key: 'Mod-Alt-Shift-ArrowDown',
       preventDefault: true,
       run: cloneSelectionVertically(true, false),
     },
@@ -142,8 +135,7 @@ export const shortcuts = () => {
       run: selectOccurrence(true),
     },
     {
-      key: 'Ctrl-Shift-d',
-      mac: 'Mod-Shift-d',
+      key: 'Mod-Shift-d',
       run: duplicateSelection,
     },
     {
@@ -171,11 +163,11 @@ export const shortcuts = () => {
       shift: selectSyntaxRight,
     },
     {
-      mac: 'Mod-Backspace',
+      mac: 'Cmd-Backspace',
       run: deleteToVisualLineStart,
     },
     {
-      mac: 'Mod-Delete',
+      mac: 'Cmd-Delete',
       run: deleteToVisualLineEnd,
     },
   ]
