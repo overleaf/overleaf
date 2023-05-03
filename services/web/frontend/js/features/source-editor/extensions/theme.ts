@@ -243,6 +243,10 @@ const staticTheme = EditorView.theme({
 })
 
 const loadSelectedTheme = async (editorTheme: string) => {
+  if (!editorTheme) {
+    editorTheme = 'textmate' // use the default theme if unset
+  }
+
   const { theme, highlightStyle, dark } = await import(
     /* webpackChunkName: "cm6-theme" */ `../themes/cm6/${editorTheme}.json`
   )
