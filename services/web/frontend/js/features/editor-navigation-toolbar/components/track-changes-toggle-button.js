@@ -2,7 +2,11 @@ import PropTypes from 'prop-types'
 import classNames from 'classnames'
 import { useTranslation } from 'react-i18next'
 
-function TrackChangesToggleButton({ trackChangesIsOpen, disabled, onClick }) {
+function TrackChangesToggleButton({
+  trackChangesIsOpen,
+  disabled,
+  onMouseDown,
+}) {
   const { t } = useTranslation()
   const classes = classNames('btn', 'btn-full-height', {
     active: trackChangesIsOpen && !disabled,
@@ -11,7 +15,7 @@ function TrackChangesToggleButton({ trackChangesIsOpen, disabled, onClick }) {
 
   return (
     <div className="toolbar-item">
-      <button disabled={disabled} className={classes} onMouseDown={onClick}>
+      <button disabled={disabled} className={classes} onMouseDown={onMouseDown}>
         <i className="review-icon" />
         <p className="toolbar-label">{t('review')}</p>
       </button>
@@ -22,7 +26,7 @@ function TrackChangesToggleButton({ trackChangesIsOpen, disabled, onClick }) {
 TrackChangesToggleButton.propTypes = {
   trackChangesIsOpen: PropTypes.bool,
   disabled: PropTypes.bool,
-  onClick: PropTypes.func.isRequired,
+  onMouseDown: PropTypes.func.isRequired,
 }
 
 export default TrackChangesToggleButton

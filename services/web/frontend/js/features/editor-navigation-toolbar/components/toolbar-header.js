@@ -68,7 +68,7 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
 
         {shouldDisplayTrackChangesButton && (
           <TrackChangesToggleButton
-            onClick={toggleReviewPanelOpen}
+            onMouseDown={toggleReviewPanelOpen}
             disabled={historyIsOpen}
             trackChangesIsOpen={reviewPanelOpen}
           />
