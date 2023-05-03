@@ -23,7 +23,7 @@ import classnames from 'classnames'
 import useScopeValue from '../../../shared/hooks/use-scope-value'
 import { getStoredSelection, setStoredSelection } from '../extensions/search'
 import { debounce } from 'lodash'
-import { EditorState } from '@codemirror/state'
+import { EditorSelection, EditorState } from '@codemirror/state'
 
 const MATCH_COUNT_DEBOUNCE_WAIT = 100 // the amount of ms to wait before counting matches
 const MAX_MATCH_COUNT = 999 // the maximum number of matches to count
@@ -169,7 +169,12 @@ const CodeMirrorSearchForm: FC = () => {
       switch (event.key) {
         case 'Enter':
           event.preventDefault()
-          if (event.shiftKey) {
+          if (emacsKeybindingsActive) {
+            closeSearchPanel(view)
+            view.dispatch({
+              selection: EditorSelection.cursor(view.state.selection.main.to),
+            })
+          } else if (event.shiftKey) {
             findPrevious(view)
           } else {
             findNext(view)
@@ -178,7 +183,7 @@ const CodeMirrorSearchForm: FC = () => {
       }
       handleEmacsNavigation(event)
     },
-    [view, handleEmacsNavigation]
+    [view, handleEmacsNavigation, emacsKeybindingsActive]
   )
 
   const handleReplaceKeyDown = useCallback(
