@@ -1,6 +1,9 @@
 const minimist = require('minimist')
 const { ObjectId } = require('mongodb')
 const { waitForDb, db } = require('../../app/src/infrastructure/mongodb')
+const {
+  hashSecret,
+} = require('../../modules/oauth2-server/app/src/SecretsHelper')
 
 async function main() {
   const opts = parseArgs()
@@ -40,7 +43,7 @@ async function upsertApplication(opts) {
     updates.name = opts.name
   }
   if (opts.secret != null) {
-    updates.clientSecret = opts.secret
+    updates.clientSecret = hashSecret(opts.secret)
   }
   if (opts.grants != null) {
     updates.grants = opts.grants
