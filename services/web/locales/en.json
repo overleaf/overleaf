@@ -850,7 +850,6 @@
   "log_viewer_error": "There was a problem displaying this project’s compilation errors and logs.",
   "logged_in_with_email": "You are currently logged in to <b>__appName__</b> with the email <b>__email__</b>.",
   "logging_in": "Logging in",
-  "logging_out": "Logging out",
   "login": "Login",
   "login_error": "Login error",
   "login_failed": "Login failed",

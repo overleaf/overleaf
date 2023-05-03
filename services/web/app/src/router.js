@@ -263,7 +263,6 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     '/read-only/one-time-login'
   )
 
-  webRouter.get('/logout', UserPagesController.logoutPage)
   webRouter.post('/logout', UserController.logout)
 
   webRouter.get('/restricted', AuthorizationMiddleware.restricted)

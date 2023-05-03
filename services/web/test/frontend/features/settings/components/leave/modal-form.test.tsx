@@ -89,7 +89,7 @@ describe('<LeaveModalForm />', function () {
         sinon.assert.calledTwice(setInFlight)
         sinon.assert.calledWithMatch(setInFlight, false)
         sinon.assert.calledOnce(assignStub)
-        sinon.assert.calledWith(assignStub, '/login')
+        sinon.assert.calledWith(assignStub, '/')
       })
     })
 

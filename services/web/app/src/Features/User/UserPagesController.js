@@ -60,7 +60,9 @@ async function settingsPage(req, res) {
   const user = await UserGetter.promises.getUser(userId)
   if (!user) {
     // The user has just deleted their account.
-    return res.redirect('/logout')
+    return UserSessionsManager.revokeAllUserSessions({ _id: userId }, [], () =>
+      res.redirect('/')
+    )
   }
   res.render('user/settings', {
     title: 'account_settings',
@@ -149,10 +151,6 @@ const UserPagesController = {
    */
   oneTimeLoginPage(req, res, next) {
     res.render('user/one_time_login')
-  },
-
-  logoutPage(req, res) {
-    res.render('user/logout')
   },
 
   renderReconfirmAccountPage(req, res) {

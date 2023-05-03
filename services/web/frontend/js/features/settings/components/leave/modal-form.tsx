@@ -55,7 +55,7 @@ function LeaveModalForm({
       },
     })
       .then(() => {
-        location.assign('/login')
+        location.assign('/')
       })
       .catch(setError)
       .finally(() => {
