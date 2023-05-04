@@ -6,6 +6,7 @@ import { Selection } from '../../services/types/selection'
 type LoadingState =
   | 'loadingInitial'
   | 'loadingUpdates'
+  | 'loadingFileDiffs'
   | 'restoringFile'
   | 'ready'
 

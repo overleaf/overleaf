@@ -133,7 +133,12 @@ function useHistory() {
       }
     }
 
-    if (updatesInfo.atEnd || loadingState === 'loadingUpdates') return
+    if (
+      updatesInfo.atEnd ||
+      !(loadingState === 'loadingInitial' || loadingState === 'ready')
+    ) {
+      return
+    }
 
     const updatesPromise = limitUpdates(
       fetchUpdates(projectId, updatesInfo.nextBeforeTimestamp)
@@ -193,10 +198,12 @@ function useHistory() {
 
   // Load files when the update selection changes
   useEffect(() => {
-    if (!updateRange || !filesEmpty) {
+    if (!updateRange || loadingState !== 'ready' || !filesEmpty) {
       return
     }
     const { fromV, toV } = updateRange
+
+    setLoadingState('loadingFileDiffs')
 
     diffFiles(projectId, fromV, toV)
       .then(({ diff: files }) => {
@@ -223,7 +230,18 @@ function useHistory() {
       .catch(error => {
         setError(error)
       })
-  }, [updateRange, projectId, updates, comparing, setError, filesEmpty])
+      .finally(() => {
+        setLoadingState('ready')
+      })
+  }, [
+    updateRange,
+    projectId,
+    updates,
+    comparing,
+    setError,
+    loadingState,
+    filesEmpty,
+  ])
 
   useEffect(() => {
     // Set update range if there isn't one and updates have loaded

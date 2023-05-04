@@ -92,7 +92,10 @@ function AllHistoryList() {
       </div>
       {showOwnerPaywall ? <OwnerPaywallPrompt /> : null}
       {showNonOwnerPaywall ? <NonOwnerPaywallPrompt /> : null}
-      {loadingState === 'ready' ? null : <LoadingSpinner />}
+      {loadingState === 'loadingInitial' ||
+      loadingState === 'loadingUpdates' ? (
+        <LoadingSpinner />
+      ) : null}
     </div>
   )
 }

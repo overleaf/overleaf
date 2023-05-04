@@ -11,14 +11,15 @@ import ErrorMessage from '../error-message'
 
 function DiffView() {
   const [diff, setDiff] = useState<Nullable<Diff>>(null)
-  const { selection, projectId } = useHistoryContext()
+  const { selection, projectId, loadingState } = useHistoryContext()
+  const loadingFileDiffs = loadingState === 'loadingFileDiffs'
 
   const { isLoading, runAsync, error } = useAsync<DocDiffResponse>()
 
   const { updateRange, selectedFile } = selection
 
   useEffect(() => {
-    if (!updateRange || !selectedFile?.pathname) {
+    if (!updateRange || !selectedFile?.pathname || loadingFileDiffs) {
       return
     }
 
@@ -44,7 +45,7 @@ function DiffView() {
         setDiff(diff)
       })
       .catch(console.error)
-  }, [projectId, runAsync, updateRange, selectedFile])
+  }, [projectId, runAsync, updateRange, selectedFile, loadingFileDiffs])
 
   return (
     <div className="doc-panel">
@@ -56,7 +57,7 @@ function DiffView() {
             <Toolbar diff={diff} selection={selection} />
           </div>
           <div className="doc-container">
-            <Main diff={diff} isLoading={isLoading} />
+            <Main diff={diff} isLoading={isLoading || loadingFileDiffs} />
           </div>
         </>
       )}
