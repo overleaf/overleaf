@@ -18,6 +18,7 @@ FROM base as app
 COPY package.json package-lock.json /overleaf/
 COPY services/history-v1/package.json /overleaf/services/history-v1/
 COPY libraries/ /overleaf/libraries/
+COPY patches/ /overleaf/patches/
 
 RUN cd /overleaf && npm ci --quiet
 
