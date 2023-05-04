@@ -125,7 +125,10 @@ export function highlightLocations() {
 export function scrollToHighlight(view: EditorView, highlight: Highlight) {
   view.dispatch({
     effects: EditorView.scrollIntoView(
-      EditorSelection.range(highlight.range.from, highlight.range.to)
+      EditorSelection.range(highlight.range.from, highlight.range.to),
+      {
+        y: 'center',
+      }
     ),
   })
 }

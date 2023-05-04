@@ -203,8 +203,8 @@ End
     // Click the "More updates above" button, which should scroll the editor up
     // but not quite to the top, and check the new state
     cy.get('.previous-highlight-button').first().click()
-    cy.get('@scroller').invoke('scrollTop').should('not.equal', 0)
-    cy.get('.previous-highlight-button').should('have.length', 1)
+    cy.get('@scroller').invoke('scrollTop').should('equal', 0)
+    cy.get('.previous-highlight-button').should('not.exist')
     cy.get('.next-highlight-button').should('have.length', 1)
   })
 
