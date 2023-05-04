@@ -189,7 +189,7 @@ async function deleteProjectChunks(projectId) {
   assert.mongoId(projectId, 'bad projectId')
 
   await mongodb.chunks.updateMany(
-    { projectId: ObjectId(projectId) },
+    { projectId: ObjectId(projectId), state: 'active' },
     { $set: { state: 'deleted', updatedAt: new Date() } }
   )
 }
