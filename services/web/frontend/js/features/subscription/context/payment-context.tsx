@@ -120,13 +120,10 @@ function usePayment({ publicKey }: RecurlyOptions) {
           country: initialCountry,
         })
         .tax({ tax_code: 'digital', vat_number: '' })
-        .currency(initiallySelectedCurrencyCode)
+        .currency(currencyCode)
         .coupon(initialCouponCode)
         .catch(function (err) {
-          if (
-            initiallySelectedCurrencyCode !== 'USD' &&
-            err.name === 'invalid-currency'
-          ) {
+          if (currencyCode !== 'USD' && err.name === 'invalid-currency') {
             setCurrencyCode('USD')
             setupPricing()
           } else if (err.name === 'api-error' && err.code === 'not-found') {
@@ -206,7 +203,7 @@ function usePayment({ publicKey }: RecurlyOptions) {
       })()
       setCoupon(couponData)
     })
-  }, [])
+  }, [currencyCode])
 
   const addCoupon = useCallback(
     (coupon: PricingFormState['coupon']) => {
