@@ -1,0 +1,10 @@
+--- settings.js
++++ settings.js
+@@ -245,6 +245,7 @@ const settings = {
+   // address and http/https protocol information.
+
+   behindProxy: process.env.SHARELATEX_BEHIND_PROXY || false,
++  trustedProxyIps: process.env.SHARELATEX_TRUSTED_PROXY_IPS,
+
+   i18n: {
+     subdomainLang: {
