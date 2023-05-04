@@ -10,8 +10,7 @@ import {
 import { EditorView, lineNumbers } from '@codemirror/view'
 import { indentationMarkers } from '@replit/codemirror-indentation-markers'
 import { highlights, setHighlightsEffect } from '../../extensions/highlights'
-import useScopeValue from '../../../../shared/hooks/use-scope-value'
-import { theme, Options } from '../../extensions/theme'
+import { theme } from '../../extensions/theme'
 import { indentUnit } from '@codemirror/language'
 import { Highlight } from '../../services/types/doc'
 import useIsMounted from '../../../../shared/hooks/use-is-mounted'
@@ -24,11 +23,7 @@ import Icon from '../../../../shared/components/icon'
 import { useTranslation } from 'react-i18next'
 import { inlineBackground } from '../../../source-editor/extensions/inline-background'
 
-type FontFamily = 'monaco' | 'lucida'
-type LineHeight = 'compact' | 'normal' | 'wide'
-type OverallTheme = '' | 'light-'
-
-function extensions(themeOptions: Options): Extension[] {
+function extensions(): Extension[] {
   return [
     EditorView.editable.of(false),
     lineNumbers(),
@@ -37,7 +32,7 @@ function extensions(themeOptions: Options): Extension[] {
     indentationMarkers({ hideFirstIndent: true, highlightActiveBlock: false }),
     highlights(),
     highlightLocations(),
-    theme(themeOptions),
+    theme(),
     inlineBackground(false),
   ]
 }
@@ -49,22 +44,13 @@ function DocumentDiffViewer({
   doc: string
   highlights: Highlight[]
 }) {
-  const [fontFamily] = useScopeValue<FontFamily>('settings.fontFamily')
-  const [fontSize] = useScopeValue<number>('settings.fontSize')
-  const [lineHeight] = useScopeValue<LineHeight>('settings.lineHeight')
-  const [overallTheme] = useScopeValue<OverallTheme>('settings.overallTheme')
   const isMounted = useIsMounted()
   const { t } = useTranslation()
 
   const [state, setState] = useState(() => {
     return EditorState.create({
       doc,
-      extensions: extensions({
-        fontFamily,
-        fontSize,
-        lineHeight,
-        overallTheme,
-      }),
+      extensions: extensions(),
     })
   })
 
