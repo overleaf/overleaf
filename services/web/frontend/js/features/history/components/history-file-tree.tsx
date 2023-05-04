@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { orderBy, reduce } from 'lodash'
 import { useHistoryContext } from '../context/history-context'
 import {
   fileTreeDiffToFileTreeData,
@@ -9,9 +9,11 @@ import HistoryFileTreeFolderList from './file-tree/history-file-tree-folder-list
 export default function HistoryFileTree() {
   const { selection, error } = useHistoryContext()
 
-  const fileTree = _.reduce(selection.files, reducePathsToTree, [])
+  const fileTree = reduce(selection.files, reducePathsToTree, [])
 
-  const mappedFileTree = fileTreeDiffToFileTreeData(fileTree)
+  const sortedFileTree = orderBy(fileTree, ['-type', 'operation', 'name'])
+
+  const mappedFileTree = fileTreeDiffToFileTreeData(sortedFileTree)
 
   return error ? null : (
     <HistoryFileTreeFolderList
