@@ -436,7 +436,9 @@ function useCodeMirrorScope(view: EditorView) {
     if (cursorHighlights && currentDoc) {
       const items = cursorHighlights[currentDoc.doc_id]
       highlightsRef.current.cursorHighlights = items
-      view.dispatch(setCursorHighlights(items))
+      window.setTimeout(() => {
+        view.dispatch(setCursorHighlights(items))
+      })
     }
   }, [view, cursorHighlights, currentDoc])
 
