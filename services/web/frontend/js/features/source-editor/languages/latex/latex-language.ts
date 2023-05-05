@@ -106,6 +106,9 @@ export const LaTeXLanguage = LRLanguage.define({
           Tokens.ctrlSym.includes(type.name)
         ) {
           types.push('$CtrlSeq')
+          if (Tokens.ctrlSym.includes(type.name)) {
+            types.push('$CtrlSym')
+          }
         } else if (Tokens.envName.includes(type.name)) {
           types.push('$EnvName')
         } else if (type.name.endsWith('Argument')) {
