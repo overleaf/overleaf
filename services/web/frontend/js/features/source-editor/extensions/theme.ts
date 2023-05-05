@@ -123,6 +123,10 @@ const baseTheme = EditorView.baseTheme({
       background: 'none',
     },
   },
+  '.cm-specialChar': {
+    color: 'red',
+    backgroundColor: 'rgba(255, 0, 0, 0.1)',
+  },
   '.cm-widgetBuffer': {
     height: '1.3em',
   },

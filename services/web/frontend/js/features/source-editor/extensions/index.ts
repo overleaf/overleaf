@@ -42,7 +42,7 @@ import { emptyLineFiller } from './empty-line-filler'
 import { goToLinePanel } from './go-to-line'
 import { parserWatcher } from './wait-for-parser'
 import { drawSelection } from './draw-selection'
-import { visual } from './visual/visual'
+import { sourceOnly, visual } from './visual/visual'
 import { scrollOneLine } from './scroll-one-line'
 import { foldingKeymap } from './folding-keymap'
 import { inlineBackground } from './inline-background'
@@ -74,7 +74,16 @@ const moduleExtensions: Array<() => Extension> = importOverleafModules(
 
 export const createExtensions = (options: Record<string, any>): Extension[] => [
   lineNumbers(),
-  highlightSpecialChars(),
+  sourceOnly(
+    false,
+    highlightSpecialChars({
+      addSpecialChars: new RegExp(
+        // non standard space characters (https://jkorpela.fi/chars/spaces.html)
+        '[\u00A0\u1680\u180E\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u200B\u202F\u205F\u3000\uFEFF]',
+        /x/.unicode != null ? 'gu' : 'g'
+      ),
+    })
+  ),
   history({ newGroupDelay: 250 }),
   foldGutter({
     openText: '▾',
