@@ -10,6 +10,7 @@ import { misspelledWordsField } from './misspelled-words'
 import { addIgnoredWord } from './ignored-words'
 import { learnWordRequest } from './backend'
 import { Word } from './spellchecker'
+import { closeCompletion } from '@codemirror/autocomplete'
 
 const ITEMS_TO_SHOW = 8
 
@@ -118,6 +119,17 @@ export const spellingMenuField = StateField.define<Tooltip | null>({
       EditorView.domEventHandlers({
         contextmenu: handleContextMenuEvent,
         click: handleClickEvent,
+        blur: (event, view: EditorView) => {
+          if (
+            event.relatedTarget instanceof HTMLButtonElement &&
+            event.relatedTarget.classList.contains('advanced-ref-search')
+          ) {
+            // prevent closing autocomplete menu if "advanced references search" Open button is clicked
+            return
+          }
+
+          closeCompletion(view)
+        },
       }),
     ]
   },
