@@ -25,7 +25,7 @@ export function customCommandCompletions(
       output.push({
         type: 'cmd',
         label: item.label,
-        boost: item.count - 10,
+        boost: Math.max(0, item.count - 10),
         apply: applySnippet(item.snippet),
         extend: extendOverUnpairedClosingBrace,
       })

@@ -16,13 +16,14 @@ import { documentOutline } from './document-outline'
 import { LaTeXLanguage } from './latex-language'
 import { documentEnvironmentNames } from './document-environment-names'
 
-const completionSources = importOverleafModules('sourceEditorCompletionSources')
-  .map((item: any) => item.import.default)
-  .concat(
-    argumentCompletionSources,
-    inCommandCompletionSource,
-    explicitCommandCompletionSource
-  ) as CompletionSource[]
+const completionSources: CompletionSource[] = [
+  ...argumentCompletionSources,
+  inCommandCompletionSource,
+  explicitCommandCompletionSource,
+  ...importOverleafModules('sourceEditorCompletionSources').map(
+    (item: any) => item.import.default
+  ),
+]
 
 export const latex = () => {
   return new LanguageSupport(LaTeXLanguage, [

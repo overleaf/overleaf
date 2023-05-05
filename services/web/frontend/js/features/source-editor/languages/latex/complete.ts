@@ -338,16 +338,6 @@ const commandCompletionSource = (context: CompletionContext) => {
 
   buildAllCompletions(completions, context)
 
-  // ensure that there's only one completion for each label
-  const uniqueCommandCompletions = Array.from(
-    new Map(
-      [
-        ...completions.commands,
-        ...customCommandCompletions(context, completions.commands),
-      ].map(completion => [completion.label, completion])
-    ).values()
-  )
-
   // Unknown commands
   const prefixMatcher = /^\\[^{\s]*$/
   const prefixMatch = matchBefore.text.match(prefixMatcher)
@@ -356,7 +346,8 @@ const commandCompletionSource = (context: CompletionContext) => {
       from: matchBefore.from,
       validFor: prefixMatcher,
       options: [
-        ...uniqueCommandCompletions,
+        ...completions.commands,
+        ...customCommandCompletions(context, completions.commands),
         ...customEnvironmentCompletions(context),
       ],
     }
@@ -365,7 +356,10 @@ const commandCompletionSource = (context: CompletionContext) => {
   // anything else (no validFor)
   return {
     from: matchBefore.to,
-    options: uniqueCommandCompletions,
+    options: [
+      ...completions.commands,
+      ...customCommandCompletions(context, completions.commands),
+    ],
   }
 }
 

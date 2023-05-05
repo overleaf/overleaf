@@ -12,7 +12,8 @@ export function buildSnippetCompletions(completions: Completions) {
       type: item.meta,
       label: item.caption,
       boost: item.score,
-      apply: applySnippet(item.snippet),
+      apply:
+        item.snippet === item.caption ? undefined : applySnippet(item.snippet),
       extend: extendOverUnpairedClosingBrace,
     })
   }

@@ -71,7 +71,7 @@
     "@babel/preset-env": "^7.14.5",
     "@babel/preset-react": "^7.14.5",
     "@babel/preset-typescript": "^7.16.0",
-    "@codemirror/autocomplete": "github:overleaf/codemirror-autocomplete#cd13c2c15a6f89b207f7cc4523e38fd5ef0efc47",
+    "@codemirror/autocomplete": "github:overleaf/codemirror-autocomplete#4514fd21c6c9219f5c23a6a675ad843bb7a5b2bd",
     "@codemirror/commands": "^6.2.3",
     "@codemirror/lang-markdown": "^6.1.1",
     "@codemirror/language": "^6.6.0",
