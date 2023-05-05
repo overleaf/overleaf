@@ -577,7 +577,6 @@
   "log_out_from": "Se déconnecter de __email__",
   "logged_in_with_email": "Vous êtes actuellement connecté à <b>__appName__</b> avec l’adresse <b>__email__</b>.",
   "logging_in": "Connexion en cours",
-  "logging_out": "Déconnexion de",
   "login": "Identifiant",
   "login_error": "Erreur de connexion",
   "login_failed": "Échec de connexion",

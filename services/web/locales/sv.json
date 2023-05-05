@@ -555,7 +555,6 @@
   "log_out_from": "Logga ut från __email__",
   "logged_in_with_email": "Du är för närvarande inloggad i <b>__appName__</b> med e-postadressen <b>__email__</b>.",
   "logging_in": "Loggar in",
-  "logging_out": "Logga ut",
   "login": "Logga in",
   "login_error": "Inloggningsfel",
   "login_failed": "Inloggning misslyckades",

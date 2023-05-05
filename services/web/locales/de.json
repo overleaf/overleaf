@@ -705,7 +705,6 @@
   "log_viewer_error": "Beim Anzeigen der Kompilierfehler und -protokolle dieses Projekts ist ein Problem aufgetreten. Dies ist ein internes __appName__-Problem, kein Problem mit deinem LaTeX-Code.",
   "logged_in_with_email": "Du bist derzeit mit der E-Mail-Adresse <b>__email__</b> bei <b>__appName__</b> angemeldet.",
   "logging_in": "Anmeldung",
-  "logging_out": "Abmeldung läuft",
   "login": "Anmelden",
   "login_error": "Login-Fehler",
   "login_failed": "Login fehlgeschlagen",
