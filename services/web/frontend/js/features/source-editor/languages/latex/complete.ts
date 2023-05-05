@@ -20,6 +20,12 @@ import {
   cursorIsAtBeginEnvironment,
   cursorIsAtEndEnvironment,
 } from '../../utils/tree-query'
+import {
+  applySnippet,
+  extendOverUnpairedClosingBrace,
+} from './completions/apply'
+import { snippet } from './completions/data/environments'
+import { syntaxTree } from '@codemirror/language'
 
 function blankCompletions(): Completions {
   return {
@@ -372,4 +378,55 @@ export const inCommandCompletionSource: CompletionSource = ifInType(
 
 export const explicitCommandCompletionSource: CompletionSource = context => {
   return context.explicit ? commandCompletionSource(context) : null
+}
+
+/**
+ * An additional completion source that handles two situations:
+ *
+ * 1. Typing the environment name within an already-complete `\begin{…}` command.
+ * 2. After typing the closing brace of a complete `\begin{foo}` command, where the environment
+ * isn't previously known, leaving the cursor after the closing brace.
+ */
+export const beginEnvironmentCompletionSource: CompletionSource = context => {
+  const beginEnvToken = context.tokenBefore(['BeginEnv'])
+  if (!beginEnvToken) {
+    return null
+  }
+
+  const beginEnv = syntaxTree(context.state).resolveInner(
+    beginEnvToken.from,
+    1
+  ).parent
+  if (!beginEnv?.type.is('BeginEnv')) {
+    return null
+  }
+
+  const envNameGroup = beginEnv.getChild('EnvNameGroup')
+  if (!envNameGroup) {
+    return null
+  }
+
+  // this completion source must only be active when the \begin command has a closing brace
+  const closeBrace = envNameGroup.getChild('CloseBrace')
+  if (!closeBrace) {
+    return null
+  }
+
+  const envName = envNameGroup.getChild('$EnvName')
+  if (!envName) {
+    return null
+  }
+
+  const name = context.state.sliceDoc(envName.from, envName.to)
+
+  const completion = {
+    label: `\\begin{${name}} …`,
+    apply: applySnippet(snippet(name)),
+    extend: extendOverUnpairedClosingBrace,
+  }
+
+  return {
+    from: beginEnvToken.from,
+    options: [completion],
+  }
 }

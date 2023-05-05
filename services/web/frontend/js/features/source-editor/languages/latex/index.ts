@@ -9,6 +9,7 @@ import {
   argumentCompletionSources,
   explicitCommandCompletionSource,
   inCommandCompletionSource,
+  beginEnvironmentCompletionSource,
 } from './complete'
 import { documentCommands } from './document-commands'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
@@ -20,6 +21,7 @@ const completionSources: CompletionSource[] = [
   ...argumentCompletionSources,
   inCommandCompletionSource,
   explicitCommandCompletionSource,
+  beginEnvironmentCompletionSource,
   ...importOverleafModules('sourceEditorCompletionSources').map(
     (item: any) => item.import.default
   ),
