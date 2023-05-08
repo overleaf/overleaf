@@ -17,20 +17,20 @@ export default function HistoryFileTreeItem({
   return (
     <div className="history-file-tree-item" role="presentation">
       {icons}
-      <button className="history-file-tree-item-button">
-        <span
-          className={classNames('history-file-tree-item-button-text', {
+      <div className="history-file-tree-item-name-wrapper">
+        <div
+          className={classNames('history-file-tree-item-name', {
             strikethrough: operation === 'removed',
           })}
         >
           {name}
-        </span>
+        </div>
         {operation ? (
-          <Badge className="history-file-tree-item-button-badge" size="sm">
+          <Badge className="history-file-tree-item-badge" size="sm">
             {operation}
           </Badge>
         ) : null}
-      </button>
+      </div>
     </div>
   )
 }

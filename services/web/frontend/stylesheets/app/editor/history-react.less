@@ -382,6 +382,7 @@ history-root {
     li {
       line-height: @file-tree-line-height;
       position: relative;
+      margin-left: 8px;
 
       &:focus {
         outline: none;
@@ -391,9 +392,9 @@ history-root {
         color: @file-tree-item-color;
         cursor: pointer;
         white-space: nowrap;
-        overflow: hidden;
-        text-overflow: clip;
         user-select: none;
+        display: flex;
+        align-items: center;
 
         &:focus {
           outline: none;
@@ -418,29 +419,30 @@ history-root {
           }
         }
 
-        .history-file-tree-item-button {
+        .history-file-tree-item-name-wrapper {
+          display: flex;
+          align-items: center;
           width: 100%;
           overflow: hidden;
-          text-overflow: ellipsis;
-          text-align: left;
-          padding-right: 40px;
-          font-weight: normal;
-          display: inline-flex;
-          flex-direction: row;
-          align-items: center;
-          justify-content: space-between;
 
-          .history-file-tree-item-button-text {
-            display: inline-flex;
-            margin-right: 5px;
+          .history-file-tree-item-name {
+            margin-right: @margin-xs;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: left;
+            font-weight: normal;
+            flex-grow: 1;
 
             &.strikethrough {
               text-decoration: line-through;
             }
           }
 
-          .history-file-tree-item-button-badge {
+          .history-file-tree-item-badge {
             text-transform: capitalize;
+            font-weight: normal;
+            margin-right: @margin-sm;
+            flex-shrink: 0;
 
             &:hover {
               background-color: @neutral-20;
@@ -452,6 +454,8 @@ history-root {
       i.fa {
         color: @file-tree-item-icon-color;
         font-size: 14px;
+        display: inline-flex;
+        flex-shrink: 0;
 
         &.file-tree-icon {
           margin-right: 4px;
