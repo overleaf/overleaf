@@ -1,6 +1,5 @@
 const _ = require('lodash')
 const { db, ObjectId } = require('../../infrastructure/mongodb')
-const Modules = require('../../infrastructure/Modules')
 const { callbackify } = require('util')
 const { Project } = require('../../models/Project')
 const { DeletedProject } = require('../../models/DeletedProject')
@@ -388,7 +387,6 @@ async function expireDeletedProject(projectId) {
       ChatApiHandler.promises.destroyProject(deletedProject.project._id),
       hardDeleteDeletedFiles(deletedProject.project._id),
       ProjectAuditLogEntry.deleteMany({ projectId }),
-      Modules.promises.hooks.fire('projectExpired', deletedProject.project._id),
     ])
 
     await DeletedProject.updateOne(

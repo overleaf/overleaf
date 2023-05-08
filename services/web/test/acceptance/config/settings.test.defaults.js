@@ -90,9 +90,6 @@ module.exports = {
     webpack: {
       url: 'http://localhost:23808',
     },
-    gitBridge: {
-      url: 'http://localhost:28000',
-    },
   },
 
   // for registration via SL, set enableLegacyRegistration to true
