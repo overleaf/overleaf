@@ -16,7 +16,7 @@ const Settings = {
     keepSoftDeletedDocsArchived:
       process.env.KEEP_SOFT_DELETED_DOCS_ARCHIVED === 'true',
 
-    backend: process.env.BACKEND || 's3',
+    backend: process.env.BACKEND,
     healthCheck: {
       project_id: process.env.HEALTH_CHECK_PROJECT_ID,
     },

@@ -4,6 +4,9 @@ const persistorSettings = settings.docstore
 persistorSettings.Metrics = require('@overleaf/metrics')
 
 const ObjectPersistor = require('@overleaf/object-persistor')
-const persistor = ObjectPersistor(persistorSettings)
+const AbstractPersistor = require('@overleaf/object-persistor/src/AbstractPersistor')
+const persistor = settings.docstore.backend
+  ? ObjectPersistor(persistorSettings)
+  : new AbstractPersistor()
 
 module.exports = persistor

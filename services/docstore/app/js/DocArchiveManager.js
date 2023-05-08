@@ -33,6 +33,10 @@ module.exports = {
 }
 
 async function archiveAllDocs(projectId) {
+  if (!_isArchivingEnabled()) {
+    return
+  }
+
   const docIds = await MongoManager.getNonArchivedProjectDocIds(projectId)
   await pMap(docIds, docId => archiveDoc(projectId, docId), {
     concurrency: PARALLEL_JOBS,
@@ -40,6 +44,10 @@ async function archiveAllDocs(projectId) {
 }
 
 async function archiveDoc(projectId, docId) {
+  if (!_isArchivingEnabled()) {
+    return
+  }
+
   const doc = await MongoManager.getDocForArchiving(projectId, docId)
 
   if (!doc) {
@@ -92,6 +100,10 @@ async function archiveDoc(projectId, docId) {
 }
 
 async function unArchiveAllDocs(projectId) {
+  if (!_isArchivingEnabled()) {
+    return
+  }
+
   while (true) {
     let docs
     if (Settings.docstore.keepSoftDeletedDocsArchived) {
@@ -150,6 +162,13 @@ async function unarchiveDoc(projectId, docId) {
     // The doc is already unarchived
     return
   }
+
+  if (!_isArchivingEnabled()) {
+    throw new Error(
+      'found archived doc, but archiving backend is not configured'
+    )
+  }
+
   const archivedDoc = await getDoc(projectId, docId)
   if (archivedDoc.rev == null) {
     // Older archived docs didn't have a rev. Assume that the rev of the
