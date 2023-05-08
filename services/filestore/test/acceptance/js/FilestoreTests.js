@@ -901,6 +901,14 @@ describe('Filestore', function () {
             expect(response.status).to.equal(200)
           })
 
+          it('should not leak sockets', async function () {
+            const response1 = await fetch(previewFileUrl)
+            expect(response1.status).to.equal(200)
+            const response2 = await fetch(previewFileUrl)
+            expect(response2.status).to.equal(200)
+            await expectNoSockets()
+          })
+
           it("should respond with only an 'OK'", async function () {
             // note: this test relies of the imagemagick conversion working
             const response = await fetch(previewFileUrl)

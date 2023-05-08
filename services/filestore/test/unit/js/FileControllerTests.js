@@ -22,7 +22,9 @@ describe('FileController', function () {
     },
   }
   const fileSize = 1234
-  const fileStream = 'fileStream'
+  const fileStream = {
+    destroy() {},
+  }
   const projectId = 'projectId'
   const fileId = 'file_id'
   const bucket = 'user_files'

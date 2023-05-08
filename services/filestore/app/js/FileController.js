@@ -67,6 +67,7 @@ function getFile(req, res, next) {
       }
 
       if (req.query.cacheWarm) {
+        fileStream.destroy()
         return res.sendStatus(200).end()
       }
 
