@@ -4,7 +4,7 @@ set -ex
 
 apt-get update
 
-apt-get install ghostscript imagemagick optipng --yes
+apt-get install ghostscript imagemagick optipng iproute2 --yes
 
 rm -rf /var/lib/apt/lists/*
 
