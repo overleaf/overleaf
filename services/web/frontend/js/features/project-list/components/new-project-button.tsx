@@ -221,8 +221,13 @@ function NewProjectButton({
               ))}
             </>
           ) : null}
-          <MenuItem divider />
-          <MenuItem header>{t('templates')}</MenuItem>
+
+          {templateLinks && templateLinks.length > 0 && (
+            <>
+              <MenuItem divider />
+              <MenuItem header>{t('templates')}</MenuItem>
+            </>
+          )}
           {templateLinks?.map((templateLink, index) => (
             <MenuItem
               key={`new-project-button-template-${index}`}

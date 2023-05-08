@@ -1274,6 +1274,12 @@ const ProjectController = {
               }
             }
 
+            const isAdminOrTemplateOwner =
+              hasAdminAccess(user) || Settings.templates?.user_id === userId
+            const showTemplatesServerPro =
+              Features.hasFeature('templates-server-pro') &&
+              isAdminOrTemplateOwner
+
             const debugPdfDetach = shouldDisplayFeature('debug_pdf_detach')
 
             const detachRole = req.params.detachRole
@@ -1390,9 +1396,7 @@ const ProjectController = {
               gitBridgePublicBaseUrl: Settings.gitBridgePublicBaseUrl,
               wsUrl,
               showSupport: Features.hasFeature('support'),
-              showTemplatesServerPro: Features.hasFeature(
-                'templates-server-pro'
-              ),
+              showTemplatesServerPro,
               pdfjsVariant: pdfjsAssignment.variant,
               debugPdfDetach,
               isParticipatingInVisualEditorNamingTest,
