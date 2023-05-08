@@ -4,16 +4,19 @@ const async = require('async')
 const { expect } = require('chai')
 const settings = require('@overleaf/settings')
 const { db, ObjectId } = require('../../../app/src/infrastructure/mongodb')
+const Features = require('../../../app/src/infrastructure/Features')
 const MockDocstoreApiClass = require('./mocks/MockDocstoreApi')
 const MockFilestoreApiClass = require('./mocks/MockFilestoreApi')
 const MockChatApiClass = require('./mocks/MockChatApi')
+const MockGitBridgeApiClass = require('./mocks/MockGitBridgeApi')
 
-let MockDocstoreApi, MockFilestoreApi, MockChatApi
+let MockDocstoreApi, MockFilestoreApi, MockChatApi, MockGitBridgeApi
 
 before(function () {
   MockDocstoreApi = MockDocstoreApiClass.instance()
   MockFilestoreApi = MockFilestoreApiClass.instance()
   MockChatApi = MockChatApiClass.instance()
+  MockGitBridgeApi = MockGitBridgeApiClass.instance()
 })
 
 describe('Deleting a user', function () {
@@ -313,6 +316,11 @@ describe('Deleting a project', function () {
           dummyFile: 'wombat',
         }
         MockChatApi.projects[this.projectId.toString()] = ['message']
+        if (Features.hasFeature('git-bridge')) {
+          MockGitBridgeApi.projects[this.projectId.toString()] = {
+            data: 'some-data',
+          }
+        }
       })
     })
 
@@ -437,4 +445,46 @@ describe('Deleting a project', function () {
       })
     })
   })
+
+  if (Features.hasFeature('git-bridge')) {
+    describe('When the project has git-bridge data', function () {
+      beforeEach(function () {
+        MockGitBridgeApi.projects[this.projectId.toString()] = {
+          data: 'some-data',
+        }
+      })
+
+      describe('When the deleted project is expired', function () {
+        beforeEach(function (done) {
+          this.user.deleteProject(this.projectId, error => {
+            if (error) {
+              return done(error)
+            }
+            request.post(
+              `/internal/project/${this.projectId}/expire-deleted-project`,
+              {
+                auth: {
+                  user: settings.apis.web.user,
+                  pass: settings.apis.web.pass,
+                  sendImmediately: true,
+                },
+              },
+              (error, res) => {
+                if (error) {
+                  return done(error)
+                }
+                expect(res.statusCode).to.equal(200)
+                done()
+              }
+            )
+          })
+        })
+
+        it('should delete the git-bridge data', function () {
+          expect(MockGitBridgeApi.projects[this.projectId.toString()]).not.to
+            .exist
+        })
+      })
+    })
+  }
 })

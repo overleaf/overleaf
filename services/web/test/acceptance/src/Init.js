@@ -7,6 +7,7 @@ const MockClsiApi = require('./mocks/MockClsiApi')
 const MockDocstoreApi = require('./mocks/MockDocstoreApi')
 const MockDocUpdaterApi = require('./mocks/MockDocUpdaterApi')
 const MockFilestoreApi = require('./mocks/MockFilestoreApi')
+const MockGitBridgeApi = require('./mocks/MockGitBridgeApi')
 const MockNotificationsApi = require('./mocks/MockNotificationsApi')
 const MockProjectHistoryApi = require('./mocks/MockProjectHistoryApi')
 const MockSpellingApi = require('./mocks/MockSpellingApi')
@@ -34,4 +35,8 @@ if (Features.hasFeature('saas')) {
   MockAnalyticsApi.initialize(23050, mockOpts)
   MockV1Api.initialize(25000, mockOpts)
   MockThirdPartyDataStoreApi.initialize(23002, mockOpts)
+}
+
+if (Features.hasFeature('git-bridge')) {
+  MockGitBridgeApi.initialize(28000, mockOpts)
 }
