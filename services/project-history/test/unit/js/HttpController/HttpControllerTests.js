@@ -52,8 +52,10 @@ describe('HttpController', function () {
     this.RetryManager = {}
     this.FlushManager = {}
     this.request = {}
+    this.pipeline = sinon.stub()
     this.HttpController = await esmock(MODULE_PATH, {
       request: this.request,
+      stream: { pipeline: this.pipeline },
       '../../../../app/js/UpdatesProcessor.js': this.UpdatesProcessor,
       '../../../../app/js/SummarizedUpdatesManager.js':
         this.SummarizedUpdatesManager,
@@ -85,7 +87,7 @@ describe('HttpController', function () {
   describe('getProjectBlob', function () {
     beforeEach(function () {
       this.blobHash = 'abcd'
-      this.stream = { pipe: sinon.stub() }
+      this.stream = {}
       this.HistoryStoreManager.getProjectBlobStream.yields(null, this.stream)
       this.HttpController.getProjectBlob(
         { params: { project_id: this.projectId, hash: this.blobHash } },
@@ -98,7 +100,7 @@ describe('HttpController', function () {
       this.HistoryStoreManager.getProjectBlobStream
         .calledWith(this.projectId, this.blobHash)
         .should.equal(true)
-      this.stream.pipe.calledWith(this.res).should.equal(true)
+      this.pipeline.should.have.been.calledWith(this.stream, this.res)
     })
   })
 
@@ -308,7 +310,7 @@ describe('HttpController', function () {
         },
       }
       this.res = { mock: 'res' }
-      this.stream = { pipe: sinon.stub() }
+      this.stream = {}
       this.SnapshotManager.getFileSnapshotStream.yields(null, this.stream)
       this.HttpController.getFileSnapshot(this.req, this.res, this.next)
     })
@@ -322,7 +324,7 @@ describe('HttpController', function () {
     })
 
     it('should pipe the returned stream into the response', function () {
-      this.stream.pipe.calledWith(this.res).should.equal(true)
+      this.pipeline.should.have.been.calledWith(this.stream, this.res)
     })
   })
 

@@ -12,9 +12,8 @@
  */
 import fs from 'fs'
 import crypto from 'crypto'
-import _ from 'lodash'
-import logger from '@overleaf/logger'
 import OError from '@overleaf/o-error'
+import { pipeline } from 'stream'
 
 export function _getBlobHashFromString(string) {
   const byteLength = Buffer.byteLength(string)
@@ -26,12 +25,7 @@ export function _getBlobHashFromString(string) {
   return hash.read()
 }
 
-export function _getBlobHash(fsPath, _callback) {
-  if (_callback == null) {
-    _callback = function () {}
-  }
-  const callback = _.once(_callback)
-
+export function _getBlobHash(fsPath, callback) {
   return fs.stat(fsPath, function (err, stats) {
     if (err != null) {
       OError.tag(err, 'failed to stat file in _getBlobHash', { fsPath })
@@ -42,22 +36,18 @@ export function _getBlobHash(fsPath, _callback) {
     hash.setEncoding('hex')
     hash.update('blob ' + byteLength + '\x00')
 
-    const stream = fs.createReadStream(fsPath)
-
-    stream.on('error', function (err) {
-      return callback(
-        OError.tag(err, 'error streaming file from disk', {
-          fsPath,
-          byteLength,
-        })
-      )
+    pipeline(fs.createReadStream(fsPath), hash, err => {
+      if (err) {
+        callback(
+          OError.tag(err, 'error streaming file from disk', {
+            fsPath,
+            byteLength,
+          })
+        )
+      } else {
+        hash.end()
+        callback(null, hash.read(), byteLength)
+      }
     })
-
-    stream.on('end', function () {
-      hash.end()
-      return callback(null, hash.read(), byteLength)
-    })
-
-    return stream.pipe(hash)
   })
 }

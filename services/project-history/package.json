@@ -39,6 +39,7 @@
     "lodash": "^4.17.20",
     "mongo-uri": "^0.1.2",
     "mongodb": "^4.11.0",
+    "node-fetch": "^2.6.0",
     "overleaf-editor-core": "*",
     "redis": "~0.10.1",
     "request": "^2.88.2",

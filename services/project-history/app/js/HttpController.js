@@ -15,6 +15,7 @@ import * as LabelsManager from './LabelsManager.js'
 import * as HistoryApiManager from './HistoryApiManager.js'
 import * as RetryManager from './RetryManager.js'
 import * as FlushManager from './FlushManager.js'
+import { pipeline } from 'stream'
 
 export function getProjectBlob(req, res, next) {
   const projectId = req.params.project_id
@@ -26,7 +27,10 @@ export function getProjectBlob(req, res, next) {
       if (err != null) {
         return next(OError.tag(err))
       }
-      stream.pipe(res)
+      pipeline(stream, res, err => {
+        if (err) next(err)
+        // res.end() is already called via 'end' event by pipeline.
+      })
     }
   )
 }
@@ -189,7 +193,10 @@ export function getFileSnapshot(req, res, next) {
       if (error != null) {
         return next(OError.tag(error))
       }
-      stream.pipe(res)
+      pipeline(stream, res, err => {
+        if (err) next(err)
+        // res.end() is already called via 'end' event by pipeline.
+      })
     }
   )
 }

@@ -10,9 +10,9 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import fs from 'fs'
+import { pipeline } from 'stream'
 import { randomUUID } from 'crypto'
 import path from 'path'
-import Url from 'url'
 import _ from 'lodash'
 import logger from '@overleaf/logger'
 import metrics from '@overleaf/metrics'
@@ -30,26 +30,21 @@ import * as LargeFileManager from './LargeFileManager.js'
 // stream can be passed to this method, the data will then be held on disk
 // rather than in memory and will be cleaned up once it has been consumed.
 //
-export function bufferOnDisk(inStream, fileId, consumeOutStream, callback) {
-  if (consumeOutStream == null) {
-    consumeOutStream = function (fsPath, done) {}
-  }
-  if (callback == null) {
-    callback = function () {}
-  }
+export function bufferOnDisk(
+  inStream,
+  url,
+  fileId,
+  consumeOutStream,
+  callback
+) {
   const timer = new metrics.Timer('LocalFileWriter.writeStream')
-
-  // capture the stream url for logging
-  const url = inStream.uri && Url.format(inStream.uri)
 
   const fsPath = path.join(
     Settings.path.uploadFolder,
     randomUUID() + `-${fileId}`
   )
 
-  let cleaningUp = false
   const cleanup = _.once((streamError, res) => {
-    cleaningUp = true
     return deleteFile(fsPath, function (cleanupError) {
       if (streamError) {
         OError.tag(streamError, 'error deleting temporary file', {
@@ -70,48 +65,37 @@ export function bufferOnDisk(inStream, fileId, consumeOutStream, callback) {
 
   logger.debug({ fsPath, url }, 'writing file locally')
 
-  inStream.on('error', function (err) {
-    OError.tag(err, 'problem writing file locally, with read stream', {
-      fsPath,
-      url,
-    })
-    return cleanup(err)
-  })
-
   const writeStream = fs.createWriteStream(fsPath)
-  writeStream.on('error', function (err) {
-    OError.tag(err, 'problem writing file locally, with write stream', {
-      fsPath,
-      url,
-    })
-    return cleanup(err)
-  })
-  writeStream.on('finish', function () {
+  pipeline(inStream, writeStream, err => {
+    if (err) {
+      OError.tag(err, 'problem writing file locally', {
+        fsPath,
+        url,
+      })
+      return cleanup(err)
+    }
     timer.done()
     // in future check inStream.response.headers for hash value here
     logger.debug({ fsPath, url }, 'stream closed after writing file locally')
-    if (!cleaningUp) {
-      const fileSize = writeStream.bytesWritten
-      return LargeFileManager.replaceWithStubIfNeeded(
-        fsPath,
-        fileId,
-        fileSize,
-        function (err, newFsPath) {
-          if (err != null) {
-            OError.tag(err, 'problem in large file manager', {
-              newFsPath,
-              fsPath,
-              fileId,
-              fileSize,
-            })
-            return cleanup(err)
-          }
-          return consumeOutStream(newFsPath, cleanup)
+    const fileSize = writeStream.bytesWritten
+    return LargeFileManager.replaceWithStubIfNeeded(
+      fsPath,
+      fileId,
+      fileSize,
+      function (err, newFsPath) {
+        if (err != null) {
+          OError.tag(err, 'problem in large file manager', {
+            newFsPath,
+            fsPath,
+            fileId,
+            fileSize,
+          })
+          return cleanup(err)
         }
-      )
-    }
+        return consumeOutStream(newFsPath, cleanup)
+      }
+    )
   })
-  return inStream.pipe(writeStream)
 }
 
 export function deleteFile(fsPath, callback) {

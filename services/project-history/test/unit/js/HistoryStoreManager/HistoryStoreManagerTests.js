@@ -47,8 +47,10 @@ describe('HistoryStoreManager', function () {
       .yields(null, this.historyId)
     this.request = sinon.stub()
     this.request.get = sinon.stub()
+    this.fetch = sinon.stub().resolves()
 
     this.HistoryStoreManager = await esmock(MODULE_PATH, {
+      'node-fetch': this.fetch,
       request: this.request,
       '@overleaf/settings': this.settings,
       '../../../../app/js/LocalFileWriter.js': this.LocalFileWriter,
@@ -361,17 +363,13 @@ describe('HistoryStoreManager', function () {
 
   describe('createBlobForUpdate', function () {
     beforeEach(function () {
-      this.fileStream = {
-        pause: sinon.stub(),
-        resume: sinon.stub(),
-        on: sinon.stub(),
-      }
+      this.fileStream = {}
       this.hash = 'random-hash'
-      this.fileStream.on
-        .withArgs('response')
-        .callsArgWith(1, { statusCode: 200 })
-      this.LocalFileWriter.bufferOnDisk.callsArgWith(3, null, this.hash)
-      this.request.get.returns(this.fileStream)
+      this.LocalFileWriter.bufferOnDisk.callsArgWith(4, null, this.hash)
+      this.fetch.resolves({
+        status: 200,
+        body: this.fileStream,
+      })
     })
 
     describe('for a file update with any filestore location', function () {
@@ -396,9 +394,9 @@ describe('HistoryStoreManager', function () {
       })
 
       it('should request the file from the filestore in settings', function () {
-        expect(this.request.get).to.have.been.calledWithMatch({
-          url: `${this.settings.apis.filestore.url}/project/${this.projectId}/file/${this.file_id}`,
-        })
+        expect(this.fetch).to.have.been.calledWithMatch(
+          `${this.settings.apis.filestore.url}/project/${this.projectId}/file/${this.file_id}`
+        )
       })
 
       it('should call the callback with the blob', function () {
@@ -469,7 +467,11 @@ describe('HistoryStoreManager', function () {
         this.historyResponse = new EventEmitter()
         this.blobHash = 'test hash'
 
-        this.request.returns(this.historyResponse)
+        this.fetch.resolves({
+          status: 200,
+          ok: true,
+          body: this.historyResponse,
+        })
         this.HistoryStoreManager.getProjectBlobStream(
           this.historyId,
           this.blobHash,
@@ -481,19 +483,12 @@ describe('HistoryStoreManager', function () {
             done()
           }
         )
-        this.historyResponse.emit('response', { statusCode: 200 })
       })
 
       it('should get the blob from the overleaf history service', function () {
-        expect(this.request).to.have.been.calledWithMatch({
-          method: 'GET',
-          url: `${this.settings.overleaf.history.host}/projects/${this.historyId}/blobs/${this.blobHash}`,
-          auth: {
-            user: this.settings.overleaf.history.user,
-            pass: this.settings.overleaf.history.pass,
-            sendImmediately: true,
-          },
-        })
+        expect(this.fetch).to.have.been.calledWithMatch(
+          `${this.settings.overleaf.history.host}/projects/${this.historyId}/blobs/${this.blobHash}`
+        )
       })
 
       it('should return a stream of the blob contents', function () {

@@ -11,6 +11,7 @@ import * as Versions from './Versions.js'
 import * as Errors from './Errors.js'
 import * as LocalFileWriter from './LocalFileWriter.js'
 import * as HashManager from './HashManager.js'
+import fetch from 'node-fetch'
 
 const HTTP_REQUEST_TIMEOUT = 300 * 1000 // 5 minutes
 
@@ -168,14 +169,24 @@ export function getProjectBlob(historyId, blobHash, callback) {
 }
 
 export function getProjectBlobStream(historyId, blobHash, callback) {
+  const url = `${Settings.overleaf.history.host}/projects/${historyId}/blobs/${blobHash}`
   logger.debug(
     { historyId, blobHash },
     'getting blob stream from history service'
   )
-  _requestHistoryServiceStream(
-    { path: `projects/${historyId}/blobs/${blobHash}` },
-    callback
-  )
+  fetch(url, getHistoryFetchOptions())
+    .then(res => {
+      if (!res.ok) {
+        const err = new OError(
+          `history store a non-success status code: ${res.status}`
+        )
+        err.statusCode = res.status
+        logger.warn({ err, url }, 'cannot get project blob')
+        return callback(err)
+      }
+      callback(null, res.body)
+    })
+    .catch(err => callback(OError.tag(err)))
 }
 
 export function sendChanges(
@@ -224,6 +235,7 @@ export function createBlobForUpdate(projectId, historyId, update, callback) {
 
     LocalFileWriter.bufferOnDisk(
       stringStream,
+      '',
       `project-${projectId}-doc-${update.doc}`,
       (fsPath, cb) => {
         _createBlob(historyId, fsPath, cb)
@@ -245,50 +257,47 @@ export function createBlobForUpdate(projectId, historyId, update, callback) {
       return callback(new OError('invalid project for blob creation'))
     }
     const fileId = urlMatch[2]
-    const fileStoreStream = request.get({
-      url: `${Settings.apis.filestore.url}/project/${projectId}/file/${fileId}`,
-      timeout: HTTP_REQUEST_TIMEOUT,
-    })
-    fileStoreStream.pause()
-    fileStoreStream.on('error', err => {
-      callback(OError.tag(err, 'error from filestore', { url: update.url }))
-    })
-    fileStoreStream.on('response', response => {
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        LocalFileWriter.bufferOnDisk(
-          fileStoreStream,
-          `project-${projectId}-file-${fileId}`,
-          (fsPath, cb) => {
-            _createBlob(historyId, fsPath, cb)
-          },
-          callback
-        )
-        fileStoreStream.resume() // start data flowing when ready
-      } else if (response.statusCode === 404) {
-        logger.warn(
-          { projectId, historyId, fileStoreUrl: update.url },
-          'File contents not found in filestore. Storing in history as an empty file'
-        )
-        const emptyStream = new StringStream()
-        LocalFileWriter.bufferOnDisk(
-          emptyStream,
-          `project-${projectId}-file-${fileId}`,
-          (fsPath, cb) => {
-            _createBlob(historyId, fsPath, cb)
-          },
-          callback
-        )
-        fileStoreStream.resume() // Drain the filestore stream
-        emptyStream.push(null) // send an EOF signal
-      } else {
-        const error = new OError(
-          `bad response from filestore: ${response.statusCode}`,
-          { url: update.url, statusCode: response.statusCode }
-        )
-        fileStoreStream.resume() // See https://github.com/overleaf/write_latex/wiki/Streams-and-pipes-in-Node.js#discard-data-if-necessary-in-the-response-handler
-        callback(error)
-      }
-    })
+    const filestoreURL = `${Settings.apis.filestore.url}/project/${projectId}/file/${fileId}`
+    fetch(filestoreURL, { signal: AbortSignal.timeout(HTTP_REQUEST_TIMEOUT) })
+      .then(response => {
+        const statusCode = response.status
+        if (statusCode >= 200 && statusCode < 300) {
+          LocalFileWriter.bufferOnDisk(
+            response.body,
+            filestoreURL,
+            `project-${projectId}-file-${fileId}`,
+            (fsPath, cb) => {
+              _createBlob(historyId, fsPath, cb)
+            },
+            callback
+          )
+        } else if (statusCode === 404) {
+          logger.warn(
+            { projectId, historyId, filestoreURL },
+            'File contents not found in filestore. Storing in history as an empty file'
+          )
+          const emptyStream = new StringStream()
+          LocalFileWriter.bufferOnDisk(
+            emptyStream,
+            filestoreURL,
+            `project-${projectId}-file-${fileId}`,
+            (fsPath, cb) => {
+              _createBlob(historyId, fsPath, cb)
+            },
+            callback
+          )
+          emptyStream.push(null) // send an EOF signal
+        } else {
+          const error = new OError(
+            `bad response from filestore: ${statusCode}`,
+            { filestoreURL, statusCode }
+          )
+          callback(error)
+        }
+      })
+      .catch(err =>
+        callback(OError.tag(err, 'error from filestore', { filestoreURL }))
+      )
   } else {
     const error = new OError('invalid update for blob creation')
     callback(error)
@@ -304,33 +313,24 @@ function _createBlob(historyId, fsPath, _callback) {
     }
     const outStream = fs.createReadStream(fsPath)
 
-    outStream.on('error', err => {
-      callback(
-        OError.tag(err, 'error streaming file from disk', {
-          fsPath,
-          hash,
-          byteLength,
-        })
-      )
-    })
-
     logger.debug(
-      { fsPath, hash, byteLength },
+      { fsPath, historyId, hash, byteLength },
       'sending blob to history service'
     )
-    _requestHistoryService(
-      {
-        method: 'PUT',
-        path: `projects/${historyId}/blobs/${hash}`,
-        body: outStream,
-      },
-      error => {
-        if (error) {
-          return callback(OError.tag(error))
+    const url = `${Settings.overleaf.history.host}/projects/${historyId}/blobs/${hash}`
+    fetch(url, { method: 'PUT', body: outStream, ...getHistoryFetchOptions() })
+      .then(res => {
+        if (!res.ok) {
+          const err = new OError(
+            `history store a non-success status code: ${res.status}`
+          )
+          err.statusCode = res.status
+          logger.warn({ err, url }, 'cannot create project blob')
+          return callback(err)
         }
         callback(null, hash)
-      }
-    )
+      })
+      .catch(err => callback(OError.tag(err)))
   })
 }
 
@@ -407,6 +407,22 @@ function _requestOptions(options) {
   return requestOptions
 }
 
+/**
+ * @return {RequestInit}
+ */
+function getHistoryFetchOptions() {
+  return {
+    signal: AbortSignal.timeout(HTTP_REQUEST_TIMEOUT),
+    headers: {
+      Authorization:
+        'Basic ' +
+        Buffer.from(
+          `${Settings.overleaf.history.user}:${Settings.overleaf.history.pass}`
+        ).toString('base64'),
+    },
+  }
+}
+
 function _requestHistoryService(options, callback) {
   const requestOptions = _requestOptions(options)
   request(requestOptions, (error, res, body) => {
@@ -423,24 +439,6 @@ function _requestHistoryService(options, callback) {
       error.statusCode = res.statusCode
       error.body = body
       logger.warn({ err: error }, error.message)
-      callback(error)
-    }
-  })
-}
-
-function _requestHistoryServiceStream(options, callback) {
-  callback = _.once(callback)
-  const requestOptions = _requestOptions(options)
-  const stream = request(requestOptions)
-  stream.on('error', callback)
-  stream.on('response', res => {
-    if (res.statusCode >= 200 && res.statusCode < 300) {
-      callback(null, stream)
-    } else {
-      const error = new OError(
-        `history store a non-success status code: ${res.statusCode}`
-      )
-      logger.warn({ err: error, options }, error.message)
       callback(error)
     }
   })
