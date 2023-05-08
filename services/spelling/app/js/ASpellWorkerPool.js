@@ -8,6 +8,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import _ from 'underscore'
+import Settings from '@overleaf/settings'
 import logger from '@overleaf/logger'
 import metrics from '@overleaf/metrics'
 import OError from '@overleaf/o-error'
@@ -15,7 +16,7 @@ import { ASpellWorker } from './ASpellWorker.js'
 
 export class ASpellWorkerPool {
   static initClass() {
-    this.prototype.MAX_REQUESTS = 100 * 1024
+    this.prototype.MAX_REQUESTS = Settings.maxRequestsPerWorker
     this.prototype.MAX_WORKERS = 32
     this.prototype.MAX_IDLE_TIME = 1000
     this.prototype.MAX_REQUEST_TIME = 60 * 1000

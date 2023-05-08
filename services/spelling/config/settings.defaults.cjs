@@ -8,6 +8,9 @@ module.exports = {
     },
   },
 
+  maxRequestsPerWorker:
+    parseInt(process.env.MAX_REQUESTS_PER_WORKER, 10) || 100 * 1024,
+
   cacheDir: Path.resolve('cache'),
 
   healthCheckUserId: '53c64d2fd68c8d000010bb5f',
