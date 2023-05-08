@@ -1317,6 +1317,10 @@ const ProjectController = {
               onboardingVideoTourAssignment.variant === 'active' &&
               req.session.justRegistered
 
+            const showPersonalAccessToken =
+              !Features.hasFeature('saas') ||
+              req.query?.personal_access_token === 'true'
+
             const template =
               detachRole === 'detached'
                 ? 'project/editor_detached'
@@ -1407,6 +1411,7 @@ const ProjectController = {
               richTextVariant: richTextAssignment.variant,
               showOnboardingVideoTour,
               historyViewReact: historyViewAssignment.variant === 'react',
+              showPersonalAccessToken,
             })
             timer.done()
           }

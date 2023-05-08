@@ -8,6 +8,7 @@ const SessionManager = require('../Authentication/SessionManager')
 const NewsletterManager = require('../Newsletter/NewsletterManager')
 const _ = require('lodash')
 const { expressify } = require('../../util/promises')
+const Features = require('../../infrastructure/Features')
 
 async function settingsPage(req, res) {
   const userId = SessionManager.getLoggedInUserId(req.session)
@@ -64,6 +65,10 @@ async function settingsPage(req, res) {
       res.redirect('/')
     )
   }
+
+  const showPersonalAccessToken =
+    !Features.hasFeature('saas') || req.query?.personal_access_token === 'true'
+
   res.render('user/settings', {
     title: 'account_settings',
     user: {
@@ -106,6 +111,7 @@ async function settingsPage(req, res) {
     ssoErrorMessage,
     thirdPartyIds: UserPagesController._restructureThirdPartyIds(user),
     projectSyncSuccessMessage,
+    showPersonalAccessToken,
   })
 }
 
