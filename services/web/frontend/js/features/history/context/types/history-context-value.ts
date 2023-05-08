@@ -31,6 +31,8 @@ export type HistoryContextValue = {
   setError: React.Dispatch<React.SetStateAction<HistoryContextValue['error']>>
   labels: Nullable<LoadedLabel[]>
   setLabels: React.Dispatch<React.SetStateAction<HistoryContextValue['labels']>>
+  labelsOnly: boolean
+  setLabelsOnly: React.Dispatch<React.SetStateAction<boolean>>
   projectId: string
   selection: Selection
   setSelection: React.Dispatch<

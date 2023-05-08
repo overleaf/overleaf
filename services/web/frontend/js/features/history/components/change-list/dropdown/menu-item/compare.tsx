@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { MenuItem, MenuItemProps } from 'react-bootstrap'
 import Icon from '../../../../../../shared/components/icon'
 import { useHistoryContext } from '../../../../context/history-context'
+import { computeUpdateRange } from '../../../../utils/range'
 import { UpdateRange } from '../../../../services/types/update'
 
 type CompareProps = {
@@ -19,37 +20,24 @@ function Compare({
   const { t } = useTranslation()
   const { selection, setSelection } = useHistoryContext()
 
-  function compare() {
-    const { updateRange } = selection
-    if (!updateRange) {
-      return
-    }
-    const fromVersion = Math.min(fromV, updateRange.fromV)
-    const toVersion = Math.max(toV, updateRange.toV)
-    const fromVTimestamp = Math.min(
-      updateMetaEndTimestamp,
-      updateRange.fromVTimestamp
-    )
-    const toVTimestamp = Math.max(
-      updateMetaEndTimestamp,
-      updateRange.toVTimestamp
-    )
-
-    setSelection({
-      updateRange: {
-        fromV: fromVersion,
-        toV: toVersion,
-        fromVTimestamp,
-        toVTimestamp,
-      },
-      comparing: true,
-      files: [],
-    })
-  }
-
   const handleCompareVersion = (e: React.MouseEvent<MenuItemProps>) => {
     e.stopPropagation()
-    compare()
+
+    const { updateRange } = selection
+    if (updateRange) {
+      const range = computeUpdateRange(
+        updateRange,
+        fromV,
+        toV,
+        updateMetaEndTimestamp
+      )
+
+      setSelection({
+        updateRange: range,
+        comparing: true,
+        files: [],
+      })
+    }
   }
 
   return (

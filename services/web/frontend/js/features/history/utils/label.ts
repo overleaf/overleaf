@@ -1,4 +1,4 @@
-import { orderBy } from 'lodash'
+import { orderBy, groupBy } from 'lodash'
 import {
   LoadedLabel,
   Label,
@@ -63,4 +63,17 @@ export const loadLabels = (
   return labelsWithPseudoLabelIfNeeded
 }
 
-export const updateLabels = () => {}
+export const getVersionWithLabels = (labels: Nullable<LoadedLabel[]>) => {
+  let versionWithLabels: { version: number; labels: LoadedLabel[] }[] = []
+
+  if (labels) {
+    const groupedLabelsHash = groupBy(labels, 'version')
+    versionWithLabels = Object.keys(groupedLabelsHash).map(key => ({
+      version: parseInt(key, 10),
+      labels: groupedLabelsHash[key],
+    }))
+    versionWithLabels = orderBy(versionWithLabels, ['version'], ['desc'])
+  }
+
+  return versionWithLabels
+}

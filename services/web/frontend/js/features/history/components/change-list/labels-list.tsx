@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import HistoryVersionDetails from './history-version-details'
 import TagTooltip from './tag-tooltip'
@@ -6,25 +7,18 @@ import LabelDropdown from './dropdown/label-dropdown'
 import { useHistoryContext } from '../../context/history-context'
 import { useUserContext } from '../../../../shared/context/user-context'
 import { isVersionSelected } from '../../utils/history-details'
-import { isPseudoLabel } from '../../utils/label'
+import { getVersionWithLabels, isPseudoLabel } from '../../utils/label'
 import { formatTime, isoToUnix } from '../../../utils/format-date'
-import { groupBy, orderBy } from 'lodash'
-import { LoadedLabel } from '../../services/types/label'
 
 function LabelsList() {
   const { t } = useTranslation()
   const { labels, projectId, selection } = useHistoryContext()
   const { id: currentUserId } = useUserContext()
 
-  let versionWithLabels: { version: number; labels: LoadedLabel[] }[] = []
-  if (labels) {
-    const groupedLabelsHash = groupBy(labels, 'version')
-    versionWithLabels = Object.keys(groupedLabelsHash).map(key => ({
-      version: parseInt(key, 10),
-      labels: groupedLabelsHash[key],
-    }))
-    versionWithLabels = orderBy(versionWithLabels, ['version'], ['desc'])
-  }
+  const versionWithLabels = useMemo(
+    () => getVersionWithLabels(labels),
+    [labels]
+  )
 
   return (
     <>

@@ -16,6 +16,7 @@ import { renamePathnameKey } from '../utils/file-tree'
 import { isFileRenamed } from '../utils/file-diff'
 import { loadLabels } from '../utils/label'
 import { autoSelectFile } from '../utils/auto-select-file'
+import usePersistedState from '../../../shared/hooks/use-persisted-state'
 import ColorManager from '../../../ide/colors/ColorManager'
 import moment from 'moment'
 import { cloneDeep } from 'lodash'
@@ -86,6 +87,10 @@ function useHistory() {
     nextBeforeTimestamp: undefined,
   })
   const [labels, setLabels] = useState<HistoryContextValue['labels']>(null)
+  const [labelsOnly, setLabelsOnly] = usePersistedState(
+    `history.userPrefs.showOnlyLabels.${projectId}`,
+    false
+  )
   const [loadingState, setLoadingState] =
     useState<HistoryContextValue['loadingState']>('loadingInitial')
   const [error, setError] = useState<HistoryContextValue['error']>(null)
@@ -269,6 +274,8 @@ function useHistory() {
       setUpdatesInfo,
       labels,
       setLabels,
+      labelsOnly,
+      setLabelsOnly,
       userHasFullFeature,
       currentUserIsOwner,
       projectId,
@@ -286,6 +293,8 @@ function useHistory() {
       setUpdatesInfo,
       labels,
       setLabels,
+      labelsOnly,
+      setLabelsOnly,
       userHasFullFeature,
       currentUserIsOwner,
       projectId,

@@ -1,9 +1,16 @@
 import { useHistoryContext } from '../context/history-context'
-import { isLabel, loadLabels } from '../utils/label'
+import { getVersionWithLabels, isLabel, loadLabels } from '../utils/label'
 import { Label } from '../services/types/label'
 
 function useAddOrRemoveLabels() {
-  const { updatesInfo, setUpdatesInfo, labels, setLabels } = useHistoryContext()
+  const {
+    updatesInfo,
+    setUpdatesInfo,
+    labels,
+    setLabels,
+    selection,
+    resetSelection,
+  } = useHistoryContext()
 
   const addOrRemoveLabel = (
     label: Label,
@@ -25,7 +32,10 @@ function useAddOrRemoveLabels() {
     if (labels) {
       const nonPseudoLabels = labels.filter(isLabel)
       const processedNonPseudoLabels = labelsHandler(nonPseudoLabels)
-      setLabels(loadLabels(processedNonPseudoLabels, tempUpdates[0].toV))
+      const newLabels = loadLabels(processedNonPseudoLabels, tempUpdates[0].toV)
+      setLabels(newLabels)
+
+      return newLabels
     }
   }
 
@@ -37,7 +47,20 @@ function useAddOrRemoveLabels() {
   const removeUpdateLabel = (label: Label) => {
     const labelHandler = (labels: Label[]) =>
       labels.filter(({ id }) => id !== label.id)
-    addOrRemoveLabel(label, labelHandler)
+    const newLabels = addOrRemoveLabel(label, labelHandler)
+
+    // removing all labels from current selection should reset the selection
+    if (newLabels) {
+      const versionWithLabels = getVersionWithLabels(newLabels)
+      // build an Array<number> of available versions
+      const versions = versionWithLabels.map(v => v.version)
+      const selectedVersion = selection.updateRange?.toV
+
+      // check whether the versions array has a version matching the current selection
+      if (selectedVersion && !versions.includes(selectedVersion)) {
+        resetSelection()
+      }
+    }
   }
 
   return { addUpdateLabel, removeUpdateLabel }

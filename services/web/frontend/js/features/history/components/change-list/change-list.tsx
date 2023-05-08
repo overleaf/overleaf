@@ -1,15 +1,10 @@
-import usePersistedState from '../../../../shared/hooks/use-persisted-state'
 import ToggleSwitch from './toggle-switch'
 import AllHistoryList from './all-history-list'
 import LabelsList from './labels-list'
 import { useHistoryContext } from '../../context/history-context'
 
 function ChangeList() {
-  const { projectId, error } = useHistoryContext()
-  const [labelsOnly, setLabelsOnly] = usePersistedState(
-    `history.userPrefs.showOnlyLabels.${projectId}`,
-    false
-  )
+  const { error, labelsOnly, setLabelsOnly } = useHistoryContext()
 
   return (
     <aside className="change-list">
