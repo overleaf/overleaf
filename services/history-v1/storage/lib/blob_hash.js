@@ -4,6 +4,7 @@
 const BPromise = require('bluebird')
 const fs = BPromise.promisifyAll(require('fs'))
 const crypto = require('crypto')
+const { pipeline } = require('stream')
 const assert = require('./assert')
 
 function getGitBlobHeader(byteLength) {
@@ -34,12 +35,14 @@ exports.fromStream = BPromise.method(function blobHashFromStream(
 
   const hash = getBlobHash(byteLength)
   return new BPromise(function (resolve, reject) {
-    stream.on('end', function () {
-      hash.end()
-      resolve(hash.read())
+    pipeline(stream, hash, function (err) {
+      if (err) {
+        reject(err)
+      } else {
+        hash.end()
+        resolve(hash.read())
+      }
     })
-    stream.on('error', reject)
-    stream.pipe(hash)
   })
 })
 

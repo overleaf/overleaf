@@ -8,17 +8,18 @@
 const BPromise = require('bluebird')
 const zlib = require('zlib')
 const stringToStream = require('string-to-stream')
-
-function promiseWriteStreamFinish(writeStream) {
-  return new BPromise(function (resolve, reject) {
-    writeStream.on('finish', resolve)
-    writeStream.on('error', reject)
-  })
-}
+const { pipeline, Writable } = require('stream')
 
 function promisePipe(readStream, writeStream) {
-  readStream.pipe(writeStream)
-  return promiseWriteStreamFinish(writeStream)
+  return new BPromise(function (resolve, reject) {
+    pipeline(readStream, writeStream, function (err) {
+      if (err) {
+        reject(err)
+      } else {
+        resolve()
+      }
+    })
+  })
 }
 
 /**
@@ -32,22 +33,36 @@ function promisePipe(readStream, writeStream) {
  */
 exports.promisePipe = promisePipe
 
+class WritableBuffer extends Writable {
+  constructor(options) {
+    super(options)
+    this.buffers = []
+  }
+
+  _write(chunk, encoding, callback) {
+    this.buffers.push(chunk)
+    callback()
+  }
+
+  _final(callback) {
+    callback()
+  }
+
+  contents() {
+    return Buffer.concat(this.buffers)
+  }
+}
+
 function readStreamToBuffer(readStream) {
   return new BPromise(function (resolve, reject) {
-    const buffers = []
-    readStream.on('readable', function () {
-      while (true) {
-        const buffer = this.read()
-        if (!buffer) {
-          break
-        }
-        buffers.push(buffer)
+    const bufferStream = new WritableBuffer()
+    pipeline(readStream, bufferStream, function (err) {
+      if (err) {
+        reject(err)
+      } else {
+        resolve(bufferStream.contents())
       }
     })
-    readStream.on('end', function () {
-      resolve(Buffer.concat(buffers))
-    })
-    readStream.on('error', reject)
   })
 }
 
@@ -62,17 +77,15 @@ exports.readStreamToBuffer = readStreamToBuffer
 
 function gunzipStreamToBuffer(readStream) {
   const gunzip = zlib.createGunzip()
-  const gunzipStream = readStream.pipe(gunzip)
+  const bufferStream = new WritableBuffer()
   return new BPromise(function (resolve, reject) {
-    const buffers = []
-    gunzipStream.on('data', function (buffer) {
-      buffers.push(buffer)
+    pipeline(readStream, gunzip, bufferStream, function (err) {
+      if (err) {
+        reject(err)
+      } else {
+        resolve(bufferStream.contents())
+      }
     })
-    gunzipStream.on('end', function () {
-      resolve(Buffer.concat(buffers))
-    })
-    readStream.on('error', reject)
-    gunzipStream.on('error', reject)
   })
 }
 

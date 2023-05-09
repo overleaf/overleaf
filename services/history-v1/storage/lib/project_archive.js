@@ -3,6 +3,7 @@
 const Archive = require('archiver')
 const BPromise = require('bluebird')
 const fs = require('fs')
+const { pipeline } = require('stream')
 
 const core = require('overleaf-editor-core')
 const Snapshot = core.Snapshot
@@ -104,12 +105,14 @@ ProjectArchive.prototype.writeZip = function projectArchiveToZip(
   })
 
   const streamArchiveToFile = new BPromise(function (resolve, reject) {
-    archive.on('error', reject)
-
     const stream = fs.createWriteStream(zipFilePath)
-    stream.on('error', reject)
-    stream.on('finish', resolve)
-    archive.pipe(stream)
+    pipeline(archive, stream, function (err) {
+      if (err) {
+        reject(err)
+      } else {
+        resolve()
+      }
+    })
   })
 
   return BPromise.join(streamArchiveToFile, addFilesToArchiveAndFinalize)
