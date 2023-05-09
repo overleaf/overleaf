@@ -9,10 +9,10 @@ import ErrorMessage from './error-message'
 const fileTreeContainer = document.getElementById('history-file-tree')
 
 function Main() {
-  const { loadingState, error } = useHistoryContext()
+  const { updatesInfo, error } = useHistoryContext()
 
   let content = null
-  if (loadingState === 'loadingInitial') {
+  if (updatesInfo.loadingState === 'loadingInitial') {
     content = <LoadingSpinner />
   } else if (error) {
     content = <ErrorMessage />

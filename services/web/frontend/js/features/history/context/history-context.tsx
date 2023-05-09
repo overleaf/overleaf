@@ -85,17 +85,19 @@ function useHistory() {
     atEnd: false,
     freeHistoryLimitHit: false,
     nextBeforeTimestamp: undefined,
+    loadingState: 'loadingInitial',
   })
   const [labels, setLabels] = useState<HistoryContextValue['labels']>(null)
   const [labelsOnly, setLabelsOnly] = usePersistedState(
     `history.userPrefs.showOnlyLabels.${projectId}`,
     false
   )
-  const [loadingState, setLoadingState] =
-    useState<HistoryContextValue['loadingState']>('loadingInitial')
+  const [loadingFileDiffs, setLoadingFileDiffs] = useState(false)
   const [error, setError] = useState<HistoryContextValue['error']>(null)
 
   const fetchNextBatchOfUpdates = useCallback(() => {
+    const updatesLoadingState = updatesInfo.loadingState
+
     const loadUpdates = (updatesData: Update[]) => {
       const dateTimeNow = new Date()
       const timestamp24hoursAgo = dateTimeNow.setDate(dateTimeNow.getDate() - 1)
@@ -140,7 +142,10 @@ function useHistory() {
 
     if (
       updatesInfo.atEnd ||
-      !(loadingState === 'loadingInitial' || loadingState === 'ready')
+      !(
+        updatesLoadingState === 'loadingInitial' ||
+        updatesLoadingState === 'ready'
+      )
     ) {
       return
     }
@@ -150,9 +155,11 @@ function useHistory() {
     )
     const labelsPromise = labels == null ? fetchLabels(projectId) : null
 
-    setLoadingState(
-      loadingState === 'ready' ? 'loadingUpdates' : 'loadingInitial'
-    )
+    setUpdatesInfo({
+      ...updatesInfo,
+      loadingState:
+        updatesLoadingState === 'ready' ? 'loadingUpdates' : 'loadingInitial',
+    })
     Promise.all([updatesPromise, labelsPromise])
       .then(([{ updates: updatesData, nextBeforeTimestamp }, labels]) => {
         const lastUpdateToV = updatesData.length ? updatesData[0].toV : null
@@ -173,16 +180,14 @@ function useHistory() {
           freeHistoryLimitHit,
           atEnd,
           nextBeforeTimestamp,
+          loadingState: 'ready',
         })
       })
       .catch(error => {
         setError(error)
-        setUpdatesInfo({ ...updatesInfo, atEnd: true })
+        setUpdatesInfo({ ...updatesInfo, atEnd: true, loadingState: 'ready' })
       })
-      .finally(() => {
-        setLoadingState('ready')
-      })
-  }, [loadingState, labels, projectId, userHasFullFeature, updatesInfo])
+  }, [updatesInfo, projectId, labels, userHasFullFeature])
 
   const resetSelection = useCallback(() => {
     setSelection(selectionInitialState)
@@ -203,12 +208,12 @@ function useHistory() {
 
   // Load files when the update selection changes
   useEffect(() => {
-    if (!updateRange || loadingState !== 'ready' || !filesEmpty) {
+    if (!updateRange || updatesInfo.loadingState !== 'ready' || !filesEmpty) {
       return
     }
     const { fromV, toV } = updateRange
 
-    setLoadingState('loadingFileDiffs')
+    setLoadingFileDiffs(true)
 
     diffFiles(projectId, fromV, toV)
       .then(({ diff: files }) => {
@@ -236,7 +241,7 @@ function useHistory() {
         setError(error)
       })
       .finally(() => {
-        setLoadingState('ready')
+        setLoadingFileDiffs(false)
       })
   }, [
     updateRange,
@@ -244,7 +249,7 @@ function useHistory() {
     updates,
     comparing,
     setError,
-    loadingState,
+    updatesInfo.loadingState,
     filesEmpty,
   ])
 
@@ -268,8 +273,8 @@ function useHistory() {
     () => ({
       error,
       setError,
-      loadingState,
-      setLoadingState,
+      loadingFileDiffs,
+      setLoadingFileDiffs,
       updatesInfo,
       setUpdatesInfo,
       labels,
@@ -287,8 +292,8 @@ function useHistory() {
     [
       error,
       setError,
-      loadingState,
-      setLoadingState,
+      loadingFileDiffs,
+      setLoadingFileDiffs,
       updatesInfo,
       setUpdatesInfo,
       labels,

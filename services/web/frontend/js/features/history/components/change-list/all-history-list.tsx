@@ -6,19 +6,16 @@ import { OwnerPaywallPrompt } from './owner-paywall-prompt'
 import { NonOwnerPaywallPrompt } from './non-owner-paywall-prompt'
 
 function AllHistoryList() {
-  const {
-    updatesInfo,
-    loadingState,
-    fetchNextBatchOfUpdates,
-    currentUserIsOwner,
-  } = useHistoryContext()
+  const { updatesInfo, fetchNextBatchOfUpdates, currentUserIsOwner } =
+    useHistoryContext()
+  const updatesLoadingState = updatesInfo.loadingState
   const { visibleUpdateCount, updates, atEnd } = updatesInfo
   const scrollerRef = useRef<HTMLDivElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   const intersectionObserverRef = useRef<IntersectionObserver | null>(null)
   const [bottomVisible, setBottomVisible] = useState(false)
   const showPaywall =
-    loadingState === 'ready' && updatesInfo.freeHistoryLimitHit
+    updatesLoadingState === 'ready' && updatesInfo.freeHistoryLimitHit
   const showOwnerPaywall = showPaywall && currentUserIsOwner
   const showNonOwnerPaywall = showPaywall && !currentUserIsOwner
   const visibleUpdates =
@@ -27,7 +24,7 @@ function AllHistoryList() {
   // Create an intersection observer that watches for any part of an element
   // positioned at the bottom of the list to be visible
   useEffect(() => {
-    if (loadingState === 'ready' && !intersectionObserverRef.current) {
+    if (updatesLoadingState === 'ready' && !intersectionObserverRef.current) {
       const scroller = scrollerRef.current
       const bottom = bottomRef.current
 
@@ -48,13 +45,13 @@ function AllHistoryList() {
         }
       }
     }
-  }, [loadingState])
+  }, [updatesLoadingState])
 
   useEffect(() => {
-    if (!atEnd && loadingState === 'ready' && bottomVisible) {
+    if (!atEnd && updatesLoadingState === 'ready' && bottomVisible) {
       fetchNextBatchOfUpdates()
     }
-  }, [atEnd, bottomVisible, fetchNextBatchOfUpdates, loadingState])
+  }, [atEnd, bottomVisible, fetchNextBatchOfUpdates, updatesLoadingState])
 
   // While updates are loading, remove the intersection observer and set
   // bottomVisible to false. This is to avoid loading more updates immediately
@@ -62,14 +59,14 @@ function AllHistoryList() {
   // the intersection observer is asynchronous and won't have noticed that the
   // bottom is no longer visible
   useEffect(() => {
-    if (loadingState !== 'ready' && intersectionObserverRef.current) {
+    if (updatesLoadingState !== 'ready' && intersectionObserverRef.current) {
       setBottomVisible(false)
       if (intersectionObserverRef.current) {
         intersectionObserverRef.current.disconnect()
         intersectionObserverRef.current = null
       }
     }
-  }, [loadingState])
+  }, [updatesLoadingState])
 
   return (
     <div ref={scrollerRef} className="history-all-versions-scroller">
@@ -92,8 +89,8 @@ function AllHistoryList() {
       </div>
       {showOwnerPaywall ? <OwnerPaywallPrompt /> : null}
       {showNonOwnerPaywall ? <NonOwnerPaywallPrompt /> : null}
-      {loadingState === 'loadingInitial' ||
-      loadingState === 'loadingUpdates' ? (
+      {updatesLoadingState === 'loadingInitial' ||
+      updatesLoadingState === 'loadingUpdates' ? (
         <LoadingSpinner />
       ) : null}
     </div>

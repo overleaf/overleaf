@@ -3,12 +3,7 @@ import { LoadedUpdate } from '../../services/types/update'
 import { LoadedLabel } from '../../services/types/label'
 import { Selection } from '../../services/types/selection'
 
-type LoadingState =
-  | 'loadingInitial'
-  | 'loadingUpdates'
-  | 'loadingFileDiffs'
-  | 'restoringFile'
-  | 'ready'
+type UpdatesLoadingState = 'loadingInitial' | 'loadingUpdates' | 'ready'
 
 export type HistoryContextValue = {
   updatesInfo: {
@@ -17,16 +12,14 @@ export type HistoryContextValue = {
     atEnd: boolean
     nextBeforeTimestamp: number | undefined
     freeHistoryLimitHit: boolean
+    loadingState: UpdatesLoadingState
   }
   setUpdatesInfo: React.Dispatch<
     React.SetStateAction<HistoryContextValue['updatesInfo']>
   >
   userHasFullFeature: boolean
   currentUserIsOwner: boolean
-  loadingState: LoadingState
-  setLoadingState: React.Dispatch<
-    React.SetStateAction<HistoryContextValue['loadingState']>
-  >
+  loadingFileDiffs: boolean
   error: Nullable<unknown>
   setError: React.Dispatch<React.SetStateAction<HistoryContextValue['error']>>
   labels: Nullable<LoadedLabel[]>

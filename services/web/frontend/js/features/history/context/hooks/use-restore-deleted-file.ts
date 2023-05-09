@@ -9,17 +9,18 @@ import { useHistoryContext } from '../history-context'
 import type { HistoryContextValue } from '../types/history-context-value'
 
 export function useRestoreDeletedFile() {
-  const { runAsync } = useAsync()
-  const { setLoadingState, projectId, setError } = useHistoryContext()
+  const { isLoading, runAsync } = useAsync()
+  const { projectId, setError } = useHistoryContext()
   const ide = useIdeContext()
   const { setView } = useLayoutContext()
 
-  return async (selection: HistoryContextValue['selection']) => {
+  const restoreDeletedFile = async (
+    selection: HistoryContextValue['selection']
+  ) => {
     const { selectedFile } = selection
 
     if (selectedFile && selectedFile.pathname && isFileRemoved(selectedFile)) {
       sendMB('history-v2-restore-deleted')
-      setLoadingState('restoringFile')
 
       await runAsync(
         restoreFile(projectId, selectedFile)
@@ -40,10 +41,9 @@ export function useRestoreDeletedFile() {
             setView('editor')
           })
           .catch(error => setError(error))
-          .finally(() => {
-            setLoadingState('ready')
-          })
       )
     }
   }
+
+  return { restoreDeletedFile, isLoading }
 }

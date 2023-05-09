@@ -9,8 +9,7 @@ import useAsync from '../../../../shared/hooks/use-async'
 import ErrorMessage from '../error-message'
 
 function DiffView() {
-  const { selection, projectId, loadingState } = useHistoryContext()
-  const loadingFileDiffs = loadingState === 'loadingFileDiffs'
+  const { selection, projectId, loadingFileDiffs } = useHistoryContext()
   const { isLoading, data, runAsync, error } = useAsync<DocDiffResponse>()
   const { updateRange, selectedFile } = selection
 
