@@ -723,11 +723,14 @@
 @btn-primary-hover-bg-color: @green-dark;
 @btn-secondary-hover-bg-color: @neutral-20;
 
+// Shadows
+@box-shadow: 0px 4px 12px rgba(30, 37, 48, 0.12),
+  0px 2px 4px rgba(30, 37, 48, 0.08);
+
 // Cards
 @card-border-radius: @border-radius-base-new;
 @card-gray-bg-color: @neutral-10; // only some variations of cards
-@card-box-shadow: 0px 4px 12px rgba(30, 37, 48, 0.12),
-  0px 2px 4px rgba(30, 37, 48, 0.08); // only some variations of cards
+@card-box-shadow: @box-shadow; // only some variations of cards
 
 // Project table
 @structured-list-link-color: @blue;
