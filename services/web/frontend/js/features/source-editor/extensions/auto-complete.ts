@@ -29,7 +29,6 @@ const createAutoComplete = (enabled: boolean) => {
     [
       autocompleteTheme,
       autocompletion({
-        closeOnBlur: false,
         icons: false,
         defaultKeymap: false,
         addToOptions: [
