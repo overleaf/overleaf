@@ -32,7 +32,7 @@
     "express-session": "^1.17.1",
     "proxy-addr": "^2.0.7",
     "request": "^2.88.2",
-    "socket.io": "github:overleaf/socket.io#0.9.19-overleaf-9",
+    "socket.io": "github:overleaf/socket.io#0.9.19-overleaf-10",
     "socket.io-client": "github:overleaf/socket.io-client#0.9.17-overleaf-5",
     "underscore": "1.13.1"
   },

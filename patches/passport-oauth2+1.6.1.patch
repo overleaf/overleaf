@@ -1,0 +1,13 @@
+diff --git a/node_modules/passport-oauth2/lib/utils.js b/node_modules/passport-oauth2/lib/utils.js
+index 486f9e1..4584507 100644
+--- a/node_modules/passport-oauth2/lib/utils.js
++++ b/node_modules/passport-oauth2/lib/utils.js
+@@ -24,7 +24,7 @@ exports.originalURL = function(req, options) {
+   var trustProxy = options.proxy;
+   
+   var proto = (req.headers['x-forwarded-proto'] || '').toLowerCase()
+-    , tls = req.connection.encrypted || (trustProxy && 'https' == proto.split(/\s*,\s*/)[0])
++    , tls = (req.connection && req.connection.encrypted) || (trustProxy && 'https' == proto.split(/\s*,\s*/)[0])
+     , host = (trustProxy && req.headers['x-forwarded-host']) || req.headers.host
+     , protocol = tls ? 'https' : 'http'
+     , path = req.url || '';
