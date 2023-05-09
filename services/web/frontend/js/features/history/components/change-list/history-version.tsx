@@ -42,7 +42,7 @@ function HistoryVersion({ update, faded }: HistoryEntryProps) {
         fromVTimestamp={update.meta.end_ts}
         toVTimestamp={update.meta.end_ts}
         selected={selected}
-        selectable={!faded}
+        selectable={!faded && (selection.comparing || !selected)}
       >
         <div className="history-version-main-details">
           <time className="history-version-metadata-time">

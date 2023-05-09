@@ -9,6 +9,7 @@ import { useUserContext } from '../../../../shared/context/user-context'
 import { isVersionSelected } from '../../utils/history-details'
 import { getVersionWithLabels, isPseudoLabel } from '../../utils/label'
 import { formatTime, isoToUnix } from '../../../utils/format-date'
+import { Version } from '../../services/types/update'
 
 function LabelsList() {
   const { t } = useTranslation()
@@ -20,10 +21,18 @@ function LabelsList() {
     [labels]
   )
 
+  const selectedVersions = new Set<Version>(
+    Array.from(versionWithLabels.values(), value => value.version).filter(
+      version => isVersionSelected(selection, version)
+    )
+  )
+
+  const singleVersionSelected = selectedVersions.size === 1
+
   return (
     <>
       {versionWithLabels.map(({ version, labels }) => {
-        const selected = isVersionSelected(selection, version)
+        const selected = selectedVersions.has(version)
 
         // first label
         const fromVTimestamp = isoToUnix(labels[labels.length - 1].created_at)
@@ -38,7 +47,7 @@ function LabelsList() {
             fromVTimestamp={fromVTimestamp}
             toVTimestamp={toVTimestamp}
             selected={selected}
-            selectable
+            selectable={!(singleVersionSelected && selected)}
           >
             <div className="history-version-main-details">
               {labels.map(label => (

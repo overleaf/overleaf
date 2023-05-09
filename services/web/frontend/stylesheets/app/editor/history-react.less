@@ -99,14 +99,18 @@ history-root {
     padding-top: 8px;
     padding-bottom: 8px;
 
-    &.history-version-selectable:hover {
+    &.history-version-selectable {
       cursor: pointer;
-      background-color: @neutral-10;
-    }
-  }
 
-  .history-version-selected {
-    background-color: @green-10;
+      &:hover {
+        background-color: @neutral-10;
+      }
+    }
+
+    &.history-version-selected,
+    &.history-version-selected.history-version-selectable:hover {
+      background-color: @green-10;
+    }
   }
 
   .history-version-metadata-time {
