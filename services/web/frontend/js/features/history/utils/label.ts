@@ -5,6 +5,7 @@ import {
   PseudoCurrentStateLabel,
 } from '../services/types/label'
 import { Nullable } from '../../../../../types/utils'
+import { Selection } from '../services/types/selection'
 
 export const isPseudoLabel = (
   label: LoadedLabel
@@ -76,4 +77,15 @@ export const getVersionWithLabels = (labels: Nullable<LoadedLabel[]>) => {
   }
 
   return versionWithLabels
+}
+
+export const isAnyVersionMatchingSelection = (
+  labels: Nullable<LoadedLabel[]>,
+  selection: Selection
+) => {
+  // build an Array<number> of available versions
+  const versions = getVersionWithLabels(labels).map(v => v.version)
+  const selectedVersion = selection.updateRange?.toV
+
+  return selectedVersion && !versions.includes(selectedVersion)
 }

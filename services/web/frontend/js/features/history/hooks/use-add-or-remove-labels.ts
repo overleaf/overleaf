@@ -1,5 +1,9 @@
 import { useHistoryContext } from '../context/history-context'
-import { getVersionWithLabels, isLabel, loadLabels } from '../utils/label'
+import {
+  isAnyVersionMatchingSelection,
+  isLabel,
+  loadLabels,
+} from '../utils/label'
 import { Label } from '../services/types/label'
 
 function useAddOrRemoveLabels() {
@@ -37,6 +41,7 @@ function useAddOrRemoveLabels() {
 
       return newLabels
     }
+    return null
   }
 
   const addUpdateLabel = (label: Label) => {
@@ -50,16 +55,8 @@ function useAddOrRemoveLabels() {
     const newLabels = addOrRemoveLabel(label, labelHandler)
 
     // removing all labels from current selection should reset the selection
-    if (newLabels) {
-      const versionWithLabels = getVersionWithLabels(newLabels)
-      // build an Array<number> of available versions
-      const versions = versionWithLabels.map(v => v.version)
-      const selectedVersion = selection.updateRange?.toV
-
-      // check whether the versions array has a version matching the current selection
-      if (selectedVersion && !versions.includes(selectedVersion)) {
-        resetSelection()
-      }
+    if (isAnyVersionMatchingSelection(newLabels, selection)) {
+      resetSelection()
     }
   }
 
