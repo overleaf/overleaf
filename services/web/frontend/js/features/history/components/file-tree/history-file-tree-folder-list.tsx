@@ -2,8 +2,10 @@ import classNames from 'classnames'
 
 import HistoryFileTreeDoc from './history-file-tree-doc'
 import HistoryFileTreeFolder from './history-file-tree-folder'
-import type { ReactNode } from 'react'
+import { ReactNode, useCallback } from 'react'
 import type { HistoryFileTree, HistoryDoc } from '../../utils/file-tree'
+import { useHistoryContext } from '../../context/history-context'
+import { FileDiff } from '../../services/types/file'
 
 type HistoryFileTreeFolderListProps = {
   folders: HistoryFileTree[]
@@ -12,12 +14,46 @@ type HistoryFileTreeFolderListProps = {
   children?: ReactNode
 }
 
-export default function HistoryFileTreeFolderList({
+function HistoryFileTreeFolderList({
   folders,
   docs,
   rootClassName,
   children,
 }: HistoryFileTreeFolderListProps) {
+  const { selection, setSelection } = useHistoryContext()
+
+  const handleEvent = useCallback(
+    (file: FileDiff) => {
+      setSelection(prevSelection => {
+        if (file.pathname !== prevSelection.selectedFile?.pathname) {
+          return {
+            ...prevSelection,
+            selectedFile: file,
+          }
+        }
+
+        return prevSelection
+      })
+    },
+    [setSelection]
+  )
+
+  const handleClick = useCallback(
+    (file: FileDiff) => {
+      handleEvent(file)
+    },
+    [handleEvent]
+  )
+
+  const handleKeyDown = useCallback(
+    (file: FileDiff, event: React.KeyboardEvent<HTMLLIElement>) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        handleEvent(file)
+      }
+    },
+    [handleEvent]
+  )
+
   return (
     <ul className={classNames('list-unstyled', rootClassName)} role="tree">
       {folders.map(folder => (
@@ -29,9 +65,18 @@ export default function HistoryFileTreeFolderList({
         />
       ))}
       {docs.map(doc => (
-        <HistoryFileTreeDoc key={doc.pathname} name={doc.name} file={doc} />
+        <HistoryFileTreeDoc
+          key={doc.pathname}
+          name={doc.name}
+          file={doc}
+          selected={selection.selectedFile?.pathname === doc.pathname}
+          onClick={handleClick}
+          onKeyDown={handleKeyDown}
+        />
       ))}
       {children}
     </ul>
   )
 }
+
+export default HistoryFileTreeFolderList

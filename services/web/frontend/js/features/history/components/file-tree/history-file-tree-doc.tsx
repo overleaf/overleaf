@@ -1,29 +1,32 @@
+import { memo } from 'react'
 import classNames from 'classnames'
 import HistoryFileTreeItem from './history-file-tree-item'
 import iconTypeFromName from '../../../file-tree/util/icon-type-from-name'
 import Icon from '../../../../shared/components/icon'
-import { useFileTreeItemSelection } from '../../context/hooks/use-file-tree-item-selection'
 import type { FileDiff } from '../../services/types/file'
 
 type HistoryFileTreeDocProps = {
   file: FileDiff
   name: string
+  selected: boolean
+  onClick: (file: FileDiff) => void
+  onKeyDown: (file: FileDiff, event: React.KeyboardEvent<HTMLLIElement>) => void
 }
 
-export default function HistoryFileTreeDoc({
+function HistoryFileTreeDoc({
   file,
   name,
+  selected,
+  onClick,
+  onKeyDown,
 }: HistoryFileTreeDocProps) {
-  const { isSelected, handleClick, handleKeyDown } =
-    useFileTreeItemSelection(file)
-
   return (
     <li
       role="treeitem"
-      className={classNames({ selected: isSelected })}
-      onClick={handleClick}
-      onKeyDown={handleKeyDown}
-      aria-selected={isSelected}
+      className={classNames({ selected })}
+      onClick={() => onClick(file)}
+      onKeyDown={e => onKeyDown(file, e)}
+      aria-selected={selected}
       aria-label={name}
       tabIndex={0}
     >
@@ -41,3 +44,5 @@ export default function HistoryFileTreeDoc({
     </li>
   )
 }
+
+export default memo(HistoryFileTreeDoc)

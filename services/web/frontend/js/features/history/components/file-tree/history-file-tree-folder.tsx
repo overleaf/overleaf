@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, memo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import HistoryFileTreeItem from './history-file-tree-item'
@@ -13,7 +13,7 @@ type HistoryFileTreeFolderProps = {
   docs: HistoryDoc[]
 }
 
-export default function HistoryFileTreeFolder({
+function HistoryFileTreeFolder({
   name,
   folders,
   docs,
@@ -61,3 +61,5 @@ export default function HistoryFileTreeFolder({
     </>
   )
 }
+
+export default memo(HistoryFileTreeFolder)

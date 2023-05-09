@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { orderBy, reduce } from 'lodash'
 import { useHistoryContext } from '../context/history-context'
 import {
@@ -9,13 +10,26 @@ import HistoryFileTreeFolderList from './file-tree/history-file-tree-folder-list
 export default function HistoryFileTree() {
   const { selection, error } = useHistoryContext()
 
-  const fileTree = reduce(selection.files, reducePathsToTree, [])
+  const fileTree = useMemo(
+    () => reduce(selection.files, reducePathsToTree, []),
+    [selection.files]
+  )
 
-  const sortedFileTree = orderBy(fileTree, ['-type', 'operation', 'name'])
+  const sortedFileTree = useMemo(
+    () => orderBy(fileTree, ['-type', 'operation', 'name']),
+    [fileTree]
+  )
 
-  const mappedFileTree = fileTreeDiffToFileTreeData(sortedFileTree)
+  const mappedFileTree = useMemo(
+    () => fileTreeDiffToFileTreeData(sortedFileTree),
+    [sortedFileTree]
+  )
 
-  return error ? null : (
+  if (error) {
+    return null
+  }
+
+  return (
     <HistoryFileTreeFolderList
       folders={mappedFileTree.folders}
       docs={mappedFileTree.docs ?? []}
