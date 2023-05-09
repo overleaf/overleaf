@@ -21,6 +21,7 @@ const UserPrimaryEmailCheckHandler = require('../User/UserPrimaryEmailCheckHandl
 const UserController = require('../User/UserController')
 const LimitationsManager = require('../Subscription/LimitationsManager')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
+const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 
 /** @typedef {import("./types").GetProjectsRequest} GetProjectsRequest */
 /** @typedef {import("./types").GetProjectsResponse} GetProjectsResponse */
@@ -319,6 +320,23 @@ async function projectListPage(req, res, next) {
     showGroupsAndEnterpriseBanner &&
     _.sample(['did-you-know', 'on-premise', 'people', 'FOMO'])
 
+  let showWritefullPromoBanner = false
+  if (Features.hasFeature('saas') && !req.session.justRegistered) {
+    try {
+      const { variant } = await SplitTestHandler.promises.getAssignment(
+        req,
+        res,
+        'writefull-promo-banner'
+      )
+      showWritefullPromoBanner = variant === 'enabled'
+    } catch (error) {
+      logger.warn(
+        { err: error },
+        'failed to get "writefull-promo-banner" split test assignment'
+      )
+    }
+  }
+
   res.render('project/list-react', {
     title: 'your_projects',
     usersBestSubscription,
@@ -335,6 +353,7 @@ async function projectListPage(req, res, next) {
     prefetchedProjectsBlob,
     showGroupsAndEnterpriseBanner,
     groupsAndEnterpriseBannerVariant,
+    showWritefullPromoBanner,
     projectDashboardReact: true, // used in navbar
   })
 }

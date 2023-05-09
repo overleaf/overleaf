@@ -3,6 +3,7 @@ import Institution from './groups/institution'
 import ConfirmEmail from './groups/confirm-email'
 import ReconfirmationInfo from './groups/affiliation/reconfirmation-info'
 import GroupsAndEnterpriseBanner from './groups-and-enterprise-banner'
+import WritefullPromoBanner from './writefull-promo-banner'
 
 function UserNotifications() {
   return (
@@ -13,6 +14,7 @@ function UserNotifications() {
         <ConfirmEmail />
         <ReconfirmationInfo />
         <GroupsAndEnterpriseBanner />
+        <WritefullPromoBanner />
       </ul>
     </div>
   )
