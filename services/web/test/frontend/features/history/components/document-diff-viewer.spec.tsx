@@ -95,13 +95,13 @@ describe('document diff viewer', function () {
     cy.get('@deletion').should('have.text', 'Language')
 
     // Check hover tooltips
-    cy.get('@addition').trigger('mousemove')
+    cy.get('@addition').trigger('mouseover')
     cy.get('.ol-cm-highlight-tooltip').should('have.length', 1)
     cy.get('.ol-cm-highlight-tooltip')
       .first()
       .should('have.text', 'Added by Wombat on Monday')
 
-    cy.get('@deletion').trigger('mousemove')
+    cy.get('@deletion').trigger('mouseover')
     cy.get('.ol-cm-highlight-tooltip').should('have.length', 1)
     cy.get('.ol-cm-highlight-tooltip')
       .first()
@@ -145,26 +145,39 @@ End
     )
 
     cy.get('.ol-cm-empty-line-addition-marker').should('have.length', 2)
-
     cy.get('.ol-cm-empty-line-deletion-marker').should('have.length', 1)
-    cy.get('.ol-cm-empty-line-deletion-marker').first().as('deletion')
+
+    // For an empty line marker, we need to trigger mouseover on the containing
+    // line beause the marker itself does not trigger mouseover
+    cy.get('.ol-cm-empty-line-addition-marker')
+      .first()
+      .parent()
+      .as('firstAdditionLine')
+    cy.get('.ol-cm-empty-line-addition-marker')
+      .first()
+      .parent()
+      .as('lastAdditionLine')
+    cy.get('.ol-cm-empty-line-deletion-marker')
+      .last()
+      .parent()
+      .as('deletionLine')
 
     // Check hover tooltips
-    cy.get('.ol-cm-empty-line-addition-marker').last().trigger('mousemove')
+    cy.get('@lastAdditionLine').trigger('mouseover')
     cy.get('.ol-cm-highlight-tooltip').should('have.length', 1)
     cy.get('.ol-cm-highlight-tooltip')
       .first()
       .should('have.text', 'Added by Wombat on Monday')
 
-    cy.get('.ol-cm-empty-line-addition-marker').last().trigger('mouseleave')
+    cy.get('@lastAdditionLine').trigger('mouseleave')
 
-    cy.get('.ol-cm-empty-line-addition-marker').first().trigger('mousemove')
+    cy.get('@firstAdditionLine').trigger('mouseover')
     cy.get('.ol-cm-highlight-tooltip').should('have.length', 1)
     cy.get('.ol-cm-highlight-tooltip')
       .first()
       .should('have.text', 'Added by Wombat on Monday')
 
-    cy.get('@deletion').trigger('mousemove')
+    cy.get('@deletionLine').trigger('mouseover')
     cy.get('.ol-cm-highlight-tooltip').should('have.length', 1)
     cy.get('.ol-cm-highlight-tooltip')
       .first()

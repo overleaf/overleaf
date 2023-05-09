@@ -10,19 +10,22 @@ import {
   Decoration,
   DecorationSet,
   EditorView,
-  hoverTooltip,
+  showTooltip,
   Tooltip,
+  ViewPlugin,
   WidgetType,
 } from '@codemirror/view'
 import { Highlight, HighlightType } from '../services/types/doc'
 
 export const setHighlightsEffect = StateEffect.define<Highlight[]>()
+const ADDITION_MARKER_CLASS = 'ol-cm-addition-marker'
+const DELETION_MARKER_CLASS = 'ol-cm-deletion-marker'
 
 function highlightToMarker(highlight: Highlight) {
   const className =
     highlight.type === 'addition'
-      ? 'ol-cm-addition-marker'
-      : 'ol-cm-deletion-marker'
+      ? ADDITION_MARKER_CLASS
+      : DELETION_MARKER_CLASS
   const { from, to } = highlight.range
 
   return Decoration.mark({
@@ -69,18 +72,21 @@ function highlightedLines(highlights: Highlight[], state: EditorState) {
 }
 
 const theme = EditorView.baseTheme({
-  '.ol-cm-addition-marker': {
+  ['.' + ADDITION_MARKER_CLASS]: {
     paddingTop: 'var(--half-leading)',
     paddingBottom: 'var(--half-leading)',
     backgroundColor: 'hsl(var(--hue), 70%, 85%)',
   },
-  '.ol-cm-deletion-marker': {
+  ['.' + DELETION_MARKER_CLASS]: {
     textDecoration: 'line-through',
     color: 'hsl(var(--hue), 70%, 40%)',
   },
-  '.cm-tooltip-hover': {
+  '.cm-tooltip': {
     backgroundColor: 'transparent',
     borderWidth: 0,
+    // Prevent a tooltip getting in the way of hovering over a line that it
+    // obscures
+    pointerEvents: 'none',
   },
   '.ol-cm-highlight-tooltip': {
     backgroundColor: 'hsl(var(--hue), 70%, 50%)',
@@ -93,25 +99,9 @@ const theme = EditorView.baseTheme({
   },
 })
 
-const tooltip = (view: EditorView, pos: number, side: any): Tooltip | null => {
-  const highlights = view.state.field(highlightDecorationsField).highlights
-  const highlight = highlights.find(highlight => {
-    const { from, to } = highlight.range
-    return !(
-      pos < from ||
-      pos > to ||
-      (pos === from && side < 0) ||
-      (pos === to && side > 0)
-    )
-  })
-
-  if (!highlight) {
-    return null
-  }
-
+function createHighlightTooltip(pos: number, highlight: Highlight) {
   return {
-    pos: highlight.range.from,
-    end: highlight.range.to,
+    pos,
     above: true,
     create: () => {
       const dom = document.createElement('div')
@@ -124,6 +114,105 @@ const tooltip = (view: EditorView, pos: number, side: any): Tooltip | null => {
   }
 }
 
+const setHighlightTooltipEffect = StateEffect.define<Tooltip | null>()
+
+const tooltipField = StateField.define<Tooltip | null>({
+  create() {
+    return null
+  },
+
+  update(tooltip, transaction) {
+    for (const effect of transaction.effects) {
+      if (effect.is(setHighlightTooltipEffect)) {
+        return effect.value
+      }
+    }
+    return tooltip
+  },
+
+  provide: field => showTooltip.from(field),
+})
+
+function highlightAtPos(state: EditorState, pos: number) {
+  const highlights = state.field(highlightDecorationsField).highlights
+  return highlights.find(highlight => {
+    const { from, to } = highlight.range
+    return pos >= from && pos <= to
+  })
+}
+
+const highlightTooltipPlugin = ViewPlugin.fromClass(
+  class {
+    private lastTooltipPos: number | null = null
+
+    // eslint-disable-next-line no-useless-constructor
+    constructor(readonly view: EditorView) {}
+
+    setHighlightTooltip(tooltip: Tooltip | null) {
+      this.view.dispatch({
+        effects: setHighlightTooltipEffect.of(tooltip),
+      })
+    }
+
+    setTooltipFromEvent(event: MouseEvent) {
+      const pos = this.view.posAtCoords({ x: event.clientX, y: event.clientY })
+      if (pos !== this.lastTooltipPos) {
+        let tooltip = null
+        if (pos !== null) {
+          const highlight = highlightAtPos(this.view.state, pos)
+          if (highlight) {
+            tooltip = createHighlightTooltip(pos, highlight)
+          }
+        }
+        this.setHighlightTooltip(tooltip)
+        this.lastTooltipPos = pos
+      }
+    }
+
+    handleMouseMove(event: MouseEvent) {
+      this.setTooltipFromEvent(event)
+    }
+
+    startHover(event: MouseEvent, el: HTMLElement) {
+      const handleMouseMove = this.handleMouseMove.bind(this)
+      this.view.contentDOM.addEventListener('mousemove', handleMouseMove)
+
+      const handleMouseLeave = () => {
+        this.setHighlightTooltip(null)
+        this.lastTooltipPos = null
+        this.view.contentDOM.removeEventListener('mousemove', handleMouseMove)
+        el.removeEventListener('mouseleave', handleMouseLeave)
+      }
+
+      el.addEventListener('mouseleave', handleMouseLeave)
+      this.setTooltipFromEvent(event)
+    }
+  },
+  {
+    eventHandlers: {
+      mouseover(event) {
+        const el = event.target as HTMLElement
+        const classList = el.classList
+        if (
+          classList.contains(ADDITION_MARKER_CLASS) ||
+          classList.contains(DELETION_MARKER_CLASS) ||
+          // An empty line widget doesn't trigger a mouseover event, so detect
+          // an event on a line element that contains one instead
+          (classList.contains('cm-line') &&
+            el.querySelector(
+              `.ol-cm-empty-line-addition-marker, .ol-cm-empty-line-deletion-marker`
+            ))
+        ) {
+          this.startHover(event, el)
+        }
+      },
+    },
+    provide() {
+      return tooltipField
+    },
+  }
+)
+
 class EmptyLineAdditionMarkerWidget extends WidgetType {
   constructor(readonly hue: number) {
     super()
@@ -131,7 +220,10 @@ class EmptyLineAdditionMarkerWidget extends WidgetType {
 
   toDOM(view: EditorView): HTMLElement {
     const element = document.createElement('span')
-    element.className = 'ol-cm-empty-line-addition-marker ol-cm-addition-marker'
+    element.classList.add(
+      'ol-cm-empty-line-addition-marker',
+      ADDITION_MARKER_CLASS
+    )
     element.style.setProperty('--hue', this.hue.toString())
 
     return element
@@ -145,7 +237,10 @@ class EmptyLineDeletionMarkerWidget extends WidgetType {
 
   toDOM(view: EditorView): HTMLElement {
     const element = document.createElement('span')
-    element.className = 'ol-cm-empty-line-deletion-marker ol-deletion-marker'
+    element.classList.add(
+      'ol-cm-empty-line-deletion-marker',
+      DELETION_MARKER_CLASS
+    )
     element.style.setProperty('--hue', this.hue.toString())
     element.textContent = ' '
 
@@ -167,21 +262,9 @@ function createEmptyLineHighlightMarkers(lineStatuses: LineStatuses) {
           ? new EmptyLineAdditionMarkerWidget(highlight.hue)
           : new EmptyLineDeletionMarkerWidget(highlight.hue)
 
-      // In order to make the hover tooltip appear for every empty line,
-      // position the widget after the position if this is the first empty line
-      // in a group or before it otherwise. Always using a value of 1 would
-      // mean that the last empty line in a group of more than one would not
-      // trigger the hover tooltip.
-      const side =
-        lineStatuses.get(lineStatus.line.number - 1)?.highlights[0]?.type ===
-        highlight.type
-          ? -1
-          : 1
-
       markers.push(
         Decoration.widget({
           widget,
-          side,
         }).range(lineStatus.line.from)
       )
     }
@@ -228,7 +311,7 @@ export const highlightDecorationsField =
         value => value.emptyLineHighlightMarkers
       ),
       theme,
-      hoverTooltip(tooltip, { hoverTime: 0 }),
+      highlightTooltipPlugin,
     ],
   })
 
