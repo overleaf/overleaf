@@ -1,0 +1,3 @@
+5 * * * *    root  /overleaf/cron/deactivate-projects.sh >> /var/log/sharelatex/cron-deactivate-projects.log 2>&1
+15 * * * *   root  /overleaf/cron/delete-users.sh >> /var/log/sharelatex/cron-delete-users.log 2>&1
+20 * * * *   root  /overleaf/cron/delete-projects.sh >> /var/log/sharelatex/cron-delete-projects.log 2>&1

@@ -51,6 +51,8 @@ RUN chmod 644 /etc/logrotate.d/sharelatex
 ADD server-ce/cron /overleaf/cron
 ADD server-ce/config/crontab-history /etc/cron.d/crontab-history
 RUN chmod 600 /etc/cron.d/crontab-history
+ADD server-ce/config/crontab-deletion /etc/cron.d/crontab-deletion
+RUN chmod 600 /etc/cron.d/crontab-deletion
 
 # Copy Phusion Image startup and shutdown scripts to their locations
 # ------------------------------------------------------------------
