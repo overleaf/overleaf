@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import Toolbar from './toolbar/toolbar'
 import Main from './main'
 import { Diff, DocDiffResponse } from '../../services/types/doc'
-import { Nullable } from '../../../../../../types/utils'
 import { useHistoryContext } from '../../context/history-context'
 import { diffDoc } from '../../services/api'
 import { highlightsFromDiffResponse } from '../../utils/highlights-from-diff-response'
@@ -10,12 +9,9 @@ import useAsync from '../../../../shared/hooks/use-async'
 import ErrorMessage from '../error-message'
 
 function DiffView() {
-  const [diff, setDiff] = useState<Nullable<Diff>>(null)
   const { selection, projectId, loadingState } = useHistoryContext()
   const loadingFileDiffs = loadingState === 'loadingFileDiffs'
-
-  const { isLoading, runAsync, error } = useAsync<DocDiffResponse>()
-
+  const { isLoading, data, runAsync, error } = useAsync<DocDiffResponse>()
   const { updateRange, selectedFile } = selection
 
   useEffect(() => {
@@ -25,27 +21,23 @@ function DiffView() {
 
     const { fromV, toV } = updateRange
 
-    runAsync(diffDoc(projectId, fromV, toV, selectedFile.pathname))
-      .then(data => {
-        let diff: Diff | undefined
-
-        if (!data?.diff) {
-          setDiff(null)
-        }
-
-        if ('binary' in data.diff) {
-          diff = { binary: true }
-        } else {
-          diff = {
-            binary: false,
-            docDiff: highlightsFromDiffResponse(data.diff),
-          }
-        }
-
-        setDiff(diff)
-      })
-      .catch(console.error)
+    runAsync(diffDoc(projectId, fromV, toV, selectedFile.pathname)).catch(
+      console.error
+    )
   }, [projectId, runAsync, updateRange, selectedFile, loadingFileDiffs])
+
+  let diff: Diff | null
+
+  if (!data?.diff) {
+    diff = null
+  } else if ('binary' in data.diff) {
+    diff = { binary: true }
+  } else {
+    diff = {
+      binary: false,
+      docDiff: highlightsFromDiffResponse(data.diff),
+    }
+  }
 
   return (
     <div className="doc-panel">
