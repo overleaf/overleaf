@@ -178,5 +178,29 @@ describe('LineTracker', function () {
         [5, false],
       ])
     })
+
+    it('should handle multiple deletions', function () {
+      const transaction = view.state.update({
+        changes: [
+          { from: 0, to: 24, insert: '' },
+          { from: 39, to: 44, insert: '' },
+        ],
+      })
+      view.dispatch(transaction)
+      check([
+        [1, true],
+        [2, true],
+      ])
+    })
+
+    it('should handle multiple insertions', function () {
+      const transactionUndo = view.state.update({
+        changes: [
+          { from: 0, to: 0, insert: 'big change\n'.repeat(20) },
+          { from: 50, to: 50, insert: 'xxxx' },
+        ],
+      })
+      view.dispatch(transactionUndo)
+    })
   })
 })

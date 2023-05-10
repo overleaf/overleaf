@@ -58,14 +58,13 @@ export class LineTracker {
   applyUpdate(update: ViewUpdate) {
     for (const transaction of update.transactions) {
       if (transaction.docChanged) {
-        let positionShift = 0
+        let lineShift = 0
         transaction.changes.iterChanges(
           (fromA, toA, fromB, toB, insertedText) => {
             const insertedLength = insertedText.length
             const removedLength = toA - fromA
             const hasInserted = insertedLength > 0
             const hasRemoved = removedLength > 0
-            const doc = update.state.doc
             const oldDoc = transaction.startState.doc
             if (hasRemoved) {
               const startLine = oldDoc.lineAt(fromA).number
@@ -85,10 +84,15 @@ export class LineTracker {
                *   |2|bb|  => [false, true, false]
                *   |3|dddd|
                */
-              this._lines.splice(startLine - 1, endLine - startLine + 1, true)
+              this._lines.splice(
+                startLine - 1 + lineShift,
+                endLine - startLine + 1,
+                true
+              )
+              lineShift -= endLine - startLine
             }
             if (hasInserted) {
-              const startLine = doc.lineAt(fromB).number
+              const startLine = oldDoc.lineAt(fromA).number
               /* Mark start line as changed, and insert new (changed) lines after.
                * Example:
                *   with this text:
@@ -108,19 +112,19 @@ export class LineTracker {
                *   |4|cccc|
                */
               const changes = new Array(insertedText.lines).fill(true)
-              this._lines.splice(startLine - 1, 1, ...changes)
+              this._lines.splice(startLine - 1 + lineShift, 1, ...changes)
+              lineShift += changes.length - 1
             }
-            positionShift = positionShift - removedLength + insertedLength
           }
         )
-        if (update.state.doc.lines !== this._lines.length) {
-          throw new OError(
-            'LineTracker length does not match document line count'
-          ).withInfo({
-            documentLines: update.state.doc.lines,
-            trackerLines: this._lines.length,
-          })
-        }
+      }
+      if (update.state.doc.lines !== this._lines.length) {
+        throw new OError(
+          'LineTracker length does not match document line count'
+        ).withInfo({
+          documentLines: update.state.doc.lines,
+          trackerLines: this._lines.length,
+        })
       }
     }
   }
