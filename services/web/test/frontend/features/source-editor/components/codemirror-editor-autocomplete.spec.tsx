@@ -321,10 +321,10 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     cy.get('.cm-line').eq(28).click().as('line')
     cy.get('@line').type('\\begin{{}ab')
     cy.findAllByRole('option').as('options')
-    cy.get('@options').should('have.length', 4)
+    cy.get('@options').should('have.length', 5)
 
-    // ---- The environment being typed should not appear in the list
-    cy.get('@options').contains('\\begin{ab}').should('not.exist')
+    // ---- The environment being typed should appear in the list
+    cy.get('@options').contains('\\begin{ab}').should('exist')
 
     // ---- A new environment used elsewhere in the doc should appear next
     cy.get('@options')

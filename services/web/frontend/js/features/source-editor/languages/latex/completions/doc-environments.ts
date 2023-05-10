@@ -22,7 +22,7 @@ export function customEnvironmentCompletions(context: CompletionContext) {
   return completions
 }
 
-const findEnvironmentsInDoc = (context: CompletionContext) => {
+export const findEnvironmentsInDoc = (context: CompletionContext) => {
   const result = new Set<string>()
 
   const environmentNamesProjection: ProjectionResult<EnvironmentName> =

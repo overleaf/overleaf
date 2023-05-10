@@ -126,8 +126,8 @@ describe('<CodeMirrorEditor/> in Rich Text mode', function () {
     function (command) {
       cy.get('@first-line')
         .type(`\\${command}{`)
-        .should('have.text', `\\${command}{`)
-        .type('} ') // Should still show braces for empty commands
+        .should('have.text', `{}`)
+        .type('{rightArrow} ')
         .should('have.text', '{} ')
         .type('{Backspace}{leftArrow}test text')
         .should('have.text', '{test text}')
@@ -148,10 +148,8 @@ describe('<CodeMirrorEditor/> in Rich Text mode', function () {
   ]).it('handles \\%s sectioning command', function (command) {
     cy.get('@first-line')
       .type(`\\${command}{`)
-      .should('have.text', `\\${command}{`)
-      .type(`}`)
       .should('have.text', `\\${command}{}`)
-      .type(' ')
+      .type('{rightArrow} ')
       .should('have.text', `\\${command}{} `)
       // Press enter before closing brace
       .type('{Backspace}{leftArrow}title{leftArrow}{Enter}')
@@ -160,30 +158,32 @@ describe('<CodeMirrorEditor/> in Rich Text mode', function () {
       .should('exist')
   })
 
-  forEach([
-    'textsc',
-    'texttt',
-    'sout',
-    'emph',
-    ['verb', '|', '|'],
-    'url',
-    'caption',
-  ]).it(
+  forEach(['textsc', 'texttt', 'sout', 'emph', 'url', 'caption']).it(
     'handles \\%s text',
-    function (command, openingBrace = '{', closingBrace = '}') {
+    function (command) {
       cy.get('@first-line')
-        .type(`\\${command}${openingBrace}`)
-        .should('have.text', `\\${command}${openingBrace}`)
-        .type(`${closingBrace}`)
-        .should('have.text', `\\${command}${openingBrace}${closingBrace}`)
-        .type(' ')
-        .should('have.text', `\\${command}${openingBrace}${closingBrace} `)
+        .type(`\\${command}{`)
+        .should('have.text', `\\${command}{}`)
+        .type('{rightArrow} ')
+        .should('have.text', `\\${command}{} `)
         .type('{Backspace}{leftArrow}test text{rightArrow} ')
         .should('have.text', 'test text ')
         .find(`.ol-cm-command-${command}`)
         .should('exist')
     }
   )
+
+  it('handles \\verb text', function () {
+    cy.get('@first-line')
+      .type(`\\verb|`)
+      .should('have.text', `\\verb|`)
+      .type('| ')
+      .should('have.text', `\\verb|| `)
+      .type('{Backspace}{leftArrow}test text{rightArrow} ')
+      .should('have.text', 'test text ')
+      .find(`.ol-cm-command-verb`)
+      .should('exist')
+  })
 
   forEach([
     ['ref', '🏷'],

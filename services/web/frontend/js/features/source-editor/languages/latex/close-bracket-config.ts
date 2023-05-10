@@ -1,9 +1,5 @@
 import { EditorState, SelectionRange, Text } from '@codemirror/state'
-import {
-  CloseBracketConfig,
-  completionStatus,
-  prevChar,
-} from '@codemirror/autocomplete'
+import { CloseBracketConfig, prevChar } from '@codemirror/autocomplete'
 
 export const closeBracketConfig: CloseBracketConfig = {
   brackets: ['$', '$$', '[', '{', '('],
@@ -72,10 +68,6 @@ export const closeBracketConfig: CloseBracketConfig = {
             return open + '}'
           }
           // don't auto-close \{
-          return open
-        }
-        // avoid auto-closing curly brackets when autocomplete is open
-        if (completionStatus(state)) {
           return open
         }
         return open + close

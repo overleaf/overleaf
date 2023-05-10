@@ -6,7 +6,10 @@ import {
 } from '@codemirror/autocomplete'
 import { customEndCompletions } from './completions/environments'
 import { customCommandCompletions } from './completions/doc-commands'
-import { customEnvironmentCompletions } from './completions/doc-environments'
+import {
+  customEnvironmentCompletions,
+  findEnvironmentsInDoc,
+} from './completions/doc-environments'
 import { Completions } from './completions/types'
 import { buildReferenceCompletions } from './completions/references'
 import { buildPackageCompletions } from './completions/packages'
@@ -406,12 +409,6 @@ export const beginEnvironmentCompletionSource: CompletionSource = context => {
     return null
   }
 
-  // this completion source must only be active when the \begin command has a closing brace
-  const closeBrace = envNameGroup.getChild('CloseBrace')
-  if (!closeBrace) {
-    return null
-  }
-
   const envName = envNameGroup.getChild('$EnvName')
   if (!envName) {
     return null
@@ -419,10 +416,19 @@ export const beginEnvironmentCompletionSource: CompletionSource = context => {
 
   const name = context.state.sliceDoc(envName.from, envName.to)
 
+  // if not directly after `\begin{…}`, exclude known environments
+  if (context.pos !== envNameGroup.to) {
+    const existingEnvironmentNames = findEnvironmentsInDoc(context)
+    if (existingEnvironmentNames.has(name)) {
+      return null
+    }
+  }
+
   const completion = {
     label: `\\begin{${name}} …`,
     apply: applySnippet(snippet(name)),
     extend: extendOverUnpairedClosingBrace,
+    boost: -99,
   }
 
   return {
