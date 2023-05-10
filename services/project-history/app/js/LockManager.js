@@ -65,7 +65,9 @@ _mocks.tryLock = (key, callback) => {
     'NX',
     function (err, gotLock) {
       if (err != null) {
-        return callback(OError.tag(err))
+        return callback(
+          OError.tag(err, 'redis error trying to get lock', { key })
+        )
       }
       if (gotLock === 'OK') {
         metrics.inc('lock.project.try.success')
@@ -94,7 +96,9 @@ _mocks.extendLock = (key, lockValue, callback) => {
     LOCK_TTL,
     function (err, result) {
       if (err != null) {
-        return callback(OError.tag(err))
+        return callback(
+          OError.tag(err, 'redis error trying to extend lock', { key })
+        )
       }
 
       if (result != null && result !== 1) {
@@ -128,9 +132,7 @@ _mocks.getLock = (key, callback) => {
   return (attempt = function () {
     if (Date.now() - startTime > MAX_LOCK_WAIT_TIME) {
       metrics.inc('lock.project.get.failed')
-      const e = new OError('Timeout')
-      e.key = key
-      return callback(e)
+      return callback(new OError('Timeout', { key }))
     }
 
     attempts += 1
