@@ -150,21 +150,22 @@ test_frontend_ct:
 build_test_frontend_ct:
 	COMPOSE_PROJECT_NAME=frontend_test_ct_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) build test_frontend_ct
 	# Note: The 2nd build should use the cache from the 1st build.
-	COMPOSE_PROJECT_NAME=frontend_test_ct_modules_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) build test_frontend_ct
+	COMPOSE_PROJECT_NAME=frontend_test_ct_editor_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) build test_frontend_ct
 
 test_frontend_ct_core: export CYPRESS_RESULTS=./cypress/results/core
-test_frontend_ct_core: export CYPRESS_SPEC_PATTERN=./test/frontend/**/*.spec.{js,ts,tsx}
+test_frontend_ct_core: export CYPRESS_SPEC_PATTERN=./{test,modules/**/test}/frontend/**/*.spec.{js,ts,tsx}
+test_frontend_ct_core: export CYPRESS_EXCLUDE_SPEC_PATTERN=./test/frontend/features/source-editor/**/*.spec.{js,ts,tsx}
 test_frontend_ct_core:
 	COMPOSE_PROJECT_NAME=frontend_test_ct_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
 	COMPOSE_PROJECT_NAME=frontend_test_ct_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm test_frontend_ct
 	COMPOSE_PROJECT_NAME=frontend_test_ct_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
 
-test_frontend_ct_modules: export CYPRESS_RESULTS=./cypress/results/modules
-test_frontend_ct_modules: export CYPRESS_SPEC_PATTERN=./modules/**/test/frontend/**/*.spec.{js,ts,tsx}
-test_frontend_ct_modules:
-	COMPOSE_PROJECT_NAME=frontend_test_ct_modules_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
-	COMPOSE_PROJECT_NAME=frontend_test_ct_modules_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm test_frontend_ct
-	COMPOSE_PROJECT_NAME=frontend_test_ct_modules_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
+test_frontend_ct_editor: export CYPRESS_RESULTS=./cypress/results/editor
+test_frontend_ct_editor: export CYPRESS_SPEC_PATTERN=./test/frontend/features/source-editor/**/*.spec.{js,ts,tsx}
+test_frontend_ct_editor:
+	COMPOSE_PROJECT_NAME=frontend_test_ct_editor_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
+	COMPOSE_PROJECT_NAME=frontend_test_ct_editor_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm test_frontend_ct
+	COMPOSE_PROJECT_NAME=frontend_test_ct_editor_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
 
 #
 # Acceptance tests

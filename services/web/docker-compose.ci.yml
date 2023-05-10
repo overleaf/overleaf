@@ -76,6 +76,7 @@ services:
     entrypoint: bash
     environment:
       CYPRESS_SPEC_PATTERN: ${CYPRESS_SPEC_PATTERN:-}
+      CYPRESS_EXCLUDE_SPEC_PATTERN: ${CYPRESS_EXCLUDE_SPEC_PATTERN:-}
     volumes:
       - ${CYPRESS_RESULTS:-./cypress/results}:/overleaf/services/web/cypress/results/
     command:

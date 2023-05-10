@@ -21,6 +21,7 @@ export default defineConfig({
     specPattern:
       process.env.CYPRESS_SPEC_PATTERN ||
       './{test,modules/**/test}/frontend/**/*.spec.{js,ts,tsx}',
+    excludeSpecPattern: process.env.CYPRESS_EXCLUDE_SPEC_PATTERN,
   },
   retries: {
     runMode: 3,
