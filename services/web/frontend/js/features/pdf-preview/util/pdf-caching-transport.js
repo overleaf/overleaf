@@ -80,7 +80,8 @@ export function generatePdfCachingTransportFactory(PDFJS) {
       })
       const isExpectedFailureOnNewCompileDomain = err =>
         isSplitTestEnabled('force-new-compile-domain') &&
-        isURLOnUserContentDomain(OError.getFullInfo(err).url)
+        isURLOnUserContentDomain(OError.getFullInfo(err).url) &&
+        OError.getFullInfo(err).responseSize !== this.pdfFile.size
 
       const isStaleOutputRequest = () =>
         performance.now() - this.startTime > STALE_OUTPUT_REQUEST_THRESHOLD_MS
