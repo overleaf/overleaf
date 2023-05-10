@@ -77,18 +77,20 @@ const autocompleteTheme = EditorView.baseTheme({
     // shift the tooltip, so the completion aligns with the text
     marginLeft: '-4px',
   },
-  '&light .cm-tooltip.cm-tooltip-autocomplete': {
-    border: '1px lightgray solid',
-    background: '#fefefe',
-    color: '#111',
-    boxShadow: '2px 3px 5px rgb(0 0 0 / 20%)',
-  },
-  '&dark .cm-tooltip.cm-tooltip-autocomplete': {
-    border: '1px #484747 solid',
-    boxShadow: '2px 3px 5px rgba(0, 0, 0, 0.51)',
-    background: '#25282c',
-    color: '#c1c1c1',
-  },
+  '&light .cm-tooltip.cm-tooltip-autocomplete, &light .cm-tooltip.cm-completionInfo':
+    {
+      border: '1px lightgray solid',
+      background: '#fefefe',
+      color: '#111',
+      boxShadow: '2px 3px 5px rgb(0 0 0 / 20%)',
+    },
+  '&dark .cm-tooltip.cm-tooltip-autocomplete, &dark .cm-tooltip.cm-completionInfo':
+    {
+      border: '1px #484747 solid',
+      boxShadow: '2px 3px 5px rgba(0, 0, 0, 0.51)',
+      background: '#25282c',
+      color: '#c1c1c1',
+    },
 
   // match editor font family and font size, so the completion aligns with the text
   '.cm-tooltip.cm-tooltip-autocomplete > ul': {
