@@ -21,6 +21,7 @@ const UserPrimaryEmailCheckHandler = require('../User/UserPrimaryEmailCheckHandl
 const UserController = require('../User/UserController')
 const LimitationsManager = require('../Subscription/LimitationsManager')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
+const GeoIpLookup = require('../../infrastructure/GeoIpLookup')
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 
 /** @typedef {import("./types").GetProjectsRequest} GetProjectsRequest */
@@ -337,6 +338,27 @@ async function projectListPage(req, res, next) {
     }
   }
 
+  let showINRBanner = false
+  if (usersBestSubscription?.type === 'free') {
+    try {
+      const inrGeoPricingAssignment =
+        await SplitTestHandler.promises.getAssignment(
+          req,
+          res,
+          'geo-pricing-inr'
+        )
+      const geoDetails = await GeoIpLookup.promises.getDetails(req.ip)
+      showINRBanner =
+        inrGeoPricingAssignment.variant === 'inr' &&
+        geoDetails?.country_code === 'IN'
+    } catch (error) {
+      logger.error(
+        { err: error },
+        'Failed to get INR geo pricing lookup or assignment'
+      )
+    }
+  }
+
   res.render('project/list-react', {
     title: 'your_projects',
     usersBestSubscription,
@@ -354,6 +376,7 @@ async function projectListPage(req, res, next) {
     showGroupsAndEnterpriseBanner,
     groupsAndEnterpriseBannerVariant,
     showWritefullPromoBanner,
+    showINRBanner,
     projectDashboardReact: true, // used in navbar
   })
 }

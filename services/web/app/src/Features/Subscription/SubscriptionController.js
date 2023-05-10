@@ -34,18 +34,15 @@ const validGroupPlanModalOptions = {
 async function plansPage(req, res) {
   const plans = SubscriptionViewModelBuilder.buildPlansList()
 
-  let recommendedCurrency
-  if (req.query.currency) {
-    const queryCurrency = req.query.currency.toUpperCase()
-    if (GeoIpLookup.isValidCurrencyParam(queryCurrency)) {
-      recommendedCurrency = queryCurrency
-    }
+  let currency = null
+  const queryCurrency = req.query.currency?.toUpperCase()
+  if (GeoIpLookup.isValidCurrencyParam(queryCurrency)) {
+    currency = queryCurrency
   }
-  if (!recommendedCurrency) {
-    const currencyLookup = await GeoIpLookup.promises.getCurrencyCode(
-      (req.query ? req.query.ip : undefined) || req.ip
-    )
-    recommendedCurrency = currencyLookup.currencyCode
+  const { recommendedCurrency, countryCode, geoPricingTestVariant } =
+    await _getRecommendedCurrency(req, res)
+  if (recommendedCurrency && currency == null) {
+    currency = recommendedCurrency
   }
 
   function getDefault(param, category, defaultValue) {
@@ -59,8 +56,8 @@ async function plansPage(req, res) {
   const currentView = 'annual'
 
   let defaultGroupPlanModalCurrency = 'USD'
-  if (validGroupPlanModalOptions.currency.includes(recommendedCurrency)) {
-    defaultGroupPlanModalCurrency = recommendedCurrency
+  if (validGroupPlanModalOptions.currency.includes(currency)) {
+    defaultGroupPlanModalCurrency = currency
   }
   const groupPlanModalDefaults = {
     plan_code: getDefault('plan', 'plan_code', 'collaborator'),
@@ -70,7 +67,10 @@ async function plansPage(req, res) {
   }
 
   AnalyticsManager.recordEventForSession(req.session, 'plans-page-view', {
-    currency: recommendedCurrency,
+    currency,
+    countryCode,
+    'geo-pricing-inr-group': geoPricingTestVariant,
+    'geo-pricing-inr-page': currency === 'INR' ? 'inr' : 'default',
   })
 
   res.render('subscriptions/plans-marketing-v2', {
@@ -80,16 +80,14 @@ async function plansPage(req, res) {
     itm_content: req.query?.itm_content,
     itm_referrer: req.query?.itm_referrer,
     itm_campaign: 'plans',
-    recommendedCurrency,
+    recommendedCurrency: currency,
     planFeatures,
     plansV2Config,
     groupPlans: GroupPlansData,
     groupPlanModalOptions,
     groupPlanModalDefaults,
     initialLocalizedGroupPrice:
-      SubscriptionHelper.generateInitialLocalizedGroupPrice(
-        recommendedCurrency
-      ),
+      SubscriptionHelper.generateInitialLocalizedGroupPrice(currency),
   })
 }
 
@@ -147,10 +145,8 @@ async function _paymentReactPage(req, res) {
           currency = queryCurrency
         }
       }
-      const { currencyCode: recommendedCurrency, countryCode } =
-        await GeoIpLookup.promises.getCurrencyCode(
-          (req.query ? req.query.ip : undefined) || req.ip
-        )
+      const { recommendedCurrency, countryCode } =
+        await _getRecommendedCurrency(req, res)
       if (recommendedCurrency && currency == null) {
         currency = recommendedCurrency
       }
@@ -205,9 +201,7 @@ async function _paymentAngularPage(req, res) {
         }
       }
       const { currencyCode: recommendedCurrency, countryCode } =
-        await GeoIpLookup.promises.getCurrencyCode(
-          (req.query ? req.query.ip : undefined) || req.ip
-        )
+        await GeoIpLookup.promises.getCurrencyCode(req.query?.ip || req.ip)
       if (recommendedCurrency && currency == null) {
         currency = recommendedCurrency
       }
@@ -378,10 +372,8 @@ async function _userSubscriptionAngularPage(req, res) {
 
 async function interstitialPaymentPage(req, res) {
   const user = SessionManager.getSessionUser(req.session)
-  const { currencyCode: recommendedCurrency } =
-    await GeoIpLookup.promises.getCurrencyCode(
-      (req.query ? req.query.ip : undefined) || req.ip
-    )
+  const { recommendedCurrency, countryCode, geoPricingTestVariant } =
+    await _getRecommendedCurrency(req, res)
 
   const hasSubscription =
     await LimitationsManager.promises.userHasV1OrV2Subscription(user)
@@ -391,9 +383,21 @@ async function interstitialPaymentPage(req, res) {
   if (hasSubscription) {
     res.redirect('/user/subscription?hasSubscription=true')
   } else {
+    AnalyticsManager.recordEventForSession(
+      req.session,
+      'paywall-plans-page-view',
+      {
+        currency: recommendedCurrency,
+        countryCode,
+        'geo-pricing-inr-group': geoPricingTestVariant,
+        'geo-pricing-inr-page':
+          recommendedCurrency === 'INR' ? 'inr' : 'default',
+      }
+    )
+
     res.render('subscriptions/interstitial-payment', {
       title: 'subscribe',
-      itm_content: req.query && req.query.itm_content,
+      itm_content: req.query?.itm_content,
       itm_campaign: req.query?.itm_campaign,
       itm_referrer: req.query?.itm_referrer,
       recommendedCurrency,
@@ -806,6 +810,38 @@ async function redirectToHostedPage(req, res) {
     )
   logger.warn({ userId, pageType }, 'redirecting to recurly hosted page')
   res.redirect(url)
+}
+
+async function _getRecommendedCurrency(req, res) {
+  const currencyLookup = await GeoIpLookup.promises.getCurrencyCode(
+    req.query?.ip || req.ip
+  )
+  const countryCode = currencyLookup.countryCode
+  let recommendedCurrency = currencyLookup.currencyCode
+  let assignment
+  // for #12703
+  try {
+    assignment = await SplitTestHandler.promises.getAssignment(
+      req,
+      res,
+      'geo-pricing-inr'
+    )
+  } catch (error) {
+    logger.error(
+      { err: error },
+      'Failed to get assignment for geo-pricing-inr test'
+    )
+  }
+  // if the user has been detected as located in India (thus recommended INR as currency)
+  // but is not part of the geo pricing test, we fall back to the default currency instead
+  if (recommendedCurrency === 'INR' && assignment.variant !== 'inr') {
+    recommendedCurrency = GeoIpLookup.DEFAULT_CURRENCY_CODE
+  }
+  return {
+    recommendedCurrency,
+    countryCode,
+    geoPricingTestVariant: assignment.variant,
+  }
 }
 
 module.exports = {

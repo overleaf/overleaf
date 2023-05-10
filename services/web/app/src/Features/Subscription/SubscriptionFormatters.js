@@ -1,6 +1,6 @@
 const dateformat = require('dateformat')
 
-const currenySymbols = {
+const currencySymbols = {
   EUR: '€',
   USD: '$',
   GBP: '£',
@@ -12,6 +12,7 @@ const currenySymbols = {
   NZD: '$',
   CHF: 'Fr',
   SGD: '$',
+  INR: '₹',
 }
 
 module.exports = {
@@ -31,7 +32,7 @@ module.exports = {
     }
     const cents = string.slice(-2)
     const dollars = string.slice(0, -2)
-    const symbol = currenySymbols[currency]
+    const symbol = currencySymbols[currency]
     return `${symbol}${dollars}.${cents}`
   },
 

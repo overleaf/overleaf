@@ -10,6 +10,7 @@ export const currencies = <const>{
   NZD: '$',
   CHF: 'Fr',
   SGD: '$',
+  INR: '₹',
 }
 
 type Currency = typeof currencies

@@ -5,6 +5,8 @@ const logger = require('@overleaf/logger')
 const { URL } = require('url')
 const { promisify, promisifyMultiResult } = require('../util/promises')
 
+const DEFAULT_CURRENCY_CODE = 'USD'
+
 const currencyMappings = {
   GB: 'GBP',
   US: 'USD',
@@ -16,9 +18,13 @@ const currencyMappings = {
   CA: 'CAD',
   SE: 'SEK',
   SG: 'SGD',
+  IN: 'INR',
 }
 
-const validCurrencyParams = Object.values(currencyMappings).concat(['EUR'])
+const validCurrencyParams = Object.values(currencyMappings).concat([
+  'EUR',
+  'INR',
+])
 
 // Countries which would likely prefer Euro's
 const EuroCountries = [
@@ -82,15 +88,15 @@ function getCurrencyCode(ip, callback) {
     if (err || !ipDetails) {
       logger.err(
         { err, ip },
-        'problem getting currencyCode for ip, defaulting to USD'
+        `problem getting currencyCode for ip, defaulting to ${DEFAULT_CURRENCY_CODE}`
       )
-      return callback(null, 'USD')
+      return callback(null, DEFAULT_CURRENCY_CODE)
     }
     const countryCode =
       ipDetails && ipDetails.country_code
         ? ipDetails.country_code.toUpperCase()
         : undefined
-    const currencyCode = currencyMappings[countryCode] || 'USD'
+    const currencyCode = currencyMappings[countryCode] || DEFAULT_CURRENCY_CODE
     logger.debug({ ip, currencyCode, ipDetails }, 'got currencyCode for ip')
     callback(err, currencyCode, countryCode)
   })
@@ -107,4 +113,5 @@ module.exports = {
       'countryCode',
     ]),
   },
+  DEFAULT_CURRENCY_CODE,
 }
