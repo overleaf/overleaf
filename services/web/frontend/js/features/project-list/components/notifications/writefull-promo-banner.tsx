@@ -12,6 +12,11 @@ const eventSegmentation = {
   name: 'writefull',
 }
 
+const isChromium = () =>
+  (window.navigator as any).userAgentData?.brands?.some(
+    (item: { brand: string }) => item.brand === 'Chromium'
+  )
+
 function WritefullPromoBanner() {
   const [show, setShow] = useState(() => {
     const show =
@@ -36,6 +41,10 @@ function WritefullPromoBanner() {
   }, [])
 
   if (!show) {
+    return null
+  }
+
+  if (!isChromium()) {
     return null
   }
 
