@@ -11,7 +11,7 @@
     "oauth2ClientSecret": "${GIT_BRIDGE_OAUTH2_CLIENT_SECRET}",
     "oauth2Server": "${GIT_BRIDGE_OAUTH2_SERVER:-https://localhost}"
   },
-  "userPasswordEnabled": ${GIT_BRIDGE_USER_PASSWORD_ENABLED:-true},
+  "userPasswordEnabled": ${GIT_BRIDGE_USER_PASSWORD_ENABLED:-false},
   "repoStore": {
     "maxFileNum": ${GIT_BRIDGE_REPOSTORE_MAX_FILE_NUM:-2000},
     "maxFileSize": ${GIT_BRIDGE_REPOSTORE_MAX_FILE_SIZE:-52428800}
