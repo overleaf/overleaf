@@ -7,7 +7,7 @@ import HistoryVersionDropdown from './dropdown/history-version-dropdown'
 import { useUserContext } from '../../../../shared/context/user-context'
 import { useHistoryContext } from '../../context/history-context'
 import { isVersionSelected } from '../../utils/history-details'
-import { relativeDate, formatTime } from '../../../utils/format-date'
+import { formatTime } from '../../../utils/format-date'
 import { orderBy } from 'lodash'
 import { LoadedUpdate } from '../../services/types/update'
 import classNames from 'classnames'
@@ -31,11 +31,6 @@ function HistoryVersion({ update, faded }: HistoryEntryProps) {
         'history-version-faded': faded,
       })}
     >
-      {update.meta.first_in_day && (
-        <time className="history-version-day">
-          {relativeDate(update.meta.end_ts)}
-        </time>
-      )}
       <HistoryVersionDetails
         fromV={update.fromV}
         toV={update.toV}

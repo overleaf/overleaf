@@ -4,6 +4,7 @@ import HistoryVersion from './history-version'
 import LoadingSpinner from '../../../../shared/components/loading-spinner'
 import { OwnerPaywallPrompt } from './owner-paywall-prompt'
 import { NonOwnerPaywallPrompt } from './non-owner-paywall-prompt'
+import { relativeDate } from '../../../utils/format-date'
 
 function AllHistoryList() {
   const { updatesInfo, fetchNextBatchOfUpdates, currentUserIsOwner } =
@@ -76,6 +77,11 @@ function AllHistoryList() {
           <Fragment key={`${update.fromV}_${update.toV}`}>
             {update.meta.first_in_day && index > 0 && (
               <hr className="history-version-divider" />
+            )}
+            {update.meta.first_in_day && (
+              <time className="history-version-day">
+                {relativeDate(update.meta.end_ts)}
+              </time>
             )}
             <HistoryVersion
               update={update}
