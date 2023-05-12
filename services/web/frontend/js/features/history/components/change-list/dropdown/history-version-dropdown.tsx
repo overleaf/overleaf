@@ -22,7 +22,10 @@ function HistoryVersionDropdown({
   updateMetaEndTimestamp,
 }: HistoryVersionDropdownProps) {
   return (
-    <ActionsDropdown id={id}>
+    <ActionsDropdown
+      id={id}
+      parentSelector="[data-history-version-list-container]"
+    >
       <AddLabel projectId={projectId} version={toV} />
       <Download projectId={projectId} version={toV} />
       {!isComparing && !isSelected && (

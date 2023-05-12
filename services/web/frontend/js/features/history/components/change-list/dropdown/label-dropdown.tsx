@@ -20,7 +20,10 @@ function LabelDropdown({
   updateMetaEndTimestamp,
 }: LabelDropdownProps) {
   return (
-    <ActionsDropdown id={id}>
+    <ActionsDropdown
+      id={id}
+      parentSelector="[data-history-version-list-container]"
+    >
       <Download projectId={projectId} version={version} />
       {!isComparing && !isSelected && (
         <Compare

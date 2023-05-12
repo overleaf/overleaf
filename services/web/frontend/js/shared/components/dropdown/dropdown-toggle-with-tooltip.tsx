@@ -5,7 +5,7 @@ import { DropdownProps } from 'react-bootstrap'
 import { MergeAndOverride } from '../../../../../types/utils'
 
 type CustomToggleProps = MergeAndOverride<
-  Pick<DropdownProps, 'bsClass'>,
+  Pick<DropdownProps, 'bsClass' | 'open'>,
   {
     children: React.ReactNode
     bsRole: 'toggle'
@@ -23,6 +23,7 @@ const DropdownToggleWithTooltip = forwardRef<
     children,
     bsClass,
     className,
+    open,
     bsRole: _bsRole,
     ...rest
   } = props
@@ -33,6 +34,8 @@ const DropdownToggleWithTooltip = forwardRef<
         type="button"
         ref={ref}
         className={classnames(bsClass, 'btn', className)}
+        aria-expanded={open}
+        aria-haspopup="true"
         {...rest}
       >
         {children}
