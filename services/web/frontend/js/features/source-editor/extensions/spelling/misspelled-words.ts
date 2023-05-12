@@ -55,12 +55,12 @@ const removeMarksUnderEdit = (
   marks: DecorationSet,
   transaction: Transaction
 ) => {
-  transaction.changes.iterChanges((fromA, toA) => {
+  transaction.changes.iterChanges((fromA, toA, fromB, toB) => {
     marks = marks.update({
       // Filter out marks that overlap the change span
       filter: (from, to, mark) => {
-        const changeStartWithinMark = from <= fromA && to >= fromA
-        const changeEndWithinMark = from <= toA && to >= toA
+        const changeStartWithinMark = from <= fromB && to >= fromB
+        const changeEndWithinMark = from <= toB && to >= toB
         const markHasBeenEdited = changeStartWithinMark || changeEndWithinMark
         return !markHasBeenEdited
       },
