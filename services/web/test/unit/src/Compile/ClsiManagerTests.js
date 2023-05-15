@@ -33,6 +33,7 @@ describe('ClsiManager', function () {
         }
       },
       inc: sinon.stub(),
+      count: sinon.stub(),
     }
     this.ClsiManager = SandboxedModule.require(modulePath, {
       requires: {

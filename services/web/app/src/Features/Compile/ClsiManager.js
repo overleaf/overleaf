@@ -24,6 +24,22 @@ const Errors = require('../Errors/Errors')
 
 const VALID_COMPILERS = ['pdflatex', 'latex', 'xelatex', 'lualatex']
 
+function collectMetricsOnBlgFiles(outputFiles) {
+  let topLevel = 0
+  let nested = 0
+  for (const outputFile of outputFiles) {
+    if (outputFile.type === 'blg') {
+      if (outputFile.path.includes('/')) {
+        nested++
+      } else {
+        topLevel++
+      }
+    }
+  }
+  Metrics.count('blg_output_file', topLevel, 1, { path: 'top-level' })
+  Metrics.count('blg_output_file', nested, 1, { path: 'nested' })
+}
+
 const ClsiManager = {
   sendRequest(projectId, userId, options, callback) {
     if (options == null) {
@@ -265,6 +281,7 @@ const ClsiManager = {
               projectId,
               response && response.compile && response.compile.outputFiles
             )
+            collectMetricsOnBlgFiles(outputFiles)
             const compile = (response && response.compile) || {}
             const status = compile.status
             const stats = compile.stats
