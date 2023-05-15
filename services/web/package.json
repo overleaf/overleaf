@@ -188,6 +188,7 @@
     "mathjax": "^2.7.9",
     "mathjax-3": "npm:mathjax@^3.2.2",
     "method-override": "^2.3.3",
+    "minimatch": "^7.4.2",
     "minimist": "^1.2.7",
     "mmmagic": "^0.5.3",
     "moment": "^2.29.4",

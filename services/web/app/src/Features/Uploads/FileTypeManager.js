@@ -3,40 +3,16 @@ const Path = require('path')
 const isUtf8 = require('utf-8-validate')
 const { promisifyAll } = require('../../util/promises')
 const Settings = require('@overleaf/settings')
+const Minimatch = require('minimatch').Minimatch
+
+const fileIgnoreMatcher = new Minimatch(Settings.fileIgnorePattern, {
+  nocase: true, // make the whole path matching case-insensitive
+  // (previously we were only matching the extension case-insensitively but it seems safer to match the whole path)
+  dot: true, // allows matching on paths containing a dot e.g. /.git/foo/bar.txt
+})
 
 const FileTypeManager = {
   TEXT_EXTENSIONS: new Set(Settings.textExtensions.map(ext => `.${ext}`)),
-
-  IGNORE_EXTENSIONS: new Set([
-    '.dvi',
-    '.aux',
-    '.log',
-    '.toc',
-    '.out',
-    '.pdfsync',
-    '.synctex', // synctex.gz is handled by the .gz extension
-    '.synctex(busy)',
-    '.fdb_latexmk',
-    '.fls',
-    // Index and glossary files
-    '.nlo',
-    '.ind',
-    '.glo',
-    '.gls',
-    '.glg',
-    // Bibtex
-    '.bbl',
-    '.blg',
-    // Misc/bad
-    '.doc',
-    '.docx',
-    '.gz',
-    '.swp',
-  ]),
-
-  IGNORE_FILENAMES: new Set(['.gitignore']),
-
-  IGNORE_FOLDERS: new Set(['__MACOSX', '.git', '.texpadtmp', '.R']),
 
   MAX_TEXT_FILE_SIZE: 1 * 1024 * 1024, // 1 MB
 
@@ -120,26 +96,10 @@ const FileTypeManager = {
     return true
   },
 
+  // FIXME: we can convert this to a synchronous function if we want to
   shouldIgnore(path, callback) {
-    const basename = Path.basename(path)
-    const extension = Path.extname(basename).toLowerCase()
-    const folders = path.split('/')
-    let ignore = false
-    if (basename.startsWith('.') && basename !== '.latexmkrc') {
-      ignore = true
-    }
-    if (FileTypeManager.IGNORE_EXTENSIONS.has(extension)) {
-      ignore = true
-    } else if (FileTypeManager.IGNORE_FILENAMES.has(basename)) {
-      ignore = true
-    } else {
-      for (const folder of folders) {
-        if (FileTypeManager.IGNORE_FOLDERS.has(folder)) {
-          ignore = true
-          break
-        }
-      }
-    }
+    // use minimatch file matching to check if the path should be ignored
+    const ignore = fileIgnoreMatcher.match(path)
     callback(null, ignore)
   },
 }
