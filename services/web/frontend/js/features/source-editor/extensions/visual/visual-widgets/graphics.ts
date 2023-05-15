@@ -48,6 +48,12 @@ export class GraphicsWidget extends WidgetType {
   updateDOM(element: HTMLImageElement, view: EditorView) {
     this.destroyed = false
     element.classList.toggle('ol-cm-environment-centered', this.centered)
+    if (
+      this.filePath === element.dataset.filepath &&
+      element.dataset.width === this.figureData?.width?.toString()
+    ) {
+      return true
+    }
     this.renderGraphic(element, view)
     return true
   }
@@ -76,7 +82,7 @@ export class GraphicsWidget extends WidgetType {
 
     const preview = this.getPreviewByPath(this.filePath)
     element.dataset.filepath = this.filePath
-    element.dataset.width = undefined
+    element.dataset.width = this.figureData?.width?.toString()
 
     if (!preview) {
       const message = document.createElement('div')

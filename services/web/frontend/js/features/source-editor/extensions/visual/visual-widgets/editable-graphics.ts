@@ -49,9 +49,6 @@ export class EditableGraphicsWidget extends GraphicsWidget {
   renderGraphic(element: HTMLElement, view: EditorView) {
     super.renderGraphic(element, view)
     if (this.figureData) {
-      if (this.figureData.width) {
-        element.dataset.width = this.figureData.width.toString()
-      }
       const button = this.createEditButton(view)
       element.prepend(button)
     }
