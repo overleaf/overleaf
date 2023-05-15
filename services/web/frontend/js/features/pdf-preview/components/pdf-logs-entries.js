@@ -1,39 +1,15 @@
-import { memo, useCallback } from 'react'
+import { memo } from 'react'
 import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import PreviewLogsPaneMaxEntries from '../../preview/components/preview-logs-pane-max-entries'
 import PdfLogEntry from './pdf-log-entry'
-import { useIdeContext } from '../../../shared/context/ide-context'
-import useDetachAction from '../../../shared/hooks/use-detach-action'
+import { useDetachCompileContext } from '../../../shared/context/detach-compile-context'
 
 const LOG_PREVIEW_LIMIT = 100
 
 function PdfLogsEntries({ entries, hasErrors }) {
   const { t } = useTranslation()
-
-  const ide = useIdeContext()
-
-  const _syncToEntry = useCallback(
-    entry => {
-      const entity = ide.fileTreeManager.findEntityByPath(entry.file)
-
-      if (entity && entity.type === 'doc') {
-        ide.editorManager.openDoc(entity, {
-          gotoLine: entry.line ?? undefined,
-          gotoColumn: entry.column ?? undefined,
-        })
-      }
-    },
-    [ide]
-  )
-
-  const syncToEntry = useDetachAction(
-    'sync-to-entry',
-    _syncToEntry,
-    'detached',
-    'detacher'
-  )
-
+  const { syncToEntry } = useDetachCompileContext()
   const logEntries = entries.slice(0, LOG_PREVIEW_LIMIT)
 
   return (

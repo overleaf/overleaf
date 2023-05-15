@@ -72,6 +72,7 @@ export function DetachCompileProvider({ children }) {
     setChangedAt: _setChangedAt,
     setSavedAt: _setSavedAt,
     clearCache: _clearCache,
+    syncToEntry: _syncToEntry,
   } = localCompileContext
 
   const [animateCompileDropdownArrow] = useDetachStateWatcher(
@@ -366,6 +367,13 @@ export function DetachCompileProvider({ children }) {
     'detacher'
   )
 
+  const syncToEntry = useDetachAction(
+    'sync-to-entry',
+    _syncToEntry,
+    'detached',
+    'detacher'
+  )
+
   useCompileTriggers(startCompile, setChangedAt, setSavedAt)
   useEffect(() => {
     // Sync the split test variant across the editor and pdf-detach.
@@ -426,6 +434,7 @@ export function DetachCompileProvider({ children }) {
       firstRenderDone,
       setChangedAt,
       cleanupCompileResult,
+      syncToEntry,
     }),
     [
       animateCompileDropdownArrow,
@@ -477,6 +486,7 @@ export function DetachCompileProvider({ children }) {
       firstRenderDone,
       setChangedAt,
       cleanupCompileResult,
+      syncToEntry,
     ]
   )
 

@@ -522,6 +522,20 @@ export function LocalCompileProvider({ children }) {
       })
   }, [compiler])
 
+  const syncToEntry = useCallback(
+    entry => {
+      const entity = ide.fileTreeManager.findEntityByPath(entry.file)
+
+      if (entity && entity.type === 'doc') {
+        ide.editorManager.openDoc(entity, {
+          gotoLine: entry.line ?? undefined,
+          gotoColumn: entry.column ?? undefined,
+        })
+      }
+    },
+    [ide]
+  )
+
   // clear the cache then run a compile, triggered by a menu item
   const recompileFromScratch = useCallback(() => {
     clearCache().then(() => {
@@ -587,6 +601,7 @@ export function LocalCompileProvider({ children }) {
       setChangedAt,
       setSavedAt,
       cleanupCompileResult,
+      syncToEntry,
     }),
     [
       animateCompileDropdownArrow,
@@ -638,6 +653,7 @@ export function LocalCompileProvider({ children }) {
       cleanupCompileResult,
       setShowLogs,
       toggleLogs,
+      syncToEntry,
     ]
   )
 
