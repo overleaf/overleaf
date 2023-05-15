@@ -834,13 +834,13 @@ async function _getRecommendedCurrency(req, res) {
   }
   // if the user has been detected as located in India (thus recommended INR as currency)
   // but is not part of the geo pricing test, we fall back to the default currency instead
-  if (recommendedCurrency === 'INR' && assignment.variant !== 'inr') {
+  if (recommendedCurrency === 'INR' && assignment?.variant !== 'inr') {
     recommendedCurrency = GeoIpLookup.DEFAULT_CURRENCY_CODE
   }
   return {
     recommendedCurrency,
     countryCode,
-    geoPricingTestVariant: assignment.variant,
+    geoPricingTestVariant: assignment?.variant,
   }
 }
 
