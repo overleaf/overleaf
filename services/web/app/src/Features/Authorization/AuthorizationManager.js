@@ -98,6 +98,12 @@ async function getPrivilegeLevelForProjectWithUser(
   projectId,
   opts = {}
 ) {
+  if (!opts.ignoreSiteAdmin) {
+    if (await isUserSiteAdmin(userId)) {
+      return PrivilegeLevels.OWNER
+    }
+  }
+
   const privilegeLevel =
     await CollaboratorsGetter.promises.getMemberIdPrivilegeLevel(
       userId,
@@ -106,12 +112,6 @@ async function getPrivilegeLevelForProjectWithUser(
   if (privilegeLevel && privilegeLevel !== PrivilegeLevels.NONE) {
     // The user has direct access
     return privilegeLevel
-  }
-
-  if (!opts.ignoreSiteAdmin) {
-    if (await isUserSiteAdmin(userId)) {
-      return PrivilegeLevels.OWNER
-    }
   }
 
   if (!opts.ignorePublicAccess) {
