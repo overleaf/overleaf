@@ -1,6 +1,6 @@
 [
 	{
-		"project": "testproj",
+		"project": "000000000000000000000000",
 		"getDoc": {
 			"versionID": 2,
 			"createdAt": "2014-11-30T18:40:58.123Z",
@@ -53,7 +53,7 @@
 	            ],
 	            "atts": [
 	            	{
-	            		"url": "http://127.0.0.1:3863/base/testproj/overleaf-white-410.png",
+	            		"url": "http://127.0.0.1:3863/base/000000000000000000000000/overleaf-white-410.png",
 	            		"path": "overleaf-white-410.png"
 	            	}
 	            ]

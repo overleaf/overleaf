@@ -2,6 +2,9 @@ package uk.ac.ic.wlgitbridge.server;
 
 import com.google.api.client.auth.oauth2.*;
 import com.google.api.client.http.GenericUrl;
+import com.google.api.client.http.HttpHeaders;
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpResponse;
 import org.apache.commons.codec.binary.Base64;
 import org.eclipse.jetty.server.Request;
 import uk.ac.ic.wlgitbridge.application.config.Oauth2;
@@ -43,18 +46,6 @@ public class Oauth2Filter implements Filter {
     @Override
     public void init(FilterConfig filterConfig) {}
 
-    private void sendResponse(ServletResponse servletResponse, int code, List<String> lines) throws IOException {
-        HttpServletResponse response = ((HttpServletResponse) servletResponse);
-        response.setContentType("text/plain");
-        response.setStatus(code);
-        PrintWriter w = response.getWriter();
-        for (String line : lines) {
-            w.println(line);
-        }
-        w.close();
-        return;
-    }
-
     /**
      * The original request from git will not contain the Authorization header.
      *
@@ -68,216 +59,343 @@ public class Oauth2Filter implements Filter {
      */
     @Override
     public void doFilter(
-            ServletRequest servletRequest,
-            ServletResponse servletResponse,
-            FilterChain filterChain
-    ) throws IOException, ServletException {
-        String requestUri = ((Request) servletRequest).getRequestURI();
-        if (requestUri.startsWith("/project")) {
-            Log.info("[{}] Invalid request URI", requestUri);
-            sendResponse(servletResponse,404, Arrays.asList(
-                    "Invalid Project ID (must not have a '/project' prefix)"
-            ));
-            return;
-        }
-        String project = Util.removeAllSuffixes(
-                requestUri.split("/")[1],
-                ".git"
-        );
-        // Reject v1 ids, the request will be rejected by v1 anyway
-        if (project.matches("^[0-9]+[bcdfghjklmnpqrstvwxyz]{6,12}$") && !project.matches("^[0-9a-f]{24}$")) {
-            Log.info("[{}] Request for v1 project, refusing", project);
-            sendResponse(servletResponse, 404, Arrays.asList(
-                    "This project has not yet been moved into the new version",
-                    "of Overleaf. You will need to move it in order to continue working on it.",
-                    "Please visit this project online on www.overleaf.com to do this.",
-                    "",
-                    "You can find the new git remote url by selecting \"Git\" from",
-                    "the left sidebar in the project view.",
-                    "",
-                    "If this is unexpected, please contact us at support@overleaf.com, or",
-                    "see https://www.overleaf.com/help/342 for more information."
-            ));
-            return;
-        }
-        Log.debug("[{}] Checking if auth needed", project);
-        GetDocRequest doc = new GetDocRequest(project);
-        doc.request();
-        try {
-            SnapshotApi.getResult(
-                    snapshotApi.getDoc(Optional.empty(), project));
-        } catch (ForbiddenException e) {
-            Log.debug("[{}] Auth needed", project);
-            getAndInjectCredentials(
-                    project,
-                    servletRequest,
-                    servletResponse,
-                    filterChain
-            );
-            return;
-        } catch (MissingRepositoryException e) {
-            handleMissingRepository(project, e, (HttpServletResponse) servletResponse);
-        }
-        Log.debug("[{}] Auth not needed", project);
-        filterChain.doFilter(servletRequest, servletResponse);
-    }
-
-    // TODO: this is ridiculous. Check for error cases first, then return/throw
-    // TODO: also, use an Optional credential, since we treat it as optional
-    private void getAndInjectCredentials(
-            String projectName,
-            ServletRequest servletRequest,
-            ServletResponse servletResponse,
-            FilterChain filterChain
+        ServletRequest servletRequest,
+        ServletResponse servletResponse,
+        FilterChain filterChain
     ) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
-        String capturedUsername = "(unknown)";
+        String requestUri = request.getRequestURI();
 
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader != null) {
-            String clientIp = request.getHeader("X-Forwarded-For");
-            if (clientIp == null) {
-              clientIp = request.getRemoteAddr();
-            }
-            Log.debug("[{}] Authorization header present", clientIp);
-            StringTokenizer st = new StringTokenizer(authHeader);
-            if (st.hasMoreTokens()) {
-                String basic = st.nextToken();
-                if (basic.equalsIgnoreCase("Basic")) {
-                    try {
-                        String credentials = new String(
-                                Base64.decodeBase64(st.nextToken()),
-                                "UTF-8"
-                        );
-                        String[] split = credentials.split(":",2);
-                        if (split.length == 2) {
-                            String username = split[0];
-                            String password = split[1];
-
-                            final Credential cred = new Credential.Builder(
-                                BearerToken.authorizationHeaderAccessMethod()
-                            ).build();
-
-                            if(username.equals("git")) {
-                                Log.debug("[{}] username is 'git', skipping password grant flow", projectName);
-                                cred.setAccessToken(password);
-                            } else if (this.isUserPasswordEnabled) {
-                                String accessToken = null;
-                                if (username.length() > 0) {
-                                    capturedUsername = username;
-                                }
-                                try {
-                                    accessToken = new PasswordTokenRequest(
-                                        Instance.httpTransport,
-                                        Instance.jsonFactory,
-                                        new GenericUrl(
-                                    oauth2.getOauth2Server()
-                                            + "/oauth/token?client_ip="
-                                            + clientIp
-                                        ),
-                                        username,
-                                        password
-                                    ).setClientAuthentication(
-                                      new ClientParametersAuthentication(
-                                        oauth2.getOauth2ClientID(),
-                                        oauth2.getOauth2ClientSecret()
-                                      )
-                                    ).execute().getAccessToken();
-                                } catch (TokenResponseException e) {
-                                    handleNeedAuthorization(projectName, capturedUsername, e.getStatusCode(), request, response);
-                                    return;
-                                }
-                                cred.setAccessToken(accessToken);
-                            }
-
-                            servletRequest.setAttribute(ATTRIBUTE_KEY, cred);
-                            filterChain.doFilter(
-                                servletRequest,
-                                servletResponse
-                            );
-
-                        } else {
-                            handleNeedAuthorization(projectName, capturedUsername, 0, request, response);
-                        }
-                    } catch (UnsupportedEncodingException e) {
-                        throw new Error("Couldn't retrieve authentication", e);
-                    }
-                }
-            }
-        } else {
-            handleNeedAuthorization(projectName, capturedUsername, 0, request, response);
+        if (requestUri.startsWith("/project")) {
+            Log.info("[{}] Invalid request URI", requestUri);
+            sendResponse(response,404, Arrays.asList(
+                "Invalid Project ID (must not have a '/project' prefix)"
+            ));
+            return;
         }
+
+        String projectId = Util.removeAllSuffixes(requestUri.split("/")[1], ".git");
+
+        BasicAuthCredentials basicAuthCreds = getBasicAuthCredentials(request);
+        if (basicAuthCreds == null) {
+            handleNeedAuthorization(projectId, "(unknown)", request, response);
+            return;
+        }
+        String username = basicAuthCreds.getUsername();
+        String password = basicAuthCreds.getPassword();
+
+        if (isLinkSharingId(projectId)) {
+            handleLinkSharingId(projectId, username, request, response);
+            return;
+        }
+        if (!isProjectId(projectId)) {
+            handleBadProjectId(projectId, username, request, response);
+            return;
+        }
+
+        final Credential cred = new Credential.Builder(
+            BearerToken.authorizationHeaderAccessMethod()
+        ).build();
+
+        if (username.equals("git")) {
+            Log.debug("[{}] username is 'git', skipping password grant flow", projectId);
+
+            // Check that the access token is valid. In principle, we could
+            // wait until we make the actual request to the web api, but the
+            // JGit API doesn't make it easy to reply with a 401 and a custom
+            // error message. This is something we can do in this filter, so as
+            // a workaround, we use the /oauth/token/info endpoint to verify
+            // the access token.
+            //
+            // It's still theoretically possible for the web api request to
+            // fail later (for example, in the unlikely event that the token
+            // expired between the two requests). In that case, JGit will
+            // return a 401 without a custom error message.
+            int statusCode = checkAccessToken(oauth2, password, getClientIp(request));
+            if (statusCode == 429) {
+                handleRateLimit(projectId, username, request, response);
+                return;
+            } else if (statusCode == 401) {
+                handleBadAccessToken(projectId, request, response);
+                return;
+            } else if (statusCode >= 400) {
+                handleUnknownOauthServerError(projectId, statusCode, request, response);
+                return;
+            }
+            cred.setAccessToken(password);
+        } else if (this.isUserPasswordEnabled) {
+            String accessToken = null;
+            try {
+                accessToken = doPasswordGrantFlow(username, password, getClientIp(request));
+            } catch (TokenResponseException e) {
+                int statusCode = e.getStatusCode();
+                if (statusCode == 429) {
+                    handleRateLimit(projectId, username, request, response);
+                } else if (statusCode == 400 || statusCode == 401) {
+                    handleNeedAuthorization(projectId, username, request, response);
+                } else {
+                    handleUnknownOauthServerError(projectId, statusCode, request, response);
+                }
+                return;
+            }
+            cred.setAccessToken(accessToken);
+        } else {
+            handleNeedAuthorization(projectId, username, request, response);
+            return;
+        }
+
+        servletRequest.setAttribute(ATTRIBUTE_KEY, cred);
+        filterChain.doFilter(
+            servletRequest,
+            servletResponse
+        );
     }
 
     @Override
     public void destroy() {}
 
-    private void handleNeedAuthorization(
-            String projectName,
-            String userName,
-            int statusCode,
-            HttpServletRequest servletRequest,
-            HttpServletResponse servletResponse
-    ) throws IOException {
-        Log.info(
-            "[{}] Unauthorized, User '{}' status={} ip={}",
-            projectName,
-            userName,
-            statusCode,
-            servletRequest.getRemoteAddr()
-        );
-        HttpServletResponse response = servletResponse;
-        response.setContentType("text/plain");
-        response.setHeader("WWW-Authenticate", "Basic realm=\"Git Bridge\"");
-        PrintWriter w = response.getWriter();
-        if (statusCode == 429) {
-          // Rate limit
-          response.setStatus(429);
-          w.println(
-            "Rate limit exceeded. Please wait and try again later."
-          );
-        } else {
-          response.setStatus(401);
-          w.println(
-            "Please sign in using your email address and Overleaf password."
-          );
-          w.println();
-          w.println(
-            "*Note*: if you sign in to Overleaf using another provider, "
-              + "such "
-          );
-          w.println(
-            "as Google or Twitter, you need to set a password "
-              + "on your Overleaf "
-          );
-          w.println(
-            "account first. "
-              + "Please see https://www.overleaf.com/learn/how-to/Troubleshooting_git_bridge_problems "
-          );
-          w.println("for more information.");
-        }
-
-        w.close();
+    private boolean isLinkSharingId(String projectId) {
+        return projectId.matches("^[0-9]+[bcdfghjklmnpqrstvwxyz]{6,12}$");
     }
 
-    private void handleMissingRepository(
-            String projectName,
-            MissingRepositoryException e,
-            HttpServletResponse response
-    ) throws IOException {
-        Log.info("[{}] Project missing.", projectName);
+    private boolean isProjectId(String projectId) {
+        return projectId.matches("^[0-9a-f]{24}$");
+    }
 
+    private void sendResponse(HttpServletResponse response, int code, List<String> lines) throws IOException {
         response.setContentType("text/plain");
-
-        // git special-cases 404 to give "repository '%s' not found",
-        // rather than displaying the raw status code.
-        response.setStatus(404);
-
+        response.setStatus(code);
         PrintWriter w = response.getWriter();
-        for (String line : e.getDescriptionLines()) {
+        for (String line : lines) {
             w.println(line);
         }
         w.close();
+    }
+
+    private void handleLinkSharingId(
+        String projectId,
+        String username,
+        HttpServletRequest request,
+        HttpServletResponse response
+    ) throws IOException {
+        Log.info(
+            "[{}] Bad project id, User '{}' ip={}",
+            projectId,
+            username,
+            getClientIp(request)
+        );
+        sendResponse(response, 404, Arrays.asList(
+            "Git access via link sharing link is not supported.",
+            "",
+            "You can find the project's git remote url by opening it in your browser",
+            "and selecting Git from the left sidebar in the project view.",
+            "",
+            "If this is unexpected, please contact us at support@overleaf.com, or",
+            "see https://www.overleaf.com/help/342 for more information."
+        ));
+    }
+
+    private void handleBadProjectId(
+        String projectId,
+        String username,
+        HttpServletRequest request,
+        HttpServletResponse response
+    ) throws IOException {
+        Log.info(
+            "[{}] Bad project id, User '{}' ip={}",
+            projectId,
+            username,
+            getClientIp(request)
+        );
+        sendResponse(response, 404, Arrays.asList(
+            "This Overleaf project does not exist.",
+            "",
+            "If this is unexpected, please contact us at support@overleaf.com, or",
+            "see https://www.overleaf.com/help/342 for more information."
+        ));
+    }
+
+    private void handleRateLimit(
+        String projectId,
+        String username,
+        HttpServletRequest request,
+        HttpServletResponse response
+    ) throws IOException {
+        Log.info(
+            "[{}] Rate limit, User '{}' ip={}",
+            projectId,
+            username,
+            getClientIp(request)
+        );
+        sendResponse(response, 429, Arrays.asList(
+            "Rate limit exceeded. Please wait and try again later."
+        ));
+    }
+
+    private void handleNeedAuthorization(
+        String projectId,
+        String username,
+        HttpServletRequest request,
+        HttpServletResponse response
+    ) throws IOException {
+        Log.info(
+            "[{}] Unauthorized, User '{}' ip={}",
+            projectId,
+            username,
+            getClientIp(request)
+        );
+        response.setHeader("WWW-Authenticate", "Basic realm=\"Git Bridge\"");
+        if (this.isUserPasswordEnabled) {
+            sendResponse(response, 401, Arrays.asList(
+                "Log in using the email address and password you use for Overleaf.",
+                "",
+                "*Note*: if you use a provider such as Google or Twitter to sign into",
+                "your Overleaf account, you will need to set a password.",
+                "",
+                "See our help page for more support:",
+                "https://www.overleaf.com/learn/how-to/Troubleshooting_git_bridge_problems"
+            ));
+        } else {
+            sendResponse(response, 401, Arrays.asList(
+                "Log in with the username 'git' and enter your Git authentication token",
+                "when prompted for a password.",
+                "",
+                "You can generate and manage your Git authentication tokens in",
+                "your Overleaf Account Settings."
+            ));
+        }
+    }
+
+    private void handleBadAccessToken(
+        String projectId,
+        HttpServletRequest request,
+        HttpServletResponse response
+    ) throws IOException {
+        Log.info(
+            "[{}] Bad access token, ip={}",
+            projectId,
+            getClientIp(request)
+        );
+        sendResponse(response, 401, Arrays.asList(
+            "Enter your Git authentication token when prompted for a password.",
+            "",
+            "You can generate and manage your Git authentication tokens in",
+            "your Overleaf Account Settings."
+        ));
+    }
+
+    private int checkAccessToken(
+        Oauth2 oauth2,
+        String accessToken,
+        String clientIp
+    ) throws IOException {
+        GenericUrl url = new GenericUrl(
+            oauth2.getOauth2Server() + "/oauth/token/info?client_ip=" + clientIp
+        );
+        HttpRequest request = Instance.httpRequestFactory.buildGetRequest(url);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAuthorization("Bearer " + accessToken);
+        request.setHeaders(headers);
+        request.setThrowExceptionOnExecuteError(false);
+        HttpResponse response = request.execute();
+        int statusCode = response.getStatusCode();
+        response.disconnect();
+        return statusCode;
+    }
+
+    private void handleUnknownOauthServerError(
+        String projectId,
+        int statusCode,
+        HttpServletRequest request,
+        HttpServletResponse response
+    ) throws IOException {
+        Log.info(
+            "[{}] OAuth server error, statusCode={}, ip={}",
+            projectId,
+            statusCode,
+            getClientIp(request)
+        );
+        sendResponse(response, 500, Arrays.asList(
+            "Unexpected server error. Please try again later."
+        ));
+    }
+
+    /**
+     * Gets the remote IP from the request.
+     */
+    private String getClientIp(HttpServletRequest request) {
+        String clientIp = request.getHeader("X-Forwarded-For");
+        if (clientIp == null) {
+            clientIp = request.getRemoteAddr();
+        }
+        return clientIp;
+    }
+
+    /**
+     * Extract basic auth credentials from the request.
+     *
+     * Returns null if valid basic auth credentials couldn't be found.
+     */
+    private BasicAuthCredentials getBasicAuthCredentials(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null) {
+            return null;
+        }
+
+        StringTokenizer st = new StringTokenizer(authHeader);
+        if (!st.hasMoreTokens()) {
+            return null;
+        }
+        String basic = st.nextToken();
+        if (!basic.equalsIgnoreCase("Basic")) {
+            return null;
+        }
+
+        String credentials = null;
+        try {
+            credentials = new String(
+                Base64.decodeBase64(st.nextToken()),
+                "UTF-8"
+            );
+        } catch (UnsupportedEncodingException e) {
+            return null;
+        }
+
+        String[] split = credentials.split(":", 2);
+        if (split.length != 2) {
+            return null;
+        }
+        String username = split[0];
+        String password = split[1];
+        return new BasicAuthCredentials(username, password);
+    }
+
+    /**
+     * Perform a password grant flow with the OAuth server and return an access token.
+     *
+     * The access token is null if the password grant flow was unsuccessful.
+     */
+    private String doPasswordGrantFlow(
+        String username,
+        String password,
+        String clientIp
+    ) throws IOException {
+        return new PasswordTokenRequest(
+            Instance.httpTransport,
+            Instance.jsonFactory,
+            new GenericUrl(
+                oauth2.getOauth2Server()
+                + "/oauth/token?client_ip="
+                + clientIp
+            ),
+            username,
+            password
+        ).setClientAuthentication(
+            new ClientParametersAuthentication(
+                oauth2.getOauth2ClientID(),
+                oauth2.getOauth2ClientSecret()
+            )
+        ).execute().getAccessToken();
     }
 }

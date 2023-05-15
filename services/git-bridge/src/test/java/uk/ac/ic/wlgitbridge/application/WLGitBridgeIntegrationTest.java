@@ -51,6 +51,10 @@ public class WLGitBridgeIntegrationTest {
 
     private Runtime runtime = Runtime.getRuntime();
 
+    private static final String PROJECT_ID = "000000000000000000000000";
+    private static final String PROJECT_ID1 = "111111111111111111111111";
+    private static final String PROJECT_ID2 = "222222222222222222222222";
+
     private Map<String, Map<String, SnapshotAPIState>> states = new HashMap<String, Map<String, SnapshotAPIState>>() {{
         put("canCloneARepository", new HashMap<String, SnapshotAPIState>() {{
             put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/canCloneARepository/state/state.json")).build());
@@ -185,7 +189,7 @@ public class WLGitBridgeIntegrationTest {
     }
 
     private File gitClone(String repositoryName, int port, File dir) throws IOException, InterruptedException {
-        String repo = "git clone http://127.0.0.1:" + port + "/" + repositoryName + ".git";
+        String repo = "git clone http://git:password@127.0.0.1:" + port + "/" + repositoryName;
         Process gitProcess = runtime.exec(repo, null, dir);
         int exitCode = gitProcess.waitFor();
         if (exitCode != 0) {
@@ -259,8 +263,8 @@ public class WLGitBridgeIntegrationTest {
             makeConfigFile(33857, 3857)
         });
         wlgb.run();
-        File testprojDir = gitClone("testproj", 33857, dir);
-        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canCloneARepository/state/testproj"), testprojDir.toPath()));
+        File testprojDir = gitClone(PROJECT_ID, 33857, dir);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canCloneARepository/state/" + PROJECT_ID), testprojDir.toPath()));
     }
 
     @Test
@@ -272,10 +276,10 @@ public class WLGitBridgeIntegrationTest {
             makeConfigFile(33858, 3858)
         });
         wlgb.run();
-        File testproj1Dir = gitClone("testproj1", 33858, dir);
-        File testproj2Dir = gitClone("testproj2", 33858, dir);
-        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canCloneMultipleRepositories/state/testproj1"), testproj1Dir.toPath()));
-        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canCloneMultipleRepositories/state/testproj2"), testproj2Dir.toPath()));
+        File testproj1Dir = gitClone(PROJECT_ID1, 33858, dir);
+        File testproj2Dir = gitClone(PROJECT_ID2, 33858, dir);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canCloneMultipleRepositories/state/" + PROJECT_ID1), testproj1Dir.toPath()));
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canCloneMultipleRepositories/state/" + PROJECT_ID2), testproj2Dir.toPath()));
     }
 
     @Test
@@ -287,11 +291,11 @@ public class WLGitBridgeIntegrationTest {
             makeConfigFile(33859, 3859)
         });
         wlgb.run();
-        File testprojDir = gitClone("testproj", 33859, dir);
-        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullAModifiedTexFile/base/testproj"), testprojDir.toPath()));
+        File testprojDir = gitClone(PROJECT_ID, 33859, dir);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullAModifiedTexFile/base/" + PROJECT_ID), testprojDir.toPath()));
         server.setState(states.get("canPullAModifiedTexFile").get("withModifiedTexFile"));
         gitPull(testprojDir);
-        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullAModifiedTexFile/withModifiedTexFile/testproj"), testprojDir.toPath()));
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullAModifiedTexFile/withModifiedTexFile/" + PROJECT_ID), testprojDir.toPath()));
     }
 
     @Test
@@ -303,11 +307,11 @@ public class WLGitBridgeIntegrationTest {
             makeConfigFile(33860, 3860)
         });
         wlgb.run();
-        File testprojDir = gitClone("testproj", 33860, dir);
-        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullADeletedTexFile/base/testproj"), testprojDir.toPath()));
+        File testprojDir = gitClone(PROJECT_ID, 33860, dir);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullADeletedTexFile/base/" + PROJECT_ID), testprojDir.toPath()));
         server.setState(states.get("canPullADeletedTexFile").get("withDeletedTexFile"));
         gitPull(testprojDir);
-        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullADeletedTexFile/withDeletedTexFile/testproj"), testprojDir.toPath()));
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullADeletedTexFile/withDeletedTexFile/" + PROJECT_ID), testprojDir.toPath()));
     }
 
     @Test
@@ -319,11 +323,11 @@ public class WLGitBridgeIntegrationTest {
             makeConfigFile(33862, 3862)
         });
         wlgb.run();
-        File testprojDir = gitClone("testproj", 33862, dir);
-        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullAModifiedBinaryFile/base/testproj"), testprojDir.toPath()));
+        File testprojDir = gitClone(PROJECT_ID, 33862, dir);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullAModifiedBinaryFile/base/" + PROJECT_ID), testprojDir.toPath()));
         server.setState(states.get("canPullAModifiedBinaryFile").get("withModifiedBinaryFile"));
         gitPull(testprojDir);
-        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullAModifiedBinaryFile/withModifiedBinaryFile/testproj"), testprojDir.toPath()));
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullAModifiedBinaryFile/withModifiedBinaryFile/" + PROJECT_ID), testprojDir.toPath()));
     }
 
     @Test
@@ -335,11 +339,11 @@ public class WLGitBridgeIntegrationTest {
             makeConfigFile(33863, 3863)
         });
         wlgb.run();
-        File testprojDir = gitClone("testproj", 33863, dir);
-        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullADeletedBinaryFile/base/testproj"), testprojDir.toPath()));
+        File testprojDir = gitClone(PROJECT_ID, 33863, dir);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullADeletedBinaryFile/base/" + PROJECT_ID), testprojDir.toPath()));
         server.setState(states.get("canPullADeletedBinaryFile").get("withDeletedBinaryFile"));
         gitPull(testprojDir);
-        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullADeletedBinaryFile/withDeletedBinaryFile/testproj"), testprojDir.toPath()));
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullADeletedBinaryFile/withDeletedBinaryFile/" + PROJECT_ID), testprojDir.toPath()));
     }
 
     @Test
@@ -351,11 +355,11 @@ public class WLGitBridgeIntegrationTest {
             makeConfigFile(44001, 4001)
         });
         wlgb.run();
-        File testprojDir = gitClone("testproj", 44001, dir);
-        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullADuplicateBinaryFile/base/testproj"), testprojDir.toPath()));
+        File testprojDir = gitClone(PROJECT_ID, 44001, dir);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullADuplicateBinaryFile/base/" + PROJECT_ID), testprojDir.toPath()));
         server.setState(states.get("canPullADuplicateBinaryFile").get("withDuplicateBinaryFile"));
         gitPull(testprojDir);
-        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullADuplicateBinaryFile/withDuplicateBinaryFile/testproj"), testprojDir.toPath()));
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullADuplicateBinaryFile/withDuplicateBinaryFile/" + PROJECT_ID), testprojDir.toPath()));
     }
 
     @Test
@@ -367,8 +371,8 @@ public class WLGitBridgeIntegrationTest {
             makeConfigFile(44002, 4002)
         });
         wlgb.run();
-        File testprojDir = gitClone("testproj", 44002, dir);
-        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canCloneDuplicateBinaryFiles/state/testproj"), testprojDir.toPath()));
+        File testprojDir = gitClone(PROJECT_ID, 44002, dir);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canCloneDuplicateBinaryFiles/state/" + PROJECT_ID), testprojDir.toPath()));
     }
 
     @Test
@@ -380,11 +384,11 @@ public class WLGitBridgeIntegrationTest {
             makeConfigFile(44003, 4003)
         });
         wlgb.run();
-        File testprojDir = gitClone("testproj", 44003, dir);
-        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullUpdatedBinaryFiles/base/testproj"), testprojDir.toPath()));
+        File testprojDir = gitClone(PROJECT_ID, 44003, dir);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullUpdatedBinaryFiles/base/" + PROJECT_ID), testprojDir.toPath()));
         server.setState(states.get("canPullUpdatedBinaryFiles").get("withUpdatedBinaryFiles"));
         gitPull(testprojDir);
-        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullUpdatedBinaryFiles/withUpdatedBinaryFiles/testproj"), testprojDir.toPath()));
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullUpdatedBinaryFiles/withUpdatedBinaryFiles/" + PROJECT_ID), testprojDir.toPath()));
     }
 
     @Test
@@ -396,11 +400,11 @@ public class WLGitBridgeIntegrationTest {
             makeConfigFile(33864, 3864)
         });
         wlgb.run();
-        File testprojDir = gitClone("testproj", 33864, dir);
-        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullAModifiedNestedFile/base/testproj"), testprojDir.toPath()));
+        File testprojDir = gitClone(PROJECT_ID, 33864, dir);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullAModifiedNestedFile/base/" + PROJECT_ID), testprojDir.toPath()));
         server.setState(states.get("canPullAModifiedNestedFile").get("withModifiedNestedFile"));
         gitPull(testprojDir);
-        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullAModifiedNestedFile/withModifiedNestedFile/testproj"), testprojDir.toPath()));
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullAModifiedNestedFile/withModifiedNestedFile/" + PROJECT_ID), testprojDir.toPath()));
     }
 
     @Test
@@ -412,11 +416,11 @@ public class WLGitBridgeIntegrationTest {
             makeConfigFile(33865, 3865)
         });
         wlgb.run();
-        File testprojDir = gitClone("testproj", 33865, dir);
-        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullDeletedNestedFiles/base/testproj"), testprojDir.toPath()));
+        File testprojDir = gitClone(PROJECT_ID, 33865, dir);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullDeletedNestedFiles/base/" + PROJECT_ID), testprojDir.toPath()));
         server.setState(states.get("canPullDeletedNestedFiles").get("withDeletedNestedFiles"));
         gitPull(testprojDir);
-        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullDeletedNestedFiles/withDeletedNestedFiles/testproj"), testprojDir.toPath()));
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullDeletedNestedFiles/withDeletedNestedFiles/" + PROJECT_ID), testprojDir.toPath()));
     }
 
     @Test
@@ -428,8 +432,8 @@ public class WLGitBridgeIntegrationTest {
         });
         wlgb.run();
         server.setState(states.get("canPushFilesSuccessfully").get("state"));
-        File testprojDir = gitClone("testproj", 33866, dir);
-        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPushFilesSuccessfully/state/testproj"), testprojDir.toPath()));
+        File testprojDir = gitClone(PROJECT_ID, 33866, dir);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPushFilesSuccessfully/state/" + PROJECT_ID), testprojDir.toPath()));
         assertEquals(0, runtime.exec("touch push.tex", null, testprojDir).waitFor());
         gitAdd(testprojDir);
         gitCommit(testprojDir, "push");
@@ -437,7 +441,7 @@ public class WLGitBridgeIntegrationTest {
         }
 
     private static final String EXPECTED_OUT_PUSH_OUT_OF_DATE_FIRST =
-      "error: failed to push some refs to 'http://127.0.0.1:33867/testproj.git'\n" +
+      "error: failed to push some refs to 'http://127.0.0.1:33867/" + PROJECT_ID + "'\n" +
       "hint: Updates were rejected because the tip of your current branch is behind\n" +
       "hint: its remote counterpart. Integrate the remote changes (e.g.\n" +
       "hint: 'git pull ...') before pushing again.\n" +
@@ -452,8 +456,8 @@ public class WLGitBridgeIntegrationTest {
             makeConfigFile(33867, 3867)
         });
         wlgb.run();
-        File testprojDir = gitClone("testproj", 33867, dir);
-        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/pushFailsOnFirstStageOutOfDate/state/testproj"), testprojDir.toPath()));
+        File testprojDir = gitClone(PROJECT_ID, 33867, dir);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/pushFailsOnFirstStageOutOfDate/state/" + PROJECT_ID), testprojDir.toPath()));
         runtime.exec("touch push.tex", null, testprojDir).waitFor();
         gitAdd(testprojDir);
         gitCommit(testprojDir, "push");
@@ -462,7 +466,7 @@ public class WLGitBridgeIntegrationTest {
     }
 
     private static final String EXPECTED_OUT_PUSH_OUT_OF_DATE_SECOND =
-      "error: failed to push some refs to 'http://127.0.0.1:33868/testproj.git'\n" +
+      "error: failed to push some refs to 'http://127.0.0.1:33868/" + PROJECT_ID + "'\n" +
       "hint: Updates were rejected because the tip of your current branch is behind\n" +
       "hint: its remote counterpart. Integrate the remote changes (e.g.\n" +
       "hint: 'git pull ...') before pushing again.\n" +
@@ -477,8 +481,8 @@ public class WLGitBridgeIntegrationTest {
             makeConfigFile(33868, 3868)
         });
         wlgb.run();
-        File testprojDir = gitClone("testproj", 33868, dir);
-        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/pushFailsOnSecondStageOutOfDate/state/testproj"), testprojDir.toPath()));
+        File testprojDir = gitClone(PROJECT_ID, 33868, dir);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/pushFailsOnSecondStageOutOfDate/state/" + PROJECT_ID), testprojDir.toPath()));
         runtime.exec("touch push.tex", null, testprojDir).waitFor();
         gitAdd(testprojDir);
         gitCommit(testprojDir, "push");
@@ -492,9 +496,9 @@ public class WLGitBridgeIntegrationTest {
         "remote: hint: file2.exe (invalid file extension)",
         "remote: hint: hello world.png (rename to: hello_world.png)",
         "remote: hint: an image.jpg (rename to: an_image.jpg)",
-        "To http://127.0.0.1:33869/testproj.git",
+        "To http://127.0.0.1:33869/" + PROJECT_ID,
         "! [remote rejected] master -> master (invalid files)",
-        "error: failed to push some refs to 'http://127.0.0.1:33869/testproj.git'"
+        "error: failed to push some refs to 'http://127.0.0.1:33869/" + PROJECT_ID + "'"
     );
 
     @Test
@@ -506,8 +510,8 @@ public class WLGitBridgeIntegrationTest {
             makeConfigFile(33869, 3869)
         });
         wlgb.run();
-        File testprojDir = gitClone("testproj", 33869, dir);
-        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/pushFailsOnInvalidFiles/state/testproj"), testprojDir.toPath()));
+        File testprojDir = gitClone(PROJECT_ID, 33869, dir);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/pushFailsOnInvalidFiles/state/" + PROJECT_ID), testprojDir.toPath()));
         runtime.exec("touch push.tex", null, testprojDir).waitFor();
         gitAdd(testprojDir);
         gitCommit(testprojDir, "push");
@@ -519,9 +523,9 @@ public class WLGitBridgeIntegrationTest {
     private static final List<String> EXPECTED_OUT_PUSH_INVALID_PROJECT = Arrays.asList(
         "remote: hint: project: no main file",
         "remote: hint: The project would have no (editable) main .tex file.",
-        "To http://127.0.0.1:33870/testproj.git",
+        "To http://127.0.0.1:33870/" + PROJECT_ID,
         "! [remote rejected] master -> master (invalid project)",
-        "error: failed to push some refs to 'http://127.0.0.1:33870/testproj.git'"
+        "error: failed to push some refs to 'http://127.0.0.1:33870/" + PROJECT_ID + "'"
     );
 
     @Test
@@ -533,8 +537,8 @@ public class WLGitBridgeIntegrationTest {
             makeConfigFile(33870, 3870)
         });
         wlgb.run();
-        File testprojDir = gitClone("testproj", 33870, dir);
-        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/pushFailsOnInvalidProject/state/testproj"), testprojDir.toPath()));
+        File testprojDir = gitClone(PROJECT_ID, 33870, dir);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/pushFailsOnInvalidProject/state/" + PROJECT_ID), testprojDir.toPath()));
         runtime.exec("touch push.tex", null, testprojDir).waitFor();
         gitAdd(testprojDir);
         gitCommit(testprojDir, "push");
@@ -546,9 +550,9 @@ public class WLGitBridgeIntegrationTest {
     private static final List<String> EXPECTED_OUT_PUSH_UNEXPECTED_ERROR = Arrays.asList(
         "remote: hint: There was an internal error with the Overleaf server.",
         "remote: hint: Please contact Overleaf.",
-        "To http://127.0.0.1:33871/testproj.git",
+        "To http://127.0.0.1:33871/" + PROJECT_ID,
         "! [remote rejected] master -> master (Overleaf error)",
-        "error: failed to push some refs to 'http://127.0.0.1:33871/testproj.git'"
+        "error: failed to push some refs to 'http://127.0.0.1:33871/" + PROJECT_ID + "'"
     );
 
     /* this one prints a stack trace */
@@ -561,8 +565,8 @@ public class WLGitBridgeIntegrationTest {
             makeConfigFile(33871, 3871)
         });
         wlgb.run();
-        File testprojDir = gitClone("testproj", 33871, dir);
-        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/pushFailsOnUnexpectedError/state/testproj"), testprojDir.toPath()));
+        File testprojDir = gitClone(PROJECT_ID, 33871, dir);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/pushFailsOnUnexpectedError/state/" + PROJECT_ID), testprojDir.toPath()));
         runtime.exec("touch push.tex", null, testprojDir).waitFor();
         gitAdd(testprojDir);
         gitCommit(testprojDir, "push");
@@ -576,9 +580,9 @@ public class WLGitBridgeIntegrationTest {
         "remote:",
         "remote: hint: You have 1 invalid files in your Overleaf project:",
         "remote: hint: file1.exe (invalid file extension)",
-        "To http://127.0.0.1:33872/testproj.git",
+        "To http://127.0.0.1:33872/" + PROJECT_ID,
         "! [remote rejected] master -> master (invalid files)",
-        "error: failed to push some refs to 'http://127.0.0.1:33872/testproj.git'"
+        "error: failed to push some refs to 'http://127.0.0.1:33872/" + PROJECT_ID + "'"
     );
 
     @Test
@@ -590,10 +594,10 @@ public class WLGitBridgeIntegrationTest {
                 makeConfigFile(33872, 3872)
         });
         wlgb.run();
-        File testprojDir = gitClone("testproj", 33872, dir);
+        File testprojDir = gitClone(PROJECT_ID, 33872, dir);
 
         // try to push invalid file; it should fail
-        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/pushSucceedsAfterRemovingInvalidFiles/invalidState/testproj"), testprojDir.toPath()));
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/pushSucceedsAfterRemovingInvalidFiles/invalidState/" + PROJECT_ID), testprojDir.toPath()));
         assertEquals(0, runtime.exec("touch file1.exe", null, testprojDir).waitFor());
         gitAdd(testprojDir);
         gitCommit(testprojDir, "push");
@@ -606,7 +610,7 @@ public class WLGitBridgeIntegrationTest {
         gitCommit(testprojDir, "remove_invalid_file");
         server.setState(states.get("pushSucceedsAfterRemovingInvalidFiles").get("validState"));
         gitPush(testprojDir);
-        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/pushSucceedsAfterRemovingInvalidFiles/validState/testproj"), testprojDir.toPath()));
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/pushSucceedsAfterRemovingInvalidFiles/validState/" + PROJECT_ID), testprojDir.toPath()));
     }
 
     @Test
@@ -629,8 +633,8 @@ public class WLGitBridgeIntegrationTest {
         });
         wlgb.run();
 
-        File testprojDir = gitClone("testproj", gitBridgePort, dir);
-        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canServePushedFiles/state/testproj"), testprojDir.toPath()));
+        File testprojDir = gitClone(PROJECT_ID, gitBridgePort, dir);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canServePushedFiles/state/" + PROJECT_ID), testprojDir.toPath()));
         runtime.exec("touch push.tex", null, testprojDir).waitFor();
         gitAdd(testprojDir);
         gitCommit(testprojDir, "push");
@@ -677,17 +681,17 @@ public class WLGitBridgeIntegrationTest {
         });
         wlgb.run();
         File rootGitDir = new File(wlgb.config.getRootGitDirectory());
-        File testProj1ServerDir = new File(rootGitDir, "testproj1");
-        File testProj2ServerDir = new File(rootGitDir, "testproj2");
-        File testProj1Dir = gitClone("testproj1", 33874, dir);
+        File testProj1ServerDir = new File(rootGitDir, PROJECT_ID1);
+        File testProj2ServerDir = new File(rootGitDir, PROJECT_ID2);
+        File testProj1Dir = gitClone(PROJECT_ID1, 33874, dir);
         assertTrue(testProj1ServerDir.exists());
         assertFalse(testProj2ServerDir.exists());
-        gitClone("testproj2", 33874, dir);
+        gitClone(PROJECT_ID2, 33874, dir);
         while (testProj1ServerDir.exists());
         assertFalse(testProj1ServerDir.exists());
         assertTrue(testProj2ServerDir.exists());
         FileUtils.deleteDirectory(testProj1Dir);
-        gitClone("testproj1", 33874, dir);
+        gitClone(PROJECT_ID1, 33874, dir);
         while (testProj2ServerDir.exists());
         assertTrue(testProj1ServerDir.exists());
         assertFalse(testProj2ServerDir.exists());
@@ -697,9 +701,9 @@ public class WLGitBridgeIntegrationTest {
             "remote: hint: Your Git repository contains a reference we cannot resolve.",
             "remote: hint: If your project contains a Git submodule,",
             "remote: hint: please remove it and try again.",
-            "To http://127.0.0.1:33875/testproj.git",
+            "To http://127.0.0.1:33875/" + PROJECT_ID,
             "! [remote rejected] master -> master (invalid git repo)",
-            "error: failed to push some refs to 'http://127.0.0.1:33875/testproj.git'"
+            "error: failed to push some refs to 'http://127.0.0.1:33875/" + PROJECT_ID + "'"
     );
 
     @Test
@@ -711,7 +715,7 @@ public class WLGitBridgeIntegrationTest {
                 makeConfigFile(33875, 3875)
         });
         wlgb.run();
-        File testprojDir = gitClone("testproj", 33875, dir);
+        File testprojDir = gitClone(PROJECT_ID, 33875, dir);
         runtime.exec("mkdir sub", null, testprojDir).waitFor();
         File sub = new File(testprojDir, "sub");
         runtime.exec("touch sub.txt", null, sub).waitFor();
@@ -749,12 +753,12 @@ public class WLGitBridgeIntegrationTest {
         assertEquals(404, response.getStatusCode());
         assertEquals("{\"message\":\"HTTP error 404\"}", response.getResponseBody());
 
-        // With an unsupported URL outside the api, we should get a 500,
-        // which is rendered by our custom error handler.
+        // With an unsupported URL outside the api, the request is assumed to
+        // be from a git client and we should get a 401 because the request
+        // does not include basic auth credentials.
         url = "http://127.0.0.1:" + gitBridgePort + "/foo";
         response = asyncHttpClient().prepareGet(url).execute().get();
-        assertEquals(500, response.getStatusCode());
-        assertEquals("{\"message\":\"HTTP error 500\"}", response.getResponseBody());
+        assertEquals(401, response.getStatusCode());
     }
 
     @Test
@@ -770,7 +774,7 @@ public class WLGitBridgeIntegrationTest {
         });
 
         wlgb.run();
-        Process gitProcess = runtime.exec("git clone http://127.0.0.1:" + gitBridgePort + "/testproj.git", null, dir);
+        Process gitProcess = runtime.exec("git clone http://git:password@127.0.0.1:" + gitBridgePort + "/" + PROJECT_ID, null, dir);
         assertNotEquals(0, gitProcess.waitFor());
     }
 
@@ -787,7 +791,7 @@ public class WLGitBridgeIntegrationTest {
         });
 
         wlgb.run();
-        Process gitProcess = runtime.exec("git clone http://127.0.0.1:" + gitBridgePort + "/testproj.git", null, dir);
+        Process gitProcess = runtime.exec("git clone http://git:password@127.0.0.1:" + gitBridgePort + "/" + PROJECT_ID, null, dir);
         assertNotEquals(0, gitProcess.waitFor());
     }
 
@@ -804,7 +808,7 @@ public class WLGitBridgeIntegrationTest {
         });
 
         wlgb.run();
-        Process gitProcess = runtime.exec("git clone http://127.0.0.1:" + gitBridgePort + "/testproj.git", null, dir);
+        Process gitProcess = runtime.exec("git clone http://git:password@127.0.0.1:" + gitBridgePort + "/" + PROJECT_ID, null, dir);
         assertNotEquals(0, gitProcess.waitFor());
     }
 
@@ -819,10 +823,10 @@ public class WLGitBridgeIntegrationTest {
                 makeConfigFile(gitBridgePort, mockServerPort)
         });
         wlgb.run();
-        File testprojDir = gitClone("testproj", gitBridgePort, dir);
-        File testprojDir2 = gitClone("testproj2", gitBridgePort, dir);
+        File testprojDir = gitClone(PROJECT_ID, gitBridgePort, dir);
+        File testprojDir2 = gitClone(PROJECT_ID2, gitBridgePort, dir);
         // Second project content is equal to content of the first
-        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canMigrateRepository/state/testproj"), testprojDir2.toPath()));
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canMigrateRepository/state/" + PROJECT_ID), testprojDir2.toPath()));
     }
 
     @Test
@@ -837,8 +841,8 @@ public class WLGitBridgeIntegrationTest {
         });
         wlgb.run();
         // don't clone the source project first
-        File testprojDir2 = gitClone("testproj2", gitBridgePort, dir);
-        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/skipMigrationWhenMigratedFromMissing/state/testproj2"), testprojDir2.toPath()));
+        File testprojDir2 = gitClone(PROJECT_ID2, gitBridgePort, dir);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/skipMigrationWhenMigratedFromMissing/state/" + PROJECT_ID2), testprojDir2.toPath()));
     }
 
     @Test
@@ -852,8 +856,8 @@ public class WLGitBridgeIntegrationTest {
                 makeConfigFile(gitBridgePort, mockServerPort)
         });
         wlgb.run();
-        File testprojDir = gitClone("testproj_no_change", gitBridgePort, dir);
-        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canCloneAMigratedRepositoryWithoutChanges/state/testproj_no_change"), testprojDir.toPath()));
+        File testprojDir = gitClone(PROJECT_ID, gitBridgePort, dir);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canCloneAMigratedRepositoryWithoutChanges/state/" + PROJECT_ID), testprojDir.toPath()));
     }
 
     @Test
@@ -867,7 +871,7 @@ public class WLGitBridgeIntegrationTest {
                 makeConfigFile(gitBridgePort, mockServerPort)
         });
         wlgb.run();
-        Process gitProcess = runtime.exec("git clone http://127.0.0.1:" + gitBridgePort + "/1234bbccddff.git", null, dir);
+        Process gitProcess = runtime.exec("git clone http://git:password@127.0.0.1:" + gitBridgePort + "/1234bbccddff.git", null, dir);
         assertNotEquals(0, gitProcess.waitFor());
     }
 
@@ -884,7 +888,7 @@ public class WLGitBridgeIntegrationTest {
         });
 
         wlgb.run();
-        Process gitProcess = runtime.exec("git clone http://127.0.0.1:" + gitBridgePort + "/conflict.git", null, dir);
+        Process gitProcess = runtime.exec("git clone http://git:password@127.0.0.1:" + gitBridgePort + "/conflict.git", null, dir);
         assertNotEquals(0, gitProcess.waitFor());
         wlgb.stop();
     }
@@ -902,7 +906,7 @@ public class WLGitBridgeIntegrationTest {
         });
 
         wlgb.run();
-        Process gitProcess = runtime.exec("git clone http://127.0.0.1:" + gitBridgePort + "/project/1234abcd", null, dir);
+        Process gitProcess = runtime.exec("git clone http://git:password@127.0.0.1:" + gitBridgePort + "/project/1234abcd", null, dir);
         assertNotEquals(0, gitProcess.waitFor());
 
         List<String> actual = Util.linesFromStream(gitProcess.getErrorStream(), 0, "");
@@ -996,7 +1000,7 @@ public class WLGitBridgeIntegrationTest {
         });
         wlgb.run();
         HttpClient client = HttpClients.createDefault();
-        String urlBase = "http://127.0.0.1:" + gitBridgePort;
+        String urlBase = "http://git:password@127.0.0.1:" + gitBridgePort;
         HttpPost gitLfsRequest = new HttpPost(urlBase+"/5f2419407929eb0026641967.git/info/lfs/objects/batch");
         HttpResponse gitLfsResponse = client.execute(gitLfsRequest);
         assertEquals(422, gitLfsResponse.getStatusLine().getStatusCode());
@@ -1016,7 +1020,7 @@ public class WLGitBridgeIntegrationTest {
         makeConfigFile(gitBridgePort, mockServerPort)
       });
       wlgb.run();
-      File testProjDir = gitClone("testproj", gitBridgePort, dir);
+      File testProjDir = gitClone(PROJECT_ID, gitBridgePort, dir);
       File one = new File(testProjDir, "sub/one.txt");
       one.createNewFile();
       FileWriter fw = new FileWriter(one.getPath());
@@ -1044,7 +1048,7 @@ public class WLGitBridgeIntegrationTest {
         makeConfigFile(gitBridgePort, mockServerPort)
       });
       wlgb.run();
-      File testProjDir = gitClone("testproj", gitBridgePort, dir);
+      File testProjDir = gitClone(PROJECT_ID, gitBridgePort, dir);
       server.setState(states.get("canPullIgnoredForceAddedFile").get("withUpdatedMainFile"));
       gitPull(testProjDir);
       File f = new File(testProjDir.getPath() + "/sub/one.txt");
@@ -1084,7 +1088,7 @@ public class WLGitBridgeIntegrationTest {
                 "    \"oauth2\": {\n" +
                 "        \"oauth2ClientID\": \"clientID\",\n" +
                 "        \"oauth2ClientSecret\": \"oauth2 client secret\",\n" +
-                "        \"oauth2Server\": \"https://www.overleaf.com\"\n" +
+                "        \"oauth2Server\": \"http://127.0.0.1:" + apiPort + "\"\n" +
                 "    }";
         if (swapCfg != null) {
             cfgStr += ",\n" +

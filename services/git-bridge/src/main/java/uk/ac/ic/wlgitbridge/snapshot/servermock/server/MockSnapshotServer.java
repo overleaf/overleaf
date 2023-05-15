@@ -3,6 +3,7 @@ package uk.ac.ic.wlgitbridge.snapshot.servermock.server;
 import org.eclipse.jetty.server.NetworkConnector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerCollection;
+import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import uk.ac.ic.wlgitbridge.snapshot.servermock.response.SnapshotResponseBuilder;
 import uk.ac.ic.wlgitbridge.snapshot.servermock.state.SnapshotAPIState;
@@ -22,7 +23,11 @@ public class MockSnapshotServer {
     public MockSnapshotServer(int port, File resourceBase) {
         server = new Server(port);
         responseBuilder = new SnapshotResponseBuilder();
-        server.setHandler(getHandlerForResourceBase(resourceBase));
+
+        HandlerList handlers = new HandlerList();
+        handlers.addHandler(new MockOAuthRequestHandler());
+        handlers.addHandler(getHandlerForResourceBase(resourceBase));
+        server.setHandler(handlers);
     }
 
     private HandlerCollection getHandlerForResourceBase(File resourceBase) {

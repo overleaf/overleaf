@@ -1,6 +1,6 @@
 [
   {
-    "project": "testproj2",
+    "project": "222222222222222222222222",
     "getDoc": {
       "versionID": 1,
       "createdAt": "2014-11-30T18:40:58.123Z",
@@ -24,7 +24,7 @@
         ],
         "atts": [
           {
-            "url": "http://127.0.0.1:3882/state/testproj2/min_mean_wait_evm_7_eps_150dpi.png",
+            "url": "http://127.0.0.1:3882/state/222222222222222222222222/min_mean_wait_evm_7_eps_150dpi.png",
             "path": "min_mean_wait_evm_7_eps_150dpi.png"
           }
         ]
