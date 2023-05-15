@@ -1319,6 +1319,7 @@
   "select_tag": "Select tag __tagName__",
   "select_user": "Select user",
   "selected": "Selected",
+  "selection_deleted": "Selection deleted",
   "send": "Send",
   "send_first_message": "Send your first message to your collaborators",
   "send_test_email": "Send a test email",

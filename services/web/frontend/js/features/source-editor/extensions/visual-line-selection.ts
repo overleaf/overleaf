@@ -141,7 +141,7 @@ function deleteBy(target: CommandTarget, by: (start: number) => number) {
       userEvent: event,
       effects:
         event == 'delete.selection'
-          ? EditorView.announce.of(state.phrase('Selection deleted'))
+          ? EditorView.announce.of(state.phrase('selection_deleted'))
           : undefined,
     })
   )

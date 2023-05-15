@@ -12,7 +12,7 @@ module.exports = {
   options: {
     sort: true,
     func: {
-      list: ['t'],
+      list: ['t', 'phrase'],
       extensions: ['.js', '.jsx'],
     },
     trans: {

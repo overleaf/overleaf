@@ -26,7 +26,7 @@ export class PreambleWidget extends WidgetType {
     helpLink.target = '_blank'
     const icon = document.createElement('i')
     icon.classList.add('fa', 'fa-question-circle')
-    icon.title = view.state.phrase('Learn more')
+    icon.title = view.state.phrase('learn_more')
     helpLink.appendChild(icon)
     const textNode = document.createElement('span')
     textNode.classList.add('ol-cm-preamble-text')
@@ -72,8 +72,8 @@ export class PreambleWidget extends WidgetType {
 
   getToggleText(view: EditorView) {
     if (this.expanded) {
-      return view.state.phrase(`Hide document preamble`)
+      return view.state.phrase(`hide_document_preamble`)
     }
-    return view.state.phrase(`Show document preamble`)
+    return view.state.phrase(`show_document_preamble`)
   }
 }
