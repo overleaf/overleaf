@@ -3,12 +3,20 @@ import { postJSON } from '../../../infrastructure/fetch-json'
 import { fileCollator } from '../util/file-collator'
 import useAbortController from '../../../shared/hooks/use-abort-controller'
 
-const alphabetical = (a, b) => fileCollator.compare(a.path, b.path)
+export type OutputEntity = {
+  path: string
+  clsiServerId: string
+  compileGroup: string
+  build: string
+}
 
-export function useProjectOutputFiles(projectId) {
-  const [loading, setLoading] = useState(false)
-  const [data, setData] = useState(null)
-  const [error, setError] = useState(false)
+const alphabetical = (a: OutputEntity, b: OutputEntity) =>
+  fileCollator.compare(a.path, b.path)
+
+export function useProjectOutputFiles(projectId?: string) {
+  const [loading, setLoading] = useState<boolean>(false)
+  const [data, setData] = useState<OutputEntity[] | null>(null)
+  const [error, setError] = useState<any>(false)
 
   const { signal } = useAbortController()
 
@@ -28,10 +36,11 @@ export function useProjectOutputFiles(projectId) {
       })
         .then(data => {
           if (data.status === 'success') {
-            const filteredFiles = data.outputFiles.filter(file =>
-              file.path.match(/.*\.(pdf|png|jpeg|jpg|gif)/)
+            const filteredFiles = data.outputFiles.filter(
+              (file: OutputEntity) =>
+                file.path.match(/.*\.(pdf|png|jpeg|jpg|gif)/)
             )
-            data.outputFiles.forEach(file => {
+            data.outputFiles.forEach((file: OutputEntity) => {
               file.clsiServerId = data.clsiServerId
               file.compileGroup = data.compileGroup
             })

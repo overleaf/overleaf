@@ -24,6 +24,7 @@ import { EndWidget } from './visual-widgets/end'
 import {
   getEnvironmentArguments,
   getEnvironmentName,
+  parseFigureData,
 } from '../../utils/tree-operations/environments'
 import { MathWidget } from './visual-widgets/math'
 import { GraphicsWidget } from './visual-widgets/graphics'
@@ -41,6 +42,9 @@ import { EndDocumentWidget } from './visual-widgets/end-document'
 import { EnvironmentLineWidget } from './visual-widgets/environment-line'
 import { ListEnvironmentName } from '../../utils/tree-operations/ancestors'
 import { InlineGraphicsWidget } from './visual-widgets/inline-graphics'
+import getMeta from '../../../../utils/meta'
+import { EditableGraphicsWidget } from './visual-widgets/editable-graphics'
+import { EditableInlineGraphicsWidget } from './visual-widgets/editable-inline-graphics'
 
 type Options = {
   fileTreeManager: {
@@ -109,6 +113,9 @@ const hasClosingBrace = (node: SyntaxNode) =>
  * Decorations that span multiple lines must be contained in a StateField, not a ViewPlugin.
  */
 export const atomicDecorations = (options: Options) => {
+  const splitTestVariants = getMeta('ol-splitTestVariants', {})
+  const figureModalEnabled = splitTestVariants['figure-modal'] === 'enabled'
+
   const getPreviewByPath = (path: string) =>
     options.fileTreeManager.getPreviewByPath(path)
 
@@ -698,19 +705,31 @@ export const atomicDecorations = (options: Options) => {
                   environmentNode &&
                     centeringNodeForEnvironment(environmentNode)
                 )
+                const figureData = environmentNode
+                  ? parseFigureData(environmentNode, state)
+                  : null
 
                 const line = state.doc.lineAt(nodeRef.from)
 
                 const lineContainsOnlyNode =
                   line.text.trim().length === nodeRef.to - nodeRef.from
 
+                const BlockGraphicsWidgetClass = figureModalEnabled
+                  ? EditableGraphicsWidget
+                  : GraphicsWidget
+
+                const InlineGraphicsWidgetClass = figureModalEnabled
+                  ? EditableInlineGraphicsWidget
+                  : InlineGraphicsWidget
+
                 if (lineContainsOnlyNode) {
                   decorations.push(
                     Decoration.replace({
-                      widget: new GraphicsWidget(
+                      widget: new BlockGraphicsWidgetClass(
                         filePath,
                         getPreviewByPath,
-                        centered
+                        centered,
+                        figureData
                       ),
                       block: true,
                     }).range(line.from, line.to)
@@ -718,10 +737,11 @@ export const atomicDecorations = (options: Options) => {
                 } else {
                   decorations.push(
                     Decoration.replace({
-                      widget: new InlineGraphicsWidget(
+                      widget: new InlineGraphicsWidgetClass(
                         filePath,
                         getPreviewByPath,
-                        centered
+                        centered,
+                        figureData
                       ),
                     }).range(nodeRef.from, nodeRef.to)
                   )

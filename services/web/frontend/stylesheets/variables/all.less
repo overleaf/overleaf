@@ -263,6 +263,32 @@
 // Note: Deprecated @dropdown-caret-color as of v3.1.0
 @dropdown-caret-color: #000;
 
+//== List group
+//
+//##
+
+//** Background color on `.list-group-item`
+@list-group-bg: #fff;
+//** `.list-group-item` border color
+@list-group-border: #ddd;
+//** List group border radius
+@list-group-border-radius: @border-radius-base;
+
+//** Background color of single list elements on hover
+@list-group-hover-bg: @component-active-bg;
+//** Text color of single list elements on hover
+@list-group-hover-color: @component-active-color;
+//** Text color of active list elements
+@list-group-active-color: @component-active-color;
+//** Background color of active list elements
+@list-group-active-bg: @component-active-bg;
+//** Border color of active list elements
+@list-group-active-border: @list-group-active-bg;
+@list-group-active-text-color: lighten(@list-group-active-bg, 40%);
+
+@list-group-link-color: #555;
+@list-group-link-heading-color: #333;
+
 //-- Z-index master list
 //
 // Warning: Avoid customizing these values. They're used for a bird's eye view

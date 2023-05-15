@@ -1,0 +1,145 @@
+.figure-modal-label {
+  font-weight: normal;
+  line-height: 100%;
+}
+
+.figure-modal-form tr,
+.figure-modal-form td {
+  vertical-align: top;
+}
+
+.figure-modal-footer {
+  display: flex;
+  justify-content: space-between;
+}
+
+.figure-modal-help-buttons,
+.figure-modal-actions {
+  flex: 1 1 auto;
+}
+
+.figure-modal-help-buttons {
+  text-align: left;
+}
+
+.figure-modal-help-link,
+.figure-modal-help-link:hover,
+.figure-modal-help-link:focus,
+.figure-modal-help-link:active {
+  color: @neutral-90;
+  text-decoration: none;
+}
+
+.figure-modal-help-link {
+  padding-left: 0;
+}
+
+.figure-modal-switcher-input {
+  display: flex;
+}
+
+.figure-modal-checkbox-input,
+.figure-modal-switcher-input {
+  margin-top: 16px;
+}
+
+.figure-modal-checkbox-input input[type='checkbox'] {
+  vertical-align: top;
+  margin-right: 12px;
+}
+
+.figure-modal-switcher-input {
+  display: flex;
+  justify-content: space-between;
+  vertical-align: middle;
+}
+
+.figure-modal-input-field {
+  width: 100%;
+}
+
+.file-container {
+  width: 100%;
+  height: 120px;
+  padding: 22px 24px;
+  border: 1px dashed #eaeaea;
+  background-color: #fafafa;
+  justify-content: space-between;
+  border-radius: 8px;
+}
+
+.file-container-file {
+  display: flex;
+  border: 1px solid @neutral-20;
+  border-radius: 8px;
+  background-color: white;
+  height: 100%;
+  padding: 16px 18px;
+}
+
+.file-info {
+  margin-left: 18px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+.file-name {
+  font-weight: bold;
+}
+
+.file-icon {
+  font-size: 20px;
+  line-height: 40px;
+}
+
+.file-action {
+  cursor: pointer;
+}
+
+.figure-modal-upload {
+  margin-bottom: 16px;
+}
+
+.figure-modal-source-button-row {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 auto;
+
+  &:not(:first-of-type) {
+    margin-top: 8px;
+  }
+}
+
+.figure-modal-source-button {
+  display: flex;
+  flex: 1 1 0;
+  align-items: center;
+  box-shadow: 0px 2px 4px 0px #1e253029;
+  line-height: 44px;
+  background-color: white;
+  border-radius: 4px;
+  border: none;
+  padding: 0 8px;
+
+  &:nth-child(even) {
+    margin-left: 4px;
+  }
+
+  &:nth-child(odd) {
+    margin-right: 4px;
+  }
+
+  &-title {
+    flex: 1 1 auto;
+    text-align: left;
+  }
+}
+
+.figure-modal-source-button-icon {
+  flex: 0 0 auto;
+  &.source-icon {
+    margin-right: 6px;
+  }
+}

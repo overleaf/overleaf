@@ -58,6 +58,21 @@ export const toolbarPanel = () => [
         },
       },
     },
+    '.ol-cm-toolbar-button-menu-popover': {
+      '& > .popover-content': {
+        padding: 0,
+      },
+      '& .arrow': {
+        display: 'none',
+      },
+      '& .list-group': {
+        marginBottom: 0,
+      },
+      '& .list-group-item': {
+        width: '100%',
+        textAlign: 'start',
+      },
+    },
     '.ol-cm-toolbar-button-group': {
       display: 'flex',
       alignItems: 'center',

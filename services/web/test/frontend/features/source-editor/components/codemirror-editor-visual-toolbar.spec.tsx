@@ -122,30 +122,6 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
       .should('have.text', '\\href{http://example.com}{test}')
   })
 
-  it('should insert a figure', function () {
-    mountEditor('test')
-
-    clickToolbarButton('Insert Figure')
-
-    cy.get('.cm-content').should(
-      'have.text',
-      [
-        'test',
-        '\\begin{figure}',
-        '    \\centering',
-        '    \\includegraphics{}',
-        '    Caption',
-        '    🏷fig:my_label',
-        '\\end{figure}',
-      ].join('')
-    )
-
-    cy.get('.cm-line')
-      .eq(3)
-      .type('test.png')
-      .should('have.text', '    \\includegraphics{test.png}')
-  })
-
   it('should insert a bullet list', function () {
     mountEditor('test')
     selectAll()

@@ -48,7 +48,8 @@
 // Use anchor elements instead of `li`s or `div`s to create linked list items.
 // Includes an extra `.active` modifier class for showing selected items.
 
-a.list-group-item {
+a.list-group-item,
+button.list-group-item {
   color: @list-group-link-color;
 
   .list-group-item-heading {
@@ -58,6 +59,7 @@ a.list-group-item {
   // Hover state
   &:hover,
   &:focus {
+    color: @list-group-hover-color;
     text-decoration: none;
     background-color: @list-group-hover-bg;
   }

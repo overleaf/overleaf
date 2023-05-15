@@ -14,6 +14,8 @@ import * as commands from '../../extensions/toolbar/commands'
 import { SectionHeadingDropdown } from './section-heading-dropdown'
 import { canAddComment } from '../../extensions/toolbar/comments'
 import { useTranslation } from 'react-i18next'
+import getMeta from '../../../../utils/meta'
+import { InsertFigureDropdown } from './insert-figure-dropdown'
 
 const isMac = /Mac/.test(window.navigator?.platform)
 
@@ -27,6 +29,7 @@ export const ToolbarItems: FC<{
   const listDepth = minimumListDepthForSelection(state)
   const addCommentEmitter = useScopeEventEmitter('comment:start_adding')
   const { setReviewPanelOpen } = useLayoutContext()
+  const splitTestVariants = getMeta('ol-splitTestVariants', {})
   const addComment = useCallback(
     (view: EditorView) => {
       const range = view.state.selection.main
@@ -42,6 +45,7 @@ export const ToolbarItems: FC<{
     [addCommentEmitter, setReviewPanelOpen]
   )
 
+  const showFigureModal = splitTestVariants['figure-modal'] === 'enabled'
   const showGroup = (group: string) => !overflowed || overflowed.has(group)
 
   return (
@@ -149,12 +153,16 @@ export const ToolbarItems: FC<{
             icon="comment"
             hidden // enable this if an alternative to the floating "Add Comment" button is needed
           />
-          <ToolbarButton
-            id="toolbar-figure"
-            label={t('toolbar_insert_figure')}
-            command={commands.insertFigure}
-            icon="picture-o"
-          />
+          {showFigureModal ? (
+            <InsertFigureDropdown />
+          ) : (
+            <ToolbarButton
+              id="toolbar-figure"
+              label={t('toolbar_insert_figure')}
+              command={commands.insertFigure}
+              icon="picture-o"
+            />
+          )}
           <ToolbarButton
             id="toolbar-table"
             label={t('toolbar_insert_table')}

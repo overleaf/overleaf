@@ -1085,6 +1085,12 @@ const ProjectController = {
             }
           )
         },
+        figureModalAssignment(cb) {
+          SplitTestHandler.getAssignment(req, res, 'figure-modal', () => {
+            // We'll pick up the assignment from the res.locals assignment.
+            cb()
+          })
+        },
         onboardingVideoTourAssignment(cb) {
           SplitTestHandler.getAssignment(
             req,

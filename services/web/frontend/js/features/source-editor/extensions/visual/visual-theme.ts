@@ -275,6 +275,15 @@ export const visualTheme = EditorView.theme({
       display: 'inline',
     },
   },
+  '.ol-cm-graphics-inline-edit-wrapper': {
+    display: 'inline-block',
+    position: 'relative',
+    verticalAlign: 'middle',
+    '& .ol-cm-graphics': {
+      paddingTop: 0,
+      paddingBottom: 0,
+    },
+  },
   '.ol-cm-graphics-loading': {
     height: '300px', // guess that the height is the same as the max width
   },
@@ -335,5 +344,13 @@ export const visualTheme = EditorView.theme({
   },
   '.ol-cm-end-document-widget': {
     textAlign: 'center',
+  },
+  '.ol-cm-environment-figure': {
+    position: 'relative',
+  },
+  '.ol-cm-graphics-edit-button': {
+    position: 'absolute',
+    top: '18px',
+    right: '18px',
   },
 })

@@ -3,12 +3,17 @@ import { getJSON } from '../../../infrastructure/fetch-json'
 import { fileCollator } from '../util/file-collator'
 import useAbortController from '../../../shared/hooks/use-abort-controller'
 
-const alphabetical = (a, b) => fileCollator.compare(a.path, b.path)
+export type Entity = {
+  path: string
+}
 
-export function useProjectEntities(projectId) {
+const alphabetical = (a: Entity, b: Entity) =>
+  fileCollator.compare(a.path, b.path)
+
+export function useProjectEntities(projectId?: string) {
   const [loading, setLoading] = useState(false)
-  const [data, setData] = useState(null)
-  const [error, setError] = useState(false)
+  const [data, setData] = useState<Entity[] | null>(null)
+  const [error, setError] = useState<any>(false)
 
   const { signal } = useAbortController()
 

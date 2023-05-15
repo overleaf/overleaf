@@ -16,6 +16,7 @@ import { CodemirrorOutline } from './codemirror-outline'
 import { dispatchTimer } from '../../../infrastructure/cm6-performance'
 
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
+import { FigureModal } from './figure-modal/figure-modal'
 
 const sourceEditorComponents = importOverleafModules(
   'sourceEditorComponents'
@@ -53,6 +54,7 @@ function CodeMirrorEditor() {
       <CodeMirrorViewContext.Provider value={viewRef.current}>
         <CodemirrorOutline />
         <CodeMirrorView />
+        <FigureModal />
         <CodeMirrorSearch />
         <CodeMirrorToolbar />
         {sourceEditorComponents.map(

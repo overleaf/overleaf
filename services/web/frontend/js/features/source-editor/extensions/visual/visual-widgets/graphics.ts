@@ -1,9 +1,10 @@
 import { EditorView, WidgetType } from '@codemirror/view'
 import { placeSelectionInsideBlock } from '../selection'
+import { isEqual } from 'lodash'
+import { FigureData } from '../../figure-modal'
 
 export class GraphicsWidget extends WidgetType {
   destroyed = false
-
   height = 300 // for estimatedHeight, updated when the image is loaded
 
   constructor(
@@ -11,7 +12,8 @@ export class GraphicsWidget extends WidgetType {
     public getPreviewByPath: (
       filePath: string
     ) => { url: string; extension: string } | null,
-    public centered: boolean
+    public centered: boolean,
+    public figureData: FigureData | null
   ) {
     super()
   }
@@ -37,7 +39,9 @@ export class GraphicsWidget extends WidgetType {
 
   eq(widget: GraphicsWidget) {
     return (
-      widget.filePath === this.filePath && widget.centered === this.centered
+      widget.filePath === this.filePath &&
+      widget.centered === this.centered &&
+      isEqual(this.figureData, widget.figureData)
     )
   }
 
@@ -49,7 +53,14 @@ export class GraphicsWidget extends WidgetType {
   }
 
   ignoreEvent(event: Event) {
-    return event.type !== 'mouseup'
+    return (
+      event.type !== 'mouseup' &&
+      // Pass events through to the edit button
+      !(
+        event.target instanceof HTMLElement &&
+        event.target.closest('.ol-cm-graphics-edit-button')
+      )
+    )
   }
 
   destroy() {
@@ -64,6 +75,8 @@ export class GraphicsWidget extends WidgetType {
     element.textContent = '' // ensure the element is empty
 
     const preview = this.getPreviewByPath(this.filePath)
+    element.dataset.filepath = this.filePath
+    element.dataset.width = undefined
 
     if (!preview) {
       const message = document.createElement('div')
@@ -92,10 +105,20 @@ export class GraphicsWidget extends WidgetType {
     }
   }
 
+  getFigureWidth() {
+    if (this.figureData?.width) {
+      return `min(100%, ${this.figureData.width * 100}%)`
+    }
+    return ''
+  }
+
   createImage(view: EditorView, url: string) {
     const image = document.createElement('img')
     image.classList.add('ol-cm-graphics')
     image.classList.add('ol-cm-graphics-loading')
+    const width = this.getFigureWidth()
+    image.style.width = width
+    image.style.maxWidth = width
 
     image.src = url
     image.addEventListener('load', () => {
@@ -126,6 +149,9 @@ export class GraphicsWidget extends WidgetType {
     const viewport = page.getViewport({ scale: 1 })
     canvas.width = viewport.width
     canvas.height = viewport.height
+    const width = this.getFigureWidth()
+    canvas.style.width = width
+    canvas.style.maxWidth = width
     page.render({
       canvasContext: canvas.getContext('2d'),
       viewport,

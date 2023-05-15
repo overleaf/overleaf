@@ -3,6 +3,7 @@ import { EditorState } from '@codemirror/state'
 import { SyntaxNode, SyntaxNodeRef, Tree } from '@lezer/common'
 import { previousSiblingIs } from './common'
 import { NodeIntersectsChangeFn, ProjectionItem } from './projection'
+import { FigureData } from '../../extensions/figure-modal'
 
 const HUNDRED_MS = 100
 
@@ -237,4 +238,121 @@ export function getEnvironmentName(
 
 export function getEnvironmentArguments(environmentNode: SyntaxNode) {
   return environmentNode.getChild('BeginEnv')?.getChildren('TextArgument')
+}
+
+export function parseFigureData(
+  figureEnvironmentNode: SyntaxNode,
+  state: EditorState
+): FigureData | null {
+  let caption: FigureData['caption'] = null
+  let label: FigureData['label'] = null
+  let file: FigureData['file'] | undefined
+  let width: FigureData['width']
+  let unknownGraphicsArguments: FigureData['unknownGraphicsArguments']
+  let graphicsCommand: FigureData['graphicsCommand'] | undefined
+  let graphicsCommandArguments: FigureData['graphicsCommandArguments'] = null
+
+  const from = figureEnvironmentNode.from
+  const to = figureEnvironmentNode.to
+
+  let error = false
+  figureEnvironmentNode.cursor().iterate((node: SyntaxNodeRef) => {
+    if (error) {
+      return false
+    }
+    if (node.type.is('Caption')) {
+      if (caption) {
+        // Multiple captions
+        error = true
+        return false
+      }
+      caption = {
+        from: node.from,
+        to: node.to,
+      }
+    }
+    if (node.type.is('Label')) {
+      if (label) {
+        // Multiple labels
+        error = true
+        return false
+      }
+      label = {
+        from: node.from,
+        to: node.to,
+      }
+    }
+    if (node.type.is('IncludeGraphics')) {
+      if (file) {
+        // Multiple figure
+        error = true
+        return false
+      }
+      graphicsCommand = {
+        from: node.from,
+        to: node.to,
+      }
+      const content = node.node
+        .getChild('IncludeGraphicsArgument')
+        ?.getChild('FilePathArgument')
+        ?.getChild('LiteralArgContent')
+      if (!content) {
+        error = true
+        return false
+      }
+      file = {
+        from: content.from,
+        to: content.to,
+        path: state.sliceDoc(content.from, content.to),
+      }
+      const optionalArgs = node.node
+        .getChild('OptionalArgument')
+        ?.getChild('ShortOptionalArg')
+      if (!optionalArgs) {
+        width = undefined
+        return false
+      }
+      graphicsCommandArguments = {
+        from: optionalArgs.from,
+        to: optionalArgs.to,
+      }
+      const optionalArgContent = state.sliceDoc(
+        optionalArgs.from,
+        optionalArgs.to
+      )
+      const widthMatch = optionalArgContent.match(
+        /^width=([0-9]|(?:[0-9]*\.[0-9]+)|(?:[0-9]+\.))\\(linewidth|pagewidth|textwidth|hsize|columnwidth)$/
+      )
+      if (widthMatch) {
+        width = parseFloat(widthMatch[1])
+        if (widthMatch[2] !== 'linewidth') {
+          // We shouldn't edit any width other that linewidth
+          unknownGraphicsArguments = optionalArgContent
+        }
+      } else {
+        unknownGraphicsArguments = optionalArgContent
+      }
+    }
+  })
+  if (error) {
+    return null
+  }
+  if (
+    graphicsCommand === undefined ||
+    file === undefined ||
+    (width === undefined && unknownGraphicsArguments === undefined)
+  ) {
+    return null
+  }
+  return new FigureData({
+    caption,
+    label,
+    file,
+    from,
+    to,
+    width,
+    unknownGraphicsArguments,
+    graphicsCommand,
+    graphicsCommandArguments,
+  })
 }

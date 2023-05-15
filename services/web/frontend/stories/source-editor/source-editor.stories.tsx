@@ -66,15 +66,38 @@ export const Visual = (args: any, { globals: { theme } }: any) => {
       open_doc_name: 'example.tex',
       showVisual: true,
     },
+    rootFolder: {
+      name: 'rootFolder',
+      id: 'root-folder-id',
+      type: 'folder',
+      children: [
+        {
+          name: 'example.tex.tex',
+          id: 'example-doc-id',
+          type: 'doc',
+          selected: false,
+          $$hashKey: 'object:89',
+        },
+        {
+          name: 'frog.jpg',
+          id: 'frog-image-id',
+          type: 'file',
+          linkedFileData: null,
+          created: '2023-05-04T16:11:04.352Z',
+          $$hashKey: 'object:108',
+        },
+      ],
+      selected: false,
+    },
     settings: {
       ...settings,
       overallTheme: theme === 'default-' ? '' : theme,
     },
   })
-
   useMeta({
     'ol-showSymbolPalette': true,
     'ol-mathJax3Path': 'https://unpkg.com/mathjax@3.2.2/es5/tex-svg-full.js',
+    'ol-splitTestVariants': { 'figure-modal': 'enabled' },
   })
 
   return <SourceEditor />
@@ -183,8 +206,8 @@ Note that your figure will automatically be placed in the most appropriate place
 
 \\begin{figure}
 \\centering
-\\includegraphics[width=0.3\\textwidth]{frog.jpg}
-\\caption{\\label{fig:frog}This frog was uploaded via the file-tree menu.}
+\\includegraphics[width=0.25\\linewidth]{frog.jpg}
+\\caption{This frog was uploaded via the file-tree menu.}\\label{fig:frog}
 \\end{figure}
 
 \\subsection{How to add Tables}

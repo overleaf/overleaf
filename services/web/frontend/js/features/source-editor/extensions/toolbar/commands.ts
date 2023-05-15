@@ -28,7 +28,7 @@ export const toggleNumberedList = toggleListForRanges('enumerate')
 export const wrapInInlineMath = wrapRanges('\\(', '\\)')
 export const wrapInDisplayMath = wrapRanges('\n\\[', '\\]\n')
 
-const ensureEmptyLine = (state: EditorState, range: SelectionRange) => {
+export const ensureEmptyLine = (state: EditorState, range: SelectionRange) => {
   let pos = range.anchor
   let suffix = ''
 
