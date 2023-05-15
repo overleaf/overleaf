@@ -35,6 +35,7 @@ function CheckoutPanel() {
   const { t } = useTranslation()
   const {
     couponError,
+    currencyCode,
     planCode,
     planName,
     pricingFormState,
@@ -214,6 +215,10 @@ function CheckoutPanel() {
     setCardIsValid(state.valid)
   }, [])
 
+  if (currencyCode === 'INR' && paymentMethod !== 'credit_card') {
+    setPaymentMethod('credit_card')
+  }
+
   if (recurlyLoadError) {
     return (
       <Alert bsStyle="danger">
@@ -321,10 +326,12 @@ function CheckoutPanel() {
               <strong>{couponError}</strong>
             </Alert>
           )}
-          <PaymentMethodToggle
-            onChange={handlePaymentMethod}
-            paymentMethod={paymentMethod}
-          />
+          {currencyCode === 'INR' ? null : (
+            <PaymentMethodToggle
+              onChange={handlePaymentMethod}
+              paymentMethod={paymentMethod}
+            />
+          )}
           {elements.current && (
             <CardElement
               className={classnames({ hidden: !isCreditCardPaymentMethod })}
