@@ -4,6 +4,7 @@ import type { Nullable } from '../../../../../types/utils'
 import type { FileDiff } from '../services/types/file'
 import type { FileOperation } from '../services/types/file-operation'
 import type { LoadedUpdate, Version } from '../services/types/update'
+import { fileFinalPathname } from './file-diff'
 
 type FileWithOps = {
   pathname: FileDiff['pathname']
@@ -97,9 +98,10 @@ export function autoSelectFile(
 
     if (fileWithMatchingOpType != null) {
       fileToSelect =
-        _.find(files, {
-          pathname: fileWithMatchingOpType.pathname,
-        }) ?? null
+        _.find(
+          files,
+          file => fileFinalPathname(file) === fileWithMatchingOpType.pathname
+        ) ?? null
 
       break
     }

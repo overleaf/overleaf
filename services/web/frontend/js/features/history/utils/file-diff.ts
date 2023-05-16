@@ -7,3 +7,7 @@ export function isFileRenamed(fileDiff: FileDiff): fileDiff is FileRenamed {
 export function isFileRemoved(fileDiff: FileDiff): fileDiff is FileRemoved {
   return (fileDiff as FileRemoved).operation === 'removed'
 }
+
+export function fileFinalPathname(fileDiff: FileDiff) {
+  return isFileRenamed(fileDiff) ? fileDiff.newPathname : fileDiff.pathname
+}

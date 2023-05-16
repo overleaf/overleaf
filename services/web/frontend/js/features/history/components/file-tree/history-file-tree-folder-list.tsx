@@ -6,6 +6,7 @@ import { ReactNode, useCallback } from 'react'
 import type { HistoryFileTree, HistoryDoc } from '../../utils/file-tree'
 import { useHistoryContext } from '../../context/history-context'
 import { FileDiff } from '../../services/types/file'
+import { fileFinalPathname } from '../../utils/file-diff'
 
 type HistoryFileTreeFolderListProps = {
   folders: HistoryFileTree[]
@@ -69,7 +70,10 @@ function HistoryFileTreeFolderList({
           key={doc.pathname}
           name={doc.name}
           file={doc}
-          selected={selection.selectedFile?.pathname === doc.pathname}
+          selected={
+            !!selection.selectedFile &&
+            fileFinalPathname(selection.selectedFile) === doc.pathname
+          }
           onClick={handleClick}
           onKeyDown={handleKeyDown}
         />

@@ -3,6 +3,7 @@ import type { FileDiff } from '../../../../../frontend/js/features/history/servi
 import { autoSelectFile } from '../../../../../frontend/js/features/history/utils/auto-select-file'
 import type { User } from '../../../../../frontend/js/features/history/services/types/shared'
 import { LoadedUpdate } from '../../../../../frontend/js/features/history/services/types/update'
+import { fileFinalPathname } from '../../../../../frontend/js/features/history/utils/file-diff'
 
 describe('autoSelectFile', function () {
   const historyUsers: User[] = [
@@ -717,6 +718,73 @@ describe('autoSelectFile', function () {
       )
 
       expect(pathname).to.equal('certainly_not_main.tex')
+    })
+
+    it('selects renamed file', function () {
+      const files: FileDiff[] = [
+        {
+          pathname: 'main.tex',
+        },
+        {
+          pathname: 'original.bib',
+          newPathname: 'new.bib',
+          operation: 'renamed',
+        },
+      ]
+
+      const updates: LoadedUpdate[] = [
+        {
+          fromV: 4,
+          toV: 7,
+          meta: {
+            users: historyUsers,
+            start_ts: 1680874742389,
+            end_ts: 1680874755552,
+          },
+          labels: [],
+          pathnames: [],
+          project_ops: [
+            {
+              rename: {
+                pathname: 'original.bib',
+                newPathname: 'new.bib',
+              },
+              atV: 5,
+            },
+          ],
+        },
+        {
+          fromV: 0,
+          toV: 4,
+          meta: {
+            users: historyUsers,
+            start_ts: 1680861975947,
+            end_ts: 1680861988442,
+          },
+          labels: [],
+          pathnames: [],
+          project_ops: [
+            {
+              add: {
+                pathname: 'original.bib',
+              },
+              atV: 1,
+            },
+            {
+              add: {
+                pathname: 'main.tex',
+              },
+              atV: 0,
+            },
+          ],
+        },
+      ]
+
+      const pathname = fileFinalPathname(
+        autoSelectFile(files, updates[0].toV, comparing, updates)
+      )
+
+      expect(pathname).to.equal('new.bib')
     })
   })
 })
