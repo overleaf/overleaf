@@ -1,4 +1,4 @@
-import { EditorView } from '@codemirror/view'
+import { EditorView, ViewUpdate } from '@codemirror/view'
 import { Diagnostic, linter, lintGutter } from '@codemirror/lint'
 import {
   Compartment,
@@ -35,6 +35,9 @@ export const lintSourceConfig = {
   // Do not show any tooltips for highlights within the editor content
   tooltipFilter() {
     return []
+  },
+  needsRefresh(update: ViewUpdate) {
+    return update.selectionSet
   },
 }
 

@@ -24,18 +24,5 @@ export const linting = () => {
 
       return null
     }),
-
-    // TODO: enable this once https://github.com/overleaf/internal/issues/10055 is fixed
-    // ViewPlugin.define(view => {
-    //   return {
-    //     update(update) {
-    //       // force the linter to run if the selection has changed
-    //       if (update.selectionSet) {
-    //         // note: no timeout needed as this is already asynchronous
-    //         forceLinting(view, true) // TODO: true to force run even if doc hasn't changed
-    //       }
-    //     },
-    //   }
-    // }),
   ]
 }
