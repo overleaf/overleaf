@@ -83,6 +83,23 @@
     padding: @content-margin-vertical @grid-gutter-width / 2;
   }
 
+  .project-list-header-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: @margin-sm;
+  }
+
+  .project-list-title {
+    min-width: 0;
+    color: @content-secondary;
+    font-family: Lato, sans-serif;
+    font-size: @font-size-large;
+    line-height: 28px;
+    font-weight: bold;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   ul.project-list-filters {
     margin: @margin-sm @folders-menu-margin;
 
@@ -246,6 +263,11 @@
         }
       }
     }
+  }
+
+  .project-tools {
+    flex-shrink: 0;
+    margin-left: auto;
   }
 
   .project-dash-table {
@@ -533,6 +555,7 @@
   @media (max-width: @screen-xs-max) {
     .project-tools {
       float: left;
+      margin-left: initial;
     }
   }
 

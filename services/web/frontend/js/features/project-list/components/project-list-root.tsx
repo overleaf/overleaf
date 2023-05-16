@@ -19,6 +19,7 @@ import SearchForm from './search-form'
 import ProjectsDropdown from './dropdown/projects-dropdown'
 import SortByDropdown from './dropdown/sort-by-dropdown'
 import ProjectTools from './table/project-tools/project-tools'
+import ProjectListTitle from './title/project-list-title'
 import Sidebar from './sidebar/sidebar'
 import LoadMore from './load-more'
 import { useEffect } from 'react'
@@ -44,7 +45,12 @@ function ProjectListPageContent() {
     searchText,
     setSearchText,
     selectedProjects,
+    filter,
+    tags,
+    selectedTagId,
   } = useProjectListContext()
+
+  const selectedTag = tags.find(tag => tag._id === selectedTagId)
 
   useEffect(() => {
     eventTracking.sendMB('loads_v2_dash', {})
@@ -68,26 +74,33 @@ function ProjectListPageContent() {
                   <UserNotifications />
                 </Col>
               </Row>
-              <Row>
-                <Col md={7} className="hidden-xs">
+              <div className="project-list-header-row">
+                <ProjectListTitle
+                  filter={filter}
+                  selectedTag={selectedTag}
+                  className="hidden-xs text-truncate"
+                />
+                <div className="project-tools">
+                  <div className="hidden-xs">
+                    {selectedProjects.length === 0 ? (
+                      <CurrentPlanWidget />
+                    ) : (
+                      <ProjectTools />
+                    )}
+                  </div>
+                  <div className="visible-xs">
+                    <CurrentPlanWidget />
+                  </div>
+                </div>
+              </div>
+              <Row className="hidden-xs">
+                <Col md={7}>
                   <SearchForm
                     inputValue={searchText}
                     setInputValue={setSearchText}
+                    filter={filter}
+                    selectedTag={selectedTag}
                   />
-                </Col>
-                <Col md={5}>
-                  <div className="project-tools">
-                    <div className="hidden-xs">
-                      {selectedProjects.length === 0 ? (
-                        <CurrentPlanWidget />
-                      ) : (
-                        <ProjectTools />
-                      )}
-                    </div>
-                    <div className="visible-xs">
-                      <CurrentPlanWidget />
-                    </div>
-                  </div>
                 </Col>
               </Row>
               <div className="project-list-sidebar-survey-wrapper visible-xs">
@@ -112,6 +125,8 @@ function ProjectListPageContent() {
                         <SearchForm
                           inputValue={searchText}
                           setInputValue={setSearchText}
+                          filter={filter}
+                          selectedTag={selectedTag}
                           className="overflow-hidden"
                           formGroupProps={{ className: 'mb-0' }}
                         />

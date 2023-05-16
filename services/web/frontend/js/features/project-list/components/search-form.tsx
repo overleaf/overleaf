@@ -9,10 +9,14 @@ import {
 import Icon from '../../../shared/components/icon'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import classnames from 'classnames'
+import { Tag } from '../../../../../app/src/Features/Tags/types'
+import { Filter } from '../context/project-list-context'
 
 type SearchFormOwnProps = {
   inputValue: string
   setInputValue: (input: string) => void
+  filter: Filter
+  selectedTag: Tag | undefined
   formGroupProps?: FormGroupProps &
     Omit<React.ComponentProps<'div'>, keyof FormGroupProps>
 }
@@ -23,11 +27,35 @@ type SearchFormProps = SearchFormOwnProps &
 function SearchForm({
   inputValue,
   setInputValue,
+  filter,
+  selectedTag,
   formGroupProps,
   ...props
 }: SearchFormProps) {
   const { t } = useTranslation()
-  const placeholder = `${t('search_projects')}…`
+  let placeholderMessage = t('search_projects')
+  if (selectedTag) {
+    placeholderMessage = `${t('search')} ${selectedTag.name}`
+  } else {
+    switch (filter) {
+      case 'all':
+        placeholderMessage = t('search_in_all_projects')
+        break
+      case 'owned':
+        placeholderMessage = t('search_in_your_projects')
+        break
+      case 'shared':
+        placeholderMessage = t('search_in_shared_projects')
+        break
+      case 'archived':
+        placeholderMessage = t('search_in_archived_projects')
+        break
+      case 'trashed':
+        placeholderMessage = t('search_in_trashed_projects')
+        break
+    }
+  }
+  const placeholder = `${placeholderMessage}…`
   const { className: formGroupClassName, ...restFormGroupProps } =
     formGroupProps || {}
 

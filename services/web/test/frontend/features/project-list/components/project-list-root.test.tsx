@@ -1037,7 +1037,7 @@ describe('<ProjectListRoot />', function () {
     describe('search', function () {
       it('shows only projects based on the input', async function () {
         const input = screen.getAllByRole('textbox', {
-          name: /search projects/i,
+          name: /search in all projects/i,
         })[0]
         const value = currentList[0].name
 
