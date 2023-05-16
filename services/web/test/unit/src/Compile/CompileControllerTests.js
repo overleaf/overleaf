@@ -356,7 +356,7 @@ describe('CompileController', function () {
       this.req.params = { Project_id: this.projectId }
 
       this.req.query = { pdfng: true }
-      this.project = { name: 'test namè' }
+      this.project = { name: 'test namè;' }
       this.ProjectGetter.getProject = sinon
         .stub()
         .callsArgWith(2, null, this.project)
@@ -380,7 +380,7 @@ describe('CompileController', function () {
 
       it('should set the content-disposition header with a safe version of the project name', function () {
         this.res.setContentDisposition.should.be.calledWith('inline', {
-          filename: 'test_nam_.pdf',
+          filename: 'test_namè_.pdf',
         })
       })
 
