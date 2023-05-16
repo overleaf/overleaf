@@ -56,7 +56,7 @@ function PdfCompileButton() {
       button={{
         tooltip: {
           description: tooltipElement,
-          id: 'logs-toggle',
+          id: 'compile',
           tooltipProps: { className: 'keyboard-tooltip' },
           overlayProps: { delayShow: 500 },
         },

@@ -23,7 +23,7 @@ function DetachCompileButton() {
   return (
     <div className="detach-compile-button-container">
       <Tooltip
-        id="logs-toggle"
+        id="detach-compile"
         description={tooltipElement}
         tooltipProps={{ className: 'keyboard-tooltip' }}
         overlayProps={{ delayShow: 500 }}

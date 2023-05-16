@@ -22,7 +22,7 @@ function PdfHybridDownloadButton() {
 
   return (
     <Tooltip
-      id="logs-toggle"
+      id="download-pdf"
       description={description}
       overlayProps={{ placement: 'bottom' }}
     >
