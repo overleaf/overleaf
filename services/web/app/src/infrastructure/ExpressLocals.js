@@ -7,6 +7,7 @@ const { URL } = require('url')
 const Path = require('path')
 const moment = require('moment')
 const request = require('request')
+const contentDisposition = require('content-disposition')
 const Features = require('./Features')
 const SessionManager = require('../Features/Authentication/SessionManager')
 const SplitTestMiddleware = require('../Features/SplitTests/SplitTestMiddleware')
@@ -104,13 +105,11 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
   })
 
   function addSetContentDisposition(req, res, next) {
-    res.setContentDisposition = function (type, opts) {
-      const directives = _.map(
-        opts,
-        (v, k) => `${k}="${encodeURIComponent(v)}"`
+    res.setContentDisposition = function (type, { filename }) {
+      res.setHeader(
+        'Content-Disposition',
+        contentDisposition(filename, { type })
       )
-      const contentDispositionValue = `${type}; ${directives.join('; ')}`
-      res.setHeader('Content-Disposition', contentDispositionValue)
     }
     next()
   }

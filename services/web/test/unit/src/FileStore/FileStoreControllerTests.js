@@ -81,9 +81,9 @@ describe('FileStoreController', function () {
 
     it('should set the Content-Disposition header', function (done) {
       this.stream.pipe = des => {
-        this.res.setContentDisposition
-          .calledWith('attachment', { filename: this.file.name })
-          .should.equal(true)
+        this.res.setContentDisposition.should.be.calledWith('attachment', {
+          filename: this.file.name,
+        })
         done()
       }
       this.controller.getFile(this.req, this.res)

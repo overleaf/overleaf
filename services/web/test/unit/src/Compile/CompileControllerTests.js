@@ -379,9 +379,9 @@ describe('CompileController', function () {
       })
 
       it('should set the content-disposition header with a safe version of the project name', function () {
-        this.res.setContentDisposition
-          .calledWith('', { filename: 'test_nam_.pdf' })
-          .should.equal(true)
+        this.res.setContentDisposition.should.be.calledWith('inline', {
+          filename: 'test_nam_.pdf',
+        })
       })
 
       it('should increment the pdf-downloads metric', function () {

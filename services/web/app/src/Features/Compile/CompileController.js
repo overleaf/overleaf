@@ -339,7 +339,7 @@ module.exports = CompileController = {
       if (req.query.popupDownload) {
         res.setContentDisposition('attachment', { filename })
       } else {
-        res.setContentDisposition('', { filename })
+        res.setContentDisposition('inline', { filename })
       }
 
       rateLimit(function (err, canContinue) {
