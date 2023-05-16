@@ -36,15 +36,6 @@ describe('keyboard shortcuts', { scrollBehavior: false }, function () {
     window.metaAttributesCache = new Map()
   })
 
-  it('comment line with {meta+shift+/}', function () {
-    cy.get('@line')
-      .type('text')
-      .type(`{${metaKey}+shift+/}`)
-      .should('have.text', '% text')
-
-    cy.get('@line').type(`{${metaKey}+shift+/}`).should('have.text', 'text')
-  })
-
   it('comment line with {meta+/}', function () {
     cy.get('@line')
       .type('text')
@@ -52,15 +43,6 @@ describe('keyboard shortcuts', { scrollBehavior: false }, function () {
       .should('have.text', '% text')
 
     cy.get('@line').type(`{${metaKey}+/}`).should('have.text', 'text')
-  })
-
-  it('comment line with {meta+ß}', function () {
-    cy.get('@line')
-      .type('text')
-      .type(`{${metaKey}+ß}`)
-      .should('have.text', '% text')
-
-    cy.get('@line').type(`{${metaKey}+ß}`).should('have.text', 'text')
   })
 
   it('comment line with {ctrl+#}', function () {

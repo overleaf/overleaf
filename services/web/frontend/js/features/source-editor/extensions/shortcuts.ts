@@ -59,21 +59,35 @@ export const shortcuts = Prec.high(
       preventDefault: true,
       run: redo,
     },
+
+    // defaultKeymap maps Mod-/ to toggleLineComment, but
+    // w3c-keyname has a hard-coded mapping of Shift+key => character
+    // which uses a US keyboard layout, so we need to add more mappings.
+
+    // Mod-/, but Spanish, Portuguese, German and Swedish keyboard layouts have / at Shift+7
+    // (keyCode 55, mapped with Shift to &)
     {
-      key: 'Mod-Shift-/',
+      key: 'Mod-&',
       preventDefault: true,
       run: toggleLineComment,
     },
+    // Mod-/, but German keyboard layouts have / at Cmd+Shift+ß
+    // Mod-/, but Czech keyboard layouts have / at Shift-ú
+    // (keyCode 191, mapped with Shift to ?)
     {
-      key: 'Mod-ß',
+      key: 'Mod-?',
       preventDefault: true,
       run: toggleLineComment,
     },
+    // German keyboard layouts map 0xBF to #,
+    // so VS Code on Windows/Linux uses Ctrl-# to toggle line comments.
+    // This is an additional, undocumented shortcut for compatibility.
     {
       key: 'Ctrl-#',
       preventDefault: true,
       run: toggleLineComment,
     },
+
     {
       key: 'Ctrl-u',
       preventDefault: true,
