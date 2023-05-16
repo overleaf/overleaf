@@ -1,7 +1,6 @@
 import {
   EditorView,
   highlightSpecialChars,
-  keymap,
   rectangularSelection,
   tooltips,
   crosshairCursor,
@@ -10,8 +9,7 @@ import {
 } from '@codemirror/view'
 import { EditorState, Extension } from '@codemirror/state'
 import { foldGutter, indentOnInput } from '@codemirror/language'
-import { history, historyKeymap, defaultKeymap } from '@codemirror/commands'
-import { lintKeymap } from '@codemirror/lint'
+import { history } from '@codemirror/commands'
 import { language } from './language'
 import { lineWrappingIndentation } from './line-wrapping-indentation'
 import { theme } from './theme'
@@ -25,7 +23,6 @@ import { editable } from './editable'
 import { autoPair } from './auto-pair'
 import { phrases } from './phrases'
 import { spelling } from './spelling'
-import { shortcuts } from './shortcuts'
 import { symbolPalette } from './symbol-palette'
 import { trackChanges } from './track-changes'
 import { search } from './search'
@@ -40,33 +37,13 @@ import { highlightActiveLine } from './highlight-active-line'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 import { emptyLineFiller } from './empty-line-filler'
 import { goToLinePanel } from './go-to-line'
-import { parserWatcher } from './wait-for-parser'
 import { drawSelection } from './draw-selection'
 import { sourceOnly, visual } from './visual/visual'
-import { scrollOneLine } from './scroll-one-line'
-import { foldingKeymap } from './folding-keymap'
 import { inlineBackground } from './inline-background'
-import { fontLoad } from './font-load'
 import { indentationMarkers } from './indentation-markers'
 import { codemirrorDevTools } from '../languages/latex/codemirror-dev-tools'
-
-const ignoredDefaultKeybindings = new Set([
-  // NOTE: disable "Mod-Enter" as it's used for "Compile"
-  'Mod-Enter',
-  // Disable Alt+Arrow as we have special behaviour on Windows / Linux
-  'Alt-ArrowLeft',
-  'Alt-ArrowRight',
-  // This keybinding causes issues on some keyboard layouts where \ is entered
-  // using AltGr. Windows treats Ctrl-Alt as AltGr, so trying to insert a \
-  // with Ctrl-Alt would trigger this keybinding, rather than inserting a \
-  'Mod-Alt-\\',
-])
-
-const ignoredDefaultMacKeybindings = new Set([
-  // We replace these with our custom visual-line versions
-  'Mod-Backspace',
-  'Mod-Delete',
-])
+import { keymaps } from './keymaps'
+import { shortcuts } from './shortcuts'
 
 const moduleExtensions: Array<() => Extension> = importOverleafModules(
   'sourceEditorExtensions'
@@ -103,24 +80,7 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   tooltips({
     parent: document.body,
   }),
-  keymap.of([
-    ...defaultKeymap.filter(
-      // We only filter on keys, so if the keybinding doesn't have a key,
-      // allow it
-      item => {
-        if (item.key && ignoredDefaultKeybindings.has(item.key)) {
-          return false
-        }
-        if (item.mac && ignoredDefaultMacKeybindings.has(item.mac)) {
-          return false
-        }
-        return true
-      }
-    ),
-    ...historyKeymap,
-    ...lintKeymap,
-  ]),
-  foldingKeymap(),
+  keymaps,
   goToLinePanel(),
   filterCharacters(),
 
@@ -143,9 +103,8 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   editable(),
   search(),
   phrases(options.phrases),
-  parserWatcher(),
   spelling(options.spelling),
-  shortcuts(),
+  shortcuts,
   symbolPalette(),
   emptyLineFiller(), // NOTE: must be before `trackChanges`
   trackChanges(options.currentDoc, options.changeManager),
@@ -153,8 +112,6 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   verticalOverflow(),
   highlightActiveLine(options.visual.visual),
   highlightActiveLineGutter(),
-  scrollOneLine(),
-  fontLoad(),
   inlineBackground(options.visual.visual),
   codemirrorDevTools(),
   exceptionLogger(),

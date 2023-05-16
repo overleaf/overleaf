@@ -15,6 +15,7 @@ import {
 import { addWordToCache, cacheField, removeWordFromCache } from './cache'
 import { spellingMenuField } from './context-menu'
 import { SpellChecker } from './spellchecker'
+import { parserWatcher } from '../wait-for-parser'
 
 const spellCheckLanguageConf = new Compartment()
 const spellCheckLanguageFacet = Facet.define<string | undefined>()
@@ -39,6 +40,7 @@ export const spelling = ({ spellCheckLanguage }: Options) => {
         borderWidth: '0',
       },
     }),
+    parserWatcher,
     spellCheckLanguageConf.of(spellCheckLanguageFacet.of(spellCheckLanguage)),
     spellCheckField,
     misspelledWordsField,

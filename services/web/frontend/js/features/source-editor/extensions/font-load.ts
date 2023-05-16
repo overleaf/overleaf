@@ -5,7 +5,7 @@ import { updateHasEffect } from '../utils/effects'
 const fontLoadEffect = StateEffect.define<readonly FontFace[]>()
 export const hasFontLoadedEffect = updateHasEffect(fontLoadEffect)
 
-const plugin = ViewPlugin.define(view => {
+export const fontLoad = ViewPlugin.define(view => {
   function listener(this: FontFaceSet, event: FontFaceSetLoadEvent) {
     view.dispatch({ effects: fontLoadEffect.of(event.fontfaces) })
   }
@@ -27,7 +27,3 @@ const plugin = ViewPlugin.define(view => {
     },
   }
 })
-
-export function fontLoad() {
-  return plugin
-}

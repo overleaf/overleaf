@@ -4,7 +4,7 @@ import { themeOptionsChange } from './theme'
 import { sourceOnly } from './visual/visual'
 import { round } from 'lodash'
 import { hasLanguageLoadedEffect } from './language'
-import { hasFontLoadedEffect } from './font-load'
+import { fontLoad, hasFontLoadedEffect } from './font-load'
 
 const themeConf = new Compartment()
 const changeHalfLeadingAnnotation = Annotation.define<boolean>()
@@ -92,5 +92,5 @@ const plugin = ViewPlugin.define(
 )
 
 export const inlineBackground = (visual: boolean) => {
-  return sourceOnly(visual, plugin)
+  return sourceOnly(visual, [fontLoad, plugin])
 }

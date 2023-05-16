@@ -1,4 +1,4 @@
-import { Command, EditorView, keymap } from '@codemirror/view'
+import { Command, EditorView } from '@codemirror/view'
 
 function scrollByLine(view: EditorView, lineCount: number) {
   view.scrollDOM.scrollTop += view.defaultLineHeight * lineCount
@@ -18,18 +18,16 @@ const scrollDownOneLine: Command = (view: EditorView) => {
   return true
 }
 
-export function scrollOneLine() {
-  // Applied to Windows and Linux only
-  return keymap.of([
-    {
-      linux: 'Ctrl-ArrowUp',
-      win: 'Ctrl-ArrowUp',
-      run: scrollUpOneLine,
-    },
-    {
-      linux: 'Ctrl-ArrowDown',
-      win: 'Ctrl-ArrowDown',
-      run: scrollDownOneLine,
-    },
-  ])
-}
+// Applied to Windows and Linux only
+export const scrollOneLineKeymap = [
+  {
+    linux: 'Ctrl-ArrowUp',
+    win: 'Ctrl-ArrowUp',
+    run: scrollUpOneLine,
+  },
+  {
+    linux: 'Ctrl-ArrowDown',
+    win: 'Ctrl-ArrowDown',
+    run: scrollDownOneLine,
+  },
+]

@@ -14,7 +14,7 @@ type ParserWait = {
   resolve: () => void
 }
 
-const plugin = ViewPlugin.fromClass(
+export const parserWatcher = ViewPlugin.fromClass(
   class {
     waits: ParserWait[] = []
 
@@ -61,16 +61,12 @@ const plugin = ViewPlugin.fromClass(
   }
 )
 
-export function parserWatcher() {
-  return plugin
-}
-
 // Returns a promise that is resolved as soon as CM6 reports that the parser is
 // ready, up to a specified offset in the document or the end if none is
 // specified. CM6 dispatches a transaction after every chunk of parser work
 // and the view plugin checks after each, so there is minimal delay
 export function waitForParser(view: EditorView, upTo?: UpTo) {
-  const pluginInstance = view.plugin(plugin)
+  const pluginInstance = view.plugin(parserWatcher)
   if (!pluginInstance) {
     throw new Error('No parser watcher view plugin found')
   }

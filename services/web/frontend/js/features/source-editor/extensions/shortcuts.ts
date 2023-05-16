@@ -1,4 +1,4 @@
-import { type KeyBinding, keymap } from '@codemirror/view'
+import { keymap } from '@codemirror/view'
 import { Prec } from '@codemirror/state'
 import { indentMore } from '../commands/indent'
 import {
@@ -24,23 +24,23 @@ import {
   deleteToVisualLineStart,
 } from './visual-line-selection'
 
-export const shortcuts = () => {
-  const toggleReviewPanel = () => {
-    dispatchEditorEvent('toggle-review-panel')
-    return true
-  }
+const toggleReviewPanel = () => {
+  dispatchEditorEvent('toggle-review-panel')
+  return true
+}
 
-  const addNewCommentFromKbdShortcut = () => {
-    dispatchEditorEvent('add-new-comment')
-    return true
-  }
+const addNewCommentFromKbdShortcut = () => {
+  dispatchEditorEvent('add-new-comment')
+  return true
+}
 
-  const toggleTrackChangesFromKbdShortcut = () => {
-    dispatchEditorEvent('toggle-track-changes')
-    return true
-  }
+const toggleTrackChangesFromKbdShortcut = () => {
+  dispatchEditorEvent('toggle-track-changes')
+  return true
+}
 
-  const keyBindings: KeyBinding[] = [
+export const shortcuts = Prec.high(
+  keymap.of([
     {
       key: 'Tab',
       run: indentMore,
@@ -191,7 +191,5 @@ export const shortcuts = () => {
       mac: 'Cmd-Delete',
       run: deleteToVisualLineEnd,
     },
-  ]
-
-  return Prec.high(keymap.of(keyBindings))
-}
+  ])
+)
