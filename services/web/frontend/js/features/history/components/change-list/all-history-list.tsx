@@ -1,20 +1,35 @@
-import { Fragment, useEffect, useRef, useState } from 'react'
-import { useHistoryContext } from '../../context/history-context'
+import { useEffect, useRef, useState } from 'react'
 import HistoryVersion from './history-version'
 import LoadingSpinner from '../../../../shared/components/loading-spinner'
 import { OwnerPaywallPrompt } from './owner-paywall-prompt'
 import { NonOwnerPaywallPrompt } from './non-owner-paywall-prompt'
-import { relativeDate } from '../../../utils/format-date'
+import { isVersionSelected } from '../../utils/history-details'
+import { useUserContext } from '../../../../shared/context/user-context'
+import useDropdownActiveItem from '../../hooks/use-dropdown-active-item'
+import { useHistoryContext } from '../../context/history-context'
 
 function AllHistoryList() {
-  const { updatesInfo, fetchNextBatchOfUpdates, currentUserIsOwner } =
-    useHistoryContext()
-  const updatesLoadingState = updatesInfo.loadingState
-  const { visibleUpdateCount, updates, atEnd } = updatesInfo
+  const { id: currentUserId } = useUserContext()
+  const {
+    projectId,
+    updatesInfo,
+    fetchNextBatchOfUpdates,
+    currentUserIsOwner,
+    selection,
+    setSelection,
+  } = useHistoryContext()
+  const {
+    visibleUpdateCount,
+    updates,
+    atEnd,
+    loadingState: updatesLoadingState,
+  } = updatesInfo
   const scrollerRef = useRef<HTMLDivElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   const intersectionObserverRef = useRef<IntersectionObserver | null>(null)
   const [bottomVisible, setBottomVisible] = useState(false)
+  const { activeDropdownItem, setActiveDropdownItem, closeDropdownForItem } =
+    useDropdownActiveItem()
   const showPaywall =
     updatesLoadingState === 'ready' && updatesInfo.freeHistoryLimitHit
   const showOwnerPaywall = showPaywall && currentUserIsOwner
@@ -73,25 +88,36 @@ function AllHistoryList() {
     <div ref={scrollerRef} className="history-all-versions-scroller">
       <div className="history-all-versions-container">
         <div ref={bottomRef} className="history-versions-bottom" />
-        {visibleUpdates.map((update, index) => (
-          <Fragment key={`${update.fromV}_${update.toV}`}>
-            {update.meta.first_in_day && index > 0 && (
-              <hr className="history-version-divider" />
-            )}
-            {update.meta.first_in_day && (
-              <time className="history-version-day">
-                {relativeDate(update.meta.end_ts)}
-              </time>
-            )}
+        {visibleUpdates.map((update, index) => {
+          const selected = isVersionSelected(
+            selection,
+            update.fromV,
+            update.toV
+          )
+          const dropdownActive = update === activeDropdownItem.item
+          const showDivider = Boolean(update.meta.first_in_day && index > 0)
+          const faded =
+            updatesInfo.freeHistoryLimitHit &&
+            index === visibleUpdates.length - 1
+
+          return (
             <HistoryVersion
+              key={`${update.fromV}_${update.toV}`}
               update={update}
-              faded={
-                updatesInfo.freeHistoryLimitHit &&
-                index === visibleUpdates.length - 1
-              }
+              faded={faded}
+              showDivider={showDivider}
+              setSelection={setSelection}
+              selected={selected}
+              currentUserId={currentUserId}
+              comparing={selection.comparing}
+              projectId={projectId}
+              setActiveDropdownItem={setActiveDropdownItem}
+              closeDropdownForItem={closeDropdownForItem}
+              dropdownOpen={activeDropdownItem.isOpened && dropdownActive}
+              dropdownActive={dropdownActive}
             />
-          </Fragment>
-        ))}
+          )
+        })}
       </div>
       {showOwnerPaywall ? <OwnerPaywallPrompt /> : null}
       {showNonOwnerPaywall ? <NonOwnerPaywallPrompt /> : null}

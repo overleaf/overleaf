@@ -6,13 +6,20 @@ import * as location from '../../../../../../shared/components/location'
 type DownloadProps = {
   projectId: string
   version: number
+  closeDropdown: () => void
 }
 
-function Download({ version, projectId, ...props }: DownloadProps) {
+function Download({
+  version,
+  projectId,
+  closeDropdown,
+  ...props
+}: DownloadProps) {
   const { t } = useTranslation()
 
   const handleDownloadVersion = (e: React.MouseEvent<MenuItemProps>) => {
     e.preventDefault()
+    closeDropdown()
     const event = e as typeof e & { target: HTMLAnchorElement }
     location.assign(event.target.href)
   }

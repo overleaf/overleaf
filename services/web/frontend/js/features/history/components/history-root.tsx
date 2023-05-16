@@ -11,7 +11,7 @@ const fileTreeContainer = document.getElementById('history-file-tree')
 function Main() {
   const { updatesInfo, error } = useHistoryContext()
 
-  let content = null
+  let content
   if (updatesInfo.loadingState === 'loadingInitial') {
     content = <LoadingSpinner />
   } else if (error) {

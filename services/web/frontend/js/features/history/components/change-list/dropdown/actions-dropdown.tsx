@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Dropdown } from 'react-bootstrap'
 import DropdownToggleWithTooltip from '../../../../../shared/components/dropdown/dropdown-toggle-with-tooltip'
@@ -9,11 +9,18 @@ type DropdownMenuProps = {
   id: string
   children: React.ReactNode
   parentSelector?: string
+  isOpened: boolean
+  setIsOpened: (isOpened: boolean) => void
 }
 
-function ActionsDropdown({ id, children, parentSelector }: DropdownMenuProps) {
+function ActionsDropdown({
+  id,
+  children,
+  parentSelector,
+  isOpened,
+  setIsOpened,
+}: DropdownMenuProps) {
   const { t } = useTranslation()
-  const [isOpened, setIsOpened] = useState(false)
   const menuRef = useRef<HTMLElement>()
 
   // handle the placement of the dropdown above or below the toggle button

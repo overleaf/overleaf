@@ -1,29 +1,28 @@
-import { useHistoryContext } from '../../context/history-context'
 import classnames from 'classnames'
+import { HistoryContextValue } from '../../context/types/history-context-value'
 import { UpdateRange } from '../../services/types/update'
+import { ReactNode, MouseEvent } from 'react'
 
 type HistoryVersionDetailsProps = {
-  children: React.ReactNode
+  children: ReactNode
+  updateRange: UpdateRange
   selected: boolean
   selectable: boolean
-} & UpdateRange
+  setSelection: HistoryContextValue['setSelection']
+}
 
 function HistoryVersionDetails({
   children,
   selected,
+  updateRange,
   selectable,
-  fromV,
-  toV,
-  fromVTimestamp,
-  toVTimestamp,
+  setSelection,
 }: HistoryVersionDetailsProps) {
-  const { setSelection } = useHistoryContext()
-
-  const handleSelect = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleSelect = (e: MouseEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement
     if (!target.closest('.dropdown') && e.currentTarget.contains(target)) {
       setSelection({
-        updateRange: { fromV, toV, fromVTimestamp, toVTimestamp },
+        updateRange,
         comparing: false,
         files: [],
       })

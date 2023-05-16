@@ -3,79 +3,115 @@ import TagTooltip from './tag-tooltip'
 import Changes from './changes'
 import MetadataUsersList from './metadata-users-list'
 import Origin from './origin'
-import HistoryVersionDropdown from './dropdown/history-version-dropdown'
-import { useUserContext } from '../../../../shared/context/user-context'
-import { useHistoryContext } from '../../context/history-context'
-import { isVersionSelected } from '../../utils/history-details'
-import { formatTime } from '../../../utils/format-date'
+import HistoryDropdown from './dropdown/history-dropdown'
+import { formatTime, relativeDate } from '../../../utils/format-date'
 import { orderBy } from 'lodash'
 import { LoadedUpdate } from '../../services/types/update'
 import classNames from 'classnames'
+import { updateRangeForUpdate } from '../../utils/history-details'
+import { ActiveDropdown } from '../../hooks/use-dropdown-active-item'
+import { memo } from 'react'
+import { HistoryContextValue } from '../../context/types/history-context-value'
+import VersionDropdownContent from './dropdown/version-dropdown-content'
 
-type HistoryEntryProps = {
+type HistoryVersionProps = {
   update: LoadedUpdate
+  currentUserId: string
+  projectId: string
+  comparing: boolean
   faded: boolean
+  showDivider: boolean
+  selected: boolean
+  setSelection: HistoryContextValue['setSelection']
+  dropdownOpen: boolean
+  dropdownActive: boolean
+  setActiveDropdownItem: ActiveDropdown['setActiveDropdownItem']
+  closeDropdownForItem: ActiveDropdown['closeDropdownForItem']
 }
 
-function HistoryVersion({ update, faded }: HistoryEntryProps) {
-  const { id: currentUserId } = useUserContext()
-  const { projectId, selection } = useHistoryContext()
-
+function HistoryVersion({
+  update,
+  currentUserId,
+  projectId,
+  comparing,
+  faded,
+  showDivider,
+  selected,
+  setSelection,
+  dropdownOpen,
+  dropdownActive,
+  setActiveDropdownItem,
+  closeDropdownForItem,
+}: HistoryVersionProps) {
   const orderedLabels = orderBy(update.labels, ['created_at'], ['desc'])
-  const selected = isVersionSelected(selection, update.fromV, update.toV)
+  const selectable = !faded && (comparing || !selected)
 
   return (
-    <div
-      data-testid="history-version"
-      className={classNames({
-        'history-version-faded': faded,
-      })}
-    >
-      <HistoryVersionDetails
-        fromV={update.fromV}
-        toV={update.toV}
-        fromVTimestamp={update.meta.end_ts}
-        toVTimestamp={update.meta.end_ts}
-        selected={selected}
-        selectable={!faded && (selection.comparing || !selected)}
+    <>
+      {showDivider ? <hr className="history-version-divider" /> : null}
+      {update.meta.first_in_day ? (
+        <time className="history-version-day">
+          {relativeDate(update.meta.end_ts)}
+        </time>
+      ) : null}
+      <div
+        data-testid="history-version"
+        className={classNames({
+          'history-version-faded': faded,
+        })}
       >
-        <div className="history-version-main-details">
-          <time className="history-version-metadata-time">
-            <b>{formatTime(update.meta.end_ts, 'Do MMMM, h:mm a')}</b>
-          </time>
-          {orderedLabels.map(label => (
-            <TagTooltip
-              key={label.id}
-              showTooltip
-              currentUserId={currentUserId}
-              label={label}
+        <HistoryVersionDetails
+          selected={selected}
+          setSelection={setSelection}
+          updateRange={updateRangeForUpdate(update)}
+          selectable={selectable}
+        >
+          <div className="history-version-main-details">
+            <time className="history-version-metadata-time">
+              <b>{formatTime(update.meta.end_ts, 'Do MMMM, h:mm a')}</b>
+            </time>
+            {orderedLabels.map(label => (
+              <TagTooltip
+                key={label.id}
+                showTooltip
+                currentUserId={currentUserId}
+                label={label}
+              />
+            ))}
+            <Changes
+              pathnames={update.pathnames}
+              projectOps={update.project_ops}
             />
-          ))}
-          <Changes
-            pathnames={update.pathnames}
-            projectOps={update.project_ops}
-          />
-          <MetadataUsersList
-            users={update.meta.users}
-            origin={update.meta.origin}
-            currentUserId={currentUserId}
-          />
-          <Origin origin={update.meta.origin} />
-        </div>
-        {faded ? null : (
-          <HistoryVersionDropdown
-            id={`${update.fromV}_${update.toV}`}
-            projectId={projectId}
-            isComparing={selection.comparing}
-            isSelected={selected}
-            fromV={update.fromV}
-            toV={update.toV}
-            updateMetaEndTimestamp={update.meta.end_ts}
-          />
-        )}
-      </HistoryVersionDetails>
-    </div>
+            <MetadataUsersList
+              users={update.meta.users}
+              origin={update.meta.origin}
+              currentUserId={currentUserId}
+            />
+            <Origin origin={update.meta.origin} />
+          </div>
+          {faded ? null : (
+            <HistoryDropdown
+              id={`${update.fromV}_${update.toV}`}
+              isOpened={dropdownOpen}
+              setIsOpened={(isOpened: boolean) =>
+                setActiveDropdownItem({ item: update, isOpened })
+              }
+            >
+              {dropdownActive ? (
+                <VersionDropdownContent
+                  comparing={comparing}
+                  selected={selected}
+                  update={update}
+                  projectId={projectId}
+                  closeDropdownForItem={closeDropdownForItem}
+                />
+              ) : null}
+            </HistoryDropdown>
+          )}
+        </HistoryVersionDetails>
+      </div>
+    </>
   )
 }
 
-export default HistoryVersion
+export default memo(HistoryVersion)

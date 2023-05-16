@@ -8,6 +8,7 @@ import { UpdateRange } from '../../../../services/types/update'
 type CompareProps = {
   projectId: string
   updateMetaEndTimestamp: number
+  closeDropdown: () => void
 } & Pick<UpdateRange, 'fromV' | 'toV'>
 
 function Compare({
@@ -15,29 +16,36 @@ function Compare({
   fromV,
   toV,
   updateMetaEndTimestamp,
+  closeDropdown,
   ...props
 }: CompareProps) {
   const { t } = useTranslation()
-  const { selection, setSelection } = useHistoryContext()
+  const { setSelection } = useHistoryContext()
 
   const handleCompareVersion = (e: React.MouseEvent<MenuItemProps>) => {
     e.stopPropagation()
+    closeDropdown()
 
-    const { updateRange } = selection
-    if (updateRange) {
-      const range = computeUpdateRange(
-        updateRange,
-        fromV,
-        toV,
-        updateMetaEndTimestamp
-      )
+    setSelection(prevSelection => {
+      const { updateRange } = prevSelection
 
-      setSelection({
-        updateRange: range,
-        comparing: true,
-        files: [],
-      })
-    }
+      if (updateRange) {
+        const range = computeUpdateRange(
+          updateRange,
+          fromV,
+          toV,
+          updateMetaEndTimestamp
+        )
+
+        return {
+          updateRange: range,
+          comparing: true,
+          files: [],
+        }
+      }
+
+      return prevSelection
+    })
   }
 
   return (

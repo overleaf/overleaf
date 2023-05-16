@@ -71,3 +71,15 @@ export function isVersionSelected(
 
 export const getUpdateForVersion = (version: number, updates: LoadedUpdate[]) =>
   updates.find(update => update.toV === version)
+
+export const updateRangeForUpdate = (update: LoadedUpdate) => {
+  const { fromV, toV, meta } = update
+  const fromVTimestamp = meta.end_ts
+
+  return {
+    fromV,
+    toV,
+    fromVTimestamp,
+    toVTimestamp: fromVTimestamp,
+  }
+}
