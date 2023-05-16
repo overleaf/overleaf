@@ -45,8 +45,6 @@ function Tag({ label, currentUserId, ...props }: TagProps) {
     }
 
     reset()
-
-    // TODO _handleHistoryUIStateChange
   }
 
   const localDeleteHandler = () => {

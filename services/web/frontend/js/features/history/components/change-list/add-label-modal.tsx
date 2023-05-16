@@ -40,12 +40,11 @@ function AddLabelModal({ show, setShow, version }: AddLabelModalProps) {
     addUpdateLabel(label)
 
     reset()
-
-    // TODO
-    // _handleHistoryUIStateChange()
   }
 
-  const handleAddLabel = () => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+
     runAsync(addLabel(projectId, { comment, version }, signal))
       .then(() => setShow(false))
       .catch(console.error)
@@ -68,39 +67,40 @@ function AddLabelModal({ show, setShow, version }: AddLabelModalProps) {
       <Modal.Header>
         <Modal.Title>{t('history_add_label')}</Modal.Title>
       </Modal.Header>
-      <Modal.Body>
-        {isError && <ModalError error={responseError} />}
-        <FormGroup>
-          <FormControl
-            type="text"
-            placeholder={t('history_new_label_name')}
-            required
-            value={comment}
-            onChange={(e: React.ChangeEvent<HTMLInputElement & FormControl>) =>
-              setComment(e.target.value)
-            }
-            autoFocus // eslint-disable-line jsx-a11y/no-autofocus
-          />
-        </FormGroup>
-      </Modal.Body>
-      <Modal.Footer>
-        <button
-          type="button"
-          className="btn btn-secondary"
-          disabled={isLoading}
-          onClick={() => setShow(false)}
-        >
-          {t('cancel')}
-        </button>
-        <button
-          type="button"
-          className="btn btn-primary"
-          disabled={isLoading || !comment.length}
-          onClick={handleAddLabel}
-        >
-          {isLoading ? t('history_adding_label') : t('history_add_label')}
-        </button>
-      </Modal.Footer>
+      <form onSubmit={handleSubmit}>
+        <Modal.Body>
+          {isError && <ModalError error={responseError} />}
+          <FormGroup>
+            <FormControl
+              type="text"
+              placeholder={t('history_new_label_name')}
+              required
+              value={comment}
+              onChange={(
+                e: React.ChangeEvent<HTMLInputElement & FormControl>
+              ) => setComment(e.target.value)}
+              autoFocus // eslint-disable-line jsx-a11y/no-autofocus
+            />
+          </FormGroup>
+        </Modal.Body>
+        <Modal.Footer>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            disabled={isLoading}
+            onClick={() => setShow(false)}
+          >
+            {t('cancel')}
+          </button>
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={isLoading || !comment.length}
+          >
+            {isLoading ? t('history_adding_label') : t('history_add_label')}
+          </button>
+        </Modal.Footer>
+      </form>
     </AccessibleModal>
   )
 }
