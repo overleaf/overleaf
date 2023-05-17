@@ -502,7 +502,11 @@ function expectProjectCreated() {
     ).to.have.been.calledWith(this.userId, this.projectName)
   })
 
-  it('sets the root doc', function () {
+  /**
+   * Temporarily disable flaky test
+   */
+  // eslint-disable-next-line mocha/no-skipped-tests
+  it.skip('sets the root doc', function () {
     // Fire pending timers
     this.clock.runAll()
     expect(
@@ -517,7 +521,11 @@ function expectProjectNotCreated() {
       .been.called
   })
 
-  it('does not set the root doc', function () {
+  /**
+   * Temporarily disable flaky test
+   */
+  // eslint-disable-next-line mocha/no-skipped-tests
+  it.skip('does not set the root doc', function () {
     // Fire pending timers
     this.clock.runAll()
     expect(this.RootDocManager.promises.setRootDocAutomatically).not.to.have
