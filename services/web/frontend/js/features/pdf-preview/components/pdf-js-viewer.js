@@ -215,7 +215,11 @@ function PdfJsViewer({ url, pdfFile }) {
   useEffect(() => {
     if (pdfJsWrapper) {
       const handleTextlayerrendered = textLayer => {
-        const pageElement = textLayer.source.textLayerDiv.closest('.page')
+        // handle both versions for backwards-compatibility
+        const textLayerDiv =
+          textLayer.source.textLayerDiv ?? textLayer.source.textLayer.div
+
+        const pageElement = textLayerDiv.closest('.page')
 
         if (!pageElement.dataset.listeningForDoubleClick) {
           pageElement.dataset.listeningForDoubleClick = true

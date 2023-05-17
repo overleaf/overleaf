@@ -215,7 +215,7 @@
     "passport-saml": "^3.2.4",
     "passport-twitter": "^1.0.4",
     "pdfjs-dist213": "npm:pdfjs-dist@2.13.216",
-    "pdfjs-dist31": "npm:pdfjs-dist@3.1.81",
+    "pdfjs-dist36": "npm:pdfjs-dist@3.6.172",
     "prop-types": "^15.7.2",
     "pug": "^3.0.1",
     "pug-runtime": "^3.0.1",

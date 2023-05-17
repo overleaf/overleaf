@@ -6,20 +6,20 @@ import 'core-js/stable/promise/all-settled' // polyfill for Promise.allSettled (
 import getMeta from '../../../utils/meta'
 import { createWorker } from '../../../utils/worker'
 
-async function importPDFJS31() {
-  const cMapUrl = '/js/pdfjs-dist31/cmaps/'
-  const standardFontDataUrl = '/fonts/pdfjs-dist31/'
-  const imageResourcesPath = '/images/pdfjs-dist31/'
+async function importPDFJS36() {
+  const cMapUrl = '/js/pdfjs-dist36/cmaps/'
+  const standardFontDataUrl = '/fonts/pdfjs-dist36/'
+  const imageResourcesPath = '/images/pdfjs-dist36/'
 
   const [PDFJS, PDFJSViewer] = await Promise.all([
-    import('pdfjs-dist31/legacy/build/pdf'),
-    import('pdfjs-dist31/legacy/web/pdf_viewer'),
-    import('pdfjs-dist31/legacy/web/pdf_viewer.css'),
+    import('pdfjs-dist36/legacy/build/pdf'),
+    import('pdfjs-dist36/legacy/web/pdf_viewer'),
+    import('pdfjs-dist36/legacy/web/pdf_viewer.css'),
   ])
 
   createWorker(() => {
     PDFJS.GlobalWorkerOptions.workerPort = new Worker(
-      new URL('pdfjs-dist31/legacy/build/pdf.worker.js', import.meta.url)
+      new URL('pdfjs-dist36/legacy/build/pdf.worker.js', import.meta.url)
     )
   })
 
@@ -61,13 +61,14 @@ async function importPDFJS213() {
 async function importPDFJS() {
   const variant = getMeta('ol-pdfjsVariant', 'default')
 
+  // NOTE: split test variants must have at least 3 characters
   switch (variant) {
     case '213':
     case 'default':
       return importPDFJS213()
 
-    case '318':
-      return importPDFJS31()
+    case '36172':
+      return importPDFJS36()
   }
 }
 
