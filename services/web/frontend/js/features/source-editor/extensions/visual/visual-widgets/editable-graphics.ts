@@ -19,19 +19,21 @@ export class EditableGraphicsWidget extends GraphicsWidget {
   }
 
   updateDOM(element: HTMLImageElement, view: EditorView): boolean {
+    this.destroyed = false
+    element.classList.toggle('ol-cm-environment-centered', this.centered)
     if (
       this.filePath === element.dataset.filepath &&
       element.dataset.width === String(this.figureData?.width?.toString())
     ) {
       // Figure remained the same, so just update the event listener on the button
-      this.setEditDispatcher(
-        element.querySelector('.ol-cm-graphics-edit-button')!,
-        view
+      const button = element.querySelector<HTMLButtonElement>(
+        '.ol-cm-graphics-edit-button'
       )
+      if (button) {
+        this.setEditDispatcher(button, view)
+      }
       return true
     }
-    this.destroyed = false
-    element.classList.toggle('ol-cm-environment-centered', this.centered)
     this.renderGraphic(element, view)
     return true
   }
