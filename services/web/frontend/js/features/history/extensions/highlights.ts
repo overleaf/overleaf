@@ -11,6 +11,9 @@ import {
   DecorationSet,
   EditorView,
   showTooltip,
+  gutter,
+  gutterLineClass,
+  GutterMarker,
   Tooltip,
   ViewPlugin,
   WidgetType,
@@ -96,6 +99,20 @@ const theme = EditorView.baseTheme({
   },
   '.ol-cm-empty-line-addition-marker': {
     padding: 'var(--half-leading) 2px',
+  },
+  '.ol-cm-changed-line': {
+    backgroundColor: 'rgba(0, 0, 0, 0.03)',
+  },
+  '.ol-cm-change-gutter': {
+    width: '3px',
+    paddingLeft: '1px',
+  },
+  '.ol-cm-changed-line-gutter': {
+    backgroundColor: 'hsl(var(--hue), 70%, 40%)',
+    height: '100%',
+  },
+  '.ol-cm-highlighted-line-gutter': {
+    backgroundColor: 'rgba(0, 0, 0, 0.03)',
   },
 })
 
@@ -272,10 +289,61 @@ function createEmptyLineHighlightMarkers(lineStatuses: LineStatuses) {
   return RangeSet.of(markers)
 }
 
+class ChangeGutterMarker extends GutterMarker {
+  constructor(readonly hue: number) {
+    super()
+  }
+
+  toDOM(view: EditorView) {
+    const el = document.createElement('div')
+    el.className = 'ol-cm-changed-line-gutter'
+    el.style.setProperty('--hue', this.hue.toString())
+
+    return el
+  }
+}
+
+function createGutterMarkers(lineStatuses: LineStatuses) {
+  const gutterMarkers: Range<GutterMarker>[] = []
+  for (const lineStatus of lineStatuses.values()) {
+    gutterMarkers.push(
+      new ChangeGutterMarker(lineStatus.highlights[0].hue).range(
+        lineStatus.line.from
+      )
+    )
+  }
+  return RangeSet.of(gutterMarkers)
+}
+
+const lineHighlight = Decoration.line({ class: 'ol-cm-changed-line' })
+
+function createLineHighlights(lineStatuses: LineStatuses) {
+  const lineHighlights: Range<Decoration>[] = []
+  for (const lineStatus of lineStatuses.values()) {
+    lineHighlights.push(lineHighlight.range(lineStatus.line.from))
+  }
+  return RangeSet.of(lineHighlights)
+}
+
+const changeLineGutterMarker = new (class extends GutterMarker {
+  elementClass = 'ol-cm-highlighted-line-gutter'
+})()
+
+function createGutterHighlights(lineStatuses: LineStatuses) {
+  const gutterMarkers: Range<GutterMarker>[] = []
+  for (const lineStatus of lineStatuses.values()) {
+    gutterMarkers.push(changeLineGutterMarker.range(lineStatus.line.from))
+  }
+  return RangeSet.of(gutterMarkers, true)
+}
+
 type HighlightDecorations = {
   highlights: Highlight[]
   highlightMarkers: DecorationSet
   emptyLineHighlightMarkers: DecorationSet
+  lineHighlights: DecorationSet
+  gutterMarkers: RangeSet<GutterMarker>
+  gutterHighlights: RangeSet<GutterMarker>
 }
 
 export const highlightDecorationsField =
@@ -285,9 +353,12 @@ export const highlightDecorationsField =
         highlights: [],
         highlightMarkers: Decoration.none,
         emptyLineHighlightMarkers: Decoration.none,
+        lineHighlights: Decoration.none,
+        gutterMarkers: RangeSet.empty,
+        gutterHighlights: RangeSet.empty,
       }
     },
-    update(highlightMarkers, tr) {
+    update(highlightDecorations, tr) {
       for (const effect of tr.effects) {
         if (effect.is(setHighlightsEffect)) {
           const highlights = effect.value
@@ -295,14 +366,20 @@ export const highlightDecorationsField =
           const highlightMarkers = createMarkers(highlights)
           const emptyLineHighlightMarkers =
             createEmptyLineHighlightMarkers(lineStatuses)
+          const lineHighlights = createLineHighlights(lineStatuses)
+          const gutterMarkers = createGutterMarkers(lineStatuses)
+          const gutterHighlights = createGutterHighlights(lineStatuses)
           return {
             highlights,
             highlightMarkers,
             emptyLineHighlightMarkers,
+            lineHighlights,
+            gutterMarkers,
+            gutterHighlights,
           }
         }
       }
-      return highlightMarkers
+      return highlightDecorations
     },
     provide: field => [
       EditorView.decorations.from(field, value => value.highlightMarkers),
@@ -310,11 +387,23 @@ export const highlightDecorationsField =
         field,
         value => value.emptyLineHighlightMarkers
       ),
+      EditorView.decorations.from(field, value => value.lineHighlights),
       theme,
       highlightTooltipPlugin,
     ],
   })
 
+const changeGutter = gutter({
+  class: 'ol-cm-change-gutter',
+  markers: view => view.state.field(highlightDecorationsField).gutterMarkers,
+  renderEmptyElements: false,
+})
+
+const gutterHighlighter = gutterLineClass.from(
+  highlightDecorationsField,
+  value => value.gutterHighlights
+)
+
 export function highlights() {
-  return highlightDecorationsField
+  return [highlightDecorationsField, changeGutter, gutterHighlighter]
 }

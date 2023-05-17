@@ -13,14 +13,20 @@ const highlights: Highlight[] = [
   {
     type: 'deletion',
     range: { from: 15, to: 25 },
-    hue: 200,
-    label: 'Deleted by Wombat on Monday',
+    hue: 62,
+    label: 'Deleted by Duck on Monday',
   },
   {
     type: 'addition',
     range: { from: 100, to: 400 },
     hue: 200,
     label: 'Added by Wombat on Friday',
+  },
+  {
+    type: 'deletion',
+    range: { from: 564, to: 565 },
+    hue: 200,
+    label: 'Deleted by Wombat on Friday',
   },
   {
     type: 'addition',

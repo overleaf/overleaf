@@ -32,7 +32,7 @@ function calculateHighlightLocations(view: EditorView): HighlightLocations {
   let previous
 
   const highlights =
-    view.state.field(highlightDecorationsField).highlights || []
+    view.state.field(highlightDecorationsField)?.highlights || []
 
   if (highlights.length === 0) {
     return { before: 0, after: 0 }
