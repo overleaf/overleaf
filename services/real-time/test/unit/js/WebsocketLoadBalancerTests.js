@@ -11,6 +11,7 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
+const expect = require('chai').expect
 const modulePath = require('path').join(
   __dirname,
   '../../../app/js/WebsocketLoadBalancer'
@@ -51,6 +52,42 @@ describe('WebsocketLoadBalancer', function () {
     this.room_id = 'room-id'
     this.message = 'otUpdateApplied'
     return (this.payload = ['argument one', 42])
+  })
+
+  describe('shouldDisconnectClient', function () {
+    const client = {
+      ol_context: { user_id: 'abcd' },
+    }
+
+    it('should return false for general messages', function () {
+      const message = {
+        message: 'someNiceMessage',
+        payload: [{ data: 'whatever' }],
+      }
+      expect(
+        this.WebsocketLoadBalancer.shouldDisconnectClient(client, message)
+      ).to.equal(false)
+    })
+
+    it('should return false for userRemovedFromProject, when the user_id does not match', function () {
+      const message = {
+        message: 'userRemovedFromProject',
+        payload: ['xyz'],
+      }
+      expect(
+        this.WebsocketLoadBalancer.shouldDisconnectClient(client, message)
+      ).to.equal(false)
+    })
+
+    it('should return true for userRemovedFromProject, if the user_id matches', function () {
+      const message = {
+        message: 'userRemovedFromProject',
+        payload: [`${client.ol_context.user_id}`],
+      }
+      expect(
+        this.WebsocketLoadBalancer.shouldDisconnectClient(client, message)
+      ).to.equal(true)
+    })
   })
 
   describe('emitToRoom', function () {
@@ -279,7 +316,7 @@ describe('WebsocketLoadBalancer', function () {
       })
     }) // restricted client, should not be called
 
-    return describe('when emitting to all', function () {
+    describe('when emitting to all', function () {
       beforeEach(function () {
         this.io.sockets = { emit: (this.emit = sinon.stub()) }
         const data = JSON.stringify({
@@ -297,6 +334,67 @@ describe('WebsocketLoadBalancer', function () {
       return it('should send the message to all clients', function () {
         return this.emit
           .calledWith(this.message, ...Array.from(this.payload))
+          .should.equal(true)
+      })
+    })
+
+    describe('when it should disconnect one of the clients', function () {
+      const targetUserId = 'bbb'
+      const message = 'userRemovedFromProject'
+      const payload = [`${targetUserId}`]
+      const clients = [
+        {
+          id: 'client-id-1',
+          emit: sinon.stub(),
+          ol_context: { user_id: 'aaa' },
+          disconnect: sinon.stub(),
+        },
+        {
+          id: 'client-id-2',
+          emit: sinon.stub(),
+          ol_context: { user_id: `${targetUserId}` },
+          disconnect: sinon.stub(),
+        },
+        {
+          id: 'client-id-3',
+          emit: sinon.stub(),
+          ol_context: { user_id: 'ccc' },
+          disconnect: sinon.stub(),
+        },
+      ]
+      beforeEach(function () {
+        this.io.sockets = {
+          clients: sinon.stub().returns(clients),
+        }
+        const data = JSON.stringify({
+          room_id: this.room_id,
+          message,
+          payload,
+        })
+        return this.WebsocketLoadBalancer._processEditorEvent(
+          this.io,
+          'editor-events',
+          data
+        )
+      })
+
+      it('should disconnect the matching client, while sending message to other clients', function () {
+        this.io.sockets.clients.calledWith(this.room_id).should.equal(true)
+
+        const [client1, client2, client3] = clients
+
+        // disconnecting one client
+        client1.disconnect.called.should.equal(false)
+        client2.disconnect.called.should.equal(true)
+        client3.disconnect.called.should.equal(false)
+
+        // emitting to remaining clients
+        client1.emit
+          .calledWith(message, ...Array.from(payload))
+          .should.equal(true)
+        client2.emit.called.should.equal(false) // disconnected client should not be called
+        client3.emit
+          .calledWith(message, ...Array.from(payload))
           .should.equal(true)
       })
     })

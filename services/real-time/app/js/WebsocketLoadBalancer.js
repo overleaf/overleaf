@@ -25,6 +25,16 @@ module.exports = WebsocketLoadBalancer = {
   rclientPubList: RedisClientManager.createClientList(Settings.redis.pubsub),
   rclientSubList: RedisClientManager.createClientList(Settings.redis.pubsub),
 
+  shouldDisconnectClient(client, message) {
+    const userId = client.ol_context.user_id
+    if (message?.message === 'userRemovedFromProject') {
+      if (message?.payload?.includes(userId)) {
+        return true
+      }
+    }
+    return false
+  },
+
   emitToRoom(roomId, message, ...payload) {
     if (!roomId) {
       logger.warn(
@@ -154,7 +164,19 @@ module.exports = WebsocketLoadBalancer = {
         for (const client of clientList) {
           if (!seen.has(client.id)) {
             seen.set(client.id, true)
-            client.emit(message.message, ...message.payload)
+            if (WebsocketLoadBalancer.shouldDisconnectClient(client, message)) {
+              logger.debug(
+                {
+                  message,
+                  userId: client?.ol_context?.user_id,
+                  projectId: client?.ol_context?.project_id,
+                },
+                'disconnecting client'
+              )
+              client.disconnect()
+            } else {
+              client.emit(message.message, ...message.payload)
+            }
           }
         }
       } else if (message.health_check) {
