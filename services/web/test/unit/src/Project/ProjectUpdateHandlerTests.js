@@ -22,6 +22,10 @@ describe('ProjectUpdateHandler', function () {
     this.clock = sinon.useFakeTimers(this.fakeTime.getTime())
   })
 
+  afterEach(function () {
+    this.clock.restore()
+  })
+
   beforeEach(function () {
     let Project
     this.ProjectModel = Project = class Project {}
