@@ -251,6 +251,7 @@ export const FileContainer: FC<{
   status: FileUploadStatus
   onDelete?: () => any
 }> = ({ name, size, status, onDelete }) => {
+  const { t } = useTranslation()
   let icon
   switch (status) {
     case FileUploadStatus.ERROR:
@@ -280,7 +281,9 @@ export const FileContainer: FC<{
           )}
         />
         <div className="file-info">
-          <span className="file-name">{name}</span>
+          <span className="file-name" aria-label={t('file_name_figure_modal')}>
+            {name}
+          </span>
           {size !== undefined && (
             <FileSize size={size} className="text-small" />
           )}
@@ -288,6 +291,7 @@ export const FileContainer: FC<{
         <Button
           bsStyle={null}
           className="btn btn-link p-0"
+          aria-label={t('remove_or_replace_figure')}
           onClick={() => onDelete && onDelete()}
         >
           <Icon fw type="times-circle" className="file-action file-icon" />
@@ -301,6 +305,7 @@ const FileSize: FC<{ size: number; className?: string }> = ({
   size,
   className,
 }) => {
+  const { t } = useTranslation()
   const BYTE_UNITS: [string, number][] = [
     ['B', 1],
     ['KB', 1e3],
@@ -317,7 +322,7 @@ const FileSize: FC<{ size: number; className?: string }> = ({
   const [label, bytesPerUnit] = BYTE_UNITS[labelIndex]
   const sizeInUnits = Math.round(size / bytesPerUnit)
   return (
-    <span className={className}>
+    <span aria-label={t('file_size')} className={className}>
       {sizeInUnits} {label}
     </span>
   )

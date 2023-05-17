@@ -126,7 +126,7 @@ export const FigureModalOtherProjectSource: FC = () => {
         items={projects ?? []}
         itemToString={project => (project ? project.name : '')}
         itemToKey={item => item._id}
-        defaultText={t('select_a_project')}
+        defaultText={t('select_a_project_figure_modal')}
         label={t('project_figure_modal')}
         disabled={projectsLoading}
         onSelectedItemChanged={item => {
@@ -201,7 +201,7 @@ const SelectFile = <T extends { path: string }>({
   onSelectedItemChange?: (item: T | null | undefined) => any
 }) => {
   const { t } = useTranslation()
-  defaultText = defaultText ?? t('select_a_file')
+  defaultText = defaultText ?? t('select_a_file_figure_modal')
   label = label ?? t('image_file')
   const imageFiles = useMemo(() => files?.filter(isImageEntity), [files])
   const empty = loading || !imageFiles || imageFiles.length === 0
@@ -257,7 +257,7 @@ const SelectFromProjectOutputFiles: FC<{
   return (
     <SelectFile
       label={t('output_file')}
-      defaultText={t('select_an_output_file')}
+      defaultText={t('select_an_output_file_figure_modal')}
       loading={loading}
       files={entities}
       disabled={!projectId}

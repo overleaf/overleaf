@@ -7,6 +7,9 @@ import {
 import { interceptEvents } from './events'
 import { interceptSpelling } from './spelling'
 import { interceptAsync } from './intercept-async'
+import { interceptFileUpload } from './upload'
+import { interceptProjectListing } from './project-list'
+import { interceptLinkedFile } from './linked-file'
 
 // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-namespace
 declare global {
@@ -20,6 +23,9 @@ declare global {
       interceptSpelling: typeof interceptSpelling
       waitForCompile: typeof waitForCompile
       interceptDeferredCompile: typeof interceptDeferredCompile
+      interceptFileUpload: typeof interceptFileUpload
+      interceptProjectListing: typeof interceptProjectListing
+      interceptLinkedFile: typeof interceptLinkedFile
     }
   }
 }
@@ -30,3 +36,6 @@ Cypress.Commands.add('interceptEvents', interceptEvents)
 Cypress.Commands.add('interceptSpelling', interceptSpelling)
 Cypress.Commands.add('waitForCompile', waitForCompile)
 Cypress.Commands.add('interceptDeferredCompile', interceptDeferredCompile)
+Cypress.Commands.add('interceptFileUpload', interceptFileUpload)
+Cypress.Commands.add('interceptProjectListing', interceptProjectListing)
+Cypress.Commands.add('interceptLinkedFile', interceptLinkedFile)

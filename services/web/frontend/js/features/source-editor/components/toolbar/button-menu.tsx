@@ -15,6 +15,7 @@ export const ToolbarButtonMenu: FC<{
     <Button
       type="button"
       className="ol-cm-toolbar-button"
+      aria-label={label}
       bsStyle={null}
       onMouseDown={event => {
         event.preventDefault()
@@ -45,6 +46,7 @@ export const ToolbarButtonMenu: FC<{
         className="ol-cm-toolbar-button-menu-popover"
       >
         <ListGroup
+          role="menu"
           onClick={() => {
             onToggle(false)
           }}

@@ -38,6 +38,7 @@ export class EditableGraphicsWidget extends GraphicsWidget {
 
   createEditButton(view: EditorView) {
     const button = document.createElement('button')
+    button.setAttribute('aria-label', view.state.phrase('edit_figure'))
     this.setEditDispatcher(button, view)
     button.classList.add('btn', 'btn-secondary', 'ol-cm-graphics-edit-button')
     const buttonLabel = document.createElement('span')

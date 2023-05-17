@@ -20,6 +20,7 @@ export const FigureModalFigureOptions: FC = () => {
         <input
           type="checkbox"
           id="figure-modal-caption"
+          data-cy="include-caption-option"
           defaultChecked={includeCaption}
           onChange={event => dispatch({ includeCaption: event.target.checked })}
         />
@@ -31,6 +32,7 @@ export const FigureModalFigureOptions: FC = () => {
         <input
           type="checkbox"
           id="figure-modal-label"
+          data-cy="include-label-option"
           defaultChecked={includeLabel}
           onChange={event => dispatch({ includeLabel: event.target.checked })}
         />
