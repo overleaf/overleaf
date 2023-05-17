@@ -7,10 +7,12 @@ import { diffDoc } from '../../services/api'
 import { highlightsFromDiffResponse } from '../../utils/highlights-from-diff-response'
 import useAsync from '../../../../shared/hooks/use-async'
 import ErrorMessage from '../error-message'
+import { useTranslation } from 'react-i18next'
 
 function DiffView() {
   const { selection, projectId, loadingFileDiffs } = useHistoryContext()
   const { isLoading, data, runAsync, error } = useAsync<DocDiffResponse>()
+  const { t } = useTranslation()
   const { updateRange, selectedFile } = selection
 
   useEffect(() => {
@@ -34,7 +36,7 @@ function DiffView() {
   } else {
     diff = {
       binary: false,
-      docDiff: highlightsFromDiffResponse(data.diff),
+      docDiff: highlightsFromDiffResponse(data.diff, t),
     }
   }
 

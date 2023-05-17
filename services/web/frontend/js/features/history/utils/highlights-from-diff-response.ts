@@ -2,8 +2,12 @@ import displayNameForUser from '../../../ide/history/util/displayNameForUser'
 import moment from 'moment/moment'
 import ColorManager from '../../../ide/colors/ColorManager'
 import { DocDiffChunk, Highlight } from '../services/types/doc'
+import { TFunction } from 'react-i18next'
 
-export function highlightsFromDiffResponse(chunks: DocDiffChunk[]) {
+export function highlightsFromDiffResponse(
+  chunks: DocDiffChunk[],
+  t: TFunction<'translation'> // Must be called `t` for i18next-scanner to find calls to it
+) {
   let pos = 0
   const highlights: Highlight[] = []
   let doc = ''
@@ -31,7 +35,7 @@ export function highlightsFromDiffResponse(chunks: DocDiffChunk[]) {
         highlights.push({
           type: 'addition',
           // There doesn't seem to be a convenient way to make this translatable
-          label: `Added by ${name} on ${date}`,
+          label: t('added_by_on', { name, date }),
           range,
           hue: ColorManager.getHueForUserId(user?.id),
         })
@@ -39,7 +43,7 @@ export function highlightsFromDiffResponse(chunks: DocDiffChunk[]) {
         highlights.push({
           type: 'deletion',
           // There doesn't seem to be a convenient way to make this translatable
-          label: `Deleted by ${name} on ${date}`,
+          label: t('deleted_by_on', { name, date }),
           range,
           hue: ColorManager.getHueForUserId(user?.id),
         })
