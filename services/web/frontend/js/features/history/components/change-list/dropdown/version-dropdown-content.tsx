@@ -1,15 +1,15 @@
 import AddLabel from './menu-item/add-label'
 import Download from './menu-item/download'
-import Compare from './menu-item/compare'
 import { LoadedUpdate } from '../../../services/types/update'
 import { useCallback } from 'react'
 import { ActiveDropdown } from '../../../hooks/use-dropdown-active-item'
+import CompareItems from './menu-item/compare-items'
+import { updateRangeForUpdate } from '../../../utils/history-details'
 
 type VersionDropdownContentProps = {
   projectId: string
   update: LoadedUpdate
   selected: boolean
-  comparing: boolean
   closeDropdownForItem: ActiveDropdown['closeDropdownForItem']
 }
 
@@ -17,9 +17,10 @@ function VersionDropdownContent({
   projectId,
   update,
   selected,
-  comparing,
   closeDropdownForItem,
 }: VersionDropdownContentProps) {
+  const updateRange = updateRangeForUpdate(update)
+
   const closeDropdown = useCallback(() => {
     closeDropdownForItem(update)
   }, [closeDropdownForItem, update])
@@ -36,15 +37,11 @@ function VersionDropdownContent({
         version={update.toV}
         closeDropdown={closeDropdown}
       />
-      {!comparing && !selected && (
-        <Compare
-          projectId={projectId}
-          fromV={update.fromV}
-          toV={update.toV}
-          updateMetaEndTimestamp={update.meta.end_ts}
-          closeDropdown={closeDropdown}
-        />
-      )}
+      <CompareItems
+        updateRange={updateRange}
+        selected={selected}
+        closeDropdown={closeDropdown}
+      />
     </>
   )
 }

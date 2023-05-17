@@ -1,9 +1,12 @@
 import { useTranslation } from 'react-i18next'
 import { useHistoryContext } from '../../context/history-context'
-import { getUpdateForVersion } from '../../utils/history-details'
-import { computeUpdateRange } from '../../utils/range'
+import {
+  getUpdateForVersion,
+  updateRangeForUpdate,
+} from '../../utils/history-details'
 import { isAnyVersionMatchingSelection } from '../../utils/label'
 import { HistoryContextValue } from '../../context/types/history-context-value'
+import { updateRangeUnion } from '../../utils/range'
 
 type ToggleSwitchProps = Pick<
   HistoryContextValue,
@@ -28,22 +31,19 @@ function ToggleSwitch({ labelsOnly, setLabelsOnly }: ToggleSwitchProps) {
         // in labels only mode the `fromV` is equal to `toV` value
         // switching to all history mode and triggering immediate comparison with
         // an older version would cause a bug if the computation below is skipped.
-        const update = selection.updateRange?.toV
-          ? getUpdateForVersion(selection.updateRange.toV, updatesInfo.updates)
-          : null
-
         const { updateRange } = selection
+        const update = updateRange?.toV
+          ? getUpdateForVersion(updateRange.toV, updatesInfo.updates)
+          : null
 
         if (
           updateRange &&
           update &&
           (update.fromV !== updateRange.fromV || update.toV !== updateRange.toV)
         ) {
-          const range = computeUpdateRange(
-            updateRange,
-            update.fromV,
-            update.toV,
-            update.meta.end_ts
+          const range = updateRangeUnion(
+            updateRangeForUpdate(update),
+            updateRange
           )
 
           setSelection({

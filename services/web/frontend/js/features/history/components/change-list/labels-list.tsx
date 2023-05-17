@@ -39,7 +39,6 @@ function LabelsList() {
             version={version}
             currentUserId={currentUserId}
             projectId={projectId}
-            comparing={selection.comparing}
             selected={selected}
             selectable={!(singleVersionSelected && selected)}
             setSelection={setSelection}

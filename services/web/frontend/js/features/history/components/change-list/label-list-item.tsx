@@ -17,7 +17,6 @@ type LabelListItemProps = {
   labels: LoadedLabel[]
   currentUserId: string
   projectId: string
-  comparing: boolean
   selected: boolean
   selectable: boolean
   setSelection: HistoryContextValue['setSelection']
@@ -32,7 +31,6 @@ function LabelListItem({
   labels,
   currentUserId,
   projectId,
-  comparing,
   selected,
   selectable,
   setSelection,
@@ -105,10 +103,9 @@ function LabelListItem({
       >
         {dropdownActive ? (
           <LabelDropdownContent
-            comparing={comparing}
             selected={selected}
             version={version}
-            updateMetaEndTimestamp={toVTimestamp}
+            versionTimestamp={toVTimestamp}
             projectId={projectId}
             closeDropdownForItem={closeDropdownForItem}
           />

@@ -1,26 +1,19 @@
 import { UpdateRange } from '../services/types/update'
 
-export const computeUpdateRange = (
-  updateRange: UpdateRange,
-  fromV: number,
-  toV: number,
-  updateMetaEndTimestamp: number
+export const updateRangeUnion = (
+  updateRange1: UpdateRange,
+  updateRange2: UpdateRange
 ) => {
-  const fromVersion = Math.min(fromV, updateRange.fromV)
-  const toVersion = Math.max(toV, updateRange.toV)
-  const fromVTimestamp = Math.min(
-    updateMetaEndTimestamp,
-    updateRange.fromVTimestamp
-  )
-  const toVTimestamp = Math.max(
-    updateMetaEndTimestamp,
-    updateRange.toVTimestamp
-  )
-
   return {
-    fromV: fromVersion,
-    toV: toVersion,
-    fromVTimestamp,
-    toVTimestamp,
+    fromV: Math.min(updateRange1.fromV, updateRange2.fromV),
+    toV: Math.max(updateRange1.toV, updateRange2.toV),
+    fromVTimestamp: Math.min(
+      updateRange1.fromVTimestamp,
+      updateRange2.fromVTimestamp
+    ),
+    toVTimestamp: Math.max(
+      updateRange1.toVTimestamp,
+      updateRange2.toVTimestamp
+    ),
   }
 }

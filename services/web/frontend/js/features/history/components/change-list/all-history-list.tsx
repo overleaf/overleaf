@@ -99,6 +99,7 @@ function AllHistoryList() {
           const faded =
             updatesInfo.freeHistoryLimitHit &&
             index === visibleUpdates.length - 1
+          const selectable = !faded && (selection.comparing || !selected)
 
           return (
             <HistoryVersion
@@ -109,7 +110,7 @@ function AllHistoryList() {
               setSelection={setSelection}
               selected={selected}
               currentUserId={currentUserId}
-              comparing={selection.comparing}
+              selectable={selectable}
               projectId={projectId}
               setActiveDropdownItem={setActiveDropdownItem}
               closeDropdownForItem={closeDropdownForItem}

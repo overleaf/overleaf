@@ -18,7 +18,7 @@ type HistoryVersionProps = {
   update: LoadedUpdate
   currentUserId: string
   projectId: string
-  comparing: boolean
+  selectable: boolean
   faded: boolean
   showDivider: boolean
   selected: boolean
@@ -33,7 +33,7 @@ function HistoryVersion({
   update,
   currentUserId,
   projectId,
-  comparing,
+  selectable,
   faded,
   showDivider,
   selected,
@@ -44,7 +44,6 @@ function HistoryVersion({
   closeDropdownForItem,
 }: HistoryVersionProps) {
   const orderedLabels = orderBy(update.labels, ['created_at'], ['desc'])
-  const selectable = !faded && (comparing || !selected)
 
   return (
     <>
@@ -99,7 +98,6 @@ function HistoryVersion({
             >
               {dropdownActive ? (
                 <VersionDropdownContent
-                  comparing={comparing}
                   selected={selected}
                   update={update}
                   projectId={projectId}
