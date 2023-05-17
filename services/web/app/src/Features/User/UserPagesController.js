@@ -68,6 +68,18 @@ async function settingsPage(req, res) {
 
   const showPersonalAccessToken =
     !Features.hasFeature('saas') || req.query?.personal_access_token === 'true'
+  let personalAccessTokens
+  if (showPersonalAccessToken) {
+    try {
+      // require this here because module may not be included in some versions
+      const PersonalAccessTokenManager = require('../../../../modules/oauth2-server/app/src/OAuthPersonalAccessTokenManager')
+      personalAccessTokens = await PersonalAccessTokenManager.listTokens(
+        user._id
+      )
+    } catch (error) {
+      logger.error(OError.tag(error))
+    }
+  }
 
   res.render('user/settings', {
     title: 'account_settings',
@@ -112,6 +124,7 @@ async function settingsPage(req, res) {
     thirdPartyIds: UserPagesController._restructureThirdPartyIds(user),
     projectSyncSuccessMessage,
     showPersonalAccessToken,
+    personalAccessTokens,
   })
 }
 

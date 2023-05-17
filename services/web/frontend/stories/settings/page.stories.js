@@ -19,6 +19,7 @@ import {
 import {
   setDefaultMeta as setDefaultLinkingMeta,
   defaultSetupMocks as defaultSetupLinkingMocks,
+  setPersonalAccessTokensMeta,
 } from './helpers/linking'
 import { UserProvider } from '../../js/shared/context/user-context'
 import { ScopeDecorator } from '../decorators/scope'
@@ -44,9 +45,15 @@ export const Overleaf = args => {
   )
 }
 
+export const OverleafWithAccessTokens = args => {
+  setPersonalAccessTokensMeta()
+  return Overleaf(args)
+}
+
 export const ServerPro = args => {
   setDefaultAccountInfoMeta()
   setDefaultPasswordMeta()
+  setPersonalAccessTokensMeta()
   useFetchMock(fetchMock => {
     defaultSetupAccountInfoMocks(fetchMock)
     defaultSetupPasswordMocks(fetchMock)

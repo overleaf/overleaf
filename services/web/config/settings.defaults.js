@@ -805,6 +805,7 @@ module.exports = {
     importProjectFromGithubMenu: [],
     editorLeftMenuSync: [],
     editorLeftMenuManageTemplate: [],
+    oauth2Server: [],
   },
 
   moduleImportSequence: [

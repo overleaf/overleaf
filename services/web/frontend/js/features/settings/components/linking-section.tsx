@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, ElementType } from 'react'
 import { Alert } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
@@ -24,7 +24,20 @@ function LinkingSection() {
       importOverleafModules('referenceLinkingWidgets')
   )
 
-  const hasIntegrationLinkingSection = integrationLinkingWidgets.length
+  const oauth2ServerComponents = importOverleafModules('oauth2Server') as {
+    import: { default: ElementType }
+    path: string
+  }[]
+
+  const showPersonalAccessToken = getMeta(
+    'ol-showPersonalAccessToken'
+  ) as boolean
+
+  const allIntegrationLinkingWidgets = showPersonalAccessToken
+    ? integrationLinkingWidgets.concat(oauth2ServerComponents)
+    : integrationLinkingWidgets
+
+  const hasIntegrationLinkingSection = allIntegrationLinkingWidgets.length
   const hasReferencesLinkingSection = referenceLinkingWidgets.length
   const hasSSOLinkingSection = Object.keys(subscriptions).length > 0
 
@@ -49,12 +62,14 @@ function LinkingSection() {
             <Alert bsStyle="success">{projectSyncSuccessMessage}</Alert>
           ) : null}
           <div className="settings-widgets-container">
-            {integrationLinkingWidgets.map(
+            {allIntegrationLinkingWidgets.map(
               ({ import: importObject, path }, widgetIndex) => (
                 <ModuleLinkingWidget
                   key={Object.keys(importObject)[0]}
                   ModuleComponent={Object.values(importObject)[0]}
-                  isLast={widgetIndex === integrationLinkingWidgets.length - 1}
+                  isLast={
+                    widgetIndex === allIntegrationLinkingWidgets.length - 1
+                  }
                 />
               )
             )}

@@ -216,3 +216,20 @@ tbody > tr.affiliations-table-warning-row > td {
 .setting-reconfirm-info-right {
   white-space: nowrap;
 }
+
+// Prevents icon from large account linking sections, such as the git bridge,
+// from rendering in the center of the widget, anchoring it to the top
+.linking-icon-fixed-position {
+  align-self: start;
+  padding-top: 10px;
+}
+
+// overrides the default `Col` padding, as the inner `affiliations-table-cell` has its own padding, and
+// the content length of the git-bridge token table is pretty much fixed (tokens and dates)
+.linking-git-bridge-table-cell {
+  padding-right: 0;
+}
+
+.linking-git-bridge-revoke-button {
+  padding: 2px 4px;
+}

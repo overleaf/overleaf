@@ -70,6 +70,9 @@ describe('UserPagesController', function () {
     this.Features = {
       hasFeature: sinon.stub().returns(false),
     }
+    this.PersonalAccessTokenManager = {
+      listTokens: sinon.stub().returns([]),
+    }
     this.UserPagesController = SandboxedModule.require(modulePath, {
       requires: {
         '@overleaf/settings': this.settings,
@@ -80,6 +83,8 @@ describe('UserPagesController', function () {
         '../Authentication/AuthenticationController':
           this.AuthenticationController,
         '../../infrastructure/Features': this.Features,
+        '../../../../modules/oauth2-server/app/src/OAuthPersonalAccessTokenManager':
+          this.PersonalAccessTokenManager,
         '../Authentication/SessionManager': this.SessionManager,
         request: (this.request = sinon.stub()),
       },

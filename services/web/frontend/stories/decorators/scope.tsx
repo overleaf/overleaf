@@ -21,7 +21,7 @@ const initialize = () => {
   }
 
   const project: Project = {
-    _id: 'a-project',
+    _id: '63e21c07946dd8c76505f85a',
     name: 'A Project',
     features: { mendeley: true, zotero: true },
     tokens: {},
