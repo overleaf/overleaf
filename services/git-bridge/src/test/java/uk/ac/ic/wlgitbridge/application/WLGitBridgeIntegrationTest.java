@@ -662,11 +662,6 @@ public class WLGitBridgeIntegrationTest {
 
         }
 
-    // We skip this test because it now hangs. It relies on the in-memory swap
-    // job, but we disable the swap job when the noop or in-memory swap store
-    // are configured. We do that for safety. Such a configuration in a
-    // production environment would lead to data loss.
-    @Ignore
     @Test
     public void wlgbCanSwapProjects(
     ) throws IOException, GitAPIException, InterruptedException {
@@ -677,7 +672,7 @@ public class WLGitBridgeIntegrationTest {
         server.start();
         server.setState(states.get("wlgbCanSwapProjects").get("state"));
         wlgb = new GitBridgeApp(new String[] {
-                makeConfigFile(33874, 3874, new SwapJobConfig(1, 0, 0, 250, null))
+                makeConfigFile(33874, 3874, new SwapJobConfig(1, 0, 0, 250, null, true))
         });
         wlgb.run();
         File rootGitDir = new File(wlgb.config.getRootGitDirectory());
@@ -1099,6 +1094,7 @@ public class WLGitBridgeIntegrationTest {
                     "        \"s3BucketName\": \"com.overleaf.testbucket\"\n" +
                     "    },\n" +
                     "    \"swapJob\": {\n" +
+                    "        \"allowUnsafeStores\": true," +
                     "        \"minProjects\": " +
                     swapCfg.getMinProjects() +
                     ",\n" +

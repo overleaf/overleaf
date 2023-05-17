@@ -64,7 +64,7 @@ public interface SwapJob {
         if (!cfg.isPresent()) {
             return new NoopSwapJob();
         }
-        if (!swapStore.isSafe()) {
+        if (!swapStore.isSafe() && !cfg.get().getAllowUnsafeStores()) {
             Log.warn("Swap store '{}' is not safe; disabling swap job", swapStore.getClass().getSimpleName());
             return new NoopSwapJob();
         }

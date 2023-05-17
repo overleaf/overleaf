@@ -13,19 +13,22 @@ public class SwapJobConfig {
     private final int highGiB;
     private final long intervalMillis;
     private final String compressionMethod;
+    private final boolean allowUnsafeStores;
 
     public SwapJobConfig(
             int minProjects,
             int lowGiB,
             int highGiB,
             long intervalMillis,
-            String compressionMethod
+            String compressionMethod,
+            boolean allowUnsafeStores
     ) {
         this.minProjects = minProjects;
         this.lowGiB = lowGiB;
         this.highGiB = highGiB;
         this.intervalMillis = intervalMillis;
         this.compressionMethod = compressionMethod;
+        this.allowUnsafeStores = allowUnsafeStores;
     }
 
     public int getMinProjects() {
@@ -42,6 +45,10 @@ public class SwapJobConfig {
 
     public long getIntervalMillis() {
         return intervalMillis;
+    }
+
+    public boolean getAllowUnsafeStores() {
+        return allowUnsafeStores;
     }
 
     public SwapJob.CompressionMethod getCompressionMethod() {
