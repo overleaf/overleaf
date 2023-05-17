@@ -72,7 +72,7 @@ export function EditorProviders({
   },
 }) {
   window.user = user || window.user
-  window.gitBridgePublicBaseUrl = 'git.overleaf.test'
+  window.gitBridgePublicBaseUrl = 'https://git.overleaf.test'
   window.project_id = projectId != null ? projectId : window.project_id
   window.isRestrictedTokenMember = isRestrictedTokenMember
 
