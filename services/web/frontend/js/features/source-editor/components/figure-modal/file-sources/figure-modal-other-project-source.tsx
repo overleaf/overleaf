@@ -187,20 +187,30 @@ const SelectFile = <T extends { path: string }>({
   disabled,
   files,
   onSelectedItemChange,
+  defaultText = 'Select a file',
+  label = 'Image file',
+  loading = false,
 }: {
   disabled: boolean
-  files?: T[]
+  files?: T[] | null
+  defaultText?: string
+  label?: string
+  loading?: boolean
   onSelectedItemChange?: (item: T | null | undefined) => any
 }) => {
   const imageFiles = useMemo(() => files?.filter(isImageEntity), [files])
+  const empty = loading || !imageFiles || imageFiles.length === 0
   return (
     <Select
+      loading={loading}
       items={imageFiles ?? []}
       itemToString={file => (file ? file.path.replace(/^\//, '') : '')}
       itemToKey={file => file.path}
-      defaultText="Select a file"
-      label="Image file"
-      disabled={disabled}
+      defaultText={
+        imageFiles?.length === 0 ? 'No image files found' : defaultText
+      }
+      label={label}
+      disabled={disabled || empty}
       onSelectedItemChanged={onSelectedItemChange}
     />
   )
@@ -219,8 +229,9 @@ const SelectFromProject: FC<{
   }, [error, dispatch])
   return (
     <SelectFile
-      files={entities ?? []}
-      disabled={loading || !projectId}
+      files={entities}
+      loading={loading}
+      disabled={!projectId}
       onSelectedItemChange={onSelectedItemChange}
     />
   )
@@ -239,8 +250,11 @@ const SelectFromProjectOutputFiles: FC<{
   }, [error, dispatch])
   return (
     <SelectFile
-      files={entities ?? []}
-      disabled={loading || !projectId}
+      label="Output file"
+      defaultText="Select an output file"
+      loading={loading}
+      files={entities}
+      disabled={!projectId}
       onSelectedItemChange={onSelectedItemChange}
     />
   )

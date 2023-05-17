@@ -11,13 +11,16 @@ export const FigureModalCurrentProjectSource: FC = () => {
     [rootFolder]
   )
   const { dispatch } = useFigureModalContext()
+  const noFiles = files?.length === 0
   return (
     <Select
       items={files || []}
       itemToString={file => (file ? file.name : '')}
       itemToSubtitle={item => item?.path ?? ''}
       itemToKey={item => item.id}
-      defaultText="Select image from project files"
+      defaultText={
+        noFiles ? 'No image files found' : 'Select image from project files'
+      }
       label="Image file"
       onSelectedItemChanged={item => {
         dispatch({

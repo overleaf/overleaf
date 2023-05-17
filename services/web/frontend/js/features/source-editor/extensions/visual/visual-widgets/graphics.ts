@@ -50,7 +50,7 @@ export class GraphicsWidget extends WidgetType {
     element.classList.toggle('ol-cm-environment-centered', this.centered)
     if (
       this.filePath === element.dataset.filepath &&
-      element.dataset.width === this.figureData?.width?.toString()
+      element.dataset.width === String(this.figureData?.width?.toString())
     ) {
       return true
     }

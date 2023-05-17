@@ -122,8 +122,8 @@ const FigureModalContent = () => {
       dispatch({ error: String(error) })
       return
     }
-    const labelCommand = includeLabel ? '\\label{fig:enter-label}' : ''
-    const captionCommand = includeCaption ? '\\caption{Enter Caption}' : ''
+    const labelCommand = includeLabel ? '\n\\label{fig:enter-label}' : ''
+    const captionCommand = includeCaption ? '\n\\caption{Enter Caption}' : ''
 
     if (figure) {
       // Updating existing figure
@@ -133,15 +133,15 @@ const FigureModalContent = () => {
       if (!hadCaptionBefore && includeCaption) {
         // We should insert a caption
         changes.push({
-          from: figure.label?.from ?? figure.graphicsCommand.to,
-          insert: (figure.label ? '' : '\n') + captionCommand,
+          from: figure.graphicsCommand.to,
+          insert: captionCommand,
         })
       }
       if (!hadLabelBefore && includeLabel) {
         // We should insert a label
         changes.push({
           from: figure.caption?.to ?? figure.graphicsCommand.to,
-          insert: (includeCaption ? '' : '\n') + labelCommand,
+          insert: labelCommand,
         })
       }
       if (hadCaptionBefore && !includeCaption) {
@@ -187,7 +187,7 @@ const FigureModalContent = () => {
           const { pos, suffix } = ensureEmptyLine(view.state, range)
           const graphicxCommand = `\\includegraphics[width=${width}\\linewidth]{${path}}`
           const changes: ChangeSpec = view.state.changes({
-            insert: `\\begin{figure}\n\\centering\n${graphicxCommand}\n${captionCommand}${labelCommand}${
+            insert: `\\begin{figure}\n\\centering\n${graphicxCommand}${captionCommand}${labelCommand}${
               labelCommand || captionCommand ? '\n' : '' // Add an extra newline if we've added a caption or label
             }\\end{figure}${suffix}`,
             from: pos,

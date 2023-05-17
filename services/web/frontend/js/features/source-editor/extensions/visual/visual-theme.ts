@@ -241,9 +241,13 @@ export const visualTheme = EditorView.theme({
     overflowWrap: 'break-word',
     hyphens: 'auto',
   },
-  '.ol-cm-environment-centered.ol-cm-caption-line': {
-    padding: '0 10%',
-    textAlign: 'center',
+  '.ol-cm-environment-centered': {
+    '&.ol-cm-label-line, &.ol-cm-caption-line': {
+      textAlign: 'center',
+    },
+    '&.ol-cm-caption-line': {
+      padding: '0 10%',
+    },
   },
   '.ol-cm-caption-line .ol-cm-label': {
     marginRight: '1ch',

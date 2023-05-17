@@ -14,6 +14,7 @@ type SelectProps<T> = {
   onSelectedItemChanged?: (item: T | null | undefined) => void
   disabled?: boolean
   optionalLabel?: boolean
+  loading?: boolean
 }
 
 export const Select = <T,>({
@@ -26,6 +27,7 @@ export const Select = <T,>({
   onSelectedItemChanged,
   disabled = false,
   optionalLabel = false,
+  loading = false,
 }: SelectProps<T>) => {
   const {
     isOpen,
@@ -54,7 +56,8 @@ export const Select = <T,>({
               <span className="select-optional-label text-muted">
                 (Optional)
               </span>
-            )}
+            )}{' '}
+            {loading && <Icon fw type="spinner" spin />}
           </label>
         ) : null}
         <div

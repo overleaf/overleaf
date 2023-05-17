@@ -21,7 +21,7 @@ export class EditableGraphicsWidget extends GraphicsWidget {
   updateDOM(element: HTMLImageElement, view: EditorView): boolean {
     if (
       this.filePath === element.dataset.filepath &&
-      element.dataset.width === this.figureData?.width?.toString()
+      element.dataset.width === String(this.figureData?.width?.toString())
     ) {
       // Figure remained the same, so just update the event listener on the button
       this.setEditDispatcher(
