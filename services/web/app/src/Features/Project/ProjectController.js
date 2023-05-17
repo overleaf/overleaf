@@ -1342,6 +1342,13 @@ const ProjectController = {
               Features.hasFeature('saas') &&
               participatingInVisualEditorNamingTest
 
+            let richTextVariant
+            if (!Features.hasFeature('saas')) {
+              richTextVariant = 'cm6'
+            } else {
+              richTextVariant = richTextAssignment.variant
+            }
+
             res.render(template, {
               title: project.name,
               priority_title: true,
@@ -1418,7 +1425,7 @@ const ProjectController = {
               fixedSizeDocument: true,
               useOpenTelemetry: Settings.useOpenTelemetryClient,
               showCM6SwitchAwaySurvey: Settings.showCM6SwitchAwaySurvey,
-              richTextVariant: richTextAssignment.variant,
+              richTextVariant,
               showOnboardingVideoTour,
               historyViewReact: historyViewAssignment.variant === 'react',
               showPersonalAccessToken,
