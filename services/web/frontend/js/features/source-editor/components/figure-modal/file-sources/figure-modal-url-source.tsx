@@ -5,6 +5,7 @@ import { useProjectContext } from '../../../../../shared/context/project-context
 import { File } from '../../../utils/file'
 import { useCurrentProjectFolders } from '../../../hooks/useCurrentProjectFolders'
 import { FileRelocator } from '../file-relocator'
+import { useTranslation } from 'react-i18next'
 
 function generateLinkedFileFetcher(
   projectId: string,
@@ -30,6 +31,7 @@ function generateLinkedFileFetcher(
 }
 
 export const FigureModalUrlSource: FC = () => {
+  const { t } = useTranslation()
   const [url, setUrl] = useState<string>('')
   const [nameDirty, setNameDirty] = useState<boolean>(false)
   const [name, setName] = useState<string>('')
@@ -61,12 +63,12 @@ export const FigureModalUrlSource: FC = () => {
 
   return (
     <>
-      <label htmlFor="figure-modal-url-url">Image URL</label>
+      <label htmlFor="figure-modal-url-url">{t('image_url')}</label>
       <input
         id="figure-modal-url-url"
         type="text"
         className="form-control figure-modal-input-field"
-        placeholder="Enter image URL"
+        placeholder={t('enter_image_url')}
         value={url}
         onChange={e => {
           setUrl(e.target.value)

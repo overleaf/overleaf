@@ -8,6 +8,7 @@ import {
 import { File, FileOrDirectory } from '../../utils/file'
 import useScopeValue from '../../../../shared/hooks/use-scope-value'
 import { Alert } from 'react-bootstrap'
+import { useTranslation } from 'react-i18next'
 
 type FileNameInputProps = Omit<
   DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>,
@@ -54,6 +55,7 @@ export const FileNameInput = ({
   targetFolder,
   ...props
 }: FileNameInputProps) => {
+  const { t } = useTranslation()
   const [overlap, setOverlap] = useState<boolean>(false)
   const [rootFolder] = useScopeValue<FileOrDirectory>('rootFolder')
   const { value } = props
@@ -83,7 +85,7 @@ export const FileNameInput = ({
       <input {...props} type="text" onFocus={onFocus} />
       {overlap && (
         <Alert bsStyle="warning" className="mt-1 mb-0">
-          A file with that name already exists. That file will be overwritten.
+          {t('a_file_with_that_name_already_exists_and_will_be_overriden')}
         </Alert>
       )}
     </>

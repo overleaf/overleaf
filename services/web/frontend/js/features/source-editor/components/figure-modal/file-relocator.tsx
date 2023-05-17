@@ -3,6 +3,7 @@ import { FileNameInput } from './file-name-input'
 import { File } from '../../utils/file'
 import { Select } from '../../../../shared/components/select'
 import { useCurrentProjectFolders } from '../../hooks/useCurrentProjectFolders'
+import { useTranslation } from 'react-i18next'
 
 export const FileRelocator = ({
   name,
@@ -23,6 +24,7 @@ export const FileRelocator = ({
   setFolder: (folder: File) => void
   setNameDirty: (nameDirty: boolean) => void
 }) => {
+  const { t } = useTranslation()
   const [folders, rootFile] = useCurrentProjectFolders()
 
   const nameChanged = useCallback(
@@ -48,7 +50,7 @@ export const FileRelocator = ({
   return (
     <>
       <label htmlFor="figure-modal-relocated-file-name">
-        File name in this project
+        {t('file_name_in_this_project_figure_modal')}
       </label>
       <FileNameInput
         id="figure-modal-relocated-file-name"
@@ -64,17 +66,17 @@ export const FileRelocator = ({
         items={folders || []}
         itemToString={item => {
           if (item?.path === '' && item?.name === 'rootFolder') {
-            return 'No folder'
+            return t('no_folder')
           }
           if (item) {
             return `${item.path}${item.name}`
           }
-          return 'No folder'
+          return t('no_folder')
         }}
         itemToSubtitle={item => item?.path ?? ''}
         itemToKey={item => item.id}
-        defaultText="Select folder from project"
-        label="Folder location"
+        defaultText={t('select_folder_from_project')}
+        label={t('folder_location')}
         optionalLabel
         onSelectedItemChanged={selectedFolderChanged}
       />

@@ -13,6 +13,7 @@ import Icon from '../../../../../shared/components/icon'
 import classNames from 'classnames'
 import { Button } from 'react-bootstrap'
 import { FileRelocator } from '../file-relocator'
+import { useTranslation } from 'react-i18next'
 
 const maxFileSize = window.ExposedSettings.maxUploadSize
 
@@ -26,6 +27,7 @@ export enum FileUploadStatus {
 /* eslint-enable no-unused-vars */
 
 export const FigureModalUploadFileSource: FC = () => {
+  const { t } = useTranslation()
   const { dispatch } = useFigureModalContext()
   const { _id: projectId } = useProjectContext()
   const [, rootFolder] = useCurrentProjectFolders()
@@ -217,9 +219,11 @@ export const FigureModalUploadFileSource: FC = () => {
               strings: {
                 // Text to show on the droppable area.
                 // `%{browseFiles}` is replaced with a link that opens the system file selection dialog.
-                dropPasteFiles: `Drag here, paste an image, or %{browseFiles}`,
+                dropPasteFiles: `${t(
+                  'drag_here_paste_an_image_or'
+                )} %{browseFiles}`,
                 // Used as the label for the link that opens the system file selection dialog.
-                browseFiles: 'select from your computer',
+                browseFiles: t('select_from_your_computer'),
               },
             }}
           />

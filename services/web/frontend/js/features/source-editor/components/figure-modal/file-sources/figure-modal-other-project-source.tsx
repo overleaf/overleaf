@@ -19,6 +19,7 @@ import { File, isImageEntity } from '../../../utils/file'
 import { postJSON } from '../../../../../infrastructure/fetch-json'
 import { useProjectContext } from '../../../../../shared/context/project-context'
 import { FileRelocator } from '../file-relocator'
+import { useTranslation } from 'react-i18next'
 
 function suggestName(path: string) {
   const parts = path.split('/')
@@ -26,6 +27,7 @@ function suggestName(path: string) {
 }
 
 export const FigureModalOtherProjectSource: FC = () => {
+  const { t } = useTranslation()
   const { dispatch } = useFigureModalContext()
   const { _id: projectId } = useProjectContext()
   const { loading: projectsLoading, data: projects, error } = useUserProjects()
@@ -124,8 +126,8 @@ export const FigureModalOtherProjectSource: FC = () => {
         items={projects ?? []}
         itemToString={project => (project ? project.name : '')}
         itemToKey={item => item._id}
-        defaultText="Select a project"
-        label="Project"
+        defaultText={t('select_a_project')}
+        label={t('project_figure_modal')}
         disabled={projectsLoading}
         onSelectedItemChanged={item => {
           const suggestion = nameDirty ? name : ''
@@ -161,8 +163,8 @@ export const FigureModalOtherProjectSource: FC = () => {
         >
           <span>
             {usingOutputFiles
-              ? 'select from project files'
-              : 'select from output files'}
+              ? t('select_from_project_files')
+              : t('select_from_output_files')}
           </span>
         </Button>
       </div>
@@ -187,8 +189,8 @@ const SelectFile = <T extends { path: string }>({
   disabled,
   files,
   onSelectedItemChange,
-  defaultText = 'Select a file',
-  label = 'Image file',
+  defaultText,
+  label,
   loading = false,
 }: {
   disabled: boolean
@@ -198,6 +200,9 @@ const SelectFile = <T extends { path: string }>({
   loading?: boolean
   onSelectedItemChange?: (item: T | null | undefined) => any
 }) => {
+  const { t } = useTranslation()
+  defaultText = defaultText ?? t('select_a_file')
+  label = label ?? t('image_file')
   const imageFiles = useMemo(() => files?.filter(isImageEntity), [files])
   const empty = loading || !imageFiles || imageFiles.length === 0
   return (
@@ -207,7 +212,7 @@ const SelectFile = <T extends { path: string }>({
       itemToString={file => (file ? file.path.replace(/^\//, '') : '')}
       itemToKey={file => file.path}
       defaultText={
-        imageFiles?.length === 0 ? 'No image files found' : defaultText
+        imageFiles?.length === 0 ? t('no_image_files_found') : defaultText
       }
       label={label}
       disabled={disabled || empty}
@@ -241,6 +246,7 @@ const SelectFromProjectOutputFiles: FC<{
   projectId?: string
   onSelectedItemChange?: (item: OutputEntity | null | undefined) => any
 }> = ({ projectId, onSelectedItemChange }) => {
+  const { t } = useTranslation()
   const { loading, data: entities, error } = useProjectOutputFiles(projectId)
   const { dispatch } = useFigureModalContext()
   useEffect(() => {
@@ -250,8 +256,8 @@ const SelectFromProjectOutputFiles: FC<{
   }, [error, dispatch])
   return (
     <SelectFile
-      label="Output file"
-      defaultText="Select an output file"
+      label={t('output_file')}
+      defaultText={t('select_an_output_file')}
       loading={loading}
       files={entities}
       disabled={!projectId}

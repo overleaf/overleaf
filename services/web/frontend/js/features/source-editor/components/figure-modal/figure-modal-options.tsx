@@ -6,8 +6,10 @@ import {
   useFigureModalExistingFigureContext,
 } from './figure-modal-context'
 import { Switcher, SwitcherItem } from '../../../../shared/components/switcher'
+import { useTranslation } from 'react-i18next'
 
 export const FigureModalFigureOptions: FC = () => {
+  const { t } = useTranslation()
   const { includeCaption, includeLabel, dispatch, width } =
     useFigureModalContext()
 
@@ -22,7 +24,7 @@ export const FigureModalFigureOptions: FC = () => {
           onChange={event => dispatch({ includeCaption: event.target.checked })}
         />
         <label className="figure-modal-label" htmlFor="figure-modal-caption">
-          Include caption
+          {t('include_caption')}
         </label>
       </div>
       <div className="figure-modal-checkbox-input">
@@ -33,20 +35,20 @@ export const FigureModalFigureOptions: FC = () => {
           onChange={event => dispatch({ includeLabel: event.target.checked })}
         />
         <label htmlFor="figure-modal-label" className="mb-0 figure-modal-label">
-          Include label
+          {t('include_label')}
           <br />
           <span className="text-muted text-small figure-modal-label-description">
-            Used when referring to the figure elsewhere in the document
+            {t('used_when_referring_to_the_figure_elsewhere_in_the_document')}
           </span>
         </label>
       </div>
       <div className="figure-modal-switcher-input">
         <div>
-          Image width{' '}
+          {t('image_width')}{' '}
           {hasComplexGraphicsArgument ? (
             <Tooltip
               id="figure-modal-image-width-warning-tooltip"
-              description="A custom size has been used in the LaTeX code."
+              description={t('a_custom_size_has_been_used_in_the_latex_code')}
               overlayProps={{ delay: 0, placement: 'top' }}
             >
               <Icon type="exclamation-triangle" fw />
@@ -54,7 +56,9 @@ export const FigureModalFigureOptions: FC = () => {
           ) : (
             <Tooltip
               id="figure-modal-image-width-tooltip"
-              description="The width you choose here is based on the width of the text in your document. Alternatively, you can customize the image size directly in the LaTeX code."
+              description={t(
+                'the_width_you_choose_here_is_based_on_the_width_of_the_text_in_your_document'
+              )}
               overlayProps={{ delay: 0, placement: 'bottom' }}
             >
               <Icon type="question-circle" fw />
@@ -68,10 +72,10 @@ export const FigureModalFigureOptions: FC = () => {
             defaultValue={width === 1 ? '1.0' : width.toString()}
             disabled={hasComplexGraphicsArgument}
           >
-            <SwitcherItem value="0.25" label="¼ width" />
-            <SwitcherItem value="0.5" label="½ width" />
-            <SwitcherItem value="0.75" label="¾ width" />
-            <SwitcherItem value="1.0" label="Full width" />
+            <SwitcherItem value="0.25" label={t('1_4_width')} />
+            <SwitcherItem value="0.5" label={t('1_2_width')} />
+            <SwitcherItem value="0.75" label={t('3_4_width')} />
+            <SwitcherItem value="1.0" label={t('full_width')} />
           </Switcher>
         </div>
       </div>

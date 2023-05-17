@@ -3,6 +3,7 @@
 import classNames from 'classnames'
 import { useSelect } from 'downshift'
 import Icon from './icon'
+import { useTranslation } from 'react-i18next'
 
 type SelectProps<T> = {
   items: T[]
@@ -29,6 +30,7 @@ export const Select = <T,>({
   optionalLabel = false,
   loading = false,
 }: SelectProps<T>) => {
+  const { t } = useTranslation()
   const {
     isOpen,
     selectedItem,
@@ -54,7 +56,7 @@ export const Select = <T,>({
             {label}{' '}
             {optionalLabel && (
               <span className="select-optional-label text-muted">
-                (Optional)
+                ({t('optional')})
               </span>
             )}{' '}
             {loading && <Icon fw type="spinner" spin />}

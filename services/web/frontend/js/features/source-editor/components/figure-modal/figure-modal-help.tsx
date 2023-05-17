@@ -1,63 +1,68 @@
 import { FC } from 'react'
+import { Trans, useTranslation } from 'react-i18next'
 
 const LearnWikiLink: FC<{ article: string }> = ({ article, children }) => {
   return <a href={`/learn/latex/${article}`}>{children}</a>
 }
 
 export const FigureModalHelp = () => {
+  const { t } = useTranslation()
   return (
     <>
       <p>
-        This tool helps you insert figures into your project without needing to
-        write the LaTeX code. The following information explains more about the
-        options in the tool and how to further customize your figures.
+        <Trans i18nKey="this_tool_helps_you_insert_figures" />
+      </p>
+      <b>{t('editing_captions')}</b>
+      <p>
+        <Trans i18nKey="when_you_tick_the_include_caption_box" />
       </p>
 
-      <b>Editing captions</b>
+      <b>{t('understanding_labels')}</b>
       <p>
-        When you tick the box “Include caption” the image will be inserted into
-        your document with a placeholder caption. To edit it, you simply select
-        the placeholder text and type to replace it with your own.{' '}
+        <Trans
+          i18nKey="labels_help_you_to_easily_reference_your_figures"
+          components={[
+            // eslint-disable-next-line react/jsx-key
+            <code />,
+            // eslint-disable-next-line react/jsx-key
+            <LearnWikiLink article="Inserting_Images#Labels_and_cross-references" />,
+          ]}
+        />
       </p>
 
-      <b>Understanding labels</b>
+      <b>{t('customizing_figures')}</b>
       <p>
-        Labels help you to easily reference your figures throughout your
-        document. To reference a figure within the text, reference the label
-        using the <code>\ref&#123;...&#125;</code> command. This makes it easy
-        to reference figures without needing to manually remember the figure
-        numbering.{' '}
-        <LearnWikiLink article="Inserting_Images#Labels_and_cross-references">
-          Learn more
-        </LearnWikiLink>
+        <Trans
+          i18nKey="there_are_lots_of_options_to_edit_and_customize_your_figures"
+          components={[
+            // eslint-disable-next-line react/jsx-key
+            <LearnWikiLink article="Inserting_Images" />,
+          ]}
+        />
       </p>
 
-      <b>Customizing figures</b>
+      <b>{t('changing_the_position_of_your_figure')}</b>
       <p>
-        There are lots of options to edit and customize your figures, such as
-        wrapping text around the figure, rotating the image, or including
-        multiple images in a single figure. You’ll need to edit the LaTeX code
-        to do this.{' '}
-        <LearnWikiLink article="Inserting_Images">Find out how</LearnWikiLink>
+        <Trans
+          i18nKey="latex_places_figures_according_to_a_special_algorithm"
+          components={[
+            // eslint-disable-next-line react/jsx-key
+            <LearnWikiLink article="Positioning_images_and_tables" />,
+          ]}
+        />
       </p>
 
-      <b>Changing the position of your figure</b>
+      <b>{t('dealing_with_errors')}</b>
       <p>
-        LaTeX places figures according to a special algorithm. You can use
-        something called ‘placement parameters’ to influence the positioning of
-        the figure.{' '}
-        <LearnWikiLink article="Positioning_images_and_tables">
-          Find out how
-        </LearnWikiLink>
-      </p>
-
-      <b>Dealing with errors</b>
-      <p>
-        Are you getting an Undefined Control Sequence error? If you are, make
-        sure you’ve loaded the graphicx package&mdash;
-        <code>\usepackage&#123;graphicx&#125;</code>&mdash;in the preamble
-        (first section of code) in your document.{' '}
-        <LearnWikiLink article="Inserting_Images">Learn more</LearnWikiLink>
+        <Trans
+          i18nKey="are_you_getting_an_undefined_control_sequence_error"
+          components={[
+            // eslint-disable-next-line react/jsx-key
+            <code />,
+            // eslint-disable-next-line react/jsx-key
+            <LearnWikiLink article="Inserting_Images" />,
+          ]}
+        />
       </p>
     </>
   )

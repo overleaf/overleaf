@@ -5,12 +5,14 @@ import {
 } from './figure-modal-context'
 import Icon from '../../../../shared/components/icon'
 import { FC } from 'react'
+import { useTranslation } from 'react-i18next'
 
 export const FigureModalFooter: FC<{
   onInsert: () => void
   onCancel: () => void
   onDelete: () => void
 }> = ({ onInsert, onCancel, onDelete }) => {
+  const { t } = useTranslation()
   return (
     <div className="figure-modal-footer">
       <div className="figure-modal-help-buttons">
@@ -23,7 +25,7 @@ export const FigureModalFooter: FC<{
           type="button"
           onClick={onCancel}
         >
-          Cancel
+          {t('cancel')}
         </Button>
         <FigureModalAction onInsert={onInsert} onDelete={onDelete} />
       </div>
@@ -32,6 +34,7 @@ export const FigureModalFooter: FC<{
 }
 
 const HelpToggle = () => {
+  const { t } = useTranslation()
   const { helpShown, dispatch } = useFigureModalContext()
   if (helpShown) {
     return (
@@ -41,7 +44,7 @@ const HelpToggle = () => {
         onClick={() => dispatch({ helpShown: false })}
       >
         <Icon type="arrow-left" fw />
-        &nbsp;Back
+        &nbsp;{t('back')}
       </Button>
     )
   }
@@ -52,7 +55,7 @@ const HelpToggle = () => {
       onClick={() => dispatch({ helpShown: true })}
     >
       <Icon type="question-circle" fw />
-      &nbsp;Help
+      &nbsp;{t('help')}
     </Button>
   )
 }
@@ -61,6 +64,7 @@ const FigureModalAction: FC<{
   onInsert: () => void
   onDelete: () => void
 }> = ({ onInsert, onDelete }) => {
+  const { t } = useTranslation()
   const { helpShown, getPath, source, sourcePickerShown } =
     useFigureModalContext()
 
@@ -76,7 +80,7 @@ const FigureModalAction: FC<{
         type="button"
         onClick={onDelete}
       >
-        Delete figure
+        {t('delete_figure')}
       </Button>
     )
   }
@@ -89,7 +93,7 @@ const FigureModalAction: FC<{
         type="button"
         onClick={onInsert}
       >
-        Done
+        {t('done')}
       </Button>
     )
   }
@@ -102,7 +106,7 @@ const FigureModalAction: FC<{
       disabled={getPath === undefined}
       onClick={onInsert}
     >
-      Insert figure
+      {t('insert_figure')}
     </Button>
   )
 }

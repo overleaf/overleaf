@@ -4,8 +4,10 @@ import {
   useFigureModalContext,
   useFigureModalExistingFigureContext,
 } from '../figure-modal-context'
+import { useTranslation } from 'react-i18next'
 
 export const FigureModalEditFigureSource: FC = () => {
+  const { t } = useTranslation()
   const { dispatch } = useFigureModalContext()
   const { name } = useFigureModalExistingFigureContext()
 
@@ -19,7 +21,7 @@ export const FigureModalEditFigureSource: FC = () => {
 
   return (
     <FileContainer
-      name={name ?? 'Unknown'}
+      name={name ?? t('unknown')}
       status={FileUploadStatus.SUCCESS}
       onDelete={() => {
         dispatch({ sourcePickerShown: true })

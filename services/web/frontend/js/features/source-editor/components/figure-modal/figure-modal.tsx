@@ -18,23 +18,7 @@ import {
   editFigureDataEffect,
 } from '../../extensions/figure-modal'
 import { ensureEmptyLine } from '../../extensions/toolbar/commands'
-
-const getTitle = (state: FigureModalSource) => {
-  switch (state) {
-    case FigureModalSource.FILE_UPLOAD:
-      return 'Upload from computer'
-    case FigureModalSource.FILE_TREE:
-      return 'Insert from project files'
-    case FigureModalSource.FROM_URL:
-      return 'Insert from URL'
-    case FigureModalSource.OTHER_PROJECT:
-      return 'Insert from another project'
-    case FigureModalSource.EDIT_FIGURE:
-      return 'Edit figure'
-    default:
-      return 'Insert image'
-  }
-}
+import { useTranslation } from 'react-i18next'
 
 export const FigureModal = memo(function FigureModal() {
   return (
@@ -45,6 +29,28 @@ export const FigureModal = memo(function FigureModal() {
 })
 
 const FigureModalContent = () => {
+  const { t } = useTranslation()
+
+  const getTitle = useCallback(
+    (state: FigureModalSource) => {
+      switch (state) {
+        case FigureModalSource.FILE_UPLOAD:
+          return t('upload_from_computer')
+        case FigureModalSource.FILE_TREE:
+          return t('insert_from_project_files')
+        case FigureModalSource.FROM_URL:
+          return t('insert_from_url')
+        case FigureModalSource.OTHER_PROJECT:
+          return t('insert_from_another_project')
+        case FigureModalSource.EDIT_FIGURE:
+          return t('edit_figure')
+        default:
+          return t('insert_image')
+      }
+    },
+    [t]
+  )
+
   const {
     source,
     dispatch,
@@ -232,9 +238,9 @@ const FigureModalContent = () => {
       <Modal.Header closeButton>
         <Modal.Title>
           {helpShown
-            ? 'Help'
+            ? t('help')
             : sourcePickerShown
-            ? 'Replace figure'
+            ? t('replace_figure')
             : getTitle(source)}{' '}
           <SplitTestBadge
             splitTestName="figure-modal"

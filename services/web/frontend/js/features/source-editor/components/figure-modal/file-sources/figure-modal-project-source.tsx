@@ -3,8 +3,10 @@ import useScopeValue from '../../../../../shared/hooks/use-scope-value'
 import { Select } from '../../../../../shared/components/select'
 import { useFigureModalContext } from '../figure-modal-context'
 import { FileOrDirectory, filterFiles, isImageFile } from '../../../utils/file'
+import { useTranslation } from 'react-i18next'
 
 export const FigureModalCurrentProjectSource: FC = () => {
+  const { t } = useTranslation()
   const [rootFolder] = useScopeValue<FileOrDirectory>('rootFolder')
   const files = useMemo(
     () => filterFiles(rootFolder)?.filter(isImageFile),
@@ -19,7 +21,9 @@ export const FigureModalCurrentProjectSource: FC = () => {
       itemToSubtitle={item => item?.path ?? ''}
       itemToKey={item => item.id}
       defaultText={
-        noFiles ? 'No image files found' : 'Select image from project files'
+        noFiles
+          ? t('no_image_files_found')
+          : t('select_image_from_project_files')
       }
       label="Image file"
       onSelectedItemChanged={item => {
