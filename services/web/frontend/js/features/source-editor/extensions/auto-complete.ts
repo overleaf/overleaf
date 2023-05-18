@@ -122,7 +122,6 @@ const autocompleteTheme = EditorView.baseTheme({
   },
   '.cm-completionMatchedText': {
     textDecoration: 'none', // remove default underline,
-    fontWeight: 'bold',
   },
   '&light .cm-completionMatchedText': {
     color: '#2d69c7',
