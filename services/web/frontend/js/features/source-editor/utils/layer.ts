@@ -173,7 +173,10 @@ function rectanglesForRange(
       : drawForWidget(endBlock, true)
     const between = []
 
-    if ((visualStart || startBlock).to < (visualEnd || endBlock).from - 1)
+    if (
+      (visualStart || startBlock).to <
+      (visualEnd || endBlock).from - (visualStart && visualEnd ? 1 : 0)
+    )
       between.push(piece(leftSide, top.bottom, rightSide, bottom.top))
     else if (
       top.bottom < bottom.top &&
