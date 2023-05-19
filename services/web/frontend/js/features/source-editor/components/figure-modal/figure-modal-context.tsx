@@ -16,7 +16,7 @@ type FigureModalState = {
   helpShown: boolean
   sourcePickerShown: boolean
   getPath?: () => Promise<string>
-  width: number
+  width: number | undefined
   includeCaption: boolean
   includeLabel: boolean
   error?: string

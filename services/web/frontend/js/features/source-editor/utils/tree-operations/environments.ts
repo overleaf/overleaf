@@ -337,11 +337,7 @@ export function parseFigureData(
   if (error) {
     return null
   }
-  if (
-    graphicsCommand === undefined ||
-    file === undefined ||
-    (width === undefined && unknownGraphicsArguments === undefined)
-  ) {
+  if (graphicsCommand === undefined || file === undefined) {
     return null
   }
   return new FigureData({

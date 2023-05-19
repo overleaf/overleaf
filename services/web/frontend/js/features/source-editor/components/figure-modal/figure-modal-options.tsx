@@ -71,7 +71,7 @@ export const FigureModalFigureOptions: FC = () => {
           <Switcher
             name="figure-width"
             onChange={value => dispatch({ width: parseFloat(value) })}
-            defaultValue={width === 1 ? '1.0' : width.toString()}
+            defaultValue={width === 1 ? '1.0' : width?.toString()}
             disabled={hasComplexGraphicsArgument}
           >
             <SwitcherItem value="0.25" label={t('1_4_width')} />

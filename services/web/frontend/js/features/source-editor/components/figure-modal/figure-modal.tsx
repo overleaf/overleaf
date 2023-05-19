@@ -97,12 +97,12 @@ const FigureModalContent = () => {
       }
       updateExistingFigure({
         name: figure.file.path,
-        hasComplexGraphicsArgument:
-          figure.unknownGraphicsArguments !== undefined,
+        // The empty string should *not* be a complex argument
+        hasComplexGraphicsArgument: Boolean(figure.unknownGraphicsArguments),
       })
       dispatch({
         source: FigureModalSource.EDIT_FIGURE,
-        width: figure.width ?? 0.5,
+        width: figure.width,
         includeCaption: figure.caption !== null,
         includeLabel: figure.label !== null,
       })
@@ -166,9 +166,9 @@ const FigureModalContent = () => {
           insert: '',
         })
       }
-      if (!figure.unknownGraphicsArguments) {
+      if (!figure.unknownGraphicsArguments && width) {
         // We understood the arguments, and should update the width
-        if (figure.graphicsCommandArguments) {
+        if (figure.graphicsCommandArguments !== null) {
           changes.push({
             from: figure.graphicsCommandArguments.from,
             to: figure.graphicsCommandArguments.to,
@@ -191,7 +191,9 @@ const FigureModalContent = () => {
       view.dispatch(
         view.state.changeByRange(range => {
           const { pos, suffix } = ensureEmptyLine(view.state, range)
-          const graphicxCommand = `\\includegraphics[width=${width}\\linewidth]{${path}}`
+          const widthArgument =
+            width !== undefined ? `[width=${width}\\linewidth]` : ''
+          const graphicxCommand = `\\includegraphics${widthArgument}{${path}}`
           const changes: ChangeSpec = view.state.changes({
             insert: `\\begin{figure}\n\\centering\n${graphicxCommand}${captionCommand}${labelCommand}${
               labelCommand || captionCommand ? '\n' : '' // Add an extra newline if we've added a caption or label
