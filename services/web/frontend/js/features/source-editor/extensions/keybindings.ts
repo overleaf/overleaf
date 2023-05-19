@@ -85,7 +85,22 @@ const customiseVimOnce = (Vim: any, CodeMirror: any) => {
   Vim.defineAction('unfoldCode', function (cm: CodeMirror) {
     unfoldCode(cm.cm6)
   })
-  Vim.mapCommand('zo', 'action', 'unfoldCode')
+
+  // disable tab and shift-tab keys in command (normal) and visual modes
+  // using "undefined" params because mapCommand signature is:
+  // mapCommand(keys, type, name, args, extra)
+  Vim.mapCommand('<Tab>', undefined, undefined, undefined, {
+    context: 'normal',
+  })
+  Vim.mapCommand('<Tab>', undefined, undefined, undefined, {
+    context: 'visual',
+  })
+  Vim.mapCommand('<S-Tab>', undefined, undefined, undefined, {
+    context: 'normal',
+  })
+  Vim.mapCommand('<S-Tab>', undefined, undefined, undefined, {
+    context: 'visual',
+  })
 
   // Make the Vim 'write' command start a compile
   CodeMirror.commands.save = () => {
