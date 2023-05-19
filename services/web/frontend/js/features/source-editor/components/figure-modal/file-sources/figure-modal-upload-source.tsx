@@ -14,6 +14,8 @@ import classNames from 'classnames'
 import { Button } from 'react-bootstrap'
 import { FileRelocator } from '../file-relocator'
 import { useTranslation } from 'react-i18next'
+import { useCodeMirrorViewContext } from '../../codemirror-editor'
+import { waitForFileTreeUpdate } from '../../../extensions/figure-modal'
 
 const maxFileSize = window.ExposedSettings.maxUploadSize
 
@@ -28,6 +30,7 @@ export enum FileUploadStatus {
 
 export const FigureModalUploadFileSource: FC = () => {
   const { t } = useTranslation()
+  const view = useCodeMirrorViewContext()
   const { dispatch } = useFigureModalContext()
   const { _id: projectId } = useProjectContext()
   const [, rootFolder] = useCurrentProjectFolders()
@@ -68,7 +71,9 @@ export const FigureModalUploadFileSource: FC = () => {
       }
       dispatch({
         getPath: async () => {
+          const fileTreeUpdate = waitForFileTreeUpdate(view)
           const uploadResult = await uppy.upload()
+          await fileTreeUpdate.withTimeout(500)
           if (!uploadResult.successful) {
             throw new Error('Upload failed')
           }
@@ -81,7 +86,7 @@ export const FigureModalUploadFileSource: FC = () => {
         },
       })
     },
-    [dispatch, rootFolder, uppy]
+    [dispatch, rootFolder, uppy, view]
   )
 
   useEffect(() => {

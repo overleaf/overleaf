@@ -20,6 +20,8 @@ import { postJSON } from '../../../../../infrastructure/fetch-json'
 import { useProjectContext } from '../../../../../shared/context/project-context'
 import { FileRelocator } from '../file-relocator'
 import { useTranslation } from 'react-i18next'
+import { waitForFileTreeUpdate } from '../../../extensions/figure-modal'
+import { useCodeMirrorViewContext } from '../../codemirror-editor'
 
 function suggestName(path: string) {
   const parts = path.split('/')
@@ -28,6 +30,7 @@ function suggestName(path: string) {
 
 export const FigureModalOtherProjectSource: FC = () => {
   const { t } = useTranslation()
+  const view = useCodeMirrorViewContext()
   const { dispatch } = useFigureModalContext()
   const { _id: projectId } = useProjectContext()
   const { loading: projectsLoading, data: projects, error } = useUserProjects()
@@ -108,9 +111,11 @@ export const FigureModalOtherProjectSource: FC = () => {
 
     dispatch({
       getPath: async () => {
+        const fileTreeUpdate = waitForFileTreeUpdate(view)
         await postJSON(`/project/${projectId}/linked_file`, {
           body,
         })
+        await fileTreeUpdate.withTimeout(500)
         return targetFolder.path === '' && targetFolder.name === 'rootFolder'
           ? `${newName}`
           : `${targetFolder.path ? targetFolder.path + '/' : ''}${

@@ -6,14 +6,19 @@ import { File } from '../../../utils/file'
 import { useCurrentProjectFolders } from '../../../hooks/useCurrentProjectFolders'
 import { FileRelocator } from '../file-relocator'
 import { useTranslation } from 'react-i18next'
+import { useCodeMirrorViewContext } from '../../codemirror-editor'
+import { EditorView } from '@codemirror/view'
+import { waitForFileTreeUpdate } from '../../../extensions/figure-modal'
 
 function generateLinkedFileFetcher(
   projectId: string,
   url: string,
   name: string,
-  folder: File
+  folder: File,
+  view: EditorView
 ) {
   return async () => {
+    const fileTreeUpdate = waitForFileTreeUpdate(view)
     await postJSON(`/project/${projectId}/linked_file`, {
       body: {
         parent_folder_id: folder.id,
@@ -24,6 +29,8 @@ function generateLinkedFileFetcher(
         },
       },
     })
+    await fileTreeUpdate.withTimeout(500)
+
     return folder.path === '' && folder.name === 'rootFolder'
       ? `${name}`
       : `${folder.path ? folder.path + '/' : ''}${folder.name}/${name}`
@@ -31,6 +38,7 @@ function generateLinkedFileFetcher(
 }
 
 export const FigureModalUrlSource: FC = () => {
+  const view = useCodeMirrorViewContext()
   const { t } = useTranslation()
   const [url, setUrl] = useState<string>('')
   const [nameDirty, setNameDirty] = useState<boolean>(false)
@@ -53,7 +61,8 @@ export const FigureModalUrlSource: FC = () => {
           projectId,
           newUrl,
           newName,
-          folder ?? rootFile
+          folder ?? rootFile,
+          view
         ),
       })
     } else if (getPath) {

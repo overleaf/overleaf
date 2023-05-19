@@ -44,6 +44,7 @@ import { indentationMarkers } from './indentation-markers'
 import { codemirrorDevTools } from '../languages/latex/codemirror-dev-tools'
 import { keymaps } from './keymaps'
 import { shortcuts } from './shortcuts'
+import { effectListeners } from './effect-listeners'
 
 const moduleExtensions: Array<() => Extension> = importOverleafModules(
   'sourceEditorExtensions'
@@ -117,4 +118,5 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   exceptionLogger(),
   moduleExtensions.map(extension => extension()),
   thirdPartyExtensions(),
+  effectListeners(),
 ]

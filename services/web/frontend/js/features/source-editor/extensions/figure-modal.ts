@@ -4,6 +4,9 @@ import {
   StateEffect,
   StateField,
 } from '@codemirror/state'
+import { EditorView } from '@codemirror/view'
+import { addEffectListener, removeEffectListener } from './effect-listeners'
+import { setMetadataEffect } from './language'
 
 type NestedReadonly<T> = {
   readonly [P in keyof T]: NestedReadonly<T[P]>
@@ -127,3 +130,31 @@ export const editFigureData = StateField.define<FigureData | null>({
 })
 
 export const figureModal = (): Extension => [editFigureData]
+
+export function waitForFileTreeUpdate(view: EditorView) {
+  const abortController = new AbortController()
+  const promise = new Promise<void>(resolve => {
+    const abort = () => {
+      console.warn('Aborting wait for file tree update')
+      removeEffectListener(view, setMetadataEffect, listener)
+      resolve()
+    }
+    function listener() {
+      if (abortController.signal.aborted) {
+        // We've already handled this
+        return
+      }
+      abortController.signal.removeEventListener('abort', abort)
+      resolve()
+    }
+    abortController.signal.addEventListener('abort', abort, { once: true })
+    addEffectListener(view, setMetadataEffect, listener, { once: true })
+  })
+  return {
+    withTimeout(afterMs = 500) {
+      setTimeout(() => abortController.abort(), afterMs)
+      return promise
+    },
+    promise,
+  }
+}
