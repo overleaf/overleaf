@@ -7,6 +7,7 @@ import {
 import { EditorView } from '@codemirror/view'
 import { addEffectListener, removeEffectListener } from './effect-listeners'
 import { setMetadataEffect } from './language'
+import getMeta from '../../../utils/meta'
 
 type NestedReadonly<T> = {
   readonly [P in keyof T]: NestedReadonly<T[P]>
@@ -157,4 +158,44 @@ export function waitForFileTreeUpdate(view: EditorView) {
     },
     promise,
   }
+}
+
+const ALLOWED_MIME_TYPES = new Set([
+  'image/jpeg',
+  'image/png',
+  'application/pdf',
+])
+
+export type PastedImageData = {
+  name: string
+  type: string
+  data: Blob
+}
+
+export const figureModalPasteHandler = (): Extension => {
+  const splitTestVariants = getMeta('ol-splitTestVariants', {})
+  const figureModalEnabled = splitTestVariants['figure-modal'] === 'enabled'
+  if (!figureModalEnabled) {
+    return []
+  }
+  return EditorView.domEventHandlers({
+    paste: evt => {
+      if (!evt.clipboardData || evt.clipboardData.files.length === 0) {
+        return
+      }
+      const file = evt.clipboardData.files[0]
+      if (!ALLOWED_MIME_TYPES.has(file.type)) {
+        return
+      }
+      window.dispatchEvent(
+        new CustomEvent<PastedImageData>('figure-modal:paste-image', {
+          detail: {
+            name: file.name,
+            type: file.type,
+            data: file,
+          },
+        })
+      )
+    },
+  })
 }

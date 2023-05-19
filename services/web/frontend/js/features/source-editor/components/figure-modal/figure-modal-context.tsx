@@ -1,4 +1,5 @@
 import { FC, createContext, useContext, useReducer } from 'react'
+import { PastedImageData } from '../../extensions/figure-modal'
 
 /* eslint-disable no-unused-vars */
 export enum FigureModalSource {
@@ -20,6 +21,7 @@ type FigureModalState = {
   includeCaption: boolean
   includeLabel: boolean
   error?: string
+  pastedImageData?: PastedImageData
 }
 
 type FigureModalStateUpdate = Partial<FigureModalState>
@@ -55,6 +57,7 @@ const reducer = (prev: FigureModalState, action: Partial<FigureModalState>) => {
       sourcePickerShown: false,
       getPath: undefined,
       error: undefined,
+      pastedImageData: undefined,
       ...action,
     }
   }

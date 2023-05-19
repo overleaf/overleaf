@@ -21,6 +21,7 @@ import { toolbarPanel } from '../toolbar/toolbar-panel'
 import { CurrentDoc } from '../../../../../../types/current-doc'
 import isValidTeXFile from '../../../../main/is-valid-tex-file'
 import { listItemMarker } from './list-item-marker'
+import { figureModalPasteHandler } from '../figure-modal'
 
 type Options = {
   visual: boolean
@@ -191,4 +192,5 @@ const extension = (options: Options) => [
   toolbarPanel(),
   scrollJumpAdjuster,
   showContentWhenParsed,
+  figureModalPasteHandler(),
 ]

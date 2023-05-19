@@ -14,11 +14,13 @@ import { ChangeSpec } from '@codemirror/state'
 import SplitTestBadge from '../../../../shared/components/split-test-badge'
 import {
   FigureData,
+  PastedImageData,
   editFigureData,
   editFigureDataEffect,
 } from '../../extensions/figure-modal'
 import { ensureEmptyLine } from '../../extensions/toolbar/commands'
 import { useTranslation } from 'react-i18next'
+import useEventListener from '../../../../shared/hooks/use-event-listener'
 
 export const FigureModal = memo(function FigureModal() {
   return (
@@ -89,8 +91,9 @@ const FigureModalContent = () => {
     view.focus()
   }, [dispatch, view])
 
-  useEffect(() => {
-    const listener = () => {
+  useEventListener(
+    'figure-modal:open-modal',
+    useCallback(() => {
       const figure = view.state.field<FigureData>(editFigureData, false)
       if (!figure) {
         return
@@ -106,14 +109,21 @@ const FigureModalContent = () => {
         includeCaption: figure.caption !== null,
         includeLabel: figure.label !== null,
       })
-    }
+    }, [view, dispatch, updateExistingFigure])
+  )
 
-    window.addEventListener('figure-modal:open-modal', listener)
-
-    return () => {
-      window.removeEventListener('figure-modal:open-modal', listener)
-    }
-  }, [view, dispatch, updateExistingFigure])
+  useEventListener(
+    'figure-modal:paste-image',
+    useCallback(
+      (image: CustomEvent<PastedImageData>) => {
+        dispatch({
+          source: FigureModalSource.FILE_UPLOAD,
+          pastedImageData: image.detail,
+        })
+      },
+      [dispatch]
+    )
+  )
 
   const insert = useCallback(async () => {
     const figure = view.state.field<FigureData>(editFigureData, false)

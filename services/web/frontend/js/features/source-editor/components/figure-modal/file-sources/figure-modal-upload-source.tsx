@@ -31,7 +31,7 @@ export enum FileUploadStatus {
 export const FigureModalUploadFileSource: FC = () => {
   const { t } = useTranslation()
   const view = useCodeMirrorViewContext()
-  const { dispatch } = useFigureModalContext()
+  const { dispatch, pastedImageData } = useFigureModalContext()
   const { _id: projectId } = useProjectContext()
   const [, rootFolder] = useCurrentProjectFolders()
   const [folder, setFolder] = useState<File | null>(null)
@@ -187,6 +187,12 @@ export const FigureModalUploadFileSource: FC = () => {
     file,
     dispatch,
   ])
+
+  useEffect(() => {
+    if (pastedImageData) {
+      uppy.addFile(pastedImageData)
+    }
+  }, [uppy, pastedImageData])
 
   return (
     <>
