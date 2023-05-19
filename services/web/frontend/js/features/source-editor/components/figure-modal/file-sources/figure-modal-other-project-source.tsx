@@ -161,7 +161,7 @@ export const FigureModalOtherProjectSource: FC = () => {
       <div>
         or{' '}
         <Button
-          className="px-0"
+          className="p-0"
           bsStyle="link"
           type="button"
           onClick={() => setUsingOutputFiles(value => !value)}

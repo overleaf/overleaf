@@ -49,7 +49,10 @@ export const FileRelocator = ({
 
   return (
     <>
-      <label htmlFor="figure-modal-relocated-file-name">
+      <label
+        htmlFor="figure-modal-relocated-file-name"
+        className="figure-modal-input-label"
+      >
         {t('file_name_in_this_project_figure_modal')}
       </label>
       <FileNameInput

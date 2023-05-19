@@ -72,7 +72,12 @@ export const FigureModalUrlSource: FC = () => {
 
   return (
     <>
-      <label htmlFor="figure-modal-url-url">{t('image_url')}</label>
+      <label
+        htmlFor="figure-modal-url-url"
+        className="figure-modal-input-label"
+      >
+        {t('image_url')}
+      </label>
       <input
         id="figure-modal-url-url"
         type="text"
