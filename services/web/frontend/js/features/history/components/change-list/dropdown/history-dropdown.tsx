@@ -14,7 +14,12 @@ function HistoryDropdown({
   setIsOpened,
 }: HistoryDropdownProps) {
   return (
-    <ActionsDropdown id={id} isOpened={isOpened} setIsOpened={setIsOpened}>
+    <ActionsDropdown
+      id={id}
+      isOpened={isOpened}
+      setIsOpened={setIsOpened}
+      parentSelector="[data-history-version-list-container]"
+    >
       {children}
     </ActionsDropdown>
   )
