@@ -109,7 +109,7 @@ describe('history toolbar', function () {
     )
 
     cy.get('.history-react-toolbar').within(() => {
-      cy.get('div:first-child').contains('Comparing 12th April')
+      cy.get('div:first-child').contains('Comparing from 12th April')
 
       cy.get('div:first-child').contains('to 13th April')
     })

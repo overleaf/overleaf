@@ -11,7 +11,7 @@ export default function ToolbarDatetime({ selection }: ToolbarDatetimeProps) {
     <div className="history-react-toolbar-datetime">
       {selection.comparing ? (
         <Trans
-          i18nKey="comparing_x_to_y"
+          i18nKey="comparing_from_x_to_y"
           // eslint-disable-next-line react/jsx-key
           components={[<time className="history-react-toolbar-time" />]}
           values={{

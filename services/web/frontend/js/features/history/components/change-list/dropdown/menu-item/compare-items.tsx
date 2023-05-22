@@ -3,6 +3,7 @@ import { useHistoryContext } from '../../../../context/history-context'
 import { UpdateRange } from '../../../../services/types/update'
 import Compare from './compare'
 import { updateRangeUnion } from '../../../../utils/range'
+import MaterialIcon from '../../../../../../shared/components/material-icon'
 
 type CompareItemsProps = {
   updateRange: UpdateRange
@@ -38,18 +39,6 @@ function CompareItems({
           text={t('history_compare_to_selected_version')}
         />
       ) : null}
-      {showCompareToThis ? (
-        <Compare
-          comparisonRange={{
-            fromV: selRange.fromV,
-            toV: updateRange.toV,
-            fromVTimestamp: selRange.fromVTimestamp,
-            toVTimestamp: updateRange.toVTimestamp,
-          }}
-          closeDropdown={closeDropdown}
-          text={t('history_compare_to_this_version')}
-        />
-      ) : null}
       {showCompareFromThis ? (
         <Compare
           comparisonRange={{
@@ -60,6 +49,20 @@ function CompareItems({
           }}
           closeDropdown={closeDropdown}
           text={t('history_compare_from_this_version')}
+          icon={<MaterialIcon type="line_start_circle" />}
+        />
+      ) : null}
+      {showCompareToThis ? (
+        <Compare
+          comparisonRange={{
+            fromV: selRange.fromV,
+            toV: updateRange.toV,
+            fromVTimestamp: selRange.fromVTimestamp,
+            toVTimestamp: updateRange.toVTimestamp,
+          }}
+          closeDropdown={closeDropdown}
+          text={t('history_compare_up_to_this_version')}
+          icon={<MaterialIcon type="line_end_circle" />}
         />
       ) : null}
     </>
