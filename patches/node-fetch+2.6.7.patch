@@ -1,0 +1,76 @@
+diff --git a/node_modules/node-fetch/lib/index.js b/node_modules/node-fetch/lib/index.js
+index e5b04f1..8c80924 100644
+--- a/node_modules/node-fetch/lib/index.js
++++ b/node_modules/node-fetch/lib/index.js
+@@ -545,8 +545,8 @@ function clone(instance) {
+ 		// tee instance body
+ 		p1 = new PassThrough();
+ 		p2 = new PassThrough();
+-		body.pipe(p1);
+-		body.pipe(p2);
++		Stream.pipeline(body, p1, () => {});
++		Stream.pipeline(body, p2, () => {});
+ 		// set instance body to teed body and return the other teed body
+ 		instance[INTERNALS].body = p1;
+ 		body = p2;
+@@ -648,14 +648,14 @@ function writeToStream(dest, instance) {
+ 		// body is null
+ 		dest.end();
+ 	} else if (isBlob(body)) {
+-		body.stream().pipe(dest);
++		Stream.pipeline(body.stream(), dest, () => {});
+ 	} else if (Buffer.isBuffer(body)) {
+ 		// body is buffer
+ 		dest.write(body);
+ 		dest.end();
+ 	} else {
+ 		// body is stream
+-		body.pipe(dest);
++		Stream.pipeline(body, dest, () => {});
+ 	}
+ }
+ 
+@@ -1594,7 +1594,7 @@ function fetch(url, opts) {
+ 			res.once('end', function () {
+ 				if (signal) signal.removeEventListener('abort', abortAndFinalize);
+ 			});
+-			let body = res.pipe(new PassThrough$1());
++			let body = new PassThrough$1(); setTimeout(() => Stream.pipeline(res, body, (err) => { if (err) req.abort() }), 0); // Note: let the call-site attach event handler to "body" before we start streaming. 
+ 
+ 			const response_options = {
+ 				url: request.url,
+@@ -1635,7 +1635,7 @@ function fetch(url, opts) {
+ 
+ 			// for gzip
+ 			if (codings == 'gzip' || codings == 'x-gzip') {
+-				body = body.pipe(zlib.createGunzip(zlibOptions));
++				const bodyGzip = zlib.createGunzip(zlibOptions); Stream.pipeline(body, bodyGzip, () => {}); body = bodyGzip;
+ 				response = new Response(body, response_options);
+ 				resolve(response);
+ 				return;
+@@ -1645,13 +1645,13 @@ function fetch(url, opts) {
+ 			if (codings == 'deflate' || codings == 'x-deflate') {
+ 				// handle the infamous raw deflate response from old servers
+ 				// a hack for old IIS and Apache servers
+-				const raw = res.pipe(new PassThrough$1());
++				const raw = new PassThrough$1(); setTimeout(() => Stream.pipeline(res, raw, () => {}), 0); // Note: delay piping into "raw" until we start piping into "body". 
+ 				raw.once('data', function (chunk) {
+ 					// see http://stackoverflow.com/questions/37519828
+ 					if ((chunk[0] & 0x0F) === 0x08) {
+-						body = body.pipe(zlib.createInflate());
++						const bodyDeflate = zlib.createInflate(); Stream.pipeline(body, bodyDeflate, () => {}); body = bodyDeflate;
+ 					} else {
+-						body = body.pipe(zlib.createInflateRaw());
++						const bodyDeflate = zlib.createInflateRaw(); Stream.pipeline(body, bodyDeflate, () => {}); body = bodyDeflate;
+ 					}
+ 					response = new Response(body, response_options);
+ 					resolve(response);
+@@ -1661,7 +1661,7 @@ function fetch(url, opts) {
+ 
+ 			// for br
+ 			if (codings == 'br' && typeof zlib.createBrotliDecompress === 'function') {
+-				body = body.pipe(zlib.createBrotliDecompress());
++				const bodyBrotli = zlib.createBrotliDecompress(); Stream.pipeline(body, bodyBrotli, () => {}); body = bodyBrotli;
+ 				response = new Response(body, response_options);
+ 				resolve(response);
+ 				return;
