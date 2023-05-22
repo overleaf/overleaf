@@ -16,12 +16,16 @@ require('https').globalAgent.maxSockets = Infinity
 
 const SOCKETS_HTTP = require('http').globalAgent.sockets
 const SOCKETS_HTTPS = require('https').globalAgent.sockets
+const FREE_SOCKETS_HTTP = require('http').globalAgent.freeSockets
+const FREE_SOCKETS_HTTPS = require('https').globalAgent.freeSockets
 
 // keep track of set gauges and reset them in the next collection cycle
 const SEEN_HOSTS_HTTP = new Set()
 const SEEN_HOSTS_HTTPS = new Set()
+const FREE_SEEN_HOSTS_HTTP = new Set()
+const FREE_SEEN_HOSTS_HTTPS = new Set()
 
-function collectOpenConnections(sockets, seenHosts, prefix) {
+function collectConnectionsCount(sockets, seenHosts, status, https) {
   const Metrics = require('./index')
   Object.keys(sockets).forEach(host => seenHosts.add(host))
   seenHosts.forEach(host => {
@@ -31,7 +35,18 @@ function collectOpenConnections(sockets, seenHosts, prefix) {
     if (!openConnections) {
       seenHosts.delete(host)
     }
-    Metrics.gauge(`open_connections.${prefix}.${hostname}`, openConnections)
+    Metrics.gauge('sockets', openConnections, 1, {
+      path: hostname,
+      method: https,
+      status,
+    })
+    if (status === 'open') {
+      // Emit legacy metric to keep old time series intact.
+      Metrics.gauge(
+        `${status}_connections.${https}.${hostname}`,
+        openConnections
+      )
+    }
   })
 }
 
@@ -46,7 +61,19 @@ module.exports = OpenSocketsMonitor = {
   },
 
   gaugeOpenSockets() {
-    collectOpenConnections(SOCKETS_HTTP, SEEN_HOSTS_HTTP, 'http')
-    collectOpenConnections(SOCKETS_HTTPS, SEEN_HOSTS_HTTPS, 'https')
+    collectConnectionsCount(SOCKETS_HTTP, SEEN_HOSTS_HTTP, 'open', 'http')
+    collectConnectionsCount(SOCKETS_HTTPS, SEEN_HOSTS_HTTPS, 'open', 'https')
+    collectConnectionsCount(
+      FREE_SOCKETS_HTTP,
+      FREE_SEEN_HOSTS_HTTP,
+      'free',
+      'http'
+    )
+    collectConnectionsCount(
+      FREE_SOCKETS_HTTPS,
+      FREE_SEEN_HOSTS_HTTPS,
+      'free',
+      'https'
+    )
   },
 }
