@@ -16,7 +16,7 @@ const Errors = require('./app/js/Errors')
 
 const Path = require('path')
 
-Metrics.open_sockets.monitor(logger)
+Metrics.open_sockets.monitor(true)
 Metrics.memory.monitor(logger)
 
 const ProjectPersistenceManager = require('./app/js/ProjectPersistenceManager')

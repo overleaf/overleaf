@@ -25,7 +25,13 @@ const SEEN_HOSTS_HTTPS = new Set()
 const FREE_SEEN_HOSTS_HTTP = new Set()
 const FREE_SEEN_HOSTS_HTTPS = new Set()
 
-function collectConnectionsCount(sockets, seenHosts, status, https) {
+function collectConnectionsCount(
+  sockets,
+  seenHosts,
+  status,
+  https,
+  emitLegacyMetric
+) {
   const Metrics = require('./index')
   Object.keys(sockets).forEach(host => seenHosts.add(host))
   seenHosts.forEach(host => {
@@ -40,7 +46,7 @@ function collectConnectionsCount(sockets, seenHosts, status, https) {
       method: https,
       status,
     })
-    if (status === 'open') {
+    if (status === 'open' && emitLegacyMetric) {
       // Emit legacy metric to keep old time series intact.
       Metrics.gauge(
         `${status}_connections.${https}.${hostname}`,
@@ -51,29 +57,43 @@ function collectConnectionsCount(sockets, seenHosts, status, https) {
 }
 
 module.exports = OpenSocketsMonitor = {
-  monitor(logger) {
+  monitor(emitLegacyMetric) {
     const interval = setInterval(
-      () => OpenSocketsMonitor.gaugeOpenSockets(),
+      () => OpenSocketsMonitor.gaugeOpenSockets(emitLegacyMetric),
       5 * seconds
     )
     const Metrics = require('./index')
     return Metrics.registerDestructor(() => clearInterval(interval))
   },
 
-  gaugeOpenSockets() {
-    collectConnectionsCount(SOCKETS_HTTP, SEEN_HOSTS_HTTP, 'open', 'http')
-    collectConnectionsCount(SOCKETS_HTTPS, SEEN_HOSTS_HTTPS, 'open', 'https')
+  gaugeOpenSockets(emitLegacyMetric) {
+    collectConnectionsCount(
+      SOCKETS_HTTP,
+      SEEN_HOSTS_HTTP,
+      'open',
+      'http',
+      emitLegacyMetric
+    )
+    collectConnectionsCount(
+      SOCKETS_HTTPS,
+      SEEN_HOSTS_HTTPS,
+      'open',
+      'https',
+      emitLegacyMetric
+    )
     collectConnectionsCount(
       FREE_SOCKETS_HTTP,
       FREE_SEEN_HOSTS_HTTP,
       'free',
-      'http'
+      'http',
+      false
     )
     collectConnectionsCount(
       FREE_SOCKETS_HTTPS,
       FREE_SEEN_HOSTS_HTTPS,
       'free',
-      'https'
+      'https',
+      false
     )
   },
 }

@@ -23,6 +23,7 @@ const async = require('async')
 const bodyParser = require('body-parser')
 
 Metrics.event_loop.monitor(logger, 100)
+Metrics.open_sockets.monitor()
 
 const app = express()
 app.use(bodyParser.json({ limit: Settings.maxJsonRequestSize }))

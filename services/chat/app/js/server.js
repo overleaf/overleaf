@@ -11,6 +11,7 @@ const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
 metrics.initialize('chat')
 logger.initialize('chat')
+metrics.open_sockets.monitor()
 
 export async function createServer() {
   const app = express()

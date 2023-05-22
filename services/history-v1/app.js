@@ -26,6 +26,7 @@ const app = express()
 module.exports = app
 
 logger.initialize('history-v1')
+Metrics.open_sockets.monitor()
 Metrics.injectMetricsRoute(app)
 app.use(Metrics.http.monitor(logger))
 

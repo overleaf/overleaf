@@ -189,7 +189,7 @@ describe('Metrics module', function () {
     })
     describe('gaugeOpenSockets()', function () {
       beforeEach(function runGaugeOpenSockets() {
-        Metrics.open_sockets.gaugeOpenSockets()
+        Metrics.open_sockets.gaugeOpenSockets(true)
       })
 
       describe('without pending connections', function () {

@@ -22,7 +22,7 @@ if (settings.sentry && settings.sentry.dsn) {
   logger.initializeErrorReporting(settings.sentry.dsn)
 }
 
-Metrics.open_sockets.monitor(logger)
+Metrics.open_sockets.monitor(true)
 Metrics.memory.monitor(logger)
 if (Metrics.event_loop) {
   Metrics.event_loop.monitor(logger)

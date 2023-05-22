@@ -18,6 +18,7 @@ const { mongoClient } = require('./app/js/mongodb')
 const controller = require('./app/js/NotificationsController')
 
 metrics.memory.monitor(logger)
+metrics.open_sockets.monitor()
 
 const HealthCheckController = require('./app/js/HealthCheckController')
 

@@ -41,6 +41,7 @@ TrackChangesLogger.addSerializers({
 const Path = require('path')
 
 Metrics.memory.monitor(logger)
+Metrics.open_sockets.monitor()
 
 const childProcess = require('child_process')
 
