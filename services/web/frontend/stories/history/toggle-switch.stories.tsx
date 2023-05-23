@@ -3,7 +3,7 @@ import ToggleSwitchComponent from '../../js/features/history/components/change-l
 import { ScopeDecorator } from '../decorators/scope'
 import { HistoryProvider } from '../../js/features/history/context/history-context'
 
-export const LabelsOnlyToggleSwitch = () => {
+export const HistoryAndLabelsToggleSwitch = () => {
   const [labelsOnly, setLabelsOnly] = useState(false)
 
   return (
