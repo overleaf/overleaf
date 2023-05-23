@@ -10,6 +10,7 @@ if (https.globalAgent.maxSockets < 300) {
 const AbstractPersistor = require('./AbstractPersistor')
 const PersistorHelper = require('./PersistorHelper')
 
+const { pipeline, PassThrough } = require('stream')
 const fs = require('fs')
 const S3 = require('aws-sdk/clients/s3')
 const { URL } = require('url')
@@ -41,7 +42,7 @@ module.exports = class S3Persistor extends AbstractPersistor {
 
       const observer = new PersistorHelper.ObserverStream(observeOptions)
       // observer will catch errors, clean up and log a warning
-      readStream.pipe(observer)
+      pipeline(readStream, observer, () => {})
 
       // if we have an md5 hash, pass this to S3 to verify the upload
       const uploadOptions = {
@@ -90,20 +91,28 @@ module.exports = class S3Persistor extends AbstractPersistor {
       params.Range = `bytes=${opts.start}-${opts.end}`
     }
 
-    const stream = this._getClientForBucket(bucketName)
-      .getObject(params)
-      .createReadStream()
-
-    // ingress from S3 to us
-    const observer = new PersistorHelper.ObserverStream({
-      metric: 's3.ingress',
-      Metrics: this.settings.Metrics,
-    })
+    const req = this._getClientForBucket(bucketName).getObject(params)
+    const stream = req.createReadStream()
 
     try {
-      // wait for the pipeline to be ready, to catch non-200s
-      await PersistorHelper.getReadyPipeline(stream, observer)
-      return observer
+      await new Promise((resolve, reject) => {
+        req.on('httpHeaders', statusCode => {
+          switch (statusCode) {
+            case 200: // full response
+            case 206: // partial response
+              return resolve()
+            case 403: // AccessDenied is handled the same as NoSuchKey
+            case 404: // NoSuchKey
+              return reject(new NotFoundError())
+            default:
+              return reject(new Error('non success status: ' + statusCode))
+          }
+        })
+        // The AWS SDK is forwarding any errors from the request to the stream.
+        // The AWS SDK is emitting additional errors on the stream ahead of starting to stream.
+        stream.on('error', reject)
+        // The AWS SDK is kicking off the request in the next event loop cycle.
+      })
     } catch (err) {
       throw PersistorHelper.wrapError(
         err,
@@ -112,6 +121,18 @@ module.exports = class S3Persistor extends AbstractPersistor {
         ReadError
       )
     }
+
+    // ingress from S3 to us
+    const observer = new PersistorHelper.ObserverStream({
+      metric: 's3.ingress',
+      Metrics: this.settings.Metrics,
+    })
+
+    const pass = new PassThrough()
+    pipeline(stream, observer, pass, err => {
+      if (err) req.abort()
+    })
+    return pass
   }
 
   async getRedirectUrl(bucketName, key) {

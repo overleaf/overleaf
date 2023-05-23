@@ -2,7 +2,7 @@ const Crypto = require('crypto')
 const Stream = require('stream')
 const { pipeline } = require('stream/promises')
 const Logger = require('@overleaf/logger')
-const { WriteError, ReadError, NotFoundError } = require('./Errors')
+const { WriteError, NotFoundError } = require('./Errors')
 
 // Observes data that passes through and computes some metadata for it
 // - specifically, it computes the number of bytes transferred, and optionally
@@ -47,7 +47,6 @@ module.exports = {
   ObserverStream,
   calculateStreamMd5,
   verifyMd5,
-  getReadyPipeline,
   wrapError,
   hexToBase64,
   base64ToHex,
@@ -85,70 +84,6 @@ async function verifyMd5(persistor, bucket, key, sourceMd5, destMd5 = null) {
       key,
     })
   }
-}
-
-// resolves when a stream is 'readable', or rejects if the stream throws an error
-// before that happens - this lets us handle protocol-level errors before trying
-// to read them
-function getReadyPipeline(...streams) {
-  return new Promise((resolve, reject) => {
-    const lastStream = streams.slice(-1)[0]
-
-    // in case of error or stream close, we must ensure that we drain the
-    // previous stream so that it can clean up its socket (if it has one)
-    const drainPreviousStream = function (previousStream) {
-      // this stream is no longer reliable, so don't pipe anything more into it
-      previousStream.unpipe(this)
-      previousStream.resume()
-    }
-
-    // handler to resolve when either:
-    // - an error happens, or
-    // - the last stream in the chain is readable
-    // for example, in the case of a 4xx error an error will occur and the
-    // streams will not become readable
-    const handler = function (err) {
-      // remove handler from all streams because we don't want to do this on
-      // later errors
-      lastStream.removeListener('readable', handler)
-      for (const stream of streams) {
-        stream.removeListener('error', handler)
-      }
-
-      // return control to the caller
-      if (err) {
-        reject(
-          wrapError(err, 'error before stream became ready', {}, ReadError)
-        )
-      } else {
-        resolve(lastStream)
-      }
-    }
-
-    // ensure the handler fires when the last strem becomes readable
-    lastStream.on('readable', handler)
-
-    for (const stream of streams) {
-      // when a stream receives a pipe, set up the drain handler to drain the
-      // connection if an error occurs or the stream is closed
-      stream.on('pipe', previousStream => {
-        stream.on('error', x => {
-          drainPreviousStream(previousStream)
-        })
-        stream.on('close', () => {
-          drainPreviousStream(previousStream)
-        })
-      })
-      // add the handler function to resolve this method on error if we can't
-      // set up the pipeline
-      stream.on('error', handler)
-    }
-
-    // begin the pipeline
-    for (let index = 0; index < streams.length - 1; index++) {
-      streams[index].pipe(streams[index + 1])
-    }
-  })
 }
 
 function wrapError(error, message, params, ErrorType) {

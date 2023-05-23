@@ -19,7 +19,14 @@ module.exports = class AbstractPersistor {
     })
   }
 
-  // opts may be {start: Number, end: Number}
+  /**
+   * @param location
+   * @param name
+   * @param {Object} opts
+   * @param {Number} opts.start
+   * @param {Number} opts.end
+   * @return {Promise<Readable>}
+   */
   async getObjectStream(location, name, opts) {
     throw new NotImplementedError('method not implemented in persistor', {
       method: 'getObjectStream',

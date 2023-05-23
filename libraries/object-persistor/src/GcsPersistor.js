@@ -1,5 +1,6 @@
 const fs = require('fs')
 const { pipeline } = require('stream/promises')
+const { PassThrough } = require('stream')
 const { Storage } = require('@google-cloud/storage')
 const { WriteError, ReadError, NotFoundError } = require('./Errors')
 const asyncPool = require('tiny-async-pool')
@@ -101,16 +102,22 @@ module.exports = class GcsPersistor extends AbstractPersistor {
       .file(key)
       .createReadStream({ decompress: false, ...opts })
 
-    // ingress to us from gcs
-    const observer = new PersistorHelper.ObserverStream({
-      metric: 'gcs.ingress',
-      Metrics: this.settings.Metrics,
-    })
-
     try {
-      // wait for the pipeline to be ready, to catch non-200s
-      await PersistorHelper.getReadyPipeline(stream, observer)
-      return observer
+      await new Promise((resolve, reject) => {
+        stream.on('response', res => {
+          switch (res.statusCode) {
+            case 200: // full response
+            case 206: // partial response
+              return resolve()
+            case 404:
+              return reject(new NotFoundError())
+            default:
+              return reject(new Error('non success status: ' + res.statusCode))
+          }
+        })
+        stream.on('error', reject)
+        stream.read(0) // kick off request
+      })
     } catch (err) {
       throw PersistorHelper.wrapError(
         err,
@@ -119,6 +126,16 @@ module.exports = class GcsPersistor extends AbstractPersistor {
         ReadError
       )
     }
+
+    // ingress to us from gcs
+    const observer = new PersistorHelper.ObserverStream({
+      metric: 'gcs.ingress',
+      Metrics: this.settings.Metrics,
+    })
+
+    const pass = new PassThrough()
+    pipeline(stream, observer, pass).catch(() => {})
+    return pass
   }
 
   async getRedirectUrl(bucketName, key) {
