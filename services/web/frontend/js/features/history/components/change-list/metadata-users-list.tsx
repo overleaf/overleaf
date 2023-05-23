@@ -15,7 +15,10 @@ function MetadataUsersList({
   const { t } = useTranslation()
 
   return (
-    <ol className="history-version-metadata-users">
+    <ol
+      className="history-version-metadata-users"
+      data-testid="history-version-metadata-users"
+    >
       {users.map((user, index) => (
         <li key={index}>
           <UserNameWithColoredBadge user={user} currentUserId={currentUserId} />

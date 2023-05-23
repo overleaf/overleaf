@@ -1,4 +1,4 @@
-import { USER_ID } from '../../../helpers/editor-providers'
+import { USER_ID, USER_EMAIL } from '../../../helpers/editor-providers'
 
 export const updates = {
   updates: [
@@ -7,6 +7,12 @@ export const updates = {
       toV: 4,
       meta: {
         users: [
+          {
+            first_name: 'testuser',
+            last_name: '',
+            email: USER_EMAIL,
+            id: USER_ID,
+          },
           {
             first_name: 'john.doe',
             last_name: '',

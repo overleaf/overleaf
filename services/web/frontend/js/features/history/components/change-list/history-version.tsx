@@ -66,7 +66,10 @@ function HistoryVersion({
           selectable={selectable}
         >
           <div className="history-version-main-details">
-            <time className="history-version-metadata-time">
+            <time
+              className="history-version-metadata-time"
+              data-testid="history-version-metadata-time"
+            >
               <b>{formatTime(update.meta.end_ts, 'Do MMMM, h:mm a')}</b>
             </time>
             {orderedLabels.map(label => (

@@ -76,7 +76,10 @@ function LabelListItem({
               currentUserId={currentUserId}
               label={label}
             />
-            <time className="history-version-metadata-time">
+            <time
+              className="history-version-metadata-time"
+              data-testid="history-version-metadata-time"
+            >
               {formatTime(label.created_at, 'Do MMMM, h:mm a')}
             </time>
             {!isPseudoLabel(label) && (

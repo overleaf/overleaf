@@ -38,6 +38,7 @@ function HistoryVersionDetails({
         'history-version-selectable': selectable,
       })}
       data-testid="history-version-details"
+      data-selected={selected}
       onClick={selectable ? handleSelect : undefined}
     >
       {children}

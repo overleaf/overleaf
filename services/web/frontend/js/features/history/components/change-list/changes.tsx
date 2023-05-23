@@ -14,20 +14,34 @@ function Changes({ pathnames, projectOps }: ChangesProps) {
     <ol className="history-version-changes">
       {pathnames.map(pathname => (
         <li key={pathname}>
-          <div className="history-version-change-action">
+          <div
+            className="history-version-change-action"
+            data-testid="history-version-change-action"
+          >
             {t('file_action_edited')}
           </div>
-          <div className="history-version-change-doc">{pathname}</div>
+          <div
+            className="history-version-change-doc"
+            data-testid="history-version-change-doc"
+          >
+            {pathname}
+          </div>
         </li>
       ))}
       {projectOps.map((op, index) => (
         <li key={index}>
-          <div className="history-version-change-action">
+          <div
+            className="history-version-change-action"
+            data-testid="history-version-change-action"
+          >
             {op.rename && t('file_action_renamed')}
             {op.add && t('file_action_created')}
             {op.remove && t('file_action_deleted')}
           </div>
-          <div className="history-version-change-doc">
+          <div
+            className="history-version-change-doc"
+            data-testid="history-version-change-doc"
+          >
             {getProjectOpDoc(op)}
           </div>
         </li>

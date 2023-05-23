@@ -9,6 +9,10 @@ import {
 import { HistoryProvider } from '../../../../../frontend/js/features/history/context/history-context'
 import { updates } from '../fixtures/updates'
 import { labels } from '../fixtures/labels'
+import {
+  formatTime,
+  relativeDate,
+} from '../../../../../frontend/js/features/utils/format-date'
 
 const mountWithEditorProviders = (
   component: React.ReactNode,
@@ -27,6 +31,28 @@ const mountWithEditorProviders = (
 }
 
 describe('change list', function () {
+  const scope = {
+    ui: { view: 'history', pdfLayout: 'sideBySide', chatOpen: true },
+  }
+
+  const waitForData = () => {
+    cy.wait('@updates')
+    cy.wait('@labels')
+    cy.wait('@diff')
+  }
+
+  beforeEach(function () {
+    cy.intercept('GET', '/project/*/updates*', {
+      body: updates,
+    }).as('updates')
+    cy.intercept('GET', '/project/*/labels', {
+      body: labels,
+    }).as('labels')
+    cy.intercept('GET', '/project/*/filetree/diff*', {
+      body: { diff: [{ pathname: 'main.tex' }, { pathname: 'name.tex' }] },
+    }).as('diff')
+  })
+
   describe('toggle switch', function () {
     it('renders switch buttons', function () {
       mountWithEditorProviders(
@@ -61,28 +87,6 @@ describe('change list', function () {
   })
 
   describe('tags', function () {
-    const scope = {
-      ui: { view: 'history', pdfLayout: 'sideBySide', chatOpen: true },
-    }
-
-    const waitForData = () => {
-      cy.wait('@updates')
-      cy.wait('@labels')
-      cy.wait('@diff')
-    }
-
-    beforeEach(function () {
-      cy.intercept('GET', '/project/*/updates*', {
-        body: updates,
-      }).as('updates')
-      cy.intercept('GET', '/project/*/labels', {
-        body: labels,
-      }).as('labels')
-      cy.intercept('GET', '/project/*/filetree/diff*', {
-        body: { diff: [{ pathname: 'main.tex' }, { pathname: 'name.tex' }] },
-      }).as('diff')
-    })
-
     it('renders tags', function () {
       mountWithEditorProviders(<ChangeList />, scope, {
         user: {
@@ -214,6 +218,234 @@ describe('change list', function () {
       })
       cy.wait('@delete')
       cy.findByText(labelToDelete).should('not.exist')
+    })
+
+    it('verifies that selecting the same list item will not trigger a new diff', function () {
+      mountWithEditorProviders(<ChangeList />, scope, {
+        user: {
+          id: USER_ID,
+          email: USER_EMAIL,
+          isAdmin: true,
+        },
+      })
+      waitForData()
+
+      const stub = cy.stub().as('diffStub')
+      cy.intercept('GET', '/project/*/filetree/diff*', stub).as('diff')
+
+      cy.findAllByTestId('history-version-details').eq(1).as('details')
+      cy.get('@details').click() // 1st click
+      cy.wait('@diff')
+      cy.get('@details').click() // 2nd click
+      cy.get('@diffStub').should('have.been.calledOnce')
+    })
+  })
+
+  describe('all history', function () {
+    beforeEach(function () {
+      mountWithEditorProviders(<ChangeList />, scope, {
+        user: {
+          id: USER_ID,
+          email: USER_EMAIL,
+          isAdmin: true,
+        },
+      })
+      waitForData()
+    })
+
+    it('shows grouped versions date', function () {
+      cy.findByText(relativeDate(updates.updates[0].meta.end_ts))
+      cy.findByText(relativeDate(updates.updates[1].meta.end_ts))
+    })
+
+    it('shows the date of the version', function () {
+      cy.findAllByTestId('history-version-details')
+        .eq(0)
+        .within(() => {
+          cy.findByTestId('history-version-metadata-time').should(
+            'have.text',
+            formatTime(updates.updates[0].meta.end_ts, 'Do MMMM, h:mm a')
+          )
+        })
+    })
+
+    it('shows change action', function () {
+      cy.findAllByTestId('history-version-details')
+        .eq(0)
+        .within(() => {
+          cy.findByTestId('history-version-change-action').should(
+            'have.text',
+            'Created'
+          )
+        })
+    })
+
+    it('shows changed document name', function () {
+      cy.findAllByTestId('history-version-details')
+        .eq(1)
+        .within(() => {
+          cy.findByTestId('history-version-change-doc').should(
+            'have.text',
+            updates.updates[1].pathnames[0]
+          )
+        })
+    })
+
+    it('shows users', function () {
+      cy.findAllByTestId('history-version-details')
+        .eq(0)
+        .within(() => {
+          cy.findByTestId('history-version-metadata-users')
+            .should('contain.text', 'You')
+            .and('contain.text', updates.updates[0].meta.users[1].first_name)
+        })
+    })
+  })
+
+  describe('labels only', function () {
+    beforeEach(function () {
+      mountWithEditorProviders(<ChangeList />, scope, {
+        user: {
+          id: USER_ID,
+          email: USER_EMAIL,
+          isAdmin: true,
+        },
+      })
+      waitForData()
+      cy.findByLabelText(/labels/i).click({ force: true })
+    })
+
+    it('does not show the dropdown menu item for adding new labels', function () {
+      cy.findAllByTestId('history-version-details')
+        .eq(1)
+        .within(() => {
+          cy.findByRole('button', { name: /more actions/i }).click()
+          cy.findByRole('menu').within(() => {
+            cy.findByRole('menuitem', {
+              name: /label this version/i,
+            }).should('not.exist')
+          })
+        })
+    })
+
+    it('resets from compare to view mode when switching tabs', function () {
+      cy.findAllByTestId('history-version-details')
+        .eq(1)
+        .within(() => {
+          cy.findByRole('button', { name: /more actions/i }).click()
+          cy.findByRole('menu').within(() => {
+            cy.findByRole('menuitem', {
+              name: /compare to selected version/i,
+            }).click()
+          })
+        })
+      cy.wait('@diff')
+      cy.findByLabelText(/all history/i).click({ force: true })
+      cy.findAllByTestId('history-version-details').should($versions => {
+        const [first, ...rest] = Array.from($versions)
+        expect(first.dataset.selected === 'true').to.be.true
+        expect(rest.every(version => version.dataset.selected === 'false')).to
+          .be.true
+      })
+    })
+  })
+
+  describe('dropdown', function () {
+    beforeEach(function () {
+      mountWithEditorProviders(<ChangeList />, scope, {
+        user: {
+          id: USER_ID,
+          email: USER_EMAIL,
+          isAdmin: true,
+        },
+      })
+      waitForData()
+    })
+
+    it('adds badge/label', function () {
+      cy.findAllByTestId('history-version-details').eq(1).as('version')
+      cy.get('@version').within(() => {
+        cy.findByRole('button', { name: /more actions/i }).click()
+        cy.findByRole('menu').within(() => {
+          cy.findByRole('menuitem', {
+            name: /label this version/i,
+          }).click()
+        })
+      })
+      cy.findByRole('dialog').as('modal')
+      cy.intercept('POST', '/project/*/labels', req => {
+        req.reply(200, {
+          id: '64633ee158e9ef7da614c000',
+          comment: req.body.comment,
+          version: req.body.version,
+          user_id: USER_ID,
+          created_at: '2023-05-16T08:29:21.250Z',
+          user_display_name: 'john.doe',
+        })
+      }).as('addLabel')
+      const newLabel = 'my new label'
+      cy.get('@modal').within(() => {
+        cy.findByRole('heading', { name: /add label/i })
+        cy.findByRole('button', { name: /cancel/i })
+        cy.findByRole('button', { name: /add label/i }).should('be.disabled')
+        cy.findByPlaceholderText(/new label name/i).as('input')
+        cy.get('@input').type(newLabel)
+        cy.findByRole('button', { name: /add label/i }).should('be.enabled')
+        cy.get('@input').type('{enter}')
+      })
+      cy.wait('@addLabel')
+      cy.get('@version').within(() => {
+        cy.findAllByTestId('history-version-badge').should($badges => {
+          const includes = Array.from($badges).some(badge =>
+            badge.textContent?.includes(newLabel)
+          )
+          expect(includes).to.be.true
+        })
+      })
+    })
+
+    it('downloads version', function () {
+      cy.intercept('GET', '/project/*/version/*/zip', { statusCode: 200 }).as(
+        'download'
+      )
+      cy.findAllByTestId('history-version-details')
+        .eq(0)
+        .within(() => {
+          cy.findByRole('button', { name: /more actions/i }).click()
+          cy.findByRole('menu').within(() => {
+            cy.findByRole('menuitem', {
+              name: /download this version/i,
+            }).click()
+          })
+        })
+      cy.wait('@download')
+    })
+
+    it('compares versions', function () {
+      cy.findAllByTestId('history-version-details').should($versions => {
+        const [first, ...rest] = Array.from($versions)
+        expect(first).to.have.attr('data-selected', 'true')
+        rest.forEach(version =>
+          expect(version).to.have.attr('data-selected', 'false')
+        )
+      })
+
+      cy.intercept('GET', '/project/*/filetree/diff*', { statusCode: 200 }).as(
+        'compareDiff'
+      )
+
+      cy.findAllByTestId('history-version-details')
+        .last()
+        .within(() => {
+          cy.findByRole('button', { name: /more actions/i }).click()
+          cy.findByRole('menu').within(() => {
+            cy.findByRole('menuitem', {
+              name: /compare to selected version/i,
+            }).click()
+          })
+        })
+
+      cy.wait('@compareDiff')
     })
   })
 
