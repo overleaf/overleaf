@@ -1,6 +1,9 @@
 #!/bin/sh
 set -e
 
+echo "Sentry upload is temporarily disabled."
+exit 0
+
 if [[ "$BRANCH_NAME" == "master" || "$BRANCH_NAME" == "main" ]]; then
   rm -rf sentry_upload
   mkdir sentry_upload
