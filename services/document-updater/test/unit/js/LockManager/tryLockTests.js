@@ -28,7 +28,7 @@ describe('LockManager - trying the lock', function () {
             }
           },
         },
-        './Metrics': { inc() {} },
+        '@overleaf/metrics': { inc() {} },
         '@overleaf/settings': {
           redis: {
             lock: {

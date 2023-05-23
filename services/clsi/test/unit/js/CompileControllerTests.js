@@ -62,6 +62,9 @@ describe('CompileController', function () {
             },
           },
         }),
+        '@overleaf/metrics': {
+          Timer: sinon.stub().returns({ done: sinon.stub() }),
+        },
         './ProjectPersistenceManager': (this.ProjectPersistenceManager = {}),
       },
     })

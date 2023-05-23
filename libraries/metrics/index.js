@@ -249,6 +249,7 @@ module.exports.register = promWrapper.registry
 
 module.exports.http = require('./http')
 module.exports.open_sockets = require('./open_sockets')
+module.exports.leaked_sockets = require('./leaked_sockets')
 module.exports.event_loop = require('./event_loop')
 module.exports.memory = require('./memory')
 module.exports.mongodb = require('./mongodb')

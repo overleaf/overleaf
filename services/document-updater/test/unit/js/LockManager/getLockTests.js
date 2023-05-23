@@ -26,7 +26,7 @@ describe('LockManager - getting the lock', function () {
             return { auth() {} }
           },
         },
-        './Metrics': { inc() {} },
+        '@overleaf/metrics': { inc() {} },
         './Profiler': (Profiler = (function () {
           Profiler = class Profiler {
             static initClass() {

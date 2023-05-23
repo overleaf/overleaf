@@ -132,6 +132,12 @@ describe('CompileManager', function () {
         './OutputFileFinder': this.OutputFileFinder,
         './OutputCacheManager': this.OutputCacheManager,
         '@overleaf/settings': this.Settings,
+        '@overleaf/metrics': {
+          inc: sinon.stub(),
+          timing: sinon.stub(),
+          gauge: sinon.stub(),
+          Timer: sinon.stub().returns({ done: sinon.stub() }),
+        },
         child_process: this.child_process,
         './CommandRunner': this.CommandRunner,
         './DraftModeManager': this.DraftModeManager,

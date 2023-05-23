@@ -21,6 +21,7 @@ describe('PersistorManager', function () {
         requires: {
           '@overleaf/settings': Settings,
           '@overleaf/object-persistor': () => new FakePersistor(),
+          '@overleaf/metrics': {},
         },
       })
 
@@ -41,6 +42,7 @@ describe('PersistorManager', function () {
         requires: {
           '@overleaf/settings': Settings,
           '@overleaf/object-persistor': () => new FakePersistor(),
+          '@overleaf/metrics': {},
         },
       })
 

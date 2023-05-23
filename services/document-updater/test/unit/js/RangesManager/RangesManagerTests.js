@@ -18,7 +18,9 @@ const SandboxedModule = require('sandboxed-module')
 describe('RangesManager', function () {
   beforeEach(function () {
     this.RangesManager = SandboxedModule.require(modulePath, {
-      requires: { './Metrics': (this.Metrics = { histogram: sinon.stub() }) },
+      requires: {
+        '@overleaf/metrics': (this.Metrics = { histogram: sinon.stub() }),
+      },
     })
 
     this.doc_id = 'doc-id-123'
@@ -424,6 +426,7 @@ describe('RangesManager', function () {
         requires: {
           '@overleaf/ranges-tracker': (this.RangesTracker =
             SandboxedModule.require('@overleaf/ranges-tracker')),
+          '@overleaf/metrics': {},
         },
       })
 

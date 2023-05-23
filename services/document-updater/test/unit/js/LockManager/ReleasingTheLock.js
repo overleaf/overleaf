@@ -40,7 +40,7 @@ describe('LockManager - releasing the lock', function () {
           },
         },
       },
-      './Metrics': { inc() {} },
+      '@overleaf/metrics': { inc() {} },
       './Profiler': (Profiler = (function () {
         Profiler = class Profiler {
           static initClass() {
