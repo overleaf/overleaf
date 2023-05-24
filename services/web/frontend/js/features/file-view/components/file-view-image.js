@@ -11,7 +11,6 @@ export default function FileViewImage({ fileName, fileId, onLoad, onError }) {
       src={`/project/${projectId}/file/${fileId}`}
       onLoad={onLoad}
       onError={onError}
-      onAbort={onError}
       alt={fileName}
     />
   )

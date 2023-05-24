@@ -33,14 +33,14 @@ describe('<CodeMirrorEditor/>', { scrollBehavior: false }, function () {
     )
 
     // put the cursor on a blank line to type in
-    cy.get('.cm-line').eq(16).click().as('line')
+    cy.get('.cm-line').eq(16).as('line')
+    cy.get('@line').click()
 
-    cy.get('@line')
-      .type('this is some text')
-      .should('have.text', 'this is some text')
-      .type('{shift}{leftArrow}{leftArrow}{leftArrow}{leftArrow}')
-      .type('{backspace}')
-      .should('have.text', 'this is some ')
+    cy.get('@line').type('this is some text')
+    cy.get('@line').should('have.text', 'this is some text')
+    cy.get('@line').type('{shift}{leftArrow}{leftArrow}{leftArrow}{leftArrow}')
+    cy.get('@line').type('{backspace}')
+    cy.get('@line').should('have.text', 'this is some ')
   })
 
   it('renders client-side lint annotations in the gutter', function () {
@@ -137,7 +137,9 @@ describe('<CodeMirrorEditor/>', { scrollBehavior: false }, function () {
     )
 
     // put the cursor on a blank line to type in
-    cy.get('.cm-line').eq(16).click().type('foo{enter}')
+    cy.get('.cm-line').eq(16).as('line')
+    cy.get('@line').click()
+    cy.get('@line').type('foo{enter}')
 
     activeEditorLine().should('have.text', '')
   })
@@ -154,7 +156,8 @@ describe('<CodeMirrorEditor/>', { scrollBehavior: false }, function () {
     )
 
     // put the cursor on a blank line to type in
-    cy.get('.cm-line').eq(16).click().as('line')
+    cy.get('.cm-line').eq(16).as('line')
+    cy.get('@line').click()
 
     cy.get('@line').type('\\begin{{}itemiz')
     cy.findAllByRole('listbox').contains('\\begin{itemize}').click()
@@ -174,10 +177,12 @@ describe('<CodeMirrorEditor/>', { scrollBehavior: false }, function () {
     )
 
     // put the cursor on a blank line to type in
-    cy.get('.cm-line').eq(16).click().as('line')
+    cy.get('.cm-line').eq(16).as('line')
+    cy.get('@line').click()
 
     // Single indentation
-    cy.get('@line').trigger('keydown', { key: 'Tab' }).type('{enter}')
+    cy.get('@line').trigger('keydown', { key: 'Tab' })
+    cy.get('@line').type('{enter}')
 
     activeEditorLine().should('have.text', '    ')
 
@@ -242,7 +247,8 @@ describe('<CodeMirrorEditor/>', { scrollBehavior: false }, function () {
       throw error
     })
 
-    cy.get('.cm-line').eq(16).click().as('line')
+    cy.get('.cm-line').eq(16).as('line')
+    cy.get('@line').click()
 
     cy.get('@line').type('text')
     cy.get('@line').should('not.contain.text', 'text')
@@ -266,7 +272,7 @@ describe('<CodeMirrorEditor/>', { scrollBehavior: false }, function () {
 
     pairs.forEach(pair => {
       activeEditorLine().type(pair).as('line')
-      cy.get('@line').find('.cm-matchingBracket').should('exist')
+      cy.get('@line').find('.cm-matchingBracket')
       cy.get('@line').type('{enter}')
     })
   })
@@ -283,7 +289,8 @@ describe('<CodeMirrorEditor/>', { scrollBehavior: false }, function () {
     )
 
     // select foldable line
-    cy.get('.cm-line').eq(9).click().as('line')
+    cy.get('.cm-line').eq(9).as('line')
+    cy.get('@line').click()
 
     const testUnfoldedState = () => {
       cy.get('.cm-gutterElement').eq(11).should('have.text', '11')
@@ -330,7 +337,8 @@ describe('<CodeMirrorEditor/>', { scrollBehavior: false }, function () {
     cy.interceptCompile()
 
     // put the cursor on a blank line to type in
-    cy.get('.cm-line').eq(16).click().as('line')
+    cy.get('.cm-line').eq(16).as('line')
+    cy.get('@line').click()
 
     cy.get('.cm-vim-panel').should('have.length', 0)
 
@@ -338,7 +346,8 @@ describe('<CodeMirrorEditor/>', { scrollBehavior: false }, function () {
 
     cy.get('.cm-vim-panel').should('have.length', 1)
 
-    cy.get('.cm-vim-panel input').type('w').type('{enter}')
+    cy.get('.cm-vim-panel input').type('w')
+    cy.get('.cm-vim-panel input').type('{enter}')
 
     // Compile after save
     cy.waitForCompile()
@@ -355,15 +364,16 @@ describe('<CodeMirrorEditor/>', { scrollBehavior: false }, function () {
       </Container>
     )
 
-    cy.get('.cm-line')
-      .eq(16)
-      .click()
-      .type(
-        '{enter}text_to_find{enter}abcde 1{enter}abcde 2{enter}abcde 3{enter}ABCDE 4{enter}'
-      )
+    cy.get('.cm-line').eq(16).as('line')
+
+    cy.get('@line').click()
+    cy.get('@line').type(
+      '{enter}text_to_find{enter}abcde 1{enter}abcde 2{enter}abcde 3{enter}ABCDE 4{enter}'
+    )
 
     // select text `text_to_find`
-    cy.get('.cm-line').eq(17).dblclick().as('lineToFind')
+    cy.get('.cm-line').eq(17).as('lineToFind')
+    cy.get('@lineToFind').dblclick()
 
     // search panel is not displayed
     cy.findByRole('search').should('have.length', 0)
@@ -382,7 +392,8 @@ describe('<CodeMirrorEditor/>', { scrollBehavior: false }, function () {
       // search input's value should be set to the selected text
       .should('have.value', 'text_to_find')
 
-    cy.get('@search-input').clear().type('abcde')
+    cy.get('@search-input').clear()
+    cy.get('@search-input').type('abcde')
 
     cy.findByRole('button', { name: 'next' }).as('next-btn')
     cy.findByRole('button', { name: 'previous' }).as('previous-btn')
@@ -411,7 +422,8 @@ describe('<CodeMirrorEditor/>', { scrollBehavior: false }, function () {
 
     // matches case
     cy.contains('Aa').click()
-    cy.get('@search-input').clear().type('ABCDE')
+    cy.get('@search-input').clear()
+    cy.get('@search-input').type('ABCDE')
     cy.get('.cm-searchMatch-selected').should('contain.text', 'ABCDE')
     cy.get('@search-input').clear()
     cy.contains('Aa').click()
@@ -434,24 +446,29 @@ describe('<CodeMirrorEditor/>', { scrollBehavior: false }, function () {
       .should('not.contain.text', 'abcde')
 
     // replace all
-    cy.get('@search-input').clear().type('abcde')
-    cy.get('@replace-input').clear().type('test')
+    cy.get('@search-input').clear()
+    cy.get('@search-input').type('abcde')
+    cy.get('@replace-input').clear()
+    cy.get('@replace-input').type('test')
     cy.findByRole('button', { name: /replace all/i }).click()
     cy.get('@search-input').clear()
     cy.get('@replace-input').clear()
     cy.should('not.contain.text', 'abcde')
 
     // replace all within selection
-    cy.get('@search-input').clear().type('contentLine')
+    cy.get('@search-input').clear()
+    cy.get('@search-input').type('contentLine')
     cy.get('.ol-cm-search-form-position').should('have.text', '1 of 100')
-    cy.get('.cm-line')
-      .eq(27)
-      .should('contain.text', 'contentLine 0')
-      .click()
-      .type('{shift}{downArrow}{downArrow}{downArrow}')
+
+    cy.get('.cm-line').eq(27).as('contentLine')
+    cy.get('@contentLine').should('contain.text', 'contentLine 0')
+    cy.get('@contentLine').click()
+    cy.get('@contentLine').type('{shift}{downArrow}{downArrow}{downArrow}')
+
     cy.findByLabelText('Within selection').click()
     cy.get('.ol-cm-search-form-position').should('have.text', '1 of 3')
-    cy.get('@replace-input').clear().type('contentedLine')
+    cy.get('@replace-input').clear()
+    cy.get('@replace-input').type('contentedLine')
     cy.findByRole('button', { name: /replace all/i }).click()
     cy.get('.cm-line:contains("contentedLine")').should('have.length', 3)
     cy.findByLabelText('Within selection').click()
@@ -475,7 +492,9 @@ describe('<CodeMirrorEditor/>', { scrollBehavior: false }, function () {
     )
 
     // Open the search panel
-    cy.get('.cm-line').eq(16).click().type(`{${metaKey}+f}`)
+    cy.get('.cm-line').eq(16).as('line')
+    cy.get('@line').click()
+    cy.get('@line').type(`{${metaKey}+f}`)
 
     cy.findByRole('search').within(() => {
       cy.findByLabelText('Find').as('find-input')
@@ -526,11 +545,13 @@ describe('<CodeMirrorEditor/>', { scrollBehavior: false }, function () {
         '@within-selection-label',
       ]) {
         // Toggle when clicked, then focus the search input
-        cy.get(option).click().should('have.class', 'checked')
+        cy.get(option).click()
+        cy.get(option).should('have.class', 'checked')
         cy.get('@find-input').should('be.focused')
 
         // Toggle when clicked again, then focus the search input
-        cy.get(option).click().should('not.have.class', 'checked')
+        cy.get(option).click()
+        cy.get(option).should('not.have.class', 'checked')
         cy.get('@find-input').should('be.focused')
       }
     })

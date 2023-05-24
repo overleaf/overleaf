@@ -116,9 +116,9 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
     clickToolbarButton('Insert Link')
     cy.get('.cm-content').should('have.text', '\\href{}{test}')
 
+    cy.get('.cm-line').eq(0).type('http://example.com')
     cy.get('.cm-line')
       .eq(0)
-      .type('http://example.com')
       .should('have.text', '\\href{http://example.com}{test}')
   })
 
@@ -138,7 +138,8 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
       ].join('')
     )
 
-    cy.get('.cm-line').eq(1).type('ing').should('have.text', ' testing')
+    cy.get('.cm-line').eq(1).type('ing')
+    cy.get('.cm-line').eq(1).should('have.text', ' testing')
   })
 
   it('should insert a numbered list', function () {
@@ -157,6 +158,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
       ].join('')
     )
 
-    cy.get('.cm-line').eq(1).type('ing').should('have.text', ' testing')
+    cy.get('.cm-line').eq(1).type('ing')
+    cy.get('.cm-line').eq(1).should('have.text', ' testing')
   })
 })

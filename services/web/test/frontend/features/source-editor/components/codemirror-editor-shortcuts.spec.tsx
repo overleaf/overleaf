@@ -28,7 +28,8 @@ describe('keyboard shortcuts', { scrollBehavior: false }, function () {
       </Container>
     )
 
-    cy.get('.cm-line').eq(16).click().as('line')
+    cy.get('.cm-line').eq(16).as('line')
+    cy.get('@line').click()
     cy.get('.cm-editor').as('editor')
   })
 
@@ -37,12 +38,12 @@ describe('keyboard shortcuts', { scrollBehavior: false }, function () {
   })
 
   it('comment line with {meta+/}', function () {
-    cy.get('@line')
-      .type('text')
-      .type(`{${metaKey}+/}`)
-      .should('have.text', '% text')
+    cy.get('@line').type('text')
+    cy.get('@line').type(`{${metaKey}+/}`)
+    cy.get('@line').should('have.text', '% text')
 
-    cy.get('@line').type(`{${metaKey}+/}`).should('have.text', 'text')
+    cy.get('@line').type(`{${metaKey}+/}`)
+    cy.get('@line').should('have.text', 'text')
   })
 
   it('comment line with {ctrl+#}', function () {
@@ -55,23 +56,23 @@ describe('keyboard shortcuts', { scrollBehavior: false }, function () {
   })
 
   it('undo line with {meta+z}', function () {
-    cy.get('@line').type('text').type(`{${metaKey}+z}`).should('have.text', '')
+    cy.get('@line').type('text')
+    cy.get('@line').type(`{${metaKey}+z}`)
+    cy.get('@line').should('have.text', '')
   })
 
   it('redo line with {meta+shift+z}', function () {
-    cy.get('@line')
-      .type('text')
-      .type(`{${metaKey}+z}`) // undo
-      .type(`{${metaKey}+shift+z}`) // redo
-      .should('have.text', 'text')
+    cy.get('@line').type('text')
+    cy.get('@line').type(`{${metaKey}+z}`) // undo
+    cy.get('@line').type(`{${metaKey}+shift+z}`) // redo
+    cy.get('@line').should('have.text', 'text')
   })
 
   it('redo line with {meta+y}', function () {
-    cy.get('@line')
-      .type('text')
-      .type(`{${metaKey}+z}`) // undo
-      .type(`{${metaKey}+y}`) // redo
-      .should('have.text', 'text')
+    cy.get('@line').type('text')
+    cy.get('@line').type(`{${metaKey}+z}`) // undo
+    cy.get('@line').type(`{${metaKey}+y}`) // redo
+    cy.get('@line').should('have.text', 'text')
   })
 
   it('delete line with {meta+d}', function () {
@@ -83,24 +84,21 @@ describe('keyboard shortcuts', { scrollBehavior: false }, function () {
   })
 
   it('indent line with {tab}', function () {
-    cy.get('@line')
-      .trigger('keydown', { key: 'Tab' })
-      .should('have.text', '    ')
+    cy.get('@line').trigger('keydown', { key: 'Tab' })
+    cy.get('@line').should('have.text', '    ')
   })
 
   it('unindent line with {shift+tab}', function () {
-    cy.get('@line')
-      .trigger('keydown', { key: 'Tab' }) // indent
-      .trigger('keydown', { key: 'Tab', shiftKey: true }) // unindent
-      .should('have.text', '')
+    cy.get('@line').trigger('keydown', { key: 'Tab' }) // indent
+    cy.get('@line').trigger('keydown', { key: 'Tab', shiftKey: true }) // unindent
+    cy.get('@line').should('have.text', '')
   })
 
   it('uppercase selection with {ctrl+u}', function () {
-    cy.get('@line')
-      .type('a')
-      .type('{shift+leftArrow}') // select text
-      .type('{ctrl+u}')
-      .should('have.text', 'A')
+    cy.get('@line').type('a')
+    cy.get('@line').type('{shift+leftArrow}') // select text
+    cy.get('@line').type('{ctrl+u}')
+    cy.get('@line').should('have.text', 'A')
   })
 
   it('lowercase selection with {ctrl+shift+u}', function () {
@@ -110,27 +108,24 @@ describe('keyboard shortcuts', { scrollBehavior: false }, function () {
       this.skip()
     }
 
-    cy.get('@line')
-      .type('A')
-      .type('{shift+leftArrow}') // select text
-      .type('{ctrl+shift+u}') // TODO: ctrl+shift+u is a system shortcut so this fails in CI
-      .should('have.text', 'a')
+    cy.get('@line').type('A')
+    cy.get('@line').type('{shift+leftArrow}') // select text
+    cy.get('@line').type('{ctrl+shift+u}') // TODO: ctrl+shift+u is a system shortcut so this fails in CI
+    cy.get('@line').should('have.text', 'a')
   })
 
   it('wrap selection with "\\textbf{}" by using {meta+b}', function () {
-    cy.get('@line')
-      .type('a')
-      .type('{shift+leftArrow}') // select text
-      .type(`{${metaKey}+b}`)
-      .should('have.text', '\\textbf{a}')
+    cy.get('@line').type('a')
+    cy.get('@line').type('{shift+leftArrow}') // select text
+    cy.get('@line').type(`{${metaKey}+b}`)
+    cy.get('@line').should('have.text', '\\textbf{a}')
   })
 
   it('wrap selection with "\\textit{}" by using {meta+i}', function () {
-    cy.get('@line')
-      .type('a')
-      .type('{shift+leftArrow}') // select text
-      .type(`{${metaKey}+i}`)
-      .should('have.text', '\\textit{a}')
+    cy.get('@line').type('a')
+    cy.get('@line').type('{shift+leftArrow}') // select text
+    cy.get('@line').type(`{${metaKey}+i}`)
+    cy.get('@line').should('have.text', '\\textit{a}')
   })
 })
 
@@ -158,7 +153,10 @@ contentLine3
         </EditorProviders>
       </Container>
     )
-    cy.get('.cm-line').eq(1).scrollIntoView().click().as('line')
+    cy.get('.cm-line').eq(1).as('line')
+    cy.get('@line').scrollIntoView()
+    cy.get('@line').click()
+
     cy.get('.cm-editor').as('editor')
   })
 
@@ -215,10 +213,9 @@ contentLine3
   })
 
   it('toggle comments with M-;', function () {
-    cy.get('@line')
-      .should('have.text', '\\documentclass{article}')
-      .type('{alt};')
-      .should('have.text', '% \\documentclass{article}')
+    cy.get('@line').should('have.text', '\\documentclass{article}')
+    cy.get('@line').type('{alt};')
+    cy.get('@line').should('have.text', '% \\documentclass{article}')
   })
 
   it('should jump between start and end with M-S-, and M-S-.', function () {
@@ -230,12 +227,11 @@ contentLine3
   })
 
   it('can enter characters', function () {
-    cy.get('.cm-line')
-      .eq(0)
-      .scrollIntoView()
-      .click()
-      .type(CHARACTERS)
-      .should('have.text', CHARACTERS)
+    cy.get('.cm-line').eq(0).as('line')
+    cy.get('@line').scrollIntoView()
+    cy.get('@line').click()
+    cy.get('@line').type(CHARACTERS)
+    cy.get('@line').should('have.text', CHARACTERS)
   })
 })
 
@@ -266,7 +262,9 @@ contentLine3
         </EditorProviders>
       </Container>
     )
-    cy.get('.cm-line').eq(1).scrollIntoView().click().as('line')
+    cy.get('.cm-line').eq(1).as('line')
+    cy.get('@line').scrollIntoView()
+    cy.get('@line').click()
     cy.get('.cm-editor').as('editor')
   })
 
@@ -275,12 +273,11 @@ contentLine3
   })
 
   it('can enter characters', function () {
-    cy.get('.cm-line')
-      .eq(0)
-      .scrollIntoView()
-      .click()
-      .type(`i${CHARACTERS}{esc}`)
-      .should('have.text', CHARACTERS)
+    cy.get('.cm-line').eq(0).as('line')
+    cy.get('@line').scrollIntoView()
+    cy.get('@line').click()
+    cy.get('@line').type(`i${CHARACTERS}{esc}`)
+    cy.get('@line').should('have.text', CHARACTERS)
   })
 
   it('can move around in normal mode', function () {
@@ -293,8 +290,7 @@ contentLine3
     activeEditorLine().should('have.text', '\\begin{document}')
 
     // Move the cursor left, insert 1, move it right, insert a 2
-    cy.get('@line')
-      .type('hi1{esc}la2{esc}')
-      .should('have.text', '\\documentclass{article1}2')
+    cy.get('@line').type('hi1{esc}la2{esc}')
+    cy.get('@line').should('have.text', '\\documentclass{article1}2')
   })
 })

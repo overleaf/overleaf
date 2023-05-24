@@ -111,7 +111,8 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     cy.findAllByRole('listbox').should('have.length', 0)
 
     // put the cursor on a blank line to type in
-    cy.get('.cm-line').eq(16).click().as('line')
+    cy.get('.cm-line').eq(16).as('line')
+    cy.get('@line').click()
 
     // single backslash
     cy.get('@line').type('\\')
@@ -161,7 +162,7 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     cy.get('@line')
       // .type('{tab}') // Tab not supported in Cypress
       .type('{rightArrow}{rightArrow}')
-      .type('fr')
+    cy.get('@line').type('fr')
 
     // select option from autocomplete
     // disabled as selector not working (Cypress bug?)
@@ -282,7 +283,8 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     cy.contains('\\section{Results}')
 
     // put the cursor on a blank line to type in
-    cy.get('.cm-line').eq(16).click().as('line')
+    cy.get('.cm-line').eq(16).as('line')
+    cy.get('@line').click()
 
     // ---- Basic autocomplete of environments
     cy.get('@line').type('\\begin{itemi')
@@ -318,13 +320,14 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     cy.get('.cm-line').eq(26).contains('\\end{align}')
 
     // ---- Start typing a begin command
-    cy.get('.cm-line').eq(28).click().as('line')
+    cy.get('.cm-line').eq(28).as('line')
+    cy.get('@line').click()
     cy.get('@line').type('\\begin{{}ab')
     cy.findAllByRole('option').as('options')
     cy.get('@options').should('have.length', 5)
 
     // ---- The environment being typed should appear in the list
-    cy.get('@options').contains('\\begin{ab}').should('exist')
+    cy.get('@options').contains('\\begin{ab}')
 
     // ---- A new environment used elsewhere in the doc should appear next
     cy.get('@options')
@@ -399,7 +402,8 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     cy.findAllByRole('listbox').should('have.length', 0)
 
     // put the cursor on a blank line to type in
-    cy.get('.cm-line').eq(16).click().as('line')
+    cy.get('.cm-line').eq(16).as('line')
+    cy.get('@line').click()
 
     // a usepackage command
     cy.get('@line').type('\\usepackage')
@@ -473,7 +477,8 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     cy.findAllByRole('listbox').should('have.length', 0)
 
     // put the cursor on a blank line to type in
-    cy.get('.cm-line').eq(16).click().as('line')
+    cy.get('.cm-line').eq(16).as('line')
+    cy.get('@line').click()
 
     // a cite command with no opening brace
     cy.get('@line').type('\\cite')
@@ -544,7 +549,8 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     cy.findAllByRole('listbox').should('have.length', 0)
 
     // put the cursor on a blank line to type in
-    cy.get('.cm-line').eq(16).click().as('line')
+    cy.get('.cm-line').eq(16).as('line')
+    cy.get('@line').click()
 
     // single backslash
     cy.get('@line').type('\\')
@@ -574,7 +580,8 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     )
 
     // put the cursor on a blank line to type in
-    cy.get('.cm-line').eq(16).click().as('line')
+    cy.get('.cm-line').eq(16).as('line')
+    cy.get('@line').click()
 
     cy.get('@line').type('\\frac')
 
@@ -589,9 +596,11 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     cy.get('@line').should('contain.text', '\\frac{\\textbf{}}{}')
 
     // go to new line
-    cy.get('@line').click().type('{enter}')
+    cy.get('@line').click()
+    cy.get('@line').type('{enter}')
 
-    cy.get('.cm-line').eq(17).click().as('line')
+    cy.get('.cm-line').eq(17).as('line')
+    cy.get('@line').click()
     cy.get('@line').type('\\frac')
 
     // select completion
@@ -617,7 +626,8 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     )
 
     // put the cursor on a blank line to type in
-    cy.get('.cm-line').eq(16).click().as('line')
+    cy.get('.cm-line').eq(16).as('line')
+    cy.get('@line').click()
 
     // type some commands
     // note: '{{}' is a single opening brace
@@ -651,7 +661,8 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     )
 
     // put the cursor on a blank line to type in
-    cy.get('.cm-line').eq(16).click().as('line')
+    cy.get('.cm-line').eq(16).as('line')
+    cy.get('@line').click()
 
     // type some commands
     // note: '{{}' is a single opening brace
@@ -687,7 +698,8 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     cy.get('.cm-editor').as('editor')
 
     // put the cursor on a blank line to type in
-    cy.get('.cm-line').eq(16).click().as('line')
+    cy.get('.cm-line').eq(16).as('line')
+    cy.get('@line').click()
 
     // a new command, then the start of the command on a new blank line
     cy.get('@line').type('\\foo[bar]{{}baz}{{}zap}')
@@ -696,7 +708,8 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     cy.get('@editor').trigger('keydown', { key: 'Enter' })
 
     // put the cursor on the new line to type in
-    cy.get('.cm-line').eq(17).click().as('line')
+    cy.get('.cm-line').eq(17).as('line')
+    cy.get('@line').click()
 
     // the start of the command
     cy.get('@line').type('\\foo')
@@ -724,7 +737,8 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     cy.get('.cm-editor').as('editor')
 
     // put the cursor on a blank line to type in
-    cy.get('.cm-line').eq(16).click().as('line')
+    cy.get('.cm-line').eq(16).as('line')
+    cy.get('@line').click()
 
     // a new command, then the start of the command on a new blank line
     cy.get('@line').type('$\\somemathcommand$')
@@ -733,7 +747,8 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     cy.get('@editor').trigger('keydown', { key: 'Enter' })
 
     // put the cursor on the new line to type in
-    cy.get('.cm-line').eq(17).click().as('line')
+    cy.get('.cm-line').eq(17).as('line')
+    cy.get('@line').click()
 
     // the start of the command
     cy.get('@line').type('hello \\somema')
@@ -758,7 +773,8 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     cy.get('.cm-editor').as('editor')
 
     // put the cursor on a blank line to type in
-    cy.get('.cm-line').eq(16).click().as('line')
+    cy.get('.cm-line').eq(16).as('line')
+    cy.get('@line').click()
 
     // a new command, then the start of the command on a new blank line
     cy.get('@line').type('\\newcommand{{}\\foo}[1]{{}#1}')
@@ -767,7 +783,8 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     cy.get('@editor').trigger('keydown', { key: 'Enter' })
 
     // put the cursor on the new line to type in
-    cy.get('.cm-line').eq(17).click().as('line')
+    cy.get('.cm-line').eq(17).as('line')
+    cy.get('@line').click()
 
     // the start of the command
     cy.get('@line').type('\\fo')
@@ -829,7 +846,8 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     cy.get('.cm-editor').as('editor')
 
     // put the cursor on a blank line to type in
-    cy.get('.cm-line').eq(16).click().as('line')
+    cy.get('.cm-line').eq(16).as('line')
+    cy.get('@line').click()
 
     // start typing a command
     cy.get('@line').type('\\label')
@@ -855,7 +873,8 @@ describe('autocomplete', { scrollBehavior: false }, function () {
         </Container>
       )
       // put the cursor on a blank line to type in
-      cy.get('.cm-line').eq(16).click().as('line')
+      cy.get('.cm-line').eq(16).as('line')
+      cy.get('@line').click()
 
       // type the name of a symbol
       cy.get('@line').type(' \\alpha')
@@ -893,7 +912,8 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     )
 
     // Put the cursor on a blank line to type in
-    cy.get('.cm-line').eq(16).click().as('line')
+    cy.get('.cm-line').eq(16).as('line')
+    cy.get('@line').click()
 
     // Type \begin{itemize}.
     // Note: '{{}' is a single opening brace
@@ -916,7 +936,8 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     )
 
     // Put the cursor on a blank line above target line
-    cy.get('.cm-line').eq(20).click().as('line')
+    cy.get('.cm-line').eq(20).as('line')
+    cy.get('@line').click()
 
     // Move to the position between the braces then type 'itemize'
     cy.get('@line').type(`{downArrow}${'{rightArrow}'.repeat(7)}itemize`, {
@@ -938,7 +959,8 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     )
 
     // Put the cursor on a blank line above target line
-    cy.get('.cm-line').eq(20).click().as('line')
+    cy.get('.cm-line').eq(20).as('line')
+    cy.get('@line').click()
 
     // Move to the position after the opening brace then type 'itemize}'
     cy.get('@line').type(`{downArrow}${'{rightArrow}'.repeat(7)}itemize}`, {
@@ -999,7 +1021,8 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     )
 
     // Put the cursor on a blank line and type
-    cy.get('.cm-line').eq(16).click().as('line')
+    cy.get('.cm-line').eq(16).as('line')
+    cy.get('@line').click()
     cy.get('@line').type('\\include{e', { delay: 100 })
     cy.findAllByRole('option').contains('example.tex').click()
     activeEditorLine().contains('\\include{example')

@@ -37,23 +37,25 @@ describe('<CodeMirrorEditor/> in Rich Text mode', function () {
     // wait for the content to be parsed and revealed
     cy.get('.cm-content').should('have.css', 'opacity', '1')
 
-    cy.get('.cm-line').eq(0).click().as('first-line')
+    cy.get('.cm-line').eq(0).as('first-line')
     cy.get('.cm-line').eq(1).as('second-line')
     cy.get('.cm-line').eq(2).as('third-line')
     cy.get('.cm-line').eq(3).as('fourth-line')
     cy.get('.ol-cm-toolbar [aria-label="Format Bold"]').as('toolbar-bold')
+
+    cy.get('@first-line').click()
   })
 
   forEach(['LaTeX', 'TeX']).it('renders the %s logo', function (logo) {
-    cy.get('@first-line').type(`\\${logo}{{}}{Enter}`).should('have.text', logo)
+    cy.get('@first-line').type(`\\${logo}{{}}{Enter}`)
+    cy.get('@first-line').should('have.text', logo)
   })
 
   it('renders \\dots', function () {
-    cy.get('@first-line')
-      .type('\\dots{Esc}')
-      .should('have.text', '\\dots')
-      .type('{Enter}')
-      .should('have.text', '…')
+    cy.get('@first-line').type('\\dots{Esc}')
+    cy.get('@first-line').should('have.text', '\\dots')
+    cy.get('@first-line').type('{Enter}')
+    cy.get('@first-line').should('have.text', '…')
   })
 
   it('creates a new list item on Enter', function () {
@@ -124,16 +126,15 @@ describe('<CodeMirrorEditor/> in Rich Text mode', function () {
   forEach(['textbf', 'textit', 'underline']).it(
     'handles \\%s text',
     function (command) {
-      cy.get('@first-line')
-        .type(`\\${command}{`)
-        .should('have.text', `{}`)
-        .type('{rightArrow} ')
-        .should('have.text', '{} ')
-        .type('{Backspace}{leftArrow}test text')
-        .should('have.text', '{test text}')
-        .type('{rightArrow} foo')
-        .should('have.text', 'test text foo') // no braces
-        .find(`.ol-cm-command-${command}`)
+      cy.get('@first-line').type(`\\${command}{`)
+      cy.get('@first-line').should('have.text', `{}`)
+      cy.get('@first-line').type('{rightArrow} ')
+      cy.get('@first-line').should('have.text', '{} ')
+      cy.get('@first-line').type('{Backspace}{leftArrow}test text')
+      cy.get('@first-line').should('have.text', '{test text}')
+      cy.get('@first-line').type('{rightArrow} foo')
+      cy.get('@first-line').should('have.text', 'test text foo') // no braces
+      cy.get('@first-line').find(`.ol-cm-command-${command}`)
     }
   )
 
@@ -146,43 +147,37 @@ describe('<CodeMirrorEditor/> in Rich Text mode', function () {
     'paragraph',
     'subparagraph',
   ]).it('handles \\%s sectioning command', function (command) {
-    cy.get('@first-line')
-      .type(`\\${command}{`)
-      .should('have.text', `\\${command}{}`)
-      .type('{rightArrow} ')
-      .should('have.text', `\\${command}{} `)
-      // Press enter before closing brace
-      .type('{Backspace}{leftArrow}title{leftArrow}{Enter}')
-      .should('have.text', 'title')
-      .find(`.ol-cm-heading.ol-cm-command-${command}`)
-      .should('exist')
+    cy.get('@first-line').type(`\\${command}{`)
+    cy.get('@first-line').should('have.text', `\\${command}{}`)
+    cy.get('@first-line').type('{rightArrow} ')
+    cy.get('@first-line').should('have.text', `\\${command}{} `)
+    // Press enter before closing brace
+    cy.get('@first-line').type('{Backspace}{leftArrow}title{leftArrow}{Enter}')
+    cy.get('@first-line').should('have.text', 'title')
+    cy.get('@first-line').find(`.ol-cm-heading.ol-cm-command-${command}`)
   })
 
   forEach(['textsc', 'texttt', 'sout', 'emph', 'url', 'caption']).it(
     'handles \\%s text',
     function (command) {
-      cy.get('@first-line')
-        .type(`\\${command}{`)
-        .should('have.text', `\\${command}{}`)
-        .type('{rightArrow} ')
-        .should('have.text', `\\${command}{} `)
-        .type('{Backspace}{leftArrow}test text{rightArrow} ')
-        .should('have.text', 'test text ')
-        .find(`.ol-cm-command-${command}`)
-        .should('exist')
+      cy.get('@first-line').type(`\\${command}{`)
+      cy.get('@first-line').should('have.text', `\\${command}{}`)
+      cy.get('@first-line').type('{rightArrow} ')
+      cy.get('@first-line').should('have.text', `\\${command}{} `)
+      cy.get('@first-line').type('{Backspace}{leftArrow}test text{rightArrow} ')
+      cy.get('@first-line').should('have.text', 'test text ')
+      cy.get('@first-line').find(`.ol-cm-command-${command}`)
     }
   )
 
   it('handles \\verb text', function () {
-    cy.get('@first-line')
-      .type(`\\verb|`)
-      .should('have.text', `\\verb|`)
-      .type('| ')
-      .should('have.text', `\\verb|| `)
-      .type('{Backspace}{leftArrow}test text{rightArrow} ')
-      .should('have.text', 'test text ')
-      .find(`.ol-cm-command-verb`)
-      .should('exist')
+    cy.get('@first-line').type(`\\verb|`)
+    cy.get('@first-line').should('have.text', `\\verb|`)
+    cy.get('@first-line').type('| ')
+    cy.get('@first-line').should('have.text', `\\verb|| `)
+    cy.get('@first-line').type('{Backspace}{leftArrow}test text{rightArrow} ')
+    cy.get('@first-line').should('have.text', 'test text ')
+    cy.get('@first-line').find(`.ol-cm-command-verb`)
   })
 
   forEach([
@@ -191,47 +186,56 @@ describe('<CodeMirrorEditor/> in Rich Text mode', function () {
     ['cite', '📚'],
     ['include', '🔗'],
   ]).it('handles \\%s commands', function (command, icon) {
-    cy.get('@first-line')
-      .type(`\\${command}{} `)
-      .should('have.text', `\\${command}{} `)
-      .type('{Backspace}{leftArrow}key')
-      .should('have.text', `\\${command}{key}`)
-      .type('{rightArrow}')
-      .should('have.text', `\\${command}{key}`)
-      .type(' ')
-      .should('have.text', `${icon}key `)
+    cy.get('@first-line').type(`\\${command}{} `)
+    cy.get('@first-line').should('have.text', `\\${command}{} `)
+    cy.get('@first-line').type('{Backspace}{leftArrow}key')
+    cy.get('@first-line').should('have.text', `\\${command}{key}`)
+    cy.get('@first-line').type('{rightArrow}')
+    cy.get('@first-line').should('have.text', `\\${command}{key}`)
+    cy.get('@first-line').type(' ')
+    cy.get('@first-line').should('have.text', `${icon}key `)
   })
 
   it('handles \\href command', function () {
-    cy.get('@first-line')
-      .type('\\href{{}https://overleaf.com} ')
-      .should('have.text', '\\href{https://overleaf.com} ')
-      .type('{Backspace}{{}{Del}Overleaf ')
-      .should('have.text', '\\href{https://overleaf.com}{Overleaf ')
-      .type('{Backspace}} ')
-      .should('have.text', 'Overleaf ')
-      .find('.ol-cm-link-text')
-      .should('exist')
+    cy.get('@first-line').type('\\href{{}https://overleaf.com} ')
+    cy.get('@first-line').should('have.text', '\\href{https://overleaf.com} ')
+    cy.get('@first-line').type('{Backspace}{{}{Del}Overleaf ')
+    cy.get('@first-line').should(
+      'have.text',
+      '\\href{https://overleaf.com}{Overleaf '
+    )
+    cy.get('@first-line').type('{Backspace}} ')
+    cy.get('@first-line').should('have.text', 'Overleaf ')
+    cy.get('@first-line').find('.ol-cm-link-text')
   })
 
   it('displays unknown commands unchanged', function () {
-    cy.get('@first-line')
-      .type('\\foo[bar]{{}baz} ')
-      .should('have.text', '\\foo[bar]{baz} ')
+    cy.get('@first-line').type('\\foo[bar]{{}baz} ')
+    cy.get('@first-line').should('have.text', '\\foo[bar]{baz} ')
   })
 
   describe('Figure environments', function () {
     beforeEach(function () {
-      cy.get('@first-line').type('\\begin{{}figure').type('{Enter}') // end with cursor in file path
+      cy.get('@first-line').type('\\begin{{}figure')
+      cy.get('@first-line').type('{Enter}') // end with cursor in file path
     })
 
     it('loads figures', function () {
       cy.get('@third-line').type('path/to/image')
 
-      cy.get('@third-line')
-        .should('have.text', '    \\includegraphics{path/to/image}')
-        .type('{DownArrow}{DownArrow}{DownArrow}{DownArrow}')
-        .should('not.exist') // Should be removed from dom when line is hidden
+      cy.get('@third-line').should(
+        'have.text',
+        '    \\includegraphics{path/to/image}'
+      )
+
+      // move the cursor out of the figure
+      cy.get('@third-line').type('{DownArrow}{DownArrow}{DownArrow}{DownArrow}')
+
+      // Should be removed from dom when line is hidden
+      cy.get('.cm-content').should(
+        'not.contain',
+        '\\includegraphics{path/to/image}'
+      )
 
       cy.get('img.ol-cm-graphics').should('have.attr', 'src', 'path/to/image')
     })
@@ -256,7 +260,8 @@ describe('<CodeMirrorEditor/> in Rich Text mode', function () {
       cy.get('@second-line')
         .should('have.text', '    \\centering')
         .should('have.class', 'ol-cm-environment-centered')
-        .type('{Backspace}')
+      cy.get('@second-line').type('{Backspace}')
+      cy.get('@second-line')
         .should('have.text', '    \\centerin')
         .should('not.have.class', 'ol-cm-environment-centered')
     })
@@ -280,34 +285,32 @@ describe('<CodeMirrorEditor/> in Rich Text mode', function () {
       })
 
       it('handles range selections inside bold', function () {
-        cy.get('@first-line')
-          .type('\\textbf{{}test}')
-          .type('{LeftArrow}'.repeat(4))
-          .type('{Shift}{RightArrow}{RightArrow}')
+        cy.get('@first-line').type('\\textbf{{}test}')
+        cy.get('@first-line').type('{LeftArrow}'.repeat(4))
+        cy.get('@first-line').type('{Shift}{RightArrow}{RightArrow}')
         cy.get('@toolbar-bold').should('have.class', 'active')
       })
 
       it('handles range selections spanning bold', function () {
-        cy.get('@first-line')
-          .type('\\textbf{{}test} outside')
-          .type('{LeftArrow}'.repeat(10))
-          .type('{Shift}' + '{RightArrow}'.repeat(5))
+        cy.get('@first-line').type('\\textbf{{}test} outside')
+        cy.get('@first-line').type('{LeftArrow}'.repeat(10))
+        cy.get('@first-line').type('{Shift}' + '{RightArrow}'.repeat(5))
         cy.get('@toolbar-bold').should('not.have.class', 'active')
       })
 
       it('does not highlight bold when commands at selection ends are different', function () {
-        cy.get('@first-line')
-          .type('\\textbf{{}first} \\textbf{{}second}')
-          .type('{LeftArrow}'.repeat(12))
-          .type('{Shift}' + '{RightArrow}'.repeat(7))
+        cy.get('@first-line').type('\\textbf{{}first} \\textbf{{}second}')
+        cy.get('@first-line').type('{LeftArrow}'.repeat(12))
+        cy.get('@first-line').type('{Shift}' + '{RightArrow}'.repeat(7))
         cy.get('@toolbar-bold').should('not.have.class', 'active')
       })
 
       it('highlight when ends share common formatting ancestor', function () {
-        cy.get('@first-line')
-          .type('\\textbf{{}\\textit{{}first} \\textit{{}second}}')
-          .type('{LeftArrow}'.repeat(13))
-          .type('{Shift}' + '{RightArrow}'.repeat(7))
+        cy.get('@first-line').type(
+          '\\textbf{{}\\textit{{}first} \\textit{{}second}}'
+        )
+        cy.get('@first-line').type('{LeftArrow}'.repeat(13))
+        cy.get('@first-line').type('{Shift}' + '{RightArrow}'.repeat(7))
         cy.get('@toolbar-bold').should('have.class', 'active')
       })
     })
@@ -318,16 +321,14 @@ describe('<CodeMirrorEditor/> in Rich Text mode', function () {
       cy.get('@first-line').type(
         '\\begin{{}frame}{{}Slide\\\\title}{Enter}\\end{{}frame}{Enter}'
       )
-      cy.get('.ol-cm-divider').should('exist')
-      cy.get('.ol-cm-frame-title').should('exist')
+      cy.get('.ol-cm-divider')
+      cy.get('.ol-cm-frame-title')
     })
     it('typesets title', function () {
       cy.get('@first-line').type(
         '\\begin{{}frame}{{}Slide\\\\title}{Enter}\\end{{}frame}{Enter}'
       )
-      cy.get('.ol-cm-frame-title')
-        .should('exist')
-        .should('have.html', 'Slide<br>title')
+      cy.get('.ol-cm-frame-title').should('have.html', 'Slide<br>title')
     })
 
     // eslint-disable-next-line mocha/no-skipped-tests
@@ -337,16 +338,14 @@ describe('<CodeMirrorEditor/> in Rich Text mode', function () {
       )
 
       // allow plenty of time for MathJax to load
-      cy.get('.MathJax', { timeout: 10000 }).should('exist')
+      cy.get('.MathJax', { timeout: 10000 })
     })
 
     it('typesets subtitle', function () {
       cy.get('@first-line').type(
         '\\begin{{}frame}{{}Slide title}{{}Slide subtitle}{Enter}\\end{{}frame}{Enter}'
       )
-      cy.get('.ol-cm-frame-subtitle')
-        .should('exist')
-        .should('have.html', 'Slide subtitle')
+      cy.get('.ol-cm-frame-subtitle').should('have.html', 'Slide subtitle')
     })
   })
 
@@ -364,12 +363,10 @@ describe('<CodeMirrorEditor/> in Rich Text mode', function () {
 
     // allow plenty of time for MathJax to load
     // TODO: re-enable this assertion when stable
-    // cy.get('.MathJax', { timeout: 10000 }).should('exist')
+    // cy.get('.MathJax', { timeout: 10000 })
 
-    cy.get('.ol-cm-maketitle').should('exist')
-    cy.get('.ol-cm-title')
-      .should('exist')
-      .should('contain.html', 'Document title<br>with')
+    cy.get('.ol-cm-maketitle')
+    cy.get('.ol-cm-title').should('contain.html', 'Document title<br>with')
     cy.get('.ol-cm-author').should('have.text', 'Author')
   })
 

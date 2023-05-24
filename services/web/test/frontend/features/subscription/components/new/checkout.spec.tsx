@@ -207,9 +207,8 @@ describe('checkout panel', function () {
     cy.mount(<CheckoutPanelWithPaymentProvider />)
     cy.get('@coupon').should('have.been.calledOnce')
     cy.findByTestId('checkout-form').within(() => {
-      cy.findByLabelText(/coupon code/i)
-        .type(couponCode, { delay: 0 })
-        .blur()
+      cy.findByLabelText(/coupon code/i).type(couponCode, { delay: 0 })
+      cy.findByLabelText(/coupon code/i).blur()
     })
     cy.get('@coupon')
       .should('have.been.calledTwice')
@@ -239,9 +238,8 @@ describe('checkout panel', function () {
     })
     cy.mount(<CheckoutPanelWithPaymentProvider />)
     cy.findByTestId('checkout-form').within(() => {
-      cy.findByLabelText(/coupon code/i)
-        .type('promo_code', { delay: 0 })
-        .blur()
+      cy.findByLabelText(/coupon code/i).type('promo_code', { delay: 0 })
+      cy.findByLabelText(/coupon code/i).blur()
     })
     cy.findByRole('alert').within(() => {
       cy.contains(/coupon code is not valid for selected plan/i)
@@ -273,9 +271,8 @@ describe('checkout panel', function () {
     cy.mount(<CheckoutPanelWithPaymentProvider />)
     cy.get('@catch').should('have.been.calledOnce')
     cy.findByTestId('checkout-form').within(() => {
-      cy.findByLabelText(/coupon code/i)
-        .type('promo_code', { delay: 0 })
-        .blur()
+      cy.findByLabelText(/coupon code/i).type('promo_code', { delay: 0 })
+      cy.findByLabelText(/coupon code/i).blur()
     })
     cy.get('@catch').should('have.been.calledTwice')
     cy.findByRole('alert').within(() => {

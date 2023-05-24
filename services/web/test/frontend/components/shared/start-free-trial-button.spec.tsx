@@ -73,18 +73,17 @@ describe('start free trial button', function () {
     cy.window().then(win => {
       cy.stub(win, 'open').as('Open')
     })
-    cy.get('button.btn')
-      .contains('Start Free Trial!')
-      .click()
-      .then(() => {
-        cy.wait('@event-paywall-click')
-          .its('request.body.paywall-type')
-          .should('eq', 'cypress-test')
-        cy.get('@Open').should(
-          'have.been.calledOnceWithExactly',
-          '/user/subscription/choose-your-plan?itm_campaign=cypress-test'
-        )
-        expect(onClickStub).to.be.called
-      })
+    cy.get('button.btn').contains('Start Free Trial!').click()
+
+    cy.wrap(null).then(() => {
+      cy.wait('@event-paywall-click')
+        .its('request.body.paywall-type')
+        .should('eq', 'cypress-test')
+      cy.get('@Open').should(
+        'have.been.calledOnceWithExactly',
+        '/user/subscription/choose-your-plan?itm_campaign=cypress-test'
+      )
+      expect(onClickStub).to.be.called
+    })
   })
 })

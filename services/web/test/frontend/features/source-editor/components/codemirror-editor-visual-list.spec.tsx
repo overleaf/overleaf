@@ -96,13 +96,12 @@ describe('<CodeMirrorEditor/> lists in Rich Text mode', function () {
     mountEditor(content)
 
     // move to the start of the item and press Tab
-    cy.get('.cm-line')
-      .eq(2)
-      .click()
-      .type('{leftArrow}'.repeat(4))
-      .trigger('keydown', {
-        key: 'Tab',
-      })
+    cy.get('.cm-line').eq(2).as('line')
+    cy.get('@line').click()
+    cy.get('@line').type('{leftArrow}'.repeat(4))
+    cy.get('@line').trigger('keydown', {
+      key: 'Tab',
+    })
 
     cy.get('.cm-content').should(
       'have.text',
@@ -127,7 +126,9 @@ describe('<CodeMirrorEditor/> lists in Rich Text mode', function () {
     mountEditor(content)
 
     // focus a line (at the end of a list item) and press Tab
-    cy.get('.cm-line').eq(2).click().trigger('keydown', {
+    cy.get('.cm-line').eq(2).as('line')
+    cy.get('@line').click()
+    cy.get('@line').trigger('keydown', {
       key: 'Tab',
     })
 
@@ -153,13 +154,12 @@ describe('<CodeMirrorEditor/> lists in Rich Text mode', function () {
     mountEditor(content)
 
     // move to the start of the list item and press Tab
-    cy.get('.cm-line')
-      .eq(2)
-      .click()
-      .type('{leftArrow}'.repeat(4))
-      .trigger('keydown', {
-        key: 'Tab',
-      })
+    cy.get('.cm-line').eq(2).as('line')
+    cy.get('@line').click()
+    cy.get('@line').type('{leftArrow}'.repeat(4))
+    cy.get('@line').trigger('keydown', {
+      key: 'Tab',
+    })
 
     cy.get('.cm-content').should(
       'have.text',
@@ -227,11 +227,10 @@ describe('<CodeMirrorEditor/> lists in Rich Text mode', function () {
     ].join('\n')
     mountEditor(content)
 
-    cy.get('.cm-line')
-      .eq(2)
-      .click()
-      .type('{leftArrow}'.repeat(3)) // to the start of the item
-      .type('{upArrow}{Shift}{rightArrow}{rightArrow}{rightArrow}') // up and extend to the end of the item
+    cy.get('.cm-line').eq(2).as('line')
+    cy.get('@line').click()
+    cy.get('@line').type('{leftArrow}'.repeat(3)) // to the start of the item
+    cy.get('@line').type('{upArrow}{Shift}{rightArrow}{rightArrow}{rightArrow}') // up and extend to the end of the item
 
     cy.window().should(win => {
       expect(win.getSelection()?.toString()).to.equal('One')
@@ -247,11 +246,10 @@ describe('<CodeMirrorEditor/> lists in Rich Text mode', function () {
     ].join('\n')
     mountEditor(content)
 
-    cy.get('.cm-line')
-      .eq(2)
-      .click()
-      .type('{leftArrow}'.repeat(3)) // to the start of the item
-      .type('{upArrow}{Shift}{rightArrow}{rightArrow}{rightArrow}') // up and extend to the end of the item
+    cy.get('.cm-line').eq(2).as('line')
+    cy.get('@line').click()
+    cy.get('@line').type('{leftArrow}'.repeat(3)) // to the start of the item
+    cy.get('@line').type('{upArrow}{Shift}{rightArrow}{rightArrow}{rightArrow}') // up and extend to the end of the item
 
     cy.window().should(win => {
       expect(win.getSelection()?.toString()).to.equal('One')
@@ -267,17 +265,16 @@ describe('<CodeMirrorEditor/> lists in Rich Text mode', function () {
     ].join('\n')
     mountEditor(content)
 
-    cy.get('.cm-line')
-      .eq(0)
-      .click('left')
-      .type(
-        '{downArrow}'.repeat(4) + // down to the end line
-          '{rightArrow}'.repeat(3) + // along a few characters
-          '{upArrow}'.repeat(2) + // up to the first list item
-          '{rightArrow}'.repeat(4) + // along to the start of the second list item
-          '{shift}' + // start extending the selection
-          '{rightArrow}'.repeat(3) // cover the word
-      )
+    cy.get('.cm-line').eq(0).as('line')
+    cy.get('@line').click('left')
+    cy.get('@line').type(
+      '{downArrow}'.repeat(4) + // down to the end line
+        '{rightArrow}'.repeat(3) + // along a few characters
+        '{upArrow}'.repeat(2) + // up to the first list item
+        '{rightArrow}'.repeat(4) + // along to the start of the second list item
+        '{shift}' + // start extending the selection
+        '{rightArrow}'.repeat(3) // cover the word
+    )
 
     cy.window().should(win => {
       expect(win.getSelection()?.toString()).to.equal('Two')
@@ -293,12 +290,11 @@ describe('<CodeMirrorEditor/> lists in Rich Text mode', function () {
     ].join('\n')
     mountEditor(content)
 
-    cy.get('.cm-line')
-      .eq(2)
-      .click()
-      .type('\\ite')
-      .type('{enter}')
-      .type('second')
+    cy.get('.cm-line').eq(2).as('line')
+    cy.get('@line').click()
+    cy.get('@line').type('\\ite')
+    cy.get('@line').type('{enter}')
+    cy.get('@line').type('second')
 
     cy.get('.cm-content').should(
       'have.text',

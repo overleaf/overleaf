@@ -46,6 +46,8 @@ function HistoryFileTreeFolder({
   return (
     <>
       <li
+        // FIXME
+        // eslint-disable-next-line jsx-a11y/role-has-required-aria-props
         role="treeitem"
         aria-expanded={expanded}
         aria-label={name}

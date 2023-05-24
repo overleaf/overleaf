@@ -110,25 +110,23 @@ describe('<PdfPreview/>', function () {
         )
 
         // start compiling
-        cy.findByRole('button', { name: 'Recompile' })
-          .click()
-          .then(() => {
-            cy.findByRole('button', { name: 'Compiling…' })
+        cy.findByRole('button', { name: 'Recompile' }).click()
 
-            // trigger a recompile
-            cy.window().then(win => {
-              win.dispatchEvent(new CustomEvent('pdf:recompile'))
-            })
-
-            // finish the original compile
-            resolveDeferredCompile()
-
-            // wait for the original compile to finish
-            cy.waitForCompile({ pdf: true })
-
-            // NOTE: difficult to assert that a second request won't be sent, at some point
-            expect(counter).to.equal(1)
+        cy.findByRole('button', { name: 'Compiling…' }).then(() => {
+          // trigger a recompile
+          cy.window().then(win => {
+            win.dispatchEvent(new CustomEvent('pdf:recompile'))
           })
+
+          // finish the original compile
+          resolveDeferredCompile()
+
+          // wait for the original compile to finish
+          cy.waitForCompile({ pdf: true })
+
+          // NOTE: difficult to assert that a second request won't be sent, at some point
+          expect(counter).to.equal(1)
+        })
       }
     )
   })

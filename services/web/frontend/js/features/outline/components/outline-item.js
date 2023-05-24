@@ -58,6 +58,8 @@ const OutlineItem = memo(function OutlineItem({
     <li
       className={mainItemClasses}
       aria-expanded={ariaExpandedValue}
+      // FIXME
+      // eslint-disable-next-line jsx-a11y/role-has-required-aria-props
       role="treeitem"
       aria-current={isHighlighted}
       aria-label={outlineItem.title}

@@ -16,7 +16,9 @@ function FileTreeDoc({ name, id, isFile, isLinkedFile }) {
 
   return (
     <li
+      // eslint-disable-next-line jsx-a11y/role-has-required-aria-props
       role="treeitem"
+      // aria-selected is provided in selectableEntityProps
       {...selectableEntityProps}
       aria-label={name}
       tabIndex="0"

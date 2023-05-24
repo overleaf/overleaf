@@ -6,7 +6,11 @@ import useAbortController from '../../../../frontend/js/shared/hooks/use-abort-c
 import { getJSON } from '../../../../frontend/js/infrastructure/fetch-json'
 
 describe('useAbortController', function () {
-  let status
+  let status: {
+    loading: boolean
+    success: boolean | null
+    error: any | null
+  }
 
   beforeEach(function () {
     fetchMock.restore()
@@ -22,7 +26,7 @@ describe('useAbortController', function () {
     fetchMock.restore()
   })
 
-  function AbortableRequest({ url }) {
+  function AbortableRequest({ url }: { url: string }) {
     const { signal } = useAbortController()
 
     React.useEffect(() => {

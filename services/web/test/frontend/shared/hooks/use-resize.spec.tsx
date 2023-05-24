@@ -88,10 +88,9 @@ describe('useResize', function () {
     const xPos = 400
     cy.mount(<ResizeTest />)
 
-    cy.get('#handle')
-      .trigger('mousedown', { button: 0 })
-      .trigger('mousemove', { clientX: xPos })
-      .trigger('mouseup')
+    cy.get('#handle').trigger('mousedown', { button: 0 })
+    cy.get('#handle').trigger('mousemove', { clientX: xPos })
+    cy.get('#handle').trigger('mouseup')
 
     cy.get('#target').should('have.css', 'width', `${xPos}px`)
   })
@@ -100,10 +99,9 @@ describe('useResize', function () {
     const xPos = 400
     cy.mount(<PersistedResizeTest />)
 
-    cy.get('#handle')
-      .trigger('mousedown', { button: 0 })
-      .trigger('mousemove', { clientX: xPos })
-      .trigger('mouseup')
+    cy.get('#handle').trigger('mousedown', { button: 0 })
+    cy.get('#handle').trigger('mousemove', { clientX: xPos })
+    cy.get('#handle').trigger('mouseup')
 
     cy.window()
       .its('localStorage.resizeable-test')

@@ -38,7 +38,8 @@ describe('Spellchecker', function () {
       </Container>
     )
 
-    cy.get('.cm-line').eq(13).click().as('line')
+    cy.get('.cm-line').eq(13).as('line')
+    cy.get('@line').click()
   })
 
   afterEach(function () {
@@ -87,9 +88,6 @@ describe('Spellchecker', function () {
 
     cy.get('@line').type('notawombat')
     cy.wait('@spellCheckRequest')
-    cy.get('@line')
-      .get('.ol-cm-spelling-error')
-      .should('exist')
-      .contains('notawombat')
+    cy.get('@line').get('.ol-cm-spelling-error').contains('notawombat')
   })
 })
