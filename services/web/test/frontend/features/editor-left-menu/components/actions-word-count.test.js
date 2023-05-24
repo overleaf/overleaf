@@ -1,4 +1,4 @@
-import { fireEvent, screen, waitFor } from '@testing-library/dom'
+import { screen, waitFor } from '@testing-library/dom'
 import { expect } from 'chai'
 import fetchMock from 'fetch-mock'
 import ActionsWordCount from '../../../../../frontend/js/features/editor-left-menu/components/actions-word-count'
@@ -53,7 +53,8 @@ describe('<ActionsWordCount />', function () {
 
     await waitFor(() => expect(fetchMock.called(compileEndpoint)).to.be.true)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Word Count' }))
+    const button = await screen.findByRole('button', { name: 'Word Count' })
+    button.click()
 
     await waitFor(() => expect(fetchMock.called(wordcountEndpoint)).to.be.true)
   })

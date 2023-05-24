@@ -94,7 +94,7 @@ describe('email actions - make primary', function () {
 
       userEvent.hover(button.parentElement!)
 
-      screen.getByText(
+      await screen.findByText(
         /Please confirm your affiliation before making this the primary/i
       )
     })
@@ -111,7 +111,7 @@ describe('email actions - make primary', function () {
 
       userEvent.hover(button.parentElement!)
 
-      screen.getByText('Make this the primary email, used to log in', {
+      await screen.findByText('Make this the primary email, used to log in', {
         exact: false,
       })
     })
@@ -152,7 +152,7 @@ describe('email actions - make primary', function () {
 
       userEvent.hover(buttons[1].parentElement!)
 
-      screen.getByText(
+      await screen.findByText(
         'Please confirm your email by linking to your institutional account before making it the primary email',
         {
           exact: false,
