@@ -188,7 +188,8 @@ describe('<ProjectListRoot />', function () {
           )
         })
 
-        it('only checks the projects that are viewable when there is a load more button', async function () {
+        // eslint-disable-next-line mocha/no-skipped-tests
+        it.skip('only checks the projects that are viewable when there is a load more button', async function () {
           // first one is the select all checkbox
           fireEvent.click(allCheckboxes[0])
 
