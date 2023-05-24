@@ -1674,6 +1674,7 @@
   "unlimited": "Unlimited",
   "unlimited_collaborators_in_each_project": "Unlimited collaborators in each project",
   "unlimited_collabs": "Unlimited collaborators",
+  "unlimited_collabs_rt": "<0>Unlimited</0> collaborators",
   "unlimited_private": "Unlimited private projects",
   "unlimited_private_info": "All your projects are private by default. Invite collaborators to read or edit by email address or by sending them a secret link.",
   "unlimited_projects": "Unlimited projects",

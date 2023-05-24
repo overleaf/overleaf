@@ -1,0 +1,57 @@
+extends ../../../layout-marketing
+
+block vars
+	- entrypoint = 'pages/user/subscription/plans-v2/plans-v2-main'
+
+block append meta
+	meta(name="ol-recommendedCurrency" content=recommendedCurrency)
+	meta(name="ol-groupPlans" data-type="json" content=groupPlans)
+	meta(name="ol-currencySymbols" data-type="json" content=groupPlanModalOptions.currencySymbols)
+	meta(name="ol-itm_content" content=itm_content)
+	meta(name="ol-currentView" content=currentView)
+
+block content
+	main.content.content-alt#main-content
+		.content-page
+			.plans
+				.container(ng-cloak)
+					.row
+						.col-md-12
+							.page-header.centered.plans-header.text-centered.top-page-header
+								h1.text-capitalize(ng-non-bindable) #{translate('choose_your_plan')}
+
+					include ./v2/_cards_controls_tables
+					.row.row-spaced-large.text-centered
+						.col-xs-12
+							p.text-centered
+								strong #{translate("all_prices_displayed_are_in_currency", {recommendedCurrency})}
+								| &nbsp;
+								span #{translate("subject_to_additional_vat")}
+							i.fa.fa-cc-mastercard.fa-2x(aria-hidden="true") &nbsp;
+							span.sr-only Mastercard accepted
+							i.fa.fa-cc-visa.fa-2x(aria-hidden="true") &nbsp;
+							span.sr-only Visa accepted
+							i.fa.fa-cc-amex.fa-2x(aria-hidden="true") &nbsp;
+							span.sr-only Amex accepted
+							i.fa.fa-cc-paypal.fa-2x(aria-hidden="true") &nbsp;
+							span.sr-only Paypal accepted
+
+					include ./v2/_university_info
+
+					include ../_quotes
+
+					include ./v2/_faq
+
+					.row.row-spaced-large
+						.col-md-12
+							.plans-header.plans-subheader.text-centered
+								hr
+								h2.header-with-btn #{translate('still_have_questions')}
+								button.btn.plans-v2-btn-header.text-capitalize(
+									data-ol-open-contact-form-modal="general"
+								) #{translate('contact_us')}
+
+					.row.row-spaced
+
+	include ../_group_plan_modal
+	!= moduleIncludes("contactModalGeneral-marketing", locals)

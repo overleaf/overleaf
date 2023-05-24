@@ -1,0 +1,53 @@
+extends ../../../layout
+
+include ./v2/_mixins
+
+block vars
+	- entrypoint = 'pages/user/subscription/plans-v2/plans-v2-main'
+	- var suppressFooter = true
+	- var suppressNavbarRight = true
+
+block append meta
+	meta(name="ol-recommendedCurrency" content=recommendedCurrency)
+	meta(name="ol-itm_content" content=itm_content)
+
+block content
+	main.content.content-alt#main-content
+		.content-page
+			.plans
+				.container
+					.row
+						.col-md-12
+							.page-header.centered.plans-header.text-centered.top-page-header
+								h1.text-capitalize #{translate('choose_your_plan')}
+
+					+monthly_annual_switch("monthly", "paywall-plans-page-toggle", '{}')
+
+					+plans_v2_table_sticky_header(true, interstitialPaymentConfig)
+
+					.row.plans-v2-table-container(data-ol-plans-v2-period='monthly')
+						.col-sm-12
+							.row
+								table.card.plans-v2-table.plans-v2-table-individual
+									+plans_v2_table('monthly', interstitialPaymentConfig)
+
+					.row.plans-v2-table-container(hidden data-ol-plans-v2-period='annual')
+						.col-sm-12
+							.row
+								table.card.plans-v2-table.plans-v2-table-individual
+									+plans_v2_table('annual', interstitialPaymentConfig)
+
+					//- sticky header on mobile will be "hidden" (by removing its sticky position) if it reaches this div
+					.invisible(aria-hidden="true" data-ol-plans-v2-table-sticky-header-stop)
+		
+		if (showSkipLink)
+			.row.row-spaced-small.text-center
+				a(href='/project'
+					event-tracking="skip-button-click"
+					event-tracking-mb="true"
+					event-tracking-trigger="click"
+					event-segmentation='{"location": "interstitial-page"}'
+				)
+					| #{translate("continue_with_free_plan")}			
+			
+	!= moduleIncludes("contactModalGeneral-marketing", locals)

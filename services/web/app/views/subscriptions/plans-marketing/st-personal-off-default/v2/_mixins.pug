@@ -141,15 +141,15 @@ mixin plans_v2_table(period, config)
 
 mixin table_individual(period)
 	table.card.plans-v2-table.plans-v2-table-individual
-		+plans_v2_table(period, plansV2Config.individual)
+		+plans_v2_table(period, plansConfig.individual)
 
 mixin table_group
 	table.card.plans-v2-table.plans-v2-table-group
-		+plans_v2_table('annual', plansV2Config.group)
+		+plans_v2_table('annual', plansConfig.group)
 
 mixin table_student(period)
 	table.card.plans-v2-table.plans-v2-table-student
-		+plans_v2_table(period, plansV2Config.student)
+		+plans_v2_table(period, plansConfig.student)
 	
 mixin table_head_individual_free(highlighted, period)
 	.plans-v2-table-th-content
@@ -193,7 +193,7 @@ mixin table_head_individual_professional(highlighted, eventTrackingKey, addition
 		.plans-v2-table-btn-buy-container-mobile
 			+btn_buy_individual_professional(highlighted, eventTrackingKey, additionalEventSegmentation, period)
 		ul.plans-v2-table-th-content-benefit
-			li #{translate("unlimited_collabs")}
+			li !{translate("unlimited_collabs_rt",{},["b"])}
 			li #{translate("all_premium_features")}
 		.plans-v2-table-btn-buy-container-desktop
 			+btn_buy_individual_professional(highlighted, eventTrackingKey, additionalEventSegmentation, period)
@@ -566,21 +566,21 @@ mixin plans_v2_table_sticky_header(withSwitch, config)
 					default
 						span #{translate(translateKey)}
 
-mixin table_sticky_header_all(plansV2Config)
+mixin table_sticky_header_all(plansConfig)
 	.row.plans-v2-table-sticky-header-container(
 		data-ol-plans-v2-view='individual'
 	)
-		+plans_v2_table_sticky_header(true, plansV2Config.individual)
+		+plans_v2_table_sticky_header(true, plansConfig.individual)
 	.row.plans-v2-table-sticky-header-container(
 		hidden
 		data-ol-plans-v2-view='group'
 	)
-		+plans_v2_table_sticky_header(false, plansV2Config.group)
+		+plans_v2_table_sticky_header(false, plansConfig.group)
 	.row.plans-v2-table-sticky-header-container(
 		hidden
 		data-ol-plans-v2-view='student'
 	)
-		+plans_v2_table_sticky_header(true, plansV2Config.student)
+		+plans_v2_table_sticky_header(true, plansConfig.student)
 
 mixin monthly_annual_switch(initialState, eventTracking, eventSegmentation)
 	- var monthlyAnnualToggleChecked = initialState === 'monthly'

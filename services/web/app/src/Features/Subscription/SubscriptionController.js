@@ -9,7 +9,10 @@ const logger = require('@overleaf/logger')
 const GeoIpLookup = require('../../infrastructure/GeoIpLookup')
 const FeaturesUpdater = require('./FeaturesUpdater')
 const planFeatures = require('./planFeatures')
-const plansV2Config = require('./plansV2Config')
+const noPersonalPlansConfig = require('./st-personal-off-variant/plansConfig')
+const hasPersonalPlansConfig = require('./st-personal-off-default/plansConfig')
+const noPersonalInterstitialPaymentConfig = require('./st-personal-off-variant/interstitialPaymentConfig')
+const hasPersonalInterstitialPaymentConfig = require('./st-personal-off-default/interstitialPaymentConfig')
 const GroupPlansData = require('./GroupPlansData')
 const V1SubscriptionManager = require('./V1SubscriptionManager')
 const Errors = require('../Errors/Errors')
@@ -21,7 +24,6 @@ const { expressify } = require('../../util/promises')
 const OError = require('@overleaf/o-error')
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const SubscriptionHelper = require('./SubscriptionHelper')
-const interstitialPaymentConfig = require('./interstitialPaymentConfig')
 
 const groupPlanModalOptions = Settings.groupPlanModalOptions
 const validGroupPlanModalOptions = {
@@ -29,6 +31,22 @@ const validGroupPlanModalOptions = {
   currency: groupPlanModalOptions.currencies.map(item => item.code),
   size: groupPlanModalOptions.sizes,
   usage: groupPlanModalOptions.usages.map(item => item.code),
+}
+
+function getPlansSplitOptions(assignment) {
+  if (assignment?.variant === 'personal-off') {
+    return {
+      directory: 'st-personal-off-variant',
+      plansConfig: noPersonalPlansConfig,
+      interstitialPaymentConfig: noPersonalInterstitialPaymentConfig,
+    }
+  }
+
+  return {
+    directory: 'st-personal-off-default',
+    plansConfig: hasPersonalPlansConfig,
+    interstitialPaymentConfig: hasPersonalInterstitialPaymentConfig,
+  }
 }
 
 async function plansPage(req, res) {
@@ -66,14 +84,34 @@ async function plansPage(req, res) {
     usage: getDefault('usage', 'usage', 'enterprise'),
   }
 
+  let removePersonalPlanAssingment = { variant: 'default' }
+  try {
+    removePersonalPlanAssingment =
+      await SplitTestHandler.promises.getAssignment(
+        req,
+        res,
+        'remove-personal-plan'
+      )
+  } catch (error) {
+    logger.error(
+      { err: error },
+      'Failed to get assignment for remove-personal-plan test'
+    )
+  }
+
+  const { plansConfig, directory } = getPlansSplitOptions(
+    removePersonalPlanAssingment
+  )
+
   AnalyticsManager.recordEventForSession(req.session, 'plans-page-view', {
-    currency,
+    currency: recommendedCurrency,
+    'remove-personal-plan-page': removePersonalPlanAssingment?.variant,
     countryCode,
     'geo-pricing-inr-group': geoPricingTestVariant,
     'geo-pricing-inr-page': currency === 'INR' ? 'inr' : 'default',
   })
 
-  res.render('subscriptions/plans-marketing-v2', {
+  res.render(`subscriptions/plans-marketing/${directory}/plans-marketing-v2`, {
     title: 'plans_and_pricing',
     currentView,
     plans,
@@ -82,7 +120,7 @@ async function plansPage(req, res) {
     itm_campaign: 'plans',
     recommendedCurrency: currency,
     planFeatures,
-    plansV2Config,
+    plansConfig,
     groupPlans: GroupPlansData,
     groupPlanModalOptions,
     groupPlanModalDefaults,
@@ -380,6 +418,25 @@ async function interstitialPaymentPage(req, res) {
 
   const showSkipLink = req.query?.skipLink === 'true'
 
+  let removePersonalPlanAssingment = { variant: 'default' }
+  try {
+    removePersonalPlanAssingment =
+      await SplitTestHandler.promises.getAssignment(
+        req,
+        res,
+        'remove-personal-plan'
+      )
+  } catch (error) {
+    logger.error(
+      { err: error },
+      'Failed to get assignment for remove-personal-plan test'
+    )
+  }
+
+  const { interstitialPaymentConfig, directory } = getPlansSplitOptions(
+    removePersonalPlanAssingment
+  )
+
   if (hasSubscription) {
     res.redirect('/user/subscription?hasSubscription=true')
   } else {
@@ -392,18 +449,22 @@ async function interstitialPaymentPage(req, res) {
         'geo-pricing-inr-group': geoPricingTestVariant,
         'geo-pricing-inr-page':
           recommendedCurrency === 'INR' ? 'inr' : 'default',
+        'remove-personal-plan-page': removePersonalPlanAssingment?.variant,
       }
     )
 
-    res.render('subscriptions/interstitial-payment', {
-      title: 'subscribe',
-      itm_content: req.query?.itm_content,
-      itm_campaign: req.query?.itm_campaign,
-      itm_referrer: req.query?.itm_referrer,
-      recommendedCurrency,
-      interstitialPaymentConfig,
-      showSkipLink,
-    })
+    res.render(
+      `subscriptions/plans-marketing/${directory}/interstitial-payment`,
+      {
+        title: 'subscribe',
+        itm_content: req.query?.itm_content,
+        itm_campaign: req.query?.itm_campaign,
+        itm_referrer: req.query?.itm_referrer,
+        recommendedCurrency,
+        interstitialPaymentConfig,
+        showSkipLink,
+      }
+    )
   }
 }
 

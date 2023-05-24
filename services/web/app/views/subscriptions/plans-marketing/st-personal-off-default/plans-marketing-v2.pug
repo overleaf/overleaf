@@ -1,4 +1,4 @@
-extends ../layout-marketing
+extends ../../../layout-marketing
 
 block vars
 	- entrypoint = 'pages/user/subscription/plans-v2/plans-v2-main'
@@ -20,7 +20,7 @@ block content
 							.page-header.centered.plans-header.text-centered.top-page-header
 								h1.text-capitalize(ng-non-bindable) #{translate('choose_your_plan')}
 
-					include ./plans-marketing/v2/_cards_controls_tables
+					include ./v2/_cards_controls_tables
 					.row.row-spaced-large.text-centered
 						.col-xs-12
 							p.text-centered
@@ -36,11 +36,11 @@ block content
 							i.fa.fa-cc-paypal.fa-2x(aria-hidden="true") &nbsp;
 							span.sr-only Paypal accepted
 
-					include ./plans-marketing/v2/_university_info
+					include ./v2/_university_info
 
-					include ./plans-marketing/_quotes
+					include ../_quotes
 
-					include ./plans-marketing/v2/_faq
+					include ./v2/_faq
 
 					.row.row-spaced-large
 						.col-md-12
@@ -53,5 +53,5 @@ block content
 
 					.row.row-spaced
 
-	include ./plans-marketing/_group_plan_modal
+	include ../_group_plan_modal
 	!= moduleIncludes("contactModalGeneral-marketing", locals)

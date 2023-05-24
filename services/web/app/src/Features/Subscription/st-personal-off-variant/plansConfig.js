@@ -1,16 +1,15 @@
-const plansV2Features = require('./plansV2Features')
+const plansV2Features = require('./plansFeatures')
 
 const config = {
   individual: {
     tableHead: {
       individual_free: {},
-      individual_personal: {},
       individual_collaborator: {},
       individual_professional: {},
     },
     features: plansV2Features.individual,
     highlightedColumn: {
-      index: 2,
+      index: 1,
       text: {
         monthly: 'MOST POPULAR',
         annual: 'MOST POPULAR',

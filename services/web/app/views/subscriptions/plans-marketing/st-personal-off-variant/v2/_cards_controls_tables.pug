@@ -1,0 +1,65 @@
+include ./_mixins
+
+.row.plans-v2-top-switch
+	.col-xs-12
+		ul.nav.plans-v2-nav
+			li.active.plans-v2-top-switch-individual(
+				data-ol-plans-v2-view-tab='individual'
+				event-tracking="plans-page-toggle-plan"
+				event-tracking-mb="true"
+				event-tracking-trigger="click"
+				event-segmentation='{"button": "individual"}'
+			)
+				button.btn.btn-default-outline #{translate("indvidual_plans")}
+			li.plans-v2-top-switch-group(
+				data-ol-plans-v2-view-tab='group'
+				event-tracking="plans-page-toggle-plan"
+				event-tracking-mb="true"
+				event-tracking-trigger="click"
+				event-segmentation='{"button": "group"}'
+			)
+				button.btn.btn-default-outline(
+					href="#"
+				)
+					span #{translate("group_plans")} 
+					span (save 30% or more)
+			li.plans-v2-top-switch-student(
+				data-ol-plans-v2-view-tab='student'
+				event-tracking="plans-page-toggle-plan"
+				event-tracking-mb="true"
+				event-tracking-trigger="click"
+				event-segmentation='{"button": "student"}'
+			)
+				button.btn.btn-default-outline(
+					href="#"
+				) #{translate("student_plans")}
+
++monthly_annual_switch("annual", "plans-page-toggle-period")
+
+.row(hidden data-ol-plans-v2-license-picker-container)
+	.col-sm-12
+		+group_plans_license_picker()
+
++table_sticky_header_all(plansConfig)
+
+.row.plans-v2-table-container(hidden data-ol-plans-v2-period='monthly')
+	.col-sm-12(data-ol-plans-v2-view='individual')
+		.row
+			+table_individual('monthly')
+	.col-sm-12(hidden data-ol-plans-v2-view='student')
+		.row
+			+table_student('monthly')
+
+.row.plans-v2-table-container(data-ol-plans-v2-period='annual')
+	.col-sm-12(data-ol-plans-v2-view='individual')
+		.row
+			+table_individual('annual')
+	.col-sm-12(hidden data-ol-plans-v2-view='group')
+		.row
+			+table_group('annual')
+	.col-sm-12(hidden data-ol-plans-v2-view='student')
+		.row
+			+table_student('annual')
+
+//- sticky header on mobile will be "hidden" (by removing its sticky position) if it reaches this div
+.invisible(aria-hidden="true" data-ol-plans-v2-table-sticky-header-stop)
