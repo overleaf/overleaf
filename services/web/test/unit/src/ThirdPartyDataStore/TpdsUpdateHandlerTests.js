@@ -502,13 +502,9 @@ function expectProjectCreated() {
     ).to.have.been.calledWith(this.userId, this.projectName)
   })
 
-  /**
-   * Temporarily disable flaky test
-   */
-  // eslint-disable-next-line mocha/no-skipped-tests
-  it.skip('sets the root doc', function () {
+  it('sets the root doc', function () {
     // Fire pending timers
-    this.clock.runAll()
+    this.clock.next()
     expect(
       this.RootDocManager.promises.setRootDocAutomatically
     ).to.have.been.calledWith(this.projects.active1._id)
@@ -521,13 +517,9 @@ function expectProjectNotCreated() {
       .been.called
   })
 
-  /**
-   * Temporarily disable flaky test
-   */
-  // eslint-disable-next-line mocha/no-skipped-tests
-  it.skip('does not set the root doc', function () {
+  it('does not set the root doc', function () {
     // Fire pending timers
-    this.clock.runAll()
+    this.clock.next()
     expect(this.RootDocManager.promises.setRootDocAutomatically).not.to.have
       .been.called
   })
