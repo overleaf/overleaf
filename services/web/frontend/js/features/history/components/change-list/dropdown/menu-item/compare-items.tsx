@@ -49,7 +49,7 @@ function CompareItems({
           }}
           closeDropdown={closeDropdown}
           text={t('history_compare_from_this_version')}
-          icon={<MaterialIcon type="line_start_circle" />}
+          icon={<MaterialIcon type="line_start_circle" className="fa-fw" />}
         />
       ) : null}
       {showCompareToThis ? (
@@ -62,7 +62,7 @@ function CompareItems({
           }}
           closeDropdown={closeDropdown}
           text={t('history_compare_up_to_this_version')}
-          icon={<MaterialIcon type="line_end_circle" />}
+          icon={<MaterialIcon type="line_end_circle" className="fa-fw" />}
         />
       ) : null}
     </>
