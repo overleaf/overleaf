@@ -46,12 +46,12 @@ describe('useDetachAction', function () {
 
     cy.spy(detachChannel, 'postMessage').as('postDetachMessage')
     cy.get('#trigger').click()
-    cy.get('@postDetachMessage').should('be.calledWith', {
+    cy.get('@postDetachMessage').should('have.been.calledWith', {
       role: 'detacher',
       event: 'action-some-action',
       data: { args: ['foo'] },
     })
-    cy.get('@actionFunction').should('not.be.called')
+    cy.get('@actionFunction').should('not.have.been.called')
   })
 
   it('call function as non-sender', function () {
@@ -67,8 +67,8 @@ describe('useDetachAction', function () {
 
     cy.spy(detachChannel, 'postMessage').as('postDetachMessage')
     cy.get('#trigger').click()
-    cy.get('@postDetachMessage').should('not.be.called')
-    cy.get('@actionFunction').should('be.calledWith', 'foo')
+    cy.get('@postDetachMessage').should('not.have.been.called')
+    cy.get('@actionFunction').should('have.been.calledWith', 'foo')
   })
 
   it('receive message and call function as target', function () {
@@ -92,7 +92,7 @@ describe('useDetachAction', function () {
       })
     })
 
-    cy.get('@actionFunction').should('be.calledWith', 'foo')
+    cy.get('@actionFunction').should('have.been.calledWith', 'foo')
   })
 
   it('receive message and does not call function as non-target', function () {
@@ -116,6 +116,6 @@ describe('useDetachAction', function () {
       })
     })
 
-    cy.get('@actionFunction').should('not.be.called')
+    cy.get('@actionFunction').should('not.have.been.called')
   })
 })

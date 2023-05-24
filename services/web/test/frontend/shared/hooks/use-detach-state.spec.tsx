@@ -73,7 +73,7 @@ describe('useDetachState', function () {
 
     cy.spy(detachChannel, 'postMessage').as('postDetachMessage')
     cy.get('#setValue').click()
-    cy.get('@postDetachMessage').should('be.calledWith', {
+    cy.get('@postDetachMessage').should('have.been.calledWith', {
       role: 'detacher',
       event: 'state-some-key',
       data: { value: 'barbaz1' },

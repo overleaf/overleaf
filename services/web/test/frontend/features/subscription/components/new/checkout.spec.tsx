@@ -205,13 +205,15 @@ describe('checkout panel', function () {
       })
     })
     cy.mount(<CheckoutPanelWithPaymentProvider />)
-    cy.get('@coupon').should('be.calledOnce')
+    cy.get('@coupon').should('have.been.calledOnce')
     cy.findByTestId('checkout-form').within(() => {
       cy.findByLabelText(/coupon code/i)
         .type(couponCode, { delay: 0 })
         .blur()
     })
-    cy.get('@coupon').should('be.calledTwice').and('be.calledWith', couponCode)
+    cy.get('@coupon')
+      .should('have.been.calledTwice')
+      .and('have.been.calledWith', couponCode)
   })
 
   it('enters invalid coupon code', function () {
@@ -269,13 +271,13 @@ describe('checkout panel', function () {
       })
     })
     cy.mount(<CheckoutPanelWithPaymentProvider />)
-    cy.get('@catch').should('be.calledOnce')
+    cy.get('@catch').should('have.been.calledOnce')
     cy.findByTestId('checkout-form').within(() => {
       cy.findByLabelText(/coupon code/i)
         .type('promo_code', { delay: 0 })
         .blur()
     })
-    cy.get('@catch').should('be.calledTwice')
+    cy.get('@catch').should('have.been.calledTwice')
     cy.findByRole('alert').within(() => {
       cy.contains(/an error occurred when verifying the coupon code/i)
     })
@@ -300,8 +302,8 @@ describe('checkout panel', function () {
         ITMReferrer: itmReferrer,
       })
     cy.get('@assign')
-      .should('be.calledOnce')
-      .and('be.calledWith', '/user/subscription/thank-you')
+      .should('have.been.calledOnce')
+      .and('have.been.calledWith', '/user/subscription/thank-you')
   })
   */
 

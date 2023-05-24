@@ -61,8 +61,8 @@ describe('<PdfLogsEntries/>', function () {
       name: 'Navigate to log position in source code: main.tex, 9',
     }).click()
 
-    cy.get('@findEntityByPath').should('be.calledOnce')
-    cy.get('@openDoc').should('be.calledOnceWith', fakeEntity, {
+    cy.get('@findEntityByPath').should('have.been.calledOnce')
+    cy.get('@openDoc').should('have.been.calledOnceWith', fakeEntity, {
       gotoLine: 9,
       gotoColumn: 8,
     })
@@ -93,8 +93,8 @@ describe('<PdfLogsEntries/>', function () {
       })
     })
 
-    cy.get('@findEntityByPath').should('be.calledOnce')
-    cy.get('@openDoc').should('be.calledOnceWith', fakeEntity, {
+    cy.get('@findEntityByPath').should('have.been.calledOnce')
+    cy.get('@openDoc').should('have.been.calledOnceWith', fakeEntity, {
       gotoLine: 7,
       gotoColumn: 6,
     })
@@ -117,9 +117,9 @@ describe('<PdfLogsEntries/>', function () {
       name: 'Navigate to log position in source code: main.tex, 9',
     }).click()
 
-    cy.get('@findEntityByPath').should('not.be.called')
-    cy.get('@openDoc').should('not.be.called')
-    cy.get('@postDetachMessage').should('be.calledWith', {
+    cy.get('@findEntityByPath').should('not.have.been.called')
+    cy.get('@openDoc').should('not.have.been.called')
+    cy.get('@postDetachMessage').should('have.been.calledWith', {
       role: 'detached',
       event: 'action-sync-to-entry',
       data: {

@@ -2,7 +2,9 @@ import { RouteHandler, RouteMatcher } from 'cypress/types/net-stubbing'
 
 export const interceptAsync = (route: RouteMatcher, alias: string) => {
   const deferred: { resolve: (value: RouteHandler) => void } = {
-    resolve: () => {},
+    resolve: () => {
+      console.error('This should never be called')
+    },
   }
 
   const promise = new Promise<RouteHandler>(resolve => {

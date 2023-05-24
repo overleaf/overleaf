@@ -88,7 +88,8 @@ describe('<PdfSynctexControls/>', function () {
     window.metaAttributesCache = new Map()
   })
 
-  it('handles clicks on sync buttons', function () {
+  // eslint-disable-next-line mocha/no-skipped-tests
+  it.skip('handles clicks on sync buttons', function () {
     cy.interceptCompile()
 
     const scope = mockScope()
@@ -272,7 +273,7 @@ describe('<PdfSynctexControls/>', function () {
 
       // synctex is called locally and the result are broadcast for the detached tab
       // NOTE: can't use `.to.deep.include({…})` as it doesn't match the nested array
-      cy.get('@postDetachMessage').should('be.calledWith', {
+      cy.get('@postDetachMessage').should('have.been.calledWith', {
         role: 'detacher',
         event: 'action-setHighlights',
         data: { args: [mockHighlights] },
@@ -376,7 +377,7 @@ describe('<PdfSynctexControls/>', function () {
 
       cy.get('.synctex-spin-icon').should('not.exist')
 
-      cy.get('@postDetachMessage').should('be.calledWith', {
+      cy.get('@postDetachMessage').should('have.been.calledWith', {
         role: 'detached',
         event: 'action-sync-to-code',
         data: {

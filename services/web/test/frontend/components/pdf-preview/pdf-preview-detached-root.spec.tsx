@@ -71,7 +71,7 @@ describe('<PdfPreviewDetachedRoot/>', function () {
       .should('not.be.disabled')
       .click()
 
-    cy.get('@postDetachMessage').should('be.calledWith', {
+    cy.get('@postDetachMessage').should('have.been.calledWith', {
       role: 'detached',
       event: 'action-clearCache',
       data: {
