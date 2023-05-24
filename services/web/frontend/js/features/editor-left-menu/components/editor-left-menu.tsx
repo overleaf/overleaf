@@ -5,9 +5,10 @@ import { useLayoutContext } from '../../../shared/context/layout-context'
 import classNames from 'classnames'
 import SyncMenu from './sync-menu'
 import SettingsMenu from './settings-menu'
+import LeftMenuMask from './left-menu-mask'
 
 export default function EditorLeftMenu() {
-  const { leftMenuShown, setLeftMenuShown } = useLayoutContext()
+  const { leftMenuShown } = useLayoutContext()
 
   return (
     <>
@@ -21,10 +22,7 @@ export default function EditorLeftMenu() {
         <SettingsMenu />
         <HelpMenu />
       </aside>
-      {leftMenuShown ? (
-        // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
-        <div id="left-menu-mask" onClick={() => setLeftMenuShown(false)} />
-      ) : null}
+      {leftMenuShown && <LeftMenuMask />}
     </>
   )
 }
