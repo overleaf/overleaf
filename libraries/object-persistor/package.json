@@ -22,7 +22,7 @@
     "@overleaf/logger": "*"
   },
   "dependencies": {
-    "@google-cloud/storage": "^6.9.0",
+    "@google-cloud/storage": "^6.10.1",
     "@overleaf/o-error": "*",
     "aws-sdk": "^2.718.0",
     "fast-crc32c": "overleaf/node-fast-crc32c#aae6b2a4c7a7a159395df9cc6c38dfde702d6f51",
