@@ -20,8 +20,6 @@ export type HistoryContextValue = {
   userHasFullFeature: boolean
   currentUserIsOwner: boolean
   loadingFileDiffs: boolean
-  error: Nullable<unknown>
-  setError: React.Dispatch<React.SetStateAction<HistoryContextValue['error']>>
   labels: Nullable<LoadedLabel[]>
   setLabels: React.Dispatch<React.SetStateAction<HistoryContextValue['labels']>>
   labelsOnly: boolean
@@ -31,6 +29,6 @@ export type HistoryContextValue = {
   setSelection: React.Dispatch<
     React.SetStateAction<HistoryContextValue['selection']>
   >
-  fetchNextBatchOfUpdates: () => void
+  fetchNextBatchOfUpdates: () => (() => void) | void
   resetSelection: () => void
 }

@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import { getUpdateForVersion } from './history-details'
 import type { Nullable } from '../../../../../types/utils'
 import type { FileDiff } from '../services/types/file'
 import type { FileOperation } from '../services/types/file-operation'
@@ -15,21 +14,20 @@ function getFilesWithOps(
   files: FileDiff[],
   toV: Version,
   comparing: boolean,
-  updates: LoadedUpdate[]
+  updateForToV: LoadedUpdate | undefined
 ): FileWithOps[] {
   if (toV && !comparing) {
     const filesWithOps: FileWithOps[] = []
-    const currentUpdate = getUpdateForVersion(toV, updates)
 
-    if (currentUpdate) {
-      for (const pathname of currentUpdate.pathnames) {
+    if (updateForToV) {
+      for (const pathname of updateForToV.pathnames) {
         filesWithOps.push({
           pathname,
           operation: 'edited',
         })
       }
 
-      for (const op of currentUpdate.project_ops) {
+      for (const op of updateForToV.project_ops) {
         let fileWithOps: Nullable<FileWithOps> = null
 
         if (op.add) {
@@ -86,11 +84,11 @@ export function autoSelectFile(
   files: FileDiff[],
   toV: Version,
   comparing: boolean,
-  updates: LoadedUpdate[]
+  updateForToV: LoadedUpdate | undefined
 ): FileDiff {
   let fileToSelect: Nullable<FileDiff> = null
 
-  const filesWithOps = getFilesWithOps(files, toV, comparing, updates)
+  const filesWithOps = getFilesWithOps(files, toV, comparing, updateForToV)
   for (const opType of orderedOpTypes) {
     const fileWithMatchingOpType = _.find(filesWithOps, {
       operation: opType,

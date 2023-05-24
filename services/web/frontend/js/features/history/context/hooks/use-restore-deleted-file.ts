@@ -7,12 +7,14 @@ import { isFileRemoved } from '../../utils/file-diff'
 import { waitFor } from '../../utils/wait-for'
 import { useHistoryContext } from '../history-context'
 import type { HistoryContextValue } from '../types/history-context-value'
+import { useErrorHandler } from 'react-error-boundary'
 
 export function useRestoreDeletedFile() {
   const { isLoading, runAsync } = useAsync()
-  const { projectId, setError } = useHistoryContext()
+  const { projectId } = useHistoryContext()
   const ide = useIdeContext()
   const { setView } = useLayoutContext()
+  const handleError = useErrorHandler()
 
   const restoreDeletedFile = async (
     selection: HistoryContextValue['selection']
@@ -40,7 +42,7 @@ export function useRestoreDeletedFile() {
 
             setView('editor')
           })
-          .catch(error => setError(error))
+          .catch(handleError)
       )
     }
   }

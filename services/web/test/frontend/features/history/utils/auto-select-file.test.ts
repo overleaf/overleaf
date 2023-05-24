@@ -4,6 +4,7 @@ import { autoSelectFile } from '../../../../../frontend/js/features/history/util
 import type { User } from '../../../../../frontend/js/features/history/services/types/shared'
 import { LoadedUpdate } from '../../../../../frontend/js/features/history/services/types/update'
 import { fileFinalPathname } from '../../../../../frontend/js/features/history/utils/file-diff'
+import { getUpdateForVersion } from '../../../../../frontend/js/features/history/utils/history-details'
 
 describe('autoSelectFile', function () {
   const historyUsers: User[] = [
@@ -264,7 +265,7 @@ describe('autoSelectFile', function () {
         files,
         updates[0].toV,
         comparing,
-        updates
+        getUpdateForVersion(updates[0].toV, updates)
       )
 
       expect(pathname).to.equal('newfolder1/newfile10.tex')
@@ -334,7 +335,7 @@ describe('autoSelectFile', function () {
         files,
         updates[0].toV,
         comparing,
-        updates
+        getUpdateForVersion(updates[0].toV, updates)
       )
 
       expect(pathname).to.equal('newfile1.tex')
@@ -435,7 +436,7 @@ describe('autoSelectFile', function () {
         files,
         updates[0].toV,
         comparing,
-        updates
+        getUpdateForVersion(updates[0].toV, updates)
       )
 
       expect(pathname).to.equal('main3.tex')
@@ -606,7 +607,7 @@ describe('autoSelectFile', function () {
         files,
         updates[0].toV,
         comparing,
-        updates
+        getUpdateForVersion(updates[0].toV, updates)
       )
 
       expect(pathname).to.equal('main.tex')
@@ -714,7 +715,7 @@ describe('autoSelectFile', function () {
         files,
         updates[0].toV,
         comparing,
-        updates
+        getUpdateForVersion(updates[0].toV, updates)
       )
 
       expect(pathname).to.equal('certainly_not_main.tex')
@@ -781,7 +782,12 @@ describe('autoSelectFile', function () {
       ]
 
       const pathname = fileFinalPathname(
-        autoSelectFile(files, updates[0].toV, comparing, updates)
+        autoSelectFile(
+          files,
+          updates[0].toV,
+          comparing,
+          getUpdateForVersion(updates[0].toV, updates)
+        )
       )
 
       expect(pathname).to.equal('new.bib')

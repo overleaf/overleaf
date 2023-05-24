@@ -11,7 +11,11 @@ import { RestoreFileResponse } from './types/restore-file'
 
 const BATCH_SIZE = 10
 
-export function fetchUpdates(projectId: string, before?: number) {
+export function fetchUpdates(
+  projectId: string,
+  before?: number,
+  signal?: AbortSignal
+) {
   const queryParams: Record<string, string> = {
     min_count: BATCH_SIZE.toString(),
   }
@@ -22,12 +26,12 @@ export function fetchUpdates(projectId: string, before?: number) {
 
   const queryParamsSerialized = new URLSearchParams(queryParams).toString()
   const updatesURL = `/project/${projectId}/updates?${queryParamsSerialized}`
-  return getJSON<FetchUpdatesResponse>(updatesURL)
+  return getJSON<FetchUpdatesResponse>(updatesURL, { signal })
 }
 
-export function fetchLabels(projectId: string) {
+export function fetchLabels(projectId: string, signal?: AbortSignal) {
   const labelsURL = `/project/${projectId}/labels`
-  return getJSON<Label[]>(labelsURL)
+  return getJSON<Label[]>(labelsURL, { signal })
 }
 
 export function addLabel(
@@ -46,21 +50,27 @@ export function deleteLabel(
   return deleteJSON(`/project/${projectId}/labels/${labelId}`, { signal })
 }
 
-export function diffFiles(projectId: string, fromV: number, toV: number) {
+export function diffFiles(
+  projectId: string,
+  fromV: number,
+  toV: number,
+  signal?: AbortSignal
+) {
   const queryParams: Record<string, string> = {
     from: fromV.toString(),
     to: toV.toString(),
   }
   const queryParamsSerialized = new URLSearchParams(queryParams).toString()
   const diffUrl = `/project/${projectId}/filetree/diff?${queryParamsSerialized}`
-  return getJSON<{ diff: FileDiff[] }>(diffUrl)
+  return getJSON<{ diff: FileDiff[] }>(diffUrl, { signal })
 }
 
 export function diffDoc(
   projectId: string,
   fromV: number,
   toV: number,
-  pathname: string
+  pathname: string,
+  signal?: AbortSignal
 ) {
   const queryParams: Record<string, string> = {
     from: fromV.toString(),
@@ -69,7 +79,7 @@ export function diffDoc(
   }
   const queryParamsSerialized = new URLSearchParams(queryParams).toString()
   const diffUrl = `/project/${projectId}/diff?${queryParamsSerialized}`
-  return getJSON<DocDiffResponse>(diffUrl)
+  return getJSON<DocDiffResponse>(diffUrl, { signal })
 }
 
 export function restoreFile(projectId: string, selectedFile: FileRemoved) {

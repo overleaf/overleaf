@@ -8,7 +8,7 @@ import {
 import HistoryFileTreeFolderList from './file-tree/history-file-tree-folder-list'
 
 export default function HistoryFileTree() {
-  const { selection, error } = useHistoryContext()
+  const { selection } = useHistoryContext()
 
   const fileTree = useMemo(
     () => reduce(selection.files, reducePathsToTree, []),
@@ -24,10 +24,6 @@ export default function HistoryFileTree() {
     () => fileTreeDiffToFileTreeData(sortedFileTree),
     [sortedFileTree]
   )
-
-  if (error) {
-    return null
-  }
 
   return (
     <HistoryFileTreeFolderList

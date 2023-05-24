@@ -26,6 +26,8 @@ import {
   Update,
 } from '../services/types/update'
 import { Selection } from '../services/types/selection'
+import { useErrorHandler } from 'react-error-boundary'
+import { getUpdateForVersion } from '../utils/history-details'
 
 // Allow testing of infinite scrolling by providing query string parameters to
 // limit the number of updates returned in a batch and apply a delay
@@ -92,10 +94,17 @@ function useHistory() {
     `history.userPrefs.showOnlyLabels.${projectId}`,
     false
   )
-  const [loadingFileDiffs, setLoadingFileDiffs] = useState(false)
-  const [error, setError] = useState<HistoryContextValue['error']>(null)
+
+  const updatesAbortControllerRef = useRef<AbortController | null>(null)
+  const handleError = useErrorHandler()
 
   const fetchNextBatchOfUpdates = useCallback(() => {
+    // If there is an in-flight request for updates, just let it complete, by
+    // bailing out
+    if (updatesAbortControllerRef.current) {
+      return
+    }
+
     const updatesLoadingState = updatesInfo.loadingState
 
     const loadUpdates = (updatesData: Update[]) => {
@@ -150,16 +159,20 @@ function useHistory() {
       return
     }
 
+    updatesAbortControllerRef.current = new AbortController()
+    const signal = updatesAbortControllerRef.current.signal
+
     const updatesPromise = limitUpdates(
-      fetchUpdates(projectId, updatesInfo.nextBeforeTimestamp)
+      fetchUpdates(projectId, updatesInfo.nextBeforeTimestamp, signal)
     )
-    const labelsPromise = labels == null ? fetchLabels(projectId) : null
+    const labelsPromise = labels == null ? fetchLabels(projectId, signal) : null
 
     setUpdatesInfo({
       ...updatesInfo,
       loadingState:
         updatesLoadingState === 'ready' ? 'loadingUpdates' : 'loadingInitial',
     })
+
     Promise.all([updatesPromise, labelsPromise])
       .then(([{ updates: updatesData, nextBeforeTimestamp }, labels]) => {
         const lastUpdateToV = updatesData.length ? updatesData[0].toV : null
@@ -183,75 +196,83 @@ function useHistory() {
           loadingState: 'ready',
         })
       })
-      .catch(error => {
-        setError(error)
-        setUpdatesInfo({ ...updatesInfo, atEnd: true, loadingState: 'ready' })
+      .catch(handleError)
+      .finally(() => {
+        updatesAbortControllerRef.current = null
       })
-  }, [updatesInfo, projectId, labels, userHasFullFeature])
+  }, [updatesInfo, projectId, labels, handleError, userHasFullFeature])
+
+  // Abort in-flight updates request on unmount
+  useEffect(() => {
+    return () => {
+      if (updatesAbortControllerRef.current) {
+        updatesAbortControllerRef.current.abort()
+      }
+    }
+  }, [])
+
+  // Initial load on first render
+  const initialFetch = useRef(false)
+  useEffect(() => {
+    if (view === 'history' && !initialFetch.current) {
+      initialFetch.current = true
+      return fetchNextBatchOfUpdates()
+    }
+  }, [view, fetchNextBatchOfUpdates])
 
   const resetSelection = useCallback(() => {
     setSelection(selectionInitialState)
   }, [])
 
-  // Initial load when the History tab is active
-  const initialFetch = useRef(false)
-  useEffect(() => {
-    if (view === 'history' && !initialFetch.current) {
-      fetchNextBatchOfUpdates()
-      initialFetch.current = true
-    }
-  }, [view, fetchNextBatchOfUpdates])
-
-  const { updateRange, comparing, files } = selection
+  const { updateRange } = selection
+  const { fromV, toV } = updateRange || {}
   const { updates } = updatesInfo
-  const filesEmpty = files.length === 0
+
+  const updateForToV =
+    toV === undefined ? undefined : getUpdateForVersion(toV, updates)
 
   // Load files when the update selection changes
+  const [loadingFileDiffs, setLoadingFileDiffs] = useState(false)
+
   useEffect(() => {
-    if (!updateRange || updatesInfo.loadingState !== 'ready' || !filesEmpty) {
+    if (fromV === undefined || toV === undefined) {
       return
     }
-    const { fromV, toV } = updateRange
 
+    let abortController: AbortController | null = new AbortController()
     setLoadingFileDiffs(true)
 
-    diffFiles(projectId, fromV, toV)
+    diffFiles(projectId, fromV, toV, abortController.signal)
       .then(({ diff: files }) => {
-        const selectedFile = autoSelectFile(
-          files,
-          updateRange.toV,
-          comparing,
-          updates
-        )
-        const newFiles = files.map(file => {
-          if (isFileRenamed(file) && file.newPathname) {
-            return renamePathnameKey(file)
-          }
+        setSelection(previousSelection => {
+          const selectedFile = autoSelectFile(
+            files,
+            toV,
+            previousSelection.comparing,
+            updateForToV
+          )
+          const newFiles = files.map(file => {
+            if (isFileRenamed(file) && file.newPathname) {
+              return renamePathnameKey(file)
+            }
 
-          return file
-        })
-        setSelection({
-          updateRange,
-          comparing,
-          files: newFiles,
-          selectedFile,
+            return file
+          })
+          return { ...previousSelection, files: newFiles, selectedFile }
         })
       })
-      .catch(error => {
-        setError(error)
-      })
+      .catch(handleError)
       .finally(() => {
         setLoadingFileDiffs(false)
+        abortController = null
       })
-  }, [
-    updateRange,
-    projectId,
-    updates,
-    comparing,
-    setError,
-    updatesInfo.loadingState,
-    filesEmpty,
-  ])
+
+    return () => {
+      if (abortController) {
+        abortController.abort()
+      }
+    }
+  }, [projectId, fromV, toV, updateForToV, handleError])
 
   useEffect(() => {
     // Set update range if there isn't one and updates have loaded
@@ -271,10 +292,7 @@ function useHistory() {
 
   const value = useMemo<HistoryContextValue>(
     () => ({
-      error,
-      setError,
       loadingFileDiffs,
-      setLoadingFileDiffs,
       updatesInfo,
       setUpdatesInfo,
       labels,
@@ -290,10 +308,7 @@ function useHistory() {
       resetSelection,
     }),
     [
-      error,
-      setError,
       loadingFileDiffs,
-      setLoadingFileDiffs,
       updatesInfo,
       setUpdatesInfo,
       labels,

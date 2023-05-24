@@ -1,6 +1,4 @@
 import { useCallback, useEffect, useState } from 'react'
-import withErrorBoundary from '../../../../infrastructure/error-boundary'
-import { ErrorBoundaryFallback } from '../../../../shared/components/error-boundary-fallback'
 import {
   EditorSelection,
   EditorState,
@@ -135,4 +133,4 @@ function DocumentDiffViewer({
   )
 }
 
-export default withErrorBoundary(DocumentDiffViewer, ErrorBoundaryFallback)
+export default DocumentDiffViewer

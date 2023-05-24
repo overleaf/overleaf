@@ -4,18 +4,17 @@ import { HistoryProvider, useHistoryContext } from '../context/history-context'
 import { createPortal } from 'react-dom'
 import HistoryFileTree from './history-file-tree'
 import LoadingSpinner from '../../../shared/components/loading-spinner'
-import ErrorMessage from './error-message'
+import { ErrorBoundaryFallback } from '../../../shared/components/error-boundary-fallback'
+import withErrorBoundary from '../../../infrastructure/error-boundary'
 
 const fileTreeContainer = document.getElementById('history-file-tree')
 
 function Main() {
-  const { updatesInfo, error } = useHistoryContext()
+  const { updatesInfo } = useHistoryContext()
 
   let content
   if (updatesInfo.loadingState === 'loadingInitial') {
     content = <LoadingSpinner />
-  } else if (error) {
-    content = <ErrorMessage />
   } else {
     content = (
       <>
@@ -35,10 +34,12 @@ function Main() {
   )
 }
 
-export default function HistoryRoot() {
+function HistoryRoot() {
   return (
     <HistoryProvider>
       <Main />
     </HistoryProvider>
   )
 }
+
+export default withErrorBoundary(HistoryRoot, ErrorBoundaryFallback)
