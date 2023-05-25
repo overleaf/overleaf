@@ -820,7 +820,7 @@ module.exports = {
     reportOnly: process.env.CSP_REPORT_ONLY === 'true',
     reportPercentage: parseFloat(process.env.CSP_REPORT_PERCENTAGE) || 0,
     reportUri: process.env.CSP_REPORT_URI,
-    exclude: ['app/views/project/editor', 'app/views/project/list'],
+    exclude: ['app/views/project/editor', 'app/views/project/list-react'],
   },
 
   unsupportedBrowsers: {
