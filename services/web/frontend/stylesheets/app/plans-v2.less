@@ -535,14 +535,25 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
     }
   }
 
+  // for remove-personal-plan split test default variant
   @media (max-width: @screen-xs-max) {
-    tr:not(.plans-v2-table-divider) {
+    tr.cols-4:not(.plans-v2-table-divider) {
       td:not(:first-of-type),
       th:not(:first-of-type) {
         // 25% is because table-individual have 4 real columns on mobile
         // it actually has 5 table columns, but on mobile version, the first column become row
         // we need to force 25% width to make each of 4 columns have an equal width of 1/4 screen width
         width: 25%;
+      }
+    }
+    // for remove-personal-plan split test personal-off variant
+    tr.cols-3:not(.plans-v2-table-divider) {
+      td:not(:first-of-type),
+      th:not(:first-of-type) {
+        // 33% is because table-individual have 3 real columns on mobile
+        // it actually has 4 table columns, but on mobile version, the first column become row
+        // we need to force 33% width to make each of 3 columns have an equal width of 1/3 screen width
+        width: calc(100% / 3);
       }
     }
 

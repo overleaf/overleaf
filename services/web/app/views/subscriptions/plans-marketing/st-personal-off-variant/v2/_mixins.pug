@@ -14,7 +14,7 @@ mixin plans_v2_table(period, config)
 	- var baseColspan = config.baseColspan || 1
 	- var maxColumn = config.maxColumn || 4
 	- var discountedColumn = config.discountedColumn || {}
-	tr
+	tr(class=`cols-${maxColumn}`)
 		th(colspan=baseColspan)
 		- for (var i = 0; i < maxColumn; i++)
 			- var tableHeadKey = Object.keys(config.tableHead)[i]
@@ -89,7 +89,7 @@ mixin plans_v2_table(period, config)
 							span )
 		for feature, featureIndex in featuresPerSection.items
 			tr(
-				class=(featureIndex === (featuresPerSection.items.length - 1) ? 'plans-v2-table-row-last-row-per-section' : '')
+				class=(featureIndex === (featuresPerSection.items.length - 1) ? `plans-v2-table-row-last-row-per-section cols-${maxColumn}` : `cols-${maxColumn}`)
 			)
 				td(
 					event-tracking="plans-page-table"

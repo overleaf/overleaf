@@ -2,6 +2,7 @@ const plansV2Features = require('./plansFeatures')
 
 const config = {
   individual: {
+    maxColumn: 4,
     tableHead: {
       individual_free: {},
       individual_personal: {},
