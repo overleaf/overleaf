@@ -179,6 +179,24 @@ export const figureModalPasteHandler = (): Extension => {
     return []
   }
   return EditorView.domEventHandlers({
+    drop: evt => {
+      if (!evt.dataTransfer || evt.dataTransfer.files.length === 0) {
+        return
+      }
+      const file = evt.dataTransfer.files[0]
+      if (!ALLOWED_MIME_TYPES.has(file.type)) {
+        return
+      }
+      window.dispatchEvent(
+        new CustomEvent<PastedImageData>('figure-modal:paste-image', {
+          detail: {
+            name: file.name,
+            type: file.type,
+            data: file,
+          },
+        })
+      )
+    },
     paste: evt => {
       if (!evt.clipboardData || evt.clipboardData.files.length === 0) {
         return
