@@ -239,6 +239,7 @@ const SelectFromProject: FC<{
   }, [error, dispatch])
   return (
     <SelectFile
+      key={projectId}
       files={entities}
       loading={loading}
       disabled={!projectId}
