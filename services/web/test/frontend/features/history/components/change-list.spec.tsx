@@ -119,6 +119,12 @@ describe('change list', function () {
       cy.get('@details')
         .eq(1)
         .within(() => {
+          cy.findAllByTestId('history-version-badge').should('have.length', 0)
+        })
+      // 3rd details entry
+      cy.get('@details')
+        .eq(2)
+        .within(() => {
           cy.findAllByTestId('history-version-badge').as('tags')
         })
       cy.get('@tags').should('have.length', 2)
@@ -130,12 +136,6 @@ describe('change list', function () {
           cy.findByRole('button', { name: /delete/i }).should('not.exist')
         })
       )
-      // 3rd details entry
-      cy.get('@details')
-        .eq(2)
-        .within(() => {
-          cy.findAllByTestId('history-version-badge').should('have.length', 0)
-        })
       cy.findByLabelText(/labels/i).click({ force: true })
       cy.findAllByTestId('history-version-details').as('details')
       cy.get('@details').should('have.length', 2)
@@ -328,10 +328,7 @@ describe('change list', function () {
         })
     })
 
-    // Skipping this test for now because it relies on a request to be made that
-    // isn't required and no longer happens.
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip('resets from compare to view mode when switching tabs', function () {
+    it('resets from compare to view mode when switching tabs', function () {
       cy.findAllByTestId('history-version-details')
         .eq(1)
         .within(() => {
@@ -424,10 +421,7 @@ describe('change list', function () {
       cy.wait('@download')
     })
 
-    // Skipping this test for now because it relies on a request to be made that
-    // isn't required and no longer happens.
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip('compares versions', function () {
+    it('compares versions', function () {
       cy.findAllByTestId('history-version-details').should($versions => {
         const [first, ...rest] = Array.from($versions)
         expect(first).to.have.attr('data-selected', 'true')
@@ -436,9 +430,9 @@ describe('change list', function () {
         )
       })
 
-      cy.intercept('GET', '/project/*/filetree/diff*', { statusCode: 200 }).as(
-        'compareDiff'
-      )
+      cy.intercept('GET', '/project/*/filetree/diff*', {
+        body: { diff: [{ pathname: 'main.tex' }, { pathname: 'name.tex' }] },
+      }).as('compareDiff')
 
       cy.findAllByTestId('history-version-details')
         .last()
