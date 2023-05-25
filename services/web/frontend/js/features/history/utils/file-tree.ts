@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import type { FileDiff, FileRenamed } from '../services/types/file'
-import { isFileRemoved } from './file-diff'
+import { isFileEditable, isFileRemoved } from './file-diff'
 
 export type FileTreeEntity = {
   name?: string
@@ -37,6 +37,7 @@ export function reducePathsToTree(
           type: 'folder',
           children: <FileTreeEntity[]>[],
           pathname: pathPart,
+          editable: false,
         }
 
         currentFileTreeLocation.push(fileTreeEntity)
@@ -68,17 +69,12 @@ export function fileTreeDiffToFileTreeData(
     if (file.type === 'file') {
       const deletedAtV = isFileRemoved(file) ? file.deletedAtV : undefined
 
-      let newDoc: HistoryDoc = {
+      const newDoc: HistoryDoc = {
         pathname: file.pathname ?? '',
         name: file.name ?? '',
         deletedAtV,
-      }
-
-      if ('operation' in file) {
-        newDoc = {
-          ...newDoc,
-          operation: file.operation,
-        }
+        editable: isFileEditable(file),
+        operation: 'operation' in file ? file.operation : undefined,
       }
 
       docs.push(newDoc)
@@ -115,5 +111,6 @@ export function renamePathnameKey(file: FileRenamed): FileRenamed {
     oldPathname: file.pathname,
     pathname: file.newPathname as string,
     operation: file.operation,
+    editable: file.editable,
   }
 }

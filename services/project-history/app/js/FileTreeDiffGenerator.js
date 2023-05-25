@@ -54,21 +54,20 @@ function _getInitialDiffSnapshot(chunk, fromVersion) {
   // with nothing in the diff marked as changed.
   // Use a bare object to protect against reserved names.
   const diff = Object.create(null)
-  const pathnames = _getInitialPathnames(chunk, fromVersion)
-  for (const pathname of Array.from(pathnames)) {
-    diff[pathname] = { pathname }
+  const files = _getInitialFiles(chunk, fromVersion)
+  for (const [pathname, file] of Object.entries(files)) {
+    diff[pathname] = { pathname, editable: file.isEditable() }
   }
   return diff
 }
 
-function _getInitialPathnames(chunk, fromVersion) {
+function _getInitialFiles(chunk, fromVersion) {
   const snapshot = chunk.getSnapshot()
   const changes = chunk
     .getChanges()
     .slice(0, fromVersion - chunk.getStartVersion())
   snapshot.applyAll(changes)
-  const pathnames = snapshot.getFilePathnames()
-  return pathnames
+  return snapshot.fileMap.files
 }
 
 function _applyAddFileToDiff(diff, operation) {
@@ -88,6 +87,7 @@ function _applyAddFileToDiff(diff, operation) {
     return (diff[operation.pathname] = {
       pathname: operation.pathname,
       operation: 'added',
+      editable: operation.file.isEditable(),
     })
   }
 }

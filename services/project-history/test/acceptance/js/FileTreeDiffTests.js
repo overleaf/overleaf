@@ -123,6 +123,7 @@ describe('FileTree Diffs', function () {
                   {
                     file: {
                       hash: sha('new-sha'),
+                      stringLength: 42,
                     },
                     pathname: 'added.tex',
                   },
@@ -155,15 +156,18 @@ describe('FileTree Diffs', function () {
               pathname: 'deleted.tex',
               operation: 'removed',
               deletedAtV: 5,
+              editable: true,
             },
             {
               newPathname: 'newName.tex',
               pathname: 'renamed.tex',
               operation: 'renamed',
+              editable: true,
             },
             {
               pathname: 'added.tex',
               operation: 'added',
+              editable: true,
             },
           ],
         })
@@ -269,6 +273,7 @@ describe('FileTree Diffs', function () {
                   {
                     file: {
                       hash: sha('new-sha'),
+                      stringLength: 42,
                     },
                     pathname: 'added.tex',
                   },
@@ -313,20 +318,24 @@ describe('FileTree Diffs', function () {
             },
             {
               pathname: 'baz.tex',
+              editable: true,
             },
             {
               pathname: 'deleted.tex',
               operation: 'removed',
               deletedAtV: 4,
+              editable: true,
             },
             {
               newPathname: 'newName.tex',
               pathname: 'renamed.tex',
               operation: 'renamed',
+              editable: true,
             },
             {
               pathname: 'added.tex',
               operation: 'added',
+              editable: true,
             },
           ],
         })
@@ -391,6 +400,7 @@ describe('FileTree Diffs', function () {
               newPathname: 'three.tex',
               pathname: 'one.tex',
               operation: 'renamed',
+              editable: true,
             },
           ],
         })
@@ -455,6 +465,7 @@ describe('FileTree Diffs', function () {
           diff: [
             {
               pathname: 'one.tex',
+              editable: true,
             },
           ],
         })
@@ -523,6 +534,7 @@ describe('FileTree Diffs', function () {
               pathname: 'two.tex',
               newPathname: 'one.tex',
               operation: 'renamed',
+              editable: true,
             },
           ],
         })
@@ -547,6 +559,7 @@ describe('FileTree Diffs', function () {
                     pathname: 'one.tex',
                     file: {
                       hash: sha('mock-sha'),
+                      stringLength: 42,
                     },
                   },
                 ],
@@ -583,6 +596,7 @@ describe('FileTree Diffs', function () {
             {
               pathname: 'two.tex',
               operation: 'added',
+              editable: true,
             },
           ],
         })

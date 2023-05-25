@@ -23,18 +23,23 @@ describe('autoSelectFile', function () {
       const files: FileDiff[] = [
         {
           pathname: 'main.tex',
+          editable: true,
         },
         {
           pathname: 'sample.bib',
+          editable: true,
         },
         {
           pathname: 'frog.jpg',
+          editable: false,
         },
         {
           pathname: 'newfile5.tex',
+          editable: true,
         },
         {
           pathname: 'newfolder1/newfolder2/newfile2.tex',
+          editable: true,
         },
         {
           pathname: 'newfolder1/newfile10.tex',
@@ -276,18 +281,22 @@ describe('autoSelectFile', function () {
         {
           pathname: 'main.tex',
           operation: 'added',
+          editable: true,
         },
         {
           pathname: 'sample.bib',
           operation: 'added',
+          editable: true,
         },
         {
           pathname: 'frog.jpg',
           operation: 'added',
+          editable: false,
         },
         {
           pathname: 'newfile1.tex',
           operation: 'added',
+          editable: true,
         },
       ]
 
@@ -347,17 +356,21 @@ describe('autoSelectFile', function () {
           pathname: 'main.tex',
           operation: 'removed',
           deletedAtV: 6,
+          editable: true,
         },
         {
           pathname: 'sample.bib',
+          editable: true,
         },
         {
           pathname: 'main2.tex',
           operation: 'added',
+          editable: true,
         },
         {
           pathname: 'main3.tex',
           operation: 'added',
+          editable: true,
         },
       ]
 
@@ -446,18 +459,22 @@ describe('autoSelectFile', function () {
       const files: FileDiff[] = [
         {
           pathname: 'main.tex',
+          editable: true,
         },
         {
           pathname: 'sample.bib',
+          editable: true,
         },
         {
           pathname: 'frog.jpg',
+          editable: false,
         },
         {
           pathname: 'newfolder/maybewillbedeleted.tex',
           newPathname: 'newfolder2/maybewillbedeleted.tex',
           operation: 'removed',
           deletedAtV: 10,
+          editable: true,
         },
       ]
 
@@ -617,12 +634,15 @@ describe('autoSelectFile', function () {
       const files: FileDiff[] = [
         {
           pathname: 'certainly_not_main.tex',
+          editable: true,
         },
         {
           pathname: 'newfile.tex',
+          editable: true,
         },
         {
           pathname: 'file2.tex',
+          editable: true,
         },
       ]
 
@@ -725,11 +745,13 @@ describe('autoSelectFile', function () {
       const files: FileDiff[] = [
         {
           pathname: 'main.tex',
+          editable: true,
         },
         {
           pathname: 'original.bib',
           newPathname: 'new.bib',
           operation: 'renamed',
+          editable: true,
         },
       ]
 
@@ -791,6 +813,80 @@ describe('autoSelectFile', function () {
       )
 
       expect(pathname).to.equal('new.bib')
+    })
+
+    it('ignores binary file', function () {
+      const files: FileDiff[] = [
+        {
+          pathname: 'frog.jpg',
+          editable: false,
+          operation: 'added',
+        },
+        {
+          pathname: 'main.tex',
+          editable: true,
+        },
+        {
+          pathname: 'sample.bib',
+          editable: true,
+        },
+      ]
+
+      const updates: LoadedUpdate[] = [
+        {
+          fromV: 4,
+          toV: 7,
+          meta: {
+            users: historyUsers,
+            start_ts: 1680874742389,
+            end_ts: 1680874755552,
+          },
+          labels: [],
+          pathnames: [],
+          project_ops: [
+            {
+              add: {
+                pathname: 'frog.jpg',
+              },
+              atV: 5,
+            },
+          ],
+        },
+        {
+          fromV: 0,
+          toV: 4,
+          meta: {
+            users: historyUsers,
+            start_ts: 1680861975947,
+            end_ts: 1680861988442,
+          },
+          labels: [],
+          pathnames: [],
+          project_ops: [
+            {
+              add: {
+                pathname: 'sample.bib',
+              },
+              atV: 1,
+            },
+            {
+              add: {
+                pathname: 'main.tex',
+              },
+              atV: 0,
+            },
+          ],
+        },
+      ]
+
+      const { pathname } = autoSelectFile(
+        files,
+        updates[0].toV,
+        comparing,
+        getUpdateForVersion(updates[0].toV, updates)
+      )
+
+      expect(pathname).to.equal('main.tex')
     })
   })
 })

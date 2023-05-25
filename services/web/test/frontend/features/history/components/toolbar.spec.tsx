@@ -43,13 +43,16 @@ describe('history toolbar', function () {
         },
         {
           pathname: 'sample.bib',
+          editable: true,
         },
         {
           pathname: 'frog.jpg',
+          editable: false,
         },
       ],
       selectedFile: {
         pathname: 'main.tex',
+        editable: true,
       },
     }
 
@@ -83,18 +86,22 @@ describe('history toolbar', function () {
         {
           pathname: 'main.tex',
           operation: 'added',
+          editable: true,
         },
         {
           pathname: 'sample.bib',
           operation: 'added',
+          editable: true,
         },
         {
           pathname: 'frog.jpg',
           operation: 'added',
+          editable: false,
         },
       ],
       selectedFile: {
         pathname: 'main.tex',
+        editable: true,
       },
     }
 
