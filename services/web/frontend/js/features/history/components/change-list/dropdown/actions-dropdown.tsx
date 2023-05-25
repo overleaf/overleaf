@@ -51,6 +51,7 @@ function ActionsDropdown({
       pullRight
       open={isOpened}
       onToggle={open => setIsOpened(open)}
+      className="pull-right"
     >
       <DropdownToggleWithTooltip
         bsRole="toggle"

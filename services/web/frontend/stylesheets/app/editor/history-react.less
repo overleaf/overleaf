@@ -94,10 +94,9 @@ history-root {
   }
 
   .history-version-details {
-    display: flex;
-    align-items: flex-start;
     padding-top: 8px;
     padding-bottom: 8px;
+    position: relative;
 
     &.history-version-selectable {
       cursor: pointer;
@@ -155,6 +154,11 @@ history-root {
     border-radius: 2px;
   }
 
+  .history-version-user-badge-text {
+    overflow-wrap: anywhere;
+    flex: 1;
+  }
+
   .history-version-day,
   .history-version-change-action,
   .history-version-metadata-users,
@@ -163,8 +167,13 @@ history-root {
     color: @neutral-70;
   }
 
+  .history-version-change-action {
+    overflow-wrap: anywhere;
+  }
+
   .history-version-change-doc {
     color: @neutral-90;
+    overflow-wrap: anywhere;
   }
 
   .history-version-divider {
@@ -175,6 +184,9 @@ history-root {
   .history-version-badge {
     margin-bottom: 4px;
     margin-right: 10px;
+    height: unset;
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 
   .history-version-label {
@@ -230,10 +242,6 @@ history-root {
       background-color: rgba(@neutral-90, 0.08);
       box-shadow: initial;
     }
-  }
-
-  .history-version-main-details {
-    flex: 1;
   }
 
   .history-loading-panel {
@@ -314,6 +322,10 @@ history-root {
 
   &-row {
     margin-bottom: 6.25px;
+
+    &-comment {
+      overflow-wrap: anywhere;
+    }
 
     &:last-child {
       margin-bottom: initial;

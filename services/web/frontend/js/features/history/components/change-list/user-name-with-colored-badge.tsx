@@ -31,7 +31,7 @@ function UserNameWithColoredBadge({
         className="history-version-user-badge-color"
         style={{ backgroundColor: getUserColor(user) }}
       />
-      {userName}
+      <span className="history-version-user-badge-text">{userName}</span>
     </>
   )
 }

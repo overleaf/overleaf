@@ -68,6 +68,21 @@ function LabelListItem({
       selectable={selectable}
       setSelection={setSelection}
     >
+      <HistoryDropdown
+        id={version.toString()}
+        isOpened={dropdownOpen}
+        setIsOpened={setIsOpened}
+      >
+        {dropdownActive ? (
+          <LabelDropdownContent
+            selected={selected}
+            version={version}
+            versionTimestamp={toVTimestamp}
+            projectId={projectId}
+            closeDropdownForItem={closeDropdownForItem}
+          />
+        ) : null}
+      </HistoryDropdown>
       <div className="history-version-main-details">
         {labels.map(label => (
           <div key={label.id} className="history-version-label">
@@ -99,21 +114,6 @@ function LabelListItem({
           </div>
         ))}
       </div>
-      <HistoryDropdown
-        id={version.toString()}
-        isOpened={dropdownOpen}
-        setIsOpened={setIsOpened}
-      >
-        {dropdownActive ? (
-          <LabelDropdownContent
-            selected={selected}
-            version={version}
-            versionTimestamp={toVTimestamp}
-            projectId={projectId}
-            closeDropdownForItem={closeDropdownForItem}
-          />
-        ) : null}
-      </HistoryDropdown>
     </HistoryVersionDetails>
   )
 }

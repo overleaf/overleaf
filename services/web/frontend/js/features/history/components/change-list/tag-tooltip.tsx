@@ -142,7 +142,7 @@ function TagTooltip({ label, currentUserId, showTooltip }: LabelBadgesProps) {
       description={
         <div className="history-version-label-tooltip">
           <div className="history-version-label-tooltip-row">
-            <b>
+            <b className="history-version-label-tooltip-row-comment">
               <Icon type="tag" fw />
               {label.comment}
             </b>

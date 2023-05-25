@@ -5,7 +5,8 @@
   align-items: center;
   overflow: hidden;
   height: @size;
-  padding: @padding;
+  min-height: @size;
+  padding: 0 @padding;
   white-space: nowrap;
   color: @ol-blue-gray-6;
   background-color: @neutral-20;
@@ -19,12 +20,20 @@
     margin-right: 2px;
   }
 
+  &-comment {
+    flex: 1;
+  }
+
   &-close {
     .reset-button;
     width: @size;
     margin-left: 4px;
-    margin-right: -@padding;
     font-size: 20px;
+    height: @size;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: -@padding;
 
     &:hover {
       background-color: @neutral-40;

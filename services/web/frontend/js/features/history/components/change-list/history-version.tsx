@@ -65,6 +65,24 @@ function HistoryVersion({
           updateRange={updateRangeForUpdate(update)}
           selectable={selectable}
         >
+          {faded ? null : (
+            <HistoryDropdown
+              id={`${update.fromV}_${update.toV}`}
+              isOpened={dropdownOpen}
+              setIsOpened={(isOpened: boolean) =>
+                setActiveDropdownItem({ item: update, isOpened })
+              }
+            >
+              {dropdownActive ? (
+                <VersionDropdownContent
+                  selected={selected}
+                  update={update}
+                  projectId={projectId}
+                  closeDropdownForItem={closeDropdownForItem}
+                />
+              ) : null}
+            </HistoryDropdown>
+          )}
           <div className="history-version-main-details">
             <time
               className="history-version-metadata-time"
@@ -91,24 +109,6 @@ function HistoryVersion({
             />
             <Origin origin={update.meta.origin} />
           </div>
-          {faded ? null : (
-            <HistoryDropdown
-              id={`${update.fromV}_${update.toV}`}
-              isOpened={dropdownOpen}
-              setIsOpened={(isOpened: boolean) =>
-                setActiveDropdownItem({ item: update, isOpened })
-              }
-            >
-              {dropdownActive ? (
-                <VersionDropdownContent
-                  selected={selected}
-                  update={update}
-                  projectId={projectId}
-                  closeDropdownForItem={closeDropdownForItem}
-                />
-              ) : null}
-            </HistoryDropdown>
-          )}
         </HistoryVersionDetails>
       </div>
     </>
