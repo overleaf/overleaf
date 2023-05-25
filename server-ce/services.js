@@ -15,9 +15,6 @@ module.exports = [
     name: 'filestore'
   },
   {
-    name: 'track-changes'
-  },
-  {
     name: 'docstore'
   },
   {

@@ -132,13 +132,6 @@ services:
     volumes:
       - spelling-cache:/overleaf/services/spelling/cache
 
-  track-changes:
-    build:
-      context: ..
-      dockerfile: services/track-changes/Dockerfile
-    env_file:
-      - dev.env
-
   web:
     build:
       context: ..

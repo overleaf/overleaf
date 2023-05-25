@@ -1,9 +1,0 @@
-#!/bin/bash
-
-NODE_PARAMS=""
-if [ "$DEBUG_NODE" == "true" ]; then
-    echo "running debug - track-changes"
-    NODE_PARAMS="--inspect=0.0.0.0:30150"
-fi
-
-exec /sbin/setuser www-data /usr/bin/node $NODE_PARAMS /overleaf/services/track-changes/app.js >> /var/log/sharelatex/track-changes.log 2>&1

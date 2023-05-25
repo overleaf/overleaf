@@ -112,17 +112,6 @@ services:
       - ../services/real-time/app.js:/overleaf/services/real-time/app.js
       - ../services/real-time/config:/overleaf/services/real-time/config
 
-  track-changes:
-    command: ["npm", "run", "nodemon"]
-    environment:
-      - NODE_APP_OPTIONS=--inspect=0.0.0.0:9229
-    ports:
-      - "127.0.0.1:9238:9229"
-    volumes:
-      - ../services/track-changes/app:/overleaf/services/track-changes/app
-      - ../services/track-changes/app.js:/overleaf/services/track-changes/app.js
-      - ../services/track-changes/config:/overleaf/services/track-changes/config
-
   web:
     command: ["npm", "run", "nodemon"]
     environment:
