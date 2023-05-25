@@ -3,7 +3,6 @@ const path = require('path')
 const sinon = require('sinon')
 const { expect } = require('chai')
 const { ObjectId } = require('mongodb')
-const Errors = require('../../../../app/src/Features/Errors/Errors')
 
 const MODULE_PATH = path.join(
   __dirname,
@@ -62,7 +61,6 @@ describe('ProjectController', function () {
         .callsArgWith(1, null, false),
     }
     this.TagsHandler = { getAllTags: sinon.stub() }
-    this.NotificationsHandler = { getUserNotifications: sinon.stub() }
     this.UserModel = { findById: sinon.stub(), updateOne: sinon.stub() }
     this.AuthorizationManager = {
       getPrivilegeLevelForProject: sinon.stub(),
@@ -71,9 +69,6 @@ describe('ProjectController', function () {
     this.EditorController = { renameProject: sinon.stub() }
     this.InactiveProjectManager = { reactivateProjectIfRequired: sinon.stub() }
     this.ProjectUpdateHandler = { markAsOpened: sinon.stub() }
-    this.UserPrimaryEmailCheckHandler = {
-      requiresPrimaryEmailCheck: sinon.stub().returns(false),
-    }
     this.ProjectGetter = {
       findAllUsersProjects: sinon.stub(),
       getProject: sinon.stub(),
@@ -102,9 +97,6 @@ describe('ProjectController', function () {
       isUserInvitedMemberOfProject: sinon.stub().callsArgWith(2, null, true),
     }
     this.ProjectEntityHandler = {}
-    this.NotificationBuilder = {
-      ipMatcherAffiliation: sinon.stub().returns({ create: sinon.stub() }),
-    }
     this.UserGetter = {
       getUserFullEmails: sinon.stub().yields(null, []),
       getUser: sinon
@@ -166,7 +158,6 @@ describe('ProjectController', function () {
         '../Subscription/SubscriptionLocator': this.SubscriptionLocator,
         '../Subscription/LimitationsManager': this.LimitationsManager,
         '../Tags/TagsHandler': this.TagsHandler,
-        '../Notifications/NotificationsHandler': this.NotificationsHandler,
         '../../models/User': { User: this.UserModel },
         '../Authorization/AuthorizationManager': this.AuthorizationManager,
         '../InactiveData/InactiveProjectManager': this.InactiveProjectManager,
@@ -179,7 +170,6 @@ describe('ProjectController', function () {
         './ProjectEntityHandler': this.ProjectEntityHandler,
         '../../infrastructure/Features': this.Features,
         '../Subscription/FeaturesUpdater': this.FeaturesUpdater,
-        '../Notifications/NotificationsBuilder': this.NotificationBuilder,
         '../User/UserGetter': this.UserGetter,
         '../BrandVariations/BrandVariationsHandler':
           this.BrandVariationsHandler,
@@ -188,16 +178,11 @@ describe('ProjectController', function () {
         '../Analytics/AnalyticsManager': { recordEventForUser: () => {} },
         '../Subscription/SubscriptionViewModelBuilder':
           this.SubscriptionViewModelBuilder,
-        '../../infrastructure/Modules': {
-          hooks: { fire: sinon.stub().yields(null, []) },
-        },
         '../Spelling/SpellingHandler': {
           getUserDictionary: sinon.stub().yields(null, []),
         },
         '../Institutions/InstitutionsFeatures': this.InstitutionsFeatures,
         '../Survey/SurveyHandler': this.SurveyHandler,
-        '../User/UserPrimaryEmailCheckHandler':
-          this.UserPrimaryEmailCheckHandler,
         './ProjectAuditLogHandler': this.ProjectAuditLogHandler,
       },
     })
@@ -401,535 +386,6 @@ describe('ProjectController', function () {
         done()
       }
       this.ProjectController.newProject(this.req, this.res)
-    })
-  })
-
-  describe('projectListPage', function () {
-    beforeEach(function () {
-      this.tags = [
-        { name: 1, project_ids: ['1', '2', '3'] },
-        { name: 2, project_ids: ['a', '1'] },
-        { name: 3, project_ids: ['a', 'b', 'c', 'd'] },
-      ]
-      this.notifications = [
-        {
-          _id: '1',
-          user_id: '2',
-          templateKey: '3',
-          messageOpts: '4',
-          key: '5',
-        },
-      ]
-      this.projects = [
-        { _id: 1, lastUpdated: 1, owner_ref: 'user-1' },
-        {
-          _id: 2,
-          lastUpdated: 2,
-          owner_ref: 'user-2',
-          lastUpdatedBy: 'user-1',
-        },
-      ]
-      this.collabertions = [{ _id: 5, lastUpdated: 5, owner_ref: 'user-1' }]
-      this.readOnly = [{ _id: 3, lastUpdated: 3, owner_ref: 'user-1' }]
-      this.tokenReadAndWrite = [{ _id: 6, lastUpdated: 5, owner_ref: 'user-4' }]
-      this.tokenReadOnly = [{ _id: 7, lastUpdated: 4, owner_ref: 'user-5' }]
-      this.allProjects = {
-        owned: this.projects,
-        readAndWrite: this.collabertions,
-        readOnly: this.readOnly,
-        tokenReadAndWrite: this.tokenReadAndWrite,
-        tokenReadOnly: this.tokenReadOnly,
-      }
-
-      this.users = {
-        'user-1': {
-          first_name: 'James',
-        },
-        'user-2': {
-          first_name: 'Henry',
-        },
-      }
-      this.users[this.user._id] = this.user // Owner
-      this.UserModel.findById = (id, fields, callback) => {
-        callback(null, this.users[id])
-      }
-      this.UserGetter.getUser = (id, fields, callback) => {
-        callback(null, this.users[id])
-      }
-
-      this.LimitationsManager.hasPaidSubscription.callsArgWith(1, null, false)
-      this.TagsHandler.getAllTags.callsArgWith(1, null, this.tags)
-      this.NotificationsHandler.getUserNotifications = sinon
-        .stub()
-        .callsArgWith(1, null, this.notifications, {})
-      this.ProjectGetter.findAllUsersProjects.callsArgWith(
-        2,
-        null,
-        this.allProjects
-      )
-    })
-
-    it('should render the project/list page', function (done) {
-      this.res.render = (pageName, opts) => {
-        pageName.should.equal('project/list')
-        done()
-      }
-      this.ProjectController.projectListPage(this.req, this.res)
-    })
-
-    it('should send the tags', function (done) {
-      this.res.render = (pageName, opts) => {
-        opts.tags.length.should.equal(this.tags.length)
-        done()
-      }
-      this.ProjectController.projectListPage(this.req, this.res)
-    })
-
-    it('should create trigger ip matcher notifications', function (done) {
-      this.settings.overleaf = true
-      this.res.render = (pageName, opts) => {
-        this.NotificationBuilder.ipMatcherAffiliation.called.should.equal(true)
-        done()
-      }
-      this.ProjectController.projectListPage(this.req, this.res)
-    })
-
-    it('should send the projects', function (done) {
-      this.res.render = (pageName, opts) => {
-        opts.projects.length.should.equal(
-          this.projects.length +
-            this.collabertions.length +
-            this.readOnly.length +
-            this.tokenReadAndWrite.length +
-            this.tokenReadOnly.length
-        )
-        done()
-      }
-      this.ProjectController.projectListPage(this.req, this.res)
-    })
-
-    it('should send the user', function (done) {
-      this.res.render = (pageName, opts) => {
-        opts.user.should.deep.equal(this.user)
-        done()
-      }
-      this.ProjectController.projectListPage(this.req, this.res)
-    })
-
-    it('should inject the users', function (done) {
-      this.res.render = (pageName, opts) => {
-        opts.projects[0].owner.should.equal(
-          this.users[this.projects[0].owner_ref]
-        )
-        opts.projects[1].owner.should.equal(
-          this.users[this.projects[1].owner_ref]
-        )
-        opts.projects[1].lastUpdatedBy.should.equal(
-          this.users[this.projects[1].lastUpdatedBy]
-        )
-        done()
-      }
-      this.ProjectController.projectListPage(this.req, this.res)
-    })
-
-    it('should send hasSubscription == false when no subscription', function (done) {
-      this.res.render = (pageName, opts) => {
-        opts.hasSubscription.should.equal(false)
-        done()
-      }
-      this.ProjectController.projectListPage(this.req, this.res)
-    })
-
-    it('should send hasSubscription == true when there is a subscription', function (done) {
-      this.LimitationsManager.hasPaidSubscription = sinon
-        .stub()
-        .callsArgWith(1, null, true)
-      this.res.render = (pageName, opts) => {
-        opts.hasSubscription.should.equal(true)
-        done()
-      }
-      this.ProjectController.projectListPage(this.req, this.res)
-    })
-
-    it("should send the user's best subscription when saas feature present", function (done) {
-      this.Features.hasFeature.withArgs('saas').returns(true)
-      this.res.render = (pageName, opts) => {
-        expect(opts.usersBestSubscription).to.deep.include({ type: 'free' })
-        done()
-      }
-      this.ProjectController.projectListPage(this.req, this.res)
-    })
-
-    it('should not return a best subscription without saas feature', function (done) {
-      this.Features.hasFeature.withArgs('saas').returns(false)
-      this.res.render = (pageName, opts) => {
-        expect(opts.usersBestSubscription).to.be.undefined
-        done()
-      }
-      this.ProjectController.projectListPage(this.req, this.res)
-    })
-
-    describe('front widget', function (done) {
-      beforeEach(function () {
-        this.settings.overleaf = {
-          front_chat_widget_room_id: 'chat-room-id',
-        }
-      })
-
-      it('should show for paid users', function (done) {
-        this.user.features.github = true
-        this.user.features.dropbox = true
-        this.res.render = (pageName, opts) => {
-          opts.frontChatWidgetRoomId.should.equal(
-            this.settings.overleaf.front_chat_widget_room_id
-          )
-          done()
-        }
-        this.ProjectController.projectListPage(this.req, this.res)
-      })
-
-      it('should show for sample users', function (done) {
-        this.user._id = ObjectId('588f3ddae8ebc1bac07c9f00') // last two digits
-        this.res.render = (pageName, opts) => {
-          opts.frontChatWidgetRoomId.should.equal(
-            this.settings.overleaf.front_chat_widget_room_id
-          )
-          done()
-        }
-        this.ProjectController.projectListPage(this.req, this.res)
-      })
-
-      it('should not show for non sample users', function (done) {
-        this.user._id = ObjectId('588f3ddae8ebc1bac07c9fff') // last two digits
-        this.res.render = (pageName, opts) => {
-          expect(opts.frontChatWidgetRoomId).to.equal(undefined)
-          done()
-        }
-        this.ProjectController.projectListPage(this.req, this.res)
-      })
-    })
-
-    describe('With Institution SSO feature', function () {
-      beforeEach(function (done) {
-        this.institutionEmail = 'test@overleaf.com'
-        this.institutionName = 'Overleaf'
-        this.Features.hasFeature.withArgs('saml').returns(true)
-        this.Features.hasFeature.withArgs('affiliations').returns(true)
-        this.Features.hasFeature.withArgs('overleaf-integration').returns(true)
-        done()
-      })
-      it('should show institution SSO available notification for confirmed domains', function () {
-        this.UserGetter.getUserFullEmails.yields(null, [
-          {
-            email: 'test@overleaf.com',
-            affiliation: {
-              institution: {
-                id: 1,
-                confirmed: true,
-                name: 'Overleaf',
-                ssoBeta: false,
-                ssoEnabled: true,
-              },
-            },
-          },
-        ])
-        this.res.render = (pageName, opts) => {
-          expect(opts.notificationsInstitution).to.deep.include({
-            email: this.institutionEmail,
-            institutionId: 1,
-            institutionName: this.institutionName,
-            templateKey: 'notification_institution_sso_available',
-          })
-        }
-        this.ProjectController.projectListPage(this.req, this.res)
-      })
-      it('should show a linked notification', function () {
-        this.req.session.saml = {
-          institutionEmail: this.institutionEmail,
-          linked: {
-            hasEntitlement: false,
-            universityName: this.institutionName,
-          },
-        }
-        this.res.render = (pageName, opts) => {
-          expect(opts.notificationsInstitution).to.deep.include({
-            email: this.institutionEmail,
-            institutionName: this.institutionName,
-            templateKey: 'notification_institution_sso_linked',
-          })
-        }
-        this.ProjectController.projectListPage(this.req, this.res)
-      })
-      it('should show a linked another email notification', function () {
-        // when they request to link an email but the institution returns
-        // a different email
-        this.res.render = (pageName, opts) => {
-          expect(opts.notificationsInstitution).to.deep.include({
-            institutionEmail: this.institutionEmail,
-            requestedEmail: 'requested@overleaf.com',
-            templateKey: 'notification_institution_sso_non_canonical',
-          })
-        }
-        this.req.session.saml = {
-          emailNonCanonical: this.institutionEmail,
-          institutionEmail: this.institutionEmail,
-          requestedEmail: 'requested@overleaf.com',
-          linked: {
-            hasEntitlement: false,
-            universityName: this.institutionName,
-          },
-        }
-        this.ProjectController.projectListPage(this.req, this.res)
-      })
-
-      it('should show a notification when intent was to register via SSO but account existed', function () {
-        this.res.render = (pageName, opts) => {
-          expect(opts.notificationsInstitution).to.deep.include({
-            email: this.institutionEmail,
-            templateKey: 'notification_institution_sso_already_registered',
-          })
-        }
-        this.req.session.saml = {
-          institutionEmail: this.institutionEmail,
-          linked: {
-            hasEntitlement: false,
-            universityName: 'Overleaf',
-          },
-          registerIntercept: {
-            id: 1,
-            name: 'Example University',
-          },
-        }
-        this.ProjectController.projectListPage(this.req, this.res)
-      })
-
-      it('should not show a register notification if the flow was abandoned', function () {
-        // could initially start to register with an SSO email and then
-        // abandon flow and login with an existing non-institution SSO email
-        this.res.render = (pageName, opts) => {
-          expect(opts.notificationsInstitution).to.deep.not.include({
-            email: 'test@overleaf.com',
-            templateKey: 'notification_institution_sso_already_registered',
-          })
-        }
-        this.req.session.saml = {
-          registerIntercept: {
-            id: 1,
-            name: 'Example University',
-          },
-        }
-        this.ProjectController.projectListPage(this.req, this.res)
-      })
-
-      it('should show error notification', function () {
-        this.res.render = (pageName, opts) => {
-          expect(opts.notificationsInstitution.length).to.equal(1)
-          expect(opts.notificationsInstitution[0].templateKey).to.equal(
-            'notification_institution_sso_error'
-          )
-          expect(opts.notificationsInstitution[0].error).to.be.instanceof(
-            Errors.SAMLAlreadyLinkedError
-          )
-        }
-        this.req.session.saml = {
-          institutionEmail: this.institutionEmail,
-          error: new Errors.SAMLAlreadyLinkedError(),
-        }
-        this.ProjectController.projectListPage(this.req, this.res)
-      })
-
-      describe('for an unconfirmed domain for an SSO institution', function () {
-        beforeEach(function (done) {
-          this.UserGetter.getUserFullEmails.yields(null, [
-            {
-              email: 'test@overleaf-uncofirmed.com',
-              affiliation: {
-                institution: {
-                  id: 1,
-                  confirmed: false,
-                  name: 'Overleaf',
-                  ssoBeta: false,
-                  ssoEnabled: true,
-                },
-              },
-            },
-          ])
-          done()
-        })
-        it('should not show institution SSO available notification', function () {
-          this.res.render = (pageName, opts) => {
-            expect(opts.notificationsInstitution.length).to.equal(0)
-          }
-          this.ProjectController.projectListPage(this.req, this.res)
-        })
-      })
-      describe('when linking/logging in initiated on institution side', function () {
-        it('should not show a linked another email notification', function () {
-          // this is only used when initated on Overleaf,
-          // because we keep track of the requested email they tried to link
-          this.res.render = (pageName, opts) => {
-            expect(opts.notificationsInstitution).to.not.deep.include({
-              institutionEmail: this.institutionEmail,
-              requestedEmail: undefined,
-              templateKey: 'notification_institution_sso_non_canonical',
-            })
-          }
-          this.req.session.saml = {
-            emailNonCanonical: this.institutionEmail,
-            institutionEmail: this.institutionEmail,
-            linked: {
-              hasEntitlement: false,
-              universityName: this.institutionName,
-            },
-          }
-          this.ProjectController.projectListPage(this.req, this.res)
-        })
-      })
-      describe('Institution with SSO beta testable', function () {
-        beforeEach(function (done) {
-          this.UserGetter.getUserFullEmails.yields(null, [
-            {
-              email: 'beta@beta.com',
-              affiliation: {
-                institution: {
-                  id: 2,
-                  confirmed: true,
-                  name: 'Beta University',
-                  ssoBeta: true,
-                  ssoEnabled: false,
-                },
-              },
-            },
-          ])
-          done()
-        })
-        it('should show institution SSO available notification when on a beta testing session', function () {
-          this.req.session.samlBeta = true
-          this.res.render = (pageName, opts) => {
-            expect(opts.notificationsInstitution).to.deep.include({
-              email: 'beta@beta.com',
-              institutionId: 2,
-              institutionName: 'Beta University',
-              templateKey: 'notification_institution_sso_available',
-            })
-          }
-          this.ProjectController.projectListPage(this.req, this.res)
-        })
-        it('should not show institution SSO available notification when not on a beta testing session', function () {
-          this.req.session.samlBeta = false
-          this.res.render = (pageName, opts) => {
-            expect(opts.notificationsInstitution).to.deep.not.include({
-              email: 'test@overleaf.com',
-              institutionId: 1,
-              institutionName: 'Overleaf',
-              templateKey: 'notification_institution_sso_available',
-            })
-          }
-          this.ProjectController.projectListPage(this.req, this.res)
-        })
-      })
-    })
-
-    describe('Without Institution SSO feature', function () {
-      beforeEach(function (done) {
-        this.Features.hasFeature.withArgs('saml').returns(false)
-        done()
-      })
-      it('should not show institution sso available notification', function () {
-        this.res.render = (pageName, opts) => {
-          expect(opts.notificationsInstitution).to.deep.not.include({
-            email: 'test@overleaf.com',
-            institutionId: 1,
-            institutionName: 'Overleaf',
-            templateKey: 'notification_institution_sso_available',
-          })
-        }
-        this.ProjectController.projectListPage(this.req, this.res)
-      })
-    })
-  })
-
-  describe('projectListPage with duplicate projects', function () {
-    beforeEach(function () {
-      this.tags = [
-        { name: 1, project_ids: ['1', '2', '3'] },
-        { name: 2, project_ids: ['a', '1'] },
-        { name: 3, project_ids: ['a', 'b', 'c', 'd'] },
-      ]
-      this.notifications = [
-        {
-          _id: '1',
-          user_id: '2',
-          templateKey: '3',
-          messageOpts: '4',
-          key: '5',
-        },
-      ]
-      this.projects = [
-        { _id: 1, lastUpdated: 1, owner_ref: 'user-1' },
-        { _id: 2, lastUpdated: 2, owner_ref: 'user-2' },
-      ]
-      this.collabertions = [{ _id: 5, lastUpdated: 5, owner_ref: 'user-1' }]
-      this.readOnly = [{ _id: 3, lastUpdated: 3, owner_ref: 'user-1' }]
-      this.tokenReadAndWrite = [{ _id: 6, lastUpdated: 5, owner_ref: 'user-4' }]
-      this.tokenReadOnly = [
-        { _id: 6, lastUpdated: 5, owner_ref: 'user-4' }, // Also in tokenReadAndWrite
-        { _id: 7, lastUpdated: 4, owner_ref: 'user-5' },
-      ]
-      this.allProjects = {
-        owned: this.projects,
-        readAndWrite: this.collabertions,
-        readOnly: this.readOnly,
-        tokenReadAndWrite: this.tokenReadAndWrite,
-        tokenReadOnly: this.tokenReadOnly,
-      }
-
-      this.users = {
-        'user-1': {
-          first_name: 'James',
-        },
-        'user-2': {
-          first_name: 'Henry',
-        },
-      }
-      this.users[this.user._id] = this.user // Owner
-      this.UserModel.findById = (id, fields, callback) => {
-        callback(null, this.users[id])
-      }
-
-      this.LimitationsManager.hasPaidSubscription.callsArgWith(1, null, false)
-      this.TagsHandler.getAllTags.callsArgWith(1, null, this.tags)
-      this.NotificationsHandler.getUserNotifications = sinon
-        .stub()
-        .callsArgWith(1, null, this.notifications, {})
-      this.ProjectGetter.findAllUsersProjects.callsArgWith(
-        2,
-        null,
-        this.allProjects
-      )
-    })
-
-    it('should render the project/list page', function (done) {
-      this.res.render = (pageName, opts) => {
-        pageName.should.equal('project/list')
-        done()
-      }
-      this.ProjectController.projectListPage(this.req, this.res)
-    })
-
-    it('should omit one of the projects', function (done) {
-      this.res.render = (pageName, opts) => {
-        opts.projects.length.should.equal(
-          this.projects.length +
-            this.collabertions.length +
-            this.readOnly.length +
-            this.tokenReadAndWrite.length +
-            this.tokenReadOnly.length -
-            1
-        )
-        done()
-      }
-      this.ProjectController.projectListPage(this.req, this.res)
     })
   })
 
