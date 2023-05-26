@@ -65,6 +65,7 @@ export type State = {
   isLoading: boolean
   data: {
     byId: NormalizedObject<UserEmailData>
+    emailCount: number
     linkedInstitutionIds: NonNullable<UserEmailData['samlProviderId']>[]
     emailAffiliationBeingEdited: Nullable<UserEmailData['email']>
   }
@@ -82,6 +83,7 @@ const setData = (state: State, action: ActionSetData) => {
   const normalized = normalize<UserEmailData>(action.payload, {
     idAttribute: 'email',
   })
+  const emailCount = action.payload.length
   const byId = normalized || {}
   const linkedInstitutionIds = action.payload
     .filter(email => Boolean(email.samlProviderId))
@@ -94,6 +96,7 @@ const setData = (state: State, action: ActionSetData) => {
     data: {
       ...initialState.data,
       byId,
+      emailCount,
       linkedInstitutionIds,
     },
   }
@@ -132,6 +135,7 @@ const deleteEmailAction = (state: State, action: ActionDeleteEmail) => {
     ...state,
     data: {
       ...state.data,
+      emailCount: state.data.emailCount - 1,
       byId,
     },
   }
@@ -191,6 +195,7 @@ const initialState: State = {
   isLoading: false,
   data: {
     byId: {},
+    emailCount: 0,
     linkedInstitutionIds: [],
     emailAffiliationBeingEdited: null,
   },

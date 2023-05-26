@@ -10,6 +10,7 @@ import { expect } from 'chai'
 import fetchMock from 'fetch-mock'
 import { UserEmailData } from '../../../../../../types/user-email'
 import { Affiliation } from '../../../../../../types/affiliation'
+import withMarkup from '../../../../helpers/with-markup'
 
 const userEmailData: UserEmailData & { affiliation: Affiliation } = {
   affiliation: {
@@ -147,6 +148,23 @@ describe('<EmailsSection />', function () {
     fireEvent.click(button)
 
     screen.getByRole('button', { name: /add new email/i })
+  })
+
+  it('prevent users from adding new emails when the limit is reached', async function () {
+    const emails = []
+    for (let i = 0; i < 10; i++) {
+      emails.push({ email: `bar${i}@overleaf.com` })
+    }
+    fetchMock.get('/user/emails?ensureAffiliation=true', emails)
+    render(<EmailsSection />)
+
+    const findByTextWithMarkup = withMarkup(screen.findByText)
+    await findByTextWithMarkup(
+      'You can have a maximum of 10 email addresses on this account. To add another email address, please delete an existing one.'
+    )
+
+    expect(screen.queryByRole('button', { name: /add another email/i })).to.not
+      .exist
   })
 
   it('adds new email address', async function () {

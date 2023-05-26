@@ -14,7 +14,11 @@ describe('UserEmailsController', function () {
     this.req.sessionID = Math.random().toString()
     this.res = new MockResponse()
     this.next = sinon.stub()
-    this.user = { _id: 'mock-user-id', email: 'example@overleaf.com' }
+    this.user = {
+      _id: 'mock-user-id',
+      email: 'example@overleaf.com',
+      emails: {},
+    }
 
     this.UserGetter = {
       getUserFullEmails: sinon.stub(),
@@ -233,6 +237,28 @@ describe('UserEmailsController', function () {
         done()
       })
       this.UserEmailsController.add(this.req, this.res, this.next)
+    })
+
+    it('should fail to add new emails when the limit has been reached', function (done) {
+      this.user.emails = []
+      for (let i = 0; i < 10; i++) {
+        this.user.emails.push({ email: `example${i}@overleaf.com` })
+      }
+      this.UserEmailsController.add(
+        this.req,
+        {
+          status: code => {
+            expect(code).to.equal(422)
+            return {
+              json: error => {
+                expect(error.message).to.equal('secondary email limit exceeded')
+                done()
+              },
+            }
+          },
+        },
+        this.next
+      )
     })
   })
 

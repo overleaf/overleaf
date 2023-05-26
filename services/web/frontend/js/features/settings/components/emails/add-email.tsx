@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, Trans } from 'react-i18next'
 import { Col } from 'react-bootstrap'
 import Cell from './cell'
 import Layout from './add-email/layout'
@@ -15,6 +15,7 @@ import { postJSON } from '../../../../infrastructure/fetch-json'
 import { University } from '../../../../../../types/university'
 import { CountryCode } from '../../data/countries-list'
 import { isValidEmail } from '../../../../shared/utils/email'
+import getMeta from '../../../../utils/meta'
 
 function AddEmail() {
   const { t } = useTranslation()
@@ -37,6 +38,8 @@ function AddEmail() {
     setLoading: setUserEmailsContextLoading,
     getEmails,
   } = useUserEmailsContext()
+
+  const emailAddressLimit = getMeta('ol-emailAddressLimit', 10)
 
   useEffect(() => {
     setUserEmailsContextLoading(isLoading)
@@ -98,9 +101,21 @@ function AddEmail() {
   if (!isFormVisible) {
     return (
       <Layout isError={isError} error={error}>
-        <Col md={4}>
+        <Col md={12}>
           <Cell>
-            <AddAnotherEmailBtn onClick={handleShowAddEmailForm} />
+            {state.data.emailCount >= emailAddressLimit ? (
+              <span className="small">
+                <Trans
+                  i18nKey="email_limit_reached"
+                  values={{
+                    emailAddressLimit,
+                  }}
+                  components={[<strong />]} // eslint-disable-line react/jsx-key
+                />
+              </span>
+            ) : (
+              <AddAnotherEmailBtn onClick={handleShowAddEmailForm} />
+            )}
           </Cell>
         </Col>
       </Layout>

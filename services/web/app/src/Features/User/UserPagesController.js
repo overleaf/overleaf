@@ -125,6 +125,7 @@ async function settingsPage(req, res) {
     projectSyncSuccessMessage,
     showPersonalAccessToken,
     personalAccessTokens,
+    emailAddressLimit: Settings.emailAddressLimit,
   })
 }
 

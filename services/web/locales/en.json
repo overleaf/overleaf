@@ -430,6 +430,7 @@
   "email_already_registered_secondary": "This email is already registered as a secondary email",
   "email_already_registered_sso": "This email is already registered. Please log in to your account another way and link your account to the new provider via your account settings.",
   "email_does_not_belong_to_university": "We don’t recognize that domain as being affiliated with your university. Please contact us to add the affiliation.",
+  "email_limit_reached": "You can have a maximum of <0>__emailAddressLimit__ email addresses</0> on this account. To add another email address, please delete an existing one.",
   "email_link_expired": "Email link expired, please request a new one.",
   "email_or_password_wrong_try_again": "Your email or password is incorrect. Please try again.",
   "email_or_password_wrong_try_again_or_reset": "Your email or password is incorrect. Please try again, or <0>set or reset your password</0>.",

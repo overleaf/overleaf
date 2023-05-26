@@ -6,10 +6,18 @@ import {
   defaultSetupMocks,
   reconfirmationSetupMocks,
   errorsMocks,
+  emailLimitSetupMocks,
 } from './helpers/emails'
 
 export const EmailsList = args => {
   useFetchMock(defaultSetupMocks)
+  setDefaultMeta()
+
+  return <EmailsSection {...args} />
+}
+
+export const EmailLimitList = args => {
+  useFetchMock(emailLimitSetupMocks)
   setDefaultMeta()
 
   return <EmailsSection {...args} />

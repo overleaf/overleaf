@@ -1,3 +1,4 @@
+const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
 const SessionManager = require('../Authentication/SessionManager')
 const UserGetter = require('./UserGetter')
@@ -32,7 +33,14 @@ async function add(req, res, next) {
   if (!email) {
     return res.sendStatus(422)
   }
-  const user = await UserGetter.promises.getUser(userId, { email: 1 })
+  const user = await UserGetter.promises.getUser(userId, {
+    email: 1,
+    'emails.email': 1,
+  })
+
+  if (user.emails.length >= Settings.emailAddressLimit) {
+    return res.status(422).json({ message: 'secondary email limit exceeded' })
+  }
 
   const affiliationOptions = {
     university: req.body.university,

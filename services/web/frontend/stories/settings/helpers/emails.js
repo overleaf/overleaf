@@ -176,6 +176,18 @@ export function reconfirmationSetupMocks(fetchMock) {
   })
 }
 
+export function emailLimitSetupMocks(fetchMock) {
+  const userData = []
+  for (let i = 0; i < 10; i++) {
+    userData.push({ email: `example${i}@overleaf.com` })
+  }
+  defaultSetupMocks(fetchMock)
+  fetchMock.get(/\/user\/emails/, userData, {
+    delay: MOCK_DELAY,
+    overwriteRoutes: true,
+  })
+}
+
 export function errorsMocks(fetchMock) {
   fetchMock
     .get(/\/user\/emails/, fakeUsersData, { delay: MOCK_DELAY })

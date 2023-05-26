@@ -684,6 +684,8 @@ module.exports = {
   emailConfirmationDisabled:
     process.env.EMAIL_CONFIRMATION_DISABLED === 'true' || false,
 
+  emailAddressLimit: intFromEnv('EMAIL_ADDRESS_LIMIT', 10),
+
   enabledServices: (process.env.ENABLED_SERVICES || 'web,api')
     .split(',')
     .map(s => s.trim()),
