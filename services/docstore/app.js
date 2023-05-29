@@ -23,6 +23,7 @@ logger.initialize('docstore')
 if (Metrics.event_loop != null) {
   Metrics.event_loop.monitor(logger)
 }
+Metrics.leaked_sockets.monitor(logger)
 Metrics.open_sockets.monitor()
 
 const app = express()
