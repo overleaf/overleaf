@@ -18,7 +18,6 @@ const Path = require('path')
 
 Metrics.open_sockets.monitor(true)
 Metrics.memory.monitor(logger)
-Metrics.leaked_sockets.monitor(logger)
 
 const ProjectPersistenceManager = require('./app/js/ProjectPersistenceManager')
 const OutputCacheManager = require('./app/js/OutputCacheManager')

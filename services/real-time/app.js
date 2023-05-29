@@ -6,7 +6,6 @@ const async = require('async')
 const logger = require('@overleaf/logger')
 logger.initialize('real-time')
 Metrics.event_loop.monitor(logger)
-Metrics.leaked_sockets.monitor(logger)
 Metrics.open_sockets.monitor()
 
 const express = require('express')
