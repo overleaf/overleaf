@@ -24,11 +24,12 @@ function Compare({
     e.stopPropagation()
     closeDropdown()
 
-    setSelection({
+    setSelection(({ previouslySelectedPathname }) => ({
       updateRange: comparisonRange,
       comparing: true,
       files: [],
-    })
+      previouslySelectedPathname,
+    }))
   }
 
   return (

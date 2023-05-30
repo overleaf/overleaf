@@ -26,8 +26,8 @@ else
 			minimum-restore-size-west="130"
 			custom-toggler-pane=hasFeature('custom-togglers') ? "west" : false
 			custom-toggler-msg-when-open=hasFeature('custom-togglers') ? translate("tooltip_hide_filetree") : false
-			custom-toggler-msg-when-closed=hasFeature('custom-togglers') ? translate("tooltip_show_filetree") : false
-			tabindex="0"
+		custom-toggler-msg-when-closed=hasFeature('custom-togglers') ? translate("tooltip_show_filetree") : false
+		tabindex="0"
 			initial-size-east="250"
 			init-closed-east="true"
 			open-east="ui.chatOpen"
@@ -44,9 +44,7 @@ else
 				include ./editor
 
 				if (historyViewReact)
-					history-root(
-						ng-if="ui.view == 'history'"
-					)
+					history-root()
 				else
 					include ./history
 

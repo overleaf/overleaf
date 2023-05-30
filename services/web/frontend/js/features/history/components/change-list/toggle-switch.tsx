@@ -46,11 +46,12 @@ function ToggleSwitch({ labelsOnly, setLabelsOnly }: ToggleSwitchProps) {
             updateRange
           )
 
-          setSelection({
+          setSelection(({ previouslySelectedPathname }) => ({
             updateRange: range,
             comparing: false,
             files: [],
-          })
+            previouslySelectedPathname,
+          }))
         }
       }
     }

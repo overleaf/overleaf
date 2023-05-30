@@ -21,11 +21,12 @@ function HistoryVersionDetails({
   const handleSelect = (e: MouseEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement
     if (!target.closest('.dropdown') && e.currentTarget.contains(target)) {
-      setSelection({
+      setSelection(({ previouslySelectedPathname }) => ({
         updateRange,
         comparing: false,
         files: [],
-      })
+        previouslySelectedPathname,
+      }))
     }
   }
 

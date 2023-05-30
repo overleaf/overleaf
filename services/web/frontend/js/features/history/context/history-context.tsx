@@ -63,6 +63,16 @@ const selectionInitialState: Selection = {
   updateRange: null,
   comparing: false,
   files: [],
+  previouslySelectedPathname: null,
+}
+
+const updatesInfoInitialState: HistoryContextValue['updatesInfo'] = {
+  updates: [],
+  visibleUpdateCount: null,
+  atEnd: false,
+  freeHistoryLimitHit: false,
+  nextBeforeTimestamp: undefined,
+  loadingState: 'loadingInitial',
 }
 
 function useHistory() {
@@ -81,14 +91,7 @@ function useHistory() {
 
   const [updatesInfo, setUpdatesInfo] = useState<
     HistoryContextValue['updatesInfo']
-  >({
-    updates: [],
-    visibleUpdateCount: null,
-    atEnd: false,
-    freeHistoryLimitHit: false,
-    nextBeforeTimestamp: undefined,
-    loadingState: 'loadingInitial',
-  })
+  >(updatesInfoInitialState)
   const [labels, setLabels] = useState<HistoryContextValue['labels']>(null)
   const [labelsOnly, setLabelsOnly] = usePersistedState(
     `history.userPrefs.showOnlyLabels.${projectId}`,
@@ -220,6 +223,20 @@ function useHistory() {
     }
   }, [view, fetchNextBatchOfUpdates])
 
+  useEffect(() => {
+    // Reset some parts of the state
+    if (view !== 'history') {
+      initialFetch.current = false
+      setSelection(prevSelection => ({
+        ...selectionInitialState,
+        // retain the previously selected pathname
+        previouslySelectedPathname: prevSelection.previouslySelectedPathname,
+      }))
+      setUpdatesInfo(updatesInfoInitialState)
+      setLabels(null)
+    }
+  }, [view])
+
   const resetSelection = useCallback(() => {
     setSelection(selectionInitialState)
   }, [])
@@ -249,7 +266,8 @@ function useHistory() {
             files,
             toV,
             previousSelection.comparing,
-            updateForToV
+            updateForToV,
+            previousSelection.previouslySelectedPathname
           )
           const newFiles = files.map(file => {
             if (isFileRenamed(file) && file.newPathname) {
@@ -258,7 +276,12 @@ function useHistory() {
 
             return file
           })
-          return { ...previousSelection, files: newFiles, selectedFile }
+          return {
+            ...previousSelection,
+            files: newFiles,
+            selectedFile,
+            previouslySelectedPathname: selectedFile.pathname,
+          }
         })
       })
       .catch(handleError)
@@ -277,7 +300,8 @@ function useHistory() {
   useEffect(() => {
     // Set update range if there isn't one and updates have loaded
     if (updates.length && !updateRange) {
-      setSelection({
+      setSelection(prevSelection => ({
+        ...prevSelection,
         updateRange: {
           fromV: updates[0].fromV,
           toV: updates[0].toV,
@@ -286,7 +310,7 @@ function useHistory() {
         },
         comparing: false,
         files: [],
-      })
+      }))
     }
   }, [updateRange, updates])
 

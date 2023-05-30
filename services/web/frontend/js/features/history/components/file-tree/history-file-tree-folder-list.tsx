@@ -30,6 +30,7 @@ function HistoryFileTreeFolderList({
           return {
             ...prevSelection,
             selectedFile: file,
+            previouslySelectedPathname: file.pathname,
           }
         }
 

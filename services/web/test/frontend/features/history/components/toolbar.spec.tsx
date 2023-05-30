@@ -54,6 +54,7 @@ describe('history toolbar', function () {
         pathname: 'main.tex',
         editable: true,
       },
+      previouslySelectedPathname: null,
     }
 
     cy.mount(
@@ -103,6 +104,7 @@ describe('history toolbar', function () {
         pathname: 'main.tex',
         editable: true,
       },
+      previouslySelectedPathname: null,
     }
 
     cy.mount(

@@ -270,7 +270,8 @@ describe('autoSelectFile', function () {
         files,
         updates[0].toV,
         comparing,
-        getUpdateForVersion(updates[0].toV, updates)
+        getUpdateForVersion(updates[0].toV, updates),
+        null
       )
 
       expect(pathname).to.equal('newfolder1/newfile10.tex')
@@ -344,7 +345,8 @@ describe('autoSelectFile', function () {
         files,
         updates[0].toV,
         comparing,
-        getUpdateForVersion(updates[0].toV, updates)
+        getUpdateForVersion(updates[0].toV, updates),
+        null
       )
 
       expect(pathname).to.equal('newfile1.tex')
@@ -449,7 +451,8 @@ describe('autoSelectFile', function () {
         files,
         updates[0].toV,
         comparing,
-        getUpdateForVersion(updates[0].toV, updates)
+        getUpdateForVersion(updates[0].toV, updates),
+        null
       )
 
       expect(pathname).to.equal('main3.tex')
@@ -624,7 +627,8 @@ describe('autoSelectFile', function () {
         files,
         updates[0].toV,
         comparing,
-        getUpdateForVersion(updates[0].toV, updates)
+        getUpdateForVersion(updates[0].toV, updates),
+        null
       )
 
       expect(pathname).to.equal('main.tex')
@@ -735,7 +739,8 @@ describe('autoSelectFile', function () {
         files,
         updates[0].toV,
         comparing,
-        getUpdateForVersion(updates[0].toV, updates)
+        getUpdateForVersion(updates[0].toV, updates),
+        null
       )
 
       expect(pathname).to.equal('certainly_not_main.tex')
@@ -808,7 +813,8 @@ describe('autoSelectFile', function () {
           files,
           updates[0].toV,
           comparing,
-          getUpdateForVersion(updates[0].toV, updates)
+          getUpdateForVersion(updates[0].toV, updates),
+          null
         )
       )
 
@@ -883,7 +889,8 @@ describe('autoSelectFile', function () {
         files,
         updates[0].toV,
         comparing,
-        getUpdateForVersion(updates[0].toV, updates)
+        getUpdateForVersion(updates[0].toV, updates),
+        null
       )
 
       expect(pathname).to.equal('main.tex')

@@ -2,6 +2,7 @@ import type { Nullable } from '../../../../../types/utils'
 import type { FileDiff } from '../services/types/file'
 import type { FileOperation } from '../services/types/file-operation'
 import type { LoadedUpdate, Version } from '../services/types/update'
+import type { Selection } from '../services/types/selection'
 import { fileFinalPathname, isFileEditable } from './file-diff'
 
 type FileWithOps = {
@@ -100,9 +101,21 @@ export function autoSelectFile(
   files: FileDiff[],
   toV: Version,
   comparing: boolean,
-  updateForToV: LoadedUpdate | undefined
+  updateForToV: LoadedUpdate | undefined,
+  previouslySelectedPathname: Selection['previouslySelectedPathname']
 ): FileDiff {
   const filesWithOps = getFilesWithOps(files, toV, comparing, updateForToV)
+  const previouslySelectedFile = files.find(file => {
+    return file.pathname === previouslySelectedPathname
+  })
+  const previouslySelectedFileHasOp = filesWithOps.some(file => {
+    return file.pathname === previouslySelectedPathname
+  })
+
+  if (previouslySelectedFile && previouslySelectedFileHasOp) {
+    return previouslySelectedFile
+  }
+
   for (const opType of orderedOpTypes) {
     const fileWithMatchingOpType = filesWithOps.find(
       file => file.operation === opType && file.editable
@@ -119,6 +132,7 @@ export function autoSelectFile(
   }
 
   return (
+    previouslySelectedFile ||
     files.find(file => /main\.tex$/.test(file.pathname)) ||
     files.find(file => /\.tex$/.test(file.pathname)) ||
     files[0]
