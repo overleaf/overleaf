@@ -116,6 +116,7 @@
     "@replit/codemirror-indentation-markers": "overleaf/codemirror-indentation-markers#1b1f93c0bcd04293aea6986aa2275185b2c56803",
     "@replit/codemirror-vim": "overleaf/codemirror-vim#07f1b50f4b2e703792da75a29e9e1e479b6b7067",
     "@sentry/browser": "^7.8.1",
+    "@slack/webhook": "^6.1.0",
     "@uppy/core": "^1.15.0",
     "@uppy/dashboard": "^1.11.0",
     "@uppy/react": "^1.11.0",
