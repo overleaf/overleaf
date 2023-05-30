@@ -1,0 +1,9 @@
+--- services/web/app/views/project/editor/file-tree-react.pug
++++ services/web/app/views/project/editor/file-tree-react.pug
+@@ -38,5 +38,3 @@ aside.editor-sidebar.full-size
+ 				highlighted-line="highlightedLine"
+ 				show="show"
+ 			)
+-
+-	documentation-button
+\ No newline at end of file
