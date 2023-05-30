@@ -27,6 +27,7 @@ Metrics.memory.monitor(logger)
 if (Metrics.event_loop) {
   Metrics.event_loop.monitor(logger)
 }
+Metrics.leaked_sockets.monitor(logger)
 
 app.use(function (req, res, next) {
   Metrics.inc('http-request')

@@ -84,7 +84,9 @@ const REDACT_REGEX = /^(Authorization|Set-Cookie|Cookie):.*?\r/gim
 function redactObject(obj) {
   const result = {}
   for (const [key, value] of Object.entries(obj)) {
-    if (key === 'headers') {
+    if (value == null) {
+      result[key] = null
+    } else if (key === 'headers') {
       // remove headers with sensitive information
       result[key] = flattenHeaders(value).replace(
         REDACT_REGEX,

@@ -12,6 +12,7 @@ if (Settings.sentry?.dsn != null) {
   logger.initializeErrorReporting(Settings.sentry.dsn)
 }
 metrics.memory.monitor(logger)
+metrics.leaked_sockets.monitor(logger)
 metrics.open_sockets.monitor()
 
 export const app = express()

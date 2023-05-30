@@ -34,6 +34,7 @@ http.globalAgent.maxSockets = Settings.limits.httpGlobalAgentMaxSockets
 https.globalAgent.maxSockets = Settings.limits.httpsGlobalAgentMaxSockets
 
 metrics.memory.monitor(logger)
+metrics.leaked_sockets.monitor(logger)
 metrics.open_sockets.monitor()
 
 const Server = require('./app/src/infrastructure/Server')
