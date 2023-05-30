@@ -34,6 +34,7 @@ module.exports = FixturesManager = {
       privilegeLevel,
       project,
       publicAccess,
+      userMetadata,
     } = options
 
     const privileges = {}
@@ -42,7 +43,15 @@ module.exports = FixturesManager = {
       privileges['anonymous-user'] = publicAccess
     }
 
-    MockWebServer.createMockProject(projectId, privileges, project)
+    const metadataByUser = {}
+    metadataByUser[userId] = userMetadata
+
+    MockWebServer.createMockProject(
+      projectId,
+      privileges,
+      project,
+      metadataByUser
+    )
     return MockWebServer.run(error => {
       if (error != null) {
         throw error

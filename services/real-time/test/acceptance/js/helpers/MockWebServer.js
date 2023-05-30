@@ -16,9 +16,11 @@ const express = require('express')
 module.exports = MockWebServer = {
   projects: {},
   privileges: {},
+  userMetadata: {},
 
-  createMockProject(projectId, privileges, project) {
+  createMockProject(projectId, privileges, project, metadataByUser) {
     MockWebServer.privileges[projectId] = privileges
+    MockWebServer.userMetadata[projectId] = metadataByUser
     return (MockWebServer.projects[projectId] = project)
   },
 
@@ -26,12 +28,12 @@ module.exports = MockWebServer = {
     if (callback == null) {
       callback = function () {}
     }
-    return callback(
-      null,
-      MockWebServer.projects[projectId],
+    const project = MockWebServer.projects[projectId]
+    const privilegeLevel =
       MockWebServer.privileges[projectId][userId] ||
-        MockWebServer.privileges[projectId]['anonymous-user']
-    )
+      MockWebServer.privileges[projectId]['anonymous-user']
+    const userMetadata = MockWebServer.userMetadata[projectId]?.[userId]
+    return callback(null, project, privilegeLevel, userMetadata)
   },
 
   joinProjectRequest(req, res, next) {
@@ -52,13 +54,16 @@ module.exports = MockWebServer = {
       return MockWebServer.joinProject(
         projectId,
         userId,
-        (error, project, privilegeLevel) => {
+        (error, project, privilegeLevel, userMetadata) => {
           if (error != null) {
             return next(error)
           }
           return res.json({
             project,
             privilegeLevel,
+            isRestrictedUser: !!userMetadata?.isRestrictedUser,
+            isTokenMember: !!userMetadata?.isTokenMember,
+            isInvitedMember: !!userMetadata?.isInvitedMember,
           })
         }
       )

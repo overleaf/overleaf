@@ -57,8 +57,13 @@ async function joinProject(req, res, next) {
     userId = null
   }
   Metrics.inc('editor.join-project')
-  const { project, privilegeLevel, isRestrictedUser } =
-    await _buildJoinProjectView(req, projectId, userId)
+  const {
+    project,
+    privilegeLevel,
+    isRestrictedUser,
+    isTokenMember,
+    isInvitedMember,
+  } = await _buildJoinProjectView(req, projectId, userId)
   if (!project) {
     return res.sendStatus(403)
   }
@@ -85,6 +90,8 @@ async function joinProject(req, res, next) {
     project,
     privilegeLevel,
     isRestrictedUser,
+    isTokenMember,
+    isInvitedMember,
   })
 }
 
@@ -150,6 +157,8 @@ async function _buildJoinProjectView(req, projectId, userId) {
       deletedDocsFromDocstore
     ),
     privilegeLevel,
+    isTokenMember,
+    isInvitedMember,
     isRestrictedUser,
   }
 }

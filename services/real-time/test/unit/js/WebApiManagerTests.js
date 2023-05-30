@@ -43,6 +43,8 @@ describe('WebApiManager', function () {
           project: { name: 'Test project' },
           privilegeLevel: 'owner',
           isRestrictedUser: true,
+          isTokenMember: true,
+          isInvitedMember: true,
         }
         this.request.post = sinon
           .stub()
@@ -79,7 +81,11 @@ describe('WebApiManager', function () {
             null,
             this.response.project,
             this.response.privilegeLevel,
-            this.response.isRestrictedUser
+            {
+              isRestrictedUser: this.response.isRestrictedUser,
+              isTokenMember: this.response.isTokenMember,
+              isInvitedMember: this.response.isInvitedMember,
+            }
           )
           .should.equal(true)
       })

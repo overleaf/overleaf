@@ -31,6 +31,14 @@ module.exports = WebsocketLoadBalancer = {
       if (message?.payload?.includes(userId)) {
         return true
       }
+    } else if (message?.message === 'project:publicAccessLevel:changed') {
+      const [info] = message.payload
+      if (
+        info.newAccessLevel === 'private' &&
+        !client.ol_context.is_invited_member
+      ) {
+        return true
+      }
     }
     return false
   },
@@ -139,12 +147,7 @@ module.exports = WebsocketLoadBalancer = {
           !RESTRICTED_USER_MESSAGE_TYPE_PASS_LIST.includes(message.message)
 
         // send messages only to unique clients (due to duplicate entries in io.sockets.clients)
-        const clientList = io.sockets
-          .clients(message.room_id)
-          .filter(
-            client =>
-              !(isRestrictedMessage && client.ol_context.is_restricted_user)
-          )
+        const clientList = io.sockets.clients(message.room_id)
 
         // avoid unnecessary work if no clients are connected
         if (clientList.length === 0) {
@@ -173,9 +176,14 @@ module.exports = WebsocketLoadBalancer = {
                 },
                 'disconnecting client'
               )
+              client.emit('project:access:revoked')
               client.disconnect()
             } else {
-              client.emit(message.message, ...message.payload)
+              if (
+                !(isRestrictedMessage && client.ol_context.is_restricted_user)
+              ) {
+                client.emit(message.message, ...message.payload)
+              }
             }
           }
         }

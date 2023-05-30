@@ -75,15 +75,15 @@ describe('WebsocketController', function () {
           .stub()
           .callsArgAsync(4)
         this.isRestrictedUser = true
+        this.isTokenMember = true
+        this.isInvitedMember = true
         this.WebApiManager.joinProject = sinon
           .stub()
-          .callsArgWith(
-            2,
-            null,
-            this.project,
-            this.privilegeLevel,
-            this.isRestrictedUser
-          )
+          .callsArgWith(2, null, this.project, this.privilegeLevel, {
+            isRestrictedUser: this.isRestrictedUser,
+            isTokenMember: this.isTokenMember,
+            isInvitedMember: this.isInvitedMember,
+          })
         this.RoomManager.joinProject = sinon.stub().callsArg(2)
         return this.WebsocketController.joinProject(
           this.client,
@@ -150,6 +150,14 @@ describe('WebsocketController', function () {
           this.isRestrictedUser
         )
       })
+      it('should set the is_token_member flag on the client', function () {
+        this.client.ol_context.is_token_member.should.equal(this.isTokenMember)
+      })
+      it('should set the is_invited_member flag on the client', function () {
+        this.client.ol_context.is_invited_member.should.equal(
+          this.isInvitedMember
+        )
+      })
       it('should call the callback with the project, privilegeLevel and protocolVersion', function () {
         return this.callback
           .calledWith(
@@ -212,15 +220,15 @@ describe('WebsocketController', function () {
           .stub()
           .callsArgAsync(4)
         this.isRestrictedUser = true
+        this.isTokenMember = true
+        this.isInvitedMember = true
         this.WebApiManager.joinProject = sinon
           .stub()
-          .callsArgWith(
-            2,
-            null,
-            this.project,
-            this.privilegeLevel,
-            this.isRestrictedUser
-          )
+          .callsArgWith(2, null, this.project, this.privilegeLevel, {
+            isRestrictedUser: this.isRestrictedUser,
+            isTokenMember: this.isTokenMember,
+            isInvitedMember: this.isInvitedMember,
+          })
         this.RoomManager.joinProject = sinon
           .stub()
           .callsArgWith(2, new Error('subscribe failed'))
@@ -273,12 +281,11 @@ describe('WebsocketController', function () {
       beforeEach(function () {
         this.WebApiManager.joinProject = (project, user, cb) => {
           this.client.disconnected = true
-          return cb(
-            null,
-            this.project,
-            this.privilegeLevel,
-            this.isRestrictedUser
-          )
+          return cb(null, this.project, this.privilegeLevel, {
+            isRestrictedUser: this.isRestrictedUser,
+            isTokenMember: this.isTokenMember,
+            isInvitedMember: this.isInvitedMember,
+          })
         }
 
         return this.WebsocketController.joinProject(

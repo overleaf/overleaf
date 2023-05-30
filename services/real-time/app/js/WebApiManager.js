@@ -40,12 +40,12 @@ module.exports = {
           if (!(data && data.project)) {
             return callback(new CorruptedJoinProjectResponseError())
           }
-          callback(
-            null,
-            data.project,
-            data.privilegeLevel,
-            data.isRestrictedUser
-          )
+          const userMetadata = {
+            isRestrictedUser: data.isRestrictedUser,
+            isTokenMember: data.isTokenMember,
+            isInvitedMember: data.isInvitedMember,
+          }
+          callback(null, data.project, data.privilegeLevel, userMetadata)
         } else if (response.statusCode === 429) {
           callback(
             new CodedError(

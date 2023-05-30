@@ -23,6 +23,7 @@ describe('WebsocketLoadBalancer', function () {
     this.RoomEvents = { on: sinon.stub() }
     this.WebsocketLoadBalancer = SandboxedModule.require(modulePath, {
       requires: {
+        '@overleaf/settings': (this.Settings = { redis: {} }),
         './RedisClientManager': {
           createClientList: () => [],
         },
@@ -55,11 +56,10 @@ describe('WebsocketLoadBalancer', function () {
   })
 
   describe('shouldDisconnectClient', function () {
-    const client = {
-      ol_context: { user_id: 'abcd' },
-    }
-
     it('should return false for general messages', function () {
+      const client = {
+        ol_context: { user_id: 'abcd' },
+      }
       const message = {
         message: 'someNiceMessage',
         payload: [{ data: 'whatever' }],
@@ -69,24 +69,103 @@ describe('WebsocketLoadBalancer', function () {
       ).to.equal(false)
     })
 
-    it('should return false for userRemovedFromProject, when the user_id does not match', function () {
-      const message = {
-        message: 'userRemovedFromProject',
-        payload: ['xyz'],
+    describe('user removed from project', function () {
+      const messageName = 'userRemovedFromProject'
+      const client = {
+        ol_context: { user_id: 'abcd' },
       }
-      expect(
-        this.WebsocketLoadBalancer.shouldDisconnectClient(client, message)
-      ).to.equal(false)
+      it('should return false, when the user_id does not match', function () {
+        const message = {
+          message: messageName,
+          payload: ['xyz'],
+        }
+        expect(
+          this.WebsocketLoadBalancer.shouldDisconnectClient(client, message)
+        ).to.equal(false)
+      })
+
+      it('should return true, if the user_id matches', function () {
+        const message = {
+          message: messageName,
+          payload: [`${client.ol_context.user_id}`],
+        }
+        expect(
+          this.WebsocketLoadBalancer.shouldDisconnectClient(client, message)
+        ).to.equal(true)
+      })
     })
 
-    it('should return true for userRemovedFromProject, if the user_id matches', function () {
-      const message = {
-        message: 'userRemovedFromProject',
-        payload: [`${client.ol_context.user_id}`],
-      }
-      expect(
-        this.WebsocketLoadBalancer.shouldDisconnectClient(client, message)
-      ).to.equal(true)
+    describe('link-sharing turned off', function () {
+      const messageName = 'project:publicAccessLevel:changed'
+
+      describe('when the new access level is set to "private"', function () {
+        const message = {
+          message: messageName,
+          payload: [{ newAccessLevel: 'private' }],
+        }
+        describe('when the user is an invited member', function () {
+          const client = {
+            ol_context: {
+              is_invited_member: true,
+            },
+          }
+
+          it('should return false', function () {
+            expect(
+              this.WebsocketLoadBalancer.shouldDisconnectClient(client, message)
+            ).to.equal(false)
+          })
+        })
+
+        describe('when the user not an invited member', function () {
+          const client = {
+            ol_context: {
+              is_invited_member: false,
+            },
+          }
+
+          it('should return true', function () {
+            expect(
+              this.WebsocketLoadBalancer.shouldDisconnectClient(client, message)
+            ).to.equal(true)
+          })
+        })
+      })
+
+      describe('when the new access level is "tokenBased"', function () {
+        const message = {
+          message: messageName,
+          payload: [{ newAccessLevel: 'tokenBased' }],
+        }
+
+        describe('when the user is an invited member', function () {
+          const client = {
+            ol_context: {
+              is_invited_member: true,
+            },
+          }
+
+          it('should return false', function () {
+            expect(
+              this.WebsocketLoadBalancer.shouldDisconnectClient(client, message)
+            ).to.equal(false)
+          })
+        })
+
+        describe('when the user not an invited member', function () {
+          const client = {
+            ol_context: {
+              is_invited_member: false,
+            },
+          }
+
+          it('should return false', function () {
+            expect(
+              this.WebsocketLoadBalancer.shouldDisconnectClient(client, message)
+            ).to.equal(false)
+          })
+        })
+      })
     })
   })
 
@@ -392,7 +471,7 @@ describe('WebsocketLoadBalancer', function () {
         client1.emit
           .calledWith(message, ...Array.from(payload))
           .should.equal(true)
-        client2.emit.called.should.equal(false) // disconnected client should not be called
+        client2.emit.calledWith('project:access:revoked').should.equal(true) // disconnected client should get informative message
         client3.emit
           .calledWith(message, ...Array.from(payload))
           .should.equal(true)

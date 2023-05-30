@@ -476,6 +476,13 @@ If the project has been renamed please look in your project list for a new proje
       $scope.hasLintingError = event.detail.hasLintingError
     })
 
+    ide.socket.on('project:access:revoked', () => {
+      ide.showGenericMessageModal(
+        'Removed From Project',
+        'You have been removed from this project, and will no longer have access to it. You will be redirected to your project dashboard momentarily.'
+      )
+    })
+
     return ide.socket.on('project:publicAccessLevel:changed', data => {
       if (data.newAccessLevel != null) {
         ide.$scope.project.publicAccesLevel = data.newAccessLevel

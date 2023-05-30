@@ -161,6 +161,9 @@ describe('EditorHttpController', function () {
 
     describe('successfully', function () {
       beforeEach(function (done) {
+        this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject.resolves(
+          true
+        )
         this.res.json.callsFake(() => done())
         this.EditorHttpController.joinProject(this.req, this.res)
       })
@@ -170,6 +173,8 @@ describe('EditorHttpController', function () {
           project: this.projectView,
           privilegeLevel: 'owner',
           isRestrictedUser: false,
+          isTokenMember: false,
+          isInvitedMember: true,
         })
       })
 
@@ -212,6 +217,8 @@ describe('EditorHttpController', function () {
           project: this.reducedProjectView,
           privilegeLevel: 'readOnly',
           isRestrictedUser: true,
+          isTokenMember: false,
+          isInvitedMember: false,
         })
       })
     })
@@ -248,6 +255,32 @@ describe('EditorHttpController', function () {
           project: this.reducedProjectView,
           privilegeLevel: 'readOnly',
           isRestrictedUser: true,
+          isTokenMember: false,
+          isInvitedMember: false,
+        })
+      })
+    })
+
+    describe('with a token access user', function () {
+      beforeEach(function (done) {
+        this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject.resolves(
+          false
+        )
+        this.CollaboratorsHandler.promises.userIsTokenMember.resolves(true)
+        this.AuthorizationManager.promises.getPrivilegeLevelForProject.resolves(
+          'readAndWrite'
+        )
+        this.res.json.callsFake(() => done())
+        this.EditorHttpController.joinProject(this.req, this.res)
+      })
+
+      it('should mark the user as being a token-access member', function () {
+        expect(this.res.json).to.have.been.calledWith({
+          project: this.projectView,
+          privilegeLevel: 'readAndWrite',
+          isRestrictedUser: false,
+          isTokenMember: true,
+          isInvitedMember: false,
         })
       })
     })

@@ -43,7 +43,7 @@ module.exports = WebsocketController = {
     WebApiManager.joinProject(
       projectId,
       user,
-      function (error, project, privilegeLevel, isRestrictedUser) {
+      function (error, project, privilegeLevel, userMetadata) {
         if (error) {
           return callback(error)
         }
@@ -73,7 +73,9 @@ module.exports = WebsocketController = {
         client.ol_context.connected_time = new Date()
         client.ol_context.signup_date = user.signUpDate
         client.ol_context.login_count = user.loginCount
-        client.ol_context.is_restricted_user = !!isRestrictedUser
+        client.ol_context.is_restricted_user = !!userMetadata.isRestrictedUser
+        client.ol_context.is_token_member = !!userMetadata.isTokenMember
+        client.ol_context.is_invited_member = !!userMetadata.isInvitedMember
 
         RoomManager.joinProject(client, projectId, function (err) {
           if (err) {
@@ -85,7 +87,7 @@ module.exports = WebsocketController = {
               projectId,
               clientId: client.id,
               privilegeLevel,
-              isRestrictedUser,
+              userMetadata,
             },
             'user joined project'
           )
