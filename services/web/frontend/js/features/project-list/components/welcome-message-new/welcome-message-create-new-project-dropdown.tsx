@@ -21,6 +21,7 @@ function WelcomeMessageCreateNewProjectDropdown({
   const handleClick = useCallback(() => {
     sendMB('welcome-page-create-first-project-click', {
       'welcome-page-redesign': 'enabled',
+      dropdownMenu: 'main-button',
       dropdownOpen: showDropdown,
     })
 
