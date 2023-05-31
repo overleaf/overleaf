@@ -9,13 +9,13 @@ export default function WelcomeMessage() {
 
   const handleTemplatesClick = useCallback(() => {
     sendMB('welcome-page-templates-click', {
-      'project-dashboard-react': 'enabled',
+      'welcome-page-redesign': 'default',
     })
   }, [])
 
   const handleLatexHelpClick = useCallback(() => {
     sendMB('welcome-page-latex-help-click', {
-      'project-dashboard-react': 'enabled',
+      'welcome-page-redesign': 'default',
     })
   }, [])
 

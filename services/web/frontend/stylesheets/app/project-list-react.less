@@ -75,6 +75,110 @@
 
   .project-list-welcome-wrapper {
     width: 100%;
+
+    .welcome-new-wrapper {
+      max-width: 1080px;
+
+      .welcome-title {
+        font-size: 32px;
+      }
+
+      .welcome-message-cards-wrapper {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 50px;
+
+        @media (min-width: @screen-md-min) {
+          flex-direction: row;
+          justify-content: center;
+        }
+      }
+
+      .welcome-message-card {
+        border: 1px solid @neutral-20;
+        border-radius: 16px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        padding: 24px 16px;
+        margin: @margin-sm 0;
+        width: 280px;
+        height: 200px;
+        position: relative;
+        cursor: pointer;
+
+        @media (min-width: @screen-md-min) {
+          margin: 0 15px;
+          height: 240px;
+        }
+
+        &:hover {
+          background-color: @ol-blue-gray-0;
+        }
+
+        .welcome-message-card-img {
+          @media (min-width: @screen-md-min) {
+            margin-bottom: 20px;
+          }
+        }
+
+        .create-new-project-dropdown {
+          border: 1px solid @neutral-20;
+          position: absolute;
+          top: 100%;
+          left: 0;
+          width: 100%;
+          padding: 0;
+          border-radius: 3px;
+          z-index: 1;
+          text-align: left;
+
+          button,
+          a,
+          .dropdown-header {
+            padding: 5px 10px;
+          }
+
+          > button {
+            background-color: white;
+            border: none;
+            box-shadow: none;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            &:hover {
+              background-color: @ol-blue-gray-0;
+            }
+          }
+
+          > a {
+            color: @ol-blue-gray-3;
+            display: block;
+
+            &:hover {
+              text-decoration: none;
+              background-color: @ol-blue-gray-0;
+            }
+          }
+
+          hr {
+            margin-top: 6px;
+            margin-bottom: 6px;
+          }
+        }
+      }
+
+      .welcome-message-card-link {
+        &,
+        &:hover {
+          text-decoration: none;
+          color: @ol-blue-gray-3;
+        }
+      }
+    }
   }
 
   .project-list-main-react {

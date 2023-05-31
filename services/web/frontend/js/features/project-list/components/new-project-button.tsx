@@ -20,7 +20,7 @@ type SendTrackingEvent = {
 }
 
 type Segmentation = SendTrackingEvent & {
-  'project-dashboard-react': 'enabled'
+  'welcome-page-redesign': 'default'
 }
 
 type ModalMenuClickOptions = {
@@ -60,7 +60,7 @@ function NewProjectButton({
     }: SendTrackingEvent) => {
       if (trackingKey) {
         let segmentation: Segmentation = {
-          'project-dashboard-react': 'enabled',
+          'welcome-page-redesign': 'default',
           dropdownMenu,
           dropdownOpen,
         }

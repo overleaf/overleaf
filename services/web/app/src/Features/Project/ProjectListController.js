@@ -308,6 +308,22 @@ async function projectListPage(req, res, next) {
     }
   }
 
+  let welcomePageRedesignAssignment = { variant: 'default' }
+
+  try {
+    welcomePageRedesignAssignment =
+      await SplitTestHandler.promises.getAssignment(
+        req,
+        res,
+        'welcome-page-redesign'
+      )
+  } catch (error) {
+    logger.error(
+      { err: error },
+      'failed to get "welcome-page-redesign" split test assignment'
+    )
+  }
+
   const hasPaidAffiliation = userAffiliations.some(
     affiliation => affiliation.licence && affiliation.licence !== 'free'
   )
@@ -378,6 +394,7 @@ async function projectListPage(req, res, next) {
     showWritefullPromoBanner,
     showINRBanner,
     projectDashboardReact: true, // used in navbar
+    welcomePageRedesignVariant: welcomePageRedesignAssignment.variant,
   })
 }
 
