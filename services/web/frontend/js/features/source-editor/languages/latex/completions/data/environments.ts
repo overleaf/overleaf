@@ -33,7 +33,7 @@ export const environments = new Map([
 \t\\centering
 \t\\includegraphics{$1}
 \t\\caption{\${2:Caption}}
-\t\\label{\${3:fig:my_label}}
+\t\\label{\${3:fig:enter-label}}
 \\end{figure}`,
   ],
   [
