@@ -15,6 +15,7 @@ export type TooltipProps = {
   id: string
   overlayProps?: OverlayProps
   tooltipProps?: BSTooltip.TooltipProps
+  hidden?: boolean
   children: React.ReactElement
 }
 
@@ -24,6 +25,7 @@ function Tooltip({
   children,
   tooltipProps,
   overlayProps,
+  hidden,
 }: TooltipProps) {
   const hideTooltip = (e: React.MouseEvent) => {
     if (e.currentTarget instanceof HTMLElement) {
@@ -34,7 +36,11 @@ function Tooltip({
   return (
     <OverlayTrigger
       overlay={
-        <BSTooltip id={`${id}-tooltip`} {...tooltipProps}>
+        <BSTooltip
+          id={`${id}-tooltip`}
+          {...tooltipProps}
+          style={{ display: hidden ? 'none' : 'block' }}
+        >
           {description}
         </BSTooltip>
       }

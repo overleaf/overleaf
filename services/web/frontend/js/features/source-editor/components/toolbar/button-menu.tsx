@@ -69,6 +69,7 @@ export const ToolbarButtonMenu: FC<{
   return (
     <>
       <Tooltip
+        hidden={open}
         id={id}
         description={<div>{label}</div>}
         overlayProps={{ placement: 'bottom' }}
