@@ -257,6 +257,41 @@ describe('SplitTestHandler', function () {
       assert.equal('default', assignment.variant)
     })
   })
+
+  describe('save assignments to res.locals', function () {
+    beforeEach(function () {
+      this.AnalyticsManager.getIdsFromSession.returns({
+        userId: 'abc123abc123',
+      })
+    })
+
+    it('when in SaaS mode it should set the variant', async function () {
+      await this.SplitTestHandler.promises.getAssignment(
+        this.req,
+        this.res,
+        'active-test'
+      )
+      expect(this.LocalsHelper.setSplitTestVariant).to.have.been.calledWith(
+        this.res.locals,
+        'active-test',
+        'variant-1'
+      )
+    })
+
+    it('when not in SaaS mode it should set the default variant', async function () {
+      this.Settings.overleaf = undefined
+      await this.SplitTestHandler.promises.getAssignment(
+        this.req,
+        this.res,
+        'active-test'
+      )
+      expect(this.LocalsHelper.setSplitTestVariant).to.have.been.calledWith(
+        this.res.locals,
+        'active-test',
+        'default'
+      )
+    })
+  })
 })
 
 function makeSplitTest(
