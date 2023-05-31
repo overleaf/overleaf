@@ -1,6 +1,7 @@
 import { EditorView } from '@codemirror/view'
 import { GraphicsWidget } from './graphics'
 import { editFigureDataEffect } from '../../figure-modal'
+import { emitCommandEvent } from '../../toolbar/utils/analytics'
 
 export class EditableGraphicsWidget extends GraphicsWidget {
   setEditDispatcher(button: HTMLButtonElement, view: EditorView) {
@@ -11,6 +12,7 @@ export class EditableGraphicsWidget extends GraphicsWidget {
         event.stopImmediatePropagation()
         view.dispatch({ effects: editFigureDataEffect.of(this.figureData) })
         window.dispatchEvent(new CustomEvent('figure-modal:open-modal'))
+        emitCommandEvent(view, 'toolbar-figure-modal-edit')
         return false
       }
     } else {
