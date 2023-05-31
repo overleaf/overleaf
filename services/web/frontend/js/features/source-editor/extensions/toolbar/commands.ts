@@ -33,7 +33,8 @@ export const ensureEmptyLine = (state: EditorState, range: SelectionRange) => {
   let suffix = ''
 
   const line = state.doc.lineAt(pos)
-  if (line.length) {
+
+  if (line.text.trim().length) {
     pos = Math.min(line.to + 1, state.doc.length)
     const nextLine = state.doc.lineAt(pos)
 

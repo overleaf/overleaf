@@ -21,6 +21,7 @@ import {
 import { ensureEmptyLine } from '../../extensions/toolbar/commands'
 import { useTranslation } from 'react-i18next'
 import useEventListener from '../../../../shared/hooks/use-event-listener'
+import { prepareLines } from '../../utils/prepare-lines'
 
 export const FigureModal = memo(function FigureModal() {
   return (
@@ -138,8 +139,8 @@ const FigureModalContent = () => {
       dispatch({ error: String(error) })
       return
     }
-    const labelCommand = includeLabel ? '\n\\label{fig:enter-label}' : ''
-    const captionCommand = includeCaption ? '\n\\caption{Enter Caption}' : ''
+    const labelCommand = includeLabel ? '\\label{fig:enter-label}' : ''
+    const captionCommand = includeCaption ? '\\caption{Enter Caption}' : ''
 
     if (figure) {
       // Updating existing figure
@@ -150,14 +151,19 @@ const FigureModalContent = () => {
         // We should insert a caption
         changes.push({
           from: figure.graphicsCommand.to,
-          insert: captionCommand,
+          insert: prepareLines(
+            ['', captionCommand],
+            view.state,
+            figure.graphicsCommand.to
+          ),
         })
       }
       if (!hadLabelBefore && includeLabel) {
+        const from = figure.caption?.to ?? figure.graphicsCommand.to
         // We should insert a label
         changes.push({
-          from: figure.caption?.to ?? figure.graphicsCommand.to,
-          insert: labelCommand,
+          from,
+          insert: prepareLines(['', labelCommand], view.state, from),
         })
       }
       if (hadCaptionBefore && !includeCaption) {
@@ -203,11 +209,19 @@ const FigureModalContent = () => {
           const { pos, suffix } = ensureEmptyLine(view.state, range)
           const widthArgument =
             width !== undefined ? `[width=${width}\\linewidth]` : ''
-          const graphicxCommand = `\\includegraphics${widthArgument}{${path}}`
           const changes: ChangeSpec = view.state.changes({
-            insert: `\\begin{figure}\n\\centering\n${graphicxCommand}${captionCommand}${labelCommand}${
-              labelCommand || captionCommand ? '\n' : '' // Add an extra newline if we've added a caption or label
-            }\\end{figure}${suffix}`,
+            insert: prepareLines(
+              [
+                '\\begin{figure}',
+                '\t\\centering',
+                `\t\\includegraphics${widthArgument}{${path}}`,
+                `\t${captionCommand}` || null,
+                `\t${labelCommand}` || null,
+                `\\end{figure}${suffix}`,
+              ],
+              view.state,
+              pos
+            ),
             from: pos,
           })
 

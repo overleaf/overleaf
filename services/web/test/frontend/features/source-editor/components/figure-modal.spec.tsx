@@ -94,7 +94,7 @@ describe('<FigureModal />', function () {
 
       cy.get('.cm-content').should(
         'have.text',
-        '\\begin{figure}\\centeringEnter Caption🏷fig:enter-label\\end{figure}'
+        '\\begin{figure}    \\centering    Enter Caption    🏷fig:enter-label\\end{figure}'
       )
     })
 
@@ -140,7 +140,7 @@ describe('<FigureModal />', function () {
       cy.findByText('Insert figure').click()
       cy.get('.cm-content').should(
         'have.text',
-        '\\begin{figure}\\centeringEnter Caption🏷fig:enter-label\\end{figure}'
+        '\\begin{figure}    \\centering    Enter Caption    🏷fig:enter-label\\end{figure}'
       )
     })
   })
@@ -214,7 +214,7 @@ describe('<FigureModal />', function () {
 
       cy.get('.cm-content').should(
         'have.text',
-        '\\begin{figure}\\centeringEnter Caption🏷fig:enter-label\\end{figure}'
+        '\\begin{figure}    \\centering    Enter Caption    🏷fig:enter-label\\end{figure}'
       )
     })
 
@@ -242,7 +242,7 @@ describe('<FigureModal />', function () {
 
       cy.get('.cm-content').should(
         'have.text',
-        '\\begin{figure}\\centeringEnter Caption🏷fig:enter-label\\end{figure}'
+        '\\begin{figure}    \\centering    Enter Caption    🏷fig:enter-label\\end{figure}'
       )
     })
   })
@@ -292,7 +292,7 @@ describe('<FigureModal />', function () {
 
       cy.get('.cm-content').should(
         'have.text',
-        '\\begin{figure}\\centeringEnter Caption🏷fig:enter-label\\end{figure}'
+        '\\begin{figure}    \\centering    Enter Caption    🏷fig:enter-label\\end{figure}'
       )
     })
   })
