@@ -25,6 +25,8 @@ import LoadMore from './load-more'
 import { useEffect } from 'react'
 import getMeta from '../../../utils/meta'
 import WelcomeMessageNew from './welcome-message-new'
+import withErrorBoundary from '../../../infrastructure/error-boundary'
+import { GenericErrorBoundaryFallback } from '../../../shared/components/generic-error-boundary-fallback'
 
 function ProjectListRoot() {
   const { isReady } = useWaitForI18n()
@@ -191,4 +193,4 @@ function DashApiError() {
   )
 }
 
-export default ProjectListRoot
+export default withErrorBoundary(ProjectListRoot, GenericErrorBoundaryFallback)
