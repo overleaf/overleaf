@@ -147,7 +147,7 @@ async function migrateProjects(projectsToMigrate) {
   }
   // send log output for each migration to a file
   const output = fs.createWriteStream(argv.output, { flags: 'a' })
-  console.log(`Writing log output to ${argv.output}`)
+  console.log(`Writing log output to ${process.cwd()}/${argv.output}`)
   const logger = new console.Console({ stdout: output })
   function logJson(obj) {
     logger.log(JSON.stringify(obj))
@@ -253,8 +253,12 @@ async function main() {
   console.log('Projects migrated: ', projectsMigrated)
   console.log('Projects failed: ', projectsFailed)
   if (projectsFailed > 0) {
-    console.log(`Log output written to ${argv.output}`)
-    console.log('Please check the log for errors.')
+    console.log('------------------------------------------------------')
+    console.log(`Log output written to ${process.cwd()}/${argv.output}`)
+    console.log(
+      'Please check the log for errors. Attach the content of the file when contacting support.'
+    )
+    console.log('------------------------------------------------------')
   }
   if (INTERRUPT) {
     console.log('Migration interrupted, please run again to continue.')

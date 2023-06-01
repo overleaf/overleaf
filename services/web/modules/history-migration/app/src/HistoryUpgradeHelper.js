@@ -115,6 +115,11 @@ async function upgradeProject(project, options) {
       const projectId = project._id
       // delete any existing history stored in the mongo backend
       await HistoryManager.promises.deleteProject(projectId, projectId)
+      // unset overleaf.history.id to prevent the migration script from failing on checks
+      await db.projects.updateOne(
+        { _id: projectId },
+        { $unset: { 'overleaf.history.id': '' } }
+      )
     } catch (err) {
       // failed to delete existing history, but we can try to continue
     }
