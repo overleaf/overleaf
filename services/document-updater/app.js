@@ -124,6 +124,17 @@ app.param('doc_id', (req, res, next, docId) => {
   }
 })
 
+// Record requests that come in after we've started shutting down - for investigation.
+app.use((req, res, next) => {
+  if (Settings.shuttingDown) {
+    logger.warn(
+      { req, timeSinceShutdown: Date.now() - Settings.shutDownTime },
+      'request received after shutting down'
+    )
+  }
+  next()
+})
+
 app.get('/project/:project_id/doc/:doc_id', HttpController.getDoc)
 app.get('/project/:project_id/doc/:doc_id/peek', HttpController.peekDoc)
 // temporarily keep the GET method for backwards compatibility
@@ -193,7 +204,13 @@ app.use((error, req, res, next) => {
 
 const shutdownCleanly = signal => () => {
   logger.info({ signal }, 'received interrupt, cleaning up')
+  if (Settings.shuttingDown) {
+    logger.warn({ signal }, 'already shutting down, ignoring interrupt')
+    return
+  }
   Settings.shuttingDown = true
+  // record the time we started shutting down
+  Settings.shutDownTime = Date.now()
   setTimeout(() => {
     logger.info({ signal }, 'shutting down')
     process.exit()
