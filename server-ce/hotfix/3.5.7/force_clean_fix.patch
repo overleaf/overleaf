@@ -1,0 +1,40 @@
+--- services/web/modules/history-migration/app/src/HistoryUpgradeHelper.js
++++ services/web/modules/history-migration/app/src/HistoryUpgradeHelper.js
+@@ -115,6 +115,11 @@ async function upgradeProject(project, options) {
+       const projectId = project._id
+       // delete any existing history stored in the mongo backend
+       await HistoryManager.promises.deleteProject(projectId, projectId)
++      // unset overleaf.history.id to prevent the migration script from failing on checks
++      await db.projects.updateOne(
++        { _id: projectId },
++        { $unset: { 'overleaf.history.id': '' } }
++      )
+     } catch (err) {
+       // failed to delete existing history, but we can try to continue
+     }
+--- services/web/scripts/history/migrate_history.js
++++ services/web/scripts/history/migrate_history.js
+@@ -147,7 +147,7 @@ async function migrateProjects(projectsToMigrate) {
+   }
+   // send log output for each migration to a file
+   const output = fs.createWriteStream(argv.output, { flags: 'a' })
+-  console.log(`Writing log output to ${argv.output}`)
++  console.log(`Writing log output to ${process.cwd()}/${argv.output}`)
+   const logger = new console.Console({ stdout: output })
+   function logJson(obj) {
+     logger.log(JSON.stringify(obj))
+@@ -253,8 +253,12 @@ async function main() {
+   console.log('Projects migrated: ', projectsMigrated)
+   console.log('Projects failed: ', projectsFailed)
+   if (projectsFailed > 0) {
+-    console.log(`Log output written to ${argv.output}`)
+-    console.log('Please check the log for errors.')
++    console.log('------------------------------------------------------')
++    console.log(`Log output written to ${process.cwd()}/${argv.output}`)
++    console.log(
++      'Please check the log for errors. Attach the content of the file when contacting support.'
++    )
++    console.log('------------------------------------------------------')
+   }
+   if (INTERRUPT) {
+     console.log('Migration interrupted, please run again to continue.')
