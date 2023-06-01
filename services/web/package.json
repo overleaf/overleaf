@@ -235,7 +235,7 @@
     "react2angular": "^4.0.6",
     "react2angular-shared-context": "^1.1.0",
     "recurly": "^4.0.0",
-    "referer-parser": "0.0.3",
+    "referer-parser": "github:overleaf/nodejs-referer-parser#8b8b103762d05b7be4cfa2f810e1d408be67d7bb",
     "request": "^2.88.2",
     "requestretry": "^7.1.0",
     "rimraf": "2.2.6",
