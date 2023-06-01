@@ -9,7 +9,7 @@
     "test:unit": "npm run test:unit:_run -- --grep=$MOCHA_GREP",
     "start": "node $NODE_APP_OPTIONS app.js",
     "nodemon": "nodemon --config nodemon.json",
-    "test:acceptance:_run": "LOG_LEVEL=error mocha --loader=esmock --recursive --reporter spec --timeout 15000 --exit $@ test/acceptance/js",
+    "test:acceptance:_run": "LOG_LEVEL=fatal mocha --loader=esmock --recursive --reporter spec --timeout 15000 --exit $@ test/acceptance/js",
     "test:unit:_run": "LOG_LEVEL=fatal mocha --loader=esmock --recursive --reporter spec $@ test/unit/js",
     "lint": "eslint --max-warnings 0 --format unix .",
     "format": "prettier --list-different $PWD/'**/*.js'",

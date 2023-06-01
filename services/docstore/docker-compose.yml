@@ -53,7 +53,7 @@ services:
     command: npm run --silent test:acceptance
 
   mongo:
-    image: mongo:4.4.16
+    image: mongo:5.0.17
     command: --replSet overleaf
     healthcheck:
       test: "mongo --quiet localhost/test --eval 'quit(db.runCommand({ ping: 1 }).ok ? 0 : 1)'"

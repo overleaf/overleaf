@@ -3,6 +3,8 @@ contacts
 --docker-repos=gcr.io/overleaf-ops
 --env-add=
 --env-pass-through=
+--esmock-loader=True
+--has-custom-nodemon=True
 --node-version=16.17.1
 --public-repo=False
---script-version=4.1.0
+--script-version=4.2.0
