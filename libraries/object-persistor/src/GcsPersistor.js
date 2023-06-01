@@ -15,7 +15,14 @@ module.exports = class GcsPersistor extends AbstractPersistor {
 
     // endpoint settings will be null by default except for tests
     // that's OK - GCS uses the locally-configured service account by default
-    this.storage = new Storage(this.settings.endpoint)
+    const storageOptions = {}
+    if (this.settings.endpoint) {
+      storageOptions.projectId = this.settings.endpoint.projectId
+      storageOptions.apiEndpoint = this.settings.endpoint.apiEndpoint
+    }
+    storageOptions.retryOptions = this.settings.retryOptions
+
+    this.storage = new Storage(storageOptions)
   }
 
   async sendFile(bucketName, key, fsPath) {

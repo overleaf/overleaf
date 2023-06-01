@@ -19,6 +19,9 @@
       "endpoint": {
         "apiEndpoint": "GCS_API_ENDPOINT",
         "projectId": "GCS_PROJECT_ID"
+      },
+      "retryOptions": {
+        "maxRetries": "GCS_MAX_RETRIES"
       }
     },
     "fallback": {
