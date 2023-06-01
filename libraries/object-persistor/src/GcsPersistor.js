@@ -16,21 +16,6 @@ module.exports = class GcsPersistor extends AbstractPersistor {
     // endpoint settings will be null by default except for tests
     // that's OK - GCS uses the locally-configured service account by default
     this.storage = new Storage(this.settings.endpoint)
-    // workaround for broken uploads with custom endpoints:
-    // https://github.com/googleapis/nodejs-storage/issues/898
-    if (this.settings.endpoint && this.settings.endpoint.apiEndpoint) {
-      this.storage.interceptors.push({
-        request: reqOpts => {
-          const url = new URL(reqOpts.uri)
-          url.host = this.settings.endpoint.apiEndpoint
-          if (this.settings.endpoint.apiScheme) {
-            url.protocol = this.settings.endpoint.apiScheme
-          }
-          reqOpts.uri = url.toString()
-          return reqOpts
-        },
-      })
-    }
   }
 
   async sendFile(bucketName, key, fsPath) {
@@ -142,10 +127,9 @@ module.exports = class GcsPersistor extends AbstractPersistor {
     if (this.settings.unsignedUrls) {
       // Construct a direct URL to the object download endpoint
       // (see https://cloud.google.com/storage/docs/request-endpoints#json-api)
-      const apiScheme = this.settings.endpoint.apiScheme || 'https://'
       const apiEndpoint =
-        this.settings.endpoint.apiEndpoint || 'storage.googleapis.com'
-      return `${apiScheme}://${apiEndpoint}/download/storage/v1/b/${bucketName}/o/${key}?alt=media`
+        this.settings.endpoint.apiEndpoint || 'https://storage.googleapis.com'
+      return `${apiEndpoint}/download/storage/v1/b/${bucketName}/o/${key}?alt=media`
     }
     try {
       const [url] = await this.storage

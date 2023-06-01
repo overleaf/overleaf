@@ -283,8 +283,7 @@ describe('GcsPersistorTests', function () {
       beforeEach(async function () {
         GcsPersistor.settings.unsignedUrls = true
         GcsPersistor.settings.endpoint = {
-          apiScheme: 'http',
-          apiEndpoint: 'custom.endpoint',
+          apiEndpoint: 'http://custom.endpoint',
         }
         signedUrl = await GcsPersistor.getRedirectUrl(bucket, key)
       })

@@ -67,7 +67,6 @@ if (
 if (process.env.GCS_API_ENDPOINT) {
   Settings.docstore.gcs.endpoint = {
     apiEndpoint: process.env.GCS_API_ENDPOINT,
-    apiScheme: process.env.GCS_API_SCHEME,
     projectId: process.env.GCS_PROJECT_ID,
   }
 }

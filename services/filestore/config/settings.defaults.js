@@ -53,7 +53,6 @@ const settings = {
       endpoint: process.env.GCS_API_ENDPOINT
         ? {
             apiEndpoint: process.env.GCS_API_ENDPOINT,
-            apiScheme: process.env.GCS_API_SCHEME,
             projectId: process.env.GCS_PROJECT_ID,
           }
         : undefined,

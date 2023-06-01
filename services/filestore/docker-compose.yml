@@ -43,8 +43,7 @@ services:
       AWS_S3_PATH_STYLE: 'true'
       AWS_ACCESS_KEY_ID: fake
       AWS_SECRET_ACCESS_KEY: fake
-      GCS_API_ENDPOINT: gcs:9090
-      GCS_API_SCHEME: http
+      GCS_API_ENDPOINT: http://gcs:9090
       GCS_PROJECT_ID: fake
       STORAGE_EMULATOR_HOST: http://gcs:9090/storage/v1
       MOCHA_GREP: ${MOCHA_GREP}

@@ -5,8 +5,7 @@
     "gcs": {
       "unsignedUrls": "true",
       "endpoint": {
-        "apiEndpoint": "gcs:9090",
-        "apiScheme": "http",
+        "apiEndpoint": "http://gcs:9090",
         "projectId": "fake"
       }
     }
