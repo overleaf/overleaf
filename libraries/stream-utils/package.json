@@ -1,0 +1,22 @@
+{
+  "name": "@overleaf/stream-utils",
+  "version": "0.1.0",
+  "description": "stream handling utilities",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run lint && npm run format && npm run test:unit",
+    "test:unit": "mocha",
+    "lint": "eslint --max-warnings 0 --format unix .",
+    "lint:fix": "eslint --fix .",
+    "format": "prettier --list-different $PWD/'**/*.js'",
+    "format:fix": "prettier --write $PWD/'**/*.js'",
+    "test:ci": "npm run test:unit"
+  },
+  "author": "Overleaf (https://www.overleaf.com)",
+  "license": "AGPL-3.0-only",
+  "devDependencies":{
+    "chai": "^4.3.6",
+    "chai-as-promised": "^7.1.1",
+    "mocha": "^10.2.0"
+  }
+}

@@ -1,7 +1,7 @@
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 const { expect } = require('chai')
-const BufferedStream = require('bufferedstream')
+const { Writable } = require('stream')
 const { ObjectId } = require('mongodb')
 
 const MODULE_PATH =
@@ -32,7 +32,7 @@ describe('UpdateMerger :', function () {
 \\date{June 2011}`
     this.docLines = this.fileContents.split('\n')
     this.source = 'dropbox'
-    this.updateRequest = new BufferedStream()
+    this.updateRequest = new Writable()
 
     this.fsPromises = {
       unlink: sinon.stub().resolves(),

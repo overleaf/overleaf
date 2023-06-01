@@ -7,8 +7,8 @@
 
 const BPromise = require('bluebird')
 const zlib = require('zlib')
-const stringToStream = require('string-to-stream')
-const { pipeline, Writable } = require('stream')
+const { WritableBuffer, ReadableString } = require('@overleaf/stream-utils')
+const { pipeline } = require('stream')
 
 function promisePipe(readStream, writeStream) {
   return new BPromise(function (resolve, reject) {
@@ -32,26 +32,6 @@ function promisePipe(readStream, writeStream) {
  * @return {Promise}
  */
 exports.promisePipe = promisePipe
-
-class WritableBuffer extends Writable {
-  constructor(options) {
-    super(options)
-    this.buffers = []
-  }
-
-  _write(chunk, encoding, callback) {
-    this.buffers.push(chunk)
-    callback()
-  }
-
-  _final(callback) {
-    callback()
-  }
-
-  contents() {
-    return Buffer.concat(this.buffers)
-  }
-}
 
 function readStreamToBuffer(readStream) {
   return new BPromise(function (resolve, reject) {
@@ -100,7 +80,7 @@ exports.gunzipStreamToBuffer = gunzipStreamToBuffer
 
 function gzipStringToStream(string) {
   const gzip = zlib.createGzip()
-  return stringToStream(string).pipe(gzip)
+  return new ReadableString(string).pipe(gzip)
 }
 
 /**

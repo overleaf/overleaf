@@ -137,13 +137,6 @@ describe('Filestore', function () {
         expect(body).to.contain('up')
       })
 
-      it('should send a 200 for the health-check endpoint', async function () {
-        const response = await fetch(`${filestoreUrl}/health_check`)
-        expect(response.status).to.equal(200)
-        const body = await response.text()
-        expect(body).to.equal('OK')
-      })
-
       describe('with a file on the server', function () {
         let fileId, fileUrl, constantFileContent
 
@@ -196,6 +189,17 @@ describe('Filestore', function () {
           const res = await fetch(fileUrl)
           const body = await res.text()
           expect(body).to.equal(constantFileContent)
+        })
+
+        it('should send a 200 for the health-check endpoint using the file', async function () {
+          Settings.health_check = {
+            project_id: projectId,
+            file_id: fileId,
+          }
+          const response = await fetch(`${filestoreUrl}/health_check`)
+          expect(response.status).to.equal(200)
+          const body = await response.text()
+          expect(body).to.equal('OK')
         })
 
         it('should not leak a socket', async function () {

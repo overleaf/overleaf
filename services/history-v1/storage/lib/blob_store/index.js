@@ -3,7 +3,7 @@
 const config = require('config')
 const fs = require('fs')
 const isValidUtf8 = require('utf-8-validate')
-const stringToStream = require('string-to-stream')
+const { ReadableString } = require('@overleaf/stream-utils')
 
 const core = require('overleaf-editor-core')
 const objectPersistor = require('@overleaf/object-persistor')
@@ -162,9 +162,9 @@ class BlobStore {
       return existingBlob
     }
     const newBlob = new Blob(hash, Buffer.byteLength(string), string.length)
-    // Note: the stringToStream is to work around a bug in the AWS SDK: it won't
+    // Note: the ReadableString is to work around a bug in the AWS SDK: it won't
     // allow Body to be blank.
-    await uploadBlob(this.projectId, newBlob, stringToStream(string))
+    await uploadBlob(this.projectId, newBlob, new ReadableString(string))
     await this.backend.insertBlob(this.projectId, newBlob)
     return newBlob
   }

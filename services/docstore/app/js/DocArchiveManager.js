@@ -4,7 +4,7 @@ const Errors = require('./Errors')
 const logger = require('@overleaf/logger')
 const Settings = require('@overleaf/settings')
 const crypto = require('crypto')
-const Streamifier = require('streamifier')
+const { ReadableString } = require('@overleaf/stream-utils')
 const RangeManager = require('./RangeManager')
 const PersistorManager = require('./PersistorManager')
 const pMap = require('p-map')
@@ -92,7 +92,7 @@ async function archiveDoc(projectId, docId) {
   }
 
   const md5 = crypto.createHash('md5').update(json).digest('hex')
-  const stream = Streamifier.createReadStream(json)
+  const stream = new ReadableString(json)
   await PersistorManager.sendStream(Settings.docstore.bucket, key, stream, {
     sourceMd5: md5,
   })

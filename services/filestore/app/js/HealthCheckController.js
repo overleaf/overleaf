@@ -1,7 +1,7 @@
 const fs = require('fs')
 const path = require('path')
 const Settings = require('@overleaf/settings')
-const streamBuffers = require('stream-buffers')
+const { WritableBuffer } = require('@overleaf/stream-utils')
 const { promisify } = require('util')
 const Stream = require('stream')
 
@@ -23,9 +23,7 @@ async function checkCanGetFiles() {
   const key = `${projectId}/${fileId}`
   const bucket = Settings.filestore.stores.user_files
 
-  const buffer = new streamBuffers.WritableStreamBuffer({
-    initialSize: 100,
-  })
+  const buffer = new WritableBuffer({ initialSize: 100 })
 
   const sourceStream = await FileHandler.getFile(bucket, key, {})
   try {

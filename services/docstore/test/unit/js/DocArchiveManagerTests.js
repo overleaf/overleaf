@@ -12,7 +12,7 @@ describe('DocArchiveManager', function () {
     RangeManager,
     Settings,
     Crypto,
-    Streamifier,
+    StreamUtils,
     HashDigest,
     HashUpdate,
     archivedDocs,
@@ -42,8 +42,8 @@ describe('DocArchiveManager', function () {
     Crypto = {
       createHash: sinon.stub().returns({ update: HashUpdate }),
     }
-    Streamifier = {
-      createReadStream: sinon.stub().returns({ stream: 'readStream' }),
+    StreamUtils = {
+      ReadableString: sinon.stub().returns({ stream: 'readStream' }),
     }
 
     projectId = ObjectId()
@@ -158,7 +158,7 @@ describe('DocArchiveManager', function () {
       requires: {
         '@overleaf/settings': Settings,
         crypto: Crypto,
-        streamifier: Streamifier,
+        '@overleaf/stream-utils': StreamUtils,
         './MongoManager': MongoManager,
         './RangeManager': RangeManager,
         './PersistorManager': PersistorManager,
@@ -185,7 +185,7 @@ describe('DocArchiveManager', function () {
 
     it('should add the schema version', async function () {
       await DocArchiveManager.promises.archiveDoc(projectId, mongoDocs[1]._id)
-      expect(Streamifier.createReadStream).to.have.been.calledWith(
+      expect(StreamUtils.ReadableString).to.have.been.calledWith(
         sinon.match(/"schema_v":1/)
       )
     })
@@ -219,7 +219,7 @@ describe('DocArchiveManager', function () {
 
     it('should create a stream from the encoded json and send it', async function () {
       await DocArchiveManager.promises.archiveDoc(projectId, mongoDocs[0]._id)
-      expect(Streamifier.createReadStream).to.have.been.calledWith(
+      expect(StreamUtils.ReadableString).to.have.been.calledWith(
         archivedDocJson
       )
       expect(PersistorManager.sendStream).to.have.been.calledWith(

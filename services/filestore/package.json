@@ -23,6 +23,7 @@
     "@overleaf/o-error": "*",
     "@overleaf/object-persistor": "*",
     "@overleaf/settings": "*",
+    "@overleaf/stream-utils": "^0.1.0",
     "body-parser": "^1.19.0",
     "bunyan": "^1.8.15",
     "express": "^4.18.2",
@@ -30,7 +31,6 @@
     "lodash.once": "^4.1.1",
     "node-fetch": "^2.6.7",
     "range-parser": "^1.2.1",
-    "stream-buffers": "~0.2.6",
     "tiny-async-pool": "^1.1.0"
   },
   "devDependencies": {

@@ -19,10 +19,10 @@ const DocstoreApp = require('./helpers/DocstoreApp')
 const DocstoreClient = require('./helpers/DocstoreClient')
 const { Storage } = require('@google-cloud/storage')
 const Persistor = require('../../../app/js/PersistorManager')
-const Streamifier = require('streamifier')
+const { ReadableString } = require('@overleaf/stream-utils')
 
 function uploadContent(path, json, callback) {
-  const stream = Streamifier.createReadStream(JSON.stringify(json))
+  const stream = new ReadableString(JSON.stringify(json))
   Persistor.sendStream(Settings.docstore.bucket, path, stream)
     .then(() => callback())
     .catch(callback)
