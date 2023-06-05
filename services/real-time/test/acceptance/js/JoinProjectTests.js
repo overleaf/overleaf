@@ -66,6 +66,7 @@ describe('joinProject', function () {
     it('should return the project', function () {
       return this.project.should.deep.equal({
         name: 'Test Project',
+        owner: { _id: this.user_id },
       })
     })
 

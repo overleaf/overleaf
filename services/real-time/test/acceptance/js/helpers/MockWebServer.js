@@ -33,6 +33,11 @@ module.exports = MockWebServer = {
       MockWebServer.privileges[projectId][userId] ||
       MockWebServer.privileges[projectId]['anonymous-user']
     const userMetadata = MockWebServer.userMetadata[projectId]?.[userId]
+    if (privilegeLevel === 'owner') {
+      project.owner = { _id: userId }
+    } else {
+      project.owner = { _id: '404404404404404404404404' }
+    }
     return callback(null, project, privilegeLevel, userMetadata)
   },
 
