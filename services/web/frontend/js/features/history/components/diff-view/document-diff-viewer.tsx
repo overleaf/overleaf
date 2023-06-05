@@ -24,6 +24,7 @@ import { inlineBackground } from '../../../source-editor/extensions/inline-backg
 function extensions(): Extension[] {
   return [
     EditorView.editable.of(false),
+    EditorView.contentAttributes.of({ tabindex: '0' }),
     lineNumbers(),
     EditorView.lineWrapping,
     indentUnit.of('    '), // TODO: Vary this by file type
