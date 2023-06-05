@@ -720,6 +720,8 @@ const equationArrayEnvNames = new Set([
   'cases*',
   'dcases',
   'dcases*',
+  'rcases',
+  'rcases*',
   'IEEEeqnarray',
   'IEEEeqnarray*',
 ])
