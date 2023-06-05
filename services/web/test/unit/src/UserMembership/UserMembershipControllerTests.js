@@ -110,13 +110,9 @@ describe('UserMembershipController', function () {
     it('render group view', async function () {
       return await this.UserMembershipController.manageGroupMembers(this.req, {
         render: (viewPath, viewParams) => {
-          expect(viewPath).to.equal('user_membership/index')
+          expect(viewPath).to.equal('user_membership/group-members-react')
           expect(viewParams.users).to.deep.equal(this.users)
           expect(viewParams.groupSize).to.equal(this.subscription.membersLimit)
-          expect(viewParams.translations.title).to.equal('group_subscription')
-          expect(viewParams.paths.addMember).to.equal(
-            `/manage/groups/${this.subscription._id}/invites`
-          )
         },
       })
     })
@@ -125,13 +121,8 @@ describe('UserMembershipController', function () {
       this.req.entityConfig = EntityConfigs.groupManagers
       return await this.UserMembershipController.manageGroupManagers(this.req, {
         render: (viewPath, viewParams) => {
-          expect(viewPath).to.equal('user_membership/index')
+          expect(viewPath).to.equal('user_membership/group-managers-react')
           expect(viewParams.groupSize).to.equal(undefined)
-          expect(viewParams.translations.title).to.equal('group_subscription')
-          expect(viewParams.translations.subtitle).to.equal(
-            'managers_management'
-          )
-          expect(viewParams.paths.exportMembers).to.be.undefined
         },
       })
     })
@@ -143,13 +134,11 @@ describe('UserMembershipController', function () {
         this.req,
         {
           render: (viewPath, viewParams) => {
-            expect(viewPath).to.equal('user_membership/index')
+            expect(viewPath).to.equal(
+              'user_membership/institution-managers-react'
+            )
             expect(viewParams.name).to.equal('Test Institution Name')
             expect(viewParams.groupSize).to.equal(undefined)
-            expect(viewParams.translations.title).to.equal(
-              'institution_account'
-            )
-            expect(viewParams.paths.exportMembers).to.be.undefined
           },
         }
       )

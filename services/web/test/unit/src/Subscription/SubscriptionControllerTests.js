@@ -78,6 +78,9 @@ describe('SubscriptionController', function () {
       promises: {
         buildUsersSubscriptionViewModel: sinon.stub().resolves({}),
       },
+      buildPlansListForSubscriptionDash: sinon
+        .stub()
+        .returns({ plans: [], planCodesChangingAtTermEnd: [] }),
     }
     this.settings = {
       coupon_codes: {
@@ -283,10 +286,10 @@ describe('SubscriptionController', function () {
       describe('with a valid plan code', function () {
         it('should render the new subscription page', function (done) {
           this.res.render = (page, opts) => {
-            page.should.equal('subscriptions/new-refreshed')
+            page.should.equal('subscriptions/new-react')
             done()
           }
-          this.SubscriptionController.paymentPage(this.req, this.res)
+          this.SubscriptionController.paymentPage(this.req, this.res, done)
         })
       })
     })
@@ -407,7 +410,7 @@ describe('SubscriptionController', function () {
         }
       )
       this.res.render = (url, variables) => {
-        url.should.equal('subscriptions/successful-subscription')
+        url.should.equal('subscriptions/successful-subscription-react')
         assert.deepEqual(variables, {
           title: 'thank_you',
           personalSubscription: 'foo',
@@ -448,13 +451,19 @@ describe('SubscriptionController', function () {
       this.SubscriptionViewModelBuilder.buildPlansList.returns(
         (this.plans = { plans: 'mock' })
       )
+      this.SubscriptionViewModelBuilder.buildPlansListForSubscriptionDash.returns(
+        {
+          plans: this.plans,
+          planCodesChangingAtTermEnd: [],
+        }
+      )
       this.LimitationsManager.promises.userHasV1OrV2Subscription.resolves(false)
       this.res.render = (view, data) => {
         this.data = data
-        expect(view).to.equal('subscriptions/dashboard')
+        expect(view).to.equal('subscriptions/dashboard-react')
         done()
       }
-      this.SubscriptionController.userSubscriptionPage(this.req, this.res)
+      this.SubscriptionController.userSubscriptionPage(this.req, this.res, done)
     })
 
     it('should load the personal, groups and v1 subscriptions', function () {
