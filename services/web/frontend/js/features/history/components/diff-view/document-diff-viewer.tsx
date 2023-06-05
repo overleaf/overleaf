@@ -8,7 +8,14 @@ import {
 import { EditorView, lineNumbers } from '@codemirror/view'
 import { indentationMarkers } from '@replit/codemirror-indentation-markers'
 import { highlights, setHighlightsEffect } from '../../extensions/highlights'
-import { theme } from '../../extensions/theme'
+import useScopeValue from '../../../../shared/hooks/use-scope-value'
+import {
+  theme,
+  Options,
+  setOptionsTheme,
+  FontFamily,
+  LineHeight,
+} from '../../extensions/theme'
 import { indentUnit } from '@codemirror/language'
 import { Highlight } from '../../services/types/doc'
 import useIsMounted from '../../../../shared/hooks/use-is-mounted'
@@ -21,7 +28,7 @@ import Icon from '../../../../shared/components/icon'
 import { useTranslation } from 'react-i18next'
 import { inlineBackground } from '../../../source-editor/extensions/inline-background'
 
-function extensions(): Extension[] {
+function extensions(themeOptions: Options): Extension[] {
   return [
     EditorView.editable.of(false),
     EditorView.contentAttributes.of({ tabindex: '0' }),
@@ -31,7 +38,7 @@ function extensions(): Extension[] {
     indentationMarkers({ hideFirstIndent: true, highlightActiveBlock: false }),
     highlights(),
     highlightLocations(),
-    theme(),
+    theme(themeOptions),
     inlineBackground(false),
   ]
 }
@@ -43,13 +50,20 @@ function DocumentDiffViewer({
   doc: string
   highlights: Highlight[]
 }) {
+  const [fontFamily] = useScopeValue<FontFamily>('settings.fontFamily')
+  const [fontSize] = useScopeValue<number>('settings.fontSize')
+  const [lineHeight] = useScopeValue<LineHeight>('settings.lineHeight')
   const isMounted = useIsMounted()
   const { t } = useTranslation()
 
   const [state, setState] = useState(() => {
     return EditorState.create({
       doc,
-      extensions: extensions(),
+      extensions: extensions({
+        fontSize,
+        fontFamily,
+        lineHeight,
+      }),
     })
   })
 
@@ -106,6 +120,18 @@ function DocumentDiffViewer({
       effects,
     })
   }, [doc, highlights, view])
+
+  // Update the document diff viewer theme whenever the font size, font family
+  // or line height user setting changes
+  useEffect(() => {
+    view.dispatch(
+      setOptionsTheme({
+        fontSize,
+        fontFamily,
+        lineHeight,
+      })
+    )
+  }, [view, fontSize, fontFamily, lineHeight])
 
   return (
     <div className="document-diff-container">
