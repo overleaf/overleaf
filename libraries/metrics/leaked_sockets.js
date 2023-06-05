@@ -15,46 +15,47 @@ const MIN_SOCKET_LEAK_TIME =
   (parseInt(process.env.LEAKED_SOCKET_AGE_THRESHOLD, 10) || 15) * 60 * 1000
 
 // Record HTTP events using diagnostics_channel
+diagnosticsChannel.subscribe('http.client.request.start', handleRequest)
+diagnosticsChannel.subscribe('http.server.request.start', handleRequest)
+diagnosticsChannel.subscribe('http.client.response.finish', handleResponse)
+diagnosticsChannel.subscribe('http.server.response.finish', handleResponse)
 
-const channels = [
-  'http.client.request.start',
-  'http.client.response.finish',
-  'http.server.request.start',
-  'http.server.response.finish',
-]
-
-for (const channel of channels) {
-  diagnosticsChannel.subscribe(channel, handler(channel))
+function handleRequest({ request: req }) {
+  const socket = req?.socket
+  if (socket) {
+    recordRequest(req, socket)
+  }
 }
 
-function handler(channel) {
-  return function ({ request: req, response: res }) {
-    const socket = req?.socket || res?.socket
-    if (!socket) {
-      return
-    }
-    // If we haven't seen this socket before, add a debug object from the request
-    if (!socket._ol_debug && req) {
-      const { method, protocol, path, url, rawHeaders, _header } = req
-      socket._ol_debug = {
-        method,
-        protocol,
-        url: url ?? path,
-        request: { headers: rawHeaders ?? _header, ts: new Date() },
-      }
-    } else if (socket._ol_debug && res) {
-      // We've already seen the request, now add debug info from the response
-      const { statusCode, statusMessage, headers, _header } = res
-      Object.assign(socket._ol_debug, {
-        response: {
-          statusCode,
-          statusMessage,
-          headers: headers ?? _header,
-          ts: new Date(),
-        },
-      })
-    }
+function recordRequest(req, socket) {
+  const { method, protocol, path, url, rawHeaders, _header } = req
+  socket._ol_debug = {
+    method,
+    protocol,
+    url: url ?? path,
+    request: { headers: rawHeaders ?? _header, ts: new Date() },
   }
+}
+
+function handleResponse({ request: req, response: res }) {
+  const socket = req?.socket || res?.socket
+  if (!socket || !res) {
+    return
+  }
+  if (!socket._ol_debug) {
+    // I don't know if this will ever happen, but if we missed the request,
+    // record it here.
+    recordRequest(req, socket)
+  }
+  const { statusCode, statusMessage, headers, _header } = res
+  Object.assign(socket._ol_debug, {
+    response: {
+      statusCode,
+      statusMessage,
+      headers: headers ?? _header,
+      ts: new Date(),
+    },
+  })
 }
 
 // Additional functions to log request headers with sensitive information redacted
