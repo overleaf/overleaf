@@ -216,7 +216,6 @@ async function userSubscriptionPage(req, res) {
     currentInstitutionsWithLicence,
     managedInstitutions,
     managedPublishers,
-    v1SubscriptionStatus,
   } = results
   const hasSubscription =
     await LimitationsManager.promises.userHasV1OrV2Subscription(user)
@@ -250,7 +249,6 @@ async function userSubscriptionPage(req, res) {
     managedGroupSubscriptions,
     managedInstitutions,
     managedPublishers,
-    v1SubscriptionStatus,
     currentInstitutionsWithLicence,
     cancelButtonNewCopy,
     groupPlans: groupPlansDataForDash,

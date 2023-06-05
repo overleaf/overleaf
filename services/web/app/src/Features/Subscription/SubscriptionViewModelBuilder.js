@@ -4,7 +4,6 @@ const PlansLocator = require('./PlansLocator')
 const SubscriptionFormatters = require('./SubscriptionFormatters')
 const SubscriptionLocator = require('./SubscriptionLocator')
 const SubscriptionUpdater = require('./SubscriptionUpdater')
-const V1SubscriptionManager = require('./V1SubscriptionManager')
 const InstitutionsGetter = require('../Institutions/InstitutionsGetter')
 const InstitutionsManager = require('../Institutions/InstitutionsManager')
 const PublishersGetter = require('../Publishers/PublishersGetter')
@@ -74,7 +73,6 @@ async function buildUsersSubscriptionViewModel(user) {
     currentInstitutionsWithLicence,
     managedInstitutions,
     managedPublishers,
-    v1SubscriptionStatus,
     recurlySubscription,
     recurlyCoupons,
     plan,
@@ -151,17 +149,6 @@ async function buildUsersSubscriptionViewModel(user) {
     managedPublishers(cb) {
       PublishersGetter.getManagedPublishers(user._id, cb)
     },
-    v1SubscriptionStatus(cb) {
-      V1SubscriptionManager.getSubscriptionStatusFromV1(
-        user._id,
-        (error, status, v1Id) => {
-          if (error) {
-            return cb(error)
-          }
-          cb(null, status)
-        }
-      )
-    },
   })
 
   if (memberGroupSubscriptions == null) {
@@ -172,9 +159,6 @@ async function buildUsersSubscriptionViewModel(user) {
   }
   if (managedInstitutions == null) {
     managedInstitutions = []
-  }
-  if (v1SubscriptionStatus == null) {
-    v1SubscriptionStatus = {}
   }
   if (recurlyCoupons == null) {
     recurlyCoupons = []
@@ -345,7 +329,6 @@ async function buildUsersSubscriptionViewModel(user) {
     currentInstitutionsWithLicence,
     managedInstitutions,
     managedPublishers,
-    v1SubscriptionStatus,
   }
 }
 

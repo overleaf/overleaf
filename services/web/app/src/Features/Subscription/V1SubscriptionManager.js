@@ -19,19 +19,6 @@ module.exports = V1SubscriptionManager = {
     )
   },
 
-  getSubscriptionStatusFromV1(userId, callback) {
-    V1SubscriptionManager._v1Request(
-      userId,
-      {
-        method: 'GET',
-        url(v1Id) {
-          return `/api/v1/sharelatex/users/${v1Id}/subscription_status`
-        },
-      },
-      callback
-    )
-  },
-
   cancelV1Subscription(userId, callback) {
     V1SubscriptionManager._v1Request(
       userId,
