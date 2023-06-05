@@ -321,9 +321,9 @@ mixin table_head_price(plan, period)
 			+gen_localized_price_for_plan_view(plan, period)
 		p.plans-v2-table-price-period-label
 			if period == 'annual'
-				| per year
+				| #{translate("per_year")}
 			else
-				| per month
+				| #{translate("per_month")}
 
 mixin table_cell(feature, plan)
 	- var planValue = feature.plans[plan]

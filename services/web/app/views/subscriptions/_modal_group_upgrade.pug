@@ -1,7 +1,7 @@
 script(type="text/ng-template", id="groupPlanModalUpgradeTemplate")
 	.modal-header
 		h2 Customize your group subscription
-		h3 Save 30% or more
+		h3 #{translate("save_30_percent_or_more_uppercase")}
 	.modal-body.plans.group-subscription-modal
 		.container-fluid
 			.row
@@ -29,7 +29,7 @@ script(type="text/ng-template", id="groupPlanModalUpgradeTemplate")
 								span {{plan_code.display}}
 						.form-group
 							label(for='size')
-								| Number of users
+								| #{translate('number_of_users')}
 							select.form-control(id="size", ng-model="selected.size")
 								option(ng-repeat="size in options.sizes", value="{{size}}") {{ size }}
 						.form-group
