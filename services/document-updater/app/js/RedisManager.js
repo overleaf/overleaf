@@ -26,7 +26,6 @@ const MEGABYTES = 1024 * 1024
 const MAX_RANGES_SIZE = 3 * MEGABYTES
 
 const keys = Settings.redis.documentupdater.key_schema
-const historyKeys = Settings.redis.history.key_schema // note: this is track changes, not project-history
 
 module.exports = RedisManager = {
   rclient,
@@ -129,7 +128,6 @@ module.exports = RedisManager = {
       keys.ranges({ doc_id: docId }),
       keys.pathname({ doc_id: docId }),
       keys.projectHistoryId({ doc_id: docId }),
-      keys.projectHistoryType({ doc_id: docId }),
       keys.unflushedTime({ doc_id: docId }),
       keys.lastUpdatedAt({ doc_id: docId }),
       keys.lastUpdatedBy({ doc_id: docId })
@@ -266,18 +264,14 @@ module.exports = RedisManager = {
   },
 
   getDocVersion(docId, callback) {
-    rclient.mget(
-      keys.docVersion({ doc_id: docId }),
-      keys.projectHistoryType({ doc_id: docId }),
-      (error, result) => {
-        if (error) {
-          return callback(error)
-        }
-        let [version, projectHistoryType] = result || []
-        version = parseInt(version, 10)
-        callback(null, version, projectHistoryType)
+    rclient.mget(keys.docVersion({ doc_id: docId }), (error, result) => {
+      if (error) {
+        return callback(error)
       }
-    )
+      let [version] = result || []
+      version = parseInt(version, 10)
+      callback(null, version)
+    })
   },
 
   getDocLines(docId, callback) {
@@ -353,26 +347,6 @@ module.exports = RedisManager = {
     })
   },
 
-  getHistoryType(docId, callback) {
-    rclient.get(
-      keys.projectHistoryType({ doc_id: docId }),
-      (error, projectHistoryType) => {
-        if (error) {
-          return callback(error)
-        }
-        callback(null, projectHistoryType)
-      }
-    )
-  },
-
-  setHistoryType(docId, projectHistoryType, callback) {
-    rclient.set(
-      keys.projectHistoryType({ doc_id: docId }),
-      projectHistoryType,
-      callback
-    )
-  },
-
   DOC_OPS_TTL: 60 * minutes,
   DOC_OPS_MAX_LENGTH: 100,
   updateDocument(
@@ -388,163 +362,129 @@ module.exports = RedisManager = {
     if (appliedOps == null) {
       appliedOps = []
     }
-    RedisManager.getDocVersion(
-      docId,
-      (error, currentVersion, projectHistoryType) => {
-        if (error) {
-          return callback(error)
-        }
-        if (currentVersion + appliedOps.length !== newVersion) {
-          error = new Error(`Version mismatch. '${docId}' is corrupted.`)
-          logger.error(
-            {
-              err: error,
-              docId,
-              currentVersion,
-              newVersion,
-              opsLength: appliedOps.length,
-            },
-            'version mismatch'
-          )
-          return callback(error)
-        }
-
-        const jsonOps = appliedOps.map(op => JSON.stringify(op))
-        for (const op of jsonOps) {
-          if (op.indexOf('\u0000') !== -1) {
-            error = new Error('null bytes found in jsonOps')
-            // this check was added to catch memory corruption in JSON.stringify
-            logger.error({ err: error, docId, jsonOps }, error.message)
-            return callback(error)
-          }
-        }
-
-        const newDocLines = JSON.stringify(docLines)
-        if (newDocLines.indexOf('\u0000') !== -1) {
-          error = new Error('null bytes found in doc lines')
-          // this check was added to catch memory corruption in JSON.stringify
-          logger.error({ err: error, docId, newDocLines }, error.message)
-          return callback(error)
-        }
-        // Do an optimised size check on the docLines using the serialised
-        // length as an upper bound
-        const sizeBound = newDocLines.length
-        if (docIsTooLarge(sizeBound, docLines, Settings.max_doc_length)) {
-          const err = new Error('blocking doc update: doc is too large')
-          const docSize = newDocLines.length
-          logger.error({ projectId, docId, err, docSize }, err.message)
-          return callback(err)
-        }
-        const newHash = RedisManager._computeHash(newDocLines)
-
-        const opVersions = appliedOps.map(op => op?.v)
-        logger.debug(
-          {
-            docId,
-            version: newVersion,
-            hash: newHash,
-            opVersions,
-          },
-          'updating doc in redis'
-        )
-        // record bytes sent to redis in update
-        metrics.summary('redis.docLines', newDocLines.length, {
-          status: 'update',
-        })
-        RedisManager._serializeRanges(ranges, (error, ranges) => {
-          if (error) {
-            logger.error({ err: error, docId }, error.message)
-            return callback(error)
-          }
-          if (ranges && ranges.indexOf('\u0000') !== -1) {
-            error = new Error('null bytes found in ranges')
-            // this check was added to catch memory corruption in JSON.stringify
-            logger.error({ err: error, docId, ranges }, error.message)
-            return callback(error)
-          }
-          const multi = rclient.multi()
-          multi.mset({
-            [keys.docLines({ doc_id: docId })]: newDocLines,
-            [keys.docVersion({ doc_id: docId })]: newVersion,
-            [keys.docHash({ doc_id: docId })]: newHash,
-            [keys.ranges({ doc_id: docId })]: ranges,
-            [keys.lastUpdatedAt({ doc_id: docId })]: Date.now(),
-            [keys.lastUpdatedBy({ doc_id: docId })]:
-              updateMeta && updateMeta.user_id,
-          })
-          multi.ltrim(
-            keys.docOps({ doc_id: docId }),
-            -RedisManager.DOC_OPS_MAX_LENGTH,
-            -1
-          ) // index 3
-          // push the ops last so we can get the lengths at fixed index position 7
-          if (jsonOps.length > 0) {
-            multi.rpush(keys.docOps({ doc_id: docId }), ...jsonOps) // index 5
-            // expire must come after rpush since before it will be a no-op if the list is empty
-            multi.expire(
-              keys.docOps({ doc_id: docId }),
-              RedisManager.DOC_OPS_TTL
-            ) // index 6
-            if (
-              Settings.disableTrackChanges ||
-              projectHistoryType === 'project-history'
-            ) {
-              metrics.inc('history-queue', 1, { status: 'skip-track-changes' })
-              logger.debug(
-                { docId },
-                'skipping push of uncompressed ops for project using project-history'
-              )
-            } else {
-              // project is using old track-changes history service
-              metrics.inc('history-queue', 1, { status: 'track-changes' })
-              multi.rpush(
-                historyKeys.uncompressedHistoryOps({ doc_id: docId }),
-                ...jsonOps
-              ) // index 7
-            }
-            // Set the unflushed timestamp to the current time if the doc
-            // hasn't been modified before (the content in mongo has been
-            // valid up to this point). Otherwise leave it alone ("NX" flag).
-            multi.set(keys.unflushedTime({ doc_id: docId }), Date.now(), 'NX')
-          }
-          multi.exec((error, result) => {
-            if (error) {
-              return callback(error)
-            }
-
-            let docUpdateCount
-            if (
-              Settings.disableTrackChanges ||
-              projectHistoryType === 'project-history'
-            ) {
-              docUpdateCount = undefined // only using project history, don't bother with track-changes
-            } else {
-              // project is using old track-changes history service
-              docUpdateCount = result[4]
-            }
-
-            if (jsonOps.length > 0 && Settings.apis?.project_history?.enabled) {
-              metrics.inc('history-queue', 1, { status: 'project-history' })
-              ProjectHistoryRedisManager.queueOps(
-                projectId,
-                ...jsonOps,
-                (error, projectUpdateCount) => {
-                  if (error) {
-                    // The full project history can re-sync a project in case
-                    //  updates went missing.
-                    // Just record the error here and acknowledge the write-op.
-                    metrics.inc('history-queue-error')
-                  }
-                  callback(null, docUpdateCount, projectUpdateCount)
-                }
-              )
-            } else {
-              callback(null, docUpdateCount)
-            }
-          })
-        })
+    RedisManager.getDocVersion(docId, (error, currentVersion) => {
+      if (error) {
+        return callback(error)
       }
-    )
+      if (currentVersion + appliedOps.length !== newVersion) {
+        error = new Error(`Version mismatch. '${docId}' is corrupted.`)
+        logger.error(
+          {
+            err: error,
+            docId,
+            currentVersion,
+            newVersion,
+            opsLength: appliedOps.length,
+          },
+          'version mismatch'
+        )
+        return callback(error)
+      }
+
+      const jsonOps = appliedOps.map(op => JSON.stringify(op))
+      for (const op of jsonOps) {
+        if (op.indexOf('\u0000') !== -1) {
+          error = new Error('null bytes found in jsonOps')
+          // this check was added to catch memory corruption in JSON.stringify
+          logger.error({ err: error, docId, jsonOps }, error.message)
+          return callback(error)
+        }
+      }
+
+      const newDocLines = JSON.stringify(docLines)
+      if (newDocLines.indexOf('\u0000') !== -1) {
+        error = new Error('null bytes found in doc lines')
+        // this check was added to catch memory corruption in JSON.stringify
+        logger.error({ err: error, docId, newDocLines }, error.message)
+        return callback(error)
+      }
+      // Do an optimised size check on the docLines using the serialised
+      // length as an upper bound
+      const sizeBound = newDocLines.length
+      if (docIsTooLarge(sizeBound, docLines, Settings.max_doc_length)) {
+        const err = new Error('blocking doc update: doc is too large')
+        const docSize = newDocLines.length
+        logger.error({ projectId, docId, err, docSize }, err.message)
+        return callback(err)
+      }
+      const newHash = RedisManager._computeHash(newDocLines)
+
+      const opVersions = appliedOps.map(op => op?.v)
+      logger.debug(
+        {
+          docId,
+          version: newVersion,
+          hash: newHash,
+          opVersions,
+        },
+        'updating doc in redis'
+      )
+      // record bytes sent to redis in update
+      metrics.summary('redis.docLines', newDocLines.length, {
+        status: 'update',
+      })
+      RedisManager._serializeRanges(ranges, (error, ranges) => {
+        if (error) {
+          logger.error({ err: error, docId }, error.message)
+          return callback(error)
+        }
+        if (ranges && ranges.indexOf('\u0000') !== -1) {
+          error = new Error('null bytes found in ranges')
+          // this check was added to catch memory corruption in JSON.stringify
+          logger.error({ err: error, docId, ranges }, error.message)
+          return callback(error)
+        }
+        const multi = rclient.multi()
+        multi.mset({
+          [keys.docLines({ doc_id: docId })]: newDocLines,
+          [keys.docVersion({ doc_id: docId })]: newVersion,
+          [keys.docHash({ doc_id: docId })]: newHash,
+          [keys.ranges({ doc_id: docId })]: ranges,
+          [keys.lastUpdatedAt({ doc_id: docId })]: Date.now(),
+          [keys.lastUpdatedBy({ doc_id: docId })]:
+            updateMeta && updateMeta.user_id,
+        })
+        multi.ltrim(
+          keys.docOps({ doc_id: docId }),
+          -RedisManager.DOC_OPS_MAX_LENGTH,
+          -1
+        ) // index 3
+        // push the ops last so we can get the lengths at fixed index position 7
+        if (jsonOps.length > 0) {
+          multi.rpush(keys.docOps({ doc_id: docId }), ...jsonOps) // index 5
+          // expire must come after rpush since before it will be a no-op if the list is empty
+          multi.expire(keys.docOps({ doc_id: docId }), RedisManager.DOC_OPS_TTL) // index 6
+          // Set the unflushed timestamp to the current time if the doc
+          // hasn't been modified before (the content in mongo has been
+          // valid up to this point). Otherwise leave it alone ("NX" flag).
+          multi.set(keys.unflushedTime({ doc_id: docId }), Date.now(), 'NX')
+        }
+        multi.exec((error, result) => {
+          if (error) {
+            return callback(error)
+          }
+
+          if (jsonOps.length > 0) {
+            metrics.inc('history-queue', 1, { status: 'project-history' })
+            ProjectHistoryRedisManager.queueOps(
+              projectId,
+              ...jsonOps,
+              (error, projectUpdateCount) => {
+                if (error) {
+                  // The full project history can re-sync a project in case
+                  //  updates went missing.
+                  // Just record the error here and acknowledge the write-op.
+                  metrics.inc('history-queue-error')
+                }
+                callback(null, projectUpdateCount)
+              }
+            )
+          } else {
+            callback(null)
+          }
+        })
+      })
+    })
   },
 
   renameDoc(projectId, docId, userId, update, projectHistoryId, callback) {

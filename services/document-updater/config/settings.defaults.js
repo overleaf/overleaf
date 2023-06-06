@@ -14,11 +14,7 @@ module.exports = {
       user: process.env.WEB_API_USER || 'sharelatex',
       pass: process.env.WEB_API_PASSWORD || 'password',
     },
-    trackchanges: {
-      url: `http://${process.env.TRACK_CHANGES_HOST || 'localhost'}:3015`,
-    },
     project_history: {
-      enabled: true,
       url: `http://${process.env.PROJECT_HISTORY_HOST || 'localhost'}:3054`,
     },
   },
@@ -44,14 +40,6 @@ module.exports = {
       maxRetriesPerRequest: parseInt(
         process.env.REDIS_MAX_RETRIES_PER_REQUEST || '20'
       ),
-      key_schema: {
-        uncompressedHistoryOps({ doc_id: docId }) {
-          return `UncompressedHistoryOps:{${docId}}`
-        },
-        docsWithHistoryOps({ project_id: projectId }) {
-          return `DocsWithHistoryOps:{${projectId}}`
-        },
-      },
     },
 
     project_history: {
@@ -137,9 +125,6 @@ module.exports = {
         projectHistoryId({ doc_id: docId }) {
           return `ProjectHistoryId:{${docId}}`
         },
-        projectHistoryType({ doc_id: docId }) {
-          return `ProjectHistoryType:{${docId}}`
-        },
         projectState({ project_id: projectId }) {
           return `ProjectState:{${projectId}}`
         },
@@ -181,8 +166,4 @@ module.exports = {
   continuousBackgroundFlush: process.env.CONTINUOUS_BACKGROUND_FLUSH === 'true',
 
   smoothingOffset: process.env.SMOOTHING_OFFSET || 1000, // milliseconds
-
-  disableDoubleFlush: process.env.DISABLE_DOUBLE_FLUSH === 'true', // don't flush track-changes for projects using project-history
-
-  disableTrackChanges: process.env.DISABLE_TRACK_CHANGES === 'true', // stop sending any updates to track-changes
 }

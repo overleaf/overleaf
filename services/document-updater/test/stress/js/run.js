@@ -14,7 +14,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const DocUpdaterClient = require('../../acceptance/js/helpers/DocUpdaterClient')
-// MockTrackChangesApi = require "../../acceptance/js/helpers/MockTrackChangesApi"
 // MockWebApi = require "../../acceptance/js/helpers/MockWebApi"
 const assert = require('assert')
 const async = require('async')

@@ -6,10 +6,8 @@
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
  * DS201: Simplify complex destructure assignments
  * DS205: Consider reworking code to avoid use of IIFEs
- * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let UpdateManager
@@ -31,44 +29,37 @@ const Profiler = require('./Profiler')
 
 module.exports = UpdateManager = {
   processOutstandingUpdates(projectId, docId, callback) {
-    if (callback == null) {
+    if (!callback) {
       callback = function () {}
     }
     const timer = new Metrics.Timer('updateManager.processOutstandingUpdates')
-    return UpdateManager.fetchAndApplyUpdates(
-      projectId,
-      docId,
-      function (error) {
-        timer.done()
-        if (error != null) {
-          return callback(error)
-        }
-        return callback()
-      }
-    )
+    UpdateManager.fetchAndApplyUpdates(projectId, docId, function (error) {
+      timer.done()
+      callback(error)
+    })
   },
 
   processOutstandingUpdatesWithLock(projectId, docId, callback) {
-    if (callback == null) {
+    if (!callback) {
       callback = function () {}
     }
     const profile = new Profiler('processOutstandingUpdatesWithLock', {
       project_id: projectId,
       doc_id: docId,
     })
-    return LockManager.tryLock(docId, (error, gotLock, lockValue) => {
-      if (error != null) {
+    LockManager.tryLock(docId, (error, gotLock, lockValue) => {
+      if (error) {
         return callback(error)
       }
       if (!gotLock) {
         return callback()
       }
       profile.log('tryLock')
-      return UpdateManager.processOutstandingUpdates(
+      UpdateManager.processOutstandingUpdates(
         projectId,
         docId,
         function (error) {
-          if (error != null) {
+          if (error) {
             return UpdateManager._handleErrorInsideLock(
               docId,
               lockValue,
@@ -77,12 +68,12 @@ module.exports = UpdateManager = {
             )
           }
           profile.log('processOutstandingUpdates')
-          return LockManager.releaseLock(docId, lockValue, error => {
-            if (error != null) {
+          LockManager.releaseLock(docId, lockValue, error => {
+            if (error) {
               return callback(error)
             }
             profile.log('releaseLock').end()
-            return UpdateManager.continueProcessingUpdatesWithLock(
+            UpdateManager.continueProcessingUpdatesWithLock(
               projectId,
               docId,
               callback
@@ -94,59 +85,56 @@ module.exports = UpdateManager = {
   },
 
   continueProcessingUpdatesWithLock(projectId, docId, callback) {
-    if (callback == null) {
+    if (!callback) {
       callback = function () {}
     }
-    return RealTimeRedisManager.getUpdatesLength(docId, (error, length) => {
-      if (error != null) {
+    RealTimeRedisManager.getUpdatesLength(docId, (error, length) => {
+      if (error) {
         return callback(error)
       }
       if (length > 0) {
-        return UpdateManager.processOutstandingUpdatesWithLock(
+        UpdateManager.processOutstandingUpdatesWithLock(
           projectId,
           docId,
           callback
         )
       } else {
-        return callback()
+        callback()
       }
     })
   },
 
   fetchAndApplyUpdates(projectId, docId, callback) {
-    if (callback == null) {
+    if (!callback) {
       callback = function () {}
     }
     const profile = new Profiler('fetchAndApplyUpdates', {
       project_id: projectId,
       doc_id: docId,
     })
-    return RealTimeRedisManager.getPendingUpdatesForDoc(
-      docId,
-      (error, updates) => {
-        if (error != null) {
-          return callback(error)
-        }
-        logger.debug(
-          { projectId, docId, count: updates.length },
-          'processing updates'
-        )
-        if (updates.length === 0) {
-          return callback()
-        }
-        profile.log('getPendingUpdatesForDoc')
-        const doUpdate = (update, cb) =>
-          UpdateManager.applyUpdate(projectId, docId, update, function (err) {
-            profile.log('applyUpdate')
-            return cb(err)
-          })
-        const finalCallback = function (err) {
-          profile.log('async done').end()
-          return callback(err)
-        }
-        return async.eachSeries(updates, doUpdate, finalCallback)
+    RealTimeRedisManager.getPendingUpdatesForDoc(docId, (error, updates) => {
+      if (error) {
+        return callback(error)
       }
-    )
+      logger.debug(
+        { projectId, docId, count: updates.length },
+        'processing updates'
+      )
+      if (updates.length === 0) {
+        return callback()
+      }
+      profile.log('getPendingUpdatesForDoc')
+      const doUpdate = (update, cb) =>
+        UpdateManager.applyUpdate(projectId, docId, update, function (err) {
+          profile.log('applyUpdate')
+          cb(err)
+        })
+      const finalCallback = function (err) {
+        profile.log('async done').end()
+        callback(err)
+      }
+      async.eachSeries(updates, doUpdate, finalCallback)
+    })
   },
 
   applyUpdate(projectId, docId, update, _callback) {
@@ -154,7 +142,7 @@ module.exports = UpdateManager = {
       _callback = function () {}
     }
     const callback = function (error) {
-      if (error != null) {
+      if (error) {
         RealTimeRedisManager.sendData({
           project_id: projectId,
           doc_id: docId,
@@ -163,7 +151,7 @@ module.exports = UpdateManager = {
         profile.log('sendData')
       }
       profile.end()
-      return _callback(error)
+      _callback(error)
     }
 
     const profile = new Profiler('applyUpdate', {
@@ -172,12 +160,12 @@ module.exports = UpdateManager = {
     })
     UpdateManager._sanitizeUpdate(update)
     profile.log('sanitizeUpdate', { sync: true })
-    return DocumentManager.getDoc(
+    DocumentManager.getDoc(
       projectId,
       docId,
       function (error, lines, version, ranges, pathname, projectHistoryId) {
         profile.log('getDoc')
-        if (error != null) {
+        if (error) {
           return callback(error)
         }
         if (lines == null || version == null) {
@@ -187,7 +175,7 @@ module.exports = UpdateManager = {
         }
         const previousVersion = version
         const incomingUpdateVersion = update.v
-        return ShareJsUpdateManager.applyUpdate(
+        ShareJsUpdateManager.applyUpdate(
           projectId,
           docId,
           update,
@@ -199,10 +187,10 @@ module.exports = UpdateManager = {
               // doc version, otherwise getPreviousDocOps is called.
               sync: incomingUpdateVersion === previousVersion,
             })
-            if (error != null) {
+            if (error) {
               return callback(error)
             }
-            return RangesManager.applyUpdate(
+            RangesManager.applyUpdate(
               projectId,
               docId,
               ranges,
@@ -216,10 +204,10 @@ module.exports = UpdateManager = {
                   lines
                 )
                 profile.log('RangesManager.applyUpdate', { sync: true })
-                if (error != null) {
+                if (error) {
                   return callback(error)
                 }
-                return RedisManager.updateDocument(
+                RedisManager.updateDocument(
                   projectId,
                   docId,
                   updatedDocLines,
@@ -227,68 +215,61 @@ module.exports = UpdateManager = {
                   appliedOps,
                   newRanges,
                   update.meta,
-                  function (error, docOpsLength, projectOpsLength) {
+                  function (error, projectOpsLength) {
                     profile.log('RedisManager.updateDocument')
-                    if (error != null) {
+                    if (error) {
                       return callback(error)
                     }
-                    return HistoryManager.recordAndFlushHistoryOps(
+                    HistoryManager.recordAndFlushHistoryOps(
                       projectId,
-                      docId,
                       appliedOps,
-                      docOpsLength,
-                      projectOpsLength,
-                      function (error) {
-                        profile.log('recordAndFlushHistoryOps')
-                        if (error != null) {
-                          return callback(error)
-                        }
-                        if (rangesWereCollapsed) {
-                          Metrics.inc('doc-snapshot')
-                          logger.debug(
-                            {
-                              projectId,
-                              docId,
-                              previousVersion,
-                              lines,
-                              ranges,
-                              update,
-                            },
-                            'update collapsed some ranges, snapshotting previous content'
-                          )
-                          // Do this last, since it's a mongo call, and so potentially longest running
-                          // If it overruns the lock, it's ok, since all of our redis work is done
-                          return SnapshotManager.recordSnapshot(
-                            projectId,
-                            docId,
-                            previousVersion,
-                            pathname,
-                            lines,
-                            ranges,
-                            function (error) {
-                              if (error != null) {
-                                logger.error(
-                                  {
-                                    err: error,
-                                    projectId,
-                                    docId,
-                                    version,
-                                    lines,
-                                    ranges,
-                                  },
-                                  'error recording snapshot'
-                                )
-                                return callback(error)
-                              } else {
-                                return callback()
-                              }
-                            }
-                          )
-                        } else {
-                          return callback()
-                        }
-                      }
+                      projectOpsLength
                     )
+                    profile.log('recordAndFlushHistoryOps')
+                    if (rangesWereCollapsed) {
+                      Metrics.inc('doc-snapshot')
+                      logger.debug(
+                        {
+                          projectId,
+                          docId,
+                          previousVersion,
+                          lines,
+                          ranges,
+                          update,
+                        },
+                        'update collapsed some ranges, snapshotting previous content'
+                      )
+                      // Do this last, since it's a mongo call, and so potentially longest running
+                      // If it overruns the lock, it's ok, since all of our redis work is done
+                      SnapshotManager.recordSnapshot(
+                        projectId,
+                        docId,
+                        previousVersion,
+                        pathname,
+                        lines,
+                        ranges,
+                        function (error) {
+                          if (error) {
+                            logger.error(
+                              {
+                                err: error,
+                                projectId,
+                                docId,
+                                version,
+                                lines,
+                                ranges,
+                              },
+                              'error recording snapshot'
+                            )
+                            callback(error)
+                          } else {
+                            callback()
+                          }
+                        }
+                      )
+                    } else {
+                      callback()
+                    }
                   }
                 )
               }
@@ -309,14 +290,14 @@ module.exports = UpdateManager = {
     })
     return LockManager.getLock(docId, function (error, lockValue) {
       profile.log('getLock')
-      if (error != null) {
+      if (error) {
         return callback(error)
       }
-      return UpdateManager.processOutstandingUpdates(
+      UpdateManager.processOutstandingUpdates(
         projectId,
         docId,
         function (error) {
-          if (error != null) {
+          if (error) {
             return UpdateManager._handleErrorInsideLock(
               docId,
               lockValue,
@@ -325,12 +306,12 @@ module.exports = UpdateManager = {
             )
           }
           profile.log('processOutstandingUpdates')
-          return method(
+          method(
             projectId,
             docId,
             ...Array.from(args),
             function (error, ...responseArgs) {
-              if (error != null) {
+              if (error) {
                 return UpdateManager._handleErrorInsideLock(
                   docId,
                   lockValue,
@@ -339,34 +320,30 @@ module.exports = UpdateManager = {
                 )
               }
               profile.log('method')
-              return LockManager.releaseLock(
-                docId,
-                lockValue,
-                function (error) {
-                  if (error != null) {
-                    return callback(error)
-                  }
-                  profile.log('releaseLock').end()
-                  callback(null, ...Array.from(responseArgs))
-                  // We held the lock for a while so updates might have queued up
-                  return UpdateManager.continueProcessingUpdatesWithLock(
-                    projectId,
-                    docId,
-                    err => {
-                      if (err) {
-                        // The processing may fail for invalid user updates.
-                        // This can be very noisy, put them on level DEBUG
-                        //  and record a metric.
-                        Metrics.inc('background-processing-updates-error')
-                        logger.debug(
-                          { err, projectId, docId },
-                          'error processing updates in background'
-                        )
-                      }
-                    }
-                  )
+              LockManager.releaseLock(docId, lockValue, function (error) {
+                if (error) {
+                  return callback(error)
                 }
-              )
+                profile.log('releaseLock').end()
+                callback(null, ...Array.from(responseArgs))
+                // We held the lock for a while so updates might have queued up
+                UpdateManager.continueProcessingUpdatesWithLock(
+                  projectId,
+                  docId,
+                  err => {
+                    if (err) {
+                      // The processing may fail for invalid user updates.
+                      // This can be very noisy, put them on level DEBUG
+                      //  and record a metric.
+                      Metrics.inc('background-processing-updates-error')
+                      logger.debug(
+                        { err, projectId, docId },
+                        'error processing updates in background'
+                      )
+                    }
+                  }
+                )
+              })
             }
           )
         }
@@ -375,10 +352,10 @@ module.exports = UpdateManager = {
   },
 
   _handleErrorInsideLock(docId, lockValue, originalError, callback) {
-    if (callback == null) {
+    if (!callback) {
       callback = function () {}
     }
-    return LockManager.releaseLock(docId, lockValue, lockError =>
+    LockManager.releaseLock(docId, lockValue, lockError =>
       callback(originalError)
     )
   },

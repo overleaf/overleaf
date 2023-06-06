@@ -1,5 +1,4 @@
 /* eslint-disable
-    no-return-assign,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -7,7 +6,6 @@
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
  * DS206: Consider reworking classes to avoid initClass
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -22,7 +20,7 @@ describe('UpdateManager', function () {
     this.projectHistoryId = 'history-id-123'
     this.doc_id = 'document-id-123'
     this.callback = sinon.stub()
-    return (this.UpdateManager = SandboxedModule.require(modulePath, {
+    this.UpdateManager = SandboxedModule.require(modulePath, {
       requires: {
         './LockManager': (this.LockManager = {}),
         './RedisManager': (this.RedisManager = {}),
@@ -56,13 +54,13 @@ describe('UpdateManager', function () {
           return Profiler
         })()),
       },
-    }))
+    })
   })
 
   describe('processOutstandingUpdates', function () {
     beforeEach(function () {
       this.UpdateManager.fetchAndApplyUpdates = sinon.stub().callsArg(2)
-      return this.UpdateManager.processOutstandingUpdates(
+      this.UpdateManager.processOutstandingUpdates(
         this.project_id,
         this.doc_id,
         this.callback
@@ -70,17 +68,17 @@ describe('UpdateManager', function () {
     })
 
     it('should apply the updates', function () {
-      return this.UpdateManager.fetchAndApplyUpdates
+      this.UpdateManager.fetchAndApplyUpdates
         .calledWith(this.project_id, this.doc_id)
         .should.equal(true)
     })
 
     it('should call the callback', function () {
-      return this.callback.called.should.equal(true)
+      this.callback.called.should.equal(true)
     })
 
-    return it('should time the execution', function () {
-      return this.Metrics.Timer.prototype.done.called.should.equal(true)
+    it('should time the execution', function () {
+      this.Metrics.Timer.prototype.done.called.should.equal(true)
     })
   })
 
@@ -94,14 +92,12 @@ describe('UpdateManager', function () {
         this.UpdateManager.continueProcessingUpdatesWithLock = sinon
           .stub()
           .callsArg(2)
-        return (this.UpdateManager.processOutstandingUpdates = sinon
-          .stub()
-          .callsArg(2))
+        this.UpdateManager.processOutstandingUpdates = sinon.stub().callsArg(2)
       })
 
       describe('successfully', function () {
         beforeEach(function () {
-          return this.UpdateManager.processOutstandingUpdatesWithLock(
+          this.UpdateManager.processOutstandingUpdatesWithLock(
             this.project_id,
             this.doc_id,
             this.callback
@@ -109,19 +105,17 @@ describe('UpdateManager', function () {
         })
 
         it('should acquire the lock', function () {
-          return this.LockManager.tryLock
-            .calledWith(this.doc_id)
-            .should.equal(true)
+          this.LockManager.tryLock.calledWith(this.doc_id).should.equal(true)
         })
 
         it('should free the lock', function () {
-          return this.LockManager.releaseLock
+          this.LockManager.releaseLock
             .calledWith(this.doc_id, this.lockValue)
             .should.equal(true)
         })
 
         it('should process the outstanding updates', function () {
-          return this.UpdateManager.processOutstandingUpdates
+          this.UpdateManager.processOutstandingUpdates
             .calledWith(this.project_id, this.doc_id)
             .should.equal(true)
         })
@@ -130,28 +124,28 @@ describe('UpdateManager', function () {
           this.UpdateManager.processOutstandingUpdates
             .calledAfter(this.LockManager.tryLock)
             .should.equal(true)
-          return this.UpdateManager.processOutstandingUpdates
+          this.UpdateManager.processOutstandingUpdates
             .calledBefore(this.LockManager.releaseLock)
             .should.equal(true)
         })
 
         it('should continue processing new updates that may have come in', function () {
-          return this.UpdateManager.continueProcessingUpdatesWithLock
+          this.UpdateManager.continueProcessingUpdatesWithLock
             .calledWith(this.project_id, this.doc_id)
             .should.equal(true)
         })
 
-        return it('should return the callback', function () {
-          return this.callback.called.should.equal(true)
+        it('should return the callback', function () {
+          this.callback.called.should.equal(true)
         })
       })
 
-      return describe('when processOutstandingUpdates returns an error', function () {
+      describe('when processOutstandingUpdates returns an error', function () {
         beforeEach(function () {
           this.UpdateManager.processOutstandingUpdates = sinon
             .stub()
             .callsArgWith(2, (this.error = new Error('Something went wrong')))
-          return this.UpdateManager.processOutstandingUpdatesWithLock(
+          this.UpdateManager.processOutstandingUpdatesWithLock(
             this.project_id,
             this.doc_id,
             this.callback
@@ -159,22 +153,22 @@ describe('UpdateManager', function () {
         })
 
         it('should free the lock', function () {
-          return this.LockManager.releaseLock
+          this.LockManager.releaseLock
             .calledWith(this.doc_id, this.lockValue)
             .should.equal(true)
         })
 
-        return it('should return the error in the callback', function () {
-          return this.callback.calledWith(this.error).should.equal(true)
+        it('should return the error in the callback', function () {
+          this.callback.calledWith(this.error).should.equal(true)
         })
       })
     })
 
-    return describe('when the lock is taken', function () {
+    describe('when the lock is taken', function () {
       beforeEach(function () {
         this.LockManager.tryLock = sinon.stub().callsArgWith(1, null, false)
         this.UpdateManager.processOutstandingUpdates = sinon.stub().callsArg(2)
-        return this.UpdateManager.processOutstandingUpdatesWithLock(
+        this.UpdateManager.processOutstandingUpdatesWithLock(
           this.project_id,
           this.doc_id,
           this.callback
@@ -182,13 +176,11 @@ describe('UpdateManager', function () {
       })
 
       it('should return the callback', function () {
-        return this.callback.called.should.equal(true)
+        this.callback.called.should.equal(true)
       })
 
-      return it('should not process the updates', function () {
-        return this.UpdateManager.processOutstandingUpdates.called.should.equal(
-          false
-        )
+      it('should not process the updates', function () {
+        this.UpdateManager.processOutstandingUpdates.called.should.equal(false)
       })
     })
   })
@@ -202,7 +194,7 @@ describe('UpdateManager', function () {
         this.UpdateManager.processOutstandingUpdatesWithLock = sinon
           .stub()
           .callsArg(2)
-        return this.UpdateManager.continueProcessingUpdatesWithLock(
+        this.UpdateManager.continueProcessingUpdatesWithLock(
           this.project_id,
           this.doc_id,
           this.callback
@@ -210,17 +202,17 @@ describe('UpdateManager', function () {
       })
 
       it('should process the outstanding updates', function () {
-        return this.UpdateManager.processOutstandingUpdatesWithLock
+        this.UpdateManager.processOutstandingUpdatesWithLock
           .calledWith(this.project_id, this.doc_id)
           .should.equal(true)
       })
 
-      return it('should return the callback', function () {
-        return this.callback.called.should.equal(true)
+      it('should return the callback', function () {
+        this.callback.called.should.equal(true)
       })
     })
 
-    return describe('when there are no outstanding updates', function () {
+    describe('when there are no outstanding updates', function () {
       beforeEach(function () {
         this.RealTimeRedisManager.getUpdatesLength = sinon
           .stub()
@@ -228,7 +220,7 @@ describe('UpdateManager', function () {
         this.UpdateManager.processOutstandingUpdatesWithLock = sinon
           .stub()
           .callsArg(2)
-        return this.UpdateManager.continueProcessingUpdatesWithLock(
+        this.UpdateManager.continueProcessingUpdatesWithLock(
           this.project_id,
           this.doc_id,
           this.callback
@@ -236,13 +228,13 @@ describe('UpdateManager', function () {
       })
 
       it('should not try to process the outstanding updates', function () {
-        return this.UpdateManager.processOutstandingUpdatesWithLock.called.should.equal(
+        this.UpdateManager.processOutstandingUpdatesWithLock.called.should.equal(
           false
         )
       })
 
-      return it('should return the callback', function () {
-        return this.callback.called.should.equal(true)
+      it('should return the callback', function () {
+        this.callback.called.should.equal(true)
       })
     })
   })
@@ -259,7 +251,7 @@ describe('UpdateManager', function () {
         this.UpdateManager.applyUpdate = sinon
           .stub()
           .callsArgWith(3, null, this.updatedDocLines, this.version)
-        return this.UpdateManager.fetchAndApplyUpdates(
+        this.UpdateManager.fetchAndApplyUpdates(
           this.project_id,
           this.doc_id,
           this.callback
@@ -267,25 +259,25 @@ describe('UpdateManager', function () {
       })
 
       it('should get the pending updates', function () {
-        return this.RealTimeRedisManager.getPendingUpdatesForDoc
+        this.RealTimeRedisManager.getPendingUpdatesForDoc
           .calledWith(this.doc_id)
           .should.equal(true)
       })
 
       it('should apply the updates', function () {
-        return Array.from(this.updates).map(update =>
+        Array.from(this.updates).map(update =>
           this.UpdateManager.applyUpdate
             .calledWith(this.project_id, this.doc_id, update)
             .should.equal(true)
         )
       })
 
-      return it('should call the callback', function () {
-        return this.callback.called.should.equal(true)
+      it('should call the callback', function () {
+        this.callback.called.should.equal(true)
       })
     })
 
-    return describe('when there are no updates', function () {
+    describe('when there are no updates', function () {
       beforeEach(function () {
         this.updates = []
         this.RealTimeRedisManager.getPendingUpdatesForDoc = sinon
@@ -293,7 +285,7 @@ describe('UpdateManager', function () {
           .callsArgWith(1, null, this.updates)
         this.UpdateManager.applyUpdate = sinon.stub()
         this.RedisManager.setDocument = sinon.stub()
-        return this.UpdateManager.fetchAndApplyUpdates(
+        this.UpdateManager.fetchAndApplyUpdates(
           this.project_id,
           this.doc_id,
           this.callback
@@ -301,11 +293,11 @@ describe('UpdateManager', function () {
       })
 
       it('should not call applyUpdate', function () {
-        return this.UpdateManager.applyUpdate.called.should.equal(false)
+        this.UpdateManager.applyUpdate.called.should.equal(false)
       })
 
-      return it('should call the callback', function () {
-        return this.callback.called.should.equal(true)
+      it('should call the callback', function () {
+        this.callback.called.should.equal(true)
       })
     })
   })
@@ -323,7 +315,6 @@ describe('UpdateManager', function () {
         { v: 42, op: 'mock-op-42' },
         { v: 45, op: 'mock-op-45' },
       ]
-      this.doc_ops_length = sinon.stub()
       this.project_ops_length = sinon.stub()
       this.pathname = '/a/b/c.tex'
       this.DocumentManager.getDoc = sinon
@@ -344,17 +335,15 @@ describe('UpdateManager', function () {
         .yields(null, this.updatedDocLines, this.version, this.appliedOps)
       this.RedisManager.updateDocument = sinon
         .stub()
-        .yields(null, this.doc_ops_length, this.project_ops_length)
+        .yields(null, this.project_ops_length)
       this.RealTimeRedisManager.sendData = sinon.stub()
       this.UpdateManager._addProjectHistoryMetadataToOps = sinon.stub()
-      return (this.HistoryManager.recordAndFlushHistoryOps = sinon
-        .stub()
-        .callsArg(5))
+      this.HistoryManager.recordAndFlushHistoryOps = sinon.stub()
     })
 
     describe('normally', function () {
       beforeEach(function () {
-        return this.UpdateManager.applyUpdate(
+        this.UpdateManager.applyUpdate(
           this.project_id,
           this.doc_id,
           this.update,
@@ -363,7 +352,7 @@ describe('UpdateManager', function () {
       })
 
       it('should apply the updates via ShareJS', function () {
-        return this.ShareJsUpdateManager.applyUpdate
+        this.ShareJsUpdateManager.applyUpdate
           .calledWith(
             this.project_id,
             this.doc_id,
@@ -375,7 +364,7 @@ describe('UpdateManager', function () {
       })
 
       it('should update the ranges', function () {
-        return this.RangesManager.applyUpdate
+        this.RangesManager.applyUpdate
           .calledWith(
             this.project_id,
             this.doc_id,
@@ -387,7 +376,7 @@ describe('UpdateManager', function () {
       })
 
       it('should save the document', function () {
-        return this.RedisManager.updateDocument
+        this.RedisManager.updateDocument
           .calledWith(
             this.project_id,
             this.doc_id,
@@ -401,7 +390,7 @@ describe('UpdateManager', function () {
       })
 
       it('should add metadata to the ops', function () {
-        return this.UpdateManager._addProjectHistoryMetadataToOps
+        this.UpdateManager._addProjectHistoryMetadataToOps
           .calledWith(
             this.appliedOps,
             this.pathname,
@@ -412,26 +401,20 @@ describe('UpdateManager', function () {
       })
 
       it('should push the applied ops into the history queue', function () {
-        return this.HistoryManager.recordAndFlushHistoryOps
-          .calledWith(
-            this.project_id,
-            this.doc_id,
-            this.appliedOps,
-            this.doc_ops_length,
-            this.project_ops_length
-          )
+        this.HistoryManager.recordAndFlushHistoryOps
+          .calledWith(this.project_id, this.appliedOps, this.project_ops_length)
           .should.equal(true)
       })
 
-      return it('should call the callback', function () {
-        return this.callback.called.should.equal(true)
+      it('should call the callback', function () {
+        this.callback.called.should.equal(true)
       })
     })
 
     describe('with UTF-16 surrogate pairs in the update', function () {
       beforeEach(function () {
         this.update = { op: [{ p: 42, i: '\uD835\uDC00' }] }
-        return this.UpdateManager.applyUpdate(
+        this.UpdateManager.applyUpdate(
           this.project_id,
           this.doc_id,
           this.update,
@@ -439,13 +422,13 @@ describe('UpdateManager', function () {
         )
       })
 
-      return it('should apply the update but with surrogate pairs removed', function () {
+      it('should apply the update but with surrogate pairs removed', function () {
         this.ShareJsUpdateManager.applyUpdate
           .calledWith(this.project_id, this.doc_id, this.update)
           .should.equal(true)
 
         // \uFFFD is 'replacement character'
-        return this.update.op[0].i.should.equal('\uFFFD\uFFFD')
+        this.update.op[0].i.should.equal('\uFFFD\uFFFD')
       })
     })
 
@@ -453,7 +436,7 @@ describe('UpdateManager', function () {
       beforeEach(function () {
         this.error = new Error('something went wrong')
         this.ShareJsUpdateManager.applyUpdate = sinon.stub().yields(this.error)
-        return this.UpdateManager.applyUpdate(
+        this.UpdateManager.applyUpdate(
           this.project_id,
           this.doc_id,
           this.update,
@@ -462,7 +445,7 @@ describe('UpdateManager', function () {
       })
 
       it('should call RealTimeRedisManager.sendData with the error', function () {
-        return this.RealTimeRedisManager.sendData
+        this.RealTimeRedisManager.sendData
           .calledWith({
             project_id: this.project_id,
             doc_id: this.doc_id,
@@ -471,18 +454,18 @@ describe('UpdateManager', function () {
           .should.equal(true)
       })
 
-      return it('should call the callback with the error', function () {
-        return this.callback.calledWith(this.error).should.equal(true)
+      it('should call the callback with the error', function () {
+        this.callback.calledWith(this.error).should.equal(true)
       })
     })
 
-    return describe('when ranges get collapsed', function () {
+    describe('when ranges get collapsed', function () {
       beforeEach(function () {
         this.RangesManager.applyUpdate = sinon
           .stub()
           .yields(null, this.updated_ranges, true)
         this.SnapshotManager.recordSnapshot = sinon.stub().yields()
-        return this.UpdateManager.applyUpdate(
+        this.UpdateManager.applyUpdate(
           this.project_id,
           this.doc_id,
           this.update,
@@ -494,8 +477,8 @@ describe('UpdateManager', function () {
         this.Metrics.inc.calledWith('doc-snapshot').should.equal(true)
       })
 
-      return it('should call SnapshotManager.recordSnapshot', function () {
-        return this.SnapshotManager.recordSnapshot
+      it('should call SnapshotManager.recordSnapshot', function () {
+        this.SnapshotManager.recordSnapshot
           .calledWith(
             this.project_id,
             this.doc_id,
@@ -510,7 +493,7 @@ describe('UpdateManager', function () {
   })
 
   describe('_addProjectHistoryMetadataToOps', function () {
-    return it('should add projectHistoryId, pathname and doc_length metadata to the ops', function () {
+    it('should add projectHistoryId, pathname and doc_length metadata to the ops', function () {
       const lines = ['some', 'test', 'data']
       const appliedOps = [
         {
@@ -535,7 +518,7 @@ describe('UpdateManager', function () {
         this.projectHistoryId,
         lines
       )
-      return appliedOps.should.deep.equal([
+      appliedOps.should.deep.equal([
         {
           projectHistoryId: this.projectHistoryId,
           v: 42,
@@ -573,7 +556,7 @@ describe('UpdateManager', function () {
     })
   })
 
-  return describe('lockUpdatesAndDo', function () {
+  describe('lockUpdatesAndDo', function () {
     beforeEach(function () {
       this.method = sinon.stub().callsArgWith(3, null, this.response_arg1)
       this.callback = sinon.stub()
@@ -583,14 +566,14 @@ describe('UpdateManager', function () {
       this.LockManager.getLock = sinon
         .stub()
         .callsArgWith(1, null, this.lockValue)
-      return (this.LockManager.releaseLock = sinon.stub().callsArg(2))
+      this.LockManager.releaseLock = sinon.stub().callsArg(2)
     })
 
     describe('successfully', function () {
       beforeEach(function () {
         this.UpdateManager.continueProcessingUpdatesWithLock = sinon.stub()
         this.UpdateManager.processOutstandingUpdates = sinon.stub().callsArg(2)
-        return this.UpdateManager.lockUpdatesAndDo(
+        this.UpdateManager.lockUpdatesAndDo(
           this.method,
           this.project_id,
           this.doc_id,
@@ -600,37 +583,33 @@ describe('UpdateManager', function () {
       })
 
       it('should lock the doc', function () {
-        return this.LockManager.getLock
-          .calledWith(this.doc_id)
-          .should.equal(true)
+        this.LockManager.getLock.calledWith(this.doc_id).should.equal(true)
       })
 
       it('should process any outstanding updates', function () {
-        return this.UpdateManager.processOutstandingUpdates
+        this.UpdateManager.processOutstandingUpdates
           .calledWith(this.project_id, this.doc_id)
           .should.equal(true)
       })
 
       it('should call the method', function () {
-        return this.method
+        this.method
           .calledWith(this.project_id, this.doc_id, this.arg1)
           .should.equal(true)
       })
 
       it('should return the method response to the callback', function () {
-        return this.callback
-          .calledWith(null, this.response_arg1)
-          .should.equal(true)
+        this.callback.calledWith(null, this.response_arg1).should.equal(true)
       })
 
       it('should release the lock', function () {
-        return this.LockManager.releaseLock
+        this.LockManager.releaseLock
           .calledWith(this.doc_id, this.lockValue)
           .should.equal(true)
       })
 
-      return it('should continue processing updates', function () {
-        return this.UpdateManager.continueProcessingUpdatesWithLock
+      it('should continue processing updates', function () {
+        this.UpdateManager.continueProcessingUpdatesWithLock
           .calledWith(this.project_id, this.doc_id)
           .should.equal(true)
       })
@@ -641,7 +620,7 @@ describe('UpdateManager', function () {
         this.UpdateManager.processOutstandingUpdates = sinon
           .stub()
           .callsArgWith(2, (this.error = new Error('Something went wrong')))
-        return this.UpdateManager.lockUpdatesAndDo(
+        this.UpdateManager.lockUpdatesAndDo(
           this.method,
           this.project_id,
           this.doc_id,
@@ -651,17 +630,17 @@ describe('UpdateManager', function () {
       })
 
       it('should free the lock', function () {
-        return this.LockManager.releaseLock
+        this.LockManager.releaseLock
           .calledWith(this.doc_id, this.lockValue)
           .should.equal(true)
       })
 
-      return it('should return the error in the callback', function () {
-        return this.callback.calledWith(this.error).should.equal(true)
+      it('should return the error in the callback', function () {
+        this.callback.calledWith(this.error).should.equal(true)
       })
     })
 
-    return describe('when the method returns an error', function () {
+    describe('when the method returns an error', function () {
       beforeEach(function () {
         this.UpdateManager.processOutstandingUpdates = sinon.stub().callsArg(2)
         this.method = sinon
@@ -671,7 +650,7 @@ describe('UpdateManager', function () {
             (this.error = new Error('something went wrong')),
             this.response_arg1
           )
-        return this.UpdateManager.lockUpdatesAndDo(
+        this.UpdateManager.lockUpdatesAndDo(
           this.method,
           this.project_id,
           this.doc_id,
@@ -681,13 +660,13 @@ describe('UpdateManager', function () {
       })
 
       it('should free the lock', function () {
-        return this.LockManager.releaseLock
+        this.LockManager.releaseLock
           .calledWith(this.doc_id, this.lockValue)
           .should.equal(true)
       })
 
-      return it('should return the error in the callback', function () {
-        return this.callback.calledWith(this.error).should.equal(true)
+      it('should return the error in the callback', function () {
+        this.callback.calledWith(this.error).should.equal(true)
       })
     })
   })

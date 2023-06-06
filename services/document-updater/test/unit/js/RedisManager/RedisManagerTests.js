@@ -15,9 +15,6 @@ describe('RedisManager', function () {
         './ProjectHistoryRedisManager': (this.ProjectHistoryRedisManager = {}),
         '@overleaf/settings': (this.settings = {
           documentupdater: { logHashErrors: { write: true, read: true } },
-          apis: {
-            project_history: { enabled: true },
-          },
           redis: {
             documentupdater: {
               key_schema: {
@@ -54,9 +51,6 @@ describe('RedisManager', function () {
                 projectHistoryId({ doc_id: docId }) {
                   return `ProjectHistoryId:${docId}`
                 },
-                projectHistoryType({ doc_id: docId }) {
-                  return `ProjectHistoryType:${docId}`
-                },
                 projectState({ project_id: projectId }) {
                   return `ProjectState:${projectId}`
                 },
@@ -68,16 +62,6 @@ describe('RedisManager', function () {
                 },
                 lastUpdatedAt({ doc_id: docId }) {
                   return `lastUpdatedAt:${docId}`
-                },
-              },
-            },
-            history: {
-              key_schema: {
-                uncompressedHistoryOps({ doc_id: docId }) {
-                  return `UncompressedHistoryOps:${docId}`
-                },
-                docsWithHistoryOps({ project_id: projectId }) {
-                  return `DocsWithHistoryOps:${projectId}`
                 },
               },
             },
@@ -463,142 +447,94 @@ describe('RedisManager', function () {
     })
 
     describe('with a consistent version', function () {
-      beforeEach(function () {})
-
-      describe('with project history enabled', function () {
-        beforeEach(function () {
-          this.settings.apis.project_history.enabled = true
-          this.RedisManager.getDocVersion
-            .withArgs(this.docId)
-            .yields(null, this.version - this.ops.length)
-          this.RedisManager.updateDocument(
-            this.project_id,
-            this.docId,
-            this.lines,
-            this.version,
-            this.ops,
-            this.ranges,
-            this.updateMeta,
-            this.callback
-          )
-        })
-
-        it('should get the current doc version to check for consistency', function () {
-          this.RedisManager.getDocVersion
-            .calledWith(this.docId)
-            .should.equal(true)
-        })
-
-        it('should set most details in a single MSET call', function () {
-          this.multi.mset
-            .calledWith({
-              [`doclines:${this.docId}`]: JSON.stringify(this.lines),
-              [`DocVersion:${this.docId}`]: this.version,
-              [`DocHash:${this.docId}`]: this.hash,
-              [`Ranges:${this.docId}`]: JSON.stringify(this.ranges),
-              [`lastUpdatedAt:${this.docId}`]: Date.now(),
-              [`lastUpdatedBy:${this.docId}`]: 'last-author-fake-id',
-            })
-            .should.equal(true)
-        })
-
-        it('should set the unflushed time', function () {
-          this.multi.set
-            .calledWith(`UnflushedTime:${this.docId}`, Date.now(), 'NX')
-            .should.equal(true)
-        })
-
-        it('should push the doc op into the doc ops list', function () {
-          this.multi.rpush
-            .calledWith(
-              `DocOps:${this.docId}`,
-              JSON.stringify(this.ops[0]),
-              JSON.stringify(this.ops[1])
-            )
-            .should.equal(true)
-        })
-
-        it('should renew the expiry ttl on the doc ops array', function () {
-          this.multi.expire
-            .calledWith(`DocOps:${this.docId}`, this.RedisManager.DOC_OPS_TTL)
-            .should.equal(true)
-        })
-
-        it('should truncate the list to 100 members', function () {
-          this.multi.ltrim
-            .calledWith(
-              `DocOps:${this.docId}`,
-              -this.RedisManager.DOC_OPS_MAX_LENGTH,
-              -1
-            )
-            .should.equal(true)
-        })
-
-        it('should push the updates into the history ops list', function () {
-          this.multi.rpush
-            .calledWith(
-              `UncompressedHistoryOps:${this.docId}`,
-              JSON.stringify(this.ops[0]),
-              JSON.stringify(this.ops[1])
-            )
-            .should.equal(true)
-        })
-
-        it('should push the updates into the project history ops list', function () {
-          this.ProjectHistoryRedisManager.queueOps
-            .calledWith(this.project_id, JSON.stringify(this.ops[0]))
-            .should.equal(true)
-        })
-
-        it('should call the callback', function () {
+      beforeEach(function () {
+        this.RedisManager.getDocVersion
+          .withArgs(this.docId)
+          .yields(null, this.version - this.ops.length)
+        this.RedisManager.updateDocument(
+          this.project_id,
+          this.docId,
+          this.lines,
+          this.version,
+          this.ops,
+          this.ranges,
+          this.updateMeta,
           this.callback
-            .calledWith(
-              null,
-              this.doc_update_list_length,
-              this.project_update_list_length
-            )
-            .should.equal(true)
-        })
-
-        it('should not log any errors', function () {
-          this.logger.error.calledWith().should.equal(false)
-        })
+        )
       })
 
-      describe('with project history disabled', function () {
-        beforeEach(function () {
-          this.settings.apis.project_history.enabled = false
-          this.RedisManager.getDocVersion
-            .withArgs(this.docId)
-            .yields(null, this.version - this.ops.length)
-          this.RedisManager.updateDocument(
-            this.project_id,
-            this.docId,
-            this.lines,
-            this.version,
-            this.ops,
-            this.ranges,
-            this.updateMeta,
-            this.callback
+      it('should get the current doc version to check for consistency', function () {
+        this.RedisManager.getDocVersion
+          .calledWith(this.docId)
+          .should.equal(true)
+      })
+
+      it('should set most details in a single MSET call', function () {
+        this.multi.mset
+          .calledWith({
+            [`doclines:${this.docId}`]: JSON.stringify(this.lines),
+            [`DocVersion:${this.docId}`]: this.version,
+            [`DocHash:${this.docId}`]: this.hash,
+            [`Ranges:${this.docId}`]: JSON.stringify(this.ranges),
+            [`lastUpdatedAt:${this.docId}`]: Date.now(),
+            [`lastUpdatedBy:${this.docId}`]: 'last-author-fake-id',
+          })
+          .should.equal(true)
+      })
+
+      it('should set the unflushed time', function () {
+        this.multi.set
+          .calledWith(`UnflushedTime:${this.docId}`, Date.now(), 'NX')
+          .should.equal(true)
+      })
+
+      it('should push the doc op into the doc ops list', function () {
+        this.multi.rpush
+          .calledWith(
+            `DocOps:${this.docId}`,
+            JSON.stringify(this.ops[0]),
+            JSON.stringify(this.ops[1])
           )
-        })
+          .should.equal(true)
+      })
 
-        it('should not push the updates into the project history ops list', function () {
-          this.ProjectHistoryRedisManager.queueOps.called.should.equal(false)
-        })
+      it('should renew the expiry ttl on the doc ops array', function () {
+        this.multi.expire
+          .calledWith(`DocOps:${this.docId}`, this.RedisManager.DOC_OPS_TTL)
+          .should.equal(true)
+      })
 
-        it('should call the callback', function () {
-          this.callback
-            .calledWith(null, this.doc_update_list_length)
-            .should.equal(true)
-        })
+      it('should truncate the list to 100 members', function () {
+        this.multi.ltrim
+          .calledWith(
+            `DocOps:${this.docId}`,
+            -this.RedisManager.DOC_OPS_MAX_LENGTH,
+            -1
+          )
+          .should.equal(true)
+      })
+
+      it('should push the updates into the project history ops list', function () {
+        this.ProjectHistoryRedisManager.queueOps
+          .calledWith(this.project_id, JSON.stringify(this.ops[0]))
+          .should.equal(true)
+      })
+
+      it('should call the callback', function () {
+        this.callback
+          .calledWith(null, this.project_update_list_length)
+          .should.equal(true)
+      })
+
+      it('should not log any errors', function () {
+        this.logger.error.calledWith().should.equal(false)
       })
 
       describe('with a doc using project history only', function () {
         beforeEach(function () {
           this.RedisManager.getDocVersion
             .withArgs(this.docId)
-            .yields(null, this.version - this.ops.length, 'project-history')
+            .yields(null, this.version - this.ops.length)
           this.RedisManager.updateDocument(
             this.project_id,
             this.docId,
@@ -609,12 +545,6 @@ describe('RedisManager', function () {
             this.updateMeta,
             this.callback
           )
-        })
-
-        it('should not push the updates to the track-changes ops list', function () {
-          this.multi.rpush
-            .calledWith(`UncompressedHistoryOps:${this.docId}`)
-            .should.equal(false)
         })
 
         it('should push the updates into the project history ops list', function () {
@@ -625,7 +555,7 @@ describe('RedisManager', function () {
 
         it('should call the callback with the project update count only', function () {
           this.callback
-            .calledWith(null, undefined, this.project_update_list_length)
+            .calledWith(null, this.project_update_list_length)
             .should.equal(true)
         })
       })
@@ -993,7 +923,6 @@ describe('RedisManager', function () {
           `Ranges:${this.docId}`,
           `Pathname:${this.docId}`,
           `ProjectHistoryId:${this.docId}`,
-          `ProjectHistoryType:${this.docId}`,
           `UnflushedTime:${this.docId}`,
           `lastUpdatedAt:${this.docId}`,
           `lastUpdatedBy:${this.docId}`
@@ -1083,44 +1012,15 @@ describe('RedisManager', function () {
     describe('getDocVersion', function () {
       beforeEach(function () {
         this.version = 12345
+        this.rclient.mget = sinon
+          .stub()
+          .withArgs(`DocVersion:${this.docId}`)
+          .callsArgWith(1, null, [`${this.version}`])
+        this.RedisManager.getDocVersion(this.docId, this.callback)
       })
 
-      describe('when the document does not have a project history type set', function () {
-        beforeEach(function () {
-          this.rclient.mget = sinon
-            .stub()
-            .withArgs(
-              `DocVersion:${this.docId}`,
-              `ProjectHistoryType:${this.docId}`
-            )
-            .callsArgWith(2, null, [`${this.version}`])
-          this.RedisManager.getDocVersion(this.docId, this.callback)
-        })
-
-        it('should return the document version and an undefined history type', function () {
-          this.callback
-            .calledWithExactly(null, this.version, undefined)
-            .should.equal(true)
-        })
-      })
-
-      describe('when the document has a project history type set', function () {
-        beforeEach(function () {
-          this.rclient.mget = sinon
-            .stub()
-            .withArgs(
-              `DocVersion:${this.docId}`,
-              `ProjectHistoryType:${this.docId}`
-            )
-            .callsArgWith(2, null, [`${this.version}`, 'project-history'])
-          this.RedisManager.getDocVersion(this.docId, this.callback)
-        })
-
-        it('should return the document version and history type', function () {
-          this.callback
-            .calledWithExactly(null, this.version, 'project-history')
-            .should.equal(true)
-        })
+      it('should return the document version', function () {
+        this.callback.calledWithExactly(null, this.version).should.equal(true)
       })
     })
   })

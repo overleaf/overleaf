@@ -42,15 +42,7 @@ module.exports = DocumentManager = {
           PersistenceManager.getDoc(
             projectId,
             docId,
-            (
-              error,
-              lines,
-              version,
-              ranges,
-              pathname,
-              projectHistoryId,
-              projectHistoryType
-            ) => {
+            (error, lines, version, ranges, pathname, projectHistoryId) => {
               if (error) {
                 return callback(error)
               }
@@ -62,7 +54,6 @@ module.exports = DocumentManager = {
                   version,
                   pathname,
                   projectHistoryId,
-                  projectHistoryType,
                 },
                 'got doc from persistence API'
               )
@@ -78,24 +69,15 @@ module.exports = DocumentManager = {
                   if (error) {
                     return callback(error)
                   }
-                  RedisManager.setHistoryType(
-                    docId,
-                    projectHistoryType,
-                    error => {
-                      if (error) {
-                        return callback(error)
-                      }
-                      callback(
-                        null,
-                        lines,
-                        version,
-                        ranges || {},
-                        pathname,
-                        projectHistoryId,
-                        null,
-                        false
-                      )
-                    }
+                  callback(
+                    null,
+                    lines,
+                    version,
+                    ranges || {},
+                    pathname,
+                    projectHistoryId,
+                    null,
+                    false
                   )
                 }
               )
@@ -357,9 +339,6 @@ module.exports = DocumentManager = {
           return callback(error)
         }
       }
-
-      // Flush in the background since it requires a http request
-      HistoryManager.flushDocChangesAsync(projectId, docId)
 
       RedisManager.removeDocFromMemory(projectId, docId, error => {
         if (error) {

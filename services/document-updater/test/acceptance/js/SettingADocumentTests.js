@@ -6,7 +6,6 @@ const docUpdaterRedis = require('@overleaf/redis-wrapper').createClient(
 )
 const Keys = Settings.redis.documentupdater.key_schema
 
-const MockTrackChangesApi = require('./helpers/MockTrackChangesApi')
 const MockProjectHistoryApi = require('./helpers/MockProjectHistoryApi')
 const MockWebApi = require('./helpers/MockWebApi')
 const DocUpdaterClient = require('./helpers/DocUpdaterClient')
@@ -35,14 +34,12 @@ describe('Setting a document', function () {
     this.source = 'dropbox'
     this.user_id = 'user-id-123'
 
-    sinon.spy(MockTrackChangesApi, 'flushDoc')
     sinon.spy(MockProjectHistoryApi, 'flushProject')
     sinon.spy(MockWebApi, 'setDocument')
     DocUpdaterApp.ensureRunning(done)
   })
 
   after(function () {
-    MockTrackChangesApi.flushDoc.restore()
     MockProjectHistoryApi.flushProject.restore()
     MockWebApi.setDocument.restore()
   })
@@ -92,7 +89,6 @@ describe('Setting a document', function () {
     })
 
     after(function () {
-      MockTrackChangesApi.flushDoc.resetHistory()
       MockProjectHistoryApi.flushProject.resetHistory()
       MockWebApi.setDocument.resetHistory()
     })
@@ -228,7 +224,6 @@ describe('Setting a document', function () {
     })
 
     after(function () {
-      MockTrackChangesApi.flushDoc.resetHistory()
       MockProjectHistoryApi.flushProject.resetHistory()
       MockWebApi.setDocument.resetHistory()
     })
@@ -245,10 +240,6 @@ describe('Setting a document', function () {
       MockWebApi.setDocument
         .calledWith(this.project_id, this.doc_id, this.newLines)
         .should.equal(true)
-    })
-
-    it('should flush track changes', function () {
-      MockTrackChangesApi.flushDoc.calledWith(this.doc_id).should.equal(true)
     })
 
     it('should flush project history', function () {
@@ -319,7 +310,6 @@ describe('Setting a document', function () {
       })
 
       after(function () {
-        MockTrackChangesApi.flushDoc.resetHistory()
         MockProjectHistoryApi.flushProject.resetHistory()
         MockWebApi.setDocument.resetHistory()
       })
@@ -330,10 +320,6 @@ describe('Setting a document', function () {
 
       it('should not send the updated doc lines to the web api', function () {
         MockWebApi.setDocument.called.should.equal(false)
-      })
-
-      it('should not flush track changes', function () {
-        MockTrackChangesApi.flushDoc.called.should.equal(false)
       })
 
       it('should not flush project history', function () {
@@ -376,7 +362,6 @@ describe('Setting a document', function () {
     })
 
     after(function () {
-      MockTrackChangesApi.flushDoc.resetHistory()
       MockProjectHistoryApi.flushProject.resetHistory()
       MockWebApi.setDocument.resetHistory()
     })
@@ -458,7 +443,6 @@ describe('Setting a document', function () {
       })
 
       after(function () {
-        MockTrackChangesApi.flushDoc.resetHistory()
         MockProjectHistoryApi.flushProject.resetHistory()
         MockWebApi.setDocument.resetHistory()
       })
@@ -521,7 +505,6 @@ describe('Setting a document', function () {
       })
 
       after(function () {
-        MockTrackChangesApi.flushDoc.resetHistory()
         MockProjectHistoryApi.flushProject.resetHistory()
         MockWebApi.setDocument.resetHistory()
       })

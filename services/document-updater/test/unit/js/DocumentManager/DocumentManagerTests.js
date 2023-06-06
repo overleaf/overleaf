@@ -19,7 +19,6 @@ describe('DocumentManager', function () {
         './ProjectHistoryRedisManager': (this.ProjectHistoryRedisManager = {}),
         './PersistenceManager': (this.PersistenceManager = {}),
         './HistoryManager': (this.HistoryManager = {
-          flushDocChangesAsync: sinon.stub(),
           flushProjectChangesAsync: sinon.stub(),
         }),
         './Metrics': this.Metrics,
@@ -32,7 +31,6 @@ describe('DocumentManager', function () {
     })
     this.project_id = 'project-id-123'
     this.projectHistoryId = 'history-id-123'
-    this.projectHistoryType = 'project-history'
     this.doc_id = 'doc-id-123'
     this.user_id = 1234
     this.callback = sinon.stub()
@@ -81,12 +79,6 @@ describe('DocumentManager', function () {
 
       it('should time the execution', function () {
         this.Metrics.Timer.prototype.done.called.should.equal(true)
-      })
-
-      it('should flush to the history api', function () {
-        this.HistoryManager.flushDocChangesAsync
-          .calledWithExactly(this.project_id, this.doc_id)
-          .should.equal(true)
       })
     })
 
@@ -388,11 +380,9 @@ describe('DocumentManager', function () {
             this.version,
             this.ranges,
             this.pathname,
-            this.projectHistoryId,
-            this.projectHistoryType
+            this.projectHistoryId
           )
         this.RedisManager.putDocInMemory = sinon.stub().yields()
-        this.RedisManager.setHistoryType = sinon.stub().yields()
         this.DocumentManager.getDoc(this.project_id, this.doc_id, this.callback)
       })
 
@@ -419,12 +409,6 @@ describe('DocumentManager', function () {
             this.pathname,
             this.projectHistoryId
           )
-          .should.equal(true)
-      })
-
-      it('should set the history type in Redis', function () {
-        this.RedisManager.setHistoryType
-          .calledWith(this.doc_id, this.projectHistoryType)
           .should.equal(true)
       })
 
