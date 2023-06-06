@@ -68,6 +68,11 @@ nav.navbar.navbar-default.navbar-main
 										each child in item.dropdown
 											if child.divider
 												li.divider
+											else if child.isContactUs
+												li
+													a(ng-controller="ContactModal" ng-click="contactUsModal()" href)
+														span(event-tracking="menu-clicked-contact" event-tracking-mb="true" event-tracking-trigger="click")
+															| #{translate("contact_us")}
 											else
 												li
 													if child.url
