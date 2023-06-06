@@ -25,10 +25,10 @@ function SwitchToPDFButton() {
       bsStyle={null}
       bsSize="xs"
       onClick={handleClick}
-      className="toolbar-btn-secondary btn-secondary"
+      className="switch-to-pdf-btn toolbar-btn-secondary btn-secondary"
     >
-      <Icon type="file-pdf-o" className="me-1" />
-      {t('switch_to_pdf')}
+      <Icon type="file-pdf-o" className="toolbar-btn-secondary-icon" />
+      <span className="toolbar-btn-secondary-text">{t('switch_to_pdf')}</span>
     </Button>
   )
 }

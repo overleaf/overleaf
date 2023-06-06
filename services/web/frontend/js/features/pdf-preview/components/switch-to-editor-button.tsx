@@ -25,10 +25,12 @@ function SwitchToEditorButton() {
       bsStyle={null}
       bsSize="xs"
       onClick={handleClick}
-      className="switch-to-editor-btn btn-secondary"
+      className="switch-to-editor-btn toolbar-btn-secondary btn-secondary"
     >
-      <Icon type="code" className="me-1" />
-      {t('switch_to_editor')}
+      <Icon type="code" className="toolbar-btn-secondary-icon" />
+      <span className="toolbar-btn-secondary-text">
+        {t('switch_to_editor')}
+      </span>
     </Button>
   )
 }
