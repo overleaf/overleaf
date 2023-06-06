@@ -77,7 +77,7 @@ function ConfirmEmailNotification({ userEmail }: { userEmail: UserEmailData }) {
           <>
             {t('please_confirm_email', {
               emailAddress: userEmail.email,
-            })}
+            })}{' '}
             <Button
               bsStyle="link"
               className="btn-inline-link"
