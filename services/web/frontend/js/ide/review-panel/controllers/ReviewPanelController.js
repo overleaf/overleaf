@@ -18,6 +18,7 @@ import RangesTracker from '@overleaf/ranges-tracker'
 import App from '../../../base'
 import EventEmitter from '../../../utils/EventEmitter'
 import ColorManager from '../../colors/ColorManager'
+import getMeta from '../../../utils/meta'
 
 export default App.controller(
   'ReviewPanelController',
@@ -103,6 +104,7 @@ export default App.controller(
       // as only one.
       nVisibleSelectedChanges: 0,
       entryHover: false,
+      isReact: getMeta('ol-splitTestVariants')?.['review-panel'] === 'react',
     }
 
     ide.$scope.loadingThreads = true
@@ -1151,6 +1153,7 @@ export default App.controller(
 
     let _refreshingRangeUsers = false
     const _refreshedForUserIds = {}
+
     function refreshChangeUsers(refresh_for_user_id) {
       if (refresh_for_user_id != null) {
         if (_refreshedForUserIds[refresh_for_user_id] != null) {
@@ -1195,6 +1198,7 @@ export default App.controller(
     }
 
     let _threadsLoaded = false
+
     function ensureThreadsAreLoaded() {
       if (_threadsLoaded) {
         // We get any updates in real time so only need to load them once.

@@ -769,6 +769,21 @@ const ProjectController = {
             }
           )
         },
+        reviewPanelAssignment(cb) {
+          SplitTestHandler.getAssignment(
+            req,
+            res,
+            'review-panel',
+            (error, assignment) => {
+              // do not fail editor load if assignment fails
+              if (error) {
+                cb(null, { variant: 'default' })
+              } else {
+                cb(null, assignment)
+              }
+            }
+          )
+        },
         accessCheckForOldCompileDomainAssigment(cb) {
           SplitTestHandler.getAssignment(
             req,
@@ -856,6 +871,7 @@ const ProjectController = {
           richTextAssignment,
           onboardingVideoTourAssignment,
           historyViewAssignment,
+          reviewPanelAssignment,
         }
       ) => {
         if (err != null) {
@@ -1076,6 +1092,7 @@ const ProjectController = {
               richTextVariant,
               showOnboardingVideoTour,
               historyViewReact: historyViewAssignment.variant === 'react',
+              isReviewPanelReact: reviewPanelAssignment.variant === 'react',
               showPersonalAccessToken,
             })
             timer.done()

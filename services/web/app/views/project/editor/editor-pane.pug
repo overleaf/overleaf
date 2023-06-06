@@ -53,9 +53,9 @@
 					include ../../source-editor/source-editor
 				div(ng-if="!editor.newSourceEditor")
 					include ./source-editor
-
-				if !isRestrictedTokenMember
-							include ./review-panel
+				div(ng-if="!editor.newSourceEditor || !reviewPanel.isReact")
+					if !isRestrictedTokenMember
+						include ./review-panel
 
 			if moduleIncludesAvailable('editor:symbol-palette') || moduleIncludesAvailable('editor:galileo')
 				.div(vertical-resizable-bottom)
