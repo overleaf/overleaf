@@ -130,6 +130,7 @@ export function generatePdfCachingTransportFactory(PDFJS) {
             throw OError.tag(new PDFJS.MissingPDFException(), 'caching', {
               statusCode: OError.getFullInfo(err).statusCode,
               url: OError.getFullInfo(err).url,
+              err,
             })
           }
           metrics.failedCount++
@@ -155,6 +156,7 @@ export function generatePdfCachingTransportFactory(PDFJS) {
               throw OError.tag(new PDFJS.MissingPDFException(), 'fallback', {
                 statusCode: OError.getFullInfo(err).statusCode,
                 url: OError.getFullInfo(err).url,
+                err,
               })
             }
             throw err
