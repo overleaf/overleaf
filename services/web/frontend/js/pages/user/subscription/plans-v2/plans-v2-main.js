@@ -170,8 +170,25 @@ function selectViewFromHash() {
         // set annual as the default
         currentMonthlyAnnualSwitchValue = 'annual'
         selectTab(view)
+
         // clear the hash so it doesn't persist when switching plans
-        window.location.hash = ''
+        const currentURL = window.location.pathname + window.location.search
+        history.replaceState('', document.title, currentURL)
+
+        // Add a small delay since it seems the scroll won't behave correctly on this scenario:
+        // 1. Open plans page
+        // 2. Click on "Group Plans"
+        // 3. Scroll down to footer
+        // 4. Click "For students" link
+        //
+        // I assume this is happening because the `selectTab` function above is doing a lot
+        // of computation to change the view and it somehow prevents the `window.scrollTo` command
+        // to behave correctly.
+        const SCROLL_TO_TOP_DELAY = 50
+
+        window.setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+        }, SCROLL_TO_TOP_DELAY)
       }
     }
   } catch {
