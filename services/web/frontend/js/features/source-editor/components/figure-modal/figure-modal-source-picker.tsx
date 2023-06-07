@@ -18,16 +18,16 @@ export const FigureModalSourcePicker: FC = () => {
           icon="upload"
         />
         <FigureModalSourceButton
-          type={FigureModalSource.OTHER_PROJECT}
-          title={t('replace_from_another_project')}
-          icon="folder-open"
+          type={FigureModalSource.FILE_TREE}
+          title={t('replace_from_project_files')}
+          icon="archive"
         />
       </div>
       <div className="figure-modal-source-button-row">
         <FigureModalSourceButton
-          type={FigureModalSource.FILE_TREE}
-          title={t('replace_from_project_files')}
-          icon="archive"
+          type={FigureModalSource.OTHER_PROJECT}
+          title={t('replace_from_another_project')}
+          icon="folder-open"
         />
         <FigureModalSourceButton
           type={FigureModalSource.FROM_URL}
