@@ -21,7 +21,8 @@
         "projectId": "GCS_PROJECT_ID"
       },
       "retryOptions": {
-        "maxRetries": "GCS_MAX_RETRIES"
+        "maxRetries": "GCS_MAX_RETRIES", 
+        "idempotencyStrategy": "GCS_IDEMPOTENCY_STRATEGY"
       }
     },
     "fallback": {

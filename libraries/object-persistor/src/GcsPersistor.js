@@ -1,11 +1,12 @@
 const fs = require('fs')
 const { pipeline } = require('stream/promises')
 const { PassThrough } = require('stream')
-const { Storage } = require('@google-cloud/storage')
+const { Storage, IdempotencyStrategy } = require('@google-cloud/storage')
 const { WriteError, ReadError, NotFoundError } = require('./Errors')
 const asyncPool = require('tiny-async-pool')
 const AbstractPersistor = require('./AbstractPersistor')
 const PersistorHelper = require('./PersistorHelper')
+const Logger = require('@overleaf/logger')
 
 module.exports = class GcsPersistor extends AbstractPersistor {
   constructor(settings) {
@@ -20,7 +21,22 @@ module.exports = class GcsPersistor extends AbstractPersistor {
       storageOptions.projectId = this.settings.endpoint.projectId
       storageOptions.apiEndpoint = this.settings.endpoint.apiEndpoint
     }
-    storageOptions.retryOptions = this.settings.retryOptions
+    storageOptions.retryOptions = { ...this.settings.retryOptions }
+    if (storageOptions.retryOptions) {
+      if (storageOptions.retryOptions.idempotencyStrategy) {
+        const value =
+          IdempotencyStrategy[this.settings.retryOptions.idempotencyStrategy]
+        if (value === undefined) {
+          throw new Error(
+            'Unrecognised value for retryOptions.idempotencyStrategy'
+          )
+        }
+        Logger.info(
+          `Setting retryOptions.idempotencyStrategy to ${storageOptions.retryOptions.idempotencyStrategy} (${value})`
+        )
+        storageOptions.retryOptions.idempotencyStrategy = value
+      }
+    }
 
     this.storage = new Storage(storageOptions)
   }
