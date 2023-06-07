@@ -46,57 +46,9 @@ describe('HistoryController', function () {
       },
     })
     return (this.settings.apis = {
-      trackchanges: {
-        enabled: false,
-        url: 'http://trackchanges.example.com',
-      },
       project_history: {
         url: 'http://project_history.example.com',
       },
-    })
-  })
-
-  describe('selectHistoryApi', function () {
-    beforeEach(function () {
-      this.req = { url: '/mock/url', method: 'POST', params: {} }
-      this.res = 'mock-res'
-      return (this.next = sinon.stub())
-    })
-
-    describe('for a project with project history', function () {
-      beforeEach(function () {
-        this.ProjectDetailsHandler.getDetails = sinon
-          .stub()
-          .callsArgWith(1, null, {
-            overleaf: { history: { id: 42, display: true } },
-          })
-        return this.HistoryController.selectHistoryApi(
-          this.req,
-          this.res,
-          this.next
-        )
-      })
-
-      it('should set the flag for project history to true', function () {
-        return this.req.useProjectHistory.should.equal(true)
-      })
-    })
-
-    describe('for any other project ', function () {
-      beforeEach(function () {
-        this.ProjectDetailsHandler.getDetails = sinon
-          .stub()
-          .callsArgWith(1, null, {})
-        return this.HistoryController.selectHistoryApi(
-          this.req,
-          this.res,
-          this.next
-        )
-      })
-
-      it('should not set the flag for project history to false', function () {
-        return this.req.useProjectHistory.should.equal(false)
-      })
     })
   })
 
@@ -158,18 +110,6 @@ describe('HistoryController', function () {
       it('should get the user id', function () {
         return this.SessionManager.getLoggedInUserId
           .calledWith(this.req.session)
-          .should.equal(true)
-      })
-
-      it('should call the track changes api', function () {
-        return this.request
-          .calledWith({
-            url: `${this.settings.apis.trackchanges.url}${this.req.url}`,
-            method: this.req.method,
-            headers: {
-              'X-User-Id': this.user_id,
-            },
-          })
           .should.equal(true)
       })
 
@@ -246,19 +186,6 @@ describe('HistoryController', function () {
       it('should get the user id', function () {
         return this.SessionManager.getLoggedInUserId
           .calledWith(this.req.session)
-          .should.equal(true)
-      })
-
-      it('should call the track changes api', function () {
-        return this.request
-          .calledWith({
-            url: `${this.settings.apis.trackchanges.url}${this.req.url}`,
-            method: this.req.method,
-            json: true,
-            headers: {
-              'X-User-Id': this.user_id,
-            },
-          })
           .should.equal(true)
       })
 

@@ -51,21 +51,11 @@ function getDocument(req, res, next) {
                 plainTextResponse(res, lines.join('\n'))
               } else {
                 const projectHistoryId = _.get(project, 'overleaf.history.id')
-                const projectHistoryDisplay = _.get(
-                  project,
-                  'overleaf.history.display'
-                )
-                const sendToBothHistorySystems = _.get(
-                  project,
-                  'overleaf.history.allowDowngrade'
-                )
-                // if project has been switched but has 'allowDowngrade' set
-                // then leave projectHistoryType undefined to (temporarily)
-                // continue sending updates to both SL and full project history
-                const projectHistoryType =
-                  projectHistoryDisplay && !sendToBothHistorySystems
-                    ? 'project-history'
-                    : undefined // for backwards compatibility, don't send anything if the project is still on track-changes
+
+                // all projects are now migrated to Full Project History, keeping the field
+                // for API compatibility
+                const projectHistoryType = 'project-history'
+
                 res.json({
                   lines,
                   version,

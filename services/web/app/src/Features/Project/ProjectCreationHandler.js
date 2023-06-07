@@ -169,15 +169,10 @@ async function _createBlankProject(
     }
   }
 
-  // only display full project history when the project has the overleaf history id attribute
-  // (to allow scripted creation of projects without full project history)
-  const historyId = project.overleaf.history.id
-  if (
-    Settings.apis.project_history.displayHistoryForNewProjects &&
-    historyId != null
-  ) {
-    project.overleaf.history.display = true
-  }
+  // All the projects are initialised with Full Project History. This property
+  // is still set for backwards compatibility: Server Pro requires all projects
+  // have it set to `true` since SP 4.0
+  project.overleaf.history.display = true
 
   if (Settings.currentImageName) {
     // avoid clobbering any imageName already set in attributes (e.g. importedImageName)

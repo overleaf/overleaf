@@ -243,7 +243,6 @@
     "scroll-into-view-if-needed": "^2.2.25",
     "tsscmp": "^1.0.6",
     "underscore": "^1.13.1",
-    "unzipper": "^0.10.11",
     "utf-8-validate": "^5.0.2",
     "uuid": "^3.0.1",
     "valid-data-url": "^2.0.0",

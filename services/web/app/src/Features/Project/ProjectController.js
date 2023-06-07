@@ -1064,10 +1064,6 @@ const ProjectController = {
               editorThemes: THEME_LIST,
               legacyEditorThemes: LEGACY_THEME_LIST,
               maxDocLength: Settings.max_doc_length,
-              useV2History:
-                project.overleaf &&
-                project.overleaf.history &&
-                Boolean(project.overleaf.history.display),
               brandVariation,
               allowedImageNames,
               gitBridgePublicBaseUrl: Settings.gitBridgePublicBaseUrl,

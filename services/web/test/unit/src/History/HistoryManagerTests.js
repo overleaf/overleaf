@@ -23,10 +23,6 @@ describe('HistoryManager', function () {
     this.v1HistoryPassword = 'verysecret'
     this.settings = {
       apis: {
-        trackchanges: {
-          enabled: false,
-          url: 'http://trackchanges.example.com',
-        },
         project_history: {
           url: this.projectHistoryUrl,
         },
@@ -55,56 +51,45 @@ describe('HistoryManager', function () {
   })
 
   describe('initializeProject', function () {
-    describe('with project history enabled', function () {
-      beforeEach(function () {
-        this.settings.apis.project_history.initializeHistoryForNewProjects = true
+    beforeEach(function () {
+      this.settings.apis.project_history.initializeHistoryForNewProjects = true
+    })
+
+    describe('project history returns a successful response', function () {
+      beforeEach(async function () {
+        this.response.json.resolves({ project: { id: this.historyId } })
+        this.result = await this.HistoryManager.promises.initializeProject(
+          this.historyId
+        )
       })
 
-      describe('project history returns a successful response', function () {
-        beforeEach(async function () {
-          this.response.json.resolves({ project: { id: this.historyId } })
-          this.result = await this.HistoryManager.promises.initializeProject(
-            this.historyId
-          )
-        })
-
-        it('should call the project history api', function () {
-          this.fetch.should.have.been.calledWithMatch(
-            `${this.settings.apis.project_history.url}/project`,
-            { method: 'POST' }
-          )
-        })
-
-        it('should return the overleaf id', function () {
-          expect(this.result).to.equal(this.historyId)
-        })
+      it('should call the project history api', function () {
+        this.fetch.should.have.been.calledWithMatch(
+          `${this.settings.apis.project_history.url}/project`,
+          { method: 'POST' }
+        )
       })
 
-      describe('project history returns a response without the project id', function () {
-        it('should throw an error', async function () {
-          this.response.json.resolves({ project: {} })
-          await expect(
-            this.HistoryManager.promises.initializeProject(this.historyId)
-          ).to.be.rejected
-        })
-      })
-
-      describe('project history errors', function () {
-        it('should propagate the error', async function () {
-          this.fetch.rejects(new Error('problem connecting'))
-          await expect(
-            this.HistoryManager.promises.initializeProject(this.historyId)
-          ).to.be.rejected
-        })
+      it('should return the overleaf id', function () {
+        expect(this.result).to.equal(this.historyId)
       })
     })
 
-    describe('with project history disabled', function () {
-      it('should return without errors', async function () {
-        this.settings.apis.project_history.initializeHistoryForNewProjects = false
+    describe('project history returns a response without the project id', function () {
+      it('should throw an error', async function () {
+        this.response.json.resolves({ project: {} })
         await expect(
           this.HistoryManager.promises.initializeProject(this.historyId)
-        ).to.be.fulfilled
+        ).to.be.rejected
+      })
+    })
+
+    describe('project history errors', function () {
+      it('should propagate the error', async function () {
+        this.fetch.rejects(new Error('problem connecting'))
+        await expect(
+          this.HistoryManager.promises.initializeProject(this.historyId)
+        ).to.be.rejected
       })
     })
   })

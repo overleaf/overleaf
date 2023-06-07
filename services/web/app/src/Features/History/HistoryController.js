@@ -16,35 +16,9 @@ const { prepareZipAttachment } = require('../../infrastructure/Response')
 const Features = require('../../infrastructure/Features')
 
 module.exports = HistoryController = {
-  selectHistoryApi(req, res, next) {
-    const { Project_id: projectId } = req.params
-    // find out which type of history service this project uses
-    ProjectDetailsHandler.getDetails(projectId, function (err, project) {
-      if (err) {
-        return next(err)
-      }
-      const history = project.overleaf && project.overleaf.history
-      if (history && history.id && history.display) {
-        req.useProjectHistory = true
-      } else {
-        req.useProjectHistory = false
-      }
-      next()
-    })
-  },
-
-  ensureProjectHistoryEnabled(req, res, next) {
-    if (req.useProjectHistory) {
-      next()
-    } else {
-      res.sendStatus(404)
-    }
-  },
-
   proxyToHistoryApi(req, res, next) {
     const userId = SessionManager.getLoggedInUserId(req.session)
-    const url =
-      HistoryController.buildHistoryServiceUrl(req.useProjectHistory) + req.url
+    const url = settings.apis.project_history.url + req.url
 
     const getReq = request({
       url,
@@ -65,8 +39,7 @@ module.exports = HistoryController = {
 
   proxyToHistoryApiAndInjectUserDetails(req, res, next) {
     const userId = SessionManager.getLoggedInUserId(req.session)
-    const url =
-      HistoryController.buildHistoryServiceUrl(req.useProjectHistory) + req.url
+    const url = settings.apis.project_history.url + req.url
     HistoryController._makeRequest(
       {
         url,
@@ -88,16 +61,6 @@ module.exports = HistoryController = {
         })
       }
     )
-  },
-
-  buildHistoryServiceUrl(useProjectHistory) {
-    // choose a history service, either document-level (trackchanges)
-    // or project-level (project_history)
-    if (useProjectHistory) {
-      return settings.apis.project_history.url
-    } else {
-      return settings.apis.trackchanges.url
-    }
   },
 
   resyncProjectHistory(req, res, next) {

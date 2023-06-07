@@ -5,14 +5,6 @@ const OError = require('@overleaf/o-error')
 const UserGetter = require('../User/UserGetter')
 
 async function initializeProject(projectId) {
-  if (
-    !(
-      settings.apis.project_history &&
-      settings.apis.project_history.initializeHistoryForNewProjects
-    )
-  ) {
-    return null
-  }
   const response = await fetch(`${settings.apis.project_history.url}/project`, {
     method: 'POST',
     headers: {

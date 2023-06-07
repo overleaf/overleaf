@@ -51,9 +51,6 @@ module.exports = {
       url: 'http://localhost:23005',
       host: 'localhost',
     },
-    trackchanges: {
-      url: 'http://localhost:23015',
-    },
     docstore: {
       url: 'http://localhost:23016',
       pubUrl: 'http://localhost:23016',
@@ -78,8 +75,6 @@ module.exports = {
     },
     project_history: {
       sendProjectStructureOps: true,
-      initializeHistoryForNewProjects: true,
-      displayHistoryForNewProjects: true,
       url: `http://localhost:23054`,
     },
     v1_history: {

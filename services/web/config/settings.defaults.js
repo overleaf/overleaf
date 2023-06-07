@@ -186,9 +186,6 @@ module.exports = {
       url: `http://${process.env.SPELLING_HOST || 'localhost'}:3005`,
       host: process.env.SPELLING_HOST,
     },
-    trackchanges: {
-      url: `http://${process.env.TRACK_CHANGES_HOST || 'localhost'}:3015`,
-    },
     docstore: {
       url: `http://${process.env.DOCSTORE_HOST || 'localhost'}:3016`,
       pubUrl: `http://${process.env.DOCSTORE_HOST || 'localhost'}:3016`,
@@ -207,8 +204,6 @@ module.exports = {
     },
     project_history: {
       sendProjectStructureOps: true,
-      initializeHistoryForNewProjects: true,
-      displayHistoryForNewProjects: true,
       url: `http://${process.env.PROJECT_HISTORY_HOST || 'localhost'}:3054`,
     },
     realTime: {
@@ -810,12 +805,7 @@ module.exports = {
     oauth2Server: [],
   },
 
-  moduleImportSequence: [
-    'launchpad',
-    'server-ce-scripts',
-    'user-activate',
-    'history-migration',
-  ],
+  moduleImportSequence: ['launchpad', 'server-ce-scripts', 'user-activate'],
 
   csp: {
     enabled: process.env.CSP_ENABLED === 'true',

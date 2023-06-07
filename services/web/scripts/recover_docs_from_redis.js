@@ -165,7 +165,6 @@ async function deleteDocFromRedis(projectId, docId) {
     `UnflushedTime:{${docId}}`,
     `Pathname:{${docId}}`,
     `ProjectHistoryId:{${docId}}`,
-    `ProjectHistoryType:{${docId}}`,
     `PendingUpdates:{${docId}}`,
     `lastUpdatedAt:{${docId}}`,
     `lastUpdatedBy:{${docId}}`

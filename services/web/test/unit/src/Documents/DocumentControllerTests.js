@@ -39,77 +39,6 @@ describe('DocumentController', function () {
       }
     })
 
-    describe('when the project exists without project history enabled', function () {
-      beforeEach(function () {
-        this.project = { _id: this.project_id }
-        this.ProjectGetter.getProject = sinon
-          .stub()
-          .callsArgWith(2, null, this.project)
-      })
-
-      describe('when the document exists', function () {
-        beforeEach(function () {
-          this.doc = { _id: this.doc_id }
-          this.ProjectLocator.findElement = sinon
-            .stub()
-            .callsArgWith(1, null, this.doc, { fileSystem: this.pathname })
-          this.ProjectEntityHandler.getDoc = sinon
-            .stub()
-            .yields(null, this.doc_lines, this.rev, this.version, this.ranges)
-          this.DocumentController.getDocument(this.req, this.res, this.next)
-        })
-
-        it('should get the project', function () {
-          this.ProjectGetter.getProject
-            .calledWith(this.project_id, { rootFolder: true, overleaf: true })
-            .should.equal(true)
-        })
-
-        it('should get the pathname of the document', function () {
-          this.ProjectLocator.findElement
-            .calledWith({
-              project: this.project,
-              element_id: this.doc_id,
-              type: 'doc',
-            })
-            .should.equal(true)
-        })
-
-        it('should get the document content', function () {
-          this.ProjectEntityHandler.getDoc
-            .calledWith(this.project_id, this.doc_id)
-            .should.equal(true)
-        })
-
-        it('should return the document data to the client as JSON', function () {
-          this.res.type.should.equal('application/json')
-          this.res.body.should.equal(
-            JSON.stringify({
-              lines: this.doc_lines,
-              version: this.version,
-              ranges: this.ranges,
-              pathname: this.pathname,
-            })
-          )
-        })
-      })
-
-      describe("when the document doesn't exist", function () {
-        beforeEach(function () {
-          this.ProjectLocator.findElement = sinon
-            .stub()
-            .callsArgWith(1, new Errors.NotFoundError('not found'))
-          this.DocumentController.getDocument(this.req, this.res, this.next)
-        })
-
-        it('should call next with the NotFoundError', function () {
-          this.next
-            .calledWith(sinon.match.instanceOf(Errors.NotFoundError))
-            .should.equal(true)
-        })
-      })
-    })
-
     describe('when project exists with project history enabled', function () {
       beforeEach(function () {
         this.doc = { _id: this.doc_id }
@@ -140,53 +69,6 @@ describe('DocumentController', function () {
       it('should return the history id and display setting to the client as JSON', function () {
         this.res.type.should.equal('application/json')
         this.res.body.should.equal(
-          JSON.stringify({
-            lines: this.doc_lines,
-            version: this.version,
-            ranges: this.ranges,
-            pathname: this.pathname,
-            projectHistoryId: this.projectHistoryId,
-            projectHistoryType: this.projectHistoryType,
-          })
-        )
-      })
-    })
-
-    describe('when project exists that was migrated with downgrades allowed', function () {
-      beforeEach(function () {
-        this.doc = { _id: this.doc_id }
-        this.projectHistoryId = 1234
-        this.projectHistoryDisplay = true
-        this.projectHistoryType = undefined
-        this.project = {
-          _id: this.project_id,
-          overleaf: {
-            history: {
-              id: this.projectHistoryId,
-              display: this.projectHistoryDisplay,
-              allowDowngrade: true,
-            },
-          },
-        }
-        this.ProjectGetter.getProject = sinon
-          .stub()
-          .callsArgWith(2, null, this.project)
-        this.ProjectLocator.findElement = sinon
-          .stub()
-          .callsArgWith(1, null, this.doc, { fileSystem: this.pathname })
-        this.ProjectEntityHandler.getDoc = sinon
-          .stub()
-          .yields(null, this.doc_lines, this.rev, this.version, this.ranges)
-        return this.DocumentController.getDocument(
-          this.req,
-          this.res,
-          this.next
-        )
-      })
-
-      it('should return the history id in the JSON but not history type, sending history to both services', function () {
-        this.res.type.should.equal('application/json')
-        return this.res.body.should.equal(
           JSON.stringify({
             lines: this.doc_lines,
             version: this.version,

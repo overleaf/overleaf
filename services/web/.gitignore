@@ -88,9 +88,6 @@ cypress/videos/
 cypress/downloads/
 cypress/results/
 
-# Test fixture zip
-!modules/history-migration/test/unit/src/data/track-changes-project.zip
-
 # Ace themes for conversion
 frontend/js/features/source-editor/themes/ace/
 

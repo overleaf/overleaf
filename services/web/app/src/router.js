@@ -711,34 +711,29 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     '/project/:Project_id/updates',
     AuthorizationMiddleware.blockRestrictedUserFromProject,
     AuthorizationMiddleware.ensureUserCanReadProject,
-    HistoryController.selectHistoryApi,
     HistoryController.proxyToHistoryApiAndInjectUserDetails
   )
   webRouter.get(
     '/project/:Project_id/doc/:doc_id/diff',
     AuthorizationMiddleware.blockRestrictedUserFromProject,
     AuthorizationMiddleware.ensureUserCanReadProject,
-    HistoryController.selectHistoryApi,
     HistoryController.proxyToHistoryApi
   )
   webRouter.get(
     '/project/:Project_id/diff',
     AuthorizationMiddleware.blockRestrictedUserFromProject,
     AuthorizationMiddleware.ensureUserCanReadProject,
-    HistoryController.selectHistoryApi,
     HistoryController.proxyToHistoryApiAndInjectUserDetails
   )
   webRouter.get(
     '/project/:Project_id/filetree/diff',
     AuthorizationMiddleware.blockRestrictedUserFromProject,
     AuthorizationMiddleware.ensureUserCanReadProject,
-    HistoryController.selectHistoryApi,
     HistoryController.proxyToHistoryApi
   )
   webRouter.post(
     '/project/:Project_id/doc/:doc_id/version/:version_id/restore',
     AuthorizationMiddleware.ensureUserCanWriteProjectContent,
-    HistoryController.selectHistoryApi,
     HistoryController.proxyToHistoryApi
   )
   webRouter.post(
@@ -768,22 +763,16 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     '/project/:Project_id/labels',
     AuthorizationMiddleware.blockRestrictedUserFromProject,
     AuthorizationMiddleware.ensureUserCanReadProject,
-    HistoryController.selectHistoryApi,
-    HistoryController.ensureProjectHistoryEnabled,
     HistoryController.getLabels
   )
   webRouter.post(
     '/project/:Project_id/labels',
     AuthorizationMiddleware.ensureUserCanWriteProjectContent,
-    HistoryController.selectHistoryApi,
-    HistoryController.ensureProjectHistoryEnabled,
     HistoryController.createLabel
   )
   webRouter.delete(
     '/project/:Project_id/labels/:label_id',
     AuthorizationMiddleware.ensureUserCanWriteProjectContent,
-    HistoryController.selectHistoryApi,
-    HistoryController.ensureProjectHistoryEnabled,
     HistoryController.deleteLabel
   )
 
