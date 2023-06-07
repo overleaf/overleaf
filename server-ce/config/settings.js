@@ -249,8 +249,6 @@ const settings = {
     },
     project_history: {
       sendProjectStructureOps: true,
-      initializeHistoryForNewProjects: process.env.SHARELATEX_FPH_INITIALIZE_NEW_PROJECTS === 'true',
-      displayHistoryForNewProjects: process.env.SHARELATEX_FPH_DISPLAY_NEW_PROJECTS === 'true',
       url: 'http://localhost:3054',
     },
     v1_history: {

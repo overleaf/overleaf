@@ -89,9 +89,6 @@ ENV SHARELATEX_APP_NAME "Overleaf Community Edition"
 
 ENV OPTIMISE_PDF "true"
 
-ENV SHARELATEX_FPH_INITIALIZE_NEW_PROJECTS "true"
-ENV SHARELATEX_FPH_DISPLAY_NEW_PROJECTS "true"
-
 # Phusion Image timeouts before sending SIGKILL to processes
 # ----------------------------------------------------------
 ENV KILL_PROCESS_TIMEOUT 55
