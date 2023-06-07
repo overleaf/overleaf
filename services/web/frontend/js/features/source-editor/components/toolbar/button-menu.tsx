@@ -3,14 +3,20 @@ import { Button, ListGroup, Overlay, Popover } from 'react-bootstrap'
 import Icon from '../../../../shared/components/icon'
 import useDropdown from '../../../../shared/hooks/use-dropdown'
 import Tooltip from '../../../../shared/components/tooltip'
+import { EditorView } from '@codemirror/view'
+import { emitCommandEvent } from '../../extensions/toolbar/utils/analytics'
+import { useCodeMirrorViewContext } from '../codemirror-editor'
 
 export const ToolbarButtonMenu: FC<{
   id: string
   label: string
   icon: string
-}> = memo(function ButtonMenu({ icon, id, label, children }) {
+  altCommand?: (view: EditorView) => void
+}> = memo(function ButtonMenu({ icon, id, label, altCommand, children }) {
   const target = useRef<any>(null)
   const { open, onToggle, ref } = useDropdown()
+  const view = useCodeMirrorViewContext()
+
   const button = (
     <Button
       type="button"
@@ -21,8 +27,15 @@ export const ToolbarButtonMenu: FC<{
         event.preventDefault()
         event.stopPropagation()
       }}
-      onClick={() => {
-        onToggle(!open)
+      onClick={event => {
+        if (event.altKey && altCommand && open === false) {
+          emitCommandEvent(view, id)
+          event.preventDefault()
+          altCommand(view)
+          view.focus()
+        } else {
+          onToggle(!open)
+        }
       }}
       ref={target}
     >

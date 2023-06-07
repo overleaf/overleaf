@@ -6,6 +6,7 @@ import { FigureModalSource } from '../figure-modal/figure-modal-context'
 import { useTranslation } from 'react-i18next'
 import { emitCommandEvent } from '../../extensions/toolbar/utils/analytics'
 import { useCodeMirrorViewContext } from '../codemirror-editor'
+import { insertFigure } from '../../extensions/toolbar/commands'
 
 export const InsertFigureDropdown = () => {
   const { t } = useTranslation()
@@ -26,6 +27,7 @@ export const InsertFigureDropdown = () => {
       id="toolbar-figure"
       label={t('toolbar_insert_figure')}
       icon="picture-o"
+      altCommand={insertFigure}
     >
       <ListGroupItem
         onClick={() =>
