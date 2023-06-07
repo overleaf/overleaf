@@ -1,4 +1,5 @@
 import NewProjectButton from '../../js/features/project-list/components/new-project-button'
+import { ProjectListProvider } from '../../js/features/project-list/context/project-list-context'
 import useFetchMock from '../hooks/use-fetch-mock'
 
 const templateLinks = [
@@ -62,7 +63,11 @@ export const Success = () => {
     )
   })
 
-  return <NewProjectButton id="new-project-button-story" />
+  return (
+    <ProjectListProvider>
+      <NewProjectButton id="new-project-button-story" />
+    </ProjectListProvider>
+  )
 }
 
 export const Error = () => {
@@ -83,7 +88,11 @@ export const Error = () => {
     )
   })
 
-  return <NewProjectButton id="new-project-button-story" />
+  return (
+    <ProjectListProvider>
+      <NewProjectButton id="new-project-button-story" />
+    </ProjectListProvider>
+  )
 }
 
 export default {
