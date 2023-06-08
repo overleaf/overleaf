@@ -32,7 +32,7 @@ const settings = {
 export const Latex = (args: any, { globals: { theme } }: any) => {
   useScope({
     editor: {
-      sharejs_doc: mockDoc(content.tex),
+      sharejs_doc: mockDoc(content.tex, changes.tex),
       open_doc_name: 'example.tex',
     },
     settings: {
@@ -47,7 +47,7 @@ export const Latex = (args: any, { globals: { theme } }: any) => {
 export const Markdown = (args: any, { globals: { theme } }: any) => {
   useScope({
     editor: {
-      sharejs_doc: mockDoc(content.md),
+      sharejs_doc: mockDoc(content.md, changes.md),
       open_doc_name: 'example.md',
     },
     settings: {
@@ -62,7 +62,7 @@ export const Markdown = (args: any, { globals: { theme } }: any) => {
 export const Visual = (args: any, { globals: { theme } }: any) => {
   useScope({
     editor: {
-      sharejs_doc: mockDoc(content.tex),
+      sharejs_doc: mockDoc(content.tex, changes.tex),
       open_doc_name: 'example.tex',
       showVisual: true,
     },
@@ -105,7 +105,7 @@ export const Visual = (args: any, { globals: { theme } }: any) => {
 
 const MAX_DOC_LENGTH = 2 * 1024 * 1024 // window.maxDocLength
 
-const mockDoc = (content: string) => {
+const mockDoc = (content: string, changes: Array<Record<string, any>> = []) => {
   const mockShareJSDoc = {
     getText() {
       return content
@@ -142,22 +142,27 @@ const mockDoc = (content: string) => {
       // Do nothing
     },
     ranges: {
-      changes: [
-        {
-          id: '1',
-          op: {
-            i: 'Your introduction goes here! Simply start writing your document and use the Recompile button to view the updated PDF preview. Examples of commonly used commands and features are listed below, to help you get started.',
-            p: 583,
-          },
-          meta: {
-            user_id: '1',
-            ts: new Date().toString(),
-          },
-        },
-      ],
+      changes,
       comments: [],
     },
   }
+}
+
+const changes: Record<string, Array<Record<string, any>>> = {
+  tex: [
+    {
+      id: '1',
+      op: {
+        i: 'Your introduction goes here! Simply start writing your document and use the Recompile button to view the updated PDF preview. Examples of commonly used commands and features are listed below, to help you get started.',
+        p: 583,
+      },
+      meta: {
+        user_id: '1',
+        ts: new Date().toString(),
+      },
+    },
+  ],
+  md: [],
 }
 
 const content = {
