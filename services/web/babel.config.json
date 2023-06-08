@@ -5,7 +5,7 @@
       {
         "useBuiltIns": "usage",
         // This version must be aligned with the `core-js` version in `package.json`
-        "corejs": { "version": 3.6 }
+        "corejs": { "version": "3.30" }
       }
     ],
     ["@babel/react", { "runtime": "automatic" }],
