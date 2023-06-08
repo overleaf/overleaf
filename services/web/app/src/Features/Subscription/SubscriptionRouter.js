@@ -64,7 +64,6 @@ module.exports = {
     // Team invites
     webRouter.get(
       '/subscription/invites/:token/',
-      AuthenticationController.requireLogin(),
       TeamInvitesController.viewInvite
     )
     webRouter.put(

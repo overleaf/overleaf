@@ -1,4 +1,3 @@
-let TeamInvitesHandler
 const logger = require('@overleaf/logger')
 const crypto = require('crypto')
 const async = require('async')
@@ -17,120 +16,125 @@ const EmailHandler = require('../Email/EmailHandler')
 const EmailHelper = require('../Helpers/EmailHelper')
 
 const Errors = require('../Errors/Errors')
+const { promisifyMultiResult, promisify } = require('../../util/promises')
 
-module.exports = TeamInvitesHandler = {
-  getInvite(token, callback) {
-    Subscription.findOne(
-      { 'teamInvites.token': token },
-      function (err, subscription) {
-        if (err) {
-          return callback(err)
-        }
-        if (!subscription) {
-          return callback(new Errors.NotFoundError('team not found'))
-        }
-
-        const invite = subscription.teamInvites.find(i => i.token === token)
-        callback(null, invite, subscription)
+function getInvite(token, callback) {
+  Subscription.findOne(
+    { 'teamInvites.token': token },
+    function (err, subscription) {
+      if (err) {
+        return callback(err)
       }
-    )
-  },
+      if (!subscription) {
+        return callback(new Errors.NotFoundError('team not found'))
+      }
 
-  createInvite(teamManagerId, subscription, email, callback) {
-    email = EmailHelper.parseEmail(email)
-    if (!email) {
-      return callback(new Error('invalid email'))
+      const invite = subscription.teamInvites.find(i => i.token === token)
+      callback(null, invite, subscription)
     }
-    UserGetter.getUser(teamManagerId, function (error, teamManager) {
+  )
+}
+
+function createInvite(teamManagerId, subscription, email, callback) {
+  email = EmailHelper.parseEmail(email)
+  if (!email) {
+    return callback(new Error('invalid email'))
+  }
+  UserGetter.getUser(teamManagerId, function (error, teamManager) {
+    if (error) {
+      return callback(error)
+    }
+
+    _removeLegacyInvite(subscription.id, email, function (error) {
       if (error) {
         return callback(error)
       }
-
-      removeLegacyInvite(subscription.id, email, function (error) {
-        if (error) {
-          return callback(error)
-        }
-        createInvite(subscription, email, teamManager, callback)
-      })
+      _createInvite(subscription, email, teamManager, callback)
     })
-  },
-
-  importInvite(subscription, inviterName, email, token, sentAt, callback) {
-    checkIfInviteIsPossible(
-      subscription,
-      email,
-      function (error, possible, reason) {
-        if (error) {
-          return callback(error)
-        }
-        if (!possible) {
-          return callback(reason)
-        }
-
-        subscription.teamInvites.push({
-          email,
-          inviterName,
-          token,
-          sentAt,
-        })
-
-        subscription.save(callback)
-      }
-    )
-  },
-
-  acceptInvite(token, userId, callback) {
-    TeamInvitesHandler.getInvite(token, function (err, invite, subscription) {
-      if (err) {
-        return callback(err)
-      }
-      if (!invite) {
-        return callback(new Errors.NotFoundError('invite not found'))
-      }
-
-      SubscriptionUpdater.addUserToGroup(
-        subscription._id,
-        userId,
-        function (err) {
-          if (err) {
-            return callback(err)
-          }
-
-          removeInviteFromTeam(subscription.id, invite.email, callback)
-        }
-      )
-    })
-  },
-
-  revokeInvite(teamManagerId, subscription, email, callback) {
-    email = EmailHelper.parseEmail(email)
-    if (!email) {
-      return callback(new Error('invalid email'))
-    }
-    removeInviteFromTeam(subscription.id, email, callback)
-  },
-
-  // Legacy method to allow a user to receive a confirmation email if their
-  // email is in Subscription.invited_emails when they join. We'll remove this
-  // after a short while.
-  createTeamInvitesForLegacyInvitedEmail(email, callback) {
-    SubscriptionLocator.getGroupsWithEmailInvite(email, function (err, teams) {
-      if (err) {
-        return callback(err)
-      }
-
-      async.map(
-        teams,
-        (team, cb) =>
-          TeamInvitesHandler.createInvite(team.admin_id, team, email, cb),
-        callback
-      )
-    })
-  },
+  })
 }
 
-function createInvite(subscription, email, inviter, callback) {
-  checkIfInviteIsPossible(
+function importInvite(
+  subscription,
+  inviterName,
+  email,
+  token,
+  sentAt,
+  callback
+) {
+  _checkIfInviteIsPossible(
+    subscription,
+    email,
+    function (error, possible, reason) {
+      if (error) {
+        return callback(error)
+      }
+      if (!possible) {
+        return callback(reason)
+      }
+
+      subscription.teamInvites.push({
+        email,
+        inviterName,
+        token,
+        sentAt,
+      })
+
+      subscription.save(callback)
+    }
+  )
+}
+
+function acceptInvite(token, userId, callback) {
+  getInvite(token, function (err, invite, subscription) {
+    if (err) {
+      return callback(err)
+    }
+    if (!invite) {
+      return callback(new Errors.NotFoundError('invite not found'))
+    }
+
+    SubscriptionUpdater.addUserToGroup(
+      subscription._id,
+      userId,
+      function (err) {
+        if (err) {
+          return callback(err)
+        }
+
+        _removeInviteFromTeam(subscription.id, invite.email, callback)
+      }
+    )
+  })
+}
+
+function revokeInvite(teamManagerId, subscription, email, callback) {
+  email = EmailHelper.parseEmail(email)
+  if (!email) {
+    return callback(new Error('invalid email'))
+  }
+  _removeInviteFromTeam(subscription.id, email, callback)
+}
+
+// Legacy method to allow a user to receive a confirmation email if their
+// email is in Subscription.invited_emails when they join. We'll remove this
+// after a short while.
+function createTeamInvitesForLegacyInvitedEmail(email, callback) {
+  SubscriptionLocator.getGroupsWithEmailInvite(email, function (err, teams) {
+    if (err) {
+      return callback(err)
+    }
+
+    async.map(
+      teams,
+      (team, cb) => createInvite(team.admin_id, team, email, cb),
+      callback
+    )
+  })
+}
+
+function _createInvite(subscription, email, inviter, callback) {
+  _checkIfInviteIsPossible(
     subscription,
     email,
     function (error, possible, reason) {
@@ -155,7 +159,7 @@ function createInvite(subscription, email, inviter, callback) {
             }
 
             // legacy: remove any invite that might have been created in the past
-            removeInviteFromTeam(subscription._id, email, error => {
+            _removeInviteFromTeam(subscription._id, email, error => {
               const inviteUserData = {
                 email: inviter.email,
                 first_name: inviter.first_name,
@@ -168,7 +172,7 @@ function createInvite(subscription, email, inviter, callback) {
         )
       }
 
-      const inviterName = getInviterName(inviter)
+      const inviterName = _getInviterName(inviter)
       let invite = subscription.teamInvites.find(
         invite => invite.email === email
       )
@@ -206,20 +210,20 @@ function createInvite(subscription, email, inviter, callback) {
   )
 }
 
-function removeInviteFromTeam(subscriptionId, email, callback) {
+function _removeInviteFromTeam(subscriptionId, email, callback) {
   const searchConditions = { _id: new ObjectId(subscriptionId.toString()) }
   const removeInvite = { $pull: { teamInvites: { email } } }
 
   async.series(
     [
       cb => Subscription.updateOne(searchConditions, removeInvite, cb),
-      cb => removeLegacyInvite(subscriptionId, email, cb),
+      cb => _removeLegacyInvite(subscriptionId, email, cb),
     ],
     callback
   )
 }
 
-const removeLegacyInvite = (subscriptionId, email, callback) =>
+const _removeLegacyInvite = (subscriptionId, email, callback) =>
   Subscription.updateOne(
     {
       _id: new ObjectId(subscriptionId.toString()),
@@ -232,7 +236,7 @@ const removeLegacyInvite = (subscriptionId, email, callback) =>
     callback
   )
 
-function checkIfInviteIsPossible(subscription, email, callback) {
+function _checkIfInviteIsPossible(subscription, email, callback) {
   if (!subscription.groupPlan) {
     logger.debug(
       { subscriptionId: subscription.id },
@@ -273,7 +277,7 @@ function checkIfInviteIsPossible(subscription, email, callback) {
   })
 }
 
-function getInviterName(inviter) {
+function _getInviterName(inviter) {
   let inviterName
   if (inviter.first_name && inviter.last_name) {
     inviterName = `${inviter.first_name} ${inviter.last_name} (${inviter.email})`
@@ -282,4 +286,23 @@ function getInviterName(inviter) {
   }
 
   return inviterName
+}
+
+module.exports = {
+  getInvite,
+  createInvite,
+  importInvite,
+  acceptInvite,
+  revokeInvite,
+  createTeamInvitesForLegacyInvitedEmail,
+  promises: {
+    getInvite: promisifyMultiResult(getInvite, ['invite', 'subscription']),
+    createInvite: promisify(createInvite),
+    importInvite: promisify(importInvite),
+    acceptInvite: promisify(acceptInvite),
+    revokeInvite: promisify(revokeInvite),
+    createTeamInvitesForLegacyInvitedEmail: promisify(
+      createTeamInvitesForLegacyInvitedEmail
+    ),
+  },
 }

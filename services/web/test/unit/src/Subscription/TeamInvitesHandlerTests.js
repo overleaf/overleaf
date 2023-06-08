@@ -340,18 +340,18 @@ describe('TeamInvitesHandler', function () {
     it('sends an invitation email to addresses in the legacy invited_emails field', function (done) {
       this.TeamInvitesHandler.createTeamInvitesForLegacyInvitedEmail(
         'eddard@example.com',
-        (err, invite) => {
+        (err, invites) => {
           expect(err).not.to.exist
+          expect(invites.length).to.eq(1)
 
-          this.TeamInvitesHandler.createInvite
-            .calledWith(
-              this.subscription.admin_id,
-              this.subscription,
-              'eddard@example.com'
-            )
-            .should.eq(true)
-
-          this.TeamInvitesHandler.createInvite.callCount.should.eq(1)
+          const [invite] = invites
+          expect(invite.token).to.eq(this.newToken)
+          expect(invite.email).to.eq('eddard@example.com')
+          expect(invite.inviterName).to.eq(
+            'Daenerys Targaryen (daenerys@example.com)'
+          )
+          expect(invite.invite).to.be.true
+          expect(this.subscription.teamInvites).to.deep.include(invite)
 
           done()
         }
