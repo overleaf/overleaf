@@ -267,6 +267,7 @@ window.addEventListener('online', () => {
 try {
   // Note: navigator.connection is not available on Firefox and Safari.
   // Docs: https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation
+  // @ts-ignore
   navigator.connection.addEventListener('change', () => {
     // The network changed. Schedule another check for it.
     accessCheckStatus = ACCESS_CHECK_PENDING

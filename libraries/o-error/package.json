@@ -26,7 +26,7 @@
     "prepublishOnly": "npm run --silent declaration:build && npm run --silent declaration:check",
     "test": "mocha",
     "test:coverage": "nyc --reporter=lcov --reporter=text-summary npm run test",
-    "typecheck": "tsc --allowJs --checkJs --noEmit --moduleResolution node --strict --target ES6 *.cjs test/**/*.js",
+    "typecheck": "tsc --allowJs --checkJs --noEmit --skipLibCheck --moduleResolution node --strict --target ES6 *.cjs test/**/*.js",
     "update-readme": "doc/update-readme.js",
     "format": "prettier --list-different $PWD/'**/*.js'",
     "format:fix": "prettier --write $PWD/'**/*.js'",
@@ -43,6 +43,6 @@
     "markdown-toc": "^1.2.0",
     "mocha": "^10.2.0",
     "nyc": "^15.1.0",
-    "typescript": "^4.5.4"
+    "typescript": "^5.0.4"
   }
 }

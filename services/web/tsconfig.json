@@ -22,5 +22,6 @@
     "modules/**/stories/**/*.*",
     "cypress",
     "types"
-  ]
+  ],
+  "exclude": ["**/*.min.js"]
 }

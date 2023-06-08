@@ -17,8 +17,9 @@ export const activeEditorLine = () => {
     }
 
     // use the parent element if this is a node, e.g. text
-    const activeElement =
+    const activeElement = (
       'closest' in activeNode ? activeNode : activeNode.parentElement
+    ) as HTMLElement | undefined
 
     return cy.wrap(activeElement?.closest('.cm-line'))
   })

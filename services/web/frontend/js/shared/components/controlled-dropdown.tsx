@@ -40,12 +40,12 @@ const ControlledDropdown: FC<ControlledDropdownProps> = ({
 
         // Dropdown.Menu
         if ('open' in child.props) {
-          return cloneElement(child, { open: dropdownProps.open })
+          return cloneElement<any>(child, { open: dropdownProps.open })
         }
 
         // Overlay
         if ('show' in child.props) {
-          return cloneElement(child, { show: dropdownProps.open })
+          return cloneElement<any>(child, { show: dropdownProps.open })
         }
 
         // anything else

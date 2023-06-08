@@ -20,7 +20,7 @@
     "chai": "^3.3.0",
     "istanbul": "^0.4.5",
     "mocha": "^10.2.0",
-    "typescript": "^4.5.5"
+    "typescript": "^5.0.4"
   },
   "dependencies": {
     "@overleaf/o-error": "*",
