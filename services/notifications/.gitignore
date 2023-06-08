@@ -40,7 +40,6 @@ cookies.txt
 UserAndProjectPopulator.coffee
 
 public/stylesheets/style.css
-public/brand/plans.css
 
 Gemfile.lock
 
