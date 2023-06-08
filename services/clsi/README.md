@@ -100,6 +100,11 @@ sudo chmod -R g+w compiles
 sudo chmod g+s compiles
 ```
 
+You can run the commands automatically each time by appending the following line to the `docker run` command described above:
+```
+docker exec -it $(docker ps -qf ancestor=overleaf/clsi) bash -c 'sudo chown -R 1000:root /overleaf/services/clsi/compiles && sudo chmod -R g+w /overleaf/services/clsi/compiles && sudo chmod g+s /overleaf/services/clsi/compiles'
+```
+
 Another solution is to create a `sharelatex` group and add both `root` and the user with `uid` `1000` to it. If the host does not have a user with that `uid`, you will need to create one first.
 
 ```shell
