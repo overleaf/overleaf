@@ -24,6 +24,10 @@ export function createToolbarPanel() {
   return { dom, top: true }
 }
 
+/**
+ * A panel which contains the editor toolbar, provided by a state field which allows the toolbar to be toggled,
+ * and styles for the toolbar.
+ */
 export const toolbarPanel = () => [
   toolbarState,
   EditorView.theme({

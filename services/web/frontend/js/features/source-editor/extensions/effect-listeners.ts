@@ -14,6 +14,10 @@ type EffectListener = {
 const addEffectListenerEffect = StateEffect.define<EffectListener>()
 const removeEffectListenerEffect = StateEffect.define<EffectListener>()
 
+/**
+ * A state field that stores a collection of listeners per effect,
+ * and runs each listener's callback function when the effect is dispatched.
+ */
 export const effectListeners = () => [effectListenersField]
 
 const effectListenersField = StateField.define<EffectListener[]>({

@@ -22,8 +22,12 @@ const spellCheckLanguageFacet = Facet.define<string | undefined>()
 
 type Options = { spellCheckLanguage?: string }
 
-/*
- * Create the spelling extensions array, based on options passed.
+/**
+ * A custom extension that creates a spell checker for the current language (from the user settings).
+ * The spell check runs on the server whenever a line changes.
+ * The mis-spelled words, ignored words and spell-checked words are stored in a state field.
+ * Mis-spelled words are decorated with a Mark decoration.
+ * The suggestions menu is displayed in a tooltip, activated with a right-click on the decoration.
  */
 export const spelling = ({ spellCheckLanguage }: Options) => {
   return [

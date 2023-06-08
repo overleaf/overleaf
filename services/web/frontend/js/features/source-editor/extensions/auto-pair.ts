@@ -16,6 +16,9 @@ export const setAutoPair = (autoPairDelimiters: boolean): TransactionSpec => {
   }
 }
 
+/**
+ * The built-in closeBrackets extension and closeBrackets keymap.
+ */
 const extension = [
   closeBrackets(),
   // NOTE: using Prec.highest as this needs to run before the default Backspace handler

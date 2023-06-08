@@ -7,7 +7,10 @@ import {
 import { syntaxTree } from '@codemirror/language'
 import { SyntaxNode } from '@lezer/common'
 
-// avoid placing the cursor in front of a list item marker
+/**
+ * A transaction filter which modifies a transaction if it places the cursor in front of a list item marker,
+ * to ensure that the cursor is positioned after the marker.
+ */
 export const listItemMarker = EditorState.transactionFilter.of(tr => {
   if (tr.selection) {
     let selection = tr.selection

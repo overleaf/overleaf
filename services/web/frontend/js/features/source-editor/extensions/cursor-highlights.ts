@@ -16,6 +16,9 @@ import { findValidPosition } from '../utils/position'
 import { Highlight } from '../../../../../types/highlight'
 import { fullHeightCoordsAtPos, getBase } from '../utils/layer'
 
+/**
+ * A custom extension that displays collaborator cursors in a separate layer.
+ */
 export const cursorHighlights = () => {
   return [
     cursorHighlightsState,

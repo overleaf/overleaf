@@ -1,6 +1,9 @@
 import { ViewPlugin } from '@codemirror/view'
 import { EditorSelection } from '@codemirror/state'
 
+/**
+ * A custom extension that listens for an `editor:insert-symbol` event and inserts the given content into the document.
+ */
 export const symbolPalette = () => {
   return ViewPlugin.define(view => {
     const listener = (event: Event) => {

@@ -110,6 +110,11 @@ export const sourceOnly = (visual: boolean, extension: Extension) => {
 }
 
 const parsedAttributesConf = new Compartment()
+
+/**
+ * A view plugin which shows the editor content, makes it focusable,
+ * and restores the scroll position, once the initial decorations have been applied.
+ */
 const showContentWhenParsed = [
   parsedAttributesConf.of([EditorView.editable.of(false)]),
   ViewPlugin.define(view => {
@@ -164,6 +169,9 @@ const showContentWhenParsed = [
   }),
 ]
 
+/**
+ * A transaction extender which scrolls mouse clicks into view, in case decorations have moved the cursor out of view.
+ */
 const scrollJumpAdjuster = EditorState.transactionExtender.of(tr => {
   // Attach a "scrollIntoView" effect on all mouse selections to adjust for
   // any jumps that may occur when hiding/showing decorations.

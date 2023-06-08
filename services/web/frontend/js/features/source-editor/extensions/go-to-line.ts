@@ -2,6 +2,10 @@ import { Prec } from '@codemirror/state'
 import { EditorView, keymap } from '@codemirror/view'
 import { gotoLine } from '@codemirror/search'
 
+/**
+ * A custom extension that provides a keyboard shortcut
+ * and panel with UI for jumping to a specific line number.
+ */
 export const goToLinePanel = () => {
   return [
     Prec.high(

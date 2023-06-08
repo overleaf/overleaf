@@ -24,6 +24,10 @@ const enabled = customLocalStorage.getItem('cm6-dev-tools') === 'on'
 
 const devToolsConf = new Compartment()
 
+/**
+ * A panel which displays an outline of the current document's syntax tree alongside the document,
+ * to assist with CodeMirror extension development.
+ */
 export const codemirrorDevTools = () => {
   return enabled ? [devToolsButton, devToolsConf.of(createExtension())] : []
 }

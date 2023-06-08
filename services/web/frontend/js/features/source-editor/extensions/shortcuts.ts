@@ -39,6 +39,9 @@ const toggleTrackChangesFromKbdShortcut = () => {
   return true
 }
 
+/**
+ * Custom key bindings for motion, transformation, selection, history, etc.
+ */
 export const shortcuts = Prec.high(
   keymap.of([
     {

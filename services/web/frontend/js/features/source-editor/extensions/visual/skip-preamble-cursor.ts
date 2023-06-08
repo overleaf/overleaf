@@ -3,6 +3,10 @@ import { EditorSelection } from '@codemirror/state'
 import { findStartOfDocumentContent } from '../../utils/tree-operations/environments'
 import { syntaxTree } from '@codemirror/language'
 import { extendForwardsOverEmptyLines } from './selection'
+
+/**
+ * A view plugin that moves the cursor from the start of the preamble into the document body when the doc is opened.
+ */
 export const skipPreambleWithCursor = ViewPlugin.define((view: EditorView) => {
   let checkedOnce = false
   return {

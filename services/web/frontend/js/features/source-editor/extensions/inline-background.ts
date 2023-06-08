@@ -43,6 +43,10 @@ function createTheme(halfLeading: number) {
   })
 }
 
+/**
+ * A custom extension which measures the height of the first non-space position and provides a CSS variable via an editor theme,
+ * used for extending elements over the whole line height using padding.
+ */
 const plugin = ViewPlugin.define(
   view => {
     let halfLeading = 0

@@ -13,6 +13,10 @@ import {
   indentIncrease,
 } from '../toolbar/commands'
 
+/**
+ * A keymap which provides behaviours for the visual editor,
+ * including lists and text formatting.
+ */
 export const visualKeymap = Prec.highest(
   keymap.of([
     // create a new list item with the same indentation

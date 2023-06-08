@@ -37,9 +37,14 @@ const filteredDefaultKeymap = defaultKeymap.filter(
 )
 
 export const keymaps = keymap.of([
+  // The default CodeMirror keymap, with a few key bindings filtered out.
   ...filteredDefaultKeymap,
+  // Key bindings for undo/redo/undoSelection/redoSelection
   ...historyKeymap,
+  // Key bindings for “open lint panel” and “next diagnostic”
   ...lintKeymap,
+  // Key bindings for folding actions
   ...foldingKeymap,
+  // Key bindings for scrolling the viewport
   ...scrollOneLineKeymap,
 ])

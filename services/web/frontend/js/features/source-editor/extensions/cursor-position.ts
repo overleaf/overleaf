@@ -11,6 +11,11 @@ import customLocalStorage from '../../../infrastructure/local-storage'
 
 const buildStorageKey = (docId: string) => `doc.position.${docId}`
 
+/**
+ * A custom extension that:
+ * a) stores the cursor position in localStorage when the view is destroyed or the window is closed.
+ * b) dispatches the cursor position when it changes, for use with “show position in PDF”.
+ */
 export const cursorPosition = ({
   currentDoc: { doc_id: docId },
 }: {

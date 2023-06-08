@@ -1,6 +1,10 @@
 import type { Extension } from '@codemirror/state'
 import CodeMirror, { CodeMirrorVim } from './bundle'
 
+/**
+ * A custom extension that allows additional CodeMirror extensions to be provided by external code,
+ * e.g. browser extensions.
+ */
 export const thirdPartyExtensions = (): Extension => {
   const extensions: Extension[] = []
 

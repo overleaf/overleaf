@@ -16,6 +16,12 @@ type LineInfo = {
   middle: BlockInfo
 }
 
+/**
+ * A custom extension that:
+ * a) stores the scroll position (first visible line number) in localStorage when the view is destroyed,
+ *    or the window is closed, or when switching between Source and Rich Text, and
+ * b) dispatches the scroll position (middle visible line) when it changes, for use in the outline.
+ */
 export const scrollPosition = ({
   currentDoc: { doc_id: docId },
 }: {

@@ -57,6 +57,10 @@ export const mouseDownEffect = StateEffect.define<boolean>()
 export const hasMouseDownEffect = hasEffect(mouseDownEffect)
 export const updateHasMouseDownEffect = updateHasEffect(mouseDownEffect)
 
+/**
+ * A listener for mousedown and mouseup events, dispatching an event
+ * to record the current mousedown status, which is stored in a state field.
+ */
 export const mouseDownListener = EditorView.domEventHandlers({
   mousedown: (event, view) => {
     // not wrapped in a timeout, so update listeners know that the mouse is down before they process the selection

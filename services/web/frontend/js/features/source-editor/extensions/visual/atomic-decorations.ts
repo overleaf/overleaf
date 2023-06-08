@@ -109,6 +109,7 @@ const hasClosingBrace = (node: SyntaxNode) =>
   node.getChild('EnvNameGroup')?.getChild('CloseBrace')
 
 /**
+ * A state field that decorates ranges of text (including multiple lines) with Widget or Line decorations.
  * Atomic decorations replace a range of content with an uneditable widget.
  * Decorations that span multiple lines must be contained in a StateField, not a ViewPlugin.
  */

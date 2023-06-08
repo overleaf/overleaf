@@ -11,6 +11,7 @@ import { centeringNodeForEnvironment } from '../../utils/tree-operations/figure'
 import { Tree } from '@lezer/common'
 
 /**
+ * A view plugin that decorates ranges of text with Mark decorations.
  * Mark decorations add attributes to elements within a range.
  */
 export const markDecorations = ViewPlugin.define(

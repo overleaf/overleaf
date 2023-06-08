@@ -21,6 +21,9 @@ type Options = {
 export const theme = (options: Options) => [
   baseTheme,
   staticTheme,
+  /**
+   * Syntax highlighting, using a highlighter which maps tags to class names.
+   */
   syntaxHighlighting(classHighlighter),
   optionsThemeConf.of(createThemeFromOptions(options)),
   selectedThemeConf.of([]),
@@ -65,7 +68,9 @@ const createThemeFromOptions = ({
   lineHeight = 'normal',
   overallTheme = '',
 }: Options) => {
-  // theme styles that depend on settings
+  /**
+   * Theme styles that depend on settings.
+   */
   return [
     EditorView.editorAttributes.of({
       class: overallTheme === '' ? 'overall-theme-dark' : 'overall-theme-light',
@@ -112,7 +117,9 @@ const createThemeFromOptions = ({
   ]
 }
 
-// base styles that can have &dark and &light variants
+/**
+ * Base styles that can have &dark and &light variants
+ */
 const baseTheme = EditorView.baseTheme({
   // use a background color for lint error ranges
   '.cm-lintRange-error': {
@@ -146,7 +153,9 @@ const baseTheme = EditorView.baseTheme({
   },
 })
 
-// theme styles that don't depend on settings
+/**
+ * Theme styles that don't depend on settings.
+ */
 // TODO: move some/all of these into baseTheme?
 const staticTheme = EditorView.theme({
   // make the editor fill the available height

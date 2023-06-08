@@ -11,6 +11,10 @@ import {
 import { sourceOnly } from './visual/visual'
 import { fullHeightCoordsAtPos } from '../utils/layer'
 
+/**
+ * An alternative version of the built-in highlightActiveLine extension,
+ * using a custom approach for highlighting the full height of the active “visual line” of a wrapped line.
+ */
 export const highlightActiveLine = (visual: boolean) => {
   // this extension should only be active in the source editor
   return sourceOnly(visual, [

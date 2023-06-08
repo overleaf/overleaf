@@ -20,6 +20,10 @@ class EmptyLineWidget extends WidgetType {
   }
 }
 
+/**
+ * A custom extension which adds a widget decoration at the start of each empty line in the viewport,
+ * so that the line is highlighted when part of tracked changes.
+ */
 export const emptyLineFiller = () => {
   if (browser.ios) {
     // disable on iOS as it breaks Backspace across empty lines

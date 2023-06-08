@@ -13,6 +13,11 @@ import {
   WidgetType,
 } from '@codemirror/view'
 
+/**
+ * A custom extension which stores values for padding needed
+ * a) at the top and bottom of the editor, to match the height of the review panel, and
+ * b) at the bottom of the editor content, so the last line of the document can be scrolled to the top of the editor.
+ */
 export function verticalOverflow(): Extension {
   return [
     overflowPaddingState,

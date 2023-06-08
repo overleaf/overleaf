@@ -20,6 +20,9 @@ type Options = {
   syntaxValidation: boolean
 }
 
+/**
+ * A state field that stores the metadata parsed from a project on the server.
+ */
 export const metadataState = StateField.define<Metadata | undefined>({
   create: () => undefined,
   update: (value, transaction) => {
@@ -32,6 +35,10 @@ export const metadataState = StateField.define<Metadata | undefined>({
   },
 })
 
+/**
+ * The parser and support extensions for each supported language,
+ * which are loaded dynamically as needed.
+ */
 export const language = (
   currentDoc: CurrentDoc,
   metadata: Metadata,
@@ -47,10 +54,16 @@ export const language = (
   }
 
   return [
-    // Default to four-space indentation, which prevents a shift in line
-    // indentation markers when LaTeX loads
+    /**
+     * Default to four-space indentation and set the configuration in advance,
+     * to prevent a shift in line indentation markers when the LaTeX language loads.
+     */
     languageConf.of(indentUnit.of('    ')),
     metadataState,
+    /**
+     * A view plugin which loads the appropriate language for the current file extension,
+     * then dispatches an effect so other extensions can update accordingly.
+     */
     ViewPlugin.define(view => {
       // load the language asynchronously
       languageDescription.load().then(support => {

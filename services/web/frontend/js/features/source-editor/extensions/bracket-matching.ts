@@ -18,6 +18,11 @@ const FORWARDS = 1
 const BACKWARDS = -1
 type Direction = 1 | -1
 
+/**
+ * A built-in extension which decorates matching pairs of brackets when focused,
+ * configured with a custom render function that combines adjacent pairs of matching markers
+ * into a single decoration so there’s no border between them.
+ */
 export const bracketMatching = () => {
   return bracketMatchingExtension({
     renderMatch: match => {
@@ -59,6 +64,10 @@ const matchedAdjacent = (match: MatchResult): match is AdjacentMatchResult =>
       (match.start.to === match.end.from || match.end.to === match.start.from)
   )
 
+/**
+ * A custom extension which handles double-click events on a matched bracket
+ * and extends the selection to cover the contents of the bracket pair.
+ */
 export const bracketSelection = (): Extension[] => [
   EditorView.domEventHandlers({
     dblclick: (evt, view) => {
@@ -74,11 +83,10 @@ export const bracketSelection = (): Extension[] => [
           maxScanDistance: 0,
         })
         if (match?.matched && match.end) {
-          const newRange = EditorSelection.range(
+          return EditorSelection.range(
             Math.min(match.start.from, match.end.from),
             Math.max(match.end.to, match.start.to)
           )
-          return newRange
         }
         return false
       }

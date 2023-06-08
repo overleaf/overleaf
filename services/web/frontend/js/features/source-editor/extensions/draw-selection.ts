@@ -4,9 +4,12 @@ import { rectangleMarkerForRange } from '../utils/layer'
 import { updateHasMouseDownEffect } from './visual/selection'
 import browser from './browser'
 
-// This is mostly a copy of CodeMirror's built-in drawSelection extension. We
-// have our own copy so that we can use our own implementation of
-// rectangleMarkerForRange
+/**
+ * The built-in extension which draws the cursor and selection(s) in layers,
+ * copied to make use of a custom version of rectangleMarkerForRange which calls
+ * fullHeightCoordsAtPos when in Source mode, extending the top and bottom
+ * of the coords to cover the full line height.
+ */
 export const drawSelection = () => {
   return [cursorLayer, selectionLayer, hideNativeSelection]
 }

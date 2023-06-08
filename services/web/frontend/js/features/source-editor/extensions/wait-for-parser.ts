@@ -14,6 +14,9 @@ type ParserWait = {
   resolve: () => void
 }
 
+/**
+ * A custom extension that resolves a Promise when the parser has built the syntax tree up to a given position.
+ */
 export const parserWatcher = ViewPlugin.fromClass(
   class {
     waits: ParserWait[] = []

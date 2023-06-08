@@ -2,6 +2,7 @@ import { EditorView, ViewUpdate } from '@codemirror/view'
 import { Diagnostic, linter, lintGutter } from '@codemirror/lint'
 import {
   Compartment,
+  Extension,
   RangeSet,
   RangeValue,
   StateEffect,
@@ -15,10 +16,15 @@ const compileLintSourceConf = new Compartment()
 export const annotations = () => [
   compileDiagnosticsState,
   compileLintSourceConf.of(compileLogLintSource()),
+  /**
+   * The built-in lint gutter extension, configured with zero hover delay.
+   */
   lintGutter({
     hoverTime: 0,
   }),
-  // move the lint gutter outside the line numbers
+  /**
+   * A theme which moves the lint gutter outside the line numbers.
+   */
   EditorView.baseTheme({
     '.cm-gutter-lint': {
       order: -1,
@@ -41,7 +47,10 @@ export const lintSourceConfig = {
   },
 }
 
-const compileLogLintSource = () =>
+/**
+ * A lint source using the compile log diagnostics
+ */
+const compileLogLintSource = (): Extension =>
   linter(view => {
     const items: Diagnostic[] = []
     const cursor = view.state.field(compileDiagnosticsState).iter()
@@ -64,6 +73,9 @@ class DiagnosticRangeValue extends RangeValue {
 
 const setCompileDiagnosticsEffect = StateEffect.define<Diagnostic[]>()
 
+/**
+ * A state field for the compile log diagnostics
+ */
 export const compileDiagnosticsState = StateField.define<
   RangeSet<DiagnosticRangeValue>
 >({

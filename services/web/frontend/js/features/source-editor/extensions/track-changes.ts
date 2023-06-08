@@ -50,6 +50,10 @@ type Options = {
   loadingThreads: boolean
 }
 
+/**
+ * A custom extension that initialises the change manager, passes any updates to it,
+ * and produces decorations for tracked changes and comments.
+ */
 export const trackChanges = (
   { currentDoc, loadingThreads }: Options,
   changeManager: ChangeManager

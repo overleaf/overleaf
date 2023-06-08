@@ -1,6 +1,5 @@
 import {
   EditorView,
-  highlightSpecialChars,
   rectangularSelection,
   tooltips,
   crosshairCursor,
@@ -38,13 +37,14 @@ import importOverleafModules from '../../../../macros/import-overleaf-module.mac
 import { emptyLineFiller } from './empty-line-filler'
 import { goToLinePanel } from './go-to-line'
 import { drawSelection } from './draw-selection'
-import { sourceOnly, visual } from './visual/visual'
+import { visual } from './visual/visual'
 import { inlineBackground } from './inline-background'
 import { indentationMarkers } from './indentation-markers'
 import { codemirrorDevTools } from '../languages/latex/codemirror-dev-tools'
 import { keymaps } from './keymaps'
 import { shortcuts } from './shortcuts'
 import { effectListeners } from './effect-listeners'
+import { highlightSpecialChars } from './highlight-special-chars'
 
 const moduleExtensions: Array<() => Extension> = importOverleafModules(
   'sourceEditorExtensions'
@@ -52,32 +52,38 @@ const moduleExtensions: Array<() => Extension> = importOverleafModules(
 
 export const createExtensions = (options: Record<string, any>): Extension[] => [
   lineNumbers(),
-  sourceOnly(
-    false,
-    highlightSpecialChars({
-      addSpecialChars: new RegExp(
-        // non standard space characters (https://jkorpela.fi/chars/spaces.html)
-        '[\u00A0\u1680\u180E\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u200B\u202F\u205F\u3000\uFEFF]',
-        /x/.unicode != null ? 'gu' : 'g'
-      ),
-    })
-  ),
+  highlightSpecialChars(options.visual.visual),
+  // The built-in extension that manages the history stack,
+  // configured to increase the maximum delay between adjacent grouped edits
   history({ newGroupDelay: 250 }),
+  // The built-in extension that displays buttons for folding code in a gutter element,
+  // configured with custom openText and closeText symbols.
   foldGutter({
     openText: '▾',
     closedText: '▸',
   }),
   drawSelection(),
+  // A built-in facet that is set to true to allow multiple selections.
+  // This makes the editor more like a code editor than Google Docs or Microsoft Word,
+  // which only have single selections.
   EditorState.allowMultipleSelections.of(true),
+  // A built-in extension that enables soft line wrapping.
   EditorView.lineWrapping,
+  // A built-in extension that re-indents input if the language defines an indentOnInput field in its language data.
   indentOnInput(),
   lineWrappingIndentation(options.visual.visual),
   indentationMarkers(options.visual.visual),
   bracketMatching(),
   bracketSelection(),
+  // A built-in extension that enables rectangular selections, created by dragging a new selection while holding down Alt.
   rectangularSelection(),
+  // A built-in extension that turns the pointer into a crosshair while Alt is pressed.
   crosshairCursor(),
+  // A built-in extension that shows where dragged content will be dropped.
   dropCursor(),
+  // A built-in extension that is used for configuring tooltip behaviour,
+  // configured so that the tooltip parent is the document body,
+  // to avoid cutting off tooltips which overflow the editor.
   tooltips({
     parent: document.body,
   }),
@@ -85,15 +91,16 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   goToLinePanel(),
   filterCharacters(),
 
-  // `autoComplete` needs to be before `keybindings` so that arrow key handling
+  // NOTE: `autoComplete` needs to be before `keybindings` so that arrow key handling
   // in the autocomplete pop-up takes precedence over Vim/Emacs key bindings
   autoComplete(options.settings),
 
-  // `keybindings` needs to be before `language` so that Vim/Emacs bindings take
+  // NOTE: `keybindings` needs to be before `language` so that Vim/Emacs bindings take
   // precedence over language-specific keyboard shortcuts
   keybindings(),
 
-  annotations(), // NOTE: must be before `language`
+  // NOTE: `annotations` needs to be before `language`
+  annotations(),
   language(options.currentDoc, options.metadata, options.settings),
   theme(options.theme),
   realtime(options.currentDoc, options.handleError),
@@ -107,15 +114,19 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   spelling(options.spelling),
   shortcuts,
   symbolPalette(),
-  emptyLineFiller(), // NOTE: must be before `trackChanges`
+  // NOTE: `emptyLineFiller` needs to be before `trackChanges`,
+  // so the decorations are added in the correct order.
+  emptyLineFiller(),
   trackChanges(options.currentDoc, options.changeManager),
   visual(options.currentDoc, options.visual),
   verticalOverflow(),
   highlightActiveLine(options.visual.visual),
+  // The built-in extension that highlights the active line in the gutter.
   highlightActiveLineGutter(),
   inlineBackground(options.visual.visual),
   codemirrorDevTools(),
   exceptionLogger(),
+  // CodeMirror extensions provided by modules
   moduleExtensions.map(extension => extension()),
   thirdPartyExtensions(),
   effectListeners(),

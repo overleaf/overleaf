@@ -1,5 +1,5 @@
 import {
-  search as searchExtension,
+  search as _search,
   setSearchQuery,
   getSearchQuery,
   openSearchPanel,
@@ -105,6 +105,9 @@ const highlightSelectionMatchesExtension = highlightSelectionMatches({
 // TODO: move this into EditorContext?
 let searchQuery: SearchQuery | null
 
+/**
+ * A collection of extensions related to the search feature.
+ */
 export const search = () => {
   let open = false
 
@@ -118,8 +121,11 @@ export const search = () => {
     // a stored selection for use in "within selection" searches
     storedSelectionState,
 
-    // a wrapper round `search`, which creates a custom panel element and passes it to React by dispatching an event
-    searchExtension({
+    /**
+     * The CodeMirror `search` extension, configured to create a custom panel element
+     * and to scroll the search match into the centre of the viewport when needed.
+     */
+    _search({
       literal: true,
       // centre the search match if it was outside the visible area
       scrollToMatch: (range: SelectionRange, view: EditorView) => {

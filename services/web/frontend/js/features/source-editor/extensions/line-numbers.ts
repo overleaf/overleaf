@@ -2,10 +2,15 @@ import { EditorSelection, Extension } from '@codemirror/state'
 import {
   BlockInfo,
   EditorView,
-  lineNumbers as cmLineNumbers,
+  lineNumbers as _lineNumbers,
 } from '@codemirror/view'
 import { DebouncedFunc, throttle } from 'lodash'
 
+/**
+ * The built-in extension which displays line numbers in the gutter,
+ * configured with a mousedown/mouseup handler that selects lines of the document
+ * when dragging a selection in the gutter.
+ */
 export function lineNumbers(): Extension {
   let listener: DebouncedFunc<(event: MouseEvent) => boolean> | null
 
@@ -37,7 +42,7 @@ export function lineNumbers(): Extension {
   }
 
   // Wrapper around the built-in codemirror lineNumbers() extension
-  return cmLineNumbers({
+  return _lineNumbers({
     domEventHandlers: {
       mousedown: (view, line, event) => {
         // Disable default focusing of line number

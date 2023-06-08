@@ -2,6 +2,9 @@ import { EditorView } from '@codemirror/view'
 import { HighlightStyle, syntaxHighlighting } from '@codemirror/language'
 import { tags } from '@lezer/highlight'
 
+/**
+ * A syntax highlighter for content types that are only styled in the visual editor.
+ */
 export const visualHighlightStyle = syntaxHighlighting(
   HighlightStyle.define([
     { tag: tags.link, class: 'ol-cm-link-text' },

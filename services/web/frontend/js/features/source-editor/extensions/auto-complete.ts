@@ -28,6 +28,11 @@ const createAutoComplete = (enabled: boolean) => {
   return [
     [
       autocompleteTheme,
+      /**
+       * A built-in extension which provides the autocomplete feature,
+       * configured with a custom render function and
+       * a zero interaction delay (so that keypresses are handled after the autocomplete is opened).
+       */
       autocompletion({
         icons: false,
         defaultKeymap: false,
@@ -50,6 +55,9 @@ const createAutoComplete = (enabled: boolean) => {
         },
         interactionDelay: 0,
       }),
+      /**
+       * A keymap which adds Tab for accepting a completion and Ctrl-Space for opening autocomplete.
+       */
       Prec.highest(
         keymap.of([
           { key: 'Escape', run: closeCompletion },
@@ -61,7 +69,9 @@ const createAutoComplete = (enabled: boolean) => {
           { key: 'Tab', run: acceptCompletion },
         ])
       ),
-      // NOTE: must be lower precedence than Ctrl-Space and Alt-Space in references-search
+      /**
+       * A keymap which positions Ctrl-Space and Alt-Space below the corresponding bindings for advanced reference search.
+       */
       Prec.high(
         keymap.of([
           { key: 'Ctrl-Space', run: startCompletion },
@@ -72,6 +82,9 @@ const createAutoComplete = (enabled: boolean) => {
   ]
 }
 
+/**
+ * Styles for the autocomplete menu
+ */
 const autocompleteTheme = EditorView.baseTheme({
   '.cm-tooltip.cm-tooltip-autocomplete': {
     // shift the tooltip, so the completion aligns with the text

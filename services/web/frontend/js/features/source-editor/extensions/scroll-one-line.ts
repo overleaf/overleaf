@@ -18,7 +18,9 @@ const scrollDownOneLine: Command = (view: EditorView) => {
   return true
 }
 
-// Applied to Windows and Linux only
+/**
+ * Custom keymap for Windows and Linux for scrolling the viewport up/down one line with Ctrl+ArrowUp/Down.
+ */
 export const scrollOneLineKeymap = [
   {
     linux: 'Ctrl-ArrowUp',

@@ -1,5 +1,8 @@
 import { foldAll, toggleFold, unfoldAll } from '@codemirror/language'
 
+/**
+ * A custom extension that binds keyboard shortcuts to folding actions.
+ */
 export const foldingKeymap = [
   {
     key: 'F2',

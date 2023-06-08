@@ -12,6 +12,12 @@ const MAX_INDENT_FRACTION = 0.9
 
 const setMaxIndentEffect = StateEffect.define<number>()
 
+/**
+ * Calculates the indentation needed for each line based on the spaces and tabs at the start of the line.
+ * Decorates each line with a `style` attribute, to ensure that wrapped lines share the same indentation.
+ *
+ * NOTE: performance increases linearly with document size, but decorating only the viewport causes unacceptable layout shifts when scrolling.
+ */
 export const lineWrappingIndentation = (visual: boolean) => {
   // this extension should only be active in the source editor
   return sourceOnly(visual, [

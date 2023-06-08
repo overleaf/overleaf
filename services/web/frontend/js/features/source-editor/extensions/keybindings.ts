@@ -210,6 +210,11 @@ const options = [
 
 const keybindingsConf = new Compartment()
 
+/**
+ * Third-party extensions providing Emacs and Vim keybindings,
+ * implemented as wrappers around the CodeMirror 5 interface,
+ * with some customisation (particularly related to search).
+ */
 export const keybindings = () => {
   return keybindingsConf.of(Prec.highest([]))
 }

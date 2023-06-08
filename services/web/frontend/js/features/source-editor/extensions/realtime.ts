@@ -20,6 +20,9 @@ import { ShareDoc } from '../../../../../types/share-doc'
  *   - frontend/js/ide/connection/EditorWatchdogManager.js
  */
 
+/**
+ * A custom extension that connects the CodeMirror 6 editor to the currently open ShareJS document.
+ */
 export const realtime = (
   { currentDoc }: { currentDoc: CurrentDoc },
   handleError: (error: Error) => void
