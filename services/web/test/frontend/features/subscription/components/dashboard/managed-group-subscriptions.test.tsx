@@ -37,7 +37,7 @@ describe('<ManagedGroupSubscriptions />', function () {
     cleanUpContext()
   })
 
-  it('renders all managed group subscriptions', function () {
+  it('renders all managed group subscriptions', async function () {
     renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
       metaTags: [
         {
@@ -58,34 +58,21 @@ describe('<ManagedGroupSubscriptions />', function () {
       'You are a manager of the Collaborator group subscription GASWPLC administered by someone@example.com'
     )
 
-    const manageMembersLinks = screen.getAllByText('Manage members')
-    expect(manageMembersLinks.length).to.equal(2)
-    expect(manageMembersLinks[0].getAttribute('href')).to.equal(
+    const links = screen.getAllByRole('link')
+    expect(links[1].getAttribute('href')).to.equal(
       '/manage/groups/bcd567/members'
     )
-    expect(manageMembersLinks[1].getAttribute('href')).to.equal(
-      '/manage/groups/def456/members'
-    )
-
-    const manageGroupManagersLinks = screen.getAllByText(
-      'Manage group managers'
-    )
-    expect(manageGroupManagersLinks.length).to.equal(2)
-    expect(manageGroupManagersLinks[0].getAttribute('href')).to.equal(
+    expect(links[2].getAttribute('href')).to.equal(
       '/manage/groups/bcd567/managers'
     )
-    expect(manageGroupManagersLinks[1].getAttribute('href')).to.equal(
+    expect(links[3].getAttribute('href')).to.equal('/metrics/groups/bcd567')
+    expect(links[5].getAttribute('href')).to.equal(
+      '/manage/groups/def456/members'
+    )
+    expect(links[6].getAttribute('href')).to.equal(
       '/manage/groups/def456/managers'
     )
-
-    const viewMetricsLinks = screen.getAllByText('View metrics')
-    expect(viewMetricsLinks.length).to.equal(2)
-    expect(viewMetricsLinks[0].getAttribute('href')).to.equal(
-      '/metrics/groups/bcd567'
-    )
-    expect(viewMetricsLinks[1].getAttribute('href')).to.equal(
-      '/metrics/groups/def456'
-    )
+    expect(links[7].getAttribute('href')).to.equal('/metrics/groups/def456')
   })
 
   it('renders nothing when there are no group memberships', function () {

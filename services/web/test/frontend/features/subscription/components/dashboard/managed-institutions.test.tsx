@@ -61,32 +61,15 @@ describe('<ManagedInstitutions />', function () {
       'You are a manager of the Overleaf Commons subscription at Inst 2'
     )
 
-    const viewMetricsLinks = screen.getAllByText('View metrics')
-    expect(viewMetricsLinks.length).to.equal(2)
-    expect(viewMetricsLinks[0].getAttribute('href')).to.equal(
-      '/metrics/institutions/123'
-    )
-    expect(viewMetricsLinks[1].getAttribute('href')).to.equal(
-      '/metrics/institutions/456'
-    )
-
-    const viewHubLinks = screen.getAllByText('View hub')
-    expect(viewHubLinks.length).to.equal(2)
-    expect(viewHubLinks[0].getAttribute('href')).to.equal(
-      '/institutions/123/hub'
-    )
-    expect(viewHubLinks[1].getAttribute('href')).to.equal(
-      '/institutions/456/hub'
-    )
-
-    const manageGroupManagersLinks = screen.getAllByText(
-      'Manage institution managers'
-    )
-    expect(manageGroupManagersLinks.length).to.equal(2)
-    expect(manageGroupManagersLinks[0].getAttribute('href')).to.equal(
+    const links = screen.getAllByRole('link')
+    expect(links[0].getAttribute('href')).to.equal('/metrics/institutions/123')
+    expect(links[1].getAttribute('href')).to.equal('/institutions/123/hub')
+    expect(links[2].getAttribute('href')).to.equal(
       '/manage/institutions/123/managers'
     )
-    expect(manageGroupManagersLinks[1].getAttribute('href')).to.equal(
+    expect(links[3].getAttribute('href')).to.equal('/metrics/institutions/456')
+    expect(links[4].getAttribute('href')).to.equal('/institutions/456/hub')
+    expect(links[5].getAttribute('href')).to.equal(
       '/manage/institutions/456/managers'
     )
 

@@ -3,6 +3,7 @@ import { Trans, useTranslation } from 'react-i18next'
 import { postJSON } from '../../../../infrastructure/fetch-json'
 import { useSubscriptionDashboardContext } from '../../context/subscription-dashboard-context'
 import { Institution } from './managed-institutions'
+import { RowLink } from './row-link'
 
 type ManagedInstitutionProps = {
   institution: Institution
@@ -48,24 +49,24 @@ export default function ManagedInstitution({
           }}
         />
       </p>
-      <p>
-        <a
-          className="btn btn-primary"
-          href={`/metrics/institutions/${institution.v1Id}`}
-        >
-          <i className="fa fa-fw fa-line-chart" /> {t('view_metrics')}
-        </a>
-      </p>
-      <p>
-        <a href={`/institutions/${institution.v1Id}/hub`}>
-          <i className="fa fa-fw fa-user-circle" /> {t('view_hub')}
-        </a>
-      </p>
-      <p>
-        <a href={`/manage/institutions/${institution.v1Id}/managers`}>
-          <i className="fa fa-fw fa-users" /> {t('manage_institution_managers')}
-        </a>
-      </p>
+      <RowLink
+        href={`/metrics/institutions/${institution.v1Id}`}
+        heading={t('view_metrics')}
+        subtext={t('view_metrics_institution_subtext')}
+        icon="insights"
+      />
+      <RowLink
+        href={`/institutions/${institution.v1Id}/hub`}
+        heading={t('view_hub')}
+        subtext={t('view_hub_subtext')}
+        icon="account_circle"
+      />
+      <RowLink
+        href={`/manage/institutions/${institution.v1Id}/managers`}
+        heading={t('manage_institution_managers')}
+        subtext={t('manage_managers_subtext')}
+        icon="manage_accounts"
+      />
       <div>
         <p>
           <span>Monthly metrics emails: </span>

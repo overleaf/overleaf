@@ -196,3 +196,50 @@
     background-color: @gray-lighter;
   }
 }
+
+a.row-link {
+  line-height: 24px;
+  color: @neutral-70;
+  display: flex;
+  flex-direction: row;
+  text-decoration: none;
+  padding: 6px 0;
+
+  &:active,
+  &:focus,
+  &:hover {
+    text-decoration: none;
+    outline: none;
+    background-color: @gray-lightest;
+  }
+
+  .icon {
+    display: flex;
+    flex: 1 1 5%;
+    padding: 0 16px;
+    margin-top: 16px;
+    > span {
+      font-size: 16px;
+    }
+
+    &.arrow {
+      margin-top: 12px;
+      > span {
+        font-size: 24px;
+      }
+    }
+  }
+
+  .text {
+    flex: 1 1 90%;
+    display: flex;
+    flex-direction: column;
+
+    .heading {
+      font-weight: @btn-font-weight;
+    }
+    .subtext {
+      font-weight: 400;
+    }
+  }
+}
