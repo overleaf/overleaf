@@ -1109,3 +1109,115 @@ button when (@is-overleaf-light = true) {
 .rp-flex-block {
   display: block;
 }
+
+// CM6-specific review panel rules
+.ol-cm-review-panel {
+  display: block;
+  flex-shrink: 0;
+
+  .rp-size-expanded & {
+    display: flex;
+    flex-direction: column;
+    width: @review-panel-width;
+    overflow: visible;
+    border-left-width: 1px;
+  }
+
+  .rp-size-mini & {
+    width: @review-off-width;
+    z-index: 6;
+    border-left-width: 1px;
+  }
+
+  background-color: @rp-bg-blue;
+  border-left: solid 0 @rp-border-grey;
+  font-family: @font-family-base;
+  line-height: @line-height-base;
+  font-size: @rp-base-font-size;
+  color: @rp-type-blue;
+  z-index: 6;
+
+  position: relative;
+  box-sizing: content-box;
+  flex-direction: column;
+
+  .review-panel-toolbar {
+    & .review-panel-toolbar-collapse-button {
+      border: none;
+      background: none;
+      padding: 0;
+    }
+  }
+
+  .rp-state-current-file & {
+    .review-panel-tools {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+    }
+
+    .review-panel-toolbar {
+      position: sticky;
+      top: 0;
+    }
+
+    .rp-nav {
+      position: sticky;
+      bottom: 0;
+    }
+
+    .review-panel-toggler {
+      position: sticky;
+      top: 0;
+    }
+  }
+
+  .rp-state-overview & {
+    position: sticky;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+
+    .review-panel-toggler {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+    }
+  }
+
+  .rp-nav-item {
+    background: none;
+  }
+
+  .rp-entry-list {
+    display: inline-flex;
+    flex-direction: column;
+
+    .rp-overview-file {
+      .rp-overview-file-entries {
+        //height: auto;
+        transition: height ease-in-out 0.15s; //, display 0.15s 0s;
+      }
+
+      .rp-overview-file-num-entries {
+        display: none;
+      }
+
+      &.rp-overview-file-collapse {
+        .rp-overview-file-num-entries {
+          display: inline;
+        }
+
+        .rp-overview-file-entries {
+          // height: 0;
+        }
+      }
+    }
+  }
+}

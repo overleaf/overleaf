@@ -128,7 +128,7 @@
 						on-indicator-click="toggleReviewPanel();"
 						on-mouse-enter="mouseEnterIndicator()"
 						on-mouse-leave="mouseLeaveIndicator()"
-						on-body-click="gotoEntry(editor.open_doc_id, entry)"
+						on-body-click="gotoEntry(editor.open_doc_id, entry.offset)"
 						permissions="permissions"
 					)
 
@@ -141,7 +141,7 @@
 						on-indicator-click="toggleReviewPanel();"
 						on-mouse-enter="mouseEnterIndicator()"
 						on-mouse-leave="mouseLeaveIndicator()"
-						on-body-click="gotoEntry(editor.open_doc_id, entry)"
+						on-body-click="gotoEntry(editor.open_doc_id, entry.offset)"
 						permissions="permissions"
 					)
 
@@ -149,14 +149,14 @@
 					comment-entry(
 						entry="entry"
 						threads="reviewPanel.commentThreads"
-						on-resolve="resolveComment(entry, entry_id)"
+						on-resolve="resolveComment(editor.open_doc_id, entry_id)"
 						on-reply="submitReply(entry, entry_id);"
 						on-indicator-click="toggleReviewPanel();"
 						on-mouse-enter="mouseEnterIndicator()"
 						on-mouse-leave="mouseLeaveIndicator()"
-						on-save-edit="saveEdit(entry.thread_id, comment)"
-						on-delete="deleteComment(entry.thread_id, comment)"
-						on-body-click="gotoEntry(editor.open_doc_id, entry)"
+						on-save-edit="saveEdit(entry.thread_id, comment.id, comment.content)"
+						on-delete="deleteComment(entry.thread_id, comment.id)"
+						on-body-click="gotoEntry(editor.open_doc_id, entry.offset)"
 						permissions="permissions"
 						ng-if="!loadingThreads"
 					)
@@ -207,7 +207,7 @@
 						change-entry(
 							entry="entry"
 							user="users[entry.metadata.user_id]"
-							ng-click="gotoEntry(doc.doc.id, entry)"
+							ng-click="gotoEntry(doc.doc.id, entry.offset)"
 							permissions="permissions"
 						)
 
@@ -215,7 +215,7 @@
 						aggregate-change-entry(
 							entry="entry"
 							user="users[entry.metadata.user_id]"
-							ng-click="gotoEntry(doc.doc.id, entry)"
+							ng-click="gotoEntry(doc.doc.id, entry.offset)"
 							permissions="permissions"
 						)
 
@@ -224,9 +224,9 @@
 							entry="entry"
 							threads="reviewPanel.commentThreads"
 							on-reply="submitReply(entry, entry_id);"
-							on-save-edit="saveEdit(entry.thread_id, comment)"
-							on-delete="deleteComment(entry.thread_id, comment)"
-							ng-click="gotoEntry(doc.doc.id, entry)"
+							on-save-edit="saveEdit(entry.thread_id, comment.id, comment.content)"
+							on-delete="deleteComment(entry.thread_id, comment.id)"
+							ng-click="gotoEntry(doc.doc.id, entry.offset)"
 							permissions="permissions"
 						)
 
@@ -325,7 +325,7 @@ script(type='text/ng-template', id='aggregateChangeEntryTemplate')
 					.rp-entry-description
 						| #{translate("aggregate_changed")}&nbsp;
 						del.rp-content-highlight
-							| {{ entry.metadata.replaced_content | limitTo:(isDeletionCollapsed ? contentLimit : entry.metadata.replaced_contentlength) }}
+							| {{ entry.metadata.replaced_content | limitTo:(isDeletionCollapsed ? contentLimit : entry.metadata.replaced_content.length) }}
 						a.rp-collapse-toggle(
 							href
 							ng-if="deletionNeedsCollapsing"
