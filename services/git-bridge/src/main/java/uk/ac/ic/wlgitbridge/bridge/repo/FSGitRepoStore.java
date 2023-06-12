@@ -75,27 +75,6 @@ public class FSGitRepoStore implements RepoStore {
                 ret, Optional.of(maxFileSize), Optional.empty());
     }
 
-     @Override
-     public ProjectRepo initRepoFromExisting(
-             String project, String fromProject
-     ) throws IOException {
-         String repoRoot = getRepoStorePath();
-         String sourcePath = repoRoot + "/" + fromProject;
-         String destinationPath = repoRoot + "/" + project;
-         Log.debug("[{}] Init repo by copying data from: {}, to: {}",
-             project,
-             sourcePath,
-             destinationPath
-         );
-         File source = new File(sourcePath);
-         File destination = new File(destinationPath);
-         FileUtils.copyDirectory(source, destination);
-         GitProjectRepo ret = GitProjectRepo.fromName(project);
-         ret.useExistingRepository(this);
-         return new WalkOverrideGitRepo(
-                 ret, Optional.of(maxFileSize), Optional.empty());
-     }
-
     @Override
     public ProjectRepo getExistingRepo(String project) throws IOException {
         GitProjectRepo ret = GitProjectRepo.fromName(project);

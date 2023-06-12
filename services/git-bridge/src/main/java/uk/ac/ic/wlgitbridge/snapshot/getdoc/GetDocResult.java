@@ -19,7 +19,6 @@ public class GetDocResult extends Result {
 
     private int error;
     private int versionID;
-    private String migratedFromID;
     private String createdAt;
     private WLUser user;
 
@@ -38,8 +37,7 @@ public class GetDocResult extends Result {
             int versionID,
             String createdAt,
             String email,
-            String name,
-            String migratedFromID
+            String name
     ) {
         if (error == null) {
             this.error = -1;
@@ -49,7 +47,6 @@ public class GetDocResult extends Result {
         this.versionID = versionID;
         this.createdAt = createdAt;
         this.user = new WLUser(name, email);
-        this.migratedFromID = migratedFromID;
     }
 
     @Override
@@ -62,9 +59,6 @@ public class GetDocResult extends Result {
             latestVerBy.addProperty("email", getEmail());
             latestVerBy.addProperty("name", getName());
             jsonThis.add("latestVerBy", latestVerBy);
-            if (migratedFromID != null) {
-                jsonThis.addProperty("migratedFromId", migratedFromID);
-            }
         } else {
             jsonThis.addProperty("status", error);
             String message;
@@ -106,11 +100,6 @@ public class GetDocResult extends Result {
             } else {
                 createdAt = null;
             }
-            if (jsonObject.has("migratedFromId")) {
-                migratedFromID = jsonObject.get("migratedFromId").getAsString();
-            } else {
-                migratedFromID = null;
-            }
             String name = null;
             String email = null;
             JsonElement latestVerBy = jsonObject.get("latestVerBy");
@@ -143,7 +132,5 @@ public class GetDocResult extends Result {
     public String getEmail() {
         return user.getEmail();
     }
-
-    public String getMigratedFromID() { return migratedFromID; }
 
 }

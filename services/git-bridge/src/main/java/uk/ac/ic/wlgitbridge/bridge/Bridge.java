@@ -370,52 +370,18 @@ public class Bridge {
             Optional<Credential> oauth2,
             String projectName,
             GetDocResult doc
-    ) throws IOException, GitUserException, CannotAcquireLockException {
+    ) throws IOException, GitUserException {
         ProjectRepo repo;
         ProjectState state = dbStore.getProjectState(projectName);
         switch (state) {
         case NOT_PRESENT:
             Log.info("[{}] Repo not present", projectName);
-            String migratedFromID = doc.getMigratedFromID();
-            if (migratedFromID != null) {
-                Log.info("[{}] Has a migratedFromId: {}", projectName, migratedFromID);
-                try (LockGuard __ = lock.lockGuard(migratedFromID)) {
-                    ProjectState sourceState = dbStore.getProjectState(migratedFromID);
-                    switch (sourceState) {
-                        case NOT_PRESENT:
-                            // Normal init-repo
-                            Log.info("[{}] migrated-from project not present, proceed as normal",
-                                 projectName
-                            );
-                            repo = repoStore.initRepo(projectName);
-                            break;
-                        case SWAPPED:
-                            // Swap back and then copy
-                            swapJob.restore(migratedFromID);
-                            /* Fallthrough */
-                        default:
-                            // Copy data, and set version to zero
-                            Log.info("[{}] Init from other project: {}",
-                                projectName,
-                                migratedFromID
-                            );
-                            repo = repoStore.initRepoFromExisting(projectName, migratedFromID);
-                            dbStore.setLatestVersionForProject(migratedFromID, 0);
-                            dbStore.setLastAccessedTime(
-                                    migratedFromID,
-                                    Timestamp.valueOf(LocalDateTime.now())
-
-                            );
-                    }
-                }
-                break;
-            } else {
-                repo = repoStore.initRepo(projectName);
-                break;
-            }
+            repo = repoStore.initRepo(projectName);
+            break;
         case SWAPPED:
             swapJob.restore(projectName);
-            /* Fallthrough */
+            repo = repoStore.getExistingRepo(projectName);
+            break;
         default:
             repo = repoStore.getExistingRepo(projectName);
         }
