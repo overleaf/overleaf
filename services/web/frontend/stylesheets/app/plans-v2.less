@@ -582,6 +582,24 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
 
 .plans-v2-table-group {
   margin-top: 26px + @plans-v2-highlighted-text-height-desktop;
+
+  p.plans-v2-table-th-content-title {
+    // Reduce font size of table heading for screen size >= @screen-lg (1200px) from 20px to 19px
+    // In the English version of overleaf, 20px is enough for the text to not be wrapped to the next line, the longest text is the 2nd column of group tab: "Group Professional".
+    // In the English version, "Group Professional" won't be wrapped to two separate lines with 20px font size for big screen.
+    // In other languages, for example, German (subdomain `de`), 20px is too big so the text is wrapped and breaks the UI. 19px is enough to fit the text on one line on the German site.
+    // This font-size reduction is a case-to-case basis since we don't have any way to know the max length of every language unless we've translated them all.
+    // There's probably a smarter way to do it, but probably also more complex. This change in font should be acceptable and we can revisit it every time there's a longer text.
+    font-size: 19px;
+
+    @media (max-width: @screen-md-max) {
+      font-size: @font-size-base;
+    }
+
+    @media (max-width: @screen-xs-max) {
+      font-size: @font-size-small;
+    }
+  }
 }
 
 .plans-v2-table {
