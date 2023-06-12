@@ -739,21 +739,6 @@ const ProjectController = {
             cb()
           })
         },
-        onboardingVideoTourAssignment(cb) {
-          SplitTestHandler.getAssignment(
-            req,
-            res,
-            'onboarding-video-tour',
-            (error, assignment) => {
-              // do not fail editor load if assignment fails
-              if (error) {
-                cb(null, { variant: 'default' })
-              } else {
-                cb(null, assignment)
-              }
-            }
-          )
-        },
         historyViewAssignment(cb) {
           SplitTestHandler.getAssignment(
             req,
@@ -869,7 +854,6 @@ const ProjectController = {
           pdfjsAssignment,
           editorLeftMenuAssignment,
           richTextAssignment,
-          onboardingVideoTourAssignment,
           historyViewAssignment,
           reviewPanelAssignment,
         }
@@ -987,12 +971,6 @@ const ProjectController = {
               !userIsMemberOfGroupSubscription &&
               !userHasInstitutionLicence
 
-            const showOnboardingVideoTour =
-              Features.hasFeature('saas') &&
-              userId &&
-              onboardingVideoTourAssignment.variant === 'active' &&
-              req.session.justRegistered
-
             const showPersonalAccessToken =
               !Features.hasFeature('saas') ||
               req.query?.personal_access_token === 'true'
@@ -1086,7 +1064,6 @@ const ProjectController = {
               useOpenTelemetry: Settings.useOpenTelemetryClient,
               showCM6SwitchAwaySurvey: Settings.showCM6SwitchAwaySurvey,
               richTextVariant,
-              showOnboardingVideoTour,
               historyViewReact: historyViewAssignment.variant === 'react',
               isReviewPanelReact: reviewPanelAssignment.variant === 'react',
               showPersonalAccessToken,

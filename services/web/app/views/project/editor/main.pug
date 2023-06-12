@@ -52,13 +52,3 @@ else
 				.ui-layout-east
 					aside.chat
 						chat()
-
-			if showOnboardingVideoTour
-				div(
-					ng-if="!state.loading"
-					ng-controller="OnboardingVideoTourModalController"
-				)
-					onboarding-video-tour-modal(
-						close-modal="closeModal"
-						show="show"
-					)
