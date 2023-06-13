@@ -154,10 +154,14 @@ describe('clientTracking', function () {
                 project: { name: 'Test Project' },
                 publicAccess: 'readAndWrite',
               },
-              (error, { user_id: userId, project_id: projectId }) => {
+              (
+                error,
+                { user_id: userId, project_id: projectId, anonymousAccessToken }
+              ) => {
                 if (error) return done(error)
                 this.user_id = userId
                 this.project_id = projectId
+                this.anonymousAccessToken = anonymousAccessToken
                 return cb()
               }
             )
@@ -203,6 +207,7 @@ describe('clientTracking', function () {
               'joinProject',
               {
                 project_id: this.project_id,
+                anonymousAccessToken: this.anonymousAccessToken,
               },
               cb
             )

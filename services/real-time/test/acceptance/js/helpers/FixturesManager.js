@@ -28,19 +28,22 @@ module.exports = FixturesManager = {
     if (!options.project) {
       options.project = { name: 'Test Project' }
     }
-    const {
+    let {
       project_id: projectId,
       user_id: userId,
       privilegeLevel,
       project,
       publicAccess,
       userMetadata,
+      anonymousAccessToken,
     } = options
 
     const privileges = {}
     privileges[userId] = privilegeLevel
     if (publicAccess) {
-      privileges['anonymous-user'] = publicAccess
+      anonymousAccessToken =
+        anonymousAccessToken || FixturesManager.getRandomId()
+      privileges[anonymousAccessToken] = publicAccess
     }
 
     const metadataByUser = {}
@@ -73,6 +76,7 @@ module.exports = FixturesManager = {
             user_id: userId,
             privilegeLevel,
             project,
+            anonymousAccessToken,
           })
         }
       )

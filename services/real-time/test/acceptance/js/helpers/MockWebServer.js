@@ -24,14 +24,19 @@ module.exports = MockWebServer = {
     return (MockWebServer.projects[projectId] = project)
   },
 
-  joinProject(projectId, userId, callback) {
+  inviteUserToProject(projectId, user, privileges) {
+    MockWebServer.privileges[projectId][user._id] = privileges
+    MockWebServer.userMetadata[projectId][user._id] = user
+  },
+
+  joinProject(projectId, userId, anonymousAccessToken, callback) {
     if (callback == null) {
       callback = function () {}
     }
     const project = MockWebServer.projects[projectId]
     const privilegeLevel =
       MockWebServer.privileges[projectId][userId] ||
-      MockWebServer.privileges[projectId]['anonymous-user']
+      MockWebServer.privileges[projectId][anonymousAccessToken]
     const userMetadata = MockWebServer.userMetadata[projectId]?.[userId]
     if (privilegeLevel === 'owner') {
       project.owner = { _id: userId }
@@ -44,6 +49,7 @@ module.exports = MockWebServer = {
   joinProjectRequest(req, res, next) {
     const { project_id: projectId } = req.params
     const { user_id: userId } = req.query
+    const { 'x-sl-anonymous-access-token': anonymousAccessToken } = req.headers
     if (projectId === '404404404404404404404404') {
       // not-found
       return res.status(404).send()
@@ -59,6 +65,7 @@ module.exports = MockWebServer = {
       return MockWebServer.joinProject(
         projectId,
         userId,
+        anonymousAccessToken,
         (error, project, privilegeLevel, userMetadata) => {
           if (error != null) {
             return next(error)

@@ -50,6 +50,7 @@ const async = require('async')
 
 const RealTimeClient = require('./helpers/RealTimeClient')
 const FixturesManager = require('./helpers/FixturesManager')
+const MockWebServer = require('./helpers/MockWebServer')
 
 const settings = require('@overleaf/settings')
 const Keys = settings.redis.documentupdater.key_schema
@@ -64,12 +65,16 @@ function cleanupPreviousUpdates(docId, cb) {
 }
 
 describe('MatrixTests', function () {
-  let privateProjectId, privateDocId, readWriteProjectId, readWriteDocId
+  let privateProjectId,
+    privateDocId,
+    readWriteProjectId,
+    readWriteDocId,
+    readWriteAnonymousAccessToken
 
   let privateClient
   before(function setupPrivateProject(done) {
     FixturesManager.setUpEditorSession(
-      { privilegeLevel: 'owner' },
+      { privilegeLevel: 'owner', publicAccessLevel: 'readAndWrite' },
       (err, { project_id: projectId, doc_id: docId }) => {
         if (err) return done(err)
         privateProjectId = projectId
@@ -94,9 +99,10 @@ describe('MatrixTests', function () {
       {
         publicAccess: 'readAndWrite',
       },
-      (err, { project_id: projectId, doc_id: docId }) => {
+      (err, { project_id: projectId, doc_id: docId, anonymousAccessToken }) => {
         readWriteProjectId = projectId
         readWriteDocId = docId
+        readWriteAnonymousAccessToken = anonymousAccessToken
         done(err)
       }
     )
@@ -104,31 +110,19 @@ describe('MatrixTests', function () {
 
   const USER_SETUP = {
     anonymous: {
-      setup(cb) {
-        RealTimeClient.setSession({}, err => {
-          if (err) return cb(err)
-          cb(null, {
-            client: RealTimeClient.connect(),
-          })
-        })
+      getAnonymousAccessToken() {
+        return readWriteAnonymousAccessToken
       },
-    },
-
-    registered: {
       setup(cb) {
-        const userId = FixturesManager.getRandomId()
         RealTimeClient.setSession(
           {
-            user: {
-              _id: userId,
-              first_name: 'Joe',
-              last_name: 'Bloggs',
+            anonTokenAccess: {
+              [readWriteProjectId]: readWriteAnonymousAccessToken,
             },
           },
           err => {
             if (err) return cb(err)
             cb(null, {
-              user_id: userId,
               client: RealTimeClient.connect(),
             })
           }
@@ -136,12 +130,40 @@ describe('MatrixTests', function () {
       },
     },
 
+    registered: {
+      getAnonymousAccessToken() {},
+      setup(cb) {
+        const userId = FixturesManager.getRandomId()
+        const user = { _id: userId, first_name: 'Joe', last_name: 'Bloggs' }
+        RealTimeClient.setSession({ user }, err => {
+          if (err) return cb(err)
+
+          MockWebServer.inviteUserToProject(
+            readWriteProjectId,
+            user,
+            'readAndWrite'
+          )
+          cb(null, {
+            user_id: userId,
+            client: RealTimeClient.connect(),
+          })
+        })
+      },
+    },
+
     registeredWithOwnedProject: {
+      getAnonymousAccessToken() {},
       setup(cb) {
         FixturesManager.setUpEditorSession(
           { privilegeLevel: 'owner' },
           (err, { project_id: projectId, user_id: userId, doc_id: docId }) => {
             if (err) return cb(err)
+
+            MockWebServer.inviteUserToProject(
+              readWriteProjectId,
+              { _id: userId },
+              'readAndWrite'
+            )
             cb(null, {
               user_id: userId,
               project_id: projectId,
@@ -169,8 +191,12 @@ describe('MatrixTests', function () {
 
       joinReadWriteProject: {
         getActions(cb) {
+          const anonymousAccessToken = userItem.getAnonymousAccessToken()
           cb(null, [
-            { rpc: 'joinProject', args: [{ project_id: readWriteProjectId }] },
+            {
+              rpc: 'joinProject',
+              args: [{ project_id: readWriteProjectId, anonymousAccessToken }],
+            },
           ])
         },
         needsOwnProject: false,
@@ -178,8 +204,12 @@ describe('MatrixTests', function () {
 
       joinReadWriteProjectAndDoc: {
         getActions(cb) {
+          const anonymousAccessToken = userItem.getAnonymousAccessToken()
           cb(null, [
-            { rpc: 'joinProject', args: [{ project_id: readWriteProjectId }] },
+            {
+              rpc: 'joinProject',
+              args: [{ project_id: readWriteProjectId, anonymousAccessToken }],
+            },
             { rpc: 'joinDoc', args: [readWriteDocId] },
           ])
         },
@@ -188,8 +218,12 @@ describe('MatrixTests', function () {
 
       joinOwnProject: {
         getActions(cb) {
+          const anonymousAccessToken = userItem.getAnonymousAccessToken()
           cb(null, [
-            { rpc: 'joinProject', args: [{ project_id: options.project_id }] },
+            {
+              rpc: 'joinProject',
+              args: [{ project_id: options.project_id, anonymousAccessToken }],
+            },
           ])
         },
         needsOwnProject: true,
@@ -197,8 +231,12 @@ describe('MatrixTests', function () {
 
       joinOwnProjectAndDoc: {
         getActions(cb) {
+          const anonymousAccessToken = userItem.getAnonymousAccessToken()
           cb(null, [
-            { rpc: 'joinProject', args: [{ project_id: options.project_id }] },
+            {
+              rpc: 'joinProject',
+              args: [{ project_id: options.project_id, anonymousAccessToken }],
+            },
             { rpc: 'joinDoc', args: [options.doc_id] },
           ])
         },
@@ -249,6 +287,23 @@ describe('MatrixTests', function () {
           noop: {
             getActions(cb) {
               cb(null, [])
+            },
+          },
+
+          joinProjectWithBadAccessToken: {
+            getActions(cb) {
+              cb(null, [
+                {
+                  rpc: 'joinProject',
+                  args: [
+                    {
+                      project_id: privateProjectId,
+                      anonymousAccessToken: 'invalid-access-token',
+                    },
+                  ],
+                  fails: 1,
+                },
+              ])
             },
           },
 
