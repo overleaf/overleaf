@@ -72,7 +72,7 @@ module.exports = ProjectRootDocManager = {
     if (callback == null) {
       callback = function () {}
     }
-    const filePathsPromise = globby(['**/*.{tex,Rtex,Rnw}'], {
+    const filePathsPromise = globby(['**/*.{tex,Rtex}'], {
       cwd: directoryPath,
       followSymlinkedDirectories: false,
       onlyFiles: true,

@@ -178,7 +178,6 @@ module.exports = Client = {
             'ist',
             'md',
             'Rmd',
-            'Rnw',
           ].indexOf(extension) > -1
         ) {
           resources.push({

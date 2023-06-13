@@ -184,7 +184,7 @@ const initialize = () => {
       'gv',
       'mf',
     ],
-    validRootDocExtensions: ['tex', 'Rtex', 'ltx', 'Rnw'],
+    validRootDocExtensions: ['tex', 'Rtex', 'ltx'],
   }
 
   window.project_id = project._id
