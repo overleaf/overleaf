@@ -138,12 +138,41 @@ function showMessages(formEl, messageBag) {
 
   // Render messages
   messageBag.forEach(message => {
-    if (message.key) {
-      formEl
-        .querySelectorAll(`[data-ol-custom-form-message="${message.key}"]`)
-        .forEach(el => {
-          el.hidden = false
+    const customErrorElements = message.key
+      ? formEl.querySelectorAll(
+          `[data-ol-custom-form-message="${message.key}"]`
+        )
+      : []
+    if (message.key && customErrorElements.length > 0) {
+      // Found at least one custom error element for key, show them
+      customErrorElements.forEach(el => {
+        el.hidden = false
+      })
+    } else {
+      // No custom error element for key on page, append a new error message
+      const messageEl = document.createElement('div')
+      messageEl.className = classNames('alert mb-2', {
+        'alert-danger': message.type === 'error',
+        'alert-success': message.type !== 'error',
+      })
+      messageEl.textContent = message.text || `Error: ${message.key}`
+      messageEl.setAttribute('aria-live', 'assertive')
+      messageEl.setAttribute(
+        'role',
+        message.type === 'error' ? 'alert' : 'status'
+      )
+      if (message.hints && message.hints.length) {
+        const listEl = document.createElement('ul')
+        message.hints.forEach(hint => {
+          const listItemEl = document.createElement('li')
+          listItemEl.textContent = hint
+          listEl.append(listItemEl)
         })
+        messageEl.append(listEl)
+      }
+      messagesEl.append(messageEl)
+    }
+    if (message.key) {
       // Hide the form elements on specific message types
       const hideOnError = formEl.attributes['data-ol-hide-on-error']
       if (
@@ -159,30 +188,7 @@ function showMessages(formEl, messageBag) {
         .forEach(el => {
           el.hidden = true
         })
-      return
     }
-
-    const messageEl = document.createElement('div')
-    messageEl.className = classNames('alert mb-2', {
-      'alert-danger': message.type === 'error',
-      'alert-success': message.type !== 'error',
-    })
-    messageEl.textContent = message.text
-    messageEl.setAttribute('aria-live', 'assertive')
-    messageEl.setAttribute(
-      'role',
-      message.type === 'error' ? 'alert' : 'status'
-    )
-    if (message.hints && message.hints.length) {
-      const listEl = document.createElement('ul')
-      message.hints.forEach(hint => {
-        const listItemEl = document.createElement('li')
-        listItemEl.textContent = hint
-        listEl.append(listItemEl)
-      })
-      messageEl.append(listEl)
-    }
-    messagesEl.append(messageEl)
   })
 }
 
