@@ -73,6 +73,7 @@ async function joinProject(req, res, next) {
   if (isRestrictedUser) {
     project.owner = { _id: project.owner._id }
     project.members = []
+    project.invites = []
   }
   // Only show the 'renamed or deleted' message once
   if (project.deletedByExternalDataSource) {

@@ -1,16 +1,3 @@
-/* eslint-disable
-    max-len,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS205: Consider reworking code to avoid use of IIFEs
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 let ProjectEditorHandler
 const _ = require('underscore')
 const Path = require('path')
@@ -48,7 +35,7 @@ module.exports = ProjectEditorHandler = {
         deletedDocsFromDocstore
       ),
       members: [],
-      invites,
+      invites: this.buildInvitesView(invites),
       tokens: project.tokens,
       imageName:
         project.imageName != null
@@ -56,12 +43,6 @@ module.exports = ProjectEditorHandler = {
           : undefined,
     }
 
-    if (result.invites == null) {
-      result.invites = []
-    }
-    result.invites.forEach(invite => {
-      delete invite.token
-    })
     ;({ owner, ownerFeatures, members } =
       this.buildOwnerAndMembersViews(members))
     result.owner = owner
@@ -100,7 +81,7 @@ module.exports = ProjectEditorHandler = {
     let owner = null
     let ownerFeatures = null
     const filteredMembers = []
-    for (const member of Array.from(members || [])) {
+    for (const member of members || []) {
       if (member.privilegeLevel === 'owner') {
         ownerFeatures = member.user.features
         owner = this.buildUserModelView(member.user, 'owner')
@@ -129,24 +110,15 @@ module.exports = ProjectEditorHandler = {
   },
 
   buildFolderModelView(folder) {
-    let file
     const fileRefs = _.filter(folder.fileRefs || [], file => file != null)
     return {
       _id: folder._id,
       name: folder.name,
-      folders: Array.from(folder.folders || []).map(childFolder =>
+      folders: (folder.folders || []).map(childFolder =>
         this.buildFolderModelView(childFolder)
       ),
-      fileRefs: (() => {
-        const result = []
-        for (file of Array.from(fileRefs)) {
-          result.push(this.buildFileModelView(file))
-        }
-        return result
-      })(),
-      docs: Array.from(folder.docs || []).map(doc =>
-        this.buildDocModelView(doc)
-      ),
+      fileRefs: fileRefs.map(file => this.buildFileModelView(file)),
+      docs: (folder.docs || []).map(doc => this.buildDocModelView(doc)),
     }
   },
 
@@ -164,5 +136,22 @@ module.exports = ProjectEditorHandler = {
       _id: doc._id,
       name: doc.name,
     }
+  },
+
+  buildInvitesView(invites) {
+    if (invites == null) {
+      return []
+    }
+    return invites.map(invite =>
+      _.pick(invite, [
+        '_id',
+        'createdAt',
+        'email',
+        'expires',
+        'privileges',
+        'projectId',
+        'sendingUserId',
+      ])
+    )
   },
 }

@@ -25,11 +25,13 @@ describe('EditorHttpController', function () {
         other_property: true,
       },
       members: [{ one: 1 }, { two: 2 }],
+      invites: [{ three: 3 }, { four: 4 }],
     }
     this.reducedProjectView = {
       _id: this.projectView._id,
       owner: { _id: this.projectView.owner._id },
       members: [],
+      invites: [],
     }
     this.doc = { _id: new ObjectId(), name: 'excellent-original-idea.tex' }
     this.file = { _id: new ObjectId() }
