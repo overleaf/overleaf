@@ -246,10 +246,19 @@ module.exports = CompileManager = {
   _getCompileBackendClassDetails(owner, compileGroup, callback) {
     const { defaultBackendClass } = Settings.apis.clsi
     if (compileGroup === 'standard') {
-      return callback(null, {
-        compileBackendClass: defaultBackendClass,
-        showFasterCompilesFeedbackUI: false,
-      })
+      return SplitTestHandler.getAssignmentForMongoUser(
+        owner,
+        'compile-backend-class-n2d',
+        (err, assignment) => {
+          if (err) return callback(err, {})
+          const { variant } = assignment
+          callback(null, {
+            compileBackendClass:
+              variant === 'default' ? defaultBackendClass : variant,
+            showFasterCompilesFeedbackUI: false,
+          })
+        }
+      )
     }
     SplitTestHandler.getAssignmentForMongoUser(
       owner,

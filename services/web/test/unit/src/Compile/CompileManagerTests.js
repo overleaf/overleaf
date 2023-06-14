@@ -250,16 +250,43 @@ describe('CompileManager', function () {
       beforeEach(function () {
         this.features.compileGroup = 'standard'
       })
-      it('should return the default class and disable ui', function (done) {
-        this.CompileManager.getProjectCompileLimits(
-          this.project_id,
-          (err, { compileBackendClass, showFasterCompilesFeedbackUI }) => {
-            if (err) return done(err)
-            expect(compileBackendClass).to.equal('e2')
-            expect(showFasterCompilesFeedbackUI).to.equal(false)
-            done()
-          }
-        )
+
+      describe('default', function () {
+        beforeEach(function () {
+          this.getAssignmentForMongoUser.yields(null, {
+            variant: 'default',
+          })
+        })
+        it('should return the e2 class and disable the ui', function (done) {
+          this.CompileManager.getProjectCompileLimits(
+            this.project_id,
+            (err, { compileBackendClass, showFasterCompilesFeedbackUI }) => {
+              if (err) return done(err)
+              expect(compileBackendClass).to.equal('e2')
+              expect(showFasterCompilesFeedbackUI).to.equal(false)
+              done()
+            }
+          )
+        })
+      })
+
+      describe('n2d variant', function () {
+        beforeEach(function () {
+          this.getAssignmentForMongoUser.yields(null, {
+            variant: 'n2d',
+          })
+        })
+        it('should return the n2d class and disable the ui', function (done) {
+          this.CompileManager.getProjectCompileLimits(
+            this.project_id,
+            (err, { compileBackendClass, showFasterCompilesFeedbackUI }) => {
+              if (err) return done(err)
+              expect(compileBackendClass).to.equal('n2d')
+              expect(showFasterCompilesFeedbackUI).to.equal(false)
+              done()
+            }
+          )
+        })
       })
     })
 
