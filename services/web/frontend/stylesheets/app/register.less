@@ -2,3 +2,26 @@
   text-align: center;
   padding-bottom: 20px;
 }
+// for focus-registration and focus-login split test variant
+.registration_logo {
+  width: 130px;
+  padding: 8px 0;
+}
+
+.login-register-header-active {
+  padding-top: @line-height-computed;
+}
+
+.login-register-header-heading-active {
+  color: @neutral-90;
+  margin-bottom: 0;
+}
+
+.login-register-form-active {
+  padding: @line-height-computed;
+  padding-bottom: 0;
+  border-bottom: solid 1px @hr-border;
+  &:last-child {
+    border-bottom-width: 0;
+  }
+}

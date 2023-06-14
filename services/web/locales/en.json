@@ -1287,6 +1287,7 @@
   "regards": "Regards",
   "register": "Register",
   "register_error": "Registration error",
+  "register_for_overleaf": "Register for __appName__",
   "register_intercept_sso": "You can link your __authProviderName__ account from the Account Settings page after logging in.",
   "register_to_accept_invitation": "Register to accept invitation",
   "register_to_edit_template": "Please register to edit the __templateName__ template",
