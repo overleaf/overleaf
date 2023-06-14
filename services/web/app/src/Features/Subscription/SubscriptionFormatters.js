@@ -40,6 +40,6 @@ module.exports = {
     if (!date) {
       return null
     }
-    return dateformat(date, 'dS mmmm yyyy')
+    return dateformat(date, 'mmmm dS, yyyy h:MM TT Z', true)
   },
 }
