@@ -135,7 +135,7 @@ export function useFileTreeData(propTypes) {
 }
 
 export function FileTreeDataProvider({ children }) {
-  const [project] = useScopeValue('project', true)
+  const [project] = useScopeValue('project')
 
   const { rootFolder } = project || {}
 
