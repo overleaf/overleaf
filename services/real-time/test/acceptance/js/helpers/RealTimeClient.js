@@ -62,13 +62,18 @@ module.exports = Client = {
     return callback()
   },
 
-  connect(cookie) {
+  connect(query) {
     const client = io.connect('http://localhost:3026', {
       'force new connection': true,
+      query,
     })
     client.on(
       'connectionAccepted',
       (_, publicId) => (client.publicId = publicId)
+    )
+    client.on(
+      'joinProjectResponse',
+      ({ publicId }) => (client.publicId = publicId)
     )
     return client
   },
@@ -95,7 +100,13 @@ module.exports = Client = {
         url: `http://localhost:3026/clients/${clientId}`,
         json: true,
       },
-      (error, response, data) => callback(error, data)
+      (error, response, data) => {
+        if (response?.statusCode === 404) {
+          callback(new Error('not found'))
+        } else {
+          callback(error, data)
+        }
+      }
     )
   },
 

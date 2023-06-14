@@ -119,6 +119,8 @@ module.exports = Router = {
     )
 
     session.on('connection', function (error, client, session) {
+      const joinProjectAutomatically = !!client.handshake.query.projectId
+
       // init client context, we may access it in Router._handleError before
       //  setting any values
       client.ol_context = {}
@@ -172,13 +174,18 @@ module.exports = Router = {
 
       // send positive confirmation that the client has a valid connection
       client.publicId = 'P.' + base64id.generateId()
-      client.emit('connectionAccepted', null, client.publicId)
+      if (!joinProjectAutomatically) {
+        client.emit('connectionAccepted', null, client.publicId)
+      }
 
       client.remoteIp = websocketAddressManager.getRemoteIp(client.handshake)
       const headers = client.handshake && client.handshake.headers
       client.userAgent = headers && headers['user-agent']
 
-      metrics.inc('socket-io.connection', 1, { status: client.transport })
+      metrics.inc('socket-io.connection', 1, {
+        status: client.transport,
+        method: joinProjectAutomatically ? 'auto-join-project' : undefined,
+      })
       metrics.gauge('socket-io.clients', io.sockets.clients().length)
 
       logger.debug({ session, clientId: client.id }, 'client connected')
@@ -205,7 +212,7 @@ module.exports = Router = {
         })
       }
 
-      client.on('joinProject', function (data, callback) {
+      const joinProject = function (data, callback) {
         data = data || {}
         if (typeof callback !== 'function') {
           return Router._handleInvalidArguments(
@@ -260,7 +267,8 @@ module.exports = Router = {
             }
           }
         )
-      })
+      }
+      client.on('joinProject', joinProject)
 
       client.on('disconnect', function () {
         metrics.inc('socket-io.disconnect', 1, { status: client.transport })
@@ -455,6 +463,27 @@ module.exports = Router = {
           }
         )
       })
+
+      if (joinProjectAutomatically) {
+        const { projectId } = client.handshake.query
+        const anonymousAccessToken = session?.anonTokenAccess?.[projectId]
+        joinProject(
+          { project_id: projectId, anonymousAccessToken },
+          (err, project, permissionsLevel, protocolVersion) => {
+            if (err) {
+              client.emit('connectionRejected', err)
+              client.disconnect()
+              return
+            }
+            client.emit('joinProjectResponse', {
+              publicId: client.publicId,
+              project,
+              permissionsLevel,
+              protocolVersion,
+            })
+          }
+        )
+      }
     })
   },
 }
