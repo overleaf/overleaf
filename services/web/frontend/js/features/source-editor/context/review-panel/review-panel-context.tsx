@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react'
-import useAngularReviewPanelState from './hooks/use-angular-review-panel'
+import useAngularReviewPanelState from './hooks/use-angular-review-panel-state'
 import { ReviewPanelState } from './types/review-panel-state'
 
 const ReviewPanelValueContext = createContext<

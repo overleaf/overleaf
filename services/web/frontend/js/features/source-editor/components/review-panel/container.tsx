@@ -1,3 +1,5 @@
+import Toolbar from './toolbar/toolbar'
+import Nav from './nav'
 import classnames from 'classnames'
 
 const reviewPanelClasses = ['ol-cm-review-panel']
@@ -10,8 +12,14 @@ type ContainerProps = {
 
 function Container({ children, classNames, ...rest }: ContainerProps) {
   return (
-    <div className={classnames(...reviewPanelClasses, classNames)} {...rest}>
+    <div
+      className={classnames(...reviewPanelClasses, classNames)}
+      {...rest}
+      data-testid="review-panel"
+    >
+      <Toolbar />
       {children}
+      <Nav />
     </div>
   )
 }

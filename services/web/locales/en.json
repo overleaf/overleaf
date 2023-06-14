@@ -1638,6 +1638,8 @@
   "tr": "Turkish",
   "track_any_change_in_real_time": "Track any change, in real-time",
   "track_changes": "Track changes",
+  "track_changes_for_everyone": "Track changes for everyone",
+  "track_changes_for_x": "Track changes for __name__",
   "track_changes_is_off": "Track changes is <strong>off</strong>",
   "track_changes_is_on": "Track changes is <strong>on</strong>",
   "tracked_change_added": "Added",
