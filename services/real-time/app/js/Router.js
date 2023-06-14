@@ -119,8 +119,6 @@ module.exports = Router = {
     )
 
     session.on('connection', function (error, client, session) {
-      const joinProjectAutomatically = !!client.handshake.query.projectId
-
       // init client context, we may access it in Router._handleError before
       //  setting any values
       client.ol_context = {}
@@ -171,6 +169,7 @@ module.exports = Router = {
         }
         return
       }
+      const joinProjectAutomatically = !!client.handshake?.query?.projectId
 
       // send positive confirmation that the client has a valid connection
       client.publicId = 'P.' + base64id.generateId()
