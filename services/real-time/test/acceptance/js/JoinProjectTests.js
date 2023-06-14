@@ -113,6 +113,118 @@ describe('joinProject', function () {
     })
   })
 
+  describe('when authorized with token', function () {
+    before(function (done) {
+      async.series(
+        [
+          cb => {
+            FixturesManager.setUpProject(
+              {
+                privilegeLevel: 'owner',
+                publicAccess: 'readOnly',
+                project: {
+                  name: 'Test Project',
+                },
+              },
+              (
+                e,
+                {
+                  user_id: ownerId,
+                  project_id: projectId,
+                  anonymousAccessToken,
+                }
+              ) => {
+                this.ownerId = ownerId
+                this.project_id = projectId
+                this.anonymousAccessToken = anonymousAccessToken
+                cb(e)
+              }
+            )
+          },
+
+          cb => {
+            RealTimeClient.setSession({}, cb)
+          },
+
+          cb => {
+            this.client = RealTimeClient.connect()
+            this.client.on('connectionAccepted', cb)
+          },
+
+          cb => {
+            this.client.emit(
+              'joinProject',
+              {
+                project_id: this.project_id,
+                anonymousAccessToken: this.anonymousAccessToken,
+              },
+              (error, project, privilegeLevel, protocolVersion) => {
+                this.project = project
+                this.privilegeLevel = privilegeLevel
+                this.protocolVersion = protocolVersion
+                cb(error)
+              }
+            )
+          },
+        ],
+        done
+      )
+    })
+
+    it('should get the project from web', function () {
+      MockWebServer.joinProject
+        .calledWith(
+          this.project_id,
+          'anonymous-user',
+          this.anonymousAccessToken
+        )
+        .should.equal(true)
+    })
+
+    it('should return the project', function () {
+      this.project.should.deep.equal({
+        name: 'Test Project',
+        owner: { _id: this.ownerId },
+      })
+    })
+
+    it('should return the privilege level', function () {
+      this.privilegeLevel.should.equal('readOnly')
+    })
+
+    it('should return the protocolVersion', function () {
+      this.protocolVersion.should.equal(2)
+    })
+
+    it('should have joined the project room', function (done) {
+      RealTimeClient.getConnectedClient(
+        this.client.socket.sessionid,
+        (error, client) => {
+          if (error) return done(error)
+          expect(Array.from(client.rooms).includes(this.project_id)).to.equal(
+            true
+          )
+          done()
+        }
+      )
+    })
+
+    it('should have marked the user as connected', function (done) {
+      this.client.emit('clientTracking.getConnectedUsers', (error, users) => {
+        if (error) return done(error)
+        let connected = false
+        for (const user of Array.from(users)) {
+          if (user.client_id === this.client.publicId) {
+            connected = true
+            break
+          }
+        }
+        expect(connected).to.equal(true)
+        done()
+      })
+    })
+  })
+
   describe('when not authorized', function () {
     before(function (done) {
       return async.series(

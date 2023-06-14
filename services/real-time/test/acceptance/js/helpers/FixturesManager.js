@@ -38,6 +38,12 @@ module.exports = FixturesManager = {
       anonymousAccessToken,
     } = options
 
+    if (privilegeLevel === 'owner') {
+      project.owner = { _id: userId }
+    } else {
+      project.owner = { _id: '404404404404404404404404' }
+    }
+
     const privileges = {}
     privileges[userId] = privilegeLevel
     if (publicAccess) {
