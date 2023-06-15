@@ -360,6 +360,7 @@
   "git_integration_info": "",
   "github_commit_message_placeholder": "",
   "github_credentials_expired": "",
+  "github_empty_repository_error": "",
   "github_file_name_error": "",
   "github_for_link_shared_projects": "",
   "github_git_folder_error": "",
