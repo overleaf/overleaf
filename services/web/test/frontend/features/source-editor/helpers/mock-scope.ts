@@ -82,7 +82,8 @@ export const mockScope = (content?: string) => {
     ui: {
       reviewPanelOpen: true,
     },
-    toggleTrackChangesForEveryone() {},
+    toggleReviewPanel: cy.stub(),
+    toggleTrackChangesForEveryone: cy.stub(),
     onlineUserCursorHighlights: {},
     permissionsLevel: 'owner',
     $on: cy.stub(),

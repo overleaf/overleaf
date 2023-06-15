@@ -1,7 +1,9 @@
-export type SubView = 'cur_file' | 'overview'
-
 function Nav() {
-  return <div style={{ background: '#bbb', padding: '10px' }}>Nav</div>
+  return (
+    <div className="rp-nav" style={{ background: '#8eaeb6', padding: '5px' }}>
+      Nav
+    </div>
+  )
 }
 
 export default Nav

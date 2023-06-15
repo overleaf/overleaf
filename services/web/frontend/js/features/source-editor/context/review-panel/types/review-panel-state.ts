@@ -1,5 +1,7 @@
-import { SubView } from '../../../components/review-panel/nav'
-import { ReviewPanelPermissions } from '../../../../../../../types/review-panel'
+import {
+  SubView,
+  ReviewPanelPermissions,
+} from '../../../../../../../types/review-panel'
 
 export interface ReviewPanelState {
   values: {
@@ -22,6 +24,7 @@ export interface ReviewPanelState {
         name: string
       }
     >
+    toggleReviewPanel: () => void
   }
   updaterFns: {
     setCollapsed: React.Dispatch<

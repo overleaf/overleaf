@@ -22,15 +22,11 @@ describe('<ReviewPanel />', function () {
     const scope = mockScope('')
     scope.editor.showVisual = true
 
-    // Making a shallow copy, otherwise cannot spy on an object declared outside the test file
-    const newScope = { ...scope }
-    cy.spy(newScope, 'toggleTrackChangesForEveryone').as(
-      'toggleTrackChangesForEveryone'
-    )
+    cy.wrap(scope).as('scope')
 
     cy.mount(
       <Container className="rp-size-expanded">
-        <EditorProviders scope={newScope}>
+        <EditorProviders scope={scope}>
           <CodeMirrorEditor />
         </EditorProviders>
       </Container>
@@ -90,7 +86,9 @@ describe('<ReviewPanel />', function () {
           cy.findByLabelText(/track changes for everyone/i).click({
             force: true,
           })
-          cy.get('@toggleTrackChangesForEveryone').should('be.calledOnce')
+          cy.get('@scope')
+            .its('toggleTrackChangesForEveryone')
+            .should('be.calledOnce')
         })
       })
 
@@ -115,6 +113,21 @@ describe('<ReviewPanel />', function () {
       it('renders a disabled guests switch', function () {
         cy.findByRole('button', { name: /track changes is off/i }).click()
         cy.findByLabelText(/track changes for guests/i).should('be.disabled')
+      })
+    })
+  })
+
+  describe('toggler', function () {
+    it('renders toggler button', function () {
+      cy.get('@review-panel').within(() => {
+        cy.findByRole('button', { name: /toggle review panel/i })
+      })
+    })
+
+    it('calls the toggler function on click', function () {
+      cy.get('@review-panel').within(() => {
+        cy.findByRole('button', { name: /toggle review panel/i }).click()
+        cy.get('@scope').its('toggleReviewPanel').should('be.calledOnce')
       })
     })
   })

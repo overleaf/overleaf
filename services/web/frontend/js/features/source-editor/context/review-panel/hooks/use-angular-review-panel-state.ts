@@ -47,6 +47,9 @@ function useAngularReviewPanelState(): ReviewPanelState {
     ReviewPanel.Value<'formattedProjectMembers'>
   >('reviewPanel.formattedProjectMembers')
 
+  const [toggleReviewPanel] =
+    useScopeValue<ReviewPanel.Value<'toggleReviewPanel'>>('toggleReviewPanel')
+
   const values = useMemo<ReviewPanelState['values']>(
     () => ({
       collapsed,
@@ -62,6 +65,7 @@ function useAngularReviewPanelState(): ReviewPanelState {
       trackChangesOnForGuests,
       trackChangesForGuestsAvailable,
       formattedProjectMembers,
+      toggleReviewPanel,
     }),
     [
       collapsed,
@@ -77,6 +81,7 @@ function useAngularReviewPanelState(): ReviewPanelState {
       trackChangesOnForGuests,
       trackChangesForGuestsAvailable,
       formattedProjectMembers,
+      toggleReviewPanel,
     ]
   )
 

@@ -1,3 +1,4 @@
+import Toggler from './toggler'
 import Toolbar from './toolbar/toolbar'
 import Nav from './nav'
 import classnames from 'classnames'
@@ -17,6 +18,7 @@ function Container({ children, classNames, ...rest }: ContainerProps) {
       {...rest}
       data-testid="review-panel"
     >
+      <Toggler />
       <Toolbar />
       {children}
       <Nav />

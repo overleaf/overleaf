@@ -1222,6 +1222,19 @@ button when (@is-overleaf-light = true) {
     }
   }
 
+  .review-panel-toggler {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    border: 0;
+
+    &:after {
+      position: sticky;
+      top: 50%;
+      bottom: 50%;
+    }
+  }
+
   .rp-state-current-file & {
     .review-panel-tools {
       display: flex;
@@ -1243,25 +1256,13 @@ button when (@is-overleaf-light = true) {
       position: sticky;
       bottom: 0;
     }
-
-    .review-panel-toggler {
-      position: sticky;
-      top: 0;
-    }
   }
 
-  .rp-state-overview & {
+  .rp-state-overview {
     position: sticky;
     top: 0;
     display: flex;
     flex-direction: column;
-
-    .review-panel-toggler {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 0;
-    }
   }
 
   .rp-nav-item {
