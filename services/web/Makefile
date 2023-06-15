@@ -410,17 +410,17 @@ $(WITH_NODE_MODULES_PATH): export PATH=$(NODE_MODULES_PATH)
 lint: lint_backend
 lint_backend:
 	npx eslint \
-		'app.{js,ts,tsx}' \
-		'app/**/*.{js,ts,tsx}' \
-		'modules/*/index.{js,ts,tsx}' \
-		'modules/*/app/**/*.{js,ts,tsx}' \
+		'app.{js,mjs,ts,tsx}' \
+		'app/**/*.{js,mjs,ts,tsx}' \
+		'modules/*/index.{js,mjs,ts,tsx}' \
+		'modules/*/app/**/*.{js,mjs,ts,tsx}' \
 		--max-warnings=0
 
 lint: lint_frontend
 lint_frontend:
 	npx eslint \
-		'frontend/**/*.{js,ts,tsx}' \
-		'modules/**/frontend/**/*.{js,ts,tsx}' \
+		'frontend/**/*.{js,mjs,ts,tsx}' \
+		'modules/**/frontend/**/*.{js,mjs,ts,tsx}' \
 		--max-warnings=0
 
 lint: lint_test
@@ -428,34 +428,34 @@ lint_test: lint_test_app
 lint_test_app: lint_test_app_unit
 lint_test_app_unit:
 	npx eslint \
-		'test/unit/**/*.{js,ts,tsx}' \
+		'test/unit/**/*.{js,mjs,ts,tsx}' \
 		--max-warnings=0
 
 lint_test_app: lint_test_app_rest
 lint_test_app_rest:
 	npx eslint \
-		'test/**/*.{js,ts,tsx}' \
-		--ignore-pattern 'test/unit/**/*.{js,ts,tsx}' \
+		'test/**/*.{js,mjs,ts,tsx}' \
+		--ignore-pattern 'test/unit/**/*.{js,mjs,ts,tsx}' \
 		--max-warnings=0
 
 lint_test: lint_test_modules
 lint_test_modules:
 	npx eslint \
-		'modules/*/test/**/*.{js,ts,tsx}' \
+		'modules/*/test/**/*.{js,mjs,ts,tsx}' \
 		--max-warnings=0
 
 lint: lint_misc
 # migrations, scripts, webpack config, karma config
 lint_misc:
 	npx eslint . \
-		--ignore-pattern 'app.{js,ts,tsx}' \
-		--ignore-pattern 'app/**/*.{js,ts,tsx}' \
-		--ignore-pattern 'modules/*/app/**/*.{js,ts,tsx}' \
-		--ignore-pattern 'modules/*/index.{js,ts,tsx}' \
-		--ignore-pattern 'frontend/**/*.{js,ts,tsx}' \
-		--ignore-pattern 'modules/**/frontend/**/*.{js,ts,tsx}' \
-		--ignore-pattern 'test/**/*.{js,ts,tsx}' \
-		--ignore-pattern 'modules/*/test/**/*.{js,ts,tsx}' \
+		--ignore-pattern 'app.{js,mjs,ts,tsx}' \
+		--ignore-pattern 'app/**/*.{js,mjs,ts,tsx}' \
+		--ignore-pattern 'modules/*/app/**/*.{js,mjs,ts,tsx}' \
+		--ignore-pattern 'modules/*/index.{js,mjs,ts,tsx}' \
+		--ignore-pattern 'frontend/**/*.{js,mjs,ts,tsx}' \
+		--ignore-pattern 'modules/**/frontend/**/*.{js,mjs,ts,tsx}' \
+		--ignore-pattern 'test/**/*.{js,mjs,ts,tsx}' \
+		--ignore-pattern 'modules/*/test/**/*.{js,mjs,ts,tsx}' \
 		--max-warnings=0
 
 lint: lint_pug

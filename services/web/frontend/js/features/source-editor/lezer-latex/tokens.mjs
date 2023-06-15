@@ -169,11 +169,9 @@ export const lstinlineTokenizer = new ExternalTokenizer(
       delimiter = CHAR_CLOSE_BRACE
     }
     input.advance()
-    let content = ''
     for (;;) {
-      let next = input.next
+      const next = input.next
       if (next === -1 || next === CHAR_NEWLINE) return
-      content += String.fromCharCode(next)
       input.advance()
       if (next === delimiter) break
     }

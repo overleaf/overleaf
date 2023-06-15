@@ -27,7 +27,7 @@
     "format:styles": "prettier --list-different $PWD/'**/*.less'",
     "format:styles:fix": "prettier --write $PWD/'**/*.less'",
     "lint": "eslint --max-warnings 0 --format unix --ext .js,.mjs,.ts,.tsx .",
-    "lint:fix": "eslint --fix --ext .js,.ts,.tsx .",
+    "lint:fix": "eslint --fix --ext .js,.mjs,.ts,.tsx .",
     "type-check": "tsc --noEmit",
     "extract-translations": "i18next-scanner",
     "migrations": "east",
