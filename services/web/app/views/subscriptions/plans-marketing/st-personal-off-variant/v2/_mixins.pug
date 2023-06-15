@@ -38,29 +38,30 @@ mixin plans_v2_table(period, config)
 				class=thClass
 				colspan=colspan
 			)
-				if (discountHighlighted)
-					p.plans-v2-table-discount-highlighted-text !{config.discountedColumn.text[period]}
-				if (highlighted)
-					p.plans-v2-table-green-highlighted-text !{config.highlightedColumn.text[period]}
-				case tableHeadKey
-					when 'individual_free'
-						+table_head_individual_free(highlighted, period)
-					when 'individual_collaborator'
-						+table_head_individual_collaborator(highlighted, eventTrackingKey, additionalEventSegmentation, period)
-					when 'individual_professional'
-						+table_head_individual_professional(highlighted, eventTrackingKey, additionalEventSegmentation, period)
-					when 'group_collaborator'
-						+table_head_group_collaborator(highlighted, eventTrackingKey, additionalEventSegmentation)
-					when 'group_professional'
-						+table_head_group_professional(highlighted, eventTrackingKey, additionalEventSegmentation)
-					when 'group_organization'
-						+table_head_group_organization(highlighted, eventTrackingKey, additionalEventSegmentation)
-					when 'student_free'
-						+table_head_student_free(highlighted, period)
-					when 'student_student'
-						+table_head_student_student(highlighted, eventTrackingKey, additionalEventSegmentation, period, tableHeadOptions.showExtraContent)
-					when 'student_university'
-						+table_head_student_university(highlighted, eventTrackingKey, additionalEventSegmentation, period)
+				.plans-v2-table-th
+					if (discountHighlighted)
+						p.plans-v2-table-discount-highlighted-text !{config.discountedColumn.text[period]}
+					if (highlighted)
+						p.plans-v2-table-green-highlighted-text !{config.highlightedColumn.text[period]}
+					case tableHeadKey
+						when 'individual_free'
+							+table_head_individual_free(highlighted, period)
+						when 'individual_collaborator'
+							+table_head_individual_collaborator(highlighted, eventTrackingKey, additionalEventSegmentation, period)
+						when 'individual_professional'
+							+table_head_individual_professional(highlighted, eventTrackingKey, additionalEventSegmentation, period)
+						when 'group_collaborator'
+							+table_head_group_collaborator(highlighted, eventTrackingKey, additionalEventSegmentation)
+						when 'group_professional'
+							+table_head_group_professional(highlighted, eventTrackingKey, additionalEventSegmentation)
+						when 'group_organization'
+							+table_head_group_organization(highlighted, eventTrackingKey, additionalEventSegmentation)
+						when 'student_free'
+							+table_head_student_free(highlighted, period)
+						when 'student_student'
+							+table_head_student_student(highlighted, eventTrackingKey, additionalEventSegmentation, period, tableHeadOptions.showExtraContent)
+						when 'student_university'
+							+table_head_student_university(highlighted, eventTrackingKey, additionalEventSegmentation, period)
 
 	for featuresPerSection in config.features
 		- var dividerColspan = Object.values(config.tableHead).reduce((prev, curr) => (prev) + (curr.colspan || 1), baseColspan)
@@ -316,21 +317,22 @@ mixin table_cell(feature, plan)
 	- var planValue = feature.plans[plan]
 	- var featureName = feature.feature
 
-	.plans-v2-table-cell(
-		data-ol-plans-v2-table-cell-plan=plan
-		data-ol-plans-v2-table-cell-feature=featureName
-	)
-		if (feature.value === 'richText')
-			| !{planValue}
-		else if (feature.value === 'str')
-			| #{planValue}
-		else if (feature.value === 'bool')
-			if (planValue)
-				i.fa.fa-check(aria-hidden="true")
-				span.sr-only #{translate("feature_included")}
-			else
-				span(aria-hidden="true") -
-				span.sr-only #{translate("feature_not_included")}
+	.plans-v2-table-cell
+		.plans-v2-table-cell-content(
+			data-ol-plans-v2-table-cell-plan=plan
+			data-ol-plans-v2-table-cell-feature=featureName
+		)
+			if (feature.value === 'richText')
+				| !{planValue}
+			else if (feature.value === 'str')
+				| #{planValue}
+			else if (feature.value === 'bool')
+				if (planValue)
+					i.fa.fa-check(aria-hidden="true")
+					span.sr-only #{translate("feature_included")}
+				else
+					span(aria-hidden="true") -
+					span.sr-only #{translate("feature_not_included")}
 
 mixin group_plans_license_picker()
 	form.plans-v2-license-picker-form(data-ol-plans-v2-license-picker-form)

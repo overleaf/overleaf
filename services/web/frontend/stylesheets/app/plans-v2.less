@@ -10,6 +10,7 @@
 @plans-v2-discount-highlighted-text-z-index: 2;
 @plans-v2-table-border-radius: 20px;
 @plans-v2-dark-blue: #2857a1;
+@plans-v2-table-td-mobile-min-height: 34px;
 
 .plans {
   @media (max-width: @screen-xs-max) {
@@ -407,7 +408,7 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
 .plans-v2-table-student {
   tr {
     // "hide" the last column on desktop by making the background-color as the default background color
-    th:last-of-type {
+    th:last-of-type > .plans-v2-table-th {
       background-color: @ol-blue-gray-0;
     }
 
@@ -417,6 +418,10 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
 
         .plans-v2-table-feature-name {
           border-bottom-left-radius: @plans-v2-table-border-radius;
+
+          @media (max-width: @screen-xs-max) {
+            border-bottom-left-radius: 0;
+          }
         }
       }
 
@@ -425,6 +430,10 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
 
         .plans-v2-table-cell {
           border-bottom-right-radius: @plans-v2-table-border-radius;
+
+          @media (max-width: @screen-xs-max) {
+            border-bottom-right-radius: 0;
+          }
         }
       }
     }
@@ -434,13 +443,22 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
     }
   }
 
-  th {
-    &:nth-last-child(2) .plans-v2-table-th-content {
+  // only make corners have round borders if the column is not highlighted
+  th:not(.plans-v2-table-green-highlighted) {
+    &:nth-last-child(2) .plans-v2-table-th {
       border-top-right-radius: @plans-v2-table-border-radius;
+
+      @media (max-width: @screen-xs-max) {
+        border-top-right-radius: 0;
+      }
     }
 
-    &:nth-child(2) .plans-v2-table-th-content {
+    &:nth-child(2) .plans-v2-table-th {
       border-top-left-radius: @plans-v2-table-border-radius;
+
+      @media (max-width: @screen-xs-max) {
+        border-top-right-radius: 0;
+      }
     }
   }
 
@@ -457,24 +475,6 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
 
   @media (max-width: @screen-xs-max) {
     tr {
-      &:last-child {
-        td:first-child {
-          background-color: @ol-blue-gray-0;
-
-          .plans-v2-table-feature-name {
-            border-bottom-left-radius: @plans-v2-table-border-radius;
-          }
-        }
-
-        td:nth-last-child(2) {
-          background-color: @ol-blue-gray-0;
-
-          .plans-v2-table-cell {
-            border-bottom-right-radius: @plans-v2-table-border-radius;
-          }
-        }
-      }
-
       &:not(.plans-v2-table-divider) {
         td:not(:first-of-type),
         th:not(:first-of-type) {
@@ -484,16 +484,6 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
           // We need to force 33.33% width to make each of 3 columns have an equal width of 1/3 screen width.
           width: 33.33%;
         }
-      }
-    }
-
-    th {
-      &:nth-last-child(2) .plans-v2-table-th-content {
-        border-top-right-radius: 0;
-      }
-
-      &:nth-child(2) .plans-v2-table-th-content {
-        border-top-left-radius: 0;
       }
     }
   }
@@ -507,6 +497,10 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
 
         .plans-v2-table-feature-name {
           border-bottom-left-radius: @plans-v2-table-border-radius;
+
+          @media (max-width: @screen-xs-max) {
+            border-bottom-left-radius: 0;
+          }
         }
       }
 
@@ -515,6 +509,10 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
 
         .plans-v2-table-cell {
           border-bottom-right-radius: @plans-v2-table-border-radius;
+
+          @media (max-width: @screen-xs-max) {
+            border-bottom-right-radius: 0;
+          }
         }
       }
     }
@@ -525,12 +523,20 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
   }
 
   th {
-    &:last-child .plans-v2-table-th-content {
+    &:last-child .plans-v2-table-th {
       border-top-right-radius: @plans-v2-table-border-radius;
+
+      @media (max-width: @screen-xs-max) {
+        border-top-right-radius: 0;
+      }
     }
 
-    &:nth-child(2) .plans-v2-table-th-content {
+    &:nth-child(2) .plans-v2-table-th {
       border-top-left-radius: @plans-v2-table-border-radius;
+
+      @media (max-width: @screen-xs-max) {
+        border-top-left-radius: 0;
+      }
     }
   }
 
@@ -553,28 +559,6 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
         // it actually has 4 table columns, but on mobile version, the first column become row
         // we need to force 33% width to make each of 3 columns have an equal width of 1/3 screen width
         width: calc(100% / 3);
-      }
-    }
-
-    tr {
-      &:last-child {
-        td:first-child .plans-v2-table-feature-name {
-          border-bottom-left-radius: 0;
-        }
-
-        td:last-child .plans-v2-table-cell {
-          border-bottom-right-radius: 0;
-        }
-      }
-    }
-
-    th {
-      &:last-child .plans-v2-table-th-content {
-        border-top-right-radius: 0;
-      }
-
-      &:nth-child(2) .plans-v2-table-th-content {
-        border-top-left-radius: 0;
       }
     }
   }
@@ -607,9 +591,10 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
   margin-bottom: 15px;
   table-layout: fixed;
   width: 100%;
-  // We want these `div` inside `th` and `td` to have a 100% height:
+  // We want these `div` inside `th` and `td` to have a 100% height since
+  // white backgrounds are defined here:
   // 1. `td > div.plans-v2-table-cell`
-  // 2. `th > div.plans-v2-table-th-content`
+  // 2. `th > div.plans-v2-table-th`
   //
   // To make both of them have 100% height of their respective `td` and `th`,
   // we need to have the `table` has an explicit `height` rule.
@@ -683,19 +668,34 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
 
         .plans-v2-table-feature-name {
           border-top-left-radius: @plans-v2-table-border-radius;
+
+          @media (max-width: @screen-xs-max) {
+            border-top-left-radius: 0;
+          }
         }
       }
     }
 
     &:not(.plans-v2-table-row-last-row-per-section):not(.plans-v2-table-divider):not(:last-of-type) {
-      border-bottom: 1px solid @ol-blue-gray-0;
+      th > .plans-v2-table-th > .plans-v2-table-th-content,
+      td > .plans-v2-table-feature-name,
+      td > .plans-v2-table-cell > .plans-v2-table-cell-content {
+        border-bottom: 1px solid @ol-blue-gray-0;
+
+        @media (max-width: @screen-xs-max) {
+          border-bottom: unset;
+        }
+      }
     }
 
+    // this will show highlghted border-bottom on the last row
     &:last-child td.plans-v2-table-green-highlighted {
-      border-bottom: 2px solid @ol-green;
+      > .plans-v2-table-cell {
+        border-bottom: 2px solid @ol-green;
 
-      @media (max-width: @screen-xs-max) {
-        border-bottom: unset;
+        @media (max-width: @screen-xs-max) {
+          border-bottom: unset;
+        }
       }
     }
 
@@ -772,28 +772,42 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
 // (i.e it contains either check mark icon or a dash)
 .plans-v2-table-cell {
   background-color: @white;
-  padding: 6px;
   height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 
-.plans-v2-table-th-content {
-  display: flex;
-  flex-direction: column;
-  min-height: 321px;
-  height: 100%;
-  background-color: @white;
-  padding: 10px 13px;
-
-  @media (max-width: @screen-md-max) {
-    min-height: 330px;
+  .plans-v2-table-cell-content {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  @media (max-width: @screen-sm-max) {
-    padding-left: @padding-xs;
-    padding-right: @padding-xs;
+  @media (max-width: @screen-xs-max) {
+    .plans-v2-table-cell-content {
+      padding: 6px;
+      min-height: @plans-v2-table-td-mobile-min-height;
+    }
+  }
+}
+
+.plans-v2-table-th {
+  height: 100%;
+  background-color: @white;
+
+  .plans-v2-table-th-content {
+    display: flex;
+    flex-direction: column;
+    min-height: 321px;
+    height: 100%;
+    padding: 10px 13px;
+
+    @media (max-width: @screen-md-max) {
+      min-height: 330px;
+    }
+
+    @media (max-width: @screen-sm-max) {
+      padding-left: @padding-xs;
+      padding-right: @padding-xs;
+    }
   }
 }
 
@@ -969,6 +983,7 @@ small.plans-v2-table-th-content-additional-link {
     padding: 6px;
     width: 100%;
     background-color: @ol-blue-gray-0;
+    min-height: @plans-v2-table-td-mobile-min-height;
 
     i.plans-v2-table-feature-name-question-icon {
       display: none;
@@ -1012,7 +1027,8 @@ tr.plans-v2-table-divider {
     }
   }
 
-  .plans-v2-table-divider-highlighted {
+  // highlighted divider will only show if the highlighted column is on the last visible column
+  .plans-v2-table-divider-highlighted > div {
     border-right: 2px solid @ol-green;
   }
 
@@ -1057,13 +1073,17 @@ tr.plans-v2-table-divider {
   }
 }
 
+// the `.plans-v2-table-green-highlighted` class below can be applied to both `th` and `td`
 .plans-v2-table-green-highlighted {
-  border-left: 2px solid @ol-green;
-  border-right: 2px solid @ol-green;
+  > .plans-v2-table-cell,
+  > .plans-v2-table-th {
+    border-left: 2px solid @ol-green;
+    border-right: 2px solid @ol-green;
 
-  @media (max-width: @screen-xs-max) {
-    border-left: unset;
-    border-right: unset;
+    @media (max-width: @screen-xs-max) {
+      border-left: unset;
+      border-right: unset;
+    }
   }
 }
 
@@ -1071,12 +1091,11 @@ p.plans-v2-table-green-highlighted-text {
   border: 2px solid @ol-green;
   position: absolute;
   top: -1 * @plans-v2-highlighted-text-height-desktop;
-  left: -2px;
+  left: 0;
   display: flex;
   justify-content: center;
   align-items: center;
-  // 4px because border width is 2px each side (left and right)
-  width: calc(100% + 4px);
+  width: 100%;
   font-family: @font-family-sans-serif;
   font-size: @font-size-small;
   line-height: 19px;
