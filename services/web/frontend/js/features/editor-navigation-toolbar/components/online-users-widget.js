@@ -72,11 +72,13 @@ function UserIcon({ user, showName, onClick }) {
     onClick(user)
   }
 
+  const [character] = [...user.name]
+
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
     <span onClick={handleOnClick}>
       <span className="online-user" style={{ backgroundColor }}>
-        {user.name.slice(0, 1)}
+        {character}
       </span>
       {showName && user.name}
     </span>
