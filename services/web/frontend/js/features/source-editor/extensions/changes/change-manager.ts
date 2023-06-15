@@ -334,20 +334,17 @@ export const createChangeManager = (
       }
 
       case 'sizes': {
-        const { overflowTop, height } = payload
-        const padding = view.documentPadding
-        const contentHeight =
-          view.contentDOM.clientHeight - padding.top - padding.bottom
-        const paddingNeeded = height - contentHeight
-
-        if (
-          overflowTop !== editorVerticalTopPadding(view) ||
-          paddingNeeded !== padding.bottom
-        ) {
+        // the content height and top overflow of the review panel
+        const { height, overflowTop } = payload
+        // the difference between the review panel height and the editor content height
+        const heightDiff = height + overflowTop - view.contentDOM.clientHeight
+        // the height of the block added at the top of the editor to match the review panel
+        const topPadding = editorVerticalTopPadding(view)
+        if (overflowTop !== topPadding || heightDiff !== 0) {
           view.dispatch(
             setVerticalOverflow({
               top: overflowTop,
-              bottom: paddingNeeded,
+              bottom: heightDiff + view.documentPadding.bottom,
             })
           )
         }
