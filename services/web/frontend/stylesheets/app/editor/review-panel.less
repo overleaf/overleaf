@@ -56,7 +56,7 @@
 }
 
 .rp-collapse-arrow() {
-  display: inline-block;
+  display: inline-flex;
   transform: rotateZ(0deg);
   transition: transform 0.15s ease;
   &-on {
@@ -1214,14 +1214,6 @@ button when (@is-overleaf-light = true) {
   box-sizing: content-box;
   flex-direction: column;
 
-  .review-panel-toolbar {
-    & .review-panel-toolbar-collapse-button {
-      border: none;
-      background: none;
-      padding: 0;
-    }
-  }
-
   .review-panel-toggler {
     display: flex;
     flex-direction: column;
@@ -1235,6 +1227,22 @@ button when (@is-overleaf-light = true) {
     }
   }
 
+  .review-panel-toolbar {
+    position: sticky;
+    top: 0;
+
+    .review-panel-toolbar-collapse-button {
+      border: none;
+      background: none;
+      padding: 0;
+    }
+  }
+
+  .rp-nav {
+    position: sticky;
+    bottom: 0;
+  }
+
   .rp-state-current-file & {
     .review-panel-tools {
       display: flex;
@@ -1246,19 +1254,9 @@ button when (@is-overleaf-light = true) {
       left: 0;
       right: 0;
     }
-
-    .review-panel-toolbar {
-      position: sticky;
-      top: 0;
-    }
-
-    .rp-nav {
-      position: sticky;
-      bottom: 0;
-    }
   }
 
-  .rp-state-overview {
+  .rp-state-overview & {
     position: sticky;
     top: 0;
     display: flex;
@@ -1266,6 +1264,9 @@ button when (@is-overleaf-light = true) {
   }
 
   .rp-nav-item {
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
     background: none;
   }
 

@@ -1,7 +1,9 @@
-import { useMemo } from 'react'
+import { useMemo, useCallback } from 'react'
 import useScopeValue from '../../../../../shared/hooks/use-scope-value'
 import { ReviewPanelState } from '../types/review-panel-state'
+import { sendMB } from '../../../../../infrastructure/event-tracking'
 import * as ReviewPanel from '../types/review-panel-state'
+import { SubView } from '../../../../../../../types/review-panel'
 
 function useAngularReviewPanelState(): ReviewPanelState {
   const [subView, setSubView] = useScopeValue<ReviewPanel.Value<'subView'>>(
@@ -50,6 +52,14 @@ function useAngularReviewPanelState(): ReviewPanelState {
   const [toggleReviewPanel] =
     useScopeValue<ReviewPanel.Value<'toggleReviewPanel'>>('toggleReviewPanel')
 
+  const handleSetSubview = useCallback(
+    (subView: SubView) => {
+      setSubView(subView)
+      sendMB('rp-subview-change', { subView })
+    },
+    [setSubView]
+  )
+
   const values = useMemo<ReviewPanelState['values']>(
     () => ({
       collapsed,
@@ -87,11 +97,11 @@ function useAngularReviewPanelState(): ReviewPanelState {
 
   const updaterFns = useMemo<ReviewPanelState['updaterFns']>(
     () => ({
-      setSubView,
+      handleSetSubview,
       setCollapsed,
       setShouldCollapse,
     }),
-    [setSubView, setCollapsed, setShouldCollapse]
+    [handleSetSubview, setCollapsed, setShouldCollapse]
   )
 
   return { values, updaterFns }

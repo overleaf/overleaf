@@ -27,11 +27,9 @@ export interface ReviewPanelState {
     toggleReviewPanel: () => void
   }
   updaterFns: {
+    handleSetSubview: (subView: SubView) => void
     setCollapsed: React.Dispatch<
       React.SetStateAction<ReviewPanelState['values']['collapsed']>
-    >
-    setSubView: React.Dispatch<
-      React.SetStateAction<ReviewPanelState['values']['subView']>
     >
     setShouldCollapse: React.Dispatch<
       React.SetStateAction<ReviewPanelState['values']['shouldCollapse']>

@@ -6,6 +6,7 @@ import {
 } from '../../context/review-panel/review-panel-context'
 import CurrentFileContainer from './current-file-container'
 import OverviewContainer from './overview-container'
+import { isCurrentFileView } from '../../utils/sub-view'
 
 type ReviewPanelViewProps = {
   parentDomNode: Element
@@ -16,7 +17,7 @@ function ReviewPanelView({ parentDomNode }: ReviewPanelViewProps) {
 
   return ReactDOM.createPortal(
     <>
-      {subView === 'cur_file' ? (
+      {isCurrentFileView(subView) ? (
         <CurrentFileContainer />
       ) : (
         <OverviewContainer />

@@ -131,4 +131,39 @@ describe('<ReviewPanel />', function () {
       })
     })
   })
+
+  describe('navigation', function () {
+    it('renders navigation', function () {
+      cy.get('@review-panel').within(() => {
+        cy.findByRole('tab', { name: /current file/i })
+        cy.findByRole('tab', { name: /overview/i })
+      })
+    })
+
+    it('selects the active tab', function () {
+      cy.get('@review-panel').within(() => {
+        cy.findByRole('tab', { name: /current file/i }).should(
+          'have.attr',
+          'aria-selected',
+          'true'
+        )
+        cy.findByRole('tab', { name: /overview/i }).should(
+          'have.attr',
+          'aria-selected',
+          'false'
+        )
+        cy.findByRole('tab', { name: /overview/i }).click()
+        cy.findByRole('tab', { name: /current file/i }).should(
+          'have.attr',
+          'aria-selected',
+          'false'
+        )
+        cy.findByRole('tab', { name: /overview/i }).should(
+          'have.attr',
+          'aria-selected',
+          'true'
+        )
+      })
+    })
+  })
 })
