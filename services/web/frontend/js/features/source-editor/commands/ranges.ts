@@ -11,6 +11,7 @@ import {
   ancestorOfNodeWithType,
   isUnknownCommandWithName,
 } from '../utils/tree-query'
+import { lastAncestorAtEndPosition } from '../utils/tree-operations/ancestors'
 
 export const wrapRanges =
   (
@@ -216,19 +217,10 @@ function getParentNode(
   let node: SyntaxNode | undefined | null = null
   if (typeof position === 'number') {
     node = tree?.resolveInner(position, assoc)?.parent
-    // HACK: Spaces after UnknownCommands (and other commands without arguments)
-    // are included in the Command node. So we have to adjust for that here.
-    const preceedingCharacter = state.sliceDoc(
-      Math.max(0, position - 1),
-      position
-    )
-    if (
-      preceedingCharacter === ' ' &&
-      ['UnknownCommand', 'Item', 'Left', 'Right'].some(name =>
-        node?.type.is(name)
-      )
-    ) {
-      node = ancestorOfNodeWithType(node, 'Command')?.parent
+
+    const ancestorAtEndPos = lastAncestorAtEndPosition(node, position)
+    if (ancestorAtEndPos?.parent) {
+      node = ancestorAtEndPos.parent
     }
   } else {
     node = position?.parent

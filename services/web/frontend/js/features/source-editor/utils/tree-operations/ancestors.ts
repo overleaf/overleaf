@@ -99,6 +99,20 @@ export const ancestorOfNodeWithType = (
   return null
 }
 
+export const lastAncestorAtEndPosition = (
+  node: SyntaxNode | null | undefined,
+  to: number
+): SyntaxNode | null => {
+  for (let ancestor = node; ancestor; ancestor = ancestor.parent) {
+    if (ancestor.parent?.to === to) {
+      continue
+    } else if (ancestor.to === to) {
+      return ancestor
+    }
+  }
+  return null
+}
+
 export const descendantsOfNodeWithType = (
   node: SyntaxNode,
   type: string | number,

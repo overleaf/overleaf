@@ -178,6 +178,22 @@ describe('toggleRanges', function () {
         cm.applyCommand(BOLD_COMMAND)
         expect(cm).line(1).to.equal('\\noindent \\textbf{<My paragraph>}')
       })
+
+      it('still formats after unknown command with arguments', function () {
+        const cm = new CodemirrorTestSession(['\\foo{test}<My paragraph>'])
+        cm.applyCommand(BOLD_COMMAND)
+        expect(cm).line(1).to.equal('\\foo{test}\\textbf{<My paragraph>}')
+      })
+
+      it('still formats after known command with arguments', function () {
+        const cm1 = new CodemirrorTestSession(['\\cite{foo}<text>'])
+        cm1.applyCommand(BOLD_COMMAND)
+        expect(cm1).line(1).to.equal('\\cite{foo}\\textbf{<text>}')
+
+        const cm2 = new CodemirrorTestSession(['\\href{url}{title}<text>'])
+        cm2.applyCommand(BOLD_COMMAND)
+        expect(cm2).line(1).to.equal('\\href{url}{title}\\textbf{<text>}')
+      })
     })
   })
 })
