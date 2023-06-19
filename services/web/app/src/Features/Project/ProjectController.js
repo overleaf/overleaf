@@ -38,8 +38,6 @@ const InstitutionsFeatures = require('../Institutions/InstitutionsFeatures')
 const ProjectAuditLogHandler = require('./ProjectAuditLogHandler')
 const PublicAccessLevels = require('../Authorization/PublicAccessLevels')
 
-const VISUAL_EDITOR_NAMING_SPLIT_TEST_MIN_SIGNUP_DATE = new Date('2023-04-17')
-
 /**
  * @typedef {import("./types").GetProjectsRequest} GetProjectsRequest
  * @typedef {import("./types").GetProjectsResponse} GetProjectsResponse
@@ -558,60 +556,6 @@ const ProjectController = {
             }
           )
         },
-        participatingInVisualEditorNamingTest: [
-          'user',
-          (results, cb) => {
-            const isNewUser =
-              results.user.signUpDate >=
-              VISUAL_EDITOR_NAMING_SPLIT_TEST_MIN_SIGNUP_DATE
-            cb(null, isNewUser)
-          },
-        ],
-        visualEditorNameAssignment: [
-          'participatingInVisualEditorNamingTest',
-          (results, cb) => {
-            if (!results.participatingInVisualEditorNamingTest) {
-              cb(null, { variant: 'default' })
-            } else {
-              SplitTestHandler.getAssignment(
-                req,
-                res,
-                'visual-editor-name',
-                (error, assignment) => {
-                  if (error) {
-                    cb(null, { variant: 'default' })
-                  } else {
-                    cb(null, assignment)
-                  }
-                }
-              )
-            }
-          },
-        ],
-        legacySourceEditorAssignment: [
-          'participatingInVisualEditorNamingTest',
-          'visualEditorNameAssignment',
-          (results, cb) => {
-            // Hide Ace for people in the Rich Text naming test
-            if (results.participatingInVisualEditorNamingTest) {
-              cb(null, { variant: 'true' })
-            } else {
-              SplitTestHandler.getAssignment(
-                req,
-                res,
-                'source-editor-legacy',
-                (error, assignment) => {
-                  // do not fail editor load if assignment fails
-                  if (error) {
-                    cb(null, { variant: 'default' })
-                  } else {
-                    cb(null, assignment)
-                  }
-                }
-              )
-            }
-          },
-        ],
         pdfjsAssignment(cb) {
           SplitTestHandler.getAssignment(
             req,
@@ -848,9 +792,6 @@ const ProjectController = {
           isTokenMember,
           isInvitedMember,
           brandVariation,
-          visualEditorNameAssignment,
-          participatingInVisualEditorNamingTest,
-          legacySourceEditorAssignment,
           pdfjsAssignment,
           editorLeftMenuAssignment,
           richTextAssignment,
@@ -941,10 +882,7 @@ const ProjectController = {
             const showLegacySourceEditor =
               !Features.hasFeature('saas') ||
               // Allow override via legacy_source_editor=true in query string
-              shouldDisplayFeature('legacy_source_editor') ||
-              // Hide Ace for beta users
-              (!user.betaProgram &&
-                legacySourceEditorAssignment.variant === 'default')
+              shouldDisplayFeature('legacy_source_editor')
 
             const editorLeftMenuReact =
               editorLeftMenuAssignment?.variant === 'react'
@@ -979,10 +917,6 @@ const ProjectController = {
               detachRole === 'detached'
                 ? 'project/editor_detached'
                 : 'project/editor'
-
-            const isParticipatingInVisualEditorNamingTest =
-              Features.hasFeature('saas') &&
-              participatingInVisualEditorNamingTest
 
             let richTextVariant
             if (!Features.hasFeature('saas')) {
@@ -1050,8 +984,6 @@ const ProjectController = {
               showTemplatesServerPro,
               pdfjsVariant: pdfjsAssignment.variant,
               debugPdfDetach,
-              isParticipatingInVisualEditorNamingTest,
-              visualEditorNameVariant: visualEditorNameAssignment.variant,
               showLegacySourceEditor,
               showSymbolPalette,
               galileoEnabled,
