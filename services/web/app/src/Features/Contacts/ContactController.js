@@ -1,92 +1,60 @@
-/* eslint-disable
-    max-len,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-let ContactsController
 const SessionManager = require('../Authentication/SessionManager')
 const ContactManager = require('./ContactManager')
 const UserGetter = require('../User/UserGetter')
-const logger = require('@overleaf/logger')
 const Modules = require('../../infrastructure/Modules')
+const { expressify } = require('../../util/promises')
 
-module.exports = ContactsController = {
-  getContacts(req, res, next) {
-    const userId = SessionManager.getLoggedInUserId(req.session)
-    return ContactManager.getContactIds(
-      userId,
-      { limit: 50 },
-      function (error, contactIds) {
-        if (error != null) {
-          return next(error)
-        }
-        return UserGetter.getUsers(
-          contactIds,
-          {
-            email: 1,
-            first_name: 1,
-            last_name: 1,
-            holdingAccount: 1,
-          },
-          function (error, contacts) {
-            if (error != null) {
-              return next(error)
-            }
+function _formatContact(contact) {
+  return {
+    id: contact._id?.toString(),
+    email: contact.email || '',
+    first_name: contact.first_name || '',
+    last_name: contact.last_name || '',
+    type: 'user',
+  }
+}
 
-            // UserGetter.getUsers may not preserve order so put them back in order
-            const positions = {}
-            for (let i = 0; i < contactIds.length; i++) {
-              const contactId = contactIds[i]
-              positions[contactId] = i
-            }
-            contacts.sort(
-              (a, b) =>
-                positions[a._id != null ? a._id.toString() : undefined] -
-                positions[b._id != null ? b._id.toString() : undefined]
-            )
+async function getContacts(req, res) {
+  const userId = SessionManager.getLoggedInUserId(req.session)
 
-            // Don't count holding accounts to discourage users from repeating mistakes (mistyped or wrong emails, etc)
-            contacts = contacts.filter(c => !c.holdingAccount)
+  const contactIds = await ContactManager.promises.getContactIds(userId, {
+    limit: 50,
+  })
 
-            contacts = contacts.map(ContactsController._formatContact)
+  let contacts = await UserGetter.promises.getUsers(contactIds, {
+    email: 1,
+    first_name: 1,
+    last_name: 1,
+    holdingAccount: 1,
+  })
 
-            return Modules.hooks.fire(
-              'getContacts',
-              userId,
-              contacts,
-              function (error, additionalContacts) {
-                if (error != null) {
-                  return next(error)
-                }
-                contacts = contacts.concat(
-                  ...Array.from(additionalContacts || [])
-                )
-                return res.json({
-                  contacts,
-                })
-              }
-            )
-          }
-        )
-      }
-    )
-  },
+  // UserGetter.getUsers may not preserve order so put them back in order
+  const positions = {}
+  for (let i = 0; i < contactIds.length; i++) {
+    const contactId = contactIds[i]
+    positions[contactId] = i
+  }
+  contacts.sort(
+    (a, b) => positions[a._id?.toString()] - positions[b._id?.toString()]
+  )
 
-  _formatContact(contact) {
-    return {
-      id: contact._id != null ? contact._id.toString() : undefined,
-      email: contact.email || '',
-      first_name: contact.first_name || '',
-      last_name: contact.last_name || '',
-      type: 'user',
-    }
-  },
+  // Don't count holding accounts to discourage users from repeating mistakes (mistyped or wrong emails, etc)
+  contacts = contacts.filter(c => !c.holdingAccount)
+
+  contacts = contacts.map(_formatContact)
+
+  const additionalContacts = await Modules.promises.hooks.fire(
+    'getContacts',
+    userId,
+    contacts
+  )
+
+  contacts = contacts.concat(...(additionalContacts || []))
+  return res.json({
+    contacts,
+  })
+}
+
+module.exports = {
+  getContacts: expressify(getContacts),
 }

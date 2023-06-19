@@ -1,90 +1,64 @@
-/* eslint-disable
-    n/handle-callback-err,
-    max-len,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-let ContactManager
+const { callbackify } = require('util')
 const OError = require('@overleaf/o-error')
-const request = require('request')
+const fetch = require('node-fetch')
 const settings = require('@overleaf/settings')
 
-module.exports = ContactManager = {
-  getContactIds(userId, options, callback) {
-    if (options == null) {
-      options = { limits: 50 }
-    }
-    if (callback == null) {
-      callback = function () {}
-    }
-    const url = `${settings.apis.contacts.url}/user/${userId}/contacts`
-    return request.get(
-      {
-        url,
-        qs: options,
-        json: true,
-        jar: false,
-      },
-      function (error, res, data) {
-        if (error != null) {
-          return callback(error)
-        }
-        if (res.statusCode >= 200 && res.statusCode < 300) {
-          return callback(
-            null,
-            (data != null ? data.contact_ids : undefined) || []
-          )
-        } else {
-          error = new OError(
-            `contacts api responded with non-success code: ${res.statusCode}`,
-            { user_id: userId }
-          )
-          return callback(error)
-        }
-      }
-    )
-  },
+async function getContactIds(userId, options) {
+  options = options ?? { limit: 50 }
 
-  addContact(userId, contactId, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    const url = `${settings.apis.contacts.url}/user/${userId}/contacts`
-    return request.post(
+  const url = new URL(`${settings.apis.contacts.url}/user/${userId}/contacts`)
+
+  for (const [key, val] of Object.entries(options)) {
+    url.searchParams.set(key, val)
+  }
+
+  const response = await fetch(url.toString(), {
+    method: 'GET',
+    headers: { Accept: 'application/json' },
+  })
+
+  const body = await response.json()
+
+  if (!response.ok) {
+    throw new OError(
+      `contacts api responded with non-success code: ${response.statusCode}`,
+      { user_id: userId }
+    )
+  }
+
+  return body?.contact_ids || []
+}
+
+async function addContact(userId, contactId) {
+  const url = new URL(`${settings.apis.contacts.url}/user/${userId}/contacts`)
+  const response = await fetch(url.toString(), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify({ contact_id: contactId }),
+  })
+
+  const body = await response.json()
+  if (!response.ok) {
+    throw new OError(
+      `contacts api responded with non-success code: ${response.statusCode}`,
       {
-        url,
-        json: {
-          contact_id: contactId,
-        },
-        jar: false,
-      },
-      function (error, res, data) {
-        if (error != null) {
-          return callback(error)
-        }
-        if (res.statusCode >= 200 && res.statusCode < 300) {
-          return callback(
-            null,
-            (data != null ? data.contact_ids : undefined) || []
-          )
-        } else {
-          error = new OError(
-            `contacts api responded with non-success code: ${res.statusCode}`,
-            {
-              user_id: userId,
-              contact_id: contactId,
-            }
-          )
-          return callback(error)
-        }
+        user_id: userId,
+        contact_id: contactId,
       }
     )
+  }
+
+  return body?.contact_ids || []
+}
+
+module.exports = {
+  getContactIds: callbackify(getContactIds),
+  addContact: callbackify(addContact),
+  promises: {
+    getContactIds,
+    addContact,
   },
 }
