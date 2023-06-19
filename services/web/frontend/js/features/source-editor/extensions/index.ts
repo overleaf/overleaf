@@ -45,6 +45,7 @@ import { keymaps } from './keymaps'
 import { shortcuts } from './shortcuts'
 import { effectListeners } from './effect-listeners'
 import { highlightSpecialChars } from './highlight-special-chars'
+import { geometryChangeEvent } from './geometry-change-event'
 
 const moduleExtensions: Array<() => Extension> = importOverleafModules(
   'sourceEditorExtensions'
@@ -130,4 +131,5 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   moduleExtensions.map(extension => extension()),
   thirdPartyExtensions(),
   effectListeners(),
+  geometryChangeEvent(options.reactReviewPanel),
 ]

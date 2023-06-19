@@ -1,6 +1,11 @@
 import Container from './container'
+import useCodeMirrorContentHeight from '../../hooks/use-codemirror-content-height'
 
 function CurrentFileContainer() {
+  const contentHeight = useCodeMirrorContentHeight()
+
+  console.log('Review panel got content height', contentHeight)
+
   return (
     <Container>
       <div
