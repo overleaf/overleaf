@@ -31,6 +31,14 @@ const UserSchema = new Schema(
     role: { type: String, default: '' },
     institution: { type: String, default: '' },
     hashedPassword: String,
+    enrollment: {
+      // sso: { type: Boolean, default: false },
+      managedBy: {
+        type: ObjectId,
+        ref: 'Subscription',
+      },
+      enrolledAt: { type: Date },
+    },
     isAdmin: { type: Boolean, default: false },
     staffAccess: {
       publisherMetrics: { type: Boolean, default: false },

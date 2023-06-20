@@ -21,6 +21,7 @@ const SubscriptionSchema = new Schema(
       },
     },
     member_ids: [{ type: ObjectId, ref: 'User' }],
+    groupPolicy: { type: ObjectId, ref: 'GroupPolicy' },
     invited_emails: [String],
     teamInvites: [TeamInviteSchema],
     recurlySubscription_id: String,
