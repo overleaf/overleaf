@@ -2,7 +2,7 @@
 # Instead run bin/update_build_scripts from
 # https://github.com/overleaf/internal/
 
-FROM node:16.17.1 as base
+FROM gcr.io/overleaf-ops/nodejs-overleaf:16.20.1 as base
 
 WORKDIR /overleaf/services/history-v1
 
