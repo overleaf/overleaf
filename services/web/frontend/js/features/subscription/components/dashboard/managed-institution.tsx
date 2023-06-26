@@ -52,7 +52,7 @@ export default function ManagedInstitution({
       <RowLink
         href={`/metrics/institutions/${institution.v1Id}`}
         heading={t('view_metrics')}
-        subtext={t('view_metrics_institution_subtext')}
+        subtext={t('view_metrics_commons_subtext')}
         icon="insights"
       />
       <RowLink
