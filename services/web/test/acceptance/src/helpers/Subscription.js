@@ -1,6 +1,7 @@
 const { db, ObjectId } = require('../../../../app/src/infrastructure/mongodb')
 const { expect } = require('chai')
 const SubscriptionUpdater = require('../../../../app/src/Features/Subscription/SubscriptionUpdater')
+const ManagedUsersHandler = require('../../../../app/src/Features/Subscription/ManagedUsersHandler')
 const SubscriptionModel =
   require('../../../../app/src/models/Subscription').Subscription
 const DeletedSubscriptionModel =
@@ -43,6 +44,10 @@ class Subscription {
     db.subscriptions.findOne({ _id: ObjectId(this._id) }, callback)
   }
 
+  getWithGroupPolicy(callback) {
+    SubscriptionModel.findById(this._id).populate('groupPolicy').exec(callback)
+  }
+
   setManagerIds(managerIds, callback) {
     return SubscriptionModel.findOneAndUpdate(
       { _id: ObjectId(this._id) },
@@ -53,6 +58,14 @@ class Subscription {
 
   refreshUsersFeatures(callback) {
     SubscriptionUpdater.refreshUsersFeatures(this, callback)
+  }
+
+  enableManagedUsers(callback) {
+    ManagedUsersHandler.enableManagedUsers(this._id, callback)
+  }
+
+  getGroupPolicyForUser(user, callback) {
+    ManagedUsersHandler.getGroupPolicyForUser(user, callback)
   }
 
   expectDeleted(deleterData, callback) {

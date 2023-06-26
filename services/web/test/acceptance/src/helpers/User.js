@@ -205,6 +205,14 @@ class User {
     )
   }
 
+  enrollInSubscription(subscription, callback) {
+    UserModel.updateOne(
+      { _id: this.id },
+      { 'enrollment.managedBy': subscription._id },
+      callback
+    )
+  }
+
   logout(callback) {
     this.getCsrfToken(error => {
       if (error != null) {
