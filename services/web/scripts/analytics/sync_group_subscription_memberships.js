@@ -31,6 +31,7 @@ async function main() {
 async function checkActiveSubscriptions() {
   let totalSubscriptionsChecked = 0
   let subscriptions
+  const processedSubscriptionIds = new Set()
   do {
     subscriptions = await Subscription.find(
       { groupPlan: true },
@@ -52,10 +53,14 @@ async function checkActiveSubscriptions() {
       )
 
       for (const subscription of subscriptions) {
-        checkSubscriptionMemberships(
-          subscription,
-          membershipsByGroupId[subscription._id.toString()]
-        )
+        const subscriptionId = subscription._id.toString()
+        if (!processedSubscriptionIds.has(subscriptionId)) {
+          await checkSubscriptionMemberships(
+            subscription,
+            membershipsByGroupId[subscriptionId] || []
+          )
+          processedSubscriptionIds.add(subscriptionId)
+        }
       }
       totalSubscriptionsChecked += subscriptions.length
     }
@@ -65,6 +70,7 @@ async function checkActiveSubscriptions() {
 async function checkDeletedSubscriptions() {
   let totalDeletedSubscriptionsChecked = 0
   let deletedSubscriptions
+  const processedSubscriptionIds = new Set()
   do {
     deletedSubscriptions = (
       await DeletedSubscription.find(
@@ -82,20 +88,27 @@ async function checkDeletedSubscriptions() {
         groupIds
       )
 
+      const membershipsByGroupId = _.groupBy(
+        bigQueryGroupMemberships,
+        'group_id'
+      )
+
       for (const deletedSubscription of deletedSubscriptions) {
-        checkDeletedSubscriptionMemberships(
-          deletedSubscription,
-          _.filter(bigQueryGroupMemberships, {
-            group_id: deletedSubscription._id.toString(),
-          })
-        )
+        const subscriptionId = deletedSubscription._id.toString()
+        if (!processedSubscriptionIds.has(subscriptionId)) {
+          await checkDeletedSubscriptionMemberships(
+            deletedSubscription,
+            membershipsByGroupId[subscriptionId] || []
+          )
+          processedSubscriptionIds.add(subscriptionId)
+        }
       }
       totalDeletedSubscriptionsChecked += deletedSubscriptions.length
     }
   } while (deletedSubscriptions.length > 0)
 }
 
-function checkSubscriptionMemberships(subscription, membershipStatuses) {
+async function checkSubscriptionMemberships(subscription, membershipStatuses) {
   if (VERBOSE) {
     console.log(
       '\n###########################################################################################',
@@ -103,7 +116,7 @@ function checkSubscriptionMemberships(subscription, membershipStatuses) {
       '\n# _id: \t\t\t\t',
       subscription._id.toString(),
       '\n# member_ids: \t\t\t',
-      subscription.member_ids,
+      subscription.member_ids.map(_id => _id.toString()),
       '\n# recurlySubscription_id: \t',
       subscription.recurlySubscription_id
     )
@@ -118,21 +131,28 @@ function checkSubscriptionMemberships(subscription, membershipStatuses) {
         is_member: true,
       })
     ) {
-      sendCorrectiveEvent(memberId, 'group-subscription-joined', subscription)
+      await sendCorrectiveEvent(
+        memberId,
+        'group-subscription-joined',
+        subscription
+      )
     }
   }
   // create missing `left` events if user is not a member of the group anymore
   for (const { user_id: userId, is_member: isMember } of membershipStatuses) {
     if (
       isMember &&
-      !subscription.member_ids.some(sub => sub.id.toString() === userId)
+      !subscription.member_ids.some(id => id.toString() === userId)
     ) {
-      sendCorrectiveEvent(userId, 'group-subscription-left', subscription)
+      await sendCorrectiveEvent(userId, 'group-subscription-left', subscription)
     }
   }
 }
 
-function checkDeletedSubscriptionMemberships(subscription, membershipStatuses) {
+async function checkDeletedSubscriptionMemberships(
+  subscription,
+  membershipStatuses
+) {
   if (VERBOSE) {
     console.log(
       '\n###########################################################################################',
@@ -140,7 +160,7 @@ function checkDeletedSubscriptionMemberships(subscription, membershipStatuses) {
       '\n# _id: \t\t\t\t',
       subscription._id.toString(),
       '\n# member_ids: \t\t\t',
-      subscription.member_ids,
+      subscription.member_ids.map(_id => _id.toString()),
       '\n# recurlySubscription_id: \t',
       subscription.recurlySubscription_id
     )
@@ -157,20 +177,24 @@ function checkDeletedSubscriptionMemberships(subscription, membershipStatuses) {
         is_member: true,
       })
     ) {
-      sendCorrectiveEvent(memberId, 'group-subscription-left', subscription)
+      await sendCorrectiveEvent(
+        memberId,
+        'group-subscription-left',
+        subscription
+      )
       updatedUserIds.add(memberId)
     }
   }
   // for cases where the user has been removed from the subscription before it was deleted and status is not up-to-date
   for (const { user_id: userId, is_member: isMember } of membershipStatuses) {
     if (isMember && !updatedUserIds.has(userId)) {
-      sendCorrectiveEvent(userId, 'group-subscription-left', subscription)
+      await sendCorrectiveEvent(userId, 'group-subscription-left', subscription)
       updatedUserIds.add(userId)
     }
   }
 }
 
-function sendCorrectiveEvent(userId, event, subscription) {
+async function sendCorrectiveEvent(userId, event, subscription) {
   const segmentation = {
     groupId: subscription._id.toString(),
     subscriptionId: subscription.recurlySubscription_id,
@@ -182,7 +206,7 @@ function sendCorrectiveEvent(userId, event, subscription) {
         segmentation
       )}`
     )
-    AnalyticsManager.recordEventForUser(userId, event, segmentation)
+    await AnalyticsManager.recordEventForUser(userId, event, segmentation)
   } else {
     console.log(
       `Dry run - would send event '${event}' for user ${userId} with segmentation: ${JSON.stringify(
@@ -195,21 +219,22 @@ function sendCorrectiveEvent(userId, event, subscription) {
 async function fetchBigQueryMembershipStatuses(groupIds) {
   const joinedGroupIds = groupIds.map(id => `"${id}"`).join(',')
   const query = `\
-    WITH memberships AS (
+    WITH user_memberships AS (
       SELECT
-        user_id, group_id, is_member, created_at,
+        group_id,
+        COALESCE(user_aliases.user_id, ugm.user_id) AS user_id,
+        is_member,
+        ugm.created_at
+      FROM analytics.user_group_memberships ugm
+      LEFT JOIN analytics.user_aliases ON ugm.user_id = user_aliases.analytics_id
+      WHERE ugm.group_id IN (${joinedGroupIds})
+    ),
+    ordered_status AS (
+      SELECT *,
         ROW_NUMBER() OVER(PARTITION BY group_id, user_id ORDER BY created_at DESC) AS row_number
-      FROM analytics.user_group_memberships
-      WHERE group_id IN (${joinedGroupIds})
+        FROM user_memberships
     )
-
-    SELECT
-      group_id,
-      COALESCE(user_aliases.user_id, memberships.user_id) AS user_id,
-      is_member,
-      memberships.created_at
-    FROM memberships
-    LEFT JOIN analytics.user_aliases ON memberships.user_id = user_aliases.analytics_id
+    SELECT group_id, user_id, is_member, created_at FROM ordered_status
     WHERE row_number = 1;
   `
 
