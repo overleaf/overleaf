@@ -1272,7 +1272,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
       const sendRes = _.once(function (statusCode, message) {
         res.status(statusCode)
         plainTextResponse(res, message)
-        ClsiCookieManager.clearServerId(projectId)
+        ClsiCookieManager.clearServerId(projectId, () => {})
       }) // force every compile to a new server
       // set a timeout
       let handler = setTimeout(function () {
