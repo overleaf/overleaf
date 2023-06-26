@@ -7,6 +7,7 @@ const {
 } = require('../../app/src/models/DeletedSubscription')
 const minimist = require('minimist')
 const _ = require('lodash')
+const { ObjectId } = require('mongodb')
 
 let FETCH_LIMIT, COMMIT, VERBOSE
 
@@ -195,6 +196,10 @@ async function checkDeletedSubscriptionMemberships(
 }
 
 async function sendCorrectiveEvent(userId, event, subscription) {
+  if (!ObjectId.isValid(userId)) {
+    console.warn(`Skipping '${event}' for user ${userId}: invalid user ID`)
+    return
+  }
   const segmentation = {
     groupId: subscription._id.toString(),
     subscriptionId: subscription.recurlySubscription_id,
