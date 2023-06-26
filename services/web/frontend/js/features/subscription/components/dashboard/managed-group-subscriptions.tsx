@@ -1,4 +1,5 @@
 import { Trans, useTranslation } from 'react-i18next'
+import getMeta from '../../../../utils/meta'
 import { useSubscriptionDashboardContext } from '../../context/subscription-dashboard-context'
 import { RowLink } from './row-link'
 
@@ -9,6 +10,8 @@ export default function ManagedGroupSubscriptions() {
   if (!managedGroupSubscriptions) {
     return null
   }
+
+  const groupSettingsEnabledFor = getMeta('ol-groupSettingsEnabledFor', [])
 
   return (
     <>
@@ -49,6 +52,14 @@ export default function ManagedGroupSubscriptions() {
             subtext={t('manage_managers_subtext')}
             icon="manage_accounts"
           />
+          {groupSettingsEnabledFor.includes(subscription._id) && (
+            <RowLink
+              href={`/manage/groups/${subscription._id}/settings`}
+              heading={t('manage_group_settings')}
+              subtext={t('manage_group_settings_subtext')}
+              icon="settings"
+            />
+          )}
           <RowLink
             href={`/metrics/groups/${subscription._id}`}
             heading={t('view_metrics')}

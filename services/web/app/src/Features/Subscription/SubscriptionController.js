@@ -24,6 +24,7 @@ const { expressify } = require('../../util/promises')
 const OError = require('@overleaf/o-error')
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const SubscriptionHelper = require('./SubscriptionHelper')
+const ManagedUsersManager = require('../../../../modules/managed-users/app/src/ManagedUsersManager')
 
 const groupPlanModalOptions = Settings.groupPlanModalOptions
 const validGroupPlanModalOptions = {
@@ -237,6 +238,10 @@ async function userSubscriptionPage(req, res) {
 
   const groupPlansDataForDash = formatGroupPlansDataForDash()
 
+  const groupSettingsEnabledFor = (managedGroupSubscriptions || [])
+    .map(sub => sub._id.toString())
+    .filter(id => ManagedUsersManager.hasManagedUsersFeature(id))
+
   const data = {
     title: 'your_subscription',
     plans: plansData?.plans,
@@ -252,6 +257,7 @@ async function userSubscriptionPage(req, res) {
     currentInstitutionsWithLicence,
     cancelButtonNewCopy,
     groupPlans: groupPlansDataForDash,
+    groupSettingsEnabledFor,
   }
   res.render('subscriptions/dashboard-react', data)
 }

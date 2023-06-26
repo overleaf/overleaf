@@ -158,6 +158,10 @@ describe('SubscriptionController', function () {
           recordEventForSession: sinon.stub(),
           setUserPropertyForUser: sinon.stub(),
         }),
+        '../../../../modules/managed-users/app/src/ManagedUsersManager':
+          (this.ManagedUsersManager = {
+            hasManagedUsersFeature: sinon.stub(),
+          }),
       },
     })
 
@@ -481,6 +485,10 @@ describe('SubscriptionController', function () {
 
     it('should load the plans', function () {
       expect(this.data.plans).to.deep.equal(this.plans)
+    })
+
+    it('should load an empty list of groups with settings available', function () {
+      expect(this.data.groupSettingsEnabledFor).to.deep.equal([])
     })
   })
 
