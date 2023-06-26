@@ -16,6 +16,8 @@ import { University } from '../../../../../../types/university'
 import { CountryCode } from '../../data/countries-list'
 import { isValidEmail } from '../../../../shared/utils/email'
 import getMeta from '../../../../utils/meta'
+import { ReCaptcha2 } from '../../../../shared/components/recaptcha-2'
+import { useRecaptcha } from '../../../../shared/hooks/use-recaptcha'
 
 function AddEmail() {
   const { t } = useTranslation()
@@ -40,6 +42,7 @@ function AddEmail() {
   } = useUserEmailsContext()
 
   const emailAddressLimit = getMeta('ol-emailAddressLimit', 10)
+  const { ref: recaptchaRef, getReCaptchaToken } = useRecaptcha()
 
   useEffect(() => {
     setUserEmailsContextLoading(isLoading)
@@ -84,13 +87,17 @@ function AddEmail() {
       }
 
     runAsync(
-      postJSON('/user/emails', {
-        body: {
-          email: newEmail,
-          ...knownUniversityData,
-          ...unknownUniversityData,
-        },
-      })
+      (async () => {
+        const token = await getReCaptchaToken()
+        await postJSON('/user/emails', {
+          body: {
+            email: newEmail,
+            ...knownUniversityData,
+            ...unknownUniversityData,
+            'g-recaptcha-response': token,
+          },
+        })
+      })()
     )
       .then(() => {
         getEmails()
@@ -137,6 +144,7 @@ function AddEmail() {
   if (!isValidEmail(newEmail)) {
     return (
       <Layout isError={isError} error={error}>
+        <ReCaptcha2 page="addEmail" ref={recaptchaRef} />
         <form>
           <Col md={8}>
             <Cell>
@@ -161,6 +169,7 @@ function AddEmail() {
 
   return (
     <Layout isError={isError} error={error}>
+      <ReCaptcha2 page="addEmail" ref={recaptchaRef} />
       <form>
         <Col md={8}>
           <Cell>

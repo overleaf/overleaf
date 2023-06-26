@@ -251,6 +251,7 @@ module.exports = {
       login: false,
       passwordReset: true,
       register: true,
+      addEmail: true,
     },
   },
 

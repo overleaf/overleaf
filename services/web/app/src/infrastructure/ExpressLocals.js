@@ -393,10 +393,9 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
       emailConfirmationDisabled: Settings.emailConfirmationDisabled,
       maxEntitiesPerProject: Settings.maxEntitiesPerProject,
       maxUploadSize: Settings.maxUploadSize,
-      recaptchaSiteKeyV3:
-        Settings.recaptcha != null ? Settings.recaptcha.siteKeyV3 : undefined,
-      recaptchaDisabled:
-        Settings.recaptcha != null ? Settings.recaptcha.disabled : undefined,
+      recaptchaSiteKey: Settings.recaptcha?.siteKey,
+      recaptchaSiteKeyV3: Settings.recaptcha?.siteKeyV3,
+      recaptchaDisabled: Settings.recaptcha?.disabled,
       textExtensions: Settings.textExtensions,
       validRootDocExtensions: Settings.validRootDocExtensions,
       sentryAllowedOriginRegex: Settings.sentry.allowedOriginRegex,

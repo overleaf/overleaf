@@ -35,5 +35,10 @@ declare global {
     crypto: {
       randomUUID: () => string
     }
+    // For react-google-recaptcha
+    recaptchaOptions?: {
+      enterprise?: boolean
+      useRecaptchaNet?: boolean
+    }
   }
 }

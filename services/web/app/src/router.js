@@ -349,6 +349,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
       '/user/emails',
       AuthenticationController.requireLogin(),
       RateLimiterMiddleware.rateLimit(rateLimiters.addEmail),
+      CaptchaMiddleware.validateCaptcha('addEmail'),
       UserEmailsController.add
     )
     webRouter.post(

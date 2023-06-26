@@ -27,8 +27,10 @@ export type ExposedSettings = {
     login: boolean
     passwordReset: boolean
     register: boolean
+    addEmail: boolean
   }
   recaptchaSiteKeyV3?: string
+  recaptchaSiteKey?: string
   samlInitPath?: string
   sentryAllowedOriginRegex: string
   sentryDsn?: string

@@ -642,6 +642,7 @@ module.exports = {
       login: true,
       passwordReset: true,
       register: true,
+      addEmail: true,
     },
   },
 

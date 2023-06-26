@@ -349,7 +349,7 @@ describe('<EmailsSection />', function () {
 
     const [[, request]] = fetchMock.calls(/\/user\/emails/)
 
-    expect(JSON.parse(request?.body?.toString() || '{}')).to.deep.equal({
+    expect(JSON.parse(request?.body?.toString() || '{}')).to.deep.include({
       email: userEmailData.email,
       university: {
         id: userEmailData.affiliation?.institution.id,
@@ -494,7 +494,7 @@ describe('<EmailsSection />', function () {
 
     const [[, request]] = fetchMock.calls(/\/user\/emails/)
 
-    expect(JSON.parse(request?.body?.toString() || '{}')).to.deep.equal({
+    expect(JSON.parse(request?.body?.toString() || '{}')).to.deep.include({
       email: userEmailData.email,
       university: {
         name: newUniversity,

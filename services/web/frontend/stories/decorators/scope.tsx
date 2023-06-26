@@ -149,6 +149,7 @@ const initialize = () => {
       login: true,
       passwordReset: true,
       register: true,
+      addEmail: true,
     },
     sentryAllowedOriginRegex: '',
     siteUrl: 'http://localhost',
