@@ -218,6 +218,10 @@ module.exports = {
     webpack: {
       url: `http://${process.env.WEBPACK_HOST || 'localhost'}:3808`,
     },
+    wiki: {
+      url: process.env.WIKI_URL || 'https://learn.sharelatex.com',
+      maxCacheAge: parseInt(process.env.WIKI_MAX_CACHE_AGE || 5 * minutes, 10),
+    },
 
     haveIBeenPwned: {
       enabled: process.env.HAVE_I_BEEN_PWNED_ENABLED === 'true',
