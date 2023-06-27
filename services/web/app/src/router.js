@@ -67,7 +67,6 @@ const logger = require('@overleaf/logger')
 const _ = require('underscore')
 const { plainTextResponse } = require('./infrastructure/Response')
 const PublicAccessLevels = require('./Features/Authorization/PublicAccessLevels')
-const UserContentDomainController = require('./Features/UserContentDomainCheck/UserContentDomainController')
 
 const rateLimiters = {
   addEmail: new RateLimiter('add-email', {
@@ -199,21 +198,6 @@ const rateLimiters = {
   }),
   zipDownload: new RateLimiter('zip-download', {
     points: 10,
-    duration: 60,
-  }),
-  userContentDomainAccessCheckResult: new RateLimiter(
-    'user-content-domain-a-c-r',
-    {
-      points: 30,
-      duration: 60,
-    }
-  ),
-  userContentDomainFallbackUsage: new RateLimiter('user-content-fb-u', {
-    points: 15,
-    duration: 60,
-  }),
-  userContentDomainMaxAccessChecksHit: new RateLimiter('user-content-mach', {
-    points: 15,
     duration: 60,
   }),
 }
@@ -1332,35 +1316,6 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     metrics.inc('client-side-error')
     res.sendStatus(204)
   })
-
-  webRouter.post(
-    '/record-user-content-domain-access-check-result',
-    validate({
-      body: Joi.object({
-        failed: Joi.number().min(0).max(6),
-        succeeded: Joi.number().min(0).max(6),
-        isOldDomain: Joi.boolean().default(false),
-      }),
-    }),
-    RateLimiterMiddleware.rateLimit(
-      rateLimiters.userContentDomainAccessCheckResult
-    ),
-    UserContentDomainController.recordCheckResult
-  )
-  webRouter.post(
-    '/record-user-content-domain-fallback-usage',
-    RateLimiterMiddleware.rateLimit(
-      rateLimiters.userContentDomainFallbackUsage
-    ),
-    UserContentDomainController.recordFallbackUsage
-  )
-  webRouter.post(
-    '/record-user-content-domain-max-access-checks-hit',
-    RateLimiterMiddleware.rateLimit(
-      rateLimiters.userContentDomainMaxAccessChecksHit
-    ),
-    UserContentDomainController.recordMaxAccessChecksHit
-  )
 
   webRouter.get(
     `/read/:token(${TokenAccessController.READ_ONLY_TOKEN_PATTERN})`,

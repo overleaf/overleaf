@@ -29,7 +29,6 @@ import { useEditorContext } from './editor-context'
 import { buildFileList } from '../../features/pdf-preview/util/file-list'
 import { useLayoutContext } from './layout-context'
 import { useUserContext } from './user-context'
-import getMeta from '../../utils/meta'
 
 export const LocalCompileContext = createContext()
 
@@ -44,7 +43,6 @@ export const CompileContextPropTypes = {
     draft: PropTypes.bool.isRequired,
     error: PropTypes.string,
     fileList: PropTypes.object,
-    forceNewDomainVariant: PropTypes.string,
     hasChanges: PropTypes.bool.isRequired,
     highlights: PropTypes.arrayOf(PropTypes.object),
     logEntries: PropTypes.object,
@@ -173,11 +171,6 @@ export function LocalCompileProvider({ children }) {
 
   // the list of files that can be downloaded
   const [fileList, setFileList] = useState()
-
-  // Split test variant for disabling the fallback, refreshed on re-compile.
-  const [forceNewDomainVariant, setForceNewDomainVariant] = useState(
-    getMeta('ol-splitTestVariants')?.['force-new-compile-domain']
-  )
 
   // the raw contents of the log file
   const [rawLog, setRawLog] = useState()
@@ -323,7 +316,6 @@ export function LocalCompileProvider({ children }) {
       setShowFasterCompilesFeedbackUI(
         Boolean(data.showFasterCompilesFeedbackUI)
       )
-      setForceNewDomainVariant(data.forceNewDomainVariant || 'default')
 
       if (data.outputFiles) {
         const outputFiles = new Map()
@@ -561,7 +553,6 @@ export function LocalCompileProvider({ children }) {
       editedSinceCompileStarted,
       error,
       fileList,
-      forceNewDomainVariant,
       hasChanges,
       highlights,
       lastCompileOptions,
@@ -616,7 +607,6 @@ export function LocalCompileProvider({ children }) {
       editedSinceCompileStarted,
       error,
       fileList,
-      forceNewDomainVariant,
       hasChanges,
       highlights,
       lastCompileOptions,

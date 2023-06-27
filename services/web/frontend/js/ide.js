@@ -73,7 +73,6 @@ import './features/history/controllers/history-file-tree-controller'
 import { cleanupServiceWorker } from './utils/service-worker-cleanup'
 import { reportCM6Perf } from './infrastructure/cm6-performance'
 import { reportAcePerf } from './ide/editor/ace-performance'
-import { scheduleUserContentDomainAccessCheck } from './features/user-content-domain-access-check'
 
 App.controller(
   'IdeController',
@@ -487,7 +486,6 @@ If the project has been renamed please look in your project list for a new proje
 )
 
 cleanupServiceWorker()
-scheduleUserContentDomainAccessCheck()
 
 angular.module('SharelatexApp').config(function ($provide) {
   $provide.decorator('$browser', [

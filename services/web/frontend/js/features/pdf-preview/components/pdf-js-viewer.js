@@ -11,10 +11,6 @@ import PdfPreviewErrorBoundaryFallback from './pdf-preview-error-boundary-fallba
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import { captureException } from '../../../infrastructure/error-reporter'
 import { getPdfCachingMetrics } from '../util/metrics'
-import { userContentDomainAccessCheckFailed } from '../../user-content-domain-access-check'
-import { isURLOnUserContentDomain } from '../util/fetchFromCompileDomain'
-import { isNetworkError } from '../../../utils/isNetworkError'
-import OError from '@overleaf/o-error'
 
 function PdfJsViewer({ url, pdfFile }) {
   const { _id: projectId } = useProjectContext()
@@ -130,15 +126,7 @@ function PdfJsViewer({ url, pdfFile }) {
         if (abortController.signal.aborted) return
         // The error is already logged at the call-site with additional context.
         if (err instanceof pdfJsWrapper.PDFJS.MissingPDFException) {
-          if (
-            // 404 is unrelated to new domain
-            OError.getFullInfo(err).statusCode !== 404 &&
-            isURLOnUserContentDomain(OError.getFullInfo(err).url)
-          ) {
-            setError('rendering-error-new-domain')
-          } else {
-            setError('rendering-error-expected')
-          }
+          setError('rendering-error-expected')
         } else {
           setError('rendering-error')
         }
@@ -148,22 +136,7 @@ function PdfJsViewer({ url, pdfFile }) {
         .catch(error => {
           if (abortController.signal.aborted) return
           console.error(error)
-          if (
-            isURLOnUserContentDomain(url) &&
-            error instanceof pdfJsWrapper.PDFJS.UnexpectedResponseException
-          ) {
-            setError('rendering-error-new-domain')
-          } else if (
-            isURLOnUserContentDomain(url) &&
-            error.name === 'UnknownErrorException' &&
-            (isNetworkError(error) || userContentDomainAccessCheckFailed())
-          ) {
-            // For some reason, pdfJsWrapper.PDFJS.UnknownErrorException is
-            //  not available for an instance check.
-            setError('rendering-error-new-domain')
-          } else {
-            setError('rendering-error')
-          }
+          setError('rendering-error')
         })
       return () => {
         abortController.abort()

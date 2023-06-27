@@ -1,5 +1,4 @@
 import OError from '@overleaf/o-error'
-import { fetchFromCompileDomain } from './fetchFromCompileDomain'
 
 const PDF_JS_CHUNK_SIZE = 128 * 1024
 const MAX_SUB_REQUEST_COUNT = 4
@@ -485,7 +484,7 @@ export async function fallbackRequest({ url, start, end, abortSignal }) {
       headers: { Range: `bytes=${start}-${end - 1}` },
       signal: abortSignal,
     }
-    const response = await fetchFromCompileDomain(url, init)
+    const response = await fetch(url, init)
     checkChunkResponse(response, end - start, init)
     return await response.arrayBuffer()
   } catch (e) {
@@ -564,7 +563,7 @@ async function fetchChunk({
     //  result all the browser cache keys (aka urls) get invalidated.
     // We memorize the previous browser cache keys in `cachedUrls`.
     try {
-      const response = await fetchFromCompileDomain(oldUrl, init)
+      const response = await fetch(oldUrl, init)
       if (response.status === 200) {
         checkChunkResponse(response, estimatedSize, init)
         metrics.oldUrlHitCount += 1
@@ -579,7 +578,7 @@ async function fetchChunk({
       // Fallback to the latest url.
     }
   }
-  const response = await fetchFromCompileDomain(url, init)
+  const response = await fetch(url, init)
   checkChunkResponse(response, estimatedSize, init)
   if (chunk.hash) cachedUrls.set(chunk.hash, url)
   return response

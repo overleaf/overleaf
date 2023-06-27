@@ -1004,7 +1004,7 @@
   "need_to_leave": "Need to leave?",
   "need_to_upgrade_for_more_collabs": "You need to upgrade your account to add more collaborators",
   "need_to_upgrade_for_more_collabs_variant": "You have reached the maximum number of collaborators. Upgrade your account to add more.",
-  "new_compile_domain_trouble_shooting": "We are migrating PDF downloads to a new domain. It looks like something is blocking your browser from accessing that new domain, <0>__compilesUserContentDomain__</0>. This could be caused by network blocking or a strict browser plugin rule. Please follow our <1>troubleshooting guide</1>.",
+  "new_compile_domain_notice": "We’ve recently migrated PDF downloads to a new domain. Something might be blocking your browser from accessing that new domain, <0>__compilesUserContentDomain__</0>. This could be caused by network blocking or a strict browser plugin rule. Please follow our <1>troubleshooting guide</1>.",
   "new_file": "New File",
   "new_folder": "New Folder",
   "new_name": "New Name",

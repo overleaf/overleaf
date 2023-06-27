@@ -58,33 +58,16 @@ const getSplitTestOptions = callbackify(async function (req, res) {
       res,
       'pdf-download-domain'
     )
-  const { variant: forceNewDomainVariant } =
-    await SplitTestHandler.promises.getAssignment(
-      editorReq,
-      res,
-      'force-new-compile-domain'
-    )
   const pdfDownloadDomain =
-    (domainVariant === 'user' || forceNewDomainVariant === 'enabled') &&
-    Settings.compilesUserContentDomain
+    domainVariant === 'user' && Settings.compilesUserContentDomain
       ? Settings.compilesUserContentDomain
       : Settings.pdfDownloadDomain
-
-  const { variant: hybridDomainVariant } =
-    await SplitTestHandler.promises.getAssignment(
-      editorReq,
-      res,
-      'pdf-download-domain-hybrid'
-    )
-  const enableHybridPdfDownload = hybridDomainVariant === 'enabled'
 
   if (!req.query.enable_pdf_caching) {
     // The frontend does not want to do pdf caching.
     return {
       pdfDownloadDomain,
-      enableHybridPdfDownload,
       enablePdfCaching: false,
-      forceNewDomainVariant,
     }
   }
 
@@ -101,18 +84,14 @@ const getSplitTestOptions = callbackify(async function (req, res) {
     // Skip the lookup of the chunk size when caching is not enabled.
     return {
       pdfDownloadDomain,
-      enableHybridPdfDownload,
       enablePdfCaching: false,
-      forceNewDomainVariant,
     }
   }
   const pdfCachingMinChunkSize = await getPdfCachingMinChunkSize(editorReq, res)
   return {
     pdfDownloadDomain,
-    enableHybridPdfDownload,
     enablePdfCaching,
     pdfCachingMinChunkSize,
-    forceNewDomainVariant,
   }
 })
 
@@ -154,13 +133,8 @@ module.exports = CompileController = {
 
     getSplitTestOptions(req, res, (err, splitTestOptions) => {
       if (err) return next(err)
-      let {
-        enablePdfCaching,
-        pdfCachingMinChunkSize,
-        pdfDownloadDomain,
-        enableHybridPdfDownload,
-        forceNewDomainVariant,
-      } = splitTestOptions
+      let { enablePdfCaching, pdfCachingMinChunkSize, pdfDownloadDomain } =
+        splitTestOptions
       options.enablePdfCaching = enablePdfCaching
       if (enablePdfCaching) {
         options.pdfCachingMinChunkSize = pdfCachingMinChunkSize
@@ -227,8 +201,6 @@ module.exports = CompileController = {
             timings,
             pdfDownloadDomain,
             pdfCachingMinChunkSize,
-            enableHybridPdfDownload,
-            forceNewDomainVariant,
           })
         }
       )

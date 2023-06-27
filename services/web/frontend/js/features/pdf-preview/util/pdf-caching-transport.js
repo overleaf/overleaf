@@ -10,8 +10,6 @@ import {
   trackPdfDownloadEnabled,
 } from './pdf-caching-flags'
 import { isNetworkError } from '../../../utils/isNetworkError'
-import { isSplitTestEnabled } from '../../../utils/splitTestUtils'
-import { isURLOnUserContentDomain } from './fetchFromCompileDomain'
 
 // 30 seconds: The shutdown grace period of a clsi pre-emp instance.
 const STALE_OUTPUT_REQUEST_THRESHOLD_MS = 30 * 1000
@@ -78,10 +76,6 @@ export function generatePdfCachingTransportFactory(PDFJS) {
         end,
         metrics,
       })
-      const isExpectedFailureOnNewCompileDomain = err =>
-        isSplitTestEnabled('force-new-compile-domain') &&
-        isURLOnUserContentDomain(OError.getFullInfo(err).url) &&
-        OError.getFullInfo(err).responseSize !== this.pdfFile.size
 
       const isStaleOutputRequest = () =>
         performance.now() - this.startTime > STALE_OUTPUT_REQUEST_THRESHOLD_MS
@@ -97,9 +91,8 @@ export function generatePdfCachingTransportFactory(PDFJS) {
       // - requests for the main output.pdf file
       //   A fallback request would not be able to retrieve the PDF either.
       const isExpectedError = err =>
-        ((is404(err) || isNetworkError(err)) &&
-          (isStaleOutputRequest() || isFromOutputPDFRequest(err))) ||
-        isExpectedFailureOnNewCompileDomain(err)
+        (is404(err) || isNetworkError(err)) &&
+        (isStaleOutputRequest() || isFromOutputPDFRequest(err))
 
       fetchRange({
         url: this.url,
@@ -120,8 +113,6 @@ export function generatePdfCachingTransportFactory(PDFJS) {
           if (isExpectedError(err)) {
             if (is404(err)) {
               // A regular pdf-js request would have seen this 404 as well.
-            } else if (isExpectedFailureOnNewCompileDomain(err)) {
-              // A regular pdf-js request would have seen this proxy-error as well.
             } else {
               // Flaky network, switch back to regular pdf-js requests.
               metrics.failedCount++

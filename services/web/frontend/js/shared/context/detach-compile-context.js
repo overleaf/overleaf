@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo } from 'react'
+import { createContext, useContext, useMemo } from 'react'
 import PropTypes from 'prop-types'
 import {
   useLocalCompileContext,
@@ -7,7 +7,6 @@ import {
 import useDetachStateWatcher from '../hooks/use-detach-state-watcher'
 import useDetachAction from '../hooks/use-detach-action'
 import useCompileTriggers from '../../features/pdf-preview/hooks/use-compile-triggers'
-import getMeta from '../../utils/meta'
 
 export const DetachCompileContext = createContext()
 
@@ -33,7 +32,6 @@ export function DetachCompileProvider({ children }) {
     editedSinceCompileStarted: _editedSinceCompileStarted,
     error: _error,
     fileList: _fileList,
-    forceNewDomainVariant: _forceNewDomainVariant,
     hasChanges: _hasChanges,
     highlights: _highlights,
     lastCompileOptions: _lastCompileOptions,
@@ -122,12 +120,6 @@ export function DetachCompileProvider({ children }) {
   const [fileList] = useDetachStateWatcher(
     'fileList',
     _fileList,
-    'detacher',
-    'detached'
-  )
-  const [forceNewDomainVariant] = useDetachStateWatcher(
-    'forceNewDomainVariant',
-    _forceNewDomainVariant,
     'detacher',
     'detached'
   )
@@ -375,11 +367,6 @@ export function DetachCompileProvider({ children }) {
   )
 
   useCompileTriggers(startCompile, setChangedAt, setSavedAt)
-  useEffect(() => {
-    // Sync the split test variant across the editor and pdf-detach.
-    const variants = getMeta('ol-splitTestVariants') || {}
-    variants['force-new-compile-domain'] = forceNewDomainVariant
-  }, [forceNewDomainVariant])
 
   const value = useMemo(
     () => ({
@@ -395,7 +382,6 @@ export function DetachCompileProvider({ children }) {
       editedSinceCompileStarted,
       error,
       fileList,
-      forceNewDomainVariant,
       hasChanges,
       highlights,
       lastCompileOptions,
@@ -449,7 +435,6 @@ export function DetachCompileProvider({ children }) {
       error,
       editedSinceCompileStarted,
       fileList,
-      forceNewDomainVariant,
       hasChanges,
       highlights,
       lastCompileOptions,

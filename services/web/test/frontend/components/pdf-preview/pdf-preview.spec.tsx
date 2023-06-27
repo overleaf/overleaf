@@ -23,6 +23,10 @@ const Layout: FC<{ layout: string; view?: string }> = ({ layout, view }) => {
 describe('<PdfPreview/>', function () {
   beforeEach(function () {
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
+    window.metaAttributesCache.set(
+      'ol-compilesUserContentDomain',
+      'https://compiles-user.dev-overleaf.com'
+    )
     cy.interceptEvents()
   })
 
