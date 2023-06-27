@@ -1,7 +1,9 @@
 const { callbackify } = require('util')
 const { Subscription } = require('../../models/Subscription')
 const { GroupPolicy } = require('../../models/GroupPolicy')
+const { User } = require('../../models/User')
 const ManagedUsersPolicy = require('./ManagedUsersPolicy')
+const OError = require('@overleaf/o-error')
 
 /**
  * This module contains functions for handling managed users in a
@@ -42,21 +44,59 @@ async function getGroupPolicyForUser(user) {
   if (user.enrollment?.managedBy == null) {
     return
   }
+  // retrieve the subscription and the group policy (without the _id field)
   const subscription = await Subscription.findById(user.enrollment.managedBy)
     .populate('groupPolicy', '-_id')
     .exec()
-  // return the group policy as a plain object without the _id and __v field
+  // return the group policy as a plain object (without the __v field)
   const groupPolicy = subscription?.groupPolicy.toObject({
     versionKey: false,
   })
   return groupPolicy
 }
 
+async function enrollInSubscription(userId, subscription) {
+  // check whether the user is already enrolled in a subscription
+  const user = await User.findOne({
+    _id: userId,
+    'enrollment.managedBy': { $exists: true },
+  }).exec()
+  if (user != null) {
+    throw new OError('User is already enrolled in a subscription', {
+      userId,
+      subscriptionId: subscription._id,
+    })
+  }
+  // update the user to be enrolled in the subscription
+  const updatedUser = await User.findOneAndUpdate(
+    { _id: userId, 'enrollment.managedBy': { $exists: false } },
+    {
+      enrollment: {
+        managedBy: subscription._id,
+        enrolledAt: new Date(),
+      },
+    },
+    { new: true }
+  ).exec()
+  // check whether the enrollment succeeded
+  if (
+    !updatedUser ||
+    !subscription.equals(updatedUser?.enrollment?.managedBy)
+  ) {
+    throw new OError('Failed to enroll user in subscription', {
+      userId,
+      subscriptionId: subscription._id,
+    })
+  }
+}
+
 module.exports = {
   promises: {
     enableManagedUsers,
     getGroupPolicyForUser,
+    enrollInSubscription,
   },
   enableManagedUsers: callbackify(enableManagedUsers),
   getGroupPolicyForUser: callbackify(getGroupPolicyForUser),
+  enrollInSubscription: callbackify(enrollInSubscription),
 }

@@ -68,6 +68,15 @@ class Subscription {
     ManagedUsersHandler.getGroupPolicyForUser(user, callback)
   }
 
+  enrollManagedUser(user, callback) {
+    SubscriptionModel.findById(this._id).exec((error, subscription) => {
+      if (error) {
+        return callback(error)
+      }
+      ManagedUsersHandler.enrollInSubscription(user._id, subscription, callback)
+    })
+  }
+
   expectDeleted(deleterData, callback) {
     DeletedSubscriptionModel.find(
       { 'subscription._id': this._id },
