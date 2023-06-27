@@ -1,3 +1,93 @@
+const {
+  registerCapability,
+  registerPolicy,
+} = require('../Authorization/PermissionsManager')
+const SubscriptionLocator = require('./SubscriptionLocator')
+
+// This file defines the capabilities and policies that are used to
+// determine what managed users can and cannot do.
+
+// Register the capability for a user to delete their own account.
+registerCapability('delete-own-account', { default: true })
+
+// Register the capability for a user to add a secondary email to their account.
+registerCapability('add-secondary-email', { default: true })
+
+// Register the capability for a user to sign in with Google to their account
+registerCapability('link-google-sso', { default: true })
+
+// Register the capability for a user to link other third party SSO to their account
+registerCapability('link-other-third-party-sso', { default: true })
+
+// Register the capability for a user to leave a managed group subscription.
+registerCapability('leave-managing-group-subscription', { default: true })
+
+// Register the capability for a user to start a subscription.
+registerCapability('start-subscription', { default: true })
+
+// Register a policy to prevent a user deleting their own account.
+registerPolicy('userCannotDeleteOwnAccount', {
+  'delete-own-account': false,
+})
+
+// Register a policy to prevent a user having secondary email addresses on their account.
+registerPolicy(
+  'userCannotAddSecondaryEmail',
+  {
+    'add-secondary-email': false,
+  },
+  {
+    validator: async user => {
+      // return true if the user does not have any secondary emails
+      return user.emails.length === 1
+    },
+  }
+)
+
+// Register a policy to prevent a user leaving the group subscription they are managed by.
+registerPolicy('userCannotLeaveManagingGroupSubscription', {
+  'leave-managing-group-subscription': false,
+})
+
+// Register a policy to prevent a user having third-party SSO linked to their account.
+registerPolicy(
+  'userCannotHaveGoogleSSO',
+  { 'link-google-sso': false },
+  {
+    // return true if the user does not have Google SSO linked
+    validator: async user =>
+      !user.thirdPartyIdentifiers?.some(
+        identifier => identifier.providerId === 'google'
+      ),
+  }
+)
+
+// Register a policy to prevent a user having third-party SSO linked to their account.
+registerPolicy(
+  'userCannotHaveOtherThirdPartySSO',
+  { 'link-other-third-party-sso': false },
+  {
+    // return true if the user does not have any other third party SSO linked
+    validator: async user =>
+      !user.thirdPartyIdentifiers?.some(
+        identifier => identifier.providerId !== 'google'
+      ),
+  }
+)
+
+// Register a policy to prevent a user having an active personal subscription.
+registerPolicy(
+  'userCannotHaveSubscription',
+  { 'start-subscription': false },
+  {
+    validator: async user => {
+      return !(await SubscriptionLocator.promises.getUserIndividualSubscription(
+        user
+      ))
+    },
+  }
+)
+
 /**
  * Returns the default group policy for managed users.
  * Managed users are users who are part of a group subscription, and are
@@ -14,7 +104,8 @@ function getDefaultPolicy() {
     userCannotAddSecondaryEmail: true,
     userCannotHaveSubscription: true,
     userCannotLeaveManagingGroupSubscription: true,
-    userCannotHaveThirdPartySSO: true,
+    userCannotHaveGoogleSSO: false, // we want to allow google SSO by default
+    userCannotHaveOtherThirdPartySSO: true,
   }
 }
 
