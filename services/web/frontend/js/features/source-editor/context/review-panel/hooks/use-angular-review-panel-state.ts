@@ -3,7 +3,7 @@ import useScopeValue from '../../../../../shared/hooks/use-scope-value'
 import { ReviewPanelState } from '../types/review-panel-state'
 import { sendMB } from '../../../../../infrastructure/event-tracking'
 import * as ReviewPanel from '../types/review-panel-state'
-import { SubView } from '../../../../../../../types/review-panel'
+import { SubView } from '../../../../../../../types/review-panel/review-panel'
 
 function useAngularReviewPanelState(): ReviewPanelState {
   const [subView, setSubView] = useScopeValue<ReviewPanel.Value<'subView'>>(
@@ -12,12 +12,18 @@ function useAngularReviewPanelState(): ReviewPanelState {
   const [collapsed, setCollapsed] = useScopeValue<
     ReviewPanel.Value<'collapsed'>
   >('reviewPanel.overview.docsCollapsedState')
+  const [entries] = useScopeValue<ReviewPanel.Value<'entries'>>(
+    'reviewPanel.entries'
+  )
+
   const [permissions] =
     useScopeValue<ReviewPanel.Value<'permissions'>>('permissions')
 
   const [wantTrackChanges] = useScopeValue<
     ReviewPanel.Value<'wantTrackChanges'>
   >('editor.wantTrackChanges')
+  const [openDocId] =
+    useScopeValue<ReviewPanel.Value<'openDocId'>>('editor.open_doc_id')
   const [shouldCollapse, setShouldCollapse] = useScopeValue<
     ReviewPanel.Value<'shouldCollapse'>
   >('reviewPanel.fullTCStateCollapsed')
@@ -63,10 +69,12 @@ function useAngularReviewPanelState(): ReviewPanelState {
   const values = useMemo<ReviewPanelState['values']>(
     () => ({
       collapsed,
+      entries,
       permissions,
-      subView,
       shouldCollapse,
+      subView,
       wantTrackChanges,
+      openDocId,
       toggleTrackChangesForEveryone,
       toggleTrackChangesForUser,
       toggleTrackChangesForGuests,
@@ -79,10 +87,12 @@ function useAngularReviewPanelState(): ReviewPanelState {
     }),
     [
       collapsed,
+      entries,
       permissions,
-      subView,
       shouldCollapse,
+      subView,
       wantTrackChanges,
+      openDocId,
       toggleTrackChangesForEveryone,
       toggleTrackChangesForUser,
       toggleTrackChangesForGuests,

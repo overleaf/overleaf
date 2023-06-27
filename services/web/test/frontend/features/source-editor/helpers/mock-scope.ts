@@ -78,6 +78,7 @@ export const mockScope = (content?: string) => {
       subView: 'cur_file',
       formattedProjectMembers: {},
       fullTCStateCollapsed: true,
+      entries: {},
     },
     ui: {
       reviewPanelOpen: true,

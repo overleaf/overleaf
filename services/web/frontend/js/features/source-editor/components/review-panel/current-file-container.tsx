@@ -1,50 +1,61 @@
-import Container from './container'
+import ChangeEntry from './entries/change-entry'
+import AggregateChangeEntry from './entries/aggregate-change-entry'
+import CommentEntry from './entries/comment-entry'
+import AddCommentEntry from './entries/add-comment-entry'
+import BulkActionsEntry from './entries/bulk-actions-entry'
+import { useReviewPanelValueContext } from '../../context/review-panel/review-panel-context'
 import useCodeMirrorContentHeight from '../../hooks/use-codemirror-content-height'
 
 function CurrentFileContainer() {
+  const { entries, openDocId, permissions } = useReviewPanelValueContext()
   const contentHeight = useCodeMirrorContentHeight()
 
   console.log('Review panel got content height', contentHeight)
 
+  const currentDocEntries =
+    openDocId && openDocId in entries ? entries[openDocId] : undefined
+
   return (
-    <Container>
+    <div
+      id="review-panel-current-file"
+      role="tabpanel"
+      tabIndex={0}
+      aria-labelledby="review-panel-tab-current-file"
+    >
       <div
-        id="review-panel-current-file"
-        role="tabpanel"
-        tabIndex={0}
-        aria-labelledby="review-panel-tab-current-file"
+        className="rp-entry-list-inner"
+        style={{ height: `${contentHeight}px` }}
       >
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-        tempor incididunt ut labore et dolore magna aliqua. Et malesuada fames
-        ac turpis egestas integer eget aliquet nibh. Et leo duis ut diam quam
-        nulla porttitor massa id. Risus quis varius quam quisque id diam vel
-        quam elementum. Nibh venenatis cras sed felis. Sit amet commodo nulla
-        facilisi nullam vehicula ipsum a arcu. Dui ut ornare lectus sit amet est
-        placerat in. Aliquam ultrices sagittis orci a. Leo a diam sollicitudin
-        tempor id eu nisl nunc mi. Quis ipsum suspendisse ultrices gravida
-        dictum fusce. Ut etiam sit amet nisl purus in mollis nunc sed. Rhoncus
-        est pellentesque elit ullamcorper dignissim cras. Faucibus turpis in eu
-        mi bibendum. Proin libero nunc consequat interdum. Ac placerat
-        vestibulum lectus mauris ultrices eros in cursus turpis. Ac felis donec
-        et odio. Nullam ac tortor vitae purus faucibus. Consectetur lorem donec
-        massa sapien faucibus et molestie. Praesent elementum facilisis leo vel
-        fringilla est ullamcorper eget nulla. Adipiscing vitae proin sagittis
-        nisl rhoncus mattis rhoncus urna. Cursus metus aliquam eleifend mi in
-        nulla posuere sollicitudin aliquam. Eget nullam non nisi est sit amet
-        facilisis magna. Donec adipiscing tristique risus nec feugiat in
-        fermentum posuere. Gravida rutrum quisque non tellus orci ac auctor
-        augue. Euismod in pellentesque massa placerat duis ultricies lacus.
-        Pellentesque diam volutpat commodo sed egestas. Tempus iaculis urna id
-        volutpat lacus laoreet. Lorem ipsum dolor sit amet consectetur.
-        Tincidunt id aliquet risus feugiat in ante metus. Risus ultricies
-        tristique nulla aliquet enim tortor at auctor urna. Purus in mollis nunc
-        sed. In ante metus dictum at. Magna eget est lorem ipsum dolor sit.
-        Fusce id velit ut tortor pretium viverra. Augue neque gravida in
-        fermentum et sollicitudin ac. Et malesuada fames ac turpis. Felis
-        bibendum ut tristique et egestas quis ipsum suspendisse ultrices. Varius
-        vel pharetra vel turpis nunc eget.
+        {currentDocEntries &&
+          Object.entries(currentDocEntries).map(([id, entry]) => {
+            if (!entry.visible) {
+              return null
+            }
+
+            if (entry.type === 'insert' || entry.type === 'delete') {
+              return <ChangeEntry key={id} />
+            }
+
+            if (entry.type === 'aggregate-change') {
+              return <AggregateChangeEntry key={id} />
+            }
+
+            if (entry.type === 'comment') {
+              return <CommentEntry key={id} />
+            }
+
+            if (entry.type === 'add-comment' && permissions.comment) {
+              return <AddCommentEntry key={id} />
+            }
+
+            if (entry.type === 'bulk-actions') {
+              return <BulkActionsEntry key={id} />
+            }
+
+            return null
+          })}
       </div>
-    </Container>
+    </div>
   )
 }
 

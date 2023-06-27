@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { useMemo } from 'react'
-import ResolvedCommentEntry from './resolved-comment-entry'
+import ResolvedCommentEntry from '../entries/resolved-comment-entry'
 import moment from 'moment'
 
 type ResolvedCommentsScrollerProps = {

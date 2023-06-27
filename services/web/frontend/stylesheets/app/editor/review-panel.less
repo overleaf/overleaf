@@ -1185,8 +1185,19 @@ button when (@is-overleaf-light = true) {
 
 // CM6-specific review panel rules
 .ol-cm-review-panel {
+  position: relative;
+  z-index: 6;
   display: block;
   flex-shrink: 0;
+  flex-direction: column;
+
+  background-color: @rp-bg-blue;
+  border-left: solid 0 @rp-border-grey;
+  font-family: @font-family-base;
+  line-height: @line-height-base;
+  font-size: @rp-base-font-size;
+  color: @rp-type-blue;
+  box-sizing: content-box;
 
   .rp-size-expanded & {
     display: flex;
@@ -1202,18 +1213,6 @@ button when (@is-overleaf-light = true) {
     border-left-width: 1px;
   }
 
-  background-color: @rp-bg-blue;
-  border-left: solid 0 @rp-border-grey;
-  font-family: @font-family-base;
-  line-height: @line-height-base;
-  font-size: @rp-base-font-size;
-  color: @rp-type-blue;
-  z-index: 6;
-
-  position: relative;
-  box-sizing: content-box;
-  flex-direction: column;
-
   .review-panel-toggler {
     display: flex;
     flex-direction: column;
@@ -1227,15 +1226,15 @@ button when (@is-overleaf-light = true) {
     }
   }
 
+  .review-panel-toolbar-collapse-button {
+    border: none;
+    background: none;
+    padding: 0;
+  }
+
   .review-panel-toolbar {
     position: sticky;
     top: 0;
-
-    .review-panel-toolbar-collapse-button {
-      border: none;
-      background: none;
-      padding: 0;
-    }
   }
 
   .rp-nav {
@@ -1263,37 +1262,32 @@ button when (@is-overleaf-light = true) {
     flex-direction: column;
   }
 
+  .rp-overview-file {
+    .rp-overview-file-entries {
+      //height: auto;
+      transition: height ease-in-out 0.15s; //, display 0.15s 0s;
+    }
+
+    .rp-overview-file-num-entries {
+      display: none;
+    }
+
+    &.rp-overview-file-collapse {
+      .rp-overview-file-num-entries {
+        display: inline;
+      }
+
+      .rp-overview-file-entries {
+        // height: 0;
+      }
+    }
+  }
+
   .rp-nav-item {
     border-right: 0;
     border-bottom: 0;
     border-left: 0;
     background: none;
-  }
-
-  .rp-entry-list {
-    display: inline-flex;
-    flex-direction: column;
-
-    .rp-overview-file {
-      .rp-overview-file-entries {
-        //height: auto;
-        transition: height ease-in-out 0.15s; //, display 0.15s 0s;
-      }
-
-      .rp-overview-file-num-entries {
-        display: none;
-      }
-
-      &.rp-overview-file-collapse {
-        .rp-overview-file-num-entries {
-          display: inline;
-        }
-
-        .rp-overview-file-entries {
-          // height: 0;
-        }
-      }
-    }
   }
 
   .rp-tc-state {

@@ -1,11 +1,12 @@
 import ReactDOM from 'react-dom'
+import Container from './container'
+import CurrentFileContainer from './current-file-container'
+import OverviewContainer from './overview-container'
 import { useCodeMirrorViewContext } from '../codemirror-editor'
 import {
   ReviewPanelProvider,
   useReviewPanelValueContext,
 } from '../../context/review-panel/review-panel-context'
-import CurrentFileContainer from './current-file-container'
-import OverviewContainer from './overview-container'
 import { isCurrentFileView } from '../../utils/sub-view'
 
 type ReviewPanelViewProps = {
@@ -18,9 +19,13 @@ function ReviewPanelView({ parentDomNode }: ReviewPanelViewProps) {
   return ReactDOM.createPortal(
     <>
       {isCurrentFileView(subView) ? (
-        <CurrentFileContainer />
+        <Container>
+          <CurrentFileContainer />
+        </Container>
       ) : (
-        <OverviewContainer />
+        <Container>
+          <OverviewContainer />
+        </Container>
       )}
     </>,
     parentDomNode

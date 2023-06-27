@@ -1,7 +1,7 @@
 import { Project, Sort } from '../../../../../types/project/dashboard/api'
 import { SortingOrder } from '../../../../../types/sorting-order'
 import { getOwnerName } from './project'
-import { Compare } from '../../../../../types/array/sort'
+import { Compare } from '../../../../../types/helpers/array/sort'
 
 const order = (order: SortingOrder, projects: Project[]) => {
   return order === 'asc' ? [...projects] : projects.reverse()

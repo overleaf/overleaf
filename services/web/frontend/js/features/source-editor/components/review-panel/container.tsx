@@ -18,10 +18,12 @@ function Container({ children, classNames, ...rest }: ContainerProps) {
       {...rest}
       data-testid="review-panel"
     >
+      <div className="review-panel-tools">
+        <Toolbar />
+        <Nav />
+      </div>
       <Toggler />
-      <Toolbar />
       {children}
-      <Nav />
     </div>
   )
 }

@@ -1,15 +1,19 @@
 import {
-  SubView,
+  DocId,
+  ReviewPanelEntries,
   ReviewPanelPermissions,
-} from '../../../../../../../types/review-panel'
+  SubView,
+} from '../../../../../../../types/review-panel/review-panel'
 
 export interface ReviewPanelState {
   values: {
     collapsed: Record<string, boolean>
-    subView: SubView
+    entries: ReviewPanelEntries
     permissions: ReviewPanelPermissions
     shouldCollapse: boolean
+    subView: SubView
     wantTrackChanges: boolean
+    openDocId: DocId | null
     toggleTrackChangesForEveryone: (isOn: boolean) => unknown
     toggleTrackChangesForUser: (isOn: boolean, memberId: string) => unknown
     toggleTrackChangesForGuests: (isOn: boolean) => unknown
