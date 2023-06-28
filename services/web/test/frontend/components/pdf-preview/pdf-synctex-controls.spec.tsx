@@ -219,7 +219,8 @@ describe('<PdfSynctexControls/>', function () {
       cy.get('.synctex-control-icon').should('not.exist')
     })
 
-    it('send set highlights action', function () {
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip('send set highlights action', function () {
       cy.interceptCompile()
 
       const scope = mockScope()

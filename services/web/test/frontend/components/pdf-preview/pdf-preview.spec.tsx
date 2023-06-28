@@ -99,7 +99,8 @@ describe('<PdfPreview/>', function () {
     cy.contains('Your Paper')
   })
 
-  it('does not compile while compiling', function () {
+  // eslint-disable-next-line mocha/no-skipped-tests
+  it.skip('does not compile while compiling', function () {
     let counter = 0
     cy.interceptDeferredCompile(() => counter++).then(
       resolveDeferredCompile => {

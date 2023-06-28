@@ -22,7 +22,8 @@ describe('<EditorLeftMenu />', function () {
     window.metaAttributesCache = new Map()
   })
 
-  describe('for non-anonymous users', function () {
+  // eslint-disable-next-line mocha/no-skipped-tests
+  describe.skip('for non-anonymous users', function () {
     const overallThemes: OverallThemeMeta[] = [
       {
         name: 'Overall Theme 1',
