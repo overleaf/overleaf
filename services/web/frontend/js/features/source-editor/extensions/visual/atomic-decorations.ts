@@ -897,19 +897,19 @@ export const atomicDecorations = (options: Options) => {
     return Decoration.set(decorations, true)
   }
 
-  let previousTree: Tree
-
   return [
     StateField.define<{
       mousedown: boolean
       decorations: DecorationSet
+      previousTree: Tree
     }>({
       create(state) {
-        previousTree = syntaxTree(state)
+        const previousTree = syntaxTree(state)
 
         return {
           mousedown: false,
           decorations: createDecorations(state, previousTree),
+          previousTree,
         }
       },
       update(value, tr) {
@@ -917,33 +917,35 @@ export const atomicDecorations = (options: Options) => {
           // store the "mousedown" value when it changes
           if (effect.is(mouseDownEffect)) {
             value = {
+              ...value,
               mousedown: effect.value,
-              decorations: value.decorations, // unchanged
             }
           }
         }
 
         const tree = syntaxTree(tr.state)
         if (
-          tree.type === previousTree.type &&
+          tree.type === value.previousTree.type &&
           tree.length < tr.state.doc.length
         ) {
           // still parsing
           value = {
-            mousedown: value.mousedown, // unchanged
+            ...value,
             decorations: value.decorations.map(tr.changes),
           }
         } else if (
           // only update the decorations when the mouse is not making a selection
           !value.mousedown &&
-          (tree !== previousTree || tr.selection || hasMouseDownEffect(tr))
+          (tree !== value.previousTree ||
+            tr.selection ||
+            hasMouseDownEffect(tr))
         ) {
           // tree changed
-          previousTree = tree
           // TODO: update the existing decorations for the changed range(s)?
           value = {
-            mousedown: value.mousedown, // unchanged
+            ...value,
             decorations: createDecorations(tr.state, tree),
+            previousTree: tree,
           }
         }
 
