@@ -160,10 +160,14 @@ function SSOLinkingWidgetContainer({
       description = t('linked_collabratec_description')
       break
     case 'google':
-    case 'twitter':
       description = `${t('login_with_service', {
         service: subscription.provider.name,
       })}.`
+      break
+    case 'twitter':
+      description = t('login_with_service_will_stop_working_soon', {
+        service: subscription.provider.name,
+      })
       break
     case 'orcid':
       description = t('oauth_orcid_description')

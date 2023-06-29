@@ -7,11 +7,20 @@ import IEEELogo from '../../../../shared/svgs/ieee-logo'
 import GoogleLogo from '../../../../shared/svgs/google-logo'
 import OrcidLogo from '../../../../shared/svgs/orcid-logo'
 import LinkingStatus from './status'
+import Icon from '../../../../shared/components/icon'
 
 const providerLogos: { readonly [p: string]: JSX.Element } = {
   collabratec: <IEEELogo />,
   google: <GoogleLogo />,
   orcid: <OrcidLogo />,
+  twitter: (
+    <Icon
+      type="exclamation-triangle"
+      fw
+      className="text-warning"
+      style={{ fontSize: '32px', width: '40px' }}
+    />
+  ),
 }
 
 type SSOLinkingWidgetProps = {

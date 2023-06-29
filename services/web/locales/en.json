@@ -922,6 +922,7 @@
   "login_to_overleaf": "Log in to Overleaf",
   "login_with_email": "Log in with your email",
   "login_with_service": "Log in with __service__",
+  "login_with_service_will_stop_working_soon": "Login with __service__ will stop working soon. If you log in with __service__, please take a moment to set up another SSO provider or a password.",
   "logs_and_output_files": "Logs and output files",
   "longer_compile_timeout": "Longer <0>compile timeout</0>",
   "looking_multiple_licenses": "Looking for multiple licenses?",
