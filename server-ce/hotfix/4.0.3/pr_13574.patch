@@ -1,0 +1,22 @@
+--- services/project-history/app/js/UpdateTranslator.js
++++ services/project-history/app/js/UpdateTranslator.js
+@@ -73,9 +73,18 @@ function _convertToChange(projectId, updateWithBlob) {
+     throw error
+   }
+
++  let v2Authors
++  if (update.meta.user_id === 'anonymous-user') {
++    // history-v1 uses null to represent an anonymous author
++    v2Authors = [null]
++  } else {
++    // user_id is missing on resync operations that update the contents of a doc
++    v2Authors = _.compact([update.meta.user_id])
++  }
++
+   const rawChange = {
+     operations,
+-    v2Authors: _.compact([update.meta.user_id]),
++    v2Authors,
+     timestamp: new Date(update.meta.ts).toISOString(),
+     projectVersion,
+     v2DocVersions: Object.keys(v2DocVersions).length ? v2DocVersions : null,
