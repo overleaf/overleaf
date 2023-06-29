@@ -16,7 +16,7 @@ import {
   selectSyntaxRight,
 } from '@codemirror/commands'
 import { changeCase, duplicateSelection } from '../commands/ranges'
-import { selectOccurrence } from '../commands/select'
+import { selectNextOccurrence, selectPrevOccurrence } from '../commands/select'
 import { cloneSelectionVertically } from '../commands/cursor'
 import { dispatchEditorEvent } from './changes/change-manager'
 import {
@@ -165,12 +165,12 @@ export const shortcuts = Prec.high(
     {
       key: 'Ctrl-Alt-ArrowLeft',
       preventDefault: true,
-      run: selectOccurrence(false),
+      run: selectPrevOccurrence,
     },
     {
       key: 'Ctrl-Alt-ArrowRight',
       preventDefault: true,
-      run: selectOccurrence(true),
+      run: selectNextOccurrence,
     },
     {
       key: 'Mod-Shift-d',

@@ -76,7 +76,7 @@
     "@codemirror/lang-markdown": "^6.1.1",
     "@codemirror/language": "^6.6.0",
     "@codemirror/lint": "^6.2.1",
-    "@codemirror/search": "github:overleaf/codemirror-search#ea83364b22ad66455fc94babea7d576fa9f76a93",
+    "@codemirror/search": "github:overleaf/codemirror-search#6a09ea7eaad138d810f989753036eabce23cc969",
     "@codemirror/state": "^6.2.0",
     "@codemirror/view": "^6.14.0",
     "@contentful/rich-text-html-renderer": "^16.0.2",
