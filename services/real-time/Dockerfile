@@ -2,7 +2,7 @@
 # Instead run bin/update_build_scripts from
 # https://github.com/overleaf/internal/
 
-FROM gcr.io/overleaf-ops/nodejs-overleaf:16.20.1 as base
+FROM node:16.20.1 as base
 
 WORKDIR /overleaf/services/real-time
 
