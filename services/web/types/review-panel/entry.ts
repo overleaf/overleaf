@@ -1,3 +1,5 @@
+import { ThreadId } from './review-panel'
+
 interface ReviewPanelEntryScreenPos {
   y: number
   height: number
@@ -8,14 +10,15 @@ interface ReviewPanelBaseEntry {
   visible: boolean
 }
 
-interface ReviewPanelCommentEntry extends ReviewPanelBaseEntry {
+export interface ReviewPanelCommentEntry extends ReviewPanelBaseEntry {
   type: 'comment'
   content: string
   entry_ids: string[]
   focused: boolean
   offset: number
   screenPos: ReviewPanelEntryScreenPos
-  thread_id: string
+  thread_id: ThreadId
+  replyContent?: string // angular specific
 }
 
 interface ReviewPanelInsertEntry extends ReviewPanelBaseEntry {

@@ -1,16 +1,33 @@
 import {
+  CommentId,
   DocId,
+  ReviewPanelCommentThreads,
   ReviewPanelEntries,
   ReviewPanelPermissions,
   SubView,
+  ThreadId,
 } from '../../../../../../../types/review-panel/review-panel'
+import { ReviewPanelCommentEntry } from '../../../../../../../types/review-panel/entry'
 
 export interface ReviewPanelState {
   values: {
     collapsed: Record<string, boolean>
+    commentThreads: ReviewPanelCommentThreads
+    deleteComment: (threadId: ThreadId, commentId: CommentId) => void
     entries: ReviewPanelEntries
+    entryHover: boolean
+    gotoEntry: (docId: DocId, entryOffset: number) => void
+    handleLayoutChange: () => void
+    loadingThreads: boolean
     permissions: ReviewPanelPermissions
+    resolveComment: (docId: DocId, entryId: ThreadId) => void
+    saveEdit: (
+      threadId: ThreadId,
+      commentId: CommentId,
+      content: string
+    ) => void
     shouldCollapse: boolean
+    submitReply: (entry: ReviewPanelCommentEntry, replyContent: string) => void
     subView: SubView
     wantTrackChanges: boolean
     openDocId: DocId | null
@@ -32,6 +49,7 @@ export interface ReviewPanelState {
   }
   updaterFns: {
     handleSetSubview: (subView: SubView) => void
+    setEntryHover: React.Dispatch<React.SetStateAction<boolean>>
     setCollapsed: React.Dispatch<
       React.SetStateAction<ReviewPanelState['values']['collapsed']>
     >

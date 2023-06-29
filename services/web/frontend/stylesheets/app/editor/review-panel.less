@@ -1294,4 +1294,18 @@ button when (@is-overleaf-light = true) {
     height: 0;
     transition: height 150ms;
   }
+
+  .rp-entry-metadata {
+    button {
+      padding: 0;
+      border: 0;
+      background-color: transparent;
+      color: @ol-blue;
+
+      &:hover,
+      &:focus {
+        text-decoration: underline;
+      }
+    }
+  }
 }

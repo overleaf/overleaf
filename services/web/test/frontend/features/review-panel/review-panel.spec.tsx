@@ -166,4 +166,27 @@ describe('<ReviewPanel />', function () {
       })
     })
   })
+
+  describe('comment entries', function () {
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip('shows threads and comments', function () {})
+
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip('edits comment', function () {})
+
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip('deletes comment', function () {})
+
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip('cancels comment editing', function () {})
+
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip('cancels comment deletion', function () {})
+
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip('adds new comment (replies) to a thread', function () {})
+
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip('resolves comment', function () {})
+  })
 })
