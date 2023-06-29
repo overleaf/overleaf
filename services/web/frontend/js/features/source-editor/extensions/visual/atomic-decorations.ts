@@ -24,6 +24,7 @@ import { EndWidget } from './visual-widgets/end'
 import {
   getEnvironmentArguments,
   getEnvironmentName,
+  getUnstarredEnvironmentName,
   parseFigureData,
 } from '../../utils/tree-operations/environments'
 import { MathWidget } from './visual-widgets/math'
@@ -224,7 +225,7 @@ export const atomicDecorations = (options: Options) => {
       enter(nodeRef) {
         if (nodeRef.type.is('$Environment')) {
           if (shouldDecorate(state, nodeRef)) {
-            const envName = getEnvironmentName(nodeRef.node, state)
+            const envName = getUnstarredEnvironmentName(nodeRef.node, state)
             const hideInEnvironmentTypes = ['figure', 'table']
             if (envName && hideInEnvironmentTypes.includes(envName)) {
               const beginNode = nodeRef.node.getChild('BeginEnv')

@@ -236,6 +236,11 @@ export function getEnvironmentName(
   return state.sliceDoc(nameNode.from, nameNode.to)
 }
 
+export const getUnstarredEnvironmentName = (
+  node: SyntaxNode | null,
+  state: EditorState
+): string | undefined => getEnvironmentName(node, state)?.replace(/\*$/, '')
+
 export function getEnvironmentArguments(environmentNode: SyntaxNode) {
   return environmentNode.getChild('BeginEnv')?.getChildren('TextArgument')
 }

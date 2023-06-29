@@ -250,7 +250,7 @@ KnownCommand {
         IncludeGraphicsArgument { FilePathArgument }
     } |
     Caption {
-        CaptionCtrlSeq optionalWhitespace? OptionalArgument? TextArgument
+        CaptionCtrlSeq "*"? optionalWhitespace? OptionalArgument? TextArgument
     } |
     Label {
         LabelCtrlSeq optionalWhitespace? LabelArgument

@@ -739,6 +739,7 @@ const otherKnownEnvNames = {
   document: DocumentEnvName,
   tikzpicture: TikzPictureEnvName,
   figure: FigureEnvName,
+  'figure*': FigureEnvName,
   subfigure: FigureEnvName,
   enumerate: ListEnvName,
   itemize: ListEnvName,
