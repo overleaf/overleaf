@@ -57,8 +57,12 @@ export const extendRequiredParameter = (
     argumentNode.getChild('OpenBrace') &&
     argumentNode.getChild('CloseBrace')
 
-  // add a closing brace if needed
-  if (nextChar(state.doc, change.to) !== '}') {
+  if (nextChar(state.doc, change.to) === '}') {
+    // include an existing closing brace, so the cursor moves after it
+    change.insert += '}'
+    change.to++
+  } else {
+    // add a closing brace if needed
     if (countUnclosedBraces(state.doc, change.from, change.to) > 0) {
       change.insert += '}'
     }
