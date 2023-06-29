@@ -10,7 +10,7 @@ const Container: FC = ({ children }) => (
   <div style={{ width: 785, height: 785 }}>{children}</div>
 )
 
-describe('<CodeMirrorEditor/> in Rich Text mode', function () {
+describe('<CodeMirrorEditor/> in Visual mode', function () {
   beforeEach(function () {
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
     window.metaAttributesCache.set(
@@ -44,6 +44,10 @@ describe('<CodeMirrorEditor/> in Rich Text mode', function () {
     cy.get('.ol-cm-toolbar [aria-label="Format Bold"]').as('toolbar-bold')
 
     cy.get('@first-line').click()
+  })
+
+  afterEach(function () {
+    window.metaAttributesCache.clear()
   })
 
   forEach(['LaTeX', 'TeX']).it('renders the %s logo', function (logo) {
@@ -372,6 +376,14 @@ describe('<CodeMirrorEditor/> in Rich Text mode', function () {
     cy.get('.ol-cm-maketitle')
     cy.get('.ol-cm-title').should('contain.html', 'Document title<br>with')
     cy.get('.ol-cm-author').should('have.text', 'Author')
+  })
+
+  it('decorates footnotes', function () {
+    cy.get('@first-line').type('Foo \\footnote{{}Bar.} ')
+    cy.get('@first-line').should('contain', 'Foo')
+    cy.get('@first-line').should('not.contain', 'Bar')
+    cy.get('@first-line').type('{leftArrow}')
+    cy.get('@first-line').should('have.text', 'Foo \\footnote{Bar.} ')
   })
 
   // TODO: \input

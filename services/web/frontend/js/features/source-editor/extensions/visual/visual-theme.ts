@@ -360,4 +360,22 @@ export const visualTheme = EditorView.theme({
     top: '18px',
     right: '18px',
   },
+  '.ol-cm-footnote': {
+    display: 'inline-flex',
+    padding: '0 0.1em',
+    background: 'rgba(125, 125, 125, 0.25)',
+    borderRadius: '2px',
+    height: '1em',
+    cursor: 'pointer',
+    verticalAlign: 'text-top',
+    '&:not(.ol-cm-footnote-view):hover': {
+      background: 'rgba(125, 125, 125, 0.5)',
+    },
+    '&.ol-cm-footnote-view': {
+      height: 'auto',
+      verticalAlign: 'unset',
+      display: 'inline',
+      padding: '0 0.5em',
+    },
+  },
 })

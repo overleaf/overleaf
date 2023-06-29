@@ -47,6 +47,7 @@ import getMeta from '../../../../utils/meta'
 import { EditableGraphicsWidget } from './visual-widgets/editable-graphics'
 import { EditableInlineGraphicsWidget } from './visual-widgets/editable-inline-graphics'
 import { CloseBrace, OpenBrace } from '../../lezer-latex/latex.terms.mjs'
+import { FootnoteWidget } from './visual-widgets/footnote'
 
 type Options = {
   fileTreeManager: {
@@ -856,6 +857,43 @@ export const atomicDecorations = (options: Options) => {
                     )
                   )
                   return false
+                }
+              } else if (
+                commandName === '\\footnote' ||
+                commandName === '\\endnote'
+              ) {
+                if (textArgumentNode) {
+                  if (
+                    state.readOnly &&
+                    selectionIntersects(state.selection, nodeRef)
+                  ) {
+                    // a special case for a read-only document:
+                    // always display the content, styled differently from the main content.
+                    decorations.push(
+                      ...decorateArgumentBraces(
+                        new BraceWidget(),
+                        textArgumentNode,
+                        nodeRef.from
+                      ),
+                      Decoration.mark({
+                        class: 'ol-cm-footnote ol-cm-footnote-view',
+                      }).range(textArgumentNode.from, textArgumentNode.to)
+                    )
+                  } else {
+                    if (shouldDecorate(state, nodeRef)) {
+                      // collapse the footnote when the selection is outside it
+                      decorations.push(
+                        Decoration.replace({
+                          widget: new FootnoteWidget(
+                            commandName === '\\footnote'
+                              ? 'footnote'
+                              : 'endnote'
+                          ),
+                        }).range(nodeRef.from, nodeRef.to)
+                      )
+                      return false
+                    }
+                  }
                 }
               } else if (commandName === '\\LaTeX') {
                 if (shouldDecorate(state, nodeRef)) {
