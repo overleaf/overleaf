@@ -45,6 +45,7 @@ import { InlineGraphicsWidget } from './visual-widgets/inline-graphics'
 import getMeta from '../../../../utils/meta'
 import { EditableGraphicsWidget } from './visual-widgets/editable-graphics'
 import { EditableInlineGraphicsWidget } from './visual-widgets/editable-inline-graphics'
+import { CloseBrace, OpenBrace } from '../../lezer-latex/latex.terms.mjs'
 
 type Options = {
   fileTreeManager: {
@@ -449,12 +450,16 @@ export const atomicDecorations = (options: Options) => {
             'SectioningCommand'
           )
           if (ancestorNode) {
-            const shouldShowBraces = !shouldDecorate(state, ancestorNode)
             // a section (or subsection, etc) command
             const argumentNode = ancestorNode.getChild('SectioningArgument')
             if (argumentNode) {
-              const braces = argumentNode.getChildren('$Brace')
-              if (braces.length !== 2) {
+              const openBrace = argumentNode.getChild(OpenBrace)
+              const closeBrace = argumentNode.getChild(CloseBrace)
+              if (!openBrace || !closeBrace) {
+                return false
+              }
+              const sectionCtrlSeqNode = ancestorNode.getChild('$CtrlSeq')
+              if (!sectionCtrlSeqNode) {
                 return false
               }
               const titleNode = argumentNode.getChild('LongArg')
@@ -466,17 +471,23 @@ export const atomicDecorations = (options: Options) => {
                 return false
               }
 
+              const showBraces =
+                selectionIntersects(state.selection, sectionCtrlSeqNode) ||
+                selectionIntersects(state.selection, openBrace) ||
+                selectionIntersects(state.selection, closeBrace)
+
               decorations.push(
                 Decoration.replace({
-                  widget: new BraceWidget(shouldShowBraces ? '}' : ''),
-                }).range(braces[1].from, braces[1].to)
+                  widget: new BraceWidget(showBraces ? '{' : ''),
+                }).range(nodeRef.from, titleNode.from)
               )
 
               decorations.push(
                 Decoration.replace({
-                  widget: new BraceWidget(shouldShowBraces ? '{' : ''),
-                }).range(nodeRef.from, titleNode.from)
+                  widget: new BraceWidget(showBraces ? '}' : ''),
+                }).range(closeBrace.from, closeBrace.to)
               )
+
               return false
             }
           }

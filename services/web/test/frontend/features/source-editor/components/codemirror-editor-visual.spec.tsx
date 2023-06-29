@@ -151,9 +151,13 @@ describe('<CodeMirrorEditor/> in Rich Text mode', function () {
     cy.get('@first-line').should('have.text', `\\${command}{}`)
     cy.get('@first-line').type('{rightArrow} ')
     cy.get('@first-line').should('have.text', `\\${command}{} `)
-    // Press enter before closing brace
-    cy.get('@first-line').type('{Backspace}{leftArrow}title{leftArrow}{Enter}')
-    cy.get('@first-line').should('have.text', 'title')
+    // Type a section heading
+    cy.get('@first-line').type('{Backspace}{leftArrow}title')
+    cy.get('@first-line').should('have.text', '{title}') // braces are visible as cursor is adjacent
+    cy.get('@first-line').type('{leftArrow}')
+    cy.get('@first-line').should('have.text', 'title') // braces are hidden as cursor is not adjacent
+    cy.get('@first-line').type('{Enter}')
+    cy.get('@first-line').should('have.text', 'title') // braces are hidden as cursor is on the next line
     cy.get('@first-line').find(`.ol-cm-heading.ol-cm-command-${command}`)
   })
 
