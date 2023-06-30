@@ -3,9 +3,9 @@ import useScopeValue from '../../../shared/hooks/use-scope-value'
 import Tooltip from '../../../shared/components/tooltip'
 import { sendMB } from '../../../infrastructure/event-tracking'
 import getMeta from '../../../utils/meta'
-import SplitTestBadge from '../../../shared/components/split-test-badge'
 import isValidTeXFile from '../../../main/is-valid-tex-file'
 import { useTranslation } from 'react-i18next'
+import SplitTestBadge from '../../../shared/components/split-test-badge'
 
 function Badge() {
   const content = (
@@ -41,23 +41,13 @@ function Badge() {
 }
 
 const showLegacySourceEditor: boolean = getMeta('ol-showLegacySourceEditor')
-const visualEditorNameVariant: string = getMeta('ol-visualEditorNameVariant')
-const isParticipatingInVisualEditorNamingTest: boolean = getMeta(
-  'ol-isParticipatingInVisualEditorNamingTest'
-)
 
 function EditorSwitch() {
+  const { t } = useTranslation()
   const [newSourceEditor, setNewSourceEditor] = useScopeValue(
     'editor.newSourceEditor'
   )
   const [richText, setRichText] = useScopeValue('editor.showRichText')
-  const sourceName =
-    visualEditorNameVariant === 'code-visual'
-      ? 'Code Editor'
-      : visualEditorNameVariant === 'source-visual'
-      ? 'Source Editor'
-      : 'Source'
-
   const [visual, setVisual] = useScopeValue('editor.showVisual')
 
   const [docName] = useScopeValue('editor.open_doc_name')
@@ -116,7 +106,7 @@ function EditorSwitch() {
           onChange={handleChange}
         />
         <label htmlFor="editor-switch-cm6" className="toggle-switch-label">
-          <span>{sourceName}</span>
+          <span>{t('code_editor')}</span>
         </label>
 
         {showLegacySourceEditor ? (
@@ -143,7 +133,7 @@ function EditorSwitch() {
         />
       </fieldset>
 
-      {!!richTextOrVisual && !isParticipatingInVisualEditorNamingTest && (
+      {!!richTextOrVisual && (
         <SplitTestBadge splitTestName="rich-text" displayOnVariants={['cm6']} />
       )}
     </div>
@@ -156,9 +146,6 @@ const RichTextToggle: FC<{
   handleChange: (event: ChangeEvent<HTMLInputElement>) => void
 }> = ({ checked, disabled, handleChange }) => {
   const { t } = useTranslation()
-
-  const richTextName =
-    visualEditorNameVariant === 'default' ? 'Rich Text' : 'Visual Editor'
 
   const toggle = (
     <span>
@@ -173,7 +160,7 @@ const RichTextToggle: FC<{
         disabled={disabled}
       />
       <label htmlFor="editor-switch-rich-text" className="toggle-switch-label">
-        <span>{richTextName}</span>
+        <span>{t('visual_editor')}</span>
       </label>
     </span>
   )
