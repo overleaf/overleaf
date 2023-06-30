@@ -13,9 +13,10 @@ import { redo, undo } from '@codemirror/commands'
 import * as commands from '../../extensions/toolbar/commands'
 import { SectionHeadingDropdown } from './section-heading-dropdown'
 import { canAddComment } from '../../extensions/toolbar/comments'
-import { useTranslation } from 'react-i18next'
 import getMeta from '../../../../utils/meta'
 import { InsertFigureDropdown } from './insert-figure-dropdown'
+import { useTranslation } from 'react-i18next'
+import { MathDropdown } from './math-dropdown'
 
 const isMac = /Mac/.test(window.navigator?.platform)
 
@@ -98,22 +99,7 @@ export const ToolbarItems: FC<{
       )}
       {showGroup('group-math') && (
         <div className="ol-cm-toolbar-button-group" data-overflow="group-math">
-          <ToolbarButton
-            id="toolbar-inline-math"
-            label={t('toolbar_insert_inline_math')}
-            command={commands.wrapInInlineMath}
-            icon="π"
-            textIcon
-            className="ol-cm-toolbar-button-math"
-          />
-          <ToolbarButton
-            id="toolbar-display-math"
-            label={t('toolbar_insert_display_math')}
-            command={commands.wrapInDisplayMath}
-            icon="Σ"
-            textIcon
-            className="ol-cm-toolbar-button-math"
-          />
+          <MathDropdown />
           <ToolbarButton
             id="toolbar-toggle-symbol-palette"
             label={t('toolbar_toggle_symbol_palette')}

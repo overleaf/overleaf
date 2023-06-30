@@ -6,13 +6,22 @@ import Tooltip from '../../../../shared/components/tooltip'
 import { EditorView } from '@codemirror/view'
 import { emitCommandEvent } from '../../extensions/toolbar/utils/analytics'
 import { useCodeMirrorViewContext } from '../codemirror-editor'
+import MaterialIcon from '../../../../shared/components/material-icon'
 
 export const ToolbarButtonMenu: FC<{
   id: string
   label: string
   icon: string
+  materialIcon?: boolean
   altCommand?: (view: EditorView) => void
-}> = memo(function ButtonMenu({ icon, id, label, altCommand, children }) {
+}> = memo(function ButtonMenu({
+  icon,
+  id,
+  label,
+  materialIcon,
+  altCommand,
+  children,
+}) {
   const target = useRef<any>(null)
   const { open, onToggle, ref } = useDropdown()
   const view = useCodeMirrorViewContext()
@@ -39,7 +48,7 @@ export const ToolbarButtonMenu: FC<{
       }}
       ref={target}
     >
-      <Icon type={icon} fw />
+      {materialIcon ? <MaterialIcon type={icon} /> : <Icon type={icon} fw />}
     </Button>
   )
 

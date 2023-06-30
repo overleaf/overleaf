@@ -22,6 +22,7 @@
 		include ./file-view
 
 		.editor-container.full-size(
+			class={"has-source-toolbar" : showSourceToolbar},
 			ng-show="ui.view == 'editor' && editor.multiSelectedCount === 0"
 			vertical-resizable-panes="south-pane-resizer"
 			vertical-resizable-panes-hidden-externally-on="south-pane-toggled"

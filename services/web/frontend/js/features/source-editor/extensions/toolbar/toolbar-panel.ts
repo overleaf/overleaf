@@ -75,6 +75,9 @@ export const toolbarPanel = () => [
       '& .list-group-item': {
         width: '100%',
         textAlign: 'start',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '5px',
       },
     },
     '.ol-cm-toolbar-button-group': {
@@ -90,6 +93,9 @@ export const toolbarPanel = () => [
         '&.ol-cm-toolbar-end': {
           borderLeft: 'none',
         },
+        '&.ol-cm-toolbar-stretch': {
+          flex: 1,
+        },
         '&.overflow-hidden': {
           borderLeft: 'none',
         },
@@ -98,6 +104,9 @@ export const toolbarPanel = () => [
         width: 0,
         padding: 0,
       },
+    },
+    '.formatting-buttons-wrapper': {
+      flex: 1,
     },
     '.ol-cm-toolbar-button': {
       display: 'inline-flex',
@@ -148,8 +157,10 @@ export const toolbarPanel = () => [
       },
     },
     '.ol-cm-toolbar-end': {
-      flex: 1,
       justifyContent: 'flex-end',
+      '& .badge': {
+        marginRight: '5px',
+      },
     },
     '.ol-cm-toolbar-overflow-toggle': {
       display: 'none',

@@ -18,7 +18,7 @@ const clickToolbarButton = (text: string) => {
 }
 
 const Container: FC = ({ children }) => (
-  <div style={{ width: 785, height: 785 }}>{children}</div>
+  <div style={{ width: 1500, height: 785 }}>{children}</div>
 )
 
 const mountEditor = (content: string) => {
@@ -97,6 +97,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
     mountEditor('2+3=5')
     selectAll()
 
+    clickToolbarButton('Insert Math')
     clickToolbarButton('Insert Inline Math')
     cy.get('.cm-content').should('have.text', '\\(2+3=5\\)')
   })
@@ -105,6 +106,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
     mountEditor('2+3=5')
     selectAll()
 
+    clickToolbarButton('Insert Math')
     clickToolbarButton('Insert Display Math')
     cy.get('.cm-content').should('have.text', '\\[2+3=5\\]')
   })

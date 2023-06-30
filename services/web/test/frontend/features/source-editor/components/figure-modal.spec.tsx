@@ -4,7 +4,7 @@ import { mockScope, rootFolderId } from '../helpers/mock-scope'
 import { FC } from 'react'
 
 const Container: FC = ({ children }) => (
-  <div style={{ width: 785, height: 785 }}>{children}</div>
+  <div style={{ width: 1500, height: 785 }}>{children}</div>
 )
 
 const clickToolbarButton = (text: string) => {

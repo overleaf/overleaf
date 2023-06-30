@@ -13,13 +13,16 @@
   margin-left: 6px;
 }
 
-.detach-compile-button-container when (@is-new-css = false) {
-  margin-right: -5px;
-}
+// only apply for legacy editor
+.toolbar-pdf-right {
+  .detach-compile-button-container when (@is-new-css = false) {
+    margin-right: -5px;
+  }
 
-// because 2px border on :active state
-.detach-compile-button-container when (@is-new-css = true) {
-  margin-right: -3px;
+  // because 2px border on :active state
+  .detach-compile-button-container when (@is-new-css = true) {
+    margin-right: -3px;
+  }
 }
 
 .btn-striped-animated {

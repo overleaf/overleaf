@@ -17,11 +17,12 @@ import { findEffect } from '../../utils/effects'
 import { forceParsing, syntaxTree } from '@codemirror/language'
 import { hasLanguageLoadedEffect } from '../language'
 import { restoreScrollPosition } from '../scroll-position'
-import { toolbarPanel } from '../toolbar/toolbar-panel'
 import { CurrentDoc } from '../../../../../../types/current-doc'
 import isValidTeXFile from '../../../../main/is-valid-tex-file'
 import { listItemMarker } from './list-item-marker'
 import { figureModalPasteHandler } from '../figure-modal'
+import { isSplitTestEnabled } from '../../../../utils/splitTestUtils'
+import { toolbarPanel } from '../toolbar/toolbar-panel'
 
 type Options = {
   visual: boolean
@@ -197,8 +198,8 @@ const extension = (options: Options) => [
   atomicDecorations(options),
   skipPreambleWithCursor,
   visualKeymap,
-  toolbarPanel(),
   scrollJumpAdjuster,
+  isSplitTestEnabled('source-editor-toolbar') ? [] : toolbarPanel(),
   showContentWhenParsed,
   figureModalPasteHandler(),
 ]

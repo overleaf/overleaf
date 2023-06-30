@@ -683,6 +683,21 @@ const ProjectController = {
             cb()
           })
         },
+        sourceEditorToolbarAssigment(cb) {
+          SplitTestHandler.getAssignment(
+            req,
+            res,
+            'source-editor-toolbar',
+            (error, assignment) => {
+              // do not fail editor load if assignment fails
+              if (error) {
+                cb(null, { variant: 'default' })
+              } else {
+                cb(null, assignment)
+              }
+            }
+          )
+        },
         historyViewAssignment(cb) {
           SplitTestHandler.getAssignment(
             req,
@@ -729,6 +744,7 @@ const ProjectController = {
           pdfjsAssignment,
           editorLeftMenuAssignment,
           richTextAssignment,
+          sourceEditorToolbarAssigment,
           historyViewAssignment,
           reviewPanelAssignment,
         }
@@ -919,6 +935,9 @@ const ProjectController = {
               pdfjsVariant: pdfjsAssignment.variant,
               debugPdfDetach,
               showLegacySourceEditor,
+              showSourceToolbar:
+                !showLegacySourceEditor &&
+                sourceEditorToolbarAssigment.variant === 'enabled',
               showSymbolPalette,
               galileoEnabled,
               galileoFeatures,

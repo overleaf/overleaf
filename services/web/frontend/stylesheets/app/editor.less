@@ -95,7 +95,13 @@
 #editor,
 #editor-rich-text {
   .full-size;
+}
+
+.editor-container #editor {
   top: @editor-toolbar-height;
+}
+.editor-container.has-source-toolbar #editor {
+  top: 0;
 }
 
 .pdf-empty,

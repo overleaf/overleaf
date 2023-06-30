@@ -13,6 +13,13 @@ import { ToolbarOverflow } from './toolbar/overflow'
 import useDropdown from '../../../shared/hooks/use-dropdown'
 import { getPanel } from '@codemirror/view'
 import { createToolbarPanel } from '../extensions/toolbar/toolbar-panel'
+import EditorSwitch from './editor-switch'
+import SwitchToPDFButton from './switch-to-pdf-button'
+import { DetacherSynctexControl } from '../../pdf-preview/components/detach-synctex-control'
+import DetachCompileButtonWrapper from '../../pdf-preview/components/detach-compile-button-wrapper'
+import getMeta from '../../../utils/meta'
+import { isVisual } from '../extensions/visual/visual'
+import SplitTestBadge from '../../../shared/components/split-test-badge'
 
 export const CodeMirrorToolbar = () => {
   const view = useCodeMirrorViewContext()
@@ -26,7 +33,10 @@ export const CodeMirrorToolbar = () => {
 }
 
 const Toolbar = memo(function Toolbar() {
+  const showSourceToolbar: boolean = getMeta('ol-showSourceToolbar')
+
   const state = useCodeMirrorStateContext()
+  const view = useCodeMirrorViewContext()
 
   const [overflowed, setOverflowed] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
@@ -85,9 +95,13 @@ const Toolbar = memo(function Toolbar() {
   }
 
   return (
-    <div className="ol-cm-toolbar" ref={resizeRef}>
+    <div className="ol-cm-toolbar toolbar-editor" ref={resizeRef}>
+      {showSourceToolbar && <EditorSwitch />}
       <ToolbarItems state={state} />
-      <div className="ol-cm-toolbar-button-group" ref={overflowBeforeRef}>
+      <div
+        className="ol-cm-toolbar-button-group ol-cm-toolbar-stretch"
+        ref={overflowBeforeRef}
+      >
         <ToolbarOverflow
           overflowed={overflowed}
           target={overflowBeforeRef.current ?? undefined}
@@ -97,6 +111,7 @@ const Toolbar = memo(function Toolbar() {
         >
           <ToolbarItems state={state} overflowed={overflowedItemsRef.current} />
         </ToolbarOverflow>
+        <div className="formatting-buttons-wrapper" />
       </div>
       <div className="ol-cm-toolbar-button-group ol-cm-toolbar-end">
         <ToolbarButton
@@ -106,6 +121,19 @@ const Toolbar = memo(function Toolbar() {
           active={searchPanelOpen(state)}
           icon="search"
         />
+        {!isVisual(view) && (
+          <SplitTestBadge
+            splitTestName="source-editor-toolbar"
+            displayOnVariants={['enabled']}
+          />
+        )}
+        {showSourceToolbar && (
+          <>
+            <SwitchToPDFButton />
+            <DetacherSynctexControl />
+            <DetachCompileButtonWrapper />
+          </>
+        )}
       </div>
       <div className="ol-cm-toolbar-button-group hidden">
         <ToolbarButton
