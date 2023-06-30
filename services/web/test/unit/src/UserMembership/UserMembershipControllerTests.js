@@ -59,6 +59,12 @@ describe('UserMembershipController', function () {
       },
     ]
 
+    this.Settings = {
+      managedUsers: {
+        enabled: false,
+      },
+    }
+
     this.SessionManager = {
       getSessionUser: sinon.stub().returns(this.user),
       getLoggedInUserId: sinon.stub().returns(this.user._id),
@@ -84,6 +90,7 @@ describe('UserMembershipController', function () {
           '../Authentication/SessionManager': this.SessionManager,
           '../SplitTests/SplitTestHandler': this.SplitTestHandler,
           './UserMembershipHandler': this.UserMembershipHandler,
+          '@overleaf/settings': this.Settings,
         },
       }
     ))
@@ -113,6 +120,20 @@ describe('UserMembershipController', function () {
           expect(viewPath).to.equal('user_membership/group-members-react')
           expect(viewParams.users).to.deep.equal(this.users)
           expect(viewParams.groupSize).to.equal(this.subscription.membersLimit)
+          expect(viewParams.managedUsersActive).to.equal(false)
+        },
+      })
+    })
+
+    it('render group view with managed users', async function () {
+      this.req.entity.groupPolicy = { somePolicy: true }
+      this.Settings.managedUsers.enabled = true
+      return await this.UserMembershipController.manageGroupMembers(this.req, {
+        render: (viewPath, viewParams) => {
+          expect(viewPath).to.equal('user_membership/group-members-react')
+          expect(viewParams.users).to.deep.equal(this.users)
+          expect(viewParams.groupSize).to.equal(this.subscription.membersLimit)
+          expect(viewParams.managedUsersActive).to.equal(true)
         },
       })
     })

@@ -106,7 +106,21 @@ function getPopulatedListOfMembers(entity, attributes, callback) {
     }
   }
 
-  async.map(userObjects, UserMembershipViewModel.buildAsync, callback)
+  async.map(userObjects, UserMembershipViewModel.buildAsync, (err, users) => {
+    if (err) {
+      return callback(err)
+    }
+    for (const user of users) {
+      if (
+        user?._id &&
+        entity?.admin_id &&
+        user._id.toString() === entity.admin_id.toString()
+      ) {
+        user.isEntityAdmin = true
+      }
+    }
+    callback(null, users)
+  })
 }
 
 function addUserToEntity(entity, attribute, user, callback) {

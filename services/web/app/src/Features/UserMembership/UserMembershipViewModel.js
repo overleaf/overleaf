@@ -39,6 +39,7 @@ module.exports = UserMembershipViewModel = {
       last_name: 1,
       lastLoggedIn: 1,
       lastActive: 1,
+      enrollment: 1,
     }
     return UserGetter.getUser(userId, projection, function (error, user) {
       if (error != null || user == null) {
@@ -61,6 +62,12 @@ function buildUserViewModel(user, isInvite) {
     last_active_at: user.lastActive || user.lastLoggedIn || null,
     last_logged_in_at: user.lastLoggedIn || null,
     invite: isInvite,
+    enrollment: user.enrollment
+      ? {
+          managedBy: user.enrollment.managedBy,
+          enrolledAt: user.enrollment.enrolledAt,
+        }
+      : undefined,
   }
 }
 

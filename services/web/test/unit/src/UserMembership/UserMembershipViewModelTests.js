@@ -39,6 +39,10 @@ describe('UserMembershipViewModel', function () {
       email: 'mock-email@baz.com',
       first_name: 'Name',
       lastLoggedIn: '2020-05-20T10:41:11.407Z',
+      enrollment: {
+        managedBy: 'mock-group-id',
+        enrolledAt: new Date(),
+      },
     }
   })
 
@@ -53,6 +57,7 @@ describe('UserMembershipViewModel', function () {
         first_name: null,
         last_name: null,
         _id: null,
+        enrollment: undefined,
       })
     })
 
@@ -66,6 +71,7 @@ describe('UserMembershipViewModel', function () {
         first_name: this.user.first_name,
         last_name: null,
         _id: this.user._id,
+        enrollment: this.user.enrollment,
       })
     })
   })
@@ -107,6 +113,8 @@ describe('UserMembershipViewModel', function () {
           expect(viewModel.first_name).to.equal(this.user.first_name)
           expect(viewModel.invite).to.equal(false)
           expect(viewModel.email).to.exist
+          expect(viewModel.enrollment).to.exist
+          expect(viewModel.enrollment).to.deep.equal(this.user.enrollment)
           return done()
         }
       )

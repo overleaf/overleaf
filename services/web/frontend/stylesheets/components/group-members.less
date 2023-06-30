@@ -1,0 +1,37 @@
+/* Styles for group-subscription members view */
+
+.structured-list.managed-users-list {
+  /* Override scrolling behaviour on structured-list */
+  overflow: initial;
+  overflow-y: initial;
+  overflow-x: initial;
+}
+
+.managed-users-list {
+  .security-state-invite-pending {
+    color: @text-muted;
+  }
+  .security-state-managed {
+    color: @green;
+  }
+  .security-state-not-managed {
+    color: @red;
+  }
+  .managed-user-actions {
+    button.dropdown-toggle {
+      color: @text-color;
+      padding-left: 1em;
+      padding-right: 1em;
+    }
+    li > a {
+      &:hover {
+        background-color: @gray-lightest;
+      }
+    }
+    .delete-user-action {
+      a {
+        color: @red;
+      }
+    }
+  }
+}

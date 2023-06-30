@@ -8,13 +8,13 @@ import {
   postJSON,
 } from '../../../infrastructure/fetch-json'
 import MaterialIcon from '../../../shared/components/material-icon'
-import Tooltip from '../../../shared/components/tooltip'
 import useWaitForI18n from '../../../shared/hooks/use-wait-for-i18n'
 import getMeta from '../../../utils/meta'
 import { parseEmails } from '../utils/emails'
 import ErrorAlert, { APIError } from './error-alert'
-import GroupMemberRow from './group-member-row'
 import useUserSelection from '../hooks/use-user-selection'
+import ManagedUsersList from './managed-users/managed-users-list'
+import GroupMembersList from './group-members-list'
 
 export default function GroupMembers() {
   const { isReady } = useWaitForI18n()
@@ -39,6 +39,7 @@ export default function GroupMembers() {
   const groupId: string = getMeta('ol-groupId')
   const groupName: string = getMeta('ol-groupName')
   const groupSize: number = getMeta('ol-groupSize')
+  const managedUsersActive: any = getMeta('ol-managedUsersActive')
 
   const paths = useMemo(
     () => ({
@@ -90,6 +91,9 @@ export default function GroupMembers() {
       setRemoveMemberError(undefined)
       ;(async () => {
         for (const user of selectedUsers) {
+          if (user?.enrollment?.managedBy) {
+            continue
+          }
           let url
           if (paths.removeInvite && user.invite && user._id == null) {
             url = `${paths.removeInvite}/${encodeURIComponent(user.email)}`
@@ -142,6 +146,13 @@ export default function GroupMembers() {
     return null
   }
 
+  const shouldShowRemoveUsersButton = () => {
+    return (
+      selectedUsers.length > 0 &&
+      !selectedUsers.find((u: User) => !!u?.enrollment?.managedBy)
+    )
+  }
+
   return (
     <div className="container">
       <Row>
@@ -173,7 +184,7 @@ export default function GroupMembers() {
                   </Button>
                 ) : (
                   <>
-                    {selectedUsers.length > 0 && (
+                    {shouldShowRemoveUsersButton() && (
                       <Button bsStyle="danger" onClick={removeMembers}>
                         {t('remove_from_group')}
                       </Button>
@@ -185,67 +196,27 @@ export default function GroupMembers() {
             </div>
             <div className="row-spaced-small">
               <ErrorAlert error={removeMemberError} />
-              <ul className="list-unstyled structured-list">
-                <li className="container-fluid">
-                  <Row>
-                    <Col xs={4}>
-                      <label htmlFor="select-all" className="sr-only">
-                        {t('select_all')}
-                      </label>
-                      <input
-                        className="select-all"
-                        id="select-all"
-                        type="checkbox"
-                        onChange={handleSelectAllClick}
-                        checked={selectedUsers.length === users.length}
-                      />
-                      <span className="header">{t('email')}</span>
-                    </Col>
-                    <Col xs={4}>
-                      <span className="header">{t('name')}</span>
-                    </Col>
-                    <Col xs={2}>
-                      <Tooltip
-                        id="last-active-tooltip"
-                        description={t('last_active_description')}
-                        overlayProps={{
-                          placement: 'left',
-                        }}
-                      >
-                        <span className="header">
-                          {t('last_active')}
-                          <sup>(?)</sup>
-                        </span>
-                      </Tooltip>
-                    </Col>
-                    <Col xs={2}>
-                      <span className="header">{t('accepted_invite')}</span>
-                    </Col>
-                  </Row>
-                </li>
-                {users.length === 0 && (
-                  <li>
-                    <Row>
-                      <Col md={12} className="text-centered">
-                        <small>{t('no_members')}</small>
-                      </Col>
-                    </Row>
-                  </li>
-                )}
-                {users.map((user: any) => (
-                  <GroupMemberRow
-                    key={user.email}
-                    user={user}
-                    selectUser={selectUser}
-                    unselectUser={unselectUser}
-                    selected={selectedUsers.includes(user)}
-                  />
-                ))}
-              </ul>
+              {managedUsersActive ? (
+                <ManagedUsersList
+                  handleSelectAllClick={handleSelectAllClick}
+                  selectedUsers={selectedUsers}
+                  users={users}
+                  selectUser={selectUser}
+                  unselectUser={unselectUser}
+                />
+              ) : (
+                <GroupMembersList
+                  handleSelectAllClick={handleSelectAllClick}
+                  selectedUsers={selectedUsers}
+                  users={users}
+                  selectUser={selectUser}
+                  unselectUser={unselectUser}
+                />
+              )}
             </div>
             <hr />
             {users.length < groupSize && (
-              <div>
+              <div className="add-more-members-form">
                 <p className="small">{t('add_more_members')}</p>
                 <ErrorAlert error={inviteError} />
                 <Form horizontal onSubmit={addMembers} className="form">

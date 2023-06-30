@@ -826,6 +826,10 @@ module.exports = {
 
   // ID of the IEEE brand in the rails app
   ieeeBrandId: intFromEnv('IEEE_BRAND_ID', 15),
+
+  managedUsers: {
+    enabled: false,
+  },
 }
 
 module.exports.mergeWith = function (overrides) {
