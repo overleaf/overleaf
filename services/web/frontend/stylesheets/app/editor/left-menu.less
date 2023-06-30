@@ -11,8 +11,8 @@
   -webkit-transition: left ease-in-out @left-menu-animation-duration;
   transition: left ease-in-out @left-menu-animation-duration;
   font-size: 14px;
-
   left: -280px;
+
   &.shown {
     left: 0;
   }
@@ -189,4 +189,33 @@
   background-color: #999;
   z-index: 99;
   transition: opacity 0.5s;
+}
+
+// Make the Bootstrap Modal behavior as a left sidebar
+#left-menu-modal {
+  opacity: 1;
+  .modal-dialog {
+    height: 100%;
+    margin: 0;
+    width: @left-menu-width;
+  }
+
+  .modal-content {
+    position: initial;
+  }
+  &.modal.fade .modal-dialog {
+    left: -280px;
+    transition: left ease-in-out @left-menu-animation-duration;
+    -webkit-transition: left ease-in-out @left-menu-animation-duration;
+    transform: translate(0, 0);
+  }
+  &.modal.in .modal-dialog {
+    left: 0;
+    transform: translate(0, 0);
+  }
+}
+// Don't disable backdrop that allows closing the Modal when clicking outside of it,
+// But match its background color with the original mask background color.
+.left-menu-modal-backdrop {
+  background-color: transparent;
 }
