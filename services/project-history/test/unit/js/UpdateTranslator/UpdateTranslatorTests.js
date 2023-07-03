@@ -447,6 +447,91 @@ describe('UpdateTranslator', function () {
       )
     })
 
+    it('sets a null author when user_id is "anonymous-user"', function (done) {
+      const updates = [
+        {
+          update: {
+            doc: this.doc_id,
+            pathname: '/main.tex',
+            docLines: 'a\nb',
+            meta: {
+              user_id: 'anonymous-user',
+              ts: this.timestamp,
+            },
+          },
+          blobHash: this.mockBlobHash,
+        },
+      ]
+      const assertion = (error, changes) => {
+        changes = changes.map(change => change.toRaw())
+        expect(error).to.be.null
+        expect(changes).to.deep.equal([
+          {
+            authors: [],
+            operations: [
+              {
+                pathname: 'main.tex',
+                file: {
+                  hash: this.mockBlobHash,
+                },
+              },
+            ],
+            v2Authors: [null],
+            timestamp: this.timestamp,
+          },
+        ])
+        done()
+      }
+
+      this.UpdateTranslator.convertToChanges(
+        this.project_id,
+        updates,
+        assertion
+      )
+    })
+
+    it('sets an empty array as author when there is no meta.user_id', function (done) {
+      const updates = [
+        {
+          update: {
+            doc: this.doc_id,
+            pathname: '/main.tex',
+            docLines: 'a\nb',
+            meta: {
+              ts: this.timestamp,
+            },
+          },
+          blobHash: this.mockBlobHash,
+        },
+      ]
+      const assertion = (error, changes) => {
+        changes = changes.map(change => change.toRaw())
+        expect(error).to.be.null
+        expect(changes).to.deep.equal([
+          {
+            authors: [],
+            operations: [
+              {
+                pathname: 'main.tex',
+                file: {
+                  hash: this.mockBlobHash,
+                },
+              },
+            ],
+            v2Authors: [],
+            timestamp: this.timestamp,
+          },
+        ])
+        done()
+      }
+
+      this.UpdateTranslator.convertToChanges(
+        this.project_id,
+        updates,
+        assertion
+      )
+    })
+
     describe('text updates', function () {
       it('can translate insertions', function (done) {
         const updates = [
