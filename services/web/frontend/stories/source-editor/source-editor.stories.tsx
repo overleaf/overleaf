@@ -103,6 +103,21 @@ export const Visual = (args: any, { globals: { theme } }: any) => {
   return <SourceEditor />
 }
 
+export const Bibtex = (args: any, { globals: { theme } }: any) => {
+  useScope({
+    editor: {
+      sharejs_doc: mockDoc(content.bib, changes.bib),
+      open_doc_name: 'example.bib',
+    },
+    settings: {
+      ...settings,
+      overallTheme: theme === 'default-' ? '' : theme,
+    },
+  })
+
+  return <SourceEditor />
+}
+
 const MAX_DOC_LENGTH = 2 * 1024 * 1024 // window.maxDocLength
 
 const mockDoc = (content: string, changes: Array<Record<string, any>> = []) => {
@@ -163,6 +178,7 @@ const changes: Record<string, Array<Record<string, any>>> = {
     },
   ],
   md: [],
+  bib: [],
 }
 
 const content = {
@@ -290,4 +306,52 @@ We hope you find Overleaf useful, and do take a look at our \\href{https://www.o
 This is **bold**
 
 This is _italic_`,
+  bib: `@book{texbook,
+  author = {Donald E. Knuth},
+  year = {1986},
+  title = {The {\\TeX} Book},
+  publisher = {Addison-Wesley Professional}
+}
+
+@book{latex:companion,
+  author = {Frank Mittelbach and Michel Gossens
+            and Johannes Braams and David Carlisle
+            and Chris Rowley},
+  year = {2004},
+  title = {The {\\LaTeX} Companion},
+  publisher = {Addison-Wesley Professional},
+  edition = {2}
+}
+
+@book{latex2e,
+  author = {Leslie Lamport},
+  year = {1994},
+  title = {{\\LaTeX}: a Document Preparation System},
+  publisher = {Addison Wesley},
+  address = {Massachusetts},
+  edition = {2}
+}
+
+@article{knuth:1984,
+  title={Literate Programming},
+  author={Donald E. Knuth},
+  journal={The Computer Journal},
+  volume={27},
+  number={2},
+  pages={97--111},
+  year={1984},
+  publisher={Oxford University Press}
+}
+
+@inproceedings{lesk:1977,
+  title={Computer Typesetting of Technical Journals on {UNIX}},
+  author={Michael Lesk and Brian Kernighan},
+  booktitle={Proceedings of American Federation of
+              Information Processing Societies: 1977
+              National Computer Conference},
+  pages={879--888},
+  year={1977},
+  address={Dallas, Texas}
+}
+`,
 }

@@ -1,11 +1,13 @@
 import { readFileSync } from 'fs'
 import { logTree } from '../../frontend/js/features/source-editor/lezer-latex/print-tree.mjs'
-import { parser } from '../../frontend/js/features/source-editor/lezer-latex/latex.mjs'
+import { parser as LaTeXParser } from '../../frontend/js/features/source-editor/lezer-latex/latex.mjs'
+import { parser as BibTeXParser } from '../../frontend/js/features/source-editor/lezer-bibtex/bibtex.mjs'
 
-// Runs the lezer-latex parser on a supplied file, and prints the resulting
+// Runs the lezer-latex or lezer-bibtex parser on a supplied file, and prints the resulting
 // parse tree to stdout
 //
 // show parse tree:     lezer-latex-run.js test/frontend/shared/lezer-latex/examples/amsmath.tex
+//                      lezer-latex-run.js test/frontend/shared/lezer-latex/examples/overleaf.bib
 // show error summary:  lezer-latex-run.js coverage test/frontend/shared/lezer-latex/examples/amsmath.tex
 
 let files = process.argv.slice(2)
@@ -27,6 +29,7 @@ function reportErrorCounts(output) {
 function parseFile(filename) {
   const text = readFileSync(filename).toString()
   const t0 = process.hrtime()
+  const parser = filename.endsWith('.bib') ? BibTeXParser : LaTeXParser
   const tree = parser.parse(text)
   const dt = process.hrtime(t0)
   const timeTaken = dt[0] + dt[1] * 1e-9

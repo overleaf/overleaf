@@ -5,7 +5,6 @@ export const languages = [
     name: 'latex',
     extensions: [
       'tex',
-      'bib',
       'sty',
       'cls',
       'clo',
@@ -48,6 +47,13 @@ export const languages = [
     ],
     load: () => {
       return import('./latex').then(m => m.latex())
+    },
+  }),
+  LanguageDescription.of({
+    name: 'bibtex',
+    extensions: ['bib'],
+    load: () => {
+      return import('./bibtex').then(m => m.bibtex())
     },
   }),
   LanguageDescription.of({

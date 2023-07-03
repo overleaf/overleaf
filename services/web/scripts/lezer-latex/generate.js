@@ -2,23 +2,39 @@ const { buildParserFile } = require('@lezer/generator')
 const { writeFileSync, readFileSync } = require('fs')
 const path = require('path')
 
-const options = {
-  grammarPath: path.resolve(
-    __dirname,
-    '../../frontend/js/features/source-editor/lezer-latex/latex.grammar'
-  ),
-  parserOutputPath: path.resolve(
-    __dirname,
-    '../../frontend/js/features/source-editor/lezer-latex/latex.mjs'
-  ),
-  termsOutputPath: path.resolve(
-    __dirname,
-    '../../frontend/js/features/source-editor/lezer-latex/latex.terms.mjs'
-  ),
-}
+const grammars = [
+  {
+    grammarPath: path.resolve(
+      __dirname,
+      '../../frontend/js/features/source-editor/lezer-latex/latex.grammar'
+    ),
+    parserOutputPath: path.resolve(
+      __dirname,
+      '../../frontend/js/features/source-editor/lezer-latex/latex.mjs'
+    ),
+    termsOutputPath: path.resolve(
+      __dirname,
+      '../../frontend/js/features/source-editor/lezer-latex/latex.terms.mjs'
+    ),
+  },
+  {
+    grammarPath: path.resolve(
+      __dirname,
+      '../../frontend/js/features/source-editor/lezer-bibtex/bibtex.grammar'
+    ),
+    parserOutputPath: path.resolve(
+      __dirname,
+      '../../frontend/js/features/source-editor/lezer-bibtex/bibtex.mjs'
+    ),
+    termsOutputPath: path.resolve(
+      __dirname,
+      '../../frontend/js/features/source-editor/lezer-bibtex/bibtex.terms.mjs'
+    ),
+  },
+]
 
-function compile() {
-  const { grammarPath, termsOutputPath, parserOutputPath } = options
+function compile(grammar) {
+  const { grammarPath, termsOutputPath, parserOutputPath } = grammar
   const moduleStyle = 'es'
   console.info(`Compiling ${grammarPath}`)
 
@@ -40,11 +56,11 @@ function compile() {
   console.info('Done!')
 }
 
-module.exports = { compile, options }
+module.exports = { compile, grammars }
 
 if (require.main === module) {
   try {
-    compile()
+    grammars.forEach(compile)
     process.exit(0)
   } catch (err) {
     console.error(err)

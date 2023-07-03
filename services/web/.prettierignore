@@ -8,3 +8,5 @@ public/minjs
 frontend/stylesheets/components/nvd3.less
 frontend/js/features/source-editor/lezer-latex/latex.mjs
 frontend/js/features/source-editor/lezer-latex/latex.terms.mjs
+frontend/js/features/source-editor/lezer-bibtex/bibtex.mjs
+frontend/js/features/source-editor/lezer-bibtex/bibtex.terms.mjs

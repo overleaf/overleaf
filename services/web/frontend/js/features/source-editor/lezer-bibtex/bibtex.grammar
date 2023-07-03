@@ -1,0 +1,85 @@
+
+
+@top Bibliography {
+  (Declaration | StringDeclaration)*
+}
+
+@tokens {
+  whiteSpace { @whitespace+ }
+  Identifier { $[a-zA-Z:_0-9-]+ }
+  StringName { $[a-zA-Z:_] $[a-zA-Z:_0-9-]* }
+  FieldName {$[a-zA-Z-_0-9]+}
+  LiteralString {
+    '"' (!["] | "\\" _)* '"'?
+  }
+  EntryTypeName { $[a-zA-Z]+ }
+  Number { @digit+ }
+  StringKeyword {"@"$[Ss]$[Tt]$[Rr]$[Ii]$[Nn]$[Gg]}
+  "@" "{" "}" "\"" "," "#" "@string"
+  Comment { "%" ![\n]* }
+}
+
+// FIXME: Technically skipping comments is wrong here. They can only appear
+//        alone on a line, but I'm not sure how to express that easily in Lezer
+@skip {whiteSpace | Comment}
+
+StringDeclaration {
+  StringKeyword "{"
+      Field<StringName>*
+  "}"
+}
+
+Declaration {
+  EntryName { "@" EntryTypeName }  "{"
+      Identifier
+      
+      fieldEntry { 
+        (","  Field<FieldName> )
+      }*
+      ("," )?
+  "}"
+}
+
+Field<Name> {
+  Name  "="  Expression
+}
+
+Expression {
+  BracedString |
+  Number | 
+  StringConcatenation
+}
+
+@local tokens {
+  openBracedContents {"{"}
+  closeBracedContents {"}"}
+  @else nonClosingBracedContents
+}
+
+@skip {}{
+  bracedStringContents {
+  (
+      nonClosingBracedContents |
+      nestedBracedString {
+        openBracedContents 
+        bracedStringContents
+        closeBracedContents
+      }
+    )*
+}
+  BracedString {
+    "{"
+    bracedStringContents closeBracedContents
+  }  
+}
+
+// TODO: Implement this
+@precedence { concatenation @left }
+
+StringConcatenation {
+  StringConcatenation !concatenation "#" StringConcatenation |
+  LiteralString |
+  StringName
+}
+
+@external propSource highlighting from "./highlight.mjs"
