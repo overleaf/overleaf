@@ -73,7 +73,6 @@
   "built_in": "빌트인",
   "bulk_accept_confirm": "선택하신 __nChanges__개의 변경 사항을 승락하시겠습니까?",
   "bulk_reject_confirm": "선택하신 __nChanges__개의 변경 사항을 거절하시겠습니까?",
-  "buy_now": "지금 구매하세요!",
   "can_edit": "편집가능",
   "can_link_to_sl_with_html": "다음의 HTML에  __appName__(을)를 연결하실 수 있습니다:",
   "can_revert_back_blurb": "공동 연구자와 함께하거나 혼자 작업하면서 실수가 생길 수 있습니다. 이전으로 돌아가기를 사용하십시오. 작업 손실 위험이 없으며 후회하지 않으실 것입니다.",

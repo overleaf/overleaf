@@ -1,9 +1,0 @@
-- var featuresPageVariantNew = splitTestVariants && splitTestVariants['features-page'] && splitTestVariants['features-page'] === 'new'
- 
-- var newVariantSegmentation = {splitTest: 'features-page', splitTestVariant: 'new'}
-- var defaultVariantSegmentation = {splitTest: 'features-page', splitTestVariant: 'default'}
-
-if featuresPageVariantNew
-    p !{translate("get_most_subscription_by_checking_features", {}, [{name: 'a', attrs: {href: '/about/features-overview', 'event-tracking':'features-page-link', 'event-tracking-trigger': 'click', 'event-tracking-mb': 'true', 'event-segmentation': newVariantSegmentation}}])}
-else
-    p !{translate("get_most_subscription_by_checking_premium_features", {}, [{name: 'a', attrs: {href: '/learn/how-to/Overleaf_premium_features', 'event-tracking':'features-page-link', 'event-tracking-trigger': 'click', 'event-tracking-mb': 'true', 'event-segmentation': defaultVariantSegmentation}}])}
