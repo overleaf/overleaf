@@ -40,6 +40,7 @@ function CommentEntry({ docId, entry, entryId, threads }: CommentEntryProps) {
 
   const [replyContent, setReplyContent] = useState('')
   const [animating, setAnimating] = useState(false)
+  const [resolved, setResolved] = useState(false)
   const entryDivRef = useRef<HTMLDivElement | null>(null)
 
   const thread =
@@ -68,6 +69,8 @@ function CommentEntry({ docId, entry, entryId, threads }: CommentEntryProps) {
     }
 
     setTimeout(() => {
+      setAnimating(false)
+      setResolved(true)
       resolveComment(docId, entryId)
     }, 350)
   }
@@ -94,7 +97,7 @@ function CommentEntry({ docId, entry, entryId, threads }: CommentEntryProps) {
     }
   }
 
-  if (!thread) {
+  if (!thread || resolved) {
     return null
   }
 

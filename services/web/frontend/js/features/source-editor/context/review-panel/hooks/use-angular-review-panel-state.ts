@@ -20,14 +20,19 @@ function useAngularReviewPanelState(): ReviewPanelState {
     'reviewPanel.commentThreads',
     true
   )
+  const [docs] = useScopeValue<ReviewPanel.Value<'docs'>>('docs')
   const [entries] = useScopeValue<ReviewPanel.Value<'entries'>>(
-    'reviewPanel.entries'
+    'reviewPanel.entries',
+    true
   )
   const [loadingThreads] =
     useScopeValue<ReviewPanel.Value<'loadingThreads'>>('loadingThreads')
 
   const [permissions] =
     useScopeValue<ReviewPanel.Value<'permissions'>>('permissions')
+  const [resolvedComments] = useScopeValue<
+    ReviewPanel.Value<'resolvedComments'>
+  >('reviewPanel.resolvedComments', true)
 
   const [wantTrackChanges] = useScopeValue<
     ReviewPanel.Value<'wantTrackChanges'>
@@ -75,6 +80,13 @@ function useAngularReviewPanelState(): ReviewPanelState {
 
   const [toggleReviewPanel] =
     useScopeValue<ReviewPanel.Value<'toggleReviewPanel'>>('toggleReviewPanel')
+  const [unresolveComment] =
+    useScopeValue<ReviewPanel.Value<'unresolveComment'>>('unresolveComment')
+  const [deleteThread] =
+    useScopeValue<ReviewPanel.Value<'deleteThread'>>('deleteThread')
+  const [refreshResolvedCommentsDropdown] = useScopeValue<
+    ReviewPanel.Value<'refreshResolvedCommentsDropdown'>
+  >('refreshResolvedCommentsDropdown')
 
   const handleSetSubview = useCallback(
     (subView: SubView) => {
@@ -104,6 +116,7 @@ function useAngularReviewPanelState(): ReviewPanelState {
       collapsed,
       commentThreads,
       deleteComment,
+      docs,
       entries,
       entryHover,
       gotoEntry,
@@ -111,6 +124,7 @@ function useAngularReviewPanelState(): ReviewPanelState {
       loadingThreads,
       permissions,
       resolveComment,
+      resolvedComments,
       saveEdit,
       shouldCollapse,
       submitReply,
@@ -126,11 +140,15 @@ function useAngularReviewPanelState(): ReviewPanelState {
       trackChangesForGuestsAvailable,
       formattedProjectMembers,
       toggleReviewPanel,
+      unresolveComment,
+      deleteThread,
+      refreshResolvedCommentsDropdown,
     }),
     [
       collapsed,
       commentThreads,
       deleteComment,
+      docs,
       entries,
       entryHover,
       gotoEntry,
@@ -138,6 +156,7 @@ function useAngularReviewPanelState(): ReviewPanelState {
       loadingThreads,
       permissions,
       resolveComment,
+      resolvedComments,
       saveEdit,
       shouldCollapse,
       submitReply,
@@ -153,6 +172,9 @@ function useAngularReviewPanelState(): ReviewPanelState {
       trackChangesForGuestsAvailable,
       formattedProjectMembers,
       toggleReviewPanel,
+      unresolveComment,
+      deleteThread,
+      refreshResolvedCommentsDropdown,
     ]
   )
 

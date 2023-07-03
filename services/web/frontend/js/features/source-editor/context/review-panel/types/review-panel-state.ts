@@ -8,12 +8,14 @@ import {
   ThreadId,
 } from '../../../../../../../types/review-panel/review-panel'
 import { ReviewPanelCommentEntry } from '../../../../../../../types/review-panel/entry'
+import { MainDocument } from '../../../../../../../types/project-settings'
 
 export interface ReviewPanelState {
   values: {
     collapsed: Record<string, boolean>
     commentThreads: ReviewPanelCommentThreads
     deleteComment: (threadId: ThreadId, commentId: CommentId) => void
+    docs: MainDocument[] | undefined
     entries: ReviewPanelEntries
     entryHover: boolean
     gotoEntry: (docId: DocId, entryOffset: number) => void
@@ -21,6 +23,7 @@ export interface ReviewPanelState {
     loadingThreads: boolean
     permissions: ReviewPanelPermissions
     resolveComment: (docId: DocId, entryId: ThreadId) => void
+    resolvedComments: ReviewPanelEntries
     saveEdit: (
       threadId: ThreadId,
       commentId: CommentId,
@@ -46,6 +49,9 @@ export interface ReviewPanelState {
       }
     >
     toggleReviewPanel: () => void
+    unresolveComment: (threadId: ThreadId) => void
+    deleteThread: (_entryId: unknown, docId: DocId, threadId: ThreadId) => void
+    refreshResolvedCommentsDropdown: () => Promise<void>
   }
   updaterFns: {
     handleSetSubview: (subView: SubView) => void

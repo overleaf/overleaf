@@ -3,6 +3,7 @@ import { useState } from 'react'
 import Linkify from 'react-linkify'
 import { formatTime } from '../../../../utils/format-date'
 import { useReviewPanelValueContext } from '../../../context/review-panel/review-panel-context'
+import { FilteredResolvedComments } from '../toolbar/resolved-comments-dropdown'
 
 function LinkDecorator(
   decoratedHref: string,
@@ -17,26 +18,7 @@ function LinkDecorator(
 }
 
 type ResolvedCommentEntryProps = {
-  thread: {
-    resolved_at: number
-    entryId: string
-    docName: string
-    content: string
-    messages: Array<{
-      id: string
-      user: {
-        id: string
-        hue: string
-        name: string
-      }
-      content: string
-      timestamp: string
-    }>
-    resolved_by_user: {
-      name: string
-      hue: string
-    }
-  } // TODO extract type
+  thread: FilteredResolvedComments
   contentLimit?: number
 }
 
@@ -45,7 +27,8 @@ function ResolvedCommentEntry({
   contentLimit = 40,
 }: ResolvedCommentEntryProps) {
   const { t } = useTranslation()
-  const { permissions } = useReviewPanelValueContext()
+  const { permissions, unresolveComment, deleteThread } =
+    useReviewPanelValueContext()
   const [isCollapsed, setIsCollapsed] = useState(false)
   const needsCollapsing = thread.content.length > contentLimit
   const content = isCollapsed
@@ -53,11 +36,11 @@ function ResolvedCommentEntry({
     : thread.content
 
   const handleUnresolve = () => {
-    // TODO unresolve comment
+    unresolveComment(thread.threadId)
   }
 
   const handleDelete = () => {
-    // TODO delete thread
+    deleteThread(undefined, thread.docId, thread.threadId)
   }
 
   return (

@@ -1,29 +1,10 @@
 import { useTranslation } from 'react-i18next'
 import { useMemo } from 'react'
 import ResolvedCommentEntry from '../entries/resolved-comment-entry'
-import moment from 'moment'
+import { FilteredResolvedComments } from './resolved-comments-dropdown'
 
 type ResolvedCommentsScrollerProps = {
-  resolvedComments: Array<{
-    resolved_at: number
-    entryId: string
-    docName: string
-    content: string
-    messages: Array<{
-      id: string
-      user: {
-        id: string
-        hue: string
-        name: string
-      }
-      content: string
-      timestamp: string
-    }>
-    resolved_by_user: {
-      name: string
-      hue: string
-    }
-  }> // TODO extract type
+  resolvedComments: FilteredResolvedComments[]
 }
 
 function ResolvedCommentsScroller({
@@ -31,12 +12,10 @@ function ResolvedCommentsScroller({
 }: ResolvedCommentsScrollerProps) {
   const { t } = useTranslation()
 
-  // TODO remove momentjs
   const sortedResolvedComments = useMemo(() => {
-    return [...resolvedComments].sort(
-      (a, b) =>
-        moment(b.resolved_at).valueOf() - moment(a.resolved_at).valueOf()
-    )
+    return [...resolvedComments].sort((a, b) => {
+      return Date.parse(b.resolved_at) - Date.parse(a.resolved_at)
+    })
   }, [resolvedComments])
 
   return (

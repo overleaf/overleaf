@@ -3,8 +3,8 @@ import { useState } from 'react'
 import AutoExpandingTextArea from '../../../../../shared/components/auto-expanding-text-area'
 import { formatTime } from '../../../../utils/format-date'
 import { useReviewPanelValueContext } from '../../../context/review-panel/review-panel-context'
+import { ReviewPanelCommentThread } from '../../../../../../../types/review-panel/comment-thread'
 import {
-  ReviewPanelCommentThread,
   ReviewPanelCommentThreadMessage,
   ThreadId,
 } from '../../../../../../../types/review-panel/review-panel'

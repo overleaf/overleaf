@@ -1,16 +1,85 @@
 import { useTranslation } from 'react-i18next'
-import { useState } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import Icon from '../../../../../shared/components/icon'
 import Tooltip from '../../../../../shared/components/tooltip'
 import ResolvedCommentsScroller from './resolved-comments-scroller'
 import classnames from 'classnames'
+import { useReviewPanelValueContext } from '../../../context/review-panel/review-panel-context'
+import {
+  DocId,
+  ReviewPanelDocEntries,
+  ThreadId,
+} from '../../../../../../../types/review-panel/review-panel'
+import { ReviewPanelResolvedCommentThread } from '../../../../../../../types/review-panel/comment-thread'
+
+export interface FilteredResolvedComments
+  extends ReviewPanelResolvedCommentThread {
+  content: string
+  threadId: ThreadId
+  entryId: string
+  docId: DocId
+  docName: string | null
+}
 
 function ResolvedCommentsDropdown() {
   const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
-  // TODO setIsLoading
-  // eslint-disable-next-line no-unused-vars
   const [isLoading, setIsLoading] = useState(false)
+  const {
+    docs,
+    commentThreads,
+    resolvedComments,
+    refreshResolvedCommentsDropdown,
+  } = useReviewPanelValueContext()
+
+  const handleResolvedCommentsClick = () => {
+    setIsOpen(isOpen => {
+      if (!isOpen) {
+        setIsLoading(true)
+        refreshResolvedCommentsDropdown().finally(() => setIsLoading(false))
+      }
+
+      return !isOpen
+    })
+  }
+
+  const getDocNameById = useCallback(
+    (docId: DocId) => {
+      return docs?.find(doc => doc.doc.id === docId)?.doc.name || null
+    },
+    [docs]
+  )
+
+  const filteredResolvedComments = useMemo(() => {
+    const comments: FilteredResolvedComments[] = []
+
+    for (const [docId, docEntries] of Object.entries(resolvedComments) as Array<
+      [DocId, ReviewPanelDocEntries]
+    >) {
+      for (const [entryId, entry] of Object.entries(docEntries)) {
+        if (entry.type === 'comment') {
+          const threadId = entry.thread_id
+          const thread =
+            threadId in commentThreads
+              ? commentThreads[entry.thread_id]
+              : undefined
+
+          if (thread?.resolved) {
+            comments.push({
+              ...thread,
+              content: entry.content,
+              threadId,
+              entryId,
+              docId,
+              docName: getDocNameById(docId),
+            })
+          }
+        }
+      }
+    }
+
+    return comments
+  }, [commentThreads, getDocNameById, resolvedComments])
 
   return (
     <div className="resolved-comments">
@@ -29,7 +98,7 @@ function ResolvedCommentsDropdown() {
       >
         <button
           className="resolved-comments-toggle"
-          onClick={() => setIsOpen(value => !value)}
+          onClick={handleResolvedCommentsClick}
           aria-label={t('resolved_comments')}
         >
           <Icon type="inbox" />
@@ -47,30 +116,7 @@ function ResolvedCommentsDropdown() {
           </div>
         ) : (
           <ResolvedCommentsScroller
-            resolvedComments={[
-              {
-                resolved_at: 12345,
-                entryId: '123',
-                docName: 'demo name',
-                content: 'demo content',
-                messages: [
-                  {
-                    id: '123',
-                    user: {
-                      id: '123',
-                      hue: 'abcde',
-                      name: 'demo name',
-                    },
-                    content: 'demo content',
-                    timestamp: '12345',
-                  },
-                ],
-                resolved_by_user: {
-                  name: 'demo',
-                  hue: 'abcde',
-                },
-              },
-            ]}
+            resolvedComments={filteredResolvedComments}
           />
         )}
       </div>

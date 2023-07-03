@@ -1,5 +1,6 @@
 import { docId, mockDoc } from './mock-doc'
 import { Folder } from '../../../../../types/folder'
+import { sleep } from '../../../helpers/sleep'
 
 export const rootFolderId = '012345678901234567890123'
 export const figuresFolderId = '123456789012345678901234'
@@ -79,12 +80,14 @@ export const mockScope = (content?: string) => {
       formattedProjectMembers: {},
       fullTCStateCollapsed: true,
       entries: {},
+      resolvedComments: {},
     },
     ui: {
       reviewPanelOpen: true,
     },
     toggleReviewPanel: cy.stub(),
     toggleTrackChangesForEveryone: cy.stub(),
+    refreshResolvedCommentsDropdown: cy.stub(() => sleep(1000)),
     onlineUserCursorHighlights: {},
     permissionsLevel: 'owner',
     $on: cy.stub(),

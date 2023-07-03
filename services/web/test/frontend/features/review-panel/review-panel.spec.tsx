@@ -42,7 +42,10 @@ describe('<ReviewPanel />', function () {
       })
 
       // eslint-disable-next-line mocha/no-skipped-tests
-      it.skip('opens dropdown', function () {})
+      it.skip('opens dropdown', function () {
+        cy.findByRole('button', { name: /resolved comments/i }).click()
+        // TODO dropdown opens/closes
+      })
 
       // eslint-disable-next-line mocha/no-skipped-tests
       it.skip('renders list of resolved comments', function () {})
