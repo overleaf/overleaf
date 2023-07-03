@@ -113,7 +113,6 @@ describe('EditorHttpController', function () {
     this.Metrics = { inc: sinon.stub() }
     this.TokenAccessHandler = {
       getRequestToken: sinon.stub().returns(this.token),
-      protectTokens: sinon.stub(),
     }
     this.SessionManager = {
       getLoggedInUserId: sinon.stub().returns(this.user._id),

@@ -513,37 +513,6 @@ describe('TokenAccessHandler', function () {
     })
   })
 
-  describe('protectTokens', function () {
-    beforeEach(function () {
-      return (this.project = {
-        tokens: {
-          readAndWrite: 'rw',
-          readOnly: 'ro',
-          readAndWritePrefix: 'pre',
-        },
-      })
-    })
-
-    it('should hide write token from read-only user', function () {
-      this.TokenAccessHandler.protectTokens(this.project, 'readOnly')
-      expect(this.project.tokens.readAndWrite).to.equal('')
-      expect(this.project.tokens.readAndWritePrefix).to.equal('')
-      return expect(this.project.tokens.readOnly).to.equal('ro')
-    })
-
-    it('should hide read token from read-write user', function () {
-      this.TokenAccessHandler.protectTokens(this.project, 'readAndWrite')
-      expect(this.project.tokens.readAndWrite).to.equal('rw')
-      return expect(this.project.tokens.readOnly).to.equal('')
-    })
-
-    it('should leave tokens in place for owner', function () {
-      this.TokenAccessHandler.protectTokens(this.project, 'owner')
-      expect(this.project.tokens.readAndWrite).to.equal('rw')
-      return expect(this.project.tokens.readOnly).to.equal('ro')
-    })
-  })
-
   describe('getDocPublishedInfo', function () {
     beforeEach(function () {
       return (this.callback = sinon.stub())

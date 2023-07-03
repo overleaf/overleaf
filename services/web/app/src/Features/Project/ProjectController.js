@@ -343,7 +343,7 @@ const ProjectController = {
     const userId = SessionManager.getLoggedInUserId(req.session)
     ProjectGetter.findAllUsersProjects(
       userId,
-      'name lastUpdated publicAccesLevel archived trashed owner_ref tokens',
+      'name lastUpdated publicAccesLevel archived trashed owner_ref',
       (err, projects) => {
         if (err != null) {
           return next(err)
@@ -1091,7 +1091,6 @@ const ProjectController = {
     // If a project is simultaneously trashed and archived, we will consider it archived but not trashed.
     const trashed = ProjectHelper.isTrashed(project, userId) && !archived
 
-    TokenAccessHandler.protectTokens(project, accessLevel)
     const model = {
       id: project._id,
       name: project.name,

@@ -246,22 +246,6 @@ const TokenAccessHandler = {
     })
   },
 
-  protectTokens(project, privilegeLevel) {
-    if (!project || !project.tokens) {
-      return
-    }
-    if (privilegeLevel === PrivilegeLevels.OWNER) {
-      return
-    }
-    if (privilegeLevel !== PrivilegeLevels.READ_AND_WRITE) {
-      project.tokens.readAndWrite = ''
-      project.tokens.readAndWritePrefix = ''
-    }
-    if (privilegeLevel !== PrivilegeLevels.READ_ONLY) {
-      project.tokens.readOnly = ''
-    }
-  },
-
   getV1DocPublishedInfo(token, callback) {
     // default to allowing access
     if (!Settings.apis.v1 || !Settings.apis.v1.url) {
@@ -304,7 +288,6 @@ TokenAccessHandler.promises = promisifyAll(TokenAccessHandler, {
     '_projectFindOne',
     'grantSessionTokenAccess',
     'getRequestToken',
-    'protectTokens',
   ],
   multiResult: {
     validateTokenForAnonymousAccess: ['isValidReadAndWrite', 'isValidReadOnly'],

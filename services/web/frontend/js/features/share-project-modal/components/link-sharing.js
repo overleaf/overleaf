@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { Button, Col, Row } from 'react-bootstrap'
 import { Trans } from 'react-i18next'
@@ -10,6 +10,8 @@ import CopyLink from '../../../shared/components/copy-link'
 import { useProjectContext } from '../../../shared/context/project-context'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import { useUserContext } from '../../../shared/context/user-context'
+import { getJSON } from '../../../infrastructure/fetch-json'
+import useAbortController from '../../../shared/hooks/use-abort-controller'
 
 export default function LinkSharing({ canAddCollaborators }) {
   const [inflight, setInflight] = useState(false)
@@ -27,8 +29,7 @@ export default function LinkSharing({ canAddCollaborators }) {
       )
         .then(() => {
           // NOTE: not calling `updateProject` here as it receives data via
-          // project:publicAccessLevel:changed and project:tokens:changed
-          // over the websocket connection
+          // project:publicAccessLevel:changed over the websocket connection
           // TODO: eventTracking.sendMB('project-make-token-based') when newPublicAccessLevel is 'tokenBased'
         })
         .finally(() => {
@@ -106,7 +107,17 @@ PrivateSharing.propTypes = {
 }
 
 function TokenBasedSharing({ setAccessLevel, inflight, canAddCollaborators }) {
-  const { tokens } = useProjectContext()
+  const { _id: projectId } = useProjectContext()
+
+  const [tokens, setTokens] = useState(null)
+
+  const { signal } = useAbortController()
+
+  useEffect(() => {
+    getJSON(`/project/${projectId}/tokens`, { signal })
+      .then(data => setTokens(data))
+      .catch(error => console.error(error))
+  }, [projectId, signal])
 
   return (
     <Row className="public-access-level">
@@ -194,7 +205,17 @@ LegacySharing.propTypes = {
 }
 
 export function ReadOnlyTokenLink() {
-  const { tokens } = useProjectContext()
+  const { _id: projectId } = useProjectContext()
+
+  const [tokens, setTokens] = useState(null)
+
+  const { signal } = useAbortController()
+
+  useEffect(() => {
+    getJSON(`/project/${projectId}/tokens`, { signal })
+      .then(data => setTokens(data))
+      .catch(error => console.error(error))
+  }, [projectId, signal])
 
   return (
     <Row className="public-access-level">

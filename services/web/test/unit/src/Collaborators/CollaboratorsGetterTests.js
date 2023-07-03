@@ -30,6 +30,11 @@ describe('CollaboratorsGetter', function () {
       tokenAccessReadAndWrite_refs: [this.readWriteTokenRef],
       tokenAccessReadOnly_refs: [this.readOnlyTokenRef],
       publicAccesLevel: 'tokenBased',
+      tokens: {
+        readOnly: 'ro',
+        readAndWrite: 'rw',
+        readAndWritePrefix: 'pre',
+      },
     }
 
     this.UserGetter = {
@@ -357,6 +362,62 @@ describe('CollaboratorsGetter', function () {
           this.project._id
         )
       expect(isMember).to.be.false
+    })
+  })
+
+  describe('getPublicShareTokens', function () {
+    const userMock = ObjectId()
+
+    it('should return null when the project is not found', async function () {
+      this.ProjectMock.expects('findOne').chain('exec').resolves(undefined)
+      const tokens =
+        await this.CollaboratorsGetter.promises.getPublicShareTokens(
+          userMock,
+          this.project._id
+        )
+      expect(tokens).to.be.null
+    })
+
+    it('should return an empty object when the user is not owner or read-only collaborator', async function () {
+      this.ProjectMock.expects('findOne').chain('exec').resolves(this.project)
+      const tokens =
+        await this.CollaboratorsGetter.promises.getPublicShareTokens(
+          userMock,
+          this.project._id
+        )
+      expect(tokens).to.deep.equal({})
+    })
+
+    describe('when the user is a read-only token collaborator', function () {
+      it('should return the read-only token', async function () {
+        this.ProjectMock.expects('findOne')
+          .chain('exec')
+          .resolves({ hasTokenReadOnlyAccess: true, ...this.project })
+
+        const tokens =
+          await this.CollaboratorsGetter.promises.getPublicShareTokens(
+            userMock,
+            this.project._id
+          )
+        expect(tokens).to.deep.equal({ readOnly: tokens.readOnly })
+      })
+    })
+
+    describe('when the user is the owner of the project', function () {
+      beforeEach(function () {
+        this.ProjectMock.expects('findOne')
+          .chain('exec')
+          .resolves({ isOwner: true, ...this.project })
+      })
+
+      it('should return all the tokens', async function () {
+        const tokens =
+          await this.CollaboratorsGetter.promises.getPublicShareTokens(
+            userMock,
+            this.project._id
+          )
+        expect(tokens).to.deep.equal(tokens)
+      })
     })
   })
 })

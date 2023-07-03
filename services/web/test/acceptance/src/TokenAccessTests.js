@@ -225,6 +225,18 @@ const tryAnonContentAccess = (user, projectId, token, test, callback) => {
   )
 }
 
+const tryFetchProjectTokens = (user, projectId, callback) => {
+  user.request.get(
+    { url: `/project/${projectId}/tokens`, json: true },
+    (error, response, body) => {
+      if (error) {
+        return callback(error)
+      }
+      callback(null, response, body)
+    }
+  )
+}
+
 describe('TokenAccess', function () {
   beforeEach(function (done) {
     this.timeout(90000)
@@ -291,6 +303,55 @@ describe('TokenAccess', function () {
           },
         ],
         done
+      )
+    })
+
+    it('should deny access to access tokens', function (done) {
+      tryFetchProjectTokens(this.other1, this.projectId, (error, response) => {
+        expect(error).to.equal(null)
+        expect(response.statusCode).to.equal(403)
+        done()
+      })
+    })
+  })
+
+  describe('owner', function () {
+    beforeEach(function (done) {
+      this.projectName = `token-owner-test${Math.random()}`
+      this.owner.createProject(this.projectName, (err, projectId) => {
+        if (err != null) {
+          return done(err)
+        }
+        this.projectId = projectId
+        this.owner.makeTokenBased(this.projectId, err => {
+          if (err != null) {
+            return done(err)
+          }
+          this.owner.getProject(this.projectId, (err, project) => {
+            if (err != null) {
+              return done(err)
+            }
+            this.tokens = project.tokens
+            done()
+          })
+        })
+      })
+    })
+
+    it('should be able to fetch read-only and read-write tokens', function (done) {
+      tryFetchProjectTokens(
+        this.owner,
+        this.projectId,
+        (error, response, body) => {
+          expect(error).to.equal(null)
+          expect(response.statusCode).to.equal(200)
+          expect(body).to.deep.equal({
+            readOnly: this.tokens.readOnly,
+            readAndWrite: this.tokens.readAndWrite,
+            readAndWritePrefix: this.tokens.readAndWritePrefix,
+          })
+          done()
+        }
       )
     })
   })
@@ -407,6 +468,42 @@ describe('TokenAccess', function () {
       )
     })
 
+    it('should allow the user to fetch the read-only token', function (done) {
+      async.series(
+        [
+          cb => {
+            // accept token
+            tryReadOnlyTokenAccept(
+              this.other1,
+              this.tokens.readOnly,
+              (response, body) => {
+                expect(response.statusCode).to.equal(200)
+              },
+              (response, body) => {
+                expect(response.statusCode).to.equal(200)
+                expect(body.redirect).to.equal(`/project/${this.projectId}`)
+                expect(body.tokenAccessGranted).to.equal('readOnly')
+              },
+              cb
+            )
+          },
+          cb => {
+            tryFetchProjectTokens(
+              this.other1,
+              this.projectId,
+              (error, response, body) => {
+                expect(error).to.equal(null)
+                expect(response.statusCode).to.equal(200)
+                expect(body).to.deep.equal({ readOnly: this.tokens.readOnly })
+                cb()
+              }
+            )
+          },
+        ],
+        done
+      )
+    })
+
     it('should redirect the admin to the project (with rw access)', function (done) {
       async.series(
         [
@@ -496,6 +593,14 @@ describe('TokenAccess', function () {
         )
       })
     })
+
+    it('should deny access to access tokens', function (done) {
+      tryFetchProjectTokens(this.other1, this.projectId, (error, response) => {
+        expect(error).to.equal(null)
+        expect(response.statusCode).to.equal(403)
+        done()
+      })
+    })
   })
 
   describe('anonymous read-only token', function () {
@@ -580,6 +685,40 @@ describe('TokenAccess', function () {
       )
     })
 
+    it('should allow the anonymous user to fetch the read-only token', function (done) {
+      async.series(
+        [
+          cb =>
+            tryReadOnlyTokenAccess(
+              this.anon,
+              this.tokens.readOnly,
+              (response, body) => {
+                expect(response.statusCode).to.equal(200)
+              },
+              (response, body) => {
+                expect(response.statusCode).to.equal(200)
+                expect(body.redirect).to.equal(`/project/${this.projectId}`)
+                expect(body.grantAnonymousAccess).to.equal('readOnly')
+              },
+              cb
+            ),
+          cb => {
+            tryFetchProjectTokens(
+              this.anon,
+              this.projectId,
+              (error, response, body) => {
+                expect(error).to.equal(null)
+                expect(response.statusCode).to.equal(200)
+                expect(body).to.deep.equal({ readOnly: this.tokens.readOnly })
+                cb()
+              }
+            )
+          },
+        ],
+        done
+      )
+    })
+
     describe('made private again', function () {
       beforeEach(function (done) {
         this.owner.makePrivate(this.projectId, () => setTimeout(done, 1000))
@@ -631,6 +770,14 @@ describe('TokenAccess', function () {
           ],
           done
         )
+      })
+
+      it('should deny access to access tokens', function (done) {
+        tryFetchProjectTokens(this.anon, this.projectId, (error, response) => {
+          expect(error).to.equal(null)
+          expect(response.statusCode).to.equal(403)
+          done()
+        })
       })
     })
   })
@@ -737,6 +884,40 @@ describe('TokenAccess', function () {
               },
               cb
             ),
+        ],
+        done
+      )
+    })
+
+    it('fetching access tokens returns an empty object', function (done) {
+      async.series(
+        [
+          cb =>
+            tryReadAndWriteTokenAccept(
+              this.other1,
+              this.tokens.readAndWrite,
+              (response, body) => {
+                expect(response.statusCode).to.equal(200)
+              },
+              (response, body) => {
+                expect(response.statusCode).to.equal(200)
+                expect(body.redirect).to.equal(`/project/${this.projectId}`)
+                expect(body.tokenAccessGranted).to.equal('readAndWrite')
+              },
+              cb
+            ),
+          cb => {
+            tryFetchProjectTokens(
+              this.other1,
+              this.projectId,
+              (error, response, body) => {
+                expect(error).to.equal(null)
+                expect(response.statusCode).to.equal(200)
+                expect(body).to.deep.equal({})
+                cb()
+              }
+            )
+          },
         ],
         done
       )
@@ -928,6 +1109,18 @@ describe('TokenAccess', function () {
           done
         )
       })
+
+      it('should deny access to access tokens', function (done) {
+        tryFetchProjectTokens(
+          this.other1,
+          this.projectId,
+          (error, response) => {
+            expect(error).to.equal(null)
+            expect(response.statusCode).to.equal(403)
+            done()
+          }
+        )
+      })
     })
   })
 
@@ -1004,6 +1197,14 @@ describe('TokenAccess', function () {
           ],
           done
         )
+      })
+
+      it('should deny access to access tokens', function (done) {
+        tryFetchProjectTokens(this.anon, this.projectId, (error, response) => {
+          expect(error).to.equal(null)
+          expect(response.statusCode).to.equal(403)
+          done()
+        })
       })
 
       it('should require login if project does not exist', function (done) {
@@ -1162,6 +1363,18 @@ describe('TokenAccess', function () {
                 ),
             ],
             done
+          )
+        })
+
+        it('should deny access to access tokens', function (done) {
+          tryFetchProjectTokens(
+            this.anon,
+            this.projectId,
+            (error, response) => {
+              expect(error).to.equal(null)
+              expect(response.statusCode).to.equal(403)
+              done()
+            }
           )
         })
       })
@@ -1452,6 +1665,43 @@ describe('TokenAccess', function () {
                 expect(response.statusCode).to.equal(404)
               },
               cb
+            )
+          },
+        ],
+        done
+      )
+    })
+
+    it('should deny access to access tokens with a 404', function (done) {
+      async.series(
+        [
+          // delete project
+          cb => {
+            this.owner.deleteProject(this.projectId, cb)
+          },
+          cb => {
+            // use read-only token
+            tryReadOnlyTokenAccess(
+              this.other1,
+              this.tokens.readOnly,
+              (response, body) => {
+                expect(response.statusCode).to.equal(200)
+              },
+              (response, body) => {
+                expect(response.statusCode).to.equal(404)
+              },
+              cb
+            )
+          },
+          cb => {
+            tryFetchProjectTokens(
+              this.other1,
+              this.projectId,
+              (error, response) => {
+                expect(error).to.equal(null)
+                expect(response.statusCode).to.equal(404)
+                cb()
+              }
             )
           },
         ],

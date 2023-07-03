@@ -90,7 +90,6 @@ describe('ProjectController', function () {
     }
     this.TokenAccessHandler = {
       getRequestToken: sinon.stub().returns(this.token),
-      protectTokens: sinon.stub(),
     }
     this.CollaboratorsGetter = {
       userIsTokenMember: sinon.stub().callsArgWith(2, null, false),

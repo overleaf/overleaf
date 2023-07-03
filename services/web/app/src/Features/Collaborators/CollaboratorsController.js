@@ -11,6 +11,7 @@ const Errors = require('../Errors/Errors')
 const logger = require('@overleaf/logger')
 const { expressify } = require('../../util/promises')
 const { hasAdminAccess } = require('../Helpers/AdminAuthorizationHelper')
+const TokenAccessHandler = require('../TokenAccess/TokenAccessHandler')
 
 module.exports = {
   removeUserFromProject: expressify(removeUserFromProject),
@@ -18,6 +19,7 @@ module.exports = {
   getAllMembers: expressify(getAllMembers),
   setCollaboratorInfo: expressify(setCollaboratorInfo),
   transferOwnership: expressify(transferOwnership),
+  getShareTokens: expressify(getShareTokens),
 }
 
 async function removeUserFromProject(req, res, next) {
@@ -113,4 +115,38 @@ async function _removeUserIdFromProject(projectId, userId) {
     userId
   )
   await TagsHandler.promises.removeProjectFromAllTags(userId, projectId)
+}
+
+async function getShareTokens(req, res) {
+  const projectId = req.params.Project_id
+  const userId = SessionManager.getLoggedInUserId(req.session)
+
+  let tokens
+  if (userId) {
+    tokens = await CollaboratorsGetter.promises.getPublicShareTokens(
+      ObjectId(userId),
+      ObjectId(projectId)
+    )
+  } else {
+    // anonymous access, the token is already available in the session
+    const readOnly = TokenAccessHandler.getRequestToken(req, projectId)
+    tokens = { readOnly }
+  }
+  if (!tokens) {
+    return res.sendStatus(403)
+  }
+
+  if (tokens.readOnly || tokens.readAndWrite) {
+    logger.info(
+      {
+        projectId,
+        userId: userId || 'anonymous',
+        ip: req.ip,
+        tokens: Object.keys(tokens),
+      },
+      'project tokens accessed'
+    )
+  }
+
+  res.json(tokens)
 }

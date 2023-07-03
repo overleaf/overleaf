@@ -207,14 +207,13 @@ async function ensureTokensArePresent(projectId) {
     project.tokens.readOnly != null &&
     project.tokens.readAndWrite != null
   ) {
-    return project.tokens
+    return
   }
   await _generateTokens(project)
   await Project.updateOne(
     { _id: projectId },
     { $set: { tokens: project.tokens } }
   ).exec()
-  return project.tokens
 }
 
 async function clearTokens(projectId) {

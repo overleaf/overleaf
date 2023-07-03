@@ -581,20 +581,7 @@ const EditorController = {
           { newAccessLevel }
         )
         if (newAccessLevel === PublicAccessLevels.TOKEN_BASED) {
-          ProjectDetailsHandler.ensureTokensArePresent(
-            projectId,
-            function (err, tokens) {
-              if (err) {
-                return callback(err)
-              }
-              EditorRealTimeController.emitToRoom(
-                projectId,
-                'project:tokens:changed',
-                { tokens }
-              )
-              callback()
-            }
-          )
+          ProjectDetailsHandler.ensureTokensArePresent(projectId, callback)
         } else {
           callback()
         }

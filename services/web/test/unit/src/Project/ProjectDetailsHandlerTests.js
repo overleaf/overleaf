@@ -511,13 +511,6 @@ describe('ProjectDetailsHandler', function () {
         await this.handler.promises.ensureTokensArePresent(this.project._id)
         expect(this.ProjectModel.updateOne).not.to.have.been.called
       })
-
-      it('should produce the tokens without error', async function () {
-        const tokens = await this.handler.promises.ensureTokensArePresent(
-          this.project._id
-        )
-        expect(tokens).to.deep.equal(this.project.tokens)
-      })
     })
 
     describe('when tokens are missing', function () {
@@ -565,17 +558,6 @@ describe('ProjectDetailsHandler', function () {
             },
           }
         )
-      })
-
-      it('should produce the tokens without error', async function () {
-        const tokens = await this.handler.promises.ensureTokensArePresent(
-          this.project._id
-        )
-        expect(tokens).to.deep.equal({
-          readOnly: this.readOnlyToken,
-          readAndWrite: this.readAndWriteToken,
-          readAndWritePrefix: this.readAndWriteTokenPrefix,
-        })
       })
     })
   })

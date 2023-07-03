@@ -27,10 +27,6 @@ export const getMockIde = () => {
           zotero: false,
         },
         publicAccessLevel: '',
-        tokens: {
-          readOnly: '',
-          readAndWrite: '',
-        },
         owner: {
           _id: '',
           email: '',

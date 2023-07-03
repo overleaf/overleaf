@@ -28,10 +28,6 @@ export const projectShape = {
     versioning: PropTypes.bool,
   }),
   publicAccessLevel: PropTypes.string,
-  tokens: PropTypes.shape({
-    readOnly: PropTypes.string,
-    readAndWrite: PropTypes.string,
-  }),
   owner: PropTypes.shape({
     _id: PropTypes.string.isRequired,
     email: PropTypes.string.isRequired,
@@ -81,7 +77,6 @@ export function ProjectProvider({ children }) {
     invites,
     features,
     publicAccesLevel: publicAccessLevel,
-    tokens,
     owner,
   } = project || projectFallback
 
@@ -94,7 +89,6 @@ export function ProjectProvider({ children }) {
       invites,
       features,
       publicAccessLevel,
-      tokens,
       owner,
     }
   }, [
@@ -105,7 +99,6 @@ export function ProjectProvider({ children }) {
     invites,
     features,
     publicAccessLevel,
-    tokens,
     owner,
   ])
 

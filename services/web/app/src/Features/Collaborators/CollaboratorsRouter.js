@@ -22,6 +22,10 @@ const rateLimiters = {
     points: 200,
     duration: 60 * 10,
   }),
+  getProjectTokens: new RateLimiter('get-project-tokens', {
+    points: 200,
+    duration: 60 * 10,
+  }),
 }
 
 module.exports = {
@@ -138,6 +142,13 @@ module.exports = {
       AuthenticationController.requireLogin(),
       CollaboratorsInviteController.acceptInvite,
       AnalyticsRegistrationSourceMiddleware.clearSource()
+    )
+
+    webRouter.get(
+      '/project/:Project_id/tokens',
+      RateLimiterMiddleware.rateLimit(rateLimiters.getProjectTokens),
+      AuthorizationMiddleware.ensureUserCanReadProject,
+      CollaboratorsController.getShareTokens
     )
   },
 }

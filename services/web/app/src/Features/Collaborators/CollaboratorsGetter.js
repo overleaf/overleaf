@@ -25,6 +25,7 @@ module.exports = {
   getInvitedCollaboratorCount: callbackify(getInvitedCollaboratorCount),
   getProjectsUserIsMemberOf: callbackify(getProjectsUserIsMemberOf),
   isUserInvitedMemberOfProject: callbackify(isUserInvitedMemberOfProject),
+  getPublicShareTokens: callbackify(getPublicShareTokens),
   userIsTokenMember: callbackify(userIsTokenMember),
   getAllInvitedMembers: callbackify(getAllInvitedMembers),
   promises: {
@@ -37,6 +38,7 @@ module.exports = {
     getInvitedCollaboratorCount,
     getProjectsUserIsMemberOf,
     isUserInvitedMemberOfProject,
+    getPublicShareTokens,
     userIsTokenMember,
     getAllInvitedMembers,
   },
@@ -131,6 +133,40 @@ async function isUserInvitedMemberOfProject(userId, projectId) {
     }
   }
   return false
+}
+
+async function getPublicShareTokens(userId, projectId) {
+  const memberInfo = await Project.findOne(
+    {
+      _id: projectId,
+    },
+    {
+      isOwner: { $eq: ['$owner_ref', userId] },
+      hasTokenReadOnlyAccess: {
+        $and: [
+          { $in: [userId, '$tokenAccessReadOnly_refs'] },
+          { $eq: ['$publicAccesLevel', PublicAccessLevels.TOKEN_BASED] },
+        ],
+      },
+      tokens: 1,
+    }
+  )
+    .lean()
+    .exec()
+
+  if (!memberInfo) {
+    return null
+  }
+
+  if (memberInfo.isOwner) {
+    return memberInfo.tokens
+  } else if (memberInfo.hasTokenReadOnlyAccess) {
+    return {
+      readOnly: memberInfo.tokens.readOnly,
+    }
+  } else {
+    return {}
+  }
 }
 
 async function getProjectsUserIsMemberOf(userId, fields) {

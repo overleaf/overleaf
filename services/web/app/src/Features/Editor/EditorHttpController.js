@@ -67,8 +67,6 @@ async function joinProject(req, res, next) {
   if (!project) {
     return res.sendStatus(403)
   }
-  // Hide access tokens if this is not the project owner
-  TokenAccessHandler.protectTokens(project, privilegeLevel)
   // Hide sensitive data if the user is restricted
   if (isRestrictedUser) {
     project.owner = { _id: project.owner._id }

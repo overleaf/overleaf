@@ -39,7 +39,6 @@ export const LinkSharingLoading = args => {
     project: {
       ...args.project,
       publicAccesLevel: 'tokenBased',
-      tokens: undefined,
     },
   })
 
@@ -160,6 +159,12 @@ function setupFetchMock(fetchMock) {
   fetchMock
     // list contacts
     .get('express:/user/contacts', { contacts }, { delay })
+    // access tokens
+    .get(
+      'express:/project/:projectId/tokens',
+      { tokens: project.tokens },
+      { delay }
+    )
     // change privacy setting
     .post('express:/project/:projectId/settings/admin', 200, { delay })
     // update project member (e.g. set privilege level)

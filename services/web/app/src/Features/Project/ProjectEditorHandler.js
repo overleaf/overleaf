@@ -36,7 +36,6 @@ module.exports = ProjectEditorHandler = {
       ),
       members: [],
       invites: this.buildInvitesView(invites),
-      tokens: project.tokens,
       imageName:
         project.imageName != null
           ? Path.basename(project.imageName)

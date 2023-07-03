@@ -50,6 +50,9 @@ describe('CollaboratorsController', function () {
         transferOwnership: sinon.stub().resolves(),
       },
     }
+    this.TokenAccessHandler = {
+      getRequestToken: sinon.stub().returns('access-token'),
+    }
 
     this.CollaboratorsController = SandboxedModule.require(MODULE_PATH, {
       requires: {
@@ -61,6 +64,7 @@ describe('CollaboratorsController', function () {
         '../../Features/Errors/HttpErrorHandler': this.HttpErrorHandler,
         '../Tags/TagsHandler': this.TagsHandler,
         '../Authentication/SessionManager': this.SessionManager,
+        '../TokenAccess/TokenAccessHandler': this.TokenAccessHandler,
       },
     })
   })

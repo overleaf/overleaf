@@ -873,7 +873,7 @@ describe('EditorController', function () {
         this.newAccessLevel = 'private'
         this.ProjectDetailsHandler.ensureTokensArePresent = sinon
           .stub()
-          .yields(null, this.tokens)
+          .yields()
         return this.EditorController.setPublicAccessLevel(
           this.project_id,
           this.newAccessLevel,
@@ -898,14 +898,6 @@ describe('EditorController', function () {
           .calledWith(this.project_id)
           .should.equal(false)
       })
-
-      it('should not broadcast a token change', function () {
-        return this.EditorRealTimeController.emitToRoom
-          .calledWith(this.project_id, 'project:tokens:changed', {
-            tokens: this.tokens,
-          })
-          .should.equal(false)
-      })
     })
 
     describe('when setting to tokenBased', function () {
@@ -914,7 +906,7 @@ describe('EditorController', function () {
         this.tokens = { readOnly: 'aaa', readAndWrite: '42bbb' }
         this.ProjectDetailsHandler.ensureTokensArePresent = sinon
           .stub()
-          .yields(null, this.tokens)
+          .yields()
         return this.EditorController.setPublicAccessLevel(
           this.project_id,
           this.newAccessLevel,
@@ -937,14 +929,6 @@ describe('EditorController', function () {
       it('should ensure tokens are present for project', function () {
         return this.ProjectDetailsHandler.ensureTokensArePresent
           .calledWith(this.project_id)
-          .should.equal(true)
-      })
-
-      it('should broadcast the token change too', function () {
-        return this.EditorRealTimeController.emitToRoom
-          .calledWith(this.project_id, 'project:tokens:changed', {
-            tokens: this.tokens,
-          })
           .should.equal(true)
       })
     })

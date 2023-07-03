@@ -31,16 +31,6 @@ export default App.controller(
       })
     }
 
-    /* tokens */
-
-    ide.socket.on('project:tokens:changed', data => {
-      if (data.tokens != null) {
-        $scope.$applyAsync(() => {
-          $scope.project.tokens = data.tokens
-        })
-      }
-    })
-
     ide.socket.on('project:membership:changed', data => {
       if (data.members) {
         listProjectMembers($scope.project._id)
