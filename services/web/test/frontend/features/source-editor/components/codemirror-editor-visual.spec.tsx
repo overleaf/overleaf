@@ -68,25 +68,21 @@ describe('<CodeMirrorEditor/> in Visual mode', function () {
     // select the first autocomplete item
     cy.findByRole('option').eq(0).click()
 
-    cy.get('@first-line').should('have.text', '\\begin{itemize}')
-    cy.get('@second-line')
+    cy.get('@first-line')
       .should('have.text', ' ')
       .find('.ol-cm-item')
       .should('have.length', 1)
-    cy.get('@third-line').should('have.text', '\\end{itemize}')
 
-    cy.get('@second-line').type('test{Enter}test')
+    cy.get('@first-line').type('test{Enter}test')
 
-    cy.get('@first-line').should('have.text', '\\begin{itemize}')
+    cy.get('@first-line')
+      .should('have.text', ' test')
+      .find('.ol-cm-item')
+      .should('have.length', 1)
     cy.get('@second-line')
       .should('have.text', ' test')
       .find('.ol-cm-item')
       .should('have.length', 1)
-    cy.get('@third-line')
-      .should('have.text', ' test')
-      .find('.ol-cm-item')
-      .should('have.length', 1)
-    cy.get('@fourth-line').should('have.text', '\\end{itemize}')
   })
 
   it('finishes a list on Enter in the last item if empty', function () {
@@ -95,10 +91,9 @@ describe('<CodeMirrorEditor/> in Visual mode', function () {
     // select the first autocomplete item
     cy.findByRole('option').eq(0).click()
 
-    cy.get('@second-line').type('test{Enter}{Enter}')
+    cy.get('@first-line').type('test{Enter}{Enter}')
 
-    cy.get('.cm-line')
-      .eq(0)
+    cy.get('@first-line')
       .should('have.text', ' test')
       .find('.ol-cm-item')
       .should('have.length', 1)
@@ -113,18 +108,7 @@ describe('<CodeMirrorEditor/> in Visual mode', function () {
     cy.findByRole('option').eq(0).click()
 
     cy.get('@second-line').type('test{Enter}test{Enter}{upArrow}{Enter}{Enter}')
-
-    const lines = [
-      '\\begin{itemize}',
-      ' test',
-      ' ',
-      ' ',
-      ' test',
-      ' ',
-      '\\end{itemize}',
-    ]
-
-    cy.get('.cm-content').should('have.text', lines.join(''))
+    cy.get('.cm-content').should('have.text', ' testtest')
   })
 
   forEach(['textbf', 'textit', 'underline']).it(

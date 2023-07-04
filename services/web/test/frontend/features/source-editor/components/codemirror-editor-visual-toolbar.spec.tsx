@@ -130,18 +130,10 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
 
     clickToolbarButton('Bullet List')
 
-    cy.get('.cm-content').should(
-      'have.text',
-      [
-        //
-        '\\begin{itemize}',
-        ' test',
-        '\\end{itemize}',
-      ].join('')
-    )
+    cy.get('.cm-content').should('have.text', ' test')
 
-    cy.get('.cm-line').eq(1).type('ing')
-    cy.get('.cm-line').eq(1).should('have.text', ' testing')
+    cy.get('.cm-line').eq(0).type('ing')
+    cy.get('.cm-line').eq(0).should('have.text', ' testing')
   })
 
   it('should insert a numbered list', function () {
@@ -150,17 +142,9 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
 
     clickToolbarButton('Numbered List')
 
-    cy.get('.cm-content').should(
-      'have.text',
-      [
-        //
-        '\\begin{enumerate}',
-        ' test',
-        '\\end{enumerate}',
-      ].join('')
-    )
+    cy.get('.cm-content').should('have.text', ' test')
 
-    cy.get('.cm-line').eq(1).type('ing')
-    cy.get('.cm-line').eq(1).should('have.text', ' testing')
+    cy.get('.cm-line').eq(0).type('ing')
+    cy.get('.cm-line').eq(0).should('have.text', ' testing')
   })
 })

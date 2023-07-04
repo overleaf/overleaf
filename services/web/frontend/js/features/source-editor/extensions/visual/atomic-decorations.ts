@@ -48,6 +48,7 @@ import { EditableGraphicsWidget } from './visual-widgets/editable-graphics'
 import { EditableInlineGraphicsWidget } from './visual-widgets/editable-inline-graphics'
 import { CloseBrace, OpenBrace } from '../../lezer-latex/latex.terms.mjs'
 import { FootnoteWidget } from './visual-widgets/footnote'
+import { getListItems } from '../toolbar/lists'
 
 type Options = {
   fileTreeManager: {
@@ -225,92 +226,91 @@ export const atomicDecorations = (options: Options) => {
     tree.iterate({
       enter(nodeRef) {
         if (nodeRef.type.is('$Environment')) {
-          if (shouldDecorate(state, nodeRef)) {
-            const envName = getUnstarredEnvironmentName(nodeRef.node, state)
-            const hideInEnvironmentTypes = ['figure', 'table']
-            if (envName && hideInEnvironmentTypes.includes(envName)) {
-              const beginNode = nodeRef.node.getChild('BeginEnv')
-              const endNode = nodeRef.node.getChild('EndEnv')
-              if (
-                beginNode &&
-                endNode &&
-                hasClosingBrace(beginNode) &&
-                hasClosingBrace(endNode)
-              ) {
-                const beginLine = state.doc.lineAt(beginNode.from)
-                const endLine = state.doc.lineAt(endNode.from)
+          const envName = getUnstarredEnvironmentName(nodeRef.node, state)
+          const hideInEnvironmentTypes = ['figure', 'table']
+          if (envName && hideInEnvironmentTypes.includes(envName)) {
+            const beginNode = nodeRef.node.getChild('BeginEnv')
+            const endNode = nodeRef.node.getChild('EndEnv')
+            if (
+              beginNode &&
+              endNode &&
+              hasClosingBrace(beginNode) &&
+              hasClosingBrace(endNode)
+            ) {
+              const beginLine = state.doc.lineAt(beginNode.from)
+              const endLine = state.doc.lineAt(endNode.from)
 
-                const begin = {
-                  from: beginLine.from,
-                  to: extendForwardsOverEmptyLines(state.doc, beginLine),
-                }
-                const end = {
-                  from: extendBackwardsOverEmptyLines(state.doc, endLine),
-                  to: endLine.to,
-                }
+              const begin = {
+                from: beginLine.from,
+                to: extendForwardsOverEmptyLines(state.doc, beginLine),
+              }
+              const end = {
+                from: extendBackwardsOverEmptyLines(state.doc, endLine),
+                to: endLine.to,
+              }
 
-                if (shouldDecorate(state, { from: begin.from, to: end.to })) {
+              if (shouldDecorate(state, { from: begin.from, to: end.to })) {
+                decorations.push(
+                  Decoration.replace({
+                    widget: new EnvironmentLineWidget(envName, 'begin'),
+                    block: true,
+                  }).range(begin.from, begin.to),
+                  Decoration.replace({
+                    widget: new EnvironmentLineWidget(envName, 'end'),
+                    block: true,
+                  }).range(end.from, end.to)
+                )
+
+                const centeringNode = centeringNodeForEnvironment(nodeRef)
+
+                if (centeringNode) {
+                  const line = state.doc.lineAt(centeringNode.from)
+                  const from = extendBackwardsOverEmptyLines(state.doc, line)
+                  const to = extendForwardsOverEmptyLines(state.doc, line)
+
                   decorations.push(
                     Decoration.replace({
-                      widget: new EnvironmentLineWidget(envName, 'begin'),
                       block: true,
-                    }).range(begin.from, begin.to),
-                    Decoration.replace({
-                      widget: new EnvironmentLineWidget(envName, 'end'),
-                      block: true,
-                    }).range(end.from, end.to)
+                    }).range(from, to)
                   )
-
-                  const centeringNode = centeringNodeForEnvironment(nodeRef)
-
-                  if (centeringNode) {
-                    const line = state.doc.lineAt(centeringNode.from)
-                    const from = extendBackwardsOverEmptyLines(state.doc, line)
-                    const to = extendForwardsOverEmptyLines(state.doc, line)
-
-                    decorations.push(
-                      Decoration.replace({
-                        block: true,
-                      }).range(from, to)
-                    )
-                  }
                 }
               }
-            } else if (nodeRef.type.is('ListEnvironment')) {
-              const beginNode = nodeRef.node.getChild('BeginEnv')
-              const endNode = nodeRef.node.getChild('EndEnv')
+            }
+          } else if (nodeRef.type.is('ListEnvironment')) {
+            const beginNode = nodeRef.node.getChild('BeginEnv')
+            const endNode = nodeRef.node.getChild('EndEnv')
+
+            if (
+              beginNode &&
+              endNode &&
+              hasClosingBrace(beginNode) &&
+              hasClosingBrace(endNode)
+            ) {
+              const beginLine = state.doc.lineAt(beginNode.from)
+              const endLine = state.doc.lineAt(endNode.from)
+
+              const begin = {
+                from: beginLine.from,
+                to: extendForwardsOverEmptyLines(state.doc, beginLine),
+              }
+              const end = {
+                from: extendBackwardsOverEmptyLines(state.doc, endLine),
+                to: endLine.to,
+              }
 
               if (
-                beginNode &&
-                endNode &&
-                hasClosingBrace(beginNode) &&
-                hasClosingBrace(endNode)
+                !selectionIntersects(state.selection, begin) &&
+                !selectionIntersects(state.selection, end) &&
+                getListItems(nodeRef.node).length > 0 // not empty
               ) {
-                const beginLine = state.doc.lineAt(beginNode.from)
-                const endLine = state.doc.lineAt(endNode.from)
-
-                const begin = {
-                  from: beginLine.from,
-                  to: extendForwardsOverEmptyLines(state.doc, beginLine),
-                }
-                const end = {
-                  from: extendBackwardsOverEmptyLines(state.doc, endLine),
-                  to: endLine.to,
-                }
-
-                if (
-                  !selectionIntersects(state.selection, begin) &&
-                  !selectionIntersects(state.selection, end)
-                ) {
-                  decorations.push(
-                    Decoration.replace({
-                      block: true,
-                    }).range(begin.from, begin.to),
-                    Decoration.replace({
-                      block: true,
-                    }).range(end.from, end.to)
-                  )
-                }
+                decorations.push(
+                  Decoration.replace({
+                    block: true,
+                  }).range(begin.from, begin.to),
+                  Decoration.replace({
+                    block: true,
+                  }).range(end.from, end.to)
+                )
               }
             }
           }

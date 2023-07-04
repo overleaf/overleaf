@@ -20,6 +20,7 @@ import {
 } from '../../utils/tree-operations/ancestors'
 import { getEnvironmentName } from '../../utils/tree-operations/environments'
 import { ListEnvironment } from '../../lezer-latex/latex.terms.mjs'
+import { SyntaxNode } from '@lezer/common'
 
 export const ancestorListType = (state: EditorState): string | null => {
   const ancestorNode = ancestorWithType(state, ListEnvironment)
@@ -301,6 +302,21 @@ const toggleListForRange = (
   }
 
   return { range }
+}
+
+export const getListItems = (node: SyntaxNode): SyntaxNode[] => {
+  const items: SyntaxNode[] = []
+
+  node.cursor().iterate(nodeRef => {
+    if (nodeRef.type.is('Item')) {
+      items.push(nodeRef.node)
+    }
+    if (nodeRef.type.is('ListEnvironment') && nodeRef.node !== node) {
+      return false
+    }
+  })
+
+  return items
 }
 
 export const toggleListForRanges =

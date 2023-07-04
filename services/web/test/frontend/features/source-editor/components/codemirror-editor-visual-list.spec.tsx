@@ -43,47 +43,27 @@ describe('<CodeMirrorEditor/> lists in Rich Text mode', function () {
 
     // create a nested list
     cy.get('.cm-line')
-      .eq(2)
+      .eq(1)
       .type(isMac ? '{cmd}]' : '{ctrl}]')
 
-    cy.get('.cm-content').should(
-      'have.text',
-      [
-        '\\begin{itemize}',
-        ' Test',
-        '\\begin{itemize}',
-        ' Test',
-        '\\end{itemize}',
-        '\\end{itemize}',
-      ].join('')
-    )
+    cy.get('.cm-content').should('have.text', [' Test', ' Test'].join(''))
   })
 
   it('creates a nested list inside an indented list', function () {
     const content = [
       '\\begin{itemize}',
-      '\\item Test',
-      '\\item Test',
+      '  \\item Test',
+      '  \\item Test',
       '\\end{itemize}',
     ].join('\n')
     mountEditor(content)
 
     // create a nested list
     cy.get('.cm-line')
-      .eq(2)
+      .eq(1)
       .type(isMac ? '{cmd}]' : '{ctrl}]')
 
-    cy.get('.cm-content').should(
-      'have.text',
-      [
-        '\\begin{itemize}',
-        ' Test',
-        '\\begin{itemize}',
-        ' Test',
-        '\\end{itemize}',
-        '\\end{itemize}',
-      ].join('')
-    )
+    cy.get('.cm-content').should('have.text', [' Test', ' Test'].join(''))
   })
 
   it('creates a nested list on Tab at the start of an item', function () {
@@ -96,24 +76,14 @@ describe('<CodeMirrorEditor/> lists in Rich Text mode', function () {
     mountEditor(content)
 
     // move to the start of the item and press Tab
-    cy.get('.cm-line').eq(2).as('line')
+    cy.get('.cm-line').eq(1).as('line')
     cy.get('@line').click()
     cy.get('@line').type('{leftArrow}'.repeat(4))
     cy.get('@line').trigger('keydown', {
       key: 'Tab',
     })
 
-    cy.get('.cm-content').should(
-      'have.text',
-      [
-        '\\begin{itemize}',
-        ' Test',
-        '\\begin{itemize}',
-        ' Test',
-        '\\end{itemize}',
-        '\\end{itemize}',
-      ].join('')
-    )
+    cy.get('.cm-content').should('have.text', [' Test', ' Test'].join(''))
   })
 
   it('does not creates a nested list on Tab when not at the start of an item', function () {
@@ -126,22 +96,13 @@ describe('<CodeMirrorEditor/> lists in Rich Text mode', function () {
     mountEditor(content)
 
     // focus a line (at the end of a list item) and press Tab
-    cy.get('.cm-line').eq(2).as('line')
+    cy.get('.cm-line').eq(1).as('line')
     cy.get('@line').click()
     cy.get('@line').trigger('keydown', {
       key: 'Tab',
     })
 
-    cy.get('.cm-content').should(
-      'have.text',
-      [
-        //
-        '\\begin{itemize}',
-        ' Test',
-        ' Test  ',
-        '\\end{itemize}',
-      ].join('')
-    )
+    cy.get('.cm-content').should('have.text', [' Test', ' Test  '].join(''))
   })
 
   it('removes a nested list on Shift-Tab', function () {
@@ -154,41 +115,22 @@ describe('<CodeMirrorEditor/> lists in Rich Text mode', function () {
     mountEditor(content)
 
     // move to the start of the list item and press Tab
-    cy.get('.cm-line').eq(2).as('line')
+    cy.get('.cm-line').eq(1).as('line')
     cy.get('@line').click()
     cy.get('@line').type('{leftArrow}'.repeat(4))
     cy.get('@line').trigger('keydown', {
       key: 'Tab',
     })
 
-    cy.get('.cm-content').should(
-      'have.text',
-      [
-        '\\begin{itemize}',
-        ' Test',
-        '\\begin{itemize}',
-        ' Test',
-        '\\end{itemize}',
-        '\\end{itemize}',
-      ].join('')
-    )
+    cy.get('.cm-content').should('have.text', [' Test', ' Test'].join(''))
 
     // focus the indented line and press Shift-Tab
-    cy.get('.cm-line').eq(4).trigger('keydown', {
+    cy.get('.cm-line').eq(1).trigger('keydown', {
       key: 'Tab',
       shiftKey: true,
     })
 
-    cy.get('.cm-content').should(
-      'have.text',
-      [
-        //
-        '\\begin{itemize}',
-        ' Test',
-        ' Test',
-        '\\end{itemize}',
-      ].join('')
-    )
+    cy.get('.cm-content').should('have.text', [' Test', ' Test'].join(''))
   })
 
   it('does not remove a top-level nested list on Shift-Tab', function () {
@@ -201,21 +143,12 @@ describe('<CodeMirrorEditor/> lists in Rich Text mode', function () {
     mountEditor(content)
 
     // focus a list item and press Shift-Tab
-    cy.get('.cm-line').eq(2).trigger('keydown', {
+    cy.get('.cm-line').eq(1).trigger('keydown', {
       key: 'Tab',
       shiftKey: true,
     })
 
-    cy.get('.cm-content').should(
-      'have.text',
-      [
-        //
-        '\\begin{itemize}',
-        ' Test',
-        ' Test',
-        '\\end{itemize}',
-      ].join('')
-    )
+    cy.get('.cm-content').should('have.text', [' Test', ' Test'].join(''))
   })
 
   it('handles up arrow at the start of a list item', function () {
@@ -227,7 +160,7 @@ describe('<CodeMirrorEditor/> lists in Rich Text mode', function () {
     ].join('\n')
     mountEditor(content)
 
-    cy.get('.cm-line').eq(2).as('line')
+    cy.get('.cm-line').eq(1).as('line')
     cy.get('@line').click()
     cy.get('@line').type('{leftArrow}'.repeat(3)) // to the start of the item
     cy.get('@line').type('{upArrow}{Shift}{rightArrow}{rightArrow}{rightArrow}') // up and extend to the end of the item
@@ -246,7 +179,7 @@ describe('<CodeMirrorEditor/> lists in Rich Text mode', function () {
     ].join('\n')
     mountEditor(content)
 
-    cy.get('.cm-line').eq(2).as('line')
+    cy.get('.cm-line').eq(1).as('line')
     cy.get('@line').click()
     cy.get('@line').type('{leftArrow}'.repeat(3)) // to the start of the item
     cy.get('@line').type('{upArrow}{Shift}{rightArrow}{rightArrow}{rightArrow}') // up and extend to the end of the item
@@ -290,15 +223,12 @@ describe('<CodeMirrorEditor/> lists in Rich Text mode', function () {
     ].join('\n')
     mountEditor(content)
 
-    cy.get('.cm-line').eq(2).as('line')
+    cy.get('.cm-line').eq(0).as('line')
     cy.get('@line').click()
     cy.get('@line').type('\\ite')
     cy.get('@line').type('{enter}')
     cy.get('@line').type('second')
 
-    cy.get('.cm-content').should(
-      'have.text',
-      ['\\begin{itemize}', ' first', ' second', '\\end{itemize}'].join('')
-    )
+    cy.get('.cm-content').should('have.text', [' first', ' second'].join(''))
   })
 })
