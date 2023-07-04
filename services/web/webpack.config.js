@@ -216,12 +216,6 @@ module.exports = {
 
       // Enables ace/ace shortcut
       ace: 'ace-builds/src-noconflict',
-      // fineupload vendored dependency (which we're aliasing to fineuploadER
-      // for some reason)
-      fineuploader: path.join(
-        __dirname,
-        `frontend/js/vendor/libs/${PackageVersions.lib('fineuploader')}`
-      ),
     },
     // symlinks: false, // enable this while using `npm link`
     extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],

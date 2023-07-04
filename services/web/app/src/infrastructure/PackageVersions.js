@@ -9,7 +9,6 @@ const ACE_VERSION = require('ace-builds/version')
 const version = {
   // Upgrade instructions: https://github.com/overleaf/write_latex/wiki/Upgrading-Ace
   ace: ACE_VERSION,
-  fineuploader: '5.15.4',
 }
 
 module.exports = {
