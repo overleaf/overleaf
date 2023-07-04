@@ -17,7 +17,7 @@ describe('<SettingsDocument />', function () {
         id: '123abc',
         type: 'doc',
         selected: false,
-      },
+      } as MainDocument['doc'],
     },
   ]
 

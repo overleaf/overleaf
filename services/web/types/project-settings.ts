@@ -1,14 +1,16 @@
 import { OverallTheme } from '../frontend/js/features/source-editor/extensions/theme'
+import { Brand } from './helpers/brand'
 
 export type AllowedImageName = {
   imageDesc: string
   imageName: string
 }
 
+export type DocId = Brand<string, 'DocId'>
 export type MainDocument = {
   doc: {
     name: string
-    id: string
+    id: DocId
     type: string
     selected: boolean
   }

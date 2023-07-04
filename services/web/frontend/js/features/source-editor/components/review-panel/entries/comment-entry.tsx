@@ -14,22 +14,29 @@ import {
 import classnames from 'classnames'
 import { ReviewPanelCommentEntry } from '../../../../../../../types/review-panel/entry'
 import {
-  DocId,
   ReviewPanelCommentThreads,
+  ReviewPanelPermissions,
   ThreadId,
 } from '../../../../../../../types/review-panel/review-panel'
+import { DocId } from '../../../../../../../types/project-settings'
 
 type CommentEntryProps = {
   docId: DocId
   entry: ReviewPanelCommentEntry
   entryId: ThreadId
+  permissions: ReviewPanelPermissions
   threads: ReviewPanelCommentThreads
 }
 
-function CommentEntry({ docId, entry, entryId, threads }: CommentEntryProps) {
+function CommentEntry({
+  docId,
+  entry,
+  entryId,
+  permissions,
+  threads,
+}: CommentEntryProps) {
   const { t } = useTranslation()
   const {
-    permissions,
     gotoEntry,
     toggleReviewPanel,
     resolveComment,

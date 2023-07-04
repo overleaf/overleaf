@@ -352,7 +352,7 @@ describe('<EditorLeftMenu />', function () {
               id: 'id1',
               type: 'doc',
               selected: false,
-            },
+            } as MainDocument['doc'],
           },
           {
             path: 'main2.tex',
@@ -361,7 +361,7 @@ describe('<EditorLeftMenu />', function () {
               id: 'id2',
               type: 'doc',
               selected: false,
-            },
+            } as MainDocument['doc'],
           },
         ]
 

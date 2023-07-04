@@ -1260,26 +1260,13 @@ button when (@is-overleaf-light = true) {
     top: 0;
     display: flex;
     flex-direction: column;
+    height: 100%;
   }
 
   .rp-overview-file {
     .rp-overview-file-entries {
       //height: auto;
       transition: height ease-in-out 0.15s; //, display 0.15s 0s;
-    }
-
-    .rp-overview-file-num-entries {
-      display: none;
-    }
-
-    &.rp-overview-file-collapse {
-      .rp-overview-file-num-entries {
-        display: inline;
-      }
-
-      .rp-overview-file-entries {
-        // height: 0;
-      }
     }
   }
 

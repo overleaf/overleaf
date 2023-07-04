@@ -1,4 +1,8 @@
 import { useMemo } from 'react'
+import Container from './container'
+import Toolbar from './toolbar/toolbar'
+import Nav from './nav'
+import Toggler from './toggler'
 import ChangeEntry from './entries/change-entry'
 import AggregateChangeEntry from './entries/aggregate-change-entry'
 import CommentEntry from './entries/comment-entry'
@@ -26,54 +30,62 @@ function CurrentFileContainer() {
   }, [currentDocEntries])
 
   return (
-    <div
-      id="review-panel-current-file"
-      role="tabpanel"
-      tabIndex={0}
-      aria-labelledby="review-panel-tab-current-file"
-    >
-      <div
-        className="rp-entry-list-inner"
-        style={{ height: `${contentHeight}px` }}
-      >
-        {openDocId &&
-          objectEntries.map(([id, entry]) => {
-            if (!entry.visible) {
-              return null
-            }
-
-            if (entry.type === 'insert' || entry.type === 'delete') {
-              return <ChangeEntry key={id} />
-            }
-
-            if (entry.type === 'aggregate-change') {
-              return <AggregateChangeEntry key={id} />
-            }
-
-            if (entry.type === 'comment' && !loadingThreads) {
-              return (
-                <CommentEntry
-                  key={id}
-                  docId={openDocId}
-                  entry={entry}
-                  entryId={id}
-                  threads={commentThreads}
-                />
-              )
-            }
-
-            if (entry.type === 'add-comment' && permissions.comment) {
-              return <AddCommentEntry key={id} />
-            }
-
-            if (entry.type === 'bulk-actions') {
-              return <BulkActionsEntry key={id} />
-            }
-
-            return null
-          })}
+    <Container>
+      <div className="review-panel-tools">
+        <Toolbar />
+        <Nav />
       </div>
-    </div>
+      <Toggler />
+      <div
+        id="review-panel-current-file"
+        role="tabpanel"
+        tabIndex={0}
+        aria-labelledby="review-panel-tab-current-file"
+      >
+        <div
+          className="rp-entry-list-inner"
+          style={{ height: `${contentHeight}px` }}
+        >
+          {openDocId &&
+            objectEntries.map(([id, entry]) => {
+              if (!entry.visible) {
+                return null
+              }
+
+              if (entry.type === 'insert' || entry.type === 'delete') {
+                return <ChangeEntry key={id} />
+              }
+
+              if (entry.type === 'aggregate-change') {
+                return <AggregateChangeEntry key={id} />
+              }
+
+              if (entry.type === 'comment' && !loadingThreads) {
+                return (
+                  <CommentEntry
+                    key={id}
+                    docId={openDocId}
+                    entry={entry}
+                    entryId={id}
+                    permissions={permissions}
+                    threads={commentThreads}
+                  />
+                )
+              }
+
+              if (entry.type === 'add-comment' && permissions.comment) {
+                return <AddCommentEntry key={id} />
+              }
+
+              if (entry.type === 'bulk-actions') {
+                return <BulkActionsEntry key={id} />
+              }
+
+              return null
+            })}
+        </div>
+      </div>
+    </Container>
   )
 }
 

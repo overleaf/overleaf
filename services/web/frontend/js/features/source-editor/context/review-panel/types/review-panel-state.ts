@@ -1,6 +1,5 @@
 import {
   CommentId,
-  DocId,
   ReviewPanelCommentThreads,
   ReviewPanelEntries,
   ReviewPanelPermissions,
@@ -8,11 +7,14 @@ import {
   ThreadId,
 } from '../../../../../../../types/review-panel/review-panel'
 import { ReviewPanelCommentEntry } from '../../../../../../../types/review-panel/entry'
-import { MainDocument } from '../../../../../../../types/project-settings'
+import {
+  DocId,
+  MainDocument,
+} from '../../../../../../../types/project-settings'
 
 export interface ReviewPanelState {
   values: {
-    collapsed: Record<string, boolean>
+    collapsed: Record<DocId, boolean>
     commentThreads: ReviewPanelCommentThreads
     deleteComment: (threadId: ThreadId, commentId: CommentId) => void
     docs: MainDocument[] | undefined
@@ -33,6 +35,7 @@ export interface ReviewPanelState {
     submitReply: (entry: ReviewPanelCommentEntry, replyContent: string) => void
     subView: SubView
     wantTrackChanges: boolean
+    loading: boolean
     openDocId: DocId | null
     toggleTrackChangesForEveryone: (isOn: boolean) => unknown
     toggleTrackChangesForUser: (isOn: boolean, memberId: string) => unknown

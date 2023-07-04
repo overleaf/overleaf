@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import Tooltip from '../../../../../shared/components/tooltip'
 import Icon from '../../../../../shared/components/icon'
@@ -9,6 +9,7 @@ import {
   useReviewPanelValueContext,
 } from '../../../context/review-panel/review-panel-context'
 import classnames from 'classnames'
+import useCollapseHeight from '../hooks/use-collapse-height'
 
 function ToggleMenu() {
   const { t } = useTranslation()
@@ -29,21 +30,7 @@ function ToggleMenu() {
   } = useReviewPanelValueContext()
 
   const containerRef = useRef<HTMLUListElement | null>(null)
-
-  useEffect(() => {
-    if (containerRef.current) {
-      const neededHeight = containerRef.current.scrollHeight
-
-      if (neededHeight > 0) {
-        const height = shouldCollapse ? 0 : neededHeight
-        containerRef.current.style.height = `${height}px`
-      } else {
-        if (shouldCollapse) {
-          containerRef.current.style.height = '0'
-        }
-      }
-    }
-  }, [shouldCollapse])
+  useCollapseHeight(containerRef, shouldCollapse)
 
   return (
     <>

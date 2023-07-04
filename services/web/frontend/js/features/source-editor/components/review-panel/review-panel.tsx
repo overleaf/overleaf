@@ -1,5 +1,4 @@
 import ReactDOM from 'react-dom'
-import Container from './container'
 import CurrentFileContainer from './current-file-container'
 import OverviewContainer from './overview-container'
 import { useCodeMirrorViewContext } from '../codemirror-editor'
@@ -19,13 +18,9 @@ function ReviewPanelView({ parentDomNode }: ReviewPanelViewProps) {
   return ReactDOM.createPortal(
     <>
       {isCurrentFileView(subView) ? (
-        <Container>
-          <CurrentFileContainer />
-        </Container>
+        <CurrentFileContainer />
       ) : (
-        <Container>
-          <OverviewContainer />
-        </Container>
+        <OverviewContainer />
       )}
     </>,
     parentDomNode

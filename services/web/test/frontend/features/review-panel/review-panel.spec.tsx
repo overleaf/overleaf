@@ -192,4 +192,12 @@ describe('<ReviewPanel />', function () {
     // eslint-disable-next-line mocha/no-skipped-tests
     it.skip('resolves comment', function () {})
   })
+
+  describe('overview mode', function () {
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip('shows list of files changed', function () {})
+
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip('renders comments', function () {})
+  })
 })

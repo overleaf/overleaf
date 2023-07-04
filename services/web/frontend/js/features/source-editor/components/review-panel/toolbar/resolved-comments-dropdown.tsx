@@ -6,11 +6,11 @@ import ResolvedCommentsScroller from './resolved-comments-scroller'
 import classnames from 'classnames'
 import { useReviewPanelValueContext } from '../../../context/review-panel/review-panel-context'
 import {
-  DocId,
   ReviewPanelDocEntries,
   ThreadId,
 } from '../../../../../../../types/review-panel/review-panel'
 import { ReviewPanelResolvedCommentThread } from '../../../../../../../types/review-panel/comment-thread'
+import { DocId } from '../../../../../../../types/project-settings'
 
 export interface FilteredResolvedComments
   extends ReviewPanelResolvedCommentThread {

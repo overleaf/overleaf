@@ -13,6 +13,9 @@ function useAngularReviewPanelState(): ReviewPanelState {
   const [subView, setSubView] = useScopeValue<ReviewPanel.Value<'subView'>>(
     'reviewPanel.subView'
   )
+  const [loading] = useScopeValue<ReviewPanel.Value<'loading'>>(
+    'reviewPanel.overview.loading'
+  )
   const [collapsed, setCollapsed] = useScopeValue<
     ReviewPanel.Value<'collapsed'>
   >('reviewPanel.overview.docsCollapsedState')
@@ -130,6 +133,7 @@ function useAngularReviewPanelState(): ReviewPanelState {
       submitReply,
       subView,
       wantTrackChanges,
+      loading,
       openDocId,
       toggleTrackChangesForEveryone,
       toggleTrackChangesForUser,
@@ -162,6 +166,7 @@ function useAngularReviewPanelState(): ReviewPanelState {
       submitReply,
       subView,
       wantTrackChanges,
+      loading,
       openDocId,
       toggleTrackChangesForEveryone,
       toggleTrackChangesForUser,

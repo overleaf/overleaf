@@ -8,6 +8,7 @@ interface ReviewPanelEntryScreenPos {
 
 interface ReviewPanelBaseEntry {
   visible: boolean
+  offset: number
 }
 
 export interface ReviewPanelCommentEntry extends ReviewPanelBaseEntry {
@@ -15,7 +16,6 @@ export interface ReviewPanelCommentEntry extends ReviewPanelBaseEntry {
   content: string
   entry_ids: string[]
   focused: boolean
-  offset: number
   screenPos: ReviewPanelEntryScreenPos
   thread_id: ThreadId
   replyContent?: string // angular specific

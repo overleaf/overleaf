@@ -1,4 +1,5 @@
 import { Brand } from '../helpers/brand'
+import { DocId } from '../project-settings'
 import { ReviewPanelEntry } from './entry'
 import { ReviewPanelCommentThread } from './comment-thread'
 
@@ -14,7 +15,6 @@ export interface ReviewPanelPermissions {
 export type ThreadId = Brand<string, 'ThreadId'>
 export type ReviewPanelDocEntries = Record<ThreadId, ReviewPanelEntry>
 
-export type DocId = Brand<string, 'DocId'>
 export type ReviewPanelEntries = Record<DocId, ReviewPanelDocEntries>
 
 export type UserId = Brand<string, 'UserId'>
