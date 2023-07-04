@@ -46,6 +46,7 @@ import { shortcuts } from './shortcuts'
 import { effectListeners } from './effect-listeners'
 import { highlightSpecialChars } from './highlight-special-chars'
 import { toolbarPanel } from './toolbar/toolbar-panel'
+import { draggableCursor } from './draggable-cursor'
 import { geometryChangeEvent } from './geometry-change-event'
 import { isSplitTestEnabled } from '../../../utils/splitTestUtils'
 
@@ -78,6 +79,8 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   indentationMarkers(options.visual.visual),
   bracketMatching(),
   bracketSelection(),
+  // NOTE: `draggableCursor` needs to be before `crosshairCursor`, so it takes precedence when Alt is held down.
+  draggableCursor(),
   // A built-in extension that enables rectangular selections, created by dragging a new selection while holding down Alt.
   rectangularSelection(),
   // A built-in extension that turns the pointer into a crosshair while Alt is pressed.
