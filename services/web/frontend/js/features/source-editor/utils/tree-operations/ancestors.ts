@@ -64,6 +64,28 @@ export function getAncestorStack(
   return stack.reverse()
 }
 
+export const wrappedNodeOfType = (
+  state: EditorState,
+  range: SelectionRange,
+  type: string | number
+): SyntaxNode | null => {
+  if (range.empty) {
+    return null
+  }
+
+  const ancestorNode = ancestorNodeOfType(state, range.from, type, 1)
+
+  if (
+    ancestorNode &&
+    ancestorNode.from === range.from &&
+    ancestorNode.to === range.to
+  ) {
+    return ancestorNode
+  }
+
+  return null
+}
+
 export const ancestorNodeOfType = (
   state: EditorState,
   pos: number,

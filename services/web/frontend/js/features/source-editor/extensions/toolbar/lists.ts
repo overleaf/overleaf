@@ -17,6 +17,7 @@ import {
   ancestorOfNodeWithType,
   ancestorWithType,
   descendantsOfNodeWithType,
+  wrappedNodeOfType,
 } from '../../utils/tree-operations/ancestors'
 import { getEnvironmentName } from '../../utils/tree-operations/environments'
 import { ListEnvironment } from '../../lezer-latex/latex.terms.mjs'
@@ -195,11 +196,9 @@ const toggleListForRange = (
   range: SelectionRange,
   environment: string
 ) => {
-  const ancestorNode = ancestorNodeOfType(
-    view.state,
-    range.head,
-    ListEnvironment
-  )
+  const ancestorNode =
+    ancestorNodeOfType(view.state, range.head, ListEnvironment) ??
+    wrappedNodeOfType(view.state, range, ListEnvironment)
 
   if (ancestorNode) {
     const beginEnvNode = ancestorNode.getChild('BeginEnv')

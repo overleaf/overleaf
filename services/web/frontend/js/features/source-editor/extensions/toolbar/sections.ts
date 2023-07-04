@@ -1,7 +1,7 @@
 import { EditorSelection, EditorState, SelectionRange } from '@codemirror/state'
 import { EditorView } from '@codemirror/view'
 import { syntaxTree } from '@codemirror/language'
-import { ancestorsOfNodeWithType } from '../../utils/tree-operations/ancestors'
+import { ancestorOfNodeWithType } from '../../utils/tree-operations/ancestors'
 import { SyntaxNode } from '@lezer/common'
 
 export const findCurrentSectionHeadingLevel = (state: EditorState) => {
@@ -25,13 +25,38 @@ export const rangeInfo = (
   range: SelectionRange
 ): RangeInfo => {
   const tree = syntaxTree(state)
-  const node = tree.resolveInner(range.anchor)
-  const command = ancestorsOfNodeWithType(node, 'SectioningCommand').next()
-    .value
-  const ctrlSeq = command?.firstChild
-  const level = ctrlSeq
-    ? state.sliceDoc(ctrlSeq.from + 1, ctrlSeq.to).trim()
-    : 'text'
+
+  const fromNode = tree.resolveInner(range.from, 1)
+  const fromAncestor = ancestorOfNodeWithType(fromNode, 'SectioningCommand')
+
+  const toNode = tree.resolveInner(range.to, -1)
+  const toAncestor = ancestorOfNodeWithType(toNode, 'SectioningCommand')
+
+  const command = fromAncestor ?? toAncestor
+
+  // from and to are both outside section heading
+  if (!command) {
+    return { range, level: 'text' }
+  }
+
+  if (fromAncestor && toAncestor) {
+    // from and to are inside different section headings
+    if (fromAncestor !== toAncestor) {
+      return { range, level: 'text' }
+    }
+  } else {
+    // the range isn't empty and only one end is inside a section heading
+    if (!range.empty) {
+      return { range, level: 'text' }
+    }
+  }
+
+  const ctrlSeq = command.firstChild
+  if (!ctrlSeq) {
+    return { range, level: 'text' }
+  }
+
+  const level = state.sliceDoc(ctrlSeq.from + 1, ctrlSeq.to).trim()
 
   return { command, ctrlSeq, level, range }
 }
