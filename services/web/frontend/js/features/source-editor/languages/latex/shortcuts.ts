@@ -1,6 +1,6 @@
 import { Prec } from '@codemirror/state'
 import { keymap } from '@codemirror/view'
-import { wrapRanges } from '../../commands/ranges'
+import { toggleRanges } from '../../commands/ranges'
 
 export const shortcuts = () => {
   return Prec.high(
@@ -9,13 +9,13 @@ export const shortcuts = () => {
         key: 'Ctrl-b',
         mac: 'Mod-b',
         preventDefault: true,
-        run: wrapRanges('\\textbf{', '}'),
+        run: toggleRanges('\\textbf'),
       },
       {
         key: 'Ctrl-i',
         mac: 'Mod-i',
         preventDefault: true,
-        run: wrapRanges('\\textit{', '}'),
+        run: toggleRanges('\\textit'),
       },
     ])
   )

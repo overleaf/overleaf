@@ -268,9 +268,7 @@ function moveRange(range: SelectionRange, newFrom: number, newTo: number) {
 
 function validateReplacement(expected: string, actual: string) {
   if (expected !== actual) {
-    throw new Error(
-      `Replacement in toggleRange failed validation. Expected ${expected} got ${actual}`
-    )
+    throw new Error('Replacement in toggleRange failed validation.')
   }
 }
 

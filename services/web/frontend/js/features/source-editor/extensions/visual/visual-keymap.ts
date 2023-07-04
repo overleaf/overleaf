@@ -1,7 +1,6 @@
 import { keymap } from '@codemirror/view'
 import { EditorSelection, Prec } from '@codemirror/state'
 import { ancestorNodeOfType } from '../../utils/tree-query'
-import { toggleRanges } from '../../commands/ranges'
 import {
   getIndentation,
   IndentContext,
@@ -127,19 +126,6 @@ export const visualKeymap = Prec.highest(
       key: 'Shift-Tab',
       preventDefault: true,
       run: indentDecrease,
-    },
-    // Override bolding in RT mode
-    {
-      key: 'Ctrl-b',
-      mac: 'Mod-b',
-      preventDefault: true,
-      run: toggleRanges('\\textbf'),
-    },
-    {
-      key: 'Ctrl-i',
-      mac: 'Mod-i',
-      preventDefault: true,
-      run: toggleRanges('\\textit'),
     },
   ])
 )
