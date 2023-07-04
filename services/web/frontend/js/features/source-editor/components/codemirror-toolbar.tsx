@@ -53,7 +53,7 @@ const Toolbar = memo(function Toolbar() {
   const buildOverflow = useCallback(
     (element: Element) => {
       setOverflowOpen(false)
-      setOverflowed(false)
+      setOverflowed(true)
 
       if (overflowBeforeRef.current) {
         overflowedItemsRef.current = new Set()
