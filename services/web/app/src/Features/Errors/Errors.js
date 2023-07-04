@@ -148,6 +148,12 @@ class SubscriptionAdminDeletionError extends OErrorV2CompatibleError {
   }
 }
 
+class SubscriptionNotFoundError extends OErrorV2CompatibleError {
+  constructor(options) {
+    super('subscription not found', options)
+  }
+}
+
 class ProjectNotFoundError extends OErrorV2CompatibleError {
   constructor(options) {
     super('project not found', options)
@@ -213,6 +219,7 @@ module.exports = {
   ThirdPartyIdentityExistsError,
   ThirdPartyUserNotFoundError,
   SubscriptionAdminDeletionError,
+  SubscriptionNotFoundError,
   ProjectNotFoundError,
   UserNotFoundError,
   UserNotCollaboratorError,

@@ -4,6 +4,10 @@ const { GroupPolicy } = require('../../models/GroupPolicy')
 const { User } = require('../../models/User')
 const ManagedUsersPolicy = require('./ManagedUsersPolicy')
 const OError = require('@overleaf/o-error')
+const {
+  UserNotFoundError,
+  SubscriptionNotFoundError,
+} = require('../Errors/Errors')
 
 /**
  * This module contains functions for handling managed users in a
@@ -40,7 +44,14 @@ async function enableManagedUsers(subscriptionId) {
  * @returns {Promise<Object>} - A Promise that resolves with the group policy
  *   object for the user's enrollment, or undefined if it does not exist.
  */
-async function getGroupPolicyForUser(user) {
+async function getGroupPolicyForUser(requestedUser) {
+  // Don't rely on the user being populated, it may be a session user without
+  // the enrollment property. Force the user to be loaded from mongo.
+  const user = await User.findById(requestedUser._id, 'enrollment')
+  if (!user) {
+    throw new UserNotFoundError({ info: { userId: requestedUser._id } })
+  }
+  // Now we are sure the user exists and we have the full contents
   if (user.enrollment?.managedBy == null) {
     return
   }
@@ -48,8 +59,13 @@ async function getGroupPolicyForUser(user) {
   const subscription = await Subscription.findById(user.enrollment.managedBy)
     .populate('groupPolicy', '-_id')
     .exec()
+  if (!subscription) {
+    throw new SubscriptionNotFoundError({
+      info: { subscriptionId: user.enrollment.managedBy, userId: user._id },
+    })
+  }
   // return the group policy as a plain object (without the __v field)
-  const groupPolicy = subscription?.groupPolicy.toObject({
+  const groupPolicy = subscription.groupPolicy.toObject({
     versionKey: false,
   })
   return groupPolicy
