@@ -154,6 +154,9 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
 
     clickToolbarButton('Numbered List')
 
+    // expose the markup
+    cy.get('.cm-line').eq(0).type('{rightArrow}')
+
     cy.get('.cm-content').should(
       'have.text',
       [
@@ -164,11 +167,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
       ].join('')
     )
 
-    cy.get('.cm-line').eq(1).click()
-
     clickToolbarButton('Bullet List')
-
-    cy.get('.cm-line').eq(1).click()
 
     cy.get('.cm-content').should(
       'have.text',
@@ -187,6 +186,9 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
 
     clickToolbarButton('Numbered List')
 
+    // expose the markup
+    cy.get('.cm-line').eq(0).type('{rightArrow}')
+
     cy.get('.cm-content').should(
       'have.text',
       [
@@ -197,11 +199,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
       ].join('')
     )
 
-    cy.get('.cm-line').eq(0).click()
-
     clickToolbarButton('Numbered List')
-
-    cy.get('.cm-line').eq(0).click()
 
     cy.get('.cm-content').should('have.text', 'test')
   })
@@ -211,6 +209,9 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
     selectAll()
 
     clickToolbarButton('Numbered List')
+
+    // expose the markup
+    cy.get('.cm-line').eq(1).type('{rightArrow}')
 
     cy.get('.cm-content').should(
       'have.text',
@@ -227,22 +228,25 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
 
     clickToolbarButton('Increase Indent')
 
+    // expose the markup
+    cy.get('.cm-line').eq(1).type('{rightArrow}')
+
     cy.get('.cm-content').should(
       'have.text',
       [
         //
-        '\\begin{enumerate}',
         ' test',
         '    \\begin{enumerate}',
         ' test',
         '    \\end{enumerate}',
-        '\\end{enumerate}',
       ].join('')
     )
 
-    cy.get('.cm-line').eq(2).click()
+    cy.get('.cm-line').eq(1).click()
 
     clickToolbarButton('Numbered List')
+
+    cy.get('.cm-line').eq(0).type('{upArrow}')
 
     cy.get('.cm-content').should(
       'have.text',
@@ -262,6 +266,9 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
 
     clickToolbarButton('Numbered List')
 
+    // expose the markup
+    cy.get('.cm-line').eq(1).type('{rightArrow}')
+
     cy.get('.cm-content').should(
       'have.text',
       [
@@ -277,24 +284,26 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
 
     clickToolbarButton('Increase Indent')
 
+    // expose the markup
+    cy.get('.cm-line').eq(1).type('{rightArrow}')
+
     cy.get('.cm-content').should(
       'have.text',
       [
         //
-        '\\begin{enumerate}',
         ' test',
         '    \\begin{enumerate}',
         ' test',
         '    \\end{enumerate}',
-        '\\end{enumerate}',
       ].join('')
     )
 
-    cy.get('.cm-line').eq(1).click()
+    cy.get('.cm-line').eq(0).click()
 
     clickToolbarButton('Numbered List')
 
-    cy.get('.cm-line').eq(1).click()
+    // expose the markup
+    cy.get('.cm-line').eq(1).type('{rightArrow}')
 
     cy.get('.cm-content').should(
       'have.text',

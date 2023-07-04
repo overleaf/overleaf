@@ -111,8 +111,16 @@ export const LaTeXLanguage = LRLanguage.define({
           }
         } else if (Tokens.envName.includes(type.name)) {
           types.push('$EnvName')
+        } else if (type.name.endsWith('Command')) {
+          types.push('$Command')
         } else if (type.name.endsWith('Argument')) {
           types.push('$Argument')
+          if (
+            type.name.endsWith('TextArgument') ||
+            type.is('SectioningArgument')
+          ) {
+            types.push('$TextArgument')
+          }
         } else if (type.name.endsWith('Environment')) {
           types.push('$Environment')
         } else if (type.name.endsWith('Brace')) {

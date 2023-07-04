@@ -12,7 +12,7 @@ import { markDecorations } from './mark-decorations'
 import { EditorView, ViewPlugin } from '@codemirror/view'
 import { visualKeymap } from './visual-keymap'
 import { skipPreambleWithCursor } from './skip-preamble-cursor'
-import { mouseDownEffect, mouseDownListener } from './selection'
+import { mousedown, mouseDownEffect } from './selection'
 import { findEffect } from '../../utils/effects'
 import { forceParsing, syntaxTree } from '@codemirror/language'
 import { hasLanguageLoadedEffect } from '../language'
@@ -23,6 +23,7 @@ import { listItemMarker } from './list-item-marker'
 import { figureModalPasteHandler } from '../figure-modal'
 import { isSplitTestEnabled } from '../../../../utils/splitTestUtils'
 import { toolbarPanel } from '../toolbar/toolbar-panel'
+import { selectDecoratedArgument } from './select-decorated-argument'
 
 type Options = {
   visual: boolean
@@ -192,7 +193,7 @@ const scrollJumpAdjuster = EditorState.transactionExtender.of(tr => {
 const extension = (options: Options) => [
   visualTheme,
   visualHighlightStyle,
-  mouseDownListener,
+  mousedown,
   listItemMarker,
   markDecorations,
   atomicDecorations(options),
@@ -200,6 +201,7 @@ const extension = (options: Options) => [
   visualKeymap,
   scrollJumpAdjuster,
   isSplitTestEnabled('source-editor-toolbar') ? [] : toolbarPanel(),
+  selectDecoratedArgument,
   showContentWhenParsed,
   figureModalPasteHandler(),
 ]
