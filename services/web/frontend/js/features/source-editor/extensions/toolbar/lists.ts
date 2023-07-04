@@ -229,39 +229,52 @@ const toggleListForRange = (
           // toggle list off
           const changeSpec: ChangeSpec[] = [
             {
-              from: emptyBeginLine ? beginLine.from - 1 : beginEnvNode.from,
-              to: emptyBeginLine ? beginLine.to : beginEnvNode.to,
+              from: emptyBeginLine ? beginLine.from : beginEnvNode.from,
+              to: emptyBeginLine
+                ? Math.min(beginLine.to + 1, view.state.doc.length)
+                : beginEnvNode.to,
               insert: '',
             },
             {
-              from: emptyEndLine ? endLine.from : endEnvNode.from,
-              to: emptyEndLine ? endLine.to + 1 : endEnvNode.to,
+              from: emptyEndLine
+                ? Math.max(endLine.from - 1, 0)
+                : endEnvNode.from,
+              to: emptyEndLine ? endLine.to : endEnvNode.to,
               insert: '',
             },
           ]
 
-          const commandNodes = descendantsOfNodeWithType(
+          // items that aren't within nested list environments
+          const itemNodes = descendantsOfNodeWithType(
             ancestorNode,
-            'Item'
-          ).filter(
-            commandNode =>
-              view.state.sliceDoc(commandNode.from, commandNode.to) === '\\item'
+            'Item',
+            ListEnvironment
           )
 
-          if (commandNodes.length > 0) {
-            // whether the command is the only content on this line, apart from whitespace
-            const emptyLineBeforeItem = /^\s*\\item\{/.test(beginLine.text)
+          if (itemNodes.length > 0) {
+            const indentUnit = getIndentUnit(view.state)
 
-            const indentUnit = emptyLineBeforeItem
-              ? getIndentUnit(view.state)
-              : 0
-
-            for (const commandNode of commandNodes) {
-              changeSpec.push({
-                from: commandNode.from - indentUnit,
-                to: commandNode.to + 1,
+            for (const itemNode of itemNodes) {
+              const change: ChangeSpec = {
+                from: itemNode.from,
+                to: itemNode.to,
                 insert: '',
-              })
+              }
+
+              const line = view.state.doc.lineAt(itemNode.from)
+
+              const lineBeforeCommand = view.state.sliceDoc(
+                line.from,
+                itemNode.from
+              )
+
+              // if the line before the command is empty, remove one unit of indentation
+              if (lineBeforeCommand.trim().length === 0) {
+                const indentation = getIndentation(view.state, itemNode.from)
+                change.from -= Math.min(indentation ?? 0, indentUnit)
+              }
+
+              changeSpec.push(change)
             }
           }
 

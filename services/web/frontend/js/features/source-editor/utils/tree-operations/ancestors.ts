@@ -138,16 +138,16 @@ export const lastAncestorAtEndPosition = (
 export const descendantsOfNodeWithType = (
   node: SyntaxNode,
   type: string | number,
-  nested = false
+  leaveType?: string | number
 ): SyntaxNode[] => {
   const children: SyntaxNode[] = []
 
   node.cursor().iterate(nodeRef => {
     if (nodeRef.type.is(type)) {
       children.push(nodeRef.node)
-      if (!nested) {
-        return false
-      }
+    }
+    if (leaveType && nodeRef.type.is(leaveType) && nodeRef.node !== node) {
+      return false
     }
   })
 

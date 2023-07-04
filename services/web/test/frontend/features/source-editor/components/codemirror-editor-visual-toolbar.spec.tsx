@@ -147,4 +147,164 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
     cy.get('.cm-line').eq(0).type('ing')
     cy.get('.cm-line').eq(0).should('have.text', ' testing')
   })
+
+  it('should toggle between list types', function () {
+    mountEditor('test')
+    selectAll()
+
+    clickToolbarButton('Numbered List')
+
+    cy.get('.cm-content').should(
+      'have.text',
+      [
+        //
+        '\\begin{enumerate}',
+        ' test',
+        '\\end{enumerate}',
+      ].join('')
+    )
+
+    cy.get('.cm-line').eq(1).click()
+
+    clickToolbarButton('Bullet List')
+
+    cy.get('.cm-line').eq(1).click()
+
+    cy.get('.cm-content').should(
+      'have.text',
+      [
+        //
+        '\\begin{itemize}',
+        ' test',
+        '\\end{itemize}',
+      ].join('')
+    )
+  })
+
+  it('should remove a list', function () {
+    mountEditor('test')
+    selectAll()
+
+    clickToolbarButton('Numbered List')
+
+    cy.get('.cm-content').should(
+      'have.text',
+      [
+        //
+        '\\begin{enumerate}',
+        ' test',
+        '\\end{enumerate}',
+      ].join('')
+    )
+
+    cy.get('.cm-line').eq(0).click()
+
+    clickToolbarButton('Numbered List')
+
+    cy.get('.cm-line').eq(0).click()
+
+    cy.get('.cm-content').should('have.text', 'test')
+  })
+
+  it('should not remove a parent list', function () {
+    mountEditor('test\ntest')
+    selectAll()
+
+    clickToolbarButton('Numbered List')
+
+    cy.get('.cm-content').should(
+      'have.text',
+      [
+        //
+        '\\begin{enumerate}',
+        ' test',
+        ' test',
+        '\\end{enumerate}',
+      ].join('')
+    )
+
+    cy.get('.cm-line').eq(2).click()
+
+    clickToolbarButton('Increase Indent')
+
+    cy.get('.cm-content').should(
+      'have.text',
+      [
+        //
+        '\\begin{enumerate}',
+        ' test',
+        '    \\begin{enumerate}',
+        ' test',
+        '    \\end{enumerate}',
+        '\\end{enumerate}',
+      ].join('')
+    )
+
+    cy.get('.cm-line').eq(2).click()
+
+    clickToolbarButton('Numbered List')
+
+    cy.get('.cm-content').should(
+      'have.text',
+      [
+        //
+        '\\begin{enumerate}',
+        ' test',
+        '    test',
+        '\\end{enumerate}',
+      ].join('')
+    )
+  })
+
+  it('should not remove a nested list', function () {
+    mountEditor('test\ntest')
+    selectAll()
+
+    clickToolbarButton('Numbered List')
+
+    cy.get('.cm-content').should(
+      'have.text',
+      [
+        //
+        '\\begin{enumerate}',
+        ' test',
+        ' test',
+        '\\end{enumerate}',
+      ].join('')
+    )
+
+    cy.get('.cm-line').eq(2).click()
+
+    clickToolbarButton('Increase Indent')
+
+    cy.get('.cm-content').should(
+      'have.text',
+      [
+        //
+        '\\begin{enumerate}',
+        ' test',
+        '    \\begin{enumerate}',
+        ' test',
+        '    \\end{enumerate}',
+        '\\end{enumerate}',
+      ].join('')
+    )
+
+    cy.get('.cm-line').eq(1).click()
+
+    clickToolbarButton('Numbered List')
+
+    cy.get('.cm-line').eq(1).click()
+
+    cy.get('.cm-content').should(
+      'have.text',
+      [
+        //
+        'test',
+        '    \\begin{enumerate}',
+        ' test',
+        '    \\end{enumerate}',
+      ].join('')
+    )
+  })
 })
