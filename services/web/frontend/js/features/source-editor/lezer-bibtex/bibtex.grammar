@@ -1,5 +1,3 @@
-
-
 @top Bibliography {
   (Declaration | StringDeclaration)*
 }
@@ -15,7 +13,9 @@
   EntryTypeName { $[a-zA-Z]+ }
   Number { @digit+ }
   StringKeyword {"@"$[Ss]$[Tt]$[Rr]$[Ii]$[Nn]$[Gg]}
-  "@" "{" "}" "\"" "," "#" "@string"
+  "{"[closedBy="}"]
+  "}"[openedBy="{"]
+  "@" "\"" "," "#" "@string"
   Comment { "%" ![\n]* }
 }
 
@@ -51,8 +51,8 @@ Expression {
 }
 
 @local tokens {
-  openBracedContents {"{"}
-  closeBracedContents {"}"}
+  OpenBracedContents[closedBy="}", @name="{"] {"{"}
+  CloseBracedContents[openedBy="{", @name="}"] {"}"}
   @else nonClosingBracedContents
 }
 
@@ -61,19 +61,17 @@ Expression {
   (
       nonClosingBracedContents |
       nestedBracedString {
-        openBracedContents 
+        OpenBracedContents
         bracedStringContents
-        closeBracedContents
+        CloseBracedContents
       }
     )*
 }
   BracedString {
-    "{"
-    bracedStringContents closeBracedContents
+    "{" bracedStringContents CloseBracedContents
   }  
 }
 
-// TODO: Implement this
 @precedence { concatenation @left }
 
 StringConcatenation {
