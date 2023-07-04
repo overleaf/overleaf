@@ -38,12 +38,13 @@ export class MakeTitleWidget extends WidgetType {
     ])
   }
 
-  // TODO: needs view
-  // updateDOM(element: HTMLElement): boolean {
-  //   this.destroyed = false
-  //   this.buildContent(view, element)
-  //   return true
-  // }
+  updateDOM(element: HTMLElement, view: EditorView): boolean {
+    this.destroyed = false
+    element.textContent = ''
+    this.buildContent(view, element)
+    view.requestMeasure()
+    return true
+  }
 
   ignoreEvent(event: Event) {
     return event.type !== 'mouseup'

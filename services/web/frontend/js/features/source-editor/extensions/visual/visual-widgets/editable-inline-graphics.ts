@@ -32,6 +32,7 @@ export class EditableInlineGraphicsWidget extends EditableGraphicsWidget {
     // We need to make sure these are updated, as `renderGraphic` in the base
     // class will update them on the inner element.
     this.updateElementData(element)
+    view.requestMeasure()
     return true
   }
 

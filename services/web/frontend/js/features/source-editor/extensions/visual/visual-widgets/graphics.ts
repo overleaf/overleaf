@@ -55,6 +55,7 @@ export class GraphicsWidget extends WidgetType {
       return true
     }
     this.renderGraphic(element, view)
+    view.requestMeasure()
     return true
   }
 

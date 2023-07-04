@@ -202,8 +202,9 @@ class TopPaddingWidget extends WidgetType {
     return this.height === widget.height
   }
 
-  updateDOM(element: HTMLElement): boolean {
+  updateDOM(element: HTMLElement, view: EditorView): boolean {
     element.style.height = this.height + 'px'
+    view.requestMeasure()
     return true
   }
 }

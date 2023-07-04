@@ -29,11 +29,12 @@ export class MathWidget extends WidgetType {
     return widget.math === this.math && widget.displayMode === this.displayMode
   }
 
-  updateDOM(element: HTMLElement) {
+  updateDOM(element: HTMLElement, view: EditorView) {
     this.destroyed = false
     this.renderMath(element).catch(() => {
       element.classList.add('ol-cm-math-error')
     })
+    view.requestMeasure()
     return true
   }
 

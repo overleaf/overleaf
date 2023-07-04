@@ -37,6 +37,7 @@ export class EditableGraphicsWidget extends GraphicsWidget {
       return true
     }
     this.renderGraphic(element, view)
+    view.requestMeasure()
     return true
   }
 
