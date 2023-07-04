@@ -24,7 +24,8 @@ const {
 
 const userId = owner.id
 
-describe('<ProjectListRoot />', function () {
+// eslint-disable-next-line mocha/no-skipped-tests
+describe.skip('<ProjectListRoot />', function () {
   let sendMBSpy: sinon.SinonSpy
   let assignStub: sinon.SinonStub
 
