@@ -6,19 +6,13 @@ describe('<PdfPreviewDetachedRoot/>', function () {
   beforeEach(function () {
     window.user = { id: 'user1' } as User
 
-    window.metaAttributesCache = new Map<string, unknown>([
-      ['ol-user', window.user],
-      ['ol-project_id', 'project1'],
-      ['ol-detachRole', 'detached'],
-      ['ol-projectName', 'Project Name'],
-      ['ol-preventCompileOnLoad', true],
-    ])
+    window.metaAttributesCache.set('ol-user', window.user)
+    window.metaAttributesCache.set('ol-project_id', 'project1')
+    window.metaAttributesCache.set('ol-detachRole', 'detached')
+    window.metaAttributesCache.set('ol-projectName', 'Project Name')
+    window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
 
     cy.interceptEvents()
-  })
-
-  afterEach(function () {
-    window.metaAttributesCache = new Map()
   })
 
   it('syncs compiling state', function () {

@@ -33,10 +33,6 @@ describe('keyboard shortcuts', { scrollBehavior: false }, function () {
     cy.get('.cm-editor').as('editor')
   })
 
-  afterEach(function () {
-    window.metaAttributesCache = new Map()
-  })
-
   it('comment line with {meta+/}', function () {
     cy.get('@line').type('text')
     cy.get('@line').type(`{${metaKey}+/}`)
@@ -160,10 +156,6 @@ contentLine3
     cy.get('.cm-editor').as('editor')
   })
 
-  afterEach(function () {
-    window.metaAttributesCache = new Map()
-  })
-
   it('emulates search behaviour', function () {
     activeEditorLine().should('have.text', '\\documentclass{article}')
 
@@ -266,10 +258,6 @@ contentLine3
     cy.get('@line').scrollIntoView()
     cy.get('@line').click()
     cy.get('.cm-editor').as('editor')
-  })
-
-  afterEach(function () {
-    window.metaAttributesCache = new Map()
   })
 
   it('can enter characters', function () {

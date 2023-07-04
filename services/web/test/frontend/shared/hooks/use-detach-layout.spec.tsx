@@ -36,15 +36,10 @@ const DetachLayoutTest = () => {
 
 describe('useDetachLayout', function () {
   beforeEach(function () {
-    window.metaAttributesCache = new Map()
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
     cy.stub(window, 'open').as('openWindow')
     cy.stub(window, 'close').as('closeWindow')
     cy.interceptEvents()
-  })
-
-  afterEach(function () {
-    window.metaAttributesCache = new Map()
   })
 
   it('detaching', function () {

@@ -23,14 +23,6 @@ const DetachActionTest: FC<{
 }
 
 describe('useDetachAction', function () {
-  beforeEach(function () {
-    window.metaAttributesCache = new Map()
-  })
-
-  afterEach(function () {
-    window.metaAttributesCache = new Map()
-  })
-
   it('broadcast message as sender', function () {
     window.metaAttributesCache.set('ol-detachRole', 'detacher')
 

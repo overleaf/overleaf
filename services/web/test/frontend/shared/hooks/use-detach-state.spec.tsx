@@ -28,14 +28,6 @@ const DetachStateTest: FC<{
 }
 
 describe('useDetachState', function () {
-  beforeEach(function () {
-    window.metaAttributesCache = new Map()
-  })
-
-  afterEach(function () {
-    window.metaAttributesCache = new Map()
-  })
-
   it('create and update state', function () {
     cy.mount(
       <EditorProviders>

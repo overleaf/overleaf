@@ -30,10 +30,6 @@ describe('<PdfPreview/>', function () {
     cy.interceptEvents()
   })
 
-  afterEach(function () {
-    window.metaAttributesCache = new Map()
-  })
-
   it('renders the PDF preview', function () {
     window.metaAttributesCache.set('ol-preventCompileOnLoad', false)
     cy.interceptCompile('compile')

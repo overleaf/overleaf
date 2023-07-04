@@ -30,10 +30,6 @@ describe('<CodeMirrorEditor/> floats', function () {
     cy.interceptSpelling()
   })
 
-  afterEach(function () {
-    window.metaAttributesCache.clear()
-  })
-
   it('decorates a caption', function () {
     mountEditor('\n\\caption{Foo}\n')
     cy.get('.cm-line').eq(2).click()

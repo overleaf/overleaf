@@ -2,10 +2,6 @@ import SplitTestBadge from '../../../../frontend/js/shared/components/split-test
 import { EditorProviders } from '../../helpers/editor-providers'
 
 describe('split test badge', function () {
-  beforeEach(function () {
-    window.metaAttributesCache = new Map()
-  })
-
   it('renders an alpha badge with the url and tooltip text', function () {
     cy.window().then(win => {
       win.metaAttributesCache.set('ol-splitTestVariants', {

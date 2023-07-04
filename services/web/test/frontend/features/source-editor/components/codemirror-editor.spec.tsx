@@ -17,10 +17,6 @@ describe('<CodeMirrorEditor/>', { scrollBehavior: false }, function () {
     cy.interceptSpelling()
   })
 
-  afterEach(function () {
-    window.metaAttributesCache = new Map()
-  })
-
   it('deletes selected text on Backspace', function () {
     const scope = mockScope()
 

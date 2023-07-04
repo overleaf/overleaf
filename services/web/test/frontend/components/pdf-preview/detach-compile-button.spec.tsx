@@ -5,12 +5,7 @@ import { testDetachChannel } from '../../helpers/detach-channel'
 
 describe('<DetachCompileButtonWrapper />', function () {
   beforeEach(function () {
-    window.metaAttributesCache = new Map()
     cy.interceptEvents()
-  })
-
-  afterEach(function () {
-    window.metaAttributesCache = new Map()
   })
 
   it('detacher mode and not linked: does not show button ', function () {

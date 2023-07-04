@@ -13,7 +13,6 @@ import {
 
 describe('<InlineTags />', function () {
   beforeEach(function () {
-    window.metaAttributesCache = new Map()
     window.metaAttributesCache.set('ol-tags', [
       {
         _id: '789fff789fff',
@@ -36,7 +35,6 @@ describe('<InlineTags />', function () {
 
   afterEach(function () {
     resetProjectListContextFetch()
-    window.metaAttributesCache.clear()
   })
 
   it('renders tags list for a project', function () {

@@ -9,17 +9,9 @@ import { EditorProviders } from '../../helpers/editor-providers'
 import { mockScope } from './scope'
 
 describe('<EditorLeftMenu />', function () {
-  before(function () {
-    window.metaAttributesCache = new Map()
-  })
-
   beforeEach(function () {
     cy.viewport(800, 800)
     cy.interceptCompile()
-  })
-
-  afterEach(function () {
-    window.metaAttributesCache = new Map()
   })
 
   // eslint-disable-next-line mocha/no-skipped-tests
@@ -58,10 +50,6 @@ describe('<EditorLeftMenu />', function () {
         first_name: 'Sherlock',
         last_name: 'Holmes',
       })
-    })
-
-    afterEach(function () {
-      window.metaAttributesCache = new Map()
     })
 
     it('render full menu', function () {
@@ -297,10 +285,6 @@ describe('<EditorLeftMenu />', function () {
     })
 
     describe('settings menu', function () {
-      afterEach(function () {
-        window.metaAttributesCache = new Map()
-      })
-
       it('shows compiler menu correctly', function () {
         const scope = mockScope({
           ui: {

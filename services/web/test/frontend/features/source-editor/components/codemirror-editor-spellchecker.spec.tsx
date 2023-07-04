@@ -42,10 +42,6 @@ describe('Spellchecker', function () {
     cy.get('@line').click()
   })
 
-  afterEach(function () {
-    window.metaAttributesCache = new Map()
-  })
-
   it('makes initial spellcheck request', function () {
     cy.intercept('POST', '/spelling/check').as('spellCheckRequest')
     cy.get('@line').type('wombat')

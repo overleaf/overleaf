@@ -25,7 +25,6 @@ const PATHS = {
 describe('institution managers', function () {
   beforeEach(function () {
     cy.window().then(win => {
-      win.metaAttributesCache = new Map()
       win.metaAttributesCache.set('ol-users', [JOHN_DOE, BOBBY_LAPOINTE])
       win.metaAttributesCache.set('ol-groupId', GROUP_ID)
       win.metaAttributesCache.set('ol-groupName', 'My Awesome Institution')

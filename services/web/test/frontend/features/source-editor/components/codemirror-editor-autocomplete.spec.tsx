@@ -19,10 +19,6 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     cy.interceptSpelling()
   })
 
-  afterEach(function () {
-    window.metaAttributesCache = new Map()
-  })
-
   it('opens autocomplete on matched text', function () {
     const rootFolder: Folder[] = [
       {

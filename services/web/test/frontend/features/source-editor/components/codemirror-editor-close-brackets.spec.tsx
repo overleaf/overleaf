@@ -27,10 +27,6 @@ describe('close brackets', { scrollBehavior: false }, function () {
     cy.get('@active-line').click()
   })
 
-  afterEach(function () {
-    window.metaAttributesCache = new Map()
-  })
-
   describe('unprefixed characters', function () {
     it('auto-closes a curly bracket', function () {
       cy.get('@active-line').type('{{}')

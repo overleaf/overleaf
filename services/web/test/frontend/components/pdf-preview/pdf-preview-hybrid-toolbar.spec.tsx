@@ -4,13 +4,8 @@ import { testDetachChannel } from '../../helpers/detach-channel'
 
 describe('<PdfPreviewHybridToolbar/>', function () {
   beforeEach(function () {
-    window.metaAttributesCache = new Map()
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
     cy.interceptEvents()
-  })
-
-  afterEach(function () {
-    window.metaAttributesCache = new Map()
   })
 
   it('shows normal mode', function () {
