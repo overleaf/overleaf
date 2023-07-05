@@ -19,7 +19,7 @@ type OverviewFileProps = {
 }
 
 function OverviewFile({ docId, docPath }: OverviewFileProps) {
-  const { entries, collapsed, commentThreads, permissions } =
+  const { entries, collapsed, commentThreads, permissions, users } =
     useReviewPanelValueContext()
   const { setCollapsed } = useReviewPanelUpdaterFnsContext()
 
@@ -77,7 +77,15 @@ function OverviewFile({ docId, docPath }: OverviewFileProps) {
       <div className="rp-overview-file-entries" ref={entriesContainerRef}>
         {objectEntries.map(([id, entry]) => {
           if (entry.type === 'insert' || entry.type === 'delete') {
-            return <ChangeEntry key={id} />
+            return (
+              <ChangeEntry
+                key={id}
+                docId={docId}
+                entry={entry}
+                permissions={permissions}
+                user={users[entry.metadata.user_id]}
+              />
+            )
           }
 
           if (entry.type === 'aggregate-change') {

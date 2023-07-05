@@ -7,10 +7,7 @@ import AutoExpandingTextArea, {
   resetHeight,
 } from '../../../../../shared/components/auto-expanding-text-area'
 import Icon from '../../../../../shared/components/icon'
-import {
-  useReviewPanelUpdaterFnsContext,
-  useReviewPanelValueContext,
-} from '../../../context/review-panel/review-panel-context'
+import { useReviewPanelValueContext } from '../../../context/review-panel/review-panel-context'
 import classnames from 'classnames'
 import { ReviewPanelCommentEntry } from '../../../../../../../types/review-panel/entry'
 import {
@@ -26,6 +23,9 @@ type CommentEntryProps = {
   entryId: ThreadId
   permissions: ReviewPanelPermissions
   threads: ReviewPanelCommentThreads
+  onMouseEnter?: () => void
+  onMouseLeave?: () => void
+  onIndicatorClick?: () => void
 }
 
 function CommentEntry({
@@ -34,17 +34,13 @@ function CommentEntry({
   entryId,
   permissions,
   threads,
+  onMouseEnter,
+  onMouseLeave,
+  onIndicatorClick,
 }: CommentEntryProps) {
   const { t } = useTranslation()
-  const {
-    gotoEntry,
-    toggleReviewPanel,
-    resolveComment,
-    submitReply,
-    handleLayoutChange,
-  } = useReviewPanelValueContext()
-  const { setEntryHover } = useReviewPanelUpdaterFnsContext()
-
+  const { gotoEntry, resolveComment, submitReply, handleLayoutChange } =
+    useReviewPanelValueContext()
   const [replyContent, setReplyContent] = useState('')
   const [animating, setAnimating] = useState(false)
   const [resolved, setResolved] = useState(false)
@@ -55,16 +51,18 @@ function CommentEntry({
 
   const handleEntryClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const target = e.target as Element
-    if (
-      [
-        'rp-entry',
-        'rp-comment-loaded',
-        'rp-comment-content',
-        'rp-comment-reply',
-        'rp-entry-metadata',
-      ].some(className => [...target.classList].includes(className))
-    ) {
-      gotoEntry(docId, entry.offset)
+
+    for (const selector of [
+      '.rp-entry',
+      '.rp-comment-loaded',
+      '.rp-comment-content',
+      '.rp-comment-reply',
+      '.rp-entry-metadata',
+    ]) {
+      if (target.matches(selector)) {
+        gotoEntry(docId, entry.offset)
+        break
+      }
     }
   }
 
@@ -109,15 +107,16 @@ function CommentEntry({
   }
 
   return (
-    <EntryContainer>
+    <EntryContainer
+      onClick={handleEntryClick}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+    >
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
       <div
         className={classnames('rp-comment-wrapper', {
           'rp-comment-wrapper-resolving': animating,
         })}
-        onMouseEnter={() => setEntryHover(true)}
-        onMouseLeave={() => setEntryHover(false)}
-        onClick={handleEntryClick}
       >
         <div
           className="rp-entry-callout rp-entry-callout-comment"
@@ -135,7 +134,7 @@ function CommentEntry({
           style={{
             top: entry.screenPos ? `${entry.screenPos.y}px` : undefined,
           }}
-          onClick={toggleReviewPanel}
+          onClick={onIndicatorClick}
         >
           <Icon type="comment" />
         </div>

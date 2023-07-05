@@ -33,6 +33,7 @@ function useAngularReviewPanelState(): ReviewPanelState {
 
   const [permissions] =
     useScopeValue<ReviewPanel.Value<'permissions'>>('permissions')
+  const [users] = useScopeValue<ReviewPanel.Value<'users'>>('users', true)
   const [resolvedComments] = useScopeValue<
     ReviewPanel.Value<'resolvedComments'>
   >('reviewPanel.resolvedComments', true)
@@ -90,6 +91,10 @@ function useAngularReviewPanelState(): ReviewPanelState {
   const [refreshResolvedCommentsDropdown] = useScopeValue<
     ReviewPanel.Value<'refreshResolvedCommentsDropdown'>
   >('refreshResolvedCommentsDropdown')
+  const [acceptChanges] =
+    useScopeValue<ReviewPanel.Value<'acceptChanges'>>('acceptChanges')
+  const [rejectChanges] =
+    useScopeValue<ReviewPanel.Value<'rejectChanges'>>('rejectChanges')
 
   const handleSetSubview = useCallback(
     (subView: SubView) => {
@@ -126,6 +131,7 @@ function useAngularReviewPanelState(): ReviewPanelState {
       handleLayoutChange,
       loadingThreads,
       permissions,
+      users,
       resolveComment,
       resolvedComments,
       saveEdit,
@@ -147,6 +153,8 @@ function useAngularReviewPanelState(): ReviewPanelState {
       unresolveComment,
       deleteThread,
       refreshResolvedCommentsDropdown,
+      acceptChanges,
+      rejectChanges,
     }),
     [
       collapsed,
@@ -159,6 +167,7 @@ function useAngularReviewPanelState(): ReviewPanelState {
       handleLayoutChange,
       loadingThreads,
       permissions,
+      users,
       resolveComment,
       resolvedComments,
       saveEdit,
@@ -180,6 +189,8 @@ function useAngularReviewPanelState(): ReviewPanelState {
       unresolveComment,
       deleteThread,
       refreshResolvedCommentsDropdown,
+      acceptChanges,
+      rejectChanges,
     ]
   )
 

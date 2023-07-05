@@ -8,14 +8,25 @@ import AggregateChangeEntry from './entries/aggregate-change-entry'
 import CommentEntry from './entries/comment-entry'
 import AddCommentEntry from './entries/add-comment-entry'
 import BulkActionsEntry from './entries/bulk-actions-entry'
-import { useReviewPanelValueContext } from '../../context/review-panel/review-panel-context'
+import {
+  useReviewPanelUpdaterFnsContext,
+  useReviewPanelValueContext,
+} from '../../context/review-panel/review-panel-context'
 import useCodeMirrorContentHeight from '../../hooks/use-codemirror-content-height'
 import { ReviewPanelEntry } from '../../../../../../types/review-panel/entry'
 import { ThreadId } from '../../../../../../types/review-panel/review-panel'
 
 function CurrentFileContainer() {
-  const { commentThreads, entries, openDocId, permissions, loadingThreads } =
-    useReviewPanelValueContext()
+  const {
+    commentThreads,
+    entries,
+    openDocId,
+    permissions,
+    loadingThreads,
+    users,
+    toggleReviewPanel,
+  } = useReviewPanelValueContext()
+  const { setEntryHover } = useReviewPanelUpdaterFnsContext()
   const contentHeight = useCodeMirrorContentHeight()
 
   console.log('Review panel got content height', contentHeight)
@@ -53,7 +64,18 @@ function CurrentFileContainer() {
               }
 
               if (entry.type === 'insert' || entry.type === 'delete') {
-                return <ChangeEntry key={id} />
+                return (
+                  <ChangeEntry
+                    key={id}
+                    docId={openDocId}
+                    entry={entry}
+                    permissions={permissions}
+                    user={users[entry.metadata.user_id]}
+                    onMouseEnter={setEntryHover.bind(null, true)}
+                    onMouseLeave={setEntryHover.bind(null, false)}
+                    onIndicatorClick={toggleReviewPanel}
+                  />
+                )
               }
 
               if (entry.type === 'aggregate-change') {
@@ -69,6 +91,9 @@ function CurrentFileContainer() {
                     entryId={id}
                     permissions={permissions}
                     threads={commentThreads}
+                    onMouseEnter={setEntryHover.bind(null, true)}
+                    onMouseLeave={setEntryHover.bind(null, false)}
+                    onIndicatorClick={toggleReviewPanel}
                   />
                 )
               }

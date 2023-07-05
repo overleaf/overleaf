@@ -3,6 +3,7 @@ import {
   ReviewPanelCommentThreads,
   ReviewPanelEntries,
   ReviewPanelPermissions,
+  ReviewPanelUsers,
   SubView,
   ThreadId,
 } from '../../../../../../../types/review-panel/review-panel'
@@ -24,6 +25,7 @@ export interface ReviewPanelState {
     handleLayoutChange: () => void
     loadingThreads: boolean
     permissions: ReviewPanelPermissions
+    users: ReviewPanelUsers
     resolveComment: (docId: DocId, entryId: ThreadId) => void
     resolvedComments: ReviewPanelEntries
     saveEdit: (
@@ -55,6 +57,8 @@ export interface ReviewPanelState {
     unresolveComment: (threadId: ThreadId) => void
     deleteThread: (_entryId: unknown, docId: DocId, threadId: ThreadId) => void
     refreshResolvedCommentsDropdown: () => Promise<void>
+    acceptChanges: (entryIds: unknown) => void
+    rejectChanges: (entryIds: unknown) => void
   }
   updaterFns: {
     handleSetSubview: (subView: SubView) => void

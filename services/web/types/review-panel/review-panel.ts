@@ -27,6 +27,7 @@ export interface ReviewPanelUser {
   isSelf: boolean
   name: string
 }
+export type ReviewPanelUsers = Record<UserId, ReviewPanelUser>
 
 export type CommentId = Brand<string, 'CommentId'>
 

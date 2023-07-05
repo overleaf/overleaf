@@ -1,9 +1,7 @@
-type EntryContainerProps = {
-  children: React.ReactNode
-}
+import classnames from 'classnames'
 
-function EntryContainer({ children }: EntryContainerProps) {
-  return <div className="rp-entry-wrapper">{children}</div>
+function EntryContainer({ className, ...rest }: React.ComponentProps<'div'>) {
+  return <div className={classnames('rp-entry-wrapper', className)} {...rest} />
 }
 
 export default EntryContainer

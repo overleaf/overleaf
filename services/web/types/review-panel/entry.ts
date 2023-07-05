@@ -1,4 +1,4 @@
-import { ThreadId } from './review-panel'
+import { ThreadId, UserId } from './review-panel'
 
 interface ReviewPanelEntryScreenPos {
   y: number
@@ -14,19 +14,35 @@ interface ReviewPanelBaseEntry {
 export interface ReviewPanelCommentEntry extends ReviewPanelBaseEntry {
   type: 'comment'
   content: string
-  entry_ids: string[]
+  entry_ids: ThreadId[]
   focused: boolean
   screenPos: ReviewPanelEntryScreenPos
   thread_id: ThreadId
   replyContent?: string // angular specific
 }
 
-interface ReviewPanelInsertEntry extends ReviewPanelBaseEntry {
+export interface ReviewPanelInsertEntry extends ReviewPanelBaseEntry {
   type: 'insert'
+  content: string
+  entry_ids: ThreadId[]
+  metadata: {
+    ts: Date
+    user_id: UserId
+  }
+  screenPos: ReviewPanelEntryScreenPos
+  focused?: boolean
 }
 
-interface ReviewPanelDeleteEntry extends ReviewPanelBaseEntry {
+export interface ReviewPanelDeleteEntry extends ReviewPanelBaseEntry {
   type: 'delete'
+  content: string
+  entry_ids: ThreadId[]
+  metadata: {
+    ts: Date
+    user_id: UserId
+  }
+  screenPos: ReviewPanelEntryScreenPos
+  focused?: boolean
 }
 
 interface ReviewPanelAggregateChangeEntry extends ReviewPanelBaseEntry {

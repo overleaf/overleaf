@@ -193,6 +193,20 @@ describe('<ReviewPanel />', function () {
     it.skip('resolves comment', function () {})
   })
 
+  describe('change entries', function () {
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip('renders inserted entries', function () {})
+
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip('renders deleted entries', function () {})
+
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip('accepts change', function () {})
+
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip('rejects change', function () {})
+  })
+
   describe('overview mode', function () {
     // eslint-disable-next-line mocha/no-skipped-tests
     it.skip('shows list of files changed', function () {})
