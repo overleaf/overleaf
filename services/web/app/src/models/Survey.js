@@ -36,6 +36,10 @@ const SurveySchema = new Schema(
         type: Boolean,
         default: false,
       },
+      rolloutPercentage: {
+        type: Number,
+        default: 100,
+      },
     },
   },
   {
