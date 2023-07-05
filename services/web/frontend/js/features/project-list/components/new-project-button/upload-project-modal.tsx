@@ -23,8 +23,7 @@ type UploadProjectModalProps = {
 function UploadProjectModal({ onHide }: UploadProjectModalProps) {
   const { t } = useTranslation()
   const { maxUploadSize } = getMeta('ol-ExposedSettings') as ExposedSettings
-  const [ableToUpload, setAbleToUpload] = useState(true)
-  const [correctfileAdded, setCorrectFileAdded] = useState(false)
+  const [ableToUpload, setAbleToUpload] = useState(false)
   const location = useLocation()
 
   const uppy: Uppy.Uppy<Uppy.StrictTypes> = useUppy(() => {
@@ -51,7 +50,11 @@ function UploadProjectModal({ onHide }: UploadProjectModalProps) {
         // once if the correct file were added
         // if user dragged more files than the maxNumberOfFiles allow,
         // the rest of the files will appear on the 'restriction-failed' event callback
-        setCorrectFileAdded(true)
+        setAbleToUpload(true)
+      })
+      .on('upload-error', () => {
+        // refresh state so they can try uploading a new zip
+        setAbleToUpload(false)
       })
       .on('upload-success', async (file, response) => {
         const { project_id: projectId }: UploadResponse = response.body
@@ -68,15 +71,17 @@ function UploadProjectModal({ onHide }: UploadProjectModalProps) {
         // will be invoked once
         // 2. maxFileSize: if the uploaded file has size > maxFileSize, it will appear here
         // 3. allowedFileTypes: if the type is not .zip, it will also appear here
+
+        // reset state so they can try uploading a different file, etc
         setAbleToUpload(false)
       })
   })
 
   useEffect(() => {
-    if (ableToUpload && correctfileAdded) {
+    if (ableToUpload) {
       uppy.upload()
     }
-  }, [ableToUpload, correctfileAdded, uppy])
+  }, [ableToUpload, uppy])
 
   return (
     <AccessibleModal
