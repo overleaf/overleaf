@@ -12,7 +12,6 @@ const UploadsRouter = require('./Features/Uploads/UploadsRouter')
 const metrics = require('@overleaf/metrics')
 const ReferalController = require('./Features/Referal/ReferalController')
 const AuthenticationController = require('./Features/Authentication/AuthenticationController')
-const PermissionsController = require('./Features/Authorization/PermissionsController')
 const SessionManager = require('./Features/Authentication/SessionManager')
 const TagsController = require('./Features/Tags/TagsController')
 const NotificationsController = require('./Features/Notifications/NotificationsController')
@@ -301,7 +300,6 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   webRouter.get(
     '/user/emails',
     AuthenticationController.requireLogin(),
-    PermissionsController.useCapabilities(),
     UserController.promises.ensureAffiliationMiddleware,
     UserEmailsController.list
   )
@@ -334,7 +332,6 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     webRouter.post(
       '/user/emails',
       AuthenticationController.requireLogin(),
-      PermissionsController.requirePermission('add-secondary-email'),
       RateLimiterMiddleware.rateLimit(rateLimiters.addEmail),
       CaptchaMiddleware.validateCaptcha('addEmail'),
       UserEmailsController.add
@@ -353,7 +350,6 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     webRouter.post(
       '/user/emails/endorse',
       AuthenticationController.requireLogin(),
-      PermissionsController.requirePermission('endorse-email'),
       RateLimiterMiddleware.rateLimit(rateLimiters.endorseEmail),
       UserEmailsController.endorse
     )
@@ -399,7 +395,6 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     '/user/delete',
     RateLimiterMiddleware.rateLimit(rateLimiters.deleteUser),
     AuthenticationController.requireLogin(),
-    PermissionsController.requirePermission('delete-own-account'),
     UserController.tryDeleteUser
   )
 

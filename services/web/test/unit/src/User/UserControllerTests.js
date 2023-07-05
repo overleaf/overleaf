@@ -928,16 +928,10 @@ describe('UserController', function () {
         ]
         this.Features.hasFeature.withArgs('affiliations').returns(true)
         this.req.query.ensureAffiliation = true
-        this.req.assertPermission = sinon.stub()
         await this.UserController.promises.ensureAffiliationMiddleware(
           this.req,
           this.res,
           this.next
-        )
-      })
-      it('should check the user has permission', function () {
-        expect(this.req.assertPermission).to.have.been.calledWith(
-          'add-affiliation'
         )
       })
       it('should unflag the emails but not confirm', function () {
@@ -966,16 +960,10 @@ describe('UserController', function () {
         ]
         this.Features.hasFeature.withArgs('affiliations').returns(true)
         this.req.query.ensureAffiliation = true
-        this.req.assertPermission = sinon.stub()
         await this.UserController.promises.ensureAffiliationMiddleware(
           this.req,
           this.res,
           this.next
-        )
-      })
-      it('should check the user has permission', function () {
-        expect(this.req.assertPermission).to.have.been.calledWith(
-          'add-affiliation'
         )
       })
       it('should add affiliation to v1, unflag and confirm on v2', function () {
@@ -1004,16 +992,10 @@ describe('UserController', function () {
         ]
         this.Features.hasFeature.withArgs('affiliations').returns(true)
         this.req.query.ensureAffiliation = true
-        this.req.assertPermission = sinon.stub()
         await this.UserController.promises.ensureAffiliationMiddleware(
           this.req,
           this.res,
           this.next
-        )
-      })
-      it('should check the user has permission', function () {
-        expect(this.req.assertPermission).to.have.been.calledWith(
-          'add-affiliation'
         )
       })
       it('should return the error', function () {

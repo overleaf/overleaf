@@ -8,7 +8,7 @@ const GroupPolicySchema = new Schema(
     userCannotDeleteOwnAccount: Boolean,
 
     // User can't add a secondary email address, or affiliation
-    userCannotHaveSecondaryEmail: Boolean,
+    userCannotAddSecondaryEmail: Boolean,
 
     // User can't have an active  (currently auto-renewing) personal subscription, nor can they start one
     userCannotHaveSubscription: Boolean,

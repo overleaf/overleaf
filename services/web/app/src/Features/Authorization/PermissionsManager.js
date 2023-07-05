@@ -26,7 +26,7 @@
  *
  * Validator: a function that takes a user and returns a boolean indicating
  * whether the user satisfies the policy or not. For example, a validator for
- * the `userCannotHaveSecondaryEmail` policy would check whether the user has
+ * the `userCannotAddSecondaryEmail` policy would check whether the user has
  * more than one email address.
  *
  * Group Policies: a collection of policies with a setting indicating whether
@@ -37,7 +37,7 @@
  *
  *     {
  *       "userCannotDeleteOwnAccount": true, // enforced
- *       "userCannotHaveSecondaryEmail": false // not enforced
+ *       "userCannotAddSecondaryEmail": false // not enforced
  *     }
  */
 

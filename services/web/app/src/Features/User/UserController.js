@@ -195,11 +195,6 @@ async function ensureAffiliationMiddleware(req, res, next) {
     return new Errors.UserNotFoundError({ info: { userId } })
   }
   try {
-    req.assertPermission('add-affiliation')
-  } catch (error) {
-    return next(error)
-  }
-  try {
     await ensureAffiliation(user)
   } catch (error) {
     return next(error)
