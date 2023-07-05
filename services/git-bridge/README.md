@@ -124,7 +124,7 @@ for git-bridge.
 
 ```
 db.oauthApplications.insert({
-  "clientSecret" : "e6b2e9eee7ae2bb653823250bb69594a91db0547fe3790a7135acb497108e62d",
+  "clientSecret" : "v1.G5HHTXfxsJMmfFhSar9QhJLg/u4KpGpYOdPGwoKdZXk=",
   "grants" : [
     "password"
   ],
