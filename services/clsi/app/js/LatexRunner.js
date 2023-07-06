@@ -184,7 +184,7 @@ function _buildLatexCommand(mainFile, opts = {}) {
 
   // We want to run latexmk on the tex file which we will automatically
   // generate from the Rtex/Rmd/md file.
-  mainFile = mainFile.replace(/\.(Rtex|md|Rmd)$/, '.tex')
+  mainFile = mainFile.replace(/\.(Rtex|md|Rmd|Rnw)$/, '.tex')
   command.push(Path.join('$COMPILE_DIR', mainFile))
 
   return command
