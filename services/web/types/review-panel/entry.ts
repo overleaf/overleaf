@@ -7,46 +7,50 @@ interface ReviewPanelEntryScreenPos {
 }
 
 interface ReviewPanelBaseEntry {
-  visible: boolean
+  focused: boolean
   offset: number
+  screenPos: ReviewPanelEntryScreenPos
+  visible: boolean
+}
+
+interface ReviewPanelInsertOrDeleteEntry {
+  content: string
+  entry_ids: ThreadId[]
+  metadata: {
+    ts: Date
+    user_id: UserId
+  }
+}
+
+export interface ReviewPanelInsertEntry
+  extends ReviewPanelBaseEntry,
+    ReviewPanelInsertOrDeleteEntry {
+  type: 'insert'
+}
+
+export interface ReviewPanelDeleteEntry
+  extends ReviewPanelBaseEntry,
+    ReviewPanelInsertOrDeleteEntry {
+  type: 'delete'
 }
 
 export interface ReviewPanelCommentEntry extends ReviewPanelBaseEntry {
   type: 'comment'
   content: string
   entry_ids: ThreadId[]
-  focused: boolean
-  screenPos: ReviewPanelEntryScreenPos
   thread_id: ThreadId
   replyContent?: string // angular specific
 }
 
-export interface ReviewPanelInsertEntry extends ReviewPanelBaseEntry {
-  type: 'insert'
-  content: string
-  entry_ids: ThreadId[]
-  metadata: {
-    ts: Date
-    user_id: UserId
-  }
-  screenPos: ReviewPanelEntryScreenPos
-  focused?: boolean
-}
-
-export interface ReviewPanelDeleteEntry extends ReviewPanelBaseEntry {
-  type: 'delete'
-  content: string
-  entry_ids: ThreadId[]
-  metadata: {
-    ts: Date
-    user_id: UserId
-  }
-  screenPos: ReviewPanelEntryScreenPos
-  focused?: boolean
-}
-
-interface ReviewPanelAggregateChangeEntry extends ReviewPanelBaseEntry {
+export interface ReviewPanelAggregateChangeEntry extends ReviewPanelBaseEntry {
   type: 'aggregate-change'
+  content: string
+  entry_ids: ThreadId[]
+  metadata: {
+    replaced_content: string
+    ts: Date
+    user_id: UserId
+  }
 }
 
 interface ReviewPanelAddCommentEntry extends ReviewPanelBaseEntry {

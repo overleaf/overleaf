@@ -79,7 +79,18 @@ function CurrentFileContainer() {
               }
 
               if (entry.type === 'aggregate-change') {
-                return <AggregateChangeEntry key={id} />
+                return (
+                  <AggregateChangeEntry
+                    key={id}
+                    docId={openDocId}
+                    entry={entry}
+                    permissions={permissions}
+                    user={users[entry.metadata.user_id]}
+                    onMouseEnter={setEntryHover.bind(null, true)}
+                    onMouseLeave={setEntryHover.bind(null, false)}
+                    onIndicatorClick={toggleReviewPanel}
+                  />
+                )
               }
 
               if (entry.type === 'comment' && !loadingThreads) {

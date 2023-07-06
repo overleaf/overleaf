@@ -195,16 +195,30 @@ describe('<ReviewPanel />', function () {
 
   describe('change entries', function () {
     // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip('renders inserted entries', function () {})
+    it.skip('renders inserted entries in current file mode', function () {})
 
     // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip('renders deleted entries', function () {})
+    it.skip('renders deleted entries in current file mode', function () {})
+
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip('renders inserted entries in overview mode', function () {})
+
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip('renders deleted entries in overview mode', function () {})
 
     // eslint-disable-next-line mocha/no-skipped-tests
     it.skip('accepts change', function () {})
 
     // eslint-disable-next-line mocha/no-skipped-tests
     it.skip('rejects change', function () {})
+  })
+
+  describe('aggregate change entries', function () {
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip('renders changed entries in current file mode', function () {})
+
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip('renders changed entries in overview mode', function () {})
   })
 
   describe('overview mode', function () {

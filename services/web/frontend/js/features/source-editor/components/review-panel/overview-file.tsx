@@ -89,7 +89,15 @@ function OverviewFile({ docId, docPath }: OverviewFileProps) {
           }
 
           if (entry.type === 'aggregate-change') {
-            return <AggregateChangeEntry key={id} />
+            return (
+              <AggregateChangeEntry
+                key={id}
+                docId={docId}
+                entry={entry}
+                permissions={permissions}
+                user={users[entry.metadata.user_id]}
+              />
+            )
           }
 
           if (entry.type === 'comment') {

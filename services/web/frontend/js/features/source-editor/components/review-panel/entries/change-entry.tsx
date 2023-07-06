@@ -40,7 +40,7 @@ function ChangeEntry({
   const { t } = useTranslation()
   const { acceptChanges, rejectChanges, handleLayoutChange, gotoEntry } =
     useReviewPanelValueContext()
-  const [isCollapsed, setIsCollapsed] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(true)
 
   const content = isCollapsed
     ? entry.content.substring(0, contentLimit)
