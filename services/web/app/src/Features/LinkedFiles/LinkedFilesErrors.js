@@ -5,7 +5,6 @@ class UrlFetchFailedError extends BackwardCompatibleError {}
 class InvalidUrlError extends BackwardCompatibleError {}
 
 class CompileFailedError extends BackwardCompatibleError {}
-class OutputFileFetchFailedError extends BackwardCompatibleError {}
 
 class AccessDeniedError extends BackwardCompatibleError {}
 
@@ -31,7 +30,6 @@ module.exports = {
   CompileFailedError,
   UrlFetchFailedError,
   InvalidUrlError,
-  OutputFileFetchFailedError,
   AccessDeniedError,
   BadEntityTypeError,
   BadDataError,

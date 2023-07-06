@@ -51,7 +51,7 @@ describe('ClsiCookieManager', function () {
   describe('getServerId', function () {
     it('should call get for the key', function (done) {
       this.redis.get.callsArgWith(1, null, 'clsi-7')
-      this.ClsiCookieManager._getServerId(
+      this.ClsiCookieManager.getServerId(
         this.project_id,
         this.user_id,
         '',
@@ -74,7 +74,7 @@ describe('ClsiCookieManager', function () {
         .stub()
         .yields(null)
       this.redis.get.callsArgWith(1, null)
-      this.ClsiCookieManager._getServerId(
+      this.ClsiCookieManager.getServerId(
         this.project_id,
         this.user_id,
         '',
@@ -95,7 +95,7 @@ describe('ClsiCookieManager', function () {
         .stub()
         .yields(null)
       this.redis.get.callsArgWith(1, null, '')
-      this.ClsiCookieManager._getServerId(
+      this.ClsiCookieManager.getServerId(
         this.project_id,
         this.user_id,
         '',
@@ -115,52 +115,91 @@ describe('ClsiCookieManager', function () {
 
   describe('_populateServerIdViaRequest', function () {
     beforeEach(function () {
-      this.response = 'some data'
-      this.request.post.callsArgWith(1, null, this.response)
-      this.ClsiCookieManager.setServerId = sinon.stub().yields(null, 'clsi-9')
+      this.clsiServerId = 'server-id'
+      this.ClsiCookieManager.setServerId = sinon.stub().yields()
     })
 
-    it('should make a request to the clsi', function (done) {
-      this.ClsiCookieManager._populateServerIdViaRequest(
-        this.project_id,
-        this.user_id,
-        'standard',
-        'e2',
-        (err, serverId) => {
-          if (err) {
-            return done(err)
-          }
-          const args = this.ClsiCookieManager.setServerId.args[0]
-          args[0].should.equal(this.project_id)
-          args[1].should.equal(this.user_id)
-          args[2].should.equal('standard')
-          args[3].should.equal('e2')
-          args[4].should.deep.equal(this.response)
-          done()
+    describe('with a server id in the response', function () {
+      beforeEach(function () {
+        this.response = {
+          headers: {
+            'set-cookie': [
+              `${this.settings.clsiCookie.key}=${this.clsiServerId}`,
+            ],
+          },
         }
-      )
+        this.request.post.callsArgWith(1, null, this.response)
+      })
+
+      it('should make a request to the clsi', function (done) {
+        this.ClsiCookieManager._populateServerIdViaRequest(
+          this.project_id,
+          this.user_id,
+          'standard',
+          'e2',
+          (err, serverId) => {
+            if (err) {
+              return done(err)
+            }
+            const args = this.ClsiCookieManager.setServerId.args[0]
+            args[0].should.equal(this.project_id)
+            args[1].should.equal(this.user_id)
+            args[2].should.equal('standard')
+            args[3].should.equal('e2')
+            args[4].should.deep.equal(this.clsiServerId)
+            done()
+          }
+        )
+      })
+
+      it('should return the server id', function (done) {
+        this.ClsiCookieManager._populateServerIdViaRequest(
+          this.project_id,
+          this.user_id,
+          '',
+          'e2',
+          (err, serverId) => {
+            if (err) {
+              return done(err)
+            }
+            serverId.should.equal(this.clsiServerId)
+            done()
+          }
+        )
+      })
     })
 
-    it('should return the server id', function (done) {
-      this.ClsiCookieManager._populateServerIdViaRequest(
-        this.project_id,
-        this.user_id,
-        '',
-        'e2',
-        (err, serverId) => {
-          if (err) {
-            return done(err)
+    describe('without a server id in the response', function () {
+      beforeEach(function () {
+        this.response = { headers: {} }
+        this.request.post.yields(null, this.response)
+      })
+      it('should not set the server id there is no server id in the response', function (done) {
+        this.ClsiCookieManager._parseServerIdFromResponse = sinon
+          .stub()
+          .returns(null)
+        this.ClsiCookieManager.setServerId(
+          this.project_id,
+          this.user_id,
+          'standard',
+          'e2',
+          this.clsiServerId,
+          null,
+          err => {
+            if (err) {
+              return done(err)
+            }
+            this.redis.setex.called.should.equal(false)
+            done()
           }
-          serverId.should.equal('clsi-9')
-          done()
-        }
-      )
+        )
+      })
     })
   })
 
   describe('setServerId', function () {
     beforeEach(function () {
-      this.response = 'dsadsakj'
+      this.clsiServerId = 'server-id'
       this.ClsiCookieManager._parseServerIdFromResponse = sinon
         .stub()
         .returns('clsi-8')
@@ -172,34 +211,30 @@ describe('ClsiCookieManager', function () {
         this.user_id,
         'standard',
         'e2',
-        this.response,
+        this.clsiServerId,
         null,
         err => {
           if (err) {
             return done(err)
           }
-          this.redis.setex
-            .calledWith(
-              `clsiserver:${this.project_id}:${this.user_id}`,
-              this.settings.clsiCookie.ttlInSeconds,
-              'clsi-8'
-            )
-            .should.equal(true)
+          this.redis.setex.should.have.been.calledWith(
+            `clsiserver:${this.project_id}:${this.user_id}`,
+            this.settings.clsiCookie.ttlInSeconds,
+            this.clsiServerId
+          )
           done()
         }
       )
     })
 
     it('should set the server id with the regular ttl for reg instance', function (done) {
-      this.ClsiCookieManager._parseServerIdFromResponse = sinon
-        .stub()
-        .returns('clsi-reg-8')
+      this.clsiServerId = 'clsi-reg-8'
       this.ClsiCookieManager.setServerId(
         this.project_id,
         this.user_id,
         'standard',
         'e2',
-        this.response,
+        this.clsiServerId,
         null,
         err => {
           if (err) {
@@ -208,26 +243,8 @@ describe('ClsiCookieManager', function () {
           expect(this.redis.setex).to.have.been.calledWith(
             `clsiserver:${this.project_id}:${this.user_id}`,
             this.settings.clsiCookie.ttlInSecondsRegular,
-            'clsi-reg-8'
+            this.clsiServerId
           )
-          done()
-        }
-      )
-    })
-
-    it('should return the server id', function (done) {
-      this.ClsiCookieManager.setServerId(
-        this.project_id,
-        this.user_id,
-        'standard',
-        'e2',
-        this.response,
-        null,
-        (err, serverId) => {
-          if (err) {
-            return done(err)
-          }
-          serverId.should.equal('clsi-8')
           done()
         }
       )
@@ -246,30 +263,9 @@ describe('ClsiCookieManager', function () {
         this.user_id,
         'standard',
         'e2',
-        this.response,
+        this.clsiServerId,
         null,
-        (err, serverId) => {
-          if (err) {
-            return done(err)
-          }
-          this.redis.setex.called.should.equal(false)
-          done()
-        }
-      )
-    })
-
-    it('should not set the server id there is no server id in the response', function (done) {
-      this.ClsiCookieManager._parseServerIdFromResponse = sinon
-        .stub()
-        .returns(null)
-      this.ClsiCookieManager.setServerId(
-        this.project_id,
-        this.user_id,
-        'standard',
-        'e2',
-        this.response,
-        null,
-        (err, serverId) => {
+        err => {
           if (err) {
             return done(err)
           }
@@ -301,19 +297,17 @@ describe('ClsiCookieManager', function () {
         this.user_id,
         'standard',
         'e2',
-        this.response,
+        this.clsiServerId,
         null,
-        (err, serverId) => {
+        err => {
           if (err) {
             return done(err)
           }
-          this.redis_secondary.setex
-            .calledWith(
-              `clsiserver:${this.project_id}:${this.user_id}`,
-              this.settings.clsiCookie.ttlInSeconds,
-              'clsi-8'
-            )
-            .should.equal(true)
+          this.redis_secondary.setex.should.have.been.calledWith(
+            `clsiserver:${this.project_id}:${this.user_id}`,
+            this.settings.clsiCookie.ttlInSeconds,
+            this.clsiServerId
+          )
           done()
         }
       )
@@ -322,7 +316,7 @@ describe('ClsiCookieManager', function () {
 
   describe('getCookieJar', function () {
     beforeEach(function () {
-      this.ClsiCookieManager._getServerId = sinon.stub().yields(null, 'clsi-11')
+      this.ClsiCookieManager.getServerId = sinon.stub().yields(null, 'clsi-11')
     })
 
     it('should return a jar with the cookie set populated from redis', function (done) {

@@ -6,6 +6,7 @@ const RedisWrapper = require('../../infrastructure/RedisWrapper')
 const Cookie = require('cookie')
 const logger = require('@overleaf/logger')
 const Metrics = require('@overleaf/metrics')
+const { promisifyAll } = require('../../util/promises')
 
 const clsiCookiesEnabled = (Settings.clsiCookie?.key ?? '') !== ''
 
@@ -16,7 +17,7 @@ if (Settings.redis.clsi_cookie_secondary != null) {
 }
 
 module.exports = function (backendGroup) {
-  return {
+  const cookieManager = {
     buildKey(projectId, userId) {
       if (backendGroup != null) {
         return `clsiserver:${backendGroup}:${projectId}:${userId}`
@@ -25,7 +26,7 @@ module.exports = function (backendGroup) {
       }
     },
 
-    _getServerId(
+    getServerId(
       projectId,
       userId,
       compileGroup,
@@ -69,14 +70,18 @@ module.exports = function (backendGroup) {
           })
           return callback(err)
         }
+        if (!clsiCookiesEnabled) {
+          return callback()
+        }
+        const serverId = this._parseServerIdFromResponse(res)
         this.setServerId(
           projectId,
           userId,
           compileGroup,
           compileBackendClass,
-          res,
+          serverId,
           null,
-          function (err, serverId) {
+          function (err) {
             if (err) {
               logger.warn(
                 { err, projectId },
@@ -128,20 +133,19 @@ module.exports = function (backendGroup) {
       userId,
       compileGroup,
       compileBackendClass,
-      response,
+      serverId,
       previous,
       callback
     ) {
       if (!clsiCookiesEnabled) {
         return callback()
       }
-      const serverId = this._parseServerIdFromResponse(response)
       if (serverId == null) {
         // We don't get a cookie back if it hasn't changed
         return rclient.expire(
           this.buildKey(projectId, userId),
           this._getTTLInSeconds(previous),
-          err => callback(err, undefined)
+          err => callback(err)
         )
       }
       if (!previous) {
@@ -164,7 +168,7 @@ module.exports = function (backendGroup) {
         )
       }
       this._setServerIdInRedis(rclient, projectId, userId, serverId, err =>
-        callback(err, serverId)
+        callback(err)
       )
     },
 
@@ -181,7 +185,20 @@ module.exports = function (backendGroup) {
       if (!clsiCookiesEnabled) {
         return callback()
       }
-      rclient.del(this.buildKey(projectId, userId), callback)
+      rclient.del(this.buildKey(projectId, userId), err => {
+        if (err) {
+          // redis errors need wrapping as the instance may be shared
+          return callback(
+            new OError(
+              'Failed to clear clsi persistence',
+              { projectId, userId },
+              err
+            )
+          )
+        } else {
+          return callback()
+        }
+      })
     },
 
     getCookieJar(
@@ -194,7 +211,7 @@ module.exports = function (backendGroup) {
       if (!clsiCookiesEnabled) {
         return callback(null, request.jar(), undefined)
       }
-      this._getServerId(
+      this.getServerId(
         projectId,
         userId,
         compileGroup,
@@ -216,4 +233,15 @@ module.exports = function (backendGroup) {
       )
     },
   }
+  cookieManager.promises = promisifyAll(cookieManager, {
+    without: [
+      '_parseServerIdFromResponse',
+      'checkIsLoadSheddingEvent',
+      '_getTTLInSeconds',
+    ],
+    multiResult: {
+      getCookieJar: ['jar', 'clsiServerId'],
+    },
+  })
+  return cookieManager
 }

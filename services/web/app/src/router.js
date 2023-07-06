@@ -1253,18 +1253,18 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     AuthorizationMiddleware.ensureUserCanReadProject,
     function (req, res) {
       const projectId = req.params.Project_id
+      // use a valid user id for testing
+      const testUserId = '123456789012345678901234'
       const sendRes = _.once(function (statusCode, message) {
         res.status(statusCode)
         plainTextResponse(res, message)
-        ClsiCookieManager.clearServerId(projectId, () => {})
+        ClsiCookieManager.clearServerId(projectId, testUserId, () => {})
       }) // force every compile to a new server
       // set a timeout
       let handler = setTimeout(function () {
         sendRes(500, 'Compiler timed out')
         handler = null
       }, 10000)
-      // use a valid user id for testing
-      const testUserId = '123456789012345678901234'
       // run the compile
       CompileManager.compile(
         projectId,

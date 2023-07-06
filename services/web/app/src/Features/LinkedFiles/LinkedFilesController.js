@@ -23,7 +23,6 @@ const {
   CompileFailedError,
   UrlFetchFailedError,
   InvalidUrlError,
-  OutputFileFetchFailedError,
   AccessDeniedError,
   BadEntityTypeError,
   BadDataError,
@@ -35,6 +34,7 @@ const {
   RemoteServiceError,
   FileCannotRefreshError,
 } = require('./LinkedFilesErrors')
+const { OutputFileFetchFailedError } = require('../Errors/Errors')
 const Modules = require('../../infrastructure/Modules')
 const { plainTextResponse } = require('../../infrastructure/Response')
 

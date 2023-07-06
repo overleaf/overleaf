@@ -7,8 +7,8 @@ const {
   CompileFailedError,
   BadDataError,
   AccessDeniedError,
-  OutputFileFetchFailedError,
 } = require('./LinkedFilesErrors')
+const { OutputFileFetchFailedError } = require('../Errors/Errors')
 const LinkedFilesHandler = require('./LinkedFilesHandler')
 
 function _prepare(projectId, linkedFileData, userId, callback) {
@@ -46,31 +46,20 @@ function createLinkedFile(
       if (err) {
         return callback(err)
       }
-      readStream.on('error', callback)
-      readStream.on('response', response => {
-        if (response.statusCode >= 200 && response.statusCode < 300) {
-          LinkedFilesHandler.importFromStream(
-            projectId,
-            readStream,
-            linkedFileData,
-            name,
-            parentFolderId,
-            userId,
-            (err, file) => {
-              if (err) {
-                return callback(err)
-              }
-              callback(null, file._id)
-            }
-          ) // Created
-        } else {
-          err = new OutputFileFetchFailedError(
-            `Output file fetch failed: ${linkedFileData.build_id}, ${linkedFileData.source_output_file_path}`
-          )
-          err.statusCode = response.statusCode
-          callback(err)
+      LinkedFilesHandler.importFromStream(
+        projectId,
+        readStream,
+        linkedFileData,
+        name,
+        parentFolderId,
+        userId,
+        (err, file) => {
+          if (err) {
+            return callback(err)
+          }
+          callback(null, file._id)
         }
-      })
+      )
     })
   })
 }
@@ -94,32 +83,21 @@ function refreshLinkedFile(
         if (err) {
           return callback(err)
         }
-        readStream.on('error', callback)
-        readStream.on('response', response => {
-          if (response.statusCode >= 200 && response.statusCode < 300) {
-            linkedFileData.build_id = newBuildId
-            LinkedFilesHandler.importFromStream(
-              projectId,
-              readStream,
-              linkedFileData,
-              name,
-              parentFolderId,
-              userId,
-              (err, file) => {
-                if (err) {
-                  return callback(err)
-                }
-                callback(null, file._id)
-              }
-            ) // Created
-          } else {
-            err = new OutputFileFetchFailedError(
-              `Output file fetch failed: ${linkedFileData.build_id}, ${linkedFileData.source_output_file_path}`
-            )
-            err.statusCode = response.statusCode
-            callback(err)
+        linkedFileData.build_id = newBuildId
+        LinkedFilesHandler.importFromStream(
+          projectId,
+          readStream,
+          linkedFileData,
+          name,
+          parentFolderId,
+          userId,
+          (err, file) => {
+            if (err) {
+              return callback(err)
+            }
+            callback(null, file._id)
           }
-        })
+        )
       }
     )
   })
@@ -193,7 +171,6 @@ function _getFileStream(linkedFileData, userId, callback) {
           if (err) {
             return callback(err)
           }
-          readStream.pause()
           callback(null, readStream)
         }
       )
@@ -239,7 +216,6 @@ function _compileAndGetFileStream(linkedFileData, userId, callback) {
             if (err) {
               return callback(err)
             }
-            readStream.pause()
             callback(null, readStream, buildId)
           }
         )
