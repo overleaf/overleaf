@@ -11,7 +11,8 @@ module.exports = merge(base, {
   mode: 'development',
 
   // Enable accurate source maps for dev
-  devtool: 'source-map',
+  devtool:
+    process.env.CSP_ENABLED === 'true' ? 'source-map' : 'eval-source-map',
 
   // Load entrypoints without contenthash in filename
   output: {
