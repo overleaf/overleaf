@@ -8,7 +8,7 @@ import { FigureData } from '../../extensions/figure-modal'
 const HUNDRED_MS = 100
 
 export class EnvironmentName extends ProjectionItem {
-  title = ''
+  readonly title: string = ''
 }
 
 export const enterNode = (

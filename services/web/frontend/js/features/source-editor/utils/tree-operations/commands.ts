@@ -7,9 +7,9 @@ import { NodeIntersectsChangeFn, ProjectionItem } from './projection'
  * A projection of a command in the document
  */
 export class Command extends ProjectionItem {
-  title = ''
-  optionalArgCount = 0
-  requiredArgCount = 0
+  readonly title: string = ''
+  readonly optionalArgCount: number = 0
+  readonly requiredArgCount: number = 0
 }
 
 /**
@@ -62,7 +62,7 @@ export const enterNode = (
       argCountNumber--
     }
 
-    const thisCommand = {
+    const thisCommand: Readonly<Command> = {
       line: state.doc.lineAt(node.from).number,
       title: commandNameText,
       from: node.from,

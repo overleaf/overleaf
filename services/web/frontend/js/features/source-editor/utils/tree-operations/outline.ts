@@ -15,8 +15,8 @@ export type Outline = {
  * A projection of a part of the file outline, typically a (sub)section heading
  */
 export class FlatOutlineItem extends ProjectionItem {
-  level = 0
-  title = ''
+  readonly level: number = 0
+  readonly title: string = ''
 }
 
 export type FlatOutline = FlatOutlineItem[]
