@@ -77,20 +77,8 @@ module.exports = merge(base, {
 
   // Customise output to the (node) console
   stats: {
-    colors: true, // Enable some coloured highlighting
-    // Hide some overly verbose output
-    performance: false, // Disable as code is uncompressed in dev mode
-    hash: false,
-    version: false,
-    chunks: false,
-    modules: false,
-    // Hide copied assets from output
-    excludeAssets: [
-      /^js\/ace/,
-      /^js\/libs/,
-      /^js\/cmaps/,
-      /^js\/standard_fonts/,
-    ],
+    preset: 'minimal',
+    colors: true,
   },
 
   optimization: {
