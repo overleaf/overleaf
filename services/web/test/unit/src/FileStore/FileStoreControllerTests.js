@@ -156,10 +156,10 @@ describe('FileStoreController', function () {
     })
     ;[
       // None of these should trigger the iOS/html logic
-      ('x.html-is-rad',
+      'x.html-is-rad',
       'html.pdf',
       '.html-is-good-for-hidden-files',
-      'somefile'),
+      'somefile',
     ].forEach(filename => {
       describe(`with filename as '${filename}'`, function () {
         beforeEach(function () {
@@ -171,7 +171,7 @@ describe('FileStoreController', function () {
             }
           }
         })
-        ;[('iPhone', 'iPad', 'Firefox', 'Chrome')].forEach(browser => {
+        ;['iPhone', 'iPad', 'Firefox', 'Chrome'].forEach(browser => {
           describe(`downloaded from ${browser}`, function () {
             beforeEach(function () {
               this.user_agent = `Some ${browser} thing`
