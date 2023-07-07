@@ -45,6 +45,8 @@ const devToolsButton = ViewPlugin.define(view => {
     button.classList.add('btn', 'formatting-btn', 'formatting-btn--icon')
     button.id = 'cm6-dev-tools-button'
     button.textContent = '🦧'
+    button.style.border = 'none'
+    button.style.outline = 'none'
     button.addEventListener('click', event => {
       event.preventDefault()
       view.dispatch(toggleDevTools())
@@ -53,8 +55,10 @@ const devToolsButton = ViewPlugin.define(view => {
     getContainer()?.prepend(button)
   }
 
-  removeButton()
-  addButton()
+  window.setTimeout(() => {
+    removeButton()
+    addButton()
+  })
 
   return {
     update(update) {
@@ -97,10 +101,12 @@ const devToolsTheme = EditorView.baseTheme({
     fontSize: '13px',
     flexShrink: '0',
     fontFamily: '"SF Mono", monospace',
-    height: '100%',
+    height: 'calc(100% - 32px)',
     overflow: 'auto',
-    position: 'sticky',
-    top: 0,
+    position: 'absolute',
+    top: '32px',
+    right: 0,
+    width: '50%',
   },
   '.ol-cm-dev-tools-item': {
     cursor: 'pointer',
@@ -152,7 +158,8 @@ const devToolsView = ViewPlugin.define(view => {
 
   const container = document.createElement('div')
   container.classList.add('ol-cm-dev-tools-container')
-  scroller.append(container)
+  scroller.after(container)
+  scroller.style.width = '50%'
 
   const highlightNodeRange = (from: number, to: number) => {
     view.dispatch({
@@ -190,6 +197,7 @@ const devToolsView = ViewPlugin.define(view => {
     },
     destroy() {
       container.remove()
+      scroller.style.width = 'unset'
     },
   }
 })
