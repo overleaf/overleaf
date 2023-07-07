@@ -47,6 +47,7 @@ export const ToolbarItems: FC<{
   )
 
   const showFigureModal = splitTestVariants['figure-modal'] === 'enabled'
+  const symbolPaletteAvailable = getMeta('ol-symbolPaletteAvailable')
   const showGroup = (group: string) => !overflowed || overflowed.has(group)
 
   return (
@@ -100,15 +101,17 @@ export const ToolbarItems: FC<{
       {showGroup('group-math') && (
         <div className="ol-cm-toolbar-button-group" data-overflow="group-math">
           <MathDropdown />
-          <ToolbarButton
-            id="toolbar-toggle-symbol-palette"
-            label={t('toolbar_toggle_symbol_palette')}
-            active={showSymbolPalette}
-            command={toggleSymbolPalette}
-            icon="Ω"
-            textIcon
-            className="ol-cm-toolbar-button-math"
-          />
+          {symbolPaletteAvailable && (
+            <ToolbarButton
+              id="toolbar-toggle-symbol-palette"
+              label={t('toolbar_toggle_symbol_palette')}
+              active={showSymbolPalette}
+              command={toggleSymbolPalette}
+              icon="Ω"
+              textIcon
+              className="ol-cm-toolbar-button-math"
+            />
+          )}
         </div>
       )}
       {showGroup('group-misc') && (

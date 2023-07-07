@@ -939,6 +939,7 @@ const ProjectController = {
                 !showLegacySourceEditor &&
                 sourceEditorToolbarAssigment.variant === 'enabled',
               showSymbolPalette,
+              symbolPaletteAvailable: Features.hasFeature('symbol-palette'),
               galileoEnabled,
               galileoFeatures,
               galileoPromptWords,

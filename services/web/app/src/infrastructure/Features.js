@@ -6,6 +6,9 @@ const publicRegistrationModuleAvailable =
 
 const supportModuleAvailable = Settings.moduleImportSequence.includes('support')
 
+const symbolPaletteModuleAvailable =
+  Settings.moduleImportSequence.includes('symbol-palette')
+
 const trackChangesModuleAvailable =
   Settings.moduleImportSequence.includes('track-changes')
 
@@ -92,6 +95,8 @@ const Features = {
         return publicRegistrationModuleAvailable
       case 'support':
         return supportModuleAvailable
+      case 'symbol-palette':
+        return symbolPaletteModuleAvailable
       case 'track-changes':
         return trackChangesModuleAvailable
       default:

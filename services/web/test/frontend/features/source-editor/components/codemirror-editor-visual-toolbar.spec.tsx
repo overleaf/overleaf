@@ -316,4 +316,16 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
       ].join('')
     )
   })
+
+  it('should display the Toggle Symbol Palette button when available', function () {
+    window.metaAttributesCache.set('ol-symbolPaletteAvailable', true)
+    mountEditor('')
+    clickToolbarButton('Toggle Symbol Palette')
+  })
+
+  it('should not display the Toggle Symbol Palette button when not available', function () {
+    window.metaAttributesCache.set('ol-symbolPaletteAvailable', false)
+    mountEditor('')
+    cy.findByLabelText('Toggle Symbol Palette').should('not.exist')
+  })
 })
