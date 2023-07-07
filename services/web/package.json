@@ -321,7 +321,7 @@
     "karma-requirejs": "^1.1.0",
     "karma-webpack": "^5.0.0",
     "less": "^3.11.1",
-    "less-loader": "^11.1.0",
+    "less-loader": "^11.1.3",
     "mensch": "^0.3.4",
     "mini-css-extract-plugin": "^2.7.5",
     "mocha": "^10.2.0",
