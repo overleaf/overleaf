@@ -27,19 +27,6 @@ describe('<FileViewHeader/>', function () {
       source_project_id: 'source-project-id',
       source_entity_path: '/source-entity-path.ext',
       provider: 'project_file',
-      importer_id: '123abd',
-    },
-    created: new Date(2021, 1, 17, 3, 24).toISOString(),
-  }
-
-  const notOrignalImporterFile = {
-    name: 'references.bib',
-    linkedFileData: {
-      v1_source_doc_id: 'v1-source-id',
-      source_project_id: 'source-project-id',
-      source_entity_path: '/source-entity-path.ext',
-      provider: 'project_file',
-      importer_id: '123abc',
     },
     created: new Date(2021, 1, 17, 3, 24).toISOString(),
   }
@@ -58,7 +45,6 @@ describe('<FileViewHeader/>', function () {
     name: 'example.tex',
     linkedFileData: {
       provider: 'zotero',
-      importer_id: '123abd',
     },
     created: new Date(2021, 1, 17, 3, 24).toISOString(),
   }
@@ -117,13 +103,11 @@ describe('<FileViewHeader/>', function () {
         <FileViewHeader file={projectFile} storeReferencesKeys={() => {}} />
       )
 
-      const refreshButton = screen.getByRole('button', { name: 'Refresh' })
-      fireEvent.click(refreshButton)
+      fireEvent.click(screen.getByRole('button', { name: 'Refresh' }))
 
       await waitForElementToBeRemoved(() =>
         screen.getByText('Refreshing', { exact: false })
       )
-
       await screen.findByText('Refresh')
     })
 
@@ -153,38 +137,14 @@ describe('<FileViewHeader/>', function () {
         />
       )
 
-      const refreshButton = screen.getByRole('button', { name: 'Refresh' })
-      fireEvent.click(refreshButton)
+      fireEvent.click(screen.getByRole('button', { name: 'Refresh' }))
 
       await waitForElementToBeRemoved(() =>
         screen.getByText('Refreshing', { exact: false })
       )
 
       expect(fetchMock.done()).to.be.true
-      expect(storeReferencesKeys).to.have.been.calledWith(reindexResponse.keys)
-    })
-
-    it('Displays message when user is not original importer', function () {
-      renderWithEditorContext(
-        <FileViewHeader
-          file={notOrignalImporterFile}
-          storeReferencesKeys={() => {}}
-        />
-      )
-
-      const refreshButton = screen.getByRole('button', { name: 'Refresh' })
-      if (refreshButton.disabled) {
-        const textBefore = screen.getByText(
-          'Only the person who originally imported this',
-          { exact: false }
-        )
-        expect(textBefore).to.exist
-
-        const textAfter = screen.getByText('file can refresh it', {
-          exact: false,
-        })
-        expect(textAfter).to.exist
-      }
+      expect(storeReferencesKeys).to.be.calledWith(reindexResponse.keys)
     })
   })
 
