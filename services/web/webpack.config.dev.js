@@ -91,4 +91,8 @@ module.exports = merge(base, {
       /^js\/standard_fonts/,
     ],
   },
+
+  optimization: {
+    runtimeChunk: 'single',
+  },
 })
