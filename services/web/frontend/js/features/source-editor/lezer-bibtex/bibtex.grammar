@@ -57,18 +57,18 @@ Expression {
 }
 
 @skip {}{
-  bracedStringContents {
+  BracedStringContents {
   (
       nonClosingBracedContents |
       nestedBracedString {
         OpenBracedContents
-        bracedStringContents
+        BracedStringContents
         CloseBracedContents
       }
     )*
 }
   BracedString {
-    "{" bracedStringContents CloseBracedContents
+    "{" BracedStringContents CloseBracedContents
   }  
 }
 
