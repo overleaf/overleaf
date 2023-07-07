@@ -221,6 +221,17 @@ describe('<ReviewPanel />', function () {
     it.skip('renders changed entries in overview mode', function () {})
   })
 
+  describe('add comment entry', function () {
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip('renders `add comment button`', function () {})
+
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip('cancels adding comment', function () {})
+
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip('adds comment', function () {})
+  })
+
   describe('overview mode', function () {
     // eslint-disable-next-line mocha/no-skipped-tests
     it.skip('shows list of files changed', function () {})

@@ -71,6 +71,7 @@ function Comment({ thread, threadId, comment }: CommentProps) {
             onBlur={handleSaveEdit}
             onClick={e => e.stopPropagation()}
             onResize={handleLayoutChange}
+            autoFocus // eslint-disable-line jsx-a11y/no-autofocus
           />
         ) : (
           <>

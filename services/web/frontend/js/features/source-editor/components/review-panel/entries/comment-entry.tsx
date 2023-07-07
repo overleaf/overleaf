@@ -1,8 +1,9 @@
 import { useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import EntryContainer from './entry-container'
-import Comment from './comment'
+import EntryCallout from './entry-callout'
 import EntryActions from './entry-actions'
+import Comment from './comment'
 import AutoExpandingTextArea, {
   resetHeight,
 } from '../../../../../shared/components/auto-expanding-text-area'
@@ -118,8 +119,8 @@ function CommentEntry({
           'rp-comment-wrapper-resolving': animating,
         })}
       >
-        <div
-          className="rp-entry-callout rp-entry-callout-comment"
+        <EntryCallout
+          className="rp-entry-callout-comment"
           style={{
             top: entry.screenPos
               ? entry.screenPos.y + entry.screenPos.height - 1 + 'px'

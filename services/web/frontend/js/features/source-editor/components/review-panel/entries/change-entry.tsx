@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import EntryContainer from './entry-container'
+import EntryCallout from './entry-callout'
 import EntryActions from './entry-actions'
 import Icon from '../../../../../shared/components/icon'
 import { useReviewPanelValueContext } from '../../../context/review-panel/review-panel-context'
@@ -75,11 +76,8 @@ function ChangeEntry({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      <div
-        className={classnames(
-          'rp-entry-callout',
-          `rp-entry-callout-${entry.type}`
-        )}
+      <EntryCallout
+        className={`rp-entry-callout-${entry.type}`}
         style={{
           top: entry.screenPos
             ? entry.screenPos.y + entry.screenPos.height - 1 + 'px'

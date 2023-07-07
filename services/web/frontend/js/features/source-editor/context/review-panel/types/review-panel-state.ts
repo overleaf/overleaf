@@ -59,6 +59,7 @@ export interface ReviewPanelState {
     refreshResolvedCommentsDropdown: () => Promise<void>
     acceptChanges: (entryIds: unknown) => void
     rejectChanges: (entryIds: unknown) => void
+    submitNewComment: (content: string) => void
   }
   updaterFns: {
     handleSetSubview: (subView: SubView) => void

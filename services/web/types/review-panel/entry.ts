@@ -53,7 +53,7 @@ export interface ReviewPanelAggregateChangeEntry extends ReviewPanelBaseEntry {
   }
 }
 
-interface ReviewPanelAddCommentEntry extends ReviewPanelBaseEntry {
+export interface ReviewPanelAddCommentEntry extends ReviewPanelBaseEntry {
   type: 'add-comment'
 }
 

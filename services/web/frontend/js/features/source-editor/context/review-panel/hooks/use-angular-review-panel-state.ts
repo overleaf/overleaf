@@ -71,6 +71,8 @@ function useAngularReviewPanelState(): ReviewPanelState {
   >('reviewPanel.trackChangesForGuestsAvailable')
   const [resolveComment] =
     useScopeValue<ReviewPanel.Value<'resolveComment'>>('resolveComment')
+  const [submitNewComment] =
+    useScopeValue<ReviewPanel.Value<'submitNewComment'>>('submitNewComment')
   const [deleteComment] =
     useScopeValue<ReviewPanel.Value<'deleteComment'>>('deleteComment')
   const [gotoEntry] = useScopeValue<ReviewPanel.Value<'gotoEntry'>>('gotoEntry')
@@ -155,6 +157,7 @@ function useAngularReviewPanelState(): ReviewPanelState {
       refreshResolvedCommentsDropdown,
       acceptChanges,
       rejectChanges,
+      submitNewComment,
     }),
     [
       collapsed,
@@ -191,6 +194,7 @@ function useAngularReviewPanelState(): ReviewPanelState {
       refreshResolvedCommentsDropdown,
       acceptChanges,
       rejectChanges,
+      submitNewComment,
     ]
   )
 
