@@ -298,7 +298,7 @@ const read1name = function (TokeniseResult, k) {
 const read1filename = function (TokeniseResult, k) {
   // read an filename foo_bar.tex
   const Tokens = TokeniseResult.tokens
-  const text = TokeniseResult.lett
+  const text = TokeniseResult.text
 
   let fileName = ''
   let j, tok
