@@ -88,17 +88,16 @@ export const visualTheme = EditorView.theme({
     padding: '0.5em',
     lineHeight: 'calc(var(--line-height) * 5/6)',
   },
-  '.ol-cm-author': {
-    display: 'inline-block',
-    maxWidth: '45%',
-    minWidth: '200px',
-    verticalAlign: 'top',
-    cursor: 'pointer',
+  '.ol-cm-authors': {
+    display: 'flex',
+    justifyContent: 'space-evenly',
+    gap: '0.5em',
+    flexWrap: 'wrap',
   },
-  '.ol-cm-author:not(:first-child)': {
+  '.ol-cm-author': {
+    cursor: 'pointer',
     display: 'inline-block',
-    marginLeft: '5%',
-    maxWidth: '45%',
+    minWidth: '150px',
   },
   '.ol-cm-icon-brace': {
     filter: 'grayscale(1)',
