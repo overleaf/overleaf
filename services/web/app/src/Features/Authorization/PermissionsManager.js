@@ -133,8 +133,16 @@ function registerPolicy(name, capabilities, options = {}) {
  * @returns {Array} An array of policy names that are enforced.
  */
 function getEnforcedPolicyNames(groupPolicy = {}) {
-  return Object.keys(groupPolicy).filter(
-    policyName => groupPolicy[policyName] !== false
+  if (!groupPolicy) {
+    return []
+  }
+  return Object.keys(
+    typeof groupPolicy.toObject === 'function'
+      ? groupPolicy.toObject()
+      : groupPolicy
+  ).filter(
+    policyName =>
+      !['__v', '_id'].includes(policyName) && groupPolicy[policyName] !== false
   ) // filter out the policies that are not enforced
 }
 

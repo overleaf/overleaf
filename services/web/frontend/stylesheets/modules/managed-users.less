@@ -1,12 +1,77 @@
 .group-settings-title {
-  min-width: 0;
-  color: @content-secondary;
   font-family: Lato, sans-serif;
   font-size: @font-size-large;
   line-height: 28px;
   font-weight: bold;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.enrollment-invite {
+  color: @neutral-90;
+
+  .inner-card {
+    background-color: @gray-lightest;
+    margin: 16px 0;
+    padding: 16px;
+
+    &.warning {
+      background-color: @yellow-10;
+    }
+
+    .list-row {
+      display: flex;
+      flex-direction: row;
+
+      .icon {
+        display: flex;
+        flex: 1 1 10%;
+        > span {
+          font-size: 16px;
+        }
+        padding-right: 12px;
+        font-size: 24px;
+
+        &.error {
+          color: @yellow-50;
+          margin-top: 2px;
+        }
+      }
+    }
+
+    a {
+      text-decoration: underline;
+    }
+  }
+
+  .title {
+    font-family: Lato, sans-serif;
+    font-size: @font-size-large;
+    line-height: 28px;
+    font-weight: bold;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .subtitle {
+    font-family: Lato, sans-serif;
+    font-size: @font-size-base;
+    line-height: 24px;
+    font-weight: bold;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .label {
+    color: @gray-dark;
+    font-size: @font-size-small;
+    padding-left: 0;
+  }
+
+  .btn {
+    width: 100%;
+    margin: 8px 0;
+  }
 }
 
 .managed-users-enabled {

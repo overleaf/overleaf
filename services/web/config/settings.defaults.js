@@ -808,6 +808,7 @@ module.exports = {
     editorLeftMenuSync: [],
     editorLeftMenuManageTemplate: [],
     oauth2Server: [],
+    managedGroupSubscriptionEnrollmentNotification: [],
   },
 
   moduleImportSequence: ['launchpad', 'server-ce-scripts', 'user-activate'],

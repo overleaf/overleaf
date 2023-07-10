@@ -22,6 +22,15 @@ const UserMembershipMiddleware = {
     ]),
   ],
 
+  requireGroup: [fetchEntityConfig('group'), fetchEntity(), requireEntity()],
+
+  requireGroupAccess: [
+    AuthenticationController.requireLogin(),
+    fetchEntityConfig('group'),
+    fetchEntity(),
+    requireEntity(),
+  ],
+
   requireGroupManagementAccess: [
     AuthenticationController.requireLogin(),
     fetchEntityConfig('group'),

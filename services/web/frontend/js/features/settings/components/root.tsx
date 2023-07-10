@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import getMeta from '../../../utils/meta'
 import EmailsSection from './emails-section'
 import AccountInfoSection from './account-info-section'
+import ManagedAccountAlert from './managed-account-alert'
 import PasswordSection from './password-section'
 import LinkingSection from './linking-section'
 import BetaProgramSection from './beta-program-section'
@@ -50,6 +51,7 @@ function SettingsPageContent() {
           <h1>{t('account_settings')}</h1>
         </div>
         <div>
+          <ManagedAccountAlert />
           <EmailsSection />
           <SSOAlert />
           <div className="row">

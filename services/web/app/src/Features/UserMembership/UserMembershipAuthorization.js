@@ -22,5 +22,16 @@ const UserMembershipAuthorization = {
       )
     }
   },
+
+  isEntityMember() {
+    return req => {
+      if (!req.entity) {
+        return false
+      }
+      return req.entity[req.entityConfig.fields.membership].some(accessUserId =>
+        accessUserId.equals(req.user._id)
+      )
+    }
+  },
 }
 module.exports = UserMembershipAuthorization

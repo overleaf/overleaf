@@ -8,6 +8,7 @@ module.exports = {
       read: ['invited_emails', 'teamInvites', 'member_ids'],
       write: null,
       access: 'manager_ids',
+      membership: 'member_ids',
       name: 'teamName',
     },
     baseQuery: {
@@ -47,6 +48,7 @@ module.exports = {
       read: ['manager_ids'],
       write: 'manager_ids',
       access: 'manager_ids',
+      membership: 'member_ids',
       name: 'teamName',
     },
     baseQuery: {
@@ -72,6 +74,7 @@ module.exports = {
       read: ['managerIds'],
       write: 'managerIds',
       access: 'managerIds',
+      membership: 'member_ids',
       name: 'name',
     },
     translations: {
@@ -95,6 +98,7 @@ module.exports = {
       read: ['managerIds'],
       write: 'managerIds',
       access: 'managerIds',
+      membership: 'member_ids',
       name: 'name',
     },
     translations: {
