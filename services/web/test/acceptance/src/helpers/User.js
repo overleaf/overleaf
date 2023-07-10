@@ -205,6 +205,10 @@ class User {
     )
   }
 
+  setEmails(emails, callback) {
+    UserModel.updateOne({ _id: this.id }, { emails }, callback)
+  }
+
   logout(callback) {
     this.getCsrfToken(error => {
       if (error != null) {

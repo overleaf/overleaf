@@ -194,6 +194,14 @@ async function ensureAffiliationMiddleware(req, res, next) {
   } catch (error) {
     return new Errors.UserNotFoundError({ info: { userId } })
   }
+  // if the user does not have permission to add an affiliation, we skip this middleware
+  try {
+    req.assertPermission('add-affiliation')
+  } catch (error) {
+    if (error instanceof Errors.ForbiddenError) {
+      return next()
+    }
+  }
   try {
     await ensureAffiliation(user)
   } catch (error) {

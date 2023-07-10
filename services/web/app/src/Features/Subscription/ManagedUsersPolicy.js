@@ -13,6 +13,12 @@ registerCapability('delete-own-account', { default: true })
 // Register the capability for a user to add a secondary email to their account.
 registerCapability('add-secondary-email', { default: true })
 
+// Register the capability for a user to add an affiliation to their account.
+registerCapability('add-affiliation', { default: true })
+
+// Register the capability for a user to endorse an email address.
+registerCapability('endorse-email', { default: true })
+
 // Register the capability for a user to sign in with Google to their account
 registerCapability('link-google-sso', { default: true })
 
@@ -20,10 +26,13 @@ registerCapability('link-google-sso', { default: true })
 registerCapability('link-other-third-party-sso', { default: true })
 
 // Register the capability for a user to leave a managed group subscription.
-registerCapability('leave-managing-group-subscription', { default: true })
+registerCapability('leave-group-subscription', { default: true })
 
 // Register the capability for a user to start a subscription.
 registerCapability('start-subscription', { default: true })
+
+// Register the capability for a user to join a subscription.
+registerCapability('join-subscription', { default: true })
 
 // Register a policy to prevent a user deleting their own account.
 registerPolicy('userCannotDeleteOwnAccount', {
@@ -32,9 +41,11 @@ registerPolicy('userCannotDeleteOwnAccount', {
 
 // Register a policy to prevent a user having secondary email addresses on their account.
 registerPolicy(
-  'userCannotAddSecondaryEmail',
+  'userCannotHaveSecondaryEmail',
   {
     'add-secondary-email': false,
+    'add-affiliation': false,
+    'endorse-email': false,
   },
   {
     validator: async user => {
@@ -46,7 +57,7 @@ registerPolicy(
 
 // Register a policy to prevent a user leaving the group subscription they are managed by.
 registerPolicy('userCannotLeaveManagingGroupSubscription', {
-  'leave-managing-group-subscription': false,
+  'leave-group-subscription': false,
 })
 
 // Register a policy to prevent a user having third-party SSO linked to their account.
@@ -78,7 +89,7 @@ registerPolicy(
 // Register a policy to prevent a user having an active personal subscription.
 registerPolicy(
   'userCannotHaveSubscription',
-  { 'start-subscription': false },
+  { 'start-subscription': false, 'join-subscription': false },
   {
     validator: async user => {
       return !(await SubscriptionLocator.promises.getUserIndividualSubscription(
@@ -101,7 +112,7 @@ registerPolicy(
 function getDefaultPolicy() {
   return {
     userCannotDeleteOwnAccount: true,
-    userCannotAddSecondaryEmail: true,
+    userCannotHaveSecondaryEmail: true,
     userCannotHaveSubscription: true,
     userCannotLeaveManagingGroupSubscription: true,
     userCannotHaveGoogleSSO: false, // we want to allow google SSO by default
