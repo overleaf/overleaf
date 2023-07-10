@@ -142,11 +142,11 @@ export const atomicDecorations = (options: Options) => {
         node: SyntaxNode
         content: string
       }
-      author?: {
+      authors: {
         node: SyntaxNode
         content: string
-      }
-    } = { from: 0, to: 0 }
+      }[]
+    } = { from: 0, to: 0, authors: [] }
 
     // find the positions of the title and author in the preamble
     tree.iterate({
@@ -165,7 +165,7 @@ export const atomicDecorations = (options: Options) => {
           const node = nodeRef.node.getChild('TextArgument')
           if (node) {
             const content = state.sliceDoc(node.from, node.to)
-            preamble.author = { node, content }
+            preamble.authors.push({ node, content })
           }
         }
       },

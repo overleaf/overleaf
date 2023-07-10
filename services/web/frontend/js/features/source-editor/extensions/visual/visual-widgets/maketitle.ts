@@ -10,10 +10,10 @@ type Preamble = {
     node: SyntaxNode
     content: string
   }
-  author?: {
+  authors: {
     node: SyntaxNode
     content: string
-  }
+  }[]
 }
 
 export class MakeTitleWidget extends WidgetType {
@@ -32,10 +32,7 @@ export class MakeTitleWidget extends WidgetType {
   }
 
   eq(widget: MakeTitleWidget) {
-    return isShallowEqualPreamble(widget.preamble, this.preamble, [
-      'title',
-      'author',
-    ])
+    return isShallowEqualPreamble(widget.preamble, this.preamble)
   }
 
   updateDOM(element: HTMLElement, view: EditorView): boolean {
@@ -80,26 +77,30 @@ export class MakeTitleWidget extends WidgetType {
         })
     }
 
-    if (this.preamble.author) {
-      const authorsElement = buildAuthorsElement(
-        view.state,
-        this.preamble.author.node
-      )
-      authorsElement.addEventListener('mouseup', () => {
-        if (this.preamble.author) {
-          selectNode(view, this.preamble.author.node)
-        }
-      })
+    if (this.preamble.authors.length) {
+      const authorsElement = buildAuthorsElement(this.preamble.authors, view)
       element.append(authorsElement)
     }
   }
 }
 
-const isShallowEqualPreamble = (
-  a: Preamble,
-  b: Preamble,
-  fields: Array<keyof Preamble>
-) => fields.every(field => a[field]?.content === b[field]?.content)
+function isShallowEqualPreamble(a: Preamble, b: Preamble) {
+  if (a.title?.content !== b.title?.content) {
+    return false // title changed
+  }
+
+  if (a.authors.length !== b.authors.length) {
+    return false // number of authors changed
+  }
+
+  for (let i = 0; i < a.authors.length; i++) {
+    if (a.authors[i].content !== b.authors[i].content) {
+      return false // author changed
+    }
+  }
+
+  return true
+}
 
 function buildTitleElement(
   state: EditorState,
@@ -112,28 +113,33 @@ function buildTitleElement(
 }
 
 function buildAuthorsElement(
-  state: EditorState,
-  argumentNode: SyntaxNode
-): HTMLDivElement {
-  const element = document.createElement('div')
-  element.classList.add('ol-cm-authors')
+  authors: { node: SyntaxNode; content: string }[],
+  view: EditorView
+) {
+  const authorsElement = document.createElement('div')
+  authorsElement.classList.add('ol-cm-authors')
 
-  const content = state.sliceDoc(argumentNode.from + 1, argumentNode.to - 1)
-  const authors = content.replaceAll(/\s+/g, ' ').split('\\and')
+  for (const { node, content } of authors) {
+    const authorContent = content.slice(1, -1) // trimming the braces
+    const authors = authorContent.replaceAll(/\s+/g, ' ').split('\\and')
 
-  for (const authorParts of authors) {
-    const authorElement = document.createElement('div')
-    authorElement.classList.add('ol-cm-author')
+    for (const author of authors) {
+      const authorElement = document.createElement('div')
+      authorElement.classList.add('ol-cm-author')
 
-    for (const authorInfoItem of authorParts.split('\\\\')) {
-      const authorLineElement = document.createElement('div')
-      authorLineElement.classList.add('ol-cm-author-line')
-      authorLineElement.textContent = authorInfoItem.trim()
-      authorElement.appendChild(authorLineElement)
+      for (const authorInfoItem of author.split('\\\\')) {
+        const authorLineElement = document.createElement('div')
+        authorLineElement.classList.add('ol-cm-author-line')
+        authorLineElement.textContent = authorInfoItem.trim()
+        authorElement.appendChild(authorLineElement)
+      }
+
+      authorElement.addEventListener('mouseup', () => {
+        selectNode(view, node)
+      })
+      authorsElement.append(authorElement)
     }
-
-    element.append(authorElement)
   }
 
-  return element
+  return authorsElement
 }

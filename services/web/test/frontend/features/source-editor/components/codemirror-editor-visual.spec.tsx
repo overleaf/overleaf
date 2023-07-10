@@ -370,8 +370,78 @@ describe('<CodeMirrorEditor/> in Visual mode', function () {
     cy.get('@first-line').should('have.text', 'Foo \\footnote{Bar.} ')
   })
 
+  it('should show document preamble', function () {
+    cy.get('@first-line').type(
+      [
+        '\\author{{}Author}',
+        '\\title{{}Document title}',
+        '\\begin{{}document}',
+        '\\maketitle',
+        '\\end{{}document}',
+        '',
+      ].join('{Enter}')
+    )
+    cy.get('.ol-cm-preamble-widget').should('have.length', 1)
+    cy.get('.ol-cm-preamble-widget').click()
+
+    cy.get('.ol-cm-preamble-line').eq(0).should('contain', '\\author{Author}')
+    cy.get('.ol-cm-preamble-line')
+      .eq(1)
+      .should('contain', '\\title{Document title}')
+    cy.get('.ol-cm-preamble-line').eq(2).should('contain', '\\begin{document}')
+    cy.get('.ol-cm-preamble-line').eq(3).should('not.exist')
+  })
+
+  it('should show multiple authors', function () {
+    cy.get('@first-line').type(
+      [
+        '\\author{{}Author \\and Author2}',
+        '\\author{{}Author3}',
+        '\\title{{}Document title}',
+        '\\begin{{}document}',
+        '\\maketitle',
+        '\\end{{}document}',
+        '',
+      ].join('{Enter}')
+    )
+    cy.get('.ol-cm-preamble-widget').should('have.length', 1)
+    cy.get('.ol-cm-preamble-widget').click()
+
+    cy.get('.ol-cm-authors').should('have.length', 1)
+    cy.get('.ol-cm-authors .ol-cm-author').should('have.length', 3)
+  })
+
+  it('should update authors', function () {
+    cy.get('@first-line').type(
+      [
+        '\\author{{}Author \\and Author2}',
+        '\\author{{}Author3}',
+        '\\title{{}Document title}',
+        '\\begin{{}document}',
+        '\\maketitle',
+        '\\end{{}document}',
+        '',
+      ].join('{Enter}')
+    )
+    cy.get('.ol-cm-preamble-widget').should('have.length', 1)
+    cy.get('.ol-cm-preamble-widget').click()
+
+    cy.get('.ol-cm-authors').should('have.length', 1)
+    cy.get('.ol-cm-author').eq(0).should('contain', 'Author')
+    cy.get('.ol-cm-author').eq(1).should('contain', 'Author2')
+    cy.get('.ol-cm-author').eq(2).should('contain', 'Author3')
+
+    cy.get('.ol-cm-author').eq(0).click()
+    cy.get('.ol-cm-preamble-line').eq(0).type('{leftarrow}{backspace}New')
+    cy.get('.ol-cm-author').eq(1).should('contain', 'AuthorNew')
+
+    // update author without changing node from/to coordinates
+    cy.get('.ol-cm-author').eq(0).click()
+    cy.get('.ol-cm-preamble-line').eq(0).type('{leftarrow}{shift}{leftarrow}X')
+    cy.get('.ol-cm-author').eq(1).should('contain', 'AuthorNeX')
+  })
+
   // TODO: \input
   // TODO: Math
   // TODO: Abstract
-  // TODO: Preamble
 })
