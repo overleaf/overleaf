@@ -24,6 +24,7 @@ export interface ReviewPanelState {
     gotoEntry: (docId: DocId, entryOffset: number) => void
     handleLayoutChange: () => void
     loadingThreads: boolean
+    nVisibleSelectedChanges: number
     permissions: ReviewPanelPermissions
     users: ReviewPanelUsers
     resolveComment: (docId: DocId, entryId: ThreadId) => void
@@ -54,6 +55,8 @@ export interface ReviewPanelState {
       }
     >
     toggleReviewPanel: () => void
+    bulkAcceptActions: () => void
+    bulkRejectActions: () => void
     unresolveComment: (threadId: ThreadId) => void
     deleteThread: (_entryId: unknown, docId: DocId, threadId: ThreadId) => void
     refreshResolvedCommentsDropdown: () => Promise<void>

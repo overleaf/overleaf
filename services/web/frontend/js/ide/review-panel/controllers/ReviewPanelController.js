@@ -688,7 +688,7 @@ export default App.controller(
       dispatchReviewPanelEvent('changes:reject', change_ids)
     }
 
-    const bulkAccept = function () {
+    ide.$scope.bulkAcceptActions = function () {
       _doAcceptChanges(ide.$scope.reviewPanel.selectedEntryIds.slice())
       eventTracking.sendMB('rp-bulk-accept', {
         view: $scope.ui.reviewPanelOpen
@@ -698,7 +698,7 @@ export default App.controller(
       })
     }
 
-    const bulkReject = function () {
+    ide.$scope.bulkRejectActions = function () {
       _doRejectChanges(ide.$scope.reviewPanel.selectedEntryIds.slice())
       eventTracking.sendMB('rp-bulk-reject', {
         view: $scope.ui.reviewPanelOpen
@@ -729,9 +729,9 @@ export default App.controller(
         })
         .result.then(function (isAccept) {
           if (isAccept) {
-            return bulkAccept()
+            return ide.$scope.bulkAcceptActions()
           } else {
-            return bulkReject()
+            return ide.$scope.bulkRejectActions()
           }
         })
 

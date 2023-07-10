@@ -7,7 +7,7 @@ import ChangeEntry from './entries/change-entry'
 import AggregateChangeEntry from './entries/aggregate-change-entry'
 import CommentEntry from './entries/comment-entry'
 import AddCommentEntry from './entries/add-comment-entry'
-import BulkActionsEntry from './entries/bulk-actions-entry'
+import BulkActionsEntry from './entries/bulk-actions-entry/bulk-actions-entry'
 import {
   useReviewPanelUpdaterFnsContext,
   useReviewPanelValueContext,
@@ -24,6 +24,7 @@ function CurrentFileContainer() {
     permissions,
     loadingThreads,
     users,
+    nVisibleSelectedChanges: nChanges,
     toggleReviewPanel,
   } = useReviewPanelValueContext()
   const { setEntryHover } = useReviewPanelUpdaterFnsContext()
@@ -114,7 +115,13 @@ function CurrentFileContainer() {
               }
 
               if (entry.type === 'bulk-actions') {
-                return <BulkActionsEntry key={id} />
+                return (
+                  <BulkActionsEntry
+                    key={id}
+                    entry={entry}
+                    nChanges={nChanges}
+                  />
+                )
               }
 
               return null

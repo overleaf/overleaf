@@ -16,6 +16,9 @@ function useAngularReviewPanelState(): ReviewPanelState {
   const [loading] = useScopeValue<ReviewPanel.Value<'loading'>>(
     'reviewPanel.overview.loading'
   )
+  const [nVisibleSelectedChanges] = useScopeValue<
+    ReviewPanel.Value<'nVisibleSelectedChanges'>
+  >('reviewPanel.nVisibleSelectedChanges')
   const [collapsed, setCollapsed] = useScopeValue<
     ReviewPanel.Value<'collapsed'>
   >('reviewPanel.overview.docsCollapsedState')
@@ -97,6 +100,10 @@ function useAngularReviewPanelState(): ReviewPanelState {
     useScopeValue<ReviewPanel.Value<'acceptChanges'>>('acceptChanges')
   const [rejectChanges] =
     useScopeValue<ReviewPanel.Value<'rejectChanges'>>('rejectChanges')
+  const [bulkAcceptActions] =
+    useScopeValue<ReviewPanel.Value<'bulkAcceptActions'>>('bulkAcceptActions')
+  const [bulkRejectActions] =
+    useScopeValue<ReviewPanel.Value<'bulkRejectActions'>>('bulkRejectActions')
 
   const handleSetSubview = useCallback(
     (subView: SubView) => {
@@ -132,6 +139,7 @@ function useAngularReviewPanelState(): ReviewPanelState {
       gotoEntry,
       handleLayoutChange,
       loadingThreads,
+      nVisibleSelectedChanges,
       permissions,
       users,
       resolveComment,
@@ -152,6 +160,8 @@ function useAngularReviewPanelState(): ReviewPanelState {
       trackChangesForGuestsAvailable,
       formattedProjectMembers,
       toggleReviewPanel,
+      bulkAcceptActions,
+      bulkRejectActions,
       unresolveComment,
       deleteThread,
       refreshResolvedCommentsDropdown,
@@ -169,6 +179,7 @@ function useAngularReviewPanelState(): ReviewPanelState {
       gotoEntry,
       handleLayoutChange,
       loadingThreads,
+      nVisibleSelectedChanges,
       permissions,
       users,
       resolveComment,
@@ -189,6 +200,8 @@ function useAngularReviewPanelState(): ReviewPanelState {
       trackChangesForGuestsAvailable,
       formattedProjectMembers,
       toggleReviewPanel,
+      bulkAcceptActions,
+      bulkRejectActions,
       unresolveComment,
       deleteThread,
       refreshResolvedCommentsDropdown,

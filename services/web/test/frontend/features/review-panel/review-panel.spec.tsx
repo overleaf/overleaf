@@ -232,6 +232,17 @@ describe('<ReviewPanel />', function () {
     it.skip('adds comment', function () {})
   })
 
+  describe('bulk actions entry', function () {
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip('renders the reject and accept all buttons`', function () {})
+
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip('accepts all changes', function () {})
+
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip('rejects all changes', function () {})
+  })
+
   describe('overview mode', function () {
     // eslint-disable-next-line mocha/no-skipped-tests
     it.skip('shows list of files changed', function () {})

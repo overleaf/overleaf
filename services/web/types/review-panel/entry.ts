@@ -57,8 +57,9 @@ export interface ReviewPanelAddCommentEntry extends ReviewPanelBaseEntry {
   type: 'add-comment'
 }
 
-interface ReviewPanelBulkActionsEntry extends ReviewPanelBaseEntry {
+export interface ReviewPanelBulkActionsEntry extends ReviewPanelBaseEntry {
   type: 'bulk-actions'
+  length: number
 }
 
 export type ReviewPanelEntry =
