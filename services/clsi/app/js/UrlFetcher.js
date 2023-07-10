@@ -1,10 +1,9 @@
 const fs = require('fs')
 const logger = require('@overleaf/logger')
 const Settings = require('@overleaf/settings')
+const { fetchStream } = require('@overleaf/fetch-utils')
 const { URL } = require('url')
-const { promisify } = require('util')
-const fetch = require('node-fetch')
-const pipeline = promisify(require('stream').pipeline)
+const { pipeline } = require('stream/promises')
 
 async function pipeUrlToFileWithRetry(url, filePath) {
   let remainingAttempts = 3
@@ -33,14 +32,13 @@ async function pipeUrlToFile(url, filePath) {
     url = `${Settings.filestoreDomainOveride}${u.pathname}${u.search}`
   }
 
-  const res = await fetch(url, { signal: AbortSignal.timeout(60 * 1000) })
-  if (res.status !== 200) {
-    throw new Error('non success response: ' + res.statusText)
-  }
+  const stream = await fetchStream(url, {
+    signal: AbortSignal.timeout(60 * 1000),
+  })
 
   const atomicWrite = filePath + '~'
   try {
-    await pipeline(res.body, fs.createWriteStream(atomicWrite))
+    await pipeline(stream, fs.createWriteStream(atomicWrite))
     await fs.promises.rename(atomicWrite, filePath)
   } catch (err) {
     try {
