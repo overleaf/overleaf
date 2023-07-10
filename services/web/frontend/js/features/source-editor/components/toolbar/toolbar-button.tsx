@@ -53,10 +53,10 @@ export const ToolbarButton = memo<{
       className={classnames('ol-cm-toolbar-button', className, { hidden })}
       aria-label={label}
       onMouseDown={handleMouseDown}
-      onClick={handleClick}
+      onClick={!disabled ? handleClick : undefined}
       bsStyle={null}
       active={active}
-      disabled={disabled}
+      aria-disabled={disabled}
       type="button"
     >
       {textIcon ? icon : <Icon type={icon} fw accessibilityLabel={label} />}

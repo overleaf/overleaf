@@ -125,15 +125,16 @@ export const toolbarPanel = () => [
         backgroundColor: 'rgba(125, 125, 125, 0.1)',
         color: 'inherit',
         boxShadow: 'none',
-        '&[disabled]': {
+        '&[aria-disabled="true"]': {
           opacity: '0.2',
         },
       },
       '&.active, &:active': {
         backgroundColor: 'rgba(125, 125, 125, 0.2)',
       },
-      '&[disabled]': {
+      '&[aria-disabled="true"]': {
         opacity: '0.2',
+        cursor: 'not-allowed',
       },
       '.overflow-hidden &': {
         display: 'none',
@@ -152,7 +153,7 @@ export const toolbarPanel = () => [
       '&.active, &:active': {
         backgroundColor: 'rgba(125, 125, 125, 0.4)',
       },
-      '&[disabled]': {
+      '&[aria-disabled="true"]': {
         opacity: 0.2,
       },
     },
