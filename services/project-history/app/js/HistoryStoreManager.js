@@ -7,11 +7,15 @@ import BPromise from 'bluebird'
 import { URL } from 'url'
 import OError from '@overleaf/o-error'
 import Settings from '@overleaf/settings'
+import {
+  fetchStream,
+  fetchNothing,
+  RequestFailedError,
+} from '@overleaf/fetch-utils'
 import * as Versions from './Versions.js'
 import * as Errors from './Errors.js'
 import * as LocalFileWriter from './LocalFileWriter.js'
 import * as HashManager from './HashManager.js'
-import fetch from 'node-fetch'
 
 const HTTP_REQUEST_TIMEOUT = 300 * 1000 // 5 minutes
 
@@ -174,17 +178,9 @@ export function getProjectBlobStream(historyId, blobHash, callback) {
     { historyId, blobHash },
     'getting blob stream from history service'
   )
-  fetch(url, getHistoryFetchOptions())
-    .then(res => {
-      if (!res.ok) {
-        const err = new OError(
-          `history store a non-success status code: ${res.status}`
-        )
-        err.statusCode = res.status
-        logger.warn({ err, url }, 'cannot get project blob')
-        return callback(err)
-      }
-      callback(null, res.body)
+  fetchStream(url, getHistoryFetchOptions())
+    .then(stream => {
+      callback(null, stream)
     })
     .catch(err => callback(OError.tag(err)))
 }
@@ -258,20 +254,22 @@ export function createBlobForUpdate(projectId, historyId, update, callback) {
     }
     const fileId = urlMatch[2]
     const filestoreURL = `${Settings.apis.filestore.url}/project/${projectId}/file/${fileId}`
-    fetch(filestoreURL, { signal: AbortSignal.timeout(HTTP_REQUEST_TIMEOUT) })
-      .then(response => {
-        const statusCode = response.status
-        if (statusCode >= 200 && statusCode < 300) {
-          LocalFileWriter.bufferOnDisk(
-            response.body,
-            filestoreURL,
-            `project-${projectId}-file-${fileId}`,
-            (fsPath, cb) => {
-              _createBlob(historyId, fsPath, cb)
-            },
-            callback
-          )
-        } else if (statusCode === 404) {
+    fetchStream(filestoreURL, {
+      signal: AbortSignal.timeout(HTTP_REQUEST_TIMEOUT),
+    })
+      .then(stream => {
+        LocalFileWriter.bufferOnDisk(
+          stream,
+          filestoreURL,
+          `project-${projectId}-file-${fileId}`,
+          (fsPath, cb) => {
+            _createBlob(historyId, fsPath, cb)
+          },
+          callback
+        )
+      })
+      .catch(err => {
+        if (err instanceof RequestFailedError && err.response.status === 404) {
           logger.warn(
             { projectId, historyId, filestoreURL },
             'File contents not found in filestore. Storing in history as an empty file'
@@ -288,16 +286,9 @@ export function createBlobForUpdate(projectId, historyId, update, callback) {
           )
           emptyStream.push(null) // send an EOF signal
         } else {
-          const error = new OError(
-            `bad response from filestore: ${statusCode}`,
-            { filestoreURL, statusCode }
-          )
-          callback(error)
+          callback(OError.tag(err, 'error from filestore', { filestoreURL }))
         }
       })
-      .catch(err =>
-        callback(OError.tag(err, 'error from filestore', { filestoreURL }))
-      )
   } else {
     const error = new OError('invalid update for blob creation')
     callback(error)
@@ -318,19 +309,17 @@ function _createBlob(historyId, fsPath, _callback) {
       'sending blob to history service'
     )
     const url = `${Settings.overleaf.history.host}/projects/${historyId}/blobs/${hash}`
-    fetch(url, { method: 'PUT', body: outStream, ...getHistoryFetchOptions() })
+    fetchNothing(url, {
+      method: 'PUT',
+      body: outStream,
+      ...getHistoryFetchOptions(),
+    })
       .then(res => {
-        if (!res.ok) {
-          const err = new OError(
-            `history store a non-success status code: ${res.status}`
-          )
-          err.statusCode = res.status
-          logger.warn({ err, url }, 'cannot create project blob')
-          return callback(err)
-        }
         callback(null, hash)
       })
-      .catch(err => callback(OError.tag(err)))
+      .catch(err => {
+        callback(OError.tag(err))
+      })
   })
 }
 
@@ -413,12 +402,9 @@ function _requestOptions(options) {
 function getHistoryFetchOptions() {
   return {
     signal: AbortSignal.timeout(HTTP_REQUEST_TIMEOUT),
-    headers: {
-      Authorization:
-        'Basic ' +
-        Buffer.from(
-          `${Settings.overleaf.history.user}:${Settings.overleaf.history.pass}`
-        ).toString('base64'),
+    basicAuth: {
+      user: Settings.overleaf.history.user,
+      password: Settings.overleaf.history.pass,
     },
   }
 }
