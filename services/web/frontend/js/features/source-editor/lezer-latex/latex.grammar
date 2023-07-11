@@ -114,7 +114,7 @@
     Whitespace { $[ \t]+ }
     NewLine { "\n" }
     BlankLine { "\n" "\n"+ }
-    Normal { ![\\{}\[\]$&#^_% \t\n] ![\\{}\[\]$&#^_%\t\n]* }  // allow ~ space in normal text
+    Normal { ![\\{}\[\]$&~#^_% \t\n] ![\\{}\[\]$&~#^_%\t\n]* }  // everything is normal text, except these characters
     @precedence { CtrlSeq, CtrlSym, BlankLine, NewLine, Whitespace, Normal }
 
     OpenBrace[closedBy=CloseBrace] { "{" }
@@ -128,11 +128,12 @@
 
     Number { $[0-9]+ ("." $[0-9]*)? }
     MathSpecialChar { $[^_=<>()\-+/*]+ }  // FIXME not all of these are special
-    MathChar { ![0-9^_=<>()\-+/*\\{}\[\]\n$%&]+ }
+    MathChar { ![0-9^_=<>()\-+/*\\{}\[\]\n$%&~]+ }
 
     @precedence { Number, MathSpecialChar, MathChar }
 
     Ampersand { "&" }
+    Tilde { "~" }
 
     EnvName {  $[a-zA-Z]+ $[*]? }
 }
@@ -338,6 +339,7 @@ textBase {
     | Normal
     | Whitespace
     | Ampersand
+    | Tilde
     )
 }
 
@@ -454,6 +456,7 @@ DefinitionFragment {
     | CloseBracket
     | "#" // macro character
     | Ampersand // for tables
+    | Tilde // unbreakable space
     | "_" | "^" // other math chars
     | SectioningCommand<
         BookCtrlSeq |
@@ -625,6 +628,7 @@ Math {
     | OpenBracket
     | CloseBracket
     | Ampersand
+    | Tilde
     | Label {
         LabelCtrlSeq optionalWhitespace? OptionalArgument? LabelArgument
     }

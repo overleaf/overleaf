@@ -474,6 +474,18 @@ describe('<CodeMirrorEditor/> in Visual mode', function () {
     cy.get('.ol-cm-author').eq(1).should('contain', 'AuthorNeX')
   })
 
+  describe('handling of special characters', function () {
+    it('decorates a tilde with a non-breaking space', function () {
+      cy.get('@first-line').type('Test~test')
+      cy.get('@first-line').should('have.text', 'Test\xa0test')
+    })
+
+    it('decorates a backslash-prefixed tilde with a tilde', function () {
+      cy.get('@first-line').type('Test\\~test')
+      cy.get('@first-line').should('have.text', 'Test~test')
+    })
+  })
+
   // TODO: \input
   // TODO: Math
   // TODO: Abstract

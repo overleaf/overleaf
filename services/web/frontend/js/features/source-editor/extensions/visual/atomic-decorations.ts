@@ -49,6 +49,7 @@ import { EditableInlineGraphicsWidget } from './visual-widgets/editable-inline-g
 import { CloseBrace, OpenBrace } from '../../lezer-latex/latex.terms.mjs'
 import { FootnoteWidget } from './visual-widgets/footnote'
 import { getListItems } from '../toolbar/lists'
+import { TildeWidget } from './visual-widgets/tilde'
 
 type Options = {
   fileTreeManager: {
@@ -683,6 +684,15 @@ export const atomicDecorations = (options: Options) => {
                 )
               )
             }
+          }
+        } else if (nodeRef.type.is('Tilde')) {
+          // a tilde (non-breaking space)
+          if (shouldDecorate(state, nodeRef)) {
+            decorations.push(
+              Decoration.replace({
+                widget: new TildeWidget(),
+              }).range(nodeRef.from, nodeRef.to)
+            )
           }
         } else if (nodeRef.type.is('Caption')) {
           if (shouldDecorate(state, nodeRef)) {
