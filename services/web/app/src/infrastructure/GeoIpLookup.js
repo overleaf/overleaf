@@ -19,11 +19,21 @@ const currencyMappings = {
   SE: 'SEK',
   SG: 'SGD',
   IN: 'INR',
+  BR: 'BRL',
+  MX: 'MXN',
+  CO: 'COP',
+  CL: 'CLP',
+  PE: 'PEN',
 }
 
 const validCurrencyParams = Object.values(currencyMappings).concat([
   'EUR',
   'INR',
+  'BRL',
+  'MXN',
+  'COP',
+  'CLP',
+  'PEN',
 ])
 
 // Countries which would likely prefer Euro's

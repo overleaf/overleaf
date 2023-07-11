@@ -215,7 +215,8 @@ function CheckoutPanel() {
     setCardIsValid(state.valid)
   }, [])
 
-  if (currencyCode === 'INR' && paymentMethod !== 'credit_card') {
+  const hidePaypal = ['INR', 'COP', 'CLP', 'PEN'].includes(currencyCode)
+  if (hidePaypal && paymentMethod !== 'credit_card') {
     setPaymentMethod('credit_card')
   }
 
@@ -326,7 +327,7 @@ function CheckoutPanel() {
               <strong>{couponError}</strong>
             </Alert>
           )}
-          {currencyCode === 'INR' ? null : (
+          {hidePaypal ? null : (
             <PaymentMethodToggle
               onChange={handlePaymentMethod}
               paymentMethod={paymentMethod}

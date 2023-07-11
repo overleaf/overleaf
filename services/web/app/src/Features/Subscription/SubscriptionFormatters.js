@@ -13,12 +13,24 @@ const currencySymbols = {
   CHF: 'Fr',
   SGD: '$',
   INR: '₹',
+  BRL: 'R$',
+  MXN: '$',
+  COP: '$',
+  CLP: '$',
+  PEN: 'S/',
 }
 
 module.exports = {
   formatPrice(priceInCents, currency) {
     if (!currency) {
       currency = 'USD'
+    } else if (currency === 'CLP') {
+      // CLP doesn't have minor units, recurly stores the whole major unit without cents
+      return priceInCents.toLocaleString('es-CL', {
+        style: 'currency',
+        currency,
+        minimumFractionDigits: 0,
+      })
     }
     let string = String(Math.round(priceInCents))
     if (string.length === 2) {

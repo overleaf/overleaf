@@ -6,6 +6,7 @@ import ReconfirmationInfo from './groups/affiliation/reconfirmation-info'
 import GroupsAndEnterpriseBanner from './groups-and-enterprise-banner'
 import WritefullPromoBanner from './writefull-promo-banner'
 import INRBanner from './ads/inr-banner'
+import LATAMBanner from './ads/latam-banner'
 import getMeta from '../../../../utils/meta'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
 
@@ -23,11 +24,12 @@ const EnrollmentNotification: JSXElementConstructor<{
 }> = enrollmentNotificationModule?.import.default
 
 function UserNotifications() {
-  const showIRNBanner = getMeta('ol-showINRBanner', false)
   const groupSubscriptionsPendingEnrollment: Subscription[] = getMeta(
     'ol-groupSubscriptionsPendingEnrollment',
     []
   )
+  const showIRNBanner = getMeta('ol-showINRBanner', false)
+  const showLATAMBanner = getMeta('ol-showLATAMBanner', false)
 
   return (
     <div className="user-notifications">
@@ -44,7 +46,13 @@ function UserNotifications() {
         <Institution />
         <ConfirmEmail />
         <ReconfirmationInfo />
-        {showIRNBanner ? <INRBanner /> : <GroupsAndEnterpriseBanner />}
+        {showLATAMBanner ? (
+          <LATAMBanner />
+        ) : showIRNBanner ? (
+          <INRBanner />
+        ) : (
+          <GroupsAndEnterpriseBanner />
+        )}
         <WritefullPromoBanner />
       </ul>
     </div>

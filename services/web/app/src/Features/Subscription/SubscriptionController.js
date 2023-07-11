@@ -58,8 +58,12 @@ async function plansPage(req, res) {
   if (GeoIpLookup.isValidCurrencyParam(queryCurrency)) {
     currency = queryCurrency
   }
-  const { recommendedCurrency, countryCode, geoPricingTestVariant } =
-    await _getRecommendedCurrency(req, res)
+  const {
+    recommendedCurrency,
+    countryCode,
+    geoPricingINRTestVariant,
+    geoPricingLATAMTestVariant,
+  } = await _getRecommendedCurrency(req, res)
   if (recommendedCurrency && currency == null) {
     currency = recommendedCurrency
   }
@@ -108,8 +112,14 @@ async function plansPage(req, res) {
     currency: recommendedCurrency,
     'remove-personal-plan-page': removePersonalPlanAssingment?.variant,
     countryCode,
-    'geo-pricing-inr-group': geoPricingTestVariant,
+    'geo-pricing-inr-group': geoPricingINRTestVariant,
     'geo-pricing-inr-page': currency === 'INR' ? 'inr' : 'default',
+    'geo-pricing-latam-group': geoPricingLATAMTestVariant,
+    'geo-pricing-latam-page': ['BRL', 'MXN', 'COP', 'CLP', 'PEN'].includes(
+      currency
+    )
+      ? 'latam'
+      : 'default',
   })
 
   res.render(`subscriptions/plans-marketing/${directory}/plans-marketing-v2`, {
@@ -264,8 +274,12 @@ async function userSubscriptionPage(req, res) {
 
 async function interstitialPaymentPage(req, res) {
   const user = SessionManager.getSessionUser(req.session)
-  const { recommendedCurrency, countryCode, geoPricingTestVariant } =
-    await _getRecommendedCurrency(req, res)
+  const {
+    recommendedCurrency,
+    countryCode,
+    geoPricingINRTestVariant,
+    geoPricingLATAMTestVariant,
+  } = await _getRecommendedCurrency(req, res)
 
   const hasSubscription =
     await LimitationsManager.promises.userHasV1OrV2Subscription(user)
@@ -300,9 +314,15 @@ async function interstitialPaymentPage(req, res) {
       {
         currency: recommendedCurrency,
         countryCode,
-        'geo-pricing-inr-group': geoPricingTestVariant,
+        'geo-pricing-inr-group': geoPricingINRTestVariant,
         'geo-pricing-inr-page':
           recommendedCurrency === 'INR' ? 'inr' : 'default',
+        'geo-pricing-latam-group': geoPricingLATAMTestVariant,
+        'geo-pricing-latam-page': ['BRL', 'MXN', 'COP', 'CLP', 'PEN'].includes(
+          recommendedCurrency
+        )
+          ? 'latam'
+          : 'default',
         'remove-personal-plan-page': removePersonalPlanAssingment?.variant,
       }
     )
@@ -665,10 +685,10 @@ async function _getRecommendedCurrency(req, res) {
   )
   const countryCode = currencyLookup.countryCode
   let recommendedCurrency = currencyLookup.currencyCode
-  let assignment
+  let assignmentINR, assignmentLATAM
   // for #12703
   try {
-    assignment = await SplitTestHandler.promises.getAssignment(
+    assignmentINR = await SplitTestHandler.promises.getAssignment(
       req,
       res,
       'geo-pricing-inr'
@@ -679,15 +699,35 @@ async function _getRecommendedCurrency(req, res) {
       'Failed to get assignment for geo-pricing-inr test'
     )
   }
+  // for #13559
+  try {
+    assignmentLATAM = await SplitTestHandler.promises.getAssignment(
+      req,
+      res,
+      'geo-pricing-latam'
+    )
+  } catch (error) {
+    logger.error(
+      { err: error },
+      'Failed to get assignment for geo-pricing-latam test'
+    )
+  }
   // if the user has been detected as located in India (thus recommended INR as currency)
   // but is not part of the geo pricing test, we fall back to the default currency instead
-  if (recommendedCurrency === 'INR' && assignment?.variant !== 'inr') {
+  if (recommendedCurrency === 'INR' && assignmentINR?.variant !== 'inr') {
+    recommendedCurrency = GeoIpLookup.DEFAULT_CURRENCY_CODE
+  }
+  if (
+    ['BRL', 'MXN', 'COP', 'CLP', 'PEN'].includes(recommendedCurrency) &&
+    assignmentLATAM?.variant !== 'latam'
+  ) {
     recommendedCurrency = GeoIpLookup.DEFAULT_CURRENCY_CODE
   }
   return {
     recommendedCurrency,
     countryCode,
-    geoPricingTestVariant: assignment?.variant,
+    geoPricingINRTestVariant: assignmentINR?.variant,
+    geoPricingLATAMTestVariant: assignmentLATAM?.variant,
   }
 }
 

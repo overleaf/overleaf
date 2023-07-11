@@ -364,7 +364,11 @@ async function projectListPage(req, res, next) {
   }
 
   let showINRBanner = false
+  let showLATAMBanner = false
+  let recommendedCurrency
   if (usersBestSubscription?.type === 'free') {
+    const { currencyCode, countryCode } =
+      await GeoIpLookup.promises.getCurrencyCode(req.ip)
     try {
       const inrGeoPricingAssignment =
         await SplitTestHandler.promises.getAssignment(
@@ -372,14 +376,32 @@ async function projectListPage(req, res, next) {
           res,
           'geo-pricing-inr'
         )
-      const geoDetails = await GeoIpLookup.promises.getDetails(req.ip)
       showINRBanner =
-        inrGeoPricingAssignment.variant === 'inr' &&
-        geoDetails?.country_code === 'IN'
+        inrGeoPricingAssignment.variant === 'inr' && countryCode === 'IN'
     } catch (error) {
       logger.error(
         { err: error },
-        'Failed to get INR geo pricing lookup or assignment'
+        'Failed to get geo-pricing-inr split test assignment'
+      )
+    }
+    try {
+      const latamGeoPricingAssignment =
+        await SplitTestHandler.promises.getAssignment(
+          req,
+          res,
+          'geo-pricing-latam'
+        )
+      showLATAMBanner =
+        latamGeoPricingAssignment.variant === 'latam' &&
+        ['BR', 'MX', 'CO', 'CL', 'PE'].includes(countryCode)
+      // LATAM Banner needs to know which currency to display
+      if (showLATAMBanner) {
+        recommendedCurrency = currencyCode
+      }
+    } catch (error) {
+      logger.error(
+        { err: error },
+        'Failed to get geo-pricing-latam split test assignment'
       )
     }
   }
@@ -402,6 +424,8 @@ async function projectListPage(req, res, next) {
     groupsAndEnterpriseBannerVariant,
     showWritefullPromoBanner,
     showINRBanner,
+    showLATAMBanner,
+    recommendedCurrency,
     projectDashboardReact: true, // used in navbar
     welcomePageRedesignVariant: welcomePageRedesignAssignment.variant,
     groupSubscriptionsPendingEnrollment:
