@@ -1,7 +1,11 @@
 const Path = require('path')
 const fs = require('fs')
 
-const fetch = require('node-fetch')
+const {
+  fetchString,
+  fetchJson,
+  RequestFailedError,
+} = require('@overleaf/fetch-utils')
 
 const CACHE_IN = Path.join(
   Path.dirname(Path.dirname(Path.dirname(__dirname))),
@@ -17,11 +21,16 @@ async function scrape(baseUrl, page) {
     format: 'json',
     redirects: true,
   }).toString()
-  const response = await fetch(uri)
-  if (response.status !== 200) {
-    console.error(response.status, page, response)
+
+  try {
+    return await fetchString(uri)
+  } catch (err) {
+    if (err instanceof RequestFailedError) {
+      console.error(err.response.status, page, err.response)
+    } else {
+      console.error(err)
+    }
   }
-  return await response.text()
 }
 
 const crypto = require('crypto')
@@ -70,11 +79,18 @@ async function getAllPagesFrom(baseUrl, continueFrom) {
     gaplimit: 100,
     ...continueFrom,
   }).toString()
-  const response = await fetch(uri)
-  if (response.status !== 200) {
-    console.error(response.status, continueFrom, response)
+
+  let blob
+  try {
+    blob = await fetchJson(uri)
+  } catch (err) {
+    if (err instanceof RequestFailedError) {
+      console.error(err.response.status, continueFrom, err.response)
+    } else {
+      console.error(err)
+      throw err
+    }
   }
-  const blob = await response.json()
   const nextContinueFrom = blob && blob.continue
   const pagesRaw = (blob && blob.query && blob.query.pages) || {}
   const pages = Object.values(pagesRaw).map(page => page.title)

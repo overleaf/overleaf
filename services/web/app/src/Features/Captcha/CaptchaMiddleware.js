@@ -1,4 +1,4 @@
-const fetch = require('node-fetch')
+const { fetchJson } = require('@overleaf/fetch-utils')
 const logger = require('@overleaf/logger')
 const Settings = require('@overleaf/settings')
 const Metrics = require('@overleaf/metrics')
@@ -60,24 +60,22 @@ function validateCaptcha(action) {
       return respondInvalidCaptcha(req, res)
     }
 
-    const response = await fetch(Settings.recaptcha.endpoint, {
-      method: 'POST',
-      body: new URLSearchParams([
-        ['secret', Settings.recaptcha.secretKey],
-        ['response', reCaptchaResponse],
-      ]),
-      headers: {
-        Accept: 'application/json',
-      },
-    })
-    const body = await response.json()
-    if (!response.ok) {
+    let body
+    try {
+      body = await fetchJson(Settings.recaptcha.endpoint, {
+        method: 'POST',
+        body: new URLSearchParams([
+          ['secret', Settings.recaptcha.secretKey],
+          ['response', reCaptchaResponse],
+        ]),
+      })
+    } catch (err) {
       Metrics.inc('captcha', 1, { path: action, status: 'error' })
-      throw new OError('failed recaptcha siteverify request', {
-        statusCode: response.status,
-        body,
+      throw OError.tag(err, 'failed recaptcha siteverify request', {
+        body: err.body,
       })
     }
+
     if (!body.success) {
       logger.warn(
         { statusCode: 200, body },

@@ -1,12 +1,11 @@
 const Settings = require('@overleaf/settings')
-const OError = require('@overleaf/o-error')
+const { fetchJson } = require('@overleaf/fetch-utils')
 const { waitForDb } = require('../app/src/infrastructure/mongodb')
 const { promiseMapWithLimit } = require('../app/src/util/promises')
 const { getHardDeletedProjectIds } = require('./delete_orphaned_data_helper')
 const TpdsUpdateSender = require('../app/src/Features/ThirdPartyDataStore/TpdsUpdateSender')
 const { promisify } = require('util')
 const { ObjectId } = require('mongodb')
-const fetch = require('node-fetch')
 const sleep = promisify(setTimeout)
 
 const START_OFFSET = process.env.START_OFFSET
@@ -34,15 +33,7 @@ async function main() {
     const url = new URL(`${Settings.apis.project_archiver.url}/project/list`)
     url.searchParams.append('pageToken', pageToken)
     url.searchParams.append('startOffset', startOffset)
-    const response = await fetch(url, {
-      headers: { Accept: 'application/json' },
-    })
-    if (!response.ok) {
-      throw new OError('Failed to get list of projects from project archiver', {
-        status: response.status,
-      })
-    }
-    const { nextPageToken, entries } = await response.json()
+    const { nextPageToken, entries } = await fetchJson(url)
     pageToken = nextPageToken
     startOffset = undefined
 
@@ -60,6 +51,7 @@ async function main() {
     )
   }
 }
+
 async function processBatch(entries) {
   const projectIdToPrefix = new Map()
   for (const { prefix, projectId } of entries) {

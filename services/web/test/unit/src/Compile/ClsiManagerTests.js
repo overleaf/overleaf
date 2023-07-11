@@ -1,9 +1,9 @@
 const { setTimeout } = require('timers/promises')
-const _ = require('lodash')
 const sinon = require('sinon')
 const { expect } = require('chai')
 const SandboxedModule = require('sandboxed-module')
 const tk = require('timekeeper')
+const { RequestFailedError } = require('@overleaf/fetch-utils')
 
 const FILESTORE_URL = 'http://filestore.example.com'
 const CLSI_HOST = 'clsi.example.com'
@@ -47,7 +47,6 @@ describe('ClsiManager', function () {
     this.response = {
       ok: true,
       status: 200,
-      json: sinon.stub().resolves(this.responseBody),
       headers: {
         raw: sinon.stub().returns({
           'set-cookie': [`${this.clsiCookieKey}=${this.newClsiServerId}`],
@@ -55,7 +54,19 @@ describe('ClsiManager', function () {
       },
     }
 
-    this.fetch = sinon.stub().resolves(this.response)
+    this.FetchUtils = {
+      fetchString: sinon
+        .stub()
+        .callsFake(() => Promise.resolve(JSON.stringify(this.responseBody))),
+      fetchStringWithResponse: sinon.stub().callsFake(() =>
+        Promise.resolve({
+          body: JSON.stringify(this.responseBody),
+          response: this.response,
+        })
+      ),
+      fetchStream: sinon.stub(),
+      RequestFailedError,
+    }
     this.ClsiCookieManager = {
       promises: {
         clearServerId: sinon.stub().resolves(),
@@ -131,7 +142,7 @@ describe('ClsiManager', function () {
           this.DocumentUpdaterHandler,
         './ClsiCookieManager': () => this.ClsiCookieManager,
         './ClsiStateManager': this.ClsiStateManager,
-        'node-fetch': this.fetch,
+        '@overleaf/fetch-utils': this.FetchUtils,
         './ClsiFormatChecker': this.ClsiFormatChecker,
         '@overleaf/metrics': this.Metrics,
       },
@@ -179,7 +190,7 @@ describe('ClsiManager', function () {
       })
 
       it('should send the request to the CLSI', function () {
-        this.fetch.should.have.been.calledWith(
+        this.FetchUtils.fetchStringWithResponse.should.have.been.calledWith(
           sinon.match(
             url =>
               url.host === CLSI_HOST &&
@@ -190,28 +201,25 @@ describe('ClsiManager', function () {
           ),
           {
             method: 'POST',
-            body: sinon.match(body => {
-              body = JSON.parse(body)
-              const options = body.compile.options
-              return (
-                options.compiler === this.project.compiler &&
-                options.imageName === this.project.imageName &&
-                options.timeout === this.timeout &&
-                options.draft === false &&
-                options.compileGroup === 'standard' &&
-                options.metricsMethod === 'standard' &&
-                options.stopOnFirstError === false &&
-                options.syncType === undefined &&
-                body.compile.rootResourcePath === 'main.tex' &&
-                _.isEqual(
-                  body.compile.resources,
-                  _makeResources(this.project, this.docs, this.files)
-                )
-              )
+            json: sinon.match({
+              compile: {
+                options: {
+                  compiler: this.project.compiler,
+                  imageName: this.project.imageName,
+                  timeout: this.timeout,
+                  draft: false,
+                  compileGroup: 'standard',
+                  metricsMethod: 'standard',
+                  stopOnFirstError: false,
+                  syncType: undefined,
+                },
+                rootResourcePath: 'main.tex',
+                resources: _makeResources(this.project, this.docs, this.files),
+              },
             }),
             headers: {
-              'Content-Type': 'application/json',
               Accept: 'application/json',
+              'Content-Type': 'application/json',
               Cookie: `${this.clsiCookieKey}=${this.clsiServerId}`,
             },
           }
@@ -252,13 +260,6 @@ describe('ClsiManager', function () {
         expect(this.result.status).to.equal('success')
         expect(this.result.outputFiles.map(f => f.path)).to.have.members(
           this.outputFiles.map(f => f.path)
-        )
-      })
-
-      it('should process a request with a cookie jar', function () {
-        expect(this.fetch).to.have.been.calledWith(
-          sinon.match.any,
-          sinon.match(opts => opts.jar === this.jar && opts.qs == null)
         )
       })
 
@@ -320,12 +321,12 @@ describe('ClsiManager', function () {
         expect(this.result.status).to.equal('success')
         expect(this.result.clsiServerId).to.equal(this.newClsiServerId)
         expect(this.result.validationError).to.be.undefined
-        expect(this.result.stats).to.equal(this.stats)
-        expect(this.result.timings).to.equal(this.timings)
+        expect(this.result.stats).to.deep.equal(this.stats)
+        expect(this.result.timings).to.deep.equal(this.timings)
         const outputPdf = this.result.outputFiles.find(
           f => f.path === 'output.pdf'
         )
-        expect(outputPdf.ranges).to.equal(this.ranges)
+        expect(outputPdf.ranges).to.deep.equal(this.ranges)
         expect(outputPdf.startXRefTable).to.equal(this.startXRefTable)
         expect(outputPdf.contentId).to.equal(this.contentId)
         expect(outputPdf.size).to.equal(this.size)
@@ -385,7 +386,7 @@ describe('ClsiManager', function () {
       })
 
       it('should build up the CLSI request', function () {
-        this.fetch.should.have.been.calledWith(
+        this.FetchUtils.fetchStringWithResponse.should.have.been.calledWith(
           sinon.match(
             url =>
               url.hostname === CLSI_HOST &&
@@ -396,33 +397,33 @@ describe('ClsiManager', function () {
           ),
           {
             method: 'POST',
-            body: sinon.match(body => {
-              const json = JSON.parse(body)
-              const options = json.compile.options
-              return (
-                options.compiler === this.project.compiler &&
-                options.timeout === 100 &&
-                options.imageName === this.project.imageName &&
-                options.draft === false &&
-                options.syncType === 'incremental' &&
-                options.syncState === '01234567890abcdef' &&
-                options.compileGroup === 'priority' &&
-                options.enablePdfCaching === true &&
-                options.pdfCachingMinChunkSize === 1337 &&
-                options.metricsMethod === 'priority' &&
-                options.stopOnFirstError === false &&
-                json.compile.rootResourcePath === 'main.tex' &&
-                _.isEqual(json.compile.resources, [
+            json: sinon.match({
+              compile: {
+                options: {
+                  compiler: this.project.compiler,
+                  timeout: 100,
+                  imageName: this.project.imageName,
+                  draft: false,
+                  syncType: 'incremental',
+                  syncState: '01234567890abcdef',
+                  compileGroup: 'priority',
+                  enablePdfCaching: true,
+                  pdfCachingMinChunkSize: 1337,
+                  metricsMethod: 'priority',
+                  stopOnFirstError: false,
+                },
+                rootResourcePath: 'main.tex',
+                resources: [
                   {
                     path: 'main.tex',
                     content: this.docs['/main.tex'].lines.join('\n'),
                   },
-                ])
-              )
+                ],
+              },
             }),
             headers: {
-              'Content-Type': 'application/json',
               Accept: 'application/json',
+              'Content-Type': 'application/json',
               Cookie: `${this.clsiCookieKey}=${this.clsiServerId}`,
             },
           }
@@ -452,14 +453,10 @@ describe('ClsiManager', function () {
       })
 
       it('should still change the root path', function () {
-        this.fetch.should.have.been.calledWith(
+        this.FetchUtils.fetchStringWithResponse.should.have.been.calledWith(
           sinon.match.any,
           sinon.match({
-            body: sinon.match(
-              body =>
-                JSON.parse(body).compile.rootResourcePath ===
-                'chapters/chapter1.tex'
-            ),
+            json: { compile: { rootResourcePath: 'chapters/chapter1.tex' } },
           })
         )
       })
@@ -475,14 +472,10 @@ describe('ClsiManager', function () {
       })
 
       it('should change root path', function () {
-        this.fetch.should.have.been.calledWith(
+        this.FetchUtils.fetchStringWithResponse.should.have.been.calledWith(
           sinon.match.any,
           sinon.match({
-            body: sinon.match(
-              body =>
-                JSON.parse(body).compile.rootResourcePath ===
-                'chapters/chapter1.tex'
-            ),
+            json: { compile: { rootResourcePath: 'chapters/chapter1.tex' } },
           })
         )
       })
@@ -498,12 +491,10 @@ describe('ClsiManager', function () {
       })
 
       it('should fallback to default root doc', function () {
-        this.fetch.should.have.been.calledWith(
+        this.FetchUtils.fetchStringWithResponse.should.have.been.calledWith(
           sinon.match.any,
           sinon.match({
-            body: sinon.match(
-              body => JSON.parse(body).compile.rootResourcePath === 'main.tex'
-            ),
+            json: { compile: { rootResourcePath: 'main.tex' } },
           })
         )
       })
@@ -520,12 +511,10 @@ describe('ClsiManager', function () {
       })
 
       it('should set the compiler to pdflatex', function () {
-        expect(this.fetch).to.have.been.calledWith(
+        expect(this.FetchUtils.fetchStringWithResponse).to.have.been.calledWith(
           sinon.match.any,
           sinon.match({
-            body: sinon.match(
-              body => JSON.parse(body).compile.options.compiler === 'pdflatex'
-            ),
+            json: { compile: { options: { compiler: 'pdflatex' } } },
           })
         )
       })
@@ -542,12 +531,10 @@ describe('ClsiManager', function () {
       })
 
       it('should set to main.tex', function () {
-        expect(this.fetch).to.have.been.calledWith(
+        expect(this.FetchUtils.fetchStringWithResponse).to.have.been.calledWith(
           sinon.match.any,
           sinon.match({
-            body: sinon.match(
-              body => JSON.parse(body).compile.rootResourcePath === 'main.tex'
-            ),
+            json: { compile: { rootResourcePath: 'main.tex' } },
           })
         )
       })
@@ -600,12 +587,10 @@ describe('ClsiManager', function () {
       })
 
       it('should set io to the only file', function () {
-        expect(this.fetch).to.have.been.calledWith(
+        expect(this.FetchUtils.fetchStringWithResponse).to.have.been.calledWith(
           sinon.match.any,
           sinon.match({
-            body: sinon.match(
-              body => JSON.parse(body).compile.rootResourcePath === 'other.tex'
-            ),
+            json: { compile: { rootResourcePath: 'other.tex' } },
           })
         )
       })
@@ -624,12 +609,10 @@ describe('ClsiManager', function () {
       })
 
       it('should add the draft option into the request', function () {
-        expect(this.fetch).to.have.been.calledWith(
+        expect(this.FetchUtils.fetchStringWithResponse).to.have.been.calledWith(
           sinon.match.any,
           sinon.match({
-            body: sinon.match(
-              body => JSON.parse(body).compile.options.draft === true
-            ),
+            json: { compile: { options: { draft: true } } },
           })
         )
       })
@@ -653,20 +636,19 @@ describe('ClsiManager', function () {
     describe('with a sync conflict', function () {
       beforeEach(async function () {
         const conflictResponseBody = { compile: { status: 'conflict' } }
-        const conflictResponse = {
-          ...this.response,
-          json: sinon.stub().resolves(conflictResponseBody),
-        }
-        this.fetch
+        this.FetchUtils.fetchStringWithResponse
           .withArgs(
             sinon.match.any,
             sinon.match({
-              body: sinon.match(
-                body => JSON.parse(body).compile.options.syncType !== 'full'
+              json: sinon.match(
+                json => json.compile.options.syncType !== 'full'
               ),
             })
           )
-          .resolves(conflictResponse)
+          .resolves({
+            body: JSON.stringify(conflictResponseBody),
+            response: this.response,
+          })
         this.result = await this.ClsiManager.promises.sendRequest(
           this.project._id,
           this.user_id,
@@ -675,18 +657,20 @@ describe('ClsiManager', function () {
       })
 
       it('should send two requests to CLSI', function () {
-        this.fetch.should.have.been.calledTwice
+        this.FetchUtils.fetchStringWithResponse.should.have.been.calledTwice
       })
 
       it('should call the CLSI first without syncType:full', function () {
-        const compileOptions = JSON.parse(this.fetch.getCall(0).args[1].body)
-          .compile.options
+        const compileOptions =
+          this.FetchUtils.fetchStringWithResponse.getCall(0).args[1].json
+            .compile.options
         expect(compileOptions.syncType).to.be.undefined
       })
 
       it('should call the CLSI a second time with syncType:full', function () {
-        const compileOptions = JSON.parse(this.fetch.getCall(1).args[1].body)
-          .compile.options
+        const compileOptions =
+          this.FetchUtils.fetchStringWithResponse.getCall(1).args[1].json
+            .compile.options
         expect(compileOptions.syncType).to.equal('full')
       })
 
@@ -697,8 +681,9 @@ describe('ClsiManager', function () {
 
     describe('with an unavailable response', function () {
       beforeEach(async function () {
-        this.response.json.onCall(0).resolves({
-          compile: { status: 'unavailable' },
+        this.FetchUtils.fetchStringWithResponse.onCall(0).resolves({
+          body: JSON.stringify({ compile: { status: 'unavailable' } }),
+          response: this.response,
         })
         this.result = await this.ClsiManager.promises.sendRequest(
           this.project._id,
@@ -708,18 +693,20 @@ describe('ClsiManager', function () {
       })
 
       it('should send two requests to CLSI', function () {
-        this.fetch.should.have.been.calledTwice
+        this.FetchUtils.fetchStringWithResponse.should.have.been.calledTwice
       })
 
       it('should call the CLSI first without syncType:full', function () {
-        const compileOptions = JSON.parse(this.fetch.getCall(0).args[1].body)
-          .compile.options
+        const compileOptions =
+          this.FetchUtils.fetchStringWithResponse.getCall(0).args[1].json
+            .compile.options
         expect(compileOptions.syncType).to.be.undefined
       })
 
       it('should call the CLSI a second time with syncType:full', function () {
-        const compileOptions = JSON.parse(this.fetch.getCall(1).args[1].body)
-          .compile.options
+        const compileOptions =
+          this.FetchUtils.fetchStringWithResponse.getCall(1).args[1].json
+            .compile.options
         expect(compileOptions.syncType).to.equal('full')
       })
 
@@ -768,8 +755,8 @@ describe('ClsiManager', function () {
       })
 
       it('makes a request to the new backend', function () {
-        expect(this.fetch).to.have.been.calledTwice
-        expect(this.fetch).to.have.been.calledWith(
+        expect(this.FetchUtils.fetchStringWithResponse).to.have.been.calledTwice
+        expect(this.FetchUtils.fetchStringWithResponse).to.have.been.calledWith(
           sinon.match(
             url =>
               url.host === CLSI_HOST &&
@@ -779,7 +766,7 @@ describe('ClsiManager', function () {
               url.searchParams.get('compileGroup') === 'standard'
           )
         )
-        expect(this.fetch).to.have.been.calledWith(
+        expect(this.FetchUtils.fetchStringWithResponse).to.have.been.calledWith(
           sinon.match(
             url =>
               url.toString() ===
@@ -826,7 +813,7 @@ describe('ClsiManager', function () {
       })
 
       it('should send the request to the CLSI', function () {
-        this.fetch.should.have.been.calledWith(
+        this.FetchUtils.fetchStringWithResponse.should.have.been.calledWith(
           sinon.match(
             url =>
               url.host === CLSI_HOST &&
@@ -836,10 +823,10 @@ describe('ClsiManager', function () {
           ),
           {
             method: 'POST',
-            body: JSON.stringify(this.clsiRequest),
+            json: this.clsiRequest,
             headers: {
-              'Content-Type': 'application/json',
               Accept: 'application/json',
+              'Content-Type': 'application/json',
               Cookie: `${this.clsiCookieKey}=${this.clsiServerId}`,
             },
           }
@@ -901,7 +888,7 @@ describe('ClsiManager', function () {
       })
 
       it('should call the delete method in the standard CLSI', function () {
-        this.fetch.should.have.been.calledWith(
+        this.FetchUtils.fetchString.should.have.been.calledWith(
           sinon.match(
             url =>
               url.host === CLSI_HOST &&
@@ -927,13 +914,6 @@ describe('ClsiManager', function () {
           .should.equal(true)
       })
 
-      it('should not add a cookie jar', function () {
-        expect(this.fetch).to.have.been.calledWith(
-          sinon.match.any,
-          sinon.match(opts => opts.jar == null)
-        )
-      })
-
       it('should not persist a cookie on response', function () {
         expect(this.ClsiCookieManager.promises.setServerId).not.to.have.been
           .called
@@ -954,13 +934,12 @@ describe('ClsiManager', function () {
       })
 
       it('should call wordCount with root file', function () {
-        expect(this.fetch).to.have.been.calledWith(
+        expect(this.FetchUtils.fetchString).to.have.been.calledWith(
           sinon.match(
             url =>
               url.toString() ===
               `http://clsi.example.com/project/${this.project._id}/user/${this.user_id}/wordcount?compileBackendClass=e2&compileGroup=standard&file=main.tex&image=mock-image-name&clsiserverid=node-1`
-          ),
-          { method: 'GET' }
+          )
         )
       })
 
@@ -982,7 +961,7 @@ describe('ClsiManager', function () {
       })
 
       it('should call wordCount with param file', function () {
-        expect(this.fetch).to.have.been.calledWith(
+        expect(this.FetchUtils.fetchString).to.have.been.calledWith(
           sinon.match(
             url =>
               url.host === CLSI_HOST &&
@@ -993,10 +972,7 @@ describe('ClsiManager', function () {
               url.searchParams.get('clsiserverid') === 'node-2' &&
               url.searchParams.get('file') === 'other.tex' &&
               url.searchParams.get('image') === 'mock-image-name'
-          ),
-          {
-            method: 'GET',
-          }
+          )
         )
       })
 

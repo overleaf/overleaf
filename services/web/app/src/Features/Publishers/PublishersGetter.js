@@ -1,6 +1,6 @@
 const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
-const fetch = require('node-fetch')
+const { fetchJson } = require('@overleaf/fetch-utils')
 const { callbackify } = require('../../util/promises')
 const UserMembershipsHandler = require('../UserMembership/UserMembershipsHandler')
 const UserMembershipEntityConfigs = require('../UserMembership/UserMembershipEntityConfigs')
@@ -14,17 +14,14 @@ async function getManagedPublishers(userId) {
 
 async function fetchV1Data(publisher) {
   const url = `${Settings.apis.v1.url}/api/v2/brands/${publisher.slug}`
-  const authorization = `Basic ${Buffer.from(
-    Settings.apis.v1.user + ':' + Settings.apis.v1.pass
-  ).toString('base64')}`
   try {
-    const response = await fetch(url, {
-      headers: {
-        Authorization: authorization,
+    const data = await fetchJson(url, {
+      basicAuth: {
+        user: Settings.apis.v1.user,
+        password: Settings.apis.v1.pass,
       },
       signal: AbortSignal.timeout(Settings.apis.v1.timeout),
     })
-    const data = await response.json()
 
     publisher.name = data?.name
     publisher.partner = data?.partner

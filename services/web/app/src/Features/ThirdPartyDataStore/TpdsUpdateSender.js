@@ -4,7 +4,7 @@ const { callbackify } = require('util')
 const logger = require('@overleaf/logger')
 const metrics = require('@overleaf/metrics')
 const Path = require('path')
-const fetch = require('node-fetch')
+const { fetchNothing } = require('@overleaf/fetch-utils')
 const settings = require('@overleaf/settings')
 
 const CollaboratorsGetter =
@@ -184,17 +184,10 @@ async function deleteProject(params) {
   metrics.inc('tpds.delete-project')
   // send the request directly to project archiver, bypassing third-party-datastore
   try {
-    const response = await fetch(
+    await fetchNothing(
       `${settings.apis.project_archiver.url}/project/${projectId}`,
       { method: 'DELETE' }
     )
-    if (!response.ok) {
-      logger.error(
-        { statusCode: response.status, projectId },
-        'error deleting project in third party datastore (project_archiver)'
-      )
-      return false
-    }
     return true
   } catch (err) {
     logger.error(
@@ -213,19 +206,11 @@ async function enqueue(group, method, job) {
   }
   try {
     const url = new URL('/enqueue/web_to_tpds_http_requests', tpdsWorkerUrl)
-    const response = await fetch(url, {
+    await fetchNothing(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ group, job, method }),
+      json: { group, job, method },
       signal: AbortSignal.timeout(5 * 1000),
     })
-    if (!response.ok) {
-      // log error and continue
-      logger.error(
-        { statusCode: response.status, group, job, method },
-        'error enqueueing tpdsworker job'
-      )
-    }
   } catch (err) {
     // log error and continue
     logger.error({ err, group, job, method }, 'error enqueueing tpdsworker job')

@@ -13,6 +13,7 @@
 const SandboxedModule = require('sandboxed-module')
 const assert = require('assert')
 const sinon = require('sinon')
+const { RequestFailedError } = require('@overleaf/fetch-utils')
 
 const modulePath = '../../../../app/src/Features/Templates/TemplatesManager'
 
@@ -61,9 +62,13 @@ describe('TemplatesManager', function () {
     }
     this.Project = { updateOne: sinon.stub().callsArgWith(3, null) }
     this.FileWriter = { ensureDumpFolderExists: sinon.stub().callsArg(0) }
+    this.FetchUtils = {
+      fetchJson: sinon.stub(),
+      RequestFailedError,
+    }
     this.TemplatesManager = SandboxedModule.require(modulePath, {
       requires: {
-        'node-fetch': sinon.stub(),
+        '@overleaf/fetch-utils': this.FetchUtils,
         '../Uploads/ProjectUploadManager': this.ProjectUploadManager,
         '../Project/ProjectOptionsHandler': this.ProjectOptionsHandler,
         '../Project/ProjectRootDocManager': this.ProjectRootDocManager,

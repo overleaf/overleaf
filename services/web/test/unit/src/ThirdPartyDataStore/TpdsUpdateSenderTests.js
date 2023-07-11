@@ -26,6 +26,10 @@ describe('TpdsUpdateSender', function () {
       _id: '12390i',
     }
     this.memberIds = [userId, collaberatorRef, readOnlyRef]
+    this.enqueueUrl = new URL(
+      'http://tpdsworker/enqueue/web_to_tpds_http_requests'
+    )
+
     this.CollaboratorsGetter = {
       promises: {
         getInvitedMemberIds: sinon.stub().resolves(this.memberIds),
@@ -36,7 +40,9 @@ describe('TpdsUpdateSender', function () {
       ok: true,
       json: sinon.stub(),
     }
-    this.fetch = sinon.stub().resolves(this.response)
+    this.FetchUtils = {
+      fetchNothing: sinon.stub().resolves(),
+    }
     this.settings = {
       siteUrl,
       apis: {
@@ -69,7 +75,7 @@ describe('TpdsUpdateSender', function () {
       requires: {
         mongodb: { ObjectId },
         '@overleaf/settings': this.settings,
-        'node-fetch': this.fetch,
+        '@overleaf/fetch-utils': this.FetchUtils,
         '../Collaborators/CollaboratorsGetter': this.CollaboratorsGetter,
         '../User/UserGetter.js': this.UserGetter,
         '@overleaf/metrics': {
@@ -82,7 +88,7 @@ describe('TpdsUpdateSender', function () {
   describe('enqueue', function () {
     it('should not call request if there is no tpdsworker url', async function () {
       await this.TpdsUpdateSender.promises.enqueue(null, null, null)
-      this.fetch.should.not.have.been.called
+      this.FetchUtils.fetchNothing.should.not.have.been.called
     })
 
     it('should post the message to the tpdsworker', async function () {
@@ -91,15 +97,13 @@ describe('TpdsUpdateSender', function () {
       const method0 = 'somemethod0'
       const job0 = 'do something'
       await this.TpdsUpdateSender.promises.enqueue(group0, method0, job0)
-      this.fetch.should.have.been.calledWith(
-        new URL('http://tpdsworker/enqueue/web_to_tpds_http_requests'),
-        sinon.match({ method: 'POST' })
+      this.FetchUtils.fetchNothing.should.have.been.calledWithMatch(
+        this.enqueueUrl,
+        {
+          method: 'POST',
+          json: { group: group0, job: job0, method: method0 },
+        }
       )
-      const opts = this.fetch.firstCall.args[1]
-      const body = JSON.parse(opts.body)
-      body.group.should.equal(group0)
-      body.job.should.equal(job0)
-      body.method.should.equal(method0)
     })
   })
 
@@ -119,39 +123,56 @@ describe('TpdsUpdateSender', function () {
         projectName,
       })
 
-      const {
-        group: group0,
-        job: job0,
-        method: method0,
-      } = JSON.parse(this.fetch.firstCall.args[1].body)
-      group0.should.equal(userId.toString())
-      method0.should.equal('pipeStreamFrom')
-      job0.method.should.equal('post')
-      job0.streamOrigin.should.equal(
-        `${filestoreUrl}/project/${projectId}/file/${fileId}`
+      expect(this.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
+        this.enqueueUrl,
+        {
+          json: {
+            group: userId,
+            method: 'pipeStreamFrom',
+            job: {
+              method: 'post',
+              streamOrigin: `${filestoreUrl}/project/${projectId}/file/${fileId}`,
+              uri: `${thirdPartyDataStoreApiUrl}/user/${userId}/entity/${encodeURIComponent(
+                projectName
+              )}${encodeURIComponent(path)}`,
+              headers: {
+                sl_all_user_ids: JSON.stringify([userId]),
+                sl_project_owner_user_id: userId,
+              },
+            },
+          },
+        }
       )
-      const expectedUrl = `${thirdPartyDataStoreApiUrl}/user/${userId}/entity/${encodeURIComponent(
-        projectName
-      )}${encodeURIComponent(path)}`
-      job0.uri.should.equal(expectedUrl)
-      job0.headers.sl_all_user_ids.should.equal(JSON.stringify([userId]))
-      job0.headers.sl_project_owner_user_id.should.equal(userId.toString())
 
-      const { group: group1, job: job1 } = JSON.parse(
-        this.fetch.secondCall.args[1].body
+      expect(this.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
+        this.enqueueUrl,
+        {
+          json: {
+            group: collaberatorRef,
+            job: {
+              headers: {
+                sl_all_user_ids: JSON.stringify([collaberatorRef]),
+                sl_project_owner_user_id: userId,
+              },
+            },
+          },
+        }
       )
-      group1.should.equal(collaberatorRef.toString())
-      job1.headers.sl_all_user_ids.should.equal(
-        JSON.stringify([collaberatorRef])
-      )
-      job1.headers.sl_project_owner_user_id.should.equal(userId.toString())
 
-      const { group: group2, job: job2 } = JSON.parse(
-        this.fetch.thirdCall.args[1].body
+      expect(this.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
+        this.enqueueUrl,
+        {
+          json: {
+            group: readOnlyRef,
+            job: {
+              headers: {
+                sl_all_user_ids: JSON.stringify([readOnlyRef]),
+                sl_project_owner_user_id: userId,
+              },
+            },
+          },
+        }
       )
-      group2.should.equal(readOnlyRef.toString())
-      job2.headers.sl_all_user_ids.should.equal(JSON.stringify([readOnlyRef]))
-      job2.headers.sl_project_owner_user_id.should.equal(userId.toString())
     })
 
     it('post doc with stream origin of docstore', async function () {
@@ -167,37 +188,53 @@ describe('TpdsUpdateSender', function () {
         projectName,
       })
 
-      const {
-        group: group0,
-        job: job0,
-        method: method0,
-      } = JSON.parse(this.fetch.firstCall.args[1].body)
-
-      group0.should.equal(userId.toString())
-      method0.should.equal('pipeStreamFrom')
-      job0.method.should.equal('post')
-      const expectedUrl = `${thirdPartyDataStoreApiUrl}/user/${userId.toString()}/entity/${encodeURIComponent(
-        projectName
-      )}${encodeURIComponent(path)}`
-      job0.uri.should.equal(expectedUrl)
-      job0.streamOrigin.should.equal(
-        `${this.docstoreUrl}/project/${projectId}/doc/${docId}/raw`
-      )
-      job0.headers.sl_all_user_ids.should.eql(JSON.stringify([userId]))
-
-      const { group: group1, job: job1 } = JSON.parse(
-        this.fetch.secondCall.args[1].body
-      )
-      group1.should.equal(collaberatorRef.toString())
-      job1.headers.sl_all_user_ids.should.equal(
-        JSON.stringify([collaberatorRef])
+      expect(this.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
+        this.enqueueUrl,
+        {
+          json: {
+            group: userId,
+            method: 'pipeStreamFrom',
+            job: {
+              method: 'post',
+              uri: `${thirdPartyDataStoreApiUrl}/user/${userId}/entity/${encodeURIComponent(
+                projectName
+              )}${encodeURIComponent(path)}`,
+              streamOrigin: `${this.docstoreUrl}/project/${projectId}/doc/${docId}/raw`,
+              headers: {
+                sl_all_user_ids: JSON.stringify([userId]),
+              },
+            },
+          },
+        }
       )
 
-      const { group: group2, job: job2 } = JSON.parse(
-        this.fetch.thirdCall.args[1].body
+      expect(this.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
+        this.enqueueUrl,
+        {
+          json: {
+            group: collaberatorRef,
+            job: {
+              headers: {
+                sl_all_user_ids: JSON.stringify([collaberatorRef]),
+              },
+            },
+          },
+        }
       )
-      group2.should.equal(readOnlyRef.toString())
-      job2.headers.sl_all_user_ids.should.equal(JSON.stringify([readOnlyRef]))
+
+      expect(this.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
+        this.enqueueUrl,
+        {
+          json: {
+            group: readOnlyRef,
+            job: {
+              headers: {
+                sl_all_user_ids: JSON.stringify([readOnlyRef]),
+              },
+            },
+          },
+        }
+      )
     })
 
     it('deleting entity', async function () {
@@ -211,35 +248,53 @@ describe('TpdsUpdateSender', function () {
         subtreeEntityIds,
       })
 
-      const {
-        group: group0,
-        job: job0,
-        method: method0,
-      } = JSON.parse(this.fetch.firstCall.args[1].body)
-
-      group0.should.equal(userId.toString())
-      method0.should.equal('standardHttpRequest')
-      job0.method.should.equal('delete')
-      const expectedUrl = `${thirdPartyDataStoreApiUrl}/user/${userId}/entity/${encodeURIComponent(
-        projectName
-      )}${encodeURIComponent(path)}`
-      job0.headers.sl_all_user_ids.should.eql(JSON.stringify([userId]))
-      job0.uri.should.equal(expectedUrl)
-      expect(job0.json).to.deep.equal({ subtreeEntityIds })
-
-      const { group: group1, job: job1 } = JSON.parse(
-        this.fetch.secondCall.args[1].body
-      )
-      group1.should.equal(collaberatorRef.toString())
-      job1.headers.sl_all_user_ids.should.equal(
-        JSON.stringify([collaberatorRef])
+      expect(this.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
+        this.enqueueUrl,
+        {
+          json: {
+            group: userId,
+            method: 'standardHttpRequest',
+            job: {
+              method: 'delete',
+              uri: `${thirdPartyDataStoreApiUrl}/user/${userId}/entity/${encodeURIComponent(
+                projectName
+              )}${encodeURIComponent(path)}`,
+              headers: {
+                sl_all_user_ids: JSON.stringify([userId]),
+              },
+              json: { subtreeEntityIds },
+            },
+          },
+        }
       )
 
-      const { group: group2, job: job2 } = JSON.parse(
-        this.fetch.thirdCall.args[1].body
+      expect(this.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
+        this.enqueueUrl,
+        {
+          json: {
+            group: collaberatorRef,
+            job: {
+              headers: {
+                sl_all_user_ids: JSON.stringify([collaberatorRef]),
+              },
+            },
+          },
+        }
       )
-      group2.should.equal(readOnlyRef.toString())
-      job2.headers.sl_all_user_ids.should.equal(JSON.stringify([readOnlyRef]))
+
+      expect(this.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
+        this.enqueueUrl,
+        {
+          json: {
+            group: readOnlyRef,
+            job: {
+              headers: {
+                sl_all_user_ids: JSON.stringify([readOnlyRef]),
+              },
+            },
+          },
+        }
+      )
     })
 
     it('moving entity', async function () {
@@ -253,35 +308,54 @@ describe('TpdsUpdateSender', function () {
         projectName,
       })
 
-      const {
-        group: group0,
-        job: job0,
-        method: method0,
-      } = JSON.parse(this.fetch.firstCall.args[1].body)
-
-      group0.should.equal(userId.toString())
-      method0.should.equal('standardHttpRequest')
-      job0.method.should.equal('put')
-      job0.uri.should.equal(
-        `${thirdPartyDataStoreApiUrl}/user/${userId}/entity`
-      )
-      job0.json.startPath.should.equal(`/${projectName}/${startPath}`)
-      job0.json.endPath.should.equal(`/${projectName}/${endPath}`)
-      job0.headers.sl_all_user_ids.should.eql(JSON.stringify([userId]))
-
-      const { group: group1, job: job1 } = JSON.parse(
-        this.fetch.secondCall.args[1].body
-      )
-      group1.should.equal(collaberatorRef.toString())
-      job1.headers.sl_all_user_ids.should.equal(
-        JSON.stringify([collaberatorRef])
+      expect(this.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
+        this.enqueueUrl,
+        {
+          json: {
+            group: userId,
+            method: 'standardHttpRequest',
+            job: {
+              method: 'put',
+              uri: `${thirdPartyDataStoreApiUrl}/user/${userId}/entity`,
+              json: {
+                startPath: `/${projectName}/${startPath}`,
+                endPath: `/${projectName}/${endPath}`,
+              },
+              headers: {
+                sl_all_user_ids: JSON.stringify([userId]),
+              },
+            },
+          },
+        }
       )
 
-      const { group: group2, job: job2 } = JSON.parse(
-        this.fetch.thirdCall.args[1].body
+      expect(this.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
+        this.enqueueUrl,
+        {
+          json: {
+            group: collaberatorRef,
+            job: {
+              headers: {
+                sl_all_user_ids: JSON.stringify([collaberatorRef]),
+              },
+            },
+          },
+        }
       )
-      group2.should.equal(readOnlyRef.toString())
-      job2.headers.sl_all_user_ids.should.equal(JSON.stringify([readOnlyRef]))
+
+      expect(this.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
+        this.enqueueUrl,
+        {
+          json: {
+            group: readOnlyRef,
+            job: {
+              headers: {
+                sl_all_user_ids: JSON.stringify([readOnlyRef]),
+              },
+            },
+          },
+        }
+      )
     })
 
     it('should be able to rename a project using the move entity func', async function () {
@@ -294,63 +368,87 @@ describe('TpdsUpdateSender', function () {
         newProjectName,
       })
 
-      const {
-        group: group0,
-        job: job0,
-        method: method0,
-      } = JSON.parse(this.fetch.firstCall.args[1].body)
-
-      group0.should.equal(userId.toString())
-      method0.should.equal('standardHttpRequest')
-      job0.method.should.equal('put')
-      job0.uri.should.equal(
-        `${thirdPartyDataStoreApiUrl}/user/${userId}/entity`
-      )
-      job0.json.startPath.should.equal(oldProjectName)
-      job0.json.endPath.should.equal(newProjectName)
-      job0.headers.sl_all_user_ids.should.eql(JSON.stringify([userId]))
-
-      const { group: group1, job: job1 } = JSON.parse(
-        this.fetch.secondCall.args[1].body
-      )
-      group1.should.equal(collaberatorRef.toString())
-      job1.headers.sl_all_user_ids.should.equal(
-        JSON.stringify([collaberatorRef])
+      expect(this.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
+        this.enqueueUrl,
+        {
+          json: {
+            group: userId,
+            method: 'standardHttpRequest',
+            job: {
+              method: 'put',
+              uri: `${thirdPartyDataStoreApiUrl}/user/${userId}/entity`,
+              json: {
+                startPath: oldProjectName,
+                endPath: newProjectName,
+              },
+              headers: {
+                sl_all_user_ids: JSON.stringify([userId]),
+              },
+            },
+          },
+        }
       )
 
-      const { group: group2, job: job2 } = JSON.parse(
-        this.fetch.thirdCall.args[1].body
+      expect(this.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
+        this.enqueueUrl,
+        {
+          json: {
+            group: collaberatorRef,
+            job: {
+              headers: {
+                sl_all_user_ids: JSON.stringify([collaberatorRef]),
+              },
+            },
+          },
+        }
       )
-      group2.should.equal(readOnlyRef.toString())
-      job2.headers.sl_all_user_ids.should.equal(JSON.stringify([readOnlyRef]))
+
+      expect(this.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
+        this.enqueueUrl,
+        {
+          json: {
+            group: readOnlyRef,
+            job: {
+              headers: {
+                sl_all_user_ids: JSON.stringify([readOnlyRef]),
+              },
+            },
+          },
+        }
+      )
     })
 
     it('pollDropboxForUser', async function () {
-      await this.TpdsUpdateSender.promises.pollDropboxForUser(userId.toString())
+      await this.TpdsUpdateSender.promises.pollDropboxForUser(userId)
 
-      const {
-        group: group0,
-        job: job0,
-        method: method0,
-      } = JSON.parse(this.fetch.firstCall.args[1].body)
-
-      group0.should.equal(userId.toString())
-      method0.should.equal('standardHttpRequest')
-
-      job0.method.should.equal('post')
-      job0.uri.should.equal(`${thirdPartyDataStoreApiUrl}/user/poll`)
-      job0.json.user_ids[0].should.equal(userId.toString())
+      expect(this.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
+        this.enqueueUrl,
+        {
+          json: {
+            group: userId,
+            method: 'standardHttpRequest',
+            job: {
+              method: 'post',
+              uri: `${thirdPartyDataStoreApiUrl}/user/poll`,
+              json: {
+                user_ids: [userId],
+              },
+            },
+          },
+        }
+      )
     })
   })
+
   describe('deleteProject', function () {
     it('should not call request if there is no project archiver url', async function () {
       await this.TpdsUpdateSender.promises.deleteProject({ projectId })
-      this.fetch.should.not.have.been.called
+      this.FetchUtils.fetchNothing.should.not.have.been.called
     })
     it('should make a delete request to project archiver', async function () {
       this.settings.apis.project_archiver = { url: projectArchiverUrl }
       await this.TpdsUpdateSender.promises.deleteProject({ projectId })
-      this.fetch.should.have.been.calledWith(
+      this.FetchUtils.fetchNothing.should.have.been.calledWith(
         `${projectArchiverUrl}/project/${projectId}`,
         { method: 'DELETE' }
       )
@@ -380,6 +478,6 @@ describe('TpdsUpdateSender', function () {
       path,
       projectName,
     })
-    this.fetch.should.not.have.been.called
+    this.FetchUtils.fetchNothing.should.not.have.been.called
   })
 })

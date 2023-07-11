@@ -3,7 +3,7 @@ const { callbackify, promisify } = require('util')
 const { ObjectId } = require('mongodb')
 const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
-const fetch = require('node-fetch')
+const { fetchJson } = require('@overleaf/fetch-utils')
 const {
   getInstitutionAffiliations,
   getConfirmedInstitutionAffiliations,
@@ -343,10 +343,9 @@ const notifyUser = (
 async function fetchV1Data(institution) {
   const url = `${Settings.apis.v1.url}/universities/list/${institution.v1Id}`
   try {
-    const response = await fetch(url, {
+    const data = await fetchJson(url, {
       signal: AbortSignal.timeout(Settings.apis.v1.timeout),
     })
-    const data = await response.json()
 
     institution.name = data?.name
     institution.countryCode = data?.country_code

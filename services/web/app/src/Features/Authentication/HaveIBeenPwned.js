@@ -6,7 +6,7 @@
  */
 
 const { callbackify } = require('util')
-const fetch = require('node-fetch')
+const { fetchString } = require('@overleaf/fetch-utils')
 const crypto = require('crypto')
 const Settings = require('@overleaf/settings')
 const Metrics = require('@overleaf/metrics')
@@ -38,7 +38,7 @@ async function getScoresForPrefix(prefix) {
     throw INVALID_PREFIX
   }
   try {
-    const response = await fetch(
+    return await fetchString(
       `${Settings.apis.haveIBeenPwned.url}/range/${prefix}`,
       {
         headers: {
@@ -49,11 +49,6 @@ async function getScoresForPrefix(prefix) {
         signal: AbortSignal.timeout(Settings.apis.haveIBeenPwned.timeout),
       }
     )
-    if (!response.ok) {
-      throw API_ERROR
-    }
-    const body = await response.text()
-    return body
   } catch (_errorWithPotentialReferenceToPrefix) {
     // NOTE: Do not leak request details by passing the original error up.
     throw API_ERROR

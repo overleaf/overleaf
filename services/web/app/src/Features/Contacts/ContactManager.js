@@ -1,6 +1,6 @@
 const { callbackify } = require('util')
 const OError = require('@overleaf/o-error')
-const fetch = require('node-fetch')
+const { fetchJson } = require('@overleaf/fetch-utils')
 const settings = require('@overleaf/settings')
 
 async function getContactIds(userId, options) {
@@ -12,18 +12,11 @@ async function getContactIds(userId, options) {
     url.searchParams.set(key, val)
   }
 
-  const response = await fetch(url.toString(), {
-    method: 'GET',
-    headers: { Accept: 'application/json' },
-  })
-
-  const body = await response.json()
-
-  if (!response.ok) {
-    throw new OError(
-      `contacts api responded with non-success code: ${response.statusCode}`,
-      { user_id: userId }
-    )
+  let body
+  try {
+    body = await fetchJson(url)
+  } catch (err) {
+    throw OError.tag(err, 'failed request to contacts API', { userId })
   }
 
   return body?.contact_ids || []
@@ -31,24 +24,18 @@ async function getContactIds(userId, options) {
 
 async function addContact(userId, contactId) {
   const url = new URL(`${settings.apis.contacts.url}/user/${userId}/contacts`)
-  const response = await fetch(url.toString(), {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-    },
-    body: JSON.stringify({ contact_id: contactId }),
-  })
 
-  const body = await response.json()
-  if (!response.ok) {
-    throw new OError(
-      `contacts api responded with non-success code: ${response.statusCode}`,
-      {
-        user_id: userId,
-        contact_id: contactId,
-      }
-    )
+  let body
+  try {
+    body = await fetchJson(url, {
+      method: 'POST',
+      json: { contact_id: contactId },
+    })
+  } catch (err) {
+    throw OError.tag(err, 'failed request to contacts API', {
+      userId,
+      contactId,
+    })
   }
 
   return body?.contact_ids || []

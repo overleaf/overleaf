@@ -100,6 +100,7 @@
     "@opentelemetry/sdk-trace-web": "^1.2.0",
     "@opentelemetry/semantic-conventions": "^1.2.0",
     "@overleaf/access-token-encryptor": "*",
+    "@overleaf/fetch-utils": "*",
     "@overleaf/logger": "*",
     "@overleaf/metrics": "*",
     "@overleaf/o-error": "*",

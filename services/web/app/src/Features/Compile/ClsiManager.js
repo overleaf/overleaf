@@ -1,6 +1,11 @@
 const { callbackify } = require('util')
 const { callbackifyMultiResult } = require('../../util/promises')
-const fetch = require('node-fetch')
+const {
+  fetchString,
+  fetchStringWithResponse,
+  fetchStream,
+  RequestFailedError,
+} = require('@overleaf/fetch-utils')
 const Settings = require('@overleaf/settings')
 const ProjectGetter = require('../Project/ProjectGetter')
 const ProjectEntityHandler = require('../Project/ProjectEntityHandler')
@@ -206,9 +211,9 @@ async function _makeRequestWithClsiServerId(
     url.searchParams.set('compileBackendClass', compileBackendClass)
     url.searchParams.set('clsiserverid', clsiserverid)
 
-    let response
+    let body
     try {
-      response = await fetch(url, opts)
+      body = await fetchString(url, opts)
     } catch (err) {
       throw OError.tag(err, 'error making request to CLSI', {
         userId,
@@ -216,13 +221,14 @@ async function _makeRequestWithClsiServerId(
       })
     }
 
-    let body
+    let json
     try {
-      body = await response.json()
+      json = JSON.parse(body)
     } catch (err) {
       // some responses are empty. Ignore JSON parsing errors.
     }
-    return { response, body }
+
+    return { body: json }
   } else {
     return await _makeRequest(
       projectId,
@@ -265,9 +271,9 @@ async function _makeRequest(
 
   const timer = new Metrics.Timer('compile.currentBackend')
 
-  let currentBackendResponse
+  let response, body
   try {
-    currentBackendResponse = await fetch(url, opts)
+    ;({ body, response } = await fetchStringWithResponse(url, opts))
   } catch (err) {
     throw OError.tag(err, 'error making request to CLSI', {
       projectId,
@@ -275,20 +281,19 @@ async function _makeRequest(
     })
   }
 
-  Metrics.inc(
-    `compile.currentBackend.response.${currentBackendResponse.status}`
-  )
+  Metrics.inc(`compile.currentBackend.response.${response.status}`)
 
-  let currentBackendBody
+  let json
   try {
-    currentBackendBody = await currentBackendResponse.json()
+    json = JSON.parse(body)
   } catch (err) {
     // some responses are empty. Ignore JSON parsing errors
   }
+
   timer.done()
   let newClsiServerId
   if (CLSI_COOKIES_ENABLED) {
-    newClsiServerId = _getClsiServerIdFromResponse(currentBackendResponse)
+    newClsiServerId = _getClsiServerIdFromResponse(response)
     await ClsiCookieManager.promises.setServerId(
       projectId,
       userId,
@@ -317,7 +322,7 @@ async function _makeRequest(
       const { response: newBackendResponse } = result
       Metrics.inc(`compile.newBackend.response.${newBackendResponse.status}`)
       const newBackendCompileTime = new Date() - newBackendStartTime
-      const currentStatusCode = currentBackendResponse.status
+      const currentStatusCode = response.status
       const newStatusCode = newBackendResponse.status
       const statusCodeSame = newStatusCode === currentStatusCode
       const timeDifference = newBackendCompileTime - currentCompileTime
@@ -337,8 +342,7 @@ async function _makeRequest(
     })
 
   return {
-    response: currentBackendResponse,
-    body: currentBackendBody,
+    body: json,
     clsiServerId: newClsiServerId || clsiServerId,
   }
 }
@@ -380,9 +384,9 @@ async function _makeNewBackendRequest(
 
   const timer = new Metrics.Timer('compile.newBackend')
 
-  let response
+  let response, body
   try {
-    response = await fetch(url, opts)
+    ;({ body, response } = await fetchStringWithResponse(url, opts))
   } catch (err) {
     throw OError.tag(err, 'error making request to new CLSI', {
       userId,
@@ -390,9 +394,9 @@ async function _makeNewBackendRequest(
     })
   }
 
-  let body
+  let json
   try {
-    body = await response.json()
+    json = JSON.parse(body)
   } catch (err) {
     // Some responses are empty. Ignore JSON parsing errors
   }
@@ -408,7 +412,7 @@ async function _makeNewBackendRequest(
       clsiServerId
     )
   }
-  return { response, body }
+  return { response, body: json }
 }
 
 function _getCompilerUrl(
@@ -445,50 +449,54 @@ async function _postToClsi(
     'compile'
   )
   const opts = {
-    body: JSON.stringify(req),
+    json: req,
     method: 'POST',
   }
-  let response, body, clsiServerId
   try {
-    ;({ response, body, clsiServerId } = await _makeRequest(
+    const { body, clsiServerId } = await _makeRequest(
       projectId,
       userId,
       compileGroup,
       compileBackendClass,
       url,
       opts
-    ))
-  } catch (err) {
-    throw new OError(
-      'failed to make request to CLSI',
-      {
-        projectId,
-        userId,
-        compileOptions: req.compile.options,
-        rootResourcePath: req.compile.rootResourcePath,
-      },
-      err
     )
-  }
-  if (response.ok) {
     return { response: body, clsiServerId }
-  } else if (response.status === 413) {
-    return { response: { compile: { status: 'project-too-large' } } }
-  } else if (response.status === 409) {
-    return { response: { compile: { status: 'conflict' } } }
-  } else if (response.status === 423) {
-    return { response: { compile: { status: 'compile-in-progress' } } }
-  } else if (response.status === 503) {
-    return { response: { compile: { status: 'unavailable' } } }
-  } else {
-    throw new OError(`CLSI returned non-success code: ${response.status}`, {
-      projectId,
-      userId,
-      compileOptions: req.compile.options,
-      rootResourcePath: req.compile.rootResourcePath,
-      clsiResponse: body,
-      statusCode: response.status,
-    })
+  } catch (err) {
+    if (err instanceof RequestFailedError) {
+      if (err.response.status === 413) {
+        return { response: { compile: { status: 'project-too-large' } } }
+      } else if (err.response.status === 409) {
+        return { response: { compile: { status: 'conflict' } } }
+      } else if (err.response.status === 423) {
+        return { response: { compile: { status: 'compile-in-progress' } } }
+      } else if (err.response.status === 503) {
+        return { response: { compile: { status: 'unavailable' } } }
+      } else {
+        throw new OError(
+          `CLSI returned non-success code: ${err.response.status}`,
+          {
+            projectId,
+            userId,
+            compileOptions: req.compile.options,
+            rootResourcePath: req.compile.rootResourcePath,
+            clsiResponse: err.body,
+            statusCode: err.response.status,
+          }
+        )
+      }
+    } else {
+      throw new OError(
+        'failed to make request to CLSI',
+        {
+          projectId,
+          userId,
+          compileOptions: req.compile.options,
+          rootResourcePath: req.compile.rootResourcePath,
+        },
+        err
+      )
+    }
   }
 }
 
@@ -593,24 +601,22 @@ async function getOutputFileStream(
   url.searchParams.set('compileBackendClass', compileBackendClass)
   url.searchParams.set('compileGroup', compileGroup)
   url.searchParams.set('clsiserverid', clsiServerId)
-  const response = await fetch(url, {
-    method: 'GET',
-    signal: AbortSignal.timeout(OUTPUT_FILE_TIMEOUT_MS),
-  })
-  if (!response.ok) {
-    // Drain the response body
-    await response.arrayBuffer()
+  try {
+    const stream = await fetchStream(url, {
+      signal: AbortSignal.timeout(OUTPUT_FILE_TIMEOUT_MS),
+    })
+    return stream
+  } catch (err) {
     throw new Errors.OutputFileFetchFailedError(
       'failed to fetch output file from CLSI',
       {
         projectId,
         userId,
         url,
-        status: response.status,
+        status: err.response?.status,
       }
     )
   }
-  return response.body
 }
 
 function _buildRequestFromDocupdater(

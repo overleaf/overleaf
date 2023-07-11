@@ -1,13 +1,3 @@
-/* eslint-disable
-    max-len,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const { Project } = require('../../models/Project')
 const OError = require('@overleaf/o-error')
 const ProjectDetailsHandler = require('../Project/ProjectDetailsHandler')
@@ -19,8 +9,8 @@ const async = require('async')
 const fs = require('fs')
 const util = require('util')
 const logger = require('@overleaf/logger')
+const { fetchJson, RequestFailedError } = require('@overleaf/fetch-utils')
 const request = require('request')
-const fetch = require('node-fetch')
 const settings = require('@overleaf/settings')
 const crypto = require('crypto')
 const Errors = require('../Errors/Errors')
@@ -52,7 +42,7 @@ const TemplatesManager = {
       return callback(err)
     })
     FileWriter.ensureDumpFolderExists(function (err) {
-      if (err != null) {
+      if (err) {
         return callback(err)
       }
 
@@ -77,7 +67,7 @@ const TemplatesManager = {
           dumpPath,
           attributes,
           function (err, project) {
-            if (err != null) {
+            if (err) {
               OError.tag(err, 'problem building project from zip', {
                 zipReq,
               })
@@ -96,11 +86,11 @@ const TemplatesManager = {
                   ),
               ],
               function (err) {
-                if (err != null) {
+                if (err) {
                   return callback(err)
                 }
                 fs.unlink(dumpPath, function (err) {
-                  if (err != null) {
+                  if (err) {
                     return logger.err({ err }, 'error unlinking template zip')
                   }
                 })
@@ -113,7 +103,7 @@ const TemplatesManager = {
                   update,
                   {},
                   function (err) {
-                    if (err != null) {
+                    if (err) {
                       return callback(err)
                     }
                     callback(null, project)
@@ -166,32 +156,22 @@ const TemplatesManager = {
         `/api/v2/templates/${templateId}`,
         settings.apis.v1.url
       )
-      const response = await fetch(url, {
-        headers: {
-          Authorization:
-            'Basic ' +
-            Buffer.from(
-              `${settings.apis.v1.user}:${settings.apis.v1.pass}`
-            ).toString('base64'),
-          Accept: 'application/json',
-        },
-        signal: AbortSignal.timeout(settings.apis.v1.timeout),
-      })
 
-      if (response.status === 404) {
-        throw new Errors.NotFoundError()
+      try {
+        return await fetchJson(url, {
+          basicAuth: {
+            user: settings.apis.v1.user,
+            password: settings.apis.v1.pass,
+          },
+          signal: AbortSignal.timeout(settings.apis.v1.timeout),
+        })
+      } catch (err) {
+        if (err instanceof RequestFailedError && err.response.status === 404) {
+          throw new Errors.NotFoundError()
+        } else {
+          throw err
+        }
       }
-
-      if (response.status !== 200) {
-        logger.warn(
-          { templateId },
-          "[TemplateMetrics] Couldn't fetch template data from v1"
-        )
-        throw new Error("Couldn't fetch template data from v1")
-      }
-
-      const body = await response.json()
-      return body
     },
   },
 }

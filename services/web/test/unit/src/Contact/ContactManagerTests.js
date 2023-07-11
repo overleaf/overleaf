@@ -8,11 +8,12 @@ describe('ContactManager', function () {
     this.user_id = 'user-id-123'
     this.contact_id = 'contact-id-123'
     this.contact_ids = ['mock', 'contact_ids']
-    this.qs = new URLSearchParams({ limit: 42 })
-    this.fetch = sinon.stub()
+    this.FetchUtils = {
+      fetchJson: sinon.stub(),
+    }
     this.ContactManager = SandboxedModule.require(modulePath, {
       requires: {
-        'node-fetch': this.fetch,
+        '@overleaf/fetch-utils': this.FetchUtils,
         '@overleaf/settings': (this.settings = {
           apis: {
             contacts: {
@@ -27,11 +28,7 @@ describe('ContactManager', function () {
   describe('getContacts', function () {
     describe('with a successful response code', function () {
       beforeEach(async function () {
-        this.response = {
-          ok: true,
-          json: sinon.stub().resolves({ contact_ids: this.contact_ids }),
-        }
-        this.fetch.resolves(this.response)
+        this.FetchUtils.fetchJson.resolves({ contact_ids: this.contact_ids })
 
         this.result = await this.ContactManager.promises.getContactIds(
           this.user_id,
@@ -40,12 +37,12 @@ describe('ContactManager', function () {
       })
 
       it('should get the contacts from the contacts api', function () {
-        this.fetch.should.have.been.calledWithMatch(
-          `${this.settings.apis.contacts.url}/user/${this.user_id}/contacts?${this.qs}`,
-          sinon.match({
-            method: 'GET',
-            headers: { Accept: 'application/json' },
-          })
+        this.FetchUtils.fetchJson.should.have.been.calledWithMatch(
+          sinon.match(
+            url =>
+              url.toString() ===
+              `${this.settings.apis.contacts.url}/user/${this.user_id}/contacts?limit=42`
+          )
         )
       })
 
@@ -54,14 +51,14 @@ describe('ContactManager', function () {
       })
     })
 
-    describe('with a failed response code', function () {
+    describe('when an error occurs', function () {
       beforeEach(async function () {
         this.response = {
           ok: false,
           statusCode: 500,
           json: sinon.stub().resolves({ contact_ids: this.contact_ids }),
         }
-        this.fetch.resolves(this.response)
+        this.FetchUtils.fetchJson.rejects(new Error('request error'))
       })
 
       it('should reject the promise', async function () {
@@ -69,9 +66,7 @@ describe('ContactManager', function () {
           this.ContactManager.promises.getContactIds(this.user_id, {
             limit: 42,
           })
-        ).to.be.rejectedWith(
-          'contacts api responded with non-success code: 500'
-        )
+        ).to.be.rejected
       })
     })
   })
@@ -79,11 +74,7 @@ describe('ContactManager', function () {
   describe('addContact', function () {
     describe('with a successful response code', function () {
       beforeEach(async function () {
-        this.response = {
-          ok: true,
-          json: sinon.stub().resolves({ contact_ids: this.contact_ids }),
-        }
-        this.fetch.resolves(this.response)
+        this.FetchUtils.fetchJson.resolves({ contact_ids: this.contact_ids })
 
         this.result = await this.ContactManager.promises.addContact(
           this.user_id,
@@ -92,17 +83,15 @@ describe('ContactManager', function () {
       })
 
       it('should add the contacts for the user in the contacts api', function () {
-        this.fetch.should.have.been.calledWithMatch(
-          `${this.settings.apis.contacts.url}/user/${this.user_id}/contacts`,
+        this.FetchUtils.fetchJson.should.have.been.calledWithMatch(
+          sinon.match(
+            url =>
+              url.toString() ===
+              `${this.settings.apis.contacts.url}/user/${this.user_id}/contacts`
+          ),
           sinon.match({
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Accept: 'application/json',
-            },
-            body: JSON.stringify({
-              contact_id: this.contact_id,
-            }),
+            json: { contact_id: this.contact_id },
           })
         )
       })
