@@ -166,6 +166,7 @@ export const LaTeXLanguage = LRLanguage.define({
         MathDelimiter: t.literal,
         DoubleDollar: t.keyword,
         Tilde: t.keyword,
+        Ampersand: t.keyword,
         Comment: t.comment,
         'UsePackage/OptionalArgument/ShortOptionalArg/Normal': t.attributeValue,
         'UsePackage/ShortTextArgument/ShortArg/Normal': t.tagName,
