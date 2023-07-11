@@ -46,6 +46,7 @@ const Toolbar = memo(function Toolbar() {
   const overflowedItemsRef = useRef<Set<string>>(new Set())
 
   const languageName = state.facet(language)?.name
+  const visual = isVisual(view)
 
   const {
     open: overflowOpen,
@@ -100,7 +101,7 @@ const Toolbar = memo(function Toolbar() {
   return (
     <div className="ol-cm-toolbar toolbar-editor" ref={resizeRef}>
       {showSourceToolbar && <EditorSwitch />}
-      <ToolbarItems state={state} languageName={languageName} />
+      <ToolbarItems state={state} languageName={languageName} visual={visual} />
       <div
         className="ol-cm-toolbar-button-group ol-cm-toolbar-stretch"
         ref={overflowBeforeRef}
@@ -116,6 +117,7 @@ const Toolbar = memo(function Toolbar() {
             state={state}
             overflowed={overflowedItemsRef.current}
             languageName={languageName}
+            visual={visual}
           />
         </ToolbarOverflow>
         <div className="formatting-buttons-wrapper" />
@@ -128,7 +130,7 @@ const Toolbar = memo(function Toolbar() {
           active={searchPanelOpen(state)}
           icon="search"
         />
-        {languageName === 'latex' && !isVisual(view) && (
+        {languageName === 'latex' && !visual && (
           <SplitTestBadge
             splitTestName="source-editor-toolbar"
             displayOnVariants={['enabled']}

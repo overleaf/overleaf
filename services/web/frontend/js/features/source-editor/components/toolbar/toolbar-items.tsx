@@ -24,7 +24,8 @@ export const ToolbarItems: FC<{
   state: EditorState
   overflowed?: Set<string>
   languageName?: string
-}> = memo(function ToolbarItems({ state, overflowed, languageName }) {
+  visual: boolean
+}> = memo(function ToolbarItems({ state, overflowed, languageName, visual }) {
   const { t } = useTranslation()
   const { toggleSymbolPalette, showSymbolPalette } = useEditorContext()
   const isActive = withinFormattingCommand(state)
@@ -192,7 +193,7 @@ export const ToolbarItems: FC<{
                 label={t('toolbar_decrease_indent')}
                 command={commands.indentDecrease}
                 icon="outdent"
-                shortcut={isMac ? '⌘[' : 'Ctrl+['}
+                shortcut={visual ? (isMac ? '⌘[' : 'Ctrl+[') : undefined}
                 disabled={listDepth < 2}
               />
               <ToolbarButton
@@ -200,7 +201,7 @@ export const ToolbarItems: FC<{
                 label={t('toolbar_increase_indent')}
                 command={commands.indentIncrease}
                 icon="indent"
-                shortcut={isMac ? '⌘]' : 'Ctrl+]'}
+                shortcut={visual ? (isMac ? '⌘]' : 'Ctrl+]') : undefined}
                 disabled={listDepth < 1}
               />
             </div>
