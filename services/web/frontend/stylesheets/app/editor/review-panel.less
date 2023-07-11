@@ -90,6 +90,10 @@
   font-size: @rp-base-font-size;
   color: @rp-type-blue;
   z-index: 6;
+
+  .has-source-toolbar & {
+    top: 0;
+  }
 }
 
 .loading-panel {
@@ -1095,6 +1099,10 @@ button when (@is-overleaf-light = true) {
   .rp-size-expanded &,
   .rp-unsupported & {
     display: none;
+  }
+
+  .has-source-toolbar & {
+    top: 32px;
   }
 }
 
