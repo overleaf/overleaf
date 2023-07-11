@@ -11,7 +11,7 @@ import { useCallback, useRef } from 'react'
 import { Overlay, Popover } from 'react-bootstrap'
 import useEventListener from '../../../../shared/hooks/use-event-listener'
 import useDropdown from '../../../../shared/hooks/use-dropdown'
-import { emitCommandEvent } from '../../extensions/toolbar/utils/analytics'
+import { emitToolbarEvent } from '../../extensions/toolbar/utils/analytics'
 import Icon from '../../../../shared/components/icon'
 import { useTranslation } from 'react-i18next'
 
@@ -90,7 +90,7 @@ export const SectionHeadingDropdown = () => {
                 role="menuitem"
                 key={level}
                 onClick={() => {
-                  emitCommandEvent(view, 'section-level-change')
+                  emitToolbarEvent(view, 'section-level-change')
                   setSectionHeadingLevel(view, level)
                   view.focus()
                   setOverflowOpen(false)

@@ -4,7 +4,7 @@ import { useCodeMirrorViewContext } from '../codemirror-editor'
 import { Button } from 'react-bootstrap'
 import classnames from 'classnames'
 import Tooltip from '../../../../shared/components/tooltip'
-import { emitCommandEvent } from '../../extensions/toolbar/utils/analytics'
+import { emitToolbarEvent } from '../../extensions/toolbar/utils/analytics'
 import Icon from '../../../../shared/components/icon'
 
 export const ToolbarButton = memo<{
@@ -38,7 +38,7 @@ export const ToolbarButton = memo<{
 
   const handleClick = useCallback(
     event => {
-      emitCommandEvent(view, id)
+      emitToolbarEvent(view, id)
       if (command) {
         event.preventDefault()
         command(view)

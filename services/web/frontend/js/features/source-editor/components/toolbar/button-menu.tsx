@@ -4,7 +4,7 @@ import Icon from '../../../../shared/components/icon'
 import useDropdown from '../../../../shared/hooks/use-dropdown'
 import Tooltip from '../../../../shared/components/tooltip'
 import { EditorView } from '@codemirror/view'
-import { emitCommandEvent } from '../../extensions/toolbar/utils/analytics'
+import { emitToolbarEvent } from '../../extensions/toolbar/utils/analytics'
 import { useCodeMirrorViewContext } from '../codemirror-editor'
 import MaterialIcon from '../../../../shared/components/material-icon'
 
@@ -38,7 +38,7 @@ export const ToolbarButtonMenu: FC<{
       }}
       onClick={event => {
         if (event.altKey && altCommand && open === false) {
-          emitCommandEvent(view, id)
+          emitToolbarEvent(view, id)
           event.preventDefault()
           altCommand(view)
           view.focus()
