@@ -24,10 +24,10 @@
  * capability will be removed. A policy can remove more than one capability, and
  * more than one policy could apply to a user.
  *
- * Validator: a function that takes a user and returns a boolean indicating
- * whether the user satisfies the policy or not. For example, a validator for
- * the `userCannotHaveSecondaryEmail` policy would check whether the user has
- * more than one email address.
+ * Validator: a function that takes an object with user and subscription properties
+ * and returns a boolean indicating whether the user satisfies the policy or not.
+ * For example, a validator for the `userCannotHaveSecondaryEmail` policy would
+ * check whether the user has more than one email address.
  *
  * Group Policies: a collection of policies with a setting indicating whether
  * they are enforced or not. Used to place restrictions on managed users in a
@@ -265,8 +265,8 @@ function hasPermission(groupPolicy, capability) {
 
 /**
  * Asynchronously checks which policies a user complies with using the
- * applicable validators. Each validator is an async function that takes a user
- * and returns a boolean.
+ * applicable validators. Each validator is an async function that takes a object
+ * with user and subscription properties and returns a boolean.
  *
  * @param {Object} user - The user object to check.
  * @param {Object} groupPolicy - The group policy object to check.
@@ -275,7 +275,7 @@ function hasPermission(groupPolicy, capability) {
  *   enforced policy names, and the values are booleans indicating whether the
  *   user complies with the policy.
  */
-async function getUserValidationStatus(user, groupPolicy) {
+async function getUserValidationStatus(user, groupPolicy, subscription) {
   // find all the enforced policies for the user
   const enforcedPolicyNames = getEnforcedPolicyNames(groupPolicy)
   // for each enforced policy, we have a list of capabilities with expected values
@@ -285,7 +285,10 @@ async function getUserValidationStatus(user, groupPolicy) {
   for (const enforcedPolicyName of enforcedPolicyNames) {
     const validator = getValidatorFromPolicy(enforcedPolicyName)
     if (validator) {
-      userValidationStatus.set(enforcedPolicyName, await validator(user))
+      userValidationStatus.set(
+        enforcedPolicyName,
+        await validator({ user, subscription })
+      )
     }
   }
   return userValidationStatus

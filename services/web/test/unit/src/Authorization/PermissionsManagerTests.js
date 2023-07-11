@@ -277,8 +277,8 @@ describe('PermissionsManager', function () {
         'policy',
         {},
         {
-          validator: async user => {
-            return user.prop === 'allowed'
+          validator: async ({ user, subscription }) => {
+            return user.prop === 'allowed' && subscription.prop === 'managed'
           },
         }
       )
@@ -286,10 +286,12 @@ describe('PermissionsManager', function () {
         policy: true,
       }
       const user = { prop: 'allowed' }
+      const subscription = { prop: 'managed' }
       const result =
         await this.PermissionsManager.promises.getUserValidationStatus(
           user,
-          groupPolicy
+          groupPolicy,
+          subscription
         )
       expect(result).to.deep.equal(new Map([['policy', true]]))
     })
@@ -299,8 +301,8 @@ describe('PermissionsManager', function () {
         'policy',
         {},
         {
-          validator: async user => {
-            return user.prop === 'allowed'
+          validator: async ({ user, subscription }) => {
+            return user.prop === 'allowed' && subscription.prop === 'managed'
           },
         }
       )
@@ -308,10 +310,12 @@ describe('PermissionsManager', function () {
         policy: true,
       }
       const user = { prop: 'not allowed' }
+      const subscription = { prop: 'managed' }
       const result =
         await this.PermissionsManager.promises.getUserValidationStatus(
           user,
-          groupPolicy
+          groupPolicy,
+          subscription
         )
       expect(result).to.deep.equal(new Map([['policy', false]]))
     })
@@ -320,8 +324,8 @@ describe('PermissionsManager', function () {
         'policy1',
         {},
         {
-          validator: async user => {
-            return user.prop === 'allowed'
+          validator: async ({ user, subscription }) => {
+            return user.prop === 'allowed' && subscription.prop === 'managed'
           },
         }
       )
@@ -329,8 +333,8 @@ describe('PermissionsManager', function () {
         'policy2',
         {},
         {
-          validator: async user => {
-            return user.prop === 'other'
+          validator: async ({ user, subscription }) => {
+            return user.prop === 'other' && subscription.prop === 'managed'
           },
         }
       )
@@ -338,8 +342,8 @@ describe('PermissionsManager', function () {
         'policy3',
         {},
         {
-          validator: async user => {
-            return user.prop === 'allowed'
+          validator: async ({ user, subscription }) => {
+            return user.prop === 'allowed' && subscription.prop === 'managed'
           },
         }
       )
@@ -350,10 +354,12 @@ describe('PermissionsManager', function () {
         policy3: false, // this policy is not enforced
       }
       const user = { prop: 'allowed' }
+      const subscription = { prop: 'managed' }
       const result =
         await this.PermissionsManager.promises.getUserValidationStatus(
           user,
-          groupPolicy
+          groupPolicy,
+          subscription
         )
       expect(result).to.deep.equal(
         new Map([

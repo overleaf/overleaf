@@ -2,7 +2,8 @@ const {
   registerCapability,
   registerPolicy,
 } = require('../Authorization/PermissionsManager')
-const SubscriptionLocator = require('./SubscriptionLocator')
+const { getUsersSubscription, getGroupSubscriptionsMemberOf } =
+  require('./SubscriptionLocator').promises
 
 // This file defines the capabilities and policies that are used to
 // determine what managed users can and cannot do.
@@ -48,7 +49,7 @@ registerPolicy(
     'endorse-email': false,
   },
   {
-    validator: async user => {
+    validator: async ({ user }) => {
       // return true if the user does not have any secondary emails
       return user.emails.length === 1
     },
@@ -66,7 +67,7 @@ registerPolicy(
   { 'link-google-sso': false },
   {
     // return true if the user does not have Google SSO linked
-    validator: async user =>
+    validator: async ({ user }) =>
       !user.thirdPartyIdentifiers?.some(
         identifier => identifier.providerId === 'google'
       ),
@@ -79,22 +80,31 @@ registerPolicy(
   { 'link-other-third-party-sso': false },
   {
     // return true if the user does not have any other third party SSO linked
-    validator: async user =>
+    validator: async ({ user }) =>
       !user.thirdPartyIdentifiers?.some(
         identifier => identifier.providerId !== 'google'
       ),
   }
 )
 
-// Register a policy to prevent a user having an active personal subscription.
+// Register a policy to prevent a user having an active subscription or
+// being a member of another group subscription.
 registerPolicy(
   'userCannotHaveSubscription',
   { 'start-subscription': false, 'join-subscription': false },
   {
-    validator: async user => {
-      return !(await SubscriptionLocator.promises.getUserIndividualSubscription(
+    validator: async ({ user, subscription }) => {
+      const usersSubscription = await getUsersSubscription(user)
+      const userHasSubscription = Boolean(usersSubscription)
+      const userMemberOfSubscriptions = await getGroupSubscriptionsMemberOf(
         user
-      ))
+      )
+      // filter out the subscription of the managed group itself
+      // the user will always be a member of this subscription
+      const isMemberOfOtherSubscriptions = userMemberOfSubscriptions.some(
+        sub => sub._id.toString() !== subscription._id.toString()
+      )
+      return !userHasSubscription && !isMemberOfOtherSubscriptions
     },
   }
 )

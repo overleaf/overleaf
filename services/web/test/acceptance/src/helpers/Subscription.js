@@ -74,8 +74,13 @@ class Subscription {
     return PermissionsManager.getUserCapabilities(groupPolicy)
   }
 
-  getUserValidationStatus(user, groupPolicy, callback) {
-    PermissionsManager.getUserValidationStatus(user, groupPolicy, callback)
+  getUserValidationStatus(user, groupPolicy, subscription, callback) {
+    PermissionsManager.getUserValidationStatus(
+      user,
+      groupPolicy,
+      subscription,
+      callback
+    )
   }
 
   enrollManagedUser(user, callback) {
