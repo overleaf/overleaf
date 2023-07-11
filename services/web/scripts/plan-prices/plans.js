@@ -110,9 +110,47 @@ const currencies = {
     symbol: '₹',
     placement: 'before',
   },
+  BRL: {
+    code: 'BRL',
+    locale: 'pt-BR',
+    symbol: 'R$ ',
+    placement: 'before',
+  },
+  MXN: {
+    code: 'MXN',
+    locale: 'es-MX',
+    symbol: '$ ',
+    placement: 'before',
+  },
+  COP: {
+    code: 'COP',
+    locale: 'es-CO',
+    symbol: '$ ',
+    placement: 'before',
+  },
+  CLP: {
+    code: 'CLP',
+    locale: 'es-CL',
+    symbol: '$ ',
+    placement: 'before',
+  },
+  PEN: {
+    code: 'PEN',
+    locale: 'es-PE',
+    symbol: 'S/ ',
+    placement: 'before',
+  },
 }
 
 const buildCurrencyValue = (amount, currency) => {
+  // Test using toLocaleString to format currencies for new LATAM regions
+  if (currency.locale && currency.code) {
+    return amount.toLocaleString(currency.locale, {
+      style: 'currency',
+      currency: currency.code,
+      minimumFractionDigits: 0,
+    })
+  }
   return currency.placement === 'before'
     ? `${currency.symbol}${amount}`
     : `${amount}${currency.symbol}`
@@ -177,17 +215,22 @@ function generateGroupPlans(workSheetJSON) {
 
   const currencies = [
     'AUD',
+    'BRL',
     'CAD',
     'CHF',
+    'CLP',
+    'COP',
     'DKK',
     'EUR',
     'GBP',
     'INR',
+    'MXN',
     'NOK',
     'NZD',
     'SEK',
     'SGD',
     'USD',
+    'PEN',
   ]
   const sizes = ['2', '3', '4', '5', '10', '20', '50']
 

@@ -240,6 +240,101 @@ App.factory('MultiCurrencyPricing', function () {
           annual: '₹9599',
         },
       },
+      BRL: {
+        symbol: 'R$',
+        student: {
+          monthly: 'R$ 23',
+          annual: 'R$ 229',
+        },
+        personal: {
+          monthly: 'R$ 35',
+          annual: 'R$ 329',
+        },
+        collaborator: {
+          monthly: 'R$ 55',
+          annual: 'R$ 499',
+        },
+        professional: {
+          monthly: 'R$ 109',
+          annual: 'R$ 999',
+        },
+      },
+      MXN: {
+        symbol: '$',
+        student: {
+          monthly: '$99',
+          annual: '$999',
+        },
+        personal: {
+          monthly: '$149',
+          annual: '$1,399',
+        },
+        collaborator: {
+          monthly: '$229',
+          annual: '$2,199',
+        },
+        professional: {
+          monthly: '$459',
+          annual: '$4,399',
+        },
+      },
+      COP: {
+        symbol: '$',
+        student: {
+          monthly: '$ 12.900',
+          annual: '$ 129.900',
+        },
+        personal: {
+          monthly: '$ 21.900',
+          annual: '$ 185.900',
+        },
+        collaborator: {
+          monthly: '$ 29.900',
+          annual: '$ 285.900',
+        },
+        professional: {
+          monthly: '$ 59.900',
+          annual: '$ 575.900',
+        },
+      },
+      CLP: {
+        symbol: '$',
+        student: {
+          monthly: '$3.990',
+          annual: '$38.990',
+        },
+        personal: {
+          monthly: '$6.190',
+          annual: '$56.990',
+        },
+        collaborator: {
+          monthly: '$9.190',
+          annual: '$87.990',
+        },
+        professional: {
+          monthly: '$18.990',
+          annual: '$174.990',
+        },
+      },
+      PEN: {
+        symbol: 'S/',
+        student: {
+          monthly: 'S/ 16',
+          annual: 'S/ 159',
+        },
+        personal: {
+          monthly: 'S/ 26',
+          annual: 'S/ 239',
+        },
+        collaborator: {
+          monthly: 'S/ 39',
+          annual: 'S/ 369',
+        },
+        professional: {
+          monthly: 'S/ 76',
+          annual: 'S/ 729',
+        },
+      },
     },
   }
 })
