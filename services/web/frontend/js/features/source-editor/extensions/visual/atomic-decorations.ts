@@ -228,7 +228,12 @@ export const atomicDecorations = (options: Options) => {
       enter(nodeRef) {
         if (nodeRef.type.is('$Environment')) {
           const envName = getUnstarredEnvironmentName(nodeRef.node, state)
-          const hideInEnvironmentTypes = ['figure', 'table']
+          const hideInEnvironmentTypes = [
+            'figure',
+            'table',
+            'verbatim',
+            'lstlisting',
+          ]
           if (envName && hideInEnvironmentTypes.includes(envName)) {
             const beginNode = nodeRef.node.getChild('BeginEnv')
             const endNode = nodeRef.node.getChild('EndEnv')

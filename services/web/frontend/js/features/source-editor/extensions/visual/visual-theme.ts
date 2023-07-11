@@ -254,6 +254,12 @@ export const visualTheme = EditorView.theme({
   '.ol-cm-caption-line .ol-cm-label': {
     marginRight: '1ch',
   },
+  '.ol-cm-environment-verbatim': {
+    fontFamily: 'var(--source-font-family)',
+  },
+  '.ol-cm-environment-lstlisting': {
+    fontFamily: 'var(--source-font-family)',
+  },
   '.ol-cm-tex': {
     textTransform: 'uppercase',
     '& sup': {

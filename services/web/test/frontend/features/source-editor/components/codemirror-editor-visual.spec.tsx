@@ -258,6 +258,54 @@ describe('<CodeMirrorEditor/> in Visual mode', function () {
         .should('not.have.class', 'ol-cm-environment-centered')
     })
   })
+
+  describe('verbatim environments', function () {
+    beforeEach(function () {
+      cy.get('@first-line').type('\\begin{{}verbatim')
+      cy.get('@first-line').type('{Enter}test') // end with cursor in content
+    })
+
+    it('marks lines as verbatim environments', function () {
+      // inside the environment
+      cy.get('@second-line').should('have.class', 'ol-cm-environment-verbatim')
+
+      // outside the environment
+      cy.get('.cm-line')
+        .eq(4)
+        .should('not.have.class', 'ol-cm-environment-verbatim')
+
+      // move the cursor out of the environment
+      cy.get('.cm-line').eq(4).click()
+
+      cy.get('.cm-content').should('have.text', '    test')
+    })
+  })
+
+  describe('lstlisting environments', function () {
+    beforeEach(function () {
+      cy.get('@first-line').type('\\begin{{}lstlisting')
+      cy.get('@first-line').type('{Enter}test') // end with cursor in content
+    })
+
+    it('marks lines as lstlisting environments', function () {
+      // inside the environment
+      cy.get('@second-line').should(
+        'have.class',
+        'ol-cm-environment-lstlisting'
+      )
+
+      // outside the environment
+      cy.get('.cm-line')
+        .eq(4)
+        .should('not.have.class', 'ol-cm-environment-lstlisting')
+
+      // move the cursor out of the environment
+      cy.get('.cm-line').eq(4).click()
+
+      cy.get('.cm-content').should('have.text', '    test')
+    })
+  })
+
   describe('Toolbar', function () {
     describe('Formatting buttons highlighting', function () {
       it('handles empty selections inside of bold', function () {
