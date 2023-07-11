@@ -7,6 +7,17 @@ process.env.REACT_REFRESH = '1'
 
 const base = require('./webpack.config')
 
+// if WEBPACK_ENTRYPOINTS is defined, remove any entrypoints that aren't included
+if (process.env.WEBPACK_ENTRYPOINTS) {
+  const entrypoints = new Set(process.env.WEBPACK_ENTRYPOINTS.split(/\s*,\s*/))
+  console.log(`Building entrypoints ${[...entrypoints].join(',')}`)
+  for (const entrypoint in base.entry) {
+    if (!entrypoints.has(entrypoint)) {
+      delete base.entry[entrypoint]
+    }
+  }
+}
+
 module.exports = merge(base, {
   mode: 'development',
 
