@@ -49,6 +49,7 @@ import { toolbarPanel } from './toolbar/toolbar-panel'
 import { geometryChangeEvent } from './geometry-change-event'
 import { isSplitTestEnabled } from '../../../utils/splitTestUtils'
 import { completionLogger } from './completion-logger'
+import { shortcutLogger } from './shortcut-logger'
 
 const moduleExtensions: Array<() => Extension> = importOverleafModules(
   'sourceEditorExtensions'
@@ -130,6 +131,7 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   highlightActiveLineGutter(),
   inlineBackground(options.visual.visual),
   completionLogger,
+  shortcutLogger,
   codemirrorDevTools(),
   exceptionLogger(),
   // CodeMirror extensions provided by modules
