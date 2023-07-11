@@ -91,4 +91,8 @@ module.exports = merge(base, {
     preset: 'minimal',
     colors: true,
   },
+
+  optimization: {
+    runtimeChunk: process.env.WEBPACK_RUNTIME_CHUNK || false,
+  },
 })
