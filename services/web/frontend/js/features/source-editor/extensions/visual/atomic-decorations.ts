@@ -849,9 +849,14 @@ export const atomicDecorations = (options: Options) => {
                 )
               } else if (
                 // markup that can't be toggled using toolbar buttons/keyboard shortcuts
-                ['\\textsc', '\\texttt', '\\sout', '\\emph'].includes(
-                  commandName
-                )
+                [
+                  '\\textsc',
+                  '\\texttt',
+                  '\\textmd',
+                  '\\textsf',
+                  '\\sout',
+                  '\\emph',
+                ].includes(commandName)
               ) {
                 if (shouldDecorate(state, nodeRef)) {
                   decorations.push(

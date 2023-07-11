@@ -220,6 +220,12 @@ export const visualTheme = EditorView.theme({
   '.ol-cm-command-texttt': {
     fontFamily: 'monospace',
   },
+  '.ol-cm-command-textmd, .ol-cm-command-textmd > .ol-cm-command-textbf': {
+    fontWeight: 'normal',
+  },
+  '.ol-cm-command-textsf': {
+    fontFamily: 'var(--source-font-family)',
+  },
   '.ol-cm-command-underline': {
     textDecoration: 'underline',
   },

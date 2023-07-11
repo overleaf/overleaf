@@ -149,18 +149,24 @@ describe('<CodeMirrorEditor/> in Visual mode', function () {
     cy.get('@first-line').find(`.ol-cm-heading.ol-cm-command-${command}`)
   })
 
-  forEach(['textsc', 'texttt', 'sout', 'emph', 'url', 'caption']).it(
-    'handles \\%s text',
-    function (command) {
-      cy.get('@first-line').type(`\\${command}{`)
-      cy.get('@first-line').should('have.text', `\\${command}{}`)
-      cy.get('@first-line').type('{rightArrow} ')
-      cy.get('@first-line').should('have.text', `\\${command}{} `)
-      cy.get('@first-line').type('{Backspace}{leftArrow}test text{rightArrow} ')
-      cy.get('@first-line').should('have.text', 'test text ')
-      cy.get('@first-line').find(`.ol-cm-command-${command}`)
-    }
-  )
+  forEach([
+    'textsc',
+    'texttt',
+    'textmd',
+    'textsf',
+    'sout',
+    'emph',
+    'url',
+    'caption',
+  ]).it('handles \\%s text', function (command) {
+    cy.get('@first-line').type(`\\${command}{`)
+    cy.get('@first-line').should('have.text', `\\${command}{}`)
+    cy.get('@first-line').type('{rightArrow} ')
+    cy.get('@first-line').should('have.text', `\\${command}{} `)
+    cy.get('@first-line').type('{Backspace}{leftArrow}test text{rightArrow} ')
+    cy.get('@first-line').should('have.text', 'test text ')
+    cy.get('@first-line').find(`.ol-cm-command-${command}`)
+  })
 
   it('handles \\verb text', function () {
     cy.get('@first-line').type(`\\verb|`)
