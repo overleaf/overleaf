@@ -664,9 +664,10 @@ export const atomicDecorations = (options: Options) => {
                   block: displayMode,
                 }).range(ancestorNode.from, ancestorNode.to)
               )
-              return false
             }
           }
+
+          return false // never decorate inside math
         } else if (nodeRef.type.is('HrefCommand')) {
           // a hyperlink with URL and content arguments
           if (shouldDecorate(state, nodeRef)) {
