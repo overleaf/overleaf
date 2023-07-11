@@ -34,8 +34,6 @@ export function typesetNodeIntoElement(
   const popAncestor = () => ancestorStack.pop()!
   const pushAncestor = (x: HTMLElement) => ancestorStack.push(x)
 
-  // NOTE: Quite hack-ish way to omit closing braces from the output
-  const ignoredRanges: { from: number; to: number }[] = []
   let from = node.from
 
   node.cursor().iterate(
@@ -45,20 +43,21 @@ export function typesetNodeIntoElement(
         ancestor().append(
           document.createTextNode(state.sliceDoc(from, childNode.from))
         )
-        from = ignoredRanges.some(
-          range => range.from <= childNode.from && range.to >= childNode.from
-        )
-          ? childNode.to
-          : childNode.from
+
+        from = childNode.from
       }
       if (isUnknownCommandWithName(childNode, '\\textit', state)) {
         pushAncestor(document.createElement('i'))
-        const argument = childNode.getChild('TextArgument')
-        from = argument?.getChild('LongArg')?.from ?? childNode.to
-        const endBrace = argument?.getChild('CloseBrace')
-        if (endBrace) {
-          ignoredRanges.push(endBrace)
-        }
+        const textArgument = childNode.getChild('TextArgument')
+        from = textArgument?.getChild('LongArg')?.from ?? childNode.to
+      } else if (isUnknownCommandWithName(childNode, '\\textbf', state)) {
+        pushAncestor(document.createElement('b'))
+        const textArgument = childNode.getChild('TextArgument')
+        from = textArgument?.getChild('LongArg')?.from ?? childNode.to
+      } else if (isUnknownCommandWithName(childNode, '\\emph', state)) {
+        pushAncestor(document.createElement('em'))
+        const textArgument = childNode.getChild('TextArgument')
+        from = textArgument?.getChild('LongArg')?.from ?? childNode.to
       } else if (isNewline(childNode, state)) {
         ancestor().appendChild(document.createElement('br'))
         from = childNode.to
@@ -69,6 +68,27 @@ export function typesetNodeIntoElement(
       if (isUnknownCommandWithName(childNode, '\\textit', state)) {
         const typeSetElement = popAncestor()
         ancestor().appendChild(typeSetElement)
+        const textArgument = childNode.getChild('TextArgument')
+        const endBrace = textArgument?.getChild('CloseBrace')
+        if (endBrace) {
+          from = endBrace.to
+        }
+      } else if (isUnknownCommandWithName(childNode, '\\textbf', state)) {
+        const typeSetElement = popAncestor()
+        ancestor().appendChild(typeSetElement)
+        const textArgument = childNode.getChild('TextArgument')
+        const endBrace = textArgument?.getChild('CloseBrace')
+        if (endBrace) {
+          from = endBrace.to
+        }
+      } else if (isUnknownCommandWithName(childNode, '\\emph', state)) {
+        const typeSetElement = popAncestor()
+        ancestor().appendChild(typeSetElement)
+        const textArgument = childNode.getChild('TextArgument')
+        const endBrace = textArgument?.getChild('CloseBrace')
+        if (endBrace) {
+          from = endBrace.to
+        }
       }
     }
   )

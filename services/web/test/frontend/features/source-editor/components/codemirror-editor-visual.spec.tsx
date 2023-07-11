@@ -360,6 +360,39 @@ describe('<CodeMirrorEditor/> in Visual mode', function () {
     cy.get('.ol-cm-maketitle')
     cy.get('.ol-cm-title').should('contain.html', 'Document title<br>with')
     cy.get('.ol-cm-author').should('have.text', 'Author')
+
+    cy.get('.ol-cm-preamble-widget').click()
+    const deleteLine =
+      '{command}{leftArrow}{shift}{command}{rightArrow}{backspace}'
+
+    cy.get('@second-line').type(deleteLine)
+    cy.get('@second-line').type(
+      '\\title{{}formatted with \\textit{{}italic} \\textbf{{}bold} \\emph{{}emph}}'
+    )
+    cy.get('.ol-cm-title').should(
+      'contain.html',
+      'formatted with <i>italic</i> <b>bold</b> <em>emph</em>'
+    )
+
+    cy.get('@second-line').type(deleteLine)
+    cy.get('@second-line').type(
+      '\\title{{}title\\\\ \\textbf{{}\\textit{{}\\emph{{}formated}}} \\textit{{}only italic}}'
+    )
+    cy.get('.ol-cm-title').should(
+      'contain.html',
+      'title<br> <b><i><em>formated</em></i></b> <i>only italic</i>'
+    )
+
+    cy.get('@second-line').type(deleteLine)
+    cy.get('@second-line').type('\\title{{}Title with \\& ampersands}')
+    cy.get('.ol-cm-title').should(
+      'contain.html',
+      'Title with \\&amp; ampersands'
+    )
+
+    cy.get('@second-line').type(deleteLine)
+    cy.get('@second-line').type('\\title{{}My \\LaTeX{{}} document}')
+    cy.get('.ol-cm-title').should('contain.html', 'My \\LaTeX{} document')
   })
 
   it('decorates footnotes', function () {
