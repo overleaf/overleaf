@@ -20,6 +20,7 @@ import DetachCompileButtonWrapper from '../../pdf-preview/components/detach-comp
 import getMeta from '../../../utils/meta'
 import { isVisual } from '../extensions/visual/visual'
 import SplitTestBadge from '../../../shared/components/split-test-badge'
+import { language } from '@codemirror/language'
 
 export const CodeMirrorToolbar = () => {
   const view = useCodeMirrorViewContext()
@@ -43,6 +44,8 @@ const Toolbar = memo(function Toolbar() {
 
   const overflowBeforeRef = useRef<HTMLDivElement>(null)
   const overflowedItemsRef = useRef<Set<string>>(new Set())
+
+  const languageName = state.facet(language)?.name
 
   const {
     open: overflowOpen,
@@ -97,7 +100,7 @@ const Toolbar = memo(function Toolbar() {
   return (
     <div className="ol-cm-toolbar toolbar-editor" ref={resizeRef}>
       {showSourceToolbar && <EditorSwitch />}
-      <ToolbarItems state={state} />
+      <ToolbarItems state={state} languageName={languageName} />
       <div
         className="ol-cm-toolbar-button-group ol-cm-toolbar-stretch"
         ref={overflowBeforeRef}
@@ -109,7 +112,11 @@ const Toolbar = memo(function Toolbar() {
           setOverflowOpen={setOverflowOpen}
           overflowRef={overflowRef}
         >
-          <ToolbarItems state={state} overflowed={overflowedItemsRef.current} />
+          <ToolbarItems
+            state={state}
+            overflowed={overflowedItemsRef.current}
+            languageName={languageName}
+          />
         </ToolbarOverflow>
         <div className="formatting-buttons-wrapper" />
       </div>
@@ -121,7 +128,7 @@ const Toolbar = memo(function Toolbar() {
           active={searchPanelOpen(state)}
           icon="search"
         />
-        {!isVisual(view) && (
+        {languageName === 'latex' && !isVisual(view) && (
           <SplitTestBadge
             splitTestName="source-editor-toolbar"
             displayOnVariants={['enabled']}

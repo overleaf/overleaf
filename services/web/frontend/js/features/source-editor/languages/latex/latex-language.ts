@@ -48,6 +48,7 @@ const typeMap: Record<string, string[]> = {
 }
 
 export const LaTeXLanguage = LRLanguage.define({
+  name: 'latex',
   parser: parser.configure({
     props: [
       foldNodeProp.add({
