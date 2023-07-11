@@ -178,12 +178,6 @@ async function paymentPage(req, res) {
         currency = recommendedCurrency
       }
 
-      await SplitTestHandler.promises.getAssignment(
-        req,
-        res,
-        'student-check-modal'
-      )
-
       res.render('subscriptions/new-react', {
         title: 'subscribe',
         currency,
