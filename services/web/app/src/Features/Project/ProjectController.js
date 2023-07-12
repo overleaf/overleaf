@@ -953,6 +953,7 @@ const ProjectController = {
               historyViewReact: historyViewAssignment.variant === 'react',
               isReviewPanelReact: reviewPanelAssignment.variant === 'react',
               showPersonalAccessToken,
+              hasTrackChangesFeature: Features.hasFeature('track-changes'),
             })
             timer.done()
           }

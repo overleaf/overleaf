@@ -24,13 +24,12 @@ function CurrentFileContainer() {
     permissions,
     loadingThreads,
     users,
+    entryHover,
     nVisibleSelectedChanges: nChanges,
     toggleReviewPanel,
   } = useReviewPanelValueContext()
   const { setEntryHover } = useReviewPanelUpdaterFnsContext()
   const contentHeight = useCodeMirrorContentHeight()
-
-  console.log('Review panel got content height', contentHeight)
 
   const currentDocEntries =
     openDocId && openDocId in entries ? entries[openDocId] : undefined
@@ -42,7 +41,7 @@ function CurrentFileContainer() {
   }, [currentDocEntries])
 
   return (
-    <Container>
+    <Container classNames={{ 'rp-collapsed-displaying-entry': entryHover }}>
       <div className="review-panel-tools">
         <Toolbar />
         <Nav />

@@ -1,4 +1,5 @@
 import ReactDOM from 'react-dom'
+import EditorWidgets from './editor-widgets/editor-widgets'
 import CurrentFileContainer from './current-file-container'
 import OverviewContainer from './overview-container'
 import { useCodeMirrorViewContext } from '../codemirror-editor'
@@ -17,6 +18,7 @@ function ReviewPanelView({ parentDomNode }: ReviewPanelViewProps) {
 
   return ReactDOM.createPortal(
     <>
+      <EditorWidgets />
       {isCurrentFileView(subView) ? (
         <CurrentFileContainer />
       ) : (

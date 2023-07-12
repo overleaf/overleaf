@@ -127,6 +127,7 @@ function useAngularReviewPanelState(): ReviewPanelState {
   )
 
   const [entryHover, setEntryHover] = useState(false)
+  const [isAddingComment, setIsAddingComment] = useState(false)
 
   const values = useMemo<ReviewPanelState['values']>(
     () => ({
@@ -136,6 +137,7 @@ function useAngularReviewPanelState(): ReviewPanelState {
       docs,
       entries,
       entryHover,
+      isAddingComment,
       gotoEntry,
       handleLayoutChange,
       loadingThreads,
@@ -176,6 +178,7 @@ function useAngularReviewPanelState(): ReviewPanelState {
       docs,
       entries,
       entryHover,
+      isAddingComment,
       gotoEntry,
       handleLayoutChange,
       loadingThreads,
@@ -217,8 +220,15 @@ function useAngularReviewPanelState(): ReviewPanelState {
       setEntryHover,
       setCollapsed,
       setShouldCollapse,
+      setIsAddingComment,
     }),
-    [handleSetSubview, setCollapsed, setEntryHover, setShouldCollapse]
+    [
+      handleSetSubview,
+      setCollapsed,
+      setEntryHover,
+      setShouldCollapse,
+      setIsAddingComment,
+    ]
   )
 
   return { values, updaterFns }

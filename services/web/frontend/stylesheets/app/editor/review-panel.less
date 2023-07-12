@@ -1304,3 +1304,20 @@ button when (@is-overleaf-light = true) {
     }
   }
 }
+
+.react-rp-in-editor-widgets {
+  position: sticky;
+  font-family: @font-family-sans-serif;
+
+  .rp-in-editor-widgets-inner {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .rp-track-changes-indicator {
+    border: 0;
+  }
+}

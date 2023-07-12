@@ -13,6 +13,7 @@ import {
   MainDocument,
 } from '../../../../../../../types/project-settings'
 
+/* eslint-disable no-use-before-define */
 export interface ReviewPanelState {
   values: {
     collapsed: Record<DocId, boolean>
@@ -21,6 +22,7 @@ export interface ReviewPanelState {
     docs: MainDocument[] | undefined
     entries: ReviewPanelEntries
     entryHover: boolean
+    isAddingComment: boolean
     gotoEntry: (docId: DocId, entryOffset: number) => void
     handleLayoutChange: () => void
     loadingThreads: boolean
@@ -66,15 +68,17 @@ export interface ReviewPanelState {
   }
   updaterFns: {
     handleSetSubview: (subView: SubView) => void
-    setEntryHover: React.Dispatch<React.SetStateAction<boolean>>
-    setCollapsed: React.Dispatch<
-      React.SetStateAction<ReviewPanelState['values']['collapsed']>
+    setEntryHover: React.Dispatch<React.SetStateAction<Value<'entryHover'>>>
+    setIsAddingComment: React.Dispatch<
+      React.SetStateAction<Value<'isAddingComment'>>
     >
+    setCollapsed: React.Dispatch<React.SetStateAction<Value<'collapsed'>>>
     setShouldCollapse: React.Dispatch<
-      React.SetStateAction<ReviewPanelState['values']['shouldCollapse']>
+      React.SetStateAction<Value<'shouldCollapse'>>
     >
   }
 }
+/* eslint-enable no-use-before-define */
 
 // Getter for values
 export type Value<T extends keyof ReviewPanelState['values']> =

@@ -4,8 +4,12 @@ import EntryContainer from './entry-container'
 import EntryCallout from './entry-callout'
 import EntryActions from './entry-actions'
 import AutoExpandingTextArea from '../../../../../shared/components/auto-expanding-text-area'
+import AddCommentButton from '../add-comment-button'
 import Icon from '../../../../../shared/components/icon'
-import { useReviewPanelValueContext } from '../../../context/review-panel/review-panel-context'
+import {
+  useReviewPanelUpdaterFnsContext,
+  useReviewPanelValueContext,
+} from '../../../context/review-panel/review-panel-context'
 import classnames from 'classnames'
 import { ReviewPanelAddCommentEntry } from '../../../../../../../types/review-panel/entry'
 
@@ -15,24 +19,25 @@ type AddCommentEntryProps = {
 
 function AddCommentEntry({ entry }: AddCommentEntryProps) {
   const { t } = useTranslation()
-  const { submitNewComment, handleLayoutChange } = useReviewPanelValueContext()
+  const { isAddingComment, submitNewComment, handleLayoutChange } =
+    useReviewPanelValueContext()
+  const { setIsAddingComment } = useReviewPanelUpdaterFnsContext()
 
   const [content, setContent] = useState('')
-  const [isAdding, setIsAdding] = useState(false)
 
   const handleStartNewComment = () => {
-    setIsAdding(true)
+    setIsAddingComment(true)
     handleLayoutChange()
   }
 
   const handleSubmitNewComment = () => {
     submitNewComment(content)
-    setIsAdding(false)
+    setIsAddingComment(false)
     setContent('')
   }
 
   const handleCancelNewComment = () => {
-    setIsAdding(false)
+    setIsAddingComment(false)
     setContent('')
     handleLayoutChange()
   }
@@ -61,14 +66,14 @@ function AddCommentEntry({ entry }: AddCommentEntryProps) {
       <EntryCallout className="rp-entry-callout-add-comment" />
       <div
         className={classnames('rp-entry', 'rp-entry-add-comment', {
-          'rp-entry-adding-comment': isAdding,
+          'rp-entry-adding-comment': isAddingComment,
         })}
         style={{
           top: entry.screenPos.y + 'px',
           visibility: entry.visible ? 'visible' : 'hidden',
         }}
       >
-        {isAdding ? (
+        {isAddingComment ? (
           <>
             <div className="rp-new-comment">
               <AutoExpandingTextArea
@@ -97,12 +102,9 @@ function AddCommentEntry({ entry }: AddCommentEntryProps) {
             </EntryActions>
           </>
         ) : (
-          <button
-            className="rp-add-comment-btn"
-            onClick={handleStartNewComment}
-          >
+          <AddCommentButton onClick={handleStartNewComment}>
             <Icon type="comment" /> {t('add_comment')}
-          </button>
+          </AddCommentButton>
         )}
       </div>
     </EntryContainer>

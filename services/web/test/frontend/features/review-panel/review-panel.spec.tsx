@@ -250,4 +250,18 @@ describe('<ReviewPanel />', function () {
     // eslint-disable-next-line mocha/no-skipped-tests
     it.skip('renders comments', function () {})
   })
+
+  describe('in editor widgets', function () {
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip('toggle review panel', function () {})
+
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip('accepts all changes', function () {})
+
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip('rejects all changes', function () {})
+
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip('add comment', function () {})
+  })
 })
