@@ -132,8 +132,8 @@ function AggregateChangeEntry({
                     ? `… (${t('show_all')})`
                     : ` (${t('show_less')})`}
                 </button>
-              )}
-              &nbsp;{t('aggregate_to')}&nbsp;
+              )}{' '}
+              {t('aggregate_to')}&nbsp;
               <ins className="rp-content-highlight">{insertionContent}</ins>
               {insertionNeedsCollapsing && (
                 <button
