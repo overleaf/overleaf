@@ -7,8 +7,6 @@ import { formatTime, relativeDate } from '../../utils/format-date'
 import { postJSON } from '../../../infrastructure/fetch-json'
 import { useEditorContext } from '../../../shared/context/editor-context'
 import { useProjectContext } from '../../../shared/context/project-context'
-import { useUserContext } from '../../../shared/context/user-context'
-import { capitalize } from 'lodash'
 
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 import useAbortController from '../../../shared/hooks/use-abort-controller'
@@ -42,7 +40,6 @@ export default function FileViewHeader({ file, storeReferencesKeys }) {
   const { permissionsLevel } = useEditorContext({
     permissionsLevel: PropTypes.string,
   })
-  const { id: userId } = useUserContext()
   const { t } = useTranslation()
 
   const [refreshing, setRefreshing] = useState(false)
@@ -51,9 +48,7 @@ export default function FileViewHeader({ file, storeReferencesKeys }) {
   const { signal } = useAbortController()
 
   let fileInfo
-  let isImporter
   if (file.linkedFileData) {
-    isImporter = file.linkedFileData.importer_id === userId
     if (file.linkedFileData.provider === 'url') {
       fileInfo = (
         <div>
@@ -122,9 +117,9 @@ export default function FileViewHeader({ file, storeReferencesKeys }) {
         ))}
       {file.linkedFileData && permissionsLevel !== 'readOnly' && (
         <button
-          className={`btn ${isImporter ? 'btn-primary' : 'btn-secondary'}`}
+          className="btn btn-primary"
           onClick={refreshFile}
-          disabled={refreshing || !isImporter}
+          disabled={refreshing}
         >
           <Icon type="refresh" spin={refreshing} fw />
           <span>{refreshing ? t('refreshing') + '...' : t('refresh')}</span>
@@ -140,41 +135,16 @@ export default function FileViewHeader({ file, storeReferencesKeys }) {
         &nbsp;
         <span>{t('download')}</span>
       </a>
-      {file.linkedFileData && !isImporter && (
-        <div className="row">
-          <div className="alert">
-            {t('only_importer_can_refresh', {
-              provider: capitalize(file.linkedFileData.provider),
-            })}
-          </div>
-        </div>
-      )}
       {refreshError && (
         <div className="row">
           <br />
-          <div
-            className="alert alert-danger col-md-10 col-md-offset-1"
-            style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
-          >
-            <div>
-              {t('something_not_right')}!&nbsp;
-              {tprLinkedFileRefreshError.map(
-                ({ import: { LinkedFileRefreshError }, path }) => (
-                  <LinkedFileRefreshError key={path} file={file} />
-                )
-              )}
-            </div>
-            <div className="text-center">
-              <button className="btn btn-danger">
-                <a
-                  href="/user/settings"
-                  target="_blank"
-                  style={{ fontWeight: 'bold', textDecoration: 'none' }}
-                >
-                  {t('go_to_settings')}
-                </a>
-              </button>
-            </div>
+          <div className="alert alert-danger col-md-6 col-md-offset-3">
+            {t('access_denied')}: {refreshError}
+            {tprLinkedFileRefreshError.map(
+              ({ import: { LinkedFileRefreshError }, path }) => (
+                <LinkedFileRefreshError key={path} file={file} />
+              )
+            )}
           </div>
         </div>
       )}
