@@ -1,15 +1,24 @@
-import { useRef } from 'react'
+import { useState, useRef } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import Tooltip from '../../../../../shared/components/tooltip'
 import Icon from '../../../../../shared/components/icon'
 import TrackChangesToggle from './track-changes-toggle'
+import UpgradeTrackChangesModal from '../upgrade-track-changes-modal'
 import { useProjectContext } from '../../../../../shared/context/project-context'
 import {
   useReviewPanelUpdaterFnsContext,
   useReviewPanelValueContext,
 } from '../../../context/review-panel/review-panel-context'
-import classnames from 'classnames'
 import useCollapseHeight from '../hooks/use-collapse-height'
+import { send, sendMB } from '../../../../../infrastructure/event-tracking'
+import classnames from 'classnames'
+
+const sendAnalytics = () => {
+  send('subscription-funnel', 'editor-click-feature', 'real-time-track-changes')
+  sendMB('paywall-prompt', {
+    'paywall-type': 'track-changes',
+  })
+}
 
 function ToggleMenu() {
   const { t } = useTranslation()
@@ -29,8 +38,19 @@ function ToggleMenu() {
     formattedProjectMembers,
   } = useReviewPanelValueContext()
 
+  const [showModal, setShowModal] = useState(false)
+
   const containerRef = useRef<HTMLUListElement | null>(null)
   useCollapseHeight(containerRef, shouldCollapse)
+
+  const handleToggleFullTCStateCollapse = () => {
+    if (project.features.trackChanges) {
+      setShouldCollapse(value => !value)
+    } else {
+      sendAnalytics()
+      setShowModal(true)
+    }
+  }
 
   return (
     <>
@@ -43,7 +63,7 @@ function ToggleMenu() {
 
         <button
           className="review-panel-toolbar-collapse-button"
-          onClick={() => setShouldCollapse(value => !value)}
+          onClick={handleToggleFullTCStateCollapse}
         >
           {wantTrackChanges ? (
             // eslint-disable-next-line react/jsx-key
@@ -164,6 +184,8 @@ function ToggleMenu() {
           />
         </li>
       </ul>
+
+      <UpgradeTrackChangesModal show={showModal} setShow={setShowModal} />
     </>
   )
 }

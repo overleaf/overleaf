@@ -1,0 +1,105 @@
+import { useTranslation } from 'react-i18next'
+import { Row, Col, Button, Modal } from 'react-bootstrap'
+import AccessibleModal from '../../../../shared/components/accessible-modal'
+import Icon from '../../../../shared/components/icon'
+import { useProjectContext } from '../../../../shared/context/project-context'
+import { useUserContext } from '../../../../shared/context/user-context'
+import { startFreeTrial, upgradePlan } from '../../../../main/account-upgrade'
+
+type UpgradeTrackChangesModalProps = {
+  show: boolean
+  setShow: React.Dispatch<React.SetStateAction<boolean>>
+}
+
+function UpgradeTrackChangesModal({
+  show,
+  setShow,
+}: UpgradeTrackChangesModalProps) {
+  const { t } = useTranslation()
+  const project = useProjectContext()
+  const user = useUserContext()
+
+  return (
+    <AccessibleModal show={show} onHide={() => setShow(false)}>
+      <Modal.Header closeButton>
+        <h3>{t('upgrade_to_track_changes')}</h3>
+      </Modal.Header>
+      <Modal.Body>
+        <div className="teaser-video-container">
+          {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+          <video className="teaser-video" autoPlay loop>
+            <source
+              src="/img/teasers/track-changes/teaser-track-changes.mp4"
+              type="video/mp4"
+            />
+            <img
+              src="/img/teasers/track-changes/teaser-track-changes.gif"
+              alt={t('demonstrating_track_changes_feature')}
+            />
+          </video>
+        </div>
+        <h4 className="teaser-title">
+          {t('see_changes_in_your_documents_live')}
+        </h4>
+        <p className="small">{t('refresh_page_after_starting_free_trial')}</p>
+        <Row>
+          <Col md={10} mdOffset={1}>
+            <ul className="list-unstyled">
+              {[
+                t('track_any_change_in_real_time'),
+                t('review_your_peers_work'),
+                t('accept_or_reject_each_changes_individually'),
+              ].map(translation => (
+                <li key={translation}>
+                  <Icon type="check" /> {translation}
+                </li>
+              ))}
+            </ul>
+          </Col>
+        </Row>
+        {project.owner && (
+          <Row className="text-center">
+            {project.owner._id === user.id ? (
+              user.allowedFreeTrial ? (
+                <Button
+                  bsStyle={null}
+                  className="btn-primary"
+                  onClick={() => startFreeTrial('track-changes')}
+                >
+                  {t('try_it_for_free')}
+                </Button>
+              ) : (
+                <Button
+                  bsStyle={null}
+                  className="btn-primary"
+                  onClick={() => upgradePlan('project-sharing')}
+                >
+                  {t('upgrade')}
+                </Button>
+              )
+            ) : (
+              <p>
+                <strong>
+                  {t(
+                    'please_ask_the_project_owner_to_upgrade_to_track_changes'
+                  )}
+                </strong>
+              </p>
+            )}
+          </Row>
+        )}
+      </Modal.Body>
+      <Modal.Footer>
+        <Button
+          bsStyle={null}
+          className="btn-secondary"
+          onClick={() => setShow(false)}
+        >
+          {t('close')}
+        </Button>
+      </Modal.Footer>
+    </AccessibleModal>
+  )
+}
+
+export default UpgradeTrackChangesModal

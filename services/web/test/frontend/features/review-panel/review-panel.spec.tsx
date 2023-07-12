@@ -264,4 +264,21 @@ describe('<ReviewPanel />', function () {
     // eslint-disable-next-line mocha/no-skipped-tests
     it.skip('add comment', function () {})
   })
+
+  describe('upgrade track changes', function () {
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip('renders modal', function () {})
+
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip('closes modal', function () {})
+
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip('opens subscription page after clicking on `upgrade`', function () {})
+
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip('opens subscription page after clicking on `try it for free`', function () {})
+
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip('shows `ask project owner to upgrade` message', function () {})
+  })
 })
