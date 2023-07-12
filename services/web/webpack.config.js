@@ -306,11 +306,6 @@ module.exports = {
           context: mathjaxDir,
         },
         {
-          from: 'libs/sigma-master',
-          to: 'js/libs/sigma-master',
-          context: vendorDir,
-        },
-        {
           from: 'src-min-noconflict',
           to: `js/ace-${PackageVersions.version.ace}/`,
           context: aceDir,
