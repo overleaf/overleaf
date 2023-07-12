@@ -1,9 +1,10 @@
 @top Bibliography {
-  (Declaration | StringDeclaration)*
+  (Other | Declaration | CommentDeclaration | PreambleDeclaration | StringDeclaration)*
 }
 
 @tokens {
-  whiteSpace { @whitespace+ }
+  Other { ![@ \t\n] ![@]* }
+  whiteSpace { $[\t\n ]+ }
   Identifier { $[a-zA-Z:_0-9-/]+ }
   StringName { $[a-zA-Z:_] $[a-zA-Z:_0-9-]* }
   FieldName {$[a-zA-Z-_0-9]+}
@@ -13,19 +14,31 @@
   EntryTypeName { $[a-zA-Z]+ }
   Number { @digit+ }
   StringKeyword {"@"$[Ss]$[Tt]$[Rr]$[Ii]$[Nn]$[Gg]}
+  PreambleKeyword {"@"$[Pp]$[Rr]$[Ee]$[Aa]$[Mm]$[Bb]$[Ll]$[Ee]}
+  CommentKeyword {"@"$[Cc]$[Oo]$[Mm]$[Mm]$[Ee]$[Nn]$[Tt]}
+  CommentContents { ![@} \t\n] ![}@]* }
   "{"[closedBy="}"]
   "}"[openedBy="{"]
   "@" "\"" "," "#" "@string"
-  Comment { "%" ![\n]* }
 }
 
-// FIXME: Technically skipping comments is wrong here. They can only appear
-//        alone on a line, but I'm not sure how to express that easily in Lezer
-@skip {whiteSpace | Comment}
+@skip { whiteSpace }
 
 StringDeclaration {
   StringKeyword "{"
       Field<StringName>*
+  "}"
+}
+
+PreambleDeclaration {
+  PreambleKeyword "{"
+      Expression
+  "}"
+}
+
+CommentDeclaration {
+  CommentKeyword "{"
+      CommentContents*
   "}"
 }
 

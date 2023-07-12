@@ -10,6 +10,9 @@ export const highlighting = styleTags({
   Expression: t.attributeValue,
   '#': t.operator,
   StringKeyword: t.keyword,
+  PreambleKeyword: t.keyword,
+  CommentKeyword: t.keyword,
+  CommentContents: t.comment,
   StringName: t.variableName,
-  Comment: t.comment,
+  Other: t.comment,
 })
