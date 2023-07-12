@@ -454,7 +454,6 @@
   "hotkeys": "快捷键",
   "hundreds_templates_info": "从我们的 LaTeX 模板库开始，为期刊、会议、论文、报告、简历等制作漂亮的文档。",
   "i_want_to_stay": "我要留下",
-  "if_error_persists_try_relinking_provider": "如果此错误仍然存在，请尝试在此处重新链接您的__provider__帐户",
   "if_have_existing_can_link": "如果您在另一封电子邮件中有一个现有的 <b>__appName__</b> 帐户，您可以通过单击 <b>__clickText__</b> 将其链接到您的 <b>__institutionName__</b> 账户。",
   "if_owner_can_link": "如果您在<b>__appName__</b>拥有账户<b>__email__</b>，您可以将其链接到您的 <b>__institutionName__</b> 机构帐户。",
   "ignore_and_continue_institution_linking": "您也可以忽略此项，然后<a href=\"__link__\">继续在 __appName__ 上使用您的 <b>__email__</b> 帐户</a>。",

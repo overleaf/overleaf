@@ -458,7 +458,6 @@
   "hotkeys": "Raccourcis clavier",
   "hundreds_templates_info": "Créez de magnifiques documents en vous basant sur notre galerie de modèles LaTeX pour les revues, conférences, thèses, rapports, CV et bien plus encore.",
   "i_want_to_stay": "Je veux rester",
-  "if_error_persists_try_relinking_provider": "Si cette erreur persiste, essayez de lier à nouveau votre compte ici",
   "if_have_existing_can_link": "Si vous avez déjà un compte <b>__appName__</b> sur une autre adresse courriel, vous pouvez le lier à votre compte <b>__institutionName__</b> en cliquant <b>__clickText</b>.",
   "if_owner_can_link": "Si vous possédez le compte <b>__appName__</b> ayant pour adresse <b>__email__</b>, vous serez autorisé à le lier à votre compte institutionnel <b>__institutionName__</b>.",
   "ignore_and_continue_institution_linking": "Vous pouvez également ignorer ceci et <a href=\"__link__\">continuer vers __appName__ avec votre compte <b>__email__</b></a>.",
