@@ -5,7 +5,7 @@
 @tokens {
   Other { ![@ \t\n] ![@]* }
   whiteSpace { $[\t\n ]+ }
-  Identifier { $[a-zA-Z:_0-9-/]+ }
+  Identifier { ![,{} \t\n%]+ }
   StringName { $[a-zA-Z:_] $[a-zA-Z:_0-9-]* }
   FieldName {$[a-zA-Z-_0-9]+}
   LiteralString {
