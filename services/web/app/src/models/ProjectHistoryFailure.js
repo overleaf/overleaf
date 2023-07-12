@@ -4,7 +4,7 @@ const { Schema } = mongoose
 
 const ProjectHistoryFailureSchema = new Schema(
   {
-    project_id: Schema.Types.ObjectId,
+    project_id: String,
     ts: Date,
     queueSize: Number,
     error: String,
