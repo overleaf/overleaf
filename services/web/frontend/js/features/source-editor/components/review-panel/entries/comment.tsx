@@ -88,7 +88,7 @@ function Comment({ thread, threadId, comment }: CommentProps) {
       </p>
       {!editing && (
         <div className="rp-entry-metadata">
-          {!deleting && formatTime(comment.timestamp, 'MMM d, y h:mm a')}
+          {!deleting && formatTime(comment.timestamp, 'MMM D, Y h:mm A')}
           {comment.user.isSelf && !deleting && (
             <span className="rp-comment-actions">
               &nbsp;&bull;&nbsp;

@@ -88,7 +88,7 @@ function ResolvedCommentEntry({
                 </Linkify>
               </p>
               <div className="rp-entry-metadata">
-                {formatTime(comment.timestamp, 'MMM d, y h:mm a')}
+                {formatTime(comment.timestamp, 'MMM D, Y h:mm A')}
               </div>
             </div>
           )
@@ -104,7 +104,7 @@ function ResolvedCommentEntry({
             {t('mark_as_resolved')}.
           </p>
           <div className="rp-entry-metadata">
-            {formatTime(thread.resolved_at, 'MMM d, y h:mm a')}
+            {formatTime(thread.resolved_at, 'MMM D, Y h:mm A')}
           </div>
         </div>
       </div>

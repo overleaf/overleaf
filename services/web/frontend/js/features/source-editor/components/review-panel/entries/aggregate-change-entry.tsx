@@ -147,7 +147,7 @@ function AggregateChangeEntry({
               )}
             </div>
             <div className="rp-entry-metadata">
-              {formatTime(entry.metadata.ts, 'MMM d, y h:mm a')}
+              {formatTime(entry.metadata.ts, 'MMM D, Y h:mm A')}
               &nbsp;&bull;&nbsp;
               {user && (
                 <span
