@@ -243,7 +243,7 @@
     "rimraf": "2.2.6",
     "sanitize-html": "^2.8.1",
     "scroll-into-view-if-needed": "^2.2.25",
-    "tough-cookie": "^4.0.0",
+    "tough-cookie": "4.0.0",
     "tsscmp": "^1.0.6",
     "underscore": "^1.13.1",
     "utf-8-validate": "^5.0.2",
