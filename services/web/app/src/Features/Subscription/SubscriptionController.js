@@ -108,7 +108,32 @@ async function plansPage(req, res) {
     removePersonalPlanAssingment
   )
 
-  AnalyticsManager.recordEventForSession(req.session, 'plans-page-view', {
+  let showInrGeoBanner, inrGeoBannerSplitTestName
+  let inrGeoBannerVariant = 'default'
+  if (countryCode === 'IN') {
+    inrGeoBannerSplitTestName =
+      geoPricingINRTestVariant === 'inr'
+        ? 'geo-banners-inr-2'
+        : 'geo-banners-inr-1'
+    try {
+      const geoBannerAssignment = await SplitTestHandler.promises.getAssignment(
+        req,
+        res,
+        inrGeoBannerSplitTestName
+      )
+      inrGeoBannerVariant = geoBannerAssignment.variant
+      if (inrGeoBannerVariant !== 'default') {
+        showInrGeoBanner = true
+      }
+    } catch (error) {
+      logger.error(
+        { err: error },
+        `Failed to get INR geo banner lookup or assignment (${inrGeoBannerSplitTestName})`
+      )
+    }
+  }
+
+  const plansPageViewSegmentation = {
     currency: recommendedCurrency,
     'remove-personal-plan-page': removePersonalPlanAssingment?.variant,
     countryCode,
@@ -120,7 +145,16 @@ async function plansPage(req, res) {
     )
       ? 'latam'
       : 'default',
-  })
+  }
+  if (inrGeoBannerSplitTestName) {
+    plansPageViewSegmentation[inrGeoBannerSplitTestName] = inrGeoBannerVariant
+  }
+
+  AnalyticsManager.recordEventForSession(
+    req.session,
+    'plans-page-view',
+    plansPageViewSegmentation
+  )
 
   res.render(`subscriptions/plans-marketing/${directory}/plans-marketing-v2`, {
     title: 'plans_and_pricing',
@@ -137,6 +171,7 @@ async function plansPage(req, res) {
     groupPlanModalDefaults,
     initialLocalizedGroupPrice:
       SubscriptionHelper.generateInitialLocalizedGroupPrice(currency),
+    showInrGeoBanner,
   })
 }
 
@@ -302,23 +337,52 @@ async function interstitialPaymentPage(req, res) {
   if (hasSubscription) {
     res.redirect('/user/subscription?hasSubscription=true')
   } else {
+    let showInrGeoBanner, inrGeoBannerSplitTestName
+    let inrGeoBannerVariant = 'default'
+    if (countryCode === 'IN') {
+      inrGeoBannerSplitTestName =
+        geoPricingINRTestVariant === 'inr'
+          ? 'geo-banners-inr-2'
+          : 'geo-banners-inr-1'
+      try {
+        const geoBannerAssignment =
+          await SplitTestHandler.promises.getAssignment(
+            req,
+            res,
+            inrGeoBannerSplitTestName
+          )
+        inrGeoBannerVariant = geoBannerAssignment.variant
+        if (inrGeoBannerVariant !== 'default') {
+          showInrGeoBanner = true
+        }
+      } catch (error) {
+        logger.error(
+          { err: error },
+          `Failed to get INR geo banner lookup or assignment (${inrGeoBannerSplitTestName})`
+        )
+      }
+    }
+    const paywallPlansPageViewSegmentation = {
+      currency: recommendedCurrency,
+      countryCode,
+      'geo-pricing-inr-group': geoPricingINRTestVariant,
+      'geo-pricing-inr-page': recommendedCurrency === 'INR' ? 'inr' : 'default',
+      'geo-pricing-latam-group': geoPricingLATAMTestVariant,
+      'geo-pricing-latam-page': ['BRL', 'MXN', 'COP', 'CLP', 'PEN'].includes(
+        recommendedCurrency
+      )
+        ? 'latam'
+        : 'default',
+      'remove-personal-plan-page': removePersonalPlanAssingment?.variant,
+    }
+    if (inrGeoBannerSplitTestName) {
+      paywallPlansPageViewSegmentation[inrGeoBannerSplitTestName] =
+        inrGeoBannerVariant
+    }
     AnalyticsManager.recordEventForSession(
       req.session,
       'paywall-plans-page-view',
-      {
-        currency: recommendedCurrency,
-        countryCode,
-        'geo-pricing-inr-group': geoPricingINRTestVariant,
-        'geo-pricing-inr-page':
-          recommendedCurrency === 'INR' ? 'inr' : 'default',
-        'geo-pricing-latam-group': geoPricingLATAMTestVariant,
-        'geo-pricing-latam-page': ['BRL', 'MXN', 'COP', 'CLP', 'PEN'].includes(
-          recommendedCurrency
-        )
-          ? 'latam'
-          : 'default',
-        'remove-personal-plan-page': removePersonalPlanAssingment?.variant,
-      }
+      paywallPlansPageViewSegmentation
     )
 
     res.render(
@@ -331,6 +395,7 @@ async function interstitialPaymentPage(req, res) {
         recommendedCurrency,
         interstitialPaymentConfig,
         showSkipLink,
+        showInrGeoBanner,
       }
     )
   }
@@ -678,10 +743,12 @@ async function _getRecommendedCurrency(req, res) {
     req.query?.ip || req.ip
   )
   const countryCode = currencyLookup.countryCode
-  let recommendedCurrency = currencyLookup.currencyCode
   let assignmentINR, assignmentLATAM
+  let recommendedCurrency = currencyLookup.currencyCode
   // for #12703
   try {
+    // Split test is kept active, but all users geolocated in India can
+    // now use the INR currency (See #13507)
     assignmentINR = await SplitTestHandler.promises.getAssignment(
       req,
       res,
@@ -705,11 +772,6 @@ async function _getRecommendedCurrency(req, res) {
       { err: error },
       'Failed to get assignment for geo-pricing-latam test'
     )
-  }
-  // if the user has been detected as located in India (thus recommended INR as currency)
-  // but is not part of the geo pricing test, we fall back to the default currency instead
-  if (recommendedCurrency === 'INR' && assignmentINR?.variant !== 'inr') {
-    recommendedCurrency = GeoIpLookup.DEFAULT_CURRENCY_CODE
   }
   if (
     ['BRL', 'MXN', 'COP', 'CLP', 'PEN'].includes(recommendedCurrency) &&

@@ -28,7 +28,12 @@ function UserNotifications() {
     'ol-groupSubscriptionsPendingEnrollment',
     []
   )
-  const showIRNBanner = getMeta('ol-showINRBanner', false)
+  const showInrGeoBanner = getMeta('ol-showInrGeoBanner', false)
+  const inrGeoBannerVariant = getMeta('ol-inrGeoBannerVariant', 'default')
+  const inrGeoBannerSplitTestName = getMeta(
+    'ol-inrGeoBannerSplitTestName',
+    'unassigned'
+  )
   const showLATAMBanner = getMeta('ol-showLATAMBanner', false)
 
   return (
@@ -48,8 +53,11 @@ function UserNotifications() {
         <ReconfirmationInfo />
         {showLATAMBanner ? (
           <LATAMBanner />
-        ) : showIRNBanner ? (
-          <INRBanner />
+        ) : showInrGeoBanner ? (
+          <INRBanner
+            variant={inrGeoBannerVariant}
+            splitTestName={inrGeoBannerSplitTestName}
+          />
         ) : (
           <GroupsAndEnterpriseBanner />
         )}

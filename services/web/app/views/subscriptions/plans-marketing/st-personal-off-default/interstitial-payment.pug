@@ -16,6 +16,9 @@ block content
 		.content-page
 			.plans
 				.container
+					if showInrGeoBanner
+						div.alert.alert-success.text-centered !{translate("inr_discount_offer_plans_page_banner", {flag: '🇮🇳'})}
+
 					.row
 						.col-md-12
 							.page-header.centered.plans-header.text-centered.top-page-header

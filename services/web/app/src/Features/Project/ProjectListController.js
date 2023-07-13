@@ -363,21 +363,24 @@ async function projectListPage(req, res, next) {
     }
   }
 
-  let showINRBanner = false
+  let showInrGeoBanner, inrGeoBannerSplitTestName
+  let inrGeoBannerVariant = 'default'
   let showLATAMBanner = false
   let recommendedCurrency
   if (usersBestSubscription?.type === 'free') {
     const { currencyCode, countryCode } =
       await GeoIpLookup.promises.getCurrencyCode(req.ip)
+    let inrGeoPricingVariant = 'default'
     try {
+      // Split test is kept active, but all users geolocated in India can
+      // now use the INR currency (See #13507)
       const inrGeoPricingAssignment =
         await SplitTestHandler.promises.getAssignment(
           req,
           res,
           'geo-pricing-inr'
         )
-      showINRBanner =
-        inrGeoPricingAssignment.variant === 'inr' && countryCode === 'IN'
+      inrGeoPricingVariant = inrGeoPricingAssignment.variant
     } catch (error) {
       logger.error(
         { err: error },
@@ -404,6 +407,27 @@ async function projectListPage(req, res, next) {
         'Failed to get geo-pricing-latam split test assignment'
       )
     }
+    if (countryCode === 'IN') {
+      inrGeoBannerSplitTestName =
+        inrGeoPricingVariant === 'inr'
+          ? 'geo-banners-inr-2'
+          : 'geo-banners-inr-1'
+      try {
+        const geoBannerAssignment =
+          await SplitTestHandler.promises.getAssignment(
+            req,
+            res,
+            inrGeoBannerSplitTestName
+          )
+        showInrGeoBanner = true
+        inrGeoBannerVariant = geoBannerAssignment.variant
+      } catch (error) {
+        logger.error(
+          { err: error },
+          `Failed to get INR geo banner lookup or assignment (${inrGeoBannerSplitTestName})`
+        )
+      }
+    }
   }
 
   res.render('project/list-react', {
@@ -423,9 +447,11 @@ async function projectListPage(req, res, next) {
     showGroupsAndEnterpriseBanner,
     groupsAndEnterpriseBannerVariant,
     showWritefullPromoBanner,
-    showINRBanner,
     showLATAMBanner,
     recommendedCurrency,
+    showInrGeoBanner,
+    inrGeoBannerVariant,
+    inrGeoBannerSplitTestName,
     projectDashboardReact: true, // used in navbar
     welcomePageRedesignVariant: welcomePageRedesignAssignment.variant,
     groupSubscriptionsPendingEnrollment:
