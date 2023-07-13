@@ -528,6 +528,7 @@
   "find_the_symbols_you_need_with_premium": "Find the symbols you need faster with Overleaf Premium",
   "first_name": "First Name",
   "first_x_days_free_after_that_y_per_month": "First <0>__trialLen__ days free</0>, after that <0>__price__</0> per month",
+  "first_x_days_free_after_that_y_per_year": "First <0>__trialLen__ days free</0>, after that <0>__price__</0> per year",
   "fold_line": "Fold line",
   "folder_location": "Folder location",
   "folders": "Folders",
