@@ -1,4 +1,5 @@
 import ManagedUserDropdownButton from '../../../../../../frontend/js/features/group-management/components/managed-users/managed-user-dropdown-button'
+import sinon from 'sinon'
 
 describe('ManagedUserDropdownButton', function () {
   describe('with managed user', function () {
@@ -17,7 +18,12 @@ describe('ManagedUserDropdownButton', function () {
     }
 
     beforeEach(function () {
-      cy.mount(<ManagedUserDropdownButton user={user} />)
+      cy.mount(
+        <ManagedUserDropdownButton
+          user={user}
+          openOffboardingModalForUser={sinon.stub()}
+        />
+      )
     })
 
     it('should render the button', function () {
@@ -47,7 +53,12 @@ describe('ManagedUserDropdownButton', function () {
     }
 
     beforeEach(function () {
-      cy.mount(<ManagedUserDropdownButton user={user} />)
+      cy.mount(
+        <ManagedUserDropdownButton
+          user={user}
+          openOffboardingModalForUser={sinon.stub()}
+        />
+      )
     })
 
     it('should render the button', function () {

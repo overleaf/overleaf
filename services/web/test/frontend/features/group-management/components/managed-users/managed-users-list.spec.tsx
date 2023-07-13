@@ -2,6 +2,7 @@ import ManagedUsersList from '../../../../../../frontend/js/features/group-manag
 import { User } from '../../../../../../types/group-management/user'
 
 describe('ManagedUsersList', function () {
+  const groupId = 'somegroup'
   describe('with users', function () {
     const users: User[] = [
       {
@@ -38,6 +39,7 @@ describe('ManagedUsersList', function () {
           handleSelectAllClick={handleSelectAllClick}
           selectUser={selectUser}
           unselectUser={unselectUser}
+          groupId={groupId}
         />
       )
     })
@@ -83,6 +85,7 @@ describe('ManagedUsersList', function () {
           handleSelectAllClick={handleSelectAllClick}
           selectUser={selectUser}
           unselectUser={unselectUser}
+          groupId={groupId}
         />
       )
     })

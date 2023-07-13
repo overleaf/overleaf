@@ -30,6 +30,7 @@ describe('ManagedUserRow', function () {
           selectUser={selectUser}
           unselectUser={unselectUser}
           selected={selected}
+          openOffboardingModalForUser={sinon.stub()}
         />
       )
     })
@@ -79,6 +80,7 @@ describe('ManagedUserRow', function () {
           selectUser={selectUser}
           unselectUser={unselectUser}
           selected={selected}
+          openOffboardingModalForUser={sinon.stub()}
         />
       )
     })
@@ -115,6 +117,7 @@ describe('ManagedUserRow', function () {
           selectUser={selectUser}
           unselectUser={unselectUser}
           selected={selected}
+          openOffboardingModalForUser={sinon.stub()}
         />
       )
     })
@@ -152,6 +155,7 @@ describe('ManagedUserRow', function () {
           selectUser={selectUser}
           unselectUser={unselectUser}
           selected={selected}
+          openOffboardingModalForUser={sinon.stub()}
         />
       )
     })
@@ -189,6 +193,7 @@ describe('ManagedUserRow', function () {
           selectUser={selectUser}
           unselectUser={unselectUser}
           selected={selected}
+          openOffboardingModalForUser={sinon.stub()}
         />
       )
     })
@@ -231,6 +236,7 @@ describe('ManagedUserRow', function () {
           selectUser={selectUser}
           unselectUser={unselectUser}
           selected={selected}
+          openOffboardingModalForUser={sinon.stub()}
         />
       )
     })

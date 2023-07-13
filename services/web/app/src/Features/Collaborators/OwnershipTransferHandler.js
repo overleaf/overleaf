@@ -15,7 +15,7 @@ module.exports = {
 }
 
 async function transferOwnership(projectId, newOwnerId, options = {}) {
-  const { allowTransferToNonCollaborators, sessionUserId } = options
+  const { allowTransferToNonCollaborators, sessionUserId, skipEmails } = options
 
   // Fetch project and user
   const [project, newOwner] = await Promise.all([
@@ -58,7 +58,9 @@ async function transferOwnership(projectId, newOwnerId, options = {}) {
 
   // Send confirmation emails
   const previousOwner = await UserGetter.promises.getUser(previousOwnerId)
-  await _sendEmails(project, previousOwner, newOwner)
+  if (!skipEmails) {
+    await _sendEmails(project, previousOwner, newOwner)
+  }
 }
 
 async function _getProject(projectId) {

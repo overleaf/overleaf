@@ -17,19 +17,22 @@
   .security-state-not-managed {
     color: @red;
   }
+  .managed-user-row {
+    overflow-wrap: break-word;
+  }
   .managed-user-actions {
     button.dropdown-toggle {
       color: @text-color;
       padding-left: 1em;
       padding-right: 1em;
     }
-    li > a {
+    li > button {
       &:hover {
         background-color: @gray-lightest;
       }
     }
     .delete-user-action {
-      a {
+      button {
         color: @red;
       }
     }

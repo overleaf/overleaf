@@ -7,12 +7,20 @@ function getAllTags(userId, callback) {
   Tag.find({ user_id: userId }, callback)
 }
 
-function createTag(userId, name, color, callback) {
+function createTag(userId, name, color, options, callback) {
+  if (typeof options === 'function') {
+    callback = options
+    options = {}
+  }
   if (!callback) {
     callback = function () {}
   }
   if (name.length > MAX_TAG_LENGTH) {
-    return callback(new Error('Exceeded max tag length'))
+    if (options.truncate) {
+      name = name.slice(0, MAX_TAG_LENGTH)
+    } else {
+      return callback(new Error('Exceeded max tag length'))
+    }
   }
   Tag.create({ user_id: userId, name, color }, function (err, tag) {
     // on duplicate key error return existing tag

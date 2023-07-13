@@ -498,6 +498,30 @@ templates.userOnboardingEmail = NoCTAEmailTemplate({
   },
 })
 
+templates.managedUserOffboarded = ctaTemplate({
+  subject() {
+    return `Your account has been deleted - ${settings.appName}`
+  },
+  title() {
+    return `Your account has been deleted`
+  },
+  message() {
+    return [
+      'Your group administrator has deleted your account. Contact your administrator to learn more about it.',
+      'You can create a new account if you want to use a different email address.',
+    ]
+  },
+  secondaryMessage() {
+    return []
+  },
+  ctaText() {
+    return 'Create a new account'
+  },
+  ctaURL() {
+    return `${settings.siteUrl}/register`
+  },
+})
+
 templates.securityAlert = NoCTAEmailTemplate({
   subject(opts) {
     return `Overleaf security note: ${opts.action}`

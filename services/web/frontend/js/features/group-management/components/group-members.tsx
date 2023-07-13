@@ -203,6 +203,7 @@ export default function GroupMembers() {
                   users={users}
                   selectUser={selectUser}
                   unselectUser={unselectUser}
+                  groupId={groupId}
                 />
               ) : (
                 <GroupMembersList

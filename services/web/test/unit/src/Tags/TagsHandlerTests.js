@@ -67,6 +67,29 @@ describe('TagsHandler', function () {
       })
     })
 
+    describe('when truncate=true, and tag is too long', function () {
+      it('should truncate the tag name', function (done) {
+        // Expect the tag to end up with this truncated name
+        this.tag.name = 'a comically long tag that will be truncated intern'
+        this.TagMock.expects('create')
+          .withArgs(this.tag)
+          .once()
+          .yields(null, this.tag)
+        this.TagsHandler.createTag(
+          this.tag.user_id,
+          // Pass this too-long name
+          'a comically long tag that will be truncated internally and not throw an error',
+          this.tag.color,
+          { truncate: true },
+          (err, resultTag) => {
+            expect(err).to.not.exist
+            expect(resultTag.name).to.equal(this.tag.name)
+            done()
+          }
+        )
+      })
+    })
+
     describe('when tag is too long', function () {
       it('should throw an error', function (done) {
         this.TagsHandler.createTag(

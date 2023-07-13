@@ -195,6 +195,15 @@ describe('OwnershipTransferHandler', function () {
       )
     })
 
+    it('should not send an email notification with the skipEmails option', async function () {
+      await this.handler.promises.transferOwnership(
+        this.project._id,
+        this.collaborator._id,
+        { skipEmails: true }
+      )
+      expect(this.EmailHandler.promises.sendEmail).not.to.have.been.called
+    })
+
     it('should track the change in BigQuery', async function () {
       const sessionUserId = ObjectId()
       await this.handler.promises.transferOwnership(

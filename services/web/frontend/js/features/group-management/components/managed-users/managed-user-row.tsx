@@ -13,6 +13,7 @@ type ManagedUserRowProps = {
   selectUser: (user: User) => void
   unselectUser: (user: User) => void
   selected: boolean
+  openOffboardingModalForUser: (user: User) => void
 }
 
 export default function ManagedUserRow({
@@ -20,6 +21,7 @@ export default function ManagedUserRow({
   selectUser,
   unselectUser,
   selected,
+  openOffboardingModalForUser,
 }: ManagedUserRowProps) {
   const { t } = useTranslation()
 
@@ -86,7 +88,9 @@ export default function ManagedUserRow({
           </span>
         </Col>
         <Col xs={2}>
-          {user.first_name} {user.last_name}
+          <span>
+            {user.first_name} {user.last_name}
+          </span>
         </Col>
         <Col xs={2}>
           {user.last_active_at
@@ -97,7 +101,10 @@ export default function ManagedUserRow({
           <span className="pull-right">
             <ManagedUserStatus user={user} />
             <span className="managed-user-actions">
-              <ManagedUserDropdownButton user={user} />
+              <ManagedUserDropdownButton
+                user={user}
+                openOffboardingModalForUser={openOffboardingModalForUser}
+              />
             </span>
           </span>
         </Col>
