@@ -1222,10 +1222,14 @@ button when (@is-overleaf-light = true) {
   }
 
   .review-panel-toggler {
-    display: flex;
     flex-direction: column;
     padding: 0;
     border: 0;
+
+    .rp-size-mini &,
+    .rp-size-expanded & {
+      display: flex;
+    }
 
     &:after {
       position: sticky;
