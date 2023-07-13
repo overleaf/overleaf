@@ -7,4 +7,4 @@ contacts
 --has-custom-nodemon=True
 --node-version=16.17.1
 --public-repo=False
---script-version=4.2.0
+--script-version=4.3.0

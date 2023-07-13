@@ -4,7 +4,9 @@ clsi
 --docker-repos=gcr.io/overleaf-ops
 --env-add=ENABLE_PDF_CACHING="true",PDF_CACHING_ENABLE_WORKER_POOL="true"
 --env-pass-through=TEXLIVE_IMAGE
+--esmock-loader=False
 --has-custom-cloudbuild=True
+--has-custom-nodemon=False
 --node-version=16.17.1
 --public-repo=True
---script-version=4.1.0
+--script-version=4.3.0
