@@ -190,20 +190,6 @@ module.exports = WebsocketLoadBalancer = {
                   },
                   'hiding restricted message from client'
                 )
-              } else if (
-                message.message === 'project:tokens:changed' &&
-                client.ol_context.owner_id !== client.ol_context.user_id
-              ) {
-                // hide owner only message
-                logger.debug(
-                  {
-                    message,
-                    clientId: client.id,
-                    userId: client.ol_context.user_id,
-                    projectId: client.ol_context.project_id,
-                  },
-                  'hiding owner only message from client'
-                )
               } else {
                 client.emit(message.message, ...message.payload)
               }

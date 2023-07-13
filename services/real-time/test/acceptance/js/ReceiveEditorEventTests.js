@@ -234,7 +234,6 @@ describe('receiveEditorEvent', function () {
             'userRemovedFromProject',
             'project:publicAccessLevel:changed',
             'project:access:revoked',
-            'project:tokens:changed',
           ]
 
           for (const eventName of eventNames) {
@@ -272,32 +271,6 @@ describe('receiveEditorEvent', function () {
     if (this.user_c_client) {
       this.user_c_client.disconnect()
     }
-  })
-
-  describe('event: project:tokens:changed', function () {
-    beforeEach(function (done) {
-      rclient.publish(
-        'editor-events',
-        JSON.stringify({
-          room_id: this.project_id,
-          message: 'project:tokens:changed',
-          payload: [{ tokens: 'TOKENS' }],
-        })
-      )
-      setTimeout(done, 200)
-    })
-
-    it('should send the event to the owner', function () {
-      expect(this.owner_updates).to.deep.equal([
-        { 'project:tokens:changed': { tokens: 'TOKENS' } },
-      ])
-    })
-
-    it('should not send the event to the other clients', function () {
-      expect(this.user_a_updates).to.deep.equal([])
-      expect(this.user_b_updates).to.deep.equal([])
-      expect(this.user_c_updates).to.deep.equal([])
-    })
   })
 
   describe('event: project:publicAccessLevel:changed, set to private', function () {
