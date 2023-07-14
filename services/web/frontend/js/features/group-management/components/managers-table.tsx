@@ -227,7 +227,7 @@ export function ManagersTable({
             </div>
             <hr />
             <div>
-              <p className="small">{t('add_more_members')}</p>
+              <p className="small">{t('add_more_managers')}</p>
               <ErrorAlert error={inviteError} />
               <Form horizontal onSubmit={addManagers} className="form">
                 <Row>
