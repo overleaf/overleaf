@@ -1,0 +1,389 @@
+--- services/web/app/src/Features/Collaborators/CollaboratorsController.js
++++ services/web/app/src/Features/Collaborators/CollaboratorsController.js
+@@ -11,6 +11,7 @@ const Errors = require('../Errors/Errors')
+ const logger = require('@overleaf/logger')
+ const { expressify } = require('../../util/promises')
+ const { hasAdminAccess } = require('../Helpers/AdminAuthorizationHelper')
++const TokenAccessHandler = require('../TokenAccess/TokenAccessHandler')
+
+ module.exports = {
+   removeUserFromProject: expressify(removeUserFromProject),
+@@ -18,6 +19,7 @@ module.exports = {
+   getAllMembers: expressify(getAllMembers),
+   setCollaboratorInfo: expressify(setCollaboratorInfo),
+   transferOwnership: expressify(transferOwnership),
++  getShareTokens: expressify(getShareTokens),
+ }
+
+ async function removeUserFromProject(req, res, next) {
+@@ -114,3 +116,37 @@ async function _removeUserIdFromProject(projectId, userId) {
+   )
+   await TagsHandler.promises.removeProjectFromAllTags(userId, projectId)
+ }
++
++async function getShareTokens(req, res) {
++  const projectId = req.params.Project_id
++  const userId = SessionManager.getLoggedInUserId(req.session)
++
++  let tokens
++  if (userId) {
++    tokens = await CollaboratorsGetter.promises.getPublicShareTokens(
++      ObjectId(userId),
++      ObjectId(projectId)
++    )
++  } else {
++    // anonymous access, the token is already available in the session
++    const readOnly = TokenAccessHandler.getRequestToken(req, projectId)
++    tokens = { readOnly }
++  }
++  if (!tokens) {
++    return res.sendStatus(403)
++  }
++
++  if (tokens.readOnly || tokens.readAndWrite) {
++    logger.info(
++      {
++        projectId,
++        userId: userId || 'anonymous',
++        ip: req.ip,
++        tokens: Object.keys(tokens),
++      },
++      'project tokens accessed'
++    )
++  }
++
++  res.json(tokens)
++}
+--- services/web/app/src/Features/Collaborators/CollaboratorsGetter.js
++++ services/web/app/src/Features/Collaborators/CollaboratorsGetter.js
+@@ -25,6 +25,7 @@ module.exports = {
+   getInvitedCollaboratorCount: callbackify(getInvitedCollaboratorCount),
+   getProjectsUserIsMemberOf: callbackify(getProjectsUserIsMemberOf),
+   isUserInvitedMemberOfProject: callbackify(isUserInvitedMemberOfProject),
++  getPublicShareTokens: callbackify(getPublicShareTokens),
+   userIsTokenMember: callbackify(userIsTokenMember),
+   getAllInvitedMembers: callbackify(getAllInvitedMembers),
+   promises: {
+@@ -37,6 +38,7 @@ module.exports = {
+     getInvitedCollaboratorCount,
+     getProjectsUserIsMemberOf,
+     isUserInvitedMemberOfProject,
++    getPublicShareTokens,
+     userIsTokenMember,
+     getAllInvitedMembers,
+   },
+@@ -133,6 +135,40 @@ async function isUserInvitedMemberOfProject(userId, projectId) {
+   return false
+ }
+
++async function getPublicShareTokens(userId, projectId) {
++  const memberInfo = await Project.findOne(
++    {
++      _id: projectId,
++    },
++    {
++      isOwner: { $eq: ['$owner_ref', userId] },
++      hasTokenReadOnlyAccess: {
++        $and: [
++          { $in: [userId, '$tokenAccessReadOnly_refs'] },
++          { $eq: ['$publicAccesLevel', PublicAccessLevels.TOKEN_BASED] },
++        ],
++      },
++      tokens: 1,
++    }
++  )
++    .lean()
++    .exec()
++
++  if (!memberInfo) {
++    return null
++  }
++
++  if (memberInfo.isOwner) {
++    return memberInfo.tokens
++  } else if (memberInfo.hasTokenReadOnlyAccess) {
++    return {
++      readOnly: memberInfo.tokens.readOnly,
++    }
++  } else {
++    return {}
++  }
++}
++
+ async function getProjectsUserIsMemberOf(userId, fields) {
+   const limit = pLimit(2)
+   const [readAndWrite, readOnly, tokenReadAndWrite, tokenReadOnly] =
+--- services/web/app/src/Features/Collaborators/CollaboratorsRouter.js
++++ services/web/app/src/Features/Collaborators/CollaboratorsRouter.js
+@@ -22,6 +22,10 @@ const rateLimiters = {
+     points: 200,
+     duration: 60 * 10,
+   }),
++  getProjectTokens: new RateLimiter('get-project-tokens', {
++    points: 200,
++    duration: 60 * 10,
++  }),
+ }
+
+ module.exports = {
+@@ -139,5 +143,12 @@ module.exports = {
+       CollaboratorsInviteController.acceptInvite,
+       AnalyticsRegistrationSourceMiddleware.clearSource()
+     )
++
++    webRouter.get(
++      '/project/:Project_id/tokens',
++      RateLimiterMiddleware.rateLimit(rateLimiters.getProjectTokens),
++      AuthorizationMiddleware.ensureUserCanReadProject,
++      CollaboratorsController.getShareTokens
++    )
+   },
+ }
+--- services/web/app/src/Features/Editor/EditorController.js
++++ services/web/app/src/Features/Editor/EditorController.js
+@@ -581,20 +581,7 @@ const EditorController = {
+           { newAccessLevel }
+         )
+         if (newAccessLevel === PublicAccessLevels.TOKEN_BASED) {
+-          ProjectDetailsHandler.ensureTokensArePresent(
+-            projectId,
+-            function (err, tokens) {
+-              if (err) {
+-                return callback(err)
+-              }
+-              EditorRealTimeController.emitToRoom(
+-                projectId,
+-                'project:tokens:changed',
+-                { tokens }
+-              )
+-              callback()
+-            }
+-          )
++          ProjectDetailsHandler.ensureTokensArePresent(projectId, callback)
+         } else {
+           callback()
+         }
+--- services/web/app/src/Features/Editor/EditorHttpController.js
++++ services/web/app/src/Features/Editor/EditorHttpController.js
+@@ -67,8 +67,6 @@ async function joinProject(req, res, next) {
+   if (!project) {
+     return res.sendStatus(403)
+   }
+-  // Hide access tokens if this is not the project owner
+-  TokenAccessHandler.protectTokens(project, privilegeLevel)
+   // Hide sensitive data if the user is restricted
+   if (isRestrictedUser) {
+     project.owner = { _id: project.owner._id }
+--- services/web/app/src/Features/Project/ProjectController.js
++++ services/web/app/src/Features/Project/ProjectController.js
+@@ -343,7 +343,7 @@ const ProjectController = {
+     const userId = SessionManager.getLoggedInUserId(req.session)
+     ProjectGetter.findAllUsersProjects(
+       userId,
+-      'name lastUpdated publicAccesLevel archived trashed owner_ref tokens',
++      'name lastUpdated publicAccesLevel archived trashed owner_ref',
+       (err, projects) => {
+         if (err != null) {
+           return next(err)
+@@ -1072,7 +1072,6 @@ const ProjectController = {
+     // If a project is simultaneously trashed and archived, we will consider it archived but not trashed.
+     const trashed = ProjectHelper.isTrashed(project, userId) && !archived
+
+-    TokenAccessHandler.protectTokens(project, accessLevel)
+     const model = {
+       id: project._id,
+       name: project.name,
+--- services/web/app/src/Features/Project/ProjectDetailsHandler.js
++++ services/web/app/src/Features/Project/ProjectDetailsHandler.js
+@@ -207,14 +207,13 @@ async function ensureTokensArePresent(projectId) {
+     project.tokens.readOnly != null &&
+     project.tokens.readAndWrite != null
+   ) {
+-    return project.tokens
++    return
+   }
+   await _generateTokens(project)
+   await Project.updateOne(
+     { _id: projectId },
+     { $set: { tokens: project.tokens } }
+   ).exec()
+-  return project.tokens
+ }
+
+ async function clearTokens(projectId) {
+--- services/web/app/src/Features/Project/ProjectEditorHandler.js
++++ services/web/app/src/Features/Project/ProjectEditorHandler.js
+@@ -49,7 +49,6 @@ module.exports = ProjectEditorHandler = {
+       ),
+       members: [],
+       invites,
+-      tokens: project.tokens,
+       imageName:
+         project.imageName != null
+           ? Path.basename(project.imageName)
+--- services/web/app/src/Features/TokenAccess/TokenAccessHandler.js
++++ services/web/app/src/Features/TokenAccess/TokenAccessHandler.js
+@@ -246,22 +246,6 @@ const TokenAccessHandler = {
+     })
+   },
+
+-  protectTokens(project, privilegeLevel) {
+-    if (!project || !project.tokens) {
+-      return
+-    }
+-    if (privilegeLevel === PrivilegeLevels.OWNER) {
+-      return
+-    }
+-    if (privilegeLevel !== PrivilegeLevels.READ_AND_WRITE) {
+-      project.tokens.readAndWrite = ''
+-      project.tokens.readAndWritePrefix = ''
+-    }
+-    if (privilegeLevel !== PrivilegeLevels.READ_ONLY) {
+-      project.tokens.readOnly = ''
+-    }
+-  },
+-
+   getV1DocPublishedInfo(token, callback) {
+     // default to allowing access
+     if (!Settings.apis.v1 || !Settings.apis.v1.url) {
+@@ -304,7 +288,6 @@ TokenAccessHandler.promises = promisifyAll(TokenAccessHandler, {
+     '_projectFindOne',
+     'grantSessionTokenAccess',
+     'getRequestToken',
+-    'protectTokens',
+   ],
+   multiResult: {
+     validateTokenForAnonymousAccess: ['isValidReadAndWrite', 'isValidReadOnly'],
+--- services/web/frontend/js/features/share-project-modal/components/link-sharing.js
++++ services/web/frontend/js/features/share-project-modal/components/link-sharing.js
+@@ -1,4 +1,4 @@
+-import { useCallback, useState } from 'react'
++import { useCallback, useState, useEffect } from 'react'
+ import PropTypes from 'prop-types'
+ import { Button, Col, Row } from 'react-bootstrap'
+ import { Trans } from 'react-i18next'
+@@ -10,6 +10,8 @@ import CopyLink from '../../../shared/components/copy-link'
+ import { useProjectContext } from '../../../shared/context/project-context'
+ import * as eventTracking from '../../../infrastructure/event-tracking'
+ import { useUserContext } from '../../../shared/context/user-context'
++import { getJSON } from '../../../infrastructure/fetch-json'
++import useAbortController from '../../../shared/hooks/use-abort-controller'
+
+ export default function LinkSharing({ canAddCollaborators }) {
+   const [inflight, setInflight] = useState(false)
+@@ -27,8 +29,7 @@ export default function LinkSharing({ canAddCollaborators }) {
+       )
+         .then(() => {
+           // NOTE: not calling `updateProject` here as it receives data via
+-          // project:publicAccessLevel:changed and project:tokens:changed
+-          // over the websocket connection
++          // project:publicAccessLevel:changed over the websocket connection
+           // TODO: eventTracking.sendMB('project-make-token-based') when newPublicAccessLevel is 'tokenBased'
+         })
+         .finally(() => {
+@@ -106,7 +107,17 @@ PrivateSharing.propTypes = {
+ }
+
+ function TokenBasedSharing({ setAccessLevel, inflight, canAddCollaborators }) {
+-  const { tokens } = useProjectContext()
++  const { _id: projectId } = useProjectContext()
++
++  const [tokens, setTokens] = useState(null)
++
++  const { signal } = useAbortController()
++
++  useEffect(() => {
++    getJSON(`/project/${projectId}/tokens`, { signal })
++      .then(data => setTokens(data))
++      .catch(error => console.error(error))
++  }, [projectId, signal])
+
+   return (
+     <Row className="public-access-level">
+@@ -194,7 +205,17 @@ LegacySharing.propTypes = {
+ }
+
+ export function ReadOnlyTokenLink() {
+-  const { tokens } = useProjectContext()
++  const { _id: projectId } = useProjectContext()
++
++  const [tokens, setTokens] = useState(null)
++
++  const { signal } = useAbortController()
++
++  useEffect(() => {
++    getJSON(`/project/${projectId}/tokens`, { signal })
++      .then(data => setTokens(data))
++      .catch(error => console.error(error))
++  }, [projectId, signal])
+
+   return (
+     <Row className="public-access-level">
+--- services/web/frontend/js/features/share-project-modal/controllers/react-share-project-modal-controller.js
++++ services/web/frontend/js/features/share-project-modal/controllers/react-share-project-modal-controller.js
+@@ -31,16 +31,6 @@ export default App.controller(
+       })
+     }
+
+-    /* tokens */
+-
+-    ide.socket.on('project:tokens:changed', data => {
+-      if (data.tokens != null) {
+-        $scope.$applyAsync(() => {
+-          $scope.project.tokens = data.tokens
+-        })
+-      }
+-    })
+-
+     ide.socket.on('project:membership:changed', data => {
+       if (data.members) {
+         listProjectMembers($scope.project._id)
+--- services/web/frontend/js/shared/context/mock/mock-ide.js
++++ services/web/frontend/js/shared/context/mock/mock-ide.js
+@@ -27,10 +27,6 @@ export const getMockIde = () => {
+           zotero: false,
+         },
+         publicAccessLevel: '',
+-        tokens: {
+-          readOnly: '',
+-          readAndWrite: '',
+-        },
+         owner: {
+           _id: '',
+           email: '',
+--- services/web/frontend/js/shared/context/project-context.js
++++ services/web/frontend/js/shared/context/project-context.js
+@@ -28,10 +28,6 @@ export const projectShape = {
+     versioning: PropTypes.bool,
+   }),
+   publicAccessLevel: PropTypes.string,
+-  tokens: PropTypes.shape({
+-    readOnly: PropTypes.string,
+-    readAndWrite: PropTypes.string,
+-  }),
+   owner: PropTypes.shape({
+     _id: PropTypes.string.isRequired,
+     email: PropTypes.string.isRequired,
+@@ -81,7 +77,6 @@ export function ProjectProvider({ children }) {
+     invites,
+     features,
+     publicAccesLevel: publicAccessLevel,
+-    tokens,
+     owner,
+   } = project || projectFallback
+
+@@ -94,7 +89,6 @@ export function ProjectProvider({ children }) {
+       invites,
+       features,
+       publicAccessLevel,
+-      tokens,
+       owner,
+     }
+   }, [
+@@ -105,7 +99,6 @@ export function ProjectProvider({ children }) {
+     invites,
+     features,
+     publicAccessLevel,
+-    tokens,
+     owner,
+   ])
