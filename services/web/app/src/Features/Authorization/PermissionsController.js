@@ -1,5 +1,9 @@
-const { ForbiddenError } = require('../Errors/Errors')
-const { hasPermission, getUserCapabilities } = require('./PermissionsManager')
+const { ForbiddenError, UserNotFoundError } = require('../Errors/Errors')
+const {
+  hasPermission,
+  getUserCapabilities,
+  getUserRestrictions,
+} = require('./PermissionsManager')
 const ManagedUsersHandler = require('../Subscription/ManagedUsersHandler')
 
 /**
@@ -8,6 +12,16 @@ const ManagedUsersHandler = require('../Subscription/ManagedUsersHandler')
  */
 function useCapabilities() {
   return async function (req, res, next) {
+    // attach the user's capabilities to the request object
+    req.capabilitySet = new Set()
+    // provide a function to assert that a capability is present
+    req.assertPermission = capability => {
+      if (!req.capabilitySet.has(capability)) {
+        throw new ForbiddenError(
+          `user does not have permission for ${capability}`
+        )
+      }
+    }
     if (!req.user) {
       return next()
     }
@@ -15,20 +29,25 @@ function useCapabilities() {
       // get the group policy applying to the user
       const groupPolicy =
         await ManagedUsersHandler.promises.getGroupPolicyForUser(req.user)
-      const capabilitySet = getUserCapabilities(groupPolicy)
-      req.assertPermission = capability => {
-        if (!capabilitySet.has(capability)) {
-          throw new ForbiddenError(
-            `user does not have permission for ${capability}`
-          )
-        }
+      // attach the new capabilities to the request object
+      for (const cap of getUserCapabilities(groupPolicy)) {
+        req.capabilitySet.add(cap)
       }
+      // also attach the user's restrictions (the capabilities they don't have)
+      req.userRestrictions = getUserRestrictions(groupPolicy)
       next()
     } catch (error) {
-      next(error)
+      if (error instanceof UserNotFoundError) {
+        // the user is logged in but doesn't exist in the database
+        // this can happen if the user has just deleted their account
+        return next()
+      } else {
+        next(error)
+      }
     }
   }
 }
+
 /**
  * Function that returns middleware to check if the user has permission to access a resource.
  * @param {[string]} requiredCapabilities - the capabilities required to access the resource.

@@ -239,6 +239,23 @@ function getUserCapabilities(groupPolicy) {
 }
 
 /**
+ * Returns a set of capabilities that a user does not have based on their group policy.
+ *
+ * @param {Object} groupPolicy - The group policy object to check.
+ * @returns {Set} A set of capabilities that the user does not have, based on their group
+ *   policy.
+ * @throws {Error} If the policy is unknown.
+ */
+function getUserRestrictions(groupPolicy) {
+  const userCapabilities = getUserCapabilities(groupPolicy)
+  const userRestrictions = getDefaultCapabilities()
+  for (const capability of userCapabilities) {
+    userRestrictions.delete(capability)
+  }
+  return userRestrictions
+}
+
+/**
  * Checks if a user has permission for a given capability based on their group
  * policy.
  *
@@ -299,6 +316,7 @@ module.exports = {
   registerPolicy,
   hasPermission,
   getUserCapabilities,
+  getUserRestrictions,
   getUserValidationStatus: callbackify(getUserValidationStatus),
   promises: { getUserValidationStatus },
 }

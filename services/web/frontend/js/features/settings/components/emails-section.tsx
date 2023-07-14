@@ -23,6 +23,11 @@ function EmailsSectionContent() {
   } = useUserEmailsContext()
   const userEmails = Object.values(userEmailsData.byId)
 
+  // Only show the "add email" button if the user has permission to add a secondary email
+  const hideAddSecondaryEmail = getMeta(
+    'ol-cannot-add-secondary-email'
+  ) as boolean
+
   return (
     <>
       <h3>{t('emails_and_affiliations_title')}</h3>
@@ -57,7 +62,7 @@ function EmailsSectionContent() {
           </>
         )}
         {isInitializingSuccess && <LeaversSurveyAlert />}
-        {isInitializingSuccess && <AddEmail />}
+        {isInitializingSuccess && !hideAddSecondaryEmail && <AddEmail />}
         {isInitializingError && (
           <Alert bsStyle="danger" className="text-center">
             <Icon type="exclamation-triangle" fw />{' '}

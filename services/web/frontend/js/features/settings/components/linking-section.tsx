@@ -39,6 +39,25 @@ function LinkingSection() {
 
   const hasIntegrationLinkingSection = allIntegrationLinkingWidgets.length
   const hasReferencesLinkingSection = referenceLinkingWidgets.length
+
+  // Filter out SSO providers that are not allowed to be linked by
+  // managed users. Allow unlinking them if they are already linked.
+  const hideGoogleSSO = getMeta('ol-cannot-link-google-sso')
+  const hideOtherThirdPartySSO = getMeta('ol-cannot-link-other-third-party-sso')
+
+  for (const providerId in subscriptions) {
+    const isLinked = subscriptions[providerId].linked
+    if (providerId === 'google') {
+      if (hideGoogleSSO && !isLinked) {
+        delete subscriptions[providerId]
+      }
+    } else {
+      if (hideOtherThirdPartySSO && !isLinked) {
+        delete subscriptions[providerId]
+      }
+    }
+  }
+
   const hasSSOLinkingSection = Object.keys(subscriptions).length > 0
 
   if (

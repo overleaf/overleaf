@@ -64,6 +64,9 @@ html(
 					indexName : settings.templates.indexName
 				})
 
+			each restriction in userRestrictions || []
+				meta(name='ol-cannot-' + restriction data-type="boolean" content=true)
+
 		block head-scripts
 
 	body(ng-csp=(cspEnabled ? "no-unsafe-eval" : false) class=(showThinFooter ? 'thin-footer' : undefined))

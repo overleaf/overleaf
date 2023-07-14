@@ -285,6 +285,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   webRouter.get(
     '/user/settings',
     AuthenticationController.requireLogin(),
+    PermissionsController.useCapabilities(),
     UserPagesController.settingsPage
   )
   webRouter.post(
