@@ -139,6 +139,7 @@
   "github_validation_check": "Tarkista, että repositoryn nimi on kelvollinen ja että sinulla on oikeudet luoda repository.",
   "go_to_code_location_in_pdf": "Mene koodin sijaintiin PDF:ssä",
   "go_to_pdf_location_in_code": "Mene PDF-sijaintiin koodissa",
+  "group_admin": "Ryhmän ylläpitäjä",
   "help": "Apua",
   "help_us_spread_word": "Auta meitä jakamaan tietoa __appName__-sovelluksesta",
   "hotkeys": "Pikanäppäimet",
