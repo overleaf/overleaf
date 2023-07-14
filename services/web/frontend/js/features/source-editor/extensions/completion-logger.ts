@@ -23,6 +23,6 @@ export const completionLogger = ViewPlugin.define(view => {
 })
 
 const completionCommand = (label: string): string | null => {
-  const matches = label.match(/^(\\\w+)/)
+  const matches = label.match(/^\\(\w+)/)
   return matches ? matches[1] : null
 }
