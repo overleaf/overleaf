@@ -28,10 +28,11 @@ block content
 
 						div(ng-show="view =='teamInvite'")
 							p #{translate("join_team_explanation", {appName: appName})}
-							p
-								a.btn.btn-secondary(href="/project") #{translate("not_now")}
-								| &nbsp;
-								a.btn.btn.btn-primary(ng-click="joinTeam()", ng-disabled="inflight") #{translate("accept_invitation")} 
+							if (!expired)
+								p
+									a.btn.btn-secondary(href="/project") #{translate("not_now")}
+									| &nbsp;
+									a.btn.btn.btn-primary(ng-click="joinTeam()", ng-disabled="inflight") #{translate("accept_invitation")} 
 
 						div(ng-show="view =='inviteAccepted'")
 							p(ng-non-bindable) #{translate("joined_team", {inviterName: inviterName})}

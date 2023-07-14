@@ -33,21 +33,27 @@ describe('TeamInvitesHandler', function () {
       groupPlan: true,
       member_ids: [],
       teamInvites: [this.teamInvite],
-      save: sinon.stub().yields(null),
+      save: sinon.stub().resolves(),
     }
 
     this.SubscriptionLocator = {
-      getUsersSubscription: sinon.stub(),
-      getSubscription: sinon.stub().yields(null, this.subscription),
+      promises: {
+        getUsersSubscription: sinon.stub(),
+        getSubscription: sinon.stub().resolves(this.subscription),
+      },
     }
 
     this.UserGetter = {
-      getUser: sinon.stub().yields(),
-      getUserByAnyEmail: sinon.stub().yields(),
+      promises: {
+        getUser: sinon.stub().resolves(),
+        getUserByAnyEmail: sinon.stub().resolves(),
+      },
     }
 
     this.SubscriptionUpdater = {
-      addUserToGroup: sinon.stub().yields(),
+      promises: {
+        addUserToGroup: sinon.stub().resolves(),
+      },
     }
 
     this.LimitationsManager = {
@@ -55,12 +61,20 @@ describe('TeamInvitesHandler', function () {
     }
 
     this.Subscription = {
-      findOne: sinon.stub().yields(),
-      updateOne: sinon.stub().yields(),
+      findOne: sinon.stub().resolves(),
+      updateOne: sinon.stub().resolves(),
     }
 
     this.EmailHandler = {
-      sendEmail: sinon.stub().yields(null),
+      promises: {
+        sendEmail: sinon.stub().resolves(null),
+      },
+    }
+
+    this.ManagedUsersHandler = {
+      promises: {
+        enrollInSubscription: sinon.stub().resolves(),
+      },
     }
 
     this.newToken = 'bbbbbbbbb'
@@ -71,18 +85,17 @@ describe('TeamInvitesHandler', function () {
       },
     }
 
-    this.UserGetter.getUser
+    this.UserGetter.promises.getUser
       .withArgs(this.manager._id)
-      .yields(null, this.manager)
-    this.UserGetter.getUserByAnyEmail
+      .resolves(this.manager)
+    this.UserGetter.promises.getUserByAnyEmail
       .withArgs(this.manager.email)
-      .yields(null, this.manager)
+      .resolves(this.manager)
 
-    this.SubscriptionLocator.getUsersSubscription.yields(
-      null,
+    this.SubscriptionLocator.promises.getUsersSubscription.resolves(
       this.subscription
     )
-    this.Subscription.findOne.yields(null, this.subscription)
+    this.Subscription.findOne.resolves(this.subscription)
 
     this.TeamInvitesHandler = SandboxedModule.require(modulePath, {
       requires: {
@@ -96,6 +109,7 @@ describe('TeamInvitesHandler', function () {
         './SubscriptionUpdater': this.SubscriptionUpdater,
         './LimitationsManager': this.LimitationsManager,
         '../Email/EmailHandler': this.EmailHandler,
+        './ManagedUsersHandler': this.ManagedUsersHandler,
       },
     })
   })
@@ -114,7 +128,7 @@ describe('TeamInvitesHandler', function () {
     })
 
     it("returns teamNotFound if there's none", function (done) {
-      this.Subscription.findOne = sinon.stub().yields(null, null)
+      this.Subscription.findOne = sinon.stub().resolves(null)
 
       this.TeamInvitesHandler.getInvite(
         this.token,
@@ -152,7 +166,7 @@ describe('TeamInvitesHandler', function () {
         this.subscription,
         'John.Snow@example.com',
         (err, invite) => {
-          this.EmailHandler.sendEmail
+          this.EmailHandler.promises.sendEmail
             .calledWith(
               'verifyEmailToJoinTeam',
               sinon.match({
@@ -214,7 +228,7 @@ describe('TeamInvitesHandler', function () {
         this.manager.email,
         (err, invite) => {
           sinon.assert.calledWith(
-            this.SubscriptionUpdater.addUserToGroup,
+            this.SubscriptionUpdater.promises.addUserToGroup,
             this.subscription._id,
             this.manager._id
           )
@@ -266,9 +280,9 @@ describe('TeamInvitesHandler', function () {
         email: 'tyrion@example.com',
       }
 
-      this.UserGetter.getUserByAnyEmail
+      this.UserGetter.promises.getUserByAnyEmail
         .withArgs(this.user.email)
-        .yields(null, this.user)
+        .resolves(this.user)
 
       this.subscription.teamInvites.push({
         email: 'john.snow@example.com',
@@ -279,7 +293,7 @@ describe('TeamInvitesHandler', function () {
 
     it('adds the user to the team', function (done) {
       this.TeamInvitesHandler.acceptInvite('dddddddd', this.user.id, () => {
-        this.SubscriptionUpdater.addUserToGroup
+        this.SubscriptionUpdater.promises.addUserToGroup
           .calledWith(this.subscription._id, this.user.id)
           .should.eq(true)
         done()
@@ -331,10 +345,10 @@ describe('TeamInvitesHandler', function () {
         'eddard@example.com',
         'robert@example.com',
       ]
-      this.TeamInvitesHandler.createInvite = sinon.stub().yields(null)
-      this.SubscriptionLocator.getGroupsWithEmailInvite = sinon
+      this.TeamInvitesHandler.createInvite = sinon.stub().resolves(null)
+      this.SubscriptionLocator.promises.getGroupsWithEmailInvite = sinon
         .stub()
-        .yields(null, [this.subscription])
+        .resolves([this.subscription])
     })
 
     it('sends an invitation email to addresses in the legacy invited_emails field', function (done) {
@@ -396,9 +410,9 @@ describe('TeamInvitesHandler', function () {
       }
 
       this.subscription.member_ids = [member.id]
-      this.UserGetter.getUserByAnyEmail
+      this.UserGetter.promises.getUserByAnyEmail
         .withArgs(member.email)
-        .yields(null, member)
+        .resolves(member)
 
       this.TeamInvitesHandler.createInvite(
         this.manager._id,

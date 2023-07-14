@@ -6,6 +6,8 @@ const ErrorController = require('../Errors/ErrorController')
 const EmailHelper = require('../Helpers/EmailHelper')
 const UserGetter = require('../User/UserGetter')
 const { expressify } = require('../../util/promises')
+const HttpErrorHandler = require('../Errors/HttpErrorHandler')
+const PermissionsManager = require('../Authorization/PermissionsManager')
 
 function createInvite(req, res, next) {
   const teamManagerId = SessionManager.getLoggedInUserId(req.session)
@@ -53,11 +55,14 @@ async function viewInvite(req, res, next) {
   const { token } = req.params
   const userId = SessionManager.getLoggedInUserId(req.session)
 
-  const { invite } = await TeamInvitesHandler.promises.getInvite(token)
+  const { invite, subscription } = await TeamInvitesHandler.promises.getInvite(
+    token
+  )
   if (!invite) {
     return ErrorController.notFound(req, res)
   }
 
+  let validationStatus = new Map()
   if (userId) {
     const personalSubscription =
       await SubscriptionLocator.promises.getUsersSubscription(userId)
@@ -69,19 +74,51 @@ async function viewInvite(req, res, next) {
       personalSubscription.recurlySubscription_id &&
       personalSubscription.recurlySubscription_id !== ''
 
-    res.render('subscriptions/team/invite', {
-      inviterName: invite.inviterName,
-      inviteToken: invite.token,
-      hasIndividualRecurlySubscription,
-      appName: settings.appName,
-      expired: req.query.expired,
-    })
+    if (subscription?.groupPolicy) {
+      if (!subscription.populated('groupPolicy')) {
+        await subscription.populate('groupPolicy')
+      }
+
+      const user = await UserGetter.promises.getUser(userId)
+
+      if (
+        user.enrollment?.managedBy &&
+        user.enrollment?.managedBy.toString() !== subscription._id.toString()
+      ) {
+        return HttpErrorHandler.forbidden(
+          req,
+          res,
+          'User is already managed by a different subscription'
+        )
+      }
+
+      validationStatus =
+        await PermissionsManager.promises.getUserValidationStatus(
+          user,
+          subscription.groupPolicy
+        )
+
+      return res.render('subscriptions/team/invite-managed', {
+        inviterName: invite.inviterName,
+        inviteToken: invite.token,
+        expired: req.query.expired,
+        validationStatus: Object.fromEntries(validationStatus),
+      })
+    } else {
+      return res.render('subscriptions/team/invite', {
+        inviterName: invite.inviterName,
+        inviteToken: invite.token,
+        hasIndividualRecurlySubscription,
+        appName: settings.appName,
+        expired: req.query.expired,
+      })
+    }
   } else {
     const userByEmail = await UserGetter.promises.getUserByMainEmail(
       invite.email
     )
 
-    res.render('subscriptions/team/invite_logged_out', {
+    return res.render('subscriptions/team/invite_logged_out', {
       inviterName: invite.inviterName,
       inviteToken: invite.token,
       appName: settings.appName,
@@ -91,16 +128,12 @@ async function viewInvite(req, res, next) {
   }
 }
 
-function acceptInvite(req, res, next) {
+async function acceptInvite(req, res, next) {
   const { token } = req.params
   const userId = SessionManager.getLoggedInUserId(req.session)
 
-  TeamInvitesHandler.acceptInvite(token, userId, function (err, results) {
-    if (err) {
-      return next(err)
-    }
-    res.sendStatus(204)
-  })
+  await TeamInvitesHandler.promises.acceptInvite(token, userId)
+  res.sendStatus(204)
 }
 
 function revokeInvite(req, res, next) {
@@ -127,6 +160,6 @@ function revokeInvite(req, res, next) {
 module.exports = {
   createInvite,
   viewInvite: expressify(viewInvite),
-  acceptInvite,
+  acceptInvite: expressify(acceptInvite),
   revokeInvite,
 }
