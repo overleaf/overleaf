@@ -15,6 +15,7 @@ block body
 		else
 			include layout/fat-footer
 
+	if (typeof(suppressCookieBanner) == 'undefined')
 		include _cookie_banner
 
 	!= moduleIncludes("contactModal", locals)
