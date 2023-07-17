@@ -22,10 +22,14 @@ const argv = yargs(hideBin(process.argv))
     description: 'Target 2-letter locale code',
     choices: VALID_LOCALES,
   })
+  .option('skip-until', {
+    type: 'string',
+    description: 'Skip locales until after the provided key',
+  })
   .parse()
 
 async function translateLocales() {
-  const { locale } = argv
+  let { locale, skip } = argv
   console.log(`Looking for missing [${locale}] translations...`)
 
   const keysToUploadFolder = Path.join(__dirname, `translated-keys-to-upload`)
@@ -48,6 +52,10 @@ async function translateLocales() {
   )
 
   for (const key of englishKeys) {
+    if (skip) {
+      if (key === skip) skip = ''
+      continue
+    }
     const translation = localeTranslations[key]
     if (!translation || translation.length === 0) {
       let value = await prompt(
@@ -57,6 +65,10 @@ async function translateLocales() {
         value = await prompt(
           `\nTranslations should not contain single-quote characters, please use curvy quotes (‘ or ’) instead:\n`
         )
+      }
+      if (!value) {
+        console.log(`Skipping ${key}`)
+        continue
       }
       localeTranslations[key] = value
 
