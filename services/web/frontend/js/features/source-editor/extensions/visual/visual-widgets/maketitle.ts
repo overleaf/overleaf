@@ -119,26 +119,32 @@ function buildAuthorsElement(
   const authorsElement = document.createElement('div')
   authorsElement.classList.add('ol-cm-authors')
 
-  for (const { node, content } of authors) {
-    const authorContent = content.slice(1, -1) // trimming the braces
-    const authors = authorContent.replaceAll(/\s+/g, ' ').split('\\and')
+  for (const { node } of authors) {
+    const typesettedAuthors = document.createElement('div')
+    typesetNodeIntoElement(node, typesettedAuthors, view.state)
 
-    for (const author of authors) {
-      const authorElement = document.createElement('div')
-      authorElement.classList.add('ol-cm-author')
+    let currentAuthor = document.createElement('div')
+    currentAuthor.classList.add('ol-cm-author')
+    authorsElement.append(currentAuthor)
 
-      for (const authorInfoItem of author.split('\\\\')) {
-        const authorLineElement = document.createElement('div')
-        authorLineElement.classList.add('ol-cm-author-line')
-        authorLineElement.textContent = authorInfoItem.trim()
-        authorElement.appendChild(authorLineElement)
+    while (typesettedAuthors.firstChild) {
+      const child = typesettedAuthors.firstChild
+      if (
+        child instanceof HTMLElement &&
+        child.classList.contains('ol-cm-command-and')
+      ) {
+        currentAuthor = document.createElement('div')
+        currentAuthor.classList.add('ol-cm-author')
+        authorsElement.append(currentAuthor)
+        child.remove()
+      } else {
+        currentAuthor.append(child)
       }
-
-      authorElement.addEventListener('mouseup', () => {
-        selectNode(view, node)
-      })
-      authorsElement.append(authorElement)
     }
+
+    currentAuthor.addEventListener('mouseup', () => {
+      selectNode(view, node)
+    })
   }
 
   return authorsElement

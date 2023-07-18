@@ -58,6 +58,26 @@ export function typesetNodeIntoElement(
         pushAncestor(document.createElement('em'))
         const textArgument = childNode.getChild('TextArgument')
         from = textArgument?.getChild('LongArg')?.from ?? childNode.to
+      } else if (isUnknownCommandWithName(childNode, '\\texttt', state)) {
+        const spanElement = document.createElement('span')
+        spanElement.classList.add('ol-cm-command-texttt')
+        pushAncestor(spanElement)
+        const textArgument = childNode.getChild('TextArgument')
+        from = textArgument?.getChild('LongArg')?.from ?? childNode.to
+      } else if (isUnknownCommandWithName(childNode, '\\and', state)) {
+        const spanElement = document.createElement('span')
+        spanElement.classList.add('ol-cm-command-and')
+        pushAncestor(spanElement)
+        const textArgument = childNode.getChild('TextArgument')
+        from = textArgument?.getChild('LongArg')?.from ?? childNode.to
+      } else if (
+        isUnknownCommandWithName(childNode, '\\corref', state) ||
+        isUnknownCommandWithName(childNode, '\\fnref', state) ||
+        isUnknownCommandWithName(childNode, '\\thanks', state)
+      ) {
+        // ignoring these commands
+        from = childNode.to
+        return false
       } else if (isNewline(childNode, state)) {
         ancestor().appendChild(document.createElement('br'))
         from = childNode.to
@@ -65,23 +85,13 @@ export function typesetNodeIntoElement(
     },
     function leave(childNodeRef) {
       const childNode = childNodeRef.node
-      if (isUnknownCommandWithName(childNode, '\\textit', state)) {
-        const typeSetElement = popAncestor()
-        ancestor().appendChild(typeSetElement)
-        const textArgument = childNode.getChild('TextArgument')
-        const endBrace = textArgument?.getChild('CloseBrace')
-        if (endBrace) {
-          from = endBrace.to
-        }
-      } else if (isUnknownCommandWithName(childNode, '\\textbf', state)) {
-        const typeSetElement = popAncestor()
-        ancestor().appendChild(typeSetElement)
-        const textArgument = childNode.getChild('TextArgument')
-        const endBrace = textArgument?.getChild('CloseBrace')
-        if (endBrace) {
-          from = endBrace.to
-        }
-      } else if (isUnknownCommandWithName(childNode, '\\emph', state)) {
+      if (
+        isUnknownCommandWithName(childNode, '\\and', state) ||
+        isUnknownCommandWithName(childNode, '\\textit', state) ||
+        isUnknownCommandWithName(childNode, '\\textbf', state) ||
+        isUnknownCommandWithName(childNode, '\\emph', state) ||
+        isUnknownCommandWithName(childNode, '\\texttt', state)
+      ) {
         const typeSetElement = popAncestor()
         ancestor().appendChild(typeSetElement)
         const textArgument = childNode.getChild('TextArgument')

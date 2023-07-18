@@ -419,6 +419,7 @@ describe('<CodeMirrorEditor/> in Visual mode', function () {
     const deleteLine =
       '{command}{leftArrow}{shift}{command}{rightArrow}{backspace}'
 
+    // italic, bold and emph
     cy.get('@second-line').type(deleteLine)
     cy.get('@second-line').type(
       '\\title{{}formatted with \\textit{{}italic} \\textbf{{}bold} \\emph{{}emph}}'
@@ -437,6 +438,24 @@ describe('<CodeMirrorEditor/> in Visual mode', function () {
       'title<br> <b><i><em>formated</em></i></b> <i>only italic</i>'
     )
 
+    // texttt command
+    cy.get('@second-line').type(deleteLine)
+    cy.get('@second-line').type('\\title{{}title with \\texttt{{}command}}')
+    cy.get('.ol-cm-title').should(
+      'contain.html',
+      'title with <span class="ol-cm-command-texttt">command</span>'
+    )
+
+    cy.get('@second-line').type(deleteLine)
+    cy.get('@second-line').type(
+      '\\title{{}title with \\texttt{{}\\textbf{{}command}}}'
+    )
+    cy.get('.ol-cm-title').should(
+      'contain.html',
+      'title with <span class="ol-cm-command-texttt"><b>command</b></span>'
+    )
+
+    // unsupported commands
     cy.get('@second-line').type(deleteLine)
     cy.get('@second-line').type('\\title{{}Title with \\& ampersands}')
     cy.get('.ol-cm-title').should(
@@ -526,6 +545,25 @@ describe('<CodeMirrorEditor/> in Visual mode', function () {
     cy.get('.ol-cm-author').eq(0).click()
     cy.get('.ol-cm-preamble-line').eq(0).type('{leftarrow}{shift}{leftarrow}X')
     cy.get('.ol-cm-author').eq(1).should('contain', 'AuthorNeX')
+  })
+
+  it('should ignore some commands in author', function () {
+    cy.get('@first-line').type(
+      [
+        '\\author{{}Author with \\corref{{}cor1} and \\fnref{{}label2} in the name}',
+        '\\title{{}Document title}',
+        '\\begin{{}document}',
+        '\\maketitle',
+        '\\end{{}document}',
+        '',
+      ].join('{Enter}')
+    )
+
+    cy.get('.ol-cm-authors').should('have.length', 1)
+    cy.get('.ol-cm-author').should(
+      'contain.html',
+      'Author with  and  in the name'
+    )
   })
 
   describe('handling of special characters', function () {
