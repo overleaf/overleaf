@@ -71,6 +71,7 @@ export const toolbarPanel = () => [
       },
       '& .list-group': {
         marginBottom: 0,
+        backgroundColor: 'var(--editor-toolbar-bg)',
       },
       '& .list-group-item': {
         width: '100%',
@@ -78,6 +79,12 @@ export const toolbarPanel = () => [
         display: 'flex',
         alignItems: 'center',
         gap: '5px',
+        color: 'var(--toolbar-btn-color)',
+        borderColor: 'var(--editor-toolbar-bg)',
+        background: 'none',
+        '&:hover, &:focus': {
+          backgroundColor: 'rgba(125, 125, 125, 0.2)',
+        },
       },
     },
     '.ol-cm-toolbar-button-group': {
