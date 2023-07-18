@@ -4,7 +4,10 @@ import EntryContainer from './entry-container'
 import EntryCallout from './entry-callout'
 import EntryActions from './entry-actions'
 import Icon from '../../../../../shared/components/icon'
-import { useReviewPanelValueContext } from '../../../context/review-panel/review-panel-context'
+import {
+  useReviewPanelUpdaterFnsContext,
+  useReviewPanelValueContext,
+} from '../../../context/review-panel/review-panel-context'
 import { formatTime } from '../../../../utils/format-date'
 import classnames from 'classnames'
 import {
@@ -14,12 +17,14 @@ import {
 import {
   ReviewPanelPermissions,
   ReviewPanelUser,
+  ThreadId,
 } from '../../../../../../../types/review-panel/review-panel'
 import { DocId } from '../../../../../../../types/project-settings'
 
 type ChangeEntryProps = {
   docId: DocId
   entry: ReviewPanelInsertEntry | ReviewPanelDeleteEntry
+  entryId: ThreadId
   permissions: ReviewPanelPermissions
   user: ReviewPanelUser | undefined
   contentLimit?: number
@@ -31,6 +36,7 @@ type ChangeEntryProps = {
 function ChangeEntry({
   docId,
   entry,
+  entryId,
   permissions,
   user,
   contentLimit = 40,
@@ -39,8 +45,9 @@ function ChangeEntry({
   onIndicatorClick,
 }: ChangeEntryProps) {
   const { t } = useTranslation()
-  const { acceptChanges, rejectChanges, handleLayoutChange, gotoEntry } =
+  const { acceptChanges, rejectChanges, gotoEntry } =
     useReviewPanelValueContext()
+  const { handleLayoutChange } = useReviewPanelUpdaterFnsContext()
   const [isCollapsed, setIsCollapsed] = useState(true)
 
   const content = isCollapsed
@@ -75,23 +82,14 @@ function ChangeEntry({
       onClick={handleEntryClick}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
+      id={entryId}
     >
-      <EntryCallout
-        className={`rp-entry-callout-${entry.type}`}
-        style={{
-          top: entry.screenPos
-            ? entry.screenPos.y + entry.screenPos.height - 1 + 'px'
-            : undefined,
-        }}
-      />
+      <EntryCallout className={`rp-entry-callout-${entry.type}`} />
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
       <div
         className={classnames('rp-entry-indicator', {
           'rp-entry-indicator-focused': entry.focused,
         })}
-        style={{
-          top: entry.screenPos ? entry.screenPos.y + 'px' : undefined,
-        }}
         onClick={onIndicatorClick}
       >
         {entry.type === 'insert' ? (
@@ -104,10 +102,6 @@ function ChangeEntry({
         className={classnames('rp-entry', `rp-entry-${entry.type}`, {
           'rp-entry-focused': entry.focused,
         })}
-        style={{
-          top: entry.screenPos ? entry.screenPos.y + 'px' : undefined,
-          visibility: entry.visible ? 'visible' : 'hidden',
-        }}
       >
         <div className="rp-entry-body">
           <div className="rp-entry-action-icon">

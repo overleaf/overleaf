@@ -11,12 +11,13 @@ import {
 } from '../../../../../../../types/review-panel/review-panel'
 import { ReviewPanelResolvedCommentThread } from '../../../../../../../types/review-panel/comment-thread'
 import { DocId } from '../../../../../../../types/project-settings'
+import { ReviewPanelEntry } from '../../../../../../../types/review-panel/entry'
 
 export interface FilteredResolvedComments
   extends ReviewPanelResolvedCommentThread {
   content: string
   threadId: ThreadId
-  entryId: string
+  entryId: ThreadId
   docId: DocId
   docName: string | null
 }
@@ -56,7 +57,9 @@ function ResolvedCommentsDropdown() {
     for (const [docId, docEntries] of Object.entries(resolvedComments) as Array<
       [DocId, ReviewPanelDocEntries]
     >) {
-      for (const [entryId, entry] of Object.entries(docEntries)) {
+      for (const [entryId, entry] of Object.entries(docEntries) as Array<
+        [ThreadId, ReviewPanelEntry]
+      >) {
         if (entry.type === 'comment') {
           const threadId = entry.thread_id
           const thread =

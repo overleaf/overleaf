@@ -128,17 +128,17 @@ export default App.controller(
     })
 
     $scope.$on('layout:pdf:linked', (event, state) =>
-      $scope.$broadcast('review-panel:layout')
+      ide.$scope.$broadcast('review-panel:layout')
     )
 
     $scope.$on('layout:pdf:resize', (event, state) => {
       ide.$scope.reviewPanel.layoutToLeft =
         state.east?.size < 220 || state.east?.initClosed
-      $scope.$broadcast('review-panel:layout', false)
+      ide.$scope.$broadcast('review-panel:layout', false)
     })
 
     $scope.$on('expandable-text-area:resize', event =>
-      $timeout(() => $scope.$broadcast('review-panel:layout'))
+      $timeout(() => ide.$scope.$broadcast('review-panel:layout'))
     )
 
     $scope.$on('review-panel:sizes', (e, sizes) => {
@@ -206,7 +206,7 @@ export default App.controller(
       delete thread.submitting
       thread.messages.push(formatComment(comment))
       $scope.$apply()
-      return $timeout(() => $scope.$broadcast('review-panel:layout'))
+      return $timeout(() => ide.$scope.$broadcast('review-panel:layout'))
     })
 
     ide.socket.on('accept-changes', function (doc_id, change_ids) {
@@ -321,7 +321,7 @@ export default App.controller(
       }
       return $timeout(function () {
         $scope.$broadcast('review-panel:toggle')
-        return $scope.$broadcast('review-panel:layout', false)
+        return ide.$scope.$broadcast('review-panel:layout', false)
       })
     })
 
@@ -559,12 +559,12 @@ export default App.controller(
         $scope.$broadcast('review-panel:recalculate-screen-positions')
         dispatchReviewPanelEvent('recalculate-screen-positions', entries)
 
-        return $scope.$broadcast('review-panel:layout')
+        return ide.$scope.$broadcast('review-panel:layout')
       }
     })
 
     $scope.$on('editor:track-changes:visibility_changed', () =>
-      $timeout(() => $scope.$broadcast('review-panel:layout', false))
+      $timeout(() => ide.$scope.$broadcast('review-panel:layout', false))
     )
 
     $scope.$on(
@@ -576,20 +576,41 @@ export default App.controller(
         ide.$scope.reviewPanel.selectedEntryIds = []
         // Count of user-visible changes, i.e. an aggregated change will count as one.
         ide.$scope.reviewPanel.nVisibleSelectedChanges = 0
-        delete entries['add-comment']
-        delete entries['bulk-actions']
 
+        const offset = selection_offset_start
+        const length = selection_offset_end - selection_offset_start
+
+        // Recreate the add comment and bulk actions entries only when
+        // necessary. This is to avoid the UI thinking that these entries have
+        // changed and getting into an infinite loop.
         if (selection) {
-          entries['add-comment'] = {
-            type: 'add-comment',
-            offset: selection_offset_start,
-            length: selection_offset_end - selection_offset_start,
+          const existingAddComment = entries['add-comment']
+          if (
+            !existingAddComment ||
+            existingAddComment.offset !== offset ||
+            existingAddComment.length !== length
+          ) {
+            entries['add-comment'] = {
+              type: 'add-comment',
+              offset,
+              length,
+            }
           }
-          entries['bulk-actions'] = {
-            type: 'bulk-actions',
-            offset: selection_offset_start,
-            length: selection_offset_end - selection_offset_start,
+          const existingBulkActions = entries['bulk-actions']
+          if (
+            !existingBulkActions ||
+            existingBulkActions.offset !== offset ||
+            existingBulkActions.length !== length
+          ) {
+            entries['bulk-actions'] = {
+              type: 'bulk-actions',
+              offset,
+              length,
+            }
           }
+        } else {
+          delete entries['add-comment']
+          delete entries['bulk-actions']
         }
 
         for (const id in entries) {
@@ -640,7 +661,11 @@ export default App.controller(
 
         dispatchReviewPanelEvent('recalculate-screen-positions', entries)
 
-        return $scope.$broadcast('review-panel:layout')
+        // Ensure that watchers, such as the React-based review panel component,
+        // are informed of the changes to entries
+        ide.$scope.$apply()
+
+        return ide.$scope.$broadcast('review-panel:layout')
       }
     )
 
@@ -757,7 +782,7 @@ export default App.controller(
         $scope.toggleReviewPanel()
       }
       return $timeout(function () {
-        $scope.$broadcast('review-panel:layout')
+        ide.$scope.$broadcast('review-panel:layout')
         return $scope.$broadcast('comment:start_adding')
       })
     }
@@ -765,7 +790,7 @@ export default App.controller(
     $scope.startNewComment = function () {
       $scope.$broadcast('comment:select_line')
       dispatchReviewPanelEvent('comment:select_line')
-      return $timeout(() => $scope.$broadcast('review-panel:layout'))
+      return $timeout(() => ide.$scope.$broadcast('review-panel:layout'))
     }
 
     ide.$scope.submitNewComment = function (content) {
@@ -800,16 +825,16 @@ export default App.controller(
         )
       // TODO: unused?
       $scope.$broadcast('editor:clearSelection')
-      $timeout(() => $scope.$broadcast('review-panel:layout'))
+      $timeout(() => ide.$scope.$broadcast('review-panel:layout'))
       eventTracking.sendMB('rp-new-comment', { size: content.length })
     }
 
     $scope.cancelNewComment = entry =>
-      $timeout(() => $scope.$broadcast('review-panel:layout'))
+      $timeout(() => ide.$scope.$broadcast('review-panel:layout'))
 
     $scope.startReply = function (entry) {
       entry.replying = true
-      return $timeout(() => $scope.$broadcast('review-panel:layout'))
+      return $timeout(() => ide.$scope.$broadcast('review-panel:layout'))
     }
 
     ide.$scope.submitReply = function (entry, entry_id) {
@@ -839,14 +864,14 @@ export default App.controller(
       thread.submitting = true
       entry.replyContent = ''
       entry.replying = false
-      $timeout(() => $scope.$broadcast('review-panel:layout'))
+      $timeout(() => ide.$scope.$broadcast('review-panel:layout'))
       eventTracking.sendMB('rp-comment-reply', trackingMetadata)
     }
 
     $scope.cancelReply = function (entry) {
       entry.replying = false
       entry.replyContent = ''
-      return $scope.$broadcast('review-panel:layout')
+      return ide.$scope.$broadcast('review-panel:layout')
     }
 
     ide.$scope.resolveComment = function (doc_id, entry_id) {
@@ -947,7 +972,7 @@ export default App.controller(
           _csrf: window.csrfToken,
         }
       )
-      return $timeout(() => $scope.$broadcast('review-panel:layout'))
+      return $timeout(() => ide.$scope.$broadcast('review-panel:layout'))
     }
 
     ide.$scope.deleteComment = function (thread_id, comment_id) {
@@ -959,7 +984,7 @@ export default App.controller(
           'X-CSRF-Token': window.csrfToken,
         },
       })
-      return $timeout(() => $scope.$broadcast('review-panel:layout'))
+      return $timeout(() => ide.$scope.$broadcast('review-panel:layout'))
     }
 
     $scope.setSubView = function (subView) {
@@ -1244,7 +1269,7 @@ export default App.controller(
           }
           ide.$scope.reviewPanel.commentThreads = threads
           dispatchReviewPanelEvent('loaded_threads')
-          return $timeout(() => $scope.$broadcast('review-panel:layout'))
+          return $timeout(() => ide.$scope.$broadcast('review-panel:layout'))
         })
     }
 
@@ -1310,7 +1335,7 @@ export default App.controller(
       switch (type) {
         case 'line-height': {
           ide.$scope.reviewPanel.rendererData.lineHeight = payload
-          $scope.$broadcast('review-panel:layout')
+          ide.$scope.$broadcast('review-panel:layout')
           break
         }
 

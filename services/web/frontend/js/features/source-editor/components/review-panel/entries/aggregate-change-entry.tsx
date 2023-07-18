@@ -4,19 +4,24 @@ import EntryContainer from './entry-container'
 import EntryCallout from './entry-callout'
 import EntryActions from './entry-actions'
 import Icon from '../../../../../shared/components/icon'
-import { useReviewPanelValueContext } from '../../../context/review-panel/review-panel-context'
+import {
+  useReviewPanelUpdaterFnsContext,
+  useReviewPanelValueContext,
+} from '../../../context/review-panel/review-panel-context'
 import { formatTime } from '../../../../utils/format-date'
 import classnames from 'classnames'
 import { ReviewPanelAggregateChangeEntry } from '../../../../../../../types/review-panel/entry'
 import {
   ReviewPanelPermissions,
   ReviewPanelUser,
+  ThreadId,
 } from '../../../../../../../types/review-panel/review-panel'
 import { DocId } from '../../../../../../../types/project-settings'
 
 type AggregateChangeEntryProps = {
   docId: DocId
   entry: ReviewPanelAggregateChangeEntry
+  entryId: ThreadId
   permissions: ReviewPanelPermissions
   user: ReviewPanelUser | undefined
   contentLimit?: number
@@ -28,6 +33,7 @@ type AggregateChangeEntryProps = {
 function AggregateChangeEntry({
   docId,
   entry,
+  entryId,
   permissions,
   user,
   contentLimit = 17,
@@ -36,8 +42,9 @@ function AggregateChangeEntry({
   onIndicatorClick,
 }: AggregateChangeEntryProps) {
   const { t } = useTranslation()
-  const { acceptChanges, rejectChanges, handleLayoutChange, gotoEntry } =
+  const { acceptChanges, rejectChanges, gotoEntry } =
     useReviewPanelValueContext()
+  const { handleLayoutChange } = useReviewPanelUpdaterFnsContext()
   const [isDeletionCollapsed, setIsDeletionCollapsed] = useState(true)
   const [isInsertionCollapsed, setIsInsertionCollapsed] = useState(true)
 
@@ -82,26 +89,17 @@ function AggregateChangeEntry({
 
   return (
     <EntryContainer
+      id={entryId}
       onClick={handleEntryClick}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      <EntryCallout
-        className="rp-entry-callout-aggregate"
-        style={{
-          top: entry.screenPos
-            ? entry.screenPos.y + entry.screenPos.height - 1 + 'px'
-            : undefined,
-        }}
-      />
+      <EntryCallout className="rp-entry-callout-aggregate" />
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
       <div
         className={classnames('rp-entry-indicator', {
           'rp-entry-indicator-focused': entry.focused,
         })}
-        style={{
-          top: entry.screenPos ? entry.screenPos.y + 'px' : undefined,
-        }}
         onClick={onIndicatorClick}
       >
         <Icon type="pencil" />
@@ -110,10 +108,6 @@ function AggregateChangeEntry({
         className={classnames('rp-entry', 'rp-entry-aggregate', {
           'rp-entry-focused': entry.focused,
         })}
-        style={{
-          top: entry.screenPos ? entry.screenPos.y + 'px' : undefined,
-          visibility: entry.visible ? 'visible' : 'hidden',
-        }}
       >
         <div className="rp-entry-body">
           <div className="rp-entry-action-icon">

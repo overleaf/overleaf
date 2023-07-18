@@ -25,6 +25,15 @@ export const dispatchEditorEvent = (type: string, payload?: unknown) => {
   }, 0)
 }
 
+export const dispatchReviewPanelLayout = () => {
+  window.dispatchEvent(new CustomEvent('review-panel:layout'))
+}
+
+const scheduleDispatchReviewPanelLayout = debounce(
+  dispatchReviewPanelLayout,
+  50
+)
+
 export type ChangeManager = {
   initialize: () => void
   handleUpdate: (update: ViewUpdate) => void
@@ -65,6 +74,10 @@ export const createChangeManager = (
       if (coords) {
         const y = Math.round(coords.top - contentRect.top - editorPaddingTop)
         const height = Math.round(coords.bottom - coords.top)
+
+        if (!entry.screenPos) {
+          visibilityChanged = true
+        }
 
         entry.screenPos = { y, height, editorPaddingTop }
       }
@@ -284,6 +297,12 @@ export const createChangeManager = (
         if (changed) {
           dispatchEditorEvent('track-changes:visibility_changed')
         }
+        dispatchReviewPanelLayout()
+        // Ensure the layout is updated again once the review panel entries
+        // have updated in the React review panel. The use of a timeout is bad
+        // but the timings are a bit of a mess and will be improved when the
+        // review panel state is migrated away from Angular
+        scheduleDispatchReviewPanelLayout()
         break
       }
 
@@ -348,7 +367,6 @@ export const createChangeManager = (
             })
           )
         }
-
         break
       }
     }

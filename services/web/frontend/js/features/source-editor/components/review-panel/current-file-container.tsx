@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import Container from './container'
 import Toolbar from './toolbar/toolbar'
 import Nav from './nav'
@@ -8,13 +8,21 @@ import AggregateChangeEntry from './entries/aggregate-change-entry'
 import CommentEntry from './entries/comment-entry'
 import AddCommentEntry from './entries/add-comment-entry'
 import BulkActionsEntry from './entries/bulk-actions-entry/bulk-actions-entry'
+import PositionedEntries from './positioned-entries'
 import {
   useReviewPanelUpdaterFnsContext,
   useReviewPanelValueContext,
 } from '../../context/review-panel/review-panel-context'
 import useCodeMirrorContentHeight from '../../hooks/use-codemirror-content-height'
 import { ReviewPanelEntry } from '../../../../../../types/review-panel/entry'
-import { ThreadId } from '../../../../../../types/review-panel/review-panel'
+import {
+  ReviewPanelDocEntries,
+  ThreadId,
+} from '../../../../../../types/review-panel/review-panel'
+
+const isEntryAThreadId = (
+  entry: keyof ReviewPanelDocEntries
+): entry is ThreadId => entry !== 'add-comment' && entry !== 'bulk-actions'
 
 function CurrentFileContainer() {
   const {
@@ -36,9 +44,17 @@ function CurrentFileContainer() {
 
   const objectEntries = useMemo(() => {
     return Object.entries(currentDocEntries || {}) as Array<
-      [ThreadId, ReviewPanelEntry]
+      [keyof ReviewPanelDocEntries, ReviewPanelEntry]
     >
   }, [currentDocEntries])
+
+  const onMouseEnter = useCallback(() => {
+    setEntryHover(true)
+  }, [setEntryHover])
+
+  const onMouseLeave = useCallback(() => {
+    setEntryHover(false)
+  }, [setEntryHover])
 
   return (
     <Container classNames={{ 'rp-collapsed-displaying-entry': entryHover }}>
@@ -53,9 +69,9 @@ function CurrentFileContainer() {
         tabIndex={0}
         aria-labelledby="review-panel-tab-current-file"
       >
-        <div
-          className="rp-entry-list-inner"
-          style={{ height: `${contentHeight}px` }}
+        <PositionedEntries
+          entries={objectEntries}
+          contentHeight={contentHeight}
         >
           {openDocId &&
             objectEntries.map(([id, entry]) => {
@@ -63,37 +79,46 @@ function CurrentFileContainer() {
                 return null
               }
 
-              if (entry.type === 'insert' || entry.type === 'delete') {
+              if (
+                isEntryAThreadId(id) &&
+                (entry.type === 'insert' || entry.type === 'delete')
+              ) {
                 return (
                   <ChangeEntry
                     key={id}
                     docId={openDocId}
                     entry={entry}
+                    entryId={id}
                     permissions={permissions}
                     user={users[entry.metadata.user_id]}
-                    onMouseEnter={setEntryHover.bind(null, true)}
-                    onMouseLeave={setEntryHover.bind(null, false)}
+                    onMouseEnter={onMouseEnter}
+                    onMouseLeave={onMouseLeave}
                     onIndicatorClick={toggleReviewPanel}
                   />
                 )
               }
 
-              if (entry.type === 'aggregate-change') {
+              if (isEntryAThreadId(id) && entry.type === 'aggregate-change') {
                 return (
                   <AggregateChangeEntry
                     key={id}
                     docId={openDocId}
                     entry={entry}
+                    entryId={id}
                     permissions={permissions}
                     user={users[entry.metadata.user_id]}
-                    onMouseEnter={setEntryHover.bind(null, true)}
-                    onMouseLeave={setEntryHover.bind(null, false)}
+                    onMouseEnter={onMouseEnter}
+                    onMouseLeave={onMouseLeave}
                     onIndicatorClick={toggleReviewPanel}
                   />
                 )
               }
 
-              if (entry.type === 'comment' && !loadingThreads) {
+              if (
+                isEntryAThreadId(id) &&
+                entry.type === 'comment' &&
+                !loadingThreads
+              ) {
                 return (
                   <CommentEntry
                     key={id}
@@ -102,15 +127,15 @@ function CurrentFileContainer() {
                     entryId={id}
                     permissions={permissions}
                     threads={commentThreads}
-                    onMouseEnter={setEntryHover.bind(null, true)}
-                    onMouseLeave={setEntryHover.bind(null, false)}
+                    onMouseEnter={onMouseEnter}
+                    onMouseLeave={onMouseLeave}
                     onIndicatorClick={toggleReviewPanel}
                   />
                 )
               }
 
               if (entry.type === 'add-comment' && permissions.comment) {
-                return <AddCommentEntry key={id} entry={entry} />
+                return <AddCommentEntry key={id} entryId={entry.type} />
               }
 
               if (entry.type === 'bulk-actions') {
@@ -118,6 +143,7 @@ function CurrentFileContainer() {
                   <BulkActionsEntry
                     key={id}
                     entry={entry}
+                    entryId={entry.type}
                     nChanges={nChanges}
                   />
                 )
@@ -125,7 +151,7 @@ function CurrentFileContainer() {
 
               return null
             })}
-        </div>
+        </PositionedEntries>
       </div>
     </Container>
   )

@@ -8,10 +8,11 @@ import { ReviewPanelBulkActionsEntry } from '../../../../../../../../types/revie
 
 type BulkActionsEntryProps = {
   entry: ReviewPanelBulkActionsEntry
+  entryId: ReviewPanelBulkActionsEntry['type']
   nChanges: number
 }
 
-function BulkActionsEntry({ entry, nChanges }: BulkActionsEntryProps) {
+function BulkActionsEntry({ entry, entryId, nChanges }: BulkActionsEntryProps) {
   const { t } = useTranslation()
   const {
     show,
@@ -24,7 +25,7 @@ function BulkActionsEntry({ entry, nChanges }: BulkActionsEntryProps) {
 
   return (
     <>
-      <EntryContainer>
+      <EntryContainer id={entryId}>
         {nChanges > 1 && (
           <>
             <EntryCallout

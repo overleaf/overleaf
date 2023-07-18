@@ -12,8 +12,6 @@ import { useCodeMirrorViewContext } from '../../codemirror-editor'
 import Modal, { useBulkActionsModal } from '../entries/bulk-actions-entry/modal'
 import getMeta from '../../../../../utils/meta'
 import useScopeValue from '../../../../../shared/hooks/use-scope-value'
-import { MergeAndOverride } from '../../../../../../../types/utils'
-import { ReviewPanelBulkActionsEntry } from '../../../../../../../types/review-panel/entry'
 
 function EditorWidgets() {
   const { t } = useTranslation()
@@ -32,30 +30,13 @@ function EditorWidgets() {
     )
   const view = useCodeMirrorViewContext()
 
-  type UseReviewPanelValueContextReturnType = ReturnType<
-    typeof useReviewPanelValueContext
-  >
   const {
     entries,
     openDocId,
     nVisibleSelectedChanges: nChanges,
     wantTrackChanges,
     permissions,
-    // Remapping entries as they may contain `add-comment` and `bulk-actions` props along with DocIds
-    // Ideally the `add-comment` and `bulk-actions` objects should not be within the entries object
-    // as the doc data, but this is what currently angular returns.
-  } = useReviewPanelValueContext() as MergeAndOverride<
-    UseReviewPanelValueContextReturnType,
-    {
-      entries: {
-        // eslint-disable-next-line no-use-before-define
-        [Entry in UseReviewPanelValueContextReturnType['entries'] as keyof Entry]: Entry & {
-          'add-comment': ReviewPanelBulkActionsEntry
-          'bulk-actions': ReviewPanelBulkActionsEntry
-        }
-      }
-    }
-  >
+  } = useReviewPanelValueContext()
 
   const hasTrackChangesFeature = getMeta('ol-hasTrackChangesFeature')
 

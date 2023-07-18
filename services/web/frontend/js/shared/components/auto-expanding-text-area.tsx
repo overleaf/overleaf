@@ -50,7 +50,11 @@ function AutoExpandingTextArea({
       if (isFirstResize) {
         isFirstResize = false
       } else {
-        onResize()
+        // Prevent errors like "ResizeObserver loop completed with undelivered
+        // notifications" that occur if onResize does something complicated.
+        // The cost of this is that onResize lags one frame behind, but it's
+        // unlikely to matter.
+        window.requestAnimationFrame(onResize)
       }
     })
 

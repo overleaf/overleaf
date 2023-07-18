@@ -1,6 +1,10 @@
 import { Brand } from '../helpers/brand'
 import { DocId } from '../project-settings'
-import { ReviewPanelEntry } from './entry'
+import {
+  ReviewPanelAddCommentEntry,
+  ReviewPanelBulkActionsEntry,
+  ReviewPanelEntry,
+} from './entry'
 import { ReviewPanelCommentThread } from './comment-thread'
 
 export type SubView = 'cur_file' | 'overview'
@@ -13,7 +17,15 @@ export interface ReviewPanelPermissions {
 }
 
 export type ThreadId = Brand<string, 'ThreadId'>
-export type ReviewPanelDocEntries = Record<ThreadId, ReviewPanelEntry>
+// Entries may contain `add-comment` and `bulk-actions` props along with DocIds
+// Ideally the `add-comment` and `bulk-actions` objects should not be within the entries object
+// as the doc data, but this is what currently angular returns.
+export type ReviewPanelDocEntries = Record<
+  | ThreadId
+  | ReviewPanelAddCommentEntry['type']
+  | ReviewPanelBulkActionsEntry['type'],
+  ReviewPanelEntry
+>
 
 export type ReviewPanelEntries = Record<DocId, ReviewPanelDocEntries>
 
@@ -27,6 +39,7 @@ export interface ReviewPanelUser {
   isSelf: boolean
   name: string
 }
+
 export type ReviewPanelUsers = Record<UserId, ReviewPanelUser>
 
 export type CommentId = Brand<string, 'CommentId'>

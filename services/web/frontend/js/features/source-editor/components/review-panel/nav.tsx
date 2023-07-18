@@ -6,14 +6,28 @@ import {
   useReviewPanelUpdaterFnsContext,
 } from '../../context/review-panel/review-panel-context'
 import { isCurrentFileView, isOverviewView } from '../../utils/sub-view'
+import { useCallback } from 'react'
+import { useResizeObserver } from '../../../../shared/hooks/use-resize-observer'
 
 function Nav() {
   const { t } = useTranslation()
   const { subView } = useReviewPanelValueContext()
-  const { handleSetSubview } = useReviewPanelUpdaterFnsContext()
+  const { handleSetSubview, setNavHeight } = useReviewPanelUpdaterFnsContext()
+  const handleResize = useCallback(
+    el => {
+      // Use requestAnimationFrame to prevent errors like "ResizeObserver loop
+      // completed with undelivered notifications" that occur if onResize does
+      // something complicated. The cost of this is that onResize lags one frame
+      // behind, but it's unlikely to matter.
+      const height = el.offsetHeight
+      window.requestAnimationFrame(() => setNavHeight(height))
+    },
+    [setNavHeight]
+  )
+  const resizeRef = useResizeObserver(handleResize)
 
   return (
-    <div className="rp-nav" role="tablist">
+    <div ref={resizeRef} className="rp-nav" role="tablist">
       <button
         type="button"
         id="review-panel-tab-current-file"

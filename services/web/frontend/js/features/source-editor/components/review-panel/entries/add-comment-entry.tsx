@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import EntryContainer from './entry-container'
 import EntryCallout from './entry-callout'
 import EntryActions from './entry-actions'
@@ -14,33 +14,40 @@ import classnames from 'classnames'
 import { ReviewPanelAddCommentEntry } from '../../../../../../../types/review-panel/entry'
 
 type AddCommentEntryProps = {
-  entry: ReviewPanelAddCommentEntry
+  entryId: ReviewPanelAddCommentEntry['type']
 }
 
-function AddCommentEntry({ entry }: AddCommentEntryProps) {
+function AddCommentEntry({ entryId }: AddCommentEntryProps) {
   const { t } = useTranslation()
-  const { isAddingComment, submitNewComment, handleLayoutChange } =
-    useReviewPanelValueContext()
-  const { setIsAddingComment } = useReviewPanelUpdaterFnsContext()
+  const { isAddingComment, submitNewComment } = useReviewPanelValueContext()
+  const { setIsAddingComment, handleLayoutChange } =
+    useReviewPanelUpdaterFnsContext()
 
   const [content, setContent] = useState('')
 
   const handleStartNewComment = () => {
     setIsAddingComment(true)
-    handleLayoutChange()
+    window.setTimeout(handleLayoutChange, 0)
   }
 
   const handleSubmitNewComment = () => {
     submitNewComment(content)
     setIsAddingComment(false)
     setContent('')
+    window.setTimeout(handleLayoutChange, 0)
   }
 
   const handleCancelNewComment = () => {
     setIsAddingComment(false)
     setContent('')
-    handleLayoutChange()
+    window.setTimeout(handleLayoutChange, 0)
   }
+
+  useEffect(() => {
+    return () => {
+      setIsAddingComment(false)
+    }
+  }, [setIsAddingComment])
 
   const handleCommentKeyPress = (
     e: React.KeyboardEvent<HTMLTextAreaElement>
@@ -62,16 +69,12 @@ function AddCommentEntry({ entry }: AddCommentEntryProps) {
   }
 
   return (
-    <EntryContainer>
+    <EntryContainer id={entryId}>
       <EntryCallout className="rp-entry-callout-add-comment" />
       <div
         className={classnames('rp-entry', 'rp-entry-add-comment', {
           'rp-entry-adding-comment': isAddingComment,
         })}
-        style={{
-          top: entry.screenPos.y + 'px',
-          visibility: entry.visible ? 'visible' : 'hidden',
-        }}
       >
         {isAddingComment ? (
           <>

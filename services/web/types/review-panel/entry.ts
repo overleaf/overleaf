@@ -1,6 +1,6 @@
 import { ThreadId, UserId } from './review-panel'
 
-interface ReviewPanelEntryScreenPos {
+export interface ReviewPanelEntryScreenPos {
   y: number
   height: number
   editorPaddingTop: number

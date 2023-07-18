@@ -1,15 +1,13 @@
 import { useState, useMemo, useCallback } from 'react'
 import useScopeValue from '../../../../../shared/hooks/use-scope-value'
-import useScopeEventEmitter from '../../../../../shared/hooks/use-scope-event-emitter'
 import { sendMB } from '../../../../../infrastructure/event-tracking'
 import { ReviewPanelState } from '../types/review-panel-state'
 import * as ReviewPanel from '../types/review-panel-state'
 import { SubView } from '../../../../../../../types/review-panel/review-panel'
 import { ReviewPanelCommentEntry } from '../../../../../../../types/review-panel/entry'
+import { dispatchReviewPanelLayout as handleLayoutChange } from '../../../extensions/changes/change-manager'
 
 function useAngularReviewPanelState(): ReviewPanelState {
-  const emitLayoutChange = useScopeEventEmitter('review-panel:layout', false)
-
   const [subView, setSubView] = useScopeValue<ReviewPanel.Value<'subView'>>(
     'reviewPanel.subView'
   )
@@ -113,12 +111,6 @@ function useAngularReviewPanelState(): ReviewPanelState {
     [setSubView]
   )
 
-  const handleLayoutChange = useCallback(() => {
-    window.requestAnimationFrame(() => {
-      emitLayoutChange()
-    })
-  }, [emitLayoutChange])
-
   const submitReply = useCallback(
     (entry: ReviewPanelCommentEntry, replyContent: string) => {
       submitReplyAngular({ ...entry, replyContent })
@@ -128,6 +120,8 @@ function useAngularReviewPanelState(): ReviewPanelState {
 
   const [entryHover, setEntryHover] = useState(false)
   const [isAddingComment, setIsAddingComment] = useState(false)
+  const [navHeight, setNavHeight] = useState(0)
+  const [toolbarHeight, setToolbarHeight] = useState(0)
 
   const values = useMemo<ReviewPanelState['values']>(
     () => ({
@@ -139,7 +133,6 @@ function useAngularReviewPanelState(): ReviewPanelState {
       entryHover,
       isAddingComment,
       gotoEntry,
-      handleLayoutChange,
       loadingThreads,
       nVisibleSelectedChanges,
       permissions,
@@ -148,6 +141,8 @@ function useAngularReviewPanelState(): ReviewPanelState {
       resolvedComments,
       saveEdit,
       shouldCollapse,
+      navHeight,
+      toolbarHeight,
       submitReply,
       subView,
       wantTrackChanges,
@@ -180,7 +175,6 @@ function useAngularReviewPanelState(): ReviewPanelState {
       entryHover,
       isAddingComment,
       gotoEntry,
-      handleLayoutChange,
       loadingThreads,
       nVisibleSelectedChanges,
       permissions,
@@ -189,6 +183,8 @@ function useAngularReviewPanelState(): ReviewPanelState {
       resolvedComments,
       saveEdit,
       shouldCollapse,
+      navHeight,
+      toolbarHeight,
       submitReply,
       subView,
       wantTrackChanges,
@@ -217,10 +213,13 @@ function useAngularReviewPanelState(): ReviewPanelState {
   const updaterFns = useMemo<ReviewPanelState['updaterFns']>(
     () => ({
       handleSetSubview,
+      handleLayoutChange,
       setEntryHover,
       setCollapsed,
       setShouldCollapse,
       setIsAddingComment,
+      setNavHeight,
+      setToolbarHeight,
     }),
     [
       handleSetSubview,
@@ -228,6 +227,8 @@ function useAngularReviewPanelState(): ReviewPanelState {
       setEntryHover,
       setShouldCollapse,
       setIsAddingComment,
+      setNavHeight,
+      setToolbarHeight,
     ]
   )
 

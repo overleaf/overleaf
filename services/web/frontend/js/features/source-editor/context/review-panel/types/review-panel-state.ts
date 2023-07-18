@@ -24,7 +24,6 @@ export interface ReviewPanelState {
     entryHover: boolean
     isAddingComment: boolean
     gotoEntry: (docId: DocId, entryOffset: number) => void
-    handleLayoutChange: () => void
     loadingThreads: boolean
     nVisibleSelectedChanges: number
     permissions: ReviewPanelPermissions
@@ -37,6 +36,8 @@ export interface ReviewPanelState {
       content: string
     ) => void
     shouldCollapse: boolean
+    navHeight: number
+    toolbarHeight: number
     submitReply: (entry: ReviewPanelCommentEntry, replyContent: string) => void
     subView: SubView
     wantTrackChanges: boolean
@@ -68,6 +69,7 @@ export interface ReviewPanelState {
   }
   updaterFns: {
     handleSetSubview: (subView: SubView) => void
+    handleLayoutChange: () => void
     setEntryHover: React.Dispatch<React.SetStateAction<Value<'entryHover'>>>
     setIsAddingComment: React.Dispatch<
       React.SetStateAction<Value<'isAddingComment'>>
@@ -75,6 +77,10 @@ export interface ReviewPanelState {
     setCollapsed: React.Dispatch<React.SetStateAction<Value<'collapsed'>>>
     setShouldCollapse: React.Dispatch<
       React.SetStateAction<Value<'shouldCollapse'>>
+    >
+    setNavHeight: React.Dispatch<React.SetStateAction<Value<'navHeight'>>>
+    setToolbarHeight: React.Dispatch<
+      React.SetStateAction<Value<'toolbarHeight'>>
     >
   }
 }

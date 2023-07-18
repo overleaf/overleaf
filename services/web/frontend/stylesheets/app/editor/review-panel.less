@@ -27,6 +27,8 @@
 @rp-toolbar-height: 32px;
 
 @rp-entry-animation-speed: 0.3s;
+// Move a little faster in React to compensate for the delay before moving the vertical position
+@rp-entry-animation-speed-react: 0.2s;
 
 .rp-button() {
   display: block; // IE doesn't do flex with inline items.
@@ -65,6 +67,8 @@
 }
 
 #review-panel {
+  --rp-animation-speed: @rp-entry-animation-speed;
+
   display: block;
 
   .rp-size-expanded & {
@@ -248,10 +252,10 @@
   border-radius: 3px;
   color: #fff;
   cursor: pointer;
-  transition: top @rp-entry-animation-speed, left 0.1s, right 0.1s;
+  transition: top var(--rp-animation-speed), left 0.1s, right 0.1s;
 
   .no-animate & {
-    transition: none;
+    transition: left 0.1s, right 0.1s;
   }
 
   &-focused {
@@ -372,10 +376,10 @@
   border-left: solid @rp-entry-ribbon-width transparent;
   border-radius: 3px;
   background-color: #fff;
-  transition: top @rp-entry-animation-speed, left 0.1s, right 0.1s;
+  transition: top var(--rp-animation-speed), left 0.1s, right 0.1s;
 
   .no-animate & {
-    transition: none;
+    transition: left 0.1s, right 0.1s;
   }
 
   &-insert,
@@ -640,7 +644,7 @@
 }
 
 .rp-entry-callout {
-  transition: top @rp-entry-animation-speed, height @rp-entry-animation-speed;
+  transition: top var(--rp-animation-speed), height var(--rp-animation-speed);
 
   .rp-state-current-file & {
     position: absolute;
@@ -1193,6 +1197,8 @@ button when (@is-overleaf-light = true) {
 
 // CM6-specific review panel rules
 .ol-cm-review-panel {
+  --rp-animation-speed: @rp-entry-animation-speed-react;
+
   position: relative;
   z-index: 6;
   display: block;
@@ -1252,6 +1258,17 @@ button when (@is-overleaf-light = true) {
   .rp-nav {
     position: sticky;
     bottom: 0;
+  }
+
+  .rp-entry-list-react {
+    position: relative;
+
+    .rp-entry-list-react-inner {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+    }
   }
 
   .rp-state-current-file & {

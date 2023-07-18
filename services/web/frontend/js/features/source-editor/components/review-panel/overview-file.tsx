@@ -82,6 +82,7 @@ function OverviewFile({ docId, docPath }: OverviewFileProps) {
                 key={id}
                 docId={docId}
                 entry={entry}
+                entryId={id}
                 permissions={permissions}
                 user={users[entry.metadata.user_id]}
               />
@@ -94,6 +95,7 @@ function OverviewFile({ docId, docPath }: OverviewFileProps) {
                 key={id}
                 docId={docId}
                 entry={entry}
+                entryId={id}
                 permissions={permissions}
                 user={users[entry.metadata.user_id]}
               />
