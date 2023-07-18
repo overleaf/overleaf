@@ -35,5 +35,5 @@ export const useResizeObserver = (handleResize: (element: Element) => void) => {
     }
   }, [])
 
-  return elementRef
+  return { elementRef, resizeRef }
 }

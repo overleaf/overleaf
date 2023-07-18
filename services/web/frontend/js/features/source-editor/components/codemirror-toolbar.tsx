@@ -1,4 +1,4 @@
-import { memo, useCallback, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import {
   useCodeMirrorStateContext,
@@ -87,8 +87,15 @@ const Toolbar = memo(function Toolbar() {
     [setOverflowOpen]
   )
 
-  // build when the container resizes
-  const resizeRef = useResizeObserver(buildOverflow)
+  // calculate overflow when the container resizes
+  const { elementRef, resizeRef } = useResizeObserver(buildOverflow)
+
+  // calculate overflow when `languageName` or `visual` change
+  useEffect(() => {
+    if (resizeRef.current) {
+      buildOverflow(resizeRef.current.element)
+    }
+  }, [buildOverflow, languageName, resizeRef, visual])
 
   const toggleToolbar = useCallback(() => {
     setCollapsed(value => !value)
@@ -99,7 +106,7 @@ const Toolbar = memo(function Toolbar() {
   }
 
   return (
-    <div className="ol-cm-toolbar toolbar-editor" ref={resizeRef}>
+    <div className="ol-cm-toolbar toolbar-editor" ref={elementRef}>
       {showSourceToolbar && <EditorSwitch />}
       <ToolbarItems state={state} languageName={languageName} visual={visual} />
       <div

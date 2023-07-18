@@ -13,7 +13,7 @@ export default function PdfLogEntryRawContent({
   const [expanded, setExpanded] = useState(false)
   const [needsExpander, setNeedsExpander] = useState(false)
 
-  const containerRef = useResizeObserver(element => {
+  const { elementRef } = useResizeObserver(element => {
     setNeedsExpander(element.scrollHeight > collapsedSize)
   })
 
@@ -27,7 +27,7 @@ export default function PdfLogEntryRawContent({
           height: expanded || !needsExpander ? 'auto' : collapsedSize,
         }}
       >
-        <pre className="log-entry-content-raw" ref={containerRef}>
+        <pre className="log-entry-content-raw" ref={elementRef}>
           {rawContent.trim()}
         </pre>
       </div>
