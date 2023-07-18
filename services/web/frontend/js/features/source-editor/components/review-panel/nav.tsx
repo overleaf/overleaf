@@ -24,10 +24,10 @@ function Nav() {
     },
     [setNavHeight]
   )
-  const resizeRef = useResizeObserver(handleResize)
+  const { elementRef } = useResizeObserver(handleResize)
 
   return (
-    <div ref={resizeRef} className="rp-nav" role="tablist">
+    <div ref={elementRef} className="rp-nav" role="tablist">
       <button
         type="button"
         id="review-panel-tab-current-file"

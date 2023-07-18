@@ -17,10 +17,10 @@ function Toolbar() {
     },
     [setToolbarHeight]
   )
-  const resizeRef = useResizeObserver(handleResize)
+  const { elementRef } = useResizeObserver(handleResize)
 
   return (
-    <div ref={resizeRef} className="review-panel-toolbar">
+    <div ref={elementRef} className="review-panel-toolbar">
       <ResolvedCommentsDropdown />
       <ToggleMenu />
     </div>
