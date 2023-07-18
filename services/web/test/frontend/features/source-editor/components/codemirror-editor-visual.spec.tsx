@@ -566,6 +566,24 @@ describe('<CodeMirrorEditor/> in Visual mode', function () {
     )
   })
 
+  describe('decorates color commands', function () {
+    it('decorates textcolor', function () {
+      cy.get('@first-line').type('\\textcolor{{}red}{{}foo}')
+      cy.get('.ol-cm-textcolor')
+        .should('have.length', 1)
+        .should('have.text', 'foo')
+        .should('have.attr', 'style', 'color: rgb(255,0,0)')
+    })
+
+    it('decorates colorbox', function () {
+      cy.get('@first-line').type('\\colorbox{{}yellow}{{}foo}')
+      cy.get('.ol-cm-colorbox')
+        .should('have.length', 1)
+        .should('have.text', 'foo')
+        .should('have.attr', 'style', 'background-color: rgb(255,255,0)')
+    })
+  })
+
   describe('handling of special characters', function () {
     it('decorates a tilde with a non-breaking space', function () {
       cy.get('@first-line').type('Test~test')

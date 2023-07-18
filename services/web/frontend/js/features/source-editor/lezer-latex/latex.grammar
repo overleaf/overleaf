@@ -87,7 +87,9 @@
     BibliographyCtrlSeq,
     BibliographyStyleCtrlSeq,
     AuthorCtrlSeq,
-    MaketitleCtrlSeq
+    MaketitleCtrlSeq,
+    TextColorCtrlSeq,
+    ColorBoxCtrlSeq
 }
 
 @external specialize {EnvName} specializeEnvName from "./tokens.mjs" {
@@ -238,6 +240,12 @@ KnownCommand {
     UsePackage {
         UsePackageCtrlSeq optionalWhitespace? OptionalArgument?
         PackageArgument
+    } |
+    TextColorCommand {
+        TextColorCtrlSeq optionalWhitespace? ShortTextArgument optionalWhitespace? TextArgument
+    } |
+    ColorBoxCommand {
+        ColorBoxCtrlSeq optionalWhitespace? ShortTextArgument optionalWhitespace? TextArgument
     } |
     HrefCommand {
         HrefCtrlSeq optionalWhitespace? UrlArgument ShortTextArgument

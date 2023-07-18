@@ -46,7 +46,12 @@ import { InlineGraphicsWidget } from './visual-widgets/inline-graphics'
 import getMeta from '../../../../utils/meta'
 import { EditableGraphicsWidget } from './visual-widgets/editable-graphics'
 import { EditableInlineGraphicsWidget } from './visual-widgets/editable-inline-graphics'
-import { CloseBrace, OpenBrace } from '../../lezer-latex/latex.terms.mjs'
+import {
+  CloseBrace,
+  OpenBrace,
+  ShortTextArgument,
+  TextArgument,
+} from '../../lezer-latex/latex.terms.mjs'
 import { FootnoteWidget } from './visual-widgets/footnote'
 import { getListItems } from '../toolbar/lists'
 import { TildeWidget } from './visual-widgets/tilde'
@@ -867,6 +872,24 @@ export const atomicDecorations = (options: Options) => {
           if (result) {
             const { name, label } = result
             theoremEnvironments.set(name, label)
+          }
+        } else if (
+          nodeRef.type.is('TextColorCommand') ||
+          nodeRef.type.is('ColorBoxCommand')
+        ) {
+          if (shouldDecorate(state, nodeRef)) {
+            const colorArgumentNode = nodeRef.node.getChild(ShortTextArgument)
+            const contentArgumentNode = nodeRef.node.getChild(TextArgument)
+            if (colorArgumentNode && contentArgumentNode) {
+              // command name and opening brace
+              decorations.push(
+                ...decorateArgumentBraces(
+                  new BraceWidget(),
+                  contentArgumentNode,
+                  nodeRef.from
+                )
+              )
+            }
           }
         } else if (nodeRef.type.is('UnknownCommand')) {
           // a command that's not defined separately by the grammar

@@ -10,6 +10,7 @@ import { getUnstarredEnvironmentName } from '../../utils/tree-operations/environ
 import { centeringNodeForEnvironment } from '../../utils/tree-operations/figure'
 import { parseTheoremStyles } from '../../utils/tree-operations/theorems'
 import { Tree } from '@lezer/common'
+import { parseColorArguments } from '../../utils/tree-operations/colors'
 
 /**
  * A view plugin that decorates ranges of text with Mark decorations.
@@ -104,6 +105,40 @@ export const markDecorations = ViewPlugin.define(
                     }).range(line.from)
                   )
                 }
+              }
+            } else if (nodeRef.type.is('TextColorCommand')) {
+              const result = parseColorArguments(state, nodeRef.node)
+
+              if (result) {
+                const { color, from, to } = result
+
+                // decorate the content
+                decorations.push(
+                  Decoration.mark({
+                    class: 'ol-cm-textcolor',
+                    inclusive: true,
+                    attributes: {
+                      style: `color: ${color}`,
+                    },
+                  }).range(from, to)
+                )
+              }
+            } else if (nodeRef.type.is('ColorBoxCommand')) {
+              const result = parseColorArguments(state, nodeRef.node)
+
+              if (result) {
+                const { color, from, to } = result
+
+                // decorate the content
+                decorations.push(
+                  Decoration.mark({
+                    class: 'ol-cm-colorbox',
+                    inclusive: true,
+                    attributes: {
+                      style: `background-color: ${color}`,
+                    },
+                  }).range(from, to)
+                )
               }
             } else if (nodeRef.type.is('$Environment')) {
               const environmentName = getUnstarredEnvironmentName(

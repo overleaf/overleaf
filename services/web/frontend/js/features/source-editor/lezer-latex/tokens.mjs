@@ -68,6 +68,8 @@ import {
   CenteringCtrlSeq,
   ListEnvName,
   MaketitleCtrlSeq,
+  TextColorCtrlSeq,
+  ColorBoxCtrlSeq,
 } from './latex.terms.mjs'
 
 function nameChar(ch) {
@@ -639,6 +641,8 @@ const otherKnowncommands = {
   '\\bibliography': BibliographyCtrlSeq,
   '\\bibliographystyle': BibliographyStyleCtrlSeq,
   '\\maketitle': MaketitleCtrlSeq,
+  '\\textcolor': TextColorCtrlSeq,
+  '\\colorbox': ColorBoxCtrlSeq,
 }
 // specializer for control sequences
 // return new tokens for specific control sequences
