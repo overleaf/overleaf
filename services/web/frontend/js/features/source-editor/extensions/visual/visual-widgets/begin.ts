@@ -2,28 +2,16 @@ import { EditorView, WidgetType } from '@codemirror/view'
 import { placeSelectionInsideBlock } from '../selection'
 
 export class BeginWidget extends WidgetType {
+  destroyed = false
+
   constructor(public environment: string) {
     super()
   }
 
   toDOM(view: EditorView) {
+    this.destroyed = false
     const element = document.createElement('div')
-    element.classList.add('ol-cm-begin')
-    element.classList.add(`ol-cm-begin-${this.environment}`)
-
-    const leftPadding = document.createElement('span')
-    leftPadding.classList.add('ol-cm-environment-padding')
-    element.appendChild(leftPadding)
-
-    const name = document.createElement('span')
-    name.textContent = this.environment
-    name.classList.add('ol-cm-environment-name')
-    name.classList.add(`ol-cm-environment-name-${this.environment}`)
-    element.appendChild(name)
-
-    const rightPadding = document.createElement('span')
-    rightPadding.classList.add('ol-cm-environment-padding')
-    element.appendChild(rightPadding)
+    this.buildElement(element, view)
 
     element.addEventListener('mouseup', event => {
       event.preventDefault()
@@ -37,13 +25,46 @@ export class BeginWidget extends WidgetType {
     return widget.environment === this.environment
   }
 
-  updateDOM(element: HTMLDivElement) {
-    element.querySelector('.ol-cm-environment-name')!.textContent =
-      this.environment
+  updateDOM(element: HTMLDivElement, view: EditorView) {
+    this.destroyed = false
+    element.textContent = ''
+    element.className = ''
+    this.buildElement(element, view)
     return true
+  }
+
+  destroy() {
+    this.destroyed = true
   }
 
   ignoreEvent(event: Event): boolean {
     return event.type !== 'mouseup'
+  }
+
+  buildName(name: HTMLSpanElement, view: EditorView) {
+    name.textContent = this.environment
+  }
+
+  buildElement(element: HTMLDivElement, view: EditorView) {
+    element.classList.add('ol-cm-begin', `ol-cm-begin-${this.environment}`)
+
+    const startPadding = document.createElement('span')
+    startPadding.classList.add(
+      'ol-cm-environment-padding',
+      'ol-cm-environment-start-padding'
+    )
+    element.appendChild(startPadding)
+
+    const name = document.createElement('span')
+    name.classList.add('ol-cm-environment-name')
+    this.buildName(name, view)
+    element.appendChild(name)
+
+    const endPadding = document.createElement('span')
+    endPadding.classList.add(
+      'ol-cm-environment-padding',
+      'ol-cm-environment-end-padding'
+    )
+    element.appendChild(endPadding)
   }
 }

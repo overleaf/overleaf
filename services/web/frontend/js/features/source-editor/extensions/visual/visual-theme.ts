@@ -113,7 +113,7 @@ export const visualTheme = EditorView.theme({
   },
   '.ol-cm-end': {
     fontFamily: 'var(--source-font-family)',
-    padding: '0.5em 0 1.5em',
+    paddingBottom: '1.5em',
     minHeight: '1em',
     textAlign: 'center',
     justifyContent: 'center',
@@ -144,6 +144,12 @@ export const visualTheme = EditorView.theme({
     {
       boxShadow: '0 2px 5px -3px rgb(125, 125, 125, 0.5)',
     },
+  '.ol-cm-environment-theorem-plain': {
+    fontStyle: 'italic',
+  },
+  '.ol-cm-begin-proof > .ol-cm-environment-name': {
+    fontStyle: 'italic',
+  },
   '.ol-cm-environment-padding': {
     flex: 1,
     height: '1px',
@@ -152,13 +158,20 @@ export const visualTheme = EditorView.theme({
   '.ol-cm-environment-name': {
     padding: '0 1em',
   },
-  '.ol-cm-environment-name-abstract': {
+  '.ol-cm-begin-abstract > .ol-cm-environment-name': {
     fontFamily: 'var(--visual-font-family)',
     fontSize: '1.2em',
     fontWeight: 550,
+    textTransform: 'capitalize',
   },
-  '.ol-cm-environment-name-abstract:first-letter': {
-    textTransform: 'uppercase',
+  '.ol-cm-begin-theorem > .ol-cm-environment-name': {
+    fontFamily: 'var(--visual-font-family)',
+    fontWeight: 550,
+    padding: '0 6px',
+    textTransform: 'capitalize',
+  },
+  '.ol-cm-begin-theorem > .ol-cm-environment-padding:first-of-type': {
+    flex: 0,
   },
   '.ol-cm-item': {
     paddingInlineStart: 'calc(var(--list-depth) * 2ch)',

@@ -357,3 +357,11 @@ export function parseFigureData(
     graphicsCommandArguments,
   })
 }
+
+export const getBeginEnvSuffix = (state: EditorState, node: SyntaxNode) => {
+  const argumentNode = node
+    .getChild('OptionalArgument')
+    ?.getChild('ShortOptionalArg')
+
+  return argumentNode && state.sliceDoc(argumentNode.from, argumentNode.to)
+}

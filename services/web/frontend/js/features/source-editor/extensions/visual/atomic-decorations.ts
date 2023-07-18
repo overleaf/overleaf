@@ -50,6 +50,8 @@ import { CloseBrace, OpenBrace } from '../../lezer-latex/latex.terms.mjs'
 import { FootnoteWidget } from './visual-widgets/footnote'
 import { getListItems } from '../toolbar/lists'
 import { TildeWidget } from './visual-widgets/tilde'
+import { BeginTheoremWidget } from './visual-widgets/begin-theorem'
+import { parseTheoremArguments } from '../../utils/tree-operations/theorems'
 
 type Options = {
   fileTreeManager: {
@@ -135,6 +137,13 @@ export const atomicDecorations = (options: Options) => {
     let currentOrdinal = 0
 
     let listDepth = 0
+
+    const theoremEnvironments = new Map<string, string>([
+      ['theorem', 'Theorem'],
+      ['corollary', 'Corollary'],
+      ['lemma', 'lemma'],
+      ['proof', 'Proof'],
+    ])
 
     const preamble: {
       from: number
@@ -322,7 +331,7 @@ export const atomicDecorations = (options: Options) => {
           }
         } else if (nodeRef.type.is('BeginEnv')) {
           // the beginning of an environment, with an environment name argument
-          const envName = getEnvironmentName(nodeRef.node, state)
+          const envName = getUnstarredEnvironmentName(nodeRef.node, state)
 
           if (envName) {
             switch (envName) {
@@ -398,7 +407,28 @@ export const atomicDecorations = (options: Options) => {
                 }
                 break
               default:
-                // do nothing
+                {
+                  const theoremName = theoremEnvironments.get(envName)
+
+                  if (theoremName && shouldDecorate(state, nodeRef)) {
+                    const argumentNode = nodeRef.node
+                      .getChild('OptionalArgument')
+                      ?.getChild('ShortOptionalArg')
+
+                    decorations.push(
+                      Decoration.replace({
+                        widget: new BeginTheoremWidget(
+                          envName,
+                          theoremName,
+                          argumentNode
+                        ),
+                        block: true,
+                      }).range(nodeRef.from, nodeRef.to)
+                    )
+                  }
+
+                  // do nothing
+                }
                 break
             }
           }
@@ -447,6 +477,16 @@ export const atomicDecorations = (options: Options) => {
                 }
                 break
               default:
+                if (theoremEnvironments.has(envName)) {
+                  if (shouldDecorate(state, nodeRef)) {
+                    decorations.push(
+                      Decoration.replace({
+                        widget: new EndWidget(),
+                        block: true,
+                      }).range(nodeRef.from, nodeRef.to)
+                    )
+                  }
+                }
                 // do nothing
                 break
             }
@@ -817,6 +857,12 @@ export const atomicDecorations = (options: Options) => {
               }).range(from, nodeRef.to)
             )
             return false
+          }
+        } else if (nodeRef.type.is('NewTheoremCommand')) {
+          const result = parseTheoremArguments(state, nodeRef.node)
+          if (result) {
+            const { name, label } = result
+            theoremEnvironments.set(name, label)
           }
         } else if (nodeRef.type.is('UnknownCommand')) {
           // a command that's not defined separately by the grammar

@@ -540,6 +540,54 @@ describe('<CodeMirrorEditor/> in Visual mode', function () {
     })
   })
 
+  describe('decorates theorems', function () {
+    it('decorates a proof environment', function () {
+      cy.get('@first-line').type(
+        ['\\begin{{}proof}{Enter}', 'foo{Enter}', '\\end{{}proof}{Enter}'].join(
+          ''
+        )
+      )
+      cy.get('.cm-content').should('have.text', 'Prooffoo')
+    })
+
+    it('decorates a theorem environment', function () {
+      cy.get('@first-line').type(
+        [
+          '\\begin{{}theorem}{Enter}',
+          'foo{Enter}',
+          '\\end{{}theorem}{Enter}',
+        ].join('')
+      )
+      cy.get('.cm-content').should('have.text', 'Theoremfoo')
+    })
+
+    it('decorates a theorem environment with a label', function () {
+      cy.get('@first-line').type(
+        [
+          '\\begin{{}theorem}[Bar]{Enter}',
+          'foo{Enter}',
+          '\\end{{}theorem}{Enter}',
+        ].join('')
+      )
+      cy.get('.cm-content').should('have.text', 'Theorem (Bar)foo')
+    })
+
+    it('decorates a custom theorem environment with a label', function () {
+      cy.get('@first-line').type(
+        [
+          '\\newtheorem{{}thm}{{}Foo}{Enter}',
+          '\\begin{{}thm}[Bar]{Enter}',
+          'foo{Enter}',
+          '\\end{{}thm}{Enter}',
+        ].join('')
+      )
+      cy.get('.cm-content').should(
+        'have.text',
+        ['\\newtheorem{thm}{Foo}', 'Foo (Bar)foo'].join('')
+      )
+    })
+  })
+
   // TODO: \input
   // TODO: Math
   // TODO: Abstract

@@ -81,6 +81,8 @@
     InputCtrlSeq,
     IncludeCtrlSeq,
     ItemCtrlSeq,
+    NewTheoremCtrlSeq,
+    TheoremStyleCtrlSeq,
     CenteringCtrlSeq,
     BibliographyCtrlSeq,
     BibliographyStyleCtrlSeq,
@@ -239,6 +241,12 @@ KnownCommand {
     } |
     HrefCommand {
         HrefCtrlSeq optionalWhitespace? UrlArgument ShortTextArgument
+    } |
+    NewTheoremCommand {
+        NewTheoremCtrlSeq "*"? optionalWhitespace? ShortTextArgument ((OptionalArgument? TextArgument) | (TextArgument OptionalArgument))
+    } |
+    TheoremStyleCommand {
+        TheoremStyleCtrlSeq optionalWhitespace? ShortTextArgument
     } |
     VerbCommand {
         VerbCtrlSeq VerbContent
