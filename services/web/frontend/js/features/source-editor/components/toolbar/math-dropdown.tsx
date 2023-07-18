@@ -8,8 +8,9 @@ import {
   wrapInDisplayMath,
   wrapInInlineMath,
 } from '../../extensions/toolbar/commands'
+import { memo } from 'react'
 
-export function MathDropdown() {
+export const MathDropdown = memo(function MathDropdown() {
   const { t } = useTranslation()
   const view = useCodeMirrorViewContext()
 
@@ -46,4 +47,4 @@ export function MathDropdown() {
       </ListGroupItem>
     </ToolbarButtonMenu>
   )
-}
+})

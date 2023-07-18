@@ -21,6 +21,7 @@ import getMeta from '../../../utils/meta'
 import { isVisual } from '../extensions/visual/visual'
 import SplitTestBadge from '../../../shared/components/split-test-badge'
 import { language } from '@codemirror/language'
+import { minimumListDepthForSelection } from '../utils/tree-operations/ancestors'
 
 export const CodeMirrorToolbar = () => {
   const view = useCodeMirrorViewContext()
@@ -47,6 +48,8 @@ const Toolbar = memo(function Toolbar() {
 
   const languageName = state.facet(language)?.name
   const visual = isVisual(view)
+
+  const listDepth = minimumListDepthForSelection(state)
 
   const {
     open: overflowOpen,
@@ -108,7 +111,12 @@ const Toolbar = memo(function Toolbar() {
   return (
     <div className="ol-cm-toolbar toolbar-editor" ref={elementRef}>
       {showSourceToolbar && <EditorSwitch />}
-      <ToolbarItems state={state} languageName={languageName} visual={visual} />
+      <ToolbarItems
+        state={state}
+        languageName={languageName}
+        visual={visual}
+        listDepth={listDepth}
+      />
       <div
         className="ol-cm-toolbar-button-group ol-cm-toolbar-stretch"
         ref={overflowBeforeRef}
@@ -125,6 +133,7 @@ const Toolbar = memo(function Toolbar() {
             overflowed={overflowedItemsRef.current}
             languageName={languageName}
             visual={visual}
+            listDepth={listDepth}
           />
         </ToolbarOverflow>
         <div className="formatting-buttons-wrapper" />

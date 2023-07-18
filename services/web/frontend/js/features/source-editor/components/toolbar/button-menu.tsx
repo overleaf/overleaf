@@ -57,7 +57,7 @@ export const ToolbarButtonMenu: FC<{
       show={open}
       target={target.current}
       placement="bottom"
-      container={document.querySelector('.cm-editor')}
+      container={view.dom}
       containerPadding={0}
       animation
       onHide={() => onToggle(false)}

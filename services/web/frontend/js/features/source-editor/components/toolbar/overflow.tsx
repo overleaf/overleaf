@@ -1,7 +1,8 @@
-import { FC, LegacyRef, memo } from 'react'
+import { FC, LegacyRef } from 'react'
 import { Button, Overlay, Popover } from 'react-bootstrap'
 import classnames from 'classnames'
 import Icon from '../../../../shared/components/icon'
+import { useCodeMirrorViewContext } from '../codemirror-editor'
 
 export const ToolbarOverflow: FC<{
   overflowed: boolean
@@ -9,14 +10,16 @@ export const ToolbarOverflow: FC<{
   overflowOpen: boolean
   setOverflowOpen: (open: boolean) => void
   overflowRef?: LegacyRef<Popover>
-}> = memo(function ToolbarOverflow({
+}> = ({
   overflowed,
   target,
   overflowOpen,
   setOverflowOpen,
   overflowRef,
   children,
-}) {
+}) => {
+  const view = useCodeMirrorViewContext()
+
   const className = classnames(
     'ol-cm-toolbar-button',
     'ol-cm-toolbar-overflow-toggle',
@@ -48,7 +51,7 @@ export const ToolbarOverflow: FC<{
         show={overflowOpen}
         target={target}
         placement="bottom"
-        container={document.querySelector('.cm-editor')}
+        container={view.dom}
         containerPadding={0}
         animation
         onHide={() => setOverflowOpen(false)}
@@ -59,4 +62,4 @@ export const ToolbarOverflow: FC<{
       </Overlay>
     </>
   )
-})
+}
