@@ -231,4 +231,20 @@ describe('<CodeMirrorEditor/> lists in Rich Text mode', function () {
 
     cy.get('.cm-content').should('have.text', [' first', ' second'].join(''))
   })
+
+  it('positions the cursor after creating a new line with leading whitespace', function () {
+    const content = [
+      '\\begin{itemize}',
+      '\\item foo bar',
+      '\\end{itemize}',
+    ].join('\n')
+    mountEditor(content)
+
+    cy.get('.cm-line').eq(0).as('line')
+    cy.get('@line').click()
+    cy.get('@line').type('{leftArrow}'.repeat(4))
+    cy.get('@line').type('{enter}baz')
+
+    cy.get('.cm-content').should('have.text', [' foo', ' bazbar'].join(''))
+  })
 })

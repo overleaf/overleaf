@@ -63,11 +63,22 @@ export const visualKeymap = Prec.highest(
               const indent = indentString(state, columns)
               const insert = `\n${indent}\\item `
 
+              const countWhitespaceAfterPosition = (pos: number) => {
+                const line = state.doc.lineAt(pos)
+                const followingText = state.sliceDoc(pos, line.to)
+                const matches = followingText.match(/^(\s+)/)
+                return matches ? matches[1].length : 0
+              }
+
+              // move the cursor past any whitespace on the new line
+              const pos =
+                from + insert.length + countWhitespaceAfterPosition(from)
+
               handled = true
 
               return {
                 changes: { from, insert },
-                range: EditorSelection.cursor(from + insert.length),
+                range: EditorSelection.cursor(pos),
               }
             }
 
