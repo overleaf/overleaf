@@ -6,6 +6,7 @@ import {
 import Icon from '../../../../shared/components/icon'
 import { FC } from 'react'
 import { useTranslation } from 'react-i18next'
+import { sendMB } from '../../../../infrastructure/event-tracking'
 
 export const FigureModalFooter: FC<{
   onInsert: () => void
@@ -91,7 +92,10 @@ const FigureModalAction: FC<{
         bsStyle={null}
         className="btn-success"
         type="button"
-        onClick={onInsert}
+        onClick={() => {
+          onInsert()
+          sendMB('figure-modal-edit')
+        }}
       >
         {t('done')}
       </Button>
@@ -104,7 +108,10 @@ const FigureModalAction: FC<{
       className="btn-success"
       type="button"
       disabled={getPath === undefined}
-      onClick={onInsert}
+      onClick={() => {
+        onInsert()
+        sendMB('figure-modal-insert')
+      }}
     >
       {t('insert_figure')}
     </Button>
