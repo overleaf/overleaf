@@ -36,9 +36,13 @@ export function updateGroupModalPlanPricing() {
   })
   modalEl.querySelector('[data-ol-group-plan-display-price]').innerText =
     localizedPrice
-  modalEl.querySelector(
-    '[data-ol-group-plan-price-per-user]'
-  ).innerText = `${localizedPerUserPrice} per user`
+  modalEl
+    .querySelectorAll('[data-ol-group-plan-price-per-user]')
+    .forEach(el => {
+      el.innerText = `${localizedPerUserPrice} ${el.getAttribute(
+        'data-ol-group-plan-price-per-user'
+      )}`
+    })
 
   modalEl.querySelector('[data-ol-group-plan-educational-discount]').hidden =
     usage !== 'educational'

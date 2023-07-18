@@ -40,9 +40,9 @@ mixin plans_v2_table(period, config)
 			)
 				.plans-v2-table-th
 					if (discountHighlighted)
-						p.plans-v2-table-discount-highlighted-text !{config.discountedColumn.text[period]}
+						p.plans-v2-table-discount-highlighted-text #{translate(config.discountedColumn.text[period]).toUpperCase()}
 					if (highlighted)
-						p.plans-v2-table-green-highlighted-text !{config.highlightedColumn.text[period]}
+						p.plans-v2-table-green-highlighted-text #{translate(config.highlightedColumn.text[period]).toUpperCase()}
 					case tableHeadKey
 						when 'individual_free'
 							+table_head_individual_free(highlighted, period)
@@ -194,7 +194,7 @@ mixin table_head_group_collaborator(highlighted, eventTrackingKey, additionalEve
 			p.plans-v2-table-price
 				span(data-ol-plans-v2-group-price-per-user='collaborator') #{initialLocalizedGroupPrice.pricePerUser.collaborator}
 			p.plans-v2-table-price-period-label
-				| per user / year
+				| #{translate('per_user_year')}
 		.plans-v2-table-btn-buy-container-mobile
 			+btn_buy_group_collaborator(highlighted, eventTrackingKey)
 			+additional_link_group(eventTrackingKey, additionalEventSegmentation, 'group_collaborator')
@@ -215,7 +215,7 @@ mixin table_head_group_professional(highlighted, eventTrackingKey, additionalEve
 			p.plans-v2-table-price
 				span(data-ol-plans-v2-group-price-per-user='professional') #{initialLocalizedGroupPrice.pricePerUser.professional}
 			p.plans-v2-table-price-period-label
-				| per user / year
+				| #{translate('per_user_year')}
 		.plans-v2-table-btn-buy-container-mobile
 			+btn_buy_group_professional(highlighted, eventTrackingKey)
 			+additional_link_group(eventTrackingKey, additionalEventSegmentation, 'group_professional')
@@ -322,10 +322,8 @@ mixin table_cell(feature, plan)
 			data-ol-plans-v2-table-cell-plan=plan
 			data-ol-plans-v2-table-cell-feature=featureName
 		)
-			if (feature.value === 'richText')
-				| !{planValue}
-			else if (feature.value === 'str')
-				| #{planValue}
+			if (feature.value === 'str')
+				| !{translate(planValue, {}, ['strong'])}
 			else if (feature.value === 'bool')
 				if (planValue)
 					i.fa.fa-check(aria-hidden="true")

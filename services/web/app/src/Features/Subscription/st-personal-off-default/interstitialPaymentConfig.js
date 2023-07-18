@@ -10,8 +10,8 @@ const config = {
   highlightedColumn: {
     index: 1,
     text: {
-      monthly: 'MOST POPULAR',
-      annual: 'MOST POPULAR',
+      monthly: 'most_popular',
+      annual: 'most_popular',
     },
   },
   eventTrackingKey: 'paywall-plans-page-click',
@@ -25,10 +25,10 @@ const config = {
           info: 'number_of_users_info',
           value: 'str',
           plans: {
-            personal: '1 user',
-            collaborator: '1 user',
-            professional: '1 user',
-            student: '1 user',
+            personal: 'one_user',
+            collaborator: 'one_user',
+            professional: 'one_user',
+            student: 'one_user',
           },
         },
         {
@@ -36,10 +36,10 @@ const config = {
           info: 'max_collab_per_project_info',
           value: 'str',
           plans: {
-            personal: 'You + 1',
-            collaborator: 'You + 10',
-            professional: 'Unlimited',
-            student: 'You + 6',
+            personal: 'you_plus_1',
+            collaborator: 'you_plus_10',
+            professional: 'unlimited',
+            student: 'you_plus_6',
           },
         },
       ],
@@ -54,10 +54,10 @@ const config = {
           info: 'compile_timeout_short_info',
           value: 'str',
           plans: {
-            personal: '4 minutes',
-            collaborator: '4 minutes',
-            professional: '4 minutes',
-            student: '4 minutes',
+            personal: 'four_minutes',
+            collaborator: 'four_minutes',
+            professional: 'four_minutes',
+            student: 'four_minutes',
           },
         },
         {

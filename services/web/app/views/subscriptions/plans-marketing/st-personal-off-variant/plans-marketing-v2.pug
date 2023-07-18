@@ -31,13 +31,13 @@ block content
 								| &nbsp;
 								span #{translate("subject_to_additional_vat")}
 							i.fa.fa-cc-mastercard.fa-2x(aria-hidden="true") &nbsp;
-							span.sr-only Mastercard accepted
+							span.sr-only #{translate('payment_method_accepted', { paymentMethod: 'Mastercard' })}
 							i.fa.fa-cc-visa.fa-2x(aria-hidden="true") &nbsp;
-							span.sr-only Visa accepted
+							span.sr-only #{translate('payment_method_accepted', { paymentMethod: 'Visa' })}
 							i.fa.fa-cc-amex.fa-2x(aria-hidden="true") &nbsp;
-							span.sr-only Amex accepted
+							span.sr-only #{translate('payment_method_accepted', { paymentMethod: 'Amex' })}
 							i.fa.fa-cc-paypal.fa-2x(aria-hidden="true") &nbsp;
-							span.sr-only Paypal accepted
+							span.sr-only #{translate('payment_method_accepted', { paymentMethod: 'Paypal' })}
 
 					include ./v2/_university_info
 

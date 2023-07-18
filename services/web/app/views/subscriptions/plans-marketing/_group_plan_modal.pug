@@ -12,7 +12,7 @@ div.modal.fade(tabindex="-1" role="dialog" data-ol-group-plan-modal)
 					aria-label=translate("close")
 				)
 					span(aria-hidden="true") &times;
-				h2 Customize your group subscription
+				h2 #{translate("customize_your_group_subscription")}
 				h3 #{translate("save_30_percent_or_more_uppercase")}
 			.modal-body.plans.group-subscription-modal
 				.container-fluid
@@ -20,11 +20,11 @@ div.modal.fade(tabindex="-1" role="dialog" data-ol-group-plan-modal)
 						.col-md-6.text-center
 							.circle.circle-lg
 								span(data-ol-group-plan-display-price) ...
-								span.small / year
+								span.small / #{translate('year')}
 								br
-								span.circle-subtext(data-ol-group-plan-price-per-user) ...
+								span.circle-subtext(data-ol-group-plan-price-per-user=translate('per_user')) ...
 							ul.list-unstyled
-								li Each user will have access to:
+								li #{translate('each_user_will_have_access_to')}:
 								li &nbsp;
 								li(
 									hidden=(groupPlanModalDefaults.plan_code !== 'collaborator')
@@ -41,7 +41,7 @@ div.modal.fade(tabindex="-1" role="dialog" data-ol-group-plan-modal)
 							form.form(data-ol-group-plan-form)
 								.form-group
 									label(for='plan_code')
-										| Plan
+										| #{translate('plan')}
 									for plan_code in groupPlanModalOptions.plan_codes
 										label.group-plan-option
 											input(
@@ -51,7 +51,7 @@ div.modal.fade(tabindex="-1" role="dialog" data-ol-group-plan-modal)
 												value=plan_code.code
 												data-ol-group-plan-code=plan_code.code
 											)
-											span #{plan_code.display}
+											span #{translate(plan_code.i18n)}
 								.form-group
 									label(for='size')
 										| #{translate('number_of_users')}
@@ -69,7 +69,7 @@ div.modal.fade(tabindex="-1" role="dialog" data-ol-group-plan-modal)
 											) #{size}
 								.form-group(data-ol-group-plan-form-currency)
 									label(for='currency')
-										| Currency
+										| #{translate('currency')}
 									select.form-control(id="currency")
 										for currency in groupPlanModalOptions.currencies
 											option(
@@ -78,7 +78,7 @@ div.modal.fade(tabindex="-1" role="dialog" data-ol-group-plan-modal)
 											) #{currency.display}
 								.form-group
 									label(for='usage')
-										| Overleaf offers a 40% educational discount for groups of 10 or more.
+										| #{translate('educational_discount_for_groups_of_ten_or_more')}
 								label.group-plan-option
 									input(
 										id="usage"
@@ -89,16 +89,16 @@ div.modal.fade(tabindex="-1" role="dialog" data-ol-group-plan-modal)
 										event-tracking-trigger="click"
 										event-tracking-element="checkbox"
 									)
-									span This license is for educational purposes (applies to students or faculty using Overleaf for teaching)
+									span #{translate('educational_discount_disclaimer')}
 
 					.row
 						.col-md-12.text-center
 							.educational-discount-badge
 								div(hidden=(groupPlanModalDefaults.usage !== 'educational') data-ol-group-plan-educational-discount)
 									p.applied(hidden=true data-ol-group-plan-educational-discount-applied)
-										| 40% educational discount applied!
+										| #{translate('educational_discount_applied')}
 									p.ineligible(hidden=true data-ol-group-plan-educational-discount-ineligible)
-										| The educational discount is available for groups of 10 or more
+										| #{translate('educational_discount_available_for_groups_of_ten_or_more')}
 			.modal-footer
 				.text-center
 					button.btn.btn-primary.btn-lg(
@@ -106,10 +106,10 @@ div.modal.fade(tabindex="-1" role="dialog" data-ol-group-plan-modal)
 						event-tracking="form-submitted-groups-modal-purchase-click"
 						event-tracking-mb="true"
 						event-tracking-trigger="click"
-						) Purchase Now
+						) #{translate('purchase_now')}
 					hr.thin
 					a(
 						href
 						data-ol-open-contact-form-for-more-than-50-licenses
-					) Need more than 50 licenses? Please get in touch
+					) #{translate('need_more_than_to_licenses_get_in_touch')}
 

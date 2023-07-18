@@ -114,7 +114,7 @@ export function changeNumberOfUsersInFeatureTable() {
         '[data-ol-plans-v2-license-picker-select]'
       ).value
 
-      el.textContent = `${licenseSize} users`
+      el.textContent = el.textContent.replace(/\d+/, licenseSize)
     })
 }
 

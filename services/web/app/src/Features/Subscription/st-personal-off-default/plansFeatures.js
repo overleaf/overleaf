@@ -7,10 +7,10 @@ const individualPlans = [
         info: 'number_of_users_info',
         value: 'str',
         plans: {
-          free: '1 user',
-          personal: '1 user',
-          collaborator: '1 user',
-          professional: '1 user',
+          free: 'one_user',
+          personal: 'one_user',
+          collaborator: 'one_user',
+          professional: 'one_user',
         },
       },
       {
@@ -18,10 +18,10 @@ const individualPlans = [
         info: 'max_collab_per_project_info',
         value: 'str',
         plans: {
-          free: 'You + 1',
-          personal: 'You + 1',
-          collaborator: 'You + 10',
-          professional: 'Unlimited',
+          free: 'you_plus_1',
+          personal: 'you_plus_1',
+          collaborator: 'you_plus_10',
+          professional: 'unlimited',
         },
       },
     ],
@@ -36,10 +36,10 @@ const individualPlans = [
         info: 'compile_timeout_short_info',
         value: 'str',
         plans: {
-          free: '1 minute',
-          personal: '4 minutes',
-          collaborator: '4 minutes',
-          professional: '4 minutes',
+          free: 'one_minute',
+          personal: 'four_minutes',
+          collaborator: 'four_minutes',
+          professional: 'four_minutes',
         },
       },
       {
@@ -205,9 +205,9 @@ const groupPlans = [
         info: 'number_of_users_info',
         value: 'str',
         plans: {
-          group_standard: '2 users',
-          group_professional: '2 users',
-          organization: 'Contact sales',
+          group_standard: 'two_users',
+          group_professional: 'two_users',
+          organization: 'contact_sales',
         },
       },
       {
@@ -215,9 +215,9 @@ const groupPlans = [
         info: 'max_collab_per_project_info',
         value: 'str',
         plans: {
-          group_standard: 'Project author + 10',
-          group_professional: 'Unlimited',
-          organization: 'Unlimited',
+          group_standard: 'project_owner_plus_10',
+          group_professional: 'unlimited',
+          organization: 'unlimited',
         },
       },
     ],
@@ -232,9 +232,9 @@ const groupPlans = [
         info: 'user_management_info',
         value: 'str',
         plans: {
-          group_standard: 'admin panel',
-          group_professional: 'admin panel',
-          organization: 'automatic user registration',
+          group_standard: 'subscription_admin_panel',
+          group_professional: 'subscription_admin_panel',
+          organization: 'automatic_user_registration',
         },
       },
       {
@@ -309,9 +309,9 @@ const groupPlans = [
         info: 'compile_timeout_short_info',
         value: 'str',
         plans: {
-          group_standard: '4 minutes',
-          group_professional: '4 minutes',
-          organization: '4 minutes',
+          group_standard: 'four_minutes',
+          group_professional: 'four_minutes',
+          organization: 'four_minutes',
         },
       },
       {
@@ -464,8 +464,8 @@ const studentPlans = [
         info: 'number_of_users_info',
         value: 'str',
         plans: {
-          free: '1 user',
-          student: '1 user',
+          free: 'one_user',
+          student: 'one_user',
         },
       },
       {
@@ -473,8 +473,8 @@ const studentPlans = [
         info: 'max_collab_per_project_info',
         value: 'str',
         plans: {
-          free: 'You + 1',
-          student: 'You + 6',
+          free: 'you_plus_1',
+          student: 'you_plus_6',
         },
       },
     ],
@@ -489,8 +489,8 @@ const studentPlans = [
         info: 'compile_timeout_short_info',
         value: 'str',
         plans: {
-          free: '1 minute',
-          student: '4 minutes',
+          free: 'one_minute',
+          student: 'four_minutes',
         },
       },
       {

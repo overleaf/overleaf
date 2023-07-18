@@ -13,8 +13,8 @@ const config = {
     highlightedColumn: {
       index: 2,
       text: {
-        monthly: 'MOST POPULAR',
-        annual: 'MOST POPULAR',
+        monthly: 'most_popular',
+        annual: 'most_popular',
       },
     },
     eventTrackingKey: 'plans-page-click',
@@ -30,7 +30,7 @@ const config = {
     highlightedColumn: {
       index: 0,
       text: {
-        annual: 'MOST POPULAR',
+        annual: 'most_popular',
       },
     },
     eventTrackingKey: 'plans-page-click',
@@ -52,8 +52,8 @@ const config = {
     highlightedColumn: {
       index: 1,
       text: {
-        monthly: 'SAVE 20% ON ANNUAL PLAN',
-        annual: 'SAVING 20%',
+        monthly: 'save_20_percent_by_paying_annually',
+        annual: 'saving_20_percent',
       },
     },
     eventTrackingKey: 'plans-page-click',
