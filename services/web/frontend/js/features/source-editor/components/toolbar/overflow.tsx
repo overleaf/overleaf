@@ -1,4 +1,4 @@
-import { FC, LegacyRef } from 'react'
+import { FC, LegacyRef, useRef } from 'react'
 import { Button, Overlay, Popover } from 'react-bootstrap'
 import classnames from 'classnames'
 import Icon from '../../../../shared/components/icon'
@@ -6,18 +6,11 @@ import { useCodeMirrorViewContext } from '../codemirror-editor'
 
 export const ToolbarOverflow: FC<{
   overflowed: boolean
-  target?: HTMLDivElement
   overflowOpen: boolean
   setOverflowOpen: (open: boolean) => void
   overflowRef?: LegacyRef<Popover>
-}> = ({
-  overflowed,
-  target,
-  overflowOpen,
-  setOverflowOpen,
-  overflowRef,
-  children,
-}) => {
+}> = ({ overflowed, overflowOpen, setOverflowOpen, overflowRef, children }) => {
+  const buttonRef = useRef<Button>(null)
   const view = useCodeMirrorViewContext()
 
   const className = classnames(
@@ -31,6 +24,7 @@ export const ToolbarOverflow: FC<{
   return (
     <>
       <Button
+        ref={buttonRef}
         type="button"
         id="toolbar-more"
         className={className}
@@ -49,7 +43,7 @@ export const ToolbarOverflow: FC<{
 
       <Overlay
         show={overflowOpen}
-        target={target}
+        target={buttonRef.current ?? undefined}
         placement="bottom"
         container={view.dom}
         containerPadding={0}

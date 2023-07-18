@@ -43,7 +43,6 @@ const Toolbar = memo(function Toolbar() {
   const [overflowed, setOverflowed] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
 
-  const overflowBeforeRef = useRef<HTMLDivElement>(null)
   const overflowedItemsRef = useRef<Set<string>>(new Set())
 
   const languageName = state.facet(language)?.name
@@ -62,30 +61,28 @@ const Toolbar = memo(function Toolbar() {
       setOverflowOpen(false)
       setOverflowed(true)
 
-      if (overflowBeforeRef.current) {
-        overflowedItemsRef.current = new Set()
+      overflowedItemsRef.current = new Set()
 
-        const buttonGroups = [
-          ...element.querySelectorAll<HTMLDivElement>('[data-overflow]'),
-        ].reverse()
+      const buttonGroups = [
+        ...element.querySelectorAll<HTMLDivElement>('[data-overflow]'),
+      ].reverse()
 
-        // restore all the overflowed items
-        for (const buttonGroup of buttonGroups) {
-          buttonGroup.classList.remove('overflow-hidden')
-        }
-
-        // find all the available items
-        for (const buttonGroup of buttonGroups) {
-          if (element.scrollWidth <= element.clientWidth) {
-            break
-          }
-          // add this item to the overflow
-          overflowedItemsRef.current.add(buttonGroup.dataset.overflow!)
-          buttonGroup.classList.add('overflow-hidden')
-        }
-
-        setOverflowed(overflowedItemsRef.current.size > 0)
+      // restore all the overflowed items
+      for (const buttonGroup of buttonGroups) {
+        buttonGroup.classList.remove('overflow-hidden')
       }
+
+      // find all the available items
+      for (const buttonGroup of buttonGroups) {
+        if (element.scrollWidth <= element.clientWidth) {
+          break
+        }
+        // add this item to the overflow
+        overflowedItemsRef.current.add(buttonGroup.dataset.overflow!)
+        buttonGroup.classList.add('overflow-hidden')
+      }
+
+      setOverflowed(overflowedItemsRef.current.size > 0)
     },
     [setOverflowOpen]
   )
@@ -117,13 +114,9 @@ const Toolbar = memo(function Toolbar() {
         visual={visual}
         listDepth={listDepth}
       />
-      <div
-        className="ol-cm-toolbar-button-group ol-cm-toolbar-stretch"
-        ref={overflowBeforeRef}
-      >
+      <div className="ol-cm-toolbar-button-group ol-cm-toolbar-stretch">
         <ToolbarOverflow
           overflowed={overflowed}
-          target={overflowBeforeRef.current ?? undefined}
           overflowOpen={overflowOpen}
           setOverflowOpen={setOverflowOpen}
           overflowRef={overflowRef}
