@@ -150,6 +150,8 @@ export const atomicDecorations = (options: Options) => {
       ['proof', 'Proof'],
     ])
 
+    let commandDefinitions = ''
+
     const preamble: {
       from: number
       to: number
@@ -570,6 +572,22 @@ export const atomicDecorations = (options: Options) => {
           }
 
           return false // no markup in verbatim content
+        } else if (
+          nodeRef.type.is('NewCommand') ||
+          nodeRef.type.is('RenewCommand')
+        ) {
+          const argumentNode = nodeRef.node.getChild('LiteralArgContent')
+          if (argumentNode) {
+            const argument = state
+              .sliceDoc(argumentNode.from, argumentNode.to)
+              .trim()
+            if (/^\\\w+/.test(argument)) {
+              const content = state.sliceDoc(nodeRef.from, nodeRef.to)
+              if (content) {
+                commandDefinitions += `${content}\n`
+              }
+            }
+          }
         } else if (nodeRef.type.is('Cite')) {
           // \cite command with a bibkey argument
           if (shouldDecorate(state, nodeRef)) {
@@ -715,7 +733,11 @@ export const atomicDecorations = (options: Options) => {
 
               decorations.push(
                 Decoration.replace({
-                  widget: new MathWidget(content, displayMode),
+                  widget: new MathWidget(
+                    content,
+                    displayMode,
+                    commandDefinitions
+                  ),
                   block: displayMode,
                 }).range(ancestorNode.from, ancestorNode.to)
               )
