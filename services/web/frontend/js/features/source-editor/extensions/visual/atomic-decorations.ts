@@ -242,6 +242,10 @@ export const atomicDecorations = (options: Options) => {
             'table',
             'verbatim',
             'lstlisting',
+            'quote',
+            'quotation',
+            'quoting',
+            'displayquote',
           ]
           if (envName && hideInEnvironmentTypes.includes(envName)) {
             const beginNode = nodeRef.node.getChild('BeginEnv')

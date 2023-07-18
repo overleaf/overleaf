@@ -150,6 +150,11 @@ export const visualTheme = EditorView.theme({
   '.ol-cm-begin-proof > .ol-cm-environment-name': {
     fontStyle: 'italic',
   },
+  '.ol-cm-environment-quote-block.ol-cm-environment-line': {
+    borderLeft: '4px solid rgba(125, 125, 125, 0.25)',
+    paddingLeft: '1em',
+    borderRadius: '0',
+  },
   '.ol-cm-environment-padding': {
     flex: 1,
     height: '1px',

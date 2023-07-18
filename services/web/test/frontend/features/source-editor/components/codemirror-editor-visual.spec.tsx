@@ -626,6 +626,22 @@ describe('<CodeMirrorEditor/> in Visual mode', function () {
     })
   })
 
+  forEach(['quote', 'quotation', 'quoting', 'displayquote']).it(
+    'renders a %s environment',
+    function (environment) {
+      cy.get('@first-line').type(`\\begin{{}${environment}`)
+      cy.findAllByRole('listbox').should('have.length', 1)
+      cy.findByRole('listbox').contains(`\\begin{${environment}}`).click()
+      cy.get('@second-line').type('foo')
+      cy.get('.cm-content').should(
+        'have.text',
+        [`\\begin{${environment}}`, '    foo', `\\end{${environment}}`].join('')
+      )
+      cy.get('.cm-line').eq(4).click()
+      cy.get('.cm-content').should('have.text', '    foo')
+    }
+  )
+
   // TODO: \input
   // TODO: Math
   // TODO: Abstract

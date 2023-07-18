@@ -153,6 +153,38 @@ export const markDecorations = ViewPlugin.define(
                     }
                     break
 
+                  case 'quote':
+                  case 'quotation':
+                  case 'quoting':
+                  case 'displayquote':
+                    {
+                      const lines = {
+                        start: state.doc.lineAt(nodeRef.from),
+                        end: state.doc.lineAt(nodeRef.to),
+                      }
+
+                      for (
+                        let lineNumber = lines.start.number;
+                        lineNumber <= lines.end.number;
+                        lineNumber++
+                      ) {
+                        const line = state.doc.line(lineNumber)
+
+                        const classNames = [
+                          `ol-cm-environment-${environmentName}`,
+                          'ol-cm-environment-quote-block',
+                          'ol-cm-environment-line',
+                        ]
+
+                        decorations.push(
+                          Decoration.line({
+                            class: classNames.join(' '),
+                          }).range(line.from)
+                        )
+                      }
+                    }
+                    break
+
                   default:
                     if (theoremStyles.has(environmentName)) {
                       const theoremStyle = theoremStyles.get(environmentName)
