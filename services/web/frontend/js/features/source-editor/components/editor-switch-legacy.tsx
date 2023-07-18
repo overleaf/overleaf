@@ -10,8 +10,9 @@ import SplitTestBadge from '../../../shared/components/split-test-badge'
 function Badge() {
   const content = (
     <>
-      Overleaf has upgraded the source editor. You can still use the old editor
-      by selecting "Source (legacy)".
+      Overleaf has upgraded the source editor.
+      <br />
+      You can still use the old editor by selecting "Source (legacy)".
       <br />
       <br />
       Click to learn more and give feedback
@@ -168,7 +169,7 @@ const RichTextToggle: FC<{
   if (disabled) {
     return (
       <Tooltip
-        description={t('rich_text_is_only_available_for_tex_files')}
+        description={t('the_visual_editor_is_only_available_for_tex_files')}
         id="rich-text-toggle-tooltip"
         overlayProps={{ placement: 'bottom' }}
         tooltipProps={{ className: 'tooltip-wide' }}
