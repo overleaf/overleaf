@@ -90,6 +90,11 @@ async function cancelSubscriptionByUuid(subscriptionUuid) {
   }
 }
 
+function subscriptionIsCanceledOrExpired(subscription) {
+  const state = subscription?.recurlyStatus?.state
+  return state === 'canceled' || state === 'expired'
+}
+
 module.exports = {
   errors: recurly.errors,
 
@@ -102,6 +107,7 @@ module.exports = {
   removeSubscriptionChangeByUuid: callbackify(removeSubscriptionChangeByUuid),
   reactivateSubscriptionByUuid: callbackify(reactivateSubscriptionByUuid),
   cancelSubscriptionByUuid: callbackify(cancelSubscriptionByUuid),
+  subscriptionIsCanceledOrExpired,
 
   promises: {
     getSubscription,

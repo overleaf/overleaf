@@ -42,9 +42,9 @@ async function enableManagedUsers(subscriptionId) {
  * @function
  * @param {Object} user - The user object to retrieve the group policy for.
  * @returns {Promise<Object>} - A Promise that resolves with the group policy
- *   object for the user's enrollment, or undefined if it does not exist.
+ *   and subscription objects for the user's enrollment, or null if it does not exist.
  */
-async function getGroupPolicyForUser(requestedUser) {
+async function getEnrollmentForUser(requestedUser) {
   // Don't rely on the user being populated, it may be a session user without
   // the enrollment property. Force the user to be loaded from mongo.
   const user = await User.findById(requestedUser._id, 'enrollment')
@@ -53,7 +53,7 @@ async function getGroupPolicyForUser(requestedUser) {
   }
   // Now we are sure the user exists and we have the full contents
   if (user.enrollment?.managedBy == null) {
-    return
+    return {}
   }
   // retrieve the subscription and the group policy (without the _id field)
   const subscription = await Subscription.findById(user.enrollment.managedBy)
@@ -64,11 +64,20 @@ async function getGroupPolicyForUser(requestedUser) {
       info: { subscriptionId: user.enrollment.managedBy, userId: user._id },
     })
   }
+
+  // check whether the user is an admin of the subscription
+  const isManagedGroupAdmin = user._id.equals(subscription.admin_id)
+
   // return the group policy as a plain object (without the __v field)
   const groupPolicy = subscription.groupPolicy.toObject({
     versionKey: false,
   })
-  return groupPolicy
+
+  return {
+    groupPolicy,
+    managedBy: user.enrollment.managedBy,
+    isManagedGroupAdmin,
+  }
 }
 
 async function enrollInSubscription(userId, subscription) {
@@ -109,10 +118,10 @@ async function enrollInSubscription(userId, subscription) {
 module.exports = {
   promises: {
     enableManagedUsers,
-    getGroupPolicyForUser,
+    getEnrollmentForUser,
     enrollInSubscription,
   },
   enableManagedUsers: callbackify(enableManagedUsers),
-  getGroupPolicyForUser: callbackify(getGroupPolicyForUser),
+  getEnrollmentForUser: callbackify(getEnrollmentForUser),
   enrollInSubscription: callbackify(enrollInSubscription),
 }

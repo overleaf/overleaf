@@ -574,6 +574,16 @@ function updateAccountEmailAddress(req, res, next) {
 function reactivateSubscription(req, res, next) {
   const user = SessionManager.getSessionUser(req.session)
   logger.debug({ userId: user._id }, 'reactivating subscription')
+  try {
+    if (req.isManagedGroupAdmin) {
+      // allow admins to reactivate subscriptions
+    } else {
+      // otherwise require the user to have the reactivate-subscription permission
+      req.assertPermission('reactivate-subscription')
+    }
+  } catch (error) {
+    return next(error)
+  }
   SubscriptionHandler.reactivateSubscription(user, function (err) {
     if (err) {
       OError.tag(err, 'something went wrong reactivating subscription', {

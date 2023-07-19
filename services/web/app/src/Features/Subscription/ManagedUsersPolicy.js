@@ -4,6 +4,7 @@ const {
 } = require('../Authorization/PermissionsManager')
 const { getUsersSubscription, getGroupSubscriptionsMemberOf } =
   require('./SubscriptionLocator').promises
+const { subscriptionIsCanceledOrExpired } = require('./RecurlyClient')
 
 // This file defines the capabilities and policies that are used to
 // determine what managed users can and cannot do.
@@ -34,6 +35,9 @@ registerCapability('start-subscription', { default: true })
 
 // Register the capability for a user to join a subscription.
 registerCapability('join-subscription', { default: true })
+
+// Register the capability for a user to reactivate a subscription.
+registerCapability('reactivate-subscription', { default: true })
 
 // Register a policy to prevent a user deleting their own account.
 registerPolicy('userCannotDeleteOwnAccount', {
@@ -91,20 +95,54 @@ registerPolicy(
 // being a member of another group subscription.
 registerPolicy(
   'userCannotHaveSubscription',
-  { 'start-subscription': false, 'join-subscription': false },
+  {
+    'start-subscription': false,
+    'join-subscription': false,
+    'reactivate-subscription': false,
+  },
   {
     validator: async ({ user, subscription }) => {
       const usersSubscription = await getUsersSubscription(user)
-      const userHasSubscription = Boolean(usersSubscription)
+
+      // The user can be enrolled if:
+      // 1. they do not have a subscription and are not a member of another subscription (apart from the managed group subscription)
+      // 2. they have a subscription and it is canceled or expired
+      // 3. they have a subscription and it is the subscription they are trying to join as a managed user
+      // The last case is to allow the admin to join their own subscription as a managed user
+
+      const userHasSubscription =
+        Boolean(usersSubscription) &&
+        !subscriptionIsCanceledOrExpired(usersSubscription)
+
+      const userIsThisGroupAdmin =
+        Boolean(usersSubscription) &&
+        usersSubscription._id.toString() === subscription._id.toString()
+
       const userMemberOfSubscriptions = await getGroupSubscriptionsMemberOf(
         user
       )
-      // filter out the subscription of the managed group itself
-      // the user will always be a member of this subscription
+
       const isMemberOfOtherSubscriptions = userMemberOfSubscriptions.some(
-        sub => sub._id.toString() !== subscription._id.toString()
+        sub => {
+          // ignore the subscription of the managed group itself
+          if (sub._id.toString() === subscription._id.toString()) {
+            return false
+          }
+          // ignore the user's own subscription
+          if (
+            usersSubscription &&
+            sub._id.toString() === usersSubscription._id.toString()
+          ) {
+            return false
+          }
+          return true
+        }
       )
-      return !userHasSubscription && !isMemberOfOtherSubscriptions
+
+      return (
+        (!userHasSubscription || userIsThisGroupAdmin) &&
+        !isMemberOfOtherSubscriptions
+      )
     },
   }
 )

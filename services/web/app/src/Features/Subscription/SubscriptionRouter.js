@@ -111,6 +111,7 @@ module.exports = {
     webRouter.post(
       '/user/subscription/reactivate',
       AuthenticationController.requireLogin(),
+      PermissionsController.useCapabilities(),
       SubscriptionController.reactivateSubscription
     )
 

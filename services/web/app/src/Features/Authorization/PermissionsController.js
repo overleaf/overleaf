@@ -27,8 +27,12 @@ function useCapabilities() {
     }
     try {
       // get the group policy applying to the user
-      const groupPolicy =
-        await ManagedUsersHandler.promises.getGroupPolicyForUser(req.user)
+      const { groupPolicy, managedBy, isManagedGroupAdmin } =
+        await ManagedUsersHandler.promises.getEnrollmentForUser(req.user)
+      // attach the subscription ID to the request object
+      req.managedBy = managedBy
+      // attach the subscription admin status to the request object
+      req.isManagedGroupAdmin = isManagedGroupAdmin
       // attach the new capabilities to the request object
       for (const cap of getUserCapabilities(groupPolicy)) {
         req.capabilitySet.add(cap)
@@ -66,8 +70,8 @@ function requirePermission(...requiredCapabilities) {
     }
     try {
       // get the group policy applying to the user
-      const groupPolicy =
-        await ManagedUsersHandler.promises.getGroupPolicyForUser(req.user)
+      const { groupPolicy } =
+        await ManagedUsersHandler.promises.getEnrollmentForUser(req.user)
       // if there is no group policy, the user is not managed
       if (!groupPolicy) {
         return next()

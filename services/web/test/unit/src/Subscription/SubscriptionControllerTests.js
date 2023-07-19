@@ -653,26 +653,76 @@ describe('SubscriptionController', function () {
   })
 
   describe('reactivateSubscription', function () {
-    beforeEach(function (done) {
-      this.res = {
-        redirect() {
+    describe('when the user has permission', function () {
+      beforeEach(function (done) {
+        this.res = {
+          redirect() {
+            done()
+          },
+        }
+        this.req.assertPermission = sinon.stub()
+        this.next = sinon.stub().callsFake(error => {
+          done(error)
+        })
+        sinon.spy(this.res, 'redirect')
+        this.SubscriptionController.reactivateSubscription(
+          this.req,
+          this.res,
+          this.next
+        )
+      })
+
+      it('should assert the user has permission to reactivate their subscription', function (done) {
+        this.req.assertPermission
+          .calledWith('reactivate-subscription')
+          .should.equal(true)
+        done()
+      })
+
+      it('should tell the handler to reactivate this user', function (done) {
+        this.SubscriptionHandler.reactivateSubscription
+          .calledWith(this.user)
+          .should.equal(true)
+        done()
+      })
+
+      it('should redurect to the subscription page', function (done) {
+        this.res.redirect.calledWith('/user/subscription').should.equal(true)
+        done()
+      })
+    })
+
+    describe('when the user does not have permission', function () {
+      beforeEach(function (done) {
+        this.res = {
+          redirect() {
+            done()
+          },
+        }
+        this.req.assertPermission = sinon.stub().throws()
+        this.next = sinon.stub().callsFake(() => {
           done()
-        },
-      }
-      sinon.spy(this.res, 'redirect')
-      this.SubscriptionController.reactivateSubscription(this.req, this.res)
-    })
+        })
+        sinon.spy(this.res, 'redirect')
+        this.SubscriptionController.reactivateSubscription(
+          this.req,
+          this.res,
+          this.next
+        )
+      })
 
-    it('should tell the handler to reactivate this user', function (done) {
-      this.SubscriptionHandler.reactivateSubscription
-        .calledWith(this.user)
-        .should.equal(true)
-      done()
-    })
+      it('should not reactivate the user', function (done) {
+        this.req.assertPermission = sinon.stub().throws()
+        this.SubscriptionHandler.reactivateSubscription.called.should.equal(
+          false
+        )
+        done()
+      })
 
-    it('should redurect to the subscription page', function (done) {
-      this.res.redirect.calledWith('/user/subscription').should.equal(true)
-      done()
+      it('should call next with an error', function (done) {
+        this.next.calledWith(sinon.match.instanceOf(Error)).should.equal(true)
+        done()
+      })
     })
   })
 
