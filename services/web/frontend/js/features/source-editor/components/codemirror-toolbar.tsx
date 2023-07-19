@@ -19,7 +19,6 @@ import { DetacherSynctexControl } from '../../pdf-preview/components/detach-sync
 import DetachCompileButtonWrapper from '../../pdf-preview/components/detach-compile-button-wrapper'
 import getMeta from '../../../utils/meta'
 import { isVisual } from '../extensions/visual/visual'
-import SplitTestBadge from '../../../shared/components/split-test-badge'
 import { language } from '@codemirror/language'
 import { minimumListDepthForSelection } from '../utils/tree-operations/ancestors'
 
@@ -139,12 +138,6 @@ const Toolbar = memo(function Toolbar() {
           active={searchPanelOpen(state)}
           icon="search"
         />
-        {languageName === 'latex' && !visual && (
-          <SplitTestBadge
-            splitTestName="source-editor-toolbar"
-            displayOnVariants={['enabled']}
-          />
-        )}
         {showSourceToolbar && (
           <>
             <SwitchToPDFButton />
