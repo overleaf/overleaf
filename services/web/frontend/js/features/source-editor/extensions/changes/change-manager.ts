@@ -316,12 +316,18 @@ export const createChangeManager = (
         acceptChanges(payload)
         view.dispatch(buildChangeMarkers())
         broadcastChange()
+        // Dispatch a focus:changed event to force the Angular controller to
+        // reassemble the list of entries without bulk actions
+        dispatchFocusChangedEvent(view.state)
         break
       }
 
       case 'changes:reject': {
         view.dispatch(rejectChanges(payload))
         broadcastChange()
+        // Dispatch a focus:changed event to force the Angular controller to
+        // reassemble the list of entries without bulk actions
+        dispatchFocusChangedEvent(view.state)
         break
       }
 
