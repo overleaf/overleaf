@@ -478,7 +478,7 @@ lint_flag_res_send_usage:
 
 lint: typecheck_frontend
 typecheck_frontend:
-	npx tsc --noEmit
+	npx -p typescript tsc --noEmit
 
 lint_in_docker:
 	$(RUN_LINT_FORMAT) make lint -j --output-sync
