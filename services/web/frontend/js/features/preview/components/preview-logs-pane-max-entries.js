@@ -39,19 +39,19 @@ function PreviewLogsPaneMaxEntries({ totalEntries, entriesShown, hasErrors }) {
                 <strong>{t('tip')}: </strong>
                 <Trans
                   i18nKey="log_entry_maximum_entries_enable_stop_on_first_error"
-                  components={{
-                    button: (
-                      <Button
-                        bsSize="xs"
-                        bsStyle="info"
-                        onClick={handleEnableStopOnFirstErrorClick}
-                      />
-                    ),
-                    'learn-more-link': (
-                      // eslint-disable-next-line jsx-a11y/anchor-has-content
-                      <a href="https://www.overleaf.com/learn/latex/Questions/Tips_and_Tricks_for_Troubleshooting_LaTeX" />
-                    ),
-                  }}
+                  components={[
+                    <Button
+                      key="enable-stop-on-first-error"
+                      bsSize="xs"
+                      bsStyle="info"
+                      onClick={handleEnableStopOnFirstErrorClick}
+                    />,
+                    // eslint-disable-next-line jsx-a11y/anchor-has-content
+                    <a
+                      key="learn-more"
+                      href="https://www.overleaf.com/learn/latex/Questions/Tips_and_Tricks_for_Troubleshooting_LaTeX"
+                    />,
+                  ]}
                 />{' '}
               </p>
               <p>{t('log_entry_maximum_entries_see_full_logs')}</p>

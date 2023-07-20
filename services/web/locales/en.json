@@ -937,7 +937,7 @@
   "loading_recent_github_commits": "Loading recent commits",
   "log_entry_description": "Log entry with level: __level__",
   "log_entry_maximum_entries": "Maximum log entries limit hit",
-  "log_entry_maximum_entries_enable_stop_on_first_error": "Try to fix the first error and recompile. Often one error causes many later error messages. You can <button>Enable “Stop on first error”</button> to focus on fixing errors. We recommend fixing errors as soon as possible; letting them accumulate may lead to hard-to-debug and fatal errors. <learn-more-link>Learn more</learn-more-link>",
+  "log_entry_maximum_entries_enable_stop_on_first_error": "Try to fix the first error and recompile. Often one error causes many later error messages. You can <0>Enable “Stop on first error”</0> to focus on fixing errors. We recommend fixing errors as soon as possible; letting them accumulate may lead to hard-to-debug and fatal errors. <1>Learn more</1>",
   "log_entry_maximum_entries_see_full_logs": "If you need to see the full logs, you can still download them or view the raw logs below.",
   "log_entry_maximum_entries_title": "__total__ log messages total. Showing the first __displayed__",
   "log_hint_extra_info": "Learn more",

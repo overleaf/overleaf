@@ -372,7 +372,6 @@
   "git_bridge_modal_description": "您可以使用下面显示的链接来<code>git</code><code>clone</code>您的项目。",
   "github_commit_message_placeholder": "为 __appName__ 中的更改提交信息",
   "github_credentials_expired": "您的 Github 授权凭证已过期",
-  "github_file_name_error": "您的项目包含文件名无效的文件。请检查您的存储库并重试。",
   "github_for_link_shared_projects": "此项目是通过链接共享访问的，除非项目所有者通过电子邮件邀请您，否则不会与您的Github同步。",
   "github_git_folder_error": "此项目在顶层包含一个.git文件夹，表示它已经是git存储库。Overleaf的Github同步服务无法同步git历史记录。请删除.git文件夹，然后重试。",
   "github_integration_info": "与GitHub或直接从Git进行提交和拉取提交，因此您或您的合作者可以在Git上脱机工作，并在Overleaf上在线工作。",

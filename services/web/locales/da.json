@@ -901,7 +901,7 @@
   "loading_recent_github_commits": "Indlæs nylige commits",
   "log_entry_description": "Logoptegnelse med niveau: __level__",
   "log_entry_maximum_entries": "Grænsen for elementer i loggen er nået",
-  "log_entry_maximum_entries_enable_stop_on_first_error": "Prøv at fikse den første fejl og genkompilere. Ofte kan en fejl være skyld i mange efterfølgende fejlmeddelelser. Du kan Slå “Stop ved første fejl” til for at fokusere på at fikse fejl. Vi anbefaler, at du fikser fejl så hurtigt som muligt; hvis de får lov at hobe sig op kan de føre til fejl, som er svære at fejlrette, og fatale fejl. Lære mere",
+  "log_entry_maximum_entries_enable_stop_on_first_error": "Prøv at fikse den første fejl og genkompilere. Ofte kan en fejl være skyld i mange efterfølgende fejlmeddelelser. Du kan Slå <0>“Stop ved første fejl”</0> til for at fokusere på at fikse fejl. Vi anbefaler, at du fikser fejl så hurtigt som muligt; hvis de får lov at hobe sig op kan de føre til fejl, som er svære at fejlrette, og fatale fejl. <1>Lære mere</1>",
   "log_entry_maximum_entries_see_full_logs": "Hvis du har brug for at se de komplette logge, så kan du stadig hente dem, eller se de rå logge herunder.",
   "log_entry_maximum_entries_title": "__total__ logbeskeder i alt. Viser de første __displayed__",
   "log_hint_extra_info": "Lær mere",
