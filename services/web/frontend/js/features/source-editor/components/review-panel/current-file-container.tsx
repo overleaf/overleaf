@@ -56,7 +56,12 @@ function CurrentFileContainer() {
   }, [setEntryHover])
 
   return (
-    <Container classNames={{ 'rp-collapsed-displaying-entry': entryHover }}>
+    <Container
+      classNames={{
+        'rp-collapsed-displaying-entry': entryHover,
+        'rp-current-file-container': true,
+      }}
+    >
       <div className="review-panel-tools">
         <Toolbar />
         <Nav />
