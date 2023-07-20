@@ -288,11 +288,11 @@ describe('PermissionsManager', function () {
       const user = { prop: 'allowed' }
       const subscription = { prop: 'managed' }
       const result =
-        await this.PermissionsManager.promises.getUserValidationStatus(
+        await this.PermissionsManager.promises.getUserValidationStatus({
           user,
           groupPolicy,
-          subscription
-        )
+          subscription,
+        })
       expect(result).to.deep.equal(new Map([['policy', true]]))
     })
 
@@ -312,11 +312,11 @@ describe('PermissionsManager', function () {
       const user = { prop: 'not allowed' }
       const subscription = { prop: 'managed' }
       const result =
-        await this.PermissionsManager.promises.getUserValidationStatus(
+        await this.PermissionsManager.promises.getUserValidationStatus({
           user,
           groupPolicy,
-          subscription
-        )
+          subscription,
+        })
       expect(result).to.deep.equal(new Map([['policy', false]]))
     })
     it('should return the status for multiple policies according to whether the user conforms', async function () {
@@ -356,11 +356,11 @@ describe('PermissionsManager', function () {
       const user = { prop: 'allowed' }
       const subscription = { prop: 'managed' }
       const result =
-        await this.PermissionsManager.promises.getUserValidationStatus(
+        await this.PermissionsManager.promises.getUserValidationStatus({
           user,
           groupPolicy,
-          subscription
-        )
+          subscription,
+        })
       expect(result).to.deep.equal(
         new Map([
           ['policy1', true],

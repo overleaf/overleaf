@@ -282,17 +282,19 @@ function hasPermission(groupPolicy, capability) {
 
 /**
  * Asynchronously checks which policies a user complies with using the
- * applicable validators. Each validator is an async function that takes a object
- * with user and subscription properties and returns a boolean.
+ * applicable validators. Each validator is an async function that takes an object
+ * with user, groupPolicy, and subscription properties and returns a boolean.
  *
- * @param {Object} user - The user object to check.
- * @param {Object} groupPolicy - The group policy object to check.
+ * @param {Object} options - The options object.
+ * @param {Object} options.user - The user object to check.
+ * @param {Object} options.groupPolicy - The group policy object to check.
+ * @param {Object} options.subscription - The subscription object for the group policy.
  * @returns {Promise<Map>} A promise that resolves with a Map object containing
  *   the validation status for each enforced policy. The keys of the Map are the
  *   enforced policy names, and the values are booleans indicating whether the
  *   user complies with the policy.
  */
-async function getUserValidationStatus(user, groupPolicy, subscription) {
+async function getUserValidationStatus({ user, groupPolicy, subscription }) {
   // find all the enforced policies for the user
   const enforcedPolicyNames = getEnforcedPolicyNames(groupPolicy)
   // for each enforced policy, we have a list of capabilities with expected values

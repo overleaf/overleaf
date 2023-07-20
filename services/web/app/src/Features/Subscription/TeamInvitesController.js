@@ -93,11 +93,11 @@ async function viewInvite(req, res, next) {
       }
 
       validationStatus =
-        await PermissionsManager.promises.getUserValidationStatus(
+        await PermissionsManager.promises.getUserValidationStatus({
           user,
-          subscription.groupPolicy,
-          subscription
-        )
+          groupPolicy: subscription.groupPolicy,
+          subscription,
+        })
 
       return res.render('subscriptions/team/invite-managed', {
         inviterName: invite.inviterName,
