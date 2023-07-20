@@ -3,6 +3,7 @@ import { postJSON } from '../../../../infrastructure/fetch-json'
 import { reactivateSubscriptionUrl } from '../../data/subscription-url'
 import useAsync from '../../../../shared/hooks/use-async'
 import { useLocation } from '../../../../shared/hooks/use-location'
+import getMeta from '../../../../utils/meta'
 
 function ReactivateSubscription() {
   const { t } = useTranslation()
@@ -15,6 +16,11 @@ function ReactivateSubscription() {
 
   if (isSuccess) {
     location.reload()
+  }
+
+  // Don't show the button to reactivate the subscription for managed users
+  if (getMeta('ol-cannot-reactivate-subscription')) {
+    return null
   }
 
   return (
