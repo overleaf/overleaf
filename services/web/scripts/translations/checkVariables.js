@@ -1,22 +1,20 @@
-// Usage: node checkVariables.js <locale>
-
 const fs = require('fs')
 const Path = require('path')
 
 const GLOBALS = ['__appName__']
 const LOCALES = Path.join(__dirname, '../../locales')
 const baseLocalePath = Path.join(LOCALES, 'en.json')
-
-if (process.argv.length < 3) {
-  console.error('Usage: node checkVariables.js <locale>')
-  process.exit(1)
-}
-
-const localeName = process.argv[2]
-const localePath = Path.join(LOCALES, `${localeName}.json`)
-
 const baseLocale = JSON.parse(fs.readFileSync(baseLocalePath, 'utf-8'))
-const locale = JSON.parse(fs.readFileSync(localePath, 'utf-8'))
+const baseLocaleKeys = Object.keys(baseLocale)
+
+const IGNORE_ORPHANED_TRANSLATIONS = process.argv.includes(
+  '--ignore-orphaned-translations'
+)
+
+const IGNORE_NESTING_FOR = {
+  over_x_templates_easy_getting_started: ['__templates__'],
+  all_packages_and_templates: ['__templatesLink__'],
+}
 
 function fetchKeys(str) {
   const matches = str.matchAll(/__.*?__/g)
@@ -26,8 +24,11 @@ function fetchKeys(str) {
   return Array.from(matches).map(match => match[0])
 }
 
-function difference(base, target) {
-  const keysInBaseButNotInTarget = base.filter(key => !target.includes(key))
+function difference(key, base, target) {
+  const nesting = IGNORE_NESTING_FOR[key] || []
+  const keysInBaseButNotInTarget = base.filter(
+    key => !target.includes(key) && !nesting.includes(key)
+  )
   const keysInTargetButNotInBase = target.filter(
     key => !base.includes(key) && !GLOBALS.includes(key)
   )
@@ -37,25 +38,49 @@ function difference(base, target) {
   }
 }
 
-for (const key of Object.keys(locale)) {
-  if (Object.prototype.hasOwnProperty.call(baseLocale, key)) {
+let violations = 0
+for (const localeName of fs.readdirSync(LOCALES)) {
+  if (localeName === 'README.md') continue
+  const localePath = Path.join(LOCALES, localeName)
+
+  const locale = JSON.parse(fs.readFileSync(localePath, 'utf-8'))
+
+  for (const key of Object.keys(locale)) {
+    if (!baseLocaleKeys.includes(key)) {
+      if (IGNORE_ORPHANED_TRANSLATIONS) continue
+      violations += 1
+      console.warn(`[${localeName}] Orphaned key "${key}" not found in en.json`)
+      continue
+    }
+
     const keysInTranslation = fetchKeys(locale[key])
     const keysInBase = fetchKeys(baseLocale[key])
     const { keysInBaseButNotInTarget, keysInTargetButNotInBase } = difference(
+      key,
       keysInBase,
       keysInTranslation
     )
     if (keysInBaseButNotInTarget.length) {
+      violations += keysInBaseButNotInTarget.length
       console.warn(
-        `Warning: Missing variables in key ${key}:`,
+        `[${localeName}] Missing variables in key "${key}":`,
         keysInBaseButNotInTarget
       )
     }
     if (keysInTargetButNotInBase.length) {
+      violations += keysInTargetButNotInBase.length
       console.warn(
-        `Warning: Extra variables in key ${key}:`,
+        `[${localeName}] Extra variables in key   "${key}":`,
         keysInTargetButNotInBase
       )
     }
   }
+}
+
+if (violations) {
+  console.warn('Variables are not in sync between translations.')
+  process.exit(1)
+} else {
+  console.log('Variables are in sync.')
+  process.exit(0)
 }

@@ -8,6 +8,9 @@ node scripts/translations/sort.js --check
 # Ensure all locales are still in use
 node scripts/translations/cleanupUnusedLocales.js --check
 
+# Ensure all locales use the same variables
+node scripts/translations/checkVariables.js --ignore-orphaned-translations
+
 # Ensure all locales used in the frontend are tracked
 OUTPUT=data/dumpFolder/i18next-scanner
 trap "rm -rf $OUTPUT" EXIT
