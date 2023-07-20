@@ -127,7 +127,6 @@
   "get_started_now": "Začněte hned",
   "github_commit_message_placeholder": "Commit zprávy pro změny udělané v __appName__u...",
   "github_is_premium": "Synchronizace s GitHubem je prémiová funkce",
-  "github_merge_failed": "Vaše změny v __appName__u a GitHubu nemohou být automaticky mergovány. Prosím mergujte manuálně <0>__sharelatex_branch__</0> branch do <1>__master_branch__</1> branche v gitu. Po dokončení manuálního merge klikněte níže pro pokračování.",
   "github_no_master_branch_error": "Tento repozitář nemůže být importován, protože nemá master branch. Prosím zajistěte, aby projekt měl master branch.",
   "github_public_description": "Tento repozitář může vidět kdokoliv. Vy určíte kdo do něj může commitovat,",
   "github_successfully_linked_description": "Děkujeme, úspěšně jsem připojili váš GitHub účet k __appName__u. Nyní můžete exportovat své projekty v __appName__u do GitHubu, nebo importovat projekty z GitHub repozitáře.",
