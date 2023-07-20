@@ -34,9 +34,8 @@ function CurrentFileContainer() {
     users,
     entryHover,
     nVisibleSelectedChanges: nChanges,
-    toggleReviewPanel,
   } = useReviewPanelValueContext()
-  const { setEntryHover } = useReviewPanelUpdaterFnsContext()
+  const { setEntryHover, toggleReviewPanel } = useReviewPanelUpdaterFnsContext()
   const contentHeight = useCodeMirrorContentHeight()
 
   const currentDocEntries =
@@ -87,10 +86,15 @@ function CurrentFileContainer() {
                   <ChangeEntry
                     key={id}
                     docId={openDocId}
-                    entry={entry}
                     entryId={id}
                     permissions={permissions}
                     user={users[entry.metadata.user_id]}
+                    content={entry.content}
+                    offset={entry.offset}
+                    type={entry.type}
+                    focused={entry.focused}
+                    entryIds={entry.entry_ids}
+                    timestamp={entry.metadata.ts}
                     onMouseEnter={onMouseEnter}
                     onMouseLeave={onMouseLeave}
                     onIndicatorClick={toggleReviewPanel}
@@ -103,10 +107,15 @@ function CurrentFileContainer() {
                   <AggregateChangeEntry
                     key={id}
                     docId={openDocId}
-                    entry={entry}
                     entryId={id}
                     permissions={permissions}
                     user={users[entry.metadata.user_id]}
+                    content={entry.content}
+                    replacedContent={entry.metadata.replaced_content}
+                    offset={entry.offset}
+                    focused={entry.focused}
+                    entryIds={entry.entry_ids}
+                    timestamp={entry.metadata.ts}
                     onMouseEnter={onMouseEnter}
                     onMouseLeave={onMouseLeave}
                     onIndicatorClick={toggleReviewPanel}
@@ -123,10 +132,12 @@ function CurrentFileContainer() {
                   <CommentEntry
                     key={id}
                     docId={openDocId}
-                    entry={entry}
+                    threadId={entry.thread_id}
+                    thread={commentThreads[entry.thread_id]}
                     entryId={id}
+                    offset={entry.offset}
+                    focused={entry.focused}
                     permissions={permissions}
-                    threads={commentThreads}
                     onMouseEnter={onMouseEnter}
                     onMouseLeave={onMouseLeave}
                     onIndicatorClick={toggleReviewPanel}
@@ -142,7 +153,6 @@ function CurrentFileContainer() {
                 return (
                   <BulkActionsEntry
                     key={id}
-                    entry={entry}
                     entryId={entry.type}
                     nChanges={nChanges}
                   />

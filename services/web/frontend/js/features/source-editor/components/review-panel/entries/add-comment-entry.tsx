@@ -19,8 +19,8 @@ type AddCommentEntryProps = {
 
 function AddCommentEntry({ entryId }: AddCommentEntryProps) {
   const { t } = useTranslation()
-  const { isAddingComment, submitNewComment } = useReviewPanelValueContext()
-  const { setIsAddingComment, handleLayoutChange } =
+  const { isAddingComment } = useReviewPanelValueContext()
+  const { setIsAddingComment, submitNewComment, handleLayoutChange } =
     useReviewPanelUpdaterFnsContext()
 
   const [content, setContent] = useState('')

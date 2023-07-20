@@ -23,14 +23,16 @@ const sendAnalytics = () => {
 function ToggleMenu() {
   const { t } = useTranslation()
   const project = useProjectContext()
-  const { setShouldCollapse } = useReviewPanelUpdaterFnsContext()
+  const {
+    setShouldCollapse,
+    toggleTrackChangesForEveryone,
+    toggleTrackChangesForUser,
+    toggleTrackChangesForGuests,
+  } = useReviewPanelUpdaterFnsContext()
   const {
     permissions,
     wantTrackChanges,
     shouldCollapse,
-    toggleTrackChangesForEveryone,
-    toggleTrackChangesForUser,
-    toggleTrackChangesForGuests,
     trackChangesState,
     trackChangesOnForEveryone,
     trackChangesOnForGuests,

@@ -7,12 +7,11 @@ import Modal, { useBulkActionsModal } from './modal'
 import { ReviewPanelBulkActionsEntry } from '../../../../../../../../types/review-panel/entry'
 
 type BulkActionsEntryProps = {
-  entry: ReviewPanelBulkActionsEntry
   entryId: ReviewPanelBulkActionsEntry['type']
   nChanges: number
 }
 
-function BulkActionsEntry({ entry, entryId, nChanges }: BulkActionsEntryProps) {
+function BulkActionsEntry({ entryId, nChanges }: BulkActionsEntryProps) {
   const { t } = useTranslation()
   const {
     show,
@@ -28,21 +27,8 @@ function BulkActionsEntry({ entry, entryId, nChanges }: BulkActionsEntryProps) {
       <EntryContainer id={entryId}>
         {nChanges > 1 && (
           <>
-            <EntryCallout
-              className="rp-entry-callout-bulk-actions"
-              style={{
-                top: entry.screenPos
-                  ? entry.screenPos.y + entry.screenPos.height - 1 + 'px'
-                  : undefined,
-              }}
-            />
-            <BulkActions
-              className="rp-entry"
-              style={{
-                top: entry.screenPos.y + 'px',
-                visibility: entry.visible ? 'visible' : 'hidden',
-              }}
-            >
+            <EntryCallout className="rp-entry-callout-bulk-actions" />
+            <BulkActions className="rp-entry">
               <BulkActions.Button onClick={handleShowBulkRejectDialog}>
                 <Icon type="times" /> {t('reject_all')} ({nChanges})
               </BulkActions.Button>

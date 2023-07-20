@@ -34,6 +34,10 @@ export interface ReviewPanelDeleteEntry
   type: 'delete'
 }
 
+export type ReviewPanelChangeEntry =
+  | ReviewPanelInsertEntry
+  | ReviewPanelDeleteEntry
+
 export interface ReviewPanelCommentEntry extends ReviewPanelBaseEntry {
   type: 'comment'
   content: string

@@ -1,60 +1,47 @@
 import { useTranslation } from 'react-i18next'
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import EntryContainer from './entry-container'
 import EntryCallout from './entry-callout'
 import EntryActions from './entry-actions'
 import Icon from '../../../../../shared/components/icon'
-import {
-  useReviewPanelUpdaterFnsContext,
-  useReviewPanelValueContext,
-} from '../../../context/review-panel/review-panel-context'
+import { useReviewPanelUpdaterFnsContext } from '../../../context/review-panel/review-panel-context'
 import { formatTime } from '../../../../utils/format-date'
 import classnames from 'classnames'
-import {
-  ReviewPanelDeleteEntry,
-  ReviewPanelInsertEntry,
-} from '../../../../../../../types/review-panel/entry'
-import {
-  ReviewPanelPermissions,
-  ReviewPanelUser,
-  ThreadId,
-} from '../../../../../../../types/review-panel/review-panel'
-import { DocId } from '../../../../../../../types/project-settings'
+import { ReviewPanelChangeEntry } from '../../../../../../../types/review-panel/entry'
+import { BaseChangeEntryProps } from '../types/base-change-entry-props'
+import comparePropsWithShallowArrayCompare from '../utils/compare-props-with-shallow-array-compare'
 
-type ChangeEntryProps = {
-  docId: DocId
-  entry: ReviewPanelInsertEntry | ReviewPanelDeleteEntry
-  entryId: ThreadId
-  permissions: ReviewPanelPermissions
-  user: ReviewPanelUser | undefined
-  contentLimit?: number
-  onMouseEnter?: () => void
-  onMouseLeave?: () => void
-  onIndicatorClick?: () => void
+interface ChangeEntryProps extends BaseChangeEntryProps {
+  type: ReviewPanelChangeEntry['type']
 }
 
 function ChangeEntry({
   docId,
-  entry,
   entryId,
   permissions,
   user,
+  content,
+  offset,
+  type,
+  focused,
+  entryIds,
+  timestamp,
   contentLimit = 40,
   onMouseEnter,
   onMouseLeave,
   onIndicatorClick,
 }: ChangeEntryProps) {
   const { t } = useTranslation()
-  const { acceptChanges, rejectChanges, gotoEntry } =
-    useReviewPanelValueContext()
-  const { handleLayoutChange } = useReviewPanelUpdaterFnsContext()
+  const { handleLayoutChange, acceptChanges, rejectChanges, gotoEntry } =
+    useReviewPanelUpdaterFnsContext()
   const [isCollapsed, setIsCollapsed] = useState(true)
 
-  const content = isCollapsed
-    ? entry.content.substring(0, contentLimit)
-    : entry.content
+  const contentToDisplay = isCollapsed
+    ? content.substring(0, contentLimit)
+    : content
 
-  const needsCollapsing = entry.content.length > contentLimit
+  const needsCollapsing = content.length > contentLimit
+  const isInsert = type === 'insert'
 
   const handleEntryClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const target = e.target as Element
@@ -66,7 +53,7 @@ function ChangeEntry({
       '.rp-entry-action-icon i',
     ]) {
       if (target.matches(selector)) {
-        gotoEntry(docId, entry.offset)
+        gotoEntry(docId, offset)
         break
       }
     }
@@ -84,28 +71,24 @@ function ChangeEntry({
       onMouseLeave={onMouseLeave}
       id={entryId}
     >
-      <EntryCallout className={`rp-entry-callout-${entry.type}`} />
+      <EntryCallout className={`rp-entry-callout-${type}`} />
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
       <div
         className={classnames('rp-entry-indicator', {
-          'rp-entry-indicator-focused': entry.focused,
+          'rp-entry-indicator-focused': focused,
         })}
         onClick={onIndicatorClick}
       >
-        {entry.type === 'insert' ? (
-          <Icon type="pencil" />
-        ) : (
-          <i className="rp-icon-delete" />
-        )}
+        {isInsert ? <Icon type="pencil" /> : <i className="rp-icon-delete" />}
       </div>
       <div
-        className={classnames('rp-entry', `rp-entry-${entry.type}`, {
-          'rp-entry-focused': entry.focused,
+        className={classnames('rp-entry', `rp-entry-${type}`, {
+          'rp-entry-focused': focused,
         })}
       >
         <div className="rp-entry-body">
           <div className="rp-entry-action-icon">
-            {entry.type === 'insert' ? (
+            {isInsert ? (
               <Icon type="pencil" />
             ) : (
               <i className="rp-icon-delete" />
@@ -114,15 +97,19 @@ function ChangeEntry({
           <div className="rp-entry-details">
             <div className="rp-entry-description">
               <span>
-                {entry.type === 'insert' ? (
+                {isInsert ? (
                   <>
                     {t('tracked_change_added')}&nbsp;
-                    <ins className="rp-content-highlight">{content}</ins>
+                    <ins className="rp-content-highlight">
+                      {contentToDisplay}
+                    </ins>
                   </>
                 ) : (
                   <>
                     {t('tracked_change_deleted')}&nbsp;
-                    <del className="rp-content-highlight">{content}</del>
+                    <del className="rp-content-highlight">
+                      {contentToDisplay}
+                    </del>
                   </>
                 )}
                 {needsCollapsing && (
@@ -138,7 +125,7 @@ function ChangeEntry({
               </span>
             </div>
             <div className="rp-entry-metadata">
-              {formatTime(entry.metadata.ts, 'MMM D, Y h:mm A')}
+              {formatTime(timestamp, 'MMM D, Y h:mm A')}
               &nbsp;&bull;&nbsp;
               {user && (
                 <span
@@ -153,10 +140,10 @@ function ChangeEntry({
         </div>
         {permissions.write && (
           <EntryActions>
-            <EntryActions.Button onClick={() => rejectChanges(entry.entry_ids)}>
+            <EntryActions.Button onClick={() => rejectChanges(entryIds)}>
               <Icon type="times" /> {t('reject')}
             </EntryActions.Button>
-            <EntryActions.Button onClick={() => acceptChanges(entry.entry_ids)}>
+            <EntryActions.Button onClick={() => acceptChanges(entryIds)}>
               <Icon type="check" /> {t('accept')}
             </EntryActions.Button>
           </EntryActions>
@@ -166,4 +153,7 @@ function ChangeEntry({
   )
 }
 
-export default ChangeEntry
+export default memo(
+  ChangeEntry,
+  comparePropsWithShallowArrayCompare('entryIds')
+)

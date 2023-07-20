@@ -1,9 +1,10 @@
 import { useTranslation } from 'react-i18next'
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import Linkify from 'react-linkify'
 import { formatTime } from '../../../../utils/format-date'
-import { useReviewPanelValueContext } from '../../../context/review-panel/review-panel-context'
+import { useReviewPanelUpdaterFnsContext } from '../../../context/review-panel/review-panel-context'
 import { FilteredResolvedComments } from '../toolbar/resolved-comments-dropdown'
+import { ReviewPanelPermissions } from '../../../../../../../types/review-panel/review-panel'
 
 function LinkDecorator(
   decoratedHref: string,
@@ -19,16 +20,17 @@ function LinkDecorator(
 
 type ResolvedCommentEntryProps = {
   thread: FilteredResolvedComments
+  permissions: ReviewPanelPermissions
   contentLimit?: number
 }
 
 function ResolvedCommentEntry({
   thread,
+  permissions,
   contentLimit = 40,
 }: ResolvedCommentEntryProps) {
   const { t } = useTranslation()
-  const { permissions, unresolveComment, deleteThread } =
-    useReviewPanelValueContext()
+  const { unresolveComment, deleteThread } = useReviewPanelUpdaterFnsContext()
   const [isCollapsed, setIsCollapsed] = useState(false)
   const needsCollapsing = thread.content.length > contentLimit
   const content = isCollapsed
@@ -122,4 +124,4 @@ function ResolvedCommentEntry({
   )
 }
 
-export default ResolvedCommentEntry
+export default memo(ResolvedCommentEntry)

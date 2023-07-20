@@ -1,9 +1,9 @@
 import { useTranslation } from 'react-i18next'
-import { useReviewPanelValueContext } from '../../context/review-panel/review-panel-context'
+import { useReviewPanelUpdaterFnsContext } from '../../context/review-panel/review-panel-context'
 
 function Toggler() {
   const { t } = useTranslation()
-  const { toggleReviewPanel } = useReviewPanelValueContext()
+  const { toggleReviewPanel } = useReviewPanelUpdaterFnsContext()
 
   const handleTogglerClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     const target = event.target as HTMLButtonElement

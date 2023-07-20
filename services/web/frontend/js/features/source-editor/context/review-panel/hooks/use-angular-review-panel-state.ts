@@ -3,8 +3,10 @@ import useScopeValue from '../../../../../shared/hooks/use-scope-value'
 import { sendMB } from '../../../../../infrastructure/event-tracking'
 import { ReviewPanelState } from '../types/review-panel-state'
 import * as ReviewPanel from '../types/review-panel-state'
-import { SubView } from '../../../../../../../types/review-panel/review-panel'
-import { ReviewPanelCommentEntry } from '../../../../../../../types/review-panel/entry'
+import {
+  SubView,
+  ThreadId,
+} from '../../../../../../../types/review-panel/review-panel'
 import { dispatchReviewPanelLayout as handleLayoutChange } from '../../../extensions/changes/change-manager'
 
 function useAngularReviewPanelState(): ReviewPanelState {
@@ -47,15 +49,18 @@ function useAngularReviewPanelState(): ReviewPanelState {
   const [shouldCollapse, setShouldCollapse] = useScopeValue<
     ReviewPanel.Value<'shouldCollapse'>
   >('reviewPanel.fullTCStateCollapsed')
+  const [lineHeight] = useScopeValue<number>(
+    'reviewPanel.rendererData.lineHeight'
+  )
 
   const [toggleTrackChangesForEveryone] = useScopeValue<
-    ReviewPanel.Value<'toggleTrackChangesForEveryone'>
+    ReviewPanel.UpdaterFn<'toggleTrackChangesForEveryone'>
   >('toggleTrackChangesForEveryone')
   const [toggleTrackChangesForUser] = useScopeValue<
-    ReviewPanel.Value<'toggleTrackChangesForUser'>
+    ReviewPanel.UpdaterFn<'toggleTrackChangesForUser'>
   >('toggleTrackChangesForUser')
   const [toggleTrackChangesForGuests] = useScopeValue<
-    ReviewPanel.Value<'toggleTrackChangesForGuests'>
+    ReviewPanel.UpdaterFn<'toggleTrackChangesForGuests'>
   >('toggleTrackChangesForGuests')
 
   const [trackChangesState] = useScopeValue<
@@ -71,37 +76,47 @@ function useAngularReviewPanelState(): ReviewPanelState {
     ReviewPanel.Value<'trackChangesForGuestsAvailable'>
   >('reviewPanel.trackChangesForGuestsAvailable')
   const [resolveComment] =
-    useScopeValue<ReviewPanel.Value<'resolveComment'>>('resolveComment')
+    useScopeValue<ReviewPanel.UpdaterFn<'resolveComment'>>('resolveComment')
   const [submitNewComment] =
-    useScopeValue<ReviewPanel.Value<'submitNewComment'>>('submitNewComment')
+    useScopeValue<ReviewPanel.UpdaterFn<'submitNewComment'>>('submitNewComment')
   const [deleteComment] =
-    useScopeValue<ReviewPanel.Value<'deleteComment'>>('deleteComment')
-  const [gotoEntry] = useScopeValue<ReviewPanel.Value<'gotoEntry'>>('gotoEntry')
-  const [saveEdit] = useScopeValue<ReviewPanel.Value<'saveEdit'>>('saveEdit')
+    useScopeValue<ReviewPanel.UpdaterFn<'deleteComment'>>('deleteComment')
+  const [gotoEntry] =
+    useScopeValue<ReviewPanel.UpdaterFn<'gotoEntry'>>('gotoEntry')
+  const [saveEdit] =
+    useScopeValue<ReviewPanel.UpdaterFn<'saveEdit'>>('saveEdit')
   const [submitReplyAngular] =
-    useScopeValue<(entry: ReviewPanelCommentEntry) => void>('submitReply')
+    useScopeValue<
+      (entry: { thread_id: ThreadId; replyContent: string }) => void
+    >('submitReply')
 
   const [formattedProjectMembers] = useScopeValue<
     ReviewPanel.Value<'formattedProjectMembers'>
   >('reviewPanel.formattedProjectMembers')
 
   const [toggleReviewPanel] =
-    useScopeValue<ReviewPanel.Value<'toggleReviewPanel'>>('toggleReviewPanel')
+    useScopeValue<ReviewPanel.UpdaterFn<'toggleReviewPanel'>>(
+      'toggleReviewPanel'
+    )
   const [unresolveComment] =
-    useScopeValue<ReviewPanel.Value<'unresolveComment'>>('unresolveComment')
+    useScopeValue<ReviewPanel.UpdaterFn<'unresolveComment'>>('unresolveComment')
   const [deleteThread] =
-    useScopeValue<ReviewPanel.Value<'deleteThread'>>('deleteThread')
+    useScopeValue<ReviewPanel.UpdaterFn<'deleteThread'>>('deleteThread')
   const [refreshResolvedCommentsDropdown] = useScopeValue<
-    ReviewPanel.Value<'refreshResolvedCommentsDropdown'>
+    ReviewPanel.UpdaterFn<'refreshResolvedCommentsDropdown'>
   >('refreshResolvedCommentsDropdown')
   const [acceptChanges] =
-    useScopeValue<ReviewPanel.Value<'acceptChanges'>>('acceptChanges')
+    useScopeValue<ReviewPanel.UpdaterFn<'acceptChanges'>>('acceptChanges')
   const [rejectChanges] =
-    useScopeValue<ReviewPanel.Value<'rejectChanges'>>('rejectChanges')
+    useScopeValue<ReviewPanel.UpdaterFn<'rejectChanges'>>('rejectChanges')
   const [bulkAcceptActions] =
-    useScopeValue<ReviewPanel.Value<'bulkAcceptActions'>>('bulkAcceptActions')
+    useScopeValue<ReviewPanel.UpdaterFn<'bulkAcceptActions'>>(
+      'bulkAcceptActions'
+    )
   const [bulkRejectActions] =
-    useScopeValue<ReviewPanel.Value<'bulkRejectActions'>>('bulkRejectActions')
+    useScopeValue<ReviewPanel.UpdaterFn<'bulkRejectActions'>>(
+      'bulkRejectActions'
+    )
 
   const handleSetSubview = useCallback(
     (subView: SubView) => {
@@ -112,8 +127,8 @@ function useAngularReviewPanelState(): ReviewPanelState {
   )
 
   const submitReply = useCallback(
-    (entry: ReviewPanelCommentEntry, replyContent: string) => {
-      submitReplyAngular({ ...entry, replyContent })
+    (threadId: ThreadId, replyContent: string) => {
+      submitReplyAngular({ thread_id: threadId, replyContent })
     },
     [submitReplyAngular]
   )
@@ -127,86 +142,54 @@ function useAngularReviewPanelState(): ReviewPanelState {
     () => ({
       collapsed,
       commentThreads,
-      deleteComment,
       docs,
       entries,
       entryHover,
       isAddingComment,
-      gotoEntry,
       loadingThreads,
       nVisibleSelectedChanges,
       permissions,
       users,
-      resolveComment,
       resolvedComments,
-      saveEdit,
       shouldCollapse,
       navHeight,
       toolbarHeight,
-      submitReply,
       subView,
       wantTrackChanges,
       loading,
       openDocId,
-      toggleTrackChangesForEveryone,
-      toggleTrackChangesForUser,
-      toggleTrackChangesForGuests,
+      lineHeight,
       trackChangesState,
       trackChangesOnForEveryone,
       trackChangesOnForGuests,
       trackChangesForGuestsAvailable,
       formattedProjectMembers,
-      toggleReviewPanel,
-      bulkAcceptActions,
-      bulkRejectActions,
-      unresolveComment,
-      deleteThread,
-      refreshResolvedCommentsDropdown,
-      acceptChanges,
-      rejectChanges,
-      submitNewComment,
     }),
     [
       collapsed,
       commentThreads,
-      deleteComment,
       docs,
       entries,
       entryHover,
       isAddingComment,
-      gotoEntry,
       loadingThreads,
       nVisibleSelectedChanges,
       permissions,
       users,
-      resolveComment,
       resolvedComments,
-      saveEdit,
       shouldCollapse,
       navHeight,
       toolbarHeight,
-      submitReply,
       subView,
       wantTrackChanges,
       loading,
       openDocId,
-      toggleTrackChangesForEveryone,
-      toggleTrackChangesForUser,
-      toggleTrackChangesForGuests,
+      lineHeight,
       trackChangesState,
       trackChangesOnForEveryone,
       trackChangesOnForGuests,
       trackChangesForGuestsAvailable,
       formattedProjectMembers,
-      toggleReviewPanel,
-      bulkAcceptActions,
-      bulkRejectActions,
-      unresolveComment,
-      deleteThread,
-      refreshResolvedCommentsDropdown,
-      acceptChanges,
-      rejectChanges,
-      submitNewComment,
     ]
   )
 
@@ -214,6 +197,23 @@ function useAngularReviewPanelState(): ReviewPanelState {
     () => ({
       handleSetSubview,
       handleLayoutChange,
+      gotoEntry,
+      resolveComment,
+      submitReply,
+      acceptChanges,
+      rejectChanges,
+      toggleReviewPanel,
+      bulkAcceptActions,
+      bulkRejectActions,
+      saveEdit,
+      submitNewComment,
+      deleteComment,
+      unresolveComment,
+      refreshResolvedCommentsDropdown,
+      deleteThread,
+      toggleTrackChangesForEveryone,
+      toggleTrackChangesForUser,
+      toggleTrackChangesForGuests,
       setEntryHover,
       setCollapsed,
       setShouldCollapse,
@@ -223,6 +223,23 @@ function useAngularReviewPanelState(): ReviewPanelState {
     }),
     [
       handleSetSubview,
+      gotoEntry,
+      resolveComment,
+      submitReply,
+      acceptChanges,
+      rejectChanges,
+      toggleReviewPanel,
+      bulkAcceptActions,
+      bulkRejectActions,
+      saveEdit,
+      submitNewComment,
+      deleteComment,
+      unresolveComment,
+      refreshResolvedCommentsDropdown,
+      deleteThread,
+      toggleTrackChangesForEveryone,
+      toggleTrackChangesForUser,
+      toggleTrackChangesForGuests,
       setCollapsed,
       setEntryHover,
       setShouldCollapse,

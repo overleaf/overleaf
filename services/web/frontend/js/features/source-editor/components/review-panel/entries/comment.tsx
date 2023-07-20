@@ -1,11 +1,8 @@
 import { useTranslation } from 'react-i18next'
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import AutoExpandingTextArea from '../../../../../shared/components/auto-expanding-text-area'
 import { formatTime } from '../../../../utils/format-date'
-import {
-  useReviewPanelUpdaterFnsContext,
-  useReviewPanelValueContext,
-} from '../../../context/review-panel/review-panel-context'
+import { useReviewPanelUpdaterFnsContext } from '../../../context/review-panel/review-panel-context'
 import { ReviewPanelCommentThread } from '../../../../../../../types/review-panel/comment-thread'
 import {
   ReviewPanelCommentThreadMessage,
@@ -20,8 +17,8 @@ type CommentProps = {
 
 function Comment({ thread, threadId, comment }: CommentProps) {
   const { t } = useTranslation()
-  const { deleteComment, saveEdit } = useReviewPanelValueContext()
-  const { handleLayoutChange } = useReviewPanelUpdaterFnsContext()
+  const { handleLayoutChange, deleteComment, saveEdit } =
+    useReviewPanelUpdaterFnsContext()
   const [deleting, setDeleting] = useState(false)
   const [editing, setEditing] = useState(false)
 
@@ -120,4 +117,4 @@ function Comment({ thread, threadId, comment }: CommentProps) {
   )
 }
 
-export default Comment
+export default memo(Comment)

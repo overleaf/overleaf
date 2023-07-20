@@ -81,10 +81,15 @@ function OverviewFile({ docId, docPath }: OverviewFileProps) {
               <ChangeEntry
                 key={id}
                 docId={docId}
-                entry={entry}
                 entryId={id}
                 permissions={permissions}
                 user={users[entry.metadata.user_id]}
+                content={entry.content}
+                offset={entry.offset}
+                type={entry.type}
+                focused={entry.focused}
+                entryIds={entry.entry_ids}
+                timestamp={entry.metadata.ts}
               />
             )
           }
@@ -94,24 +99,32 @@ function OverviewFile({ docId, docPath }: OverviewFileProps) {
               <AggregateChangeEntry
                 key={id}
                 docId={docId}
-                entry={entry}
                 entryId={id}
                 permissions={permissions}
                 user={users[entry.metadata.user_id]}
+                content={entry.content}
+                replacedContent={entry.metadata.replaced_content}
+                offset={entry.offset}
+                focused={entry.focused}
+                entryIds={entry.entry_ids}
+                timestamp={entry.metadata.ts}
               />
             )
           }
 
           if (entry.type === 'comment') {
-            if (!commentThreads[entry.thread_id]?.resolved) {
+            const thread = commentThreads[entry.thread_id]
+            if (!thread?.resolved) {
               return (
                 <CommentEntry
                   key={id}
                   docId={docId}
-                  entry={entry}
+                  threadId={entry.thread_id}
+                  thread={thread}
                   entryId={id}
+                  offset={entry.offset}
+                  focused={entry.focused}
                   permissions={permissions}
-                  threads={commentThreads}
                 />
               )
             }

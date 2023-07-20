@@ -4,7 +4,10 @@ import Icon from '../../../../../shared/components/icon'
 import Tooltip from '../../../../../shared/components/tooltip'
 import ResolvedCommentsScroller from './resolved-comments-scroller'
 import classnames from 'classnames'
-import { useReviewPanelValueContext } from '../../../context/review-panel/review-panel-context'
+import {
+  useReviewPanelUpdaterFnsContext,
+  useReviewPanelValueContext,
+} from '../../../context/review-panel/review-panel-context'
 import {
   ReviewPanelDocEntries,
   ThreadId,
@@ -26,12 +29,10 @@ function ResolvedCommentsDropdown() {
   const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const {
-    docs,
-    commentThreads,
-    resolvedComments,
-    refreshResolvedCommentsDropdown,
-  } = useReviewPanelValueContext()
+  const { docs, commentThreads, resolvedComments, permissions } =
+    useReviewPanelValueContext()
+
+  const { refreshResolvedCommentsDropdown } = useReviewPanelUpdaterFnsContext()
 
   const handleResolvedCommentsClick = () => {
     setIsOpen(isOpen => {
@@ -117,11 +118,12 @@ function ResolvedCommentsDropdown() {
           <div className="rp-loading">
             <Icon type="spinner" spin />
           </div>
-        ) : (
+        ) : isOpen ? (
           <ResolvedCommentsScroller
             resolvedComments={filteredResolvedComments}
+            permissions={permissions}
           />
-        )}
+        ) : null}
       </div>
     </div>
   )

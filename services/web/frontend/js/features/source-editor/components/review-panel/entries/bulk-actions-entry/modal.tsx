@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button, Modal as BootstrapModal } from 'react-bootstrap'
 import AccessibleModal from '../../../../../../shared/components/accessible-modal'
-import { useReviewPanelValueContext } from '../../../../context/review-panel/review-panel-context'
+import { useReviewPanelUpdaterFnsContext } from '../../../../context/review-panel/review-panel-context'
 
 type BulkActionsModalProps = {
   show: boolean
@@ -52,7 +52,8 @@ function Modal({
 export function useBulkActionsModal() {
   const [show, setShow] = useState(false)
   const [isAccept, setIsAccept] = useState(false)
-  const { bulkAcceptActions, bulkRejectActions } = useReviewPanelValueContext()
+  const { bulkAcceptActions, bulkRejectActions } =
+    useReviewPanelUpdaterFnsContext()
 
   const handleShowBulkAcceptDialog = useCallback(() => {
     setIsAccept(true)

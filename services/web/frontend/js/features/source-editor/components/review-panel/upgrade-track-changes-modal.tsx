@@ -5,6 +5,7 @@ import Icon from '../../../../shared/components/icon'
 import { useProjectContext } from '../../../../shared/context/project-context'
 import { useUserContext } from '../../../../shared/context/user-context'
 import { startFreeTrial, upgradePlan } from '../../../../main/account-upgrade'
+import { memo } from 'react'
 
 type UpgradeTrackChangesModalProps = {
   show: boolean
@@ -102,4 +103,4 @@ function UpgradeTrackChangesModal({
   )
 }
 
-export default UpgradeTrackChangesModal
+export default memo(UpgradeTrackChangesModal)

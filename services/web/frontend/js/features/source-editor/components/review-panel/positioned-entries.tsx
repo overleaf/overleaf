@@ -4,14 +4,20 @@ import {
   ReviewPanelEntry,
   ReviewPanelEntryScreenPos,
 } from '../../../../../../types/review-panel/entry'
-import useScopeValue from '../../../../shared/hooks/use-scope-value'
 import { debugConsole } from '../../../../utils/debugging'
 import { useReviewPanelValueContext } from '../../context/review-panel/review-panel-context'
 import useEventListener from '../../../../shared/hooks/use-event-listener'
 import { ReviewPanelDocEntries } from '../../../../../../types/review-panel/review-panel'
 import { dispatchReviewPanelLayout } from '../../extensions/changes/change-manager'
+import { isEqual } from 'lodash'
+
+type Positions = {
+  entryTop: number
+  callout: { top: number; height: number; inverted: boolean }
+}
 
 type EntryView = {
+  entryId: keyof ReviewPanelDocEntries
   wrapper: HTMLElement
   indicator: HTMLElement | null
   box: HTMLElement
@@ -22,10 +28,16 @@ type EntryView = {
   previousCalloutTop: number | null
   entry: ReviewPanelEntry
   visible: boolean
-  positions?: {
-    entryTop: number
-    callout: { top: number; height: number; inverted: boolean }
-  }
+  positions?: Positions
+}
+
+type EntryPositions = Pick<EntryView, 'entryId' | 'positions'>
+
+type LayoutInfo = {
+  focusedEntryIndex: number
+  overflowTop: number
+  height: number
+  positions: EntryPositions[]
 }
 
 function css(el: HTMLElement, props: React.CSSProperties) {
@@ -51,6 +63,13 @@ function calculateCalloutPosition(
     height: Math.abs(entryTop - originalTop),
     inverted,
   }
+}
+
+function positionsEqual(
+  entryPos1: EntryPositions[],
+  entryPos2: EntryPositions[]
+) {
+  return isEqual(entryPos1, entryPos2)
 }
 
 const calculateEntryViewPositions = (
@@ -90,14 +109,16 @@ function PositionedEntries({
   contentHeight,
   children,
 }: PositionedEntriesProps) {
-  const { navHeight, toolbarHeight } = useReviewPanelValueContext()
+  const { navHeight, toolbarHeight, lineHeight } = useReviewPanelValueContext()
   const containerRef = useRef<HTMLDivElement | null>(null)
   const { reviewPanelOpen } = useLayoutContext()
-  const [lineHeight] = useScopeValue<number>(
-    'reviewPanel.rendererData.lineHeight'
-  )
   const animationTimerRef = useRef<number | null>(null)
-  const previousFocusedEntryIndexRef = useRef(0)
+  const previousLayoutInfoRef = useRef<LayoutInfo>({
+    focusedEntryIndex: 0,
+    overflowTop: 0,
+    height: 0,
+    positions: [],
+  })
 
   const layout = () => {
     const container = containerRef.current
@@ -117,7 +138,9 @@ function PositionedEntries({
     for (const wrapper of container.querySelectorAll<HTMLElement>(
       '.rp-entry-wrapper'
     )) {
-      const entryId = wrapper.dataset.entryId
+      const entryId = wrapper.dataset.entryId as
+        | EntryView['entryId']
+        | undefined
       if (!entryId) {
         throw new Error('Could not find an entry ID')
       }
@@ -138,6 +161,7 @@ function PositionedEntries({
         const previousEntryTopData = box.dataset.previousEntryTop
         const previousCalloutTopData = callout.dataset.previousEntryTop
         entryViews.push({
+          entryId,
           wrapper,
           indicator,
           box,
@@ -200,11 +224,10 @@ function PositionedEntries({
     let focusedEntryIndex = entryViews.findIndex(view => view.entry.focused)
     if (focusedEntryIndex === -1) {
       focusedEntryIndex = Math.min(
-        previousFocusedEntryIndexRef.current,
+        previousLayoutInfoRef.current.focusedEntryIndex,
         entryViews.length - 1
       )
     }
-    previousFocusedEntryIndexRef.current = focusedEntryIndex
 
     const focusedEntryView = entryViews[focusedEntryIndex]
     if (!focusedEntryView.entry.screenPos) {
@@ -352,42 +375,64 @@ function PositionedEntries({
       animationTimerRef.current = null
     }
 
-    moveEntriesToInitialPosition()
-
-    // Inform the editor of the new top overflow
-    window.dispatchEvent(
-      new CustomEvent('review-panel:event', {
-        detail: {
-          type: 'sizes',
-          payload: {
-            overflowTop,
-            height: lastEntryBottom + navPaddedHeight,
-          },
-        },
+    // Check whether the positions of any entry have changed since the last
+    // layout
+    const positions = entryViews.map(
+      (entryView): EntryPositions => ({
+        entryId: entryView.entryId,
+        positions: entryView.positions,
       })
     )
 
-    // Schedule the final, animated move
-    animationTimerRef.current = window.setTimeout(moveToFinalPositions, 60)
+    const positionsChanged = !positionsEqual(
+      previousLayoutInfoRef.current.positions,
+      positions
+    )
+
+    // Check whether the top overflow or review panel height have changed
+    const overflowTopChanged =
+      overflowTop !== previousLayoutInfoRef.current.overflowTop
+
+    const height = lastEntryBottom + navPaddedHeight
+    const heightChanged = height !== previousLayoutInfoRef.current.height
+
+    // Move entries into their initial positions
+    if (positionsChanged || overflowTopChanged) {
+      moveEntriesToInitialPosition()
+    }
+
+    // Inform the editor of the new top overflow and/or height if either has
+    // changed
+    if (overflowTopChanged || heightChanged) {
+      window.dispatchEvent(
+        new CustomEvent('review-panel:event', {
+          detail: {
+            type: 'sizes',
+            payload: {
+              overflowTop,
+              height,
+            },
+          },
+        })
+      )
+    }
+
+    // Do the final move
+    if (positionsChanged || overflowTopChanged) {
+      moveToFinalPositions()
+    }
+
+    previousLayoutInfoRef.current = {
+      positions,
+      focusedEntryIndex,
+      height,
+      overflowTop,
+    }
   }
 
   useEventListener('review-panel:layout', () => {
-    if (animationTimerRef.current) {
-      window.clearTimeout(animationTimerRef.current)
-      animationTimerRef.current = null
-    }
     layout()
   })
-
-  // Cancel scheduled move on unmount
-  useEffect(() => {
-    return () => {
-      if (animationTimerRef.current) {
-        window.clearTimeout(animationTimerRef.current)
-        animationTimerRef.current = null
-      }
-    }
-  }, [])
 
   // Layout on first render. This is necessary to ensure layout happens when
   // switching from overview to current file view

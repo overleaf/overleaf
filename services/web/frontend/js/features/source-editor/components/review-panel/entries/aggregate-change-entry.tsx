@@ -1,55 +1,41 @@
 import { useTranslation } from 'react-i18next'
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import EntryContainer from './entry-container'
 import EntryCallout from './entry-callout'
 import EntryActions from './entry-actions'
 import Icon from '../../../../../shared/components/icon'
-import {
-  useReviewPanelUpdaterFnsContext,
-  useReviewPanelValueContext,
-} from '../../../context/review-panel/review-panel-context'
+import { useReviewPanelUpdaterFnsContext } from '../../../context/review-panel/review-panel-context'
 import { formatTime } from '../../../../utils/format-date'
 import classnames from 'classnames'
-import { ReviewPanelAggregateChangeEntry } from '../../../../../../../types/review-panel/entry'
-import {
-  ReviewPanelPermissions,
-  ReviewPanelUser,
-  ThreadId,
-} from '../../../../../../../types/review-panel/review-panel'
-import { DocId } from '../../../../../../../types/project-settings'
+import comparePropsWithShallowArrayCompare from '../utils/compare-props-with-shallow-array-compare'
+import { BaseChangeEntryProps } from '../types/base-change-entry-props'
 
-type AggregateChangeEntryProps = {
-  docId: DocId
-  entry: ReviewPanelAggregateChangeEntry
-  entryId: ThreadId
-  permissions: ReviewPanelPermissions
-  user: ReviewPanelUser | undefined
-  contentLimit?: number
-  onMouseEnter?: () => void
-  onMouseLeave?: () => void
-  onIndicatorClick?: () => void
+interface AggregateChangeEntryProps extends BaseChangeEntryProps {
+  replacedContent: string
 }
 
 function AggregateChangeEntry({
   docId,
-  entry,
   entryId,
   permissions,
   user,
+  content,
+  replacedContent,
+  offset,
+  focused,
+  entryIds,
+  timestamp,
   contentLimit = 17,
   onMouseEnter,
   onMouseLeave,
   onIndicatorClick,
 }: AggregateChangeEntryProps) {
   const { t } = useTranslation()
-  const { acceptChanges, rejectChanges, gotoEntry } =
-    useReviewPanelValueContext()
-  const { handleLayoutChange } = useReviewPanelUpdaterFnsContext()
+  const { acceptChanges, rejectChanges, gotoEntry, handleLayoutChange } =
+    useReviewPanelUpdaterFnsContext()
   const [isDeletionCollapsed, setIsDeletionCollapsed] = useState(true)
   const [isInsertionCollapsed, setIsInsertionCollapsed] = useState(true)
 
-  const replacedContent = entry.metadata.replaced_content
-  const content = entry.content
   const deletionNeedsCollapsing = replacedContent.length > contentLimit
   const insertionNeedsCollapsing = content.length > contentLimit
 
@@ -71,7 +57,7 @@ function AggregateChangeEntry({
       '.rp-entry-action-icon i',
     ]) {
       if (target.matches(selector)) {
-        gotoEntry(docId, entry.offset)
+        gotoEntry(docId, offset)
         break
       }
     }
@@ -98,7 +84,7 @@ function AggregateChangeEntry({
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
       <div
         className={classnames('rp-entry-indicator', {
-          'rp-entry-indicator-focused': entry.focused,
+          'rp-entry-indicator-focused': focused,
         })}
         onClick={onIndicatorClick}
       >
@@ -106,7 +92,7 @@ function AggregateChangeEntry({
       </div>
       <div
         className={classnames('rp-entry', 'rp-entry-aggregate', {
-          'rp-entry-focused': entry.focused,
+          'rp-entry-focused': focused,
         })}
       >
         <div className="rp-entry-body">
@@ -141,7 +127,7 @@ function AggregateChangeEntry({
               )}
             </div>
             <div className="rp-entry-metadata">
-              {formatTime(entry.metadata.ts, 'MMM D, Y h:mm A')}
+              {formatTime(timestamp, 'MMM D, Y h:mm A')}
               &nbsp;&bull;&nbsp;
               {user && (
                 <span
@@ -156,10 +142,10 @@ function AggregateChangeEntry({
         </div>
         {permissions.write && (
           <EntryActions>
-            <EntryActions.Button onClick={() => rejectChanges(entry.entry_ids)}>
+            <EntryActions.Button onClick={() => rejectChanges(entryIds)}>
               <Icon type="times" /> {t('reject')}
             </EntryActions.Button>
-            <EntryActions.Button onClick={() => acceptChanges(entry.entry_ids)}>
+            <EntryActions.Button onClick={() => acceptChanges(entryIds)}>
               <Icon type="check" /> {t('accept')}
             </EntryActions.Button>
           </EntryActions>
@@ -169,4 +155,7 @@ function AggregateChangeEntry({
   )
 }
 
-export default AggregateChangeEntry
+export default memo(
+  AggregateChangeEntry,
+  comparePropsWithShallowArrayCompare('entryIds')
+)

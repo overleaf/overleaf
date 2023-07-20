@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import EntryContainer from './entry-container'
 import EntryCallout from './entry-callout'
@@ -8,51 +8,46 @@ import AutoExpandingTextArea, {
   resetHeight,
 } from '../../../../../shared/components/auto-expanding-text-area'
 import Icon from '../../../../../shared/components/icon'
-import {
-  useReviewPanelUpdaterFnsContext,
-  useReviewPanelValueContext,
-} from '../../../context/review-panel/review-panel-context'
+import { useReviewPanelUpdaterFnsContext } from '../../../context/review-panel/review-panel-context'
 import classnames from 'classnames'
-import { ReviewPanelCommentEntry } from '../../../../../../../types/review-panel/entry'
 import {
-  ReviewPanelCommentThreads,
   ReviewPanelPermissions,
   ThreadId,
 } from '../../../../../../../types/review-panel/review-panel'
 import { DocId } from '../../../../../../../types/project-settings'
+import { ReviewPanelCommentThread } from '../../../../../../../types/review-panel/comment-thread'
+import { ReviewPanelCommentEntry } from '../../../../../../../types/review-panel/entry'
 
 type CommentEntryProps = {
   docId: DocId
-  entry: ReviewPanelCommentEntry
   entryId: ThreadId
+  thread: ReviewPanelCommentThread | undefined
+  threadId: ReviewPanelCommentEntry['thread_id']
   permissions: ReviewPanelPermissions
-  threads: ReviewPanelCommentThreads
   onMouseEnter?: () => void
   onMouseLeave?: () => void
   onIndicatorClick?: () => void
-}
+} & Pick<ReviewPanelCommentEntry, 'offset' | 'focused'>
 
 function CommentEntry({
   docId,
-  entry,
   entryId,
+  thread,
+  threadId,
+  offset,
+  focused,
   permissions,
-  threads,
   onMouseEnter,
   onMouseLeave,
   onIndicatorClick,
 }: CommentEntryProps) {
   const { t } = useTranslation()
-  const { gotoEntry, resolveComment, submitReply } =
-    useReviewPanelValueContext()
-  const { handleLayoutChange } = useReviewPanelUpdaterFnsContext()
+  const { gotoEntry, resolveComment, submitReply, handleLayoutChange } =
+    useReviewPanelUpdaterFnsContext()
   const [replyContent, setReplyContent] = useState('')
   const [animating, setAnimating] = useState(false)
   const [resolved, setResolved] = useState(false)
   const entryDivRef = useRef<HTMLDivElement | null>(null)
-
-  const thread =
-    entry.thread_id in threads ? threads[entry.thread_id] : undefined
 
   const handleEntryClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const target = e.target as Element
@@ -65,7 +60,7 @@ function CommentEntry({
       '.rp-entry-metadata',
     ]) {
       if (target.matches(selector)) {
-        gotoEntry(docId, entry.offset)
+        gotoEntry(docId, offset)
         break
       }
     }
@@ -93,7 +88,7 @@ function CommentEntry({
 
       if (replyContent.length) {
         ;(e.target as HTMLTextAreaElement).blur()
-        submitReply(entry, replyContent)
+        submitReply(threadId, replyContent)
         setReplyContent('')
         resetHeight(e)
       }
@@ -102,7 +97,7 @@ function CommentEntry({
 
   const handleOnReply = () => {
     if (replyContent.length) {
-      submitReply(entry, replyContent)
+      submitReply(threadId, replyContent)
       setReplyContent('')
     }
   }
@@ -139,7 +134,7 @@ function CommentEntry({
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
         <div
           className={classnames('rp-entry-indicator', {
-            'rp-entry-indicator-focused': entry.focused,
+            'rp-entry-indicator-focused': focused,
           })}
           onClick={onIndicatorClick}
         >
@@ -147,7 +142,7 @@ function CommentEntry({
         </div>
         <div
           className={classnames('rp-entry', 'rp-entry-comment', {
-            'rp-entry-focused': entry.focused,
+            'rp-entry-focused': focused,
             'rp-entry-comment-resolving': animating,
           })}
           ref={entryDivRef}
@@ -160,7 +155,7 @@ function CommentEntry({
               <Comment
                 key={comment.id}
                 thread={thread}
-                threadId={entry.thread_id}
+                threadId={threadId}
                 comment={comment}
               />
             ))}
@@ -204,4 +199,4 @@ function CommentEntry({
   )
 }
 
-export default CommentEntry
+export default memo(CommentEntry)
