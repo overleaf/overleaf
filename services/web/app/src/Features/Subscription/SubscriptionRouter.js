@@ -23,6 +23,7 @@ module.exports = {
     webRouter.get(
       '/user/subscription',
       AuthenticationController.requireLogin(),
+      PermissionsController.useCapabilities(),
       SubscriptionController.userSubscriptionPage
     )
 

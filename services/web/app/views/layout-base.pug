@@ -64,6 +64,7 @@ html(
 					indexName : settings.templates.indexName
 				})
 
+			meta(name="ol-isManagedAccount" data-type="boolean" content=isManagedAccount)
 			each restriction in userRestrictions || []
 				meta(name='ol-cannot-' + restriction data-type="boolean" content=true)
 

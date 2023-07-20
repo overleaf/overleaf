@@ -297,6 +297,8 @@ async function userSubscriptionPage(req, res) {
     cancelButtonNewCopy,
     groupPlans: groupPlansDataForDash,
     groupSettingsEnabledFor,
+    isManagedAccount: !!req.managedBy,
+    userRestrictions: Array.from(req.userRestrictions || []),
   }
   res.render('subscriptions/dashboard-react', data)
 }

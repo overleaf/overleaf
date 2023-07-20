@@ -4,6 +4,7 @@ import { MemberGroupSubscription } from '../../../../../../types/subscription/da
 import { useSubscriptionDashboardContext } from '../../context/subscription-dashboard-context'
 import { LEAVE_GROUP_MODAL_ID } from './leave-group-modal'
 import PremiumFeaturesLink from './premium-features-link'
+import getMeta from '../../../../utils/meta.js'
 
 type GroupSubscriptionMembershipProps = {
   subscription: MemberGroupSubscription
@@ -22,6 +23,11 @@ export default function GroupSubscriptionMembership({
     handleOpenModal(LEAVE_GROUP_MODAL_ID)
     setLeavingGroupId(subscription._id)
   }
+
+  // Hide leave group button for managed users
+  const hideLeaveButton = getMeta(
+    'ol-cannot-leave-group-subscription'
+  ) as boolean
 
   return (
     <div>
@@ -43,11 +49,18 @@ export default function GroupSubscriptionMembership({
         </p>
       )}
       {isLast && <PremiumFeaturesLink />}
-      <span>
-        <Button bsStyle="danger" onClick={leaveGroup}>
-          {t('leave_group')}
-        </Button>
-      </span>
+      {hideLeaveButton ? (
+        <span>
+          {' '}
+          {t('need_to_leave')} {t('contact_group_admin')}{' '}
+        </span>
+      ) : (
+        <span>
+          <Button bsStyle="danger" onClick={leaveGroup}>
+            {t('leave_group')}
+          </Button>
+        </span>
+      )}
       <hr />
     </div>
   )
