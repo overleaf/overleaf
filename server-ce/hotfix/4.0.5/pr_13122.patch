@@ -1,0 +1,11 @@
+--- services/web/app/src/Features/Compile/CompileController.js
++++ services/web/app/src/Features/Compile/CompileController.js
+@@ -371,7 +371,7 @@ module.exports = CompileController = {
+   },
+
+   _getSafeProjectName(project) {
+-    return project.name.replace(/\P{L}/gu, '_')
++    return project.name.replace(/[^\p{L}\p{Nd}]/gu, '_')
+   },
+
+   deleteAuxFiles(req, res, next) {

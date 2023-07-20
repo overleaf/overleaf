@@ -1,0 +1,92 @@
+--- services/web/app/src/Features/Editor/EditorHttpController.js
++++ services/web/app/src/Features/Editor/EditorHttpController.js
+@@ -73,6 +73,7 @@ async function joinProject(req, res, next) {
+   if (isRestrictedUser) {
+     project.owner = { _id: project.owner._id }
+     project.members = []
++    project.invites = []
+   }
+   // Only show the 'renamed or deleted' message once
+   if (project.deletedByExternalDataSource) {
+--- services/web/app/src/Features/Project/ProjectEditorHandler.js
++++ services/web/app/src/Features/Project/ProjectEditorHandler.js
+@@ -48,19 +48,13 @@
+         deletedDocsFromDocstore
+       ),
+       members: [],
+-      invites,
++      invites: this.buildInvitesView(invites),
+       imageName:
+         project.imageName != null
+           ? Path.basename(project.imageName)
+           : undefined,
+     }
+
+-    if (result.invites == null) {
+-      result.invites = []
+-    }
+-    result.invites.forEach(invite => {
+-      delete invite.token
+-    })
+     ;({ owner, ownerFeatures, members } =
+       this.buildOwnerAndMembersViews(members))
+     result.owner = owner
+@@ -99,7 +93,7 @@
+     let owner = null
+     let ownerFeatures = null
+     const filteredMembers = []
+-    for (const member of Array.from(members || [])) {
++    for (const member of members || []) {
+       if (member.privilegeLevel === 'owner') {
+         ownerFeatures = member.user.features
+         owner = this.buildUserModelView(member.user, 'owner')
+@@ -128,24 +122,15 @@
+   },
+
+   buildFolderModelView(folder) {
+-    let file
+     const fileRefs = _.filter(folder.fileRefs || [], file => file != null)
+     return {
+       _id: folder._id,
+       name: folder.name,
+-      folders: Array.from(folder.folders || []).map(childFolder =>
++      folders: (folder.folders || []).map(childFolder =>
+         this.buildFolderModelView(childFolder)
+       ),
+-      fileRefs: (() => {
+-        const result = []
+-        for (file of Array.from(fileRefs)) {
+-          result.push(this.buildFileModelView(file))
+-        }
+-        return result
+-      })(),
+-      docs: Array.from(folder.docs || []).map(doc =>
+-        this.buildDocModelView(doc)
+-      ),
++      fileRefs: fileRefs.map(file => this.buildFileModelView(file)),
++      docs: (folder.docs || []).map(doc => this.buildDocModelView(doc)),
+     }
+   },
+
+@@ -164,4 +149,21 @@
+       name: doc.name,
+     }
+   },
++
++  buildInvitesView(invites) {
++    if (invites == null) {
++      return []
++    }
++    return invites.map(invite =>
++      _.pick(invite, [
++        '_id',
++        'createdAt',
++        'email',
++        'expires',
++        'privileges',
++        'projectId',
++        'sendingUserId',
++      ])
++    )
++  },
+ }
