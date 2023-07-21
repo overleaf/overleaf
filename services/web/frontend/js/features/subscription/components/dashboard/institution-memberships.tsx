@@ -1,7 +1,6 @@
 import { Trans } from 'react-i18next'
 import { Institution } from '../../../../../../types/institution'
 import { useSubscriptionDashboardContext } from '../../context/subscription-dashboard-context'
-import PremiumFeaturesLink from './premium-features-link'
 
 function InstitutionMemberships() {
   const { institutionMemberships } = useSubscriptionDashboardContext()
@@ -44,7 +43,6 @@ function InstitutionMemberships() {
           <hr />
         </div>
       ))}
-      <PremiumFeaturesLink />
     </div>
   )
 }

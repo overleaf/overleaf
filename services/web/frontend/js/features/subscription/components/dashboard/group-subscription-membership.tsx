@@ -3,17 +3,14 @@ import { Trans, useTranslation } from 'react-i18next'
 import { MemberGroupSubscription } from '../../../../../../types/subscription/dashboard/subscription'
 import { useSubscriptionDashboardContext } from '../../context/subscription-dashboard-context'
 import { LEAVE_GROUP_MODAL_ID } from './leave-group-modal'
-import PremiumFeaturesLink from './premium-features-link'
 import getMeta from '../../../../utils/meta.js'
 
 type GroupSubscriptionMembershipProps = {
   subscription: MemberGroupSubscription
-  isLast: boolean
 }
 
 export default function GroupSubscriptionMembership({
   subscription,
-  isLast,
 }: GroupSubscriptionMembershipProps) {
   const { t } = useTranslation()
   const { handleOpenModal, setLeavingGroupId } =
@@ -48,7 +45,6 @@ export default function GroupSubscriptionMembership({
           <em>{subscription.teamNotice}</em>
         </p>
       )}
-      {isLast && <PremiumFeaturesLink />}
       {hideLeaveButton ? (
         <span>
           {' '}

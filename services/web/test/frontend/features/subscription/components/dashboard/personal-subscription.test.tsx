@@ -86,11 +86,6 @@ describe('<PersonalSubscription />', function () {
 
       screen.getByText('No further payments will be taken.', { exact: false })
 
-      screen.getByText(
-        'Get the most out of your Overleaf subscription by checking out the list of',
-        { exact: false }
-      )
-
       screen.getByRole('link', { name: 'View Your Invoices' })
       screen.getByRole('button', { name: 'Reactivate your subscription' })
     })

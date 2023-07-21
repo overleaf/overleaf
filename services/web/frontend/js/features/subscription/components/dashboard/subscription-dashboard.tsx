@@ -9,6 +9,7 @@ import ManagedGroupSubscriptions from './managed-group-subscriptions'
 import ManagedInstitutions from './managed-institutions'
 import { useSubscriptionDashboardContext } from '../../context/subscription-dashboard-context'
 import getMeta from '../../../../utils/meta'
+import PremiumFeaturesLink from './premium-features-link'
 
 function SubscriptionDashboard() {
   const { t } = useTranslation()
@@ -37,6 +38,7 @@ function SubscriptionDashboard() {
             <ManagedPublishers />
             <GroupSubscriptionMemberships />
             <InstitutionMemberships />
+            {hasDisplayedSubscription && <PremiumFeaturesLink />}
             {!hasDisplayedSubscription &&
               (hasSubscription ? <ContactSupport /> : <FreePlan />)}
           </div>

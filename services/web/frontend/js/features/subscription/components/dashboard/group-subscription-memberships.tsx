@@ -17,10 +17,9 @@ export default function GroupSubscriptionMemberships() {
   return (
     <>
       {memberOnlyGroupSubscriptions.map(
-        (subscription: MemberGroupSubscription, index: number) => (
+        (subscription: MemberGroupSubscription) => (
           <GroupSubscriptionMembership
             subscription={subscription}
-            isLast={index === memberOnlyGroupSubscriptions.length - 1}
             key={subscription._id}
           />
         )

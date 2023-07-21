@@ -59,15 +59,4 @@ describe('<InstitutionMemberships />', function () {
       'Sorry, something went wrong. Subscription information related to institutional affiliations may not be displayed. Please try again later.'
     )
   })
-
-  it('renders the "Get the most out of your" subscription text when a user has a subscription', function () {
-    renderWithSubscriptionDashContext(<InstitutionMemberships />, {
-      metaTags: [
-        { name: 'ol-currentInstitutionsWithLicence', value: memberships },
-      ],
-    })
-    screen.getByText('Get the most out of your', {
-      exact: false,
-    })
-  })
 })

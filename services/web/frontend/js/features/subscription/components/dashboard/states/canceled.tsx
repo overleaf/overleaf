@@ -1,6 +1,5 @@
 import { useTranslation, Trans } from 'react-i18next'
 import { RecurlySubscription } from '../../../../../../../types/subscription/dashboard/subscription'
-import PremiumFeaturesLink from '../premium-features-link'
 import ReactivateSubscription from '../reactivate-subscription'
 
 export function CanceledSubscription({
@@ -36,7 +35,6 @@ export function CanceledSubscription({
           ]}
         />
       </p>
-      <PremiumFeaturesLink />
       <p>
         <a
           href={subscription.recurly.accountManagementLink}

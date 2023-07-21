@@ -53,12 +53,6 @@ describe('<ActiveSubscription />', function () {
     })
     expect(dates.length).to.equal(2)
 
-    // sentence broken up by link
-    screen.getByText(
-      'Get the most out of your Overleaf subscription by checking out the list of',
-      { exact: false }
-    )
-
     screen.getByText(
       '* Prices may be subject to additional VAT, depending on your country.'
     )

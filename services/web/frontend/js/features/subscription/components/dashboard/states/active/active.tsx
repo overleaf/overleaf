@@ -1,5 +1,4 @@
 import { useTranslation, Trans } from 'react-i18next'
-import PremiumFeaturesLink from '../../premium-features-link'
 import { PriceExceptions } from '../../../shared/price-exceptions'
 import { useSubscriptionDashboardContext } from '../../../../context/subscription-dashboard-context'
 import { RecurlySubscription } from '../../../../../../../../types/subscription/dashboard/subscription'
@@ -98,7 +97,6 @@ export function ActiveSubscription({
           ]}
         />
       </p>
-      <PremiumFeaturesLink />
       <PriceExceptions subscription={subscription} />
       <p>
         <a
