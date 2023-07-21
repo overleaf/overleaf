@@ -222,6 +222,7 @@ describe('ClsiManager', function () {
               'Content-Type': 'application/json',
               Cookie: `${this.clsiCookieKey}=${this.clsiServerId}`,
             },
+            signal: sinon.match.instanceOf(AbortSignal),
           }
         )
       })
@@ -426,6 +427,7 @@ describe('ClsiManager', function () {
               'Content-Type': 'application/json',
               Cookie: `${this.clsiCookieKey}=${this.clsiServerId}`,
             },
+            signal: sinon.match.instanceOf(AbortSignal),
           }
         )
       })
@@ -829,6 +831,7 @@ describe('ClsiManager', function () {
               'Content-Type': 'application/json',
               Cookie: `${this.clsiCookieKey}=${this.clsiServerId}`,
             },
+            signal: sinon.match.instanceOf(AbortSignal),
           }
         )
       })

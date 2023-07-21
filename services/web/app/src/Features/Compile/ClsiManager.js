@@ -29,6 +29,9 @@ const VALID_COMPILERS = ['pdflatex', 'latex', 'xelatex', 'lualatex']
 const OUTPUT_FILE_TIMEOUT_MS = 60000
 const CLSI_COOKIES_ENABLED = (Settings.clsiCookie?.key ?? '') !== ''
 
+// The timeout in services/clsi/app.js is 10 minutes, so we'll be on the safe side with 12 minutes
+const COMPILE_REQUEST_TIMEOUT_MS = 12 * 60 * 1000
+
 function collectMetricsOnBlgFiles(outputFiles) {
   let topLevel = 0
   let nested = 0
@@ -451,6 +454,7 @@ async function _postToClsi(
   const opts = {
     json: req,
     method: 'POST',
+    signal: AbortSignal.timeout(COMPILE_REQUEST_TIMEOUT_MS),
   }
   try {
     const { body, clsiServerId } = await _makeRequest(
