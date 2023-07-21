@@ -39,6 +39,15 @@ describe('Archiving', function () {
     await storage.createBucket(`${Settings.docstore.bucket}-deleted`)
   })
 
+  after(async function () {
+    // Tear down the buckets created above
+    const storage = new Storage(Settings.docstore.gcs.endpoint)
+    await storage.bucket(Settings.docstore.bucket).deleteFiles()
+    await storage.bucket(Settings.docstore.bucket).delete()
+    await storage.bucket(`${Settings.docstore.bucket}-deleted`).deleteFiles()
+    await storage.bucket(`${Settings.docstore.bucket}-deleted`).delete()
+  })
+
   describe('multiple docs in a project', function () {
     before(function (done) {
       this.project_id = ObjectId()

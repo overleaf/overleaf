@@ -86,6 +86,15 @@ describe('Filestore', function () {
         projectId,
         otherProjectId
 
+      const BUCKET_NAMES = [
+        process.env.GCS_USER_FILES_BUCKET_NAME,
+        process.env.GCS_PUBLIC_FILES_BUCKET_NAME,
+        process.env.GCS_TEMPLATE_FILES_BUCKET_NAME,
+        `${process.env.GCS_USER_FILES_BUCKET_NAME}-deleted`,
+        `${process.env.GCS_PUBLIC_FILES_BUCKET_NAME}-deleted`,
+        `${process.env.GCS_TEMPLATE_FILES_BUCKET_NAME}-deleted`,
+      ]
+
       before(async function () {
         // create the app with the relevant filestore settings
         Settings.filestore = BackendSettings[backend]
@@ -95,19 +104,21 @@ describe('Filestore', function () {
 
       if (BackendSettings[backend].gcs) {
         before(async function () {
+          // create test buckets for gcs
           const storage = new Storage(Settings.filestore.gcs.endpoint)
-          await storage.createBucket(process.env.GCS_USER_FILES_BUCKET_NAME)
-          await storage.createBucket(process.env.GCS_PUBLIC_FILES_BUCKET_NAME)
-          await storage.createBucket(process.env.GCS_TEMPLATE_FILES_BUCKET_NAME)
-          await storage.createBucket(
-            `${process.env.GCS_USER_FILES_BUCKET_NAME}-deleted`
-          )
-          await storage.createBucket(
-            `${process.env.GCS_PUBLIC_FILES_BUCKET_NAME}-deleted`
-          )
-          await storage.createBucket(
-            `${process.env.GCS_TEMPLATE_FILES_BUCKET_NAME}-deleted`
-          )
+          for (const bucketName of BUCKET_NAMES) {
+            await storage.createBucket(bucketName)
+          }
+        })
+
+        after(async function () {
+          // tear down all the gcs buckets
+          const storage = new Storage(Settings.filestore.gcs.endpoint)
+          for (const bucketName of BUCKET_NAMES) {
+            const bucket = storage.bucket(bucketName)
+            await bucket.deleteFiles()
+            await bucket.delete()
+          }
         })
       }
 

@@ -15,6 +15,15 @@ describe('Getting A Doc from Archive', function () {
     await storage.createBucket(`${Settings.docstore.bucket}-deleted`)
   })
 
+  after(async function () {
+    // Tear down the buckets created above
+    const storage = new Storage(Settings.docstore.gcs.endpoint)
+    await storage.bucket(Settings.docstore.bucket).deleteFiles()
+    await storage.bucket(Settings.docstore.bucket).delete()
+    await storage.bucket(`${Settings.docstore.bucket}-deleted`).deleteFiles()
+    await storage.bucket(`${Settings.docstore.bucket}-deleted`).delete()
+  })
+
   describe('for an archived doc', function () {
     before(function (done) {
       this.project_id = ObjectId()

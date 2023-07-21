@@ -3,10 +3,27 @@ const { expect } = require('chai')
 const DocstoreApp = require('./helpers/DocstoreApp')
 const Errors = require('../../../app/js/Errors')
 const Settings = require('@overleaf/settings')
+const { Storage } = require('@google-cloud/storage')
 
 const DocstoreClient = require('./helpers/DocstoreClient')
 
 function deleteTestSuite(deleteDoc) {
+  before(async function () {
+    // Create buckets needed by the archiving part of these tests
+    const storage = new Storage(Settings.docstore.gcs.endpoint)
+    await storage.createBucket(Settings.docstore.bucket)
+    await storage.createBucket(`${Settings.docstore.bucket}-deleted`)
+  })
+
+  after(async function () {
+    // Tear down the buckets created above
+    const storage = new Storage(Settings.docstore.gcs.endpoint)
+    await storage.bucket(Settings.docstore.bucket).deleteFiles()
+    await storage.bucket(Settings.docstore.bucket).delete()
+    await storage.bucket(`${Settings.docstore.bucket}-deleted`).deleteFiles()
+    await storage.bucket(`${Settings.docstore.bucket}-deleted`).delete()
+  })
+
   beforeEach(function (done) {
     this.project_id = ObjectId()
     this.doc_id = ObjectId()
