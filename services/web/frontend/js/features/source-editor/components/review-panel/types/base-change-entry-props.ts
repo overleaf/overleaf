@@ -15,7 +15,4 @@ export interface BaseChangeEntryProps
   timestamp: ReviewPanelChangeEntry['metadata']['ts']
   contentLimit?: number
   entryIds: ReviewPanelChangeEntry['entry_ids']
-  onMouseEnter?: () => void
-  onMouseLeave?: () => void
-  onIndicatorClick?: () => void
 }

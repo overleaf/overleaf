@@ -45,10 +45,11 @@ export interface ReviewPanelState {
         name: string
       }
     >
+    layoutSuspended: boolean
   }
   updaterFns: {
     handleSetSubview: (subView: SubView) => void
-    handleLayoutChange: () => void
+    handleLayoutChange: (force?: boolean) => void
     gotoEntry: (docId: DocId, entryOffset: number) => void
     resolveComment: (docId: DocId, entryId: ThreadId) => void
     deleteComment: (threadId: ThreadId, commentId: CommentId) => void
@@ -81,6 +82,9 @@ export interface ReviewPanelState {
     setNavHeight: React.Dispatch<React.SetStateAction<Value<'navHeight'>>>
     setToolbarHeight: React.Dispatch<
       React.SetStateAction<Value<'toolbarHeight'>>
+    >
+    setLayoutSuspended: React.Dispatch<
+      React.SetStateAction<Value<'layoutSuspended'>>
     >
   }
 }

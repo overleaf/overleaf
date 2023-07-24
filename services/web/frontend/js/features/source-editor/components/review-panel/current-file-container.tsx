@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react'
+import { useMemo } from 'react'
 import Container from './container'
 import Toolbar from './toolbar/toolbar'
 import Nav from './nav'
@@ -9,10 +9,7 @@ import CommentEntry from './entries/comment-entry'
 import AddCommentEntry from './entries/add-comment-entry'
 import BulkActionsEntry from './entries/bulk-actions-entry/bulk-actions-entry'
 import PositionedEntries from './positioned-entries'
-import {
-  useReviewPanelUpdaterFnsContext,
-  useReviewPanelValueContext,
-} from '../../context/review-panel/review-panel-context'
+import { useReviewPanelValueContext } from '../../context/review-panel/review-panel-context'
 import useCodeMirrorContentHeight from '../../hooks/use-codemirror-content-height'
 import { ReviewPanelEntry } from '../../../../../../types/review-panel/entry'
 import {
@@ -35,7 +32,6 @@ function CurrentFileContainer() {
     entryHover,
     nVisibleSelectedChanges: nChanges,
   } = useReviewPanelValueContext()
-  const { setEntryHover, toggleReviewPanel } = useReviewPanelUpdaterFnsContext()
   const contentHeight = useCodeMirrorContentHeight()
 
   const currentDocEntries =
@@ -46,14 +42,6 @@ function CurrentFileContainer() {
       [keyof ReviewPanelDocEntries, ReviewPanelEntry]
     >
   }, [currentDocEntries])
-
-  const onMouseEnter = useCallback(() => {
-    setEntryHover(true)
-  }, [setEntryHover])
-
-  const onMouseLeave = useCallback(() => {
-    setEntryHover(false)
-  }, [setEntryHover])
 
   return (
     <Container
@@ -100,9 +88,6 @@ function CurrentFileContainer() {
                     focused={entry.focused}
                     entryIds={entry.entry_ids}
                     timestamp={entry.metadata.ts}
-                    onMouseEnter={onMouseEnter}
-                    onMouseLeave={onMouseLeave}
-                    onIndicatorClick={toggleReviewPanel}
                   />
                 )
               }
@@ -121,9 +106,6 @@ function CurrentFileContainer() {
                     focused={entry.focused}
                     entryIds={entry.entry_ids}
                     timestamp={entry.metadata.ts}
-                    onMouseEnter={onMouseEnter}
-                    onMouseLeave={onMouseLeave}
-                    onIndicatorClick={toggleReviewPanel}
                   />
                 )
               }
@@ -143,9 +125,6 @@ function CurrentFileContainer() {
                     offset={entry.offset}
                     focused={entry.focused}
                     permissions={permissions}
-                    onMouseEnter={onMouseEnter}
-                    onMouseLeave={onMouseLeave}
-                    onIndicatorClick={toggleReviewPanel}
                   />
                 )
               }

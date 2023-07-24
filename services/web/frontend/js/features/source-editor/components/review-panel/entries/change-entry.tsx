@@ -10,6 +10,8 @@ import classnames from 'classnames'
 import { ReviewPanelChangeEntry } from '../../../../../../../types/review-panel/entry'
 import { BaseChangeEntryProps } from '../types/base-change-entry-props'
 import comparePropsWithShallowArrayCompare from '../utils/compare-props-with-shallow-array-compare'
+import useIndicatorHover from '../hooks/use-indicator-hover'
+import EntryIndicator from './entry-indicator'
 
 interface ChangeEntryProps extends BaseChangeEntryProps {
   type: ReviewPanelChangeEntry['type']
@@ -27,14 +29,18 @@ function ChangeEntry({
   entryIds,
   timestamp,
   contentLimit = 40,
-  onMouseEnter,
-  onMouseLeave,
-  onIndicatorClick,
 }: ChangeEntryProps) {
   const { t } = useTranslation()
   const { handleLayoutChange, acceptChanges, rejectChanges, gotoEntry } =
     useReviewPanelUpdaterFnsContext()
   const [isCollapsed, setIsCollapsed] = useState(true)
+  const {
+    hoverCoords,
+    indicatorRef,
+    handleEntryMouseLeave,
+    handleIndicatorMouseEnter,
+    handleIndicatorClick,
+  } = useIndicatorHover()
 
   const contentToDisplay = isCollapsed
     ? content.substring(0, contentLimit)
@@ -66,21 +72,20 @@ function ChangeEntry({
 
   return (
     <EntryContainer
-      onClick={handleEntryClick}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
       id={entryId}
+      hoverCoords={hoverCoords}
+      onClick={handleEntryClick}
+      onMouseLeave={handleEntryMouseLeave}
     >
       <EntryCallout className={`rp-entry-callout-${type}`} />
-      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
-      <div
-        className={classnames('rp-entry-indicator', {
-          'rp-entry-indicator-focused': focused,
-        })}
-        onClick={onIndicatorClick}
+      <EntryIndicator
+        ref={indicatorRef}
+        focused={focused}
+        onMouseEnter={handleIndicatorMouseEnter}
+        onClick={handleIndicatorClick}
       >
         {isInsert ? <Icon type="pencil" /> : <i className="rp-icon-delete" />}
-      </div>
+      </EntryIndicator>
       <div
         className={classnames('rp-entry', `rp-entry-${type}`, {
           'rp-entry-focused': focused,

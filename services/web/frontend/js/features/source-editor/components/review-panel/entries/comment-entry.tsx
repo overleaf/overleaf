@@ -17,6 +17,8 @@ import {
 import { DocId } from '../../../../../../../types/project-settings'
 import { ReviewPanelCommentThread } from '../../../../../../../types/review-panel/comment-thread'
 import { ReviewPanelCommentEntry } from '../../../../../../../types/review-panel/entry'
+import useIndicatorHover from '../hooks/use-indicator-hover'
+import EntryIndicator from './entry-indicator'
 
 type CommentEntryProps = {
   docId: DocId
@@ -24,9 +26,6 @@ type CommentEntryProps = {
   thread: ReviewPanelCommentThread | undefined
   threadId: ReviewPanelCommentEntry['thread_id']
   permissions: ReviewPanelPermissions
-  onMouseEnter?: () => void
-  onMouseLeave?: () => void
-  onIndicatorClick?: () => void
 } & Pick<ReviewPanelCommentEntry, 'offset' | 'focused'>
 
 function CommentEntry({
@@ -37,9 +36,6 @@ function CommentEntry({
   offset,
   focused,
   permissions,
-  onMouseEnter,
-  onMouseLeave,
-  onIndicatorClick,
 }: CommentEntryProps) {
   const { t } = useTranslation()
   const { gotoEntry, resolveComment, submitReply, handleLayoutChange } =
@@ -48,6 +44,13 @@ function CommentEntry({
   const [animating, setAnimating] = useState(false)
   const [resolved, setResolved] = useState(false)
   const entryDivRef = useRef<HTMLDivElement | null>(null)
+  const {
+    hoverCoords,
+    indicatorRef,
+    handleEntryMouseLeave,
+    handleIndicatorMouseEnter,
+    handleIndicatorClick,
+  } = useIndicatorHover()
 
   const handleEntryClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const target = e.target as Element
@@ -120,9 +123,9 @@ function CommentEntry({
   return (
     <EntryContainer
       id={entryId}
+      hoverCoords={hoverCoords}
       onClick={handleEntryClick}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
+      onMouseLeave={handleEntryMouseLeave}
     >
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
       <div
@@ -131,15 +134,14 @@ function CommentEntry({
         })}
       >
         <EntryCallout className="rp-entry-callout-comment" />
-        {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
-        <div
-          className={classnames('rp-entry-indicator', {
-            'rp-entry-indicator-focused': focused,
-          })}
-          onClick={onIndicatorClick}
+        <EntryIndicator
+          ref={indicatorRef}
+          focused={focused}
+          onMouseEnter={handleIndicatorMouseEnter}
+          onClick={handleIndicatorClick}
         >
           <Icon type="comment" />
-        </div>
+        </EntryIndicator>
         <div
           className={classnames('rp-entry', 'rp-entry-comment', {
             'rp-entry-focused': focused,

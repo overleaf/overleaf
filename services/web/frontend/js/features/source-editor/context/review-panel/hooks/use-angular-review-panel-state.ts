@@ -137,6 +137,7 @@ function useAngularReviewPanelState(): ReviewPanelState {
   const [isAddingComment, setIsAddingComment] = useState(false)
   const [navHeight, setNavHeight] = useState(0)
   const [toolbarHeight, setToolbarHeight] = useState(0)
+  const [layoutSuspended, setLayoutSuspended] = useState(false)
 
   const values = useMemo<ReviewPanelState['values']>(
     () => ({
@@ -164,6 +165,7 @@ function useAngularReviewPanelState(): ReviewPanelState {
       trackChangesOnForGuests,
       trackChangesForGuestsAvailable,
       formattedProjectMembers,
+      layoutSuspended,
     }),
     [
       collapsed,
@@ -190,6 +192,7 @@ function useAngularReviewPanelState(): ReviewPanelState {
       trackChangesOnForGuests,
       trackChangesForGuestsAvailable,
       formattedProjectMembers,
+      layoutSuspended,
     ]
   )
 
@@ -220,6 +223,7 @@ function useAngularReviewPanelState(): ReviewPanelState {
       setIsAddingComment,
       setNavHeight,
       setToolbarHeight,
+      setLayoutSuspended,
     }),
     [
       handleSetSubview,
@@ -246,6 +250,7 @@ function useAngularReviewPanelState(): ReviewPanelState {
       setIsAddingComment,
       setNavHeight,
       setToolbarHeight,
+      setLayoutSuspended,
     ]
   )
 

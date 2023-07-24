@@ -232,8 +232,15 @@
 .rp-entry-indicator {
   display: none;
   z-index: 2; // above .review-panel-toggler
+
   .rp-size-mini & {
     display: block;
+  }
+
+  .rp-floating-entry & {
+    display: block;
+    position: static;
+    width: @review-off-width - 4px;
   }
 
   .rp-size-mini &-add-comment {
@@ -280,8 +287,8 @@
     width: @review-panel-width;
   }
 
-  .rp-state-current-file-mini & {
-    display: none;
+  .rp-state-current-file-mini &,
+  .rp-floating-entry & {
     left: @review-off-width + @rp-entry-arrow-width;
     box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.2);
     z-index: 1;
@@ -307,6 +314,17 @@
       left: -(@rp-entry-ribbon-width + @rp-entry-arrow-width);
       content: '';
     }
+  }
+
+  .rp-state-current-file-mini & {
+    display: none;
+  }
+
+  .rp-floating-entry & {
+    position: absolute;
+    width: @review-panel-width;
+    left: @review-off-width + @rp-entry-arrow-width;
+    top: 0;
   }
 
   .rp-state-current-file-mini.rp-layout-left & {
@@ -1258,7 +1276,6 @@ button when (@is-overleaf-light = true) {
 
   .rp-entry-list-react {
     position: relative;
-    overflow-x: hidden;
   }
 
   .rp-state-current-file & {
@@ -1299,7 +1316,16 @@ button when (@is-overleaf-light = true) {
     height: 0;
     transition: height 150ms;
   }
+}
 
+.rp-floating-entry {
+  position: absolute;
+  font-size: @rp-base-font-size;
+  color: @rp-type-blue;
+}
+
+.ol-cm-review-panel,
+.rp-floating-entry {
   .rp-entry-metadata {
     button {
       padding: 0;

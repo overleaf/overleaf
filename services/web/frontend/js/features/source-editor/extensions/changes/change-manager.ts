@@ -31,8 +31,10 @@ export const dispatchEditorEvent = (type: string, payload?: unknown) => {
   }, 0)
 }
 
-export const dispatchReviewPanelLayout = () => {
-  window.dispatchEvent(new CustomEvent('review-panel:layout'))
+export const dispatchReviewPanelLayout = (force = false) => {
+  window.dispatchEvent(
+    new CustomEvent('review-panel:layout', { detail: { force } })
+  )
 }
 
 const scheduleDispatchReviewPanelLayout = debounce(

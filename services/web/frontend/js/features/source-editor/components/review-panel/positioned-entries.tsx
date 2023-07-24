@@ -24,30 +24,16 @@ type EntryView = {
   callout: HTMLElement
   layout: HTMLElement
   height: number
-  previousEntryTop: number | null
-  previousCalloutTop: number | null
   entry: ReviewPanelEntry
   visible: boolean
   positions?: Positions
+  previousPositions?: Positions
 }
 
 type EntryPositions = Pick<EntryView, 'entryId' | 'positions'>
 
-type LayoutInfo = {
-  focusedEntryIndex: number
-  overflowTop: number
-  height: number
-  positions: EntryPositions[]
-}
-
 function css(el: HTMLElement, props: React.CSSProperties) {
   Object.assign(el.style, props)
-}
-
-function applyEntryVisibility(entryView: EntryView) {
-  const visible = !!entryView.entry.screenPos
-  entryView.wrapper.classList.toggle('rp-entry-hidden', !visible)
-  return visible
 }
 
 function calculateCalloutPosition(
@@ -78,8 +64,8 @@ const calculateEntryViewPositions = (
   calculateTop: (originalTop: number, height: number) => number
 ) => {
   for (const entryView of entryViews) {
-    const entryVisible = applyEntryVisibility(entryView)
-    if (entryVisible) {
+    entryView.wrapper.classList.toggle('rp-entry-hidden', !entryView.visible)
+    if (entryView.visible) {
       const entryTop = calculateTop(
         entryView.entry.screenPos.y,
         entryView.height
@@ -104,21 +90,24 @@ type PositionedEntriesProps = {
   children: React.ReactNode
 }
 
+const initialLayoutInfo = {
+  focusedEntryIndex: 0,
+  overflowTop: 0,
+  height: 0,
+  positions: [] as EntryPositions[],
+}
+
 function PositionedEntries({
   entries,
   contentHeight,
   children,
 }: PositionedEntriesProps) {
-  const { navHeight, toolbarHeight, lineHeight } = useReviewPanelValueContext()
+  const { navHeight, toolbarHeight, lineHeight, layoutSuspended } =
+    useReviewPanelValueContext()
   const containerRef = useRef<HTMLDivElement | null>(null)
   const { reviewPanelOpen } = useLayoutContext()
   const animationTimerRef = useRef<number | null>(null)
-  const previousLayoutInfoRef = useRef<LayoutInfo>({
-    focusedEntryIndex: 0,
-    overflowTop: 0,
-    height: 0,
-    positions: [],
-  })
+  const previousLayoutInfoRef = useRef(initialLayoutInfo)
 
   const layout = () => {
     const container = containerRef.current
@@ -158,8 +147,10 @@ function PositionedEntries({
       const layoutElement = reviewPanelOpen ? box : indicator
 
       if (box && callout && layoutElement) {
-        const previousEntryTopData = box.dataset.previousEntryTop
-        const previousCalloutTopData = callout.dataset.previousEntryTop
+        const previousPositions = previousLayoutInfoRef.current?.positions.find(
+          pos => pos.entryId === entryId
+        )?.positions
+        const visible = Boolean(entry.screenPos)
         entryViews.push({
           entryId,
           wrapper,
@@ -167,17 +158,10 @@ function PositionedEntries({
           box,
           callout,
           layout: layoutElement,
-          visible: !!entry.screenPos,
+          visible,
           height: 0,
-          previousEntryTop:
-            previousEntryTopData !== undefined
-              ? parseInt(previousEntryTopData)
-              : null,
-          previousCalloutTop:
-            previousCalloutTopData !== undefined
-              ? parseInt(previousCalloutTopData)
-              : null,
           entry,
+          previousPositions,
         })
       } else {
         debugConsole.log(
@@ -305,10 +289,9 @@ function PositionedEntries({
 
           // Position the main wrapper in its original position, if it had
           // one, or its new position otherwise
-          const entryTopInitial =
-            entryView.previousEntryTop === null
-              ? entryTop
-              : entryView.previousEntryTop
+          const entryTopInitial = entryView.previousPositions
+            ? entryView.previousPositions.entryTop
+            : entryTop
 
           css(entryView.box, {
             top: entryTopInitial + overflowTop + 'px',
@@ -322,25 +305,20 @@ function PositionedEntries({
             entryView.indicator.style.top = entryTopInitial + overflowTop + 'px'
           }
 
-          entryView.box.dataset.previousEntryTop = entryTopInitial + ''
-
           // Position the callout element in its original position, if it had
           // one, or its new position otherwise
           calloutEl.classList.toggle(
             'rp-entry-callout-inverted',
             callout.inverted
           )
-          const calloutTopInitial =
-            entryView.previousCalloutTop === null
-              ? callout.top
-              : entryView.previousCalloutTop
+          const calloutTopInitial = entryView.previousPositions
+            ? entryView.previousPositions.callout.top
+            : callout.top
 
           css(calloutEl, {
             top: calloutTopInitial + overflowTop + 'px',
             height: callout.height + 'px',
           })
-
-          entryView.box.dataset.previousCalloutTop = calloutTopInitial + ''
         }
       }
     }
@@ -355,19 +333,17 @@ function PositionedEntries({
           const { entryTop, callout } = positions
 
           // Position the main wrapper, if it's moved
-          if (entryView.previousEntryTop !== entryTop) {
+          if (entryView.previousPositions?.entryTop !== entryTop) {
             entryView.box.style.top = entryTop + overflowTop + 'px'
           }
-          entryView.box.dataset.previousEntryTop = entryTop + ''
 
           if (entryView.indicator) {
             entryView.indicator.style.top = entryTop + overflowTop + 'px'
           }
 
           // Position the callout element
-          if (entryView.previousCalloutTop !== callout.top) {
+          if (entryView.previousPositions?.callout.top !== callout.top) {
             calloutEl.style.top = callout.top + overflowTop + 'px'
-            entryView.callout.dataset.previousCalloutTop = callout.top + ''
           }
         }
       }
@@ -430,8 +406,14 @@ function PositionedEntries({
     }
   }
 
-  useEventListener('review-panel:layout', () => {
-    layout()
+  useEventListener('review-panel:layout', (event: CustomEvent) => {
+    if (!layoutSuspended) {
+      // Clear previous positions if forcing a layout
+      if (event.detail.force) {
+        previousLayoutInfoRef.current = initialLayoutInfo
+      }
+      layout()
+    }
   })
 
   // Layout on first render. This is necessary to ensure layout happens when
@@ -439,6 +421,11 @@ function PositionedEntries({
   useEffect(() => {
     dispatchReviewPanelLayout()
   }, [])
+
+  // Ensure layout is performed after opening or closing the review panel
+  useEffect(() => {
+    previousLayoutInfoRef.current = initialLayoutInfo
+  }, [reviewPanelOpen])
 
   return (
     <div

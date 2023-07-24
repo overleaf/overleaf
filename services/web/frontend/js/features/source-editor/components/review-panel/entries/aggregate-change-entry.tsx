@@ -9,6 +9,8 @@ import { formatTime } from '../../../../utils/format-date'
 import classnames from 'classnames'
 import comparePropsWithShallowArrayCompare from '../utils/compare-props-with-shallow-array-compare'
 import { BaseChangeEntryProps } from '../types/base-change-entry-props'
+import useIndicatorHover from '../hooks/use-indicator-hover'
+import EntryIndicator from './entry-indicator'
 
 interface AggregateChangeEntryProps extends BaseChangeEntryProps {
   replacedContent: string
@@ -26,15 +28,19 @@ function AggregateChangeEntry({
   entryIds,
   timestamp,
   contentLimit = 17,
-  onMouseEnter,
-  onMouseLeave,
-  onIndicatorClick,
 }: AggregateChangeEntryProps) {
   const { t } = useTranslation()
   const { acceptChanges, rejectChanges, gotoEntry, handleLayoutChange } =
     useReviewPanelUpdaterFnsContext()
   const [isDeletionCollapsed, setIsDeletionCollapsed] = useState(true)
   const [isInsertionCollapsed, setIsInsertionCollapsed] = useState(true)
+  const {
+    hoverCoords,
+    indicatorRef,
+    handleEntryMouseLeave,
+    handleIndicatorMouseEnter,
+    handleIndicatorClick,
+  } = useIndicatorHover()
 
   const deletionNeedsCollapsing = replacedContent.length > contentLimit
   const insertionNeedsCollapsing = content.length > contentLimit
@@ -76,20 +82,19 @@ function AggregateChangeEntry({
   return (
     <EntryContainer
       id={entryId}
+      hoverCoords={hoverCoords}
       onClick={handleEntryClick}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
+      onMouseLeave={handleEntryMouseLeave}
     >
       <EntryCallout className="rp-entry-callout-aggregate" />
-      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
-      <div
-        className={classnames('rp-entry-indicator', {
-          'rp-entry-indicator-focused': focused,
-        })}
-        onClick={onIndicatorClick}
+      <EntryIndicator
+        ref={indicatorRef}
+        focused={focused}
+        onMouseEnter={handleIndicatorMouseEnter}
+        onClick={handleIndicatorClick}
       >
         <Icon type="pencil" />
-      </div>
+      </EntryIndicator>
       <div
         className={classnames('rp-entry', 'rp-entry-aggregate', {
           'rp-entry-focused': focused,
