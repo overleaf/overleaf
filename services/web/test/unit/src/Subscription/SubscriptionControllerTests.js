@@ -393,6 +393,27 @@ describe('SubscriptionController', function () {
         this.SubscriptionController.paymentPage(this.req, this.res)
       })
     })
+
+    describe('with a user from a restricted country', function () {
+      beforeEach(function () {
+        this.LimitationsManager.promises.userHasV1OrV2Subscription.resolves(
+          false
+        )
+        this.PlansLocator.findLocalPlanInSettings.returns({})
+        this.GeoIpLookup.promises.getCurrencyCode.resolves({
+          currencyCode: this.stubbedCurrencyCode,
+          countryCode: 'KP',
+        })
+      })
+
+      it('should render the restricted country page', function (done) {
+        this.res.render = (page, opts) => {
+          page.should.equal('subscriptions/restricted-country')
+          done()
+        }
+        this.SubscriptionController.paymentPage(this.req, this.res, done)
+      })
+    })
   })
 
   describe('successfulSubscription', function () {

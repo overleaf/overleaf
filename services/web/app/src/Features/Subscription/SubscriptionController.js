@@ -213,6 +213,13 @@ async function paymentPage(req, res) {
         currency = recommendedCurrency
       }
 
+      // Block web sales to restricted countries
+      if (['CU', 'IR', 'KP', 'RU', 'SY', 'VE'].includes(countryCode)) {
+        return res.render('subscriptions/restricted-country', {
+          title: 'restricted',
+        })
+      }
+
       res.render('subscriptions/new-react', {
         title: 'subscribe',
         currency,

@@ -1544,6 +1544,7 @@
   "something_went_wrong_rendering_pdf_expected": "There was an issue displaying this PDF. <0>Please recompile</0>",
   "something_went_wrong_server": "Something went wrong. Please try again.",
   "somthing_went_wrong_compiling": "Sorry, something went wrong and your project could not be compiled. Please try again in a few moments.",
+  "sorry_detected_sales_restricted_region": "Sorry, we’ve detected that you are in a region from which we cannot presently accept payments. If you think you’ve received this message in error, please <a href=\"__link__\">contact us</a> with details of your location, and we will look into this for you. We apologize for the inconvenience.",
   "sorry_something_went_wrong_opening_the_document_please_try_again": "Sorry, an unexpected error occurred when trying to open this content on Overleaf. Please try again.",
   "sorry_your_token_expired": "Sorry, your token expired",
   "sort_by": "Sort by",

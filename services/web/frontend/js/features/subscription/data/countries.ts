@@ -64,7 +64,7 @@ const countries = <const>[
   { code: 'CR', name: 'Costa Rica' },
   { code: 'CI', name: 'Côte d’Ivoire' },
   { code: 'HR', name: 'Croatia' },
-  { code: 'CU', name: 'Cuba' },
+  // { code: 'CU', name: 'Cuba' }, // blocked
   { code: 'CY', name: 'Cyprus' },
   { code: 'CZ', name: 'Czech Republic' },
   { code: 'DK', name: 'Denmark' },
@@ -115,7 +115,7 @@ const countries = <const>[
   { code: 'IS', name: 'Iceland' },
   { code: 'IN', name: 'India' },
   { code: 'ID', name: 'Indonesia' },
-  { code: 'IR', name: 'Iran' },
+  // { code: 'IR', name: 'Iran' }, // blocked
   { code: 'IQ', name: 'Iraq' },
   { code: 'IE', name: 'Ireland' },
   { code: 'IM', name: 'Isle of Man' },
@@ -180,7 +180,7 @@ const countries = <const>[
   { code: 'NG', name: 'Nigeria' },
   { code: 'NU', name: 'Niue' },
   { code: 'NF', name: 'Norfolk Island' },
-  { code: 'KP', name: 'North Korea' },
+  // { code: 'KP', name: 'North Korea' }, // blocked
   { code: 'VD', name: 'North Vietnam' },
   { code: 'MP', name: 'Northern Mariana Islands' },
   { code: 'NO', name: 'Norway' },
@@ -204,7 +204,7 @@ const countries = <const>[
   { code: 'QA', name: 'Qatar' },
   { code: 'RE', name: 'Réunion' },
   { code: 'RO', name: 'Romania' },
-  { code: 'RU', name: 'Russia' },
+  // { code: 'RU', name: 'Russia' }, // blocked
   { code: 'RW', name: 'Rwanda' },
   { code: 'BL', name: 'Saint Barthélemy' },
   { code: 'SH', name: 'Saint Helena' },
@@ -238,7 +238,7 @@ const countries = <const>[
   { code: 'SZ', name: 'Swaziland' },
   { code: 'SE', name: 'Sweden' },
   { code: 'CH', name: 'Switzerland' },
-  { code: 'SY', name: 'Syria' },
+  // { code: 'SY', name: 'Syria' }, // blocked
   { code: 'TW', name: 'Taiwan' },
   { code: 'TJ', name: 'Tajikistan' },
   { code: 'TZ', name: 'Tanzania' },
@@ -266,7 +266,7 @@ const countries = <const>[
   { code: 'UZ', name: 'Uzbekistan' },
   { code: 'VU', name: 'Vanuatu' },
   { code: 'VA', name: 'Vatican City' },
-  { code: 'VE', name: 'Venezuela' },
+  // { code: 'VE', name: 'Venezuela' }, // blocked
   { code: 'VN', name: 'Vietnam' },
   { code: 'WK', name: 'Wake Island' },
   { code: 'WF', name: 'Wallis and Futuna' },
