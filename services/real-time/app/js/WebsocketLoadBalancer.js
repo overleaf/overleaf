@@ -16,8 +16,14 @@ const RESTRICTED_USER_MESSAGE_TYPE_PASS_LIST = [
   'reciveNewDoc',
   'reciveNewFile',
   'reciveNewFolder',
+  'reciveEntityMove',
+  'reciveEntityRename',
   'removeEntity',
   'accept-changes',
+  'projectNameUpdated',
+  'rootDocUpdated',
+  'toggle-track-changes',
+  'projectRenamedOrDeletedByExternalSource',
 ]
 
 let WebsocketLoadBalancer
