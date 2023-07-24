@@ -131,6 +131,8 @@ app.use((req, res, next) => {
       { req, timeSinceShutdown: Date.now() - Settings.shutDownTime },
       'request received after shutting down'
     )
+    // We don't want keep-alive connections to be kept open when the server is shutting down.
+    res.set('Connection', 'close')
   }
   next()
 })
