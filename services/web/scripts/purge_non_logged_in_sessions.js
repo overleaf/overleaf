@@ -4,7 +4,7 @@ const SessionManager = require('../app/src/Features/Authentication/SessionManage
 const async = require('async')
 const _ = require('lodash')
 
-const redis = RedisWrapper.createClient(Settings.redis.web)
+const redis = RedisWrapper.createClient(Settings.redis.websessions)
 
 let totalDeletedSessions = 0
 
