@@ -31,6 +31,7 @@ const SubscriptionSchema = new Schema(
     groupPlan: { type: Boolean, default: false },
     membersLimit: { type: Number, default: 0 },
     customAccount: Boolean,
+    features: { managedUsers: { type: Boolean, default: false } },
     overleaf: {
       id: {
         type: Number,

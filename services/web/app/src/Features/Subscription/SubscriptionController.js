@@ -285,8 +285,10 @@ async function userSubscriptionPage(req, res) {
   const groupPlansDataForDash = formatGroupPlansDataForDash()
 
   const groupSettingsEnabledFor = (managedGroupSubscriptions || [])
-    .map(sub => sub._id.toString())
-    .filter(id => ManagedUsersManager.hasManagedUsersFeature(id))
+    .filter(subscription =>
+      ManagedUsersManager.hasManagedUsersFeature(subscription)
+    )
+    .map(subscription => subscription._id.toString())
 
   const data = {
     title: 'your_subscription',
