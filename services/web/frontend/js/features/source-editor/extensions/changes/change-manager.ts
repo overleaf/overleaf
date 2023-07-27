@@ -88,6 +88,8 @@ export const createChangeManager = (
         }
 
         entry.screenPos = { y: y + offsetTop, height, editorPaddingTop }
+      } else {
+        entry.screenPos = null
       }
 
       if (allVisible) {

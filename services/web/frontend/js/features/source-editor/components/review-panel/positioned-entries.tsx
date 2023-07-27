@@ -204,17 +204,32 @@ function PositionedEntries({
       }
     }
 
-    // Calculate positions for all visible entries
+    // Calculate positions for all visible entries, starting by calculating the
+    // entry to put in its desired position and anchor everything else around.
+    // If there is an explicitly focused entry, use that.
     let focusedEntryIndex = entryViews.findIndex(view => view.entry.focused)
     if (focusedEntryIndex === -1) {
+      // There is no explicitly focused entry, so use the focused entry from the
+      // previous layout. This will be the first entry in the list if there was
+      // no previous layout.
       focusedEntryIndex = Math.min(
         previousLayoutInfoRef.current.focusedEntryIndex,
         entryViews.length - 1
       )
+      // If the entry from the previous layout is not visible, fall back to the
+      // first visible entry in the list
+      if (!entryViews[focusedEntryIndex].visible) {
+        focusedEntryIndex = entryViews.findIndex(view => view.visible)
+      }
+    }
+
+    // If there is no visible entry, bail out
+    if (focusedEntryIndex === -1) {
+      return
     }
 
     const focusedEntryView = entryViews[focusedEntryIndex]
-    if (!focusedEntryView.entry.screenPos) {
+    if (!focusedEntryView.visible) {
       return
     }
 
