@@ -397,7 +397,7 @@ if (
     pattern: process.env.SHARELATEX_PASSWORD_VALIDATION_PATTERN || 'aA$3',
     length: {
       min: process.env.SHARELATEX_PASSWORD_VALIDATION_MIN_LENGTH || 8,
-      max: process.env.SHARELATEX_PASSWORD_VALIDATION_MAX_LENGTH || 150,
+      max: process.env.SHARELATEX_PASSWORD_VALIDATION_MAX_LENGTH || 72,
     },
   }
 }
