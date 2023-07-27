@@ -30,12 +30,16 @@ const ScriptLogger = {
     ScriptLogger.mismatchSubscriptionsCount += 1
     const mismatchReasonsString = JSON.stringify(mismatchReasons)
     if (ScriptLogger.allMismatchReasons[mismatchReasonsString]) {
-      ScriptLogger.allMismatchReasons[mismatchReasonsString].push(
-        subscription._id
-      )
+      ScriptLogger.allMismatchReasons[mismatchReasonsString].push({
+        id: subscription._id,
+        name: subscription.planCode,
+      })
     } else {
       ScriptLogger.allMismatchReasons[mismatchReasonsString] = [
-        subscription._id,
+        {
+          id: subscription._id,
+          name: subscription.planCode,
+        },
       ]
     }
   },

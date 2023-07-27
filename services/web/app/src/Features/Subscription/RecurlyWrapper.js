@@ -472,6 +472,9 @@ const RecurlyWrapper = {
         (response.statusCode !== 404 || !expect404) &&
         (response.statusCode !== 422 || !expect422)
       ) {
+        if (options.headers.Authorization) {
+          options.headers.Authorization = 'REDACTED'
+        }
         logger.warn(
           {
             err: error,
