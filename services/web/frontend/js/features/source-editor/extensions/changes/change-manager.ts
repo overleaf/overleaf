@@ -39,7 +39,7 @@ export const dispatchReviewPanelLayout = (force = false) => {
 
 const scheduleDispatchReviewPanelLayout = debounce(
   dispatchReviewPanelLayout,
-  50
+  10
 )
 
 export type ChangeManager = {
@@ -307,11 +307,10 @@ export const createChangeManager = (
         if (changed) {
           dispatchEditorEvent('track-changes:visibility_changed')
         }
-        dispatchReviewPanelLayout()
-        // Ensure the layout is updated again once the review panel entries
-        // have updated in the React review panel. The use of a timeout is bad
-        // but the timings are a bit of a mess and will be improved when the
-        // review panel state is migrated away from Angular
+        // Ensure the layout is updated once the review panel entries have
+        // updated in the React review panel. The use of a timeout is bad but
+        // the timings are a bit of a mess and will be improved when the review
+        // panel state is migrated away from Angular
         scheduleDispatchReviewPanelLayout()
         break
       }
