@@ -37,7 +37,7 @@ function AggregateChangeEntry({
   const {
     hoverCoords,
     indicatorRef,
-    handleEntryMouseLeave,
+    endHover,
     handleIndicatorMouseEnter,
     handleIndicatorClick,
   } = useIndicatorHover()
@@ -84,7 +84,7 @@ function AggregateChangeEntry({
       id={entryId}
       hoverCoords={hoverCoords}
       onClick={handleEntryClick}
-      onMouseLeave={handleEntryMouseLeave}
+      onMouseLeave={endHover}
     >
       <EntryCallout className="rp-entry-callout-aggregate" />
       <EntryIndicator

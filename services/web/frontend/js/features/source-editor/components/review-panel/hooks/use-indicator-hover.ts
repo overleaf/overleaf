@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { useReviewPanelUpdaterFnsContext } from '../../../context/review-panel/review-panel-context'
 import { useLayoutContext } from '../../../../../shared/context/layout-context'
@@ -18,7 +18,7 @@ function useIndicatorHover() {
     useReviewPanelUpdaterFnsContext()
   const indicatorRef = useRef<HTMLDivElement | null>(null)
 
-  const handleEntryMouseLeave = () => {
+  const endHover = useCallback(() => {
     if (!reviewPanelOpen && !layoutToLeft) {
       // Use flushSync to ensure that React renders immediately. This is
       // necessary to ensure that the subsequent layout update acts on the
@@ -29,7 +29,7 @@ function useIndicatorHover() {
       })
       handleLayoutChange(true)
     }
-  }
+  }, [handleLayoutChange, layoutToLeft, reviewPanelOpen, setLayoutSuspended])
 
   const handleIndicatorMouseEnter = () => {
     if (!layoutToLeft) {
@@ -48,10 +48,20 @@ function useIndicatorHover() {
     toggleReviewPanel()
   }
 
+  useEffect(() => {
+    if (hoverCoords) {
+      window.addEventListener('editor:scroll', endHover)
+
+      return () => {
+        window.removeEventListener('editor:scroll', endHover)
+      }
+    }
+  }, [hoverCoords, endHover])
+
   return {
     hoverCoords,
     indicatorRef,
-    handleEntryMouseLeave,
+    endHover,
     handleIndicatorMouseEnter,
     handleIndicatorClick,
   }

@@ -37,7 +37,7 @@ function ChangeEntry({
   const {
     hoverCoords,
     indicatorRef,
-    handleEntryMouseLeave,
+    endHover,
     handleIndicatorMouseEnter,
     handleIndicatorClick,
   } = useIndicatorHover()
@@ -75,7 +75,7 @@ function ChangeEntry({
       id={entryId}
       hoverCoords={hoverCoords}
       onClick={handleEntryClick}
-      onMouseLeave={handleEntryMouseLeave}
+      onMouseLeave={endHover}
     >
       <EntryCallout className={`rp-entry-callout-${type}`} />
       <EntryIndicator
