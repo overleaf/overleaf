@@ -231,19 +231,30 @@ export function FileTreeActionableProvider({ children }) {
         return dispatch({ type: ACTION_TYPES.ERROR, error: validationError })
       }
 
+      // keep track of old parent folder ids so we can revert entities if sync fails
+      const oldParentFolderIds = {}
+      let isMoveFailed = false
+
       // dispatch moves immediately
-      founds.forEach(found => dispatchMove(found.entity._id, toFolderId))
+      founds.forEach(found => {
+        oldParentFolderIds[found.entity._id] = found.parentFolderId
+        dispatchMove(found.entity._id, toFolderId)
+      })
 
       // sync dispatched moves after
-      return mapSeries(founds, found =>
-        syncMove(projectId, found.type, found.entity._id, toFolderId)
-      )
-        .then(() => {
-          dispatch({ type: ACTION_TYPES.CLEAR })
-        })
-        .catch(error => {
+      return mapSeries(founds, async found => {
+        try {
+          await syncMove(projectId, found.type, found.entity._id, toFolderId)
+        } catch (error) {
+          isMoveFailed = true
+          dispatchMove(found.entity._id, oldParentFolderIds[found.entity._id])
           dispatch({ type: ACTION_TYPES.ERROR, error })
-        })
+        }
+      }).then(() => {
+        if (!isMoveFailed) {
+          dispatch({ type: ACTION_TYPES.CLEAR })
+        }
+      })
     },
     [dispatchMove, fileTreeData, projectId]
   )
