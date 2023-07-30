@@ -1,6 +1,6 @@
-extends ../../../layout
+extends ../layout
 
-include ./v2/_mixins
+include ./plans/_mixins
 
 block vars
 	- entrypoint = 'pages/user/subscription/plans-v2/plans-v2-main'
@@ -43,7 +43,7 @@ block content
 
 					//- sticky header on mobile will be "hidden" (by removing its sticky position) if it reaches this div
 					.invisible(aria-hidden="true" data-ol-plans-v2-table-sticky-header-stop)
-		
+
 		if (showSkipLink)
 			.row.row-spaced-small.text-center
 				a(href='/project'
@@ -53,5 +53,5 @@ block content
 					event-segmentation='{"location": "interstitial-page"}'
 				)
 					| #{translate("continue_with_free_plan")}			
-			
+
 	!= moduleIncludes("contactModalGeneral-marketing", locals)

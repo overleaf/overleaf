@@ -75,10 +75,10 @@ mixin plans_v2_table(period, config)
 						b.plans-v2-table-divider-label #{translate(featuresPerSection.dividerLabel)}
 						//- will only appear on screen width >= 768px (using CSS)
 						i.fa.fa-question-circle.plans-v2-table-divider-question-icon(
-									data-toggle="tooltip"
-									title=translate(featuresPerSection.dividerInfo),
-									data-placement="top"
-								)
+							data-toggle="tooltip"
+							title=translate(featuresPerSection.dividerInfo),
+							data-placement="top"
+)
 						//- will only appear on screen width < 768px (using CSS)
 						span.plans-v2-table-divider-learn-more-container
 							span (
@@ -149,7 +149,7 @@ mixin table_group
 mixin table_student(period)
 	table.card.plans-v2-table.plans-v2-table-student
 		+plans_v2_table(period, plansConfig.student)
-	
+
 mixin table_head_individual_free(highlighted, period)
 	.plans-v2-table-th-content
 		p.plans-v2-table-th-content-title #{translate("free")}

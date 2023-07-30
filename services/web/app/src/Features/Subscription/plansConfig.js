@@ -1,17 +1,16 @@
-const plansV2Features = require('./plansFeatures')
+const plansFeatures = require('./plansFeatures')
 
 const config = {
   individual: {
-    maxColumn: 4,
+    maxColumn: 3,
     tableHead: {
       individual_free: {},
-      individual_personal: {},
       individual_collaborator: {},
       individual_professional: {},
     },
-    features: plansV2Features.individual,
+    features: plansFeatures.individual,
     highlightedColumn: {
-      index: 2,
+      index: 1,
       text: {
         monthly: 'most_popular',
         annual: 'most_popular',
@@ -26,7 +25,7 @@ const config = {
       group_professional: {},
       group_organization: {},
     },
-    features: plansV2Features.group,
+    features: plansFeatures.group,
     highlightedColumn: {
       index: 0,
       text: {
@@ -48,7 +47,7 @@ const config = {
         colspan: 3,
       },
     },
-    features: plansV2Features.student,
+    features: plansFeatures.student,
     highlightedColumn: {
       index: 1,
       text: {
