@@ -146,7 +146,7 @@ async function getAssignmentForMongoUser(
 /**
  * Get a mapping of the active split test assignments for the given user
  */
-async function getActiveAssignmentsForUser(userId) {
+async function getActiveAssignmentsForUser(userId, removeArchived = false) {
   if (!Features.hasFeature('saas')) {
     return {}
   }
@@ -158,6 +158,7 @@ async function getActiveAssignmentsForUser(userId) {
 
   const splitTests = await SplitTest.find({
     $where: 'this.versions[this.versions.length - 1].active',
+    ...(removeArchived && { archived: { $ne: true } }),
   }).exec()
   const assignments = {}
   for (const splitTest of splitTests) {
