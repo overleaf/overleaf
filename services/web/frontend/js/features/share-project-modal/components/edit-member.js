@@ -8,6 +8,7 @@ import { Button, Col, Form, FormControl, FormGroup } from 'react-bootstrap'
 import Tooltip from '../../../shared/components/tooltip'
 import Icon from '../../../shared/components/icon'
 import { useProjectContext } from '../../../shared/context/project-context'
+import { sendMB } from '../../../infrastructure/event-tracking'
 
 export default function EditMember({ member }) {
   const [privileges, setPrivileges] = useState(member.privileges)
@@ -112,15 +113,21 @@ SelectPrivilege.propTypes = {
 function RemoveMemberAction({ member }) {
   const { t } = useTranslation()
   const { updateProject, monitorRequest } = useShareProjectContext()
-  const { _id: projectId, members } = useProjectContext()
+  const { _id: projectId, members, invites } = useProjectContext()
 
   function handleClick(event) {
     event.preventDefault()
 
     monitorRequest(() => removeMemberFromProject(projectId, member)).then(
       () => {
+        const updatedMembers = members.filter(existing => existing !== member)
         updateProject({
-          members: members.filter(existing => existing !== member),
+          members: updatedMembers,
+        })
+        sendMB('collaborator-removed', {
+          project_id: projectId,
+          current_collaborators_amount: updatedMembers.length,
+          current_invites_amount: invites.length,
         })
       }
     )

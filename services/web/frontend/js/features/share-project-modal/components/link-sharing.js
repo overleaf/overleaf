@@ -10,6 +10,7 @@ import CopyLink from '../../../shared/components/copy-link'
 import { useProjectContext } from '../../../shared/context/project-context'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import { useUserContext } from '../../../shared/context/user-context'
+import { sendMB } from '../../../infrastructure/event-tracking'
 import { getJSON } from '../../../infrastructure/fetch-json'
 import useAbortController from '../../../shared/hooks/use-abort-controller'
 
@@ -24,6 +25,9 @@ export default function LinkSharing({ canAddCollaborators }) {
   const setAccessLevel = useCallback(
     newPublicAccessLevel => {
       setInflight(true)
+      sendMB('link-sharing-click-off', {
+        project_id: projectId,
+      })
       monitorRequest(() =>
         setProjectAccessLevel(projectId, newPublicAccessLevel)
       )
@@ -43,7 +47,11 @@ export default function LinkSharing({ canAddCollaborators }) {
     // Private (with token-access available)
     case 'private':
       return (
-        <PrivateSharing setAccessLevel={setAccessLevel} inflight={inflight} />
+        <PrivateSharing
+          setAccessLevel={setAccessLevel}
+          inflight={inflight}
+          projectId={projectId}
+        />
       )
 
     // Token-based access
@@ -76,7 +84,7 @@ LinkSharing.propTypes = {
   canAddCollaborators: PropTypes.bool,
 }
 
-function PrivateSharing({ setAccessLevel, inflight }) {
+function PrivateSharing({ setAccessLevel, inflight, projectId }) {
   return (
     <Row className="public-access-level">
       <Col xs={12} className="text-center">
@@ -88,7 +96,7 @@ function PrivateSharing({ setAccessLevel, inflight }) {
           className="btn-inline-link"
           onClick={() => {
             setAccessLevel('tokenBased')
-            eventTracking.sendMB('link-sharing-click')
+            eventTracking.sendMB('link-sharing-click', { projectId })
           }}
           disabled={inflight}
         >
@@ -104,6 +112,7 @@ function PrivateSharing({ setAccessLevel, inflight }) {
 PrivateSharing.propTypes = {
   setAccessLevel: PropTypes.func.isRequired,
   inflight: PropTypes.bool,
+  projectId: PropTypes.string,
 }
 
 function TokenBasedSharing({ setAccessLevel, inflight, canAddCollaborators }) {

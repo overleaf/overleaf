@@ -58,9 +58,10 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
     if (show) {
       sendMB('share-modal-opened', {
         splitTestVariant: splitTestVariants['null-test-share-modal'],
+        project_id: project._id,
       })
     }
-  }, [splitTestVariants, show])
+  }, [splitTestVariants, project._id, show])
 
   // reset error when the modal is opened
   useEffect(() => {

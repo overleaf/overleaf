@@ -8,6 +8,7 @@ import { Trans, useTranslation } from 'react-i18next'
 import MemberPrivileges from './member-privileges'
 import { resendInvite, revokeInvite } from '../utils/api'
 import { useProjectContext } from '../../../shared/context/project-context'
+import { sendMB } from '../../../infrastructure/event-tracking'
 
 export default function Invite({ invite, isProjectOwner }) {
   return (
@@ -77,14 +78,20 @@ ResendInvite.propTypes = {
 function RevokeInvite({ invite }) {
   const { t } = useTranslation()
   const { updateProject, monitorRequest } = useShareProjectContext()
-  const { _id: projectId, invites } = useProjectContext()
+  const { _id: projectId, invites, members } = useProjectContext()
 
   function handleClick(event) {
     event.preventDefault()
 
     monitorRequest(() => revokeInvite(projectId, invite)).then(() => {
+      const updatedInvites = invites.filter(existing => existing !== invite)
       updateProject({
-        invites: invites.filter(existing => existing !== invite),
+        invites: updatedInvites,
+      })
+      sendMB('collaborator-invite-revoked', {
+        project_id: projectId,
+        current_invites_amount: updatedInvites.length,
+        current_collaborators_amount: members.length,
       })
     })
   }

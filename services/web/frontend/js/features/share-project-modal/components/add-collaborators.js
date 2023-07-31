@@ -8,6 +8,7 @@ import { resendInvite, sendInvite } from '../utils/api'
 import { useUserContacts } from '../hooks/use-user-contacts'
 import useIsMounted from '../../../shared/hooks/use-is-mounted'
 import { useProjectContext } from '../../../shared/context/project-context'
+import { sendMB } from '../../../infrastructure/event-tracking'
 
 export default function AddCollaborators() {
   const [privileges, setPrivileges] = useState('readAndWrite')
@@ -82,6 +83,15 @@ export default function AddCollaborators() {
         } else {
           data = await sendInvite(projectId, email, privileges)
         }
+
+        sendMB('collaborator-invited', {
+          project_id: projectId,
+          // invitation is only populated on successful invite, meaning that for paywall and other cases this will be null
+          successful_invite: !!data.invite,
+          users_updated: !!(data.users || data.user),
+          current_collaborators_amount: members.length,
+          current_invites_amount: invites.length,
+        })
       } catch (error) {
         setInFlight(false)
         setError(
