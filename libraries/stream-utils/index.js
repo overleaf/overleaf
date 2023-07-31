@@ -111,7 +111,7 @@ class TimeoutStream extends PassThrough {
 
 /**
  * LoggerStream which will call the provided logger function when the stream exceeds a user specified limit. It will call the provided function again when flushing the stream and it exceeded the user specified limit before.
-* @extends stream.Transform
+ * @extends stream.Transform
  */
 class LoggerStream extends Transform {
   /**
