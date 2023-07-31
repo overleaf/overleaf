@@ -1,32 +1,10 @@
 // Creates data for localizedPlanPricing object in settings.overrides.saas.js
 // and plans object in main/plans.js
 
-const xlsx = require('xlsx')
 const csv = require('csv/sync')
 const fs = require('fs')
 const path = require('path')
 const minimist = require('minimist')
-
-function readXLSXFile(fileName, sheetName) {
-  // Pick the xlsx file
-  const filePath = path.resolve(__dirname, fileName)
-  const file = xlsx.readFile(filePath)
-
-  if (!file.SheetNames.includes(sheetName)) {
-    console.error(
-      `Error: sheet '${sheetName}' not found.\n` +
-        `Valid sheet names are: ${file.SheetNames.join(',')}`
-    )
-    process.exit(1)
-  }
-
-  const workSheet = Object.values(file.Sheets)[
-    file.SheetNames.indexOf(sheetName)
-  ]
-  // Convert to JSON
-  const workSheetJSON = xlsx.utils.sheet_to_json(workSheet)
-  return workSheetJSON
-}
 
 function readCSVFile(fileName) {
   // Pick the csv file
@@ -180,6 +158,10 @@ function generatePlans(workSheetJSON) {
       )
 
       if (!monthlyPlan) throw new Error(`Missing plan: ${actualKey}`)
+      if (!(currency in monthlyPlan))
+        throw new Error(
+          `Missing currency "${currency}" for plan "${actualKey}"`
+        )
 
       const actualKeyAnnual = `${actualKey}-annual`
       const annualPlan = workSheetJSON.find(
@@ -187,6 +169,10 @@ function generatePlans(workSheetJSON) {
       )
 
       if (!annualPlan) throw new Error(`Missing plan: ${actualKeyAnnual}`)
+      if (!(currency in annualPlan))
+        throw new Error(
+          `Missing currency "${currency}" for plan "${actualKeyAnnual}"`
+        )
 
       const monthly = buildCurrencyValue(monthlyPlan[currency], currencyDetails)
       const monthlyTimesTwelve = buildCurrencyValue(
@@ -258,8 +244,8 @@ function generateGroupPlans(workSheetJSON) {
 }
 
 const argv = minimist(process.argv.slice(2), {
-  string: ['output', 'file', 'sheet'],
-  alias: { o: 'output', f: 'file', s: 'sheet' },
+  string: ['output', 'file'],
+  alias: { o: 'output', f: 'file' },
 })
 
 let input
@@ -269,30 +255,26 @@ if (argv.file) {
     case '.csv':
       input = readCSVFile(argv.file)
       break
-    case '.xls':
-    case '.xlsx':
-      input = readXLSXFile(argv.file, argv.sheet)
-      break
     case '.json':
       input = readJSONFile(argv.file)
       break
     default:
-      console.log('Invalid file type: must be csv, xls, xlsx, or json')
+      console.log('Invalid file type: must be csv or json')
   }
 } else {
-  console.log(
-    'usage: node plans.js -f <file.xls|file.csv|file.json> [-s <sheet>] -o <dir>'
-  )
+  console.log('usage: node plans.js -f <file.csv|file.json> -o <dir>')
   process.exit(1)
 }
 // removes quotes from object keys
 const formatJS = obj =>
   JSON.stringify(obj, null, 2).replace(/"([^"]+)":/g, '$1:')
 const formatJSON = obj => JSON.stringify(obj, null, 2)
+
 function writeFile(outputFile, data) {
   console.log(`Writing ${outputFile}`)
   fs.writeFileSync(outputFile, data)
 }
+
 const { localizedPlanPricing, plans } = generatePlans(input)
 const groupPlans = generateGroupPlans(input)
 
