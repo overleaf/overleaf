@@ -3,6 +3,7 @@ import { flushSync } from 'react-dom'
 import { useReviewPanelUpdaterFnsContext } from '../../../context/review-panel/review-panel-context'
 import { useLayoutContext } from '../../../../../shared/context/layout-context'
 import useScopeValue from '../../../../../shared/hooks/use-scope-value'
+import EntryIndicator from '../entries/entry-indicator'
 
 export type Coordinates = {
   x: number
@@ -16,7 +17,9 @@ function useIndicatorHover() {
   const { reviewPanelOpen } = useLayoutContext()
   const { setLayoutSuspended, handleLayoutChange } =
     useReviewPanelUpdaterFnsContext()
-  const indicatorRef = useRef<HTMLDivElement | null>(null)
+  const indicatorRef = useRef<React.ElementRef<typeof EntryIndicator> | null>(
+    null
+  )
 
   const endHover = useCallback(() => {
     if (!reviewPanelOpen && !layoutToLeft) {
