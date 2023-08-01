@@ -16,6 +16,7 @@ describe('TagsHandler', function () {
     this.tag = { user_id: this.userId, name: 'some name', color: '#3399CC' }
     this.tagId = ObjectId().toString()
     this.projectId = ObjectId().toString()
+    this.projectIds = [ObjectId().toString(), ObjectId().toString()]
 
     this.mongodb = { ObjectId }
     this.TagMock = sinon.mock(Tag)
@@ -34,7 +35,7 @@ describe('TagsHandler', function () {
       this.TagMock.expects('find')
         .once()
         .withArgs({ user_id: this.userId })
-        .yields(null, stubbedTags)
+        .resolves(stubbedTags)
       this.TagsHandler.getAllTags(this.userId, (err, result) => {
         expect(err).to.not.exist
         this.TagMock.verify()
@@ -50,7 +51,7 @@ describe('TagsHandler', function () {
         this.TagMock.expects('create')
           .withArgs(this.tag)
           .once()
-          .yields(null, this.tag)
+          .resolves(this.tag)
         this.TagsHandler.createTag(
           this.tag.user_id,
           this.tag.name,
@@ -74,7 +75,7 @@ describe('TagsHandler', function () {
         this.TagMock.expects('create')
           .withArgs(this.tag)
           .once()
-          .yields(null, this.tag)
+          .resolves(this.tag)
         this.TagsHandler.createTag(
           this.tag.user_id,
           // Pass this too-long name
@@ -114,11 +115,11 @@ describe('TagsHandler', function () {
         this.TagMock.expects('create')
           .withArgs(this.tag)
           .once()
-          .yields(this.duplicateKeyError)
+          .throws(this.duplicateKeyError)
         this.TagMock.expects('findOne')
           .withArgs({ user_id: this.tag.user_id, name: this.tag.name })
           .once()
-          .yields(null, this.tag)
+          .resolves(this.tag)
         this.TagsHandler.createTag(
           this.tag.user_id,
           this.tag.name,
@@ -138,8 +139,6 @@ describe('TagsHandler', function () {
 
   describe('addProjectToTag', function () {
     describe('with a valid tag_id', function () {
-      beforeEach(function () {})
-
       it('should call update in mongo', function (done) {
         this.TagMock.expects('findOneAndUpdate')
           .once()
@@ -147,11 +146,35 @@ describe('TagsHandler', function () {
             { _id: this.tagId, user_id: this.userId },
             { $addToSet: { project_ids: this.projectId } }
           )
-          .yields()
+          .resolves()
         this.TagsHandler.addProjectToTag(
           this.userId,
           this.tagId,
           this.projectId,
+          err => {
+            expect(err).to.not.exist
+            this.TagMock.verify()
+            done()
+          }
+        )
+      })
+    })
+  })
+
+  describe('addProjectsToTag', function () {
+    describe('with a valid tag_id', function () {
+      it('should call update in mongo', function (done) {
+        this.TagMock.expects('findOneAndUpdate')
+          .once()
+          .withArgs(
+            { _id: this.tagId, user_id: this.userId },
+            { $addToSet: { project_ids: { $each: this.projectIds } } }
+          )
+          .resolves()
+        this.TagsHandler.addProjectsToTag(
+          this.userId,
+          this.tagId,
+          this.projectIds,
           err => {
             expect(err).to.not.exist
             this.TagMock.verify()
@@ -171,7 +194,7 @@ describe('TagsHandler', function () {
           { $addToSet: { project_ids: this.projectId } },
           { upsert: true }
         )
-        .yields()
+        .resolves()
       this.TagsHandler.addProjectToTagName(
         this.tag.userId,
         this.tag.name,
@@ -182,24 +205,6 @@ describe('TagsHandler', function () {
           done()
         }
       )
-    })
-  })
-
-  describe('updateTagUserIds', function () {
-    it('should call update in mongo', function (done) {
-      this.newUserId = ObjectId().toString()
-      this.TagMock.expects('updateMany')
-        .once()
-        .withArgs(
-          { user_id: this.userId },
-          { $set: { user_id: this.newUserId } }
-        )
-        .yields()
-      this.TagsHandler.updateTagUserIds(this.userId, this.newUserId, err => {
-        expect(err).to.not.exist
-        this.TagMock.verify()
-        done()
-      })
     })
   })
 
@@ -217,11 +222,40 @@ describe('TagsHandler', function () {
               $pull: { project_ids: this.projectId },
             }
           )
-          .yields()
+          .resolves()
         this.TagsHandler.removeProjectFromTag(
           this.userId,
           this.tagId,
           this.projectId,
+          err => {
+            expect(err).to.not.exist
+            this.TagMock.verify()
+            done()
+          }
+        )
+      })
+    })
+  })
+
+  describe('removeProjectsFromTag', function () {
+    describe('with a valid tag_id', function () {
+      it('should call update in mongo', function (done) {
+        this.TagMock.expects('updateOne')
+          .once()
+          .withArgs(
+            {
+              _id: this.tagId,
+              user_id: this.userId,
+            },
+            {
+              $pullAll: { project_ids: this.projectIds },
+            }
+          )
+          .resolves()
+        this.TagsHandler.removeProjectsFromTag(
+          this.userId,
+          this.tagId,
+          this.projectIds,
           err => {
             expect(err).to.not.exist
             this.TagMock.verify()
@@ -244,7 +278,7 @@ describe('TagsHandler', function () {
             $pull: { project_ids: this.projectId },
           }
         )
-        .yields()
+        .resolves()
       this.TagsHandler.removeProjectFromAllTags(
         this.userId,
         this.projectId,
@@ -263,7 +297,7 @@ describe('TagsHandler', function () {
         this.TagMock.expects('deleteOne')
           .once()
           .withArgs({ _id: this.tagId, user_id: this.userId })
-          .yields()
+          .resolves()
         this.TagsHandler.deleteTag(this.userId, this.tagId, err => {
           expect(err).to.not.exist
           this.TagMock.verify()
@@ -283,7 +317,7 @@ describe('TagsHandler', function () {
             { _id: this.tagId, user_id: this.userId },
             { $set: { name: this.newName } }
           )
-          .yields()
+          .resolves()
         this.TagsHandler.renameTag(
           this.userId,
           this.tagId,
