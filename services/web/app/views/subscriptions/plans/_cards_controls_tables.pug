@@ -1,4 +1,9 @@
-include ./_mixins
+if annualTrialsAssignment == 'nudge'
+	include ./_mixins_nudge
+else if annualTrialsAssignment == 'no-nudge'
+	include ./_mixins_nudge
+else if annualTrialsAssignment == 'default'
+	include ./_mixins
 
 .row.plans-v2-top-switch
 	.col-xs-12

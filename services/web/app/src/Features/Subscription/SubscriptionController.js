@@ -123,7 +123,7 @@ async function plansPage(req, res) {
     )
       ? 'latam'
       : 'default',
-    'annual-trials': annualTrialsAssignment?.variant,
+    'annual-trials': annualTrialsAssignment.variant,
   }
   if (inrGeoBannerSplitTestName) {
     plansPageViewSegmentation[inrGeoBannerSplitTestName] = inrGeoBannerVariant
@@ -366,7 +366,7 @@ async function interstitialPaymentPage(req, res) {
       )
         ? 'latam'
         : 'default',
-      'annual-trials': annualTrialsAssignment?.variant,
+      'annual-trials': annualTrialsAssignment.variant,
     }
     if (inrGeoBannerSplitTestName) {
       paywallPlansPageViewSegmentation[inrGeoBannerSplitTestName] =
@@ -378,23 +378,29 @@ async function interstitialPaymentPage(req, res) {
       paywallPlansPageViewSegmentation
     )
 
-    res.render(
-      annualTrialsAssignment?.variant == 'nudge'
-        ? 'subscriptions/interstitial-payment_nudge_annual'
-        : annualTrialsAssignment?.variant == 'no-nudge'
-        ? 'subscriptions/interstitial-payment_no_nudge_monthly'
-        : 'subscriptions/interstitial-payment',
-      {
-        title: 'subscribe',
-        itm_content: req.query?.itm_content,
-        itm_campaign: req.query?.itm_campaign,
-        itm_referrer: req.query?.itm_referrer,
-        recommendedCurrency,
-        interstitialPaymentConfig,
-        showSkipLink,
-        showInrGeoBanner,
-      }
-    )
+    let templatePath
+
+    switch (annualTrialsAssignment?.variant) {
+      case 'nudge':
+        templatePath = 'subscriptions/interstitial-payment_nudge_annual'
+        break
+      case 'no-nudge':
+        templatePath = 'subscriptions/interstitial-payment_no_nudge_monthly'
+        break
+      default:
+        templatePath = 'subscriptions/interstitial-payment'
+    }
+
+    res.render(templatePath, {
+      title: 'subscribe',
+      itm_content: req.query?.itm_content,
+      itm_campaign: req.query?.itm_campaign,
+      itm_referrer: req.query?.itm_referrer,
+      recommendedCurrency,
+      interstitialPaymentConfig,
+      showSkipLink,
+      showInrGeoBanner,
+    })
   }
 }
 
