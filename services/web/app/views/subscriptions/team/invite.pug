@@ -18,6 +18,10 @@ block content
 						.page-header
 							h1.text-centered(ng-non-bindable) #{translate("invited_to_group", {inviterName: inviterName, appName: appName})}
 
+						div(ng-show="view =='restrictedByManagedGroup'")
+							.alert.alert-info #{translate("restricted")}
+								p #{translate("account_managed_by_group_administrator")}
+
 						div(ng-show="view =='hasIndividualRecurlySubscription'")
 							p #{translate("cancel_personal_subscription_first")}
 							.alert.alert-danger(ng-show="cancel_error" ng-cloak) #{translate("something_went_wrong_canceling_your_subscription")}

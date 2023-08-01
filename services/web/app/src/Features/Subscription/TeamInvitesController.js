@@ -112,6 +112,7 @@ async function viewInvite(req, res, next) {
         hasIndividualRecurlySubscription,
         appName: settings.appName,
         expired: req.query.expired,
+        userRestrictions: Array.from(req.userRestrictions || []),
       })
     }
   } else {

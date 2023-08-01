@@ -14,11 +14,15 @@ import getMeta from '../../utils/meta'
 
 export default App.controller('TeamInviteController', function ($scope, $http) {
   $scope.inflight = false
+
+  const hideJoinSubscription = getMeta('ol-cannot-join-subscription')
   const hasIndividualRecurlySubscription = getMeta(
     'ol-hasIndividualRecurlySubscription'
   )
 
-  if (hasIndividualRecurlySubscription) {
+  if (hideJoinSubscription) {
+    $scope.view = 'restrictedByManagedGroup'
+  } else if (hasIndividualRecurlySubscription) {
     $scope.view = 'hasIndividualRecurlySubscription'
   } else {
     $scope.view = 'teamInvite'
