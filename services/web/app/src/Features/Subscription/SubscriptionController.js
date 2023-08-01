@@ -96,6 +96,22 @@ async function plansPage(req, res) {
     }
   }
 
+  // annual plans with the free trial option split test - nudge variant
+  let annualTrialsAssignment = { variant: 'default' }
+
+  try {
+    annualTrialsAssignment = await SplitTestHandler.promises.getAssignment(
+      req,
+      res,
+      'annual-trials'
+    )
+  } catch (error) {
+    logger.error(
+      { err: error },
+      'failed to get "annualTrialsAssignment" split test assignment'
+    )
+  }
+
   const plansPageViewSegmentation = {
     currency: recommendedCurrency,
     countryCode,
@@ -107,6 +123,7 @@ async function plansPage(req, res) {
     )
       ? 'latam'
       : 'default',
+    'annual-trials': annualTrialsAssignment?.variant,
   }
   if (inrGeoBannerSplitTestName) {
     plansPageViewSegmentation[inrGeoBannerSplitTestName] = inrGeoBannerVariant
@@ -134,6 +151,7 @@ async function plansPage(req, res) {
     initialLocalizedGroupPrice:
       SubscriptionHelper.generateInitialLocalizedGroupPrice(currency),
     showInrGeoBanner,
+    annualTrialsAssignment: annualTrialsAssignment?.variant,
   })
 }
 
@@ -320,6 +338,23 @@ async function interstitialPaymentPage(req, res) {
         )
       }
     }
+
+    // annual plans with the free trial option split test - nudge variant
+    let annualTrialsAssignment = { variant: 'default' }
+
+    try {
+      annualTrialsAssignment = await SplitTestHandler.promises.getAssignment(
+        req,
+        res,
+        'annual-trials'
+      )
+    } catch (error) {
+      logger.error(
+        { err: error },
+        'failed to get "annualTrialsAssignment" split test assignment'
+      )
+    }
+
     const paywallPlansPageViewSegmentation = {
       currency: recommendedCurrency,
       countryCode,
@@ -331,6 +366,7 @@ async function interstitialPaymentPage(req, res) {
       )
         ? 'latam'
         : 'default',
+      'annual-trials': annualTrialsAssignment?.variant,
     }
     if (inrGeoBannerSplitTestName) {
       paywallPlansPageViewSegmentation[inrGeoBannerSplitTestName] =
@@ -342,16 +378,23 @@ async function interstitialPaymentPage(req, res) {
       paywallPlansPageViewSegmentation
     )
 
-    res.render('subscriptions/interstitial-payment', {
-      title: 'subscribe',
-      itm_content: req.query?.itm_content,
-      itm_campaign: req.query?.itm_campaign,
-      itm_referrer: req.query?.itm_referrer,
-      recommendedCurrency,
-      interstitialPaymentConfig,
-      showSkipLink,
-      showInrGeoBanner,
-    })
+    res.render(
+      annualTrialsAssignment?.variant == 'nudge'
+        ? 'subscriptions/interstitial-payment_nudge_annual'
+        : annualTrialsAssignment?.variant == 'no-nudge'
+        ? 'subscriptions/interstitial-payment_no_nudge_monthly'
+        : 'subscriptions/interstitial-payment',
+      {
+        title: 'subscribe',
+        itm_content: req.query?.itm_content,
+        itm_campaign: req.query?.itm_campaign,
+        itm_referrer: req.query?.itm_referrer,
+        recommendedCurrency,
+        interstitialPaymentConfig,
+        showSkipLink,
+        showInrGeoBanner,
+      }
+    )
   }
 }
 
