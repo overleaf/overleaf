@@ -4,6 +4,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+const Events = require('events')
 const Metrics = require('@overleaf/metrics')
 Metrics.initialize('docstore')
 const Settings = require('@overleaf/settings')
@@ -18,6 +19,8 @@ const {
 const { mongoClient } = require('./app/js/mongodb')
 const Errors = require('./app/js/Errors')
 const HttpController = require('./app/js/HttpController')
+
+Events.setMaxListeners(20)
 
 logger.initialize('docstore')
 if (Metrics.event_loop != null) {

@@ -5,6 +5,6 @@ contacts
 --env-pass-through=
 --esmock-loader=True
 --has-custom-nodemon=True
---node-version=16.17.1
+--node-version=18.16.1
 --public-repo=False
 --script-version=4.3.0

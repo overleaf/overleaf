@@ -1,3 +1,4 @@
+const Events = require('events')
 const Metrics = require('@overleaf/metrics')
 Metrics.initialize(process.env.METRICS_APP_NAME || 'filestore')
 
@@ -14,7 +15,20 @@ const healthCheckController = require('./app/js/HealthCheckController')
 
 const RequestLogger = require('./app/js/RequestLogger')
 
+Events.setMaxListeners(20)
+
 const app = express()
+
+process.on('warning', warning => {
+  logger.warn(
+    {
+      name: warning.name,
+      message: warning.message,
+      stack: warning.stack,
+    },
+    'Warning details'
+  )
+})
 
 app.use(RequestLogger.middleware)
 

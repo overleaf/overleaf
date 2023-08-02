@@ -7,6 +7,7 @@
 const Metrics = require('@overleaf/metrics')
 Metrics.initialize('history-v1')
 
+const Events = require('events')
 const BPromise = require('bluebird')
 const express = require('express')
 const cors = require('cors')
@@ -22,6 +23,7 @@ const healthChecks = require('./api/controllers/health_checks')
 const { mongodb, loadGlobalBlobs } = require('./storage')
 const path = require('path')
 
+Events.setMaxListeners(20)
 const app = express()
 module.exports = app
 

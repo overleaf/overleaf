@@ -3,4 +3,3 @@ coverage
 node_modules/
 
 .npmrc
-Dockerfile
