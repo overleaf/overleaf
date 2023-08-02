@@ -4,7 +4,6 @@ const ProjectDetailsHandler = require('../Project/ProjectDetailsHandler')
 const ProjectOptionsHandler = require('../Project/ProjectOptionsHandler')
 const ProjectRootDocManager = require('../Project/ProjectRootDocManager')
 const ProjectUploadManager = require('../Uploads/ProjectUploadManager')
-const FileWriter = require('../../infrastructure/FileWriter')
 const async = require('async')
 const fs = require('fs')
 const util = require('util')
@@ -41,81 +40,76 @@ const TemplatesManager = {
       logger.warn({ err }, 'error getting zip from template API')
       return callback(err)
     })
-    FileWriter.ensureDumpFolderExists(function (err) {
-      if (err) {
-        return callback(err)
-      }
 
-      const projectName = ProjectDetailsHandler.fixProjectName(templateName)
-      const dumpPath = `${settings.path.dumpFolder}/${crypto.randomUUID()}`
-      const writeStream = fs.createWriteStream(dumpPath)
-      const attributes = {
-        fromV1TemplateId: templateId,
-        fromV1TemplateVersionId: templateVersionId,
-      }
-      writeStream.on('close', function () {
-        if (zipReq.response.statusCode !== 200) {
-          logger.warn(
-            { uri: zipUrl, statusCode: zipReq.response.statusCode },
-            'non-success code getting zip from template API'
-          )
-          return callback(new Error('get zip failed'))
-        }
-        ProjectUploadManager.createProjectFromZipArchiveWithName(
-          userId,
-          projectName,
-          dumpPath,
-          attributes,
-          function (err, project) {
-            if (err) {
-              OError.tag(err, 'problem building project from zip', {
-                zipReq,
-              })
-              return callback(err)
-            }
-            async.series(
-              [
-                cb => TemplatesManager._setCompiler(project._id, compiler, cb),
-                cb => TemplatesManager._setImage(project._id, imageName, cb),
-                cb => TemplatesManager._setMainFile(project._id, mainFile, cb),
-                cb =>
-                  TemplatesManager._setBrandVariationId(
-                    project._id,
-                    brandVariationId,
-                    cb
-                  ),
-              ],
-              function (err) {
-                if (err) {
-                  return callback(err)
-                }
-                fs.unlink(dumpPath, function (err) {
-                  if (err) {
-                    return logger.err({ err }, 'error unlinking template zip')
-                  }
-                })
-                const update = {
-                  fromV1TemplateId: templateId,
-                  fromV1TemplateVersionId: templateVersionId,
-                }
-                Project.updateOne(
-                  { _id: project._id },
-                  update,
-                  {},
-                  function (err) {
-                    if (err) {
-                      return callback(err)
-                    }
-                    callback(null, project)
-                  }
-                )
-              }
-            )
-          }
+    const projectName = ProjectDetailsHandler.fixProjectName(templateName)
+    const dumpPath = `${settings.path.dumpFolder}/${crypto.randomUUID()}`
+    const writeStream = fs.createWriteStream(dumpPath)
+    const attributes = {
+      fromV1TemplateId: templateId,
+      fromV1TemplateVersionId: templateVersionId,
+    }
+    writeStream.on('close', function () {
+      if (zipReq.response.statusCode !== 200) {
+        logger.warn(
+          { uri: zipUrl, statusCode: zipReq.response.statusCode },
+          'non-success code getting zip from template API'
         )
-      })
-      zipReq.pipe(writeStream)
+        return callback(new Error('get zip failed'))
+      }
+      ProjectUploadManager.createProjectFromZipArchiveWithName(
+        userId,
+        projectName,
+        dumpPath,
+        attributes,
+        function (err, project) {
+          if (err) {
+            OError.tag(err, 'problem building project from zip', {
+              zipReq,
+            })
+            return callback(err)
+          }
+          async.series(
+            [
+              cb => TemplatesManager._setCompiler(project._id, compiler, cb),
+              cb => TemplatesManager._setImage(project._id, imageName, cb),
+              cb => TemplatesManager._setMainFile(project._id, mainFile, cb),
+              cb =>
+                TemplatesManager._setBrandVariationId(
+                  project._id,
+                  brandVariationId,
+                  cb
+                ),
+            ],
+            function (err) {
+              if (err) {
+                return callback(err)
+              }
+              fs.unlink(dumpPath, function (err) {
+                if (err) {
+                  return logger.err({ err }, 'error unlinking template zip')
+                }
+              })
+              const update = {
+                fromV1TemplateId: templateId,
+                fromV1TemplateVersionId: templateVersionId,
+              }
+              Project.updateOne(
+                { _id: project._id },
+                update,
+                {},
+                function (err) {
+                  if (err) {
+                    return callback(err)
+                  }
+                  callback(null, project)
+                }
+              )
+            }
+          )
+        }
+      )
     })
+    zipReq.pipe(writeStream)
   },
 
   _setCompiler(projectId, compiler, callback) {

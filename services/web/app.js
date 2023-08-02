@@ -44,6 +44,7 @@ const mongoose = require('./app/src/infrastructure/Mongoose')
 const {
   triggerGracefulShutdown,
 } = require('./app/src/infrastructure/GracefulShutdown')
+const FileWriter = require('./app/src/infrastructure/FileWriter')
 
 if (Settings.catchErrors) {
   process.removeAllListeners('uncaughtException')
@@ -51,6 +52,10 @@ if (Settings.catchErrors) {
     logger.error({ err: error }, 'uncaughtException')
   )
 }
+
+// Create ./data/dumpFolder if needed
+FileWriter.ensureDumpFolderExists()
+
 const port = Settings.port || Settings.internal.web.port || 3000
 const host = Settings.internal.web.host || 'localhost'
 if (!module.parent) {

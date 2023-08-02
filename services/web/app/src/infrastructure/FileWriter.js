@@ -57,17 +57,8 @@ class SizeLimitedStream extends Transform {
 }
 
 const FileWriter = {
-  ensureDumpFolderExists(callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    return fs.mkdir(Settings.path.dumpFolder, function (error) {
-      if (error != null && error.code !== 'EEXIST') {
-        // Ignore error about already existing
-        return callback(error)
-      }
-      return callback(null)
-    })
+  ensureDumpFolderExists() {
+    fs.mkdirSync(Settings.path.dumpFolder, { recursive: true })
   },
 
   writeLinesToDisk(identifier, lines, callback) {
@@ -81,20 +72,14 @@ const FileWriter = {
     if (callback == null) {
       callback = function () {}
     }
-    callback = _.once(callback)
     const fsPath = `${
       Settings.path.dumpFolder
     }/${identifier}_${crypto.randomUUID()}`
-    return FileWriter.ensureDumpFolderExists(function (error) {
+    return fs.writeFile(fsPath, content, function (error) {
       if (error != null) {
         return callback(error)
       }
-      return fs.writeFile(fsPath, content, function (error) {
-        if (error != null) {
-          return callback(error)
-        }
-        return callback(null, fsPath)
-      })
+      return callback(null, fsPath)
     })
   },
 
@@ -112,57 +97,47 @@ const FileWriter = {
       Settings.path.dumpFolder
     }/${identifier}_${crypto.randomUUID()}`
 
-    stream.pause()
+    const writeStream = fs.createWriteStream(fsPath)
+    const passThrough = new SizeLimitedStream({
+      maxSizeBytes: options.maxSizeBytes,
+    })
 
-    FileWriter.ensureDumpFolderExists(function (error) {
-      const writeStream = fs.createWriteStream(fsPath)
-
-      if (error != null) {
-        return callback(error)
-      }
-      stream.resume()
-
-      const passThrough = new SizeLimitedStream({
-        maxSizeBytes: options.maxSizeBytes,
+    // if writing fails, we want to consume the bytes from the source, to avoid leaks
+    for (const evt of ['error', 'close']) {
+      writeStream.on(evt, function () {
+        passThrough.unpipe(writeStream)
+        passThrough.resume()
       })
+    }
 
-      // if writing fails, we want to consume the bytes from the source, to avoid leaks
-      for (const evt of ['error', 'close']) {
-        writeStream.on(evt, function () {
-          passThrough.unpipe(writeStream)
-          passThrough.resume()
-        })
+    pipeline(stream, passThrough, writeStream, function (err) {
+      if (
+        options.maxSizeBytes &&
+        passThrough.bytes >= options.maxSizeBytes &&
+        !(err instanceof FileTooLargeError)
+      ) {
+        err = new FileTooLargeError({
+          message: 'stream size limit reached',
+          info: { size: passThrough.bytes },
+        }).withCause(err || {})
       }
-
-      pipeline(stream, passThrough, writeStream, function (err) {
-        if (
-          options.maxSizeBytes &&
-          passThrough.bytes >= options.maxSizeBytes &&
-          !(err instanceof FileTooLargeError)
-        ) {
-          err = new FileTooLargeError({
-            message: 'stream size limit reached',
-            info: { size: passThrough.bytes },
-          }).withCause(err || {})
-        }
-        if (err) {
-          OError.tag(
-            err,
-            '[writeStreamToDisk] something went wrong writing the stream to disk',
-            {
-              identifier,
-              fsPath,
-            }
-          )
-          return callback(err)
-        }
-
-        logger.debug(
-          { identifier, fsPath },
-          '[writeStreamToDisk] write stream finished'
+      if (err) {
+        OError.tag(
+          err,
+          '[writeStreamToDisk] something went wrong writing the stream to disk',
+          {
+            identifier,
+            fsPath,
+          }
         )
-        callback(null, fsPath)
-      })
+        return callback(err)
+      }
+
+      logger.debug(
+        { identifier, fsPath },
+        '[writeStreamToDisk] write stream finished'
+      )
+      callback(null, fsPath)
     })
   },
 
@@ -198,5 +173,7 @@ const FileWriter = {
 }
 
 module.exports = FileWriter
-module.exports.promises = promisifyAll(FileWriter)
+module.exports.promises = promisifyAll(FileWriter, {
+  without: ['ensureDumpFolderExists'],
+})
 module.exports.SizeLimitedStream = SizeLimitedStream

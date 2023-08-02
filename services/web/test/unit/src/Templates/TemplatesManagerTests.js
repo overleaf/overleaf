@@ -61,7 +61,6 @@ describe('TemplatesManager', function () {
       fixProjectName: sinon.stub().returns(this.templateName),
     }
     this.Project = { updateOne: sinon.stub().callsArgWith(3, null) }
-    this.FileWriter = { ensureDumpFolderExists: sinon.stub().callsArg(0) }
     this.FetchUtils = {
       fetchJson: sinon.stub(),
       RequestFailedError,
@@ -76,7 +75,6 @@ describe('TemplatesManager', function () {
         '../Authentication/SessionManager': (this.SessionManager = {
           getLoggedInUserId: sinon.stub(),
         }),
-        '../../infrastructure/FileWriter': this.FileWriter,
         '@overleaf/settings': {
           path: {
             dumpFolder: this.dumpFolder,
@@ -176,10 +174,6 @@ describe('TemplatesManager', function () {
             fromV1TemplateVersionId: this.templateVersionId,
           }
         )
-      })
-
-      it('should ensure that the dump folder exists', function () {
-        return sinon.assert.called(this.FileWriter.ensureDumpFolderExists)
       })
     })
 

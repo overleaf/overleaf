@@ -84,7 +84,6 @@ function _getUrlStream(projectId, data, currentUserId, callback) {
   }
   url = UrlHelper.wrapUrlWithProxy(url)
   const readStream = request.get(url)
-  readStream.pause()
   callback(null, readStream)
 }
 
