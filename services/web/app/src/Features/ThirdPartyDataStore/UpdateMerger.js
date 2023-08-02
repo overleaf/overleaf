@@ -1,17 +1,17 @@
 const { callbackify } = require('util')
 const _ = require('underscore')
 const fsPromises = require('fs/promises')
+const fs = require('fs')
 const logger = require('@overleaf/logger')
 const EditorController = require('../Editor/EditorController')
 const FileTypeManager = require('../Uploads/FileTypeManager')
-const FileWriter = require('../../infrastructure/FileWriter')
 const ProjectEntityHandler = require('../Project/ProjectEntityHandler')
+const crypto = require('crypto')
+const Settings = require('@overleaf/settings')
+const { pipeline } = require('stream/promises')
 
 async function mergeUpdate(userId, projectId, path, updateRequest, source) {
-  const fsPath = await FileWriter.promises.writeStreamToDisk(
-    projectId,
-    updateRequest
-  )
+  const fsPath = await writeUpdateToDisk(projectId, updateRequest)
   try {
     const metadata = await _mergeUpdate(userId, projectId, path, fsPath, source)
     return metadata
@@ -19,9 +19,27 @@ async function mergeUpdate(userId, projectId, path, updateRequest, source) {
     try {
       await fsPromises.unlink(fsPath)
     } catch (err) {
-      logger.err({ projectId, fsPath }, 'error deleting file')
+      logger.err({ err, projectId, fsPath }, 'error deleting file')
     }
   }
+}
+
+async function writeUpdateToDisk(projectId, updateStream) {
+  const fsPath = `${
+    Settings.path.dumpFolder
+  }/${projectId}_${crypto.randomUUID()}`
+  const writeStream = fs.createWriteStream(fsPath)
+  try {
+    await pipeline(updateStream, writeStream)
+  } catch (err) {
+    try {
+      await fsPromises.unlink(fsPath)
+    } catch (err) {
+      logger.error({ err, projectId, fsPath }, 'error deleting file')
+    }
+    throw err
+  }
+  return fsPath
 }
 
 async function _findExistingFileType(projectId, path) {

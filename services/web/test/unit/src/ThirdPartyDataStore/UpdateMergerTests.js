@@ -11,6 +11,8 @@ describe('UpdateMerger :', function () {
   beforeEach(function () {
     this.projectId = 'project_id_here'
     this.userId = 'mock-user-id'
+    this.randomUUID = 'random-uuid'
+    this.dumpPath = '/dump'
 
     this.docPath = this.newDocPath = '/folder/doc.tex'
     this.filePath = this.newFilePath = '/folder/file.png'
@@ -23,7 +25,7 @@ describe('UpdateMerger :', function () {
     this.existingDocs = [{ path: '/main.tex' }, { path: '/folder/other.tex' }]
     this.existingFiles = [{ path: '/figure.pdf' }, { path: '/folder/fig1.pdf' }]
 
-    this.fsPath = '/tmp/file/path'
+    this.fsPath = `${this.dumpPath}/${this.projectId}_${this.randomUUID}`
     this.fileContents = `\\documentclass{article}
 \\usepackage[utf8]{inputenc}
 
@@ -33,10 +35,16 @@ describe('UpdateMerger :', function () {
     this.docLines = this.fileContents.split('\n')
     this.source = 'dropbox'
     this.updateRequest = new Writable()
+    this.writeStream = new Writable()
 
     this.fsPromises = {
       unlink: sinon.stub().resolves(),
       readFile: sinon.stub().withArgs(this.fsPath).resolves(this.fileContents),
+      mkdir: sinon.stub().resolves(),
+    }
+
+    this.fs = {
+      createWriteStream: sinon.stub().returns(this.writeStream),
     }
 
     this.doc = {
@@ -71,10 +79,8 @@ describe('UpdateMerger :', function () {
       },
     }
 
-    this.FileWriter = {
-      promises: {
-        writeStreamToDisk: sinon.stub().resolves(this.fsPath),
-      },
+    this.crypto = {
+      randomUUID: sinon.stub().returns(this.randomUUID),
     }
 
     this.ProjectEntityHandler = {
@@ -86,16 +92,20 @@ describe('UpdateMerger :', function () {
       },
     }
 
-    this.Settings = { path: { dumpPath: 'dump_here' } }
+    this.Settings = { path: { dumpFolder: this.dumpPath } }
+
+    this.stream = { pipeline: sinon.stub().resolves() }
 
     this.UpdateMerger = SandboxedModule.require(MODULE_PATH, {
       requires: {
         'fs/promises': this.fsPromises,
+        fs: this.fs,
         '../Editor/EditorController': this.EditorController,
         '../Uploads/FileTypeManager': this.FileTypeManager,
-        '../../infrastructure/FileWriter': this.FileWriter,
         '../Project/ProjectEntityHandler': this.ProjectEntityHandler,
         '@overleaf/settings': this.Settings,
+        'stream/promises': this.stream,
+        crypto: this.crypto,
       },
     })
   })
