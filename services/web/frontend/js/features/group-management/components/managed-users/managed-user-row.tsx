@@ -98,15 +98,13 @@ export default function ManagedUserRow({
             : 'N/A'}
         </Col>
         <Col xs={2}>
-          <span className="pull-right">
+          <div className="managed-user-security">
             <ManagedUserStatus user={user} />
-            <span className="managed-user-actions">
-              <ManagedUserDropdownButton
-                user={user}
-                openOffboardingModalForUser={openOffboardingModalForUser}
-              />
-            </span>
-          </span>
+            <ManagedUserDropdownButton
+              user={user}
+              openOffboardingModalForUser={openOffboardingModalForUser}
+            />
+          </div>
         </Col>
       </Row>
     </li>

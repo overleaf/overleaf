@@ -20,7 +20,7 @@ export default function ManagedUserDropdownButton({
   }
 
   return (
-    <>
+    <span className="managed-user-actions">
       <ControlledDropdown id={`managed-user-dropdown-${user._id}`}>
         <Dropdown.Toggle
           bsStyle={null}
@@ -48,6 +48,6 @@ export default function ManagedUserDropdownButton({
           )}
         </Dropdown.Menu>
       </ControlledDropdown>
-    </>
+    </span>
   )
 }
