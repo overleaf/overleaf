@@ -81,6 +81,10 @@ class MockResponse {
     }
   }
 
+  writeHead(status) {
+    this.statusCode = status
+  }
+
   send(status, body) {
     if (arguments.length < 2) {
       if (typeof status !== 'number') {

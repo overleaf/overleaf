@@ -33,6 +33,9 @@ module.exports = function (backendGroup) {
       compileBackendClass,
       callback
     ) {
+      if (!clsiCookiesEnabled) {
+        return callback()
+      }
       rclient.get(this.buildKey(projectId, userId), (err, serverId) => {
         if (err) {
           return callback(err)

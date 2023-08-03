@@ -5,6 +5,8 @@ const modulePath = '../../../../app/src/Features/Compile/CompileController.js'
 const SandboxedModule = require('sandboxed-module')
 const MockRequest = require('../helpers/MockRequest')
 const MockResponse = require('../helpers/MockResponse')
+const { Headers } = require('node-fetch')
+const { ReadableString } = require('@overleaf/stream-utils')
 
 describe('CompileController', function () {
   beforeEach(function () {
@@ -29,21 +31,23 @@ describe('CompileController', function () {
     this.settings = {
       apis: {
         clsi: {
-          url: 'clsi.example.com',
+          url: 'http://clsi.example.com',
           defaultBackendClass: 'e2',
         },
         clsi_priority: {
-          url: 'clsi-priority.example.com',
+          url: 'http://clsi-priority.example.com',
         },
       },
       defaultFeatures: {
         compileGroup: 'standard',
         compileTimeout: 60,
       },
+      clsiCookie: {
+        key: 'cookie-key',
+      },
     }
-    this.jar = { cookie: 'stuff' }
     this.ClsiCookieManager = {
-      getCookieJar: sinon.stub().yields(null, this.jar),
+      getServerId: sinon.stub().yields(null, 'clsi-server-id-from-redis'),
     }
     this.SessionManager = {
       getLoggedInUser: sinon.stub().callsArgWith(1, null, this.user),
@@ -51,9 +55,27 @@ describe('CompileController', function () {
       getSessionUser: sinon.stub().returns(this.user),
       isUserLoggedIn: sinon.stub().returns(true),
     }
+    this.pipeline = sinon.stub().callsFake(async (stream, res) => {
+      if (res.callback) res.callback()
+    })
+    this.clsiStream = new ReadableString('{}')
+    this.clsiResponse = {
+      headers: new Headers({
+        'Content-Length': '2',
+        'Content-Type': 'application/json',
+      }),
+    }
+    this.fetchUtils = {
+      fetchStreamWithResponse: sinon.stub().resolves({
+        stream: this.clsiStream,
+        response: this.clsiResponse,
+      }),
+    }
     this.CompileController = SandboxedModule.require(modulePath, {
       requires: {
+        'stream/promises': { pipeline: this.pipeline },
         '@overleaf/settings': this.settings,
+        '@overleaf/fetch-utils': this.fetchUtils,
         request: (this.request = sinon.stub()),
         '../Project/ProjectGetter': (this.ProjectGetter = {}),
         '@overleaf/metrics': (this.Metrics = { inc: sinon.stub() }),
@@ -349,7 +371,6 @@ describe('CompileController', function () {
     beforeEach(function () {
       this.req.params = { Project_id: this.projectId }
 
-      this.req.query = { pdfng: true }
       this.project = { name: 'test namè; 1' }
       this.ProjectGetter.getProject = sinon
         .stub()
@@ -357,8 +378,10 @@ describe('CompileController', function () {
     })
 
     describe('when downloading for embedding', function () {
-      beforeEach(function () {
-        this.CompileController.proxyToClsi = sinon.stub()
+      beforeEach(function (done) {
+        this.CompileController.proxyToClsi = sinon
+          .stub()
+          .callsFake(() => done())
         this.CompileController.downloadPdf(this.req, this.res, this.next)
       })
 
@@ -387,6 +410,7 @@ describe('CompileController', function () {
           .calledWith(
             this.projectId,
             `/project/${this.projectId}/user/${this.user_id}/output/output.pdf`,
+            {},
             this.req,
             this.res,
             this.next
@@ -396,9 +420,11 @@ describe('CompileController', function () {
     })
 
     describe('when the a build-id is provided', function () {
-      beforeEach(function () {
+      beforeEach(function (done) {
         this.req.params.build_id = this.buildId = '1234-5678'
-        this.CompileController.proxyToClsi = sinon.stub()
+        this.CompileController.proxyToClsi = sinon
+          .stub()
+          .callsFake(() => done())
         this.CompileController.downloadPdf(this.req, this.res, this.next)
       })
 
@@ -407,31 +433,12 @@ describe('CompileController', function () {
           .calledWith(
             this.projectId,
             `/project/${this.projectId}/user/${this.user_id}/build/${this.buildId}/output/output.pdf`,
+            {},
             this.req,
             this.res,
             this.next
           )
           .should.equal(true)
-      })
-    })
-
-    describe('when the pdf is not going to be used in pdfjs viewer', function () {
-      it('should check the rate limiter when pdfng is not set', function (done) {
-        this.req.query = {}
-        this.CompileController.proxyToClsi = (projectId, url) => {
-          expect(this.rateLimiter.consume).to.have.been.called
-          done()
-        }
-        this.CompileController.downloadPdf(this.req, this.res)
-      })
-
-      it('should check the rate limiter when pdfng is false', function (done) {
-        this.req.query = { pdfng: false }
-        this.CompileController.proxyToClsi = (projectId, url) => {
-          expect(this.rateLimiter.consume).to.have.been.called
-          done()
-        }
-        this.CompileController.downloadPdf(this.req, this.res)
       })
     })
   })
@@ -464,6 +471,7 @@ describe('CompileController', function () {
         this.CompileController.proxyToClsiWithLimits.should.have.been.calledWith(
           this.submission_id,
           this.expected_url,
+          {},
           {
             compileGroup: 'standard',
             compileBackendClass: 'e2',
@@ -486,6 +494,7 @@ describe('CompileController', function () {
         this.CompileController.proxyToClsiWithLimits.should.have.been.calledWith(
           this.submission_id,
           this.expected_url,
+          {},
           {
             compileGroup: 'special',
             compileBackendClass: 'e2',
@@ -517,10 +526,8 @@ describe('CompileController', function () {
     it('should proxy the request with an imageName', function () {
       expect(this.CompileController.proxyToClsi).to.have.been.calledWith(
         this.projectId,
-        {
-          url: `/project/${this.projectId}/user/${this.user_id}/sync/code`,
-          qs: { file, line, column, imageName },
-        },
+        `/project/${this.projectId}/user/${this.user_id}/sync/code`,
+        { file, line, column, imageName },
         this.req,
         this.res,
         this.next
@@ -551,10 +558,8 @@ describe('CompileController', function () {
     it('should proxy the request with an imageName', function () {
       expect(this.CompileController.proxyToClsi).to.have.been.calledWith(
         this.projectId,
-        {
-          url: `/project/${this.projectId}/user/${this.user_id}/sync/pdf`,
-          qs: { page, h, v, imageName },
-        },
+        `/project/${this.projectId}/user/${this.user_id}/sync/pdf`,
+        { page, h, v, imageName },
         this.req,
         this.res,
         this.next
@@ -564,16 +569,6 @@ describe('CompileController', function () {
 
   describe('proxyToClsi', function () {
     beforeEach(function () {
-      this.request.returns(
-        (this.proxy = {
-          pipe: sinon.stub(),
-          on: sinon.stub(),
-        })
-      )
-      this.upstream = {
-        statusCode: 204,
-        headers: { mock: 'header' },
-      }
       this.req.method = 'mock-method'
       this.req.headers = {
         Mock: 'Headers',
@@ -585,7 +580,8 @@ describe('CompileController', function () {
 
     describe('old pdf viewer', function () {
       describe('user with standard priority', function () {
-        beforeEach(function () {
+        beforeEach(function (done) {
+          this.res.callback = done
           this.CompileManager.getProjectCompileLimits = sinon
             .stub()
             .callsArgWith(1, null, {
@@ -595,6 +591,7 @@ describe('CompileController', function () {
           this.CompileController.proxyToClsi(
             this.projectId,
             (this.url = '/test'),
+            { query: 'foo' },
             this.req,
             this.res,
             this.next
@@ -602,43 +599,45 @@ describe('CompileController', function () {
         })
 
         it('should open a request to the CLSI', function () {
-          this.request
-            .calledWith({
-              jar: this.jar,
-              qs: { compileGroup: 'standard', compileBackendClass: 'e2' },
-              method: this.req.method,
-              url: `${this.settings.apis.clsi.url}${this.url}`,
-              timeout: 60 * 1000,
-            })
-            .should.equal(true)
+          this.fetchUtils.fetchStreamWithResponse.should.have.been.calledWith(
+            `${this.settings.apis.clsi.url}${this.url}?compileGroup=standard&compileBackendClass=e2&query=foo`
+          )
         })
 
         it('should pass the request on to the client', function () {
-          this.proxy.pipe.calledWith(this.res).should.equal(true)
-        })
-
-        it('should bind an error handle to the request proxy', function () {
-          this.proxy.on.calledWith('error').should.equal(true)
+          this.pipeline.should.have.been.calledWith(this.clsiStream, this.res)
         })
       })
 
       describe('user with priority compile', function () {
-        beforeEach(function () {
+        beforeEach(function (done) {
+          this.res.callback = done
           this.CompileManager.getProjectCompileLimits = sinon
             .stub()
-            .callsArgWith(1, null, { compileGroup: 'priority' })
+            .callsArgWith(1, null, {
+              compileGroup: 'priority',
+              compileBackendClass: 'c2d',
+            })
           this.CompileController.proxyToClsi(
             this.projectId,
             (this.url = '/test'),
+            {},
             this.req,
             this.res,
             this.next
           )
         })
+
+        it('should open a request to the CLSI', function () {
+          this.fetchUtils.fetchStreamWithResponse.should.have.been.calledWith(
+            `${this.settings.apis.clsi.url}${this.url}?compileGroup=priority&compileBackendClass=c2d`
+          )
+        })
       })
 
       describe('user with standard priority via query string', function () {
-        beforeEach(function () {
+        beforeEach(function (done) {
+          this.res.callback = done
           this.req.query = { compileGroup: 'standard' }
           this.CompileManager.getProjectCompileLimits = sinon
             .stub()
@@ -649,6 +648,7 @@ describe('CompileController', function () {
           this.CompileController.proxyToClsi(
             this.projectId,
             (this.url = '/test'),
+            {},
             this.req,
             this.res,
             this.next
@@ -656,28 +656,19 @@ describe('CompileController', function () {
         })
 
         it('should open a request to the CLSI', function () {
-          this.request
-            .calledWith({
-              jar: this.jar,
-              qs: { compileGroup: 'standard', compileBackendClass: 'e2' },
-              method: this.req.method,
-              url: `${this.settings.apis.clsi.url}${this.url}`,
-              timeout: 60 * 1000,
-            })
-            .should.equal(true)
+          this.fetchUtils.fetchStreamWithResponse.should.have.been.calledWith(
+            `${this.settings.apis.clsi.url}${this.url}?compileGroup=standard&compileBackendClass=e2`
+          )
         })
 
         it('should pass the request on to the client', function () {
-          this.proxy.pipe.calledWith(this.res).should.equal(true)
-        })
-
-        it('should bind an error handle to the request proxy', function () {
-          this.proxy.on.calledWith('error').should.equal(true)
+          this.pipeline.should.have.been.calledWith(this.clsiStream, this.res)
         })
       })
 
       describe('user with non-existent priority via query string', function () {
-        beforeEach(function () {
+        beforeEach(function (done) {
+          this.res.callback = done
           this.req.query = { compileGroup: 'foobar' }
           this.CompileManager.getProjectCompileLimits = sinon
             .stub()
@@ -688,6 +679,7 @@ describe('CompileController', function () {
           this.CompileController.proxyToClsi(
             this.projectId,
             (this.url = '/test'),
+            {},
             this.req,
             this.res,
             this.next
@@ -695,20 +687,15 @@ describe('CompileController', function () {
         })
 
         it('should proxy to the standard url', function () {
-          this.request
-            .calledWith({
-              jar: this.jar,
-              qs: { compileGroup: 'standard', compileBackendClass: 'e2' },
-              method: this.req.method,
-              url: `${this.settings.apis.clsi.url}${this.url}`,
-              timeout: 60 * 1000,
-            })
-            .should.equal(true)
+          this.fetchUtils.fetchStreamWithResponse.should.have.been.calledWith(
+            `${this.settings.apis.clsi.url}${this.url}?compileGroup=standard&compileBackendClass=e2`
+          )
         })
       })
 
       describe('user with build parameter via query string', function () {
-        beforeEach(function () {
+        beforeEach(function (done) {
+          this.res.callback = done
           this.CompileManager.getProjectCompileLimits = sinon
             .stub()
             .callsArgWith(1, null, {
@@ -719,6 +706,7 @@ describe('CompileController', function () {
           this.CompileController.proxyToClsi(
             this.projectId,
             (this.url = '/test'),
+            {},
             this.req,
             this.res,
             this.next
@@ -726,103 +714,9 @@ describe('CompileController', function () {
         })
 
         it('should proxy to the standard url without the build parameter', function () {
-          this.request
-            .calledWith({
-              jar: this.jar,
-              qs: { compileGroup: 'standard', compileBackendClass: 'e2' },
-              method: this.req.method,
-              url: `${this.settings.apis.clsi.url}${this.url}`,
-              timeout: 60 * 1000,
-            })
-            .should.equal(true)
-        })
-      })
-    })
-
-    describe('new pdf viewer', function () {
-      beforeEach(function () {
-        this.req.query = { pdfng: true }
-      })
-      describe('user with standard priority', function () {
-        beforeEach(function () {
-          this.CompileManager.getProjectCompileLimits = sinon
-            .stub()
-            .callsArgWith(1, null, {
-              compileGroup: 'standard',
-              compileBackendClass: 'e2',
-            })
-          this.CompileController.proxyToClsi(
-            this.projectId,
-            (this.url = '/test'),
-            this.req,
-            this.res,
-            this.next
+          this.fetchUtils.fetchStreamWithResponse.should.have.been.calledWith(
+            `${this.settings.apis.clsi.url}${this.url}?compileGroup=standard&compileBackendClass=e2`
           )
-        })
-
-        it('should open a request to the CLSI', function () {
-          this.request
-            .calledWith({
-              jar: this.jar,
-              qs: { compileGroup: 'standard', compileBackendClass: 'e2' },
-              method: this.req.method,
-              url: `${this.settings.apis.clsi.url}${this.url}`,
-              timeout: 60 * 1000,
-              headers: {
-                Range: '123-456',
-                'If-Range': 'abcdef',
-                'If-Modified-Since': 'Mon, 15 Dec 2014 15:23:56 GMT',
-              },
-            })
-            .should.equal(true)
-        })
-
-        it('should pass the request on to the client', function () {
-          this.proxy.pipe.calledWith(this.res).should.equal(true)
-        })
-
-        it('should bind an error handle to the request proxy', function () {
-          this.proxy.on.calledWith('error').should.equal(true)
-        })
-      })
-
-      describe('user with build parameter via query string', function () {
-        beforeEach(function () {
-          this.CompileManager.getProjectCompileLimits = sinon
-            .stub()
-            .callsArgWith(1, null, {
-              compileGroup: 'standard',
-              compileBackendClass: 'e2',
-            })
-          this.req.query = { build: 1234, pdfng: true }
-          this.CompileController.proxyToClsi(
-            this.projectId,
-            (this.url = '/test'),
-            this.req,
-            this.res,
-            this.next
-          )
-        })
-
-        it('should proxy to the standard url with the build parameter', function () {
-          this.request
-            .calledWith({
-              jar: this.jar,
-              method: this.req.method,
-              qs: {
-                build: 1234,
-                compileGroup: 'standard',
-                compileBackendClass: 'e2',
-              },
-              url: `${this.settings.apis.clsi.url}${this.url}`,
-              timeout: 60 * 1000,
-              headers: {
-                Range: '123-456',
-                'If-Range': 'abcdef',
-                'If-Modified-Since': 'Mon, 15 Dec 2014 15:23:56 GMT',
-              },
-            })
-            .should.equal(true)
         })
       })
     })
@@ -872,6 +766,7 @@ describe('CompileController', function () {
         this.CompileController.proxyToClsi,
         this.projectId,
         `/project/${this.projectId}/output/output.pdf`,
+        {},
         this.req,
         this.res
       )
@@ -880,6 +775,7 @@ describe('CompileController', function () {
         .calledWith(
           this.projectId,
           `/project/${this.projectId}/output/output.pdf`,
+          {},
           this.req,
           this.res
         )

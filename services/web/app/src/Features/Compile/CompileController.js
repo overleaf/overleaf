@@ -1,12 +1,13 @@
 let CompileController
-const { URL } = require('url')
+const { URL, URLSearchParams } = require('url')
+const { pipeline } = require('stream/promises')
+const { Cookie } = require('tough-cookie')
 const OError = require('@overleaf/o-error')
 const Metrics = require('@overleaf/metrics')
 const ProjectGetter = require('../Project/ProjectGetter')
 const CompileManager = require('./CompileManager')
 const ClsiManager = require('./ClsiManager')
 const logger = require('@overleaf/logger')
-const request = require('request')
 const Settings = require('@overleaf/settings')
 const SessionManager = require('../Authentication/SessionManager')
 const { RateLimiter } = require('../../infrastructure/RateLimiter')
@@ -17,6 +18,10 @@ const Path = require('path')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const { callbackify } = require('../../util/promises')
+const {
+  fetchStreamWithResponse,
+  RequestFailedError,
+} = require('@overleaf/fetch-utils')
 
 const COMPILE_TIMEOUT_MS = 10 * 60 * 1000
 
@@ -274,24 +279,19 @@ module.exports = CompileController = {
   downloadPdf(req, res, next) {
     Metrics.inc('pdf-downloads')
     const projectId = req.params.Project_id
-    const isPdfjsPartialDownload = req.query?.pdfng
     const rateLimit = function (callback) {
-      if (isPdfjsPartialDownload) {
-        callback(null, true)
-      } else {
-        pdfDownloadRateLimiter
-          .consume(req.ip)
-          .then(() => {
-            callback(null, true)
-          })
-          .catch(err => {
-            if (err instanceof Error) {
-              callback(err)
-            } else {
-              callback(null, false)
-            }
-          })
-      }
+      pdfDownloadRateLimiter
+        .consume(req.ip)
+        .then(() => {
+          callback(null, true)
+        })
+        .catch(err => {
+          if (err instanceof Error) {
+            callback(err)
+          } else {
+            callback(null, false)
+          }
+        })
     }
 
     ProjectGetter.getProject(projectId, { name: 1 }, function (err, project) {
@@ -328,7 +328,7 @@ module.exports = CompileController = {
               req.params.build_id,
               'output.pdf'
             )
-            CompileController.proxyToClsi(projectId, url, req, res, next)
+            CompileController.proxyToClsi(projectId, url, {}, req, res, next)
           })
         }
       })
@@ -374,7 +374,7 @@ module.exports = CompileController = {
         return
       }
       const url = `/project/${projectId}/output/output.pdf`
-      CompileController.proxyToClsi(projectId, url, req, res, next)
+      CompileController.proxyToClsi(projectId, url, {}, req, res, next)
     })
   },
 
@@ -390,7 +390,7 @@ module.exports = CompileController = {
         req.params.build_id,
         req.params.file
       )
-      CompileController.proxyToClsi(projectId, url, req, res, next)
+      CompileController.proxyToClsi(projectId, url, {}, req, res, next)
     })
   },
 
@@ -412,6 +412,7 @@ module.exports = CompileController = {
     CompileController.proxyToClsiWithLimits(
       submissionId,
       url,
+      {},
       limits,
       req,
       res,
@@ -464,8 +465,14 @@ module.exports = CompileController = {
         if (error) return next(error)
 
         const url = CompileController._getUrl(projectId, userId, 'sync/pdf')
-        const destination = { url, qs: { page, h, v, imageName } }
-        CompileController.proxyToClsi(projectId, destination, req, res, next)
+        CompileController.proxyToClsi(
+          projectId,
+          url,
+          { page, h, v, imageName },
+          req,
+          res,
+          next
+        )
       })
     })
   },
@@ -499,13 +506,19 @@ module.exports = CompileController = {
         if (error) return next(error)
 
         const url = CompileController._getUrl(projectId, userId, 'sync/code')
-        const destination = { url, qs: { file, line, column, imageName } }
-        CompileController.proxyToClsi(projectId, destination, req, res, next)
+        CompileController.proxyToClsi(
+          projectId,
+          url,
+          { file, line, column, imageName },
+          req,
+          res,
+          next
+        )
       })
     })
   },
 
-  proxyToClsi(projectId, url, req, res, next) {
+  proxyToClsi(projectId, url, qs, req, res, next) {
     CompileManager.getProjectCompileLimits(projectId, function (error, limits) {
       if (error) {
         return next(error)
@@ -513,6 +526,7 @@ module.exports = CompileController = {
       CompileController.proxyToClsiWithLimits(
         projectId,
         url,
+        qs,
         limits,
         req,
         res,
@@ -521,60 +535,44 @@ module.exports = CompileController = {
     })
   },
 
-  proxyToClsiWithLimits(projectId, url, limits, req, res, next) {
+  proxyToClsiWithLimits(projectId, url, qs, limits, req, res, next) {
     _getPersistenceOptions(
       req,
       projectId,
       limits.compileGroup,
       limits.compileBackendClass,
       (err, persistenceOptions) => {
-        let qs
         if (err) {
           OError.tag(err, 'error getting cookie jar for clsi request')
           return next(err)
         }
-        // expand any url parameter passed in as {url:..., qs:...}
-        if (typeof url === 'object') {
-          ;({ url, qs } = url)
-        }
-        const compilerUrl = Settings.apis.clsi.url
-        url = `${compilerUrl}${url}`
-        const oneMinute = 60 * 1000
-        // the base request
-        const options = {
-          url,
+        url = new URL(`${Settings.apis.clsi.url}${url}`)
+        url.search = new URLSearchParams({
+          ...persistenceOptions.qs,
+          ...qs,
+        }).toString()
+        fetchStreamWithResponse(url.href, {
           method: req.method,
-          timeout: oneMinute,
-          ...persistenceOptions,
-        }
-        // add any provided query string
-        if (qs != null) {
-          options.qs = Object.assign(options.qs || {}, qs)
-        }
-        // if we have a build parameter, pass it through to the clsi
-        if (req.query?.pdfng && req.query?.build != null) {
-          // only for new pdf viewer
-          if (options.qs == null) {
-            options.qs = {}
-          }
-          options.qs.build = req.query.build
-        }
-        // if we are byte serving pdfs, pass through If-* and Range headers
-        // do not send any others, there's a proxying loop if Host: is passed!
-        if (req.query?.pdfng) {
-          const newHeaders = {}
-          for (const h in req.headers) {
-            if (/^(If-|Range)/i.test(h)) {
-              newHeaders[h] = req.headers[h]
+          signal: AbortSignal.timeout(60 * 1000),
+          headers: persistenceOptions.headers,
+        })
+          .then(({ stream, response }) => {
+            for (const key of ['Content-Length', 'Content-Type']) {
+              res.setHeader(key, response.headers.get(key))
             }
-          }
-          options.headers = newHeaders
-        }
-        const proxy = request(options)
-        proxy.pipe(res)
-        proxy.on('error', error =>
-          logger.warn({ err: error, url }, 'CLSI proxy error')
-        )
+            res.writeHead(response.status)
+            return pipeline(stream, res)
+          })
+          .catch(err => {
+            if (!res.headersSent) {
+              if (err instanceof RequestFailedError) {
+                res.sendStatus(err.response.status)
+              } else {
+                res.sendStatus(500)
+              }
+            }
+            logger.warn({ err, projectId, url }, 'CLSI proxy error')
+          })
       }
     )
   },
@@ -613,15 +611,29 @@ function _getPersistenceOptions(
   const { clsiserverid } = req.query
   const userId = SessionManager.getLoggedInUserId(req)
   if (clsiserverid && typeof clsiserverid === 'string') {
-    callback(null, { qs: { clsiserverid, compileGroup, compileBackendClass } })
+    callback(null, {
+      qs: { clsiserverid, compileGroup, compileBackendClass },
+      headers: {},
+    })
   } else {
-    ClsiCookieManager.getCookieJar(
+    ClsiCookieManager.getServerId(
       projectId,
       userId,
       compileGroup,
       compileBackendClass,
-      (err, jar) => {
-        callback(err, { jar, qs: { compileGroup, compileBackendClass } })
+      (err, clsiServerId) => {
+        if (err) return callback(err)
+        callback(null, {
+          qs: { compileGroup, compileBackendClass },
+          headers: clsiServerId
+            ? {
+                Cookie: new Cookie({
+                  key: Settings.clsiCookie.key,
+                  value: clsiServerId,
+                }).cookieString(),
+              }
+            : {},
+        })
       }
     )
   }

@@ -59,9 +59,6 @@ async function createNewUser(attributes, options = {}) {
   Object.assign(user, attributes)
 
   user.ace.syntaxValidation = true
-  if (user.featureSwitches != null) {
-    user.featureSwitches.pdfng = true
-  }
 
   const reversedHostname = user.email.split('@')[1].split('').reverse().join('')
 
