@@ -138,8 +138,8 @@ async function plansPage(req, res) {
 }
 
 /**
- * @param {import('express').Request} req
- * @param {import('express').Response} res
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
  * @returns {Promise<void>}
  */
 async function paymentPage(req, res) {
@@ -208,8 +208,8 @@ function formatGroupPlansDataForDash() {
 }
 
 /**
- * @param {import('express').Request} req
- * @param {import('express').Response} res
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
  * @returns {Promise<void>}
  */
 async function userSubscriptionPage(req, res) {
@@ -246,13 +246,9 @@ async function userSubscriptionPage(req, res) {
 
   const groupPlansDataForDash = formatGroupPlansDataForDash()
 
-  // display the Group Settings button only to admins of group subscriptions with the Managed Users feature available
   const groupSettingsEnabledFor = (managedGroupSubscriptions || [])
-    .filter(
-      subscription =>
-        ManagedUsersManager.hasManagedUsersFeature(subscription) &&
-        (subscription.admin_id._id || subscription.admin_id).toString() ===
-          user._id.toString()
+    .filter(subscription =>
+      ManagedUsersManager.hasManagedUsersFeature(subscription)
     )
     .map(subscription => subscription._id.toString())
 
@@ -403,8 +399,8 @@ async function createSubscription(req, res) {
 }
 
 /**
- * @param {import('express').Request} req
- * @param {import('express').Response} res
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
  * @returns {Promise<void>}
  */
 async function successfulSubscription(req, res) {
@@ -444,9 +440,9 @@ function cancelSubscription(req, res, next) {
 }
 
 /**
- * @param {import('express').Request} req
- * @param {import('express').Response} res
- * @param {import('express').NextFunction} next
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ * @param {import("express").NextFunction} next
  * @returns {Promise<void>}
  */
 function canceledSubscription(req, res, next) {
