@@ -114,9 +114,7 @@ export const enterNode = (
       // This should already be in `items`
       return
     }
-    const name =
-      command.getChild('OptionalArgument')?.getChild('ShortOptionalArg') ??
-      command.getChild('SectioningArgument')?.getChild('LongArg')
+    const name = command.getChild('SectioningArgument')?.getChild('LongArg')
 
     if (name == null || command == null) {
       return

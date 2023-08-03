@@ -435,13 +435,13 @@ describe('CodeMirror LaTeX-FileOutline', function () {
       view = makeView(content)
     })
 
-    it('should use the optional argument as title', function () {
+    it('should use the long argument as title', function () {
       const outline = getOutline(view)
       expect(outline).to.deep.equal([
         {
           from: 0,
           to: 30,
-          title: 'short title',
+          title: 'section',
           line: 1,
           level: SECTION_LEVEL,
         },
