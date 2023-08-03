@@ -16,7 +16,7 @@ export function buildHighlightElement(highlight, wrapper) {
 
   const element = document.createElement('div')
   element.style.left = Math.floor(pageView.div.offsetLeft + left) + 'px'
-  element.style.top = Math.floor(pageView.div.offsetTop + top + 10) + 'px'
+  element.style.top = Math.floor(pageView.div.offsetTop + top) + 'px'
   element.style.width = Math.ceil(right - left) + 'px'
   element.style.height = Math.ceil(bottom - top) + 'px'
   element.style.backgroundColor = 'rgba(255,255,0)'
