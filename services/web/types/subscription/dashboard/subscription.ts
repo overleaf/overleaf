@@ -40,6 +40,10 @@ type Recurly = {
   pendingTotalLicenses?: number
 }
 
+export type GroupPolicy = {
+  [policy: string]: boolean
+}
+
 export type Subscription = {
   _id: string
   admin_id: string
@@ -47,6 +51,7 @@ export type Subscription = {
   member_ids: string[]
   invited_emails: string[]
   groupPlan: boolean
+  groupPolicy?: GroupPolicy
   membersLimit: number
   teamInvites: object[]
   planCode: string

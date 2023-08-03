@@ -8,6 +8,8 @@ const {
   UserNotFoundError,
   SubscriptionNotFoundError,
 } = require('../Errors/Errors')
+const UserGetter = require('../User/UserGetter')
+const UserUpdater = require('../User/UserUpdater')
 
 /**
  * This module contains functions for handling managed users in a
@@ -37,10 +39,38 @@ async function enableManagedUsers(subscriptionId) {
 }
 
 /**
+ * Disables managed users for a given subscription by removing the
+ * group policy and deleting enrolment information for all managed users.
+ * @async
+ * @function
+ * @param {string} subscriptionId - The ID of the subscription to disable
+ *   managed users for.
+ * @returns {Promise<void>} - A Promise that resolves when the subscription and
+ *   users have been updated.
+ */
+async function disableManagedUsers(subscriptionId) {
+  const subscription = await Subscription.findById(subscriptionId).exec()
+
+  for (const userId of subscription.member_ids || []) {
+    const user = await UserGetter.promises.getUser(userId, { enrollment: 1 })
+    if (
+      user.enrollment?.managedBy?.toString() === subscription._id.toString()
+    ) {
+      await UserUpdater.promises.updateUser(userId, {
+        $unset: { enrollment: 1 },
+      })
+    }
+  }
+
+  subscription.groupPolicy = undefined
+  await subscription.save()
+}
+
+/**
  * Retrieves the group policy for a user enrolled in a managed group.
  * @async
  * @function
- * @param {Object} user - The user object to retrieve the group policy for.
+ * @param {Object} requestedUser - The user object to retrieve the group policy for.
  * @returns {Promise<Object>} - A Promise that resolves with the group policy
  *   and subscription objects for the user's enrollment, or null if it does not exist.
  */
@@ -118,10 +148,12 @@ async function enrollInSubscription(userId, subscription) {
 module.exports = {
   promises: {
     enableManagedUsers,
+    disableManagedUsers,
     getEnrollmentForUser,
     enrollInSubscription,
   },
   enableManagedUsers: callbackify(enableManagedUsers),
   getEnrollmentForUser: callbackify(getEnrollmentForUser),
   enrollInSubscription: callbackify(enrollInSubscription),
+  disableManagedUsers: callbackify(disableManagedUsers),
 }
