@@ -14,19 +14,6 @@ module.exports = {
     baseQuery: {
       groupPlan: true,
     },
-    translations: {
-      title: 'group_subscription',
-      subtitle: 'members_management',
-      remove: 'remove_from_group',
-    },
-    pathsFor(id) {
-      return {
-        addMember: `/manage/groups/${id}/invites`,
-        removeMember: `/manage/groups/${id}/user`,
-        removeInvite: `/manage/groups/${id}/invites`,
-        exportMembers: `/manage/groups/${id}/members/export`,
-      }
-    },
   },
 
   team: {
@@ -54,16 +41,20 @@ module.exports = {
     baseQuery: {
       groupPlan: true,
     },
-    translations: {
-      title: 'group_subscription',
-      subtitle: 'managers_management',
-      remove: 'remove_manager',
+  },
+
+  groupAdmin: {
+    modelName: 'Subscription',
+    fields: {
+      primaryKey: '_id',
+      read: ['admin_id'],
+      write: 'admin_id',
+      access: 'admin_id',
+      membership: 'admin_id',
+      name: 'teamName',
     },
-    pathsFor(id) {
-      return {
-        addMember: `/manage/groups/${id}/managers`,
-        removeMember: `/manage/groups/${id}/managers`,
-      }
+    baseQuery: {
+      groupPlan: true,
     },
   },
 
@@ -77,16 +68,9 @@ module.exports = {
       membership: 'member_ids',
       name: 'name',
     },
-    translations: {
-      title: 'institution_account',
-      subtitle: 'managers_management',
-      remove: 'remove_manager',
-    },
     pathsFor(id) {
       return {
         index: `/manage/institutions/${id}/managers`,
-        addMember: `/manage/institutions/${id}/managers`,
-        removeMember: `/manage/institutions/${id}/managers`,
       }
     },
   },
@@ -101,16 +85,9 @@ module.exports = {
       membership: 'member_ids',
       name: 'name',
     },
-    translations: {
-      title: 'publisher_account',
-      subtitle: 'managers_management',
-      remove: 'remove_manager',
-    },
     pathsFor(id) {
       return {
         index: `/manage/publishers/${id}/managers`,
-        addMember: `/manage/publishers/${id}/managers`,
-        removeMember: `/manage/publishers/${id}/managers`,
       }
     },
   },

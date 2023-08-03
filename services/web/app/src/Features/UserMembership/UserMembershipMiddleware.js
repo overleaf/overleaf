@@ -64,6 +64,17 @@ const UserMembershipMiddleware = {
     ]),
   ],
 
+  requireGroupAdminAccess: [
+    AuthenticationController.requireLogin(),
+    fetchEntityConfig('groupAdmin'),
+    fetchEntity(),
+    requireEntity(),
+    allowAccessIfAny([
+      UserMembershipAuthorization.hasEntityAccess(),
+      UserMembershipAuthorization.hasStaffAccess('groupManagement'),
+    ]),
+  ],
+
   requireInstitutionMetricsAccess: [
     AuthenticationController.requireLogin(),
     fetchEntityConfig('institution'),
@@ -222,12 +233,11 @@ function fetchEntityConfig(entityName) {
 // fetch the entity with id and config, and set it in the request
 function fetchEntity() {
   return expressify(async (req, res, next) => {
-    const entity =
+    req.entity =
       await UserMembershipHandler.promises.getEntityWithoutAuthorizationCheck(
         req.params.id,
         req.entityConfig
       )
-    req.entity = entity
     next()
   })
 }
