@@ -312,7 +312,7 @@
     "glob": "^7.1.6",
     "handlebars-loader": "^1.7.3",
     "html-webpack-plugin": "^5.5.1",
-    "i18next-scanner": "^3.0.0",
+    "i18next-scanner": "^4.3.0",
     "jsdom": "^19.0.0",
     "jsdom-global": "^3.0.2",
     "karma": "^6.3.17",
