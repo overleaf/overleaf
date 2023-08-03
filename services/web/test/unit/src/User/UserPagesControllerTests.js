@@ -44,8 +44,8 @@ describe('UserPagesController', function () {
         },
       ],
       refProviders: {
-        mendeley: true,
-        zotero: true,
+        mendeley: { encrypted: 'aaaa' },
+        zotero: { encrypted: 'bbbb' },
       },
     }
 
@@ -309,6 +309,17 @@ describe('UserPagesController', function () {
       this.res.render = (page, opts) => {
         opts.projectSyncSuccessMessage.should.equal('Some Sync Success')
         expect(this.req.session.projectSyncSuccessMessage).to.not.exist
+        return done()
+      }
+      return this.UserPagesController.settingsPage(this.req, this.res)
+    })
+
+    it('should cast refProviders to booleans', function (done) {
+      this.res.render = function (page, opts) {
+        expect(opts.user.refProviders).to.deep.equal({
+          mendeley: true,
+          zotero: true,
+        })
         return done()
       }
       return this.UserPagesController.settingsPage(this.req, this.res)

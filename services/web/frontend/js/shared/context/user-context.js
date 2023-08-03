@@ -25,8 +25,8 @@ UserContext.Provider.propTypes = {
         compileTimeout: PropTypes.number,
       }),
       refProviders: PropTypes.shape({
-        mendeley: PropTypes.any,
-        zotero: PropTypes.any,
+        mendeley: PropTypes.boolean,
+        zotero: PropTypes.boolean,
       }),
     }),
   }),

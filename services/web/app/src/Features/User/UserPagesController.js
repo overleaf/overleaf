@@ -101,8 +101,8 @@ async function settingsPage(req, res) {
         references: user.features.references,
       },
       refProviders: {
-        mendeley: user.refProviders?.mendeley,
-        zotero: user.refProviders?.zotero,
+        mendeley: Boolean(user.refProviders?.mendeley),
+        zotero: Boolean(user.refProviders?.zotero),
       },
     },
     hasPassword: !!user.hashedPassword,
