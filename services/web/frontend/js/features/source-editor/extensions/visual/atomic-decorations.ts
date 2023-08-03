@@ -165,67 +165,6 @@ export const atomicDecorations = (options: Options) => {
       }[]
     } = { from: 0, to: 0, authors: [] }
 
-    // find the positions of the title and author in the preamble
-    tree.iterate({
-      enter(nodeRef) {
-        if (nodeRef.type.is('DocumentEnvironment')) {
-          // Attempt to include \begin{document} in the preamble
-          preamble.to = nodeRef.node.getChild('Content')?.from ?? nodeRef.from
-          return false
-        } else if (nodeRef.type.is('Title')) {
-          const node = nodeRef.node.getChild('TextArgument')
-          if (node) {
-            const content = state.sliceDoc(node.from, node.to)
-            preamble.title = { node, content }
-          }
-        } else if (nodeRef.type.is('Author')) {
-          const node = nodeRef.node.getChild('TextArgument')
-          if (node) {
-            const content = state.sliceDoc(node.from, node.to)
-            preamble.authors.push({ node, content })
-          }
-        }
-      },
-    })
-    if (preamble.to > 0) {
-      // hide the preamble. We use selectionIntersects directly, so that it also
-      // expands in readOnly mode.
-      const endLine = state.doc.lineAt(preamble.to).number
-      for (let lineNumber = 1; lineNumber <= endLine; ++lineNumber) {
-        const line = state.doc.line(lineNumber)
-        const classes = ['ol-cm-preamble-line']
-        if (lineNumber === 1) {
-          classes.push('ol-cm-environment-first-line')
-        }
-        if (lineNumber === endLine) {
-          classes.push('ol-cm-environment-last-line')
-        }
-        decorations.push(
-          Decoration.line({
-            class: classes.join(' '),
-          }).range(line.from)
-        )
-      }
-
-      const isExpanded = selectionIntersects(state.selection, preamble)
-      if (!isExpanded) {
-        decorations.push(
-          Decoration.replace({
-            widget: new PreambleWidget(preamble.to, isExpanded),
-            block: true,
-          }).range(0, preamble.to)
-        )
-      } else {
-        decorations.push(
-          Decoration.widget({
-            widget: new PreambleWidget(preamble.to, isExpanded),
-            block: true,
-            side: -1,
-          }).range(0)
-        )
-      }
-    }
-
     const startListEnvironment = (envName: ListEnvironmentName) => {
       if (currentListEnvironment) {
         listEnvironmentStack.push(currentListEnvironment)
@@ -242,6 +181,27 @@ export const atomicDecorations = (options: Options) => {
 
     tree.iterate({
       enter(nodeRef) {
+        if (nodeRef.node.type.is('Maketitle')) {
+          preamble.to = nodeRef.node.from
+        } else if (nodeRef.node.type.is('DocumentEnvironment')) {
+          preamble.to =
+            nodeRef.node.getChild('Content')?.from ?? nodeRef.node.from
+        } else if (nodeRef.node.type.is('Title')) {
+          const node = nodeRef.node.getChild('TextArgument')
+          if (node) {
+            const content = state.sliceDoc(node.from, node.to)
+            preamble.title = { node, content }
+            preamble.to = nodeRef.node.to
+          }
+        } else if (nodeRef.node.type.is('Author')) {
+          const node = nodeRef.node.getChild('TextArgument')
+          if (node) {
+            const content = state.sliceDoc(node.from, node.to)
+            preamble.authors.push({ node, content })
+            preamble.to = nodeRef.node.to
+          }
+        }
+
         if (nodeRef.type.is('$Environment')) {
           const envName = getUnstarredEnvironmentName(nodeRef.node, state)
           const hideInEnvironmentTypes = [
@@ -1048,6 +1008,44 @@ export const atomicDecorations = (options: Options) => {
       },
     })
 
+    if (preamble.to > 0) {
+      // hide the preamble. We use selectionIntersects directly, so that it also
+      // expands in readOnly mode.
+      const endLine = state.doc.lineAt(preamble.to).number
+      for (let lineNumber = 1; lineNumber <= endLine; ++lineNumber) {
+        const line = state.doc.line(lineNumber)
+        const classes = ['ol-cm-preamble-line']
+        if (lineNumber === 1) {
+          classes.push('ol-cm-environment-first-line')
+        }
+        if (lineNumber === endLine) {
+          classes.push('ol-cm-environment-last-line')
+        }
+        decorations.push(
+          Decoration.line({
+            class: classes.join(' '),
+          }).range(line.from)
+        )
+      }
+
+      const isExpanded = selectionIntersects(state.selection, preamble)
+      if (!isExpanded) {
+        decorations.push(
+          Decoration.replace({
+            widget: new PreambleWidget(preamble.to, isExpanded),
+            block: true,
+          }).range(0, preamble.to)
+        )
+      } else {
+        decorations.push(
+          Decoration.widget({
+            widget: new PreambleWidget(preamble.to, isExpanded),
+            block: true,
+            side: -1,
+          }).range(0)
+        )
+      }
+    }
     return Decoration.set(decorations, true)
   }
 
