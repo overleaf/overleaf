@@ -168,6 +168,45 @@ async function updateSplitTestBadgeInfo(name, badgeInfo) {
   return _saveSplitTest(splitTest)
 }
 
+async function replaceSplitTests(tests) {
+  _checkEnvIsSafe('replace')
+
+  try {
+    await _deleteSplitTests()
+    return await SplitTest.create(tests)
+  } catch (error) {
+    throw OError.tag(error, 'Failed to replace all split tests', { tests })
+  }
+}
+
+async function mergeSplitTests(incomingTests, overWriteLocal) {
+  _checkEnvIsSafe('merge')
+
+  // this is required as the query returns models, and we need all the items to be objects,
+  //   similar to the ones we recieve as incomingTests
+  const localTests = await SplitTest.find({}).lean().exec()
+
+  let merged
+  // we preserve the state of the local tests (baseTests)
+  // eg: if inTest is in phase 1, and basetest is in phase 2, the merged will be in state 2
+  // therefore, we can have the opposite effect by swapping the order of args (overwrite locals with sent tests)
+  if (overWriteLocal) {
+    merged = _mergeFlags(localTests, incomingTests)
+  } else {
+    merged = _mergeFlags(incomingTests, localTests)
+  }
+
+  try {
+    await _deleteSplitTests()
+    const success = await SplitTest.create(merged)
+    return success
+  } catch (error) {
+    throw OError.tag(error, 'Failed to merge all split tests, merged set was', {
+      merged,
+    })
+  }
+}
+
 async function switchToNextPhase({ name, comment }, userId) {
   const splitTest = await getSplitTest({ name })
   if (!splitTest) {
@@ -356,6 +395,47 @@ async function _saveSplitTest(splitTest) {
   }
 }
 
+/*
+ * As this is only used for utility in local dev, we want to prevent this running in any other env
+ *  since deleting all records in staging or prod would be very bad...
+ */
+function _checkEnvIsSafe(operation) {
+  if (process.env.NODE_ENV !== 'development') {
+    throw OError.tag(
+      `attempted to ${operation} all feature flags outside of local env`
+    )
+  }
+}
+
+async function _deleteSplitTests() {
+  _checkEnvIsSafe('delete')
+  let deleted
+
+  try {
+    deleted = await SplitTest.deleteMany({}).exec()
+  } catch (error) {
+    throw OError.tag('Failed to delete all split tests')
+  }
+
+  if (!deleted.acknowledged) {
+    throw OError.tag('Error deleting split tests, split tests have not updated')
+  }
+}
+
+function _mergeFlags(incomingTests, baseTests) {
+  // copy all base versions
+  const mergedSet = baseTests.map(test => test)
+  for (const inTest of incomingTests) {
+    // since name is a unique key, we can use it to compare
+    const newFeatureFlag = !mergedSet.some(bTest => bTest.name === inTest.name)
+    // only add new feature flags, instead of overwriting ones in baseTests, meaning baseTests take precendence
+    if (newFeatureFlag) {
+      mergedSet.push(inTest)
+    }
+  }
+  return mergedSet
+}
+
 module.exports = {
   getSplitTest,
   getSplitTests,
@@ -366,4 +446,6 @@ module.exports = {
   switchToNextPhase,
   revertToPreviousVersion,
   archive,
+  replaceSplitTests,
+  mergeSplitTests,
 }
