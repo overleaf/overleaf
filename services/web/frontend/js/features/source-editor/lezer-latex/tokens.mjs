@@ -461,6 +461,15 @@ const refCommands = new Set([
   '\\vrefrange',
   '\\Crefrange',
   '\\Crefrang',
+  '\\fref',
+  '\\pref',
+  '\\tref',
+  '\\Aref',
+  '\\Bref',
+  '\\Pref',
+  '\\Sref',
+  '\\vref',
+  '\\nameref',
 ])
 
 const refStarrableCommands = new Set([

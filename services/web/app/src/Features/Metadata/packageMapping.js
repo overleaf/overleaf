@@ -29109,6 +29109,12 @@ module.exports = {
       meta: 'varioref-cmd',
       score: 0.008565354665444157,
     },
+    {
+      caption: '\\vref',
+      snippet: '\\vref{$1}',
+      meta: 'vref-cmd',
+      score: 0.008565354665444157,
+    },
   ],
   SIunits: [
     {
