@@ -15,6 +15,7 @@ const { assert } = require('chai')
 const async = require('async')
 const User = require('./helpers/User')
 const request = require('./helpers/request')
+const ProjectGetter = require('../../../app/src/Features/Project/ProjectGetter')
 
 const assertHasCommonHeaders = function (response) {
   const { headers } = response
@@ -100,29 +101,86 @@ describe('SecurityHeaders', function () {
     )
   })
 
-  it('should have cache headers on project page', function (done) {
+  it('should have cache headers on project page when user is logged out', function (done) {
     return async.series(
       [
         cb => this.user.login(cb),
-        cb => {
-          return this.user.createProject(
+        cb =>
+          this.user.createProject('public-project', (error, projectId) => {
+            if (error != null) {
+              return done(error)
+            }
+            this.project_id = projectId
+            return this.user.makePublic(this.project_id, 'readAndWrite', cb)
+          }),
+        cb => this.user.logout(cb),
+        cb => request.get(`/project/${this.project_id}`, cb),
+      ],
+      (err, res) => {
+        const mainResponse = res[3][0]
+        assertHasCacheHeaders(mainResponse)
+        return done()
+      }
+    )
+  })
+
+  it('should have private cache headers on project file', function (done) {
+    return async.series(
+      [
+        cb => this.user.login(cb),
+        cb =>
+          this.user.createProject(
             'public-project',
-            (error, projectId) => {
+            (error, projectId, folderId) => {
               if (error != null) {
                 return done(error)
               }
               this.project_id = projectId
               return this.user.makePublic(this.project_id, 'readAndWrite', cb)
             }
+          ),
+        cb =>
+          ProjectGetter.getProject(this.project_id, (error, project) => {
+            if (error) {
+              return cb(error)
+            }
+            this.root_folder_id = project.rootFolder[0]._id.toString()
+            cb()
+          }),
+        cb => {
+          return this.user.uploadFileInProject(
+            this.project_id,
+            this.root_folder_id,
+            '2pixel.png',
+            '1pixel.png',
+            'image/png',
+            (error, fileId) => {
+              if (error) {
+                return cb(error)
+              }
+              this.file_id = fileId
+              cb()
+            }
           )
         },
+        cb =>
+          request.get(`/project/${this.project_id}/file/${this.file_id}`, cb),
         cb => this.user.logout(cb),
       ],
       (err, results) => {
-        return request.get(`/project/${this.project_id}`, (err, res, body) => {
-          assertHasCacheHeaders(res)
-          return done()
+        const res = results[4][0]
+
+        assert.include(res.headers, {
+          'cache-control': 'private, max-age=3600',
         })
+
+        assert.doesNotHaveAnyKeys(res.headers, [
+          'surrogate-control',
+          'pragma',
+          'expires',
+        ])
+
+        return done()
       }
     )
   })

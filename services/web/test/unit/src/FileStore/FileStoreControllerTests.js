@@ -7,6 +7,10 @@ const MockResponse = require('../helpers/MockResponse')
 const MODULE_PATH =
   '../../../../app/src/Features/FileStore/FileStoreController.js'
 
+const expectedFileHeaders = {
+  'Cache-Control': 'private, max-age=3600',
+}
+
 describe('FileStoreController', function () {
   beforeEach(function () {
     this.FileStoreHandler = {
@@ -104,7 +108,9 @@ describe('FileStoreController', function () {
         describe('from a non-ios browser', function () {
           it('should not set Content-Type', function (done) {
             this.stream.pipe = des => {
-              this.res.headers.should.deep.equal({})
+              this.res.headers.should.deep.equal({
+                ...expectedFileHeaders,
+              })
               done()
             }
             this.controller.getFile(this.req, this.res)
@@ -123,6 +129,7 @@ describe('FileStoreController', function () {
           it("should set Content-Type to 'text/plain'", function (done) {
             this.stream.pipe = des => {
               this.res.headers.should.deep.equal({
+                ...expectedFileHeaders,
                 'Content-Type': 'text/plain; charset=utf-8',
                 'X-Content-Type-Options': 'nosniff',
               })
@@ -144,6 +151,7 @@ describe('FileStoreController', function () {
           it("should set Content-Type to 'text/plain'", function (done) {
             this.stream.pipe = des => {
               this.res.headers.should.deep.equal({
+                ...expectedFileHeaders,
                 'Content-Type': 'text/plain; charset=utf-8',
                 'X-Content-Type-Options': 'nosniff',
               })
@@ -179,7 +187,9 @@ describe('FileStoreController', function () {
 
             it('Should not set the Content-type', function (done) {
               this.stream.pipe = des => {
-                this.res.headers.should.deep.equal({})
+                this.res.headers.should.deep.equal({
+                  ...expectedFileHeaders,
+                })
                 done()
               }
               this.controller.getFile(this.req, this.res)

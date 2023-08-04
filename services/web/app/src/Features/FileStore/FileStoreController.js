@@ -38,6 +38,9 @@ module.exports = {
               preparePlainTextResponse(res)
             }
             res.setContentDisposition('attachment', { filename: file.name })
+            // allow the browser to cache these immutable files
+            // note: both "private" and "max-age" appear to be required for caching
+            res.setHeader('Cache-Control', 'private, max-age=3600')
             stream.pipe(res)
           }
         )

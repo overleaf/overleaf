@@ -253,13 +253,28 @@ webRouter.use(AuthenticationController.validateAdmin)
 // add security headers using Helmet
 const noCacheMiddleware = require('nocache')()
 webRouter.use(function addNoCacheHeader(req, res, next) {
-  const isLoggedIn = SessionManager.isUserLoggedIn(req.session)
-  const isProjectPage = !!req.path.match('^/project/[a-f0-9]{24}$')
-  if (isLoggedIn || isProjectPage) {
-    noCacheMiddleware(req, res, next)
-  } else {
-    next()
+  const isProjectPage = /^\/project\/[a-f0-9]{24}$/.test(req.path)
+  if (isProjectPage) {
+    // always set no-cache headers on a project page, as it could be an anonymous token viewer
+    return noCacheMiddleware(req, res, next)
   }
+
+  const isProjectFile = /^\/project\/[a-f0-9]{24}\/file\/[a-f0-9]{24}$/.test(
+    req.path
+  )
+  if (isProjectFile) {
+    // don't set no-cache headers on a project file, as it's immutable and can be cached (privately)
+    return next()
+  }
+
+  const isLoggedIn = SessionManager.isUserLoggedIn(req.session)
+  if (isLoggedIn) {
+    // always set no-cache headers for authenticated users (apart from project files, above)
+    return noCacheMiddleware(req, res, next)
+  }
+
+  // allow other responses (anonymous users, except for project pages) to be cached
+  return next()
 })
 webRouter.use(
   helmet({
