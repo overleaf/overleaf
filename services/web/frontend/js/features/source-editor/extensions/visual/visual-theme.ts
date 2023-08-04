@@ -87,6 +87,7 @@ export const visualTheme = EditorView.theme({
     cursor: 'pointer',
     padding: '0.5em',
     lineHeight: 'calc(var(--line-height) * 5/6)',
+    textWrap: 'balance',
   },
   '.ol-cm-authors': {
     display: 'flex',
