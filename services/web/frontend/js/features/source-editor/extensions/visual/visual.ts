@@ -195,8 +195,8 @@ const extension = (options: Options) => [
   visualHighlightStyle,
   mousedown,
   listItemMarker,
-  markDecorations,
   atomicDecorations(options),
+  markDecorations, // NOTE: must be after atomicDecorations, so that mark decorations wrap inline widgets
   skipPreambleWithCursor,
   visualKeymap,
   scrollJumpAdjuster,
