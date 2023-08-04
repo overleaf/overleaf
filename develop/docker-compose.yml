@@ -95,10 +95,6 @@ services:
       - "127.0.0.1:27017:27017" # for debugging
     volumes:
       - mongo-data:/data/db
-    healthcheck:
-      test: 'test $$(mongosh --eval "rs.initiate({ _id: "overleaf", members: [ { _id: 0, host: "mongo:27017" } ] }).ok || rs.status().ok" --quiet) -eq 1'
-      interval: 30s
-      start_period: 30s
 
   notifications:
     build:

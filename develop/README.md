@@ -2,15 +2,28 @@
 
 ## Building and running
 
-In this `develop` directory, build and start the services:
+In this `develop` directory, build the services:
+
+```shell
+bin/build
+```
+
+> [!NOTE]
+> If Docker is running out of RAM while building the services in parallel, create a `.env` file in this directory containing `COMPOSE_PARALLEL_LIMIT=1`.
+
+Next, initialize the database:
+
+```shell
+bin/init
+```
+
+Then start the services:
 
 ```shell
 bin/up
 ```
 
 Once the services are running, open <http://localhost/launchpad> to create the first admin account.
-
-After making any changes to the code, run `bin/up` manually to rebuild the changed Docker images and recreate the changed containers.
 
 ## TeX Live
 
@@ -20,34 +33,36 @@ Compiling a PDF requires building a TeX Live image to handle the compilation ins
 docker build texlive -t texlive-full
 ```
 
-> **Note**
-> To compile on a macOS host, you'll need to override the path to the Docker socket by creating a `.env` file in this directory, containing
+> [!NOTE]
+> To compile on a macOS host, you may need to override the path to the Docker socket by creating a `.env` file in this directory, containing
 > `DOCKER_SOCKET_PATH=/var/run/docker.sock.raw`
 
 ## Development
 
-To avoid running `bin/up` after every code change, you can run Overleaf
-Community Edition in _development mode_, where services will automatically
-update on code changes. To do this, use the included `bin/dev` script:
+To avoid running `bin/build && bin/up` after every code change, you can run Overleaf
+Community Edition in _development mode_, where services will automatically update on code changes.
+
+To do this, use the included `bin/dev` script:
 
 ```shell
 bin/dev
 ```
 
-This will start all services using `nodemon`, which will automatically monitor
-the code and restart the services as necessary. This will incur a performance
-hit, especially on macOS, so in order to only start a subset of the services,
-provide a space-separated list to the `bin/dev` script.
+This will start all services using `nodemon`, which will automatically monitor the code and restart the services as necessary.
+
+To improve performance, you can start only a subset of the services in development mode by providing a space-separated list to the `bin/dev` script:
 
 ```shell
-bin/dev [service1] [service2] ...  [serviceN]
+bin/dev [service1] [service2] ... [serviceN]
 ```
 
-> **Note**
+> [!NOTE]
 > Starting the `web` service in _development mode_ will only update the `web`
 > service when backend code changes. In order to automatically update frontend
 > code as well, make sure to start the `webpack` service in _development mode_
 > as well.
+
+If no services are named, all services will start in development mode.
 
 ## Debugging
 
@@ -68,6 +83,8 @@ each service:
 | `filestore`        | 9235 |
 | `notifications`    | 9236 |
 | `real-time`        | 9237 |
+| `history-v1`       | 9239 |
+| `project-history`  | 9240 |
 
 To attach to a service using Chrome's _remote debugging_, go to
 <chrome://inspect/> and make sure _Discover network targets_ is checked. Next
