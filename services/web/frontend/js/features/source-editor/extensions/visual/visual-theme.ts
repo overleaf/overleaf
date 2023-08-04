@@ -104,6 +104,9 @@ export const visualTheme = EditorView.theme({
     filter: 'grayscale(1)',
     marginRight: '2px',
   },
+  '.ol-cm-indicator': {
+    color: 'rgba(125, 125, 125, 0.5)',
+  },
   '.ol-cm-begin': {
     fontFamily: 'var(--source-font-family)',
     minHeight: '1em',

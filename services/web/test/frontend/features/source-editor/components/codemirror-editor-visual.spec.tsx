@@ -594,6 +594,12 @@ describe('<CodeMirrorEditor/> in Visual mode', function () {
       cy.get('@first-line').type('Test\\~test')
       cy.get('@first-line').should('have.text', 'Test~test')
     })
+
+    it('decorates line breaks', function () {
+      cy.get('@first-line').type('Test \\\\ test')
+      cy.get('@second-line').click()
+      cy.get('@first-line').should('have.text', 'Test ↩ test')
+    })
   })
 
   describe('decorates theorems', function () {

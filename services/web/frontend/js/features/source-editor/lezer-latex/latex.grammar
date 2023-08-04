@@ -107,7 +107,8 @@
     OpenParenCtrlSym,
     CloseParenCtrlSym,
     OpenBracketCtrlSym,
-    CloseBracketCtrlSym
+    CloseBracketCtrlSym,
+    LineBreakCtrlSym
 }
 
 @tokens {
@@ -344,6 +345,11 @@ UnknownCommand {
 Command {
       KnownCommand
     | UnknownCommand
+    | KnownCtrlSym
+}
+
+KnownCtrlSym {
+  LineBreakCtrlSym
 }
 
 textBase {
@@ -464,6 +470,7 @@ DefinitionFragment {
     | CloseParenCtrlSym
     | OpenBracketCtrlSym
     | CloseBracketCtrlSym
+    | KnownCtrlSym
     | BlankLine
     | NewLine
     | Normal
@@ -660,7 +667,7 @@ MathTextCommand {
 
 MathCommand { CtrlSeq }
 
-MathCtrlSym { CtrlSym }
+MathCtrlSym { CtrlSym | KnownCtrlSym }
 
 MathGroup {
     OpenBrace Math? CloseBrace

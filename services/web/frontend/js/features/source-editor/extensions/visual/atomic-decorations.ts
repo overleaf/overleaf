@@ -57,6 +57,7 @@ import { getListItems } from '../toolbar/lists'
 import { TildeWidget } from './visual-widgets/tilde'
 import { BeginTheoremWidget } from './visual-widgets/begin-theorem'
 import { parseTheoremArguments } from '../../utils/tree-operations/theorems'
+import { IndicatorWidget } from './visual-widgets/indicator'
 
 type Options = {
   fileTreeManager: {
@@ -730,6 +731,13 @@ export const atomicDecorations = (options: Options) => {
               }).range(nodeRef.from, nodeRef.to)
             )
           }
+        } else if (nodeRef.type.is('LineBreakCtrlSym')) {
+          // line break
+          decorations.push(
+            Decoration.replace({
+              widget: new IndicatorWidget('\u21A9'),
+            }).range(nodeRef.from, nodeRef.to)
+          )
         } else if (nodeRef.type.is('Caption')) {
           if (shouldDecorate(state, nodeRef)) {
             // a caption

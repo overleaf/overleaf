@@ -49,6 +49,7 @@ import {
   CloseParenCtrlSym,
   OpenBracketCtrlSym,
   CloseBracketCtrlSym,
+  LineBreakCtrlSym,
   // Sectioning commands
   BookCtrlSeq,
   PartCtrlSeq,
@@ -748,6 +749,7 @@ const otherKnownCtrlSyms = {
   '\\)': CloseParenCtrlSym,
   '\\[': OpenBracketCtrlSym,
   '\\]': CloseBracketCtrlSym,
+  '\\\\': LineBreakCtrlSym,
 }
 
 export const specializeCtrlSym = (name, terms) => {

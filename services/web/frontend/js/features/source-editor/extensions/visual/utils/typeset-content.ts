@@ -1,14 +1,7 @@
 import { EditorState } from '@codemirror/state'
-import { SyntaxNode, SyntaxNodeRef } from '@lezer/common'
+import { SyntaxNode } from '@lezer/common'
 import { isUnknownCommandWithName } from '../../../utils/tree-query'
-
-function isNewline(node: SyntaxNodeRef, state: EditorState) {
-  if (!node.type.is('CtrlSym')) {
-    return false
-  }
-  const command = state.sliceDoc(node.from, node.to)
-  return command === '\\\\'
-}
+import { LineBreakCtrlSym } from '../../../lezer-latex/latex.terms.mjs'
 
 /**
  * Does a small amount of typesetting of LaTeX content into a DOM element.
@@ -78,7 +71,7 @@ export function typesetNodeIntoElement(
         // ignoring these commands
         from = childNode.to
         return false
-      } else if (isNewline(childNode, state)) {
+      } else if (childNode.type.is(LineBreakCtrlSym)) {
         ancestor().appendChild(document.createElement('br'))
         from = childNode.to
       }
