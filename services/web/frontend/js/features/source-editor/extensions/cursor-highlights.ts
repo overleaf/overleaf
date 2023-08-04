@@ -1,8 +1,10 @@
 import {
+  MapMode,
   RangeSet,
   RangeValue,
   StateEffect,
   StateField,
+  Transaction,
   TransactionSpec,
 } from '@codemirror/state'
 import {
@@ -67,8 +69,14 @@ export const cursorHighlights = () => {
 }
 
 class HighlightRangeValue extends RangeValue {
+  mapMode = MapMode.Simple
+
   constructor(public highlight: Highlight) {
     super()
+  }
+
+  eq(other: HighlightRangeValue) {
+    return other.highlight === this.highlight
   }
 }
 
@@ -101,7 +109,7 @@ const cursorHighlightsState = StateField.define<RangeSet<HighlightRangeValue>>({
       }
     }
 
-    if (tr.docChanged) {
+    if (tr.docChanged && !tr.annotation(Transaction.remote)) {
       value = value.map(tr.changes)
     }
 
