@@ -90,9 +90,9 @@ export const mockScope = (content?: string) => {
     refreshResolvedCommentsDropdown: cy.stub(() => sleep(1000)),
     onlineUserCursorHighlights: {},
     permissionsLevel: 'owner',
-    $on: cy.stub(),
-    $broadcast: cy.stub(),
-    $emit: cy.stub(),
+    $on: cy.stub().log(false),
+    $broadcast: cy.stub().log(false),
+    $emit: cy.stub().log(false),
     $root: {
       _references: {
         keys: ['foo'],
