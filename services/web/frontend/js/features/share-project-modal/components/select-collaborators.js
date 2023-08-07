@@ -215,7 +215,7 @@ export default function SelectCollaborators({
 
                   if (data) {
                     const emails = data
-                      .split(/\s*,\s*/)
+                      .split(/[\r\n,; ]+/)
                       .filter(item => item.includes('@'))
 
                     if (emails.length) {

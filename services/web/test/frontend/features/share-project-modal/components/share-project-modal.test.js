@@ -595,7 +595,8 @@ describe('<ShareProjectModal/>', function () {
     fireEvent.paste(inputElement, {
       clipboardData: {
         getData: () =>
-          'test@example.com, foo@example.com, bar@example.com, a@b.c',
+          `test@example.com; foo@example.com
+          bar@example.com, a@b.c`,
       },
     })
 
