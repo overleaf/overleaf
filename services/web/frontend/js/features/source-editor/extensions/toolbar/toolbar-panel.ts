@@ -255,5 +255,30 @@ export const toolbarPanel = () => [
         },
       },
     },
+    '.ol-cm-toolbar-table-grid': {
+      borderCollapse: 'separate',
+      tableLayout: 'fixed',
+      fontSize: '6px',
+      cursor: 'pointer',
+      '& td': {
+        outline: '1px solid #E7E9EE',
+        outlineOffset: '-2px',
+        width: '16px',
+        height: '16px',
+
+        '&.active': {
+          outlineColor: '#3265B2',
+          background: '#F1F4F9',
+        },
+      },
+    },
+    '.ol-cm-toolbar-table-size-label': {
+      maxWidth: '160px',
+      fontFamily: 'Lato, sans-serif',
+      fontSize: '12px',
+    },
+    '.ol-cm-toolbar-table-grid-popover': {
+      padding: '8px',
+    },
   }),
 ]

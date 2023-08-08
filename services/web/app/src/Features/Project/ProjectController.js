@@ -683,6 +683,12 @@ const ProjectController = {
             cb()
           })
         },
+        tableGeneratorAssignment(cb) {
+          SplitTestHandler.getAssignment(req, res, 'table-generator', () => {
+            // We'll pick up the assignment from the res.locals assignment.
+            cb()
+          })
+        },
         sourceEditorToolbarAssigment(cb) {
           SplitTestHandler.getAssignment(
             req,

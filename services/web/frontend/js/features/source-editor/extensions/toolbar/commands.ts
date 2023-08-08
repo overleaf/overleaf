@@ -1,5 +1,5 @@
 import { EditorSelection, EditorState, SelectionRange } from '@codemirror/state'
-import { Command } from '@codemirror/view'
+import { Command, EditorView } from '@codemirror/view'
 import {
   closeSearchPanel,
   openSearchPanel,
@@ -53,10 +53,16 @@ export const insertFigure: Command = view => {
   return true
 }
 
-export const insertTable: Command = view => {
+export const insertTable = (view: EditorView, sizeX: number, sizeY: number) => {
   const { state, dispatch } = view
   const { pos, suffix } = ensureEmptyLine(state, state.selection.main)
-  const template = `\n${snippets.table}\n${suffix}`
+  const template = `\n\\begin{table}{#{}}
+\t\\centering
+\\begin{tabular}{${'c'.repeat(sizeX)}}
+${('\t\t' + '#{} & #{}'.repeat(sizeX - 1) + '\\\\\n').repeat(
+  sizeY
+)}\\end{tabular}
+\\end{table}${suffix}`
   snippet(template)({ state, dispatch }, { label: 'Table' }, pos, pos)
   return true
 }

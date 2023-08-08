@@ -54,7 +54,7 @@ function CodeMirrorEditor() {
 
   return (
     <CodeMirrorStateContext.Provider value={state}>
-      <CodeMirrorViewContext.Provider value={viewRef.current}>
+      <CodeMirrorViewContextProvider value={viewRef.current}>
         <CodemirrorOutline />
         <CodeMirrorView />
         <FigureModal />
@@ -66,7 +66,7 @@ function CodeMirrorEditor() {
             <Component key={path} />
           )
         )}
-      </CodeMirrorViewContext.Provider>
+      </CodeMirrorViewContextProvider>
     </CodeMirrorStateContext.Provider>
   )
 }
@@ -89,12 +89,14 @@ export const useCodeMirrorStateContext = (): EditorState => {
 
 const CodeMirrorViewContext = createContext<EditorView | undefined>(undefined)
 
+export const CodeMirrorViewContextProvider = CodeMirrorViewContext.Provider
+
 export const useCodeMirrorViewContext = (): EditorView => {
   const context = useContext(CodeMirrorViewContext)
 
   if (!context) {
     throw new Error(
-      'useCodeMirrorViewContext is only available inside CodeMirrorEditor'
+      'useCodeMirrorViewContext is only available inside CodeMirrorViewContextProvider'
     )
   }
 

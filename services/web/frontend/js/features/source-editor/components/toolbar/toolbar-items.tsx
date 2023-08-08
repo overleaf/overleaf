@@ -14,6 +14,7 @@ import getMeta from '../../../../utils/meta'
 import { InsertFigureDropdown } from './insert-figure-dropdown'
 import { useTranslation } from 'react-i18next'
 import { MathDropdown } from './math-dropdown'
+import { TableInserterDropdown } from './table-inserter-dropdown'
 
 const isMac = /Mac/.test(window.navigator?.platform)
 
@@ -52,6 +53,7 @@ export const ToolbarItems: FC<{
   )
 
   const showFigureModal = splitTestVariants['figure-modal'] === 'enabled'
+  const showTableGenerator = splitTestVariants['table-generator'] === 'enabled'
   const symbolPaletteAvailable = getMeta('ol-symbolPaletteAvailable')
   const showGroup = (group: string) => !overflowed || overflowed.has(group)
 
@@ -165,13 +167,7 @@ export const ToolbarItems: FC<{
                   icon="picture-o"
                 />
               )}
-              <ToolbarButton
-                id="toolbar-table"
-                label={t('toolbar_insert_table')}
-                command={commands.insertTable}
-                icon="table"
-                hidden
-              />
+              {showTableGenerator && <TableInserterDropdown />}
             </div>
           )}
           {showGroup('group-list') && (

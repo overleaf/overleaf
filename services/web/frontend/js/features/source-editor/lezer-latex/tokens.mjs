@@ -71,6 +71,7 @@ import {
   MaketitleCtrlSeq,
   TextColorCtrlSeq,
   ColorBoxCtrlSeq,
+  HLineCtrlSeq,
 } from './latex.terms.mjs'
 
 function nameChar(ch) {
@@ -618,6 +619,7 @@ const otherKnowncommands = {
   '\\maketitle': MaketitleCtrlSeq,
   '\\textcolor': TextColorCtrlSeq,
   '\\colorbox': ColorBoxCtrlSeq,
+  '\\hline': HLineCtrlSeq,
 }
 // specializer for control sequences
 // return new tokens for specific control sequences

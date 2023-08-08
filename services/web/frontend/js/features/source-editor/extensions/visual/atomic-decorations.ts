@@ -58,6 +58,7 @@ import { TildeWidget } from './visual-widgets/tilde'
 import { BeginTheoremWidget } from './visual-widgets/begin-theorem'
 import { parseTheoremArguments } from '../../utils/tree-operations/theorems'
 import { IndicatorWidget } from './visual-widgets/indicator'
+import { TabularWidget } from './visual-widgets/tabular'
 
 type Options = {
   fileTreeManager: {
@@ -129,6 +130,8 @@ const hasClosingBrace = (node: SyntaxNode) =>
 export const atomicDecorations = (options: Options) => {
   const splitTestVariants = getMeta('ol-splitTestVariants', {})
   const figureModalEnabled = splitTestVariants['figure-modal'] === 'enabled'
+  const tableGeneratorEnabled =
+    splitTestVariants['table-generator'] === 'enabled'
 
   const getPreviewByPath = (path: string) =>
     options.fileTreeManager.getPreviewByPath(path)
@@ -299,6 +302,22 @@ export const atomicDecorations = (options: Options) => {
                   }).range(end.from, end.to)
                 )
               }
+            }
+          } else if (
+            tableGeneratorEnabled &&
+            nodeRef.type.is('TabularEnvironment')
+          ) {
+            if (shouldDecorate(state, nodeRef)) {
+              decorations.push(
+                Decoration.replace({
+                  widget: new TabularWidget(
+                    nodeRef.node,
+                    state.doc.sliceString(nodeRef.from, nodeRef.to)
+                  ),
+                  block: true,
+                }).range(nodeRef.from, nodeRef.to)
+              )
+              return false
             }
           }
         } else if (nodeRef.type.is('BeginEnv')) {

@@ -1,7 +1,22 @@
 import { EditorState } from '@codemirror/state'
 import { SyntaxNode } from '@lezer/common'
-import { isUnknownCommandWithName } from '../../../utils/tree-query'
 import { LineBreakCtrlSym } from '../../../lezer-latex/latex.terms.mjs'
+
+const isUnknownCommandWithName = (
+  node: SyntaxNode,
+  command: string,
+  getText: (from: number, to: number) => string
+): boolean => {
+  if (!node.type.is('UnknownCommand')) {
+    return false
+  }
+  const commandNameNode = node.getChild('CtrlSeq')
+  if (!commandNameNode) {
+    return false
+  }
+  const commandName = getText(commandNameNode.from, commandNameNode.to)
+  return commandName === command
+}
 
 /**
  * Does a small amount of typesetting of LaTeX content into a DOM element.
@@ -14,8 +29,14 @@ import { LineBreakCtrlSym } from '../../../lezer-latex/latex.terms.mjs'
 export function typesetNodeIntoElement(
   node: SyntaxNode,
   element: HTMLElement,
-  state: EditorState
+  state: EditorState | ((from: number, to: number) => string)
 ) {
+  let getText: (from: number, to: number) => string
+  if (typeof state === 'function') {
+    getText = state
+  } else {
+    getText = state!.sliceDoc.bind(state!)
+  }
   // If we're a TextArgument node, we should skip the braces
   const argument = node.getChild('LongArg')
   if (argument) {
@@ -34,39 +55,39 @@ export function typesetNodeIntoElement(
       const childNode = childNodeRef.node
       if (from < childNode.from) {
         ancestor().append(
-          document.createTextNode(state.sliceDoc(from, childNode.from))
+          document.createTextNode(getText(from, childNode.from))
         )
 
         from = childNode.from
       }
-      if (isUnknownCommandWithName(childNode, '\\textit', state)) {
+      if (isUnknownCommandWithName(childNode, '\\textit', getText)) {
         pushAncestor(document.createElement('i'))
         const textArgument = childNode.getChild('TextArgument')
         from = textArgument?.getChild('LongArg')?.from ?? childNode.to
-      } else if (isUnknownCommandWithName(childNode, '\\textbf', state)) {
+      } else if (isUnknownCommandWithName(childNode, '\\textbf', getText)) {
         pushAncestor(document.createElement('b'))
         const textArgument = childNode.getChild('TextArgument')
         from = textArgument?.getChild('LongArg')?.from ?? childNode.to
-      } else if (isUnknownCommandWithName(childNode, '\\emph', state)) {
+      } else if (isUnknownCommandWithName(childNode, '\\emph', getText)) {
         pushAncestor(document.createElement('em'))
         const textArgument = childNode.getChild('TextArgument')
         from = textArgument?.getChild('LongArg')?.from ?? childNode.to
-      } else if (isUnknownCommandWithName(childNode, '\\texttt', state)) {
+      } else if (isUnknownCommandWithName(childNode, '\\texttt', getText)) {
         const spanElement = document.createElement('span')
         spanElement.classList.add('ol-cm-command-texttt')
         pushAncestor(spanElement)
         const textArgument = childNode.getChild('TextArgument')
         from = textArgument?.getChild('LongArg')?.from ?? childNode.to
-      } else if (isUnknownCommandWithName(childNode, '\\and', state)) {
+      } else if (isUnknownCommandWithName(childNode, '\\and', getText)) {
         const spanElement = document.createElement('span')
         spanElement.classList.add('ol-cm-command-and')
         pushAncestor(spanElement)
         const textArgument = childNode.getChild('TextArgument')
         from = textArgument?.getChild('LongArg')?.from ?? childNode.to
       } else if (
-        isUnknownCommandWithName(childNode, '\\corref', state) ||
-        isUnknownCommandWithName(childNode, '\\fnref', state) ||
-        isUnknownCommandWithName(childNode, '\\thanks', state)
+        isUnknownCommandWithName(childNode, '\\corref', getText) ||
+        isUnknownCommandWithName(childNode, '\\fnref', getText) ||
+        isUnknownCommandWithName(childNode, '\\thanks', getText)
       ) {
         // ignoring these commands
         from = childNode.to
@@ -79,11 +100,11 @@ export function typesetNodeIntoElement(
     function leave(childNodeRef) {
       const childNode = childNodeRef.node
       if (
-        isUnknownCommandWithName(childNode, '\\and', state) ||
-        isUnknownCommandWithName(childNode, '\\textit', state) ||
-        isUnknownCommandWithName(childNode, '\\textbf', state) ||
-        isUnknownCommandWithName(childNode, '\\emph', state) ||
-        isUnknownCommandWithName(childNode, '\\texttt', state)
+        isUnknownCommandWithName(childNode, '\\and', getText) ||
+        isUnknownCommandWithName(childNode, '\\textit', getText) ||
+        isUnknownCommandWithName(childNode, '\\textbf', getText) ||
+        isUnknownCommandWithName(childNode, '\\emph', getText) ||
+        isUnknownCommandWithName(childNode, '\\texttt', getText)
       ) {
         const typeSetElement = popAncestor()
         ancestor().appendChild(typeSetElement)
@@ -96,7 +117,7 @@ export function typesetNodeIntoElement(
     }
   )
   if (from < node.to) {
-    ancestor().append(document.createTextNode(state.sliceDoc(from, node.to)))
+    ancestor().append(document.createTextNode(getText(from, node.to)))
   }
 
   return element

@@ -1711,6 +1711,8 @@
   "toolbar_insert_table": "Insert Table",
   "toolbar_numbered_list": "Numbered List",
   "toolbar_redo": "Redo",
+  "toolbar_table_insert_size_table": "Insert __size__ table",
+  "toolbar_table_insert_table_lowercase": "Insert table",
   "toolbar_toggle_symbol_palette": "Toggle Symbol Palette",
   "toolbar_undo": "Undo",
   "tooltip_hide_filetree": "Click to hide the file-tree",

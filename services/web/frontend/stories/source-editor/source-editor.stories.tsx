@@ -97,7 +97,10 @@ export const Visual = (args: any, { globals: { theme } }: any) => {
   useMeta({
     'ol-showSymbolPalette': true,
     'ol-mathJax3Path': 'https://unpkg.com/mathjax@3.2.2/es5/tex-svg-full.js',
-    'ol-splitTestVariants': { 'figure-modal': 'enabled' },
+    'ol-splitTestVariants': {
+      'figure-modal': 'enabled',
+      'table-generator': 'enabled',
+    },
   })
 
   return <SourceEditor />
