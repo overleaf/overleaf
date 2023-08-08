@@ -51,7 +51,24 @@ export function updateLinkTargets() {
 
     const plan = el.getAttribute('data-ol-start-new-subscription')
     const view = el.getAttribute('data-ol-item-view')
-    const suffix = view === 'annual' ? `-annual` : `_free_trial_7_days`
+    // annual split test trial (nudge, no-nudge, default)
+    const annualTrialsVariant = getMeta('ol-splitTestVariants')?.[
+      'annual-trials'
+    ]
+
+    let suffix = ''
+    if (view === 'annual') {
+      if (annualTrialsVariant === 'nudge') {
+        suffix = '-annual_free_trial_7_days'
+      } else if (annualTrialsVariant === 'no-nudge') {
+        suffix = '-annual_free_trial_7_days'
+      } else if (annualTrialsVariant === 'default') {
+        suffix = '-annual'
+      }
+    } else {
+      suffix = '_free_trial_7_days'
+    }
+
     const planCode = `${plan}${suffix}`
 
     const location = el.getAttribute('data-ol-location')
