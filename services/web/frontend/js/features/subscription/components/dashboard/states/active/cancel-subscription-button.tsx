@@ -35,9 +35,20 @@ export function CancelSubscriptionButton({
           {t('cancel_your_subscription')}
         </button>
       </p>
-      {!stillInATrial && (
-        <p>
-          <i>
+      <p>
+        <i>
+          {stillInATrial ? (
+            <Trans
+              i18nKey="subscription_will_remain_active_until_end_of_trial_period_x"
+              values={{
+                terminationDate: subscription.recurly.nextPaymentDueAt,
+              }}
+              components={[
+                // eslint-disable-next-line react/jsx-key
+                <strong />,
+              ]}
+            />
+          ) : (
             <Trans
               i18nKey="subscription_will_remain_active_until_end_of_billing_period_x"
               values={{
@@ -48,9 +59,9 @@ export function CancelSubscriptionButton({
                 <strong />,
               ]}
             />
-          </i>
-        </p>
-      )}
+          )}
+        </i>
+      </p>
     </>
   )
 }

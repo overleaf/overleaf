@@ -1586,6 +1586,7 @@
   "subscription_canceled": "Subscription Canceled",
   "subscription_canceled_and_terminate_on_x": " Your subscription has been canceled and will terminate on <0>__terminateDate__</0>. No further payments will be taken.",
   "subscription_will_remain_active_until_end_of_billing_period_x": "Your subscription will remain active until the end of your billing period, <0>__terminationDate__</0>.",
+  "subscription_will_remain_active_until_end_of_trial_period_x": "Your subscription will remain active until the end of your trial period, <0>__terminationDate__</0>.",
   "suggestion": "Suggestion",
   "support_lots_of_features": "We support almost all LaTeX features, including inserting images, bibliographies, equations, and much more! Read about all the exciting things you can do with __appName__ in our <0>__help_guides_link__</0>",
   "sure_you_want_to_cancel_plan_change": "Are you sure you want to revert your scheduled plan change? You will remain subscribed to the <0>__planName__</0> plan.",

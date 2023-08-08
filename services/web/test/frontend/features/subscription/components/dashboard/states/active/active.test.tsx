@@ -169,14 +169,14 @@ describe('<ActiveSubscription />', function () {
     screen.getByText(subscription.recurly.totalLicenses)
   })
 
-  it('shows when trial ends and first payment collected', function () {
+  it('shows when trial ends and first payment collected and when subscription would become inactive if cancelled', function () {
     renderActiveSubscription(trialSubscription)
     screen.getByText('You’re on a free trial which ends on', { exact: false })
 
     const endDate = screen.getAllByText(
       trialSubscription.recurly.trialEndsAtFormatted!
     )
-    expect(endDate.length).to.equal(2)
+    expect(endDate.length).to.equal(3)
   })
 
   it('shows current discounts', function () {
@@ -218,9 +218,8 @@ describe('<ActiveSubscription />', function () {
       fireEvent.click(button)
     }
 
-    it('shows cancel UI and sends event', function () {
+    it('shows cancel UI', function () {
       renderActiveSubscription(annualActiveSubscription)
-      // before button clicked
       screen.getByText(
         'Your subscription will remain active until the end of your billing period',
         { exact: false }
@@ -232,6 +231,30 @@ describe('<ActiveSubscription />', function () {
         }
       )
       expect(dates.length).to.equal(2)
+      const button = screen.getByRole('button', {
+        name: 'Cancel Your Subscription',
+      })
+      expect(button).to.exist
+    })
+
+    it('shows cancel UI when still in a trial period', function () {
+      renderActiveSubscription(trialSubscription)
+      screen.getByText(
+        'Your subscription will remain active until the end of your trial period',
+        { exact: false }
+      )
+      const dates = screen.getAllByText(
+        trialSubscription.recurly.trialEndsAtFormatted!
+      )
+      expect(dates.length).to.equal(3)
+      const button = screen.getByRole('button', {
+        name: 'Cancel Your Subscription',
+      })
+      expect(button).to.exist
+    })
+
+    it('shows cancel prompt on button click and sends event', function () {
+      renderActiveSubscription(annualActiveSubscription)
 
       showConfirmCancelUI()
 
