@@ -41,8 +41,12 @@
   border-bottom-width: @table-generator-active-border-width;
 }
 
-.table-generator-cell.focused {
+.table-generator-cell.selected {
   background-color: @blue-10;
+}
+
+.table-generator-cell:focus-visible {
+  outline: 2px dotted @table-generator-focus-border-color;
 }
 
 .table-generator-cell {

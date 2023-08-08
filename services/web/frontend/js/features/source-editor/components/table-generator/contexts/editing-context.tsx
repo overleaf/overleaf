@@ -54,6 +54,10 @@ export const EditingContextProvider: FC = ({ children }) => {
     if (!cellData) {
       return
     }
+    if (!cellData.dirty) {
+      setCellData(null)
+      return
+    }
     const { rowIndex, cellIndex, content } = cellData
     write(rowIndex, cellIndex, content)
     setCellData(null)

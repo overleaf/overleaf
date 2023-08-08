@@ -13,8 +13,14 @@ type TableCoordinate = {
 }
 
 export class TableSelection {
-  // eslint-disable-next-line no-useless-constructor
-  constructor(public from: TableCoordinate, public to: TableCoordinate) {}
+  public readonly from: TableCoordinate
+  public readonly to: TableCoordinate
+
+  constructor(from: TableCoordinate, to?: TableCoordinate) {
+    this.from = from
+    this.to = to ?? from
+  }
+
   contains(point: TableCoordinate) {
     const { minX, maxX, minY, maxY } = this.normalized()
 
@@ -63,6 +69,82 @@ export class TableSelection {
   isColumnSelected(cell: number, totalRows: number) {
     const { minX, maxX, minY, maxY } = this.normalized()
     return cell >= minX && cell <= maxX && minY === 0 && maxY === totalRows - 1
+  }
+
+  moveRight(totalColumns: number) {
+    const newColumn = Math.min(totalColumns - 1, this.to.cell + 1)
+    return new TableSelection({ row: this.to.row, cell: newColumn })
+  }
+
+  moveLeft() {
+    const newColumn = Math.max(0, this.to.cell - 1)
+    return new TableSelection({ row: this.to.row, cell: newColumn })
+  }
+
+  moveUp() {
+    const newRow = Math.max(0, this.to.row - 1)
+    return new TableSelection({ row: newRow, cell: this.to.cell })
+  }
+
+  moveDown(totalRows: number) {
+    const newRow = Math.min(totalRows - 1, this.to.row + 1)
+    return new TableSelection({ row: newRow, cell: this.to.cell })
+  }
+
+  moveNext(totalColumns: number, totalRows: number) {
+    const { row, cell } = this.to
+    if (cell === totalColumns - 1 && row === totalRows - 1) {
+      return new TableSelection(this.to)
+    }
+    if (cell === totalColumns - 1) {
+      return new TableSelection({ row: row + 1, cell: 0 })
+    }
+    return new TableSelection({ row, cell: cell + 1 })
+  }
+
+  movePrevious(totalColumns: number) {
+    if (this.to.cell === 0 && this.to.row === 0) {
+      return new TableSelection(this.to)
+    }
+    if (this.to.cell === 0) {
+      return new TableSelection({
+        row: this.to.row - 1,
+        cell: totalColumns - 1,
+      })
+    }
+    return new TableSelection({ row: this.to.row, cell: this.to.cell - 1 })
+  }
+
+  extendRight(totalColumns: number) {
+    const newColumn = Math.min(totalColumns - 1, this.to.cell + 1)
+    return new TableSelection(
+      { row: this.from.row, cell: this.from.cell },
+      { row: this.to.row, cell: newColumn }
+    )
+  }
+
+  extendLeft() {
+    const newColumn = Math.max(0, this.to.cell - 1)
+    return new TableSelection(
+      { row: this.from.row, cell: this.from.cell },
+      { row: this.to.row, cell: newColumn }
+    )
+  }
+
+  extendUp() {
+    const newRow = Math.max(0, this.to.row - 1)
+    return new TableSelection(
+      { row: this.from.row, cell: this.from.cell },
+      { row: newRow, cell: this.to.cell }
+    )
+  }
+
+  extendDown(totalRows: number) {
+    const newRow = Math.min(totalRows - 1, this.to.row + 1)
+    return new TableSelection(
+      { row: this.from.row, cell: this.from.cell },
+      { row: newRow, cell: this.to.cell }
+    )
   }
 }
 

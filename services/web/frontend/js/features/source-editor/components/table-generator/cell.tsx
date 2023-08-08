@@ -19,6 +19,7 @@ export const Cell: FC<{
 }> = ({ cellData, columnSpecification, rowIndex, columnIndex, row }) => {
   const { selection, setSelection } = useSelectionContext()
   const renderDiv = useRef<HTMLDivElement>(null)
+  const cellRef = useRef<HTMLTableCellElement>(null)
   const {
     cellData: editingCellData,
     updateCellData: update,
@@ -64,7 +65,15 @@ export const Cell: FC<{
     return input.replaceAll(/(?<!\\)&/g, '\\&').replaceAll('\\\\', '')
   }
 
-  const hasFocus = selection?.contains({ row: rowIndex, cell: columnIndex })
+  const isFocused =
+    selection?.to.cell === columnIndex && selection?.to.row === rowIndex
+
+  useEffect(() => {
+    if (isFocused && !editing && cellRef.current) {
+      cellRef.current.focus()
+    }
+  }, [isFocused, editing])
+
   useEffect(() => {
     const toDisplay = cellData.content.trim()
     if (renderDiv.current && !editing) {
@@ -97,6 +106,8 @@ export const Cell: FC<{
     )
   }
 
+  const inSelection = selection?.contains({ row: rowIndex, cell: columnIndex })
+
   const onDoubleClick = useCallback(() => {
     startEditing(rowIndex, columnIndex, cellData.content.trim())
   }, [columnIndex, rowIndex, cellData, startEditing])
@@ -107,6 +118,7 @@ export const Cell: FC<{
       onDoubleClick={onDoubleClick}
       tabIndex={row.cells.length * rowIndex + columnIndex + 1}
       onMouseDown={onMouseDown}
+      ref={cellRef}
       className={classNames('table-generator-cell', {
         'table-generator-cell-border-left': columnSpecification.borderLeft > 0,
         'table-generator-cell-border-right':
@@ -117,12 +129,14 @@ export const Cell: FC<{
         'alignment-center': columnSpecification.alignment === 'center',
         'alignment-right': columnSpecification.alignment === 'right',
         'alignment-paragraph': columnSpecification.alignment === 'paragraph',
-        focused: hasFocus,
-        'selection-edge-top': hasFocus && selection?.bordersTop(rowIndex),
-        'selection-edge-bottom': hasFocus && selection?.bordersBottom(rowIndex),
-        'selection-edge-left': hasFocus && selection?.bordersLeft(columnIndex),
+        selected: inSelection,
+        'selection-edge-top': inSelection && selection?.bordersTop(rowIndex),
+        'selection-edge-bottom':
+          inSelection && selection?.bordersBottom(rowIndex),
+        'selection-edge-left':
+          inSelection && selection?.bordersLeft(columnIndex),
         'selection-edge-right':
-          hasFocus && selection?.bordersRight(columnIndex),
+          inSelection && selection?.bordersRight(columnIndex),
       })}
     >
       {body}
