@@ -150,7 +150,11 @@ export default ConnectionManager = (function () {
           window.wsRetryHandshake &&
           connectionAttempt++ < window.wsRetryHandshake
         ) {
-          return setTimeout(() => this.ide.socket.socket.connect(), 100)
+          return setTimeout(
+            () => this.ide.socket.socket.connect(),
+            // add jitter to spread reconnects
+            connectionAttempt * (1 + Math.random()) * 1000
+          )
         }
         this.updateConnectionManagerState('error')
         sl_console.log('socket.io error', err)
