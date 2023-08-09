@@ -89,6 +89,9 @@ describe('SubscriptionHandler', function () {
       getAccountPastDueInvoices: sinon.stub().yields(),
       attemptInvoiceCollection: sinon.stub().yields(),
       listAccountActiveSubscriptions: sinon.stub().yields(null, []),
+      promises: {
+        getSubscription: sinon.stub().resolves(this.activeRecurlySubscription),
+      },
     }
     this.RecurlyClient = {
       changeSubscriptionByUuid: sinon
@@ -101,14 +104,28 @@ describe('SubscriptionHandler', function () {
         .stub()
         .yields(null, this.activeRecurlyClientSubscription),
       cancelSubscriptionByUuid: sinon.stub().yields(),
+      promises: {
+        reactivateSubscriptionByUuid: sinon
+          .stub()
+          .resolves(this.activeRecurlyClientSubscription),
+        cancelSubscriptionByUuid: sinon.stub().resolves(),
+      },
     }
 
     this.SubscriptionUpdater = {
       syncSubscription: sinon.stub().yields(),
       startFreeTrial: sinon.stub().callsArgWith(1),
+      promises: {
+        updateSubscriptionFromRecurly: sinon.stub().resolves(),
+      },
     }
 
-    this.LimitationsManager = { userHasV2Subscription: sinon.stub() }
+    this.LimitationsManager = {
+      userHasV2Subscription: sinon.stub(),
+      promises: {
+        userHasV2Subscription: sinon.stub().resolves(),
+      },
+    }
 
     this.EmailHandler = {
       sendEmail: sinon.stub(),
@@ -377,7 +394,7 @@ describe('SubscriptionHandler', function () {
   describe('cancelSubscription', function () {
     describe('with a user without a subscription', function () {
       beforeEach(function (done) {
-        this.LimitationsManager.userHasV2Subscription.callsArgWith(
+        this.LimitationsManager.promises.userHasV2Subscription.callsArgWith(
           1,
           null,
           false,
@@ -393,18 +410,18 @@ describe('SubscriptionHandler', function () {
 
     describe('with a user with a subscription', function () {
       beforeEach(function (done) {
-        this.LimitationsManager.userHasV2Subscription.callsArgWith(
-          1,
-          null,
-          true,
-          this.subscription
-        )
+        this.LimitationsManager.promises.userHasV2Subscription.resolves({
+          hasSubscription: true,
+          subscription: this.subscription,
+        })
         this.SubscriptionHandler.cancelSubscription(this.user, done)
       })
 
       it('should cancel the subscription', function () {
-        this.RecurlyClient.cancelSubscriptionByUuid.called.should.equal(true)
-        this.RecurlyClient.cancelSubscriptionByUuid
+        this.RecurlyClient.promises.cancelSubscriptionByUuid.called.should.equal(
+          true
+        )
+        this.RecurlyClient.promises.cancelSubscriptionByUuid
           .calledWith(this.subscription.recurlySubscription_id)
           .should.equal(true)
       })
@@ -420,15 +437,13 @@ describe('SubscriptionHandler', function () {
     })
   })
 
-  describe('reactiveRecurlySubscription', function () {
+  describe('reactivateSubscription', function () {
     describe('with a user without a subscription', function () {
       beforeEach(function (done) {
-        this.LimitationsManager.userHasV2Subscription.callsArgWith(
-          1,
-          null,
-          false,
-          this.subscription
-        )
+        this.LimitationsManager.promises.userHasV2Subscription.resolves({
+          hasSubscription: false,
+          subscription: this.subscription,
+        })
         this.SubscriptionHandler.reactivateSubscription(this.user, done)
       })
 
@@ -445,20 +460,18 @@ describe('SubscriptionHandler', function () {
 
     describe('with a user with a subscription', function () {
       beforeEach(function (done) {
-        this.LimitationsManager.userHasV2Subscription.callsArgWith(
-          1,
-          null,
-          true,
-          this.subscription
-        )
+        this.LimitationsManager.promises.userHasV2Subscription.resolves({
+          hasSubscription: true,
+          subscription: this.subscription,
+        })
         this.SubscriptionHandler.reactivateSubscription(this.user, done)
       })
 
       it('should reactivate the subscription', function () {
-        this.RecurlyClient.reactivateSubscriptionByUuid.called.should.equal(
+        this.RecurlyClient.promises.reactivateSubscriptionByUuid.called.should.equal(
           true
         )
-        this.RecurlyClient.reactivateSubscriptionByUuid
+        this.RecurlyClient.promises.reactivateSubscriptionByUuid
           .calledWith(this.subscription.recurlySubscription_id)
           .should.equal(true)
       })

@@ -9,6 +9,7 @@ const LimitationsManager = require('./LimitationsManager')
 const EmailHandler = require('../Email/EmailHandler')
 const PlansLocator = require('./PlansLocator')
 const SubscriptionHelper = require('./SubscriptionHelper')
+const { callbackify } = require('../../util/promises')
 
 function validateNoSubscriptionInRecurly(userId, callback) {
   RecurlyWrapper.listAccountActiveSubscriptions(
@@ -177,80 +178,62 @@ function cancelPendingSubscriptionChange(user, callback) {
   )
 }
 
-function cancelSubscription(user, callback) {
-  LimitationsManager.userHasV2Subscription(
-    user,
-    function (err, hasSubscription, subscription) {
-      if (err) {
-        logger.warn(
-          { err, userId: user._id, hasSubscription },
-          'there was an error checking user v2 subscription'
-        )
+async function cancelSubscription(user) {
+  try {
+    const { hasSubscription, subscription } =
+      await LimitationsManager.promises.userHasV2Subscription(user)
+    if (hasSubscription) {
+      await RecurlyClient.promises.cancelSubscriptionByUuid(
+        subscription.recurlySubscription_id
+      )
+      await _updateSubscriptionFromRecurly(subscription)
+      const emailOpts = {
+        to: user.email,
+        first_name: user.first_name,
       }
-      if (hasSubscription) {
-        RecurlyClient.cancelSubscriptionByUuid(
-          subscription.recurlySubscription_id,
-          function (error) {
-            if (error) {
-              return callback(error)
-            }
-            const emailOpts = {
-              to: user.email,
-              first_name: user.first_name,
-            }
-            const ONE_HOUR_IN_MS = 1000 * 60 * 60
-            EmailHandler.sendDeferredEmail(
-              'canceledSubscription',
-              emailOpts,
-              ONE_HOUR_IN_MS
-            )
-            callback()
-          }
-        )
-      } else {
-        callback()
-      }
+      const ONE_HOUR_IN_MS = 1000 * 60 * 60
+      EmailHandler.sendDeferredEmail(
+        'canceledSubscription',
+        emailOpts,
+        ONE_HOUR_IN_MS
+      )
     }
-  )
+  } catch (err) {
+    logger.warn(
+      { err, userId: user._id },
+      'there was an error checking user v2 subscription'
+    )
+  }
 }
 
-function reactivateSubscription(user, callback) {
-  LimitationsManager.userHasV2Subscription(
-    user,
-    function (err, hasSubscription, subscription) {
-      if (err) {
-        logger.warn(
-          { err, userId: user._id, hasSubscription },
-          'there was an error checking user v2 subscription'
-        )
-      }
-      if (hasSubscription) {
-        RecurlyClient.reactivateSubscriptionByUuid(
-          subscription.recurlySubscription_id,
-          function (error) {
-            if (error) {
-              return callback(error)
-            }
-            EmailHandler.sendEmail(
-              'reactivatedSubscription',
-              { to: user.email },
-              err => {
-                if (err) {
-                  logger.warn(
-                    { err },
-                    'failed to send reactivation confirmation email'
-                  )
-                }
-              }
+async function reactivateSubscription(user) {
+  try {
+    const { hasSubscription, subscription } =
+      await LimitationsManager.promises.userHasV2Subscription(user)
+    if (hasSubscription) {
+      await RecurlyClient.promises.reactivateSubscriptionByUuid(
+        subscription.recurlySubscription_id
+      )
+      await _updateSubscriptionFromRecurly(subscription)
+      EmailHandler.sendEmail(
+        'reactivatedSubscription',
+        { to: user.email },
+        err => {
+          if (err) {
+            logger.warn(
+              { err },
+              'failed to send reactivation confirmation email'
             )
-            callback()
           }
-        )
-      } else {
-        callback()
-      }
+        }
+      )
     }
-  )
+  } catch (err) {
+    logger.warn(
+      { err, userId: user._id },
+      'there was an error checking user v2 subscription'
+    )
+  }
 }
 
 function syncSubscription(recurlySubscription, requesterData, callback) {
@@ -323,13 +306,24 @@ function extendTrial(subscription, daysToExend, callback) {
   )
 }
 
+async function _updateSubscriptionFromRecurly(subscription) {
+  const recurlySubscription = await RecurlyWrapper.promises.getSubscription(
+    subscription.recurlySubscription_id,
+    {}
+  )
+  await SubscriptionUpdater.promises.updateSubscriptionFromRecurly(
+    recurlySubscription,
+    subscription
+  )
+}
+
 module.exports = {
   validateNoSubscriptionInRecurly,
   createSubscription,
   updateSubscription,
   cancelPendingSubscriptionChange,
-  cancelSubscription,
-  reactivateSubscription,
+  cancelSubscription: callbackify(cancelSubscription),
+  reactivateSubscription: callbackify(reactivateSubscription),
   syncSubscription,
   attemptPaypalInvoiceCollection,
   extendTrial,
@@ -338,8 +332,8 @@ module.exports = {
     createSubscription: promisify(createSubscription),
     updateSubscription: promisify(updateSubscription),
     cancelPendingSubscriptionChange: promisify(cancelPendingSubscriptionChange),
-    cancelSubscription: promisify(cancelSubscription),
-    reactivateSubscription: promisify(reactivateSubscription),
+    cancelSubscription,
+    reactivateSubscription,
     syncSubscription: promisify(syncSubscription),
     attemptPaypalInvoiceCollection: promisify(attemptPaypalInvoiceCollection),
     extendTrial: promisify(extendTrial),
