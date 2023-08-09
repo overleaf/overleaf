@@ -39,7 +39,7 @@
   "account_has_been_link_to_institution_account": "Your __appName__ account on <b>__email__</b> has been linked to your <b>__institutionName__</b> institutional account.",
   "account_has_past_due_invoice_change_plan_warning": "Your account currently has a past due invoice. You will not be able to change your plan until this is resolved.",
   "account_linking": "Account Linking",
-  "account_managed_by_group_administrator": "Your account is managed by your group administrator",
+  "account_managed_by_group_administrator": "Your account is managed by your group administrator (__admin__)",
   "account_not_linked_to_dropbox": "Your account is not linked to Dropbox",
   "account_settings": "Account Settings",
   "account_with_email_exists": "It looks like an <b>__appName__</b> account with the email <b>__email__</b> already exists.",

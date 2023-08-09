@@ -20,7 +20,7 @@ block content
 
 						div(ng-show="view =='restrictedByManagedGroup'")
 							.alert.alert-info #{translate("restricted")}
-								p #{translate("account_managed_by_group_administrator")}
+								p #{translate("account_managed_by_group_administrator", {admin: currentManagedUserAdminEmail})}
 
 						div(ng-show="view =='hasIndividualRecurlySubscription'")
 							p #{translate("cancel_personal_subscription_first")}

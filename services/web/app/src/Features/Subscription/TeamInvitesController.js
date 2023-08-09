@@ -1,4 +1,5 @@
 const settings = require('@overleaf/settings')
+const logger = require('@overleaf/logger')
 const TeamInvitesHandler = require('./TeamInvitesHandler')
 const SessionManager = require('../Authentication/SessionManager')
 const SubscriptionLocator = require('./SubscriptionLocator')
@@ -106,6 +107,14 @@ async function viewInvite(req, res, next) {
         validationStatus: Object.fromEntries(validationStatus),
       })
     } else {
+      let currentManagedUserAdminEmail
+      try {
+        currentManagedUserAdminEmail =
+          await SubscriptionLocator.promises.getAdminEmail(req.managedBy)
+      } catch (err) {
+        logger.error({ err }, 'error getting subscription admin email')
+      }
+
       return res.render('subscriptions/team/invite', {
         inviterName: invite.inviterName,
         inviteToken: invite.token,
@@ -113,6 +122,7 @@ async function viewInvite(req, res, next) {
         appName: settings.appName,
         expired: req.query.expired,
         userRestrictions: Array.from(req.userRestrictions || []),
+        currentManagedUserAdminEmail,
       })
     }
   } else {

@@ -6,6 +6,7 @@ const Settings = require('@overleaf/settings')
 const AuthenticationController = require('../Authentication/AuthenticationController')
 const SessionManager = require('../Authentication/SessionManager')
 const NewsletterManager = require('../Newsletter/NewsletterManager')
+const SubscriptionLocator = require('../Subscription/SubscriptionLocator')
 const _ = require('lodash')
 const { expressify } = require('../../util/promises')
 const Features = require('../../infrastructure/Features')
@@ -81,6 +82,14 @@ async function settingsPage(req, res) {
     }
   }
 
+  let currentManagedUserAdminEmail
+  try {
+    currentManagedUserAdminEmail =
+      await SubscriptionLocator.promises.getAdminEmail(req.managedBy)
+  } catch (err) {
+    logger.error({ err }, 'error getting subscription admin email')
+  }
+
   res.render('user/settings', {
     title: 'account_settings',
     user: {
@@ -128,6 +137,7 @@ async function settingsPage(req, res) {
     emailAddressLimit: Settings.emailAddressLimit,
     isManagedAccount: !!req.managedBy,
     userRestrictions: Array.from(req.userRestrictions || []),
+    currentManagedUserAdminEmail,
   })
 }
 
