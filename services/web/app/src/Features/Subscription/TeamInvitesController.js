@@ -100,11 +100,20 @@ async function viewInvite(req, res, next) {
           subscription,
         })
 
+      let currentManagedUserAdminEmail
+      try {
+        currentManagedUserAdminEmail =
+          await SubscriptionLocator.promises.getAdminEmail(subscription._id)
+      } catch (err) {
+        logger.error({ err }, 'error getting subscription admin email')
+      }
+
       return res.render('subscriptions/team/invite-managed', {
         inviterName: invite.inviterName,
         inviteToken: invite.token,
         expired: req.query.expired,
         validationStatus: Object.fromEntries(validationStatus),
+        currentManagedUserAdminEmail,
       })
     } else {
       let currentManagedUserAdminEmail

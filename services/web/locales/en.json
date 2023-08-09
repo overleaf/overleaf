@@ -694,7 +694,7 @@
   "group_admins_get_access_to": "Group admins get access to",
   "group_admins_get_access_to_info": "Special features available only on group plans.",
   "group_full": "This group is already full",
-  "group_managed_by_group_administrator": "This group is managed by the group administrator",
+  "group_managed_by_group_administrator": "This group is managed by the group administrator (__admin__)",
   "group_members_and_collaborators_get_access_to": "Group members and their project collaborators get access to",
   "group_members_and_collaborators_get_access_to_info": "These features are available to group members and their collaborators (other Overleaf users invited to projects owned a group member).",
   "group_members_get_access_to": "Group members get access to",
