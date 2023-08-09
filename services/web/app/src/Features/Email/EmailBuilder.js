@@ -360,6 +360,77 @@ templates.verifyEmailToJoinTeam = ctaTemplate({
   },
 })
 
+templates.verifyEmailToJoinManagedUsers = ctaTemplate({
+  subject(opts) {
+    return `You’ve been invited by ${_.escape(
+      _formatUserNameAndEmail(opts.inviter, 'a collaborator')
+    )} to join an ${settings.appName} group subscription.`
+  },
+  title(opts) {
+    return `You’ve been invited by ${_.escape(
+      _formatUserNameAndEmail(opts.inviter, 'a collaborator')
+    )} to join an ${settings.appName} group subscription.`
+  },
+  message(opts) {
+    return [
+      `By joining this group, you'll have access to ${settings.appName} premium features such as additional collaborators, greater maximum compile time, and real-time track changes.`,
+    ]
+  },
+  secondaryMessage(opts) {
+    return [
+      `<b>User accounts in this group are managed by ${_.escape(
+        _formatUserNameAndEmail(opts.admin, 'an admin')
+      )}</b>`,
+      `If you accept, you’ll transfer the management of your ${settings.appName} account to the owner of the group subscription, who will then have admin rights over your account and control over your stuff.`,
+      `If you have personal projects in your ${settings.appName} account that you want to keep separate, that’s not a problem. You can set up another account under a personal email address and change the ownership of your personal projects to the new account. Find out how to change project owner.`,
+    ]
+  },
+  ctaURL(opts) {
+    return opts.acceptInviteUrl
+  },
+  ctaText(opts) {
+    return 'Accept invitation'
+  },
+  greeting() {
+    return ''
+  },
+})
+
+templates.inviteNewUserToJoinManagedUsers = ctaTemplate({
+  subject(opts) {
+    return `You’ve been invited by ${_.escape(
+      _formatUserNameAndEmail(opts.inviter, 'a collaborator')
+    )} to join an ${settings.appName} group subscription.`
+  },
+  title(opts) {
+    return `You’ve been invited by ${_.escape(
+      _formatUserNameAndEmail(opts.inviter, 'a collaborator')
+    )} to join an ${settings.appName} group subscription.`
+  },
+  message(opts) {
+    return ['']
+  },
+  secondaryMessage(opts) {
+    return [
+      `User accounts in this group are managed by ${_.escape(
+        _formatUserNameAndEmail(opts.admin, 'an admin')
+      )}`,
+      `If you accept the owner of the group subscription will have admin rights over your account and control over your stuff.`,
+      `<b>What is ${settings.appName}?</b>`,
+      `${settings.appName} is the collaborative online LaTeX editor loved by researchers and technical writers. With thousands of ready-to-use templates and an array of LaTeX learning resources you’ll be up and running in no time.`,
+    ]
+  },
+  ctaURL(opts) {
+    return opts.acceptInviteUrl
+  },
+  ctaText(opts) {
+    return 'Accept invitation'
+  },
+  greeting() {
+    return ''
+  },
+})
+
 templates.testEmail = ctaTemplate({
   subject() {
     return `A Test Email from ${settings.appName}`
