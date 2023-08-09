@@ -1,4 +1,5 @@
 const User = require('./helpers/User')
+const Subscription = require('./helpers/Subscription')
 const request = require('./helpers/request')
 const async = require('async')
 const { expect } = require('chai')
@@ -21,13 +22,39 @@ before(function () {
 
 describe('Deleting a user', function () {
   beforeEach(function (done) {
-    this.user = new User()
-    async.series(
-      [
-        this.user.ensureUserExists.bind(this.user),
-        this.user.login.bind(this.user),
-      ],
-      done
+    async.auto(
+      {
+        user: cb => {
+          const user = new User()
+          user.ensureUserExists(() => {
+            cb(null, user)
+          })
+        },
+        login: [
+          'user',
+          (results, cb) => {
+            results.user.login(cb)
+          },
+        ],
+        subscription: [
+          'user',
+          'login',
+          (results, cb) => {
+            const subscription = new Subscription({
+              admin_id: results.user._id,
+            })
+            subscription.ensureExists(err => {
+              cb(err, subscription)
+            })
+          },
+        ],
+      },
+      (err, results) => {
+        expect(err).not.to.exist
+        this.user = results.user
+        this.subscription = results.subscription
+        done()
+      }
     )
   })
 

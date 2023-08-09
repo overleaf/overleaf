@@ -17,19 +17,12 @@ const UserMembershipAuthorization = {
       if (!req.entity) {
         return false
       }
-      return req.entity[req.entityConfig.fields.access].some(accessUserId =>
-        accessUserId.equals(req.user._id)
-      )
-    }
-  },
-
-  isEntityMember() {
-    return req => {
-      if (!req.entity) {
-        return false
-      }
-      return req.entity[req.entityConfig.fields.membership].some(accessUserId =>
-        accessUserId.equals(req.user._id)
+      const fieldAccess = req.entity[req.entityConfig.fields.access]
+      const fieldAccessArray = Array.isArray(fieldAccess)
+        ? fieldAccess
+        : [fieldAccess.toString()]
+      return fieldAccessArray.some(
+        accessUserId => accessUserId.toString() === req.user._id.toString()
       )
     }
   },
