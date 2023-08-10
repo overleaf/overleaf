@@ -414,7 +414,7 @@ templates.inviteNewUserToJoinManagedUsers = ctaTemplate({
     return [
       `User accounts in this group are managed by ${_.escape(
         _formatUserNameAndEmail(opts.admin, 'an admin')
-      )}`,
+      )}.`,
       `If you accept the owner of the group subscription will have admin rights over your account and control over your stuff.`,
       `<b>What is ${settings.appName}?</b>`,
       `${settings.appName} is the collaborative online LaTeX editor loved by researchers and technical writers. With thousands of ready-to-use templates and an array of LaTeX learning resources you’ll be up and running in no time.`,
