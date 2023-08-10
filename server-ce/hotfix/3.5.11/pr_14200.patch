@@ -1,0 +1,95 @@
+--- services/web/modules/history-migration/app/src/HistoryUpgradeHelper.js
++++ services/web/modules/history-migration/app/src/HistoryUpgradeHelper.js
+@@ -1,6 +1,9 @@
++const _ = require('lodash')
++const fs = require('fs')
+ const { ReadPreference, ObjectId } = require('mongodb')
+ const { db } = require('../../../../app/src/infrastructure/mongodb')
+ const Settings = require('@overleaf/settings')
++const logger = require('@overleaf/logger')
+
+ const ProjectHistoryHandler = require('../../../../app/src/Features/Project/ProjectHistoryHandler')
+ const HistoryManager = require('../../../../app/src/Features/History/HistoryManager')
+@@ -8,6 +11,8 @@ const ProjectHistoryController = require('./ProjectHistoryController')
+ const ProjectEntityHandler = require('../../../../app/src/Features/Project/ProjectEntityHandler')
+ const ProjectEntityUpdateHandler = require('../../../../app/src/Features/Project/ProjectEntityUpdateHandler')
+ const DocumentUpdaterHandler = require('../../../../app/src/Features/DocumentUpdater/DocumentUpdaterHandler')
++const { Doc } = require('../../../../app/src/models/Doc')
++const FileWriter = require('../../../../app/src/infrastructure/FileWriter')
+
+ // Timestamp of when 'Enable history for SL in background' release
+ const ID_WHEN_FULL_PROJECT_HISTORY_ENABLED =
+@@ -340,9 +345,33 @@ async function anyDocHistoryIndexExists(project) {
+   )
+ }
+
++async function convertDeletedDocToFile(projectId, docId, userId, source, doc) {
++  // write the doc to a temporary file and upload to filestore
++  const tmpFilePath = await FileWriter.promises.writeLinesToDisk(
++    projectId,
++    doc.lines
++  )
++  await ProjectEntityUpdateHandler.promises.upsertFileWithPath(
++    projectId,
++    `/_deleted/${docId}/${doc.name}`,
++    tmpFilePath,
++    null,
++    userId,
++    source
++  )
++  // hard delete the original doc, otherwise it will get picked up again
++  // by readDeletedDocs in ProjectHistoryController and the final
++  // resync of the history will fail.
++  await db.docs.deleteOne({ _id: docId })
++  await db.docOps.deleteOne({ doc_id: docId })
++  // clean up the temporary file
++  await fs.promises.unlink(tmpFilePath)
++}
++
+ async function convertLargeDocsToFile(projectId, userId) {
+-  const docs = await ProjectEntityHandler.promises.getAllDocs(projectId)
+   let convertedDocCount = 0
++  const docs = await ProjectEntityHandler.promises.getAllDocs(projectId)
++  // Convert large docs to files
+   for (const doc of Object.values(docs)) {
+     const sizeBound = JSON.stringify(doc.lines)
+     if (docIsTooLarge(sizeBound, doc.lines, Settings.max_doc_length)) {
+@@ -355,6 +384,39 @@ async function convertLargeDocsToFile(projectId, userId) {
+       convertedDocCount++
+     }
+   }
++  // Convert deleted docs to files, these cannot be converted by
++  // ProjectEntityUpdateHandler so we do it manually
++  const docsCursor = Doc.find({
++    project_id: ObjectId(projectId),
++  })
++    .lean()
++    .cursor()
++  for await (const doc of docsCursor) {
++    // check whether the doc is present in the filetree instead of
++    // relying on the deletedAt property
++    const docExistsInFiletree = _.find(docs, existingDoc =>
++      existingDoc._id.equals(doc._id)
++    )
++    if (docExistsInFiletree || doc.inS3) {
++      continue
++    }
++    const sizeBound = JSON.stringify(doc.lines)
++    if (docIsTooLarge(sizeBound, doc.lines, Settings.max_doc_length)) {
++      const docId = doc._id.toString()
++      if (!_.isEmpty(doc.ranges)) {
++        throw new Error(`found too large deleted doc with ranges: ${docId}`)
++      }
++      logger.warn({ projectId, docId }, 'converting large deleted doc')
++      await convertDeletedDocToFile(
++        projectId,
++        doc._id,
++        userId,
++        'history-migration',
++        doc
++      )
++      convertedDocCount++
++    }
++  }
+   return convertedDocCount
+ }
