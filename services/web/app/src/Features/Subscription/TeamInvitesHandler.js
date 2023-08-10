@@ -1,5 +1,4 @@
 const logger = require('@overleaf/logger')
-const OError = require('@overleaf/o-error')
 const crypto = require('crypto')
 
 const settings = require('@overleaf/settings')
@@ -154,10 +153,8 @@ async function _createInvite(subscription, email, inviter) {
       admin = await SubscriptionLocator.promises.getAdminEmailAndName(
         subscription._id
       )
-    } catch (error) {
-      logger.error(
-        OError.tag(error, 'error getting subscription admin email and name')
-      )
+    } catch (err) {
+      logger.error({ err }, 'error getting subscription admin email and name')
     }
 
     const user = await UserGetter.promises.getUserByAnyEmail(email)
