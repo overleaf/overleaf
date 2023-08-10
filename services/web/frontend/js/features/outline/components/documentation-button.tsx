@@ -25,7 +25,7 @@ function DocumentationButton() {
   )
 
   function handleCloseClick() {
-    sendMB('file-tree-documentation-dismiss ')
+    sendMB('file-tree-documentation-click')
 
     setShowDocumentationButton(false)
   }
