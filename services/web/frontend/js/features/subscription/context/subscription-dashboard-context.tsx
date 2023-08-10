@@ -40,6 +40,7 @@ type SubscriptionDashboardContextValue = {
     planCode?: string
   ) => void
   hasDisplayedSubscription: boolean
+  hasValidActiveSubscription: boolean
   institutionMemberships?: Institution[]
   managedGroupSubscriptions: ManagedGroupSubscription[]
   memberGroupSubscriptions: MemberGroupSubscription[]
@@ -130,6 +131,12 @@ export function SubscriptionDashboardProvider({
       managedGroupSubscriptions?.length > 0 ||
       managedInstitutions?.length > 0 ||
       managedPublishers?.length > 0
+  )
+
+  const hasValidActiveSubscription = Boolean(
+    ['active', 'canceled'].includes(personalSubscription?.recurly?.state) ||
+      institutionMemberships?.length > 0 ||
+      memberGroupSubscriptions?.length > 0
   )
 
   useEffect(() => {
@@ -243,6 +250,7 @@ export function SubscriptionDashboardProvider({
       handleCloseModal,
       handleOpenModal,
       hasDisplayedSubscription,
+      hasValidActiveSubscription,
       institutionMemberships,
       managedGroupSubscriptions,
       memberGroupSubscriptions,
@@ -277,6 +285,7 @@ export function SubscriptionDashboardProvider({
       handleCloseModal,
       handleOpenModal,
       hasDisplayedSubscription,
+      hasValidActiveSubscription,
       institutionMemberships,
       managedGroupSubscriptions,
       memberGroupSubscriptions,

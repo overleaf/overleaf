@@ -38,7 +38,7 @@ function SubscriptionDashboard() {
             <ManagedPublishers />
             <GroupSubscriptionMemberships />
             <InstitutionMemberships />
-            {hasDisplayedSubscription && <PremiumFeaturesLink />}
+            <PremiumFeaturesLink />
             {!hasDisplayedSubscription &&
               (hasSubscription ? <ContactSupport /> : <FreePlan />)}
           </div>
