@@ -647,21 +647,6 @@ const ProjectController = {
             }
           )
         },
-        editorDocumentationButton(cb) {
-          SplitTestHandler.getAssignment(
-            req,
-            res,
-            'documentation-on-editor',
-            (error, assignment) => {
-              // do not fail editor load if assignment fails
-              if (error) {
-                cb(null, { variant: 'default' })
-              } else {
-                cb(null, assignment)
-              }
-            }
-          )
-        },
         // this is only needed until the survey link is removed from the toolbar
         richTextAssignment(cb) {
           SplitTestHandler.getAssignment(
