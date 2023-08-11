@@ -24,6 +24,7 @@ import { figureModalPasteHandler } from '../figure-modal'
 import { isSplitTestEnabled } from '../../../../utils/splitTestUtils'
 import { toolbarPanel } from '../toolbar/toolbar-panel'
 import { selectDecoratedArgument } from './select-decorated-argument'
+import { pasteHtml } from './paste-html'
 
 type Options = {
   visual: boolean
@@ -204,4 +205,5 @@ const extension = (options: Options) => [
   selectDecoratedArgument,
   showContentWhenParsed,
   figureModalPasteHandler(),
+  isSplitTestEnabled('paste-html') ? pasteHtml : [],
 ]

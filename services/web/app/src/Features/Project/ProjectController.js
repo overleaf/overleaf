@@ -689,6 +689,12 @@ const ProjectController = {
             cb()
           })
         },
+        pasteHtmlAssignment(cb) {
+          SplitTestHandler.getAssignment(req, res, 'paste-html', () => {
+            // We'll pick up the assignment from the res.locals assignment.
+            cb()
+          })
+        },
         sourceEditorToolbarAssigment(cb) {
           SplitTestHandler.getAssignment(
             req,
