@@ -248,6 +248,16 @@ export const visualTheme = EditorView.theme({
   '.ol-cm-command-textsf': {
     fontFamily: 'var(--source-font-family)',
   },
+  '.ol-cm-command-textsuperscript': {
+    verticalAlign: 'super',
+    fontSize: 'smaller',
+    lineHeight: 'calc(var(--line-height) / 2)',
+  },
+  '.ol-cm-command-textsubscript': {
+    verticalAlign: 'sub',
+    fontSize: 'smaller',
+    lineHeight: 'calc(var(--line-height) / 2)',
+  },
   '.ol-cm-command-underline': {
     textDecoration: 'underline',
   },

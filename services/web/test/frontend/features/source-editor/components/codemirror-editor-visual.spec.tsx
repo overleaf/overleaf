@@ -154,6 +154,8 @@ describe('<CodeMirrorEditor/> in Visual mode', function () {
     'texttt',
     'textmd',
     'textsf',
+    'textsubscript',
+    'textsuperscript',
     'sout',
     'emph',
     'url',

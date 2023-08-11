@@ -936,6 +936,8 @@ export const atomicDecorations = (options: Options) => {
                   '\\texttt',
                   '\\textmd',
                   '\\textsf',
+                  '\\textsuperscript',
+                  '\\textsubscript',
                   '\\sout',
                   '\\emph',
                 ].includes(commandName)
