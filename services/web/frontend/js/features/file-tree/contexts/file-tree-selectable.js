@@ -150,6 +150,7 @@ export function FileTreeSelectableProvider({ onSelect, children }) {
 
       dispatch({ type: ACTION_TYPES.SELECT, id: found.entity._id })
     }
+
     window.addEventListener('editor.openDoc', handleOpenDoc)
     return () => window.removeEventListener('editor.openDoc', handleOpenDoc)
   }, [fileTreeData])
@@ -202,7 +203,11 @@ const editorContextPropTypes = {
   permissionsLevel: PropTypes.oneOf(['readOnly', 'readAndWrite', 'owner']),
 }
 
-export function useSelectableEntity(id, isFile) {
+export function useSelectableEntity(
+  id,
+  shouldShowVisualSelection = true,
+  isFile
+) {
   const { view, setView } = useLayoutContext(layoutContextPropTypes)
   const { selectedEntityIds, selectOrMultiSelectEntity } = useContext(
     FileTreeSelectableContext
@@ -244,7 +249,8 @@ export function useSelectableEntity(id, isFile) {
     [id, handleEvent, selectedEntityIds]
   )
 
-  const isVisuallySelected = isSelected && view !== 'pdf'
+  const isVisuallySelected =
+    shouldShowVisualSelection && isSelected && view !== 'pdf'
   const props = useMemo(
     () => ({
       className: classNames({ selected: isVisuallySelected }),

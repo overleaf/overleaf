@@ -11,6 +11,7 @@ import { fileFinalPathname } from '../../utils/file-diff'
 type HistoryFileTreeFolderListProps = {
   folders: HistoryFileTree[]
   docs: HistoryDoc[]
+  shouldShowVisualSelection: boolean
   rootClassName?: string
   children?: ReactNode
 }
@@ -19,6 +20,7 @@ function HistoryFileTreeFolderList({
   folders,
   docs,
   rootClassName,
+  shouldShowVisualSelection,
   children,
 }: HistoryFileTreeFolderListProps) {
   const { selection, setSelection } = useHistoryContext()
@@ -64,6 +66,7 @@ function HistoryFileTreeFolderList({
           name={folder.name}
           folders={folder.folders}
           docs={folder.docs ?? []}
+          shouldShowVisualSelection={shouldShowVisualSelection}
         />
       ))}
       {docs.map(doc => (
@@ -72,6 +75,7 @@ function HistoryFileTreeFolderList({
           name={doc.name}
           file={doc}
           selected={
+            shouldShowVisualSelection &&
             !!selection.selectedFile &&
             fileFinalPathname(selection.selectedFile) === doc.pathname
           }

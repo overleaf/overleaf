@@ -11,12 +11,14 @@ type HistoryFileTreeFolderProps = {
   name: string
   folders: HistoryFileTree[]
   docs: HistoryDoc[]
+  shouldShowVisualSelection: boolean
 }
 
 function HistoryFileTreeFolder({
   name,
   folders,
   docs,
+  shouldShowVisualSelection,
 }: HistoryFileTreeFolderProps) {
   const { t } = useTranslation()
 
@@ -58,7 +60,11 @@ function HistoryFileTreeFolder({
         <HistoryFileTreeItem name={name} icons={icons} />
       </li>
       {expanded ? (
-        <HistoryFileTreeFolderList folders={folders} docs={docs} />
+        <HistoryFileTreeFolderList
+          folders={folders}
+          docs={docs}
+          shouldShowVisualSelection={shouldShowVisualSelection}
+        />
       ) : null}
     </>
   )
