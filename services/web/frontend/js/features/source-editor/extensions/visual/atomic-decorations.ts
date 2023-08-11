@@ -3,6 +3,7 @@ import {
   Decoration,
   DecorationSet,
   EditorView,
+  ViewPlugin,
   WidgetType,
 } from '@codemirror/view'
 import { SyntaxNode, Tree } from '@lezer/common'
@@ -59,6 +60,7 @@ import { BeginTheoremWidget } from './visual-widgets/begin-theorem'
 import { parseTheoremArguments } from '../../utils/tree-operations/theorems'
 import { IndicatorWidget } from './visual-widgets/indicator'
 import { TabularWidget } from './visual-widgets/tabular'
+import { nextSnippetField, pickedCompletion } from '@codemirror/autocomplete'
 
 type Options = {
   fileTreeManager: {
@@ -587,19 +589,24 @@ export const atomicDecorations = (options: Options) => {
           return false // no markup in cite content
         } else if (nodeRef.type.is('Ref')) {
           // \ref command with a ref label argument
-          if (shouldDecorate(state, nodeRef)) {
-            const argumentNode = nodeRef.node
-              .getChild('RefArgument')
-              ?.getChild('ShortTextArgument')
 
-            decorations.push(
-              ...decorateArgumentBraces(
-                new IconBraceWidget('🏷'),
-                argumentNode,
-                nodeRef.from
-              )
+          const argumentNode = nodeRef.node
+            .getChild('RefArgument')
+            ?.getChild('ShortTextArgument')
+
+          const shouldShowBraces =
+            !shouldDecorate(state, nodeRef) ||
+            argumentNode?.from === argumentNode?.to
+
+          decorations.push(
+            ...decorateArgumentBraces(
+              new IconBraceWidget(shouldShowBraces ? '🏷{' : '🏷'),
+              argumentNode,
+              nodeRef.from,
+              true,
+              new BraceWidget(shouldShowBraces ? '}' : '')
             )
-          }
+          )
 
           return false // no markup in ref content
         } else if (nodeRef.type.is('Label')) {
@@ -727,19 +734,56 @@ export const atomicDecorations = (options: Options) => {
           return false // never decorate inside math
         } else if (nodeRef.type.is('HrefCommand')) {
           // a hyperlink with URL and content arguments
-          if (shouldDecorate(state, nodeRef)) {
-            const urlArgument = nodeRef.node.getChild('UrlArgument')
-            const textArgument = nodeRef.node.getChild('ShortTextArgument')
+          const urlArgumentNode = nodeRef.node.getChild('UrlArgument')
+          const urlNode = urlArgumentNode?.getChild('LiteralArgContent')
+          const contentArgumentNode = nodeRef.node.getChild('ShortTextArgument')
+          const contentNode = contentArgumentNode?.getChild('ShortArg')
 
-            if (urlArgument) {
+          if (
+            urlArgumentNode &&
+            urlNode &&
+            contentArgumentNode &&
+            contentNode
+          ) {
+            const shouldShowBraces =
+              !shouldDecorate(state, nodeRef) ||
+              contentNode.from === contentNode.to
+
+            const url = state.sliceDoc(urlNode.from, urlNode.to)
+
+            // avoid decorating when the URL spans multiple lines, as the argument node is probably unclosed
+            if (!url.includes('\n')) {
               decorations.push(
                 ...decorateArgumentBraces(
-                  new BraceWidget(),
-                  textArgument,
-                  nodeRef.from
+                  new BraceWidget(shouldShowBraces ? '{' : ''),
+                  contentArgumentNode,
+                  nodeRef.from,
+                  true,
+                  new BraceWidget(shouldShowBraces ? '}' : '')
                 )
               )
             }
+          }
+        } else if (nodeRef.type.is('UrlCommand')) {
+          // a hyperlink with URL and content arguments
+          const argumentNode = nodeRef.node.getChild('UrlArgument')
+
+          if (argumentNode) {
+            const contentNode = argumentNode.getChild('LiteralArgContent')
+
+            const shouldShowBraces =
+              !shouldDecorate(state, nodeRef) ||
+              contentNode?.from === contentNode?.to
+
+            decorations.push(
+              ...decorateArgumentBraces(
+                new BraceWidget(shouldShowBraces ? '{' : ''),
+                argumentNode,
+                nodeRef.from,
+                false,
+                new BraceWidget(shouldShowBraces ? '}' : '')
+              )
+            )
           }
         } else if (nodeRef.type.is('Tilde')) {
           // a tilde (non-breaking space)
@@ -951,18 +995,6 @@ export const atomicDecorations = (options: Options) => {
                     )
                   )
                 }
-              } else if (commandName === '\\url') {
-                if (shouldDecorate(state, nodeRef)) {
-                  // command name and opening brace
-                  decorations.push(
-                    ...decorateArgumentBraces(
-                      new BraceWidget(),
-                      textArgumentNode,
-                      nodeRef.from
-                    )
-                  )
-                  return false
-                }
               } else if (
                 commandName === '\\footnote' ||
                 commandName === '\\endnote'
@@ -1136,6 +1168,17 @@ export const atomicDecorations = (options: Options) => {
         return [
           EditorView.decorations.from(field, field => field.decorations),
           EditorView.atomicRanges.from(field, value => () => value.decorations),
+          ViewPlugin.define(view => {
+            return {
+              update(update) {
+                for (const tr of update.transactions) {
+                  if (tr.annotation(pickedCompletion)?.label === '\\href{}{}') {
+                    window.setTimeout(() => nextSnippetField(view))
+                  }
+                }
+              },
+            }
+          }),
         ]
       },
     }),

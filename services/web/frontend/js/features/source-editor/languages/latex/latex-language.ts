@@ -38,6 +38,7 @@ const Styles = {
 }
 
 const typeMap: Record<string, string[]> = {
+  // commands that are section headings
   PartCtrlSeq: ['$SectioningCommand'],
   ChapterCtrlSeq: ['$SectioningCommand'],
   SectionCtrlSeq: ['$SectioningCommand'],
@@ -45,6 +46,12 @@ const typeMap: Record<string, string[]> = {
   SubSubSectionCtrlSeq: ['$SectioningCommand'],
   ParagraphCtrlSeq: ['$SectioningCommand'],
   SubParagraphCtrlSeq: ['$SectioningCommand'],
+  // commands that have a "command tooltip"
+  HrefCommand: ['$CommandTooltipCommand'],
+  Include: ['$CommandTooltipCommand'],
+  Input: ['$CommandTooltipCommand'],
+  Ref: ['$CommandTooltipCommand'],
+  UrlCommand: ['$CommandTooltipCommand'],
 }
 
 export const LaTeXLanguage = LRLanguage.define({

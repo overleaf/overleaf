@@ -181,7 +181,6 @@ describe('<CodeMirrorEditor/> in Visual mode', function () {
   })
 
   forEach([
-    ['ref', '🏷'],
     ['label', '🏷'],
     ['cite', '📚'],
     ['include', '🔗'],
@@ -192,6 +191,17 @@ describe('<CodeMirrorEditor/> in Visual mode', function () {
     cy.get('@first-line').should('have.text', `\\${command}{key}`)
     cy.get('@first-line').type('{rightArrow}')
     cy.get('@first-line').should('have.text', `\\${command}{key}`)
+    cy.get('@first-line').type(' ')
+    cy.get('@first-line').should('have.text', `${icon}key `)
+  })
+
+  forEach([['ref', '🏷']]).it('handles \\%s commands', function (command, icon) {
+    cy.get('@first-line').type(`\\${command}{} `)
+    cy.get('@first-line').should('have.text', `${icon} `)
+    cy.get('@first-line').type('{Backspace}{leftArrow}key')
+    cy.get('@first-line').should('have.text', `${icon}{key}`)
+    cy.get('@first-line').type('{rightArrow}')
+    cy.get('@first-line').should('have.text', `${icon}{key}`)
     cy.get('@first-line').type(' ')
     cy.get('@first-line').should('have.text', `${icon}key `)
   })

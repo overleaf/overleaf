@@ -17,11 +17,15 @@ import {
 import { snippet } from '@codemirror/autocomplete'
 import { snippets } from './snippets'
 import { minimumListDepthForSelection } from '../../utils/tree-operations/ancestors'
+import { isVisual } from '../visual/visual'
 
 export const toggleBold = toggleRanges('\\textbf')
 export const toggleItalic = toggleRanges('\\textit')
-export const wrapInHref = wrapRanges('\\href{}{', '}', false, range =>
-  EditorSelection.cursor(range.from - 2)
+
+// TODO: apply as a snippet?
+// TODO: read URL from clipboard?
+export const wrapInHref = wrapRanges('\\href{}{', '}', false, (range, view) =>
+  isVisual(view) ? range : EditorSelection.cursor(range.from - 2)
 )
 export const toggleBulletList = toggleListForRanges('itemize')
 export const toggleNumberedList = toggleListForRanges('enumerate')

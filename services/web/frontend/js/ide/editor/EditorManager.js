@@ -156,6 +156,18 @@ export default EditorManager = (function () {
         const { doc, ...options } = event.detail
         this.openDoc(doc, options)
       })
+
+      window.addEventListener('editor:open-file', event => {
+        const { name, ...options } = event.detail
+        for (const extension of ['', '.tex']) {
+          const path = `${name}${extension}`
+          const doc = ide.fileTreeManager.findEntityByPath(path)
+          if (doc) {
+            this.openDoc(doc, options)
+            break
+          }
+        }
+      })
     }
 
     getEditorType() {

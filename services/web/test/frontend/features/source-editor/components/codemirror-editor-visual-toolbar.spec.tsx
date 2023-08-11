@@ -116,12 +116,8 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
     selectAll()
 
     clickToolbarButton('Insert Link')
-    cy.get('.cm-content').should('have.text', '\\href{}{test}')
-
-    cy.get('.cm-line').eq(0).type('http://example.com')
-    cy.get('.cm-line')
-      .eq(0)
-      .should('have.text', '\\href{http://example.com}{test}')
+    cy.get('.cm-content').should('have.text', '{test}')
+    cy.findByLabelText('URL') // tooltip form
   })
 
   it('should insert a bullet list', function () {

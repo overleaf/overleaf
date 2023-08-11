@@ -23,7 +23,7 @@ export const wrapRanges =
     prefix: string,
     suffix: string,
     wrapWholeLine = false,
-    selection?: (range: SelectionRange) => SelectionRange
+    selection?: (range: SelectionRange, view: EditorView) => SelectionRange
   ) =>
   (view: EditorView): boolean => {
     if (view.state.readOnly) {
@@ -63,7 +63,7 @@ export const wrapRanges =
         )
 
         return {
-          range: selection ? selection(changedRange) : changedRange,
+          range: selection ? selection(changedRange, view) : changedRange,
           // create a single change, including the content
           changes: [
             {

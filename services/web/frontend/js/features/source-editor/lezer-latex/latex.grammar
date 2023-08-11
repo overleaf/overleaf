@@ -58,6 +58,7 @@
     DocumentClassCtrlSeq,
     UsePackageCtrlSeq,
     HrefCtrlSeq,
+    UrlCtrlSeq,
     VerbCtrlSeq,
     LstInlineCtrlSeq,
     IncludeGraphicsCtrlSeq,
@@ -257,6 +258,9 @@ KnownCommand {
     } |
     TheoremStyleCommand {
         TheoremStyleCtrlSeq optionalWhitespace? ShortTextArgument
+    } |
+    UrlCommand {
+        UrlCtrlSeq optionalWhitespace? UrlArgument
     } |
     VerbCommand {
         VerbCtrlSeq VerbContent
