@@ -142,7 +142,7 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
     cy.spy(clipboardData, 'getData').as('get-data')
     cy.get('@content').trigger('paste', { clipboardData })
 
-    cy.get('@content').should('have.text', '\\href{https://example.com/}{foo}')
+    cy.get('@content').should('have.text', '{foo}')
     cy.get('.ol-cm-command-href').should('have.length', 1)
   })
 
@@ -183,19 +183,18 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
   it('handles pasted text with formatting', function () {
     mountEditor()
 
-    const data = '<b>foo</b><sup>th</sup> <i>bar</i><sub>2</sub>'
+    const data = '<b>foo</b><sup>th</sup> <i>bar</i><sub>2</sub> baz'
 
     const clipboardData = new DataTransfer()
     clipboardData.setData('text/html', data)
     cy.spy(clipboardData, 'getData').as('get-data')
     cy.get('@content').trigger('paste', { clipboardData })
 
-    cy.get('@content').should(
-      'have.text',
-      'foo\\textsuperscript{th} bar\\textsubscript{2}'
-    )
+    cy.get('@content').should('have.text', 'footh bar2 baz')
     cy.get('.ol-cm-command-textbf').should('have.length', 1)
     cy.get('.ol-cm-command-textit').should('have.length', 1)
+    cy.get('.ol-cm-command-textsuperscript').should('have.length', 1)
+    cy.get('.ol-cm-command-textsubscript').should('have.length', 1)
   })
 
   it('protects special characters', function () {
