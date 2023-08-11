@@ -76,13 +76,13 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlet</artifactId>
-            <version>9.4.48.v20220622</version>
+            <version>9.4.51.v20230217</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-server -->
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
-            <version>9.4.48.v20220622</version>
+            <version>9.4.51.v20230217</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
         <dependency>
@@ -112,7 +112,7 @@
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
-            <version>3.36.0.1</version>
+            <version>3.41.2.2</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/joda-time/joda-time -->
         <dependency>
@@ -149,12 +149,6 @@
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>1.2.3</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>30.1.1-jre</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.mock-server/mockserver-netty -->
         <dependency>
