@@ -312,6 +312,7 @@ function _createBlob(historyId, fsPath, _callback) {
     fetchNothing(url, {
       method: 'PUT',
       body: outStream,
+      headers: { 'Content-Length': byteLength }, // add the content length to work around problems with chunked encoding in node 18
       ...getHistoryFetchOptions(),
     })
       .then(res => {
