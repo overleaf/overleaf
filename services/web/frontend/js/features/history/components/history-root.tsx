@@ -8,7 +8,7 @@ import LoadingSpinner from '../../../shared/components/loading-spinner'
 import { ErrorBoundaryFallback } from '../../../shared/components/error-boundary-fallback'
 import withErrorBoundary from '../../../infrastructure/error-boundary'
 
-export const fileTreeContainer = document.getElementById('history-file-tree')
+const fileTreeContainer = document.getElementById('history-file-tree')
 
 function Main() {
   const { view } = useLayoutContext()
