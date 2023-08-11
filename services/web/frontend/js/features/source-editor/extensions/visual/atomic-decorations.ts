@@ -843,7 +843,7 @@ export const atomicDecorations = (options: Options) => {
           if (shouldDecorate(state, nodeRef)) {
             const line = state.doc.lineAt(nodeRef.from)
             const from = extendBackwardsOverEmptyLines(state.doc, line)
-            const to = extendForwardsOverEmptyLines(state.doc, line)
+            const { to } = state.doc.lineAt(nodeRef.to)
 
             if (shouldDecorate(state, { from, to })) {
               decorations.push(
