@@ -1,15 +1,8 @@
 import { Trans } from 'react-i18next'
 import getMeta from '../../../../utils/meta'
 import * as eventTracking from '../../../../infrastructure/event-tracking'
-import { useSubscriptionDashboardContext } from '../../context/subscription-dashboard-context'
 
 function PremiumFeaturesLink() {
-  const { hasValidActiveSubscription } = useSubscriptionDashboardContext()
-
-  if (!hasValidActiveSubscription) {
-    return null
-  }
-
   const featuresPageVariant =
     getMeta('ol-splitTestVariants')?.['features-page'] || 'default'
 

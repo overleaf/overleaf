@@ -1,14 +1,9 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
-import { fireEvent, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import * as eventTracking from '../../../../../../frontend/js/infrastructure/event-tracking'
 import PremiumFeaturesLink from '../../../../../../frontend/js/features/subscription/components/dashboard/premium-features-link'
 import * as useLocationModule from '../../../../../../frontend/js/shared/hooks/use-location'
-import {
-  cleanUpContext,
-  renderWithSubscriptionDashContext,
-} from '../../helpers/render-with-subscription-dash-context'
-import { annualActiveSubscription } from '../../fixtures/subscriptions'
 
 describe('<PremiumFeaturesLink />', function () {
   const originalLocation = window.location
@@ -21,6 +16,7 @@ describe('<PremiumFeaturesLink />', function () {
   ]
 
   beforeEach(function () {
+    window.metaAttributesCache = new Map()
     sendMBSpy = sinon.spy(eventTracking, 'sendMB')
     this.locationStub = sinon.stub(useLocationModule, 'useLocation').returns({
       assign: sinon.stub(),
@@ -29,32 +25,24 @@ describe('<PremiumFeaturesLink />', function () {
   })
 
   afterEach(function () {
+    window.metaAttributesCache = new Map()
     sendMBSpy.restore()
     this.locationStub.restore()
-    cleanUpContext()
-  })
-
-  describe('without an active valid subscription', function () {
-    it('returns an empty container', function () {
-      const { container } = renderWithSubscriptionDashContext(
-        <PremiumFeaturesLink />
-      )
-      expect(container.firstChild).to.be.null
-    })
   })
 
   for (const variant of variants) {
     describe(`${variant.name} variant`, function () {
-      it('renders the premium features link and sends analytics event', function () {
-        renderWithSubscriptionDashContext(<PremiumFeaturesLink />, {
-          metaTags: [
-            { name: 'ol-subscription', value: annualActiveSubscription },
-            {
-              name: 'ol-splitTestVariants',
-              value: { 'features-page': variant.name },
-            },
-          ],
+      beforeEach(function () {
+        window.metaAttributesCache.set('ol-splitTestVariants', {
+          'features-page': variant.name,
         })
+      })
+      afterEach(function () {
+        window.metaAttributesCache.delete('ol-splitTestVariants')
+      })
+
+      it('renders the premium features link and sends analytics event', function () {
+        render(<PremiumFeaturesLink />)
         const premiumText = screen.getByText('Get the most out of your', {
           exact: false,
         })

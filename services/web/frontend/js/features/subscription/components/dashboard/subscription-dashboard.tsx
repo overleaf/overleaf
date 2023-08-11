@@ -13,8 +13,11 @@ import PremiumFeaturesLink from './premium-features-link'
 
 function SubscriptionDashboard() {
   const { t } = useTranslation()
-  const { hasDisplayedSubscription, hasSubscription } =
-    useSubscriptionDashboardContext()
+  const {
+    hasDisplayedSubscription,
+    hasSubscription,
+    hasValidActiveSubscription,
+  } = useSubscriptionDashboardContext()
 
   const fromPlansPage: boolean = getMeta('ol-fromPlansPage')
 
@@ -38,7 +41,7 @@ function SubscriptionDashboard() {
             <ManagedPublishers />
             <GroupSubscriptionMemberships />
             <InstitutionMemberships />
-            <PremiumFeaturesLink />
+            {hasValidActiveSubscription && <PremiumFeaturesLink />}
             {!hasDisplayedSubscription &&
               (hasSubscription ? <ContactSupport /> : <FreePlan />)}
           </div>
