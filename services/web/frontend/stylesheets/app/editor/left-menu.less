@@ -11,7 +11,7 @@
   -webkit-transition: left ease-in-out @left-menu-animation-duration;
   transition: left ease-in-out @left-menu-animation-duration;
   font-size: 14px;
-  left: -280px;
+  left: -@left-menu-width;
 
   &.shown {
     left: 0;
@@ -206,7 +206,7 @@
     position: initial;
   }
   &.modal.fade .modal-dialog {
-    left: -280px;
+    left: -@left-menu-width;
     transition: left ease-in-out @left-menu-animation-duration;
     -webkit-transition: left ease-in-out @left-menu-animation-duration;
     transform: translate(0, 0);
