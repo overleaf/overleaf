@@ -17,7 +17,8 @@ export const Cell: FC<{
   columnIndex: number
   row: RowData
 }> = ({ cellData, columnSpecification, rowIndex, columnIndex, row }) => {
-  const { selection, setSelection } = useSelectionContext()
+  const { selection, setSelection, dragging, setDragging } =
+    useSelectionContext()
   const renderDiv = useRef<HTMLDivElement>(null)
   const cellRef = useRef<HTMLTableCellElement>(null)
   const {
@@ -36,22 +37,56 @@ export const Cell: FC<{
       if (event.button !== 0) {
         return
       }
-      event.stopPropagation()
+      setDragging(true)
+      document.getSelection()?.empty()
       setSelection(current => {
         if (event.shiftKey && current) {
           return new TableSelection(current.from, {
-            row: rowIndex,
             cell: columnIndex,
+            row: rowIndex,
           })
-        } else {
-          return new TableSelection(
-            { row: rowIndex, cell: columnIndex },
-            { row: rowIndex, cell: columnIndex }
-          )
         }
+        return new TableSelection({ cell: columnIndex, row: rowIndex })
       })
     },
-    [setSelection, rowIndex, columnIndex]
+    [setDragging, columnIndex, rowIndex, setSelection]
+  )
+
+  const onMouseUp = useCallback(() => {
+    if (dragging) {
+      setDragging(false)
+    }
+  }, [setDragging, dragging])
+
+  const onMouseMove: MouseEventHandler = useCallback(
+    event => {
+      if (dragging) {
+        if (event.buttons !== 1) {
+          setDragging(false)
+          return
+        }
+        document.getSelection()?.empty()
+        if (
+          selection?.to.cell === columnIndex &&
+          selection?.to.row === rowIndex
+        ) {
+          // Do nothing if selection has remained the same
+          return
+        }
+        event.stopPropagation()
+        setSelection(current => {
+          if (current) {
+            return new TableSelection(current.from, {
+              row: rowIndex,
+              cell: columnIndex,
+            })
+          } else {
+            return new TableSelection({ row: rowIndex, cell: columnIndex })
+          }
+        })
+      }
+    },
+    [dragging, columnIndex, rowIndex, setSelection, selection, setDragging]
   )
 
   useEffect(() => {
@@ -122,6 +157,8 @@ export const Cell: FC<{
       onDoubleClick={onDoubleClick}
       tabIndex={row.cells.length * rowIndex + columnIndex + 1}
       onMouseDown={onMouseDown}
+      onMouseUp={onMouseUp}
+      onMouseMove={onMouseMove}
       ref={cellRef}
       className={classNames('table-generator-cell', {
         'table-generator-cell-border-left': columnSpecification.borderLeft > 0,

@@ -260,6 +260,7 @@ export const toolbarPanel = () => [
       tableLayout: 'fixed',
       fontSize: '6px',
       cursor: 'pointer',
+      width: '160px',
       '& td': {
         outline: '1px solid #E7E9EE',
         outlineOffset: '-2px',
@@ -279,6 +280,7 @@ export const toolbarPanel = () => [
     },
     '.ol-cm-toolbar-table-grid-popover': {
       padding: '8px',
+      marginLeft: '80px',
     },
   }),
 ]

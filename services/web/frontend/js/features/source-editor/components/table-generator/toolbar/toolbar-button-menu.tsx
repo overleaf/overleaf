@@ -3,7 +3,7 @@ import useDropdown from '../../../../../shared/hooks/use-dropdown'
 import { Button, ListGroup, Overlay, Popover } from 'react-bootstrap'
 import Tooltip from '../../../../../shared/components/tooltip'
 import MaterialIcon from '../../../../../shared/components/material-icon'
-import { useCodeMirrorViewContext } from '../../codemirror-editor'
+import { useTabularContext } from '../contexts/tabular-context'
 
 export const ToolbarButtonMenu: FC<{
   id: string
@@ -13,7 +13,7 @@ export const ToolbarButtonMenu: FC<{
 }> = memo(function ButtonMenu({ icon, id, label, children, disabled }) {
   const target = useRef<any>(null)
   const { open, onToggle, ref } = useDropdown()
-  const view = useCodeMirrorViewContext()
+  const { ref: tableContainerRef } = useTabularContext()
 
   const button = (
     <Button
@@ -36,12 +36,12 @@ export const ToolbarButtonMenu: FC<{
     </Button>
   )
 
-  const overlay = (
+  const overlay = tableContainerRef.current && (
     <Overlay
       show={open}
       target={target.current}
       placement="bottom"
-      container={view.dom}
+      container={tableContainerRef.current}
       containerPadding={0}
       animation
       onHide={() => onToggle(false)}

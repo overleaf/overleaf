@@ -1,6 +1,7 @@
 import { FC, createContext, useCallback, useContext, useState } from 'react'
 import { useCodeMirrorViewContext } from '../../codemirror-editor'
 import { useTableContext } from './table-context'
+import { TableSelection } from './selection-context'
 
 type EditingContextData = {
   rowIndex: number
@@ -15,6 +16,7 @@ const EditingContext = createContext<
       updateCellData: (content: string) => void
       cancelEditing: () => void
       commitCellData: () => void
+      clearCells: (selection: TableSelection) => void
       startEditing: (
         rowIndex: number,
         cellIndex: number,
@@ -84,6 +86,22 @@ export const EditingContextProvider: FC = ({ children }) => {
     },
     [setCellData]
   )
+
+  const clearCells = useCallback(
+    (selection: TableSelection) => {
+      const changes: { from: number; to: number; insert: '' }[] = []
+      const { minX, minY, maxX, maxY } = selection.normalized()
+      for (let row = minY; row <= maxY; row++) {
+        for (let cell = minX; cell <= maxX; cell++) {
+          const { from, to } = cellPositions[row][cell]
+          changes.push({ from, to, insert: '' })
+        }
+      }
+      view.dispatch({ changes })
+    },
+    [view, cellPositions]
+  )
+
   return (
     <EditingContext.Provider
       value={{
@@ -92,6 +110,7 @@ export const EditingContextProvider: FC = ({ children }) => {
         cancelEditing,
         commitCellData,
         startEditing,
+        clearCells,
       }}
     >
       {children}

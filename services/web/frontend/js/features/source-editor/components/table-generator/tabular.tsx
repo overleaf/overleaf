@@ -1,16 +1,23 @@
 import { SyntaxNode } from '@lezer/common'
-import { FC } from 'react'
+import { FC, useEffect } from 'react'
 import { CellPosition, RowPosition } from './utils'
 import { Toolbar } from './toolbar/toolbar'
 import { Table } from './table'
-import { SelectionContextProvider } from './contexts/selection-context'
-import { EditingContextProvider } from './contexts/editing-context'
+import {
+  SelectionContextProvider,
+  useSelectionContext,
+} from './contexts/selection-context'
+import {
+  EditingContextProvider,
+  useEditingContext,
+} from './contexts/editing-context'
 import { EditorView } from '@codemirror/view'
 import { ErrorBoundary } from 'react-error-boundary'
 import { Alert, Button } from 'react-bootstrap'
 import { EditorSelection } from '@codemirror/state'
 import { CodeMirrorViewContextProvider } from '../codemirror-editor'
 import { TableProvider } from './contexts/table-context'
+import { TabularProvider, useTabularContext } from './contexts/tabular-context'
 
 export type CellData = {
   // TODO: Add columnSpan
@@ -72,17 +79,45 @@ export const Tabular: FC<{
       onError={(error, componentStack) => console.error(error, componentStack)}
     >
       <CodeMirrorViewContextProvider value={view}>
-        <TableProvider tabularNode={tabularNode} view={view}>
-          <SelectionContextProvider>
-            <EditingContextProvider>
-              <div className="table-generator">
-                <Toolbar />
-                <Table />
-              </div>
-            </EditingContextProvider>
-          </SelectionContextProvider>
-        </TableProvider>
+        <TabularProvider>
+          <TableProvider tabularNode={tabularNode} view={view}>
+            <SelectionContextProvider>
+              <EditingContextProvider>
+                <TabularWrapper />
+              </EditingContextProvider>
+            </SelectionContextProvider>
+          </TableProvider>
+        </TabularProvider>
       </CodeMirrorViewContextProvider>
     </ErrorBoundary>
+  )
+}
+
+const TabularWrapper: FC = () => {
+  const { setSelection, selection } = useSelectionContext()
+  const { commitCellData, cellData } = useEditingContext()
+  const { ref } = useTabularContext()
+  useEffect(() => {
+    const listener: (event: MouseEvent) => void = event => {
+      if (!ref.current?.contains(event.target as Node)) {
+        if (selection) {
+          setSelection(null)
+        }
+        if (cellData) {
+          commitCellData()
+        }
+      }
+    }
+    window.addEventListener('mousedown', listener)
+
+    return () => {
+      window.removeEventListener('mousedown', listener)
+    }
+  }, [cellData, commitCellData, selection, setSelection, ref])
+  return (
+    <div className="table-generator" ref={ref}>
+      <Toolbar />
+      <Table />
+    </div>
   )
 }

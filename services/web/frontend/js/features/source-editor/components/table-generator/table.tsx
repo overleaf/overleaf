@@ -1,4 +1,11 @@
-import { FC, KeyboardEventHandler, useCallback, useMemo, useRef } from 'react'
+import {
+  FC,
+  KeyboardEvent,
+  KeyboardEventHandler,
+  useCallback,
+  useMemo,
+  useRef,
+} from 'react'
 import { Row } from './row'
 import { ColumnSelector } from './selectors'
 import {
@@ -23,8 +30,14 @@ type NavigationMap = {
 
 export const Table: FC = () => {
   const { selection, setSelection } = useSelectionContext()
-  const { cellData, cancelEditing, startEditing, commitCellData } =
-    useEditingContext()
+  const {
+    cellData,
+    cancelEditing,
+    startEditing,
+    commitCellData,
+    clearCells,
+    updateCellData,
+  } = useEditingContext()
   const { table: tableData } = useTableContext()
   const tableRef = useRef<HTMLTableElement>(null)
   const view = useCodeMirrorViewContext()
@@ -50,6 +63,15 @@ export const Table: FC = () => {
     [selection, tableData.columns.length, tableData.rows.length]
   )
 
+  const isCharacterInput = useCallback((event: KeyboardEvent) => {
+    return (
+      event.key?.length === 1 &&
+      !event.ctrlKey &&
+      !event.metaKey &&
+      !event.altKey
+    )
+  }, [])
+
   const onKeyDown: KeyboardEventHandler = useCallback(
     event => {
       if (event.code === 'Enter') {
@@ -74,6 +96,16 @@ export const Table: FC = () => {
         } else {
           cancelEditing()
         }
+      } else if (event.code === 'Delete' || event.code === 'Backspace') {
+        if (cellData) {
+          return
+        }
+        if (!selection) {
+          return
+        }
+        event.preventDefault()
+        event.stopPropagation()
+        clearCells(selection)
       } else if (Object.prototype.hasOwnProperty.call(navigation, event.code)) {
         const [defaultNavigation, shiftNavigation] =
           navigation[event.code as NavigationKey]
@@ -92,6 +124,16 @@ export const Table: FC = () => {
         } else {
           setSelection(defaultNavigation())
         }
+      } else if (isCharacterInput(event) && !cellData) {
+        event.preventDefault()
+        event.stopPropagation()
+        if (!selection) {
+          return
+        }
+        const cell = tableData.rows[selection.to.row].cells[selection.to.cell]
+        startEditing(selection.to.row, selection.to.cell, cell.content)
+        updateCellData(event.key)
+        setSelection(new TableSelection(selection.to, selection.to))
       }
     },
     [
@@ -104,6 +146,9 @@ export const Table: FC = () => {
       commitCellData,
       navigation,
       view,
+      clearCells,
+      updateCellData,
+      isCharacterInput,
     ]
   )
   return (

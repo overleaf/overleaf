@@ -178,6 +178,11 @@ function parseTabularBody(
       if (lastCell?.content) {
         throw new Error('\\hline must be at the start of a row')
       }
+      // push start of cell past the hline
+      if (lastCell) {
+        lastCell.position.from = currentChild.to
+        lastCell.position.to = currentChild.to
+      }
       const lastRow = getLastRow()
       lastRow.hlines.push({
         position: { from: currentChild.from, to: currentChild.to },

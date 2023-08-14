@@ -152,6 +152,8 @@ const SelectionContext = createContext<
   | {
       selection: TableSelection | null
       setSelection: Dispatch<SetStateAction<TableSelection | null>>
+      dragging: boolean
+      setDragging: Dispatch<SetStateAction<boolean>>
     }
   | undefined
 >(undefined)
@@ -170,8 +172,11 @@ export const useSelectionContext = () => {
 
 export const SelectionContextProvider: FC = ({ children }) => {
   const [selection, setSelection] = useState<TableSelection | null>(null)
+  const [dragging, setDragging] = useState(false)
   return (
-    <SelectionContext.Provider value={{ selection, setSelection }}>
+    <SelectionContext.Provider
+      value={{ selection, setSelection, dragging, setDragging }}
+    >
       {children}
     </SelectionContext.Provider>
   )

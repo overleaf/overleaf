@@ -3,7 +3,7 @@ import useDropdown from '../../../../../shared/hooks/use-dropdown'
 import { Overlay, Popover } from 'react-bootstrap'
 import MaterialIcon from '../../../../../shared/components/material-icon'
 import Tooltip from '../../../../../shared/components/tooltip'
-import { useCodeMirrorViewContext } from '../../codemirror-editor'
+import { useTabularContext } from '../contexts/tabular-context'
 
 export const ToolbarDropdown: FC<{
   id: string
@@ -23,7 +23,7 @@ export const ToolbarDropdown: FC<{
 }) => {
   const { open, onToggle } = useDropdown()
   const toggleButtonRef = useRef<HTMLButtonElement | null>(null)
-  const view = useCodeMirrorViewContext()
+  const { ref: tabularRef } = useTabularContext()
 
   const button = (
     <button
@@ -42,12 +42,12 @@ export const ToolbarDropdown: FC<{
       <MaterialIcon type={icon} />
     </button>
   )
-  const overlay = open && (
+  const overlay = open && tabularRef.current && (
     <Overlay
       show
       onHide={() => onToggle(false)}
       animation={false}
-      container={view.dom}
+      container={tabularRef.current}
       containerPadding={0}
       placement="bottom"
       rootClose
