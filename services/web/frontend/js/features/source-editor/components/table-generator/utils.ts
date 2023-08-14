@@ -71,7 +71,7 @@ const isRowSeparator = (node: SyntaxNode, state: EditorState) =>
 
 const isHLine = (node: SyntaxNode) =>
   node.type.is('Command') &&
-  Boolean(node.getChild('KnownCommand')?.getChild('HLine'))
+  Boolean(node.getChild('KnownCommand')?.getChild('HorizontalLine'))
 
 type Position = {
   from: number

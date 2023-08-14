@@ -73,6 +73,9 @@ import {
   TextColorCtrlSeq,
   ColorBoxCtrlSeq,
   HLineCtrlSeq,
+  TopRuleCtrlSeq,
+  MidRuleCtrlSeq,
+  BottomRuleCtrlSeq,
 } from './latex.terms.mjs'
 
 function nameChar(ch) {
@@ -622,6 +625,9 @@ const otherKnowncommands = {
   '\\textcolor': TextColorCtrlSeq,
   '\\colorbox': ColorBoxCtrlSeq,
   '\\hline': HLineCtrlSeq,
+  '\\toprule': TopRuleCtrlSeq,
+  '\\midrule': MidRuleCtrlSeq,
+  '\\bottomrule': BottomRuleCtrlSeq,
 }
 // specializer for control sequences
 // return new tokens for specific control sequences

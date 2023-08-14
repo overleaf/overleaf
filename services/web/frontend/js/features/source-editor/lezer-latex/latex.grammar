@@ -90,8 +90,11 @@
     AuthorCtrlSeq,
     MaketitleCtrlSeq,
     TextColorCtrlSeq,
-    ColorBoxCtrlSeq
-    HLineCtrlSeq
+    ColorBoxCtrlSeq,
+    HLineCtrlSeq,
+    TopRuleCtrlSeq,
+    MidRuleCtrlSeq,
+    BottomRuleCtrlSeq
 }
 
 @external specialize {EnvName} specializeEnvName from "./tokens.mjs" {
@@ -338,8 +341,8 @@ KnownCommand {
     Maketitle {
         MaketitleCtrlSeq optionalWhitespace?
     } |
-    HLine {
-        HLineCtrlSeq optionalWhitespace?
+    HorizontalLine {
+        (HLineCtrlSeq | TopRuleCtrlSeq | MidRuleCtrlSeq | BottomRuleCtrlSeq) optionalWhitespace?
     }
 }
 
