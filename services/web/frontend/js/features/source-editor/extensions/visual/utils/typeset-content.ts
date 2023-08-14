@@ -1,6 +1,5 @@
 import { EditorState } from '@codemirror/state'
 import { SyntaxNode } from '@lezer/common'
-import { LineBreakCtrlSym } from '../../../lezer-latex/latex.terms.mjs'
 
 const isUnknownCommandWithName = (
   node: SyntaxNode,
@@ -92,7 +91,7 @@ export function typesetNodeIntoElement(
         // ignoring these commands
         from = childNode.to
         return false
-      } else if (childNode.type.is(LineBreakCtrlSym)) {
+      } else if (childNode.type.is('LineBreak')) {
         ancestor().appendChild(document.createElement('br'))
         from = childNode.to
       }

@@ -360,7 +360,9 @@ Command {
 }
 
 KnownCtrlSym {
-  LineBreakCtrlSym
+    LineBreak {
+        LineBreakCtrlSym OptionalArgument?
+    }
 }
 
 textBase {

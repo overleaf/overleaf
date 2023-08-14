@@ -794,13 +794,17 @@ export const atomicDecorations = (options: Options) => {
               }).range(nodeRef.from, nodeRef.to)
             )
           }
-        } else if (nodeRef.type.is('LineBreakCtrlSym')) {
+        } else if (nodeRef.type.is('LineBreak')) {
           // line break
-          decorations.push(
-            Decoration.replace({
-              widget: new IndicatorWidget('\u21A9'),
-            }).range(nodeRef.from, nodeRef.to)
-          )
+          const optionalArgument = nodeRef.node.getChild('OptionalArgument')
+          if (!optionalArgument || shouldDecorate(state, optionalArgument)) {
+            decorations.push(
+              Decoration.replace({
+                widget: new IndicatorWidget('\u21A9'),
+              }).range(nodeRef.from, nodeRef.to)
+            )
+          }
+          return false
         } else if (nodeRef.type.is('Caption')) {
           if (shouldDecorate(state, nodeRef)) {
             // a caption

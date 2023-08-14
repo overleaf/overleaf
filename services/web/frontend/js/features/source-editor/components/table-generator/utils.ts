@@ -66,8 +66,9 @@ function parseColumnSpecifications(specification: string): ColumnDefinition[] {
   return columns
 }
 
-const isRowSeparator = (node: SyntaxNode, state: EditorState) =>
-  node.type.is('Command') && state.sliceDoc(node.from, node.to) === '\\\\'
+const isRowSeparator = (node: SyntaxNode) =>
+  node.type.is('Command') &&
+  Boolean(node.getChild('KnownCtrlSym')?.getChild('LineBreak'))
 
 const isHLine = (node: SyntaxNode) =>
   node.type.is('Command') &&
@@ -133,7 +134,7 @@ function parseTabularBody(
     currentChild;
     currentChild = currentChild.nextSibling
   ) {
-    if (isRowSeparator(currentChild, state)) {
+    if (isRowSeparator(currentChild)) {
       const lastRow = getLastRow()
       body.rows.push({
         cells: [],
