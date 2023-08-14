@@ -18,6 +18,7 @@ import { EditorSelection } from '@codemirror/state'
 import { CodeMirrorViewContextProvider } from '../codemirror-editor'
 import { TableProvider } from './contexts/table-context'
 import { TabularProvider, useTabularContext } from './contexts/tabular-context'
+import Icon from '../../../../shared/components/icon'
 
 export type CellData = {
   // TODO: Add columnSpan
@@ -48,22 +49,29 @@ export type Positions = {
   rowPositions: RowPosition[]
 }
 
-export const FallbackComponent: FC<{ view: EditorView; node: SyntaxNode }> = ({
-  view,
-  node,
-}) => {
+export const TableRenderingError: FC<{
+  view: EditorView
+  codePosition?: number
+}> = ({ view, codePosition }) => {
   return (
-    <Alert bsStyle="warning" style={{ marginBottom: 0 }}>
-      Table rendering error{' '}
-      <Button
-        onClick={() =>
-          view.dispatch({
-            selection: EditorSelection.cursor(node.from),
-          })
-        }
-      >
-        View code
-      </Button>
+    <Alert className="table-generator-error">
+      <span className="table-generator-error-icon">
+        <Icon type="exclamation-circle" />
+      </span>
+      <span className="table-generator-error-message">
+        We couldn't render your table
+      </span>
+      {codePosition !== undefined && (
+        <Button
+          onClick={() =>
+            view.dispatch({
+              selection: EditorSelection.cursor(codePosition),
+            })
+          }
+        >
+          View code
+        </Button>
+      )}
     </Alert>
   )
 }
@@ -75,9 +83,8 @@ export const Tabular: FC<{
   return (
     <ErrorBoundary
       fallbackRender={() => (
-        <FallbackComponent view={view} node={tabularNode} />
+        <TableRenderingError view={view} codePosition={tabularNode.from} />
       )}
-      onError={(error, componentStack) => console.error(error, componentStack)}
     >
       <CodeMirrorViewContextProvider value={view}>
         <TabularProvider>
