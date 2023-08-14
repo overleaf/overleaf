@@ -9,7 +9,7 @@ type HistoryFileTreeDocProps = {
   file: FileDiff
   name: string
   selected: boolean
-  onClick: (file: FileDiff) => void
+  onClick: (file: FileDiff, event: React.MouseEvent<HTMLLIElement>) => void
   onKeyDown: (file: FileDiff, event: React.KeyboardEvent<HTMLLIElement>) => void
 }
 
@@ -24,7 +24,7 @@ function HistoryFileTreeDoc({
     <li
       role="treeitem"
       className={classNames({ selected })}
-      onClick={() => onClick(file)}
+      onClick={e => onClick(file, e)}
       onKeyDown={e => onKeyDown(file, e)}
       aria-selected={selected}
       aria-label={name}

@@ -21,10 +21,21 @@ function HistoryFileTreeFolderList({
   rootClassName,
   children,
 }: HistoryFileTreeFolderListProps) {
-  const { selection, setSelection } = useHistoryContext()
+  const {
+    selection,
+    setSelection,
+    shouldShowVisualSelection,
+    setShouldShowVisualSelection,
+  } = useHistoryContext()
+
+  const handleTopLevelClick = () => {
+    setShouldShowVisualSelection(false)
+  }
 
   const handleEvent = useCallback(
-    (file: FileDiff) => {
+    (file: FileDiff, event: React.UIEvent) => {
+      event.stopPropagation()
+      setShouldShowVisualSelection(true)
       setSelection(prevSelection => {
         if (file.pathname !== prevSelection.selectedFile?.pathname) {
           return {
@@ -37,12 +48,12 @@ function HistoryFileTreeFolderList({
         return prevSelection
       })
     },
-    [setSelection]
+    [setSelection, setShouldShowVisualSelection]
   )
 
   const handleClick = useCallback(
-    (file: FileDiff) => {
-      handleEvent(file)
+    (file: FileDiff, event: React.MouseEvent<HTMLLIElement>) => {
+      handleEvent(file, event)
     },
     [handleEvent]
   )
@@ -50,14 +61,19 @@ function HistoryFileTreeFolderList({
   const handleKeyDown = useCallback(
     (file: FileDiff, event: React.KeyboardEvent<HTMLLIElement>) => {
       if (event.key === 'Enter' || event.key === ' ') {
-        handleEvent(file)
+        handleEvent(file, event)
       }
     },
     [handleEvent]
   )
 
   return (
-    <ul className={classNames('list-unstyled', rootClassName)} role="tree">
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events
+    <ul
+      className={classNames('list-unstyled', rootClassName)}
+      role="tree"
+      onClick={handleTopLevelClick}
+    >
       {folders.map(folder => (
         <HistoryFileTreeFolder
           key={folder.name}
@@ -72,6 +88,7 @@ function HistoryFileTreeFolderList({
           name={doc.name}
           file={doc}
           selected={
+            shouldShowVisualSelection &&
             !!selection.selectedFile &&
             fileFinalPathname(selection.selectedFile) === doc.pathname
           }

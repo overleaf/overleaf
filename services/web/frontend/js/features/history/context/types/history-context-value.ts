@@ -31,4 +31,8 @@ export type HistoryContextValue = {
   >
   fetchNextBatchOfUpdates: () => (() => void) | void
   resetSelection: () => void
+  shouldShowVisualSelection: boolean
+  setShouldShowVisualSelection: React.Dispatch<
+    React.SetStateAction<HistoryContextValue['shouldShowVisualSelection']>
+  >
 }

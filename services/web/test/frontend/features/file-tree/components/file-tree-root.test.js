@@ -305,4 +305,38 @@ describe('<FileTreeRoot/>', function () {
     // multiple items selected: no menu button is visible
     expect(screen.queryAllByRole('button', { name: 'Menu' })).to.have.length(0)
   })
+
+  it('deselects files when clicked outside the list but inside wrapping container', function () {
+    const rootFolder = [
+      {
+        _id: 'root-folder-id',
+        name: 'rootFolder',
+        docs: [{ _id: '456def', name: 'main.tex' }],
+        folders: [],
+        fileRefs: [],
+      },
+    ]
+    renderWithEditorContext(
+      <FileTreeRoot
+        refProviders={{}}
+        reindexReferences={() => null}
+        setRefProviderEnabled={() => null}
+        setStartedFreeTrial={() => null}
+        onSelect={onSelect}
+        onInit={onInit}
+        isConnected
+      />,
+      {
+        rootFolder,
+        projectId: '123abc',
+        rootDocId: '456def',
+        features: {},
+        permissionsLevel: 'owner',
+      }
+    )
+
+    screen.getByRole('treeitem', { selected: true })
+    fireEvent.click(screen.getByTestId('file-tree-inner'))
+    expect(screen.queryByRole('treeitem', { selected: true })).to.be.null
+  })
 })

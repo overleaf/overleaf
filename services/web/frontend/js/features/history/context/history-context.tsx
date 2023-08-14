@@ -88,6 +88,8 @@ function useHistory() {
   const currentUserIsOwner = projectOwnerId === userId
 
   const [selection, setSelection] = useState<Selection>(selectionInitialState)
+  const [shouldShowVisualSelection, setShouldShowVisualSelection] =
+    useState(true)
 
   const [updatesInfo, setUpdatesInfo] = useState<
     HistoryContextValue['updatesInfo']
@@ -330,6 +332,8 @@ function useHistory() {
       setSelection,
       fetchNextBatchOfUpdates,
       resetSelection,
+      shouldShowVisualSelection,
+      setShouldShowVisualSelection,
     }),
     [
       loadingFileDiffs,
@@ -346,6 +350,8 @@ function useHistory() {
       setSelection,
       fetchNextBatchOfUpdates,
       resetSelection,
+      shouldShowVisualSelection,
+      setShouldShowVisualSelection,
     ]
   )
 

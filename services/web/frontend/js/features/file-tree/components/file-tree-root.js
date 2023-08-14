@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 
 import withErrorBoundary from '../../../infrastructure/error-boundary'
@@ -31,6 +31,12 @@ const FileTreeRoot = React.memo(function FileTreeRoot({
   const { _id: projectId } = useProjectContext(projectContextPropTypes)
   const { fileTreeData } = useFileTreeData()
   const isReady = projectId && fileTreeData
+  const [shouldShowVisualSelection, setShouldShowVisualSelection] =
+    useState(true)
+
+  const handleFileTreeClick = () => {
+    setShouldShowVisualSelection(false)
+  }
 
   useEffect(() => {
     if (isReady) onInit()
@@ -42,14 +48,22 @@ const FileTreeRoot = React.memo(function FileTreeRoot({
       refProviders={refProviders}
       setRefProviderEnabled={setRefProviderEnabled}
       setStartedFreeTrial={setStartedFreeTrial}
+      setShouldShowVisualSelection={setShouldShowVisualSelection}
       reindexReferences={reindexReferences}
       onSelect={onSelect}
     >
       {isConnected ? null : <div className="disconnected-overlay" />}
       <FileTreeToolbar />
       <FileTreeContextMenu />
-      <div className="file-tree-inner">
-        <FileTreeRootFolder />
+      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+      <div
+        className="file-tree-inner"
+        onClick={handleFileTreeClick}
+        data-testid="file-tree-inner"
+      >
+        <FileTreeRootFolder
+          shouldShowVisualSelection={shouldShowVisualSelection}
+        />
       </div>
       <FileTreeModalDelete />
       <FileTreeModalCreateFile />
@@ -59,7 +73,7 @@ const FileTreeRoot = React.memo(function FileTreeRoot({
   )
 })
 
-function FileTreeRootFolder() {
+function FileTreeRootFolder({ shouldShowVisualSelection }) {
   useFileTreeSocketListener()
   const { fileTreeData } = useFileTreeData()
 
@@ -75,11 +89,16 @@ function FileTreeRootFolder() {
         classes={{ root: 'file-tree-list' }}
         dropRef={dropRef}
         isOver={isOver}
+        shouldShowVisualSelection={shouldShowVisualSelection}
       >
         <li className="bottom-buffer" />
       </FileTreeFolderList>
     </>
   )
+}
+
+FileTreeRootFolder.propTypes = {
+  shouldShowVisualSelection: PropTypes.bool,
 }
 
 FileTreeRoot.propTypes = {
