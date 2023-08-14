@@ -485,7 +485,7 @@ typecheck_frontend:
 	npx -p typescript tsc --noEmit
 
 lint_in_docker:
-	$(RUN_LINT_FORMAT) make lint -j --output-sync
+	$(RUN_LINT_FORMAT) make lint -j2 --output-sync
 
 format: format_js
 format_js:
@@ -502,7 +502,7 @@ format_styles_fix:
 	npm run --silent format:styles:fix
 
 format_in_docker:
-	$(RUN_LINT_FORMAT) make format -j --output-sync
+	$(RUN_LINT_FORMAT) make format -j2 --output-sync
 
 #
 # Build & publish
