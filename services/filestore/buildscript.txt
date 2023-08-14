@@ -6,6 +6,6 @@ filestore
 --env-pass-through=
 --esmock-loader=False
 --has-custom-nodemon=False
---node-version=18.16.1
+--node-version=18.17.1
 --public-repo=True
 --script-version=4.3.0

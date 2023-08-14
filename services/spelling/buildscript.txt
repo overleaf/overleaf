@@ -6,6 +6,6 @@ spelling
 --env-pass-through=
 --esmock-loader=True
 --has-custom-nodemon=False
---node-version=18.16.1
+--node-version=18.17.1-buster
 --public-repo=False
 --script-version=4.3.0

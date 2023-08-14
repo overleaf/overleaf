@@ -37,7 +37,7 @@
   "repository": "github:overleaf/o-error",
   "devDependencies": {
     "@types/chai": "^4.3.0",
-    "@types/node": "^14.18.1",
+    "@types/node": "^18.17.4",
     "chai": "^4.3.6",
     "jsdoc-to-markdown": "^7.1.0",
     "markdown-toc": "^1.2.0",
