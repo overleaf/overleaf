@@ -16,7 +16,7 @@ DOCKER_COMPOSE := BUILD_NUMBER=$(BUILD_NUMBER) \
 	BRANCH_NAME=$(BRANCH_NAME) \
 	PROJECT_NAME=$(PROJECT_NAME) \
 	MOCHA_GREP=${MOCHA_GREP} \
-	docker-compose ${DOCKER_COMPOSE_FLAGS}
+	docker compose ${DOCKER_COMPOSE_FLAGS}
 
 MODULE_DIRS := $(shell find modules -mindepth 1 -maxdepth 1 -type d -not -name '.git' )
 MODULE_MAKEFILES := $(MODULE_DIRS:=/Makefile)
@@ -269,7 +269,7 @@ test_acceptance_module_maybe_in_server_pro: export BASE_CONFIG=$(CFG_SERVER_PRO)
 # We get the full list of modules and check for a matching module entry.
 # Either the grep will find and emit the module, or exits with code 1, which
 #  we handle with a fallback to a noop make target.
-# Run the node command in a docker-compose container which provides the needed
+# Run the node command in a docker compose container which provides the needed
 #  npm dependencies (from disk in dev-env or from the CI image in CI).
 # Pick the test_unit service which is very light-weight -- the test_acceptance
 #  service would start mongo/redis.
