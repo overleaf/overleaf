@@ -66,6 +66,16 @@ export class TableSelection {
     return row >= minY && row <= maxY && minX === 0 && maxX === totalColumns - 1
   }
 
+  isAnyRowSelected(totalColumns: number) {
+    const { minX, maxX } = this.normalized()
+    return minX === 0 && maxX === totalColumns - 1
+  }
+
+  isAnyColumnSelected(totalRows: number) {
+    const { minY, maxY } = this.normalized()
+    return minY === 0 && maxY === totalRows - 1
+  }
+
   isColumnSelected(cell: number, totalRows: number) {
     const { minX, maxX, minY, maxY } = this.normalized()
     return cell >= minX && cell <= maxX && minY === 0 && maxY === totalRows - 1
@@ -144,6 +154,16 @@ export class TableSelection {
     return new TableSelection(
       { row: this.from.row, cell: this.from.cell },
       { row: newRow, cell: this.to.cell }
+    )
+  }
+
+  spansEntireTable(totalColumns: number, totalRows: number) {
+    const { minX, maxX, minY, maxY } = this.normalized()
+    return (
+      minX === 0 &&
+      maxX === totalColumns - 1 &&
+      minY === 0 &&
+      maxY === totalRows - 1
     )
   }
 }

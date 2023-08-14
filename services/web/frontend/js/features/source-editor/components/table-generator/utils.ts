@@ -99,7 +99,7 @@ type ParsedCell = {
   position: Position
 }
 
-type CellSeparator = Position
+export type CellSeparator = Position
 export type RowSeparator = Position
 
 type ParsedRow = {
@@ -233,6 +233,7 @@ export function generateTable(
   specification: { from: number; to: number }
   rowPositions: RowPosition[]
   rowSeparators: RowSeparator[]
+  cellSeparators: CellSeparator[][]
 } {
   const specification = node
     .getChild('BeginEnv')
@@ -253,6 +254,7 @@ export function generateTable(
   const cellPositions = tableData.rows.map(row =>
     row.cells.map(cell => cell.position)
   )
+  const cellSeparators = tableData.rows.map(row => row.cellSeparators)
   const rowPositions = tableData.rows.map(row => ({
     ...row.position,
     hlines: row.hlines.map(hline => hline.position),
@@ -274,5 +276,6 @@ export function generateTable(
     specification,
     rowPositions,
     rowSeparators: tableData.rowSeparators,
+    cellSeparators,
   }
 }

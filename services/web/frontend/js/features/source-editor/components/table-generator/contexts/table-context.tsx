@@ -2,6 +2,7 @@ import { FC, createContext, useContext } from 'react'
 import { Positions, TableData } from '../tabular'
 import {
   CellPosition,
+  CellSeparator,
   RowPosition,
   RowSeparator,
   generateTable,
@@ -16,6 +17,7 @@ const TableContext = createContext<
       specification: { from: number; to: number }
       rowPositions: RowPosition[]
       rowSeparators: RowSeparator[]
+      cellSeparators: CellSeparator[][]
       positions: Positions
     }
   | undefined

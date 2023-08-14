@@ -4,14 +4,21 @@ import { ToolbarButton } from './toolbar-button'
 import { ToolbarButtonMenu } from './toolbar-button-menu'
 import { ToolbarDropdown } from './toolbar-dropdown'
 import MaterialIcon from '../../../../../shared/components/material-icon'
-import { BorderTheme, setAlignment, setBorders } from './commands'
+import {
+  BorderTheme,
+  insertColumn,
+  insertRow,
+  removeRowOrColumns,
+  setAlignment,
+  setBorders,
+} from './commands'
 import { useCodeMirrorViewContext } from '../../codemirror-editor'
 import { useTableContext } from '../contexts/table-context'
 
 export const Toolbar = memo(function Toolbar() {
   const { selection } = useSelectionContext()
   const view = useCodeMirrorViewContext()
-  const { positions, rowSeparators } = useTableContext()
+  const { positions, rowSeparators, cellSeparators } = useTableContext()
   if (!selection) {
     return null
   }
@@ -87,6 +94,7 @@ export const Toolbar = memo(function Toolbar() {
           label="Alignment"
           icon="format_align_left"
           id="table-generator-align-dropdown"
+          disabledLabel="Select a column or a merged cell to align"
           disabled={
             !selection.isColumnSelected(
               selection.from.cell,
@@ -124,24 +132,37 @@ export const Toolbar = memo(function Toolbar() {
           id="table-generator-merge-cells"
           label="Merge cells"
           disabled
+          disabledLabel="Select cells in a row to merge"
         />
         <ToolbarButton
           icon="delete"
           id="table-generator-remove-column-row"
-          label="Remove row or column"
-          disabled
+          label="Delete row or column"
+          disabledLabel="Select a row or a column to delete"
+          disabled={
+            !(
+              positions.cells.length &&
+              selection.isAnyRowSelected(positions.cells[0].length)
+            ) && !selection.isAnyColumnSelected(positions.rowPositions.length)
+          }
+          command={() =>
+            removeRowOrColumns(view, selection, positions, cellSeparators)
+          }
         />
         <ToolbarDropdown
           id="table-generator-add-dropdown"
           btnClassName="table-generator-toolbar-button"
           icon="add"
           tooltip="Insert"
-          disabled
+          disabled={!selection}
         >
           <button
             className="ol-cm-toolbar-menu-item"
             role="menuitem"
             type="button"
+            onClick={() => {
+              insertColumn(view, selection, positions, false)
+            }}
           >
             <span className="table-generator-button-label">
               Insert column left
@@ -151,6 +172,9 @@ export const Toolbar = memo(function Toolbar() {
             className="ol-cm-toolbar-menu-item"
             role="menuitem"
             type="button"
+            onClick={() => {
+              insertColumn(view, selection, positions, true)
+            }}
           >
             <span className="table-generator-button-label">
               Insert column right
@@ -161,6 +185,9 @@ export const Toolbar = memo(function Toolbar() {
             className="ol-cm-toolbar-menu-item"
             role="menuitem"
             type="button"
+            onClick={() => {
+              insertRow(view, selection, positions, false)
+            }}
           >
             <span className="table-generator-button-label">
               Insert row above
@@ -170,6 +197,9 @@ export const Toolbar = memo(function Toolbar() {
             className="ol-cm-toolbar-menu-item"
             role="menuitem"
             type="button"
+            onClick={() => {
+              insertRow(view, selection, positions, true)
+            }}
           >
             <span className="table-generator-button-label">
               Insert row below
@@ -181,7 +211,7 @@ export const Toolbar = memo(function Toolbar() {
         <ToolbarButton
           icon="delete_forever"
           id="table-generator-remove-table"
-          label="Remove table"
+          label="Delete table"
           disabled
         />
       </div>

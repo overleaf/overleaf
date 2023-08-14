@@ -1,7 +1,6 @@
 import { EditorView } from '@codemirror/view'
 import classNames from 'classnames'
 import { memo, useCallback } from 'react'
-import { Button } from 'react-bootstrap'
 import Tooltip from '../../../../../shared/components/tooltip'
 import MaterialIcon from '../../../../../shared/components/material-icon'
 import { useCodeMirrorViewContext } from '../../codemirror-editor'
@@ -13,9 +12,9 @@ export const ToolbarButton = memo<{
   command?: (view: EditorView) => void
   active?: boolean
   disabled?: boolean
+  disabledLabel?: string
   icon: string
   hidden?: boolean
-  shortcut?: string
 }>(function ToolbarButton({
   id,
   className,
@@ -25,7 +24,7 @@ export const ToolbarButton = memo<{
   disabled,
   icon,
   hidden = false,
-  shortcut,
+  disabledLabel,
 }) {
   const view = useCodeMirrorViewContext()
   const handleMouseDown = useCallback(event => {
@@ -44,32 +43,24 @@ export const ToolbarButton = memo<{
   )
 
   const button = (
-    <Button
+    <button
       className={classNames('table-generator-toolbar-button', className, {
         hidden,
+        active,
       })}
       aria-label={label}
       onMouseDown={handleMouseDown}
       onClick={!disabled ? handleClick : undefined}
-      bsStyle={null}
-      active={active}
       disabled={disabled}
+      aria-disabled={disabled}
       type="button"
     >
       <MaterialIcon type={icon} />
-    </Button>
+    </button>
   )
 
-  if (!label) {
-    return button
-  }
-
-  const description = (
-    <>
-      <div>{label}</div>
-      {shortcut && <div>{shortcut}</div>}
-    </>
-  )
+  const description =
+    disabled && disabledLabel ? <div>{disabledLabel}</div> : <div>{label}</div>
 
   return (
     <Tooltip

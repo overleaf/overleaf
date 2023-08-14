@@ -12,6 +12,7 @@ export const ToolbarDropdown: FC<{
   icon?: string
   tooltip?: string
   disabled?: boolean
+  disabledTooltip?: string
 }> = ({
   id,
   label,
@@ -20,6 +21,7 @@ export const ToolbarDropdown: FC<{
   icon = 'expand_more',
   tooltip,
   disabled,
+  disabledTooltip,
 }) => {
   const { open, onToggle } = useDropdown()
   const toggleButtonRef = useRef<HTMLButtonElement | null>(null)
@@ -81,8 +83,8 @@ export const ToolbarDropdown: FC<{
   return (
     <>
       <Tooltip
-        id={`${id}-tooltip`}
-        description={tooltip}
+        id={id}
+        description={disabled && disabledTooltip ? disabledTooltip : tooltip}
         overlayProps={{ placement: 'bottom' }}
       >
         {button}

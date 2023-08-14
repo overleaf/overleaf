@@ -1,6 +1,6 @@
 import { FC, memo, useRef } from 'react'
 import useDropdown from '../../../../../shared/hooks/use-dropdown'
-import { Button, ListGroup, Overlay, Popover } from 'react-bootstrap'
+import { ListGroup, Overlay, Popover } from 'react-bootstrap'
 import Tooltip from '../../../../../shared/components/tooltip'
 import MaterialIcon from '../../../../../shared/components/material-icon'
 import { useTabularContext } from '../contexts/tabular-context'
@@ -10,17 +10,24 @@ export const ToolbarButtonMenu: FC<{
   label: string
   icon: string
   disabled?: boolean
-}> = memo(function ButtonMenu({ icon, id, label, children, disabled }) {
+  disabledLabel?: string
+}> = memo(function ButtonMenu({
+  icon,
+  id,
+  label,
+  children,
+  disabled,
+  disabledLabel,
+}) {
   const target = useRef<any>(null)
   const { open, onToggle, ref } = useDropdown()
   const { ref: tableContainerRef } = useTabularContext()
 
   const button = (
-    <Button
+    <button
       type="button"
       className="table-generator-toolbar-button table-generator-toolbar-button-menu"
       aria-label={label}
-      bsStyle={null}
       onMouseDown={event => {
         event.preventDefault()
         event.stopPropagation()
@@ -29,11 +36,12 @@ export const ToolbarButtonMenu: FC<{
         onToggle(!open)
       }}
       disabled={disabled}
+      aria-disabled={disabled}
       ref={target}
     >
       <MaterialIcon type={icon} />
       <MaterialIcon type="expand_more" />
-    </Button>
+    </button>
   )
 
   const overlay = tableContainerRef.current && (
@@ -63,21 +71,14 @@ export const ToolbarButtonMenu: FC<{
     </Overlay>
   )
 
-  if (!label) {
-    return (
-      <>
-        {button}
-        {overlay}
-      </>
-    )
-  }
-
   return (
     <>
       <Tooltip
         hidden={open}
         id={id}
-        description={<div>{label}</div>}
+        description={
+          <div>{disabled && disabledLabel ? disabledLabel : label}</div>
+        }
         overlayProps={{ placement: 'bottom' }}
       >
         {button}
