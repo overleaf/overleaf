@@ -1,4 +1,4 @@
-import { useTranslation } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 import { Button } from 'react-bootstrap'
 import Notification from '../notification'
 import Icon from '../../../../../shared/components/icon'
@@ -35,6 +35,28 @@ const ssoAvailable = ({ samlProviderId, affiliation }: UserEmailData) => {
   return false
 }
 
+function emailHasLicenceAfterConfirming(emailData: UserEmailData) {
+  if (emailData.confirmedAt) {
+    return false
+  }
+  if (!emailData.affiliation) {
+    return false
+  }
+  const affiliation = emailData.affiliation
+  const institution = affiliation.institution
+  if (!institution) {
+    return false
+  }
+  if (!institution.confirmed) {
+    return false
+  }
+  if (affiliation.pastReconfirmDate) {
+    return false
+  }
+
+  return affiliation.institution.commonsAccount
+}
+
 const showConfirmEmail = (userEmail: UserEmailData) => {
   const { emailConfirmationDisabled } = getMeta(
     'ol-ExposedSettings'
@@ -63,9 +85,48 @@ function ConfirmEmailNotification({ userEmail }: { userEmail: UserEmailData }) {
     return null
   }
 
+  if (emailHasLicenceAfterConfirming(userEmail)) {
+    return (
+      <Notification bsStyle="info">
+        <Notification.Body data-testid="notification-body">
+          {isLoading ? (
+            <>
+              <Icon type="spinner" spin /> {t('resending_confirmation_email')}
+              &hellip;
+            </>
+          ) : isError ? (
+            <div aria-live="polite">{getUserFacingMessage(error)}</div>
+          ) : (
+            <>
+              <Trans
+                i18nKey="one_step_away_from_professional_features"
+                components={[<strong />]} // eslint-disable-line react/jsx-key
+              />
+              <button
+                className="pull-right btn btn-info btn-sm"
+                onClick={() => handleResendConfirmationEmail(userEmail)}
+              >
+                {t('resend_email')}
+              </button>
+              <br />
+              <Trans
+                i18nKey="institution_has_overleaf_subscription"
+                values={{
+                  institutionName: userEmail.affiliation?.institution.name,
+                  emailAddress: userEmail.email,
+                }}
+                components={[<strong />]} // eslint-disable-line react/jsx-key
+              />
+            </>
+          )}
+        </Notification.Body>
+      </Notification>
+    )
+  }
+
   return (
     <Notification bsStyle="warning">
-      <Notification.Body>
+      <Notification.Body data-testid="pro-notification-body">
         {isLoading ? (
           <>
             <Icon type="spinner" spin /> {t('resending_confirmation_email')}

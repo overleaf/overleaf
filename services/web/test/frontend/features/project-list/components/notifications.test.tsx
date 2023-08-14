@@ -5,12 +5,14 @@ import {
   render,
   screen,
   waitForElementToBeRemoved,
+  within,
 } from '@testing-library/react'
 import fetchMock from 'fetch-mock'
 import { merge, cloneDeep } from 'lodash'
 import {
   professionalUserData,
   unconfirmedUserData,
+  unconfirmedCommonsUserData,
 } from '../../settings/fixtures/test-user-email-data'
 import {
   notification,
@@ -508,9 +510,6 @@ describe('<UserNotifications />', function () {
         emailConfirmationDisabled: false,
       })
       window.metaAttributesCache.set('ol-userEmails', [unconfirmedUserData])
-
-      renderWithinProjectListProvider(ConfirmEmail)
-      await fetchMock.flush(true)
     })
 
     afterEach(function () {
@@ -518,7 +517,15 @@ describe('<UserNotifications />', function () {
     })
 
     it('sends successfully', async function () {
+      renderWithinProjectListProvider(ConfirmEmail)
+      await fetchMock.flush(true)
       fetchMock.post('/user/emails/resend_confirmation', 200)
+
+      const email = unconfirmedUserData.email
+      const notificationBody = screen.getByTestId('pro-notification-body')
+      expect(notificationBody.textContent).to.contain(
+        `Please confirm your email ${email} by clicking on the link in the confirmation email`
+      )
 
       const resendButton = screen.getByRole('button', { name: /resend/i })
       fireEvent.click(resendButton)
@@ -534,6 +541,8 @@ describe('<UserNotifications />', function () {
     })
 
     it('fails to send', async function () {
+      renderWithinProjectListProvider(ConfirmEmail)
+      await fetchMock.flush(true)
       fetchMock.post('/user/emails/resend_confirmation', 500)
 
       const resendButton = screen.getByRole('button', { name: /resend/i })
@@ -545,6 +554,25 @@ describe('<UserNotifications />', function () {
 
       expect(fetchMock.called()).to.be.true
       screen.getByText(/something went wrong/i)
+    })
+
+    it('shows notification for commons account', async function () {
+      window.metaAttributesCache.set('ol-userEmails', [
+        unconfirmedCommonsUserData,
+      ])
+
+      renderWithinProjectListProvider(ConfirmEmail)
+      await fetchMock.flush(true)
+
+      const alert = screen.getByRole('alert')
+      const email = unconfirmedCommonsUserData.email
+      const notificationBody = within(alert).getByTestId('notification-body')
+      expect(notificationBody.textContent).to.contain(
+        'You are one step away from accessing Overleaf Professional features'
+      )
+      expect(notificationBody.textContent).to.contain(
+        `Overleaf has an Overleaf subscription. Click the confirmation link sent to ${email} to upgrade to Overleaf Professional`
+      )
     })
   })
 

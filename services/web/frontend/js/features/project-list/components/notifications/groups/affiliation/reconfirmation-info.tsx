@@ -11,7 +11,6 @@ function ReconfirmationInfo() {
   ) as UserEmailData[]
   const userEmails = getMeta('ol-userEmails', []) as UserEmailData[]
   const reconfirmedViaSAML = getMeta('ol-reconfirmedViaSAML') as string
-
   return (
     <>
       {allInReconfirmNotificationPeriods.map(userEmail =>
