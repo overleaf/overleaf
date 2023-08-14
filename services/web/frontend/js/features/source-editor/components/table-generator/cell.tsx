@@ -62,7 +62,11 @@ export const Cell: FC<{
 
   const filterInput = (input: string) => {
     // TODO: Are there situations where we don't want to filter the input?
-    return input.replaceAll('\\\\', '')
+    return input
+      .replaceAll(/(^&|[^\\]&)/g, match =>
+        match.length === 1 ? '\\&' : `${match[0]}\\&`
+      )
+      .replaceAll('\\\\', '')
   }
 
   const isFocused =
