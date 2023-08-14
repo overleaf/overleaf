@@ -22,7 +22,7 @@ const { expressify } = require('../../util/promises')
 const OError = require('@overleaf/o-error')
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const SubscriptionHelper = require('./SubscriptionHelper')
-const ManagedUsersManager = require('../../../../modules/managed-users/app/src/ManagedUsersManager')
+const Features = require('../../infrastructure/Features')
 
 const groupPlanModalOptions = Settings.groupPlanModalOptions
 const validGroupPlanModalOptions = {
@@ -268,7 +268,8 @@ async function userSubscriptionPage(req, res) {
   const groupSettingsEnabledFor = (managedGroupSubscriptions || [])
     .filter(
       subscription =>
-        ManagedUsersManager.hasManagedUsersFeature(subscription) &&
+        Features.hasFeature('saas') &&
+        subscription?.features?.managedUsers &&
         (subscription.admin_id._id || subscription.admin_id).toString() ===
           user._id.toString()
     )

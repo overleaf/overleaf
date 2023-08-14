@@ -128,6 +128,9 @@ describe('SubscriptionController', function () {
     this.SubscriptionHelper = {
       generateInitialLocalizedGroupPrice: sinon.stub(),
     }
+    this.Features = {
+      hasFeature: sinon.stub().returns(false),
+    }
     this.SubscriptionController = SandboxedModule.require(modulePath, {
       requires: {
         '../SplitTests/SplitTestHandler': this.SplitTestV2Hander,
@@ -158,10 +161,7 @@ describe('SubscriptionController', function () {
           recordEventForSession: sinon.stub(),
           setUserPropertyForUser: sinon.stub(),
         }),
-        '../../../../modules/managed-users/app/src/ManagedUsersManager':
-          (this.ManagedUsersManager = {
-            hasManagedUsersFeature: sinon.stub(),
-          }),
+        '../../infrastructure/Features': this.Features,
       },
     })
 
