@@ -1,7 +1,8 @@
 import { EditorView } from '@codemirror/view'
-import { Positions } from '../tabular'
+import { ColumnDefinition, Positions } from '../tabular'
 import { ChangeSpec } from '@codemirror/state'
-import { RowSeparator } from '../utils'
+import { RowSeparator, parseColumnSpecifications } from '../utils'
+import { TableSelection } from '../contexts/selection-context'
 
 /* eslint-disable no-unused-vars */
 export enum BorderTheme {
@@ -95,4 +96,47 @@ export const setBorders = (
       changes: [insertColumns, ...insertHlines],
     })
   }
+}
+
+export const setAlignment = (
+  view: EditorView,
+  selection: TableSelection,
+  alignment: 'left' | 'right' | 'center',
+  positions: Positions
+) => {
+  const specification = view.state.sliceDoc(
+    positions.columnDeclarations.from,
+    positions.columnDeclarations.to
+  )
+  const columnSpecification = parseColumnSpecifications(specification)
+  const { minX, maxX } = selection.normalized()
+  for (let i = minX; i <= maxX; i++) {
+    if (selection.isColumnSelected(i, positions.rowPositions.length)) {
+      if (columnSpecification[i].alignment === alignment) {
+        continue
+      }
+      columnSpecification[i].alignment = alignment
+      // TODO: This won't work for paragraph, which needs width argument
+      columnSpecification[i].content = alignment[0]
+    }
+  }
+  const newSpecification = generateColumnSpecification(columnSpecification)
+  view.dispatch({
+    changes: [
+      {
+        from: positions.columnDeclarations.from,
+        to: positions.columnDeclarations.to,
+        insert: newSpecification,
+      },
+    ],
+  })
+}
+
+const generateColumnSpecification = (columns: ColumnDefinition[]) => {
+  return columns
+    .map(
+      ({ borderLeft, borderRight, content }) =>
+        `${'|'.repeat(borderLeft)}${content}${'|'.repeat(borderRight)}`
+    )
+    .join('')
 }

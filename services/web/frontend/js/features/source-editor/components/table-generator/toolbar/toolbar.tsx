@@ -4,7 +4,7 @@ import { ToolbarButton } from './toolbar-button'
 import { ToolbarButtonMenu } from './toolbar-button-menu'
 import { ToolbarDropdown } from './toolbar-dropdown'
 import MaterialIcon from '../../../../../shared/components/material-icon'
-import { BorderTheme, setBorders } from './commands'
+import { BorderTheme, setAlignment, setBorders } from './commands'
 import { useCodeMirrorViewContext } from '../../codemirror-editor'
 import { useTableContext } from '../contexts/table-context'
 
@@ -87,27 +87,36 @@ export const Toolbar = memo(function Toolbar() {
           label="Alignment"
           icon="format_align_left"
           id="table-generator-align-dropdown"
-          disabled
+          disabled={
+            !selection.isColumnSelected(
+              selection.from.cell,
+              positions.rowPositions.length
+            )
+          }
         >
           <ToolbarButton
             icon="format_align_left"
             id="table-generator-align-left"
             label="Left"
+            command={() => {
+              setAlignment(view, selection, 'left', positions)
+            }}
           />
           <ToolbarButton
             icon="format_align_center"
             id="table-generator-align-center"
             label="Center"
+            command={() => {
+              setAlignment(view, selection, 'center', positions)
+            }}
           />
           <ToolbarButton
             icon="format_align_right"
             id="table-generator-align-right"
             label="Right"
-          />
-          <ToolbarButton
-            icon="format_align_justify"
-            id="table-generator-align-justify"
-            label="Justify"
+            command={() => {
+              setAlignment(view, selection, 'right', positions)
+            }}
           />
         </ToolbarButtonMenu>
         <ToolbarButton

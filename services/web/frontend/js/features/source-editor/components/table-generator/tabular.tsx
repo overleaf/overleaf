@@ -34,6 +34,7 @@ export type ColumnDefinition = {
   alignment: 'left' | 'center' | 'right' | 'paragraph'
   borderLeft: number
   borderRight: number
+  content: string
 }
 
 export type TableData = {

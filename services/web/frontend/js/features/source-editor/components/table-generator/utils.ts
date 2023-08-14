@@ -11,21 +11,26 @@ export type RowPosition = {
   hlines: { from: number; to: number }[]
 }
 
-function parseColumnSpecifications(specification: string): ColumnDefinition[] {
+export function parseColumnSpecifications(
+  specification: string
+): ColumnDefinition[] {
   const columns: ColumnDefinition[] = []
   let currentAlignment: ColumnDefinition['alignment'] | undefined
   let currentBorderLeft = 0
   let currentBorderRight = 0
+  let currentContent = ''
   function maybeCommit() {
     if (currentAlignment !== undefined) {
       columns.push({
         alignment: currentAlignment,
         borderLeft: currentBorderLeft,
         borderRight: currentBorderRight,
+        content: currentContent,
       })
       currentAlignment = undefined
       currentBorderLeft = 0
       currentBorderRight = 0
+      currentContent = ''
     }
   }
   for (let i = 0; i < specification.length; i++) {
@@ -45,18 +50,23 @@ function parseColumnSpecifications(specification: string): ColumnDefinition[] {
       }
       case 'c':
         currentAlignment = 'center'
+        currentContent += 'c'
         break
       case 'l':
         currentAlignment = 'left'
+        currentContent += 'l'
         break
       case 'r':
         currentAlignment = 'right'
+        currentContent += 'r'
         break
       case 'p': {
         currentAlignment = 'paragraph'
+        currentContent += 'p'
         // TODO: Parse these details
         while (i < specification.length && specification.charAt(i) !== '}') {
           i++
+          currentContent += specification.charAt(i)
         }
         break
       }
