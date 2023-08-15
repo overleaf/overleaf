@@ -132,6 +132,23 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
     )
   })
 
+  it('handles a pasted table with a caption', function () {
+    mountEditor()
+
+    const data =
+      '<table><caption>A table</caption><tbody><tr><td>foo</td><td>bar</td></tr></tbody></table>'
+
+    const clipboardData = new DataTransfer()
+    clipboardData.setData('text/html', data)
+    cy.spy(clipboardData, 'getData').as('get-data')
+    cy.get('@content').trigger('paste', { clipboardData })
+
+    cy.get('@content').should(
+      'have.text',
+      'A table\\begin{tabular}{c c}foo & bar ↩\\end{tabular}'
+    )
+  })
+
   it('handles a pasted link', function () {
     mountEditor()
 

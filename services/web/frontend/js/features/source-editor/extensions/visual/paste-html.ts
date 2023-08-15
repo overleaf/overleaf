@@ -30,7 +30,9 @@ export const pasteHtml = Prec.highest(
         )
 
         return true
-      } catch {
+      } catch (error) {
+        console.error(error)
+
         // fall back to the default paste handler
         return false
       }
@@ -53,6 +55,9 @@ const htmlToLaTeX = (html: string) => {
 
   // remove style elements
   removeUnwantedElements(documentElement, 'style')
+
+  // pre-process table elements
+  processTables(documentElement)
 
   // protect special characters in non-LaTeX text nodes
   protectSpecialCharacters(documentElement)
@@ -145,6 +150,24 @@ const matchingParents = (element: HTMLElement, selector: string) => {
   }
 
   return matches
+}
+
+const processTables = (element: HTMLElement) => {
+  for (const table of element.querySelectorAll('table')) {
+    // create a wrapper element for the table and the caption
+    const container = document.createElement('div')
+    container.className = 'ol-table-wrap'
+    table.after(container)
+
+    // move the caption (if it exists) into the container before the table
+    const caption = table.querySelector('caption')
+    if (caption) {
+      container.append(caption)
+    }
+
+    // move the table into the container
+    container.append(table)
+  }
 }
 
 const tabular = (element: HTMLTableElement) => {
@@ -336,12 +359,14 @@ export const selectors = [
     end: () => `\n\\end{verbatim}\n\n`,
   }),
   createSelector({
+    selector: '.ol-table-wrap',
+    start: element => `\n\n\\begin{table}\n\\centering\n`,
+    end: () => `\n\\end{table}\n\n`,
+  }),
+  createSelector({
     selector: 'table',
-    start: element =>
-      `\n\n\\begin{table}\n\\centering\n\\begin{tabular}{${tabular(
-        element
-      )}}\n`,
-    end: () => `\n\\end{tabular}\n\\end{table}\n\n`,
+    start: element => `\n\\begin{tabular}{${tabular(element)}}\n`,
+    end: () => `\n\\end{tabular}\n`,
   }),
   createSelector({
     selector: 'thead',
@@ -386,8 +411,8 @@ export const selectors = [
     },
   }),
   createSelector({
-    selector: 'table > caption',
-    start: () => `\n\n\\caption{\\label{tab:example}`,
+    selector: 'caption',
+    start: () => `\n\n\\caption{`,
     end: () => `}\n\n`,
   }),
   createSelector({
