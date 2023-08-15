@@ -104,7 +104,7 @@ const RichTextToggle: FC<{
   if (disabled) {
     return (
       <Tooltip
-        description={t('the_visual_editor_is_only_available_for_tex_files')}
+        description={t('visual_editor_is_only_available_for_tex_files')}
         id="rich-text-toggle-tooltip"
         overlayProps={{ placement: 'bottom' }}
         tooltipProps={{ className: 'tooltip-wide' }}
