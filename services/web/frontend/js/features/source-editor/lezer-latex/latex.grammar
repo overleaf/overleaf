@@ -221,6 +221,10 @@ MacroParameter {
     "#" ("1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9")
 }
 
+OptionalMacroParameter {
+    OpenBracket MacroParameter CloseBracket
+}
+
 // The autocompletion code in services/web/frontend/js/features/source-editor/utils/tree-operations/commands.ts
 // depends on following the `KnownCommand { Command { CommandCtrlSeq [args] } }`
 // structure
@@ -289,7 +293,7 @@ KnownCommand {
     } |
     Def {
         // allow more general Csname argument to \def commands, since other symbols such as '@' are often used in definitions
-        DefCtrlSeq (Csname | CtrlSym) optionalWhitespace? MacroParameter* optionalWhitespace? DefinitionArgument
+        DefCtrlSeq optionalWhitespace? (Csname | CtrlSym) optionalWhitespace? (MacroParameter | OptionalMacroParameter)* optionalWhitespace? DefinitionArgument
     } |
     Hbox {
         HboxCtrlSeq optionalWhitespace? TextArgument
