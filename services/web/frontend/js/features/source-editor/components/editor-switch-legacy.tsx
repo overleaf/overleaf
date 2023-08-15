@@ -48,12 +48,12 @@ function EditorSwitch() {
   const [newSourceEditor, setNewSourceEditor] = useScopeValue(
     'editor.newSourceEditor'
   )
-  const [richText, setRichText] = useScopeValue('editor.showRichText')
   const [visual, setVisual] = useScopeValue('editor.showVisual')
 
   const [docName] = useScopeValue('editor.open_doc_name')
   const richTextAvailable = isValidTeXFile(docName)
-  const richTextOrVisual = richText || (richTextAvailable && visual)
+  // TODO: rename this after legacy & toolbar split tests are complete
+  const richTextOrVisual = richTextAvailable && visual
 
   const handleChange = useCallback(
     event => {
@@ -61,33 +61,25 @@ function EditorSwitch() {
 
       switch (editorType) {
         case 'ace':
-          setRichText(false)
           setVisual(false)
           setNewSourceEditor(false)
           break
 
         case 'cm6':
-          setRichText(false)
           setVisual(false)
           setNewSourceEditor(true)
           break
 
         case 'rich-text':
-          if (getMeta('ol-richTextVariant') === 'cm6') {
-            setRichText(false)
-            setVisual(true)
-            setNewSourceEditor(true)
-          } else {
-            setRichText(true)
-            setVisual(false)
-          }
+          setVisual(true)
+          setNewSourceEditor(true)
 
           break
       }
 
       sendMB('editor-switch-change', { editorType })
     },
-    [setRichText, setVisual, setNewSourceEditor]
+    [setVisual, setNewSourceEditor]
   )
 
   return (

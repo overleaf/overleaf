@@ -1,0 +1,46 @@
+.toolbar.toolbar-editor(ng-controller="EditorToolbarController")
+	.toggle-wrapper
+		editor-switch
+
+	div(
+		formatting-buttons
+		ng-cloak
+		ng-if="!editor.showVisual"
+		buttons="editorButtons"
+		opening="editor.opening"
+		resize-on="layout:main:resize,layout:pdf:resize,layout:review:resize,review-panel:toggle"
+		is-fullscreen-editor="ui.view == 'editor' && ui.pdfLayout == 'flat'"
+		class="formatting-buttons"
+	)
+	div(
+		formatting-buttons
+		ng-cloak
+		ng-if="editor.showVisual"
+		buttons="[]"
+		opening="editor.opening"
+		resize-on="layout:main:resize,layout:pdf:resize,layout:review:resize,review-panel:toggle"
+		is-fullscreen-editor="ui.view == 'editor' && ui.pdfLayout == 'flat'"
+		class="formatting-buttons"
+	)
+
+	.toolbar-pdf-right
+		switch-to-pdf-button()
+		detacher-synctex-control()
+		editor-compile-button()
+
+	script(type="text/ng-template", id="formattingButtonsTpl")
+		.formatting-buttons-wrapper
+			| &nbsp;
+			button.btn.formatting-btn.formatting-btn--icon(
+				ng-repeat="button in shownButtons"
+				ng-click="button.handleClick()"
+				ng-class="{ active: button.active }",
+				aria-label="{{button.title}}"
+				tooltip="{{button.title}}"
+				tooltip-placement="bottom"
+				tooltip-append-to-body="true"
+			)
+				i(class="{{button.iconClass}}") {{button.iconText}}
+
+			if moduleIncludesAvailable('editor:galileo')
+				galileo-toolbar-button

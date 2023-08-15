@@ -17,6 +17,7 @@ import _ from 'lodash'
 import Document from './Document'
 import './components/spellMenu'
 import './directives/aceEditor'
+import './directives/formattingButtons'
 import './directives/toggleSwitch'
 import './controllers/SavingNotificationController'
 import './controllers/CompileButton'
@@ -45,7 +46,6 @@ export default EditorManager = (function () {
         trackChanges: false,
         wantTrackChanges: false,
         docTooLongErrorShown: false,
-        showRichText: this.showRichText(),
         showVisual: this.showVisual(),
         newSourceEditor: this.newSourceEditor(),
         showSymbolPalette: false,
@@ -184,22 +184,7 @@ export default EditorManager = (function () {
       return editorType
     }
 
-    showRichText() {
-      if (getMeta('ol-richTextVariant') === 'cm6') {
-        return false
-      }
-
-      return (
-        this.localStorage(`editor.mode.${this.$scope.project_id}`) ===
-        'rich-text'
-      )
-    }
-
     showVisual() {
-      if (getMeta('ol-richTextVariant') !== 'cm6') {
-        return false
-      }
-
       return (
         this.localStorage(`editor.mode.${this.$scope.project_id}`) ===
         'rich-text'

@@ -12,7 +12,6 @@ type GrammarlyWarningProps = {
 export default function GrammarlyWarning({ delay }: GrammarlyWarningProps) {
   const [show, setShow] = useState(false)
   const [newSourceEditor] = useScopeValue('editor.newSourceEditor')
-  const [showRichText] = useScopeValue('editor.showRichText')
   const grammarly = grammarlyExtensionPresent()
   const hasDismissedGrammarlyWarning = customLocalStorage.getItem(
     'editor.has_dismissed_grammarly_warning'
@@ -20,10 +19,7 @@ export default function GrammarlyWarning({ delay }: GrammarlyWarningProps) {
 
   useEffect(() => {
     const showGrammarlyWarning =
-      !hasDismissedGrammarlyWarning &&
-      grammarly &&
-      newSourceEditor &&
-      !showRichText
+      !hasDismissedGrammarlyWarning && grammarly && newSourceEditor
 
     let timeoutID: Nullable<number>
 
@@ -41,13 +37,7 @@ export default function GrammarlyWarning({ delay }: GrammarlyWarningProps) {
         clearTimeout(timeoutID)
       }
     }
-  }, [
-    grammarly,
-    hasDismissedGrammarlyWarning,
-    newSourceEditor,
-    showRichText,
-    delay,
-  ])
+  }, [grammarly, hasDismissedGrammarlyWarning, newSourceEditor, delay])
 
   const handleClose = useCallback(() => {
     setShow(false)

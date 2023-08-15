@@ -68,21 +68,9 @@ class OutlineManager {
 
       this.updateHighlightedLine(middleVisibleRow + 1)
     })
-
-    scope.$watch('editor.showRichText', () => {
-      this.ignoreNextScroll = true
-      this.ignoreNextCursorUpdate = true
-      if (this.shouldShowOutline()) {
-        this.updateOutline()
-        this.broadcastChangeEvent()
-      }
-    })
   }
 
   shouldShowOutline() {
-    if (this.scope.editor.showRichText) {
-      return true
-    }
     return !this.scope.editor.newSourceEditor
   }
 

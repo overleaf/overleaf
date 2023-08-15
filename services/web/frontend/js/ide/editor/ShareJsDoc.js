@@ -366,19 +366,6 @@ export default ShareJsDoc = (function () {
         : undefined
     }
 
-    attachToCM(cm) {
-      this._attachToEditor('CM', cm, () => {
-        this._doc.attach_cm(cm, window.maxDocLength)
-      })
-    }
-
-    detachFromCM() {
-      this._maybeDetachEditorWatchdogManager()
-      return typeof this._doc.detach_cm === 'function'
-        ? this._doc.detach_cm()
-        : undefined
-    } // If we're waiting for the project to join, try again in 0.5 seconds
-
     attachToCM6(cm6) {
       this._attachToEditor('CM6', cm6, () => {
         cm6.attachShareJs(this._doc, window.maxDocLength)

@@ -104,27 +104,6 @@ describe('<GrammarlyWarning />', function () {
     })
   })
 
-  it('does not show warning when user have rich text as their preference', async function () {
-    grammarlyStub.returns(true)
-
-    renderWithEditorContext(<GrammarlyWarning delay={100} />, {
-      scope: {
-        editor: {
-          newSourceEditor: true,
-          showRichText: true,
-        },
-      },
-    })
-
-    await waitFor(() => {
-      expect(
-        screen.queryByText(
-          'A browser extension, for example Grammarly, may be slowing down Overleaf.'
-        )
-      ).to.not.exist
-    })
-  })
-
   it('hides warning if close button is pressed', async function () {
     grammarlyStub.returns(true)
 

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Button } from 'react-bootstrap'
 import useScopeValue from '../../../shared/hooks/use-scope-value'
 import {
@@ -12,33 +12,18 @@ type CM6SwitchAwaySurveyState = 'disabled' | 'enabled' | 'shown'
 export default function CM6SwitchAwaySurvey() {
   const [state, setState] = useState<CM6SwitchAwaySurveyState>('disabled')
   const [newSourceEditor] = useScopeValue('editor.newSourceEditor')
-  const [richText] = useScopeValue('editor.showRichText')
-  const initialRichTextPreference = useRef<boolean>(richText)
 
   useEffect(() => {
     // If the user has previously seen any switch-away survey, then don't show
     // the current one
     if (hasSeenCM6SwitchAwaySurvey()) return
 
-    if (initialRichTextPreference.current) {
-      if (!richText && newSourceEditor) {
-        // If user change from rich text to cm6, we remove the rich text
-        // preference so if user use rich text -> cm6 -> ace, we will show the
-        // current survey
-        initialRichTextPreference.current = false
-      }
-
-      // If the user loaded rich text initially, then don't show the survey
-      // (we are assuming that they will not have used CM6 as much)
-      return
-    }
-
-    if (!newSourceEditor && !richText) {
+    if (!newSourceEditor) {
       setState('enabled')
     } else {
       setState('disabled')
     }
-  }, [newSourceEditor, richText])
+  }, [newSourceEditor])
 
   useEffect(() => {
     const handleKeyDown = () => {

@@ -106,7 +106,7 @@ export class EditorFacade extends EventEmitter {
   // as new transactions.
   // This is a broad immitation of helper functions supplied in
   // the sharejs library. (See vendor/libs/sharejs, in particular
-  // the 'attach_cm' and 'attach_ace' helpers)
+  // the 'attach_ace' helper)
   attachShareJs(shareDoc: ShareDoc, maxDocLength?: number) {
     this.shareDoc = shareDoc
     this.maxDocLength = maxDocLength

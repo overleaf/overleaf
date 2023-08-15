@@ -1,7 +1,6 @@
 .ui-layout-center(
 		ng-controller="ReviewPanelController",
 		ng-class="{\
-			'rp-unsupported': editor.showRichText,\
 			'rp-state-current-file': (reviewPanel.subView === SubViews.CUR_FILE),\
 			'rp-state-current-file-expanded': (reviewPanel.subView === SubViews.CUR_FILE && ui.reviewPanelOpen),\
 			'rp-state-current-file-mini': (reviewPanel.subView === SubViews.CUR_FILE && !ui.reviewPanelOpen),\
@@ -36,7 +35,6 @@
 
 				.loading-panel(
 					ng-show="(!editor.sharejs_doc || editor.opening) && !editor.error_state",
-					style=showRichText ? "top: 32px" : "",
 				)
 					span(ng-show="editor.open_doc_id")
 						i.fa.fa-spin.fa-refresh
@@ -45,10 +43,9 @@
 						i.fa.fa-arrow-left
 						| &nbsp;&nbsp;#{translate("open_a_file_on_the_left")}
 
-				if moduleIncludesAvailable('editor:main')
-					!= moduleIncludes('editor:main', locals)
-				else
-					.toolbar.toolbar-editor
+				div(ng-controller="EditorLoaderController")
+					if (!showSourceToolbar)
+						include ./toolbar
 
 				div(ng-if="editor.newSourceEditor")
 					include ../../source-editor/source-editor

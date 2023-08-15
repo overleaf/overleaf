@@ -124,7 +124,5 @@ block foot-scripts
 	each file in (useOpenTelemetry ? entrypointScripts("tracing") : [])
 		script(type="text/javascript", nonce=scriptNonce, src=file)
 	script(type="text/javascript", nonce=scriptNonce, src=(wsUrl || '/socket.io') + '/socket.io.js')
-	if (richTextVariant !== 'cm6')
-		script(type="text/javascript", nonce=scriptNonce, src=mathJaxPath)
 	each file in entrypointScripts("ide")
 		script(type="text/javascript", nonce=scriptNonce, src=file)

@@ -662,6 +662,7 @@ const ProjectController = {
             }
           )
         },
+        // this is only needed until the survey link is removed from the toolbar
         richTextAssignment(cb) {
           SplitTestHandler.getAssignment(
             req,
@@ -755,7 +756,6 @@ const ProjectController = {
           brandVariation,
           pdfjsAssignment,
           editorLeftMenuAssignment,
-          richTextAssignment,
           sourceEditorToolbarAssigment,
           historyViewAssignment,
           reviewPanelAssignment,
@@ -880,13 +880,6 @@ const ProjectController = {
                 ? 'project/editor_detached'
                 : 'project/editor'
 
-            let richTextVariant
-            if (!Features.hasFeature('saas')) {
-              richTextVariant = 'cm6'
-            } else {
-              richTextVariant = richTextAssignment.variant
-            }
-
             res.render(template, {
               title: project.name,
               priority_title: true,
@@ -961,7 +954,6 @@ const ProjectController = {
               fixedSizeDocument: true,
               useOpenTelemetry: Settings.useOpenTelemetryClient,
               showCM6SwitchAwaySurvey: Settings.showCM6SwitchAwaySurvey,
-              richTextVariant,
               historyViewReact: historyViewAssignment.variant === 'react',
               isReviewPanelReact: reviewPanelAssignment.variant === 'react',
               showPersonalAccessToken,

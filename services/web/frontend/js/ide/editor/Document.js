@@ -85,7 +85,6 @@ export default Document = (function () {
       this.joined = false
       this.wantToBeJoined = false
       this._checkAceConsistency = () => this._checkConsistency(this.ace)
-      this._checkCMConsistency = () => this._checkConsistency(this.cm)
       this._checkCM6Consistency = () => this._checkConsistency(this.cm6)
       this._bindToEditorEvents()
       this._bindToSocketEvents()
@@ -96,8 +95,6 @@ export default Document = (function () {
         return 'ace'
       } else if (this.cm6) {
         return 'cm6'
-      } else if (this.cm) {
-        return 'cm-rich-text'
       } else {
         return null
       }
@@ -123,29 +120,6 @@ export default Document = (function () {
         editorDoc.off('change', this._checkAceConsistency)
       }
       delete this.ace
-      this.clearChaosMonkey()
-      return this.ide.$scope.$emit('document:closed', this.doc)
-    }
-
-    attachToCM(cm) {
-      this.cm = cm
-      if (this.doc != null) {
-        this.doc.attachToCM(this.cm)
-      }
-      if (this.cm != null) {
-        this.cm.on('change', this._checkCMConsistency)
-      }
-      return this.ide.$scope.$emit('document:opened', this.doc)
-    }
-
-    detachFromCM() {
-      if (this.doc != null) {
-        this.doc.detachFromCM()
-      }
-      if (this.cm != null) {
-        this.cm.off('change', this._checkCMConsistency)
-      }
-      delete this.cm
       this.clearChaosMonkey()
       return this.ide.$scope.$emit('document:closed', this.doc)
     }

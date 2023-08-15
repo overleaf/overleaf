@@ -285,8 +285,7 @@ export default App.controller(
     function updateScrollbar() {
       if (
         scrollbar.isVisible &&
-        ide.$scope.reviewPanel.subView === $scope.SubViews.CUR_FILE &&
-        !$scope.editor.showRichText
+        ide.$scope.reviewPanel.subView === $scope.SubViews.CUR_FILE
       ) {
         return $reviewPanelEl.css('right', `${scrollbar.scrollbarWidth}px`)
       } else {
@@ -554,13 +553,10 @@ export default App.controller(
       const doc_id = $scope.editor.open_doc_id
       const entries = updateEntries(doc_id)
 
-      // For now, not worrying about entry panels for rich text
-      if (!$scope.editor.showRichText) {
-        $scope.$broadcast('review-panel:recalculate-screen-positions')
-        dispatchReviewPanelEvent('recalculate-screen-positions', entries)
+      $scope.$broadcast('review-panel:recalculate-screen-positions')
+      dispatchReviewPanelEvent('recalculate-screen-positions', entries)
 
-        return ide.$scope.$broadcast('review-panel:layout')
-      }
+      return ide.$scope.$broadcast('review-panel:layout')
     })
 
     $scope.$on('editor:track-changes:visibility_changed', () =>
