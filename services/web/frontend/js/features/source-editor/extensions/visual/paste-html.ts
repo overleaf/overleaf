@@ -6,7 +6,17 @@ export const pasteHtml = Prec.highest(
     paste(event, view) {
       const { clipboardData } = event
 
-      if (!clipboardData?.types.includes('text/html')) {
+      if (!clipboardData) {
+        return false
+      }
+
+      // allow pasting an image to create a figure
+      if (clipboardData.files.length > 0) {
+        return false
+      }
+
+      // only handle pasted HTML
+      if (!clipboardData.types.includes('text/html')) {
         return false
       }
 
