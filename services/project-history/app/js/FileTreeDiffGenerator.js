@@ -71,25 +71,11 @@ function _getInitialFiles(chunk, fromVersion) {
 }
 
 function _applyAddFileToDiff(diff, operation) {
-  const change = diff[operation.pathname]
-  if (change != null) {
-    // already exists, likely a delete so just cancel that and put the file back to unchanged
-    if (change.operation !== 'removed') {
-      const err = new Errors.InconsistentChunkError(
-        'trying to add file that already exists',
-        { diff, operation }
-      )
-      throw err
-    }
-    delete diff[operation.pathname].operation
-    return delete diff[operation.pathname].deletedAtV
-  } else {
-    return (diff[operation.pathname] = {
-      pathname: operation.pathname,
-      operation: 'added',
-      editable: operation.file.isEditable(),
-    })
-  }
+  return (diff[operation.pathname] = {
+    pathname: operation.pathname,
+    operation: 'added',
+    editable: operation.file.isEditable(),
+  })
 }
 
 function _applyEditFileToDiff(diff, operation) {

@@ -409,7 +409,7 @@ describe('FileTree Diffs', function () {
     )
   })
 
-  it('should handle deleting the re-adding a file', function (done) {
+  it('should handle deleting then re-adding a file', function (done) {
     MockHistoryStore()
       .get(`/api/projects/${this.historyId}/versions/5/history`)
       .reply(200, {
@@ -465,7 +465,8 @@ describe('FileTree Diffs', function () {
           diff: [
             {
               pathname: 'one.tex',
-              editable: true,
+              operation: 'added',
+              editable: null,
             },
           ],
         })
@@ -655,7 +656,7 @@ describe('FileTree Diffs', function () {
     )
   })
 
-  it('should return 422 with a chunk with an invalid add', function (done) {
+  it('should return 200 with a chunk with an invalid add', function (done) {
     MockHistoryStore()
       .get(`/api/projects/${this.historyId}/versions/6/history`)
       .reply(200, {
@@ -697,7 +698,16 @@ describe('FileTree Diffs', function () {
         if (error != null) {
           throw error
         }
-        expect(statusCode).to.equal(422)
+        expect(diff).to.deep.equal({
+          diff: [
+            {
+              pathname: 'foo.tex',
+              operation: 'added',
+              editable: null,
+            },
+          ],
+        })
+        expect(statusCode).to.equal(200)
         return done()
       }
     )
