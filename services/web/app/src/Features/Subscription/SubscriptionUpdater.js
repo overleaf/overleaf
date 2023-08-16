@@ -8,6 +8,7 @@ const FeaturesHelper = require('./FeaturesHelper')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const { DeletedSubscription } = require('../../models/DeletedSubscription')
 const logger = require('@overleaf/logger')
+const Features = require('../../infrastructure/Features')
 
 /**
  * Change the admin of the given subscription.
@@ -228,7 +229,18 @@ async function updateSubscriptionFromRecurly(
   requesterData
 ) {
   if (recurlySubscription.state === 'expired') {
-    await deleteSubscription(subscription, requesterData)
+    const hasManagedUsersFeature =
+      Features.hasFeature('saas') && subscription?.groupPolicy != null
+    if (hasManagedUsersFeature) {
+      // If a payment lapses and if the group is managed, as a temporary measure we need to
+      // make sure that the group continues as-is and no destructive actions are taken.
+      logger.warn(
+        { subscriptionId: subscription._id },
+        'expired subscription has managedUsers feature, skipping deletion'
+      )
+    } else {
+      await deleteSubscription(subscription, requesterData)
+    }
     return
   }
   const updatedPlanCode = recurlySubscription.plan.plan_code

@@ -143,6 +143,10 @@ describe('SubscriptionUpdater', function () {
       setUserPropertyForUser: sinon.stub(),
     }
 
+    this.Features = {
+      hasFeature: sinon.stub().returns(false),
+    }
+
     this.SubscriptionUpdater = SandboxedModule.require(modulePath, {
       requires: {
         '../../models/Subscription': {
@@ -157,6 +161,7 @@ describe('SubscriptionUpdater', function () {
           DeletedSubscription: this.DeletedSubscription,
         },
         '../Analytics/AnalyticsManager': this.AnalyticsManager,
+        '../../infrastructure/Features': this.Features,
       },
     })
   })
@@ -267,6 +272,22 @@ describe('SubscriptionUpdater', function () {
         this.subscription,
         {}
       )
+      this.SubscriptionModel.deleteOne.should.have.been.calledWith({
+        _id: this.subscription._id,
+      })
+    })
+
+    it('should not remove the subscription when expired if it has "managedUsers" feature', async function () {
+      this.Features.hasFeature.withArgs('saas').returns(true)
+      this.subscription.groupPolicy = { policy: true }
+
+      this.recurlySubscription.state = 'expired'
+      await this.SubscriptionUpdater.promises.updateSubscriptionFromRecurly(
+        this.recurlySubscription,
+        this.subscription,
+        {}
+      )
+      this.SubscriptionModel.deleteOne.should.not.have.been.called
     })
 
     it('should update all the users features', async function () {
