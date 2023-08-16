@@ -10,6 +10,8 @@ const {
 } = require('../Errors/Errors')
 const UserGetter = require('../User/UserGetter')
 const UserUpdater = require('../User/UserUpdater')
+const EmailHandler = require('../Email/EmailHandler')
+const logger = require('@overleaf/logger')
 
 /**
  * This module contains functions for handling managed users in a
@@ -36,6 +38,8 @@ async function enableManagedUsers(subscriptionId) {
   // update the subscription to use the new policy
   subscription.groupPolicy = groupPolicy._id
   await subscription.save()
+
+  await _sendEmailToGroupMembers(subscriptionId)
 }
 
 /**
@@ -142,6 +146,45 @@ async function enrollInSubscription(userId, subscription) {
       userId,
       subscriptionId: subscription._id,
     })
+  }
+}
+
+/**
+ * Send email to all group members, irregardless of the member status.
+ * @async
+ * @function
+ * @param {string} subscriptionId - The ID of the subscription to enable
+ *   managed users for.
+ * @returns {Promise<void>} - A Promise that resolves when all the `sendEmail` function has been sent,
+ * irregardless of whether they're successful or failed.
+ */
+async function _sendEmailToGroupMembers(subscriptionId) {
+  const EMAIL_DELAY_IN_MS = 0
+
+  const subscription = await Subscription.findById(subscriptionId)
+    .populate('member_ids', 'email')
+    .populate('admin_id', ['first_name', 'last_name', 'email'])
+    .exec()
+
+  // On failure, log the error and carry on so that one email failing does not prevent other emails sending
+  for (const recipient of subscription.member_ids) {
+    try {
+      const opts = {
+        to: recipient.email,
+        admin: subscription.admin_id,
+        groupName: subscription.teamName,
+      }
+      EmailHandler.sendDeferredEmail(
+        'surrenderAccountForManagedUsers',
+        opts,
+        EMAIL_DELAY_IN_MS
+      )
+    } catch (err) {
+      logger.error(
+        { err, userId: recipient._id },
+        'could not send notification email to surrender account'
+      )
+    }
   }
 }
 

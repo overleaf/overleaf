@@ -437,6 +437,64 @@ templates.inviteNewUserToJoinManagedUsers = ctaTemplate({
   },
 })
 
+templates.surrenderAccountForManagedUsers = ctaTemplate({
+  subject(opts) {
+    const admin = _.escape(_formatUserNameAndEmail(opts.admin, 'an admin'))
+
+    const toGroupName = opts.groupName ? ` to ${opts.groupName}` : ''
+
+    return `You’ve been invited by ${admin} to transfer management of your ${settings.appName} account${toGroupName}`
+  },
+  title(opts) {
+    const admin = _.escape(_formatUserNameAndEmail(opts.admin, 'an admin'))
+
+    const toGroupName = opts.groupName ? ` to ${opts.groupName}` : ''
+
+    return `You’ve been invited by ${admin} to transfer management of your ${settings.appName} account${toGroupName}`
+  },
+  message(opts, isPlainText) {
+    const admin = _.escape(_formatUserNameAndEmail(opts.admin, 'an admin'))
+
+    const groupName = opts.groupName ?? `a group managed by ${admin}`
+
+    // TODO update with actual wiki link once created
+    const managedUsersLink = EmailMessageHelper.displayLink(
+      'user account management',
+      `${settings.siteUrl}/learn/how-to/Managed_Users`,
+      isPlainText
+    )
+
+    return [
+      `Your ${settings.appName} account ${_.escape(
+        opts.to
+      )} is part of ${groupName} and your group administrator has now enabled ${managedUsersLink}. This will ensure that projects aren’t lost when someone leaves the group.`,
+    ]
+  },
+  secondaryMessage(opts, isPlainText) {
+    const transferProjectOwnershipLink = EmailMessageHelper.displayLink(
+      'change project owner',
+      `${settings.siteUrl}/learn/how-to/How_to_Transfer_Project_Ownership`,
+      isPlainText
+    )
+
+    return [
+      `<b>What does this mean for you?</b>`,
+      `If you accept, you’ll transfer the management of your ${settings.appName} account to the owner of the group subscription, who will then have admin rights over your account and control over your stuff.`,
+      `If you have personal projects in your ${settings.appName} account that you want to keep separate, that’s not a problem. You can set up another account under a personal email address and change the ownership of your personal projects to the new account. Find out how to ${transferProjectOwnershipLink}.`,
+      `If you think this invitation has been sent in error please contact your group administrator.`,
+    ]
+  },
+  ctaURL(opts) {
+    return opts.acceptInviteUrl
+  },
+  ctaText(opts) {
+    return 'Accept invitation'
+  },
+  greeting() {
+    return ''
+  },
+})
+
 templates.testEmail = ctaTemplate({
   subject() {
     return `A Test Email from ${settings.appName}`
