@@ -296,6 +296,9 @@ module.exports = DocumentManager = {
           callback(null)
         } else {
           logger.debug({ projectId, docId, version }, 'flushing doc')
+          Metrics.inc('flush-doc-if-loaded', {
+            status: unflushedTime != null ? 'modified' : 'unmodified',
+          })
           PersistenceManager.setDoc(
             projectId,
             docId,
