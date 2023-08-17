@@ -61,7 +61,7 @@ make test_unit MOCHA_GREP='lezer-latex'
 ## Trying the parser
 
 While developing the parser, you can run it against a file by calling the `lezer-latex:run` task. There are
-some example files in the test suite, at `web/test/frontend/shared/lezer-latex/examples/`.
+some example files in the test suite, at `web/test/unit/src/LezerLatex/examples/`.
 
 For example:
 

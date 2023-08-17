@@ -13,7 +13,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const examplesDir = path.join(
   __dirname,
-  '../../test/unit/src/lezer-latex/examples'
+  '../../test/unit/src/LezerLatex/examples'
 )
 
 const strictParser = parser.configure({ strict: true }) // throw exception for invalid documents
