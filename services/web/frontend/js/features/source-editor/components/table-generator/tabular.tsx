@@ -47,6 +47,7 @@ export type Positions = {
   cells: CellPosition[][]
   columnDeclarations: { from: number; to: number }
   rowPositions: RowPosition[]
+  tabular: { from: number; to: number }
 }
 
 export const TableRenderingError: FC<{
@@ -79,7 +80,8 @@ export const TableRenderingError: FC<{
 export const Tabular: FC<{
   tabularNode: SyntaxNode
   view: EditorView
-}> = ({ tabularNode, view }) => {
+  tableNode: SyntaxNode | null
+}> = ({ tabularNode, view, tableNode }) => {
   return (
     <ErrorBoundary
       fallbackRender={() => (
@@ -88,7 +90,11 @@ export const Tabular: FC<{
     >
       <CodeMirrorViewContextProvider value={view}>
         <TabularProvider>
-          <TableProvider tabularNode={tabularNode} view={view}>
+          <TableProvider
+            tabularNode={tabularNode}
+            view={view}
+            tableNode={tableNode}
+          >
             <SelectionContextProvider>
               <EditingContextProvider>
                 <TabularWrapper />

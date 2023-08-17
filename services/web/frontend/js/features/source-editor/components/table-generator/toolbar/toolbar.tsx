@@ -8,6 +8,9 @@ import {
   BorderTheme,
   insertColumn,
   insertRow,
+  moveCaption,
+  removeCaption,
+  removeNodes,
   removeRowOrColumns,
   setAlignment,
   setBorders,
@@ -18,7 +21,8 @@ import { useTableContext } from '../contexts/table-context'
 export const Toolbar = memo(function Toolbar() {
   const { selection } = useSelectionContext()
   const view = useCodeMirrorViewContext()
-  const { positions, rowSeparators, cellSeparators } = useTableContext()
+  const { positions, rowSeparators, cellSeparators, tableEnvironment } =
+    useTableContext()
   if (!selection) {
     return null
   }
@@ -27,12 +31,15 @@ export const Toolbar = memo(function Toolbar() {
       <ToolbarDropdown
         id="table-generator-caption-dropdown"
         label="Caption below"
-        disabled
+        disabled={!tableEnvironment}
       >
         <button
           className="ol-cm-toolbar-menu-item"
           role="menuitem"
           type="button"
+          onClick={() => {
+            removeCaption(view, tableEnvironment)
+          }}
         >
           No caption
         </button>
@@ -40,6 +47,9 @@ export const Toolbar = memo(function Toolbar() {
           className="ol-cm-toolbar-menu-item"
           role="menuitem"
           type="button"
+          onClick={() => {
+            moveCaption(view, positions, 'above', tableEnvironment)
+          }}
         >
           Caption above
         </button>
@@ -47,6 +57,9 @@ export const Toolbar = memo(function Toolbar() {
           className="ol-cm-toolbar-menu-item"
           role="menuitem"
           type="button"
+          onClick={() => {
+            moveCaption(view, positions, 'below', tableEnvironment)
+          }}
         >
           Caption below
         </button>
@@ -212,7 +225,9 @@ export const Toolbar = memo(function Toolbar() {
           icon="delete_forever"
           id="table-generator-remove-table"
           label="Delete table"
-          disabled
+          command={() => {
+            removeNodes(view, tableEnvironment?.table ?? positions.tabular)
+          }}
         />
       </div>
     </div>

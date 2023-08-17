@@ -105,7 +105,8 @@
     VerbatimEnvName,
     TikzPictureEnvName,
     FigureEnvName,
-    ListEnvName
+    ListEnvName,
+    TableEnvName
 }
 
 @external specialize {CtrlSym} specializeCtrlSym from "./tokens.mjs" {
@@ -521,6 +522,7 @@ KnownEnvironment {
     | TikzPictureEnvironment
     | FigureEnvironment
     | ListEnvironment
+    | TableEnvironment
     )
 }
 
@@ -549,6 +551,12 @@ TabularEnvironment[@isGroup="$Environment"] {
         (textWithGroupsEnvironmentsAndBlankLines)+
     }>
     EndEnv<TabularEnvName>
+}
+
+TableEnvironment[@isGroup="$Environment"] {
+    BeginEnv<TableEnvName>
+    Content<Text>
+    EndEnv<TableEnvName>
 }
 
 EquationEnvironment[@isGroup="$Environment"] {

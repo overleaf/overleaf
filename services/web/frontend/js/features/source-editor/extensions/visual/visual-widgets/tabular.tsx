@@ -6,7 +6,11 @@ import { Tabular } from '../../../components/table-generator/tabular'
 export class TabularWidget extends WidgetType {
   private element: HTMLElement | undefined
 
-  constructor(private node: SyntaxNode, private content: string) {
+  constructor(
+    private tabularNode: SyntaxNode,
+    private content: string,
+    private tableNode: SyntaxNode | null
+  ) {
     super()
   }
 
@@ -15,7 +19,11 @@ export class TabularWidget extends WidgetType {
     this.element.classList.add('ol-cm-tabular')
     this.element.style.backgroundColor = 'rgba(125, 125, 125, 0.05)'
     ReactDOM.render(
-      <Tabular view={view} tabularNode={this.node} />,
+      <Tabular
+        view={view}
+        tabularNode={this.tabularNode}
+        tableNode={this.tableNode}
+      />,
       this.element
     )
     return this.element
@@ -23,7 +31,10 @@ export class TabularWidget extends WidgetType {
 
   eq(widget: TabularWidget): boolean {
     return (
-      this.node.from === widget.node.from && this.content === widget.content
+      this.tabularNode.from === widget.tabularNode.from &&
+      this.tableNode?.from === widget.tableNode?.from &&
+      this.tableNode?.to === widget.tableNode?.to &&
+      this.content === widget.content
     )
   }
 

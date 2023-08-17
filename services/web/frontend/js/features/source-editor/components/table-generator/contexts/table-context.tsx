@@ -6,9 +6,16 @@ import {
   RowPosition,
   RowSeparator,
   generateTable,
+  parseTableEnvironment,
 } from '../utils'
 import { EditorView } from '@codemirror/view'
 import { SyntaxNode } from '@lezer/common'
+
+export type TableEnvironmentData = {
+  table: { from: number; to: number }
+  caption?: { from: number; to: number }
+  label?: { from: number; to: number }
+}
 
 const TableContext = createContext<
   | {
@@ -19,6 +26,7 @@ const TableContext = createContext<
       rowSeparators: RowSeparator[]
       cellSeparators: CellSeparator[][]
       positions: Positions
+      tableEnvironment?: TableEnvironmentData
     }
   | undefined
 >(undefined)
@@ -26,7 +34,8 @@ const TableContext = createContext<
 export const TableProvider: FC<{
   tabularNode: SyntaxNode
   view: EditorView
-}> = ({ tabularNode, view, children }) => {
+  tableNode: SyntaxNode | null
+}> = ({ tabularNode, view, children, tableNode }) => {
   const tableData = generateTable(tabularNode, view.state)
 
   // TODO: Validate better that the table matches the column definition
@@ -40,9 +49,21 @@ export const TableProvider: FC<{
     cells: tableData.cellPositions,
     columnDeclarations: tableData.specification,
     rowPositions: tableData.rowPositions,
+    tabular: { from: tabularNode.from, to: tabularNode.to },
   }
+
+  const tableEnvironment = tableNode
+    ? parseTableEnvironment(tableNode)
+    : undefined
+
   return (
-    <TableContext.Provider value={{ ...tableData, positions }}>
+    <TableContext.Provider
+      value={{
+        ...tableData,
+        positions,
+        tableEnvironment,
+      }}
+    >
       {children}
     </TableContext.Provider>
   )

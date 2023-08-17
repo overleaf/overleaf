@@ -42,7 +42,10 @@ import { DividerWidget } from './visual-widgets/divider'
 import { PreambleWidget } from './visual-widgets/preamble'
 import { EndDocumentWidget } from './visual-widgets/end-document'
 import { EnvironmentLineWidget } from './visual-widgets/environment-line'
-import { ListEnvironmentName } from '../../utils/tree-operations/ancestors'
+import {
+  ListEnvironmentName,
+  ancestorOfNodeWithType,
+} from '../../utils/tree-operations/ancestors'
 import { InlineGraphicsWidget } from './visual-widgets/inline-graphics'
 import getMeta from '../../../../utils/meta'
 import { EditableGraphicsWidget } from './visual-widgets/editable-graphics'
@@ -310,11 +313,19 @@ export const atomicDecorations = (options: Options) => {
             nodeRef.type.is('TabularEnvironment')
           ) {
             if (shouldDecorate(state, nodeRef)) {
+              const tableNode = ancestorOfNodeWithType(
+                nodeRef.node,
+                'TableEnvironment'
+              )
               decorations.push(
                 Decoration.replace({
                   widget: new TabularWidget(
                     nodeRef.node,
-                    state.doc.sliceString(nodeRef.from, nodeRef.to)
+                    state.doc.sliceString(
+                      (tableNode ?? nodeRef).from,
+                      (tableNode ?? nodeRef).to
+                    ),
+                    tableNode
                   ),
                   block: true,
                 }).range(nodeRef.from, nodeRef.to)

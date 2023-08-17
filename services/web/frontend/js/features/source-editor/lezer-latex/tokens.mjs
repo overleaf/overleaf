@@ -76,6 +76,7 @@ import {
   TopRuleCtrlSeq,
   MidRuleCtrlSeq,
   BottomRuleCtrlSeq,
+  TableEnvName,
 } from './latex.terms.mjs'
 
 function nameChar(ch) {
@@ -736,6 +737,7 @@ const otherKnownEnvNames = {
   subfigure: FigureEnvName,
   enumerate: ListEnvName,
   itemize: ListEnvName,
+  table: TableEnvName,
 }
 
 export const specializeEnvName = (name, terms) => {

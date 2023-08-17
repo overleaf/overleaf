@@ -125,7 +125,9 @@ export const Cell: FC<{
         toDisplay.substring.bind(toDisplay)
       )
       loadMathJax().then(async MathJax => {
-        await MathJax.typesetPromise([renderDiv.current])
+        if (renderDiv.current) {
+          await MathJax.typesetPromise([renderDiv.current])
+        }
       })
     }
   }, [cellData.content, editing])

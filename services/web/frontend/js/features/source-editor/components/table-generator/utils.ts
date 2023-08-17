@@ -1,6 +1,7 @@
 import { EditorState } from '@codemirror/state'
 import { SyntaxNode } from '@lezer/common'
 import { ColumnDefinition, TableData } from './tabular'
+import { TableEnvironmentData } from './contexts/table-context'
 
 const ALIGNMENT_CHARACTERS = ['c', 'l', 'r', 'p']
 
@@ -278,4 +279,22 @@ export function generateTable(
     rowSeparators: tableData.rowSeparators,
     cellSeparators,
   }
+}
+
+export function parseTableEnvironment(tableNode: SyntaxNode) {
+  const tableEnvironment: TableEnvironmentData = {
+    table: { from: tableNode.from, to: tableNode.to },
+  }
+  tableNode.cursor().iterate(({ type, from, to }) => {
+    if (tableEnvironment.caption && tableEnvironment.label) {
+      // Stop looking once we've found both caption and label
+      return false
+    }
+    if (type.is('Caption')) {
+      tableEnvironment.caption = { from, to }
+    } else if (type.is('Label')) {
+      tableEnvironment.label = { from, to }
+    }
+  })
+  return tableEnvironment
 }

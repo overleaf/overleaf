@@ -1,12 +1,18 @@
 import { EditorView } from '@codemirror/view'
 import { ColumnDefinition, Positions } from '../tabular'
-import { ChangeSpec } from '@codemirror/state'
+import { ChangeSpec, EditorSelection } from '@codemirror/state'
 import {
   CellSeparator,
   RowSeparator,
   parseColumnSpecifications,
 } from '../utils'
 import { TableSelection } from '../contexts/selection-context'
+import { ensureEmptyLine } from '../../../extensions/toolbar/commands'
+import { TableEnvironmentData } from '../contexts/table-context'
+import {
+  extendBackwardsOverEmptyLines,
+  extendForwardsOverEmptyLines,
+} from '../../../extensions/visual/selection'
 
 /* eslint-disable no-unused-vars */
 export enum BorderTheme {
@@ -294,4 +300,136 @@ export const insertColumn = (
     insert: generateColumnSpecification(columnSpecification),
   })
   view.dispatch({ changes })
+}
+
+export const removeNodes = (
+  view: EditorView,
+  ...nodes: ({ from: number; to: number } | undefined)[]
+) => {
+  const changes: ChangeSpec[] = []
+  for (const node of nodes) {
+    if (node !== undefined) {
+      changes.push({ from: node.from, to: node.to, insert: '' })
+    }
+  }
+  view.dispatch({
+    changes,
+  })
+}
+
+const contains = (
+  { from: outerFrom, to: outerTo }: { from: number; to: number },
+  { from: innerFrom, to: innerTo }: { from: number; to: number }
+) => {
+  return outerFrom <= innerFrom && outerTo >= innerTo
+}
+
+export const moveCaption = (
+  view: EditorView,
+  positions: Positions,
+  target: 'above' | 'below',
+  tableEnvironment?: TableEnvironmentData
+) => {
+  const changes: ChangeSpec[] = []
+  const position =
+    target === 'above' ? positions.tabular.from : positions.tabular.to
+  const cursor = EditorSelection.cursor(position)
+
+  if (tableEnvironment?.caption) {
+    const { caption: existingCaption } = tableEnvironment
+    if (
+      (existingCaption.from < positions.tabular.from && target === 'above') ||
+      (existingCaption.from > positions.tabular.to && target === 'below')
+    ) {
+      // It's already in the right place
+      return
+    }
+  }
+
+  const { pos, prefix, suffix } = ensureEmptyLine(view.state, cursor, target)
+
+  if (!tableEnvironment?.caption) {
+    let labelText = '\\label{tab:my_table}'
+    if (tableEnvironment?.label) {
+      // We have a label, but no caption. Move the label after our caption
+      changes.push({
+        from: tableEnvironment.label.from,
+        to: tableEnvironment.label.to,
+        insert: '',
+      })
+      labelText = view.state.sliceDoc(
+        tableEnvironment.label.from,
+        tableEnvironment.label.to
+      )
+    }
+    changes.push({
+      ...gobbleEmptyLines(view, pos, 2, target),
+      insert: `${prefix}\\caption{Caption}\n${labelText}${suffix}`,
+    })
+  } else {
+    const { caption: existingCaption, label: existingLabel } = tableEnvironment
+    // We have a caption, and we need to move it
+    let currentCaption = view.state.sliceDoc(
+      existingCaption.from,
+      existingCaption.to
+    )
+    if (existingLabel && !contains(existingCaption, existingLabel)) {
+      // Move label with it
+      const labelText = view.state.sliceDoc(
+        existingLabel.from,
+        existingLabel.to
+      )
+      currentCaption += `\n${labelText}`
+      changes.push({
+        from: existingLabel.from,
+        to: existingLabel.to,
+        insert: '',
+      })
+    }
+    changes.push({
+      ...gobbleEmptyLines(view, pos, 2, target),
+      insert: `${prefix}${currentCaption}${suffix}`,
+    })
+    // remove exsisting caption
+    changes.push({
+      from: existingCaption.from,
+      to: existingCaption.to,
+      insert: '',
+    })
+  }
+  view.dispatch({ changes })
+}
+
+export const removeCaption = (
+  view: EditorView,
+  tableEnvironment?: TableEnvironmentData
+) => {
+  if (tableEnvironment?.caption && tableEnvironment.label) {
+    if (contains(tableEnvironment.caption, tableEnvironment.label)) {
+      return removeNodes(view, tableEnvironment.caption)
+    }
+  }
+  return removeNodes(view, tableEnvironment?.caption, tableEnvironment?.label)
+}
+
+const gobbleEmptyLines = (
+  view: EditorView,
+  pos: number,
+  lines: number,
+  target: 'above' | 'below'
+) => {
+  const line = view.state.doc.lineAt(pos)
+  if (line.length !== 0) {
+    return { from: pos, to: pos }
+  }
+  if (target === 'above') {
+    return {
+      from: extendBackwardsOverEmptyLines(view.state.doc, line, lines),
+      to: pos,
+    }
+  }
+  return {
+    from: pos,
+    to: extendForwardsOverEmptyLines(view.state.doc, line, lines),
+  }
 }

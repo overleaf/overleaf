@@ -32,21 +32,32 @@ export const toggleNumberedList = toggleListForRanges('enumerate')
 export const wrapInInlineMath = wrapRanges('\\(', '\\)')
 export const wrapInDisplayMath = wrapRanges('\n\\[', '\\]\n')
 
-export const ensureEmptyLine = (state: EditorState, range: SelectionRange) => {
+export const ensureEmptyLine = (
+  state: EditorState,
+  range: SelectionRange,
+  direction: 'above' | 'below' = 'below'
+) => {
   let pos = range.anchor
   let suffix = ''
+  let prefix = ''
 
   const line = state.doc.lineAt(pos)
 
   if (line.text.trim().length) {
-    pos = Math.min(line.to + 1, state.doc.length)
-    const nextLine = state.doc.lineAt(pos)
+    if (direction === 'below') {
+      pos = Math.min(line.to + 1, state.doc.length)
+    } else {
+      pos = Math.max(line.from - 1, 0)
+    }
+    const neighbouringLine = state.doc.lineAt(pos)
 
-    if (nextLine.length) {
+    if (neighbouringLine.length && direction === 'below') {
       suffix = '\n'
+    } else if (neighbouringLine.length && direction === 'above') {
+      prefix = '\n'
     }
   }
-  return { pos, suffix }
+  return { pos, suffix, prefix }
 }
 
 export const insertFigure: Command = view => {
@@ -66,6 +77,8 @@ export const insertTable = (view: EditorView, sizeX: number, sizeY: number) => {
 ${('\t\t' + '#{} & #{}'.repeat(sizeX - 1) + '\\\\\n').repeat(
   sizeY
 )}\\end{tabular}
+\t\\caption{Caption}
+\t\\label{tab:my_label}
 \\end{table}${suffix}`
   snippet(template)({ state, dispatch }, { label: 'Table' }, pos, pos)
   return true

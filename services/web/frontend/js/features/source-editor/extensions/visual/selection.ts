@@ -35,9 +35,17 @@ export const placeSelectionInsideBlock = (
   return { selection, effects: EditorView.scrollIntoView(line.to) }
 }
 
-export const extendBackwardsOverEmptyLines = (doc: Text, line: Line) => {
+export const extendBackwardsOverEmptyLines = (
+  doc: Text,
+  line: Line,
+  limit: number = Number.POSITIVE_INFINITY
+) => {
   let { number, from } = line
-  for (let lineNumber = number - 1; lineNumber > 0; lineNumber--) {
+  for (
+    let lineNumber = number - 1;
+    lineNumber > 0 && number - lineNumber <= limit;
+    lineNumber--
+  ) {
     const line = doc.line(lineNumber)
     if (line.text.trim().length > 0) {
       break
@@ -47,9 +55,17 @@ export const extendBackwardsOverEmptyLines = (doc: Text, line: Line) => {
   return from
 }
 
-export const extendForwardsOverEmptyLines = (doc: Text, line: Line) => {
+export const extendForwardsOverEmptyLines = (
+  doc: Text,
+  line: Line,
+  limit: number = Number.POSITIVE_INFINITY
+) => {
   let { number, to } = line
-  for (let lineNumber = number + 1; lineNumber <= doc.lines; lineNumber++) {
+  for (
+    let lineNumber = number + 1;
+    lineNumber <= doc.lines && lineNumber - number <= limit;
+    lineNumber++
+  ) {
     const line = doc.line(lineNumber)
     if (line.text.trim().length > 0) {
       break
