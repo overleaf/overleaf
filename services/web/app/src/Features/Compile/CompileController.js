@@ -328,7 +328,15 @@ module.exports = CompileController = {
               req.params.build_id,
               'output.pdf'
             )
-            CompileController.proxyToClsi(projectId, url, {}, req, res, next)
+            CompileController.proxyToClsi(
+              projectId,
+              'output-file',
+              url,
+              {},
+              req,
+              res,
+              next
+            )
           })
         }
       })
@@ -374,7 +382,15 @@ module.exports = CompileController = {
         return
       }
       const url = `/project/${projectId}/output/output.pdf`
-      CompileController.proxyToClsi(projectId, url, {}, req, res, next)
+      CompileController.proxyToClsi(
+        projectId,
+        'output-file',
+        url,
+        {},
+        req,
+        res,
+        next
+      )
     })
   },
 
@@ -390,7 +406,15 @@ module.exports = CompileController = {
         req.params.build_id,
         req.params.file
       )
-      CompileController.proxyToClsi(projectId, url, {}, req, res, next)
+      CompileController.proxyToClsi(
+        projectId,
+        'output-file',
+        url,
+        {},
+        req,
+        res,
+        next
+      )
     })
   },
 
@@ -411,6 +435,7 @@ module.exports = CompileController = {
     }
     CompileController.proxyToClsiWithLimits(
       submissionId,
+      'output-file',
       url,
       {},
       limits,
@@ -467,6 +492,7 @@ module.exports = CompileController = {
         const url = CompileController._getUrl(projectId, userId, 'sync/pdf')
         CompileController.proxyToClsi(
           projectId,
+          'sync-to-pdf',
           url,
           { page, h, v, imageName },
           req,
@@ -508,6 +534,7 @@ module.exports = CompileController = {
         const url = CompileController._getUrl(projectId, userId, 'sync/code')
         CompileController.proxyToClsi(
           projectId,
+          'sync-to-code',
           url,
           { file, line, column, imageName },
           req,
@@ -518,13 +545,14 @@ module.exports = CompileController = {
     })
   },
 
-  proxyToClsi(projectId, url, qs, req, res, next) {
+  proxyToClsi(projectId, action, url, qs, req, res, next) {
     CompileManager.getProjectCompileLimits(projectId, function (error, limits) {
       if (error) {
         return next(error)
       }
       CompileController.proxyToClsiWithLimits(
         projectId,
+        action,
         url,
         qs,
         limits,
@@ -535,7 +563,7 @@ module.exports = CompileController = {
     })
   },
 
-  proxyToClsiWithLimits(projectId, url, qs, limits, req, res, next) {
+  proxyToClsiWithLimits(projectId, action, url, qs, limits, req, res, next) {
     _getPersistenceOptions(
       req,
       projectId,
@@ -551,19 +579,43 @@ module.exports = CompileController = {
           ...persistenceOptions.qs,
           ...qs,
         }).toString()
+        const timer = new Metrics.Timer(
+          'proxy_to_clsi',
+          1,
+          { path: action },
+          [0, 100, 1000, 2000, 5000, 10000, 15000, 20000, 30000, 45000, 60000]
+        )
+        Metrics.inc('proxy_to_clsi', 1, { path: action, status: 'start' })
         fetchStreamWithResponse(url.href, {
           method: req.method,
           signal: AbortSignal.timeout(60 * 1000),
           headers: persistenceOptions.headers,
         })
           .then(({ stream, response }) => {
+            if (req.destroyed) {
+              // The client has disconnected already, avoid trying to write into the broken connection.
+              Metrics.inc('proxy_to_clsi', 1, {
+                path: action,
+                status: 'req-aborted',
+              })
+              return
+            }
+            Metrics.inc('proxy_to_clsi', 1, {
+              path: action,
+              status: response.status,
+            })
+
             for (const key of ['Content-Length', 'Content-Type']) {
               res.setHeader(key, response.headers.get(key))
             }
             res.writeHead(response.status)
             return pipeline(stream, res)
           })
+          .then(() => {
+            timer.done()
+          })
           .catch(err => {
+            const duration = timer.done()
             if (!res.headersSent) {
               if (err instanceof RequestFailedError) {
                 res.sendStatus(err.response.status)
@@ -571,7 +623,19 @@ module.exports = CompileController = {
                 res.sendStatus(500)
               }
             }
-            logger.warn({ err, projectId, url }, 'CLSI proxy error')
+            const reqAborted = Boolean(req.destroyed)
+            if (reqAborted) {
+              Metrics.inc('proxy_to_clsi', 1, {
+                path: action,
+                status: 'req-aborted-late',
+              })
+            } else {
+              Metrics.inc('proxy_to_clsi', 1, { path: action, status: 'error' })
+            }
+            logger.warn(
+              { err, projectId, url, action, reqAborted, duration },
+              'CLSI proxy error'
+            )
           })
       }
     )

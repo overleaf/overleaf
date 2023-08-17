@@ -78,7 +78,12 @@ describe('CompileController', function () {
         '@overleaf/fetch-utils': this.fetchUtils,
         request: (this.request = sinon.stub()),
         '../Project/ProjectGetter': (this.ProjectGetter = {}),
-        '@overleaf/metrics': (this.Metrics = { inc: sinon.stub() }),
+        '@overleaf/metrics': (this.Metrics = {
+          inc: sinon.stub(),
+          Timer: class {
+            done() {}
+          },
+        }),
         './CompileManager': this.CompileManager,
         '../User/UserGetter': this.UserGetter,
         './ClsiManager': this.ClsiManager,
@@ -409,6 +414,7 @@ describe('CompileController', function () {
         this.CompileController.proxyToClsi
           .calledWith(
             this.projectId,
+            'output-file',
             `/project/${this.projectId}/user/${this.user_id}/output/output.pdf`,
             {},
             this.req,
@@ -432,6 +438,7 @@ describe('CompileController', function () {
         this.CompileController.proxyToClsi
           .calledWith(
             this.projectId,
+            'output-file',
             `/project/${this.projectId}/user/${this.user_id}/build/${this.buildId}/output/output.pdf`,
             {},
             this.req,
@@ -470,6 +477,7 @@ describe('CompileController', function () {
       it('should proxy to CLSI with correct URL and default limits', function () {
         this.CompileController.proxyToClsiWithLimits.should.have.been.calledWith(
           this.submission_id,
+          'output-file',
           this.expected_url,
           {},
           {
@@ -493,6 +501,7 @@ describe('CompileController', function () {
       it('should proxy to CLSI with correct URL and specified limits', function () {
         this.CompileController.proxyToClsiWithLimits.should.have.been.calledWith(
           this.submission_id,
+          'output-file',
           this.expected_url,
           {},
           {
@@ -526,6 +535,7 @@ describe('CompileController', function () {
     it('should proxy the request with an imageName', function () {
       expect(this.CompileController.proxyToClsi).to.have.been.calledWith(
         this.projectId,
+        'sync-to-code',
         `/project/${this.projectId}/user/${this.user_id}/sync/code`,
         { file, line, column, imageName },
         this.req,
@@ -558,6 +568,7 @@ describe('CompileController', function () {
     it('should proxy the request with an imageName', function () {
       expect(this.CompileController.proxyToClsi).to.have.been.calledWith(
         this.projectId,
+        'sync-to-pdf',
         `/project/${this.projectId}/user/${this.user_id}/sync/pdf`,
         { page, h, v, imageName },
         this.req,
@@ -590,6 +601,7 @@ describe('CompileController', function () {
             })
           this.CompileController.proxyToClsi(
             this.projectId,
+            'output-file',
             (this.url = '/test'),
             { query: 'foo' },
             this.req,
@@ -620,6 +632,7 @@ describe('CompileController', function () {
             })
           this.CompileController.proxyToClsi(
             this.projectId,
+            'output-file',
             (this.url = '/test'),
             {},
             this.req,
@@ -647,6 +660,7 @@ describe('CompileController', function () {
             })
           this.CompileController.proxyToClsi(
             this.projectId,
+            'output-file',
             (this.url = '/test'),
             {},
             this.req,
@@ -678,6 +692,7 @@ describe('CompileController', function () {
             })
           this.CompileController.proxyToClsi(
             this.projectId,
+            'output-file',
             (this.url = '/test'),
             {},
             this.req,
@@ -705,6 +720,7 @@ describe('CompileController', function () {
           this.req.query = { build: 1234 }
           this.CompileController.proxyToClsi(
             this.projectId,
+            'output-file',
             (this.url = '/test'),
             {},
             this.req,
@@ -765,6 +781,7 @@ describe('CompileController', function () {
       sinon.assert.calledWith(
         this.CompileController.proxyToClsi,
         this.projectId,
+        'output-file',
         `/project/${this.projectId}/output/output.pdf`,
         {},
         this.req,
@@ -774,6 +791,7 @@ describe('CompileController', function () {
       this.CompileController.proxyToClsi
         .calledWith(
           this.projectId,
+          'output-file',
           `/project/${this.projectId}/output/output.pdf`,
           {},
           this.req,
