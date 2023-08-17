@@ -36,7 +36,6 @@ export const ToolbarButton = memo<{
       if (command) {
         event.preventDefault()
         command(view)
-        view.focus()
       }
     },
     [command, view]

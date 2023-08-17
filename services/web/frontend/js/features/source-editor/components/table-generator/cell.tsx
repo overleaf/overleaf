@@ -118,7 +118,7 @@ export const Cell: FC<{
     if (renderDiv.current && !editing) {
       const tree = parser.parse(toDisplay)
       const node = tree.topNode
-
+      renderDiv.current.innerText = ''
       typesetNodeIntoElement(
         node,
         renderDiv.current,

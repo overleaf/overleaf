@@ -23,10 +23,9 @@ export const ToolbarDropdown: FC<{
   disabled,
   disabledTooltip,
 }) => {
-  const { open, onToggle } = useDropdown()
+  const { open, onToggle, ref } = useDropdown()
   const toggleButtonRef = useRef<HTMLButtonElement | null>(null)
   const { ref: tabularRef } = useTabularContext()
-
   const button = (
     <button
       ref={toggleButtonRef}
@@ -34,8 +33,13 @@ export const ToolbarDropdown: FC<{
       id={id}
       aria-haspopup="true"
       className={btnClassName}
-      onMouseDown={event => event.preventDefault()}
-      onClick={() => onToggle(!open)}
+      onMouseDown={event => {
+        event.preventDefault()
+        event.stopPropagation()
+      }}
+      onClick={() => {
+        onToggle(!open)
+      }}
       aria-label={tooltip}
       disabled={disabled}
       aria-disabled={disabled}
@@ -44,26 +48,30 @@ export const ToolbarDropdown: FC<{
       <MaterialIcon type={icon} />
     </button>
   )
-  const overlay = open && tabularRef.current && (
+  const overlay = tabularRef.current && (
     <Overlay
-      show
-      onHide={() => onToggle(false)}
-      animation={false}
-      container={tabularRef.current}
-      containerPadding={0}
-      placement="bottom"
-      rootClose
+      show={open}
       target={toggleButtonRef.current ?? undefined}
+      placement="bottom"
+      container={tabularRef.current}
+      animation
+      containerPadding={0}
+      onHide={() => onToggle(false)}
     >
       <Popover
         id={`${id}-popover`}
+        ref={ref}
         className="table-generator-toolbar-dropdown-popover"
       >
+        {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions,
+                                     jsx-a11y/click-events-have-key-events */}
         <div
           className="table-generator-toolbar-dropdown-menu"
           id={`${id}-menu`}
-          role="menu"
           aria-labelledby={id}
+          onClick={() => {
+            onToggle(false)
+          }}
         >
           {children}
         </div>
@@ -83,6 +91,7 @@ export const ToolbarDropdown: FC<{
   return (
     <>
       <Tooltip
+        hidden={open}
         id={id}
         description={disabled && disabledTooltip ? disabledTooltip : tooltip}
         overlayProps={{ placement: 'bottom' }}

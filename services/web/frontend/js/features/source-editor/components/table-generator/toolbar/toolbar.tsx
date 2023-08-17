@@ -19,7 +19,7 @@ import { useCodeMirrorViewContext } from '../../codemirror-editor'
 import { useTableContext } from '../contexts/table-context'
 
 export const Toolbar = memo(function Toolbar() {
-  const { selection } = useSelectionContext()
+  const { selection, setSelection } = useSelectionContext()
   const view = useCodeMirrorViewContext()
   const { positions, rowSeparators, cellSeparators, tableEnvironment } =
     useTableContext()
@@ -159,7 +159,9 @@ export const Toolbar = memo(function Toolbar() {
             ) && !selection.isAnyColumnSelected(positions.rowPositions.length)
           }
           command={() =>
-            removeRowOrColumns(view, selection, positions, cellSeparators)
+            setSelection(
+              removeRowOrColumns(view, selection, positions, cellSeparators)
+            )
           }
         />
         <ToolbarDropdown
@@ -174,7 +176,7 @@ export const Toolbar = memo(function Toolbar() {
             role="menuitem"
             type="button"
             onClick={() => {
-              insertColumn(view, selection, positions, false)
+              setSelection(insertColumn(view, selection, positions, false))
             }}
           >
             <span className="table-generator-button-label">
@@ -186,7 +188,7 @@ export const Toolbar = memo(function Toolbar() {
             role="menuitem"
             type="button"
             onClick={() => {
-              insertColumn(view, selection, positions, true)
+              setSelection(insertColumn(view, selection, positions, true))
             }}
           >
             <span className="table-generator-button-label">
@@ -199,7 +201,7 @@ export const Toolbar = memo(function Toolbar() {
             role="menuitem"
             type="button"
             onClick={() => {
-              insertRow(view, selection, positions, false)
+              setSelection(insertRow(view, selection, positions, false))
             }}
           >
             <span className="table-generator-button-label">
@@ -211,7 +213,7 @@ export const Toolbar = memo(function Toolbar() {
             role="menuitem"
             type="button"
             onClick={() => {
-              insertRow(view, selection, positions, true)
+              setSelection(insertRow(view, selection, positions, true))
             }}
           >
             <span className="table-generator-button-label">

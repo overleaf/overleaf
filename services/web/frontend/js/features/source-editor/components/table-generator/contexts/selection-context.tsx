@@ -166,6 +166,16 @@ export class TableSelection {
       maxY === totalRows - 1
     )
   }
+
+  width() {
+    const { minX, maxX } = this.normalized()
+    return maxX - minX + 1
+  }
+
+  height() {
+    const { minY, maxY } = this.normalized()
+    return maxY - minY + 1
+  }
 }
 
 const SelectionContext = createContext<

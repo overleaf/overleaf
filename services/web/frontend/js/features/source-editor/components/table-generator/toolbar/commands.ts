@@ -173,8 +173,15 @@ export const removeRowOrColumns = (
   const numberOfRows = positions.rowPositions.length
 
   if (selection.spansEntireTable(numberOfColumns, numberOfRows)) {
-    return emptyTable(view, columnSpecification, positions)
+    emptyTable(view, columnSpecification, positions)
+    return new TableSelection({ cell: 0, row: 0 })
   }
+  const removedRows =
+    Number(selection.isRowSelected(startRow, numberOfColumns)) *
+    selection.height()
+  const removedColumns =
+    Number(selection.isColumnSelected(startCell, numberOfRows)) *
+    selection.width()
 
   for (let row = startRow; row <= endRow; row++) {
     if (selection.isRowSelected(row, numberOfColumns)) {
@@ -221,6 +228,13 @@ export const removeRowOrColumns = (
     insert: newSpecification,
   })
   view.dispatch({ changes })
+  const updatedNumberOfRows = numberOfRows - removedRows
+  const updatedNumberOfColumns = numberOfColumns - removedColumns
+  // Clamp selection to new table size
+  return new TableSelection({
+    cell: Math.max(0, Math.min(updatedNumberOfColumns - 1, startCell)),
+    row: Math.max(0, Math.min(updatedNumberOfRows - 1, startRow)),
+  })
 }
 
 const emptyTable = (
@@ -262,6 +276,13 @@ export const insertRow = (
   const numberOfColumns = positions.cells[maxY].length
   const insert = `\n${' &'.repeat(numberOfColumns - 1)}\\\\`
   view.dispatch({ changes: { from, to: from, insert } })
+  if (!below) {
+    return selection
+  }
+  return new TableSelection(
+    { cell: 0, row: maxY + 1 },
+    { cell: numberOfColumns - 1, row: maxY + 1 }
+  )
 }
 
 export const insertColumn = (
@@ -300,6 +321,13 @@ export const insertColumn = (
     insert: generateColumnSpecification(columnSpecification),
   })
   view.dispatch({ changes })
+  if (!after) {
+    return selection
+  }
+  return new TableSelection(
+    { cell: maxX + 1, row: 0 },
+    { cell: maxX + 1, row: positions.rowPositions.length - 1 }
+  )
 }
 
 export const removeNodes = (

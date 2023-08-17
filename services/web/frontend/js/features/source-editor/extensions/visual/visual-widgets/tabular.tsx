@@ -38,6 +38,19 @@ export class TabularWidget extends WidgetType {
     )
   }
 
+  updateDOM(dom: HTMLElement, view: EditorView): boolean {
+    this.element = dom
+    ReactDOM.render(
+      <Tabular
+        view={view}
+        tabularNode={this.tabularNode}
+        tableNode={this.tableNode}
+      />,
+      this.element
+    )
+    return true
+  }
+
   destroy() {
     console.debug('destroying tabular widget')
     if (this.element) {

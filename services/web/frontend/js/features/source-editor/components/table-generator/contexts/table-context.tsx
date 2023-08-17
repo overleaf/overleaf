@@ -1,5 +1,5 @@
 import { FC, createContext, useContext } from 'react'
-import { Positions, TableData } from '../tabular'
+import { Positions, TableData, TableRenderingError } from '../tabular'
 import {
   CellPosition,
   CellSeparator,
@@ -41,7 +41,7 @@ export const TableProvider: FC<{
   // TODO: Validate better that the table matches the column definition
   for (const row of tableData.table.rows) {
     if (row.cells.length !== tableData.table.columns.length) {
-      throw new Error("Table doesn't match column definition")
+      return <TableRenderingError view={view} codePosition={tabularNode.from} />
     }
   }
 
