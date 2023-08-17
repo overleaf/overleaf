@@ -45,7 +45,7 @@ export const TableInserterDropdown: FC = () => {
           }}
           ref={target}
         >
-          <MaterialIcon type="table" />
+          <MaterialIcon type="table_chart" />
         </Button>
       </Tooltip>
       <Overlay
