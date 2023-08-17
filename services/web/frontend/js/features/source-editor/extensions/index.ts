@@ -7,7 +7,7 @@ import {
   highlightActiveLineGutter,
 } from '@codemirror/view'
 import { EditorState, Extension } from '@codemirror/state'
-import { foldGutter, indentOnInput } from '@codemirror/language'
+import { foldGutter, indentOnInput, indentUnit } from '@codemirror/language'
 import { history } from '@codemirror/commands'
 import { language } from './language'
 import { lineWrappingIndentation } from './line-wrapping-indentation'
@@ -107,6 +107,7 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   // NOTE: `annotations` needs to be before `language`
   annotations(),
   language(options.currentDoc, options.metadata, options.settings),
+  indentUnit.of('    '), // 4 spaces
   theme(options.theme),
   realtime(options.currentDoc, options.handleError),
   cursorPosition(options.currentDoc),

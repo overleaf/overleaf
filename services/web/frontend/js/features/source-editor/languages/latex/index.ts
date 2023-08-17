@@ -1,7 +1,7 @@
 import { latexIndentService } from './latex-indent-service'
 import { shortcuts } from './shortcuts'
 import { linting } from './linting'
-import { LanguageSupport, indentUnit } from '@codemirror/language'
+import { LanguageSupport } from '@codemirror/language'
 import { CompletionSource } from '@codemirror/autocomplete'
 import { openAutocomplete } from './open-autocomplete'
 import { metadata } from './metadata'
@@ -30,7 +30,6 @@ const completionSources: CompletionSource[] = [
 
 export const latex = () => {
   return new LanguageSupport(LaTeXLanguage, [
-    indentUnit.of('    '), // 4 spaces
     shortcuts(),
     documentOutline.extension,
     documentCommands.extension,
