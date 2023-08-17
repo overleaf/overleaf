@@ -1064,4 +1064,23 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     cy.findAllByRole('option').contains('sometext.txt').click()
     activeEditorLine().should('have.text', '\\input{sometext.txt}')
   })
+
+  it('excludes the current command from completions', function () {
+    const scope = mockScope(mockDocContent(''))
+
+    cy.mount(
+      <Container>
+        <EditorProviders scope={scope}>
+          <CodeMirrorEditor />
+        </EditorProviders>
+      </Container>
+    )
+
+    cy.get('.cm-line').eq(21).type('\\fff \\ff')
+
+    cy.findAllByRole('listbox').should('have.length', 1)
+    cy.findAllByRole('option').contains('\\fff').click()
+
+    cy.get('.cm-line').eq(21).should('have.text', '\\fff \\fff')
+  })
 })

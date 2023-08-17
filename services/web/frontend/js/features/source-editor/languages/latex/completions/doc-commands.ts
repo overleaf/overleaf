@@ -2,6 +2,7 @@ import { applySnippet, extendOverUnpairedClosingBrace } from './apply'
 import { Completion, CompletionContext } from '@codemirror/autocomplete'
 import { documentCommands } from '../document-commands'
 import { Command } from '../../../utils/tree-operations/commands'
+import { syntaxTree } from '@codemirror/language'
 
 const commandNameFromLabel = (label: string): string | undefined =>
   label.match(/^\\\w+/)?.[0]
@@ -36,9 +37,8 @@ export function customCommandCompletions(
 }
 
 const countCommandUsage = (context: CompletionContext) => {
-  const { doc } = context.state
-
-  const excludeLineNumber = doc.lineAt(context.pos).number
+  const tree = syntaxTree(context.state)
+  const currentNode = tree.resolveInner(context.pos, -1)
 
   const result = new Map<
     string,
@@ -51,7 +51,7 @@ const countCommandUsage = (context: CompletionContext) => {
   }
 
   for (const command of commandListProjection.items) {
-    if (command.line === excludeLineNumber) {
+    if (command.from === currentNode.from) {
       continue
     }
     const label = buildLabel(command)
