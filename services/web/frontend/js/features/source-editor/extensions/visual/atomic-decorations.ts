@@ -188,13 +188,19 @@ export const atomicDecorations = (options: Options) => {
       currentOrdinal = ordinalStack.pop() ?? 0
     }
 
+    let seenDocumentEnvironment = false
+
     tree.iterate({
       enter(nodeRef) {
         if (nodeRef.node.type.is('Maketitle')) {
           preamble.to = nodeRef.node.from
         } else if (nodeRef.node.type.is('DocumentEnvironment')) {
-          preamble.to =
-            nodeRef.node.getChild('Content')?.from ?? nodeRef.node.from
+          // only count the first instance of DocumentEnvironment
+          if (!seenDocumentEnvironment) {
+            preamble.to =
+              nodeRef.node.getChild('Content')?.from ?? nodeRef.node.from
+            seenDocumentEnvironment = true
+          }
         } else if (nodeRef.node.type.is('Title')) {
           const node = nodeRef.node.getChild('TextArgument')
           if (node) {
