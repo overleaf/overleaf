@@ -10,9 +10,10 @@ import { LoadedUpdate } from '../../services/types/update'
 import classNames from 'classnames'
 import { updateRangeForUpdate } from '../../utils/history-details'
 import { ActiveDropdown } from '../../hooks/use-dropdown-active-item'
-import { memo } from 'react'
+import { memo, useCallback } from 'react'
 import { HistoryContextValue } from '../../context/types/history-context-value'
 import VersionDropdownContent from './dropdown/version-dropdown-content'
+import CompareItems from './dropdown/menu-item/compare-items'
 
 type HistoryVersionProps = {
   update: LoadedUpdate
@@ -45,6 +46,12 @@ function HistoryVersion({
 }: HistoryVersionProps) {
   const orderedLabels = orderBy(update.labels, ['created_at'], ['desc'])
 
+  const closeDropdown = useCallback(() => {
+    closeDropdownForItem(update)
+  }, [closeDropdownForItem, update])
+
+  const updateRange = updateRangeForUpdate(update)
+
   return (
     <>
       {showDivider ? <hr className="history-version-divider" /> : null}
@@ -75,7 +82,6 @@ function HistoryVersion({
             >
               {dropdownActive ? (
                 <VersionDropdownContent
-                  selected={selected}
                   update={update}
                   projectId={projectId}
                   closeDropdownForItem={closeDropdownForItem}
@@ -83,6 +89,17 @@ function HistoryVersion({
               ) : null}
             </HistoryDropdown>
           )}
+
+          {!selected ? (
+            <span data-testid="compare-icon-version" className="pull-right">
+              <CompareItems
+                updateRange={updateRange}
+                selected={selected}
+                closeDropdown={closeDropdown}
+              />
+            </span>
+          ) : null}
+
           <div className="history-version-main-details">
             <time
               className="history-version-metadata-time"

@@ -19,16 +19,44 @@ function CompareItems({
   const { t } = useTranslation()
   const { selection } = useHistoryContext()
   const { updateRange: selRange, comparing } = selection
-  const notASelectionBoundary =
+
+  // Comparing mode variables
+  const notASelectionBoundaryComparingMode =
     !!selRange &&
     comparing &&
     updateRange.toV !== selRange.toV &&
     updateRange.fromV !== selRange.fromV
   const showCompareWithSelected = !comparing && !!selRange && !selected
-  const showCompareToThis =
-    notASelectionBoundary && updateRange.toV > selRange.fromV
-  const showCompareFromThis =
-    notASelectionBoundary && updateRange.fromV < selRange.toV
+  const showCompareToThisComparingMode =
+    notASelectionBoundaryComparingMode && updateRange.toV > selRange.toV
+  const showCompareFromThisComparingMode =
+    notASelectionBoundaryComparingMode && updateRange.fromV < selRange.fromV
+
+  // Normal mode variables
+  const notASelectionBoundaryNormalMode =
+    !!selRange &&
+    updateRange.toV !== selRange.toV &&
+    updateRange.fromV !== selRange.fromV
+  const showCompareToThisNormalMode =
+    notASelectionBoundaryNormalMode && updateRange.toV > selRange.toV
+  const showCompareFromThisNormalMode =
+    notASelectionBoundaryNormalMode && updateRange.fromV < selRange.fromV
+
+  let iconTypeNonSelectedVersion = ''
+  let toolTipDescriptionNonSelectedVersion = ''
+
+  if (showCompareToThisNormalMode) {
+    iconTypeNonSelectedVersion = 'align_start'
+    toolTipDescriptionNonSelectedVersion = t(
+      'history_compare_up_to_this_version'
+    )
+  }
+  if (showCompareFromThisNormalMode) {
+    iconTypeNonSelectedVersion = 'align_end'
+    toolTipDescriptionNonSelectedVersion = t(
+      'history_compare_from_this_version'
+    )
+  }
 
   return (
     <>
@@ -36,10 +64,16 @@ function CompareItems({
         <Compare
           comparisonRange={updateRangeUnion(updateRange, selRange)}
           closeDropdown={closeDropdown}
-          text={t('history_compare_to_selected_version')}
+          toolTipDescription={toolTipDescriptionNonSelectedVersion}
+          icon={
+            <MaterialIcon
+              type={iconTypeNonSelectedVersion}
+              className="material-symbols-rounded history-dropdown-icon p-1"
+            />
+          }
         />
       ) : null}
-      {showCompareFromThis ? (
+      {showCompareFromThisComparingMode ? (
         <Compare
           comparisonRange={{
             fromV: updateRange.fromV,
@@ -48,11 +82,16 @@ function CompareItems({
             toVTimestamp: selRange.toVTimestamp,
           }}
           closeDropdown={closeDropdown}
-          text={t('history_compare_from_this_version')}
-          icon={<MaterialIcon type="line_start_circle" className="fa-fw" />}
+          toolTipDescription={t('history_compare_from_this_version')}
+          icon={
+            <MaterialIcon
+              type="align_end"
+              className="material-symbols-rounded history-dropdown-icon p-1"
+            />
+          }
         />
       ) : null}
-      {showCompareToThis ? (
+      {showCompareToThisComparingMode ? (
         <Compare
           comparisonRange={{
             fromV: selRange.fromV,
@@ -61,8 +100,13 @@ function CompareItems({
             toVTimestamp: updateRange.toVTimestamp,
           }}
           closeDropdown={closeDropdown}
-          text={t('history_compare_up_to_this_version')}
-          icon={<MaterialIcon type="line_end_circle" className="fa-fw" />}
+          toolTipDescription={t('history_compare_up_to_this_version')}
+          icon={
+            <MaterialIcon
+              type="align_start"
+              className="material-symbols-rounded history-dropdown-icon p-1"
+            />
+          }
         />
       ) : null}
     </>

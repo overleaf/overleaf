@@ -57,7 +57,8 @@ class TestServer {
     })
 
     this.app.get('/json/basic-auth', (req, res) => {
-      const expectedAuth = 'Basic ' + Buffer.from('user:pass').toString('base64')
+      const expectedAuth =
+        'Basic ' + Buffer.from('user:pass').toString('base64')
       if (req.headers.authorization === expectedAuth) {
         res.json({ key: 'verysecret' })
       } else {

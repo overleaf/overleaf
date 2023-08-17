@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next'
 import { ActiveDropdown } from '../../hooks/use-dropdown-active-item'
 import { HistoryContextValue } from '../../context/types/history-context-value'
 import LabelDropdownContent from './dropdown/label-dropdown-content'
+import CompareItems from './dropdown/menu-item/compare-items'
 
 type LabelListItemProps = {
   version: Version
@@ -59,6 +60,9 @@ function LabelListItem({
     },
     [setActiveDropdownItem, version]
   )
+  const closeDropdown = useCallback(() => {
+    closeDropdownForItem(version)
+  }, [closeDropdownForItem, version])
 
   return (
     <HistoryVersionDetails
@@ -75,14 +79,24 @@ function LabelListItem({
       >
         {dropdownActive ? (
           <LabelDropdownContent
-            selected={selected}
             version={version}
-            versionTimestamp={toVTimestamp}
             projectId={projectId}
             closeDropdownForItem={closeDropdownForItem}
           />
         ) : null}
       </HistoryDropdown>
+      <span className="pull-right">
+        <CompareItems
+          updateRange={{
+            fromV: version,
+            toV: version,
+            fromVTimestamp: toVTimestamp,
+            toVTimestamp,
+          }}
+          selected={selected}
+          closeDropdown={closeDropdown}
+        />
+      </span>
       <div className="history-version-main-details">
         {labels.map(label => (
           <div key={label.id} className="history-version-label">
