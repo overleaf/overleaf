@@ -1,19 +1,15 @@
 import {
   StateField,
   StateEffect,
-  Range,
-  RangeValue,
   EditorSelection,
+  Prec,
 } from '@codemirror/state'
-import { EditorView, showTooltip, Tooltip } from '@codemirror/view'
-import { misspelledWordsField } from './misspelled-words'
+import { EditorView, showTooltip, Tooltip, keymap } from '@codemirror/view'
 import { addIgnoredWord } from './ignored-words'
 import { learnWordRequest } from './backend'
-import { Word } from './spellchecker'
+import { Word, Mark, getMarkAtPosition } from './spellchecker'
 
 const ITEMS_TO_SHOW = 8
-
-type Mark = Range<RangeValue & { spec: { word: Word } }>
 
 /*
  * The time until which a click event will be ignored, so it doesn't immediately close the spelling menu.
@@ -48,21 +44,13 @@ const handleContextMenuEvent = (event: MouseEvent, view: EditorView) => {
     },
     false
   )
+  const targetMark = getMarkAtPosition(view, position)
 
-  const marks = view.state.field(misspelledWordsField)
-
-  let targetMark: Mark | null = null
-  marks.between(view.viewport.from, view.viewport.to, (from, to, value) => {
-    if (position >= from && position <= to) {
-      targetMark = { from, to, value }
-      return false
-    }
-  })
   if (!targetMark) {
     return
   }
 
-  const { from, to, value } = targetMark as Mark
+  const { from, to, value } = targetMark
 
   const targetWord = value.spec.word
   if (!targetWord) {
@@ -83,6 +71,24 @@ const handleContextMenuEvent = (event: MouseEvent, view: EditorView) => {
       word: targetWord,
     }),
   })
+}
+
+const handleShortcutEvent = (view: EditorView) => {
+  const targetMark = getMarkAtPosition(view, view.state.selection.main.from)
+
+  if (!targetMark || !targetMark.value) {
+    return false
+  }
+
+  view.dispatch({
+    selection: EditorSelection.range(targetMark.from, targetMark.to),
+    effects: showSpellingMenu.of({
+      mark: targetMark,
+      word: targetMark.value.spec.word,
+    }),
+  })
+
+  return true
 }
 
 /*
@@ -119,6 +125,12 @@ export const spellingMenuField = StateField.define<Tooltip | null>({
         contextmenu: handleContextMenuEvent,
         click: handleClickEvent,
       }),
+      Prec.highest(
+        keymap.of([
+          { key: 'Ctrl-Space', run: handleShortcutEvent },
+          { key: 'Alt-Space', run: handleShortcutEvent },
+        ])
+      ),
     ]
   },
 })
@@ -148,6 +160,68 @@ const createSpellingSuggestionList = (
 
   // List
   const list = document.createElement('ul')
+  list.setAttribute('tabindex', '0')
+  list.setAttribute('role', 'menu')
+  list.addEventListener('keydown', event => {
+    if (event.code === 'Tab') {
+      // preventing selecting next element
+      event.preventDefault()
+    }
+  })
+  list.addEventListener('keyup', event => {
+    switch (event.code) {
+      case 'ArrowDown': {
+        // get currently selected option
+        const selectedButton =
+          list.querySelector<HTMLButtonElement>('li button:focus')
+
+        if (!selectedButton) {
+          return list
+            .querySelector<HTMLButtonElement>('li[role="option"] button')
+            ?.focus()
+        }
+
+        // get next option
+        let nextElement = selectedButton.parentElement?.nextElementSibling
+        if (nextElement?.role !== 'option') {
+          nextElement = nextElement?.nextElementSibling
+        }
+        nextElement?.querySelector('button')?.focus()
+        break
+      }
+      case 'ArrowUp': {
+        // get currently selected option
+        const selectedButton =
+          list.querySelector<HTMLButtonElement>('li button:focus')
+
+        if (!selectedButton) {
+          return list
+            .querySelector<HTMLButtonElement>(
+              'li[role="option"]:last-child button'
+            )
+            ?.focus()
+        }
+
+        // get previous option
+        let previousElement =
+          selectedButton.parentElement?.previousElementSibling
+        if (previousElement?.role !== 'option') {
+          previousElement = previousElement?.previousElementSibling
+        }
+        previousElement?.querySelector('button')?.focus()
+        break
+      }
+      case 'Escape':
+      case 'Tab': {
+        view.dispatch({
+          effects: hideSpellingMenu.of(null),
+        })
+        view.focus()
+        break
+      }
+    }
+  })
+
   list.classList.add('dropdown-menu', 'dropdown-menu-unpositioned')
 
   // List items, with links inside
@@ -161,6 +235,10 @@ const createSpellingSuggestionList = (
       list.appendChild(li)
     }
   }
+
+  setTimeout(() => {
+    list.querySelector<HTMLButtonElement>('li:first-child button')?.focus()
+  }, 0)
 
   // Divider
   const divider = document.createElement('li')
@@ -184,6 +262,7 @@ const createSpellingSuggestionList = (
 const makeLinkItem = (suggestion: string, handler: EventListener) => {
   const li = document.createElement('li')
   const button = document.createElement('button')
+  li.setAttribute('role', 'option')
   button.classList.add('btn-link', 'text-left', 'dropdown-menu-button')
   button.onclick = handler
   button.textContent = suggestion
@@ -238,4 +317,5 @@ const handleCorrectWord = (
     ],
     effects: [hideSpellingMenu.of(null)],
   })
+  view.focus()
 }

@@ -1,4 +1,4 @@
-import { addMisspelledWords } from './misspelled-words'
+import { addMisspelledWords, misspelledWordsField } from './misspelled-words'
 import { ignoredWordsField, resetSpellChecker } from './ignored-words'
 import { LineTracker } from './line-tracker'
 import { cacheField, addWordToCache, WordCacheValue } from './cache'
@@ -6,7 +6,7 @@ import { WORD_REGEX } from './helpers'
 import OError from '@overleaf/o-error'
 import { spellCheckRequest } from './backend'
 import { EditorView, ViewUpdate } from '@codemirror/view'
-import { Line } from '@codemirror/state'
+import { Line, Range, RangeValue } from '@codemirror/state'
 import { IgnoredWords } from '../../../dictionary/ignored-words'
 import {
   getNormalTextSpansFromLine,
@@ -384,4 +384,22 @@ export const getWordsFromLine = (
     }
   })
   return words
+}
+
+export type Mark = Range<RangeValue & { spec: { word: Word } }>
+
+export const getMarkAtPosition = (
+  view: EditorView,
+  position: number
+): Mark | null => {
+  const marks = view.state.field(misspelledWordsField)
+
+  let targetMark: Mark | null = null
+  marks.between(view.viewport.from, view.viewport.to, (from, to, value) => {
+    if (position >= from && position <= to) {
+      targetMark = { from, to, value }
+      return false
+    }
+  })
+  return targetMark
 }
