@@ -31,7 +31,7 @@ const initialize = () => {
     },
     members: [],
     invites: [],
-    rootDocId: '5e74f1a7ce17ae0041dfd056',
+    rootDoc_id: '5e74f1a7ce17ae0041dfd056',
     rootFolder: [
       {
         _id: 'root-folder-id',

@@ -25,6 +25,6 @@ export type Project = {
   owner: MongoUser
   members: ProjectMember[]
   invites: ProjectInvite[]
-  rootDocId?: string
+  rootDoc_id?: string
   rootFolder?: Folder[]
 }
