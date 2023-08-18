@@ -2,6 +2,7 @@ import { expect } from 'chai'
 import sinon from 'sinon'
 import { screen, fireEvent, waitFor } from '@testing-library/react'
 import fetchMock from 'fetch-mock'
+import MockedSocket from 'socket.io-mock'
 
 import {
   renderWithEditorContext,
@@ -306,37 +307,92 @@ describe('<FileTreeRoot/>', function () {
     expect(screen.queryAllByRole('button', { name: 'Menu' })).to.have.length(0)
   })
 
-  it('deselects files when clicked outside the list but inside wrapping container', function () {
-    const rootFolder = [
-      {
-        _id: 'root-folder-id',
-        name: 'rootFolder',
-        docs: [{ _id: '456def', name: 'main.tex' }],
-        folders: [],
-        fileRefs: [],
-      },
-    ]
-    renderWithEditorContext(
-      <FileTreeRoot
-        refProviders={{}}
-        reindexReferences={() => null}
-        setRefProviderEnabled={() => null}
-        setStartedFreeTrial={() => null}
-        onSelect={onSelect}
-        onInit={onInit}
-        isConnected
-      />,
-      {
-        rootFolder,
-        projectId: '123abc',
-        rootDocId: '456def',
-        features: {},
-        permissionsLevel: 'owner',
-      }
-    )
+  describe('when deselecting files', function () {
+    beforeEach(function () {
+      const rootFolder = [
+        {
+          _id: 'root-folder-id',
+          name: 'rootFolder',
+          docs: [{ _id: '123abc', name: 'main.tex' }],
+          folders: [
+            {
+              _id: '789ghi',
+              name: 'thefolder',
+              docs: [{ _id: '456def', name: 'sub.tex' }],
+              fileRefs: [],
+              folders: [],
+            },
+          ],
+          fileRefs: [],
+        },
+      ]
+      renderWithEditorContext(
+        <FileTreeRoot
+          refProviders={{}}
+          reindexReferences={() => null}
+          setRefProviderEnabled={() => null}
+          setStartedFreeTrial={() => null}
+          onSelect={onSelect}
+          onInit={onInit}
+          isConnected
+        />,
+        {
+          rootFolder,
+          projectId: '123abc',
+          rootDocId: '456def',
+          features: {},
+          permissionsLevel: 'owner',
+          socket: new MockedSocket(),
+        }
+      )
 
-    screen.getByRole('treeitem', { selected: true })
-    fireEvent.click(screen.getByTestId('file-tree-inner'))
-    expect(screen.queryByRole('treeitem', { selected: true })).to.be.null
+      // select the sub file
+      const mainDoc = screen.getByRole('treeitem', { name: 'sub.tex' })
+      fireEvent.click(mainDoc)
+      expect(mainDoc.getAttribute('aria-selected')).to.equal('true')
+
+      // click on empty area
+      fireEvent.click(screen.getByTestId('file-tree-inner'))
+    })
+
+    afterEach(function () {
+      fetchMock.reset()
+    })
+
+    it('removes the selected indicator', function () {
+      expect(screen.queryByRole('treeitem', { selected: true })).to.be.null
+    })
+
+    it('disables the "rename" and "delete" buttons', function () {
+      expect(screen.queryByRole('button', { name: 'Rename' })).to.be.null
+      expect(screen.queryByRole('button', { name: 'Delete' })).to.be.null
+    })
+
+    it('creates new file in the root folder', async function () {
+      fetchMock.post('express:/project/:projectId/doc', () => 200)
+
+      fireEvent.click(screen.getByRole('button', { name: /new file/i }))
+      fireEvent.click(screen.getByRole('button', { name: /create/i }))
+
+      const socketData = {
+        _id: '12345',
+        name: 'abcdef.tex',
+        docs: [],
+        fileRefs: [],
+        folders: [],
+      }
+      window._ide.socket.socketClient.emit(
+        'reciveNewDoc',
+        'root-folder-id',
+        socketData
+      )
+
+      await fetchMock.flush(true)
+
+      const newItem = screen.getByRole('treeitem', { name: socketData.name })
+      const rootEl = screen.getByTestId('file-tree-list-root')
+
+      expect(newItem.parentNode).to.equal(rootEl)
+    })
   })
 })

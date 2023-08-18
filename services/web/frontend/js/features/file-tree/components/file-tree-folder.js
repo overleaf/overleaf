@@ -14,20 +14,10 @@ import FileTreeItemInner from './file-tree-item/file-tree-item-inner'
 import FileTreeFolderList from './file-tree-folder-list'
 import usePersistedState from '../../../shared/hooks/use-persisted-state'
 
-function FileTreeFolder({
-  name,
-  id,
-  folders,
-  docs,
-  files,
-  shouldShowVisualSelection,
-}) {
+function FileTreeFolder({ name, id, folders, docs, files }) {
   const { t } = useTranslation()
 
-  const { isSelected, props: selectableEntityProps } = useSelectableEntity(
-    id,
-    shouldShowVisualSelection
-  )
+  const { isSelected, props: selectableEntityProps } = useSelectableEntity(id)
 
   const { selectedEntityParentIds } = useFileTreeSelectable(id)
 
@@ -97,7 +87,6 @@ function FileTreeFolder({
           docs={docs}
           files={files}
           dropRef={dropRefList}
-          shouldShowVisualSelection={shouldShowVisualSelection}
         />
       ) : null}
     </>
@@ -110,7 +99,6 @@ FileTreeFolder.propTypes = {
   folders: PropTypes.array.isRequired,
   docs: PropTypes.array.isRequired,
   files: PropTypes.array.isRequired,
-  shouldShowVisualSelection: PropTypes.bool,
 }
 
 export default FileTreeFolder

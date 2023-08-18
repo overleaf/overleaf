@@ -12,7 +12,7 @@ function FileTreeFolderList({
   classes = {},
   dropRef = null,
   children,
-  shouldShowVisualSelection,
+  dataTestId,
 }) {
   files = files.map(file => ({ ...file, isFile: true }))
   const docsAndFiles = [...docs, ...files]
@@ -23,6 +23,7 @@ function FileTreeFolderList({
       role="tree"
       ref={dropRef}
       dnd-container="true"
+      data-testid={dataTestId}
     >
       {folders.sort(compareFunction).map(folder => {
         return (
@@ -33,7 +34,6 @@ function FileTreeFolderList({
             folders={folder.folders}
             docs={folder.docs}
             files={folder.fileRefs}
-            shouldShowVisualSelection={shouldShowVisualSelection}
           />
         )
       })}
@@ -45,7 +45,6 @@ function FileTreeFolderList({
             id={doc._id}
             isFile={doc.isFile}
             isLinkedFile={doc.linkedFileData && !!doc.linkedFileData.provider}
-            shouldShowVisualSelection={shouldShowVisualSelection}
           />
         )
       })}
@@ -63,7 +62,7 @@ FileTreeFolderList.propTypes = {
   }),
   dropRef: PropTypes.func,
   children: PropTypes.node,
-  shouldShowVisualSelection: PropTypes.bool,
+  dataTestId: PropTypes.string,
 }
 
 function compareFunction(one, two) {

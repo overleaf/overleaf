@@ -131,7 +131,7 @@ export function FileTreeActionableProvider({ children }) {
   )
 
   const { fileTreeData, dispatchRename, dispatchMove } = useFileTreeData()
-  const { selectedEntityIds } = useFileTreeSelectable()
+  const { selectedEntityIds, isRootFolderSelected } = useFileTreeSelectable()
 
   const [droppedFiles, setDroppedFiles] = useState(null)
 
@@ -263,10 +263,13 @@ export function FileTreeActionableProvider({ children }) {
     dispatch({ type: ACTION_TYPES.START_CREATE_FOLDER })
   }, [])
 
-  const parentFolderId = useMemo(
-    () => getSelectedParentFolderId(fileTreeData, selectedEntityIds),
-    [fileTreeData, selectedEntityIds]
-  )
+  const parentFolderId = useMemo(() => {
+    return getSelectedParentFolderId(
+      fileTreeData,
+      selectedEntityIds,
+      isRootFolderSelected
+    )
+  }, [fileTreeData, selectedEntityIds, isRootFolderSelected])
 
   const finishCreatingEntity = useCallback(
     entity => {
@@ -369,8 +372,8 @@ export function FileTreeActionableProvider({ children }) {
   }, [fileTreeData, projectId, selectedEntityIds])
 
   const value = {
-    canDelete: selectedEntityIds.size > 0,
-    canRename: selectedEntityIds.size === 1,
+    canDelete: selectedEntityIds.size > 0 && !isRootFolderSelected,
+    canRename: selectedEntityIds.size === 1 && !isRootFolderSelected,
     canCreate: selectedEntityIds.size < 2,
     ...state,
     parentFolderId,
@@ -427,7 +430,15 @@ export function useFileTreeActionable() {
   return context
 }
 
-function getSelectedParentFolderId(fileTreeData, selectedEntityIds) {
+function getSelectedParentFolderId(
+  fileTreeData,
+  selectedEntityIds,
+  isRootFolderSelected
+) {
+  if (isRootFolderSelected) {
+    return fileTreeData._id
+  }
+
   // we expect only one entity to be selected in that case, so we pick the first
   const selectedEntityId = Array.from(selectedEntityIds)[0]
   if (!selectedEntityId) {

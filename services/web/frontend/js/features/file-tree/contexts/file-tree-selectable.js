@@ -75,11 +75,7 @@ function fileTreeSelectableReadOnlyReducer(selectedEntityIds, action) {
   }
 }
 
-export function FileTreeSelectableProvider({
-  onSelect,
-  setShouldShowVisualSelection,
-  children,
-}) {
+export function FileTreeSelectableProvider({ onSelect, children }) {
   const { _id: projectId, rootDocId } = useProjectContext(
     projectContextPropTypes
   )
@@ -91,6 +87,8 @@ export function FileTreeSelectableProvider({
   )
 
   const { fileTreeData, setSelectedEntities } = useFileTreeData()
+
+  const [isRootFolderSelected, setIsRootFolderSelected] = useState(false)
 
   const [selectedEntityIds, dispatch] = useReducer(
     permissionsLevel === 'readOnly'
@@ -181,7 +179,8 @@ export function FileTreeSelectableProvider({
     select,
     unselect,
     selectOrMultiSelectEntity,
-    setShouldShowVisualSelection,
+    isRootFolderSelected,
+    setIsRootFolderSelected,
   }
 
   return (
@@ -193,7 +192,6 @@ export function FileTreeSelectableProvider({
 
 FileTreeSelectableProvider.propTypes = {
   onSelect: PropTypes.func.isRequired,
-  setShouldShowVisualSelection: PropTypes.func.isRequired,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),
     PropTypes.node,
@@ -209,16 +207,13 @@ const editorContextPropTypes = {
   permissionsLevel: PropTypes.oneOf(['readOnly', 'readAndWrite', 'owner']),
 }
 
-export function useSelectableEntity(
-  id,
-  shouldShowVisualSelection = true,
-  isFile
-) {
+export function useSelectableEntity(id, isFile) {
   const { view, setView } = useLayoutContext(layoutContextPropTypes)
   const {
     selectedEntityIds,
     selectOrMultiSelectEntity,
-    setShouldShowVisualSelection,
+    isRootFolderSelected,
+    setIsRootFolderSelected,
   } = useContext(FileTreeSelectableContext)
 
   const isSelected = selectedEntityIds.has(id)
@@ -226,17 +221,11 @@ export function useSelectableEntity(
   const handleEvent = useCallback(
     ev => {
       ev.stopPropagation()
-      setShouldShowVisualSelection(true)
+      setIsRootFolderSelected(false)
       selectOrMultiSelectEntity(id, ev.ctrlKey || ev.metaKey)
       setView(isFile ? 'file' : 'editor')
     },
-    [
-      id,
-      setShouldShowVisualSelection,
-      selectOrMultiSelectEntity,
-      setView,
-      isFile,
-    ]
+    [id, setIsRootFolderSelected, selectOrMultiSelectEntity, setView, isFile]
   )
 
   const handleClick = useCallback(
@@ -266,7 +255,7 @@ export function useSelectableEntity(
   )
 
   const isVisuallySelected =
-    shouldShowVisualSelection && isSelected && view !== 'pdf'
+    !isRootFolderSelected && isSelected && view !== 'pdf'
   const props = useMemo(
     () => ({
       className: classNames({ selected: isVisuallySelected }),

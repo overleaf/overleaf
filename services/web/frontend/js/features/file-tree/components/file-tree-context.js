@@ -15,7 +15,6 @@ function FileTreeContext({
   reindexReferences,
   setRefProviderEnabled,
   setStartedFreeTrial,
-  setShouldShowVisualSelection,
   onSelect,
   children,
 }) {
@@ -24,13 +23,9 @@ function FileTreeContext({
       refProviders={refProviders}
       setRefProviderEnabled={setRefProviderEnabled}
       setStartedFreeTrial={setStartedFreeTrial}
-      setShouldShowVisualSelection={setShouldShowVisualSelection}
       reindexReferences={reindexReferences}
     >
-      <FileTreeSelectableProvider
-        onSelect={onSelect}
-        setShouldShowVisualSelection={setShouldShowVisualSelection}
-      >
+      <FileTreeSelectableProvider onSelect={onSelect}>
         <FileTreeActionableProvider>
           <FileTreeDraggableProvider>{children}</FileTreeDraggableProvider>
         </FileTreeActionableProvider>
@@ -44,7 +39,6 @@ FileTreeContext.propTypes = {
   refProviders: PropTypes.object.isRequired,
   setRefProviderEnabled: PropTypes.func.isRequired,
   setStartedFreeTrial: PropTypes.func.isRequired,
-  setShouldShowVisualSelection: PropTypes.func.isRequired,
   onSelect: PropTypes.func.isRequired,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),

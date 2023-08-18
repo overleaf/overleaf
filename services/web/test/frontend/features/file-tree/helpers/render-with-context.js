@@ -24,7 +24,6 @@ export default (children, options = {}) => {
     setStartedFreeTrial: () => {
       console.log('started free trial')
     },
-    setShouldShowVisualSelection: () => {},
     onSelect: () => {},
     ...contextProps,
   }
@@ -33,7 +32,6 @@ export default (children, options = {}) => {
     reindexReferences,
     setRefProviderEnabled,
     setStartedFreeTrial,
-    setShouldShowVisualSelection,
     onSelect,
     ...editorContextProps
   } = contextProps
@@ -43,7 +41,6 @@ export default (children, options = {}) => {
       reindexReferences={reindexReferences}
       setRefProviderEnabled={setRefProviderEnabled}
       setStartedFreeTrial={setStartedFreeTrial}
-      setShouldShowVisualSelection={setShouldShowVisualSelection}
       onSelect={onSelect}
     >
       {children}
