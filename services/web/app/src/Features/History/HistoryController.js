@@ -317,13 +317,34 @@ module.exports = HistoryController = {
     if (!Features.hasFeature('saas')) {
       const getReq = request({ ...options, method: 'get' })
 
-      pipeline(getReq, res, function (err) {
-        // If the downstream request is cancelled, we get an
-        // ERR_STREAM_PREMATURE_CLOSE.
-        if (err && err.code !== 'ERR_STREAM_PREMATURE_CLOSE') {
-          logger.error({ url, err }, 'history API error')
-          next(err)
+      getReq.on('error', function (err) {
+        logger.warn({ err, v1ProjectId, version }, 'history zip download error')
+        res.sendStatus(500)
+      })
+      getReq.on('response', function (response) {
+        const statusCode = response.statusCode
+        if (statusCode !== 200) {
+          logger.warn(
+            { v1ProjectId, version, statusCode },
+            'history zip download failed'
+          )
+          if (statusCode === 404) {
+            res.sendStatus(404)
+          } else {
+            res.sendStatus(500)
+          }
+          return
         }
+
+        prepareZipAttachment(res, `${name}.zip`)
+        pipeline(response, res, function (err) {
+          // If the downstream request is cancelled, we get an
+          // ERR_STREAM_PREMATURE_CLOSE.
+          if (err && err.code !== 'ERR_STREAM_PREMATURE_CLOSE') {
+            logger.error({ err, v1ProjectId, version }, 'history API error')
+            next(err)
+          }
+        })
       })
       return
     }
