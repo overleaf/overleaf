@@ -1,3 +1,4 @@
+const Settings = require('@overleaf/settings')
 const { execSync } = require('child_process')
 const { expect } = require('chai')
 const { db } = require('../../../../../app/src/infrastructure/mongodb')
@@ -227,6 +228,142 @@ describe('ServerCEScripts', function () {
         }
         expect(await getCompileTimeout(userA)).to.equal(userATimeout)
         expect(await getCompileTimeout(userB)).to.equal(userBTimeout)
+      })
+    })
+  })
+
+  describe('upgrade-user-features', function () {
+    let userLatest, userSP1, userCustomTimeoutLower, userCustomTimeoutHigher
+    beforeEach('create users', async function () {
+      userLatest = new User()
+      userSP1 = new User()
+      userCustomTimeoutLower = new User()
+      userCustomTimeoutHigher = new User()
+
+      await Promise.all([
+        userLatest.ensureUserExists(),
+        userSP1.ensureUserExists(),
+        userCustomTimeoutLower.ensureUserExists(),
+        userCustomTimeoutHigher.ensureUserExists(),
+      ])
+    })
+
+    const serverPro1Features = {
+      collaborators: -1,
+      dropbox: true,
+      versioning: true,
+      compileTimeout: 180,
+      compileGroup: 'standard',
+      references: true,
+      templates: true,
+      trackChanges: true,
+    }
+
+    beforeEach('downgrade userSP1', async function () {
+      await userSP1.mongoUpdate({ $set: { features: serverPro1Features } })
+    })
+
+    beforeEach('downgrade userCustomTimeoutLower', async function () {
+      run(
+        `node modules/server-ce-scripts/scripts/change-compile-timeout --user-id=${userCustomTimeoutLower.id} --compile-timeout=42`
+      )
+    })
+
+    beforeEach('upgrade userCustomTimeoutHigher', async function () {
+      run(
+        `node modules/server-ce-scripts/scripts/change-compile-timeout --user-id=${userCustomTimeoutHigher.id} --compile-timeout=360`
+      )
+    })
+
+    async function getFeatures() {
+      return [
+        await userLatest.getFeatures(),
+        await userSP1.getFeatures(),
+        await userCustomTimeoutLower.getFeatures(),
+        await userCustomTimeoutHigher.getFeatures(),
+      ]
+    }
+
+    let initialFeatures
+    beforeEach('collect initial features', async function () {
+      initialFeatures = await getFeatures()
+    })
+
+    it('should have prepared the right features', async function () {
+      expect(initialFeatures).to.deep.equal([
+        Settings.defaultFeatures,
+        serverPro1Features,
+        Object.assign({}, Settings.defaultFeatures, {
+          compileTimeout: 42,
+        }),
+        Object.assign({}, Settings.defaultFeatures, {
+          compileTimeout: 360,
+        }),
+      ])
+    })
+
+    describe('dry-run', function () {
+      let output
+      beforeEach('run script', function () {
+        output = run(
+          `node modules/server-ce-scripts/scripts/upgrade-user-features`
+        )
+      })
+
+      it('should update SP1 features', function () {
+        expect(output).to.include(userSP1.id)
+      })
+
+      it('should update lowerTimeout features', function () {
+        expect(output).to.include(userCustomTimeoutLower.id)
+      })
+
+      it('should not update latest features', function () {
+        expect(output).to.not.include(userLatest.id)
+      })
+
+      it('should not update higherTimeout features', function () {
+        expect(output).to.not.include(userCustomTimeoutHigher.id)
+      })
+
+      it('should not change any features in the db', async function () {
+        expect(await getFeatures()).to.deep.equal(initialFeatures)
+      })
+    })
+
+    describe('live run', function () {
+      let output
+      beforeEach('run script', function () {
+        output = run(
+          `node modules/server-ce-scripts/scripts/upgrade-user-features --dry-run=false`
+        )
+      })
+
+      it('should update SP1 features', function () {
+        expect(output).to.include(userSP1.id)
+      })
+
+      it('should update lowerTimeout features', function () {
+        expect(output).to.include(userCustomTimeoutLower.id)
+      })
+
+      it('should not update latest features', function () {
+        expect(output).to.not.include(userLatest.id)
+      })
+
+      it('should not update higherTimeout features', function () {
+        expect(output).to.not.include(userCustomTimeoutHigher.id)
+      })
+
+      it('should update features in the db', async function () {
+        expect(await getFeatures()).to.deep.equal([
+          Settings.defaultFeatures,
+          Settings.defaultFeatures,
+          Settings.defaultFeatures,
+          Object.assign({}, Settings.defaultFeatures, {
+            compileTimeout: 360,
+          }),
+        ])
       })
     })
   })
