@@ -467,7 +467,15 @@ export function toggleRanges(
               range.to === view.state.doc.length ? -1 : 1
             )
 
-        if (ancestorAtStartOfRange !== ancestorAtEndOfRange) {
+        const tree = ensureSyntaxTree(view.state, 1000)
+        const nodeAtFrom = tree?.resolveInner(range.from, 1)
+        const nodeAtTo = tree?.resolveInner(range.to, -1)
+        const isSingleNodeSelected = nodeAtFrom === nodeAtTo
+
+        if (
+          !isSingleNodeSelected &&
+          ancestorAtStartOfRange !== ancestorAtEndOfRange
+        ) {
           // But handle the exception of case 8
           const ancestorAtStartIsWrappingCommand =
             ancestorAtStartOfRange &&

@@ -196,4 +196,28 @@ describe('toggleRanges', function () {
       })
     })
   })
+
+  it('still formats text next to a command', function () {
+    const cm = new CodemirrorTestSession(['<item>\\foo'])
+    cm.applyCommand(BOLD_COMMAND)
+    expect(cm).line(1).to.equal('\\textbf{item}\\foo')
+  })
+
+  it('still formats part of a text next to command', function () {
+    const cm = new CodemirrorTestSession(['hello <world>\\foo'])
+    cm.applyCommand(BOLD_COMMAND)
+    expect(cm).line(1).to.equal('hello \\textbf{world}\\foo')
+  })
+
+  it('still formats command without arguments', function () {
+    const cm = new CodemirrorTestSession(['\\item<\\foo>'])
+    cm.applyCommand(BOLD_COMMAND)
+    expect(cm).line(1).to.equal('\\item\\textbf{<\\foo>}')
+  })
+
+  it('skips formatting if in the middle of two commands', function () {
+    const cm = new CodemirrorTestSession(['\\f<oo\\b>ar'])
+    cm.applyCommand(BOLD_COMMAND)
+    expect(cm).line(1).to.equal('\\foo\\bar')
+  })
 })
