@@ -1,5 +1,9 @@
 const minimist = require('minimist')
-const { db, ObjectId, waitForDb } = require('../../../app/src/infrastructure/mongodb')
+const {
+  db,
+  ObjectId,
+  waitForDb,
+} = require('../../../app/src/infrastructure/mongodb')
 
 async function main() {
   await waitForDb()
@@ -10,7 +14,12 @@ async function main() {
 
   const { 'user-id': userId, 'compile-timeout': rawCompileTimeout } = argv
   const compileTimeout = parseInt(rawCompileTimeout, 10)
-  if (!userId || !ObjectId.isValid(userId) || !rawCompileTimeout || Number.isNaN(compileTimeout)) {
+  if (
+    !userId ||
+    !ObjectId.isValid(userId) ||
+    !rawCompileTimeout ||
+    Number.isNaN(compileTimeout)
+  ) {
     console.error(
       `Usage: node ${__filename} --user-id=5a9414f259776c7900b300e6 --timeout=90`
     )
