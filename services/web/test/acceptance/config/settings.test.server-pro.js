@@ -1,9 +1,9 @@
 const { merge } = require('@overleaf/settings/merge')
 const baseApp = require('../../../config/settings.overrides.server-pro')
-const baseTest = require('./settings.test.defaults')
+const baseTestServerCE = require('./settings.test.server-ce')
 
 module.exports = baseApp.mergeWith(
-  baseTest.mergeWith({
+  baseTestServerCE.mergeWith({
     proxyLearn: true,
   })
 )
