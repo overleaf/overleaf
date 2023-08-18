@@ -23,7 +23,8 @@ function EditorWidgets() {
     handleShowBulkRejectDialog,
     handleConfirmDialog,
   } = useBulkActionsModal()
-  const { setIsAddingComment } = useReviewPanelUpdaterFnsContext()
+  const { setIsAddingComment, handleSetSubview } =
+    useReviewPanelUpdaterFnsContext()
   const [addNewComment] =
     useScopeValue<(e: React.MouseEvent<HTMLButtonElement>) => void>(
       'addNewComment'
@@ -47,6 +48,7 @@ function EditorWidgets() {
     addNewComment(e)
     setTimeout(() => {
       // Re-render the comment box in order to add autofocus every time
+      handleSetSubview('cur_file')
       setIsAddingComment(false)
       setIsAddingComment(true)
     }, 0)
