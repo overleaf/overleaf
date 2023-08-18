@@ -52,9 +52,6 @@ export default EditorManager = (function () {
         toggleSymbolPalette: () => {
           const newValue = !this.$scope.editor.showSymbolPalette
           this.$scope.editor.showSymbolPalette = newValue
-          if (newValue && this.$scope.editor.showGalileo) {
-            this.$scope.editor.toggleGalileoPanel()
-          }
           ide.$scope.$emit('south-pane-toggled', newValue)
           eventTracking.sendMB(
             newValue ? 'symbol-palette-show' : 'symbol-palette-hide'
@@ -63,24 +60,6 @@ export default EditorManager = (function () {
         insertSymbol: symbol => {
           ide.$scope.$emit('editor:replace-selection', symbol.command)
           eventTracking.sendMB('symbol-palette-insert')
-        },
-        showGalileo: false,
-        toggleGalileoPanel: () => {
-          const newValue = !this.$scope.editor.showGalileo
-          this.$scope.editor.showGalileo = newValue
-          if (newValue && this.$scope.editor.showSymbolPalette) {
-            this.$scope.editor.toggleSymbolPalette()
-          }
-          ide.$scope.$emit('south-pane-toggled', newValue)
-          eventTracking.sendMB(newValue ? 'galileo-show' : 'galileo-hide')
-        },
-        galileoActivated: false,
-        toggleGalileo: () => {
-          const newValue = !this.$scope.editor.galileoActivated
-          this.$scope.editor.galileoActivated = newValue
-          eventTracking.sendMB(
-            newValue ? 'galileo-activated' : 'galileo-disabled'
-          )
         },
         multiSelectedCount: 0,
       }

@@ -55,9 +55,7 @@
 					if !isRestrictedTokenMember
 						include ./review-panel
 
-			if moduleIncludesAvailable('editor:symbol-palette') || moduleIncludesAvailable('editor:galileo')
+			if moduleIncludesAvailable('editor:symbol-palette')
 				.div(vertical-resizable-bottom)
 					if moduleIncludesAvailable('editor:symbol-palette')
 						!= moduleIncludes('editor:symbol-palette', locals)
-					if moduleIncludesAvailable('editor:galileo')
-						!= moduleIncludes('editor:galileo', locals)

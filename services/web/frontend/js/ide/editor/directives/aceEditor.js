@@ -153,12 +153,6 @@ App.directive(
           }
         })
 
-        ide.$scope.$on('galileo-toggled', (event, isToggled) => {
-          if (!isToggled) {
-            editor.focus()
-          }
-        })
-
         scope.$watch('autoPairDelimiters', autoPairDelimiters => {
           if (autoPairDelimiters) {
             return editor.setOption('behavioursEnabled', true)

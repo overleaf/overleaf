@@ -437,7 +437,7 @@ const ProjectController = {
             )
             User.findById(
               userId,
-              'email first_name last_name referal_id signUpDate featureSwitches features featuresEpoch refProviders alphaProgram betaProgram isAdmin ace labsProgram labsProgramGalileo',
+              'email first_name last_name referal_id signUpDate featureSwitches features featuresEpoch refProviders alphaProgram betaProgram isAdmin ace labsProgram',
               (err, user) => {
                 // Handle case of deleted user
                 if (user == null) {
@@ -853,15 +853,6 @@ const ProjectController = {
               !Features.hasFeature('saas') ||
               (user.features && user.features.symbolPalette)
 
-            // It would be nice if this could go in the Galileo module but
-            // nothing else does that
-            const galileoEnabled = req.query?.galileo || ''
-            const galileoFeatures =
-              req.query && 'galileoFeatures' in req.query
-                ? req.query.galileoFeatures.split(',').map(f => f.trim())
-                : ['all']
-            const galileoPromptWords = req.query?.galileoPromptWords || ''
-
             // Persistent upgrade prompts
             // in header & in share project modal
             const showUpgradePrompt =
@@ -901,7 +892,6 @@ const ProjectController = {
                 alphaProgram: user.alphaProgram,
                 betaProgram: user.betaProgram,
                 labsProgram: user.labsProgram,
-                labsProgramGalileo: user.labsProgramGalileo,
                 isAdmin: hasAdminAccess(user),
               },
               userSettings: {
@@ -945,9 +935,6 @@ const ProjectController = {
                 sourceEditorToolbarAssigment.variant === 'enabled',
               showSymbolPalette,
               symbolPaletteAvailable: Features.hasFeature('symbol-palette'),
-              galileoEnabled,
-              galileoFeatures,
-              galileoPromptWords,
               detachRole,
               metadata: { viewport: false },
               showUpgradePrompt,
