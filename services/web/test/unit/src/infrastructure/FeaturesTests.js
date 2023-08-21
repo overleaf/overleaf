@@ -49,7 +49,6 @@ describe('Features', function () {
     describe('without any settings', function () {
       it('should return true', function () {
         expect(this.Features.hasFeature('registration-page')).to.be.true
-        expect(this.Features.hasFeature('templates-server-pro')).to.be.true
       })
       it('should return false', function () {
         expect(this.Features.hasFeature('registration')).to.be.false
@@ -64,6 +63,7 @@ describe('Features', function () {
         expect(this.Features.hasFeature('overleaf-integration')).to.be.false
         expect(this.Features.hasFeature('references')).to.be.false
         expect(this.Features.hasFeature('saml')).to.be.false
+        expect(this.Features.hasFeature('templates-server-pro')).to.be.false
       })
     })
     describe('with settings', function () {
