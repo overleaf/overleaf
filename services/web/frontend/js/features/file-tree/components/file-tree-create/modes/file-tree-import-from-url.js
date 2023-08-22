@@ -6,6 +6,7 @@ import { useFileTreeActionable } from '../../../contexts/file-tree-actionable'
 import { useFileTreeCreateName } from '../../../contexts/file-tree-create-name'
 import { useFileTreeCreateForm } from '../../../contexts/file-tree-create-form'
 import ErrorMessage from '../error-message'
+import * as eventTracking from '../../../../../infrastructure/event-tracking'
 
 export default function FileTreeImportFromUrl() {
   const { t } = useTranslation()
@@ -35,7 +36,7 @@ export default function FileTreeImportFromUrl() {
   // form submission: create a linked file with this name, from this URL
   const handleSubmit = event => {
     event.preventDefault()
-
+    eventTracking.sendMB('new-file-created', { method: 'url' })
     finishCreatingLinkedFile({
       name,
       provider: 'url',

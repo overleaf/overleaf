@@ -4,6 +4,7 @@ import { Button, Label } from 'react-bootstrap'
 import Tooltip from '../../../shared/components/tooltip'
 import Icon from '../../../shared/components/icon'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
+import * as eventTracking from '../../../infrastructure/event-tracking'
 
 function PdfHybridLogsButton() {
   const { error, logEntries, toggleLogs, showLogs, stoppedOnFirstError } =
@@ -12,8 +13,12 @@ function PdfHybridLogsButton() {
   const { t } = useTranslation()
 
   const handleClick = useCallback(() => {
+    // only send analytics on open
+    if (!showLogs) {
+      eventTracking.sendMB('logs-click')
+    }
     toggleLogs()
-  }, [toggleLogs])
+  }, [toggleLogs, showLogs])
 
   const errorCount = Number(logEntries?.errors?.length)
   const warningCount = Number(logEntries?.warnings?.length)

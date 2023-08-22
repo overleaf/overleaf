@@ -3,6 +3,7 @@ import FileTreeCreateNameInput from '../file-tree-create-name-input'
 import { useFileTreeActionable } from '../../../contexts/file-tree-actionable'
 import { useFileTreeCreateName } from '../../../contexts/file-tree-create-name'
 import { useFileTreeCreateForm } from '../../../contexts/file-tree-create-form'
+import * as eventTracking from '../../../../../infrastructure/event-tracking'
 import ErrorMessage from '../error-message'
 
 export default function FileTreeCreateNewDoc() {
@@ -21,6 +22,7 @@ export default function FileTreeCreateNewDoc() {
       event.preventDefault()
 
       finishCreatingDoc({ name })
+      eventTracking.sendMB('new-file-created', { method: 'doc' })
     },
     [finishCreatingDoc, name]
   )

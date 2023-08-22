@@ -7,6 +7,7 @@ import XHRUpload from '@uppy/xhr-upload'
 import { Dashboard, useUppy } from '@uppy/react'
 import { useFileTreeActionable } from '../../../contexts/file-tree-actionable'
 import { useProjectContext } from '../../../../../shared/context/project-context'
+import * as eventTracking from '../../../../../infrastructure/event-tracking'
 
 import '@uppy/core/dist/style.css'
 import '@uppy/dashboard/dist/style.css'
@@ -94,6 +95,7 @@ export default function FileTreeUploadDoc() {
         })
         // broadcast doc metadata after each successful upload
         .on('upload-success', (file, response) => {
+          eventTracking.sendMB('new-file-created', { method: 'upload' })
           if (response.body.entity_type === 'doc') {
             window.setTimeout(() => {
               refreshProjectMetadata(projectId, response.body.entity_id)

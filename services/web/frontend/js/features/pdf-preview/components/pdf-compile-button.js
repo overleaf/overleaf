@@ -5,8 +5,17 @@ import { useDetachCompileContext as useCompileContext } from '../../../shared/co
 import { useStopOnFirstError } from '../../../shared/hooks/use-stop-on-first-error'
 import SplitMenu from '../../../shared/components/split-menu'
 import Icon from '../../../shared/components/icon'
+import * as eventTracking from '../../../infrastructure/event-tracking'
 
 const modifierKey = /Mac/i.test(navigator.platform) ? 'Cmd' : 'Ctrl'
+
+function sendEventAndSet(value, setter, settingName) {
+  eventTracking.sendMB('recompile-setting-changed', {
+    setting: settingName,
+    settingVal: value,
+  })
+  setter(value)
+}
 
 function PdfCompileButton() {
   const {
@@ -29,6 +38,13 @@ function PdfCompileButton() {
     useStopOnFirstError({ eventSource: 'dropdown' })
 
   const { t } = useTranslation()
+
+  const fromScratchWithEvent = () => {
+    eventTracking.sendMB('recompile-setting-changed', {
+      setting: 'from-scratch',
+    })
+    recompileFromScratch()
+  }
 
   const compileButtonLabel = compiling ? `${t('compiling')}…` : t('recompile')
   const tooltipElement = (
@@ -76,36 +92,52 @@ function PdfCompileButton() {
     >
       <SplitMenu.Item header>{t('auto_compile')}</SplitMenu.Item>
 
-      <SplitMenu.Item onSelect={() => setAutoCompile(true)}>
+      <SplitMenu.Item
+        onSelect={() => sendEventAndSet(true, setAutoCompile, 'auto-compile')}
+      >
         <Icon type={autoCompile ? 'check' : ''} fw />
         {t('on')}
       </SplitMenu.Item>
 
-      <SplitMenu.Item onSelect={() => setAutoCompile(false)}>
+      <SplitMenu.Item
+        onSelect={() => sendEventAndSet(false, setAutoCompile, 'auto-compile')}
+      >
         <Icon type={!autoCompile ? 'check' : ''} fw />
         {t('off')}
       </SplitMenu.Item>
 
       <SplitMenu.Item header>{t('compile_mode')}</SplitMenu.Item>
 
-      <SplitMenu.Item onSelect={() => setDraft(false)}>
+      <SplitMenu.Item
+        onSelect={() => sendEventAndSet(false, setDraft, 'compile-mode')}
+      >
         <Icon type={!draft ? 'check' : ''} fw />
         {t('normal')}
       </SplitMenu.Item>
 
-      <SplitMenu.Item onSelect={() => setDraft(true)}>
+      <SplitMenu.Item
+        onSelect={() => sendEventAndSet(true, setDraft, 'compile-mode')}
+      >
         <Icon type={draft ? 'check' : ''} fw />
         {t('fast')} <span className="subdued">[draft]</span>
       </SplitMenu.Item>
 
       <SplitMenu.Item header>Syntax Checks</SplitMenu.Item>
 
-      <SplitMenu.Item onSelect={() => setStopOnValidationError(true)}>
+      <SplitMenu.Item
+        onSelect={() =>
+          sendEventAndSet(true, setStopOnValidationError, 'syntax-check')
+        }
+      >
         <Icon type={stopOnValidationError ? 'check' : ''} fw />
         {t('stop_on_validation_error')}
       </SplitMenu.Item>
 
-      <SplitMenu.Item onSelect={() => setStopOnValidationError(false)}>
+      <SplitMenu.Item
+        onSelect={() =>
+          sendEventAndSet(false, setStopOnValidationError, 'syntax-check')
+        }
+      >
         <Icon type={!stopOnValidationError ? 'check' : ''} fw />
         {t('ignore_validation_errors')}
       </SplitMenu.Item>
@@ -133,7 +165,7 @@ function PdfCompileButton() {
       </SplitMenu.Item>
 
       <SplitMenu.Item
-        onSelect={() => recompileFromScratch()}
+        onSelect={fromScratchWithEvent}
         disabled={compiling}
         aria-disabled={compiling}
       >

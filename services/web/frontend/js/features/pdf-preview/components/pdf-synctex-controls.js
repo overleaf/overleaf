@@ -18,6 +18,7 @@ import useDetachAction from '../../../shared/hooks/use-detach-action'
 import localStorage from '../../../infrastructure/local-storage'
 import { useFileTreeData } from '../../../shared/context/file-tree-data-context'
 import useScopeEventListener from '../../../shared/hooks/use-scope-event-listener'
+import * as eventTracking from '../../../infrastructure/event-tracking'
 
 function GoToCodeButton({
   position,
@@ -38,6 +39,14 @@ function GoToCodeButton({
     buttonIcon = <Icon type="arrow-left" className="synctex-control-icon" />
   }
 
+  const syncToCodeWithButton = () => {
+    eventTracking.sendMB('jump-to-location', {
+      direction: 'pdf-location-in-code',
+      method: 'arrow',
+    })
+    syncToCode(position, 72)
+  }
+
   return (
     <Tooltip
       id="sync-to-code"
@@ -47,7 +56,7 @@ function GoToCodeButton({
       <Button
         bsStyle={null}
         bsSize="xs"
-        onClick={() => syncToCode(position, 72)}
+        onClick={syncToCodeWithButton}
         disabled={syncToCodeInFlight}
         className={buttonClasses}
         aria-label={t('go_to_pdf_location_in_code')}
@@ -227,6 +236,11 @@ function PdfSynctexControls() {
         line: cursorPosition.row + 1,
         column: cursorPosition.column,
       }).toString()
+
+      eventTracking.sendMB('jump-to-location', {
+        direction: 'code-location-in-pdf',
+        method: 'arrow',
+      })
 
       goToPdfLocation(params)
     },

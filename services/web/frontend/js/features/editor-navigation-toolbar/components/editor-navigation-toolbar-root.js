@@ -5,6 +5,7 @@ import { useEditorContext } from '../../../shared/context/editor-context'
 import { useChatContext } from '../../chat/context/chat-context'
 import { useLayoutContext } from '../../../shared/context/layout-context'
 import { useProjectContext } from '../../../shared/context/project-context'
+import * as eventTracking from '../../../infrastructure/event-tracking'
 
 const projectContextPropTypes = {
   name: PropTypes.string.isRequired,
@@ -36,6 +37,10 @@ const layoutContextPropTypes = {
 const chatContextPropTypes = {
   markMessagesAsRead: PropTypes.func.isRequired,
   unreadMessageCount: PropTypes.number.isRequired,
+}
+
+function isOpentoString(open) {
+  return open ? 'open' : 'close'
 }
 
 const EditorNavigationToolbarRoot = React.memo(
@@ -74,29 +79,38 @@ const EditorNavigationToolbarRoot = React.memo(
       if (!chatIsOpen) {
         markMessagesAsRead()
       }
+      eventTracking.sendMB('navigation-clicked-chat', {
+        action: isOpentoString(!chatIsOpen),
+      })
       setChatIsOpen(value => !value)
     }, [chatIsOpen, setChatIsOpen, markMessagesAsRead])
 
     const toggleReviewPanelOpen = useCallback(
       event => {
         event.preventDefault()
+        eventTracking.sendMB('navigation-clicked-review', {
+          action: isOpentoString(!reviewPanelOpen),
+        })
         setReviewPanelOpen(value => !value)
       },
-      [setReviewPanelOpen]
+      [reviewPanelOpen, setReviewPanelOpen]
     )
 
     const toggleHistoryOpen = useCallback(() => {
+      const action = view === 'history' ? 'close' : 'open'
+      eventTracking.sendMB('navigation-clicked-history', { action })
       setView(view === 'history' ? 'editor' : 'history')
     }, [view, setView])
 
     const openShareModal = useCallback(() => {
+      eventTracking.sendMB('navigation-clicked-share')
       openShareProjectModal()
     }, [openShareProjectModal])
 
-    const onShowLeftMenuClick = useCallback(
-      () => setLeftMenuShown(value => !value),
-      [setLeftMenuShown]
-    )
+    const onShowLeftMenuClick = useCallback(() => {
+      eventTracking.sendMB('navigation-clicked-menu')
+      setLeftMenuShown(value => !value)
+    }, [setLeftMenuShown])
 
     const goToUser = useCallback(
       user => {

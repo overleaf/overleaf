@@ -17,7 +17,10 @@ function PdfHybridDownloadButton() {
     : t('please_compile_pdf_before_download')
 
   function handleOnClick() {
-    eventTracking.sendMB('download-pdf-button-click', { projectId })
+    eventTracking.sendMB('download-pdf-button-click', {
+      projectId,
+      location: 'pdf-preview',
+    })
   }
 
   return (

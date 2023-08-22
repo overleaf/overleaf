@@ -1,20 +1,26 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import Tooltip from '../../../shared/components/tooltip'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import WordCountModal from '../../word-count-modal/components/word-count-modal'
 import LeftMenuButton from './left-menu-button'
+import * as eventTracking from '../../../infrastructure/event-tracking'
 
 export default function ActionsWordCount() {
   const [showModal, setShowModal] = useState(false)
   const { pdfUrl } = useCompileContext()
   const { t } = useTranslation()
 
+  const handleShowModal = useCallback(() => {
+    eventTracking.sendMB('left-menu-count')
+    setShowModal(true)
+  }, [])
+
   return (
     <>
       {pdfUrl ? (
         <LeftMenuButton
-          onClick={() => setShowModal(true)}
+          onClick={handleShowModal}
           icon={{
             type: 'eye',
             fw: true,

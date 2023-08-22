@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import * as eventTracking from '../../../../infrastructure/event-tracking'
 
 import { MenuItem } from 'react-bootstrap'
 import { useFileTreeActionable } from '../../contexts/file-tree-actionable'
@@ -18,6 +19,16 @@ function FileTreeItemMenuItems() {
     downloadPath,
   } = useFileTreeActionable()
 
+  const createWithAnalytics = () => {
+    eventTracking.sendMB('new-file-click', { location: 'file-menu' })
+    startCreatingDocOrFile()
+  }
+
+  const uploadWithAnalytics = () => {
+    eventTracking.sendMB('upload-click', { location: 'file-menu' })
+    startUploadingDocOrFile()
+  }
+
   return (
     <>
       {canRename ? (
@@ -34,9 +45,9 @@ function FileTreeItemMenuItems() {
       {canCreate ? (
         <>
           <MenuItem divider />
-          <MenuItem onClick={startCreatingDocOrFile}>{t('new_file')}</MenuItem>
+          <MenuItem onClick={createWithAnalytics}>{t('new_file')}</MenuItem>
           <MenuItem onClick={startCreatingFolder}>{t('new_folder')}</MenuItem>
-          <MenuItem onClick={startUploadingDocOrFile}>{t('upload')}</MenuItem>
+          <MenuItem onClick={uploadWithAnalytics}>{t('upload')}</MenuItem>
         </>
       ) : null}
     </>

@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
+import * as eventTracking from '../../../infrastructure/event-tracking'
 
 import { Button } from 'react-bootstrap'
 import Tooltip from '../../../shared/components/tooltip'
@@ -34,6 +35,16 @@ function FileTreeToolbarLeft() {
     startUploadingDocOrFile,
   } = useFileTreeActionable()
 
+  const createWithAnalytics = () => {
+    eventTracking.sendMB('new-file-click', { location: 'toolbar' })
+    startCreatingDocOrFile()
+  }
+
+  const uploadWithAnalytics = () => {
+    eventTracking.sendMB('upload-click', { location: 'toolbar' })
+    startUploadingDocOrFile()
+  }
+
   if (!canCreate) return null
 
   return (
@@ -43,7 +54,7 @@ function FileTreeToolbarLeft() {
         description={t('new_file')}
         overlayProps={{ placement: 'bottom' }}
       >
-        <Button onClick={startCreatingDocOrFile} bsStyle={null}>
+        <Button onClick={createWithAnalytics} bsStyle={null}>
           <Icon type="file" fw accessibilityLabel={t('new_file')} />
         </Button>
       </Tooltip>
@@ -61,7 +72,7 @@ function FileTreeToolbarLeft() {
         description={t('upload')}
         overlayProps={{ placement: 'bottom' }}
       >
-        <Button onClick={startUploadingDocOrFile}>
+        <Button onClick={uploadWithAnalytics}>
           <Icon type="upload" fw accessibilityLabel={t('upload')} />
         </Button>
       </Tooltip>

@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import Tooltip from '../../../shared/components/tooltip'
 import Icon from '../../../shared/components/icon'
+import * as eventTracking from '../../../infrastructure/event-tracking'
 
 function BackToProjectsButton() {
   const { t } = useTranslation()
@@ -12,7 +13,13 @@ function BackToProjectsButton() {
       overlayProps={{ placement: 'right' }}
     >
       <div className="toolbar-item">
-        <a className="btn btn-full-height" href="/project">
+        <a
+          className="btn btn-full-height"
+          href="/project"
+          onClick={() => {
+            eventTracking.sendMB('navigation-clicked-home')
+          }}
+        >
           <Icon
             type="home"
             fw

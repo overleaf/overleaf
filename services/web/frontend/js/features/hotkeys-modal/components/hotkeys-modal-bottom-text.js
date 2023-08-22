@@ -1,4 +1,5 @@
 import { Trans } from 'react-i18next'
+import * as eventTracking from '../../../infrastructure/event-tracking'
 
 export default function HotkeysModalBottomText() {
   return (
@@ -8,6 +9,7 @@ export default function HotkeysModalBottomText() {
         components={[
           // eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key
           <a
+            onClick={() => eventTracking.sendMB('left-menu-hotkeys-template')}
             href="/articles/overleaf-keyboard-shortcuts/qykqfvmxdnjf"
             target="_blank"
           />,

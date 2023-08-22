@@ -149,6 +149,9 @@ function LayoutDropdownButton() {
       )}
       <ControlledDropdown
         id="layout-dropdown"
+        onMainButtonClick={() => {
+          eventTracking.sendMB('navigation-clicked-layout')
+        }}
         className="toolbar-item layout-dropdown"
         pullRight
       >

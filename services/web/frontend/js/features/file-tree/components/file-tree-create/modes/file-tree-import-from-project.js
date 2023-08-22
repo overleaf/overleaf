@@ -12,6 +12,7 @@ import { useFileTreeCreateName } from '../../../contexts/file-tree-create-name'
 import { useFileTreeCreateForm } from '../../../contexts/file-tree-create-form'
 import { useProjectContext } from '../../../../../shared/context/project-context'
 import ErrorMessage from '../error-message'
+import * as eventTracking from '../../../../../infrastructure/event-tracking'
 
 export default function FileTreeImportFromProject() {
   const { t } = useTranslation()
@@ -85,6 +86,7 @@ export default function FileTreeImportFromProject() {
   // form submission: create a linked file with this name, from this entity or output file
   const handleSubmit = event => {
     event.preventDefault()
+    eventTracking.sendMB('new-file-created', { method: 'project' })
 
     if (isOutputFilesMode) {
       finishCreatingLinkedFile({

@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
+import * as eventTracking from '../../../infrastructure/event-tracking'
 import { useProjectContext } from '../../../shared/context/project-context'
 import HotkeysModal from '../../hotkeys-modal/components/hotkeys-modal'
 import useScopeValue from '../../../shared/hooks/use-scope-value'
@@ -12,10 +13,15 @@ export default function HelpShowHotkeys() {
   const { features } = useProjectContext()
   const isMac = /Mac/.test(window.navigator?.platform)
 
+  const showModalWithAnalytics = useCallback(() => {
+    eventTracking.sendMB('left-menu-hotkeys')
+    setShowModal(true)
+  }, [])
+
   return (
     <>
       <LeftMenuButton
-        onClick={() => setShowModal(true)}
+        onClick={showModalWithAnalytics}
         icon={{
           type: 'keyboard-o',
           fw: true,
