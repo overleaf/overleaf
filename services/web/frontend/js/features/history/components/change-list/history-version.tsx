@@ -8,7 +8,10 @@ import { formatTime, relativeDate } from '../../../utils/format-date'
 import { orderBy } from 'lodash'
 import { LoadedUpdate } from '../../services/types/update'
 import classNames from 'classnames'
-import { updateRangeForUpdate } from '../../utils/history-details'
+import {
+  updateRangeForUpdate,
+  ItemSelectionState,
+} from '../../utils/history-details'
 import { ActiveDropdown } from '../../hooks/use-dropdown-active-item'
 import { memo, useCallback } from 'react'
 import { HistoryContextValue } from '../../context/types/history-context-value'
@@ -22,7 +25,7 @@ type HistoryVersionProps = {
   selectable: boolean
   faded: boolean
   showDivider: boolean
-  selected: boolean
+  selected: ItemSelectionState
   setSelection: HistoryContextValue['setSelection']
   dropdownOpen: boolean
   dropdownActive: boolean
@@ -54,11 +57,28 @@ function HistoryVersion({
 
   return (
     <>
-      {showDivider ? <hr className="history-version-divider" /> : null}
+      {showDivider ? (
+        <div
+          className={classNames({
+            'history-version-divider-container': true,
+            'version-element-within-selected ':
+              selected === 'withinSelected' || selected === 'selectedEdge',
+          })}
+        >
+          <hr className="history-version-divider" />
+        </div>
+      ) : null}
       {update.meta.first_in_day ? (
-        <time className="history-version-day">
-          {relativeDate(update.meta.end_ts)}
-        </time>
+        <div
+          className={classNames({
+            'version-element-within-selected ':
+              selected === 'withinSelected' || selected === 'selectedEdge',
+          })}
+        >
+          <time className="history-version-day">
+            {relativeDate(update.meta.end_ts)}
+          </time>
+        </div>
       ) : null}
       <div
         data-testid="history-version"
@@ -90,13 +110,15 @@ function HistoryVersion({
             </HistoryDropdown>
           )}
 
-          {!selected ? (
+          {selected !== 'selected' ? (
             <span data-testid="compare-icon-version" className="pull-right">
-              <CompareItems
-                updateRange={updateRange}
-                selected={selected}
-                closeDropdown={closeDropdown}
-              />
+              {selected !== 'withinSelected' ? (
+                <CompareItems
+                  updateRange={updateRange}
+                  selected={selected}
+                  closeDropdown={closeDropdown}
+                />
+              ) : null}
             </span>
           ) : null}
 

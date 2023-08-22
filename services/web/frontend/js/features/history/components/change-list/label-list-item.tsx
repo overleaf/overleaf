@@ -12,13 +12,14 @@ import { ActiveDropdown } from '../../hooks/use-dropdown-active-item'
 import { HistoryContextValue } from '../../context/types/history-context-value'
 import LabelDropdownContent from './dropdown/label-dropdown-content'
 import CompareItems from './dropdown/menu-item/compare-items'
+import { ItemSelectionState } from '../../utils/history-details'
 
 type LabelListItemProps = {
   version: Version
   labels: LoadedLabel[]
   currentUserId: string
   projectId: string
-  selected: boolean
+  selected: ItemSelectionState
   selectable: boolean
   setSelection: HistoryContextValue['setSelection']
   dropdownOpen: boolean

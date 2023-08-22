@@ -37,36 +37,78 @@ export const getProjectOpDoc = (projectOp: ProjectOp) => {
   return ''
 }
 
+export type ItemSelectionState =
+  | 'selectedEdge'
+  | 'withinSelected'
+  | 'aboveSelected'
+  | 'belowSelected'
+  | 'selected'
+  | null
+
 export function isVersionSelected(
   selection: Selection,
   version: Version
-): boolean
+): ItemSelectionState
 // eslint-disable-next-line no-redeclare
 export function isVersionSelected(
   selection: Selection,
   fromV: Version,
   toV: Version
-): boolean
+): ItemSelectionState
 // eslint-disable-next-line no-redeclare
 export function isVersionSelected(
   selection: Selection,
   ...args: [Version] | [Version, Version]
-): boolean {
+): ItemSelectionState {
   if (selection.updateRange) {
     let [fromV, toV] = args
     toV = toV ?? fromV
-
     if (selection.comparing) {
-      // compare mode
-      return (
-        fromV >= selection.updateRange.fromV && toV <= selection.updateRange.toV
-      )
-    } else {
+      if (
+        fromV > selection.updateRange.fromV &&
+        toV < selection.updateRange.toV
+      ) {
+        return 'withinSelected'
+      }
+
+      // Condition for selectedEdge when the comparing versions are from labels list
+      if (fromV === toV) {
+        if (
+          toV === selection.updateRange.fromV ||
+          fromV === selection.updateRange.toV
+        ) {
+          return 'selectedEdge'
+        }
+      }
+
+      // Comparing mode above selected condition
+      if (fromV >= selection.updateRange.toV) {
+        return 'aboveSelected'
+      }
+      // Comparing mode below selected condition
+      if (toV <= selection.updateRange.fromV) {
+        return 'belowSelected'
+      }
+
+      if (
+        fromV === selection.updateRange.fromV ||
+        toV === selection.updateRange.toV
+      ) {
+        return 'selectedEdge'
+      }
+    } else if (toV === selection.updateRange.toV) {
       // single version mode
-      return toV === selection.updateRange.toV
+      return 'selected'
+    } else if (fromV >= selection.updateRange.toV) {
+      // Non-Comparing mode above selected condition
+      return 'aboveSelected'
+    } else if (toV <= selection.updateRange.fromV) {
+      // Non-Comparing mode below selected condition
+      return 'belowSelected'
     }
   }
-  return false
+
+  return null
 }
 
 export const getUpdateForVersion = (version: number, updates: LoadedUpdate[]) =>

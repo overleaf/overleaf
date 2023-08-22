@@ -2,11 +2,12 @@ import classnames from 'classnames'
 import { HistoryContextValue } from '../../context/types/history-context-value'
 import { UpdateRange } from '../../services/types/update'
 import { ReactNode, MouseEvent } from 'react'
+import { ItemSelectionState } from '../../utils/history-details'
 
 type HistoryVersionDetailsProps = {
   children: ReactNode
   updateRange: UpdateRange
-  selected: boolean
+  selected: ItemSelectionState
   selectable: boolean
   setSelection: HistoryContextValue['setSelection']
 }
@@ -35,7 +36,9 @@ function HistoryVersionDetails({
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions
     <div
       className={classnames('history-version-details clearfix', {
-        'history-version-selected': selected,
+        'history-version-selected':
+          selected === 'selectedEdge' || selected === 'selected',
+        'history-version-within-selected': selected === 'withinSelected',
         'history-version-selectable': selectable,
       })}
       data-testid="history-version-details"

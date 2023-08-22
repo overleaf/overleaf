@@ -90,7 +90,6 @@ history-root {
     padding-top: 12px;
     padding-bottom: 4px;
     line-height: 20px;
-    background-color: @white;
   }
 
   .history-version-details {
@@ -106,10 +105,34 @@ history-root {
       }
     }
 
-    &.history-version-selected,
-    &.history-version-selected.history-version-selectable:hover {
+    &.history-version-selected {
       background-color: @green-10;
+      border-left: 3px solid @green-50;
     }
+
+    &.history-version-selected.history-version-selectable:hover {
+      background-color: fade(@green-70, 16%);
+      border-left: 3px solid @green-50;
+    }
+
+    &.history-version-within-selected {
+      background-color: @neutral-10;
+      border-left: 3px solid @green-50;
+    }
+
+    &.history-version-within-selected:hover {
+      background-color: fade(@neutral-90, 8%);
+    }
+  }
+
+  .version-element-within-selected {
+    background-color: @neutral-10;
+    border-left: 3px solid @green-50;
+  }
+
+  .version-element-selected {
+    background-color: @green-10;
+    border-left: 3px solid @green-50;
   }
 
   .history-version-metadata-time {
@@ -176,8 +199,12 @@ history-root {
     overflow-wrap: anywhere;
   }
 
+  .history-version-divider-container {
+    padding: 6px 8px;
+  }
+
   .history-version-divider {
-    margin: 6px 8px;
+    margin: 0px;
     border-color: @neutral-20;
   }
 
@@ -377,6 +404,11 @@ history-root {
 
 .history-dropdown-icon {
   color: @neutral-90;
+}
+
+.history-compare-btn {
+  line-height: 1;
+  padding: 0;
 }
 
 .history-compare-btn {

@@ -99,7 +99,11 @@ function AllHistoryList() {
           const faded =
             updatesInfo.freeHistoryLimitHit &&
             index === visibleUpdates.length - 1
-          const selectable = !faded && (selection.comparing || !selected)
+          const selectable =
+            !faded &&
+            (selection.comparing ||
+              selected === 'aboveSelected' ||
+              selected === 'belowSelected')
 
           return (
             <HistoryVersion

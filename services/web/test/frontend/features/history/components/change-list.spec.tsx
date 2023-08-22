@@ -339,9 +339,14 @@ describe('change list', function () {
       cy.findByLabelText(/all history/i).click({ force: true })
       cy.findAllByTestId('history-version-details').should($versions => {
         const [first, ...rest] = Array.from($versions)
-        expect(first.dataset.selected === 'true').to.be.true
-        expect(rest.every(version => version.dataset.selected === 'false')).to
-          .be.true
+        expect(first.dataset.selected === 'selected').to.be.true
+        expect(
+          rest.every(
+            version =>
+              version.dataset.selected === 'belowSelected' ||
+              version.dataset.selected === 'aboveSelected'
+          )
+        ).to.be.true
       })
     })
   })
@@ -361,9 +366,11 @@ describe('change list', function () {
     it('compares versions', function () {
       cy.findAllByTestId('history-version-details').should($versions => {
         const [first, ...rest] = Array.from($versions)
-        expect(first).to.have.attr('data-selected', 'true')
+        expect(first).to.have.attr('data-selected', 'selected')
         rest.forEach(version =>
-          expect(version).to.have.attr('data-selected', 'false')
+          // Based on the fact that we are selecting first version as we load the page
+          // Every other version will be belowSelected
+          expect(version).to.have.attr('data-selected', 'belowSelected')
         )
       })
 
