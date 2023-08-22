@@ -4,26 +4,22 @@ import { Col, Row } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import { User } from '../../../../../../types/group-management/user'
 import Badge from '../../../../shared/components/badge'
+import { useGroupMembersContext } from '../../context/group-members-context'
 import ManagedUserDropdownButton from './managed-user-dropdown-button'
 import Tooltip from '../../../../shared/components/tooltip'
 import ManagedUserStatus from './managed-user-status'
 
 type ManagedUserRowProps = {
   user: User
-  selectUser: (user: User) => void
-  unselectUser: (user: User) => void
-  selected: boolean
   openOffboardingModalForUser: (user: User) => void
 }
 
 export default function ManagedUserRow({
   user,
-  selectUser,
-  unselectUser,
-  selected,
   openOffboardingModalForUser,
 }: ManagedUserRowProps) {
   const { t } = useTranslation()
+  const { selectedUsers, selectUser, unselectUser } = useGroupMembersContext()
 
   const handleSelectUser = useCallback(
     (event, user) => {
@@ -35,6 +31,8 @@ export default function ManagedUserRow({
     },
     [selectUser, unselectUser]
   )
+
+  const selected = selectedUsers.includes(user)
 
   return (
     <li

@@ -1,4 +1,5 @@
 import GroupMembers from '../../../../../frontend/js/features/group-management/components/group-members'
+import { GroupMembersProvider } from '../../../../../frontend/js/features/group-management/context/group-members-context'
 
 const JOHN_DOE = {
   _id: 'abc123def456',
@@ -27,13 +28,17 @@ const PATHS = {
 describe('group members, without managed users', function () {
   beforeEach(function () {
     cy.window().then(win => {
-      win.metaAttributesCache.set('ol-users', [JOHN_DOE, BOBBY_LAPOINTE])
       win.metaAttributesCache.set('ol-groupId', GROUP_ID)
       win.metaAttributesCache.set('ol-groupName', 'My Awesome Team')
       win.metaAttributesCache.set('ol-groupSize', 10)
+      win.metaAttributesCache.set('ol-users', [JOHN_DOE, BOBBY_LAPOINTE])
     })
 
-    cy.mount(<GroupMembers />)
+    cy.mount(
+      <GroupMembersProvider>
+        <GroupMembers />
+      </GroupMembersProvider>
+    )
   })
 
   it('renders the group members page', function () {

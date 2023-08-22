@@ -1,25 +1,20 @@
 import { Col, Row } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
-import { User } from '../../../../../types/group-management/user'
 import Tooltip from '../../../shared/components/tooltip'
+import { useGroupMembersContext } from '../context/group-members-context'
 import GroupMemberRow from './group-member-row'
 
 type GroupMembersListProps = {
   handleSelectAllClick: (e: any) => void
-  selectedUsers: User[]
-  users: User[]
-  selectUser: (user: User) => void
-  unselectUser: (user: User) => void
 }
 
 export default function GroupMembersList({
   handleSelectAllClick,
-  selectedUsers,
-  users,
-  selectUser,
-  unselectUser,
 }: GroupMembersListProps) {
   const { t } = useTranslation()
+  const { selectedUsers, users, selectUser, unselectUser } =
+    useGroupMembersContext()
+
   return (
     <ul className="list-unstyled structured-list">
       <li className="container-fluid">

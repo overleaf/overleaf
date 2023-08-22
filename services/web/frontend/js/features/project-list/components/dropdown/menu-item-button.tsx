@@ -12,10 +12,16 @@ export default function MenuItemButton({
   onClick,
   className,
   afterNode,
+  ...buttonProps
 }: MenuItemButtonProps) {
   return (
     <li role="presentation" className={className}>
-      <button className="menu-item-button" role="menuitem" onClick={onClick}>
+      <button
+        className="menu-item-button"
+        role="menuitem"
+        onClick={onClick}
+        {...buttonProps}
+      >
         {children}
       </button>
       {afterNode}

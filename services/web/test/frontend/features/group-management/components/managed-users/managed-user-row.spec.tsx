@@ -1,13 +1,11 @@
-import sinon, { SinonStub } from 'sinon'
+import sinon from 'sinon'
 import ManagedUserRow from '../../../../../../frontend/js/features/group-management/components/managed-users/managed-user-row'
+import { GroupMembersProvider } from '../../../../../../frontend/js/features/group-management/context/group-members-context'
 import { User } from '../../../../../../types/group-management/user'
 
 describe('ManagedUserRow', function () {
   describe('with an ordinary user', function () {
-    let user: User,
-      selectUser: SinonStub,
-      unselectUser: SinonStub,
-      selected: boolean
+    let user: User
 
     beforeEach(function () {
       user = {
@@ -20,18 +18,17 @@ describe('ManagedUserRow', function () {
         enrollment: undefined,
         isEntityAdmin: undefined,
       }
-      selectUser = sinon.stub()
-      unselectUser = sinon.stub()
-      selected = false
+      cy.window().then(win => {
+        win.metaAttributesCache.set('ol-users', [user])
+      })
 
       cy.mount(
-        <ManagedUserRow
-          user={user}
-          selectUser={selectUser}
-          unselectUser={unselectUser}
-          selected={selected}
-          openOffboardingModalForUser={sinon.stub()}
-        />
+        <GroupMembersProvider>
+          <ManagedUserRow
+            user={user}
+            openOffboardingModalForUser={sinon.stub()}
+          />
+        </GroupMembersProvider>
       )
     })
 
@@ -49,15 +46,14 @@ describe('ManagedUserRow', function () {
       // Managed status
       cy.get('.row').contains('Managed')
       // Dropdown button
-      cy.get(`#managed-user-dropdown-${user._id}`).should('exist')
+      cy.get('#managed-user-dropdown-some\\.user\\@example\\.com').should(
+        'exist'
+      )
     })
   })
 
   describe('with a pending invite', function () {
-    let user: User,
-      selectUser: SinonStub,
-      unselectUser: SinonStub,
-      selected: boolean
+    let user: User
 
     beforeEach(function () {
       user = {
@@ -70,18 +66,17 @@ describe('ManagedUserRow', function () {
         enrollment: undefined,
         isEntityAdmin: undefined,
       }
-      selectUser = sinon.stub()
-      unselectUser = sinon.stub()
-      selected = false
+      cy.window().then(win => {
+        win.metaAttributesCache.set('ol-users', [user])
+      })
 
       cy.mount(
-        <ManagedUserRow
-          user={user}
-          selectUser={selectUser}
-          unselectUser={unselectUser}
-          selected={selected}
-          openOffboardingModalForUser={sinon.stub()}
-        />
+        <GroupMembersProvider>
+          <ManagedUserRow
+            user={user}
+            openOffboardingModalForUser={sinon.stub()}
+          />
+        </GroupMembersProvider>
       )
     })
 
@@ -91,10 +86,7 @@ describe('ManagedUserRow', function () {
   })
 
   describe('with a group admin', function () {
-    let user: User,
-      selectUser: SinonStub,
-      unselectUser: SinonStub,
-      selected: boolean
+    let user: User
 
     beforeEach(function () {
       user = {
@@ -107,18 +99,17 @@ describe('ManagedUserRow', function () {
         enrollment: undefined,
         isEntityAdmin: true,
       }
-      selectUser = sinon.stub()
-      unselectUser = sinon.stub()
-      selected = false
+      cy.window().then(win => {
+        win.metaAttributesCache.set('ol-users', [user])
+      })
 
       cy.mount(
-        <ManagedUserRow
-          user={user}
-          selectUser={selectUser}
-          unselectUser={unselectUser}
-          selected={selected}
-          openOffboardingModalForUser={sinon.stub()}
-        />
+        <GroupMembersProvider>
+          <ManagedUserRow
+            user={user}
+            openOffboardingModalForUser={sinon.stub()}
+          />
+        </GroupMembersProvider>
       )
     })
 
@@ -127,11 +118,8 @@ describe('ManagedUserRow', function () {
     })
   })
 
-  describe('user is selected', function () {
-    let user: User,
-      selectUser: SinonStub,
-      unselectUser: SinonStub,
-      selected: boolean
+  describe('selecting and unselecting user row', function () {
+    let user: User
 
     beforeEach(function () {
       user = {
@@ -144,109 +132,26 @@ describe('ManagedUserRow', function () {
         enrollment: undefined,
         isEntityAdmin: undefined,
       }
-      selectUser = sinon.stub()
-      unselectUser = sinon.stub()
-      // User is selected
-      selected = true
+      cy.window().then(win => {
+        win.metaAttributesCache.set('ol-users', [user])
+      })
 
       cy.mount(
-        <ManagedUserRow
-          user={user}
-          selectUser={selectUser}
-          unselectUser={unselectUser}
-          selected={selected}
-          openOffboardingModalForUser={sinon.stub()}
-        />
+        <GroupMembersProvider>
+          <ManagedUserRow
+            user={user}
+            openOffboardingModalForUser={sinon.stub()}
+          />
+        </GroupMembersProvider>
       )
     })
 
-    it('should render the selection box as selected', function () {
-      cy.get('.select-item').should('be.checked')
-    })
-  })
-
-  describe('selecting user row', function () {
-    let user: User,
-      selectUser: SinonStub,
-      unselectUser: SinonStub,
-      selected: boolean
-
-    beforeEach(function () {
-      user = {
-        _id: 'some-user',
-        email: 'some.user@example.com',
-        first_name: 'Some',
-        last_name: 'User',
-        invite: false,
-        last_active_at: new Date('2070-11-21T03:00:00'),
-        enrollment: undefined,
-        isEntityAdmin: undefined,
-      }
-      selectUser = sinon.stub()
-      unselectUser = sinon.stub()
-      // User is not selected
-      selected = false
-
-      cy.mount(
-        <ManagedUserRow
-          user={user}
-          selectUser={selectUser}
-          unselectUser={unselectUser}
-          selected={selected}
-          openOffboardingModalForUser={sinon.stub()}
-        />
-      )
-    })
-
-    it('should select the user', function () {
+    it('should select and unselect the user', function () {
       cy.get('.select-item').should('not.be.checked')
       cy.get('.select-item').click()
-      cy.get('.select-item').then(() => {
-        expect(selectUser.called).to.equal(true)
-        expect(unselectUser.called).to.equal(false)
-      })
-    })
-  })
-
-  describe('un-selecting user row', function () {
-    let user: User,
-      selectUser: SinonStub,
-      unselectUser: SinonStub,
-      selected: boolean
-
-    beforeEach(function () {
-      user = {
-        _id: 'some-user',
-        email: 'some.user@example.com',
-        first_name: 'Some',
-        last_name: 'User',
-        invite: false,
-        last_active_at: new Date('2070-11-21T03:00:00'),
-        enrollment: undefined,
-        isEntityAdmin: undefined,
-      }
-      selectUser = sinon.stub()
-      unselectUser = sinon.stub()
-      // User is selected
-      selected = true
-
-      cy.mount(
-        <ManagedUserRow
-          user={user}
-          selectUser={selectUser}
-          unselectUser={unselectUser}
-          selected={selected}
-          openOffboardingModalForUser={sinon.stub()}
-        />
-      )
-    })
-
-    it('should select the user', function () {
       cy.get('.select-item').should('be.checked')
       cy.get('.select-item').click()
-      cy.get('.select-item').then(() => {
-        expect(unselectUser.called).to.equal(true)
-      })
+      cy.get('.select-item').should('not.be.checked')
     })
   })
 })

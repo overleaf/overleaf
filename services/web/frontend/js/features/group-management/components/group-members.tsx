@@ -1,128 +1,37 @@
-import { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { Button, Col, Form, FormControl, Row } from 'react-bootstrap'
 import { Trans, useTranslation } from 'react-i18next'
 import { User } from '../../../../../types/group-management/user'
-import {
-  deleteJSON,
-  FetchError,
-  postJSON,
-} from '../../../infrastructure/fetch-json'
 import MaterialIcon from '../../../shared/components/material-icon'
 import useWaitForI18n from '../../../shared/hooks/use-wait-for-i18n'
 import getMeta from '../../../utils/meta'
-import { parseEmails } from '../utils/emails'
-import ErrorAlert, { APIError } from './error-alert'
-import useUserSelection from '../hooks/use-user-selection'
+import { useGroupMembersContext } from '../context/group-members-context'
+import ErrorAlert from './error-alert'
 import ManagedUsersList from './managed-users/managed-users-list'
 import GroupMembersList from './group-members-list'
 
 export default function GroupMembers() {
   const { isReady } = useWaitForI18n()
   const { t } = useTranslation()
-
   const {
     users,
-    setUsers,
     selectedUsers,
     selectAllUsers,
     unselectAllUsers,
-    selectUser,
-    unselectUser,
-  } = useUserSelection(getMeta('ol-users', []))
-
+    addMembers,
+    removeMembers,
+    removeMemberLoading,
+    removeMemberError,
+    inviteMemberLoading,
+    inviteError,
+    paths,
+  } = useGroupMembersContext()
   const [emailString, setEmailString] = useState<string>('')
-  const [inviteUserInflightCount, setInviteUserInflightCount] = useState(0)
-  const [inviteError, setInviteError] = useState<APIError>()
-  const [removeMemberInflightCount, setRemoveMemberInflightCount] = useState(0)
-  const [removeMemberError, setRemoveMemberError] = useState<APIError>()
 
   const groupId: string = getMeta('ol-groupId')
   const groupName: string = getMeta('ol-groupName')
   const groupSize: number = getMeta('ol-groupSize')
   const managedUsersActive: any = getMeta('ol-managedUsersActive')
-
-  const paths = useMemo(
-    () => ({
-      addMember: `/manage/groups/${groupId}/invites`,
-      removeMember: `/manage/groups/${groupId}/user`,
-      removeInvite: `/manage/groups/${groupId}/invites`,
-      exportMembers: `/manage/groups/${groupId}/members/export`,
-    }),
-    [groupId]
-  )
-
-  const addMembers = useCallback(
-    e => {
-      e.preventDefault()
-      setInviteError(undefined)
-      const emails = parseEmails(emailString)
-      ;(async () => {
-        for (const email of emails) {
-          setInviteUserInflightCount(count => count + 1)
-          try {
-            const data = await postJSON<{ user: User }>(paths.addMember, {
-              body: {
-                email,
-              },
-            })
-            if (data.user) {
-              const alreadyListed = users.find(
-                user => user.email === data.user.email
-              )
-              if (!alreadyListed) {
-                setUsers(users => [...users, data.user])
-              }
-            }
-            setEmailString('')
-          } catch (error: unknown) {
-            console.error(error)
-            setInviteError((error as FetchError)?.data?.error || {})
-          }
-          setInviteUserInflightCount(count => count - 1)
-        }
-      })()
-    },
-    [emailString, paths.addMember, users, setUsers]
-  )
-
-  const removeMembers = useCallback(
-    e => {
-      e.preventDefault()
-      setRemoveMemberError(undefined)
-      ;(async () => {
-        for (const user of selectedUsers) {
-          if (user?.enrollment?.managedBy) {
-            continue
-          }
-          let url
-          if (paths.removeInvite && user.invite && user._id == null) {
-            url = `${paths.removeInvite}/${encodeURIComponent(user.email)}`
-          } else if (paths.removeMember && user._id) {
-            url = `${paths.removeMember}/${user._id}`
-          } else {
-            return
-          }
-          setRemoveMemberInflightCount(count => count + 1)
-          try {
-            await deleteJSON(url, {})
-            setUsers(users => users.filter(u => u !== user))
-            unselectUser(user)
-          } catch (error: unknown) {
-            console.error(error)
-            setRemoveMemberError((error as FetchError)?.data?.error || {})
-          }
-          setRemoveMemberInflightCount(count => count - 1)
-        }
-      })()
-    },
-    [
-      selectedUsers,
-      unselectUser,
-      setUsers,
-      paths.removeInvite,
-      paths.removeMember,
-    ]
-  )
 
   const handleSelectAllClick = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -153,6 +62,11 @@ export default function GroupMembers() {
     )
   }
 
+  const onAddMembersSubmit = (e: React.FormEvent<Form>) => {
+    e.preventDefault()
+    addMembers(emailString)
+  }
+
   return (
     <div className="container">
       <Row>
@@ -178,7 +92,7 @@ export default function GroupMembers() {
                     />
                   </small>
                 )}
-                {removeMemberInflightCount > 0 ? (
+                {removeMemberLoading ? (
                   <Button bsStyle="danger" disabled>
                     {t('removing')}&hellip;
                   </Button>
@@ -199,20 +113,10 @@ export default function GroupMembers() {
               {managedUsersActive ? (
                 <ManagedUsersList
                   handleSelectAllClick={handleSelectAllClick}
-                  selectedUsers={selectedUsers}
-                  users={users}
-                  selectUser={selectUser}
-                  unselectUser={unselectUser}
                   groupId={groupId}
                 />
               ) : (
-                <GroupMembersList
-                  handleSelectAllClick={handleSelectAllClick}
-                  selectedUsers={selectedUsers}
-                  users={users}
-                  selectUser={selectUser}
-                  unselectUser={unselectUser}
-                />
+                <GroupMembersList handleSelectAllClick={handleSelectAllClick} />
               )}
             </div>
             <hr />
@@ -220,7 +124,7 @@ export default function GroupMembers() {
               <div className="add-more-members-form">
                 <p className="small">{t('add_more_members')}</p>
                 <ErrorAlert error={inviteError} />
-                <Form horizontal onSubmit={addMembers} className="form">
+                <Form horizontal onSubmit={onAddMembersSubmit} className="form">
                   <Row>
                     <Col xs={6}>
                       <FormControl
@@ -232,12 +136,12 @@ export default function GroupMembers() {
                       />
                     </Col>
                     <Col xs={4}>
-                      {inviteUserInflightCount > 0 ? (
+                      {inviteMemberLoading ? (
                         <Button bsStyle="primary" disabled>
                           {t('adding')}&hellip;
                         </Button>
                       ) : (
-                        <Button bsStyle="primary" onClick={addMembers}>
+                        <Button bsStyle="primary" onClick={onAddMembersSubmit}>
                           {t('add')}
                         </Button>
                       )}

@@ -6,7 +6,6 @@ export default function useUserSelection(initialUsers: User[]) {
   const [selectedUsers, setSelectedUsers] = useState<User[]>([])
 
   const selectAllUsers = () => setSelectedUsers(users)
-
   const unselectAllUsers = () => setSelectedUsers([])
 
   const selectUser = useCallback((user: User) => {

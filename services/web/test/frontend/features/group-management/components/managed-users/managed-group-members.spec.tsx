@@ -1,4 +1,5 @@
 import GroupMembers from '../../../../../../frontend/js/features/group-management/components/group-members'
+import { GroupMembersProvider } from '../../../../../../frontend/js/features/group-management/context/group-members-context'
 
 const GROUP_ID = '777fff777fff'
 const JOHN_DOE = {
@@ -48,11 +49,14 @@ describe('group members, with managed users', function () {
       win.metaAttributesCache.set('ol-groupId', GROUP_ID)
       win.metaAttributesCache.set('ol-groupName', 'My Awesome Team')
       win.metaAttributesCache.set('ol-groupSize', 10)
-      // Managed Users is active on this group
       win.metaAttributesCache.set('ol-managedUsersActive', true)
     })
 
-    cy.mount(<GroupMembers />)
+    cy.mount(
+      <GroupMembersProvider>
+        <GroupMembers />
+      </GroupMembersProvider>
+    )
   })
 
   it('renders the group members page', function () {
@@ -185,7 +189,9 @@ describe('group members, with managed users', function () {
       })
     })
 
-    cy.get('button').contains('Remove from group').should('not.exist')
+    cy.get('.page-header').within(() => {
+      cy.findByRole('button', { name: 'Remove from group' }).should('not.exist')
+    })
   })
 
   it('does not show the remove-member button if any of the selected users are managed', function () {
@@ -204,7 +210,9 @@ describe('group members, with managed users', function () {
       })
     })
 
-    cy.get('button').contains('Remove from group').should('not.exist')
+    cy.get('.page-header').within(() => {
+      cy.findByRole('button', { name: 'Remove from group' }).should('not.exist')
+    })
   })
 
   it('tries to remove a user and displays the error', function () {
@@ -217,7 +225,9 @@ describe('group members, with managed users', function () {
         cy.get('.select-item').check()
       })
     })
-    cy.get('button').contains('Remove from group').click()
+    cy.get('.page-header').within(() => {
+      cy.get('button').contains('Remove from group').click()
+    })
 
     cy.get('.alert').contains('Sorry, something went wrong')
   })

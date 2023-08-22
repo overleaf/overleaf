@@ -1,10 +1,11 @@
 import ManagedUsersList from '../../../../../../frontend/js/features/group-management/components/managed-users/managed-users-list'
-import { User } from '../../../../../../types/group-management/user'
+import { GroupMembersProvider } from '../../../../../../frontend/js/features/group-management/context/group-members-context'
 
 describe('ManagedUsersList', function () {
   const groupId = 'somegroup'
+
   describe('with users', function () {
-    const users: User[] = [
+    const users = [
       {
         _id: 'user-one',
         email: 'sarah.brennan@example.com',
@@ -26,21 +27,20 @@ describe('ManagedUsersList', function () {
         isEntityAdmin: undefined,
       },
     ]
-    const selectedUsers: User[] = []
-    const handleSelectAllClick = () => {}
-    const selectUser = () => {}
-    const unselectUser = () => {}
 
     beforeEach(function () {
+      cy.window().then(win => {
+        win.metaAttributesCache.set('ol-users', users)
+      })
+      const handleSelectAllClick = () => {}
+
       cy.mount(
-        <ManagedUsersList
-          users={users}
-          selectedUsers={selectedUsers}
-          handleSelectAllClick={handleSelectAllClick}
-          selectUser={selectUser}
-          unselectUser={unselectUser}
-          groupId={groupId}
-        />
+        <GroupMembersProvider>
+          <ManagedUsersList
+            handleSelectAllClick={handleSelectAllClick}
+            groupId={groupId}
+          />
+        </GroupMembersProvider>
       )
     })
 
@@ -70,23 +70,21 @@ describe('ManagedUsersList', function () {
       cy.get('.managed-users-list').contains(users[1].last_name)
     })
   })
+
   describe('empty user list', function () {
-    const users: User[] = []
-    const selectedUsers: User[] = []
     const handleSelectAllClick = () => {}
-    const selectUser = () => {}
-    const unselectUser = () => {}
 
     beforeEach(function () {
+      cy.window().then(win => {
+        win.metaAttributesCache.set('ol-users', [])
+      })
       cy.mount(
-        <ManagedUsersList
-          users={users}
-          selectedUsers={selectedUsers}
-          handleSelectAllClick={handleSelectAllClick}
-          selectUser={selectUser}
-          unselectUser={unselectUser}
-          groupId={groupId}
-        />
+        <GroupMembersProvider>
+          <ManagedUsersList
+            handleSelectAllClick={handleSelectAllClick}
+            groupId={groupId}
+          />
+        </GroupMembersProvider>
       )
     })
 

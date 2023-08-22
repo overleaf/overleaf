@@ -2,31 +2,25 @@ import { Col, Row } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import { User } from '../../../../../../types/group-management/user'
 import Tooltip from '../../../../shared/components/tooltip'
+import { useGroupMembersContext } from '../../context/group-members-context'
 import ManagedUserRow from './managed-user-row'
 import OffboardManagedUserModal from './offboard-managed-user-modal'
 import { useState } from 'react'
 
 type ManagedUsersListProps = {
   handleSelectAllClick: (e: any) => void
-  selectedUsers: User[]
-  users: User[]
-  selectUser: (user: User) => void
-  unselectUser: (user: User) => void
   groupId: string
 }
 
 export default function ManagedUsersList({
   handleSelectAllClick,
-  selectedUsers,
-  users,
-  selectUser,
-  unselectUser,
   groupId,
 }: ManagedUsersListProps) {
   const { t } = useTranslation()
   const [userToOffboard, setUserToOffboard] = useState<User | undefined>(
     undefined
   )
+  const { selectedUsers, users } = useGroupMembersContext()
 
   return (
     <div>
@@ -81,9 +75,6 @@ export default function ManagedUsersList({
           <ManagedUserRow
             key={user.email}
             user={user}
-            selectUser={selectUser}
-            unselectUser={unselectUser}
-            selected={selectedUsers.includes(user)}
             openOffboardingModalForUser={setUserToOffboard}
           />
         ))}
