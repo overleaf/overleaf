@@ -4,12 +4,10 @@ const Operation = require('./')
 const TextOperation = require('./text_operation')
 
 /**
- * @classdesc
  * Edit a file in place. It is a wrapper around a single TextOperation.
  */
 class EditFileOperation extends Operation {
   /**
-   * @constructor
    * @param {string} pathname
    * @param {TextOperation} textOperation
    */

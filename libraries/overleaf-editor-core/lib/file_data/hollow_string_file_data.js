@@ -7,7 +7,6 @@ const FileData = require('./')
 
 class HollowStringFileData extends FileData {
   /**
-   * @constructor
    * @param {number} stringLength
    * @see FileData
    */

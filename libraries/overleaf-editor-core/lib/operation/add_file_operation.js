@@ -6,12 +6,10 @@ const File = require('../file')
 const Operation = require('./')
 
 /**
- * @classdesc
  * Adds a new file to a project.
  */
 class AddFileOperation extends Operation {
   /**
-   * @constructor
    * @param {string} pathname
    * @param {File} file
    */

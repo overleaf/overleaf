@@ -20,7 +20,6 @@ let SetFileMetadataOperation = null
  */
 
 /**
- * @classdesc
  * An `Operation` changes a `Snapshot` when it is applied. See the
  * {@tutorial OT} tutorial for background.
  */

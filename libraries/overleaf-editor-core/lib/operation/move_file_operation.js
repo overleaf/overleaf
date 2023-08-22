@@ -3,7 +3,6 @@
 const Operation = require('./')
 
 /**
- * @classdesc
  * Moves or removes a file from a project.
  */
 class MoveFileOperation extends Operation {
@@ -51,4 +50,5 @@ class MoveFileOperation extends Operation {
     snapshot.moveFile(this.getPathname(), this.getNewPathname())
   }
 }
+
 module.exports = MoveFileOperation

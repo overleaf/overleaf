@@ -11,7 +11,6 @@ const TextOperation = require('../operation/text_operation')
 
 class LazyStringFileData extends FileData {
   /**
-   * @constructor
    * @param {string} hash
    * @param {number} stringLength
    * @param {Array.<TextOperation>} [textOperations]

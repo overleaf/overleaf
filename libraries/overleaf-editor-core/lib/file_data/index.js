@@ -19,7 +19,6 @@ let StringFileData = null
  */
 
 /**
- * @classdesc
  * Helper to represent the content of a file. This class and its subclasses
  * should be used only through {@link File}.
  */

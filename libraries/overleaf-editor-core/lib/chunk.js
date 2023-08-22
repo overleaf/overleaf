@@ -10,24 +10,6 @@ const History = require('./history')
  * @typedef {import("./change")} Change
  * @typedef {import("./snapshot")} Snapshot
  */
-
-/**
- * @constructor
- * @param {History} history
- * @param {number} startVersion
- *
- * @classdesc
- * A Chunk is a {@link History} that is part of a project's overall history. It
- * has a start and an end version that place its History in context.
- */
-function Chunk(history, startVersion) {
-  assert.instance(history, History, 'bad history')
-  assert.integer(startVersion, 'bad startVersion')
-
-  this.history = history
-  this.startVersion = startVersion
-}
-
 class ConflictingEndVersion extends OError {
   constructor(clientEndVersion, latestEndVersion) {
     const message =
@@ -40,7 +22,6 @@ class ConflictingEndVersion extends OError {
     this.latestEndVersion = latestEndVersion
   }
 }
-Chunk.ConflictingEndVersion = ConflictingEndVersion
 
 class NotFoundError extends OError {
   // `message` and `info` optional arguments allow children classes to override
@@ -53,7 +34,6 @@ class NotFoundError extends OError {
     this.projectId = projectId
   }
 }
-Chunk.NotFoundError = NotFoundError
 
 class VersionNotFoundError extends NotFoundError {
   constructor(projectId, version) {
@@ -65,7 +45,6 @@ class VersionNotFoundError extends NotFoundError {
     this.version = version
   }
 }
-Chunk.VersionNotFoundError = VersionNotFoundError
 
 class BeforeTimestampNotFoundError extends NotFoundError {
   constructor(projectId, timestamp) {
@@ -74,7 +53,6 @@ class BeforeTimestampNotFoundError extends NotFoundError {
     this.timestamp = timestamp
   }
 }
-Chunk.BeforeTimestampNotFoundError = BeforeTimestampNotFoundError
 
 class NotPersistedError extends NotFoundError {
   constructor(projectId) {
@@ -82,85 +60,108 @@ class NotPersistedError extends NotFoundError {
     this.projectId = projectId
   }
 }
-Chunk.NotPersistedError = NotPersistedError
-
-Chunk.fromRaw = function chunkFromRaw(raw) {
-  return new Chunk(History.fromRaw(raw.history), raw.startVersion)
-}
-
-Chunk.prototype.toRaw = function chunkToRaw() {
-  return { history: this.history.toRaw(), startVersion: this.startVersion }
-}
 
 /**
- * The history for this chunk.
- *
- * @return {History}
+ * A Chunk is a {@link History} that is part of a project's overall history. It
+ * has a start and an end version that place its History in context.
  */
-Chunk.prototype.getHistory = function () {
-  return this.history
-}
+class Chunk {
+  static ConflictingEndVersion = ConflictingEndVersion
+  static NotFoundError = NotFoundError
+  static VersionNotFoundError = VersionNotFoundError
+  static BeforeTimestampNotFoundError = BeforeTimestampNotFoundError
+  static NotPersistedError = NotPersistedError
 
-/**
- * {@see History#getSnapshot}
- * @return {Snapshot}
- */
-Chunk.prototype.getSnapshot = function () {
-  return this.history.getSnapshot()
-}
+  /**
+   * @param {History} history
+   * @param {number} startVersion
+   */
+  constructor(history, startVersion) {
+    assert.instance(history, History, 'bad history')
+    assert.integer(startVersion, 'bad startVersion')
 
-/**
- * {@see History#getChanges}
- * @return {Array.<Change>}
- */
-Chunk.prototype.getChanges = function () {
-  return this.history.getChanges()
-}
+    this.history = history
+    this.startVersion = startVersion
+  }
 
-/**
- * {@see History#pushChanges}
- * @param {Array.<Change>} changes
- */
-Chunk.prototype.pushChanges = function chunkPushChanges(changes) {
-  this.history.pushChanges(changes)
-}
+  static fromRaw(raw) {
+    return new Chunk(History.fromRaw(raw.history), raw.startVersion)
+  }
 
-/**
- * The version of the project after applying all changes in this chunk.
- *
- * @return {number} non-negative, greater than or equal to start version
- */
-Chunk.prototype.getEndVersion = function chunkGetEndVersion() {
-  return this.startVersion + this.history.countChanges()
-}
+  toRaw() {
+    return { history: this.history.toRaw(), startVersion: this.startVersion }
+  }
 
-/**
- * The timestamp of the last change in this chunk
- */
+  /**
+   * The history for this chunk.
+   *
+   * @return {History}
+   */
+  getHistory() {
+    return this.history
+  }
 
-Chunk.prototype.getEndTimestamp = function getEndTimestamp() {
-  if (!this.history.countChanges()) return null
-  return this.history.getChanges().slice(-1)[0].getTimestamp()
-}
+  /**
+   * {@see History#getSnapshot}
+   * @return {Snapshot}
+   */
+  getSnapshot() {
+    return this.history.getSnapshot()
+  }
 
-/**
- * The version of the project before applying all changes in this chunk.
- *
- * @return {number} non-negative, less than or equal to end version
- */
-Chunk.prototype.getStartVersion = function () {
-  return this.startVersion
-}
+  /**
+   * {@see History#getChanges}
+   * @return {Array.<Change>}
+   */
+  getChanges() {
+    return this.history.getChanges()
+  }
 
-/**
- * {@see History#loadFiles}
- *
- * @param {string} kind
- * @param {BlobStore} blobStore
- * @return {Promise}
- */
-Chunk.prototype.loadFiles = function chunkLoadFiles(kind, blobStore) {
-  return this.history.loadFiles(kind, blobStore)
+  /**
+   * {@see History#pushChanges}
+   * @param {Array.<Change>} changes
+   */
+  pushChanges(changes) {
+    this.history.pushChanges(changes)
+  }
+
+  /**
+   * The version of the project after applying all changes in this chunk.
+   *
+   * @return {number} non-negative, greater than or equal to start version
+   */
+  getEndVersion() {
+    return this.startVersion + this.history.countChanges()
+  }
+
+  /**
+   * The timestamp of the last change in this chunk
+   */
+
+  getEndTimestamp() {
+    if (!this.history.countChanges()) return null
+    return this.history.getChanges().slice(-1)[0].getTimestamp()
+  }
+
+  /**
+   * The version of the project before applying all changes in this chunk.
+   *
+   * @return {number} non-negative, less than or equal to end version
+   */
+  getStartVersion() {
+    return this.startVersion
+  }
+
+  /**
+   * {@see History#loadFiles}
+   *
+   * @param {string} kind
+   * @param {BlobStore} blobStore
+   * @return {Promise}
+   */
+  loadFiles(kind, blobStore) {
+    return this.history.loadFiles(kind, blobStore)
+  }
 }
 
 module.exports = Chunk

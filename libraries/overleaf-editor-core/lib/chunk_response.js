@@ -3,30 +3,31 @@
 const assert = require('check-types').assert
 const Chunk = require('./chunk')
 
-//
-// The ChunkResponse allows for additional data to be sent back with the chunk
-// at present there are no extra data to send.
-//
-
-function ChunkResponse(chunk) {
-  assert.instance(chunk, Chunk)
-  this.chunk = chunk
-}
-
-ChunkResponse.prototype.toRaw = function chunkResponseToRaw() {
-  return {
-    chunk: this.chunk.toRaw(),
+/**
+ * The ChunkResponse allows for additional data to be sent back with the chunk
+ * at present there are no extra data to send.
+ */
+class ChunkResponse {
+  constructor(chunk) {
+    assert.instance(chunk, Chunk)
+    this.chunk = chunk
   }
-}
 
-ChunkResponse.fromRaw = function chunkResponseFromRaw(raw) {
-  if (!raw) return null
+  toRaw() {
+    return {
+      chunk: this.chunk.toRaw(),
+    }
+  }
 
-  return new ChunkResponse(Chunk.fromRaw(raw.chunk))
-}
+  static fromRaw(raw) {
+    if (!raw) return null
 
-ChunkResponse.prototype.getChunk = function () {
-  return this.chunk
+    return new ChunkResponse(Chunk.fromRaw(raw.chunk))
+  }
+
+  getChunk() {
+    return this.chunk
+  }
 }
 
 module.exports = ChunkResponse

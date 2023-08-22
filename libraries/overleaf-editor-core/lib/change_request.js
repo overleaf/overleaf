@@ -11,12 +11,6 @@ const Operation = require('./operation')
  */
 
 /**
- * @constructor
- * @param {number} baseVersion
- * @param {Array.<Operation>} operations
- * @param {boolean} [untransformable]
- * @param {number[] | Author[]} [authors]
- * @classdesc
  * A `ChangeRequest` is a list of {@link Operation}s that the server can apply
  * as a {@link Change}.
  *
@@ -28,63 +22,69 @@ const Operation = require('./operation')
  * metadata at the same time. The expectation is that if the change is rejected,
  * the client will retry on a later version.
  */
-function ChangeRequest(baseVersion, operations, untransformable, authors) {
-  assert.integer(baseVersion, 'bad baseVersion')
-  assert.array.of.object(operations, 'bad operations')
-  assert.maybe.boolean(untransformable, 'ChangeRequest: bad untransformable')
-  // TODO remove authors once we have JWTs working --- pass as parameter to
-  // makeChange instead
-  authors = authors || []
+class ChangeRequest {
+  /**
+   * @param {number} baseVersion
+   * @param {Array.<Operation>} operations
+   * @param {boolean} [untransformable]
+   * @param {number[] | Author[]} [authors]
+   */
+  constructor(baseVersion, operations, untransformable, authors) {
+    assert.integer(baseVersion, 'bad baseVersion')
+    assert.array.of.object(operations, 'bad operations')
+    assert.maybe.boolean(untransformable, 'ChangeRequest: bad untransformable')
+    // TODO remove authors once we have JWTs working --- pass as parameter to
+    // makeChange instead
+    authors = authors || []
 
-  // check all are the same type
-  AuthorList.assertV1(authors, 'bad authors')
+    // check all are the same type
+    AuthorList.assertV1(authors, 'bad authors')
 
-  this.authors = authors
-  this.baseVersion = baseVersion
-  this.operations = operations
-  this.untransformable = untransformable || false
+    this.authors = authors
+    this.baseVersion = baseVersion
+    this.operations = operations
+    this.untransformable = untransformable || false
+  }
+
+  /**
+   * For serialization.
+   *
+   * @return {Object}
+   */
+  toRaw() {
+    function operationToRaw(operation) {
+      return operation.toRaw()
+    }
+
+    return {
+      baseVersion: this.baseVersion,
+      operations: this.operations.map(operationToRaw),
+      untransformable: this.untransformable,
+      authors: this.authors,
+    }
+  }
+
+  static fromRaw(raw) {
+    assert.array.of.object(raw.operations, 'bad raw.operations')
+    return new ChangeRequest(
+      raw.baseVersion,
+      raw.operations.map(Operation.fromRaw),
+      raw.untransformable,
+      raw.authors
+    )
+  }
+
+  getBaseVersion() {
+    return this.baseVersion
+  }
+
+  isUntransformable() {
+    return this.untransformable
+  }
+
+  makeChange(timestamp) {
+    return new Change(this.operations, timestamp, this.authors)
+  }
 }
 
 module.exports = ChangeRequest
-
-/**
- * For serialization.
- *
- * @return {Object}
- */
-ChangeRequest.prototype.toRaw = function changeRequestToRaw() {
-  function operationToRaw(operation) {
-    return operation.toRaw()
-  }
-
-  return {
-    baseVersion: this.baseVersion,
-    operations: this.operations.map(operationToRaw),
-    untransformable: this.untransformable,
-    authors: this.authors,
-  }
-}
-
-ChangeRequest.fromRaw = function changeRequestFromRaw(raw) {
-  assert.array.of.object(raw.operations, 'bad raw.operations')
-  return new ChangeRequest(
-    raw.baseVersion,
-    raw.operations.map(Operation.fromRaw),
-    raw.untransformable,
-    raw.authors
-  )
-}
-
-ChangeRequest.prototype.getBaseVersion = function () {
-  return this.baseVersion
-}
-
-ChangeRequest.prototype.isUntransformable = function () {
-  return this.untransformable
-}
-
-ChangeRequest.prototype.makeChange = function changeRequestMakeChange(
-  timestamp
-) {
-  return new Change(this.operations, timestamp, this.authors)
-}

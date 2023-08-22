@@ -7,7 +7,6 @@ const FileData = require('./')
 
 class HollowBinaryFileData extends FileData {
   /**
-   * @constructor
    * @param {number} byteLength
    * @see FileData
    */

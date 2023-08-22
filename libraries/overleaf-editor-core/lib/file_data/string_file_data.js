@@ -11,7 +11,6 @@ const FileData = require('./')
 
 class StringFileData extends FileData {
   /**
-   * @constructor
    * @param {string} content
    */
   constructor(content) {

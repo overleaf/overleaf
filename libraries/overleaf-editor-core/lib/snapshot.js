@@ -13,11 +13,17 @@ const V2DocVersions = require('./v2_doc_versions')
  * @typedef {import("./operation/text_operation")} TextOperation
  */
 
+class EditMissingFileError extends OError {}
+
 /**
- * @classdesc A Snapshot represents the state of a {@link Project} at a
- *     particular version.
+ * A Snapshot represents the state of a {@link Project} at a
+ * particular version.
  */
 class Snapshot {
+  static PROJECT_VERSION_RX_STRING = '^[0-9]+\\.[0-9]+$'
+  static PROJECT_VERSION_RX = new RegExp(Snapshot.PROJECT_VERSION_RX_STRING)
+  static EditMissingFileError = EditMissingFileError
+
   static fromRaw(raw) {
     assert.object(raw.files, 'bad raw.files')
     return new Snapshot(
@@ -37,7 +43,6 @@ class Snapshot {
   }
 
   /**
-   * @constructor
    * @param {FileMap} [fileMap]
    * @param {string} [projectVersion]
    * @param {V2DocVersions} [v2DocVersions]
@@ -230,11 +235,5 @@ class Snapshot {
     return Snapshot.fromRaw(this.toRaw())
   }
 }
-
-class EditMissingFileError extends OError {}
-Snapshot.EditMissingFileError = EditMissingFileError
-
-Snapshot.PROJECT_VERSION_RX_STRING = '^[0-9]+\\.[0-9]+$'
-Snapshot.PROJECT_VERSION_RX = new RegExp(Snapshot.PROJECT_VERSION_RX_STRING)
 
 module.exports = Snapshot

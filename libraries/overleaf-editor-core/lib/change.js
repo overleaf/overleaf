@@ -17,13 +17,14 @@ const V2DocVersions = require('./v2_doc_versions')
  */
 
 /**
- * @classdesc
  * A Change is a list of {@link Operation}s applied atomically by given
  * {@link Author}(s) at a given time.
  */
 class Change {
+  static PROJECT_VERSION_RX_STRING = '^[0-9]+\\.[0-9]+$'
+  static PROJECT_VERSION_RX = new RegExp(Change.PROJECT_VERSION_RX_STRING)
+
   /**
-   * @constructor
    * @param {Array.<Operation>} operations
    * @param {Date} timestamp
    * @param {number[] | Author[]} [authors]
@@ -326,8 +327,5 @@ class Change {
     return operations[0].canBeComposedWith(otherOperations[0])
   }
 }
-
-Change.PROJECT_VERSION_RX_STRING = '^[0-9]+\\.[0-9]+$'
-Change.PROJECT_VERSION_RX = new RegExp(Change.PROJECT_VERSION_RX_STRING)
 
 module.exports = Change

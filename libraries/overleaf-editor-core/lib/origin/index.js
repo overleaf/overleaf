@@ -7,46 +7,48 @@ const assert = require('check-types').assert
 let RestoreOrigin = null
 
 /**
- * @constructor
- * @param {string} kind
- * @classdesc
  * An Origin records where a {@link Change} came from. The Origin class handles
  * simple tag origins, like "it came from rich text mode", or "it came from
  * uploading files". Its subclasses record more detailed data for Changes such
  * as restoring a version.
  */
-function Origin(kind) {
-  assert.string(kind, 'Origin: bad kind')
+class Origin {
+  /**
+   * @param {string} kind
+   */
+  constructor(kind) {
+    assert.string(kind, 'Origin: bad kind')
 
-  this.kind = kind
-}
+    this.kind = kind
+  }
 
-/**
- * Create an Origin from its raw form.
- *
- * @param {Object} [raw]
- * @return {Origin | null}
- */
-Origin.fromRaw = function originFromRaw(raw) {
-  if (!raw) return null
-  if (raw.kind === RestoreOrigin.KIND) return RestoreOrigin.fromRaw(raw)
-  return new Origin(raw.kind)
-}
+  /**
+   * Create an Origin from its raw form.
+   *
+   * @param {Object} [raw]
+   * @return {Origin | null}
+   */
+  static fromRaw(raw) {
+    if (!raw) return null
+    if (raw.kind === RestoreOrigin.KIND) return RestoreOrigin.fromRaw(raw)
+    return new Origin(raw.kind)
+  }
 
-/**
- * Convert the Origin to raw form for storage or transmission.
- *
- * @return {Object}
- */
-Origin.prototype.toRaw = function originToRaw() {
-  return { kind: this.kind }
-}
+  /**
+   * Convert the Origin to raw form for storage or transmission.
+   *
+   * @return {Object}
+   */
+  toRaw() {
+    return { kind: this.kind }
+  }
 
-/**
- * @return {string}
- */
-Origin.prototype.getKind = function () {
-  return this.kind
+  /**
+   * @return {string}
+   */
+  getKind() {
+    return this.kind
+  }
 }
 
 module.exports = Origin

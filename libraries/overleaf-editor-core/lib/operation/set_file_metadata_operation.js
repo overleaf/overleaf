@@ -6,12 +6,10 @@ const assert = require('check-types').assert
 const Operation = require('./')
 
 /**
- * @classdesc
  * Moves or removes a file from a project.
  */
 class SetFileMetadataOperation extends Operation {
   /**
-   * @constructor
    * @param {string} pathname
    * @param {Object} metadata
    */

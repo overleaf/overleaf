@@ -42,4 +42,4 @@ function assertV2(authors, msg) {
   })
 }
 
-module.exports = { assertV1: assertV1, assertV2: assertV2 }
+module.exports = { assertV1, assertV2 }

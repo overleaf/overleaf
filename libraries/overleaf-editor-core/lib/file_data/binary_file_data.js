@@ -8,7 +8,6 @@ const FileData = require('./')
 
 class BinaryFileData extends FileData {
   /**
-   * @constructor
    * @param {string} hash
    * @param {number} byteLength
    * @see FileData
