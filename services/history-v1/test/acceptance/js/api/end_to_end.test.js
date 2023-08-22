@@ -161,7 +161,7 @@ describe('overleaf ot', function () {
             .then(() => projectId)
         })
 
-        .tap(projectId => {
+        .then(projectId => {
           // Fetch empty file blob
           return client.apis.Project.getProjectBlob({
             project_id: projectId,

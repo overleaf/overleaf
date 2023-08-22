@@ -1,10 +1,9 @@
 'use strict'
 
-const BPromise = require('bluebird')
 const _ = require('lodash')
-
 const assert = require('check-types').assert
 const OError = require('@overleaf/o-error')
+const pMap = require('p-map')
 
 const File = require('./file')
 const safePathname = require('./safe_pathname')
@@ -233,22 +232,21 @@ class FileMap {
    * Map the files in this map to new values asynchronously, with an optional
    * limit on concurrency.
    * @param {function} iteratee like for _.mapValues
-   * @param {number} [concurrency] as for BPromise.map
-   * @return {Object}
+   * @param {number} [concurrency]
+   * @return {Promise<Object>}
    */
-  mapAsync(iteratee, concurrency) {
+  async mapAsync(iteratee, concurrency) {
     assert.maybe.number(concurrency, 'bad concurrency')
 
     const pathnames = this.getPathnames()
-    return BPromise.map(
+    const files = await pMap(
       pathnames,
       file => {
         return iteratee(this.getFile(file), file, pathnames)
       },
       { concurrency: concurrency || 1 }
-    ).then(files => {
-      return _.zipObject(pathnames, files)
-    })
+    )
+    return _.zipObject(pathnames, files)
   }
 }
 

@@ -1,7 +1,6 @@
 'use strict'
 
 const { expect } = require('chai')
-const BPromise = require('bluebird')
 const _ = require('lodash')
 
 const ot = require('..')
@@ -177,26 +176,20 @@ describe('FileMap', function () {
     expect(() => fileMap.removeFile('b')).to.throw(FileMap.FileNotFoundError)
   })
 
-  it('has mapAsync', function () {
+  it('has mapAsync', async function () {
     const concurrency = 1
-    return BPromise.map(
-      [
-        [[], {}],
-        [['a'], { a: 'a-a' }], // the test is to map to "content-pathname"
-        [['a', 'b'], { a: 'a-a', b: 'b-b' }],
-      ],
-      test => {
-        const input = test[0]
-        const expectedOutput = test[1]
-        const fileMap = makeFileMap(input)
-        return fileMap
-          .mapAsync((file, pathname) => {
-            return file.getContent() + '-' + pathname
-          }, concurrency)
-          .then(result => {
-            expect(result).to.deep.equal(expectedOutput)
-          })
-      }
-    )
+    for (const test of [
+      [[], {}],
+      [['a'], { a: 'a-a' }], // the test is to map to "content-pathname"
+      [['a', 'b'], { a: 'a-a', b: 'b-b' }],
+    ]) {
+      const input = test[0]
+      const expectedOutput = test[1]
+      const fileMap = makeFileMap(input)
+      const result = await fileMap.mapAsync((file, pathname) => {
+        return file.getContent() + '-' + pathname
+      }, concurrency)
+      expect(result).to.deep.equal(expectedOutput)
+    }
   })
 })

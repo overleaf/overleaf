@@ -2,7 +2,6 @@
 
 const _ = require('lodash')
 const assert = require('check-types').assert
-const BPromise = require('bluebird')
 
 const Blob = require('../blob')
 const FileData = require('./')
@@ -84,22 +83,19 @@ class LazyStringFileData extends FileData {
   }
 
   /** @inheritdoc */
-  toEager(blobStore) {
-    return blobStore.getString(this.hash).then(content => {
-      return new EagerStringFileData(
-        computeContent(this.textOperations, content)
-      )
-    })
+  async toEager(blobStore) {
+    const content = await blobStore.getString(this.hash)
+    return new EagerStringFileData(computeContent(this.textOperations, content))
   }
 
   /** @inheritdoc */
-  toLazy() {
-    return BPromise.resolve(this)
+  async toLazy() {
+    return this
   }
 
   /** @inheritdoc */
-  toHollow() {
-    return BPromise.try(() => FileData.createHollow(null, this.stringLength))
+  async toHollow() {
+    return FileData.createHollow(null, this.stringLength)
   }
 
   /** @inheritdoc */
@@ -109,20 +105,19 @@ class LazyStringFileData extends FileData {
   }
 
   /** @inheritdoc */
-  store(blobStore) {
-    if (this.textOperations.length === 0)
-      return BPromise.resolve({ hash: this.hash })
-    return blobStore
-      .getString(this.hash)
-      .then(content => {
-        return blobStore.putString(computeContent(this.textOperations, content))
-      })
-      .then(blob => {
-        this.hash = blob.getHash()
-        this.stringLength = blob.getStringLength()
-        this.textOperations.length = 0
-        return { hash: this.hash }
-      })
+  async store(blobStore) {
+    if (this.textOperations.length === 0) {
+      return { hash: this.hash }
+    }
+
+    const content = await blobStore.getString(this.hash)
+    const blob = await blobStore.putString(
+      computeContent(this.textOperations, content)
+    )
+    this.hash = blob.getHash()
+    this.stringLength = blob.getStringLength()
+    this.textOperations.length = 0
+    return { hash: this.hash }
   }
 }
 

@@ -1,7 +1,6 @@
 'use strict'
 
 const _ = require('lodash')
-const BPromise = require('bluebird')
 
 const ChangeNote = require('./change_note')
 const ChangeRequest = require('./change_request')
@@ -113,7 +112,7 @@ class OtClient {
      */
     this.waitForVersion = function otClientWaitForVersion(version) {
       if (!_waiting[version]) _waiting[version] = []
-      return new BPromise(function (resolve, reject) {
+      return new Promise(function (resolve, reject) {
         _waiting[version].push(resolve)
       })
     }

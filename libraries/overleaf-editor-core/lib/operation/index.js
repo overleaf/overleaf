@@ -2,7 +2,6 @@
 
 const _ = require('lodash')
 const assert = require('check-types').assert
-const BPromise = require('bluebird')
 
 const TextOperation = require('./text_operation')
 
@@ -79,11 +78,9 @@ class Operation {
    *
    * @param {string} kind see {File#load}
    * @param {BlobStore} blobStore
-   * @return {Promise}
+   * @return {Promise<void>}
    */
-  loadFiles(kind, blobStore) {
-    return BPromise.resolve()
-  }
+  async loadFiles(kind, blobStore) {}
 
   /**
    * Return a version of this operation that is suitable for long term storage.
@@ -93,8 +90,8 @@ class Operation {
    * @param {BlobStore} blobStore
    * @return {Promise.<Object>}
    */
-  store(blobStore) {
-    return BPromise.try(() => this.toRaw())
+  async store(blobStore) {
+    return this.toRaw()
   }
 
   /**

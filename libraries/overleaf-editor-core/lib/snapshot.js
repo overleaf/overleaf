@@ -1,11 +1,12 @@
 'use strict'
 
 const assert = require('check-types').assert
-const BPromise = require('bluebird')
 const OError = require('@overleaf/o-error')
 
 const FileMap = require('./file_map')
 const V2DocVersions = require('./v2_doc_versions')
+
+const FILE_LOAD_CONCURRENCY = 50
 
 /**
  * @typedef {import("./types").BlobStore} BlobStore
@@ -194,10 +195,14 @@ class Snapshot {
    *
    * @param {string} kind see {File#load}
    * @param {BlobStore} blobStore
-   * @return {Promise}
+   * @return {Promise<Object>} an object where keys are the pathnames and
+   * values are the files in the snapshot
    */
-  loadFiles(kind, blobStore) {
-    return BPromise.props(this.fileMap.map(file => file.load(kind, blobStore)))
+  async loadFiles(kind, blobStore) {
+    return await this.fileMap.mapAsync(
+      file => file.load(kind, blobStore),
+      FILE_LOAD_CONCURRENCY
+    )
   }
 
   /**
@@ -208,22 +213,22 @@ class Snapshot {
    * @param {number} [concurrency]
    * @return {Promise.<Object>}
    */
-  store(blobStore, concurrency) {
+  async store(blobStore, concurrency) {
     assert.maybe.number(concurrency, 'bad concurrency')
 
     const projectVersion = this.projectVersion
     const rawV2DocVersions = this.v2DocVersions
       ? this.v2DocVersions.toRaw()
       : undefined
-    return this.fileMap
-      .mapAsync(file => file.store(blobStore), concurrency)
-      .then(rawFiles => {
-        return {
-          files: rawFiles,
-          projectVersion,
-          v2DocVersions: rawV2DocVersions,
-        }
-      })
+    const rawFiles = await this.fileMap.mapAsync(
+      file => file.store(blobStore),
+      concurrency
+    )
+    return {
+      files: rawFiles,
+      projectVersion,
+      v2DocVersions: rawV2DocVersions,
+    }
   }
 
   /**

@@ -1,9 +1,8 @@
 import Blob from './blob'
-import BPromise from 'bluebird'
 
 export type BlobStore = {
-  getString(hash: string): BPromise<string>
-  putString(content: string): BPromise<Blob>
+  getString(hash: string): Promise<string>
+  putString(content: string): Promise<Blob>
 }
 
 export type StringFileRawData = {

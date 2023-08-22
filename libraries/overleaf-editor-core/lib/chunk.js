@@ -157,10 +157,10 @@ class Chunk {
    *
    * @param {string} kind
    * @param {BlobStore} blobStore
-   * @return {Promise}
+   * @return {Promise<void>}
    */
-  loadFiles(kind, blobStore) {
-    return this.history.loadFiles(kind, blobStore)
+  async loadFiles(kind, blobStore) {
+    await this.history.loadFiles(kind, blobStore)
   }
 }
 

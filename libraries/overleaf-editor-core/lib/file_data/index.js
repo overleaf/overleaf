@@ -1,7 +1,6 @@
 'use strict'
 
 const assert = require('check-types').assert
-const BPromise = require('bluebird')
 
 const Blob = require('../blob')
 
@@ -95,52 +94,46 @@ class FileData {
   /**
    * @function
    * @param {BlobStore} blobStore
-   * @return {BPromise<FileData>}
+   * @return {Promise<FileData>}
    * @abstract
    * @see FileData#load
    */
-  toEager(blobStore) {
-    return BPromise.reject(
-      new Error('toEager not implemented for ' + JSON.stringify(this))
-    )
+  async toEager(blobStore) {
+    throw new Error('toEager not implemented for ' + JSON.stringify(this))
   }
 
   /**
    * @function
    * @param {BlobStore} blobStore
-   * @return {BPromise<FileData>}
+   * @return {Promise<FileData>}
    * @abstract
    * @see FileData#load
    */
-  toLazy(blobStore) {
-    return BPromise.reject(
-      new Error('toLazy not implemented for ' + JSON.stringify(this))
-    )
+  async toLazy(blobStore) {
+    throw new Error('toLazy not implemented for ' + JSON.stringify(this))
   }
 
   /**
    * @function
    * @param {BlobStore} blobStore
-   * @return {BPromise<FileData>}
+   * @return {Promise<FileData>}
    * @abstract
    * @see FileData#load
    */
-  toHollow(blobStore) {
-    return BPromise.reject(
-      new Error('toHollow not implemented for ' + JSON.stringify(this))
-    )
+  async toHollow(blobStore) {
+    throw new Error('toHollow not implemented for ' + JSON.stringify(this))
   }
 
   /**
    * @see File#load
    * @param {string} kind
    * @param {BlobStore} blobStore
-   * @return {BPromise<FileData>}
+   * @return {Promise<FileData>}
    */
-  load(kind, blobStore) {
-    if (kind === 'eager') return this.toEager(blobStore)
-    if (kind === 'lazy') return this.toLazy(blobStore)
-    if (kind === 'hollow') return this.toHollow(blobStore)
+  async load(kind, blobStore) {
+    if (kind === 'eager') return await this.toEager(blobStore)
+    if (kind === 'lazy') return await this.toLazy(blobStore)
+    if (kind === 'hollow') return await this.toHollow(blobStore)
     throw new Error('bad file data load kind: ' + kind)
   }
 
@@ -148,13 +141,11 @@ class FileData {
    * @see File#store
    * @function
    * @param {BlobStore} blobStore
-   * @return {BPromise<Object>} a raw HashFile
+   * @return {Promise<Object>} a raw HashFile
    * @abstract
    */
-  store(blobStore) {
-    return BPromise.reject(
-      new Error('store not implemented for ' + JSON.stringify(this))
-    )
+  async store(blobStore) {
+    throw new Error('store not implemented for ' + JSON.stringify(this))
   }
 }
 

@@ -16,7 +16,6 @@
   "license": "Proprietary",
   "private": true,
   "devDependencies": {
-    "@types/bluebird": "^3.5.30",
     "chai": "^3.3.0",
     "istanbul": "^0.4.5",
     "mocha": "^10.2.0",
@@ -24,8 +23,8 @@
   },
   "dependencies": {
     "@overleaf/o-error": "*",
-    "bluebird": "^3.1.1",
     "check-types": "^5.1.0",
-    "lodash": "^4.17.19"
+    "lodash": "^4.17.19",
+    "p-map": "^4.0.0"
   }
 }

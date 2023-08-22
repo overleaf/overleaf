@@ -1,7 +1,6 @@
 'use strict'
 
 const assert = require('check-types').assert
-const BPromise = require('bluebird')
 
 const FileData = require('./')
 
@@ -57,22 +56,19 @@ class StringFileData extends FileData {
   }
 
   /** @inheritdoc */
-  toEager() {
-    return BPromise.resolve(this)
+  async toEager() {
+    return this
   }
 
   /** @inheritdoc */
-  toHollow() {
-    return BPromise.try(() =>
-      FileData.createHollow(this.getByteLength(), this.getStringLength())
-    )
+  async toHollow() {
+    return FileData.createHollow(this.getByteLength(), this.getStringLength())
   }
 
   /** @inheritdoc */
-  store(blobStore) {
-    return blobStore.putString(this.content).then(function (blob) {
-      return { hash: blob.getHash() }
-    })
+  async store(blobStore) {
+    const blob = await blobStore.putString(this.content)
+    return { hash: blob.getHash() }
   }
 }
 

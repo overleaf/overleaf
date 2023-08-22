@@ -1,7 +1,6 @@
 'use strict'
 
 const assert = require('check-types').assert
-const BPromise = require('bluebird')
 
 const Blob = require('../blob')
 const FileData = require('./')
@@ -33,30 +32,27 @@ class HashFileData extends FileData {
   }
 
   /** @inheritdoc */
-  toEager(blobStore) {
-    return this.toLazy(blobStore).then(lazyFileData =>
-      lazyFileData.toEager(blobStore)
-    )
+  async toEager(blobStore) {
+    const lazyFileData = await this.toLazy(blobStore)
+    return await lazyFileData.toEager(blobStore)
   }
 
   /** @inheritdoc */
-  toLazy(blobStore) {
-    return blobStore.getBlob(this.hash).then(blob => {
-      if (!blob) throw new Error('blob not found: ' + this.hash)
-      return FileData.createLazyFromBlob(blob)
-    })
+  async toLazy(blobStore) {
+    const blob = await blobStore.getBlob(this.hash)
+    if (!blob) throw new Error('blob not found: ' + this.hash)
+    return FileData.createLazyFromBlob(blob)
   }
 
   /** @inheritdoc */
-  toHollow(blobStore) {
-    return blobStore.getBlob(this.hash).then(function (blob) {
-      return FileData.createHollow(blob.getByteLength(), blob.getStringLength())
-    })
+  async toHollow(blobStore) {
+    const blob = await blobStore.getBlob(this.hash)
+    return FileData.createHollow(blob.getByteLength(), blob.getStringLength())
   }
 
   /** @inheritdoc */
-  store() {
-    return BPromise.resolve({ hash: this.hash })
+  async store() {
+    return { hash: this.hash }
   }
 }
 

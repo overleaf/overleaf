@@ -26,7 +26,7 @@ describe('File', function () {
       const file = File.fromHash(File.EMPTY_FILE_HASH, metadata)
       expect(file.toRaw()).to.eql({
         hash: File.EMPTY_FILE_HASH,
-        metadata: metadata,
+        metadata,
       })
 
       delete file.getMetadata().main
@@ -45,34 +45,31 @@ describe('File', function () {
   })
 
   describe('store', function () {
-    it('does not return empty metadata', function () {
+    it('does not return empty metadata', async function () {
       const file = File.fromHash(File.EMPTY_FILE_HASH)
       const fakeBlobStore = new FakeBlobStore()
-      return file.store(fakeBlobStore).then(raw => {
-        expect(raw).to.eql({ hash: File.EMPTY_FILE_HASH })
-      })
+      const raw = await file.store(fakeBlobStore)
+      expect(raw).to.eql({ hash: File.EMPTY_FILE_HASH })
     })
 
-    it('returns non-empty metadata', function () {
+    it('returns non-empty metadata', async function () {
       const metadata = { main: true }
       const file = File.fromHash(File.EMPTY_FILE_HASH, metadata)
       const fakeBlobStore = new FakeBlobStore()
-      return file.store(fakeBlobStore).then(raw => {
-        expect(raw).to.eql({
-          hash: File.EMPTY_FILE_HASH,
-          metadata: metadata,
-        })
+      const raw = await file.store(fakeBlobStore)
+      expect(raw).to.eql({
+        hash: File.EMPTY_FILE_HASH,
+        metadata,
       })
     })
 
-    it('returns a deep clone of metadata', function () {
+    it('returns a deep clone of metadata', async function () {
       const metadata = { externalFile: { id: 123 } }
       const file = File.fromHash(File.EMPTY_FILE_HASH, metadata)
       const fakeBlobStore = new FakeBlobStore()
-      return file.store(fakeBlobStore).then(raw => {
-        raw.metadata.externalFile.id = 456
-        expect(file.getMetadata().externalFile.id).to.equal(123)
-      })
+      const raw = await file.store(fakeBlobStore)
+      raw.metadata.externalFile.id = 456
+      expect(file.getMetadata().externalFile.id).to.equal(123)
     })
   })
 

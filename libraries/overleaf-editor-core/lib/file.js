@@ -15,11 +15,6 @@ const StringFileData = require('./file_data/string_file_data')
  * @typedef {import("./operation/text_operation")} TextOperation
  */
 
-/**
- * @template T
- * @typedef {import("bluebird")<T>} BPromise
- */
-
 class NotEditableError extends OError {
   constructor() {
     super('File is not editable')
@@ -206,11 +201,10 @@ class File {
    * @param {BlobStore} blobStore
    * @return {Promise.<File>} for this
    */
-  load(kind, blobStore) {
-    return this.data.load(kind, blobStore).then(data => {
-      this.data = data
-      return this
-    })
+  async load(kind, blobStore) {
+    const data = await this.data.load(kind, blobStore)
+    this.data = data
+    return this
   }
 
   /**
@@ -219,13 +213,12 @@ class File {
    * the hash.
    *
    * @param {BlobStore} blobStore
-   * @return {BPromise<Object>} a raw HashFile
+   * @return {Promise<Object>} a raw HashFile
    */
-  store(blobStore) {
-    return this.data.store(blobStore).then(raw => {
-      storeRawMetadata(this.metadata, raw)
-      return raw
-    })
+  async store(blobStore) {
+    const raw = await this.data.store(blobStore)
+    storeRawMetadata(this.metadata, raw)
+    return raw
   }
 }
 

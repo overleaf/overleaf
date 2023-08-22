@@ -1,7 +1,7 @@
 'use strict'
 
 const assert = require('check-types').assert
-const BPromise = require('bluebird')
+const pMap = require('p-map')
 
 const Change = require('./change')
 const Snapshot = require('./snapshot')
@@ -85,16 +85,19 @@ class History {
    *
    * @param {string} kind see {File#load}
    * @param {BlobStore} blobStore
-   * @return {Promise}
+   * @return {Promise<void>}
    */
-  loadFiles(kind, blobStore) {
-    function loadChangeFiles(change) {
-      return change.loadFiles(kind, blobStore)
+  async loadFiles(kind, blobStore) {
+    async function loadChangeFiles(changes) {
+      for (const change of changes) {
+        await change.loadFiles(kind, blobStore)
+      }
     }
-    return BPromise.join(
+
+    await Promise.all([
       this.snapshot.loadFiles(kind, blobStore),
-      BPromise.each(this.changes, loadChangeFiles)
-    )
+      loadChangeFiles(this.changes),
+    ])
   }
 
   /**
@@ -107,21 +110,21 @@ class History {
    *                               operations
    * @return {Promise.<Object>}
    */
-  store(blobStore, concurrency) {
+  async store(blobStore, concurrency) {
     assert.maybe.number(concurrency, 'bad concurrency')
 
-    function storeChange(change) {
-      return change.store(blobStore, concurrency)
+    async function storeChange(change) {
+      return await change.store(blobStore, concurrency)
     }
-    return BPromise.join(
+
+    const [rawSnapshot, rawChanges] = await Promise.all([
       this.snapshot.store(blobStore, concurrency),
-      BPromise.map(this.changes, storeChange, { concurrency: concurrency || 1 })
-    ).then(([rawSnapshot, rawChanges]) => {
-      return {
-        snapshot: rawSnapshot,
-        changes: rawChanges,
-      }
-    })
+      pMap(this.changes, storeChange, { concurrency: concurrency || 1 }),
+    ])
+    return {
+      snapshot: rawSnapshot,
+      changes: rawChanges,
+    }
   }
 }
 
