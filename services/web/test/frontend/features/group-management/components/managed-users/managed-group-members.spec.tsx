@@ -64,7 +64,7 @@ describe('group members, with managed users', function () {
     cy.get('small').contains('You have added 3 of 10 available members')
 
     cy.get('ul.managed-users-list').within(() => {
-      cy.get('li:nth-child(2)').within(() => {
+      cy.get('> li:nth-child(2)').within(() => {
         cy.contains('john.doe@test.com')
         cy.contains('John Doe')
         cy.contains('15th Jan 2023')
@@ -74,7 +74,7 @@ describe('group members, with managed users', function () {
         cy.get(`.security-state-invite-pending`).should('exist')
       })
 
-      cy.get('li:nth-child(3)').within(() => {
+      cy.get('> li:nth-child(3)').within(() => {
         cy.contains('bobby.lapointe@test.com')
         cy.contains('Bobby Lapointe')
         cy.contains('2nd Jan 2023')
@@ -82,7 +82,7 @@ describe('group members, with managed users', function () {
         cy.get('i[aria-label="Not managed"]').should('exist')
       })
 
-      cy.get('li:nth-child(4)').within(() => {
+      cy.get('> li:nth-child(4)').within(() => {
         cy.contains('claire.jennings@test.com')
         cy.contains('Claire Jennings')
         cy.contains('3rd Jan 2023')
@@ -107,7 +107,7 @@ describe('group members, with managed users', function () {
     cy.get('.add-more-members-form button').click()
 
     cy.get('ul.managed-users-list').within(() => {
-      cy.get('li:nth-child(5)').within(() => {
+      cy.get('> li:nth-child(5)').within(() => {
         cy.contains('someone.else@test.com')
         cy.contains('N/A')
         cy.get(`[aria-label="Pending invite"]`)
@@ -134,7 +134,7 @@ describe('group members, with managed users', function () {
 
   it('checks the select all checkbox', function () {
     cy.get('ul.managed-users-list').within(() => {
-      cy.get('li:nth-child(2)').within(() => {
+      cy.get('> li:nth-child(2)').within(() => {
         cy.get('.select-item').should('not.be.checked')
       })
       cy.get('li:nth-child(3)').within(() => {
@@ -145,7 +145,7 @@ describe('group members, with managed users', function () {
     cy.get('.select-all').click()
 
     cy.get('ul.managed-users-list').within(() => {
-      cy.get('li:nth-child(2)').within(() => {
+      cy.get('> li:nth-child(2)').within(() => {
         cy.get('.select-item').should('be.checked')
       })
       cy.get('li:nth-child(3)').within(() => {
@@ -160,7 +160,7 @@ describe('group members, with managed users', function () {
     })
 
     cy.get('ul.managed-users-list').within(() => {
-      cy.get('li:nth-child(2)').within(() => {
+      cy.get('> li:nth-child(2)').within(() => {
         cy.get('.select-item').check()
       })
     })
@@ -169,7 +169,7 @@ describe('group members, with managed users', function () {
 
     cy.get('small').contains('You have added 2 of 10 available members')
     cy.get('ul.managed-users-list').within(() => {
-      cy.get('li:nth-child(2)').within(() => {
+      cy.get('> li:nth-child(2)').within(() => {
         cy.contains('bobby.lapointe@test.com')
         cy.contains('Bobby Lapointe')
         cy.contains('2nd Jan 2023')
@@ -184,7 +184,7 @@ describe('group members, with managed users', function () {
 
     cy.get('ul.managed-users-list').within(() => {
       // Select 'Claire Jennings', a managed user
-      cy.get('li:nth-child(4)').within(() => {
+      cy.get('> li:nth-child(4)').within(() => {
         cy.get('.select-item').check()
       })
     })
@@ -201,7 +201,7 @@ describe('group members, with managed users', function () {
 
     cy.get('ul.managed-users-list').within(() => {
       // Select 'Claire Jennings', a managed user
-      cy.get('li:nth-child(4)').within(() => {
+      cy.get('> li:nth-child(4)').within(() => {
         cy.get('.select-item').check()
       })
       // Select another user
@@ -221,7 +221,7 @@ describe('group members, with managed users', function () {
     })
 
     cy.get('ul.managed-users-list').within(() => {
-      cy.get('li:nth-child(2)').within(() => {
+      cy.get('> li:nth-child(2)').within(() => {
         cy.get('.select-item').check()
       })
     })

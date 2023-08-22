@@ -1,11 +1,13 @@
+import { useState } from 'react'
 import { Col, Row } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import { User } from '../../../../../../types/group-management/user'
 import Tooltip from '../../../../shared/components/tooltip'
 import { useGroupMembersContext } from '../../context/group-members-context'
+import type { ManagedUserAlert } from '../../utils/types'
 import ManagedUserRow from './managed-user-row'
 import OffboardManagedUserModal from './offboard-managed-user-modal'
-import { useState } from 'react'
+import ManagedUsersListAlert from './managed-users-list-alert'
 
 type ManagedUsersListProps = {
   handleSelectAllClick: (e: any) => void
@@ -20,10 +22,19 @@ export default function ManagedUsersList({
   const [userToOffboard, setUserToOffboard] = useState<User | undefined>(
     undefined
   )
+  const [managedUserAlert, setManagedUserAlert] =
+    useState<ManagedUserAlert>(undefined)
   const { selectedUsers, users } = useGroupMembersContext()
 
   return (
     <div>
+      {managedUserAlert && (
+        <ManagedUsersListAlert
+          variant={managedUserAlert.variant}
+          invitedUserEmail={managedUserAlert.email}
+          onDismiss={() => setManagedUserAlert(undefined)}
+        />
+      )}
       <ul className="list-unstyled structured-list managed-users-list">
         <li className="container-fluid">
           <Row id="managed-users-list-headers">
@@ -76,6 +87,8 @@ export default function ManagedUsersList({
             key={user.email}
             user={user}
             openOffboardingModalForUser={setUserToOffboard}
+            setManagedUserAlert={setManagedUserAlert}
+            groupId={groupId}
           />
         ))}
       </ul>

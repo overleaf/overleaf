@@ -443,14 +443,22 @@ templates.surrenderAccountForManagedUsers = ctaTemplate({
 
     const toGroupName = opts.groupName ? ` to ${opts.groupName}` : ''
 
-    return `You’ve been invited by ${admin} to transfer management of your ${settings.appName} account${toGroupName}`
+    return `${
+      opts.reminder ? 'Reminder: ' : ''
+    }You’ve been invited by ${admin} to transfer management of your ${
+      settings.appName
+    } account${toGroupName}`
   },
   title(opts) {
     const admin = _.escape(_formatUserNameAndEmail(opts.admin, 'an admin'))
 
     const toGroupName = opts.groupName ? ` to ${opts.groupName}` : ''
 
-    return `You’ve been invited by ${admin} to transfer management of your ${settings.appName} account${toGroupName}`
+    return `${
+      opts.reminder ? 'Reminder: ' : ''
+    }You’ve been invited by ${admin} to transfer management of your ${
+      settings.appName
+    } account${toGroupName}`
   },
   message(opts, isPlainText) {
     const admin = _.escape(_formatUserNameAndEmail(opts.admin, 'an admin'))

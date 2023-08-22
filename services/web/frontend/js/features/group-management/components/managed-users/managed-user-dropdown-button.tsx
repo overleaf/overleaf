@@ -1,21 +1,88 @@
+import {
+  useState,
+  type ComponentProps,
+  useCallback,
+  type Dispatch,
+  type SetStateAction,
+} from 'react'
+import { useTranslation } from 'react-i18next'
 import { Dropdown, MenuItem } from 'react-bootstrap'
 import { User } from '../../../../../../types/group-management/user'
-import ControlledDropdown from '../../../../shared/components/controlled-dropdown'
-import { useTranslation } from 'react-i18next'
-import MenuItemButton from '../../../project-list/components/dropdown/menu-item-button'
+import useAsync from '../../../../shared/hooks/use-async'
+import {
+  type FetchError,
+  postJSON,
+} from '../../../../infrastructure/fetch-json'
+import Icon from '../../../../shared/components/icon'
+import { ManagedUserAlert } from '../../utils/types'
 import { useGroupMembersContext } from '../../context/group-members-context'
+
+type ResendManagedUserInviteResponse = {
+  success: boolean
+}
 
 type ManagedUserDropdownButtonProps = {
   user: User
   openOffboardingModalForUser: (user: User) => void
+  groupId: string
+  setManagedUserAlert: Dispatch<SetStateAction<ManagedUserAlert>>
 }
 
 export default function ManagedUserDropdownButton({
   user,
   openOffboardingModalForUser,
+  groupId,
+  setManagedUserAlert,
 }: ManagedUserDropdownButtonProps) {
   const { t } = useTranslation()
   const { removeMember } = useGroupMembersContext()
+  const [isOpened, setIsOpened] = useState(false)
+  const {
+    runAsync: runResendManagedUserInviteAsync,
+    isLoading: isResendingManagedUserInvite,
+  } = useAsync<ResendManagedUserInviteResponse>()
+
+  const userNotManaged =
+    !user.isEntityAdmin && !user.invite && !user.enrollment?.managedBy
+
+  const handleResendManagedUserInvite = useCallback(
+    async user => {
+      try {
+        const result = await runResendManagedUserInviteAsync(
+          postJSON(
+            `/manage/groups/${groupId}/resendManagedUserInvite/${user._id}`
+          )
+        )
+
+        if (result.success) {
+          setManagedUserAlert({
+            variant: 'resendManagedUserInviteSuccess',
+            email: user.email,
+          })
+          setIsOpened(false)
+        }
+      } catch (err) {
+        if ((err as FetchError)?.response?.status === 429) {
+          setManagedUserAlert({
+            variant: 'resendManagedUserInviteTooManyRequests',
+            email: user.email,
+          })
+        } else {
+          setManagedUserAlert({
+            variant: 'resendManagedUserInviteFailed',
+            email: user.email,
+          })
+        }
+
+        setIsOpened(false)
+      }
+    },
+    [setManagedUserAlert, groupId, runResendManagedUserInviteAsync]
+  )
+
+  const onResendManagedUserInviteClick = () => {
+    handleResendManagedUserInvite(user)
+  }
 
   const onDeleteUserClick = () => {
     openOffboardingModalForUser(user)
@@ -27,7 +94,11 @@ export default function ManagedUserDropdownButton({
 
   return (
     <span className="managed-user-actions">
-      <ControlledDropdown id={`managed-user-dropdown-${user.email}`}>
+      <Dropdown
+        id={`managed-user-dropdown-${user.email}`}
+        open={isOpened}
+        onToggle={open => setIsOpened(open)}
+      >
         <Dropdown.Toggle
           bsStyle={null}
           className="btn btn-link action-btn"
@@ -39,7 +110,15 @@ export default function ManagedUserDropdownButton({
             aria-label={t('actions')}
           />
         </Dropdown.Toggle>
-        <Dropdown.Menu className="dropdown-menu-right managed-users-dropdown-menu">
+        <Dropdown.Menu className="dropdown-menu-right managed-user-dropdown-menu">
+          {userNotManaged ? (
+            <MenuItemButton onClick={onResendManagedUserInviteClick}>
+              {t('resend_managed_user_invite')}
+              {isResendingManagedUserInvite ? (
+                <Icon type="spinner" spin style={{ marginLeft: '5px' }} />
+              ) : null}
+            </MenuItemButton>
+          ) : null}
           {user.enrollment ? (
             <MenuItemButton
               className="delete-user-action"
@@ -62,7 +141,27 @@ export default function ManagedUserDropdownButton({
             </MenuItemButton>
           )}
         </Dropdown.Menu>
-      </ControlledDropdown>
+      </Dropdown>
     </span>
+  )
+}
+
+function MenuItemButton({
+  children,
+  onClick,
+  className,
+  ...buttonProps
+}: ComponentProps<'button'>) {
+  return (
+    <li role="presentation" className={className}>
+      <button
+        className="managed-user-menu-item-button"
+        role="menuitem"
+        onClick={onClick}
+        {...buttonProps}
+      >
+        {children}
+      </button>
+    </li>
   )
 }

@@ -20,6 +20,7 @@
   .managed-user-row {
     overflow-wrap: break-word;
   }
+
   .managed-user-security {
     display: flex;
     justify-content: space-between;
@@ -30,15 +31,45 @@
       padding-left: 1em;
       padding-right: 1em;
     }
-    li > button {
-      &:hover {
-        background-color: @gray-lightest;
+    .managed-user-dropdown-menu {
+      width: 300px;
+
+      li > button {
+        &:hover {
+          background-color: @gray-lightest;
+        }
+      }
+      .delete-user-action {
+        button {
+          color: @red;
+        }
       }
     }
-    .delete-user-action {
-      button {
-        color: @red;
-      }
+  }
+  .managed-user-menu-item-button {
+    padding: 12px 20px;
+    position: relative;
+    width: 100%;
+    border: none;
+    box-shadow: none;
+    background: inherit;
+    color: @ol-blue-gray-5;
+    text-align: left;
+    &[disabled] {
+      background-color: @gray-lighter;
+    }
+  }
+}
+
+.managed-users-list-alert {
+  display: flex;
+  justify-content: space-between;
+  .managed-users-list-alert-close {
+    padding-left: @padding-sm;
+    text-align: right;
+    width: 10%;
+    @media (min-width: @screen-sm-min) {
+      width: auto;
     }
   }
 }

@@ -1,22 +1,27 @@
 import moment from 'moment'
-import { useCallback } from 'react'
+import { type Dispatch, type SetStateAction, useCallback } from 'react'
 import { Col, Row } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import { User } from '../../../../../../types/group-management/user'
 import Badge from '../../../../shared/components/badge'
-import { useGroupMembersContext } from '../../context/group-members-context'
-import ManagedUserDropdownButton from './managed-user-dropdown-button'
 import Tooltip from '../../../../shared/components/tooltip'
+import type { ManagedUserAlert } from '../../utils/types'
+import { useGroupMembersContext } from '../../context/group-members-context'
 import ManagedUserStatus from './managed-user-status'
+import ManagedUserDropdownButton from './managed-user-dropdown-button'
 
 type ManagedUserRowProps = {
   user: User
   openOffboardingModalForUser: (user: User) => void
+  groupId: string
+  setManagedUserAlert: Dispatch<SetStateAction<ManagedUserAlert>>
 }
 
 export default function ManagedUserRow({
   user,
   openOffboardingModalForUser,
+  setManagedUserAlert,
+  groupId,
 }: ManagedUserRowProps) {
   const { t } = useTranslation()
   const { selectedUsers, selectUser, unselectUser } = useGroupMembersContext()
@@ -101,6 +106,8 @@ export default function ManagedUserRow({
             <ManagedUserDropdownButton
               user={user}
               openOffboardingModalForUser={openOffboardingModalForUser}
+              setManagedUserAlert={setManagedUserAlert}
+              groupId={groupId}
             />
           </div>
         </Col>

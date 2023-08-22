@@ -3,6 +3,8 @@ import sinon from 'sinon'
 import { GroupMembersProvider } from '../../../../../../frontend/js/features/group-management/context/group-members-context'
 
 describe('ManagedUserDropdownButton', function () {
+  const subscriptionId = '123abc'
+
   describe('with managed user', function () {
     const user = {
       _id: 'some-user',
@@ -28,6 +30,8 @@ describe('ManagedUserDropdownButton', function () {
           <ManagedUserDropdownButton
             user={user}
             openOffboardingModalForUser={sinon.stub()}
+            groupId={subscriptionId}
+            setManagedUserAlert={sinon.stub()}
           />
         </GroupMembersProvider>
       )
@@ -71,6 +75,8 @@ describe('ManagedUserDropdownButton', function () {
           <ManagedUserDropdownButton
             user={user}
             openOffboardingModalForUser={sinon.stub()}
+            groupId={subscriptionId}
+            setManagedUserAlert={sinon.stub()}
           />
         </GroupMembersProvider>
       )
@@ -114,6 +120,8 @@ describe('ManagedUserDropdownButton', function () {
           <ManagedUserDropdownButton
             user={user}
             openOffboardingModalForUser={sinon.stub()}
+            groupId={subscriptionId}
+            setManagedUserAlert={sinon.stub()}
           />
         </GroupMembersProvider>
       )

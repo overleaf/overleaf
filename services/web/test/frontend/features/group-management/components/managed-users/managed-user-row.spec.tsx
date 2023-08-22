@@ -4,6 +4,8 @@ import { GroupMembersProvider } from '../../../../../../frontend/js/features/gro
 import { User } from '../../../../../../types/group-management/user'
 
 describe('ManagedUserRow', function () {
+  const subscriptionId = '123abc'
+
   describe('with an ordinary user', function () {
     let user: User
 
@@ -27,6 +29,8 @@ describe('ManagedUserRow', function () {
           <ManagedUserRow
             user={user}
             openOffboardingModalForUser={sinon.stub()}
+            groupId={subscriptionId}
+            setManagedUserAlert={sinon.stub()}
           />
         </GroupMembersProvider>
       )
@@ -75,6 +79,8 @@ describe('ManagedUserRow', function () {
           <ManagedUserRow
             user={user}
             openOffboardingModalForUser={sinon.stub()}
+            groupId={subscriptionId}
+            setManagedUserAlert={sinon.stub()}
           />
         </GroupMembersProvider>
       )
@@ -108,6 +114,8 @@ describe('ManagedUserRow', function () {
           <ManagedUserRow
             user={user}
             openOffboardingModalForUser={sinon.stub()}
+            groupId={subscriptionId}
+            setManagedUserAlert={sinon.stub()}
           />
         </GroupMembersProvider>
       )
@@ -141,6 +149,8 @@ describe('ManagedUserRow', function () {
           <ManagedUserRow
             user={user}
             openOffboardingModalForUser={sinon.stub()}
+            groupId={subscriptionId}
+            setManagedUserAlert={sinon.stub()}
           />
         </GroupMembersProvider>
       )
