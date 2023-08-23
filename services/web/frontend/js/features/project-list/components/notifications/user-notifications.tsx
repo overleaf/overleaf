@@ -9,6 +9,7 @@ import INRBanner from './ads/inr-banner'
 import LATAMBanner from './ads/latam-banner'
 import getMeta from '../../../../utils/meta'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
+import BackToSchoolModal from './ads/back-to-school-modal'
 
 type Subscription = {
   groupId: string
@@ -28,8 +29,12 @@ function UserNotifications() {
     'ol-groupSubscriptionsPendingEnrollment',
     []
   )
+  const showBackToSchoolModal = getMeta('ol-showBackToSchoolModal', false)
+
   const showInrGeoBanner = getMeta('ol-showInrGeoBanner', false)
-  const inrGeoBannerVariant = getMeta('ol-inrGeoBannerVariant', 'default')
+  const inrGeoBannerVariant = showBackToSchoolModal
+    ? 'default' // This test should be disabled to prevent double modals, but sanity check to be safe
+    : getMeta('ol-inrGeoBannerVariant', 'default')
   const inrGeoBannerSplitTestName = getMeta(
     'ol-inrGeoBannerSplitTestName',
     'unassigned'
@@ -61,7 +66,11 @@ function UserNotifications() {
         ) : (
           <GroupsAndEnterpriseBanner />
         )}
-        <WritefullPromoBanner />
+        {showBackToSchoolModal ? (
+          <BackToSchoolModal />
+        ) : (
+          <WritefullPromoBanner />
+        )}
       </ul>
     </div>
   )

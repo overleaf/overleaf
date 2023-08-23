@@ -78,6 +78,7 @@ describe('SubscriptionController', function () {
       buildPlansList: sinon.stub(),
       promises: {
         buildUsersSubscriptionViewModel: sinon.stub().resolves({}),
+        getBestSubscription: sinon.stub().resolves({}),
       },
       buildPlansListForSubscriptionDash: sinon
         .stub()

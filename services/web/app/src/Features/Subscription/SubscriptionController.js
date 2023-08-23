@@ -130,6 +130,16 @@ async function plansPage(req, res) {
     plansPageViewSegmentation[inrGeoBannerSplitTestName] = inrGeoBannerVariant
   }
 
+  let showBackToSchoolBanner
+  const userId = SessionManager.getLoggedInUserId(req.session)
+  if (userId) {
+    const usersBestSubscription =
+      await SubscriptionViewModelBuilder.promises.getBestSubscription({
+        _id: userId,
+      })
+    showBackToSchoolBanner = usersBestSubscription?.type === 'free'
+  }
+
   AnalyticsManager.recordEventForSession(
     req.session,
     'plans-page-view',
@@ -152,6 +162,7 @@ async function plansPage(req, res) {
     initialLocalizedGroupPrice:
       SubscriptionHelper.generateInitialLocalizedGroupPrice(currency),
     showInrGeoBanner,
+    showBackToSchoolBanner,
     annualTrialsAssignment: annualTrialsAssignment?.variant,
   })
 }

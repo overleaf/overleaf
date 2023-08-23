@@ -14,6 +14,31 @@ block append meta
 
 block content
 	main.content.content-alt#main-content
+		.container
+			.user-notifications
+				ul.list-unstyled(ng-cloak)
+					li.notification-entry
+						div.alert.alert-back-to-school(
+							event-tracking-mb="true"
+							event-tracking="promo-prompt"
+							event-tracking-trigger="load"
+							event-segmentation='{"location": "interstitial-page-banner", "name": "bts2023", "content": "banner"}'
+						)
+							.notification-body
+								| 🎉 &nbsp;
+								p
+									strong #{translate("back_to_school_banner_bargain_with_x_percent_off_in_school_or_not", {x: '15'})}
+									br
+									| #{translate("back_to_school_banner_hurry_offer_ends_sep_30")}
+							.notification-action
+								a.btn.btn-sm.btn-default-outline(
+									href="/about/back-to-school-promo-2023"
+									event-tracking-mb="true"
+									event-tracking="promo-click"
+									event-tracking-trigger="click"
+									event-segmentation='{"location": "interstitial-page-banner", "name": "bts2023", "content": "banner", "type": "click"}'
+								) #{translate('claim_discounts')}
+
 		.content-page
 			.plans
 				.container
