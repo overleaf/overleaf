@@ -23,6 +23,7 @@ const OError = require('@overleaf/o-error')
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const SubscriptionHelper = require('./SubscriptionHelper')
 const Features = require('../../infrastructure/Features')
+const UserGetter = require('../User/UserGetter')
 
 const groupPlanModalOptions = Settings.groupPlanModalOptions
 const validGroupPlanModalOptions = {
@@ -191,6 +192,21 @@ async function paymentPage(req, res) {
         await _getRecommendedCurrency(req, res)
       if (recommendedCurrency && currency == null) {
         currency = recommendedCurrency
+      }
+
+      // Prevent checkout for users without a confirmed primary email address
+      const userData = await UserGetter.promises.getUser(user._id, {
+        email: 1,
+        emails: 1,
+      })
+      const userPrimaryEmail = userData.emails.find(
+        emailEntry => emailEntry.email === userData.email
+      )
+      if (userPrimaryEmail?.confirmedAt == null) {
+        return res.render('subscriptions/unconfirmed-primary-email', {
+          title: 'confirm_email',
+          email: userData.email,
+        })
       }
 
       // Block web sales to restricted countries

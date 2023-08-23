@@ -30,6 +30,7 @@ describe('SubscriptionController', function () {
       email: 'tom@yahoo.com',
       _id: 'one',
       signUpDate: new Date('2000-10-01'),
+      emails: [{ email: 'tom@yahoo.com', confirmedAt: new Date('2000-10-02') }],
     }
     this.activeRecurlySubscription =
       mockSubscriptions['subscription-123-active']
@@ -383,6 +384,28 @@ describe('SubscriptionController', function () {
           done()
         }
         this.SubscriptionController.paymentPage(this.req, this.res)
+      })
+    })
+
+    describe('with a user that has not confirmed their primary email address', function () {
+      beforeEach(function () {
+        this.LimitationsManager.promises.userHasV1OrV2Subscription.resolves(
+          false
+        )
+        this.PlansLocator.findLocalPlanInSettings.returns({})
+        this.UserGetter.promises.getUser.resolves({
+          email: 'test@example.com',
+          emails: [{ email: 'test@example.com' }],
+        })
+      })
+
+      it('should not render the checkout and instead show the unconfirmed primary email page', function (done) {
+        this.res.render = (page, opts) => {
+          page.should.equal('subscriptions/unconfirmed-primary-email')
+          opts.email.should.equal('test@example.com')
+          done()
+        }
+        this.SubscriptionController.paymentPage(this.req, this.res, done)
       })
     })
 

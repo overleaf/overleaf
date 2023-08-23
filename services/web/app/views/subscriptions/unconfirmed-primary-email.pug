@@ -1,0 +1,11 @@
+extends ../layout-marketing
+
+block content
+	main.content.content-alt#main-content
+		.container
+			.error-container
+				.error-details
+					p.error-status #{translate("confirm_email")}
+					p.error-description !{translate("please_confirm_email", {emailAddress: email})}
+					p.error-actions
+						a.error-btn(href="/user/settings") #{translate("account_settings")}
