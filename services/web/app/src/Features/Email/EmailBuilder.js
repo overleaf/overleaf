@@ -421,7 +421,7 @@ templates.inviteNewUserToJoinManagedUsers = ctaTemplate({
       `User accounts in this group are managed by ${_.escape(
         _formatUserNameAndEmail(opts.admin, 'an admin')
       )}.`,
-      `If you accept the owner of the group subscription will have admin rights over your account and control over your stuff.`,
+      `If you accept, the owner of the group subscription will have admin rights over your account and control over your stuff.`,
       `<b>What is ${settings.appName}?</b>`,
       `${settings.appName} is the collaborative online LaTeX editor loved by researchers and technical writers. With thousands of ready-to-use templates and an array of LaTeX learning resources you’ll be up and running in no time.`,
     ]
@@ -463,19 +463,16 @@ templates.surrenderAccountForManagedUsers = ctaTemplate({
   message(opts, isPlainText) {
     const admin = _.escape(_formatUserNameAndEmail(opts.admin, 'an admin'))
 
-    const groupName = opts.groupName ?? `a group managed by ${admin}`
-
-    // TODO update with actual wiki link once created
     const managedUsersLink = EmailMessageHelper.displayLink(
       'user account management',
-      `${settings.siteUrl}/learn/how-to/Managed_Users`,
+      `${settings.siteUrl}/learn/how-to/Understanding_Managed_Overleaf_Accounts`,
       isPlainText
     )
 
     return [
       `Your ${settings.appName} account ${_.escape(
         opts.to
-      )} is part of ${groupName} and your group administrator has now enabled ${managedUsersLink}. This will ensure that projects aren’t lost when someone leaves the group.`,
+      )} is part of ${admin}'s group. They’ve now enabled ${managedUsersLink} for the group. This will ensure that projects aren’t lost when someone leaves the group.`,
     ]
   },
   secondaryMessage(opts, isPlainText) {

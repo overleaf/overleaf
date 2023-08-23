@@ -31,8 +31,9 @@ export default function ManagedAccountAlert() {
         <div>
           <Trans
             i18nKey="need_contact_group_admin_to_make_changes"
-            // TODO update with actual wiki link once created
-            components={[<a href="/learn/how-to/Managed_Users" />]} // eslint-disable-line jsx-a11y/anchor-has-content, react/jsx-key
+            components={[
+              <a href="/learn/how-to/Understanding_Managed_Overleaf_Accounts" />, // eslint-disable-line jsx-a11y/anchor-has-content, react/jsx-key
+            ]}
           />
         </div>
       </div>
