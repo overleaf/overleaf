@@ -17,15 +17,9 @@ const EmailHelper = require('../Helpers/EmailHelper')
 const { csvAttachment } = require('../../infrastructure/Response')
 const { UserIsManagerError } = require('./UserMembershipErrors')
 const CSVParser = require('json2csv').Parser
-const Settings = require('@overleaf/settings')
-
-function isManagedUsersActiveOnGroup(entity) {
-  return !!(Settings.managedUsers?.enabled && entity.groupPolicy)
-}
 
 async function manageGroupMembers(req, res, next) {
   const { entity, entityConfig } = req
-  const managedUsersActive = isManagedUsersActiveOnGroup(entity)
   return entity.fetchV1Data(function (error, entity) {
     if (error != null) {
       return next(error)
@@ -48,7 +42,7 @@ async function manageGroupMembers(req, res, next) {
           groupId: entityPrimaryKey,
           users,
           groupSize: entity.membersLimit,
-          managedUsersActive,
+          managedUsersActive: entity.groupPolicy != null,
         })
       }
     )

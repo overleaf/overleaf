@@ -127,7 +127,6 @@ describe('UserMembershipController', function () {
 
     it('render group view with managed users', async function () {
       this.req.entity.groupPolicy = { somePolicy: true }
-      this.Settings.managedUsers.enabled = true
       return await this.UserMembershipController.manageGroupMembers(this.req, {
         render: (viewPath, viewParams) => {
           expect(viewPath).to.equal('user_membership/group-members-react')
