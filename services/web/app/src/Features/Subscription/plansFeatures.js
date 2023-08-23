@@ -1,3 +1,5 @@
+const Settings = require('@overleaf/settings')
+
 const individualPlans = [
   {
     divider: false,
@@ -604,6 +606,20 @@ const studentPlans = [
     ],
   },
 ]
+
+if (Settings.managedUsers?.enabled) {
+  const row = 2
+  groupPlans[1].items.splice(row, 0, {
+    feature: 'managed_users_accounts',
+    info: 'managed_users_accounts_plan_info',
+    value: 'bool',
+    plans: {
+      group_standard: false,
+      group_professional: true,
+      organization: true,
+    },
+  })
+}
 
 module.exports = {
   individual: individualPlans,

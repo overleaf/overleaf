@@ -973,6 +973,8 @@
   "managed": "Managed",
   "managed_user_invite_has_been_sent_to_email": "Managed User invite has been sent to <0>__email__</0>",
   "managed_users": "Managed Users",
+  "managed_users_accounts": "Managed user accounts",
+  "managed_users_accounts_plan_info": "Managed Users gives you more control over your group’s use of Overleaf. It ensures tighter management of user access and deletion and allows you to keep control of projects when someone leaves the group.",
   "managed_users_explanation": "Managed Users ensures you stay in control of your organization’s projects and who owns them. <0>Read more about Managed Users.</0>",
   "managed_users_terms": "To use the Managed Users feature, you must agree to the latest version of our customer terms at <0>__link__</0> on behalf of your organization by selecting \"I agree\" below. These terms will then apply to your organization’s use of Overleaf in place of any previously agreed Overleaf terms, except where we have a signed agreement in place with you, in which case that signed agreement will continue to govern. Please keep a copy for your records",
   "managers_cannot_remove_admin": "Admins cannot be removed",
