@@ -16,7 +16,7 @@ function VersionDropdownContent({
   closeDropdownForItem,
 }: VersionDropdownContentProps) {
   const closeDropdown = useCallback(() => {
-    closeDropdownForItem(update)
+    closeDropdownForItem(update, 'moreOptions')
   }, [closeDropdownForItem, update])
 
   return (

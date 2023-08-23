@@ -349,6 +349,26 @@ describe('change list', function () {
         ).to.be.true
       })
     })
+    it('opens the compare drop down and compares with selected version', function () {
+      cy.findByLabelText(/all history/i).click({ force: true })
+      cy.findAllByTestId('history-version-details')
+        .eq(2)
+        .within(() => {
+          cy.findByRole('button', {
+            name: /compare from this version/i,
+          }).click()
+        })
+      cy.findByRole('button', { name: /compare drop down/i }).click()
+      cy.findByRole('button', { name: /compare up to this version/i }).click()
+
+      cy.findAllByTestId('history-version-details').should($versions => {
+        const [first, ...rest] = Array.from($versions)
+        expect(first).to.have.attr('data-selected', 'aboveSelected')
+        rest.forEach(version =>
+          expect(version).to.have.attr('data-selected', 'selectedEdge')
+        )
+      })
+    })
   })
 
   describe('compare mode', function () {

@@ -94,7 +94,12 @@ function AllHistoryList() {
             update.fromV,
             update.toV
           )
-          const dropdownActive = update === activeDropdownItem.item
+          const dropdownActive =
+            update === activeDropdownItem.item &&
+            activeDropdownItem.whichDropDown === 'moreOptions'
+          const compareDropdownActive =
+            update === activeDropdownItem.item &&
+            activeDropdownItem.whichDropDown === 'compare'
           const showDivider = Boolean(update.meta.first_in_day && index > 0)
           const faded =
             updatesInfo.freeHistoryLimitHit &&
@@ -119,6 +124,10 @@ function AllHistoryList() {
               setActiveDropdownItem={setActiveDropdownItem}
               closeDropdownForItem={closeDropdownForItem}
               dropdownOpen={activeDropdownItem.isOpened && dropdownActive}
+              compareDropdownActive={compareDropdownActive}
+              compareDropdownOpen={
+                activeDropdownItem.isOpened && compareDropdownActive
+              }
               dropdownActive={dropdownActive}
             />
           )

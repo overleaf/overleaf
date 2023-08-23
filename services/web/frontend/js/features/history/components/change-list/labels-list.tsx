@@ -21,7 +21,12 @@ function LabelsList() {
     <>
       {versionWithLabels.map(({ version, labels }) => {
         const selected = isVersionSelected(selection, version)
-        const dropdownActive = version === activeDropdownItem.item
+        const dropdownActive =
+          version === activeDropdownItem.item &&
+          activeDropdownItem.whichDropDown === 'moreOptions'
+        const compareDropdownActive =
+          version === activeDropdownItem.item &&
+          activeDropdownItem.whichDropDown === 'compare'
 
         return (
           <LabelListItem
@@ -35,6 +40,10 @@ function LabelsList() {
             setSelection={setSelection}
             dropdownOpen={activeDropdownItem.isOpened && dropdownActive}
             dropdownActive={dropdownActive}
+            compareDropdownActive={compareDropdownActive}
+            compareDropdownOpen={
+              activeDropdownItem.isOpened && compareDropdownActive
+            }
             setActiveDropdownItem={setActiveDropdownItem}
             closeDropdownForItem={closeDropdownForItem}
           />

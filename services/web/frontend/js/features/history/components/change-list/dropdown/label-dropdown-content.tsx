@@ -15,7 +15,7 @@ function LabelDropdownContent({
   closeDropdownForItem,
 }: LabelDropdownContentProps) {
   const closeDropdown = useCallback(() => {
-    closeDropdownForItem(version)
+    closeDropdownForItem(version, 'moreOptions')
   }, [closeDropdownForItem, version])
 
   return (

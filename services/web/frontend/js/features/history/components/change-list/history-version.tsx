@@ -17,6 +17,8 @@ import { memo, useCallback } from 'react'
 import { HistoryContextValue } from '../../context/types/history-context-value'
 import VersionDropdownContent from './dropdown/version-dropdown-content'
 import CompareItems from './dropdown/menu-item/compare-items'
+import CompareVersionDropdown from './dropdown/compare-version-dropdown'
+import { CompareVersionDropdownContentAllHistory } from './dropdown/compare-version-dropdown-content'
 
 type HistoryVersionProps = {
   update: LoadedUpdate
@@ -29,6 +31,8 @@ type HistoryVersionProps = {
   setSelection: HistoryContextValue['setSelection']
   dropdownOpen: boolean
   dropdownActive: boolean
+  compareDropdownOpen: boolean
+  compareDropdownActive: boolean
   setActiveDropdownItem: ActiveDropdown['setActiveDropdownItem']
   closeDropdownForItem: ActiveDropdown['closeDropdownForItem']
 }
@@ -44,13 +48,15 @@ function HistoryVersion({
   setSelection,
   dropdownOpen,
   dropdownActive,
+  compareDropdownOpen,
+  compareDropdownActive,
   setActiveDropdownItem,
   closeDropdownForItem,
 }: HistoryVersionProps) {
   const orderedLabels = orderBy(update.labels, ['created_at'], ['desc'])
 
   const closeDropdown = useCallback(() => {
-    closeDropdownForItem(update)
+    closeDropdownForItem(update, 'moreOptions')
   }, [closeDropdownForItem, update])
 
   const updateRange = updateRangeForUpdate(update)
@@ -97,7 +103,11 @@ function HistoryVersion({
               id={`${update.fromV}_${update.toV}`}
               isOpened={dropdownOpen}
               setIsOpened={(isOpened: boolean) =>
-                setActiveDropdownItem({ item: update, isOpened })
+                setActiveDropdownItem({
+                  item: update,
+                  isOpened,
+                  whichDropDown: 'moreOptions',
+                })
               }
             >
               {dropdownActive ? (
@@ -111,15 +121,34 @@ function HistoryVersion({
           )}
 
           {selected !== 'selected' ? (
-            <span data-testid="compare-icon-version" className="pull-right">
+            <div data-testid="compare-icon-version" className="pull-right">
               {selected !== 'withinSelected' ? (
                 <CompareItems
                   updateRange={updateRange}
                   selected={selected}
                   closeDropdown={closeDropdown}
                 />
-              ) : null}
-            </span>
+              ) : (
+                <CompareVersionDropdown
+                  id={`${update.fromV}_${update.toV}`}
+                  isOpened={compareDropdownOpen}
+                  setIsOpened={(isOpened: boolean) =>
+                    setActiveDropdownItem({
+                      item: update,
+                      isOpened,
+                      whichDropDown: 'compare',
+                    })
+                  }
+                >
+                  {compareDropdownActive ? (
+                    <CompareVersionDropdownContentAllHistory
+                      update={update}
+                      closeDropdownForItem={closeDropdownForItem}
+                    />
+                  ) : null}
+                </CompareVersionDropdown>
+              )}
+            </div>
           ) : null}
 
           <div className="history-version-main-details">

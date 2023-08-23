@@ -8,12 +8,14 @@ import { ItemSelectionState } from '../../../../utils/history-details'
 type CompareItemsProps = {
   updateRange: UpdateRange
   selected: ItemSelectionState
+  text?: string
   closeDropdown: () => void
 }
 
 function CompareItems({
   updateRange,
   selected,
+  text,
   closeDropdown,
 }: CompareItemsProps) {
   const { t } = useTranslation()
@@ -35,6 +37,7 @@ function CompareItems({
           }}
           closeDropdown={closeDropdown}
           toolTipDescription={t('history_compare_from_this_version')}
+          text={text}
           icon={
             <MaterialIcon
               type="align_end"
@@ -53,6 +56,7 @@ function CompareItems({
           }}
           closeDropdown={closeDropdown}
           toolTipDescription={t('history_compare_up_to_this_version')}
+          text={text}
           icon={
             <MaterialIcon
               type="align_start"

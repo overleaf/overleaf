@@ -1,8 +1,6 @@
-import { useRef, useEffect } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useRef, useEffect, ReactNode } from 'react'
 import { Dropdown } from 'react-bootstrap'
 import DropdownToggleWithTooltip from '../../../../../shared/components/dropdown/dropdown-toggle-with-tooltip'
-import Icon from '../../../../../shared/components/icon'
 import DropdownMenuWithRef from '../../../../../shared/components/dropdown/dropdown-menu-with-ref'
 
 type DropdownMenuProps = {
@@ -10,6 +8,8 @@ type DropdownMenuProps = {
   children: React.ReactNode
   parentSelector?: string
   isOpened: boolean
+  iconTag: ReactNode
+  toolTipDescription: string
   setIsOpened: (isOpened: boolean) => void
 }
 
@@ -18,9 +18,10 @@ function ActionsDropdown({
   children,
   parentSelector,
   isOpened,
+  iconTag,
   setIsOpened,
+  toolTipDescription,
 }: DropdownMenuProps) {
-  const { t } = useTranslation()
   const menuRef = useRef<HTMLElement>()
 
   // handle the placement of the dropdown above or below the toggle button
@@ -58,11 +59,11 @@ function ActionsDropdown({
         className="history-version-dropdown-menu-btn"
         tooltipProps={{
           id,
-          description: t('more_actions'),
+          description: toolTipDescription,
           overlayProps: { placement: 'bottom', trigger: ['hover'] },
         }}
       >
-        <Icon type="ellipsis-v" accessibilityLabel={t('more_actions')} />
+        {iconTag}
       </DropdownToggleWithTooltip>
       <DropdownMenuWithRef
         bsRole="menu"
