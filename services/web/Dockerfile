@@ -11,6 +11,15 @@ WORKDIR /overleaf/services/web
 # (see https://googleapis.dev/nodejs/storage/latest/File.html#createWriteStream)
 RUN mkdir /home/node/.config && chown node:node /home/node/.config
 
+RUN mkdir -p /overleaf/services/web/data/dumpFolder \
+    &&  mkdir -p /overleaf/services/web/data/logs \
+    &&  mkdir -p /overleaf/services/web/data/pdf \
+    &&  mkdir -p /overleaf/services/web/data/uploads \
+    &&  mkdir -p /overleaf/services/web/data/zippedProjects \
+    &&  mkdir -p /overleaf/services/web/data/projectHistories \
+    &&  chmod -R 0755 /overleaf/services/web/data \
+    &&  chown -R node:node /overleaf/services/web/data
+
 # the deps image is used for caching npm ci
 FROM base as deps-prod
 
@@ -31,22 +40,12 @@ RUN cd /overleaf && npm install
 # the dev is suitable for running tests
 FROM deps as dev
 
+ARG SENTRY_RELEASE
+ENV SENTRY_RELEASE=$SENTRY_RELEASE
 COPY services/web /overleaf/services/web
 
 # Build the latex parser
 RUN cd /overleaf/services/web && npm run 'lezer-latex:generate'
-
-RUN mkdir -p /overleaf/services/web/data/dumpFolder \
-    &&  mkdir -p /overleaf/services/web/data/logs \
-    &&  mkdir -p /overleaf/services/web/data/pdf \
-    &&  mkdir -p /overleaf/services/web/data/uploads \
-    &&  mkdir -p /overleaf/services/web/data/zippedProjects \
-    &&  mkdir -p /overleaf/services/web/data/projectHistories \
-    &&  chmod -R 0755 /overleaf/services/web/data \
-    &&  chown -R node:node /overleaf/services/web/data
-
-ARG SENTRY_RELEASE
-ENV SENTRY_RELEASE=$SENTRY_RELEASE
 
 USER node
 
@@ -64,6 +63,9 @@ RUN find /overleaf/services/web/public -name '*.js.map' -delete
 
 FROM deps-prod as app
 
+ARG SENTRY_RELEASE
+ENV SENTRY_RELEASE=$SENTRY_RELEASE
+COPY services/web /overleaf/services/web
 COPY --from=webpack-no-sourcemaps /overleaf/services/web/public /overleaf/services/web/public
 RUN rm /overleaf/services/web/modules/server-ce-scripts -rf
 USER node
