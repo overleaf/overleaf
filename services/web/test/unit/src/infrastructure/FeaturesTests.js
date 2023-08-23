@@ -54,7 +54,6 @@ describe('Features', function () {
         expect(this.Features.hasFeature('registration')).to.be.false
         expect(this.Features.hasFeature('affiliations')).to.be.false
         expect(this.Features.hasFeature('analytics')).to.be.false
-        expect(this.Features.hasFeature('custom-togglers')).to.be.false
         expect(this.Features.hasFeature('git-bridge')).to.be.false
         expect(this.Features.hasFeature('github-sync')).to.be.false
         expect(this.Features.hasFeature('homepage')).to.be.false
@@ -73,7 +72,6 @@ describe('Features', function () {
           this.settings.apis = {}
         })
         it('should return true', function () {
-          expect(this.Features.hasFeature('custom-togglers')).to.be.true
           expect(this.Features.hasFeature('overleaf-integration')).to.be.true
           expect(this.Features.hasFeature('registration')).to.be.true
         })
@@ -106,7 +104,6 @@ describe('Features', function () {
           it('should return true', function () {
             expect(this.Features.hasFeature('affiliations')).to.be.true
             expect(this.Features.hasFeature('analytics')).to.be.true
-            expect(this.Features.hasFeature('custom-togglers')).to.be.true
             expect(this.Features.hasFeature('overleaf-integration')).to.be.true
             expect(this.Features.hasFeature('references')).to.be.true
             expect(this.Features.hasFeature('registration')).to.be.true
@@ -133,7 +130,6 @@ describe('Features', function () {
               expect(this.Features.hasFeature('link-url')).to.be.true
               expect(this.Features.hasFeature('affiliations')).to.be.true
               expect(this.Features.hasFeature('analytics')).to.be.true
-              expect(this.Features.hasFeature('custom-togglers')).to.be.true
               expect(this.Features.hasFeature('github-sync')).to.be.true
               expect(this.Features.hasFeature('git-bridge')).to.be.true
               expect(this.Features.hasFeature('homepage')).to.be.true

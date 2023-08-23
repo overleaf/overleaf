@@ -65,8 +65,6 @@ const Features = {
         return Boolean(Settings.enableGithubSync)
       case 'git-bridge':
         return Boolean(Settings.enableGitBridge)
-      case 'custom-togglers':
-        return Boolean(Settings.overleaf)
       case 'oauth':
         return Boolean(Settings.oauth)
       case 'templates-server-pro':
