@@ -355,7 +355,7 @@ describe('<EditorLeftMenu />', function () {
             } as MainDocument['doc'],
           },
           {
-            path: 'main2.tex',
+            path: 'folder/main2.tex',
             doc: {
               name: 'main2.tex',
               id: 'id2',
@@ -381,10 +381,10 @@ describe('<EditorLeftMenu />', function () {
         cy.get<HTMLOptionElement>('#settings-menu-rootDocId option').then(
           options => {
             const values = [...options].map(o => o.value)
-            expect(values).to.deep.eq(['id1', 'id2'])
+            expect(values).to.deep.eq(docs.map(doc => doc.doc.id))
 
             const texts = [...options].map(o => o.text)
-            expect(texts).to.deep.eq(['main.tex', 'main2.tex'])
+            expect(texts).to.deep.eq(docs.map(doc => doc.path))
           }
         )
       })

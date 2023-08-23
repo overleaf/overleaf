@@ -22,7 +22,7 @@ export default function SettingsDocument() {
 
     const mappedDocs: Array<Option> = filteredDocs.map(doc => ({
       value: doc.doc.id,
-      label: doc.doc.name,
+      label: doc.path,
     }))
 
     return mappedDocs
