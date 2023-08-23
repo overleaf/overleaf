@@ -30,6 +30,12 @@ module.exports = {
       RateLimiterMiddleware.rateLimit(rateLimiters.createTeamInvite),
       TeamInvitesController.createInvite
     )
+    webRouter.post(
+      '/manage/groups/:id/resendInvite',
+      UserMembershipMiddleware.requireGroupManagementAccess,
+      RateLimiterMiddleware.rateLimit(rateLimiters.createTeamInvite),
+      TeamInvitesController.resendInvite
+    )
     webRouter.delete(
       '/manage/groups/:id/user/:user_id',
       UserMembershipMiddleware.requireGroupManagementAccess,

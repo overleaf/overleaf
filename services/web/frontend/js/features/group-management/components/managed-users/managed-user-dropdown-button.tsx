@@ -17,7 +17,7 @@ import Icon from '../../../../shared/components/icon'
 import { ManagedUserAlert } from '../../utils/types'
 import { useGroupMembersContext } from '../../context/group-members-context'
 
-type ResendManagedUserInviteResponse = {
+type resendInviteResponse = {
   success: boolean
 }
 
@@ -40,10 +40,17 @@ export default function ManagedUserDropdownButton({
   const {
     runAsync: runResendManagedUserInviteAsync,
     isLoading: isResendingManagedUserInvite,
-  } = useAsync<ResendManagedUserInviteResponse>()
+  } = useAsync<resendInviteResponse>()
+
+  const {
+    runAsync: runResendGroupInviteAsync,
+    isLoading: isResendingGroupInvite,
+  } = useAsync<resendInviteResponse>()
 
   const userNotManaged =
     !user.isEntityAdmin && !user.invite && !user.enrollment?.managedBy
+
+  const userPending = user.invite
 
   const handleResendManagedUserInvite = useCallback(
     async user => {
@@ -64,7 +71,7 @@ export default function ManagedUserDropdownButton({
       } catch (err) {
         if ((err as FetchError)?.response?.status === 429) {
           setManagedUserAlert({
-            variant: 'resendManagedUserInviteTooManyRequests',
+            variant: 'resendInviteTooManyRequests',
             email: user.email,
           })
         } else {
@@ -80,8 +87,47 @@ export default function ManagedUserDropdownButton({
     [setManagedUserAlert, groupId, runResendManagedUserInviteAsync]
   )
 
+  const handleResendGroupInvite = useCallback(
+    async user => {
+      try {
+        await runResendGroupInviteAsync(
+          postJSON(`/manage/groups/${groupId}/resendInvite/`, {
+            body: {
+              email: user.email,
+            },
+          })
+        )
+
+        setManagedUserAlert({
+          variant: 'resendGroupInviteSuccess',
+          email: user.email,
+        })
+        setIsOpened(false)
+      } catch (err) {
+        if ((err as FetchError)?.response?.status === 429) {
+          setManagedUserAlert({
+            variant: 'resendInviteTooManyRequests',
+            email: user.email,
+          })
+        } else {
+          setManagedUserAlert({
+            variant: 'resendGroupInviteFailed',
+            email: user.email,
+          })
+        }
+
+        setIsOpened(false)
+      }
+    },
+    [setManagedUserAlert, groupId, runResendGroupInviteAsync]
+  )
+
   const onResendManagedUserInviteClick = () => {
     handleResendManagedUserInvite(user)
+  }
+
+  const onResendGroupInviteClick = () => {
+    handleResendGroupInvite(user)
   }
 
   const onDeleteUserClick = () => {
@@ -111,6 +157,14 @@ export default function ManagedUserDropdownButton({
           />
         </Dropdown.Toggle>
         <Dropdown.Menu className="dropdown-menu-right managed-user-dropdown-menu">
+          {userPending ? (
+            <MenuItemButton onClick={onResendGroupInviteClick}>
+              {t('resend_group_invite')}
+              {isResendingGroupInvite ? (
+                <Icon type="spinner" spin style={{ marginLeft: '5px' }} />
+              ) : null}
+            </MenuItemButton>
+          ) : null}
           {userNotManaged ? (
             <MenuItemButton onClick={onResendManagedUserInviteClick}>
               {t('resend_managed_user_invite')}

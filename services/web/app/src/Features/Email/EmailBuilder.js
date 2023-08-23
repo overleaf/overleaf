@@ -362,12 +362,16 @@ templates.verifyEmailToJoinTeam = ctaTemplate({
 
 templates.verifyEmailToJoinManagedUsers = ctaTemplate({
   subject(opts) {
-    return `You’ve been invited by ${_.escape(
+    return `${
+      opts.reminder ? 'Reminder: ' : ''
+    }You’ve been invited by ${_.escape(
       _formatUserNameAndEmail(opts.inviter, 'a collaborator')
     )} to join an ${settings.appName} group subscription.`
   },
   title(opts) {
-    return `You’ve been invited by ${_.escape(
+    return `${
+      opts.reminder ? 'Reminder: ' : ''
+    }You’ve been invited by ${_.escape(
       _formatUserNameAndEmail(opts.inviter, 'a collaborator')
     )} to join an ${settings.appName} group subscription.`
   },
@@ -404,12 +408,16 @@ templates.verifyEmailToJoinManagedUsers = ctaTemplate({
 
 templates.inviteNewUserToJoinManagedUsers = ctaTemplate({
   subject(opts) {
-    return `You’ve been invited by ${_.escape(
+    return `${
+      opts.reminder ? 'Reminder: ' : ''
+    }You’ve been invited by ${_.escape(
       _formatUserNameAndEmail(opts.inviter, 'a collaborator')
     )} to join an ${settings.appName} group subscription.`
   },
   title(opts) {
-    return `You’ve been invited by ${_.escape(
+    return `${
+      opts.reminder ? 'Reminder: ' : ''
+    }You’ve been invited by ${_.escape(
       _formatUserNameAndEmail(opts.inviter, 'a collaborator')
     )} to join an ${settings.appName} group subscription.`
   },

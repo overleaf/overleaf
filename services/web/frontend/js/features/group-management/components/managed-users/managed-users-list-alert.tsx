@@ -29,7 +29,21 @@ export default function ManagedUsersListAlert({
           invitedUserEmail={invitedUserEmail}
         />
       )
-    case 'resendManagedUserInviteTooManyRequests':
+    case 'resendGroupInviteSuccess':
+      return (
+        <ResendGroupInviteSuccess
+          onDismiss={onDismiss}
+          invitedUserEmail={invitedUserEmail}
+        />
+      )
+    case 'resendGroupInviteFailed':
+      return (
+        <FailedToResendGroupInvite
+          onDismiss={onDismiss}
+          invitedUserEmail={invitedUserEmail}
+        />
+      )
+    case 'resendInviteTooManyRequests':
       return (
         <TooManyRequests
           onDismiss={onDismiss}
@@ -72,6 +86,46 @@ function FailedToResendManagedInvite({
     <AlertComponent bsStyle="danger" onDismiss={onDismiss}>
       <Trans
         i18nKey="failed_to_send_managed_user_invite_to_email"
+        values={{
+          email: invitedUserEmail,
+        }}
+        components={[
+          // eslint-disable-next-line react/jsx-key
+          <strong />,
+        ]}
+      />
+    </AlertComponent>
+  )
+}
+
+function ResendGroupInviteSuccess({
+  onDismiss,
+  invitedUserEmail,
+}: ManagedUsersListAlertComponentProps) {
+  return (
+    <AlertComponent bsStyle="success" onDismiss={onDismiss}>
+      <Trans
+        i18nKey="group_invite_has_been_sent_to_email"
+        values={{
+          email: invitedUserEmail,
+        }}
+        components={[
+          // eslint-disable-next-line react/jsx-key
+          <strong />,
+        ]}
+      />
+    </AlertComponent>
+  )
+}
+
+function FailedToResendGroupInvite({
+  onDismiss,
+  invitedUserEmail,
+}: ManagedUsersListAlertComponentProps) {
+  return (
+    <AlertComponent bsStyle="danger" onDismiss={onDismiss}>
+      <Trans
+        i18nKey="failed_to_send_group_invite_to_email"
         values={{
           email: invitedUserEmail,
         }}

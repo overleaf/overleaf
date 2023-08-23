@@ -1,5 +1,6 @@
 const settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
+const OError = require('@overleaf/o-error')
 const TeamInvitesHandler = require('./TeamInvitesHandler')
 const SessionManager = require('../Authentication/SessionManager')
 const SubscriptionLocator = require('./SubscriptionLocator')
@@ -9,8 +10,17 @@ const UserGetter = require('../User/UserGetter')
 const { expressify } = require('../../util/promises')
 const HttpErrorHandler = require('../Errors/HttpErrorHandler')
 const PermissionsManager = require('../Authorization/PermissionsManager')
+const EmailHandler = require('../Email/EmailHandler')
+const { RateLimiter } = require('../../infrastructure/RateLimiter')
 
-function createInvite(req, res, next) {
+const rateLimiters = {
+  resendGroupInvite: new RateLimiter('resend-group-invite', {
+    points: 1,
+    duration: 60 * 60,
+  }),
+}
+
+async function createInvite(req, res, next) {
   const teamManagerId = SessionManager.getLoggedInUserId(req.session)
   const subscription = req.entity
   const email = EmailHelper.parseEmail(req.body.email)
@@ -23,33 +33,31 @@ function createInvite(req, res, next) {
     })
   }
 
-  TeamInvitesHandler.createInvite(
-    teamManagerId,
-    subscription,
-    email,
-    function (err, inviteUserData) {
-      if (err) {
-        if (err.alreadyInTeam) {
-          return res.status(400).json({
-            error: {
-              code: 'user_already_added',
-              message: req.i18n.translate('user_already_added'),
-            },
-          })
-        }
-        if (err.limitReached) {
-          return res.status(400).json({
-            error: {
-              code: 'group_full',
-              message: req.i18n.translate('group_full'),
-            },
-          })
-        }
-        return next(err)
-      }
-      res.json({ user: inviteUserData })
+  try {
+    const invitedUserData = await TeamInvitesHandler.promises.createInvite(
+      teamManagerId,
+      subscription,
+      email
+    )
+    return res.json({ user: invitedUserData })
+  } catch (err) {
+    if (err.alreadyInTeam) {
+      return res.status(400).json({
+        error: {
+          code: 'user_already_added',
+          message: req.i18n.translate('user_already_added'),
+        },
+      })
     }
-  )
+    if (err.limitReached) {
+      return res.status(400).json({
+        error: {
+          code: 'group_full',
+          message: req.i18n.translate('group_full'),
+        },
+      })
+    }
+  }
 }
 
 async function viewInvite(req, res, next) {
@@ -178,9 +186,55 @@ function revokeInvite(req, res, next) {
   )
 }
 
+async function resendInvite(req, res, next) {
+  const { entity: subscription } = req
+  const userEmail = EmailHelper.parseEmail(req.body.email)
+  await subscription.populate('admin_id', ['email', 'first_name', 'last_name'])
+
+  if (!userEmail) {
+    throw new Error('invalid email')
+  }
+
+  const currentInvite = subscription.teamInvites.find(
+    invite => invite?.email === userEmail
+  )
+
+  if (!currentInvite) {
+    return await createInvite(req, res)
+  }
+
+  const opts = {
+    to: userEmail,
+    admin: subscription.admin_id,
+    inviter: currentInvite.inviterName,
+    acceptInviteUrl: `${settings.siteUrl}/subscription/invites/${currentInvite.token}/`,
+    reminder: true,
+  }
+
+  try {
+    await rateLimiters.resendGroupInvite.consume(userEmail)
+
+    const existingUser = await UserGetter.promises.getUserByAnyEmail(userEmail)
+    const emailTemplate = existingUser
+      ? 'verifyEmailToJoinManagedUsers'
+      : 'inviteNewUserToJoinManagedUsers'
+
+    EmailHandler.sendDeferredEmail(emailTemplate, opts)
+  } catch (err) {
+    if (err?.remainingPoints === 0) {
+      return res.sendStatus(429)
+    } else {
+      throw OError.tag(err, 'Failed to resend group invite email')
+    }
+  }
+
+  return res.status(200).json({ success: true })
+}
+
 module.exports = {
-  createInvite,
+  createInvite: expressify(createInvite),
   viewInvite: expressify(viewInvite),
   acceptInvite: expressify(acceptInvite),
   revokeInvite,
+  resendInvite: expressify(resendInvite),
 }

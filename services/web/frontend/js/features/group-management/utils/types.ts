@@ -1,7 +1,9 @@
 export type ManagedUserAlertVariant =
   | 'resendManagedUserInviteSuccess'
   | 'resendManagedUserInviteFailed'
-  | 'resendManagedUserInviteTooManyRequests'
+  | 'resendGroupInviteSuccess'
+  | 'resendGroupInviteFailed'
+  | 'resendInviteTooManyRequests'
 
 export type ManagedUserAlert =
   | {
