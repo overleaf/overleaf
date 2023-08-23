@@ -12,16 +12,20 @@ WORKDIR /overleaf/services/web
 RUN mkdir /home/node/.config && chown node:node /home/node/.config
 
 # the deps image is used for caching npm ci
-FROM base as deps
+FROM base as deps-prod
 
 COPY package.json package-lock.json /overleaf/
 COPY services/web/package.json /overleaf/services/web/
 COPY libraries/ /overleaf/libraries/
 COPY patches/ /overleaf/patches/
 
+RUN cd /overleaf && NODE_ENV=production npm ci --quiet
+
+FROM deps-prod as deps
+
 ENV CYPRESS_INSTALL_BINARY=0
 
-RUN cd /overleaf && npm ci --quiet
+RUN cd /overleaf && npm install
 
 
 # the dev is suitable for running tests
@@ -55,9 +59,12 @@ RUN chmod 0755 ./install_deps.sh && ./install_deps.sh
 
 
 # the final production image without webpack source maps
-FROM webpack as app
-
+FROM webpack as webpack-no-sourcemaps
 RUN find /overleaf/services/web/public -name '*.js.map' -delete
+
+FROM deps-prod as app
+
+COPY --from=webpack-no-sourcemaps /overleaf/services/web/public /overleaf/services/web/public
 RUN rm /overleaf/services/web/modules/server-ce-scripts -rf
 USER node
 

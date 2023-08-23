@@ -65,6 +65,26 @@ const pdfjsVersions = ['pdfjs-dist213', 'pdfjs-dist36']
 
 const vendorDir = path.join(__dirname, 'frontend/js/vendor')
 
+const ACE_VERSION = require('ace-builds/version')
+if (ACE_VERSION !== PackageVersions.version.ace) {
+  throw new Error(
+    '"ace-builds" version de-synced, update services/web/app/src/infrastructure/PackageVersions.js'
+  )
+}
+const MATHJAX_VERSION = require('mathjax/package.json').version
+if (MATHJAX_VERSION !== PackageVersions.version.mathjax) {
+  throw new Error(
+    '"mathjax" version de-synced, update services/web/app/src/infrastructure/PackageVersions.js'
+  )
+}
+
+const MATHJAX_3_VERSION = require('mathjax-3/package.json').version
+if (MATHJAX_3_VERSION !== PackageVersions.version['mathjax-3']) {
+  throw new Error(
+    '"mathjax-3" version de-synced, update services/web/app/src/infrastructure/PackageVersions.js'
+  )
+}
+
 module.exports = {
   // Defines the "entry point(s)" for the application - i.e. the file which
   // bootstraps the application

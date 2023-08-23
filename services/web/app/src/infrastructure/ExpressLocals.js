@@ -184,13 +184,13 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
     res.locals.mathJaxPath = `/js/libs/mathjax/MathJax.js?${querystring.stringify(
       {
         config: 'TeX-AMS_HTML,Safe',
-        v: require('mathjax/package.json').version,
+        v: PackageVersions.version.mathjax,
       }
     )}`
 
     res.locals.mathJax3Path = `/js/libs/mathjax3/es5/tex-svg-full.js?${querystring.stringify(
       {
-        v: require('mathjax-3/package.json').version,
+        v: PackageVersions.version['mathjax-3'],
       }
     )}`
 
