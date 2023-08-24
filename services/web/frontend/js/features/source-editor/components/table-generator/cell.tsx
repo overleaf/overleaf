@@ -9,6 +9,7 @@ import { useEditingContext } from './contexts/editing-context'
 import { loadMathJax } from '../../../mathjax/load-mathjax'
 import { typesetNodeIntoElement } from '../../extensions/visual/utils/typeset-content'
 import { parser } from '../../lezer-latex/latex.mjs'
+import { useTableContext } from './contexts/table-context'
 
 export const Cell: FC<{
   cellData: CellData
@@ -16,9 +17,19 @@ export const Cell: FC<{
   rowIndex: number
   columnIndex: number
   row: RowData
-}> = ({ cellData, columnSpecification, rowIndex, columnIndex, row }) => {
+}> = ({
+  cellData,
+  columnSpecification: columnSpecificationFromTabular,
+  rowIndex,
+  columnIndex,
+  row,
+}) => {
+  const columnSpecification = cellData.multiColumn
+    ? cellData.multiColumn.columns.specification[0]
+    : columnSpecificationFromTabular
   const { selection, setSelection, dragging, setDragging } =
     useSelectionContext()
+  const { table } = useTableContext()
   const renderDiv = useRef<HTMLDivElement>(null)
   const cellRef = useRef<HTMLTableCellElement>(null)
   const {
@@ -30,7 +41,9 @@ export const Cell: FC<{
 
   const editing =
     editingCellData?.rowIndex === rowIndex &&
-    editingCellData?.cellIndex === columnIndex
+    editingCellData?.cellIndex >= columnIndex &&
+    editingCellData?.cellIndex <
+      columnIndex + (cellData.multiColumn?.columnSpan ?? 1)
 
   const onMouseDown: MouseEventHandler = useCallback(
     event => {
@@ -44,12 +57,14 @@ export const Cell: FC<{
           return new TableSelection(current.from, {
             cell: columnIndex,
             row: rowIndex,
-          })
+          }).explode(table)
         }
-        return new TableSelection({ cell: columnIndex, row: rowIndex })
+        return new TableSelection({ cell: columnIndex, row: rowIndex }).explode(
+          table
+        )
       })
     },
-    [setDragging, columnIndex, rowIndex, setSelection]
+    [setDragging, columnIndex, rowIndex, setSelection, table]
   )
 
   const onMouseUp = useCallback(() => {
@@ -79,14 +94,25 @@ export const Cell: FC<{
             return new TableSelection(current.from, {
               row: rowIndex,
               cell: columnIndex,
-            })
+            }).explode(table)
           } else {
-            return new TableSelection({ row: rowIndex, cell: columnIndex })
+            return new TableSelection({
+              row: rowIndex,
+              cell: columnIndex,
+            }).explode(table)
           }
         })
       }
     },
-    [dragging, columnIndex, rowIndex, setSelection, selection, setDragging]
+    [
+      dragging,
+      columnIndex,
+      rowIndex,
+      setSelection,
+      selection,
+      setDragging,
+      table,
+    ]
   )
 
   useEffect(() => {
@@ -105,7 +131,9 @@ export const Cell: FC<{
   }
 
   const isFocused =
-    selection?.to.cell === columnIndex && selection?.to.row === rowIndex
+    selection?.to.row === rowIndex &&
+    selection?.to.cell >= columnIndex &&
+    selection?.to.cell < columnIndex + (cellData.multiColumn?.columnSpan ?? 1)
 
   useEffect(() => {
     if (isFocused && !editing && cellRef.current) {
@@ -147,11 +175,17 @@ export const Cell: FC<{
     )
   }
 
-  const inSelection = selection?.contains({ row: rowIndex, cell: columnIndex })
+  const inSelection = selection?.contains(
+    {
+      row: rowIndex,
+      cell: columnIndex,
+    },
+    table
+  )
 
   const onDoubleClick = useCallback(() => {
-    startEditing(rowIndex, columnIndex, cellData.content.trim())
-  }, [columnIndex, rowIndex, cellData, startEditing])
+    startEditing(rowIndex, columnIndex, cellData.content)
+  }, [columnIndex, rowIndex, startEditing, cellData.content])
 
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
@@ -161,6 +195,7 @@ export const Cell: FC<{
       onMouseDown={onMouseDown}
       onMouseUp={onMouseUp}
       onMouseMove={onMouseMove}
+      colSpan={cellData.multiColumn?.columnSpan}
       ref={cellRef}
       className={classNames('table-generator-cell', {
         'table-generator-cell-border-left': columnSpecification.borderLeft > 0,
@@ -177,9 +212,9 @@ export const Cell: FC<{
         'selection-edge-bottom':
           inSelection && selection?.bordersBottom(rowIndex),
         'selection-edge-left':
-          inSelection && selection?.bordersLeft(columnIndex),
+          inSelection && selection?.bordersLeft(rowIndex, columnIndex, table),
         'selection-edge-right':
-          inSelection && selection?.bordersRight(columnIndex),
+          inSelection && selection?.bordersRight(rowIndex, columnIndex, table),
       })}
     >
       {body}

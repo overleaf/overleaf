@@ -20,7 +20,7 @@ const EditingContext = createContext<
       startEditing: (
         rowIndex: number,
         cellIndex: number,
-        content: string
+        initialContent?: string
       ) => void
     }
   | undefined
@@ -38,18 +38,28 @@ export const useEditingContext = () => {
 }
 
 export const EditingContextProvider: FC = ({ children }) => {
-  const { cellPositions } = useTableContext()
+  const { table } = useTableContext()
   const [cellData, setCellData] = useState<EditingContextData | null>(null)
+  const [initialContent, setInitialContent] = useState<string | undefined>(
+    undefined
+  )
   const view = useCodeMirrorViewContext()
   const write = useCallback(
     (rowIndex: number, cellIndex: number, content: string) => {
-      const { from, to } = cellPositions[rowIndex][cellIndex]
+      const { from, to } = table.getCell(rowIndex, cellIndex)
+      const currentText = view.state.sliceDoc(from, to)
+      if (currentText !== initialContent && initialContent !== undefined) {
+        // The cell has changed since we started editing, so we don't want to overwrite it
+        console.error('Cell has changed since editing started, not overwriting')
+        return
+      }
+      setInitialContent(undefined)
       view.dispatch({
         changes: { from, to, insert: content },
       })
       setCellData(null)
     },
-    [view, cellPositions]
+    [view, table, initialContent]
   )
 
   const commitCellData = useCallback(() => {
@@ -70,14 +80,21 @@ export const EditingContextProvider: FC = ({ children }) => {
   }, [setCellData])
 
   const startEditing = useCallback(
-    (rowIndex: number, cellIndex: number, content: string) => {
+    (rowIndex: number, cellIndex: number, initialContent = undefined) => {
       if (cellData?.dirty) {
         // We're already editing something else
         commitCellData()
       }
-      setCellData({ cellIndex, rowIndex, content, dirty: false })
+      setInitialContent(initialContent)
+      const content = table.getCell(rowIndex, cellIndex).content.trim()
+      setCellData({
+        cellIndex,
+        rowIndex,
+        content,
+        dirty: false,
+      })
     },
-    [setCellData, cellData, commitCellData]
+    [setCellData, cellData, commitCellData, table]
   )
 
   const updateCellData = useCallback(
@@ -93,13 +110,13 @@ export const EditingContextProvider: FC = ({ children }) => {
       const { minX, minY, maxX, maxY } = selection.normalized()
       for (let row = minY; row <= maxY; row++) {
         for (let cell = minX; cell <= maxX; cell++) {
-          const { from, to } = cellPositions[row][cell]
+          const { from, to } = table.getCell(row, cell)
           changes.push({ from, to, insert: '' })
         }
       }
       view.dispatch({ changes })
     },
-    [view, cellPositions]
+    [view, table]
   )
 
   return (

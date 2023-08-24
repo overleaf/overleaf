@@ -20,9 +20,35 @@ import { TableProvider } from './contexts/table-context'
 import { TabularProvider, useTabularContext } from './contexts/tabular-context'
 import Icon from '../../../../shared/components/icon'
 
-export type CellData = {
-  // TODO: Add columnSpan
+export type ColumnDefinition = {
+  alignment: 'left' | 'center' | 'right' | 'paragraph'
+  borderLeft: number
+  borderRight: number
   content: string
+}
+
+export type CellData = {
+  content: string
+  from: number
+  to: number
+  multiColumn?: {
+    columnSpan: number
+    columns: {
+      specification: ColumnDefinition[]
+      from: number
+      to: number
+    }
+    from: number
+    to: number
+    preamble: {
+      from: number
+      to: number
+    }
+    postamble: {
+      from: number
+      to: number
+    }
+  }
 }
 
 export type RowData = {
@@ -31,16 +57,40 @@ export type RowData = {
   borderBottom: number
 }
 
-export type ColumnDefinition = {
-  alignment: 'left' | 'center' | 'right' | 'paragraph'
-  borderLeft: number
-  borderRight: number
-  content: string
-}
+export class TableData {
+  // eslint-disable-next-line no-useless-constructor
+  constructor(
+    public readonly rows: RowData[],
+    public readonly columns: ColumnDefinition[]
+  ) {}
 
-export type TableData = {
-  rows: RowData[]
-  columns: ColumnDefinition[]
+  getCellIndex(row: number, column: number): number {
+    let cellIndex = 0
+    for (let i = 0; i < this.rows[row].cells.length; i++) {
+      cellIndex += this.rows[row].cells[i].multiColumn?.columnSpan ?? 1
+      if (column < cellIndex) {
+        return i
+      }
+    }
+    return this.rows[row].cells.length - 1
+  }
+
+  getCell(row: number, column: number): CellData {
+    return this.rows[row].cells[this.getCellIndex(row, column)]
+  }
+
+  getCellBoundaries(row: number, cell: number) {
+    let currentCellOffset = 0
+    for (let index = 0; index < this.rows[row].cells.length; ++index) {
+      const currentCell = this.rows[row].cells[index]
+      const skip = currentCell.multiColumn?.columnSpan ?? 1
+      if (currentCellOffset + skip > cell) {
+        return { from: currentCellOffset, to: currentCellOffset + skip - 1 }
+      }
+      currentCellOffset += skip
+    }
+    throw new Error("Couldn't find cell boundaries")
+  }
 }
 
 export type Positions = {

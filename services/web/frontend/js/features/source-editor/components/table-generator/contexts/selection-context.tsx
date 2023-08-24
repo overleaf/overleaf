@@ -6,10 +6,11 @@ import {
   useContext,
   useState,
 } from 'react'
+import { TableData } from '../tabular'
 
 type TableCoordinate = {
-  row: number
-  cell: number
+  readonly row: number
+  readonly cell: number
 }
 
 export class TableSelection {
@@ -21,14 +22,18 @@ export class TableSelection {
     this.to = to ?? from
   }
 
-  contains(point: TableCoordinate) {
+  contains(anchor: TableCoordinate, table: TableData) {
     const { minX, maxX, minY, maxY } = this.normalized()
-
+    const { from, to } = table.getCellBoundaries(anchor.row, anchor.cell)
     return (
-      point.cell >= minX &&
-      point.cell <= maxX &&
-      point.row >= minY &&
-      point.row <= maxY
+      from >= minX && to <= maxX && anchor.row >= minY && anchor.row <= maxY
+    )
+  }
+
+  static selectRow(row: number, table: TableData) {
+    return new TableSelection(
+      { row, cell: 0 },
+      { row, cell: table.columns.length - 1 }
     )
   }
 
@@ -41,14 +46,14 @@ export class TableSelection {
     return { minX, maxX, minY, maxY }
   }
 
-  bordersLeft(x: number) {
+  bordersLeft(row: number, cell: number, table: TableData) {
     const { minX } = this.normalized()
-    return minX === x
+    return minX === table.getCellBoundaries(row, cell).from
   }
 
-  bordersRight(x: number) {
+  bordersRight(row: number, cell: number, table: TableData) {
     const { maxX } = this.normalized()
-    return maxX === x
+    return maxX === table.getCellBoundaries(row, cell).to
   }
 
   bordersTop(y: number) {
@@ -61,103 +66,221 @@ export class TableSelection {
     return maxY === y
   }
 
-  isRowSelected(row: number, totalColumns: number) {
+  toString() {
+    return `TableSelection(${this.from.row}, ${this.from.cell}) -> (${this.to.row}, ${this.to.cell})`
+  }
+
+  isRowSelected(row: number, table: TableData) {
     const { minX, maxX, minY, maxY } = this.normalized()
-    return row >= minY && row <= maxY && minX === 0 && maxX === totalColumns - 1
+    return (
+      row >= minY &&
+      row <= maxY &&
+      minX === 0 &&
+      maxX === table.columns.length - 1
+    )
   }
 
-  isAnyRowSelected(totalColumns: number) {
-    const { minX, maxX } = this.normalized()
-    return minX === 0 && maxX === totalColumns - 1
+  isAnyRowSelected(table: TableData) {
+    for (let i = 0; i < table.rows.length; ++i) {
+      if (this.isRowSelected(i, table)) {
+        return true
+      }
+    }
+    return false
   }
 
-  isAnyColumnSelected(totalRows: number) {
-    const { minY, maxY } = this.normalized()
-    return minY === 0 && maxY === totalRows - 1
+  isAnyColumnSelected(table: TableData) {
+    for (let i = 0; i < table.columns.length; ++i) {
+      if (this.isColumnSelected(i, table)) {
+        return true
+      }
+    }
+    return false
   }
 
-  isColumnSelected(cell: number, totalRows: number) {
+  isColumnSelected(cell: number, table: TableData) {
+    const totalRows = table.rows.length
     const { minX, maxX, minY, maxY } = this.normalized()
     return cell >= minX && cell <= maxX && minY === 0 && maxY === totalRows - 1
   }
 
-  moveRight(totalColumns: number) {
-    const newColumn = Math.min(totalColumns - 1, this.to.cell + 1)
-    return new TableSelection({ row: this.to.row, cell: newColumn })
+  public eq(other: TableSelection) {
+    return (
+      this.from.row === other.from.row &&
+      this.from.cell === other.from.cell &&
+      this.to.row === other.to.row &&
+      this.to.cell === other.to.cell
+    )
   }
 
-  moveLeft() {
-    const newColumn = Math.max(0, this.to.cell - 1)
-    return new TableSelection({ row: this.to.row, cell: newColumn })
+  public explode(table: TableData) {
+    const expandOnce = (current: TableSelection) => {
+      if (
+        current.to.row >= table.rows.length ||
+        current.to.cell >= table.columns.length
+      ) {
+        throw new Error("Can't expand selection outside of table")
+      }
+      const { minX, maxX, minY, maxY } = current.normalized()
+      for (let row = minY; row <= maxY; ++row) {
+        const cellBoundariesMinX = table.getCellBoundaries(row, minX)
+        const cellBoundariesMaxX = table.getCellBoundaries(row, maxX)
+        if (cellBoundariesMinX.from < minX) {
+          if (current.from.cell === minX) {
+            return new TableSelection(
+              { row: current.from.row, cell: cellBoundariesMinX.from },
+              { row: current.to.row, cell: current.to.cell }
+            )
+          } else {
+            return new TableSelection(
+              { row: current.from.row, cell: current.from.cell },
+              { row: current.to.row, cell: cellBoundariesMinX.from }
+            )
+          }
+        } else if (cellBoundariesMaxX.to > maxX) {
+          if (current.to.cell === maxX) {
+            return new TableSelection(
+              { row: current.from.row, cell: current.from.cell },
+              { row: current.to.row, cell: cellBoundariesMaxX.to }
+            )
+          } else {
+            return new TableSelection(
+              { row: current.from.row, cell: cellBoundariesMaxX.to },
+              { row: current.to.row, cell: current.to.cell }
+            )
+          }
+        }
+      }
+      return current
+    }
+    let last: TableSelection = this
+    for (
+      let current = expandOnce(last);
+      !current.eq(last);
+      current = expandOnce(last)
+    ) {
+      last = current
+    }
+    return last
   }
 
-  moveUp() {
+  moveRight(table: TableData) {
+    const totalColumns = table.columns.length
+    const newColumn = Math.min(
+      totalColumns - 1,
+      table.getCellBoundaries(this.to.row, this.to.cell).to + 1
+    )
+    return new TableSelection({
+      row: this.to.row,
+      cell: newColumn,
+    }).explode(table)
+  }
+
+  moveLeft(table: TableData) {
+    const row = this.to.row
+    const from = table.getCellBoundaries(row, this.to.cell).from
+    const newColumn = Math.max(0, from - 1)
+    return new TableSelection({ row: this.to.row, cell: newColumn }).explode(
+      table
+    )
+  }
+
+  moveUp(table: TableData) {
     const newRow = Math.max(0, this.to.row - 1)
-    return new TableSelection({ row: newRow, cell: this.to.cell })
+    return new TableSelection({ row: newRow, cell: this.to.cell }).explode(
+      table
+    )
   }
 
-  moveDown(totalRows: number) {
+  moveDown(table: TableData) {
+    const totalRows: number = table.rows.length
     const newRow = Math.min(totalRows - 1, this.to.row + 1)
-    return new TableSelection({ row: newRow, cell: this.to.cell })
+    const cell = table.getCellBoundaries(this.to.row, this.to.cell).from
+    return new TableSelection({ row: newRow, cell }).explode(table)
   }
 
-  moveNext(totalColumns: number, totalRows: number) {
+  moveNext(table: TableData) {
+    const totalRows = table.rows.length
+    const totalColumns = table.columns.length
     const { row, cell } = this.to
-    if (cell === totalColumns - 1 && row === totalRows - 1) {
-      return new TableSelection(this.to)
+    const boundaries = table.getCellBoundaries(row, cell)
+    if (boundaries.to === totalColumns - 1 && row === totalRows - 1) {
+      return new TableSelection(this.to).explode(table)
     }
-    if (cell === totalColumns - 1) {
-      return new TableSelection({ row: row + 1, cell: 0 })
+    if (boundaries.to === totalColumns - 1) {
+      return new TableSelection({ row: row + 1, cell: 0 }).explode(table)
     }
-    return new TableSelection({ row, cell: cell + 1 })
+    return new TableSelection({ row, cell: boundaries.to + 1 }).explode(table)
   }
 
-  movePrevious(totalColumns: number) {
-    if (this.to.cell === 0 && this.to.row === 0) {
-      return new TableSelection(this.to)
+  movePrevious(table: TableData) {
+    const totalColumns = table.columns.length
+    const { row, cell } = this.to
+    const boundaries = table.getCellBoundaries(row, cell)
+    if (boundaries.from === 0 && this.to.row === 0) {
+      return new TableSelection(this.to).explode(table)
     }
-    if (this.to.cell === 0) {
+    if (boundaries.from === 0) {
       return new TableSelection({
         row: this.to.row - 1,
         cell: totalColumns - 1,
-      })
+      }).explode(table)
     }
-    return new TableSelection({ row: this.to.row, cell: this.to.cell - 1 })
+    return new TableSelection({
+      row: this.to.row,
+      cell: boundaries.from - 1,
+    })
   }
 
-  extendRight(totalColumns: number) {
-    const newColumn = Math.min(totalColumns - 1, this.to.cell + 1)
+  extendRight(table: TableData) {
+    const totalColumns = table.columns.length
+    const { minY, maxY } = this.normalized()
+    let newColumn = this.to.cell
+    for (let row = minY; row <= maxY; ++row) {
+      const boundary = table.getCellBoundaries(row, this.to.cell).to + 1
+      newColumn = Math.max(newColumn, boundary)
+    }
+    newColumn = Math.min(totalColumns - 1, newColumn)
     return new TableSelection(
       { row: this.from.row, cell: this.from.cell },
       { row: this.to.row, cell: newColumn }
-    )
+    ).explode(table)
   }
 
-  extendLeft() {
-    const newColumn = Math.max(0, this.to.cell - 1)
+  extendLeft(table: TableData) {
+    const { minY, maxY } = this.normalized()
+    let newColumn = this.to.cell
+    for (let row = minY; row <= maxY; ++row) {
+      const boundary = table.getCellBoundaries(row, this.to.cell).from - 1
+      newColumn = Math.min(newColumn, boundary)
+    }
+    newColumn = Math.max(0, newColumn)
     return new TableSelection(
       { row: this.from.row, cell: this.from.cell },
       { row: this.to.row, cell: newColumn }
-    )
+    ).explode(table)
   }
 
-  extendUp() {
+  extendUp(table: TableData) {
     const newRow = Math.max(0, this.to.row - 1)
     return new TableSelection(
       { row: this.from.row, cell: this.from.cell },
       { row: newRow, cell: this.to.cell }
-    )
+    ).explode(table)
   }
 
-  extendDown(totalRows: number) {
+  extendDown(table: TableData) {
+    const totalRows = table.rows.length
     const newRow = Math.min(totalRows - 1, this.to.row + 1)
     return new TableSelection(
       { row: this.from.row, cell: this.from.cell },
       { row: newRow, cell: this.to.cell }
-    )
+    ).explode(table)
   }
 
-  spansEntireTable(totalColumns: number, totalRows: number) {
+  spansEntireTable(table: TableData) {
+    const totalRows = table.rows.length
+    const totalColumns = table.columns.length
     const { minX, maxX, minY, maxY } = this.normalized()
     return (
       minX === 0 &&
@@ -165,6 +288,40 @@ export class TableSelection {
       minY === 0 &&
       maxY === totalRows - 1
     )
+  }
+
+  isMergedCellSelected(table: TableData) {
+    if (this.from.row !== this.to.row) {
+      return false
+    }
+    const boundariesFrom = table.getCellBoundaries(
+      this.from.row,
+      this.from.cell
+    )
+    const boundariesTo = table.getCellBoundaries(this.to.row, this.to.cell)
+    if (boundariesFrom.from !== boundariesTo.from) {
+      // boundaries are for two different cells, so it's not a merged cell
+      return false
+    }
+    const cellData = table.getCell(this.from.row, boundariesFrom.from)
+    return cellData && Boolean(cellData.multiColumn)
+  }
+
+  isMergeableCells(table: TableData) {
+    const { minX, maxX, minY, maxY } = this.normalized()
+    if (minY !== maxY) {
+      return false
+    }
+    if (minX === maxX) {
+      return false
+    }
+    for (let cell = minX; cell <= maxX; ++cell) {
+      const cellData = table.getCell(this.from.row, cell)
+      if (cellData.multiColumn) {
+        return false
+      }
+    }
+    return true
   }
 
   width() {

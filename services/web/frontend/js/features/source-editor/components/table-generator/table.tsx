@@ -45,22 +45,27 @@ export const Table: FC = () => {
   const navigation: NavigationMap = useMemo(
     () => ({
       ArrowRight: [
-        () => selection!.moveRight(tableData.columns.length),
-        () => selection!.extendRight(tableData.columns.length),
+        () => selection!.moveRight(tableData),
+        () => selection!.extendRight(tableData),
       ],
-      ArrowLeft: [() => selection!.moveLeft(), () => selection!.extendLeft()],
-      ArrowUp: [() => selection!.moveUp(), () => selection!.extendUp()],
+      ArrowLeft: [
+        () => selection!.moveLeft(tableData),
+        () => selection!.extendLeft(tableData),
+      ],
+      ArrowUp: [
+        () => selection!.moveUp(tableData),
+        () => selection!.extendUp(tableData),
+      ],
       ArrowDown: [
-        () => selection!.moveDown(tableData.rows.length),
-        () => selection!.extendDown(tableData.rows.length),
+        () => selection!.moveDown(tableData),
+        () => selection!.extendDown(tableData),
       ],
       Tab: [
-        () =>
-          selection!.moveNext(tableData.columns.length, tableData.rows.length),
-        () => selection!.movePrevious(tableData.columns.length),
+        () => selection!.moveNext(tableData),
+        () => selection!.movePrevious(tableData),
       ],
     }),
-    [selection, tableData.columns.length, tableData.rows.length]
+    [selection, tableData]
   )
 
   const isCharacterInput = useCallback((event: KeyboardEvent) => {
@@ -82,11 +87,16 @@ export const Table: FC = () => {
         }
         if (cellData) {
           commitCellData()
-          return
+        } else {
+          const initialContent = tableData.getCell(
+            selection.to.row,
+            selection.to.cell
+          ).content
+          startEditing(selection.to.row, selection.to.cell, initialContent)
         }
-        const cell = tableData.rows[selection.to.row].cells[selection.to.cell]
-        startEditing(selection.to.row, selection.to.cell, cell.content)
-        setSelection(new TableSelection(selection.to, selection.to))
+        setSelection(
+          new TableSelection(selection.to, selection.to).explode(tableData)
+        )
       } else if (event.code === 'Escape') {
         event.preventDefault()
         event.stopPropagation()
@@ -115,7 +125,10 @@ export const Table: FC = () => {
         event.preventDefault()
         if (!selection) {
           setSelection(
-            new TableSelection({ row: 0, cell: 0 }, { row: 0, cell: 0 })
+            new TableSelection(
+              { row: 0, cell: 0 },
+              { row: 0, cell: 0 }
+            ).explode(tableData)
           )
           return
         }
@@ -130,15 +143,13 @@ export const Table: FC = () => {
         if (!selection) {
           return
         }
-        const cell = tableData.rows[selection.to.row].cells[selection.to.cell]
-        startEditing(selection.to.row, selection.to.cell, cell.content)
+        startEditing(selection.to.row, selection.to.cell)
         updateCellData(event.key)
         setSelection(new TableSelection(selection.to, selection.to))
       }
     },
     [
       selection,
-      tableData.rows,
       cellData,
       setSelection,
       cancelEditing,
@@ -149,6 +160,7 @@ export const Table: FC = () => {
       clearCells,
       updateCellData,
       isCharacterInput,
+      tableData,
     ]
   )
   return (
@@ -163,11 +175,7 @@ export const Table: FC = () => {
         <tr>
           <td />
           {tableData.columns.map((_, columnIndex) => (
-            <ColumnSelector
-              index={columnIndex}
-              key={columnIndex}
-              rows={tableData.rows.length}
-            />
+            <ColumnSelector index={columnIndex} key={columnIndex} />
           ))}
         </tr>
       </thead>
@@ -180,6 +188,15 @@ export const Table: FC = () => {
             columnSpecifications={tableData.columns}
           />
         ))}
+        {/* A workaround for a chrome bug where it will not respect colspan 
+            unless there is a row filled with cells without colspan */}
+        <tr className="table-generator-filler-row">
+          {/* A td for the row selector */}
+          <td />
+          {tableData.columns.map((_, columnIndex) => (
+            <td key={columnIndex} />
+          ))}
+        </tr>
       </tbody>
     </table>
   )

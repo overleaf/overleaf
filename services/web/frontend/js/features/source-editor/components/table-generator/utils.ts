@@ -1,6 +1,6 @@
 import { EditorState } from '@codemirror/state'
 import { SyntaxNode } from '@lezer/common'
-import { ColumnDefinition, TableData } from './tabular'
+import { CellData, ColumnDefinition, TableData } from './tabular'
 import { TableEnvironmentData } from './contexts/table-context'
 
 const ALIGNMENT_CHARACTERS = ['c', 'l', 'r', 'p']
@@ -85,6 +85,10 @@ const isHLine = (node: SyntaxNode) =>
   node.type.is('Command') &&
   Boolean(node.getChild('KnownCommand')?.getChild('HorizontalLine'))
 
+const isMultiColumn = (node: SyntaxNode) =>
+  node.type.is('Command') &&
+  Boolean(node.getChild('KnownCommand')?.getChild('MultiColumn'))
+
 type Position = {
   from: number
   to: number
@@ -98,6 +102,16 @@ type HLineData = {
 type ParsedCell = {
   content: string
   position: Position
+  multiColumn?: {
+    columnSpecification: {
+      position: Position
+      specification: ColumnDefinition[]
+    }
+    span: number
+    position: Position
+    preamble: Position
+    postamble: Position
+  }
 }
 
 export type CellSeparator = Position
@@ -170,24 +184,100 @@ function parseTabularBody(
         from: currentChild.from,
         to: currentChild.to,
       })
+    } else if (isMultiColumn(currentChild)) {
+      // do stuff
+      const multiColumn = currentChild
+        .getChild('KnownCommand')!
+        .getChild('MultiColumn')!
+      const columnArgument = multiColumn
+        .getChild('ColumnArgument')
+        ?.getChild('ShortTextArgument')
+        ?.getChild('ShortArg')
+      const spanArgument = multiColumn
+        .getChild('SpanArgument')
+        ?.getChild('ShortTextArgument')
+        ?.getChild('ShortArg')
+      const tabularArgument = multiColumn
+        .getChild('TabularArgument')
+        ?.getChild('TabularContent')
+      if (!columnArgument) {
+        throw new Error(
+          'Invalid multicolumn definition: missing column specification argument'
+        )
+      }
+      if (!spanArgument) {
+        throw new Error(
+          'Invalid multicolumn definition: missing colspan argument'
+        )
+      }
+      if (!tabularArgument) {
+        throw new Error('Invalid multicolumn definition: missing cell content')
+      }
+      if (getLastCell()?.content) {
+        throw new Error(
+          'Invalid multicolumn definition: multicolumn must be at the start of a cell'
+        )
+      }
+      const columnSpecification = parseColumnSpecifications(
+        state.sliceDoc(columnArgument.from, columnArgument.to)
+      )
+      const span = parseInt(state.sliceDoc(spanArgument.from, spanArgument.to))
+      const cellContent = state.sliceDoc(
+        tabularArgument.from,
+        tabularArgument.to
+      )
+      if (!getLastCell()) {
+        getLastRow().cells.push({
+          content: '',
+          position: { from: currentChild.from, to: currentChild.from },
+        })
+      }
+      const lastCell = getLastCell()!
+      lastCell.multiColumn = {
+        columnSpecification: {
+          position: { from: columnArgument.from, to: columnArgument.to },
+          specification: columnSpecification,
+        },
+        span,
+        preamble: {
+          from: currentChild.from,
+          to: tabularArgument.from,
+        },
+        postamble: {
+          from: tabularArgument.to,
+          to: currentChild.to,
+        },
+        position: { from: currentChild.from, to: currentChild.to },
+      }
+      lastCell.content = cellContent
+      lastCell.position.from = tabularArgument.from
+      lastCell.position.to = tabularArgument.to
+      // Don't update position at the end of the loop
+      continue
     } else if (
       currentChild.type.is('NewLine') ||
       currentChild.type.is('Whitespace')
     ) {
       const lastCell = getLastCell()
-      if (lastCell) {
-        if (lastCell.content.trim() === '') {
-          lastCell.position.from = currentChild.to
-          lastCell.position.to = currentChild.to
-        } else {
-          lastCell.content += state.sliceDoc(currentChild.from, currentChild.to)
-          lastCell.position.to = currentChild.to
+      if (!lastCell?.multiColumn) {
+        if (lastCell) {
+          if (lastCell.content.trim() === '') {
+            lastCell.position.from = currentChild.to
+            lastCell.position.to = currentChild.to
+          } else {
+            lastCell.content += state.sliceDoc(
+              currentChild.from,
+              currentChild.to
+            )
+            lastCell.position.to = currentChild.to
+          }
         }
       }
       // Try to preserve whitespace by skipping past it when locating cells
     } else if (isHLine(currentChild)) {
       const lastCell = getLastCell()
-      if (lastCell?.content) {
+      if (lastCell?.content.trim()) {
+        console.error(lastCell)
         throw new Error('\\hline must be at the start of a row')
       }
       // push start of cell past the hline
@@ -253,7 +343,7 @@ export function generateTable(
   }
   const tableData = parseTabularBody(body, state)
   const cellPositions = tableData.rows.map(row =>
-    row.cells.map(cell => cell.position)
+    row.cells.map(cell => cell.multiColumn?.position ?? cell.position)
   )
   const cellSeparators = tableData.rows.map(row => row.cellSeparators)
   const rowPositions = tableData.rows.map(row => ({
@@ -261,16 +351,38 @@ export function generateTable(
     hlines: row.hlines.map(hline => hline.position),
   }))
   const rows = tableData.rows.map(row => ({
-    cells: row.cells.map(cell => ({
-      content: cell.content,
-    })),
+    cells: row.cells.map(cell => {
+      const cellData: CellData = {
+        content: cell.content,
+        from: cell.position.from,
+        to: cell.position.to,
+      }
+      if (cell.multiColumn) {
+        cellData.multiColumn = {
+          columns: {
+            specification: cell.multiColumn.columnSpecification.specification,
+            from: cell.multiColumn.columnSpecification.position.from,
+            to: cell.multiColumn.columnSpecification.position.to,
+          },
+          columnSpan: cell.multiColumn.span,
+          from: cell.multiColumn.position.from,
+          to: cell.multiColumn.position.to,
+          preamble: {
+            from: cell.multiColumn.preamble.from,
+            to: cell.multiColumn.preamble.to,
+          },
+          postamble: {
+            from: cell.multiColumn.postamble.from,
+            to: cell.multiColumn.postamble.to,
+          },
+        }
+      }
+      return cellData
+    }),
     borderTop: row.hlines.filter(hline => !hline.atBottom).length,
     borderBottom: row.hlines.filter(hline => hline.atBottom).length,
   }))
-  const table = {
-    rows,
-    columns,
-  }
+  const table = new TableData(rows, columns)
   return {
     table,
     cellPositions,

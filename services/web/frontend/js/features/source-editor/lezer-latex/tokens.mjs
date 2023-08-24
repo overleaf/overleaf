@@ -77,6 +77,7 @@ import {
   MidRuleCtrlSeq,
   BottomRuleCtrlSeq,
   TableEnvName,
+  MultiColumnCtrlSeq,
 } from './latex.terms.mjs'
 
 function nameChar(ch) {
@@ -629,6 +630,7 @@ const otherKnowncommands = {
   '\\toprule': TopRuleCtrlSeq,
   '\\midrule': MidRuleCtrlSeq,
   '\\bottomrule': BottomRuleCtrlSeq,
+  '\\multicolumn': MultiColumnCtrlSeq,
 }
 // specializer for control sequences
 // return new tokens for specific control sequences

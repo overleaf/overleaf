@@ -8,12 +8,14 @@ import {
   BorderTheme,
   insertColumn,
   insertRow,
+  mergeCells,
   moveCaption,
   removeCaption,
   removeNodes,
   removeRowOrColumns,
   setAlignment,
   setBorders,
+  unmergeCells,
 } from './commands'
 import { useCodeMirrorViewContext } from '../../codemirror-editor'
 import { useTableContext } from '../contexts/table-context'
@@ -21,7 +23,7 @@ import { useTableContext } from '../contexts/table-context'
 export const Toolbar = memo(function Toolbar() {
   const { selection, setSelection } = useSelectionContext()
   const view = useCodeMirrorViewContext()
-  const { positions, rowSeparators, cellSeparators, tableEnvironment } =
+  const { positions, rowSeparators, cellSeparators, tableEnvironment, table } =
     useTableContext()
   if (!selection) {
     return null
@@ -77,7 +79,8 @@ export const Toolbar = memo(function Toolbar() {
               view,
               BorderTheme.FULLY_BORDERED,
               positions,
-              rowSeparators
+              rowSeparators,
+              table
             )
           }}
         >
@@ -89,7 +92,13 @@ export const Toolbar = memo(function Toolbar() {
           role="menuitem"
           type="button"
           onClick={() => {
-            setBorders(view, BorderTheme.NO_BORDERS, positions, rowSeparators)
+            setBorders(
+              view,
+              BorderTheme.NO_BORDERS,
+              positions,
+              rowSeparators,
+              table
+            )
           }}
         >
           <MaterialIcon type="border_clear" />
@@ -109,10 +118,8 @@ export const Toolbar = memo(function Toolbar() {
           id="table-generator-align-dropdown"
           disabledLabel="Select a column or a merged cell to align"
           disabled={
-            !selection.isColumnSelected(
-              selection.from.cell,
-              positions.rowPositions.length
-            )
+            !selection.isColumnSelected(selection.from.cell, table) &&
+            !selection.isMergedCellSelected(table)
           }
         >
           <ToolbarButton
@@ -120,7 +127,7 @@ export const Toolbar = memo(function Toolbar() {
             id="table-generator-align-left"
             label="Left"
             command={() => {
-              setAlignment(view, selection, 'left', positions)
+              setAlignment(view, selection, 'left', positions, table)
             }}
           />
           <ToolbarButton
@@ -128,7 +135,7 @@ export const Toolbar = memo(function Toolbar() {
             id="table-generator-align-center"
             label="Center"
             command={() => {
-              setAlignment(view, selection, 'center', positions)
+              setAlignment(view, selection, 'center', positions, table)
             }}
           />
           <ToolbarButton
@@ -136,16 +143,31 @@ export const Toolbar = memo(function Toolbar() {
             id="table-generator-align-right"
             label="Right"
             command={() => {
-              setAlignment(view, selection, 'right', positions)
+              setAlignment(view, selection, 'right', positions, table)
             }}
           />
         </ToolbarButtonMenu>
         <ToolbarButton
           icon="cell_merge"
           id="table-generator-merge-cells"
-          label="Merge cells"
-          disabled
+          label={
+            selection.isMergedCellSelected(table)
+              ? 'Unmerge cells'
+              : 'Merge cells'
+          }
+          active={selection.isMergedCellSelected(table)}
+          disabled={
+            !selection.isMergedCellSelected(table) &&
+            !selection.isMergeableCells(table)
+          }
           disabledLabel="Select cells in a row to merge"
+          command={() => {
+            if (selection.isMergedCellSelected(table)) {
+              unmergeCells(view, selection, table)
+            } else {
+              mergeCells(view, selection, table)
+            }
+          }}
         />
         <ToolbarButton
           icon="delete"
@@ -153,14 +175,19 @@ export const Toolbar = memo(function Toolbar() {
           label="Delete row or column"
           disabledLabel="Select a row or a column to delete"
           disabled={
-            !(
-              positions.cells.length &&
-              selection.isAnyRowSelected(positions.cells[0].length)
-            ) && !selection.isAnyColumnSelected(positions.rowPositions.length)
+            (!selection.isAnyRowSelected(table) &&
+              !selection.isAnyColumnSelected(table)) ||
+            !selection.eq(selection.explode(table))
           }
           command={() =>
             setSelection(
-              removeRowOrColumns(view, selection, positions, cellSeparators)
+              removeRowOrColumns(
+                view,
+                selection,
+                positions,
+                cellSeparators,
+                table
+              )
             )
           }
         />
@@ -176,7 +203,9 @@ export const Toolbar = memo(function Toolbar() {
             role="menuitem"
             type="button"
             onClick={() => {
-              setSelection(insertColumn(view, selection, positions, false))
+              setSelection(
+                insertColumn(view, selection, positions, false, table)
+              )
             }}
           >
             <span className="table-generator-button-label">
@@ -188,7 +217,9 @@ export const Toolbar = memo(function Toolbar() {
             role="menuitem"
             type="button"
             onClick={() => {
-              setSelection(insertColumn(view, selection, positions, true))
+              setSelection(
+                insertColumn(view, selection, positions, true, table)
+              )
             }}
           >
             <span className="table-generator-button-label">
@@ -201,7 +232,7 @@ export const Toolbar = memo(function Toolbar() {
             role="menuitem"
             type="button"
             onClick={() => {
-              setSelection(insertRow(view, selection, positions, false))
+              setSelection(insertRow(view, selection, positions, false, table))
             }}
           >
             <span className="table-generator-button-label">
@@ -213,7 +244,7 @@ export const Toolbar = memo(function Toolbar() {
             role="menuitem"
             type="button"
             onClick={() => {
-              setSelection(insertRow(view, selection, positions, true))
+              setSelection(insertRow(view, selection, positions, true, table))
             }}
           >
             <span className="table-generator-button-label">

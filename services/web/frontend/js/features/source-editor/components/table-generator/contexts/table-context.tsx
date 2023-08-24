@@ -27,6 +27,8 @@ const TableContext = createContext<
       cellSeparators: CellSeparator[][]
       positions: Positions
       tableEnvironment?: TableEnvironmentData
+      rows: number
+      columns: number
     }
   | undefined
 >(undefined)
@@ -36,37 +38,57 @@ export const TableProvider: FC<{
   view: EditorView
   tableNode: SyntaxNode | null
 }> = ({ tabularNode, view, children, tableNode }) => {
-  const tableData = generateTable(tabularNode, view.state)
+  try {
+    const tableData = generateTable(tabularNode, view.state)
 
-  // TODO: Validate better that the table matches the column definition
-  for (const row of tableData.table.rows) {
-    if (row.cells.length !== tableData.table.columns.length) {
-      return <TableRenderingError view={view} codePosition={tabularNode.from} />
+    // TODO: Validate better that the table matches the column definition
+    for (const row of tableData.table.rows) {
+      const rowLength = row.cells.reduce(
+        (acc, cell) => acc + (cell.multiColumn?.columnSpan ?? 1),
+        0
+      )
+      for (const cell of row.cells) {
+        if (
+          cell.multiColumn?.columns.specification &&
+          cell.multiColumn.columns.specification.length !== 1
+        ) {
+          throw new Error(
+            'Multi-column cells must have exactly one column definition'
+          )
+        }
+      }
+      if (rowLength !== tableData.table.columns.length) {
+        throw new Error('Row length does not match column definition')
+      }
     }
+
+    const positions: Positions = {
+      cells: tableData.cellPositions,
+      columnDeclarations: tableData.specification,
+      rowPositions: tableData.rowPositions,
+      tabular: { from: tabularNode.from, to: tabularNode.to },
+    }
+
+    const tableEnvironment = tableNode
+      ? parseTableEnvironment(tableNode)
+      : undefined
+
+    return (
+      <TableContext.Provider
+        value={{
+          ...tableData,
+          positions,
+          tableEnvironment,
+          rows: tableData.table.rows.length,
+          columns: tableData.table.columns.length,
+        }}
+      >
+        {children}
+      </TableContext.Provider>
+    )
+  } catch {
+    return <TableRenderingError view={view} codePosition={tabularNode.from} />
   }
-
-  const positions: Positions = {
-    cells: tableData.cellPositions,
-    columnDeclarations: tableData.specification,
-    rowPositions: tableData.rowPositions,
-    tabular: { from: tabularNode.from, to: tabularNode.to },
-  }
-
-  const tableEnvironment = tableNode
-    ? parseTableEnvironment(tableNode)
-    : undefined
-
-  return (
-    <TableContext.Provider
-      value={{
-        ...tableData,
-        positions,
-        tableEnvironment,
-      }}
-    >
-      {children}
-    </TableContext.Provider>
-  )
 }
 
 export const useTableContext = () => {

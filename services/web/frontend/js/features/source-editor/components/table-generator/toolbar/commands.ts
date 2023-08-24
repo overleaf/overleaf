@@ -1,5 +1,5 @@
 import { EditorView } from '@codemirror/view'
-import { ColumnDefinition, Positions } from '../tabular'
+import { ColumnDefinition, Positions, TableData } from '../tabular'
 import { ChangeSpec, EditorSelection } from '@codemirror/state'
 import {
   CellSeparator,
@@ -24,7 +24,8 @@ export const setBorders = (
   view: EditorView,
   theme: BorderTheme,
   positions: Positions,
-  rowSeparators: RowSeparator[]
+  rowSeparators: RowSeparator[],
+  table: TableData
 ) => {
   const specification = view.state.sliceDoc(
     positions.columnDeclarations.from,
@@ -46,27 +47,31 @@ export const setBorders = (
         })
       }
     }
+    const removeMulticolumnBorders: ChangeSpec[] = []
+    for (const row of table.rows) {
+      for (const cell of row.cells) {
+        if (cell.multiColumn) {
+          const specification = view.state.sliceDoc(
+            cell.multiColumn.columns.from,
+            cell.multiColumn.columns.to
+          )
+          removeMulticolumnBorders.push({
+            from: cell.multiColumn.columns.from,
+            to: cell.multiColumn.columns.to,
+            insert: specification.replace(/\|/g, ''),
+          })
+        }
+      }
+    }
     view.dispatch({
-      changes: [removeColumnBorders, ...removeHlines],
+      changes: [
+        removeColumnBorders,
+        ...removeHlines,
+        ...removeMulticolumnBorders,
+      ],
     })
   } else if (theme === BorderTheme.FULLY_BORDERED) {
-    let newSpec = '|'
-    let consumingBrackets = 0
-    for (const char of specification) {
-      if (char === '{') {
-        consumingBrackets++
-      }
-      if (char === '}' && consumingBrackets > 0) {
-        consumingBrackets--
-      }
-      if (consumingBrackets) {
-        newSpec += char
-      }
-      if (char === '|') {
-        continue
-      }
-      newSpec += char + '|'
-    }
+    const newSpec = addColumnBordersToSpecification(specification)
 
     const insertColumns = view.state.changes({
       from: positions.columnDeclarations.from,
@@ -101,19 +106,85 @@ export const setBorders = (
         })
       )
     }
+    const addMulticolumnBorders: ChangeSpec[] = []
+    for (const row of table.rows) {
+      for (const cell of row.cells) {
+        if (cell.multiColumn) {
+          const specification = view.state.sliceDoc(
+            cell.multiColumn.columns.from,
+            cell.multiColumn.columns.to
+          )
+          addMulticolumnBorders.push({
+            from: cell.multiColumn.columns.from,
+            to: cell.multiColumn.columns.to,
+            insert: addColumnBordersToSpecification(specification),
+          })
+        }
+      }
+    }
 
     view.dispatch({
-      changes: [insertColumns, ...insertHlines],
+      changes: [insertColumns, ...insertHlines, ...addMulticolumnBorders],
     })
   }
+}
+
+const addColumnBordersToSpecification = (specification: string) => {
+  let newSpec = '|'
+  let consumingBrackets = 0
+  for (const char of specification) {
+    if (char === '{') {
+      consumingBrackets++
+    }
+    if (char === '}' && consumingBrackets > 0) {
+      consumingBrackets--
+    }
+    if (consumingBrackets) {
+      newSpec += char
+    }
+    if (char === '|') {
+      continue
+    }
+    newSpec += char + '|'
+  }
+  return newSpec
 }
 
 export const setAlignment = (
   view: EditorView,
   selection: TableSelection,
   alignment: 'left' | 'right' | 'center',
-  positions: Positions
+  positions: Positions,
+  table: TableData
 ) => {
+  if (selection.isMergedCellSelected(table)) {
+    // change for mergedColumn
+    const { minX, minY } = selection.normalized()
+    const cell = table.getCell(minY, minX)
+    if (!cell.multiColumn) {
+      return
+    }
+    const specification = view.state.sliceDoc(
+      cell.multiColumn.columns.from,
+      cell.multiColumn.columns.to
+    )
+    const columnSpecification = parseColumnSpecifications(specification)
+    for (const column of columnSpecification) {
+      if (column.alignment !== alignment) {
+        column.alignment = alignment
+        column.content = alignment[0]
+      }
+    }
+    const newSpec = generateColumnSpecification(columnSpecification)
+    view.dispatch({
+      changes: {
+        from: cell.multiColumn.columns.from,
+        to: cell.multiColumn.columns.to,
+        insert: newSpec,
+      },
+    })
+    return
+  }
   const specification = view.state.sliceDoc(
     positions.columnDeclarations.from,
     positions.columnDeclarations.to
@@ -121,7 +192,7 @@ export const setAlignment = (
   const columnSpecification = parseColumnSpecifications(specification)
   const { minX, maxX } = selection.normalized()
   for (let i = minX; i <= maxX; i++) {
-    if (selection.isColumnSelected(i, positions.rowPositions.length)) {
+    if (selection.isColumnSelected(i, table)) {
       if (columnSpecification[i].alignment === alignment) {
         continue
       }
@@ -155,7 +226,8 @@ export const removeRowOrColumns = (
   view: EditorView,
   selection: TableSelection,
   positions: Positions,
-  cellSeparators: CellSeparator[][]
+  cellSeparators: CellSeparator[][],
+  table: TableData
 ) => {
   const {
     minX: startCell,
@@ -172,19 +244,17 @@ export const removeRowOrColumns = (
   const numberOfColumns = columnSpecification.length
   const numberOfRows = positions.rowPositions.length
 
-  if (selection.spansEntireTable(numberOfColumns, numberOfRows)) {
+  if (selection.spansEntireTable(table)) {
     emptyTable(view, columnSpecification, positions)
     return new TableSelection({ cell: 0, row: 0 })
   }
   const removedRows =
-    Number(selection.isRowSelected(startRow, numberOfColumns)) *
-    selection.height()
+    Number(selection.isRowSelected(startRow, table)) * selection.height()
   const removedColumns =
-    Number(selection.isColumnSelected(startCell, numberOfRows)) *
-    selection.width()
+    Number(selection.isColumnSelected(startCell, table)) * selection.width()
 
   for (let row = startRow; row <= endRow; row++) {
-    if (selection.isRowSelected(row, numberOfColumns)) {
+    if (selection.isRowSelected(row, table)) {
       const rowPosition = positions.rowPositions[row]
       changes.push({
         from: rowPosition.from,
@@ -192,10 +262,13 @@ export const removeRowOrColumns = (
         insert: '',
       })
     } else {
-      for (let cell = startCell; cell <= endCell; cell++) {
-        if (selection.isColumnSelected(cell, numberOfRows)) {
-          // FIXME: handle multicolumn
-          if (cell === 0 && cellSeparators[row].length > 0) {
+      for (let cell = startCell; cell <= endCell; ) {
+        const cellIndex = table.getCellIndex(row, cell)
+        const cellPosition = positions.cells[row][cellIndex]
+        if (selection.isColumnSelected(cell, table)) {
+          // We should remove this column.
+          const boundaries = table.getCellBoundaries(row, cell)
+          if (boundaries.from === 0 && cellSeparators[row].length > 0) {
             // Remove the cell separator between the first and second cell
             changes.push({
               from: positions.cells[row][cell].from,
@@ -204,9 +277,8 @@ export const removeRowOrColumns = (
             })
           } else {
             // Remove the cell separator between the cell before and this if possible
-            const cellPosition = positions.cells[row][cell]
             const from =
-              cellSeparators[row][cell - 1]?.from ?? cellPosition.from
+              cellSeparators[row][cellIndex - 1]?.from ?? cellPosition.from
             const to = cellPosition.to
             changes.push({
               from,
@@ -215,11 +287,12 @@ export const removeRowOrColumns = (
             })
           }
         }
+        cell += table.rows[row].cells[cellIndex].multiColumn?.columnSpan ?? 1
       }
     }
   }
   const filteredColumns = columnSpecification.filter(
-    (_, i) => !selection.isColumnSelected(i, numberOfRows)
+    (_, i) => !selection.isColumnSelected(i, table)
   )
   const newSpecification = generateColumnSpecification(filteredColumns)
   changes.push({
@@ -266,14 +339,15 @@ export const insertRow = (
   view: EditorView,
   selection: TableSelection,
   positions: Positions,
-  below: boolean
+  below: boolean,
+  table: TableData
 ) => {
   // TODO: Handle borders
   const { maxY, minY } = selection.normalized()
   const from = below
     ? positions.rowPositions[maxY].to
     : positions.rowPositions[minY].from
-  const numberOfColumns = positions.cells[maxY].length
+  const numberOfColumns = table.columns.length
   const insert = `\n${' &'.repeat(numberOfColumns - 1)}\\\\`
   view.dispatch({ changes: { from, to: from, insert } })
   if (!below) {
@@ -287,19 +361,22 @@ export const insertRow = (
 
 export const insertColumn = (
   view: EditorView,
-  selection: TableSelection,
+  initialSelection: TableSelection,
   positions: Positions,
-  after: boolean
+  after: boolean,
+  table: TableData
 ) => {
   // TODO: Handle borders
-  // FIXME: Handle multicolumn
+  const selection = initialSelection.explode(table)
   const { maxX, minX } = selection.normalized()
   const changes: ChangeSpec[] = []
-  for (const row of positions.cells) {
-    const from = after ? row[maxX].to : row[minX].from
+  const targetColumn = after ? maxX : minX
+  for (let row = 0; row < positions.rowPositions.length; row++) {
+    const cell = table.getCell(row, targetColumn)
+    const target = cell.multiColumn ?? cell
+    const from = after ? target.to : target.from
     changes.push({
       from,
-      to: from,
       insert: ' &',
     })
   }
@@ -460,4 +537,60 @@ const gobbleEmptyLines = (
     from: pos,
     to: extendForwardsOverEmptyLines(view.state.doc, line, lines),
   }
+}
+
+export const unmergeCells = (
+  view: EditorView,
+  selection: TableSelection,
+  table: TableData
+) => {
+  const cell = table.getCell(selection.from.row, selection.from.cell)
+  if (!cell.multiColumn) {
+    return
+  }
+  view.dispatch({
+    changes: [
+      {
+        from: cell.multiColumn.preamble.from,
+        to: cell.multiColumn.preamble.to,
+        insert: '',
+      },
+      {
+        from: cell.multiColumn.postamble.from,
+        to: cell.multiColumn.postamble.to,
+        insert: '&'.repeat(cell.multiColumn.columnSpan - 1),
+      },
+    ],
+  })
+}
+
+export const mergeCells = (
+  view: EditorView,
+  selection: TableSelection,
+  table: TableData
+) => {
+  const { minX, maxX, minY, maxY } = selection.normalized()
+  if (minY !== maxY) {
+    return
+  }
+  if (minX === maxX) {
+    return
+  }
+  const cellContent = []
+  for (let i = minX; i <= maxX; i++) {
+    cellContent.push(table.getCell(minY, i).content)
+  }
+  const content = cellContent.join(' ').trim()
+  // TODO: respect border theme
+  const preamble = '\\multicolumn{' + (maxX - minX + 1) + '}{c}{'
+  const postamble = '}'
+  const { from } = table.getCell(minY, minX)
+  const { to } = table.getCell(minY, maxX)
+  view.dispatch({
+    changes: {
+      from,
+      to,
+      insert: `${preamble}${content}${postamble}`,
+    },
+  })
 }

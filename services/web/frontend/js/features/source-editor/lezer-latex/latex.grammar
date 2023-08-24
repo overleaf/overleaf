@@ -94,7 +94,8 @@
     HLineCtrlSeq,
     TopRuleCtrlSeq,
     MidRuleCtrlSeq,
-    BottomRuleCtrlSeq
+    BottomRuleCtrlSeq,
+    MultiColumnCtrlSeq
 }
 
 @external specialize {EnvName} specializeEnvName from "./tokens.mjs" {
@@ -187,6 +188,10 @@ BibKeyArgument {
 
 PackageArgument {
     !argument ShortTextArgument
+}
+
+TabularArgument {
+    !argument OpenBrace TabularContent CloseBrace
 }
 
 UrlArgument {
@@ -348,6 +353,12 @@ KnownCommand {
     } |
     HorizontalLine {
         (HLineCtrlSeq | TopRuleCtrlSeq | MidRuleCtrlSeq | BottomRuleCtrlSeq) optionalWhitespace?
+    } |
+    MultiColumn {
+        MultiColumnCtrlSeq
+            optionalWhitespace? SpanArgument { ShortTextArgument }
+            optionalWhitespace? ColumnArgument { ShortTextArgument }
+            optionalWhitespace? TabularArgument
     }
 }
 
@@ -545,11 +556,13 @@ DocumentEnvironment[@isGroup="$Environment"] {
     (TrailingWhitespaceOnly | TrailingContent)?
 }
 
+TabularContent {
+    (textWithGroupsEnvironmentsAndBlankLines)*
+}
+
 TabularEnvironment[@isGroup="$Environment"] {
     BeginEnv<TabularEnvName>
-    Content<TabularContent {
-        (textWithGroupsEnvironmentsAndBlankLines)+
-    }>
+    Content<TabularContent>
     EndEnv<TabularEnvName>
 }
 
