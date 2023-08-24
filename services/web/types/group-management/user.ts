@@ -1,6 +1,6 @@
 export type UserEnrollment = {
-  managedBy: string
-  enrolledAt: Date
+  managedBy?: string
+  enrolledAt?: Date
 }
 
 export type User = {

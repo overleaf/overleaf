@@ -173,7 +173,7 @@ export default function ManagedUserDropdownButton({
               ) : null}
             </MenuItemButton>
           ) : null}
-          {user.enrollment ? (
+          {user.enrollment?.managedBy ? (
             <MenuItemButton
               className="delete-user-action"
               data-testid="delete-user-action"

@@ -61,7 +61,7 @@ describe('ManagedUserDropdownButton', function () {
       last_name: 'User',
       invite: true,
       last_active_at: new Date(),
-      enrollment: undefined,
+      enrollment: {},
       isEntityAdmin: undefined,
     }
 
@@ -106,7 +106,7 @@ describe('ManagedUserDropdownButton', function () {
       last_name: 'User',
       invite: false,
       last_active_at: new Date(),
-      enrollment: undefined,
+      enrollment: {},
       isEntityAdmin: true,
     }
 
