@@ -13,6 +13,7 @@ const ENTRY_FIELDS_TO_OMIT = [
   'pid',
   'msg',
   'err',
+  'error',
   'req',
   'res',
 ]
@@ -25,20 +26,22 @@ function convertLogEntry(entry) {
 
   // Error information. In GCP, the stack trace goes in the message property.
   // This enables the error reporting feature.
-  if (entry.err) {
-    if (entry.err.info) {
-      Object.assign(gcpEntry, entry.err.info)
+  const err = entry.err || entry.error
+  if (err) {
+    if (err.info) {
+      Object.assign(gcpEntry, err.info)
     }
-    if (entry.err.code) {
-      gcpEntry.code = entry.err.code
+    if (err.code) {
+      gcpEntry.code = err.code
     }
-    if (entry.err.signal) {
-      gcpEntry.signal = entry.err.signal
+    if (err.signal) {
+      gcpEntry.signal = err.signal
     }
-    if (entry.err.stack !== '(no stack)') {
-      gcpEntry.message = entry.err.stack
-    } else if (entry.err.message) {
-      gcpEntry.message = entry.err.message
+    const stack = err.stack
+    if (stack && stack !== '(no stack)') {
+      gcpEntry.message = stack
+    } else if (err.message) {
+      gcpEntry.message = err.message
     }
     if (entry.name) {
       gcpEntry.serviceContext = { service: entry.name }

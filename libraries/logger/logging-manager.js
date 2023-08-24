@@ -19,6 +19,7 @@ const LoggingManager = {
       name,
       serializers: {
         err: Serializers.err,
+        error: Serializers.err,
         req: Serializers.req,
         res: Serializers.res,
       },
