@@ -109,7 +109,7 @@ const SizeGrid: FC<{
                   onMouseEnter={() => {
                     setCurrentSize({ sizeX: x, sizeY: y })
                   }}
-                  onMouseDown={() => onSizeSelected(x, y)}
+                  onMouseUp={() => onSizeSelected(x, y)}
                 />
               ))}
             </tr>

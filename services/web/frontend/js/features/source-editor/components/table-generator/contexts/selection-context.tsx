@@ -333,6 +333,17 @@ export class TableSelection {
     const { minY, maxY } = this.normalized()
     return maxY - minY + 1
   }
+
+  maximumCellWidth(table: TableData) {
+    const { minX, maxX, minY, maxY } = this.normalized()
+    let maxWidth = 1
+    for (let row = minY; row <= maxY; ++row) {
+      const start = table.getCellIndex(row, minX)
+      const end = table.getCellIndex(row, maxX)
+      maxWidth = Math.max(maxWidth, end - start + 1)
+    }
+    return maxWidth
+  }
 }
 
 const SelectionContext = createContext<

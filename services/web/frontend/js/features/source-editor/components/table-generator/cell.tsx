@@ -36,6 +36,7 @@ export const Cell: FC<{
     cellData: editingCellData,
     updateCellData: update,
     startEditing,
+    commitCellData,
   } = useEditingContext()
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -167,6 +168,7 @@ export const Cell: FC<{
         className="table-generator-cell-input"
         ref={inputRef}
         value={editingCellData.content}
+        onBlur={commitCellData}
         style={{ width: `inherit` }}
         onChange={e => {
           update(filterInput(e.target.value))

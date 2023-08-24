@@ -71,7 +71,7 @@ export const insertFigure: Command = view => {
 export const insertTable = (view: EditorView, sizeX: number, sizeY: number) => {
   const { state, dispatch } = view
   const { pos, suffix } = ensureEmptyLine(state, state.selection.main)
-  const template = `\n\\begin{table}{#{}}
+  const template = `\n\\begin{table}[#{}]
 \t\\centering
 \\begin{tabular}{${'c'.repeat(sizeX)}}
 ${('\t\t' + '#{} & #{}'.repeat(sizeX - 1) + '\\\\\n').repeat(

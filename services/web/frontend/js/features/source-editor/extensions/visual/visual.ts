@@ -26,6 +26,7 @@ import { toolbarPanel } from '../toolbar/toolbar-panel'
 import { selectDecoratedArgument } from './select-decorated-argument'
 import { pasteHtml } from './paste-html'
 import { commandTooltip } from '../command-tooltip'
+import { tableGeneratorTheme } from './table-generator'
 
 type Options = {
   visual: boolean
@@ -208,4 +209,5 @@ const extension = (options: Options) => [
   showContentWhenParsed,
   figureModalPasteHandler(),
   isSplitTestEnabled('paste-html') ? pasteHtml : [],
+  isSplitTestEnabled('table-generator') ? tableGeneratorTheme : [],
 ]

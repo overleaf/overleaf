@@ -213,7 +213,7 @@ function parseTabularBody(
       if (!tabularArgument) {
         throw new Error('Invalid multicolumn definition: missing cell content')
       }
-      if (getLastCell()?.content) {
+      if (getLastCell()?.content.trim()) {
         throw new Error(
           'Invalid multicolumn definition: multicolumn must be at the start of a cell'
         )

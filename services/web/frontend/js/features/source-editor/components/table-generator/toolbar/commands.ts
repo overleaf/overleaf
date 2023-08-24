@@ -342,13 +342,21 @@ export const insertRow = (
   below: boolean,
   table: TableData
 ) => {
-  // TODO: Handle borders
   const { maxY, minY } = selection.normalized()
+  const rowsToInsert = selection.height()
   const from = below
     ? positions.rowPositions[maxY].to
     : positions.rowPositions[minY].from
   const numberOfColumns = table.columns.length
-  const insert = `\n${' &'.repeat(numberOfColumns - 1)}\\\\`
+  const borderTheme = table.getBorderTheme()
+  const border = borderTheme === BorderTheme.FULLY_BORDERED ? '\\hline' : ''
+  const initialHline =
+    borderTheme === BorderTheme.FULLY_BORDERED && !below && minY === 0
+      ? '\\hline'
+      : ''
+  const insert = `${initialHline}\n${' &'.repeat(
+    numberOfColumns - 1
+  )}\\\\${border}`.repeat(rowsToInsert)
   view.dispatch({ changes: { from, to: from, insert } })
   if (!below) {
     return selection
@@ -366,9 +374,9 @@ export const insertColumn = (
   after: boolean,
   table: TableData
 ) => {
-  // TODO: Handle borders
   const selection = initialSelection.explode(table)
   const { maxX, minX } = selection.normalized()
+  const columnsToInsert = selection.maximumCellWidth(table)
   const changes: ChangeSpec[] = []
   const targetColumn = after ? maxX : minX
   for (let row = 0; row < positions.rowPositions.length; row++) {
@@ -377,7 +385,7 @@ export const insertColumn = (
     const from = after ? target.to : target.from
     changes.push({
       from,
-      insert: ' &',
+      insert: ' &'.repeat(columnsToInsert),
     })
   }
 
@@ -386,12 +394,25 @@ export const insertColumn = (
     positions.columnDeclarations.to
   )
   const columnSpecification = parseColumnSpecifications(specification)
-  columnSpecification.splice(after ? maxX + 1 : minX, 0, {
-    alignment: 'left',
-    borderLeft: 0,
-    borderRight: 0,
-    content: 'l',
-  })
+  const borderTheme = table.getBorderTheme()
+  const borderRight = borderTheme === BorderTheme.FULLY_BORDERED ? 1 : 0
+  const targetIndex = after ? maxX + 1 : minX
+  columnSpecification.splice(
+    targetIndex,
+    0,
+    ...Array.from({ length: columnsToInsert }, () => ({
+      alignment: 'left' as const,
+      borderLeft: 0,
+      borderRight,
+      content: 'l',
+    }))
+  )
+  if (targetIndex === 0 && borderTheme === BorderTheme.FULLY_BORDERED) {
+    columnSpecification[0].borderLeft = Math.max(
+      1,
+      columnSpecification[0].borderLeft
+    )
+  }
   changes.push({
     from: positions.columnDeclarations.from,
     to: positions.columnDeclarations.to,
@@ -581,8 +602,9 @@ export const mergeCells = (
     cellContent.push(table.getCell(minY, i).content)
   }
   const content = cellContent.join(' ').trim()
-  // TODO: respect border theme
-  const preamble = '\\multicolumn{' + (maxX - minX + 1) + '}{c}{'
+  const border =
+    table.getBorderTheme() === BorderTheme.FULLY_BORDERED ? '|' : ''
+  const preamble = `\\multicolumn{${maxX - minX + 1}}{${border}c${border}}{`
   const postamble = '}'
   const { from } = table.getCell(minY, minX)
   const { to } = table.getCell(minY, maxX)

@@ -1,4 +1,4 @@
-import { memo } from 'react'
+import { memo, useMemo } from 'react'
 import { useSelectionContext } from '../contexts/selection-context'
 import { ToolbarButton } from './toolbar-button'
 import { ToolbarButtonMenu } from './toolbar-button-menu'
@@ -20,19 +20,49 @@ import {
 import { useCodeMirrorViewContext } from '../../codemirror-editor'
 import { useTableContext } from '../contexts/table-context'
 
+const borderThemeLabel = (theme: BorderTheme | null) => {
+  switch (theme) {
+    case BorderTheme.FULLY_BORDERED:
+      return 'All borders'
+    case BorderTheme.NO_BORDERS:
+      return 'No borders'
+    default:
+      return 'Custom borders'
+  }
+}
+
 export const Toolbar = memo(function Toolbar() {
   const { selection, setSelection } = useSelectionContext()
   const view = useCodeMirrorViewContext()
   const { positions, rowSeparators, cellSeparators, tableEnvironment, table } =
     useTableContext()
+
+  const borderDropdownLabel = useMemo(
+    () => borderThemeLabel(table.getBorderTheme()),
+    [table]
+  )
+
+  const captionLabel = useMemo(() => {
+    if (!tableEnvironment?.caption) {
+      return 'No caption'
+    }
+    if (tableEnvironment.caption.from < positions.tabular.from) {
+      return 'Caption above'
+    }
+    return 'Caption below'
+  }, [tableEnvironment, positions.tabular.from])
+
   if (!selection) {
     return null
   }
+  const columnsToInsert = selection.maximumCellWidth(table)
+  const rowsToInsert = selection.height()
+
   return (
     <div className="table-generator-floating-toolbar">
       <ToolbarDropdown
         id="table-generator-caption-dropdown"
-        label="Caption below"
+        label={captionLabel}
         disabled={!tableEnvironment}
       >
         <button
@@ -68,7 +98,7 @@ export const Toolbar = memo(function Toolbar() {
       </ToolbarDropdown>
       <ToolbarDropdown
         id="table-generator-borders-dropdown"
-        label="All borders"
+        label={borderDropdownLabel}
       >
         <button
           className="ol-cm-toolbar-menu-item"
@@ -209,7 +239,9 @@ export const Toolbar = memo(function Toolbar() {
             }}
           >
             <span className="table-generator-button-label">
-              Insert column left
+              {columnsToInsert === 1
+                ? 'Insert column left'
+                : `Insert ${columnsToInsert} columns left`}
             </span>
           </button>
           <button
@@ -223,7 +255,9 @@ export const Toolbar = memo(function Toolbar() {
             }}
           >
             <span className="table-generator-button-label">
-              Insert column right
+              {columnsToInsert === 1
+                ? 'Insert column right'
+                : `Insert ${columnsToInsert} columns right`}
             </span>
           </button>
           <hr />
@@ -236,7 +270,9 @@ export const Toolbar = memo(function Toolbar() {
             }}
           >
             <span className="table-generator-button-label">
-              Insert row above
+              {rowsToInsert === 1
+                ? 'Insert row above'
+                : `Insert ${rowsToInsert} rows above`}
             </span>
           </button>
           <button
@@ -248,7 +284,9 @@ export const Toolbar = memo(function Toolbar() {
             }}
           >
             <span className="table-generator-button-label">
-              Insert row below
+              {rowsToInsert === 1
+                ? 'Insert row below'
+                : `Insert ${rowsToInsert} rows below`}
             </span>
           </button>
         </ToolbarDropdown>
@@ -260,6 +298,7 @@ export const Toolbar = memo(function Toolbar() {
           label="Delete table"
           command={() => {
             removeNodes(view, tableEnvironment?.table ?? positions.tabular)
+            view.focus()
           }}
         />
       </div>

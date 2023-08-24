@@ -255,6 +255,15 @@ export const toolbarPanel = () => [
         },
       },
     },
+    '&.overall-theme-dark .ol-cm-toolbar-table-grid-popover': {
+      color: '#fff',
+    },
+    '&.overall-theme-dark .ol-cm-toolbar-table-grid': {
+      '& td.active': {
+        outlineColor: 'white',
+        background: 'rgb(125, 125, 125)',
+      },
+    },
     '.ol-cm-toolbar-table-grid': {
       borderCollapse: 'separate',
       tableLayout: 'fixed',
@@ -281,6 +290,7 @@ export const toolbarPanel = () => [
     '.ol-cm-toolbar-table-grid-popover': {
       padding: '8px',
       marginLeft: '80px',
+      backgroundColor: 'var(--editor-toolbar-bg)',
     },
   }),
 ]

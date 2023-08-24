@@ -19,6 +19,7 @@ import { CodeMirrorViewContextProvider } from '../codemirror-editor'
 import { TableProvider } from './contexts/table-context'
 import { TabularProvider, useTabularContext } from './contexts/tabular-context'
 import Icon from '../../../../shared/components/icon'
+import { BorderTheme } from './toolbar/commands'
 
 export type ColumnDefinition = {
   alignment: 'left' | 'center' | 'right' | 'paragraph'
@@ -90,6 +91,56 @@ export class TableData {
       currentCellOffset += skip
     }
     throw new Error("Couldn't find cell boundaries")
+  }
+
+  getBorderTheme(): BorderTheme | null {
+    if (this.rows.length === 0 || this.columns.length === 0) {
+      return null
+    }
+    const lastRow = this.rows[this.rows.length - 1]
+    const hasBottomBorder = lastRow.borderBottom > 0
+    const firstColumn = this.columns[0]
+    const hasLeftBorder = firstColumn.borderLeft > 0
+    for (const row of this.rows) {
+      if (hasBottomBorder === (row.borderTop === 0)) {
+        return null
+      }
+    }
+    // If we had the first, we have verified that we have the rest
+    const hasAllRowBorders = hasBottomBorder
+
+    for (const column of this.columns) {
+      if (hasLeftBorder === (column.borderRight === 0)) {
+        return null
+      }
+    }
+
+    for (const row of this.rows) {
+      for (const cell of row.cells) {
+        if (cell.multiColumn) {
+          if (cell.multiColumn.columns.specification.length === 0) {
+            return null
+          }
+          const firstCell = cell.multiColumn.columns.specification[0]
+          if (hasLeftBorder === (firstCell.borderLeft === 0)) {
+            return null
+          }
+          for (const column of cell.multiColumn.columns.specification) {
+            if (hasLeftBorder === (column.borderRight === 0)) {
+              return null
+            }
+          }
+        }
+      }
+    }
+    // If we had the first, we have verified that we have the rest
+    const hasAllColumnBorders = hasLeftBorder
+
+    if (hasAllRowBorders && hasAllColumnBorders) {
+      return BorderTheme.FULLY_BORDERED
+    } else {
+      return BorderTheme.NO_BORDERS
+    }
   }
 }
 
