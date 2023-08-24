@@ -149,4 +149,13 @@ const LoggingManager = {
 
 LoggingManager.initialize('default-sharelatex')
 
+function handleWarning(err) {
+  LoggingManager.warn({ err }, 'Warning details')
+}
+
+process.on('warning', handleWarning)
+LoggingManager.removeWarningHandler = () => {
+  process.off('warning', handleWarning)
+}
+
 module.exports = LoggingManager

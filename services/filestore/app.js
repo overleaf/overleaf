@@ -19,17 +19,6 @@ Events.setMaxListeners(20)
 
 const app = express()
 
-process.on('warning', warning => {
-  logger.warn(
-    {
-      name: warning.name,
-      message: warning.message,
-      stack: warning.stack,
-    },
-    'Warning details'
-  )
-})
-
 app.use(RequestLogger.middleware)
 
 if (settings.sentry && settings.sentry.dsn) {

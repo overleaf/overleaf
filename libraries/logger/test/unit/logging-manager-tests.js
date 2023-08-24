@@ -59,6 +59,10 @@ describe('LoggingManager', function () {
     this.logger.initializeErrorReporting('test_dsn')
   })
 
+  afterEach(function () {
+    this.LoggingManager.removeWarningHandler()
+  })
+
   describe('initialize', function () {
     beforeEach(function () {
       this.Bunyan.createLogger.reset()
