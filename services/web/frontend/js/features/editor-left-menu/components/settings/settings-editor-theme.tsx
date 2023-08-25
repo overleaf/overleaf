@@ -30,7 +30,7 @@ export default function SettingsEditorTheme() {
     const legacyEditorThemeOptions: Array<Option> =
       legacyEditorThemes?.map(theme => ({
         value: theme,
-        label: theme.replace(/_/g, ' '),
+        label: theme.replace(/_/g, ' ') + ' (Legacy)',
       })) ?? []
 
     return [...editorThemeOptions, dividerOption, ...legacyEditorThemeOptions]

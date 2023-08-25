@@ -30,7 +30,9 @@ describe('<SettingsEditorTheme />', function () {
     }
 
     for (const theme of legacyEditorThemes) {
-      const option = within(select).getByText(theme.replace(/_/g, ' '))
+      const option = within(select).getByText(
+        theme.replace(/_/g, ' ') + ' (Legacy)'
+      )
       expect(option.getAttribute('value')).to.equal(theme)
     }
   })
