@@ -133,6 +133,11 @@
           {
             "selector": "AssignmentExpression[left.object.object.name='window'][left.object.property.name='location'][left.property.name='href']",
             "message": "Modify location via useLocation instead of calling window.location methods directly"
+          },
+          // prohibit using lookbehinds due to incidents with Safari simply crashing when the script is parsed
+          {
+            "selector": "Literal[regex.pattern=/\\(\\?<[!=]/]",
+            "message": "Lookbehind is not supported in older Safari versions."
           }
         ]
       }
