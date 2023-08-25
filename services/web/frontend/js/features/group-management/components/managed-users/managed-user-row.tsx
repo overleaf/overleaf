@@ -43,17 +43,23 @@ export default function ManagedUserRow({
       key={`user-${user.email}`}
       className={`managed-user-row ${user.invite ? 'text-muted' : ''}`}
     >
+      <td className="cell-checkbox">
+        {user.enrollment?.managedBy ? null : (
+          <>
+            <label htmlFor={`select-user-${user.email}`} className="sr-only">
+              {t('select_user')}
+            </label>
+            <input
+              className="select-item"
+              id={`select-user-${user.email}`}
+              type="checkbox"
+              checked={selected}
+              onChange={e => handleSelectUser(e, user)}
+            />
+          </>
+        )}
+      </td>
       <td className="cell-email">
-        <label htmlFor={`select-user-${user.email}`} className="sr-only">
-          {t('select_user')}
-        </label>
-        <input
-          className="select-item"
-          id={`select-user-${user.email}`}
-          type="checkbox"
-          checked={selected}
-          onChange={e => handleSelectUser(e, user)}
-        />
         <span>
           {user.email}
           {user.invite ? (

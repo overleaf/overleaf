@@ -42,7 +42,7 @@ export default function ManagedUsersList({
               <table className="managed-users-table">
                 <thead>
                   <tr>
-                    <td className="cell-email">
+                    <td className="cell-checkbox">
                       <label htmlFor="select-all" className="sr-only">
                         {t('select_all')}
                       </label>
@@ -53,6 +53,8 @@ export default function ManagedUsersList({
                         onChange={handleSelectAllClick}
                         checked={selectedUsers.length === users.length}
                       />
+                    </td>
+                    <td className="cell-email">
                       <span className="header">{t('email')}</span>
                     </td>
                     <td className="cell-name">

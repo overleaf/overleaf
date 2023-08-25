@@ -183,35 +183,10 @@ describe('group members, with managed users', function () {
     })
 
     cy.get('ul.managed-users-list table > tbody').within(() => {
-      // Select 'Claire Jennings', a managed user
+      // no checkbox should be shown for 'Claire Jennings', a managed user
       cy.get('tr:nth-child(3)').within(() => {
-        cy.get('.select-item').check()
+        cy.get('.select-item').should('not.exist')
       })
-    })
-
-    cy.get('.page-header').within(() => {
-      cy.findByRole('button', { name: 'Remove from group' }).should('not.exist')
-    })
-  })
-
-  it('does not show the remove-member button if any of the selected users are managed', function () {
-    cy.intercept('DELETE', `${PATHS.removeMember}/abc123def456`, {
-      statusCode: 200,
-    })
-
-    cy.get('ul.managed-users-list table > tbody').within(() => {
-      // Select 'Claire Jennings', a managed user
-      cy.get('tr:nth-child(3)').within(() => {
-        cy.get('.select-item').check()
-      })
-      // Select another user
-      cy.get('tr:nth-child(2)').within(() => {
-        cy.get('.select-item').check()
-      })
-    })
-
-    cy.get('.page-header').within(() => {
-      cy.findByRole('button', { name: 'Remove from group' }).should('not.exist')
     })
   })
 
