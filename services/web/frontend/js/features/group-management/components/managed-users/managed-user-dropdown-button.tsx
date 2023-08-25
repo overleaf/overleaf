@@ -173,7 +173,11 @@ export default function ManagedUserDropdownButton({
               ) : null}
             </MenuItemButton>
           ) : null}
-          {user.enrollment?.managedBy ? (
+          {user.isEntityAdmin ? (
+            <MenuItem data-testid="no-actions-available">
+              <span className="text-muted">{t('no_actions')}</span>
+            </MenuItem>
+          ) : user.enrollment?.managedBy ? (
             <MenuItemButton
               className="delete-user-action"
               data-testid="delete-user-action"
@@ -181,10 +185,6 @@ export default function ManagedUserDropdownButton({
             >
               {t('delete_user')}
             </MenuItemButton>
-          ) : user.isEntityAdmin ? (
-            <MenuItem data-testid="no-actions-available">
-              <span className="text-muted">{t('no_actions')}</span>
-            </MenuItem>
           ) : (
             <MenuItemButton
               onClick={onRemoveFromGroup}

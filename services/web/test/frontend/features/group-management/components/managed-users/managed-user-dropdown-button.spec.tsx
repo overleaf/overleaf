@@ -139,4 +139,49 @@ describe('ManagedUserDropdownButton', function () {
       cy.findByTestId('no-actions-available').should('exist')
     })
   })
+
+  describe('with managed group admin user', function () {
+    const user = {
+      _id: 'some-user',
+      email: 'some.user@example.com',
+      first_name: 'Some',
+      last_name: 'User',
+      invite: false,
+      last_active_at: new Date(),
+      enrollment: {
+        managedBy: 'some-group',
+        enrolledAt: new Date(),
+      },
+      isEntityAdmin: true,
+    }
+
+    beforeEach(function () {
+      cy.window().then(win => {
+        win.metaAttributesCache.set('ol-users', [user])
+      })
+
+      cy.mount(
+        <GroupMembersProvider>
+          <ManagedUserDropdownButton
+            user={user}
+            openOffboardingModalForUser={sinon.stub()}
+            groupId={subscriptionId}
+            setManagedUserAlert={sinon.stub()}
+          />
+        </GroupMembersProvider>
+      )
+    })
+
+    it('should render the button', function () {
+      cy.get('#managed-user-dropdown-some\\.user\\@example\\.com').should(
+        'exist'
+      )
+      cy.get(`.action-btn`).should('exist')
+    })
+
+    it('should show the (empty) menu when the button is clicked', function () {
+      cy.get('.action-btn').click()
+      cy.findByTestId('no-actions-available').should('exist')
+    })
+  })
 })
