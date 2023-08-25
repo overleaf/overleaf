@@ -37,18 +37,18 @@ describe('ManagedUserRow', function () {
     })
 
     it('renders the row', function () {
-      cy.get('.row').should('exist')
+      cy.get('tr').should('exist')
       // Checkbox
       cy.get('.select-item').should('not.be.checked')
       // Email
-      cy.get('.row').contains(user.email)
+      cy.get('tr').contains(user.email)
       // Name
-      cy.get('.row').contains(user.first_name)
-      cy.get('.row').contains(user.last_name)
+      cy.get('tr').contains(user.first_name)
+      cy.get('tr').contains(user.last_name)
       // Last active date
-      cy.get('.row').contains('21st Nov 2070')
+      cy.get('tr').contains('21st Nov 2070')
       // Managed status
-      cy.get('.row').contains('Managed')
+      cy.get('tr').contains('Managed')
       // Dropdown button
       cy.get('#managed-user-dropdown-some\\.user\\@example\\.com').should(
         'exist'

@@ -1,7 +1,9 @@
 import classNames from 'classnames'
+import React from 'react'
 
 type IconOwnProps = {
   type: string
+  category?: 'rounded' | 'outlined'
   accessibilityLabel?: string
 }
 
@@ -10,11 +12,16 @@ type IconProps = IconOwnProps &
 
 function MaterialIcon({
   type,
+  category = 'rounded',
   className,
   accessibilityLabel,
   ...rest
 }: IconProps) {
-  const iconClassName = classNames('material-symbols-rounded', className)
+  const iconClassName = classNames(
+    'material-symbols',
+    `material-symbols-${category}`,
+    className
+  )
 
   return (
     <>

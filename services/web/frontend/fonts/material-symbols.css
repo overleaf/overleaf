@@ -7,12 +7,11 @@
     format('woff2');
 }
 
-.material-symbols-rounded {
+.material-symbols {
   font-family: 'Material Symbols Rounded';
   font-weight: normal;
   font-style: normal;
   font-size: 20px;
-  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
   line-height: 1;
   letter-spacing: normal;
   text-transform: none;
@@ -22,4 +21,8 @@
   direction: ltr;
   font-feature-settings: 'liga';
   -webkit-font-smoothing: antialiased;
+}
+
+.material-symbols.material-symbols-rounded {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
 }

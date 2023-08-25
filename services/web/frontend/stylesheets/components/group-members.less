@@ -73,3 +73,118 @@
     }
   }
 }
+
+.managed-users-table {
+  width: 100%;
+  table-layout: fixed;
+
+  tr {
+    border-bottom: 1px solid @structured-list-border-color;
+  }
+
+  th,
+  td {
+    padding: (@line-height-computed / 4) @line-height-computed / 2;
+    vertical-align: top;
+  }
+
+  thead {
+    tr:hover {
+      background-color: transparent;
+    }
+  }
+
+  tbody {
+    tr:last-child {
+      border-bottom: 0 none;
+    }
+    tr:hover {
+      background-color: #f6f7f9;
+    }
+  }
+
+  .cell-email {
+    width: 50%;
+  }
+
+  .cell-name {
+    width: 15%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .cell-last-active {
+    width: 15%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .cell-security {
+    width: 15%;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .cell-dropdown {
+    width: 5%;
+    min-width: 25px;
+  }
+
+  @media (min-width: @screen-xs) {
+    .cell-email {
+      width: 40%;
+    }
+
+    .cell-name {
+      width: 20%;
+    }
+
+    .cell-last-active {
+      width: 20%;
+    }
+
+    .cell-security {
+      width: 15%;
+    }
+
+    .cell-dropdown {
+      width: 5%;
+      button.dropdown-toggle {
+        padding-left: 0;
+        padding-right: 0;
+      }
+    }
+  }
+
+  @media (min-width: @screen-lg) {
+    .cell-email {
+      width: 50%;
+    }
+
+    .cell-name {
+      width: 20%;
+    }
+
+    .cell-last-active {
+      width: 15%;
+    }
+
+    .cell-security {
+      width: 12%;
+    }
+
+    .cell-dropdown {
+      width: 3%;
+    }
+  }
+}
+
+.managed-user-security {
+  .material-symbols {
+    position: relative;
+    top: 4px;
+  }
+}

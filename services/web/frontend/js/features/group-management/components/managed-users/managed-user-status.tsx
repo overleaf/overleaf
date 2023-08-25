@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { User } from '../../../../../../types/group-management/user'
+import MaterialIcon from '../../../../shared/components/material-icon'
 
 type ManagedUserStatusProps = {
   user: User
@@ -16,10 +17,10 @@ export default function ManagedUserStatus({ user }: ManagedUserStatusProps) {
         <>
           {user.invite ? (
             <span className="security-state-invite-pending">
-              <i
-                className="fa fa-clock-o"
-                aria-hidden="true"
-                aria-label={t('pending_invite')}
+              <MaterialIcon
+                type="schedule"
+                category="outlined"
+                accessibilityLabel={t('pending_invite')}
               />
               &nbsp;
               {t('managed')}
@@ -28,20 +29,18 @@ export default function ManagedUserStatus({ user }: ManagedUserStatusProps) {
             <>
               {user.enrollment?.managedBy ? (
                 <span className="security-state-managed">
-                  <i
-                    className="fa fa-check"
-                    aria-hidden="true"
-                    aria-label={t('managed')}
+                  <MaterialIcon
+                    type="check"
+                    accessibilityLabel={t('managed')}
                   />
                   &nbsp;
                   {t('managed')}
                 </span>
               ) : (
                 <span className="security-state-not-managed">
-                  <i
-                    className="fa fa-times"
-                    aria-hidden="true"
-                    aria-label={t('not_managed')}
+                  <MaterialIcon
+                    type="close"
+                    accessibilityLabel={t('not_managed')}
                   />
                   &nbsp;
                   {t('managed')}
