@@ -30,6 +30,7 @@ module.exports = {
     webRouter.get(
       '/user/subscription/new',
       AuthenticationController.requireLogin(),
+      SubscriptionController.requireConfirmedPrimaryEmailAddress,
       SubscriptionController.paymentPage
     )
 
@@ -93,6 +94,7 @@ module.exports = {
       '/user/subscription/create',
       AuthenticationController.requireLogin(),
       PermissionsController.requirePermission('start-subscription'),
+      SubscriptionController.requireConfirmedPrimaryEmailAddress,
       SubscriptionController.createSubscription
     )
     webRouter.post(

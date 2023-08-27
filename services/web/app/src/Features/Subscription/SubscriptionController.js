@@ -205,21 +205,6 @@ async function paymentPage(req, res) {
         currency = recommendedCurrency
       }
 
-      // Prevent checkout for users without a confirmed primary email address
-      const userData = await UserGetter.promises.getUser(user._id, {
-        email: 1,
-        emails: 1,
-      })
-      const userPrimaryEmail = userData.emails.find(
-        emailEntry => emailEntry.email === userData.email
-      )
-      if (userPrimaryEmail?.confirmedAt == null) {
-        return res.render('subscriptions/unconfirmed-primary-email', {
-          title: 'confirm_email',
-          email: userData.email,
-        })
-      }
-
       // Block web sales to restricted countries
       if (['CU', 'IR', 'KP', 'RU', 'SY', 'VE'].includes(countryCode)) {
         return res.render('subscriptions/restricted-country', {
@@ -241,6 +226,22 @@ async function paymentPage(req, res) {
       })
     }
   }
+}
+
+async function requireConfirmedPrimaryEmailAddress(req, res, next) {
+  const userData = await UserGetter.promises.getUser(req.user._id, {
+    email: 1,
+    emails: 1,
+  })
+  const userPrimaryEmail = userData.emails.find(
+    emailEntry => emailEntry.email === userData.email
+  )
+  if (userPrimaryEmail?.confirmedAt != null) return next()
+
+  res.status(422).render('subscriptions/unconfirmed-primary-email', {
+    title: 'confirm_email',
+    email: userData.email,
+  })
 }
 
 function formatGroupPlansDataForDash() {
@@ -849,4 +850,7 @@ module.exports = {
   recurlyNotificationParser,
   refreshUserFeatures: expressify(refreshUserFeatures),
   redirectToHostedPage: expressify(redirectToHostedPage),
+  requireConfirmedPrimaryEmailAddress: expressify(
+    requireConfirmedPrimaryEmailAddress
+  ),
 }

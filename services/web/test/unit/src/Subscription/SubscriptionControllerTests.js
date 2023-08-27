@@ -388,28 +388,6 @@ describe('SubscriptionController', function () {
       })
     })
 
-    describe('with a user that has not confirmed their primary email address', function () {
-      beforeEach(function () {
-        this.LimitationsManager.promises.userHasV1OrV2Subscription.resolves(
-          false
-        )
-        this.PlansLocator.findLocalPlanInSettings.returns({})
-        this.UserGetter.promises.getUser.resolves({
-          email: 'test@example.com',
-          emails: [{ email: 'test@example.com' }],
-        })
-      })
-
-      it('should not render the checkout and instead show the unconfirmed primary email page', function (done) {
-        this.res.render = (page, opts) => {
-          page.should.equal('subscriptions/unconfirmed-primary-email')
-          opts.email.should.equal('test@example.com')
-          done()
-        }
-        this.SubscriptionController.paymentPage(this.req, this.res, done)
-      })
-    })
-
     describe('with a user from a restricted country', function () {
       beforeEach(function () {
         this.LimitationsManager.promises.userHasV1OrV2Subscription.resolves(
@@ -995,6 +973,30 @@ describe('SubscriptionController', function () {
       }
 
       this.SubscriptionController.processUpgradeToAnnualPlan(this.req, this.res)
+    })
+  })
+
+  describe('requireConfirmedPrimaryEmailAddress', function () {
+    describe('when user does not have confirmed email address', function () {
+      beforeEach(function () {
+        this.req.user = { _id: 'testing' }
+        this.UserGetter.promises.getUser.resolves({
+          email: 'test@example.com',
+          emails: [{ email: 'test@example.com' }],
+        })
+      })
+
+      it('should show unconfirmed primary email page', function (done) {
+        this.res.render = (page, opts) => {
+          page.should.equal('subscriptions/unconfirmed-primary-email')
+          opts.email.should.equal('test@example.com')
+          done()
+        }
+        this.SubscriptionController.requireConfirmedPrimaryEmailAddress(
+          this.req,
+          this.res
+        )
+      })
     })
   })
 })
