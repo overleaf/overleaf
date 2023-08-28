@@ -1,3 +1,4 @@
+const OError = require('@overleaf/o-error')
 const { expect } = require('chai')
 const async = require('async')
 const User = require('./helpers/User')
@@ -22,9 +23,15 @@ describe('AdminEmails', function () {
 
     it('should block the user', function (done) {
       this.badUser.login(err => {
-        expect(err).to.not.exist
+        // User.login refreshes the csrf token after login.
+        // Seeing the csrf token request fail "after login" indicates a successful login.
+        expect(OError.getFullStack(err)).to.match(/TaggedError: after login/)
+        expect(OError.getFullStack(err)).to.match(
+          /get csrf token failed: status=500 /
+        )
         this.badUser.getProjectListPage((err, statusCode) => {
-          expect(err).to.exist
+          expect(err).to.not.exist
+          expect(statusCode).to.equal(500)
           done()
         })
       })

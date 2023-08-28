@@ -360,7 +360,9 @@ describe('Registration', function () {
         this.user1.addEmail(secondaryEmail, err => {
           expect(err).to.not.exist
           this.user1.loginWith(secondaryEmail, err => {
-            expect(err != null).to.equal(false)
+            expect(err).to.match(
+              /login failed: status=401 body={"message":{"text":"Your email or password is incorrect. Please try again.","type":"error"}}/
+            )
             this.user1.isLoggedIn((err, isLoggedIn) => {
               expect(err).to.not.exist
               expect(isLoggedIn).to.equal(false)

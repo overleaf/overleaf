@@ -98,7 +98,7 @@ describe('Project ownership transfer', function () {
           this.projectId,
           this.collaborator._id
         )
-      ).to.be.rejectedWith('Unexpected status code: 403')
+      ).to.be.rejectedWith(/failed: status=403 /)
     })
 
     it('prevents transfers to a non-collaborator', async function () {
@@ -107,7 +107,7 @@ describe('Project ownership transfer', function () {
           this.projectId,
           this.stranger._id
         )
-      ).to.be.rejectedWith('Unexpected status code: 403')
+      ).to.be.rejectedWith(/failed: status=403 /)
     })
 
     it('allows an admin to transfer to any project to a non-collaborator', async function () {

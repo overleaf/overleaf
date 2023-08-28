@@ -1,4 +1,3 @@
-const { expect } = require('chai')
 const { CookieJar } = require('tough-cookie')
 const AuthenticationManager = require('../../../../app/src/Features/Authentication/AuthenticationManager')
 const Settings = require('@overleaf/settings')
@@ -120,7 +119,15 @@ class UserHelper {
   async getCsrfToken() {
     // get csrf token from api and store
     const response = await this.fetch('/dev/csrf')
-    this._csrfToken = await response.text()
+    const body = await response.text()
+    if (response.status !== 200) {
+      throw new Error(
+        `get csrf token failed: status=${response.status} body=${JSON.stringify(
+          body
+        )}`
+      )
+    }
+    this._csrfToken = body
   }
 
   /**
@@ -307,6 +314,13 @@ class UserHelper {
       ...options,
     })
     const body = await response.json()
+    if (response.status !== 200) {
+      throw new Error(
+        `register failed: status=${response.status} body=${JSON.stringify(
+          body
+        )}`
+      )
+    }
     if (body.message && body.message.type === 'error') {
       throw new Error(`register api error: ${body.message.text}`)
     }
@@ -338,7 +352,14 @@ class UserHelper {
       method: 'POST',
       body: new URLSearchParams([['email', email]]),
     })
-    expect(response.status).to.equal(204)
+    const body = await response.text()
+    if (response.status !== 204) {
+      throw new Error(
+        `add email failed: status=${response.status} body=${JSON.stringify(
+          body
+        )}`
+      )
+    }
   }
 
   async addEmailAndConfirm(userId, email) {
@@ -408,7 +429,14 @@ class UserHelper {
       method: 'POST',
       body: new URLSearchParams([['email', email]]),
     })
-    expect(response.status).to.equal(200)
+    if (response.status !== 200) {
+      const body = await response.text()
+      throw new Error(
+        `resend confirmation failed: status=${
+          response.status
+        } body=${JSON.stringify(body)}`
+      )
+    }
     const tokenData = await db.tokens
       .find({
         use: 'email_confirmation',
@@ -421,7 +449,14 @@ class UserHelper {
       method: 'POST',
       body: new URLSearchParams([['token', tokenData.token]]),
     })
-    expect(response.status).to.equal(200)
+    if (response.status !== 200) {
+      const body = await response.text()
+      throw new Error(
+        `confirm email failed: status=${response.status} body=${JSON.stringify(
+          body
+        )}`
+      )
+    }
   }
 }
 

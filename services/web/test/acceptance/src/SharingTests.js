@@ -53,7 +53,7 @@ describe('Sharing', function () {
           this.collaborator._id,
           { privilegeLevel: 'readAndWrite' }
         )
-      ).to.be.rejectedWith('Unexpected status code: 403')
+      ).to.be.rejectedWith(/failed: status=403 /)
     })
 
     it('validates the privilege level', async function () {
@@ -63,7 +63,7 @@ describe('Sharing', function () {
           this.collaborator._id,
           { privilegeLevel: 'superpowers' }
         )
-      ).to.be.rejectedWith('Unexpected status code: 400')
+      ).to.be.rejectedWith(/failed: status=400 /)
     })
 
     it('returns 404 if the user is not already a collaborator', async function () {
@@ -73,7 +73,7 @@ describe('Sharing', function () {
           this.stranger._id,
           { privilegeLevel: 'readOnly' }
         )
-      ).to.be.rejectedWith('Unexpected status code: 404')
+      ).to.be.rejectedWith(/failed: status=404 /)
     })
   })
 

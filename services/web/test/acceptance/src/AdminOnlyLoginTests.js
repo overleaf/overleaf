@@ -27,11 +27,14 @@ describe('AdminOnlyLogin', function () {
   }
 
   async function expectRejectedLogin(user) {
-    const response = await user.login()
-    expect(response.statusCode).to.equal(403)
-    expect(response.body).to.deep.equal({
-      message: { type: 'error', text: 'Admin only panel' },
-    })
+    try {
+      await user.login()
+      expect.fail('expected the login request to fail')
+    } catch (err) {
+      expect(err).to.match(
+        /login failed: status=403 body={"message":{"type":"error","text":"Admin only panel"}}/
+      )
+    }
   }
 
   describe('adminOnlyLogin=true', function () {

@@ -162,7 +162,14 @@ describe('HaveIBeenPwnedApi', function () {
       }
     })
     beforeEach('login', async function () {
-      await user.loginWithEmailPassword(user.email, 'aLeakedPassword42')
+      try {
+        await user.loginWithEmailPassword(user.email, 'aLeakedPassword42')
+        expect.fail('expected the login request to fail')
+      } catch (err) {
+        expect(err).to.match(
+          /login failed: status=401 body={"message":{"text":"Your email or password is incorrect. Please try again.","type":"error"}}/
+        )
+      }
       await letPasswordCheckRunInBackground()
     })
     it('should not increment any counter', async function () {

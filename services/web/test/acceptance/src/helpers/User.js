@@ -1,3 +1,4 @@
+const OError = require('@overleaf/o-error')
 const request = require('./request')
 const settings = require('@overleaf/settings')
 const { db, ObjectId } = require('../../../../app/src/infrastructure/mongodb')
@@ -96,6 +97,15 @@ class User {
           if (error != null) {
             return callback(error)
           }
+          if (response.statusCode !== 200) {
+            return callback(
+              new Error(
+                `register failed: status=${
+                  response.statusCode
+                } body=${JSON.stringify(body)}`
+              )
+            )
+          }
           db.users.findOne({ email: this.email }, (error, user) => {
             if (error != null) {
               return callback(error)
@@ -143,10 +153,19 @@ class User {
           if (error != null) {
             return callback(error)
           }
+          if (response.statusCode !== 200) {
+            return callback(
+              new Error(
+                `login failed: status=${
+                  response.statusCode
+                } body=${JSON.stringify(body)}`
+              )
+            )
+          }
           // get new csrf token, then return result of login
           this.getCsrfToken(err => {
             if (err) {
-              return callback(err)
+              return callback(OError.tag(err, 'after login'))
             }
             callback(null, response, body)
           })
@@ -225,6 +244,15 @@ class User {
         (error, response, body) => {
           if (error != null) {
             return callback(error)
+          }
+          if (response.statusCode !== 200) {
+            return callback(
+              new Error(
+                `logout failed: status=${
+                  response.statusCode
+                } body=${JSON.stringify(body)}`
+              )
+            )
           }
           db.users.findOne({ email: this.email }, (error, user) => {
             if (error != null) {
@@ -344,16 +372,19 @@ class User {
           url: '/user/delete',
           json: { password: this.password },
         },
-        (err, res) => {
+        (err, response, body) => {
           if (err) {
             return callback(err)
           }
-          if (res.statusCode < 200 || res.statusCode >= 300) {
+          if (response.statusCode !== 200) {
             return callback(
-              new Error('Error received from API: ' + res.statusCode)
+              new Error(
+                `user deletion failed: status=${
+                  response.statusCode
+                } body=${JSON.stringify(body)}`
+              )
             )
           }
-
           callback()
         }
       )
@@ -383,6 +414,15 @@ class User {
         if (error != null) {
           return callback(error)
         }
+        if (response.statusCode !== 200) {
+          return callback(
+            new Error(
+              `project creation failed: status=${
+                response.statusCode
+              } body=${JSON.stringify(body)}`
+            )
+          )
+        }
         if ((body != null ? body.project_id : undefined) == null) {
           error = new Error(
             JSON.stringify([
@@ -411,6 +451,15 @@ class User {
         if (error != null) {
           return callback(error)
         }
+        if (response.statusCode !== 200) {
+          return callback(
+            new Error(
+              `project deletion failed: status=${
+                response.statusCode
+              } body=${JSON.stringify(body)}`
+            )
+          )
+        }
         callback(null)
       }
     )
@@ -421,14 +470,16 @@ class User {
       {
         url: `/admin/project/${projectId}/undelete`,
       },
-      (error, response) => {
+      (error, response, body) => {
         if (error) {
           return callback(error)
         }
         if (response.statusCode !== 204) {
           return callback(
             new Error(
-              `Non-success response when undeleting project: ${response.statusCode}`
+              `project un-deletion failed: status=${
+                response.statusCode
+              } body=${JSON.stringify(body)}`
             )
           )
         }
@@ -451,10 +502,13 @@ class User {
           return callback(error)
         }
         if (response.statusCode !== 200) {
-          const err = new Error(
-            `Non-success response when opening project: ${response.statusCode}`
+          return callback(
+            new Error(
+              `opening project failed: status=${
+                response.statusCode
+              } body=${JSON.stringify(body)}`
+            )
           )
-          return callback(err)
         }
         callback(null)
       }
@@ -477,6 +531,15 @@ class User {
         (error, response, body) => {
           if (error != null) {
             return callback(error)
+          }
+          if (response.statusCode !== 200) {
+            return callback(
+              new Error(
+                `doc creation in project failed: status=${
+                  response.statusCode
+                } body=${JSON.stringify(body)}`
+              )
+            )
           }
           callback(null, body._id)
         }
@@ -506,12 +569,18 @@ class User {
           },
         },
       },
-      (error, res, body) => {
+      (error, response, body) => {
         if (error) {
           return callback(error)
         }
-        if (res.statusCode < 200 || res.statusCode >= 300) {
-          return callback(new Error(`failed to upload file ${res.statusCode}`))
+        if (response.statusCode !== 200) {
+          return callback(
+            new Error(
+              `uploading file failed: status=${
+                response.statusCode
+              } body=${JSON.stringify(body)}`
+            )
+          )
         }
 
         callback(null, JSON.parse(body).entity_id)
@@ -538,12 +607,18 @@ class User {
           folder_id: folderId,
         },
       },
-      (error, res) => {
+      (error, response, body) => {
         if (error) {
           return callback(error)
         }
-        if (res.statusCode < 200 || res.statusCode >= 300) {
-          return callback(new Error(`failed to move ${type} ${res.statusCode}`))
+        if (response.statusCode !== 200) {
+          return callback(
+            new Error(
+              `move item in project failed: type=${type} status=${
+                response.statusCode
+              } body=${JSON.stringify(body)}`
+            )
+          )
         }
 
         callback()
@@ -559,13 +634,17 @@ class User {
           name,
         },
       },
-      (error, res) => {
+      (error, response, body) => {
         if (error) {
           return callback(error)
         }
-        if (res.statusCode < 200 || res.statusCode >= 300) {
+        if (response.statusCode !== 204) {
           return callback(
-            new Error(`failed to rename ${type} ${res.statusCode}`)
+            new Error(
+              `rename item in project failed: type=${type} status=${
+                response.statusCode
+              } body=${JSON.stringify(body)}`
+            )
           )
         }
 
@@ -577,13 +656,17 @@ class User {
   deleteItemInProject(projectId, type, itemId, callback) {
     this.request.delete(
       `project/${projectId}/${type}/${itemId}`,
-      (error, res) => {
+      (error, response, body) => {
         if (error) {
           return callback(error)
         }
-        if (res.statusCode < 200 || res.statusCode >= 300) {
+        if (response.statusCode !== 204) {
           return callback(
-            new Error(`failed to delete ${type} ${res.statusCode}`)
+            new Error(
+              `delete item in project failed: type=${type} status=${
+                response.statusCode
+              } body=${JSON.stringify(body)}`
+            )
           )
         }
         callback()
@@ -604,13 +687,17 @@ class User {
         json: true,
         jar: false,
       },
-      (error, res, body) => {
+      (error, response, body) => {
         if (error) {
           return callback(error)
         }
-        if (res.statusCode < 200 || res.statusCode >= 300) {
+        if (response.statusCode !== 200) {
           return callback(
-            new Error(`failed to join project ${projectId} ${res.statusCode}`)
+            new Error(
+              `join project failed: status=${
+                response.statusCode
+              } body=${JSON.stringify(body)}`
+            )
           )
         }
         callback(null, body)
@@ -651,6 +738,15 @@ class User {
         if (error != null) {
           return callback(error)
         }
+        if (response.statusCode !== 204) {
+          return callback(
+            new Error(
+              `disable link sharing failed: status=${
+                response.statusCode
+              } body=${JSON.stringify(body)}`
+            )
+          )
+        }
         callback(null)
       }
     )
@@ -668,6 +764,15 @@ class User {
         if (error != null) {
           return callback(error)
         }
+        if (response.statusCode !== 204) {
+          return callback(
+            new Error(
+              `enable link sharing failed: status=${
+                response.statusCode
+              } body=${JSON.stringify(body)}`
+            )
+          )
+        }
         callback(null)
       }
     )
@@ -681,6 +786,15 @@ class User {
       (err, response, body) => {
         if (err != null) {
           return callback(err)
+        }
+        if (response.statusCode !== 200) {
+          return callback(
+            new Error(
+              `get csrf token failed: status=${
+                response.statusCode
+              } body=${JSON.stringify(body)}`
+            )
+          )
         }
         this.csrfToken = body
         this.request = this.request.defaults({
@@ -707,9 +821,18 @@ class User {
             newPassword2: newPassword,
           },
         },
-        err => {
+        (err, response, body) => {
           if (err) {
             return callback(err)
+          }
+          if (response.statusCode !== 200) {
+            return callback(
+              new Error(
+                `change password failed: status=${
+                  response.statusCode
+                } body=${JSON.stringify(body)}`
+              )
+            )
           }
           this.password = newPassword
           callback()
@@ -730,7 +853,7 @@ class User {
             email: userEmail,
           },
         },
-        (error, response, body) => {
+        (error, response) => {
           callback(error, response)
         }
       )
@@ -750,6 +873,15 @@ class User {
           if (error != null) {
             return callback(error)
           }
+          if (response.statusCode !== 200) {
+            return callback(
+              new Error(
+                `open settings page failed: status=${
+                  response.statusCode
+                } body=${JSON.stringify(body)}`
+              )
+            )
+          }
           callback(null, response.statusCode)
         }
       )
@@ -766,27 +898,29 @@ class User {
           url: '/user/settings',
           json: newSettings,
         },
-        callback
+        (err, response, body) => {
+          if (err) return callback(err)
+          if (response.statusCode !== 200) {
+            return callback(
+              new Error(
+                `login failed: status=${
+                  response.statusCode
+                } body=${JSON.stringify(body)}`
+              )
+            )
+          }
+          callback()
+        }
       )
     })
   }
 
   getProjectListPage(callback) {
-    this.getCsrfToken(error => {
+    this.request.get('/project', (error, response) => {
       if (error != null) {
         return callback(error)
       }
-      this.request.get(
-        {
-          url: '/project',
-        },
-        (error, response, body) => {
-          if (error != null) {
-            return callback(error)
-          }
-          callback(null, response.statusCode)
-        }
-      )
+      callback(null, response.statusCode)
     })
   }
 
@@ -802,7 +936,7 @@ class User {
       } else {
         callback(
           new Error(
-            `unexpected status code from /user/personal_info: ${response.statusCode}`
+            `unexpected status code from /user/personal_info: status=${response.statusCode} body=${body}`
           )
         )
       }
@@ -821,13 +955,17 @@ class User {
             user_id: userId.toString(),
           },
         },
-        (err, response) => {
+        (err, response, body) => {
           if (err != null) {
             return callback(err)
           }
           if (response.statusCode !== 204) {
             return callback(
-              new Error(`Unexpected status code: ${response.statusCode}`)
+              new Error(
+                `transfer project ownership failed: status=${
+                  response.statusCode
+                } body=${JSON.stringify(body)}`
+              )
             )
           }
           callback()
@@ -860,13 +998,17 @@ class User {
           url: `/project/${projectId.toString()}/users/${userId.toString()}`,
           json: info,
         },
-        (err, response) => {
+        (err, response, body) => {
           if (err != null) {
             return callback(err)
           }
           if (response.statusCode !== 204) {
             return callback(
-              new Error(`Unexpected status code: ${response.statusCode}`)
+              new Error(
+                `update collaborator access failed: status=${
+                  response.statusCode
+                } body=${JSON.stringify(body)}`
+              )
             )
           }
           callback()
