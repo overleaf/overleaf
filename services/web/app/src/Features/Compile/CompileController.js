@@ -612,28 +612,41 @@ module.exports = CompileController = {
             return pipeline(stream, res)
           })
           .then(() => {
+            timer.labels.status = 'success'
             timer.done()
           })
           .catch(err => {
+            const reqAborted = Boolean(req.destroyed)
+            const status = reqAborted ? 'req-aborted-late' : 'error'
+            timer.labels.status = status
             const duration = timer.done()
-            if (!res.headersSent) {
+            Metrics.inc('proxy_to_clsi', 1, { path: action, status })
+            const streamingStarted = Boolean(res.headersSent)
+            if (!streamingStarted) {
               if (err instanceof RequestFailedError) {
                 res.sendStatus(err.response.status)
               } else {
                 res.sendStatus(500)
               }
             }
-            const reqAborted = Boolean(req.destroyed)
-            if (reqAborted) {
-              Metrics.inc('proxy_to_clsi', 1, {
-                path: action,
-                status: 'req-aborted-late',
-              })
-            } else {
-              Metrics.inc('proxy_to_clsi', 1, { path: action, status: 'error' })
+            if (
+              streamingStarted &&
+              reqAborted &&
+              err.code === 'ERR_STREAM_PREMATURE_CLOSE'
+            ) {
+              // Ignore noisy spurious error
+              return
             }
             logger.warn(
-              { err, projectId, url, action, reqAborted, duration },
+              {
+                err,
+                projectId,
+                url,
+                action,
+                reqAborted,
+                streamingStarted,
+                duration,
+              },
               'CLSI proxy error'
             )
           })

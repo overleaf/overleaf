@@ -81,6 +81,10 @@ describe('CompileController', function () {
         '@overleaf/metrics': (this.Metrics = {
           inc: sinon.stub(),
           Timer: class {
+            constructor() {
+              this.labels = {}
+            }
+
             done() {}
           },
         }),
