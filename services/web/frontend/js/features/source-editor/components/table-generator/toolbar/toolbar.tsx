@@ -266,7 +266,16 @@ export const Toolbar = memo(function Toolbar() {
             role="menuitem"
             type="button"
             onClick={() => {
-              setSelection(insertRow(view, selection, positions, false, table))
+              setSelection(
+                insertRow(
+                  view,
+                  selection,
+                  positions,
+                  false,
+                  rowSeparators,
+                  table
+                )
+              )
             }}
           >
             <span className="table-generator-button-label">
@@ -280,7 +289,16 @@ export const Toolbar = memo(function Toolbar() {
             role="menuitem"
             type="button"
             onClick={() => {
-              setSelection(insertRow(view, selection, positions, true, table))
+              setSelection(
+                insertRow(
+                  view,
+                  selection,
+                  positions,
+                  true,
+                  rowSeparators,
+                  table
+                )
+              )
             }}
           >
             <span className="table-generator-button-label">

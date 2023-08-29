@@ -172,6 +172,15 @@ export const Table: FC = () => {
       ref={tableRef}
     >
       <thead>
+        {/* A workaround for a chrome bug where it will not respect colspan 
+            unless there is a row filled with cells without colspan */}
+        <tr className="table-generator-filler-row">
+          {/* A td for the row selector */}
+          <td />
+          {tableData.columns.map((_, columnIndex) => (
+            <td key={columnIndex} />
+          ))}
+        </tr>
         <tr>
           <td />
           {tableData.columns.map((_, columnIndex) => (
@@ -188,15 +197,6 @@ export const Table: FC = () => {
             columnSpecifications={tableData.columns}
           />
         ))}
-        {/* A workaround for a chrome bug where it will not respect colspan 
-            unless there is a row filled with cells without colspan */}
-        <tr className="table-generator-filler-row">
-          {/* A td for the row selector */}
-          <td />
-          {tableData.columns.map((_, columnIndex) => (
-            <td key={columnIndex} />
-          ))}
-        </tr>
       </tbody>
     </table>
   )

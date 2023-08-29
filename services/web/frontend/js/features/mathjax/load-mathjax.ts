@@ -40,7 +40,12 @@ export const loadMathJax = async () => {
       }
 
       const script = document.createElement('script')
-      script.src = getMeta('ol-mathJax3Path')
+      const path = getMeta('ol-mathJax3Path')
+      if (!path) {
+        reject(new Error('No MathJax path found'))
+        return
+      }
+      script.src = path
       script.addEventListener('load', async () => {
         await window.MathJax.startup.promise
         document.head.appendChild(window.MathJax.svgStylesheet())

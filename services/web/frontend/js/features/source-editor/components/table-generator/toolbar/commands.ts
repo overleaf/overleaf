@@ -340,6 +340,7 @@ export const insertRow = (
   selection: TableSelection,
   positions: Positions,
   below: boolean,
+  rowSeparators: RowSeparator[],
   table: TableData
 ) => {
   const { maxY, minY } = selection.normalized()
@@ -350,11 +351,13 @@ export const insertRow = (
   const numberOfColumns = table.columns.length
   const borderTheme = table.getBorderTheme()
   const border = borderTheme === BorderTheme.FULLY_BORDERED ? '\\hline' : ''
+  const initialRowSeparator =
+    below && rowSeparators.length === table.rows.length - 1 ? '\\\\' : ''
   const initialHline =
     borderTheme === BorderTheme.FULLY_BORDERED && !below && minY === 0
       ? '\\hline'
       : ''
-  const insert = `${initialHline}\n${' &'.repeat(
+  const insert = `${initialRowSeparator}${initialHline}\n${' &'.repeat(
     numberOfColumns - 1
   )}\\\\${border}`.repeat(rowsToInsert)
   view.dispatch({ changes: { from, to: from, insert } })
@@ -599,7 +602,7 @@ export const mergeCells = (
   }
   const cellContent = []
   for (let i = minX; i <= maxX; i++) {
-    cellContent.push(table.getCell(minY, i).content)
+    cellContent.push(table.getCell(minY, i).content.trim())
   }
   const content = cellContent.join(' ').trim()
   const border =

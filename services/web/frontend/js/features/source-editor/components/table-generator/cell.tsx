@@ -157,11 +157,13 @@ export const Cell: FC<{
         renderDiv.current,
         toDisplay.substring.bind(toDisplay)
       )
-      loadMathJax().then(async MathJax => {
-        if (renderDiv.current) {
-          await MathJax.typesetPromise([renderDiv.current])
-        }
-      })
+      loadMathJax()
+        .then(async MathJax => {
+          if (renderDiv.current) {
+            await MathJax.typesetPromise([renderDiv.current])
+          }
+        })
+        .catch(() => {})
     }
   }, [cellData.content, editing])
 
