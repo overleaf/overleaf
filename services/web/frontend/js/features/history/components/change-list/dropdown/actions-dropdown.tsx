@@ -57,6 +57,7 @@ function ActionsDropdown({
       <DropdownToggleWithTooltip
         bsRole="toggle"
         className="history-version-dropdown-menu-btn"
+        isOpened={isOpened}
         tooltipProps={{
           id,
           description: toolTipDescription,

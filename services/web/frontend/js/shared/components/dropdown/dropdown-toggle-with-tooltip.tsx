@@ -8,6 +8,7 @@ type CustomToggleProps = MergeAndOverride<
   Pick<DropdownProps, 'bsClass' | 'open'>,
   {
     children: React.ReactNode
+    isOpened: boolean
     bsRole: 'toggle'
     className?: string
     tooltipProps: Omit<React.ComponentProps<typeof Tooltip>, 'children'>
@@ -20,6 +21,7 @@ const DropdownToggleWithTooltip = forwardRef<
 >(function (props, ref) {
   const {
     tooltipProps,
+    isOpened,
     children,
     bsClass,
     className,
@@ -28,21 +30,24 @@ const DropdownToggleWithTooltip = forwardRef<
     ...rest
   } = props
 
+  const button = (
+    <button
+      type="button"
+      ref={ref}
+      className={classnames(bsClass, 'btn', className)}
+      aria-expanded={open}
+      aria-haspopup="true"
+      {...rest}
+    >
+      {children}
+    </button>
+  )
+
   return (
-    <Tooltip {...tooltipProps}>
-      <button
-        type="button"
-        ref={ref}
-        className={classnames(bsClass, 'btn', className)}
-        aria-expanded={open}
-        aria-haspopup="true"
-        {...rest}
-      >
-        {children}
-      </button>
-    </Tooltip>
+    <>{isOpened ? button : <Tooltip {...tooltipProps}>{button}</Tooltip>}</>
   )
 })
+
 DropdownToggleWithTooltip.displayName = 'DropdownToggleWithTooltip'
 
 export default DropdownToggleWithTooltip
