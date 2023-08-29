@@ -20,6 +20,14 @@ export const pasteHtml = Prec.highest(
         return false
       }
 
+      // ignore text/html from VS Code
+      if (
+        clipboardData.types.includes('application/vnd.code.copymetadata') ||
+        clipboardData.types.includes('vscode-editor-data')
+      ) {
+        return false
+      }
+
       const html = clipboardData.getData('text/html').trim()
 
       if (html.length === 0) {
@@ -28,7 +36,15 @@ export const pasteHtml = Prec.highest(
 
       // convert the HTML to LaTeX
       try {
-        const latex = htmlToLaTeX(html)
+        const parser = new DOMParser()
+        const { documentElement } = parser.parseFromString(html, 'text/html')
+
+        // if the only content is in a code block, use the plain text version
+        if (onlyCode(documentElement)) {
+          return false
+        }
+
+        const latex = htmlToLaTeX(documentElement)
 
         view.dispatch(
           view.state.changeByRange(range => {
@@ -59,18 +75,21 @@ const removeUnwantedElements = (
   }
 }
 
-const htmlToLaTeX = (html: string) => {
-  const parser = new DOMParser()
-  const { documentElement } = parser.parseFromString(html, 'text/html')
+// return true if the text content of the first <code> element
+// is the same as the text content of the whole document element
+const onlyCode = (documentElement: HTMLElement) =>
+  documentElement.querySelector('code')?.textContent?.trim() ===
+  documentElement.textContent?.trim()
 
+const htmlToLaTeX = (documentElement: HTMLElement) => {
   // remove style elements
   removeUnwantedElements(documentElement, 'style')
 
+  // replace non-breaking spaces added by Chrome on copy
+  processWhitespace(documentElement)
+
   // pre-process table elements
   processTables(documentElement)
-
-  // protect special characters in non-LaTeX text nodes
-  protectSpecialCharacters(documentElement)
 
   processMatchedElements(documentElement)
 
@@ -84,36 +103,15 @@ const htmlToLaTeX = (html: string) => {
   return text.replaceAll(/\n{2,}/g, '\n\n')
 }
 
-const protectSpecialCharacters = (documentElement: HTMLElement) => {
-  for (const element of documentElement.childNodes) {
-    const text = element.textContent
-    if (text) {
-      // if there are no code blocks, use backslash as an indicator of LaTeX code that shouldn't be protected
-      if (
-        element instanceof HTMLElement &&
-        !element.querySelector('code') &&
-        text.includes('\\')
-      ) {
-        continue
-      }
+const processWhitespace = (documentElement: HTMLElement) => {
+  const walker = document.createTreeWalker(
+    documentElement,
+    NodeFilter.SHOW_TEXT
+  )
 
-      const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT)
-
-      for (let node = walker.nextNode(); node; node = walker.nextNode()) {
-        const text = node.textContent
-        if (text) {
-          // leave text that's in a code block
-          if (node.parentElement?.closest('code')) {
-            continue
-          }
-
-          // replace non-backslash-prefixed characters
-          node.textContent = text.replaceAll(
-            /(^|[^\\])([#$%&~_^\\{}])/g,
-            (_match, prefix: string, char: string) => `${prefix}\\${char}`
-          )
-        }
-      }
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+    if (node.textContent === ' ') {
+      node.textContent = ' '
     }
   }
 }
@@ -180,40 +178,65 @@ const processTables = (element: HTMLElement) => {
   }
 }
 
+const cellAlignment = new Map([
+  ['left', 'l'],
+  ['center', 'c'],
+  ['right', 'r'],
+])
+
 const tabular = (element: HTMLTableElement) => {
-  const options = []
+  const definitions: Array<{
+    alignment: string
+    borderLeft: boolean
+    borderRight: boolean
+  }> = []
 
-  // NOTE: only analysing cells in the first row
-  const row = element.querySelector('tr')
+  const rows = element.querySelectorAll('tr')
 
-  if (row) {
-    // TODO: look for horizontal borders and insert \hline (or \toprule, \midrule, \bottomrule etc)?
-
+  for (const row of rows) {
     const cells = [...row.childNodes].filter(
       element => element.nodeName === 'TD' || element.nodeName === 'TH'
-    ) as Array<HTMLTableCellElement | HTMLTableHeaderCellElement>
+    ) as Array<HTMLTableCellElement>
+
+    let index = 0
 
     for (const cell of cells) {
-      const { borderLeft, textAlign, borderRight } = cell.style
+      // NOTE: reading the alignment and borders from the first cell definition in each column
+      if (definitions[index] === undefined) {
+        const { textAlign, borderLeftStyle, borderRightStyle } = cell.style
 
-      if (borderLeft && borderLeft !== 'none') {
-        // avoid duplicating when both left and right borders are defined
-        if (options.length === 0 || options[options.length - 1] !== '|') {
-          options.push('|')
+        definitions[index] = {
+          alignment: textAlign,
+          borderLeft: visibleBorderStyle(borderLeftStyle),
+          borderRight: visibleBorderStyle(borderRightStyle),
         }
       }
-
-      options.push(
-        textAlign === 'left' ? 'l' : textAlign === 'right' ? 'r' : 'c'
-      )
-
-      if (borderRight && borderRight !== 'none') {
-        options.push('|')
-      }
+      index += Number(cell.getAttribute('colspan') ?? 1)
     }
   }
 
-  return options.join(' ')
+  for (let index = 0; index <= definitions.length; index++) {
+    // fill in missing definitions
+    const item = definitions[index] || {
+      alignment: 'left',
+      borderLeft: false,
+      borderRight: false,
+    }
+
+    // remove left border if previous column had a right border
+    if (item.borderLeft && index > 0 && definitions[index - 1]?.borderRight) {
+      item.borderLeft = false
+    }
+  }
+
+  return definitions
+    .flatMap(definition => [
+      definition.borderLeft ? '|' : '',
+      cellAlignment.get(definition.alignment) ?? 'l',
+      definition.borderRight ? '|' : '',
+    ])
+    .filter(Boolean)
+    .join(' ')
 }
 
 const listDepth = (
@@ -255,7 +278,50 @@ const hasContent = (element: HTMLElement): boolean => {
   return Boolean(element.textContent && element.textContent.trim().length > 0)
 }
 
-export const selectors = [
+type BorderStyle =
+  | 'borderTopStyle'
+  | 'borderRightStyle'
+  | 'borderBottomStyle'
+  | 'borderLeftStyle'
+
+const visibleBorderStyle = (style: CSSStyleDeclaration[BorderStyle]): boolean =>
+  !!style && style !== 'none' && style !== 'hidden'
+
+const rowHasBorderStyle = (
+  element: HTMLTableRowElement,
+  style: BorderStyle
+): boolean => {
+  if (visibleBorderStyle(element.style[style])) {
+    return true
+  }
+
+  const cells = element.querySelectorAll<HTMLTableCellElement>('th,td')
+
+  return [...cells].every(cell => visibleBorderStyle(cell.style[style]))
+}
+
+const isTableRowElement = (
+  element: Element | null
+): element is HTMLTableRowElement => element?.tagName === 'TR'
+
+const nextRowHasBorderStyle = (
+  element: HTMLTableRowElement,
+  style: BorderStyle
+) => {
+  const { nextElementSibling } = element
+  return (
+    isTableRowElement(nextElementSibling) &&
+    rowHasBorderStyle(nextElementSibling, style)
+  )
+}
+
+const startMulticolumn = (element: HTMLTableCellElement): string => {
+  const colspan = element.getAttribute('colspan') ?? 1
+  const alignment = cellAlignment.get(element.style.textAlign) ?? 'l'
+  return `\\multicolumn{${Number(colspan)}}{${alignment}}{`
+}
+
+const selectors = [
   createSelector({
     selector: 'b',
     match: element =>
@@ -274,6 +340,12 @@ export const selectors = [
     inside: true,
   }),
   createSelector({
+    selector: 'strong',
+    match: element => hasContent(element),
+    start: () => '\\textbf{',
+    end: () => '}',
+  }),
+  createSelector({
     selector: 'i',
     match: element =>
       element.style.fontStyle !== 'normal' && hasContent(element),
@@ -284,6 +356,12 @@ export const selectors = [
     selector: '*',
     match: element =>
       element.style.fontStyle === 'italic' && hasContent(element),
+    start: () => '\\textit{',
+    end: () => '}',
+  }),
+  createSelector({
+    selector: 'em',
+    match: element => hasContent(element),
     start: () => '\\textit{',
     end: () => '}',
   }),
@@ -370,13 +448,13 @@ export const selectors = [
   }),
   createSelector({
     selector: '.ol-table-wrap',
-    start: element => `\n\n\\begin{table}\n\\centering\n`,
+    start: () => `\n\n\\begin{table}\n\\centering\n`,
     end: () => `\n\\end{table}\n\n`,
   }),
   createSelector({
     selector: 'table',
-    start: element => `\n\\begin{tabular}{${tabular(element)}}\n`,
-    end: () => `\n\\end{tabular}\n`,
+    start: element => `\n\\begin{tabular}{${tabular(element)}}`,
+    end: () => `\\end{tabular}\n`,
   }),
   createSelector({
     selector: 'thead',
@@ -395,14 +473,22 @@ export const selectors = [
   }),
   createSelector({
     selector: 'tr',
-    match: element => element.nextElementSibling?.nodeName === 'TR',
-    end: () => `\n`,
+    start: element => {
+      const borderTop = rowHasBorderStyle(element, 'borderTopStyle')
+      return borderTop ? '\\hline\n' : ''
+    },
+    end: element => {
+      const borderBottom = rowHasBorderStyle(element, 'borderBottomStyle')
+      return borderBottom && !nextRowHasBorderStyle(element, 'borderTopStyle')
+        ? '\n\\hline\n'
+        : '\n'
+    },
   }),
   createSelector({
     selector: 'tr > td:not(:last-child), tr > th:not(:last-child)',
-    start: element => {
+    start: (element: HTMLTableCellElement) => {
       const colspan = element.getAttribute('colspan')
-      return colspan ? `\\multicolumn{${Number(colspan)}}{` : ''
+      return colspan ? startMulticolumn(element) : ''
     },
     end: element => {
       const colspan = element.getAttribute('colspan')
@@ -411,13 +497,13 @@ export const selectors = [
   }),
   createSelector({
     selector: 'tr > td:last-child, tr > th:last-child',
-    start: element => {
+    start: (element: HTMLTableCellElement) => {
       const colspan = element.getAttribute('colspan')
-      return colspan ? `\\multicolumn{${Number(colspan)}}{` : ''
+      return colspan ? startMulticolumn(element) : ''
     },
     end: element => {
       const colspan = element.getAttribute('colspan')
-      return colspan ? `}  \\\\` : ` \\\\`
+      return colspan ? `} \\\\` : ` \\\\`
     },
   }),
   createSelector({
