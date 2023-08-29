@@ -1,5 +1,6 @@
 import { EditorView } from '@codemirror/view'
 import { EditorSelection, Prec } from '@codemirror/state'
+import { ancestorNodeOfType } from '../../utils/tree-query'
 
 export const pasteHtml = Prec.highest(
   EditorView.domEventHandlers({
@@ -29,6 +30,7 @@ export const pasteHtml = Prec.highest(
       }
 
       const html = clipboardData.getData('text/html').trim()
+      const text = clipboardData.getData('text/plain').trim()
 
       if (html.length === 0) {
         return false
@@ -48,6 +50,16 @@ export const pasteHtml = Prec.highest(
 
         view.dispatch(
           view.state.changeByRange(range => {
+            // avoid pasting formatted content into a math container
+            if (
+              ancestorNodeOfType(view.state, range.anchor, '$MathContainer')
+            ) {
+              return {
+                range: EditorSelection.cursor(range.from + text.length),
+                changes: { from: range.from, to: range.to, insert: text },
+              }
+            }
+
             return {
               range: EditorSelection.cursor(range.from + latex.length),
               changes: { from: range.from, to: range.to, insert: latex },

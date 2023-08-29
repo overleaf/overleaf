@@ -45,7 +45,9 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
     cy.get('@content').trigger('paste', { clipboardData })
 
     cy.get('@content').should('have.text', 'foo')
-    cy.get('@get-data').should('have.been.calledOnceWithExactly', 'text/html')
+    cy.get('@get-data').should('have.been.calledTwice')
+    cy.get('@get-data').should('have.been.calledWithExactly', 'text/html')
+    cy.get('@get-data').should('have.been.calledWithExactly', 'text/plain')
   })
 
   it('handles a pasted bullet list', function () {
