@@ -21,6 +21,7 @@ const UserInfoController = require('./Features/User/UserInfoController')
 const UserController = require('./Features/User/UserController')
 const UserEmailsController = require('./Features/User/UserEmailsController')
 const UserPagesController = require('./Features/User/UserPagesController')
+const TutorialController = require('./Features/Tutorial/TutorialController')
 const DocumentController = require('./Features/Documents/DocumentController')
 const CompileManager = require('./Features/Compile/CompileManager')
 const CompileController = require('./Features/Compile/CompileController')
@@ -425,6 +426,12 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     '/user/tpds/queues',
     AuthenticationController.requireLogin(),
     TpdsController.getQueues
+  )
+
+  webRouter.post(
+    '/tutorial/:tutorialKey/complete',
+    AuthenticationController.requireLogin(),
+    TutorialController.completeTutorial
   )
 
   webRouter.get(
