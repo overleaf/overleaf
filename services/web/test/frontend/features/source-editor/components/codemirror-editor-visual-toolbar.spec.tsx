@@ -62,13 +62,15 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
     cy.findByRole('menu').within(() => {
       cy.findByText('Subsection').click()
     })
-    cy.get('.cm-content').should('have.text', '{hi}')
+    cy.get('.cm-content').should('have.text', 'hi')
+    cy.get('.ol-cm-command-subsection').should('have.length', 1)
 
     clickToolbarButton('Choose section heading level')
     cy.findByRole('menu').within(() => {
       cy.findByText('Normal text').click()
     })
     cy.get('.cm-content').should('have.text', 'hi')
+    cy.get('.ol-cm-command-subsection').should('have.length', 0)
   })
 
   it('should toggle Bold and Italic', function () {
