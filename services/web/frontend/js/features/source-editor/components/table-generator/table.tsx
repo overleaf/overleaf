@@ -79,7 +79,7 @@ export const Table: FC = () => {
 
   const onKeyDown: KeyboardEventHandler = useCallback(
     event => {
-      if (event.code === 'Enter') {
+      if (event.code === 'Enter' && !event.shiftKey) {
         event.preventDefault()
         event.stopPropagation()
         if (!selection) {

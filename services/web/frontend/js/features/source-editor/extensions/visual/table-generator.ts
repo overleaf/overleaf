@@ -275,10 +275,14 @@ export const tableGeneratorTheme = EditorView.baseTheme({
 
   '.table-generator-cell-input': {
     'max-width': 'calc(200px - 0.5em)',
-    width: '100%',
     'background-color': 'transparent',
+    width: '100%',
+    height: '1.5em',
     border: '1px solid var(--table-generator-toolbar-shadow-color)',
     padding: '0',
+    resize: 'none',
+    'box-sizing': 'border-box',
+    overflow: 'hidden',
   },
 
   '.table-generator-border-options-coming-soon': {
