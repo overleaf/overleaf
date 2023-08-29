@@ -9,6 +9,7 @@ const express = require('express')
 const {
   plainTextResponse,
 } = require('../../../app/src/infrastructure/Response')
+const http = require('http')
 const LinkedUrlProxy = express()
 LinkedUrlProxy.get('/', (req, res, next) => {
   if (req.query.url === 'http://example.com/foo') {
@@ -29,7 +30,15 @@ describe('LinkedFiles', function () {
 
   let server
   before(function (done) {
-    server = LinkedUrlProxy.listen(6543, done)
+    server = http
+      .createServer(
+        {
+          // Workaround broken detection of idle connections in CI.
+          connectionsCheckingInterval: 30 * 60 * 1000,
+        },
+        LinkedUrlProxy
+      )
+      .listen(6543, done)
   })
   after(function (done) {
     server.close(done)
