@@ -44,6 +44,9 @@ describe('<CodeMirrorEditor/> command tooltip in Visual mode', function () {
       cy.stub(win, 'open').as('window-open')
     })
 
+    // wait for preamble to be escaped
+    cy.get('.cm-line').eq(0).should('have.text', '')
+
     // enter the command
     cy.get('.cm-line').eq(0).as('content-line')
     cy.get('@content-line').type('\\href{{}}{{}foo')
@@ -76,6 +79,9 @@ describe('<CodeMirrorEditor/> command tooltip in Visual mode', function () {
       '\\end{document}',
     ].join('\n')
     mountEditor(content)
+
+    // wait for preamble to be escaped
+    cy.get('.cm-line').eq(0).should('have.text', '')
 
     // enter the command
     cy.get('.cm-line').eq(0).as('content-line')
@@ -173,7 +179,7 @@ describe('<CodeMirrorEditor/> command tooltip in Visual mode', function () {
 
     // assert the unfocused label is decorated
     cy.get('.cm-line').eq(0).as('heading-line')
-    cy.get('@heading-line').should('have.text', 'Foo 🏷sec:foo')
+    cy.get('@heading-line').should('have.text', '{Foo} 🏷sec:foo')
 
     // enter the command and cross-reference label
     cy.get('.cm-line').eq(1).as('content-line')

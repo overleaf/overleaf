@@ -1,8 +1,22 @@
 import { EditorSelection } from '@codemirror/state'
 import { EditorView, WidgetType } from '@codemirror/view'
+import { SyntaxNode } from '@lezer/common'
+
+export type Preamble = {
+  from: number
+  to: number
+  title?: {
+    node: SyntaxNode
+    content: string
+  }
+  authors: {
+    node: SyntaxNode
+    content: string
+  }[]
+}
 
 export class PreambleWidget extends WidgetType {
-  constructor(public length: number, public expanded: boolean) {
+  constructor(public expanded: boolean) {
     super()
   }
 
@@ -46,14 +60,10 @@ export class PreambleWidget extends WidgetType {
       }
       event.preventDefault()
       if (this.expanded) {
-        const target = Math.min(this.length + 1, view.state.doc.length)
-        view.dispatch({
-          selection: EditorSelection.single(target),
-          scrollIntoView: true,
-        })
+        view.dom.dispatchEvent(new Event('editor:collapse-preamble'))
       } else {
         view.dispatch({
-          selection: EditorSelection.single(0),
+          selection: EditorSelection.cursor(0),
           scrollIntoView: true,
         })
       }

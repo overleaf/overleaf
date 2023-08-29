@@ -39,7 +39,7 @@ import {
 import { centeringNodeForEnvironment } from '../../utils/tree-operations/figure'
 import { Frame, FrameWidget } from './visual-widgets/frame'
 import { DividerWidget } from './visual-widgets/divider'
-import { PreambleWidget } from './visual-widgets/preamble'
+import { Preamble, PreambleWidget } from './visual-widgets/preamble'
 import { EndDocumentWidget } from './visual-widgets/end-document'
 import { EnvironmentLineWidget } from './visual-widgets/environment-line'
 import {
@@ -64,6 +64,7 @@ import { parseTheoremArguments } from '../../utils/tree-operations/theorems'
 import { IndicatorWidget } from './visual-widgets/indicator'
 import { TabularWidget } from './visual-widgets/tabular'
 import { nextSnippetField, pickedCompletion } from '@codemirror/autocomplete'
+import { skipPreambleWithCursor } from './skip-preamble-cursor'
 
 type Options = {
   fileTreeManager: {
@@ -141,7 +142,10 @@ export const atomicDecorations = (options: Options) => {
   const getPreviewByPath = (path: string) =>
     options.fileTreeManager.getPreviewByPath(path)
 
-  const createDecorations = (state: EditorState, tree: Tree): DecorationSet => {
+  const createDecorations = (
+    state: EditorState,
+    tree: Tree
+  ): { decorations: DecorationSet; preamble: Preamble } => {
     const decorations: Range<Decoration>[] = []
 
     const listEnvironmentStack: ListEnvironmentName[] = []
@@ -161,18 +165,7 @@ export const atomicDecorations = (options: Options) => {
 
     let commandDefinitions = ''
 
-    const preamble: {
-      from: number
-      to: number
-      title?: {
-        node: SyntaxNode
-        content: string
-      }
-      authors: {
-        node: SyntaxNode
-        content: string
-      }[]
-    } = { from: 0, to: 0, authors: [] }
+    const preamble: Preamble = { from: 0, to: 0, authors: [] }
 
     const startListEnvironment = (envName: ListEnvironmentName) => {
       if (currentListEnvironment) {
@@ -1091,8 +1084,9 @@ export const atomicDecorations = (options: Options) => {
     })
 
     if (preamble.to > 0) {
-      // hide the preamble. We use selectionIntersects directly, so that it also
-      // expands in readOnly mode.
+      // add environmentclass names to each line of the preamble
+      // note: this should be in markDecorations,
+      // but the preamble extents are calculated in this extension.
       const endLine = state.doc.lineAt(preamble.to).number
       for (let lineNumber = 1; lineNumber <= endLine; ++lineNumber) {
         const line = state.doc.line(lineNumber)
@@ -1110,39 +1104,47 @@ export const atomicDecorations = (options: Options) => {
         )
       }
 
+      // hide the preamble. We use selectionIntersects directly, so that it also
+      // expands in readOnly mode.
       const isExpanded = selectionIntersects(state.selection, preamble)
       if (!isExpanded) {
         decorations.push(
           Decoration.replace({
-            widget: new PreambleWidget(preamble.to, isExpanded),
+            widget: new PreambleWidget(isExpanded),
             block: true,
           }).range(0, preamble.to)
         )
       } else {
         decorations.push(
           Decoration.widget({
-            widget: new PreambleWidget(preamble.to, isExpanded),
+            widget: new PreambleWidget(isExpanded),
             block: true,
             side: -1,
           }).range(0)
         )
       }
     }
-    return Decoration.set(decorations, true)
+    return {
+      decorations: Decoration.set(decorations, true),
+      preamble,
+    }
   }
 
   return [
     StateField.define<{
       mousedown: boolean
       decorations: DecorationSet
+      preamble: Preamble
       previousTree: Tree
     }>({
       create(state) {
         const previousTree = syntaxTree(state)
+        const { decorations, preamble } = createDecorations(state, previousTree)
 
         return {
           mousedown: false,
-          decorations: createDecorations(state, previousTree),
+          decorations,
+          preamble,
           previousTree,
         }
       },
@@ -1174,11 +1176,13 @@ export const atomicDecorations = (options: Options) => {
             tr.selection ||
             hasMouseDownEffect(tr))
         ) {
-          // tree changed
+          // tree changed, or selection changed, or mousedown ended
           // TODO: update the existing decorations for the changed range(s)?
+          const { decorations, preamble } = createDecorations(tr.state, tree)
           value = {
             ...value,
-            decorations: createDecorations(tr.state, tree),
+            decorations,
+            preamble,
             previousTree: tree,
           }
         }
@@ -1200,6 +1204,7 @@ export const atomicDecorations = (options: Options) => {
               },
             }
           }),
+          skipPreambleWithCursor(field),
         ]
       },
     }),

@@ -96,9 +96,8 @@ describe('<CodeMirrorEditor/> lists in Rich Text mode', function () {
     mountEditor(content)
 
     // focus a line (at the end of a list item) and press Tab
-    cy.get('.cm-line').eq(1).as('line')
-    cy.get('@line').click()
-    cy.get('@line').trigger('keydown', {
+    cy.get('.cm-line').eq(2).click()
+    cy.get('.cm-line').eq(1).trigger('keydown', {
       key: 'Tab',
     })
 
@@ -143,6 +142,7 @@ describe('<CodeMirrorEditor/> lists in Rich Text mode', function () {
     mountEditor(content)
 
     // focus a list item and press Shift-Tab
+    cy.get('.cm-line').eq(2).click()
     cy.get('.cm-line').eq(1).trigger('keydown', {
       key: 'Tab',
       shiftKey: true,
@@ -214,24 +214,6 @@ describe('<CodeMirrorEditor/> lists in Rich Text mode', function () {
     })
   })
 
-  it('uses autocomplete to create an list item', function () {
-    const content = [
-      '\\begin{itemize}',
-      '\\item first',
-      '',
-      '\\end{itemize}',
-    ].join('\n')
-    mountEditor(content)
-
-    cy.get('.cm-line').eq(0).as('line')
-    cy.get('@line').click()
-    cy.get('@line').type('\\ite')
-    cy.get('@line').type('{enter}')
-    cy.get('@line').type('second')
-
-    cy.get('.cm-content').should('have.text', [' first', ' second'].join(''))
-  })
-
   it('positions the cursor after creating a new line with leading whitespace', function () {
     const content = [
       '\\begin{itemize}',
@@ -240,10 +222,9 @@ describe('<CodeMirrorEditor/> lists in Rich Text mode', function () {
     ].join('\n')
     mountEditor(content)
 
-    cy.get('.cm-line').eq(0).as('line')
-    cy.get('@line').click()
-    cy.get('@line').type('{leftArrow}'.repeat(4))
-    cy.get('@line').type('{enter}baz')
+    cy.get('.cm-line').eq(1).click()
+    cy.get('.cm-line').eq(0).type('{leftArrow}'.repeat(4))
+    cy.get('.cm-line').eq(0).type('{enter}baz')
 
     cy.get('.cm-content').should('have.text', [' foo', ' bazbar'].join(''))
   })

@@ -11,7 +11,6 @@ import { atomicDecorations } from './atomic-decorations'
 import { markDecorations } from './mark-decorations'
 import { EditorView, ViewPlugin } from '@codemirror/view'
 import { visualKeymap } from './visual-keymap'
-import { skipPreambleWithCursor } from './skip-preamble-cursor'
 import { mousedown, mouseDownEffect } from './selection'
 import { findEffect } from '../../utils/effects'
 import { forceParsing, syntaxTree } from '@codemirror/language'
@@ -200,7 +199,6 @@ const extension = (options: Options) => [
   listItemMarker,
   atomicDecorations(options),
   markDecorations, // NOTE: must be after atomicDecorations, so that mark decorations wrap inline widgets
-  skipPreambleWithCursor,
   visualKeymap,
   commandTooltip,
   scrollJumpAdjuster,
