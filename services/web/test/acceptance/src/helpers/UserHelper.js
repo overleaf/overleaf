@@ -142,7 +142,14 @@ class UserHelper {
       response.status !== 302 ||
       !response.headers.get('location').includes('/login')
     ) {
-      throw new Error('logout failed')
+      const body = await response.text()
+      throw new Error(
+        `logout failed: status=${response.status} body=${JSON.stringify(
+          body
+        )} headers=${JSON.stringify(
+          Object.fromEntries(response.headers.entries())
+        )}`
+      )
     }
     // after logout CSRF token becomes invalid
     this._csrfToken = ''
@@ -258,14 +265,21 @@ class UserHelper {
       }),
     })
     if (!response.ok) {
-      const error = new Error('login failed')
+      const body = await response.text()
+      const error = new Error(
+        `login failed: status=${response.status} body=${JSON.stringify(body)}`
+      )
       error.response = response
       throw error
     }
 
     const body = await response.json()
     if (body.redir !== '/project') {
-      const error = new Error('login failed')
+      const error = new Error(
+        `login should redirect to /project: status=${
+          response.status
+        } body=${JSON.stringify(body)}`
+      )
       error.response = response
       throw error
     }
