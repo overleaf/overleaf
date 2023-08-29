@@ -1,4 +1,4 @@
-import Close from './close'
+import Close from '../../../../shared/components/close'
 import usePersistedState from '../../../../shared/hooks/use-persisted-state'
 
 type SystemMessageProps = {

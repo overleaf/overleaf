@@ -3,10 +3,23 @@ import HistoryVersion from './history-version'
 import LoadingSpinner from '../../../../shared/components/loading-spinner'
 import { OwnerPaywallPrompt } from './owner-paywall-prompt'
 import { NonOwnerPaywallPrompt } from './non-owner-paywall-prompt'
-import { isVersionSelected } from '../../utils/history-details'
+import {
+  isVersionSelected,
+  ItemSelectionState,
+} from '../../utils/history-details'
 import { useUserContext } from '../../../../shared/context/user-context'
 import useDropdownActiveItem from '../../hooks/use-dropdown-active-item'
 import { useHistoryContext } from '../../context/history-context'
+import getMeta from '../../../../utils/meta'
+
+type CompletedTutorials = {
+  'react-history-buttons-tutorial': Date
+}
+
+const unselectedStates: ItemSelectionState[] = [
+  'aboveSelected',
+  'belowSelected',
+]
 
 function AllHistoryList() {
   const { id: currentUserId } = useUserContext()
@@ -84,6 +97,27 @@ function AllHistoryList() {
     }
   }, [updatesLoadingState])
 
+  const completedTutorials: CompletedTutorials = getMeta(
+    'ol-completedTutorials'
+  )
+
+  // only show tutorial popover if they havent dismissed ("completed") it yet
+  const hasCompletedHistTutorial = Boolean(
+    completedTutorials?.['react-history-buttons-tutorial']
+  )
+
+  // only show tutorial popover on the first icon
+  const firstUnselectedIndex = visibleUpdates.findIndex(update => {
+    const selectionState = isVersionSelected(
+      selection,
+      update.fromV,
+      update.toV
+    )
+    return unselectedStates.includes(selectionState)
+  })
+
+  const [showTutorial, setShowTutorial] = useState(!hasCompletedHistTutorial)
+
   return (
     <div ref={scrollerRef} className="history-all-versions-scroller">
       <div className="history-all-versions-container">
@@ -110,6 +144,9 @@ function AllHistoryList() {
               selected === 'aboveSelected' ||
               selected === 'belowSelected')
 
+          const hasTutorialOverlay =
+            index === firstUnselectedIndex && showTutorial
+
           return (
             <HistoryVersion
               key={`${update.fromV}_${update.toV}`}
@@ -129,6 +166,8 @@ function AllHistoryList() {
                 activeDropdownItem.isOpened && compareDropdownActive
               }
               dropdownActive={dropdownActive}
+              hasTutorialOverlay={hasTutorialOverlay}
+              setShowTutorial={setShowTutorial}
             />
           )
         })}

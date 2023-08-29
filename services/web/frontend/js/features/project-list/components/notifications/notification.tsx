@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Alert, AlertProps } from 'react-bootstrap'
 import Body from './body'
 import Action from './action'
-import Close from './close'
+import Close from '../../../../shared/components/close'
 import classnames from 'classnames'
 
 type NotificationProps = {

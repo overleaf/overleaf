@@ -137,3 +137,54 @@
     }
   }
 }
+
+.popover.dark-themed {
+  .popover-title {
+    color: @popover-dark-color;
+    background-color: @popover-dark-bg;
+    border-bottom: 0;
+    font-family: Lato, sans-serif;
+    font-weight: bold;
+  }
+
+  .popover-content {
+    color: @popover-dark-color;
+    background-color: @popover-dark-bg;
+  }
+
+  a {
+    color: #97b6e5;
+  }
+
+  padding: 0;
+  border: 1px solid @popover-dark-border-color;
+  max-width: @popover-dark-max-width;
+}
+
+.popover.dark-themed {
+  &.top > .arrow {
+    border-top-color: @popover-dark-arrow-outer-color;
+    &:after {
+      border-top-color: @popover-dark-arrow-color;
+    }
+  }
+  &.right > .arrow {
+    border-right-color: @popover-dark-arrow-outer-color;
+    &:after {
+      border-right-color: @popover-dark-arrow-color;
+    }
+  }
+  &.bottom > .arrow {
+    border-bottom-color: @popover-dark-arrow-outer-color;
+    &:after {
+      border-bottom-color: @popover-dark-arrow-color;
+    }
+  }
+
+  &.left > .arrow {
+    border-left-color: @popover-dark-arrow-outer-color;
+    &:after {
+      border-left-color: @popover-dark-arrow-color;
+    }
+  }
+}
