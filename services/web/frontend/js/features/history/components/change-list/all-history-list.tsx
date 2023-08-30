@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import HistoryVersion from './history-version'
 import LoadingSpinner from '../../../../shared/components/loading-spinner'
 import { OwnerPaywallPrompt } from './owner-paywall-prompt'
@@ -10,10 +10,14 @@ import {
 import { useUserContext } from '../../../../shared/context/user-context'
 import useDropdownActiveItem from '../../hooks/use-dropdown-active-item'
 import { useHistoryContext } from '../../context/history-context'
-import getMeta from '../../../../utils/meta'
+import { useEditorContext } from '../../../../shared/context/editor-context'
 
 type CompletedTutorials = {
   'react-history-buttons-tutorial': Date
+}
+type EditorTutorials = {
+  completedTutorials: CompletedTutorials
+  setCompletedTutorial: (key: string) => void
 }
 
 const unselectedStates: ItemSelectionState[] = [
@@ -97,14 +101,15 @@ function AllHistoryList() {
     }
   }, [updatesLoadingState])
 
-  const completedTutorials: CompletedTutorials = getMeta(
-    'ol-completedTutorials'
-  )
+  const { completedTutorials, setCompletedTutorial }: EditorTutorials =
+    useEditorContext()
 
   // only show tutorial popover if they havent dismissed ("completed") it yet
-  const hasCompletedHistTutorial = Boolean(
-    completedTutorials?.['react-history-buttons-tutorial']
-  )
+  const showTutorial = !completedTutorials?.['react-history-buttons-tutorial']
+
+  const completeTutorial = useCallback(() => {
+    setCompletedTutorial('react-history-buttons-tutorial')
+  }, [setCompletedTutorial])
 
   // only show tutorial popover on the first icon
   const firstUnselectedIndex = visibleUpdates.findIndex(update => {
@@ -115,8 +120,6 @@ function AllHistoryList() {
     )
     return unselectedStates.includes(selectionState)
   })
-
-  const [showTutorial, setShowTutorial] = useState(!hasCompletedHistTutorial)
 
   return (
     <div ref={scrollerRef} className="history-all-versions-scroller">
@@ -167,7 +170,7 @@ function AllHistoryList() {
               }
               dropdownActive={dropdownActive}
               hasTutorialOverlay={hasTutorialOverlay}
-              setShowTutorial={setShowTutorial}
+              completeTutorial={completeTutorial}
             />
           )
         })}

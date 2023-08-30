@@ -4,6 +4,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useState,
 } from 'react'
 import PropTypes from 'prop-types'
 import useScopeValue from '../hooks/use-scope-value'
@@ -79,6 +80,20 @@ export function EditorProvider({ children, settings }) {
   const [showSymbolPalette] = useScopeValue('editor.showSymbolPalette')
   const [toggleSymbolPalette] = useScopeValue('editor.toggleSymbolPalette')
 
+  const [completedTutorials, setCompletedTutorials] = useState(() =>
+    getMeta('ol-completedTutorials')
+  )
+
+  const setCompletedTutorial = useCallback(
+    tutorialKey => {
+      setCompletedTutorials({
+        ...completedTutorials,
+        [tutorialKey]: new Date(),
+      })
+    },
+    [completedTutorials]
+  )
+
   useEffect(() => {
     if (ide?.socket) {
       ide.socket.on('projectNameUpdated', setProjectName)
@@ -151,6 +166,8 @@ export function EditorProvider({ children, settings }) {
       showSymbolPalette,
       toggleSymbolPalette,
       insertSymbol,
+      completedTutorials,
+      setCompletedTutorial,
     }),
     [
       cobranding,
@@ -163,6 +180,8 @@ export function EditorProvider({ children, settings }) {
       showSymbolPalette,
       toggleSymbolPalette,
       insertSymbol,
+      completedTutorials,
+      setCompletedTutorial,
     ]
   )
 

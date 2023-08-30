@@ -49,7 +49,7 @@ type HistoryVersionProps = {
   setActiveDropdownItem: ActiveDropdown['setActiveDropdownItem']
   closeDropdownForItem: ActiveDropdown['closeDropdownForItem']
   hasTutorialOverlay?: boolean
-  setShowTutorial: (show: boolean) => void
+  completeTutorial: () => void
 }
 
 function HistoryVersion({
@@ -68,7 +68,7 @@ function HistoryVersion({
   setActiveDropdownItem,
   closeDropdownForItem,
   hasTutorialOverlay = false,
-  setShowTutorial,
+  completeTutorial,
 }: HistoryVersionProps) {
   const orderedLabels = orderBy(update.labels, ['created_at'], ['desc'])
   const iconRef = useRef<HTMLDivElement>(null)
@@ -81,10 +81,16 @@ function HistoryVersion({
   // wait for the layout to settle before showing popover, to avoid a flash/ instant move
   const [layoutSettled, setLayoutSettled] = useState(false)
 
+  const [resizing, setResizing] = useState(false)
+
+  // Determine whether the tutorial popover should be shown or not.
+  // This is a slightly unusual pattern, as in theory we could control this via
+  // the `show` prop. However we were concerned about the perf impact of every
+  // history version having a (hidden) popover that won't ever be triggered.
   useEffect(() => {
-    if (iconRef.current && hasTutorialOverlay && layoutSettled) {
+    if (iconRef.current && hasTutorialOverlay && layoutSettled && !resizing) {
       const dismissModal = () => {
-        setShowTutorial(false)
+        completeTutorial()
         runAsync(completeHistoryTutorial()).catch(console.error)
       }
 
@@ -98,7 +104,7 @@ function HistoryVersion({
       setPopover(
         <Overlay
           placement="left"
-          show={hasTutorialOverlay}
+          show
           target={iconRef.current ?? undefined}
           shouldUpdatePosition
         >
@@ -114,17 +120,25 @@ function HistoryVersion({
           >
             <Trans
               i18nKey="react_history_tutorial_content"
-              components={[compareIcon]} // eslint-disable-line react/jsx-key
+              components={[
+                compareIcon,
+                <a href="https://www.overleaf.com/learn/latex/Using_the_History_feature" />, // eslint-disable-line jsx-a11y/anchor-has-content, react/jsx-key
+              ]}
             />
-            <a href="https://www.overleaf.com/learn/latex/Using_the_History_feature">
-              {' '}
-              {t('react_history_tutorial_learn_more')}
-            </a>
           </Popover>
         </Overlay>
       )
+    } else {
+      setPopover(null)
     }
-  }, [hasTutorialOverlay, runAsync, setShowTutorial, t, layoutSettled])
+  }, [
+    hasTutorialOverlay,
+    runAsync,
+    t,
+    layoutSettled,
+    completeTutorial,
+    resizing,
+  ])
 
   // give the components time to position before showing popover so we dont get a instant position change
   useEffect(() => {
@@ -144,11 +158,11 @@ function HistoryVersion({
       if (timer) {
         window.clearTimeout(timer)
       } else {
-        setShowTutorial(false)
+        setResizing(true)
       }
       timer = window.setTimeout(() => {
         timer = null
-        setShowTutorial(true)
+        setResizing(false)
       }, 500)
     }
 
@@ -157,7 +171,7 @@ function HistoryVersion({
       window.addEventListener('resize', handleResize)
       return () => window.removeEventListener('resize', handleResize)
     }
-  }, [hasTutorialOverlay, setShowTutorial])
+  }, [hasTutorialOverlay])
 
   const closeDropdown = useCallback(() => {
     closeDropdownForItem(update, 'moreOptions')
@@ -167,7 +181,7 @@ function HistoryVersion({
 
   return (
     <>
-      {hasTutorialOverlay && popover}
+      {popover}
       {showDivider ? (
         <div
           className={classNames({
