@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import Icon from '../../../../shared/components/icon'
 import { Button } from 'react-bootstrap'
-import { postJSON } from '../../../../infrastructure/fetch-json'
+import { FetchError, postJSON } from '../../../../infrastructure/fetch-json'
 import useAsync from '../../../../shared/hooks/use-async'
 import { UserEmailData } from '../../../../../../types/user-email'
 import { useUserEmailsContext } from '../../context/user-email-context'
@@ -15,7 +15,7 @@ function ResendConfirmationEmailButton({
   email,
 }: ResendConfirmationEmailButtonProps) {
   const { t } = useTranslation()
-  const { isLoading, isError, runAsync } = useAsync()
+  const { error, isLoading, isError, runAsync } = useAsync()
   const { state, setLoading: setUserEmailsContextLoading } =
     useUserEmailsContext()
 
@@ -42,6 +42,9 @@ function ResendConfirmationEmailButton({
     )
   }
 
+  const rateLimited =
+    error && error instanceof FetchError && error.response?.status === 429
+
   return (
     <>
       <Button
@@ -54,7 +57,11 @@ function ResendConfirmationEmailButton({
       </Button>
       <br />
       {isError && (
-        <div className="text-danger">{t('generic_something_went_wrong')}</div>
+        <div className="text-danger">
+          {rateLimited
+            ? t('too_many_requests')
+            : t('generic_something_went_wrong')}
+        </div>
       )}
     </>
   )

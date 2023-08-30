@@ -187,7 +187,7 @@ const rateLimiters = {
     duration: 60,
   }),
   resendConfirmation: new RateLimiter('resend-confirmation', {
-    points: 10,
+    points: 1,
     duration: 60,
   }),
   sendChatMessage: new RateLimiter('send-chat-message', {

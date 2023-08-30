@@ -1,6 +1,6 @@
 import { useState, useEffect, useLayoutEffect } from 'react'
 import useAsync from '../../../../../shared/hooks/use-async'
-import { postJSON } from '../../../../../infrastructure/fetch-json'
+import { FetchError, postJSON } from '../../../../../infrastructure/fetch-json'
 import { Trans, useTranslation } from 'react-i18next'
 import { Institution } from '../../../../../../../types/institution'
 import { Button } from 'react-bootstrap'
@@ -24,7 +24,7 @@ function ReconfirmationInfoPrompt({
 }: ReconfirmationInfoPromptProps) {
   const { t } = useTranslation()
   const { samlInitPath } = getMeta('ol-ExposedSettings') as ExposedSettings
-  const { isLoading, isError, isSuccess, runAsync } = useAsync()
+  const { error, isLoading, isError, isSuccess, runAsync } = useAsync()
   const { state, setLoading: setUserEmailsContextLoading } =
     useUserEmailsContext()
   const [isPending, setIsPending] = useState(false)
@@ -59,6 +59,9 @@ function ReconfirmationInfoPrompt({
     }
   }
 
+  const rateLimited =
+    isError && error instanceof FetchError && error.response?.status === 429
+
   if (hasSent) {
     return (
       <div>
@@ -87,7 +90,11 @@ function ReconfirmationInfoPrompt({
         )}
         <br />
         {isError && (
-          <div className="text-danger">{t('generic_something_went_wrong')}</div>
+          <div className="text-danger">
+            {rateLimited
+              ? t('too_many_requests')
+              : t('generic_something_went_wrong')}
+          </div>
         )}
       </div>
     )
@@ -117,7 +124,11 @@ function ReconfirmationInfoPrompt({
         </Button>
         <br />
         {isError && (
-          <div className="text-danger">{t('generic_something_went_wrong')}</div>
+          <div className="text-danger">
+            {rateLimited
+              ? t('too_many_requests')
+              : t('generic_something_went_wrong')}
+          </div>
         )}
       </div>
     </>

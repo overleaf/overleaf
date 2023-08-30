@@ -13,6 +13,16 @@ const {
   UserAuditLogEntry,
 } = require('../../../../app/src/models/UserAuditLogEntry')
 
+// Import the rate limiter so we can clear it between tests
+
+const {
+  RateLimiter,
+} = require('../../../../app/src/infrastructure/RateLimiter')
+
+const rateLimiters = {
+  resendConfirmation: new RateLimiter('resend-confirmation'),
+}
+
 let globalUserNum = Settings.test.counterInit
 
 class UserHelper {
@@ -438,6 +448,8 @@ class UserHelper {
   }
 
   async confirmEmail(userId, email) {
+    // clear ratelimiting on resend confirmation endpoint
+    await rateLimiters.resendConfirmation.delete(userId)
     // UserHelper.createUser does not create a confirmation token
     let response = await this.fetch('/user/emails/resend_confirmation', {
       method: 'POST',
