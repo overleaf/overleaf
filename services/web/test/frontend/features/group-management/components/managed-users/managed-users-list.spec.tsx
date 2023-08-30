@@ -32,14 +32,10 @@ describe('ManagedUsersList', function () {
       cy.window().then(win => {
         win.metaAttributesCache.set('ol-users', users)
       })
-      const handleSelectAllClick = () => {}
 
       cy.mount(
         <GroupMembersProvider>
-          <ManagedUsersList
-            handleSelectAllClick={handleSelectAllClick}
-            groupId={groupId}
-          />
+          <ManagedUsersList groupId={groupId} />
         </GroupMembersProvider>
       )
     })
@@ -72,18 +68,13 @@ describe('ManagedUsersList', function () {
   })
 
   describe('empty user list', function () {
-    const handleSelectAllClick = () => {}
-
     beforeEach(function () {
       cy.window().then(win => {
         win.metaAttributesCache.set('ol-users', [])
       })
       cy.mount(
         <GroupMembersProvider>
-          <ManagedUsersList
-            handleSelectAllClick={handleSelectAllClick}
-            groupId={groupId}
-          />
+          <ManagedUsersList groupId={groupId} />
         </GroupMembersProvider>
       )
     })

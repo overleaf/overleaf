@@ -1,13 +1,13 @@
 import moment from 'moment'
-import { type Dispatch, type SetStateAction, useCallback } from 'react'
+import { type Dispatch, type SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { User } from '../../../../../../types/group-management/user'
 import Badge from '../../../../shared/components/badge'
 import Tooltip from '../../../../shared/components/tooltip'
 import type { ManagedUserAlert } from '../../utils/types'
-import { useGroupMembersContext } from '../../context/group-members-context'
 import ManagedUserStatus from './managed-user-status'
 import ManagedUserDropdownButton from './managed-user-dropdown-button'
+import ManagedUsersSelectUserCheckbox from './managed-users-select-user-checkbox'
 
 type ManagedUserRowProps = {
   user: User
@@ -23,42 +23,13 @@ export default function ManagedUserRow({
   groupId,
 }: ManagedUserRowProps) {
   const { t } = useTranslation()
-  const { selectedUsers, selectUser, unselectUser } = useGroupMembersContext()
-
-  const handleSelectUser = useCallback(
-    (event, user) => {
-      if (event.target.checked) {
-        selectUser(user)
-      } else {
-        unselectUser(user)
-      }
-    },
-    [selectUser, unselectUser]
-  )
-
-  const selected = selectedUsers.includes(user)
 
   return (
     <tr
       key={`user-${user.email}`}
       className={`managed-user-row ${user.invite ? 'text-muted' : ''}`}
     >
-      <td className="cell-checkbox">
-        {user.enrollment?.managedBy ? null : (
-          <>
-            <label htmlFor={`select-user-${user.email}`} className="sr-only">
-              {t('select_user')}
-            </label>
-            <input
-              className="select-item"
-              id={`select-user-${user.email}`}
-              type="checkbox"
-              checked={selected}
-              onChange={e => handleSelectUser(e, user)}
-            />
-          </>
-        )}
-      </td>
+      <ManagedUsersSelectUserCheckbox user={user} />
       <td className="cell-email">
         <span>
           {user.email}

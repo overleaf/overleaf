@@ -1,7 +1,6 @@
 import React, { useCallback, useState } from 'react'
 import { Button, Col, Form, FormControl, Row } from 'react-bootstrap'
 import { Trans, useTranslation } from 'react-i18next'
-import { User } from '../../../../../types/group-management/user'
 import MaterialIcon from '../../../shared/components/material-icon'
 import useWaitForI18n from '../../../shared/hooks/use-wait-for-i18n'
 import getMeta from '../../../utils/meta'
@@ -16,8 +15,6 @@ export default function GroupMembers() {
   const {
     users,
     selectedUsers,
-    selectAllUsers,
-    unselectAllUsers,
     addMembers,
     removeMembers,
     removeMemberLoading,
@@ -33,17 +30,6 @@ export default function GroupMembers() {
   const groupSize: number = getMeta('ol-groupSize')
   const managedUsersActive: any = getMeta('ol-managedUsersActive')
 
-  const handleSelectAllClick = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (e.target.checked) {
-        selectAllUsers()
-      } else {
-        unselectAllUsers()
-      }
-    },
-    [selectAllUsers, unselectAllUsers]
-  )
-
   const handleEmailsChange = useCallback(
     e => {
       setEmailString(e.target.value)
@@ -53,13 +39,6 @@ export default function GroupMembers() {
 
   if (!isReady) {
     return null
-  }
-
-  const shouldShowRemoveUsersButton = () => {
-    return (
-      selectedUsers.length > 0 &&
-      !selectedUsers.find((u: User) => !!u?.enrollment?.managedBy)
-    )
   }
 
   const onAddMembersSubmit = (e: React.FormEvent<Form>) => {
@@ -98,7 +77,7 @@ export default function GroupMembers() {
                   </Button>
                 ) : (
                   <>
-                    {shouldShowRemoveUsersButton() && (
+                    {selectedUsers.length > 0 && (
                       <Button bsStyle="danger" onClick={removeMembers}>
                         {t('remove_from_group')}
                       </Button>
@@ -111,12 +90,9 @@ export default function GroupMembers() {
             <div className="row-spaced-small">
               <ErrorAlert error={removeMemberError} />
               {managedUsersActive ? (
-                <ManagedUsersList
-                  handleSelectAllClick={handleSelectAllClick}
-                  groupId={groupId}
-                />
+                <ManagedUsersList groupId={groupId} />
               ) : (
-                <GroupMembersList handleSelectAllClick={handleSelectAllClick} />
+                <GroupMembersList />
               )}
             </div>
             <hr />

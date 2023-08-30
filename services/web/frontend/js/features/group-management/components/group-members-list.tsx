@@ -1,19 +1,31 @@
+import { useCallback } from 'react'
 import { Col, Row } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import Tooltip from '../../../shared/components/tooltip'
 import { useGroupMembersContext } from '../context/group-members-context'
 import GroupMemberRow from './group-member-row'
 
-type GroupMembersListProps = {
-  handleSelectAllClick: (e: any) => void
-}
-
-export default function GroupMembersList({
-  handleSelectAllClick,
-}: GroupMembersListProps) {
+export default function GroupMembersList() {
   const { t } = useTranslation()
-  const { selectedUsers, users, selectUser, unselectUser } =
-    useGroupMembersContext()
+  const {
+    selectedUsers,
+    users,
+    selectUser,
+    unselectUser,
+    selectAllUsers,
+    unselectAllUsers,
+  } = useGroupMembersContext()
+
+  const handleSelectAllClick = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.checked) {
+        selectAllUsers()
+      } else {
+        unselectAllUsers()
+      }
+    },
+    [selectAllUsers, unselectAllUsers]
+  )
 
   return (
     <ul className="list-unstyled structured-list">

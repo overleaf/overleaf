@@ -8,23 +8,20 @@ import type { ManagedUserAlert } from '../../utils/types'
 import ManagedUserRow from './managed-user-row'
 import OffboardManagedUserModal from './offboard-managed-user-modal'
 import ManagedUsersListAlert from './managed-users-list-alert'
+import ManagedUsersSelectAllCheckbox from './managed-users-select-all-checkbox'
 
 type ManagedUsersListProps = {
-  handleSelectAllClick: (e: any) => void
   groupId: string
 }
 
-export default function ManagedUsersList({
-  handleSelectAllClick,
-  groupId,
-}: ManagedUsersListProps) {
+export default function ManagedUsersList({ groupId }: ManagedUsersListProps) {
   const { t } = useTranslation()
   const [userToOffboard, setUserToOffboard] = useState<User | undefined>(
     undefined
   )
   const [managedUserAlert, setManagedUserAlert] =
     useState<ManagedUserAlert>(undefined)
-  const { selectedUsers, users } = useGroupMembersContext()
+  const { users } = useGroupMembersContext()
 
   return (
     <div>
@@ -42,18 +39,7 @@ export default function ManagedUsersList({
               <table className="managed-users-table">
                 <thead>
                   <tr>
-                    <td className="cell-checkbox">
-                      <label htmlFor="select-all" className="sr-only">
-                        {t('select_all')}
-                      </label>
-                      <input
-                        className="select-all"
-                        id="select-all"
-                        type="checkbox"
-                        onChange={handleSelectAllClick}
-                        checked={selectedUsers.length === users.length}
-                      />
-                    </td>
+                    <ManagedUsersSelectAllCheckbox />
                     <td className="cell-email">
                       <span className="header">{t('email')}</span>
                     </td>

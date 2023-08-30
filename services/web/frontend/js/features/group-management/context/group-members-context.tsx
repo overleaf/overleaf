@@ -24,6 +24,7 @@ export type GroupMembersContextValue = {
   selectUser: (user: User) => void
   selectAllUsers: () => void
   unselectAllUsers: () => void
+  selectAllNonManagedUsers: () => void
   unselectUser: (user: User) => void
   addMembers: (emailString: string) => void
   removeMembers: (e: any) => void
@@ -50,6 +51,7 @@ export function GroupMembersProvider({ children }: GroupMembersProviderProps) {
     selectedUsers,
     selectAllUsers,
     unselectAllUsers,
+    selectAllNonManagedUsers,
     selectUser,
     unselectUser,
   } = useUserSelection(getMeta('ol-users', []))
@@ -147,6 +149,7 @@ export function GroupMembersProvider({ children }: GroupMembersProviderProps) {
       selectedUsers,
       selectAllUsers,
       unselectAllUsers,
+      selectAllNonManagedUsers,
       selectUser,
       unselectUser,
       addMembers,
@@ -163,6 +166,7 @@ export function GroupMembersProvider({ children }: GroupMembersProviderProps) {
       selectedUsers,
       selectAllUsers,
       unselectAllUsers,
+      selectAllNonManagedUsers,
       selectUser,
       unselectUser,
       addMembers,

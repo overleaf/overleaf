@@ -152,6 +152,8 @@ describe('group members, with managed users', function () {
         cy.get('.select-item').should('be.checked')
       })
     })
+
+    cy.get('button').contains('Remove from group').click()
   })
 
   it('remove a member', function () {
