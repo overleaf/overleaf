@@ -130,7 +130,7 @@ async function plansPage(req, res) {
     plansPageViewSegmentation[inrGeoBannerSplitTestName] = inrGeoBannerVariant
   }
 
-  let showBackToSchoolBanner
+  let showBackToSchoolBanner = true
   const userId = SessionManager.getLoggedInUserId(req.session)
   if (userId) {
     const usersBestSubscription =
