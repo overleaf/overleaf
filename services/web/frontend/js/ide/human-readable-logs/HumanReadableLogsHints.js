@@ -1,5 +1,8 @@
 import PropTypes from 'prop-types'
-import packageSuggestions from './HumanReadableLogsPackageSuggestions'
+import {
+  packageSuggestionsForCommands,
+  packageSuggestionsForEnvironments,
+} from './HumanReadableLogsPackageSuggestions'
 
 function WikiLink({ url, children }) {
   if (window.wikiEnabled) {
@@ -162,22 +165,25 @@ const hints = {
     ),
   },
   hint_undefined_control_sequence: {
-    extraInfoURL:
-      'https://www.overleaf.com/learn/Errors/Undefined_control_sequence',
     formattedContent: details => {
-      if (details?.length && packageSuggestions.has(details[0])) {
+      if (details?.length && packageSuggestionsForCommands.has(details[0])) {
         const command = details[0]
-        const suggestion = packageSuggestions.get(command)
+        const suggestion = packageSuggestionsForCommands.get(command)
         return (
           <>
-            Undefined control sequence. You have used the command{' '}
-            <code>{command}</code>, which is part of the{' '}
-            <code>{suggestion.name}</code> package. Make sure to include the
-            package in your{' '}
-            <WikiLink url="https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#The_preamble_of_a_document">
-              preamble
-            </WikiLink>{' '}
-            using <code>{suggestion.command}</code>.
+            <p>
+              We think you’ve got a missing package! The <code>{command}</code>{' '}
+              command won't work unless you include
+              <code>{suggestion.command}</code> in your{' '}
+              <WikiLink url="https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#The_preamble_of_a_document">
+                document preamble
+              </WikiLink>
+              .{' '}
+              <WikiLink url="https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#Finding_and_using_LaTeX_packages">
+                Learn more about packages
+              </WikiLink>
+              .
+            </p>
           </>
         )
       }
@@ -188,6 +194,61 @@ const hints = {
           a package, make sure you have included the package in your preamble
           using <code>\usepackage</code>
           {'{...}'}.
+          <div className="log-entry-content-link">
+            <a
+              href="https://www.overleaf.com/learn/Errors/Undefined_control_sequence"
+              target="_blank"
+              rel="noopener"
+            >
+              Learn more
+            </a>
+          </div>
+        </>
+      )
+    },
+  },
+  hint_undefined_environment: {
+    formattedContent: details => {
+      if (
+        details?.length &&
+        packageSuggestionsForEnvironments.has(details[0])
+      ) {
+        const environment = details[0]
+        const suggestion = packageSuggestionsForEnvironments.get(environment)
+        return (
+          <>
+            <p>
+              We think you’ve got a missing package! The{' '}
+              <code>{environment}</code> environment won't work unless you
+              include <code>{suggestion.command}</code> in your{' '}
+              <WikiLink url="https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#The_preamble_of_a_document">
+                document preamble
+              </WikiLink>
+              .{' '}
+              <WikiLink url="https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#Finding_and_using_LaTeX_packages">
+                Learn more about packages
+              </WikiLink>
+              .
+            </p>
+          </>
+        )
+      }
+      return (
+        <>
+          You have created an environment (using \begin
+          {'{…}'} and \end
+          {'{…}'} commands) which is not recognized. Make sure you have included
+          the required package for that environment in your preamble, and that
+          the environment is spelled correctly.
+          <div className="log-entry-content-link">
+            <a
+              href="https://www.overleaf.com/learn/Errors%2FLaTeX%20Error%3A%20Environment%20XXX%20undefined"
+              target="_blank"
+              rel="noopener"
+            >
+              Learn more
+            </a>
+          </div>
         </>
       )
     },
@@ -336,19 +397,6 @@ const hints = {
         \author. To fix this, include an author in your preamble using the
         \author
         {'{…}'} command.
-      </>
-    ),
-  },
-  hint_environment_undefined: {
-    extraInfoURL:
-      'https://www.overleaf.com/learn/Errors%2FLaTeX%20Error%3A%20Environment%20XXX%20undefined',
-    formattedContent: () => (
-      <>
-        You have created an environment (using \begin
-        {'{…}'} and \end
-        {'{…}'} commands) which is not recognized. Make sure you have included
-        the required package for that environment in your preamble, and that the
-        environment is spelled correctly.
       </>
     ),
   },

@@ -1,5 +1,8 @@
 /* eslint-disable no-useless-escape */
-import packageSuggestions from './HumanReadableLogsPackageSuggestions'
+import {
+  packageSuggestionsForCommands,
+  packageSuggestionsForEnvironments,
+} from './HumanReadableLogsPackageSuggestions'
 
 const rules = [
   {
@@ -48,10 +51,34 @@ const rules = [
     contentRegex:
       /^(?:l\.[0-9]+|<(?:recently read|inserted text|to be read again)>)\s*(\\\S+)/,
     improvedTitle: (currentTitle, details) => {
-      if (details?.length && packageSuggestions.has(details[0])) {
+      if (details?.length && packageSuggestionsForCommands.has(details[0])) {
         const command = details[0]
-        const suggestion = packageSuggestions.get(command)
-        return `${suggestion.command} is missing.`
+        const suggestion = packageSuggestionsForCommands.get(command)
+        return (
+          <span>
+            Is <code>{suggestion.command}</code> missing?
+          </span>
+        )
+      }
+      return currentTitle
+    },
+  },
+  {
+    ruleId: 'hint_undefined_environment',
+    regexToMatch: /LaTeX Error: Environment .+ undefined/,
+    contentRegex: /\\begin\{(\S+)\}/,
+    improvedTitle: (currentTitle, details) => {
+      if (
+        details?.length &&
+        packageSuggestionsForEnvironments.has(details[0])
+      ) {
+        const environment = details[0]
+        const suggestion = packageSuggestionsForEnvironments.get(environment)
+        return (
+          <span>
+            Is <code>{suggestion.command}</code> missing?
+          </span>
+        )
       }
       return currentTitle
     },
@@ -107,10 +134,6 @@ const rules = [
   {
     ruleId: 'hint_no_author_given',
     regexToMatch: /No \\author given/,
-  },
-  {
-    ruleId: 'hint_environment_undefined',
-    regexToMatch: /LaTeX Error: Environment .+ undefined/,
   },
   {
     ruleId: 'hint_somethings_wrong_perhaps_a_missing_item',
