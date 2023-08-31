@@ -95,8 +95,7 @@ describe('<PdfPreview/>', function () {
     cy.contains('Your Paper')
   })
 
-  // eslint-disable-next-line mocha/no-skipped-tests
-  it.skip('does not compile while compiling', function () {
+  it('does not compile while compiling', function () {
     let counter = 0
     cy.interceptDeferredCompile(() => counter++).then(
       resolveDeferredCompile => {
@@ -123,10 +122,10 @@ describe('<PdfPreview/>', function () {
           resolveDeferredCompile()
 
           // wait for the original compile to finish
-          cy.waitForCompile({ pdf: true })
-
-          // NOTE: difficult to assert that a second request won't be sent, at some point
-          expect(counter).to.equal(1)
+          cy.waitForCompile().then(() => {
+            // NOTE: difficult to assert that a second request won't be sent, at some point
+            expect(counter).to.equal(1)
+          })
         })
       }
     )

@@ -433,7 +433,6 @@ describe('change list', function () {
           }).click()
         })
       })
-      cy.findByRole('dialog').as('modal')
       cy.intercept('POST', '/project/*/labels', req => {
         req.reply(200, {
           id: '64633ee158e9ef7da614c000',
@@ -445,7 +444,7 @@ describe('change list', function () {
         })
       }).as('addLabel')
       const newLabel = 'my new label'
-      cy.get('@modal').within(() => {
+      cy.findByRole('dialog').within(() => {
         cy.findByRole('heading', { name: /add label/i })
         cy.findByRole('button', { name: /cancel/i })
         cy.findByRole('button', { name: /add label/i }).should('be.disabled')
