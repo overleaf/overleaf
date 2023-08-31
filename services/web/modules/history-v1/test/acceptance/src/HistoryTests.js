@@ -295,6 +295,12 @@ describe('History', function () {
           (appRoute.route != null ? appRoute.route.path : undefined) ===
           '/api/projects/:project_id/version/:version/zip'
       )
+      MockV1HistoryApi.app.get(
+        '/api/projects/:project_id/version/:version/zip',
+        (req, res, next) => {
+          res.sendStatus(500)
+        }
+      )
       MockV1HistoryApi.app.post(
         '/api/projects/:project_id/version/:version/zip',
         (req, res, next) => {
@@ -309,7 +315,7 @@ describe('History', function () {
       MockV1HistoryApi.applyRoutes()
     })
 
-    it('should produce 404 when post request produces 404', function (done) {
+    it('should produce 500', function (done) {
       this.owner.createProject('example-project', (error, projectId) => {
         if (error) {
           return done(error)

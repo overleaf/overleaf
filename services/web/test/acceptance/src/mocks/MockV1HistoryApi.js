@@ -17,6 +17,7 @@ class MockV1HistoryApi extends AbstractMockApi {
     this.app.get(
       '/api/projects/:project_id/version/:version/zip',
       (req, res, next) => {
+        this.sentChunks++
         zipAttachment(
           res,
           `Mock zip for ${req.params.project_id} at version ${req.params.version}`,

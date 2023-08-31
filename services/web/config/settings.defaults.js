@@ -812,7 +812,12 @@ module.exports = {
     managedGroupEnrollmentInvite: [],
   },
 
-  moduleImportSequence: ['launchpad', 'server-ce-scripts', 'user-activate'],
+  moduleImportSequence: [
+    'history-v1',
+    'launchpad',
+    'server-ce-scripts',
+    'user-activate',
+  ],
 
   csp: {
     enabled: process.env.CSP_ENABLED === 'true',
