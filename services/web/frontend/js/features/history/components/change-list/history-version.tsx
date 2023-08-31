@@ -178,7 +178,6 @@ function HistoryVersion({
   }, [closeDropdownForItem, update])
 
   const updateRange = updateRangeForUpdate(update)
-
   return (
     <>
       {popover}
@@ -187,7 +186,7 @@ function HistoryVersion({
           className={classNames({
             'history-version-divider-container': true,
             'version-element-within-selected ':
-              selected === 'withinSelected' || selected === 'selectedEdge',
+              selected === 'withinSelected' || selected === 'lowerSelected',
           })}
         >
           <hr className="history-version-divider" />
@@ -197,7 +196,7 @@ function HistoryVersion({
         <div
           className={classNames({
             'version-element-within-selected ':
-              selected === 'withinSelected' || selected === 'selectedEdge',
+              selected === 'withinSelected' || selected === 'lowerSelected',
           })}
         >
           <time className="history-version-day">

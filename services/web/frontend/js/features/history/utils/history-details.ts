@@ -38,7 +38,8 @@ export const getProjectOpDoc = (projectOp: ProjectOp) => {
 }
 
 export type ItemSelectionState =
-  | 'selectedEdge'
+  | 'upperSelected'
+  | 'lowerSelected'
   | 'withinSelected'
   | 'aboveSelected'
   | 'belowSelected'
@@ -73,11 +74,11 @@ export function isVersionSelected(
 
       // Condition for selectedEdge when the comparing versions are from labels list
       if (fromV === toV) {
-        if (
-          toV === selection.updateRange.fromV ||
-          fromV === selection.updateRange.toV
-        ) {
-          return 'selectedEdge'
+        if (fromV === selection.updateRange.toV) {
+          return 'upperSelected'
+        }
+        if (toV === selection.updateRange.fromV) {
+          return 'lowerSelected'
         }
       }
 
@@ -90,11 +91,11 @@ export function isVersionSelected(
         return 'belowSelected'
       }
 
-      if (
-        fromV === selection.updateRange.fromV ||
-        toV === selection.updateRange.toV
-      ) {
-        return 'selectedEdge'
+      if (toV === selection.updateRange.toV) {
+        return 'upperSelected'
+      }
+      if (fromV === selection.updateRange.fromV) {
+        return 'lowerSelected'
       }
     } else if (toV === selection.updateRange.toV) {
       // single version mode

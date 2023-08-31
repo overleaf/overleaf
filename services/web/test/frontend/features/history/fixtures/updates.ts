@@ -3,8 +3,33 @@ import { USER_ID, USER_EMAIL } from '../../../helpers/editor-providers'
 export const updates = {
   updates: [
     {
-      fromV: 3,
-      toV: 4,
+      fromV: 5,
+      toV: 6,
+      meta: {
+        users: [
+          {
+            first_name: 'testuser',
+            last_name: '',
+            email: USER_EMAIL,
+            id: USER_ID,
+          },
+          {
+            first_name: 'john.doe',
+            last_name: '',
+            email: 'john.doe@test.com',
+            id: '631710ab1094c5002647184e',
+          },
+        ],
+        start_ts: 1681220036519,
+        end_ts: 1681220036619,
+      },
+      labels: [],
+      pathnames: ['name.tex'],
+      project_ops: [],
+    },
+    {
+      fromV: 4,
+      toV: 5,
       meta: {
         users: [
           {
@@ -43,8 +68,8 @@ export const updates = {
       project_ops: [{ add: { pathname: 'name.tex' }, atV: 3 }],
     },
     {
-      fromV: 1,
-      toV: 3,
+      fromV: 2,
+      toV: 4,
       meta: {
         users: [
           {
@@ -62,8 +87,8 @@ export const updates = {
       project_ops: [],
     },
     {
-      fromV: 0,
-      toV: 1,
+      fromV: 1,
+      toV: 2,
       meta: {
         users: [
           {
@@ -92,8 +117,33 @@ export const updates = {
           created_at: '2023-04-12T14:15:20.814Z',
         },
       ],
+      pathnames: ['main.tex'],
+      project_ops: [],
+    },
+    {
+      fromV: 0,
+      toV: 1,
+      meta: {
+        users: [
+          {
+            first_name: 'testuser',
+            last_name: '',
+            email: USER_EMAIL,
+            id: USER_ID,
+          },
+          {
+            first_name: 'john.doe',
+            last_name: '',
+            email: 'john.doe@test.com',
+            id: '631710ab1094c5002647184e',
+          },
+        ],
+        start_ts: 1669218226500,
+        end_ts: 1669218226600,
+      },
+      labels: [],
       pathnames: [],
-      project_ops: [{ add: { pathname: 'main.tex' }, atV: 0 }],
+      project_ops: [{ add: { pathname: 'main.tex' }, atV: 3 }],
     },
   ],
 }

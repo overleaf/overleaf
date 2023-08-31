@@ -102,10 +102,10 @@ describe('change list', function () {
 
       cy.findByLabelText(/all history/i).click({ force: true })
       cy.findAllByTestId('history-version-details').as('details')
-      cy.get('@details').should('have.length', 3)
-      // 1st details entry
+      cy.get('@details').should('have.length', 5)
+      // start with 2nd details entry, as first has no tags
       cy.get('@details')
-        .eq(0)
+        .eq(1)
         .within(() => {
           cy.findAllByTestId('history-version-badge').as('tags')
         })
@@ -118,15 +118,15 @@ describe('change list', function () {
           cy.findByRole('button', { name: /delete/i })
         })
       )
-      // 2nd details entry
-      cy.get('@details')
-        .eq(1)
-        .within(() => {
-          cy.findAllByTestId('history-version-badge').should('have.length', 0)
-        })
       // 3rd details entry
       cy.get('@details')
         .eq(2)
+        .within(() => {
+          cy.findAllByTestId('history-version-badge').should('have.length', 0)
+        })
+      // 4th details entry
+      cy.get('@details')
+        .eq(3)
         .within(() => {
           cy.findAllByTestId('history-version-badge').as('tags')
         })
@@ -141,9 +141,10 @@ describe('change list', function () {
       )
       cy.findByLabelText(/labels/i).click({ force: true })
       cy.findAllByTestId('history-version-details').as('details')
-      cy.get('@details').should('have.length', 2)
+      // first details on labels is always "current version", start testing on second
+      cy.get('@details').should('have.length', 3)
       cy.get('@details')
-        .eq(0)
+        .eq(1)
         .within(() => {
           cy.findAllByTestId('history-version-badge').as('tags')
         })
@@ -151,7 +152,7 @@ describe('change list', function () {
       cy.get('@tags').eq(0).should('contain.text', 'tag-2')
       cy.get('@tags').eq(1).should('contain.text', 'tag-1')
       cy.get('@details')
-        .eq(1)
+        .eq(2)
         .within(() => {
           cy.findAllByTestId('history-version-badge').as('tags')
         })
@@ -174,7 +175,7 @@ describe('change list', function () {
       cy.findByLabelText(/all history/i).click({ force: true })
 
       const labelToDelete = 'tag-2'
-      cy.findAllByTestId('history-version-details').eq(0).as('details')
+      cy.findAllByTestId('history-version-details').eq(1).as('details')
       cy.get('@details').within(() => {
         cy.findAllByTestId('history-version-badge').eq(0).as('tag')
       })
@@ -236,7 +237,7 @@ describe('change list', function () {
       const stub = cy.stub().as('diffStub')
       cy.intercept('GET', '/project/*/filetree/diff*', stub).as('diff')
 
-      cy.findAllByTestId('history-version-details').eq(1).as('details')
+      cy.findAllByTestId('history-version-details').eq(2).as('details')
       cy.get('@details').click() // 1st click
       cy.wait('@diff')
       cy.get('@details').click() // 2nd click
@@ -263,7 +264,7 @@ describe('change list', function () {
 
     it('shows the date of the version', function () {
       cy.findAllByTestId('history-version-details')
-        .eq(0)
+        .eq(1)
         .within(() => {
           cy.findByTestId('history-version-metadata-time').should(
             'have.text',
@@ -274,7 +275,7 @@ describe('change list', function () {
 
     it('shows change action', function () {
       cy.findAllByTestId('history-version-details')
-        .eq(0)
+        .eq(1)
         .within(() => {
           cy.findByTestId('history-version-change-action').should(
             'have.text',
@@ -285,22 +286,22 @@ describe('change list', function () {
 
     it('shows changed document name', function () {
       cy.findAllByTestId('history-version-details')
-        .eq(1)
+        .eq(2)
         .within(() => {
           cy.findByTestId('history-version-change-doc').should(
             'have.text',
-            updates.updates[1].pathnames[0]
+            updates.updates[2].pathnames[0]
           )
         })
     })
 
     it('shows users', function () {
       cy.findAllByTestId('history-version-details')
-        .eq(0)
+        .eq(1)
         .within(() => {
           cy.findByTestId('history-version-metadata-users')
             .should('contain.text', 'You')
-            .and('contain.text', updates.updates[0].meta.users[1].first_name)
+            .and('contain.text', updates.updates[1].meta.users[1].first_name)
         })
     })
   })
@@ -341,35 +342,45 @@ describe('change list', function () {
         })
       cy.findByLabelText(/all history/i).click({ force: true })
       cy.findAllByTestId('history-version-details').should($versions => {
-        const [first, ...rest] = Array.from($versions)
-        expect(first.dataset.selected === 'selected').to.be.true
+        const [selected, ...rest] = Array.from($versions)
+        expect(selected).to.have.attr('data-selected', 'selected')
         expect(
-          rest.every(
-            version =>
-              version.dataset.selected === 'belowSelected' ||
-              version.dataset.selected === 'aboveSelected'
-          )
+          rest.every(version => version.dataset.selected === 'belowSelected')
         ).to.be.true
       })
     })
     it('opens the compare drop down and compares with selected version', function () {
       cy.findByLabelText(/all history/i).click({ force: true })
       cy.findAllByTestId('history-version-details')
-        .eq(2)
+        .eq(3)
         .within(() => {
           cy.findByRole('button', {
             name: /compare from this version/i,
           }).click()
         })
-      cy.findByRole('button', { name: /compare drop down/i }).click()
-      cy.findByRole('button', { name: /compare up to this version/i }).click()
+
+      cy.findAllByTestId('history-version-details')
+        .eq(1)
+        .within(() => {
+          cy.findByRole('button', { name: /compare drop down/i }).click()
+          cy.findByRole('button', {
+            name: /compare up to this version/i,
+          }).click()
+        })
 
       cy.findAllByTestId('history-version-details').should($versions => {
-        const [first, ...rest] = Array.from($versions)
-        expect(first).to.have.attr('data-selected', 'aboveSelected')
-        rest.forEach(version =>
-          expect(version).to.have.attr('data-selected', 'selectedEdge')
-        )
+        const [
+          aboveSelected,
+          upperSelected,
+          withinSelected,
+          lowerSelected,
+          belowSelected,
+        ] = Array.from($versions)
+        expect(aboveSelected).to.have.attr('data-selected', 'aboveSelected')
+        expect(upperSelected).to.have.attr('data-selected', 'upperSelected')
+        expect(withinSelected).to.have.attr('data-selected', 'withinSelected')
+        expect(lowerSelected).to.have.attr('data-selected', 'lowerSelected')
+        expect(belowSelected).to.have.attr('data-selected', 'belowSelected')
       })
     })
   })

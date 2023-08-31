@@ -37,7 +37,9 @@ function HistoryVersionDetails({
     <div
       className={classnames('history-version-details clearfix', {
         'history-version-selected':
-          selected === 'selectedEdge' || selected === 'selected',
+          selected === 'upperSelected' ||
+          selected === 'lowerSelected' ||
+          selected === 'selected',
         'history-version-within-selected': selected === 'withinSelected',
         'history-version-selectable': selectable,
       })}
