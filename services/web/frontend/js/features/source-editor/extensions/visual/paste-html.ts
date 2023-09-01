@@ -99,6 +99,9 @@ const htmlToLaTeX = (documentElement: HTMLElement) => {
   // pre-process table elements
   processTables(documentElement)
 
+  // protect special characters in non-LaTeX text nodes
+  protectSpecialCharacters(documentElement)
+
   processMatchedElements(documentElement)
 
   const text = documentElement.textContent
@@ -120,6 +123,49 @@ const processWhitespace = (documentElement: HTMLElement) => {
   for (let node = walker.nextNode(); node; node = walker.nextNode()) {
     if (node.textContent === ' ') {
       node.textContent = ' '
+    }
+  }
+}
+
+const isElementNode = (node: Node): node is HTMLElement =>
+  node.nodeType === Node.ELEMENT_NODE
+
+// TODO: negative lookbehind once Safari supports it
+const specialCharacterRegExp = /(^|[^\\])([#$%&~_^\\{}])/g
+
+const specialCharacterReplacer = (
+  _match: string,
+  prefix: string,
+  char: string
+) => {
+  if (char === '\\') {
+    // convert `\` to `\textbackslash{}`, preserving subsequent whitespace
+    char = 'textbackslash{}'
+  }
+
+  return `${prefix}\\${char}`
+}
+
+const protectSpecialCharacters = (documentElement: HTMLElement) => {
+  const walker = document.createTreeWalker(
+    documentElement,
+    NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT,
+    node =>
+      isElementNode(node) && node.tagName === 'CODE'
+        ? NodeFilter.FILTER_REJECT
+        : NodeFilter.FILTER_ACCEPT
+  )
+
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const text = node.textContent
+      if (text) {
+        // replace non-backslash-prefixed characters
+        node.textContent = text.replaceAll(
+          specialCharacterRegExp,
+          specialCharacterReplacer
+        )
+      }
     }
   }
 }

@@ -363,4 +363,37 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
     cy.get('@content').should('have.text', 'foo')
     cy.get('.ol-cm-command-textbf').should('have.length', 0)
   })
+
+  it('protects special characters', function () {
+    mountEditor()
+
+    const data = 'foo & bar~baz'
+
+    const clipboardData = new DataTransfer()
+    clipboardData.setData('text/html', data)
+    cy.get('@content').trigger('paste', { clipboardData })
+
+    cy.get('@content').should('have.text', 'foo & bar~baz')
+    cy.get('.ol-cm-character').should('have.length', 2)
+  })
+
+  it('does not protect special characters in code blocks', function () {
+    mountEditor()
+
+    const data = 'foo & bar~baz <code>\\textbf{foo}</code>'
+
+    const clipboardData = new DataTransfer()
+    clipboardData.setData('text/html', data)
+    cy.get('@content').trigger('paste', { clipboardData })
+
+    cy.get('@content').should(
+      'have.text',
+      'foo & bar~baz \\verb|\\textbf{foo}|'
+    )
+
+    cy.get('.cm-line').eq(0).type('{Enter}')
+    cy.get('@content').should('have.text', 'foo & bar~baz \\textbf{foo}')
+    cy.get('.ol-cm-character').should('have.length', 2)
+    cy.get('.ol-cm-command-verb').should('have.length', 1)
+  })
 })
