@@ -236,6 +236,9 @@ module.exports = {
 
       // Enables ace/ace shortcut
       ace: 'ace-builds/src-noconflict',
+
+      // custom prefixes for import paths
+      '@': path.resolve(__dirname, './frontend/js/'),
     },
     // symlinks: false, // enable this while using `npm link`
     extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
