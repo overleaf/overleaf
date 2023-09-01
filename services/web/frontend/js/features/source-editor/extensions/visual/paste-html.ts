@@ -1,82 +1,78 @@
 import { EditorView } from '@codemirror/view'
-import { EditorSelection, Prec } from '@codemirror/state'
-import { ancestorNodeOfType } from '../../utils/tree-query'
+import { Prec } from '@codemirror/state'
+import {
+  insertPastedContent,
+  pastedContent,
+  storePastedContent,
+} from './pasted-content'
 
-export const pasteHtml = Prec.highest(
-  EditorView.domEventHandlers({
-    paste(event, view) {
-      const { clipboardData } = event
+export const pasteHtml = [
+  Prec.highest(
+    EditorView.domEventHandlers({
+      paste(event, view) {
+        const { clipboardData } = event
 
-      if (!clipboardData) {
-        return false
-      }
-
-      // allow pasting an image to create a figure
-      if (clipboardData.files.length > 0) {
-        return false
-      }
-
-      // only handle pasted HTML
-      if (!clipboardData.types.includes('text/html')) {
-        return false
-      }
-
-      // ignore text/html from VS Code
-      if (
-        clipboardData.types.includes('application/vnd.code.copymetadata') ||
-        clipboardData.types.includes('vscode-editor-data')
-      ) {
-        return false
-      }
-
-      const html = clipboardData.getData('text/html').trim()
-      const text = clipboardData.getData('text/plain').trim()
-
-      if (html.length === 0) {
-        return false
-      }
-
-      // convert the HTML to LaTeX
-      try {
-        const parser = new DOMParser()
-        const { documentElement } = parser.parseFromString(html, 'text/html')
-
-        // if the only content is in a code block, use the plain text version
-        if (onlyCode(documentElement)) {
+        if (!clipboardData) {
           return false
         }
 
-        const latex = htmlToLaTeX(documentElement)
+        // allow pasting an image to create a figure
+        if (clipboardData.files.length > 0) {
+          return false
+        }
 
-        view.dispatch(
-          view.state.changeByRange(range => {
-            // avoid pasting formatted content into a math container
-            if (
-              ancestorNodeOfType(view.state, range.anchor, '$MathContainer')
-            ) {
-              return {
-                range: EditorSelection.cursor(range.from + text.length),
-                changes: { from: range.from, to: range.to, insert: text },
-              }
-            }
+        // only handle pasted HTML
+        if (!clipboardData.types.includes('text/html')) {
+          return false
+        }
 
-            return {
-              range: EditorSelection.cursor(range.from + latex.length),
-              changes: { from: range.from, to: range.to, insert: latex },
-            }
-          })
-        )
+        // ignore text/html from VS Code
+        if (
+          clipboardData.types.includes('application/vnd.code.copymetadata') ||
+          clipboardData.types.includes('vscode-editor-data')
+        ) {
+          return false
+        }
 
-        return true
-      } catch (error) {
-        console.error(error)
+        const html = clipboardData.getData('text/html').trim()
+        const text = clipboardData.getData('text/plain').trim()
 
-        // fall back to the default paste handler
-        return false
-      }
-    },
-  })
-)
+        if (html.length === 0) {
+          return false
+        }
+
+        // convert the HTML to LaTeX
+        try {
+          const parser = new DOMParser()
+          const { documentElement } = parser.parseFromString(html, 'text/html')
+
+          // if the only content is in a code block, use the plain text version
+          if (onlyCode(documentElement)) {
+            return false
+          }
+
+          const latex = htmlToLaTeX(documentElement)
+
+          // if there's no formatting, use the plain text version
+          if (latex === text) {
+            return false
+          }
+
+          view.dispatch(insertPastedContent(view, { latex, text }))
+          view.dispatch(storePastedContent({ latex, text }, true))
+
+          return true
+        } catch (error) {
+          console.error(error)
+
+          // fall back to the default paste handler
+          return false
+        }
+      },
+    })
+  ),
+  pastedContent,
+]
 
 const removeUnwantedElements = (
   documentElement: HTMLElement,
