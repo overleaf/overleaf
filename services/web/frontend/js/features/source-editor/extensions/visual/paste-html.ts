@@ -543,4 +543,9 @@ const selectors = [
       element.nextElementSibling?.nodeName === 'P' && hasContent(element),
     end: () => '\n\n',
   }),
+  createSelector({
+    selector: 'blockquote',
+    start: () => `\n\n\\begin{quote}\n`,
+    end: () => `\n\\end{quote}\n\n`,
+  }),
 ]

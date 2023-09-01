@@ -251,6 +251,25 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
     )
   })
 
+  it('handles a pasted blockquote', function () {
+    mountEditor()
+
+    const data = 'test <blockquote>foo</blockquote> test'
+
+    const clipboardData = new DataTransfer()
+    clipboardData.setData('text/html', data)
+    cy.get('@content').trigger('paste', { clipboardData })
+
+    cy.get('@content').should('have.text', 'test foo test')
+    cy.get('.ol-cm-environment-quote').should('have.length', 5)
+
+    cy.get('.cm-line').eq(2).click()
+    cy.get('@content').should(
+      'have.text',
+      'test \\begin{quote}foo\\end{quote} test'
+    )
+  })
+
   it('handles pasted inline code', function () {
     mountEditor()
 
