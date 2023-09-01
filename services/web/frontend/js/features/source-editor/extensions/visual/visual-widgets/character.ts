@@ -35,6 +35,7 @@ const SUBSTITUTIONS = new Map([
   ['\\&', '\u0026'],
   ['\\#', '\u0023'],
   ['\\{', '\u007B'],
+  ['\\$', '\u0024'],
   ['\\textasciicircum', '\u005E'],
   ['\\textless', '\u003C'],
   ['\\textasciitilde', '\u007E'],

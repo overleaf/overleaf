@@ -626,6 +626,12 @@ describe('<CodeMirrorEditor/> in Visual mode', function () {
       cy.get('@first-line').should('have.text', 'Test~test')
     })
 
+    it('decorates a backslash-prefixed dollar sign with a dollar sign', function () {
+      cy.get('@first-line').type('\\$5.00')
+      cy.get('@first-line').should('have.text', '$5.00')
+      cy.get('.ol-cm-character').should('have.length', 1)
+    })
+
     it('decorates line breaks', function () {
       cy.get('@first-line').type('Test \\\\ test')
       cy.get('@second-line').click()
