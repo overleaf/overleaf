@@ -510,6 +510,25 @@ describe('<CodeMirrorEditor/> in Visual mode', function () {
     cy.get('.ol-cm-preamble-line').eq(3).should('not.exist')
   })
 
+  it('should exclude maketitle from preamble extents if nested in another environment', function () {
+    cy.get('@first-line').type(
+      [
+        '\\author{{}Author}',
+        '\\title{{}Document title}',
+        '\\begin{{}document}',
+        '\\begin{{}frame}{{}Foo}',
+        '\\maketitle',
+        '\\end{{}frame}',
+        '\\end{{}document}',
+        '',
+      ].join('{Enter}')
+    )
+    cy.get('.ol-cm-preamble-widget').should('have.length', 1)
+    cy.get('.ol-cm-preamble-widget').click()
+
+    cy.get('.ol-cm-preamble-line').should('have.length', 3)
+  })
+
   it('should show multiple authors', function () {
     cy.get('@first-line').type(
       [

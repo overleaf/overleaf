@@ -186,7 +186,14 @@ export const atomicDecorations = (options: Options) => {
     tree.iterate({
       enter(nodeRef) {
         if (nodeRef.node.type.is('Maketitle')) {
-          preamble.to = nodeRef.node.from
+          // end the preamble at \maketitle, if it's directly inside the document environment
+          const parentEnvironment = ancestorOfNodeWithType(
+            nodeRef.node,
+            '$Environment'
+          )
+          if (parentEnvironment?.type.is('DocumentEnvironment')) {
+            preamble.to = nodeRef.node.from
+          }
         } else if (nodeRef.node.type.is('DocumentEnvironment')) {
           // only count the first instance of DocumentEnvironment
           if (!seenDocumentEnvironment) {
