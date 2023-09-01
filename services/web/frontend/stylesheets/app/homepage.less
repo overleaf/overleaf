@@ -339,12 +339,19 @@
     border: 1px solid @blue-20;
     color: @neutral-90;
     .banner-row {
-      height: 56px;
+      min-height: 56px;
       display: flex;
       justify-content: center;
       align-content: center;
       flex-wrap: wrap;
     }
+
+    @media only screen and (max-width: @screen-sm-max) {
+      .banner-row {
+        min-height: 100px;
+      }
+    }
+
     .claim-my-discount {
       font-size: 14px;
       font-weight: 700;
