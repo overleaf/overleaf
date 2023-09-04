@@ -24,7 +24,9 @@ describe('AuthenticationManager', function () {
           db: (this.db = { users: {} }),
           ObjectId,
         },
-        bcrypt: (this.bcrypt = {}),
+        bcrypt: (this.bcrypt = {
+          getRounds: sinon.stub().returns(4),
+        }),
         '@overleaf/settings': this.settings,
         '../User/UserGetter': (this.UserGetter = {}),
         './AuthenticationErrors': AuthenticationErrors,
@@ -136,10 +138,6 @@ describe('AuthenticationManager', function () {
 
         it('should not return the user', function () {
           this.callback.calledWith(null, null).should.equal(true)
-        })
-
-        it('should not send metrics', function () {
-          expect(this.metrics.inc.called).to.equal(false)
         })
       })
 
@@ -307,10 +305,6 @@ describe('AuthenticationManager', function () {
           )
         })
 
-        it('should not send metrics', function () {
-          expect(this.metrics.inc.called).to.equal(false)
-        })
-
         it('should not return the user', function () {
           this.callback.calledWith(null, null).should.equal(true)
           this.UserAuditLogHandler.addEntry.callCount.should.equal(0)
@@ -374,7 +368,11 @@ describe('AuthenticationManager', function () {
         })
 
         it('should check the number of rounds', function () {
-          this.bcrypt.getRounds.called.should.equal(true)
+          expect(this.metrics.inc).to.have.been.calledWith(
+            'bcrypt_check_rounds',
+            1,
+            { status: 'upgrade' }
+          )
         })
 
         it('should set the users password (with a higher number of rounds)', function () {
@@ -408,7 +406,11 @@ describe('AuthenticationManager', function () {
         })
 
         it('should not check the number of rounds', function () {
-          this.bcrypt.getRounds.called.should.equal(false)
+          expect(this.metrics.inc).to.have.been.calledWith(
+            'bcrypt_check_rounds',
+            1,
+            { status: 'disabled' }
+          )
         })
 
         it('should not set the users password (with a higher number of rounds)', function () {

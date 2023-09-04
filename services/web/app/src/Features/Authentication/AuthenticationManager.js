@@ -70,6 +70,10 @@ const AuthenticationManager = {
       if (!user || !user.hashedPassword) {
         return callback(null, null, null)
       }
+      Metrics.inc('bcrypt', 1, {
+        method: 'compare',
+        path: bcrypt.getRounds(user.hashedPassword),
+      })
       bcrypt.compare(password, user.hashedPassword, function (error, match) {
         if (error) {
           return callback(error)
@@ -255,13 +259,16 @@ const AuthenticationManager = {
   checkRounds(user, hashedPassword, password, callback) {
     // Temporarily disable this function, TODO: re-enable this
     if (Settings.security.disableBcryptRoundsUpgrades) {
+      Metrics.inc('bcrypt_check_rounds', 1, { status: 'disabled' })
       return callback()
     }
     // check current number of rounds and rehash if necessary
     const currentRounds = bcrypt.getRounds(hashedPassword)
     if (currentRounds < BCRYPT_ROUNDS) {
+      Metrics.inc('bcrypt_check_rounds', 1, { status: 'upgrade' })
       AuthenticationManager._setUserPasswordInMongo(user, password, callback)
     } else {
+      Metrics.inc('bcrypt_check_rounds', 1, { status: 'success' })
       callback()
     }
   },
@@ -276,6 +283,10 @@ const AuthenticationManager = {
       if (error) {
         return callback(error)
       }
+      Metrics.inc('bcrypt', 1, {
+        method: 'hash',
+        path: BCRYPT_ROUNDS,
+      })
       bcrypt.hash(password, salt, callback)
     })
   },
