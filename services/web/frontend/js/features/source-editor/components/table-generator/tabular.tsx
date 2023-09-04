@@ -20,6 +20,8 @@ import { TableProvider } from './contexts/table-context'
 import { TabularProvider, useTabularContext } from './contexts/tabular-context'
 import Icon from '../../../../shared/components/icon'
 import { BorderTheme } from './toolbar/commands'
+import { TableGeneratorHelpModal } from './help-modal'
+import { SplitTestProvider } from '../../../../shared/context/split-test-context'
 
 export type ColumnDefinition = {
   alignment: 'left' | 'center' | 'right' | 'paragraph'
@@ -190,22 +192,25 @@ export const Tabular: FC<{
         <TableRenderingError view={view} codePosition={tabularNode.from} />
       )}
     >
-      <CodeMirrorViewContextProvider value={view}>
-        <TabularProvider>
-          <TableProvider
-            tabularNode={tabularNode}
-            tableData={parsedTableData}
-            tableNode={tableNode}
-            view={view}
-          >
-            <SelectionContextProvider>
-              <EditingContextProvider>
-                <TabularWrapper />
-              </EditingContextProvider>
-            </SelectionContextProvider>
-          </TableProvider>
-        </TabularProvider>
-      </CodeMirrorViewContextProvider>
+      <SplitTestProvider>
+        <CodeMirrorViewContextProvider value={view}>
+          <TabularProvider>
+            <TableProvider
+              tabularNode={tabularNode}
+              tableData={parsedTableData}
+              tableNode={tableNode}
+              view={view}
+            >
+              <SelectionContextProvider>
+                <EditingContextProvider>
+                  <TabularWrapper />
+                </EditingContextProvider>
+              </SelectionContextProvider>
+            </TableProvider>
+            <TableGeneratorHelpModal />
+          </TabularProvider>
+        </CodeMirrorViewContextProvider>
+      </SplitTestProvider>
     </ErrorBoundary>
   )
 }
@@ -216,7 +221,10 @@ const TabularWrapper: FC = () => {
   const { ref } = useTabularContext()
   useEffect(() => {
     const listener: (event: MouseEvent) => void = event => {
-      if (!ref.current?.contains(event.target as Node)) {
+      if (
+        !ref.current?.contains(event.target as Node) &&
+        !(event.target as HTMLElement).closest('.table-generator-help-modal')
+      ) {
         if (selection) {
           setSelection(null)
         }

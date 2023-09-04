@@ -19,6 +19,8 @@ import {
 } from './commands'
 import { useCodeMirrorViewContext } from '../../codemirror-editor'
 import { useTableContext } from '../contexts/table-context'
+import { useTabularContext } from '../contexts/tabular-context'
+import SplitTestBadge from '../../../../../shared/components/split-test-badge'
 
 const borderThemeLabel = (theme: BorderTheme | null) => {
   switch (theme) {
@@ -36,6 +38,7 @@ export const Toolbar = memo(function Toolbar() {
   const view = useCodeMirrorViewContext()
   const { positions, rowSeparators, cellSeparators, tableEnvironment, table } =
     useTableContext()
+  const { showHelp } = useTabularContext()
 
   const borderDropdownLabel = useMemo(
     () => borderThemeLabel(table.getBorderTheme()),
@@ -319,6 +322,18 @@ export const Toolbar = memo(function Toolbar() {
             view.focus()
           }}
         />
+        <ToolbarButton
+          icon="help"
+          id="table-generator-show-help"
+          label="Help"
+          command={showHelp}
+        />
+        <div className="toolbar-beta-badge">
+          <SplitTestBadge
+            displayOnVariants={['enabled']}
+            splitTestName="table-generator"
+          />
+        </div>
       </div>
     </div>
   )
