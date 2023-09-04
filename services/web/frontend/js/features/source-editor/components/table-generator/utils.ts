@@ -315,17 +315,19 @@ function parseTabularBody(
   return body
 }
 
-export function generateTable(
-  node: SyntaxNode,
-  state: EditorState
-): {
+export type ParsedTableData = {
   table: TableData
   cellPositions: CellPosition[][]
   specification: { from: number; to: number }
   rowPositions: RowPosition[]
   rowSeparators: RowSeparator[]
   cellSeparators: CellSeparator[][]
-} {
+}
+
+export function generateTable(
+  node: SyntaxNode,
+  state: EditorState
+): ParsedTableData {
   const specification = node
     .getChild('BeginEnv')
     ?.getChild('TextArgument')

@@ -1,7 +1,7 @@
 import { EditorView } from '@codemirror/view'
 
 export const tableGeneratorTheme = EditorView.baseTheme({
-  '&dark .table-generator': {
+  '&dark .table-generator-container': {
     '--table-generator-active-border-color': '#ccc',
     '--table-generator-coming-soon-background-color': '#41464f',
     '--table-generator-coming-soon-color': '#fff',
@@ -23,6 +23,7 @@ export const tableGeneratorTheme = EditorView.baseTheme({
       'rgba(125,125,125,0.3)',
     '--table-generator-toolbar-dropdown-disabled-color': '#999',
     '--table-generator-toolbar-shadow-color': '#1e253029',
+    '--table-generator-error-background': '#F1F4F9',
   },
 
   '&light .table-generator': {
@@ -46,6 +47,7 @@ export const tableGeneratorTheme = EditorView.baseTheme({
     '--table-generator-toolbar-dropdown-disabled-background': '#f2f2f2',
     '--table-generator-toolbar-dropdown-disabled-color': 'var(--neutral-40)',
     '--table-generator-toolbar-shadow-color': '#1e253029',
+    '--table-generator-error-background': '#F1F4F9',
   },
 
   '.table-generator': {
@@ -401,20 +403,24 @@ export const tableGeneratorTheme = EditorView.baseTheme({
     },
   },
 
+  '.ol-cm-environment-table.table-generator-error-container, .ol-cm-environment-table.ol-cm-tabular':
+    {
+      background: 'rgba(125, 125, 125, 0.05)',
+    },
+
   '.table-generator-error': {
-    background:
-      'linear-gradient(0deg, #f9f1f1, #f9f1f1), linear-gradient(0deg, #f5beba, #f5beba)',
+    background: 'var(--table-generator-error-background)',
     display: 'flex',
     'justify-content': 'space-between',
     color: 'black',
-    border: '1px solid #f5beba',
+    border: '1px solid #C3D0E3',
     'font-family': 'Lato',
-    'margin-bottom': '0',
+    margin: '0 16px 0 16px',
     '& .table-generator-error-message': {
-      flex: '1 0 auto',
+      flex: '1 1 auto',
     },
     '& .table-generator-error-icon': {
-      color: '#b83a33',
+      color: '#3265B2',
       'margin-right': '12px',
     },
   },

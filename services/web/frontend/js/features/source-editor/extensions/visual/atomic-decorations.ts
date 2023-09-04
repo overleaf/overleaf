@@ -65,6 +65,7 @@ import { IndicatorWidget } from './visual-widgets/indicator'
 import { TabularWidget } from './visual-widgets/tabular'
 import { nextSnippetField, pickedCompletion } from '@codemirror/autocomplete'
 import { skipPreambleWithCursor } from './skip-preamble-cursor'
+import { TableRenderingErrorWidget } from './visual-widgets/table-rendering-error'
 
 type Options = {
   fileTreeManager: {
@@ -323,20 +324,33 @@ export const atomicDecorations = (options: Options) => {
                 nodeRef.node,
                 'TableEnvironment'
               )
-              decorations.push(
-                Decoration.replace({
-                  widget: new TabularWidget(
-                    nodeRef.node,
-                    state.doc.sliceString(
-                      (tableNode ?? nodeRef).from,
-                      (tableNode ?? nodeRef).to
-                    ),
-                    tableNode
-                  ),
-                  block: true,
-                }).range(nodeRef.from, nodeRef.to)
+              const tabularWidget = new TabularWidget(
+                nodeRef.node,
+                state.doc.sliceString(
+                  (tableNode ?? nodeRef).from,
+                  (tableNode ?? nodeRef).to
+                ),
+                tableNode,
+                state
               )
-              return false
+
+              if (tabularWidget.isValid()) {
+                decorations.push(
+                  Decoration.replace({
+                    widget: tabularWidget,
+                    block: true,
+                  }).range(nodeRef.from, nodeRef.to)
+                )
+                return false
+              } else {
+                // Show error message
+                decorations.push(
+                  Decoration.widget({
+                    widget: new TableRenderingErrorWidget(tableNode),
+                    block: true,
+                  }).range(nodeRef.from, nodeRef.from)
+                )
+              }
             }
           }
         } else if (nodeRef.type.is('BeginEnv')) {

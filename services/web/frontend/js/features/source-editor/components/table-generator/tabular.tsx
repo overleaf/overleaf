@@ -1,6 +1,6 @@
 import { SyntaxNode } from '@lezer/common'
 import { FC, useEffect } from 'react'
-import { CellPosition, RowPosition } from './utils'
+import { CellPosition, ParsedTableData, RowPosition } from './utils'
 import { Toolbar } from './toolbar/toolbar'
 import { Table } from './table'
 import {
@@ -182,7 +182,8 @@ export const Tabular: FC<{
   tabularNode: SyntaxNode
   view: EditorView
   tableNode: SyntaxNode | null
-}> = ({ tabularNode, view, tableNode }) => {
+  parsedTableData: ParsedTableData
+}> = ({ tabularNode, view, tableNode, parsedTableData }) => {
   return (
     <ErrorBoundary
       fallbackRender={() => (
@@ -193,8 +194,9 @@ export const Tabular: FC<{
         <TabularProvider>
           <TableProvider
             tabularNode={tabularNode}
-            view={view}
+            tableData={parsedTableData}
             tableNode={tableNode}
+            view={view}
           >
             <SelectionContextProvider>
               <EditingContextProvider>

@@ -3,9 +3,9 @@ import { Positions, TableData, TableRenderingError } from '../tabular'
 import {
   CellPosition,
   CellSeparator,
+  ParsedTableData,
   RowPosition,
   RowSeparator,
-  generateTable,
   parseTableEnvironment,
 } from '../utils'
 import { EditorView } from '@codemirror/view'
@@ -34,34 +34,12 @@ const TableContext = createContext<
 >(undefined)
 
 export const TableProvider: FC<{
+  tableData: ParsedTableData
+  tableNode: SyntaxNode | null
   tabularNode: SyntaxNode
   view: EditorView
-  tableNode: SyntaxNode | null
-}> = ({ tabularNode, view, children, tableNode }) => {
+}> = ({ tableData, children, tableNode, tabularNode, view }) => {
   try {
-    const tableData = generateTable(tabularNode, view.state)
-
-    // TODO: Validate better that the table matches the column definition
-    for (const row of tableData.table.rows) {
-      const rowLength = row.cells.reduce(
-        (acc, cell) => acc + (cell.multiColumn?.columnSpan ?? 1),
-        0
-      )
-      for (const cell of row.cells) {
-        if (
-          cell.multiColumn?.columns.specification &&
-          cell.multiColumn.columns.specification.length !== 1
-        ) {
-          throw new Error(
-            'Multi-column cells must have exactly one column definition'
-          )
-        }
-      }
-      if (rowLength !== tableData.table.columns.length) {
-        throw new Error('Row length does not match column definition')
-      }
-    }
-
     const positions: Positions = {
       cells: tableData.cellPositions,
       columnDeclarations: tableData.specification,
