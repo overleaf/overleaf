@@ -5,6 +5,7 @@ import { Toolbar } from './toolbar/toolbar'
 import { Table } from './table'
 import {
   SelectionContextProvider,
+  TableSelection,
   useSelectionContext,
 } from './contexts/selection-context'
 import {
@@ -76,6 +77,34 @@ export class TableData {
       }
     }
     return this.rows[row].cells.length - 1
+  }
+
+  iterateCells(
+    minRow: number,
+    maxRow: number,
+    minColumn: number,
+    maxColumn: number,
+    callback: (cell: CellData, row: number, column: number) => void
+  ) {
+    for (let row = minRow; row <= maxRow; ++row) {
+      let currentCellOffset = this.getCellBoundaries(row, minColumn).from
+      const minX = this.getCellIndex(row, minColumn)
+      const maxX = this.getCellIndex(row, maxColumn)
+      for (let column = minX; column <= maxX; ++column) {
+        const currentCell = this.rows[row].cells[column]
+        const skip = currentCell.multiColumn?.columnSpan ?? 1
+        callback(currentCell, row, currentCellOffset)
+        currentCellOffset += skip
+      }
+    }
+  }
+
+  iterateSelection(
+    selection: TableSelection,
+    callback: (cell: CellData, row: number, column: number) => void
+  ) {
+    const { minX, maxX, minY, maxY } = selection.normalized()
+    this.iterateCells(minY, maxY, minX, maxX, callback)
   }
 
   getCell(row: number, column: number): CellData {

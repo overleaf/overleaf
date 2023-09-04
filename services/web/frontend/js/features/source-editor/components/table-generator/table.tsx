@@ -262,24 +262,26 @@ export const Table: FC = () => {
       const changes: ChangeSpec[] = []
       const data = event.clipboardData?.getData('text/plain')
       if (data) {
-        const rows = data.split('\n')
-        const { minX, minY } = selection.normalized()
-        for (let row = 0; row < rows.length; row++) {
-          if (tableData.rows.length <= minY + row) {
-            // TODO: Add rows
-            continue
+        const cells = data.split('\n').map(row => row.split('\t'))
+        const { minY, minX } = selection.normalized()
+        for (let row = 0; row < cells.length; ++row) {
+          const rowIndex = minY + row
+          if (rowIndex >= tableData.rows.length) {
+            // TODO: add more rows
+            break
           }
-          const cells = rows[row].split('\t')
-          for (let cell = 0; cell < cells.length; cell++) {
-            if (tableData.columns.length <= minX + cell) {
-              // TODO: Add columns
-              continue
+          const cellStart = tableData.getCellIndex(rowIndex, minX)
+          for (let column = 0; column < cells[row].length; ++column) {
+            const cellIndex = cellStart + column
+            if (cellIndex >= tableData.rows[rowIndex].cells.length) {
+              // TODO: add more columns
+              break
             }
-            const cellData = tableData.getCell(minY + row, minX + cell)
+            const cell = tableData.rows[rowIndex].cells[cellIndex]
             changes.push({
-              from: cellData.from,
-              to: cellData.to,
-              insert: cells[cell],
+              from: cell.from,
+              to: cell.to,
+              insert: cells[row][column],
             })
           }
         }
@@ -293,16 +295,16 @@ export const Table: FC = () => {
         return false
       }
       event.preventDefault()
-      const { minX, minY, maxX, maxY } = selection.normalized()
-      const content = []
-      for (let row = minY; row <= maxY; row++) {
-        const rowContent = []
-        for (let cell = minX; cell <= maxX; cell++) {
-          rowContent.push(tableData.getCell(row, cell).content)
-        }
-        content.push(rowContent.join('\t'))
-      }
-      navigator.clipboard.writeText(content.join('\n'))
+      const { minY, maxY } = selection.normalized()
+      const cells: string[][] = Array.from(
+        { length: maxY - minY + 1 },
+        () => []
+      )
+      tableData.iterateSelection(selection, (cell, row) => {
+        cells[row - minY].push(cell.content)
+      })
+      const content = cells.map(row => row.join('\t')).join('\n')
+      navigator.clipboard.writeText(content)
     }
     window.addEventListener('paste', onPaste)
     window.addEventListener('copy', onCopy)
