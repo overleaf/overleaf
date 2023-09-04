@@ -467,14 +467,11 @@ describe('<CodeMirrorEditor/> in Visual mode', function () {
       'title with <span class="ol-cm-command-texttt"><b>command</b></span>'
     )
 
-    // unsupported commands
     cy.get('@second-line').type(deleteLine)
     cy.get('@second-line').type('\\title{{}Title with \\& ampersands}')
-    cy.get('.ol-cm-title').should(
-      'contain.html',
-      'Title with \\&amp; ampersands'
-    )
+    cy.get('.ol-cm-title').should('contain.html', 'Title with &amp; ampersands')
 
+    // unsupported command
     cy.get('@second-line').type(deleteLine)
     cy.get('@second-line').type('\\title{{}My \\LaTeX{{}} document}')
     cy.get('.ol-cm-title').should('contain.html', 'My \\LaTeX{} document')

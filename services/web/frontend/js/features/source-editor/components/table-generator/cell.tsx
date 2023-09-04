@@ -11,6 +11,7 @@ import { typesetNodeIntoElement } from '../../extensions/visual/utils/typeset-co
 import { parser } from '../../lezer-latex/latex.mjs'
 import { useTableContext } from './contexts/table-context'
 import { CellInput, CellInputRef } from './cell-input'
+import { useCodeMirrorViewContext } from '../codemirror-editor'
 
 export const Cell: FC<{
   cellData: CellData
@@ -40,6 +41,7 @@ export const Cell: FC<{
     commitCellData,
   } = useEditingContext()
   const inputRef = useRef<CellInputRef>(null)
+  const view = useCodeMirrorViewContext()
 
   const editing =
     editingCellData?.rowIndex === rowIndex &&
@@ -132,6 +134,9 @@ export const Cell: FC<{
       .replaceAll(/(^&|[^\\]&)/g, match =>
         match.length === 1 ? '\\&' : `${match[0]}\\&`
       )
+      .replaceAll(/(^%|[^\\]%)/g, match =>
+        match.length === 1 ? '\\%' : `${match[0]}\\%`
+      )
       .replaceAll('\\\\', '')
   }, [])
 
@@ -142,7 +147,7 @@ export const Cell: FC<{
 
   useEffect(() => {
     if (isFocused && !editing && cellRef.current) {
-      cellRef.current.focus()
+      cellRef.current.focus({ preventScroll: true })
     }
   }, [isFocused, editing])
 
@@ -161,11 +166,12 @@ export const Cell: FC<{
         .then(async MathJax => {
           if (renderDiv.current) {
             await MathJax.typesetPromise([renderDiv.current])
+            view.requestMeasure()
           }
         })
         .catch(() => {})
     }
-  }, [cellData.content, editing])
+  }, [cellData.content, editing, view])
 
   const onInput = useCallback(
     e => {
@@ -227,6 +233,7 @@ export const Cell: FC<{
           inSelection && selection?.bordersLeft(rowIndex, columnIndex, table),
         'selection-edge-right':
           inSelection && selection?.bordersRight(rowIndex, columnIndex, table),
+        editing,
       })}
     >
       {body}

@@ -1,20 +1,59 @@
 import { EditorState } from '@codemirror/state'
 import { SyntaxNode } from '@lezer/common'
+import { COMMAND_SUBSTITUTIONS } from '../visual-widgets/character'
 
 const isUnknownCommandWithName = (
   node: SyntaxNode,
   command: string,
   getText: (from: number, to: number) => string
 ): boolean => {
-  if (!node.type.is('UnknownCommand')) {
+  const commandName = getUnknownCommandName(node, getText)
+  if (commandName === undefined) {
     return false
+  }
+  return commandName === command
+}
+
+const getUnknownCommandName = (
+  node: SyntaxNode,
+  getText: (from: number, to: number) => string
+): string | undefined => {
+  if (!node.type.is('UnknownCommand')) {
+    return undefined
   }
   const commandNameNode = node.getChild('CtrlSeq')
   if (!commandNameNode) {
-    return false
+    return undefined
   }
   const commandName = getText(commandNameNode.from, commandNameNode.to)
-  return commandName === command
+  return commandName
+}
+
+type NodeMapping = {
+  elementType: keyof HTMLElementTagNameMap
+  className?: string
+}
+type MarkupMapping = {
+  [command: string]: NodeMapping
+}
+const MARKUP_COMMANDS: MarkupMapping = {
+  '\\textit': {
+    elementType: 'i',
+  },
+  '\\textbf': {
+    elementType: 'b',
+  },
+  '\\emph': {
+    elementType: 'em',
+  },
+  '\\texttt': {
+    elementType: 'span',
+    className: 'ol-cm-command-texttt',
+  },
+  '\\textsc': {
+    elementType: 'span',
+    className: 'ol-cm-command-textsc',
+  },
 }
 
 /**
@@ -56,28 +95,27 @@ export function typesetNodeIntoElement(
         ancestor().append(
           document.createTextNode(getText(from, childNode.from))
         )
-
         from = childNode.from
       }
-      if (isUnknownCommandWithName(childNode, '\\textit', getText)) {
-        pushAncestor(document.createElement('i'))
-        const textArgument = childNode.getChild('TextArgument')
-        from = textArgument?.getChild('LongArg')?.from ?? childNode.to
-      } else if (isUnknownCommandWithName(childNode, '\\textbf', getText)) {
-        pushAncestor(document.createElement('b'))
-        const textArgument = childNode.getChild('TextArgument')
-        from = textArgument?.getChild('LongArg')?.from ?? childNode.to
-      } else if (isUnknownCommandWithName(childNode, '\\emph', getText)) {
-        pushAncestor(document.createElement('em'))
-        const textArgument = childNode.getChild('TextArgument')
-        from = textArgument?.getChild('LongArg')?.from ?? childNode.to
-      } else if (isUnknownCommandWithName(childNode, '\\texttt', getText)) {
-        const spanElement = document.createElement('span')
-        spanElement.classList.add('ol-cm-command-texttt')
-        pushAncestor(spanElement)
-        const textArgument = childNode.getChild('TextArgument')
-        from = textArgument?.getChild('LongArg')?.from ?? childNode.to
-      } else if (isUnknownCommandWithName(childNode, '\\and', getText)) {
+
+      if (childNode.type.is('UnknownCommand')) {
+        const commandNameNode = childNode.getChild('CtrlSeq')
+        if (commandNameNode) {
+          const commandName = getText(commandNameNode.from, commandNameNode.to)
+          const mapping: NodeMapping | undefined = MARKUP_COMMANDS[commandName]
+          if (mapping) {
+            const element = document.createElement(mapping.elementType)
+            if (mapping.className) {
+              element.classList.add(mapping.className)
+            }
+            pushAncestor(element)
+            const textArgument = childNode.getChild('TextArgument')
+            from = textArgument?.getChild('LongArg')?.from ?? childNode.to
+            return
+          }
+        }
+      }
+      if (isUnknownCommandWithName(childNode, '\\and', getText)) {
         const spanElement = document.createElement('span')
         spanElement.classList.add('ol-cm-command-and')
         pushAncestor(spanElement)
@@ -94,16 +132,22 @@ export function typesetNodeIntoElement(
       } else if (childNode.type.is('LineBreak')) {
         ancestor().appendChild(document.createElement('br'))
         from = childNode.to
+      } else if (childNode.type.is('UnknownCommand')) {
+        const command = getText(childNode.from, childNode.to)
+        const symbol = COMMAND_SUBSTITUTIONS.get(command.trim())
+        if (symbol !== undefined) {
+          ancestor().append(document.createTextNode(symbol))
+          from = childNode.to
+          return false
+        }
       }
     },
     function leave(childNodeRef) {
       const childNode = childNodeRef.node
+      const commandName = getUnknownCommandName(childNode, getText)
       if (
-        isUnknownCommandWithName(childNode, '\\and', getText) ||
-        isUnknownCommandWithName(childNode, '\\textit', getText) ||
-        isUnknownCommandWithName(childNode, '\\textbf', getText) ||
-        isUnknownCommandWithName(childNode, '\\emph', getText) ||
-        isUnknownCommandWithName(childNode, '\\texttt', getText)
+        (commandName && Boolean(MARKUP_COMMANDS[commandName])) ||
+        isUnknownCommandWithName(childNode, '\\and', getText)
       ) {
         const typeSetElement = popAncestor()
         ancestor().appendChild(typeSetElement)

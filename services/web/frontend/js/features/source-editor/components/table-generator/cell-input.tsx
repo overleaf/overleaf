@@ -6,7 +6,7 @@ interface CellInputProps
 }
 
 export type CellInputRef = {
-  focus: () => void
+  focus: (options?: FocusOptions) => void
 }
 
 export const CellInput = forwardRef<CellInputRef, CellInputProps>(
@@ -14,9 +14,9 @@ export const CellInput = forwardRef<CellInputRef, CellInputProps>(
     const inputRef = useRef<HTMLTextAreaElement>(null)
     useImperativeHandle(ref, () => {
       return {
-        focus() {
-          inputRef.current?.focus()
+        focus(options) {
           inputRef.current?.setSelectionRange(value.length, value.length)
+          inputRef.current?.focus(options)
         },
       }
     })

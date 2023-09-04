@@ -26,7 +26,7 @@ export class CharacterWidget extends WidgetType {
   }
 }
 
-const SUBSTITUTIONS = new Map([
+export const COMMAND_SUBSTITUTIONS = new Map([
   ['\\', ' '], // a trimmed \\ '
   ['\\%', '\u0025'],
   ['\\_', '\u005F'],
@@ -151,12 +151,12 @@ const SUBSTITUTIONS = new Map([
 export function createCharacterCommand(
   command: string
 ): CharacterWidget | undefined {
-  const substitution = SUBSTITUTIONS.get(command)
+  const substitution = COMMAND_SUBSTITUTIONS.get(command)
   if (substitution !== undefined) {
     return new CharacterWidget(substitution)
   }
 }
 
 export function hasCharacterSubstitution(command: string): boolean {
-  return SUBSTITUTIONS.has(command)
+  return COMMAND_SUBSTITUTIONS.has(command)
 }

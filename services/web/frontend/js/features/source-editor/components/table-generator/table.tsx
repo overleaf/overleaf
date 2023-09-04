@@ -3,6 +3,7 @@ import {
   KeyboardEvent,
   KeyboardEventHandler,
   useCallback,
+  useEffect,
   useMemo,
   useRef,
 } from 'react'
@@ -15,6 +16,8 @@ import {
 import { useEditingContext } from './contexts/editing-context'
 import { useTableContext } from './contexts/table-context'
 import { useCodeMirrorViewContext } from '../codemirror-editor'
+import { undo, redo } from '@codemirror/commands'
+import { ChangeSpec } from '@codemirror/state'
 
 type NavigationKey =
   | 'ArrowRight'
@@ -27,6 +30,8 @@ type NavigationMap = {
   // eslint-disable-next-line no-unused-vars
   [key in NavigationKey]: [() => TableSelection, () => TableSelection]
 }
+
+const isMac = /Mac/.test(window.navigator?.platform)
 
 export const Table: FC = () => {
   const { selection, setSelection } = useSelectionContext()
@@ -70,6 +75,7 @@ export const Table: FC = () => {
 
   const isCharacterInput = useCallback((event: KeyboardEvent) => {
     return (
+      Boolean(event.code) && // is a keyboard key
       event.key?.length === 1 &&
       !event.ctrlKey &&
       !event.metaKey &&
@@ -79,6 +85,7 @@ export const Table: FC = () => {
 
   const onKeyDown: KeyboardEventHandler = useCallback(
     event => {
+      const commandKey = isMac ? event.metaKey : event.ctrlKey
       if (event.code === 'Enter' && !event.shiftKey) {
         event.preventDefault()
         event.stopPropagation()
@@ -116,6 +123,18 @@ export const Table: FC = () => {
         event.preventDefault()
         event.stopPropagation()
         clearCells(selection)
+        view.requestMeasure()
+        setTimeout(() => {
+          if (tableRef.current) {
+            const { minY } = selection.normalized()
+            const row = tableRef.current.querySelectorAll('tbody tr')[minY]
+            if (row) {
+              if (row.getBoundingClientRect().top < 0) {
+                row.scrollIntoView({ block: 'center' })
+              }
+            }
+          }
+        }, 0)
       } else if (Object.prototype.hasOwnProperty.call(navigation, event.code)) {
         const [defaultNavigation, shiftNavigation] =
           navigation[event.code as NavigationKey]
@@ -146,6 +165,21 @@ export const Table: FC = () => {
         startEditing(selection.to.row, selection.to.cell)
         updateCellData(event.key)
         setSelection(new TableSelection(selection.to, selection.to))
+      } else if (
+        !cellData &&
+        event.key === 'z' &&
+        !event.shiftKey &&
+        commandKey
+      ) {
+        event.preventDefault()
+        undo(view)
+      } else if (
+        !cellData &&
+        (event.key === 'y' ||
+          (event.key === 'Z' && event.shiftKey && commandKey))
+      ) {
+        event.preventDefault()
+        redo(view)
       }
     },
     [
@@ -163,6 +197,67 @@ export const Table: FC = () => {
       tableData,
     ]
   )
+
+  useEffect(() => {
+    const onPaste = (event: ClipboardEvent) => {
+      if (cellData || !selection) {
+        // We're editing a cell, so allow browser to insert there
+        return false
+      }
+      event.preventDefault()
+      const changes: ChangeSpec[] = []
+      const data = event.clipboardData?.getData('text/plain')
+      if (data) {
+        const rows = data.split('\n')
+        const { minX, minY } = selection.normalized()
+        for (let row = 0; row < rows.length; row++) {
+          if (tableData.rows.length <= minY + row) {
+            // TODO: Add rows
+            continue
+          }
+          const cells = rows[row].split('\t')
+          for (let cell = 0; cell < cells.length; cell++) {
+            if (tableData.columns.length <= minX + cell) {
+              // TODO: Add columns
+              continue
+            }
+            const cellData = tableData.getCell(minY + row, minX + cell)
+            changes.push({
+              from: cellData.from,
+              to: cellData.to,
+              insert: cells[cell],
+            })
+          }
+        }
+      }
+      view.dispatch({ changes })
+    }
+
+    const onCopy = (event: ClipboardEvent) => {
+      if (cellData || !selection) {
+        // We're editing a cell, so allow browser to insert there
+        return false
+      }
+      event.preventDefault()
+      const { minX, minY, maxX, maxY } = selection.normalized()
+      const content = []
+      for (let row = minY; row <= maxY; row++) {
+        const rowContent = []
+        for (let cell = minX; cell <= maxX; cell++) {
+          rowContent.push(tableData.getCell(row, cell).content)
+        }
+        content.push(rowContent.join('\t'))
+      }
+      navigator.clipboard.writeText(content.join('\n'))
+    }
+    window.addEventListener('paste', onPaste)
+    window.addEventListener('copy', onCopy)
+    return () => {
+      window.removeEventListener('paste', onPaste)
+      window.removeEventListener('copy', onCopy)
+    }
+  }, [cellData, selection, tableData, view])
+
   return (
     // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
     <table

@@ -315,15 +315,22 @@ cell 3 & cell 4 \\\\
       cy.get('.table-generator').findByText('cell 1').click()
       cy.get('.table-generator-floating-toolbar').as('toolbar').should('exist')
 
+      // Set border theme to "All borders" so that we can check that theme is
+      // preserved when adding new rows and columns
+      cy.get('@toolbar').findByText('No borders').click()
+      cy.get('.table-generator').findByText('All borders').click()
+
       cy.get('.table-generator').findByText('cell 1').click()
       cy.get('@toolbar').findByLabelText('Insert').click()
       cy.get('.table-generator').findByText('Insert column left').click()
       checkTable([['', 'cell 1']])
+      checkBordersWithNoMultiColumn([true, true], [true, true, true])
 
       cy.get('.table-generator').findByText('cell 1').click()
       cy.get('@toolbar').findByLabelText('Insert').click()
       cy.get('.table-generator').findByText('Insert column right').click()
       checkTable([['', 'cell 1', '']])
+      checkBordersWithNoMultiColumn([true, true], [true, true, true, true])
 
       cy.get('.table-generator').findByText('cell 1').click()
       cy.get('@toolbar').findByLabelText('Insert').click()
@@ -332,6 +339,10 @@ cell 3 & cell 4 \\\\
         ['', '', ''],
         ['', 'cell 1', ''],
       ])
+      checkBordersWithNoMultiColumn(
+        [true, true, true],
+        [true, true, true, true]
+      )
 
       cy.get('.table-generator').findByText('cell 1').click()
       cy.get('@toolbar').findByLabelText('Insert').click()
@@ -341,6 +352,10 @@ cell 3 & cell 4 \\\\
         ['', 'cell 1', ''],
         ['', '', ''],
       ])
+      checkBordersWithNoMultiColumn(
+        [true, true, true, true],
+        [true, true, true, true]
+      )
     })
 
     it('Removes the table on toolbar button click', function () {

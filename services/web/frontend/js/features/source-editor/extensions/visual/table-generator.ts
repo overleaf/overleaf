@@ -113,6 +113,8 @@ export const tableGeneratorTheme = EditorView.baseTheme({
       'border-bottom-color': 'var(--table-generator-active-border-color)',
       'border-bottom-width': 'var(--table-generator-active-border-width)',
     },
+    'overflow-x': 'auto',
+    'overflow-y': 'hidden',
   },
 
   '.table-generator-table': {
@@ -122,8 +124,11 @@ export const tableGeneratorTheme = EditorView.baseTheme({
     cursor: 'default',
 
     '& td': {
-      padding: '0 0.25em',
+      '&:not(.editing)': {
+        padding: '0 0.25em',
+      },
       'max-width': '200px',
+      'vertical-align': 'top',
 
       '&.alignment-left': {
         'text-align': 'left',
@@ -280,11 +285,16 @@ export const tableGeneratorTheme = EditorView.baseTheme({
     'background-color': 'transparent',
     width: '100%',
     height: '1.5em',
+    'min-height': '100%',
     border: '1px solid var(--table-generator-toolbar-shadow-color)',
-    padding: '0',
+    padding: '0 0.25em',
     resize: 'none',
     'box-sizing': 'border-box',
     overflow: 'hidden',
+    '&:focus, &:focus-visible': {
+      outline: '2px solid var(--table-generator-focus-border-color)',
+      'outline-offset': '-2px',
+    },
   },
 
   '.table-generator-border-options-coming-soon': {

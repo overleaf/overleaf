@@ -10,7 +10,7 @@ import {
 
 export class TabularWidget extends WidgetType {
   private element: HTMLElement | undefined
-  private readonly parseResult: ParsedTableData
+  private readonly parseResult: ParsedTableData | null = null
 
   constructor(
     private tabularNode: SyntaxNode,
@@ -19,10 +19,17 @@ export class TabularWidget extends WidgetType {
     state: EditorState
   ) {
     super()
-    this.parseResult = generateTable(tabularNode, state)
+    try {
+      this.parseResult = generateTable(tabularNode, state)
+    } catch (e) {
+      this.parseResult = null
+    }
   }
 
   isValid() {
+    if (!this.parseResult) {
+      return false
+    }
     for (const row of this.parseResult.table.rows) {
       const rowLength = row.cells.reduce(
         (acc, cell) => acc + (cell.multiColumn?.columnSpan ?? 1),
@@ -49,15 +56,17 @@ export class TabularWidget extends WidgetType {
     if (this.tableNode) {
       this.element.classList.add('ol-cm-environment-table')
     }
-    ReactDOM.render(
-      <Tabular
-        view={view}
-        tabularNode={this.tabularNode}
-        parsedTableData={this.parseResult}
-        tableNode={this.tableNode}
-      />,
-      this.element
-    )
+    if (this.parseResult) {
+      ReactDOM.render(
+        <Tabular
+          view={view}
+          tabularNode={this.tabularNode}
+          parsedTableData={this.parseResult}
+          tableNode={this.tableNode}
+        />,
+        this.element
+      )
+    }
     return this.element
   }
 
@@ -71,6 +80,9 @@ export class TabularWidget extends WidgetType {
   }
 
   updateDOM(dom: HTMLElement, view: EditorView): boolean {
+    if (!this.parseResult) {
+      return false
+    }
     this.element = dom
     ReactDOM.render(
       <Tabular

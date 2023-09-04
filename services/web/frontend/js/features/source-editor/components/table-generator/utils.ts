@@ -133,6 +133,7 @@ function parseTabularBody(
   node: SyntaxNode,
   state: EditorState
 ): ParsedTableBody {
+  const firstChild = node.firstChild
   const body: ParsedTableBody = {
     rows: [
       {
@@ -155,7 +156,7 @@ function parseTabularBody(
     return getLastRow().cells[getLastRow().cells.length - 1]
   }
   for (
-    let currentChild: SyntaxNode | null = node;
+    let currentChild: SyntaxNode | null = firstChild;
     currentChild;
     currentChild = currentChild.nextSibling
   ) {
@@ -256,7 +257,8 @@ function parseTabularBody(
       continue
     } else if (
       currentChild.type.is('NewLine') ||
-      currentChild.type.is('Whitespace')
+      currentChild.type.is('Whitespace') ||
+      currentChild.type.is('Comment')
     ) {
       const lastCell = getLastCell()
       if (!lastCell?.multiColumn) {
@@ -306,11 +308,22 @@ function parseTabularBody(
     getLastRow().position.to = currentChild.to
   }
   const lastRow = getLastRow()
-  if (lastRow.cells.length === 1 && lastRow.cells[0].content.trim() === '') {
+  if (
+    body.rows.length > 1 &&
+    lastRow.cells.length === 1 &&
+    lastRow.cells[0].content.trim() === ''
+  ) {
     // Remove the last row if it's empty, but move hlines up to previous row
     const hlines = lastRow.hlines.map(hline => ({ ...hline, atBottom: true }))
     body.rows.pop()
     getLastRow().hlines.push(...hlines)
+    const lastLineContents = state.sliceDoc(
+      lastRow.position.from,
+      lastRow.position.to
+    )
+    const lastLineOffset =
+      lastLineContents.length - lastLineContents.trimEnd().length
+    getLastRow().position.to = lastRow.position.to - lastLineOffset
   }
   return body
 }
@@ -339,7 +352,7 @@ export function generateTable(
   const columns = parseColumnSpecifications(
     state.sliceDoc(specification.from, specification.to)
   )
-  const body = node.getChild('Content')?.getChild('TabularContent')?.firstChild
+  const body = node.getChild('Content')?.getChild('TabularContent')
   if (!body) {
     throw new Error('Missing table body')
   }

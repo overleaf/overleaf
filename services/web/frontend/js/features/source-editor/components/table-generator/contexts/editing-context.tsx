@@ -57,6 +57,7 @@ export const EditingContextProvider: FC = ({ children }) => {
       view.dispatch({
         changes: { from, to, insert: content },
       })
+      view.requestMeasure()
       setCellData(null)
     },
     [view, table, initialContent]
@@ -68,6 +69,7 @@ export const EditingContextProvider: FC = ({ children }) => {
     }
     if (!cellData.dirty) {
       setCellData(null)
+      setInitialContent(undefined)
       return
     }
     const { rowIndex, cellIndex, content } = cellData
