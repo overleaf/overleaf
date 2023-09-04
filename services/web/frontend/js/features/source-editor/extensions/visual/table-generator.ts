@@ -119,7 +119,7 @@ export const tableGeneratorTheme = EditorView.baseTheme({
 
   '.table-generator-table': {
     'table-layout': 'fixed',
-    'max-width': '80%',
+    'max-width': '95%',
     margin: '0 auto',
     cursor: 'default',
 
@@ -127,7 +127,6 @@ export const tableGeneratorTheme = EditorView.baseTheme({
       '&:not(.editing)': {
         padding: '0 0.25em',
       },
-      'max-width': '200px',
       'vertical-align': 'top',
 
       '&.alignment-left': {
@@ -281,9 +280,9 @@ export const tableGeneratorTheme = EditorView.baseTheme({
   },
 
   '.table-generator-cell-input': {
-    'max-width': 'calc(200px - 0.5em)',
     'background-color': 'transparent',
     width: '100%',
+    'text-align': 'inherit',
     height: '1.5em',
     'min-height': '100%',
     border: '1px solid var(--table-generator-toolbar-shadow-color)',
