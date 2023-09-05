@@ -12,6 +12,24 @@ export type RowPosition = {
   hlines: { from: number; to: number }[]
 }
 
+function parseArgument(spec: string, startIndex: number): number {
+  if (spec.charAt(startIndex) !== '{') {
+    throw new Error('Missing opening brace')
+  }
+  let depth = 0
+  for (let i = startIndex; i < spec.length; i++) {
+    if (spec.charAt(i) === '{') {
+      depth++
+    } else if (spec.charAt(i) === '}') {
+      depth--
+    }
+    if (depth === 0) {
+      return i
+    }
+  }
+  throw new Error('Missing closing brace')
+}
+
 export function parseColumnSpecifications(
   specification: string
 ): ColumnDefinition[] {
@@ -20,6 +38,8 @@ export function parseColumnSpecifications(
   let currentBorderLeft = 0
   let currentBorderRight = 0
   let currentContent = ''
+  let currentCellSpacingLeft = ''
+  let currentCellSpacingRight = ''
   function maybeCommit() {
     if (currentAlignment !== undefined) {
       columns.push({
@@ -27,11 +47,15 @@ export function parseColumnSpecifications(
         borderLeft: currentBorderLeft,
         borderRight: currentBorderRight,
         content: currentContent,
+        cellSpacingLeft: currentCellSpacingLeft,
+        cellSpacingRight: currentCellSpacingRight,
       })
       currentAlignment = undefined
       currentBorderLeft = 0
       currentBorderRight = 0
       currentContent = ''
+      currentCellSpacingLeft = ''
+      currentCellSpacingRight = ''
     }
   }
   for (let i = 0; i < specification.length; i++) {
@@ -65,12 +89,31 @@ export function parseColumnSpecifications(
         currentAlignment = 'paragraph'
         currentContent += 'p'
         // TODO: Parse these details
-        while (i < specification.length && specification.charAt(i) !== '}') {
-          i++
-          currentContent += specification.charAt(i)
+        const argumentEnd = parseArgument(specification, i + 1)
+        // Don't include the p twice
+        currentContent += specification.slice(i + 1, argumentEnd + 1)
+        i = argumentEnd
+        break
+      }
+      case '@':
+      case '!': {
+        const argumentEnd = parseArgument(specification, i + 1)
+        // Include the @/!
+        const argument = specification.slice(i, argumentEnd + 1)
+        i = argumentEnd
+        if (currentAlignment) {
+          // We have a cell, so this is right cell spacing
+          currentCellSpacingRight = argument
+        } else {
+          currentCellSpacingLeft = argument
         }
         break
       }
+      case ' ':
+      case '\n':
+      case '\t':
+        currentContent += char
+        break
     }
   }
   maybeCommit()
@@ -279,7 +322,6 @@ function parseTabularBody(
     } else if (isHLine(currentChild)) {
       const lastCell = getLastCell()
       if (lastCell?.content.trim()) {
-        console.error(lastCell)
         throw new Error('\\hline must be at the start of a row')
       }
       // push start of cell past the hline

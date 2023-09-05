@@ -22,6 +22,7 @@ export class TabularWidget extends WidgetType {
     try {
       this.parseResult = generateTable(tabularNode, state)
     } catch (e) {
+      console.error(e)
       this.parseResult = null
     }
   }

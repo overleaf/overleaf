@@ -29,6 +29,8 @@ export type ColumnDefinition = {
   borderLeft: number
   borderRight: number
   content: string
+  cellSpacingLeft: string
+  cellSpacingRight: string
 }
 
 export type CellData = {

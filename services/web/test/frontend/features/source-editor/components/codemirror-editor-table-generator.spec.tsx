@@ -422,5 +422,28 @@ cell 3 & cell 4 \\\\
       cy.get('.ol-cm-command-caption').should('not.exist')
       cy.get('.ol-cm-command-label').should('not.exist')
     })
+
+    it('Renders a table with custom column spacing', function () {
+      mountEditor(`
+\\begin{tabular}{@{}c@{}l!{}}
+  cell 1 & cell 2 \\\\
+  cell 3 & cell 4 \\\\
+\\end{tabular}`)
+      checkTable([
+        ['cell 1', 'cell 2'],
+        ['cell 3', 'cell 4'],
+      ])
+      cy.get('.table-generator-cell').first().click()
+      cy.get('.table-generator-floating-toolbar').as('toolbar').should('exist')
+      cy.get('@toolbar').findByText('No borders').click()
+      cy.get('.table-generator').findByText('All borders').click()
+      // The element is partially covered, but we can still click it
+      cy.get('.cm-line').first().click({ force: true })
+      checkTable([
+        ['cell 1', 'cell 2'],
+        ['cell 3', 'cell 4'],
+      ])
+      checkBordersWithNoMultiColumn([true, true, true], [true, true, true])
+    })
   })
 })
