@@ -32,14 +32,6 @@ describe('PersistenceManager', function () {
     this.pathname = '/a/b/c.tex'
     this.lastUpdatedAt = Date.now()
     this.lastUpdatedBy = 'last-author-id'
-    this.doc = {
-      lines: this.lines,
-      version: this.version,
-      ranges: this.ranges,
-      projectHistoryId: this.projectHistoryId,
-      pathname: this.pathname,
-      historyRangesSupport: false,
-    }
     this.Settings.apis = {
       web: {
         url: (this.url = 'www.example.com'),
@@ -95,7 +87,16 @@ describe('PersistenceManager', function () {
       })
 
       it('should call the callback with the doc lines, version and ranges', function () {
-        this.callback.should.have.been.calledWith(null, this.doc)
+        this.callback
+          .calledWith(
+            null,
+            this.lines,
+            this.version,
+            this.ranges,
+            this.pathname,
+            this.projectHistoryId
+          )
+          .should.equal(true)
       })
 
       it('should time the execution', function () {

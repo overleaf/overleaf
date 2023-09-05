@@ -30,44 +30,47 @@ const keys = Settings.redis.documentupdater.key_schema
 module.exports = RedisManager = {
   rclient,
 
-  putDocInMemory(projectId, docId, doc, _callback) {
+  putDocInMemory(
+    projectId,
+    docId,
+    docLines,
+    version,
+    ranges,
+    pathname,
+    projectHistoryId,
+    _callback
+  ) {
     const timer = new metrics.Timer('redis.put-doc')
     const callback = error => {
       timer.done()
       _callback(error)
     }
-    const docLinesJson = JSON.stringify(doc.lines)
-    if (docLinesJson.indexOf('\u0000') !== -1) {
+    const docLinesArray = docLines
+    docLines = JSON.stringify(docLines)
+    if (docLines.indexOf('\u0000') !== -1) {
       const error = new Error('null bytes found in doc lines')
       // this check was added to catch memory corruption in JSON.stringify.
       // It sometimes returned null bytes at the end of the string.
-      logger.error({ err: error, docId, docLines: docLinesJson }, error.message)
+      logger.error({ err: error, docId, docLines }, error.message)
       return callback(error)
     }
     // Do an optimised size check on the docLines using the serialised
     // length as an upper bound
-    const sizeBound = docLinesJson.length
-    if (docIsTooLarge(sizeBound, doc.lines, Settings.max_doc_length)) {
-      const docSize = docLinesJson.length
+    const sizeBound = docLines.length
+    if (docIsTooLarge(sizeBound, docLinesArray, Settings.max_doc_length)) {
+      const docSize = docLines.length
       const err = new Error('blocking doc insert into redis: doc is too large')
       logger.error({ projectId, docId, err, docSize }, err.message)
       return callback(err)
     }
-    const docHash = RedisManager._computeHash(docLinesJson)
+    const docHash = RedisManager._computeHash(docLines)
     // record bytes sent to redis
-    metrics.summary('redis.docLines', docLinesJson.length, { status: 'set' })
+    metrics.summary('redis.docLines', docLines.length, { status: 'set' })
     logger.debug(
-      {
-        projectId,
-        docId,
-        version: doc.version,
-        docHash,
-        pathname: doc.pathname,
-        projectHistoryId: doc.projectHistoryId,
-      },
+      { projectId, docId, version, docHash, pathname, projectHistoryId },
       'putting doc in redis'
     )
-    RedisManager._serializeRanges(doc.ranges, (error, ranges) => {
+    RedisManager._serializeRanges(ranges, (error, ranges) => {
       if (error) {
         logger.error({ err: error, docId, projectId }, error.message)
         return callback(error)
@@ -79,27 +82,25 @@ module.exports = RedisManager = {
         error => {
           if (error) return callback(error)
 
-          if (!doc.pathname) {
+          if (!pathname) {
             metrics.inc('pathname', 1, {
               path: 'RedisManager.setDoc',
-              status: doc.pathname === '' ? 'zero-length' : 'undefined',
+              status: pathname === '' ? 'zero-length' : 'undefined',
             })
           }
 
-          const multi = rclient.multi()
-          multi.mset({
-            [keys.docLines({ doc_id: docId })]: docLinesJson,
-            [keys.projectKey({ doc_id: docId })]: projectId,
-            [keys.docVersion({ doc_id: docId })]: doc.version,
-            [keys.docHash({ doc_id: docId })]: docHash,
-            [keys.ranges({ doc_id: docId })]: ranges,
-            [keys.pathname({ doc_id: docId })]: doc.pathname,
-            [keys.projectHistoryId({ doc_id: docId })]: doc.projectHistoryId,
-          })
-          if (doc.historyRangesSupport) {
-            multi.sadd(keys.historyRangesSupport(), docId)
-          }
-          multi.exec(callback)
+          rclient.mset(
+            {
+              [keys.docLines({ doc_id: docId })]: docLines,
+              [keys.projectKey({ doc_id: docId })]: projectId,
+              [keys.docVersion({ doc_id: docId })]: version,
+              [keys.docHash({ doc_id: docId })]: docHash,
+              [keys.ranges({ doc_id: docId })]: ranges,
+              [keys.pathname({ doc_id: docId })]: pathname,
+              [keys.projectHistoryId({ doc_id: docId })]: projectHistoryId,
+            },
+            callback
+          )
         }
       )
     })
@@ -131,7 +132,6 @@ module.exports = RedisManager = {
       keys.lastUpdatedAt({ doc_id: docId }),
       keys.lastUpdatedBy({ doc_id: docId })
     )
-    multi.srem(keys.historyRangesSupport(), docId)
     multi.exec((error, response) => {
       if (error) {
         return callback(error)

@@ -39,27 +39,50 @@ module.exports = DocumentManager = {
             { projectId, docId },
             'doc not in redis so getting from persistence API'
           )
-          PersistenceManager.getDoc(projectId, docId, (error, doc) => {
-            if (error) {
-              return callback(error)
-            }
-            logger.debug({ doc }, 'got doc from persistence API')
-            RedisManager.putDocInMemory(projectId, docId, doc, error => {
+          PersistenceManager.getDoc(
+            projectId,
+            docId,
+            (error, lines, version, ranges, pathname, projectHistoryId) => {
               if (error) {
                 return callback(error)
               }
-              callback(
-                null,
-                doc.lines,
-                doc.version,
-                doc.ranges || {},
-                doc.pathname,
-                doc.projectHistoryId,
-                null,
-                false
+              logger.debug(
+                {
+                  projectId,
+                  docId,
+                  lines,
+                  version,
+                  pathname,
+                  projectHistoryId,
+                },
+                'got doc from persistence API'
               )
-            })
-          })
+              RedisManager.putDocInMemory(
+                projectId,
+                docId,
+                lines,
+                version,
+                ranges,
+                pathname,
+                projectHistoryId,
+                error => {
+                  if (error) {
+                    return callback(error)
+                  }
+                  callback(
+                    null,
+                    lines,
+                    version,
+                    ranges || {},
+                    pathname,
+                    projectHistoryId,
+                    null,
+                    false
+                  )
+                }
+              )
+            }
+          )
         } else {
           callback(
             null,
@@ -494,7 +517,7 @@ module.exports = DocumentManager = {
             projectId,
             docId,
             { peek: true },
-            (error, doc) => {
+            (error, lines, version, ranges, pathname, projectHistoryId) => {
               if (error) {
                 logger.error(
                   { projectId, docId, getDocError: error },
@@ -504,10 +527,10 @@ module.exports = DocumentManager = {
               }
               ProjectHistoryRedisManager.queueResyncDocContent(
                 projectId,
-                doc.projectHistoryId,
+                projectHistoryId,
                 docId,
-                doc.lines,
-                doc.version,
+                lines,
+                version,
                 path, // use the path from the resyncProjectStructure update
                 callback
               )

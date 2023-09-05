@@ -140,9 +140,6 @@ module.exports = {
         flushAndDeleteQueue() {
           return 'DocUpdaterFlushAndDeleteQueue'
         },
-        historyRangesSupport() {
-          return 'HistoryRangesSupport'
-        },
       },
     },
   },
