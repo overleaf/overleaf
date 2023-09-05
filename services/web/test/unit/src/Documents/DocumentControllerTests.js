@@ -1,27 +1,18 @@
 const sinon = require('sinon')
-const modulePath =
-  '../../../../app/src/Features/Documents/DocumentController.js'
 const SandboxedModule = require('sandboxed-module')
 const MockRequest = require('../helpers/MockRequest')
 const MockResponse = require('../helpers/MockResponse')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 
+const MODULE_PATH =
+  '../../../../app/src/Features/Documents/DocumentController.js'
+
 describe('DocumentController', function () {
   beforeEach(function () {
-    this.DocumentController = SandboxedModule.require(modulePath, {
-      requires: {
-        '../Project/ProjectGetter': (this.ProjectGetter = {}),
-        '../Project/ProjectLocator': (this.ProjectLocator = {}),
-        '../Project/ProjectEntityHandler': (this.ProjectEntityHandler = {}),
-        '../Project/ProjectEntityUpdateHandler':
-          (this.ProjectEntityUpdateHandler = {}),
-      },
-    })
     this.res = new MockResponse()
     this.req = new MockRequest()
     this.next = sinon.stub()
-    this.project_id = 'project-id-123'
-    this.doc_id = 'doc-id-123'
+    this.doc = { _id: 'doc-id-123' }
     this.doc_lines = ['one', 'two', 'three']
     this.version = 42
     this.ranges = { mock: 'ranges' }
@@ -29,40 +20,68 @@ describe('DocumentController', function () {
     this.lastUpdatedAt = new Date().getTime()
     this.lastUpdatedBy = 'fake-last-updater-id'
     this.rev = 5
+    this.project = {
+      _id: 'project-id-123',
+      overleaf: {
+        history: {
+          id: 1234,
+          display: true,
+        },
+      },
+    }
+
+    this.ProjectGetter = {
+      promises: {
+        getProject: sinon.stub().resolves(this.project),
+      },
+    }
+    this.ProjectLocator = {
+      promises: {
+        findElement: sinon
+          .stub()
+          .resolves({ element: this.doc, path: { fileSystem: this.pathname } }),
+      },
+    }
+    this.ProjectEntityHandler = {
+      promises: {
+        getDoc: sinon.stub().resolves({
+          lines: this.doc_lines,
+          rev: this.rev,
+          version: this.version,
+          ranges: this.ranges,
+        }),
+      },
+    }
+    this.ProjectEntityUpdateHandler = {
+      promises: {
+        updateDocLines: sinon.stub().resolves(),
+      },
+    }
+
+    this.DocumentController = SandboxedModule.require(MODULE_PATH, {
+      requires: {
+        '../Project/ProjectGetter': this.ProjectGetter,
+        '../Project/ProjectLocator': this.ProjectLocator,
+        '../Project/ProjectEntityHandler': this.ProjectEntityHandler,
+        '../Project/ProjectEntityUpdateHandler':
+          this.ProjectEntityUpdateHandler,
+      },
+    })
   })
 
   describe('getDocument', function () {
     beforeEach(function () {
       this.req.params = {
-        Project_id: this.project_id,
-        doc_id: this.doc_id,
+        Project_id: this.project._id,
+        doc_id: this.doc._id,
       }
     })
 
     describe('when project exists with project history enabled', function () {
-      beforeEach(function () {
-        this.doc = { _id: this.doc_id }
-        this.projectHistoryId = 1234
-        this.projectHistoryDisplay = true
-        this.projectHistoryType = 'project-history'
-        this.project = {
-          _id: this.project_id,
-          overleaf: {
-            history: {
-              id: this.projectHistoryId,
-              display: this.projectHistoryDisplay,
-            },
-          },
+      beforeEach(function (done) {
+        this.res.callback = err => {
+          done(err)
         }
-        this.ProjectGetter.getProject = sinon
-          .stub()
-          .callsArgWith(2, null, this.project)
-        this.ProjectLocator.findElement = sinon
-          .stub()
-          .callsArgWith(1, null, this.doc, { fileSystem: this.pathname })
-        this.ProjectEntityHandler.getDoc = sinon
-          .stub()
-          .yields(null, this.doc_lines, this.rev, this.version, this.ranges)
         this.DocumentController.getDocument(this.req, this.res, this.next)
       })
 
@@ -74,16 +93,19 @@ describe('DocumentController', function () {
             version: this.version,
             ranges: this.ranges,
             pathname: this.pathname,
-            projectHistoryId: this.projectHistoryId,
-            projectHistoryType: this.projectHistoryType,
+            projectHistoryId: this.project.overleaf.history.id,
+            projectHistoryType: 'project-history',
           })
         )
       })
     })
 
     describe('when the project does not exist', function () {
-      beforeEach(function () {
-        this.ProjectGetter.getProject = sinon.stub().callsArgWith(2, null, null)
+      beforeEach(function (done) {
+        this.ProjectGetter.promises.getProject.resolves(null)
+        this.res.callback = err => {
+          done(err)
+        }
         this.DocumentController.getDocument(this.req, this.res, this.next)
       })
 
@@ -96,14 +118,13 @@ describe('DocumentController', function () {
   describe('setDocument', function () {
     beforeEach(function () {
       this.req.params = {
-        Project_id: this.project_id,
-        doc_id: this.doc_id,
+        Project_id: this.project._id,
+        doc_id: this.doc._id,
       }
     })
 
     describe('when the document exists', function () {
-      beforeEach(function () {
-        this.ProjectEntityUpdateHandler.updateDocLines = sinon.stub().yields()
+      beforeEach(function (done) {
         this.req.body = {
           lines: this.doc_lines,
           version: this.version,
@@ -111,14 +132,17 @@ describe('DocumentController', function () {
           lastUpdatedAt: this.lastUpdatedAt,
           lastUpdatedBy: this.lastUpdatedBy,
         }
+        this.res.callback = err => {
+          done(err)
+        }
         this.DocumentController.setDocument(this.req, this.res, this.next)
       })
 
       it('should update the document in Mongo', function () {
         sinon.assert.calledWith(
-          this.ProjectEntityUpdateHandler.updateDocLines,
-          this.project_id,
-          this.doc_id,
+          this.ProjectEntityUpdateHandler.promises.updateDocLines,
+          this.project._id,
+          this.doc._id,
           this.doc_lines,
           this.version,
           this.ranges,
@@ -133,11 +157,14 @@ describe('DocumentController', function () {
     })
 
     describe("when the document doesn't exist", function () {
-      beforeEach(function () {
-        this.ProjectEntityUpdateHandler.updateDocLines = sinon
-          .stub()
-          .yields(new Errors.NotFoundError('document does not exist'))
+      beforeEach(function (done) {
+        this.ProjectEntityUpdateHandler.promises.updateDocLines.rejects(
+          new Errors.NotFoundError('document does not exist')
+        )
         this.req.body = { lines: this.doc_lines }
+        this.next.callsFake(() => {
+          done()
+        })
         this.DocumentController.setDocument(this.req, this.res, this.next)
       })
 
