@@ -30,7 +30,7 @@ function useIndicatorHover() {
         setHoverCoords(null)
         setLayoutSuspended(false)
       })
-      handleLayoutChange(true)
+      handleLayoutChange({ force: true })
     }
   }, [handleLayoutChange, layoutToLeft, reviewPanelOpen, setLayoutSuspended])
 

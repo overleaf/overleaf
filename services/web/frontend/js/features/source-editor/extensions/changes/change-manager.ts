@@ -2,8 +2,9 @@ import { trackChangesAnnotation } from '../realtime'
 import { clearChangeMarkers, buildChangeMarkers } from '../track-changes'
 import {
   setVerticalOverflow,
-  updateSetsVerticalOverflow,
   editorVerticalTopPadding,
+  updateChangesTopPadding,
+  updateSetsVerticalOverflow,
 } from '../vertical-overflow'
 import { EditorSelection, EditorState } from '@codemirror/state'
 import { EditorView, ViewUpdate } from '@codemirror/view'
@@ -31,22 +32,52 @@ export const dispatchEditorEvent = (type: string, payload?: unknown) => {
   }, 0)
 }
 
-export const dispatchReviewPanelLayout = (force = false) => {
+const dispatchReviewPanelLayoutImmediately = ({
+  force = false,
+  animate = true,
+} = {}) => {
   window.dispatchEvent(
-    new CustomEvent('review-panel:layout', { detail: { force } })
+    new CustomEvent('review-panel:layout', { detail: { force, animate } })
   )
 }
 
 const scheduleDispatchReviewPanelLayout = debounce(
-  dispatchReviewPanelLayout,
+  dispatchReviewPanelLayoutImmediately,
   10
 )
+
+/**
+ * @param force If true, forces the entries to be repositioned
+ * @param animate
+ * @param async If true, calls are briefly delayed and debounced
+ */
+export const dispatchReviewPanelLayout = ({
+  force = false,
+  animate = true,
+  async = false,
+} = {}) => {
+  if (async) {
+    scheduleDispatchReviewPanelLayout({ force, animate })
+  } else {
+    dispatchReviewPanelLayoutImmediately({ force, animate })
+  }
+}
 
 export type ChangeManager = {
   initialize: () => void
   handleUpdate: (update: ViewUpdate) => void
   destroy: () => void
 }
+
+type UpdateType =
+  | 'edit'
+  | 'selectionChange'
+  | 'geometryChange'
+  | 'viewportChange'
+  | 'acceptChanges'
+  | 'rejectChanges'
+  | 'trackedChangesChange'
+  | 'topPaddingChange'
 
 export const createChangeManager = (
   view: EditorView,
@@ -58,7 +89,13 @@ export const createChangeManager = (
    *
    * Returns a boolean indicating whether the visibility of any entry has changed
    */
-  const recalculateScreenPositions = (entries?: Record<string, any>) => {
+  const recalculateScreenPositions = ({
+    entries,
+    updateType,
+  }: {
+    entries?: Record<string, any>
+    updateType: UpdateType
+  }) => {
     const contentRect = view.contentDOM.getBoundingClientRect()
 
     const { doc } = view.state
@@ -88,8 +125,9 @@ export const createChangeManager = (
         }
 
         entry.screenPos = { y: y + offsetTop, height, editorPaddingTop }
+        entry.inViewport = true
       } else {
-        entry.screenPos = null
+        entry.inViewport = false
       }
 
       if (allVisible) {
@@ -114,7 +152,7 @@ export const createChangeManager = (
       }
     }
 
-    return visibilityChanged
+    return { visibilityChanged, updateType }
   }
 
   /**
@@ -303,15 +341,29 @@ export const createChangeManager = (
       }
 
       case 'recalculate-screen-positions': {
-        const changed = recalculateScreenPositions(payload)
-        if (changed) {
+        const { visibilityChanged, updateType } =
+          recalculateScreenPositions(payload)
+        if (visibilityChanged) {
           dispatchEditorEvent('track-changes:visibility_changed')
         }
         // Ensure the layout is updated once the review panel entries have
         // updated in the React review panel. The use of a timeout is bad but
         // the timings are a bit of a mess and will be improved when the review
-        // panel state is migrated away from Angular
-        scheduleDispatchReviewPanelLayout()
+        // panel state is migrated away from Angular. Entries are not animated
+        // into position when scrolling, or when the editor geometry changes
+        // (e.g. because the window has been resized), or when the top padding
+        // is adjusted
+        const nonAnimatingUpdateTypes: UpdateType[] = [
+          'viewportChange',
+          'geometryChange',
+          'topPaddingChange',
+        ]
+        const animate = !nonAnimatingUpdateTypes.includes(updateType)
+        dispatchReviewPanelLayout({
+          async: true,
+          animate,
+          force: false, // updateType === 'geometryChange',
+        })
         break
       }
 
@@ -321,7 +373,7 @@ export const createChangeManager = (
         broadcastChange()
         // Dispatch a focus:changed event to force the Angular controller to
         // reassemble the list of entries without bulk actions
-        dispatchFocusChangedEvent(view.state)
+        scheduleDispatchFocusChanged(view.state, 'acceptChanges')
         break
       }
 
@@ -330,7 +382,7 @@ export const createChangeManager = (
         broadcastChange()
         // Dispatch a focus:changed event to force the Angular controller to
         // reassemble the list of entries without bulk actions
-        dispatchFocusChangedEvent(view.state)
+        scheduleDispatchFocusChanged(view.state, 'rejectChanges')
         break
       }
 
@@ -368,17 +420,23 @@ export const createChangeManager = (
       }
 
       case 'sizes': {
+        const editorFullContentHeight = view.contentDOM.clientHeight
         // the content height and top overflow of the review panel
         const { height, overflowTop } = payload
         // the difference between the review panel height and the editor content height
-        const heightDiff = height + overflowTop - view.contentDOM.clientHeight
+        const heightDiff = height + overflowTop - editorFullContentHeight
         // the height of the block added at the top of the editor to match the review panel
         const topPadding = editorVerticalTopPadding(view)
+        const bottomPadding = view.documentPadding.bottom
+        const contentHeight =
+          editorFullContentHeight - (topPadding + bottomPadding)
+        const newBottomPadding = height - contentHeight
+
         if (overflowTop !== topPadding || heightDiff !== 0) {
           view.dispatch(
             setVerticalOverflow({
               top: overflowTop,
-              bottom: heightDiff + view.documentPadding.bottom,
+              bottom: newBottomPadding,
             })
           )
         }
@@ -396,13 +454,27 @@ export const createChangeManager = (
    * tell the review panel to update.
    *
    * @param state object
+   * @param updateType UpdateType
    */
-  const dispatchFocusChangedEvent = debounce((state: EditorState) => {
+  const dispatchFocusChangedImmediately = (
+    state: EditorState,
+    updateType: UpdateType
+  ) => {
     // TODO: multiple selections?
     const { from, to, empty } = state.selection.main
 
-    dispatchEditorEvent('focus:changed', { from, to, empty })
-  }, 50)
+    dispatchEditorEvent('focus:changed', {
+      from,
+      to,
+      empty,
+      updateType,
+    })
+  }
+
+  const scheduleDispatchFocusChanged = debounce(
+    dispatchFocusChangedImmediately,
+    50
+  )
 
   /**
    * When the editor is scrolled, tell the review panel so it can scroll in sync.
@@ -478,15 +550,25 @@ export const createChangeManager = (
       broadcastChange()
     },
     handleUpdate(update: ViewUpdate) {
-      if (update.geometryChanged && !update.docChanged) {
+      const changesTopPadding = updateChangesTopPadding(update)
+      const {
+        geometryChanged,
+        viewportChanged,
+        docChanged,
+        focusChanged,
+        selectionSet,
+      } = update
+      const setsVerticalOverflow = updateSetsVerticalOverflow(update)
+      const ignoringGeometryChanges = Date.now() < ignoreGeometryChangesUntil
+
+      if (geometryChanged && !docChanged && !ignoringGeometryChanges) {
         broadcastChange()
       }
 
-      if (updateSetsVerticalOverflow(update)) {
-        ignoreGeometryChangesUntil = Date.now() + 50 // ignore changes for 50ms
-      } else if (
-        (update.geometryChanged || update.viewportChanged) &&
-        Date.now() < ignoreGeometryChangesUntil
+      if (
+        !setsVerticalOverflow &&
+        (geometryChanged || viewportChanged) &&
+        ignoringGeometryChanges
       ) {
         // Ignore a change to the editor geometry or viewport that occurs immediately after
         // an update to the vertical padding because otherwise it triggers
@@ -495,14 +577,25 @@ export const createChangeManager = (
         return
       }
 
-      if (
-        update.docChanged ||
-        update.focusChanged ||
-        update.viewportChanged ||
-        update.selectionSet ||
-        update.geometryChanged
-      ) {
-        dispatchFocusChangedEvent(update.state)
+      if (changesTopPadding) {
+        scheduleDispatchFocusChanged(update.state, 'topPaddingChange')
+      } else if (docChanged) {
+        scheduleDispatchFocusChanged(update.state, 'edit')
+      } else if (focusChanged || selectionSet) {
+        scheduleDispatchFocusChanged(update.state, 'selectionChange')
+      } else if (viewportChanged && !geometryChanged) {
+        // It's better to respond immediately to a viewport change, which
+        // happens when scrolling, and have previously unpositioned entries
+        // appear immediately rather than risk a delay due to debouncing
+        dispatchFocusChangedImmediately(update.state, 'viewportChange')
+      } else if (geometryChanged) {
+        scheduleDispatchFocusChanged(update.state, 'geometryChange')
+      }
+
+      // Wait until after updating the review panel layout before starting the
+      // interval during which to ignore geometry update
+      if (setsVerticalOverflow) {
+        ignoreGeometryChangesUntil = Date.now() + 50
       }
     },
     destroy() {

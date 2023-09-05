@@ -11,6 +11,7 @@ import {
   DocId,
   MainDocument,
 } from '../../../../../../../types/project-settings'
+import { dispatchReviewPanelLayout } from '../../../extensions/changes/change-manager'
 
 /* eslint-disable no-use-before-define */
 export interface ReviewPanelState {
@@ -49,7 +50,9 @@ export interface ReviewPanelState {
   }
   updaterFns: {
     handleSetSubview: (subView: SubView) => void
-    handleLayoutChange: (force?: boolean) => void
+    handleLayoutChange: (
+      ...args: Parameters<typeof dispatchReviewPanelLayout>
+    ) => void
     gotoEntry: (docId: DocId, entryOffset: number) => void
     resolveComment: (docId: DocId, entryId: ThreadId) => void
     deleteComment: (threadId: ThreadId, commentId: CommentId) => void

@@ -14,6 +14,7 @@ import { isEqual } from 'lodash'
 type Positions = {
   entryTop: number
   callout: { top: number; height: number; inverted: boolean }
+  inViewport: boolean
 }
 
 type EntryView = {
@@ -25,12 +26,25 @@ type EntryView = {
   layout: HTMLElement
   height: number
   entry: ReviewPanelEntry
-  visible: boolean
+  hasScreenPos: boolean
   positions?: Positions
   previousPositions?: Positions
 }
 
 type EntryPositions = Pick<EntryView, 'entryId' | 'positions'>
+
+type PositionedEntriesProps = {
+  entries: Array<[keyof ReviewPanelDocEntries, ReviewPanelEntry]>
+  contentHeight: number
+  children: React.ReactNode
+}
+
+const initialLayoutInfo = {
+  focusedEntryIndex: 0,
+  overflowTop: 0,
+  height: 0,
+  positions: [] as EntryPositions[],
+}
 
 function css(el: HTMLElement, props: React.CSSProperties) {
   Object.assign(el.style, props)
@@ -58,43 +72,131 @@ function positionsEqual(
   return isEqual(entryPos1, entryPos2)
 }
 
-const calculateEntryViewPositions = (
+function updateEntryPositions(
+  entryView: EntryView,
+  entryTop: number,
+  lineHeight: number
+) {
+  const callout = calculateCalloutPosition(
+    entryView.entry.screenPos,
+    entryTop,
+    lineHeight
+  )
+  entryView.positions = {
+    entryTop,
+    callout,
+    inViewport: entryView.entry.inViewport,
+  }
+}
+
+function calculateEntryViewPositions(
   entryViews: EntryView[],
   lineHeight: number,
   calculateTop: (originalTop: number, height: number) => number
-) => {
+) {
   for (const entryView of entryViews) {
-    entryView.wrapper.classList.toggle('rp-entry-hidden', !entryView.visible)
-    if (entryView.visible) {
+    if (entryView.hasScreenPos) {
       const entryTop = calculateTop(
         entryView.entry.screenPos.y,
         entryView.height
       )
-      const callout = calculateCalloutPosition(
-        entryView.entry.screenPos,
-        entryTop,
-        lineHeight
-      )
-      entryView.positions = {
-        entryTop,
-        callout,
-      }
+      updateEntryPositions(entryView, entryTop, lineHeight)
     }
-    debugConsole.log('ENTRY', { entry: entryView.entry, top })
   }
 }
 
-type PositionedEntriesProps = {
-  entries: Array<[keyof ReviewPanelDocEntries, ReviewPanelEntry]>
-  contentHeight: number
-  children: React.ReactNode
+function hideOrShowEntries(entryViews: EntryView[]) {
+  for (const entryView of entryViews) {
+    // Completely hide any entry that has no screen position
+    entryView.wrapper.classList.toggle(
+      'rp-entry-hidden',
+      !entryView.hasScreenPos
+    )
+  }
 }
 
-const initialLayoutInfo = {
-  focusedEntryIndex: 0,
-  overflowTop: 0,
-  height: 0,
-  positions: [] as EntryPositions[],
+function applyEntryTop(entryView: EntryView, top: number) {
+  entryView.box.style.top = top + 'px'
+
+  if (entryView.indicator) {
+    entryView.indicator.style.top = top + 'px'
+  }
+}
+
+function applyEntryVisibility(entryView: EntryView) {
+  // The entry element is invisible by default, to avoid flickering when
+  // positioning for the first time. Here we make sure it becomes visible after
+  // acquiring a screen position.
+  if (entryView.entry.inViewport) {
+    entryView.box.style.visibility = 'visible'
+    entryView.callout.style.visibility = 'visible'
+  }
+}
+
+// Position everything where it was before, taking into account the new top
+// overflow
+function moveEntriesToInitialPosition(
+  entryViews: EntryView[],
+  overflowTop: number
+) {
+  for (const entryView of entryViews) {
+    const { callout: calloutEl, positions } = entryView
+    if (positions) {
+      const { entryTop, callout } = positions
+
+      // Position the main wrapper in its original position, if it had
+      // one, or its new position otherwise
+      const entryTopInitial = entryView.previousPositions
+        ? entryView.previousPositions.entryTop
+        : entryTop
+
+      applyEntryVisibility(entryView)
+      applyEntryTop(entryView, entryTopInitial + overflowTop)
+
+      // Position the callout element in its original position, if it had
+      // one, or its new position otherwise
+      calloutEl.classList.toggle('rp-entry-callout-inverted', callout.inverted)
+      const calloutTopInitial = entryView.previousPositions
+        ? entryView.previousPositions.callout.top
+        : callout.top
+
+      css(calloutEl, {
+        top: calloutTopInitial + overflowTop + 'px',
+        height: callout.height + 'px',
+      })
+    }
+  }
+}
+
+function moveEntriesToFinalPositions(
+  entryViews: EntryView[],
+  overflowTop: number,
+  shouldApplyVisibility: boolean
+) {
+  for (const entryView of entryViews) {
+    const { callout: calloutEl, positions } = entryView
+    if (positions) {
+      const { entryTop, callout } = positions
+
+      if (shouldApplyVisibility) {
+        applyEntryVisibility(entryView)
+      }
+
+      // Position the main wrapper, if it's moved
+      if (entryView.previousPositions?.entryTop !== entryTop) {
+        entryView.box.style.top = entryTop + overflowTop + 'px'
+      }
+
+      if (entryView.indicator) {
+        entryView.indicator.style.top = entryTop + overflowTop + 'px'
+      }
+
+      // Position the callout element
+      if (entryView.previousPositions?.callout.top !== callout.top) {
+        calloutEl.style.top = callout.top + overflowTop + 'px'
+      }
+    }
+  }
 }
 
 function PositionedEntries({
@@ -106,10 +208,9 @@ function PositionedEntries({
     useReviewPanelValueContext()
   const containerRef = useRef<HTMLDivElement | null>(null)
   const { reviewPanelOpen } = useLayoutContext()
-  const animationTimerRef = useRef<number | null>(null)
   const previousLayoutInfoRef = useRef(initialLayoutInfo)
 
-  const layout = () => {
+  const layout = (animate = true) => {
     const container = containerRef.current
     if (!container) {
       return
@@ -150,7 +251,7 @@ function PositionedEntries({
         const previousPositions = previousLayoutInfoRef.current?.positions.find(
           pos => pos.entryId === entryId
         )?.positions
-        const visible = Boolean(entry.screenPos)
+        const hasScreenPos = Boolean(entry.screenPos)
         entryViews.push({
           entryId,
           wrapper,
@@ -158,7 +259,7 @@ function PositionedEntries({
           box,
           callout,
           layout: layoutElement,
-          visible,
+          hasScreenPos,
           height: 0,
           entry,
           previousPositions,
@@ -184,29 +285,26 @@ function PositionedEntries({
     // - Measure the height of each entry
     // - Move each entry without animation to their original position
     //   relative to the editor content
-    // - In the next animation frame, re-enable animation and position each
-    //   entry
+    // - Re-enable animation and position each entry
     //
     // The idea is to batch DOM reads and writes to avoid layout thrashing. In
     // this case, the best we can do is a write phase, a read phase then a
     // final write phase.
     // See https://web.dev/avoid-large-complex-layouts-and-layout-thrashing/
 
-    // First, update visibility for each entry that needs it
-    for (const entryView of entryViews) {
-      entryView.wrapper.classList.toggle('rp-entry-hidden', !entryView.visible)
-    }
+    // First, update display for each entry that needs it
+    hideOrShowEntries(entryViews)
 
     // Next, measure the height of each entry
     for (const entryView of entryViews) {
-      if (entryView.visible) {
+      if (entryView.hasScreenPos) {
         entryView.height = entryView.layout.offsetHeight
       }
     }
 
-    // Calculate positions for all visible entries, starting by calculating the
-    // entry to put in its desired position and anchor everything else around.
-    // If there is an explicitly focused entry, use that.
+    // Calculate positions for all positioned entries, starting by calculating
+    // which entry to put in its desired position and anchor everything else
+    // around. If there is an explicitly focused entry, use that.
     let focusedEntryIndex = entryViews.findIndex(view => view.entry.focused)
     if (focusedEntryIndex === -1) {
       // There is no explicitly focused entry, so use the focused entry from the
@@ -216,30 +314,30 @@ function PositionedEntries({
         previousLayoutInfoRef.current.focusedEntryIndex,
         entryViews.length - 1
       )
-      // If the entry from the previous layout is not visible, fall back to the
-      // first visible entry in the list
-      if (!entryViews[focusedEntryIndex].visible) {
-        focusedEntryIndex = entryViews.findIndex(view => view.visible)
+      // If the entry from the previous layout has no screen position, fall back
+      // to the first entry in the list that does.
+      if (!entryViews[focusedEntryIndex].hasScreenPos) {
+        focusedEntryIndex = entryViews.findIndex(view => view.hasScreenPos)
       }
     }
 
-    // If there is no visible entry, bail out
+    // If there is no entry with a screen position, bail out
     if (focusedEntryIndex === -1) {
       return
     }
 
     const focusedEntryView = entryViews[focusedEntryIndex]
-    if (!focusedEntryView.visible) {
+    if (!focusedEntryView.hasScreenPos) {
       return
     }
 
     // If the focused entry has no screenPos, we can't position other
     // entryViews relative to it, so we position all other entryViews as
     // though the focused entry is at the top and the rest follow it
-    const entryViewsAfter = focusedEntryView.visible
+    const entryViewsAfter = focusedEntryView.hasScreenPos
       ? entryViews.slice(focusedEntryIndex + 1)
       : [...entryViews]
-    const entryViewsBefore = focusedEntryView.visible
+    const entryViewsBefore = focusedEntryView.hasScreenPos
       ? entryViews.slice(0, focusedEntryIndex).reverse() // Work through backwards, starting with the one just above
       : []
 
@@ -248,19 +346,11 @@ function PositionedEntries({
     let lastEntryBottom = 0
     let firstEntryTop = 0
 
-    // Put the focused entry as close to where it wants to be as possible
-    if (focusedEntryView.visible) {
+    // Put the focused entry as close as possible to where it wants to be
+    if (focusedEntryView.hasScreenPos) {
       const focusedEntryScreenPos = focusedEntryView.entry.screenPos
       const entryTop = Math.max(focusedEntryScreenPos.y, toolbarPaddedHeight)
-      const callout = calculateCalloutPosition(
-        focusedEntryScreenPos,
-        entryTop,
-        lineHeight
-      )
-      focusedEntryView.positions = {
-        entryTop,
-        callout,
-      }
+      updateEntryPositions(focusedEntryView, entryTop, lineHeight)
       lastEntryBottom = entryTop + focusedEntryView.height
       firstEntryTop = entryTop
     }
@@ -292,80 +382,6 @@ function PositionedEntries({
     // Calculate the new top overflow
     const overflowTop = Math.max(0, toolbarPaddedHeight - firstEntryTop)
 
-    // Position everything where it was before, taking into account the new top
-    // overflow
-    const moveEntriesToInitialPosition = () => {
-      // Prevent CSS animation of position for this phase
-      container.classList.add('no-animate')
-      for (const entryView of entryViews) {
-        const { callout: calloutEl, positions } = entryView
-        if (positions) {
-          const { entryTop, callout } = positions
-
-          // Position the main wrapper in its original position, if it had
-          // one, or its new position otherwise
-          const entryTopInitial = entryView.previousPositions
-            ? entryView.previousPositions.entryTop
-            : entryTop
-
-          css(entryView.box, {
-            top: entryTopInitial + overflowTop + 'px',
-            // The entry element is invisible by default, to avoid flickering
-            // when positioning for the first time. Here we make sure it becomes
-            // visible after having a "top" value.
-            visibility: 'visible',
-          })
-
-          if (entryView.indicator) {
-            entryView.indicator.style.top = entryTopInitial + overflowTop + 'px'
-          }
-
-          // Position the callout element in its original position, if it had
-          // one, or its new position otherwise
-          calloutEl.classList.toggle(
-            'rp-entry-callout-inverted',
-            callout.inverted
-          )
-          const calloutTopInitial = entryView.previousPositions
-            ? entryView.previousPositions.callout.top
-            : callout.top
-
-          css(calloutEl, {
-            top: calloutTopInitial + overflowTop + 'px',
-            height: callout.height + 'px',
-          })
-        }
-      }
-    }
-
-    const moveToFinalPositions = () => {
-      // Re-enable CSS animation of position for this phase
-      container.classList.remove('no-animate')
-
-      for (const entryView of entryViews) {
-        const { callout: calloutEl, positions } = entryView
-        if (positions) {
-          const { entryTop, callout } = positions
-
-          // Position the main wrapper, if it's moved
-          if (entryView.previousPositions?.entryTop !== entryTop) {
-            entryView.box.style.top = entryTop + overflowTop + 'px'
-          }
-
-          if (entryView.indicator) {
-            entryView.indicator.style.top = entryTop + overflowTop + 'px'
-          }
-
-          // Position the callout element
-          if (entryView.previousPositions?.callout.top !== callout.top) {
-            calloutEl.style.top = callout.top + overflowTop + 'px'
-          }
-        }
-      }
-
-      animationTimerRef.current = null
-    }
-
     // Check whether the positions of any entry have changed since the last
     // layout
     const positions = entryViews.map(
@@ -386,10 +402,13 @@ function PositionedEntries({
 
     const height = lastEntryBottom + navPaddedHeight
     const heightChanged = height !== previousLayoutInfoRef.current.height
+    const isMoveRequired = positionsChanged || overflowTopChanged
 
-    // Move entries into their initial positions
-    if (positionsChanged || overflowTopChanged) {
-      moveEntriesToInitialPosition()
+    // Move entries into their initial positions, if animating, avoiding
+    // animation until the final animated move
+    if (animate && isMoveRequired) {
+      container.classList.add('no-animate')
+      moveEntriesToInitialPosition(entryViews, overflowTop)
     }
 
     // Inform the editor of the new top overflow and/or height if either has
@@ -409,8 +428,20 @@ function PositionedEntries({
     }
 
     // Do the final move
-    if (positionsChanged || overflowTopChanged) {
-      moveToFinalPositions()
+    if (isMoveRequired) {
+      if (animate) {
+        container.classList.remove('no-animate')
+        moveEntriesToFinalPositions(entryViews, overflowTop, false)
+      } else {
+        container.classList.add('no-animate')
+        moveEntriesToFinalPositions(entryViews, overflowTop, true)
+
+        // Force reflow now to ensure that entries are moved without animation
+        // eslint-disable-next-line no-void
+        void container.offsetHeight
+
+        container.classList.remove('no-animate')
+      }
     }
 
     previousLayoutInfoRef.current = {
@@ -427,7 +458,7 @@ function PositionedEntries({
       if (event.detail.force) {
         previousLayoutInfoRef.current = initialLayoutInfo
       }
-      layout()
+      layout(event.detail.animate)
     }
   })
 
@@ -437,7 +468,7 @@ function PositionedEntries({
     dispatchReviewPanelLayout()
   }, [])
 
-  // Ensure layout is performed after opening or closing the review panel
+  // Ensure a full layout is performed after opening or closing the review panel
   useEffect(() => {
     previousLayoutInfoRef.current = initialLayoutInfo
   }, [reviewPanelOpen])

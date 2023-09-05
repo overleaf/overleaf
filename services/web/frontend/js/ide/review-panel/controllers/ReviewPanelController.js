@@ -554,7 +554,14 @@ export default App.controller(
       const entries = updateEntries(doc_id)
 
       $scope.$broadcast('review-panel:recalculate-screen-positions')
-      dispatchReviewPanelEvent('recalculate-screen-positions', entries)
+      dispatchReviewPanelEvent('recalculate-screen-positions', {
+        entries,
+        updateType: 'trackedChangesChange',
+      })
+
+      // Ensure that watchers, such as the React-based review panel component,
+      // are informed of the changes to entries
+      ide.$scope.$apply()
 
       return ide.$scope.$broadcast('review-panel:layout')
     })
@@ -565,7 +572,13 @@ export default App.controller(
 
     $scope.$on(
       'editor:focus:changed',
-      function (e, selection_offset_start, selection_offset_end, selection) {
+      function (
+        e,
+        selection_offset_start,
+        selection_offset_end,
+        selection,
+        updateType = null
+      ) {
         const doc_id = $scope.editor.open_doc_id
         const entries = getDocEntries(doc_id)
         // All selected changes will be added to this array.
@@ -655,7 +668,10 @@ export default App.controller(
 
         $scope.$broadcast('review-panel:recalculate-screen-positions')
 
-        dispatchReviewPanelEvent('recalculate-screen-positions', entries)
+        dispatchReviewPanelEvent('recalculate-screen-positions', {
+          entries,
+          updateType,
+        })
 
         // Ensure that watchers, such as the React-based review panel component,
         // are informed of the changes to entries
@@ -1264,6 +1280,11 @@ export default App.controller(
             }
           }
           ide.$scope.reviewPanel.commentThreads = threads
+          // Update entries so that the view has up-to-date information about
+          // the entries when handling the loaded_threads events, which avoids
+          // thrashing
+          updateEntries($scope.editor.open_doc_id)
+
           dispatchReviewPanelEvent('loaded_threads')
           return $timeout(() => ide.$scope.$broadcast('review-panel:layout'))
         })
@@ -1346,8 +1367,14 @@ export default App.controller(
         }
 
         case 'focus:changed': {
-          const { from, to, empty } = payload
-          $scope.$broadcast('editor:focus:changed', from, to, !empty)
+          const { from, to, empty, updateType } = payload
+          $scope.$broadcast(
+            'editor:focus:changed',
+            from,
+            to,
+            !empty,
+            updateType
+          )
           break
         }
 

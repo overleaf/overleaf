@@ -27,20 +27,20 @@ function AddCommentEntry({ entryId }: AddCommentEntryProps) {
 
   const handleStartNewComment = () => {
     setIsAddingComment(true)
-    window.setTimeout(handleLayoutChange, 0)
+    handleLayoutChange({ async: true })
   }
 
   const handleSubmitNewComment = () => {
     submitNewComment(content)
     setIsAddingComment(false)
     setContent('')
-    window.setTimeout(handleLayoutChange, 0)
+    handleLayoutChange({ async: true })
   }
 
   const handleCancelNewComment = () => {
     setIsAddingComment(false)
     setContent('')
-    window.setTimeout(handleLayoutChange, 0)
+    handleLayoutChange({ async: true })
   }
 
   useEffect(() => {

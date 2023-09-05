@@ -11,6 +11,7 @@ interface ReviewPanelBaseEntry {
   offset: number
   screenPos: ReviewPanelEntryScreenPos
   visible: boolean
+  inViewport: boolean
 }
 
 interface ReviewPanelInsertOrDeleteEntry {

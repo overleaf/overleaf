@@ -111,8 +111,7 @@ function CommentEntry({
   useEffect(() => {
     if (!submitting) {
       // Ensure everything is rendered in the DOM before updating the layout.
-      // Having to use a timeout seems less than ideal.
-      window.setTimeout(handleLayoutChange, 0)
+      handleLayoutChange({ async: true })
     }
   }, [submitting, handleLayoutChange])
 

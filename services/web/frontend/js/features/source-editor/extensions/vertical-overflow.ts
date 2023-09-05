@@ -235,6 +235,13 @@ export function updateSetsVerticalOverflow(update: ViewUpdate): boolean {
   })
 }
 
+export function updateChangesTopPadding(update: ViewUpdate): boolean {
+  return (
+    update.state.field(overflowPaddingState).top !==
+    update.startState.field(overflowPaddingState).top
+  )
+}
+
 export function editorVerticalTopPadding(view: EditorView): number {
   return view.state.field(overflowPaddingState).top
 }
