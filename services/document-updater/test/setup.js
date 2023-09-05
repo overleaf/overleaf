@@ -1,9 +1,11 @@
 const chai = require('chai')
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
+const sinonChai = require('sinon-chai')
 
 // Chai configuration
 chai.should()
+chai.use(sinonChai)
 
 // Global stubs
 const sandbox = sinon.createSandbox()

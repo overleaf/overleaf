@@ -35,6 +35,11 @@ async function getDocument(req, res) {
     plainTextResponse(res, lines.join('\n'))
   } else {
     const projectHistoryId = _.get(project, 'overleaf.history.id')
+    const historyRangesSupport = _.get(
+      project,
+      'overleaf.history.rangesSupportEnabled',
+      false
+    )
 
     // all projects are now migrated to Full Project History, keeping the field
     // for API compatibility
@@ -47,6 +52,7 @@ async function getDocument(req, res) {
       pathname: path.fileSystem,
       projectHistoryId,
       projectHistoryType,
+      historyRangesSupport,
     })
   }
 }

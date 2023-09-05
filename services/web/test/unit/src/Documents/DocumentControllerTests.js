@@ -95,6 +95,7 @@ describe('DocumentController', function () {
             pathname: this.pathname,
             projectHistoryId: this.project.overleaf.history.id,
             projectHistoryType: 'project-history',
+            historyRangesSupport: false,
           })
         )
       })

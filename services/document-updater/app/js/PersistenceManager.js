@@ -93,16 +93,16 @@ function getDoc(projectId, docId, options = {}, _callback) {
           status: body.pathname === '' ? 'zero-length' : 'undefined',
         })
       }
-      callback(
-        null,
-        body.lines,
-        body.version,
-        body.ranges,
-        body.pathname,
-        body.projectHistoryId?.toString()
-      )
+      callback(null, {
+        lines: body.lines,
+        version: body.version,
+        ranges: body.ranges,
+        pathname: body.pathname,
+        projectHistoryId: body.projectHistoryId?.toString(),
+        historyRangesSupport: body.historyRangesSupport || false,
+      })
     } else if (res.statusCode === 404) {
-      callback(new Errors.NotFoundError(`doc not not found: ${urlPath}`))
+      callback(new Errors.NotFoundError(`doc not found: ${urlPath}`))
     } else if (res.statusCode === 413) {
       callback(
         new Errors.FileTooLargeError(`doc exceeds maximum size: ${urlPath}`)
@@ -160,7 +160,7 @@ function setDoc(
       if (res.statusCode >= 200 && res.statusCode < 300) {
         callback(null, body)
       } else if (res.statusCode === 404) {
-        callback(new Errors.NotFoundError(`doc not not found: ${urlPath}`))
+        callback(new Errors.NotFoundError(`doc not found: ${urlPath}`))
       } else if (res.statusCode === 413) {
         callback(
           new Errors.FileTooLargeError(`doc exceeds maximum size: ${urlPath}`)

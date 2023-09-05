@@ -42,6 +42,14 @@ describe('DocumentManager', function () {
     this.lastUpdatedAt = Date.now()
     this.lastUpdatedBy = 'last-author-id'
     this.source = 'external-source'
+    this.doc = {
+      lines: this.lines,
+      version: this.version,
+      ranges: this.ranges,
+      pathname: this.pathname,
+      projectHistoryId: this.projectHistoryId,
+      historyRangesSupport: false,
+    }
   })
 
   afterEach(function () {
@@ -373,15 +381,7 @@ describe('DocumentManager', function () {
           .callsArgWith(2, null, null, null, null, null, null)
         this.PersistenceManager.getDoc = sinon
           .stub()
-          .callsArgWith(
-            2,
-            null,
-            this.lines,
-            this.version,
-            this.ranges,
-            this.pathname,
-            this.projectHistoryId
-          )
+          .callsArgWith(2, null, this.doc)
         this.RedisManager.putDocInMemory = sinon.stub().yields()
         this.DocumentManager.getDoc(this.project_id, this.doc_id, this.callback)
       })
@@ -400,15 +400,7 @@ describe('DocumentManager', function () {
 
       it('should set the doc in Redis', function () {
         this.RedisManager.putDocInMemory
-          .calledWith(
-            this.project_id,
-            this.doc_id,
-            this.lines,
-            this.version,
-            this.ranges,
-            this.pathname,
-            this.projectHistoryId
-          )
+          .calledWith(this.project_id, this.doc_id, this.doc)
           .should.equal(true)
       })
 
@@ -1109,16 +1101,7 @@ describe('DocumentManager', function () {
       beforeEach(function () {
         this.pathnameFromProjectStructureUpdate = '/foo/bar.tex'
         this.RedisManager.getDoc = sinon.stub().callsArgWith(2, null)
-        this.PersistenceManager.getDoc = sinon
-          .stub()
-          .yields(
-            null,
-            this.lines,
-            this.version,
-            this.ranges,
-            this.pathname,
-            this.projectHistoryId
-          )
+        this.PersistenceManager.getDoc = sinon.stub().yields(null, this.doc)
         this.ProjectHistoryRedisManager.queueResyncDocContent = sinon.stub()
         this.DocumentManager.resyncDocContents(
           this.project_id,
