@@ -60,7 +60,7 @@ export default {
     comparing: false,
     faded: false,
     showDivider: false,
-    selected: false,
+    selectionState: false,
     setSelection: () => {},
     dropdownOpen: false,
     dropdownActive: false,

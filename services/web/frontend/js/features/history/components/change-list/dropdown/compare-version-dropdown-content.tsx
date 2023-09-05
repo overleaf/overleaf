@@ -28,7 +28,7 @@ function CompareVersionDropdownContentAllHistory({
       <DropdownOption>
         <CompareItems
           updateRange={updateRange}
-          selected="aboveSelected"
+          selectionState="aboveSelected"
           text={t('history_compare_up_to_this_version')}
           closeDropdown={closeDropdown}
         />
@@ -36,7 +36,7 @@ function CompareVersionDropdownContentAllHistory({
       <DropdownOption>
         <CompareItems
           updateRange={updateRange}
-          selected="belowSelected"
+          selectionState="belowSelected"
           text={t('history_compare_from_this_version')}
           closeDropdown={closeDropdown}
         />
@@ -72,7 +72,7 @@ function CompareVersionDropdownContentLabelsList({
             fromVTimestamp: versionTimestamp,
             toVTimestamp: versionTimestamp,
           }}
-          selected="aboveSelected"
+          selectionState="aboveSelected"
           text={t('history_compare_up_to_this_version')}
           closeDropdown={closeDropdownLabels}
         />
@@ -85,7 +85,7 @@ function CompareVersionDropdownContentLabelsList({
             fromVTimestamp: versionTimestamp,
             toVTimestamp: versionTimestamp,
           }}
-          selected="belowSelected"
+          selectionState="belowSelected"
           text={t('history_compare_from_this_version')}
           closeDropdown={closeDropdownLabels}
         />

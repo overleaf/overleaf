@@ -21,7 +21,7 @@ type LabelListItemProps = {
   labels: LoadedLabel[]
   currentUserId: string
   projectId: string
-  selected: ItemSelectionState
+  selectionState: ItemSelectionState
   selectable: boolean
   setSelection: HistoryContextValue['setSelection']
   dropdownOpen: boolean
@@ -37,7 +37,7 @@ function LabelListItem({
   labels,
   currentUserId,
   projectId,
-  selected,
+  selectionState,
   selectable,
   setSelection,
   dropdownOpen,
@@ -79,7 +79,7 @@ function LabelListItem({
     <HistoryVersionDetails
       key={version}
       updateRange={updateRange}
-      selected={selected}
+      selectionState={selectionState}
       selectable={selectable}
       setSelection={setSelection}
     >
@@ -96,12 +96,12 @@ function LabelListItem({
           />
         ) : null}
       </HistoryDropdown>
-      {selected !== 'selected' ? (
+      {selectionState !== 'selected' ? (
         <div data-testid="compare-icon-version" className="pull-right">
-          {selected !== 'withinSelected' ? (
+          {selectionState !== 'withinSelected' ? (
             <CompareItems
               updateRange={updateRange}
-              selected={selected}
+              selectionState={selectionState}
               closeDropdown={closeDropdown}
             />
           ) : (

@@ -41,7 +41,7 @@ export default {
     currentUserId: '1',
     projectId: '123',
     comparing: false,
-    selected: false,
+    selectionState: false,
     selectable: false,
     setSelection: () => {},
     dropdownOpen: false,

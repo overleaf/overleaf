@@ -7,14 +7,14 @@ import { ItemSelectionState } from '../../utils/history-details'
 type HistoryVersionDetailsProps = {
   children: ReactNode
   updateRange: UpdateRange
-  selected: ItemSelectionState
+  selectionState: ItemSelectionState
   selectable: boolean
   setSelection: HistoryContextValue['setSelection']
 }
 
 function HistoryVersionDetails({
   children,
-  selected,
+  selectionState,
   updateRange,
   selectable,
   setSelection,
@@ -37,14 +37,14 @@ function HistoryVersionDetails({
     <div
       className={classnames('history-version-details clearfix', {
         'history-version-selected':
-          selected === 'upperSelected' ||
-          selected === 'lowerSelected' ||
-          selected === 'selected',
-        'history-version-within-selected': selected === 'withinSelected',
+          selectionState === 'upperSelected' ||
+          selectionState === 'lowerSelected' ||
+          selectionState === 'selected',
+        'history-version-within-selected': selectionState === 'withinSelected',
         'history-version-selectable': selectable,
       })}
       data-testid="history-version-details"
-      data-selected={selected}
+      data-selected={selectionState}
       onClick={selectable ? handleSelect : undefined}
     >
       {children}

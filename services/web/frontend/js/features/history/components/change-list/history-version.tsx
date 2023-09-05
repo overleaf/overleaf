@@ -40,7 +40,7 @@ type HistoryVersionProps = {
   selectable: boolean
   faded: boolean
   showDivider: boolean
-  selected: ItemSelectionState
+  selectionState: ItemSelectionState
   setSelection: HistoryContextValue['setSelection']
   dropdownOpen: boolean
   dropdownActive: boolean
@@ -59,7 +59,7 @@ function HistoryVersion({
   selectable,
   faded,
   showDivider,
-  selected,
+  selectionState,
   setSelection,
   dropdownOpen,
   dropdownActive,
@@ -186,7 +186,8 @@ function HistoryVersion({
           className={classNames({
             'history-version-divider-container': true,
             'version-element-within-selected ':
-              selected === 'withinSelected' || selected === 'lowerSelected',
+              selectionState === 'withinSelected' ||
+              selectionState === 'lowerSelected',
           })}
         >
           <hr className="history-version-divider" />
@@ -196,7 +197,8 @@ function HistoryVersion({
         <div
           className={classNames({
             'version-element-within-selected ':
-              selected === 'withinSelected' || selected === 'lowerSelected',
+              selectionState === 'withinSelected' ||
+              selectionState === 'lowerSelected',
           })}
         >
           <time className="history-version-day">
@@ -211,7 +213,7 @@ function HistoryVersion({
         })}
       >
         <HistoryVersionDetails
-          selected={selected}
+          selectionState={selectionState}
           setSelection={setSelection}
           updateRange={updateRangeForUpdate(update)}
           selectable={selectable}
@@ -238,16 +240,16 @@ function HistoryVersion({
             </HistoryDropdown>
           )}
 
-          {selected !== 'selected' ? (
+          {selectionState !== 'selected' && !faded ? (
             <div
               data-testid="compare-icon-version"
               className="pull-right"
               ref={iconRef}
             >
-              {selected !== 'withinSelected' ? (
+              {selectionState !== 'withinSelected' ? (
                 <CompareItems
                   updateRange={updateRange}
-                  selected={selected}
+                  selectionState={selectionState}
                   closeDropdown={closeDropdown}
                 />
               ) : (

@@ -126,7 +126,7 @@ function AllHistoryList() {
       <div className="history-all-versions-container">
         <div ref={bottomRef} className="history-versions-bottom" />
         {visibleUpdates.map((update, index) => {
-          const selected = isVersionSelected(
+          const selectionState = isVersionSelected(
             selection,
             update.fromV,
             update.toV
@@ -144,8 +144,8 @@ function AllHistoryList() {
           const selectable =
             !faded &&
             (selection.comparing ||
-              selected === 'aboveSelected' ||
-              selected === 'belowSelected')
+              selectionState === 'aboveSelected' ||
+              selectionState === 'belowSelected')
 
           const hasTutorialOverlay =
             index === firstUnselectedIndex && showTutorial
@@ -157,7 +157,7 @@ function AllHistoryList() {
               faded={faded}
               showDivider={showDivider}
               setSelection={setSelection}
-              selected={selected}
+              selectionState={selectionState}
               currentUserId={currentUserId}
               selectable={selectable}
               projectId={projectId}

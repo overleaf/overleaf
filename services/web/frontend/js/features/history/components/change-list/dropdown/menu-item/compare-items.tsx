@@ -7,14 +7,14 @@ import { ItemSelectionState } from '../../../../utils/history-details'
 
 type CompareItemsProps = {
   updateRange: UpdateRange
-  selected: ItemSelectionState
+  selectionState: ItemSelectionState
   text?: string
   closeDropdown: () => void
 }
 
 function CompareItems({
   updateRange,
-  selected,
+  selectionState,
   text,
   closeDropdown,
 }: CompareItemsProps) {
@@ -27,7 +27,7 @@ function CompareItems({
 
   return (
     <>
-      {selected === 'belowSelected' ? (
+      {selectionState === 'belowSelected' ? (
         <Compare
           comparisonRange={{
             fromV: updateRange.fromV,
@@ -46,7 +46,7 @@ function CompareItems({
           }
         />
       ) : null}
-      {selected === 'aboveSelected' ? (
+      {selectionState === 'aboveSelected' ? (
         <Compare
           comparisonRange={{
             fromV: selRange.fromV,

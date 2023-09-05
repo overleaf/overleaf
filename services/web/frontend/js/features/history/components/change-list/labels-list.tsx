@@ -20,7 +20,7 @@ function LabelsList() {
   return (
     <>
       {versionWithLabels.map(({ version, labels }) => {
-        const selected = isVersionSelected(selection, version)
+        const selectionState = isVersionSelected(selection, version)
         const dropdownActive =
           version === activeDropdownItem.item &&
           activeDropdownItem.whichDropDown === 'moreOptions'
@@ -35,8 +35,8 @@ function LabelsList() {
             version={version}
             currentUserId={currentUserId}
             projectId={projectId}
-            selected={selected}
-            selectable={selected !== 'selected'}
+            selectionState={selectionState}
+            selectable={selectionState !== 'selected'}
             setSelection={setSelection}
             dropdownOpen={activeDropdownItem.isOpened && dropdownActive}
             dropdownActive={dropdownActive}
