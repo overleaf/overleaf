@@ -284,6 +284,26 @@ cell 3 & cell 4 \\\\
       ])
     })
 
+    it('Removes rows correctly when removing from the left', function () {
+      mountEditor(`
+\\begin{tabular}{|c|c|c|}\\hline
+    cell 1&cell 2&cell 3 \\\\\\hline
+\\end{tabular}
+      `)
+      checkTable([['cell 1', 'cell 2', 'cell 3']])
+      cy.get('.table-generator').findByText('cell 1').click()
+      cy.get('.table-generator')
+        .findByText('cell 1')
+        .type('{shift}{rightarrow}')
+      cy.get('.table-generator-floating-toolbar').as('toolbar').should('exist')
+      cy.get('@toolbar')
+        .findByLabelText('Delete row or column')
+        .should('be.enabled')
+      cy.get('@toolbar').findByLabelText('Delete row or column').click()
+      checkTable([['cell 3']])
+      checkBordersWithNoMultiColumn([true, true], [true, true])
+    })
+
     it('Merges and unmerged cells', function () {
       mountEditor(`
 \\begin{tabular}{ccc}

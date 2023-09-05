@@ -253,6 +253,8 @@ export const removeRowOrColumns = (
   const removedColumns =
     Number(selection.isColumnSelected(startCell, table)) * selection.width()
 
+  const removingFromBeginning = selection.isColumnSelected(0, table)
+
   for (let row = startRow; row <= endRow; row++) {
     if (selection.isRowSelected(row, table)) {
       const rowPosition = positions.rowPositions[row]
@@ -267,19 +269,29 @@ export const removeRowOrColumns = (
         const cellPosition = positions.cells[row][cellIndex]
         if (selection.isColumnSelected(cell, table)) {
           // We should remove this column.
-          const boundaries = table.getCellBoundaries(row, cell)
-          if (boundaries.from === 0 && cellSeparators[row].length > 0) {
-            // Remove the cell separator between the first and second cell
+          if (removingFromBeginning) {
+            // Deletes content in { }
+            // [ cell x - 1 ] & { [ cell x ] & } [ cell x + 1 ]
+            const from = cellPosition.from
+            const to = cellSeparators[row][cellIndex].to
+            if (from === undefined || to === undefined) {
+              console.error('Failed to remove column')
+              return selection
+            }
             changes.push({
-              from: positions.cells[row][cell].from,
-              to: cellSeparators[row][0].to,
+              from,
+              to,
               insert: '',
             })
           } else {
-            // Remove the cell separator between the cell before and this if possible
-            const from =
-              cellSeparators[row][cellIndex - 1]?.from ?? cellPosition.from
+            // Deletes content in { }
+            // [ cell x - 1 ] { &  [ cell x ] } & [ cell x + 1 ]
+            const from = cellSeparators[row][cellIndex - 1].from
             const to = cellPosition.to
+            if (from === undefined || to === undefined) {
+              console.error('Failed to remove column')
+              return selection
+            }
             changes.push({
               from,
               to,
@@ -294,6 +306,13 @@ export const removeRowOrColumns = (
   const filteredColumns = columnSpecification.filter(
     (_, i) => !selection.isColumnSelected(i, table)
   )
+  if (
+    table.getBorderTheme() === BorderTheme.FULLY_BORDERED &&
+    columnSpecification[0]?.borderLeft > 0 &&
+    filteredColumns.length
+  ) {
+    filteredColumns[0].borderLeft = Math.max(1, filteredColumns[0].borderLeft)
+  }
   const newSpecification = generateColumnSpecification(filteredColumns)
   changes.push({
     from: positions.columnDeclarations.from,
