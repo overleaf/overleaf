@@ -363,9 +363,11 @@ describe('change list', function () {
         .eq(1)
         .within(() => {
           cy.findByRole('button', { name: /compare drop down/i }).click()
-          cy.findByRole('button', {
-            name: /compare up to this version/i,
-          }).click()
+          cy.findByRole('menu').within(() => {
+            cy.findByRole('menuitem', {
+              name: /compare up to this version/i,
+            }).click()
+          })
         })
 
       cy.findAllByTestId('history-version-details').should($versions => {

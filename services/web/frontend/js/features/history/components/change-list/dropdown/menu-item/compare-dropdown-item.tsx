@@ -2,20 +2,19 @@ import Icon from '../../../../../../shared/components/icon'
 import { useHistoryContext } from '../../../../context/history-context'
 import { UpdateRange } from '../../../../services/types/update'
 import { ReactNode } from 'react'
-import Tooltip from '../../../../../../shared/components/tooltip'
-import { Button } from 'react-bootstrap'
+import { Button, MenuItem } from 'react-bootstrap'
 
 type CompareProps = {
   comparisonRange: UpdateRange
-  icon?: ReactNode
-  toolTipDescription?: string
+  icon: ReactNode
+  text: string
   closeDropdown: () => void
 }
 
-function Compare({
+function CompareDropDownItem({
   comparisonRange,
+  text,
   closeDropdown,
-  toolTipDescription,
   icon = <Icon type="exchange" fw />,
   ...props
 }: CompareProps) {
@@ -34,21 +33,11 @@ function Compare({
   }
 
   return (
-    <Tooltip
-      description={toolTipDescription}
-      id="compare-btn"
-      overlayProps={{ placement: 'left' }}
-    >
-      <Button
-        bsStyle="link"
-        className="history-compare-btn"
-        onClick={handleCompareVersion}
-      >
-        <span className="sr-only">{toolTipDescription}</span>
-        {icon}
-      </Button>
-    </Tooltip>
+    <MenuItem {...props} onClick={handleCompareVersion}>
+      {icon}
+      <span className="">{text}</span>
+    </MenuItem>
   )
 }
 
-export default Compare
+export default CompareDropDownItem

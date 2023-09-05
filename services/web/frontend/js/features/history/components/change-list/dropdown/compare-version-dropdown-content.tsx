@@ -1,10 +1,11 @@
 import { LoadedUpdate, Version } from '../../../services/types/update'
-import { ReactNode, useCallback } from 'react'
+import { useCallback } from 'react'
 import { ActiveDropdown } from '../../../hooks/use-dropdown-active-item'
-import { MenuItem } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
-import CompareItems from './menu-item/compare-items'
 import { updateRangeForUpdate } from '../../../utils/history-details'
+import CompareDropDownItem from './menu-item/compare-dropdown-item'
+import { useHistoryContext } from '../../../context/history-context'
+import MaterialIcon from '../../../../../shared/components/material-icon'
 
 type VersionDropdownContentAllHistoryProps = {
   update: LoadedUpdate
@@ -22,25 +23,45 @@ function CompareVersionDropdownContentAllHistory({
   }, [closeDropdownForItem, update])
 
   const { t } = useTranslation()
-
+  const { selection } = useHistoryContext()
+  const { updateRange: selRange } = selection
+  if (selRange === null) {
+    return null
+  }
   return (
     <>
-      <DropdownOption>
-        <CompareItems
-          updateRange={updateRange}
-          selectionState="aboveSelected"
-          text={t('history_compare_up_to_this_version')}
-          closeDropdown={closeDropdown}
-        />
-      </DropdownOption>
-      <DropdownOption>
-        <CompareItems
-          updateRange={updateRange}
-          selectionState="belowSelected"
-          text={t('history_compare_from_this_version')}
-          closeDropdown={closeDropdown}
-        />
-      </DropdownOption>
+      <CompareDropDownItem
+        comparisonRange={{
+          fromV: selRange.fromV,
+          toV: updateRange.toV,
+          fromVTimestamp: selRange.fromVTimestamp,
+          toVTimestamp: updateRange.toVTimestamp,
+        }}
+        closeDropdown={closeDropdown}
+        text={t('history_compare_up_to_this_version')}
+        icon={
+          <MaterialIcon
+            type="align_start"
+            className="material-symbols-rounded history-dropdown-icon p-1"
+          />
+        }
+      />
+      <CompareDropDownItem
+        comparisonRange={{
+          fromV: updateRange.fromV,
+          toV: selRange.toV,
+          fromVTimestamp: updateRange.fromVTimestamp,
+          toVTimestamp: selRange.toVTimestamp,
+        }}
+        closeDropdown={closeDropdown}
+        text={t('history_compare_from_this_version')}
+        icon={
+          <MaterialIcon
+            type="align_end"
+            className="material-symbols-rounded history-dropdown-icon p-1"
+          />
+        }
+      />
     </>
   )
 }
@@ -61,47 +82,46 @@ function CompareVersionDropdownContentLabelsList({
   }, [closeDropdownForItem, version])
 
   const { t } = useTranslation()
+  const { selection } = useHistoryContext()
+  const { updateRange: selRange } = selection
+  if (selRange === null) {
+    return null
+  }
 
   return (
     <>
-      <DropdownOption>
-        <CompareItems
-          updateRange={{
-            fromV: version,
-            toV: version,
-            fromVTimestamp: versionTimestamp,
-            toVTimestamp: versionTimestamp,
-          }}
-          selectionState="aboveSelected"
-          text={t('history_compare_up_to_this_version')}
-          closeDropdown={closeDropdownLabels}
-        />
-      </DropdownOption>
-      <DropdownOption>
-        <CompareItems
-          updateRange={{
-            fromV: version,
-            toV: version,
-            fromVTimestamp: versionTimestamp,
-            toVTimestamp: versionTimestamp,
-          }}
-          selectionState="belowSelected"
-          text={t('history_compare_from_this_version')}
-          closeDropdown={closeDropdownLabels}
-        />
-      </DropdownOption>
-    </>
-  )
-}
-
-type DropdownOptionProps = {
-  children: ReactNode
-}
-
-function DropdownOption({ children, ...props }: DropdownOptionProps) {
-  return (
-    <>
-      <MenuItem {...props}>{children}</MenuItem>
+      <CompareDropDownItem
+        comparisonRange={{
+          fromV: selRange.fromV,
+          toV: version,
+          fromVTimestamp: selRange.fromVTimestamp,
+          toVTimestamp: versionTimestamp,
+        }}
+        closeDropdown={closeDropdownLabels}
+        text={t('history_compare_up_to_this_version')}
+        icon={
+          <MaterialIcon
+            type="align_start"
+            className="material-symbols-rounded history-dropdown-icon p-1"
+          />
+        }
+      />
+      <CompareDropDownItem
+        comparisonRange={{
+          fromV: version,
+          toV: selRange.toV,
+          fromVTimestamp: versionTimestamp,
+          toVTimestamp: selRange.toVTimestamp,
+        }}
+        closeDropdown={closeDropdownLabels}
+        text={t('history_compare_from_this_version')}
+        icon={
+          <MaterialIcon
+            type="align_end"
+            className="material-symbols-rounded history-dropdown-icon p-1"
+          />
+        }
+      />
     </>
   )
 }
