@@ -581,8 +581,19 @@ const selectors = [
   }),
   createSelector({
     selector: 'p',
-    match: element =>
-      element.nextElementSibling?.nodeName === 'P' && hasContent(element),
+    match: element => {
+      // must have content
+      if (!hasContent(element)) {
+        return false
+      }
+
+      // inside lists and tables, must precede another paragraph
+      if (element.closest('li') || element.closest('table')) {
+        return element.nextElementSibling?.nodeName === 'P'
+      }
+
+      return true
+    },
     end: () => '\n\n',
   }),
   createSelector({

@@ -270,6 +270,48 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
     )
   })
 
+  it('handles pasted paragraphs', function () {
+    mountEditor()
+
+    const data = [
+      'test',
+      '<p>foo</p>',
+      '<p>bar</p>',
+      '<p>baz</p>',
+      'test',
+    ].join('\n')
+
+    const clipboardData = new DataTransfer()
+    clipboardData.setData('text/html', data)
+    cy.get('@content').trigger('paste', { clipboardData })
+
+    cy.get('@content').should('have.text', 'testfoobarbaztest')
+    cy.get('.cm-line').should('have.length', 8)
+  })
+
+  it('handles pasted paragraphs in list items and table cells', function () {
+    mountEditor()
+
+    const data = [
+      'test',
+      '<p>foo</p><p>bar</p><p>baz</p>',
+      '<ul><li><p>foo</p></li></ul>',
+      '<ol><li><p>foo</p></li></ol>',
+      '<table><tbody><tr><td><p>foo</p></td></tr></tbody></table>',
+      'test',
+    ].join('\n')
+
+    const clipboardData = new DataTransfer()
+    clipboardData.setData('text/html', data)
+    cy.get('@content').trigger('paste', { clipboardData })
+
+    cy.get('@content').should(
+      'have.text',
+      'testfoobarbaz foo foo\\begin{tabular}{l}foo ↩\\end{tabular}test'
+    )
+    cy.get('.cm-line').should('have.length', 17)
+  })
+
   it('handles pasted inline code', function () {
     mountEditor()
 
