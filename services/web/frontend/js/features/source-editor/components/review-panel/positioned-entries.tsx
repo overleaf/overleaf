@@ -210,6 +210,10 @@ function PositionedEntries({
   const { reviewPanelOpen } = useLayoutContext()
   const previousLayoutInfoRef = useRef(initialLayoutInfo)
 
+  const resetLayout = () => {
+    previousLayoutInfoRef.current = initialLayoutInfo
+  }
+
   const layout = (animate = true) => {
     const container = containerRef.current
     if (!container) {
@@ -273,6 +277,7 @@ function PositionedEntries({
     }
 
     if (entryViews.length === 0) {
+      resetLayout()
       return
     }
 
