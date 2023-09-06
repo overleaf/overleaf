@@ -2,7 +2,7 @@ import { memo, useMemo } from 'react'
 import { useSelectionContext } from '../contexts/selection-context'
 import { ToolbarButton } from './toolbar-button'
 import { ToolbarButtonMenu } from './toolbar-button-menu'
-import { ToolbarDropdown } from './toolbar-dropdown'
+import { ToolbarDropdown, ToolbarDropdownItem } from './toolbar-dropdown'
 import MaterialIcon from '../../../../../shared/components/material-icon'
 import {
   BorderTheme,
@@ -68,46 +68,38 @@ export const Toolbar = memo(function Toolbar() {
         label={captionLabel}
         disabled={!tableEnvironment}
       >
-        <button
-          className="ol-cm-toolbar-menu-item"
-          role="menuitem"
-          type="button"
-          onClick={() => {
+        <ToolbarDropdownItem
+          id="table-generator-caption-none"
+          command={() => {
             removeCaption(view, tableEnvironment)
           }}
         >
           No caption
-        </button>
-        <button
-          className="ol-cm-toolbar-menu-item"
-          role="menuitem"
-          type="button"
-          onClick={() => {
+        </ToolbarDropdownItem>
+        <ToolbarDropdownItem
+          id="table-generator-caption-above"
+          command={() => {
             moveCaption(view, positions, 'above', tableEnvironment)
           }}
         >
           Caption above
-        </button>
-        <button
-          className="ol-cm-toolbar-menu-item"
-          role="menuitem"
-          type="button"
-          onClick={() => {
+        </ToolbarDropdownItem>
+        <ToolbarDropdownItem
+          id="table-generator-caption-below"
+          command={() => {
             moveCaption(view, positions, 'below', tableEnvironment)
           }}
         >
           Caption below
-        </button>
+        </ToolbarDropdownItem>
       </ToolbarDropdown>
       <ToolbarDropdown
         id="table-generator-borders-dropdown"
         label={borderDropdownLabel}
       >
-        <button
-          className="ol-cm-toolbar-menu-item"
-          role="menuitem"
-          type="button"
-          onClick={() => {
+        <ToolbarDropdownItem
+          id="table-generator-borders-fully-bordered"
+          command={() => {
             setBorders(
               view,
               BorderTheme.FULLY_BORDERED,
@@ -119,12 +111,10 @@ export const Toolbar = memo(function Toolbar() {
         >
           <MaterialIcon type="border_all" />
           <span className="table-generator-button-label">All borders</span>
-        </button>
-        <button
-          className="ol-cm-toolbar-menu-item"
-          role="menuitem"
-          type="button"
-          onClick={() => {
+        </ToolbarDropdownItem>
+        <ToolbarDropdownItem
+          id="table-generator-borders-no-borders"
+          command={() => {
             setBorders(
               view,
               BorderTheme.NO_BORDERS,
@@ -136,7 +126,7 @@ export const Toolbar = memo(function Toolbar() {
         >
           <MaterialIcon type="border_clear" />
           <span className="table-generator-button-label">No borders</span>
-        </button>
+        </ToolbarDropdownItem>
         <div className="table-generator-border-options-coming-soon">
           <div className="info-icon">
             <MaterialIcon type="info" />
@@ -231,11 +221,9 @@ export const Toolbar = memo(function Toolbar() {
           tooltip="Insert"
           disabled={!selection}
         >
-          <button
-            className="ol-cm-toolbar-menu-item"
-            role="menuitem"
-            type="button"
-            onClick={() => {
+          <ToolbarDropdownItem
+            id="table-generator-insert-column-left"
+            command={() => {
               setSelection(
                 insertColumn(view, selection, positions, false, table)
               )
@@ -246,12 +234,10 @@ export const Toolbar = memo(function Toolbar() {
                 ? 'Insert column left'
                 : `Insert ${columnsToInsert} columns left`}
             </span>
-          </button>
-          <button
-            className="ol-cm-toolbar-menu-item"
-            role="menuitem"
-            type="button"
-            onClick={() => {
+          </ToolbarDropdownItem>
+          <ToolbarDropdownItem
+            id="table-generator-insert-column-right"
+            command={() => {
               setSelection(
                 insertColumn(view, selection, positions, true, table)
               )
@@ -262,13 +248,11 @@ export const Toolbar = memo(function Toolbar() {
                 ? 'Insert column right'
                 : `Insert ${columnsToInsert} columns right`}
             </span>
-          </button>
+          </ToolbarDropdownItem>
           <hr />
-          <button
-            className="ol-cm-toolbar-menu-item"
-            role="menuitem"
-            type="button"
-            onClick={() => {
+          <ToolbarDropdownItem
+            id="table-generator-insert-row-above"
+            command={() => {
               setSelection(
                 insertRow(
                   view,
@@ -286,12 +270,10 @@ export const Toolbar = memo(function Toolbar() {
                 ? 'Insert row above'
                 : `Insert ${rowsToInsert} rows above`}
             </span>
-          </button>
-          <button
-            className="ol-cm-toolbar-menu-item"
-            role="menuitem"
-            type="button"
-            onClick={() => {
+          </ToolbarDropdownItem>
+          <ToolbarDropdownItem
+            id="table-generator-insert-row-below"
+            command={() => {
               setSelection(
                 insertRow(
                   view,
@@ -309,7 +291,7 @@ export const Toolbar = memo(function Toolbar() {
                 ? 'Insert row below'
                 : `Insert ${rowsToInsert} rows below`}
             </span>
-          </button>
+          </ToolbarDropdownItem>
         </ToolbarDropdown>
       </div>
       <div className="table-generator-button-group">

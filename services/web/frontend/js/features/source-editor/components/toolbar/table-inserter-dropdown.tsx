@@ -7,6 +7,7 @@ import { useCodeMirrorViewContext } from '../codemirror-editor'
 import Tooltip from '../../../../shared/components/tooltip'
 import MaterialIcon from '../../../../shared/components/material-icon'
 import classNames from 'classnames'
+import { emitToolbarEvent } from '../../extensions/toolbar/utils/analytics'
 
 export const TableInserterDropdown: FC = () => {
   const { t } = useTranslation()
@@ -18,6 +19,7 @@ export const TableInserterDropdown: FC = () => {
     (sizeX: number, sizeY: number) => {
       onToggle(false)
       commands.insertTable(view, sizeX, sizeY)
+      emitToolbarEvent(view, 'table-generator-insert-table')
       view.focus()
     },
     [view, onToggle]

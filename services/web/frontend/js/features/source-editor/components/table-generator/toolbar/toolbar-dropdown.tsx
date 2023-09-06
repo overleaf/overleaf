@@ -1,9 +1,11 @@
-import { FC, useRef } from 'react'
+import { ButtonHTMLAttributes, FC, useCallback, useRef } from 'react'
 import useDropdown from '../../../../../shared/hooks/use-dropdown'
 import { Overlay, Popover } from 'react-bootstrap'
 import MaterialIcon from '../../../../../shared/components/material-icon'
 import Tooltip from '../../../../../shared/components/tooltip'
 import { useTabularContext } from '../contexts/tabular-context'
+import { emitTableGeneratorEvent } from '../analytics'
+import { useCodeMirrorViewContext } from '../../codemirror-editor'
 
 export const ToolbarDropdown: FC<{
   id: string
@@ -100,5 +102,29 @@ export const ToolbarDropdown: FC<{
       </Tooltip>
       {overlay}
     </>
+  )
+}
+
+export const ToolbarDropdownItem: FC<
+  Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onClick'> & {
+    command: () => void
+    id: string
+  }
+> = ({ children, command, id, ...props }) => {
+  const view = useCodeMirrorViewContext()
+  const onClick = useCallback(() => {
+    emitTableGeneratorEvent(view, id)
+    command()
+  }, [view, command, id])
+  return (
+    <button
+      className="ol-cm-toolbar-menu-item"
+      role="menuitem"
+      type="button"
+      {...props}
+      onClick={onClick}
+    >
+      {children}
+    </button>
   )
 }

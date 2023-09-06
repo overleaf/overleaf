@@ -4,6 +4,7 @@ import { memo, useCallback } from 'react'
 import Tooltip from '../../../../../shared/components/tooltip'
 import MaterialIcon from '../../../../../shared/components/material-icon'
 import { useCodeMirrorViewContext } from '../../codemirror-editor'
+import { emitTableGeneratorEvent } from '../analytics'
 
 export const ToolbarButton = memo<{
   id: string
@@ -34,11 +35,12 @@ export const ToolbarButton = memo<{
   const handleClick = useCallback(
     event => {
       if (command) {
+        emitTableGeneratorEvent(view, id)
         event.preventDefault()
         command(view)
       }
     },
-    [command, view]
+    [command, view, id]
   )
 
   const button = (
