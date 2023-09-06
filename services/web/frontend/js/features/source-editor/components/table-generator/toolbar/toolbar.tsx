@@ -21,17 +21,7 @@ import { useCodeMirrorViewContext } from '../../codemirror-editor'
 import { useTableContext } from '../contexts/table-context'
 import { useTabularContext } from '../contexts/tabular-context'
 import SplitTestBadge from '../../../../../shared/components/split-test-badge'
-
-const borderThemeLabel = (theme: BorderTheme | null) => {
-  switch (theme) {
-    case BorderTheme.FULLY_BORDERED:
-      return 'All borders'
-    case BorderTheme.NO_BORDERS:
-      return 'No borders'
-    default:
-      return 'Custom borders'
-  }
-}
+import { useTranslation } from 'react-i18next'
 
 export const Toolbar = memo(function Toolbar() {
   const { selection, setSelection } = useSelectionContext()
@@ -39,21 +29,28 @@ export const Toolbar = memo(function Toolbar() {
   const { positions, rowSeparators, cellSeparators, tableEnvironment, table } =
     useTableContext()
   const { showHelp } = useTabularContext()
+  const { t } = useTranslation()
 
-  const borderDropdownLabel = useMemo(
-    () => borderThemeLabel(table.getBorderTheme()),
-    [table]
-  )
+  const borderDropdownLabel = useMemo(() => {
+    switch (table.getBorderTheme()) {
+      case BorderTheme.FULLY_BORDERED:
+        return t('all_borders')
+      case BorderTheme.NO_BORDERS:
+        return t('no_borders')
+      default:
+        return t('custom_borders')
+    }
+  }, [table, t])
 
   const captionLabel = useMemo(() => {
     if (!tableEnvironment?.caption) {
-      return 'No caption'
+      return t('no_caption')
     }
     if (tableEnvironment.caption.from < positions.tabular.from) {
-      return 'Caption above'
+      return t('caption_above')
     }
-    return 'Caption below'
-  }, [tableEnvironment, positions.tabular.from])
+    return t('caption_below')
+  }, [tableEnvironment, positions.tabular.from, t])
 
   if (!selection) {
     return null
@@ -75,7 +72,7 @@ export const Toolbar = memo(function Toolbar() {
               removeCaption(view, tableEnvironment)
             }}
           >
-            No caption
+            {t('no_caption')}
           </ToolbarDropdownItem>
           <ToolbarDropdownItem
             id="table-generator-caption-above"
@@ -83,7 +80,7 @@ export const Toolbar = memo(function Toolbar() {
               moveCaption(view, positions, 'above', tableEnvironment)
             }}
           >
-            Caption above
+            {t('caption_above')}
           </ToolbarDropdownItem>
           <ToolbarDropdownItem
             id="table-generator-caption-below"
@@ -91,7 +88,7 @@ export const Toolbar = memo(function Toolbar() {
               moveCaption(view, positions, 'below', tableEnvironment)
             }}
           >
-            Caption below
+            {t('caption_below')}
           </ToolbarDropdownItem>
         </ToolbarDropdown>
         <ToolbarDropdown
@@ -111,7 +108,9 @@ export const Toolbar = memo(function Toolbar() {
             }}
           >
             <MaterialIcon type="border_all" />
-            <span className="table-generator-button-label">All borders</span>
+            <span className="table-generator-button-label">
+              {t('all_borders')}
+            </span>
           </ToolbarDropdownItem>
           <ToolbarDropdownItem
             id="table-generator-borders-no-borders"
@@ -126,22 +125,24 @@ export const Toolbar = memo(function Toolbar() {
             }}
           >
             <MaterialIcon type="border_clear" />
-            <span className="table-generator-button-label">No borders</span>
+            <span className="table-generator-button-label">
+              {t('no_borders')}
+            </span>
           </ToolbarDropdownItem>
           <div className="table-generator-border-options-coming-soon">
             <div className="info-icon">
               <MaterialIcon type="info" />
             </div>
-            More options for border settings coming soon.
+            {t('more_options_for_border_settings_coming_soon')}
           </div>
         </ToolbarDropdown>
       </div>
       <div className="table-generator-button-group">
         <ToolbarButtonMenu
-          label="Alignment"
+          label={t('alignment')}
           icon="format_align_left"
           id="table-generator-align-dropdown"
-          disabledLabel="Select a column or a merged cell to align"
+          disabledLabel={t('select_a_column_or_a_merged_cell_to_align')}
           disabled={
             !selection.isColumnSelected(selection.from.cell, table) &&
             !selection.isMergedCellSelected(table)
@@ -150,7 +151,7 @@ export const Toolbar = memo(function Toolbar() {
           <ToolbarButton
             icon="format_align_left"
             id="table-generator-align-left"
-            label="Left"
+            label={t('left')}
             command={() => {
               setAlignment(view, selection, 'left', positions, table)
             }}
@@ -158,7 +159,7 @@ export const Toolbar = memo(function Toolbar() {
           <ToolbarButton
             icon="format_align_center"
             id="table-generator-align-center"
-            label="Center"
+            label={t('center')}
             command={() => {
               setAlignment(view, selection, 'center', positions, table)
             }}
@@ -166,7 +167,7 @@ export const Toolbar = memo(function Toolbar() {
           <ToolbarButton
             icon="format_align_right"
             id="table-generator-align-right"
-            label="Right"
+            label={t('right')}
             command={() => {
               setAlignment(view, selection, 'right', positions, table)
             }}
@@ -177,15 +178,15 @@ export const Toolbar = memo(function Toolbar() {
           id="table-generator-merge-cells"
           label={
             selection.isMergedCellSelected(table)
-              ? 'Unmerge cells'
-              : 'Merge cells'
+              ? t('unmerge_cells')
+              : t('merge_cells')
           }
           active={selection.isMergedCellSelected(table)}
           disabled={
             !selection.isMergedCellSelected(table) &&
             !selection.isMergeableCells(table)
           }
-          disabledLabel="Select cells in a row to merge"
+          disabledLabel={t('select_cells_in_a_single_row_to_merge')}
           command={() => {
             if (selection.isMergedCellSelected(table)) {
               unmergeCells(view, selection, table)
@@ -197,8 +198,8 @@ export const Toolbar = memo(function Toolbar() {
         <ToolbarButton
           icon="delete"
           id="table-generator-remove-column-row"
-          label="Delete row or column"
-          disabledLabel="Select a row or a column to delete"
+          label={t('delete_row_or_column')}
+          disabledLabel={t('select_a_row_or_a_column_to_delete')}
           disabled={
             (!selection.isAnyRowSelected(table) &&
               !selection.isAnyColumnSelected(table)) ||
@@ -220,7 +221,7 @@ export const Toolbar = memo(function Toolbar() {
           id="table-generator-add-dropdown"
           btnClassName="table-generator-toolbar-button"
           icon="add"
-          tooltip="Insert"
+          tooltip={t('insert')}
           disabled={!selection}
         >
           <ToolbarDropdownItem
@@ -233,8 +234,8 @@ export const Toolbar = memo(function Toolbar() {
           >
             <span className="table-generator-button-label">
               {columnsToInsert === 1
-                ? 'Insert column left'
-                : `Insert ${columnsToInsert} columns left`}
+                ? t('insert_column_left')
+                : t('insert_x_columns_left', { columns: columnsToInsert })}
             </span>
           </ToolbarDropdownItem>
           <ToolbarDropdownItem
@@ -247,8 +248,8 @@ export const Toolbar = memo(function Toolbar() {
           >
             <span className="table-generator-button-label">
               {columnsToInsert === 1
-                ? 'Insert column right'
-                : `Insert ${columnsToInsert} columns right`}
+                ? t('insert_column_right')
+                : t('insert_x_columns_right', { columns: columnsToInsert })}
             </span>
           </ToolbarDropdownItem>
           <hr />
@@ -269,8 +270,8 @@ export const Toolbar = memo(function Toolbar() {
           >
             <span className="table-generator-button-label">
               {rowsToInsert === 1
-                ? 'Insert row above'
-                : `Insert ${rowsToInsert} rows above`}
+                ? t('insert_row_above')
+                : t('insert_x_rows_above', { rows: rowsToInsert })}
             </span>
           </ToolbarDropdownItem>
           <ToolbarDropdownItem
@@ -290,8 +291,8 @@ export const Toolbar = memo(function Toolbar() {
           >
             <span className="table-generator-button-label">
               {rowsToInsert === 1
-                ? 'Insert row below'
-                : `Insert ${rowsToInsert} rows below`}
+                ? t('insert_row_below')
+                : t('insert_x_rows_below', { rows: rowsToInsert })}
             </span>
           </ToolbarDropdownItem>
         </ToolbarDropdown>
@@ -300,7 +301,7 @@ export const Toolbar = memo(function Toolbar() {
         <ToolbarButton
           icon="delete_forever"
           id="table-generator-remove-table"
-          label="Delete table"
+          label={t('delete_table')}
           command={() => {
             removeNodes(view, tableEnvironment?.table ?? positions.tabular)
             view.focus()
@@ -309,7 +310,7 @@ export const Toolbar = memo(function Toolbar() {
         <ToolbarButton
           icon="help"
           id="table-generator-show-help"
-          label="Help"
+          label={t('help')}
           command={showHelp}
         />
         <div className="toolbar-beta-badge">

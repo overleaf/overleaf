@@ -23,6 +23,7 @@ import Icon from '../../../../shared/components/icon'
 import { BorderTheme } from './toolbar/commands'
 import { TableGeneratorHelpModal } from './help-modal'
 import { SplitTestProvider } from '../../../../shared/context/split-test-context'
+import { useTranslation } from 'react-i18next'
 
 export type ColumnDefinition = {
   alignment: 'left' | 'center' | 'right' | 'paragraph'
@@ -188,23 +189,33 @@ export const TableRenderingError: FC<{
   view: EditorView
   codePosition?: number
 }> = ({ view, codePosition }) => {
+  const { t } = useTranslation()
   return (
     <Alert className="table-generator-error">
       <span className="table-generator-error-icon">
         <Icon type="exclamation-circle" />
       </span>
-      <span className="table-generator-error-message">
-        We couldn't render your table
-      </span>
+      <div className="table-generator-error-message">
+        <p className="table-generator-error-message-header">
+          {t('sorry_your_table_cant_be_displayed_at_the_moment')}
+        </p>
+        <p>
+          {t(
+            'this_could_be_because_we_cant_support_some_elements_of_the_table'
+          )}
+        </p>
+      </div>
       {codePosition !== undefined && (
         <Button
+          bsStyle={null}
+          className="btn-secondary table-generator-error-show-code-button"
           onClick={() =>
             view.dispatch({
               selection: EditorSelection.cursor(codePosition),
             })
           }
         >
-          View code
+          {t('view_code')}
         </Button>
       )}
     </Alert>

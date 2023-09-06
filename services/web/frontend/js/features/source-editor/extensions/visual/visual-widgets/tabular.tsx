@@ -98,7 +98,6 @@ export class TabularWidget extends WidgetType {
   }
 
   destroy() {
-    console.debug('destroying tabular widget')
     if (this.element) {
       ReactDOM.unmountComponentAtNode(this.element)
     }

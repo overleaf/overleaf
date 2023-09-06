@@ -437,6 +437,13 @@ export const tableGeneratorTheme = EditorView.baseTheme({
     '& .table-generator-error-message': {
       flex: '1 1 auto',
     },
+    '& .table-generator-error-message-header': {
+      fontWeight: 'bold',
+      marginBottom: '2px',
+    },
+    '& .table-generator-error-show-code-button': {
+      alignSelf: 'baseline',
+    },
     '& .table-generator-error-icon': {
       color: '#3265B2',
       'margin-right': '12px',
