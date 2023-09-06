@@ -443,7 +443,7 @@ const selectors = [
   createSelector({
     selector: '*',
     match: element =>
-      parseInt(element.style.fontWeight) > 400 && hasContent(element),
+      parseInt(element.style.fontWeight) >= 700 && hasContent(element),
     start: () => '\\textbf{',
     end: () => '}',
     inside: true,
