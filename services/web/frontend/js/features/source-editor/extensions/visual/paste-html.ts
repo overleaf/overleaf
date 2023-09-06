@@ -229,8 +229,57 @@ const processTables = (element: HTMLElement) => {
 
     // move the table into the container
     container.append(table)
+
+    // add empty cells to account for rowspan
+    for (const cell of table.querySelectorAll<HTMLTableCellElement>(
+      'th[rowspan],td[rowspan]'
+    )) {
+      const rowspan = Number(cell.getAttribute('rowspan') || '1')
+      const colspan = Number(cell.getAttribute('colspan') || '1')
+
+      let row: HTMLTableRowElement | null = cell.closest('tr')
+      if (row) {
+        let position = 0
+        for (const child of row.cells) {
+          if (child === cell) {
+            break
+          }
+          position += Number(child.getAttribute('colspan') || '1')
+        }
+        for (let i = 1; i < rowspan; i++) {
+          const nextElement: Element | null = row?.nextElementSibling
+          if (!isTableRow(nextElement)) {
+            break
+          }
+          row = nextElement
+
+          let targetCell: HTMLTableCellElement | undefined
+          let targetPosition = 0
+          for (const child of row.cells) {
+            if (targetPosition === position) {
+              targetCell = child
+              break
+            }
+            targetPosition += Number(child.getAttribute('colspan') || '1')
+          }
+
+          const fillerCells = Array.from({ length: colspan }, () =>
+            document.createElement('td')
+          )
+
+          if (targetCell) {
+            targetCell.before(...fillerCells)
+          } else {
+            row.append(...fillerCells)
+          }
+        }
+      }
+    }
   }
 }
+
+const isTableRow = (element: Element | null): element is HTMLTableRowElement =>
+  element?.tagName === 'TR'
 
 const cellAlignment = new Map([
   ['left', 'l'],
@@ -370,9 +419,15 @@ const nextRowHasBorderStyle = (
 }
 
 const startMulticolumn = (element: HTMLTableCellElement): string => {
-  const colspan = element.getAttribute('colspan') ?? 1
+  const colspan = Number(element.getAttribute('colspan') || 1)
   const alignment = cellAlignment.get(element.style.textAlign) ?? 'l'
-  return `\\multicolumn{${Number(colspan)}}{${alignment}}{`
+  return `\\multicolumn{${colspan}}{${alignment}}{`
+}
+
+const startMultirow = (element: HTMLTableCellElement): string => {
+  const rowspan = Number(element.getAttribute('rowspan') || 1)
+  // NOTE: it would be useful to read cell width if specified, using `*` as a starting point
+  return `\\multirow{${rowspan}}{*}{`
 }
 
 const selectors = [
@@ -539,25 +594,30 @@ const selectors = [
     },
   }),
   createSelector({
-    selector: 'tr > td:not(:last-child), tr > th:not(:last-child)',
+    selector: 'tr > td, tr > th',
     start: (element: HTMLTableCellElement) => {
-      const colspan = element.getAttribute('colspan')
-      return colspan ? startMulticolumn(element) : ''
+      let output = ''
+      if (element.getAttribute('colspan')) {
+        output += startMulticolumn(element)
+      }
+      // NOTE: multirow is nested inside multicolumn
+      if (element.getAttribute('rowspan')) {
+        output += startMultirow(element)
+      }
+      return output
     },
     end: element => {
-      const colspan = element.getAttribute('colspan')
-      return colspan ? `} & ` : ` & `
-    },
-  }),
-  createSelector({
-    selector: 'tr > td:last-child, tr > th:last-child',
-    start: (element: HTMLTableCellElement) => {
-      const colspan = element.getAttribute('colspan')
-      return colspan ? startMulticolumn(element) : ''
-    },
-    end: element => {
-      const colspan = element.getAttribute('colspan')
-      return colspan ? `} \\\\` : ` \\\\`
+      let output = ''
+      // NOTE: multirow is nested inside multicolumn
+      if (element.getAttribute('rowspan')) {
+        output += '}'
+      }
+      if (element.getAttribute('colspan')) {
+        output += '}'
+      }
+      const row = element.parentElement as HTMLTableRowElement
+      const isLastChild = row.cells.item(row.cells.length - 1) === element
+      return output + (isLastChild ? ' \\\\' : ' & ')
     },
   }),
   createSelector({

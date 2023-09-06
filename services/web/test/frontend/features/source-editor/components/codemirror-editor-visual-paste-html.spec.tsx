@@ -161,7 +161,7 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
     )
   })
 
-  it('handles a pasted table with merged cells', function () {
+  it('handles a pasted table with merged columns', function () {
     mountEditor()
 
     const data = [
@@ -179,6 +179,48 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
     cy.get('@content').should(
       'have.text',
       '\\begin{tabular}{l l l}test & test & test ↩\\multicolumn{2}{l}{test} & test ↩test & \\multicolumn{2}{r}{test} ↩\\end{tabular}'
+    )
+  })
+
+  it('handles a pasted table with merged rows', function () {
+    mountEditor()
+
+    const data = [
+      `<table><tbody>`,
+      `<tr><td>test</td><td>test</td><td>test</td></tr>`,
+      `<tr><td rowspan="2">test</td><td>test</td><td>test</td></tr>`,
+      `<tr><td>test</td><td>test</td></tr>`,
+      `</tbody></table>`,
+    ].join('')
+
+    const clipboardData = new DataTransfer()
+    clipboardData.setData('text/html', data)
+    cy.get('@content').trigger('paste', { clipboardData })
+
+    cy.get('@content').should(
+      'have.text',
+      '\\begin{tabular}{l l l}test & test & test ↩\\multirow{2}{*}{test} & test & test ↩ & test & test ↩\\end{tabular}'
+    )
+  })
+
+  it('handles a pasted table with merged rows and columns', function () {
+    mountEditor()
+
+    const data = [
+      `<table><tbody>`,
+      `<tr><td colspan="2" rowspan="2">test</td><td>test</td></tr>`,
+      `<tr><td>test</td></tr>`,
+      `<tr><td>test</td><td>test</td><td>test</td></tr>`,
+      `</tbody></table>`,
+    ].join('')
+
+    const clipboardData = new DataTransfer()
+    clipboardData.setData('text/html', data)
+    cy.get('@content').trigger('paste', { clipboardData })
+
+    cy.get('@content').should(
+      'have.text',
+      '\\begin{tabular}{l l l}\\multicolumn{2}{l}{\\multirow{2}{*}{test}} & test ↩ &  & test ↩test & test & test ↩\\end{tabular}'
     )
   })
 
