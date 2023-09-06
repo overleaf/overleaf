@@ -191,18 +191,22 @@ export const tableGeneratorTheme = EditorView.baseTheme({
 
   '.table-generator-floating-toolbar': {
     position: 'absolute',
-    top: '-36px',
+    top: '0',
+    transform: 'translateY(-100%)',
     left: '0',
     right: '0',
     margin: '0 auto',
     'z-index': '1',
     'border-radius': '4px',
     width: 'max-content',
+    'justify-content': 'start',
+    maxWidth: '100%',
     'background-color': 'var(--table-generator-toolbar-background)',
     'box-shadow': '0px 2px 4px 0px var(--table-generator-toolbar-shadow-color)',
     padding: '4px',
-    height: '40px',
     display: 'flex',
+    flexWrap: 'wrap',
+    rowGap: '8px',
   },
 
   '.table-generator-toolbar-button': {
@@ -262,10 +266,10 @@ export const tableGeneratorTheme = EditorView.baseTheme({
     'justify-content': 'center',
     'line-height': '1',
     overflow: 'hidden',
-    '&:not(:first-child)': {
-      'border-left': '1px solid var(--table-generator-divider-color)',
-      'padding-left': '8px',
-      'margin-left': '8px',
+    '&:not(:last-child)': {
+      'border-right': '1px solid var(--table-generator-divider-color)',
+      'padding-right': '8px',
+      'margin-right': '8px',
     },
   },
 
@@ -332,6 +336,7 @@ export const tableGeneratorTheme = EditorView.baseTheme({
     'align-items': 'center',
     'justify-content': 'space-between',
     'font-family': 'Lato',
+    height: '36px',
 
     '&:not(:first-child)': {
       'margin-left': '8px',

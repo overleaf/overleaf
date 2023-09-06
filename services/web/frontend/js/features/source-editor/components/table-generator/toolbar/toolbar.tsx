@@ -63,77 +63,79 @@ export const Toolbar = memo(function Toolbar() {
 
   return (
     <div className="table-generator-floating-toolbar">
-      <ToolbarDropdown
-        id="table-generator-caption-dropdown"
-        label={captionLabel}
-        disabled={!tableEnvironment}
-      >
-        <ToolbarDropdownItem
-          id="table-generator-caption-none"
-          command={() => {
-            removeCaption(view, tableEnvironment)
-          }}
+      <div className="table-generator-button-group">
+        <ToolbarDropdown
+          id="table-generator-caption-dropdown"
+          label={captionLabel}
+          disabled={!tableEnvironment}
         >
-          No caption
-        </ToolbarDropdownItem>
-        <ToolbarDropdownItem
-          id="table-generator-caption-above"
-          command={() => {
-            moveCaption(view, positions, 'above', tableEnvironment)
-          }}
+          <ToolbarDropdownItem
+            id="table-generator-caption-none"
+            command={() => {
+              removeCaption(view, tableEnvironment)
+            }}
+          >
+            No caption
+          </ToolbarDropdownItem>
+          <ToolbarDropdownItem
+            id="table-generator-caption-above"
+            command={() => {
+              moveCaption(view, positions, 'above', tableEnvironment)
+            }}
+          >
+            Caption above
+          </ToolbarDropdownItem>
+          <ToolbarDropdownItem
+            id="table-generator-caption-below"
+            command={() => {
+              moveCaption(view, positions, 'below', tableEnvironment)
+            }}
+          >
+            Caption below
+          </ToolbarDropdownItem>
+        </ToolbarDropdown>
+        <ToolbarDropdown
+          id="table-generator-borders-dropdown"
+          label={borderDropdownLabel}
         >
-          Caption above
-        </ToolbarDropdownItem>
-        <ToolbarDropdownItem
-          id="table-generator-caption-below"
-          command={() => {
-            moveCaption(view, positions, 'below', tableEnvironment)
-          }}
-        >
-          Caption below
-        </ToolbarDropdownItem>
-      </ToolbarDropdown>
-      <ToolbarDropdown
-        id="table-generator-borders-dropdown"
-        label={borderDropdownLabel}
-      >
-        <ToolbarDropdownItem
-          id="table-generator-borders-fully-bordered"
-          command={() => {
-            setBorders(
-              view,
-              BorderTheme.FULLY_BORDERED,
-              positions,
-              rowSeparators,
-              table
-            )
-          }}
-        >
-          <MaterialIcon type="border_all" />
-          <span className="table-generator-button-label">All borders</span>
-        </ToolbarDropdownItem>
-        <ToolbarDropdownItem
-          id="table-generator-borders-no-borders"
-          command={() => {
-            setBorders(
-              view,
-              BorderTheme.NO_BORDERS,
-              positions,
-              rowSeparators,
-              table
-            )
-          }}
-        >
-          <MaterialIcon type="border_clear" />
-          <span className="table-generator-button-label">No borders</span>
-        </ToolbarDropdownItem>
-        <div className="table-generator-border-options-coming-soon">
-          <div className="info-icon">
-            <MaterialIcon type="info" />
+          <ToolbarDropdownItem
+            id="table-generator-borders-fully-bordered"
+            command={() => {
+              setBorders(
+                view,
+                BorderTheme.FULLY_BORDERED,
+                positions,
+                rowSeparators,
+                table
+              )
+            }}
+          >
+            <MaterialIcon type="border_all" />
+            <span className="table-generator-button-label">All borders</span>
+          </ToolbarDropdownItem>
+          <ToolbarDropdownItem
+            id="table-generator-borders-no-borders"
+            command={() => {
+              setBorders(
+                view,
+                BorderTheme.NO_BORDERS,
+                positions,
+                rowSeparators,
+                table
+              )
+            }}
+          >
+            <MaterialIcon type="border_clear" />
+            <span className="table-generator-button-label">No borders</span>
+          </ToolbarDropdownItem>
+          <div className="table-generator-border-options-coming-soon">
+            <div className="info-icon">
+              <MaterialIcon type="info" />
+            </div>
+            More options for border settings coming soon.
           </div>
-          More options for border settings coming soon.
-        </div>
-      </ToolbarDropdown>
+        </ToolbarDropdown>
+      </div>
       <div className="table-generator-button-group">
         <ToolbarButtonMenu
           label="Alignment"
