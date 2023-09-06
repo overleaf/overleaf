@@ -606,6 +606,12 @@ describe('RedisManager', function () {
         )
       })
 
+      it('should set the unflushed time (potential ranges changes)', function () {
+        this.multi.set
+          .calledWith(`UnflushedTime:${this.docId}`, Date.now(), 'NX')
+          .should.equal(true)
+      })
+
       it('should not try to enqueue doc updates', function () {
         this.multi.rpush.called.should.equal(false)
       })

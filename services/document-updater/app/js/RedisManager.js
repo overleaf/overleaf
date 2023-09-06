@@ -454,11 +454,9 @@ module.exports = RedisManager = {
           multi.rpush(keys.docOps({ doc_id: docId }), ...jsonOps) // index 5
           // expire must come after rpush since before it will be a no-op if the list is empty
           multi.expire(keys.docOps({ doc_id: docId }), RedisManager.DOC_OPS_TTL) // index 6
-          // Set the unflushed timestamp to the current time if the doc
-          // hasn't been modified before (the content in mongo has been
-          // valid up to this point). Otherwise leave it alone ("NX" flag).
-          multi.set(keys.unflushedTime({ doc_id: docId }), Date.now(), 'NX')
         }
+        // Set the unflushed timestamp to the current time if not set ("NX" flag).
+        multi.set(keys.unflushedTime({ doc_id: docId }), Date.now(), 'NX')
         multi.exec((error, result) => {
           if (error) {
             return callback(error)

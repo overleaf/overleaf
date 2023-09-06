@@ -4,6 +4,9 @@ const sinon = require('sinon')
 
 // Chai configuration
 chai.should()
+// Load sinon-chai assertions so expect(stubFn).to.have.been.calledWith('abc')
+// has a nicer failure messages
+chai.use(require('sinon-chai'))
 
 // Global stubs
 const sandbox = sinon.createSandbox()

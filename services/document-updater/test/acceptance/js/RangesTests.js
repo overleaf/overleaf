@@ -346,7 +346,8 @@ describe('Ranges', function () {
   })
 
   describe('accepting a change', function () {
-    before(function (done) {
+    beforeEach(function (done) {
+      sinon.spy(MockWebApi, 'setDocument')
       this.project_id = DocUpdaterClient.randomId()
       this.user_id = DocUpdaterClient.randomId()
       this.id_seed = '587357bd35e64f6157'
@@ -401,8 +402,11 @@ describe('Ranges', function () {
         }
       )
     })
+    afterEach(function () {
+      MockWebApi.setDocument.restore()
+    })
 
-    return it('should remove the change after accepting', function (done) {
+    it('should remove the change after accepting', function (done) {
       return DocUpdaterClient.acceptChange(
         this.project_id,
         this.doc.id,
@@ -424,6 +428,41 @@ describe('Ranges', function () {
           )
         }
       )
+    })
+
+    it('should persist the ranges after accepting', function (done) {
+      DocUpdaterClient.flushDoc(this.project_id, this.doc.id, err => {
+        if (err) return done(err)
+        DocUpdaterClient.acceptChange(
+          this.project_id,
+          this.doc.id,
+          this.id_seed + '000001',
+          error => {
+            if (error != null) {
+              throw error
+            }
+
+            DocUpdaterClient.flushDoc(this.project_id, this.doc.id, err => {
+              if (err) return done(err)
+              DocUpdaterClient.getDoc(
+                this.project_id,
+                this.doc.id,
+                (error, res, data) => {
+                  if (error != null) {
+                    throw error
+                  }
+                  expect(data.ranges.changes).to.be.undefined
+
+                  MockWebApi.setDocument
+                    .calledWith(this.project_id, this.doc.id, ['a456aa'], 1, {})
+                    .should.equal(true)
+                  done()
+                }
+              )
+            })
+          }
+        )
+      })
     })
   })
 

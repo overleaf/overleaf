@@ -288,17 +288,23 @@ module.exports = DocumentManager = {
           return callback(error)
         }
         if (lines == null || version == null) {
+          Metrics.inc('flush-doc-if-loaded', 1, { status: 'not-loaded' })
           logger.debug(
             { projectId, docId },
             'doc is not loaded so not flushing'
           )
           // TODO: return a flag to bail out, as we go on to remove doc from memory?
           callback(null)
+        } else if (unflushedTime == null) {
+          Metrics.inc('flush-doc-if-loaded', 1, { status: 'unmodified' })
+          logger.debug(
+            { projectId, docId },
+            'doc is not modified so not flushing'
+          )
+          callback(null)
         } else {
           logger.debug({ projectId, docId, version }, 'flushing doc')
-          Metrics.inc('flush-doc-if-loaded', {
-            status: unflushedTime != null ? 'modified' : 'unmodified',
-          })
+          Metrics.inc('flush-doc-if-loaded', 1, { status: 'modified' })
           PersistenceManager.setDoc(
             projectId,
             docId,

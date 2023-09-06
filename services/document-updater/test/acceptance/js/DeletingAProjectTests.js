@@ -15,7 +15,7 @@ const DocUpdaterClient = require('./helpers/DocUpdaterClient')
 const DocUpdaterApp = require('./helpers/DocUpdaterApp')
 
 describe('Deleting a project', function () {
-  before(function (done) {
+  beforeEach(function (done) {
     let docId0, docId1
     this.project_id = DocUpdaterClient.randomId()
     this.docs = [
@@ -60,8 +60,87 @@ describe('Deleting a project', function () {
     DocUpdaterApp.ensureRunning(done)
   })
 
+  describe('without updates', function () {
+    beforeEach(function (done) {
+      sinon.spy(MockWebApi, 'setDocument')
+      sinon.spy(MockProjectHistoryApi, 'flushProject')
+
+      async.series(
+        this.docs.map(doc => {
+          return callback => {
+            DocUpdaterClient.preloadDoc(this.project_id, doc.id, error => {
+              callback(error)
+            })
+          }
+        }),
+        error => {
+          if (error != null) {
+            throw error
+          }
+          setTimeout(() => {
+            DocUpdaterClient.deleteProject(
+              this.project_id,
+              (error, res, body) => {
+                if (error) return done(error)
+                this.statusCode = res.statusCode
+                done()
+              }
+            )
+          }, 200)
+        }
+      )
+    })
+
+    afterEach(function () {
+      MockWebApi.setDocument.restore()
+      MockProjectHistoryApi.flushProject.restore()
+    })
+
+    it('should return a 204 status code', function () {
+      this.statusCode.should.equal(204)
+    })
+
+    it('should not send any document to the web api', function () {
+      MockWebApi.setDocument.should.not.have.been.called
+    })
+
+    it('should need to reload the docs if read again', function (done) {
+      sinon.spy(MockWebApi, 'getDocument')
+      async.series(
+        this.docs.map(doc => {
+          return callback => {
+            MockWebApi.getDocument
+              .calledWith(this.project_id, doc.id)
+              .should.equal(false)
+            DocUpdaterClient.getDoc(
+              this.project_id,
+              doc.id,
+              (error, res, returnedDoc) => {
+                if (error) return done(error)
+                MockWebApi.getDocument
+                  .calledWith(this.project_id, doc.id)
+                  .should.equal(true)
+                callback()
+              }
+            )
+          }
+        }),
+        () => {
+          MockWebApi.getDocument.restore()
+          done()
+        }
+      )
+    })
+
+    it('should flush each doc in project history', function () {
+      MockProjectHistoryApi.flushProject
+        .calledWith(this.project_id)
+        .should.equal(true)
+    })
+  })
+
   describe('with documents which have been updated', function () {
-    before(function (done) {
+    beforeEach(function (done) {
       sinon.spy(MockWebApi, 'setDocument')
       sinon.spy(MockProjectHistoryApi, 'flushProject')
 
@@ -101,7 +180,7 @@ describe('Deleting a project', function () {
       )
     })
 
-    after(function () {
+    afterEach(function () {
       MockWebApi.setDocument.restore()
       MockProjectHistoryApi.flushProject.restore()
     })
@@ -154,14 +233,26 @@ describe('Deleting a project', function () {
   })
 
   describe('with the background=true parameter from realtime and no request to flush the queue', function () {
-    before(function (done) {
+    beforeEach(function (done) {
       sinon.spy(MockWebApi, 'setDocument')
       sinon.spy(MockProjectHistoryApi, 'flushProject')
 
       async.series(
         this.docs.map(doc => {
           return callback => {
-            DocUpdaterClient.preloadDoc(this.project_id, doc.id, callback)
+            DocUpdaterClient.preloadDoc(this.project_id, doc.id, error => {
+              if (error != null) {
+                return callback(error)
+              }
+              DocUpdaterClient.sendUpdate(
+                this.project_id,
+                doc.id,
+                doc.update,
+                error => {
+                  callback(error)
+                }
+              )
+            })
           }
         }),
         error => {
@@ -182,7 +273,7 @@ describe('Deleting a project', function () {
       )
     })
 
-    after(function () {
+    afterEach(function () {
       MockWebApi.setDocument.restore()
       MockProjectHistoryApi.flushProject.restore()
     })
@@ -201,14 +292,26 @@ describe('Deleting a project', function () {
   })
 
   describe('with the background=true parameter from realtime and a request to flush the queue', function () {
-    before(function (done) {
+    beforeEach(function (done) {
       sinon.spy(MockWebApi, 'setDocument')
       sinon.spy(MockProjectHistoryApi, 'flushProject')
 
       async.series(
         this.docs.map(doc => {
           return callback => {
-            DocUpdaterClient.preloadDoc(this.project_id, doc.id, callback)
+            DocUpdaterClient.preloadDoc(this.project_id, doc.id, error => {
+              if (error != null) {
+                return callback(error)
+              }
+              DocUpdaterClient.sendUpdate(
+                this.project_id,
+                doc.id,
+                doc.update,
+                error => {
+                  callback(error)
+                }
+              )
+            })
           }
         }),
         error => {
@@ -230,7 +333,7 @@ describe('Deleting a project', function () {
       )
     })
 
-    after(function () {
+    afterEach(function () {
       MockWebApi.setDocument.restore()
       MockProjectHistoryApi.flushProject.restore()
     })
