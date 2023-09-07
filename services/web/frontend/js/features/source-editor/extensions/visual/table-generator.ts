@@ -196,7 +196,8 @@ export const tableGeneratorTheme = EditorView.baseTheme({
     left: '0',
     right: '0',
     margin: '0 auto',
-    'z-index': '1',
+    // z-index of cursor layer is 150
+    'z-index': '152',
     'border-radius': '4px',
     width: 'max-content',
     'justify-content': 'start',
