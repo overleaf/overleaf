@@ -20,18 +20,14 @@ describe('LogLevelChecker', function () {
       level: sinon.stub(),
       fields: { name: 'myapp' },
     }
-    this.fetchResponse = {
-      text: sinon.stub().resolves(''),
-      status: 200,
-      ok: true,
+    this.FetchUtils = {
+      fetchString: sinon.stub(),
     }
-    this.fetch = sinon
-      .stub()
-      .withArgs(
-        'http://metadata.google.internal/computeMetadata/v1/project/attributes/myapp-setLogLevelEndTime',
-        { headers: { 'Metadata-Flavor': 'Google' } }
-      )
-      .resolves(this.fetchResponse)
+    this.fetchLogLevelEndTimeStub = this.FetchUtils.fetchString.withArgs(
+      'http://metadata.google.internal/computeMetadata/v1/project/attributes/myapp-setLogLevelEndTime',
+      { headers: { 'Metadata-Flavor': 'Google' } }
+    )
+    this.fetchLogLevelEndTimeStub.resolves('')
 
     this.fs = {
       promises: {
@@ -43,7 +39,7 @@ describe('LogLevelChecker', function () {
 
     this.module = SandboxedModule.require(MODULE_PATH, {
       requires: {
-        'node-fetch': this.fetch,
+        '@overleaf/fetch-utils': this.FetchUtils,
         fs: this.fs,
       },
     })
@@ -142,16 +138,7 @@ describe('LogLevelChecker', function () {
 
     describe('when the request errors', function () {
       beforeEach(async function () {
-        this.fetchResponse.text.rejects(new Error('Read error!'))
-      })
-      checkLogLevel()
-      expectLevelSetTo(DEFAULT_LEVEL)
-    })
-
-    describe('when the request returns a failure status code', function () {
-      beforeEach(async function () {
-        this.fetchResponse.status = 500
-        this.fetchResponse.ok = false
+        this.FetchUtils.fetchString.rejects(new Error('Read error!'))
       })
       checkLogLevel()
       expectLevelSetTo(DEFAULT_LEVEL)
@@ -181,7 +168,7 @@ function setupTracingEndTimeGCE(contents) {
   beforeEach(
     `set tracing end time in GCE metadata to ${contents}`,
     function () {
-      this.fetchResponse.text.resolves(contents)
+      this.fetchLogLevelEndTimeStub.resolves(contents)
     }
   )
 }

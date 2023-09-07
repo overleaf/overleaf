@@ -5,5 +5,5 @@ chai.use(require('sinon-chai'))
 chai.use(require('chai-as-promised'))
 
 SandboxedModule.configure({
-  globals: { Buffer, console, process, URL },
+  globals: { Buffer, Math, console, process, URL },
 })
