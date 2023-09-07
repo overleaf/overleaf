@@ -16,6 +16,7 @@ export class TabularWidget extends WidgetType {
     private tabularNode: SyntaxNode,
     private content: string,
     private tableNode: SyntaxNode | null,
+    private isDirectChildOfTableEnvironment: boolean,
     state: EditorState
   ) {
     super()
@@ -64,6 +65,7 @@ export class TabularWidget extends WidgetType {
           tabularNode={this.tabularNode}
           parsedTableData={this.parseResult}
           tableNode={this.tableNode}
+          directTableChild={this.isDirectChildOfTableEnvironment}
         />,
         this.element
       )
@@ -91,6 +93,7 @@ export class TabularWidget extends WidgetType {
         tabularNode={this.tabularNode}
         parsedTableData={this.parseResult}
         tableNode={this.tableNode}
+        directTableChild={this.isDirectChildOfTableEnvironment}
       />,
       this.element
     )

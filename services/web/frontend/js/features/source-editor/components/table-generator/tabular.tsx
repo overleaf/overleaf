@@ -227,7 +227,8 @@ export const Tabular: FC<{
   view: EditorView
   tableNode: SyntaxNode | null
   parsedTableData: ParsedTableData
-}> = ({ tabularNode, view, tableNode, parsedTableData }) => {
+  directTableChild?: boolean
+}> = ({ tabularNode, view, tableNode, parsedTableData, directTableChild }) => {
   return (
     <ErrorBoundary
       fallbackRender={() => (
@@ -241,6 +242,7 @@ export const Tabular: FC<{
               tabularNode={tabularNode}
               tableData={parsedTableData}
               tableNode={tableNode}
+              directTableChild={directTableChild}
               view={view}
             >
               <SelectionContextProvider>

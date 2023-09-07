@@ -45,6 +45,7 @@ import { EnvironmentLineWidget } from './visual-widgets/environment-line'
 import {
   ListEnvironmentName,
   ancestorOfNodeWithType,
+  isDirectChildOfEnvironment,
 } from '../../utils/tree-operations/ancestors'
 import { InlineGraphicsWidget } from './visual-widgets/inline-graphics'
 import getMeta from '../../../../utils/meta'
@@ -320,17 +321,23 @@ export const atomicDecorations = (options: Options) => {
             nodeRef.type.is('TabularEnvironment')
           ) {
             if (shouldDecorate(state, nodeRef)) {
+              const tabularNode = nodeRef.node
               const tableNode = ancestorOfNodeWithType(
-                nodeRef.node,
+                tabularNode,
                 'TableEnvironment'
               )
+              const directChild = isDirectChildOfEnvironment(
+                tabularNode.parent,
+                tableNode
+              )
               const tabularWidget = new TabularWidget(
-                nodeRef.node,
+                tabularNode,
                 state.doc.sliceString(
-                  (tableNode ?? nodeRef).from,
-                  (tableNode ?? nodeRef).to
+                  (tableNode ?? tabularNode).from,
+                  (tableNode ?? tabularNode).to
                 ),
                 tableNode,
+                directChild,
                 state
               )
 

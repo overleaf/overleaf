@@ -81,10 +81,17 @@ export const ToolbarDropdown: FC<{
     </Overlay>
   )
 
-  if (!tooltip) {
+  if (tooltip || (disabled && disabledTooltip)) {
     return (
       <>
-        {button}
+        <Tooltip
+          hidden={open}
+          id={id}
+          description={disabled && disabledTooltip ? disabledTooltip : tooltip}
+          overlayProps={{ placement: 'bottom' }}
+        >
+          {button}
+        </Tooltip>
         {overlay}
       </>
     )
@@ -92,14 +99,7 @@ export const ToolbarDropdown: FC<{
 
   return (
     <>
-      <Tooltip
-        hidden={open}
-        id={id}
-        description={disabled && disabledTooltip ? disabledTooltip : tooltip}
-        overlayProps={{ placement: 'bottom' }}
-      >
-        {button}
-      </Tooltip>
+      {button}
       {overlay}
     </>
   )

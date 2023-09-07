@@ -26,8 +26,14 @@ import { useTranslation } from 'react-i18next'
 export const Toolbar = memo(function Toolbar() {
   const { selection, setSelection } = useSelectionContext()
   const view = useCodeMirrorViewContext()
-  const { positions, rowSeparators, cellSeparators, tableEnvironment, table } =
-    useTableContext()
+  const {
+    positions,
+    rowSeparators,
+    cellSeparators,
+    tableEnvironment,
+    table,
+    directTableChild,
+  } = useTableContext()
   const { showHelp } = useTabularContext()
   const { t } = useTranslation()
 
@@ -64,7 +70,10 @@ export const Toolbar = memo(function Toolbar() {
         <ToolbarDropdown
           id="table-generator-caption-dropdown"
           label={captionLabel}
-          disabled={!tableEnvironment}
+          disabled={!tableEnvironment || !directTableChild}
+          disabledTooltip={t(
+            'to_insert_or_move_a_caption_make_sure_tabular_is_directly_within_table'
+          )}
         >
           <ToolbarDropdownItem
             id="table-generator-caption-none"

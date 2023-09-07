@@ -278,3 +278,11 @@ export const minimumListDepthForSelection = (state: EditorState) => {
   }
   return Math.min(...depths)
 }
+
+export const isDirectChildOfEnvironment = (
+  child?: SyntaxNode | null,
+  ancestor?: SyntaxNode | null
+) => {
+  const possiblyAncestor = child?.parent?.parent?.parent // Text → Content → Environment
+  return ancestor === possiblyAncestor
+}

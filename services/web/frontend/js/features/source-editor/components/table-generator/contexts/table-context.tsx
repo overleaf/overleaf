@@ -29,6 +29,7 @@ const TableContext = createContext<
       tableEnvironment?: TableEnvironmentData
       rows: number
       columns: number
+      directTableChild?: boolean
     }
   | undefined
 >(undefined)
@@ -38,7 +39,15 @@ export const TableProvider: FC<{
   tableNode: SyntaxNode | null
   tabularNode: SyntaxNode
   view: EditorView
-}> = ({ tableData, children, tableNode, tabularNode, view }) => {
+  directTableChild?: boolean
+}> = ({
+  tableData,
+  children,
+  tableNode,
+  tabularNode,
+  view,
+  directTableChild,
+}) => {
   try {
     const positions: Positions = {
       cells: tableData.cellPositions,
@@ -59,6 +68,7 @@ export const TableProvider: FC<{
           tableEnvironment,
           rows: tableData.table.rows.length,
           columns: tableData.table.columns.length,
+          directTableChild,
         }}
       >
         {children}

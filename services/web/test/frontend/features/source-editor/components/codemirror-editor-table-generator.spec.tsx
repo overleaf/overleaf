@@ -413,8 +413,21 @@ cell 3 & cell 4 \\\\
         })
       })
 
-      // Removes caption when clicking "No caption"
       cy.get('@toolbar').findByText('Caption below').click()
+      cy.get('.table-generator-toolbar-dropdown-menu')
+        .findByText('Caption above')
+        .click()
+      // Check that caption is above table
+      cy.get('.ol-cm-command-caption').then(([caption]) => {
+        const { top: captionYPosition } = caption.getBoundingClientRect()
+        cy.get('.table-generator').then(([table]) => {
+          const { top: tableYPosition } = table.getBoundingClientRect()
+          cy.wrap(captionYPosition).should('be.lessThan', tableYPosition)
+        })
+      })
+
+      // Removes caption when clicking "No caption"
+      cy.get('@toolbar').findByText('Caption above').click()
       cy.get('.table-generator-toolbar-dropdown-menu')
         .findByText('No caption')
         .click()
@@ -444,6 +457,24 @@ cell 3 & cell 4 \\\\
         ['cell 3', 'cell 4'],
       ])
       checkBordersWithNoMultiColumn([true, true, true], [true, true, true])
+    })
+
+    it('Disables caption dropdown when not directly inside table environment', function () {
+      mountEditor(`
+\\begin{table}
+  \\caption{Table caption}
+  \\label{tab:table}
+  \\begin{adjustbox}{max width=\\textwidth}
+    \\begin{tabular}{c}
+      cell 1
+    \\end{tabular}
+  \\end{adjustbox}
+\\end{table}`)
+      cy.get('.table-generator').findByText('cell 1').click()
+      cy.get('.table-generator-floating-toolbar').as('toolbar').should('exist')
+      cy.get('@toolbar')
+        .contains('button', 'Caption above')
+        .should('be.disabled')
     })
   })
 })

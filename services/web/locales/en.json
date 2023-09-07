@@ -1722,6 +1722,7 @@
   "to_add_more_collaborators": "To add more collaborators or turn on link sharing, please ask the project owner",
   "to_change_access_permissions": "To change access permissions, please ask the project owner",
   "to_confirm_transfer_enter_email_address": "To accept the invitation, enter the email address linked to your account.",
+  "to_insert_or_move_a_caption_make_sure_tabular_is_directly_within_table": "To insert or move a caption, make sure \\begin{tabular} is directly within a table environment",
   "to_many_login_requests_2_mins": "This account has had too many login requests. Please wait 2 minutes before trying to log in again",
   "to_modify_your_subscription_go_to": "To modify your subscription go to",
   "toggle_compile_options_menu": "Toggle compile options menu",
