@@ -14,6 +14,7 @@ describe('InstitutionsManager', function () {
     this.user = {}
     this.getInstitutionAffiliations = sinon.stub()
     this.getConfirmedInstitutionAffiliations = sinon.stub()
+    this.addAffiliation = sinon.stub().callsArgWith(3, null)
     this.refreshFeatures = sinon.stub().yields()
     this.users = [
       { _id: 'lapsed', features: {} },
@@ -92,12 +93,26 @@ describe('InstitutionsManager', function () {
       with_confirmed_email: 2, // 1 non entitled SSO + 1 email user
     }
 
+    // this.InstitutionsController = SandboxedModule.require(modulePath, {
+    //   requires: {
+    //     '../User/UserGetter': {
+    //       getInstitutionUsersByHostname: this.getInstitutionUsersByHostname,
+    //     },
+    //     '../Institutions/InstitutionsAPI': {
+    //       addAffiliation: this.addAffiliation,
+    //     },
+    //     '../Subscription/FeaturesUpdater': {
+    //       refreshFeatures: this.refreshFeatures,
+    //     },
+    //   },
+
     this.InstitutionsManager = SandboxedModule.require(modulePath, {
       requires: {
         './InstitutionsAPI': {
           getInstitutionAffiliations: this.getInstitutionAffiliations,
           getConfirmedInstitutionAffiliations:
             this.getConfirmedInstitutionAffiliations,
+          addAffiliation: this.addAffiliation,
           promises: {
             getInstitutionAffiliations:
               (this.getInstitutionAffiliationsPromise = sinon
@@ -125,6 +140,9 @@ describe('InstitutionsManager', function () {
         '../../models/Institution': this.InstitutionModel,
         '../../models/Subscription': SubscriptionModel,
         mongodb: this.Mongo,
+        '@overleaf/settings': {
+          features: { professional: { 'test-feature': true } },
+        },
       },
     })
   })
@@ -353,6 +371,108 @@ describe('InstitutionsManager', function () {
           done()
         }
       )
+    })
+  })
+
+  describe('addAffiliations', function () {
+    beforeEach(function () {
+      this.host = 'mit.edu'.split('').reverse().join('')
+      this.stubbedUser1 = {
+        _id: '3131231',
+        name: 'bob',
+        email: 'hello@world.com',
+        emails: [
+          { email: 'stubb1@mit.edu', reversedHostname: this.host },
+          { email: 'test@test.com', reversedHostname: 'test.com' },
+          { email: 'another@mit.edu', reversedHostname: this.host },
+        ],
+      }
+      this.stubbedUser1DecoratedEmails = [
+        {
+          email: 'stubb1@mit.edu',
+          reversedHostname: this.host,
+          samlIdentifier: { hasEntitlement: false },
+        },
+        { email: 'test@test.com', reversedHostname: 'test.com' },
+        {
+          email: 'another@mit.edu',
+          reversedHostname: this.host,
+          samlIdentifier: { hasEntitlement: true },
+        },
+      ]
+      this.stubbedUser2 = {
+        _id: '3131232',
+        name: 'test',
+        email: 'hello2@world.com',
+        emails: [{ email: 'subb2@mit.edu', reversedHostname: this.host }],
+      }
+      this.stubbedUser2DecoratedEmails = [
+        {
+          email: 'subb2@mit.edu',
+          reversedHostname: this.host,
+        },
+      ]
+
+      this.getInstitutionUsersByHostname = sinon.stub().yields(null, [
+        {
+          _id: this.stubbedUser1._id,
+          emails: this.stubbedUser1DecoratedEmails,
+        },
+        {
+          _id: this.stubbedUser2._id,
+          emails: this.stubbedUser2DecoratedEmails,
+        },
+      ])
+      this.UserGetter.getInstitutionUsersByHostname =
+        this.getInstitutionUsersByHostname
+    })
+
+    describe('affiliateUsers', function () {
+      it('should add affiliations for matching users', function (done) {
+        this.InstitutionsManager.affiliateUsers('mit.edu', error => {
+          expect(error).not.to.exist
+          this.getInstitutionUsersByHostname.calledOnce.should.equal(true)
+          this.addAffiliation.calledThrice.should.equal(true)
+          this.addAffiliation
+            .calledWithMatch(
+              this.stubbedUser1._id,
+              this.stubbedUser1.emails[0].email,
+              { entitlement: false }
+            )
+            .should.equal(true)
+          this.addAffiliation
+            .calledWithMatch(
+              this.stubbedUser1._id,
+              this.stubbedUser1.emails[2].email,
+              { entitlement: true }
+            )
+            .should.equal(true)
+          this.addAffiliation
+            .calledWithMatch(
+              this.stubbedUser2._id,
+              this.stubbedUser2.emails[0].email,
+              { entitlement: undefined }
+            )
+            .should.equal(true)
+          this.refreshFeatures
+            .calledWith(this.stubbedUser1._id)
+            .should.equal(true)
+          this.refreshFeatures
+            .calledWith(this.stubbedUser2._id)
+            .should.equal(true)
+          this.refreshFeatures.should.have.been.calledTwice
+          done()
+        })
+      })
+
+      it('should return errors if last affiliation cannot be added', function (done) {
+        this.addAffiliation.onCall(2).callsArgWith(3, new Error('error'))
+        this.InstitutionsManager.affiliateUsers('mit.edu', error => {
+          expect(error).to.exist
+          this.getInstitutionUsersByHostname.calledOnce.should.equal(true)
+          done()
+        })
+      })
     })
   })
 })

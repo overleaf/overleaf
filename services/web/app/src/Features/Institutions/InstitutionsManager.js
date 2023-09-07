@@ -7,6 +7,7 @@ const { fetchJson } = require('@overleaf/fetch-utils')
 const {
   getInstitutionAffiliations,
   getConfirmedInstitutionAffiliations,
+  addAffiliation,
   promises: InstitutionsAPIPromises,
 } = require('./InstitutionsAPI')
 const FeaturesUpdater = require('../Subscription/FeaturesUpdater')
@@ -17,6 +18,7 @@ const NotificationsHandler = require('../Notifications/NotificationsHandler')
 const SubscriptionLocator = require('../Subscription/SubscriptionLocator')
 const { Institution } = require('../../models/Institution')
 const { Subscription } = require('../../models/Subscription')
+const OError = require('@overleaf/o-error')
 
 const ASYNC_LIMIT = parseInt(process.env.ASYNC_LIMIT, 10) || 5
 
@@ -249,6 +251,25 @@ const InstitutionsManager = {
         .exec(callback)
     })
   },
+
+  affiliateUsers(hostname, callback) {
+    const reversedHostname = hostname.trim().split('').reverse().join('')
+    UserGetter.getInstitutionUsersByHostname(hostname, (error, users) => {
+      if (error) {
+        OError.tag(error, 'problem fetching users by hostname')
+        return callback(error)
+      }
+
+      async.mapLimit(
+        users,
+        ASYNC_LIMIT,
+        (user, innerCallback) => {
+          affiliateUserByReversedHostname(user, reversedHostname, innerCallback)
+        },
+        callback
+      )
+    })
+  },
 }
 
 const fetchInstitutionAndAffiliations = (institutionId, callback) =>
@@ -359,7 +380,48 @@ async function fetchV1Data(institution) {
   }
 }
 
+function affiliateUserByReversedHostname(user, reversedHostname, callback) {
+  const matchingEmails = user.emails.filter(
+    email => email.reversedHostname === reversedHostname
+  )
+  async.mapSeries(
+    matchingEmails,
+    (email, innerCallback) => {
+      addAffiliation(
+        user._id,
+        email.email,
+        {
+          confirmedAt: email.confirmedAt,
+          entitlement:
+            email.samlIdentifier && email.samlIdentifier.hasEntitlement,
+        },
+        error => {
+          if (error) {
+            OError.tag(
+              error,
+              'problem adding affiliation while confirming hostname'
+            )
+            return innerCallback(error)
+          }
+          innerCallback()
+        }
+      )
+    },
+    err => {
+      if (err) {
+        return callback(err)
+      }
+      FeaturesUpdater.refreshFeatures(
+        user._id,
+        'affiliate-user-by-reversed-hostname',
+        callback
+      )
+    }
+  )
+}
+
 InstitutionsManager.promises = {
+  affiliateUsers: promisify(InstitutionsManager.affiliateUsers),
   checkInstitutionUsers,
   clearInstitutionNotifications: promisify(
     InstitutionsManager.clearInstitutionNotifications
