@@ -223,21 +223,25 @@ const UserPagesController = {
 
   emailPreferencesPage(req, res, next) {
     const userId = SessionManager.getLoggedInUserId(req.session)
-    UserGetter.getUser(userId, (err, user) => {
-      if (err != null) {
-        return next(err)
-      }
-      NewsletterManager.subscribed(user, (err, subscribed) => {
+    UserGetter.getUser(
+      userId,
+      { _id: 1, email: 1, first_name: 1, last_name: 1 },
+      (err, user) => {
         if (err != null) {
-          OError.tag(err, 'error getting newsletter subscription status')
           return next(err)
         }
-        res.render('user/email-preferences', {
-          title: 'newsletter_info_title',
-          subscribed,
+        NewsletterManager.subscribed(user, (err, subscribed) => {
+          if (err != null) {
+            OError.tag(err, 'error getting newsletter subscription status')
+            return next(err)
+          }
+          res.render('user/email-preferences', {
+            title: 'newsletter_info_title',
+            subscribed,
+          })
         })
-      })
-    })
+      }
+    )
   },
 
   _restructureThirdPartyIds(user) {

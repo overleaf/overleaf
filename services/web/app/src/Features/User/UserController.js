@@ -288,44 +288,52 @@ const UserController = {
 
   subscribe(req, res, next) {
     const userId = SessionManager.getLoggedInUserId(req.session)
-    UserGetter.getUser(userId, (err, user) => {
-      if (err != null) {
-        return next(err)
-      }
-      NewsletterManager.subscribe(user, err => {
+    UserGetter.getUser(
+      userId,
+      { _id: 1, email: 1, first_name: 1, last_name: 1 },
+      (err, user) => {
         if (err != null) {
-          OError.tag(err, 'error subscribing to newsletter')
           return next(err)
         }
-        return res.json({
-          message: req.i18n.translate('thanks_settings_updated'),
-        })
-      })
-    })
-  },
-
-  unsubscribe(req, res, next) {
-    const userId = SessionManager.getLoggedInUserId(req.session)
-    UserGetter.getUser(userId, (err, user) => {
-      if (err != null) {
-        return next(err)
-      }
-      NewsletterManager.unsubscribe(user, err => {
-        if (err != null) {
-          OError.tag(err, 'error unsubscribing to newsletter')
-          return next(err)
-        }
-        Modules.hooks.fire('newsletterUnsubscribed', user, err => {
-          if (err) {
-            OError.tag(err, 'error firing "newsletterUnsubscribed" hook')
+        NewsletterManager.subscribe(user, err => {
+          if (err != null) {
+            OError.tag(err, 'error subscribing to newsletter')
             return next(err)
           }
           return res.json({
             message: req.i18n.translate('thanks_settings_updated'),
           })
         })
-      })
-    })
+      }
+    )
+  },
+
+  unsubscribe(req, res, next) {
+    const userId = SessionManager.getLoggedInUserId(req.session)
+    UserGetter.getUser(
+      userId,
+      { _id: 1, email: 1, first_name: 1, last_name: 1 },
+      (err, user) => {
+        if (err != null) {
+          return next(err)
+        }
+        NewsletterManager.unsubscribe(user, err => {
+          if (err != null) {
+            OError.tag(err, 'error unsubscribing to newsletter')
+            return next(err)
+          }
+          Modules.hooks.fire('newsletterUnsubscribed', user, err => {
+            if (err) {
+              OError.tag(err, 'error firing "newsletterUnsubscribed" hook')
+              return next(err)
+            }
+            return res.json({
+              message: req.i18n.translate('thanks_settings_updated'),
+            })
+          })
+        })
+      }
+    )
   },
 
   updateUserSettings(req, res, next) {

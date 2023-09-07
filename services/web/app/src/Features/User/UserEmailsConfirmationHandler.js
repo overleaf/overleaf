@@ -90,7 +90,7 @@ const UserEmailsConfirmationHandler = {
         if (!userId || email !== EmailHelper.parseEmail(email)) {
           return callback(new Errors.NotFoundError('invalid data'))
         }
-        UserGetter.getUser(userId, {}, function (error, user) {
+        UserGetter.getUser(userId, { emails: 1 }, function (error, user) {
           if (error) {
             return callback(error)
           }

@@ -38,10 +38,10 @@ describe('UserController', function () {
 
     this.UserDeleter = { deleteUser: sinon.stub().yields() }
     this.UserGetter = {
-      getUser: sinon.stub().callsArgWith(1, null, this.user),
+      getUser: sinon.stub().yields(null, this.user),
       promises: { getUser: sinon.stub().resolves(this.user) },
     }
-    this.User = { findById: sinon.stub().callsArgWith(1, null, this.user) }
+    this.User = { findById: sinon.stub().yields(null, this.user) }
     this.NewsLetterManager = {
       subscribe: sinon.stub().yields(),
       unsubscribe: sinon.stub().yields(),

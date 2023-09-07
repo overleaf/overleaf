@@ -9,7 +9,7 @@ describe('mongoose', function () {
 
     it('allows the creation of a user', async function () {
       await expect(User.create({ email })).to.be.fulfilled
-      await expect(User.findOne({ email })).to.eventually.exist
+      await expect(User.findOne({ email }, { _id: 1 })).to.eventually.exist
     })
 
     it('does not allow the creation of multiple users with the same email', async function () {
@@ -41,7 +41,7 @@ describe('mongoose', function () {
         })
       ).to.be.fulfilled
 
-      const user = await User.findOne({ email })
+      const user = await User.findOne({ email }, { splitTests: 1 })
       expect(user.splitTests['some-test'][0].assignedAt).to.be.a('date')
       expect(user.splitTests['some-test'][1].assignedAt).to.be.a('date')
     })

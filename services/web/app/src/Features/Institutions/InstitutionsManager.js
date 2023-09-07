@@ -322,7 +322,7 @@ function refreshFeaturesAndNotify(affiliation, callback) {
 const getUserInfo = (userId, callback) =>
   async.waterfall(
     [
-      cb => UserGetter.getUser(userId, cb),
+      cb => UserGetter.getUser(userId, { _id: 1 }, cb),
       (user, cb) =>
         SubscriptionLocator.getUsersSubscription(user, (err, subscription) =>
           cb(err, user, subscription)

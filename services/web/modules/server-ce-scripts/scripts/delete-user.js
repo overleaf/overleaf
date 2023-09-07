@@ -12,7 +12,7 @@ async function main() {
   }
 
   await new Promise((resolve, reject) => {
-    UserGetter.getUser({ email }, function (error, user) {
+    UserGetter.getUser({ email }, { _id: 1 }, function (error, user) {
       if (error) {
         return reject(error)
       }

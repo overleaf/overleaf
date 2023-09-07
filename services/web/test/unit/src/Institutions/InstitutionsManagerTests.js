@@ -45,7 +45,7 @@ describe('InstitutionsManager', function () {
 
     this.UserGetter = {
       getUsersByAnyConfirmedEmail: sinon.stub().yields(),
-      getUser: sinon.stub().callsArgWith(1, null, this.user),
+      getUser: sinon.stub().yields(null, this.user),
       promises: {
         getUsers: sinon.stub().resolves(this.users),
         getUsersByAnyConfirmedEmail: sinon.stub().resolves(),
@@ -164,18 +164,10 @@ describe('InstitutionsManager', function () {
       this.user3 = { _id: this.user3Id }
       this.user4 = { _id: this.user4Id }
 
-      this.UserGetter.getUser
-        .withArgs(this.user1Id)
-        .callsArgWith(1, null, this.user1)
-      this.UserGetter.getUser
-        .withArgs(this.user2Id)
-        .callsArgWith(1, null, this.user2)
-      this.UserGetter.getUser
-        .withArgs(this.user3Id)
-        .callsArgWith(1, null, this.user3)
-      this.UserGetter.getUser
-        .withArgs(this.user4Id)
-        .callsArgWith(1, null, this.user4)
+      this.UserGetter.getUser.withArgs(this.user1Id).yields(null, this.user1)
+      this.UserGetter.getUser.withArgs(this.user2Id).yields(null, this.user2)
+      this.UserGetter.getUser.withArgs(this.user3Id).yields(null, this.user3)
+      this.UserGetter.getUser.withArgs(this.user4Id).yields(null, this.user4)
 
       this.SubscriptionLocator.getUsersSubscription
         .withArgs(this.user2)

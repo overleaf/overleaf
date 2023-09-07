@@ -111,6 +111,14 @@ const UserGetter = {
     }
   },
 
+  getUserFeatures(userId, callback) {
+    this.getUser(userId, { features: 1 }, (error, user) => {
+      if (error) return callback(error)
+      if (!user) return callback(new Errors.NotFoundError('user not found'))
+      callback(null, user.features)
+    })
+  },
+
   getUserEmail(userId, callback) {
     this.getUser(userId, { email: 1 }, (error, user) =>
       callback(error, user && user.email)
