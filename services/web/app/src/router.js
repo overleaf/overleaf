@@ -99,10 +99,6 @@ const rateLimiters = {
     points: 10,
     duration: 60,
   }),
-  confirmUniversityDomain: new RateLimiter('confirm-university-domain', {
-    points: 1,
-    duration: 60,
-  }),
   createProject: new RateLimiter('create-project', {
     points: 20,
     duration: 60,
@@ -1141,7 +1137,6 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   )
   publicApiRouter.post(
     '/api/institutions/confirm_university_domain',
-    RateLimiterMiddleware.rateLimit(rateLimiters.confirmUniversityDomain),
     AuthenticationController.requirePrivateApiAuth(),
     InstitutionsController.confirmDomain
   )

@@ -18,6 +18,7 @@ const NotificationsHandler = require('../Notifications/NotificationsHandler')
 const SubscriptionLocator = require('../Subscription/SubscriptionLocator')
 const { Institution } = require('../../models/Institution')
 const { Subscription } = require('../../models/Subscription')
+const Queues = require('../../infrastructure/Queues')
 const OError = require('@overleaf/o-error')
 
 const ASYNC_LIMIT = parseInt(process.env.ASYNC_LIMIT, 10) || 5
@@ -270,6 +271,8 @@ const InstitutionsManager = {
       )
     })
   },
+
+  confirmDomain: callbackify(confirmDomain),
 }
 
 const fetchInstitutionAndAffiliations = (institutionId, callback) =>
@@ -380,6 +383,14 @@ async function fetchV1Data(institution) {
   }
 }
 
+/**
+ * Enqueue a job for adding affiliations for when a domain is confirmed
+ */
+async function confirmDomain(hostname) {
+  const queue = Queues.getQueue('confirm-institution-domain')
+  await queue.add({ hostname })
+}
+
 function affiliateUserByReversedHostname(user, reversedHostname, callback) {
   const matchingEmails = user.emails.filter(
     email => email.reversedHostname === reversedHostname
@@ -422,6 +433,7 @@ function affiliateUserByReversedHostname(user, reversedHostname, callback) {
 
 InstitutionsManager.promises = {
   affiliateUsers: promisify(InstitutionsManager.affiliateUsers),
+  confirmDomain,
   checkInstitutionUsers,
   clearInstitutionNotifications: promisify(
     InstitutionsManager.clearInstitutionNotifications

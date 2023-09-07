@@ -3,6 +3,7 @@ const Queues = require('./Queues')
 const UserOnboardingEmailManager = require('../Features/User/UserOnboardingEmailManager')
 const UserPostRegistrationAnalyticsManager = require('../Features/User/UserPostRegistrationAnalyticsManager')
 const FeaturesUpdater = require('../Features/Subscription/FeaturesUpdater')
+const InstitutionsManager = require('../Features/Institutions/InstitutionsManager')
 const {
   addOptionalCleanupHandlerBeforeStoppingTraffic,
   addRequiredCleanupHandlerBeforeDrainingConnections,
@@ -63,6 +64,21 @@ function start() {
     }
   })
   registerCleanup(deferredEmailsQueue)
+
+  const confirmInstitutionDomainQueue = Queues.getQueue(
+    'confirm-institution-domain'
+  )
+  confirmInstitutionDomainQueue.process(async job => {
+    const { hostname } = job.data
+    try {
+      await InstitutionsManager.promises.affiliateUsers(hostname)
+    } catch (e) {
+      const error = OError.tag(e, 'failed to confirm university domain')
+      logger.warn(error)
+      throw error
+    }
+  })
+  registerCleanup(confirmInstitutionDomainQueue)
 }
 
 function registerCleanup(queue) {
