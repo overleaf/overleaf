@@ -1,3 +1,4 @@
+const Metrics = require('@overleaf/metrics')
 const SplitTestManager = require('./SplitTestManager')
 const { CacheLoader } = require('cache-flow')
 
@@ -9,6 +10,9 @@ class SplitTestCache extends CacheLoader {
   }
 
   async load(name) {
+    Metrics.inc('split_test_get_split_test_from_mongo', 1, {
+      path: name,
+    })
     const splitTest = await SplitTestManager.getSplitTest({
       name,
       archived: { $ne: true },

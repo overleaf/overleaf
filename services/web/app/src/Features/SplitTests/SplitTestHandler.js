@@ -1,3 +1,4 @@
+const Metrics = require('@overleaf/metrics')
 const UserGetter = require('../User/UserGetter')
 const UserUpdater = require('../User/UserUpdater')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
@@ -79,6 +80,7 @@ async function getAssignment(req, res, splitTestName, { sync = false } = {}) {
         session: req.session,
         sync,
       })
+      _collectSessionStats(req.session)
     }
   }
 
@@ -223,9 +225,19 @@ async function _getAssignment(
       currentVersion
     )
     if (cachedVariant) {
+      Metrics.inc('split_test_get_assignment_source', 1, { status: 'cache' })
       return _makeAssignment(splitTest, cachedVariant, currentVersion)
     }
   }
+
+  if (user) {
+    Metrics.inc('split_test_get_assignment_source', 1, { status: 'provided' })
+  } else if (userId) {
+    Metrics.inc('split_test_get_assignment_source', 1, { status: 'mongo' })
+  } else {
+    Metrics.inc('split_test_get_assignment_source', 1, { status: 'none' })
+  }
+
   user = user || (userId && (await _getUser(userId)))
   const { activeForUser, selectedVariantName, phase, versionNumber } =
     await _getAssignmentMetadata(analyticsId, user, splitTest)
@@ -386,12 +398,18 @@ function _getCachedVariantFromSession(session, splitTestName, currentVersion) {
 }
 
 async function _getUser(id) {
-  return UserGetter.promises.getUser(id, {
+  const user = await UserGetter.promises.getUser(id, {
     analyticsId: 1,
     splitTests: 1,
     alphaProgram: 1,
     betaProgram: 1,
   })
+  Metrics.histogram(
+    'split_test_get_user_from_mongo_size',
+    JSON.stringify(user).length,
+    [0, 100, 500, 1000, 2000, 5000, 10000, 15000, 20000, 50000, 100000]
+  )
+  return user
 }
 
 async function _loadSplitTestInfoInLocals(locals, splitTestName) {
@@ -415,6 +433,29 @@ function _getNonSaasAssignment(splitTestName) {
     }
   }
   return DEFAULT_ASSIGNMENT
+}
+
+function _collectSessionStats(session) {
+  if (session.cachedSplitTestAssignments) {
+    Metrics.summary(
+      'split_test_session_cache_count',
+      Object.keys(session.cachedSplitTestAssignments).length
+    )
+    Metrics.summary(
+      'split_test_session_cache_size',
+      JSON.stringify(session.cachedSplitTestAssignments).length
+    )
+  }
+  if (session.splitTests) {
+    Metrics.summary(
+      'split_test_session_storage_count',
+      Object.keys(session.splitTests).length
+    )
+    Metrics.summary(
+      'split_test_session_storage_size',
+      JSON.stringify(session.splitTests).length
+    )
+  }
 }
 
 module.exports = {
