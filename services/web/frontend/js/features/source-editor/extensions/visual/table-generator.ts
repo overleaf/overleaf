@@ -1,7 +1,7 @@
 import { EditorView } from '@codemirror/view'
 
 export const tableGeneratorTheme = EditorView.baseTheme({
-  '&dark .table-generator-container': {
+  '&dark .table-generator': {
     '--table-generator-active-border-color': '#ccc',
     '--table-generator-coming-soon-background-color': '#41464f',
     '--table-generator-coming-soon-color': '#fff',
@@ -12,10 +12,10 @@ export const tableGeneratorTheme = EditorView.baseTheme({
     '--table-generator-selected-background-color': '#ffffff2a',
     '--table-generator-selector-background-color': '#777',
     '--table-generator-selector-hover-color': '#3265b2',
-    '--table-generator-toolbar-background': 'var(--editor-toolbar-bg)',
+    '--table-generator-toolbar-background': '#2c3645',
     '--table-generator-toolbar-button-active-background':
       'rgba(125, 125, 125, 0.4)',
-    '--table-generator-toolbar-button-color': 'var(--toolbar-btn-color)',
+    '--table-generator-toolbar-button-color': '#fff',
     '--table-generator-toolbar-button-hover-background':
       'rgba(125, 125, 125, 0.2)',
     '--table-generator-toolbar-dropdown-border-color': 'rgba(125,125,125,0.3)',
@@ -23,7 +23,9 @@ export const tableGeneratorTheme = EditorView.baseTheme({
       'rgba(125,125,125,0.3)',
     '--table-generator-toolbar-dropdown-disabled-color': '#999',
     '--table-generator-toolbar-shadow-color': '#1e253029',
-    '--table-generator-error-background': '#F1F4F9',
+    '--table-generator-error-background': '#2c3645',
+    '--table-generator-error-color': '#fff',
+    '--table-generator-error-border-color': '#677283',
   },
 
   '&light .table-generator': {
@@ -48,6 +50,8 @@ export const tableGeneratorTheme = EditorView.baseTheme({
     '--table-generator-toolbar-dropdown-disabled-color': 'var(--neutral-40)',
     '--table-generator-toolbar-shadow-color': '#1e253029',
     '--table-generator-error-background': '#F1F4F9',
+    '--table-generator-error-color': 'black',
+    '--table-generator-error-border-color': '#C3D0E3',
   },
 
   '.table-generator': {
@@ -431,8 +435,8 @@ export const tableGeneratorTheme = EditorView.baseTheme({
     background: 'var(--table-generator-error-background)',
     display: 'flex',
     'justify-content': 'space-between',
-    color: 'black',
-    border: '1px solid #C3D0E3',
+    color: 'var(--table-generator-error-color)',
+    border: '1px solid var(--table-generator-error-border-color)',
     'font-family': 'Lato',
     margin: '0 16px 0 16px',
     '& .table-generator-error-message': {
