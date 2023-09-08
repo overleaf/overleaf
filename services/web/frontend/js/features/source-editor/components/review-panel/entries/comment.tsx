@@ -67,6 +67,7 @@ function Comment({ thread, threadId, comment }: CommentProps) {
         {editing ? (
           <AutoExpandingTextArea
             className="rp-comment-input"
+            defaultValue={comment.content}
             onKeyPress={handleSaveEditOnEnter}
             onBlur={handleSaveEdit}
             onClick={e => e.stopPropagation()}
