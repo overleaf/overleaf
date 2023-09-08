@@ -254,11 +254,13 @@ history-root {
     }
   }
 
+  .history-compare-btn,
   .history-version-dropdown-menu-btn {
     @size: 30px;
     padding: 0;
     width: @size;
     height: @size;
+    line-height: 1;
     font-size: @font-size-small;
     color: @neutral-90;
     background-color: transparent;
@@ -409,19 +411,6 @@ history-root {
 .history-dropdown-icon-inverted {
   color: @neutral-10;
   vertical-align: top;
-}
-
-.history-compare-btn {
-  line-height: 1;
-  padding: 0;
-  color: black;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.history-compare-btn:hover {
-  text-decoration: none;
-  color: black;
 }
 
 .history-file-tree {

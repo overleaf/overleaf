@@ -38,7 +38,7 @@ function CompareItems({
           icon={
             <MaterialIcon
               type="align_end"
-              className="history-dropdown-icon p-1"
+              className="history-dropdown-icon pb-1"
             />
           }
         />
@@ -56,7 +56,7 @@ function CompareItems({
           icon={
             <MaterialIcon
               type="align_start"
-              className="history-dropdown-icon p-1"
+              className="history-dropdown-icon pt-1"
             />
           }
         />

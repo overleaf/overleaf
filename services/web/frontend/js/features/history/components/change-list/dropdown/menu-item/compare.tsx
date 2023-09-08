@@ -40,7 +40,7 @@ function Compare({
       overlayProps={{ placement: 'left' }}
     >
       <Button
-        bsStyle="link"
+        bsStyle={null}
         className="history-compare-btn"
         onClick={handleCompareVersion}
       >
