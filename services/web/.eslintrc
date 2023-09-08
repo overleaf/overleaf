@@ -101,7 +101,16 @@
         "import/no-extraneous-dependencies": ["error", {
           // do not allow importing of devDependencies.
           "devDependencies": false
-        }]
+        }],
+
+        // do not allow node-fetch in backend code
+        "no-restricted-syntax": [
+          "error",
+          {
+            "selector": "CallExpression[callee.name='require'] > .arguments[value='node-fetch']",
+            "message": "Requiring node-fetch is not allowed in production services, please use fetch-utils."
+          }
+        ]
       }
     },
     {
