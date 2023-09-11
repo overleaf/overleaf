@@ -109,6 +109,7 @@ describe('<CodeMirrorEditor/> Table editor', function () {
     cy.interceptEvents()
     cy.interceptSpelling()
     cy.interceptMathJax()
+    cy.interceptCompile('compile', Number.MAX_SAFE_INTEGER)
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
     window.metaAttributesCache.set('ol-splitTestVariants', {
       'table-generator': 'enabled',
@@ -636,6 +637,24 @@ cell 3 & cell 4 \\\\
       cy.get('@cell-2').should('have.class', 'selected')
       cy.get('@cell-3').should('have.class', 'selected')
       cy.get('@cell-4').should('have.class', 'selected')
+    })
+
+    it('Allow compilation shortcuts to work', function () {
+      mountEditor(`
+\\begin{tabular}{cc }
+cell 1 & cell 2\\\\
+cell 3 & cell 4 \\\\
+\\end{tabular}`)
+      cy.get('.table-generator-cell').eq(0).as('cell-1').click()
+      cy.get('@cell-1').type('{ctrl}{enter}')
+      cy.wait('@compile')
+      cy.get('@cell-1').type('foo{ctrl}{enter}')
+      cy.wait('@compile')
+      cy.get('@cell-1').type('{esc}')
+      cy.get('@cell-1').type('{ctrl}{s}')
+      cy.wait('@compile')
+      cy.get('@cell-1').type('foo{ctrl}{s}')
+      cy.wait('@compile')
     })
   })
 })

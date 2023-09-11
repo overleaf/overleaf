@@ -145,7 +145,7 @@ export const Table: FC = () => {
   const onKeyDown: KeyboardEventHandler = useCallback(
     event => {
       const commandKey = isMac ? event.metaKey : event.ctrlKey
-      if (event.code === 'Enter' && !event.shiftKey) {
+      if (event.code === 'Enter' && !event.shiftKey && !commandKey) {
         event.preventDefault()
         event.stopPropagation()
         if (!selection) {
