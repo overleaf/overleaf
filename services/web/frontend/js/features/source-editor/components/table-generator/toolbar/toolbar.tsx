@@ -58,6 +58,42 @@ export const Toolbar = memo(function Toolbar() {
     return t('caption_below')
   }, [tableEnvironment, positions.tabular.from, t])
 
+  const currentAlignment = useMemo(() => {
+    if (!selection) {
+      return undefined
+    }
+    if (selection.isMergedCellSelected(table)) {
+      const cell = table.getCell(selection.from.row, selection.from.cell)
+      if (cell.multiColumn) {
+        // NOTE: Assumes merged columns can only have one internal column
+        return cell.multiColumn.columns.specification[0].alignment
+      }
+    }
+    const { minX, maxX } = selection.normalized()
+    const alignment = table.columns[minX].alignment
+    for (let x = minX + 1; x <= maxX; x++) {
+      if (table.columns[x].alignment !== alignment) {
+        return undefined
+      }
+    }
+    return alignment
+  }, [selection, table])
+
+  const alignmentIcon = useMemo(() => {
+    switch (currentAlignment) {
+      case 'left':
+        return 'format_align_left'
+      case 'center':
+        return 'format_align_center'
+      case 'right':
+        return 'format_align_right'
+      case 'paragraph':
+        return 'format_align_justify'
+      default:
+        return 'format_align_left'
+    }
+  }, [currentAlignment])
+
   if (!selection) {
     return null
   }
@@ -149,7 +185,7 @@ export const Toolbar = memo(function Toolbar() {
       <div className="table-generator-button-group">
         <ToolbarButtonMenu
           label={t('alignment')}
-          icon="format_align_left"
+          icon={alignmentIcon}
           id="table-generator-align-dropdown"
           disabledLabel={t('select_a_column_or_a_merged_cell_to_align')}
           disabled={

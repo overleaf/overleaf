@@ -223,7 +223,11 @@ cell 3 & cell 4 \\\\
         .click()
 
       cy.get('.table-generator-floating-toolbar').as('toolbar').should('exist')
-      cy.get('@toolbar').findByLabelText('Alignment').should('be.disabled')
+      cy.get('@toolbar')
+        .findByLabelText('Alignment')
+        .should('be.disabled')
+        .should('contain.text', 'format_align_center')
+
       cy.get('.column-selector').first().click()
       cy.get('@toolbar')
         .findByLabelText('Alignment')
@@ -237,6 +241,13 @@ cell 3 & cell 4 \\\\
         ['cell 1', 'cell 2'],
         ['cell 3', 'cell 4'],
       ])
+      // Check that alignment button updated to reflect the left alignment
+      cy.get('.table-generator-cell').first().click()
+      cy.get('@toolbar')
+        .findByLabelText('Alignment')
+        .should('be.disabled')
+        .should('contain.text', 'format_align_left')
+
       cy.get('.table-generator-cell')
         .eq(0)
         .should('have.class', 'alignment-left')
