@@ -70,13 +70,18 @@ export const insertFigure: Command = view => {
 
 export const insertTable = (view: EditorView, sizeX: number, sizeY: number) => {
   const { state, dispatch } = view
+  const visual = isVisual(view)
+  const placeholder = visual ? '' : '#{}'
+  const placeholderAtStart = visual ? '#{}' : ''
   const { pos, suffix } = ensureEmptyLine(state, state.selection.main)
-  const template = `\n\\begin{table}[#{}]
+  const template = `${placeholderAtStart}\n\\begin{table}
 \t\\centering
-\\begin{tabular}{${'c'.repeat(sizeX)}}
-${('\t\t' + '#{} & #{}'.repeat(sizeX - 1) + '\\\\\n').repeat(
-  sizeY
-)}\\end{tabular}
+\t\\begin{tabular}{${'c'.repeat(sizeX)}}
+${(
+  '\t\t' +
+  `${placeholder} & ${placeholder}`.repeat(sizeX - 1) +
+  '\\\\\n'
+).repeat(sizeY)}\t\\end{tabular}
 \t\\caption{Caption}
 \t\\label{tab:my_label}
 \\end{table}${suffix}`
