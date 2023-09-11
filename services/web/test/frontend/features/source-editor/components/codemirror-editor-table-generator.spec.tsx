@@ -587,6 +587,11 @@ cell 3 & cell 4 \\\\
       cy.get('@cell-2').should('have.focus').should('have.class', 'selected')
       cy.get('@cell-2').tab({ shift: true })
       cy.get('@cell-1').should('have.focus').should('have.class', 'selected')
+      // Tabbing when editing a cell should commit change and move to next cell
+      cy.get('@cell-1').type('foo')
+      cy.get('@cell-1').tab()
+      cy.get('@cell-2').should('have.focus').should('have.class', 'selected')
+      cy.get('@cell-1').should('have.text', 'foo')
     })
 
     it('Can select rows and columns with selectors', function () {

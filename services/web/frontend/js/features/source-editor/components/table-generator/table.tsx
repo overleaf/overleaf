@@ -28,7 +28,11 @@ type NavigationKey =
 
 type NavigationMap = {
   // eslint-disable-next-line no-unused-vars
-  [key in NavigationKey]: [() => TableSelection, () => TableSelection]
+  [key in NavigationKey]: {
+    run: () => TableSelection
+    shift: () => TableSelection
+    canExitEditing?: boolean
+  }
 }
 
 const isMac = /Mac/.test(window.navigator?.platform)
@@ -103,26 +107,27 @@ export const Table: FC = () => {
 
   const navigation: NavigationMap = useMemo(
     () => ({
-      ArrowRight: [
-        () => selection!.moveRight(tableData),
-        () => selection!.extendRight(tableData),
-      ],
-      ArrowLeft: [
-        () => selection!.moveLeft(tableData),
-        () => selection!.extendLeft(tableData),
-      ],
-      ArrowUp: [
-        () => selection!.moveUp(tableData),
-        () => selection!.extendUp(tableData),
-      ],
-      ArrowDown: [
-        () => selection!.moveDown(tableData),
-        () => selection!.extendDown(tableData),
-      ],
-      Tab: [
-        () => selection!.moveNext(tableData),
-        () => selection!.movePrevious(tableData),
-      ],
+      ArrowRight: {
+        run: () => selection!.moveRight(tableData),
+        shift: () => selection!.extendRight(tableData),
+      },
+      ArrowLeft: {
+        run: () => selection!.moveLeft(tableData),
+        shift: () => selection!.extendLeft(tableData),
+      },
+      ArrowUp: {
+        run: () => selection!.moveUp(tableData),
+        shift: () => selection!.extendUp(tableData),
+      },
+      ArrowDown: {
+        run: () => selection!.moveDown(tableData),
+        shift: () => selection!.extendDown(tableData),
+      },
+      Tab: {
+        run: () => selection!.moveNext(tableData),
+        shift: () => selection!.movePrevious(tableData),
+        canExitEditing: true,
+      },
     }),
     [selection, tableData]
   )
@@ -190,10 +195,15 @@ export const Table: FC = () => {
           }
         }, 0)
       } else if (Object.prototype.hasOwnProperty.call(navigation, event.code)) {
-        const [defaultNavigation, shiftNavigation] =
-          navigation[event.code as NavigationKey]
+        const {
+          run: defaultNavigation,
+          shift: shiftNavigation,
+          canExitEditing,
+        } = navigation[event.code as NavigationKey]
         if (cellData) {
-          return
+          if (!canExitEditing) {
+            return
+          }
         }
         event.preventDefault()
         if (!selection) {
@@ -205,11 +215,13 @@ export const Table: FC = () => {
           )
           return
         }
-        if (event.shiftKey) {
-          setSelection(shiftNavigation())
-        } else {
-          setSelection(defaultNavigation())
+        const newSelection = event.shiftKey
+          ? shiftNavigation()
+          : defaultNavigation()
+        if (cellData && canExitEditing) {
+          commitCellData()
         }
+        setSelection(newSelection)
       } else if (isCharacterInput(event) && !cellData) {
         event.preventDefault()
         event.stopPropagation()
