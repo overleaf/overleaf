@@ -62,7 +62,7 @@ export default function GroupMemberRow({
                 aria-hidden="true"
                 aria-label={t('invite_not_accepted')}
               />
-              <span className="sr-only">t('invite_not_accepted')</span>
+              <span className="sr-only">{t('invite_not_accepted')}</span>
             </>
           ) : (
             <>
@@ -71,7 +71,7 @@ export default function GroupMemberRow({
                 aria-hidden="true"
                 aria-label={t('accepted_invite')}
               />
-              <span className="sr-only">t('accepted_invite')</span>
+              <span className="sr-only">{t('accepted_invite')}</span>
             </>
           )}
         </Col>
