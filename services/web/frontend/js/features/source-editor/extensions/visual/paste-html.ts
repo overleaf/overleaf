@@ -99,6 +99,9 @@ const htmlToLaTeX = (documentElement: HTMLElement) => {
   // pre-process table elements
   processTables(documentElement)
 
+  // pre-process lists
+  processLists(documentElement)
+
   // protect special characters in non-LaTeX text nodes
   protectSpecialCharacters(documentElement)
 
@@ -212,6 +215,18 @@ const matchingParents = (element: HTMLElement, selector: string) => {
   }
 
   return matches
+}
+
+const processLists = (element: HTMLElement) => {
+  for (const list of element.querySelectorAll('ol,ul')) {
+    // if the list has only one item, replace the list with an element containing the contents of the item
+    if (list.childElementCount === 1) {
+      const div = document.createElement('div')
+      div.append(...list.firstElementChild!.childNodes)
+      list.before('\n', div, '\n')
+      list.remove()
+    }
+  }
 }
 
 const processTables = (element: HTMLElement) => {
@@ -626,11 +641,13 @@ const selectors = [
     end: () => `}\n\n`,
   }),
   createSelector({
+    // selector: 'ul:has(> li:nth-child(2))', // only select lists with at least 2 items (once Firefox supports :has())
     selector: 'ul',
     start: element => `\n\n${listIndent(element)}\\begin{itemize}`,
     end: element => `\n${listIndent(element)}\\end{itemize}\n`,
   }),
   createSelector({
+    // selector: 'ol:has(> li:nth-child(2))', // only select lists with at least 2 items (once Firefox supports :has())
     selector: 'ol',
     start: element => `\n\n${listIndent(element)}\\begin{enumerate}`,
     end: element => `\n${listIndent(element)}\\end{enumerate}\n`,

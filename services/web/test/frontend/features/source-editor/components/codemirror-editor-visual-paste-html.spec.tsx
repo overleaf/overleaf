@@ -76,6 +76,19 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
     cy.get('.ol-cm-item').should('have.length', 2)
   })
 
+  it('removes a solitary item from a list', function () {
+    mountEditor()
+
+    const data = '<ul><li>foo</li></ul>'
+
+    const clipboardData = new DataTransfer()
+    clipboardData.setData('text/html', data)
+    cy.get('@content').trigger('paste', { clipboardData })
+
+    cy.get('@content').should('have.text', 'foo')
+    cy.get('.ol-cm-item').should('have.length', 0)
+  })
+
   it('handles a pasted table', function () {
     mountEditor()
 
@@ -337,8 +350,8 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
     const data = [
       'test',
       '<p>foo</p><p>bar</p><p>baz</p>',
-      '<ul><li><p>foo</p></li></ul>',
-      '<ol><li><p>foo</p></li></ol>',
+      '<ul><li><p>foo</p></li><li><p>foo</p></li></ul>',
+      '<ol><li><p>foo</p></li><li><p>foo</p></li></ol>',
       '<table><tbody><tr><td><p>foo</p></td></tr></tbody></table>',
       'test',
     ].join('\n')
@@ -349,9 +362,9 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
 
     cy.get('@content').should(
       'have.text',
-      'testfoobarbaz foo foo\\begin{tabular}{l}foo ↩\\end{tabular}test'
+      'testfoobarbaz foo foo foo foo\\begin{tabular}{l}foo ↩\\end{tabular}test'
     )
-    cy.get('.cm-line').should('have.length', 17)
+    cy.get('.cm-line').should('have.length', 19)
   })
 
   it('handles pasted inline code', function () {
