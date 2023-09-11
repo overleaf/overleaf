@@ -613,9 +613,9 @@ EnvNameGroup<name> {
 }
 
 Environment[@isGroup="$Environment"] {
-    BeginEnv<EnvName>
+    BeginEnv<EnvName?>
     Content<Text>
-    EndEnv<EnvName>
+    EndEnv<EnvName?>
 }
 
 Group<GroupContent> {
