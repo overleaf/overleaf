@@ -31,9 +31,9 @@ const completionSources: CompletionSource[] = [
 export const latex = () => {
   return new LanguageSupport(LaTeXLanguage, [
     shortcuts(),
-    documentOutline.extension,
-    documentCommands.extension,
-    documentEnvironmentNames.extension,
+    documentOutline,
+    documentCommands,
+    documentEnvironmentNames,
     latexIndentService(),
     linting(),
     metadata(),
