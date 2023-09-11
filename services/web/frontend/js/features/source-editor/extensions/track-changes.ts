@@ -263,6 +263,7 @@ const createChangeRange = (change: Change, currentDoc: CurrentDoc) => {
 
     const changeWidget = Decoration.widget({
       widget: new ChangeDeletedWidget(change as Change<DeleteOperation>),
+      side: 1,
       opType,
       id,
       metadata,
@@ -270,6 +271,7 @@ const createChangeRange = (change: Change, currentDoc: CurrentDoc) => {
 
     const calloutWidget = Decoration.widget({
       widget: new ChangeCalloutWidget(change, opType),
+      side: 1,
       opType,
       id,
       metadata,
