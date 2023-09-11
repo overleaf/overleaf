@@ -99,6 +99,14 @@ const mouseDownListener = EditorView.domEventHandlers({
       })
     })
   },
+  contextmenu: (event: MouseEvent, view) => {
+    // treat a `contextmenu` event as a `mouseup` event, which isn't fired
+    window.setTimeout(() => {
+      view.dispatch({
+        effects: mouseDownEffect.of(false),
+      })
+    })
+  },
 })
 
 const mousedownSelectionState = StateField.define<EditorSelection | undefined>({
