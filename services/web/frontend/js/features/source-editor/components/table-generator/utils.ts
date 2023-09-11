@@ -301,7 +301,8 @@ function parseTabularBody(
     } else if (
       currentChild.type.is('NewLine') ||
       currentChild.type.is('Whitespace') ||
-      currentChild.type.is('Comment')
+      currentChild.type.is('Comment') ||
+      currentChild.type.is('BlankLine')
     ) {
       const lastCell = getLastCell()
       if (!lastCell?.multiColumn) {
