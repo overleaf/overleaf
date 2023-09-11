@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { MouseEventHandler, useCallback } from 'react'
 import {
   TableSelection,
   useSelectionContext,
@@ -9,14 +9,22 @@ import { useTableContext } from './contexts/table-context'
 export const ColumnSelector = ({ index }: { index: number }) => {
   const { selection, setSelection } = useSelectionContext()
   const { table } = useTableContext()
-  const onColumnSelect = useCallback(() => {
-    setSelection(
-      new TableSelection(
-        { row: 0, cell: index },
-        { row: table.rows.length - 1, cell: index }
-      )
-    )
-  }, [table.rows.length, index, setSelection])
+  const onColumnSelect: MouseEventHandler = useCallback(
+    event => {
+      event.preventDefault()
+      if (!selection) {
+        setSelection(
+          new TableSelection(
+            { row: 0, cell: index },
+            { row: table.rows.length - 1, cell: index }
+          )
+        )
+        return
+      }
+      setSelection(selection.selectColumn(index, event.shiftKey, table))
+    },
+    [index, setSelection, selection, table]
+  )
   const fullySelected = selection?.isColumnSelected(index, table)
   return (
     // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
@@ -32,9 +40,22 @@ export const ColumnSelector = ({ index }: { index: number }) => {
 export const RowSelector = ({ index }: { index: number }) => {
   const { table } = useTableContext()
   const { selection, setSelection } = useSelectionContext()
-  const onSelect = useCallback(() => {
-    setSelection(TableSelection.selectRow(index, table))
-  }, [index, setSelection, table])
+  const onSelect: MouseEventHandler = useCallback(
+    event => {
+      event.preventDefault()
+      if (!selection) {
+        setSelection(
+          new TableSelection(
+            { row: index, cell: 0 },
+            { row: index, cell: table.columns.length - 1 }
+          )
+        )
+        return
+      }
+      setSelection(selection.selectRow(index, event.shiftKey, table))
+    },
+    [index, setSelection, table, selection]
+  )
   const fullySelected = selection?.isRowSelected(index, table)
   return (
     // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions

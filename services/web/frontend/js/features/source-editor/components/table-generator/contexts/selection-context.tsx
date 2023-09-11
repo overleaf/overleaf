@@ -30,10 +30,17 @@ export class TableSelection {
     )
   }
 
-  static selectRow(row: number, table: TableData) {
+  selectRow(row: number, extend: boolean, table: TableData) {
     return new TableSelection(
-      { row, cell: 0 },
+      { row: extend ? this.from.row : row, cell: 0 },
       { row, cell: table.columns.length - 1 }
+    )
+  }
+
+  selectColumn(column: number, extend: boolean, table: TableData) {
+    return new TableSelection(
+      { row: 0, cell: extend ? this.from.cell : column },
+      { row: table.rows.length - 1, cell: column }
     )
   }
 
