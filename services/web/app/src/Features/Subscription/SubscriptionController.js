@@ -24,6 +24,7 @@ const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const SubscriptionHelper = require('./SubscriptionHelper')
 const Features = require('../../infrastructure/Features')
 const UserGetter = require('../User/UserGetter')
+const Modules = require('../../infrastructure/Modules')
 
 const groupPlanModalOptions = Settings.groupPlanModalOptions
 const validGroupPlanModalOptions = {
@@ -448,6 +449,18 @@ async function createSubscription(req, res) {
   if (hasSubscription) {
     logger.warn({ userId: user._id }, 'user already has subscription')
     return res.sendStatus(409) // conflict
+  }
+
+  const result = {}
+  await Modules.promises.hooks.fire(
+    'createSubscription',
+    req,
+    res,
+    user,
+    result
+  )
+  if (result.error) {
+    return HttpErrorHandler.unprocessableEntity(req, res)
   }
 
   try {
