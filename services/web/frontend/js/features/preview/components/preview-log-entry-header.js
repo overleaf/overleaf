@@ -130,7 +130,7 @@ PreviewLogEntryHeader.propTypes = {
     column: PropTypes.any,
   }),
   level: PropTypes.string.isRequired,
-  headerTitle: PropTypes.string,
+  headerTitle: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
   headerIcon: PropTypes.element,
   logType: PropTypes.string,
   showSourceLocationLink: PropTypes.bool,

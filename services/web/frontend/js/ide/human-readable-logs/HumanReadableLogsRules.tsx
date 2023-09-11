@@ -4,7 +4,20 @@ import {
   packageSuggestionsForEnvironments,
 } from './HumanReadableLogsPackageSuggestions'
 
-const rules = [
+interface Rule {
+  ruleId: string
+  types?: string[]
+  cascadesFrom?: string[]
+  newMessage?: string
+  regexToMatch: RegExp
+  contentRegex?: RegExp
+  improvedTitle?: (
+    currentTitle: string,
+    details?: [string]
+  ) => string | [string, JSX.Element]
+}
+
+const rules: Rule[] = [
   {
     ruleId: 'hint_misplaced_alignment_tab_character',
     regexToMatch: /Misplaced alignment tab character \&/,
@@ -50,15 +63,17 @@ const rules = [
     regexToMatch: /Undefined control sequence/,
     contentRegex:
       /^(?:l\.[0-9]+|<(?:recently read|inserted text|to be read again)>)\s*(\\\S+)/,
-    improvedTitle: (currentTitle, details) => {
+    improvedTitle: (currentTitle: string, details?: [string]) => {
       if (details?.length && packageSuggestionsForCommands.has(details[0])) {
         const command = details[0]
         const suggestion = packageSuggestionsForCommands.get(command)
-        return (
+        return [
+          `Is ${suggestion.command} missing?`,
+          // eslint-disable-next-line react/jsx-key
           <span>
             Is <code>{suggestion.command}</code> missing?
-          </span>
-        )
+          </span>,
+        ]
       }
       return currentTitle
     },
@@ -67,18 +82,20 @@ const rules = [
     ruleId: 'hint_undefined_environment',
     regexToMatch: /LaTeX Error: Environment .+ undefined/,
     contentRegex: /\\begin\{(\S+)\}/,
-    improvedTitle: (currentTitle, details) => {
+    improvedTitle: (currentTitle: string, details?: [string]) => {
       if (
         details?.length &&
         packageSuggestionsForEnvironments.has(details[0])
       ) {
         const environment = details[0]
         const suggestion = packageSuggestionsForEnvironments.get(environment)
-        return (
+        return [
+          `Is ${suggestion.command} missing?`,
+          // eslint-disable-next-line react/jsx-key
           <span>
             Is <code>{suggestion.command}</code> missing?
-          </span>
-        )
+          </span>,
+        ]
       }
       return currentTitle
     },

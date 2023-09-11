@@ -67,7 +67,7 @@ function PdfLogEntry({
 PdfLogEntry.propTypes = {
   ruleId: PropTypes.string,
   sourceLocation: PreviewLogEntryHeader.propTypes.sourceLocation,
-  headerTitle: PropTypes.string,
+  headerTitle: PreviewLogEntryHeader.propTypes.headerTitle,
   headerIcon: PropTypes.element,
   rawContent: PropTypes.string,
   logType: PropTypes.string,

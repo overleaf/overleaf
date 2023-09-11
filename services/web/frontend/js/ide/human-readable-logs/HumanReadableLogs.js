@@ -42,10 +42,16 @@ export default {
           }
         }
         if (entry.contentDetails && ruleDetails.improvedTitle) {
-          entry.message = ruleDetails.improvedTitle(
+          const message = ruleDetails.improvedTitle(
             entry.message,
             entry.contentDetails
           )
+          if (Array.isArray(message)) {
+            entry.message = message[0]
+            entry.messageComponent = message[1]
+          } else {
+            entry.message = message
+          }
         }
         // suppress any entries that are known to cascade from previous error types
         if (ruleDetails.cascadesFrom != null) {
