@@ -424,6 +424,61 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
     cy.get('.ol-cm-command-textsubscript').should('have.length', 1)
   })
 
+  it('handles pasted text with bold CSS formatting', function () {
+    mountEditor()
+
+    const data =
+      '<span style="font-weight:bold">foo</span> <span style="font-weight:800">foo</span> foo'
+
+    const clipboardData = new DataTransfer()
+    clipboardData.setData('text/html', data)
+    cy.get('@content').trigger('paste', { clipboardData })
+
+    cy.get('@content').should('have.text', 'foo foo foo')
+    cy.get('.ol-cm-command-textbf').should('have.length', 2)
+  })
+
+  it('handles pasted text with italic CSS formatting', function () {
+    mountEditor()
+
+    const data = '<span style="font-style:italic">foo</span> foo'
+
+    const clipboardData = new DataTransfer()
+    clipboardData.setData('text/html', data)
+    cy.get('@content').trigger('paste', { clipboardData })
+
+    cy.get('@content').should('have.text', 'foo foo')
+    cy.get('.ol-cm-command-textit').should('have.length', 1)
+  })
+
+  it('handles pasted text with non-bold CSS', function () {
+    mountEditor()
+
+    const data =
+      '<strong style="font-weight:normal">foo</strong> <strong style="font-weight:200">foo</strong> foo'
+
+    const clipboardData = new DataTransfer()
+    clipboardData.setData('text/html', data)
+    cy.get('@content').trigger('paste', { clipboardData })
+
+    cy.get('@content').should('have.text', 'foo foo foo')
+    cy.get('.ol-cm-command-textbf').should('have.length', 0)
+  })
+
+  it('handles pasted text with non-italic CSS', function () {
+    mountEditor()
+
+    const data =
+      '<em style="font-style:normal">foo</em> <i style="font-style:normal">foo</i> foo'
+
+    const clipboardData = new DataTransfer()
+    clipboardData.setData('text/html', data)
+    cy.get('@content').trigger('paste', { clipboardData })
+
+    cy.get('@content').should('have.text', 'foo foo foo')
+    cy.get('.ol-cm-command-textit').should('have.length', 0)
+  })
+
   it('removes a non-breaking space when a text node contains no other content', function () {
     mountEditor()
 
