@@ -32,6 +32,7 @@ function PdfHybridDownloadButton() {
       <Button
         onClick={handleOnClick}
         bsStyle="link"
+        draggable="false"
         disabled={!pdfDownloadUrl}
         download
         href={pdfDownloadUrl || '#'}

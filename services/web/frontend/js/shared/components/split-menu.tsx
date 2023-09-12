@@ -138,7 +138,7 @@ function SplitMenuButton({
 }
 
 function SplitMenuItem(props: MenuItemProps) {
-  return <MenuItem {...props} />
+  return <MenuItem {...props} draggable="false" />
 }
 
 SplitMenu.Item = SplitMenuItem
