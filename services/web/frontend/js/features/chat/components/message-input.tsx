@@ -1,19 +1,26 @@
 import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 
-function MessageInput({ resetUnreadMessages, sendMessage }) {
+type MessageInputProps = {
+  resetUnreadMessages: () => void
+  sendMessage: (message: string) => void
+}
+
+function MessageInput({ resetUnreadMessages, sendMessage }: MessageInputProps) {
   const { t } = useTranslation()
 
-  function handleKeyDown(event) {
-    if (event.key === 'Enter') {
+  function handleKeyDown(event: React.KeyboardEvent) {
+    const selectingCharacter = event.nativeEvent.isComposing
+    if (event.key === 'Enter' && !selectingCharacter) {
       event.preventDefault()
-      sendMessage(event.target.value)
+      const target = event.target as HTMLInputElement
+      sendMessage(target.value)
       // wrap the form reset in setTimeout so input sources have time to finish
       // https://github.com/overleaf/internal/pull/9206
       window.setTimeout(() => {
-        event.target.blur()
-        event.target.closest('form').reset()
-        event.target.focus()
+        target.blur()
+        target.closest('form')?.reset()
+        target.focus()
       }, 0)
     }
   }
