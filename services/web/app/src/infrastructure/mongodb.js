@@ -70,6 +70,7 @@ async function setupDb() {
   db.samlLogs = internalDb.collection('samlLogs')
   db.spellingPreferences = internalDb.collection('spellingPreferences')
   db.splittests = internalDb.collection('splittests')
+  db.ssoConfigs = internalDb.collection('ssoConfigs')
   db.subscriptions = internalDb.collection('subscriptions')
   db.surveys = internalDb.collection('surveys')
   db.systemmessages = internalDb.collection('systemmessages')

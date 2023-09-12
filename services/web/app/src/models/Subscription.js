@@ -55,6 +55,7 @@ const SubscriptionSchema = new Schema(
         type: Date,
       },
     },
+    ssoConfig: { type: ObjectId, ref: 'SSOConfig' },
   },
   { minimize: false }
 )
