@@ -265,10 +265,11 @@ cell 3 & cell 4 \\\\
 
     it('Removes rows and columns', function () {
       mountEditor(`
-\\begin{tabular}{ccc}
-    cell 1 & cell 2 & cell 3 \\\\
-    cell 4 & cell 5 & cell 6 \\\\
-    cell 7 & cell 8 & cell 9 \\\\
+\\begin{tabular}{|c|c|c|}
+    \\hline
+    cell 1 & cell 2 & cell 3 \\\\ \\hline
+    cell 4 & cell 5 & cell 6 \\\\ \\hline
+    cell 7 & cell 8 & cell 9 \\\\ \\hline
 \\end{tabular}
       `)
       checkTable([
@@ -288,12 +289,13 @@ cell 3 & cell 4 \\\\
         ['cell 4', 'cell 6'],
         ['cell 7', 'cell 9'],
       ])
-      cy.get('.row-selector').eq(1).click()
+      cy.get('.row-selector').eq(2).click()
       cy.get('@toolbar').findByLabelText('Delete row or column').click()
       checkTable([
         ['cell 1', 'cell 3'],
-        ['cell 7', 'cell 9'],
+        ['cell 4', 'cell 6'],
       ])
+      checkBordersWithNoMultiColumn([true, true, true], [true, true, true])
     })
 
     it('Removes rows correctly when removing from the left', function () {

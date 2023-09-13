@@ -236,6 +236,7 @@ export const removeRowOrColumns = (
     minY: startRow,
     maxY: endRow,
   } = selection.normalized()
+  const borderTheme = table.getBorderTheme()
   const changes: { from: number; to: number; insert: string }[] = []
   const specification = view.state.sliceDoc(
     positions.columnDeclarations.from,
@@ -259,10 +260,17 @@ export const removeRowOrColumns = (
   for (let row = startRow; row <= endRow; row++) {
     if (selection.isRowSelected(row, table)) {
       const rowPosition = positions.rowPositions[row]
+      let insert = ''
+      if (
+        row === numberOfRows - 1 &&
+        borderTheme === BorderTheme.FULLY_BORDERED
+      ) {
+        insert = '\\hline'
+      }
       changes.push({
         from: rowPosition.from,
         to: rowPosition.to,
-        insert: '',
+        insert,
       })
     } else {
       for (let cell = startCell; cell <= endCell; ) {
