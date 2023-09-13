@@ -1,6 +1,7 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 
 import { Grid, Row, Col, Button, Alert, ProgressBar } from 'react-bootstrap'
+import Notification from '../js/shared/components/notification'
 
 export const Colors = () => {
   return (
@@ -242,8 +243,54 @@ export const Alerts = () => {
     <div className="content content-alt">
       <Grid>
         <Row>
-          <Col md={8} mdOffset={2}>
-            <h2>Alerts</h2>
+          <Col md={8} mdOffset={2} className="notification-list">
+            <h2>Alerts / Notifications</h2>
+            <p>See Notification in shared components for options</p>
+            <Notification
+              type="info"
+              body={
+                <div>
+                  <b>
+                    <code>.notitifcation .notification-type-info</code>
+                  </b>
+                </div>
+              }
+            />
+            <Notification
+              type="success"
+              body={
+                <div>
+                  <b>
+                    <code>.notitifcation .notification-type-success</code>
+                  </b>
+                </div>
+              }
+            />
+            <Notification
+              type="warning"
+              body={
+                <div>
+                  <b>
+                    <code>.notitifcation .notification-type-warning</code>
+                  </b>
+                </div>
+              }
+            />
+
+            <Notification
+              type="error"
+              body={
+                <div>
+                  <b>
+                    <code>.notitifcation .notification-type-error</code>
+                  </b>
+                </div>
+              }
+            />
+            <b>
+              Note: these styles below will be deprecated since there are new
+              alert styles rolling out as part of the new design system
+            </b>
 
             <Alert bsStyle="danger">
               An <code>.alert-danger</code> alert
