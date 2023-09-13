@@ -96,6 +96,15 @@ const Toolbar = memo(function Toolbar() {
     }
   }, [buildOverflow, languageName, resizeRef, visual])
 
+  const insideTable = document.activeElement?.closest(
+    '.table-generator-help-modal,.table-generator'
+  )
+  useEffect(() => {
+    if (resizeRef.current) {
+      buildOverflow(resizeRef.current.element)
+    }
+  }, [buildOverflow, insideTable, resizeRef])
+
   const toggleToolbar = useCallback(() => {
     setCollapsed(value => !value)
   }, [])
@@ -107,27 +116,31 @@ const Toolbar = memo(function Toolbar() {
   return (
     <div className="ol-cm-toolbar toolbar-editor" ref={elementRef}>
       {showSourceToolbar && <EditorSwitch />}
-      <ToolbarItems
-        state={state}
-        languageName={languageName}
-        visual={visual}
-        listDepth={listDepth}
-      />
+      {!insideTable && (
+        <ToolbarItems
+          state={state}
+          languageName={languageName}
+          visual={visual}
+          listDepth={listDepth}
+        />
+      )}
       <div className="ol-cm-toolbar-button-group ol-cm-toolbar-stretch">
-        <ToolbarOverflow
-          overflowed={overflowed}
-          overflowOpen={overflowOpen}
-          setOverflowOpen={setOverflowOpen}
-          overflowRef={overflowRef}
-        >
-          <ToolbarItems
-            state={state}
-            overflowed={overflowedItemsRef.current}
-            languageName={languageName}
-            visual={visual}
-            listDepth={listDepth}
-          />
-        </ToolbarOverflow>
+        {!insideTable && (
+          <ToolbarOverflow
+            overflowed={overflowed}
+            overflowOpen={overflowOpen}
+            setOverflowOpen={setOverflowOpen}
+            overflowRef={overflowRef}
+          >
+            <ToolbarItems
+              state={state}
+              overflowed={overflowedItemsRef.current}
+              languageName={languageName}
+              visual={visual}
+              listDepth={listDepth}
+            />
+          </ToolbarOverflow>
+        )}
         <div className="formatting-buttons-wrapper" />
       </div>
       <div className="ol-cm-toolbar-button-group ol-cm-toolbar-end">

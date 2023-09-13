@@ -16,7 +16,10 @@ import { EditorView } from '@codemirror/view'
 import { ErrorBoundary } from 'react-error-boundary'
 import { Alert, Button } from 'react-bootstrap'
 import { EditorSelection } from '@codemirror/state'
-import { CodeMirrorViewContextProvider } from '../codemirror-editor'
+import {
+  CodeMirrorViewContextProvider,
+  useCodeMirrorViewContext,
+} from '../codemirror-editor'
 import { TableProvider } from './contexts/table-context'
 import { TabularProvider, useTabularContext } from './contexts/tabular-context'
 import Icon from '../../../../shared/components/icon'
@@ -263,6 +266,7 @@ const TabularWrapper: FC = () => {
   const { setSelection, selection } = useSelectionContext()
   const { commitCellData, cellData } = useEditingContext()
   const { ref } = useTabularContext()
+  const view = useCodeMirrorViewContext()
   useEffect(() => {
     const listener: (event: MouseEvent) => void = event => {
       if (
@@ -275,6 +279,8 @@ const TabularWrapper: FC = () => {
         if (cellData) {
           commitCellData()
         }
+      } else {
+        view.dispatch() // trigger a state update when clicking inside the table
       }
     }
     window.addEventListener('mousedown', listener)
@@ -282,7 +288,7 @@ const TabularWrapper: FC = () => {
     return () => {
       window.removeEventListener('mousedown', listener)
     }
-  }, [cellData, commitCellData, selection, setSelection, ref])
+  }, [cellData, commitCellData, selection, setSelection, ref, view])
   return (
     <div className="table-generator" ref={ref}>
       <Toolbar />
