@@ -116,3 +116,21 @@
     text-decoration: none;
   }
 }
+
+.design-system {
+  .alert {
+    display: flex;
+    flex-direction: row;
+
+    .icon {
+      flex: 1 1 auto;
+      padding: 0 16px 0 4px;
+    }
+  }
+  .alert-info {
+    background-color: @blue-10;
+    border: 1px solid @blue-20;
+    border-radius: @border-radius-base-new;
+    color: @content-primary;
+  }
+}

@@ -485,6 +485,7 @@
   "empty_zip_file": "Zip doesn’t contain any file",
   "en": "English",
   "enable_managed_users": "Enable Managed Users",
+  "enabled_managed_users_set_up_sso": "You need to enable Managed Users to set up SSO.",
   "enabling": "Enabling",
   "end_of_document": "End of document",
   "enter_image_url": "Enter image URL",
