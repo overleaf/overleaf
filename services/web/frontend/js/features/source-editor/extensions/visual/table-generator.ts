@@ -126,6 +126,7 @@ export const tableGeneratorTheme = EditorView.baseTheme({
 
   '.table-generator-table': {
     'table-layout': 'fixed',
+    width: '95%',
     'max-width': '95%',
     margin: '0 auto',
     cursor: 'default',

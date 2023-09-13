@@ -333,7 +333,7 @@ export const Table: FC = () => {
       onKeyDown={onKeyDown}
       tabIndex={-1}
       ref={tableRef}
-      style={{ width: `${tableWidth}ch` }}
+      style={{ width: `min(${tableWidth}ch, 95%)` }}
     >
       <colgroup>
         <col width="20" />
