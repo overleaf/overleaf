@@ -66,6 +66,8 @@ const AuthenticationController = {
       must_reconfirm: user.must_reconfirm,
       v1_id: user.overleaf != null ? user.overleaf.id : undefined,
       analyticsId: user.analyticsId || user._id,
+      alphaProgram: user.alphaProgram || undefined, // only store if set
+      betaProgram: user.betaProgram || undefined, // only store if set
     }
     callback(null, lightUser)
   },

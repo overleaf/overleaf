@@ -128,6 +128,7 @@ describe('ProjectController', function () {
         getAssignment: sinon.stub().resolves({ variant: 'default' }),
       },
       getAssignment: sinon.stub().yields(null, { variant: 'default' }),
+      sessionMaintenance: sinon.stub().yields(),
     }
     this.InstitutionsFeatures = {
       hasLicence: sinon.stub().callsArgWith(1, null, false),
@@ -513,6 +514,28 @@ describe('ProjectController', function () {
         return done()
       }
       return this.ProjectController.loadEditor(this.req, this.res)
+    })
+
+    it('should invoke the session maintenance for logged in user', function (done) {
+      this.res.render = () => {
+        this.SplitTestHandler.sessionMaintenance.should.have.been.calledWith(
+          this.req,
+          this.user
+        )
+        done()
+      }
+      this.ProjectController.loadEditor(this.req, this.res)
+    })
+
+    it('should invoke the session maintenance for anonymous user', function (done) {
+      this.SessionManager.getLoggedInUserId.returns(null)
+      this.res.render = () => {
+        this.SplitTestHandler.sessionMaintenance.should.have.been.calledWith(
+          this.req
+        )
+        done()
+      }
+      this.ProjectController.loadEditor(this.req, this.res)
     })
 
     it('should render the closed page if the editor is closed', function (done) {

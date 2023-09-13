@@ -4,6 +4,7 @@ const UserGetter = require('../User/UserGetter')
 const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
 const SessionManager = require('../Authentication/SessionManager')
+const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 
 const BetaProgramController = {
   optIn(req, res, next) {
@@ -16,7 +17,9 @@ const BetaProgramController = {
       if (err) {
         return next(err)
       }
-      res.redirect('/beta/participate')
+      SplitTestHandler.sessionMaintenance(req, null, () =>
+        res.redirect('/beta/participate')
+      )
     })
   },
 
@@ -30,7 +33,9 @@ const BetaProgramController = {
       if (err) {
         return next(err)
       }
-      res.redirect('/beta/participate')
+      SplitTestHandler.sessionMaintenance(req, null, () =>
+        res.redirect('/beta/participate')
+      )
     })
   },
 

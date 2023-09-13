@@ -101,7 +101,7 @@ async function projectListPage(req, res, next) {
   })
   const user = await User.findById(
     userId,
-    `email emails features lastPrimaryEmailCheck signUpDate${
+    `email emails features alphaProgram betaProgram lastPrimaryEmailCheck signUpDate${
       isSaas ? ' enrollment' : ''
     }`
   )
@@ -113,6 +113,8 @@ async function projectListPage(req, res, next) {
   }
 
   if (isSaas) {
+    await SplitTestHandler.promises.sessionMaintenance(req, user)
+
     try {
       usersBestSubscription =
         await SubscriptionViewModelBuilder.promises.getBestSubscription({

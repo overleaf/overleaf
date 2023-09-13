@@ -13,6 +13,7 @@ const { getAnalyticsIdFromMongoUser } = require('../Analytics/AnalyticsHelper')
 const Features = require('../../infrastructure/Features')
 const SplitTestUtils = require('./SplitTestUtils')
 const Settings = require('@overleaf/settings')
+const SessionManager = require('../Authentication/SessionManager')
 
 const DEFAULT_VARIANT = 'default'
 const ALPHA_PHASE = 'alpha'
@@ -186,6 +187,34 @@ async function getActiveAssignmentsForUser(userId, removeArchived = false) {
     }
   }
   return assignments
+}
+
+/**
+ * @param {import('express').Request} req
+ * @param {Object|null} user optional, prefetched user with alphaProgram and betaProgram field
+ * @return {Promise<void>}
+ */
+async function sessionMaintenance(req, user) {
+  const session = req.session
+  const sessionUser = SessionManager.getSessionUser(session)
+
+  Metrics.inc('split_test_session_maintenance', 1, { status: 'start' })
+  if (sessionUser) {
+    user = user || (await _getUser(sessionUser._id))
+    if (
+      Boolean(sessionUser.alphaProgram) !== Boolean(user.alphaProgram) ||
+      Boolean(sessionUser.betaProgram) !== Boolean(user.betaProgram)
+    ) {
+      Metrics.inc('split_test_session_maintenance', 1, {
+        status: 'program-change',
+      })
+      sessionUser.alphaProgram = user.alphaProgram || undefined // only store if set
+      sessionUser.betaProgram = user.betaProgram || undefined // only store if set
+      session.cachedSplitTestAssignments = {}
+    }
+  }
+
+  // TODO: After changing the split test config fetching: remove split test assignments for archived split tests
 }
 
 /**
@@ -507,10 +536,12 @@ module.exports = {
   getAssignmentForMongoUser: callbackify(getAssignmentForMongoUser),
   getAssignmentForUser: callbackify(getAssignmentForUser),
   getActiveAssignmentsForUser: callbackify(getActiveAssignmentsForUser),
+  sessionMaintenance: callbackify(sessionMaintenance),
   promises: {
     getAssignment,
     getAssignmentForMongoUser,
     getAssignmentForUser,
     getActiveAssignmentsForUser,
+    sessionMaintenance,
   },
 }

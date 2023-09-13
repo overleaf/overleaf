@@ -427,6 +427,7 @@ const ProjectController = {
         },
         user(cb) {
           if (userId == null) {
+            SplitTestHandler.sessionMaintenance(req, null, () => {})
             cb(null, defaultSettingsForAnonymousUser(userId))
           } else {
             User.updateOne(
@@ -448,6 +449,7 @@ const ProjectController = {
                   return cb(err)
                 }
                 logger.debug({ projectId, userId }, 'got user')
+                SplitTestHandler.sessionMaintenance(req, user, () => {})
                 if (FeaturesUpdater.featuresEpochIsCurrent(user)) {
                   return cb(null, user)
                 }

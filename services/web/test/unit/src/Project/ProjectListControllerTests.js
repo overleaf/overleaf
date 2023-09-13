@@ -102,6 +102,7 @@ describe('ProjectListController', function () {
     }
     this.SplitTestHandler = {
       promises: {
+        sessionMaintenance: sinon.stub().resolves(),
         getAssignment: sinon.stub().resolves({ variant: 'default' }),
       },
     }
@@ -199,6 +200,18 @@ describe('ProjectListController', function () {
     it('should render the project/list-react page', function (done) {
       this.res.render = (pageName, opts) => {
         pageName.should.equal('project/list-react')
+        done()
+      }
+      this.ProjectListController.projectListPage(this.req, this.res)
+    })
+
+    it('should invoke the session maintenance', function (done) {
+      this.Features.hasFeature.withArgs('saas').returns(true)
+      this.res.render = () => {
+        this.SplitTestHandler.promises.sessionMaintenance.should.have.been.calledWith(
+          this.req,
+          this.user
+        )
         done()
       }
       this.ProjectListController.projectListPage(this.req, this.res)
