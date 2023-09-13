@@ -4,9 +4,7 @@ import EntryContainer from './entry-container'
 import EntryCallout from './entry-callout'
 import EntryActions from './entry-actions'
 import Comment from './comment'
-import AutoExpandingTextArea, {
-  resetHeight,
-} from '../../../../../shared/components/auto-expanding-text-area'
+import AutoExpandingTextArea from '../../../../../shared/components/auto-expanding-text-area'
 import Icon from '../../../../../shared/components/icon'
 import { useReviewPanelUpdaterFnsContext } from '../../../context/review-panel/review-panel-context'
 import classnames from 'classnames'
@@ -93,7 +91,6 @@ function CommentEntry({
         ;(e.target as HTMLTextAreaElement).blur()
         submitReply(threadId, replyContent)
         setReplyContent('')
-        resetHeight(e)
       }
     }
   }
