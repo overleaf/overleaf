@@ -70,9 +70,41 @@ const AuthenticationManager = {
       if (!user || !user.hashedPassword) {
         return callback(null, null, null)
       }
+      let rounds = 0
+      try {
+        rounds = bcrypt.getRounds(user.hashedPassword)
+      } catch (err) {
+        let prefix, suffix, length
+        if (typeof user.hashedPassword === 'string') {
+          length = user.hashedPassword.length
+          if (user.hashedPassword.length > 50) {
+            // A full bcrypt hash is 60 characters long.
+            prefix = user.hashedPassword.slice(0, '$2a$12$x'.length)
+            suffix = user.hashedPassword.slice(-4)
+          } else if (user.hashedPassword.length > 20) {
+            prefix = user.hashedPassword.slice(0, 4)
+            suffix = user.hashedPassword.slice(-4)
+          } else {
+            prefix = user.hashedPassword.slice(0, 4)
+          }
+        }
+        logger.warn(
+          {
+            err,
+            userId: user._id,
+            hashedPassword: {
+              type: typeof user.hashedPassword,
+              length,
+              prefix,
+              suffix,
+            },
+          },
+          'unexpected user.hashedPassword value'
+        )
+      }
       Metrics.inc('bcrypt', 1, {
         method: 'compare',
-        path: bcrypt.getRounds(user.hashedPassword),
+        path: rounds,
       })
       bcrypt.compare(password, user.hashedPassword, function (error, match) {
         if (error) {
