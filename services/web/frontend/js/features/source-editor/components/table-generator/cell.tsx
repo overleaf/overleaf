@@ -180,7 +180,7 @@ export const Cell: FC<{
     [update, filterInput]
   )
 
-  let body = <div ref={renderDiv} />
+  let body = <div ref={renderDiv} className="table-generator-cell-render" />
   if (editing) {
     body = (
       <CellInput

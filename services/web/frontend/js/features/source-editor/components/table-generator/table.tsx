@@ -53,7 +53,7 @@ export const Table: FC = () => {
   const { table: tableData } = useTableContext()
   const tableRef = useRef<HTMLTableElement>(null)
   const view = useCodeMirrorViewContext()
-  const cellWidths: number[] = useMemo(() => {
+  const { columns: cellWidths, tableWidth } = useMemo(() => {
     const columns = Array.from(
       { length: tableData.columns.length },
       () => MINIMUM_CELL_WIDTH_CHARACTERS
@@ -95,9 +95,9 @@ export const Table: FC = () => {
     // Third pass, normalize the columns to the total width of the table
     const totalLog = columns.reduce((a, b) => a + b, 0)
     for (let i = 0; i < columns.length; ++i) {
-      columns[i] = Math.round((columns[i] / totalLog) * total)
+      columns[i] = Math.round((columns[i] / totalLog) * 100)
     }
-    return columns
+    return { columns, tableWidth: total }
   }, [
     tableData,
     cellData?.cellIndex,
@@ -333,20 +333,15 @@ export const Table: FC = () => {
       onKeyDown={onKeyDown}
       tabIndex={-1}
       ref={tableRef}
+      style={{ width: `${tableWidth}ch` }}
     >
+      <colgroup>
+        <col width="20" />
+        {tableData.columns.map((_, index) => (
+          <col key={index} width={`${cellWidths[index]}%`} />
+        ))}
+      </colgroup>
       <thead>
-        {/* A workaround for a chrome bug where it will not respect colspan
-            unless there is a row filled with cells without colspan */}
-        <tr className="table-generator-filler-row">
-          {/* A td for the row selector */}
-          <td />
-          {tableData.columns.map((_, columnIndex) => (
-            <td
-              key={columnIndex}
-              style={{ width: `${cellWidths[columnIndex]}ch` }}
-            />
-          ))}
-        </tr>
         <tr>
           <td />
           {tableData.columns.map((_, columnIndex) => (

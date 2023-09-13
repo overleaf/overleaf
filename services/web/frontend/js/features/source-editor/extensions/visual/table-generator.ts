@@ -117,8 +117,11 @@ export const tableGeneratorTheme = EditorView.baseTheme({
       'border-bottom-color': 'var(--table-generator-active-border-color)',
       'border-bottom-width': 'var(--table-generator-active-border-width)',
     },
-    'overflow-x': 'auto',
-    'overflow-y': 'hidden',
+    '& .table-generator-cell-render': {
+      'overflow-x': 'auto',
+      'overflow-y': 'hidden',
+      width: '100%',
+    },
   },
 
   '.table-generator-table': {
