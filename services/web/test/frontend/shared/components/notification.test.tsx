@@ -41,7 +41,7 @@ describe('<Notification />', function () {
     screen.getByRole('button', { name: 'Close' })
   })
 
-  it('renders with title', function () {
+  it('renders with title and content passed as HTML', function () {
     render(
       <Notification
         type="info"
@@ -50,5 +50,13 @@ describe('<Notification />', function () {
       />
     )
     screen.getByText('A title')
+    screen.getByText('A notification')
+  })
+
+  it('renders with content when passed as a string', function () {
+    render(
+      <Notification type="info" content="A notification" title="A title" />
+    )
+    screen.getByText('A notification')
   })
 })

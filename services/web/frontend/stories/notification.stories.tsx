@@ -300,6 +300,10 @@ export const SuccessFlow = (args: Args) => {
   return startNotification
 }
 
+export const ContentAsAString = (args: Args) => {
+  return <Notification {...args} content="An alert" />
+}
+
 export default {
   title: 'Shared / Components / Notification',
   component: Notification,

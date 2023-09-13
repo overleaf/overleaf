@@ -8,7 +8,7 @@ type NotificationType = 'info' | 'success' | 'warning' | 'error'
 type NotificationProps = {
   action?: React.ReactElement
   ariaLive?: 'polite' | 'off' | 'assertive'
-  content: React.ReactElement
+  content: React.ReactElement | string
   customIcon?: React.ReactElement
   isDismissible?: boolean
   isActionBelowContent?: boolean
