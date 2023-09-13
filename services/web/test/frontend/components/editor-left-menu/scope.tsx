@@ -23,6 +23,9 @@ type Scope = {
     owner: {
       _id: string
     }
+    features?: {
+      gitBridge?: boolean
+    }
   }
   user?: {
     features?: {

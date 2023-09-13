@@ -23,6 +23,7 @@ UserContext.Provider.propTypes = {
         zotero: PropTypes.boolean,
         references: PropTypes.boolean,
         compileTimeout: PropTypes.number,
+        gitBridge: PropTypes.boolean,
       }),
       refProviders: PropTypes.shape({
         mendeley: PropTypes.boolean,

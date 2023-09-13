@@ -244,6 +244,14 @@ describe('<EditorLeftMenu />', function () {
           ui: {
             leftMenuShown: true,
           },
+          project: {
+            owner: {
+              _id: '123',
+            },
+            features: {
+              gitBridge: true,
+            },
+          },
         })
 
         cy.mount(
@@ -255,6 +263,31 @@ describe('<EditorLeftMenu />', function () {
         cy.findByRole('button', { name: 'Git' }).click()
         cy.findByText('Clone with Git')
         cy.findByText(/your project using the link displayed below/)
+      })
+
+      it('shows git modal paywall correctly', function () {
+        const scope = mockScope({
+          ui: {
+            leftMenuShown: true,
+          },
+          project: {
+            owner: {
+              _id: '123',
+            },
+            features: {
+              gitBridge: false,
+            },
+          },
+        })
+
+        cy.mount(
+          <EditorProviders scope={scope}>
+            <EditorLeftMenu />
+          </EditorProviders>
+        )
+
+        cy.findByRole('button', { name: 'Git' }).click()
+        cy.findByText('Collaborate online and offline, using your own workflow')
       })
 
       it('shows github modal correctly', function () {

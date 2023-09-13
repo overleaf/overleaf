@@ -26,6 +26,7 @@ export const projectShape = {
     mendeley: PropTypes.bool,
     zotero: PropTypes.bool,
     versioning: PropTypes.bool,
+    gitBridge: PropTypes.bool,
   }),
   publicAccessLevel: PropTypes.string,
   owner: PropTypes.shape({
