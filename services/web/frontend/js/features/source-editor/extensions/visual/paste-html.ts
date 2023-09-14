@@ -449,8 +449,7 @@ const selectors = [
   createSelector({
     selector: 'b',
     match: element =>
-      element.style.fontWeight !== 'normal' &&
-      !(parseInt(element.style.fontWeight) < 700) &&
+      !element.style.fontWeight &&
       !isHeading(element.parentElement) &&
       hasContent(element),
     start: () => '\\textbf{',
@@ -468,17 +467,13 @@ const selectors = [
   }),
   createSelector({
     selector: 'strong',
-    match: element =>
-      element.style.fontWeight !== 'normal' &&
-      !(parseInt(element.style.fontWeight) < 700) &&
-      hasContent(element),
+    match: element => !element.style.fontWeight && hasContent(element),
     start: () => '\\textbf{',
     end: () => '}',
   }),
   createSelector({
     selector: 'i',
-    match: element =>
-      element.style.fontStyle !== 'normal' && hasContent(element),
+    match: element => !element.style.fontStyle && hasContent(element),
     start: () => '\\textit{',
     end: () => '}',
   }),
@@ -491,14 +486,13 @@ const selectors = [
   }),
   createSelector({
     selector: 'em',
-    match: element =>
-      element.style.fontStyle !== 'normal' && hasContent(element),
+    match: element => !element.style.fontStyle && hasContent(element),
     start: () => '\\textit{',
     end: () => '}',
   }),
   createSelector({
     selector: 'sup',
-    match: element => hasContent(element),
+    match: element => !element.style.verticalAlign && hasContent(element),
     start: () => '\\textsuperscript{',
     end: () => '}',
   }),
@@ -511,7 +505,7 @@ const selectors = [
   }),
   createSelector({
     selector: 'sub',
-    match: element => hasContent(element),
+    match: element => !element.style.verticalAlign && hasContent(element),
     start: () => '\\textsubscript{',
     end: () => '}',
   }),

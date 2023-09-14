@@ -479,6 +479,25 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
     cy.get('.ol-cm-command-textit').should('have.length', 0)
   })
 
+  it('handles pasted elements with duplicate CSS formatting', function () {
+    mountEditor()
+
+    const data = [
+      '<strong style="font-weight:bold">foo</strong>',
+      '<b style="font-weight:bold">foo</b>',
+      '<em style="font-style:italic">foo</em>',
+      '<i style="font-style:italic">foo</i>',
+      'foo',
+    ].join(' ')
+
+    const clipboardData = new DataTransfer()
+    clipboardData.setData('text/html', data)
+    cy.get('@content').trigger('paste', { clipboardData })
+
+    cy.get('.ol-cm-command-textbf').should('have.length', 2)
+    cy.get('.ol-cm-command-textit').should('have.length', 2)
+  })
+
   it('removes a non-breaking space when a text node contains no other content', function () {
     mountEditor()
 
