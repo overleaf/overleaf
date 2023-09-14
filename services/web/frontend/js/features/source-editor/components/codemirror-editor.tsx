@@ -41,13 +41,13 @@ function CodeMirrorEditor() {
 
     const view = new EditorView({
       state,
-      dispatch: tr => {
-        timer.start(tr)
-        view.update([tr])
+      dispatchTransactions: trs => {
+        timer.start(trs)
+        view.update(trs)
         if (isMounted.current) {
           setState(view.state)
         }
-        timer.end(tr, view)
+        timer.end(trs, view)
       },
     })
     viewRef.current = view
