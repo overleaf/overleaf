@@ -277,7 +277,8 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
   it('handles a pasted link', function () {
     mountEditor()
 
-    const data = '<a href="https://example.com/">foo</a>'
+    const data =
+      '<a href="https://example.com/?q=$foo_~bar&x=\\bar#fragment{y}%2">foo</a>'
 
     const clipboardData = new DataTransfer()
     clipboardData.setData('text/html', data)
@@ -285,6 +286,13 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
 
     cy.get('@content').should('have.text', '{foo}')
     cy.get('.ol-cm-command-href').should('have.length', 1)
+
+    cy.get('.cm-line').eq(0).type('{leftArrow}')
+    cy.findByLabelText('URL').should(
+      'have.value',
+      'https://example.com/?q=$foo_~bar&x=\\\\bar\\#fragment%7By%7D\\%2'
+    )
+    // TODO: assert that the "Go to page" link has been unescaped
   })
 
   it('handles a pasted code block', function () {

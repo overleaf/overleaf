@@ -217,6 +217,25 @@ const matchingParents = (element: HTMLElement, selector: string) => {
   return matches
 }
 
+const urlCharacterReplacements = new Map<string, string>([
+  ['\\', '\\\\'],
+  ['#', '\\#'],
+  ['%', '\\%'],
+  ['{', '%7B'],
+  ['}', '%7D'],
+])
+
+const protectUrlCharacters = (url: string) => {
+  // NOTE: add new characters to both this regex and urlCharacterReplacements
+  return url.replaceAll(/[\\#%{}]/g, match => {
+    const replacement = urlCharacterReplacements.get(match)
+    if (!replacement) {
+      throw new Error(`No replacement found for ${match}`)
+    }
+    return replacement
+  })
+}
+
 const processLists = (element: HTMLElement) => {
   for (const list of element.querySelectorAll('ol,ul')) {
     // if the list has only one item, replace the list with an element containing the contents of the item
@@ -519,8 +538,11 @@ const selectors = [
   createSelector({
     selector: 'a',
     match: element => !!element.href && hasContent(element),
-    start: (element: HTMLAnchorElement) => `\\href{${element.href}}{`,
-    end: element => `}`,
+    start: (element: HTMLAnchorElement) => {
+      const url = protectUrlCharacters(element.href)
+      return `\\href{${url}}{`
+    },
+    end: () => `}`,
   }),
   createSelector({
     selector: 'h1',

@@ -102,6 +102,7 @@ export const HrefTooltipContent: FC = () => {
         bsStyle="link"
         className="ol-cm-command-tooltip-link"
         onClick={() => {
+          // TODO: unescape content
           window.open(url, '_blank')
         }}
       >
