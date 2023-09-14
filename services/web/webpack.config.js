@@ -108,6 +108,13 @@ module.exports = {
     library: ['Frontend', '[name]'],
   },
 
+  optimization: {
+    // https://webpack.js.org/plugins/split-chunks-plugin/#splitchunkschunks
+    splitChunks: {
+      chunks: 'all', // allow non-async chunks to be analysed for shared modules
+    },
+  },
+
   // Define how file types are handled by webpack
   module: {
     rules: [
