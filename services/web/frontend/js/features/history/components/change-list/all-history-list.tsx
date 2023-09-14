@@ -140,7 +140,8 @@ function AllHistoryList() {
           const showDivider = Boolean(update.meta.first_in_day && index > 0)
           const faded =
             updatesInfo.freeHistoryLimitHit &&
-            index === visibleUpdates.length - 1
+            index === visibleUpdates.length - 1 &&
+            visibleUpdates.length > 1
           const selectable =
             !faded &&
             (selection.comparing ||

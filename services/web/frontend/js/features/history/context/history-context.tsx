@@ -132,15 +132,17 @@ function useHistory() {
 
         previousUpdate = update
 
+        // the free tier cutoff is 24 hours, so show one extra update
+        //  after which will become the fade teaser above the paywall
         if (
           !userHasFullFeature &&
           visibleUpdateCount === null &&
           update.meta.end_ts < timestamp24hoursAgo
         ) {
-          // Make sure that we show at least one entry (to allow labelling), and
-          // load one extra update that is displayed but faded out above the
-          // paywall
-          visibleUpdateCount = index + 1
+          // Make sure that we show at least one entry fully (to allow labelling), and one extra for fading
+          //  Since the index for the first free tier cutoff will be at 0 if all versions were updated the day before (all version in the past),
+          //  we need to +2 instead of +1. this gives us one which is selected and one which is faded
+          visibleUpdateCount = index > 0 ? index + 1 : 2
           freeHistoryLimitHit = true
         }
       }
