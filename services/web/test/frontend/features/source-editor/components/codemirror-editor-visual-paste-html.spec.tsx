@@ -295,23 +295,20 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
     // TODO: assert that the "Go to page" link has been unescaped
   })
 
-  it('handles a pasted code block', function () {
+  it('handles pasted code in pre blocks', function () {
     mountEditor()
 
-    const data = 'test <pre><code>foo</code></pre> test'
+    const data = `test <pre><code>\\textbf{foo}</code></pre> <pre style="font-family: 'Lucida Console', monospace">\\textbf{foo}</pre> test`
 
     const clipboardData = new DataTransfer()
     clipboardData.setData('text/html', data)
     cy.get('@content').trigger('paste', { clipboardData })
 
-    cy.get('@content').should('have.text', 'test foo test')
-    cy.get('.ol-cm-environment-verbatim').should('have.length', 5)
-
-    cy.get('.cm-line').eq(2).click()
     cy.get('@content').should(
       'have.text',
-      'test \\begin{verbatim}foo\\end{verbatim} test'
+      'test \\textbf{foo} \\textbf{foo} test'
     )
+    cy.get('.ol-cm-environment-verbatim').should('have.length', 10)
   })
 
   it('handles a pasted blockquote', function () {
@@ -407,6 +404,22 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
 
     const clipboardData = new DataTransfer()
     clipboardData.setData('text/html', '<pre><code>foo</code></pre>')
+    clipboardData.setData('text/plain', 'foo')
+    cy.get('@content').trigger('paste', { clipboardData })
+
+    cy.get('@content').should('have.text', 'foo')
+    cy.get('.ol-cm-command-verb').should('have.length', 0)
+    cy.get('.ol-cm-environment-verbatim').should('have.length', 0)
+  })
+
+  it('use text/plain for a pre element with monospace font', function () {
+    mountEditor()
+
+    const clipboardData = new DataTransfer()
+    clipboardData.setData(
+      'text/html',
+      '<pre style="font-family:Courier,monospace">foo</pre>'
+    )
     clipboardData.setData('text/plain', 'foo')
     cy.get('@content').trigger('paste', { clipboardData })
 

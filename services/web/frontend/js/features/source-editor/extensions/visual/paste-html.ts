@@ -83,11 +83,33 @@ const removeUnwantedElements = (
   }
 }
 
+const findCodeContainingElement = (documentElement: HTMLElement) => {
+  let result: HTMLElement | null
+
+  // a code element
+  result = documentElement.querySelector<HTMLElement>('code')
+  if (result) {
+    return result
+  }
+
+  // a pre element with "monospace" somewhere in the font family
+  result = documentElement.querySelector<HTMLPreElement>('pre')
+  if (result?.style.fontFamily.includes('monospace')) {
+    return result
+  }
+
+  return null
+}
+
 // return true if the text content of the first <code> element
 // is the same as the text content of the whole document element
-const onlyCode = (documentElement: HTMLElement) =>
-  documentElement.querySelector('code')?.textContent?.trim() ===
-  documentElement.textContent?.trim()
+const onlyCode = (documentElement: HTMLElement) => {
+  const codeElement = findCodeContainingElement(documentElement)
+
+  return (
+    codeElement?.textContent?.trim() === documentElement.textContent?.trim()
+  )
+}
 
 const htmlToLaTeX = (documentElement: HTMLElement) => {
   // remove style elements
@@ -149,12 +171,16 @@ const specialCharacterReplacer = (
   return `${prefix}\\${char}`
 }
 
+const isElementContainingCode = (element: HTMLElement) =>
+  element.tagName === 'CODE' ||
+  (element.tagName === 'PRE' && element.style.fontFamily.includes('monospace'))
+
 const protectSpecialCharacters = (documentElement: HTMLElement) => {
   const walker = document.createTreeWalker(
     documentElement,
     NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT,
     node =>
-      isElementNode(node) && node.tagName === 'CODE'
+      isElementNode(node) && isElementContainingCode(node)
         ? NodeFilter.FILTER_REJECT
         : NodeFilter.FILTER_ACCEPT
   )
@@ -590,6 +616,15 @@ const selectors = [
   createSelector({
     selector: 'pre > code',
     match: element => hasContent(element),
+    start: () => `\n\n\\begin{verbatim}\n`,
+    end: () => `\n\\end{verbatim}\n\n`,
+  }),
+  createSelector({
+    selector: 'pre',
+    match: element =>
+      element.style.fontFamily.includes('monospace') &&
+      element.firstElementChild?.nodeName !== 'CODE' &&
+      hasContent(element),
     start: () => `\n\n\\begin{verbatim}\n`,
     end: () => `\n\\end{verbatim}\n\n`,
   }),
