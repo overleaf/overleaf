@@ -99,24 +99,33 @@ export const spellingMenuField = StateField.define<Tooltip | null>({
   create() {
     return null
   },
-  update(menu, transaction) {
+  update(value, transaction) {
+    if (value) {
+      value = {
+        ...value,
+        pos: transaction.changes.mapPos(value.pos),
+        end: value.end ? transaction.changes.mapPos(value.end) : undefined,
+      }
+    }
+
     for (const effect of transaction.effects) {
       if (effect.is(hideSpellingMenu)) {
-        return null
+        value = null
       } else if (effect.is(showSpellingMenu)) {
         const { mark, word } = effect.value
         // Build a "Tooltip" showing the suggestions
-        return {
+        value = {
           pos: mark.from,
+          end: mark.to,
           above: false,
           strictSide: false,
           create: view => {
-            return createSpellingSuggestionList(mark, word, view)
+            return createSpellingSuggestionList(word, view)
           },
         }
       }
     }
-    return menu
+    return value
   },
   provide: field => {
     return [
@@ -143,11 +152,7 @@ const hideSpellingMenu = StateEffect.define()
  * Creates the suggestion menu dom, to be displayed in the
  * spelling menu "tooltip"
  * */
-const createSpellingSuggestionList = (
-  mark: Mark,
-  word: Word,
-  view: EditorView
-) => {
+const createSpellingSuggestionList = (word: Word, view: EditorView) => {
   // Wrapper div.
   // Note, CM6 doesn't like showing complex elements
   // 'inside' its Tooltip element, so we style this
@@ -229,7 +234,7 @@ const createSpellingSuggestionList = (
     for (const suggestion of word.suggestions.slice(0, ITEMS_TO_SHOW)) {
       const li = makeLinkItem(suggestion, event => {
         const text = (event.target as HTMLElement).innerText
-        handleCorrectWord(mark, word, text, view)
+        handleCorrectWord(word, text, view)
         event.preventDefault()
       })
       list.appendChild(li)
@@ -289,19 +294,19 @@ const handleLearnWord = async function (word: Word, view: EditorView) {
  * Correct a word, removing the marked range
  * and replacing it with the chosen text
  */
-const handleCorrectWord = (
-  mark: Mark,
-  word: Word,
-  text: string,
-  view: EditorView
-) => {
-  const existingText = view.state.doc.sliceString(mark.from, mark.to)
+const handleCorrectWord = (word: Word, text: string, view: EditorView) => {
+  const tooltip = view.state.field(spellingMenuField)
+  if (!tooltip) {
+    throw new Error('No active tooltip')
+  }
+  const existingText = view.state.doc.sliceString(tooltip.pos, tooltip.end)
   // Defend against erroneous replacement, if the word at this
   // position is not actually what we think it is
   if (existingText !== word.text) {
     console.debug(
       '>> spelling word-to-correct does not match, stopping',
-      mark,
+      tooltip.pos,
+      tooltip.end,
       existingText,
       word
     )
@@ -310,8 +315,8 @@ const handleCorrectWord = (
   view.dispatch({
     changes: [
       {
-        from: mark.from,
-        to: mark.to,
+        from: tooltip.pos,
+        to: tooltip.end,
         insert: text,
       },
     ],
