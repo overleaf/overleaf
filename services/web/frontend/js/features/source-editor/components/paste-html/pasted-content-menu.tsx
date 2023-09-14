@@ -85,7 +85,7 @@ export const PastedContentMenu: FC<{
           show
           onHide={() => setMenuOpen(false)}
           animation={false}
-          container={view.dom}
+          container={view.scrollDOM}
           containerPadding={0}
           placement="bottom"
           rootClose

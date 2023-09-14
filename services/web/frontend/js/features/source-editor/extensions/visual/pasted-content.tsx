@@ -113,6 +113,7 @@ export const pastedContent = StateField.define<{
           flexDirection: 'column',
           boxSizing: 'border-box',
           fontSize: '14px',
+          fontFamily: '"Lato", sans-serif',
         },
         '.ol-cm-pasted-content-menu-item': {
           border: 'none',
