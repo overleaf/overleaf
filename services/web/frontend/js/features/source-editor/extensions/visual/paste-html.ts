@@ -16,11 +16,6 @@ export const pasteHtml = [
           return false
         }
 
-        // allow pasting an image to create a figure
-        if (clipboardData.files.length > 0) {
-          return false
-        }
-
         // only handle pasted HTML
         if (!clipboardData.types.includes('text/html')) {
           return false
@@ -38,6 +33,12 @@ export const pasteHtml = [
         const text = clipboardData.getData('text/plain').trim()
 
         if (html.length === 0) {
+          return false
+        }
+
+        // allow pasting an image to create a figure, if the HTML doesn't contain a table
+        // (because desktop Excel puts both an image and the HTML table on the clipboard)
+        if (clipboardData.files.length > 0 && !html.includes('<table')) {
           return false
         }
 
