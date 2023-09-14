@@ -135,8 +135,13 @@ const htmlToLaTeX = (documentElement: HTMLElement) => {
     return ''
   }
 
-  // normalise multiple newlines
-  return text.replaceAll(/\n{2,}/g, '\n\n')
+  return (
+    text
+      // remove zero-width spaces (e.g. those added by Powerpoint)
+      .replaceAll('​', '')
+      // normalise multiple newlines
+      .replaceAll(/\n{2,}/g, '\n\n')
+  )
 }
 
 const processWhitespace = (documentElement: HTMLElement) => {
@@ -274,8 +279,34 @@ const processLists = (element: HTMLElement) => {
   }
 }
 
+const removeNonContentTextNodes = (table: HTMLTableElement) => {
+  // remove text nodes that are direct children of non-content table elements
+  const containers = table.querySelectorAll('thead,tbody,tr')
+  for (const element of [table, ...containers]) {
+    for (const childNode of element.childNodes) {
+      if (childNode.nodeType === Node.TEXT_NODE) {
+        element.removeChild(childNode)
+      }
+    }
+  }
+
+  // remove whitespace-only text nodes at the start or end of table cells
+  for (const element of table.querySelectorAll('th,td')) {
+    for (const childNode of [element.firstChild, element.lastChild]) {
+      if (
+        childNode?.nodeType === Node.TEXT_NODE &&
+        childNode.textContent?.trim() === ''
+      ) {
+        element.removeChild(childNode)
+      }
+    }
+  }
+}
+
 const processTables = (element: HTMLElement) => {
   for (const table of element.querySelectorAll('table')) {
+    removeNonContentTextNodes(table)
+
     // create a wrapper element for the table and the caption
     const container = document.createElement('div')
     container.className = 'ol-table-wrap'
@@ -670,11 +701,13 @@ const selectors = [
     selector: 'tr > td, tr > th',
     start: (element: HTMLTableCellElement) => {
       let output = ''
-      if (element.getAttribute('colspan')) {
+      const colspan = element.getAttribute('colspan')
+      if (colspan && Number(colspan) > 1) {
         output += startMulticolumn(element)
       }
       // NOTE: multirow is nested inside multicolumn
-      if (element.getAttribute('rowspan')) {
+      const rowspan = element.getAttribute('rowspan')
+      if (rowspan && Number(rowspan) > 1) {
         output += startMultirow(element)
       }
       return output
@@ -682,10 +715,12 @@ const selectors = [
     end: element => {
       let output = ''
       // NOTE: multirow is nested inside multicolumn
-      if (element.getAttribute('rowspan')) {
+      const rowspan = element.getAttribute('rowspan')
+      if (rowspan && Number(rowspan) > 1) {
         output += '}'
       }
-      if (element.getAttribute('colspan')) {
+      const colspan = element.getAttribute('colspan')
+      if (colspan && Number(colspan) > 1) {
         output += '}'
       }
       const row = element.parentElement as HTMLTableRowElement

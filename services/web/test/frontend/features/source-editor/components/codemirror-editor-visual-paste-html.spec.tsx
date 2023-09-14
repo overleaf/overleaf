@@ -237,6 +237,26 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
     )
   })
 
+  it('ignores rowspan="1" and colspan="1"', function () {
+    mountEditor()
+
+    const data = [
+      `<table><tbody>`,
+      `<tr><td colspan="1" rowspan="1">test</td><td>test</td></tr>`,
+      `<tr><td>test</td><td>test</td><td>test</td></tr>`,
+      `</tbody></table>`,
+    ].join('')
+
+    const clipboardData = new DataTransfer()
+    clipboardData.setData('text/html', data)
+    cy.get('@content').trigger('paste', { clipboardData })
+
+    cy.get('@content').should(
+      'have.text',
+      '\\begin{tabular}{l l l}test & test ↩test & test & test ↩\\end{tabular}'
+    )
+  })
+
   it('handles a pasted table with adjacent borders and merged cells', function () {
     mountEditor()
 
@@ -543,6 +563,18 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
     cy.get('@content').should('have.text', 'foo bar')
   })
 
+  it('removes all zero-width spaces', function () {
+    mountEditor()
+
+    const data = 'foo\u200bbar'
+
+    const clipboardData = new DataTransfer()
+    clipboardData.setData('text/html', data)
+    cy.get('@content').trigger('paste', { clipboardData })
+
+    cy.get('@content').should('have.text', 'foobar')
+  })
+
   it('ignores HTML pasted from VS Code', function () {
     mountEditor()
 
@@ -587,5 +619,23 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
     cy.get('@content').should('have.text', 'foo & bar~baz \\textbf{foo}')
     cy.get('.ol-cm-character').should('have.length', 2)
     cy.get('.ol-cm-command-verb').should('have.length', 1)
+  })
+
+  it('tidies whitespace in pasted tables', function () {
+    mountEditor()
+
+    const data = `<table>
+ <tr>
+  <td>
+  <p><b>test</b></p>
+  </td>
+</tr>
+</table>`
+
+    const clipboardData = new DataTransfer()
+    clipboardData.setData('text/html', data)
+    cy.get('@content').trigger('paste', { clipboardData })
+
+    cy.get('.cm-line').should('have.length', 8)
   })
 })
