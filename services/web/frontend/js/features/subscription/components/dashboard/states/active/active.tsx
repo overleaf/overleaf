@@ -8,11 +8,13 @@ import { PendingPlanChange } from './pending-plan-change'
 import { TrialEnding } from './trial-ending'
 import { PendingAdditionalLicenses } from './pending-additional-licenses'
 import { ContactSupportToChangeGroupPlan } from './contact-support-to-change-group-plan'
+import SubscriptionRemainder from './subscription-remainder'
 import isInFreeTrial from '../../../../util/is-in-free-trial'
 import { ChangePlanModal } from './change-plan/modals/change-plan-modal'
 import { ConfirmChangePlanModal } from './change-plan/modals/confirm-change-plan-modal'
 import { KeepCurrentPlanModal } from './change-plan/modals/keep-current-plan-modal'
 import { ChangeToGroupModal } from './change-plan/modals/change-to-group-modal'
+import { isSplitTestEnabled } from '../../../../../../../../frontend/js/utils/splitTestUtils'
 
 export function ActiveSubscription({
   subscription,
@@ -22,6 +24,10 @@ export function ActiveSubscription({
   const { t } = useTranslation()
   const { recurlyLoadError, setModalIdShown, showCancellation } =
     useSubscriptionDashboardContext()
+
+  const isDesignSystemUpdatesEnabled = isSplitTestEnabled(
+    'design-system-updates'
+  )
 
   if (showCancellation) return <CancelSubscription />
 
@@ -115,10 +121,25 @@ export function ActiveSubscription({
         >
           {t('view_your_invoices')}
         </a>
+        {!recurlyLoadError && isDesignSystemUpdatesEnabled && (
+          <CancelSubscriptionButton className="btn btn-danger-ghost ms-1" />
+        )}
       </p>
 
       {!recurlyLoadError && (
-        <CancelSubscriptionButton subscription={subscription} />
+        <>
+          <br />
+          {!isDesignSystemUpdatesEnabled && (
+            <p>
+              <CancelSubscriptionButton className="btn btn-danger" />
+            </p>
+          )}
+          <p>
+            <i>
+              <SubscriptionRemainder subscription={subscription} />
+            </i>
+          </p>
+        </>
       )}
 
       <ChangePlanModal />

@@ -11,6 +11,7 @@ import {
 import { currencies, CurrencyCode, CurrencySymbol } from '../data/currency'
 import { useTranslation } from 'react-i18next'
 import getMeta from '../../../utils/meta'
+import { getSplitTestVariant } from '../../../../../frontend/js/utils/splitTestUtils'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import {
   PaymentContextValue,
@@ -38,6 +39,10 @@ function usePayment({ publicKey }: RecurlyOptions) {
     'ol-recommendedCurrency'
   )
   const planCode: string = getMeta('ol-planCode')
+  const designSystemUpdatesVariant = getSplitTestVariant(
+    'design-system-updates',
+    'default'
+  )
 
   const [planName, setPlanName] = useState(plan.name)
   const [recurlyLoading, setRecurlyLoading] = useState(true)
@@ -98,6 +103,7 @@ function usePayment({ publicKey }: RecurlyOptions) {
     eventTracking.sendMB('payment-page-view', {
       plan: planCode,
       currency: currencyCode,
+      'split-test-design-system-updates': designSystemUpdatesVariant,
     })
     eventTracking.send(
       'subscription-funnel',
@@ -142,6 +148,7 @@ function usePayment({ publicKey }: RecurlyOptions) {
 
     setupPricing()
   }, [
+    designSystemUpdatesVariant,
     initialCountry,
     initialCouponCode,
     initiallySelectedCurrencyCode,

@@ -1,67 +1,32 @@
-import { useTranslation, Trans } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 import * as eventTracking from '../../../../../../infrastructure/event-tracking'
-import { RecurlySubscription } from '../../../../../../../../types/subscription/dashboard/subscription'
 import { useSubscriptionDashboardContext } from '../../../../context/subscription-dashboard-context'
+import { getSplitTestVariant } from '../../../../../../../../frontend/js/utils/splitTestUtils'
 
-export function CancelSubscriptionButton({
-  subscription,
-}: {
-  subscription: RecurlySubscription
-}) {
+export function CancelSubscriptionButton(
+  props: React.ComponentProps<'button'>
+) {
   const { t } = useTranslation()
   const { recurlyLoadError, setShowCancellation } =
     useSubscriptionDashboardContext()
 
-  const stillInATrial =
-    subscription.recurly.trialEndsAtFormatted &&
-    subscription.recurly.trial_ends_at &&
-    new Date(subscription.recurly.trial_ends_at).getTime() > Date.now()
+  const designSystemUpdatesVariant = getSplitTestVariant(
+    'design-system-updates',
+    'default'
+  )
 
   function handleCancelSubscriptionClick() {
-    eventTracking.sendMB('subscription-page-cancel-button-click')
+    eventTracking.sendMB('subscription-page-cancel-button-click', {
+      'split-test-design-system-updates': designSystemUpdatesVariant,
+    })
     setShowCancellation(true)
   }
 
   if (recurlyLoadError) return null
 
   return (
-    <>
-      <br />
-      <p>
-        <button
-          className="btn btn-danger"
-          onClick={handleCancelSubscriptionClick}
-        >
-          {t('cancel_your_subscription')}
-        </button>
-      </p>
-      <p>
-        <i>
-          {stillInATrial ? (
-            <Trans
-              i18nKey="subscription_will_remain_active_until_end_of_trial_period_x"
-              values={{
-                terminationDate: subscription.recurly.nextPaymentDueAt,
-              }}
-              components={[
-                // eslint-disable-next-line react/jsx-key
-                <strong />,
-              ]}
-            />
-          ) : (
-            <Trans
-              i18nKey="subscription_will_remain_active_until_end_of_billing_period_x"
-              values={{
-                terminationDate: subscription.recurly.nextPaymentDueAt,
-              }}
-              components={[
-                // eslint-disable-next-line react/jsx-key
-                <strong />,
-              ]}
-            />
-          )}
-        </i>
-      </p>
-    </>
+    <button onClick={handleCancelSubscriptionClick} {...props}>
+      {t('cancel_your_subscription')}
+    </button>
   )
 }

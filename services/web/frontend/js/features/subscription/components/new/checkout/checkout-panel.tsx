@@ -17,6 +17,7 @@ import TosAgreementNotice from './tos-agreement-notice'
 import SubmitButton from './submit-button'
 import ThreeDSecure from './three-d-secure'
 import getMeta from '../../../../../utils/meta'
+import { getSplitTestVariant } from '../../../../../../../frontend/js/utils/splitTestUtils'
 import { postJSON } from '../../../../../infrastructure/fetch-json'
 import * as eventTracking from '../../../../../infrastructure/event-tracking'
 import classnames from 'classnames'
@@ -68,6 +69,10 @@ function CheckoutPanel() {
     formRef.current?.querySelector<HTMLInputElement>(
       '#add-company-details-checkbox'
     )?.checked
+  )
+  const designSystemUpdatesVariant = getSplitTestVariant(
+    'design-system-updates',
+    'default'
   )
 
   const completeSubscription = useCallback(
@@ -140,6 +145,7 @@ function CheckoutPanel() {
           plan_code: postData.subscriptionDetails.plan_code,
           coupon_code: postData.subscriptionDetails.coupon_code,
           isPaypal: postData.subscriptionDetails.isPaypal,
+          'split-test-design-system-updates': designSystemUpdatesVariant,
         })
         eventTracking.send(
           'subscription-funnel',
@@ -172,6 +178,7 @@ function CheckoutPanel() {
       }
     },
     [
+      designSystemUpdatesVariant,
       ITMCampaign,
       ITMContent,
       ITMReferrer,

@@ -43,7 +43,23 @@ module.exports = HomeController = {
 
   async home(req, res) {
     if (Features.hasFeature('homepage') && homepageExists) {
-      return res.render('external/home/v2')
+      let designSystemUpdatesAssignment = { variant: 'default' }
+      try {
+        designSystemUpdatesAssignment =
+          await SplitTestHandler.promises.getAssignment(
+            req,
+            res,
+            'design-system-updates'
+          )
+      } catch (error) {
+        logger.error(
+          { err: error },
+          'failed to get "design-system-updates" split test assignment'
+        )
+      }
+      return res.render('external/home/v2', {
+        designSystemUpdatesVariant: designSystemUpdatesAssignment.variant,
+      })
     } else {
       return res.redirect('/login')
     }

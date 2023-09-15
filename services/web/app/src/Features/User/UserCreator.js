@@ -7,6 +7,7 @@ const UserDeleter = require('./UserDeleter')
 const UserGetter = require('./UserGetter')
 const UserUpdater = require('./UserUpdater')
 const Analytics = require('../Analytics/AnalyticsManager')
+const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const UserOnboardingEmailManager = require('./UserOnboardingEmailManager')
 const UserPostRegistrationAnalyticsManager = require('./UserPostRegistrationAnalyticsManager')
 const OError = require('@overleaf/o-error')
@@ -36,9 +37,24 @@ async function _addAffiliation(user, affiliationOptions) {
 }
 
 async function recordRegistrationEvent(user) {
+  let designSystemUpdatesAssignment = { variant: 'default' }
+  try {
+    designSystemUpdatesAssignment =
+      await SplitTestHandler.promises.getAssignmentForUser(
+        user._id,
+        'design-system-updates'
+      )
+  } catch (error) {
+    logger.error(
+      { err: error },
+      'failed to get "design-system-updates" split test assignment'
+    )
+  }
+
   try {
     const segmentation = {
       'home-registration': 'default',
+      'split-test-design-system-updates': designSystemUpdatesAssignment.variant,
     }
     if (user.thirdPartyIdentifiers && user.thirdPartyIdentifiers.length > 0) {
       segmentation.provider = user.thirdPartyIdentifiers[0].providerId

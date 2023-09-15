@@ -280,8 +280,28 @@ async function userSubscriptionPage(req, res) {
     SubscriptionViewModelBuilder.buildPlansListForSubscriptionDash(
       personalSubscription?.plan
     )
+  let designSystemUpdatesAssignment = { variant: 'default' }
+  try {
+    designSystemUpdatesAssignment =
+      await SplitTestHandler.promises.getAssignment(
+        req,
+        res,
+        'design-system-updates'
+      )
+  } catch (error) {
+    logger.error(
+      { err: error },
+      'failed to get "design-system-updates" split test assignment'
+    )
+  }
 
-  AnalyticsManager.recordEventForSession(req.session, 'subscription-page-view')
+  AnalyticsManager.recordEventForSession(
+    req.session,
+    'subscription-page-view',
+    {
+      'split-test-design-system-updates': designSystemUpdatesAssignment.variant,
+    }
+  )
 
   const cancelButtonAssignment = await SplitTestHandler.promises.getAssignment(
     req,

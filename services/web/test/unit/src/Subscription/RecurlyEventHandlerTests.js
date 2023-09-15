@@ -34,6 +34,13 @@ describe('RecurlyEventHandler', function () {
           recordEventForUser: sinon.stub(),
           setUserPropertyForUser: sinon.stub(),
         }),
+        '../SplitTests/SplitTestHandler': (this.SplitTestHandler = {
+          promises: {
+            getAssignmentForUser: sinon.stub().resolves({
+              variant: 'default',
+            }),
+          },
+        }),
       },
     })
   })
@@ -159,11 +166,16 @@ describe('RecurlyEventHandler', function () {
     )
   })
 
-  it('with canceled_subscription_notification', function () {
+  it('with canceled_subscription_notification', async function () {
     this.eventData.subscription.state = 'cancelled'
-    this.RecurlyEventHandler.sendRecurlyAnalyticsEvent(
+    await this.RecurlyEventHandler.sendRecurlyAnalyticsEvent(
       'canceled_subscription_notification',
       this.eventData
+    )
+    sinon.assert.calledWith(
+      this.SplitTestHandler.promises.getAssignmentForUser,
+      this.userId,
+      'design-system-updates'
     )
     sinon.assert.calledWith(
       this.AnalyticsManager.recordEventForUser,
@@ -174,6 +186,7 @@ describe('RecurlyEventHandler', function () {
         quantity: 1,
         is_trial: true,
         subscriptionId: this.eventData.subscription.uuid,
+        'split-test-design-system-updates': 'default',
       }
     )
     sinon.assert.calledWith(
