@@ -25,6 +25,7 @@ const SubscriptionHelper = require('./SubscriptionHelper')
 const Features = require('../../infrastructure/Features')
 const UserGetter = require('../User/UserGetter')
 const Modules = require('../../infrastructure/Modules')
+const AuthorizationManager = require('../Authorization/AuthorizationManager')
 
 const groupPlanModalOptions = Settings.groupPlanModalOptions
 const validGroupPlanModalOptions = {
@@ -814,9 +815,15 @@ async function redirectToHostedPage(req, res) {
 }
 
 async function _getRecommendedCurrency(req, res) {
-  const currencyLookup = await GeoIpLookup.promises.getCurrencyCode(
-    req.query?.ip || req.ip
-  )
+  const userId = SessionManager.getLoggedInUserId(req.session)
+  let ip = req.ip
+  if (
+    req.query?.ip &&
+    (await AuthorizationManager.promises.isUserSiteAdmin(userId))
+  ) {
+    ip = req.query.ip
+  }
+  const currencyLookup = await GeoIpLookup.promises.getCurrencyCode(ip)
   const countryCode = currencyLookup.countryCode
   let assignmentINR, assignmentLATAM
   let recommendedCurrency = currencyLookup.currencyCode

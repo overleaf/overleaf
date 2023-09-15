@@ -109,6 +109,11 @@ describe('SubscriptionController', function () {
       },
       siteUrl: 'http://de.sharelatex.dev:3000',
     }
+    this.AuthorizationManager = {
+      promises: {
+        isUserSiteAdmin: sinon.stub().resolves(false),
+      },
+    }
     this.GeoIpLookup = {
       isValidCurrencyParam: sinon.stub().returns(true),
       getCurrencyCode: sinon.stub(),
@@ -135,6 +140,7 @@ describe('SubscriptionController', function () {
     }
     this.SubscriptionController = SandboxedModule.require(modulePath, {
       requires: {
+        '../Authorization/AuthorizationManager': this.AuthorizationManager,
         '../SplitTests/SplitTestHandler': this.SplitTestV2Hander,
         '../Authentication/SessionManager': this.SessionManager,
         './SubscriptionHandler': this.SubscriptionHandler,
@@ -180,6 +186,36 @@ describe('SubscriptionController', function () {
       this.req.ip = '1234.3123.3131.333 313.133.445.666 653.5345.5345.534'
       this.GeoIpLookup.promises.getCurrencyCode.resolves({
         currencyCode: this.stubbedCurrencyCode,
+      })
+    })
+
+    describe('ip override', function () {
+      beforeEach(function () {
+        this.req.ip = '1.2.3.4'
+        this.req.query = { ip: '5.6.7.8' }
+        this.GeoIpLookup.promises.getCurrencyCode.withArgs('1.2.3.4').resolves({
+          currencyCode: 'GBP',
+        })
+        this.GeoIpLookup.promises.getCurrencyCode.withArgs('5.6.7.8').resolves({
+          currencyCode: 'USD',
+        })
+      })
+      it('should ignore override for non admin', function (done) {
+        this.res.render = (page, opts) => {
+          opts.recommendedCurrency.should.equal('GBP')
+          done()
+        }
+        this.AuthorizationManager.promises.isUserSiteAdmin.resolves(false)
+        this.SubscriptionController.plansPage(this.req, this.res)
+      })
+
+      it('should accept override for admin', function (done) {
+        this.res.render = (page, opts) => {
+          opts.recommendedCurrency.should.equal('USD')
+          done()
+        }
+        this.AuthorizationManager.promises.isUserSiteAdmin.resolves(true)
+        this.SubscriptionController.plansPage(this.req, this.res)
       })
     })
 
