@@ -423,18 +423,14 @@
       padding: 0;
       font-weight: bold;
       max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
 
       &:hover,
       &:focus {
         color: @ol-type-color;
         text-decoration: none;
       }
-    }
-
-    thead th,
-    .table-header-sort-btn {
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
 
     .dash-cell-checkbox {
