@@ -47,7 +47,7 @@ const DownloadProjectButtonTooltip = memo(
               aria-label={text}
               onClick={downloadProject}
             >
-              <Icon type="cloud-download" />
+              <Icon type="cloud-download" fw />
             </button>
           </Tooltip>
         )}

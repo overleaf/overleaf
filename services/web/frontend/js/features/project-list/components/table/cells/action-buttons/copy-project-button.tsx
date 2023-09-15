@@ -74,7 +74,7 @@ const CopyProjectButtonTooltip = memo(function CopyProjectButtonTooltip({
             aria-label={text}
             onClick={handleOpenModal}
           >
-            <Icon type="files-o" />
+            <Icon type="files-o" fw />
           </button>
         </Tooltip>
       )}

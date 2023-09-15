@@ -72,7 +72,7 @@ const LeaveProjectButtonTooltip = memo(function LeaveProjectButtonTooltip({
             aria-label={text}
             onClick={handleOpenModal}
           >
-            <Icon type="sign-out" />
+            <Icon type="sign-out" fw />
           </button>
         </Tooltip>
       )}

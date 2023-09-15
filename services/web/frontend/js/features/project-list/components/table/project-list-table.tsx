@@ -14,8 +14,8 @@ function SortBtn({ onClick, text, iconType, screenReaderText }: SortBtnProps) {
       onClick={onClick}
       aria-label={screenReaderText}
     >
-      {text}
-      {iconType ? <Icon className="tablesort" type={iconType} /> : null}
+      <span className="tablesort-text">{text}</span>
+      {iconType && <Icon type={iconType} />}
     </button>
   )
 }

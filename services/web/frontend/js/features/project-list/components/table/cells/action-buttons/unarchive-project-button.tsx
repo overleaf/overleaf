@@ -51,7 +51,7 @@ const UnarchiveProjectButtonTooltip = memo(
               aria-label={text}
               onClick={handleUnarchiveProject}
             >
-              <Icon type="reply" />
+              <Icon type="reply" fw />
             </button>
           </Tooltip>
         )}

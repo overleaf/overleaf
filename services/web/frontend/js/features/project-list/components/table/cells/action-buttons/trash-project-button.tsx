@@ -72,7 +72,7 @@ const TrashProjectButtonTooltip = memo(function TrashProjectButtonTooltip({
             aria-label={text}
             onClick={handleOpenModal}
           >
-            <Icon type="trash" />
+            <Icon type="trash" fw />
           </button>
         </Tooltip>
       )}

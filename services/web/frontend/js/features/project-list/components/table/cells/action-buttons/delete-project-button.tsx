@@ -73,7 +73,7 @@ const DeleteProjectButtonTooltip = memo(function DeleteProjectButtonTooltip({
             aria-label={text}
             onClick={handleOpenModal}
           >
-            <Icon type="ban" />
+            <Icon type="ban" fw />
           </button>
         </Tooltip>
       )}

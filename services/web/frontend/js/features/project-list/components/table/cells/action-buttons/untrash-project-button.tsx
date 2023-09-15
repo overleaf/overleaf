@@ -49,7 +49,7 @@ const UntrashProjectButtonTooltip = memo(function UntrashProjectButtonTooltip({
             aria-label={text}
             onClick={handleUntrashProject}
           >
-            <Icon type="reply" />
+            <Icon type="reply" fw />
           </button>
         </Tooltip>
       )}

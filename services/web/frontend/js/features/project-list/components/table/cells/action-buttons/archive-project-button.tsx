@@ -75,7 +75,7 @@ const ArchiveProjectButtonTooltip = memo(function ArchiveProjectButtonTooltip({
             aria-label={text}
             onClick={handleOpenModal}
           >
-            <Icon type="inbox" />
+            <Icon type="inbox" fw />
           </button>
         </Tooltip>
       )}
