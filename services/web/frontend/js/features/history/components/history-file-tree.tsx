@@ -30,8 +30,6 @@ export default function HistoryFileTree() {
       folders={mappedFileTree.folders}
       docs={mappedFileTree.docs ?? []}
       rootClassName="history-file-tree-list"
-    >
-      <li className="bottom-buffer" />
-    </HistoryFileTreeFolderList>
+    />
   )
 }

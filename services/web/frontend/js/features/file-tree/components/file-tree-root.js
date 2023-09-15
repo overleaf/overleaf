@@ -77,9 +77,7 @@ function FileTreeRootFolder() {
         dropRef={dropRef}
         isOver={isOver}
         dataTestId="file-tree-list-root"
-      >
-        <li className="bottom-buffer" />
-      </FileTreeFolderList>
+      />
     </>
   )
 }

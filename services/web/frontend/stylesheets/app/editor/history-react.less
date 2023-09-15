@@ -432,7 +432,9 @@ history-root {
       margin-left: 22px;
     }
 
-    li.bottom-buffer {
+    &::after {
+      content: '';
+      display: block;
       min-height: @line-height-computed;
     }
 
