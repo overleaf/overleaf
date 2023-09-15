@@ -93,7 +93,6 @@ services:
     command: --replSet overleaf
 
   ldap:
-    restart: always
     image: rroemhild/test-openldap:1.1
     # Workaround large memory allocation (using the max-open-files-limit as socket buffer scale).
     # REF: https://github.com/moby/moby/issues/8231#issuecomment-63877553
@@ -104,7 +103,6 @@ services:
       - 'ulimit -n 1024 && exec bash /run.sh'
 
   saml:
-      restart: always
       image: gcr.io/overleaf-ops/saml-test
       environment:
           SAML_BASE_URL_PATH: 'http://saml/simplesaml/'
