@@ -410,7 +410,7 @@ function PdfJsViewer({ url, pdfFile }) {
       >
         <div className="pdfViewer" />
       </div>
-      <div className="pdfjs-controls">
+      <div className="pdfjs-controls" tabIndex="0">
         <PdfViewerControls setZoom={setZoom} />
       </div>
     </div>

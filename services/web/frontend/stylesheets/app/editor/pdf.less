@@ -210,11 +210,23 @@
     left: 0;
     display: inline-block;
     z-index: 10; // above the PDF viewer
+
     .btn-group {
       transition: opacity 0.5s ease, visibility 0 linear 0.5s;
       visibility: hidden;
       opacity: 0;
     }
+
+    &:focus-within,
+    &:hover {
+      // make .pdfjs-controls and its children visible when it or any of its descendants are focused
+      .btn-group {
+        transition: none;
+        visibility: visible;
+        opacity: 1;
+      }
+    }
+
     &:hover,
     &.flash {
       .btn-group {
