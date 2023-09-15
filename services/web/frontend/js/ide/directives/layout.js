@@ -213,7 +213,8 @@ class=\"custom-toggler ${`custom-toggler-${customTogglerPane}`}\" \
 ng-class=\"isOpen ? 'custom-toggler-open' : 'custom-toggler-closed'\" \
 tooltip=\"{{ isOpen ? tooltipMsgWhenOpen : tooltipMsgWhenClosed }}\" \
 tooltip-placement=\"{{ tooltipPlacement }}\" \
-ng-click=\"handleClick()\">\
+ng-click=\"handleClick()\" \
+aria-label=\"{{ isOpen ? tooltipMsgWhenOpen : tooltipMsgWhenClosed }}\">\
 `)(customTogglerScope)
           element.append(customTogglerEl)
         }

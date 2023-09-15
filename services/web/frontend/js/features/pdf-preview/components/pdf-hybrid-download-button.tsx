@@ -38,6 +38,7 @@ function PdfHybridDownloadButton() {
         href={pdfDownloadUrl || '#'}
         target="_blank"
         style={{ pointerEvents: 'auto' }}
+        aria-label={t('download_pdf')}
       >
         <Icon type="download" fw />
       </Button>
