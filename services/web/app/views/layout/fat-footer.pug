@@ -1,7 +1,7 @@
 - var featuresPageVariant = splitTestVariants && splitTestVariants['features-page']
 
 footer.fat-footer.hidden-print
-	.fat-footer-container
+	.fat-footer-container(role="navigation" aria-label=translate('footer_navigation'))
 		.fat-footer-sections(class=hideFatFooter ? 'hidden' : undefined)
 			.footer-section#footer-brand
 				a(href='/', aria-label=settings.appName).footer-brand
