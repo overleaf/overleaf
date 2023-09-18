@@ -702,7 +702,7 @@ const ProjectController = {
           SplitTestHandler.getAssignment(
             req,
             res,
-            'history-view',
+            'history-view-version',
             (error, assignment) => {
               // do not fail editor load if assignment fails
               if (error) {

@@ -19,7 +19,7 @@ export default function Toolbar({ diff, selection }: ToolbarProps) {
   return (
     <div className="history-react-toolbar">
       <SplitTestBadge
-        splitTestName="history-view"
+        splitTestName="history-view-version"
         displayOnVariants={['react']}
       />
       <ToolbarDatetime selection={selection} />

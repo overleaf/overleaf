@@ -126,7 +126,9 @@ export default HistoryManager = (function () {
     }
 
     isReact() {
-      return getMeta('ol-splitTestVariants')?.['history-view'] === 'react'
+      return (
+        getMeta('ol-splitTestVariants')?.['history-view-version'] === 'react'
+      )
     }
 
     hardReset() {
