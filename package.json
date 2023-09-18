@@ -15,7 +15,7 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-promise": "^6.0.0",
-    "nodemon": "^2.0.16",
+    "nodemon": "^3.0.1",
     "prettier": "2.5.1"
   },
   "scripts": {
