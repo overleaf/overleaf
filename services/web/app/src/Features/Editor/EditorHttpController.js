@@ -74,13 +74,13 @@ async function joinProject(req, res, next) {
   // Compile timeout 20s test
   if (project.features?.compileTimeout <= 60) {
     const compileAssignment =
-      await SplitTestHandler.promises.getAssignmentForMongoUser(
+      await SplitTestHandler.promises.getAssignmentForUser(
         project.owner._id,
         'compile-backend-class-n2d'
       )
     if (compileAssignment?.variant === 'n2d') {
       const timeoutAssignment =
-        await SplitTestHandler.promises.getAssignmentForMongoUser(
+        await SplitTestHandler.promises.getAssignmentForUser(
           project.owner._id,
           'compile-timeout-20s'
         )
