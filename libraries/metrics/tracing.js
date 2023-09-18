@@ -15,9 +15,7 @@ function initialize(appName) {
     DiagLogLevel,
     trace,
   } = require('@opentelemetry/api')
-  const {
-    OTLPTraceExporter,
-  } = require('@opentelemetry/exporter-trace-otlp-http')
+  const { JaegerExporter } = require('@opentelemetry/exporter-jaeger')
   const { Resource } = require('@opentelemetry/resources')
   const {
     SemanticResourceAttributes,
@@ -36,9 +34,7 @@ function initialize(appName) {
   if (process.env.GCP_OPENTELEMETRY) {
     exporter = new GCP.TraceExporter()
   } else if (process.env.JAEGER_OPENTELEMETRY) {
-    exporter = new OTLPTraceExporter({
-      url: `http://${process.env.JAEGER_HOST || 'jaeger'}:4318/v1/traces`,
-    })
+    exporter = new JaegerExporter({ host: process.env.JAEGER_HOST || 'jaeger' })
   } else {
     return
   }
