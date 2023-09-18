@@ -89,54 +89,71 @@ mixin plans_v2_table(period, config)
 							) #{translate("learn_more_lowercase")}
 							span )
 		for feature, featureIndex in featuresPerSection.items
-			tr(
-				class=(featureIndex === (featuresPerSection.items.length - 1) ? `plans-v2-table-row-last-row-per-section cols-${maxColumn}` : `cols-${maxColumn}`)
-			)
-				td(
-					event-tracking="plans-page-table"
-					event-tracking-trigger="hover"
-					event-tracking-ga="subscription-funnel"
-					event-tracking-label=`${feature.feature}`
-					colspan=baseColspan
+			unless !showNewCompileTimeoutVariant && feature.feature === 'compile_servers'
+				tr(
+					class=(featureIndex === (featuresPerSection.items.length - 1) ? `plans-v2-table-row-last-row-per-section cols-${maxColumn}` : `cols-${maxColumn}`)
 				)
-					.plans-v2-table-feature-name
-						if feature.info
-							span #{translate(feature.feature)}
-							//- will only appear on screen width >= 768px (using CSS)
-							i.fa.fa-question-circle.plans-v2-table-feature-name-question-icon(
-								data-toggle="tooltip"
-								title=translate(feature.info),
-								data-placement="right"
-							)
-							//- will only appear on screen width < 768px (using CSS)
-							span.plans-v2-table-feature-name-learn-more-container
-								span (
-								span.plans-v2-table-feature-name-learn-more-text(
-									data-toggle="tooltip"
-									title=translate(feature.info),
-									data-placement="top"
-								) #{translate("learn_more_lowercase")}
-								span )
-						else
-							| #{translate(feature.feature)}
-				for plan, planIndex in Object.keys(feature.plans)
-					- var tableHeadOptions = Object.values(config.tableHead)[planIndex] || {}
-					- var colspan = tableHeadOptions.colspan || baseColspan
-					-
-						if (planIndex === discountedColumn.index) {
-							var tdClass = 'plans-v2-table-discount-highlighted'
-						} else if (planIndex === config.highlightedColumn.index) {
-							var tdClass = 'plans-v2-table-green-highlighted'
-						} else if (planIndex === config.highlightedColumn.index - 1) {
-							var tdClass = 'plans-v2-table-cell-before-green-highlighted-column'
-						} else {
-							var tdClass = ''
-						}
 					td(
-						class=tdClass
-						colspan=colspan
+						event-tracking="plans-page-table"
+						event-tracking-trigger="hover"
+						event-tracking-ga="subscription-funnel"
+						event-tracking-label=`${feature.feature}`
+						colspan=baseColspan
 					)
-						+table_cell(feature, plan)
+						.plans-v2-table-feature-name
+							if feature.info
+								span #{translate(feature.feature)}
+								//- will only appear on screen width >= 768px (using CSS)
+								if showNewCompileTimeoutVariant && feature.info === 'compile_timeout_short_info'
+									i.fa.fa-question-circle.plans-v2-table-feature-name-question-icon(
+										data-toggle="tooltip"
+										title=translate("compile_timeout_short_info_basic"),
+										data-placement="right"
+									)
+									//- will only appear on screen width < 768px (using CSS)
+									span.plans-v2-table-feature-name-learn-more-container
+										span (
+										span.plans-v2-table-feature-name-learn-more-text(
+											data-toggle="tooltip"
+											title=translate("compile_timeout_short_info_basic"),
+											data-placement="top"
+										) #{translate("learn_more_lowercase")}
+										span )
+								else
+									i.fa.fa-question-circle.plans-v2-table-feature-name-question-icon(
+										data-toggle="tooltip"
+										title=translate(feature.info),
+										data-placement="right"
+									)
+									//- will only appear on screen width < 768px (using CSS)
+									span.plans-v2-table-feature-name-learn-more-container
+										span (
+										span.plans-v2-table-feature-name-learn-more-text(
+											data-toggle="tooltip"
+											title=translate(feature.info),
+											data-placement="top"
+										) #{translate("learn_more_lowercase")}
+										span )
+							else
+								| #{translate(feature.feature)}
+					for plan, planIndex in Object.keys(feature.plans)
+						- var tableHeadOptions = Object.values(config.tableHead)[planIndex] || {}
+						- var colspan = tableHeadOptions.colspan || baseColspan
+						-
+							if (planIndex === discountedColumn.index) {
+								var tdClass = 'plans-v2-table-discount-highlighted'
+							} else if (planIndex === config.highlightedColumn.index) {
+								var tdClass = 'plans-v2-table-green-highlighted'
+							} else if (planIndex === config.highlightedColumn.index - 1) {
+								var tdClass = 'plans-v2-table-cell-before-green-highlighted-column'
+							} else {
+								var tdClass = ''
+							}
+						td(
+							class=tdClass
+							colspan=colspan
+						)
+							+table_cell(feature, plan)
 
 mixin table_individual(period)
 	table.card.plans-v2-table.plans-v2-table-individual
@@ -322,15 +339,32 @@ mixin table_cell(feature, plan)
 			data-ol-plans-v2-table-cell-plan=plan
 			data-ol-plans-v2-table-cell-feature=featureName
 		)
-			if (feature.value === 'str')
-				| !{translate(planValue, {}, ['strong'])}
-			else if (feature.value === 'bool')
-				if (planValue)
-					i.fa.fa-check(aria-hidden="true")
-					span.sr-only #{translate("feature_included")}
+			if feature.feature === 'compile_servers'
+				if showNewCompileTimeoutVariant
+					| #{translate(planValue)}
+			else if feature.feature === 'compile_timeout_short'
+				if showNewCompileTimeoutVariant && plan !== 'group_standard' && plan !== 'group_professional' && plan !== 'organization'
+					if plan === 'free'
+						| #{translate("basic")}&nbsp;
+						strong *
+					else
+						| #{translate("12x_basic")}
 				else
-					span(aria-hidden="true") -
-					span.sr-only #{translate("feature_not_included")}
+					if plan === 'free'
+						| #{translate(planValue)}&nbsp;
+						strong *
+					else
+						| #{translate(planValue)}
+			else
+				if (feature.value === 'str')
+					| !{translate(planValue, {}, ['strong'])}
+				else if (feature.value === 'bool')
+					if (planValue)
+						i.fa.fa-check(aria-hidden="true")
+						span.sr-only #{translate("feature_included")}
+					else
+						span(aria-hidden="true") -
+						span.sr-only #{translate("feature_not_included")}
 
 mixin group_plans_license_picker()
 	form.plans-v2-license-picker-form(data-ol-plans-v2-license-picker-form)

@@ -42,6 +42,16 @@ const individualPlans = [
         },
       },
       {
+        feature: 'compile_servers',
+        info: 'compile_servers_info',
+        value: 'str',
+        plans: {
+          free: 'fast',
+          collaborator: 'fastest',
+          professional: 'fastest',
+        },
+      },
+      {
         feature: 'realtime_track_changes',
         info: 'realtime_track_changes_info_v2',
         value: 'bool',

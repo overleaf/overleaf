@@ -69,6 +69,13 @@ block content
 					//- sticky header on mobile will be "hidden" (by removing its sticky position) if it reaches this div
 					.invisible(aria-hidden="true" data-ol-plans-v2-table-sticky-header-stop)
 
+					.row.row-spaced-large.text-centered
+						.col-xs-12
+							p.text-centered
+								strong *
+								| &nbsp;
+								| !{translate("the_free_compile_timeout_will_be_changing_soon_with_faster_servers", {}, [{name: 'a', attrs: {href: '/blog/changes-to-free-compile-timeouts-and-servers', rel: 'noopener noreferrer', target: '_blank'}}])}
+
 		if (showSkipLink)
 			.row.row-spaced-small.text-center
 				a(href='/project'
