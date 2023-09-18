@@ -8,9 +8,10 @@ import { useDetachCompileContext as useCompileContext } from '../../../shared/co
 import FasterCompilesFeedback from './faster-compiles-feedback'
 import { PdfPreviewMessages } from './pdf-preview-messages'
 import CompileTimeWarning from './compile-time-warning'
+import CompileTimeoutMessages from './compile-timeout-messages'
 
 function PdfPreviewPane() {
-  const { pdfUrl } = useCompileContext()
+  const { pdfUrl, showNewCompileTimeoutUI } = useCompileContext()
   const classes = classNames('pdf', 'full-size', {
     'pdf-empty': !pdfUrl,
   })
@@ -18,7 +19,11 @@ function PdfPreviewPane() {
     <div className={classes}>
       <PdfHybridPreviewToolbar />
       <PdfPreviewMessages>
-        <CompileTimeWarning />
+        {showNewCompileTimeoutUI ? (
+          <CompileTimeoutMessages />
+        ) : (
+          <CompileTimeWarning />
+        )}
       </PdfPreviewMessages>
       <Suspense fallback={<LoadingPreview />}>
         <div className="pdf-viewer">

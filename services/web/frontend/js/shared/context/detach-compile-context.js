@@ -34,6 +34,7 @@ export function DetachCompileProvider({ children }) {
     fileList: _fileList,
     hasChanges: _hasChanges,
     highlights: _highlights,
+    isProjectOwner: _isProjectOwner,
     lastCompileOptions: _lastCompileOptions,
     logEntries: _logEntries,
     logEntryAnnotations: _logEntryAnnotations,
@@ -55,6 +56,7 @@ export function DetachCompileProvider({ children }) {
     setStopOnValidationError: _setStopOnValidationError,
     showLogs: _showLogs,
     showCompileTimeWarning: _showCompileTimeWarning,
+    showNewCompileTimeoutUI: _showNewCompileTimeoutUI,
     showFasterCompilesFeedbackUI: _showFasterCompilesFeedbackUI,
     stopOnFirstError: _stopOnFirstError,
     stopOnValidationError: _stopOnValidationError,
@@ -135,6 +137,12 @@ export function DetachCompileProvider({ children }) {
     'detacher',
     'detached'
   )
+  const [isProjectOwner] = useDetachStateWatcher(
+    'isProjectOwner',
+    _isProjectOwner,
+    'detacher',
+    'detached'
+  )
   const [lastCompileOptions] = useDetachStateWatcher(
     'lastCompileOptions',
     _lastCompileOptions,
@@ -186,6 +194,12 @@ export function DetachCompileProvider({ children }) {
   const [showLogs] = useDetachStateWatcher(
     'showLogs',
     _showLogs,
+    'detacher',
+    'detached'
+  )
+  const [showNewCompileTimeoutUI] = useDetachStateWatcher(
+    'showNewCompileTimeoutUI',
+    _showNewCompileTimeoutUI,
     'detacher',
     'detached'
   )
@@ -384,6 +398,7 @@ export function DetachCompileProvider({ children }) {
       fileList,
       hasChanges,
       highlights,
+      isProjectOwner,
       lastCompileOptions,
       logEntryAnnotations,
       logEntries,
@@ -409,6 +424,7 @@ export function DetachCompileProvider({ children }) {
       setStopOnValidationError,
       showLogs,
       showCompileTimeWarning,
+      showNewCompileTimeoutUI,
       showFasterCompilesFeedbackUI,
       startCompile,
       stopCompile,
@@ -437,6 +453,7 @@ export function DetachCompileProvider({ children }) {
       fileList,
       hasChanges,
       highlights,
+      isProjectOwner,
       lastCompileOptions,
       logEntryAnnotations,
       logEntries,
@@ -460,6 +477,7 @@ export function DetachCompileProvider({ children }) {
       setStopOnValidationError,
       showCompileTimeWarning,
       showLogs,
+      showNewCompileTimeoutUI,
       showFasterCompilesFeedbackUI,
       startCompile,
       stopCompile,

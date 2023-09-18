@@ -11,7 +11,11 @@ const { RateLimiter } = require('../../infrastructure/RateLimiter')
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const { getAnalyticsIdFromMongoUser } = require('../Analytics/AnalyticsHelper')
 
+const NEW_COMPILE_TIMEOUT_ENFORCED_CUTOFF = new Date('2023-09-18T11:00:00.000Z')
+
 module.exports = CompileManager = {
+  NEW_COMPILE_TIMEOUT_ENFORCED_CUTOFF,
+
   compile(projectId, userId, options = {}, _callback) {
     const timer = new Metrics.Timer('editor.compile')
     const callback = function (...args) {
@@ -53,6 +57,16 @@ module.exports = CompileManager = {
                     for (const key in limits) {
                       const value = limits[key]
                       options[key] = value
+                    }
+                    if (options.timeout !== 20) {
+                      // temporary override to force the new compile timeout
+                      if (options.forceNewCompileTimeout === 'active') {
+                        options.timeout = 20
+                      } else if (
+                        options.forceNewCompileTimeout === 'changing'
+                      ) {
+                        options.timeout = 60
+                      }
                     }
                     // Put a lower limit on autocompiles for free users, based on compileGroup
                     CompileManager._checkCompileGroupAutoCompileLimit(
@@ -149,6 +163,7 @@ module.exports = CompileManager = {
             betaProgram: 1,
             features: 1,
             splitTests: 1,
+            signUpDate: 1, // for compile-timeout-20s
           },
           function (err, owner) {
             if (err) {
@@ -176,7 +191,28 @@ module.exports = CompileManager = {
                 limits.compileBackendClass = compileBackendClass
                 limits.showFasterCompilesFeedbackUI =
                   showFasterCompilesFeedbackUI
-                callback(null, limits)
+                if (compileBackendClass === 'n2d' && limits.timeout <= 60) {
+                  // project owners with faster compiles but with <= 60 compile timeout (default)
+                  // will have a 20s compile timeout
+                  // The compile-timeout-20s split test exists to enable a gradual rollout
+                  SplitTestHandler.getAssignmentForMongoUser(
+                    owner,
+                    'compile-timeout-20s',
+                    (err, assignment) => {
+                      if (err) return callback(err)
+                      if (assignment?.variant === '20s') {
+                        if (
+                          owner.signUpDate > NEW_COMPILE_TIMEOUT_ENFORCED_CUTOFF
+                        ) {
+                          limits.timeout = 20
+                        }
+                      }
+                      callback(null, limits)
+                    }
+                  )
+                } else {
+                  callback(null, limits)
+                }
               }
             )
           }

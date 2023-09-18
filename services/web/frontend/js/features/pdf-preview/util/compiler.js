@@ -184,6 +184,14 @@ export default class DocumentCompiler {
       params.file_line_errors = 'true'
     }
 
+    // temporary override to force the new compile timeout
+    const newCompileTimeoutOverride = new URLSearchParams(
+      window.location.search
+    ).get('force_new_compile_timeout')
+    if (newCompileTimeoutOverride) {
+      params.set('force_new_compile_timeout', newCompileTimeoutOverride)
+    }
+
     return params
   }
 

@@ -14,6 +14,10 @@ const Errors = require('../Errors/Errors')
 const DocstoreManager = require('../Docstore/DocstoreManager')
 const logger = require('@overleaf/logger')
 const { expressify } = require('../../util/promises')
+const SplitTestHandler = require('../SplitTests/SplitTestHandler')
+const {
+  NEW_COMPILE_TIMEOUT_ENFORCED_CUTOFF,
+} = require('../Compile/CompileManager')
 
 module.exports = {
   joinProject: expressify(joinProject),
@@ -66,6 +70,30 @@ async function joinProject(req, res, next) {
   } = await _buildJoinProjectView(req, projectId, userId)
   if (!project) {
     return res.sendStatus(403)
+  }
+  // Compile timeout 20s test
+  if (project.features?.compileTimeout <= 60) {
+    const compileAssignment =
+      await SplitTestHandler.promises.getAssignmentForMongoUser(
+        project.owner._id,
+        'compile-backend-class-n2d'
+      )
+    if (compileAssignment?.variant === 'n2d') {
+      const timeoutAssignment =
+        await SplitTestHandler.promises.getAssignmentForMongoUser(
+          project.owner._id,
+          'compile-timeout-20s'
+        )
+      if (timeoutAssignment?.variant === '20s') {
+        if (project.owner.signUpDate > NEW_COMPILE_TIMEOUT_ENFORCED_CUTOFF) {
+          // New users will see a 10s warning and compile fail at 20s
+          project.showNewCompileTimeoutUI = 'active'
+        } else {
+          // Older users aren't limited to 20s, but will see a notice of upcoming changes if compile >20s
+          project.showNewCompileTimeoutUI = 'changing'
+        }
+      }
+    }
   }
   // Hide sensitive data if the user is restricted
   if (isRestrictedUser) {

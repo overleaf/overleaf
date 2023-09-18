@@ -156,6 +156,35 @@
     background-color: @red-10;
   }
 }
+.btn-info-ghost when (@is-new-css = true) {
+  .btn-borderless(@blue-50, @btn-info-ghost-bg, @blue-10);
+}
+// Info Ghost appear as info blue with no border
+.btn-info-ghost when (@is-new-css = false) {
+  .button-variant(@btn-info-ghost-color; @btn-info-ghost-bg; @btn-info-ghost-border);
+  // hover for ghost acts different from typical variants, as it's default state has no bg
+  &:hover {
+    background-color: @blue-10;
+  }
+}
+// Inline button to fit text, without link styling.
+// TODO: generic class for other styles
+.btn-info-ghost-inline when (@is-new-css = true) {
+  .btn-borderless(@blue-50, @btn-info-ghost-bg, @blue-10);
+  padding: 0 !important;
+  font-size: inherit !important;
+  vertical-align: inherit;
+}
+.btn-info-ghost-inline when (@is-new-css = false) {
+  .button-variant(@btn-info-ghost-color; @btn-info-ghost-bg; @btn-info-ghost-border);
+  // hover for ghost acts different from typical variants, as it's default state has no bg
+  &:hover {
+    background-color: @blue-10;
+  }
+  padding: 0 !important;
+  font-size: inherit !important;
+  vertical-align: inherit;
+}
 .btn-danger-ghost when (@is-new-css = true) {
   .btn-borderless(@red-50, @btn-danger-ghost-bg, @red-10);
 }

@@ -29,7 +29,7 @@ function CompileTimeWarning() {
         return
       }
       setDisplayStatus({ lastDisplayTime: Date.now(), dismissed: false })
-      eventTracking.sendMB('compile-time-warning-displayed', {})
+      eventTracking.sendMB('compile-time-warning-displayed', { time: 30 })
     }
   }, [showCompileTimeWarning, displayStatus, setDisplayStatus])
 
@@ -40,6 +40,7 @@ function CompileTimeWarning() {
   const closeWarning = useCallback(() => {
     eventTracking.sendMB('compile-time-warning-dismissed', {
       'time-since-displayed': getTimeSinceDisplayed(),
+      time: 30,
     })
     setShowCompileTimeWarning(false)
     setDisplayStatus(displayStatus => ({ ...displayStatus, dismissed: true }))
@@ -48,6 +49,7 @@ function CompileTimeWarning() {
   const handleUpgradeClick = useCallback(() => {
     eventTracking.sendMB('compile-time-warning-upgrade-click', {
       'time-since-displayed': getTimeSinceDisplayed(),
+      time: 30,
     })
     setShowCompileTimeWarning(false)
     setDisplayStatus(displayStatus => ({ ...displayStatus, dismissed: true }))

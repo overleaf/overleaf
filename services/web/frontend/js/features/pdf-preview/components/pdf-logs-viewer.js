@@ -4,6 +4,7 @@ import classnames from 'classnames'
 import PdfValidationIssue from './pdf-validation-issue'
 import StopOnFirstErrorPrompt from './stop-on-first-error-prompt'
 import TimeoutUpgradePrompt from './timeout-upgrade-prompt'
+import TimeoutUpgradePromptNew from './timeout-upgrade-prompt-new'
 import PdfPreviewError from './pdf-preview-error'
 import PdfClearCacheButton from './pdf-clear-cache-button'
 import PdfDownloadFilesButton from './pdf-download-files-button'
@@ -23,6 +24,7 @@ function PdfLogsViewer() {
     validationIssues,
     showLogs,
     stoppedOnFirstError,
+    showNewCompileTimeoutUI,
   } = useCompileContext()
 
   const { t } = useTranslation()
@@ -34,9 +36,14 @@ function PdfLogsViewer() {
 
         {stoppedOnFirstError && <StopOnFirstErrorPrompt />}
 
-        {error && <PdfPreviewError error={error} />}
-
-        {error === 'timedout' && <TimeoutUpgradePrompt />}
+        {showNewCompileTimeoutUI && error === 'timedout' ? (
+          <TimeoutUpgradePromptNew />
+        ) : (
+          <>
+            {error && <PdfPreviewError error={error} />}
+            {error === 'timedout' && <TimeoutUpgradePrompt />}
+          </>
+        )}
 
         {validationIssues &&
           Object.entries(validationIssues).map(([name, issue]) => (

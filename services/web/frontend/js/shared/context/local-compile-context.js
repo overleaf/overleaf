@@ -66,6 +66,7 @@ export const CompileContextPropTypes = {
     setStopOnValidationError: PropTypes.func.isRequired,
     showCompileTimeWarning: PropTypes.bool.isRequired,
     showLogs: PropTypes.bool.isRequired,
+    showNewCompileTimeoutUI: PropTypes.string,
     showFasterCompilesFeedbackUI: PropTypes.bool.isRequired,
     stopOnFirstError: PropTypes.bool.isRequired,
     stopOnValidationError: PropTypes.bool.isRequired,
@@ -84,7 +85,11 @@ export function LocalCompileProvider({ children }) {
 
   const { hasPremiumCompile, isProjectOwner } = useEditorContext()
 
-  const { _id: projectId, rootDocId } = useProjectContext()
+  const {
+    _id: projectId,
+    rootDocId,
+    showNewCompileTimeoutUI,
+  } = useProjectContext()
 
   const { pdfPreviewOpen } = useLayoutContext()
 
@@ -555,6 +560,7 @@ export function LocalCompileProvider({ children }) {
       fileList,
       hasChanges,
       highlights,
+      isProjectOwner,
       lastCompileOptions,
       logEntryAnnotations,
       logEntries,
@@ -580,6 +586,7 @@ export function LocalCompileProvider({ children }) {
       setStopOnFirstError,
       setStopOnValidationError,
       showLogs,
+      showNewCompileTimeoutUI,
       showFasterCompilesFeedbackUI,
       startCompile,
       stopCompile,
@@ -609,6 +616,7 @@ export function LocalCompileProvider({ children }) {
       fileList,
       hasChanges,
       highlights,
+      isProjectOwner,
       lastCompileOptions,
       logEntries,
       logEntryAnnotations,
@@ -629,6 +637,7 @@ export function LocalCompileProvider({ children }) {
       setStopOnValidationError,
       showCompileTimeWarning,
       showLogs,
+      showNewCompileTimeoutUI,
       showFasterCompilesFeedbackUI,
       startCompile,
       stopCompile,

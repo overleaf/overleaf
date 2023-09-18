@@ -33,6 +33,7 @@ export const projectShape = {
     _id: PropTypes.string.isRequired,
     email: PropTypes.string.isRequired,
   }),
+  useNewCompileTimeoutUI: PropTypes.string,
 }
 
 ProjectContext.Provider.propTypes = {
@@ -79,7 +80,19 @@ export function ProjectProvider({ children }) {
     features,
     publicAccesLevel: publicAccessLevel,
     owner,
+    showNewCompileTimeoutUI,
   } = project || projectFallback
+
+  // temporary override for new compile timeout
+  const forceNewCompileTimeout = new URLSearchParams(
+    window.location.search
+  ).get('force_new_compile_timeout')
+  const newCompileTimeoutOverride =
+    forceNewCompileTimeout === 'active'
+      ? 'active'
+      : forceNewCompileTimeout === 'changing'
+      ? 'changing'
+      : undefined
 
   const value = useMemo(() => {
     return {
@@ -91,6 +104,8 @@ export function ProjectProvider({ children }) {
       features,
       publicAccessLevel,
       owner,
+      showNewCompileTimeoutUI:
+        newCompileTimeoutOverride || showNewCompileTimeoutUI,
     }
   }, [
     _id,
@@ -101,6 +116,8 @@ export function ProjectProvider({ children }) {
     features,
     publicAccessLevel,
     owner,
+    showNewCompileTimeoutUI,
+    newCompileTimeoutOverride,
   ])
 
   return (
