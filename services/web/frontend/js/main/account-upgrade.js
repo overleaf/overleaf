@@ -1,8 +1,13 @@
 import * as eventTracking from '../infrastructure/event-tracking'
 
-function startFreeTrial(source, version, $scope) {
+function startFreeTrial(source, version, $scope, variant) {
+  const eventSegmentation = { 'paywall-type': source }
+  if (variant) {
+    eventSegmentation.variant = variant
+  }
+
   eventTracking.send('subscription-funnel', 'upgraded-free-trial', source)
-  eventTracking.sendMB('paywall-click', { 'paywall-type': source })
+  eventTracking.sendMB('paywall-click', eventSegmentation)
 
   const searchParams = new URLSearchParams({
     itm_campaign: source,

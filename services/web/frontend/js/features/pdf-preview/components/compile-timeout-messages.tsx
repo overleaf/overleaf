@@ -146,7 +146,8 @@ function CompileTimeoutMessages() {
         <Notification
           action={
             <StartFreeTrialButton
-              source="compile-time-warning-new-10s"
+              variant="new-10s"
+              source="compile-time-warning"
               buttonProps={{
                 className: 'btn-secondary-compile-timeout-override',
               }}
@@ -188,7 +189,8 @@ function CompileTimeoutMessages() {
           <Notification
             action={
               <StartFreeTrialButton
-                source="compile-time-warning-new-changing-soon"
+                variant="new-changing"
+                source="compile-time-warning"
                 buttonProps={{
                   className: 'btn-secondary-compile-timeout-override',
                 }}

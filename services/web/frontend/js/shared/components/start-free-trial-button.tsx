@@ -6,6 +6,7 @@ import * as eventTracking from '../../infrastructure/event-tracking'
 
 type StartFreeTrialButtonProps = {
   source: string
+  variant?: string
   buttonProps?: Button.ButtonProps
   children?: React.ReactNode
   handleClick?: MouseEventHandler<Button>
@@ -18,14 +19,19 @@ export default function StartFreeTrialButton({
   children,
   handleClick,
   source,
+  variant,
 }: StartFreeTrialButtonProps) {
   const { t } = useTranslation()
 
   useEffect(() => {
-    eventTracking.sendMB('paywall-prompt', {
+    const eventSegmentation: { [key: string]: unknown } = {
       'paywall-type': source,
-    })
-  }, [source])
+    }
+    if (variant) {
+      eventSegmentation.variant = variant
+    }
+    eventTracking.sendMB('paywall-prompt', eventSegmentation)
+  }, [source, variant])
 
   const onClick = useCallback(
     event => {
@@ -35,9 +41,9 @@ export default function StartFreeTrialButton({
         handleClick(event)
       }
 
-      startFreeTrial(source)
+      startFreeTrial(source, null, null, variant)
     },
-    [handleClick, source]
+    [handleClick, source, variant]
   )
 
   return (

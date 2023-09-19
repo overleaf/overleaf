@@ -52,7 +52,7 @@ type CompileTimeoutProps = {
   isProjectOwner: boolean
 }
 
-function CompileTimeout({
+const CompileTimeout = memo(function CompileTimeout({
   compileTimeChanging,
   isProjectOwner,
 }: CompileTimeoutProps) {
@@ -98,11 +98,8 @@ function CompileTimeout({
           {isProjectOwner && (
             <p className="text-center">
               <StartFreeTrialButton
-                source={
-                  compileTimeChanging
-                    ? 'compile-timeout-new-changing'
-                    : 'compile-timeout-new-active'
-                }
+                variant={compileTimeChanging ? 'new-changing' : 'new-20s'}
+                source="compile-timeout"
                 buttonProps={{
                   bsStyle: 'success',
                   className: 'row-spaced-small',
@@ -119,7 +116,7 @@ function CompileTimeout({
       level="error"
     />
   )
-}
+})
 
 type PreventTimeoutHelpMessageProps = {
   compileTimeChanging?: boolean
@@ -127,7 +124,7 @@ type PreventTimeoutHelpMessageProps = {
   handleEnableStopOnFirstErrorClick: () => void
 }
 
-function PreventTimeoutHelpMessage({
+const PreventTimeoutHelpMessage = memo(function PreventTimeoutHelpMessage({
   compileTimeChanging,
   lastCompileOptions,
   handleEnableStopOnFirstErrorClick,
@@ -236,6 +233,6 @@ function PreventTimeoutHelpMessage({
       level="raw"
     />
   )
-}
+})
 
 export default memo(TimeoutUpgradePromptNew)
