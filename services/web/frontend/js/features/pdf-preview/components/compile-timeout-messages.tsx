@@ -90,11 +90,6 @@ function CompileTimeoutMessages() {
 
   useEffect(() => {
     if (compiling || error || showLogs) return
-    window.sl_console.log(
-      `[compileTimeout] compiledTimeServerE2E ${
-        deliveryLatencies.compileTimeServerE2E / 1000
-      }s`
-    )
     handleNewCompile(deliveryLatencies.compileTimeServerE2E)
   }, [compiling, error, showLogs, deliveryLatencies, handleNewCompile])
 

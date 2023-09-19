@@ -26,11 +26,6 @@ function CompileTimeWarning() {
 
   useEffect(() => {
     if (deliveryLatencies && deliveryLatencies.compileTimeServerE2E) {
-      window.sl_console.log(
-        `[compileTimeout] compiledTimeServerE2E ${
-          deliveryLatencies.compileTimeServerE2E / 1000
-        }s`
-      )
       // compile-timeout-20s test
       if (deliveryLatencies.compileTimeServerE2E > 10000) {
         eventTracking.sendMB('compile-time-warning-would-display', {
