@@ -26,7 +26,7 @@ function CompileTimeoutMessages() {
 
   const segmentation = useMemo(() => {
     return {
-      newCompileTimeout: showNewCompileTimeoutUI || 'control',
+      newCompileTimeout: showNewCompileTimeoutUI,
       isProjectOwner,
     }
   }, [showNewCompileTimeoutUI, isProjectOwner])
@@ -59,11 +59,6 @@ function CompileTimeoutMessages() {
               ...segmentation,
             })
           }
-        } else {
-          eventTracking.sendMB('compile-time-warning-would-display', {
-            time: 10,
-            ...segmentation,
-          })
         }
       }
     },

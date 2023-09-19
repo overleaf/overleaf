@@ -6,7 +6,7 @@ import StartFreeTrialButton from '../../../shared/components/start-free-trial-bu
 import { useDetachCompileContext } from '../../../shared/context/detach-compile-context'
 import usePersistedState from '../../../shared/hooks/use-persisted-state'
 
-const ONE_DAY = 24 * 60 * 60 * 24 * 1000
+const TWENTY_FOUR_DAYS = 24 * 60 * 60 * 24 * 1000
 
 function CompileTimeWarning() {
   const { t } = useTranslation()
@@ -17,14 +17,36 @@ function CompileTimeWarning() {
     true
   )
 
-  const { showCompileTimeWarning, setShowCompileTimeWarning } =
-    useDetachCompileContext()
+  const {
+    showCompileTimeWarning,
+    setShowCompileTimeWarning,
+    deliveryLatencies,
+    isProjectOwner,
+  } = useDetachCompileContext()
+
+  useEffect(() => {
+    if (deliveryLatencies && deliveryLatencies.compileTimeServerE2E) {
+      window.sl_console.log(
+        `[compileTimeout] compiledTimeServerE2E ${
+          deliveryLatencies.compileTimeServerE2E / 1000
+        }s`
+      )
+      // compile-timeout-20s test
+      if (deliveryLatencies.compileTimeServerE2E > 10000) {
+        eventTracking.sendMB('compile-time-warning-would-display', {
+          time: 10,
+          newCompileTimeout: 'control',
+          isProjectOwner,
+        })
+      }
+    }
+  }, [deliveryLatencies, isProjectOwner])
 
   useEffect(() => {
     if (showCompileTimeWarning) {
       if (
         displayStatus &&
-        Date.now() - displayStatus.lastDisplayTime < ONE_DAY
+        Date.now() - displayStatus.lastDisplayTime < TWENTY_FOUR_DAYS
       ) {
         return
       }
