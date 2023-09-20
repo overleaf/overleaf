@@ -85,6 +85,7 @@ describe('SubscriptionController', function () {
         .returns({ plans: [], planCodesChangingAtTermEnd: [] }),
     }
     this.settings = {
+      restrictedCountries: ['KP'],
       coupon_codes: {
         upgradeToAnnualPromo: {
           student: 'STUDENTCODEHERE',
@@ -116,9 +117,12 @@ describe('SubscriptionController', function () {
     }
     this.GeoIpLookup = {
       isValidCurrencyParam: sinon.stub().returns(true),
-      getCurrencyCode: sinon.stub(),
+      getCurrencyCode: sinon.stub().yields('USD', 'US'),
       promises: {
-        getCurrencyCode: sinon.stub(),
+        getCurrencyCode: sinon.stub().resolves({
+          countryCode: 'US',
+          currencyCode: 'USD',
+        }),
       },
     }
     this.UserGetter = {
@@ -161,7 +165,10 @@ describe('SubscriptionController', function () {
         './GroupPlansData': (this.GroupPlansData = {}),
         './V1SubscriptionManager': (this.V1SubscriptionManager = {}),
         '../Errors/HttpErrorHandler': (this.HttpErrorHandler = {
-          unprocessableEntity: sinon.stub(),
+          unprocessableEntity: sinon.stub().callsFake((req, res, message) => {
+            res.status(422)
+            res.json({ message })
+          }),
         }),
         './Errors': SubscriptionErrors,
         '../Analytics/AnalyticsManager': (this.AnalyticsManager = {
@@ -597,6 +604,23 @@ describe('SubscriptionController', function () {
           done()
         },
       })
+    })
+
+    it('should handle restricted country', function (done) {
+      this.GeoIpLookup.promises.getCurrencyCode.resolves({
+        countryCode: 'KP',
+      })
+      this.res.callback = () => {
+        expect(this.res.statusCode).to.equal(422)
+        expect(this.res.body).to.include(
+          'sorry_detected_sales_restricted_region'
+        )
+        this.SubscriptionHandler.promises.createSubscription.called.should.equal(
+          false
+        )
+        done()
+      }
+      this.SubscriptionController.createSubscription(this.req, this.res)
     })
 
     it('should handle 3DSecure errors/recurly transaction errors', function (done) {

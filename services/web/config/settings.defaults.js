@@ -347,6 +347,7 @@ module.exports = {
   ],
 
   enableSubscriptions: false,
+  restrictedCountries: [],
 
   enabledLinkedFileTypes: (process.env.ENABLED_LINKED_FILE_TYPES || '').split(
     ','

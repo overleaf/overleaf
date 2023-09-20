@@ -227,7 +227,7 @@ async function paymentPage(req, res) {
       }
 
       // Block web sales to restricted countries
-      if (['CU', 'IR', 'KP', 'RU', 'SY', 'VE'].includes(countryCode)) {
+      if (Settings.restrictedCountries.includes(countryCode)) {
         return res.render('subscriptions/restricted-country', {
           title: 'restricted',
         })
@@ -508,6 +508,19 @@ async function createSubscription(req, res) {
   if (hasSubscription) {
     logger.warn({ userId: user._id }, 'user already has subscription')
     return res.sendStatus(409) // conflict
+  }
+
+  const { countryCode } = await _getRecommendedCurrency(req, res)
+
+  // Block web sales to restricted countries
+  if (Settings.restrictedCountries.includes(countryCode)) {
+    return HttpErrorHandler.unprocessableEntity(
+      req,
+      res,
+      req.i18n.translate('sorry_detected_sales_restricted_region', {
+        link: '/contact',
+      })
+    )
   }
 
   const result = {}
