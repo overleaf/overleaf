@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import Toolbar from './toolbar/toolbar'
 import Main from './main'
 import { Diff, DocDiffResponse } from '../../services/types/doc'
@@ -53,18 +53,22 @@ function DiffView() {
     handleError,
   ])
 
-  let diff: Diff | null
+  const diff = useMemo(() => {
+    let diff: Diff | null
 
-  if (!data?.diff) {
-    diff = null
-  } else if ('binary' in data.diff) {
-    diff = { binary: true }
-  } else {
-    diff = {
-      binary: false,
-      docDiff: highlightsFromDiffResponse(data.diff, t),
+    if (!data?.diff) {
+      diff = null
+    } else if ('binary' in data.diff) {
+      diff = { binary: true }
+    } else {
+      diff = {
+        binary: false,
+        docDiff: highlightsFromDiffResponse(data.diff, t),
+      }
     }
-  }
+
+    return diff
+  }, [data, t])
 
   return (
     <div className="doc-panel">
