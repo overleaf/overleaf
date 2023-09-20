@@ -24,16 +24,23 @@ function AddCommentEntry({ entryId }: AddCommentEntryProps) {
     useReviewPanelUpdaterFnsContext()
 
   const [content, setContent] = useState('')
+  const [isSubmitting, setIsSubmiting] = useState(false)
 
   const handleStartNewComment = () => {
     setIsAddingComment(true)
     handleLayoutChange({ async: true })
   }
 
-  const handleSubmitNewComment = () => {
-    submitNewComment(content)
-    setIsAddingComment(false)
-    setContent('')
+  const handleSubmitNewComment = async () => {
+    setIsSubmiting(true)
+    try {
+      await submitNewComment(content)
+      setIsSubmiting(false)
+      setIsAddingComment(false)
+      setContent('')
+    } catch (err) {
+      setIsSubmiting(false)
+    }
     handleLayoutChange({ async: true })
   }
 
@@ -79,15 +86,21 @@ function AddCommentEntry({ entryId }: AddCommentEntryProps) {
         {isAddingComment ? (
           <>
             <div className="rp-new-comment">
-              <AutoExpandingTextArea
-                className="rp-comment-input"
-                onChange={e => setContent(e.target.value)}
-                onKeyPress={handleCommentKeyPress}
-                onResize={handleLayoutChange}
-                placeholder={t('add_your_comment_here')}
-                value={content}
-                autoFocus // eslint-disable-line jsx-a11y/no-autofocus
-              />
+              {isSubmitting ? (
+                <div className="rp-loading">
+                  <Icon type="spinner" spin />
+                </div>
+              ) : (
+                <AutoExpandingTextArea
+                  className="rp-comment-input"
+                  onChange={e => setContent(e.target.value)}
+                  onKeyPress={handleCommentKeyPress}
+                  onResize={handleLayoutChange}
+                  placeholder={t('add_your_comment_here')}
+                  value={content}
+                  autoFocus // eslint-disable-line jsx-a11y/no-autofocus
+                />
+              )}
             </div>
             <EntryActions>
               <EntryActions.Button
@@ -98,7 +111,7 @@ function AddCommentEntry({ entryId }: AddCommentEntryProps) {
               </EntryActions.Button>
               <EntryActions.Button
                 onClick={handleSubmitNewComment}
-                disabled={!content.length}
+                disabled={isSubmitting || !content.length}
               >
                 <Icon type="comment" /> {t('comment')}
               </EntryActions.Button>

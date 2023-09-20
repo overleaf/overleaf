@@ -818,27 +818,42 @@ export default App.controller(
       const thread_id = RangesTracker.generateId()
       const thread = getThread(thread_id)
       thread.submitting = true
-      $scope.$broadcast('comment:add', thread_id, offset, length)
-      dispatchReviewPanelEvent('comment:add', {
-        threadId: thread_id,
-        offset,
-        length,
-      })
-      $http
+
+      const emitCommentAdd = () => {
+        $scope.$broadcast('comment:add', thread_id, offset, length)
+        dispatchReviewPanelEvent('comment:add', {
+          threadId: thread_id,
+          offset,
+          length,
+        })
+
+        // TODO: unused?
+        $scope.$broadcast('editor:clearSelection')
+        $timeout(() => ide.$scope.$broadcast('review-panel:layout'))
+        eventTracking.sendMB('rp-new-comment', { size: content.length })
+      }
+
+      if (ide.$scope.reviewPanel.isReact === false) {
+        emitCommentAdd()
+      }
+
+      return $http
         .post(`/project/${$scope.project_id}/thread/${thread_id}/messages`, {
           content,
           _csrf: window.csrfToken,
         })
-        .catch(() =>
+        .then(() => {
+          if (ide.$scope.reviewPanel.isReact) {
+            emitCommentAdd()
+          }
+        })
+        .catch(() => {
           ide.showGenericMessageModal(
             'Error submitting comment',
             'Sorry, there was a problem submitting your comment'
           )
-        )
-      // TODO: unused?
-      $scope.$broadcast('editor:clearSelection')
-      $timeout(() => ide.$scope.$broadcast('review-panel:layout'))
-      eventTracking.sendMB('rp-new-comment', { size: content.length })
+          throw Error('Error submitting comment')
+        })
     }
 
     $scope.cancelNewComment = entry =>
