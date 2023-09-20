@@ -1,61 +1,71 @@
 const logger = require('@overleaf/logger')
+const request = require('request')
+const _ = require('underscore')
 const urlValidator = require('valid-url')
 const { InvalidUrlError, UrlFetchFailedError } = require('./LinkedFilesErrors')
 const LinkedFilesHandler = require('./LinkedFilesHandler')
 const UrlHelper = require('../Helpers/UrlHelper')
-const { fetchStream, RequestFailedError } = require('@overleaf/fetch-utils')
-const { callbackify } = require('../../util/promises')
-const { FileTooLargeError } = require('../Errors/Errors')
 
-async function createLinkedFile(
+function createLinkedFile(
   projectId,
   linkedFileData,
   name,
   parentFolderId,
-  userId
+  userId,
+  callback
 ) {
   logger.info(
     { projectId, userId, url: linkedFileData.url },
     'create linked file'
   )
   linkedFileData = _sanitizeData(linkedFileData)
-  const fetchUrl = _getUrl(projectId, linkedFileData, userId)
-  try {
-    const readStream = await fetchStream(fetchUrl)
-    const file = await LinkedFilesHandler.promises.importFromStream(
-      projectId,
-      readStream,
-      linkedFileData,
-      name,
-      parentFolderId,
-      userId
-    )
-    return file._id
-  } catch (error) {
-    if (error instanceof RequestFailedError && /too large/.test(error.body)) {
-      throw new FileTooLargeError('file too large', {
-        url: linkedFileData.url,
-      }).withCause(error)
+  _getUrlStream(projectId, linkedFileData, userId, (err, readStream) => {
+    if (err) {
+      return callback(err)
     }
-    throw new UrlFetchFailedError('url fetch failed', {
-      url: linkedFileData.url,
-    }).withCause(error)
-  }
+    readStream.on('error', callback)
+    readStream.on('response', response => {
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        LinkedFilesHandler.importFromStream(
+          projectId,
+          readStream,
+          linkedFileData,
+          name,
+          parentFolderId,
+          userId,
+          (err, file) => {
+            if (err) {
+              return callback(err)
+            }
+            callback(null, file._id)
+          }
+        ) // Created
+      } else {
+        const error = new UrlFetchFailedError(
+          `url fetch failed: ${linkedFileData.url}`
+        )
+        error.statusCode = response.statusCode
+        callback(error)
+      }
+    })
+  })
 }
 
-async function refreshLinkedFile(
+function refreshLinkedFile(
   projectId,
   linkedFileData,
   name,
   parentFolderId,
-  userId
+  userId,
+  callback
 ) {
-  return await createLinkedFile(
+  createLinkedFile(
     projectId,
     linkedFileData,
     name,
     parentFolderId,
-    userId
+    userId,
+    callback
   )
 }
 
@@ -66,17 +76,15 @@ function _sanitizeData(data) {
   }
 }
 
-function _getUrl(projectId, data, currentUserId) {
+function _getUrlStream(projectId, data, currentUserId, callback) {
+  callback = _.once(callback)
   let { url } = data
   if (!urlValidator.isWebUri(url)) {
-    throw new InvalidUrlError(`invalid url: ${url}`)
+    return callback(new InvalidUrlError(`invalid url: ${url}`))
   }
   url = UrlHelper.wrapUrlWithProxy(url)
-  return url
+  const readStream = request.get(url)
+  callback(null, readStream)
 }
 
-module.exports = {
-  createLinkedFile: callbackify(createLinkedFile),
-  refreshLinkedFile: callbackify(refreshLinkedFile),
-  promises: { createLinkedFile, refreshLinkedFile },
-}
+module.exports = { createLinkedFile, refreshLinkedFile }
