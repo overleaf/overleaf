@@ -34,7 +34,10 @@ const {
   RemoteServiceError,
   FileCannotRefreshError,
 } = require('./LinkedFilesErrors')
-const { OutputFileFetchFailedError } = require('../Errors/Errors')
+const {
+  OutputFileFetchFailedError,
+  FileTooLargeError,
+} = require('../Errors/Errors')
 const Modules = require('../../infrastructure/Modules')
 const { plainTextResponse } = require('../../infrastructure/Response')
 
@@ -209,6 +212,9 @@ module.exports = LinkedFilesController = {
     } else if (/\bECONNREFUSED\b/.test(error.message)) {
       res.status(500)
       plainTextResponse(res, 'Importing references is not currently available')
+    } else if (error instanceof FileTooLargeError) {
+      res.status(422)
+      plainTextResponse(res, 'File too large')
     } else {
       next(error)
     }

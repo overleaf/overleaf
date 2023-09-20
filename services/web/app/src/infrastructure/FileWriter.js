@@ -27,7 +27,7 @@ class SizeLimitedStream extends Transform {
     super(options)
 
     this.bytes = 0
-    this.maxSizeBytes = options.maxSizeBytes
+    this.maxSizeBytes = options.maxSizeBytes || Settings.maxUploadSize
     this.drain = false
     this.on('error', () => {
       this.drain = true

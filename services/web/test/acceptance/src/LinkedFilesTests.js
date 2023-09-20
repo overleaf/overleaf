@@ -16,6 +16,8 @@ LinkedUrlProxy.get('/', (req, res, next) => {
     return plainTextResponse(res, 'foo foo foo')
   } else if (req.query.url === 'http://example.com/bar') {
     return plainTextResponse(res, 'bar bar bar')
+  } else if (req.query.url === 'http://example.com/large') {
+    return plainTextResponse(res, 'x'.repeat(Settings.maxUploadSize + 1))
   } else {
     return res.sendStatus(404)
   }
@@ -317,6 +319,23 @@ describe('LinkedFiles', function () {
       ))
       expect(response.statusCode).to.equal(200)
       expect(body).to.equal('bar bar bar')
+    })
+
+    it('should return an error if the file exceeds the maximum size', async function () {
+      // download does not succeed
+      const { response, body } = await owner.doRequest('post', {
+        url: `/project/${projectOneId}/linked_file`,
+        json: {
+          provider: 'url',
+          data: {
+            url: 'http://example.com/large',
+          },
+          parent_folder_id: projectOneRootFolderId,
+          name: 'url-large-file-1',
+        },
+      })
+      expect(response.statusCode).to.equal(422)
+      expect(body).to.equal('File too large')
     })
 
     it("should return an error if the file can't be downloaded", async function () {
