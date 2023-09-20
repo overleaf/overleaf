@@ -10,7 +10,6 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let LinkedFilesHandler
 const FileWriter = require('../../infrastructure/FileWriter')
 const EditorController = require('../Editor/EditorController')
 const ProjectLocator = require('../Project/ProjectLocator')
@@ -22,8 +21,9 @@ const {
   V1ProjectNotFoundError,
   BadDataError,
 } = require('./LinkedFilesErrors')
+const { promisifyAll } = require('../../util/promises')
 
-module.exports = LinkedFilesHandler = {
+const LinkedFilesHandler = {
   getFileById(projectId, fileId, callback) {
     if (callback == null) {
       callback = function () {}
@@ -150,4 +150,11 @@ module.exports = LinkedFilesHandler = {
       )
     })
   },
+}
+
+module.exports = {
+  ...LinkedFilesHandler,
+  promises: promisifyAll(LinkedFilesHandler, {
+    multiResult: { getFileById: ['file', 'path', 'parentFolder'] },
+  }),
 }
