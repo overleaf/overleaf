@@ -217,6 +217,14 @@ export const atomicDecorations = (options: Options) => {
             preamble.authors.push({ node, content })
             preamble.to = nodeRef.node.to
           }
+        } else if (
+          nodeRef.node.type.is('Affil') ||
+          nodeRef.node.type.is('Affiliation')
+        ) {
+          const node = nodeRef.node.getChild('TextArgument')
+          if (node) {
+            preamble.to = nodeRef.node.to
+          }
         }
 
         if (nodeRef.type.is('$Environment')) {

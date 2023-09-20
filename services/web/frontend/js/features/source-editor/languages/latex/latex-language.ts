@@ -178,6 +178,9 @@ export const LaTeXLanguage = LRLanguage.define({
         Comment: t.comment,
         'UsePackage/OptionalArgument/ShortOptionalArg/Normal': t.attributeValue,
         'UsePackage/ShortTextArgument/ShortArg/Normal': t.tagName,
+        'Affiliation/OptionalArgument/ShortOptionalArg/Normal':
+          t.attributeValue,
+        'Affil/OptionalArgument/ShortOptionalArg/Normal': t.attributeValue,
         'LiteralArgContent VerbContent VerbatimContent LstInlineContent':
           t.string,
         'NewCommand/LiteralArgContent': t.typeName,

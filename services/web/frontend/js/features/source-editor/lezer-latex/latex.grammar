@@ -88,6 +88,8 @@
     BibliographyCtrlSeq,
     BibliographyStyleCtrlSeq,
     AuthorCtrlSeq,
+    AffilCtrlSeq,
+    AffiliationCtrlSeq,
     MaketitleCtrlSeq,
     TextColorCtrlSeq,
     ColorBoxCtrlSeq,
@@ -240,6 +242,12 @@ KnownCommand {
     } |
     Author {
         AuthorCtrlSeq optionalWhitespace? OptionalArgument? optionalWhitespace? TextArgument
+    } |
+    Affil {
+        AffilCtrlSeq optionalWhitespace? OptionalArgument? optionalWhitespace? TextArgument
+    } |
+    Affiliation {
+        AffiliationCtrlSeq optionalWhitespace? OptionalArgument? optionalWhitespace? TextArgument
     } |
     DocumentClass {
         DocumentClassCtrlSeq optionalWhitespace? OptionalArgument?
