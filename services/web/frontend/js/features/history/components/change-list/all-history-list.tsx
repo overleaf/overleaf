@@ -3,14 +3,17 @@ import HistoryVersion from './history-version'
 import LoadingSpinner from '../../../../shared/components/loading-spinner'
 import { OwnerPaywallPrompt } from './owner-paywall-prompt'
 import { NonOwnerPaywallPrompt } from './non-owner-paywall-prompt'
-import {
-  isVersionSelected,
-  ItemSelectionState,
-} from '../../utils/history-details'
+import { isVersionSelected } from '../../utils/history-details'
 import { useUserContext } from '../../../../shared/context/user-context'
 import useDropdownActiveItem from '../../hooks/use-dropdown-active-item'
 import { useHistoryContext } from '../../context/history-context'
 import { useEditorContext } from '../../../../shared/context/editor-context'
+import { Overlay, Popover } from 'react-bootstrap'
+import Close from '@/shared/components/close'
+import { Trans, useTranslation } from 'react-i18next'
+import MaterialIcon from '@/shared/components/material-icon'
+import useAsync from '@/shared/hooks/use-async'
+import { completeHistoryTutorial } from '../../services/api'
 
 type CompletedTutorials = {
   'react-history-buttons-tutorial': Date
@@ -19,11 +22,6 @@ type EditorTutorials = {
   completedTutorials: CompletedTutorials
   setCompletedTutorial: (key: string) => void
 }
-
-const unselectedStates: ItemSelectionState[] = [
-  'aboveSelected',
-  'belowSelected',
-]
 
 function AllHistoryList() {
   const { id: currentUserId } = useUserContext()
@@ -104,25 +102,113 @@ function AllHistoryList() {
   const { completedTutorials, setCompletedTutorial }: EditorTutorials =
     useEditorContext()
 
-  // only show tutorial popover if they havent dismissed ("completed") it yet
+  // only show tutorial popover if they haven't dismissed ("completed") it yet
   const showTutorial = !completedTutorials?.['react-history-buttons-tutorial']
 
   const completeTutorial = useCallback(() => {
     setCompletedTutorial('react-history-buttons-tutorial')
   }, [setCompletedTutorial])
 
-  // only show tutorial popover on the first icon
-  const firstUnselectedIndex = visibleUpdates.findIndex(update => {
-    const selectionState = isVersionSelected(
-      selection,
-      update.fromV,
-      update.toV
+  const { runAsync } = useAsync()
+
+  const { t } = useTranslation()
+
+  // wait for the layout to settle before showing popover, to avoid a flash/ instant move
+  const [layoutSettled, setLayoutSettled] = useState(false)
+  const [resizing, setResizing] = useState(false)
+
+  // When there is a paywall and only two version's to compare,
+  // they are not comparable because the one that has a paywall will not have the compare button
+  // so we should not display on-boarding popover in that case
+  const isPaywallAndNonComparable =
+    visibleUpdates.length === 2 && updatesInfo.freeHistoryLimitHit
+
+  const isMoreThanOneVersion = visibleUpdates.length > 1
+  let popover = null
+
+  if (
+    isMoreThanOneVersion &&
+    !isPaywallAndNonComparable &&
+    showTutorial &&
+    layoutSettled &&
+    !resizing
+  ) {
+    const dismissModal = () => {
+      completeTutorial()
+      runAsync(completeHistoryTutorial()).catch(console.error)
+    }
+
+    popover = (
+      <Overlay
+        placement="left"
+        show
+        // using scrollerRef to position the popover in the middle of the viewport
+        target={scrollerRef.current ?? undefined}
+        shouldUpdatePosition
+      >
+        <Popover
+          id="popover-toolbar-overflow"
+          arrowOffsetTop={10}
+          title={
+            <span>
+              {t('react_history_tutorial_title')}{' '}
+              <Close variant="dark" onDismiss={() => dismissModal()} />
+            </span>
+          }
+          className="dark-themed history-popover"
+        >
+          <Trans
+            i18nKey="react_history_tutorial_content"
+            components={[
+              // eslint-disable-next-line react/jsx-key
+              <MaterialIcon
+                type="align_end"
+                className="material-symbols-rounded history-dropdown-icon-inverted"
+              />,
+              <a href="https://www.overleaf.com/learn/latex/Using_the_History_feature" />, // eslint-disable-line jsx-a11y/anchor-has-content, react/jsx-key
+            ]}
+          />
+        </Popover>
+      </Overlay>
     )
-    return unselectedStates.includes(selectionState)
-  })
+  }
+
+  // give the components time to position before showing popover so we don't get an instant position change
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setLayoutSettled(true)
+    }, 500)
+
+    return () => clearTimeout(timer)
+  }, [setLayoutSettled])
+
+  useEffect(() => {
+    let timer: number | null = null
+
+    const handleResize = () => {
+      // Hide popover when a resize starts, then waiting for a gap of 500ms
+      // with no resizes before making it reappear
+      if (timer) {
+        window.clearTimeout(timer)
+      } else {
+        setResizing(true)
+      }
+      timer = window.setTimeout(() => {
+        timer = null
+        setResizing(false)
+      }, 500)
+    }
+
+    // only need a listener on the component that actually has the popover
+    if (showTutorial) {
+      window.addEventListener('resize', handleResize)
+      return () => window.removeEventListener('resize', handleResize)
+    }
+  }, [showTutorial])
 
   return (
     <div ref={scrollerRef} className="history-all-versions-scroller">
+      {popover}
       <div className="history-all-versions-container">
         <div ref={bottomRef} className="history-versions-bottom" />
         {visibleUpdates.map((update, index) => {
@@ -148,9 +234,6 @@ function AllHistoryList() {
               selectionState === 'aboveSelected' ||
               selectionState === 'belowSelected')
 
-          const hasTutorialOverlay =
-            index === firstUnselectedIndex && showTutorial
-
           return (
             <HistoryVersion
               key={`${update.fromV}_${update.toV}`}
@@ -170,8 +253,6 @@ function AllHistoryList() {
                 activeDropdownItem.isOpened && compareDropdownActive
               }
               dropdownActive={dropdownActive}
-              hasTutorialOverlay={hasTutorialOverlay}
-              completeTutorial={completeTutorial}
             />
           )
         })}
