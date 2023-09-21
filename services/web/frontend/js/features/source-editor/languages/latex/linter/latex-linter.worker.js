@@ -322,54 +322,6 @@ const read1filename = function (TokeniseResult, k) {
   }
 }
 
-const readOptionalLabel = function (TokeniseResult, k) {
-  // read a label my_label:text..
-  const Tokens = TokeniseResult.tokens
-  const text = TokeniseResult.text
-
-  const params = Tokens[k + 1]
-
-  // Quick check for arguments like [label]
-  if (params && params[1] === 'Text') {
-    const paramNum = text.substring(params[2], params[3])
-    if (paramNum.match(/^(\[[^\]]*\])*\s*$/)) {
-      return k + 1 // got it
-    }
-  }
-
-  let label = ''
-  let j, tok
-  for (j = k + 1, tok; (tok = Tokens[j]); j++) {
-    if (tok[1] === '{') {
-      // unclosed label
-      break
-    } else if (tok[1] === 'Text') {
-      const str = text.substring(tok[2], tok[3])
-      label = label + str
-      if (str.match(/\]/)) {
-        // breaking due to ]
-        break
-      }
-    } else if (tok[1] === '_') {
-      label = label + tok[1]
-    } else {
-      break // breaking due to unrecognised token
-    }
-  }
-
-  if (label.length === 0) {
-    return null
-  } else if (label.length > 0 && /^\[[^\]]*\]\s*$/.test(label)) {
-    // make sure the label is of the form [label]
-    return j - 1 // advance past these tokens
-  } else {
-    // invalid label
-    const e = new Error('Invalid label')
-    e.pos = j + 1
-    return e
-  }
-}
-
 const readOptionalParams = function (TokeniseResult, k) {
   // read an optional parameter [N] where N is a number, used
   // for \newcommand{\foo}[2]... meaning 2 parameters
@@ -993,28 +945,6 @@ const InterpretTokens = function (TokeniseResult, ErrorReporter) {
         let newPos = readOptionalGeneric(TokeniseResult, i)
         if (newPos === null) {
           /* do nothing */
-        } else {
-          i = newPos
-        }
-        // try to read parameter {....}, advance if found
-        newPos = readDefinition(TokeniseResult, i)
-        if (newPos === null) {
-          /* do nothing */
-        } else {
-          i = newPos
-        }
-        nextGroupMathMode = false
-      } else if (seq === 'hyperref') {
-        // try to read any optional params [LABEL].... allowing for
-        // underscores, advance if found
-        let newPos = readOptionalLabel(TokeniseResult, i)
-        if (newPos instanceof Error) {
-          TokenErrorFromTo(
-            Tokens[i + 1],
-            Tokens[newPos.pos],
-            'invalid hyperref label'
-          )
-          i = newPos.pos
         } else {
           i = newPos
         }

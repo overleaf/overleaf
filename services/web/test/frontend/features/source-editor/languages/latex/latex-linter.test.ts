@@ -410,40 +410,6 @@ describe('LatexLinter', function () {
     assert.equal(errors.length, 0)
   })
 
-  it('should accept a plain hyperref command', function () {
-    const { errors } = Parse('\\hyperref{http://www.overleaf.com/}')
-    assert.equal(errors.length, 0)
-  })
-
-  it('should accept a hyperref command with underscores in the url ', function () {
-    const { errors } = Parse('\\hyperref{http://www.overleaf.com/my_page.html}')
-    assert.equal(errors.length, 0)
-  })
-
-  it('should accept a hyperref command with category, name and text arguments ', function () {
-    const { errors } = Parse(
-      '\\hyperref{http://www.overleaf.com/}{category}{name}{text}'
-    )
-    assert.equal(errors.length, 0)
-  })
-
-  it('should accept an underscore in a hyperref label', function () {
-    const { errors } = Parse('\\hyperref[foo_bar]{foo bar}')
-    assert.equal(errors.length, 0)
-  })
-
-  it('should reject a $ in a hyperref label', function () {
-    const { errors } = Parse('\\hyperref[foo$bar]{foo bar}')
-    assert.equal(errors.length, 1)
-  })
-
-  it('should reject an unclosed hyperref label', function () {
-    const { errors } = Parse('\\hyperref[foo_bar{foo bar}')
-    assert.equal(errors.length, 2)
-    assert.equal(errors[0].text, 'invalid hyperref label')
-    assert.equal(errors[1].text, 'unexpected close group }')
-  })
-
   // %novalidate
   // %begin novalidate
   // %end novalidate
