@@ -81,7 +81,7 @@ public abstract class Request<T extends Result> {
                     "Rate-limit exceeded. Please wait a while and try again.",
                     "",
                     "If this is unexpected, please contact us at support@overleaf.com, or",
-                    "see https://www.overleaf.com/help/342 for more information."
+                    "see https://www.overleaf.com/learn/how-to/Git_integration for more information."
                   ));
                 } else if (sc == HttpServletResponse.SC_CONFLICT) {  // 409
                     try {
@@ -96,7 +96,7 @@ public abstract class Request<T extends Result> {
                                     "We recommend removing the .git folder before trying again.",
                                     "",
                                     "If this is unexpected, please contact us at support@overleaf.com, or",
-                                    "see https://www.overleaf.com/help/342 for more information."
+                                    "see https://www.overleaf.com/learn/how-to/Git_integration for more information."
                             ));
                         } else {
                             throw new MissingRepositoryException(Arrays.asList("Conflict: 409"));

@@ -15,7 +15,7 @@ public class MissingRepositoryException extends SnapshotAPIException {
         "for the project.",
         "",
         "If this is unexpected, please contact us at support@overleaf.com, or",
-        "see https://www.overleaf.com/help/342 for more information."
+        "see https://www.overleaf.com/learn/how-to/Git_integration for more information."
     );
 
     static List<String> buildDeprecatedMessage(String newUrl) {
@@ -29,7 +29,7 @@ public class MissingRepositoryException extends SnapshotAPIException {
                     "prompted to update your git remote to the project's new identifier.",
                     "",
                     "If this is unexpected, please contact us at support@overleaf.com, or",
-                    "see https://www.overleaf.com/help/342 for more information."
+                    "see https://www.overleaf.com/learn/how-to/Git_integration for more information."
             );
         } else {
             return Arrays.asList(
@@ -43,7 +43,7 @@ public class MissingRepositoryException extends SnapshotAPIException {
                 "prompted to update your git remote to the project's new identifier.",
                 "",
                 "If this is unexpected, please contact us at support@overleaf.com, or",
-                "see https://www.overleaf.com/help/342 for more information."
+                "see https://www.overleaf.com/learn/how-to/Git_integration for more information."
             );
         }
 
@@ -55,7 +55,7 @@ public class MissingRepositoryException extends SnapshotAPIException {
                 "This Overleaf project has been moved to Overleaf v2 and cannot be used with git at this time.",
                 "",
                 "If this error persists, please contact us at support@overleaf.com, or",
-                "see https://www.overleaf.com/help/342 for more information."
+                "see https://www.overleaf.com/learn/how-to/Git_integration for more information."
             );
         } else {
             return Arrays.asList(
@@ -70,7 +70,7 @@ public class MissingRepositoryException extends SnapshotAPIException {
                 "    git remote set-url origin " + remoteUrl,
                 "",
                 "If this does not work, please contact us at support@overleaf.com, or",
-                "see https://www.overleaf.com/help/342 for more information."
+                "see https://www.overleaf.com/learn/how-to/Git_integration for more information."
             );
         }
     }

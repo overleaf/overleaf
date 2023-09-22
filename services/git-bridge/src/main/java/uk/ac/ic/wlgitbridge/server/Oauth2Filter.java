@@ -192,7 +192,7 @@ public class Oauth2Filter implements Filter {
             "and selecting Git from the left sidebar in the project view.",
             "",
             "If this is unexpected, please contact us at support@overleaf.com, or",
-            "see https://www.overleaf.com/help/342 for more information."
+            "see https://www.overleaf.com/learn/how-to/Git_integration for more information."
         ));
     }
 
@@ -212,7 +212,7 @@ public class Oauth2Filter implements Filter {
             "This Overleaf project does not exist.",
             "",
             "If this is unexpected, please contact us at support@overleaf.com, or",
-            "see https://www.overleaf.com/help/342 for more information."
+            "see https://www.overleaf.com/learn/how-to/Git_integration for more information."
         ));
     }
 
