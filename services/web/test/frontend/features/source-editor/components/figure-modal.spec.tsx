@@ -384,6 +384,23 @@ text below`,
       cy.get('.cm-content').should('have.text', 'text abovetext below')
     })
 
+    it('Opens figure modal on pasting image', function () {
+      cy.fixture<Uint8Array>('images/gradient.png').then(gradientBuffer => {
+        const gradientFile = new File([gradientBuffer], 'gradient.png', {
+          type: 'image/png',
+        })
+        const clipboardData = new DataTransfer()
+        clipboardData.items.add(gradientFile)
+        cy.wrap(clipboardData.files).should('have.length', 1)
+        cy.get('.cm-content').trigger('paste', { clipboardData })
+        cy.findByText('Upload from computer').should('be.visible')
+        cy.findByLabelText('File name in this project').should(
+          'have.value',
+          'gradient.png'
+        )
+      })
+    })
+
     // TODO: Add tests for replacing image when we can match on image path
     // TODO: Add tests for changing image size when we can match on figure width
   })
