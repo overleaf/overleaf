@@ -512,10 +512,12 @@ const readVerb = function (TokeniseResult, k) {
   return null
 }
 
-const readUrl = function (TokeniseResult, k) {
+const readUrl = function (TokeniseResult, k, options) {
   // read a url argument
-  // \url|foo|
-  // \url{foo}
+  // \url|https://example.com|
+  // \url{https://example.com}
+  // \href|https://example.com|
+  // \href{https://example.com}
 
   // Note: this is only an approximation, because we have already
   // tokenised the input stream, so anything after a comment
@@ -525,13 +527,22 @@ const readUrl = function (TokeniseResult, k) {
   const Tokens = TokeniseResult.tokens
   const text = TokeniseResult.text
 
-  const urlToken = Tokens[k]
-  // const urlStr = text.substring(urlToken[2], urlToken[3])
+  // Tokens[k] is the href or url control sequence
 
-  // start looking at text immediately after \url command
-  let pos = urlToken[3]
-  const openDelimiter = text[pos]
-  const closeDelimiter = openDelimiter === '{' ? '}' : openDelimiter
+  if (!Tokens[k + 1]) {
+    return null
+  }
+
+  let pos = Tokens[k + 1][2]
+  let openDelimiter = '{'
+  let closeDelimiter = '}'
+
+  if (options && options.allowCustomDelimiter) {
+    openDelimiter = text[pos]
+    closeDelimiter = openDelimiter === '{' ? '}' : openDelimiter
+  } else if (text[pos] !== openDelimiter) {
+    return null
+  }
 
   // Was the delimiter a token? if so, advance token index
   let nextToken = Tokens[k + 1]
@@ -869,11 +880,17 @@ const InterpretTokens = function (TokeniseResult, ErrorReporter) {
         } else {
           i = newPos
         }
-      } else if (seq === 'url') {
+      } else if (seq === 'url' || seq === 'href') {
         // \url{...} or \url|....|  where | = any char
-        const newPos = readUrl(TokeniseResult, i)
+        // \href{...} or \href|....|  where | = any char
+        // href has a second argument, which is the text to show for the url.
+        // We leave that alone here, since it can contain math mode, which we
+        // want to parse with the rest of the machinery.
+        const newPos = readUrl(TokeniseResult, i, {
+          allowCustomDelimiter: seq === 'url',
+        })
         if (newPos === null) {
-          TokenError(token, 'invalid url command')
+          TokenError(token, `invalid ${seq} command`)
         } else {
           i = newPos
         }

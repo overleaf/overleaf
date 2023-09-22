@@ -239,6 +239,40 @@ describe('LatexLinter', function () {
     assert.equal(errors.length, 0)
   })
 
+  it('should accept \\href{...}{...}', function () {
+    const { errors } = Parse(
+      'this is text \\href{http://www.sharelatex.com/}{test} and more\n'
+    )
+    assert.equal(errors.length, 0)
+  })
+
+  it('should accept \\href{...}{...} with dollarsign in url', function () {
+    const { errors } = Parse(
+      'this is text \\href{http://www.sharelatex.com/foo=$bar}{test} and more\n'
+    )
+    assert.equal(errors.length, 0)
+  })
+
+  it('should not accept \\href|...|{...}', function () {
+    const { errors } = Parse(
+      'this is text \\href|http://www.sharelatex.com|{test} and more\n'
+    )
+    assert.equal(errors.length, 1)
+    assert.equal(errors[0].text, 'invalid href command')
+    assert.equal(errors[0].type, 'error')
+  })
+
+  it('should catch error in text argument of \\href{...}{...}', function () {
+    const { errors } = Parse(
+      'this is text \\href{http://www.sharelatex.com/foo=$bar}{i have made an $error} and more\n'
+    )
+    assert.equal(errors.length, 2)
+    assert.equal(errors[0].text, 'unclosed $ found at close group }')
+    assert.equal(errors[0].type, 'error')
+    assert.equal(errors[1].text, 'unexpected close group } after $')
+    assert.equal(errors[1].type, 'error')
+  })
+
   it('should accept \\left( and \\right)', function () {
     const { errors } = Parse('math $\\left( x + y \\right) = y + x$ and more\n')
     assert.equal(errors.length, 0)
