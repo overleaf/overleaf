@@ -248,7 +248,15 @@ async function _getAssignment(
     return DEFAULT_ASSIGNMENT
   }
 
-  if (session) {
+  // Do not cache assignments for anonymous users. All the context for their assignments is in the session:
+  // They cannot be part of the alpha or beta program, and they will use their analyticsId for assignments.
+  const canUseSessionCache = session && SessionManager.isUserLoggedIn(session)
+  if (session && !canUseSessionCache) {
+    // Purge the existing cache
+    delete session.cachedSplitTestAssignments
+  }
+
+  if (canUseSessionCache) {
     const cachedVariant = _getCachedVariantFromSession(
       session,
       splitTest.name,
@@ -275,7 +283,7 @@ async function _getAssignment(
   user = user || (userId && (await _getUser(userId, splitTestName)))
   const { activeForUser, selectedVariantName, phase, versionNumber } =
     await _getAssignmentMetadata(analyticsId, user, splitTest)
-  if (session) {
+  if (canUseSessionCache) {
     _setVariantInSession({
       session,
       splitTestName,
