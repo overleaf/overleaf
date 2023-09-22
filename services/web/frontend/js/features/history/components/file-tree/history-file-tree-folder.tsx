@@ -13,6 +13,22 @@ type HistoryFileTreeFolderProps = {
   docs: HistoryDoc[]
 }
 
+function hasChanges(fileTree: HistoryFileTree): boolean {
+  const hasSameLevelChanges = fileTree.docs?.some(
+    (doc: HistoryDoc) => (doc as any).operation !== undefined
+  )
+  if (hasSameLevelChanges) {
+    return true
+  }
+  const hasNestedChanges = fileTree.folders?.some(folder => {
+    return hasChanges(folder)
+  })
+  if (hasNestedChanges) {
+    return true
+  }
+  return false
+}
+
 function HistoryFileTreeFolder({
   name,
   folders,
@@ -20,7 +36,9 @@ function HistoryFileTreeFolder({
 }: HistoryFileTreeFolderProps) {
   const { t } = useTranslation()
 
-  const [expanded, setExpanded] = useState(true)
+  const [expanded, setExpanded] = useState(() => {
+    return hasChanges({ name, folders, docs })
+  })
 
   const icons = (
     <>
