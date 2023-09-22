@@ -278,6 +278,27 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
     )
   })
 
+  it('handles a pasted table with cell styles', function () {
+    window.metaAttributesCache.set('ol-splitTestVariants', {
+      'paste-html': 'enabled',
+      'table-generator': 'enabled',
+    })
+
+    mountEditor()
+
+    const data =
+      '<table><tbody><tr><td style="font-weight:bold">foo</td><td style="font-style:italic">bar</td><td style="font-style:italic;font-weight:bold">baz</td></tr></tbody></table>'
+
+    const clipboardData = new DataTransfer()
+    clipboardData.setData('text/html', data)
+    cy.get('@content').trigger('paste', { clipboardData })
+
+    cy.get('@content').should('have.text', 'foobarbaz')
+    cy.findByText(/Sorry/).should('not.exist')
+    cy.get('td b').should('have.length', 2)
+    cy.get('td i').should('have.length', 2)
+  })
+
   it('handles a pasted table with a caption', function () {
     mountEditor()
 

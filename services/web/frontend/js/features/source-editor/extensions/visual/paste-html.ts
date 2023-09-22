@@ -560,6 +560,7 @@ const selectors = [
       element.style.fontStyle === 'italic' && hasContent(element),
     start: () => '\\textit{',
     end: () => '}',
+    inside: true,
   }),
   createSelector({
     selector: 'em',
