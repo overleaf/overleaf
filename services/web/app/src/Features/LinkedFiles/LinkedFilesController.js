@@ -177,10 +177,16 @@ module.exports = LinkedFilesController = {
       plainTextResponse(res, 'Could not get output file')
     } else if (error instanceof UrlFetchFailedError) {
       res.status(422)
-      plainTextResponse(
-        res,
-        `Your URL could not be reached (${error.statusCode} status code). Please check it and try again.`
-      )
+      if (error.cause instanceof FileTooLargeError) {
+        plainTextResponse(res, 'File too large')
+      } else {
+        plainTextResponse(
+          res,
+          `Your URL could not be reached (${
+            error.info?.status || error.cause?.info?.status
+          } status code). Please check it and try again.`
+        )
+      }
     } else if (error instanceof InvalidUrlError) {
       res.status(422)
       plainTextResponse(
