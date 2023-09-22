@@ -36,16 +36,17 @@ export const pasteHtml = [
           return false
         }
 
-        // allow pasting an image to create a figure, if the HTML doesn't contain a table
-        // (because desktop Excel puts both an image and the HTML table on the clipboard)
-        if (clipboardData.files.length > 0 && !html.includes('<table')) {
-          return false
-        }
-
         // convert the HTML to LaTeX
         try {
           const parser = new DOMParser()
           const { documentElement } = parser.parseFromString(html, 'text/html')
+
+          // fall back to creating a figure when there's an image on the clipoard,
+          // unless the HTML indicates that it came from an Office application
+          // (which also puts an image on the clipboard)
+          if (clipboardData.files.length > 0 && !hasProgId(documentElement)) {
+            return false
+          }
 
           // if the only content is in a code block, use the plain text version
           if (onlyCode(documentElement)) {
@@ -55,7 +56,7 @@ export const pasteHtml = [
           const latex = htmlToLaTeX(documentElement)
 
           // if there's no formatting, use the plain text version
-          if (latex === text) {
+          if (latex === text && clipboardData.files.length === 0) {
             return false
           }
 
@@ -110,6 +111,13 @@ const onlyCode = (documentElement: HTMLElement) => {
   return (
     codeElement?.textContent?.trim() === documentElement.textContent?.trim()
   )
+}
+
+const hasProgId = (documentElement: HTMLElement) => {
+  const meta = documentElement.querySelector<HTMLMetaElement>(
+    'meta[name="ProgId"]'
+  )
+  return meta && meta.content.trim().length > 0
 }
 
 const htmlToLaTeX = (documentElement: HTMLElement) => {

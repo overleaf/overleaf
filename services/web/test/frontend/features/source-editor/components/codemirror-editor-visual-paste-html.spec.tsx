@@ -29,6 +29,7 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
     window.metaAttributesCache.set('ol-splitTestVariants', {
       'paste-html': 'enabled',
+      'figure-modal': 'enabled',
     })
     cy.interceptEvents()
     cy.interceptSpelling()
@@ -658,5 +659,39 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
     cy.get('@content').trigger('paste', { clipboardData })
 
     cy.get('.cm-line').should('have.length', 8)
+  })
+
+  it('treats a pasted image as a figure even if there is HTML', function () {
+    mountEditor()
+
+    cy.fixture<Uint8Array>('images/gradient.png').then(image => {
+      const file = new File([image], 'gradient.png', { type: 'image/png' })
+      const html = `<meta charset="utf-8"><img src="https://example.com/gradient.png" alt="gradient">`
+
+      const clipboardData = new DataTransfer()
+      clipboardData.setData('text/html', html)
+      clipboardData.items.add(file)
+      cy.get('.cm-content').trigger('paste', { clipboardData })
+
+      // figure modal paste handler should appear
+      cy.findByText('Upload from computer').should('be.visible')
+    })
+  })
+
+  it('does not treat a pasted image as a figure if there is Office HTML', function () {
+    mountEditor()
+
+    cy.fixture<Uint8Array>('images/gradient.png').then(image => {
+      const file = new File([image], 'gradient.png', { type: 'image/png' })
+      const html = `<meta charset="utf-8"><meta name="ProgId" content="MS.Word"><img src="https://example.com/gradient.png" alt="gradient">`
+
+      const clipboardData = new DataTransfer()
+      clipboardData.setData('text/html', html)
+      clipboardData.items.add(file)
+      cy.get('.cm-content').trigger('paste', { clipboardData })
+
+      // paste options button should appear
+      cy.findByLabelText('Paste options').should('be.visible')
+    })
   })
 })
