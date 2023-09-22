@@ -7,6 +7,6 @@ clsi
 --esmock-loader=False
 --has-custom-cloudbuild=True
 --has-custom-nodemon=False
---node-version=18.17.1
+--node-version=18.18.0
 --public-repo=True
 --script-version=4.3.0

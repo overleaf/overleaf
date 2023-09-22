@@ -1,7 +1,6 @@
 const OError = require('@overleaf/o-error')
 const express = require('express')
 const bodyParser = require('body-parser')
-const http = require('http')
 
 /**
  * Abstract class for running a mock API via Express. Handles setting up of
@@ -140,14 +139,7 @@ class AbstractMockApi {
         // eslint-disable-next-line no-console
         console.log('Starting mock on port', this.constructor.name, this.port)
       }
-      this.server = http
-        .createServer(
-          {
-            // Workaround broken detection of idle connections in CI.
-            connectionsCheckingInterval: 30 * 60 * 1000,
-          },
-          this.app
-        )
+      this.server = this.app
         .listen(this.port, err => {
           if (err) {
             return reject(err)

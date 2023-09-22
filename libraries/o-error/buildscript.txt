@@ -6,6 +6,6 @@ o-error
 --esmock-loader=False
 --has-custom-nodemon=False
 --is-library=True
---node-version=18.17.1
+--node-version=18.18.0
 --public-repo=False
 --script-version=4.3.0

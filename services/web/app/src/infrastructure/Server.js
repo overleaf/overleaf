@@ -303,15 +303,7 @@ if (Settings.csp && Settings.csp.enabled) {
 }
 
 logger.debug('creating HTTP server'.yellow)
-const server = require('http').createServer(
-  process.env.NODE_ENV === 'test'
-    ? {
-        // Workaround broken detection of idle connections in CI.
-        connectionsCheckingInterval: 30 * 60 * 1000,
-      }
-    : {},
-  app
-)
+const server = require('http').createServer(app)
 
 // provide settings for separate web and api processes
 if (Settings.enabledServices.includes('api')) {
