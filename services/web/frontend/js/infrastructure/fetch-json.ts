@@ -103,7 +103,7 @@ export class FetchError extends OError {
 function fetchJSON<T>(
   path: FetchPath,
   {
-    body = {},
+    body,
     headers = {},
     method = 'GET',
     credentials = 'same-origin',
@@ -123,7 +123,7 @@ function fetchJSON<T>(
     method,
   }
 
-  if (method !== 'GET' && method !== 'HEAD') {
+  if (body !== undefined) {
     options.body = JSON.stringify(body)
   }
 
