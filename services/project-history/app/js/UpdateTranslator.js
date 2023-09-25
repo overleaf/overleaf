@@ -55,7 +55,7 @@ function _convertToChange(projectId, updateWithBlob) {
     let pathname = update.meta.pathname
 
     pathname = _convertPathname(pathname)
-    const builder = new TextOperationsBuilder(update.doc, docLength, pathname)
+    const builder = new TextOperationsBuilder(docLength, pathname)
     // convert ops
     for (const op of update.op) {
       builder.addOp(op)
@@ -153,15 +153,15 @@ export function _convertPathname(pathname) {
 }
 
 class TextOperationsBuilder {
-  constructor(docId, docLength, pathname) {
+  constructor(docLength, pathname) {
     this.operations = []
-    this.doc_id = docId
-    this.doc_length = docLength
+    this.currentOperation = []
+    this.cursor = 0
+    this.docLength = docLength
     this.pathname = pathname
   }
 
   addOp(op) {
-    let retain
     if (op.c != null) {
       return // ignore comment op
     }
@@ -170,41 +170,60 @@ class TextOperationsBuilder {
     }
 
     // We sometimes receive operations that operate at positions outside the
-    // doc_length. Document updater coerces the position to the end of the
+    // docLength. Document updater coerces the position to the end of the
     // document. We do the same here.
-    const pos = Math.min(op.p, this.doc_length)
+    const pos = Math.min(op.p, this.docLength)
 
-    const textOperation = []
-    if (pos > 0) {
-      textOperation.push(pos)
+    if (pos < this.cursor) {
+      this.pushCurrentOperation()
+      // At this point, this.cursor === 0 and we can continue
+    }
+
+    if (pos > this.cursor) {
+      this.retain(pos - this.cursor)
     }
 
     if (op.i != null) {
-      textOperation.push(op.i)
-      retain = this.doc_length - pos
-      this.doc_length += op.i.length
+      this.insert(op.i)
     }
 
     if (op.d != null) {
-      textOperation.push(-op.d.length)
-      retain = this.doc_length - pos - op.d.length
-      this.doc_length -= op.d.length
+      this.delete(op.d.length)
     }
-
-    if (retain > 0) {
-      textOperation.push(retain)
-    }
-    this.pushTextOperation(textOperation)
   }
 
-  pushTextOperation(textOperation) {
-    this.operations.push({
-      pathname: this.pathname,
-      textOperation,
-    })
+  retain(length) {
+    this.currentOperation.push(length)
+    this.cursor += length
+  }
+
+  insert(str) {
+    this.currentOperation.push(str)
+    this.cursor += str.length
+    this.docLength += str.length
+  }
+
+  delete(length) {
+    this.currentOperation.push(-length)
+    this.docLength -= length
+  }
+
+  pushCurrentOperation() {
+    if (this.cursor < this.docLength) {
+      this.retain(this.docLength - this.cursor)
+    }
+    if (this.currentOperation.length > 0) {
+      this.operations.push({
+        pathname: this.pathname,
+        textOperation: this.currentOperation,
+      })
+      this.currentOperation = []
+    }
+    this.cursor = 0
   }
 
   finish() {
+    this.pushCurrentOperation()
     return this.operations
   }
 }
