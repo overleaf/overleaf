@@ -530,7 +530,8 @@ module.exports = {
   exposeHostname: process.env.EXPOSE_HOSTNAME === 'true',
 
   // Cookie max age (in milliseconds). Set to false for a browser session.
-  cookieSessionLength: 5 * 24 * 60 * 60 * 1000, // 5 days
+  cookieSessionLength:
+    parseInt(process.env.COOKIE_SESSION_LENGTH) || 5 * 24 * 60 * 60 * 1000, // 5 days
 
   // When true, only allow invites to be sent to email addresses that
   // already have user accounts
