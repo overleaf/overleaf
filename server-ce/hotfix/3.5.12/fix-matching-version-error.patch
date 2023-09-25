@@ -1,0 +1,22 @@
+--- services/track-changes/app/js/ZipManager.js
++++ services/track-changes/app/js/ZipManager.js
+@@ -95,6 +95,19 @@ async function rewindDoc(projectId, docId, zipfile) {
+       continue
+     }
+
++    if (previousUpdate && update.v >= previousUpdate.v) {
++      logger.warn(
++        {
++          projectId,
++          docId,
++          previousUpdateVersion: previousUpdate.v,
++          updateVersion: update.v,
++        },
++        'adjusting version for update with matching version'
++      )
++      update.v = previousUpdate.v - 1
++    }
++
+     const updatePath = `${id}/updates/${update.v}`
+
+     try {
