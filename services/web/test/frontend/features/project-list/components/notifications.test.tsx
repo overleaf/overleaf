@@ -15,7 +15,11 @@ import {
   unconfirmedCommonsUserData,
 } from '../../settings/fixtures/test-user-email-data'
 import {
-  notification,
+  notificationDropboxDuplicateProjectNames,
+  notificationGroupInviteDefault,
+  notificationIPMatchedAffiliation,
+  notificationProjectInvite,
+  notificationTPDSFileLimit,
   notificationsInstitution,
 } from '../fixtures/notifications-data'
 import Common from '../../../../../frontend/js/features/project-list/components/notifications/groups/common'
@@ -86,7 +90,7 @@ describe('<UserNotifications />', function () {
         templateKey: 'notification_project_invite',
       }
       window.metaAttributesCache.set('ol-notifications', [
-        merge(cloneDeep(notification), reconfiguredNotification),
+        merge(cloneDeep(notificationProjectInvite), reconfiguredNotification),
       ])
 
       renderWithinProjectListProvider(Common)
@@ -97,7 +101,7 @@ describe('<UserNotifications />', function () {
         200
       )
       const acceptMock = fetchMock.post(
-        `project/${notification.messageOpts.projectId}/invite/token/${notification.messageOpts.token}/accept`,
+        `project/${notificationProjectInvite.messageOpts.projectId}/invite/token/${notificationProjectInvite.messageOpts.token}/accept`,
         200
       )
 
@@ -124,7 +128,7 @@ describe('<UserNotifications />', function () {
 
       const openProject = screen.getByRole('link', { name: /open project/i })
       expect(openProject.getAttribute('href')).to.equal(
-        `/project/${notification.messageOpts.projectId}`
+        `/project/${notificationProjectInvite.messageOpts.projectId}`
       )
 
       const closeBtn = screen.getByRole('button', { name: /close/i })
@@ -140,13 +144,13 @@ describe('<UserNotifications />', function () {
         templateKey: 'notification_project_invite',
       }
       window.metaAttributesCache.set('ol-notifications', [
-        merge(cloneDeep(notification), reconfiguredNotification),
+        merge(cloneDeep(notificationProjectInvite), reconfiguredNotification),
       ])
 
       renderWithinProjectListProvider(Common)
       await fetchMock.flush(true)
       fetchMock.post(
-        `project/${notification.messageOpts.projectId}/invite/token/${notification.messageOpts.token}/accept`,
+        `project/${notificationProjectInvite.messageOpts.projectId}/invite/token/${notificationProjectInvite.messageOpts.token}/accept`,
         500
       )
 
@@ -174,7 +178,7 @@ describe('<UserNotifications />', function () {
         templateKey: 'wfh_2020_upgrade_offer',
       }
       window.metaAttributesCache.set('ol-notifications', [
-        merge(cloneDeep(notification), reconfiguredNotification),
+        merge(reconfiguredNotification),
       ])
 
       renderWithinProjectListProvider(Common)
@@ -202,7 +206,10 @@ describe('<UserNotifications />', function () {
         messageOpts: { ssoEnabled: true },
       }
       window.metaAttributesCache.set('ol-notifications', [
-        merge(cloneDeep(notification), reconfiguredNotification),
+        merge(
+          cloneDeep(notificationIPMatchedAffiliation),
+          reconfiguredNotification
+        ),
       ])
 
       renderWithinProjectListProvider(Common)
@@ -222,7 +229,7 @@ describe('<UserNotifications />', function () {
       )
       const linkAccount = screen.getByRole('link', { name: /link account/i })
       expect(linkAccount.getAttribute('href')).to.equal(
-        `${exposedSettings.samlInitPath}?university_id=${notification.messageOpts.institutionId}&auto=/project`
+        `${exposedSettings.samlInitPath}?university_id=${notificationIPMatchedAffiliation.messageOpts.institutionId}&auto=/project`
       )
       const closeBtn = screen.getByRole('button', { name: /close/i })
       fireEvent.click(closeBtn)
@@ -238,7 +245,10 @@ describe('<UserNotifications />', function () {
         messageOpts: { ssoEnabled: false },
       }
       window.metaAttributesCache.set('ol-notifications', [
-        merge(cloneDeep(notification), reconfiguredNotification),
+        merge(
+          cloneDeep(notificationIPMatchedAffiliation),
+          reconfiguredNotification
+        ),
       ])
 
       renderWithinProjectListProvider(Common)
@@ -268,7 +278,7 @@ describe('<UserNotifications />', function () {
         templateKey: 'notification_tpds_file_limit',
       }
       window.metaAttributesCache.set('ol-notifications', [
-        merge(cloneDeep(notification), reconfiguredNotification),
+        merge(cloneDeep(notificationTPDSFileLimit), reconfiguredNotification),
       ])
 
       renderWithinProjectListProvider(Common)
@@ -296,7 +306,10 @@ describe('<UserNotifications />', function () {
         templateKey: 'notification_dropbox_duplicate_project_names',
       }
       window.metaAttributesCache.set('ol-notifications', [
-        merge(cloneDeep(notification), reconfiguredNotification),
+        merge(
+          cloneDeep(notificationDropboxDuplicateProjectNames),
+          reconfiguredNotification
+        ),
       ])
 
       renderWithinProjectListProvider(Common)
@@ -325,7 +338,10 @@ describe('<UserNotifications />', function () {
           'notification_dropbox_unlinked_due_to_lapsed_reconfirmation',
       }
       window.metaAttributesCache.set('ol-notifications', [
-        merge(cloneDeep(notification), reconfiguredNotification),
+        merge(
+          cloneDeep(notificationDropboxDuplicateProjectNames),
+          reconfiguredNotification
+        ),
       ])
 
       renderWithinProjectListProvider(Common)
@@ -355,7 +371,7 @@ describe('<UserNotifications />', function () {
         html: 'unspecific message',
       }
       window.metaAttributesCache.set('ol-notifications', [
-        merge(cloneDeep(notification), reconfiguredNotification),
+        reconfiguredNotification,
       ])
 
       renderWithinProjectListProvider(Common)
@@ -370,6 +386,68 @@ describe('<UserNotifications />', function () {
 
       expect(fetchMock.called()).to.be.true
       expect(screen.queryByRole('alert')).to.be.null
+    })
+
+    describe('<GroupInvitation />', function () {
+      describe('without existing personal subscription', function () {
+        it('shows group invitation notification for user without personal subscription', async function () {
+          const notificationGroupInvite: DeepPartial<Notification> = {
+            _id: 1,
+            templateKey: 'notification_group_invitation',
+          }
+
+          window.metaAttributesCache.set('ol-notifications', [
+            merge(
+              cloneDeep(notificationGroupInviteDefault),
+              notificationGroupInvite
+            ),
+          ])
+
+          renderWithinProjectListProvider(Common)
+          await fetchMock.flush(true)
+          fetchMock.delete(`/notifications/${notificationGroupInvite._id}`, 200)
+          screen.getByRole('alert')
+          screen.getByText(
+            /inviter@overleaf.com has invited you to join a group subscription on Overleaf/
+          )
+          screen.getByRole('button', { name: 'Join now' })
+          screen.getByRole('button', { name: /close/i })
+        })
+
+        describe('with existing personal subscription', function () {
+          it('shows group invitation notification for user with personal subscription', async function () {
+            const notificationGroupInvite: DeepPartial<Notification> = {
+              _id: 1,
+              templateKey: 'notification_group_invitation',
+            }
+
+            window.metaAttributesCache.set('ol-notifications', [
+              merge(
+                cloneDeep(notificationGroupInviteDefault),
+                notificationGroupInvite
+              ),
+            ])
+            window.metaAttributesCache.set(
+              'ol-hasIndividualRecurlySubscription',
+              true
+            )
+
+            renderWithinProjectListProvider(Common)
+            await fetchMock.flush(true)
+            fetchMock.delete(
+              `/notifications/${notificationGroupInvite._id}`,
+              200
+            )
+
+            screen.getByRole('alert')
+            screen.getByText(
+              /inviter@overleaf.com has invited you to join a group Overleaf subscription. If you join this group, you may not need your individual subscription. Would you like to cancel it/
+            )
+            screen.getByRole('button', { name: 'Not now' })
+            screen.getByRole('button', { name: 'Cancel my subscription' })
+          })
+        })
+      })
     })
   })
 

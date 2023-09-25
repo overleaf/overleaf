@@ -47,6 +47,7 @@ describe('TeamInvitesHandler', function () {
       promises: {
         getUser: sinon.stub().resolves(),
         getUserByAnyEmail: sinon.stub().resolves(),
+        getUserByMainEmail: sinon.stub().resolves(),
       },
     }
 
@@ -91,10 +92,23 @@ describe('TeamInvitesHandler', function () {
     this.UserGetter.promises.getUserByAnyEmail
       .withArgs(this.manager.email)
       .resolves(this.manager)
+    this.UserGetter.promises.getUserByMainEmail
+      .withArgs(this.manager.email)
+      .resolves(this.manager)
 
     this.SubscriptionLocator.promises.getUsersSubscription.resolves(
       this.subscription
     )
+
+    this.NotificationsBuilder = {
+      promises: {
+        groupInvitation: sinon.stub().returns({
+          create: sinon.stub().resolves(),
+          read: sinon.stub().resolves(),
+        }),
+      },
+    }
+
     this.Subscription.findOne.resolves(this.subscription)
 
     this.TeamInvitesHandler = SandboxedModule.require(modulePath, {
@@ -110,6 +124,7 @@ describe('TeamInvitesHandler', function () {
         './LimitationsManager': this.LimitationsManager,
         '../Email/EmailHandler': this.EmailHandler,
         './ManagedUsersHandler': this.ManagedUsersHandler,
+        '../Notifications/NotificationsBuilder': this.NotificationsBuilder,
       },
     })
   })
@@ -242,6 +257,34 @@ describe('TeamInvitesHandler', function () {
         }
       )
     })
+
+    it('sends a notification if inviting registered user', function (done) {
+      const id = new ObjectId('6a6b3a8014829a865bbf700d')
+      const managedUsersEnabled = false
+
+      this.UserGetter.promises.getUserByMainEmail
+        .withArgs('john.snow@example.com')
+        .resolves({
+          _id: id,
+        })
+
+      this.TeamInvitesHandler.createInvite(
+        this.manager._id,
+        this.subscription,
+        'John.Snow@example.com',
+        (err, invite) => {
+          this.NotificationsBuilder.promises
+            .groupInvitation(
+              id.toString(),
+              this.subscription._id,
+              managedUsersEnabled
+            )
+            .create.calledWith(invite)
+            .should.eq(true)
+          done(err)
+        }
+      )
+    })
   })
 
   describe('importInvite', function () {
@@ -311,6 +354,21 @@ describe('TeamInvitesHandler', function () {
         done()
       })
     })
+
+    it('removes dashboard notification after they accepted group invitation', function (done) {
+      const managedUsersEnabled = false
+
+      this.TeamInvitesHandler.acceptInvite('dddddddd', this.user.id, () => {
+        sinon.assert.called(
+          this.NotificationsBuilder.promises.groupInvitation(
+            this.user.id,
+            this.subscription._id,
+            managedUsersEnabled
+          ).read
+        )
+        done()
+      })
+    })
   })
 
   describe('revokeInvite', function () {
@@ -333,6 +391,36 @@ describe('TeamInvitesHandler', function () {
               { $pull: { invited_emails: 'jorah@example.com' } }
             )
             .should.eq(true)
+          done()
+        }
+      )
+    })
+
+    it('removes dashboard notification for pending group invitation', function (done) {
+      const managedUsersEnabled = false
+
+      const pendingUser = {
+        id: '1a2b',
+        email: 'tyrion@example.com',
+      }
+
+      this.UserGetter.promises.getUserByAnyEmail
+        .withArgs(pendingUser.email)
+        .resolves(pendingUser)
+
+      this.TeamInvitesHandler.revokeInvite(
+        this.manager._id,
+        this.subscription,
+        pendingUser.email,
+        () => {
+          sinon.assert.called(
+            this.NotificationsBuilder.promises.groupInvitation(
+              pendingUser.id,
+              this.subscription._id,
+              managedUsersEnabled
+            ).read
+          )
+
           done()
         }
       )

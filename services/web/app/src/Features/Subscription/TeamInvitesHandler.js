@@ -17,6 +17,7 @@ const EmailHelper = require('../Helpers/EmailHelper')
 
 const Errors = require('../Errors/Errors')
 const { callbackify, callbackifyMultiResult } = require('../../util/promises')
+const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
 
 async function getInvite(token) {
   const subscription = await Subscription.findOne({
@@ -75,14 +76,29 @@ async function acceptInvite(token, userId) {
   }
 
   await _removeInviteFromTeam(subscription.id, invite.email)
+
+  await NotificationsBuilder.promises
+    .groupInvitation(userId, subscription._id, false)
+    .read()
 }
 
 async function revokeInvite(teamManagerId, subscription, email) {
   email = EmailHelper.parseEmail(email)
+
   if (!email) {
     throw new Error('invalid email')
   }
+
   await _removeInviteFromTeam(subscription.id, email)
+
+  // Remove group invitation dashboard notification if invitation is revoked before
+  // the invited user accepted the group invitation
+  const user = await UserGetter.promises.getUserByAnyEmail(email)
+  if (user) {
+    await NotificationsBuilder.promises
+      .groupInvitation(user._id, subscription._id, false)
+      .read()
+  }
 }
 
 // Legacy method to allow a user to receive a confirmation email if their
@@ -92,7 +108,6 @@ async function createTeamInvitesForLegacyInvitedEmail(email) {
   const teams = await SubscriptionLocator.promises.getGroupsWithEmailInvite(
     email
   )
-
   return Promise.all(
     teams.map(team => createInvite(team.admin_id, team, email))
   )
@@ -143,6 +158,21 @@ async function _createInvite(subscription, email, inviter) {
       sentAt: new Date(),
     }
     subscription.teamInvites.push(invite)
+  }
+
+  try {
+    const managedUsersEnabled = Boolean(subscription.groupPolicy)
+    await _sendNotificationToExistingUser(
+      subscription,
+      email,
+      invite,
+      managedUsersEnabled
+    )
+  } catch (err) {
+    logger.error(
+      { err },
+      'Failed to send notification to existing user when creating group invitation'
+    )
   }
 
   await subscription.save()
@@ -199,6 +229,27 @@ async function _removeInviteFromTeam(subscriptionId, email, callback) {
 
   await Subscription.updateOne(searchConditions, removeInvite)
   await _removeLegacyInvite(subscriptionId, email)
+}
+
+async function _sendNotificationToExistingUser(
+  subscription,
+  email,
+  invite,
+  managedUsersEnabled
+) {
+  const user = await UserGetter.promises.getUserByMainEmail(email)
+
+  if (!user) {
+    return
+  }
+
+  await NotificationsBuilder.promises
+    .groupInvitation(
+      user._id.toString(),
+      subscription._id.toString(),
+      managedUsersEnabled
+    )
+    .create(invite)
 }
 
 async function _removeLegacyInvite(subscriptionId, email) {

@@ -7,8 +7,12 @@ import useAsyncDismiss from '../hooks/useAsyncDismiss'
 import useAsync from '../../../../../shared/hooks/use-async'
 import { FetchError, postJSON } from '../../../../../infrastructure/fetch-json'
 import { ExposedSettings } from '../../../../../../../types/exposed-settings'
-import { Notification as NotificationType } from '../../../../../../../types/project/dashboard/notification'
+import {
+  NotificationProjectInvite,
+  Notification as NotificationType,
+} from '../../../../../../../types/project/dashboard/notification'
 import { User } from '../../../../../../../types/user'
+import GroupInvitationNotification from './group-invitation/group-invitation'
 
 function Common() {
   const notifications = getMeta('ol-notifications', []) as NotificationType[]
@@ -42,16 +46,17 @@ function CommonNotification({ notification }: CommonNotificationProps) {
   // 404 probably means the invite has already been accepted and deleted. Treat as success
   const accepted = isSuccess || error?.response?.status === 404
 
-  function handleAcceptInvite() {
+  function handleAcceptInvite(notification: NotificationProjectInvite) {
     const {
       messageOpts: { projectId, token },
     } = notification
+
     runAsync(
       postJSON(`/project/${projectId}/invite/token/${token}/accept`)
     ).catch(console.error)
   }
 
-  const { _id: id, templateKey, messageOpts, html } = notification
+  const { _id: id, templateKey, html } = notification
 
   return (
     <>
@@ -62,15 +67,15 @@ function CommonNotification({ notification }: CommonNotificationProps) {
               <Trans
                 i18nKey="notification_project_invite_accepted_message"
                 components={{ b: <b /> }}
-                values={{ projectName: messageOpts.projectName }}
+                values={{ projectName: notification.messageOpts.projectName }}
               />
             ) : (
               <Trans
                 i18nKey="notification_project_invite_message"
                 components={{ b: <b /> }}
                 values={{
-                  userName: messageOpts.userName,
-                  projectName: messageOpts.projectName,
+                  userName: notification.messageOpts.userName,
+                  projectName: notification.messageOpts.projectName,
                 }}
               />
             )}
@@ -81,7 +86,7 @@ function CommonNotification({ notification }: CommonNotificationProps) {
                 bsStyle="info"
                 bsSize="sm"
                 className="pull-right"
-                href={`/project/${messageOpts.projectId}`}
+                href={`/project/${notification.messageOpts.projectId}`}
               >
                 {t('open_project')}
               </Button>
@@ -90,7 +95,7 @@ function CommonNotification({ notification }: CommonNotificationProps) {
                 bsStyle="info"
                 bsSize="sm"
                 disabled={isLoading}
-                onClick={handleAcceptInvite}
+                onClick={() => handleAcceptInvite(notification)}
               >
                 {isLoading ? (
                   <>
@@ -128,11 +133,11 @@ function CommonNotification({ notification }: CommonNotificationProps) {
               i18nKey="looks_like_youre_at"
               components={[<b />]} // eslint-disable-line react/jsx-key
               values={{
-                institutionName: messageOpts.university_name,
+                institutionName: notification.messageOpts.university_name,
               }}
             />
             <br />
-            {messageOpts.ssoEnabled ? (
+            {notification.messageOpts.ssoEnabled ? (
               <>
                 <Trans
                   i18nKey="you_can_now_log_in_sso"
@@ -142,7 +147,7 @@ function CommonNotification({ notification }: CommonNotificationProps) {
                 {t('link_institutional_email_get_started')}{' '}
                 <a
                   href={
-                    messageOpts.portalPath ||
+                    notification.messageOpts.portalPath ||
                     'https://www.overleaf.com/learn/how-to/Institutional_Login'
                   }
                 >
@@ -155,7 +160,7 @@ function CommonNotification({ notification }: CommonNotificationProps) {
                   i18nKey="did_you_know_institution_providing_professional"
                   components={[<b />]} // eslint-disable-line react/jsx-key
                   values={{
-                    institutionName: messageOpts.university_name,
+                    institutionName: notification.messageOpts.university_name,
                   }}
                 />
                 <br />
@@ -169,12 +174,12 @@ function CommonNotification({ notification }: CommonNotificationProps) {
               bsSize="sm"
               className="pull-right"
               href={
-                messageOpts.ssoEnabled
-                  ? `${samlInitPath}?university_id=${messageOpts.institutionId}&auto=/project`
+                notification.messageOpts.ssoEnabled
+                  ? `${samlInitPath}?university_id=${notification.messageOpts.institutionId}&auto=/project`
                   : '/user/settings'
               }
             >
-              {messageOpts.ssoEnabled
+              {notification.messageOpts.ssoEnabled
                 ? t('link_account')
                 : t('add_affiliation')}
             </Button>
@@ -186,8 +191,9 @@ function CommonNotification({ notification }: CommonNotificationProps) {
           onDismiss={() => id && handleDismiss(id)}
         >
           <Notification.Body>
-            Error: Your project {messageOpts.projectName} has gone over the 2000
-            file limit using an integration (e.g. Dropbox or GitHub) <br />
+            Error: Your project {notification.messageOpts.projectName} has gone
+            over the 2000 file limit using an integration (e.g. Dropbox or
+            GitHub) <br />
             Please decrease the size of your project to prevent further errors.
           </Notification.Body>
           <Notification.Action>
@@ -211,7 +217,7 @@ function CommonNotification({ notification }: CommonNotificationProps) {
               <Trans
                 i18nKey="dropbox_duplicate_project_names"
                 components={[<b />]} // eslint-disable-line react/jsx-key
-                values={{ projectName: messageOpts.projectName }}
+                values={{ projectName: notification.messageOpts.projectName }}
               />
             </p>
             <p>
@@ -248,6 +254,8 @@ function CommonNotification({ notification }: CommonNotificationProps) {
             </a>
           </Notification.Body>
         </Notification>
+      ) : templateKey === 'notification_group_invitation' ? (
+        <GroupInvitationNotification notification={notification} />
       ) : (
         <Notification bsStyle="info" onDismiss={() => id && handleDismiss(id)}>
           <Notification.Body>{html}</Notification.Body>

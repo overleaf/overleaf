@@ -121,6 +121,11 @@ describe('ProjectListController', function () {
         ipMatcherAffiliation: sinon.stub().returns({ create: sinon.stub() }),
       },
     }
+    this.SubscriptionLocator = {
+      promises: {
+        getUserSubscription: sinon.stub().resolves({}),
+      },
+    }
 
     this.ProjectListController = SandboxedModule.require(MODULE_PATH, {
       requires: {
@@ -149,6 +154,7 @@ describe('ProjectListController', function () {
         '../User/UserPrimaryEmailCheckHandler':
           this.UserPrimaryEmailCheckHandler,
         '../Notifications/NotificationsBuilder': this.NotificationBuilder,
+        '../Subscription/SubscriptionLocator': this.SubscriptionLocator,
       },
     })
 

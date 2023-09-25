@@ -31,18 +31,6 @@ export const fakeReconfirmationUsersData = {
   default: false,
 } as DeepReadonly<UserEmailData>
 
-const fakeNotificationData = {
-  messageOpts: {
-    projectId: '123',
-    projectName: 'Abc Project',
-    ssoEnabled: false,
-    institutionId: '456',
-    userName: 'fakeUser',
-    university_name: 'Abc University',
-    token: 'abcdef',
-  },
-} as DeepReadonly<Notification>
-
 export function defaultSetupMocks(fetchMock: FetchMockStatic) {
   // at least one project is required to show some notifications
   const projects = [{}] as Project[]
@@ -94,9 +82,7 @@ export function institutionSetupMocks(fetchMock: FetchMockStatic) {
 
 export function setCommonMeta(notificationData: DeepPartial<Notification>) {
   setDefaultMeta()
-  window.metaAttributesCache.set('ol-notifications', [
-    merge(cloneDeep(fakeNotificationData), notificationData),
-  ])
+  window.metaAttributesCache.set('ol-notifications', [notificationData])
 }
 
 export function commonSetupMocks(fetchMock: FetchMockStatic) {

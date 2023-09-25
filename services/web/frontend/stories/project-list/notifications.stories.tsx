@@ -18,6 +18,12 @@ export const ProjectInvite = (args: any) => {
   useFetchMock(commonSetupMocks)
   setCommonMeta({
     templateKey: 'notification_project_invite',
+    messageOpts: {
+      projectId: '123',
+      projectName: 'Abc Project',
+      userName: 'fakeUser',
+      token: 'abcdef',
+    },
   })
 
   return (
@@ -31,6 +37,12 @@ export const ProjectInviteNetworkError = (args: any) => {
   useFetchMock(errorsMocks)
   setCommonMeta({
     templateKey: 'notification_project_invite',
+    messageOpts: {
+      projectId: '123',
+      projectName: 'Abc Project',
+      userName: 'fakeUser',
+      token: 'abcdef',
+    },
   })
 
   return (
@@ -60,6 +72,8 @@ export const IPMatchedAffiliationSsoEnabled = (args: any) => {
     _id: 1,
     templateKey: 'notification_ip_matched_affiliation',
     messageOpts: {
+      university_name: 'Abc University',
+      institutionId: '456',
       ssoEnabled: true,
     },
   })
@@ -77,6 +91,8 @@ export const IPMatchedAffiliationSsoDisabled = (args: any) => {
     _id: 1,
     templateKey: 'notification_ip_matched_affiliation',
     messageOpts: {
+      university_name: 'Abc University',
+      institutionId: '456',
       ssoEnabled: false,
     },
   })
@@ -93,6 +109,9 @@ export const TpdsFileLimit = (args: any) => {
   setCommonMeta({
     _id: 1,
     templateKey: 'notification_tpds_file_limit',
+    messageOpts: {
+      projectName: 'Abc Project',
+    },
   })
 
   return (
@@ -107,6 +126,9 @@ export const DropBoxDuplicateProjectNames = (args: any) => {
   setCommonMeta({
     _id: 1,
     templateKey: 'notification_dropbox_duplicate_project_names',
+    messageOpts: {
+      projectName: 'Abc Project',
+    },
   })
 
   return (
@@ -122,6 +144,42 @@ export const DropBoxUnlinkedDueToLapsedReconfirmation = (args: any) => {
     _id: 1,
     templateKey: 'notification_dropbox_unlinked_due_to_lapsed_reconfirmation',
   })
+
+  return (
+    <ProjectListProvider>
+      <UserNotifications {...args} />
+    </ProjectListProvider>
+  )
+}
+
+export const NotificationGroupInvitation = (args: any) => {
+  useFetchMock(commonSetupMocks)
+  setCommonMeta({
+    _id: 1,
+    templateKey: 'notification_group_invitation',
+    messageOpts: {
+      inviterName: 'John Doe',
+    },
+  })
+
+  return (
+    <ProjectListProvider>
+      <UserNotifications {...args} />
+    </ProjectListProvider>
+  )
+}
+
+export const NotificationGroupInvitationCancelSubscription = (args: any) => {
+  useFetchMock(commonSetupMocks)
+  setCommonMeta({
+    _id: 1,
+    templateKey: 'notification_group_invitation',
+    messageOpts: {
+      inviterName: 'John Doe',
+    },
+  })
+
+  window.metaAttributesCache.set('ol-hasIndividualRecurlySubscription', true)
 
   return (
     <ProjectListProvider>

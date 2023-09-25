@@ -224,6 +224,37 @@ function tpdsFileLimit(userId) {
   }
 }
 
+function groupInvitation(userId, subscriptionId, managedUsersEnabled) {
+  return {
+    key: `groupInvitation-${subscriptionId}-${userId}`,
+    create(invite, callback) {
+      if (callback == null) {
+        callback = function () {}
+      }
+      const messageOpts = {
+        token: invite.token,
+        inviterName: invite.inviterName,
+        managedUsersEnabled,
+      }
+      NotificationsHandler.createNotification(
+        userId,
+        this.key,
+        'notification_group_invitation',
+        messageOpts,
+        null,
+        true,
+        callback
+      )
+    },
+    read(callback) {
+      if (callback == null) {
+        callback = function () {}
+      }
+      NotificationsHandler.markAsReadByKeyOnly(this.key, callback)
+    },
+  }
+}
+
 const NotificationsBuilder = {
   // Note: notification keys should be url-safe
   dropboxUnlinkedDueToLapsedReconfirmation,
@@ -233,6 +264,7 @@ const NotificationsBuilder = {
   projectInvite,
   ipMatcherAffiliation,
   tpdsFileLimit,
+  groupInvitation,
 }
 
 NotificationsBuilder.promises = {
@@ -247,6 +279,9 @@ NotificationsBuilder.promises = {
   },
   ipMatcherAffiliation: function (userId) {
     return promisifyAll(ipMatcherAffiliation(userId))
+  },
+  groupInvitation: function (userId, groupId, managedUsersEnabled) {
+    return promisifyAll(groupInvitation(userId, groupId, managedUsersEnabled))
   },
 }
 

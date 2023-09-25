@@ -57,6 +57,42 @@ describe('NotificationsBuilder', function () {
     })
   })
 
+  describe('groupInvitation', function (done) {
+    const subscriptionId = '123123bcabca'
+    beforeEach(function () {
+      this.invite = {
+        token: '123123abcabc',
+        inviterName: 'Mr Overleaf',
+        managedUsersEnabled: false,
+      }
+    })
+
+    it('should create the notification', function (done) {
+      this.controller
+        .groupInvitation(
+          userId,
+          subscriptionId,
+          this.invite.managedUsersEnabled
+        )
+        .create(this.invite, error => {
+          expect(error).to.not.exist
+          expect(this.handler.createNotification).to.have.been.calledWith(
+            userId,
+            `groupInvitation-${subscriptionId}-${userId}`,
+            'notification_group_invitation',
+            {
+              token: this.invite.token,
+              inviterName: this.invite.inviterName,
+              managedUsersEnabled: this.invite.managedUsersEnabled,
+            },
+            null,
+            true
+          )
+          done()
+        })
+    })
+  })
+
   describe('ipMatcherAffiliation', function () {
     describe('with portal and with SSO', function () {
       beforeEach(function () {

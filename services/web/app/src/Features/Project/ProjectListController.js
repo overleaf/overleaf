@@ -23,6 +23,7 @@ const LimitationsManager = require('../Subscription/LimitationsManager')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
 const GeoIpLookup = require('../../infrastructure/GeoIpLookup')
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
+const SubscriptionLocator = require('../Subscription/SubscriptionLocator')
 
 /** @typedef {import("./types").GetProjectsRequest} GetProjectsRequest */
 /** @typedef {import("./types").GetProjectsResponse} GetProjectsResponse */
@@ -432,6 +433,20 @@ async function projectListPage(req, res, next) {
     }
   }
 
+  let hasIndividualRecurlySubscription = false
+
+  try {
+    const individualSubscription =
+      await SubscriptionLocator.promises.getUsersSubscription(userId)
+
+    hasIndividualRecurlySubscription =
+      individualSubscription?.groupPlan === false &&
+      individualSubscription?.recurlyStatus?.state !== 'canceled' &&
+      individualSubscription?.recurlySubscription_id !== ''
+  } catch (error) {
+    logger.error({ err: error }, 'Failed to get individual subscription')
+  }
+
   res.render('project/list-react', {
     title: 'your_projects',
     usersBestSubscription,
@@ -462,6 +477,7 @@ async function projectListPage(req, res, next) {
         groupId: subscription._id,
         groupName: subscription.teamName,
       })),
+    hasIndividualRecurlySubscription,
   })
 }
 
