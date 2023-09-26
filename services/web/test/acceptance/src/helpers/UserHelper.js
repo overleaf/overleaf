@@ -98,7 +98,7 @@ class UserHelper {
   async fetch(url, opts = {}) {
     url = UserHelper.url(url)
     const headers = {}
-    const cookieString = this.jar.getCookieStringSync(url)
+    const cookieString = this.jar.getCookieStringSync(url.toString())
     if (cookieString) {
       headers.Cookie = cookieString
     }
@@ -115,7 +115,7 @@ class UserHelper {
     const cookies = response.headers.raw()['set-cookie']
     if (cookies != null) {
       for (const cookie of cookies) {
-        this.jar.setCookieSync(cookie, url)
+        this.jar.setCookieSync(cookie, url.toString())
       }
     }
     return response

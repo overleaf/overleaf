@@ -127,7 +127,7 @@
     "mmmagic": "^0.5.3",
     "moment": "^2.29.4",
     "mongodb": "^4.13.0",
-    "mongoose": "^6.11.4",
+    "mongoose": "^6.12.0",
     "multer": "overleaf/multer#e1df247fbf8e7590520d20ae3601eaef9f3d2e9e",
     "nocache": "^2.1.0",
     "nock": "^13.1.3",
