@@ -12,7 +12,6 @@ import {
   cleanUpContext,
 } from '../../../helpers/render-with-context'
 import { stubMathJax, tearDownMathJaxStubs } from './stubs'
-import sinon from 'sinon'
 
 describe('<ChatPane />', function () {
   const user = {
@@ -22,16 +21,11 @@ describe('<ChatPane />', function () {
   }
 
   beforeEach(function () {
-    this.clock = sinon.useFakeTimers({
-      toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval'],
-    })
     window.metaAttributesCache = new Map()
     window.metaAttributesCache.set('ol-user', user)
   })
 
   afterEach(function () {
-    this.clock.runAll()
-    this.clock.restore()
     fetchMock.reset()
     window.metaAttributesCache = new Map()
   })
@@ -98,12 +92,13 @@ describe('<ChatPane />', function () {
 
     renderWithChatContext(<ChatPane />, { user })
 
-    this.clock.tick(600) // wait for spinner to be displayed
+    // not displayed initially
+    expect(screen.queryByText('Loading…')).to.not.exist
 
+    // eventually displayed
     await screen.findByText('Loading…')
 
-    this.clock.tick(1000) // wait for response to be received
-
+    // eventually removed when the fetch call returns
     await waitForElementToBeRemoved(() => screen.getByText('Loading…'))
   })
 
