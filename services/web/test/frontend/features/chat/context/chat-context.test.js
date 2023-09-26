@@ -618,7 +618,7 @@ function createMessages(number, user, timestamp = Date.now()) {
  * Get query param by key from the last fetchMock response
  */
 function getLastFetchMockQueryParam(key) {
-  const { url } = fetchMock.lastResponse()
+  const url = fetchMock.lastUrl()
   const { searchParams } = new URL(url, 'https://www.overleaf.com')
   return searchParams.get(key)
 }
