@@ -8,7 +8,7 @@ import fetchMock from 'fetch-mock'
 import sinon from 'sinon'
 
 import { renderWithEditorContext } from '../../../helpers/render-with-context'
-import FileViewHeader from '../../../../../frontend/js/features/file-view/components/file-view-header.js'
+import FileViewHeader from '../../../../../frontend/js/features/file-view/components/file-view-header'
 
 describe('<FileViewHeader/>', function () {
   const urlFile = {

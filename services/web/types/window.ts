@@ -39,5 +39,6 @@ declare global {
       enterprise?: boolean
       useRecaptchaNet?: boolean
     }
+    expectingLinkedFileRefreshedSocketFor?: string | null
   }
 }

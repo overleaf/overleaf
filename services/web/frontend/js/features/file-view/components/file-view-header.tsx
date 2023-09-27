@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, type ElementType } from 'react'
 import PropTypes from 'prop-types'
 import { Trans, useTranslation } from 'react-i18next'
 
@@ -11,18 +11,27 @@ import { useProjectContext } from '../../../shared/context/project-context'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 import useAbortController from '../../../shared/hooks/use-abort-controller'
 import { LinkedFileIcon } from './file-view-icons'
+import { BinaryFile, hasProvider, LinkedFile } from '../types/binary-file'
 import { debugConsole } from '@/utils/debugging'
-const tprLinkedFileInfo = importOverleafModules('tprLinkedFileInfo')
+
+const tprLinkedFileInfo = importOverleafModules('tprLinkedFileInfo') as {
+  import: { LinkedFileInfo: ElementType }
+  path: string
+}[]
+
 const tprLinkedFileRefreshError = importOverleafModules(
   'tprLinkedFileRefreshError'
-)
+) as {
+  import: { LinkedFileRefreshError: ElementType }
+  path: string
+}[]
 
 const MAX_URL_LENGTH = 60
 const FRONT_OF_URL_LENGTH = 35
 const FILLER = '...'
 const TAIL_OF_URL_LENGTH = MAX_URL_LENGTH - FRONT_OF_URL_LENGTH - FILLER.length
 
-function shortenedUrl(url) {
+function shortenedUrl(url: string) {
   if (!url) {
     return
   }
@@ -34,7 +43,15 @@ function shortenedUrl(url) {
   return url
 }
 
-export default function FileViewHeader({ file, storeReferencesKeys }) {
+type FileViewHeaderProps = {
+  file: BinaryFile
+  storeReferencesKeys: (keys: string[]) => void
+}
+
+export default function FileViewHeader({
+  file,
+  storeReferencesKeys,
+}: FileViewHeaderProps) {
   const { _id: projectId } = useProjectContext({
     _id: PropTypes.string.isRequired,
   })
@@ -50,19 +67,19 @@ export default function FileViewHeader({ file, storeReferencesKeys }) {
 
   let fileInfo
   if (file.linkedFileData) {
-    if (file.linkedFileData.provider === 'url') {
+    if (hasProvider(file, 'url')) {
       fileInfo = (
         <div>
           <UrlProvider file={file} />
         </div>
       )
-    } else if (file.linkedFileData.provider === 'project_file') {
+    } else if (hasProvider(file, 'project_file')) {
       fileInfo = (
         <div>
           <ProjectFilePathProvider file={file} />
         </div>
       )
-    } else if (file.linkedFileData.provider === 'project_output_file') {
+    } else if (hasProvider(file, 'project_output_file')) {
       fileInfo = (
         <div>
           <ProjectOutputFileProvider file={file} />
@@ -85,8 +102,8 @@ export default function FileViewHeader({ file, storeReferencesKeys }) {
       })
       .finally(() => {
         if (
-          file.linkedFileData.provider === 'mendeley' ||
-          file.linkedFileData.provider === 'zotero' ||
+          hasProvider(file, 'mendeley') ||
+          hasProvider(file, 'zotero') ||
           file.name.match(/^.*\.bib$/)
         ) {
           reindexReferences()
@@ -151,16 +168,11 @@ export default function FileViewHeader({ file, storeReferencesKeys }) {
   )
 }
 
-FileViewHeader.propTypes = {
-  file: PropTypes.shape({
-    id: PropTypes.string,
-    name: PropTypes.string,
-    linkedFileData: PropTypes.object,
-  }).isRequired,
-  storeReferencesKeys: PropTypes.func.isRequired,
+type UrlProviderProps = {
+  file: LinkedFile<'url'>
 }
 
-function UrlProvider({ file }) {
+function UrlProvider({ file }: UrlProviderProps) {
   return (
     <p>
       <LinkedFileIcon />
@@ -181,14 +193,11 @@ function UrlProvider({ file }) {
   )
 }
 
-UrlProvider.propTypes = {
-  file: PropTypes.shape({
-    linkedFileData: PropTypes.object,
-    created: PropTypes.string,
-  }).isRequired,
+type ProjectFilePathProviderProps = {
+  file: LinkedFile<'project_file'>
 }
 
-function ProjectFilePathProvider({ file }) {
+function ProjectFilePathProvider({ file }: ProjectFilePathProviderProps) {
   /* eslint-disable jsx-a11y/anchor-has-content, react/jsx-key */
   return (
     <p>
@@ -218,14 +227,11 @@ function ProjectFilePathProvider({ file }) {
   )
 }
 
-ProjectFilePathProvider.propTypes = {
-  file: PropTypes.shape({
-    linkedFileData: PropTypes.object,
-    created: PropTypes.string,
-  }).isRequired,
+type ProjectOutputFileProviderProps = {
+  file: LinkedFile<'project_output_file'>
 }
 
-function ProjectOutputFileProvider({ file }) {
+function ProjectOutputFileProvider({ file }: ProjectOutputFileProviderProps) {
   return (
     <p>
       <LinkedFileIcon />
@@ -251,11 +257,4 @@ function ProjectOutputFileProvider({ file }) {
       />
     </p>
   )
-}
-
-ProjectOutputFileProvider.propTypes = {
-  file: PropTypes.shape({
-    linkedFileData: PropTypes.object,
-    created: PropTypes.string,
-  }).isRequired,
 }
