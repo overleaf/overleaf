@@ -4,6 +4,7 @@ import { reactivateSubscriptionUrl } from '../../data/subscription-url'
 import useAsync from '../../../../shared/hooks/use-async'
 import { useLocation } from '../../../../shared/hooks/use-location'
 import getMeta from '../../../../utils/meta'
+import { debugConsole } from '@/utils/debugging'
 
 function ReactivateSubscription() {
   const { t } = useTranslation()
@@ -11,7 +12,7 @@ function ReactivateSubscription() {
   const location = useLocation()
 
   const handleReactivate = () => {
-    runAsync(postJSON(reactivateSubscriptionUrl)).catch(console.error)
+    runAsync(postJSON(reactivateSubscriptionUrl)).catch(debugConsole.error)
   }
 
   if (isSuccess) {

@@ -10,6 +10,7 @@ import useSelectColor from '../../hooks/use-select-color'
 import { createTag } from '../../util/api'
 import { MAX_TAG_LENGTH } from '../../util/tag'
 import { ColorPicker } from '../color-picker/color-picker'
+import { debugConsole } from '@/utils/debugging'
 
 type CreateTagModalProps = {
   id: string
@@ -39,7 +40,7 @@ export default function CreateTagModal({
     if (tagName) {
       runAsync(createTag(tagName, selectedColor))
         .then(tag => onCreate(tag))
-        .catch(console.error)
+        .catch(debugConsole.error)
     }
   }, [runAsync, tagName, selectedColor, onCreate])
 

@@ -19,6 +19,7 @@
 import EventEmitter from '../../utils/EventEmitter'
 import ShareJs from '../../vendor/libs/sharejs'
 import EditorWatchdogManager from '../connection/EditorWatchdogManager'
+import { debugConsole } from '@/utils/debugging'
 
 let ShareJsDoc
 const SINGLE_USER_FLUSH_DELAY = 2000 // ms
@@ -59,14 +60,14 @@ export default ShareJsDoc = (function () {
             window.disconnectOnUpdate != null &&
             Math.random() < window.disconnectOnUpdate
           ) {
-            sl_console.log('Disconnecting on update', update)
+            debugConsole.log('Disconnecting on update', update)
             window._ide.socket.socket.disconnect()
           }
           if (
             window.dropUpdates != null &&
             Math.random() < window.dropUpdates
           ) {
-            sl_console.log('Simulating a lost update', update)
+            debugConsole.log('Simulating a lost update', update)
             return
           }
           if (this.track_changes) {
@@ -141,7 +142,7 @@ export default ShareJsDoc = (function () {
       })
       let nextPos
       while ((nextPos = doc.snapshot.indexOf('\r')) !== -1) {
-        sl_console.log('[ShareJsDoc] remove-carriage-return-char', nextPos)
+        debugConsole.log('[ShareJsDoc] remove-carriage-return-char', nextPos)
         doc.del(nextPos, 1)
       }
     }
@@ -159,11 +160,13 @@ export default ShareJsDoc = (function () {
     }
 
     _pushOntoQueue(message) {
-      sl_console.log(`[processUpdate] push onto queue ${message.v}`)
+      debugConsole.log(`[processUpdate] push onto queue ${message.v}`)
       // set a timer so that we never leave messages in the queue indefinitely
       if (!this.queuedMessageTimer) {
         this.queuedMessageTimer = setTimeout(() => {
-          sl_console.log(`[processUpdate] queue timeout fired for ${message.v}`)
+          debugConsole.log(
+            `[processUpdate] queue timeout fired for ${message.v}`
+          )
           // force the message to be processed after the timeout,
           // it will cause an error if the missing update has not arrived
           this.processUpdateFromServer(message)
@@ -187,13 +190,13 @@ export default ShareJsDoc = (function () {
           // there are updates we still can't apply yet
         } else {
           // there's a version we can accept on the queue, apply it
-          sl_console.log(
+          debugConsole.log(
             `[processUpdate] taken from queue ${nextAvailableVersion}`
           )
           this.processUpdateFromServerInOrder(this.queuedMessages.shift())
           // clear the pending timer if the queue has now been cleared
           if (this.queuedMessages.length === 0 && this.queuedMessageTimer) {
-            sl_console.log('[processUpdate] queue is empty, cleared timeout')
+            debugConsole.log('[processUpdate] queue is empty, cleared timeout')
             clearTimeout(this.queuedMessageTimer)
             this.queuedMessageTimer = null
           }
@@ -235,7 +238,7 @@ export default ShareJsDoc = (function () {
         this._doc._onMessage(message)
       } catch (error) {
         // Version mismatches are thrown as errors
-        console.log(error)
+        debugConsole.error(error)
         this._handleError(error)
         return error // return the error for queue handling
       }
@@ -288,7 +291,7 @@ export default ShareJsDoc = (function () {
     }
 
     updateConnectionState(state) {
-      sl_console.log(`[updateConnectionState] Setting state to ${state}`)
+      debugConsole.log(`[updateConnectionState] Setting state to ${state}`)
       this.connection.state = state
       this.connection.id = this.socket.publicId
       this._doc.autoOpen = false
@@ -385,7 +388,7 @@ export default ShareJsDoc = (function () {
         // Only send the update again if inflightOp is still populated
         // This can be cleared when hard reloading the document in which
         // case we don't want to keep trying to send it.
-        sl_console.log('[inflightOpTimeout] Trying op again')
+        debugConsole.log('[inflightOpTimeout] Trying op again')
         if (this._doc.inflightOp != null) {
           // When there is a socket.io disconnect, @_doc.inflightSubmittedIds
           // is updated with the socket.io client id of the current op in flight
@@ -403,7 +406,7 @@ export default ShareJsDoc = (function () {
           // when we've joined the project
           if (this.connection.state !== 'ok') {
             let timer
-            sl_console.log(
+            debugConsole.log(
               '[inflightOpTimeout] Not connected, retrying in 0.5s'
             )
             return (timer = setTimeout(
@@ -411,7 +414,7 @@ export default ShareJsDoc = (function () {
               this.WAIT_FOR_CONNECTION_TIMEOUT
             ))
           } else {
-            sl_console.log('[inflightOpTimeout] Sending')
+            debugConsole.log('[inflightOpTimeout] Sending')
             return this.connection.send(update)
           }
         }

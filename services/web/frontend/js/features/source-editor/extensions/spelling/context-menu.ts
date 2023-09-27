@@ -8,6 +8,7 @@ import { EditorView, showTooltip, Tooltip, keymap } from '@codemirror/view'
 import { addIgnoredWord } from './ignored-words'
 import { learnWordRequest } from './backend'
 import { Word, Mark, getMarkAtPosition } from './spellchecker'
+import { debugConsole } from '@/utils/debugging'
 
 const ITEMS_TO_SHOW = 8
 
@@ -54,7 +55,7 @@ const handleContextMenuEvent = (event: MouseEvent, view: EditorView) => {
 
   const targetWord = value.spec.word
   if (!targetWord) {
-    console.debug(
+    debugConsole.debug(
       '>> spelling no word associated with decorated range, stopping'
     )
     return
@@ -286,7 +287,7 @@ const handleLearnWord = async function (word: Word, view: EditorView) {
       effects: [addIgnoredWord.of(word), hideSpellingMenu.of(null)],
     })
   } catch (err) {
-    console.error(err)
+    debugConsole.error(err)
   }
 }
 
@@ -303,7 +304,7 @@ const handleCorrectWord = (word: Word, text: string, view: EditorView) => {
   // Defend against erroneous replacement, if the word at this
   // position is not actually what we think it is
   if (existingText !== word.text) {
-    console.debug(
+    debugConsole.debug(
       '>> spelling word-to-correct does not match, stopping',
       tooltip.pos,
       tooltip.end,

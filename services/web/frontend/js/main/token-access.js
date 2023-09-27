@@ -1,4 +1,5 @@
 import App from '../base'
+import { debugConsole } from '@/utils/debugging'
 App.controller(
   'TokenAccessPageController',
   ($scope, $http, $location, localStorage) => {
@@ -56,7 +57,7 @@ App.controller(
           if (data.redirect) {
             const redirect = response.data.redirect
             if (!redirect) {
-              console.warn(
+              debugConsole.warn(
                 'no redirect supplied in success response data',
                 response
               )
@@ -71,7 +72,7 @@ App.controller(
             $scope.mode = 'requireAccept'
             $scope.requireAccept = data.requireAccept
           } else {
-            console.warn(
+            debugConsole.warn(
               'invalid data from server in success response',
               response
             )
@@ -79,7 +80,7 @@ App.controller(
           }
         },
         function errorCallback(response) {
-          console.warn('error response from server', response)
+          debugConsole.warn('error response from server', response)
           $scope.accessInFlight = false
           $scope.accessError = response.status === 404 ? 'not_found' : 'error'
         }

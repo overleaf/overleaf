@@ -14,6 +14,7 @@ import ErrorAlert, { APIError } from './error-alert'
 import GroupMemberRow from './group-member-row'
 import useUserSelection from '../hooks/use-user-selection'
 import { User } from '../../../../../types/group-management/user'
+import { debugConsole } from '@/utils/debugging'
 
 type ManagersPaths = {
   addMember: string
@@ -77,7 +78,7 @@ export function ManagersTable({
             }
             setEmailString('')
           } catch (error: unknown) {
-            console.error(error)
+            debugConsole.error(error)
             setInviteError((error as FetchError)?.data?.error || {})
           }
           setInviteUserInflightCount(count => count - 1)
@@ -105,7 +106,7 @@ export function ManagersTable({
             setUsers(users => users.filter(u => u !== user))
             unselectUser(user)
           } catch (error: unknown) {
-            console.error(error)
+            debugConsole.error(error)
             setRemoveMemberError((error as FetchError)?.data?.error || {})
           }
           setRemoveMemberInflightCount(count => count - 1)

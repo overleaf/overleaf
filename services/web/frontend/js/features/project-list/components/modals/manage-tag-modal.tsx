@@ -9,6 +9,7 @@ import { deleteTag, editTag } from '../../util/api'
 import { Tag } from '../../../../../../app/src/Features/Tags/types'
 import { getTagColor } from '../../util/tag'
 import { ColorPicker } from '../color-picker/color-picker'
+import { debugConsole } from '@/utils/debugging'
 
 type ManageTagModalProps = {
   id: string
@@ -46,7 +47,7 @@ export function ManageTagModal({
         .then(() => {
           onDelete(tagId)
         })
-        .catch(console.error)
+        .catch(debugConsole.error)
     },
     [runDeleteAsync, onDelete]
   )
@@ -56,7 +57,7 @@ export function ManageTagModal({
       if (newTagName) {
         runEditAsync(editTag(tagId, newTagName, selectedColor))
           .then(() => onEdit(tagId, newTagName, selectedColor))
-          .catch(console.error)
+          .catch(debugConsole.error)
       }
     },
     [runEditAsync, newTagName, selectedColor, onEdit]

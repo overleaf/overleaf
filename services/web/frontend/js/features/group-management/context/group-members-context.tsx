@@ -17,6 +17,7 @@ import getMeta from '../../../utils/meta'
 import { APIError } from '../components/error-alert'
 import useUserSelection from '../hooks/use-user-selection'
 import { parseEmails } from '../utils/emails'
+import { debugConsole } from '@/utils/debugging'
 
 export type GroupMembersContextValue = {
   users: User[]
@@ -94,7 +95,7 @@ export function GroupMembersProvider({ children }: GroupMembersProviderProps) {
             }
           }
         } catch (error: unknown) {
-          console.error(error)
+          debugConsole.error(error)
           setInviteError((error as FetchError)?.data?.error || {})
         }
         setInviteUserInflightCount(count => count - 1)
@@ -119,7 +120,7 @@ export function GroupMembersProvider({ children }: GroupMembersProviderProps) {
         setUsers(users => users.filter(u => u !== user))
         unselectUser(user)
       } catch (error: unknown) {
-        console.error(error)
+        debugConsole.error(error)
         setRemoveMemberError((error as FetchError)?.data?.error || {})
       }
       setRemoveMemberInflightCount(count => count - 1)

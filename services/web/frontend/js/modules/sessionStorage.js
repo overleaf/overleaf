@@ -1,3 +1,5 @@
+import { debugConsole } from '@/utils/debugging'
+
 angular.module('sessionStorage', []).value('sessionStorage', sessionStorage)
 
 /*
@@ -9,7 +11,7 @@ function sessionStorage(...args) {
   try {
     return $.sessionStorage(...args)
   } catch (e) {
-    console.error('sessionStorage exception', e)
+    debugConsole.error('sessionStorage exception', e)
     return null
   }
 }

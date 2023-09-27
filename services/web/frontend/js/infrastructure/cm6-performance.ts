@@ -3,6 +3,7 @@ import { EditorView } from '@codemirror/view'
 import { round } from 'lodash'
 import grammarlyExtensionPresent from '../shared/utils/grammarly'
 import getMeta from '../utils/meta'
+import { debugConsole } from '@/utils/debugging'
 
 const TIMER_START_NAME = 'CM6-BeforeUpdate'
 const TIMER_END_NAME = 'CM6-AfterUpdate'
@@ -326,5 +327,5 @@ export function reportCM6Perf() {
 }
 
 window._reportCM6Perf = () => {
-  console.log(reportCM6Perf())
+  debugConsole.warn(reportCM6Perf())
 }

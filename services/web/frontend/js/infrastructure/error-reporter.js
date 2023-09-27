@@ -1,6 +1,7 @@
 // Conditionally enable Sentry based on whether the DSN token is set
 import getMeta from '../utils/meta'
 import OError from '@overleaf/o-error'
+import { debugConsole } from '@/utils/debugging'
 
 const reporterPromise = window.ExposedSettings?.sentryDsn
   ? sentryReporter()
@@ -81,7 +82,7 @@ function sentryReporter() {
       })
       // If Sentry fails to load, use the null reporter instead
       .catch(error => {
-        console.error(error)
+        debugConsole.error(error)
         return nullReporter()
       })
   )
@@ -89,8 +90,8 @@ function sentryReporter() {
 
 function nullReporter() {
   return Promise.resolve({
-    captureException: console.error,
-    captureMessage: console.error,
+    captureException: debugConsole.error,
+    captureMessage: debugConsole.error,
   })
 }
 

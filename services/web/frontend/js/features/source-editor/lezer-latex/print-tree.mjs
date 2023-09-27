@@ -23,6 +23,7 @@
 // SOFTWARE.
 import { Text } from '@codemirror/state'
 import { Tree, TreeCursor } from '@lezer/common'
+import { debugConsole } from '@/utils/debugging'
 
 class StringInput {
   constructor(input) {
@@ -211,5 +212,5 @@ function locAt(text, pos) {
 }
 
 export function logTree(tree, input, options) {
-  console.log(printTree(tree, input, options))
+  debugConsole.warn(printTree(tree, input, options))
 }

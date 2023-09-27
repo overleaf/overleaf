@@ -13,6 +13,7 @@ import {
   extendBackwardsOverEmptyLines,
   extendForwardsOverEmptyLines,
 } from '../../../extensions/visual/selection'
+import { debugConsole } from '@/utils/debugging'
 
 /* eslint-disable no-unused-vars */
 export enum BorderTheme {
@@ -284,7 +285,7 @@ export const removeRowOrColumns = (
             const from = cellPosition.from
             const to = cellSeparators[row][cellIndex].to
             if (from === undefined || to === undefined) {
-              console.error('Failed to remove column')
+              debugConsole.error('Failed to remove column')
               return selection
             }
             changes.push({
@@ -298,7 +299,7 @@ export const removeRowOrColumns = (
             const from = cellSeparators[row][cellIndex - 1].from
             const to = cellPosition.to
             if (from === undefined || to === undefined) {
-              console.error('Failed to remove column')
+              debugConsole.error('Failed to remove column')
               return selection
             }
             changes.push({

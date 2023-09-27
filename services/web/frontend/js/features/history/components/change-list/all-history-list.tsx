@@ -14,6 +14,7 @@ import { Trans, useTranslation } from 'react-i18next'
 import MaterialIcon from '@/shared/components/material-icon'
 import useAsync from '@/shared/hooks/use-async'
 import { completeHistoryTutorial } from '../../services/api'
+import { debugConsole } from '@/utils/debugging'
 
 type CompletedTutorials = {
   'react-history-buttons-tutorial': Date
@@ -135,7 +136,7 @@ function AllHistoryList() {
   ) {
     const dismissModal = () => {
       completeTutorial()
-      runAsync(completeHistoryTutorial()).catch(console.error)
+      runAsync(completeHistoryTutorial()).catch(debugConsole.error)
     }
 
     popover = (

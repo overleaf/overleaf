@@ -1,5 +1,6 @@
 import FileTreeContext from '../../../../../frontend/js/features/file-tree/components/file-tree-context'
 import { renderWithEditorContext } from '../../../helpers/render-with-context'
+import { debugConsole } from '@/utils/debugging'
 
 export default (children, options = {}) => {
   let { contextProps = {}, ...renderOptions } = options
@@ -16,13 +17,13 @@ export default (children, options = {}) => {
     ],
     refProviders: {},
     reindexReferences: () => {
-      console.log('reindex references')
+      debugConsole.warn('reindex references')
     },
     setRefProviderEnabled: provider => {
-      console.log(`ref provider ${provider} enabled`)
+      debugConsole.warn(`ref provider ${provider} enabled`)
     },
     setStartedFreeTrial: () => {
-      console.log('started free trial')
+      debugConsole.warn('started free trial')
     },
     onSelect: () => {},
     ...contextProps,

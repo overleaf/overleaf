@@ -72,6 +72,7 @@ services:
     environment:
       MOCHA_GREP: ${MOCHA_GREP}
       NODE_OPTIONS: "--unhandled-rejections=strict"
+      VERBOSE_LOGGING:
     command: npm run --silent test:frontend
     user: node
 
@@ -80,6 +81,8 @@ services:
     volumes:
       - ../../:/overleaf
     working_dir: /overleaf/services/web
+    environment:
+      VERBOSE_LOGGING:
     entrypoint: npm
     command:
       - "run"

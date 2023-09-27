@@ -2,6 +2,7 @@ import { expect } from 'chai'
 import sinon from 'sinon'
 
 import customLocalStorage from '../../../frontend/js/infrastructure/local-storage'
+import { debugConsole } from '@/utils/debugging'
 
 describe('localStorage', function () {
   let originalLocalStorage
@@ -15,6 +16,7 @@ describe('localStorage', function () {
     })
   })
 
+  let spyOnDebugConsoleError
   beforeEach(function () {
     Object.defineProperty(global, 'localStorage', {
       value: {
@@ -25,11 +27,11 @@ describe('localStorage', function () {
       },
     })
 
-    global.console.error = sinon.stub()
+    spyOnDebugConsoleError = sinon.spy(debugConsole, 'error')
   })
 
   afterEach(function () {
-    global.console.error.reset()
+    spyOnDebugConsoleError.restore()
     Object.defineProperty(global, 'localStorage', { value: undefined })
   })
 
@@ -44,7 +46,7 @@ describe('localStorage', function () {
 
     global.localStorage.getItem.throws(new Error('Nope'))
     expect(customLocalStorage.getItem('foo')).to.be.null
-    expect(global.console.error).to.be.calledOnce
+    expect(debugConsole.error).to.be.calledOnce
   })
 
   it('setItem', function () {
@@ -62,7 +64,7 @@ describe('localStorage', function () {
 
     global.localStorage.setItem.throws(new Error('Nope'))
     expect(customLocalStorage.setItem('foo', 'bar')).to.be.null
-    expect(global.console.error).to.be.calledOnce
+    expect(debugConsole.error).to.be.calledOnce
   })
 
   it('clear', function () {
@@ -71,7 +73,7 @@ describe('localStorage', function () {
 
     global.localStorage.clear.throws(new Error('Nope'))
     expect(customLocalStorage.clear()).to.be.null
-    expect(global.console.error).to.be.calledOnce
+    expect(debugConsole.error).to.be.calledOnce
   })
 
   it('removeItem', function () {
@@ -81,6 +83,6 @@ describe('localStorage', function () {
 
     global.localStorage.removeItem.throws(new Error('Nope'))
     expect(customLocalStorage.removeItem('foo')).to.be.null
-    expect(global.console.error).to.be.calledOnce
+    expect(debugConsole.error).to.be.calledOnce
   })
 })

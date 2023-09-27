@@ -23,6 +23,7 @@ import './controllers/FileTreeController'
 import './controllers/FileTreeEntityController'
 import './controllers/FileTreeFolderController'
 import '../../features/file-tree/controllers/file-tree-controller'
+import { debugConsole } from '@/utils/debugging'
 let FileTreeManager
 
 export default FileTreeManager = class FileTreeManager {
@@ -631,7 +632,7 @@ export default FileTreeManager = class FileTreeManager {
     const provider =
       file.linkedFileData != null ? file.linkedFileData.provider : undefined
     if (provider == null) {
-      console.warn(`>> no provider for ${file.name}`, file)
+      debugConsole.warn(`>> no provider for ${file.name}`, file)
       return
     }
     return this.ide.$http.post(

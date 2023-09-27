@@ -94,9 +94,6 @@
       // Backend specific rules
       "files": ["**/app/src/**/*.js", "app.js"],
       "rules": {
-        // don't allow console.log in backend code
-        "no-console": "error",
-
         // do not allow importing of implicit dependencies.
         "import/no-extraneous-dependencies": ["error", {
           // do not allow importing of devDependencies.
@@ -179,8 +176,6 @@
         "angular": true,
         "ace": true,
         "ga": true,
-        "sl_console": true,
-        "sl_debugging": true,
         // Injected in layout.pug
         "user_id": true,
         "ExposedSettings": true
@@ -273,6 +268,28 @@
           "devDependencies": true,
           "packageDir": [".", "../../"]
         }]
+      }
+    },
+    {
+      "files": [
+        // Backend: Use @overleaf/logger
+        //          Docs: https://manual.dev-overleaf.com/development/code/logging/#structured-logging
+        "**/app/**/*.{js,cjs,mjs}", "app.js", "modules/*/*.js",
+        // Frontend: Prefer debugConsole over bare console
+        //           Docs: https://manual.dev-overleaf.com/development/code/logging/#frontend
+        "**/frontend/**/*.{js,ts,tsx}"
+      ],
+      "excludedFiles": [
+        // Allow console logs in scripts
+        "**/scripts/**/*.js",
+        // Allow console logs in stories
+        "**/stories/**/*.{js,ts,tsx}",
+        // Workers do not have access to the search params for enabling ?debug=true.
+        // self.location.url is the URL of the worker script.
+        "*.worker.{js,ts}"
+      ],
+      "rules": {
+        "no-console": "error"
       }
     }
   ]

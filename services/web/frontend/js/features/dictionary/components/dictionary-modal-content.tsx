@@ -6,6 +6,7 @@ import Tooltip from '../../../shared/components/tooltip'
 import useAsync from '../../../shared/hooks/use-async'
 import { postJSON } from '../../../infrastructure/fetch-json'
 import ignoredWords from '../ignored-words'
+import { debugConsole } from '@/utils/debugging'
 
 type DictionaryModalContentProps = {
   handleHide: () => void
@@ -29,7 +30,7 @@ export default function DictionaryModalContent({
             word,
           },
         })
-      ).catch(console.error)
+      ).catch(debugConsole.error)
     },
     [runAsync]
   )

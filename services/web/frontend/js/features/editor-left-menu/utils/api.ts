@@ -10,6 +10,7 @@ import type {
 } from '../../../../../types/project-settings'
 import { sendMB } from '../../../infrastructure/event-tracking'
 import { postJSON } from '../../../infrastructure/fetch-json'
+import { debugConsole } from '@/utils/debugging'
 
 export type UserSettings = {
   pdfViewer: PdfViewer
@@ -50,7 +51,7 @@ export function saveUserSettings(
     body: {
       [key]: value,
     },
-  }).catch(console.error)
+  }).catch(debugConsole.error)
 }
 
 export const saveProjectSettings = async (

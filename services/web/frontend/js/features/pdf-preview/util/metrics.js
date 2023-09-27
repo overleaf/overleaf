@@ -1,6 +1,7 @@
 import { v4 as uuid } from 'uuid'
 import { sendMB } from '../../../infrastructure/event-tracking'
 import { trackPdfDownloadEnabled } from './pdf-caching-flags'
+import { debugConsole } from '@/utils/debugging'
 
 // VERSION should get incremented when making changes to caching behavior or
 //  adjusting metrics collection.
@@ -60,6 +61,6 @@ function submitCompileMetrics(metrics) {
     ...metrics,
     id: EDITOR_SESSION_ID,
   }
-  sl_console.log('/event/compile-metrics', JSON.stringify(leanMetrics))
+  debugConsole.log('/event/compile-metrics', JSON.stringify(leanMetrics))
   sendMB('compile-metrics-v6', leanMetrics)
 }

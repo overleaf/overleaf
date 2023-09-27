@@ -20,9 +20,9 @@ const overrides = require('./overrides.json')
 const { merge } = require('lodash')
 
 // CSS files from https://github.com/overleaf/ace/tree/overleaf/lib/ace/theme copied into the "ace" folder
-const themePaths = globby.sync(['ace/*.css'], { cwd: __dirname })
+const themePaths = globby.sync(['ace/*.css'], { cwd: path.dirname(__dirname) })
 
-const outputDir = path.join(__dirname, 'cm6')
+const outputDir = path.join(path.dirname(__dirname), 'cm6')
 
 // from js/ide.js
 const darkThemes = [

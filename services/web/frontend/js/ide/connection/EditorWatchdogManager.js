@@ -75,6 +75,8 @@
   See also: https://developer.mozilla.org/en-US/docs/Web/API/Performance/now
  */
 
+import { debugConsole } from '@/utils/debugging'
+
 // TIMEOUT specifies the timeout for edits into a single ShareJsDoc.
 const TIMEOUT = 60 * 1000
 // GLOBAL_TIMEOUT specifies the timeout for edits into any ShareJSDoc.
@@ -229,6 +231,6 @@ export default class EditorWatchdogManager {
   }
 
   _log() {
-    sl_console.log(`[EditorWatchdogManager] ${this.scope}:`, ...arguments)
+    debugConsole.log(`[EditorWatchdogManager] ${this.scope}:`, ...arguments)
   }
 }

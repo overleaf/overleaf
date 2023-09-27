@@ -4,6 +4,7 @@ import { postJSON } from '../../../../infrastructure/fetch-json'
 import { useSubscriptionDashboardContext } from '../../context/subscription-dashboard-context'
 import { Institution } from './managed-institutions'
 import { RowLink } from './row-link'
+import { debugConsole } from '@/utils/debugging'
 
 type ManagedInstitutionProps = {
   institution: Institution
@@ -27,7 +28,7 @@ export default function ManagedInstitution({
           institution.metricsEmail.optedOutUserIds = data
           updateManagedInstitution(institution)
         } catch (error) {
-          console.error(error)
+          debugConsole.error(error)
         }
         setSubscriptionChanging(false)
       }

@@ -4,6 +4,7 @@ import { postJSON } from '../../../../../../../infrastructure/fetch-json'
 import { subscriptionUpdateUrl } from '../../../../../data/subscription-url'
 import ActionButtonText from '../../../action-button-text'
 import { useLocation } from '../../../../../../../shared/hooks/use-location'
+import { debugConsole } from '@/utils/debugging'
 
 export default function DowngradePlanButton({
   isButtonDisabled,
@@ -31,7 +32,7 @@ export default function DowngradePlanButton({
       )
       location.reload()
     } catch (e) {
-      console.error(e)
+      debugConsole.error(e)
     }
   }
 

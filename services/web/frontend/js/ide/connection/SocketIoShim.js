@@ -1,5 +1,7 @@
 /* global io */
 
+import { debugConsole } from '@/utils/debugging'
+
 class SocketShimBase {
   static connect(url, options) {
     return new SocketShimBase()
@@ -205,14 +207,14 @@ class SocketShimV2 extends SocketShimBase {
 
 let current
 if (typeof io === 'undefined' || !io) {
-  sl_console.log('[socket.io] Shim: socket.io is not loaded, returning noop')
+  debugConsole.log('[socket.io] Shim: socket.io is not loaded, returning noop')
   current = SocketShimNoop
 } else if (typeof io.version === 'string' && io.version.slice(0, 1) === '0') {
-  sl_console.log('[socket.io] Shim: detected v0')
+  debugConsole.log('[socket.io] Shim: detected v0')
   current = SocketShimV0
 } else {
   // socket.io v2 does not have a global io.version attribute.
-  sl_console.log('[socket.io] Shim: detected v2')
+  debugConsole.log('[socket.io] Shim: detected v2')
   current = SocketShimV2
 }
 

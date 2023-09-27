@@ -8,10 +8,6 @@ declare global {
   // eslint-disable-next-line no-unused-vars
   interface Window {
     csrfToken: string
-    sl_console: {
-      log: (message: string) => void
-    }
-    sl_debugging: boolean
     user: User
     user_id?: string
     oauthProviders: OAuthProviders

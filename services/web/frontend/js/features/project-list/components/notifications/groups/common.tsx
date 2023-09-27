@@ -13,6 +13,7 @@ import {
 } from '../../../../../../../types/project/dashboard/notification'
 import { User } from '../../../../../../../types/user'
 import GroupInvitationNotification from './group-invitation/group-invitation'
+import { debugConsole } from '@/utils/debugging'
 
 function Common() {
   const notifications = getMeta('ol-notifications', []) as NotificationType[]
@@ -53,7 +54,7 @@ function CommonNotification({ notification }: CommonNotificationProps) {
 
     runAsync(
       postJSON(`/project/${projectId}/invite/token/${token}/accept`)
-    ).catch(console.error)
+    ).catch(debugConsole.error)
   }
 
   const { _id: id, templateKey, html } = notification

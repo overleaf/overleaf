@@ -12,6 +12,7 @@
 
 import SocketIoShim from './SocketIoShim'
 import getMeta from '../../utils/meta'
+import { debugConsole, debugging } from '@/utils/debugging'
 
 let ConnectionManager
 const ONEHOUR = 1000 * 60 * 60
@@ -42,7 +43,7 @@ export default ConnectionManager = (function () {
           // try reloading and falling back to the siteUrl
           window.location = window.location.href + '?ws=fallback'
         }
-        console.error(
+        debugConsole.error(
           'Socket.io javascript not loaded. Please check that the real-time service is running and accessible.'
         )
         this.ide.socket = SocketIoShim.stub()
@@ -59,7 +60,7 @@ export default ConnectionManager = (function () {
 
       // trigger a reconnect immediately if network comes back online
       window.addEventListener('online', () => {
-        sl_console.log('[online] browser notified online')
+        debugConsole.log('[online] browser notified online')
         if (!this.connected) {
           return this.tryReconnectWithRateLimit({ force: true })
         }
@@ -78,7 +79,7 @@ export default ConnectionManager = (function () {
       this.joinProjectRetryInterval = this.JOIN_PROJECT_RETRY_INTERVAL
 
       this.$scope.connection = {
-        debug: sl_debugging,
+        debug: debugging,
         reconnecting: false,
         stillReconnecting: false,
         // If we need to force everyone to reload the editor
@@ -157,7 +158,7 @@ export default ConnectionManager = (function () {
           )
         }
         this.updateConnectionManagerState('error')
-        sl_console.log('socket.io error', err)
+        debugConsole.log('socket.io error', err)
         if (this.wsUrl && !window.location.href.match(/ws=fallback/)) {
           // if we tried to load a custom websocket location and failed
           // try reloading and falling back to the siteUrl
@@ -180,7 +181,7 @@ export default ConnectionManager = (function () {
         // state should be 'connecting'...
         // remove connection error handler when connected, avoid unwanted fallbacks
         this.ide.socket.removeListener('error', connectionErrorHandler)
-        sl_console.log('[socket.io connect] Connected')
+        debugConsole.log('[socket.io connect] Connected')
         this.updateConnectionManagerState('authenticating')
       })
 
@@ -192,7 +193,7 @@ export default ConnectionManager = (function () {
       this.ide.socket.on('connectionAccepted', (_, publicId) => {
         this.ide.socket.publicId = publicId || this.ide.socket.socket.sessionid
         // state should be 'authenticating'...
-        sl_console.log('[socket.io connectionAccepted] allowed to connect')
+        debugConsole.log('[socket.io connectionAccepted] allowed to connect')
         this.connected = true
         this.gracefullyReconnecting = false
         this.ide.pushEvent('connected')
@@ -215,7 +216,7 @@ export default ConnectionManager = (function () {
         'joinProjectResponse',
         ({ publicId, project, permissionsLevel, protocolVersion }) => {
           this.ide.socket.publicId = publicId
-          sl_console.log('[socket.io bootstrap] ready for joinDoc')
+          debugConsole.log('[socket.io bootstrap] ready for joinDoc')
           this.connected = true
           this.gracefullyReconnecting = false
           this.ide.pushEvent('connected')
@@ -240,7 +241,7 @@ export default ConnectionManager = (function () {
 
       this.ide.socket.on('connectionRejected', err => {
         // state should be 'authenticating'...
-        sl_console.log(
+        debugConsole.log(
           '[socket.io connectionRejected] session not valid or other connection error'
         )
         // real-time sends a 'retry' message if the process was shutting down
@@ -279,7 +280,7 @@ export default ConnectionManager = (function () {
       // "connect" event.
 
       this.ide.socket.on('disconnect', () => {
-        sl_console.log('[socket.io disconnect] Disconnected')
+        debugConsole.log('[socket.io disconnect] Disconnected')
         this.connected = false
         this.ide.pushEvent('disconnected')
 
@@ -320,7 +321,7 @@ The editor will refresh automatically in ${delay} seconds.\
       })
 
       this.ide.socket.on('reconnectGracefully', () => {
-        sl_console.log('Reconnect gracefully')
+        debugConsole.log('Reconnect gracefully')
         this.reconnectGracefully()
       })
     }
@@ -329,7 +330,7 @@ The editor will refresh automatically in ${delay} seconds.\
       this.$scope.$apply(() => {
         this.$scope.connection.jobId += 1
         const jobId = this.$scope.connection.jobId
-        sl_console.log(
+        debugConsole.log(
           `[updateConnectionManagerState ${jobId}] from ${this.$scope.connection.state} to ${state}`
         )
         this.$scope.connection.state = state
@@ -376,7 +377,7 @@ The editor will refresh automatically in ${delay} seconds.\
         } else if (state === 'error') {
           // something is wrong
         } else {
-          sl_console.log(
+          debugConsole.log(
             `[WARN] [updateConnectionManagerState ${jobId}] got unrecognised state ${state}`
           )
         }
@@ -391,7 +392,7 @@ The editor will refresh automatically in ${delay} seconds.\
         return true
       }
 
-      sl_console.log(
+      debugConsole.log(
         `[WARN] [state mismatch] expected state ${state}${
           jobId ? '/' + jobId : ''
         } when in ${this.$scope.connection.state}/${
@@ -404,7 +405,7 @@ The editor will refresh automatically in ${delay} seconds.\
     // Error reporting, which can reload the page if appropriate
 
     reportConnectionError(err) {
-      sl_console.log('[socket.io] reporting connection error')
+      debugConsole.log('[socket.io] reporting connection error')
       this.updateConnectionManagerState('error')
       if (
         (err != null ? err.message : undefined) === 'not authorized' ||
@@ -425,12 +426,12 @@ Something went wrong connecting to your project. Please refresh if this continue
     }
 
     joinProject(connectionId) {
-      sl_console.log(`[joinProject ${connectionId}] joining...`)
+      debugConsole.log(`[joinProject ${connectionId}] joining...`)
       // Note: if the "joinProject" message doesn't reach the server
       // (e.g. if we are in a disconnected state at this point) the
       // callback will never be executed
       if (!this.expectConnectionManagerState('joining', connectionId)) {
-        sl_console.log(
+        debugConsole.log(
           `[joinProject ${connectionId}] aborting with stale connection`
         )
         return
@@ -477,7 +478,7 @@ Something went wrong connecting to your project. Please refresh if this continue
           return
         }
         if (err.code === 'TooManyRequests') {
-          sl_console.log(
+          debugConsole.log(
             `[joinProject ${connectionId}] retrying: ${err.message}`
           )
           setTimeout(
@@ -525,16 +526,16 @@ Something went wrong connecting to your project. Please refresh if this continue
 
     disconnect(options) {
       if (options && options.permanent) {
-        sl_console.log('[disconnect] shutting down ConnectionManager')
+        debugConsole.log('[disconnect] shutting down ConnectionManager')
         this.updateConnectionManagerState('inactive')
         this.shuttingDown = true // prevent reconnection attempts
       } else if (this.ide.socket.socket && !this.ide.socket.socket.connected) {
-        sl_console.log(
+        debugConsole.log(
           '[socket.io] skipping disconnect because socket.io has not connected'
         )
         return
       }
-      sl_console.log('[socket.io] disconnecting client')
+      debugConsole.log('[socket.io] disconnecting client')
       return this.ide.socket.disconnect()
     }
 
@@ -542,7 +543,7 @@ Something went wrong connecting to your project. Please refresh if this continue
       this.updateConnectionManagerState('waitingCountdown')
       const connectionId = this.$scope.connection.jobId
       let countdown
-      sl_console.log('[ConnectionManager] starting autoreconnect countdown')
+      debugConsole.log('[ConnectionManager] starting autoreconnect countdown')
       const twoMinutes = 2 * 60 * 1000
       if (
         this.lastUserAction != null &&
@@ -579,7 +580,7 @@ Something went wrong connecting to your project. Please refresh if this continue
     stopReconnectCountdownTimer() {
       // clear timeout and set to null so we know there is no countdown running
       if (this.countdownTimeoutId != null) {
-        sl_console.log(
+        debugConsole.log(
           '[ConnectionManager] cancelling existing reconnect timer'
         )
         clearTimeout(this.countdownTimeoutId)
@@ -595,13 +596,13 @@ Something went wrong connecting to your project. Please refresh if this continue
       if (
         !this.expectConnectionManagerState('waitingCountdown', connectionId)
       ) {
-        sl_console.log(
+        debugConsole.log(
           `[ConnectionManager] Aborting stale countdown ${connectionId}`
         )
         return
       }
 
-      sl_console.log(
+      debugConsole.log(
         '[ConnectionManager] decreasing countdown',
         this.$scope.connection.reconnection_countdown
       )
@@ -623,7 +624,7 @@ Something went wrong connecting to your project. Please refresh if this continue
     }
 
     tryReconnect() {
-      sl_console.log('[ConnectionManager] tryReconnect')
+      debugConsole.log('[ConnectionManager] tryReconnect')
       if (
         this.connected ||
         this.shuttingDown ||
@@ -632,20 +633,20 @@ Something went wrong connecting to your project. Please refresh if this continue
         return
       }
       this.updateConnectionManagerState('reconnecting')
-      sl_console.log('[ConnectionManager] Starting new connection')
+      debugConsole.log('[ConnectionManager] Starting new connection')
 
       const removeHandler = () => {
         this.ide.socket.removeListener('error', handleFailure)
         this.ide.socket.removeListener('connect', handleSuccess)
       }
       const handleFailure = () => {
-        sl_console.log('[ConnectionManager] tryReconnect: failed')
+        debugConsole.log('[ConnectionManager] tryReconnect: failed')
         removeHandler()
         this.updateConnectionManagerState('reconnectFailed')
         this.tryReconnectWithRateLimit({ force: true })
       }
       const handleSuccess = () => {
-        sl_console.log('[ConnectionManager] tryReconnect: success')
+        debugConsole.log('[ConnectionManager] tryReconnect: success')
         removeHandler()
       }
       this.ide.socket.on('error', handleFailure)
@@ -703,7 +704,7 @@ Something went wrong connecting to your project. Please refresh if this continue
         this.reconnectGracefullyStarted = new Date()
       } else {
         if (!force) {
-          sl_console.log(
+          debugConsole.log(
             '[reconnectGracefully] reconnection is already in process, so skipping'
           )
           return
@@ -716,12 +717,12 @@ Something went wrong connecting to your project. Please refresh if this continue
         new Date() - this.reconnectGracefullyStarted >
         this.MAX_RECONNECT_GRACEFULLY_INTERVAL
       if (userIsInactive || maxIntervalReached) {
-        sl_console.log(
+        debugConsole.log(
           "[reconnectGracefully] User didn't do anything for last 5 seconds, reconnecting"
         )
         this._reconnectGracefullyNow()
       } else {
-        sl_console.log(
+        debugConsole.log(
           '[reconnectGracefully] User is working, will try again in 5 seconds'
         )
         this.updateConnectionManagerState('waitingGracefully')

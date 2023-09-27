@@ -11,6 +11,7 @@ import useDetachLayout from '../hooks/use-detach-layout'
 import { useIdeContext } from './ide-context'
 import localStorage from '../../infrastructure/local-storage'
 import getMeta from '../../utils/meta'
+import { debugConsole } from '@/utils/debugging'
 
 const debugPdfDetach = getMeta('ol-debugPdfDetach')
 
@@ -122,7 +123,7 @@ export function LayoutProvider({ children }) {
 
   useEffect(() => {
     if (debugPdfDetach) {
-      console.log('Layout Effect', {
+      debugConsole.warn('Layout Effect', {
         detachIsRedundant,
         detachRole,
         detachIsLinking,

@@ -1,3 +1,5 @@
+import { debugConsole } from '@/utils/debugging'
+
 angular.module('localStorage', []).value('localStorage', localStorage)
 
 /*
@@ -9,7 +11,7 @@ function localStorage(...args) {
   try {
     return $.localStorage(...args)
   } catch (e) {
-    console.error('localStorage exception', e)
+    debugConsole.error('localStorage exception', e)
     return null
   }
 }

@@ -14,6 +14,7 @@
  */
 import App from '../../base'
 import EditorWatchdogManager from '../connection/EditorWatchdogManager'
+import { debugConsole } from '@/utils/debugging'
 // We create and provide this as service so that we can access the global ide
 // from within other parts of the angular app.
 App.factory(
@@ -38,7 +39,7 @@ App.factory(
       if (meta == null) {
         meta = {}
       }
-      sl_console.log('event', type, meta)
+      debugConsole.log('event', type, meta)
       this.recentEvents.push({ type, meta, date: new Date() })
       if (this.recentEvents.length > 100) {
         return this.recentEvents.shift()

@@ -1,6 +1,7 @@
 import { round } from 'lodash'
 import grammarlyExtensionPresent from '../../shared/utils/grammarly'
 import getMeta from '../../utils/meta'
+import { debugConsole } from '@/utils/debugging'
 
 const TIMER_DOM_UPDATE_NAME = 'Ace-DomUpdate'
 const TIMER_MEASURE_NAME = 'Ace-Keypress-Measure'
@@ -154,5 +155,5 @@ export function reportAcePerf() {
 }
 
 window._reportAcePerf = () => {
-  console.log(reportAcePerf())
+  debugConsole.warn(reportAcePerf())
 }

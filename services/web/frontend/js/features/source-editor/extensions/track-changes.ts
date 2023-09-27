@@ -30,6 +30,7 @@ import {
   Operation,
 } from '../../../../../types/change'
 import { ChangeManager } from './changes/change-manager'
+import { debugConsole } from '@/utils/debugging'
 
 const clearChangesEffect = StateEffect.define()
 const buildChangesEffect = StateEffect.define()
@@ -192,7 +193,7 @@ const buildChangeDecorations = (currentDoc: CurrentDoc) => {
       decorations.push(...createChangeRange(change, currentDoc))
     } catch (error) {
       // ignore invalid changes
-      console.debug('invalid change position', error)
+      debugConsole.debug('invalid change position', error)
     }
   }
 

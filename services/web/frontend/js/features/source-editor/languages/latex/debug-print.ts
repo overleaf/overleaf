@@ -25,6 +25,7 @@
 
 import { Text } from '@codemirror/state'
 import { Input, NodeType, SyntaxNode, Tree, TreeCursor } from '@lezer/common'
+import { debugConsole } from '@/utils/debugging'
 
 class StringInput implements Input {
   private input: string
@@ -278,5 +279,5 @@ export function logTree(
   input: string,
   options?: PrintTreeOptions
 ): void {
-  console.log(printTree(tree, input, options))
+  debugConsole.warn(printTree(tree, input, options))
 }

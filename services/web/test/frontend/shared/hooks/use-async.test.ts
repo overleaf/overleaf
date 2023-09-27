@@ -2,6 +2,7 @@ import { renderHook, act } from '@testing-library/react-hooks'
 import { expect } from 'chai'
 import sinon from 'sinon'
 import useAsync from '../../../../frontend/js/shared/hooks/use-async'
+import { debugConsole } from '@/utils/debugging'
 
 function deferred() {
   let res!: (
@@ -50,14 +51,13 @@ const rejectedState = {
 }
 
 describe('useAsync', function () {
+  let spyOnDebugConsoleError: sinon.SinonSpy
   beforeEach(function () {
-    global.console.error = sinon.stub()
+    spyOnDebugConsoleError = sinon.spy(debugConsole, 'error')
   })
 
   afterEach(function () {
-    // eslint-disable-next-line
-    // @ts-ignore
-    global.console.error.reset()
+    spyOnDebugConsoleError.restore()
   })
 
   it('exposes the methods', function () {
@@ -177,6 +177,6 @@ describe('useAsync', function () {
       await p
     })
 
-    expect(global.console.error).not.to.have.been.called
+    expect(debugConsole.error).not.to.have.been.called
   })
 })

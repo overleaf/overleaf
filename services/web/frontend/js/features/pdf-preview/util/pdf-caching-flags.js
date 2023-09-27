@@ -1,15 +1,16 @@
 import getMeta from '../../../utils/meta'
+import { debugConsole } from '@/utils/debugging'
 
 const hasTextEncoder = typeof TextEncoder !== 'undefined'
 if (!hasTextEncoder) {
-  console.warn('TextEncoder is not available. Disabling pdf-caching.')
+  debugConsole.warn('TextEncoder is not available. Disabling pdf-caching.')
 }
 
 const isOpera =
   Array.isArray(navigator.userAgentData?.brands) &&
   navigator.userAgentData.brands.some(b => b.brand === 'Opera')
 if (isOpera) {
-  console.warn('Browser cache is limited in Opera. Disabling pdf-caching.')
+  debugConsole.warn('Browser cache is limited in Opera. Disabling pdf-caching.')
 }
 
 function isFlagEnabled(flag) {

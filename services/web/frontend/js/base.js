@@ -56,8 +56,4 @@ App.run(($rootScope, $templateCache) => {
   )
 })
 
-const sl_debugging = window.location.search.match(/debug=true/)
-window.sl_debugging = sl_debugging // make a global flag for debugging code
-window.sl_console = sl_debugging ? console : { log() {} }
-
 export default App

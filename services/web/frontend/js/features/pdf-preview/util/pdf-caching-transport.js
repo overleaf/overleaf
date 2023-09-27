@@ -10,6 +10,7 @@ import {
   trackPdfDownloadEnabled,
 } from './pdf-caching-flags'
 import { isNetworkError } from '../../../utils/isNetworkError'
+import { debugConsole } from '@/utils/debugging'
 
 // 30 seconds: The shutdown grace period of a clsi pre-emp instance.
 const STALE_OUTPUT_REQUEST_THRESHOLD_MS = 30 * 1000
@@ -130,7 +131,7 @@ export function generatePdfCachingTransportFactory(PDFJS) {
             throw err // This was a fallback request already. Do not retry.
           }
           err = OError.tag(err, 'optimized pdf download error', getDebugInfo())
-          console.error(err)
+          debugConsole.error(err)
           captureException(err, {
             tags: {
               fromPdfCaching: true,
@@ -160,7 +161,7 @@ export function generatePdfCachingTransportFactory(PDFJS) {
         .catch(err => {
           if (abortSignal.aborted) return
           err = OError.tag(err, 'fatal pdf download error', getDebugInfo())
-          console.error(err)
+          debugConsole.error(err)
           if (!(err instanceof PDFJS.MissingPDFException)) {
             captureException(err, {
               tags: {

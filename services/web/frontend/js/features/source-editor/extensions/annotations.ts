@@ -10,6 +10,7 @@ import {
   Text,
 } from '@codemirror/state'
 import { Annotation } from '../../../../../types/annotation'
+import { debugConsole } from '@/utils/debugging'
 
 const compileLintSourceConf = new Compartment()
 
@@ -115,7 +116,7 @@ export const setAnnotations = (doc: Text, annotations: Annotation[]) => {
         diagnostics.push(convertAnnotationToDiagnostic(doc, annotation))
       } catch (error) {
         // ignore invalid annotations
-        console.debug('invalid annotation position', error)
+        debugConsole.debug('invalid annotation position', error)
       }
     }
   }

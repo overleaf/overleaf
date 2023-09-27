@@ -7,6 +7,7 @@ import {
   ParsedTableData,
   generateTable,
 } from '../../../components/table-generator/utils'
+import { debugConsole } from '@/utils/debugging'
 
 export class TabularWidget extends WidgetType {
   private element: HTMLElement | undefined
@@ -23,7 +24,7 @@ export class TabularWidget extends WidgetType {
     try {
       this.parseResult = generateTable(tabularNode, state)
     } catch (e) {
-      console.error(e)
+      debugConsole.error(e)
       this.parseResult = null
     }
   }

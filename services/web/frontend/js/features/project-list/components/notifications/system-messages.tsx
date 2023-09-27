@@ -8,6 +8,7 @@ import {
   SystemMessage as TSystemMessage,
   SuggestedLanguage,
 } from '../../../../../../types/project/dashboard/system-message'
+import { debugConsole } from '@/utils/debugging'
 
 const MESSAGE_POLL_INTERVAL = 15 * 60 * 1000
 
@@ -24,7 +25,7 @@ function SystemMessages() {
         return
       }
 
-      runAsync(getJSON('/system/messages')).catch(console.error)
+      runAsync(getJSON('/system/messages')).catch(debugConsole.error)
     }
     pollMessages()
 

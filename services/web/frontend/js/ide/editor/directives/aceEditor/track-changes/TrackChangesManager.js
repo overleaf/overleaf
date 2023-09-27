@@ -6,6 +6,7 @@ import EditorShareJsCodec from '../../../EditorShareJsCodec'
 import 'ace/ace'
 import '../../../../../utils/EventEmitter'
 import '../../../../colors/ColorManager'
+import { debugConsole } from '@/utils/debugging'
 const { Range } = ace.require('ace/range')
 class TrackChangesManager {
   constructor($scope, editor, element, adapter) {
@@ -547,7 +548,7 @@ class TrackChangesManager {
         marker.range.end.row !== end.row ||
         marker.range.end.column !== end.column
       ) {
-        console.error("Change doesn't match marker anymore", {
+        debugConsole.error("Change doesn't match marker anymore", {
           marker,
           start,
           end,
@@ -560,7 +561,7 @@ class TrackChangesManager {
       for (const marker_id in markers) {
         marker = markers[marker_id]
         if (/track-changes/.test(marker.clazz)) {
-          result.push(console.error('Orphaned ace marker', marker))
+          result.push(debugConsole.error('Orphaned ace marker', marker))
         } else {
           result.push(undefined)
         }

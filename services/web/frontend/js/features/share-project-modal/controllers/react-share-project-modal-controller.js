@@ -4,6 +4,7 @@ import { react2angular } from 'react2angular'
 import ShareProjectModal from '../components/share-project-modal'
 import { rootContext } from '../../../shared/context/root-context'
 import { listProjectInvites, listProjectMembers } from '../utils/api'
+import { debugConsole } from '@/utils/debugging'
 
 App.component(
   'shareProjectModal',
@@ -41,8 +42,8 @@ export default App.controller(
               })
             }
           })
-          .catch(() => {
-            console.error('Error fetching members for project')
+          .catch(err => {
+            debugConsole.error('Error fetching members for project', err)
           })
       }
 
@@ -55,8 +56,8 @@ export default App.controller(
               })
             }
           })
-          .catch(() => {
-            console.error('Error fetching invites for project')
+          .catch(err => {
+            debugConsole.error('Error fetching invites for project', err)
           })
       }
     })

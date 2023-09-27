@@ -13,6 +13,7 @@ import { useUserContext } from '../../../shared/context/user-context'
 import { sendMB } from '../../../infrastructure/event-tracking'
 import { getJSON } from '../../../infrastructure/fetch-json'
 import useAbortController from '../../../shared/hooks/use-abort-controller'
+import { debugConsole } from '@/utils/debugging'
 
 export default function LinkSharing({ canAddCollaborators }) {
   const [inflight, setInflight] = useState(false)
@@ -125,7 +126,7 @@ function TokenBasedSharing({ setAccessLevel, inflight, canAddCollaborators }) {
   useEffect(() => {
     getJSON(`/project/${projectId}/tokens`, { signal })
       .then(data => setTokens(data))
-      .catch(error => console.error(error))
+      .catch(debugConsole.error)
   }, [projectId, signal])
 
   return (
@@ -223,7 +224,7 @@ export function ReadOnlyTokenLink() {
   useEffect(() => {
     getJSON(`/project/${projectId}/tokens`, { signal })
       .then(data => setTokens(data))
-      .catch(error => console.error(error))
+      .catch(debugConsole.error)
   }, [projectId, signal])
 
   return (

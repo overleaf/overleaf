@@ -71,6 +71,7 @@ import './features/history/controllers/history-file-tree-controller'
 import { cleanupServiceWorker } from './utils/service-worker-cleanup'
 import { reportCM6Perf } from './infrastructure/cm6-performance'
 import { reportAcePerf } from './ide/editor/ace-performance'
+import { debugConsole } from '@/utils/debugging'
 
 App.controller(
   'IdeController',
@@ -427,7 +428,7 @@ If the project has been renamed please look in your project list for a new proje
         !/.*Chromium\/.*/.test(userAgent)
     } catch (error) {
       err = error
-      console.error(err)
+      debugConsole.error(err)
     }
 
     if (ide.browserIsSafari) {
@@ -448,7 +449,7 @@ If the project has been renamed please look in your project list for a new proje
       }
     } catch (error1) {
       err = error1
-      console.error(err)
+      debugConsole.error(err)
     }
 
     // User can append ?ft=somefeature to url to activate a feature toggle

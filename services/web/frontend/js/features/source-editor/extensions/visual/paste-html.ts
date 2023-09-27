@@ -5,6 +5,7 @@ import {
   pastedContent,
   storePastedContent,
 } from './pasted-content'
+import { debugConsole } from '@/utils/debugging'
 
 export const pasteHtml = [
   Prec.highest(
@@ -65,7 +66,7 @@ export const pasteHtml = [
 
           return true
         } catch (error) {
-          console.error(error)
+          debugConsole.error(error)
 
           // fall back to the default paste handler
           return false

@@ -1,5 +1,6 @@
 import 'abort-controller/polyfill'
 import { postJSON } from '../../infrastructure/fetch-json'
+import { debugConsole } from '@/utils/debugging'
 
 const grecaptcha = window.grecaptcha
 
@@ -50,7 +51,7 @@ function emitError(err, src) {
     `captcha check failed: ${getMessage(err)}, please retry again`
   )
   // Keep a record of this error. 2nd line might request a screenshot of it.
-  console.error(err, src)
+  debugConsole.error(err, src)
 
   recaptchaCallbacks.splice(0).forEach(({ reject, resetTimeout }) => {
     resetTimeout()

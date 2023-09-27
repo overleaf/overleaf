@@ -10,6 +10,7 @@ import PropTypes from 'prop-types'
 import getMeta from '../../utils/meta'
 import { buildUrlWithDetachRole } from '../utils/url-helper'
 import useCallbackHandlers from '../hooks/use-callback-handlers'
+import { debugConsole } from '@/utils/debugging'
 
 export const DetachContext = createContext()
 
@@ -43,7 +44,7 @@ export function DetachProvider({ children }) {
 
   useEffect(() => {
     if (debugPdfDetach) {
-      console.log('Effect', { role })
+      debugConsole.warn('Effect', { role })
     }
     window.history.replaceState({}, '', buildUrlWithDetachRole(role).toString())
   }, [role])
@@ -52,7 +53,7 @@ export function DetachProvider({ children }) {
     if (detachChannel) {
       const listener = event => {
         if (debugPdfDetach) {
-          console.log(`Receiving:`, event.data)
+          debugConsole.warn(`Receiving:`, event.data)
         }
         callEventHandlers(event.data)
       }
@@ -69,7 +70,7 @@ export function DetachProvider({ children }) {
     (event, data) => {
       if (!role) {
         if (debugPdfDetach) {
-          console.log('Not Broadcasting (no role)', {
+          debugConsole.warn('Not Broadcasting (no role)', {
             role,
             event,
             data,
@@ -78,7 +79,7 @@ export function DetachProvider({ children }) {
         return
       }
       if (debugPdfDetach) {
-        console.log('Broadcasting', {
+        debugConsole.warn('Broadcasting', {
           role,
           event,
           data,

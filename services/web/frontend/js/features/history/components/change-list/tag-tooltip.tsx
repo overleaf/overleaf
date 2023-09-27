@@ -14,6 +14,7 @@ import { deleteLabel } from '../../services/api'
 import { isPseudoLabel } from '../../utils/label'
 import { formatDate } from '../../../../utils/dates'
 import { LoadedLabel } from '../../services/types/label'
+import { debugConsole } from '@/utils/debugging'
 
 type TagProps = {
   label: LoadedLabel
@@ -50,7 +51,7 @@ function Tag({ label, currentUserId, ...props }: TagProps) {
   const localDeleteHandler = () => {
     runAsync(deleteLabel(projectId, label.id, signal))
       .then(() => setShowDeleteModal(false))
-      .catch(console.error)
+      .catch(debugConsole.error)
   }
 
   const responseError = error as unknown as {

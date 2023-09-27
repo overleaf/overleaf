@@ -14,6 +14,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import App from '../../../base'
+import { debugConsole } from '@/utils/debugging'
 
 export default App.directive('reviewPanelSorted', $timeout => ({
   link(scope, element, attrs) {
@@ -109,7 +110,7 @@ export default App.directive('reviewPanelSorted', $timeout => ({
         : []
       previous_focused_entry_index = focused_entry_index
 
-      sl_console.log('focused_entry_index', focused_entry_index)
+      debugConsole.log('focused_entry_index', focused_entry_index)
 
       const positionLayoutEl = function (
         $callout_el,
@@ -180,7 +181,7 @@ export default App.directive('reviewPanelSorted', $timeout => ({
             screenPosHeight
           )
         }
-        sl_console.log('ENTRY', { entry: entry.scope.entry, top })
+        debugConsole.log('ENTRY', { entry: entry.scope.entry, top })
       }
 
       let previousTop = focused_entry_top
@@ -210,7 +211,7 @@ export default App.directive('reviewPanelSorted', $timeout => ({
             screenPosHeight
           )
         }
-        sl_console.log('ENTRY', { entry: entry.scope.entry, top })
+        debugConsole.log('ENTRY', { entry: entry.scope.entry, top })
       }
 
       const lastTop = top
@@ -268,7 +269,6 @@ export default App.directive('reviewPanelSorted', $timeout => ({
         return (ignoreNextAceEvent = false)
       } else {
         list.height(height)
-        // console.log({height, scrollTop, top: height - scrollTop})
         return list.css({ top: -scrollTop })
       }
     }

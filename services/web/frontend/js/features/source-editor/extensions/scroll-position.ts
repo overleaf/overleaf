@@ -8,6 +8,7 @@ import {
   TransactionSpec,
 } from '@codemirror/state'
 import { toggleVisualEffect } from './visual/visual'
+import { debugConsole } from '@/utils/debugging'
 
 const buildStorageKey = (docId: string) => `doc.position.${docId}`
 
@@ -157,7 +158,7 @@ const scrollStoredLineToTop = (doc: Text, docId: string): TransactionSpec => {
     }
   } catch (e) {
     // ignore invalid line number
-    console.error(e)
+    debugConsole.error(e)
     return {}
   }
 }

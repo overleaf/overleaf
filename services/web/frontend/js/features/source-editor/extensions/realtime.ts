@@ -3,6 +3,7 @@ import { EditorView, ViewPlugin } from '@codemirror/view'
 import { EventEmitter } from 'events'
 import { CurrentDoc } from '../../../../../types/current-doc'
 import { ShareDoc } from '../../../../../types/share-doc'
+import { debugConsole } from '@/utils/debugging'
 
 /*
  * Integrate CodeMirror 6 with the real-time system, via ShareJS.
@@ -51,7 +52,7 @@ export const realtime = (
   const ensureRealtimePlugin = EditorView.updateListener.of(update => {
     if (!update.view.plugin(realtimePlugin)) {
       const message = 'The realtime extension has been destroyed!!'
-      console.log(message)
+      debugConsole.warn(message)
       if (currentDoc.doc) {
         // display the "out of sync" modal
         currentDoc.doc.emit('error', message)
@@ -119,9 +120,9 @@ export class EditorFacade extends EventEmitter {
 
         if (editorText !== otText) {
           shareDoc.emit('error', 'Text does not match in CodeMirror 6')
-          console.error('Text does not match!')
-          console.error('editor: ' + editorText)
-          return console.error('ot:     ' + otText)
+          debugConsole.error('Text does not match!')
+          debugConsole.error('editor: ' + editorText)
+          debugConsole.error('ot:     ' + otText)
         }
       }, 0)
     }

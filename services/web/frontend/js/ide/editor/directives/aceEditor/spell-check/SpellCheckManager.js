@@ -1,4 +1,5 @@
 import ignoredWords from '../../../../../features/dictionary/ignored-words'
+import { debugConsole } from '@/utils/debugging'
 
 // eslint-disable-next-line prefer-regex-literals
 const BLACKLISTED_COMMAND_REGEX = new RegExp(
@@ -352,7 +353,7 @@ class SpellCheckManager {
     if (callback == null) {
       callback = function (error, result) {
         if (error) {
-          console.error(error)
+          debugConsole.error(error)
         }
       }
     }

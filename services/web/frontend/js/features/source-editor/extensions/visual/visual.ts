@@ -26,6 +26,7 @@ import { selectDecoratedArgument } from './select-decorated-argument'
 import { pasteHtml } from './paste-html'
 import { commandTooltip } from '../command-tooltip'
 import { tableGeneratorTheme } from './table-generator'
+import { debugConsole } from '@/utils/debugging'
 
 type Options = {
   visual: boolean
@@ -163,9 +164,7 @@ const showContentWhenParsed = [
               window.clearTimeout(fallbackTimer)
               // show the content, in a timeout so the decorations can build first
               window.setTimeout(showContent)
-            }).catch(error => {
-              console.error(error)
-            })
+            }).catch(debugConsole.error)
           })
         }
       },

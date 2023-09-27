@@ -31,7 +31,7 @@
     "type-check": "tsc --noEmit",
     "extract-translations": "i18next-scanner",
     "migrations": "east",
-    "convert-themes": "node frontend/js/features/source-editor/themes/convert.js",
+    "convert-themes": "node frontend/js/features/source-editor/themes/scripts/convert.js",
     "cypress:open-ct": "SHARELATEX_CONFIG=$PWD/config/settings.webpack.js cypress open --component",
     "cypress:run-ct": "SHARELATEX_CONFIG=$PWD/config/settings.webpack.js cypress run --component --browser chrome",
     "cypress:docker:open-ct": "DOCKER_USER=\"$(id -u):$(id -g)\" docker compose -f docker-compose.cypress.yml run --rm cypress run cypress:open-ct",

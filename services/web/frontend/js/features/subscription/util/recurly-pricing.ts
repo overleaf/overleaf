@@ -2,15 +2,14 @@ import { SubscriptionPricingState } from '@recurly/recurly-js'
 import { PriceForDisplayData } from '../../../../../types/subscription/plan'
 import { currencies, CurrencyCode } from '../data/currency'
 import { getRecurlyGroupPlanCode } from './recurly-group-plan-code'
+import { debugConsole } from '@/utils/debugging'
 
 function queryRecurlyPlanPrice(planCode: string, currency: CurrencyCode) {
   return new Promise(resolve => {
     recurly.Pricing.Subscription()
       .plan(planCode, { quantity: 1 })
       .currency(currency)
-      .catch(function (error) {
-        console.error(error)
-      })
+      .catch(debugConsole.error)
       .done(response => {
         if (response) {
           resolve(response)

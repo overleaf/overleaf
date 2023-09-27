@@ -10,6 +10,7 @@ import { ExposedSettings } from '../../../../../../../types/exposed-settings'
 import { ssoAvailableForInstitution } from '../../../utils/sso'
 import Icon from '../../../../../shared/components/icon'
 import { useLocation } from '../../../../../shared/hooks/use-location'
+import { debugConsole } from '@/utils/debugging'
 
 type ReconfirmationInfoPromptProps = {
   email: string
@@ -55,7 +56,7 @@ function ReconfirmationInfoPrompt({
             email,
           },
         })
-      ).catch(console.error)
+      ).catch(debugConsole.error)
     }
   }
 

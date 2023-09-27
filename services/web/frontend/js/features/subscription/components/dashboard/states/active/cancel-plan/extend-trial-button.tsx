@@ -3,6 +3,7 @@ import { putJSON } from '../../../../../../../infrastructure/fetch-json'
 import { extendTrialUrl } from '../../../../../data/subscription-url'
 import ActionButtonText from '../../../action-button-text'
 import { useLocation } from '../../../../../../../shared/hooks/use-location'
+import { debugConsole } from '@/utils/debugging'
 
 export default function ExtendTrialButton({
   isButtonDisabled,
@@ -24,7 +25,7 @@ export default function ExtendTrialButton({
       await runAsyncSecondaryAction(putJSON(extendTrialUrl))
       location.reload()
     } catch (e) {
-      console.error(e)
+      debugConsole.error(e)
     }
   }
 

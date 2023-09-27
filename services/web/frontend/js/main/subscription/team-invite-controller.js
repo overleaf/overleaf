@@ -11,6 +11,7 @@
  */
 import App from '../../base'
 import getMeta from '../../utils/meta'
+import { debugConsole } from '@/utils/debugging'
 
 export default App.controller('TeamInviteController', function ($scope, $http) {
   $scope.inflight = false
@@ -42,7 +43,7 @@ export default App.controller('TeamInviteController', function ($scope, $http) {
     return request.catch(() => {
       $scope.inflight = false
       $scope.cancel_error = true
-      console.log('the request failed')
+      debugConsole.error('the request failed')
     })
   }
 
@@ -61,6 +62,6 @@ export default App.controller('TeamInviteController', function ($scope, $http) {
         return ($scope.requestSent = false)
       }
     })
-    return request.catch(() => console.log('the request failed'))
+    return request.catch(() => debugConsole.error('the request failed'))
   })
 })

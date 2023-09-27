@@ -11,6 +11,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import App from '../../../base'
+import { debugConsole } from '@/utils/debugging'
 
 export default App.controller(
   'HistoryV2ToolbarController',
@@ -117,7 +118,7 @@ export default App.controller(
             }, 0)
           }
         })
-        .catch(err => console.warn(err))
+        .catch(debugConsole.error)
     }
   }
 )

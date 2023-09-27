@@ -3,6 +3,8 @@
  * use localStorage for anything critical, so in that case just fail gracefully.
  */
 
+import { debugConsole } from '@/utils/debugging'
+
 /**
  * Catch, log and otherwise ignore errors.
  *
@@ -14,7 +16,7 @@ const callSafe = function (fn, key, value) {
   try {
     return fn(key, value)
   } catch (e) {
-    console.error('localStorage exception', e)
+    debugConsole.error('localStorage exception', e)
     return null
   }
 }

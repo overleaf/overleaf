@@ -8,5 +8,6 @@ services:
     entrypoint: npm
     user: "${DOCKER_USER:-1000:1000}"
     environment:
-      - "DISPLAY=${DISPLAY:-:0}"
-#      - "DEBUG=cypress.*"
+      VERBOSE_LOGGING:
+      DISPLAY: ${DISPLAY:-:0}
+#      DEBUG: cypress.*

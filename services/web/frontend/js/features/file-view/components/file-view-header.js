@@ -11,6 +11,7 @@ import { useProjectContext } from '../../../shared/context/project-context'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 import useAbortController from '../../../shared/hooks/use-abort-controller'
 import { LinkedFileIcon } from './file-view-icons'
+import { debugConsole } from '@/utils/debugging'
 const tprLinkedFileInfo = importOverleafModules('tprLinkedFileInfo')
 const tprLinkedFileRefreshError = importOverleafModules(
   'tprLinkedFileRefreshError'
@@ -102,9 +103,7 @@ export default function FileViewHeader({ file, storeReferencesKeys }) {
           // Later updated by the socket but also updated here for immediate use
           storeReferencesKeys(response.keys)
         })
-        .catch(error => {
-          console.log(error)
-        })
+        .catch(debugConsole.error)
     }
   }, [file, projectId, signal, storeReferencesKeys])
 

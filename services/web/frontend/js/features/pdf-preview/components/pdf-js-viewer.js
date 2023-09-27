@@ -12,6 +12,7 @@ import { useDetachCompileContext as useCompileContext } from '../../../shared/co
 import { captureException } from '../../../infrastructure/error-reporter'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import { getPdfCachingMetrics } from '../util/metrics'
+import { debugConsole } from '@/utils/debugging'
 
 function PdfJsViewer({ url, pdfFile }) {
   const { _id: projectId } = useProjectContext()
@@ -136,7 +137,7 @@ function PdfJsViewer({ url, pdfFile }) {
         .loadDocument({ url, pdfFile, abortController, handleFetchError })
         .catch(error => {
           if (abortController.signal.aborted) return
-          console.error(error)
+          debugConsole.error(error)
           setError('rendering-error')
         })
       return () => {
@@ -161,7 +162,7 @@ function PdfJsViewer({ url, pdfFile }) {
         try {
           setPosition(pdfViewer.currentPosition)
         } catch (error) {
-          // console.error(error)
+          // debugConsole.error(error)
         }
       }, 500)
 

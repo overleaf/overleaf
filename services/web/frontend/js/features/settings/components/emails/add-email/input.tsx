@@ -10,6 +10,7 @@ import { Nullable } from '../../../../../../../types/utils'
 import { getJSON } from '../../../../../infrastructure/fetch-json'
 import useAbortController from '../../../../../shared/hooks/use-abort-controller'
 import domainBlocklist from '../../../domain-blocklist'
+import { debugConsole } from '@/utils/debugging'
 
 const LOCAL_AND_DOMAIN_REGEX = /([^@]+)@(.+)/
 
@@ -109,9 +110,9 @@ function Input({ onChange, handleAddNewEmail }: InputProps) {
           }
         })
         .catch(error => {
+          debugConsole.error(error)
           setSuggestion(null)
           setMatchedDomain(null)
-          console.error(error)
         })
     },
     [signal, matchedDomain]

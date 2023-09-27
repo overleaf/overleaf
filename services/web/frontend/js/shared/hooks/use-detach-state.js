@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useDetachContext } from '../context/detach-context'
 import getMeta from '../../utils/meta'
+import { debugConsole } from '@/utils/debugging'
 
 const debugPdfDetach = getMeta('ol-debugPdfDetach')
 
@@ -46,7 +47,7 @@ export default function useDetachState(
         return
       }
       if (debugPdfDetach) {
-        console.log(`Set ${message.data.value} for ${eventName}`)
+        debugConsole.warn(`Set ${message.data.value} for ${eventName}`)
       }
       setValue(message.data.value)
     },

@@ -41,6 +41,7 @@ import './filters/formatDate'
 import './features/cookie-banner'
 import '../../modules/modules-main.js'
 import './cdn-load-test'
+import { debugConsole } from '@/utils/debugging'
 angular.module('SharelatexApp').config(function ($locationProvider) {
   try {
     return $locationProvider.html5Mode({
@@ -49,7 +50,7 @@ angular.module('SharelatexApp').config(function ($locationProvider) {
       rewriteLinks: false,
     })
   } catch (e) {
-    return console.error("Error while trying to fix '#' links: ", e)
+    debugConsole.error("Error while trying to fix '#' links: ", e)
   }
 })
 export default angular.bootstrap(document.body, ['SharelatexApp'])

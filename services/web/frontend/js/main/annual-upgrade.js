@@ -10,6 +10,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import App from '../base'
+import { debugConsole } from '@/utils/debugging'
 
 export default App.controller(
   'AnnualUpgradeController',
@@ -38,7 +39,9 @@ export default App.controller(
       return $http
         .post(MESSAGES_URL, body)
         .then(() => ($scope.upgradeComplete = true))
-        .catch(() => console.log('something went wrong changing plan'))
+        .catch(err =>
+          debugConsole.error('something went wrong changing plan', err)
+        )
     })
   }
 )

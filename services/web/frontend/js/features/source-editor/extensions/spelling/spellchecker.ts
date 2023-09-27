@@ -13,13 +13,10 @@ import {
   NormalTextSpan,
 } from '../../utils/tree-query'
 import { waitForParser } from '../wait-for-parser'
-
-const DEBUG = window ? window.sl_debugging : false
+import { debugConsole } from '@/utils/debugging'
 
 const _log = (...args: any) => {
-  if (DEBUG) {
-    console.debug('[SpellChecker]: ', ...args)
-  }
+  debugConsole.debug('[SpellChecker]: ', ...args)
 }
 
 /*

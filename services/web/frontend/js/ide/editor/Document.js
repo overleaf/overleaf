@@ -19,6 +19,7 @@
 import RangesTracker from '@overleaf/ranges-tracker'
 import EventEmitter from '../../utils/EventEmitter'
 import ShareJsDoc from './ShareJsDoc'
+import { debugConsole } from '@/utils/debugging'
 let Document
 
 export default Document = (function () {
@@ -37,18 +38,18 @@ export default Document = (function () {
       // joinDoc:existing code path on an existing doc that doesn't have any
       // local changes and getting an error if its version is too old.
       if (this.openDocs[doc_id]) {
-        sl_console.log(
+        debugConsole.log(
           `[getDocument] Cleaning up existing document instance for ${doc_id}`
         )
         this.openDocs[doc_id]._cleanUp()
       }
       if (this.openDocs[doc_id] == null) {
-        sl_console.log(
+        debugConsole.log(
           `[getDocument] Creating new document instance for ${doc_id}`
         )
         this.openDocs[doc_id] = new Document(ide, doc_id)
       } else {
-        sl_console.log(
+        debugConsole.log(
           `[getDocument] Returning existing document instance for ${doc_id}`
         )
       }
@@ -286,7 +287,7 @@ export default Document = (function () {
       this.wantToBeJoined = false
       this._cancelJoin()
       if (this.doc != null && this.doc.hasBufferedOps()) {
-        sl_console.log(
+        debugConsole.log(
           '[leave] Doc has buffered ops, pushing callback for later'
         )
         if (!this._leaveCallbacks) {
@@ -294,10 +295,10 @@ export default Document = (function () {
         }
         return this._leaveCallbacks.push(callback)
       } else if (!this.connected) {
-        sl_console.log('[leave] Not connected, returning now')
+        debugConsole.log('[leave] Not connected, returning now')
         return callback()
       } else {
-        sl_console.log('[leave] Leaving now')
+        debugConsole.log('[leave] Leaving now')
         return this._leaveDoc(callback)
       }
     }
@@ -366,12 +367,12 @@ export default Document = (function () {
       if (inflightOp == null && pendingOp == null) {
         // there's nothing going on, this is ok.
         saved = true
-        sl_console.log('[pollSavedStatus] no inflight or pending ops')
+        debugConsole.log('[pollSavedStatus] no inflight or pending ops')
       } else if (inflightOp != null && inflightOp === this.oldInflightOp) {
         // The same inflight op has been sitting unacked since we
         // last checked, this is bad.
         saved = false
-        sl_console.log('[pollSavedStatus] inflight op is same as before')
+        debugConsole.log('[pollSavedStatus] inflight op is same as before')
       } else if (
         pendingOp != null &&
         recentAck &&
@@ -380,7 +381,7 @@ export default Document = (function () {
         // There is an op waiting to go to server but it is small and
         // within the flushDelay, this is ok for now.
         saved = true
-        sl_console.log(
+        debugConsole.log(
           '[pollSavedStatus] pending op (small with recent ack) assume ok',
           pendingOp,
           pendingOpSize
@@ -388,7 +389,7 @@ export default Document = (function () {
       } else {
         // In any other situation, assume the document is unsaved.
         saved = false
-        sl_console.log(
+        debugConsole.log(
           `[pollSavedStatus] assuming not saved (inflightOp?: ${
             inflightOp != null
           }, pendingOp?: ${pendingOp != null})`
@@ -424,7 +425,7 @@ export default Document = (function () {
         window.disconnectOnAck != null &&
         Math.random() < window.disconnectOnAck
       ) {
-        sl_console.log('Disconnecting on ack', update)
+        debugConsole.log('Disconnecting on ack', update)
         window._ide.socket.socket.disconnect()
         // Pretend we never received the ack
         return
@@ -433,7 +434,7 @@ export default Document = (function () {
       if (window.dropAcks != null && Math.random() < window.dropAcks) {
         if (update.op == null) {
           // Only drop our own acks, not collaborator updates
-          sl_console.log('Simulating a lost ack', update)
+          debugConsole.log('Simulating a lost ack', update)
           return
         }
       }
@@ -455,7 +456,7 @@ export default Document = (function () {
     }
 
     _onDisconnect() {
-      sl_console.log('[onDisconnect] disconnecting')
+      debugConsole.log('[onDisconnect] disconnecting')
       this.connected = false
       this.joined = false
       return this.doc != null
@@ -464,7 +465,7 @@ export default Document = (function () {
     }
 
     _onReconnect() {
-      sl_console.log('[onReconnect] reconnected (joined project)')
+      debugConsole.log('[onReconnect] reconnected (joined project)')
       this.ide.pushEvent('reconnected:afterJoinProject')
 
       this.connected = true
@@ -472,7 +473,7 @@ export default Document = (function () {
         this.wantToBeJoined ||
         (this.doc != null ? this.doc.hasBufferedOps() : undefined)
       ) {
-        sl_console.log(
+        debugConsole.log(
           `[onReconnect] Rejoining (wantToBeJoined: ${
             this.wantToBeJoined
           } OR hasBufferedOps: ${
@@ -584,7 +585,7 @@ export default Document = (function () {
           return result
         })()
       } catch (err) {
-        return console.log(err)
+        debugConsole.error(err)
       }
     }
 
@@ -595,14 +596,14 @@ export default Document = (function () {
       this.ide.pushEvent('leaveDoc', {
         doc_id: this.doc_id,
       })
-      sl_console.log('[_leaveDoc] Sending leaveDoc request')
+      debugConsole.log('[_leaveDoc] Sending leaveDoc request')
       return this.ide.socket.emit('leaveDoc', this.doc_id, error => {
         if (error != null) {
           return callback(error)
         }
         this.joined = false
         for (callback of Array.from(this._leaveCallbacks || [])) {
-          sl_console.log('[_leaveDoc] Calling buffered callback', callback)
+          debugConsole.log('[_leaveDoc] Calling buffered callback', callback)
           callback(error)
         }
         delete this._leaveCallbacks
@@ -613,12 +614,12 @@ export default Document = (function () {
     _cleanUp() {
       // if we arrive here from _onError the pending and inflight ops will have been cleared
       if (this.hasBufferedOps()) {
-        sl_console.log(
+        debugConsole.log(
           `[_cleanUp] Document (${this.doc_id}) has buffered ops, refusing to remove from openDocs`
         )
         return // return immediately, do not unbind from events
       } else if (Document.openDocs[this.doc_id] === this) {
-        sl_console.log(
+        debugConsole.log(
           `[_cleanUp] Removing self (${this.doc_id}) from in openDocs`
         )
         delete Document.openDocs[this.doc_id]
@@ -626,7 +627,7 @@ export default Document = (function () {
         // It's possible that this instance has error, and the doc has been reloaded.
         // This creates a new instance in Document.openDoc with the same id. We shouldn't
         // clear it because it's not this instance.
-        sl_console.log(
+        debugConsole.log(
           `[_cleanUp] New instance of (${this.doc_id}) created. Not removing`
         )
       }
@@ -716,9 +717,9 @@ export default Document = (function () {
         meta = {}
       }
       meta.doc_id = this.doc_id
-      sl_console.log('ShareJS error', error, meta)
+      debugConsole.log('ShareJS error', error, meta)
       if (error.message === 'no project_id found on client') {
-        sl_console.log('ignoring error, will wait to join project')
+        debugConsole.log('ignoring error, will wait to join project')
         return
       }
       if (this.doc != null) {

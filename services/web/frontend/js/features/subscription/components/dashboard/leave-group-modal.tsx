@@ -5,6 +5,7 @@ import { deleteJSON } from '../../../../infrastructure/fetch-json'
 import AccessibleModal from '../../../../shared/components/accessible-modal'
 import { useSubscriptionDashboardContext } from '../../context/subscription-dashboard-context'
 import { useLocation } from '../../../../shared/hooks/use-location'
+import { debugConsole } from '@/utils/debugging'
 
 export const LEAVE_GROUP_MODAL_ID = 'leave-group'
 
@@ -26,7 +27,7 @@ export default function LeaveGroupModal() {
       await deleteJSON(`/subscription/group/user?${params}`)
       location.reload()
     } catch (error) {
-      console.log('something went wrong', error)
+      debugConsole.error('something went wrong', error)
       setInflight(false)
     }
   }, [location, leavingGroupId])

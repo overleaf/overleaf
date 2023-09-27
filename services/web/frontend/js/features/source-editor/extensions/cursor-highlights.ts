@@ -17,6 +17,7 @@ import {
 import { findValidPosition } from '../utils/position'
 import { Highlight } from '../../../../../types/highlight'
 import { fullHeightCoordsAtPos, getBase } from '../utils/layer'
+import { debugConsole } from '@/utils/debugging'
 
 /**
  * A custom extension that displays collaborator cursors in a separate layer.
@@ -100,7 +101,7 @@ const cursorHighlightsState = StateField.define<RangeSet<HighlightRangeValue>>({
               )
             } catch (error) {
               // ignore invalid highlights
-              console.debug('invalid highlight position', error)
+              debugConsole.debug('invalid highlight position', error)
             }
           }
         }

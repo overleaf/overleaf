@@ -22,7 +22,6 @@ export default App.controller(
     }
 
     return ($scope.clearSessions = function () {
-      console.log('>> clearing all sessions')
       return $http({
         method: 'POST',
         url: '/user/sessions/clear',

@@ -34,6 +34,7 @@ import {
   isDeletableProject,
   isLeavableProject,
 } from '../util/project'
+import { debugConsole } from '@/utils/debugging'
 
 const MAX_PROJECT_PER_PAGE = 20
 
@@ -168,7 +169,7 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
         setLoadedProjects(data.projects)
         setTotalProjectsCount(data.totalSize)
       })
-      .catch(error => console.error(error))
+      .catch(debugConsole.error)
       .finally(() => {
         setLoadProgress(100)
       })

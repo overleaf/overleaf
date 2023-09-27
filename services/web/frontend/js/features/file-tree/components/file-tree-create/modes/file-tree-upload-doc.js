@@ -13,6 +13,7 @@ import '@uppy/core/dist/style.css'
 import '@uppy/dashboard/dist/style.css'
 import { refreshProjectMetadata } from '../../../util/api'
 import ErrorMessage from '../error-message'
+import { debugConsole } from '@/utils/debugging'
 
 export default function FileTreeUploadDoc() {
   const { parentFolderId, cancel, isDuplicate, droppedFiles, setDroppedFiles } =
@@ -114,7 +115,7 @@ export default function FileTreeUploadDoc() {
               break
 
             default:
-              console.error(error)
+              debugConsole.error(error)
               setError(response?.body?.error || 'generic_something_went_wrong')
               break
           }

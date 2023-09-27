@@ -4,6 +4,7 @@ import Linkify from 'react-linkify'
 import useIsMounted from '../../../shared/hooks/use-is-mounted'
 import { configureMathJax } from '../../mathjax/configure'
 import { loadMathJax } from '../../mathjax/load-mathjax'
+import { debugConsole } from '@/utils/debugging'
 
 const MessageContent: FC<{ content: string }> = ({ content }) => {
   const root = useRef<HTMLDivElement | null>(null)
@@ -33,14 +34,10 @@ const MessageContent: FC<{ content: string }> = ({ content }) => {
       loadMathJax()
         .then(MathJax => {
           if (mounted.current) {
-            MathJax.typesetPromise([root.current]).catch((error: Error) => {
-              console.error(error)
-            })
+            MathJax.typesetPromise([root.current]).catch(debugConsole.error)
           }
         })
-        .catch(error => {
-          console.error(error)
-        })
+        .catch(debugConsole.error)
     }
   }, [content, mounted])
 

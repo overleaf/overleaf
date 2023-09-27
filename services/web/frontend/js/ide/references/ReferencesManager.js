@@ -59,7 +59,6 @@ export default ReferencesManager = class ReferencesManager {
   }
 
   _storeReferencesKeys(newKeys) {
-    // console.log '>> storing references keys'
     const oldKeys = this.$scope.$root._references.keys
     const keys = _.union(oldKeys, newKeys)
     window.dispatchEvent(

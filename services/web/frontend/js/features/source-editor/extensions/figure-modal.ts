@@ -8,6 +8,7 @@ import { EditorView } from '@codemirror/view'
 import { addEffectListener, removeEffectListener } from './effect-listeners'
 import { setMetadataEffect } from './language'
 import getMeta from '../../../utils/meta'
+import { debugConsole } from '@/utils/debugging'
 
 type NestedReadonly<T> = {
   readonly [P in keyof T]: NestedReadonly<T[P]>
@@ -136,7 +137,7 @@ export function waitForFileTreeUpdate(view: EditorView) {
   const abortController = new AbortController()
   const promise = new Promise<void>(resolve => {
     const abort = () => {
-      console.warn('Aborting wait for file tree update')
+      debugConsole.warn('Aborting wait for file tree update')
       removeEffectListener(view, setMetadataEffect, listener)
       resolve()
     }

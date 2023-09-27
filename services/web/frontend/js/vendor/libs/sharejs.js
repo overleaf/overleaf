@@ -26,7 +26,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['ace/ace','crypto-js/sha1'], function (_ignore, CryptoJSSHA1) {
+define(['ace/ace','crypto-js/sha1', '@/utils/debugging'], function (_ignore, CryptoJSSHA1, { debugging, debugConsole }) {
   var append = void 0,
       bootstrapTransform = void 0,
       exports = void 0,
@@ -1013,7 +1013,7 @@ define(['ace/ace','crypto-js/sha1'], function (_ignore, CryptoJSSHA1) {
     }, {
       key: '_onMessage',
       value: function _onMessage(msg) {
-        // console.warn 's->c', msg
+        // debugConsole.warn('s->c', msg)
         if (msg.open === true) {
           // The document has been successfully opened.
           this.state = 'open';
@@ -1063,9 +1063,7 @@ define(['ace/ace','crypto-js/sha1'], function (_ignore, CryptoJSSHA1) {
           // The document has either been closed, or an open request has failed.
           if (msg.error) {
             // An error occurred opening the document.
-            if (typeof console !== 'undefined' && console !== null) {
-              console.error('Could not open document: ' + msg.error);
-            }
+            debugConsole.error('Could not open document: ' + msg.error);
             this.emit('error', msg.error);
             if (typeof this._openCallback === 'function') {
               this._openCallback(msg.error);
@@ -1246,10 +1244,10 @@ define(['ace/ace','crypto-js/sha1'], function (_ignore, CryptoJSSHA1) {
             case 'shout':
               return this.emit('shout', value);
             default:
-              return typeof console !== 'undefined' && console !== null ? console.warn('Unhandled meta op:', msg) : undefined;
+              return debugConsole.warn('Unhandled meta op:', msg);
           }
         } else {
-          return typeof console !== 'undefined' && console !== null ? console.warn('Unhandled document message:', msg) : undefined;
+          return debugConsole.warn('Unhandled document message:', msg);
         }
       }
 
@@ -1277,13 +1275,13 @@ define(['ace/ace','crypto-js/sha1'], function (_ignore, CryptoJSSHA1) {
 
         this.emit('flipped_pending_to_inflight');
 
-        if (window.useShareJsHash || window.sl_debugging) {
+        if (window.useShareJsHash || debugging) {
           var now = Date.now()
           var age = this.__lastSubmitTimestamp && (now - this.__lastSubmitTimestamp)
           var RECOMPUTE_HASH_INTERVAL = 5000
           // check the document hash regularly (but not if we have checked in the last 5 seconds)
           var needToRecomputeHash = !this.__lastSubmitTimestamp || (age > RECOMPUTE_HASH_INTERVAL) || (age < 0)
-          if (needToRecomputeHash || window.sl_debugging) {
+          if (needToRecomputeHash || debugging) {
             // send git hash of current snapshot
             var sha1 = CryptoJSSHA1("blob " + this.snapshot.length + "\x00" + this.snapshot).toString()
             this.__lastSubmitTimestamp = now;
@@ -1476,9 +1474,9 @@ define(['ace/ace','crypto-js/sha1'], function (_ignore, CryptoJSSHA1) {
 
         if (editorText !== otText) {
           doc.emit('error','Text does not match in ace')
-          console.error('Text does not match!');
-          console.error('editor: ' + editorText);
-          return console.error('ot:     ' + otText);
+          debugConsole.error('Text does not match!');
+          debugConsole.error('editor: ' + editorText);
+          debugConsole.error('ot:     ' + otText);
         }
       }
       // Should probably also replace the editor text with the doc snapshot.

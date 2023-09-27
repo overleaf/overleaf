@@ -15,6 +15,7 @@ import GenericErrorAlert from '../../../generic-error-alert'
 import DowngradePlanButton from './downgrade-plan-button'
 import ExtendTrialButton from './extend-trial-button'
 import { useLocation } from '../../../../../../../shared/hooks/use-location'
+import { debugConsole } from '@/utils/debugging'
 
 const planCodeToDowngradeTo = 'paid-personal'
 
@@ -180,7 +181,7 @@ export function CancelSubscription() {
       await runAsyncCancel(postJSON(cancelSubscriptionUrl))
       location.assign(redirectAfterCancelSubscriptionUrl)
     } catch (e) {
-      console.error(e)
+      debugConsole.error(e)
     }
   }
 

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { useProjectContext } from '../../../shared/context/project-context'
+import { debugConsole } from '@/utils/debugging'
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024
 
@@ -47,7 +48,7 @@ export default function FileViewText({ file, onLoad, onError }) {
         })
       })
       .catch(err => {
-        console.error(err)
+        debugConsole.error(err)
         onError()
       })
       .finally(() => {

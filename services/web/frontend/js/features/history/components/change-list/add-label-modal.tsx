@@ -10,6 +10,7 @@ import { useHistoryContext } from '../../context/history-context'
 import { addLabel } from '../../services/api'
 import { Label } from '../../services/types/label'
 import { useRefWithAutoFocus } from '../../../../shared/hooks/use-ref-with-auto-focus'
+import { debugConsole } from '@/utils/debugging'
 
 type AddLabelModalProps = {
   show: boolean
@@ -59,7 +60,7 @@ function AddLabelModal({ show, setShow, version }: AddLabelModalProps) {
 
     runAsync(addLabel(projectId, { comment, version }, signal))
       .then(() => setShow(false))
-      .catch(console.error)
+      .catch(debugConsole.error)
   }
 
   const responseError = error as unknown as {

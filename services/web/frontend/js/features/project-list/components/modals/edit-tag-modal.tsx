@@ -10,6 +10,7 @@ import useSelectColor from '../../hooks/use-select-color'
 import { editTag } from '../../util/api'
 import { getTagColor, MAX_TAG_LENGTH } from '../../util/tag'
 import { ColorPicker } from '../color-picker/color-picker'
+import { debugConsole } from '@/utils/debugging'
 
 type EditTagModalProps = {
   id: string
@@ -39,7 +40,7 @@ export function EditTagModal({ id, tag, onEdit, onClose }: EditTagModalProps) {
         const color = selectedColor
         runAsync(editTag(tagId, newTagName, color))
           .then(() => onEdit(tagId, newTagName, color))
-          .catch(console.error)
+          .catch(debugConsole.error)
       }
     },
     [runAsync, newTagName, selectedColor, onEdit]

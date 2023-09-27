@@ -16,6 +16,7 @@ import moment from 'moment'
 import App from '../base'
 import '../modules/localStorage'
 import { sendMB } from '../infrastructure/event-tracking'
+import { debugConsole } from '@/utils/debugging'
 const CACHE_KEY = 'mbEvents'
 
 // keep track of how many heartbeats we've sent so we can calculate how
@@ -71,14 +72,14 @@ App.factory('eventTracking', function ($http, localStorage) {
     },
 
     editingSessionHeartbeat(segmentationCb = () => {}) {
-      sl_console.log('[Event] heartbeat trigger')
+      debugConsole.log('[Event] heartbeat trigger')
 
       // If the next heartbeat is in the future, stop
       if (nextHeartbeat > new Date()) return
 
       const segmentation = segmentationCb()
 
-      sl_console.log('[Event] send heartbeat request', segmentation)
+      debugConsole.log('[Event] send heartbeat request', segmentation)
       _sendEditingSessionHeartbeat(segmentation)
 
       heartbeatsSent++

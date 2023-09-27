@@ -1,4 +1,5 @@
 import { indentService } from '@codemirror/language'
+import { debugConsole } from '@/utils/debugging'
 
 export const latexIndentService = () => {
   return indentService.of((indentContext, pos) => {
@@ -10,7 +11,7 @@ export const latexIndentService = () => {
         return whitespace[0].length
       }
     } catch (err) {
-      console.error('Error in CM indentService', err)
+      debugConsole.error('Error in CM indentService', err)
     }
     return null
   })

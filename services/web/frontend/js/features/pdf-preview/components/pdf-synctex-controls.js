@@ -19,6 +19,7 @@ import localStorage from '../../../infrastructure/local-storage'
 import { useFileTreeData } from '../../../shared/context/file-tree-data-context'
 import useScopeEventListener from '../../../shared/hooks/use-scope-event-listener'
 import * as eventTracking from '../../../infrastructure/event-tracking'
+import { debugConsole } from '@/utils/debugging'
 
 function GoToCodeButton({
   position,
@@ -209,9 +210,7 @@ function PdfSynctexControls() {
           setShowLogs(false)
           setHighlights(data.pdf)
         })
-        .catch(error => {
-          console.error(error)
-        })
+        .catch(debugConsole.error)
         .finally(() => {
           if (isMounted.current) {
             setSyncToPdfInFlight(false)
@@ -297,9 +296,7 @@ function PdfSynctexControls() {
           const [{ file, line }] = data.code
           goToCodeLine(file, line)
         })
-        .catch(error => {
-          console.error(error)
-        })
+        .catch(debugConsole.error)
         .finally(() => {
           if (isMounted.current) {
             setSyncToCodeInFlight(false)

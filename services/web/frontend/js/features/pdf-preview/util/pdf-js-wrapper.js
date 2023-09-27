@@ -1,5 +1,6 @@
 import { captureException } from '../../../infrastructure/error-reporter'
 import { generatePdfCachingTransportFactory } from './pdf-caching-transport'
+import { debugConsole } from '@/utils/debugging'
 
 const params = new URLSearchParams(window.location.search)
 const disableFontFace = params.get('disable-font-face') === 'true'
@@ -112,7 +113,7 @@ export default class PDFJSWrapper {
           resolve(doc)
 
           if (previousDoc) {
-            previousDoc.cleanup().catch(console.error)
+            previousDoc.cleanup().catch(debugConsole.error)
             previousDoc.destroy()
           }
         })

@@ -4,6 +4,7 @@ import getMeta from '../../utils/meta'
 import { buildUrlWithDetachRole } from '../utils/url-helper'
 import * as eventTracking from '../../infrastructure/event-tracking'
 import usePreviousValue from './use-previous-value'
+import { debugConsole } from '@/utils/debugging'
 
 const debugPdfDetach = getMeta('ol-debugPdfDetach')
 
@@ -28,14 +29,14 @@ export default function useDetachLayout() {
 
   useEffect(() => {
     if (debugPdfDetach) {
-      console.log('Effect', { isLinked })
+      debugConsole.warn('Effect', { isLinked })
     }
     setIsLinking(false)
   }, [isLinked, setIsLinking])
 
   useEffect(() => {
     if (debugPdfDetach) {
-      console.log('Effect', { role, isLinked })
+      debugConsole.warn('Effect', { role, isLinked })
     }
     if (role === 'detached' && isLinked) {
       eventTracking.sendMB('project-layout-detached')
@@ -62,7 +63,7 @@ export default function useDetachLayout() {
 
   useEffect(() => {
     if (debugPdfDetach) {
-      console.log('Effect', { isLinking })
+      debugConsole.warn('Effect', { isLinking })
     }
   }, [isLinking])
 
@@ -89,7 +90,7 @@ export default function useDetachLayout() {
 
   const handleEventForDetacherFromDetacher = useCallback(() => {
     if (debugPdfDetach) {
-      console.log(
+      debugConsole.warn(
         'Duplicate detacher detected, turning into a regular editor again'
       )
     }

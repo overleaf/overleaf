@@ -15,6 +15,7 @@ import useAsync from '../../../../shared/hooks/use-async'
 import { useTranslation } from 'react-i18next'
 import { useLocation } from '../../../../shared/hooks/use-location'
 import { FetchError, postJSON } from '../../../../infrastructure/fetch-json'
+import { debugConsole } from '@/utils/debugging'
 
 type OffboardManagedUserModalProps = {
   user: User
@@ -59,7 +60,7 @@ export default function OffboardManagedUserModal({
           location.reload()
         })
         .catch(err => {
-          console.error(err)
+          debugConsole.error(err)
           setError(
             err instanceof FetchError ? err.getUserFacingMessage() : err.message
           )

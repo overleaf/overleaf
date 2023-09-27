@@ -24,6 +24,7 @@ import './controllers/CompileButton'
 import './controllers/SwitchToPDFButton'
 import getMeta from '../../utils/meta'
 import { hasSeenCM6SwitchAwaySurvey } from '../../features/source-editor/utils/switch-away-survey'
+import { debugConsole } from '@/utils/debugging'
 
 let EditorManager
 
@@ -120,7 +121,7 @@ export default EditorManager = (function () {
         //  sync: we can use any new version of the doc that the server may
         //  present us. There should be no need to insert local changes into
         //  the doc history as the user comes back.
-        sl_console.log('[EditorManager] forcing flush onblur')
+        debugConsole.log('[EditorManager] forcing flush onblur')
         Document.flushAll()
       })
 
@@ -237,7 +238,7 @@ export default EditorManager = (function () {
       if (options == null) {
         options = {}
       }
-      sl_console.log(`[openDoc] Opening ${doc.id}`)
+      debugConsole.log(`[openDoc] Opening ${doc.id}`)
       if (this.$scope.ui.view === 'editor') {
         // store position of previous doc before switching docs
         this.$scope.$broadcast('store-doc-position')
@@ -292,7 +293,7 @@ export default EditorManager = (function () {
         this.$scope.editor.opening = true
         return this._openNewDocument(doc, (error, sharejs_doc) => {
           if (error && error.message === 'another document was loaded') {
-            sl_console.log(
+            debugConsole.log(
               `[openDoc] another document was loaded while ${doc.id} was loading`
             )
             return
@@ -330,7 +331,7 @@ export default EditorManager = (function () {
         current_sharejs_doc && current_sharejs_doc.hasBufferedOps()
       const changingDoc = current_sharejs_doc && currentDocId !== doc.id
       if (changingDoc || hasBufferedOps) {
-        sl_console.log('[_openNewDocument] Leaving existing open doc...')
+        debugConsole.log('[_openNewDocument] Leaving existing open doc...')
 
         // Do not trigger any UI changes from remote operations
         this._unbindFromDocumentEvents(current_sharejs_doc)
@@ -344,14 +345,14 @@ export default EditorManager = (function () {
         const editorOpenDocEpoch = ++this.editorOpenDocEpoch
         current_sharejs_doc.leaveAndCleanUp(error => {
           if (error) {
-            sl_console.log(
+            debugConsole.log(
               `[_openNewDocument] error leaving doc ${currentDocId}`,
               error
             )
             return callback(error)
           }
           if (this.editorOpenDocEpoch !== editorOpenDocEpoch) {
-            sl_console.log(
+            debugConsole.log(
               `[openNewDocument] editorOpenDocEpoch mismatch ${this.editorOpenDocEpoch} vs ${editorOpenDocEpoch}`
             )
             return callback(new Error('another document was loaded'))
@@ -367,19 +368,19 @@ export default EditorManager = (function () {
       if (callback == null) {
         callback = function () {}
       }
-      sl_console.log('[_doOpenNewDocument] Opening...')
+      debugConsole.log('[_doOpenNewDocument] Opening...')
       const new_sharejs_doc = Document.getDocument(this.ide, doc.id)
       const editorOpenDocEpoch = ++this.editorOpenDocEpoch
       return new_sharejs_doc.join(error => {
         if (error != null) {
-          sl_console.log(
+          debugConsole.log(
             `[_doOpenNewDocument] error joining doc ${doc.id}`,
             error
           )
           return callback(error)
         }
         if (this.editorOpenDocEpoch !== editorOpenDocEpoch) {
-          sl_console.log(
+          debugConsole.log(
             `[openNewDocument] editorOpenDocEpoch mismatch ${this.editorOpenDocEpoch} vs ${editorOpenDocEpoch}`
           )
           new_sharejs_doc.leaveAndCleanUp()

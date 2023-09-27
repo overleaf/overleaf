@@ -15,6 +15,7 @@ import {
 import { useLocation } from '../../../../../../../shared/hooks/use-location'
 import getMeta from '../../../../../../../utils/meta'
 import useAsyncDismiss from '../../../hooks/useAsyncDismiss'
+import { debugConsole } from '@/utils/debugging'
 
 const SUCCESSFUL_NOTIF_TIME_BEFORE_HIDDEN = 10 * 1000
 
@@ -85,9 +86,8 @@ export function useGroupInvitationNotification(
           setGroupInvitationStatus(GroupInvitationStatus.SuccessfullyJoined)
         })
         .catch(err => {
+          debugConsole.error(err)
           setGroupInvitationStatus(GroupInvitationStatus.Error)
-
-          console.error(err)
         })
         .finally(() => {
           // remove notification automatically in the browser
@@ -107,7 +107,7 @@ export function useGroupInvitationNotification(
           _csrf: getMeta('ol-csrfToken'),
         },
       })
-    ).catch(console.error)
+    ).catch(debugConsole.error)
   }, [runAsync])
 
   const dismissGroupInviteNotification = useCallback(() => {

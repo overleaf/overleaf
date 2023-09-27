@@ -2,6 +2,7 @@ import { EditorView, WidgetType } from '@codemirror/view'
 import { placeSelectionInsideBlock } from '../selection'
 import { isEqual } from 'lodash'
 import { FigureData } from '../../figure-modal'
+import { debugConsole } from '@/utils/debugging'
 
 export class GraphicsWidget extends WidgetType {
   destroyed = false
@@ -99,9 +100,7 @@ export class GraphicsWidget extends WidgetType {
         {
           const canvas = document.createElement('canvas')
           canvas.classList.add('ol-cm-graphics')
-          this.renderPDF(view, canvas, preview.url).catch(error => {
-            console.error(error)
-          })
+          this.renderPDF(view, canvas, preview.url).catch(debugConsole.error)
           element.append(canvas)
         }
         break

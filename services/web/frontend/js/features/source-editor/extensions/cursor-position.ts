@@ -8,6 +8,7 @@ import {
 import { EditorView, ViewPlugin } from '@codemirror/view'
 import { findValidPosition } from '../utils/position'
 import customLocalStorage from '../../../infrastructure/local-storage'
+import { debugConsole } from '@/utils/debugging'
 
 const buildStorageKey = (docId: string) => `doc.position.${docId}`
 
@@ -112,7 +113,7 @@ export const restoreCursorPosition = (
     }
   } catch (error) {
     // ignore invalid cursor position
-    console.debug('invalid cursor position', error)
+    debugConsole.debug('invalid cursor position', error)
     return {}
   }
 }
@@ -142,7 +143,7 @@ export const setCursorLineAndScroll = (
     selectionRange = EditorSelection.cursor(pos)
   } catch (error) {
     // ignore invalid cursor position
-    console.debug('invalid cursor position', error)
+    debugConsole.debug('invalid cursor position', error)
   }
 
   if (selectionRange) {
@@ -157,7 +158,7 @@ export const setCursorPositionAndScroll = (view: EditorView, pos: number) => {
     selectionRange = EditorSelection.cursor(pos)
   } catch (error) {
     // ignore invalid cursor position
-    console.debug('invalid cursor position', error)
+    debugConsole.debug('invalid cursor position', error)
   }
 
   if (selectionRange) {

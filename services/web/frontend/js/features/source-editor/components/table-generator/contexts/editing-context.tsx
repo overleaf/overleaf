@@ -2,6 +2,7 @@ import { FC, createContext, useCallback, useContext, useState } from 'react'
 import { useCodeMirrorViewContext } from '../../codemirror-editor'
 import { useTableContext } from './table-context'
 import { TableSelection } from './selection-context'
+import { debugConsole } from '@/utils/debugging'
 
 type EditingContextData = {
   rowIndex: number
@@ -50,7 +51,9 @@ export const EditingContextProvider: FC = ({ children }) => {
       const currentText = view.state.sliceDoc(from, to)
       if (currentText !== initialContent && initialContent !== undefined) {
         // The cell has changed since we started editing, so we don't want to overwrite it
-        console.error('Cell has changed since editing started, not overwriting')
+        debugConsole.error(
+          'Cell has changed since editing started, not overwriting'
+        )
         return
       }
       setInitialContent(undefined)
