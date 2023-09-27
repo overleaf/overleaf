@@ -18,6 +18,7 @@ import { useTableContext } from './contexts/table-context'
 import { useCodeMirrorViewContext } from '../codemirror-editor'
 import { undo, redo } from '@codemirror/commands'
 import { ChangeSpec } from '@codemirror/state'
+import { startCompileKeypress } from '@/features/pdf-preview/hooks/use-compile-triggers'
 
 type NavigationKey =
   | 'ArrowRight'
@@ -144,8 +145,11 @@ export const Table: FC = () => {
 
   const onKeyDown: KeyboardEventHandler = useCallback(
     event => {
+      if (startCompileKeypress(event)) {
+        return
+      }
       const commandKey = isMac ? event.metaKey : event.ctrlKey
-      if (event.code === 'Enter' && !event.shiftKey && !commandKey) {
+      if (event.code === 'Enter' && !event.shiftKey) {
         event.preventDefault()
         event.stopPropagation()
         if (!selection) {
