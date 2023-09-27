@@ -1,6 +1,5 @@
 // from https://gist.github.com/msteen/e4828fbf25d6efef73576fc43ac479d2
 // https://discuss.codemirror.net/t/whats-the-best-to-test-and-debug-grammars/2542/5
-
 // MIT License
 //
 // Copyright (c) 2021 Matthijs Steen
@@ -22,80 +21,33 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-
 import { Text } from '@codemirror/state'
-import { Input, NodeType, SyntaxNode, Tree, TreeCursor } from '@lezer/common'
-import { debugConsole } from '@/utils/debugging'
+import { Tree, TreeCursor } from '@lezer/common'
 
-class StringInput implements Input {
-  private input: string
-
-  constructor(input: string) {
+class StringInput {
+  constructor(input) {
     this.input = input
+    this.lineChunks = false
   }
 
   get length() {
     return this.input.length
   }
 
-  chunk(from: number): string {
+  chunk(from) {
     return this.input.slice(from)
   }
 
-  lineChunks = false
-
-  read(from: number, to: number): string {
+  read(from, to) {
     return this.input.slice(from, to)
   }
 }
 
-export function sliceType(
-  cursor: TreeCursor,
-  input: Input,
-  type: number
-): string | null {
-  if (cursor.type.id === type) {
-    const s = input.read(cursor.from, cursor.to)
-    cursor.nextSibling()
-    return s
-  }
-  return null
-}
-
-export function isType(cursor: TreeCursor, type: number): boolean {
-  const cond = cursor.type.id === type
-  if (cond) cursor.nextSibling()
-  return cond
-}
-
-export type CursorNode = {
-  type: NodeType
-  from: number
-  to: number
-  isLeaf: boolean
-}
-
-function cursorNode(
-  { type, from, to }: TreeCursor,
-  isLeaf = false
-): CursorNode {
+function cursorNode({ type, from, to }, isLeaf = false) {
   return { type, from, to, isLeaf }
 }
-
-export type TreeTraversal = {
-  beforeEnter?: (cursor: TreeCursor) => void
-  onEnter: (node: CursorNode) => false | void
-  onLeave?: (node: CursorNode) => false | void
-}
-
-type TreeTraversalOptions = {
-  from?: number
-  to?: number
-  includeParents?: boolean
-} & TreeTraversal
-
-export function traverseTree(
-  cursor: TreeCursor | Tree | SyntaxNode,
+function traverseTree(
+  cursor,
   {
     from = -Infinity,
     to = Infinity,
@@ -103,8 +55,8 @@ export function traverseTree(
     beforeEnter,
     onEnter,
     onLeave,
-  }: TreeTraversalOptions
-): void {
+  }
+) {
   if (!(cursor instanceof TreeCursor))
     cursor = cursor instanceof Tree ? cursor.cursor() : cursor.cursor()
   for (;;) {
@@ -133,8 +85,7 @@ export function traverseTree(
     }
   }
 }
-
-function isChildOf(child: CursorNode, parent: CursorNode): boolean {
+function isChildOf(child, parent) {
   return (
     child.from >= parent.from &&
     child.from <= parent.to &&
@@ -142,15 +93,11 @@ function isChildOf(child: CursorNode, parent: CursorNode): boolean {
     child.to >= parent.from
   )
 }
-
-export function validatorTraversal(
-  input: Input | string,
-  { fullMatch = true }: { fullMatch?: boolean } = {}
-) {
+function validatorTraversal(input, { fullMatch = true } = {}) {
   if (typeof input === 'string') input = new StringInput(input)
   const state = {
     valid: true,
-    parentNodes: [] as CursorNode[],
+    parentNodes: [],
     lastLeafTo: 0,
   }
   return {
@@ -182,41 +129,31 @@ export function validatorTraversal(
       onLeave(node) {
         if (!node.isLeaf) state.parentNodes.shift()
       },
-    } as TreeTraversal,
+    },
   }
 }
 
-export function validateTree(
-  tree: TreeCursor | Tree | SyntaxNode,
-  input: Input | string,
-  options?: { fullMatch?: boolean }
-): boolean {
-  const { state, traversal } = validatorTraversal(input, options)
-  traverseTree(tree, traversal)
-  return state.valid
+let Color
+;(function (Color) {
+  Color[(Color.Red = 31)] = 'Red'
+  Color[(Color.Green = 32)] = 'Green'
+  Color[(Color.Yellow = 33)] = 'Yellow'
+})(Color || (Color = {}))
+
+function colorize(value, color) {
+  return '\u001b[' + color + 'm' + String(value) + '\u001b[39m'
 }
 
-function colorize(value: any): string {
-  return '' + value
-}
-
-type PrintTreeOptions = {
-  from?: number
-  to?: number
-  start?: number
-  includeParents?: boolean
-}
-
-export function printTree(
-  cursor: TreeCursor | Tree | SyntaxNode,
-  input: Input | string,
-  { from, to, start = 0, includeParents }: PrintTreeOptions = {}
-): string {
+function printTree(
+  cursor,
+  input,
+  { from, to, start = 0, includeParents } = {}
+) {
   const inp = typeof input === 'string' ? new StringInput(input) : input
   const text = Text.of(inp.read(0, inp.length).split('\n'))
   const state = {
     output: '',
-    prefixes: [] as string[],
+    prefixes: [],
     hasNextSibling: false,
   }
   const validator = validatorTraversal(inp)
@@ -244,40 +181,35 @@ export function printTree(
       const hasRange = node.from !== node.to
       state.output +=
         (node.type.isError || !validator.state.valid
-          ? colorize('ERROR ' + node.type.name)
+          ? colorize('ERROR ' + node.type.name, Color.Red)
           : node.type.name) +
         ' ' +
         (hasRange
           ? '[' +
-            colorize(locAt(text, start + node.from)) +
+            colorize(locAt(text, start + node.from), Color.Yellow) +
             '..' +
-            colorize(locAt(text, start + node.to)) +
+            colorize(locAt(text, start + node.to), Color.Yellow) +
             ']'
-          : colorize(locAt(text, start + node.from)))
+          : colorize(locAt(text, start + node.from), Color.Yellow))
       if (hasRange && node.isLeaf) {
         state.output +=
-          ': ' + colorize(JSON.stringify(inp.read(node.from, node.to)))
+          ': ' +
+          colorize(JSON.stringify(inp.read(node.from, node.to)), Color.Green)
       }
     },
     onLeave(node) {
-      if (validator.traversal.onLeave) {
-        validator.traversal.onLeave(node)
-      }
+      validator.traversal.onLeave(node)
       state.prefixes.pop()
     },
   })
   return state.output
 }
 
-function locAt(text: Text, pos: number): string {
+function locAt(text, pos) {
   const line = text.lineAt(pos)
   return line.number + ':' + (pos - line.from)
 }
 
-export function logTree(
-  tree: TreeCursor | Tree | SyntaxNode,
-  input: string,
-  options?: PrintTreeOptions
-): void {
-  debugConsole.warn(printTree(tree, input, options))
+export function logTree(tree, input, options) {
+  console.warn(printTree(tree, input, options))
 }
