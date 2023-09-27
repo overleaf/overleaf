@@ -9,7 +9,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import './main/token-access'
-import './main/project-list/index'
 import './main/clear-sessions'
 import './main/account-upgrade-angular'
 import './main/plans'
