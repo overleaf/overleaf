@@ -9,11 +9,11 @@ export function waitFor<T>(
   return new Promise<T>((resolve, reject) => {
     const tryIteration = () => {
       if (iterations > iterationLimit) {
-        reject(
-          console.error(
-            `waiting too long, ${JSON.stringify({ timeout, pollInterval })}`
-          )
+        const err = new Error(
+          `waiting too long, ${JSON.stringify({ timeout, pollInterval })}`
         )
+        console.error(err)
+        reject(err)
         return
       }
 
