@@ -35,9 +35,40 @@ export const Latex = (args: any, { globals: { theme } }: any) => {
       sharejs_doc: mockDoc(content.tex, changes.tex),
       open_doc_name: 'example.tex',
     },
+    rootFolder: {
+      name: 'rootFolder',
+      id: 'root-folder-id',
+      type: 'folder',
+      children: [
+        {
+          name: 'example.tex.tex',
+          id: 'example-doc-id',
+          type: 'doc',
+          selected: false,
+          $$hashKey: 'object:89',
+        },
+        {
+          name: 'frog.jpg',
+          id: 'frog-image-id',
+          type: 'file',
+          linkedFileData: null,
+          created: '2023-05-04T16:11:04.352Z',
+          $$hashKey: 'object:108',
+        },
+      ],
+      selected: false,
+    },
     settings: {
       ...settings,
       overallTheme: theme === 'default-' ? '' : theme,
+    },
+  })
+
+  useMeta({
+    'ol-showSymbolPalette': true,
+    'ol-splitTestVariants': {
+      'figure-modal': 'enabled',
+      'table-generator': 'enabled',
     },
   })
 

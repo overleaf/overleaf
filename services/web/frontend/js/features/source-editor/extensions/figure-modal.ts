@@ -202,6 +202,9 @@ export const figureModalPasteHandler = (): Extension => {
       if (!evt.clipboardData || evt.clipboardData.files.length === 0) {
         return
       }
+      if (evt.clipboardData.types.includes('text/plain')) {
+        return // allow pasted text to be handled even if there's also a file on the clipboard
+      }
       const file = evt.clipboardData.files[0]
       if (!ALLOWED_MIME_TYPES.has(file.type)) {
         return

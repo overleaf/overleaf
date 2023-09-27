@@ -19,7 +19,6 @@ import { restoreScrollPosition } from '../scroll-position'
 import { CurrentDoc } from '../../../../../../types/current-doc'
 import isValidTeXFile from '../../../../main/is-valid-tex-file'
 import { listItemMarker } from './list-item-marker'
-import { figureModalPasteHandler } from '../figure-modal'
 import { isSplitTestEnabled } from '../../../../utils/splitTestUtils'
 import { toolbarPanel } from '../toolbar/toolbar-panel'
 import { selectDecoratedArgument } from './select-decorated-argument'
@@ -204,7 +203,6 @@ const extension = (options: Options) => [
   isSplitTestEnabled('source-editor-toolbar') ? [] : toolbarPanel(),
   selectDecoratedArgument,
   showContentWhenParsed,
-  figureModalPasteHandler(),
   isSplitTestEnabled('paste-html') ? pasteHtml : [],
   isSplitTestEnabled('table-generator') ? tableGeneratorTheme : [],
 ]
