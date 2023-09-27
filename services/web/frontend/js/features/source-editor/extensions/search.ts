@@ -105,6 +105,23 @@ const highlightSelectionMatchesExtension = highlightSelectionMatches({
 // TODO: move this into EditorContext?
 let searchQuery: SearchQuery | null
 
+const scrollToMatch = (range: SelectionRange, view: EditorView) => {
+  const coords = {
+    from: view.coordsAtPos(range.from),
+    to: view.coordsAtPos(range.to),
+  }
+  const scrollRect = view.scrollDOM.getBoundingClientRect()
+  const strategy =
+    (coords.from && coords.from.top < scrollRect.top) ||
+    (coords.to && coords.to.bottom > scrollRect.bottom)
+      ? 'center'
+      : 'nearest'
+
+  return EditorView.scrollIntoView(range, {
+    y: strategy,
+  })
+}
+
 /**
  * A collection of extensions related to the search feature.
  */
@@ -128,22 +145,7 @@ export const search = () => {
     _search({
       literal: true,
       // centre the search match if it was outside the visible area
-      scrollToMatch: (range: SelectionRange, view: EditorView) => {
-        const coords = {
-          from: view.coordsAtPos(range.from),
-          to: view.coordsAtPos(range.to),
-        }
-        const scrollRect = view.scrollDOM.getBoundingClientRect()
-        const strategy =
-          (coords.from && coords.from.top < scrollRect.top) ||
-          (coords.to && coords.to.bottom > scrollRect.bottom)
-            ? 'center'
-            : 'nearest'
-
-        return EditorView.scrollIntoView(range, {
-          y: strategy,
-        })
-      },
+      scrollToMatch,
       createPanel: () => {
         const dom = document.createElement('div')
         dom.className = 'ol-cm-search'
@@ -226,9 +228,10 @@ export const search = () => {
 
               // scroll into view if not opening the panel
               if (searchPanelOpen(tr.startState)) {
-                spec.effects = EditorView.scrollIntoView(next.from, {
-                  y: 'center',
-                })
+                spec.effects = scrollToMatch(
+                  EditorSelection.range(next.from, next.to),
+                  update.view
+                )
               }
 
               update.view.dispatch(spec)
