@@ -271,7 +271,7 @@ const read1name = function (TokeniseResult, k) {
     // handle names like FOO_BAR
     let delimiterName = ''
     let j, tok
-    for (j = k + 2, tok; (tok = Tokens[j]); j++) {
+    for (j = k + 2; (tok = Tokens[j]); j++) {
       if (tok[1] === 'Text') {
         const str = text.substring(tok[2], tok[3])
         if (!str.match(/^\S*$/)) {
@@ -302,7 +302,7 @@ const read1filename = function (TokeniseResult, k) {
 
   let fileName = ''
   let j, tok
-  for (j = k + 1, tok; (tok = Tokens[j]); j++) {
+  for (j = k + 1; (tok = Tokens[j]); j++) {
     if (tok[1] === 'Text') {
       const str = text.substring(tok[2], tok[3])
       if (!str.match(/^\S*$/)) {
@@ -319,6 +319,54 @@ const read1filename = function (TokeniseResult, k) {
     return j // advance past these tokens
   } else {
     return null
+  }
+}
+
+const readOptionalLabel = function (TokeniseResult, k) {
+  // read a label my_label:text..
+  const Tokens = TokeniseResult.tokens
+  const text = TokeniseResult.text
+
+  const params = Tokens[k + 1]
+
+  // Quick check for arguments like [label]
+  if (params && params[1] === 'Text') {
+    const paramNum = text.substring(params[2], params[3])
+    if (paramNum.match(/^(\[[^\]]*\])*\s*$/)) {
+      return k + 1 // got it
+    }
+  }
+
+  let label = ''
+  let j, tok
+  for (j = k + 1; (tok = Tokens[j]); j++) {
+    if (tok[1] === '{') {
+      // unclosed label
+      break
+    } else if (tok[1] === 'Text') {
+      const str = text.substring(tok[2], tok[3])
+      label = label + str
+      if (str.match(/\]/)) {
+        // breaking due to ]
+        break
+      }
+    } else if (tok[1] === '_') {
+      label = label + tok[1]
+    } else {
+      break // breaking due to unrecognised token
+    }
+  }
+
+  if (label.length === 0) {
+    return null
+  } else if (label.length > 0 && /^\[[^\]]*\]\s*$/.test(label)) {
+    // make sure the label is of the form [label]
+    return j - 1 // advance past these tokens
+  } else {
+    // invalid label
+    const e = new Error('Invalid label')
+    e.pos = j + 1
+    return e
   }
 }
 
@@ -596,20 +644,34 @@ const InterpretTokens = function (TokeniseResult, ErrorReporter) {
   const nextGroupMathModeStack = [] // tracking all nextGroupMathModes
   let seenUserDefinedBeginEquation = false // if we have seen macros like \beq
   let seenUserDefinedEndEquation = false // if we have seen macros like \eeq
+  let seenInfiniteLoop = false // if we have seen an infinite loop in the linter
 
   // Iterate over the tokens, looking for environments to match
   //
   // Push environment command found (\begin, \end) onto the
   // Environments array.
 
-  for (let i = 0, len = Tokens.length; i < len; i++) {
+  for (let i = 0, len = Tokens.length, lastPos = -1; i < len; i++) {
     const token = Tokens[i]
     // const line = token[0]
     const type = token[1]
     // const start = token[2]
     // const end = token[3]
     const seq = token[4]
-
+    if (i > lastPos) {
+      // advanced successfully through the tokens
+      lastPos = i
+    } else {
+      // we're not moving forward, so force the parsing to advance
+      if (!seenInfiniteLoop)
+        console.error('infinite loop in linter detected', lastPos, i, token)
+      lastPos = lastPos + 1
+      i = lastPos + 1
+      seenInfiniteLoop = true
+      if (i >= len) {
+        break
+      }
+    }
     if (type === '{') {
       // handle open group as a type of environment
       Environments.push({
@@ -667,7 +729,7 @@ const InterpretTokens = function (TokeniseResult, ErrorReporter) {
           if (open && open[1] === '{' && delimiter && delimiter[1] === 'Text') {
             let delimiterName = ''
             let j, tok
-            for (j = i + 2, tok; (tok = Tokens[j]); j++) {
+            for (j = i + 2; (tok = Tokens[j]); j++) {
               if (tok[1] === 'Text') {
                 const str = text.substring(tok[2], tok[3])
                 if (!str.match(/^\S*$/)) {
@@ -961,6 +1023,30 @@ const InterpretTokens = function (TokeniseResult, ErrorReporter) {
         // try to read any optional params [BAR]...., advance if found
         let newPos = readOptionalGeneric(TokeniseResult, i)
         if (newPos === null) {
+          /* do nothing */
+        } else {
+          i = newPos
+        }
+        // try to read parameter {....}, advance if found
+        newPos = readDefinition(TokeniseResult, i)
+        if (newPos === null) {
+          /* do nothing */
+        } else {
+          i = newPos
+        }
+        nextGroupMathMode = false
+      } else if (seq === 'hyperref') {
+        // try to read any optional params [LABEL].... allowing for
+        // underscores, advance if found
+        let newPos = readOptionalLabel(TokeniseResult, i)
+        if (newPos instanceof Error) {
+          TokenErrorFromTo(
+            Tokens[i + 1],
+            Tokens[Math.min(newPos.pos, len - 1)],
+            'invalid hyperref label'
+          )
+          i = newPos.pos
+        } else if (newPos == null) {
           /* do nothing */
         } else {
           i = newPos
