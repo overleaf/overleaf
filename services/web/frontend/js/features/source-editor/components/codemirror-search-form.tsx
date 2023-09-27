@@ -99,7 +99,7 @@ const CodeMirrorSearchForm: FC = () => {
         replace: data.replace as string,
         caseSensitive: data.caseSensitive === 'on',
         regexp: data.regexp === 'on',
-        literal: true,
+        literal: data.regexp !== 'on',
         wholeWord: data.wholeWord === 'on',
         scope: getStoredSelection(view.state)?.ranges,
       })
