@@ -102,6 +102,9 @@ export const Visual = (args: any, { globals: { theme } }: any) => {
       'paste-html': 'enabled',
       'table-generator': 'enabled',
     },
+    'ol-completedTutorials': {
+      'table-generator-promotion': '2023-09-01T00:00:00.000Z',
+    },
   })
 
   return <SourceEditor />

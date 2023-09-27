@@ -114,6 +114,9 @@ describe('<CodeMirrorEditor/> Table editor', function () {
     window.metaAttributesCache.set('ol-splitTestVariants', {
       'table-generator': 'enabled',
     })
+    window.metaAttributesCache.set('ol-completedTutorials', {
+      'table-generator-promotion': '2023-09-01T00:00:00.000Z',
+    })
   })
 
   describe('Table rendering', function () {

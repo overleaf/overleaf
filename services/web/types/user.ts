@@ -2,6 +2,7 @@ export type User = {
   id: string
   email: string
   allowedFreeTrial?: boolean
+  signUpDate?: string // date string
   features?: {
     collaborators?: number
     compileGroup?: 'standard' | 'priority'

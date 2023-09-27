@@ -5,6 +5,7 @@ import { sendMB } from '../../../infrastructure/event-tracking'
 import isValidTeXFile from '../../../main/is-valid-tex-file'
 import { useTranslation } from 'react-i18next'
 import SplitTestBadge from '../../../shared/components/split-test-badge'
+import { PromotionOverlay } from './table-generator/promotion/popover'
 
 function EditorSwitch() {
   const { t } = useTranslation()
@@ -114,7 +115,7 @@ const RichTextToggle: FC<{
     )
   }
 
-  return toggle
+  return <PromotionOverlay>{toggle}</PromotionOverlay>
 }
 
 export default memo(EditorSwitch)

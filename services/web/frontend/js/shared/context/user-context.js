@@ -16,6 +16,7 @@ UserContext.Provider.propTypes = {
       alphaProgram: PropTypes.boolean,
       betaProgram: PropTypes.boolean,
       labsProgram: PropTypes.boolean,
+      signUpDate: PropTypes.string,
       features: PropTypes.shape({
         dropbox: PropTypes.boolean,
         github: PropTypes.boolean,

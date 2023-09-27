@@ -2,7 +2,10 @@ const SessionManager = require('../Authentication/SessionManager')
 const TutorialHandler = require('./TutorialHandler')
 const { expressify } = require('../../util/promises')
 
-const VALID_KEYS = ['react-history-buttons-tutorial']
+const VALID_KEYS = [
+  'react-history-buttons-tutorial',
+  'table-generator-promotion',
+]
 
 async function completeTutorial(req, res, next) {
   const userId = SessionManager.getLoggedInUserId(req.session)
