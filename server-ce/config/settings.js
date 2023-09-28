@@ -229,6 +229,12 @@ const settings = {
   behindProxy: process.env.SHARELATEX_BEHIND_PROXY || false,
   trustedProxyIps: process.env.SHARELATEX_TRUSTED_PROXY_IPS,
 
+  // The amount of time, in milliseconds, until the (rolling) cookie session expires
+  cookieSessionLength: parseInt(
+    process.env.SHARELATEX_COOKIE_SESSION_LENGTH || 5 * 24 * 60 * 60 * 1000, // default 5 days
+    10
+  ),
+
   i18n: {
     subdomainLang: {
       www: {
