@@ -30,6 +30,7 @@ export type ProjectSettings = {
   imageName: string
   rootDocId: string
   spellCheckLanguage: string
+  name: string
 }
 
 type SaveUserSettings = Partial<

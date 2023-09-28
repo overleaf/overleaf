@@ -117,7 +117,7 @@ export function EditorProviders({
           <ProjectProvider>
             <FileTreeDataProvider>
               <DetachProvider>
-                <EditorProvider settings={{}}>
+                <EditorProvider>
                   <ProjectSettingsProvider>
                     <LayoutProvider>
                       <LocalCompileProvider>

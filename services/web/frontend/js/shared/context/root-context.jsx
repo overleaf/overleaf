@@ -14,7 +14,7 @@ import { SplitTestProvider } from './split-test-context'
 import { FileTreeDataProvider } from './file-tree-data-context'
 import { ProjectSettingsProvider } from '../../features/editor-left-menu/context/project-settings-context'
 
-export function ContextRoot({ children, ide, settings }) {
+export function ContextRoot({ children, ide }) {
   return (
     <SplitTestProvider>
       <IdeProvider ide={ide}>
@@ -22,7 +22,7 @@ export function ContextRoot({ children, ide, settings }) {
           <ProjectProvider>
             <FileTreeDataProvider>
               <DetachProvider>
-                <EditorProvider settings={settings}>
+                <EditorProvider>
                   <ProjectSettingsProvider>
                     <LayoutProvider>
                       <LocalCompileProvider>
@@ -45,7 +45,6 @@ export function ContextRoot({ children, ide, settings }) {
 ContextRoot.propTypes = {
   children: PropTypes.any,
   ide: PropTypes.object,
-  settings: PropTypes.object,
 }
 
 export const rootContext = createSharedContext(ContextRoot)

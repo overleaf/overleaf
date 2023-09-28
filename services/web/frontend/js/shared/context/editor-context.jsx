@@ -14,6 +14,7 @@ import { useProjectContext } from './project-context'
 import { useDetachContext } from './detach-context'
 import getMeta from '../../utils/meta'
 import { useUserContext } from './user-context'
+import { saveProjectSettings } from '@/features/editor-left-menu/utils/api'
 
 export const EditorContext = createContext()
 
@@ -42,18 +43,23 @@ EditorContext.Provider.propTypes = {
   }),
 }
 
-export function EditorProvider({ children, settings }) {
+export function EditorProvider({ children }) {
   const ide = useIdeContext()
   const { id: userId } = useUserContext()
   const { role } = useDetachContext()
 
-  const { owner, features } = useProjectContext({
+  const {
+    owner,
+    features,
+    _id: projectId,
+  } = useProjectContext({
     owner: PropTypes.shape({
       _id: PropTypes.string.isRequired,
     }),
     features: PropTypes.shape({
       compileGroup: PropTypes.string,
     }),
+    _id: PropTypes.string.isRequired,
   })
 
   const cobranding = useMemo(() => {
@@ -106,7 +112,7 @@ export function EditorProvider({ children, settings }) {
     newName => {
       setProjectName(oldName => {
         if (oldName !== newName) {
-          settings.saveProjectSettings({ name: newName }).catch(response => {
+          saveProjectSettings(projectId, { name: newName }).catch(response => {
             setProjectName(oldName)
             const { data, status } = response
             if (status === 400) {
@@ -122,7 +128,7 @@ export function EditorProvider({ children, settings }) {
         return newName
       })
     },
-    [settings, ide, setProjectName]
+    [ide, setProjectName, projectId]
   )
 
   const { setTitle } = useBrowserWindow()
@@ -192,7 +198,6 @@ export function EditorProvider({ children, settings }) {
 
 EditorProvider.propTypes = {
   children: PropTypes.any,
-  settings: PropTypes.object,
 }
 
 export function useEditorContext(propTypes) {

@@ -229,7 +229,7 @@ export const ScopeDecorator = (
   }, [])
 
   return (
-    <ContextRoot ide={ide} settings={{}}>
+    <ContextRoot ide={ide}>
       <Story />
     </ContextRoot>
   )
