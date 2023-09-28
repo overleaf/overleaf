@@ -6,7 +6,11 @@ import CloneProjectModal from '../../../../../clone-project-modal/components/clo
 import useIsMounted from '../../../../../../shared/hooks/use-is-mounted'
 import { useProjectListContext } from '../../../../context/project-list-context'
 import * as eventTracking from '../../../../../../infrastructure/event-tracking'
-import { Project } from '../../../../../../../../types/project/dashboard/api'
+import {
+  ClonedProject,
+  Project,
+} from '../../../../../../../../types/project/dashboard/api'
+import { useProjectTags } from '@/features/project-list/hooks/use-project-tags'
 
 type CopyButtonProps = {
   project: Project
@@ -14,12 +18,16 @@ type CopyButtonProps = {
 }
 
 function CopyProjectButton({ project, children }: CopyButtonProps) {
-  const { addClonedProjectToViewData, updateProjectViewData } =
-    useProjectListContext()
+  const {
+    addClonedProjectToViewData,
+    addProjectToTagInView,
+    updateProjectViewData,
+  } = useProjectListContext()
   const { t } = useTranslation()
   const text = t('copy')
   const [showModal, setShowModal] = useState(false)
   const isMounted = useIsMounted()
+  const projectTags = useProjectTags(project.id)
 
   const handleOpenModal = useCallback(() => {
     setShowModal(true)
@@ -32,13 +40,21 @@ function CopyProjectButton({ project, children }: CopyButtonProps) {
   }, [isMounted])
 
   const handleAfterCloned = useCallback(
-    clonedProject => {
+    (clonedProject: ClonedProject, tags: { _id: string }[]) => {
       eventTracking.sendMB('project-list-page-interaction', { action: 'clone' })
       addClonedProjectToViewData(clonedProject)
+      for (const tag of tags) {
+        addProjectToTagInView(tag._id, clonedProject.project_id)
+      }
       updateProjectViewData({ ...project, selected: false })
       setShowModal(false)
     },
-    [addClonedProjectToViewData, project, updateProjectViewData]
+    [
+      addClonedProjectToViewData,
+      addProjectToTagInView,
+      project,
+      updateProjectViewData,
+    ]
   )
 
   if (project.archived || project.trashed) return null
@@ -52,6 +68,7 @@ function CopyProjectButton({ project, children }: CopyButtonProps) {
         handleAfterCloned={handleAfterCloned}
         projectId={project.id}
         projectName={project.name}
+        projectTags={projectTags}
       />
     </>
   )

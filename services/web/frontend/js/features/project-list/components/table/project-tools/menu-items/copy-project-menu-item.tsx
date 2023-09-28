@@ -5,18 +5,20 @@ import CloneProjectModal from '../../../../../clone-project-modal/components/clo
 import useIsMounted from '../../../../../../shared/hooks/use-is-mounted'
 import { useProjectListContext } from '../../../../context/project-list-context'
 import * as eventTracking from '../../../../../../infrastructure/event-tracking'
-import { Project } from '../../../../../../../../types/project/dashboard/api'
+import { ClonedProject } from '../../../../../../../../types/project/dashboard/api'
+import { useProjectTags } from '@/features/project-list/hooks/use-project-tags'
 
 function CopyProjectMenuItem() {
   const {
     addClonedProjectToViewData,
+    addProjectToTagInView,
     updateProjectViewData,
     selectedProjects,
   } = useProjectListContext()
   const { t } = useTranslation()
-
   const [showModal, setShowModal] = useState(false)
   const isMounted = useIsMounted()
+  const projectTags = useProjectTags(selectedProjects[0]?.id)
 
   const handleOpenModal = useCallback(() => {
     setShowModal(true)
@@ -29,10 +31,13 @@ function CopyProjectMenuItem() {
   }, [isMounted])
 
   const handleAfterCloned = useCallback(
-    (clonedProject: Project) => {
+    (clonedProject: ClonedProject, tags: { _id: string }[]) => {
       const project = selectedProjects[0]
       eventTracking.sendMB('project-list-page-interaction', { action: 'clone' })
       addClonedProjectToViewData(clonedProject)
+      for (const tag of tags) {
+        addProjectToTagInView(tag._id, clonedProject.project_id)
+      }
       updateProjectViewData({ ...project, selected: false })
 
       if (isMounted.current) {
@@ -43,6 +48,7 @@ function CopyProjectMenuItem() {
       isMounted,
       selectedProjects,
       addClonedProjectToViewData,
+      addProjectToTagInView,
       updateProjectViewData,
     ]
   )
@@ -59,6 +65,7 @@ function CopyProjectMenuItem() {
         handleAfterCloned={handleAfterCloned}
         projectId={selectedProjects[0].id}
         projectName={selectedProjects[0].name}
+        projectTags={projectTags}
       />
       <MenuItem onClick={handleOpenModal}>{t('make_a_copy')}</MenuItem>
     </>

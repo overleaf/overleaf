@@ -7,6 +7,14 @@ async function getAllTags(userId) {
   return Tag.find({ user_id: userId })
 }
 
+async function countTagsForProject(userId, projectId) {
+  return Tag.count({ user_id: userId, project_ids: projectId })
+}
+
+async function getTagsForProject(userId, projectId) {
+  return Tag.find({ user_id: userId, project_ids: projectId }, '-project_ids')
+}
+
 async function createTag(userId, name, color, options = {}) {
   if (name.length > MAX_TAG_LENGTH) {
     if (options.truncate) {
@@ -119,26 +127,38 @@ async function removeProjectFromAllTags(userId, projectId) {
   await Tag.updateMany(searchOps, deleteOperation)
 }
 
+async function addProjectToTags(userId, tagIds, projectId) {
+  const searchOps = { user_id: userId, _id: { $in: tagIds } }
+  const insertOperation = { $addToSet: { project_ids: projectId } }
+  await Tag.updateMany(searchOps, insertOperation)
+}
+
 module.exports = {
   getAllTags: callbackify(getAllTags),
+  countTagsForProject: callbackify(countTagsForProject),
+  getTagsForProject: callbackify(getTagsForProject),
   createTag: callbackify(createTag),
   renameTag: callbackify(renameTag),
   editTag: callbackify(editTag),
   deleteTag: callbackify(deleteTag),
   addProjectToTag: callbackify(addProjectToTag),
   addProjectsToTag: callbackify(addProjectsToTag),
+  addProjectToTags: callbackify(addProjectToTags),
   removeProjectFromTag: callbackify(removeProjectFromTag),
   removeProjectsFromTag: callbackify(removeProjectsFromTag),
   addProjectToTagName: callbackify(addProjectToTagName),
   removeProjectFromAllTags: callbackify(removeProjectFromAllTags),
   promises: {
     getAllTags,
+    countTagsForProject,
+    getTagsForProject,
     createTag,
     renameTag,
     editTag,
     deleteTag,
     addProjectToTag,
     addProjectsToTag,
+    addProjectToTags,
     removeProjectFromTag,
     removeProjectsFromTag,
     addProjectToTagName,

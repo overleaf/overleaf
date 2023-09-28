@@ -291,6 +291,35 @@ describe('TagsHandler', function () {
     })
   })
 
+  describe('addProjectToTags', function () {
+    it('should add the project id to each tag', function (done) {
+      const tagIds = []
+
+      this.TagMock.expects('updateMany')
+        .once()
+        .withArgs(
+          {
+            user_id: this.userId,
+            _id: { $in: tagIds },
+          },
+          {
+            $addToSet: { project_ids: this.projectId },
+          }
+        )
+        .resolves()
+      this.TagsHandler.addProjectToTags(
+        this.userId,
+        tagIds,
+        this.projectId,
+        (err, result) => {
+          expect(err).to.not.exist
+          this.TagMock.verify()
+          done()
+        }
+      )
+    })
+  })
+
   describe('deleteTag', function () {
     describe('with a valid tag_id', function () {
       it('should call remove in mongo', function (done) {

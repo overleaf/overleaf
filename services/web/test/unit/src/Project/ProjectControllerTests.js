@@ -43,7 +43,7 @@ describe('ProjectController', function () {
       findArchivedProjects: sinon.stub(),
     }
     this.ProjectDuplicator = {
-      duplicate: sinon.stub().callsArgWith(3, null, { _id: this.project_id }),
+      duplicate: sinon.stub().callsArgWith(4, null, { _id: this.project_id }),
     }
     this.ProjectCreationHandler = {
       createExampleProject: sinon
@@ -60,7 +60,15 @@ describe('ProjectController', function () {
         .stub()
         .callsArgWith(1, null, false),
     }
-    this.TagsHandler = { getAllTags: sinon.stub() }
+    this.TagsHandler = {
+      getTagsForProject: sinon.stub().callsArgWith(2, null, [
+        {
+          name: 'test',
+          project_ids: [this.project_id],
+        },
+      ]),
+      addProjectToTags: sinon.stub(),
+    }
     this.UserModel = { findById: sinon.stub(), updateOne: sinon.stub() }
     this.AuthorizationManager = {
       getPrivilegeLevelForProject: sinon.stub(),

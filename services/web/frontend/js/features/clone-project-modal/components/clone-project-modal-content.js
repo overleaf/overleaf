@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/no-autofocus */
 import PropTypes from 'prop-types'
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Modal,
@@ -11,6 +11,7 @@ import {
   FormGroup,
 } from 'react-bootstrap'
 import { postJSON } from '../../../infrastructure/fetch-json'
+import { CloneProjectTag } from './clone-project-tag'
 
 export default function CloneProjectModalContent({
   handleHide,
@@ -19,6 +20,7 @@ export default function CloneProjectModalContent({
   handleAfterCloned,
   projectId,
   projectName,
+  projectTags,
 }) {
   const { t } = useTranslation()
 
@@ -26,6 +28,8 @@ export default function CloneProjectModalContent({
   const [clonedProjectName, setClonedProjectName] = useState(
     `${projectName} (Copy)`
   )
+
+  const [clonedProjectTags, setClonedProjectTags] = useState(projectTags)
 
   // valid if the cloned project has a name
   const valid = useMemo(
@@ -46,11 +50,14 @@ export default function CloneProjectModalContent({
 
     // clone the project
     postJSON(`/project/${projectId}/clone`, {
-      body: { projectName: clonedProjectName },
+      body: {
+        projectName: clonedProjectName,
+        tags: clonedProjectTags.map(tag => ({ id: tag._id })),
+      },
     })
       .then(data => {
         // open the cloned project
-        handleAfterCloned(data)
+        handleAfterCloned(data, clonedProjectTags)
       })
       .catch(({ response, data }) => {
         if (response?.status === 400) {
@@ -63,6 +70,10 @@ export default function CloneProjectModalContent({
         setInFlight(false)
       })
   }
+
+  const removeTag = useCallback(tag => {
+    setClonedProjectTags(value => value.filter(item => item._id !== tag._id))
+  }, [])
 
   return (
     <>
@@ -87,6 +98,23 @@ export default function CloneProjectModalContent({
               autoFocus
             />
           </FormGroup>
+
+          {clonedProjectTags.length > 0 && (
+            <FormGroup className="clone-project-tag">
+              <ControlLabel htmlFor="clone-project-tags-list">
+                {t('tags')}:{' '}
+              </ControlLabel>
+              <div role="listbox" id="clone-project-tags-list">
+                {clonedProjectTags.map(tag => (
+                  <CloneProjectTag
+                    key={tag._id}
+                    tag={tag}
+                    removeTag={removeTag}
+                  />
+                ))}
+              </div>
+            </FormGroup>
+          )}
         </form>
 
         {error && (
@@ -126,4 +154,11 @@ CloneProjectModalContent.propTypes = {
   handleAfterCloned: PropTypes.func.isRequired,
   projectId: PropTypes.string,
   projectName: PropTypes.string,
+  projectTags: PropTypes.arrayOf(
+    PropTypes.shape({
+      _id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      color: PropTypes.string,
+    })
+  ),
 }

@@ -37,6 +37,7 @@ const { hasAdminAccess } = require('../Helpers/AdminAuthorizationHelper')
 const InstitutionsFeatures = require('../Institutions/InstitutionsFeatures')
 const ProjectAuditLogHandler = require('./ProjectAuditLogHandler')
 const PublicAccessLevels = require('../Authorization/PublicAccessLevels')
+const TagsHandler = require('../Tags/TagsHandler')
 
 /**
  * @typedef {import("./types").GetProjectsRequest} GetProjectsRequest
@@ -253,7 +254,7 @@ const ProjectController = {
     res.setTimeout(5 * 60 * 1000) // allow extra time for the copy to complete
     metrics.inc('cloned-project')
     const projectId = req.params.Project_id
-    const { projectName } = req.body
+    const { projectName, tags } = req.body
     logger.debug({ projectId, projectName }, 'cloning project')
     if (!SessionManager.isUserLoggedIn(req.session)) {
       return res.json({ redir: '/register' })
@@ -264,6 +265,7 @@ const ProjectController = {
       currentUser,
       projectId,
       projectName,
+      tags,
       (err, project) => {
         if (err != null) {
           OError.tag(err, 'error cloning project', {
@@ -739,6 +741,12 @@ const ProjectController = {
             }
           )
         },
+        projectTags(cb) {
+          if (!userId) {
+            return cb(null, [])
+          }
+          TagsHandler.getTagsForProject(userId, projectId, cb)
+        },
       },
       (
         err,
@@ -757,6 +765,7 @@ const ProjectController = {
           sourceEditorToolbarAssigment,
           historyViewAssignment,
           reviewPanelAssignment,
+          projectTags,
         }
       ) => {
         if (err != null) {
@@ -944,6 +953,7 @@ const ProjectController = {
               isReviewPanelReact: reviewPanelAssignment.variant === 'react',
               showPersonalAccessToken,
               hasTrackChangesFeature: Features.hasFeature('track-changes'),
+              projectTags,
             })
             timer.done()
           }

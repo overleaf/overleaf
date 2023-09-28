@@ -6,7 +6,11 @@ import CloneProjectModal from './clone-project-modal'
 
 const EditorCloneProjectModalWrapper = React.memo(
   function EditorCloneProjectModalWrapper({ show, handleHide, openProject }) {
-    const { _id: projectId, name: projectName } = useProjectContext()
+    const {
+      _id: projectId,
+      name: projectName,
+      tags: projectTags,
+    } = useProjectContext()
 
     if (!projectName) {
       // wait for useProjectContext
@@ -19,6 +23,7 @@ const EditorCloneProjectModalWrapper = React.memo(
           handleAfterCloned={openProject}
           projectId={projectId}
           projectName={projectName}
+          projectTags={projectTags}
         />
       )
     }

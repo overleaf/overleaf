@@ -17,6 +17,7 @@ const ProjectOptionsHandler = require('./ProjectOptionsHandler')
 const SafePath = require('./SafePath')
 const TpdsProjectFlusher = require('../ThirdPartyDataStore/TpdsProjectFlusher')
 const _ = require('lodash')
+const TagsHandler = require('../Tags/TagsHandler')
 
 module.exports = {
   duplicate: callbackify(duplicate),
@@ -25,7 +26,7 @@ module.exports = {
   },
 }
 
-async function duplicate(owner, originalProjectId, newProjectName) {
+async function duplicate(owner, originalProjectId, newProjectName, tags = []) {
   await DocumentUpdaterHandler.promises.flushProjectToMongo(originalProjectId)
   const originalProject = await ProjectGetter.promises.getProject(
     originalProjectId,
@@ -49,6 +50,14 @@ async function duplicate(owner, originalProjectId, newProjectName) {
     'fromV1TemplateVersionId',
   ])
   segmentation.duplicatedFromProject = originalProjectId
+
+  // count the number of tags before and after, for analytics
+  segmentation['original-tags'] =
+    await TagsHandler.promises.countTagsForProject(
+      owner._id,
+      originalProject._id
+    )
+  segmentation['updated-tags'] = tags.length
 
   // remove any leading or trailing spaces
   newProjectName = newProjectName.trim()
@@ -88,6 +97,14 @@ async function duplicate(owner, originalProjectId, newProjectName) {
       newProject: { version: projectVersion },
     })
     await TpdsProjectFlusher.promises.flushProjectToTpds(newProject._id)
+
+    if (tags?.length > 0) {
+      await TagsHandler.promises.addProjectToTags(
+        owner._id,
+        tags.map(tag => tag.id),
+        newProject._id
+      )
+    }
   } catch (err) {
     // Clean up broken clone on error.
     // Make sure we delete the new failed project, not the original one!
@@ -98,6 +115,7 @@ async function duplicate(owner, originalProjectId, newProjectName) {
       newProjectId: newProject._id,
     })
   }
+
   return newProject
 }
 

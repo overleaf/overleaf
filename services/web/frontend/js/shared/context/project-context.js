@@ -1,6 +1,7 @@
 import { createContext, useContext, useMemo } from 'react'
 import PropTypes from 'prop-types'
 import useScopeValue from '../hooks/use-scope-value'
+import getMeta from '@/utils/meta'
 
 const ProjectContext = createContext()
 
@@ -34,6 +35,13 @@ export const projectShape = {
     email: PropTypes.string.isRequired,
   }),
   useNewCompileTimeoutUI: PropTypes.string,
+  tags: PropTypes.arrayOf(
+    PropTypes.shape({
+      _id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      color: PropTypes.string,
+    })
+  ).isRequired,
 }
 
 ProjectContext.Provider.propTypes = {
@@ -83,6 +91,14 @@ export function ProjectProvider({ children }) {
     showNewCompileTimeoutUI,
   } = project || projectFallback
 
+  const tags = useMemo(
+    () =>
+      getMeta('ol-projectTags', [])
+        // `tag.name` data may be null for some old users
+        .map(tag => ({ ...tag, name: tag.name ?? '' })),
+    []
+  )
+
   // temporary override for new compile timeout
   const forceNewCompileTimeout = new URLSearchParams(
     window.location.search
@@ -106,6 +122,7 @@ export function ProjectProvider({ children }) {
       owner,
       showNewCompileTimeoutUI:
         newCompileTimeoutOverride || showNewCompileTimeoutUI,
+      tags,
     }
   }, [
     _id,
@@ -118,6 +135,7 @@ export function ProjectProvider({ children }) {
     owner,
     showNewCompileTimeoutUI,
     newCompileTimeoutOverride,
+    tags,
   ])
 
   return (

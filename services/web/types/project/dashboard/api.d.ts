@@ -57,3 +57,15 @@ export type GetProjectsResponseBody = {
   totalSize: number
   projects: Project[]
 }
+
+export type ClonedProject = {
+  project_id: string
+  name: string
+  lastUpdated: string
+  owner: {
+    _id: string
+    email: string
+    first_name: string
+    last_name: string
+  }
+}

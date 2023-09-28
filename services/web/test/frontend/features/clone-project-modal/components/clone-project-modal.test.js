@@ -87,6 +87,7 @@ describe('<EditorCloneProjectModalWrapper />', function () {
 
     expect(JSON.parse(options.body)).to.deep.equal({
       projectName: 'A Cloned Project',
+      tags: [],
     })
 
     expect(openProject).to.be.calledOnce

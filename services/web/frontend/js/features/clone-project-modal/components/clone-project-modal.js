@@ -9,6 +9,7 @@ function CloneProjectModal({
   handleAfterCloned,
   projectId,
   projectName,
+  projectTags,
 }) {
   const [inFlight, setInFlight] = useState(false)
 
@@ -35,6 +36,7 @@ function CloneProjectModal({
         handleAfterCloned={handleAfterCloned}
         projectId={projectId}
         projectName={projectName}
+        projectTags={projectTags}
       />
     </AccessibleModal>
   )
@@ -46,6 +48,13 @@ CloneProjectModal.propTypes = {
   handleAfterCloned: PropTypes.func.isRequired,
   projectId: PropTypes.string,
   projectName: PropTypes.string,
+  projectTags: PropTypes.arrayOf(
+    PropTypes.shape({
+      _id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      color: PropTypes.string,
+    })
+  ),
 }
 
 export default memo(CloneProjectModal)

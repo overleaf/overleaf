@@ -464,7 +464,8 @@
       .text-overflow();
     }
 
-    .dash-cell-tag {
+    .dash-cell-tag,
+    .clone-project-tag {
       .tag-label {
         padding: 14px 0;
         cursor: pointer;
@@ -977,5 +978,13 @@
     right: 0;
     bottom: 0;
     left: 0;
+  }
+}
+
+.clone-project-tag {
+  display: flex;
+
+  &:hover .label.tag-label-name {
+    background-color: @tag-bg-color;
   }
 }

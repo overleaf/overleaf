@@ -143,6 +143,14 @@ describe('ProjectDuplicator', function () {
         copyFile: sinon.stub().resolves(this.filestoreUrl),
       },
     }
+    this.TagsHandler = {
+      promises: {
+        addProjectToTags: sinon.stub().resolves({
+          _id: 'project-1',
+        }),
+        countTagsForProject: sinon.stub().resolves(1),
+      },
+    }
     this.ProjectCreationHandler = {
       promises: {
         createBlankProject: sinon.stub().resolves(this.newBlankProject),
@@ -216,6 +224,7 @@ describe('ProjectDuplicator', function () {
         './ProjectLocator': this.ProjectLocator,
         './ProjectOptionsHandler': this.ProjectOptionsHandler,
         '../ThirdPartyDataStore/TpdsProjectFlusher': this.TpdsProjectFlusher,
+        '../Tags/TagsHandler': this.TagsHandler,
       },
     })
   })
