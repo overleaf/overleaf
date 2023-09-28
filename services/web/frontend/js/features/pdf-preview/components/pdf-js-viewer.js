@@ -13,12 +13,15 @@ import { captureException } from '../../../infrastructure/error-reporter'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import { getPdfCachingMetrics } from '../util/metrics'
 import { debugConsole } from '@/utils/debugging'
+import { usePdfPreviewContext } from '@/features/pdf-preview/components/pdf-preview-provider'
 
 function PdfJsViewer({ url, pdfFile }) {
   const { _id: projectId } = useProjectContext()
 
   const { setError, firstRenderDone, highlights, position, setPosition } =
     useCompileContext()
+
+  const { setLoadingError } = usePdfPreviewContext()
 
   // state values persisted in localStorage to restore on load
   const [scale, setScale] = usePersistedState(
@@ -41,7 +44,7 @@ function PdfJsViewer({ url, pdfFile }) {
             setPdfJsWrapper(wrapper)
           })
           .catch(error => {
-            setError('pdf-viewer-loading-error')
+            setLoadingError(true)
             captureException(error)
           })
 
@@ -51,7 +54,7 @@ function PdfJsViewer({ url, pdfFile }) {
         }
       }
     },
-    [setError]
+    [setLoadingError]
   )
 
   const [startFetch, setStartFetch] = useState(0)

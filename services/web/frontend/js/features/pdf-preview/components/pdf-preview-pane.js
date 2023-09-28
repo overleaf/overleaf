@@ -9,6 +9,7 @@ import FasterCompilesFeedback from './faster-compiles-feedback'
 import { PdfPreviewMessages } from './pdf-preview-messages'
 import CompileTimeWarning from './compile-time-warning'
 import CompileTimeoutMessages from './compile-timeout-messages'
+import { PdfPreviewProvider } from './pdf-preview-provider'
 
 function PdfPreviewPane() {
   const { pdfUrl, showNewCompileTimeoutUI } = useCompileContext()
@@ -17,21 +18,23 @@ function PdfPreviewPane() {
   })
   return (
     <div className={classes}>
-      <PdfHybridPreviewToolbar />
-      <PdfPreviewMessages>
-        {showNewCompileTimeoutUI ? (
-          <CompileTimeoutMessages />
-        ) : (
-          <CompileTimeWarning />
-        )}
-      </PdfPreviewMessages>
-      <Suspense fallback={<LoadingPreview />}>
-        <div className="pdf-viewer">
-          <PdfViewer />
-          <FasterCompilesFeedback />
-        </div>
-      </Suspense>
-      <PdfLogsViewer />
+      <PdfPreviewProvider>
+        <PdfHybridPreviewToolbar />
+        <PdfPreviewMessages>
+          {showNewCompileTimeoutUI ? (
+            <CompileTimeoutMessages />
+          ) : (
+            <CompileTimeWarning />
+          )}
+        </PdfPreviewMessages>
+        <Suspense fallback={<LoadingPreview />}>
+          <div className="pdf-viewer">
+            <PdfViewer />
+            <FasterCompilesFeedback />
+          </div>
+        </Suspense>
+        <PdfLogsViewer />
+      </PdfPreviewProvider>
     </div>
   )
 }

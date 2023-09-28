@@ -3,6 +3,7 @@ import PdfJsViewer from '../../../../frontend/js/features/pdf-preview/components
 import { mockScope } from './scope'
 import { getContainerEl } from 'cypress/react'
 import { unmountComponentAtNode } from 'react-dom'
+import { PdfPreviewProvider } from '../../../../frontend/js/features/pdf-preview/components/pdf-preview-provider'
 
 describe('<PdfJSViewer/>', function () {
   beforeEach(function () {
@@ -16,9 +17,11 @@ describe('<PdfJSViewer/>', function () {
 
     cy.mount(
       <EditorProviders scope={scope}>
-        <div className="pdf-viewer">
-          <PdfJsViewer url="/build/123/output.pdf" />
-        </div>
+        <PdfPreviewProvider>
+          <div className="pdf-viewer">
+            <PdfJsViewer url="/build/123/output.pdf" />
+          </div>
+        </PdfPreviewProvider>
       </EditorProviders>
     )
 
@@ -39,9 +42,11 @@ describe('<PdfJSViewer/>', function () {
 
     cy.mount(
       <EditorProviders scope={scope}>
-        <div className="pdf-viewer">
-          <PdfJsViewer url="/build/123/output.pdf" />
-        </div>
+        <PdfPreviewProvider>
+          <div className="pdf-viewer">
+            <PdfJsViewer url="/build/123/output.pdf" />
+          </div>
+        </PdfPreviewProvider>
       </EditorProviders>
     )
 
@@ -57,9 +62,11 @@ describe('<PdfJSViewer/>', function () {
 
     cy.mount(
       <EditorProviders scope={scope}>
-        <div className="pdf-viewer">
-          <PdfJsViewer url="/build/123/output.pdf" />
-        </div>
+        <PdfPreviewProvider>
+          <div className="pdf-viewer">
+            <PdfJsViewer url="/build/123/output.pdf" />
+          </div>
+        </PdfPreviewProvider>
       </EditorProviders>
     )
 
@@ -75,9 +82,11 @@ describe('<PdfJSViewer/>', function () {
 
     cy.mount(
       <EditorProviders scope={scope}>
-        <div className="pdf-viewer">
-          <PdfJsViewer url="/build/123/output.pdf" />
-        </div>
+        <PdfPreviewProvider>
+          <div className="pdf-viewer">
+            <PdfJsViewer url="/build/123/output.pdf" />
+          </div>
+        </PdfPreviewProvider>
       </EditorProviders>
     )
 
