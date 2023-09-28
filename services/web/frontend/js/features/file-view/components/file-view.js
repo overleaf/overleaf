@@ -9,7 +9,7 @@ import Icon from '../../../shared/components/icon'
 
 const imageExtensions = ['png', 'jpg', 'jpeg', 'gif']
 
-export default function FileView({ file, storeReferencesKeys }) {
+export default function FileView({ file }) {
   const [contentLoading, setContentLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
 
@@ -34,7 +34,7 @@ export default function FileView({ file, storeReferencesKeys }) {
 
   const content = (
     <>
-      <FileViewHeader file={file} storeReferencesKeys={storeReferencesKeys} />
+      <FileViewHeader file={file} />
       {imageExtensions.includes(extension) && (
         <FileViewImage
           fileName={file.name}
@@ -77,5 +77,4 @@ FileView.propTypes = {
     id: PropTypes.string,
     name: PropTypes.string,
   }).isRequired,
-  storeReferencesKeys: PropTypes.func.isRequired,
 }

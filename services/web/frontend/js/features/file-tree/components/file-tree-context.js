@@ -26,7 +26,7 @@ function FileTreeContext({
       reindexReferences={reindexReferences}
     >
       <FileTreeSelectableProvider onSelect={onSelect}>
-        <FileTreeActionableProvider>
+        <FileTreeActionableProvider reindexReferences={reindexReferences}>
           <FileTreeDraggableProvider>{children}</FileTreeDraggableProvider>
         </FileTreeActionableProvider>
       </FileTreeSelectableProvider>

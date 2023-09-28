@@ -12,7 +12,6 @@ import importOverleafModules from '../../../../macros/import-overleaf-module.mac
 import useAbortController from '../../../shared/hooks/use-abort-controller'
 import { LinkedFileIcon } from './file-view-icons'
 import { BinaryFile, hasProvider, LinkedFile } from '../types/binary-file'
-import { debugConsole } from '@/utils/debugging'
 
 const tprLinkedFileInfo = importOverleafModules('tprLinkedFileInfo') as {
   import: { LinkedFileInfo: ElementType }
@@ -45,13 +44,9 @@ function shortenedUrl(url: string) {
 
 type FileViewHeaderProps = {
   file: BinaryFile
-  storeReferencesKeys: (keys: string[]) => void
 }
 
-export default function FileViewHeader({
-  file,
-  storeReferencesKeys,
-}: FileViewHeaderProps) {
+export default function FileViewHeader({ file }: FileViewHeaderProps) {
   const { _id: projectId } = useProjectContext({
     _id: PropTypes.string.isRequired,
   })
@@ -92,7 +87,16 @@ export default function FileViewHeader({
     setRefreshing(true)
     // Replacement of the file handled by the file tree
     window.expectingLinkedFileRefreshedSocketFor = file.name
-    postJSON(`/project/${projectId}/linked_file/${file.id}/refresh`, { signal })
+    const body = {
+      shouldReindexReferences:
+        file.linkedFileData?.provider === 'mendeley' ||
+        file.linkedFileData?.provider === 'zotero' ||
+        /\.bib$/.test(file.name),
+    }
+    postJSON(`/project/${projectId}/linked_file/${file.id}/refresh`, {
+      signal,
+      body,
+    })
       .then(() => {
         setRefreshing(false)
       })
@@ -100,29 +104,7 @@ export default function FileViewHeader({
         setRefreshing(false)
         setRefreshError(err.data?.message || err.message)
       })
-      .finally(() => {
-        if (
-          hasProvider(file, 'mendeley') ||
-          hasProvider(file, 'zotero') ||
-          file.name.match(/^.*\.bib$/)
-        ) {
-          reindexReferences()
-        }
-      })
-
-    function reindexReferences() {
-      const opts = {
-        body: { shouldBroadcast: true },
-      }
-
-      postJSON(`/project/${projectId}/references/indexAll`, opts)
-        .then(response => {
-          // Later updated by the socket but also updated here for immediate use
-          storeReferencesKeys(response.keys)
-        })
-        .catch(debugConsole.error)
-    }
-  }, [file, projectId, signal, storeReferencesKeys])
+  }, [file, projectId, signal])
 
   return (
     <div>

@@ -45,9 +45,7 @@ describe('<FileView/>', function () {
         'Text file content'
       )
 
-      renderWithEditorContext(
-        <FileView file={textFile} storeReferencesKeys={() => {}} />
-      )
+      renderWithEditorContext(<FileView file={textFile} />)
 
       await waitForElementToBeRemoved(() =>
         screen.getByText('Loading', { exact: false })
@@ -60,9 +58,7 @@ describe('<FileView/>', function () {
         name: 'example.not-tex',
       }
 
-      renderWithEditorContext(
-        <FileView file={unpreviewableTextFile} storeReferencesKeys={() => {}} />
-      )
+      renderWithEditorContext(<FileView file={unpreviewableTextFile} />)
 
       await screen.findByText('Sorry, no preview is available', {
         exact: false,
@@ -72,17 +68,13 @@ describe('<FileView/>', function () {
 
   describe('for an image file', function () {
     it('shows a loading indicator while the file is loading', async function () {
-      renderWithEditorContext(
-        <FileView file={imageFile} storeReferencesKeys={() => {}} />
-      )
+      renderWithEditorContext(<FileView file={imageFile} />)
 
       screen.getByText('Loading', { exact: false })
     })
 
     it('shows messaging if the image could not be loaded', async function () {
-      renderWithEditorContext(
-        <FileView file={imageFile} storeReferencesKeys={() => {}} />
-      )
+      renderWithEditorContext(<FileView file={imageFile} />)
 
       // Fake the image request failing as the request is handled by the browser
       fireEvent.error(screen.getByRole('img'))

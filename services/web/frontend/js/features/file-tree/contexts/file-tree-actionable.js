@@ -119,7 +119,7 @@ function fileTreeActionableReducer(state, action) {
   }
 }
 
-export function FileTreeActionableProvider({ children }) {
+export function FileTreeActionableProvider({ reindexReferences, children }) {
   const { _id: projectId } = useProjectContext(projectContextPropTypes)
   const { permissionsLevel } = useEditorContext(editorContextPropTypes)
 
@@ -187,9 +187,12 @@ export function FileTreeActionableProvider({ children }) {
   // deletes entities in series. Tree will be updated via the socket event
   const finishDeleting = useCallback(() => {
     dispatch({ type: ACTION_TYPES.DELETING })
+    let shouldReindexReferences = false
 
     return mapSeries(Array.from(selectedEntityIds), id => {
       const found = findInTreeOrThrow(fileTreeData, id)
+      shouldReindexReferences =
+        shouldReindexReferences || /\.bib$/.test(found.entity.name)
       return syncDelete(projectId, found.type, found.entity._id).catch(
         error => {
           // throw unless 404
@@ -200,13 +203,16 @@ export function FileTreeActionableProvider({ children }) {
       )
     })
       .then(() => {
+        if (shouldReindexReferences) {
+          reindexReferences()
+        }
         dispatch({ type: ACTION_TYPES.CLEAR })
       })
       .catch(error => {
         // set an error and allow user to retry
         dispatch({ type: ACTION_TYPES.ERROR, error })
       })
-  }, [fileTreeData, projectId, selectedEntityIds])
+  }, [fileTreeData, projectId, selectedEntityIds, reindexReferences])
 
   // moves entities. Tree is updated immediately and data are sync'd after.
   const finishMoving = useCallback(
@@ -404,6 +410,7 @@ export function FileTreeActionableProvider({ children }) {
 }
 
 FileTreeActionableProvider.propTypes = {
+  reindexReferences: PropTypes.func.isRequired,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),
     PropTypes.node,

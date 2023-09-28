@@ -50,17 +50,17 @@ export default ReferencesManager = class ReferencesManager {
       // not on every reconnect
       if (!this.inited) {
         this.inited = true
-        this.ide.socket.on('references:keys:updated', keys =>
-          this._storeReferencesKeys(keys)
+        this.ide.socket.on('references:keys:updated', (keys, allDocs) =>
+          this._storeReferencesKeys(keys, allDocs)
         )
         this.indexAllReferences(false)
       }
     })
   }
 
-  _storeReferencesKeys(newKeys) {
+  _storeReferencesKeys(newKeys, replaceExistingKeys) {
     const oldKeys = this.$scope.$root._references.keys
-    const keys = _.union(oldKeys, newKeys)
+    const keys = replaceExistingKeys ? newKeys : _.union(oldKeys, newKeys)
     window.dispatchEvent(
       new CustomEvent('project:references', {
         detail: keys,
@@ -99,7 +99,7 @@ export default ReferencesManager = class ReferencesManager {
     return this.ide.$http
       .post(`/project/${this.$scope.project_id}/references/index`, opts)
       .then(response => {
-        return this._storeReferencesKeys(response.data.keys)
+        return this._storeReferencesKeys(response.data.keys, false)
       })
   }
 
@@ -111,7 +111,7 @@ export default ReferencesManager = class ReferencesManager {
     return this.ide.$http
       .post(`/project/${this.$scope.project_id}/references/indexAll`, opts)
       .then(response => {
-        return this._storeReferencesKeys(response.data.keys)
+        return this._storeReferencesKeys(response.data.keys, true)
       })
   }
 }

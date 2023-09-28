@@ -39,6 +39,7 @@ module.exports = ReferencesController = {
         res,
         projectId,
         shouldBroadcast,
+        false,
         data
       )
     })
@@ -57,12 +58,13 @@ module.exports = ReferencesController = {
         res,
         projectId,
         shouldBroadcast,
+        true,
         data
       )
     })
   },
 
-  _handleIndexResponse(req, res, projectId, shouldBroadcast, data) {
+  _handleIndexResponse(req, res, projectId, shouldBroadcast, isAllDocs, data) {
     if (data == null || data.keys == null) {
       return res.json({ projectId, keys: [] })
     }
@@ -70,7 +72,8 @@ module.exports = ReferencesController = {
       EditorRealTimeController.emitToRoom(
         projectId,
         'references:keys:updated',
-        data.keys
+        data.keys,
+        isAllDocs
       )
     }
     return res.json(data)

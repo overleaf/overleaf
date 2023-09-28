@@ -13,6 +13,7 @@ import FileTreeRoot from '../../../../../frontend/js/features/file-tree/componen
 describe('FileTree Delete Entity Flow', function () {
   const onSelect = sinon.stub()
   const onInit = sinon.stub()
+  const reindexReferences = sinon.stub()
 
   beforeEach(function () {
     window.metaAttributesCache = new Map()
@@ -23,6 +24,7 @@ describe('FileTree Delete Entity Flow', function () {
     fetchMock.restore()
     onSelect.reset()
     onInit.reset()
+    reindexReferences.reset()
     cleanUpContext()
     window.metaAttributesCache = new Map()
   })
@@ -41,7 +43,7 @@ describe('FileTree Delete Entity Flow', function () {
       renderWithEditorContext(
         <FileTreeRoot
           refProviders={{}}
-          reindexReferences={() => null}
+          reindexReferences={reindexReferences}
           setRefProviderEnabled={() => null}
           setStartedFreeTrial={() => null}
           onSelect={onSelect}
@@ -94,6 +96,7 @@ describe('FileTree Delete Entity Flow', function () {
 
       const [lastFetchPath] = fetchMock.lastCall(fetchMatcher)
       expect(lastFetchPath).to.equal('/project/123abc/doc/456def')
+      expect(reindexReferences).not.to.have.been.called
     })
 
     it('continues delete on 404s', async function () {
@@ -220,7 +223,7 @@ describe('FileTree Delete Entity Flow', function () {
       renderWithEditorContext(
         <FileTreeRoot
           refProviders={{}}
-          reindexReferences={() => null}
+          reindexReferences={reindexReferences}
           setRefProviderEnabled={() => null}
           setStartedFreeTrial={() => null}
           onSelect={onSelect}
@@ -254,7 +257,7 @@ describe('FileTree Delete Entity Flow', function () {
       fireEvent.click(deleteButton)
     })
 
-    it('removes all items', async function () {
+    it('removes all items and reindexes references after deleting .bib file', async function () {
       const fetchMatcher = /\/project\/\w+\/(doc|file)\/\w+/
       fetchMock.delete(fetchMatcher, 204)
 
@@ -289,6 +292,7 @@ describe('FileTree Delete Entity Flow', function () {
         .map(([url]) => url)
       expect(firstFetchPath).to.equal('/project/123abc/doc/456def')
       expect(secondFetchPath).to.equal('/project/123abc/file/789ghi')
+      expect(reindexReferences).to.have.been.called
     })
   })
 

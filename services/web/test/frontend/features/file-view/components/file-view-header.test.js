@@ -5,7 +5,6 @@ import {
 } from '@testing-library/react'
 import { expect } from 'chai'
 import fetchMock from 'fetch-mock'
-import sinon from 'sinon'
 
 import { renderWithEditorContext } from '../../../helpers/render-with-context'
 import FileViewHeader from '../../../../../frontend/js/features/file-view/components/file-view-header'
@@ -55,9 +54,7 @@ describe('<FileViewHeader/>', function () {
 
   describe('header text', function () {
     it('Renders the correct text for a file with the url provider', function () {
-      renderWithEditorContext(
-        <FileViewHeader file={urlFile} storeReferencesKeys={() => {}} />
-      )
+      renderWithEditorContext(<FileViewHeader file={urlFile} />)
       screen.getByText('Imported from', { exact: false })
       screen.getByText('at 3:24 am Wed, 17th Feb 21', {
         exact: false,
@@ -65,9 +62,7 @@ describe('<FileViewHeader/>', function () {
     })
 
     it('Renders the correct text for a file with the project_file provider', function () {
-      renderWithEditorContext(
-        <FileViewHeader file={projectFile} storeReferencesKeys={() => {}} />
-      )
+      renderWithEditorContext(<FileViewHeader file={projectFile} />)
       screen.getByText('Imported from', { exact: false })
       screen.getByText('Another project', { exact: false })
       screen.getByText('/source-entity-path.ext, at 3:24 am Wed, 17th Feb 21', {
@@ -99,9 +94,7 @@ describe('<FileViewHeader/>', function () {
         }
       )
 
-      renderWithEditorContext(
-        <FileViewHeader file={projectFile} storeReferencesKeys={() => {}} />
-      )
+      renderWithEditorContext(<FileViewHeader file={projectFile} />)
 
       fireEvent.click(screen.getByRole('button', { name: 'Refresh' }))
 
@@ -119,23 +112,7 @@ describe('<FileViewHeader/>', function () {
         }
       )
 
-      const reindexResponse = {
-        projectId: '123abc',
-        keys: ['reference1', 'reference2', 'reference3', 'reference4'],
-      }
-      fetchMock.post(
-        'express:/project/:project_id/references/indexAll',
-        reindexResponse
-      )
-
-      const storeReferencesKeys = sinon.stub()
-
-      renderWithEditorContext(
-        <FileViewHeader
-          file={thirdPartyReferenceFile}
-          storeReferencesKeys={storeReferencesKeys}
-        />
-      )
+      renderWithEditorContext(<FileViewHeader file={thirdPartyReferenceFile} />)
 
       fireEvent.click(screen.getByRole('button', { name: 'Refresh' }))
 
@@ -144,15 +121,15 @@ describe('<FileViewHeader/>', function () {
       )
 
       expect(fetchMock.done()).to.be.true
-      expect(storeReferencesKeys).to.be.calledWith(reindexResponse.keys)
+
+      const lastCallBody = JSON.parse(fetchMock.lastCall()[1].body)
+      expect(lastCallBody.shouldReindexReferences).to.be.true
     })
   })
 
   describe('The download button', function () {
     it('exists', function () {
-      renderWithEditorContext(
-        <FileViewHeader file={urlFile} storeReferencesKeys={() => {}} />
-      )
+      renderWithEditorContext(<FileViewHeader file={urlFile} />)
 
       screen.getByText('Download', { exact: false })
     })
