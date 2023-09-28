@@ -31,13 +31,13 @@ const buildConfig = () => {
   // add entrypoint under '/' for latex-linter worker
   addWorker(
     'latex-linter-worker',
-    '../../frontend/js/features/source-editor/languages/latex/linter/latex-linter.worker.js'
+    '../../frontend/js/features/source-editor/languages/latex/linter/latex-linter.worker'
   )
 
   // add entrypoints under '/' for pdfjs workers
   const pdfjsVersions = ['pdfjs-dist213', 'pdfjs-dist36']
   for (const name of pdfjsVersions) {
-    addWorker(name, `${name}/legacy/build/pdf.worker.js`)
+    addWorker(name, `${name}/legacy/build/pdf.worker`)
   }
 
   return webpackConfig

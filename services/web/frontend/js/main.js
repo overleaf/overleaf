@@ -38,7 +38,7 @@ import './services/validateCaptcha'
 import './services/validateCaptchaV3'
 import './filters/formatDate'
 import './features/cookie-banner'
-import '../../modules/modules-main.js'
+import '../../modules/modules-main'
 import './cdn-load-test'
 import { debugConsole } from '@/utils/debugging'
 angular.module('SharelatexApp').config(function ($locationProvider) {

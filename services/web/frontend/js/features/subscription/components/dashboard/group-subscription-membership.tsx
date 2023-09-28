@@ -3,7 +3,7 @@ import { Trans, useTranslation } from 'react-i18next'
 import { MemberGroupSubscription } from '../../../../../../types/subscription/dashboard/subscription'
 import { useSubscriptionDashboardContext } from '../../context/subscription-dashboard-context'
 import { LEAVE_GROUP_MODAL_ID } from './leave-group-modal'
-import getMeta from '../../../../utils/meta.js'
+import getMeta from '../../../../utils/meta'
 
 type GroupSubscriptionMembershipProps = {
   subscription: MemberGroupSubscription

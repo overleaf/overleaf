@@ -153,15 +153,15 @@ build_test_frontend_ct:
 	COMPOSE_PROJECT_NAME=frontend_test_ct_editor_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) build test_frontend_ct
 
 test_frontend_ct_core: export CYPRESS_RESULTS=./cypress/results/core
-test_frontend_ct_core: export CYPRESS_SPEC_PATTERN=./{test,modules/**/test}/frontend/**/*.spec.{js,ts,tsx}
-test_frontend_ct_core: export CYPRESS_EXCLUDE_SPEC_PATTERN=./test/frontend/features/source-editor/**/*.spec.{js,ts,tsx}
+test_frontend_ct_core: export CYPRESS_SPEC_PATTERN=./{test,modules/**/test}/frontend/**/*.spec.{js,jsx,ts,tsx}
+test_frontend_ct_core: export CYPRESS_EXCLUDE_SPEC_PATTERN=./test/frontend/features/source-editor/**/*.spec.{js,jsx,ts,tsx}
 test_frontend_ct_core:
 	COMPOSE_PROJECT_NAME=frontend_test_ct_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
 	COMPOSE_PROJECT_NAME=frontend_test_ct_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm test_frontend_ct
 	COMPOSE_PROJECT_NAME=frontend_test_ct_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
 
 test_frontend_ct_editor: export CYPRESS_RESULTS=./cypress/results/editor
-test_frontend_ct_editor: export CYPRESS_SPEC_PATTERN=./test/frontend/features/source-editor/**/*.spec.{js,ts,tsx}
+test_frontend_ct_editor: export CYPRESS_SPEC_PATTERN=./test/frontend/features/source-editor/**/*.spec.{js,jsx,ts,tsx}
 test_frontend_ct_editor:
 	COMPOSE_PROJECT_NAME=frontend_test_ct_editor_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
 	COMPOSE_PROJECT_NAME=frontend_test_ct_editor_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm test_frontend_ct
@@ -410,17 +410,17 @@ $(WITH_NODE_MODULES_PATH): export PATH=$(NODE_MODULES_PATH)
 lint: lint_backend
 lint_backend:
 	npx eslint \
-		'app.{js,mjs,ts,tsx}' \
-		'app/**/*.{js,mjs,ts,tsx}' \
-		'modules/*/index.{js,mjs,ts,tsx}' \
-		'modules/*/app/**/*.{js,mjs,ts,tsx}' \
+		'app.{js,jsx,mjs,ts,tsx}' \
+		'app/**/*.{js,jsx,mjs,ts,tsx}' \
+		'modules/*/index.{js,jsx,mjs,ts,tsx}' \
+		'modules/*/app/**/*.{js,jsx,mjs,ts,tsx}' \
 		--max-warnings=0
 
 lint: lint_frontend
 lint_frontend:
 	npx eslint \
-		'frontend/**/*.{js,mjs,ts,tsx}' \
-		'modules/**/frontend/**/*.{js,mjs,ts,tsx}' \
+		'frontend/**/*.{js,jsx,mjs,ts,tsx}' \
+		'modules/**/frontend/**/*.{js,jsx,mjs,ts,tsx}' \
 		--max-warnings=0
 
 lint: lint_test
@@ -428,34 +428,34 @@ lint_test: lint_test_app
 lint_test_app: lint_test_app_unit
 lint_test_app_unit:
 	npx eslint \
-		'test/unit/**/*.{js,mjs,ts,tsx}' \
+		'test/unit/**/*.{js,jsx,mjs,ts,tsx}' \
 		--max-warnings=0
 
 lint_test_app: lint_test_app_rest
 lint_test_app_rest:
 	npx eslint \
-		'test/**/*.{js,mjs,ts,tsx}' \
-		--ignore-pattern 'test/unit/**/*.{js,mjs,ts,tsx}' \
+		'test/**/*.{js,jsx,mjs,ts,tsx}' \
+		--ignore-pattern 'test/unit/**/*.{js,jsx,mjs,ts,tsx}' \
 		--max-warnings=0
 
 lint_test: lint_test_modules
 lint_test_modules:
 	npx eslint \
-		'modules/*/test/**/*.{js,mjs,ts,tsx}' \
+		'modules/*/test/**/*.{js,jsx,mjs,ts,tsx}' \
 		--max-warnings=0
 
 lint: lint_misc
 # migrations, scripts, webpack config, karma config
 lint_misc:
 	npx eslint . \
-		--ignore-pattern 'app.{js,mjs,ts,tsx}' \
-		--ignore-pattern 'app/**/*.{js,mjs,ts,tsx}' \
-		--ignore-pattern 'modules/*/app/**/*.{js,mjs,ts,tsx}' \
-		--ignore-pattern 'modules/*/index.{js,mjs,ts,tsx}' \
-		--ignore-pattern 'frontend/**/*.{js,mjs,ts,tsx}' \
-		--ignore-pattern 'modules/**/frontend/**/*.{js,mjs,ts,tsx}' \
-		--ignore-pattern 'test/**/*.{js,mjs,ts,tsx}' \
-		--ignore-pattern 'modules/*/test/**/*.{js,mjs,ts,tsx}' \
+		--ignore-pattern 'app.{js,jsx,mjs,ts,tsx}' \
+		--ignore-pattern 'app/**/*.{js,jsx,mjs,ts,tsx}' \
+		--ignore-pattern 'modules/*/app/**/*.{js,jsx,mjs,ts,tsx}' \
+		--ignore-pattern 'modules/*/index.{js,jsx,mjs,ts,tsx}' \
+		--ignore-pattern 'frontend/**/*.{js,jsx,mjs,ts,tsx}' \
+		--ignore-pattern 'modules/**/frontend/**/*.{js,jsx,mjs,ts,tsx}' \
+		--ignore-pattern 'test/**/*.{js,jsx,mjs,ts,tsx}' \
+		--ignore-pattern 'modules/*/test/**/*.{js,jsx,mjs,ts,tsx}' \
 		--max-warnings=0
 
 lint: lint_pug

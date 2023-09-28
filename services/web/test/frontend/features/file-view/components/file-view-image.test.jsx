@@ -1,7 +1,7 @@
 import { screen } from '@testing-library/react'
 
 import { renderWithEditorContext } from '../../../helpers/render-with-context'
-import FileViewImage from '../../../../../frontend/js/features/file-view/components/file-view-image.js'
+import FileViewImage from '../../../../../frontend/js/features/file-view/components/file-view-image'
 
 describe('<FileViewImage />', function () {
   const file = {

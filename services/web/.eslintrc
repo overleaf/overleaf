@@ -112,7 +112,7 @@
     },
     {
       // Cypress specific rules
-      "files": ["cypress/**/*.{js,ts,tsx}", "**/test/frontend/**/*.spec.{js,ts,tsx}"],
+      "files": ["cypress/**/*.{js,jsx,ts,tsx}", "**/test/frontend/**/*.spec.{js,jsx,ts,tsx}"],
       "extends": [
         "plugin:cypress/recommended"
       ]
@@ -120,7 +120,7 @@
     {
       // React component specific rules
       //
-      "files": ["**/frontend/js/**/components/**/*.{js,ts,tsx}", "**/frontend/js/**/hooks/**/*.{js,ts,tsx}"],
+      "files": ["**/frontend/js/**/components/**/*.{js,jsx,ts,tsx}", "**/frontend/js/**/hooks/**/*.{js,jsx,ts,tsx}"],
       "rules": {
         // https://astexplorer.net/
         "no-restricted-syntax": [
@@ -150,15 +150,12 @@
     },
     {
       // Frontend specific rules
-      "files": ["**/frontend/js/**/*.{js,ts,tsx}", "**/frontend/stories/**/*.{js,ts,tsx}", "**/*.stories.{js,ts,tsx}", "**/test/frontend/**/*.{js,ts,tsx}", "**/test/frontend/components/**/*.spec.{js,ts,tsx}"],
+      "files": ["**/frontend/js/**/*.{js,jsx,ts,tsx}", "**/frontend/stories/**/*.{js,jsx,ts,tsx}", "**/*.stories.{js,jsx,ts,tsx}", "**/test/frontend/**/*.{js,jsx,ts,tsx}", "**/test/frontend/components/**/*.spec.{js,jsx,ts,tsx}"],
       "env": {
         "browser": true
       },
       "parserOptions": {
-        "sourceType": "module",
-        "ecmaFeatures": {
-          "jsx": true
-        }
+        "sourceType": "module"
       },
       "plugins": [
         "jsx-a11y"
@@ -233,7 +230,12 @@
               ]
             }
           }
-        ]
+        ],
+
+        // Require .jsx or .tsx file extension when using JSX
+        "react/jsx-filename-extension": ["error", {
+          "extensions": [".jsx", ".tsx"]
+        }]
       }
     },
     // React + TypeScript-specific rules
@@ -277,13 +279,13 @@
         "**/app/**/*.{js,cjs,mjs}", "app.js", "modules/*/*.js",
         // Frontend: Prefer debugConsole over bare console
         //           Docs: https://manual.dev-overleaf.com/development/code/logging/#frontend
-        "**/frontend/**/*.{js,ts,tsx}"
+        "**/frontend/**/*.{js,jsx,ts,tsx}"
       ],
       "excludedFiles": [
         // Allow console logs in scripts
         "**/scripts/**/*.js",
         // Allow console logs in stories
-        "**/stories/**/*.{js,ts,tsx}",
+        "**/stories/**/*.{js,jsx,ts,tsx}",
         // Workers do not have access to the search params for enabling ?debug=true.
         // self.location.url is the URL of the worker script.
         "*.worker.{js,ts}"
