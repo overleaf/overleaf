@@ -77,14 +77,15 @@ export default function CreateTagModal({
       <Modal.Body>
         <Form name="createTagForm" onSubmit={handleSubmit}>
           <FormGroup>
+            <label htmlFor="new-tag-form-name">{t('new_tag_name')}</label>
             <input
-              ref={autoFocusedRef}
               className="form-control"
-              type="text"
-              placeholder={t('new_tag_name')}
+              id="new-tag-form-name"
               name="new-tag-form-name"
-              required
               onChange={e => setTagName(e.target.value)}
+              ref={autoFocusedRef}
+              required
+              type="text"
             />
           </FormGroup>
           <FormGroup aria-hidden="true">

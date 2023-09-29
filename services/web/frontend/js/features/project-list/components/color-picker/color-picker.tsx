@@ -23,16 +23,30 @@ type ColorPickerItemProps = {
 
 function ColorPickerItem({ color }: ColorPickerItemProps) {
   const { selectColor, selectedColor, pickingCustomColor } = useSelectColor()
+  const { t } = useTranslation()
+  const labelId = `color-picker-item-label-${color.replace('#', '')}`
+
+  function handleKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      selectColor(color)
+    }
+  }
 
   return (
     /* eslint-disable-next-line jsx-a11y/click-events-have-key-events,
       jsx-a11y/no-static-element-interactions, jsx-a11y/interactive-supports-focus */
     <div
+      aria-labelledby={labelId}
       className="color-picker-item"
+      onClick={() => selectColor(color)}
       role="button"
       style={{ backgroundColor: color }}
-      onClick={() => selectColor(color)}
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
     >
+      <span id={labelId} className="sr-only">
+        {t('select_color', { color })}
+      </span>
       {!pickingCustomColor && color === selectedColor && (
         <Icon type="check" className="color-picker-item-icon" />
       )}
@@ -41,7 +55,6 @@ function ColorPickerItem({ color }: ColorPickerItemProps) {
 }
 
 function MoreButton() {
-  const { t } = useTranslation()
   const {
     selectedColor,
     selectColor,
@@ -51,6 +64,7 @@ function MoreButton() {
     setPickingCustomColor,
   } = useSelectColor()
   const [localColor, setLocalColor] = useState<string>()
+  const { t } = useTranslation()
 
   useEffect(() => {
     setLocalColor(selectedColor)
@@ -58,6 +72,12 @@ function MoreButton() {
 
   const isCustomColorSelected =
     localColor && !PRESET_COLORS.includes(localColor)
+
+  function handleKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      showCustomPicker ? closeCustomPicker() : openCustomPicker()
+    }
+  }
 
   return (
     <div className="color-picker-more-wrapper" data-content="My Content">
@@ -72,6 +92,8 @@ function MoreButton() {
             ? localColor || selectedColor
             : 'white',
         }}
+        tabIndex={0}
+        onKeyDown={handleKeyDown}
       >
         <Tooltip
           id="tooltip-color-picker-plus"
