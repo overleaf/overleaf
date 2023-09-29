@@ -76,9 +76,9 @@ export default function BackToSchoolModal() {
 
   return (
     <AccessibleModal show={showModal} onHide={handleHide}>
-      <Modal.Header closeButton>
-        <Modal.Title>
-          {t('back_to_school_modal_bargain_with_x_percent_off', { x: '15' })}
+      <Modal.Header style={{ borderBottom: 'none' }} closeButton>
+        <Modal.Title style={{ fontSize: '20px' }}>
+          {t('back_to_school_bargain_for_everyone')}
         </Modal.Title>
       </Modal.Header>
       <Modal.Body className="modal-body-share">
@@ -91,10 +91,11 @@ export default function BackToSchoolModal() {
             }}
           />
         </p>
+        <strong style={{ fontSize: '20px' }}>
+          {t('back_to_school_banner_x_percent_off', { x: '15' })}
+        </strong>
         <p>{t('back_to_school_modal_offers_from_writefull_and_papers')}</p>
-        <p>
-          <strong>{t('back_to_school_modal_offer_ends_sep_30')}</strong>
-        </p>
+        <p>{t('back_to_school_banner_extended_offer_oct_15')}</p>
       </Modal.Body>
       <Modal.Footer>
         <Button bsStyle="default" onClick={handleMaybeLater}>
