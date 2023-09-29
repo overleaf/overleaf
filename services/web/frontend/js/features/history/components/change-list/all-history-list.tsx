@@ -103,10 +103,13 @@ function AllHistoryList() {
   const { completedTutorials, setCompletedTutorial }: EditorTutorials =
     useEditorContext()
 
-  // only show tutorial popover if they haven't dismissed ("completed") it yet
-  const showTutorial = !completedTutorials?.['react-history-buttons-tutorial']
+  const [showPopover, setShowPopover] = useState(() => {
+    // only show tutorial popover if they haven't dismissed ("completed") it yet
+    return !completedTutorials?.['react-history-buttons-tutorial']
+  })
 
   const completeTutorial = useCallback(() => {
+    setShowPopover(false)
     setCompletedTutorial('react-history-buttons-tutorial')
   }, [setCompletedTutorial])
 
@@ -116,7 +119,6 @@ function AllHistoryList() {
 
   // wait for the layout to settle before showing popover, to avoid a flash/ instant move
   const [layoutSettled, setLayoutSettled] = useState(false)
-  const [resizing, setResizing] = useState(false)
 
   // When there is a paywall and only two version's to compare,
   // they are not comparable because the one that has a paywall will not have the compare button
@@ -127,12 +129,17 @@ function AllHistoryList() {
   const isMoreThanOneVersion = visibleUpdates.length > 1
   let popover = null
 
+  // hiding is different from dismissing, as we wont save a full dismissal to the user
+  // meaning the tutorial will show on page reload/ re-navigation
+  const hidePopover = () => {
+    completeTutorial()
+  }
+
   if (
     isMoreThanOneVersion &&
+    showPopover &&
     !isPaywallAndNonComparable &&
-    showTutorial &&
-    layoutSettled &&
-    !resizing
+    layoutSettled
   ) {
     const dismissModal = () => {
       completeTutorial()
@@ -142,7 +149,9 @@ function AllHistoryList() {
     popover = (
       <Overlay
         placement="left"
-        show
+        show={showPopover}
+        rootClose
+        onHide={hidePopover}
         // using scrollerRef to position the popover in the middle of the viewport
         target={scrollerRef.current ?? undefined}
         shouldUpdatePosition
@@ -183,29 +192,11 @@ function AllHistoryList() {
     return () => clearTimeout(timer)
   }, [setLayoutSettled])
 
+  // resizes can cause the popover to point to the wrong thing, since it changes the horizontal layout of the page
   useEffect(() => {
-    let timer: number | null = null
-
-    const handleResize = () => {
-      // Hide popover when a resize starts, then waiting for a gap of 500ms
-      // with no resizes before making it reappear
-      if (timer) {
-        window.clearTimeout(timer)
-      } else {
-        setResizing(true)
-      }
-      timer = window.setTimeout(() => {
-        timer = null
-        setResizing(false)
-      }, 500)
-    }
-
-    // only need a listener on the component that actually has the popover
-    if (showTutorial) {
-      window.addEventListener('resize', handleResize)
-      return () => window.removeEventListener('resize', handleResize)
-    }
-  }, [showTutorial])
+    window.addEventListener('resize', hidePopover)
+    return () => window.removeEventListener('resize', hidePopover)
+  })
 
   return (
     <div ref={scrollerRef} className="history-all-versions-scroller">
