@@ -54,6 +54,10 @@ describe('autocomplete', { scrollBehavior: false }, function () {
             _id: 'test-image-file',
             name: 'frog.jpg',
           },
+          {
+            _id: 'uppercase-extension-image-file',
+            name: 'frog.JPG',
+          },
         ],
       },
     ]
@@ -191,8 +195,8 @@ describe('autocomplete', { scrollBehavior: false }, function () {
       .type('{ctrl+ }')
 
     cy.findAllByRole('listbox').should('have.length', 1)
-    cy.findByRole('listbox').contains('frog.jpg').click()
-    activeEditorLine().should('have.text', '\\includegraphics[]{frog.jpg}')
+    cy.findByRole('listbox').contains('frog.JPG').click()
+    activeEditorLine().should('have.text', '\\includegraphics[]{frog.JPG}')
   })
 
   it('opens autocomplete on begin environment', function () {

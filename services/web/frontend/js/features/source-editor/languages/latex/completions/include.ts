@@ -59,7 +59,7 @@ export function buildIncludeCompletions(
     }
 
     // TODO: a better list of graphics extensions?
-    if (/\.(eps|jpe?g|gif|png|tiff?|pdf|svg)$/.test(path)) {
+    if (/\.(eps|jpe?g|gif|png|tiff?|pdf|svg)$/i.test(path)) {
       // path parameter for \includegraphics{path}
       completions.graphics.push({
         type: 'file',
