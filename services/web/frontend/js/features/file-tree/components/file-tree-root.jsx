@@ -75,7 +75,6 @@ function FileTreeRootFolder() {
         files={fileTreeData.fileRefs}
         classes={{ root: 'file-tree-list' }}
         dropRef={dropRef}
-        isOver={isOver}
         dataTestId="file-tree-list-root"
       />
     </>

@@ -16,14 +16,6 @@ function FileTreeDraggablePreviewLayer({ isOver }) {
   }))
   const ref = useRef()
 
-  const containerOffset = ref.current
-    ? ref.current.getBoundingClientRect()
-    : null
-
-  if (!isDragging || !item.title) {
-    return null
-  }
-
   return (
     <div
       ref={ref}
@@ -31,9 +23,16 @@ function FileTreeDraggablePreviewLayer({ isOver }) {
         'dnd-droppable-hover': isOver,
       })}
     >
-      <div style={getItemStyle(clientOffset, containerOffset)}>
-        <DraggablePreviewItem title={item.title} />
-      </div>
+      {isDragging && item?.title && (
+        <div
+          style={getItemStyle(
+            clientOffset,
+            ref.current?.getBoundingClientRect()
+          )}
+        >
+          <DraggablePreviewItem title={item.title} />
+        </div>
+      )}
     </div>
   )
 }
