@@ -31,7 +31,7 @@ export const ConfigurationModalLoadingError = (
   return <SSOConfigurationModal {...args} />
 }
 
-export const ConfigurationModal = (args: SSOConfigurationModalProps) => {
+export const ConfigurationModalFilled = (args: SSOConfigurationModalProps) => {
   useMeta({ 'ol-groupId': '123' })
   useFetchMock(fetchMock => {
     fetchMock.get('express:/manage/groups/:id/settings/sso', config, {
@@ -77,7 +77,7 @@ export const ConfigurationModalSaveError = (
 }
 
 export default {
-  title: 'Subscription / SSO',
+  title: 'Subscription / SSO / Configuration Modal',
   component: SSOConfigurationModal,
   args: {
     show: true,
