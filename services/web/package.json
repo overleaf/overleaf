@@ -18,7 +18,7 @@
     "test:karma": "karma start",
     "test:karma:single": "karma start --no-auto-watch --single-run",
     "start": "node $NODE_APP_OPTIONS app.js",
-    "nodemon": "nodemon $NODE_APP_OPTIONS --config nodemon.json",
+    "nodemon": "node --watch $NODE_APP_OPTIONS app.js --watch-locales",
     "webpack": "webpack serve --config webpack.config.dev.js",
     "webpack:production": "webpack --config webpack.config.prod.js",
     "webpack:profile": "webpack --config webpack.config.prod.js --profile --json > stats.json",

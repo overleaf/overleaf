@@ -31,6 +31,14 @@ if (!availableLanguageCodes.includes(fallbackLanguageCode)) {
   availableLanguageCodes.push(fallbackLanguageCode)
 }
 
+// The "node --watch" flag is not easy to detect.
+if (process.argv.includes('--watch-locales')) {
+  // Dummy imports for setting up watching of locales files.
+  for (const lngCode of availableLanguageCodes) {
+    require(`../../../locales/${lngCode}.json`)
+  }
+}
+
 i18n
   .use(fsBackend)
   .use(middleware.LanguageDetector)

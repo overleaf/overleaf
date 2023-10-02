@@ -8,7 +8,7 @@
     "start": "node $NODE_APP_OPTIONS app.js",
     "test:acceptance": "npm run test:acceptance:_run -- --grep=$MOCHA_GREP",
     "test:unit": "npm run test:unit:_run -- --grep=$MOCHA_GREP",
-    "nodemon": "nodemon --config nodemon.json",
+    "nodemon": "node --watch $NODE_APP_OPTIONS app.js",
     "test:acceptance:_run": "mocha --recursive --reporter spec --timeout 15000 --exit $@ test/acceptance/js",
     "test:unit:_run": "mocha --recursive --reporter spec $@ test/unit/js",
     "lint": "eslint --max-warnings 0 --format unix .",

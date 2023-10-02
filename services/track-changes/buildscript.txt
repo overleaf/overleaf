@@ -4,7 +4,6 @@ track-changes
 --env-add=AWS_BUCKET=bucket
 --env-pass-through=
 --esmock-loader=False
---has-custom-nodemon=True
 --node-version=18.18.0
 --public-repo=True
---script-version=4.3.0
+--script-version=4.4.0

@@ -4,8 +4,7 @@ object-persistor
 --env-add=
 --env-pass-through=
 --esmock-loader=False
---has-custom-nodemon=False
 --is-library=True
 --node-version=18.18.0
 --public-repo=False
---script-version=4.3.0
+--script-version=4.4.0
