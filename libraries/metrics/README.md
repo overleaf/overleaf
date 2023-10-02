@@ -25,7 +25,6 @@ The metrics module can be configured through the following environment variables
 
 - `DEBUG_METRICS` - enables display of debugging messages to the console.
 - `ENABLE_TRACE_AGENT` - enables @google-cloud/trace-agent on Google Cloud
-- `ENABLE_DEBUG_AGENT` - enables @google-cloud/debug-agent on Google Cloud
 - `ENABLE_PROFILE_AGENT` - enables @google-cloud/profiler on Google Cloud
 - `METRICS_COMPRESSION_LEVEL` - sets the [compression level](https://www.npmjs.com/package/compression#level) for `/metrics`
 - `STACKDRIVER_LOGGING` - toggles the request logging format

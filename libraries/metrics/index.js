@@ -51,19 +51,6 @@ function initialize(appName, opts = {}) {
     traceAgent.start(traceOpts)
   }
 
-  console.log(`ENABLE_DEBUG_AGENT set to ${process.env.ENABLE_DEBUG_AGENT}`)
-  if (process.env.ENABLE_DEBUG_AGENT === 'true') {
-    console.log('starting google debug agent')
-    const debugAgent = require('@google-cloud/debug-agent')
-    debugAgent.start({
-      allowExpressions: true,
-      serviceContext: {
-        service: appName,
-        version: process.env.BUILD_VERSION,
-      },
-    })
-  }
-
   console.log(`ENABLE_PROFILE_AGENT set to ${process.env.ENABLE_PROFILE_AGENT}`)
   if (process.env.ENABLE_PROFILE_AGENT === 'true') {
     console.log('starting google profile agent')
