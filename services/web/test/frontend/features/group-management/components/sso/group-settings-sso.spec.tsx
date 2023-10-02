@@ -1,9 +1,9 @@
-import GroupSettingsSSO from '../../../../../../modules/managed-users/frontend/js/components/sso/group-settings-sso'
+import GroupSettingsSSORoot from '../../../../../../modules/managed-users/frontend/js/components/sso/group-settings-sso-root'
 
 function GroupSettingsSSOComponent() {
   return (
     <div style={{ padding: '25px', width: '600px' }}>
-      <GroupSettingsSSO managedUsersEnabled />
+      <GroupSettingsSSORoot managedUsersEnabled />
     </div>
   )
 }
@@ -24,8 +24,6 @@ describe('GroupSettingsSSO', function () {
     cy.get('.group-settings-sso').within(() => {
       cy.contains('Single Sign-On (SSO)')
       cy.contains('Enable SSO')
-      cy.contains('SSO configuration')
-      cy.findByRole('button', { name: 'Configure SSO' })
     })
   })
 
@@ -113,6 +111,17 @@ describe('GroupSettingsSSO', function () {
         cy.intercept('POST', `/manage/groups/${GROUP_ID}/settings/enableSSO`, {
           statusCode: 200,
         }).as('enableSSO')
+
+        cy.intercept('GET', `/manage/groups/${GROUP_ID}/settings/sso`, {
+          statusCode: 200,
+          body: {
+            entryPoint: 'entrypoint',
+            certificate: 'cert',
+            signatureAlgorithm: 'sha1',
+            userIdAttribute: 'email',
+            enabled: true,
+          },
+        }).as('sso')
 
         cy.get('.modal-dialog').within(() => {
           cy.findByRole('button', { name: 'Enable SSO' }).click()
