@@ -1,0 +1,90 @@
+#ide-react-page {
+  height: 100vh;
+}
+
+.ide-react-main {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .toolbar.toolbar-header {
+    position: static;
+    flex-grow: 0;
+    color: var(--neutral-20);
+  }
+}
+
+.ide-react-body {
+  flex-grow: 1;
+}
+
+.horizontal-resize-handle {
+  width: @ui-resizer-size !important;
+  height: 100%;
+
+  // Enable ::before and ::after pseudo-elements to position themselves correctly
+  position: relative;
+
+  background-color: @editor-resizer-bg-color;
+
+  .custom-toggler {
+    padding: 0;
+    border-width: 0;
+  }
+
+  &::before,
+  &::after {
+    // This SVG has the colour hard-coded to the current value of @ol-blue-gray-2, so if we changed @ol-blue-gray-2,
+    // we'd have to change this SVG too
+    content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='18' viewBox='0 0 7 18'%3E%3Cpath d='M2 0h3v3H2zM2 5h3v3H2zM2 10h3v3H2zM2 15h3v3H2z' style='fill:%239da7b7'/%3E%3C/svg%3E");
+    display: block;
+    position: absolute;
+    text-align: center;
+    left: 0;
+    width: 7px;
+    height: 18px;
+  }
+  &::before {
+    top: 25%;
+  }
+  &::after {
+    top: 75%;
+  }
+}
+
+.vertical-resize-handle {
+  height: 6px;
+  background-color: @vertical-resizable-resizer-bg;
+
+  &:hover {
+    background-color: @vertical-resizable-resizer-hover-bg;
+  }
+
+  &::after {
+    // This SVG has the colour hard-coded to the current value of @ol-blue-gray-2, so if we changed @ol-blue-gray-2,
+    // we'd have to change this SVG too
+    content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='6' viewBox='0 0 18 6'%3E%3Cpath d='M0 1.5h3v3H0zM5 1.5h3v3H5zM10 1.5h3v3h-3zM15 1.5h3v3h-3z' style='fill:%239da7b7'/%3E%3C/svg%3E");
+    display: block;
+    text-align: center;
+    line-height: 0;
+  }
+}
+
+// Styles for placeholder elements that will eventually be replaced
+.ide-react-placeholder-chat {
+  background-color: var(--editor-toolbar-bg);
+  color: var(--neutral-20);
+  height: 100%;
+}
+
+.ide-react-placeholder-editor-sidebar {
+  height: 100%;
+  background-color: @file-tree-bg;
+  color: var(--neutral-20);
+}
+
+.ide-react-placeholder-symbol-palette {
+  height: 100%;
+  background-color: @symbol-palette-bg;
+  color: var(--neutral-20);
+}

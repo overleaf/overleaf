@@ -873,9 +873,14 @@ const ProjectController = {
               !Features.hasFeature('saas') ||
               req.query?.personal_access_token === 'true'
 
+            const idePageReact = req.query?.['ide-page'] === 'react'
+
             const template =
               detachRole === 'detached'
-                ? 'project/editor_detached'
+                ? // TODO: Create React version of detached page
+                  'project/editor_detached'
+                : idePageReact
+                ? 'project/ide-react'
                 : 'project/editor'
 
             res.render(template, {

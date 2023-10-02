@@ -1,0 +1,21 @@
+extends ../layout
+
+block vars
+	- var suppressNavbar = true
+	- var suppressFooter = true
+	- var suppressSkipToContent = true
+	- metadata.robotsNoindexNofollow = true
+
+block entrypointVar
+	- entrypoint = 'pages/ide'
+
+block content
+	main#ide-root
+
+block append meta
+	include ./editor/meta
+
+block prepend foot-scripts
+	each file in (useOpenTelemetry ? entrypointScripts("tracing") : [])
+		script(type="text/javascript", nonce=scriptNonce, src=file)
+	script(type="text/javascript", nonce=scriptNonce, src=(wsUrl || '/socket.io') + '/socket.io.js')

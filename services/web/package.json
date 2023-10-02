@@ -330,6 +330,7 @@
     "react-refresh": "^0.14.0",
     "react2angular": "^4.0.6",
     "react2angular-shared-context": "^1.1.0",
+    "react-resizable-panels": "^0.0.55",
     "requirejs": "^2.3.6",
     "samlp": "^7.0.2",
     "sandboxed-module": "overleaf/node-sandboxed-module#cafa2d60f17ce75cc023e6f296eb8de79d92d35d",
