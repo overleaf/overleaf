@@ -1,10 +1,7 @@
-import { memo, useCallback, useState } from 'react'
+import { memo, useCallback } from 'react'
 import Notification from './notification'
 import { sendMB } from '../../../../infrastructure/event-tracking'
-import getMeta from '../../../../utils/meta'
 import customLocalStorage from '../../../../infrastructure/local-storage'
-
-const STORAGE_KEY = 'has_dismissed_writefull_promo_banner'
 
 const eventSegmentation = {
   location: 'dashboard-banner',
@@ -12,39 +9,30 @@ const eventSegmentation = {
   name: 'writefull',
 }
 
-const isChromium = () =>
-  (window.navigator as any).userAgentData?.brands?.some(
-    (item: { brand: string }) => item.brand === 'Chromium'
-  )
-
-function WritefullPromoBanner() {
-  const [show, setShow] = useState(() => {
-    const show =
-      getMeta('ol-showWritefullPromoBanner') &&
-      !customLocalStorage.getItem(STORAGE_KEY)
-
-    if (show) {
-      sendMB('promo-prompt', eventSegmentation)
-    }
-
-    return show
-  })
-
+function WritefullPromoBanner({
+  show,
+  setShow,
+  onDismiss,
+}: {
+  show: boolean
+  setShow: (value: boolean) => void
+  onDismiss: () => void
+}) {
   const handleOpenLink = useCallback(() => {
     sendMB('promo-click', eventSegmentation)
   }, [])
 
   const handleClose = useCallback(() => {
-    customLocalStorage.setItem(STORAGE_KEY, new Date())
+    customLocalStorage.setItem(
+      'has_dismissed_writefull_promo_banner',
+      new Date()
+    )
     setShow(false)
     sendMB('promo-dismiss', eventSegmentation)
-  }, [])
+    onDismiss()
+  }, [setShow, onDismiss])
 
   if (!show) {
-    return null
-  }
-
-  if (!isChromium()) {
     return null
   }
 

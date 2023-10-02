@@ -1,4 +1,4 @@
-import { JSXElementConstructor } from 'react'
+import { JSXElementConstructor, useState } from 'react'
 import Common from './groups/common'
 import Institution from './groups/institution'
 import ConfirmEmail from './groups/confirm-email'
@@ -10,6 +10,13 @@ import LATAMBanner from './ads/latam-banner'
 import getMeta from '../../../../utils/meta'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
 import BackToSchoolModal from './ads/back-to-school-modal'
+import customLocalStorage from '../../../../infrastructure/local-storage'
+import { sendMB } from '../../../../infrastructure/event-tracking'
+
+const isChromium = () =>
+  (window.navigator as any).userAgentData?.brands?.some(
+    (item: { brand: string }) => item.brand === 'Chromium'
+  )
 
 type Subscription = {
   groupId: string
@@ -41,6 +48,24 @@ function UserNotifications() {
   )
   const showLATAMBanner = getMeta('ol-showLATAMBanner', false)
 
+  // Temporary workaround to prevent also showing groups/enterprise banner
+  const [showWritefull, setShowWritefull] = useState(() => {
+    if (isChromium()) {
+      const show =
+        getMeta('ol-showWritefullPromoBanner') &&
+        !customLocalStorage.getItem('has_dismissed_writefull_promo_banner')
+      if (show) {
+        sendMB('promo-prompt', {
+          location: 'dashboard-banner',
+          page: '/project',
+          name: 'writefull',
+        })
+      }
+      return show
+    }
+  })
+  const [dismissedWritefull, setDismissedWritefull] = useState(false)
+
   return (
     <div className="user-notifications">
       <ul className="list-unstyled">
@@ -56,6 +81,10 @@ function UserNotifications() {
         <Institution />
         <ConfirmEmail />
         <ReconfirmationInfo />
+        {!showLATAMBanner &&
+          !showInrGeoBanner &&
+          !showWritefull &&
+          !dismissedWritefull && <GroupsAndEnterpriseBanner />}
         {showLATAMBanner ? (
           <LATAMBanner />
         ) : showInrGeoBanner ? (
@@ -63,13 +92,17 @@ function UserNotifications() {
             variant={inrGeoBannerVariant}
             splitTestName={inrGeoBannerSplitTestName}
           />
-        ) : (
-          <GroupsAndEnterpriseBanner />
-        )}
+        ) : null}
         {showBackToSchoolModal ? (
           <BackToSchoolModal />
         ) : (
-          <WritefullPromoBanner />
+          <WritefullPromoBanner
+            show={showWritefull}
+            setShow={setShowWritefull}
+            onDismiss={() => {
+              setDismissedWritefull(true)
+            }}
+          />
         )}
       </ul>
     </div>
