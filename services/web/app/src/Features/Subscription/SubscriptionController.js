@@ -1,6 +1,5 @@
 const SessionManager = require('../Authentication/SessionManager')
 const SubscriptionHandler = require('./SubscriptionHandler')
-const PlansLocator = require('./PlansLocator')
 const SubscriptionViewModelBuilder = require('./SubscriptionViewModelBuilder')
 const LimitationsManager = require('./LimitationsManager')
 const RecurlyWrapper = require('./RecurlyWrapper')
@@ -13,9 +12,6 @@ const plansConfig = require('./plansConfig')
 const interstitialPaymentConfig = require('./interstitialPaymentConfig')
 const GroupPlansData = require('./GroupPlansData')
 const V1SubscriptionManager = require('./V1SubscriptionManager')
-const Errors = require('../Errors/Errors')
-const HttpErrorHandler = require('../Errors/HttpErrorHandler')
-const SubscriptionErrors = require('./Errors')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const RecurlyEventHandler = require('./RecurlyEventHandler')
 const { expressify } = require('../../util/promises')
@@ -23,8 +19,6 @@ const OError = require('@overleaf/o-error')
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const SubscriptionHelper = require('./SubscriptionHelper')
 const Features = require('../../infrastructure/Features')
-const UserGetter = require('../User/UserGetter')
-const Modules = require('../../infrastructure/Modules')
 const AuthorizationManager = require('../Authorization/AuthorizationManager')
 
 const groupPlanModalOptions = Settings.groupPlanModalOptions
@@ -185,83 +179,6 @@ async function plansPage(req, res) {
     showBackToSchoolBanner,
     annualTrialsAssignment: annualTrialsAssignment?.variant,
     showNewCompileTimeoutVariant,
-  })
-}
-
-/**
- * @param {import('express').Request} req
- * @param {import('express').Response} res
- * @returns {Promise<void>}
- */
-async function paymentPage(req, res) {
-  const user = SessionManager.getSessionUser(req.session)
-  const plan = PlansLocator.findLocalPlanInSettings(req.query.planCode)
-  if (!plan) {
-    return HttpErrorHandler.unprocessableEntity(req, res, 'Plan not found')
-  }
-  const hasSubscription =
-    await LimitationsManager.promises.userHasV1OrV2Subscription(user)
-  if (hasSubscription) {
-    res.redirect('/user/subscription?hasSubscription=true')
-  } else {
-    // LimitationsManager.userHasV2Subscription only checks Mongo. Double check with
-    // Recurly as well at this point (we don't do this most places for speed).
-    const valid =
-      await SubscriptionHandler.promises.validateNoSubscriptionInRecurly(
-        user._id
-      )
-    if (!valid) {
-      res.redirect('/user/subscription?hasSubscription=true')
-    } else {
-      let currency = null
-      if (req.query.currency) {
-        const queryCurrency = req.query.currency.toUpperCase()
-        if (GeoIpLookup.isValidCurrencyParam(queryCurrency)) {
-          currency = queryCurrency
-        }
-      }
-      const { recommendedCurrency, countryCode } =
-        await _getRecommendedCurrency(req, res)
-      if (recommendedCurrency && currency == null) {
-        currency = recommendedCurrency
-      }
-
-      // Block web sales to restricted countries
-      if (Settings.restrictedCountries.includes(countryCode)) {
-        return res.render('subscriptions/restricted-country', {
-          title: 'restricted',
-        })
-      }
-
-      res.render('subscriptions/new-react', {
-        title: 'subscribe',
-        currency,
-        countryCode,
-        plan,
-        planCode: req.query.planCode,
-        couponCode: req.query.cc,
-        showCouponField: !!req.query.scf,
-        itm_campaign: req.query.itm_campaign,
-        itm_content: req.query.itm_content,
-        itm_referrer: req.query.itm_referrer,
-      })
-    }
-  }
-}
-
-async function requireConfirmedPrimaryEmailAddress(req, res, next) {
-  const userData = await UserGetter.promises.getUser(req.user._id, {
-    email: 1,
-    emails: 1,
-  })
-  const userPrimaryEmail = userData.emails.find(
-    emailEntry => emailEntry.email === userData.email
-  )
-  if (userPrimaryEmail?.confirmedAt != null) return next()
-
-  res.status(422).render('subscriptions/unconfirmed-primary-email', {
-    title: 'confirm_email',
-    email: userData.email,
   })
 }
 
@@ -490,78 +407,6 @@ async function interstitialPaymentPage(req, res) {
       showInrGeoBanner,
       showNewCompileTimeoutVariant,
     })
-  }
-}
-
-async function createSubscription(req, res) {
-  const user = SessionManager.getSessionUser(req.session)
-  const recurlyTokenIds = {
-    billing: req.body.recurly_token_id,
-    threeDSecureActionResult:
-      req.body.recurly_three_d_secure_action_result_token_id,
-  }
-  const { subscriptionDetails } = req.body
-
-  const hasSubscription =
-    await LimitationsManager.promises.userHasV1OrV2Subscription(user)
-
-  if (hasSubscription) {
-    logger.warn({ userId: user._id }, 'user already has subscription')
-    return res.sendStatus(409) // conflict
-  }
-
-  const { countryCode } = await _getRecommendedCurrency(req, res)
-
-  // Block web sales to restricted countries
-  if (Settings.restrictedCountries.includes(countryCode)) {
-    return HttpErrorHandler.unprocessableEntity(
-      req,
-      res,
-      req.i18n.translate('sorry_detected_sales_restricted_region', {
-        link: '/contact',
-      })
-    )
-  }
-
-  const result = {}
-  await Modules.promises.hooks.fire(
-    'createSubscription',
-    req,
-    res,
-    user,
-    result
-  )
-  if (result.error) {
-    return HttpErrorHandler.unprocessableEntity(req, res)
-  }
-
-  try {
-    await SubscriptionHandler.promises.createSubscription(
-      user,
-      subscriptionDetails,
-      recurlyTokenIds
-    )
-
-    res.sendStatus(201)
-  } catch (err) {
-    if (
-      err instanceof SubscriptionErrors.RecurlyTransactionError ||
-      err instanceof Errors.InvalidError
-    ) {
-      logger.error({ err }, 'recurly transaction error, potential 422')
-      HttpErrorHandler.unprocessableEntity(
-        req,
-        res,
-        err.message,
-        OError.getFullInfo(err).public
-      )
-    } else {
-      logger.warn(
-        { err, userId: user._id },
-        'something went wrong creating subscription'
-      )
-      throw err
-    }
   }
 }
 
@@ -922,10 +767,8 @@ async function _getRecommendedCurrency(req, res) {
 
 module.exports = {
   plansPage: expressify(plansPage),
-  paymentPage: expressify(paymentPage),
   userSubscriptionPage: expressify(userSubscriptionPage),
   interstitialPaymentPage: expressify(interstitialPaymentPage),
-  createSubscription: expressify(createSubscription),
   successfulSubscription: expressify(successfulSubscription),
   cancelSubscription,
   canceledSubscription,
@@ -941,7 +784,7 @@ module.exports = {
   recurlyNotificationParser,
   refreshUserFeatures: expressify(refreshUserFeatures),
   redirectToHostedPage: expressify(redirectToHostedPage),
-  requireConfirmedPrimaryEmailAddress: expressify(
-    requireConfirmedPrimaryEmailAddress
-  ),
+  promises: {
+    getRecommendedCurrency: _getRecommendedCurrency,
+  },
 }

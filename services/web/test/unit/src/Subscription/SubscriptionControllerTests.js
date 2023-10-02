@@ -5,7 +5,6 @@ const MockRequest = require('../helpers/MockRequest')
 const MockResponse = require('../helpers/MockResponse')
 const modulePath =
   '../../../../app/src/Features/Subscription/SubscriptionController'
-const Errors = require('../../../../app/src/Features/Errors/Errors')
 const SubscriptionErrors = require('../../../../app/src/Features/Subscription/Errors')
 
 const mockSubscriptions = {
@@ -85,7 +84,6 @@ describe('SubscriptionController', function () {
         .returns({ plans: [], planCodesChangingAtTermEnd: [] }),
     }
     this.settings = {
-      restrictedCountries: ['KP'],
       coupon_codes: {
         upgradeToAnnualPromo: {
           student: 'STUDENTCODEHERE',
@@ -305,154 +303,6 @@ describe('SubscriptionController', function () {
     })
   })
 
-  describe('paymentPage', function () {
-    beforeEach(function () {
-      this.req.headers = {}
-      this.SubscriptionHandler.promises.validateNoSubscriptionInRecurly = sinon
-        .stub()
-        .resolves(true)
-      this.GeoIpLookup.promises.getCurrencyCode.resolves({
-        currencyCode: this.stubbedCurrencyCode,
-      })
-    })
-
-    describe('with a user without a subscription', function () {
-      beforeEach(function () {
-        this.LimitationsManager.promises.userHasV1OrV2Subscription.resolves(
-          false
-        )
-        this.PlansLocator.findLocalPlanInSettings.returns({})
-      })
-
-      describe('with a valid plan code', function () {
-        it('should render the new subscription page', function (done) {
-          this.res.render = (page, opts) => {
-            page.should.equal('subscriptions/new-react')
-            done()
-          }
-          this.SubscriptionController.paymentPage(this.req, this.res, done)
-        })
-      })
-    })
-
-    describe('with a user with subscription', function () {
-      it('should redirect to the subscription dashboard', function (done) {
-        this.PlansLocator.findLocalPlanInSettings.returns({})
-        this.LimitationsManager.promises.userHasV1OrV2Subscription.resolves(
-          true
-        )
-        this.res.redirect = url => {
-          url.should.equal('/user/subscription?hasSubscription=true')
-          done()
-        }
-        this.SubscriptionController.paymentPage(this.req, this.res)
-      })
-    })
-
-    describe('with an invalid plan code', function () {
-      it('should return 422 error - Unprocessable Entity', function (done) {
-        this.LimitationsManager.promises.userHasV1OrV2Subscription.resolves(
-          false
-        )
-        this.PlansLocator.findLocalPlanInSettings.returns(null)
-        this.HttpErrorHandler.unprocessableEntity = sinon.spy(
-          (req, res, message) => {
-            expect(req).to.exist
-            expect(res).to.exist
-            expect(message).to.deep.equal('Plan not found')
-            done()
-          }
-        )
-        this.SubscriptionController.paymentPage(this.req, this.res)
-      })
-    })
-
-    describe('which currency to use', function () {
-      beforeEach(function () {
-        this.LimitationsManager.promises.userHasV1OrV2Subscription.resolves(
-          false
-        )
-        this.PlansLocator.findLocalPlanInSettings.returns({})
-      })
-
-      it('should use the set currency from the query string', function (done) {
-        this.req.query.currency = 'EUR'
-        this.res.render = (page, opts) => {
-          opts.currency.should.equal('EUR')
-          opts.currency.should.not.equal(this.stubbedCurrencyCode)
-          done()
-        }
-        this.SubscriptionController.paymentPage(this.req, this.res)
-      })
-
-      it('should upercase the currency code', function (done) {
-        this.req.query.currency = 'eur'
-        this.res.render = (page, opts) => {
-          opts.currency.should.equal('EUR')
-          done()
-        }
-        this.SubscriptionController.paymentPage(this.req, this.res)
-      })
-
-      it('should use the geo ip currency if non is provided', function (done) {
-        this.req.query.currency = null
-        this.res.render = (page, opts) => {
-          opts.currency.should.equal(this.stubbedCurrencyCode)
-          done()
-        }
-        this.SubscriptionController.paymentPage(this.req, this.res)
-      })
-
-      it('should use the geo ip currency if not valid', function (done) {
-        this.req.query.currency = 'WAT'
-        this.GeoIpLookup.isValidCurrencyParam.returns(false)
-        this.res.render = (page, opts) => {
-          opts.currency.should.equal(this.stubbedCurrencyCode)
-          done()
-        }
-        this.SubscriptionController.paymentPage(this.req, this.res)
-      })
-    })
-
-    describe('with a recurly subscription already', function () {
-      it('should redirect to the subscription dashboard', function (done) {
-        this.PlansLocator.findLocalPlanInSettings.returns({})
-        this.LimitationsManager.promises.userHasV1OrV2Subscription.resolves(
-          false
-        )
-        this.SubscriptionHandler.promises.validateNoSubscriptionInRecurly.resolves(
-          false
-        )
-        this.res.redirect = url => {
-          url.should.equal('/user/subscription?hasSubscription=true')
-          done()
-        }
-        this.SubscriptionController.paymentPage(this.req, this.res)
-      })
-    })
-
-    describe('with a user from a restricted country', function () {
-      beforeEach(function () {
-        this.LimitationsManager.promises.userHasV1OrV2Subscription.resolves(
-          false
-        )
-        this.PlansLocator.findLocalPlanInSettings.returns({})
-        this.GeoIpLookup.promises.getCurrencyCode.resolves({
-          currencyCode: this.stubbedCurrencyCode,
-          countryCode: 'KP',
-        })
-      })
-
-      it('should render the restricted country page', function (done) {
-        this.res.render = (page, opts) => {
-          page.should.equal('subscriptions/restricted-country')
-          done()
-        }
-        this.SubscriptionController.paymentPage(this.req, this.res, done)
-      })
-    })
-  })
-
   describe('successfulSubscription', function () {
     it('without a personal subscription', function (done) {
       this.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel.resolves(
@@ -547,128 +397,6 @@ describe('SubscriptionController', function () {
 
     it('should load an empty list of groups with settings available', function () {
       expect(this.data.groupSettingsEnabledFor).to.deep.equal([])
-    })
-  })
-
-  describe('createSubscription', function () {
-    beforeEach(function (done) {
-      this.res = {
-        sendStatus() {
-          done()
-        },
-      }
-      sinon.spy(this.res, 'sendStatus')
-      this.subscriptionDetails = {
-        card: '1234',
-        cvv: '123',
-      }
-      this.recurlyTokenIds = {
-        billing: '1234',
-        threeDSecureActionResult: '5678',
-      }
-      this.req.body.recurly_token_id = this.recurlyTokenIds.billing
-      this.req.body.recurly_three_d_secure_action_result_token_id =
-        this.recurlyTokenIds.threeDSecureActionResult
-      this.req.body.subscriptionDetails = this.subscriptionDetails
-      this.LimitationsManager.userHasV1OrV2Subscription.yields(null, false)
-      this.SubscriptionController.createSubscription(this.req, this.res)
-    })
-
-    it('should send the user and subscriptionId to the handler', function (done) {
-      this.SubscriptionHandler.promises.createSubscription
-        .calledWithMatch(
-          this.user,
-          this.subscriptionDetails,
-          this.recurlyTokenIds
-        )
-        .should.equal(true)
-      done()
-    })
-
-    it('should redirect to the subscription page', function (done) {
-      this.res.sendStatus.calledWith(201).should.equal(true)
-      done()
-    })
-  })
-
-  describe('createSubscription with errors', function () {
-    it('should handle users with subscription', function (done) {
-      this.LimitationsManager.promises.userHasV1OrV2Subscription.resolves(true)
-      this.SubscriptionController.createSubscription(this.req, {
-        sendStatus: status => {
-          expect(status).to.equal(409)
-          this.SubscriptionHandler.promises.createSubscription.called.should.equal(
-            false
-          )
-
-          done()
-        },
-      })
-    })
-
-    it('should handle restricted country', function (done) {
-      this.GeoIpLookup.promises.getCurrencyCode.resolves({
-        countryCode: 'KP',
-      })
-      this.res.callback = () => {
-        expect(this.res.statusCode).to.equal(422)
-        expect(this.res.body).to.include(
-          'sorry_detected_sales_restricted_region'
-        )
-        this.SubscriptionHandler.promises.createSubscription.called.should.equal(
-          false
-        )
-        done()
-      }
-      this.SubscriptionController.createSubscription(this.req, this.res)
-    })
-
-    it('should handle 3DSecure errors/recurly transaction errors', function (done) {
-      this.LimitationsManager.promises.userHasV1OrV2Subscription.resolves(false)
-      this.SubscriptionHandler.promises.createSubscription.rejects(
-        new SubscriptionErrors.RecurlyTransactionError({})
-      )
-      this.HttpErrorHandler.unprocessableEntity = sinon.spy(
-        (req, res, message) => {
-          expect(req).to.exist
-          expect(res).to.exist
-          expect(message).to.deep.equal('Unknown transaction error')
-          done()
-        }
-      )
-      this.SubscriptionController.createSubscription(this.req, this.res)
-    })
-
-    it('should handle validation errors', function (done) {
-      this.LimitationsManager.promises.userHasV1OrV2Subscription.resolves(false)
-      this.SubscriptionHandler.promises.createSubscription.rejects(
-        new Errors.InvalidError('invalid error test')
-      )
-      this.HttpErrorHandler.unprocessableEntity = sinon.spy(
-        (req, res, message) => {
-          expect(req).to.exist
-          expect(res).to.exist
-          expect(message).to.deep.equal('invalid error test')
-          done()
-        }
-      )
-      this.SubscriptionController.createSubscription(this.req, this.res)
-    })
-
-    it('should throw errors from createSubscription that are not handled', function (done) {
-      const genericError = new Error('generic error')
-      this.LimitationsManager.promises.userHasV1OrV2Subscription.resolves(false)
-      this.SubscriptionHandler.promises.createSubscription.rejects(genericError)
-
-      this.SubscriptionController.createSubscription(
-        this.req,
-        this.res,
-        error => {
-          expect(error).to.be.instanceof(Error)
-          expect(error.message).to.equal(genericError.message)
-          done()
-        }
-      )
     })
   })
 
@@ -1033,30 +761,6 @@ describe('SubscriptionController', function () {
       }
 
       this.SubscriptionController.processUpgradeToAnnualPlan(this.req, this.res)
-    })
-  })
-
-  describe('requireConfirmedPrimaryEmailAddress', function () {
-    describe('when user does not have confirmed email address', function () {
-      beforeEach(function () {
-        this.req.user = { _id: 'testing' }
-        this.UserGetter.promises.getUser.resolves({
-          email: 'test@example.com',
-          emails: [{ email: 'test@example.com' }],
-        })
-      })
-
-      it('should show unconfirmed primary email page', function (done) {
-        this.res.render = (page, opts) => {
-          page.should.equal('subscriptions/unconfirmed-primary-email')
-          opts.email.should.equal('test@example.com')
-          done()
-        }
-        this.SubscriptionController.requireConfirmedPrimaryEmailAddress(
-          this.req,
-          this.res
-        )
-      })
     })
   })
 })
