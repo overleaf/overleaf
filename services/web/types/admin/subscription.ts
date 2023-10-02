@@ -8,4 +8,5 @@ export type Subscription = {
   admin_id: string
   groupPlan: boolean
   customAccount: boolean
+  ssoConfig: object
 }
