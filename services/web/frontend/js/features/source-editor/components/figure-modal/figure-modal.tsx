@@ -11,7 +11,6 @@ import { FigureModalFooter } from './figure-modal-footer'
 import { memo, useCallback, useEffect } from 'react'
 import { useCodeMirrorViewContext } from '../codemirror-editor'
 import { ChangeSpec } from '@codemirror/state'
-import SplitTestBadge from '../../../../shared/components/split-test-badge'
 import {
   FigureData,
   PastedImageData,
@@ -22,6 +21,7 @@ import { ensureEmptyLine } from '../../extensions/toolbar/commands'
 import { useTranslation } from 'react-i18next'
 import useEventListener from '../../../../shared/hooks/use-event-listener'
 import { prepareLines } from '../../utils/prepare-lines'
+import { FeedbackBadge } from '@/shared/components/feedback-badge'
 
 export const FigureModal = memo(function FigureModal() {
   return (
@@ -268,9 +268,10 @@ const FigureModalContent = () => {
             : sourcePickerShown
             ? t('replace_figure')
             : getTitle(source)}{' '}
-          <SplitTestBadge
-            splitTestName="figure-modal"
-            displayOnVariants={['enabled']}
+          <FeedbackBadge
+            id="figure-modal-feedback"
+            url="https://forms.gle/PfEtwceYBNQ32DF4A"
+            text="Please click to give feedback about editing figures."
           />
         </Modal.Title>
       </Modal.Header>

@@ -47,7 +47,6 @@ import { effectListeners } from './effect-listeners'
 import { highlightSpecialChars } from './highlight-special-chars'
 import { toolbarPanel } from './toolbar/toolbar-panel'
 import { geometryChangeEvent } from './geometry-change-event'
-import { isSplitTestEnabled } from '../../../utils/splitTestUtils'
 import { completionLogger } from './completion-logger'
 import { shortcutLogger } from './shortcut-logger'
 
@@ -125,7 +124,7 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   emptyLineFiller(),
   trackChanges(options.currentDoc, options.changeManager),
   visual(options.currentDoc, options.visual),
-  isSplitTestEnabled('source-editor-toolbar') ? toolbarPanel() : [],
+  toolbarPanel(),
   verticalOverflow(),
   highlightActiveLine(options.visual.visual),
   // The built-in extension that highlights the active line in the gutter.

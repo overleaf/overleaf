@@ -19,8 +19,6 @@ import { restoreScrollPosition } from '../scroll-position'
 import { CurrentDoc } from '../../../../../../types/current-doc'
 import isValidTeXFile from '../../../../main/is-valid-tex-file'
 import { listItemMarker } from './list-item-marker'
-import { isSplitTestEnabled } from '../../../../utils/splitTestUtils'
-import { toolbarPanel } from '../toolbar/toolbar-panel'
 import { selectDecoratedArgument } from './select-decorated-argument'
 import { pasteHtml } from './paste-html'
 import { commandTooltip } from '../command-tooltip'
@@ -200,9 +198,8 @@ const extension = (options: Options) => [
   visualKeymap,
   commandTooltip,
   scrollJumpAdjuster,
-  isSplitTestEnabled('source-editor-toolbar') ? [] : toolbarPanel(),
   selectDecoratedArgument,
   showContentWhenParsed,
-  isSplitTestEnabled('paste-html') ? pasteHtml : [],
-  isSplitTestEnabled('table-generator') ? tableGeneratorTheme : [],
+  pasteHtml,
+  tableGeneratorTheme,
 ]

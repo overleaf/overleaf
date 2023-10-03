@@ -4,8 +4,8 @@ import Tooltip from '../../../shared/components/tooltip'
 import { sendMB } from '../../../infrastructure/event-tracking'
 import isValidTeXFile from '../../../main/is-valid-tex-file'
 import { useTranslation } from 'react-i18next'
-import SplitTestBadge from '../../../shared/components/split-test-badge'
 import { PromotionOverlay } from './table-generator/promotion/popover'
+import { FeedbackBadge } from '@/shared/components/feedback-badge'
 
 function EditorSwitch() {
   const { t } = useTranslation()
@@ -71,11 +71,23 @@ function EditorSwitch() {
       </fieldset>
 
       {!!richTextOrVisual && (
-        <SplitTestBadge splitTestName="rich-text" displayOnVariants={['cm6']} />
+        <FeedbackBadge
+          id="visual-editor-feedback"
+          url="https://forms.gle/AUqHmKNiEH3DRniPA"
+          text={<VisualEditorFeedbackContent />}
+        />
       )}
     </div>
   )
 }
+
+const VisualEditorFeedbackContent = () => (
+  <>
+    We have a new Visual Editor!
+    <br />
+    Click to give feedback
+  </>
+)
 
 const RichTextToggle: FC<{
   checked: boolean

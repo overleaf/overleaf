@@ -636,49 +636,6 @@ const ProjectController = {
             }
           )
         },
-        editorLeftMenuAssignment(cb) {
-          SplitTestHandler.getAssignment(
-            req,
-            res,
-            'editor-left-menu',
-            (error, assignment) => {
-              // do not fail editor load if assignment fails
-              if (error) {
-                cb(null, { variant: 'default' })
-              } else {
-                cb(null, assignment)
-              }
-            }
-          )
-        },
-        // this is only needed until the survey link is removed from the toolbar
-        richTextAssignment(cb) {
-          SplitTestHandler.getAssignment(
-            req,
-            res,
-            'rich-text',
-            (error, assignment) => {
-              // do not fail editor load if assignment fails
-              if (error) {
-                cb(null, { variant: 'default' })
-              } else {
-                cb(null, assignment)
-              }
-            }
-          )
-        },
-        figureModalAssignment(cb) {
-          SplitTestHandler.getAssignment(req, res, 'figure-modal', () => {
-            // We'll pick up the assignment from the res.locals assignment.
-            cb()
-          })
-        },
-        tableGeneratorAssignment(cb) {
-          SplitTestHandler.getAssignment(req, res, 'table-generator', () => {
-            // We'll pick up the assignment from the res.locals assignment.
-            cb()
-          })
-        },
         tableGeneratorPromotionAssignment(cb) {
           SplitTestHandler.getAssignment(
             req,
@@ -687,27 +644,6 @@ const ProjectController = {
             () => {
               // We'll pick up the assignment from the res.locals assignment.
               cb()
-            }
-          )
-        },
-        pasteHtmlAssignment(cb) {
-          SplitTestHandler.getAssignment(req, res, 'paste-html', () => {
-            // We'll pick up the assignment from the res.locals assignment.
-            cb()
-          })
-        },
-        sourceEditorToolbarAssigment(cb) {
-          SplitTestHandler.getAssignment(
-            req,
-            res,
-            'source-editor-toolbar',
-            (error, assignment) => {
-              // do not fail editor load if assignment fails
-              if (error) {
-                cb(null, { variant: 'default' })
-              } else {
-                cb(null, assignment)
-              }
             }
           )
         },
@@ -761,8 +697,6 @@ const ProjectController = {
           isInvitedMember,
           brandVariation,
           pdfjsAssignment,
-          editorLeftMenuAssignment,
-          sourceEditorToolbarAssigment,
           historyViewAssignment,
           reviewPanelAssignment,
           projectTags,
@@ -853,9 +787,6 @@ const ProjectController = {
               // Allow override via legacy_source_editor=true in query string
               shouldDisplayFeature('legacy_source_editor')
 
-            const editorLeftMenuReact =
-              editorLeftMenuAssignment?.variant === 'react'
-
             const showSymbolPalette =
               !Features.hasFeature('saas') ||
               (user.features && user.features.symbolPalette)
@@ -889,7 +820,6 @@ const ProjectController = {
               bodyClasses: ['editor'],
               project_id: project._id,
               projectName: project.name,
-              editorLeftMenuReact,
               user: {
                 id: userId,
                 email: user.email,
@@ -943,9 +873,7 @@ const ProjectController = {
               pdfjsVariant: pdfjsAssignment.variant,
               debugPdfDetach,
               showLegacySourceEditor,
-              showSourceToolbar:
-                !showLegacySourceEditor &&
-                sourceEditorToolbarAssigment.variant === 'enabled',
+              showSourceToolbar: !showLegacySourceEditor,
               showSymbolPalette,
               symbolPaletteAvailable: Features.hasFeature('symbol-palette'),
               detachRole,

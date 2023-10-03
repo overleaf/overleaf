@@ -29,7 +29,6 @@ import {
   parseFigureData,
 } from '../../utils/tree-operations/environments'
 import { MathWidget } from './visual-widgets/math'
-import { GraphicsWidget } from './visual-widgets/graphics'
 import { IconBraceWidget } from './visual-widgets/icon-brace'
 import { TeXWidget } from './visual-widgets/tex'
 import {
@@ -47,8 +46,6 @@ import {
   ancestorOfNodeWithType,
   isDirectChildOfEnvironment,
 } from '../../utils/tree-operations/ancestors'
-import { InlineGraphicsWidget } from './visual-widgets/inline-graphics'
-import getMeta from '../../../../utils/meta'
 import { EditableGraphicsWidget } from './visual-widgets/editable-graphics'
 import { EditableInlineGraphicsWidget } from './visual-widgets/editable-inline-graphics'
 import {
@@ -136,11 +133,6 @@ const hasClosingBrace = (node: SyntaxNode) =>
  * Decorations that span multiple lines must be contained in a StateField, not a ViewPlugin.
  */
 export const atomicDecorations = (options: Options) => {
-  const splitTestVariants = getMeta('ol-splitTestVariants', {})
-  const figureModalEnabled = splitTestVariants['figure-modal'] === 'enabled'
-  const tableGeneratorEnabled =
-    splitTestVariants['table-generator'] === 'enabled'
-
   const getPreviewByPath = (path: string) =>
     options.fileTreeManager.getPreviewByPath(path)
 
@@ -324,10 +316,7 @@ export const atomicDecorations = (options: Options) => {
                 )
               }
             }
-          } else if (
-            tableGeneratorEnabled &&
-            nodeRef.type.is('TabularEnvironment')
-          ) {
+          } else if (nodeRef.type.is('TabularEnvironment')) {
             if (shouldDecorate(state, nodeRef)) {
               const tabularNode = nodeRef.node
               const tableNode = ancestorOfNodeWithType(
@@ -896,18 +885,10 @@ export const atomicDecorations = (options: Options) => {
                 const lineContainsOnlyNode =
                   line.text.trim().length === nodeRef.to - nodeRef.from
 
-                const BlockGraphicsWidgetClass = figureModalEnabled
-                  ? EditableGraphicsWidget
-                  : GraphicsWidget
-
-                const InlineGraphicsWidgetClass = figureModalEnabled
-                  ? EditableInlineGraphicsWidget
-                  : InlineGraphicsWidget
-
                 if (lineContainsOnlyNode) {
                   decorations.push(
                     Decoration.replace({
-                      widget: new BlockGraphicsWidgetClass(
+                      widget: new EditableGraphicsWidget(
                         filePath,
                         getPreviewByPath,
                         centered,
@@ -919,7 +900,7 @@ export const atomicDecorations = (options: Options) => {
                 } else {
                   decorations.push(
                     Decoration.replace({
-                      widget: new InlineGraphicsWidgetClass(
+                      widget: new EditableInlineGraphicsWidget(
                         filePath,
                         getPreviewByPath,
                         centered,

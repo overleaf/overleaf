@@ -7,7 +7,6 @@ import {
 import { EditorView } from '@codemirror/view'
 import { addEffectListener, removeEffectListener } from './effect-listeners'
 import { setMetadataEffect } from './language'
-import getMeta from '../../../utils/meta'
 import { debugConsole } from '@/utils/debugging'
 
 type NestedReadonly<T> = {
@@ -174,11 +173,6 @@ export type PastedImageData = {
 }
 
 export const figureModalPasteHandler = (): Extension => {
-  const splitTestVariants = getMeta('ol-splitTestVariants', {})
-  const figureModalEnabled = splitTestVariants['figure-modal'] === 'enabled'
-  if (!figureModalEnabled) {
-    return []
-  }
   return EditorView.domEventHandlers({
     drop: evt => {
       if (!evt.dataTransfer || evt.dataTransfer.files.length === 0) {

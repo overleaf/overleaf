@@ -12,8 +12,7 @@ import { useTranslation } from 'react-i18next'
 import { EditorView } from '@codemirror/view'
 import { PastedContent } from '../../extensions/visual/pasted-content'
 import useEventListener from '../../../../shared/hooks/use-event-listener'
-import SplitTestBadge from '../../../../shared/components/split-test-badge'
-import { useSplitTestContext } from '../../../../shared/context/split-test-context'
+import { FeedbackBadge } from '@/shared/components/feedback-badge'
 
 const isMac = /Mac/.test(window.navigator?.platform)
 
@@ -30,8 +29,6 @@ export const PastedContentMenu: FC<{
   const [menuOpen, setMenuOpen] = useState(false)
   const toggleButtonRef = useRef<HTMLButtonElement | null>(null)
   const { t } = useTranslation()
-  const { splitTestInfo } = useSplitTestContext()
-  const feedbackURL = splitTestInfo['paste-html']?.badgeInfo?.url
 
   // record whether the Shift key is currently down, for use in the `paste` event handler
   const shiftRef = useRef(false)
@@ -138,13 +135,16 @@ export const PastedContentMenu: FC<{
               <MenuItem
                 style={{ borderTop: '1px solid #eee' }}
                 onClick={() => {
-                  window.open(feedbackURL, '_blank')
+                  window.open(
+                    'https://docs.google.com/forms/d/e/1FAIpQLSc7WcHrwz9fnCkUP5hXyvkG3LkSYZiR3lVJWZ0o6uqNQYrV7Q/viewform',
+                    '_blank'
+                  )
                   setMenuOpen(false)
                 }}
               >
-                <SplitTestBadge
-                  splitTestName="paste-html"
-                  displayOnVariants={['enabled']}
+                <FeedbackBadge
+                  id="paste-html-feedback"
+                  url="https://docs.google.com/forms/d/e/1FAIpQLSc7WcHrwz9fnCkUP5hXyvkG3LkSYZiR3lVJWZ0o6uqNQYrV7Q/viewform"
                 />
                 <span className="ol-cm-pasted-content-menu-item-label">
                   {t('give_feedback')}

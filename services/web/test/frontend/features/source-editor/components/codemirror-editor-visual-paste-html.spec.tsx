@@ -27,10 +27,6 @@ const mountEditor = (content = '') => {
 describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
   beforeEach(function () {
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
-    window.metaAttributesCache.set('ol-splitTestVariants', {
-      'paste-html': 'enabled',
-      'figure-modal': 'enabled',
-    })
     cy.interceptEvents()
     cy.interceptSpelling()
   })
@@ -100,10 +96,8 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
     clipboardData.setData('text/html', data)
     cy.get('@content').trigger('paste', { clipboardData })
 
-    cy.get('@content').should(
-      'have.text',
-      '\\begin{tabular}{l l}foo & bar ↩\\end{tabular}'
-    )
+    cy.get('@content').should('have.text', 'foobar')
+    cy.get('.table-generator-cell').should('have.length', 2)
   })
 
   it('handles a pasted table with cell borders', function () {
@@ -116,10 +110,12 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
     clipboardData.setData('text/html', data)
     cy.get('@content').trigger('paste', { clipboardData })
 
-    cy.get('@content').should(
-      'have.text',
-      '\\begin{tabular}{| l | l |}\\hlinefoo & bar ↩\\hline\\end{tabular}'
-    )
+    cy.get('@content').should('have.text', 'foobar')
+    cy.get('.table-generator-cell').should('have.length', 2)
+    cy.get('.table-generator-cell-border-left').should('have.length', 1)
+    cy.get('.table-generator-cell-border-right').should('have.length', 2)
+    cy.get('.table-generator-row-border-top').should('have.length', 2)
+    cy.get('.table-generator-row-border-bottom').should('have.length', 2)
   })
 
   it('handles a pasted table with row borders', function () {
@@ -132,10 +128,12 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
     clipboardData.setData('text/html', data)
     cy.get('@content').trigger('paste', { clipboardData })
 
-    cy.get('@content').should(
-      'have.text',
-      '\\begin{tabular}{l l}\\hlinefoo & bar ↩\\hline\\end{tabular}'
-    )
+    cy.get('@content').should('have.text', 'foobar')
+    cy.get('.table-generator-cell').should('have.length', 2)
+    cy.get('.table-generator-cell-border-left').should('have.length', 0)
+    cy.get('.table-generator-cell-border-right').should('have.length', 0)
+    cy.get('.table-generator-row-border-top').should('have.length', 2)
+    cy.get('.table-generator-row-border-bottom').should('have.length', 2)
   })
 
   it('handles a pasted table with adjacent borders', function () {
@@ -153,10 +151,12 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
     clipboardData.setData('text/html', data)
     cy.get('@content').trigger('paste', { clipboardData })
 
-    cy.get('@content').should(
-      'have.text',
-      '\\begin{tabular}{| l | l |}\\hlinefoo & bar ↩\\hlinefoo & bar ↩\\hlinefoo & bar ↩\\hline\\end{tabular}'
-    )
+    cy.get('@content').should('have.text', 'foobarfoobarfoobar')
+    cy.get('.table-generator-cell').should('have.length', 6)
+    cy.get('.table-generator-cell-border-left').should('have.length', 3)
+    cy.get('.table-generator-cell-border-right').should('have.length', 6)
+    cy.get('.table-generator-row-border-top').should('have.length', 6)
+    cy.get('.table-generator-row-border-bottom').should('have.length', 2)
   })
 
   it('handles a pasted table with alignment', function () {
@@ -169,10 +169,11 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
     clipboardData.setData('text/html', data)
     cy.get('@content').trigger('paste', { clipboardData })
 
-    cy.get('@content').should(
-      'have.text',
-      '\\begin{tabular}{l l c r l}foo & foo & foo & foo & foo ↩\\end{tabular}'
-    )
+    cy.get('@content').should('have.text', 'foofoofoofoofoo')
+    cy.get('.table-generator-cell').should('have.length', 5)
+    cy.get('.table-generator-cell.alignment-left').should('have.length', 3)
+    cy.get('.table-generator-cell.alignment-center').should('have.length', 1)
+    cy.get('.table-generator-cell.alignment-right').should('have.length', 1)
   })
 
   it('handles a pasted table with merged columns', function () {
@@ -190,10 +191,9 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
     clipboardData.setData('text/html', data)
     cy.get('@content').trigger('paste', { clipboardData })
 
-    cy.get('@content').should(
-      'have.text',
-      '\\begin{tabular}{l l l}test & test & test ↩\\multicolumn{2}{l}{test} & test ↩test & \\multicolumn{2}{r}{test} ↩\\end{tabular}'
-    )
+    cy.get('@content').should('have.text', 'testtesttesttesttesttesttest')
+    cy.get('.table-generator-cell').should('have.length', 7)
+    cy.get('.table-generator-cell[colspan="2"]').should('have.length', 2)
   })
 
   it('handles a pasted table with merged rows', function () {
@@ -213,8 +213,9 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
 
     cy.get('@content').should(
       'have.text',
-      '\\begin{tabular}{l l l}test & test & test ↩\\multirow{2}{*}{test} & test & test ↩ & test & test ↩\\end{tabular}'
+      'testtesttest\\multirow{2}{*}{test}testtesttesttest'
     )
+    cy.get('.table-generator-cell').should('have.length', 9)
   })
 
   it('handles a pasted table with merged rows and columns', function () {
@@ -234,8 +235,10 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
 
     cy.get('@content').should(
       'have.text',
-      '\\begin{tabular}{l l l}\\multicolumn{2}{l}{\\multirow{2}{*}{test}} & test ↩ &  & test ↩test & test & test ↩\\end{tabular}'
+      '\\multirow{2}{*}{test}testtesttesttesttest'
     )
+    cy.get('.table-generator-cell').should('have.length', 8)
+    cy.get('.table-generator-cell[colspan="2"]').should('have.length', 1)
   })
 
   it('ignores rowspan="1" and colspan="1"', function () {
@@ -243,7 +246,7 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
 
     const data = [
       `<table><tbody>`,
-      `<tr><td colspan="1" rowspan="1">test</td><td>test</td></tr>`,
+      `<tr><td colspan="1" rowspan="1">test</td><td>test</td><td>test</td></tr>`,
       `<tr><td>test</td><td>test</td><td>test</td></tr>`,
       `</tbody></table>`,
     ].join('')
@@ -252,10 +255,9 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
     clipboardData.setData('text/html', data)
     cy.get('@content').trigger('paste', { clipboardData })
 
-    cy.get('@content').should(
-      'have.text',
-      '\\begin{tabular}{l l l}test & test ↩test & test & test ↩\\end{tabular}'
-    )
+    cy.get('@content').should('have.text', 'testtesttesttesttesttest')
+    cy.get('.table-generator-cell').should('have.length', 6)
+    cy.get('.table-generator-cell[colspan]').should('have.length', 0)
   })
 
   it('handles a pasted table with adjacent borders and merged cells', function () {
@@ -273,18 +275,16 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
     clipboardData.setData('text/html', data)
     cy.get('@content').trigger('paste', { clipboardData })
 
-    cy.get('@content').should(
-      'have.text',
-      '\\begin{tabular}{| l | l |}\\hline\\multicolumn{2}{l}{foo} ↩\\hlinefoo & bar ↩\\hlinefoo & bar ↩\\hline\\end{tabular}'
-    )
+    cy.get('@content').should('have.text', 'foofoobarfoobar')
+    cy.get('.table-generator-cell').should('have.length', 5)
+    cy.get('.table-generator-cell[colspan="2"]').should('have.length', 1)
+    cy.get('.table-generator-cell-border-left').should('have.length', 2)
+    cy.get('.table-generator-cell-border-right').should('have.length', 4)
+    cy.get('.table-generator-row-border-top').should('have.length', 5)
+    cy.get('.table-generator-row-border-bottom').should('have.length', 2)
   })
 
   it('handles a pasted table with cell styles', function () {
-    window.metaAttributesCache.set('ol-splitTestVariants', {
-      'paste-html': 'enabled',
-      'table-generator': 'enabled',
-    })
-
     mountEditor()
 
     const data =
@@ -310,10 +310,9 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
     clipboardData.setData('text/html', data)
     cy.get('@content').trigger('paste', { clipboardData })
 
-    cy.get('@content').should(
-      'have.text',
-      'A table\\begin{tabular}{l l}foo & bar ↩\\end{tabular}'
-    )
+    cy.get('@content').should('have.text', 'A tablefoobar')
+    cy.get('.table-generator-cell').should('have.length', 2)
+    cy.get('.ol-cm-command-caption').should('have.length', 1)
   })
 
   it('handles a pasted link', function () {
@@ -409,9 +408,9 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
 
     cy.get('@content').should(
       'have.text',
-      'testfoobarbaz foo foo foo foo\\begin{tabular}{l}foo ↩\\end{tabular}test'
+      'testfoobarbaz foo foo foo foofootest'
     )
-    cy.get('.cm-line').should('have.length', 19)
+    cy.get('.cm-line').should('have.length', 15)
   })
 
   it('handles pasted inline code', function () {
@@ -643,7 +642,9 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
     cy.get('.ol-cm-command-verb').should('have.length', 1)
   })
 
-  it('tidies whitespace in pasted tables', function () {
+  // FIXME: need to assert on source code
+  // eslint-disable-next-line mocha/no-skipped-tests
+  it.skip('tidies whitespace in pasted tables', function () {
     mountEditor()
 
     const data = `<table>

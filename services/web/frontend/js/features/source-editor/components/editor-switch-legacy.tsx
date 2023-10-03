@@ -5,7 +5,6 @@ import { sendMB } from '../../../infrastructure/event-tracking'
 import getMeta from '../../../utils/meta'
 import isValidTeXFile from '../../../main/is-valid-tex-file'
 import { useTranslation } from 'react-i18next'
-import SplitTestBadge from '../../../shared/components/split-test-badge'
 
 function Badge() {
   const content = (
@@ -125,10 +124,6 @@ function EditorSwitch() {
           handleChange={handleChange}
         />
       </fieldset>
-
-      {!!richTextOrVisual && (
-        <SplitTestBadge splitTestName="rich-text" displayOnVariants={['cm6']} />
-      )}
     </div>
   )
 }

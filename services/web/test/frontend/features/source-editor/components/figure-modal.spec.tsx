@@ -41,9 +41,6 @@ describe('<FigureModal />', function () {
   // TODO: Write tests for width toggle, when we can match on source code
   beforeEach(function () {
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
-    window.metaAttributesCache.set('ol-splitTestVariants', {
-      'figure-modal': 'enabled',
-    })
     window.metaAttributesCache.set(
       'ol-mathJax3Path',
       'https://unpkg.com/mathjax@3.2.2/es5/tex-svg-full.js'

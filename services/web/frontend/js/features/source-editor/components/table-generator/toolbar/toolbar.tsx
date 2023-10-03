@@ -20,8 +20,8 @@ import {
 import { useCodeMirrorViewContext } from '../../codemirror-editor'
 import { useTableContext } from '../contexts/table-context'
 import { useTabularContext } from '../contexts/tabular-context'
-import SplitTestBadge from '../../../../../shared/components/split-test-badge'
 import { useTranslation } from 'react-i18next'
+import { FeedbackBadge } from '@/shared/components/feedback-badge'
 
 export const Toolbar = memo(function Toolbar() {
   const { selection, setSelection } = useSelectionContext()
@@ -359,12 +359,21 @@ export const Toolbar = memo(function Toolbar() {
           command={showHelp}
         />
         <div className="toolbar-beta-badge">
-          <SplitTestBadge
-            displayOnVariants={['enabled']}
-            splitTestName="table-generator"
+          <FeedbackBadge
+            id="table-generator-feedback"
+            url="https://forms.gle/ri3fzV1oQDAjmfmD7"
+            text={<FeedbackBadgeContent />}
           />
         </div>
       </div>
     </div>
   )
 })
+
+const FeedbackBadgeContent = () => (
+  <>
+    We have a new way to insert and edit tables.
+    <br />
+    Click to give feedback
+  </>
+)

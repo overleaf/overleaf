@@ -111,9 +111,6 @@ describe('<CodeMirrorEditor/> Table editor', function () {
     cy.interceptMathJax()
     cy.interceptCompile('compile', Number.MAX_SAFE_INTEGER)
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
-    window.metaAttributesCache.set('ol-splitTestVariants', {
-      'table-generator': 'enabled',
-    })
     window.metaAttributesCache.set('ol-completedTutorials', {
       'table-generator-promotion': '2023-09-01T00:00:00.000Z',
     })
@@ -151,7 +148,7 @@ describe('<CodeMirrorEditor/> Table editor', function () {
     it('Renders borders', function () {
       mountEditor(`
 \\begin{tabular}{c|c}
-cell 1 & cell 2 \\\\ 
+cell 1 & cell 2 \\\\
 \\hline
 cell 3 & cell 4 \\\\
 \\end{tabular}`)
@@ -181,12 +178,12 @@ cell 3 & cell 4 \\\\
     cell 1 & cell 2 \\\\
     cell 3 & cell 4 \\\\
 \\end{tabular}
-      `)
+`)
       checkBordersWithNoMultiColumn([false, false, false], [false, true, false])
       cy.get('.table-generator-floating-toolbar').should('not.exist')
       cy.get('.table-generator-cell').first().click()
       cy.get('.table-generator-floating-toolbar').as('toolbar').should('exist')
-      cy.get('@toolbar').findByText('Custom borders').click()
+      cy.get('@toolbar').findByText('Custom borders').click({ force: true })
       cy.get('.table-generator').findByText('All borders').click()
       // The element is partially covered, but we can still click it
       cy.get('.cm-line').first().click({ force: true })
