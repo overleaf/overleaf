@@ -1,25 +1,12 @@
-/* eslint-disable
-    n/handle-callback-err,
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const sinon = require('sinon')
 const { expect } = require('chai')
-const modulePath =
-  '../../../../app/src/Features/Collaborators/CollaboratorsInviteController.js'
 const SandboxedModule = require('sandboxed-module')
-const events = require('events')
 const MockRequest = require('../helpers/MockRequest')
 const MockResponse = require('../helpers/MockResponse')
 const { ObjectId } = require('mongodb')
+
+const MODULE_PATH =
+  '../../../../app/src/Features/Collaborators/CollaboratorsInviteController.js'
 
 describe('CollaboratorsInviteController', function () {
   beforeEach(function () {
@@ -40,26 +27,34 @@ describe('CollaboratorsInviteController', function () {
       RateLimiter: sinon.stub().returns(this.rateLimiter),
     }
 
-    this.LimitationsManager = {}
+    this.LimitationsManager = { promises: {} }
     this.UserGetter = {
-      getUserByAnyEmail: sinon.stub(),
-      getUser: sinon.stub(),
+      promises: {
+        getUserByAnyEmail: sinon.stub(),
+        getUser: sinon.stub(),
+      },
     }
 
-    this.CollaboratorsInviteController = SandboxedModule.require(modulePath, {
+    this.ProjectGetter = { promises: {} }
+    this.CollaboratorsGetter = { promises: {} }
+    this.CollaboratorsInviteHandler = { promises: {} }
+    this.EditorRealTimeController = {
+      emitToRoom: sinon.stub(),
+    }
+    this.settings = {}
+
+    this.CollaboratorsInviteController = SandboxedModule.require(MODULE_PATH, {
       requires: {
-        '../Project/ProjectGetter': (this.ProjectGetter = {}),
+        '../Project/ProjectGetter': this.ProjectGetter,
         '../Subscription/LimitationsManager': this.LimitationsManager,
         '../User/UserGetter': this.UserGetter,
-        './CollaboratorsGetter': (this.CollaboratorsGetter = {}),
-        './CollaboratorsInviteHandler': (this.CollaboratorsInviteHandler = {}),
-        '../Editor/EditorRealTimeController': (this.EditorRealTimeController = {
-          emitToRoom: sinon.stub(),
-        }),
+        './CollaboratorsGetter': this.CollaboratorsGetter,
+        './CollaboratorsInviteHandler': this.CollaboratorsInviteHandler,
+        '../Editor/EditorRealTimeController': this.EditorRealTimeController,
         '../Analytics/AnalyticsManager': this.AnalyticsManger,
         '../Authentication/AuthenticationController':
           this.AuthenticationController,
-        '@overleaf/settings': (this.settings = {}),
+        '@overleaf/settings': this.settings,
         '../../infrastructure/RateLimiter': this.RateLimiter,
       },
     })
@@ -67,7 +62,7 @@ describe('CollaboratorsInviteController', function () {
     this.req = new MockRequest()
 
     this.project_id = 'project-id-123'
-    return (this.callback = sinon.stub())
+    this.callback = sinon.stub()
   })
 
   describe('getAllInvites', function () {
@@ -78,15 +73,16 @@ describe('CollaboratorsInviteController', function () {
       ]
       this.req.params = { Project_id: this.project_id }
       this.res.json = sinon.stub()
-      return (this.next = sinon.stub())
+      this.next = sinon.stub()
     })
 
     describe('when all goes well', function () {
-      beforeEach(function () {
-        this.CollaboratorsInviteHandler.getAllInvites = sinon
+      beforeEach(function (done) {
+        this.CollaboratorsInviteHandler.promises.getAllInvites = sinon
           .stub()
-          .callsArgWith(1, null, this.fakeInvites)
-        return this.CollaboratorsInviteController.getAllInvites(
+          .resolves(this.fakeInvites)
+        this.res.json.callsFake(() => done())
+        this.CollaboratorsInviteController.getAllInvites(
           this.req,
           this.res,
           this.next
@@ -94,30 +90,33 @@ describe('CollaboratorsInviteController', function () {
       })
 
       it('should not produce an error', function () {
-        return this.next.callCount.should.equal(0)
+        this.next.callCount.should.equal(0)
       })
 
       it('should produce a list of invite objects', function () {
         this.res.json.callCount.should.equal(1)
-        return this.res.json
+        this.res.json
           .calledWith({ invites: this.fakeInvites })
           .should.equal(true)
       })
 
       it('should have called CollaboratorsInviteHandler.getAllInvites', function () {
-        this.CollaboratorsInviteHandler.getAllInvites.callCount.should.equal(1)
-        return this.CollaboratorsInviteHandler.getAllInvites
+        this.CollaboratorsInviteHandler.promises.getAllInvites.callCount.should.equal(
+          1
+        )
+        this.CollaboratorsInviteHandler.promises.getAllInvites
           .calledWith(this.project_id)
           .should.equal(true)
       })
     })
 
     describe('when CollaboratorsInviteHandler.getAllInvites produces an error', function () {
-      beforeEach(function () {
-        this.CollaboratorsInviteHandler.getAllInvites = sinon
+      beforeEach(function (done) {
+        this.CollaboratorsInviteHandler.promises.getAllInvites = sinon
           .stub()
-          .callsArgWith(1, new Error('woops'))
-        return this.CollaboratorsInviteController.getAllInvites(
+          .rejects(new Error('woops'))
+        this.next.callsFake(() => done())
+        this.CollaboratorsInviteController.getAllInvites(
           this.req,
           this.res,
           this.next
@@ -126,7 +125,7 @@ describe('CollaboratorsInviteController', function () {
 
       it('should produce an error', function () {
         this.next.callCount.should.equal(1)
-        return this.next.firstCall.args[0].should.be.instanceof(Error)
+        this.next.firstCall.args[0].should.be.instanceof(Error)
       })
     })
   })
@@ -151,28 +150,28 @@ describe('CollaboratorsInviteController', function () {
         targetEmail: 'user@example.com',
         createdAt: new Date(),
       }
-      this.LimitationsManager.canAddXCollaborators = sinon
+      this.LimitationsManager.promises.canAddXCollaborators = sinon
         .stub()
-        .callsArgWith(2, null, true)
-      this.CollaboratorsInviteHandler.inviteToProject = sinon
+        .resolves(true)
+      this.CollaboratorsInviteHandler.promises.inviteToProject = sinon
         .stub()
-        .callsArgWith(4, null, this.invite)
+        .resolves(this.invite)
       this.callback = sinon.stub()
-      return (this.next = sinon.stub())
+      this.next = sinon.stub()
     })
 
-    describe('when all goes well', function () {
-      beforeEach(function () {
-        this.CollaboratorsInviteController._checkShouldInviteEmail = sinon
+    describe('when all goes well', function (done) {
+      beforeEach(function (done) {
+        this.CollaboratorsInviteController.promises._checkShouldInviteEmail =
+          sinon.stub().resolves(true)
+        this.CollaboratorsInviteController.promises._checkRateLimit = sinon
           .stub()
-          .callsArgWith(1, null, true)
-        this.CollaboratorsInviteController._checkRateLimit = sinon
+          .resolves(true)
+        this.LimitationsManager.promises.canAddXCollaborators = sinon
           .stub()
-          .yields(null, true)
-        this.LimitationsManager.canAddXCollaborators = sinon
-          .stub()
-          .callsArgWith(2, null, true)
-        return this.CollaboratorsInviteController.inviteToProject(
+          .resolves(true)
+        this.res.json.callsFake(() => done())
+        this.CollaboratorsInviteController.inviteToProject(
           this.req,
           this.res,
           this.next
@@ -181,32 +180,34 @@ describe('CollaboratorsInviteController', function () {
 
       it('should produce json response', function () {
         this.res.json.callCount.should.equal(1)
-        return { invite: this.invite }.should.deep.equal(
-          this.res.json.firstCall.args[0]
-        )
+        expect(this.res.json.firstCall.args[0]).to.deep.equal({
+          invite: this.invite,
+        })
       })
 
       it('should have called canAddXCollaborators', function () {
-        this.LimitationsManager.canAddXCollaborators.callCount.should.equal(1)
-        return this.LimitationsManager.canAddXCollaborators
+        this.LimitationsManager.promises.canAddXCollaborators.callCount.should.equal(
+          1
+        )
+        this.LimitationsManager.promises.canAddXCollaborators
           .calledWith(this.project_id)
           .should.equal(true)
       })
 
       it('should have called _checkShouldInviteEmail', function () {
-        this.CollaboratorsInviteController._checkShouldInviteEmail.callCount.should.equal(
+        this.CollaboratorsInviteController.promises._checkShouldInviteEmail.callCount.should.equal(
           1
         )
-        return this.CollaboratorsInviteController._checkShouldInviteEmail
+        this.CollaboratorsInviteController.promises._checkShouldInviteEmail
           .calledWith(this.targetEmail)
           .should.equal(true)
       })
 
       it('should have called inviteToProject', function () {
-        this.CollaboratorsInviteHandler.inviteToProject.callCount.should.equal(
+        this.CollaboratorsInviteHandler.promises.inviteToProject.callCount.should.equal(
           1
         )
-        return this.CollaboratorsInviteHandler.inviteToProject
+        this.CollaboratorsInviteHandler.promises.inviteToProject
           .calledWith(
             this.project_id,
             this.current_user,
@@ -218,24 +219,24 @@ describe('CollaboratorsInviteController', function () {
 
       it('should have called emitToRoom', function () {
         this.EditorRealTimeController.emitToRoom.callCount.should.equal(1)
-        return this.EditorRealTimeController.emitToRoom
+        this.EditorRealTimeController.emitToRoom
           .calledWith(this.project_id, 'project:membership:changed')
           .should.equal(true)
       })
     })
 
     describe('when the user is not allowed to add more collaborators', function () {
-      beforeEach(function () {
-        this.CollaboratorsInviteController._checkShouldInviteEmail = sinon
+      beforeEach(function (done) {
+        this.CollaboratorsInviteController.promises._checkShouldInviteEmail =
+          sinon.stub().resolves(true)
+        this.CollaboratorsInviteController.promises._checkRateLimit = sinon
           .stub()
-          .callsArgWith(1, null, true)
-        this.CollaboratorsInviteController._checkRateLimit = sinon
+          .resolves(true)
+        this.LimitationsManager.promises.canAddXCollaborators = sinon
           .stub()
-          .yields(null, true)
-        this.LimitationsManager.canAddXCollaborators = sinon
-          .stub()
-          .callsArgWith(2, null, false)
-        return this.CollaboratorsInviteController.inviteToProject(
+          .resolves(false)
+        this.res.json.callsFake(() => done())
+        this.CollaboratorsInviteController.inviteToProject(
           this.req,
           this.res,
           this.next
@@ -244,39 +245,37 @@ describe('CollaboratorsInviteController', function () {
 
       it('should produce json response without an invite', function () {
         this.res.json.callCount.should.equal(1)
-        return { invite: null }.should.deep.equal(
-          this.res.json.firstCall.args[0]
-        )
+        expect(this.res.json.firstCall.args[0]).to.deep.equal({ invite: null })
       })
 
       it('should not have called _checkShouldInviteEmail', function () {
-        this.CollaboratorsInviteController._checkShouldInviteEmail.callCount.should.equal(
+        this.CollaboratorsInviteController.promises._checkShouldInviteEmail.callCount.should.equal(
           0
         )
-        return this.CollaboratorsInviteController._checkShouldInviteEmail
+        this.CollaboratorsInviteController.promises._checkShouldInviteEmail
           .calledWith(this.sendingUser, this.targetEmail)
           .should.equal(false)
       })
 
       it('should not have called inviteToProject', function () {
-        return this.CollaboratorsInviteHandler.inviteToProject.callCount.should.equal(
+        this.CollaboratorsInviteHandler.promises.inviteToProject.callCount.should.equal(
           0
         )
       })
     })
 
     describe('when canAddXCollaborators produces an error', function () {
-      beforeEach(function () {
-        this.CollaboratorsInviteController._checkShouldInviteEmail = sinon
+      beforeEach(function (done) {
+        this.CollaboratorsInviteController.promises._checkShouldInviteEmail =
+          sinon.stub().resolves(true)
+        this.CollaboratorsInviteController.promises._checkRateLimit = sinon
           .stub()
-          .callsArgWith(1, null, true)
-        this.CollaboratorsInviteController._checkRateLimit = sinon
+          .resolves(true)
+        this.LimitationsManager.promises.canAddXCollaborators = sinon
           .stub()
-          .yields(null, true)
-        this.LimitationsManager.canAddXCollaborators = sinon
-          .stub()
-          .callsArgWith(2, new Error('woops'))
-        return this.CollaboratorsInviteController.inviteToProject(
+          .rejects(new Error('woops'))
+        this.next.callsFake(() => done())
+        this.CollaboratorsInviteController.inviteToProject(
           this.req,
           this.res,
           this.next
@@ -285,39 +284,37 @@ describe('CollaboratorsInviteController', function () {
 
       it('should call next with an error', function () {
         this.next.callCount.should.equal(1)
-        return this.next
-          .calledWith(sinon.match.instanceOf(Error))
-          .should.equal(true)
+        this.next.calledWith(sinon.match.instanceOf(Error)).should.equal(true)
       })
 
       it('should not have called _checkShouldInviteEmail', function () {
-        this.CollaboratorsInviteController._checkShouldInviteEmail.callCount.should.equal(
+        this.CollaboratorsInviteController.promises._checkShouldInviteEmail.callCount.should.equal(
           0
         )
-        return this.CollaboratorsInviteController._checkShouldInviteEmail
+        this.CollaboratorsInviteController.promises._checkShouldInviteEmail
           .calledWith(this.sendingUser, this.targetEmail)
           .should.equal(false)
       })
 
       it('should not have called inviteToProject', function () {
-        return this.CollaboratorsInviteHandler.inviteToProject.callCount.should.equal(
+        this.CollaboratorsInviteHandler.promises.inviteToProject.callCount.should.equal(
           0
         )
       })
     })
 
     describe('when inviteToProject produces an error', function () {
-      beforeEach(function () {
-        this.CollaboratorsInviteController._checkShouldInviteEmail = sinon
+      beforeEach(function (done) {
+        this.CollaboratorsInviteController.promises._checkShouldInviteEmail =
+          sinon.stub().resolves(true)
+        this.CollaboratorsInviteController.promises._checkRateLimit = sinon
           .stub()
-          .callsArgWith(1, null, true)
-        this.CollaboratorsInviteController._checkRateLimit = sinon
+          .resolves(true)
+        this.CollaboratorsInviteHandler.promises.inviteToProject = sinon
           .stub()
-          .yields(null, true)
-        this.CollaboratorsInviteHandler.inviteToProject = sinon
-          .stub()
-          .callsArgWith(4, new Error('woops'))
-        return this.CollaboratorsInviteController.inviteToProject(
+          .rejects(new Error('woops'))
+        this.next.callsFake(() => done())
+        this.CollaboratorsInviteController.inviteToProject(
           this.req,
           this.res,
           this.next
@@ -330,26 +327,28 @@ describe('CollaboratorsInviteController', function () {
       })
 
       it('should have called canAddXCollaborators', function () {
-        this.LimitationsManager.canAddXCollaborators.callCount.should.equal(1)
-        return this.LimitationsManager.canAddXCollaborators
+        this.LimitationsManager.promises.canAddXCollaborators.callCount.should.equal(
+          1
+        )
+        this.LimitationsManager.promises.canAddXCollaborators
           .calledWith(this.project_id)
           .should.equal(true)
       })
 
       it('should have called _checkShouldInviteEmail', function () {
-        this.CollaboratorsInviteController._checkShouldInviteEmail.callCount.should.equal(
+        this.CollaboratorsInviteController.promises._checkShouldInviteEmail.callCount.should.equal(
           1
         )
-        return this.CollaboratorsInviteController._checkShouldInviteEmail
+        this.CollaboratorsInviteController.promises._checkShouldInviteEmail
           .calledWith(this.targetEmail)
           .should.equal(true)
       })
 
       it('should have called inviteToProject', function () {
-        this.CollaboratorsInviteHandler.inviteToProject.callCount.should.equal(
+        this.CollaboratorsInviteHandler.promises.inviteToProject.callCount.should.equal(
           1
         )
-        return this.CollaboratorsInviteHandler.inviteToProject
+        this.CollaboratorsInviteHandler.promises.inviteToProject
           .calledWith(
             this.project_id,
             this.current_user,
@@ -361,17 +360,17 @@ describe('CollaboratorsInviteController', function () {
     })
 
     describe('when _checkShouldInviteEmail disallows the invite', function () {
-      beforeEach(function () {
-        this.CollaboratorsInviteController._checkShouldInviteEmail = sinon
+      beforeEach(function (done) {
+        this.CollaboratorsInviteController.promises._checkShouldInviteEmail =
+          sinon.stub().resolves(false)
+        this.CollaboratorsInviteController.promises._checkRateLimit = sinon
           .stub()
-          .callsArgWith(1, null, false)
-        this.CollaboratorsInviteController._checkRateLimit = sinon
+          .resolves(true)
+        this.LimitationsManager.promises.canAddXCollaborators = sinon
           .stub()
-          .yields(null, true)
-        this.LimitationsManager.canAddXCollaborators = sinon
-          .stub()
-          .callsArgWith(2, null, true)
-        return this.CollaboratorsInviteController.inviteToProject(
+          .resolves(true)
+        this.res.json.callsFake(() => done())
+        this.CollaboratorsInviteController.inviteToProject(
           this.req,
           this.res,
           this.next
@@ -380,40 +379,40 @@ describe('CollaboratorsInviteController', function () {
 
       it('should produce json response with no invite, and an error property', function () {
         this.res.json.callCount.should.equal(1)
-        return {
+        expect(this.res.json.firstCall.args[0]).to.deep.equal({
           invite: null,
           error: 'cannot_invite_non_user',
-        }.should.deep.equal(this.res.json.firstCall.args[0])
+        })
       })
 
       it('should have called _checkShouldInviteEmail', function () {
-        this.CollaboratorsInviteController._checkShouldInviteEmail.callCount.should.equal(
+        this.CollaboratorsInviteController.promises._checkShouldInviteEmail.callCount.should.equal(
           1
         )
-        return this.CollaboratorsInviteController._checkShouldInviteEmail
+        this.CollaboratorsInviteController.promises._checkShouldInviteEmail
           .calledWith(this.targetEmail)
           .should.equal(true)
       })
 
       it('should not have called inviteToProject', function () {
-        return this.CollaboratorsInviteHandler.inviteToProject.callCount.should.equal(
+        this.CollaboratorsInviteHandler.promises.inviteToProject.callCount.should.equal(
           0
         )
       })
     })
 
     describe('when _checkShouldInviteEmail produces an error', function () {
-      beforeEach(function () {
-        this.CollaboratorsInviteController._checkShouldInviteEmail = sinon
+      beforeEach(function (done) {
+        this.CollaboratorsInviteController.promises._checkShouldInviteEmail =
+          sinon.stub().rejects(new Error('woops'))
+        this.CollaboratorsInviteController.promises._checkRateLimit = sinon
           .stub()
-          .callsArgWith(1, new Error('woops'))
-        this.CollaboratorsInviteController._checkRateLimit = sinon
+          .resolves(true)
+        this.LimitationsManager.promises.canAddXCollaborators = sinon
           .stub()
-          .yields(null, true)
-        this.LimitationsManager.canAddXCollaborators = sinon
-          .stub()
-          .callsArgWith(2, null, true)
-        return this.CollaboratorsInviteController.inviteToProject(
+          .resolves(true)
+        this.next.callsFake(() => done())
+        this.CollaboratorsInviteController.inviteToProject(
           this.req,
           this.res,
           this.next
@@ -422,22 +421,20 @@ describe('CollaboratorsInviteController', function () {
 
       it('should call next with an error', function () {
         this.next.callCount.should.equal(1)
-        return this.next
-          .calledWith(sinon.match.instanceOf(Error))
-          .should.equal(true)
+        this.next.calledWith(sinon.match.instanceOf(Error)).should.equal(true)
       })
 
       it('should have called _checkShouldInviteEmail', function () {
-        this.CollaboratorsInviteController._checkShouldInviteEmail.callCount.should.equal(
+        this.CollaboratorsInviteController.promises._checkShouldInviteEmail.callCount.should.equal(
           1
         )
-        return this.CollaboratorsInviteController._checkShouldInviteEmail
+        this.CollaboratorsInviteController.promises._checkShouldInviteEmail
           .calledWith(this.targetEmail)
           .should.equal(true)
       })
 
       it('should not have called inviteToProject', function () {
-        return this.CollaboratorsInviteHandler.inviteToProject.callCount.should.equal(
+        this.CollaboratorsInviteHandler.promises.inviteToProject.callCount.should.equal(
           0
         )
       })
@@ -447,16 +444,15 @@ describe('CollaboratorsInviteController', function () {
       beforeEach(function () {
         this.req.session.user = { _id: 'abc', email: 'me@example.com' }
         this.req.body.email = 'me@example.com'
-        this.CollaboratorsInviteController._checkShouldInviteEmail = sinon
+        this.CollaboratorsInviteController.promises._checkShouldInviteEmail =
+          sinon.stub().resolves(true)
+        this.CollaboratorsInviteController.promises._checkRateLimit = sinon
           .stub()
-          .callsArgWith(1, null, true)
-        this.CollaboratorsInviteController._checkRateLimit = sinon
+          .resolves(true)
+        this.LimitationsManager.promises.canAddXCollaborators = sinon
           .stub()
-          .yields(null, true)
-        this.LimitationsManager.canAddXCollaborators = sinon
-          .stub()
-          .callsArgWith(2, null, true)
-        return this.CollaboratorsInviteController.inviteToProject(
+          .resolves(true)
+        this.CollaboratorsInviteController.inviteToProject(
           this.req,
           this.res,
           this.next
@@ -465,48 +461,47 @@ describe('CollaboratorsInviteController', function () {
 
       it('should reject action, return json response with error code', function () {
         this.res.json.callCount.should.equal(1)
-        return { invite: null, error: 'cannot_invite_self' }.should.deep.equal(
-          this.res.json.firstCall.args[0]
-        )
+        expect(this.res.json.firstCall.args[0]).to.deep.equal({
+          invite: null,
+          error: 'cannot_invite_self',
+        })
       })
 
       it('should not have called canAddXCollaborators', function () {
-        return this.LimitationsManager.canAddXCollaborators.callCount.should.equal(
+        this.LimitationsManager.promises.canAddXCollaborators.callCount.should.equal(
           0
         )
       })
 
       it('should not have called _checkShouldInviteEmail', function () {
-        return this.CollaboratorsInviteController._checkShouldInviteEmail.callCount.should.equal(
+        this.CollaboratorsInviteController.promises._checkShouldInviteEmail.callCount.should.equal(
           0
         )
       })
 
       it('should not have called inviteToProject', function () {
-        return this.CollaboratorsInviteHandler.inviteToProject.callCount.should.equal(
+        this.CollaboratorsInviteHandler.promises.inviteToProject.callCount.should.equal(
           0
         )
       })
 
       it('should not have called emitToRoom', function () {
-        return this.EditorRealTimeController.emitToRoom.callCount.should.equal(
-          0
-        )
+        this.EditorRealTimeController.emitToRoom.callCount.should.equal(0)
       })
     })
 
     describe('when _checkRateLimit returns false', function () {
-      beforeEach(function () {
-        this.CollaboratorsInviteController._checkShouldInviteEmail = sinon
+      beforeEach(function (done) {
+        this.CollaboratorsInviteController.promises._checkShouldInviteEmail =
+          sinon.stub().resolves(true)
+        this.CollaboratorsInviteController.promises._checkRateLimit = sinon
           .stub()
-          .callsArgWith(1, null, true)
-        this.CollaboratorsInviteController._checkRateLimit = sinon
+          .resolves(false)
+        this.LimitationsManager.promises.canAddXCollaborators = sinon
           .stub()
-          .yields(null, false)
-        this.LimitationsManager.canAddXCollaborators = sinon
-          .stub()
-          .callsArgWith(2, null, true)
-        return this.CollaboratorsInviteController.inviteToProject(
+          .resolves(true)
+        this.res.sendStatus.callsFake(() => done())
+        this.CollaboratorsInviteController.inviteToProject(
           this.req,
           this.res,
           this.next
@@ -514,19 +509,17 @@ describe('CollaboratorsInviteController', function () {
       })
 
       it('should send a 429 response', function () {
-        return this.res.sendStatus.calledWith(429).should.equal(true)
+        this.res.sendStatus.calledWith(429).should.equal(true)
       })
 
       it('should not call inviteToProject', function () {
-        return this.CollaboratorsInviteHandler.inviteToProject.called.should.equal(
+        this.CollaboratorsInviteHandler.promises.inviteToProject.called.should.equal(
           false
         )
       })
 
       it('should not call emitToRoom', function () {
-        return this.EditorRealTimeController.emitToRoom.called.should.equal(
-          false
-        )
+        this.EditorRealTimeController.emitToRoom.called.should.equal(false)
       })
     })
   })
@@ -566,24 +559,25 @@ describe('CollaboratorsInviteController', function () {
         email: 'john@example.com',
       }
 
-      this.CollaboratorsGetter.isUserInvitedMemberOfProject = sinon
+      this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject = sinon
         .stub()
-        .callsArgWith(2, null, false)
-      this.CollaboratorsInviteHandler.getInviteByToken = sinon
+        .resolves(false)
+      this.CollaboratorsInviteHandler.promises.getInviteByToken = sinon
         .stub()
-        .callsArgWith(2, null, this.invite)
-      this.ProjectGetter.getProject = sinon
+        .resolves(this.invite)
+      this.ProjectGetter.promises.getProject = sinon
         .stub()
-        .callsArgWith(2, null, this.fakeProject)
-      this.UserGetter.getUser.callsArgWith(2, null, this.owner)
+        .resolves(this.fakeProject)
+      this.UserGetter.promises.getUser.resolves(this.owner)
 
       this.callback = sinon.stub()
-      return (this.next = sinon.stub())
+      this.next = sinon.stub()
     })
 
     describe('when the token is valid', function () {
-      beforeEach(function () {
-        return this.CollaboratorsInviteController.viewInvite(
+      beforeEach(function (done) {
+        this.res.render.callsFake(() => done())
+        this.CollaboratorsInviteController.viewInvite(
           this.req,
           this.res,
           this.next
@@ -592,54 +586,53 @@ describe('CollaboratorsInviteController', function () {
 
       it('should render the view template', function () {
         this.res.render.callCount.should.equal(1)
-        return this.res.render
-          .calledWith('project/invite/show')
-          .should.equal(true)
+        this.res.render.calledWith('project/invite/show').should.equal(true)
       })
 
       it('should not call next', function () {
-        return this.next.callCount.should.equal(0)
+        this.next.callCount.should.equal(0)
       })
 
       it('should call CollaboratorsGetter.isUserInvitedMemberOfProject', function () {
-        this.CollaboratorsGetter.isUserInvitedMemberOfProject.callCount.should.equal(
+        this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject.callCount.should.equal(
           1
         )
-        return this.CollaboratorsGetter.isUserInvitedMemberOfProject
+        this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject
           .calledWith(this.current_user_id, this.project_id)
           .should.equal(true)
       })
 
       it('should call getInviteByToken', function () {
-        this.CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal(
+        this.CollaboratorsInviteHandler.promises.getInviteByToken.callCount.should.equal(
           1
         )
-        return this.CollaboratorsInviteHandler.getInviteByToken
+        this.CollaboratorsInviteHandler.promises.getInviteByToken
           .calledWith(this.fakeProject._id, this.invite.token)
           .should.equal(true)
       })
 
       it('should call User.getUser', function () {
-        this.UserGetter.getUser.callCount.should.equal(1)
-        return this.UserGetter.getUser
+        this.UserGetter.promises.getUser.callCount.should.equal(1)
+        this.UserGetter.promises.getUser
           .calledWith({ _id: this.fakeProject.owner_ref })
           .should.equal(true)
       })
 
       it('should call ProjectGetter.getProject', function () {
-        this.ProjectGetter.getProject.callCount.should.equal(1)
-        return this.ProjectGetter.getProject
+        this.ProjectGetter.promises.getProject.callCount.should.equal(1)
+        this.ProjectGetter.promises.getProject
           .calledWith(this.project_id)
           .should.equal(true)
       })
     })
 
     describe('when user is already a member of the project', function () {
-      beforeEach(function () {
-        this.CollaboratorsGetter.isUserInvitedMemberOfProject = sinon
+      beforeEach(function (done) {
+        this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject = sinon
           .stub()
-          .callsArgWith(2, null, true)
-        return this.CollaboratorsInviteController.viewInvite(
+          .resolves(true)
+        this.res.redirect.callsFake(() => done())
+        this.CollaboratorsInviteController.viewInvite(
           this.req,
           this.res,
           this.next
@@ -648,45 +641,46 @@ describe('CollaboratorsInviteController', function () {
 
       it('should redirect to the project page', function () {
         this.res.redirect.callCount.should.equal(1)
-        return this.res.redirect
+        this.res.redirect
           .calledWith(`/project/${this.project_id}`)
           .should.equal(true)
       })
 
       it('should not call next with an error', function () {
-        return this.next.callCount.should.equal(0)
+        this.next.callCount.should.equal(0)
       })
 
       it('should call CollaboratorsGetter.isUserInvitedMemberOfProject', function () {
-        this.CollaboratorsGetter.isUserInvitedMemberOfProject.callCount.should.equal(
+        this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject.callCount.should.equal(
           1
         )
-        return this.CollaboratorsGetter.isUserInvitedMemberOfProject
+        this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject
           .calledWith(this.current_user_id, this.project_id)
           .should.equal(true)
       })
 
       it('should not call getInviteByToken', function () {
-        return this.CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal(
+        this.CollaboratorsInviteHandler.promises.getInviteByToken.callCount.should.equal(
           0
         )
       })
 
       it('should not call User.getUser', function () {
-        return this.UserGetter.getUser.callCount.should.equal(0)
+        this.UserGetter.promises.getUser.callCount.should.equal(0)
       })
 
       it('should not call ProjectGetter.getProject', function () {
-        return this.ProjectGetter.getProject.callCount.should.equal(0)
+        this.ProjectGetter.promises.getProject.callCount.should.equal(0)
       })
     })
 
     describe('when isUserInvitedMemberOfProject produces an error', function () {
-      beforeEach(function () {
-        this.CollaboratorsGetter.isUserInvitedMemberOfProject = sinon
+      beforeEach(function (done) {
+        this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject = sinon
           .stub()
-          .callsArgWith(2, new Error('woops'))
-        return this.CollaboratorsInviteController.viewInvite(
+          .rejects(new Error('woops'))
+        this.next.callsFake(() => done())
+        this.CollaboratorsInviteController.viewInvite(
           this.req,
           this.res,
           this.next
@@ -695,40 +689,40 @@ describe('CollaboratorsInviteController', function () {
 
       it('should call next with an error', function () {
         this.next.callCount.should.equal(1)
-        return expect(this.next.firstCall.args[0]).to.be.instanceof(Error)
+        expect(this.next.firstCall.args[0]).to.be.instanceof(Error)
       })
 
       it('should call CollaboratorsGetter.isUserInvitedMemberOfProject', function () {
-        this.CollaboratorsGetter.isUserInvitedMemberOfProject.callCount.should.equal(
+        this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject.callCount.should.equal(
           1
         )
-        return this.CollaboratorsGetter.isUserInvitedMemberOfProject
+        this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject
           .calledWith(this.current_user_id, this.project_id)
           .should.equal(true)
       })
 
       it('should not call getInviteByToken', function () {
-        return this.CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal(
+        this.CollaboratorsInviteHandler.promises.getInviteByToken.callCount.should.equal(
           0
         )
       })
 
       it('should not call User.getUser', function () {
-        return this.UserGetter.getUser.callCount.should.equal(0)
+        this.UserGetter.promises.getUser.callCount.should.equal(0)
       })
 
       it('should not call ProjectGetter.getProject', function () {
-        return this.ProjectGetter.getProject.callCount.should.equal(0)
+        this.ProjectGetter.promises.getProject.callCount.should.equal(0)
       })
     })
 
     describe('when the getInviteByToken produces an error', function () {
-      beforeEach(function () {
-        this.CollaboratorsInviteHandler.getInviteByToken.callsArgWith(
-          2,
+      beforeEach(function (done) {
+        this.CollaboratorsInviteHandler.promises.getInviteByToken.rejects(
           new Error('woops')
         )
-        return this.CollaboratorsInviteController.viewInvite(
+        this.next.callsFake(() => done())
+        this.CollaboratorsInviteController.viewInvite(
           this.req,
           this.res,
           this.next
@@ -737,46 +731,41 @@ describe('CollaboratorsInviteController', function () {
 
       it('should call next with the error', function () {
         this.next.callCount.should.equal(1)
-        return this.next
-          .calledWith(sinon.match.instanceOf(Error))
-          .should.equal(true)
+        this.next.calledWith(sinon.match.instanceOf(Error)).should.equal(true)
       })
 
       it('should call CollaboratorsGetter.isUserInvitedMemberOfProject', function () {
-        this.CollaboratorsGetter.isUserInvitedMemberOfProject.callCount.should.equal(
+        this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject.callCount.should.equal(
           1
         )
-        return this.CollaboratorsGetter.isUserInvitedMemberOfProject
+        this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject
           .calledWith(this.current_user_id, this.project_id)
           .should.equal(true)
       })
 
       it('should call getInviteByToken', function () {
-        this.CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal(
+        this.CollaboratorsInviteHandler.promises.getInviteByToken.callCount.should.equal(
           1
         )
-        return this.CollaboratorsGetter.isUserInvitedMemberOfProject
+        this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject
           .calledWith(this.current_user_id, this.project_id)
           .should.equal(true)
       })
 
       it('should not call User.getUser', function () {
-        return this.UserGetter.getUser.callCount.should.equal(0)
+        this.UserGetter.promises.getUser.callCount.should.equal(0)
       })
 
       it('should not call ProjectGetter.getProject', function () {
-        return this.ProjectGetter.getProject.callCount.should.equal(0)
+        this.ProjectGetter.promises.getProject.callCount.should.equal(0)
       })
     })
 
     describe('when the getInviteByToken does not produce an invite', function () {
-      beforeEach(function () {
-        this.CollaboratorsInviteHandler.getInviteByToken.callsArgWith(
-          2,
-          null,
-          null
-        )
-        return this.CollaboratorsInviteController.viewInvite(
+      beforeEach(function (done) {
+        this.CollaboratorsInviteHandler.promises.getInviteByToken.resolves(null)
+        this.res.render.callsFake(() => done())
+        this.CollaboratorsInviteController.viewInvite(
           this.req,
           this.res,
           this.next
@@ -785,46 +774,47 @@ describe('CollaboratorsInviteController', function () {
 
       it('should render the not-valid view template', function () {
         this.res.render.callCount.should.equal(1)
-        return this.res.render
+        this.res.render
           .calledWith('project/invite/not-valid')
           .should.equal(true)
       })
 
       it('should not call next', function () {
-        return this.next.callCount.should.equal(0)
+        this.next.callCount.should.equal(0)
       })
 
       it('should call CollaboratorsGetter.isUserInvitedMemberOfProject', function () {
-        this.CollaboratorsGetter.isUserInvitedMemberOfProject.callCount.should.equal(
+        this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject.callCount.should.equal(
           1
         )
-        return this.CollaboratorsGetter.isUserInvitedMemberOfProject
+        this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject
           .calledWith(this.current_user_id, this.project_id)
           .should.equal(true)
       })
 
       it('should call getInviteByToken', function () {
-        this.CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal(
+        this.CollaboratorsInviteHandler.promises.getInviteByToken.callCount.should.equal(
           1
         )
-        return this.CollaboratorsGetter.isUserInvitedMemberOfProject
+        this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject
           .calledWith(this.current_user_id, this.project_id)
           .should.equal(true)
       })
 
       it('should not call User.getUser', function () {
-        return this.UserGetter.getUser.callCount.should.equal(0)
+        this.UserGetter.promises.getUser.callCount.should.equal(0)
       })
 
       it('should not call ProjectGetter.getProject', function () {
-        return this.ProjectGetter.getProject.callCount.should.equal(0)
+        this.ProjectGetter.promises.getProject.callCount.should.equal(0)
       })
     })
 
     describe('when User.getUser produces an error', function () {
-      beforeEach(function () {
-        this.UserGetter.getUser.callsArgWith(2, new Error('woops'))
-        return this.CollaboratorsInviteController.viewInvite(
+      beforeEach(function (done) {
+        this.UserGetter.promises.getUser.rejects(new Error('woops'))
+        this.next.callsFake(() => done())
+        this.CollaboratorsInviteController.viewInvite(
           this.req,
           this.res,
           this.next
@@ -833,40 +823,41 @@ describe('CollaboratorsInviteController', function () {
 
       it('should produce an error', function () {
         this.next.callCount.should.equal(1)
-        return expect(this.next.firstCall.args[0]).to.be.instanceof(Error)
+        expect(this.next.firstCall.args[0]).to.be.instanceof(Error)
       })
 
       it('should call CollaboratorsGetter.isUserInvitedMemberOfProject', function () {
-        this.CollaboratorsGetter.isUserInvitedMemberOfProject.callCount.should.equal(
+        this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject.callCount.should.equal(
           1
         )
-        return this.CollaboratorsGetter.isUserInvitedMemberOfProject
+        this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject
           .calledWith(this.current_user_id, this.project_id)
           .should.equal(true)
       })
 
       it('should call getInviteByToken', function () {
-        return this.CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal(
+        this.CollaboratorsInviteHandler.promises.getInviteByToken.callCount.should.equal(
           1
         )
       })
 
       it('should call User.getUser', function () {
-        this.UserGetter.getUser.callCount.should.equal(1)
-        return this.UserGetter.getUser
+        this.UserGetter.promises.getUser.callCount.should.equal(1)
+        this.UserGetter.promises.getUser
           .calledWith({ _id: this.fakeProject.owner_ref })
           .should.equal(true)
       })
 
       it('should not call ProjectGetter.getProject', function () {
-        return this.ProjectGetter.getProject.callCount.should.equal(0)
+        this.ProjectGetter.promises.getProject.callCount.should.equal(0)
       })
     })
 
     describe('when User.getUser does not find a user', function () {
-      beforeEach(function () {
-        this.UserGetter.getUser.callsArgWith(2, null, null)
-        return this.CollaboratorsInviteController.viewInvite(
+      beforeEach(function (done) {
+        this.UserGetter.promises.getUser.resolves(null)
+        this.res.render.callsFake(() => done())
+        this.CollaboratorsInviteController.viewInvite(
           this.req,
           this.res,
           this.next
@@ -875,46 +866,47 @@ describe('CollaboratorsInviteController', function () {
 
       it('should render the not-valid view template', function () {
         this.res.render.callCount.should.equal(1)
-        return this.res.render
+        this.res.render
           .calledWith('project/invite/not-valid')
           .should.equal(true)
       })
 
       it('should not call next', function () {
-        return this.next.callCount.should.equal(0)
+        this.next.callCount.should.equal(0)
       })
 
       it('should call CollaboratorsGetter.isUserInvitedMemberOfProject', function () {
-        this.CollaboratorsGetter.isUserInvitedMemberOfProject.callCount.should.equal(
+        this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject.callCount.should.equal(
           1
         )
-        return this.CollaboratorsGetter.isUserInvitedMemberOfProject
+        this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject
           .calledWith(this.current_user_id, this.project_id)
           .should.equal(true)
       })
 
       it('should call getInviteByToken', function () {
-        return this.CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal(
+        this.CollaboratorsInviteHandler.promises.getInviteByToken.callCount.should.equal(
           1
         )
       })
 
       it('should call User.getUser', function () {
-        this.UserGetter.getUser.callCount.should.equal(1)
-        return this.UserGetter.getUser
+        this.UserGetter.promises.getUser.callCount.should.equal(1)
+        this.UserGetter.promises.getUser
           .calledWith({ _id: this.fakeProject.owner_ref })
           .should.equal(true)
       })
 
       it('should not call ProjectGetter.getProject', function () {
-        return this.ProjectGetter.getProject.callCount.should.equal(0)
+        this.ProjectGetter.promises.getProject.callCount.should.equal(0)
       })
     })
 
     describe('when getProject produces an error', function () {
-      beforeEach(function () {
-        this.ProjectGetter.getProject.callsArgWith(2, new Error('woops'))
-        return this.CollaboratorsInviteController.viewInvite(
+      beforeEach(function (done) {
+        this.ProjectGetter.promises.getProject.rejects(new Error('woops'))
+        this.next.callsFake(() => done())
+        this.CollaboratorsInviteController.viewInvite(
           this.req,
           this.res,
           this.next
@@ -923,40 +915,41 @@ describe('CollaboratorsInviteController', function () {
 
       it('should produce an error', function () {
         this.next.callCount.should.equal(1)
-        return expect(this.next.firstCall.args[0]).to.be.instanceof(Error)
+        expect(this.next.firstCall.args[0]).to.be.instanceof(Error)
       })
 
       it('should call CollaboratorsGetter.isUserInvitedMemberOfProject', function () {
-        this.CollaboratorsGetter.isUserInvitedMemberOfProject.callCount.should.equal(
+        this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject.callCount.should.equal(
           1
         )
-        return this.CollaboratorsGetter.isUserInvitedMemberOfProject
+        this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject
           .calledWith(this.current_user_id, this.project_id)
           .should.equal(true)
       })
 
       it('should call getInviteByToken', function () {
-        return this.CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal(
+        this.CollaboratorsInviteHandler.promises.getInviteByToken.callCount.should.equal(
           1
         )
       })
 
       it('should call User.getUser', function () {
-        this.UserGetter.getUser.callCount.should.equal(1)
-        return this.UserGetter.getUser
+        this.UserGetter.promises.getUser.callCount.should.equal(1)
+        this.UserGetter.promises.getUser
           .calledWith({ _id: this.fakeProject.owner_ref })
           .should.equal(true)
       })
 
       it('should call ProjectGetter.getProject', function () {
-        return this.ProjectGetter.getProject.callCount.should.equal(1)
+        this.ProjectGetter.promises.getProject.callCount.should.equal(1)
       })
     })
 
     describe('when Project.getUser does not find a user', function () {
-      beforeEach(function () {
-        this.ProjectGetter.getProject.callsArgWith(2, null, null)
-        return this.CollaboratorsInviteController.viewInvite(
+      beforeEach(function (done) {
+        this.ProjectGetter.promises.getProject.resolves(null)
+        this.res.render.callsFake(() => done())
+        this.CollaboratorsInviteController.viewInvite(
           this.req,
           this.res,
           this.next
@@ -965,39 +958,39 @@ describe('CollaboratorsInviteController', function () {
 
       it('should render the not-valid view template', function () {
         this.res.render.callCount.should.equal(1)
-        return this.res.render
+        this.res.render
           .calledWith('project/invite/not-valid')
           .should.equal(true)
       })
 
       it('should not call next', function () {
-        return this.next.callCount.should.equal(0)
+        this.next.callCount.should.equal(0)
       })
 
       it('should call CollaboratorsGetter.isUserInvitedMemberOfProject', function () {
-        this.CollaboratorsGetter.isUserInvitedMemberOfProject.callCount.should.equal(
+        this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject.callCount.should.equal(
           1
         )
-        return this.CollaboratorsGetter.isUserInvitedMemberOfProject
+        this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject
           .calledWith(this.current_user_id, this.project_id)
           .should.equal(true)
       })
 
       it('should call getInviteByToken', function () {
-        return this.CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal(
+        this.CollaboratorsInviteHandler.promises.getInviteByToken.callCount.should.equal(
           1
         )
       })
 
       it('should call getUser', function () {
-        this.UserGetter.getUser.callCount.should.equal(1)
-        return this.UserGetter.getUser
+        this.UserGetter.promises.getUser.callCount.should.equal(1)
+        this.UserGetter.promises.getUser
           .calledWith({ _id: this.fakeProject.owner_ref })
           .should.equal(true)
       })
 
       it('should call ProjectGetter.getProject', function () {
-        return this.ProjectGetter.getProject.callCount.should.equal(1)
+        this.ProjectGetter.promises.getProject.callCount.should.equal(1)
       })
     })
   })
@@ -1013,19 +1006,20 @@ describe('CollaboratorsInviteController', function () {
       }
       this.res.render = sinon.stub()
       this.res.sendStatus = sinon.stub()
-      this.CollaboratorsInviteHandler.resendInvite = sinon
+      this.CollaboratorsInviteHandler.promises.resendInvite = sinon
         .stub()
-        .callsArgWith(3, null)
-      this.CollaboratorsInviteController._checkRateLimit = sinon
+        .resolves(null)
+      this.CollaboratorsInviteController.promises._checkRateLimit = sinon
         .stub()
-        .yields(null, true)
+        .resolves(true)
       this.callback = sinon.stub()
-      return (this.next = sinon.stub())
+      this.next = sinon.stub()
     })
 
     describe('when resendInvite does not produce an error', function () {
-      beforeEach(function () {
-        return this.CollaboratorsInviteController.resendInvite(
+      beforeEach(function (done) {
+        this.res.sendStatus.callsFake(() => done())
+        this.CollaboratorsInviteController.resendInvite(
           this.req,
           this.res,
           this.next
@@ -1034,28 +1028,29 @@ describe('CollaboratorsInviteController', function () {
 
       it('should produce a 201 response', function () {
         this.res.sendStatus.callCount.should.equal(1)
-        return this.res.sendStatus.calledWith(201).should.equal(true)
+        this.res.sendStatus.calledWith(201).should.equal(true)
       })
 
       it('should have called resendInvite', function () {
-        return this.CollaboratorsInviteHandler.resendInvite.callCount.should.equal(
+        this.CollaboratorsInviteHandler.promises.resendInvite.callCount.should.equal(
           1
         )
       })
 
       it('should check the rate limit', function () {
-        return this.CollaboratorsInviteController._checkRateLimit.callCount.should.equal(
+        this.CollaboratorsInviteController.promises._checkRateLimit.callCount.should.equal(
           1
         )
       })
     })
 
     describe('when resendInvite produces an error', function () {
-      beforeEach(function () {
-        this.CollaboratorsInviteHandler.resendInvite = sinon
+      beforeEach(function (done) {
+        this.CollaboratorsInviteHandler.promises.resendInvite = sinon
           .stub()
-          .callsArgWith(3, new Error('woops'))
-        return this.CollaboratorsInviteController.resendInvite(
+          .rejects(new Error('woops'))
+        this.next.callsFake(() => done())
+        this.CollaboratorsInviteController.resendInvite(
           this.req,
           this.res,
           this.next
@@ -1063,18 +1058,16 @@ describe('CollaboratorsInviteController', function () {
       })
 
       it('should not produce a 201 response', function () {
-        return this.res.sendStatus.callCount.should.equal(0)
+        this.res.sendStatus.callCount.should.equal(0)
       })
 
       it('should call next with the error', function () {
         this.next.callCount.should.equal(1)
-        return this.next
-          .calledWith(sinon.match.instanceOf(Error))
-          .should.equal(true)
+        this.next.calledWith(sinon.match.instanceOf(Error)).should.equal(true)
       })
 
       it('should have called resendInvite', function () {
-        return this.CollaboratorsInviteHandler.resendInvite.callCount.should.equal(
+        this.CollaboratorsInviteHandler.promises.resendInvite.callCount.should.equal(
           1
         )
       })
@@ -1091,16 +1084,17 @@ describe('CollaboratorsInviteController', function () {
       this.req.session = { user: this.current_user }
       this.res.render = sinon.stub()
       this.res.sendStatus = sinon.stub()
-      this.CollaboratorsInviteHandler.revokeInvite = sinon
+      this.CollaboratorsInviteHandler.promises.revokeInvite = sinon
         .stub()
-        .callsArgWith(2, null)
+        .resolves(null)
       this.callback = sinon.stub()
-      return (this.next = sinon.stub())
+      this.next = sinon.stub()
     })
 
     describe('when revokeInvite does not produce an error', function () {
-      beforeEach(function () {
-        return this.CollaboratorsInviteController.revokeInvite(
+      beforeEach(function (done) {
+        this.res.sendStatus.callsFake(() => done())
+        this.CollaboratorsInviteController.revokeInvite(
           this.req,
           this.res,
           this.next
@@ -1109,29 +1103,30 @@ describe('CollaboratorsInviteController', function () {
 
       it('should produce a 201 response', function () {
         this.res.sendStatus.callCount.should.equal(1)
-        return this.res.sendStatus.calledWith(201).should.equal(true)
+        this.res.sendStatus.calledWith(201).should.equal(true)
       })
 
       it('should have called revokeInvite', function () {
-        return this.CollaboratorsInviteHandler.revokeInvite.callCount.should.equal(
+        this.CollaboratorsInviteHandler.promises.revokeInvite.callCount.should.equal(
           1
         )
       })
 
       it('should have called emitToRoom', function () {
         this.EditorRealTimeController.emitToRoom.callCount.should.equal(1)
-        return this.EditorRealTimeController.emitToRoom
+        this.EditorRealTimeController.emitToRoom
           .calledWith(this.project_id, 'project:membership:changed')
           .should.equal(true)
       })
     })
 
     describe('when revokeInvite produces an error', function () {
-      beforeEach(function () {
-        this.CollaboratorsInviteHandler.revokeInvite = sinon
+      beforeEach(function (done) {
+        this.CollaboratorsInviteHandler.promises.revokeInvite = sinon
           .stub()
-          .callsArgWith(2, new Error('woops'))
-        return this.CollaboratorsInviteController.revokeInvite(
+          .rejects(new Error('woops'))
+        this.next.callsFake(() => done())
+        this.CollaboratorsInviteController.revokeInvite(
           this.req,
           this.res,
           this.next
@@ -1139,18 +1134,16 @@ describe('CollaboratorsInviteController', function () {
       })
 
       it('should not produce a 201 response', function () {
-        return this.res.sendStatus.callCount.should.equal(0)
+        this.res.sendStatus.callCount.should.equal(0)
       })
 
       it('should call next with the error', function () {
         this.next.callCount.should.equal(1)
-        return this.next
-          .calledWith(sinon.match.instanceOf(Error))
-          .should.equal(true)
+        this.next.calledWith(sinon.match.instanceOf(Error)).should.equal(true)
       })
 
       it('should have called revokeInvite', function () {
-        return this.CollaboratorsInviteHandler.revokeInvite.callCount.should.equal(
+        this.CollaboratorsInviteHandler.promises.revokeInvite.callCount.should.equal(
           1
         )
       })
@@ -1168,16 +1161,17 @@ describe('CollaboratorsInviteController', function () {
       }
       this.res.render = sinon.stub()
       this.res.redirect = sinon.stub()
-      this.CollaboratorsInviteHandler.acceptInvite = sinon
+      this.CollaboratorsInviteHandler.promises.acceptInvite = sinon
         .stub()
-        .callsArgWith(3, null)
+        .resolves(null)
       this.callback = sinon.stub()
-      return (this.next = sinon.stub())
+      this.next = sinon.stub()
     })
 
     describe('when acceptInvite does not produce an error', function () {
-      beforeEach(function () {
-        return this.CollaboratorsInviteController.acceptInvite(
+      beforeEach(function (done) {
+        this.res.redirect.callsFake(() => done())
+        this.CollaboratorsInviteController.acceptInvite(
           this.req,
           this.res,
           this.next
@@ -1186,31 +1180,32 @@ describe('CollaboratorsInviteController', function () {
 
       it('should redirect to project page', function () {
         this.res.redirect.callCount.should.equal(1)
-        return this.res.redirect
+        this.res.redirect
           .calledWith(`/project/${this.project_id}`)
           .should.equal(true)
       })
 
       it('should have called acceptInvite', function () {
-        return this.CollaboratorsInviteHandler.acceptInvite
+        this.CollaboratorsInviteHandler.promises.acceptInvite
           .calledWith(this.project_id, this.token)
           .should.equal(true)
       })
 
       it('should have called emitToRoom', function () {
         this.EditorRealTimeController.emitToRoom.callCount.should.equal(1)
-        return this.EditorRealTimeController.emitToRoom
+        this.EditorRealTimeController.emitToRoom
           .calledWith(this.project_id, 'project:membership:changed')
           .should.equal(true)
       })
     })
 
     describe('when revokeInvite produces an error', function () {
-      beforeEach(function () {
-        this.CollaboratorsInviteHandler.acceptInvite = sinon
+      beforeEach(function (done) {
+        this.CollaboratorsInviteHandler.promises.acceptInvite = sinon
           .stub()
-          .callsArgWith(3, new Error('woops'))
-        return this.CollaboratorsInviteController.acceptInvite(
+          .rejects(new Error('woops'))
+        this.next.callsFake(() => done())
+        this.CollaboratorsInviteController.acceptInvite(
           this.req,
           this.res,
           this.next
@@ -1218,18 +1213,16 @@ describe('CollaboratorsInviteController', function () {
       })
 
       it('should not redirect to project page', function () {
-        return this.res.redirect.callCount.should.equal(0)
+        this.res.redirect.callCount.should.equal(0)
       })
 
       it('should call next with the error', function () {
         this.next.callCount.should.equal(1)
-        return this.next
-          .calledWith(sinon.match.instanceOf(Error))
-          .should.equal(true)
+        this.next.calledWith(sinon.match.instanceOf(Error)).should.equal(true)
       })
 
       it('should have called acceptInvite', function () {
-        return this.CollaboratorsInviteHandler.acceptInvite.callCount.should.equal(
+        this.CollaboratorsInviteHandler.promises.acceptInvite.callCount.should.equal(
           1
         )
       })
@@ -1238,33 +1231,33 @@ describe('CollaboratorsInviteController', function () {
 
   describe('_checkShouldInviteEmail', function () {
     beforeEach(function () {
-      return (this.email = 'user@example.com')
+      this.email = 'user@example.com'
     })
 
     describe('when we should be restricting to existing accounts', function () {
       beforeEach(function () {
         this.settings.restrictInvitesToExistingAccounts = true
-        return (this.call = callback => {
-          return this.CollaboratorsInviteController._checkShouldInviteEmail(
+        this.call = callback => {
+          this.CollaboratorsInviteController._checkShouldInviteEmail(
             this.email,
             callback
           )
-        })
+        }
       })
 
       describe('when user account is present', function () {
         beforeEach(function () {
           this.user = { _id: ObjectId().toString() }
-          return (this.UserGetter.getUserByAnyEmail = sinon
+          this.UserGetter.promises.getUserByAnyEmail = sinon
             .stub()
-            .callsArgWith(2, null, this.user))
+            .resolves(this.user)
         })
 
         it('should callback with `true`', function (done) {
-          return this.call((err, shouldAllow) => {
+          this.call((err, shouldAllow) => {
             expect(err).to.equal(null)
             expect(shouldAllow).to.equal(true)
-            return done()
+            done()
           })
         })
       })
@@ -1272,26 +1265,29 @@ describe('CollaboratorsInviteController', function () {
       describe('when user account is absent', function () {
         beforeEach(function () {
           this.user = null
-          return (this.UserGetter.getUserByAnyEmail = sinon
+          this.UserGetter.promises.getUserByAnyEmail = sinon
             .stub()
-            .callsArgWith(2, null, this.user))
+            .resolves(this.user)
         })
 
         it('should callback with `false`', function (done) {
-          return this.call((err, shouldAllow) => {
+          this.call((err, shouldAllow) => {
             expect(err).to.equal(null)
             expect(shouldAllow).to.equal(false)
-            return done()
+            done()
           })
         })
 
         it('should have called getUser', function (done) {
-          return this.call((err, shouldAllow) => {
-            this.UserGetter.getUserByAnyEmail.callCount.should.equal(1)
-            this.UserGetter.getUserByAnyEmail
+          this.call((err, shouldAllow) => {
+            if (err) {
+              return done(err)
+            }
+            this.UserGetter.promises.getUserByAnyEmail.callCount.should.equal(1)
+            this.UserGetter.promises.getUserByAnyEmail
               .calledWith(this.email, { _id: 1 })
               .should.equal(true)
-            return done()
+            done()
           })
         })
       })
@@ -1299,17 +1295,17 @@ describe('CollaboratorsInviteController', function () {
       describe('when getUser produces an error', function () {
         beforeEach(function () {
           this.user = null
-          return (this.UserGetter.getUserByAnyEmail = sinon
+          this.UserGetter.promises.getUserByAnyEmail = sinon
             .stub()
-            .callsArgWith(2, new Error('woops')))
+            .rejects(new Error('woops'))
         })
 
         it('should callback with an error', function (done) {
-          return this.call((err, shouldAllow) => {
+          this.call((err, shouldAllow) => {
             expect(err).to.not.equal(null)
             expect(err).to.be.instanceof(Error)
             expect(shouldAllow).to.equal(undefined)
-            return done()
+            done()
           })
         })
       })
@@ -1320,35 +1316,42 @@ describe('CollaboratorsInviteController', function () {
     beforeEach(function () {
       this.settings.restrictInvitesToExistingAccounts = false
       this.sendingUserId = '32312313'
-      this.LimitationsManager.allowedNumberOfCollaboratorsForUser = sinon.stub()
-      return this.LimitationsManager.allowedNumberOfCollaboratorsForUser
+      this.LimitationsManager.promises.allowedNumberOfCollaboratorsForUser =
+        sinon.stub()
+      this.LimitationsManager.promises.allowedNumberOfCollaboratorsForUser
         .withArgs(this.sendingUserId)
-        .yields(null, 17)
+        .resolves(17)
     })
 
     it('should callback with `true` when rate limit under', function (done) {
-      return this.CollaboratorsInviteController._checkRateLimit(
+      this.CollaboratorsInviteController._checkRateLimit(
         this.sendingUserId,
         (err, result) => {
+          if (err) {
+            return done(err)
+          }
           expect(this.rateLimiter.consume).to.have.been.calledWith(
             this.sendingUserId
           )
           result.should.equal(true)
-          return done()
+          done()
         }
       )
     })
 
     it('should callback with `false` when rate limit hit', function (done) {
       this.rateLimiter.consume.rejects({ remainingPoints: 0 })
-      return this.CollaboratorsInviteController._checkRateLimit(
+      this.CollaboratorsInviteController._checkRateLimit(
         this.sendingUserId,
         (err, result) => {
+          if (err) {
+            return done(err)
+          }
           expect(this.rateLimiter.consume).to.have.been.calledWith(
             this.sendingUserId
           )
           result.should.equal(false)
-          return done()
+          done()
         }
       )
     })
@@ -1357,43 +1360,52 @@ describe('CollaboratorsInviteController', function () {
       this.CollaboratorsInviteController._checkRateLimit(
         this.sendingUserId,
         (err, result) => {
+          if (err) {
+            return done(err)
+          }
           expect(this.rateLimiter.consume).to.have.been.calledWith(
             this.sendingUserId,
             Math.floor(40000 / 170)
           )
-          return done()
+          done()
         }
       )
     })
 
     it('should allow 200 requests when collaborators is -1', function (done) {
-      this.LimitationsManager.allowedNumberOfCollaboratorsForUser
+      this.LimitationsManager.promises.allowedNumberOfCollaboratorsForUser
         .withArgs(this.sendingUserId)
-        .yields(null, -1)
+        .resolves(-1)
       this.CollaboratorsInviteController._checkRateLimit(
         this.sendingUserId,
         (err, result) => {
+          if (err) {
+            return done(err)
+          }
           expect(this.rateLimiter.consume).to.have.been.calledWith(
             this.sendingUserId,
             Math.floor(40000 / 200)
           )
-          return done()
+          done()
         }
       )
     })
 
     it('should allow 10 requests when user has no collaborators set', function (done) {
-      this.LimitationsManager.allowedNumberOfCollaboratorsForUser
+      this.LimitationsManager.promises.allowedNumberOfCollaboratorsForUser
         .withArgs(this.sendingUserId)
-        .yields(null)
-      return this.CollaboratorsInviteController._checkRateLimit(
+        .resolves(null)
+      this.CollaboratorsInviteController._checkRateLimit(
         this.sendingUserId,
         (err, result) => {
+          if (err) {
+            return done(err)
+          }
           expect(this.rateLimiter.consume).to.have.been.calledWith(
             this.sendingUserId,
             Math.floor(40000 / 10)
           )
-          return done()
+          done()
         }
       )
     })
