@@ -138,6 +138,18 @@ describe('close brackets', { scrollBehavior: false }, function () {
       cy.get('@active-line').should('have.text', '2$')
     })
 
+    it('does not auto-close a dollar sign before a command', function () {
+      cy.get('@active-line').type('\\nu')
+      cy.get('@active-line').type('{leftArrow}{leftArrow}{leftArrow}$')
+      cy.get('@active-line').should('have.text', '$\\nu')
+    })
+
+    it('does auto-close a dollar sign before a newline', function () {
+      cy.get('@active-line').type('\\\\')
+      cy.get('@active-line').type('{leftArrow}{leftArrow}$')
+      cy.get('@active-line').should('have.text', '$$\\\\')
+    })
+
     it('does auto-close a curly bracket before punctuation', function () {
       cy.get('@active-line').type(':2')
       cy.get('@active-line').type('{leftArrow}{leftArrow}{{}')
