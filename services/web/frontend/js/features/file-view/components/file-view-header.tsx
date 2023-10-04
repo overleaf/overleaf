@@ -1,27 +1,22 @@
-import { useState, useCallback, type ElementType } from 'react'
+import { useState, type ElementType } from 'react'
 import PropTypes from 'prop-types'
 import { Trans, useTranslation } from 'react-i18next'
 
 import Icon from '../../../shared/components/icon'
 import { formatTime, relativeDate } from '../../utils/format-date'
-import { postJSON } from '../../../infrastructure/fetch-json'
 import { useEditorContext } from '../../../shared/context/editor-context'
 import { useProjectContext } from '../../../shared/context/project-context'
 
+import { Nullable } from '../../../../../types/utils'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
-import useAbortController from '../../../shared/hooks/use-abort-controller'
 import { LinkedFileIcon } from './file-view-icons'
 import { BinaryFile, hasProvider, LinkedFile } from '../types/binary-file'
+import FileViewRefreshButton from './file-view-refresh-button'
+import FileViewNotOriginalImporter from './file-view-not-original-importer'
+import FileViewRefreshError from './file-view-refresh-error'
 
 const tprLinkedFileInfo = importOverleafModules('tprLinkedFileInfo') as {
   import: { LinkedFileInfo: ElementType }
-  path: string
-}[]
-
-const tprLinkedFileRefreshError = importOverleafModules(
-  'tprLinkedFileRefreshError'
-) as {
-  import: { LinkedFileRefreshError: ElementType }
   path: string
 }[]
 
@@ -55,10 +50,7 @@ export default function FileViewHeader({ file }: FileViewHeaderProps) {
   })
   const { t } = useTranslation()
 
-  const [refreshing, setRefreshing] = useState(false)
-  const [refreshError, setRefreshError] = useState(null)
-
-  const { signal } = useAbortController()
+  const [refreshError, setRefreshError] = useState<Nullable<string>>(null)
 
   let fileInfo
   if (file.linkedFileData) {
@@ -83,29 +75,6 @@ export default function FileViewHeader({ file }: FileViewHeaderProps) {
     }
   }
 
-  const refreshFile = useCallback(() => {
-    setRefreshing(true)
-    // Replacement of the file handled by the file tree
-    window.expectingLinkedFileRefreshedSocketFor = file.name
-    const body = {
-      shouldReindexReferences:
-        file.linkedFileData?.provider === 'mendeley' ||
-        file.linkedFileData?.provider === 'zotero' ||
-        /\.bib$/.test(file.name),
-    }
-    postJSON(`/project/${projectId}/linked_file/${file.id}/refresh`, {
-      signal,
-      body,
-    })
-      .then(() => {
-        setRefreshing(false)
-      })
-      .catch(err => {
-        setRefreshing(false)
-        setRefreshError(err.data?.message || err.message)
-      })
-  }, [file, projectId, signal])
-
   return (
     <div>
       {file.linkedFileData && fileInfo}
@@ -114,14 +83,7 @@ export default function FileViewHeader({ file }: FileViewHeaderProps) {
           <LinkedFileInfo key={path} file={file} />
         ))}
       {file.linkedFileData && permissionsLevel !== 'readOnly' && (
-        <button
-          className="btn btn-primary"
-          onClick={refreshFile}
-          disabled={refreshing}
-        >
-          <Icon type="refresh" spin={refreshing} fw />
-          <span>{refreshing ? t('refreshing') + '...' : t('refresh')}</span>
-        </button>
+        <FileViewRefreshButton file={file} setRefreshError={setRefreshError} />
       )}
       &nbsp;
       <a
@@ -133,18 +95,9 @@ export default function FileViewHeader({ file }: FileViewHeaderProps) {
         &nbsp;
         <span>{t('download')}</span>
       </a>
+      {file.linkedFileData && <FileViewNotOriginalImporter file={file} />}
       {refreshError && (
-        <div className="row">
-          <br />
-          <div className="alert alert-danger col-md-6 col-md-offset-3">
-            {t('access_denied')}: {refreshError}
-            {tprLinkedFileRefreshError.map(
-              ({ import: { LinkedFileRefreshError }, path }) => (
-                <LinkedFileRefreshError key={path} file={file} />
-              )
-            )}
-          </div>
-        </div>
+        <FileViewRefreshError file={file} refreshError={refreshError} />
       )}
     </div>
   )

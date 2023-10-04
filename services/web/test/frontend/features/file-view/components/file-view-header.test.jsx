@@ -1,13 +1,9 @@
-import {
-  screen,
-  fireEvent,
-  waitForElementToBeRemoved,
-} from '@testing-library/react'
-import { expect } from 'chai'
+import { screen } from '@testing-library/react'
 import fetchMock from 'fetch-mock'
 
 import { renderWithEditorContext } from '../../../helpers/render-with-context'
 import FileViewHeader from '../../../../../frontend/js/features/file-view/components/file-view-header'
+import { USER_ID } from '../../../helpers/editor-providers'
 
 describe('<FileViewHeader/>', function () {
   const urlFile = {
@@ -26,6 +22,7 @@ describe('<FileViewHeader/>', function () {
       source_project_id: 'source-project-id',
       source_entity_path: '/source-entity-path.ext',
       provider: 'project_file',
+      importer_id: USER_ID,
     },
     created: new Date(2021, 1, 17, 3, 24).toISOString(),
   }
@@ -36,14 +33,6 @@ describe('<FileViewHeader/>', function () {
       v1_source_doc_id: 'v1-source-id',
       source_output_file_path: '/source-entity-path.ext',
       provider: 'project_output_file',
-    },
-    created: new Date(2021, 1, 17, 3, 24).toISOString(),
-  }
-
-  const thirdPartyReferenceFile = {
-    name: 'example.tex',
-    linkedFileData: {
-      provider: 'zotero',
     },
     created: new Date(2021, 1, 17, 3, 24).toISOString(),
   }
@@ -82,48 +71,6 @@ describe('<FileViewHeader/>', function () {
       screen.getByText('/source-entity-path.ext, at 3:24 am Wed, 17th Feb 21', {
         exact: false,
       })
-    })
-  })
-
-  describe('The refresh button', async function () {
-    it('Changes text when the file is refreshing', async function () {
-      fetchMock.post(
-        'express:/project/:project_id/linked_file/:file_id/refresh',
-        {
-          new_file_id: '5ff7418157b4e144321df5c4',
-        }
-      )
-
-      renderWithEditorContext(<FileViewHeader file={projectFile} />)
-
-      fireEvent.click(screen.getByRole('button', { name: 'Refresh' }))
-
-      await waitForElementToBeRemoved(() =>
-        screen.getByText('Refreshing', { exact: false })
-      )
-      await screen.findByText('Refresh')
-    })
-
-    it('Reindexes references after refreshing a file from a third-party provider', async function () {
-      fetchMock.post(
-        'express:/project/:project_id/linked_file/:file_id/refresh',
-        {
-          new_file_id: '5ff7418157b4e144321df5c4',
-        }
-      )
-
-      renderWithEditorContext(<FileViewHeader file={thirdPartyReferenceFile} />)
-
-      fireEvent.click(screen.getByRole('button', { name: 'Refresh' }))
-
-      await waitForElementToBeRemoved(() =>
-        screen.getByText('Refreshing', { exact: false })
-      )
-
-      expect(fetchMock.done()).to.be.true
-
-      const lastCallBody = JSON.parse(fetchMock.lastCall()[1].body)
-      expect(lastCallBody.shouldReindexReferences).to.be.true
     })
   })
 
