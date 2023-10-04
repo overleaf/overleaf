@@ -15,11 +15,17 @@ export default function FileView({ file }) {
 
   const { t } = useTranslation()
 
-  const { textExtensions } = window.ExposedSettings
+  const { textExtensions, editableFilenames } = window.ExposedSettings
 
   const extension = file.name.split('.').pop().toLowerCase()
-  const isUnpreviewableFile =
-    !imageExtensions.includes(extension) && !textExtensions.includes(extension)
+
+  const isEditableTextFile =
+    textExtensions.includes(extension) ||
+    editableFilenames.includes(file.name.toLowerCase())
+
+  const isImageFile = imageExtensions.includes(extension)
+
+  const isUnpreviewableFile = !isEditableTextFile && !isImageFile
 
   const handleLoad = useCallback(() => {
     setContentLoading(false)
@@ -35,7 +41,7 @@ export default function FileView({ file }) {
   const content = (
     <>
       <FileViewHeader file={file} />
-      {imageExtensions.includes(extension) && (
+      {isImageFile && (
         <FileViewImage
           fileName={file.name}
           fileId={file.id}
@@ -43,7 +49,7 @@ export default function FileView({ file }) {
           onError={handleError}
         />
       )}
-      {textExtensions.includes(extension) && (
+      {isEditableTextFile && (
         <FileViewText file={file} onLoad={handleLoad} onError={handleError} />
       )}
     </>

@@ -28,6 +28,12 @@ describe('FileSystemImportManager', function () {
       requires: {
         '@overleaf/settings': {
           textExtensions: ['tex', 'txt'],
+          editableFilenames: [
+            'latexmkrc',
+            '.latexmkrc',
+            'makefile',
+            'gnumakefile',
+          ],
           fileIgnorePattern: Settings.fileIgnorePattern, // use the real pattern from the default settings
         },
         '../Editor/EditorController': this.EditorController,

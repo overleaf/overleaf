@@ -13,6 +13,7 @@ const fileIgnoreMatcher = new Minimatch(Settings.fileIgnorePattern, {
 
 const FileTypeManager = {
   TEXT_EXTENSIONS: new Set(Settings.textExtensions.map(ext => `.${ext}`)),
+  EDITABLE_FILENAMES: Settings.editableFilenames,
 
   MAX_TEXT_FILE_SIZE: 1 * 1024 * 1024, // 1 MB
 
@@ -108,7 +109,7 @@ function _isTextFilename(filename) {
   const extension = Path.extname(filename).toLowerCase()
   return (
     FileTypeManager.TEXT_EXTENSIONS.has(extension) ||
-    filename.match(/^(\.)?latexmkrc$/)
+    FileTypeManager.EDITABLE_FILENAMES.includes(filename.toLowerCase())
   )
 }
 

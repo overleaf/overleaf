@@ -168,7 +168,6 @@ const initialize = () => {
       'rtex',
       'md',
       'asy',
-      'latexmkrc',
       'lbx',
       'bbx',
       'cbx',
@@ -184,7 +183,10 @@ const initialize = () => {
       'lua',
       'gv',
       'mf',
+      'lhs',
+      'mk',
     ],
+    editableFilenames: ['latexmkrc', '.latexmkrc', 'makefile', 'gnumakefile'],
     validRootDocExtensions: ['tex', 'Rtex', 'ltx', 'Rnw'],
   }
 

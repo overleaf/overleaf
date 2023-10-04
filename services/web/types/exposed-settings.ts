@@ -38,6 +38,7 @@ export type ExposedSettings = {
   sentryRelease?: string
   siteUrl: string
   textExtensions: string[]
+  editableFilenames: string[]
   validRootDocExtensions: string[]
   templateLinks?: TemplateLink[]
   labsEnabled: boolean

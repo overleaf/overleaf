@@ -397,6 +397,7 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
       recaptchaSiteKeyV3: Settings.recaptcha?.siteKeyV3,
       recaptchaDisabled: Settings.recaptcha?.disabled,
       textExtensions: Settings.textExtensions,
+      editableFilenames: Settings.editableFilenames,
       validRootDocExtensions: Settings.validRootDocExtensions,
       sentryAllowedOriginRegex: Settings.sentry.allowedOriginRegex,
       sentryDsn: Settings.sentry.publicDSN,

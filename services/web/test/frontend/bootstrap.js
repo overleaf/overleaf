@@ -46,7 +46,6 @@ window.ExposedSettings = {
     'rtex',
     'md',
     'asy',
-    'latexmkrc',
     'lbx',
     'bbx',
     'cbx',
@@ -62,7 +61,10 @@ window.ExposedSettings = {
     'lua',
     'gv',
     'mf',
+    'lhs',
+    'mk',
   ],
+  editableFilenames: ['latexmkrc', '.latexmkrc', 'makefile', 'gnumakefile'],
 }
 
 window.i18n = { currentLangCode: 'en' }

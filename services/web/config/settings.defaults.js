@@ -44,7 +44,6 @@ const defaultTextExtensions = [
   'rtex',
   'md',
   'asy',
-  'latexmkrc',
   'lbx',
   'bbx',
   'cbx',
@@ -62,6 +61,8 @@ const defaultTextExtensions = [
   'mf',
   'yml',
   'yaml',
+  'lhs',
+  'mk',
 ]
 
 const parseTextExtensions = function (extensions) {
@@ -675,6 +676,9 @@ module.exports = {
   textExtensions: defaultTextExtensions.concat(
     parseTextExtensions(process.env.ADDITIONAL_TEXT_EXTENSIONS)
   ),
+
+  // case-insensitive file names that is editable (doc) in the editor
+  editableFilenames: ['latexmkrc', '.latexmkrc', 'makefile', 'gnumakefile'],
 
   fileIgnorePattern:
     process.env.FILE_IGNORE_PATTERN ||

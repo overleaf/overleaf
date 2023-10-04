@@ -90,6 +90,10 @@ describe('FileTypeManager', function () {
         '/file.m',
         '/something/file.m',
         '/file.TEX',
+        '/file.lhs',
+        '/makefile',
+        '/Makefile',
+        '/GNUMakefile',
       ]
       TEXT_FILENAMES.forEach(filename => {
         it(`should classify ${filename} as text`, function (done) {
