@@ -50,7 +50,7 @@ function UserNotifications() {
 
   // Temporary workaround to prevent also showing groups/enterprise banner
   const [showWritefull, setShowWritefull] = useState(() => {
-    if (isChromium()) {
+    if (isChromium() && !showBackToSchoolModal) {
       const show =
         getMeta('ol-showWritefullPromoBanner') &&
         !customLocalStorage.getItem('has_dismissed_writefull_promo_banner')
@@ -93,17 +93,14 @@ function UserNotifications() {
             splitTestName={inrGeoBannerSplitTestName}
           />
         ) : null}
-        {showBackToSchoolModal ? (
-          <BackToSchoolModal />
-        ) : (
-          <WritefullPromoBanner
-            show={showWritefull}
-            setShow={setShowWritefull}
-            onDismiss={() => {
-              setDismissedWritefull(true)
-            }}
-          />
-        )}
+        {showBackToSchoolModal && <BackToSchoolModal />}
+        <WritefullPromoBanner
+          show={showWritefull}
+          setShow={setShowWritefull}
+          onDismiss={() => {
+            setDismissedWritefull(true)
+          }}
+        />
       </ul>
     </div>
   )
