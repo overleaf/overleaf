@@ -1406,7 +1406,6 @@
   "reference_search_info_v2": "It’s easy to find your references - you can search by author, title, year or journal. You can still search by citation key too.",
   "reference_sync": "Reference manager sync",
   "reference_sync_info": "Manage your reference library in Mendeley or Zotero and link it directly to a .bib file in Overleaf, so you can easily cite anything in your library.",
-  "references_search_hint": "Press CTRL-Space to Search",
   "refresh": "Refresh",
   "refresh_page_after_linking_dropbox": "Please refresh this page after linking your account to Dropbox.",
   "refresh_page_after_starting_free_trial": "Please refresh this page after starting your free trial.",
