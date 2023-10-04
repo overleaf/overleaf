@@ -1,17 +1,5 @@
-/* eslint-disable
-    n/handle-callback-err,
-    max-len,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+const { callbackify, promisify } = require('util')
 const { ProjectInvite } = require('../../models/ProjectInvite')
-const OError = require('@overleaf/o-error')
 const logger = require('@overleaf/logger')
 const CollaboratorsEmailHandler = require('./CollaboratorsEmailHandler')
 const CollaboratorsHandler = require('./CollaboratorsHandler')
@@ -20,335 +8,196 @@ const ProjectGetter = require('../Project/ProjectGetter')
 const Errors = require('../Errors/Errors')
 const Crypto = require('crypto')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
-const { promisifyAll } = require('../../util/promises')
+
+const randomBytes = promisify(Crypto.randomBytes)
 
 const CollaboratorsInviteHandler = {
-  getAllInvites(projectId, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
+  async getAllInvites(projectId) {
     logger.debug({ projectId }, 'fetching invites for project')
-    ProjectInvite.find({ projectId }, function (err, invites) {
-      if (err != null) {
-        OError.tag(err, 'error getting invites from mongo', {
-          projectId,
-        })
-        return callback(err)
-      }
-      logger.debug(
-        { projectId, count: invites.length },
-        'found invites for project'
-      )
-      callback(null, invites)
-    })
-  },
-
-  getInviteCount(projectId, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    logger.debug({ projectId }, 'counting invites for project')
-    ProjectInvite.countDocuments({ projectId }, function (err, count) {
-      if (err != null) {
-        OError.tag(err, 'error getting invites from mongo', {
-          projectId,
-        })
-        return callback(err)
-      }
-      callback(null, count)
-    })
-  },
-
-  _trySendInviteNotification(projectId, sendingUser, invite, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    const { email } = invite
-    UserGetter.getUserByAnyEmail(
-      email,
-      { _id: 1 },
-      function (err, existingUser) {
-        if (err != null) {
-          OError.tag(err, 'error checking if user exists', {
-            projectId,
-            email,
-          })
-          return callback(err)
-        }
-        if (existingUser == null) {
-          logger.debug(
-            { projectId, email },
-            'no existing user found, returning'
-          )
-          return callback(null)
-        }
-        ProjectGetter.getProject(
-          projectId,
-          { _id: 1, name: 1 },
-          function (err, project) {
-            if (err != null) {
-              OError.tag(err, 'error getting project', {
-                projectId,
-                email,
-              })
-              return callback(err)
-            }
-            if (project == null) {
-              logger.debug(
-                { projectId },
-                'no project found while sending notification, returning'
-              )
-              return callback(null)
-            }
-            NotificationsBuilder.projectInvite(
-              invite,
-              project,
-              sendingUser,
-              existingUser
-            ).create(callback)
-          }
-        )
-      }
+    const invites = await ProjectInvite.find({ projectId }).exec()
+    logger.debug(
+      { projectId, count: invites.length },
+      'found invites for project'
     )
+    return invites
   },
 
-  _tryCancelInviteNotification(inviteId, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    NotificationsBuilder.projectInvite(
-      { _id: inviteId },
-      null,
-      null,
-      null
-    ).read(callback)
+  async getInviteCount(projectId) {
+    logger.debug({ projectId }, 'counting invites for project')
+    const count = await ProjectInvite.countDocuments({ projectId }).exec()
+    return count
   },
 
-  _sendMessages(projectId, sendingUser, invite, callback) {
-    if (callback == null) {
-      callback = function () {}
+  async _trySendInviteNotification(projectId, sendingUser, invite) {
+    const { email } = invite
+    const existingUser = await UserGetter.promises.getUserByAnyEmail(email, {
+      _id: 1,
+    })
+    if (existingUser == null) {
+      logger.debug({ projectId, email }, 'no existing user found, returning')
+      return null
     }
+    const project = await ProjectGetter.promises.getProject(projectId, {
+      _id: 1,
+      name: 1,
+    })
+    if (project == null) {
+      logger.debug(
+        { projectId },
+        'no project found while sending notification, returning'
+      )
+      return null
+    }
+    await NotificationsBuilder.promises
+      .projectInvite(invite, project, sendingUser, existingUser)
+      .create()
+  },
+
+  async _tryCancelInviteNotification(inviteId) {
+    return await NotificationsBuilder.promises
+      .projectInvite({ _id: inviteId }, null, null, null)
+      .read()
+  },
+
+  async _sendMessages(projectId, sendingUser, invite) {
     logger.debug(
       { projectId, inviteId: invite._id },
       'sending notification and email for invite'
     )
-    CollaboratorsEmailHandler.notifyUserOfProjectInvite(
+    await CollaboratorsEmailHandler.promises.notifyUserOfProjectInvite(
       projectId,
       invite.email,
       invite,
+      sendingUser
+    )
+    await CollaboratorsInviteHandler._trySendInviteNotification(
+      projectId,
       sendingUser,
-      function (err) {
-        if (err != null) {
-          return callback(err)
-        }
-        CollaboratorsInviteHandler._trySendInviteNotification(
-          projectId,
-          sendingUser,
-          invite,
-          function (err) {
-            if (err != null) {
-              return callback(err)
-            }
-            callback()
-          }
-        )
-      }
+      invite
     )
   },
 
-  inviteToProject(projectId, sendingUser, email, privileges, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
+  async inviteToProject(projectId, sendingUser, email, privileges) {
     logger.debug(
       { projectId, sendingUserId: sendingUser._id, email, privileges },
       'adding invite'
     )
-    Crypto.randomBytes(24, function (err, buffer) {
-      if (err != null) {
-        OError.tag(err, 'error generating random token', {
-          projectId,
-          sendingUserId: sendingUser._id,
-          email,
-        })
-        return callback(err)
-      }
-      const token = buffer.toString('hex')
-      const invite = new ProjectInvite({
-        email,
-        token,
-        sendingUserId: sendingUser._id,
-        projectId,
-        privileges,
-      })
-      invite.save(function (err, invite) {
-        if (err != null) {
-          OError.tag(err, 'error saving token', {
-            projectId,
-            sendingUserId: sendingUser._id,
-            email,
-          })
-          return callback(err)
-        }
-        // Send email and notification in background
-        CollaboratorsInviteHandler._sendMessages(
-          projectId,
-          sendingUser,
-          invite,
-          function (err) {
-            if (err != null) {
-              return logger.err(
-                { err, projectId, email },
-                'error sending messages for invite'
-              )
-            }
-          }
-        )
-        callback(null, invite)
-      })
+    const buffer = await randomBytes(24)
+    const token = buffer.toString('hex')
+    let invite = new ProjectInvite({
+      email,
+      token,
+      sendingUserId: sendingUser._id,
+      projectId,
+      privileges,
     })
+    invite = await invite.save()
+
+    // Send email and notification in background
+    CollaboratorsInviteHandler._sendMessages(
+      projectId,
+      sendingUser,
+      invite
+    ).catch(err => {
+      logger.err({ err, projectId, email }, 'error sending messages for invite')
+    })
+
+    return invite
   },
 
-  revokeInvite(projectId, inviteId, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
+  async revokeInvite(projectId, inviteId) {
     logger.debug({ projectId, inviteId }, 'removing invite')
-    ProjectInvite.deleteOne({ projectId, _id: inviteId }, function (err) {
-      if (err != null) {
-        OError.tag(err, 'error removing invite', {
-          projectId,
-          inviteId,
-        })
-        return callback(err)
-      }
-      CollaboratorsInviteHandler._tryCancelInviteNotification(
-        inviteId,
-        function () {}
-      )
-      callback(null)
-    })
-  },
-
-  resendInvite(projectId, sendingUser, inviteId, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    logger.debug({ projectId, inviteId }, 'resending invite email')
-    ProjectInvite.findOne({ _id: inviteId, projectId }, function (err, invite) {
-      if (err != null) {
-        OError.tag(err, 'error finding invite', {
-          projectId,
-          inviteId,
-        })
-        return callback(err)
-      }
-      if (invite == null) {
+    await ProjectInvite.deleteOne({ projectId, _id: inviteId }).exec()
+    CollaboratorsInviteHandler._tryCancelInviteNotification(inviteId).catch(
+      err => {
         logger.err(
           { err, projectId, inviteId },
-          'no invite found, nothing to resend'
+          'failed to cancel invite notification'
         )
-        return callback(null)
-      }
-      CollaboratorsInviteHandler._sendMessages(
-        projectId,
-        sendingUser,
-        invite,
-        function (err) {
-          if (err != null) {
-            OError.tag(err, 'error resending invite messages', {
-              projectId,
-              inviteId,
-            })
-            return callback(err)
-          }
-          callback(null)
-        }
-      )
-    })
-  },
-
-  getInviteByToken(projectId, tokenString, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    logger.debug({ projectId }, 'fetching invite by token')
-    ProjectInvite.findOne(
-      { projectId, token: tokenString },
-      function (err, invite) {
-        if (err != null) {
-          OError.tag(err, 'error fetching invite', {
-            projectId,
-          })
-          return callback(err)
-        }
-        if (invite == null) {
-          logger.err({ err, projectId }, 'no invite found')
-          return callback(null, null)
-        }
-        callback(null, invite)
       }
     )
   },
 
-  acceptInvite(projectId, tokenString, user, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    logger.debug({ projectId, userId: user._id }, 'accepting invite')
-    CollaboratorsInviteHandler.getInviteByToken(
+  async resendInvite(projectId, sendingUser, inviteId) {
+    logger.debug({ projectId, inviteId }, 'resending invite email')
+    const invite = await ProjectInvite.findOne({
+      _id: inviteId,
       projectId,
-      tokenString,
-      function (err, invite) {
-        if (err != null) {
-          OError.tag(err, 'error finding invite', {
-            projectId,
-            tokenString,
-          })
-          return callback(err)
-        }
-        if (!invite) {
-          err = new Errors.NotFoundError('no matching invite found')
-          logger.debug({ err, projectId }, 'no matching invite found')
-          return callback(err)
-        }
-        const inviteId = invite._id
-        CollaboratorsHandler.addUserIdToProject(
-          projectId,
-          invite.sendingUserId,
-          user._id,
-          invite.privileges,
-          function (err) {
-            if (err != null) {
-              OError.tag(err, 'error adding user to project', {
-                projectId,
-                inviteId,
-                userId: user._id,
-              })
-              return callback(err)
-            }
-            // Remove invite
-            logger.debug({ projectId, inviteId }, 'removing invite')
-            ProjectInvite.deleteOne({ _id: inviteId }, function (err) {
-              if (err != null) {
-                OError.tag(err, 'error removing invite', {
-                  projectId,
-                  inviteId,
-                })
-                return callback(err)
-              }
-              CollaboratorsInviteHandler._tryCancelInviteNotification(
-                inviteId,
-                function () {}
-              )
-              callback()
-            })
-          }
+    }).exec()
+
+    if (invite == null) {
+      logger.warn({ projectId, inviteId }, 'no invite found, nothing to resend')
+      return
+    }
+
+    await CollaboratorsInviteHandler._sendMessages(
+      projectId,
+      sendingUser,
+      invite
+    )
+  },
+
+  async getInviteByToken(projectId, tokenString) {
+    logger.debug({ projectId }, 'fetching invite by token')
+    const invite = await ProjectInvite.findOne({
+      projectId,
+      token: tokenString,
+    }).exec()
+
+    if (invite == null) {
+      logger.err({ projectId }, 'no invite found')
+      return null
+    }
+
+    return invite
+  },
+
+  async acceptInvite(projectId, tokenString, user) {
+    logger.debug({ projectId, userId: user._id }, 'accepting invite')
+    const invite = await CollaboratorsInviteHandler.getInviteByToken(
+      projectId,
+      tokenString
+    )
+
+    if (!invite) {
+      throw new Errors.NotFoundError('no matching invite found')
+    }
+    const inviteId = invite._id
+    CollaboratorsHandler.promises.addUserIdToProject(
+      projectId,
+      invite.sendingUserId,
+      user._id,
+      invite.privileges
+    )
+
+    // Remove invite
+    logger.debug({ projectId, inviteId }, 'removing invite')
+    await ProjectInvite.deleteOne({ _id: inviteId }).exec()
+    CollaboratorsInviteHandler._tryCancelInviteNotification(inviteId).catch(
+      err => {
+        logger.error(
+          { err, projectId, inviteId },
+          'failed to cancel invite notification'
         )
       }
     )
   },
 }
 
-module.exports = CollaboratorsInviteHandler
-module.exports.promises = promisifyAll(CollaboratorsInviteHandler)
+module.exports = {
+  promises: CollaboratorsInviteHandler,
+  getAllInvites: callbackify(CollaboratorsInviteHandler.getAllInvites),
+  getInviteCount: callbackify(CollaboratorsInviteHandler.getInviteCount),
+  inviteToProject: callbackify(CollaboratorsInviteHandler.inviteToProject),
+  revokeInvite: callbackify(CollaboratorsInviteHandler.revokeInvite),
+  resendInvite: callbackify(CollaboratorsInviteHandler.resendInvite),
+  getInviteByToken: callbackify(CollaboratorsInviteHandler.getInviteByToken),
+  acceptInvite: callbackify(CollaboratorsInviteHandler.acceptInvite),
+  _trySendInviteNotification: callbackify(
+    CollaboratorsInviteHandler._trySendInviteNotification
+  ),
+  _tryCancelInviteNotification: callbackify(
+    CollaboratorsInviteHandler._tryCancelInviteNotification
+  ),
+  _sendMessages: callbackify(CollaboratorsInviteHandler._sendMessages),
+}

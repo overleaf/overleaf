@@ -283,6 +283,9 @@ NotificationsBuilder.promises = {
   groupInvitation: function (userId, groupId, managedUsersEnabled) {
     return promisifyAll(groupInvitation(userId, groupId, managedUsersEnabled))
   },
+  projectInvite(invite, project, sendingUser, user) {
+    return promisifyAll(projectInvite(invite, project, sendingUser, user))
+  },
 }
 
 module.exports = NotificationsBuilder

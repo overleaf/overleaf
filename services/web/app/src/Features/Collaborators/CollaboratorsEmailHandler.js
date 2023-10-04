@@ -1,13 +1,9 @@
-/* eslint-disable
-    n/handle-callback-err,
-    max-len,
-*/
-let CollaboratorsEmailHandler
+const { callbackify } = require('util')
 const { Project } = require('../../models/Project')
 const EmailHandler = require('../Email/EmailHandler')
 const Settings = require('@overleaf/settings')
 
-module.exports = CollaboratorsEmailHandler = {
+const CollaboratorsEmailHandler = {
   _buildInviteUrl(project, invite) {
     return (
       `${Settings.siteUrl}/project/${project._id}/invite/token/${invite.token}?` +
@@ -18,22 +14,29 @@ module.exports = CollaboratorsEmailHandler = {
     )
   },
 
-  notifyUserOfProjectInvite(projectId, email, invite, sendingUser, callback) {
-    Project.findOne({ _id: projectId })
+  async notifyUserOfProjectInvite(projectId, email, invite, sendingUser) {
+    const project = await Project.findOne({ _id: projectId })
       .select('name owner_ref')
       .populate('owner_ref')
-      .exec(function (err, project) {
-        const emailOptions = {
-          to: email,
-          replyTo: project.owner_ref.email,
-          project: {
-            name: project.name,
-          },
-          inviteUrl: CollaboratorsEmailHandler._buildInviteUrl(project, invite),
-          owner: project.owner_ref,
-          sendingUser_id: sendingUser._id,
-        }
-        EmailHandler.sendEmail('projectInvite', emailOptions, callback)
-      })
+      .exec()
+    const emailOptions = {
+      to: email,
+      replyTo: project.owner_ref.email,
+      project: {
+        name: project.name,
+      },
+      inviteUrl: CollaboratorsEmailHandler._buildInviteUrl(project, invite),
+      owner: project.owner_ref,
+      sendingUser_id: sendingUser._id,
+    }
+    await EmailHandler.promises.sendEmail('projectInvite', emailOptions)
   },
+}
+
+module.exports = {
+  promises: CollaboratorsEmailHandler,
+  notifyUserOfProjectInvite: callbackify(
+    CollaboratorsEmailHandler.notifyUserOfProjectInvite
+  ),
+  _buildInviteUrl: CollaboratorsEmailHandler._buildInviteUrl,
 }
