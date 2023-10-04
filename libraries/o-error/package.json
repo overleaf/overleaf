@@ -25,7 +25,6 @@
     "lint:fix": "eslint --fix .",
     "prepublishOnly": "npm run --silent declaration:build && npm run --silent declaration:check",
     "test": "mocha",
-    "test:coverage": "nyc --reporter=lcov --reporter=text-summary npm run test",
     "typecheck": "tsc --allowJs --checkJs --noEmit --skipLibCheck --moduleResolution node --strict --target ES6 *.cjs test/**/*.js",
     "update-readme": "doc/update-readme.js",
     "format": "prettier --list-different $PWD/'**/*.js'",
@@ -40,7 +39,6 @@
     "@types/node": "^18.17.4",
     "chai": "^4.3.6",
     "mocha": "^10.2.0",
-    "nyc": "^15.1.0",
     "typescript": "^5.0.4"
   }
 }
