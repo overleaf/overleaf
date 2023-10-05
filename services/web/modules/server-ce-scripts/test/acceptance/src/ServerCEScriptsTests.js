@@ -3,6 +3,7 @@ const { execSync } = require('child_process')
 const { expect } = require('chai')
 const { db } = require('../../../../../app/src/infrastructure/mongodb')
 const User = require('../../../../../test/acceptance/src/helpers/User').promises
+const fs = require('fs')
 
 /**
  * @param {string} cmd
@@ -125,6 +126,131 @@ describe('ServerCEScripts', function () {
         run('node modules/server-ce-scripts/scripts/delete-user')
       } catch (e) {
         expect(e.status).to.equal(1)
+        return
+      }
+      expect.fail('command should have failed')
+    })
+  })
+
+  describe('migrate-user-emails', function () {
+    let usersToMigrate
+    let otherUsers
+    let csv
+    let csvfail
+    beforeEach(async function () {
+      // set up some users to migrate and others to leave alone
+      usersToMigrate = []
+      otherUsers = []
+      for (let i = 0; i < 2; i++) {
+        const user = new User()
+        await user.login()
+        usersToMigrate.push(user)
+      }
+      for (let i = 0; i < 2; i++) {
+        const user = new User()
+        await user.login()
+        otherUsers.push(user)
+      }
+      // write the migration csv to a temporary file
+      const id = usersToMigrate[0]._id
+      csv = `/tmp/migration-${id}.csv`
+      const rows = []
+      for (const user of usersToMigrate) {
+        rows.push(`${user.email},new-${user.email}`)
+      }
+      fs.writeFileSync(csv, rows.join('\n'))
+      // also write a csv with a user that doesn't exist
+      csvfail = `/tmp/migration-fail-${id}.csv`
+      fs.writeFileSync(
+        csvfail,
+        [
+          'nouser@example.com,nouser@other.example.com',
+          ...rows,
+          'foo@example.com,bar@example.com',
+        ].join('\n')
+      )
+    })
+
+    afterEach(function () {
+      // clean up the temporary files
+      fs.unlinkSync(csv)
+      fs.unlinkSync(csvfail)
+    })
+
+    it('should do a dry run by default', async function () {
+      run(
+        `node modules/server-ce-scripts/scripts/migrate-user-emails.js ${csv}`
+      )
+      for (const user of usersToMigrate) {
+        const dbEntry = await user.get()
+        expect(dbEntry.email).to.equal(user.email)
+      }
+      for (const user of otherUsers) {
+        const dbEntry = await user.get()
+        expect(dbEntry.email).to.equal(user.email)
+      }
+    })
+
+    it('should exit with code 0 when successfully migrating user emails', function () {
+      run(
+        `node modules/server-ce-scripts/scripts/migrate-user-emails.js --commit ${csv}`
+      )
+    })
+
+    it('should migrate the user emails with the --commit option', async function () {
+      run(
+        `node modules/server-ce-scripts/scripts/migrate-user-emails.js --commit ${csv}`
+      )
+      for (const user of usersToMigrate) {
+        const dbEntry = await user.get()
+        expect(dbEntry.email).to.equal(`new-${user.email}`)
+        expect(dbEntry.emails).to.have.lengthOf(1)
+        expect(dbEntry.emails[0].email).to.equal(`new-${user.email}`)
+        expect(dbEntry.emails[0].reversedHostname).to.equal('moc.elpmaxe')
+        expect(dbEntry.emails[0].createdAt).to.eql(user.emails[0].createdAt)
+      }
+    })
+
+    it('should leave other user emails unchanged', async function () {
+      run(
+        `node modules/server-ce-scripts/scripts/migrate-user-emails.js --commit ${csv}`
+      )
+      for (const user of otherUsers) {
+        const dbEntry = await user.get()
+        expect(dbEntry.email).to.equal(user.email)
+      }
+    })
+
+    it('should exit with code 1 when there are failures migrating user emails', function () {
+      try {
+        run(
+          `node modules/server-ce-scripts/scripts/migrate-user-emails.js --commit ${csvfail}`
+        )
+      } catch (e) {
+        expect(e.status).to.equal(1)
+        return
+      }
+      expect.fail('command should have failed')
+    })
+
+    it('should migrate other users when there are failures with the --continue option', async function () {
+      try {
+        run(
+          `node modules/server-ce-scripts/scripts/migrate-user-emails.js --commit ${csvfail}`
+        )
+      } catch (e) {
+        expect(e.status).to.equal(1)
+        run(
+          `node modules/server-ce-scripts/scripts/migrate-user-emails.js --commit --continue ${csvfail}`
+        )
+        for (const user of usersToMigrate) {
+          const dbEntry = await user.get()
+          expect(dbEntry.email).to.equal(`new-${user.email}`)
+          expect(dbEntry.emails).to.have.lengthOf(1)
+          expect(dbEntry.emails[0].email).to.equal(`new-${user.email}`)
+          expect(dbEntry.emails[0].reversedHostname).to.equal('moc.elpmaxe')
+          expect(dbEntry.emails[0].createdAt).to.eql(user.emails[0].createdAt)
+        }
         return
       }
       expect.fail('command should have failed')

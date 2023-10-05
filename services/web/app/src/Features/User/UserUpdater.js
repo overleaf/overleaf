@@ -234,6 +234,58 @@ async function setDefaultEmailAddress(
   }
 }
 
+/**
+ * Overwrites the primary email address of a user in the database in-place.
+ * This function is only intended for use in scripts to migrate email addresses
+ * where we do not want to trigger all the actions that happen when a user
+ * changes their own email.  It should not be used in any other circumstances.
+ */
+async function migrateDefaultEmailAddress(
+  userId,
+  oldEmail,
+  newEmail,
+  auditLog
+) {
+  oldEmail = EmailHelper.parseEmail(oldEmail)
+  if (oldEmail == null) {
+    throw new Error('invalid old email')
+  }
+  newEmail = EmailHelper.parseEmail(newEmail)
+  if (newEmail == null) {
+    throw new Error('invalid new email')
+  }
+  const reversedHostname = newEmail.split('@')[1].split('').reverse().join('')
+  const query = {
+    _id: userId,
+    email: oldEmail,
+    'emails.email': oldEmail,
+  }
+  const update = {
+    $set: {
+      email: newEmail,
+      'emails.$.email': newEmail,
+      'emails.$.reversedHostname': reversedHostname,
+    },
+  }
+  const result = await updateUser(query, update)
+  if (result.modifiedCount !== 1) {
+    throw new Error('email update error')
+  }
+  // add a user audit log entry for the email change
+  await UserAuditLogHandler.promises.addEntry(
+    userId,
+    'migrate-default-email',
+    auditLog.initiatorId,
+    auditLog.ipAddress,
+    {
+      oldEmail,
+      newEmail,
+      // Add optional extra info
+      ...(auditLog.extraInfo || {}),
+    }
+  )
+}
+
 async function confirmEmail(userId, email, affiliationOptions) {
   // used for initial email confirmation (non-SSO and SSO)
   // also used for reconfirmation of non-SSO emails
@@ -492,6 +544,7 @@ module.exports = {
   removeEmailAddress: callbackify(removeEmailAddress),
   removeReconfirmFlag: callbackify(removeReconfirmFlag),
   setDefaultEmailAddress: callbackify(setDefaultEmailAddress),
+  migrateDefaultEmailAddress: callbackify(migrateDefaultEmailAddress),
   updateUser: callbackify(updateUser),
   promises: {
     addAffiliationForNewUser,
@@ -502,6 +555,7 @@ module.exports = {
     removeEmailAddress,
     removeReconfirmFlag,
     setDefaultEmailAddress,
+    migrateDefaultEmailAddress,
     updateUser,
   },
 }
