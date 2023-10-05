@@ -9,15 +9,13 @@
     "format:fix": "prettier --write $PWD/'**/*.js'",
     "lint": "eslint --max-warnings 0 --format unix lib test && tsc",
     "lint:fix": "eslint --fix lib test",
-    "test:ci": "npm run test",
-    "coverage": "istanbul cover _mocha"
+    "test:ci": "npm run test"
   },
   "author": "team@overleaf.com",
   "license": "Proprietary",
   "private": true,
   "devDependencies": {
     "chai": "^3.3.0",
-    "istanbul": "^0.4.5",
     "mocha": "^10.2.0",
     "typescript": "^5.0.4"
   },
