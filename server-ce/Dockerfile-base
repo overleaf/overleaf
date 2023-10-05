@@ -66,7 +66,7 @@ RUN mkdir /install-tl-unx \
       texcount \
       synctex \
       etoolbox \
-    \
+      xetex \
 &&  tlmgr path add \
 &&  rm -rf /install-tl-unx
 
