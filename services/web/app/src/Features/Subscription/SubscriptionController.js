@@ -18,8 +18,9 @@ const { expressify } = require('../../util/promises')
 const OError = require('@overleaf/o-error')
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const SubscriptionHelper = require('./SubscriptionHelper')
-const Features = require('../../infrastructure/Features')
 const AuthorizationManager = require('../Authorization/AuthorizationManager')
+const Modules = require('../../infrastructure/Modules')
+const async = require('async')
 
 const groupPlanModalOptions = Settings.groupPlanModalOptions
 const validGroupPlanModalOptions = {
@@ -251,15 +252,30 @@ async function userSubscriptionPage(req, res) {
   const groupPlansDataForDash = formatGroupPlansDataForDash()
 
   // display the Group Settings button only to admins of group subscriptions with the Managed Users feature available
-  const groupSettingsEnabledFor = (managedGroupSubscriptions || [])
-    .filter(
-      subscription =>
-        Features.hasFeature('saas') &&
-        subscription?.features?.managedUsers &&
-        (subscription.admin_id._id || subscription.admin_id).toString() ===
+  let groupSettingsEnabledFor
+  try {
+    const managedGroups = await async.filter(
+      managedGroupSubscriptions || [],
+      async subscription => {
+        const results = await Modules.promises.hooks.fire(
+          'hasManagedUsersFeature',
+          subscription
+        )
+        const isGroupAdmin =
+          (subscription.admin_id._id || subscription.admin_id).toString() ===
           user._id.toString()
+        return results?.[0] === true && isGroupAdmin
+      }
     )
-    .map(subscription => subscription._id.toString())
+    groupSettingsEnabledFor = managedGroups.map(subscription =>
+      subscription._id.toString()
+    )
+  } catch (error) {
+    logger.error(
+      { err: error },
+      'Failed to list groups with group settings enabled'
+    )
+  }
 
   const data = {
     title: 'your_subscription',

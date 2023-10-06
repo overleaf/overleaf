@@ -11,7 +11,10 @@ export default function ManagedGroupSubscriptions() {
     return null
   }
 
-  const groupSettingsEnabledFor = getMeta('ol-groupSettingsEnabledFor', [])
+  const groupSettingsEnabledFor = getMeta(
+    'ol-groupSettingsEnabledFor',
+    []
+  ) as string[]
 
   return (
     <>
@@ -52,7 +55,7 @@ export default function ManagedGroupSubscriptions() {
             subtext={t('manage_managers_subtext')}
             icon="manage_accounts"
           />
-          {groupSettingsEnabledFor.includes(subscription._id) && (
+          {groupSettingsEnabledFor?.includes(subscription._id) && (
             <RowLink
               href={`/manage/groups/${subscription._id}/settings`}
               heading={t('manage_group_settings')}
