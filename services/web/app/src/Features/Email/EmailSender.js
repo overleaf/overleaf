@@ -4,7 +4,6 @@ const metrics = require('@overleaf/metrics')
 const Settings = require('@overleaf/settings')
 const nodemailer = require('nodemailer')
 const sesTransport = require('nodemailer-ses-transport')
-const mandrillTransport = require('nodemailer-mandrill-transport')
 const OError = require('@overleaf/o-error')
 const { RateLimiter } = require('../../infrastructure/RateLimiter')
 const _ = require('lodash')
@@ -37,13 +36,8 @@ function getClient() {
         'sendgridApiKey configuration option is deprecated, use SMTP instead'
       )
     } else if (emailParameters.MandrillApiKey) {
-      logger.debug('using mandril for email')
-      client = nodemailer.createTransport(
-        mandrillTransport({
-          auth: {
-            apiKey: emailParameters.MandrillApiKey,
-          },
-        })
+      throw new OError(
+        'MandrillApiKey configuration option is deprecated, use SMTP instead'
       )
     } else {
       logger.debug('using smtp for email')

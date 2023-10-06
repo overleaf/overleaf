@@ -37,7 +37,6 @@ describe('EmailSender', function () {
       requires: {
         nodemailer: this.ses,
         'nodemailer-ses-transport': sinon.stub(),
-        'nodemailer-mandrill-transport': {},
         '@overleaf/settings': this.Settings,
         '../../infrastructure/RateLimiter': this.RateLimiter,
         '@overleaf/metrics': {
