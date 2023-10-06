@@ -1556,6 +1556,7 @@
   "select_from_your_computer": "select from your computer",
   "select_github_repository": "Select a GitHub repository to import into __appName__.",
   "select_image_from_project_files": "Select image from project files",
+  "select_monthly_plans": "Select for monthly plans",
   "select_project": "Select __project__",
   "select_projects": "Select Projects",
   "select_tag": "Select tag __tagName__",
