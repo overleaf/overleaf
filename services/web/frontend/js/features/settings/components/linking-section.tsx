@@ -5,8 +5,10 @@ import importOverleafModules from '../../../../macros/import-overleaf-module.mac
 import { useSSOContext, SSOSubscription } from '../context/sso-context'
 import { SSOLinkingWidget } from './linking/sso-widget'
 import getMeta from '../../../utils/meta'
+import { useBroadcastUser } from '@/shared/hooks/user-channel/use-broadcast-user'
 
 function LinkingSection() {
+  useBroadcastUser()
   const { t } = useTranslation()
   const { subscriptions } = useSSOContext()
   const ssoErrorMessage = getMeta('ol-ssoErrorMessage') as string
