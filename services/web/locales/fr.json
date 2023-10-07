@@ -803,7 +803,6 @@
   "reference_search_info": "Vous pouvez toujours rechercher une citation par sa clé, mais la recherche de références avancée vous permet en plus de rechercher par auteur, titre, année ou revue.",
   "reference_sync": "Synchro. avec gestionnaire de références",
   "reference_sync_info": "Gérez votre bibliothèque de références sur Mendeley et liez-la directement à un fichier .bib sur Overleaf pour pouvoir aisément citer n’importe quel élément de votre bibliothèque Mendeley.",
-  "references_search_hint": "Appuyez sur CTRL-espace pour rechercher",
   "refresh": "Rafraîchir",
   "refresh_page_after_linking_dropbox": "Veuillez rafraîchir cette page après avoir lié votre compte à Dropbox.",
   "refresh_page_after_starting_free_trial": "Veuillez actualiser cette page avant de commencer votre essai gratuit.",
