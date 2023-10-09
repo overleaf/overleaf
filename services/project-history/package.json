@@ -48,7 +48,6 @@
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
     "mocha": "^10.2.0",
-    "multer": "^1.4.2",
     "nock": "^12.0.3",
     "sinon": "~9.0.1",
     "sinon-chai": "^3.7.0",
