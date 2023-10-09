@@ -6,6 +6,14 @@ import {
   storePastedContent,
 } from './pasted-content'
 import { debugConsole } from '@/utils/debugging'
+import {
+  isBlockContainingElement,
+  isBlockElement,
+  isElementNode,
+  isInlineElement,
+  isTextNode,
+  shouldRemoveEmptyBlockElement,
+} from './html-elements'
 
 export const pasteHtml = [
   Prec.highest(
@@ -49,12 +57,18 @@ export const pasteHtml = [
             return false
           }
 
-          // if the only content is in a code block, use the plain text version
-          if (onlyCode(documentElement)) {
+          const bodyElement = documentElement.querySelector('body')
+          // DOMParser should always create a body element, so this is mostly for TypeScript
+          if (!bodyElement) {
             return false
           }
 
-          const latex = htmlToLaTeX(documentElement)
+          // if the only content is in a code block, use the plain text version
+          if (onlyCode(bodyElement)) {
+            return false
+          }
+
+          const latex = htmlToLaTeX(bodyElement)
 
           // if there's no formatting, use the plain text version
           if (latex === text && clipboardData.files.length === 0) {
@@ -121,25 +135,38 @@ const hasProgId = (documentElement: HTMLElement) => {
   return meta && meta.content.trim().length > 0
 }
 
-const htmlToLaTeX = (documentElement: HTMLElement) => {
+const htmlToLaTeX = (bodyElement: HTMLElement) => {
   // remove style elements
-  removeUnwantedElements(documentElement, 'style')
+  removeUnwantedElements(bodyElement, 'style')
 
-  // replace non-breaking spaces added by Chrome on copy
-  processWhitespace(documentElement)
+  let before: string | null = null
+  let after: string | null = null
+
+  // repeat until the content stabilises
+  do {
+    before = bodyElement.textContent
+
+    // normalise whitespace in text
+    normaliseWhitespace(bodyElement)
+
+    // replace unwanted whitespace in blocks
+    processWhitespaceInBlocks(bodyElement)
+
+    after = bodyElement.textContent
+  } while (before !== after)
 
   // pre-process table elements
-  processTables(documentElement)
+  processTables(bodyElement)
 
   // pre-process lists
-  processLists(documentElement)
+  processLists(bodyElement)
 
   // protect special characters in non-LaTeX text nodes
-  protectSpecialCharacters(documentElement)
+  protectSpecialCharacters(bodyElement)
 
-  processMatchedElements(documentElement)
+  processMatchedElements(bodyElement)
 
-  const text = documentElement.textContent
+  const text = bodyElement.textContent
 
   if (!text) {
     return ''
@@ -151,24 +178,102 @@ const htmlToLaTeX = (documentElement: HTMLElement) => {
       .replaceAll('​', '')
       // normalise multiple newlines
       .replaceAll(/\n{2,}/g, '\n\n')
+      // only allow a single newline at the start and end
+      .replaceAll(/(^\n+|\n+$)/g, '\n')
+      // replace tab with 4 spaces (hard-coded indent unit)
+      .replaceAll('\t', '    ')
   )
 }
 
-const processWhitespace = (documentElement: HTMLElement) => {
+const trimInlineElements = (
+  element: HTMLElement,
+  precedingSpace = true
+): boolean => {
+  for (const node of element.childNodes) {
+    if (isTextNode(node)) {
+      let text = node.textContent!
+
+      if (precedingSpace) {
+        text = text.replace(/^\s+/, '')
+      }
+
+      if (text === '') {
+        node.remove()
+      } else {
+        node.textContent = text
+        precedingSpace = /\s$/.test(text)
+      }
+    } else if (isInlineElement(node)) {
+      precedingSpace = trimInlineElements(node, precedingSpace)
+    } else if (isBlockElement(node)) {
+      precedingSpace = true // TODO
+    } else {
+      precedingSpace = false // TODO
+    }
+  }
+
+  // TODO: trim whitespace at the end
+
+  return precedingSpace
+}
+
+const processWhitespaceInBlocks = (documentElement: HTMLElement) => {
+  trimInlineElements(documentElement)
+
   const walker = document.createTreeWalker(
     documentElement,
-    NodeFilter.SHOW_TEXT
+    NodeFilter.SHOW_ELEMENT,
+    node =>
+      isElementNode(node) && isElementContainingCode(node)
+        ? NodeFilter.FILTER_REJECT
+        : NodeFilter.FILTER_ACCEPT
   )
 
   for (let node = walker.nextNode(); node; node = walker.nextNode()) {
-    if (node.textContent === ' ') {
-      node.textContent = ' '
+    // TODO: remove leading newline from pre, code and textarea?
+    if (isBlockContainingElement(node)) {
+      // remove all text nodes directly inside elements that should only contain blocks
+      for (const childNode of node.childNodes) {
+        if (isTextNode(childNode)) {
+          childNode.remove()
+        }
+      }
+    }
+
+    if (isBlockElement(node)) {
+      trimInlineElements(node)
+
+      if (shouldRemoveEmptyBlockElement(node)) {
+        node.remove()
+        // TODO: and parents?
+      }
     }
   }
 }
 
-const isElementNode = (node: Node): node is HTMLElement =>
-  node.nodeType === Node.ELEMENT_NODE
+const normaliseWhitespace = (documentElement: HTMLElement) => {
+  const walker = document.createTreeWalker(
+    documentElement,
+    NodeFilter.SHOW_TEXT,
+    node =>
+      isElementNode(node) && isElementContainingCode(node)
+        ? NodeFilter.FILTER_REJECT
+        : NodeFilter.FILTER_ACCEPT
+  )
+
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+    const text = node.textContent
+    if (text !== null) {
+      if (/^\s+$/.test(text)) {
+        // replace nodes containing only whitespace (including non-breaking space) with a single space
+        node.textContent = ' '
+      } else {
+        // collapse contiguous whitespace (except for non-breaking space) to a single space
+        node.textContent = text.replaceAll(/[\n\r\f\t \u2028\u2029]+/g, ' ')
+      }
+    }
+  }
+}
 
 // TODO: negative lookbehind once Safari supports it
 const specialCharacterRegExp = /(^|[^\\])([#$%&~_^\\{}])/g
@@ -187,8 +292,8 @@ const specialCharacterReplacer = (
 }
 
 const isElementContainingCode = (element: HTMLElement) =>
-  element.tagName === 'CODE' ||
-  (element.tagName === 'PRE' && element.style.fontFamily.includes('monospace'))
+  element.nodeName === 'CODE' ||
+  (element.nodeName === 'PRE' && element.style.fontFamily.includes('monospace'))
 
 const protectSpecialCharacters = (documentElement: HTMLElement) => {
   const walker = document.createTreeWalker(
@@ -201,7 +306,7 @@ const protectSpecialCharacters = (documentElement: HTMLElement) => {
   )
 
   for (let node = walker.nextNode(); node; node = walker.nextNode()) {
-    if (node.nodeType === Node.TEXT_NODE) {
+    if (isTextNode(node)) {
       const text = node.textContent
       if (text) {
         // replace non-backslash-prefixed characters
@@ -289,34 +394,8 @@ const processLists = (element: HTMLElement) => {
   }
 }
 
-const removeNonContentTextNodes = (table: HTMLTableElement) => {
-  // remove text nodes that are direct children of non-content table elements
-  const containers = table.querySelectorAll('thead,tbody,tr')
-  for (const element of [table, ...containers]) {
-    for (const childNode of element.childNodes) {
-      if (childNode.nodeType === Node.TEXT_NODE) {
-        element.removeChild(childNode)
-      }
-    }
-  }
-
-  // remove whitespace-only text nodes at the start or end of table cells
-  for (const element of table.querySelectorAll('th,td')) {
-    for (const childNode of [element.firstChild, element.lastChild]) {
-      if (
-        childNode?.nodeType === Node.TEXT_NODE &&
-        childNode.textContent?.trim() === ''
-      ) {
-        element.removeChild(childNode)
-      }
-    }
-  }
-}
-
 const processTables = (element: HTMLElement) => {
   for (const table of element.querySelectorAll('table')) {
-    removeNonContentTextNodes(table)
-
     // create a wrapper element for the table and the caption
     const container = document.createElement('div')
     container.className = 'ol-table-wrap'
@@ -380,7 +459,7 @@ const processTables = (element: HTMLElement) => {
 }
 
 const isTableRow = (element: Element | null): element is HTMLTableRowElement =>
-  element?.tagName === 'TR'
+  element?.nodeName === 'TR'
 
 const cellAlignment = new Map([
   ['left', 'l'],
@@ -506,7 +585,7 @@ const rowHasBorderStyle = (
 
 const isTableRowElement = (
   element: Element | null
-): element is HTMLTableRowElement => element?.tagName === 'TR'
+): element is HTMLTableRowElement => element?.nodeName === 'TR'
 
 const nextRowHasBorderStyle = (
   element: HTMLTableRowElement,
@@ -645,7 +724,7 @@ const selectors = [
   // TODO: h6?
   createSelector({
     selector: 'br',
-    match: element => element.parentElement?.nodeName !== 'TD', // TODO: why?
+    match: element => !element.closest('table'),
     start: () => `\n\n`,
   }),
   createSelector({

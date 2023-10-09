@@ -66,10 +66,6 @@ export const Latex = (args: any, { globals: { theme } }: any) => {
 
   useMeta({
     'ol-showSymbolPalette': true,
-    'ol-splitTestVariants': {
-      'figure-modal': 'enabled',
-      'table-generator': 'enabled',
-    },
   })
 
   return <SourceEditor />

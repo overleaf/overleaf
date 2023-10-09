@@ -347,7 +347,7 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
 
     cy.get('@content').should(
       'have.text',
-      'test \\textbf{foo} \\textbf{foo} test'
+      'test \\textbf{foo}\\textbf{foo}test'
     )
     cy.get('.ol-cm-environment-verbatim').should('have.length', 10)
   })
@@ -361,13 +361,13 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
     clipboardData.setData('text/html', data)
     cy.get('@content').trigger('paste', { clipboardData })
 
-    cy.get('@content').should('have.text', 'test foo test')
+    cy.get('@content').should('have.text', 'test footest')
     cy.get('.ol-cm-environment-quote').should('have.length', 5)
 
     cy.get('.cm-line').eq(2).click()
     cy.get('@content').should(
       'have.text',
-      'test \\begin{quote}foo\\end{quote} test'
+      'test \\begin{quote}foo\\end{quote}test'
     )
   })
 
@@ -386,8 +386,8 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
     clipboardData.setData('text/html', data)
     cy.get('@content').trigger('paste', { clipboardData })
 
-    cy.get('@content').should('have.text', 'testfoobarbaztest')
-    cy.get('.cm-line').should('have.length', 8)
+    cy.get('@content').should('have.text', 'test foobarbaztest')
+    cy.get('.cm-line').should('have.length', 7)
   })
 
   it('handles pasted paragraphs in list items and table cells', function () {
@@ -408,9 +408,9 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
 
     cy.get('@content').should(
       'have.text',
-      'testfoobarbaz foo foo foo foofootest'
+      'test foobarbaz foo foo foo foofootest'
     )
-    cy.get('.cm-line').should('have.length', 15)
+    cy.get('.cm-line').should('have.length', 14)
   })
 
   it('handles pasted inline code', function () {
@@ -660,6 +660,45 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
     cy.get('@content').trigger('paste', { clipboardData })
 
     cy.get('.cm-line').should('have.length', 8)
+  })
+
+  it('tidies whitespace in pasted lists', function () {
+    mountEditor()
+
+    const data = `<ul>
+<li>  foo  </li>
+   <li>
+
+  <p>
+
+  <b>test</b></p>
+<p>test test test
+test test
+test test test</p>
+    </li>
+</ul>`
+
+    const clipboardData = new DataTransfer()
+    clipboardData.setData('text/html', data)
+    cy.get('@content').trigger('paste', { clipboardData })
+
+    cy.get('.cm-line').should('have.length', 6)
+    cy.get('@content').should(
+      'have.text',
+      ' foo  testtest test test test test test test test'
+    )
+  })
+
+  it('collapses whitespace in adjacent inline elements', function () {
+    mountEditor()
+
+    const data = `<p><b> foo </b><span> test </span><i> bar </i> baz</p>`
+
+    const clipboardData = new DataTransfer()
+    clipboardData.setData('text/html', data)
+    cy.get('@content').trigger('paste', { clipboardData })
+
+    cy.get('@content').should('have.text', 'foo test bar baz')
   })
 
   it('treats a pasted image as a figure even if there is HTML', function () {
