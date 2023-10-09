@@ -445,6 +445,44 @@ templates.inviteNewUserToJoinManagedUsers = ctaTemplate({
   },
 })
 
+templates.managedUsersDisabledSSO = ctaTemplate({
+  subject(opts) {
+    return `Action required: Set your Overleaf password`
+  },
+  title(opts) {
+    return `Single sign-on disabled`
+  },
+  message(opts) {
+    return [
+      `Hi,
+      <div>
+        Your group administrator has disabled single sign-on for your group.
+      </div>
+      </br>
+      <div>
+        <strong>What does this mean for you?</strong>
+      </div> 
+      </br>
+      <div>
+        You now need an email address and password to sign in to your Overleaf account.
+      </div>
+      `,
+    ]
+  },
+  secondaryMessage(opts) {
+    return [``]
+  },
+  ctaURL(opts) {
+    return opts.setNewPasswordUrl
+  },
+  ctaText(opts) {
+    return 'Set your new password'
+  },
+  greeting() {
+    return ''
+  },
+})
+
 templates.surrenderAccountForManagedUsers = ctaTemplate({
   subject(opts) {
     const admin = _.escape(_formatUserNameAndEmail(opts.admin, 'an admin'))

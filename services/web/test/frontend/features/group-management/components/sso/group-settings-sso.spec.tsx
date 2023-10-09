@@ -135,5 +135,74 @@ describe('GroupSettingsSSO', function () {
         })
       })
     })
+    describe('SSO disable modal', function () {
+      beforeEach(function () {
+        cy.intercept('GET', `/manage/groups/${GROUP_ID}/settings/sso`, {
+          statusCode: 200,
+          body: {
+            entryPoint: 'entrypoint',
+            certificate: 'cert',
+            signatureAlgorithm: 'sha1',
+            userIdAttribute: 'email',
+            enabled: true,
+          },
+        }).as('sso')
+
+        cy.mount(<GroupSettingsSSOComponent />)
+
+        cy.wait('@sso')
+
+        cy.get('.group-settings-sso-enable').within(() => {
+          cy.get('.switch-input').within(() => {
+            cy.get('.invisible-input').click({ force: true })
+          })
+        })
+      })
+
+      it('render disable modal correctly', function () {
+        // disable modal
+        cy.get('.modal-dialog').within(() => {
+          cy.contains('Disable single sign-on')
+          cy.contains(
+            'You’re about to disable single sign-on for all group members.'
+          )
+        })
+      })
+
+      it('close disable modal if Cancel button is clicked', function () {
+        cy.get('.modal-dialog').within(() => {
+          cy.findByRole('button', { name: 'Cancel' }).click()
+        })
+
+        cy.get('.modal-dialog').should('not.exist')
+      })
+
+      it('disables SSO if Disable SSO button is clicked', function () {
+        cy.intercept('POST', `/manage/groups/${GROUP_ID}/settings/disableSSO`, {
+          statusCode: 200,
+        }).as('disableSSO')
+
+        cy.intercept('GET', `/manage/groups/${GROUP_ID}/settings/sso`, {
+          statusCode: 200,
+          body: {
+            entryPoint: 'entrypoint',
+            certificate: 'cert',
+            signatureAlgorithm: 'sha1',
+            userIdAttribute: 'email',
+            enabled: false,
+          },
+        }).as('sso')
+
+        cy.get('.modal-dialog').within(() => {
+          cy.findByRole('button', { name: 'Disable SSO' }).click()
+        })
+        cy.get('.modal-dialog').should('not.exist')
+        cy.get('.group-settings-sso-enable').within(() => {
+          cy.get('.switch-input').within(() => {
+            cy.get('.invisible-input').should('not.be.checked')
+          })
+        })
+      })
+    })
   })
 })
