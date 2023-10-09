@@ -626,7 +626,7 @@ if (Settings.managedUsers?.enabled) {
     plans: {
       group_standard: false,
       group_professional: true,
-      organization: true,
+      organization: false,
     },
   })
 }
