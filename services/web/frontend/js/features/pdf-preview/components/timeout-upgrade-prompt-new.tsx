@@ -162,7 +162,7 @@ const PreventTimeoutHelpMessage = memo(function PreventTimeoutHelpMessage({
                       onClick={sendInfoClickEvent}
                     />,
                   ]}
-                  values={{ date: 'October 6 2023' }}
+                  values={{ date: 'October 27 2023' }}
                 />
               </>
             )}
