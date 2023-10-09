@@ -77,7 +77,7 @@ services:
     user: node
 
   test_frontend_ct:
-    image: cypress/included:12.17.1
+    image: cypress/included:13.3.0
     volumes:
       - ../../:/overleaf
     working_dir: /overleaf/services/web

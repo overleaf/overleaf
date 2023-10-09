@@ -435,7 +435,7 @@ describe('<CodeMirrorEditor/>', { scrollBehavior: false }, function () {
     // replace
     cy.get('@search-input').type('abcde 1')
     cy.get('@replace-input').type('test 1')
-    cy.findByRole('button', { name: 'Replace', exact: true }).click()
+    cy.findByRole('button', { name: 'Replace' }).click()
     cy.get('.cm-line')
       .eq(18)
       .should('contain.text', 'test 1')

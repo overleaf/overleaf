@@ -6,7 +6,6 @@ export default defineConfig({
   video: !!process.env.CI,
   screenshotsFolder: 'cypress/results',
   videosFolder: 'cypress/results',
-  videoUploadOnPasses: false,
   viewportHeight: 800,
   viewportWidth: 800,
   component: {

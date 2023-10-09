@@ -58,7 +58,7 @@ describe('useDetachLayout', function () {
     cy.get('#detach').click()
     cy.get('@openWindow').should(
       'have.been.calledOnceWith',
-      Cypress.sinon.match(/\/detached$/),
+      Cypress.sinon.match(/\/detached/),
       '_blank'
     )
     cy.get('#isLinked').should('not.be.checked')
