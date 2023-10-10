@@ -13,7 +13,7 @@ const { getAnalyticsIdFromMongoUser } = require('../Analytics/AnalyticsHelper')
 
 const NEW_COMPILE_TIMEOUT_ENFORCED_CUTOFF = new Date('2023-09-18T11:00:00.000Z')
 const NEW_COMPILE_TIMEOUT_ENFORCED_CUTOFF_DEFAULT_BASELINE = new Date(
-  '2023-10-08T11:00:00.000Z'
+  '2023-10-10T11:00:00.000Z'
 )
 
 module.exports = CompileManager = {
