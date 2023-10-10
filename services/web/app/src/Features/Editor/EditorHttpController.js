@@ -17,7 +17,9 @@ const { expressify } = require('../../util/promises')
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const {
   NEW_COMPILE_TIMEOUT_ENFORCED_CUTOFF,
+  NEW_COMPILE_TIMEOUT_ENFORCED_CUTOFF_DEFAULT_BASELINE,
 } = require('../Compile/CompileManager')
+const UserGetter = require('../User/UserGetter')
 
 module.exports = {
   joinProject: expressify(joinProject),
@@ -85,7 +87,25 @@ async function joinProject(req, res, next) {
           'compile-timeout-20s'
         )
       if (timeoutAssignment?.variant === '20s') {
-        if (project.owner.signUpDate > NEW_COMPILE_TIMEOUT_ENFORCED_CUTOFF) {
+        // users who were on the 'default' servers at time of original rollout
+        // will have a later cutoff date for the 20s timeout in the next phase
+        // we check the backend class at version 8 (baseline)
+        const owner = await UserGetter.promises.getUser(project.owner._id, {
+          _id: 1,
+          'splitTests.compile-backend-class-n2d': 1,
+        })
+        const backendClassHistory =
+          owner.splitTests?.['compile-backend-class-n2d'] || []
+        const backendClassBaselineVariant = backendClassHistory.find(
+          version => {
+            return version.versionNumber === 8
+          }
+        )?.variantName
+        const timeoutEnforcedCutoff =
+          backendClassBaselineVariant === 'default'
+            ? NEW_COMPILE_TIMEOUT_ENFORCED_CUTOFF_DEFAULT_BASELINE
+            : NEW_COMPILE_TIMEOUT_ENFORCED_CUTOFF
+        if (project.owner.signUpDate > timeoutEnforcedCutoff) {
           // New users will see a 10s warning and compile fail at 20s
           project.showNewCompileTimeoutUI = 'active'
         } else {

@@ -261,10 +261,6 @@ describe('CompileManager', function () {
           null,
           (this.user = { features: this.features, analyticsId: 'abc' })
         )
-      this.CompileManager.getProjectCompileLimits(
-        this.project_id,
-        this.callback
-      )
     })
 
     describe('user is in the n2d group and compile-timeout-20s split test variant', function () {
@@ -318,6 +314,68 @@ describe('CompileManager', function () {
           this.callback
             .calledWith(null, sinon.match({ timeout: 20 }))
             .should.equal(true)
+        })
+      })
+
+      describe('user was in the default n2d variant at the baseline test version', function () {
+        beforeEach(function () {
+          this.UserGetter.getUser = sinon.stub().callsArgWith(
+            2,
+            null,
+            (this.user = {
+              features: this.features,
+              analyticsId: 'abc',
+              splitTests: {
+                'compile-backend-class-n2d': [
+                  {
+                    variantName: 'default',
+                    versionNumber: 8,
+                    phase: 'release',
+                  },
+                ],
+              },
+            })
+          )
+        })
+
+        describe('user signed up after the original rollout but before the second phase rollout', function () {
+          beforeEach(function () {
+            const signUpDate = new Date(
+              this.CompileManager.NEW_COMPILE_TIMEOUT_ENFORCED_CUTOFF
+            )
+            signUpDate.setDate(signUpDate.getDate() + 1)
+            this.user.signUpDate = signUpDate
+          })
+
+          it('should keep the users compile timeout', function () {
+            this.CompileManager.getProjectCompileLimits(
+              this.project_id,
+              this.callback
+            )
+            this.callback
+              .calledWith(null, sinon.match({ timeout: 60 }))
+              .should.equal(true)
+          })
+        })
+
+        describe('user signed up after the second phase rollout', function () {
+          beforeEach(function () {
+            const signUpDate = new Date(
+              this.CompileManager.NEW_COMPILE_TIMEOUT_ENFORCED_CUTOFF_DEFAULT_BASELINE
+            )
+            signUpDate.setDate(signUpDate.getDate() + 1)
+            this.user.signUpDate = signUpDate
+          })
+
+          it('should reduce compile timeout to 20s', function () {
+            this.CompileManager.getProjectCompileLimits(
+              this.project_id,
+              this.callback
+            )
+            this.callback
+              .calledWith(null, sinon.match({ timeout: 20 }))
+              .should.equal(true)
+          })
         })
       })
     })

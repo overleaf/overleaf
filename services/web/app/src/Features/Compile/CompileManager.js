@@ -12,9 +12,13 @@ const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const { getAnalyticsIdFromMongoUser } = require('../Analytics/AnalyticsHelper')
 
 const NEW_COMPILE_TIMEOUT_ENFORCED_CUTOFF = new Date('2023-09-18T11:00:00.000Z')
+const NEW_COMPILE_TIMEOUT_ENFORCED_CUTOFF_DEFAULT_BASELINE = new Date(
+  '2023-10-08T11:00:00.000Z'
+)
 
 module.exports = CompileManager = {
   NEW_COMPILE_TIMEOUT_ENFORCED_CUTOFF,
+  NEW_COMPILE_TIMEOUT_ENFORCED_CUTOFF_DEFAULT_BASELINE,
 
   compile(projectId, userId, options = {}, _callback) {
     const timer = new Metrics.Timer('editor.compile')
@@ -200,10 +204,21 @@ module.exports = CompileManager = {
                     'compile-timeout-20s',
                     (err, assignment) => {
                       if (err) return callback(err)
+                      // users who were on the 'default' servers at time of original rollout
+                      // will have a later cutoff date for the 20s timeout in the next phase
+                      // we check the backend class at version 8 (baseline)
+                      const backendClassHistory =
+                        owner.splitTests?.['compile-backend-class-n2d'] || []
+                      const backendClassBaselineVariant =
+                        backendClassHistory.find(version => {
+                          return version.versionNumber === 8
+                        })?.variantName
+                      const timeoutEnforcedCutoff =
+                        backendClassBaselineVariant === 'default'
+                          ? NEW_COMPILE_TIMEOUT_ENFORCED_CUTOFF_DEFAULT_BASELINE
+                          : NEW_COMPILE_TIMEOUT_ENFORCED_CUTOFF
                       if (assignment?.variant === '20s') {
-                        if (
-                          owner.signUpDate > NEW_COMPILE_TIMEOUT_ENFORCED_CUTOFF
-                        ) {
+                        if (owner.signUpDate > timeoutEnforcedCutoff) {
                           limits.timeout = 20
                         }
                       }

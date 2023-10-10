@@ -138,6 +138,7 @@ describe('EditorHttpController', function () {
           .resolves({ variant: 'default' }),
       },
     }
+    this.UserGetter = { promises: { getUser: sinon.stub().resolves(null, {}) } }
     this.EditorHttpController = SandboxedModule.require(MODULE_PATH, {
       requires: {
         '../Project/ProjectDeleter': this.ProjectDeleter,
@@ -159,6 +160,7 @@ describe('EditorHttpController', function () {
         '../Errors/HttpErrorHandler': this.HttpErrorHandler,
         '../SplitTests/SplitTestHandler': this.SplitTestHandler,
         '../Compile/CompileManager': {},
+        '../User/UserGetter': this.UserGetter,
       },
     })
   })
