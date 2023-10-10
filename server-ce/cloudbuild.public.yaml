@@ -40,7 +40,7 @@ steps:
     entrypoint: /bin/bash
 timeout: 3600s
 options:
-  machineType: N1_HIGHCPU_32
+  machineType: E2_HIGHCPU_32
   env:
     - 'BRANCH_NAME=${BRANCH_NAME}'
 images:
