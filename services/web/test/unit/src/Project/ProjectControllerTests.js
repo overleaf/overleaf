@@ -314,10 +314,16 @@ describe('ProjectController', function () {
       }
       this.res.sendStatus = code => {
         this.ProjectAuditLogHandler.addEntry
-          .calledWith(this.project_id, 'toggle-access-level', this.user._id, {
-            publicAccessLevel: 'readOnly',
-            status: 'OK',
-          })
+          .calledWith(
+            this.project_id,
+            'toggle-access-level',
+            this.user._id,
+            this.req.ip,
+            {
+              publicAccessLevel: 'readOnly',
+              status: 'OK',
+            }
+          )
           .should.equal(true)
         done()
       }

@@ -234,6 +234,7 @@ describe('OwnershipTransferHandler', function () {
         this.project._id,
         'transfer-ownership',
         sessionUserId,
+        '', // IP address
         {
           previousOwnerId: this.user._id,
           newOwnerId: this.collaborator._id,

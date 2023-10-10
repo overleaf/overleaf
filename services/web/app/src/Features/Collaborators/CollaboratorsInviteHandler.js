@@ -5,7 +5,6 @@ const CollaboratorsEmailHandler = require('./CollaboratorsEmailHandler')
 const CollaboratorsHandler = require('./CollaboratorsHandler')
 const UserGetter = require('../User/UserGetter')
 const ProjectGetter = require('../Project/ProjectGetter')
-const Errors = require('../Errors/Errors')
 const Crypto = require('crypto')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
 
@@ -107,7 +106,10 @@ const CollaboratorsInviteHandler = {
 
   async revokeInvite(projectId, inviteId) {
     logger.debug({ projectId, inviteId }, 'removing invite')
-    await ProjectInvite.deleteOne({ projectId, _id: inviteId }).exec()
+    const invite = await ProjectInvite.findOneAndDelete({
+      projectId,
+      _id: inviteId,
+    }).exec()
     CollaboratorsInviteHandler._tryCancelInviteNotification(inviteId).catch(
       err => {
         logger.err(
@@ -116,6 +118,7 @@ const CollaboratorsInviteHandler = {
         )
       }
     )
+    return invite
   },
 
   async resendInvite(projectId, sendingUser, inviteId) {
@@ -127,7 +130,7 @@ const CollaboratorsInviteHandler = {
 
     if (invite == null) {
       logger.warn({ projectId, inviteId }, 'no invite found, nothing to resend')
-      return
+      return null
     }
 
     await CollaboratorsInviteHandler._sendMessages(
@@ -135,6 +138,8 @@ const CollaboratorsInviteHandler = {
       sendingUser,
       invite
     )
+
+    return invite
   },
 
   async getInviteByToken(projectId, tokenString) {
@@ -152,17 +157,7 @@ const CollaboratorsInviteHandler = {
     return invite
   },
 
-  async acceptInvite(projectId, tokenString, user) {
-    logger.debug({ projectId, userId: user._id }, 'accepting invite')
-    const invite = await CollaboratorsInviteHandler.getInviteByToken(
-      projectId,
-      tokenString
-    )
-
-    if (!invite) {
-      throw new Errors.NotFoundError('no matching invite found')
-    }
-    const inviteId = invite._id
+  async acceptInvite(invite, projectId, user) {
     CollaboratorsHandler.promises.addUserIdToProject(
       projectId,
       invite.sendingUserId,
@@ -171,6 +166,7 @@ const CollaboratorsInviteHandler = {
     )
 
     // Remove invite
+    const inviteId = invite._id
     logger.debug({ projectId, inviteId }, 'removing invite')
     await ProjectInvite.deleteOne({ _id: inviteId }).exec()
     CollaboratorsInviteHandler._tryCancelInviteNotification(inviteId).catch(

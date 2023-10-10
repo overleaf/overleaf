@@ -49,6 +49,7 @@ async function transferOwnership(projectId, newOwnerId, options = {}) {
     projectId,
     'transfer-ownership',
     sessionUserId,
+    '', // IP address
     { previousOwnerId, newOwnerId }
   )
   await _transferOwnership(projectId, previousOwnerId, newOwnerId)

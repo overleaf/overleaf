@@ -3,7 +3,6 @@ const { expect } = require('chai')
 const SandboxedModule = require('sandboxed-module')
 const { ObjectId } = require('mongodb')
 const Crypto = require('crypto')
-const Errors = require('../../../../app/src/Features/Errors/Errors')
 
 const MODULE_PATH =
   '../../../../app/src/Features/Collaborators/CollaboratorsInviteHandler.js'
@@ -26,6 +25,7 @@ describe('CollaboratorsInviteHandler', function () {
     this.ProjectInvite.findOne = sinon.stub()
     this.ProjectInvite.find = sinon.stub()
     this.ProjectInvite.deleteOne = sinon.stub()
+    this.ProjectInvite.findOneAndDelete = sinon.stub()
     this.ProjectInvite.countDocuments = sinon.stub()
 
     this.Crypto = {
@@ -177,8 +177,6 @@ describe('CollaboratorsInviteHandler', function () {
     })
 
     describe('when all goes well', function () {
-      beforeEach(function () {})
-
       it('should produce the invite object', async function () {
         const invite = await this.call()
         expect(invite).to.not.equal(null)
@@ -296,13 +294,13 @@ describe('CollaboratorsInviteHandler', function () {
 
   describe('revokeInvite', function () {
     beforeEach(function () {
-      this.ProjectInvite.deleteOne.returns({
-        exec: sinon.stub().resolves(),
+      this.ProjectInvite.findOneAndDelete.returns({
+        exec: sinon.stub().resolves(this.fakeInvite),
       })
       this.CollaboratorsInviteHandler.promises._tryCancelInviteNotification =
         sinon.stub().resolves()
       this.call = async () => {
-        await this.CollaboratorsInviteHandler.promises.revokeInvite(
+        return await this.CollaboratorsInviteHandler.promises.revokeInvite(
           this.projectId,
           this.inviteId
         )
@@ -310,14 +308,13 @@ describe('CollaboratorsInviteHandler', function () {
     })
 
     describe('when all goes well', function () {
-      beforeEach(function () {})
-
-      it('should call ProjectInvite.deleteOne', async function () {
+      it('should call ProjectInvite.findOneAndDelete', async function () {
         await this.call()
-        this.ProjectInvite.deleteOne.callCount.should.equal(1)
-        this.ProjectInvite.deleteOne
-          .calledWith({ projectId: this.projectId, _id: this.inviteId })
-          .should.equal(true)
+        this.ProjectInvite.findOneAndDelete.should.have.been.calledOnce
+        this.ProjectInvite.findOneAndDelete.should.have.been.calledWith({
+          projectId: this.projectId,
+          _id: this.inviteId,
+        })
       })
 
       it('should call _tryCancelInviteNotification', async function () {
@@ -329,11 +326,16 @@ describe('CollaboratorsInviteHandler', function () {
           .calledWith(this.inviteId)
           .should.equal(true)
       })
+
+      it('should return the deleted invite', async function () {
+        const invite = await this.call()
+        expect(invite).to.deep.equal(this.fakeInvite)
+      })
     })
 
     describe('when remove produces an error', function () {
       beforeEach(function () {
-        this.ProjectInvite.deleteOne.returns({
+        this.ProjectInvite.findOneAndDelete.returns({
           exec: sinon.stub().rejects(new Error('woops')),
         })
       })
@@ -353,7 +355,7 @@ describe('CollaboratorsInviteHandler', function () {
         .stub()
         .resolves()
       this.call = async () => {
-        await this.CollaboratorsInviteHandler.promises.resendInvite(
+        return await this.CollaboratorsInviteHandler.promises.resendInvite(
           this.projectId,
           this.sendingUser,
           this.inviteId
@@ -362,8 +364,6 @@ describe('CollaboratorsInviteHandler', function () {
     })
 
     describe('when all goes well', function () {
-      beforeEach(function () {})
-
       it('should call ProjectInvite.findOne', async function () {
         await this.call()
         this.ProjectInvite.findOne.callCount.should.equal(1)
@@ -380,6 +380,11 @@ describe('CollaboratorsInviteHandler', function () {
         this.CollaboratorsInviteHandler.promises._sendMessages
           .calledWith(this.projectId, this.sendingUser, this.fakeInvite)
           .should.equal(true)
+      })
+
+      it('should return the invite', async function () {
+        const invite = await this.call()
+        expect(invite).to.deep.equal(this.fakeInvite)
       })
     })
 
@@ -480,49 +485,30 @@ describe('CollaboratorsInviteHandler', function () {
         readOnly_refs: [],
       }
       this.CollaboratorsHandler.promises.addUserIdToProject.resolves()
-      this._getInviteByToken = sinon.stub(
-        this.CollaboratorsInviteHandler.promises,
-        'getInviteByToken'
-      )
-      this._getInviteByToken.resolves(this.fakeInvite)
       this.CollaboratorsInviteHandler.promises._tryCancelInviteNotification =
         sinon.stub().resolves()
       this.ProjectInvite.deleteOne.returns({ exec: sinon.stub().resolves() })
       this.call = async () => {
         await this.CollaboratorsInviteHandler.promises.acceptInvite(
+          this.fakeInvite,
           this.projectId,
-          this.token,
           this.user
         )
       }
     })
 
-    afterEach(function () {
-      this._getInviteByToken.restore()
-    })
-
     describe('when all goes well', function () {
-      it('should have called getInviteByToken', async function () {
-        await this.call()
-        this._getInviteByToken.callCount.should.equal(1)
-        this._getInviteByToken
-          .calledWith(this.projectId, this.token)
-          .should.equal(true)
-      })
-
       it('should have called CollaboratorsHandler.addUserIdToProject', async function () {
         await this.call()
         this.CollaboratorsHandler.promises.addUserIdToProject.callCount.should.equal(
           1
         )
-        this.CollaboratorsHandler.promises.addUserIdToProject
-          .calledWith(
-            this.projectId,
-            this.sendingUserId,
-            this.userId,
-            this.fakeInvite.privileges
-          )
-          .should.equal(true)
+        this.CollaboratorsHandler.promises.addUserIdToProject.should.have.been.calledWith(
+          this.projectId,
+          this.sendingUserId,
+          this.userId,
+          this.fakeInvite.privileges
+        )
       })
 
       it('should have called ProjectInvite.deleteOne', async function () {
@@ -537,7 +523,6 @@ describe('CollaboratorsInviteHandler', function () {
     describe('when the invite is for readOnly access', function () {
       beforeEach(function () {
         this.fakeInvite.privileges = 'readOnly'
-        this._getInviteByToken.resolves(this.fakeInvite)
       })
 
       it('should have called CollaboratorsHandler.addUserIdToProject', async function () {
@@ -556,66 +541,6 @@ describe('CollaboratorsInviteHandler', function () {
       })
     })
 
-    describe('when getInviteByToken does not find an invite', function () {
-      beforeEach(function () {
-        this._getInviteByToken.resolves(null)
-      })
-
-      it('should produce an error', async function () {
-        await expect(this.call()).to.be.rejectedWith(Errors.NotFoundError)
-      })
-
-      it('should have called getInviteByToken', async function () {
-        await expect(this.call()).to.be.rejected
-        this._getInviteByToken.callCount.should.equal(1)
-        this._getInviteByToken
-          .calledWith(this.projectId, this.token)
-          .should.equal(true)
-      })
-
-      it('should not have called CollaboratorsHandler.addUserIdToProject', async function () {
-        await expect(this.call()).to.be.rejected
-        this.CollaboratorsHandler.promises.addUserIdToProject.callCount.should.equal(
-          0
-        )
-      })
-
-      it('should not have called ProjectInvite.deleteOne', async function () {
-        await expect(this.call()).to.be.rejected
-        this.ProjectInvite.deleteOne.callCount.should.equal(0)
-      })
-    })
-
-    describe('when getInviteByToken produces an error', function () {
-      beforeEach(function () {
-        this._getInviteByToken.rejects(new Error('woops'))
-      })
-
-      it('should produce an error', async function () {
-        await expect(this.call()).to.be.rejectedWith(Error)
-      })
-
-      it('should have called getInviteByToken', async function () {
-        await expect(this.call()).to.be.rejected
-        this._getInviteByToken.callCount.should.equal(1)
-        this._getInviteByToken
-          .calledWith(this.projectId, this.token)
-          .should.equal(true)
-      })
-
-      it('should not have called CollaboratorsHandler.addUserIdToProject', async function () {
-        await expect(this.call()).to.be.rejected
-        this.CollaboratorsHandler.promises.addUserIdToProject.callCount.should.equal(
-          0
-        )
-      })
-
-      it('should not have called ProjectInvite.deleteOne', async function () {
-        await expect(this.call()).to.be.rejected
-        this.ProjectInvite.deleteOne.callCount.should.equal(0)
-      })
-    })
-
     describe('when addUserIdToProject produces an error', function () {
       beforeEach(function () {
         this.CollaboratorsHandler.promises.addUserIdToProject.callsArgWith(
@@ -626,14 +551,6 @@ describe('CollaboratorsInviteHandler', function () {
 
       it('should produce an error', async function () {
         await expect(this.call()).to.be.rejectedWith(Error)
-      })
-
-      it('should have called getInviteByToken', async function () {
-        await expect(this.call()).to.be.rejected
-        this._getInviteByToken.callCount.should.equal(1)
-        this._getInviteByToken
-          .calledWith(this.projectId, this.token)
-          .should.equal(true)
       })
 
       it('should have called CollaboratorsHandler.addUserIdToProject', async function () {
@@ -668,27 +585,17 @@ describe('CollaboratorsInviteHandler', function () {
         await expect(this.call()).to.be.rejectedWith(Error)
       })
 
-      it('should have called getInviteByToken', async function () {
-        await expect(this.call()).to.be.rejected
-        this._getInviteByToken.callCount.should.equal(1)
-        this._getInviteByToken
-          .calledWith(this.projectId, this.token)
-          .should.equal(true)
-      })
-
       it('should have called CollaboratorsHandler.addUserIdToProject', async function () {
         await expect(this.call()).to.be.rejected
         this.CollaboratorsHandler.promises.addUserIdToProject.callCount.should.equal(
           1
         )
-        this.CollaboratorsHandler.promises.addUserIdToProject
-          .calledWith(
-            this.projectId,
-            this.sendingUserId,
-            this.userId,
-            this.fakeInvite.privileges
-          )
-          .should.equal(true)
+        this.CollaboratorsHandler.promises.addUserIdToProject.should.have.been.calledWith(
+          this.projectId,
+          this.sendingUserId,
+          this.userId,
+          this.fakeInvite.privileges
+        )
       })
 
       it('should have called ProjectInvite.deleteOne', async function () {

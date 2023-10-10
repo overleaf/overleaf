@@ -12,6 +12,8 @@ const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const SessionManager = require('../Authentication/SessionManager')
 const { RateLimiter } = require('../../infrastructure/RateLimiter')
 const { expressify } = require('../../util/promises')
+const ProjectAuditLogHandler = require('../Project/ProjectAuditLogHandler')
+const Errors = require('../Errors/Errors')
 
 // This rate limiter allows a different number of requests depending on the
 // number of callaborators a user is allowed. This is implemented by providing
@@ -138,7 +140,20 @@ const CollaboratorsInviteController = {
       email,
       privileges
     )
+
+    ProjectAuditLogHandler.addEntryInBackground(
+      projectId,
+      'send-invite',
+      sendingUserId,
+      req.ip,
+      {
+        inviteId: invite._id,
+        privileges,
+      }
+    )
+
     logger.debug({ projectId, email, sendingUserId }, 'invite created')
+
     EditorRealTimeController.emitToRoom(
       projectId,
       'project:membership:changed',
@@ -150,21 +165,40 @@ const CollaboratorsInviteController = {
   async revokeInvite(req, res) {
     const projectId = req.params.Project_id
     const inviteId = req.params.invite_id
+    const user = SessionManager.getSessionUser(req.session)
 
     logger.debug({ projectId, inviteId }, 'revoking invite')
-    await CollaboratorsInviteHandler.promises.revokeInvite(projectId, inviteId)
-    EditorRealTimeController.emitToRoom(
+
+    const invite = await CollaboratorsInviteHandler.promises.revokeInvite(
       projectId,
-      'project:membership:changed',
-      { invites: true }
+      inviteId
     )
 
-    res.sendStatus(201)
+    if (invite != null) {
+      ProjectAuditLogHandler.addEntryInBackground(
+        projectId,
+        'revoke-invite',
+        user._id,
+        req.ip,
+        {
+          inviteId: invite._id,
+          privileges: invite.privileges,
+        }
+      )
+      EditorRealTimeController.emitToRoom(
+        projectId,
+        'project:membership:changed',
+        { invites: true }
+      )
+    }
+
+    res.sendStatus(204)
   },
 
   async resendInvite(req, res) {
     const projectId = req.params.Project_id
     const inviteId = req.params.invite_id
+    const user = SessionManager.getSessionUser(req.session)
 
     logger.debug({ projectId, inviteId }, 'resending invite')
     const sendingUser = SessionManager.getSessionUser(req.session)
@@ -175,11 +209,24 @@ const CollaboratorsInviteController = {
       return res.sendStatus(429)
     }
 
-    await CollaboratorsInviteHandler.promises.resendInvite(
+    const invite = await CollaboratorsInviteHandler.promises.resendInvite(
       projectId,
       sendingUser,
       inviteId
     )
+
+    if (invite != null) {
+      ProjectAuditLogHandler.addEntryInBackground(
+        projectId,
+        'resend-invite',
+        user._id,
+        req.ip,
+        {
+          inviteId: invite._id,
+          privileges: invite.privileges,
+        }
+      )
+    }
 
     res.sendStatus(201)
   },
@@ -248,21 +295,40 @@ const CollaboratorsInviteController = {
   },
 
   async acceptInvite(req, res) {
-    const projectId = req.params.Project_id
-    const { token } = req.params
+    const { Project_id: projectId, token } = req.params
     const currentUser = SessionManager.getSessionUser(req.session)
     logger.debug(
       { projectId, userId: currentUser._id },
       'got request to accept invite'
     )
 
-    await CollaboratorsInviteHandler.promises.acceptInvite(
+    const invite = await CollaboratorsInviteHandler.promises.getInviteByToken(
       projectId,
-      token,
+      token
+    )
+
+    if (invite == null) {
+      throw new Errors.NotFoundError('no matching invite found')
+    }
+
+    await ProjectAuditLogHandler.promises.addEntry(
+      projectId,
+      'accept-invite',
+      currentUser._id,
+      req.ip,
+      {
+        inviteId: invite._id,
+        privileges: invite.privileges,
+      }
+    )
+
+    await CollaboratorsInviteHandler.promises.acceptInvite(
+      invite,
+      projectId,
       currentUser
     )
 
-    EditorRealTimeController.emitToRoom(
+    await EditorRealTimeController.emitToRoom(
       projectId,
       'project:membership:changed',
       { invites: true, members: true }

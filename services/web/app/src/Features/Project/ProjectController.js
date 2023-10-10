@@ -133,6 +133,7 @@ const ProjectController = {
           projectId,
           'toggle-access-level',
           user._id,
+          req.ip,
           { publicAccessLevel: req.body.publicAccessLevel, status: 'OK' },
           callback
         )
