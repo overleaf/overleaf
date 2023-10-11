@@ -93,6 +93,8 @@ const TokenAccessHandler = {
         publicAccesLevel: 1,
         owner_ref: 1,
         name: 1,
+        tokenAccessReadOnly_refs: 1,
+        tokenAccessReadAndWrite_refs: 1,
       },
       callback
     )

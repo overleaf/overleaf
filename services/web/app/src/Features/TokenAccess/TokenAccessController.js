@@ -11,6 +11,7 @@ const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
 const {
   handleAdminDomainRedirect,
 } = require('../Authorization/AuthorizationMiddleware')
+const ProjectAuditLogHandler = require('../Project/ProjectAuditLogHandler')
 
 const orderedPrivilegeLevels = [
   PrivilegeLevels.NONE,
@@ -252,6 +253,17 @@ async function grantTokenAccessReadAndWrite(req, res, next) {
         },
       })
     }
+
+    if (!project.tokenAccessReadAndWrite_refs.some(id => id.equals(userId))) {
+      await ProjectAuditLogHandler.promises.addEntry(
+        project._id,
+        'join-via-token',
+        userId,
+        req.ip,
+        { privileges: 'readAndWrite' }
+      )
+    }
+
     await TokenAccessHandler.promises.addReadAndWriteUserToProject(
       userId,
       project._id
@@ -306,6 +318,17 @@ async function grantTokenAccessReadOnly(req, res, next) {
         },
       })
     }
+
+    if (!project.tokenAccessReadOnly_refs.some(id => id.equals(userId))) {
+      await ProjectAuditLogHandler.promises.addEntry(
+        project._id,
+        'join-via-token',
+        userId,
+        req.ip,
+        { privileges: 'readOnly' }
+      )
+    }
+
     await TokenAccessHandler.promises.addReadOnlyUserToProject(
       userId,
       project._id
