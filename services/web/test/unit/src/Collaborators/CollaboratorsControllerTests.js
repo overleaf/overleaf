@@ -54,6 +54,10 @@ describe('CollaboratorsController', function () {
       getRequestToken: sinon.stub().returns('access-token'),
     }
 
+    this.ProjectAuditLogHandler = {
+      addEntryInBackground: sinon.stub(),
+    }
+
     this.CollaboratorsController = SandboxedModule.require(MODULE_PATH, {
       requires: {
         mongodb: { ObjectId },
@@ -65,6 +69,7 @@ describe('CollaboratorsController', function () {
         '../Tags/TagsHandler': this.TagsHandler,
         '../Authentication/SessionManager': this.SessionManager,
         '../TokenAccess/TokenAccessHandler': this.TokenAccessHandler,
+        '../Project/ProjectAuditLogHandler': this.ProjectAuditLogHandler,
       },
     })
   })
@@ -105,6 +110,16 @@ describe('CollaboratorsController', function () {
         'project:membership:changed'
       )
     })
+
+    it('should write a project audit log', function () {
+      this.ProjectAuditLogHandler.addEntryInBackground.should.have.been.calledWith(
+        this.projectId,
+        'remove-collaborator',
+        this.user._id,
+        this.req.ip,
+        { userId: this.user._id }
+      )
+    })
   })
 
   describe('removeSelfFromProject', function () {
@@ -138,6 +153,15 @@ describe('CollaboratorsController', function () {
 
     it('should return a success code', function () {
       this.res.sendStatus.calledWith(204).should.equal(true)
+    })
+
+    it('should write a project audit log', function () {
+      this.ProjectAuditLogHandler.addEntryInBackground.should.have.been.calledWith(
+        this.projectId,
+        'leave-project',
+        this.user._id,
+        this.req.ip
+      )
     })
   })
 

@@ -12,6 +12,7 @@ const logger = require('@overleaf/logger')
 const { expressify } = require('../../util/promises')
 const { hasAdminAccess } = require('../Helpers/AdminAuthorizationHelper')
 const TokenAccessHandler = require('../TokenAccess/TokenAccessHandler')
+const ProjectAuditLogHandler = require('../Project/ProjectAuditLogHandler')
 
 module.exports = {
   removeUserFromProject: expressify(removeUserFromProject),
@@ -25,10 +26,20 @@ module.exports = {
 async function removeUserFromProject(req, res, next) {
   const projectId = req.params.Project_id
   const userId = req.params.user_id
+  const sessionUserId = SessionManager.getLoggedInUserId(req.session)
   await _removeUserIdFromProject(projectId, userId)
   EditorRealTimeController.emitToRoom(projectId, 'project:membership:changed', {
     members: true,
   })
+
+  ProjectAuditLogHandler.addEntryInBackground(
+    projectId,
+    'remove-collaborator',
+    sessionUserId,
+    req.ip,
+    { userId }
+  )
+
   res.sendStatus(204)
 }
 
@@ -36,6 +47,14 @@ async function removeSelfFromProject(req, res, next) {
   const projectId = req.params.Project_id
   const userId = SessionManager.getLoggedInUserId(req.session)
   await _removeUserIdFromProject(projectId, userId)
+
+  ProjectAuditLogHandler.addEntryInBackground(
+    projectId,
+    'leave-project',
+    userId,
+    req.ip
+  )
+
   res.sendStatus(204)
 }
 
