@@ -29,6 +29,12 @@ module.exports = {
     },
   },
 
+  mongo: {
+    options: {
+      family: 4,
+    },
+  },
+
   apis: {
     linkedUrlProxy: {
       url: process.env.LINKED_URL_PROXY,
