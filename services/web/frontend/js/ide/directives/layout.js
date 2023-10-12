@@ -220,7 +220,7 @@ aria-label=\"{{ isOpen ? tooltipMsgWhenOpen : tooltipMsgWhenClosed }}\">\
         }
 
         function onPaneOpen(pane) {
-          if (!hasCustomToggler && pane !== customTogglerPane) {
+          if (!hasCustomToggler || pane !== customTogglerPane) {
             return
           }
           return customTogglerEl
@@ -229,7 +229,7 @@ aria-label=\"{{ isOpen ? tooltipMsgWhenOpen : tooltipMsgWhenClosed }}\">\
         }
 
         function onPaneClose(pane) {
-          if (!hasCustomToggler && pane !== customTogglerPane) {
+          if (!hasCustomToggler || pane !== customTogglerPane) {
             return
           }
           return customTogglerEl
@@ -263,7 +263,7 @@ aria-label=\"{{ isOpen ? tooltipMsgWhenOpen : tooltipMsgWhenClosed }}\">\
               } else {
                 layout.close('east')
               }
-              if (hasCustomToggler) {
+              if (hasCustomToggler && customTogglerPane === 'east') {
                 repositionCustomToggler()
                 customTogglerEl.scope().$applyAsync(function () {
                   customTogglerEl.scope().isOpen = value
