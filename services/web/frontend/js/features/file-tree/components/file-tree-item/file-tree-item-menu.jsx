@@ -1,23 +1,20 @@
-import { useState } from 'react'
-import { findDOMNode } from 'react-dom'
+import { useRef } from 'react'
 import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
-import withoutPropagation from '../../../../infrastructure/without-propagation'
 
-import { Button } from 'react-bootstrap'
 import Icon from '../../../../shared/components/icon'
 
 import { useFileTreeMainContext } from '../../contexts/file-tree-main'
 
 function FileTreeItemMenu({ id }) {
   const { t } = useTranslation()
-
   const { contextMenuCoords, setContextMenuCoords } = useFileTreeMainContext()
-  const [dropdownTarget, setDropdownTarget] = useState()
+  const menuButtonRef = useRef()
 
-  function handleClick(_ev) {
-    const target = dropdownTarget.getBoundingClientRect()
+  function handleClick(event) {
+    event.stopPropagation()
     if (!contextMenuCoords) {
+      const target = menuButtonRef.current.getBoundingClientRect()
       setContextMenuCoords({
         top: target.top + target.height / 2,
         left: target.right,
@@ -27,25 +24,16 @@ function FileTreeItemMenu({ id }) {
     }
   }
 
-  const menuButtonRef = component => {
-    if (component) {
-      // eslint-disable-next-line react/no-find-dom-node
-      setDropdownTarget(findDOMNode(component))
-    }
-  }
-
   return (
     <div className="menu-button btn-group">
-      <Button
-        className="entity-menu-toggle"
-        bsSize="sm"
+      <button
+        className="entity-menu-toggle btn btn-sm"
         id={`menu-button-${id}`}
-        onClick={withoutPropagation(handleClick)}
+        onClick={handleClick}
         ref={menuButtonRef}
-        bsStyle={null}
       >
         <Icon type="ellipsis-v" accessibilityLabel={t('menu')} />
-      </Button>
+      </button>
     </div>
   )
 }

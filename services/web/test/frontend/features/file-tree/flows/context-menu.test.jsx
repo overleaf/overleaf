@@ -59,6 +59,45 @@ describe('FileTree Context Menu Flow', function () {
     screen.getByRole('menu')
   })
 
+  it('closes when a new selection is started', async function () {
+    const rootFolder = [
+      {
+        _id: 'root-folder-id',
+        name: 'rootFolder',
+        docs: [
+          { _id: '456def', name: 'main.tex' },
+          { _id: '456def', name: 'foo.tex' },
+        ],
+        folders: [],
+        fileRefs: [],
+      },
+    ]
+    renderWithEditorContext(
+      <FileTreeRoot
+        refProviders={{}}
+        reindexReferences={() => null}
+        setRefProviderEnabled={() => null}
+        setStartedFreeTrial={() => null}
+        onSelect={onSelect}
+        onInit={onInit}
+        isConnected
+      />,
+      {
+        rootFolder,
+        projectId: '123abc',
+        rootDocId: '456def',
+      }
+    )
+    const treeitem = screen.getByRole('button', { name: 'main.tex' })
+    expect(screen.queryByRole('menu')).to.be.null
+
+    fireEvent.contextMenu(treeitem)
+    screen.getByRole('menu')
+
+    screen.getByRole('button', { name: 'foo.tex' }).click()
+    expect(screen.queryByRole('menu')).to.be.null
+  })
+
   it("doesn't open in read only mode", async function () {
     const rootFolder = [
       {

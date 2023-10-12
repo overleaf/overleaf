@@ -18,6 +18,7 @@ import { useEditorContext } from '../../../shared/context/editor-context'
 import { useLayoutContext } from '../../../shared/context/layout-context'
 import usePersistedState from '../../../shared/hooks/use-persisted-state'
 import usePreviousValue from '../../../shared/hooks/use-previous-value'
+import { useFileTreeMainContext } from '@/features/file-tree/contexts/file-tree-main'
 
 const FileTreeSelectableContext = createContext()
 
@@ -31,7 +32,7 @@ function fileTreeSelectableReadWriteReducer(selectedEntityIds, action) {
   switch (action.type) {
     case ACTION_TYPES.SELECT: {
       // reset selection
-      return new Set([action.id])
+      return new Set(Array.isArray(action.id) ? action.id : [action.id])
     }
 
     case ACTION_TYPES.MULTI_SELECT: {
@@ -207,8 +208,11 @@ const editorContextPropTypes = {
   permissionsLevel: PropTypes.oneOf(['readOnly', 'readAndWrite', 'owner']),
 }
 
+const isMac = /Mac/.test(window.navigator?.platform)
+
 export function useSelectableEntity(id, isFile) {
   const { view, setView } = useLayoutContext(layoutContextPropTypes)
+  const { setContextMenuCoords } = useFileTreeMainContext()
   const {
     selectedEntityIds,
     selectOrMultiSelectEntity,
@@ -221,18 +225,32 @@ export function useSelectableEntity(id, isFile) {
   const handleEvent = useCallback(
     ev => {
       ev.stopPropagation()
+      // use Command (macOS) or Ctrl (other OS) to select multiple items,
+      // as long as the root folder wasn't selected
+      const multiSelect =
+        !isRootFolderSelected && (isMac ? ev.metaKey : ev.ctrlKey)
       setIsRootFolderSelected(false)
-      selectOrMultiSelectEntity(id, ev.ctrlKey || ev.metaKey)
+      selectOrMultiSelectEntity(id, multiSelect)
       setView(isFile ? 'file' : 'editor')
     },
-    [id, setIsRootFolderSelected, selectOrMultiSelectEntity, setView, isFile]
+    [
+      id,
+      isRootFolderSelected,
+      setIsRootFolderSelected,
+      selectOrMultiSelectEntity,
+      setView,
+      isFile,
+    ]
   )
 
   const handleClick = useCallback(
     ev => {
       handleEvent(ev)
+      if (!ev.ctrlKey && !ev.metaKey) {
+        setContextMenuCoords(null)
+      }
     },
-    [handleEvent]
+    [handleEvent, setContextMenuCoords]
   )
 
   const handleKeyPress = useCallback(

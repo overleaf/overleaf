@@ -347,9 +347,9 @@ describe('<FileTreeRoot/>', function () {
       )
 
       // select the sub file
-      const mainDoc = screen.getByRole('treeitem', { name: 'sub.tex' })
-      fireEvent.click(mainDoc)
-      expect(mainDoc.getAttribute('aria-selected')).to.equal('true')
+      const subDoc = screen.getByRole('treeitem', { name: 'sub.tex' })
+      fireEvent.click(subDoc)
+      expect(subDoc.getAttribute('aria-selected')).to.equal('true')
 
       // click on empty area
       fireEvent.click(screen.getByTestId('file-tree-inner'))
@@ -393,6 +393,17 @@ describe('<FileTreeRoot/>', function () {
       const rootEl = screen.getByTestId('file-tree-list-root')
 
       expect(newItem.parentNode).to.equal(rootEl)
+    })
+
+    it('starts a new selection', function () {
+      const subDoc = screen.getByRole('treeitem', { name: 'sub.tex' })
+      expect(subDoc.getAttribute('aria-selected')).to.equal('false')
+
+      const mainDoc = screen.getByRole('treeitem', { name: 'main.tex' })
+      fireEvent.click(mainDoc, { ctrlKey: true })
+      expect(mainDoc.getAttribute('aria-selected')).to.equal('true')
+
+      expect(subDoc.getAttribute('aria-selected')).to.equal('false')
     })
   })
 })
