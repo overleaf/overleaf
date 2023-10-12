@@ -445,6 +445,45 @@ templates.inviteNewUserToJoinManagedUsers = ctaTemplate({
   },
 })
 
+templates.managedUsersEnabledSSO = ctaTemplate({
+  subject(opts) {
+    return `Action required: Authenticate your Overleaf account`
+  },
+  title(opts) {
+    return `Single sign-on enabled`
+  },
+  message(opts) {
+    return [
+      `Hi,
+      <div>
+        Your group administrator has enabled single sign-on for your group.
+      </div>
+      </br>
+      <div>
+        <strong>What does this mean for you?</strong>
+      </div> 
+      </br>
+      <div>
+        You won't need to remember a separate email address and password to sign in to Overleaf. 
+        All you need to do is authenticate your existing Overleaf account with your SSO provider.
+      </div>
+      `,
+    ]
+  },
+  secondaryMessage(opts) {
+    return [``]
+  },
+  ctaURL(opts) {
+    return opts.authenticateWithSSO
+  },
+  ctaText(opts) {
+    return 'Authenticate with SSO'
+  },
+  greeting() {
+    return ''
+  },
+})
+
 templates.managedUsersDisabledSSO = ctaTemplate({
   subject(opts) {
     return `Action required: Set your Overleaf password`
