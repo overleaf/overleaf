@@ -66,6 +66,46 @@ describe('GroupSettingsSSO', function () {
         })
       })
     })
+    it('updates the configuration, and checks the success message', function () {
+      cy.intercept('GET', `/manage/groups/${GROUP_ID}/settings/sso`, {
+        statusCode: 200,
+        body: {
+          entryPoint: 'entrypoint',
+          certificate: 'cert',
+          signatureAlgorithm: 'sha1',
+          userIdAttribute: 'email',
+          enabled: true,
+        },
+      }).as('sso')
+
+      cy.intercept('POST', `/manage/groups/${GROUP_ID}/settings/sso`, {
+        statusCode: 200,
+        body: {
+          entryPoint: 'entrypoint',
+          certificate: 'certi',
+          signatureAlgorithm: 'sha1',
+          userIdAttribute: 'email',
+          enabled: false,
+        },
+      }).as('ssoUpdated')
+
+      cy.mount(<GroupSettingsSSOComponent />)
+
+      cy.wait('@sso')
+
+      cy.get('.group-settings-sso-enable').within(() => {
+        cy.get('.switch-input').within(() => {
+          cy.get('.invisible-input').should('be.checked')
+          cy.get('.invisible-input').should('not.be.disabled')
+        })
+      })
+
+      cy.findByRole('button', { name: 'View configuration' }).click()
+      cy.findByRole('button', { name: 'Edit configuration' }).click()
+      cy.findByRole('button', { name: 'Save' }).click()
+      cy.wait('@ssoUpdated')
+      cy.findByText('SSO configuration was updated successfully')
+    })
 
     describe('sso enable modal', function () {
       beforeEach(function () {
@@ -107,7 +147,7 @@ describe('GroupSettingsSSO', function () {
         cy.get('.modal-dialog').should('not.exist')
       })
 
-      it('enables SSO if Enable SSO button is clicked', function () {
+      it('enables SSO if Enable SSO button is clicked and shows success banner', function () {
         cy.intercept('POST', `/manage/groups/${GROUP_ID}/settings/enableSSO`, {
           statusCode: 200,
         }).as('enableSSO')
@@ -133,6 +173,7 @@ describe('GroupSettingsSSO', function () {
             cy.get('.invisible-input').should('not.be.disabled')
           })
         })
+        cy.findByText('SSO is enabled')
       })
     })
     describe('SSO disable modal', function () {
@@ -177,7 +218,7 @@ describe('GroupSettingsSSO', function () {
         cy.get('.modal-dialog').should('not.exist')
       })
 
-      it('disables SSO if Disable SSO button is clicked', function () {
+      it('disables SSO if Disable SSO button is clicked and shows success banner', function () {
         cy.intercept('POST', `/manage/groups/${GROUP_ID}/settings/disableSSO`, {
           statusCode: 200,
         }).as('disableSSO')
@@ -202,6 +243,7 @@ describe('GroupSettingsSSO', function () {
             cy.get('.invisible-input').should('not.be.checked')
           })
         })
+        cy.findByText('SSO is disabled')
       })
     })
   })
