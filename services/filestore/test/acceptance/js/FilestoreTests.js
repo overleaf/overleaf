@@ -136,8 +136,8 @@ describe('Filestore', function () {
             `${metricPrefix}_egress`
           )
         }
-        projectId = ObjectId().toString()
-        otherProjectId = ObjectId().toString()
+        projectId = new ObjectId().toString()
+        otherProjectId = new ObjectId().toString()
       })
 
       it('should send a 200 for the status endpoint', async function () {
@@ -155,7 +155,7 @@ describe('Filestore', function () {
           '/tmp/filestore_acceptance_tests_file_read.txt'
 
         beforeEach(async function () {
-          fileId = ObjectId().toString()
+          fileId = new ObjectId().toString()
           fileUrl = `${filestoreUrl}/project/${projectId}/file/${fileId}`
           constantFileContent = [
             'hello world',
@@ -238,8 +238,8 @@ describe('Filestore', function () {
         })
 
         it('should be able to copy files', async function () {
-          const newProjectID = ObjectId().toString()
-          const newFileId = ObjectId().toString()
+          const newProjectID = new ObjectId().toString()
+          const newFileId = new ObjectId().toString()
           const newFileUrl = `${filestoreUrl}/project/${newProjectID}/file/${newFileId}`
           let response = await fetch(newFileUrl, {
             method: 'PUT',
@@ -343,9 +343,9 @@ describe('Filestore', function () {
           projectUrl = `${filestoreUrl}/project/${projectId}`
           otherProjectUrl = `${filestoreUrl}/project/${otherProjectId}`
           fileIds = [
-            ObjectId().toString(),
-            ObjectId().toString(),
-            ObjectId().toString(),
+            new ObjectId().toString(),
+            new ObjectId().toString(),
+            new ObjectId().toString(),
           ]
           fileUrls = [
             `${projectUrl}/file/${fileIds[0]}`,
@@ -416,7 +416,7 @@ describe('Filestore', function () {
         let fileId, fileUrl, largeFileContent, error
 
         beforeEach(async function () {
-          fileId = ObjectId().toString()
+          fileId = new ObjectId().toString()
           fileUrl = `${filestoreUrl}/project/${projectId}/file/${fileId}`
 
           largeFileContent = '_wombat_'.repeat(1024 * 1024) // 8 megabytes
@@ -457,8 +457,8 @@ describe('Filestore', function () {
 
           beforeEach(async function () {
             constantFileContent = `This is a file in a different S3 bucket ${Math.random()}`
-            fileId = ObjectId().toString()
-            bucketName = ObjectId().toString()
+            fileId = new ObjectId().toString()
+            bucketName = new ObjectId().toString()
             fileUrl = `${filestoreUrl}/bucket/${bucketName}/key/${fileId}`
 
             const s3ClientSettings = {
@@ -501,7 +501,7 @@ describe('Filestore', function () {
           beforeEach(async function () {
             date = new Date()
             tk.freeze(date)
-            fileId = ObjectId()
+            fileId = new ObjectId()
             fileUrl = `${filestoreUrl}/project/${projectId}/file/${fileId}`
 
             content = '_wombat_' + Math.random()
@@ -549,7 +549,7 @@ describe('Filestore', function () {
 
           beforeEach(function () {
             constantFileContent = `This is yet more file content ${Math.random()}`
-            fileId = ObjectId().toString()
+            fileId = new ObjectId().toString()
             fileKey = `${projectId}/${fileId}`
             fileUrl = `${filestoreUrl}/project/${projectId}/file/${fileId}`
 
@@ -637,8 +637,8 @@ describe('Filestore', function () {
               let newFileId, newFileUrl, newFileKey, opts
 
               beforeEach(function () {
-                const newProjectID = ObjectId().toString()
-                newFileId = ObjectId().toString()
+                const newProjectID = new ObjectId().toString()
+                newFileId = new ObjectId().toString()
                 newFileUrl = `${filestoreUrl}/project/${newProjectID}/file/${newFileId}`
                 newFileKey = `${newProjectID}/${newFileId}`
 
@@ -857,7 +857,7 @@ describe('Filestore', function () {
         )
 
         beforeEach(async function () {
-          fileId = ObjectId().toString()
+          fileId = new ObjectId().toString()
           fileUrl = `${filestoreUrl}/project/${projectId}/file/${fileId}`
           const stat = await fsStat(localFileReadPath)
           localFileSize = stat.size

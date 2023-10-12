@@ -20,9 +20,9 @@ describe('FileHandler', function () {
     fs
 
   const bucket = 'my_bucket'
-  const key = `${ObjectId()}/${ObjectId()}`
-  const convertedFolderKey = `${ObjectId()}/${ObjectId()}`
-  const projectKey = `${ObjectId()}/`
+  const key = `${new ObjectId()}/${new ObjectId()}`
+  const convertedFolderKey = `${new ObjectId()}/${new ObjectId()}`
+  const projectKey = `${new ObjectId()}/`
   const sourceStream = 'sourceStream'
   const convertedKey = 'convertedKey'
   const redirectUrl = 'https://wombat.potato/giraffe'
