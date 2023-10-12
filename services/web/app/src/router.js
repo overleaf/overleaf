@@ -726,16 +726,6 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     HistoryController.proxyToHistoryApi
   )
   webRouter.post(
-    '/project/:Project_id/doc/:doc_id/version/:version_id/restore',
-    AuthorizationMiddleware.ensureUserCanWriteProjectContent,
-    HistoryController.proxyToHistoryApi
-  )
-  webRouter.post(
-    '/project/:project_id/doc/:doc_id/restore',
-    AuthorizationMiddleware.ensureUserCanWriteProjectContent,
-    HistoryController.restoreDocFromDeletedDoc
-  )
-  webRouter.post(
     '/project/:project_id/restore_file',
     AuthorizationMiddleware.ensureUserCanWriteProjectContent,
     HistoryController.restoreFileFromV2

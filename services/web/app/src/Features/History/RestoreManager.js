@@ -22,40 +22,6 @@ const Errors = require('../Errors/Errors')
 const moment = require('moment')
 
 module.exports = RestoreManager = {
-  restoreDocFromDeletedDoc(userId, projectId, docId, name, callback) {
-    // This is the legacy method for restoring a doc from the SL track-changes/deletedDocs system.
-    // It looks up the deleted doc's contents, and then creates a new doc with the same content.
-    // We don't actually remove the deleted doc entry, just create a new one from its lines.
-    if (callback == null) {
-      callback = function () {}
-    }
-    return ProjectEntityHandler.getDoc(
-      projectId,
-      docId,
-      { include_deleted: true },
-      function (error, lines) {
-        if (error != null) {
-          return callback(error)
-        }
-        const addDocWithName = (name, callback) =>
-          EditorController.addDoc(
-            projectId,
-            null,
-            name,
-            lines,
-            'restore',
-            userId,
-            callback
-          )
-        return RestoreManager._addEntityWithUniqueName(
-          addDocWithName,
-          name,
-          callback
-        )
-      }
-    )
-  },
-
   restoreFileFromV2(userId, projectId, version, pathname, callback) {
     if (callback == null) {
       callback = function () {}

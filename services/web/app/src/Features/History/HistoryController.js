@@ -99,27 +99,6 @@ module.exports = HistoryController = {
     )
   },
 
-  restoreDocFromDeletedDoc(req, res, next) {
-    const { project_id: projectId, doc_id: docId } = req.params
-    const { name } = req.body
-    const userId = SessionManager.getLoggedInUserId(req.session)
-    if (name == null) {
-      return res.sendStatus(400) // Malformed request
-    }
-    RestoreManager.restoreDocFromDeletedDoc(
-      userId,
-      projectId,
-      docId,
-      name,
-      (err, doc) => {
-        if (err) return next(err)
-        res.json({
-          doc_id: doc._id,
-        })
-      }
-    )
-  },
-
   getLabels(req, res, next) {
     const projectId = req.params.Project_id
     HistoryController._makeRequest(

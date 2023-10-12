@@ -1,6 +1,6 @@
 .history-toolbar(
 	ng-controller="HistoryV2ToolbarController"
-	ng-if="ui.view == 'history' && history.isV2"
+	ng-if="ui.view == 'history'"
 )
 	span.history-toolbar-selected-version(ng-show="history.loadingFileTree")
 		i.fa.fa-spin.fa-refresh

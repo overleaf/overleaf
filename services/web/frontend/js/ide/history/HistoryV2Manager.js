@@ -133,7 +133,6 @@ export default HistoryManager = (function () {
 
     hardReset() {
       this.$scope.history = {
-        isV2: true,
         updates: [],
         viewMode: this._getViewModeUserPref(),
         nextBeforeTimestamp: null,

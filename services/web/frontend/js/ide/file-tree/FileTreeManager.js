@@ -18,10 +18,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-import './directives/fileEntity'
 import './controllers/FileTreeController'
-import './controllers/FileTreeEntityController'
-import './controllers/FileTreeFolderController'
 import '../../features/file-tree/controllers/file-tree-controller'
 import { debugConsole } from '@/utils/debugging'
 let FileTreeManager
@@ -144,22 +141,6 @@ export default FileTreeManager = class FileTreeManager {
     return (entity.selected = true)
   }
 
-  toggleMultiSelectEntity(entity) {
-    entity.multiSelected = !entity.multiSelected
-    this.$scope.multiSelectedCount = this.multiSelectedCount()
-    this.$scope.editor.multiSelectedCount = this.$scope.multiSelectedCount
-  }
-
-  multiSelectedCount() {
-    let count = 0
-    this.forEachEntity(function (entity) {
-      if (entity.multiSelected) {
-        return count++
-      }
-    })
-    return count
-  }
-
   getMultiSelectedEntities() {
     const entities = []
     this.forEachEntity(function (e) {
@@ -221,14 +202,6 @@ export default FileTreeManager = class FileTreeManager {
     } // Be efficient, this is called a lot on 'click'
     this.forEachEntity(entity => (entity.multiSelected = false))
     return (this.$scope.multiSelectedCount = 0)
-  }
-
-  multiSelectSelectedEntity() {
-    const entity = this.findSelectedEntity()
-    if (entity) {
-      entity.multiSelected = true
-    }
-    this.$scope.multiSelectedCount = this.multiSelectedCount()
   }
 
   existsInFolder(folder_id, name) {

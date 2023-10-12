@@ -15,7 +15,6 @@ import HistoryV2Manager from '../../../../frontend/js/ide/history/HistoryV2Manag
 export default describe('HistoryV2Manager', function () {
   beforeEach(function (done) {
     this.defaultHistoryScope = {
-      isV2: true,
       updates: [],
       viewMode: 'point_in_time',
       nextBeforeTimestamp: null,

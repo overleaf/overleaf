@@ -16,7 +16,7 @@ include ./left-menu-react
 		main#ide-body(
 			ng-cloak,
 			role="main",
-			ng-class="{ 'ide-history-open' : (ui.view == 'history' && history.isV2 && !history.isReact) }",
+			ng-class="{ 'ide-history-open' : (ui.view == 'history' && !history.isReact) }",
 			layout="main",
 			ng-hide="state.loading",
 			resize-on="layout:chat:resize,history:toggle,layout:flat-screen:toggle,south-pane-toggled",
@@ -34,7 +34,6 @@ include ./left-menu-react
 				if (historyViewReact)
 					include ./file-tree-history-react
 				else
-					include ./file-tree-history
 					include ./history/fileTreeV2
 
 			.ui-layout-center
