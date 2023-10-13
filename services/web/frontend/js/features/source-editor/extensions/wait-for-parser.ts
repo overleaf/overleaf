@@ -9,7 +9,6 @@ import { EditorState } from '@codemirror/state'
 type UpTo = number | ((view: EditorView) => number)
 
 type ParserWait = {
-  promise: Promise<void>
   upTo?: UpTo
   resolve: () => void
 }
@@ -33,7 +32,6 @@ export const parserWatcher = ViewPlugin.fromClass(
     wait(upTo?: UpTo) {
       const promise = new Promise<void>(resolve => {
         const wait = {
-          promise,
           upTo,
           resolve,
         }
