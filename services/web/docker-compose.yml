@@ -46,19 +46,6 @@ services:
       - ldap
     command: npm run --silent test:acceptance:app
 
-  test_karma:
-    build:
-      context: ../..
-      dockerfile: services/web/Dockerfile.frontend
-    volumes:
-      - .:/overleaf/services/web
-      - ../../node_modules:/overleaf/node_modules
-      - ../../libraries:/overleaf/libraries
-    environment:
-      NODE_OPTIONS: "--unhandled-rejections=strict"
-    working_dir: /overleaf/services/web
-    command: npm run --silent test:karma:single
-
   test_frontend:
     build:
       context: ../..

@@ -38,20 +38,6 @@ services:
       - saml
       - ldap
 
-  test_karma:
-    build:
-      context: ../..
-      dockerfile: services/web/Dockerfile.frontend.ci
-      args:
-        PROJECT_NAME: $PROJECT_NAME
-        BRANCH_NAME: $BRANCH_NAME
-        BUILD_NUMBER: $BUILD_NUMBER
-    working_dir: /overleaf/services/web
-    command: npm run test:karma:single
-    user: node
-    environment:
-      NODE_OPTIONS: "--unhandled-rejections=strict"
-
   test_frontend:
     build:
       context: ../..

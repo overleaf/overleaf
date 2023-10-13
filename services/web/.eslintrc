@@ -37,7 +37,6 @@
         "**/app/src/**/*.js",
         "app.js",
         "i18next-scanner.config.js",
-        "karma.conf.js",
         "scripts/**/*.js",
         "webpack.config*.js"
       ],
@@ -80,14 +79,6 @@
         // we don't enforce this at the top-level - just in tests to manage `this` scope
         // based on mocha's context mechanism
         "mocha/prefer-arrow-callback": "error"
-      }
-    },
-    {
-      // Frontend test specific rules
-      "files": ["**/test/karma/**/*.js"],
-      "globals": {
-        "expect": true,
-        "$": true
       }
     },
     {

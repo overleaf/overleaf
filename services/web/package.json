@@ -15,8 +15,6 @@
     "test:unit:app": "npm run test:unit:run_dir -- test/unit/src",
     "test:frontend": "NODE_ENV=test TZ=GMT mocha --recursive --timeout 5000 --exit --extension js,jsx,mjs,ts,tsx --grep=$MOCHA_GREP --require test/frontend/bootstrap.js --ignore '**/*.spec.{js,jsx,ts,tsx}' test/frontend modules/*/test/frontend",
     "test:frontend:coverage": "c8 --all --include 'frontend/js' --include 'modules/*/frontend/js' --exclude 'frontend/js/vendor' --reporter=lcov --reporter=text-summary npm run test:frontend",
-    "test:karma": "karma start",
-    "test:karma:single": "karma start --no-auto-watch --single-run",
     "start": "node $NODE_APP_OPTIONS app.js",
     "nodemon": "node --watch $NODE_APP_OPTIONS app.js --watch-locales",
     "webpack": "webpack serve --config webpack.config.dev.js",
@@ -58,7 +56,7 @@
     "local:test:acceptance": "npm run local:test:acceptance:app && npm run local:test:acceptance:modules",
     "local:test:unit": "npm run test:unit:all",
     "local:test:frontend": "npm run test:frontend",
-    "local:test": "npm run local:test:unit && npm run local:test:frontend && npm run test:karma:single && npm run local:test:acceptance"
+    "local:test": "npm run local:test:unit && npm run local:test:frontend && npm run local:test:acceptance"
   },
   "browserslist": [
     "last 1 year",
@@ -289,13 +287,6 @@
     "jquery": "^2.2.4",
     "jsdom": "^19.0.0",
     "jsdom-global": "^3.0.2",
-    "karma": "^6.3.17",
-    "karma-chai-sinon": "^0.1.5",
-    "karma-chrome-launcher": "^3.1.0",
-    "karma-mocha": "^2.0.0",
-    "karma-mocha-reporter": "^2.2.5",
-    "karma-requirejs": "^1.1.0",
-    "karma-webpack": "^5.0.0",
     "less": "^3.11.1",
     "less-loader": "^11.1.3",
     "match-sorter": "^6.2.0",

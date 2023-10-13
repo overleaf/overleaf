@@ -45,8 +45,6 @@ clean:
 	-COMPOSE_PROJECT_NAME=acceptance_modules_merged_saas_4_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down --rmi local
 	-COMPOSE_PROJECT_NAME=acceptance_modules_merged_server_ce_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down --rmi local
 	-COMPOSE_PROJECT_NAME=acceptance_modules_merged_server_pro_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down --rmi local
-	-COMPOSE_PROJECT_NAME=karma_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down --rmi local
-	-COMPOSE_PROJECT_NAME=karma_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down --rmi local
 	-COMPOSE_PROJECT_NAME=frontend_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down --rmi local
 	-COMPOSE_PROJECT_NAME=tar_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down --rmi local
 
@@ -60,7 +58,7 @@ clean_ci:
 # Tests
 #
 
-test: test_unit test_karma test_acceptance test_frontend test_frontend_ct
+test: test_unit test_acceptance test_frontend test_frontend_ct
 
 test_module: test_unit_module test_acceptance_module
 
@@ -115,18 +113,6 @@ test_unit_modules: $(TEST_UNIT_MODULES)
 test_unit_module:
 	$(MAKE) modules/$(MODULE_NAME)/test_unit
 
-#
-# Karma frontend tests
-#
-
-test_karma: build_test_karma test_karma_run
-
-test_karma_run:
-	COMPOSE_PROJECT_NAME=karma_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
-	COMPOSE_PROJECT_NAME=karma_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm test_karma
-	COMPOSE_PROJECT_NAME=karma_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
-
-test_karma_build_run: build_test_karma test_karma_run
 
 #
 # Frontend tests
@@ -445,7 +431,7 @@ lint_test_modules:
 		--max-warnings=0
 
 lint: lint_misc
-# migrations, scripts, webpack config, karma config
+# migrations, scripts, webpack config
 lint_misc:
 	npx eslint . \
 		--ignore-pattern 'app.{js,jsx,mjs,ts,tsx}' \
@@ -558,9 +544,6 @@ build:
 		--file Dockerfile \
 		../..
 
-build_test_karma:
-	COMPOSE_PROJECT_NAME=karma_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) build test_karma
-
 publish:
 	docker push $(DOCKER_REPO)/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
 
@@ -583,7 +566,7 @@ $(MODULE_TARGETS):
 	$(MODULE_TARGETS) \
 	compile_modules compile_modules_full clean_ci \
 	test test_module test_unit test_unit_app \
-	test_unit_modules test_unit_module test_karma test_karma_run \
-	test_karma_build_run test_frontend test_acceptance test_acceptance_app \
-	test_acceptance_modules test_acceptance_module ci format format_fix lint \
-	build build_test_karma publish tar
+	test_unit_modules test_unit_module test_frontend \
+	test_acceptance test_acceptance_app test_acceptance_modules \
+	test_acceptance_module ci format format_fix lint \
+	build publish tar
