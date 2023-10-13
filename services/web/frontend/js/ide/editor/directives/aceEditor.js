@@ -54,11 +54,21 @@ if (ace.config._moduleUrl == null) {
   }
 }
 
-App.directive(
-  'aceEditor',
+App.directive('aceEditor', [
+  'ide',
+  '$compile',
+  '$rootScope',
+  'eventTracking',
+  'localStorage',
+  '$cacheFactory',
+  'metadata',
+  'graphics',
+  'preamble',
+  'files',
+  '$http',
+  '$q',
   function (
     ide,
-    $timeout,
     $compile,
     $rootScope,
     eventTracking,
@@ -69,8 +79,7 @@ App.directive(
     preamble,
     files,
     $http,
-    $q,
-    $window
+    $q
   ) {
     monkeyPatchSearch($rootScope, $compile)
 
@@ -951,8 +960,8 @@ App.directive(
 </div>\
 `,
     }
-  }
-)
+  },
+])
 
 function monkeyPatchSearch($rootScope, $compile) {
   const searchHtml = `\

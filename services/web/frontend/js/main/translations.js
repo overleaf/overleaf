@@ -1,7 +1,9 @@
 import App from '../base'
 
-App.controller(
-  'TranslationsPopupController',
+App.controller('TranslationsPopupController', [
+  '$scope',
+  'ipCookie',
+  'localStorage',
   function ($scope, ipCookie, localStorage) {
     function getStoredDismissal() {
       const localStore = localStorage('hide-i18n-notification')
@@ -28,5 +30,5 @@ App.controller(
       localStorage('hide-i18n-notification', true)
       $scope.hidei18nNotification = true
     }
-  }
-)
+  },
+])

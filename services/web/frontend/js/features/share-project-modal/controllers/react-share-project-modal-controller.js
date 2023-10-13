@@ -14,8 +14,10 @@ App.component(
   )
 )
 
-export default App.controller(
-  'ReactShareProjectModalController',
+export default App.controller('ReactShareProjectModalController', [
+  '$scope',
+  'eventTracking',
+  'ide',
   function ($scope, eventTracking, ide) {
     $scope.show = false
 
@@ -61,5 +63,5 @@ export default App.controller(
           })
       }
     })
-  }
-)
+  },
+])

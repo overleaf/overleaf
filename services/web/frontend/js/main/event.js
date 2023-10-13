@@ -24,98 +24,102 @@ const CACHE_KEY = 'mbEvents'
 let heartbeatsSent = 0
 let nextHeartbeat = new Date()
 
-App.factory('eventTracking', function ($http, localStorage) {
-  const _getEventCache = function () {
-    let eventCache = localStorage(CACHE_KEY)
+App.factory('eventTracking', [
+  '$http',
+  'localStorage',
+  function ($http, localStorage) {
+    const _getEventCache = function () {
+      let eventCache = localStorage(CACHE_KEY)
 
-    // Initialize as an empy object if the event cache is still empty.
-    if (eventCache == null) {
-      eventCache = {}
-      localStorage(CACHE_KEY, eventCache)
+      // Initialize as an empy object if the event cache is still empty.
+      if (eventCache == null) {
+        eventCache = {}
+        localStorage(CACHE_KEY, eventCache)
+      }
+
+      return eventCache
     }
 
-    return eventCache
-  }
+    const _eventInCache = function (key) {
+      const curCache = _getEventCache()
+      return curCache[key] || false
+    }
 
-  const _eventInCache = function (key) {
-    const curCache = _getEventCache()
-    return curCache[key] || false
-  }
+    const _addEventToCache = function (key) {
+      const curCache = _getEventCache()
+      curCache[key] = true
 
-  const _addEventToCache = function (key) {
-    const curCache = _getEventCache()
-    curCache[key] = true
+      return localStorage(CACHE_KEY, curCache)
+    }
 
-    return localStorage(CACHE_KEY, curCache)
-  }
+    const _sendEditingSessionHeartbeat = segmentation =>
+      $http({
+        url: `/editingSession/${window.project_id}`,
+        method: 'PUT',
+        data: { segmentation },
+        headers: {
+          'X-CSRF-Token': window.csrfToken,
+        },
+      })
 
-  const _sendEditingSessionHeartbeat = segmentation =>
-    $http({
-      url: `/editingSession/${window.project_id}`,
-      method: 'PUT',
-      data: { segmentation },
-      headers: {
-        'X-CSRF-Token': window.csrfToken,
+    return {
+      send(category, action, label, value) {
+        return ga('send', 'event', category, action, label, value)
       },
-    })
 
-  return {
-    send(category, action, label, value) {
-      return ga('send', 'event', category, action, label, value)
-    },
+      sendGAOnce(category, action, label, value) {
+        if (!_eventInCache(action)) {
+          _addEventToCache(action)
+          return this.send(category, action, label, value)
+        }
+      },
 
-    sendGAOnce(category, action, label, value) {
-      if (!_eventInCache(action)) {
-        _addEventToCache(action)
-        return this.send(category, action, label, value)
-      }
-    },
+      editingSessionHeartbeat(segmentationCb = () => {}) {
+        debugConsole.log('[Event] heartbeat trigger')
 
-    editingSessionHeartbeat(segmentationCb = () => {}) {
-      debugConsole.log('[Event] heartbeat trigger')
+        // If the next heartbeat is in the future, stop
+        if (nextHeartbeat > new Date()) return
 
-      // If the next heartbeat is in the future, stop
-      if (nextHeartbeat > new Date()) return
+        const segmentation = segmentationCb()
 
-      const segmentation = segmentationCb()
+        debugConsole.log('[Event] send heartbeat request', segmentation)
+        _sendEditingSessionHeartbeat(segmentation)
 
-      debugConsole.log('[Event] send heartbeat request', segmentation)
-      _sendEditingSessionHeartbeat(segmentation)
+        heartbeatsSent++
 
-      heartbeatsSent++
+        // send two first heartbeats at 0 and 30s then increase the backoff time
+        // 1min per call until we reach 5 min
+        const backoffSecs =
+          heartbeatsSent <= 2
+            ? 30
+            : heartbeatsSent <= 6
+            ? (heartbeatsSent - 2) * 60
+            : 300
 
-      // send two first heartbeats at 0 and 30s then increase the backoff time
-      // 1min per call until we reach 5 min
-      const backoffSecs =
-        heartbeatsSent <= 2
-          ? 30
-          : heartbeatsSent <= 6
-          ? (heartbeatsSent - 2) * 60
-          : 300
+        nextHeartbeat = moment().add(backoffSecs, 'seconds').toDate()
+      },
 
-      nextHeartbeat = moment().add(backoffSecs, 'seconds').toDate()
-    },
+      sendMB,
 
-    sendMB,
+      sendMBSampled(key, segmentation, rate = 0.01) {
+        if (Math.random() < rate) {
+          this.sendMB(key, segmentation)
+        }
+      },
 
-    sendMBSampled(key, segmentation, rate = 0.01) {
-      if (Math.random() < rate) {
-        this.sendMB(key, segmentation)
-      }
-    },
+      sendMBOnce(key, segmentation) {
+        if (!_eventInCache(key)) {
+          _addEventToCache(key)
+          this.sendMB(key, segmentation)
+        }
+      },
 
-    sendMBOnce(key, segmentation) {
-      if (!_eventInCache(key)) {
-        _addEventToCache(key)
-        this.sendMB(key, segmentation)
-      }
-    },
-
-    eventInCache(key) {
-      return _eventInCache(key)
-    },
-  }
-})
+      eventInCache(key) {
+        return _eventInCache(key)
+      },
+    }
+  },
+])
 
 export default $('.navbar a').on('click', function (e) {
   const href = $(e.target).attr('href')

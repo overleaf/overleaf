@@ -2,7 +2,7 @@
 
 import App from '../base'
 
-export default App.directive('mathjax', function ($compile, $parse) {
+export default App.directive('mathjax', function () {
   return {
     link(scope, element, attrs) {
       if (!(MathJax && MathJax.Hub)) return

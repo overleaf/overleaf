@@ -12,8 +12,9 @@
 import App from '../base'
 import getMeta from '../utils/meta'
 
-export default App.controller(
-  'ClearSessionsController',
+export default App.controller('ClearSessionsController', [
+  '$scope',
+  '$http',
   function ($scope, $http) {
     $scope.state = {
       otherSessions: getMeta('ol-otherSessions'),
@@ -34,5 +35,5 @@ export default App.controller(
         })
         .catch(() => ($scope.state.error = true))
     })
-  }
-)
+  },
+])

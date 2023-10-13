@@ -1,6 +1,9 @@
 import App from '../base'
-App.controller(
-  'ImportingController',
+App.controller('ImportingController', [
+  '$interval',
+  '$scope',
+  '$timeout',
+  '$window',
   function ($interval, $scope, $timeout, $window) {
     $interval(function () {
       $scope.state.load_progress += 5
@@ -14,5 +17,5 @@ App.controller(
     $scope.state = {
       load_progress: 20,
     }
-  }
-)
+  },
+])

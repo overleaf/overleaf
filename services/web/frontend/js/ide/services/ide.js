@@ -17,8 +17,14 @@ import EditorWatchdogManager from '../connection/EditorWatchdogManager'
 import { debugConsole } from '@/utils/debugging'
 // We create and provide this as service so that we can access the global ide
 // from within other parts of the angular app.
-App.factory(
-  'ide',
+App.factory('ide', [
+  '$http',
+  'queuedHttp',
+  '$modal',
+  '$q',
+  '$filter',
+  '$timeout',
+  'eventTracking',
   function ($http, queuedHttp, $modal, $q, $filter, $timeout, eventTracking) {
     const ide = {}
     ide.$http = $http
@@ -132,21 +138,28 @@ App.factory(
       })
 
     return ide
-  }
-)
+  },
+])
 
-App.controller(
-  'GenericMessageModalController',
+App.controller('GenericMessageModalController', [
+  '$scope',
+  '$modalInstance',
+  'title',
+  'message',
   function ($scope, $modalInstance, title, message) {
     $scope.title = title
     $scope.message = message
 
     return ($scope.done = () => $modalInstance.close())
-  }
-)
+  },
+])
 
-App.controller(
-  'OutOfSyncModalController',
+App.controller('OutOfSyncModalController', [
+  '$scope',
+  '$window',
+  'title',
+  'message',
+  'editorContent',
   function ($scope, $window, title, message, editorContent) {
     $scope.title = title
     $scope.message = message
@@ -158,8 +171,8 @@ App.controller(
       // https://github.com/overleaf/issues/issues/3694
       $window.location.reload()
     }
-  }
-)
+  },
+])
 
 function __guard__(value, transform) {
   return typeof value !== 'undefined' && value !== null

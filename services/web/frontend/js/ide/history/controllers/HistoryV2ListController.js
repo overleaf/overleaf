@@ -12,8 +12,10 @@
  */
 import App from '../../../base'
 
-export default App.controller(
-  'HistoryV2ListController',
+export default App.controller('HistoryV2ListController', [
+  '$scope',
+  '$modal',
+  'ide',
   function ($scope, $modal, ide) {
     $scope.hoveringOverListSelectors = false
     $scope.listConfig = { showOnlyLabelled: false }
@@ -50,5 +52,5 @@ export default App.controller(
           },
         },
       }))
-  }
-)
+  },
+])

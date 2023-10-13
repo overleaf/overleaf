@@ -9,14 +9,14 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import App from '../base'
-App.directive('stopPropagation', $http => ({
+App.directive('stopPropagation', () => ({
   restrict: 'A',
   link(scope, element, attrs) {
     return element.bind(attrs.stopPropagation, e => e.stopPropagation())
   },
 }))
 
-export default App.directive('preventDefault', $http => ({
+export default App.directive('preventDefault', () => ({
   restrict: 'A',
   link(scope, element, attrs) {
     return element.bind(attrs.preventDefault, e => e.preventDefault())

@@ -13,9 +13,13 @@
 import App from '../../../base'
 import { debugConsole } from '@/utils/debugging'
 
-export default App.controller(
-  'HistoryV2ToolbarController',
-  ($scope, $modal, ide, eventTracking, waitFor) => {
+export default App.controller('HistoryV2ToolbarController', [
+  '$scope',
+  '$modal',
+  'ide',
+  'eventTracking',
+  'waitFor',
+  function ($scope, $modal, ide, eventTracking, waitFor) {
     $scope.currentUpdate = null
     $scope.currentLabel = null
 
@@ -120,5 +124,5 @@ export default App.controller(
         })
         .catch(debugConsole.error)
     }
-  }
-)
+  },
+])

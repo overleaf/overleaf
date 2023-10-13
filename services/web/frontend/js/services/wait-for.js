@@ -11,32 +11,35 @@
  */
 import App from '../base'
 
-export default App.factory('waitFor', function ($q) {
-  const waitFor = function (testFunction, timeout, pollInterval) {
-    if (pollInterval == null) {
-      pollInterval = 500
-    }
-    const iterationLimit = Math.floor(timeout / pollInterval)
-    let iterations = 0
-    return $q(function (resolve, reject) {
-      let tryIteration
-      return (tryIteration = function () {
-        if (iterations > iterationLimit) {
-          return reject(
-            new Error(
-              `waiting too long, ${JSON.stringify({ timeout, pollInterval })}`
+export default App.factory('waitFor', [
+  '$q',
+  function ($q) {
+    const waitFor = function (testFunction, timeout, pollInterval) {
+      if (pollInterval == null) {
+        pollInterval = 500
+      }
+      const iterationLimit = Math.floor(timeout / pollInterval)
+      let iterations = 0
+      return $q(function (resolve, reject) {
+        let tryIteration
+        return (tryIteration = function () {
+          if (iterations > iterationLimit) {
+            return reject(
+              new Error(
+                `waiting too long, ${JSON.stringify({ timeout, pollInterval })}`
+              )
             )
-          )
-        }
-        iterations += 1
-        const result = testFunction()
-        if (result != null) {
-          return resolve(result)
-        } else {
-          return setTimeout(tryIteration, pollInterval)
-        }
-      })()
-    })
-  }
-  return waitFor
-})
+          }
+          iterations += 1
+          const result = testFunction()
+          if (result != null) {
+            return resolve(result)
+          } else {
+            return setTimeout(tryIteration, pollInterval)
+          }
+        })()
+      })
+    }
+    return waitFor
+  },
+])

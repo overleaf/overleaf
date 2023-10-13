@@ -11,7 +11,10 @@
  */
 import App from '../../../base'
 
-export default App.controller(
-  'TrackChangesUpgradeModalController',
-  ($scope, $modalInstance) => ($scope.cancel = () => $modalInstance.dismiss())
-)
+export default App.controller('TrackChangesUpgradeModalController', [
+  '$scope',
+  '$modalInstance',
+  function ($scope, $modalInstance) {
+    $scope.cancel = () => $modalInstance.dismiss()
+  },
+])

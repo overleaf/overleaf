@@ -13,30 +13,33 @@ import _ from 'lodash'
  */
 import App from '../../../base'
 
-export default App.factory('graphics', function (ide) {
-  const Graphics = {
-    getGraphicsFiles() {
-      const graphicsFiles = []
-      ide.fileTreeManager.forEachEntity(function (entity, folder, path) {
-        if (
-          entity.type === 'file' &&
-          __guardMethod__(
-            entity != null ? entity.name : undefined,
-            'match',
-            o => o.match(/.*\.(png|jpg|jpeg|pdf|eps)/i)
-          )
-        ) {
-          const cloned = _.clone(entity)
-          cloned.path = path
-          return graphicsFiles.push(cloned)
-        }
-      })
-      return graphicsFiles
-    },
-  }
+export default App.factory('graphics', [
+  'ide',
+  function (ide) {
+    const Graphics = {
+      getGraphicsFiles() {
+        const graphicsFiles = []
+        ide.fileTreeManager.forEachEntity(function (entity, folder, path) {
+          if (
+            entity.type === 'file' &&
+            __guardMethod__(
+              entity != null ? entity.name : undefined,
+              'match',
+              o => o.match(/.*\.(png|jpg|jpeg|pdf|eps)/i)
+            )
+          ) {
+            const cloned = _.clone(entity)
+            cloned.path = path
+            return graphicsFiles.push(cloned)
+          }
+        })
+        return graphicsFiles
+      },
+    }
 
-  return Graphics
-})
+    return Graphics
+  },
+])
 
 function __guardMethod__(obj, methodName, transform) {
   if (

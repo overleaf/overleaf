@@ -70,8 +70,15 @@ import { reportCM6Perf } from './infrastructure/cm6-performance'
 import { reportAcePerf } from './ide/editor/ace-performance'
 import { debugConsole } from '@/utils/debugging'
 
-App.controller(
-  'IdeController',
+App.controller('IdeController', [
+  '$scope',
+  '$timeout',
+  'ide',
+  'localStorage',
+  'eventTracking',
+  'metadata',
+  'CobrandingDataService',
+  '$window',
   function (
     $scope,
     $timeout,
@@ -79,7 +86,6 @@ App.controller(
     localStorage,
     eventTracking,
     metadata,
-    $q,
     CobrandingDataService,
     $window
   ) {
@@ -478,23 +484,26 @@ If the project has been renamed please look in your project list for a new proje
         return $scope.$digest()
       }
     })
-  }
-)
+  },
+])
 
 cleanupServiceWorker()
 
-angular.module('SharelatexApp').config(function ($provide) {
-  $provide.decorator('$browser', [
-    '$delegate',
-    function ($delegate) {
-      $delegate.onUrlChange = function () {}
-      $delegate.url = function () {
-        return ''
-      }
-      return $delegate
-    },
-  ])
-})
+angular.module('SharelatexApp').config([
+  '$provide',
+  function ($provide) {
+    $provide.decorator('$browser', [
+      '$delegate',
+      function ($delegate) {
+        $delegate.onUrlChange = function () {}
+        $delegate.url = function () {
+          return ''
+        }
+        return $delegate
+      },
+    ])
+  },
+])
 
 export default angular.bootstrap(document.body, ['SharelatexApp'])
 

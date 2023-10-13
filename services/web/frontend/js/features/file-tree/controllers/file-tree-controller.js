@@ -5,14 +5,11 @@ import { cloneDeep } from 'lodash'
 import FileTreeRoot from '../components/file-tree-root'
 import { rootContext } from '../../../shared/context/root-context'
 
-App.controller(
-  'ReactFileTreeController',
-  function (
-    $scope,
-    $timeout,
-    ide
-    // eventTracking
-  ) {
+App.controller('ReactFileTreeController', [
+  '$scope',
+  '$timeout',
+  'ide',
+  function ($scope, $timeout, ide) {
     $scope.isConnected = true
 
     $scope.$on('project:joined', () => {
@@ -108,8 +105,8 @@ App.controller(
     $scope.reindexReferences = () => {
       ide.$scope.$emit('references:should-reindex', {})
     }
-  }
-)
+  },
+])
 
 App.component(
   'fileTreeRoot',

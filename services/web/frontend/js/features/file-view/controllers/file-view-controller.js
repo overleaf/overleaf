@@ -5,8 +5,9 @@ import _ from 'lodash'
 import { rootContext } from '../../../shared/context/root-context'
 import FileView from '../components/file-view'
 
-export default App.controller(
-  'FileViewController',
+export default App.controller('FileViewController', [
+  '$scope',
+  '$rootScope',
   function ($scope, $rootScope) {
     $scope.file = $scope.openFile
 
@@ -14,8 +15,8 @@ export default App.controller(
       const oldKeys = $rootScope._references.keys
       return ($rootScope._references.keys = _.union(oldKeys, newKeys))
     }
-  }
-)
+  },
+])
 
 App.component(
   'fileView',

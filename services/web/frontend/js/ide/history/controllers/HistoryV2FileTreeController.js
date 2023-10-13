@@ -12,11 +12,12 @@
  */
 import App from '../../../base'
 
-export default App.controller(
-  'HistoryV2FileTreeController',
+export default App.controller('HistoryV2FileTreeController', [
+  '$scope',
+  'ide',
   function ($scope, ide) {
     $scope.handleFileSelection = file => {
       ide.historyManager.selectFile(file)
     }
-  }
-)
+  },
+])

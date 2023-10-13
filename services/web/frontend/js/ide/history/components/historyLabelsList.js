@@ -13,7 +13,7 @@ import _ from 'lodash'
 import App from '../../../base'
 import ColorManager from '../../colors/ColorManager'
 import displayNameForUser from '../util/displayNameForUser'
-const historyLabelsListController = function ($scope, $element, $attrs) {
+const historyLabelsListController = function ($scope) {
   const ctrl = this
   ctrl.isDragging = false
   ctrl.versionsWithLabels = []
@@ -170,6 +170,6 @@ export default App.component('historyLabelsList', {
     onRangeSelect: '&',
     onLabelDelete: '&',
   },
-  controller: historyLabelsListController,
+  controller: ['$scope', historyLabelsListController],
   templateUrl: 'historyLabelsListTpl',
 })

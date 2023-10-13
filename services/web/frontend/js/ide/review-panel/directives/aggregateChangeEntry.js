@@ -11,59 +11,62 @@
  */
 import App from '../../../base'
 
-export default App.directive('aggregateChangeEntry', $timeout => ({
-  restrict: 'E',
-  templateUrl: 'aggregateChangeEntryTemplate',
-  scope: {
-    entry: '=',
-    user: '=',
-    permissions: '=',
-    onAccept: '&',
-    onReject: '&',
-    onIndicatorClick: '&',
-    onMouseEnter: '&',
-    onMouseLeave: '&',
-    onBodyClick: '&',
-  },
-  link(scope, element, attrs) {
-    scope.contentLimit = 17
-    scope.isDeletionCollapsed = true
-    scope.isInsertionCollapsed = true
-    scope.deletionNeedsCollapsing = false
-    scope.insertionNeedsCollapsing = false
+export default App.directive('aggregateChangeEntry', [
+  '$timeout',
+  $timeout => ({
+    restrict: 'E',
+    templateUrl: 'aggregateChangeEntryTemplate',
+    scope: {
+      entry: '=',
+      user: '=',
+      permissions: '=',
+      onAccept: '&',
+      onReject: '&',
+      onIndicatorClick: '&',
+      onMouseEnter: '&',
+      onMouseLeave: '&',
+      onBodyClick: '&',
+    },
+    link(scope, element, attrs) {
+      scope.contentLimit = 17
+      scope.isDeletionCollapsed = true
+      scope.isInsertionCollapsed = true
+      scope.deletionNeedsCollapsing = false
+      scope.insertionNeedsCollapsing = false
 
-    element.on('click', function (e) {
-      if (
-        $(e.target).is(
-          '.rp-entry, .rp-entry-description, .rp-entry-body, .rp-entry-action-icon i'
-        )
-      ) {
-        return scope.onBodyClick()
+      element.on('click', function (e) {
+        if (
+          $(e.target).is(
+            '.rp-entry, .rp-entry-description, .rp-entry-body, .rp-entry-action-icon i'
+          )
+        ) {
+          return scope.onBodyClick()
+        }
+      })
+
+      scope.toggleDeletionCollapse = function () {
+        scope.isDeletionCollapsed = !scope.isDeletionCollapsed
+        return $timeout(() => scope.$emit('review-panel:layout'))
       }
-    })
 
-    scope.toggleDeletionCollapse = function () {
-      scope.isDeletionCollapsed = !scope.isDeletionCollapsed
-      return $timeout(() => scope.$emit('review-panel:layout'))
-    }
+      scope.toggleInsertionCollapse = function () {
+        scope.isInsertionCollapsed = !scope.isInsertionCollapsed
+        return $timeout(() => scope.$emit('review-panel:layout'))
+      }
 
-    scope.toggleInsertionCollapse = function () {
-      scope.isInsertionCollapsed = !scope.isInsertionCollapsed
-      return $timeout(() => scope.$emit('review-panel:layout'))
-    }
+      scope.$watch(
+        'entry.metadata.replaced_content.length',
+        deletionContentLength =>
+          (scope.deletionNeedsCollapsing =
+            deletionContentLength > scope.contentLimit)
+      )
 
-    scope.$watch(
-      'entry.metadata.replaced_content.length',
-      deletionContentLength =>
-        (scope.deletionNeedsCollapsing =
-          deletionContentLength > scope.contentLimit)
-    )
-
-    return scope.$watch(
-      'entry.content.length',
-      insertionContentLength =>
-        (scope.insertionNeedsCollapsing =
-          insertionContentLength > scope.contentLimit)
-    )
-  },
-}))
+      return scope.$watch(
+        'entry.content.length',
+        insertionContentLength =>
+          (scope.insertionNeedsCollapsing =
+            insertionContentLength > scope.contentLimit)
+      )
+    },
+  }),
+])

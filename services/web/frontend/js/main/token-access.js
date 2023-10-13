@@ -1,8 +1,10 @@
 import App from '../base'
 import { debugConsole } from '@/utils/debugging'
-App.controller(
-  'TokenAccessPageController',
-  ($scope, $http, $location, localStorage) => {
+App.controller('TokenAccessPageController', [
+  '$scope',
+  '$http',
+  '$location',
+  function ($scope, $http, $location) {
     window.S = $scope
     $scope.mode = 'accessAttempt' // 'accessAttempt' | 'v1Import' | 'requireAccept'
 
@@ -86,5 +88,5 @@ App.controller(
         }
       )
     }
-  }
-)
+  },
+])

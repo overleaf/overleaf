@@ -16,7 +16,7 @@
 import App from '../../../base'
 import { debugConsole } from '@/utils/debugging'
 
-export default App.directive('reviewPanelSorted', $timeout => ({
+export default App.directive('reviewPanelSorted', () => ({
   link(scope, element, attrs) {
     let previous_focused_entry_index = 0
 

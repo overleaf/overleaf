@@ -3,42 +3,47 @@ import OutlinePane from '../components/outline-pane'
 import { react2angular } from 'react2angular'
 import { rootContext } from '../../../shared/context/root-context'
 
-App.controller('OutlineController', function ($scope, ide, eventTracking) {
-  $scope.isTexFile = false
-  $scope.outline = []
-  $scope.eventTracking = eventTracking
+App.controller('OutlineController', [
+  '$scope',
+  'ide',
+  'eventTracking',
+  function ($scope, ide, eventTracking) {
+    $scope.isTexFile = false
+    $scope.outline = []
+    $scope.eventTracking = eventTracking
 
-  function shouldShowOutline() {
-    return !$scope.editor.newSourceEditor
-  }
+    function shouldShowOutline() {
+      return !$scope.editor.newSourceEditor
+    }
 
-  $scope.show = shouldShowOutline()
-
-  $scope.$watch('editor.newSourceEditor', function () {
     $scope.show = shouldShowOutline()
-  })
 
-  $scope.$on('outline-manager:outline-changed', onOutlineChange)
-
-  function onOutlineChange(e, outlineInfo) {
-    $scope.$applyAsync(() => {
-      $scope.isTexFile = outlineInfo.isTexFile
-      $scope.outline = outlineInfo.outline
-      $scope.highlightedLine = outlineInfo.highlightedLine
+    $scope.$watch('editor.newSourceEditor', function () {
+      $scope.show = shouldShowOutline()
     })
-  }
 
-  $scope.jumpToLine = (lineNo, syncToPdf) => {
-    ide.outlineManager.jumpToLine(lineNo, syncToPdf)
-    eventTracking.sendMB('outline-jump-to-line')
-  }
+    $scope.$on('outline-manager:outline-changed', onOutlineChange)
 
-  $scope.onToggle = isOpen => {
-    $scope.$applyAsync(() => {
-      $scope.$emit('outline-toggled', isOpen)
-    })
-  }
-})
+    function onOutlineChange(e, outlineInfo) {
+      $scope.$applyAsync(() => {
+        $scope.isTexFile = outlineInfo.isTexFile
+        $scope.outline = outlineInfo.outline
+        $scope.highlightedLine = outlineInfo.highlightedLine
+      })
+    }
+
+    $scope.jumpToLine = (lineNo, syncToPdf) => {
+      ide.outlineManager.jumpToLine(lineNo, syncToPdf)
+      eventTracking.sendMB('outline-jump-to-line')
+    }
+
+    $scope.onToggle = isOpen => {
+      $scope.$applyAsync(() => {
+        $scope.$emit('outline-toggled', isOpen)
+      })
+    }
+  },
+])
 
 // Wrap React component as Angular component. Only needed for "top-level" component
 App.component(

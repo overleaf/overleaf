@@ -12,9 +12,10 @@
 import App from '../base'
 import { debugConsole } from '@/utils/debugging'
 
-export default App.controller(
-  'AnnualUpgradeController',
-  function ($scope, $http, $modal) {
+export default App.controller('AnnualUpgradeController', [
+  '$scope',
+  '$http',
+  function ($scope, $http) {
     const MESSAGES_URL = '/user/subscription/upgrade-annual'
 
     $scope.upgradeComplete = false
@@ -43,5 +44,5 @@ export default App.controller(
           debugConsole.error('something went wrong changing plan', err)
         )
     })
-  }
-)
+  },
+])

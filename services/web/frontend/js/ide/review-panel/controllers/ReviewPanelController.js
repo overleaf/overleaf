@@ -20,8 +20,15 @@ import EventEmitter from '../../../utils/EventEmitter'
 import ColorManager from '../../colors/ColorManager'
 import getMeta from '../../../utils/meta'
 
-export default App.controller(
-  'ReviewPanelController',
+export default App.controller('ReviewPanelController', [
+  '$scope',
+  '$element',
+  'ide',
+  '$timeout',
+  '$http',
+  '$modal',
+  'eventTracking',
+  'localStorage',
   function (
     $scope,
     $element,
@@ -1412,8 +1419,8 @@ export default App.controller(
 
     // Add methods somewhere that React can see them
     $scope.reviewPanel.saveEdit = $scope.saveEdit
-  }
-)
+  },
+])
 
 // send events to the CodeMirror 6 track changes extension
 const dispatchReviewPanelEvent = (type, payload) => {

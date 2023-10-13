@@ -10,7 +10,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import App from '../../../base'
-const historyEntriesListController = function ($scope, $element, $attrs) {
+const historyEntriesListController = function ($scope, $element) {
   const ctrl = this
   ctrl.$entryListViewportEl = null
   ctrl.isDragging = false
@@ -133,6 +133,6 @@ export default App.component('historyEntriesList', {
     onRangeSelect: '&',
     onLabelDelete: '&',
   },
-  controller: historyEntriesListController,
+  controller: ['$scope', '$element', historyEntriesListController],
   templateUrl: 'historyEntriesListTpl',
 })

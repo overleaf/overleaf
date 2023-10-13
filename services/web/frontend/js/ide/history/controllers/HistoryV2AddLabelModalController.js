@@ -11,8 +11,11 @@
  */
 import App from '../../../base'
 
-export default App.controller(
-  'HistoryV2AddLabelModalController',
+export default App.controller('HistoryV2AddLabelModalController', [
+  '$scope',
+  '$modalInstance',
+  'ide',
+  'update',
   function ($scope, $modalInstance, ide, update) {
     $scope.update = update
     $scope.inputs = { labelName: null }
@@ -43,5 +46,5 @@ export default App.controller(
           }
         })
     })
-  }
-)
+  },
+])

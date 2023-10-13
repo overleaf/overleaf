@@ -8,7 +8,7 @@ import _ from 'lodash'
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import App from '../../../base'
-const historyFileTreeController = function ($scope, $element, $attrs) {
+const historyFileTreeController = function ($scope) {
   const ctrl = this
   ctrl.handleEntityClick = file => ctrl.onSelectedFileChange({ file })
   ctrl._fileTree = []
@@ -58,6 +58,6 @@ export default App.component('historyFileTree', {
     onSelectedFileChange: '&',
     isLoading: '<',
   },
-  controller: historyFileTreeController,
+  controller: ['$scope', historyFileTreeController],
   templateUrl: 'historyFileTreeTpl',
 })

@@ -12,7 +12,7 @@
 import App from '../../../base'
 import iconTypeFromName from '../../file-tree/util/iconTypeFromName'
 import fileOperationI18nNames from '../../file-tree/util/fileOperationI18nNames'
-const historyFileEntityController = function ($scope, $element, $attrs) {
+const historyFileEntityController = function ($scope) {
   const ctrl = this
   ctrl.hasOperation = false
   ctrl.getRenameTooltip = i18nRenamedStr => {
@@ -99,6 +99,6 @@ export default App.component('historyFileEntity', {
   bindings: {
     fileEntity: '<',
   },
-  controller: historyFileEntityController,
+  controller: ['$scope', historyFileEntityController],
   templateUrl: 'historyFileEntityTpl',
 })

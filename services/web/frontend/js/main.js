@@ -41,15 +41,18 @@ import './features/cookie-banner'
 import '../../modules/modules-main'
 import './cdn-load-test'
 import { debugConsole } from '@/utils/debugging'
-angular.module('SharelatexApp').config(function ($locationProvider) {
-  try {
-    return $locationProvider.html5Mode({
-      enabled: true,
-      requireBase: false,
-      rewriteLinks: false,
-    })
-  } catch (e) {
-    debugConsole.error("Error while trying to fix '#' links: ", e)
-  }
-})
+angular.module('SharelatexApp').config([
+  '$locationProvider',
+  function ($locationProvider) {
+    try {
+      return $locationProvider.html5Mode({
+        enabled: true,
+        requireBase: false,
+        rewriteLinks: false,
+      })
+    } catch (e) {
+      debugConsole.error("Error while trying to fix '#' links: ", e)
+    }
+  },
+])
 export default angular.bootstrap(document.body, ['SharelatexApp'])

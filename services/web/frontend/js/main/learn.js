@@ -2,9 +2,10 @@ import _ from 'lodash'
 import App from '../base'
 import '../directives/mathjax'
 import '../services/algolia-search'
-App.controller(
-  'SearchWikiController',
-  function ($scope, algoliaSearch, $modal) {
+App.controller('SearchWikiController', [
+  '$scope',
+  'algoliaSearch',
+  function ($scope, algoliaSearch) {
     $scope.hits = []
     $scope.hits_total = 0
     $scope.config_hits_per_page = 20
@@ -95,7 +96,7 @@ App.controller(
         }
       )
     }
-  }
-)
+  },
+])
 
 export default App.controller('LearnController', function () {})

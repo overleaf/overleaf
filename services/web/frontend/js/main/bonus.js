@@ -9,17 +9,22 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import App from '../base'
-App.controller(
-  'BonusLinksController',
-  ($scope, $modal) =>
-    ($scope.openLinkToUsModal = () =>
+App.controller('BonusLinksController', [
+  '$scope',
+  '$modal',
+  function ($scope, $modal) {
+    $scope.openLinkToUsModal = () =>
       $modal.open({
         templateUrl: 'BonusLinkToUsModal',
         controller: 'BonusModalController',
-      }))
-)
+      })
+  },
+])
 
-export default App.controller(
-  'BonusModalController',
-  ($scope, $modalInstance) => ($scope.cancel = () => $modalInstance.dismiss())
-)
+export default App.controller('BonusModalController', [
+  '$scope',
+  '$modalInstance',
+  function ($scope, $modalInstance) {
+    $scope.cancel = () => $modalInstance.dismiss()
+  },
+])

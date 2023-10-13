@@ -14,9 +14,10 @@
 import App from '../../../base'
 import Document from '../Document'
 
-export default App.controller(
-  'SavingNotificationController',
-  function ($scope, $interval, ide) {
+export default App.controller('SavingNotificationController', [
+  '$scope',
+  'ide',
+  function ($scope, ide) {
     let warnAboutUnsavedChanges
     setInterval(() => pollSavedStatus(), 1000)
 
@@ -98,5 +99,5 @@ export default App.controller(
         return 'You have unsaved changes. If you leave now they will not be saved.'
       }
     })
-  }
-)
+  },
+])

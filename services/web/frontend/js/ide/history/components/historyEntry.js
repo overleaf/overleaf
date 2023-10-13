@@ -13,7 +13,7 @@ import _ from 'lodash'
 import App from '../../../base'
 import ColorManager from '../../colors/ColorManager'
 import displayNameForUser from '../util/displayNameForUser'
-const historyEntryController = function ($scope, $element, $attrs) {
+const historyEntryController = function ($scope, $element) {
   const ctrl = this
   // This method (and maybe the one below) will be removed soon. User details data will be
   // injected into the history API responses, so we won't need to fetch user data from other
@@ -120,6 +120,6 @@ export default App.component('historyEntry', {
   require: {
     historyEntriesList: '^historyEntriesList',
   },
-  controller: historyEntryController,
+  controller: ['$scope', '$element', historyEntryController],
   templateUrl: 'historyEntryTpl',
 })
