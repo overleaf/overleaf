@@ -19,7 +19,7 @@ async function importPDFJS36() {
 
   createWorker(() => {
     PDFJS.GlobalWorkerOptions.workerPort = new Worker(
-      new URL('pdfjs-dist36/legacy/build/pdf.worker', import.meta.url)
+      new URL('pdfjs-dist36/legacy/build/pdf.worker.js', import.meta.url)
     )
   })
 
@@ -45,7 +45,7 @@ async function importPDFJS213() {
 
   createWorker(() => {
     PDFJS.GlobalWorkerOptions.workerPort = new Worker(
-      new URL('pdfjs-dist213/legacy/build/pdf.worker', import.meta.url)
+      new URL('pdfjs-dist213/legacy/build/pdf.worker.js', import.meta.url)
     )
   })
 

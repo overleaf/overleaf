@@ -6,9 +6,10 @@ import { mergeCompatibleOverlappingDiagnostics } from './merge-overlapping-diagn
 
 let lintWorker: Worker
 createWorker(() => {
-  lintWorker = new Worker(new URL('./latex-linter.worker', import.meta.url), {
-    type: 'module',
-  })
+  lintWorker = new Worker(
+    new URL('./latex-linter.worker.js', import.meta.url),
+    { type: 'module' }
+  )
 })
 
 class Deferred {
