@@ -1,5 +1,28 @@
+const fs = require('fs')
 const Path = require('path')
 const { merge } = require('@overleaf/settings/merge')
+
+const MODULES_PATH = Path.join(__dirname, '../modules')
+const entryPointsIde = []
+const entryPointsMain = []
+fs.readdirSync(MODULES_PATH).forEach(module => {
+  const entryPathIde = Path.join(
+    MODULES_PATH,
+    module,
+    '/frontend/js/ide/index.js'
+  )
+  if (fs.existsSync(entryPathIde)) {
+    entryPointsIde.push(entryPathIde)
+  }
+  const entryPathMain = Path.join(
+    MODULES_PATH,
+    module,
+    '/frontend/js/main/index.js'
+  )
+  if (fs.existsSync(entryPathMain)) {
+    entryPointsMain.push(entryPathMain)
+  }
+})
 
 let defaultFeatures, siteUrl
 
@@ -815,6 +838,8 @@ module.exports = {
     oauth2Server: [],
     managedGroupSubscriptionEnrollmentNotification: [],
     managedGroupEnrollmentInvite: [],
+    entryPointsIde,
+    entryPointsMain,
   },
 
   moduleImportSequence: [

@@ -209,24 +209,6 @@ module.exports = {
           },
         ],
       },
-      // Allow for injection of modules dependencies by reading contents of
-      // modules directory and adding necessary dependencies
-      {
-        test: path.join(__dirname, 'modules/modules-main.js'),
-        use: [
-          {
-            loader: 'val-loader',
-          },
-        ],
-      },
-      {
-        test: path.join(__dirname, 'modules/modules-ide.js'),
-        use: [
-          {
-            loader: 'val-loader',
-          },
-        ],
-      },
       {
         // Expose jQuery and $ global variables
         test: require.resolve('jquery'),

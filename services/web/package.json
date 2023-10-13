@@ -343,7 +343,6 @@
     "timekeeper": "^2.2.0",
     "to-string-loader": "^1.2.0",
     "typescript": "^5.0.4",
-    "val-loader": "^5.0.1",
     "webpack": "^5.83.1",
     "webpack-assets-manifest": "^5.1.0",
     "webpack-cli": "^5.1.1",
