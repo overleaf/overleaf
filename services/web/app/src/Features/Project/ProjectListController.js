@@ -469,7 +469,6 @@ async function projectListPage(req, res, next) {
     showInrGeoBanner,
     inrGeoBannerVariant,
     inrGeoBannerSplitTestName,
-    showBackToSchoolModal: Boolean(usersBestSubscription?.type === 'free'),
     projectDashboardReact: true, // used in navbar
     welcomePageRedesignVariant: welcomePageRedesignAssignment.variant,
     groupSubscriptionsPendingEnrollment:

@@ -53,7 +53,7 @@
   position: relative;
   text-align: center;
   overflow: hidden;
-  padding-top: 0px; // temporarily change from @header-height to 0px for back to school banner changes
+  padding-top: @header-height;
   h1,
   p,
   label {
@@ -329,49 +329,6 @@
     color: @blue;
   }
   box-shadow: 0 3px 5px rgba(0, 0, 0, 0.3);
-}
-
-.back-to-school {
-  .back-to-school-banner {
-    background: @blue-10;
-    padding: 0px 16px 0px 12px;
-    border-radius: 4px;
-    border: 1px solid @blue-20;
-    color: @neutral-90;
-    .banner-row {
-      min-height: 56px;
-      display: flex;
-      justify-content: center;
-      align-content: center;
-      flex-wrap: wrap;
-    }
-
-    @media only screen and (max-width: @screen-sm-max) {
-      .banner-row {
-        min-height: 100px;
-      }
-    }
-
-    .claim-my-discount {
-      font-size: 14px;
-      font-weight: 700;
-    }
-    p {
-      margin: 0;
-    }
-    span {
-      font-size: 14px;
-      font-weight: 700;
-      margin-left: 10px;
-    }
-    a {
-      text-decoration: underline;
-      white-space: nowrap;
-    }
-  }
-  .navbar-default {
-    position: relative;
-  }
 }
 
 @media only screen and (max-width: @screen-sm-max) {

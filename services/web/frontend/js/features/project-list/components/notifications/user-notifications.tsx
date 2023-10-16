@@ -9,7 +9,6 @@ import INRBanner from './ads/inr-banner'
 import LATAMBanner from './ads/latam-banner'
 import getMeta from '../../../../utils/meta'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
-import BackToSchoolModal from './ads/back-to-school-modal'
 import customLocalStorage from '../../../../infrastructure/local-storage'
 import { sendMB } from '../../../../infrastructure/event-tracking'
 
@@ -36,12 +35,9 @@ function UserNotifications() {
     'ol-groupSubscriptionsPendingEnrollment',
     []
   )
-  const showBackToSchoolModal = getMeta('ol-showBackToSchoolModal', false)
 
   const showInrGeoBanner = getMeta('ol-showInrGeoBanner', false)
-  const inrGeoBannerVariant = showBackToSchoolModal
-    ? 'default' // This test should be disabled to prevent double modals, but sanity check to be safe
-    : getMeta('ol-inrGeoBannerVariant', 'default')
+  const inrGeoBannerVariant = getMeta('ol-inrGeoBannerVariant', 'default')
   const inrGeoBannerSplitTestName = getMeta(
     'ol-inrGeoBannerSplitTestName',
     'unassigned'
@@ -50,7 +46,7 @@ function UserNotifications() {
 
   // Temporary workaround to prevent also showing groups/enterprise banner
   const [showWritefull, setShowWritefull] = useState(() => {
-    if (isChromium() && !showBackToSchoolModal) {
+    if (isChromium()) {
       const show =
         getMeta('ol-showWritefullPromoBanner') &&
         !customLocalStorage.getItem('has_dismissed_writefull_promo_banner')
@@ -93,7 +89,6 @@ function UserNotifications() {
             splitTestName={inrGeoBannerSplitTestName}
           />
         ) : null}
-        {showBackToSchoolModal && <BackToSchoolModal />}
         <WritefullPromoBanner
           show={showWritefull}
           setShow={setShowWritefull}
