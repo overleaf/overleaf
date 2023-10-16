@@ -838,6 +838,7 @@ module.exports = {
     oauth2Server: [],
     managedGroupSubscriptionEnrollmentNotification: [],
     managedGroupEnrollmentInvite: [],
+    ssoConfigurationModal: [],
     entryPointsIde,
     entryPointsMain,
   },
