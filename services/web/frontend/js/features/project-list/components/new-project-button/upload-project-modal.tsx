@@ -22,7 +22,9 @@ type UploadProjectModalProps = {
 
 function UploadProjectModal({ onHide }: UploadProjectModalProps) {
   const { t } = useTranslation()
-  const { maxUploadSize } = getMeta('ol-ExposedSettings') as ExposedSettings
+  const { maxUploadSize, projectUploadTimeout } = getMeta(
+    'ol-ExposedSettings'
+  ) as ExposedSettings
   const [ableToUpload, setAbleToUpload] = useState(false)
   const location = useLocation()
 
@@ -42,7 +44,7 @@ function UploadProjectModal({ onHide }: UploadProjectModalProps) {
         },
         limit: 1,
         fieldName: 'qqfile', // "qqfile" is needed for our express multer middleware
-        timeout: 120000,
+        timeout: projectUploadTimeout,
       })
       .on('file-added', () => {
         // this function can be invoked multiple times depending on maxNumberOfFiles

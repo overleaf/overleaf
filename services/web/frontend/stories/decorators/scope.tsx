@@ -188,6 +188,7 @@ const initialize = () => {
     ],
     editableFilenames: ['latexmkrc', '.latexmkrc', 'makefile', 'gnumakefile'],
     validRootDocExtensions: ['tex', 'Rtex', 'ltx', 'Rnw'],
+    projectUploadTimeout: 12000,
   }
 
   window.project_id = project._id
