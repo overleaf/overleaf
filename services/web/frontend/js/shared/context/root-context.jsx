@@ -8,11 +8,11 @@ import { LocalCompileProvider } from './local-compile-context'
 import { DetachCompileProvider } from './detach-compile-context'
 import { LayoutProvider } from './layout-context'
 import { DetachProvider } from './detach-context'
-import { ChatProvider } from '../../features/chat/context/chat-context'
+import { ChatProvider } from '@/features/chat/context/chat-context'
 import { ProjectProvider } from './project-context'
 import { SplitTestProvider } from './split-test-context'
 import { FileTreeDataProvider } from './file-tree-data-context'
-import { ProjectSettingsProvider } from '../../features/editor-left-menu/context/project-settings-context'
+import { ProjectSettingsProvider } from '@/features/editor-left-menu/context/project-settings-context'
 
 export function ContextRoot({ children, ide }) {
   return (

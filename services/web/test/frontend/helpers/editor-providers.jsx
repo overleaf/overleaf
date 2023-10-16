@@ -2,17 +2,17 @@
 /* eslint-disable react/prop-types */
 import sinon from 'sinon'
 import { get } from 'lodash'
-import { SplitTestProvider } from '../../../frontend/js/shared/context/split-test-context'
-import { IdeProvider } from '../../../frontend/js/shared/context/ide-context'
-import { UserProvider } from '../../../frontend/js/shared/context/user-context'
-import { ProjectProvider } from '../../../frontend/js/shared/context/project-context'
-import { FileTreeDataProvider } from '../../../frontend/js/shared/context/file-tree-data-context'
-import { EditorProvider } from '../../../frontend/js/shared/context/editor-context'
-import { DetachProvider } from '../../../frontend/js/shared/context/detach-context'
-import { LayoutProvider } from '../../../frontend/js/shared/context/layout-context'
-import { LocalCompileProvider } from '../../../frontend/js/shared/context/local-compile-context'
-import { DetachCompileProvider } from '../../../frontend/js/shared/context/detach-compile-context'
-import { ProjectSettingsProvider } from '../../../frontend/js/features/editor-left-menu/context/project-settings-context'
+import { SplitTestProvider } from '@/shared/context/split-test-context'
+import { IdeProvider } from '@/shared/context/ide-context'
+import { UserProvider } from '@/shared/context/user-context'
+import { ProjectProvider } from '@/shared/context/project-context'
+import { FileTreeDataProvider } from '@/shared/context/file-tree-data-context'
+import { EditorProvider } from '@/shared/context/editor-context'
+import { DetachProvider } from '@/shared/context/detach-context'
+import { LayoutProvider } from '@/shared/context/layout-context'
+import { LocalCompileProvider } from '@/shared/context/local-compile-context'
+import { DetachCompileProvider } from '@/shared/context/detach-compile-context'
+import { ProjectSettingsProvider } from '@/features/editor-left-menu/context/project-settings-context'
 
 // these constants can be imported in tests instead of
 // using magic strings
