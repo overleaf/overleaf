@@ -225,7 +225,7 @@ async function sessionMaintenance(req, user) {
  * @private
  */
 async function _getVariantNames(splitTestName) {
-  const splitTest = await SplitTestCache.get(splitTestName)
+  const splitTest = await _getSplitTest(splitTestName)
   const currentVersion = SplitTestUtils.getCurrentVersion(splitTest)
   if (currentVersion?.active) {
     return currentVersion.variants.map(v => v.name).concat([DEFAULT_VARIANT])
@@ -242,7 +242,7 @@ async function _getAssignment(
     return DEFAULT_ASSIGNMENT
   }
 
-  const splitTest = await SplitTestCache.get(splitTestName)
+  const splitTest = await _getSplitTest(splitTestName)
   const currentVersion = SplitTestUtils.getCurrentVersion(splitTest)
   if (!currentVersion?.active) {
     return DEFAULT_ASSIGNMENT
@@ -493,9 +493,14 @@ async function _getUser(id, splitTestName) {
 }
 
 async function _loadSplitTestInfoInLocals(locals, splitTestName) {
-  const splitTest = await SplitTestCache.get(splitTestName)
+  const splitTest = await _getSplitTest(splitTestName)
   if (splitTest) {
-    const phase = SplitTestUtils.getCurrentVersion(splitTest).phase
+    const currentVersion = SplitTestUtils.getCurrentVersion(splitTest)
+    if (!currentVersion.active) {
+      return
+    }
+
+    const phase = currentVersion.phase
     LocalsHelper.setSplitTestInfo(locals, splitTestName, {
       phase,
       badgeInfo: splitTest.badgeInfo?.[phase],
@@ -536,6 +541,11 @@ function _collectSessionStats(session) {
       JSON.stringify(session.splitTests).length
     )
   }
+}
+
+async function _getSplitTest(name) {
+  const splitTests = await SplitTestCache.get('')
+  return splitTests?.get(name)
 }
 
 module.exports = {

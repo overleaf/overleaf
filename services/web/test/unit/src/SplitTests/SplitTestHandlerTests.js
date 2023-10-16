@@ -22,6 +22,10 @@ describe('SplitTestHandler', function () {
         versionNumber: 2,
       }),
     ]
+    this.cachedSplitTests = new Map()
+    for (const splitTest of this.splitTests) {
+      this.cachedSplitTests.set(splitTest.name, splitTest)
+    }
 
     this.UserGetter = {
       promises: {
@@ -36,11 +40,9 @@ describe('SplitTestHandler', function () {
     }
 
     this.SplitTestCache = {
-      get: sinon.stub().resolves(null),
+      get: sinon.stub().resolves({}),
     }
-    for (const splitTest of this.splitTests) {
-      this.SplitTestCache.get.withArgs(splitTest.name).resolves(splitTest)
-    }
+    this.SplitTestCache.get.resolves(this.cachedSplitTests)
     this.Settings = {
       moduleImportSequence: [],
       overleaf: {},
@@ -203,22 +205,29 @@ describe('SplitTestHandler', function () {
       this.AnalyticsManager.getIdsFromSession.returns({
         userId: 'abc123abc123',
       })
-      this.SplitTestCache.get.returns({
-        name: 'my-test-name',
-        versions: [
-          {
-            versionNumber: 0,
-            active: true,
-            variants: [
-              {
-                name: '100-percent-variant',
-                rolloutPercent: 100,
-                rolloutStripes: [{ start: 0, end: 100 }],
-              },
-            ],
-          },
-        ],
-      })
+      this.SplitTestCache.get.resolves(
+        new Map([
+          [
+            'my-test-name',
+            {
+              name: 'my-test-name',
+              versions: [
+                {
+                  versionNumber: 0,
+                  active: true,
+                  variants: [
+                    {
+                      name: '100-percent-variant',
+                      rolloutPercent: 100,
+                      rolloutStripes: [{ start: 0, end: 100 }],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        ])
+      )
 
       const assignment = await this.SplitTestHandler.promises.getAssignment(
         this.req,
