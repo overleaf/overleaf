@@ -1,0 +1,70 @@
+#onboarding-data-collection {
+  width: 720px;
+  padding: 24px;
+  margin: 0 auto;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+  p {
+    font-size: 20px;
+    margin-bottom: 5px;
+  }
+
+  .logo {
+    width: 130px;
+    margin: 0 auto;
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+
+    .group-horizontal {
+      display: flex;
+      justify-content: stretch;
+      gap: 24px;
+
+      .form-group {
+        flex-grow: 1;
+      }
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: space-between;
+
+      > div {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        button.btn-info-ghost {
+          color: @gray-dark;
+        }
+      }
+    }
+  }
+
+  .onboarding-step-2 {
+    .checkbox {
+      margin: 0;
+
+      p {
+        margin-bottom: 0;
+      }
+
+      label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        input {
+          margin-right: 4px;
+        }
+      }
+    }
+  }
+}
