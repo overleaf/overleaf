@@ -1,11 +1,20 @@
 import { Button, Modal, Grid } from 'react-bootstrap'
 import { Trans } from 'react-i18next'
-import ShareModalBody from './share-modal-body'
 import Icon from '../../../shared/components/icon'
 import AccessibleModal from '../../../shared/components/accessible-modal'
 import PropTypes from 'prop-types'
-import { ReadOnlyTokenLink } from './link-sharing'
 import { useEditorContext } from '../../../shared/context/editor-context'
+import { lazy, Suspense } from 'react'
+import { FullSizeLoadingSpinner } from '@/shared/components/loading-spinner'
+
+const ReadOnlyTokenLink = lazy(() =>
+  import('./link-sharing').then(({ ReadOnlyTokenLink }) => ({
+    // re-export as default -- lazy can only handle default exports.
+    default: ReadOnlyTokenLink,
+  }))
+)
+
+const ShareModalBody = lazy(() => import('./share-modal-body'))
 
 export default function ShareProjectModalContent({
   show,
@@ -28,7 +37,13 @@ export default function ShareProjectModalContent({
 
       <Modal.Body className="modal-body-share">
         <Grid fluid>
-          {isRestrictedTokenMember ? <ReadOnlyTokenLink /> : <ShareModalBody />}
+          <Suspense fallback={<FullSizeLoadingSpinner minHeight="15rem" />}>
+            {isRestrictedTokenMember ? (
+              <ReadOnlyTokenLink />
+            ) : (
+              <ShareModalBody />
+            )}
+          </Suspense>
         </Grid>
       </Modal.Body>
 

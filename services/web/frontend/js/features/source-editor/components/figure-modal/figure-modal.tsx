@@ -6,9 +6,8 @@ import {
   useFigureModalContext,
   useFigureModalExistingFigureContext,
 } from './figure-modal-context'
-import { FigureModalBody } from './figure-modal-body'
 import { FigureModalFooter } from './figure-modal-footer'
-import { memo, useCallback, useEffect } from 'react'
+import { lazy, memo, Suspense, useCallback, useEffect } from 'react'
 import { useCodeMirrorViewContext } from '../codemirror-editor'
 import { ChangeSpec } from '@codemirror/state'
 import {
@@ -22,6 +21,9 @@ import { useTranslation } from 'react-i18next'
 import useEventListener from '../../../../shared/hooks/use-event-listener'
 import { prepareLines } from '../../utils/prepare-lines'
 import { FeedbackBadge } from '@/shared/components/feedback-badge'
+import { FullSizeLoadingSpinner } from '@/shared/components/loading-spinner'
+
+const FigureModalBody = lazy(() => import('./figure-modal-body'))
 
 export const FigureModal = memo(function FigureModal() {
   return (
@@ -277,7 +279,9 @@ const FigureModalContent = () => {
       </Modal.Header>
 
       <Modal.Body>
-        <FigureModalBody />
+        <Suspense fallback={<FullSizeLoadingSpinner minHeight="15rem" />}>
+          <FigureModalBody />
+        </Suspense>
       </Modal.Body>
 
       <Modal.Footer>

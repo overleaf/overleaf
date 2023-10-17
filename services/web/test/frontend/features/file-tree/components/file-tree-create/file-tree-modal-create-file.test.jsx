@@ -382,14 +382,16 @@ describe('<FileTreeModalCreateFile/>', function () {
     // the submit button should not be present
     expect(screen.queryByRole('button', { name: 'Create' })).to.be.null
 
-    const dropzone = screen.getByLabelText('File Uploader')
+    await waitFor(() => {
+      const dropzone = screen.getByLabelText('File Uploader')
 
-    expect(dropzone).not.to.be.null
+      expect(dropzone).not.to.be.null
 
-    fireEvent.drop(dropzone, {
-      dataTransfer: {
-        files: [new File(['test'], 'test.tex', { type: 'text/plain' })],
-      },
+      fireEvent.drop(dropzone, {
+        dataTransfer: {
+          files: [new File(['test'], 'test.tex', { type: 'text/plain' })],
+        },
+      })
     })
 
     await waitFor(() => expect(requests).to.have.length(1))
@@ -415,14 +417,16 @@ describe('<FileTreeModalCreateFile/>', function () {
     // the submit button should not be present
     expect(screen.queryByRole('button', { name: 'Create' })).to.be.null
 
-    const dropzone = screen.getByLabelText('File Uploader')
+    await waitFor(() => {
+      const dropzone = screen.getByLabelText('File Uploader')
 
-    expect(dropzone).not.to.be.null
+      expect(dropzone).not.to.be.null
 
-    fireEvent.paste(dropzone, {
-      clipboardData: {
-        files: [new File(['test'], 'test.tex', { type: 'text/plain' })],
-      },
+      fireEvent.paste(dropzone, {
+        clipboardData: {
+          files: [new File(['test'], 'test.tex', { type: 'text/plain' })],
+        },
+      })
     })
 
     await waitFor(() => expect(requests).to.have.length(1))
@@ -448,14 +452,16 @@ describe('<FileTreeModalCreateFile/>', function () {
     // the submit button should not be present
     expect(screen.queryByRole('button', { name: 'Create' })).to.be.null
 
-    const dropzone = screen.getByLabelText('File Uploader')
+    await waitFor(() => {
+      const dropzone = screen.getByLabelText('File Uploader')
 
-    expect(dropzone).not.to.be.null
+      expect(dropzone).not.to.be.null
 
-    fireEvent.paste(dropzone, {
-      clipboardData: {
-        files: [new File(['test'], 'tes!t.tex', { type: 'text/plain' })],
-      },
+      fireEvent.paste(dropzone, {
+        clipboardData: {
+          files: [new File(['test'], 'tes!t.tex', { type: 'text/plain' })],
+        },
+      })
     })
 
     await waitFor(() => expect(requests).to.have.length(1))

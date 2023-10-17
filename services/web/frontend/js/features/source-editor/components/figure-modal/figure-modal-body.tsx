@@ -21,7 +21,7 @@ const sourceModes = new Map([
   [FigureModalSource.EDIT_FIGURE, FigureModalEditFigureSource],
 ])
 
-export const FigureModalBody = () => {
+export default function FigureModalBody() {
   const { source, helpShown, sourcePickerShown, error, dispatch } =
     useFigureModalContext()
   const Body = sourceModes.get(source)

@@ -36,3 +36,22 @@ LoadingSpinner.propTypes = {
 }
 
 export default LoadingSpinner
+
+export function FullSizeLoadingSpinner({
+  delay = 0,
+  minHeight,
+}: {
+  delay?: number
+  minHeight?: string
+}) {
+  return (
+    <div className="full-size-loading-spinner-container" style={{ minHeight }}>
+      <LoadingSpinner delay={delay} />
+    </div>
+  )
+}
+
+FullSizeLoadingSpinner.propTypes = {
+  delay: PropTypes.number,
+  minHeight: PropTypes.string,
+}

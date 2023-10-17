@@ -1,5 +1,5 @@
 import { lazy, memo, Suspense } from 'react'
-import LoadingSpinner from '../../../shared/components/loading-spinner'
+import { FullSizeLoadingSpinner } from '../../../shared/components/loading-spinner'
 import withErrorBoundary from '../../../infrastructure/error-boundary'
 import { ErrorBoundaryFallback } from '../../../shared/components/error-boundary-fallback'
 
@@ -10,13 +10,7 @@ const CodeMirrorEditor = lazy(
 
 function SourceEditor() {
   return (
-    <Suspense
-      fallback={
-        <div className="pdf-loading-spinner-container">
-          <LoadingSpinner delay={500} />
-        </div>
-      }
-    >
+    <Suspense fallback={<FullSizeLoadingSpinner delay={500} />}>
       <CodeMirrorEditor />
     </Suspense>
   )

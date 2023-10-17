@@ -1,13 +1,11 @@
-import DownloadMenu from './download-menu'
-import ActionsMenu from './actions-menu'
-import HelpMenu from './help-menu'
 import { useLayoutContext } from '../../../shared/context/layout-context'
-import SyncMenu from './sync-menu'
-import SettingsMenu from './settings-menu'
 import LeftMenuMask from './left-menu-mask'
 import AccessibleModal from '../../../shared/components/accessible-modal'
 import { Modal } from 'react-bootstrap'
 import classNames from 'classnames'
+import { lazy, Suspense } from 'react'
+import { FullSizeLoadingSpinner } from '@/shared/components/loading-spinner'
+const EditorLeftMenuBody = lazy(() => import('./editor-left-menu-body'))
 
 export default function EditorLeftMenu() {
   const { leftMenuShown, setLeftMenuShown } = useLayoutContext()
@@ -29,11 +27,9 @@ export default function EditorLeftMenu() {
           className={classNames('full-size', { shown: leftMenuShown })}
           id="left-menu"
         >
-          <DownloadMenu />
-          <ActionsMenu />
-          <SyncMenu />
-          <SettingsMenu />
-          <HelpMenu />
+          <Suspense fallback={<FullSizeLoadingSpinner delay={500} />}>
+            <EditorLeftMenuBody />
+          </Suspense>
         </Modal.Body>
       </AccessibleModal>
       {leftMenuShown && <LeftMenuMask />}

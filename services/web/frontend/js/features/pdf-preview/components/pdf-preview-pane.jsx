@@ -2,7 +2,7 @@ import { memo, Suspense } from 'react'
 import classNames from 'classnames'
 import PdfLogsViewer from './pdf-logs-viewer'
 import PdfViewer from './pdf-viewer'
-import LoadingSpinner from '../../../shared/components/loading-spinner'
+import { FullSizeLoadingSpinner } from '../../../shared/components/loading-spinner'
 import PdfHybridPreviewToolbar from './pdf-preview-hybrid-toolbar'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import FasterCompilesFeedback from './faster-compiles-feedback'
@@ -27,7 +27,7 @@ function PdfPreviewPane() {
             <CompileTimeWarning />
           )}
         </PdfPreviewMessages>
-        <Suspense fallback={<LoadingPreview />}>
+        <Suspense fallback={<FullSizeLoadingSpinner delay={500} />}>
           <div className="pdf-viewer">
             <PdfViewer />
             <FasterCompilesFeedback />
@@ -35,14 +35,6 @@ function PdfPreviewPane() {
         </Suspense>
         <PdfLogsViewer />
       </PdfPreviewProvider>
-    </div>
-  )
-}
-
-function LoadingPreview() {
-  return (
-    <div className="pdf-loading-spinner-container">
-      <LoadingSpinner delay={500} />
     </div>
   )
 }
