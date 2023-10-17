@@ -249,7 +249,7 @@ const groupPlans = [
         value: 'bool',
         plans: {
           group_standard: false,
-          group_professional: false,
+          group_professional: Settings.groupSSO?.enabled === true,
           organization: true,
         },
       },
