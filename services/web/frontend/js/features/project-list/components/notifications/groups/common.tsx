@@ -257,6 +257,19 @@ function CommonNotification({ notification }: CommonNotificationProps) {
         </Notification>
       ) : templateKey === 'notification_group_invitation' ? (
         <GroupInvitationNotification notification={notification} />
+      ) : templateKey === 'notification_personal_and_group_subscriptions' ? (
+        <Notification
+          bsStyle="warning"
+          onDismiss={() => id && handleDismiss(id)}
+        >
+          <Notification.Body>
+            <Trans
+              i18nKey="notification_personal_and_group_subscriptions"
+              /* eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key */
+              components={[<strong />, <a href="/user/subscription" />]}
+            />
+          </Notification.Body>
+        </Notification>
       ) : (
         <Notification bsStyle="info" onDismiss={() => id && handleDismiss(id)}>
           <Notification.Body>{html}</Notification.Body>

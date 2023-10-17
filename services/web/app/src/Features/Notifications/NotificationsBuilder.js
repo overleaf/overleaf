@@ -255,6 +255,32 @@ function groupInvitation(userId, subscriptionId, managedUsersEnabled) {
   }
 }
 
+function personalAndGroupSubscriptions(userId) {
+  return {
+    key: 'personal-and-group-subscriptions',
+    create(callback) {
+      if (callback == null) {
+        callback = function () {}
+      }
+      NotificationsHandler.createNotification(
+        userId,
+        this.key,
+        'notification_personal_and_group_subscriptions',
+        {},
+        null,
+        false,
+        callback
+      )
+    },
+    read(callback) {
+      if (callback == null) {
+        callback = function () {}
+      }
+      NotificationsHandler.markAsReadByKeyOnly(this.key, callback)
+    },
+  }
+}
+
 const NotificationsBuilder = {
   // Note: notification keys should be url-safe
   dropboxUnlinkedDueToLapsedReconfirmation,
@@ -265,6 +291,7 @@ const NotificationsBuilder = {
   ipMatcherAffiliation,
   tpdsFileLimit,
   groupInvitation,
+  personalAndGroupSubscriptions,
 }
 
 NotificationsBuilder.promises = {
@@ -285,6 +312,9 @@ NotificationsBuilder.promises = {
   },
   projectInvite(invite, project, sendingUser, user) {
     return promisifyAll(projectInvite(invite, project, sendingUser, user))
+  },
+  personalAndGroupSubscriptions(userId) {
+    return promisifyAll(personalAndGroupSubscriptions(userId))
   },
 }
 

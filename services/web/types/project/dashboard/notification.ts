@@ -6,6 +6,7 @@ type TemplateKey =
   | 'notification_dropbox_duplicate_project_names'
   | 'notification_dropbox_unlinked_due_to_lapsed_reconfirmation'
   | 'notification_group_invitation'
+  | 'notification_personal_and_group_subscriptions'
 
 type NotificationBase = {
   _id?: number
