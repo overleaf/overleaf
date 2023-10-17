@@ -10,16 +10,18 @@
  */
 import App from '../../../base'
 
-export default App.directive('bulkActionsEntry', () => ({
-  restrict: 'E',
-  templateUrl: 'bulkActionsEntryTemplate',
-  scope: {
-    onBulkAccept: '&',
-    onBulkReject: '&',
-    nEntries: '=',
-  },
-  link(scope, element, attrs) {
-    scope.bulkAccept = () => scope.onBulkAccept()
-    return (scope.bulkReject = () => scope.onBulkReject())
-  },
-}))
+export default App.directive('bulkActionsEntry', function () {
+  return {
+    restrict: 'E',
+    templateUrl: 'bulkActionsEntryTemplate',
+    scope: {
+      onBulkAccept: '&',
+      onBulkReject: '&',
+      nEntries: '=',
+    },
+    link(scope, element, attrs) {
+      scope.bulkAccept = () => scope.onBulkAccept()
+      return (scope.bulkReject = () => scope.onBulkReject())
+    },
+  }
+})

@@ -7,13 +7,15 @@
  */
 import App from '../base'
 
-export default App.directive('rightClick', () => ({
-  restrict: 'A',
-  link(scope, element, attrs) {
-    return element.bind('contextmenu', function (e) {
-      e.preventDefault()
-      e.stopPropagation()
-      return scope.$eval(attrs.rightClick)
-    })
-  },
-}))
+export default App.directive('rightClick', function () {
+  return {
+    restrict: 'A',
+    link(scope, element, attrs) {
+      return element.bind('contextmenu', function (e) {
+        e.preventDefault()
+        e.stopPropagation()
+        return scope.$eval(attrs.rightClick)
+      })
+    },
+  }
+})

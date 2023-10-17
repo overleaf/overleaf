@@ -226,7 +226,32 @@
         // Require .jsx or .tsx file extension when using JSX
         "react/jsx-filename-extension": ["error", {
           "extensions": [".jsx", ".tsx"]
-        }]
+        }],
+        "no-restricted-syntax": [
+          "error",
+          // Begin: Make sure angular can withstand minification
+          {
+            "selector": "CallExpression[callee.object.name='App'][callee.property.name=/run|directive|config|controller/] > :function[params.length > 0]",
+            "message": "Wrap the function in an array with the parameter names, to withstand minifcation. E.g. App.controller('MyController', ['param1', function(param1) {}]"
+          },
+          {
+            "selector": "CallExpression[callee.object.name='App'][callee.property.name=/run|directive|config|controller/] > ArrayExpression > ArrowFunctionExpression",
+            "message": "Use standard function syntax instead of arrow function syntax in angular components. E.g. function(param1) {}"
+          },
+          {
+            "selector": "CallExpression[callee.object.name='App'][callee.property.name=/run|directive|config|controller/] > ArrowFunctionExpression",
+            "message": "Use standard function syntax instead of arrow function syntax in angular components. E.g. function(param1) {}"
+          },
+          {
+            "selector": "CallExpression[callee.object.name='App'][callee.property.name=/run|directive|config|controller/] > ArrayExpression > :not(:function, Identifier):last-child",
+            "message": "Last element of the array must be a function. E.g ['param1', function(param1) {}]"
+          },
+          {
+            "selector": "CallExpression[callee.object.name='App'][callee.property.name=/run|directive|config|controller/] > ArrayExpression[elements.length=0]",
+            "message": "Array must not be empty. Add parameters and a function. E.g ['param1', function(param1) {}]"
+          }
+          // End: Make sure angular can withstand minification
+        ]
       }
     },
     // React + TypeScript-specific rules

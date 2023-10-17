@@ -1,14 +1,15 @@
 import App from '../../../base'
 
-export default App.directive('toggleSwitch', () => ({
-  restrict: 'E',
-  scope: {
-    description: '@',
-    labelFalse: '@',
-    labelTrue: '@',
-    ngModel: '=',
-  },
-  template: `\
+export default App.directive('toggleSwitch', function () {
+  return {
+    restrict: 'E',
+    scope: {
+      description: '@',
+      labelFalse: '@',
+      labelTrue: '@',
+      ngModel: '=',
+    },
+    template: `\
 <fieldset class="toggle-switch">
   <legend class="sr-only">{{description}}</legend>
 
@@ -33,4 +34,5 @@ export default App.directive('toggleSwitch', () => ({
   <label for="toggle-switch-true-{{$id}}" class="toggle-switch-label"><span>{{labelTrue}}</span></label>
 </fieldset>\
 `,
-}))
+  }
+})

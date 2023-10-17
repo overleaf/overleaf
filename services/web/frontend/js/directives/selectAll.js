@@ -11,88 +11,98 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import App from '../base'
-App.directive('selectAllList', () => ({
-  controller: [
-    '$scope',
-    function ($scope) {
-      // Selecting or deselecting all should apply to all projects
-      this.selectAll = () => $scope.$broadcast('select-all:select')
+App.directive('selectAllList', function () {
+  return {
+    controller: [
+      '$scope',
+      function ($scope) {
+        // Selecting or deselecting all should apply to all projects
+        this.selectAll = () => $scope.$broadcast('select-all:select')
 
-      this.deselectAll = () => $scope.$broadcast('select-all:deselect')
+        this.deselectAll = () => $scope.$broadcast('select-all:deselect')
 
-      this.clearSelectAllState = () => $scope.$broadcast('select-all:clear')
+        this.clearSelectAllState = () => $scope.$broadcast('select-all:clear')
+      },
+    ],
+    link(scope, element, attrs) {},
+  }
+})
+
+App.directive('selectAll', function () {
+  return {
+    require: '^selectAllList',
+    link(scope, element, attrs, selectAllListController) {
+      scope.$on('select-all:clear', () => element.prop('checked', false))
+
+      return element.change(function () {
+        if (element.is(':checked')) {
+          selectAllListController.selectAll()
+        } else {
+          selectAllListController.deselectAll()
+        }
+        return true
+      })
     },
-  ],
-  link(scope, element, attrs) {},
-}))
+  }
+})
 
-App.directive('selectAll', () => ({
-  require: '^selectAllList',
-  link(scope, element, attrs, selectAllListController) {
-    scope.$on('select-all:clear', () => element.prop('checked', false))
+App.directive('selectIndividual', function () {
+  return {
+    require: '^selectAllList',
+    scope: {
+      ngModel: '=',
+    },
+    link(scope, element, attrs, selectAllListController) {
+      let ignoreChanges = false
 
-    return element.change(function () {
-      if (element.is(':checked')) {
-        selectAllListController.selectAll()
-      } else {
-        selectAllListController.deselectAll()
-      }
-      return true
-    })
-  },
-}))
-
-App.directive('selectIndividual', () => ({
-  require: '^selectAllList',
-  scope: {
-    ngModel: '=',
-  },
-  link(scope, element, attrs, selectAllListController) {
-    let ignoreChanges = false
-
-    scope.$watch('ngModel', function (value) {
-      if (value != null && !ignoreChanges) {
-        return selectAllListController.clearSelectAllState()
-      }
-    })
-
-    scope.$on('select-all:select', function () {
-      if (element.prop('disabled')) {
-        return
-      }
-      ignoreChanges = true
-      scope.$apply(() => (scope.ngModel = true))
-      return (ignoreChanges = false)
-    })
-
-    scope.$on('select-all:deselect', function () {
-      if (element.prop('disabled')) {
-        return
-      }
-      ignoreChanges = true
-      scope.$apply(() => (scope.ngModel = false))
-      return (ignoreChanges = false)
-    })
-
-    return scope.$on('select-all:row-clicked', function () {
-      if (element.prop('disabled')) {
-        return
-      }
-      ignoreChanges = true
-      scope.$apply(function () {
-        scope.ngModel = !scope.ngModel
-        if (!scope.ngModel) {
+      scope.$watch('ngModel', function (value) {
+        if (value != null && !ignoreChanges) {
           return selectAllListController.clearSelectAllState()
         }
       })
-      return (ignoreChanges = false)
-    })
-  },
-}))
 
-export default App.directive('selectRow', () => ({
-  scope: true,
-  link(scope, element, attrs) {
-    return element.on('click', e => scope.$broadcast('select-all:row-clicked'))
-  },
-}))
+      scope.$on('select-all:select', function () {
+        if (element.prop('disabled')) {
+          return
+        }
+        ignoreChanges = true
+        scope.$apply(() => (scope.ngModel = true))
+        return (ignoreChanges = false)
+      })
+
+      scope.$on('select-all:deselect', function () {
+        if (element.prop('disabled')) {
+          return
+        }
+        ignoreChanges = true
+        scope.$apply(() => (scope.ngModel = false))
+        return (ignoreChanges = false)
+      })
+
+      return scope.$on('select-all:row-clicked', function () {
+        if (element.prop('disabled')) {
+          return
+        }
+        ignoreChanges = true
+        scope.$apply(function () {
+          scope.ngModel = !scope.ngModel
+          if (!scope.ngModel) {
+            return selectAllListController.clearSelectAllState()
+          }
+        })
+        return (ignoreChanges = false)
+      })
+    },
+  }
+})
+
+export default App.directive('selectRow', function () {
+  return {
+    scope: true,
+    link(scope, element, attrs) {
+      return element.on('click', e =>
+        scope.$broadcast('select-all:row-clicked')
+      )
+    },
+  }
+})

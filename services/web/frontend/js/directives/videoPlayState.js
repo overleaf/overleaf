@@ -12,21 +12,23 @@ import App from '../base'
 
 export default App.directive('videoPlayState', [
   '$parse',
-  $parse => ({
-    restrict: 'A',
-    link(scope, element, attrs) {
-      const videoDOMEl = element[0]
-      return scope.$watch(
-        () => $parse(attrs.videoPlayState)(scope),
-        function (shouldPlay) {
-          if (shouldPlay) {
-            videoDOMEl.currentTime = 0
-            return videoDOMEl.play()
-          } else {
-            return videoDOMEl.pause()
+  function ($parse) {
+    return {
+      restrict: 'A',
+      link(scope, element, attrs) {
+        const videoDOMEl = element[0]
+        return scope.$watch(
+          () => $parse(attrs.videoPlayState)(scope),
+          function (shouldPlay) {
+            if (shouldPlay) {
+              videoDOMEl.currentTime = 0
+              return videoDOMEl.play()
+            } else {
+              return videoDOMEl.pause()
+            }
           }
-        }
-      )
-    },
-  }),
+        )
+      },
+    }
+  },
 ])

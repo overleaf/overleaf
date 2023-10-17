@@ -11,43 +11,45 @@
  */
 import App from '../../../base'
 
-export default App.directive('infiniteScroll', () => ({
-  link(scope, element, attrs, ctrl) {
-    const innerElement = element.find('.infinite-scroll-inner')
-    element.css({ 'overflow-y': 'auto' })
+export default App.directive('infiniteScroll', function () {
+  return {
+    link(scope, element, attrs, ctrl) {
+      const innerElement = element.find('.infinite-scroll-inner')
+      element.css({ 'overflow-y': 'auto' })
 
-    const atEndOfListView = function () {
-      if (attrs.infiniteScrollUpwards != null) {
-        return atTopOfListView()
-      } else {
-        return atBottomOfListView()
+      const atEndOfListView = function () {
+        if (attrs.infiniteScrollUpwards != null) {
+          return atTopOfListView()
+        } else {
+          return atBottomOfListView()
+        }
       }
-    }
 
-    const atTopOfListView = () => element.scrollTop() < 30
+      const atTopOfListView = () => element.scrollTop() < 30
 
-    const atBottomOfListView = () =>
-      element.scrollTop() + element.height() >= innerElement.height() - 30
+      const atBottomOfListView = () =>
+        element.scrollTop() + element.height() >= innerElement.height() - 30
 
-    const listShorterThanContainer = () =>
-      element.height() > innerElement.height()
+      const listShorterThanContainer = () =>
+        element.height() > innerElement.height()
 
-    function loadUntilFull() {
-      if (
-        (listShorterThanContainer() || atEndOfListView()) &&
-        !scope.$eval(attrs.infiniteScrollDisabled)
-      ) {
-        const promise = scope.$eval(attrs.infiniteScroll)
-        return promise.then(() => setTimeout(() => loadUntilFull(), 0))
+      function loadUntilFull() {
+        if (
+          (listShorterThanContainer() || atEndOfListView()) &&
+          !scope.$eval(attrs.infiniteScrollDisabled)
+        ) {
+          const promise = scope.$eval(attrs.infiniteScroll)
+          return promise.then(() => setTimeout(() => loadUntilFull(), 0))
+        }
       }
-    }
 
-    element.on('scroll', event => loadUntilFull())
+      element.on('scroll', event => loadUntilFull())
 
-    return scope.$watch(attrs.infiniteScrollInitialize, function (value) {
-      if (value) {
-        return loadUntilFull()
-      }
-    })
-  },
-}))
+      return scope.$watch(attrs.infiniteScrollInitialize, function (value) {
+        if (value) {
+          return loadUntilFull()
+        }
+      })
+    },
+  }
+})

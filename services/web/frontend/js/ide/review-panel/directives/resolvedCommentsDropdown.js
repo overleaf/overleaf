@@ -14,96 +14,98 @@ import _ from 'lodash'
  */
 import App from '../../../base'
 
-export default App.directive('resolvedCommentsDropdown', () => ({
-  restrict: 'E',
-  templateUrl: 'resolvedCommentsDropdownTemplate',
-  scope: {
-    entries: '=',
-    threads: '=',
-    resolvedIds: '=',
-    docs: '=',
-    permissions: '=',
-    onOpen: '&',
-    onUnresolve: '&',
-    onDelete: '&',
-    isLoading: '=',
-  },
+export default App.directive('resolvedCommentsDropdown', function () {
+  return {
+    restrict: 'E',
+    templateUrl: 'resolvedCommentsDropdownTemplate',
+    scope: {
+      entries: '=',
+      threads: '=',
+      resolvedIds: '=',
+      docs: '=',
+      permissions: '=',
+      onOpen: '&',
+      onUnresolve: '&',
+      onDelete: '&',
+      isLoading: '=',
+    },
 
-  link(scope, element, attrs) {
-    let filterResolvedComments
-    scope.state = { isOpen: false }
+    link(scope, element, attrs) {
+      let filterResolvedComments
+      scope.state = { isOpen: false }
 
-    scope.toggleOpenState = function () {
-      scope.state.isOpen = !scope.state.isOpen
-      if (scope.state.isOpen) {
-        return scope.onOpen().then(() => filterResolvedComments())
+      scope.toggleOpenState = function () {
+        scope.state.isOpen = !scope.state.isOpen
+        if (scope.state.isOpen) {
+          return scope.onOpen().then(() => filterResolvedComments())
+        }
       }
-    }
 
-    scope.resolvedComments = []
-
-    scope.handleUnresolve = function (threadId) {
-      scope.onUnresolve({ threadId })
-      return (scope.resolvedComments = scope.resolvedComments.filter(
-        c => c.threadId !== threadId
-      ))
-    }
-
-    scope.handleDelete = function (entryId, docId, threadId) {
-      scope.onDelete({ entryId, docId, threadId })
-      return (scope.resolvedComments = scope.resolvedComments.filter(
-        c => c.threadId !== threadId
-      ))
-    }
-
-    const getDocNameById = function (docId) {
-      const doc = _.find(scope.docs, doc => doc.doc.id === docId)
-      if (doc != null) {
-        return doc.path
-      } else {
-        return null
-      }
-    }
-
-    return (filterResolvedComments = function () {
       scope.resolvedComments = []
 
-      return (() => {
-        const result = []
-        for (const docId in scope.entries) {
-          const docEntries = scope.entries[docId]
-          result.push(
-            (() => {
-              const result1 = []
-              for (const entryId in docEntries) {
-                const entry = docEntries[entryId]
-                if (
-                  entry.type === 'comment' &&
-                  (scope.threads[entry.thread_id] != null
-                    ? scope.threads[entry.thread_id].resolved
-                    : undefined) != null
-                ) {
-                  const resolvedComment = angular.copy(
-                    scope.threads[entry.thread_id]
-                  )
+      scope.handleUnresolve = function (threadId) {
+        scope.onUnresolve({ threadId })
+        return (scope.resolvedComments = scope.resolvedComments.filter(
+          c => c.threadId !== threadId
+        ))
+      }
 
-                  resolvedComment.content = entry.content
-                  resolvedComment.threadId = entry.thread_id
-                  resolvedComment.entryId = entryId
-                  resolvedComment.docId = docId
-                  resolvedComment.docName = getDocNameById(docId)
+      scope.handleDelete = function (entryId, docId, threadId) {
+        scope.onDelete({ entryId, docId, threadId })
+        return (scope.resolvedComments = scope.resolvedComments.filter(
+          c => c.threadId !== threadId
+        ))
+      }
 
-                  result1.push(scope.resolvedComments.push(resolvedComment))
-                } else {
-                  result1.push(undefined)
-                }
-              }
-              return result1
-            })()
-          )
+      const getDocNameById = function (docId) {
+        const doc = _.find(scope.docs, doc => doc.doc.id === docId)
+        if (doc != null) {
+          return doc.path
+        } else {
+          return null
         }
-        return result
-      })()
-    })
-  },
-}))
+      }
+
+      return (filterResolvedComments = function () {
+        scope.resolvedComments = []
+
+        return (() => {
+          const result = []
+          for (const docId in scope.entries) {
+            const docEntries = scope.entries[docId]
+            result.push(
+              (() => {
+                const result1 = []
+                for (const entryId in docEntries) {
+                  const entry = docEntries[entryId]
+                  if (
+                    entry.type === 'comment' &&
+                    (scope.threads[entry.thread_id] != null
+                      ? scope.threads[entry.thread_id].resolved
+                      : undefined) != null
+                  ) {
+                    const resolvedComment = angular.copy(
+                      scope.threads[entry.thread_id]
+                    )
+
+                    resolvedComment.content = entry.content
+                    resolvedComment.threadId = entry.thread_id
+                    resolvedComment.entryId = entryId
+                    resolvedComment.docId = docId
+                    resolvedComment.docName = getDocNameById(docId)
+
+                    result1.push(scope.resolvedComments.push(resolvedComment))
+                  } else {
+                    result1.push(undefined)
+                  }
+                }
+                return result1
+              })()
+            )
+          }
+          return result
+        })()
+      })
+    },
+  }
+})

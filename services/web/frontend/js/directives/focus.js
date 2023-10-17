@@ -12,82 +12,96 @@
 import App from '../base'
 App.directive('focusWhen', [
   '$timeout',
-  $timeout => ({
-    restrict: 'A',
-    link(scope, element, attr) {
-      return scope.$watch(attr.focusWhen, function (value) {
-        if (value) {
-          return $timeout(() => element.focus())
-        }
-      })
-    },
-  }),
+  function ($timeout) {
+    return {
+      restrict: 'A',
+      link(scope, element, attr) {
+        return scope.$watch(attr.focusWhen, function (value) {
+          if (value) {
+            return $timeout(() => element.focus())
+          }
+        })
+      },
+    }
+  },
 ])
 
-App.directive('focusOn', () => ({
-  restrict: 'A',
-  link(scope, element, attrs) {
-    return scope.$on(attrs.focusOn, () => element.focus())
-  },
-}))
+App.directive('focusOn', function () {
+  return {
+    restrict: 'A',
+    link(scope, element, attrs) {
+      return scope.$on(attrs.focusOn, () => element.focus())
+    },
+  }
+})
 
 App.directive('selectWhen', [
   '$timeout',
-  $timeout => ({
-    restrict: 'A',
-    link(scope, element, attr) {
-      return scope.$watch(attr.selectWhen, function (value) {
-        if (value) {
-          return $timeout(() => element.select())
-        }
-      })
-    },
-  }),
+  function ($timeout) {
+    return {
+      restrict: 'A',
+      link(scope, element, attr) {
+        return scope.$watch(attr.selectWhen, function (value) {
+          if (value) {
+            return $timeout(() => element.select())
+          }
+        })
+      },
+    }
+  },
 ])
 
-App.directive('selectOn', () => ({
-  restrict: 'A',
-  link(scope, element, attrs) {
-    return scope.$on(attrs.selectOn, () => element.select())
-  },
-}))
+App.directive('selectOn', function () {
+  return {
+    restrict: 'A',
+    link(scope, element, attrs) {
+      return scope.$on(attrs.selectOn, () => element.select())
+    },
+  }
+})
 
 App.directive('selectNameWhen', [
   '$timeout',
-  $timeout => ({
-    restrict: 'A',
-    link(scope, element, attrs) {
-      return scope.$watch(attrs.selectNameWhen, function (value) {
-        if (value) {
-          return $timeout(() => selectName(element))
-        }
-      })
-    },
-  }),
+  function ($timeout) {
+    return {
+      restrict: 'A',
+      link(scope, element, attrs) {
+        return scope.$watch(attrs.selectNameWhen, function (value) {
+          if (value) {
+            return $timeout(() => selectName(element))
+          }
+        })
+      },
+    }
+  },
 ])
 
-App.directive('selectNameOn', () => ({
-  restrict: 'A',
-  link(scope, element, attrs) {
-    return scope.$on(attrs.selectNameOn, () => selectName(element))
-  },
-}))
+App.directive('selectNameOn', function () {
+  return {
+    restrict: 'A',
+    link(scope, element, attrs) {
+      return scope.$on(attrs.selectNameOn, () => selectName(element))
+    },
+  }
+})
 
 App.directive('focus', [
   '$timeout',
-  $timeout => ({
-    scope: {
-      trigger: '@focus',
-    },
+  function ($timeout) {
+    return {
+      scope: {
+        trigger: '@focus',
+      },
 
-    link(scope, element) {
-      return scope.$watch('trigger', function (value) {
-        if (value === 'true') {
-          return $timeout(() => element[0].focus())
-        }
-      })
-    },
-  }),
+      link(scope, element) {
+        return scope.$watch('trigger', function (value) {
+          if (value === 'true') {
+            return $timeout(() => element[0].focus())
+          }
+        })
+      },
+    }
+  },
 ])
 
 function selectName(element) {

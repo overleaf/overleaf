@@ -13,45 +13,47 @@ import App from '../../../base'
 
 export default App.directive('changeEntry', [
   '$timeout',
-  $timeout => ({
-    restrict: 'E',
-    templateUrl: 'changeEntryTemplate',
-    scope: {
-      entry: '=',
-      user: '=',
-      permissions: '=',
-      onAccept: '&',
-      onReject: '&',
-      onIndicatorClick: '&',
-      onMouseEnter: '&',
-      onMouseLeave: '&',
-      onBodyClick: '&',
-    },
-    link(scope, element, attrs) {
-      scope.contentLimit = 40
-      scope.isCollapsed = true
-      scope.needsCollapsing = false
+  function ($timeout) {
+    return {
+      restrict: 'E',
+      templateUrl: 'changeEntryTemplate',
+      scope: {
+        entry: '=',
+        user: '=',
+        permissions: '=',
+        onAccept: '&',
+        onReject: '&',
+        onIndicatorClick: '&',
+        onMouseEnter: '&',
+        onMouseLeave: '&',
+        onBodyClick: '&',
+      },
+      link(scope, element, attrs) {
+        scope.contentLimit = 40
+        scope.isCollapsed = true
+        scope.needsCollapsing = false
 
-      element.on('click', function (e) {
-        if (
-          $(e.target).is(
-            '.rp-entry, .rp-entry-description, .rp-entry-body, .rp-entry-action-icon i'
-          )
-        ) {
-          return scope.onBodyClick()
+        element.on('click', function (e) {
+          if (
+            $(e.target).is(
+              '.rp-entry, .rp-entry-description, .rp-entry-body, .rp-entry-action-icon i'
+            )
+          ) {
+            return scope.onBodyClick()
+          }
+        })
+
+        scope.toggleCollapse = function () {
+          scope.isCollapsed = !scope.isCollapsed
+          return $timeout(() => scope.$emit('review-panel:layout'))
         }
-      })
 
-      scope.toggleCollapse = function () {
-        scope.isCollapsed = !scope.isCollapsed
-        return $timeout(() => scope.$emit('review-panel:layout'))
-      }
-
-      return scope.$watch(
-        'entry.content.length',
-        contentLength =>
-          (scope.needsCollapsing = contentLength > scope.contentLimit)
-      )
-    },
-  }),
+        return scope.$watch(
+          'entry.content.length',
+          contentLength =>
+            (scope.needsCollapsing = contentLength > scope.contentLimit)
+        )
+      },
+    }
+  },
 ])

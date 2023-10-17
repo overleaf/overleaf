@@ -9,16 +9,20 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import App from '../base'
-App.directive('stopPropagation', () => ({
-  restrict: 'A',
-  link(scope, element, attrs) {
-    return element.bind(attrs.stopPropagation, e => e.stopPropagation())
-  },
-}))
+App.directive('stopPropagation', function () {
+  return {
+    restrict: 'A',
+    link(scope, element, attrs) {
+      return element.bind(attrs.stopPropagation, e => e.stopPropagation())
+    },
+  }
+})
 
-export default App.directive('preventDefault', () => ({
-  restrict: 'A',
-  link(scope, element, attrs) {
-    return element.bind(attrs.preventDefault, e => e.preventDefault())
-  },
-}))
+export default App.directive('preventDefault', function () {
+  return {
+    restrict: 'A',
+    link(scope, element, attrs) {
+      return element.bind(attrs.preventDefault, e => e.preventDefault())
+    },
+  }
+})

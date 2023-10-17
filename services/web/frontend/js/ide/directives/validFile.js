@@ -12,10 +12,12 @@
 import App from '../../base'
 import SafePath from './SafePath'
 
-export default App.directive('validFile', () => ({
-  require: 'ngModel',
-  link(scope, element, attrs, ngModelCtrl) {
-    return (ngModelCtrl.$validators.validFile = filename =>
-      SafePath.isCleanFilename(filename))
-  },
-}))
+export default App.directive('validFile', function () {
+  return {
+    require: 'ngModel',
+    link(scope, element, attrs, ngModelCtrl) {
+      return (ngModelCtrl.$validators.validFile = filename =>
+        SafePath.isCleanFilename(filename))
+    },
+  }
+})
