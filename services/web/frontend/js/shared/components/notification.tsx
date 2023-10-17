@@ -57,7 +57,6 @@ function Notification({
   const notificationClassName = classNames(
     'notification',
     `notification-type-${type}`,
-    isDismissible ? 'notification-dismissible' : '',
     isActionBelowContent ? 'notification-cta-below-content' : ''
   )
 
