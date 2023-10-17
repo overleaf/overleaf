@@ -4,9 +4,9 @@ export const GLOBAL_THREAD = 'GLOBAL'
 
 export async function findOrCreateThread(projectId, threadId) {
   let query, update
-  projectId = ObjectId(projectId.toString())
+  projectId = new ObjectId(projectId.toString())
   if (threadId !== GLOBAL_THREAD) {
-    threadId = ObjectId(threadId.toString())
+    threadId = new ObjectId(threadId.toString())
   }
 
   if (threadId === GLOBAL_THREAD) {
@@ -33,14 +33,14 @@ export async function findOrCreateThread(projectId, threadId) {
     { $set: update },
     { upsert: true, returnDocument: 'after' }
   )
-  return result.value
+  return result
 }
 
 export async function findAllThreadRooms(projectId) {
   return db.rooms
     .find(
       {
-        project_id: ObjectId(projectId.toString()),
+        project_id: new ObjectId(projectId.toString()),
         thread_id: { $exists: true },
       },
       {
@@ -55,7 +55,7 @@ export async function findAllThreadRoomsAndGlobalThread(projectId) {
   return db.rooms
     .find(
       {
-        project_id: ObjectId(projectId.toString()),
+        project_id: new ObjectId(projectId.toString()),
       },
       {
         thread_id: 1,
@@ -68,8 +68,8 @@ export async function findAllThreadRoomsAndGlobalThread(projectId) {
 export async function resolveThread(projectId, threadId, userId) {
   await db.rooms.updateOne(
     {
-      project_id: ObjectId(projectId.toString()),
-      thread_id: ObjectId(threadId.toString()),
+      project_id: new ObjectId(projectId.toString()),
+      thread_id: new ObjectId(threadId.toString()),
     },
     {
       $set: {
@@ -85,8 +85,8 @@ export async function resolveThread(projectId, threadId, userId) {
 export async function reopenThread(projectId, threadId) {
   await db.rooms.updateOne(
     {
-      project_id: ObjectId(projectId.toString()),
-      thread_id: ObjectId(threadId.toString()),
+      project_id: new ObjectId(projectId.toString()),
+      thread_id: new ObjectId(threadId.toString()),
     },
     {
       $unset: {
@@ -106,6 +106,6 @@ export async function deleteThread(projectId, threadId) {
 
 export async function deleteAllThreadsInProject(projectId) {
   await db.rooms.deleteMany({
-    project_id: ObjectId(projectId.toString()),
+    project_id: new ObjectId(projectId.toString()),
   })
 }

@@ -5,14 +5,14 @@ import * as ChatClient from './helpers/ChatClient.js'
 import * as ChatApp from './helpers/ChatApp.js'
 
 describe('Deleting a thread', async function () {
-  const projectId = ObjectId().toString()
-  const userId = ObjectId().toString()
+  const projectId = new ObjectId().toString()
+  const userId = new ObjectId().toString()
   before(async function () {
     await ChatApp.ensureRunning()
   })
 
   describe('with a thread that is deleted', async function () {
-    const threadId = ObjectId().toString()
+    const threadId = new ObjectId().toString()
     const content = 'deleted thread message'
     before(async function () {
       const { response } = await ChatClient.sendMessage(

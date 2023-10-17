@@ -15,9 +15,9 @@ describe('Editing a message', async function () {
     const newContent = 'updated thread message'
     let messageId
     beforeEach(async function () {
-      projectId = ObjectId().toString()
-      userId = ObjectId().toString()
-      threadId = ObjectId().toString()
+      projectId = new ObjectId().toString()
+      userId = new ObjectId().toString()
+      threadId = new ObjectId().toString()
 
       const { response, body: message } = await ChatClient.sendMessage(
         projectId,
@@ -80,7 +80,7 @@ describe('Editing a message', async function () {
           projectId,
           threadId,
           messageId,
-          ObjectId(),
+          new ObjectId(),
           newContent
         )
         expect(response.statusCode).to.equal(404)

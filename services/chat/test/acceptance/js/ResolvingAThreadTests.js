@@ -5,14 +5,14 @@ import * as ChatClient from './helpers/ChatClient.js'
 import * as ChatApp from './helpers/ChatApp.js'
 
 describe('Resolving a thread', async function () {
-  const projectId = ObjectId().toString()
-  const userId = ObjectId().toString()
+  const projectId = new ObjectId().toString()
+  const userId = new ObjectId().toString()
   before(async function () {
     await ChatApp.ensureRunning()
   })
 
   describe('with a resolved thread', async function () {
-    const threadId = ObjectId().toString()
+    const threadId = new ObjectId().toString()
     const content = 'resolved message'
     before(async function () {
       const { response } = await ChatClient.sendMessage(
@@ -41,7 +41,7 @@ describe('Resolving a thread', async function () {
   })
 
   describe('when a thread is not resolved', async function () {
-    const threadId = ObjectId().toString()
+    const threadId = new ObjectId().toString()
     const content = 'open message'
     before(async function () {
       const { response } = await ChatClient.sendMessage(
@@ -61,7 +61,7 @@ describe('Resolving a thread', async function () {
   })
 
   describe('when a thread is resolved then reopened', async function () {
-    const threadId = ObjectId().toString()
+    const threadId = new ObjectId().toString()
     const content = 'resolved message'
     before(async function () {
       const { response } = await ChatClient.sendMessage(

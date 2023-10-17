@@ -5,9 +5,9 @@ import * as ChatClient from './helpers/ChatClient.js'
 import * as ChatApp from './helpers/ChatApp.js'
 
 describe('Deleting a message', async function () {
-  const projectId = ObjectId().toString()
-  const userId = ObjectId().toString()
-  const threadId = ObjectId().toString()
+  const projectId = new ObjectId().toString()
+  const userId = new ObjectId().toString()
+  const threadId = new ObjectId().toString()
 
   before(async function () {
     await ChatApp.ensureRunning()

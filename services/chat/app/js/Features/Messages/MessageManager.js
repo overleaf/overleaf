@@ -54,7 +54,7 @@ export async function updateMessage(
     room_id: roomId,
   })
   if (userId) {
-    query.user_id = ObjectId(userId)
+    query.user_id = new ObjectId(userId)
   }
   const res = await db.messages.updateOne(query, {
     $set: {
@@ -75,13 +75,13 @@ export async function deleteMessage(roomId, messageId) {
 
 function _ensureIdsAreObjectIds(query) {
   if (query.user_id && !(query.user_id instanceof ObjectId)) {
-    query.user_id = ObjectId(query.user_id)
+    query.user_id = new ObjectId(query.user_id)
   }
   if (query.room_id && !(query.room_id instanceof ObjectId)) {
-    query.room_id = ObjectId(query.room_id)
+    query.room_id = new ObjectId(query.room_id)
   }
   if (query._id && !(query._id instanceof ObjectId)) {
-    query._id = ObjectId(query._id)
+    query._id = new ObjectId(query._id)
   }
   return query
 }

@@ -15,8 +15,8 @@ async function getCount() {
 }
 
 describe('Getting messages', async function () {
-  const userId1 = ObjectId().toString()
-  const userId2 = ObjectId().toString()
+  const userId1 = new ObjectId().toString()
+  const userId2 = new ObjectId().toString()
   const content1 = 'foo bar'
   const content2 = 'hello world'
   before(async function () {
@@ -24,7 +24,7 @@ describe('Getting messages', async function () {
   })
 
   describe('globally', async function () {
-    const projectId = ObjectId().toString()
+    const projectId = new ObjectId().toString()
     before(async function () {
       const previousCount = await getCount()
       const { response } = await ChatClient.sendGlobalMessage(
@@ -60,9 +60,9 @@ describe('Getting messages', async function () {
   })
 
   describe('from all the threads', async function () {
-    const projectId = ObjectId().toString()
-    const threadId1 = ObjectId().toString()
-    const threadId2 = ObjectId().toString()
+    const projectId = new ObjectId().toString()
+    const threadId1 = new ObjectId().toString()
+    const threadId2 = new ObjectId().toString()
 
     before(async function () {
       const { response } = await ChatClient.sendMessage(

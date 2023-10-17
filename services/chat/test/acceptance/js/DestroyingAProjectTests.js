@@ -8,19 +8,19 @@ const db = ChatApp.db
 
 async function getMessage(messageId) {
   return await db.messages.findOne({
-    _id: ObjectId(messageId),
+    _id: new ObjectId(messageId),
   })
 }
 
 describe('Destroying a project', async function () {
-  const projectId = ObjectId().toString()
-  const userId = ObjectId().toString()
+  const projectId = new ObjectId().toString()
+  const userId = new ObjectId().toString()
   before(async function () {
     await ChatApp.ensureRunning()
   })
 
   describe('with a project that has threads and messages', async function () {
-    const threadId = ObjectId().toString()
+    const threadId = new ObjectId().toString()
     before(async function () {
       const { response } = await ChatClient.sendMessage(
         projectId,
@@ -39,7 +39,7 @@ describe('Destroying a project', async function () {
       this.globalThreadMessageId = response2.body.id
 
       const threadRooms = await db.rooms
-        .find({ project_id: ObjectId(projectId) })
+        .find({ project_id: new ObjectId(projectId) })
         .toArray()
       expect(threadRooms.length).to.equal(2)
       const threadMessage = await getMessage(this.threadMessageId)
@@ -55,7 +55,7 @@ describe('Destroying a project', async function () {
 
     it('should remove the messages and threads from the database', async function () {
       const threadRooms = await db.rooms
-        .find({ project_id: ObjectId(projectId) })
+        .find({ project_id: new ObjectId(projectId) })
         .toArray()
       expect(threadRooms.length).to.equal(0)
       const threadMessage = await getMessage(this.threadMessageId)

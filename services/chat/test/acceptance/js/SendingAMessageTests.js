@@ -10,8 +10,8 @@ describe('Sending a message', async function () {
   })
 
   describe('globally', async function () {
-    const projectId = ObjectId().toString()
-    const userId = ObjectId().toString()
+    const projectId = new ObjectId().toString()
+    const userId = new ObjectId().toString()
     const content = 'global message'
     before(async function () {
       const { response, body } = await ChatClient.sendGlobalMessage(
@@ -36,9 +36,9 @@ describe('Sending a message', async function () {
   })
 
   describe('to a thread', async function () {
-    const projectId = ObjectId().toString()
-    const userId = ObjectId().toString()
-    const threadId = ObjectId().toString()
+    const projectId = new ObjectId().toString()
+    const userId = new ObjectId().toString()
+    const threadId = new ObjectId().toString()
     const content = 'thread message'
     before(async function () {
       const { response, body } = await ChatClient.sendMessage(
@@ -70,9 +70,9 @@ describe('Sending a message', async function () {
   })
 
   describe('failure cases', async function () {
-    const projectId = ObjectId().toString()
-    const userId = ObjectId().toString()
-    const threadId = ObjectId().toString()
+    const projectId = new ObjectId().toString()
+    const userId = new ObjectId().toString()
+    const threadId = new ObjectId().toString()
 
     describe('with a malformed userId', async function () {
       it('should return a graceful error', async function () {
