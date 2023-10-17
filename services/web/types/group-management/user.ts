@@ -1,7 +1,6 @@
 export type UserEnrollment = {
   managedBy?: string
   enrolledAt?: Date
-  sso?: object
 }
 
 export type User = {

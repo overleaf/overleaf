@@ -28,10 +28,6 @@ const CLAIRE_JENNINGS = {
   enrollment: {
     managedBy: GROUP_ID,
     enrolledAt: new Date('2023-01-03'),
-    sso: {
-      providerId: '123',
-      externalId: '123',
-    },
   },
 }
 const PATHS = {
@@ -84,7 +80,6 @@ describe('group members, with managed users', function () {
         cy.contains('2nd Jan 2023')
         cy.get('.badge-new-comment').should('not.exist')
         cy.get('.sr-only').contains('Not managed')
-        cy.get('.sr-only').contains('SSO unlinked')
       })
 
       cy.get('tr:nth-child(3)').within(() => {
@@ -93,7 +88,6 @@ describe('group members, with managed users', function () {
         cy.contains('3rd Jan 2023')
         cy.get('.badge-new-comment').should('not.exist')
         cy.get('.sr-only').contains('Managed')
-        cy.get('.sr-only').contains('SSO linked')
       })
     })
   })

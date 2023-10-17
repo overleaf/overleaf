@@ -6,7 +6,6 @@ import Badge from '../../../../shared/components/badge'
 import Tooltip from '../../../../shared/components/tooltip'
 import type { ManagedUserAlert } from '../../utils/types'
 import ManagedUserStatus from './managed-user-status'
-import SSOStatus from './sso-status'
 import ManagedUserDropdownButton from './managed-user-dropdown-button'
 import ManagedUsersSelectUserCheckbox from './managed-users-select-user-checkbox'
 
@@ -75,11 +74,6 @@ export default function ManagedUserRow({
           : 'N/A'}
       </td>
       <td className="cell-security">
-        <div className="managed-user-security">
-          <SSOStatus user={user} />
-        </div>
-      </td>
-      <td className="cell-managed">
         <div className="managed-user-security">
           <ManagedUserStatus user={user} />
         </div>

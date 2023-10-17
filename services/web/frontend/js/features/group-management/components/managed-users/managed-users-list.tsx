@@ -63,9 +63,6 @@ export default function ManagedUsersList({ groupId }: ManagedUsersListProps) {
                     <td className="cell-security">
                       <span className="header">{t('security')}</span>
                     </td>
-                    <td className="cell-managed">
-                      <span className="header">{t('managed')}</span>
-                    </td>
                     <td />
                   </tr>
                 </thead>
