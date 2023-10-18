@@ -552,7 +552,7 @@ describe('GcsPersistorTests', function () {
   })
 
   describe('deleteDirectory', function () {
-    const directoryName = `${ObjectId()}/${ObjectId()}`
+    const directoryName = `${new ObjectId()}/${new ObjectId()}`
     const directoryPrefix = `${directoryName}/`
     describe('with valid parameters', function () {
       beforeEach(async function () {
