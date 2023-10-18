@@ -1,6 +1,7 @@
-const Metrics = require('@overleaf/metrics')
-Metrics.initialize('doc-updater')
+// Metrics must be initialized before importing anything else
+require('@overleaf/metrics/initialize')
 
+const Metrics = require('@overleaf/metrics')
 const express = require('express')
 const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')

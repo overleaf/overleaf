@@ -6,7 +6,6 @@ import bodyParser from 'body-parser'
 import * as SpellingAPIController from './SpellingAPIController.js'
 import * as HealthCheckController from './HealthCheckController.js'
 
-metrics.initialize('spelling')
 logger.initialize('spelling')
 if (Settings.sentry?.dsn != null) {
   logger.initializeErrorReporting(Settings.sentry.dsn)

@@ -1,12 +1,8 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+// Metrics must be initialized before importing anything else
+require('@overleaf/metrics/initialize')
+
 const Events = require('events')
 const Metrics = require('@overleaf/metrics')
-Metrics.initialize('docstore')
 const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
 const express = require('express')
@@ -36,18 +32,18 @@ app.use(Metrics.http.monitor(logger))
 Metrics.injectMetricsRoute(app)
 
 app.param('project_id', function (req, res, next, projectId) {
-  if (projectId != null ? projectId.match(/^[0-9a-f]{24}$/) : undefined) {
-    return next()
+  if (projectId?.match(/^[0-9a-f]{24}$/)) {
+    next()
   } else {
-    return next(new Error('invalid project id'))
+    next(new Error('invalid project id'))
   }
 })
 
 app.param('doc_id', function (req, res, next, docId) {
-  if (docId != null ? docId.match(/^[0-9a-f]{24}$/) : undefined) {
-    return next()
+  if (docId?.match(/^[0-9a-f]{24}$/)) {
+    next()
   } else {
-    return next(new Error('invalid doc id'))
+    next(new Error('invalid doc id'))
   }
 })
 
@@ -93,13 +89,13 @@ app.use(handleValidationErrors())
 app.use(function (error, req, res, next) {
   logger.error({ err: error, req }, 'request errored')
   if (error instanceof Errors.NotFoundError) {
-    return res.sendStatus(404)
+    res.sendStatus(404)
   } else if (error instanceof Errors.DocModifiedError) {
-    return res.sendStatus(409)
+    res.sendStatus(409)
   } else if (error instanceof Errors.DocVersionDecrementedError) {
-    return res.sendStatus(409)
+    res.sendStatus(409)
   } else {
-    return res.status(500).send('Oops, something went wrong')
+    res.status(500).send('Oops, something went wrong')
   }
 })
 
@@ -116,9 +112,7 @@ if (!module.parent) {
           logger.fatal({ err }, `Cannot bind to ${host}:${port}. Exiting.`)
           process.exit(1)
         }
-        return logger.debug(
-          `Docstore starting up, listening on ${host}:${port}`
-        )
+        logger.debug(`Docstore starting up, listening on ${host}:${port}`)
       })
       server.timeout = 120000
       server.keepAliveTimeout = 5000

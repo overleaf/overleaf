@@ -1,71 +1,12 @@
 /* eslint-disable no-console */
-const os = require('os')
+
 const ExpressCompression = require('compression')
 const promClient = require('prom-client')
 const promWrapper = require('./prom_wrapper')
-const tracing = require('./tracing')
 
-const DEFAULT_APP_NAME = 'unknown'
-
-const { collectDefaultMetrics } = promWrapper
 const destructors = []
 
 require('./uv_threadpool_size')
-
-/**
- * Configure the metrics module
- */
-function configure(opts = {}) {
-  const appName = opts.appName || DEFAULT_APP_NAME
-  const hostname = os.hostname()
-  promClient.register.setDefaultLabels({ app: appName, host: hostname })
-  if (opts.ttlInMinutes) {
-    promWrapper.ttlInMinutes = opts.ttlInMinutes
-  }
-}
-
-let initialized = false
-
-/**
- * Configure the metrics module and start the default metrics collectors and
- * profiling agents.
- */
-function initialize(appName, opts = {}) {
-  if (initialized) {
-    return
-  }
-  appName = appName || DEFAULT_APP_NAME
-  if (tracing.tracingEnabled()) {
-    tracing.initialize(appName)
-  }
-  configure({ ...opts, appName })
-  collectDefaultMetrics({ timeout: 5000, prefix: '' })
-  promWrapper.setupSweeping()
-
-  console.log(`ENABLE_TRACE_AGENT set to ${process.env.ENABLE_TRACE_AGENT}`)
-  if (process.env.ENABLE_TRACE_AGENT === 'true') {
-    console.log('starting google trace agent')
-    const traceAgent = require('@google-cloud/trace-agent')
-
-    const traceOpts = { ignoreUrls: [/^\/status/, /^\/health_check/] }
-    traceAgent.start(traceOpts)
-  }
-
-  console.log(`ENABLE_PROFILE_AGENT set to ${process.env.ENABLE_PROFILE_AGENT}`)
-  if (process.env.ENABLE_PROFILE_AGENT === 'true') {
-    console.log('starting google profile agent')
-    const profiler = require('@google-cloud/profiler')
-    profiler.start({
-      serviceContext: {
-        service: appName,
-        version: process.env.BUILD_VERSION,
-      },
-    })
-  }
-
-  inc('process_startup')
-  initialized = true
-}
 
 function registerDestructor(func) {
   destructors.push(func)
@@ -215,8 +156,6 @@ function close() {
   }
 }
 
-module.exports.configure = configure
-module.exports.initialize = initialize
 module.exports.registerDestructor = registerDestructor
 module.exports.injectMetricsRoute = injectMetricsRoute
 module.exports.buildPromKey = buildPromKey

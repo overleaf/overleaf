@@ -1,5 +1,5 @@
-const Metrics = require('@overleaf/metrics')
-Metrics.initialize('clsi')
+// Metrics must be initialized before importing anything else
+require('@overleaf/metrics/initialize')
 
 const CompileController = require('./app/js/CompileController')
 const ContentController = require('./app/js/ContentController')
@@ -9,6 +9,7 @@ logger.initialize('clsi')
 if (Settings.sentry.dsn != null) {
   logger.initializeErrorReporting(Settings.sentry.dsn)
 }
+const Metrics = require('@overleaf/metrics')
 
 const smokeTest = require('./test/smoke/js/SmokeTests')
 const ContentTypeMapper = require('./app/js/ContentTypeMapper')

@@ -2,10 +2,8 @@
 
 /* eslint-disable no-console */
 
-// Initialize metrics as early as possible because this is where the Google
-// profiling agents are also started.
-const Metrics = require('@overleaf/metrics')
-Metrics.initialize('history-v1')
+// Metrics must be initialized before importing anything else
+require('@overleaf/metrics/initialize')
 
 const Events = require('events')
 const BPromise = require('bluebird')
@@ -14,6 +12,7 @@ const cors = require('cors')
 const helmet = require('helmet')
 const HTTPStatus = require('http-status')
 const logger = require('@overleaf/logger')
+const Metrics = require('@overleaf/metrics')
 const cookieParser = require('cookie-parser')
 const bodyParser = require('body-parser')
 const swaggerTools = require('swagger-tools')

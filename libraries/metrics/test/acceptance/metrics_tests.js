@@ -10,7 +10,8 @@ const sleep = promisify(setTimeout)
 
 describe('Metrics module', function () {
   before(function () {
-    Metrics.initialize(APP_NAME)
+    process.env.METRICS_APP_NAME = 'test-app'
+    require('../../initialize')
   })
 
   describe('at startup', function () {

@@ -1,6 +1,8 @@
+// Metrics must be initialized before importing anything else
+require('@overleaf/metrics/initialize')
+
 const Metrics = require('@overleaf/metrics')
 const Settings = require('@overleaf/settings')
-Metrics.initialize(process.env.METRICS_APP_NAME || 'real-time')
 const async = require('async')
 
 const logger = require('@overleaf/logger')

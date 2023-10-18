@@ -1,3 +1,6 @@
+// Metrics must be initialized before importing anything else
+import '@overleaf/metrics/initialize.js'
+
 import logger from '@overleaf/logger'
 import settings from '@overleaf/settings'
 import { mongoClient } from './app/js/mongodb.js'

@@ -1,3 +1,6 @@
+// Metrics must be initialized before importing anything else
+import '@overleaf/metrics/initialize.js'
+
 import Settings from '@overleaf/settings'
 import logger from '@overleaf/logger'
 import OError from '@overleaf/o-error'

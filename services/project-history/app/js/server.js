@@ -13,7 +13,6 @@ if (Settings.sentry.dsn) {
   logger.initializeErrorReporting(Settings.sentry.dsn)
 }
 
-Metrics.initialize('project-history')
 Metrics.event_loop.monitor(logger)
 Metrics.memory.monitor(logger)
 Metrics.leaked_sockets.monitor(logger)

@@ -1,6 +1,8 @@
+// Metrics must be initialized before importing anything else
+require('@overleaf/metrics/initialize')
+
 const Events = require('events')
 const Metrics = require('@overleaf/metrics')
-Metrics.initialize(process.env.METRICS_APP_NAME || 'filestore')
 
 const logger = require('@overleaf/logger')
 logger.initialize(process.env.METRICS_APP_NAME || 'filestore')
