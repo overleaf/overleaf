@@ -42,11 +42,11 @@ function BibtexParser(arg0, allowedKeys) {
   // Determine how this function is to be used
   if (typeof arg0 === 'string') {
     // Passed a string, synchronous call without 'new'
-    let entries = []
+    const entries = []
     function accumulator(entry) {
       entries.push(entry)
     }
-    let parser = new BibtexParser(accumulator, allowedKeys)
+    const parser = new BibtexParser(accumulator, allowedKeys)
     parser.parse(arg0)
     return {
       entries,
@@ -210,15 +210,15 @@ BibtexParser.prototype.error_ = function (text) {
  * this.CALLBACK_. Parsed (but unprocessed) entry data is in this.DATA_.
  */
 BibtexParser.prototype.processEntry_ = function () {
-  let data = this.DATA_
+  const data = this.DATA_
   if (data.Fields)
-    for (let f in data.Fields) {
+    for (const f in data.Fields) {
       let raw = data.Fields[f]
 
       // Convert Latex/Bibtex special characters to UTF-8 equivalents
       for (let i = 0; i < this.CHARCONV_.length; i++) {
-        let re = this.CHARCONV_[i][0]
-        let rep = this.CHARCONV_[i][1]
+        const re = this.CHARCONV_[i][0]
+        const rep = this.CHARCONV_[i][1]
         raw = raw.replace(re, rep)
       }
 
@@ -229,7 +229,7 @@ BibtexParser.prototype.processEntry_ = function () {
         .replace(/^\s+|\s+$/g, '')
 
       // Remove braces and backslashes
-      let len = raw.length
+      const len = raw.length
       let processedArr = []
       for (let i = 0; i < len; i++) {
         let c = raw[i]
@@ -245,7 +245,7 @@ BibtexParser.prototype.processEntry_ = function () {
     }
 
   if (data.ObjectType == 'string') {
-    for (let f in data.Fields) {
+    for (const f in data.Fields) {
       this.MACROS_[f] = data.Fields[f]
     }
   } else {
@@ -316,7 +316,7 @@ BibtexParser.prototype.processCharacter_ = function (c) {
           this.SKIPCOMMENT_ = true
         } else {
           // Break from state and validate object type
-          let ot = this.DATA_.ObjectType
+          const ot = this.DATA_.ObjectType
           if (ot == 'comment') {
             this.STATE_ = this.STATES_.ENTRY_OR_JUNK
           } else {
@@ -480,10 +480,10 @@ BibtexParser.prototype.processCharacter_ = function (c) {
       // Start at first non-whitespace/comment character after '='
       // -- Populate this.PARSETMP_.Value
       case this.STATES_.KV_VALUE:
-        let delim = this.VALBRACES_
+        const delim = this.VALBRACES_
         // valueCharsArray is the list of characters that make up the
         // current value
-        let valueCharsArray = this.PARSETMP_.Value
+        const valueCharsArray = this.PARSETMP_.Value
         let doneParsingValue = false
 
         // Test for special characters
@@ -494,7 +494,7 @@ BibtexParser.prototype.processCharacter_ = function (c) {
             // (2) end of a macro reference
             if (delim['"'].length + delim['{'].length === 0) {
               // end of a macro reference
-              let macro = this.PARSETMP_.Value.join('').trim()
+              const macro = this.PARSETMP_.Value.join('').trim()
               if (macro in this.MACROS_) {
                 // Successful macro reference
                 this.PARSETMP_.Value = [this.MACROS_[macro]]
@@ -551,7 +551,7 @@ BibtexParser.prototype.processCharacter_ = function (c) {
             // (3) end of object definition if value was a macro
             if (delim['"'].length + delim['{'].length === 0) {
               // end of object definition, after macro
-              let macro = this.PARSETMP_.Value.join('').trim()
+              const macro = this.PARSETMP_.Value.join('').trim()
               if (macro in this.MACROS_) {
                 // Successful macro reference
                 this.PARSETMP_.Value = [this.MACROS_[macro]]
@@ -562,9 +562,23 @@ BibtexParser.prototype.processCharacter_ = function (c) {
               AnotherIteration = true
               doneParsingValue = true
             } else {
+              // sometimes imported bibs will have {\},{\\}, {\\\}, {\\\\}, etc for whitespace,
+              //  which would otherwise break the parsing. we watch for these occurences of
+              //  1+ backslashes in an empty bracket pair to gracefully handle the malformed bib file
+              const doubleSlash =
+                valueCharsArray.length >= 2 &&
+                valueCharsArray[valueCharsArray.length - 1] === '\\' && // for \\}
+                valueCharsArray[valueCharsArray.length - 2] === '\\'
+              const singleSlash =
+                valueCharsArray.length >= 2 &&
+                valueCharsArray[valueCharsArray.length - 1] === '\\' && // for {\}
+                valueCharsArray[valueCharsArray.length - 2] === '{'
+
               if (
                 valueCharsArray.length == 0 ||
-                valueCharsArray[valueCharsArray.length - 1] != '\\'
+                valueCharsArray[valueCharsArray.length - 1] != '\\' || // for }
+                doubleSlash ||
+                singleSlash
               ) {
                 if (delim['{'].length > 0) {
                   // pop stack for stacked verbatim delimiter
