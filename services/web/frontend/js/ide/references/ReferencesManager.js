@@ -85,22 +85,9 @@ export default ReferencesManager = class ReferencesManager {
       cacheEntry.timestamp > now - CACHE_LIFETIME &&
       cacheEntry.hash === sha1
     if (!isCached) {
-      this.indexReferences([docId], shouldBroadcast)
+      this.indexAllReferences(shouldBroadcast)
       this.existingIndexHash[docId] = { hash: sha1, timestamp: now }
     }
-  }
-
-  indexReferences(docIds, shouldBroadcast) {
-    const opts = {
-      docIds,
-      shouldBroadcast,
-      _csrf: window.csrfToken,
-    }
-    return this.ide.$http
-      .post(`/project/${this.$scope.project_id}/references/index`, opts)
-      .then(response => {
-        return this._storeReferencesKeys(response.data.keys, false)
-      })
   }
 
   indexAllReferences(shouldBroadcast) {

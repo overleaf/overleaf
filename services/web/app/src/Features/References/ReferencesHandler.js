@@ -25,9 +25,6 @@ const _ = require('underscore')
 const Async = require('async')
 const Errors = require('../Errors/Errors')
 
-const oneMinInMs = 60 * 1000
-const fiveMinsInMs = oneMinInMs * 5
-
 if (!Features.hasFeature('references')) {
   logger.debug('references search not enabled')
 }
@@ -125,36 +122,6 @@ module.exports = ReferencesHandler = {
           project,
           docIds,
           fileIds,
-          callback
-        )
-      }
-    )
-  },
-
-  index(projectId, docIds, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    return ProjectGetter.getProject(
-      projectId,
-      { rootFolder: true, owner_ref: 1 },
-      function (err, project) {
-        if (err) {
-          OError.tag(err, 'error finding project', {
-            projectId,
-          })
-          return callback(err)
-        }
-        if (!project) {
-          return callback(
-            new Errors.NotFoundError(`project does not exist: ${projectId}`)
-          )
-        }
-        return ReferencesHandler._doIndexOperation(
-          projectId,
-          project,
-          docIds,
-          [],
           callback
         )
       }

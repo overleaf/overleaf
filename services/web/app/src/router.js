@@ -143,10 +143,6 @@ const rateLimiters = {
     points: 30,
     duration: 60,
   }),
-  indexProjectReferences: new RateLimiter('index-project-references', {
-    points: 30,
-    duration: 60,
-  }),
   miscOutputDownload: new RateLimiter('misc-output-download', {
     points: 1000,
     duration: 60 * 60,
@@ -1073,12 +1069,6 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     ChatController.sendMessage
   )
 
-  webRouter.post(
-    '/project/:Project_id/references/index',
-    AuthorizationMiddleware.ensureUserCanReadProject,
-    RateLimiterMiddleware.rateLimit(rateLimiters.indexProjectReferences),
-    ReferencesController.index
-  )
   webRouter.post(
     '/project/:Project_id/references/indexAll',
     AuthorizationMiddleware.ensureUserCanReadProject,

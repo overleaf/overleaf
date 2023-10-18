@@ -18,33 +18,6 @@ const EditorRealTimeController = require('../Editor/EditorRealTimeController')
 const { OError } = require('../Errors/Errors')
 
 module.exports = ReferencesController = {
-  index(req, res, next) {
-    const projectId = req.params.Project_id
-    const { shouldBroadcast } = req.body
-    const { docIds } = req.body
-    if (!docIds || !(docIds instanceof Array)) {
-      logger.err(
-        { projectId, docIds },
-        "docIds is not valid, should be either Array or String 'ALL'"
-      )
-      return res.sendStatus(400)
-    }
-    return ReferencesHandler.index(projectId, docIds, function (error, data) {
-      if (error) {
-        OError.tag(error, 'failed to index references', { projectId })
-        return next(error)
-      }
-      return ReferencesController._handleIndexResponse(
-        req,
-        res,
-        projectId,
-        shouldBroadcast,
-        false,
-        data
-      )
-    })
-  },
-
   indexAll(req, res, next) {
     const projectId = req.params.Project_id
     const { shouldBroadcast } = req.body
