@@ -678,6 +678,21 @@ const ProjectController = {
             }
           )
         },
+        idePageAssignment(cb) {
+          SplitTestHandler.getAssignment(
+            req,
+            res,
+            'ide-page',
+            (error, assignment) => {
+              // do not fail editor load if assignment fails
+              if (error) {
+                cb(null, { variant: 'default' })
+              } else {
+                cb(null, assignment)
+              }
+            }
+          )
+        },
         projectTags(cb) {
           if (!userId) {
             return cb(null, [])
@@ -700,6 +715,7 @@ const ProjectController = {
           pdfjsAssignment,
           historyViewAssignment,
           reviewPanelAssignment,
+          idePageAssignment,
           projectTags,
         }
       ) => {
@@ -805,7 +821,7 @@ const ProjectController = {
               !Features.hasFeature('saas') ||
               req.query?.personal_access_token === 'true'
 
-            const idePageReact = req.query?.['ide-page'] === 'react'
+            const idePageReact = idePageAssignment.variant === 'react'
 
             const template =
               detachRole === 'detached'
@@ -885,6 +901,7 @@ const ProjectController = {
               showCM6SwitchAwaySurvey: Settings.showCM6SwitchAwaySurvey,
               historyViewReact: historyViewAssignment.variant === 'react',
               isReviewPanelReact: reviewPanelAssignment.variant === 'react',
+              idePageReact,
               showPersonalAccessToken,
               hasTrackChangesFeature: Features.hasFeature('track-changes'),
               projectTags,
