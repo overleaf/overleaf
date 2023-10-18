@@ -1,6 +1,7 @@
 import { EditorView } from '@codemirror/view'
 import { HighlightStyle, syntaxHighlighting } from '@codemirror/language'
 import { tags } from '@lezer/highlight'
+import { Annotation, Compartment, Extension } from '@codemirror/state'
 
 /**
  * A syntax highlighter for content types that are only styled in the visual editor.
@@ -24,7 +25,7 @@ export const visualHighlightStyle = syntaxHighlighting(
   ])
 )
 
-export const visualTheme = EditorView.theme({
+const mainVisualTheme = EditorView.theme({
   '&.cm-editor': {
     '--visual-font-family':
       "'Noto Serif', 'Palatino Linotype', 'Book Antiqua', Palatino, serif !important",
@@ -39,7 +40,8 @@ export const visualTheme = EditorView.theme({
   },
   '.cm-content.cm-content': {
     overflowX: 'hidden', // needed so the callout elements don't overflow (requires line wrapping to be on)
-    padding: '0 max(calc((100% - 100ch) / 2), 8%)', // max 100 characters per line
+    padding:
+      '0 max(calc((var(--content-width) - 95ch) / 2), calc(var(--content-width) * 0.08))', // max 95 characters per line
     fontFamily: 'var(--visual-font-family)',
     fontSize: 'var(--visual-font-size)',
   },
@@ -422,3 +424,43 @@ export const visualTheme = EditorView.theme({
     },
   },
 })
+
+const contentWidthThemeConf = new Compartment()
+const changeContentWidthAnnotation = Annotation.define<boolean>()
+
+function createContentWidthTheme(contentWidth: string) {
+  return EditorView.theme({
+    '&.cm-editor': {
+      '--content-width': contentWidth,
+    },
+  })
+}
+
+const contentWidthSetter = EditorView.updateListener.of(update => {
+  if (update.geometryChanged && !update.docChanged) {
+    // Ignore any update triggered by this plugin
+    if (
+      update.transactions.some(tr =>
+        tr.annotation(changeContentWidthAnnotation)
+      )
+    ) {
+      return
+    }
+    update.view.dispatch({
+      effects: contentWidthThemeConf.reconfigure(
+        createContentWidthTheme(update.view.contentDOM.offsetWidth + 'px')
+      ),
+      // Set the selection explicitly to force the cursor to redraw if CM6
+      // fails to spot a change in geometry, which sometimes seems to happen
+      // (see #15145)
+      selection: update.view.state.selection,
+      annotations: changeContentWidthAnnotation.of(true),
+    })
+  }
+})
+
+export const visualTheme: Extension = [
+  contentWidthThemeConf.of(createContentWidthTheme('100%')),
+  mainVisualTheme,
+  contentWidthSetter,
+]
