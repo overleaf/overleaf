@@ -107,7 +107,7 @@ function LayoutDropdownButton() {
     changeLayout,
     view,
     pdfLayout,
-  } = useLayoutContext(layoutContextPropTypes)
+  } = useLayoutContext()
 
   const handleDetach = useCallback(() => {
     detach()
@@ -249,14 +249,4 @@ IconCheckmark.propTypes = {
   pdfLayout: PropTypes.string.isRequired,
   view: PropTypes.string,
   detachRole: PropTypes.string,
-}
-
-const layoutContextPropTypes = {
-  reattach: PropTypes.func.isRequired,
-  detach: PropTypes.func.isRequired,
-  changeLayout: PropTypes.func.isRequired,
-  detachIsLinked: PropTypes.bool,
-  detachRole: PropTypes.string,
-  pdfLayout: PropTypes.string.isRequired,
-  view: PropTypes.string,
 }

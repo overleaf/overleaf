@@ -4,104 +4,108 @@ import {
   useCallback,
   useMemo,
   useEffect,
+  Dispatch,
+  SetStateAction,
+  FC,
 } from 'react'
-import PropTypes from 'prop-types'
 import useScopeValue from '../hooks/use-scope-value'
 import useDetachLayout from '../hooks/use-detach-layout'
-import { useIdeContext } from './ide-context'
 import localStorage from '../../infrastructure/local-storage'
 import getMeta from '../../utils/meta'
 import { debugConsole } from '@/utils/debugging'
+import { BinaryFile } from '@/features/file-view/types/binary-file'
+
+export type IdeLayout = 'sideBySide' | 'flat'
+export type IdeView = 'editor' | 'file' | 'pdf' | 'history'
+
+type LayoutContextValue = {
+  reattach: () => void
+  detach: () => void
+  detachIsLinked: boolean
+  detachRole: 'detacher' | 'detached' | null
+  changeLayout: (newLayout: IdeLayout, newView?: IdeView) => void
+  view: IdeView
+  setView: (view: IdeView) => void
+  chatIsOpen: boolean
+  setChatIsOpen: Dispatch<SetStateAction<LayoutContextValue['chatIsOpen']>>
+  reviewPanelOpen: boolean
+  setReviewPanelOpen: Dispatch<
+    SetStateAction<LayoutContextValue['reviewPanelOpen']>
+  >
+  leftMenuShown: boolean
+  setLeftMenuShown: Dispatch<
+    SetStateAction<LayoutContextValue['leftMenuShown']>
+  >
+  loadingStyleSheet: boolean
+  setLoadingStyleSheet: Dispatch<
+    SetStateAction<LayoutContextValue['loadingStyleSheet']>
+  >
+  pdfLayout: IdeLayout
+  pdfPreviewOpen: boolean
+}
 
 const debugPdfDetach = getMeta('ol-debugPdfDetach')
 
-export const LayoutContext = createContext()
+export const LayoutContext = createContext<LayoutContextValue | undefined>(
+  undefined
+)
 
-LayoutContext.Provider.propTypes = {
-  value: PropTypes.shape({
-    reattach: PropTypes.func.isRequired,
-    detach: PropTypes.func.isRequired,
-    detachIsLinked: PropTypes.bool,
-    detachRole: PropTypes.string,
-    changeLayout: PropTypes.func.isRequired,
-    view: PropTypes.oneOf(['editor', 'file', 'pdf', 'history']),
-    setView: PropTypes.func.isRequired,
-    chatIsOpen: PropTypes.bool,
-    setChatIsOpen: PropTypes.func.isRequired,
-    reviewPanelOpen: PropTypes.bool,
-    setReviewPanelOpen: PropTypes.func.isRequired,
-    leftMenuShown: PropTypes.bool,
-    setLeftMenuShown: PropTypes.func.isRequired,
-    pdfLayout: PropTypes.oneOf(['sideBySide', 'flat']).isRequired,
-    pdfPreviewOpen: PropTypes.bool,
-  }).isRequired,
-}
-
-function setLayoutInLocalStorage(pdfLayout) {
+function setLayoutInLocalStorage(pdfLayout: IdeLayout) {
   localStorage.setItem(
     'pdf.layout',
     pdfLayout === 'sideBySide' ? 'split' : 'flat'
   )
 }
 
-export function LayoutProvider({ children }) {
-  const { $scope } = useIdeContext()
-
+export const LayoutProvider: FC = ({ children }) => {
   // what to show in the "flat" view (editor or pdf)
-  const [view, _setView] = useScopeValue('ui.view')
+  const [view, _setView] = useScopeValue<IdeView>('ui.view')
+  const [toggleHistory] = useScopeValue<() => void>('toggleHistory')
+  const [openFile] = useScopeValue<BinaryFile | null>('openFile')
 
   const setView = useCallback(
-    value => {
+    (value: IdeView) => {
       _setView(oldValue => {
         // ensure that the "history:toggle" event is broadcast when switching in or out of history view
         if (value === 'history' || oldValue === 'history') {
-          $scope.toggleHistory()
+          toggleHistory()
         }
 
-        if (value === 'editor' && $scope.openFile) {
+        if (value === 'editor' && openFile) {
           // if a file is currently opened, ensure the view is 'file' instead of
           // 'editor' when the 'editor' view is requested. This is to ensure
           // that the entity selected in the file tree is the one visible and
-          // that docs don't take precendence over files.
+          // that docs don't take precedence over files.
           return 'file'
         }
 
         return value
       })
     },
-    [$scope, _setView]
+    [_setView, openFile, toggleHistory]
   )
 
   // whether the chat pane is open
-  const [chatIsOpen, setChatIsOpen] = useScopeValue('ui.chatOpen')
+  const [chatIsOpen, setChatIsOpen] = useScopeValue<boolean>('ui.chatOpen')
 
   // whether the review pane is open
   const [reviewPanelOpen, setReviewPanelOpen] =
     useScopeValue('ui.reviewPanelOpen')
 
   // whether the menu pane is open
-  const [leftMenuShown, setLeftMenuShown] = useScopeValue('ui.leftMenuShown')
+  const [leftMenuShown, setLeftMenuShown] =
+    useScopeValue<boolean>('ui.leftMenuShown')
 
   // whether to display the editor and preview side-by-side or full-width ("flat")
-  const [pdfLayout, setPdfLayout] = useScopeValue('ui.pdfLayout')
+  const [pdfLayout, setPdfLayout] = useScopeValue<IdeLayout>('ui.pdfLayout')
 
   // whether stylesheet on theme is loading
-  const [loadingStyleSheet, setLoadingStyleSheet] = useScopeValue(
+  const [loadingStyleSheet, setLoadingStyleSheet] = useScopeValue<boolean>(
     'ui.loadingStyleSheet'
   )
 
-  // switch to either side-by-side or flat (full-width) layout
-  const switchLayout = useCallback(() => {
-    setPdfLayout(layout => {
-      const newLayout = layout === 'sideBySide' ? 'flat' : 'sideBySide'
-      setView(newLayout === 'sideBySide' ? 'editor' : 'pdf')
-      setPdfLayout(newLayout)
-      setLayoutInLocalStorage(newLayout)
-    })
-  }, [setPdfLayout, setView])
-
   const changeLayout = useCallback(
-    (newLayout, newView) => {
+    (newLayout: IdeLayout, newView: IdeView = 'editor') => {
       setPdfLayout(newLayout)
       setView(newLayout === 'sideBySide' ? 'editor' : newView)
       setLayoutInLocalStorage(newLayout)
@@ -151,7 +155,7 @@ export function LayoutProvider({ children }) {
     changeLayout,
   ])
 
-  const value = useMemo(
+  const value = useMemo<LayoutContextValue>(
     () => ({
       reattach,
       detach,
@@ -170,7 +174,6 @@ export function LayoutProvider({ children }) {
       setReviewPanelOpen,
       setLoadingStyleSheet,
       setView,
-      switchLayout,
       view,
     }),
     [
@@ -191,7 +194,6 @@ export function LayoutProvider({ children }) {
       setReviewPanelOpen,
       setLoadingStyleSheet,
       setView,
-      switchLayout,
       view,
     ]
   )
@@ -201,12 +203,10 @@ export function LayoutProvider({ children }) {
   )
 }
 
-LayoutProvider.propTypes = {
-  children: PropTypes.any,
-}
-
-export function useLayoutContext(propTypes) {
-  const data = useContext(LayoutContext)
-  PropTypes.checkPropTypes(propTypes, data, 'data', 'LayoutContext.Provider')
-  return data
+export function useLayoutContext() {
+  const context = useContext(LayoutContext)
+  if (!context) {
+    throw new Error('useLayoutContext is only available inside LayoutProvider')
+  }
+  return context
 }

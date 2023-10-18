@@ -22,7 +22,9 @@ type ConnectionContextValue = {
   registerUserActivity: () => void
 }
 
-const ConnectionContext = createContext<ConnectionContextValue | null>(null)
+const ConnectionContext = createContext<ConnectionContextValue | undefined>(
+  undefined
+)
 
 export const ConnectionProvider: FC = ({ children }) => {
   const [connectionManager] = useState(() => new ConnectionManager())

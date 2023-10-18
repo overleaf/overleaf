@@ -18,7 +18,7 @@ const MessageList = lazy(() => import('./message-list'))
 const ChatPane = React.memo(function ChatPane() {
   const { t } = useTranslation()
 
-  const { chatIsOpen } = useLayoutContext({ chatIsOpen: PropTypes.bool })
+  const { chatIsOpen } = useLayoutContext()
   const user = useUserContext({
     id: PropTypes.string.isRequired,
   })

@@ -2,7 +2,11 @@ import localStorage from '../../../../frontend/js/infrastructure/local-storage'
 import PdfPreview from '../../../../frontend/js/features/pdf-preview/components/pdf-preview'
 import { EditorProviders } from '../../helpers/editor-providers'
 import { mockScope } from './scope'
-import { useLayoutContext } from '../../../../frontend/js/shared/context/layout-context'
+import {
+  IdeLayout,
+  IdeView,
+  useLayoutContext,
+} from '../../../../frontend/js/shared/context/layout-context'
 import { FC, useEffect } from 'react'
 
 const storeAndFireEvent = (win: typeof window, key: string, value: unknown) => {
@@ -10,7 +14,10 @@ const storeAndFireEvent = (win: typeof window, key: string, value: unknown) => {
   win.dispatchEvent(new StorageEvent('storage', { key }))
 }
 
-const Layout: FC<{ layout: string; view?: string }> = ({ layout, view }) => {
+const Layout: FC<{ layout: IdeLayout; view?: IdeView }> = ({
+  layout,
+  view,
+}) => {
   const { changeLayout } = useLayoutContext()
 
   useEffect(() => {

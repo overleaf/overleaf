@@ -211,7 +211,7 @@ const editorContextPropTypes = {
 const isMac = /Mac/.test(window.navigator?.platform)
 
 export function useSelectableEntity(id, isFile) {
-  const { view, setView } = useLayoutContext(layoutContextPropTypes)
+  const { view, setView } = useLayoutContext()
   const { setContextMenuCoords } = useFileTreeMainContext()
   const {
     selectedEntityIds,
@@ -286,11 +286,6 @@ export function useSelectableEntity(id, isFile) {
   )
 
   return { isSelected, props }
-}
-
-const layoutContextPropTypes = {
-  view: PropTypes.string,
-  setView: PropTypes.func.isRequired,
 }
 
 export function useFileTreeSelectable() {

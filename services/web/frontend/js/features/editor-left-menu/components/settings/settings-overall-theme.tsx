@@ -12,9 +12,7 @@ export default function SettingsOverallTheme() {
   const overallThemes = getMeta('ol-overallThemes') as
     | OverallThemeMeta[]
     | undefined
-  const { loadingStyleSheet } = useLayoutContext() as {
-    loadingStyleSheet: boolean
-  }
+  const { loadingStyleSheet } = useLayoutContext()
   const { overallTheme, setOverallTheme } = useProjectSettingsContext()
 
   const options: Array<Option<OverallTheme>> = useMemo(

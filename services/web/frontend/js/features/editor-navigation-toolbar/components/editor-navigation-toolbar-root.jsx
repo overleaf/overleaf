@@ -23,17 +23,6 @@ const editorContextPropTypes = {
   permissionsLevel: PropTypes.string,
 }
 
-const layoutContextPropTypes = {
-  chatIsOpen: PropTypes.bool,
-  setChatIsOpen: PropTypes.func.isRequired,
-  reviewPanelOpen: PropTypes.bool,
-  setReviewPanelOpen: PropTypes.func.isRequired,
-  view: PropTypes.string,
-  setView: PropTypes.func.isRequired,
-  setLeftMenuShown: PropTypes.func.isRequired,
-  pdfLayout: PropTypes.string.isRequired,
-}
-
 const chatContextPropTypes = {
   markMessagesAsRead: PropTypes.func.isRequired,
   unreadMessageCount: PropTypes.number.isRequired,
@@ -70,7 +59,7 @@ const EditorNavigationToolbarRoot = React.memo(
       view,
       setView,
       setLeftMenuShown,
-    } = useLayoutContext(layoutContextPropTypes)
+    } = useLayoutContext()
 
     const { markMessagesAsRead, unreadMessageCount } =
       useChatContext(chatContextPropTypes)

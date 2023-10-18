@@ -136,7 +136,7 @@ export function ChatProvider({ children }) {
     _id: PropTypes.string.isRequired,
   })
 
-  const { chatIsOpen } = useLayoutContext({ chatIsOpen: PropTypes.bool })
+  const { chatIsOpen } = useLayoutContext()
 
   const {
     hasFocus: windowHasFocus,
