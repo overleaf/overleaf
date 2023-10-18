@@ -91,6 +91,7 @@ describe('FileTypeManager', function () {
         '/something/file.m',
         '/file.TEX',
         '/file.lhs',
+        '/file.xmpdata',
         '/makefile',
         '/Makefile',
         '/GNUMakefile',

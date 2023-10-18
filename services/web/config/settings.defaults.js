@@ -86,6 +86,7 @@ const defaultTextExtensions = [
   'yaml',
   'lhs',
   'mk',
+  'xmpdata',
 ]
 
 const parseTextExtensions = function (extensions) {

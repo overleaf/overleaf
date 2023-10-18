@@ -185,6 +185,7 @@ const initialize = () => {
       'mf',
       'lhs',
       'mk',
+      'xmpdata',
     ],
     editableFilenames: ['latexmkrc', '.latexmkrc', 'makefile', 'gnumakefile'],
     validRootDocExtensions: ['tex', 'Rtex', 'ltx', 'Rnw'],
