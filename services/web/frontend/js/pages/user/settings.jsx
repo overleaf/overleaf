@@ -11,6 +11,7 @@ const element = document.getElementById('settings-page-root')
 // For react-google-recaptcha
 window.recaptchaOptions = {
   enterprise: true,
+  useRecaptchaNet: true,
 }
 if (element) {
   ReactDOM.render(<SettingsPageRoot />, element)
