@@ -2,6 +2,7 @@ import LayoutWithPlaceholders from '@/features/ide-react/components/layout/layou
 import { useConnectionContext } from '@/features/ide-react/context/connection-context'
 import useEventListener from '@/shared/hooks/use-event-listener'
 import { useCallback, useEffect } from 'react'
+import { Alerts } from '@/features/ide-react/components/alerts/alerts'
 
 // This is filled with placeholder content while the real content is migrated
 // away from Angular
@@ -23,7 +24,8 @@ export default function IdePage() {
 
   return (
     <>
-      {/* TODO: Alerts and left menu will go here */}
+      <Alerts />
+      {/* TODO: Left menu will go here */}
       <LayoutWithPlaceholders shouldPersistLayout />
     </>
   )

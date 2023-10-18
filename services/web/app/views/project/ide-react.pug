@@ -9,6 +9,10 @@ block vars
 block entrypointVar
 	- entrypoint = 'pages/ide'
 
+block css
+	each file in entrypointStyles('ide')
+		link(rel='stylesheet', href=file)
+
 block content
 	main#ide-root
 		.loading-screen
