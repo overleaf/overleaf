@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Trans } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 import { Button } from 'react-bootstrap'
 import PropTypes from 'prop-types'
 
@@ -12,6 +12,7 @@ import AddCollaboratorsUpgradeContentVariant from './add-collaborators-upgrade-c
 import { useSplitTestContext } from '../../../shared/context/split-test-context'
 
 export default function AddCollaboratorsUpgrade() {
+  const { t } = useTranslation()
   const user = useUserContext({
     allowedFreeTrial: PropTypes.bool,
   })
@@ -45,14 +46,12 @@ export default function AddCollaboratorsUpgrade() {
               setStartedFreeTrial(true)
             }}
           >
-            <Trans i18nKey="upgrade" />
+            {t('upgrade')}
           </Button>
         )}
       </p>
       {startedFreeTrial && (
-        <p className="small">
-          <Trans i18nKey="refresh_page_after_starting_free_trial" />
-        </p>
+        <p className="small">{t('refresh_page_after_starting_free_trial')}</p>
       )}
     </div>
   )

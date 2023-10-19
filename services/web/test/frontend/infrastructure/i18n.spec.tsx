@@ -31,30 +31,6 @@ describe('i18n', function () {
   })
 
   describe('Trans', function () {
-    it('translates a plain string', function () {
-      const Test = () => {
-        return (
-          <div>
-            <Trans i18nKey="accept" />
-          </div>
-        )
-      }
-      cy.mount(<Test />)
-      cy.findByText('Accept')
-    })
-
-    it('uses defaultValues', function () {
-      const Test = () => {
-        return (
-          <div>
-            <Trans i18nKey="welcome_to_sl" />
-          </div>
-        )
-      }
-      cy.mount(<Test />)
-      cy.findByText('Welcome to Overleaf!')
-    })
-
     it('uses values', function () {
       const Test = () => {
         return (

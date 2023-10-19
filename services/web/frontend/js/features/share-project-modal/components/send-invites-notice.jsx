@@ -1,6 +1,6 @@
 import { Col, Row } from 'react-bootstrap'
 import PropTypes from 'prop-types'
-import { Trans } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 import { useProjectContext } from '../../../shared/context/project-context'
 
 export default function SendInvitesNotice() {
@@ -16,12 +16,13 @@ export default function SendInvitesNotice() {
 }
 
 function AccessLevel({ level }) {
+  const { t } = useTranslation()
   switch (level) {
     case 'private':
-      return <Trans i18nKey="to_add_more_collaborators" />
+      return t('to_add_more_collaborators')
 
     case 'tokenBased':
-      return <Trans i18nKey="to_change_access_permissions" />
+      return t('to_change_access_permissions')
 
     default:
       return null

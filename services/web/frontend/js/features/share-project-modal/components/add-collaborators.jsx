@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { useTranslation, Trans } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 import { Form, FormGroup, FormControl, Button } from 'react-bootstrap'
 import { useMultipleSelection } from 'downshift'
 import { useShareProjectContext } from './share-project-modal'
@@ -152,7 +152,7 @@ export default function AddCollaborators() {
           </FormControl>
           <span>&nbsp;&nbsp;</span>
           <Button type="submit" bsStyle="primary">
-            <Trans i18nKey="share" />
+            {t('share')}
           </Button>
         </div>
       </FormGroup>

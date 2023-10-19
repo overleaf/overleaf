@@ -114,7 +114,7 @@
       //
       "files": ["**/frontend/js/**/components/**/*.{js,jsx,ts,tsx}", "**/frontend/js/**/hooks/**/*.{js,jsx,ts,tsx}"],
       "rules": {
-        "@overleaf/no-empty-trans": "off",
+        "@overleaf/no-empty-trans": "error",
         "@overleaf/should-unescape-trans": "error",
 
         // https://astexplorer.net/

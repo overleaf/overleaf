@@ -9,13 +9,9 @@ export const FigureModalHelp = () => {
   const { t } = useTranslation()
   return (
     <>
-      <p>
-        <Trans i18nKey="this_tool_helps_you_insert_figures" />
-      </p>
+      <p>{t('this_tool_helps_you_insert_figures')}</p>
       <b>{t('editing_captions')}</b>
-      <p>
-        <Trans i18nKey="when_you_tick_the_include_caption_box" />
-      </p>
+      <p>{t('when_you_tick_the_include_caption_box')}</p>
 
       <b>{t('understanding_labels')}</b>
       <p>

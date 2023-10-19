@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
-import { Trans, useTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 import { useShareProjectContext } from './share-project-modal'
 import TransferOwnershipModal from './transfer-ownership-modal'
 import { removeMemberFromProject, updateMember } from '../utils/api'
@@ -137,7 +137,7 @@ function RemoveMemberAction({ member }) {
     <FormControl.Static className="text-center">
       <Tooltip
         id="remove-collaborator"
-        description={<Trans i18nKey="remove_collaborator" />}
+        description={t('remove_collaborator')}
         overlayProps={{ placement: 'bottom' }}
       >
         <Button
@@ -163,16 +163,18 @@ RemoveMemberAction.propTypes = {
 }
 
 function ChangePrivilegesActions({ handleReset }) {
+  const { t } = useTranslation()
+
   return (
     <div className="text-center">
       <Button type="submit" bsSize="sm" bsStyle="primary">
-        <Trans i18nKey="change_or_cancel-change" />
+        {t('change_or_cancel-change')}
       </Button>
       <div className="text-sm">
-        <Trans i18nKey="change_or_cancel-or" />
+        {t('change_or_cancel-or')}
         &nbsp;
         <Button type="button" className="btn-inline-link" onClick={handleReset}>
-          <Trans i18nKey="change_or_cancel-cancel" />
+          {t('change_or_cancel-cancel')}
         </Button>
       </div>
     </div>

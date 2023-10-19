@@ -19,13 +19,17 @@ function PdfPreviewError({ error }) {
           headerTitle={t('pdf_rendering_error')}
           formattedContent={
             <>
-              <Trans i18nKey="something_went_wrong_rendering_pdf_expected">
-                <Button
-                  bsSize="xs"
-                  bsStyle="info"
-                  onClick={() => startCompile()}
-                />
-              </Trans>
+              <Trans
+                i18nKey="something_went_wrong_rendering_pdf_expected"
+                components={[
+                  // eslint-disable-next-line react/jsx-key
+                  <Button
+                    bsSize="xs"
+                    bsStyle="info"
+                    onClick={() => startCompile()}
+                  />,
+                ]}
+              />
               <br />
               <br />
               <Trans

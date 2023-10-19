@@ -154,21 +154,15 @@ function CompileTimeoutMessages() {
           content={
             <div>
               <div>
-                <span>
-                  <Trans i18nKey="your_project_near_compile_timeout_limit" />
-                </span>
+                <span>{t('your_project_near_compile_timeout_limit')}</span>
               </div>
               {showNewCompileTimeoutUI === 'active' ? (
                 <>
-                  <strong>
-                    <Trans i18nKey="upgrade_for_12x_more_compile_time" />
-                  </strong>
+                  <strong>{t('upgrade_for_12x_more_compile_time')}</strong>
                   {'. '}
                 </>
               ) : (
-                <strong>
-                  <Trans i18nKey="upgrade_for_plenty_more_compile_time" />
-                </strong>
+                <strong>{t('upgrade_for_plenty_more_compile_time')}</strong>
               )}
             </div>
           }
@@ -204,7 +198,7 @@ function CompileTimeoutMessages() {
                     shouldUnescape
                     tOptions={{ interpolation: { escapeValue: true } }}
                   />{' '}
-                  <Trans i18nKey="and_you_can_upgrade_for_plenty_more_compile_time" />
+                  {t('and_you_can_upgrade_for_plenty_more_compile_time')}
                 </p>
               </div>
             }
@@ -229,7 +223,9 @@ function CompileTimeoutMessages() {
                   />
                 </p>
                 <p className="row-spaced">
-                  <Trans i18nKey="tell_the_project_owner_to_upgrade_plan_for_more_compile_time" />
+                  {t(
+                    'tell_the_project_owner_to_upgrade_plan_for_more_compile_time'
+                  )}
                 </p>
               </div>
             }

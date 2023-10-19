@@ -78,10 +78,10 @@ const CompileTimeout = memo(function CompileTimeout({
                 </>
               ) : (
                 <>
-                  <strong>
-                    <Trans i18nKey="upgrade_for_12x_more_compile_time" />
-                  </strong>{' '}
-                  <Trans i18nKey="plus_additional_collaborators_document_history_track_changes_and_more" />
+                  <strong>{t('upgrade_for_12x_more_compile_time')}</strong>{' '}
+                  {t(
+                    'plus_additional_collaborators_document_history_track_changes_and_more'
+                  )}
                 </>
               )}
             </p>

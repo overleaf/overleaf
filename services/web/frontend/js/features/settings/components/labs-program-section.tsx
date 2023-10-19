@@ -1,4 +1,4 @@
-import { useTranslation, Trans } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 import { useUserContext } from '../../../shared/context/user-context'
 
 function LabsProgramSection() {
@@ -10,9 +10,8 @@ function LabsProgramSection() {
       <h3>{t('overleaf_labs')}</h3>
       {labsProgram ? null : (
         <p className="small">
-          <Trans i18nKey="labs_program_benefits">
-            <span />
-          </Trans>
+          {/* eslint-disable-next-line react/jsx-key */}
+          <Trans i18nKey="labs_program_benefits" components={[<span />]} />
         </p>
       )}
       <p className="small">

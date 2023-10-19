@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useRef, useCallback } from 'react'
 import PropTypes from 'prop-types'
-import { Trans, useTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 import { matchSorter } from 'match-sorter'
 import { useCombobox } from 'downshift'
 import classnames from 'classnames'
@@ -19,6 +19,7 @@ export default function SelectCollaborators({
   placeholder,
   multipleSelectionProps,
 }) {
+  const { t } = useTranslation()
   const {
     getSelectedItemProps,
     getDropdownProps,
@@ -141,7 +142,7 @@ export default function SelectCollaborators({
     <div className="tags-input">
       {/* eslint-disable-next-line jsx-a11y/label-has-for */}
       <label className="small" {...getLabelProps()}>
-        <Trans i18nKey="share_with_your_collabs" />
+        {t('share_with_your_collabs')}
         &nbsp;
         {loading && <Icon type="refresh" spin />}
       </label>

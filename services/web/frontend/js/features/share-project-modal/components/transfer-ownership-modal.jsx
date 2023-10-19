@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Modal, Button } from 'react-bootstrap'
-import { Trans } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 import PropTypes from 'prop-types'
 import Icon from '../../../shared/components/icon'
 import { transferProjectOwnership } from '../utils/api'
@@ -9,6 +9,8 @@ import { useProjectContext } from '../../../shared/context/project-context'
 import { useLocation } from '../../../shared/hooks/use-location'
 
 export default function TransferOwnershipModal({ member, cancel }) {
+  const { t } = useTranslation()
+
   const [inflight, setInflight] = useState(false)
   const [error, setError] = useState(false)
   const location = useLocation()
@@ -32,9 +34,7 @@ export default function TransferOwnershipModal({ member, cancel }) {
   return (
     <AccessibleModal show onHide={cancel}>
       <Modal.Header closeButton>
-        <Modal.Title>
-          <Trans i18nKey="change_project_owner" />
-        </Modal.Title>
+        <Modal.Title>{t('change_project_owner')}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <p>
@@ -47,16 +47,14 @@ export default function TransferOwnershipModal({ member, cancel }) {
             tOptions={{ interpolation: { escapeValue: true } }}
           />
         </p>
-        <p>
-          <Trans i18nKey="project_ownership_transfer_confirmation_2" />
-        </p>
+        <p>{t('project_ownership_transfer_confirmation_2')}</p>
       </Modal.Body>
       <Modal.Footer>
         <div className="modal-footer-left">
           {inflight && <Icon type="refresh" spin />}
           {error && (
             <span className="text-danger">
-              <Trans i18nKey="generic_something_went_wrong" />
+              {t('generic_something_went_wrong')}
             </span>
           )}
         </div>
@@ -68,7 +66,7 @@ export default function TransferOwnershipModal({ member, cancel }) {
             onClick={cancel}
             disabled={inflight}
           >
-            <Trans i18nKey="cancel" />
+            {t('cancel')}
           </Button>
           <Button
             type="button"
@@ -76,7 +74,7 @@ export default function TransferOwnershipModal({ member, cancel }) {
             onClick={confirm}
             disabled={inflight}
           >
-            <Trans i18nKey="change_owner" />
+            {t('change_owner')}
           </Button>
         </div>
       </Modal.Footer>

@@ -1,7 +1,7 @@
 import { useCallback, useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { Button, Col, Row } from 'react-bootstrap'
-import { Trans } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 import Tooltip from '../../../shared/components/tooltip'
 import Icon from '../../../shared/components/icon'
 import { useShareProjectContext } from './share-project-modal'
@@ -86,10 +86,11 @@ LinkSharing.propTypes = {
 }
 
 function PrivateSharing({ setAccessLevel, inflight, projectId }) {
+  const { t } = useTranslation()
   return (
     <Row className="public-access-level">
       <Col xs={12} className="text-center">
-        <Trans i18nKey="link_sharing_is_off" />
+        {t('link_sharing_is_off')}
         <span>&nbsp;&nbsp;</span>
         <Button
           type="button"
@@ -101,7 +102,7 @@ function PrivateSharing({ setAccessLevel, inflight, projectId }) {
           }}
           disabled={inflight}
         >
-          <Trans i18nKey="turn_on_link_sharing" />
+          {t('turn_on_link_sharing')}
         </Button>
         <span>&nbsp;&nbsp;</span>
         <LinkSharingInfo />
@@ -117,6 +118,7 @@ PrivateSharing.propTypes = {
 }
 
 function TokenBasedSharing({ setAccessLevel, inflight, canAddCollaborators }) {
+  const { t } = useTranslation()
   const { _id: projectId } = useProjectContext()
 
   const [tokens, setTokens] = useState(null)
@@ -132,9 +134,7 @@ function TokenBasedSharing({ setAccessLevel, inflight, canAddCollaborators }) {
   return (
     <Row className="public-access-level">
       <Col xs={12} className="text-center">
-        <strong>
-          <Trans i18nKey="link_sharing_is_on" />
-        </strong>
+        <strong>{t('link_sharing_is_on')}</strong>
         <span>&nbsp;&nbsp;</span>
         <Button
           bsStyle="link"
@@ -142,16 +142,14 @@ function TokenBasedSharing({ setAccessLevel, inflight, canAddCollaborators }) {
           onClick={() => setAccessLevel('private')}
           disabled={inflight}
         >
-          <Trans i18nKey="turn_off_link_sharing" />
+          {t('turn_off_link_sharing')}
         </Button>
         <span>&nbsp;&nbsp;</span>
         <LinkSharingInfo />
       </Col>
       <Col xs={12} className="access-token-display-area">
         <div className="access-token-wrapper">
-          <strong>
-            <Trans i18nKey="anyone_with_link_can_edit" />
-          </strong>
+          <strong>{t('anyone_with_link_can_edit')}</strong>
           <AccessToken
             token={tokens?.readAndWrite}
             path="/"
@@ -159,9 +157,7 @@ function TokenBasedSharing({ setAccessLevel, inflight, canAddCollaborators }) {
           />
         </div>
         <div className="access-token-wrapper">
-          <strong>
-            <Trans i18nKey="anyone_with_link_can_view" />
-          </strong>
+          <strong>{t('anyone_with_link_can_view')}</strong>
           <AccessToken
             token={tokens?.readOnly}
             path="/read/"
@@ -180,16 +176,14 @@ TokenBasedSharing.propTypes = {
 }
 
 function LegacySharing({ accessLevel, setAccessLevel, inflight }) {
+  const { t } = useTranslation()
+
   return (
     <Row className="public-access-level">
       <Col xs={12} className="text-center">
         <strong>
-          {accessLevel === 'readAndWrite' && (
-            <Trans i18nKey="this_project_is_public" />
-          )}
-          {accessLevel === 'readOnly' && (
-            <Trans i18nKey="this_project_is_public_read_only" />
-          )}
+          {accessLevel === 'readAndWrite' && t('this_project_is_public')}
+          {accessLevel === 'readOnly' && t('this_project_is_public_read_only')}
         </strong>
         <span>&nbsp;&nbsp;</span>
         <Button
@@ -199,7 +193,7 @@ function LegacySharing({ accessLevel, setAccessLevel, inflight }) {
           onClick={() => setAccessLevel('private')}
           disabled={inflight}
         >
-          <Trans i18nKey="make_private" />
+          {t('make_private')}
         </Button>
         <span>&nbsp;&nbsp;</span>
         <LinkSharingInfo />
@@ -215,6 +209,7 @@ LegacySharing.propTypes = {
 }
 
 export function ReadOnlyTokenLink() {
+  const { t } = useTranslation()
   const { _id: projectId } = useProjectContext()
 
   const [tokens, setTokens] = useState(null)
@@ -231,9 +226,7 @@ export function ReadOnlyTokenLink() {
     <Row className="public-access-level">
       <Col xs={12} className="access-token-display-area">
         <div className="access-token-wrapper">
-          <strong>
-            <Trans i18nKey="anyone_with_link_can_view" />
-          </strong>
+          <strong>{t('anyone_with_link_can_view')}</strong>
           <AccessToken
             token={tokens?.readOnly}
             path="/read/"
@@ -246,14 +239,13 @@ export function ReadOnlyTokenLink() {
 }
 
 function AccessToken({ token, path, tooltipId }) {
+  const { t } = useTranslation()
   const { isAdmin } = useUserContext()
 
   if (!token) {
     return (
       <pre className="access-token">
-        <span>
-          <Trans i18nKey="loading" />…
-        </span>
+        <span>{t('loading')}…</span>
       </pre>
     )
   }
@@ -279,10 +271,12 @@ AccessToken.propTypes = {
 }
 
 function LinkSharingInfo() {
+  const { t } = useTranslation()
+
   return (
     <Tooltip
       id="link-sharing-info"
-      description={<Trans i18nKey="learn_more_about_link_sharing" />}
+      description={t('learn_more_about_link_sharing')}
     >
       <a
         href="/learn/how-to/What_is_Link_Sharing%3F"

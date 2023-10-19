@@ -4,20 +4,21 @@ import { useShareProjectContext } from './share-project-modal'
 import Icon from '../../../shared/components/icon'
 import { Button, Col, Row } from 'react-bootstrap'
 import Tooltip from '../../../shared/components/tooltip'
-import { Trans, useTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 import MemberPrivileges from './member-privileges'
 import { resendInvite, revokeInvite } from '../utils/api'
 import { useProjectContext } from '../../../shared/context/project-context'
 import { sendMB } from '../../../infrastructure/event-tracking'
 
 export default function Invite({ invite, isProjectOwner }) {
+  const { t } = useTranslation()
   return (
     <Row className="project-invite">
       <Col xs={7}>
         <div>{invite.email}</div>
 
         <div className="small">
-          <Trans i18nKey="invite_not_accepted" />
+          {t('invite_not_accepted')}
           .&nbsp;
           {isProjectOwner && <ResendInvite invite={invite} />}
         </div>
@@ -42,6 +43,7 @@ Invite.propTypes = {
 }
 
 function ResendInvite({ invite }) {
+  const { t } = useTranslation()
   const { monitorRequest } = useShareProjectContext()
   const { _id: projectId } = useProjectContext()
 
@@ -66,7 +68,7 @@ function ResendInvite({ invite }) {
       onClick={handleClick}
       // ref={buttonRef}
     >
-      <Trans i18nKey="resend" />
+      {t('resend')}
     </Button>
   )
 }
@@ -99,7 +101,7 @@ function RevokeInvite({ invite }) {
   return (
     <Tooltip
       id="revoke-invite"
-      description={<Trans i18nKey="revoke_invite" />}
+      description={t('revoke_invite')}
       overlayProps={{ placement: 'bottom' }}
     >
       <Button

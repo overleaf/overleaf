@@ -1,13 +1,15 @@
 import PropTypes from 'prop-types'
-import { Trans } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 
 export default function MemberPrivileges({ privileges }) {
+  const { t } = useTranslation()
+
   switch (privileges) {
     case 'readAndWrite':
-      return <Trans i18nKey="can_edit" />
+      return t('can_edit')
 
     case 'readOnly':
-      return <Trans i18nKey="read_only" />
+      return t('read_only')
 
     default:
       return null

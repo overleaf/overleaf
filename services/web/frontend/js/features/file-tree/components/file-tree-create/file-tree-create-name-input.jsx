@@ -2,7 +2,7 @@ import ControlLabel from 'react-bootstrap/lib/ControlLabel'
 import { Alert, FormControl } from 'react-bootstrap'
 import FormGroup from 'react-bootstrap/lib/FormGroup'
 import { useCallback } from 'react'
-import { Trans, useTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 import { useFileTreeCreateName } from '../../contexts/file-tree-create-name'
 import PropTypes from 'prop-types'
 import {
@@ -57,7 +57,7 @@ export default function FileTreeCreateNameInput({
 
       {touchedName && !validName && (
         <Alert bsStyle="danger" className="row-spaced-small">
-          <Trans i18nKey="files_cannot_include_invalid_characters" />
+          {t('files_cannot_include_invalid_characters')}
         </Alert>
       )}
 
@@ -77,6 +77,8 @@ FileTreeCreateNameInput.propTypes = {
 }
 
 function ErrorMessage({ error }) {
+  const { t } = useTranslation()
+
   // if (typeof error === 'string') {
   //   return error
   // }
@@ -85,21 +87,21 @@ function ErrorMessage({ error }) {
     case DuplicateFilenameError:
       return (
         <Alert bsStyle="danger" className="row-spaced-small">
-          <Trans i18nKey="file_already_exists" />
+          {t('file_already_exists')}
         </Alert>
       )
 
     case InvalidFilenameError:
       return (
         <Alert bsStyle="danger" className="row-spaced-small">
-          <Trans i18nKey="files_cannot_include_invalid_characters" />
+          {t('files_cannot_include_invalid_characters')}
         </Alert>
       )
 
     case BlockedFilenameError:
       return (
         <Alert bsStyle="danger" className="row-spaced-small">
-          <Trans i18nKey="blocked_filename" />
+          {t('blocked_filename')}
         </Alert>
       )
 

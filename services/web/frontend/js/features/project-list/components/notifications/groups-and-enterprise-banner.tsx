@@ -4,7 +4,7 @@ import * as eventTracking from '../../../../infrastructure/event-tracking'
 import getMeta from '../../../../utils/meta'
 import customLocalStorage from '../../../../infrastructure/local-storage'
 import { useProjectListContext } from '../../context/project-list-context'
-import { Trans, useTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 
 const variants = ['did-you-know', 'on-premise', 'people', 'FOMO'] as const
 type GroupsAndEnterpriseBannerVariant = typeof variants[number]
@@ -64,7 +64,7 @@ export default function GroupsAndEnterpriseBanner() {
   return (
     <Notification bsStyle="info" onDismiss={handleClose}>
       <Notification.Body>
-        <span>{getText(groupsAndEnterpriseBannerVariant)}</span>
+        <BannerContent variant={groupsAndEnterpriseBannerVariant} />
       </Notification.Body>
       <Notification.Action>
         <a
@@ -85,16 +85,40 @@ function isVariantValid(variant: GroupsAndEnterpriseBannerVariant) {
   return variants.includes(variant)
 }
 
-function getText(variant: GroupsAndEnterpriseBannerVariant) {
+function BannerContent({
+  variant,
+}: {
+  variant: GroupsAndEnterpriseBannerVariant
+}) {
+  const { t } = useTranslation()
+
   switch (variant) {
     case 'did-you-know':
-      return <Trans i18nKey="did_you_know_that_overleaf_offers" />
+      return <span>{t('did_you_know_that_overleaf_offers')}</span>
     case 'on-premise':
-      return 'Overleaf On-Premises: Does your company want to keep its data within its firewall? Overleaf offers Server Pro, an on-premises solution for companies. Get in touch to learn more.'
+      return (
+        <span>
+          Overleaf On-Premises: Does your company want to keep its data within
+          its firewall? Overleaf offers Server Pro, an on-premises solution for
+          companies. Get in touch to learn more.
+        </span>
+      )
     case 'people':
-      return 'Other people at your company may already be using Overleaf. Save money with Overleaf group and company-wide subscriptions. Request more information.'
+      return (
+        <span>
+          Other people at your company may already be using Overleaf. Save money
+          with Overleaf group and company-wide subscriptions. Request more
+          information.
+        </span>
+      )
     case 'FOMO':
-      return 'Why do Fortune 500 companies and top research institutions trust Overleaf to streamline their collaboration? Get in touch to learn more.'
+      return (
+        <span>
+          Why do Fortune 500 companies and top research institutions trust
+          Overleaf to streamline their collaboration? Get in touch to learn
+          more.
+        </span>
+      )
   }
 }
 

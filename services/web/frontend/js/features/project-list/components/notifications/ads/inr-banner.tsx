@@ -154,9 +154,7 @@ export default function INRBanner({ variant, splitTestName }: INRBannerProps) {
               }}
             />
           </p>
-          <p>
-            <Trans i18nKey="inr_discount_modal_info" />
-          </p>
+          <p>{t('inr_discount_modal_info')}</p>
         </Modal.Body>
         <Modal.Footer>
           <Button bsStyle="default" onClick={handleMaybeLater}>

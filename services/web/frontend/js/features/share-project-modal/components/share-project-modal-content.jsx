@@ -1,5 +1,5 @@
 import { Button, Modal, Grid } from 'react-bootstrap'
-import { Trans } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 import Icon from '../../../shared/components/icon'
 import AccessibleModal from '../../../shared/components/accessible-modal'
 import PropTypes from 'prop-types'
@@ -23,6 +23,8 @@ export default function ShareProjectModalContent({
   inFlight,
   error,
 }) {
+  const { t } = useTranslation()
+
   const { isRestrictedTokenMember } = useEditorContext({
     isRestrictedTokenMember: PropTypes.bool,
   })
@@ -30,9 +32,7 @@ export default function ShareProjectModalContent({
   return (
     <AccessibleModal show={show} onHide={cancel} animation={animation}>
       <Modal.Header closeButton>
-        <Modal.Title>
-          <Trans i18nKey="share_project" />
-        </Modal.Title>
+        <Modal.Title>{t('share_project')}</Modal.Title>
       </Modal.Header>
 
       <Modal.Body className="modal-body-share">
@@ -65,7 +65,7 @@ export default function ShareProjectModalContent({
             className="btn-secondary"
             disabled={inFlight}
           >
-            <Trans i18nKey="close" />
+            {t('close')}
           </Button>
         </div>
       </Modal.Footer>
@@ -81,24 +81,26 @@ ShareProjectModalContent.propTypes = {
 }
 
 function ErrorMessage({ error }) {
+  const { t } = useTranslation()
+
   switch (error) {
     case 'cannot_invite_non_user':
-      return <Trans i18nKey="cannot_invite_non_user" />
+      return t('cannot_invite_non_user')
 
     case 'cannot_verify_user_not_robot':
-      return <Trans i18nKey="cannot_verify_user_not_robot" />
+      return t('cannot_verify_user_not_robot')
 
     case 'cannot_invite_self':
-      return <Trans i18nKey="cannot_invite_self" />
+      return t('cannot_invite_self')
 
     case 'invalid_email':
-      return <Trans i18nKey="invalid_email" />
+      return t('invalid_email')
 
     case 'too_many_requests':
-      return <Trans i18nKey="too_many_requests" />
+      return t('too_many_requests')
 
     default:
-      return <Trans i18nKey="generic_something_went_wrong" />
+      return t('generic_something_went_wrong')
   }
 }
 ErrorMessage.propTypes = {
