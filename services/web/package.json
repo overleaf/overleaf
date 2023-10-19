@@ -165,12 +165,12 @@
     "yauzl": "^2.10.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.21.5",
-    "@babel/core": "^7.21.8",
-    "@babel/preset-env": "^7.21.5",
-    "@babel/preset-react": "^7.18.6",
-    "@babel/preset-typescript": "^7.21.5",
-    "@babel/register": "^7.21.0",
+    "@babel/cli": "^7.23.0",
+    "@babel/core": "^7.23.2",
+    "@babel/preset-env": "^7.23.2",
+    "@babel/preset-react": "^7.22.15",
+    "@babel/preset-typescript": "^7.23.2",
+    "@babel/register": "^7.22.15",
     "@codemirror/autocomplete": "github:overleaf/codemirror-autocomplete#b795675768e25c442916c7190da75716c0a5ac80",
     "@codemirror/commands": "^6.3.0",
     "@codemirror/lang-markdown": "^6.2.1",
