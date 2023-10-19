@@ -214,6 +214,8 @@ const CodeMirrorSearchForm: FC = () => {
     return getSearchQuery(state)
   }, [state])
 
+  const showReplace = !state.readOnly
+
   return (
     // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
     <form
@@ -330,24 +332,26 @@ const CodeMirrorSearchForm: FC = () => {
           </InputGroup.Button>
         </InputGroup>
 
-        <InputGroup
-          bsSize="small"
-          className="ol-cm-search-input-group ol-cm-search-replace-input"
-        >
-          <FormControl
-            type="text"
-            name="replace"
-            placeholder={t('search_replace_with')}
-            autoComplete="off"
-            value={query.replace || ''}
-            onChange={handleChange}
-            onKeyDown={handleReplaceKeyDown}
-            className="ol-cm-search-form-input"
+        {showReplace && (
+          <InputGroup
             bsSize="small"
-            inputRef={handleReplaceRef}
-            aria-label={t('search_command_replace')}
-          />
-        </InputGroup>
+            className="ol-cm-search-input-group ol-cm-search-replace-input"
+          >
+            <FormControl
+              type="text"
+              name="replace"
+              placeholder={t('search_replace_with')}
+              autoComplete="off"
+              value={query.replace || ''}
+              onChange={handleChange}
+              onKeyDown={handleReplaceKeyDown}
+              className="ol-cm-search-form-input"
+              bsSize="small"
+              inputRef={handleReplaceRef}
+              aria-label={t('search_command_replace')}
+            />
+          </InputGroup>
+        )}
 
         <div className="ol-cm-search-hidden-inputs">
           <input
@@ -427,19 +431,25 @@ const CodeMirrorSearchForm: FC = () => {
           )}
         </div>
 
-        <div className="ol-cm-search-form-group ol-cm-search-replace-buttons">
-          <Button
-            type="button"
-            bsSize="small"
-            onClick={() => replaceNext(view)}
-          >
-            {t('search_replace')}
-          </Button>
+        {showReplace && (
+          <div className="ol-cm-search-form-group ol-cm-search-replace-buttons">
+            <Button
+              type="button"
+              bsSize="small"
+              onClick={() => replaceNext(view)}
+            >
+              {t('search_replace')}
+            </Button>
 
-          <Button type="button" bsSize="small" onClick={() => replaceAll(view)}>
-            {t('search_replace_all')}
-          </Button>
-        </div>
+            <Button
+              type="button"
+              bsSize="small"
+              onClick={() => replaceAll(view)}
+            >
+              {t('search_replace_all')}
+            </Button>
+          </div>
+        )}
       </div>
 
       <div className="ol-cm-search-form-close">

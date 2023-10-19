@@ -5,9 +5,6 @@ const toggleToolbarEffect = StateEffect.define<boolean>()
 const toolbarState = StateField.define<boolean>({
   create: () => true,
   update: (value, tr) => {
-    if (tr.state.readOnly) {
-      return false
-    }
     for (const effect of tr.effects) {
       if (effect.is(toggleToolbarEffect)) {
         value = effect.value

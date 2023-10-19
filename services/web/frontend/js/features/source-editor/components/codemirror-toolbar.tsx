@@ -113,10 +113,12 @@ const Toolbar = memo(function Toolbar() {
     return null
   }
 
+  const showActions = !state.readOnly && !insideTable
+
   return (
     <div className="ol-cm-toolbar toolbar-editor" ref={elementRef}>
       {showSourceToolbar && <EditorSwitch />}
-      {!insideTable && (
+      {showActions && (
         <ToolbarItems
           state={state}
           languageName={languageName}
@@ -125,7 +127,7 @@ const Toolbar = memo(function Toolbar() {
         />
       )}
       <div className="ol-cm-toolbar-button-group ol-cm-toolbar-stretch">
-        {!insideTable && (
+        {showActions && (
           <ToolbarOverflow
             overflowed={overflowed}
             overflowOpen={overflowOpen}
