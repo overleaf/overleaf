@@ -18,7 +18,7 @@ const assert = require('assert')
 const { ObjectId } = require('mongodb')
 
 const userId = '51dc93e6fb625a261300003b'
-const notificationId = '574ee8d6f40c3a244e704249'
+const notificationId = 'fb625a26f09d'
 const notificationKey = 'notification-key'
 
 describe('Notifications Tests', function () {
@@ -46,7 +46,7 @@ describe('Notifications Tests', function () {
     })
 
     this.stubbedNotification = {
-      user_id: new ObjectId(userId),
+      user_id: ObjectId(userId),
       key: 'notification-key',
       messageOpts: 'some info',
       templateKey: 'template-key',
@@ -63,7 +63,7 @@ describe('Notifications Tests', function () {
           if (err) return done(err)
           notifications.should.equal(this.stubbedNotificationArray)
           assert.deepEqual(this.findStub.args[0][0], {
-            user_id: new ObjectId(userId),
+            user_id: ObjectId(userId),
             templateKey: { $exists: true },
           })
           return done()
@@ -75,7 +75,7 @@ describe('Notifications Tests', function () {
   describe('addNotification', function () {
     beforeEach(function () {
       this.stubbedNotification = {
-        user_id: new ObjectId(userId),
+        user_id: ObjectId(userId),
         key: 'notification-key',
         messageOpts: 'some info',
         templateKey: 'template-key',
@@ -150,7 +150,7 @@ describe('Notifications Tests', function () {
     describe('when the notification is set to expire', function () {
       beforeEach(function () {
         this.stubbedNotification = {
-          user_id: new ObjectId(userId),
+          user_id: ObjectId(userId),
           key: 'notification-key',
           messageOpts: 'some info',
           templateKey: 'template-key',
@@ -190,7 +190,7 @@ describe('Notifications Tests', function () {
     return describe('when the notification has a nonsensical expires field', function () {
       beforeEach(function () {
         this.stubbedNotification = {
-          user_id: new ObjectId(userId),
+          user_id: ObjectId(userId),
           key: 'notification-key',
           messageOpts: 'some info',
           templateKey: 'template-key',
@@ -229,8 +229,8 @@ describe('Notifications Tests', function () {
         err => {
           if (err) return done(err)
           const searchOps = {
-            user_id: new ObjectId(userId),
-            _id: new ObjectId(notificationId),
+            user_id: ObjectId(userId),
+            _id: ObjectId(notificationId),
           }
           const updateOperation = {
             $unset: { templateKey: true, messageOpts: true },
@@ -253,7 +253,7 @@ describe('Notifications Tests', function () {
         err => {
           if (err) return done(err)
           const searchOps = {
-            user_id: new ObjectId(userId),
+            user_id: ObjectId(userId),
             key: notificationKey,
           }
           const updateOperation = {
