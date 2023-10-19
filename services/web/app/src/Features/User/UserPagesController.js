@@ -10,6 +10,7 @@ const SubscriptionLocator = require('../Subscription/SubscriptionLocator')
 const _ = require('lodash')
 const { expressify } = require('../../util/promises')
 const Features = require('../../infrastructure/Features')
+const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 
 async function settingsPage(req, res) {
   const userId = SessionManager.getLoggedInUserId(req.session)
@@ -69,8 +70,27 @@ async function settingsPage(req, res) {
 
   const showPersonalAccessToken =
     !Features.hasFeature('saas') || req.query?.personal_access_token === 'true'
+
+  // if not already enabled, use a split test to determine whether to offer personal access tokens
+  let optionalPersonalAccessToken = false
+  if (!showPersonalAccessToken) {
+    try {
+      const { variant } = await SplitTestHandler.promises.getAssignment(
+        req,
+        res,
+        'personal-access-token'
+      )
+      optionalPersonalAccessToken = variant === 'enabled' // `?personal-access-token=enabled`
+    } catch (error) {
+      logger.error(
+        { err: error },
+        'Failed to get personal-access-token split test assignment'
+      )
+    }
+  }
+
   let personalAccessTokens
-  if (showPersonalAccessToken) {
+  if (showPersonalAccessToken || optionalPersonalAccessToken) {
     try {
       // require this here because module may not be included in some versions
       const PersonalAccessTokenManager = require('../../../../modules/oauth2-server/app/src/OAuthPersonalAccessTokenManager')
@@ -133,6 +153,7 @@ async function settingsPage(req, res) {
     thirdPartyIds: UserPagesController._restructureThirdPartyIds(user),
     projectSyncSuccessMessage,
     showPersonalAccessToken,
+    optionalPersonalAccessToken,
     personalAccessTokens,
     emailAddressLimit: Settings.emailAddressLimit,
     isManagedAccount: !!req.managedBy,

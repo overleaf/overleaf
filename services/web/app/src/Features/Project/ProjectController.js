@@ -648,6 +648,21 @@ const ProjectController = {
             }
           )
         },
+        personalAccessTokenAssignment(cb) {
+          SplitTestHandler.getAssignment(
+            req,
+            res,
+            'personal-access-token',
+            (error, assignment) => {
+              // do not fail editor load if assignment fails
+              if (error) {
+                cb(null, { variant: 'default' })
+              } else {
+                cb(null, assignment)
+              }
+            }
+          )
+        },
         historyViewAssignment(cb) {
           SplitTestHandler.getAssignment(
             req,
@@ -716,6 +731,7 @@ const ProjectController = {
           historyViewAssignment,
           reviewPanelAssignment,
           idePageAssignment,
+          personalAccessTokenAssignment,
           projectTags,
         }
       ) => {
@@ -821,6 +837,10 @@ const ProjectController = {
               !Features.hasFeature('saas') ||
               req.query?.personal_access_token === 'true'
 
+            const optionalPersonalAccessToken =
+              !showPersonalAccessToken &&
+              personalAccessTokenAssignment.variant === 'enabled' // `?personal-access-token=enabled`
+
             const idePageReact = idePageAssignment.variant === 'react'
 
             const template =
@@ -903,6 +923,7 @@ const ProjectController = {
               isReviewPanelReact: reviewPanelAssignment.variant === 'react',
               idePageReact,
               showPersonalAccessToken,
+              optionalPersonalAccessToken,
               hasTrackChangesFeature: Features.hasFeature('track-changes'),
               projectTags,
             })

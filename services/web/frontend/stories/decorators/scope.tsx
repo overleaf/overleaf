@@ -9,6 +9,7 @@ import {
   mockCompileError,
 } from '../fixtures/compile'
 import useFetchMock from '../hooks/use-fetch-mock'
+import { useMeta } from '../hooks/use-meta'
 
 const scopeWatchers: [string, (value: any) => void][] = []
 
@@ -210,7 +211,8 @@ type ScopeDecoratorOptions = {
 
 export const ScopeDecorator = (
   Story: any,
-  opts: ScopeDecoratorOptions = { mockCompileOnLoad: true }
+  opts: ScopeDecoratorOptions = { mockCompileOnLoad: true },
+  meta: Record<string, any> = {}
 ) => {
   // mock compile on load
   useFetchMock(fetchMock => {
@@ -231,6 +233,9 @@ export const ScopeDecorator = (
   const ide = useMemo(() => {
     return initialize()
   }, [])
+
+  // set values on window.metaAttributesCache (created in initialize, above)
+  useMeta(meta)
 
   return (
     <ContextRoot ide={ide}>

@@ -364,7 +364,7 @@
   "get_same_latex_setup": "Avec __appName__, votre configuration LaTeX vous suit partout. En travaillant avec vos collègues ou étudiant·e·s sur __appName__, vous êtes sûr·e de ne pas rencontrer d’incohérences de version ou de conflits de paquets.",
   "get_started_now": "Commencer maintenant",
   "git": "Git",
-  "git_bridge_modal_description": "Vous pouvez effectuer un <code>git</code> <code>clone</code> de votre projet en utilisant le lien ci-dessous.",
+  "git_bridge_modal_description": "Vous pouvez effectuer un git clone de votre projet en utilisant le lien ci-dessous.",
   "github_commit_message_placeholder": "Message de commit pour les changements effectués dans __appName__…",
   "github_credentials_expired": "Vos identifiants GitHub ont expiré",
   "github_for_link_shared_projects": "Vous avez accédé à ce projet par un partage de lien : celui-ci ne sera pas synchronisé à votre GitHub tant que vous n’aurez pas été invité par courriel par le propriétaire du projet.",

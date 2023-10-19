@@ -31,11 +31,11 @@ function LinkingSection() {
     path: string
   }[]
 
-  const showPersonalAccessToken = getMeta(
-    'ol-showPersonalAccessToken'
-  ) as boolean
+  const showPersonalAccessTokenComponents: boolean =
+    getMeta('ol-showPersonalAccessToken') ||
+    getMeta('ol-optionalPersonalAccessToken')
 
-  const allIntegrationLinkingWidgets = showPersonalAccessToken
+  const allIntegrationLinkingWidgets = showPersonalAccessTokenComponents
     ? integrationLinkingWidgets.concat(oauth2ServerComponents)
     : integrationLinkingWidgets
 

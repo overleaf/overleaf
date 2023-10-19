@@ -261,7 +261,7 @@
   "get_same_latex_setup": "Com __appName__ você tem o mesmo aplicativo onde quer que vá. Trabalhando com seus colegas e estudantes no __appName__, você sabe que não terá problema de inconsistência ou conflito de pacotes.",
   "get_started_now": "Comece agora",
   "git": "Git",
-  "git_bridge_modal_description": "Você pode usar <code>git clone</code> no seu projeto usando o link abaixo.",
+  "git_bridge_modal_description": "Você pode usar git clone no seu projeto usando o link abaixo.",
   "github_commit_message_placeholder": "Mensagem de commit para as alterações feitas no __appName__...",
   "github_credentials_expired": "Suas credenciais de autorização do GitHub expiraram",
   "github_for_link_shared_projects": "Este projeto foi acessado por meio do compartilhamento de links e não será sincronizado com o seu Github, a menos que você seja convidado por e-mail pelo proprietário do projeto.",

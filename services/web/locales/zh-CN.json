@@ -362,7 +362,7 @@
   "get_same_latex_setup": "您到任何地方都可以用  __appName__ 实现LaTeX的功能。由于您和您的同事和学生可以在  __appName__ 上共同工作，不会出现版本不一致和包冲突的情况。",
   "get_started_now": "立即开始",
   "git": "Git",
-  "git_bridge_modal_description": "您可以使用下面显示的链接来<code>git</code><code>clone</code>您的项目。",
+  "git_bridge_modal_description": "您可以使用下面显示的链接来git clone您的项目。",
   "github_commit_message_placeholder": "为 __appName__ 中的更改提交信息",
   "github_credentials_expired": "您的 Github 授权凭证已过期",
   "github_for_link_shared_projects": "此项目是通过链接共享访问的，除非项目所有者通过电子邮件邀请您，否则不会与您的Github同步。",

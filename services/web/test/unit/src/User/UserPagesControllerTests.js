@@ -82,6 +82,11 @@ describe('UserPagesController', function () {
         getAdminEmail: sinon.stub().returns(this.adminEmail),
       },
     }
+    this.SplitTestHandler = {
+      promises: {
+        getAssignment: sinon.stub().returns('default'),
+      },
+    }
     this.UserPagesController = SandboxedModule.require(modulePath, {
       requires: {
         '@overleaf/settings': this.settings,
@@ -96,6 +101,7 @@ describe('UserPagesController', function () {
         '../../../../modules/oauth2-server/app/src/OAuthPersonalAccessTokenManager':
           this.PersonalAccessTokenManager,
         '../Authentication/SessionManager': this.SessionManager,
+        '../SplitTests/SplitTestHandler': this.SplitTestHandler,
         request: (this.request = sinon.stub()),
       },
     })

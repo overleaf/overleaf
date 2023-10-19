@@ -6,7 +6,7 @@ import Tooltip from '../../../shared/components/tooltip'
 import Icon from '../../../shared/components/icon'
 import { useShareProjectContext } from './share-project-modal'
 import { setProjectAccessLevel } from '../utils/api'
-import CopyLink from '../../../shared/components/copy-link'
+import { CopyToClipboard } from '@/shared/components/copy-to-clipboard'
 import { useProjectContext } from '../../../shared/context/project-context'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import { useUserContext } from '../../../shared/context/user-context'
@@ -265,10 +265,10 @@ function AccessToken({ token, path, tooltipId }) {
   const link = `${origin}${path}${token}`
 
   return (
-    <pre className="access-token">
-      <span>{link}</span>
-      <CopyLink link={link} tooltipId={tooltipId} />
-    </pre>
+    <div className="access-token">
+      <code>{link}</code>
+      <CopyToClipboard content={link} tooltipId={tooltipId} />
+    </div>
   )
 }
 
