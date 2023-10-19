@@ -815,10 +815,10 @@ const ProjectController = {
 
             const detachRole = req.params.detachRole
 
-            const showLegacySourceEditor =
-              !Features.hasFeature('saas') ||
-              // Allow override via legacy_source_editor=true in query string
-              shouldDisplayFeature('legacy_source_editor')
+            // Allow override via legacy_source_editor=true in query string
+            const showLegacySourceEditor = shouldDisplayFeature(
+              'legacy_source_editor'
+            )
 
             const showSymbolPalette =
               !Features.hasFeature('saas') ||
