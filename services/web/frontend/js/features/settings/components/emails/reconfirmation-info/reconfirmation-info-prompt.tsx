@@ -71,6 +71,8 @@ function ReconfirmationInfoPrompt({
           values={{
             institutionName: institution.name,
           }}
+          shouldUnescape
+          tOptions={{ interpolation: { escapeValue: true } }}
           components={
             /* eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key */
             [<strong />]
@@ -155,6 +157,8 @@ function ReconfirmationInfoPromptText({
         values={{
           institutionName,
         }}
+        shouldUnescape
+        tOptions={{ interpolation: { escapeValue: true } }}
         components={
           /* eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key */
           [<strong />]

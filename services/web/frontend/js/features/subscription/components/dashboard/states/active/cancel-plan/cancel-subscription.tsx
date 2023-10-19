@@ -78,6 +78,8 @@ function NotCancelOption({
             values={{
               days: 14,
             }}
+            shouldUnescape
+            tOptions={{ interpolation: { escapeValue: true } }}
             components={[
               // eslint-disable-next-line react/jsx-key
               <strong />,
@@ -105,6 +107,8 @@ function NotCancelOption({
             values={{
               price: planToDowngradeTo.displayPrice,
             }}
+            shouldUnescape
+            tOptions={{ interpolation: { escapeValue: true } }}
             components={[
               // eslint-disable-next-line react/jsx-key
               <strong />,

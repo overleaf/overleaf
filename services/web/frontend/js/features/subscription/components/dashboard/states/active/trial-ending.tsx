@@ -10,6 +10,8 @@ export function TrialEnding({
       <Trans
         i18nKey="youre_on_free_trial_which_ends_on"
         values={{ date: trialEndsAtFormatted }}
+        shouldUnescape
+        tOptions={{ interpolation: { escapeValue: true } }}
         components={[
           // eslint-disable-next-line react/jsx-key
           <strong />,

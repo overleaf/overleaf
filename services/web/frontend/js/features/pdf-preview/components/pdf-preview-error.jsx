@@ -72,6 +72,8 @@ function PdfPreviewError({ error }) {
                     getMeta('ol-compilesUserContentDomain')
                   ).hostname,
                 }}
+                shouldUnescape
+                tOptions={{ interpolation: { escapeValue: true } }}
                 components={[
                   <code key="domain" />,
                   /* eslint-disable-next-line jsx-a11y/anchor-has-content */

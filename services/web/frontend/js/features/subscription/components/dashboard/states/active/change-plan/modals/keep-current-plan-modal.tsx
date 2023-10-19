@@ -57,6 +57,8 @@ export function KeepCurrentPlanModal() {
             values={{
               planName: personalSubscription.plan.name,
             }}
+            shouldUnescape
+            tOptions={{ interpolation: { escapeValue: true } }}
             components={[
               // eslint-disable-next-line react/jsx-key
               <strong />,

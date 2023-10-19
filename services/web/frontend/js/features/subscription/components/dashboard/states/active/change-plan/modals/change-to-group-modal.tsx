@@ -27,6 +27,8 @@ function GroupPlanCollaboratorCount({ planCode }: { planCode: string }) {
           values={{
             collabcount: 10,
           }}
+          shouldUnescape
+          tOptions={{ interpolation: { escapeValue: true } }}
         />
       </>
     )
@@ -44,6 +46,8 @@ function EducationDiscountAppliedOrNot({ groupSize }: { groupSize: string }) {
         <Trans
           i18nKey="educational_percent_discount_applied"
           values={{ percent: educationalPercentDiscount }}
+          shouldUnescape
+          tOptions={{ interpolation: { escapeValue: true } }}
         />
       </p>
     )
@@ -54,6 +58,8 @@ function EducationDiscountAppliedOrNot({ groupSize }: { groupSize: string }) {
       <Trans
         i18nKey="educational_discount_for_groups_of_x_or_more"
         values={{ size: groupSizeForEducationalDiscount }}
+        shouldUnescape
+        tOptions={{ interpolation: { escapeValue: true } }}
       />
     </p>
   )
@@ -92,6 +98,8 @@ function GroupPrice({
           <Trans
             i18nKey="x_price_per_year"
             values={{ price: groupPlanToChangeToPrice?.totalForDisplay }}
+            shouldUnescape
+            tOptions={{ interpolation: { escapeValue: true } }}
           />
         )}
       </span>
@@ -105,6 +113,8 @@ function GroupPrice({
             values={{
               price: perUserPrice,
             }}
+            shouldUnescape
+            tOptions={{ interpolation: { escapeValue: true } }}
           />
         </span>
         <span className="sr-only">
@@ -116,6 +126,8 @@ function GroupPrice({
               values={{
                 price: perUserPrice,
               }}
+              shouldUnescape
+              tOptions={{ interpolation: { escapeValue: true } }}
             />
           )}
         </span>
@@ -208,6 +220,8 @@ export function ChangeToGroupModal() {
               values={{
                 percent: '30',
               }}
+              shouldUnescape
+              tOptions={{ interpolation: { escapeValue: true } }}
             />
           </h3>
         </div>
@@ -296,6 +310,8 @@ export function ChangeToGroupModal() {
                         percent: educationalPercentDiscount,
                         size: groupSizeForEducationalDiscount,
                       }}
+                      shouldUnescape
+                      tOptions={{ interpolation: { escapeValue: true } }}
                     />
                   </strong>
                 </div>
@@ -345,6 +361,8 @@ export function ChangeToGroupModal() {
                   subtotal: groupPlanToChangeToPrice.subtotal,
                   tax: groupPlanToChangeToPrice.tax,
                 }}
+                shouldUnescape
+                tOptions={{ interpolation: { escapeValue: true } }}
                 components={[
                   /* eslint-disable-next-line react/jsx-key */
                   <strong />,
@@ -375,7 +393,12 @@ export function ChangeToGroupModal() {
           </button>
           <hr className="thin" />
           <button className="btn-inline-link" onClick={handleGetInTouchButton}>
-            <Trans i18nKey="need_more_than_x_licenses" values={{ x: 50 }} />{' '}
+            <Trans
+              i18nKey="need_more_than_x_licenses"
+              values={{ x: 50 }}
+              shouldUnescape
+              tOptions={{ interpolation: { escapeValue: true } }}
+            />{' '}
             {t('please_get_in_touch')}
           </button>
         </div>

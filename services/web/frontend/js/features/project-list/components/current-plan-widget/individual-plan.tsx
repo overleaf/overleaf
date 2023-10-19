@@ -24,6 +24,8 @@ function IndividualPlan({
           i18nKey="trial_remaining_days"
           components={{ b: <strong /> }}
           values={{ days: remainingTrialDays }}
+          shouldUnescape
+          tOptions={{ interpolation: { escapeValue: true } }}
         />
       )
     ) : (

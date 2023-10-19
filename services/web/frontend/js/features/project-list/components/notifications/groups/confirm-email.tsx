@@ -116,6 +116,8 @@ function ConfirmEmailNotification({ userEmail }: { userEmail: UserEmailData }) {
                   institutionName: userEmail.affiliation?.institution.name,
                   emailAddress: userEmail.email,
                 }}
+                shouldUnescape
+                tOptions={{ interpolation: { escapeValue: true } }}
                 components={[<strong />]} // eslint-disable-line react/jsx-key
               />
             </>

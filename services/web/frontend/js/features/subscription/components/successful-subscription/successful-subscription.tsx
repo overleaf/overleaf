@@ -35,6 +35,8 @@ function SuccessfulSubscription() {
                         paymentAmmount: subscription.recurly.displayPrice,
                         collectionDate: subscription.recurly.nextPaymentDueAt,
                       }}
+                      shouldUnescape
+                      tOptions={{ interpolation: { escapeValue: true } }}
                       components={[<strong />, <strong />]} // eslint-disable-line react/jsx-key
                     />
                   </p>

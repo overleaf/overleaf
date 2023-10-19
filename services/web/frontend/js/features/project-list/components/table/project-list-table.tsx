@@ -68,8 +68,8 @@ function ProjectListTable() {
             aria-sort={
               sort.by === 'title'
                 ? sort.order === 'asc'
-                  ? t('ascending')
-                  : t('descending')
+                  ? 'ascending'
+                  : 'descending'
                 : undefined
             }
           >
@@ -92,8 +92,8 @@ function ProjectListTable() {
             aria-sort={
               sort.by === 'owner'
                 ? sort.order === 'asc'
-                  ? t('ascending')
-                  : t('descending')
+                  ? 'ascending'
+                  : 'descending'
                 : undefined
             }
           >
@@ -110,8 +110,8 @@ function ProjectListTable() {
             aria-sort={
               sort.by === 'lastUpdated'
                 ? sort.order === 'asc'
-                  ? t('ascending')
-                  : t('descending')
+                  ? 'ascending'
+                  : 'descending'
                 : undefined
             }
           >

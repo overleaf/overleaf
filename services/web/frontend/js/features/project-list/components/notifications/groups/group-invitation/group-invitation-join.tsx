@@ -29,6 +29,8 @@ export default function GroupInvitationNotificationJoin({
           values={{
             inviterName,
           }}
+          shouldUnescape
+          tOptions={{ interpolation: { escapeValue: true } }}
         />
       </Notification.Body>
       <Notification.Action>

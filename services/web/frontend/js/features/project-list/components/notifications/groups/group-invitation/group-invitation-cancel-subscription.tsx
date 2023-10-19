@@ -31,6 +31,8 @@ export default function GroupInvitationCancelIndividualSubscriptionNotification(
           values={{
             inviterName,
           }}
+          shouldUnescape
+          tOptions={{ interpolation: { escapeValue: true } }}
         />
       </Notification.Body>
       <Notification.Action className="group-invitation-cancel-subscription-notification-buttons">

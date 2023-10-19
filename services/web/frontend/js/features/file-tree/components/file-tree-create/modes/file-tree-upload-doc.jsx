@@ -215,6 +215,8 @@ function UploadErrorMessage({ error, maxNumberOfFiles }) {
         <Trans
           i18nKey="maximum_files_uploaded_together"
           values={{ max: maxNumberOfFiles }}
+          shouldUnescape
+          tOptions={{ interpolation: { escapeValue: true } }}
         />
       )
 

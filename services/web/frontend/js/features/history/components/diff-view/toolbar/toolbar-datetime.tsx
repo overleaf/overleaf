@@ -24,6 +24,8 @@ export default function ToolbarDatetime({ selection }: ToolbarDatetimeProps) {
               'Do MMMM · h:mm a'
             ),
           }}
+          shouldUnescape
+          tOptions={{ interpolation: { escapeValue: true } }}
         />
       ) : (
         <Trans
@@ -36,6 +38,8 @@ export default function ToolbarDatetime({ selection }: ToolbarDatetimeProps) {
               'Do MMMM · h:mm a'
             ),
           }}
+          shouldUnescape
+          tOptions={{ interpolation: { escapeValue: true } }}
         />
       )}
     </div>

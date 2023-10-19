@@ -69,6 +69,8 @@ function ResendManagedUserInviteSuccess({
         values={{
           email: invitedUserEmail,
         }}
+        shouldUnescape
+        tOptions={{ interpolation: { escapeValue: true } }}
         components={[
           // eslint-disable-next-line react/jsx-key
           <strong />,
@@ -89,6 +91,8 @@ function FailedToResendManagedInvite({
         values={{
           email: invitedUserEmail,
         }}
+        shouldUnescape
+        tOptions={{ interpolation: { escapeValue: true } }}
         components={[
           // eslint-disable-next-line react/jsx-key
           <strong />,
@@ -109,6 +113,8 @@ function ResendGroupInviteSuccess({
         values={{
           email: invitedUserEmail,
         }}
+        shouldUnescape
+        tOptions={{ interpolation: { escapeValue: true } }}
         components={[
           // eslint-disable-next-line react/jsx-key
           <strong />,
@@ -129,6 +135,8 @@ function FailedToResendGroupInvite({
         values={{
           email: invitedUserEmail,
         }}
+        shouldUnescape
+        tOptions={{ interpolation: { escapeValue: true } }}
         components={[
           // eslint-disable-next-line react/jsx-key
           <strong />,
@@ -149,6 +157,8 @@ function TooManyRequests({
         values={{
           email: invitedUserEmail,
         }}
+        shouldUnescape
+        tOptions={{ interpolation: { escapeValue: true } }}
         components={[
           // eslint-disable-next-line react/jsx-key
           <strong />,

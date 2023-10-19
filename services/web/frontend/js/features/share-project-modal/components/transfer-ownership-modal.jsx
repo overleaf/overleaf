@@ -44,6 +44,7 @@ export default function TransferOwnershipModal({ member, cancel }) {
             components={[<strong key="strong-1" />, <strong key="strong-2" />]}
             // eslint-disable-next-line react/jsx-boolean-value
             shouldUnescape={true}
+            tOptions={{ interpolation: { escapeValue: true } }}
           />
         </p>
         <p>

@@ -34,6 +34,8 @@ export default function ErrorMessage({ error }) {
               values={{
                 nameLimit: fileNameLimit,
               }}
+              shouldUnescape
+              tOptions={{ interpolation: { escapeValue: true } }}
             />
           </DangerMessage>
         )

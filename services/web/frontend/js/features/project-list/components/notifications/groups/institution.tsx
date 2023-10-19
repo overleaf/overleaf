@@ -48,6 +48,8 @@ function Institution() {
                       i18nKey="can_link_institution_email_acct_to_institution_acct"
                       components={{ b: <b /> }}
                       values={{ appName, email, institutionName }}
+                      shouldUnescape
+                      tOptions={{ interpolation: { escapeValue: true } }}
                     />
                   </p>
                   <div>
@@ -55,6 +57,8 @@ function Institution() {
                       i18nKey="doing_this_allow_log_in_through_institution"
                       components={{ b: <b /> }}
                       values={{ appName }}
+                      shouldUnescape
+                      tOptions={{ interpolation: { escapeValue: true } }}
                     />{' '}
                     <a href="/learn/how-to/Institutional_Login">
                       {t('learn_more')}
@@ -82,6 +86,8 @@ function Institution() {
                     i18nKey="account_has_been_link_to_institution_account"
                     components={{ b: <b /> }}
                     values={{ appName, email, institutionName }}
+                    shouldUnescape
+                    tOptions={{ interpolation: { escapeValue: true } }}
                   />
                 </Notification.Body>
               </Notification>
@@ -97,11 +103,15 @@ function Institution() {
                     i18nKey="tried_to_log_in_with_email"
                     components={{ b: <b /> }}
                     values={{ appName, email: requestedEmail }}
+                    shouldUnescape
+                    tOptions={{ interpolation: { escapeValue: true } }}
                   />{' '}
                   <Trans
                     i18nKey="in_order_to_match_institutional_metadata_associated"
                     components={{ b: <b /> }}
                     values={{ email: institutionEmail }}
+                    shouldUnescape
+                    tOptions={{ interpolation: { escapeValue: true } }}
                   />
                 </Notification.Body>
               </Notification>
@@ -117,6 +127,8 @@ function Institution() {
                     i18nKey="tried_to_register_with_email"
                     components={{ b: <b /> }}
                     values={{ appName, email }}
+                    shouldUnescape
+                    tOptions={{ interpolation: { escapeValue: true } }}
                   />{' '}
                   {t('we_logged_you_in')}
                 </Notification.Body>

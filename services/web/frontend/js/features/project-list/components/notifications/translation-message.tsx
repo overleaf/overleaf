@@ -23,6 +23,8 @@ function TranslationMessage() {
             i18nKey="click_here_to_view_sl_in_lng"
             components={[<strong />]} // eslint-disable-line react/jsx-key
             values={{ lngName: config.lngName }}
+            shouldUnescape
+            tOptions={{ interpolation: { escapeValue: true } }}
           />
           <img
             className="ms-1"

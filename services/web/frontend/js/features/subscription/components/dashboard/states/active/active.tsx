@@ -39,6 +39,8 @@ export function ActiveSubscription({
           values={{
             planName: subscription.plan.name,
           }}
+          shouldUnescape
+          tOptions={{ interpolation: { escapeValue: true } }}
           components={[
             // eslint-disable-next-line react/jsx-key
             <strong />,
@@ -95,6 +97,8 @@ export function ActiveSubscription({
             paymentAmmount: subscription.recurly.displayPrice,
             collectionDate: subscription.recurly.nextPaymentDueAt,
           }}
+          shouldUnescape
+          tOptions={{ interpolation: { escapeValue: true } }}
           components={[
             // eslint-disable-next-line react/jsx-key
             <strong />,

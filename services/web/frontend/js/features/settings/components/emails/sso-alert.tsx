@@ -64,6 +64,8 @@ export function SSOAlert() {
               i18nKey="institution_acct_successfully_linked_2"
               components={[<strong />]} // eslint-disable-line react/jsx-key
               values={{ institutionName: institutionLinked.universityName }}
+              shouldUnescape
+              tOptions={{ interpolation: { escapeValue: true } }}
             />
           </p>
           {institutionLinked.hasEntitlement && (
@@ -72,6 +74,8 @@ export function SSOAlert() {
                 i18nKey="this_grants_access_to_features_2"
                 components={[<strong />]} // eslint-disable-line react/jsx-key
                 values={{ featureType: t('professional') }}
+                shouldUnescape
+                tOptions={{ interpolation: { escapeValue: true } }}
               />
             </p>
           )}
@@ -92,6 +96,8 @@ export function SSOAlert() {
               i18nKey="in_order_to_match_institutional_metadata_2"
               components={[<strong />]} // eslint-disable-line react/jsx-key
               values={{ email: institutionEmailNonCanonical }}
+              shouldUnescape
+              tOptions={{ interpolation: { escapeValue: true } }}
             />
           </p>
         </Alert>

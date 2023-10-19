@@ -7,6 +7,7 @@
     "standard",
     "prettier"
   ],
+  "plugins": ["@overleaf"],
   "env": {
     "es2020": true
   },
@@ -113,6 +114,9 @@
       //
       "files": ["**/frontend/js/**/components/**/*.{js,jsx,ts,tsx}", "**/frontend/js/**/hooks/**/*.{js,jsx,ts,tsx}"],
       "rules": {
+        "@overleaf/no-empty-trans": "off",
+        "@overleaf/should-unescape-trans": "error",
+
         // https://astexplorer.net/
         "no-restricted-syntax": [
           "error",

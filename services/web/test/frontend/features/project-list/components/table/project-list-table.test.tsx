@@ -31,7 +31,7 @@ describe('<ProjectListTable />', function () {
     const columns = screen.getAllByRole('columnheader')
     columns.forEach(col => {
       if (col.getAttribute('aria-label') === 'Last Modified') {
-        expect(col.getAttribute('aria-sort')).to.equal('Descending')
+        expect(col.getAttribute('aria-sort')).to.equal('descending')
         foundSortedColumn = true
       } else {
         expect(col.getAttribute('aria-sort')).to.be.null
@@ -46,14 +46,14 @@ describe('<ProjectListTable />', function () {
       name: /last modified/i,
     })
     const lastModifiedCol = lastModifiedBtn.closest('th')
-    expect(lastModifiedCol?.getAttribute('aria-sort')).to.equal('Descending')
+    expect(lastModifiedCol?.getAttribute('aria-sort')).to.equal('descending')
     const ownerBtn = screen.getByRole('button', { name: /owner/i })
     const ownerCol = ownerBtn.closest('th')
     expect(ownerCol?.getAttribute('aria-sort')).to.be.null
     fireEvent.click(ownerBtn)
-    expect(ownerCol?.getAttribute('aria-sort')).to.equal('Descending')
+    expect(ownerCol?.getAttribute('aria-sort')).to.equal('descending')
     fireEvent.click(ownerBtn)
-    expect(ownerCol?.getAttribute('aria-sort')).to.equal('Ascending')
+    expect(ownerCol?.getAttribute('aria-sort')).to.equal('ascending')
   })
 
   it('renders buttons for sorting all sortable columns', function () {

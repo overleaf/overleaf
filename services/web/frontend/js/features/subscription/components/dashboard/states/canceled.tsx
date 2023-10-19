@@ -17,6 +17,8 @@ export function CanceledSubscription({
           values={{
             planName: subscription.plan.name,
           }}
+          shouldUnescape
+          tOptions={{ interpolation: { escapeValue: true } }}
           components={[
             // eslint-disable-next-line react/jsx-key
             <strong />,
@@ -29,6 +31,8 @@ export function CanceledSubscription({
           values={{
             terminateDate: subscription.recurly.nextPaymentDueAt,
           }}
+          shouldUnescape
+          tOptions={{ interpolation: { escapeValue: true } }}
           components={[
             // eslint-disable-next-line react/jsx-key
             <strong />,

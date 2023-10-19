@@ -30,6 +30,8 @@ export default function ManagedGroupSubscriptions() {
                   groupName: subscription.teamName || '',
                   adminEmail: subscription.admin_id.email,
                 }}
+                shouldUnescape
+                tOptions={{ interpolation: { escapeValue: true } }}
               />
             ) : (
               <Trans
@@ -40,6 +42,8 @@ export default function ManagedGroupSubscriptions() {
                   groupName: subscription.teamName || '',
                   adminEmail: subscription.admin_id.email,
                 }}
+                shouldUnescape
+                tOptions={{ interpolation: { escapeValue: true } }}
               />
             )}
           </p>

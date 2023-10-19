@@ -18,6 +18,8 @@ export default function ManagedPublisher({ publisher }: ManagedPublisherProps) {
           values={{
             publisherName: publisher.name || '',
           }}
+          shouldUnescape
+          tOptions={{ interpolation: { escapeValue: true } }}
         />
       </p>
       <RowLink

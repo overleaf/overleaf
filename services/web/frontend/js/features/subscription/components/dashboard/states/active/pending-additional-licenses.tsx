@@ -14,6 +14,8 @@ export function PendingAdditionalLicenses({
         additionalLicenses,
         totalLicenses,
       }}
+      shouldUnescape
+      tOptions={{ interpolation: { escapeValue: true } }}
       components={[
         // eslint-disable-next-line react/jsx-key
         <strong />,

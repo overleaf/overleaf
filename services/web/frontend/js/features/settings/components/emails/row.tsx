@@ -98,6 +98,8 @@ function SSOAffiliationInfo({ userEmailData }: SSOAffiliationInfoProps) {
                 values={{
                   institutionName: userEmailData.affiliation?.institution.name,
                 }}
+                shouldUnescape
+                tOptions={{ interpolation: { escapeValue: true } }}
               />
             </p>
           </EmailCell>
@@ -120,6 +122,8 @@ function SSOAffiliationInfo({ userEmailData }: SSOAffiliationInfoProps) {
                     institutionName:
                       userEmailData.affiliation?.institution.name,
                   }}
+                  shouldUnescape
+                  tOptions={{ interpolation: { escapeValue: true } }}
                   components={
                     /* eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key */
                     [<strong />]

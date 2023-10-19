@@ -123,6 +123,8 @@ export default function INRBanner({ variant, splitTestName }: INRBannerProps) {
             i18nKey="inr_discount_offer_green_banner"
             components={[<b />, <br />]} // eslint-disable-line react/jsx-key
             values={{ flag: '🇮🇳' }}
+            shouldUnescape
+            tOptions={{ interpolation: { escapeValue: true } }}
           />
         </Notification.Body>
         <Notification.Action>

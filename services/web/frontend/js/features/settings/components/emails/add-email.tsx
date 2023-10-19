@@ -117,6 +117,8 @@ function AddEmail() {
                   values={{
                     emailAddressLimit,
                   }}
+                  shouldUnescape
+                  tOptions={{ interpolation: { escapeValue: true } }}
                   components={[<strong />]} // eslint-disable-line react/jsx-key
                 />
               </span>

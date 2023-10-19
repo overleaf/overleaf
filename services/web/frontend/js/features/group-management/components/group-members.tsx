@@ -68,6 +68,8 @@ export default function GroupMembers() {
                       i18nKey="you_have_added_x_of_group_size_y"
                       components={[<strong />, <strong />]} // eslint-disable-line react/jsx-key
                       values={{ addedUsersSize: users.length, groupSize }}
+                      shouldUnescape
+                      tOptions={{ interpolation: { escapeValue: true } }}
                     />
                   </small>
                 )}

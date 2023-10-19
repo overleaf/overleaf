@@ -17,6 +17,8 @@ function SubscriptionRemainder({ subscription }: SubscriptionRemainderProps) {
       values={{
         terminationDate: subscription.recurly.nextPaymentDueAt,
       }}
+      shouldUnescape
+      tOptions={{ interpolation: { escapeValue: true } }}
       components={[
         // eslint-disable-next-line react/jsx-key
         <strong />,
@@ -28,6 +30,8 @@ function SubscriptionRemainder({ subscription }: SubscriptionRemainderProps) {
       values={{
         terminationDate: subscription.recurly.nextPaymentDueAt,
       }}
+      shouldUnescape
+      tOptions={{ interpolation: { escapeValue: true } }}
       components={[
         // eslint-disable-next-line react/jsx-key
         <strong />,

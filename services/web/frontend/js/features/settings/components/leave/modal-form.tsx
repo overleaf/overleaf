@@ -107,6 +107,8 @@ function LeaveModalForm({
           values={{
             userDefaultEmail,
           }}
+          shouldUnescape
+          tOptions={{ interpolation: { escapeValue: true } }}
         />
       </Checkbox>
       {error ? <LeaveModalFormError error={error} /> : null}

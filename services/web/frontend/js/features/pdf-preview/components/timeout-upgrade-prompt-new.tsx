@@ -112,6 +112,7 @@ const CompileTimeout = memo(function CompileTimeout({
           )}
         </>
       }
+      // @ts-ignore
       entryAriaLabel={t('your_compile_timed_out')}
       level="error"
     />
@@ -163,6 +164,8 @@ const PreventTimeoutHelpMessage = memo(function PreventTimeoutHelpMessage({
                     />,
                   ]}
                   values={{ date: 'October 27 2023' }}
+                  shouldUnescape
+                  tOptions={{ interpolation: { escapeValue: true } }}
                 />
               </>
             )}
@@ -229,6 +232,7 @@ const PreventTimeoutHelpMessage = memo(function PreventTimeoutHelpMessage({
           </p>
         </>
       }
+      // @ts-ignore
       entryAriaLabel={t('other_ways_to_prevent_compile_timeouts')}
       level="raw"
     />

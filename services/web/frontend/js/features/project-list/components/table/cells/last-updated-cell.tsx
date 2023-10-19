@@ -18,6 +18,7 @@ export default function LastUpdatedCell({ project }: LastUpdatedCellProps) {
       }}
       // eslint-disable-next-line react/jsx-boolean-value
       shouldUnescape={true}
+      tOptions={{ interpolation: { escapeValue: true } }}
     />
   ) : (
     fromNowDate(project.lastUpdated)

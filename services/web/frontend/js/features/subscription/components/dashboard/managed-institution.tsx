@@ -48,6 +48,8 @@ export default function ManagedInstitution({
           values={{
             institutionName: institution.name || '',
           }}
+          shouldUnescape
+          tOptions={{ interpolation: { escapeValue: true } }}
         />
       </p>
       <RowLink

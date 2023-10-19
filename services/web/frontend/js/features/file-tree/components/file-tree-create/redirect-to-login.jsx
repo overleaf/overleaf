@@ -34,6 +34,8 @@ export default function RedirectToLogin() {
     <Trans
       i18nKey="session_expired_redirecting_to_login"
       values={{ seconds: secondsToRedirect }}
+      shouldUnescape
+      tOptions={{ interpolation: { escapeValue: true } }}
     />
   )
 }

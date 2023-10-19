@@ -123,6 +123,8 @@ function UrlProvider({ file }: UrlProviderProps) {
           formattedDate: formatTime(file.created),
           relativeDate: relativeDate(file.created),
         }}
+        shouldUnescape
+        tOptions={{ interpolation: { escapeValue: true } }}
       />
     </p>
   )
@@ -156,6 +158,8 @@ function ProjectFilePathProvider({ file }: ProjectFilePathProviderProps) {
           formattedDate: formatTime(file.created),
           relativeDate: relativeDate(file.created),
         }}
+        shouldUnescape
+        tOptions={{ interpolation: { escapeValue: true } }}
       />
     </p>
     /* esline-enable jsx-a11y/anchor-has-content, react/jsx-key */
@@ -189,6 +193,8 @@ function ProjectOutputFileProvider({ file }: ProjectOutputFileProviderProps) {
           formattedDate: formatTime(file.created),
           relativeDate: relativeDate(file.created),
         }}
+        shouldUnescape
+        tOptions={{ interpolation: { escapeValue: true } }}
       />
     </p>
   )

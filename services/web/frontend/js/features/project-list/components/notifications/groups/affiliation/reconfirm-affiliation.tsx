@@ -62,6 +62,8 @@ function ReconfirmAffiliation({
           i18nKey="please_check_your_inbox_to_confirm"
           components={[<b />]} // eslint-disable-line react/jsx-key
           values={{ institutionName: institution.name }}
+          shouldUnescape
+          tOptions={{ interpolation: { escapeValue: true } }}
         />
         &nbsp;
         {isLoading ? (
@@ -113,6 +115,8 @@ function ReconfirmAffiliation({
         i18nKey="are_you_still_at"
         components={[<b />]} // eslint-disable-line react/jsx-key
         values={{ institutionName: institution.name }}
+        shouldUnescape
+        tOptions={{ interpolation: { escapeValue: true } }}
       />
       &nbsp;
       <Trans

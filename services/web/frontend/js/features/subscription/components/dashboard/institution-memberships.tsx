@@ -31,6 +31,8 @@ function InstitutionMemberships() {
               planName: 'Professional',
               institutionName: institution.name || '',
             }}
+            shouldUnescape
+            tOptions={{ interpolation: { escapeValue: true } }}
             components={[
               // eslint-disable-next-line react/jsx-key, jsx-a11y/anchor-has-content
               <a href="/user/subscription/plans" rel="noopener" />,

@@ -35,6 +35,8 @@ function PersonalSubscriptionRecurlySyncEmail() {
                   i18nKey="recurly_email_update_needed"
                   components={[<em />, <em />]} // eslint-disable-line react/jsx-key
                   values={{ recurlyEmail, userEmail }}
+                  shouldUnescape
+                  tOptions={{ interpolation: { escapeValue: true } }}
                 />
               </p>
               <div>

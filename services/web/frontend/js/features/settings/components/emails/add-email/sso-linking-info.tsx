@@ -36,6 +36,7 @@ function SsoLinkingInfo({ domainInfo, email }: SSOLinkingInfoProps) {
           values={{ institutionName: domainInfo.university.name }}
           // eslint-disable-next-line react/jsx-boolean-value
           shouldUnescape={true}
+          tOptions={{ interpolation: { escapeValue: true } }}
         />
       </p>
       <p>
@@ -45,6 +46,7 @@ function SsoLinkingInfo({ domainInfo, email }: SSOLinkingInfoProps) {
           values={{ institutionName: domainInfo.university.name }}
           // eslint-disable-next-line react/jsx-boolean-value
           shouldUnescape={true}
+          tOptions={{ interpolation: { escapeValue: true } }}
         />{' '}
         <a
           href="/learn/how-to/Institutional_Login"

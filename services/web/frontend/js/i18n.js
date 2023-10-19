@@ -33,6 +33,10 @@ i18n.use(initReactI18next).init({
     // injection via another nested value
     skipOnVariables: true,
 
+    // Do not escape values, as `t` + React will already escape them
+    // (`escapeValue: true` and `shouldUnescape` must be set on each use of `Trans`)
+    escapeValue: false,
+
     defaultVariables: {
       appName: window.ExposedSettings.appName,
     },

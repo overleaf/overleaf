@@ -33,6 +33,8 @@ function ConfirmationModal({
             i18nKey="do_you_want_to_change_your_primary_email_address_to"
             components={{ b: <b /> }}
             values={{ email }}
+            shouldUnescape
+            tOptions={{ interpolation: { escapeValue: true } }}
           />
         </p>
         <p className="mb-0">{t('log_in_with_primary_email_address')}</p>

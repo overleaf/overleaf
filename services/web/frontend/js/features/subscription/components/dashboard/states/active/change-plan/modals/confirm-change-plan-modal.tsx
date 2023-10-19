@@ -69,6 +69,8 @@ export function ConfirmChangePlanModal() {
             values={{
               planName: plan.name,
             }}
+            shouldUnescape
+            tOptions={{ interpolation: { escapeValue: true } }}
             components={[
               // eslint-disable-next-line react/jsx-key
               <strong />,

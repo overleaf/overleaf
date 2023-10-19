@@ -89,6 +89,8 @@ export default function LATAMBanner() {
           i18nKey="latam_discount_offer"
           components={[<b />]} // eslint-disable-line react/jsx-key
           values={{ flag, currencyName, discountPercent }}
+          shouldUnescape
+          tOptions={{ interpolation: { escapeValue: true } }}
         />
       </Notification.Body>
       <Notification.Action>

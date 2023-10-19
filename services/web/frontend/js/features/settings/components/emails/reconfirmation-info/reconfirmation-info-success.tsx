@@ -17,6 +17,8 @@ function ReconfirmationInfoSuccess({
       <Trans
         i18nKey="your_affiliation_is_confirmed"
         values={{ institutionName: institution.name }}
+        shouldUnescape
+        tOptions={{ interpolation: { escapeValue: true } }}
         components={[<strong />]} // eslint-disable-line react/jsx-key
       />{' '}
       {t('thank_you_exclamation')}

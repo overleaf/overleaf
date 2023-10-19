@@ -16,6 +16,8 @@ export function PendingPlanChange({
           values={{
             pendingPlanName: subscription.pendingPlan.name,
           }}
+          shouldUnescape
+          tOptions={{ interpolation: { escapeValue: true } }}
           components={[
             // eslint-disable-next-line react/jsx-key
             <strong />,
@@ -35,6 +37,8 @@ export function PendingPlanChange({
                 subscription.recurly.pendingAdditionalLicenses,
               pendingTotalLicenses: subscription.recurly.pendingTotalLicenses,
             }}
+            shouldUnescape
+            tOptions={{ interpolation: { escapeValue: true } }}
             components={[
               // eslint-disable-next-line react/jsx-key
               <strong />,

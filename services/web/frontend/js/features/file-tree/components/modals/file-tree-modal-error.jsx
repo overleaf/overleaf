@@ -46,6 +46,8 @@ function FileTreeModalError() {
             i18nKey="file_already_exists_in_this_location"
             components={[<strong />]} // eslint-disable-line react/jsx-key
             values={{ fileName: error.entityName }}
+            shouldUnescape
+            tOptions={{ interpolation: { escapeValue: true } }}
           />
         )
       case InvalidFilenameError:

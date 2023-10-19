@@ -24,6 +24,8 @@ export default function AddCollaboratorsUpgradeContentVariant() {
             <Trans
               i18nKey="collabs_per_proj"
               values={{ collabcount: 'Multiple' }}
+              shouldUnescape
+              tOptions={{ interpolation: { escapeValue: true } }}
             />
           </li>
           <li>

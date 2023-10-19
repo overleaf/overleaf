@@ -69,6 +69,8 @@ function CommonNotification({ notification }: CommonNotificationProps) {
                 i18nKey="notification_project_invite_accepted_message"
                 components={{ b: <b /> }}
                 values={{ projectName: notification.messageOpts.projectName }}
+                shouldUnescape
+                tOptions={{ interpolation: { escapeValue: true } }}
               />
             ) : (
               <Trans
@@ -78,6 +80,8 @@ function CommonNotification({ notification }: CommonNotificationProps) {
                   userName: notification.messageOpts.userName,
                   projectName: notification.messageOpts.projectName,
                 }}
+                shouldUnescape
+                tOptions={{ interpolation: { escapeValue: true } }}
               />
             )}
           </Notification.Body>
@@ -136,6 +140,8 @@ function CommonNotification({ notification }: CommonNotificationProps) {
               values={{
                 institutionName: notification.messageOpts.university_name,
               }}
+              shouldUnescape
+              tOptions={{ interpolation: { escapeValue: true } }}
             />
             <br />
             {notification.messageOpts.ssoEnabled ? (
@@ -163,6 +169,8 @@ function CommonNotification({ notification }: CommonNotificationProps) {
                   values={{
                     institutionName: notification.messageOpts.university_name,
                   }}
+                  shouldUnescape
+                  tOptions={{ interpolation: { escapeValue: true } }}
                 />
                 <br />
                 {t('add_email_to_claim_features')}
@@ -219,6 +227,8 @@ function CommonNotification({ notification }: CommonNotificationProps) {
                 i18nKey="dropbox_duplicate_project_names"
                 components={[<b />]} // eslint-disable-line react/jsx-key
                 values={{ projectName: notification.messageOpts.projectName }}
+                shouldUnescape
+                tOptions={{ interpolation: { escapeValue: true } }}
               />
             </p>
             <p>

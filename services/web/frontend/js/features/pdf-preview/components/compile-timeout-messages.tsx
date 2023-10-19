@@ -201,6 +201,8 @@ function CompileTimeoutMessages() {
                     i18nKey="compile_timeout_will_be_reduced_project_exceeds_limit_speed_up_compile"
                     components={compileTimeoutBlogLinks}
                     values={{ date: 'October 27 2023' }}
+                    shouldUnescape
+                    tOptions={{ interpolation: { escapeValue: true } }}
                   />{' '}
                   <Trans i18nKey="and_you_can_upgrade_for_plenty_more_compile_time" />
                 </p>
@@ -222,6 +224,8 @@ function CompileTimeoutMessages() {
                     i18nKey="compile_timeout_will_be_reduced_project_exceeds_limit_speed_up_compile"
                     components={compileTimeoutBlogLinks}
                     values={{ date: 'October 27 2023' }}
+                    shouldUnescape
+                    tOptions={{ interpolation: { escapeValue: true } }}
                   />
                 </p>
                 <p className="row-spaced">

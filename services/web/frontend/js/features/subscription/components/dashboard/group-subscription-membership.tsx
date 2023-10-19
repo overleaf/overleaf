@@ -37,6 +37,8 @@ export default function GroupSubscriptionMembership({
             groupName: subscription.teamName || '',
             adminEmail: subscription.admin_id.email,
           }}
+          shouldUnescape
+          tOptions={{ interpolation: { escapeValue: true } }}
         />
       </p>
       {subscription.teamNotice && (

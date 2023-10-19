@@ -25,6 +25,8 @@ export default function ManagedAccountAlert() {
               values={{
                 admin: currentManagedUserAdminEmail,
               }}
+              shouldUnescape
+              tOptions={{ interpolation: { escapeValue: true } }}
             />
           </strong>
         </div>
