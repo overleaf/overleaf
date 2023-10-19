@@ -28,6 +28,10 @@ const CLAIRE_JENNINGS = {
   enrollment: {
     managedBy: GROUP_ID,
     enrolledAt: new Date('2023-01-03'),
+    sso: {
+      providerId: '123',
+      externalId: '123',
+    },
   },
 }
 const PATHS = {
@@ -35,6 +39,14 @@ const PATHS = {
   removeMember: `/manage/groups/${GROUP_ID}/user`,
   removeInvite: `/manage/groups/${GROUP_ID}/invites`,
   exportMembers: `/manage/groups/${GROUP_ID}/members/export`,
+}
+
+function mountGroupMembersProvider() {
+  cy.mount(
+    <GroupMembersProvider>
+      <GroupMembers />
+    </GroupMembersProvider>
+  )
 }
 
 describe('group members, with managed users', function () {
@@ -51,12 +63,7 @@ describe('group members, with managed users', function () {
       win.metaAttributesCache.set('ol-groupSize', 10)
       win.metaAttributesCache.set('ol-managedUsersActive', true)
     })
-
-    cy.mount(
-      <GroupMembersProvider>
-        <GroupMembers />
-      </GroupMembersProvider>
-    )
+    mountGroupMembersProvider()
   })
 
   it('renders the group members page', function () {
@@ -207,5 +214,57 @@ describe('group members, with managed users', function () {
     })
 
     cy.get('.alert').contains('Sorry, something went wrong')
+  })
+})
+
+describe('Group members when group SSO is enabled', function () {
+  beforeEach(function () {
+    cy.window().then(win => {
+      win.metaAttributesCache = new Map()
+      win.metaAttributesCache.set('ol-users', [
+        JOHN_DOE,
+        BOBBY_LAPOINTE,
+        CLAIRE_JENNINGS,
+      ])
+      win.metaAttributesCache.set('ol-groupId', GROUP_ID)
+      win.metaAttributesCache.set('ol-groupName', 'My Awesome Team')
+      win.metaAttributesCache.set('ol-groupSize', 10)
+      win.metaAttributesCache.set('ol-managedUsersActive', true)
+    })
+  })
+
+  it('should not display SSO Column when group sso is not enabled', function () {
+    cy.window().then(win => {
+      win.metaAttributesCache.set('ol-groupSSOActive', false)
+    })
+    mountGroupMembersProvider()
+    cy.get('ul.managed-users-list table > tbody').within(() => {
+      cy.get('tr:nth-child(2)').within(() => {
+        cy.contains('bobby.lapointe@test.com')
+        cy.get('.sr-only').contains('SSO unlinked').should('not.exist')
+      })
+
+      cy.get('tr:nth-child(3)').within(() => {
+        cy.contains('claire.jennings@test.com')
+        cy.get('.sr-only').contains('SSO linked').should('not.exist')
+      })
+    })
+  })
+  it('should display SSO Column when group sso is not enabled', function () {
+    cy.window().then(win => {
+      win.metaAttributesCache.set('ol-groupSSOActive', true)
+    })
+    mountGroupMembersProvider()
+    cy.get('ul.managed-users-list table > tbody').within(() => {
+      cy.get('tr:nth-child(2)').within(() => {
+        cy.contains('bobby.lapointe@test.com')
+        cy.get('.sr-only').contains('SSO unlinked')
+      })
+
+      cy.get('tr:nth-child(3)').within(() => {
+        cy.contains('claire.jennings@test.com')
+        cy.get('.sr-only').contains('SSO linked')
+      })
+    })
   })
 })

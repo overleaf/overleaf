@@ -1,9 +1,11 @@
 import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useGroupMembersContext } from '../../context/group-members-context'
+import getMeta from '@/utils/meta'
 
 export default function ManagedUsersSelectAllCheckbox() {
   const { t } = useTranslation()
+  const groupSSOActive = getMeta('ol-groupSSOActive')
 
   const { selectedUsers, users, selectAllNonManagedUsers, unselectAllUsers } =
     useGroupMembersContext()
@@ -28,7 +30,11 @@ export default function ManagedUsersSelectAllCheckbox() {
   }
 
   return (
-    <td className="cell-checkbox">
+    <td
+      className={
+        groupSSOActive ? 'cell-checkbox-with-sso-col ' : 'cell-checkbox'
+      }
+    >
       <label htmlFor="select-all" className="sr-only">
         {t('select_all')}
       </label>

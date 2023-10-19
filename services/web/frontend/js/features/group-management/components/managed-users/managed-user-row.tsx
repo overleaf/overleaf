@@ -6,8 +6,10 @@ import Badge from '../../../../shared/components/badge'
 import Tooltip from '../../../../shared/components/tooltip'
 import type { ManagedUserAlert } from '../../utils/types'
 import ManagedUserStatus from './managed-user-status'
+import SSOStatus from './sso-status'
 import ManagedUserDropdownButton from './managed-user-dropdown-button'
 import ManagedUsersSelectUserCheckbox from './managed-users-select-user-checkbox'
+import getMeta from '@/utils/meta'
 
 type ManagedUserRowProps = {
   user: User
@@ -23,6 +25,7 @@ export default function ManagedUserRow({
   groupId,
 }: ManagedUserRowProps) {
   const { t } = useTranslation()
+  const groupSSOActive = getMeta('ol-groupSSOActive')
 
   return (
     <tr
@@ -30,7 +33,7 @@ export default function ManagedUserRow({
       className={`managed-user-row ${user.invite ? 'text-muted' : ''}`}
     >
       <ManagedUsersSelectUserCheckbox user={user} />
-      <td className="cell-email">
+      <td className={groupSSOActive ? 'cell-email-with-sso-col' : 'cell-email'}>
         <span>
           {user.email}
           {user.invite ? (
@@ -73,7 +76,14 @@ export default function ManagedUserRow({
           ? moment(user.last_active_at).format('Do MMM YYYY')
           : 'N/A'}
       </td>
-      <td className="cell-security">
+      {groupSSOActive && (
+        <td className="cell-security">
+          <div className="managed-user-security">
+            <SSOStatus user={user} />
+          </div>
+        </td>
+      )}
+      <td className="cell-managed">
         <div className="managed-user-security">
           <ManagedUserStatus user={user} />
         </div>

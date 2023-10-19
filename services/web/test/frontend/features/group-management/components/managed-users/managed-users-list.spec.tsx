@@ -1,9 +1,17 @@
 import ManagedUsersList from '../../../../../../frontend/js/features/group-management/components/managed-users/managed-users-list'
 import { GroupMembersProvider } from '../../../../../../frontend/js/features/group-management/context/group-members-context'
 
-describe('ManagedUsersList', function () {
-  const groupId = 'somegroup'
+const groupId = 'somegroup'
 
+function mountManagedUsersList() {
+  cy.mount(
+    <GroupMembersProvider>
+      <ManagedUsersList groupId={groupId} />
+    </GroupMembersProvider>
+  )
+}
+
+describe('ManagedUsersList', function () {
   describe('with users', function () {
     const users = [
       {
@@ -32,15 +40,31 @@ describe('ManagedUsersList', function () {
       cy.window().then(win => {
         win.metaAttributesCache.set('ol-users', users)
       })
-
-      cy.mount(
-        <GroupMembersProvider>
-          <ManagedUsersList groupId={groupId} />
-        </GroupMembersProvider>
-      )
+      mountManagedUsersList()
     })
 
-    it('should render the table headers', function () {
+    it('should render the table headers but not SSO Column', function () {
+      cy.window().then(win => {
+        win.metaAttributesCache.set('ol-groupSSOActive', false)
+      })
+      mountManagedUsersList()
+      cy.get('#managed-users-list-headers').should('exist')
+
+      // Select-all checkbox
+      cy.get('#managed-users-list-headers .select-all').should('exist')
+
+      cy.get('#managed-users-list-headers').contains('Email')
+      cy.get('#managed-users-list-headers').contains('Name')
+      cy.get('#managed-users-list-headers').contains('Last Active')
+      cy.get('#managed-users-list-headers')
+        .contains('Security')
+        .should('not.exist')
+    })
+    it('should render the table headers with SSO Column', function () {
+      cy.window().then(win => {
+        win.metaAttributesCache.set('ol-groupSSOActive', true)
+      })
+      mountManagedUsersList()
       cy.get('#managed-users-list-headers').should('exist')
 
       // Select-all checkbox

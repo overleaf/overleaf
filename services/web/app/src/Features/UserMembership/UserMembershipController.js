@@ -17,9 +17,14 @@ const EmailHelper = require('../Helpers/EmailHelper')
 const { csvAttachment } = require('../../infrastructure/Response')
 const { UserIsManagerError } = require('./UserMembershipErrors')
 const CSVParser = require('json2csv').Parser
+const SSOConfigManager = require('../../../../modules/managed-users/app/src/SSOConfigManager')
 
 async function manageGroupMembers(req, res, next) {
   const { entity, entityConfig } = req
+
+  const ssoConfig = await SSOConfigManager.promises.getSSOConfig(
+    entity.ssoConfig
+  )
   return entity.fetchV1Data(function (error, entity) {
     if (error != null) {
       return next(error)
@@ -37,12 +42,14 @@ async function manageGroupMembers(req, res, next) {
         if (entityConfig.fields.name) {
           entityName = entity[entityConfig.fields.name]
         }
+
         return res.render('user_membership/group-members-react', {
           name: entityName,
           groupId: entityPrimaryKey,
           users,
           groupSize: entity.membersLimit,
           managedUsersActive: entity.groupPolicy != null,
+          groupSSOActive: ssoConfig?.enabled,
         })
       }
     )

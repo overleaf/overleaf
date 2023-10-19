@@ -9,6 +9,7 @@ import ManagedUserRow from './managed-user-row'
 import OffboardManagedUserModal from './offboard-managed-user-modal'
 import ManagedUsersListAlert from './managed-users-list-alert'
 import ManagedUsersSelectAllCheckbox from './managed-users-select-all-checkbox'
+import getMeta from '@/utils/meta'
 
 type ManagedUsersListProps = {
   groupId: string
@@ -22,6 +23,7 @@ export default function ManagedUsersList({ groupId }: ManagedUsersListProps) {
   const [managedUserAlert, setManagedUserAlert] =
     useState<ManagedUserAlert>(undefined)
   const { users } = useGroupMembersContext()
+  const groupSSOActive = getMeta('ol-groupSSOActive')
 
   return (
     <div>
@@ -40,7 +42,13 @@ export default function ManagedUsersList({ groupId }: ManagedUsersListProps) {
                 <thead>
                   <tr>
                     <ManagedUsersSelectAllCheckbox />
-                    <td className="cell-email">
+                    <td
+                      className={
+                        groupSSOActive
+                          ? 'cell-email-with-sso-col'
+                          : 'cell-email'
+                      }
+                    >
                       <span className="header">{t('email')}</span>
                     </td>
                     <td className="cell-name">
@@ -60,8 +68,13 @@ export default function ManagedUsersList({ groupId }: ManagedUsersListProps) {
                         </span>
                       </Tooltip>
                     </td>
-                    <td className="cell-security">
-                      <span className="header">{t('security')}</span>
+                    {groupSSOActive && (
+                      <td className="cell-security">
+                        <span className="header">{t('security')}</span>
+                      </td>
+                    )}
+                    <td className="cell-managed">
+                      <span className="header">{t('managed')}</span>
                     </td>
                     <td />
                   </tr>

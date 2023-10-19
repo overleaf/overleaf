@@ -69,6 +69,11 @@ describe('UserMembershipController', function () {
       getSessionUser: sinon.stub().returns(this.user),
       getLoggedInUserId: sinon.stub().returns(this.user._id),
     }
+    this.SSOConfigManager = {
+      promises: {
+        getSSOConfig: sinon.stub().resolves({ enabled: true }),
+      },
+    }
     this.UserMembershipHandler = {
       getEntity: sinon.stub().yields(null, this.subscription),
       createEntity: sinon.stub().yields(null, this.institution),
@@ -91,6 +96,8 @@ describe('UserMembershipController', function () {
           '../SplitTests/SplitTestHandler': this.SplitTestHandler,
           './UserMembershipHandler': this.UserMembershipHandler,
           '@overleaf/settings': this.Settings,
+          '../../../../modules/managed-users/app/src/SSOConfigManager':
+            this.SSOConfigManager,
         },
       }
     ))
