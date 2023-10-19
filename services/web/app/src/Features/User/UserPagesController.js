@@ -8,7 +8,7 @@ const SessionManager = require('../Authentication/SessionManager')
 const NewsletterManager = require('../Newsletter/NewsletterManager')
 const SubscriptionLocator = require('../Subscription/SubscriptionLocator')
 const _ = require('lodash')
-const { expressify } = require('../../util/promises')
+const { expressify } = require('@overleaf/promise-utils')
 const Features = require('../../infrastructure/Features')
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 

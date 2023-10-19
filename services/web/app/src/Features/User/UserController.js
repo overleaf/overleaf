@@ -17,7 +17,7 @@ const OError = require('@overleaf/o-error')
 const EmailHandler = require('../Email/EmailHandler')
 const UrlHelper = require('../Helpers/UrlHelper')
 const { promisify } = require('util')
-const { expressify } = require('../../util/promises')
+const { expressify } = require('@overleaf/promise-utils')
 const {
   acceptsJson,
 } = require('../../infrastructure/RequestContentTypeDetection')

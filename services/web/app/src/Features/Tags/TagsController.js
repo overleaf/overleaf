@@ -1,7 +1,7 @@
 const TagsHandler = require('./TagsHandler')
 const SessionManager = require('../Authentication/SessionManager')
 const Errors = require('../Errors/Errors')
-const { expressify } = require('../../util/promises')
+const { expressify } = require('@overleaf/promise-utils')
 
 async function _getTags(userId, _req, res) {
   if (!userId) {

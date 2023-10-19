@@ -1,5 +1,5 @@
 const NotificationsHandler = require('./NotificationsHandler')
-const { promisifyAll } = require('../../util/promises')
+const { promisifyAll } = require('@overleaf/promise-utils')
 const request = require('request')
 const settings = require('@overleaf/settings')
 

@@ -8,7 +8,7 @@ const ProjectDeleter = require('../Project/ProjectDeleter')
 const EditorRealTimeController = require('./EditorRealTimeController')
 const async = require('async')
 const PublicAccessLevels = require('../Authorization/PublicAccessLevels')
-const { promisifyAll } = require('../../util/promises')
+const { promisifyAll } = require('@overleaf/promise-utils')
 
 const EditorController = {
   addDoc(projectId, folderId, docName, docLines, source, userId, callback) {

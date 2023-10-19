@@ -7,7 +7,7 @@ const UserUpdater = require('../User/UserUpdater')
 const UserSessionsManager = require('../User/UserSessionsManager')
 const OError = require('@overleaf/o-error')
 const EmailsHelper = require('../Helpers/EmailHelper')
-const { expressify } = require('../../util/promises')
+const { expressify } = require('@overleaf/promise-utils')
 
 async function setNewUserPassword(req, res, next) {
   let user

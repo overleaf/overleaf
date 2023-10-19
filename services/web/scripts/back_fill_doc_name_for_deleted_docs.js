@@ -1,5 +1,5 @@
 const { batchedUpdate } = require('./helpers/batchedUpdate')
-const { promiseMapWithLimit, promisify } = require('../app/src/util/promises')
+const { promiseMapWithLimit, promisify } = require('@overleaf/promise-utils')
 const { db } = require('../app/src/infrastructure/mongodb')
 const sleep = promisify(setTimeout)
 const _ = require('lodash')

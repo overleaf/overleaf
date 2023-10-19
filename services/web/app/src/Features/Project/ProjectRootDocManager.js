@@ -23,7 +23,7 @@ const { promisify } = require('util')
 const async = require('async')
 const globby = require('globby')
 const _ = require('underscore')
-const { promisifyAll } = require('../../util/promises')
+const { promisifyAll } = require('@overleaf/promise-utils')
 
 module.exports = ProjectRootDocManager = {
   setRootDocAutomatically(projectId, callback) {

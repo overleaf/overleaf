@@ -1,6 +1,6 @@
 const logger = require('@overleaf/logger')
 const { ProjectAuditLogEntry } = require('../../models/ProjectAuditLogEntry')
-const { callbackify } = require('../../util/promises')
+const { callbackify } = require('@overleaf/promise-utils')
 
 module.exports = {
   promises: {

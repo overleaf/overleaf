@@ -1,5 +1,5 @@
 const UserGetter = require('./UserGetter')
-const { callbackify } = require('../../util/promises')
+const { callbackify } = require('@overleaf/promise-utils')
 
 async function getPersonalInfo(userId) {
   return UserGetter.promises.getUser(userId, {

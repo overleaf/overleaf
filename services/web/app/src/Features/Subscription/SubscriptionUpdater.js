@@ -1,5 +1,5 @@
 const { db, ObjectId } = require('../../infrastructure/mongodb')
-const { callbackify } = require('../../util/promises')
+const { callbackify } = require('@overleaf/promise-utils')
 const { Subscription } = require('../../models/Subscription')
 const SubscriptionLocator = require('./SubscriptionLocator')
 const PlansLocator = require('./PlansLocator')

@@ -1,7 +1,7 @@
 const crypto = require('crypto')
 const SurveyCache = require('./SurveyCache')
 const SubscriptionLocator = require('../Subscription/SubscriptionLocator')
-const { callbackify } = require('../../util/promises')
+const { callbackify } = require('@overleaf/promise-utils')
 
 /**
  * @typedef {import('../../../../types/project/dashboard/survey').Survey} Survey

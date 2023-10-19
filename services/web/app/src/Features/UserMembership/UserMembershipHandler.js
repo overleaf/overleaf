@@ -13,7 +13,7 @@
  */
 const { ObjectId } = require('mongodb')
 const async = require('async')
-const { promisifyAll } = require('../../util/promises')
+const { promisifyAll } = require('@overleaf/promise-utils')
 const Errors = require('../Errors/Errors')
 const EntityModels = {
   Institution: require('../../models/Institution').Institution,

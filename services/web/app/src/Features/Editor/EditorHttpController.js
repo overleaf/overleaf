@@ -13,7 +13,7 @@ const SessionManager = require('../Authentication/SessionManager')
 const Errors = require('../Errors/Errors')
 const DocstoreManager = require('../Docstore/DocstoreManager')
 const logger = require('@overleaf/logger')
-const { expressify } = require('../../util/promises')
+const { expressify } = require('@overleaf/promise-utils')
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const {
   NEW_COMPILE_TIMEOUT_ENFORCED_CUTOFF,

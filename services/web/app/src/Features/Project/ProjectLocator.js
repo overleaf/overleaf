@@ -4,7 +4,7 @@ const OError = require('@overleaf/o-error')
 const async = require('async')
 const ProjectGetter = require('./ProjectGetter')
 const Errors = require('../Errors/Errors')
-const { promisifyMultiResult } = require('../../util/promises')
+const { promisifyMultiResult } = require('@overleaf/promise-utils')
 const { iterablePaths } = require('./IterablePath')
 
 function findElement(options, _callback) {

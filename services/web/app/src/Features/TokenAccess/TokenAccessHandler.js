@@ -6,7 +6,7 @@ const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
 const V1Api = require('../V1/V1Api')
 const crypto = require('crypto')
-const { promisifyAll } = require('../../util/promises')
+const { promisifyAll } = require('@overleaf/promise-utils')
 const Analytics = require('../Analytics/AnalyticsManager')
 
 const READ_AND_WRITE_TOKEN_PATTERN = '([0-9]+[a-z]{6,12})'

@@ -17,7 +17,7 @@ const ClsiCookieManager = require('./ClsiCookieManager')(
 const Path = require('path')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
-const { callbackify } = require('../../util/promises')
+const { callbackify } = require('@overleaf/promise-utils')
 const {
   fetchStreamWithResponse,
   RequestFailedError,

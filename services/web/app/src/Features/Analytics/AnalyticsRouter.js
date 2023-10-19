@@ -3,7 +3,7 @@ const AnalyticsController = require('./AnalyticsController')
 const AnalyticsProxy = require('./AnalyticsProxy')
 const { RateLimiter } = require('../../infrastructure/RateLimiter')
 const RateLimiterMiddleware = require('../Security/RateLimiterMiddleware')
-const { expressify } = require('../../util/promises')
+const { expressify } = require('@overleaf/promise-utils')
 
 const rateLimiters = {
   recordEvent: new RateLimiter('analytics-record-event', {

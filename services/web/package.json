@@ -74,6 +74,7 @@
     "@overleaf/metrics": "*",
     "@overleaf/o-error": "*",
     "@overleaf/object-persistor": "*",
+    "@overleaf/promise-utils": "*",
     "@overleaf/redis-wrapper": "*",
     "@overleaf/settings": "*",
     "@slack/webhook": "^6.1.0",

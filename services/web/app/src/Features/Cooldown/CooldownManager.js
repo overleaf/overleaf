@@ -14,7 +14,7 @@ let CooldownManager
 const RedisWrapper = require('../../infrastructure/RedisWrapper')
 const rclient = RedisWrapper.client('cooldown')
 const logger = require('@overleaf/logger')
-const { promisifyAll } = require('../../util/promises')
+const { promisifyAll } = require('@overleaf/promise-utils')
 
 const COOLDOWN_IN_SECONDS = 60 * 10
 

@@ -1,6 +1,6 @@
 const { Project } = require('../../models/Project')
 const settings = require('@overleaf/settings')
-const { promisifyAll } = require('../../util/promises')
+const { promisifyAll } = require('@overleaf/promise-utils')
 
 const safeCompilers = ['xelatex', 'pdflatex', 'latex', 'lualatex']
 

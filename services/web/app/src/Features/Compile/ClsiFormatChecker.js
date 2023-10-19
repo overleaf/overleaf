@@ -13,7 +13,7 @@ let ClsiFormatChecker
 const _ = require('lodash')
 const async = require('async')
 const settings = require('@overleaf/settings')
-const { promisifyAll } = require('../../util/promises')
+const { promisifyAll } = require('@overleaf/promise-utils')
 
 module.exports = ClsiFormatChecker = {
   checkRecoursesForProblems(resources, callback) {

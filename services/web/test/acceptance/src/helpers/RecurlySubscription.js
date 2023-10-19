@@ -2,7 +2,7 @@ const { ObjectId } = require('mongodb')
 const Subscription = require('./Subscription')
 const MockRecurlyApiClass = require('../mocks/MockRecurlyApi')
 const RecurlyWrapper = require('../../../../app/src/Features/Subscription/RecurlyWrapper')
-const { promisifyClass } = require('../../../../app/src/util/promises')
+const { promisifyClass } = require('@overleaf/promise-utils')
 
 let MockRecurlyApi
 

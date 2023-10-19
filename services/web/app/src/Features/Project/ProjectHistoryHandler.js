@@ -2,7 +2,7 @@ const { Project } = require('../../models/Project')
 const ProjectDetailsHandler = require('./ProjectDetailsHandler')
 const HistoryManager = require('../History/HistoryManager')
 const ProjectEntityUpdateHandler = require('./ProjectEntityUpdateHandler')
-const { promisifyAll } = require('../../util/promises')
+const { promisifyAll } = require('@overleaf/promise-utils')
 
 const ProjectHistoryHandler = {
   setHistoryId(projectId, historyId, callback) {

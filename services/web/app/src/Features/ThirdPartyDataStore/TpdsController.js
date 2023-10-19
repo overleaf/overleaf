@@ -1,4 +1,4 @@
-const { expressify } = require('../../util/promises')
+const { expressify } = require('@overleaf/promise-utils')
 const TpdsUpdateHandler = require('./TpdsUpdateHandler')
 const UpdateMerger = require('./UpdateMerger')
 const Errors = require('../Errors/Errors')

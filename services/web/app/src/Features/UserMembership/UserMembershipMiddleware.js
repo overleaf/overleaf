@@ -1,4 +1,4 @@
-const { expressify } = require('../../util/promises')
+const { expressify } = require('@overleaf/promise-utils')
 const async = require('async')
 const UserMembershipAuthorization = require('./UserMembershipAuthorization')
 const AuthenticationController = require('../Authentication/AuthenticationController')

@@ -4,7 +4,7 @@ const metrics = require('@overleaf/metrics')
 const logger = require('@overleaf/logger')
 const moment = require('moment')
 const settings = require('@overleaf/settings')
-const { promisifyAll } = require('../../util/promises')
+const { promisifyAll } = require('@overleaf/promise-utils')
 const {
   promises: InstitutionsAPIPromises,
 } = require('../Institutions/InstitutionsAPI')

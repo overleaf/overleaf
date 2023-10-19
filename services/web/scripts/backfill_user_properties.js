@@ -1,7 +1,7 @@
 const WRITE_CONCURRENCY = parseInt(process.env.WRITE_CONCURRENCY, 10) || 10
 
 const { batchedUpdateWithResultHandling } = require('./helpers/batchedUpdate')
-const { promiseMapWithLimit } = require('../app/src/util/promises')
+const { promiseMapWithLimit } = require('@overleaf/promise-utils')
 const SubscriptionLocator = require('../app/src/Features/Subscription/SubscriptionLocator')
 const PlansLocator = require('../app/src/Features/Subscription/PlansLocator')
 const FeaturesHelper = require('../app/src/Features/Subscription/FeaturesHelper')

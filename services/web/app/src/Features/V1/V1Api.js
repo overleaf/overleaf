@@ -10,7 +10,7 @@
 const request = require('request')
 const settings = require('@overleaf/settings')
 const Errors = require('../Errors/Errors')
-const { promisifyAll } = require('../../util/promises')
+const { promisifyAll } = require('@overleaf/promise-utils')
 
 // TODO: check what happens when these settings aren't defined
 const DEFAULT_V1_PARAMS = {

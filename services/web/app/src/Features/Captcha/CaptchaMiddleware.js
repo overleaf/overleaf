@@ -5,7 +5,7 @@ const Metrics = require('@overleaf/metrics')
 const OError = require('@overleaf/o-error')
 const DeviceHistory = require('./DeviceHistory')
 const AuthenticationController = require('../Authentication/AuthenticationController')
-const { expressify } = require('../../util/promises')
+const { expressify } = require('@overleaf/promise-utils')
 
 function respondInvalidCaptcha(req, res) {
   res.status(400).json({

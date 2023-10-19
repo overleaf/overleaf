@@ -1,7 +1,7 @@
 const minimist = require('minimist')
 const { promisify } = require('util')
 const bcrypt = require('bcrypt')
-const { promiseMapWithLimit } = require('../app/src/util/promises')
+const { promiseMapWithLimit } = require('@overleaf/promise-utils')
 const csv = require('csv/sync')
 
 const bcryptCompare = promisify(bcrypt.compare)

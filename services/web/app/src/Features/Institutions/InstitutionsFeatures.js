@@ -2,7 +2,7 @@ let InstitutionsFeatures
 const UserGetter = require('../User/UserGetter')
 const PlansLocator = require('../Subscription/PlansLocator')
 const Settings = require('@overleaf/settings')
-const { promisifyAll } = require('../../util/promises')
+const { promisifyAll } = require('@overleaf/promise-utils')
 
 module.exports = InstitutionsFeatures = {
   getInstitutionsFeatures(userId, callback) {

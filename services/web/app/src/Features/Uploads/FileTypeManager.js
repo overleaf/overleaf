@@ -1,7 +1,7 @@
 const fs = require('fs')
 const Path = require('path')
 const isUtf8 = require('utf-8-validate')
-const { promisifyAll } = require('../../util/promises')
+const { promisifyAll } = require('@overleaf/promise-utils')
 const Settings = require('@overleaf/settings')
 const Minimatch = require('minimatch').Minimatch
 

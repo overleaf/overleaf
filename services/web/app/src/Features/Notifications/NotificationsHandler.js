@@ -2,7 +2,7 @@ const settings = require('@overleaf/settings')
 const request = require('request')
 const logger = require('@overleaf/logger')
 const _ = require('lodash')
-const { promisifyAll } = require('../../util/promises')
+const { promisifyAll } = require('@overleaf/promise-utils')
 
 const notificationsApi = _.get(settings, ['apis', 'notifications', 'url'])
 const oneSecond = 1000

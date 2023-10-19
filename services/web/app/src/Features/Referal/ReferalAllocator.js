@@ -1,7 +1,7 @@
 const OError = require('@overleaf/o-error')
 const { User } = require('../../models/User')
 const FeaturesUpdater = require('../Subscription/FeaturesUpdater')
-const { promisify } = require('../../util/promises')
+const { promisify } = require('@overleaf/promise-utils')
 
 function allocate(
   referalId,

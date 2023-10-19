@@ -8,7 +8,7 @@ const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
 const CollaboratorsInvitesHandler = require('../Collaborators/CollaboratorsInviteHandler')
 const V1SubscriptionManager = require('./V1SubscriptionManager')
 const { V1ConnectionError } = require('../Errors/Errors')
-const { promisifyAll } = require('../../util/promises')
+const { promisifyAll } = require('@overleaf/promise-utils')
 
 const LimitationsManager = {
   allowedNumberOfCollaboratorsInProject(projectId, callback) {

@@ -5,7 +5,7 @@ const Errors = require('../Errors/Errors')
 const logger = require('@overleaf/logger')
 const settings = require('@overleaf/settings')
 const OError = require('@overleaf/o-error')
-const { expressify } = require('../../util/promises')
+const { expressify } = require('@overleaf/promise-utils')
 const AuthorizationManager = require('../Authorization/AuthorizationManager')
 const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
 const {

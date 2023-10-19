@@ -21,7 +21,7 @@ const SafePath = require('./SafePath')
 const TpdsUpdateSender = require('../ThirdPartyDataStore/TpdsUpdateSender')
 const FileWriter = require('../../infrastructure/FileWriter')
 const EditorRealTimeController = require('../Editor/EditorRealTimeController')
-const { promisifyAll } = require('../../util/promises')
+const { promisifyAll } = require('@overleaf/promise-utils')
 const { iterablePaths } = require('./IterablePath')
 
 const LOCK_NAMESPACE = 'sequentialProjectStructureUpdateLock'

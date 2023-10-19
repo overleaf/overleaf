@@ -1,6 +1,6 @@
 const _ = require('lodash')
 const { callbackify } = require('util')
-const { callbackifyMultiResult } = require('../../util/promises')
+const { callbackifyMultiResult } = require('@overleaf/promise-utils')
 const PlansLocator = require('./PlansLocator')
 const SubscriptionLocator = require('./SubscriptionLocator')
 const UserFeaturesUpdater = require('./UserFeaturesUpdater')

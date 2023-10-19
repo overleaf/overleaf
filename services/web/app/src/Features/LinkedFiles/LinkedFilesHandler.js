@@ -21,7 +21,7 @@ const {
   V1ProjectNotFoundError,
   BadDataError,
 } = require('./LinkedFilesErrors')
-const { promisifyAll } = require('../../util/promises')
+const { promisifyAll } = require('@overleaf/promise-utils')
 
 const LinkedFilesHandler = {
   getFileById(projectId, fileId, callback) {

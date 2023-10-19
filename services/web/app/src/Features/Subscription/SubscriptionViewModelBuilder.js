@@ -11,7 +11,7 @@ const sanitizeHtml = require('sanitize-html')
 const _ = require('underscore')
 const async = require('async')
 const SubscriptionHelper = require('./SubscriptionHelper')
-const { callbackify } = require('../../util/promises')
+const { callbackify } = require('@overleaf/promise-utils')
 const {
   InvalidError,
   NotFoundError,

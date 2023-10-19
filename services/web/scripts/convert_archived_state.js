@@ -4,7 +4,7 @@ const WRITE_CONCURRENCY = parseInt(process.env.WRITE_CONCURRENCY, 10) || 10
 
 const { db } = require('../app/src/infrastructure/mongodb')
 const { batchedUpdate } = require('./helpers/batchedUpdate')
-const { promiseMapWithLimit } = require('../app/src/util/promises')
+const { promiseMapWithLimit } = require('@overleaf/promise-utils')
 
 // $ node scripts/convert_archived_state.js FIRST,SECOND
 

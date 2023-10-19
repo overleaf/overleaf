@@ -10,7 +10,7 @@ const UserGetter = require('../User/UserGetter')
 const UserUpdater = require('../User/UserUpdater')
 const logger = require('@overleaf/logger')
 const { User } = require('../../models/User')
-const { promiseMapWithLimit } = require('../../util/promises')
+const { promiseMapWithLimit } = require('@overleaf/promise-utils')
 
 async function _addAuditLogEntry(operation, userId, auditLog, extraInfo) {
   await UserAuditLogHandler.promises.addEntry(

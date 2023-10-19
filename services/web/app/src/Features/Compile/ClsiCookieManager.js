@@ -6,7 +6,7 @@ const RedisWrapper = require('../../infrastructure/RedisWrapper')
 const Cookie = require('cookie')
 const logger = require('@overleaf/logger')
 const Metrics = require('@overleaf/metrics')
-const { promisifyAll } = require('../../util/promises')
+const { promisifyAll } = require('@overleaf/promise-utils')
 
 const clsiCookiesEnabled = (Settings.clsiCookie?.key ?? '') !== ''
 

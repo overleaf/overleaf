@@ -14,7 +14,7 @@ process.env.MONGO_SOCKET_TIMEOUT =
   parseInt(process.env.MONGO_SOCKET_TIMEOUT, 10) || 600000
 
 const { ObjectId } = require('mongodb')
-const { promiseMapWithLimit } = require('../app/src/util/promises')
+const { promiseMapWithLimit } = require('@overleaf/promise-utils')
 const { batchedUpdate } = require('./helpers/batchedUpdate')
 const ChatApiHandler = require('../app/src/Features/Chat/ChatApiHandler')
 const { getHardDeletedProjectIds } = require('./delete_orphaned_data_helper')

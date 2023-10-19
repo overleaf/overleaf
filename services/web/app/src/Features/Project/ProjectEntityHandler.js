@@ -2,7 +2,7 @@ const path = require('path')
 const DocstoreManager = require('../Docstore/DocstoreManager')
 const Errors = require('../Errors/Errors')
 const ProjectGetter = require('./ProjectGetter')
-const { promisifyAll } = require('../../util/promises')
+const { promisifyAll } = require('@overleaf/promise-utils')
 const OError = require('@overleaf/o-error')
 const { iterablePaths } = require('./IterablePath')
 

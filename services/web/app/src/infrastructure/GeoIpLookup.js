@@ -3,7 +3,7 @@ const settings = require('@overleaf/settings')
 const _ = require('underscore')
 const logger = require('@overleaf/logger')
 const { URL } = require('url')
-const { promisify, promisifyMultiResult } = require('../util/promises')
+const { promisify, promisifyMultiResult } = require('@overleaf/promise-utils')
 
 const DEFAULT_CURRENCY_CODE = 'USD'
 

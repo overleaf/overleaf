@@ -1,4 +1,4 @@
-const { promisify, promiseMapWithLimit } = require('../app/src/util/promises')
+const { promisify, promiseMapWithLimit } = require('@overleaf/promise-utils')
 const rClient = require('../app/src/Features/User/UserSessionsRedis').client()
 
 const args = require('minimist')(process.argv.slice(2))

@@ -19,7 +19,7 @@ const Settings = require('@overleaf/settings')
 const request = require('request')
 const { Transform, pipeline } = require('stream')
 const { FileTooLargeError } = require('../Features/Errors/Errors')
-const { promisifyAll } = require('../util/promises')
+const { promisifyAll } = require('@overleaf/promise-utils')
 
 class SizeLimitedStream extends Transform {
   constructor(options) {

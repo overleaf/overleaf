@@ -16,7 +16,10 @@ const EmailHandler = require('../Email/EmailHandler')
 const EmailHelper = require('../Helpers/EmailHelper')
 
 const Errors = require('../Errors/Errors')
-const { callbackify, callbackifyMultiResult } = require('../../util/promises')
+const {
+  callbackify,
+  callbackifyMultiResult,
+} = require('@overleaf/promise-utils')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
 
 async function getInvite(token) {

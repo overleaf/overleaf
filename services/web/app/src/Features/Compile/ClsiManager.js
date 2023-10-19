@@ -1,5 +1,5 @@
 const { callbackify } = require('util')
-const { callbackifyMultiResult } = require('../../util/promises')
+const { callbackifyMultiResult } = require('@overleaf/promise-utils')
 const {
   fetchString,
   fetchStringWithResponse,

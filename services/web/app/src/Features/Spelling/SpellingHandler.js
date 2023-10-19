@@ -1,6 +1,6 @@
 const OError = require('@overleaf/o-error')
 const Metrics = require('@overleaf/metrics')
-const { promisifyAll } = require('../../util/promises')
+const { promisifyAll } = require('@overleaf/promise-utils')
 const LearnedWordsManager = require('./LearnedWordsManager')
 
 module.exports = {

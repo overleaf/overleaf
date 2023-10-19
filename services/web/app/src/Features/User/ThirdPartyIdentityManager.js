@@ -8,7 +8,7 @@ const logger = require('@overleaf/logger')
 const OError = require('@overleaf/o-error')
 const settings = require('@overleaf/settings')
 const { User } = require(`${APP_ROOT}/models/User`)
-const { promisifyAll } = require(`${APP_ROOT}/util/promises`)
+const { promisifyAll } = require('@overleaf/promise-utils')
 
 const oauthProviders = settings.oauthProviders || {}
 

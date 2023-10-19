@@ -10,7 +10,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const async = require('async')
-const { promisifyAll } = require('../../util/promises')
+const { promisifyAll } = require('@overleaf/promise-utils')
 const EntityModels = {
   Institution: require('../../models/Institution').Institution,
   Subscription: require('../../models/Subscription').Subscription,

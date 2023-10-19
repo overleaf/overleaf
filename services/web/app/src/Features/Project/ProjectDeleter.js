@@ -20,7 +20,7 @@ const FilestoreHandler = require('../FileStore/FileStoreHandler')
 const TpdsUpdateSender = require('../ThirdPartyDataStore/TpdsUpdateSender')
 const ChatApiHandler = require('../Chat/ChatApiHandler')
 const moment = require('moment')
-const { promiseMapWithLimit } = require('../../util/promises')
+const { promiseMapWithLimit } = require('@overleaf/promise-utils')
 const { READ_PREFERENCE_SECONDARY } = require('../../infrastructure/mongodb')
 
 const EXPIRE_PROJECTS_AFTER_DAYS = 90

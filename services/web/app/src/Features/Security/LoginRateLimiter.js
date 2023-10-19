@@ -1,5 +1,5 @@
 const { RateLimiter } = require('../../infrastructure/RateLimiter')
-const { promisifyAll } = require('../../util/promises')
+const { promisifyAll } = require('@overleaf/promise-utils')
 
 const rateLimiter = new RateLimiter('login', {
   points: 10,

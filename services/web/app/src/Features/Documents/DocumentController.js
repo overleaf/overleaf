@@ -5,7 +5,7 @@ const ProjectEntityUpdateHandler = require('../Project/ProjectEntityUpdateHandle
 const logger = require('@overleaf/logger')
 const _ = require('lodash')
 const { plainTextResponse } = require('../../infrastructure/Response')
-const { expressify } = require('../../util/promises')
+const { expressify } = require('@overleaf/promise-utils')
 
 async function getDocument(req, res) {
   const { Project_id: projectId, doc_id: docId } = req.params

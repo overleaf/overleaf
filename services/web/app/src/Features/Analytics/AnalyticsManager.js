@@ -5,7 +5,7 @@ const Metrics = require('../../infrastructure/Metrics')
 const Queues = require('../../infrastructure/Queues')
 const crypto = require('crypto')
 const _ = require('lodash')
-const { expressify } = require('../../util/promises')
+const { expressify } = require('@overleaf/promise-utils')
 const logger = require('@overleaf/logger')
 const { getAnalyticsIdFromMongoUser } = require('./AnalyticsHelper')
 

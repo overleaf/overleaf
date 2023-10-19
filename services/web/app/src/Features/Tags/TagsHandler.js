@@ -1,5 +1,5 @@
 const { Tag } = require('../../models/Tag')
-const { callbackify } = require('../../util/promises')
+const { callbackify } = require('@overleaf/promise-utils')
 
 const MAX_TAG_LENGTH = 50
 

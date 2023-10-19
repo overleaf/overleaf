@@ -1,5 +1,5 @@
 const { User } = require('../../models/User')
-const { promisifyAll } = require('../../util/promises')
+const { promisifyAll } = require('@overleaf/promise-utils')
 const Settings = require('@overleaf/settings')
 
 function _featuresChanged(newFeatures, featuresBefore) {

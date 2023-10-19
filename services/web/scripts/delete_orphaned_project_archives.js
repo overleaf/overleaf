@@ -1,7 +1,7 @@
 const Settings = require('@overleaf/settings')
 const { fetchJson } = require('@overleaf/fetch-utils')
 const { waitForDb } = require('../app/src/infrastructure/mongodb')
-const { promiseMapWithLimit } = require('../app/src/util/promises')
+const { promiseMapWithLimit } = require('@overleaf/promise-utils')
 const { getHardDeletedProjectIds } = require('./delete_orphaned_data_helper')
 const TpdsUpdateSender = require('../app/src/Features/ThirdPartyDataStore/TpdsUpdateSender')
 const { promisify } = require('util')

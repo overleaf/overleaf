@@ -2,7 +2,7 @@ const SessionManager = require('../Authentication/SessionManager')
 const ContactManager = require('./ContactManager')
 const UserGetter = require('../User/UserGetter')
 const Modules = require('../../infrastructure/Modules')
-const { expressify } = require('../../util/promises')
+const { expressify } = require('@overleaf/promise-utils')
 
 function _formatContact(contact) {
   return {

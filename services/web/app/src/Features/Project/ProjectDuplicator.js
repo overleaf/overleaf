@@ -1,7 +1,7 @@
 const { callbackify } = require('util')
 const Path = require('path')
 const OError = require('@overleaf/o-error')
-const { promiseMapWithLimit } = require('../../util/promises')
+const { promiseMapWithLimit } = require('@overleaf/promise-utils')
 const { Doc } = require('../../models/Doc')
 const { File } = require('../../models/File')
 const DocstoreManager = require('../Docstore/DocstoreManager')

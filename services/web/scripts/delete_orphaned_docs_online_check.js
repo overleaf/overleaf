@@ -7,7 +7,7 @@ const {
   READ_PREFERENCE_PRIMARY,
   READ_PREFERENCE_SECONDARY,
 } = require('../app/src/infrastructure/mongodb')
-const { promiseMapWithLimit } = require('../app/src/util/promises')
+const { promiseMapWithLimit } = require('@overleaf/promise-utils')
 const { getHardDeletedProjectIds } = require('./delete_orphaned_data_helper')
 const sleep = promisify(setTimeout)
 

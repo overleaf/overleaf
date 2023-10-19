@@ -1,6 +1,6 @@
 const SessionManager = require('../Authentication/SessionManager')
 const TutorialHandler = require('./TutorialHandler')
-const { expressify } = require('../../util/promises')
+const { expressify } = require('@overleaf/promise-utils')
 
 const VALID_KEYS = [
   'react-history-buttons-tutorial',

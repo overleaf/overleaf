@@ -9,7 +9,7 @@ const LimitationsManager = require('./LimitationsManager')
 const EmailHandler = require('../Email/EmailHandler')
 const PlansLocator = require('./PlansLocator')
 const SubscriptionHelper = require('./SubscriptionHelper')
-const { callbackify } = require('../../util/promises')
+const { callbackify } = require('@overleaf/promise-utils')
 
 function validateNoSubscriptionInRecurly(userId, callback) {
   RecurlyWrapper.listAccountActiveSubscriptions(

@@ -8,7 +8,7 @@ const {
   db,
   READ_PREFERENCE_SECONDARY,
 } = require('../app/src/infrastructure/mongodb')
-const { promiseMapWithLimit } = require('../app/src/util/promises')
+const { promiseMapWithLimit } = require('@overleaf/promise-utils')
 const TokenGenerator = require('../app/src/Features/TokenGenerator/TokenGenerator')
 const { batchedUpdate } = require('./helpers/batchedUpdate')
 

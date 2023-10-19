@@ -6,7 +6,7 @@ const { waitForDb } = require('../app/src/infrastructure/mongodb')
 const ChatApiHandler = require('../app/src/Features/Chat/ChatApiHandler')
 const DocstoreManager = require('../app/src/Features/Docstore/DocstoreManager')
 const DocumentUpdaterHandler = require('../app/src/Features/DocumentUpdater/DocumentUpdaterHandler')
-const { promiseMapWithLimit } = require('../app/src/util/promises')
+const { promiseMapWithLimit } = require('@overleaf/promise-utils')
 
 /**
  * Remove doc comment ranges that are "orphaned" as they do have matching chat

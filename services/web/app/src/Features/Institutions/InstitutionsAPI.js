@@ -3,7 +3,7 @@ const logger = require('@overleaf/logger')
 const metrics = require('@overleaf/metrics')
 const settings = require('@overleaf/settings')
 const request = require('requestretry')
-const { promisifyAll } = require('../../util/promises')
+const { promisifyAll } = require('@overleaf/promise-utils')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
 const {
   V1ConnectionError,

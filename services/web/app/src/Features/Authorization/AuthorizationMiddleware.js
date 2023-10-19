@@ -6,7 +6,7 @@ const HttpErrorHandler = require('../Errors/HttpErrorHandler')
 const AuthenticationController = require('../Authentication/AuthenticationController')
 const SessionManager = require('../Authentication/SessionManager')
 const TokenAccessHandler = require('../TokenAccess/TokenAccessHandler')
-const { expressify } = require('../../util/promises')
+const { expressify } = require('@overleaf/promise-utils')
 const {
   canRedirectToAdminDomain,
 } = require('../Helpers/AdminAuthorizationHelper')

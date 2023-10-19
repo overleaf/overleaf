@@ -1,7 +1,7 @@
 const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
 const { fetchJson } = require('@overleaf/fetch-utils')
-const { callbackify } = require('../../util/promises')
+const { callbackify } = require('@overleaf/promise-utils')
 const UserMembershipsHandler = require('../UserMembership/UserMembershipsHandler')
 const UserMembershipEntityConfigs = require('../UserMembership/UserMembershipEntityConfigs')
 

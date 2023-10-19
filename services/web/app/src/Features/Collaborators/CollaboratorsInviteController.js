@@ -11,7 +11,7 @@ const EditorRealTimeController = require('../Editor/EditorRealTimeController')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const SessionManager = require('../Authentication/SessionManager')
 const { RateLimiter } = require('../../infrastructure/RateLimiter')
-const { expressify } = require('../../util/promises')
+const { expressify } = require('@overleaf/promise-utils')
 const ProjectAuditLogHandler = require('../Project/ProjectAuditLogHandler')
 const Errors = require('../Errors/Errors')
 

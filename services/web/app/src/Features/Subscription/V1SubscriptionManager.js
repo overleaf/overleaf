@@ -3,7 +3,7 @@ const UserGetter = require('../User/UserGetter')
 const request = require('requestretry')
 const settings = require('@overleaf/settings')
 const { V1ConnectionError, NotFoundError } = require('../Errors/Errors')
-const { promisifyAll } = require('../../util/promises')
+const { promisifyAll } = require('@overleaf/promise-utils')
 
 module.exports = V1SubscriptionManager = {
   getSubscriptionsFromV1(userId, callback) {

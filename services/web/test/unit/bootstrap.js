@@ -64,7 +64,6 @@ function getSandboxedModuleRequires() {
   }
 
   const internalModules = [
-    '../../app/src/util/promises',
     '../../app/src/Features/Errors/Errors',
     '../../app/src/Features/Helpers/Mongo',
   ]

@@ -4,7 +4,7 @@ const { InvalidUrlError, UrlFetchFailedError } = require('./LinkedFilesErrors')
 const LinkedFilesHandler = require('./LinkedFilesHandler')
 const UrlHelper = require('../Helpers/UrlHelper')
 const { fetchStream, RequestFailedError } = require('@overleaf/fetch-utils')
-const { callbackify } = require('../../util/promises')
+const { callbackify } = require('@overleaf/promise-utils')
 const { FileTooLargeError } = require('../Errors/Errors')
 
 async function createLinkedFile(

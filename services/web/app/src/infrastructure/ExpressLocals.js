@@ -20,7 +20,7 @@ const {
 const {
   addOptionalCleanupHandlerAfterDrainingConnections,
 } = require('./GracefulShutdown')
-const { expressify } = require('../util/promises')
+const { expressify } = require('@overleaf/promise-utils')
 
 const IEEE_BRAND_ID = Settings.ieeeBrandId
 

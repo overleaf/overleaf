@@ -1,7 +1,7 @@
 const crypto = require('crypto')
 const { db } = require('../../infrastructure/mongodb')
 const Errors = require('../Errors/Errors')
-const { promisifyAll } = require('../../util/promises')
+const { promisifyAll } = require('@overleaf/promise-utils')
 
 const ONE_HOUR_IN_S = 60 * 60
 
