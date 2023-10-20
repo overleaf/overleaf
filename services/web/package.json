@@ -317,7 +317,7 @@
     "react-dom": "^17.0.2",
     "react-error-boundary": "^2.3.1",
     "react-google-recaptcha": "^3.1.0",
-    "react-i18next": "^13.3.0",
+    "react-i18next": "^13.3.1",
     "react-linkify": "^1.0.0-alpha",
     "react-refresh": "^0.14.0",
     "react-resizable-panels": "^0.0.55",

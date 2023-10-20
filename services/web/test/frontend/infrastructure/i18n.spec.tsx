@@ -116,5 +116,32 @@ describe('i18n', function () {
         .should('have.length', 1)
         .should('have.text', "T&e's<code>t</code>ing")
     })
+
+    it('does not convert markup in values to components', function () {
+      const Test = () => {
+        return (
+          <div data-testid="container">
+            <Trans
+              i18nKey="are_you_still_at"
+              components={[<b />]} // eslint-disable-line react/jsx-key
+              values={{
+                institutionName: "<i>T</i>&<b>e</b>'s<code>t</code>ing",
+              }}
+              shouldUnescape
+              tOptions={{ interpolation: { escapeValue: true } }}
+            />
+          </div>
+        )
+      }
+      cy.mount(<Test />)
+      cy.findByTestId('container')
+        .should(
+          'have.text',
+          "Are you still at <i>T</i>&<b>e</b>'s<code>t</code>ing?"
+        )
+        .find('b')
+        .should('have.length', 1)
+        .should('have.text', "<i>T</i>&<b>e</b>'s<code>t</code>ing")
+    })
   })
 })
