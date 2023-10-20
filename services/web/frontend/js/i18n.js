@@ -11,6 +11,9 @@ const LANG = window.i18n.currentLangCode
 i18n.use(initReactI18next).init({
   lng: LANG,
 
+  // still using the v3 plural suffixes
+  compatibilityJSON: 'v3',
+
   react: {
     // Since we are manually waiting on the translations data to
     // load, we don't need to use Suspense

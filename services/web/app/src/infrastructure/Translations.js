@@ -47,6 +47,9 @@ i18n
       loadPath: path.join(__dirname, '../../../locales/__lng__.json'),
     },
 
+    // still using the v3 plural suffixes
+    compatibilityJSON: 'v3',
+
     // Load translation files synchronously: https://www.i18next.com/overview/configuration-options#initimmediate
     initImmediate: false,
 
