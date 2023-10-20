@@ -11,7 +11,7 @@ import classnames from 'classnames'
 function FileTreeDoc({ name, id, isFile, isLinkedFile }) {
   const { isSelected, props: selectableEntityProps } = useSelectableEntity(
     id,
-    isFile
+    isFile ? 'file' : 'doc'
   )
 
   return (

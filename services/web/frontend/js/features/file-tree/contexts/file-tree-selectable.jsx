@@ -210,9 +210,10 @@ const editorContextPropTypes = {
 
 const isMac = /Mac/.test(window.navigator?.platform)
 
-export function useSelectableEntity(id, isFile) {
+export function useSelectableEntity(id, type) {
   const { view, setView } = useLayoutContext()
   const { setContextMenuCoords } = useFileTreeMainContext()
+  const { fileTreeData } = useFileTreeData()
   const {
     selectedEntityIds,
     selectOrMultiSelectEntity,
@@ -221,6 +222,26 @@ export function useSelectableEntity(id, isFile) {
   } = useContext(FileTreeSelectableContext)
 
   const isSelected = selectedEntityIds.has(id)
+
+  const chooseView = useCallback(() => {
+    for (const id of selectedEntityIds) {
+      const selectedEntity = findInTree(fileTreeData, id)
+
+      if (selectedEntity.type === 'doc') {
+        return 'editor'
+      }
+
+      if (selectedEntity.type === 'fileRef') {
+        return 'file'
+      }
+
+      if (selectedEntity.type === 'folder') {
+        return view
+      }
+    }
+
+    return null
+  }, [fileTreeData, selectedEntityIds, view])
 
   const handleEvent = useCallback(
     ev => {
@@ -231,7 +252,14 @@ export function useSelectableEntity(id, isFile) {
         !isRootFolderSelected && (isMac ? ev.metaKey : ev.ctrlKey)
       setIsRootFolderSelected(false)
       selectOrMultiSelectEntity(id, multiSelect)
-      setView(isFile ? 'file' : 'editor')
+
+      if (type === 'file') {
+        setView('file')
+      } else if (type === 'doc') {
+        setView('editor')
+      } else if (type === 'folder') {
+        setView(chooseView())
+      }
     },
     [
       id,
@@ -239,7 +267,8 @@ export function useSelectableEntity(id, isFile) {
       setIsRootFolderSelected,
       selectOrMultiSelectEntity,
       setView,
-      isFile,
+      type,
+      chooseView,
     ]
   )
 

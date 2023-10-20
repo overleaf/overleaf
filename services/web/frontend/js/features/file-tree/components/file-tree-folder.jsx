@@ -17,7 +17,10 @@ import usePersistedState from '../../../shared/hooks/use-persisted-state'
 function FileTreeFolder({ name, id, folders, docs, files }) {
   const { t } = useTranslation()
 
-  const { isSelected, props: selectableEntityProps } = useSelectableEntity(id)
+  const { isSelected, props: selectableEntityProps } = useSelectableEntity(
+    id,
+    'folder'
+  )
 
   const { selectedEntityParentIds } = useFileTreeSelectable(id)
 
