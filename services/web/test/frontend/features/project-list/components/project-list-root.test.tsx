@@ -24,8 +24,9 @@ const {
 
 const userId = owner.id
 
-// eslint-disable-next-line mocha/no-skipped-tests
-describe.skip('<ProjectListRoot />', function () {
+describe('<ProjectListRoot />', function () {
+  this.timeout('10s')
+
   let sendMBSpy: sinon.SinonSpy
   let assignStub: sinon.SinonStub
 
@@ -189,8 +190,7 @@ describe.skip('<ProjectListRoot />', function () {
           )
         })
 
-        // eslint-disable-next-line mocha/no-skipped-tests
-        it.skip('only checks the projects that are viewable when there is a load more button', async function () {
+        it('only checks the projects that are viewable when there is a load more button', async function () {
           // first one is the select all checkbox
           fireEvent.click(allCheckboxes[0])
 
