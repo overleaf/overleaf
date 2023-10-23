@@ -219,12 +219,16 @@ export function FileTreeActionableProvider({ reindexReferences, children }) {
     (toFolderId, draggedEntityIds) => {
       dispatch({ type: ACTION_TYPES.MOVING })
 
-      // find entities and filter out no-ops
+      // find entities and filter out no-ops and nested files
       const founds = Array.from(draggedEntityIds)
         .map(draggedEntityId =>
           findInTreeOrThrow(fileTreeData, draggedEntityId)
         )
-        .filter(found => found.parentFolderId !== toFolderId)
+        .filter(
+          found =>
+            found.parentFolderId !== toFolderId &&
+            !draggedEntityIds.has(found.parentFolderId)
+        )
 
       // make sure all entities can be moved, return early otherwise
       const isMoveToRoot = toFolderId === fileTreeData._id
