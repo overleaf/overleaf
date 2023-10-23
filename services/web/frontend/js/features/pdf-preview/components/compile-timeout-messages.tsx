@@ -198,7 +198,10 @@ function CompileTimeoutMessages() {
                     shouldUnescape
                     tOptions={{ interpolation: { escapeValue: true } }}
                   />{' '}
-                  {t('and_you_can_upgrade_for_plenty_more_compile_time')}
+                  <Trans
+                    i18nKey="and_you_can_upgrade_for_plenty_more_compile_time"
+                    components={{ strong: <strong /> }}
+                  />
                 </p>
               </div>
             }
@@ -223,9 +226,10 @@ function CompileTimeoutMessages() {
                   />
                 </p>
                 <p className="row-spaced">
-                  {t(
-                    'tell_the_project_owner_to_upgrade_plan_for_more_compile_time'
-                  )}
+                  <Trans
+                    i18nKey="tell_the_project_owner_to_upgrade_plan_for_more_compile_time"
+                    components={{ strong: <strong /> }}
+                  />
                 </p>
               </div>
             }
