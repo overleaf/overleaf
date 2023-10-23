@@ -20,7 +20,7 @@ module.exports = Notifications = {
       callback = function () {}
     }
     const query = {
-      user_id: ObjectId(userId),
+      user_id: new ObjectId(userId),
       templateKey: { $exists: true },
     }
     db.notifications.find(query).toArray(callback)
@@ -31,7 +31,7 @@ module.exports = Notifications = {
       callback = function () {}
     }
     const query = {
-      user_id: ObjectId(userId),
+      user_id: new ObjectId(userId),
       key: notification.key,
     }
     return db.notifications.count(query, function (err, count) {
@@ -54,7 +54,7 @@ module.exports = Notifications = {
           return callback()
         }
         const doc = {
-          user_id: ObjectId(userId),
+          user_id: new ObjectId(userId),
           key: notification.key,
           messageOpts: notification.messageOpts,
           templateKey: notification.templateKey,
@@ -88,8 +88,8 @@ module.exports = Notifications = {
 
   removeNotificationId(userId, notificationId, callback) {
     const searchOps = {
-      user_id: ObjectId(userId),
-      _id: ObjectId(notificationId),
+      user_id: new ObjectId(userId),
+      _id: new ObjectId(notificationId),
     }
     const updateOperation = { $unset: { templateKey: true, messageOpts: true } }
     db.notifications.updateOne(searchOps, updateOperation, callback)
@@ -97,7 +97,7 @@ module.exports = Notifications = {
 
   removeNotificationKey(userId, notificationKey, callback) {
     const searchOps = {
-      user_id: ObjectId(userId),
+      user_id: new ObjectId(userId),
       key: notificationKey,
     }
     const updateOperation = { $unset: { templateKey: true } }

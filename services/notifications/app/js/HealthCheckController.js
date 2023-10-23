@@ -18,11 +18,11 @@ const logger = require('@overleaf/logger')
 
 module.exports = {
   check(callback) {
-    const userId = ObjectId()
+    const userId = new ObjectId()
     const cleanupNotifications = callback =>
-      db.notifications.remove({ user_id: userId }, callback)
+      db.notifications.deleteOne({ user_id: userId }, callback)
 
-    let notificationKey = `smoke-test-notification-${ObjectId()}`
+    let notificationKey = `smoke-test-notification-${new ObjectId()}`
     const getOpts = endPath => ({
       url: `http://localhost:${port}/user/${userId}${endPath}`,
       timeout: 5000,
