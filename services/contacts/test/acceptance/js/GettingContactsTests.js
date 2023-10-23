@@ -22,7 +22,7 @@ describe('Getting Contacts', function () {
 
   describe('with no contacts', function () {
     beforeEach(function () {
-      this.user_id = ObjectId().toString()
+      this.user_id = new ObjectId().toString()
     })
 
     it('should return an empty array', function (done) {
@@ -46,10 +46,10 @@ describe('Getting Contacts', function () {
 
   describe('with contacts', function () {
     beforeEach(function (done) {
-      this.user_id = ObjectId().toString()
-      this.contact_id_1 = ObjectId().toString()
-      this.contact_id_2 = ObjectId().toString()
-      this.contact_id_3 = ObjectId().toString()
+      this.user_id = new ObjectId().toString()
+      this.contact_id_1 = new ObjectId().toString()
+      this.contact_id_2 = new ObjectId().toString()
+      this.contact_id_3 = new ObjectId().toString()
 
       const touchContact = (userId, contactId, cb) =>
         request(

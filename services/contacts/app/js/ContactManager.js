@@ -2,7 +2,7 @@ import { db, ObjectId } from './mongodb.js'
 
 export async function touchContact(userId, contactId) {
   await db.contacts.updateOne(
-    { user_id: ObjectId(userId.toString()) },
+    { user_id: new ObjectId(userId.toString()) },
     {
       $inc: {
         [`contacts.${contactId}.n`]: 1,
@@ -17,7 +17,7 @@ export async function touchContact(userId, contactId) {
 
 export async function getContacts(userId) {
   const user = await db.contacts.findOne({
-    user_id: ObjectId(userId.toString()),
+    user_id: new ObjectId(userId.toString()),
   })
 
   return user?.contacts

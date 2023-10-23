@@ -16,8 +16,8 @@ describe('ContactManager', function () {
       },
     })
 
-    this.user_id = ObjectId().toString()
-    this.contact_id = ObjectId().toString()
+    this.user_id = new ObjectId().toString()
+    this.contact_id = new ObjectId().toString()
   })
 
   afterEach(function () {
@@ -62,7 +62,7 @@ describe('ContactManager', function () {
             this.contact_id
           )
         ).to.be.rejectedWith(
-          'Argument passed in must be a string of 12 bytes or a string of 24 hex characters or an integer'
+          'input must be a 24 character hex string, 12 byte Uint8Array, or an integer'
         )
       })
     })
