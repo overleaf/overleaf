@@ -38,6 +38,8 @@ function sanitize(input) {
     })
       // Restore the escaping again.
       .replaceAll(/&lt;([/]?[0-9])&gt;/g, '<$1>')
+      // Restore escaped standalone ampersands
+      .replaceAll(/ &amp; /g, ' & ')
   )
 }
 

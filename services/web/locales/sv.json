@@ -349,7 +349,7 @@
   "first_name": "Förnamn",
   "first_x_days_free_after_that_y_per_month": "De första <0>__trialLen__-dagarna är gratis</0>, därefter <0>__price__</0> per månad",
   "folders": "Mappar",
-  "following_paths_conflict": "Följande filer &amp; mappar har samma sökvägar",
+  "following_paths_conflict": "Följande filer & mappar har samma sökvägar",
   "font_family": "Typsnittsfamilj",
   "font_size": "Teckenstorlek",
   "forgot_your_password": "Glömt ditt lösenord",
