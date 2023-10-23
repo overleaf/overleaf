@@ -82,7 +82,9 @@ function MakePrimary({ userEmailData, makePrimaryAsync }: MakePrimaryProps) {
   return (
     <>
       {makePrimaryAsync.isLoading ? (
-        <PrimaryButton disabled>{t('sending')}...</PrimaryButton>
+        <PrimaryButton disabled>
+          {t('processing_uppercase')}&hellip;
+        </PrimaryButton>
       ) : (
         <Tooltip
           id={`make-primary-${userEmailData.email}`}

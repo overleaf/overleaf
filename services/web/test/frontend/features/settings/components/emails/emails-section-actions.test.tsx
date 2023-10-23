@@ -173,7 +173,7 @@ describe('email actions - make primary', function () {
       expect(screen.queryByRole('dialog')).to.be.null
 
       await waitForElementToBeRemoved(() =>
-        screen.getByRole('button', { name: /sending/i, hidden: true })
+        screen.getByRole('button', { name: /Processing/i, hidden: true })
       )
     }
 

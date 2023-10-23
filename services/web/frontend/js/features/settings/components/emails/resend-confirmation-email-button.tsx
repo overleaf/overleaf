@@ -37,7 +37,7 @@ function ResendConfirmationEmailButton({
   if (isLoading) {
     return (
       <>
-        <Icon type="refresh" spin fw /> {t('sending')}...
+        <Icon type="refresh" spin fw /> {t('sending')}&hellip;
       </>
     )
   }
