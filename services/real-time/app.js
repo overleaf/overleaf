@@ -49,6 +49,7 @@ DeploymentManager.initialise()
 const app = express()
 
 const server = require('http').createServer(app)
+server.keepAliveTimeout = Settings.keepAliveTimeoutMs
 const io = require('socket.io').listen(server, {
   logger: socketIoLogger,
 })

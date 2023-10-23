@@ -166,6 +166,7 @@ const settings = {
 
   behindProxy: process.env.BEHIND_PROXY === 'true',
   trustedProxyIps: process.env.TRUSTED_PROXY_IPS,
+  keepAliveTimeoutMs: parseInt(process.env.KEEPALIVE_TIMEOUT_MS ?? '5000', 10),
 }
 
 // console.log settings.redis
