@@ -550,10 +550,8 @@ module.exports = {
   behindProxy: false,
 
   // Delay before closing the http server upon receiving a SIGTERM process signal.
-  gracefulShutdownDelayInMs: parseInt(
-    process.env.GRACEFUL_SHUTDOWN_DELAY || 30 * seconds,
-    10
-  ),
+  gracefulShutdownDelayInMs:
+    parseInt(process.env.GRACEFUL_SHUTDOWN_DELAY_SECONDS ?? '5', 10) * seconds,
 
   // Expose the hostname in the `X-Served-By` response header
   exposeHostname: process.env.EXPOSE_HOSTNAME === 'true',
