@@ -261,6 +261,10 @@ const settings = {
       url: process.env.V1_HISTORY_URL || 'http://localhost:3100/api',
       user: 'staging',
       pass: process.env.STAGING_PASSWORD,
+      requestTimeout: parseInt(
+        process.env.SHARELATEX_HISTORY_V1_HTTP_REQUEST_TIMEOUT || '300000', // default is 5min
+        10
+      ),
     },
   },
   references: {},

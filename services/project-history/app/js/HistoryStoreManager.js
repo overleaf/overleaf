@@ -17,7 +17,7 @@ import * as Errors from './Errors.js'
 import * as LocalFileWriter from './LocalFileWriter.js'
 import * as HashManager from './HashManager.js'
 
-const HTTP_REQUEST_TIMEOUT = 300 * 1000 // 5 minutes
+const HTTP_REQUEST_TIMEOUT = Settings.apis.history_v1.requestTimeout
 
 /**
  * Container for functions that need to be mocked in tests

@@ -23,6 +23,7 @@ describe('HistoryStoreManager', function () {
         filestore: {
           url: 'http://filestore.sharelatex.production',
         },
+        history_v1: { requestTimeout: 123 },
       },
     }
     this.latestChunkRequestArgs = sinon.match({

@@ -5,6 +5,7 @@
 // Metrics must be initialized before importing anything else
 require('@overleaf/metrics/initialize')
 
+const config = require('config')
 const Events = require('events')
 const BPromise = require('bluebird')
 const express = require('express')
@@ -47,9 +48,9 @@ app.use(cors())
 security.setupSSL(app)
 security.setupBasicHttpAuthForSwaggerDocs(app)
 
+const HTTP_REQUEST_TIMEOUT = parseInt(config.get('httpRequestTimeout'), 10)
 app.use(function (req, res, next) {
-  // use a 5 minute timeout on all responses
-  res.setTimeout(5 * 60 * 1000)
+  res.setTimeout(HTTP_REQUEST_TIMEOUT)
   next()
 })
 

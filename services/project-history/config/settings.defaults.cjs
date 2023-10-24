@@ -20,6 +20,9 @@ module.exports = {
     filestore: {
       url: `http://${process.env.FILESTORE_HOST || 'localhost'}:3009`,
     },
+    history_v1: {
+      requestTimeout: parseInt(process.env.V1_REQUEST_TIMEOUT || '300000', 10),
+    },
     web: {
       url: `http://${
         process.env.WEB_API_HOST || process.env.WEB_HOST || 'localhost'

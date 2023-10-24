@@ -25,5 +25,6 @@
   "maxFileUploadSize": "52428800",
   "databasePoolMin": "2",
   "databasePoolMax": "10",
-  "httpsOnly": "false"
+  "httpsOnly": "false",
+  "httpRequestTimeout": "300000"
 }

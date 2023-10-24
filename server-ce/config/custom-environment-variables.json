@@ -43,5 +43,6 @@
   },
   "clusterWorkers": "CLUSTER_WORKERS",
   "maxFileUploadSize": "MAX_FILE_UPLOAD_SIZE",
-  "httpsOnly": "HTTPS_ONLY"
+  "httpsOnly": "HTTPS_ONLY",
+  "httpRequestTimeout": "SHARELATEX_HISTORY_V1_HTTP_REQUEST_TIMEOUT"
 }
