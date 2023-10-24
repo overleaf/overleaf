@@ -1,0 +1,90 @@
+--- overleaf/services/history-v1/config/custom-environment-variables.json
++++ overleaf/services/history-v1/config/custom-environment-variables.json
+@@ -43,5 +43,6 @@
+   },
+   "clusterWorkers": "CLUSTER_WORKERS",
+   "maxFileUploadSize": "MAX_FILE_UPLOAD_SIZE",
+-  "httpsOnly": "HTTPS_ONLY"
++  "httpsOnly": "HTTPS_ONLY",
++  "httpRequestTimeout": "SHARELATEX_HISTORY_V1_HTTP_REQUEST_TIMEOUT"
+ }
+--- etc/sharelatex/settings.js
++++ etc/sharelatex/settings.js
+@@ -261,6 +261,10 @@ const settings = {
+       url: process.env.V1_HISTORY_URL || 'http://localhost:3100/api',
+       user: 'staging',
+       pass: process.env.STAGING_PASSWORD,
++      requestTimeout: parseInt(
++        process.env.SHARELATEX_HISTORY_V1_HTTP_REQUEST_TIMEOUT || '300000', // default is 5min
++        10
++      ),
+     },
+   },
+   references: {},
+diff --git a/services/history-v1/app.js b/services/history-v1/app.js
+index 6b3a2ba8f89..2ad490fb6b6 100644
+--- overleaf/services/history-v1/app.js
++++ overleaf/services/history-v1/app.js
+@@ -5,6 +5,7 @@
+ // Metrics must be initialized before importing anything else
+ require('@overleaf/metrics/initialize')
+
++const config = require('config')
+ const Events = require('events')
+ const BPromise = require('bluebird')
+ const express = require('express')
+@@ -47,9 +48,9 @@ app.use(cors())
+ security.setupSSL(app)
+ security.setupBasicHttpAuthForSwaggerDocs(app)
+
++const HTTP_REQUEST_TIMEOUT = parseInt(config.get('httpRequestTimeout'), 10)
+ app.use(function (req, res, next) {
+-  // use a 5 minute timeout on all responses
+-  res.setTimeout(5 * 60 * 1000)
++  res.setTimeout(HTTP_REQUEST_TIMEOUT)
+   next()
+ })
+
+--- overleaf/services/history-v1/config/default.json
++++ overleaf/services/history-v1/config/default.json
+@@ -25,5 +25,6 @@
+   "maxFileUploadSize": "52428800",
+   "databasePoolMin": "2",
+   "databasePoolMax": "10",
+-  "httpsOnly": "false"
++  "httpsOnly": "false",
++  "httpRequestTimeout": "300000"
+ }
+--- overleaf/services/project-history/app/js/HistoryStoreManager.js
++++ overleaf/services/project-history/app/js/HistoryStoreManager.js
+@@ -17,7 +17,7 @@ import * as Errors from './Errors.js'
+ import * as LocalFileWriter from './LocalFileWriter.js'
+ import * as HashManager from './HashManager.js'
+
+-const HTTP_REQUEST_TIMEOUT = 300 * 1000 // 5 minutes
++const HTTP_REQUEST_TIMEOUT = Settings.apis.history_v1.requestTimeout
+
+ /**
+  * Container for functions that need to be mocked in tests
+--- overleaf/services/project-history/config/settings.defaults.cjs
++++ overleaf/services/project-history/config/settings.defaults.cjs
+@@ -20,6 +20,9 @@ module.exports = {
+     filestore: {
+       url: `http://${process.env.FILESTORE_HOST || 'localhost'}:3009`,
+     },
++    history_v1: {
++      requestTimeout: parseInt(process.env.V1_REQUEST_TIMEOUT || '300000', 10),
++    },
+     web: {
+       url: `http://${
+         process.env.WEB_API_HOST || process.env.WEB_HOST || 'localhost'
+--- overleaf/services/project-history/test/unit/js/HistoryStoreManager/HistoryStoreManagerTests.js
++++ overleaf/services/project-history/test/unit/js/HistoryStoreManager/HistoryStoreManagerTests.js
+@@ -23,6 +23,7 @@ describe('HistoryStoreManager', function () {
+         filestore: {
+           url: 'http://filestore.sharelatex.production',
+         },
++        history_v1: { requestTimeout: 123 },
+       },
+     }
+     this.latestChunkRequestArgs = sinon.match({

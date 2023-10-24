@@ -1,0 +1,153 @@
+--- services/history-v1/api/controllers/projects.js
++++ services/history-v1/api/controllers/projects.js
+@@ -194,18 +194,23 @@ async function getProjectBlob(req, res, next) {
+   const hash = req.swagger.params.hash.value
+
+   const blobStore = new BlobStore(projectId)
+-  let stream
++  logger.debug({ projectId, hash }, 'getProjectBlob started')
+   try {
+-    stream = await blobStore.getStream(hash)
+-  } catch (err) {
+-    if (err instanceof Blob.NotFoundError) {
+-      return render.notFound(res)
+-    } else {
+-      throw err
++    let stream
++    try {
++      stream = await blobStore.getStream(hash)
++    } catch (err) {
++      if (err instanceof Blob.NotFoundError) {
++        return render.notFound(res)
++      } else {
++        throw err
++      }
+     }
++    res.set('Content-Type', 'application/octet-stream')
++    await pipeline(stream, res)
++  } finally {
++    logger.debug({ projectId, hash }, 'getProjectBlob finished')
+   }
+-  res.set('Content-Type', 'application/octet-stream')
+-  await pipeline(stream, res)
+ }
+
+ async function getSnapshotAtVersion(projectId, version) {
+--- services/history-v1/storage/lib/blob_store/index.js
++++ services/history-v1/storage/lib/blob_store/index.js
+@@ -20,6 +20,7 @@ const projectKey = require('../project_key')
+ const streams = require('../streams')
+ const postgresBackend = require('./postgres')
+ const mongoBackend = require('./mongo')
++const logger = require('@overleaf/logger')
+
+ const GLOBAL_BLOBS = new Map()
+
+@@ -34,9 +35,14 @@ function makeProjectKey(projectId, hash) {
+ async function uploadBlob(projectId, blob, stream) {
+   const bucket = config.get('blobStore.projectBucket')
+   const key = makeProjectKey(projectId, blob.getHash())
+-  await persistor.sendStream(bucket, key, stream, {
+-    contentType: 'application/octet-stream',
+-  })
++  logger.debug({ projectId, blob }, 'uploadBlob started')
++  try {
++    await persistor.sendStream(bucket, key, stream, {
++      contentType: 'application/octet-stream',
++    })
++  } finally {
++    logger.debug({ projectId, blob }, 'uploadBlob finished')
++  }
+ }
+
+ function getBlobLocation(projectId, hash) {
+@@ -109,7 +115,12 @@ async function getStringLengthOfFile(byteLength, pathname) {
+ async function deleteBlobsInBucket(projectId) {
+   const bucket = config.get('blobStore.projectBucket')
+   const prefix = `${projectKey.format(projectId)}/`
+-  await persistor.deleteDirectory(bucket, prefix)
++  logger.debug({ projectId }, 'deleteBlobsInBucket started')
++  try {
++    await persistor.deleteDirectory(bucket, prefix)
++  } finally {
++    logger.debug({ projectId }, 'deleteBlobsInBucket finished')
++  }
+ }
+
+ async function loadGlobalBlobs() {
+@@ -202,9 +213,15 @@ class BlobStore {
+   async getString(hash) {
+     assert.blobHash(hash, 'bad hash')
+
+-    const stream = await this.getStream(hash)
+-    const buffer = await streams.readStreamToBuffer(stream)
+-    return buffer.toString()
++    const projectId = this.projectId
++    logger.debug({ projectId, hash }, 'getString started')
++    try {
++      const stream = await this.getStream(hash)
++      const buffer = await streams.readStreamToBuffer(stream)
++      return buffer.toString()
++    } finally {
++      logger.debug({ projectId, hash }, 'getString finished')
++    }
+   }
+
+   /**
+--- services/history-v1/storage/lib/history_store.js
++++ services/history-v1/storage/lib/history_store.js
+@@ -8,6 +8,7 @@ const path = require('path')
+
+ const OError = require('@overleaf/o-error')
+ const objectPersistor = require('@overleaf/object-persistor')
++const logger = require('@overleaf/logger')
+
+ const assert = require('./assert')
+ const persistor = require('./persistor')
+@@ -70,6 +71,7 @@ HistoryStore.prototype.loadRaw = function historyStoreLoadRaw(
+
+   const key = getKey(projectId, chunkId)
+
++  logger.debug({ projectId, chunkId }, 'loadRaw started')
+   return BPromise.resolve()
+     .then(() => persistor.getObjectStream(BUCKET, key))
+     .then(streams.gunzipStreamToBuffer)
+@@ -80,6 +82,7 @@ HistoryStore.prototype.loadRaw = function historyStoreLoadRaw(
+       }
+       throw new HistoryStore.LoadError(projectId, chunkId).withCause(err)
+     })
++    .finally(() => logger.debug({ projectId, chunkId }, 'loadRaw finished'))
+ }
+
+ /**
+@@ -102,6 +105,7 @@ HistoryStore.prototype.storeRaw = function historyStoreStoreRaw(
+   const key = getKey(projectId, chunkId)
+   const stream = streams.gzipStringToStream(JSON.stringify(rawHistory))
+
++  logger.debug({ projectId, chunkId }, 'storeRaw started')
+   return BPromise.resolve()
+     .then(() =>
+       persistor.sendStream(BUCKET, key, stream, {
+@@ -112,6 +116,7 @@ HistoryStore.prototype.storeRaw = function historyStoreStoreRaw(
+     .catch(err => {
+       throw new HistoryStore.StoreError(projectId, chunkId).withCause(err)
+     })
++    .finally(() => logger.debug({ projectId, chunkId }, 'storeRaw finished'))
+ }
+
+ /**
+@@ -121,12 +126,13 @@ HistoryStore.prototype.storeRaw = function historyStoreStoreRaw(
+  * @return {Promise}
+  */
+ HistoryStore.prototype.deleteChunks = function historyDeleteChunks(chunks) {
++  logger.debug({ chunks }, 'deleteChunks started')
+   return BPromise.all(
+     chunks.map(chunk => {
+       const key = getKey(chunk.projectId, chunk.chunkId)
+       return persistor.deleteObject(BUCKET, key)
+     })
+-  )
++  ).finally(() => logger.debug({ chunks }, 'deleteChunks finished'))
+ }
+
+ module.exports = new HistoryStore()
