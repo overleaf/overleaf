@@ -29,6 +29,7 @@ describe('TokenAccessController', function () {
       isReadAndWriteToken: sinon.stub().returns(true),
       isReadOnlyToken: sinon.stub().returns(true),
       tokenAccessEnabledForProject: sinon.stub().returns(true),
+      checkTokenHashPrefix: sinon.stub(),
       promises: {
         addReadAndWriteUserToProject: sinon.stub().resolves(),
         addReadOnlyUserToProject: sinon.stub().resolves(),
@@ -78,7 +79,7 @@ describe('TokenAccessController', function () {
     describe('normal case', function () {
       beforeEach(function (done) {
         this.req.params = { token: this.token }
-        this.req.body = { confirmedByUser: true }
+        this.req.body = { confirmedByUser: true, tokenHashPrefix: 'prefix' }
         this.res.callback = done
         this.TokenAccessController.grantTokenAccessReadAndWrite(
           this.req,
@@ -104,6 +105,12 @@ describe('TokenAccessController', function () {
           { privileges: 'readAndWrite' }
         )
       })
+
+      it('checks token hash', function () {
+        expect(
+          this.TokenAccessHandler.checkTokenHashPrefix
+        ).to.have.been.calledWith(this.token, 'prefix', 'readAndWrite')
+      })
     })
 
     describe('when the access was already granted', function () {
@@ -124,13 +131,38 @@ describe('TokenAccessController', function () {
           .called
       })
     })
+
+    describe('hash prefix missing in request', function () {
+      beforeEach(function (done) {
+        this.req.params = { token: this.token }
+        this.req.body = { confirmedByUser: true }
+        this.res.callback = done
+        this.TokenAccessController.grantTokenAccessReadAndWrite(
+          this.req,
+          this.res,
+          done
+        )
+      })
+
+      it('grants read and write access', function () {
+        expect(
+          this.TokenAccessHandler.promises.addReadAndWriteUserToProject
+        ).to.have.been.calledWith(this.user._id, this.project._id)
+      })
+
+      it('sends missing hash to metrics', function () {
+        expect(
+          this.TokenAccessHandler.checkTokenHashPrefix
+        ).to.have.been.calledWith(this.token, undefined, 'readAndWrite')
+      })
+    })
   })
 
   describe('grantTokenAccessReadOnly', function () {
     describe('normal case', function () {
       beforeEach(function (done) {
         this.req.params = { token: this.token }
-        this.req.body = { confirmedByUser: true }
+        this.req.body = { confirmedByUser: true, tokenHashPrefix: 'prefix' }
         this.res.callback = done
         this.TokenAccessController.grantTokenAccessReadOnly(
           this.req,
@@ -155,6 +187,12 @@ describe('TokenAccessController', function () {
           this.req.ip,
           { privileges: 'readOnly' }
         )
+      })
+
+      it('sends checks if hash prefix matches', function () {
+        expect(
+          this.TokenAccessHandler.checkTokenHashPrefix
+        ).to.have.been.calledWith(this.token, 'prefix', 'readOnly')
       })
     })
 

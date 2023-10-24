@@ -1,16 +1,3 @@
-/* eslint-disable
-    n/handle-callback-err,
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const SandboxedModule = require('sandboxed-module')
 const path = require('path')
 const sinon = require('sinon')
@@ -32,10 +19,11 @@ describe('TokenAccessHandler', function () {
     }
     this.userId = ObjectId()
     this.req = {}
-    return (this.TokenAccessHandler = SandboxedModule.require(modulePath, {
+    this.TokenAccessHandler = SandboxedModule.require(modulePath, {
       requires: {
         mongodb: { ObjectId },
         '../../models/Project': { Project: (this.Project = {}) },
+        '@overleaf/metrics': (this.Metrics = { inc: sinon.stub() }),
         '@overleaf/settings': (this.settings = {}),
         '../V1/V1Api': (this.V1Api = {
           request: sinon.stub(),
@@ -45,7 +33,7 @@ describe('TokenAccessHandler', function () {
           recordEventForUser: sinon.stub(),
         }),
       },
-    }))
+    })
   })
 
   describe('getTokenType', function () {
@@ -119,14 +107,15 @@ describe('TokenAccessHandler', function () {
 
   describe('addReadOnlyUserToProject', function () {
     beforeEach(function () {
-      return (this.Project.updateOne = sinon.stub().callsArgWith(2, null))
+      this.Project.updateOne = sinon.stub().callsArgWith(2, null)
     })
 
     it('should call Project.updateOne', function (done) {
-      return this.TokenAccessHandler.addReadOnlyUserToProject(
+      this.TokenAccessHandler.addReadOnlyUserToProject(
         this.userId,
         this.projectId,
         err => {
+          expect(err).to.not.exist
           expect(this.Project.updateOne.callCount).to.equal(1)
           expect(
             this.Project.updateOne.calledWith({
@@ -142,36 +131,36 @@ describe('TokenAccessHandler', function () {
             'project-joined',
             { mode: 'read-only' }
           )
-          return done()
+          done()
         }
       )
     })
 
     it('should not produce an error', function (done) {
-      return this.TokenAccessHandler.addReadOnlyUserToProject(
+      this.TokenAccessHandler.addReadOnlyUserToProject(
         this.userId,
         this.projectId,
         err => {
           expect(err).to.not.exist
-          return done()
+          done()
         }
       )
     })
 
     describe('when Project.updateOne produces an error', function () {
       beforeEach(function () {
-        return (this.Project.updateOne = sinon
+        this.Project.updateOne = sinon
           .stub()
-          .callsArgWith(2, new Error('woops')))
+          .callsArgWith(2, new Error('woops'))
       })
 
       it('should produce an error', function (done) {
-        return this.TokenAccessHandler.addReadOnlyUserToProject(
+        this.TokenAccessHandler.addReadOnlyUserToProject(
           this.userId,
           this.projectId,
           err => {
             expect(err).to.exist
-            return done()
+            done()
           }
         )
       })
@@ -180,14 +169,15 @@ describe('TokenAccessHandler', function () {
 
   describe('addReadAndWriteUserToProject', function () {
     beforeEach(function () {
-      return (this.Project.updateOne = sinon.stub().callsArgWith(2, null))
+      this.Project.updateOne = sinon.stub().callsArgWith(2, null)
     })
 
     it('should call Project.updateOne', function (done) {
-      return this.TokenAccessHandler.addReadAndWriteUserToProject(
+      this.TokenAccessHandler.addReadAndWriteUserToProject(
         this.userId,
         this.projectId,
         err => {
+          expect(err).to.not.exist
           expect(this.Project.updateOne.callCount).to.equal(1)
           expect(
             this.Project.updateOne.calledWith({
@@ -203,36 +193,36 @@ describe('TokenAccessHandler', function () {
             'project-joined',
             { mode: 'read-write' }
           )
-          return done()
+          done()
         }
       )
     })
 
     it('should not produce an error', function (done) {
-      return this.TokenAccessHandler.addReadAndWriteUserToProject(
+      this.TokenAccessHandler.addReadAndWriteUserToProject(
         this.userId,
         this.projectId,
         err => {
           expect(err).to.not.exist
-          return done()
+          done()
         }
       )
     })
 
     describe('when Project.updateOne produces an error', function () {
       beforeEach(function () {
-        return (this.Project.updateOne = sinon
+        this.Project.updateOne = sinon
           .stub()
-          .callsArgWith(2, new Error('woops')))
+          .callsArgWith(2, new Error('woops'))
       })
 
       it('should produce an error', function (done) {
-        return this.TokenAccessHandler.addReadAndWriteUserToProject(
+        this.TokenAccessHandler.addReadAndWriteUserToProject(
           this.userId,
           this.projectId,
           err => {
             expect(err).to.exist
-            return done()
+            done()
           }
         )
       })
@@ -241,7 +231,7 @@ describe('TokenAccessHandler', function () {
 
   describe('grantSessionTokenAccess', function () {
     beforeEach(function () {
-      return (this.req = { session: {}, headers: {} })
+      this.req = { session: {}, headers: {} }
     })
 
     it('should add the token to the session', function (done) {
@@ -253,7 +243,7 @@ describe('TokenAccessHandler', function () {
       expect(
         this.req.session.anonTokenAccess[this.projectId.toString()]
       ).to.equal(this.token)
-      return done()
+      done()
     })
   })
 
@@ -267,27 +257,28 @@ describe('TokenAccessHandler', function () {
       })
 
       it('should try to find projects with both kinds of token', function (done) {
-        return this.TokenAccessHandler.validateTokenForAnonymousAccess(
+        this.TokenAccessHandler.validateTokenForAnonymousAccess(
           this.projectId,
           this.token,
           (err, allowed) => {
+            expect(err).to.not.exist
             expect(
               this.TokenAccessHandler.getProjectByToken.callCount
             ).to.equal(1)
-            return done()
+            done()
           }
         )
       })
 
       it('should allow read-only access', function (done) {
-        return this.TokenAccessHandler.validateTokenForAnonymousAccess(
+        this.TokenAccessHandler.validateTokenForAnonymousAccess(
           this.projectId,
           this.token,
           (err, rw, ro) => {
             expect(err).to.not.exist
             expect(rw).to.equal(false)
             expect(ro).to.equal(true)
-            return done()
+            done()
           }
         )
       })
@@ -309,27 +300,28 @@ describe('TokenAccessHandler', function () {
         })
 
         it('should try to find projects with both kinds of token', function (done) {
-          return this.TokenAccessHandler.validateTokenForAnonymousAccess(
+          this.TokenAccessHandler.validateTokenForAnonymousAccess(
             this.projectId,
             this.token,
             (err, rw, ro) => {
+              expect(err).to.not.exist
               expect(
                 this.TokenAccessHandler.getProjectByToken.callCount
               ).to.equal(1)
-              return done()
+              done()
             }
           )
         })
 
         it('should not allow read-and-write access', function (done) {
-          return this.TokenAccessHandler.validateTokenForAnonymousAccess(
+          this.TokenAccessHandler.validateTokenForAnonymousAccess(
             this.projectId,
             this.token,
             (err, rw, ro) => {
               expect(err).to.not.exist
               expect(rw).to.equal(false)
               expect(ro).to.equal(false)
-              return done()
+              done()
             }
           )
         })
@@ -341,27 +333,28 @@ describe('TokenAccessHandler', function () {
         })
 
         it('should try to find projects with both kinds of token', function (done) {
-          return this.TokenAccessHandler.validateTokenForAnonymousAccess(
+          this.TokenAccessHandler.validateTokenForAnonymousAccess(
             this.projectId,
             this.token,
             (err, rw, ro) => {
+              expect(err).to.not.exist
               expect(
                 this.TokenAccessHandler.getProjectByToken.callCount
               ).to.equal(1)
-              return done()
+              done()
             }
           )
         })
 
         it('should allow read-and-write access', function (done) {
-          return this.TokenAccessHandler.validateTokenForAnonymousAccess(
+          this.TokenAccessHandler.validateTokenForAnonymousAccess(
             this.projectId,
             this.token,
             (err, rw, ro) => {
               expect(err).to.not.exist
               expect(rw).to.equal(true)
               expect(ro).to.equal(false)
-              return done()
+              done()
             }
           )
         })
@@ -376,27 +369,28 @@ describe('TokenAccessHandler', function () {
       })
 
       it('should try to find projects with both kinds of token', function (done) {
-        return this.TokenAccessHandler.validateTokenForAnonymousAccess(
+        this.TokenAccessHandler.validateTokenForAnonymousAccess(
           this.projectId,
           this.token,
           (err, allowed) => {
+            expect(err).to.not.exist
             expect(
               this.TokenAccessHandler.getProjectByToken.callCount
             ).to.equal(1)
-            return done()
+            done()
           }
         )
       })
 
       it('should not allow any access', function (done) {
-        return this.TokenAccessHandler.validateTokenForAnonymousAccess(
+        this.TokenAccessHandler.validateTokenForAnonymousAccess(
           this.projectId,
           this.token,
           (err, rw, ro) => {
             expect(err).to.not.exist
             expect(rw).to.equal(false)
             expect(ro).to.equal(false)
-            return done()
+            done()
           }
         )
       })
@@ -410,20 +404,22 @@ describe('TokenAccessHandler', function () {
       })
 
       it('should try to find projects with both kinds of token', function (done) {
-        return this.TokenAccessHandler.validateTokenForAnonymousAccess(
+        this.TokenAccessHandler.validateTokenForAnonymousAccess(
           this.projectId,
           this.token,
           (err, allowed) => {
+            expect(err).to.exist
+            expect(allowed).to.not.exist
             expect(
               this.TokenAccessHandler.getProjectByToken.callCount
             ).to.equal(1)
-            return done()
+            done()
           }
         )
       })
 
       it('should produce an error and not allow access', function (done) {
-        return this.TokenAccessHandler.validateTokenForAnonymousAccess(
+        this.TokenAccessHandler.validateTokenForAnonymousAccess(
           this.projectId,
           this.token,
           (err, rw, ro) => {
@@ -431,7 +427,7 @@ describe('TokenAccessHandler', function () {
             expect(err).to.be.instanceof(Error)
             expect(rw).to.equal(undefined)
             expect(ro).to.equal(undefined)
-            return done()
+            done()
           }
         )
       })
@@ -439,7 +435,7 @@ describe('TokenAccessHandler', function () {
 
     describe('when project is not set to token-based access', function () {
       beforeEach(function () {
-        return (this.project.publicAccesLevel = 'private')
+        this.project.publicAccesLevel = 'private'
       })
 
       describe('for read-and-write project', function () {
@@ -453,14 +449,14 @@ describe('TokenAccessHandler', function () {
         })
 
         it('should not allow any access', function (done) {
-          return this.TokenAccessHandler.validateTokenForAnonymousAccess(
+          this.TokenAccessHandler.validateTokenForAnonymousAccess(
             this.projectId,
             this.token,
             (err, rw, ro) => {
               expect(err).to.not.exist
               expect(rw).to.equal(false)
               expect(ro).to.equal(false)
-              return done()
+              done()
             }
           )
         })
@@ -477,14 +473,14 @@ describe('TokenAccessHandler', function () {
         })
 
         it('should not allow any access', function (done) {
-          return this.TokenAccessHandler.validateTokenForAnonymousAccess(
+          this.TokenAccessHandler.validateTokenForAnonymousAccess(
             this.projectId,
             this.token,
             (err, rw, ro) => {
               expect(err).to.not.exist
               expect(rw).to.equal(false)
               expect(ro).to.equal(false)
-              return done()
+              done()
             }
           )
         })
@@ -498,14 +494,14 @@ describe('TokenAccessHandler', function () {
         })
 
         it('should not allow any access', function (done) {
-          return this.TokenAccessHandler.validateTokenForAnonymousAccess(
+          this.TokenAccessHandler.validateTokenForAnonymousAccess(
             this.projectId,
             null,
             (err, rw, ro) => {
               expect(err).to.not.exist
               expect(rw).to.equal(false)
               expect(ro).to.equal(false)
-              return done()
+              done()
             }
           )
         })
@@ -515,21 +511,18 @@ describe('TokenAccessHandler', function () {
 
   describe('getDocPublishedInfo', function () {
     beforeEach(function () {
-      return (this.callback = sinon.stub())
+      this.callback = sinon.stub()
     })
 
     describe('when v1 api not set', function () {
       beforeEach(function () {
         this.settings.apis = { v1: undefined }
-        return this.TokenAccessHandler.getV1DocPublishedInfo(
-          this.token,
-          this.callback
-        )
+        this.TokenAccessHandler.getV1DocPublishedInfo(this.token, this.callback)
       })
 
       it('should not check access and return default info', function () {
         expect(this.V1Api.request.called).to.equal(false)
-        return expect(
+        expect(
           this.callback.calledWith(null, {
             allow: true,
           })
@@ -539,7 +532,7 @@ describe('TokenAccessHandler', function () {
 
     describe('when v1 api is set', function () {
       beforeEach(function () {
-        return (this.settings.apis = { v1: { url: 'v1Url' } })
+        this.settings.apis = { v1: { url: 'v1Url' } }
       })
 
       describe('on V1Api.request success', function () {
@@ -547,7 +540,7 @@ describe('TokenAccessHandler', function () {
           this.V1Api.request = sinon
             .stub()
             .callsArgWith(1, null, null, 'mock-data')
-          return this.TokenAccessHandler.getV1DocPublishedInfo(
+          this.TokenAccessHandler.getV1DocPublishedInfo(
             this.token,
             this.callback
           )
@@ -559,23 +552,21 @@ describe('TokenAccessHandler', function () {
               url: `/api/v1/sharelatex/docs/${this.token}/is_published`,
             })
           ).to.equal(true)
-          return expect(this.callback.calledWith(null, 'mock-data')).to.equal(
-            true
-          )
+          expect(this.callback.calledWith(null, 'mock-data')).to.equal(true)
         })
       })
 
       describe('on V1Api.request error', function () {
         beforeEach(function () {
           this.V1Api.request = sinon.stub().callsArgWith(1, 'error')
-          return this.TokenAccessHandler.getV1DocPublishedInfo(
+          this.TokenAccessHandler.getV1DocPublishedInfo(
             this.token,
             this.callback
           )
         })
 
         it('should callback with error', function () {
-          return expect(this.callback.calledWith('error')).to.equal(true)
+          expect(this.callback.calledWith('error')).to.equal(true)
         })
       })
     })
@@ -583,12 +574,12 @@ describe('TokenAccessHandler', function () {
 
   describe('getV1DocInfo', function () {
     beforeEach(function () {
-      return (this.callback = sinon.stub())
+      this.callback = sinon.stub()
     })
 
     describe('when v1 api not set', function () {
       beforeEach(function () {
-        return this.TokenAccessHandler.getV1DocInfo(
+        this.TokenAccessHandler.getV1DocInfo(
           this.token,
           this.v2UserId,
           this.callback
@@ -597,7 +588,7 @@ describe('TokenAccessHandler', function () {
 
       it('should not check access and return default info', function () {
         expect(this.V1Api.request.called).to.equal(false)
-        return expect(
+        expect(
           this.callback.calledWith(null, {
             exists: true,
             exported: false,
@@ -608,7 +599,7 @@ describe('TokenAccessHandler', function () {
 
     describe('when v1 api is set', function () {
       beforeEach(function () {
-        return (this.settings.apis = { v1: 'v1' })
+        this.settings.apis = { v1: 'v1' }
       })
 
       describe('on V1Api.request success', function () {
@@ -616,7 +607,7 @@ describe('TokenAccessHandler', function () {
           this.V1Api.request = sinon
             .stub()
             .callsArgWith(1, null, null, 'mock-data')
-          return this.TokenAccessHandler.getV1DocInfo(
+          this.TokenAccessHandler.getV1DocInfo(
             this.token,
             this.v2UserId,
             this.callback
@@ -629,16 +620,14 @@ describe('TokenAccessHandler', function () {
               url: `/api/v1/sharelatex/docs/${this.token}/info`,
             })
           ).to.equal(true)
-          return expect(this.callback.calledWith(null, 'mock-data')).to.equal(
-            true
-          )
+          expect(this.callback.calledWith(null, 'mock-data')).to.equal(true)
         })
       })
 
       describe('on V1Api.request error', function () {
         beforeEach(function () {
           this.V1Api.request = sinon.stub().callsArgWith(1, 'error')
-          return this.TokenAccessHandler.getV1DocInfo(
+          this.TokenAccessHandler.getV1DocInfo(
             this.token,
             this.v2UserId,
             this.callback
@@ -646,9 +635,67 @@ describe('TokenAccessHandler', function () {
         })
 
         it('should callback with error', function () {
-          return expect(this.callback.calledWith('error')).to.equal(true)
+          expect(this.callback.calledWith('error')).to.equal(true)
         })
       })
+    })
+  })
+
+  describe('createTokenHashPrefix', function () {
+    it('creates a prefix of the hash', function () {
+      const prefix =
+        this.TokenAccessHandler.createTokenHashPrefix('zxpxjrwdtsgd')
+      expect(prefix.length).to.equal(6)
+    })
+  })
+
+  describe('checkTokenHashPrefix', function () {
+    it('sends "match" to metrics when prefix matches the prefix of the hash of the token', function () {
+      const token = 'zxpxjrwdtsgd'
+      const prefix = this.TokenAccessHandler.createTokenHashPrefix(token)
+
+      this.TokenAccessHandler.checkTokenHashPrefix(token, prefix, 'readOnly')
+
+      expect(this.Metrics.inc).to.have.been.calledWith(
+        'link-sharing.hash-check',
+        {
+          path: 'readOnly',
+          status: 'match',
+        }
+      )
+    })
+    it('sends "mismatch" to metrics when prefix does not match the prefix of the hash of the token', function () {
+      const token = 'zxpxjrwdtsgd'
+      const prefix = this.TokenAccessHandler.createTokenHashPrefix(token)
+
+      this.TokenAccessHandler.checkTokenHashPrefix(
+        'anothertoken',
+        prefix,
+        'readOnly'
+      )
+
+      expect(this.Metrics.inc).to.have.been.calledWith(
+        'link-sharing.hash-check',
+        {
+          path: 'readOnly',
+          status: 'mismatch',
+        }
+      )
+    })
+    it('sends "missing" to metrics when prefix is undefined', function () {
+      this.TokenAccessHandler.checkTokenHashPrefix(
+        'anothertoken',
+        undefined,
+        'readOnly'
+      )
+
+      expect(this.Metrics.inc).to.have.been.calledWith(
+        'link-sharing.hash-check',
+        {
+          path: 'readOnly',
+          status: 'missing',
+        }
+      )
     })
   })
 })

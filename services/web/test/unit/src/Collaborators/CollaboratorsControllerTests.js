@@ -23,6 +23,7 @@ describe('CollaboratorsController', function () {
         removeUserFromProject: sinon.stub().resolves(),
         setCollaboratorPrivilegeLevel: sinon.stub().resolves(),
       },
+      createTokenHashPrefix: sinon.stub().returns('abc123'),
     }
     this.CollaboratorsGetter = {
       promises: {

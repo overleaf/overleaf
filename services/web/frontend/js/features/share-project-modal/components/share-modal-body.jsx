@@ -69,7 +69,7 @@ export default function ShareModalBody() {
           {isProjectOwner && (
             <>
               <br />
-              <LinkSharing canAddCollaborators={canAddCollaborators} />
+              <LinkSharing />
             </>
           )}
 
@@ -108,7 +108,7 @@ export default function ShareModalBody() {
           {isProjectOwner && (
             <>
               <br />
-              <LinkSharing canAddCollaborators={canAddCollaborators} />
+              <LinkSharing />
             </>
           )}
 
@@ -122,9 +122,7 @@ export default function ShareModalBody() {
     default:
       return (
         <>
-          {isProjectOwner && (
-            <LinkSharing canAddCollaborators={canAddCollaborators} />
-          )}
+          {isProjectOwner && <LinkSharing />}
 
           <OwnerInfo />
 

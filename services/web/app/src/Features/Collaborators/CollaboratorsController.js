@@ -167,5 +167,17 @@ async function getShareTokens(req, res) {
     )
   }
 
+  if (tokens.readOnly) {
+    tokens.readOnlyHashPrefix = TokenAccessHandler.createTokenHashPrefix(
+      tokens.readOnly
+    )
+  }
+
+  if (tokens.readAndWrite) {
+    tokens.readAndWriteHashPrefix = TokenAccessHandler.createTokenHashPrefix(
+      tokens.readAndWrite
+    )
+  }
+
   res.json(tokens)
 }

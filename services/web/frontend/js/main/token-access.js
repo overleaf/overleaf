@@ -43,13 +43,13 @@ App.controller('TokenAccessPageController', [
       const parsedData = JSON.parse(textData)
       const { postUrl, csrfToken } = parsedData
       $scope.accessInFlight = true
-
       $http({
         method: 'POST',
         url: postUrl,
         data: {
           _csrf: csrfToken,
           confirmedByUser,
+          tokenHashPrefix: window.location.hash,
         },
       }).then(
         function successCallback(response) {

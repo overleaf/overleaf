@@ -2,6 +2,7 @@ const { Project } = require('../../models/Project')
 const PublicAccessLevels = require('../Authorization/PublicAccessLevels')
 const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
 const { ObjectId } = require('mongodb')
+const Metrics = require('@overleaf/metrics')
 const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
 const V1Api = require('../V1/V1Api')
@@ -277,6 +278,32 @@ const TokenAccessHandler = {
         return callback(err)
       }
       callback(null, body)
+    })
+  },
+
+  createTokenHashPrefix(token) {
+    const hash = crypto.createHash('sha256')
+    hash.update(token)
+    return hash.digest('hex').slice(0, 6)
+  },
+
+  checkTokenHashPrefix(token, tokenHashPrefix, type) {
+    let hashPrefixStatus
+
+    if (!tokenHashPrefix) {
+      hashPrefixStatus = 'missing'
+    } else {
+      const hashPrefix = TokenAccessHandler.createTokenHashPrefix(token)
+      if (hashPrefix === tokenHashPrefix.replace('#', '')) {
+        hashPrefixStatus = 'match'
+      } else {
+        hashPrefixStatus = 'mismatch'
+      }
+    }
+
+    Metrics.inc('link-sharing.hash-check', {
+      path: type,
+      status: hashPrefixStatus,
     })
   },
 }

@@ -146,6 +146,14 @@ describe('<ShareProjectModal/>', function () {
   })
 
   it('handles access level "tokenBased"', async function () {
+    const tokens = {
+      readAndWrite: '6862414195fwtbrtrdtskb',
+      readAndWritePrefix: '6862414195',
+      readOnly: 'wrnjfzkysqkr',
+      readAndWriteHashPrefix: 'taEVki',
+      readOnlyHashPrefix: 'j2xYbL',
+    }
+    fetchMock.get(`/project/${project._id}/tokens`, tokens)
     renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
       scope: { project: { ...project, publicAccesLevel: 'tokenBased' } },
     })
@@ -157,6 +165,13 @@ describe('<ShareProjectModal/>', function () {
       .not.to.be.null
     expect(screen.queryByText('Anyone with this link can edit this project'))
       .not.to.be.null
+
+    screen.getByText(
+      `https://www.test-overleaf.com/${tokens.readAndWrite}#${tokens.readAndWriteHashPrefix}`
+    )
+    screen.getByText(
+      `https://www.test-overleaf.com/read/${tokens.readOnly}#${tokens.readOnlyHashPrefix}`
+    )
   })
 
   it('handles legacy access level "readAndWrite"', async function () {

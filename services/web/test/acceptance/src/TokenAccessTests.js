@@ -345,11 +345,14 @@ describe('TokenAccess', function () {
         (error, response, body) => {
           expect(error).to.equal(null)
           expect(response.statusCode).to.equal(200)
-          expect(body).to.deep.equal({
+          expect(body).to.include({
             readOnly: this.tokens.readOnly,
             readAndWrite: this.tokens.readAndWrite,
             readAndWritePrefix: this.tokens.readAndWritePrefix,
           })
+          expect(body.readOnlyHashPrefix).to.exist
+          expect(body.readAndWriteHashPrefix).to.exist
+          expect(Object.keys(body).length).to.equal(5)
           done()
         }
       )
@@ -494,7 +497,8 @@ describe('TokenAccess', function () {
               (error, response, body) => {
                 expect(error).to.equal(null)
                 expect(response.statusCode).to.equal(200)
-                expect(body).to.deep.equal({ readOnly: this.tokens.readOnly })
+                expect(body).to.include({ readOnly: this.tokens.readOnly })
+                expect(body.readOnlyHashPrefix).to.exist
                 cb()
               }
             )
@@ -709,7 +713,9 @@ describe('TokenAccess', function () {
               (error, response, body) => {
                 expect(error).to.equal(null)
                 expect(response.statusCode).to.equal(200)
-                expect(body).to.deep.equal({ readOnly: this.tokens.readOnly })
+                expect(body).to.include({ readOnly: this.tokens.readOnly })
+                expect(body.readOnlyHashPrefix).to.exist
+                expect(Object.keys(body).length).to.equal(2)
                 cb()
               }
             )

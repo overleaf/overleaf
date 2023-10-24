@@ -15,7 +15,7 @@ import { getJSON } from '../../../infrastructure/fetch-json'
 import useAbortController from '../../../shared/hooks/use-abort-controller'
 import { debugConsole } from '@/utils/debugging'
 
-export default function LinkSharing({ canAddCollaborators }) {
+export default function LinkSharing() {
   const [inflight, setInflight] = useState(false)
 
   const { monitorRequest } = useShareProjectContext()
@@ -61,7 +61,6 @@ export default function LinkSharing({ canAddCollaborators }) {
         <TokenBasedSharing
           setAccessLevel={setAccessLevel}
           inflight={inflight}
-          canAddCollaborators={canAddCollaborators}
         />
       )
 
@@ -79,10 +78,6 @@ export default function LinkSharing({ canAddCollaborators }) {
     default:
       return null
   }
-}
-
-LinkSharing.propTypes = {
-  canAddCollaborators: PropTypes.bool,
 }
 
 function PrivateSharing({ setAccessLevel, inflight, projectId }) {
@@ -117,7 +112,7 @@ PrivateSharing.propTypes = {
   projectId: PropTypes.string,
 }
 
-function TokenBasedSharing({ setAccessLevel, inflight, canAddCollaborators }) {
+function TokenBasedSharing({ setAccessLevel, inflight }) {
   const { t } = useTranslation()
   const { _id: projectId } = useProjectContext()
 
@@ -152,6 +147,7 @@ function TokenBasedSharing({ setAccessLevel, inflight, canAddCollaborators }) {
           <strong>{t('anyone_with_link_can_edit')}</strong>
           <AccessToken
             token={tokens?.readAndWrite}
+            tokenHashPrefix={tokens?.readAndWriteHashPrefix}
             path="/"
             tooltipId="tooltip-copy-link-rw"
           />
@@ -160,6 +156,7 @@ function TokenBasedSharing({ setAccessLevel, inflight, canAddCollaborators }) {
           <strong>{t('anyone_with_link_can_view')}</strong>
           <AccessToken
             token={tokens?.readOnly}
+            tokenHashPrefix={tokens?.readOnlyHashPrefix}
             path="/read/"
             tooltipId="tooltip-copy-link-ro"
           />
@@ -172,7 +169,6 @@ function TokenBasedSharing({ setAccessLevel, inflight, canAddCollaborators }) {
 TokenBasedSharing.propTypes = {
   setAccessLevel: PropTypes.func.isRequired,
   inflight: PropTypes.bool,
-  canAddCollaborators: PropTypes.bool,
 }
 
 function LegacySharing({ accessLevel, setAccessLevel, inflight }) {
@@ -229,6 +225,7 @@ export function ReadOnlyTokenLink() {
           <strong>{t('anyone_with_link_can_view')}</strong>
           <AccessToken
             token={tokens?.readOnly}
+            tokenHashPrefix={tokens?.readOnlyHashPrefix}
             path="/read/"
             tooltipId="tooltip-copy-link-ro"
           />
@@ -238,7 +235,7 @@ export function ReadOnlyTokenLink() {
   )
 }
 
-function AccessToken({ token, path, tooltipId }) {
+function AccessToken({ token, tokenHashPrefix, path, tooltipId }) {
   const { t } = useTranslation()
   const { isAdmin } = useUserContext()
 
@@ -254,7 +251,9 @@ function AccessToken({ token, path, tooltipId }) {
   if (isAdmin) {
     origin = window.ExposedSettings.siteUrl
   }
-  const link = `${origin}${path}${token}`
+  const link = `${origin}${path}${token}${
+    tokenHashPrefix ? `#${tokenHashPrefix}` : ''
+  }`
 
   return (
     <div className="access-token">
@@ -266,6 +265,7 @@ function AccessToken({ token, path, tooltipId }) {
 
 AccessToken.propTypes = {
   token: PropTypes.string,
+  tokenHashPrefix: PropTypes.string,
   tooltipId: PropTypes.string.isRequired,
   path: PropTypes.string.isRequired,
 }

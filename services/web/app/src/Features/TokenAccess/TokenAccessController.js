@@ -96,6 +96,7 @@ async function tokenAccessPage(req, res, next) {
         return res.redirect(302, docPublishedInfo.published_path)
       }
     }
+
     res.render('project/token/access', {
       postUrl: makePostUrl(token),
     })
@@ -225,12 +226,15 @@ async function checkAndGetProjectOrResponseAction(
 
 async function grantTokenAccessReadAndWrite(req, res, next) {
   const { token } = req.params
-  const { confirmedByUser } = req.body
+  const { confirmedByUser, tokenHashPrefix } = req.body
   const userId = SessionManager.getLoggedInUserId(req.session)
   if (!TokenAccessHandler.isReadAndWriteToken(token)) {
     return res.sendStatus(400)
   }
   const tokenType = TokenAccessHandler.TOKEN_TYPES.READ_AND_WRITE
+
+  TokenAccessHandler.checkTokenHashPrefix(token, tokenHashPrefix, tokenType)
+
   try {
     const [project, action] = await checkAndGetProjectOrResponseAction(
       tokenType,
@@ -268,6 +272,7 @@ async function grantTokenAccessReadAndWrite(req, res, next) {
       userId,
       project._id
     )
+
     return res.json({
       redirect: `/project/${project._id}`,
       tokenAccessGranted: tokenType,
@@ -285,12 +290,16 @@ async function grantTokenAccessReadAndWrite(req, res, next) {
 
 async function grantTokenAccessReadOnly(req, res, next) {
   const { token } = req.params
-  const { confirmedByUser } = req.body
+  const { confirmedByUser, tokenHashPrefix } = req.body
   const userId = SessionManager.getLoggedInUserId(req.session)
   if (!TokenAccessHandler.isReadOnlyToken(token)) {
     return res.sendStatus(400)
   }
+
   const tokenType = TokenAccessHandler.TOKEN_TYPES.READ_ONLY
+
+  TokenAccessHandler.checkTokenHashPrefix(token, tokenHashPrefix, tokenType)
+
   const docPublishedInfo =
     await TokenAccessHandler.promises.getV1DocPublishedInfo(token)
   if (docPublishedInfo.allow === false) {
@@ -333,6 +342,7 @@ async function grantTokenAccessReadOnly(req, res, next) {
       userId,
       project._id
     )
+
     return res.json({
       redirect: `/project/${project._id}`,
       tokenAccessGranted: tokenType,
