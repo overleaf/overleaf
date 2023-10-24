@@ -111,8 +111,10 @@ function AutoExpandingTextArea({
     resetHeight()
     if (autoFocus) {
       const cursorPos = el.value.length
-      el.focus()
-      el.setSelectionRange(cursorPos, cursorPos)
+      window.setTimeout(() => {
+        el.focus()
+        el.setSelectionRange(cursorPos, cursorPos)
+      }, 100)
     }
   }, [autoFocus, resetHeight])
 
