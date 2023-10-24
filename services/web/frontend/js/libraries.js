@@ -9,8 +9,5 @@ import './vendor/libs/select/select'
 // CSS
 import 'angular/angular-csp.css'
 
-// Polyfill fetch for IE11
-import 'isomorphic-unfetch'
-
 // Rewrite meta elements
 import './utils/meta'
