@@ -1,41 +1,20 @@
-import { createContext, FC, useContext, useMemo } from 'react'
-import { ScopeValueStore } from '../../../../types/ide/scope-value-store'
-import { Scope } from '../../../../types/angular/scope'
-import getMeta from '@/utils/meta'
-import { ScopeEventEmitter } from '../../../../types/ide/scope-event-emitter'
+import { createContext, FC, useContext, useState } from 'react'
+import { getMockIde } from './mock/mock-ide'
 
-export type Ide = {
+type Ide = {
   [key: string]: any // TODO: define the rest of the `ide` and `$scope` properties
-  $scope: Scope
+  $scope: Record<string, any>
 }
 
-type IdeContextValue = Ide & {
-  isReactIde: boolean
-  scopeStore: ScopeValueStore
-  scopeEventEmitter: ScopeEventEmitter
-}
+const IdeContext = createContext<Ide | null>(null)
 
-const IdeContext = createContext<IdeContextValue | undefined>(undefined)
-const isReactIde: boolean = getMeta('ol-idePageReact')
-
-export const IdeProvider: FC<{
-  ide: Ide
-  scopeStore: ScopeValueStore
-  scopeEventEmitter: ScopeEventEmitter
-}> = ({ ide, scopeStore, scopeEventEmitter, children }) => {
-  const value = useMemo<IdeContextValue>(() => {
-    return {
-      ...ide,
-      isReactIde,
-      scopeStore,
-      scopeEventEmitter,
-    }
-  }, [ide, scopeStore, scopeEventEmitter])
+export const IdeProvider: FC<{ ide: Ide }> = ({ ide, children }) => {
+  const [value] = useState(() => ide || getMockIde())
 
   return <IdeContext.Provider value={value}>{children}</IdeContext.Provider>
 }
 
-export function useIdeContext(): IdeContextValue {
+export function useIdeContext(): Ide {
   const context = useContext(IdeContext)
 
   if (!context) {

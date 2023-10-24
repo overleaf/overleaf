@@ -1,14 +1,13 @@
 import { useEffect } from 'react'
 import { useIdeContext } from '../context/ide-context'
-import { ScopeEventName } from '../../../../types/ide/scope-event-emitter'
 
 export default function useScopeEventListener(
-  eventName: ScopeEventName,
+  eventName: string,
   listener: (...args: unknown[]) => void
 ) {
-  const { scopeEventEmitter } = useIdeContext()
+  const { $scope } = useIdeContext()
 
   useEffect(() => {
-    return scopeEventEmitter.on(eventName, listener)
-  }, [scopeEventEmitter, eventName, listener])
+    return $scope.$on(eventName, listener)
+  }, [$scope, eventName, listener])
 }

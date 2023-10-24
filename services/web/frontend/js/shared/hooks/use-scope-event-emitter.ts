@@ -1,17 +1,20 @@
 import { useCallback } from 'react'
 import { useIdeContext } from '../context/ide-context'
-import { ScopeEventName } from '../../../../types/ide/scope-event-emitter'
 
 export default function useScopeEventEmitter(
-  eventName: ScopeEventName,
+  eventName: string,
   broadcast = true
 ) {
-  const { scopeEventEmitter } = useIdeContext()
+  const { $scope } = useIdeContext()
 
   return useCallback(
     (...detail: unknown[]) => {
-      scopeEventEmitter.emit(eventName, broadcast, ...detail)
+      if (broadcast) {
+        $scope.$broadcast(eventName, ...detail)
+      } else {
+        $scope.$emit(eventName, ...detail)
+      }
     },
-    [scopeEventEmitter, eventName, broadcast]
+    [$scope, eventName, broadcast]
   )
 }
