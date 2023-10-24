@@ -3,7 +3,7 @@
 import sinon from 'sinon'
 import { get } from 'lodash'
 import { SplitTestProvider } from '@/shared/context/split-test-context'
-import { IdeProvider } from '@/shared/context/ide-context'
+import { IdeAngularProvider } from '@/shared/context/ide-angular-provider'
 import { UserProvider } from '@/shared/context/user-context'
 import { ProjectProvider } from '@/shared/context/project-context'
 import { FileTreeDataProvider } from '@/shared/context/file-tree-data-context'
@@ -112,7 +112,7 @@ export function EditorProviders({
 
   return (
     <SplitTestProvider>
-      <IdeProvider ide={window._ide}>
+      <IdeAngularProvider ide={window._ide}>
         <UserProvider>
           <ProjectProvider>
             <FileTreeDataProvider>
@@ -132,7 +132,7 @@ export function EditorProviders({
             </FileTreeDataProvider>
           </ProjectProvider>
         </UserProvider>
-      </IdeProvider>
+      </IdeAngularProvider>
     </SplitTestProvider>
   )
 }
