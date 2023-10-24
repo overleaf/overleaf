@@ -1,61 +1,57 @@
 const BetaProgramHandler = require('./BetaProgramHandler')
 const OError = require('@overleaf/o-error')
 const UserGetter = require('../User/UserGetter')
-const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
 const SessionManager = require('../Authentication/SessionManager')
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
+const { expressify } = require('../../util/promises')
 
-const BetaProgramController = {
-  optIn(req, res, next) {
-    const userId = SessionManager.getLoggedInUserId(req.session)
-    logger.debug({ userId }, 'user opting in to beta program')
-    if (userId == null) {
-      return next(new Error('no user id in session'))
-    }
-    BetaProgramHandler.optIn(userId, function (err) {
-      if (err) {
-        return next(err)
-      }
-      SplitTestHandler.sessionMaintenance(req, null, () =>
-        res.redirect('/beta/participate')
-      )
-    })
-  },
-
-  optOut(req, res, next) {
-    const userId = SessionManager.getLoggedInUserId(req.session)
-    logger.debug({ userId }, 'user opting out of beta program')
-    if (userId == null) {
-      return next(new Error('no user id in session'))
-    }
-    BetaProgramHandler.optOut(userId, function (err) {
-      if (err) {
-        return next(err)
-      }
-      SplitTestHandler.sessionMaintenance(req, null, () =>
-        res.redirect('/beta/participate')
-      )
-    })
-  },
-
-  optInPage(req, res, next) {
-    const userId = SessionManager.getLoggedInUserId(req.session)
-    logger.debug({ userId }, 'showing beta participation page for user')
-    UserGetter.getUser(userId, { betaProgram: 1 }, function (err, user) {
-      if (err) {
-        OError.tag(err, 'error fetching user', {
-          userId,
-        })
-        return next(err)
-      }
-      res.render('beta_program/opt_in', {
-        title: 'sharelatex_beta_program',
-        user,
-        languages: Settings.languages,
-      })
-    })
-  },
+async function optIn(req, res) {
+  const userId = SessionManager.getLoggedInUserId(req.session)
+  await BetaProgramHandler.promises.optIn(userId)
+  try {
+    await SplitTestHandler.promises.sessionMaintenance(req, null)
+  } catch (error) {
+    logger.error(
+      { err: error },
+      'Failed to perform session maintenance after beta program opt in'
+    )
+  }
+  res.redirect('/beta/participate')
 }
 
-module.exports = BetaProgramController
+async function optOut(req, res) {
+  const userId = SessionManager.getLoggedInUserId(req.session)
+  await BetaProgramHandler.promises.optOut(userId)
+  try {
+    await SplitTestHandler.promises.sessionMaintenance(req, null)
+  } catch (error) {
+    logger.error(
+      { err: error },
+      'Failed to perform session maintenance after beta program opt out'
+    )
+  }
+  res.redirect('/beta/participate')
+}
+
+async function optInPage(req, res) {
+  const userId = SessionManager.getLoggedInUserId(req.session)
+  let user
+  try {
+    user = await UserGetter.promises.getUser(userId, { betaProgram: 1 })
+  } catch (error) {
+    throw OError.tag(error, 'error fetching user', {
+      userId,
+    })
+  }
+  res.render('beta_program/opt_in', {
+    title: 'sharelatex_beta_program',
+    user,
+  })
+}
+
+module.exports = {
+  optIn: expressify(optIn),
+  optOut: expressify(optOut),
+  optInPage: expressify(optInPage),
+}

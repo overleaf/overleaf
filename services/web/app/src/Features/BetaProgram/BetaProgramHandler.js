@@ -17,15 +17,11 @@ async function optOut(userId) {
   AnalyticsManager.setUserPropertyForUser(userId, 'beta-program', false)
 }
 
-const BetaProgramHandler = {
+module.exports = {
   optIn: callbackify(optIn),
-
   optOut: callbackify(optOut),
+  promises: {
+    optIn,
+    optOut,
+  },
 }
-
-BetaProgramHandler.promises = {
-  optIn,
-  optOut,
-}
-
-module.exports = BetaProgramHandler
