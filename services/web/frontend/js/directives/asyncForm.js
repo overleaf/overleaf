@@ -1,5 +1,4 @@
 import App from '../base'
-import '../vendor/libs/passfield'
 App.directive('asyncForm', [
   '$http',
   'validateCaptcha',

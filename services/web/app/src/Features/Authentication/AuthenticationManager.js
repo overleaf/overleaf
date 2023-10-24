@@ -196,8 +196,8 @@ const AuthenticationManager = {
     return null
   },
 
-  // validates a password based on a similar set of rules to `complexPassword.js` on the frontend
-  // note that `passfield.js` enforces more rules than this, but these are the most commonly set.
+  // validates a password based on a similar set of rules previously used by `passfield.js` on the frontend
+  // note that `passfield.js` enforced more rules than this, but these are the most commonly set.
   // returns null on success, or an error object.
   validatePassword(password, email) {
     if (password == null) {

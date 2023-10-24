@@ -27,11 +27,8 @@ import { configureMathJax } from './features/mathjax/configure'
 const App = angular
   .module('SharelatexApp', [
     'ui.bootstrap',
-    'autocomplete',
     'RecursionHelper',
-    'ng-context-menu',
     'ngSanitize',
-    'ipCookie',
     'ErrorCatcher',
     'localStorage',
     'sessionStorage',
