@@ -194,18 +194,23 @@ async function getProjectBlob(req, res, next) {
   const hash = req.swagger.params.hash.value
 
   const blobStore = new BlobStore(projectId)
-  let stream
+  logger.debug({ projectId, hash }, 'getProjectBlob started')
   try {
-    stream = await blobStore.getStream(hash)
-  } catch (err) {
-    if (err instanceof Blob.NotFoundError) {
-      return render.notFound(res)
-    } else {
-      throw err
+    let stream
+    try {
+      stream = await blobStore.getStream(hash)
+    } catch (err) {
+      if (err instanceof Blob.NotFoundError) {
+        return render.notFound(res)
+      } else {
+        throw err
+      }
     }
+    res.set('Content-Type', 'application/octet-stream')
+    await pipeline(stream, res)
+  } finally {
+    logger.debug({ projectId, hash }, 'getProjectBlob finished')
   }
-  res.set('Content-Type', 'application/octet-stream')
-  await pipeline(stream, res)
 }
 
 async function getSnapshotAtVersion(projectId, version) {

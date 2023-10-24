@@ -8,6 +8,7 @@ const path = require('path')
 
 const OError = require('@overleaf/o-error')
 const objectPersistor = require('@overleaf/object-persistor')
+const logger = require('@overleaf/logger')
 
 const assert = require('./assert')
 const persistor = require('./persistor')
@@ -70,6 +71,7 @@ HistoryStore.prototype.loadRaw = function historyStoreLoadRaw(
 
   const key = getKey(projectId, chunkId)
 
+  logger.debug({ projectId, chunkId }, 'loadRaw started')
   return BPromise.resolve()
     .then(() => persistor.getObjectStream(BUCKET, key))
     .then(streams.gunzipStreamToBuffer)
@@ -80,6 +82,7 @@ HistoryStore.prototype.loadRaw = function historyStoreLoadRaw(
       }
       throw new HistoryStore.LoadError(projectId, chunkId).withCause(err)
     })
+    .finally(() => logger.debug({ projectId, chunkId }, 'loadRaw finished'))
 }
 
 /**
@@ -102,6 +105,7 @@ HistoryStore.prototype.storeRaw = function historyStoreStoreRaw(
   const key = getKey(projectId, chunkId)
   const stream = streams.gzipStringToStream(JSON.stringify(rawHistory))
 
+  logger.debug({ projectId, chunkId }, 'storeRaw started')
   return BPromise.resolve()
     .then(() =>
       persistor.sendStream(BUCKET, key, stream, {
@@ -112,6 +116,7 @@ HistoryStore.prototype.storeRaw = function historyStoreStoreRaw(
     .catch(err => {
       throw new HistoryStore.StoreError(projectId, chunkId).withCause(err)
     })
+    .finally(() => logger.debug({ projectId, chunkId }, 'storeRaw finished'))
 }
 
 /**
@@ -121,12 +126,13 @@ HistoryStore.prototype.storeRaw = function historyStoreStoreRaw(
  * @return {Promise}
  */
 HistoryStore.prototype.deleteChunks = function historyDeleteChunks(chunks) {
+  logger.debug({ chunks }, 'deleteChunks started')
   return BPromise.all(
     chunks.map(chunk => {
       const key = getKey(chunk.projectId, chunk.chunkId)
       return persistor.deleteObject(BUCKET, key)
     })
-  )
+  ).finally(() => logger.debug({ chunks }, 'deleteChunks finished'))
 }
 
 module.exports = new HistoryStore()

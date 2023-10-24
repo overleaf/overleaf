@@ -20,6 +20,7 @@ const projectKey = require('../project_key')
 const streams = require('../streams')
 const postgresBackend = require('./postgres')
 const mongoBackend = require('./mongo')
+const logger = require('@overleaf/logger')
 
 const GLOBAL_BLOBS = new Map()
 
@@ -34,9 +35,14 @@ function makeProjectKey(projectId, hash) {
 async function uploadBlob(projectId, blob, stream) {
   const bucket = config.get('blobStore.projectBucket')
   const key = makeProjectKey(projectId, blob.getHash())
-  await persistor.sendStream(bucket, key, stream, {
-    contentType: 'application/octet-stream',
-  })
+  logger.debug({ projectId, blob }, 'uploadBlob started')
+  try {
+    await persistor.sendStream(bucket, key, stream, {
+      contentType: 'application/octet-stream',
+    })
+  } finally {
+    logger.debug({ projectId, blob }, 'uploadBlob finished')
+  }
 }
 
 function getBlobLocation(projectId, hash) {
@@ -109,7 +115,12 @@ async function getStringLengthOfFile(byteLength, pathname) {
 async function deleteBlobsInBucket(projectId) {
   const bucket = config.get('blobStore.projectBucket')
   const prefix = `${projectKey.format(projectId)}/`
-  await persistor.deleteDirectory(bucket, prefix)
+  logger.debug({ projectId }, 'deleteBlobsInBucket started')
+  try {
+    await persistor.deleteDirectory(bucket, prefix)
+  } finally {
+    logger.debug({ projectId }, 'deleteBlobsInBucket finished')
+  }
 }
 
 async function loadGlobalBlobs() {
@@ -202,9 +213,15 @@ class BlobStore {
   async getString(hash) {
     assert.blobHash(hash, 'bad hash')
 
-    const stream = await this.getStream(hash)
-    const buffer = await streams.readStreamToBuffer(stream)
-    return buffer.toString()
+    const projectId = this.projectId
+    logger.debug({ projectId, hash }, 'getString started')
+    try {
+      const stream = await this.getStream(hash)
+      const buffer = await streams.readStreamToBuffer(stream)
+      return buffer.toString()
+    } finally {
+      logger.debug({ projectId, hash }, 'getString finished')
+    }
   }
 
   /**
