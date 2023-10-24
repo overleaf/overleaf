@@ -21,7 +21,16 @@ function RenameProjectMenuItem() {
     }
   }, [isMounted])
 
-  if (selectedProjects.length !== 1) return null
+  if (selectedProjects.length !== 1) {
+    return null
+  }
+
+  const [selectedProject] = selectedProjects
+
+  // only show Rename if the current user is the project owner
+  if (selectedProject.accessLevel !== 'owner') {
+    return null
+  }
 
   return (
     <>
@@ -29,7 +38,7 @@ function RenameProjectMenuItem() {
       <RenameProjectModal
         handleCloseModal={handleCloseModal}
         showModal={showModal}
-        project={selectedProjects[0]}
+        project={selectedProject}
       />
     </>
   )

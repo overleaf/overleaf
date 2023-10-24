@@ -31,13 +31,21 @@ import { GenericErrorBoundaryFallback } from '../../../shared/components/generic
 function ProjectListRoot() {
   const { isReady } = useWaitForI18n()
 
-  return isReady ? (
+  if (!isReady) {
+    return null
+  }
+
+  return <ProjectListRootInner />
+}
+
+export function ProjectListRootInner() {
+  return (
     <ProjectListProvider>
       <ColorPickerProvider>
         <ProjectListPageContent />
       </ColorPickerProvider>
     </ProjectListProvider>
-  ) : null
+  )
 }
 
 function ProjectListPageContent() {
