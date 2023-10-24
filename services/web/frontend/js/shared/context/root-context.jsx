@@ -2,7 +2,7 @@ import PropTypes from 'prop-types'
 import createSharedContext from 'react2angular-shared-context'
 
 import { UserProvider } from './user-context'
-import { IdeProvider } from './ide-context'
+import { IdeAngularProvider } from './ide-angular-provider'
 import { EditorProvider } from './editor-context'
 import { LocalCompileProvider } from './local-compile-context'
 import { DetachCompileProvider } from './detach-compile-context'
@@ -17,7 +17,7 @@ import { ProjectSettingsProvider } from '@/features/editor-left-menu/context/pro
 export function ContextRoot({ children, ide }) {
   return (
     <SplitTestProvider>
-      <IdeProvider ide={ide}>
+      <IdeAngularProvider ide={ide}>
         <UserProvider>
           <ProjectProvider>
             <FileTreeDataProvider>
@@ -37,7 +37,7 @@ export function ContextRoot({ children, ide }) {
             </FileTreeDataProvider>
           </ProjectProvider>
         </UserProvider>
-      </IdeProvider>
+      </IdeAngularProvider>
     </SplitTestProvider>
   )
 }

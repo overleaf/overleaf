@@ -12,38 +12,39 @@ import { useIdeContext } from '../context/ide-context'
  * Binds a property in an Angular scope making it accessible in a React
  * component. The interface is compatible with React.useState(), including
  * the option of passing a function to the setter.
+ *
+ * The generic type is not an actual guarantee because the value for a path is
+ * returned as undefined when there is nothing in the scope store for that path.
  */
 export default function useScopeValue<T = any>(
   path: string, // dot '.' path of a property in the Angular scope
   deep = false
 ): [T, Dispatch<SetStateAction<T>>] {
-  const { $scope } = useIdeContext()
+  const { scopeStore } = useIdeContext()
 
-  const [value, setValue] = useState<T>(() => _.get($scope, path))
+  const [value, setValue] = useState<T>(() => scopeStore.get(path))
 
   useEffect(() => {
-    return $scope.$watch(
+    return scopeStore.watch<T>(
       path,
       (newValue: T) => {
-        setValue(() => {
-          // NOTE: this is deliberately wrapped in a function,
-          // to avoid calling setValue directly with a value that's a function
-          return deep ? _.cloneDeep(newValue) : newValue
-        })
+        // NOTE: this is deliberately wrapped in a function,
+        // to avoid calling setValue directly with a value that's a function
+        setValue(() => newValue)
       },
       deep
     )
-  }, [path, $scope, deep])
+  }, [path, scopeStore, deep])
 
   const scopeSetter = useCallback(
     (newValue: SetStateAction<T>) => {
       setValue(val => {
         const actualNewValue = _.isFunction(newValue) ? newValue(val) : newValue
-        $scope.$applyAsync(() => _.set($scope, path, actualNewValue))
+        scopeStore.set(path, actualNewValue)
         return actualNewValue
       })
     },
-    [path, $scope]
+    [path, scopeStore]
   )
 
   return [value, scopeSetter]
