@@ -12,6 +12,8 @@ import { useCodeMirrorViewContext } from '../../codemirror-editor'
 import Modal, { useBulkActionsModal } from '../entries/bulk-actions-entry/modal'
 import getMeta from '../../../../../utils/meta'
 import useScopeValue from '../../../../../shared/hooks/use-scope-value'
+import useScopeEventListener from '@/shared/hooks/use-scope-event-listener'
+import { useCallback } from 'react'
 
 function EditorWidgets() {
   const { t } = useTranslation()
@@ -53,6 +55,13 @@ function EditorWidgets() {
       setIsAddingComment(true)
     }, 0)
   }
+
+  useScopeEventListener(
+    'comment:start_adding',
+    useCallback(() => {
+      setIsAddingComment(true)
+    }, [setIsAddingComment])
+  )
 
   return ReactDOM.createPortal(
     <>

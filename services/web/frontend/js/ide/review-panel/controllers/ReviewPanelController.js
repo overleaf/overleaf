@@ -786,7 +786,7 @@ export default App.controller('ReviewPanelController', [
 
     ide.$scope.addNewComment = function (e) {
       e.preventDefault()
-      $scope.$broadcast('comment:start_adding')
+      ide.$scope.$broadcast('comment:start_adding')
       return $scope.toggleReviewPanel()
     }
 
@@ -802,7 +802,7 @@ export default App.controller('ReviewPanelController', [
       }
       return $timeout(function () {
         ide.$scope.$broadcast('review-panel:layout')
-        return $scope.$broadcast('comment:start_adding')
+        ide.$scope.$broadcast('comment:start_adding')
       })
     }
 
