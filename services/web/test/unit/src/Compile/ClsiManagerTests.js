@@ -121,6 +121,7 @@ describe('ClsiManager', function () {
         clsi: {
           url: `http://${CLSI_HOST}`,
           defaultBackendClass: 'e2',
+          submissionBackendClass: 'n2d',
         },
         clsi_priority: {
           url: 'https://clsipremium.example.com',

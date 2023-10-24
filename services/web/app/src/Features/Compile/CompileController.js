@@ -244,7 +244,7 @@ module.exports = CompileController = {
     }
     options.compileGroup =
       req.body?.compileGroup || Settings.defaultFeatures.compileGroup
-    options.compileBackendClass = Settings.apis.clsi.defaultBackendClass
+    options.compileBackendClass = Settings.apis.clsi.submissionBackendClass
     options.timeout =
       req.body?.timeout || Settings.defaultFeatures.compileTimeout
     ClsiManager.sendExternalRequest(
@@ -440,7 +440,7 @@ module.exports = CompileController = {
         req.body?.compileGroup ||
         req.query?.compileGroup ||
         Settings.defaultFeatures.compileGroup,
-      compileBackendClass: Settings.apis.clsi.defaultBackendClass,
+      compileBackendClass: Settings.apis.clsi.submissionBackendClass,
     }
     CompileController.proxyToClsiWithLimits(
       submissionId,

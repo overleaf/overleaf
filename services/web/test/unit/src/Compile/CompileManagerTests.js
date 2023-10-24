@@ -22,7 +22,9 @@ describe('CompileManager', function () {
     this.CompileManager = SandboxedModule.require(MODULE_PATH, {
       requires: {
         '@overleaf/settings': (this.settings = {
-          apis: { clsi: { defaultBackendClass: 'e2' } },
+          apis: {
+            clsi: { defaultBackendClass: 'e2', submissionBackendClass: 'n2d' },
+          },
           redis: { web: { host: 'localhost', port: 42 } },
           rateLimit: { autoCompile: {} },
         }),

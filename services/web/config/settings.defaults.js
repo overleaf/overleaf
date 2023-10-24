@@ -226,6 +226,8 @@ module.exports = {
       // url: "http://#{process.env['CLSI_LB_HOST']}:3014"
       backendGroupName: undefined,
       defaultBackendClass: process.env.CLSI_DEFAULT_BACKEND_CLASS || 'e2',
+      submissionBackendClass:
+        process.env.CLSI_SUBMISSION_BACKEND_CLASS || 'n2d',
     },
     project_history: {
       sendProjectStructureOps: true,

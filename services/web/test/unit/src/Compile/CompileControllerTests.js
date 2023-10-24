@@ -33,6 +33,7 @@ describe('CompileController', function () {
         clsi: {
           url: 'http://clsi.example.com',
           defaultBackendClass: 'e2',
+          submissionBackendClass: 'n2d',
         },
         clsi_priority: {
           url: 'http://clsi-priority.example.com',
@@ -337,7 +338,7 @@ describe('CompileController', function () {
         this.ClsiManager.sendExternalRequest.should.have.been.calledWith(
           this.submission_id,
           { compileGroup: 'special', timeout: 600 },
-          { compileGroup: 'special', compileBackendClass: 'e2', timeout: 600 }
+          { compileGroup: 'special', compileBackendClass: 'n2d', timeout: 600 }
         )
       })
     })
@@ -368,7 +369,7 @@ describe('CompileController', function () {
             draft: true,
             check: 'validate',
             compileGroup: 'standard',
-            compileBackendClass: 'e2',
+            compileBackendClass: 'n2d',
             timeout: 60,
           }
         )
@@ -486,7 +487,7 @@ describe('CompileController', function () {
           {},
           {
             compileGroup: 'standard',
-            compileBackendClass: 'e2',
+            compileBackendClass: 'n2d',
           }
         )
       })
@@ -510,7 +511,7 @@ describe('CompileController', function () {
           {},
           {
             compileGroup: 'special',
-            compileBackendClass: 'e2',
+            compileBackendClass: 'n2d',
           }
         )
       })
