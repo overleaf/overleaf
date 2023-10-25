@@ -781,22 +781,24 @@ describe('<ProjectListRoot />', function () {
             const filterButton = screen.getAllByText('All Projects')[0]
             fireEvent.click(filterButton)
             allCheckboxes = screen.getAllByRole<HTMLInputElement>('checkbox')
-            // first one is the select all checkbox
-            fireEvent.click(allCheckboxes[2])
-            actionsToolbar = screen.getAllByRole('toolbar')[0]
           })
 
           it('does not show the dropdown when more than 1 project is selected', async function () {
+            fireEvent.click(allCheckboxes[2]) // select a project
+
+            const actionsToolbar = screen.getAllByRole('toolbar')[0]
             await waitFor(() => {
               within(actionsToolbar).getByText<HTMLElement>('More')
             })
-            fireEvent.click(allCheckboxes[0])
+            fireEvent.click(allCheckboxes[0]) // select all
             expect(within(actionsToolbar).queryByText<HTMLElement>('More')).to
               .be.null
           })
 
-          // eslint-disable-next-line mocha/no-skipped-tests
-          it.skip('validates the project name', async function () {
+          it('validates the project name', async function () {
+            fireEvent.click(allCheckboxes[1]) // select a project owned by the current user
+
+            const actionsToolbar = screen.getAllByRole('toolbar')[0]
             const moreDropdown = await within(
               actionsToolbar
             ).findByText<HTMLElement>('More')
@@ -833,8 +835,10 @@ describe('<ProjectListRoot />', function () {
             expect(confirmButton.disabled).to.be.true
           })
 
-          // eslint-disable-next-line mocha/no-skipped-tests
-          it.skip('opens the rename modal, and can rename the project, and view updated', async function () {
+          it('opens the rename modal, and can rename the project, and view updated', async function () {
+            fireEvent.click(allCheckboxes[1]) // select a project owned by the current user
+            const actionsToolbar = screen.getAllByRole('toolbar')[0]
+
             const renameProjectMock = fetchMock.post(
               `express:/project/:id/rename`,
               {
@@ -871,21 +875,26 @@ describe('<ProjectListRoot />', function () {
             await fetchMock.flush(true)
 
             expect(
-              renameProjectMock.called(`/project/${projectsData[1].id}/rename`)
+              renameProjectMock.called(`/project/${projectsData[0].id}/rename`)
             ).to.be.true
 
             const table = await screen.findByRole('table')
             within(table).getByText(newProjectName)
             expect(within(table).queryByText(oldName)).to.be.null
 
-            const allCheckboxes = await within(
+            const allCheckboxesInTable = await within(
               table
             ).findAllByRole<HTMLInputElement>('checkbox')
-            const allCheckboxesChecked = allCheckboxes.filter(c => c.checked)
+            const allCheckboxesChecked = allCheckboxesInTable.filter(
+              c => c.checked
+            )
             expect(allCheckboxesChecked.length).to.equal(0)
           })
 
           it('opens the copy modal, can copy the project, and view updated', async function () {
+            fireEvent.click(allCheckboxes[2])
+            const actionsToolbar = screen.getAllByRole('toolbar')[0]
+
             const tableRows = screen.getAllByRole('row')
             const linkForProjectToCopy = within(tableRows[1]).getByRole('link')
             const projectNameToCopy = linkForProjectToCopy.textContent || '' // needed for type checking
