@@ -7,49 +7,40 @@ type ManagedUserStatusProps = {
 }
 export default function ManagedUserStatus({ user }: ManagedUserStatusProps) {
   const { t } = useTranslation()
-  return (
-    <span>
-      {user.isEntityAdmin ? (
-        <>
-          <span className="security-state-group-admin" />
-        </>
-      ) : (
-        <>
-          {user.invite ? (
-            <span className="security-state-invite-pending">
-              <MaterialIcon
-                type="schedule"
-                category="outlined"
-                accessibilityLabel={t('pending_invite')}
-              />
-              &nbsp;
-              {t('managed')}
-            </span>
-          ) : (
-            <>
-              {user.enrollment?.managedBy ? (
-                <span className="security-state-managed">
-                  <MaterialIcon
-                    type="check"
-                    accessibilityLabel={t('managed')}
-                  />
-                  &nbsp;
-                  {t('managed')}
-                </span>
-              ) : (
-                <span className="security-state-not-managed">
-                  <MaterialIcon
-                    type="close"
-                    accessibilityLabel={t('not_managed')}
-                  />
-                  &nbsp;
-                  {t('managed')}
-                </span>
-              )}
-            </>
-          )}
-        </>
-      )}
+  const managedUserInvite = (
+    <span className="security-state-invite-pending">
+      <MaterialIcon
+        type="schedule"
+        category="outlined"
+        accessibilityLabel={t('pending_invite')}
+      />
+      &nbsp;
+      {t('managed')}
     </span>
   )
+
+  const managedUserAccepted = (
+    <span className="security-state-managed">
+      <MaterialIcon type="check" accessibilityLabel={t('managed')} />
+      &nbsp;
+      {t('managed')}
+    </span>
+  )
+  const managedUserNotAccepted = (
+    <span className="security-state-not-managed">
+      <MaterialIcon type="close" accessibilityLabel={t('not_managed')} />
+      &nbsp;
+      {t('managed')}
+    </span>
+  )
+
+  if (user.isEntityAdmin) {
+    return <span className="security-state-group-admin" />
+  }
+  if (user.invite) {
+    return managedUserInvite
+  }
+  return user.enrollment?.managedBy
+    ? managedUserAccepted
+    : managedUserNotAccepted
 }

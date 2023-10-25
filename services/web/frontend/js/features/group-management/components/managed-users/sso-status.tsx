@@ -7,35 +7,32 @@ type SSOStatusProps = {
 }
 export default function SSOStatus({ user }: SSOStatusProps) {
   const { t } = useTranslation()
-  return (
-    <span>
-      {user.invite ? (
-        <span className="security-state-invite-pending">
-          <MaterialIcon
-            type="schedule"
-            category="outlined"
-            accessibilityLabel={t('pending_invite')}
-          />
-          &nbsp; {t('sso')}
-        </span>
-      ) : (
-        <>
-          {user.enrollment?.sso ? (
-            <span className="security-state-managed">
-              <MaterialIcon type="check" accessibilityLabel={t('sso_linked')} />
-              &nbsp; {t('sso')}
-            </span>
-          ) : (
-            <span className="security-state-not-managed">
-              <MaterialIcon
-                type="close"
-                accessibilityLabel={t('sso_unlinked')}
-              />
-              &nbsp; {t('sso')}
-            </span>
-          )}
-        </>
-      )}
+  const invitedSSO = (
+    <span className="security-state-invite-pending">
+      <MaterialIcon
+        type="schedule"
+        category="outlined"
+        accessibilityLabel={t('pending_invite')}
+      />
+      &nbsp; {t('sso')}
     </span>
   )
+  const acceptedSSO = (
+    <span className="security-state-managed">
+      <MaterialIcon type="check" accessibilityLabel={t('sso_linked')} />
+      &nbsp; {t('sso')}
+    </span>
+  )
+  const notAcceptedSSO = (
+    <span className="security-state-not-managed">
+      <MaterialIcon type="close" accessibilityLabel={t('sso_unlinked')} />
+      &nbsp; {t('sso')}
+    </span>
+  )
+
+  if (user.invite) {
+    return invitedSSO
+  }
+
+  return user.enrollment?.sso ? acceptedSSO : notAcceptedSSO
 }
