@@ -14,7 +14,7 @@ async function getLatestChunk(projectId) {
   assert.mongoId(projectId, 'bad projectId')
 
   const record = await mongodb.chunks.findOne(
-    { projectId: ObjectId(projectId), state: 'active' },
+    { projectId: new ObjectId(projectId), state: 'active' },
     { sort: { startVersion: -1 } }
   )
   if (record == null) {
@@ -32,7 +32,7 @@ async function getChunkForVersion(projectId, version) {
 
   const record = await mongodb.chunks.findOne(
     {
-      projectId: ObjectId(projectId),
+      projectId: new ObjectId(projectId),
       state: 'active',
       startVersion: { $lte: version },
       endVersion: { $gte: version },
@@ -55,7 +55,7 @@ async function getChunkForTimestamp(projectId, timestamp) {
 
   const record = await mongodb.chunks.findOne(
     {
-      projectId: ObjectId(projectId),
+      projectId: new ObjectId(projectId),
       state: 'active',
       endTimestamp: { $gte: timestamp },
     },
@@ -84,7 +84,7 @@ async function getProjectChunkIds(projectId) {
   assert.mongoId(projectId, 'bad projectId')
 
   const cursor = mongodb.chunks.find(
-    { projectId: ObjectId(projectId), state: 'active' },
+    { projectId: new ObjectId(projectId), state: 'active' },
     { projection: { _id: 1 } }
   )
   return await cursor.map(record => record._id).toArray()
@@ -100,7 +100,7 @@ async function insertPendingChunk(projectId, chunk) {
   const chunkId = new ObjectId()
   await mongodb.chunks.insertOne({
     _id: chunkId,
-    projectId: ObjectId(projectId),
+    projectId: new ObjectId(projectId),
     startVersion: chunk.getStartVersion(),
     endVersion: chunk.getEndVersion(),
     endTimestamp: chunk.getEndTimestamp(),
@@ -122,8 +122,8 @@ async function confirmCreate(projectId, chunk, chunkId, mongoOpts = {}) {
   try {
     result = await mongodb.chunks.updateOne(
       {
-        _id: ObjectId(chunkId),
-        projectId: ObjectId(projectId),
+        _id: new ObjectId(chunkId),
+        projectId: new ObjectId(projectId),
         state: 'pending',
       },
       { $set: { state: 'active', updatedAt: new Date() } },
@@ -176,7 +176,7 @@ async function deleteChunk(projectId, chunkId, mongoOpts = {}) {
   assert.mongoId(chunkId, 'bad chunkId')
 
   await mongodb.chunks.updateOne(
-    { _id: ObjectId(chunkId), projectId: ObjectId(projectId) },
+    { _id: new ObjectId(chunkId), projectId: new ObjectId(projectId) },
     { $set: { state: 'deleted', updatedAt: new Date() } },
     mongoOpts
   )
@@ -189,7 +189,7 @@ async function deleteProjectChunks(projectId) {
   assert.mongoId(projectId, 'bad projectId')
 
   await mongodb.chunks.updateMany(
-    { projectId: ObjectId(projectId), state: 'active' },
+    { projectId: new ObjectId(projectId), state: 'active' },
     { $set: { state: 'deleted', updatedAt: new Date() } }
   )
 }
@@ -239,7 +239,7 @@ async function getOldChunksBatch(count, minAgeSecs) {
  */
 async function deleteOldChunks(chunkIds) {
   await mongodb.chunks.deleteMany({
-    _id: { $in: chunkIds.map(ObjectId) },
+    _id: { $in: chunkIds.map(id => new ObjectId(id)) },
     state: { $in: ['deleted', 'pending'] },
   })
 }

@@ -14,7 +14,7 @@ const cleanup = require('./support/cleanup')
 
 const CHUNK_STORE_BUCKET = config.get('chunkStore.bucket')
 const postgresProjectId = 1
-const mongoProjectId = ObjectId('abcdefabcdefabcdefabcdef')
+const mongoProjectId = new ObjectId('abcdefabcdefabcdefabcdef')
 
 describe('tasks', function () {
   beforeEach(cleanup.everything)
@@ -42,7 +42,7 @@ describe('tasks', function () {
         deleted_at: deletedAt,
       })
       mongoChunks.push({
-        _id: ObjectId(i.toString().padStart(24, '0')),
+        _id: new ObjectId(i.toString().padStart(24, '0')),
         projectId: mongoProjectId,
         startVersion,
         endVersion,
@@ -63,7 +63,7 @@ describe('tasks', function () {
         deleted_at: deletedAt,
       })
       mongoChunks.push({
-        _id: ObjectId(i.toString().padStart(24, '0')),
+        _id: new ObjectId(i.toString().padStart(24, '0')),
         projectId: mongoProjectId,
         startVersion,
         endVersion,

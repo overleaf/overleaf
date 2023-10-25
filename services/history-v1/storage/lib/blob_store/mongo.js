@@ -29,7 +29,7 @@ async function initialize(projectId) {
   assert.mongoId(projectId, 'bad projectId')
   try {
     await mongodb.blobs.insertOne({
-      _id: ObjectId(projectId),
+      _id: new ObjectId(projectId),
       blobs: {},
     })
   } catch (err) {
@@ -48,7 +48,7 @@ async function findBlob(projectId, hash) {
 
   const bucket = getBucket(hash)
   const result = await mongodb.blobs.findOne(
-    { _id: ObjectId(projectId) },
+    { _id: new ObjectId(projectId) },
     { projection: { _id: 0, bucket: `$${bucket}` } }
   )
 
@@ -103,7 +103,7 @@ async function findBlobs(projectId, hashes) {
     projection[bucket] = 1
   }
   const result = await mongodb.blobs.findOne(
-    { _id: ObjectId(projectId) },
+    { _id: new ObjectId(projectId) },
     { projection }
   )
 
@@ -191,7 +191,7 @@ async function insertBlob(projectId, blob) {
   const record = blobToRecord(blob)
   const result = await mongodb.blobs.updateOne(
     {
-      _id: ObjectId(projectId),
+      _id: new ObjectId(projectId),
       $expr: {
         $lt: [{ $size: { $ifNull: [`$${bucket}`, []] } }, MAX_BLOBS_IN_BUCKET],
       },
@@ -224,7 +224,7 @@ async function insertRecordSharded(projectId, hash, record) {
  */
 async function deleteBlobs(projectId) {
   assert.mongoId(projectId, 'bad projectId')
-  await mongodb.blobs.deleteOne({ _id: ObjectId(projectId) })
+  await mongodb.blobs.deleteOne({ _id: new ObjectId(projectId) })
   const minShardedId = makeShardedId(projectId, '0')
   const maxShardedId = makeShardedId(projectId, 'f')
   await mongodb.shardedBlobs.deleteMany({

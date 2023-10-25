@@ -9,7 +9,7 @@ describe('chunk store Mongo backend', function () {
 
   describe('garbage collection', function () {
     it('deletes pending and deleted chunks', async function () {
-      const projectId = ObjectId().toString()
+      const projectId = new ObjectId().toString()
 
       // Create a pending chunk
       const pendingChunk = makeChunk([], 0)

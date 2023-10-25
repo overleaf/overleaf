@@ -6,7 +6,7 @@ const mongoBackend = require('../../../../storage/lib/blob_store/mongo')
 const mongodb = require('../../../../storage/lib/mongodb')
 
 describe('BlobStore Mongo backend', function () {
-  const projectId = ObjectId().toString()
+  const projectId = new ObjectId().toString()
   const hashes = {
     abcd: [
       'abcd000000000000000000000000000000000000',
@@ -38,7 +38,7 @@ describe('BlobStore Mongo backend', function () {
         const blob = new Blob(hash, 123, 99)
         await mongoBackend.insertBlob(projectId, blob)
       }
-      const record = await mongodb.blobs.findOne(ObjectId(projectId), {
+      const record = await mongodb.blobs.findOne(new ObjectId(projectId), {
         promoteBuffers: true,
       })
       expect(record.blobs).to.deep.equal({
@@ -56,7 +56,7 @@ describe('BlobStore Mongo backend', function () {
         const blob = new Blob(hash, 123, 99)
         await mongoBackend.insertBlob(projectId, blob)
       }
-      const record = await mongodb.blobs.findOne(ObjectId(projectId), {
+      const record = await mongodb.blobs.findOne(new ObjectId(projectId), {
         promoteBuffers: true,
       })
       expect(record.blobs).to.deep.equal({
