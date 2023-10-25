@@ -155,6 +155,14 @@ cell 3 & cell 4 \\\\
 
       checkBordersWithNoMultiColumn([false, true, false], [false, true, false])
     })
+
+    it('Renders math in cells', function () {
+      mountEditor(`
+\\begin{tabular}{c}
+  $\\pi$
+\\end{tabular}`)
+      cy.get('.MathJax').should('have.text', '$\\pi$')
+    })
   })
 
   describe('The toolbar', function () {

@@ -27,10 +27,7 @@ const mountEditor = (content: string, ...args: any[]) => {
 describe('<CodeMirrorEditor/> in Visual mode with read-only permission', function () {
   beforeEach(function () {
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
-    window.metaAttributesCache.set(
-      'ol-mathJax3Path',
-      'https://unpkg.com/mathjax@3.2.2/es5/tex-svg-full.js'
-    )
+    cy.interceptMathJax()
     cy.interceptEvents()
     cy.interceptSpelling()
   })

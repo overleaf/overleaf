@@ -13,12 +13,9 @@ const Container: FC = ({ children }) => (
 describe('<CodeMirrorEditor/> in Visual mode', function () {
   beforeEach(function () {
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
-    window.metaAttributesCache.set(
-      'ol-mathJax3Path',
-      'https://unpkg.com/mathjax@3.2.2/es5/tex-svg-full.js'
-    )
     cy.interceptEvents()
     cy.interceptSpelling()
+    cy.interceptMathJax()
 
     // 3 blank lines
     const content = '\n'.repeat(3)
@@ -386,17 +383,14 @@ describe('<CodeMirrorEditor/> in Visual mode', function () {
       cy.get('@first-line').type(
         '\\begin{{}frame}{{}Slide\\\\title}{Enter}\\end{{}frame}{Enter}'
       )
-      cy.get('.ol-cm-frame-title').should('have.html', 'Slide<br>title')
+      cy.get('.ol-cm-frame-title').should('contain.html', 'Slide<br>title')
     })
 
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip('typesets math in title', function () {
+    it('typesets math in title', function () {
       cy.get('@first-line').type(
         '\\begin{{}frame}{{}Slide $\\pi$}{Enter}\\end{{}frame}{Enter}'
       )
-
-      // allow plenty of time for MathJax to load
-      cy.get('.MathJax', { timeout: 10000 })
+      cy.get('.MathJax').should('contain.text', '$\\pi$')
     })
 
     it('typesets subtitle', function () {
@@ -419,11 +413,7 @@ describe('<CodeMirrorEditor/> in Visual mode', function () {
       ].join('{Enter}')
     )
 
-    // allow plenty of time for MathJax to load
-    // TODO: re-enable this assertion when stable
-    // cy.get('.MathJax', { timeout: 10000 })
-
-    cy.get('.ol-cm-maketitle')
+    cy.get('.ol-cm-maketitle').should('have.class', 'MathJax')
     cy.get('.ol-cm-title').should('contain.html', 'Document title<br>with')
     cy.get('.ol-cm-author').should('have.text', 'Author')
 
@@ -700,7 +690,15 @@ describe('<CodeMirrorEditor/> in Visual mode', function () {
     }
   )
 
+  it('invokes MathJax when math is written', function () {
+    cy.get('@first-line').type('foo $\\pi$ bar')
+    cy.get('@second-line').type(
+      'foo \n\\[\\epsilon{rightArrow}{rightArrow}\nbar'
+    )
+    cy.get('.MathJax').first().should('have.text', '\\pi')
+    cy.get('.MathJax').eq(1).should('have.text', '\\epsilon')
+  })
+
   // TODO: \input
-  // TODO: Math
   // TODO: Abstract
 })
