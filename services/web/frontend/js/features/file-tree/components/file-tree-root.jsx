@@ -19,6 +19,8 @@ import { useDroppable } from '../contexts/file-tree-draggable'
 import { useFileTreeSocketListener } from '../hooks/file-tree-socket-listener'
 import FileTreeModalCreateFile from './modals/file-tree-modal-create-file'
 import FileTreeInner from './file-tree-inner'
+import { useDragLayer } from 'react-dnd'
+import classnames from 'classnames'
 
 const FileTreeRoot = React.memo(function FileTreeRoot({
   refProviders,
@@ -66,14 +68,24 @@ function FileTreeRootFolder() {
 
   const { isOver, dropRef } = useDroppable(fileTreeData._id)
 
+  const dragLayer = useDragLayer(monitor => ({
+    isDragging: monitor.isDragging(),
+    item: monitor.getItem(),
+    clientOffset: monitor.getClientOffset(),
+  }))
+
   return (
     <>
-      <FileTreeDraggablePreviewLayer isOver={isOver} />
+      <FileTreeDraggablePreviewLayer isOver={isOver} {...dragLayer} />
       <FileTreeFolderList
         folders={fileTreeData.folders}
         docs={fileTreeData.docs}
         files={fileTreeData.fileRefs}
-        classes={{ root: 'file-tree-list' }}
+        classes={{
+          root: classnames('file-tree-list', {
+            'file-tree-dragging': dragLayer.isDragging,
+          }),
+        }}
         dropRef={dropRef}
         dataTestId="file-tree-list-root"
       />

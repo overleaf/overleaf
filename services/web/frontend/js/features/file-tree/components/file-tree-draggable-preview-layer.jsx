@@ -1,6 +1,5 @@
 import { useRef } from 'react'
 import PropTypes from 'prop-types'
-import { useDragLayer } from 'react-dnd'
 import classNames from 'classnames'
 
 // a custom component rendered on top of a draggable area that renders the
@@ -8,12 +7,12 @@ import classNames from 'classnames'
 // https://react-dnd.github.io/react-dnd/examples/drag-around/custom-drag-layer
 // for more details.
 // Also used to display a container border when hovered.
-function FileTreeDraggablePreviewLayer({ isOver }) {
-  const { isDragging, item, clientOffset } = useDragLayer(monitor => ({
-    isDragging: monitor.isDragging(),
-    item: monitor.getItem(),
-    clientOffset: monitor.getClientOffset(),
-  }))
+function FileTreeDraggablePreviewLayer({
+  isOver,
+  isDragging,
+  item,
+  clientOffset,
+}) {
   const ref = useRef()
 
   return (
@@ -39,6 +38,11 @@ function FileTreeDraggablePreviewLayer({ isOver }) {
 
 FileTreeDraggablePreviewLayer.propTypes = {
   isOver: PropTypes.bool.isRequired,
+  isDragging: PropTypes.bool.isRequired,
+  item: PropTypes.shape({
+    title: PropTypes.string.isRequired,
+  }),
+  clientOffset: PropTypes.number,
 }
 
 function DraggablePreviewItem({ title }) {

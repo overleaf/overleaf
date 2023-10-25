@@ -67,22 +67,6 @@
     }
   }
 
-  li.dnd-droppable-hover .entity-name,
-  li .entity-name.droppable-hover {
-    font-weight: bold;
-    background-color: @file-tree-item-hover-bg;
-    .fake-full-width-bg(@file-tree-item-hover-bg);
-  }
-
-  ul.droppable-hover li div.entity-name:hover {
-    background-color: transparent;
-    .fake-full-width-bg(transparent);
-    &.droppable-hover {
-      background-color: @file-tree-item-hover-bg;
-      .fake-full-width-bg(@file-tree-item-hover-bg);
-    }
-  }
-
   ul.file-tree-list {
     margin: 0;
     overflow-x: hidden;
@@ -144,10 +128,10 @@
         &:focus {
           outline: none;
         }
+        background-color: transparent;
         &:hover {
           background-color: @file-tree-item-hover-bg;
-        }
-        &:hover {
+
           // When the entity is a subfolder, the DOM element is "indented" via margin-left. This makes the
           // element not fill the entire file-tree width (as it's spaced from the left-hand side via margin)
           // and, in consequence, the background gets clipped. The ::before pseudo-selector is used to fill
@@ -160,13 +144,6 @@
         .entity-menu-toggle > i {
           color: white;
           font-size: 18px;
-        }
-      }
-
-      .entity.dnd-draggable-dragging {
-        .entity-name:hover {
-          background-color: transparent;
-          .fake-full-width-bg(transparent);
         }
       }
 
@@ -309,15 +286,18 @@
       > .entity {
         > .entity-name {
           color: @file-tree-item-selected-color;
+
           > div > i.fa,
           > button > i.fa,
           > i.fa,
           .entity-menu-toggle i.fa {
             color: @file-tree-item-selected-color;
           }
+
           > i.linked-file-highlight {
             color: @blue;
           }
+
           background-color: @file-tree-item-selected-bg;
           font-weight: bold;
           padding-right: 32px;
@@ -332,13 +312,43 @@
         }
       }
     }
-    ul.file-tree-list li.selected.dnd-droppable-hover {
-      > .entity {
-        > .entity-name {
-          background-color: @file-tree-item-hover-bg;
-          .fake-full-width-bg(@file-tree-item-hover-bg);
-        }
-      }
+  }
+
+  // while dragging, the previously selected item gets no highlight
+  ul.file-tree-list.file-tree-dragging li.selected .entity .entity-name {
+    font-weight: normal;
+
+    background-color: transparent;
+    .fake-full-width-bg(transparent);
+    color: @file-tree-item-color;
+    i.fa {
+      color: @file-tree-item-icon-color !important;
+    }
+  }
+
+  // the items being dragged get the full "hover" colour
+  ul.file-tree-list.file-tree-dragging
+    li
+    .entity.file-tree-entity-dragging
+    .entity-name {
+    background-color: fade(@file-tree-item-hover-bg, 90%);
+    .fake-full-width-bg(fade(@file-tree-item-hover-bg, 90%));
+    color: @file-tree-item-color;
+    i.fa {
+      color: @file-tree-item-icon-color !important;
+    }
+  }
+
+  // the drop target gets the "selected" colour
+  ul.file-tree-list.file-tree-dragging
+    li.dnd-droppable-hover
+    .entity
+    .entity-name {
+    background-color: @file-tree-item-selected-bg;
+    .fake-full-width-bg(@file-tree-item-selected-bg);
+    color: @file-tree-item-selected-color;
+    i.fa {
+      color: @file-tree-item-selected-color !important;
     }
   }
 
@@ -355,8 +365,7 @@
     }
   }
 
-  .dnd-draggable-preview-item,
-  .ui-draggable-dragging {
+  .dnd-draggable-preview-item {
     background-color: fade(@file-tree-item-selected-bg, 60%);
     color: @file-tree-item-selected-color;
     width: 75%;

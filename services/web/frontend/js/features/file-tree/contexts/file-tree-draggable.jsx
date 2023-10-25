@@ -88,7 +88,7 @@ export function useDraggable(draggedEntityId) {
   const [isDraggable, setIsDraggable] = useState(true)
 
   const item = { type: DRAGGABLE_TYPE }
-  const [{ isDragging }, dragRef, preview] = useDrag({
+  const [{ isDragging, draggedEntityIds }, dragRef, preview] = useDrag({
     item, // required, but overwritten by the return value of `begin`
     begin: () => {
       const draggedEntityIds = getDraggedEntityIds(
@@ -104,6 +104,7 @@ export function useDraggable(draggedEntityId) {
       isDragging: !!monitor.isDragging(),
     }),
     canDrag: () => permissionsLevel !== 'readOnly' && isDraggable,
+    end: () => item,
   })
 
   // remove the automatic preview as we're using a custom preview via
@@ -116,6 +117,7 @@ export function useDraggable(draggedEntityId) {
     dragRef,
     isDragging,
     setIsDraggable,
+    draggedEntityIds,
   }
 }
 

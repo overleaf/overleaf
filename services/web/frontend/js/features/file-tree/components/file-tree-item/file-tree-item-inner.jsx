@@ -11,6 +11,7 @@ import FileTreeItemName from './file-tree-item-name'
 import FileTreeItemMenu from './file-tree-item-menu'
 import { useFileTreeSelectable } from '../../contexts/file-tree-selectable'
 import { useFileTreeActionable } from '../../contexts/file-tree-actionable'
+import { useDragDropManager } from 'react-dnd'
 
 function FileTreeItemInner({ id, name, isSelected, icons }) {
   const { permissionsLevel } = useEditorContext(editorContextPropTypes)
@@ -24,7 +25,9 @@ function FileTreeItemInner({ id, name, isSelected, icons }) {
     isSelected &&
     selectedEntityIds.size === 1
 
-  const { isDragging, dragRef, setIsDraggable } = useDraggable(id)
+  const { dragRef, setIsDraggable } = useDraggable(id)
+
+  const dragDropItem = useDragDropManager().getMonitor().getItem()
 
   const itemRef = useRef()
 
@@ -58,7 +61,7 @@ function FileTreeItemInner({ id, name, isSelected, icons }) {
   return (
     <div
       className={classNames('entity', {
-        'dnd-draggable-dragging': isDragging,
+        'file-tree-entity-dragging': dragDropItem?.draggedEntityIds?.has(id),
       })}
       role="presentation"
       ref={dragRef}
