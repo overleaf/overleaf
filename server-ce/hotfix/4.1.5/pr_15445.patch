@@ -1,0 +1,44 @@
+--- services/history-v1/storage/lib/history_store.js
++++ services/history-v1/storage/lib/history_store.js
+@@ -103,11 +103,11 @@ HistoryStore.prototype.storeRaw = function historyStoreStoreRaw(
+   assert.object(rawHistory, 'bad rawHistory')
+
+   const key = getKey(projectId, chunkId)
+-  const stream = streams.gzipStringToStream(JSON.stringify(rawHistory))
+
+   logger.debug({ projectId, chunkId }, 'storeRaw started')
+   return BPromise.resolve()
+-    .then(() =>
++    .then(() => streams.gzipStringToStream(JSON.stringify(rawHistory)))
++    .then(stream =>
+       persistor.sendStream(BUCKET, key, stream, {
+         contentType: 'application/json',
+         contentEncoding: 'gzip',
+--- services/history-v1/storage/lib/streams.js
++++ services/history-v1/storage/lib/streams.js
+@@ -79,8 +79,15 @@ function gunzipStreamToBuffer(readStream) {
+ exports.gunzipStreamToBuffer = gunzipStreamToBuffer
+
+ function gzipStringToStream(string) {
+-  const gzip = zlib.createGzip()
+-  return new ReadableString(string).pipe(gzip)
++  return new BPromise(function (resolve, reject) {
++    zlib.gzip(Buffer.from(string), function (error, result) {
++      if (error) {
++        reject(error)
++      } else {
++        resolve(new ReadableString(result))
++      }
++    })
++  })
+ }
+
+ /**
+@@ -88,6 +95,6 @@ function gzipStringToStream(string) {
+  *
+  * @function
+  * @param {string} string
+- * @return {stream.Writable}
++ * @return {Promise.<stream.Readable>}
+  */
+ exports.gzipStringToStream = gzipStringToStream
