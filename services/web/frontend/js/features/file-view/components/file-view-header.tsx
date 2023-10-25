@@ -12,11 +12,17 @@ import importOverleafModules from '../../../../macros/import-overleaf-module.mac
 import { LinkedFileIcon } from './file-view-icons'
 import { BinaryFile, hasProvider, LinkedFile } from '../types/binary-file'
 import FileViewRefreshButton from './file-view-refresh-button'
-import FileViewNotOriginalImporter from './file-view-not-original-importer'
 import FileViewRefreshError from './file-view-refresh-error'
 
-const tprLinkedFileInfo = importOverleafModules('tprLinkedFileInfo') as {
-  import: { LinkedFileInfo: ElementType }
+const tprFileViewInfo = importOverleafModules('tprFileViewInfo') as {
+  import: { TPRFileViewInfo: ElementType }
+  path: string
+}[]
+
+const tprFileViewNotOriginalImporter = importOverleafModules(
+  'tprFileViewNotOriginalImporter'
+) as {
+  import: { TPRFileViewNotOriginalImporter: ElementType }
   path: string
 }[]
 
@@ -79,8 +85,8 @@ export default function FileViewHeader({ file }: FileViewHeaderProps) {
     <div>
       {file.linkedFileData && fileInfo}
       {file.linkedFileData &&
-        tprLinkedFileInfo.map(({ import: { LinkedFileInfo }, path }) => (
-          <LinkedFileInfo key={path} file={file} />
+        tprFileViewInfo.map(({ import: { TPRFileViewInfo }, path }) => (
+          <TPRFileViewInfo key={path} file={file} />
         ))}
       {file.linkedFileData && permissionsLevel !== 'readOnly' && (
         <FileViewRefreshButton file={file} setRefreshError={setRefreshError} />
@@ -95,7 +101,12 @@ export default function FileViewHeader({ file }: FileViewHeaderProps) {
         &nbsp;
         <span>{t('download')}</span>
       </a>
-      {file.linkedFileData && <FileViewNotOriginalImporter file={file} />}
+      {file.linkedFileData &&
+        tprFileViewNotOriginalImporter.map(
+          ({ import: { TPRFileViewNotOriginalImporter }, path }) => (
+            <TPRFileViewNotOriginalImporter key={path} file={file} />
+          )
+        )[0]}
       {refreshError && (
         <FileViewRefreshError file={file} refreshError={refreshError} />
       )}

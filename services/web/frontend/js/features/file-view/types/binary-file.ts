@@ -1,15 +1,7 @@
-type LinkedFileData = {
+export type LinkedFileData = {
   url: {
     provider: 'url'
     url: string
-  }
-  zotero: {
-    provider: 'zotero'
-    importer_id: string
-  }
-  mendeley: {
-    provider: 'mendeley'
-    importer_id: string
   }
   project_file: {
     provider: 'project_file'

@@ -1,73 +1,99 @@
 import {
   type Dispatch,
   type SetStateAction,
+  type ElementType,
   useCallback,
   useState,
 } from 'react'
 import { useTranslation } from 'react-i18next'
-import classNames from 'classnames'
 import Icon from '@/shared/components/icon'
 import { postJSON } from '@/infrastructure/fetch-json'
 import { useProjectContext } from '@/shared/context/project-context'
 import useAbortController from '@/shared/hooks/use-abort-controller'
-import { useUserContext } from '@/shared/context/user-context'
-import { hasProvider, type BinaryFile } from '../types/binary-file'
+import type { BinaryFile } from '../types/binary-file'
 import { Nullable } from '../../../../../types/utils'
+import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 
 type FileViewRefreshButtonProps = {
   setRefreshError: Dispatch<SetStateAction<Nullable<string>>>
   file: BinaryFile
 }
 
+const tprFileViewRefreshButton = importOverleafModules(
+  'tprFileViewRefreshButton'
+) as {
+  import: { TPRFileViewRefreshButton: ElementType }
+  path: string
+}[]
+
 export default function FileViewRefreshButton({
   setRefreshError,
   file,
 }: FileViewRefreshButtonProps) {
-  const { signal } = useAbortController()
-  const { t } = useTranslation()
-  const [refreshing, setRefreshing] = useState(false)
   const { _id: projectId } = useProjectContext()
-  const { id: userId } = useUserContext()
+  const { signal } = useAbortController()
+  const [refreshing, setRefreshing] = useState(false)
 
-  const isMendeleyOrZotero =
-    hasProvider(file, 'mendeley') || hasProvider(file, 'zotero')
+  const refreshFile = useCallback(
+    (isTPR: Nullable<boolean>) => {
+      setRefreshing(true)
+      // Replacement of the file handled by the file tree
+      window.expectingLinkedFileRefreshedSocketFor = file.name
+      const body = {
+        shouldReindexReferences: isTPR || /\.bib$/.test(file.name),
+      }
+      postJSON(`/project/${projectId}/linked_file/${file.id}/refresh`, {
+        signal,
+        body,
+      })
+        .then(() => {
+          setRefreshing(false)
+        })
+        .catch(err => {
+          setRefreshing(false)
+          setRefreshError(err.data?.message || err.message)
+        })
+    },
+    [file, projectId, signal, setRefreshError]
+  )
 
-  let isImporter
-
-  if (isMendeleyOrZotero) {
-    isImporter = file.linkedFileData.importer_id === userId
+  if (tprFileViewRefreshButton.length > 0) {
+    return tprFileViewRefreshButton.map(
+      ({ import: { TPRFileViewRefreshButton }, path }) => (
+        <TPRFileViewRefreshButton
+          key={path}
+          file={file}
+          refreshFile={refreshFile}
+          refreshing={refreshing}
+        />
+      )
+    )[0]
+  } else {
+    return (
+      <FileViewRefreshButtonDefault
+        refreshFile={refreshFile}
+        refreshing={refreshing}
+      />
+    )
   }
+}
 
-  const buttonClickable = isMendeleyOrZotero ? isImporter : true
+type FileViewRefreshButtonDefaultProps = {
+  refreshFile: (isTPR: Nullable<boolean>) => void
+  refreshing: boolean
+}
 
-  const refreshFile = useCallback(() => {
-    setRefreshing(true)
-    // Replacement of the file handled by the file tree
-    window.expectingLinkedFileRefreshedSocketFor = file.name
-    const body = {
-      shouldReindexReferences: isMendeleyOrZotero || /\.bib$/.test(file.name),
-    }
-    postJSON(`/project/${projectId}/linked_file/${file.id}/refresh`, {
-      signal,
-      body,
-    })
-      .then(() => {
-        setRefreshing(false)
-      })
-      .catch(err => {
-        setRefreshing(false)
-        setRefreshError(err.data?.message || err.message)
-      })
-  }, [file, projectId, signal, setRefreshError, isMendeleyOrZotero])
+function FileViewRefreshButtonDefault({
+  refreshFile,
+  refreshing,
+}: FileViewRefreshButtonDefaultProps) {
+  const { t } = useTranslation()
 
   return (
     <button
-      className={classNames('btn', {
-        'btn-primary': buttonClickable,
-        'btn-secondary': !buttonClickable,
-      })}
-      onClick={refreshFile}
-      disabled={refreshing || !buttonClickable}
+      className="btn btn-primary"
+      onClick={() => refreshFile(null)}
+      disabled={refreshing}
     >
       <Icon type="refresh" spin={refreshing} fw />
       <span>{refreshing ? `${t('refreshing')}…` : t('refresh')}</span>

@@ -1,6 +1,6 @@
-import FileView from '../js/features/file-view/components/file-view'
-import useFetchMock from './hooks/use-fetch-mock'
-import { ScopeDecorator } from './decorators/scope'
+import FileView from '../../js/features/file-view/components/file-view'
+import useFetchMock from '../hooks/use-fetch-mock'
+import { ScopeDecorator } from '../decorators/scope'
 
 const bodies = {
   latex: `\\documentclass{article}
@@ -157,50 +157,6 @@ ImageFile.args = {
       source_project_id: 'source_project_id',
       source_entity_path: '/source-file.jpg',
       provider: 'project_file',
-    },
-  },
-}
-
-export const ThirdPartyReferenceFile = args => {
-  useFetchMock(fetchMock =>
-    setupFetchMock(fetchMock).get(
-      'express:/project/:project_id/file/:file_id',
-      { body: bodies.bibtex }
-    )
-  )
-
-  return <FileView {...args} />
-}
-
-ThirdPartyReferenceFile.args = {
-  file: {
-    ...fileData,
-    name: 'references.bib',
-    linkedFileData: {
-      provider: 'zotero',
-    },
-  },
-}
-
-export const ThirdPartyReferenceFileWithError = args => {
-  useFetchMock(fetchMock =>
-    setupFetchMock(fetchMock).head(
-      'express:/project/:project_id/file/:file_id',
-      { status: 500 },
-      { overwriteRoutes: true }
-    )
-  )
-  return <FileView {...args} />
-}
-ThirdPartyReferenceFileWithError.storyName =
-  'Third Party Reference File (Error)'
-ThirdPartyReferenceFileWithError.args = {
-  file: {
-    ...fileData,
-    id: '500500500500500500500500',
-    name: 'references.bib',
-    linkedFileData: {
-      provider: 'zotero',
     },
   },
 }
