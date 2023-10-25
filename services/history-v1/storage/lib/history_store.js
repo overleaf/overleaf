@@ -103,11 +103,11 @@ HistoryStore.prototype.storeRaw = function historyStoreStoreRaw(
   assert.object(rawHistory, 'bad rawHistory')
 
   const key = getKey(projectId, chunkId)
-  const stream = streams.gzipStringToStream(JSON.stringify(rawHistory))
 
   logger.debug({ projectId, chunkId }, 'storeRaw started')
   return BPromise.resolve()
-    .then(() =>
+    .then(() => streams.gzipStringToStream(JSON.stringify(rawHistory)))
+    .then(stream =>
       persistor.sendStream(BUCKET, key, stream, {
         contentType: 'application/json',
         contentEncoding: 'gzip',

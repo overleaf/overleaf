@@ -79,8 +79,15 @@ function gunzipStreamToBuffer(readStream) {
 exports.gunzipStreamToBuffer = gunzipStreamToBuffer
 
 function gzipStringToStream(string) {
-  const gzip = zlib.createGzip()
-  return new ReadableString(string).pipe(gzip)
+  return new BPromise(function (resolve, reject) {
+    zlib.gzip(Buffer.from(string), function (error, result) {
+      if (error) {
+        reject(error)
+      } else {
+        resolve(new ReadableString(result))
+      }
+    })
+  })
 }
 
 /**
@@ -88,6 +95,6 @@ function gzipStringToStream(string) {
  *
  * @function
  * @param {string} string
- * @return {stream.Writable}
+ * @return {Promise.<stream.Readable>}
  */
 exports.gzipStringToStream = gzipStringToStream
