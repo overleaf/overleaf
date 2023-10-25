@@ -4,6 +4,8 @@ export type ManagedUserAlertVariant =
   | 'resendGroupInviteSuccess'
   | 'resendGroupInviteFailed'
   | 'resendInviteTooManyRequests'
+  | 'resendSSOLinkInviteSuccess'
+  | 'resendSSOLinkInviteFailed'
 
 export type ManagedUserAlert =
   | {

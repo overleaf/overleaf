@@ -447,10 +447,12 @@ templates.inviteNewUserToJoinManagedUsers = ctaTemplate({
 
 templates.managedUsersEnabledSSO = ctaTemplate({
   subject(opts) {
-    return `Action required: Authenticate your Overleaf account`
+    const subjectPrefix = opts.reminder ? 'Reminder: ' : 'Action required: '
+    return `${subjectPrefix}Authenticate your Overleaf account`
   },
   title(opts) {
-    return `Single sign-on enabled`
+    const titlePrefix = opts.reminder ? 'Reminder: ' : ''
+    return `${titlePrefix}Single sign-on enabled`
   },
   message(opts) {
     return [

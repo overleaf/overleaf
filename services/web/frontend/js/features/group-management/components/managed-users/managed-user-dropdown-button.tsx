@@ -16,7 +16,7 @@ import {
 import Icon from '../../../../shared/components/icon'
 import { ManagedUserAlert } from '../../utils/types'
 import { useGroupMembersContext } from '../../context/group-members-context'
-
+import getMeta from '@/utils/meta'
 type resendInviteResponse = {
   success: boolean
 }
@@ -40,6 +40,13 @@ export default function ManagedUserDropdownButton({
   const {
     runAsync: runResendManagedUserInviteAsync,
     isLoading: isResendingManagedUserInvite,
+  } = useAsync<resendInviteResponse>()
+
+  const groupSSOActive = getMeta('ol-groupSSOActive')
+  const ssoEnabledButNotAccepted = groupSSOActive && !user.enrollment?.sso
+  const {
+    runAsync: runResendLinkSSOInviteAsync,
+    isLoading: isResendingSSOLinkInvite,
   } = useAsync<resendInviteResponse>()
 
   const {
@@ -87,6 +94,39 @@ export default function ManagedUserDropdownButton({
     [setManagedUserAlert, groupId, runResendManagedUserInviteAsync]
   )
 
+  const handleResendLinkSSOInviteAsync = useCallback(
+    async user => {
+      try {
+        const result = await runResendLinkSSOInviteAsync(
+          postJSON(`/manage/groups/${groupId}/resendSSOLinkInvite/${user._id}`)
+        )
+
+        if (result.success) {
+          setManagedUserAlert({
+            variant: 'resendSSOLinkInviteSuccess',
+            email: user.email,
+          })
+          setIsOpened(false)
+        }
+      } catch (err) {
+        if ((err as FetchError)?.response?.status === 429) {
+          setManagedUserAlert({
+            variant: 'resendInviteTooManyRequests',
+            email: user.email,
+          })
+        } else {
+          setManagedUserAlert({
+            variant: 'resendSSOLinkInviteFailed',
+            email: user.email,
+          })
+        }
+
+        setIsOpened(false)
+      }
+    },
+    [setManagedUserAlert, groupId, runResendLinkSSOInviteAsync]
+  )
+
   const handleResendGroupInvite = useCallback(
     async user => {
       try {
@@ -124,6 +164,9 @@ export default function ManagedUserDropdownButton({
 
   const onResendManagedUserInviteClick = () => {
     handleResendManagedUserInvite(user)
+  }
+  const onResendSSOLinkInviteClick = () => {
+    handleResendLinkSSOInviteAsync(user)
   }
 
   const onResendGroupInviteClick = () => {
@@ -179,6 +222,17 @@ export default function ManagedUserDropdownButton({
               ) : null}
             </MenuItemButton>
           ) : null}
+          {ssoEnabledButNotAccepted && (
+            <MenuItemButton
+              onClick={onResendSSOLinkInviteClick}
+              data-testid="resend-sso-link-invite-action"
+            >
+              {t('resend_link_sso')}
+              {isResendingSSOLinkInvite ? (
+                <Icon type="spinner" spin style={{ marginLeft: '5px' }} />
+              ) : null}
+            </MenuItemButton>
+          )}
           {user.isEntityAdmin ? (
             <MenuItem data-testid="no-actions-available">
               <span className="text-muted">{t('no_actions')}</span>

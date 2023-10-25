@@ -22,9 +22,23 @@ export default function ManagedUsersListAlert({
           invitedUserEmail={invitedUserEmail}
         />
       )
+    case 'resendSSOLinkInviteSuccess':
+      return (
+        <ResendSSOLinkInviteSuccess
+          onDismiss={onDismiss}
+          invitedUserEmail={invitedUserEmail}
+        />
+      )
     case 'resendManagedUserInviteFailed':
       return (
         <FailedToResendManagedInvite
+          onDismiss={onDismiss}
+          invitedUserEmail={invitedUserEmail}
+        />
+      )
+    case 'resendSSOLinkInviteFailed':
+      return (
+        <FailedToResendSSOLink
           onDismiss={onDismiss}
           invitedUserEmail={invitedUserEmail}
         />
@@ -80,6 +94,28 @@ function ResendManagedUserInviteSuccess({
   )
 }
 
+function ResendSSOLinkInviteSuccess({
+  onDismiss,
+  invitedUserEmail,
+}: ManagedUsersListAlertComponentProps) {
+  return (
+    <AlertComponent bsStyle="success" onDismiss={onDismiss}>
+      <Trans
+        i18nKey="sso_link_invite_has_been_sent_to_email"
+        values={{
+          email: invitedUserEmail,
+        }}
+        shouldUnescape
+        tOptions={{ interpolation: { escapeValue: true } }}
+        components={[
+          // eslint-disable-next-line react/jsx-key
+          <strong />,
+        ]}
+      />
+    </AlertComponent>
+  )
+}
+
 function FailedToResendManagedInvite({
   onDismiss,
   invitedUserEmail,
@@ -88,6 +124,27 @@ function FailedToResendManagedInvite({
     <AlertComponent bsStyle="danger" onDismiss={onDismiss}>
       <Trans
         i18nKey="failed_to_send_managed_user_invite_to_email"
+        values={{
+          email: invitedUserEmail,
+        }}
+        shouldUnescape
+        tOptions={{ interpolation: { escapeValue: true } }}
+        components={[
+          // eslint-disable-next-line react/jsx-key
+          <strong />,
+        ]}
+      />
+    </AlertComponent>
+  )
+}
+function FailedToResendSSOLink({
+  onDismiss,
+  invitedUserEmail,
+}: ManagedUsersListAlertComponentProps) {
+  return (
+    <AlertComponent bsStyle="danger" onDismiss={onDismiss}>
+      <Trans
+        i18nKey="failed_to_send_sso_link_invite_to_email"
         values={{
           email: invitedUserEmail,
         }}
