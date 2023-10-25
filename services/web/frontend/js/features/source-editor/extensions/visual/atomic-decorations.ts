@@ -64,6 +64,8 @@ import { TabularWidget } from './visual-widgets/tabular'
 import { nextSnippetField, pickedCompletion } from '@codemirror/autocomplete'
 import { skipPreambleWithCursor } from './skip-preamble-cursor'
 import { TableRenderingErrorWidget } from './visual-widgets/table-rendering-error'
+import { GraphicsWidget } from './visual-widgets/graphics'
+import { InlineGraphicsWidget } from './visual-widgets/inline-graphics'
 
 type Options = {
   fileTreeManager: {
@@ -886,9 +888,12 @@ export const atomicDecorations = (options: Options) => {
                   line.text.trim().length === nodeRef.to - nodeRef.from
 
                 if (lineContainsOnlyNode) {
+                  const Widget = state.readOnly
+                    ? GraphicsWidget
+                    : EditableGraphicsWidget
                   decorations.push(
                     Decoration.replace({
-                      widget: new EditableGraphicsWidget(
+                      widget: new Widget(
                         filePath,
                         getPreviewByPath,
                         centered,
@@ -898,9 +903,12 @@ export const atomicDecorations = (options: Options) => {
                     }).range(line.from, line.to)
                   )
                 } else {
+                  const Widget = state.readOnly
+                    ? InlineGraphicsWidget
+                    : EditableInlineGraphicsWidget
                   decorations.push(
                     Decoration.replace({
-                      widget: new EditableInlineGraphicsWidget(
+                      widget: new Widget(
                         filePath,
                         getPreviewByPath,
                         centered,

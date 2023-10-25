@@ -148,6 +148,9 @@ export const Table: FC = () => {
       if (startCompileKeypress(event)) {
         return
       }
+      if (view.state.readOnly) {
+        return
+      }
       const commandKey = isMac ? event.metaKey : event.ctrlKey
       if (event.code === 'Enter' && !event.shiftKey) {
         event.preventDefault()
@@ -270,6 +273,9 @@ export const Table: FC = () => {
 
   useEffect(() => {
     const onPaste = (event: ClipboardEvent) => {
+      if (view.state.readOnly) {
+        return false
+      }
       if (cellData || !selection) {
         // We're editing a cell, so allow browser to insert there
         return false

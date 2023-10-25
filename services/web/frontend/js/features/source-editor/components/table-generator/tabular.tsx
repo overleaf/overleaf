@@ -291,7 +291,7 @@ const TabularWrapper: FC = () => {
   }, [cellData, commitCellData, selection, setSelection, ref, view])
   return (
     <div className="table-generator" ref={ref}>
-      <Toolbar />
+      {!view.state.readOnly && <Toolbar />}
       <Table />
     </div>
   )

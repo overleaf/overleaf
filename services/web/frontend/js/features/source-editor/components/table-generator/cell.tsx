@@ -202,8 +202,10 @@ export const Cell: FC<{
   )
 
   const onDoubleClick = useCallback(() => {
-    startEditing(rowIndex, columnIndex, cellData.content)
-  }, [columnIndex, rowIndex, startEditing, cellData.content])
+    if (!view.state.readOnly) {
+      startEditing(rowIndex, columnIndex, cellData.content)
+    }
+  }, [columnIndex, rowIndex, startEditing, cellData.content, view])
 
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
