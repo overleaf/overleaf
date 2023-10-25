@@ -1,7 +1,7 @@
 import { EditorView } from '@codemirror/view'
 import { HighlightStyle, syntaxHighlighting } from '@codemirror/language'
 import { tags } from '@lezer/highlight'
-import { Annotation, Compartment, Extension } from '@codemirror/state'
+import { Annotation, Compartment, Extension, Facet } from '@codemirror/state'
 
 /**
  * A syntax highlighter for content types that are only styled in the visual editor.
@@ -427,13 +427,24 @@ const mainVisualTheme = EditorView.theme({
 
 const contentWidthThemeConf = new Compartment()
 const changeContentWidthAnnotation = Annotation.define<boolean>()
+const currentWidth = Facet.define<string, string>({
+  combine: values => {
+    if (values.length === 0) {
+      return ''
+    }
+    return values[0]
+  },
+})
 
 function createContentWidthTheme(contentWidth: string) {
-  return EditorView.theme({
-    '&.cm-editor': {
-      '--content-width': contentWidth,
-    },
-  })
+  return [
+    currentWidth.of(contentWidth),
+    EditorView.theme({
+      '&.cm-editor': {
+        '--content-width': contentWidth,
+      },
+    }),
+  ]
 }
 
 const contentWidthSetter = EditorView.updateListener.of(update => {
@@ -446,9 +457,18 @@ const contentWidthSetter = EditorView.updateListener.of(update => {
     ) {
       return
     }
+
+    const viewWidth = `${update.view.contentDOM.offsetWidth}px`
+
+    const currentConfiguredWidth = update.state.facet(currentWidth)
+    if (currentConfiguredWidth === viewWidth) {
+      // We already have the correct width stored
+      return
+    }
+
     update.view.dispatch({
       effects: contentWidthThemeConf.reconfigure(
-        createContentWidthTheme(update.view.contentDOM.offsetWidth + 'px')
+        createContentWidthTheme(viewWidth)
       ),
       // Set the selection explicitly to force the cursor to redraw if CM6
       // fails to spot a change in geometry, which sometimes seems to happen
