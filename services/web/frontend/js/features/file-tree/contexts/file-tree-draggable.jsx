@@ -83,7 +83,7 @@ export function useDraggable(draggedEntityId) {
 
   const { permissionsLevel } = useEditorContext(editorContextPropTypes)
   const { fileTreeData } = useFileTreeData()
-  const { selectedEntityIds } = useFileTreeSelectable()
+  const { selectedEntityIds, isRootFolderSelected } = useFileTreeSelectable()
 
   const [isDraggable, setIsDraggable] = useState(true)
 
@@ -92,7 +92,7 @@ export function useDraggable(draggedEntityId) {
     item, // required, but overwritten by the return value of `begin`
     begin: () => {
       const draggedEntityIds = getDraggedEntityIds(
-        selectedEntityIds,
+        isRootFolderSelected ? new Set() : selectedEntityIds,
         draggedEntityId
       )
       const draggedItems = findAllInTreeOrThrow(fileTreeData, draggedEntityIds)
