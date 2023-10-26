@@ -16,6 +16,7 @@ import { OnlineUsersProvider } from '@/features/ide-react/context/online-users-c
 import { MetadataProvider } from '@/features/ide-react/context/metadata-context'
 import { ReferencesProvider } from '@/features/ide-react/context/references-context'
 import { SplitTestProvider } from '@/shared/context/split-test-context'
+import { FileTreePathProvider } from '@/features/file-tree/contexts/file-tree-path'
 
 export const ReactContextRoot: FC = ({ children }) => {
   return (
@@ -25,29 +26,31 @@ export const ReactContextRoot: FC = ({ children }) => {
           <UserProvider>
             <ProjectProvider>
               <FileTreeDataProvider>
-                <ReferencesProvider>
-                  <DetachProvider>
-                    <EditorProvider>
-                      <ProjectSettingsProvider>
-                        <LayoutProvider>
-                          <LocalCompileProvider>
-                            <DetachCompileProvider>
-                              <ChatProvider>
-                                <EditorManagerProvider>
-                                  <OnlineUsersProvider>
-                                    <MetadataProvider>
-                                      {children}
-                                    </MetadataProvider>
-                                  </OnlineUsersProvider>
-                                </EditorManagerProvider>
-                              </ChatProvider>
-                            </DetachCompileProvider>
-                          </LocalCompileProvider>
-                        </LayoutProvider>
-                      </ProjectSettingsProvider>
-                    </EditorProvider>
-                  </DetachProvider>
-                </ReferencesProvider>
+                <FileTreePathProvider>
+                  <ReferencesProvider>
+                    <DetachProvider>
+                      <EditorProvider>
+                        <ProjectSettingsProvider>
+                          <LayoutProvider>
+                            <LocalCompileProvider>
+                              <DetachCompileProvider>
+                                <ChatProvider>
+                                  <EditorManagerProvider>
+                                    <OnlineUsersProvider>
+                                      <MetadataProvider>
+                                        {children}
+                                      </MetadataProvider>
+                                    </OnlineUsersProvider>
+                                  </EditorManagerProvider>
+                                </ChatProvider>
+                              </DetachCompileProvider>
+                            </LocalCompileProvider>
+                          </LayoutProvider>
+                        </ProjectSettingsProvider>
+                      </EditorProvider>
+                    </DetachProvider>
+                  </ReferencesProvider>
+                </FileTreePathProvider>
               </FileTreeDataProvider>
             </ProjectProvider>
           </UserProvider>
