@@ -1,9 +1,31 @@
 import { EditorProviders } from '../../helpers/editor-providers'
 import PdfLogsEntries from '../../../../frontend/js/features/pdf-preview/components/pdf-logs-entries'
 import { detachChannel, testDetachChannel } from '../../helpers/detach-channel'
+import { FileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
+import { FindResult } from '@/features/file-tree/util/path'
+import { FC } from 'react'
 
 describe('<PdfLogsEntries/>', function () {
-  const fakeEntity = { type: 'doc' }
+  const fakeFindEntityResult: FindResult = {
+    type: 'doc',
+    entity: { _id: '123', name: '123 Doc' },
+  }
+
+  const FileTreePathProvider: FC = ({ children }) => (
+    <FileTreePathContext.Provider
+      value={{
+        dirname: cy.stub(),
+        findEntityByPath: cy
+          .stub()
+          .as('findEntityByPath')
+          .returns(fakeFindEntityResult),
+        pathInFolder: cy.stub(),
+        previewByPath: cy.stub(),
+      }}
+    >
+      {children}
+    </FileTreePathContext.Provider>
+  )
 
   const logEntries = [
     {
@@ -23,11 +45,8 @@ describe('<PdfLogsEntries/>', function () {
 
   beforeEach(function () {
     props = {
-      fileTreeManager: {
-        findEntityByPath: cy.stub().as('findEntityByPath').returns(fakeEntity),
-      },
       editorManager: {
-        openDoc: cy.spy().as('openDoc'),
+        openDocId: cy.spy().as('openDocId'),
       },
     }
 
@@ -47,7 +66,7 @@ describe('<PdfLogsEntries/>', function () {
 
   it('opens doc on click', function () {
     cy.mount(
-      <EditorProviders {...props}>
+      <EditorProviders {...props} providers={{ FileTreePathProvider }}>
         <PdfLogsEntries entries={logEntries} />
       </EditorProviders>
     )
@@ -57,10 +76,14 @@ describe('<PdfLogsEntries/>', function () {
     }).click()
 
     cy.get('@findEntityByPath').should('have.been.calledOnce')
-    cy.get('@openDoc').should('have.been.calledOnceWith', fakeEntity, {
-      gotoLine: 9,
-      gotoColumn: 8,
-    })
+    cy.get('@openDocId').should(
+      'have.been.calledOnceWith',
+      fakeFindEntityResult.entity._id,
+      {
+        gotoLine: 9,
+        gotoColumn: 8,
+      }
+    )
   })
 
   it('opens doc via detached action', function () {
@@ -69,7 +92,7 @@ describe('<PdfLogsEntries/>', function () {
     })
 
     cy.mount(
-      <EditorProviders {...props}>
+      <EditorProviders {...props} providers={{ FileTreePathProvider }}>
         <PdfLogsEntries entries={logEntries} />
       </EditorProviders>
     ).then(() => {
@@ -89,10 +112,14 @@ describe('<PdfLogsEntries/>', function () {
     })
 
     cy.get('@findEntityByPath').should('have.been.calledOnce')
-    cy.get('@openDoc').should('have.been.calledOnceWith', fakeEntity, {
-      gotoLine: 7,
-      gotoColumn: 6,
-    })
+    cy.get('@openDocId').should(
+      'have.been.calledOnceWith',
+      fakeFindEntityResult.entity._id,
+      {
+        gotoLine: 7,
+        gotoColumn: 6,
+      }
+    )
   })
 
   it('sends open doc clicks via detached action', function () {
@@ -101,7 +128,7 @@ describe('<PdfLogsEntries/>', function () {
     })
 
     cy.mount(
-      <EditorProviders {...props}>
+      <EditorProviders {...props} providers={{ FileTreePathProvider }}>
         <PdfLogsEntries entries={logEntries} />
       </EditorProviders>
     )
@@ -113,7 +140,7 @@ describe('<PdfLogsEntries/>', function () {
     }).click()
 
     cy.get('@findEntityByPath').should('not.have.been.called')
-    cy.get('@openDoc').should('not.have.been.called')
+    cy.get('@openDocId').should('not.have.been.called')
     cy.get('@postDetachMessage').should('have.been.calledWith', {
       role: 'detached',
       event: 'action-sync-to-entry',

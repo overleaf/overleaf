@@ -46,7 +46,7 @@ export function createEntityInTree(tree, parentFolderId, newEntityData) {
 }
 
 function mutateInTree(tree, id, mutationFunction) {
-  if (tree._id === id) {
+  if (!id || tree._id === id) {
     // covers the root folder case: it has no parent so in order to use
     // mutationFunction we pass an empty array as the parent and return the
     // mutated tree directly

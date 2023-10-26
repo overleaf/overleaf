@@ -20,6 +20,7 @@ import { useFileTreeData } from '../../../shared/context/file-tree-data-context'
 import useScopeEventListener from '../../../shared/hooks/use-scope-event-listener'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import { debugConsole } from '@/utils/debugging'
+import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
 
 function GoToCodeButton({
   position,
@@ -118,7 +119,7 @@ function GoToPdfButton({
 function PdfSynctexControls() {
   const ide = useIdeContext()
 
-  const { _id: projectId } = useProjectContext()
+  const { _id: projectId, rootDocId } = useProjectContext()
 
   const { detachRole } = useLayoutContext()
 
@@ -132,6 +133,7 @@ function PdfSynctexControls() {
   } = useCompileContext()
 
   const { selectedEntities } = useFileTreeData()
+  const { findEntityByPath, dirname, pathInFolder } = useFileTreePathContext()
 
   const [cursorPosition, setCursorPosition] = useState(() => {
     const position = localStorage.getItem(
@@ -162,26 +164,28 @@ function PdfSynctexControls() {
 
   const getCurrentFilePath = useCallback(() => {
     const docId = ide.editorManager.getCurrentDocId()
-    const doc = ide.fileTreeManager.findEntityById(docId)
-
-    let path = ide.fileTreeManager.getEntityPath(doc)
+    let path = pathInFolder(docId)
 
     // If the root file is folder/main.tex, then synctex sees the path as folder/./main.tex
-    const rootDocDirname = ide.fileTreeManager.getRootDocDirname()
+    const rootDocDirname = dirname(rootDocId)
 
     if (rootDocDirname) {
       path = path.replace(RegExp(`^${rootDocDirname}`), `${rootDocDirname}/.`)
     }
 
     return path
-  }, [ide])
+  }, [dirname, ide.editorManager, pathInFolder, rootDocId])
 
   const goToCodeLine = useCallback(
     (file, line) => {
       if (file) {
-        const doc = ide.fileTreeManager.findEntityByPath(file)
+        const doc = findEntityByPath(file)?.entity
+        if (!doc) {
+          debugConsole.warn(`Document with path ${file} not found`)
+          return
+        }
 
-        ide.editorManager.openDoc(doc, {
+        ide.editorManager.openDocId(doc._id, {
           gotoLine: line,
         })
       } else {
@@ -194,7 +198,7 @@ function PdfSynctexControls() {
         }, 4000)
       }
     },
-    [ide, isMounted, setSynctexError]
+    [findEntityByPath, ide.editorManager, isMounted, setSynctexError]
   )
 
   const goToPdfLocation = useCallback(

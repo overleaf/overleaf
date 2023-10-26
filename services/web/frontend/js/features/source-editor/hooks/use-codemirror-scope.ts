@@ -48,6 +48,7 @@ import { CurrentDoc } from '../../../../../types/current-doc'
 import { useErrorHandler } from 'react-error-boundary'
 import { setVisual } from '../extensions/visual/visual'
 import getMeta from '../../../utils/meta'
+import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
 
 function useCodeMirrorScope(view: EditorView) {
   const ide = useIdeContext()
@@ -244,8 +245,10 @@ function useCodeMirrorScope(view: EditorView) {
 
   const editableRef = useRef(permissionsLevel !== 'readOnly')
 
+  const { previewByPath } = useFileTreePathContext()
+
   const visualRef = useRef({
-    fileTreeManager: ide.fileTreeManager,
+    previewByPath,
     visual,
   })
 
@@ -311,6 +314,11 @@ function useCodeMirrorScope(view: EditorView) {
     // clear performance measures and marks when switching between Source and Rich Text
     window.dispatchEvent(new Event('editor:visual-switch'))
   }, [view, visual])
+
+  useEffect(() => {
+    visualRef.current.previewByPath = previewByPath
+    view.dispatch(setVisual(visualRef.current))
+  }, [view, previewByPath])
 
   useEffect(() => {
     editableRef.current = permissionsLevel !== 'readOnly'

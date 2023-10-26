@@ -24,14 +24,11 @@ import { pasteHtml } from './paste-html'
 import { commandTooltip } from '../command-tooltip'
 import { tableGeneratorTheme } from './table-generator'
 import { debugConsole } from '@/utils/debugging'
+import { PreviewPath } from '../../../../../../types/preview-path'
 
 type Options = {
   visual: boolean
-  fileTreeManager: {
-    getPreviewByPath: (
-      path: string
-    ) => { url: string; extension: string } | null
-  }
+  previewByPath: (path: string) => PreviewPath | null
 }
 
 const visualConf = new Compartment()

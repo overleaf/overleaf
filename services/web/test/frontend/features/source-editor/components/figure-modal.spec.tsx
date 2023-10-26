@@ -2,6 +2,7 @@ import CodemirrorEditor from '../../../../../frontend/js/features/source-editor/
 import { EditorProviders } from '../../../helpers/editor-providers'
 import { mockScope, rootFolderId } from '../helpers/mock-scope'
 import { FC } from 'react'
+import { FileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
 
 const Container: FC = ({ children }) => (
   <div style={{ width: 1500, height: 785 }}>{children}</div>
@@ -50,9 +51,25 @@ describe('<FigureModal />', function () {
     const scope = mockScope(content)
     scope.editor.showVisual = true
 
+    const FileTreePathProvider: FC = ({ children }) => (
+      <FileTreePathContext.Provider
+        value={{
+          dirname: cy.stub(),
+          findEntityByPath: cy.stub(),
+          pathInFolder: cy.stub(),
+          previewByPath: cy
+            .stub()
+            .as('previewByPath')
+            .returns({ url: 'frog.jpg', extension: 'jpg' }),
+        }}
+      >
+        {children}
+      </FileTreePathContext.Provider>
+    )
+
     cy.mount(
       <Container>
-        <EditorProviders scope={scope}>
+        <EditorProviders scope={scope} providers={{ FileTreePathProvider }}>
           <CodemirrorEditor />
         </EditorProviders>
       </Container>

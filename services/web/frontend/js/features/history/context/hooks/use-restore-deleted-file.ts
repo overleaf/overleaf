@@ -1,51 +1,100 @@
 import { sendMB } from '../../../../infrastructure/event-tracking'
 import { useIdeContext } from '../../../../shared/context/ide-context'
 import { useLayoutContext } from '../../../../shared/context/layout-context'
-import useAsync from '../../../../shared/hooks/use-async'
 import { restoreFile } from '../../services/api'
 import { isFileRemoved } from '../../utils/file-diff'
-import { waitFor } from '../../utils/wait-for'
 import { useHistoryContext } from '../history-context'
 import type { HistoryContextValue } from '../types/history-context-value'
 import { useErrorHandler } from 'react-error-boundary'
+import { useFileTreeData } from '@/shared/context/file-tree-data-context'
+import { findInTree } from '@/features/file-tree/util/find-in-tree'
+import { useCallback, useEffect, useState } from 'react'
+import { RestoreFileResponse } from '@/features/history/services/types/restore-file'
+
+type RestorationState =
+  | 'idle'
+  | 'restoring'
+  | 'waitingForFileTree'
+  | 'complete'
+  | 'error'
+  | 'timedOut'
 
 export function useRestoreDeletedFile() {
-  const { isLoading, runAsync } = useAsync()
   const { projectId } = useHistoryContext()
   const ide = useIdeContext()
   const { setView } = useLayoutContext()
   const handleError = useErrorHandler()
+  const { fileTreeData } = useFileTreeData()
+  const [state, setState] = useState<RestorationState>('idle')
+  const [restoredFileMetadata, setRestoredFileMetadata] =
+    useState<RestoreFileResponse | null>(null)
 
-  const restoreDeletedFile = async (
-    selection: HistoryContextValue['selection']
-  ) => {
-    const { selectedFile } = selection
+  const isLoading = state === 'restoring' || state === 'waitingForFileTree'
 
-    if (selectedFile && selectedFile.pathname && isFileRemoved(selectedFile)) {
-      sendMB('history-v2-restore-deleted')
-
-      await runAsync(
-        restoreFile(projectId, selectedFile)
-          .then(async data => {
-            const { id, type } = data
-
-            const entity = await waitFor(
-              () => ide.fileTreeManager.findEntityById(id),
-              3000
-            )
-
-            if (type === 'doc') {
-              ide.editorManager.openDoc(entity)
-            } else {
-              ide.binaryFilesManager.openFile(entity)
-            }
-
-            setView('editor')
-          })
-          .catch(handleError)
-      )
+  useEffect(() => {
+    if (state === 'waitingForFileTree' && restoredFileMetadata) {
+      const result = findInTree(fileTreeData, restoredFileMetadata.id)
+      if (result) {
+        setState('complete')
+        const { _id: id } = result.entity
+        setView('editor')
+        if (restoredFileMetadata.type === 'doc') {
+          ide.editorManager.openDocId(id)
+        } else {
+          ide.binaryFilesManager.openFileWithId(id)
+        }
+        // Get the file tree to select the entity that has just been restored
+        window.dispatchEvent(new CustomEvent('editor.openDoc', { detail: id }))
+      }
     }
-  }
+  }, [
+    state,
+    fileTreeData,
+    restoredFileMetadata,
+    ide.editorManager,
+    ide.binaryFilesManager,
+    setView,
+  ])
+
+  useEffect(() => {
+    if (state === 'waitingForFileTree') {
+      const timer = window.setTimeout(() => {
+        setState('timedOut')
+        handleError(new Error('timed out'))
+      }, 3000)
+
+      return () => {
+        window.clearTimeout(timer)
+      }
+    }
+  }, [handleError, state])
+
+  const restoreDeletedFile = useCallback(
+    (selection: HistoryContextValue['selection']) => {
+      const { selectedFile } = selection
+
+      if (
+        selectedFile &&
+        selectedFile.pathname &&
+        isFileRemoved(selectedFile)
+      ) {
+        sendMB('history-v2-restore-deleted')
+
+        setState('restoring')
+        restoreFile(projectId, selectedFile).then(
+          (data: RestoreFileResponse) => {
+            setRestoredFileMetadata(data)
+            setState('waitingForFileTree')
+          },
+          error => {
+            setState('error')
+            handleError(error)
+          }
+        )
+      }
+    },
+    [handleError, projectId]
+  )
 
   return { restoreDeletedFile, isLoading }
 }

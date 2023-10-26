@@ -2,12 +2,37 @@ import SourceEditor from '../../js/features/source-editor/components/source-edit
 import { ScopeDecorator } from '../decorators/scope'
 import { useScope } from '../hooks/use-scope'
 import { useMeta } from '../hooks/use-meta'
+import { FC } from 'react'
+import { FileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
+
+const FileTreePathProvider: FC = ({ children }) => (
+  <FileTreePathContext.Provider
+    value={{
+      dirname: () => null,
+      findEntityByPath: () => null,
+      pathInFolder: () => null,
+      previewByPath: (path: string) =>
+        path === 'frog.jpg'
+          ? {
+              extension: 'png',
+              url: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsCAYAAAB5fY51AAABhWlDQ1BJQ0MgcHJvZmlsZQAAKJF9kT1Iw0AcxV9TpaJVETuIOGSogmBBVMRRq1CECqFWaNXB5NIvaNKQpLg4Cq4FBz8Wqw4uzro6uAqC4AeIq4uToouU+L+k0CLWg+N+vLv3uHsHCNUi06y2cUDTbTMRi4qp9KoYeIWAPnShB6Mys4w5SYqj5fi6h4+vdxGe1frcn6NbzVgM8InEs8wwbeIN4ulN2+C8TxxieVklPiceM+mCxI9cVzx+45xzWeCZITOZmCcOEYu5JlaamOVNjXiKOKxqOuULKY9VzluctWKZ1e/JXxjM6CvLXKc5hBgWsQQJIhSUUUARNiK06qRYSNB+tIV/0PVL5FLIVQAjxwJK0CC7fvA/+N2tlZ2c8JKCUaD9xXE+hoHALlCrOM73sePUTgD/M3ClN/ylKjDzSXqloYWPgN5t4OK6oSl7wOUOMPBkyKbsSn6aQjYLvJ/RN6WB/lugc83rrb6P0wcgSV3Fb4CDQ2AkR9nrLd7d0dzbv2fq/f0ARfNylZJUgMQAAAAGYktHRABuAP8AAGHZRr4AAAAJcEhZcwAALiMAAC4jAXilP3YAAAAHdElNRQfnAhELEhgyPeVkAAAAGXRFWHRDb21tZW50AENyZWF0ZWQgd2l0aCBHSU1QV4EOFwAAAyVJREFUeNrt1rEJgDAURVGVNCmS2hS6PziCteIYWjuEbiEfOWeEV1xe35bt6QhjnlYjBJLzbYRABhMAggUgWIBgAQgWgGABggUgWACCBQgWgGABCBYgWACCBSBYgGABCBaAYAGCBSBYAIIFCBaAYAEIFiBYAIIFIFiAYAEIFiBYAIIFIFiAYAEIFoBgAYIFIFgAggUIFoBgAQgWIFgAggUgWIBgAQgWgGABggUgWACCBQgWgGABCBYgWACCBSBYgGABCBYgWACCBSBYgGABCBaAYAGCBSBYAIIFCBaAYAEIFiBYAIIFIFiAYAEIFoBgAYIFIFgAggUIFoBgAQgWIFgAggUgWIBgAQgWIFgAggUgWIBgAQgWgGABggUgWACCBQgWgGABCBbwX6m13QqB5HwbIZBSLyN4WACCBQgWgGABCBYgWACCBSBYgGABCBaAYAGCBSBYAIIFCBaAYAEIFiBYAIIFCBaAYAEIFiBYAIIFIFiAYAEIFoBgAYIFIFgAggUIFoBgAQgWIFgAggUgWIBgAQgWgGABggUgWACCBQgWgGABCBYgWACCBQgWgGABCBYgWACCBSBYgGABCBaAYAGCBSBYAIIFCBaAYAEIFiBYAIIFIFiAYAEIFoBgAYIFIFgAggUIFoBgAQgWIFgAggUIFoBgAQgWIFgAggUgWIBgAQgWgGABggUgWACCBQgWgGABCBYgWACCBSBYgGABCBaAYAGCBfCFVMtphUBKvYwQSBsPI3hYAIIFCBaAYAEIFiBYAIIFIFiAYAEIFoBgAYIFIFgAggUIFoBgAQgWIFgAggUIFoBgAQgWIFgAggUgWIBgAQgWgGABggUgWACCBQgWgGABCBYgWACCBSBYgGABCBaAYAGCBSBYAIIFCBaAYAEIFiBYAIIFCBaAYAEIFiBYAIIFIFiAYAEIFoBgAYIFIFgAggUIFoBgAQgWIFgAggUgWIBgAQgWgGABggUgWACCBQgWgGABCBYgWACCBQgWgGABCBYgWACCBSBYgGABCBaAYAGCBSBYAIIFCBaAYAEIFiBYAIIFIFiAYAEIFoBgAYIF8IUXjtUMuBMh1xAAAAAASUVORK5CYII=',
+            }
+          : null,
+    }}
+  >
+    {children}
+  </FileTreePathContext.Provider>
+)
 
 export default {
   title: 'Editor / Source Editor',
   component: SourceEditor,
   decorators: [
-    ScopeDecorator,
+    (Story: any) =>
+      ScopeDecorator(Story, {
+        mockCompileOnLoad: true,
+        providers: { FileTreePathProvider },
+      }),
     (Story: any) => (
       <div style={{ height: '90vh' }}>
         <Story />
@@ -93,29 +118,6 @@ export const Visual = (args: any, { globals: { theme } }: any) => {
       open_doc_name: 'example.tex',
       showVisual: true,
     },
-    rootFolder: {
-      name: 'rootFolder',
-      id: 'root-folder-id',
-      type: 'folder',
-      children: [
-        {
-          name: 'example.tex.tex',
-          id: 'example-doc-id',
-          type: 'doc',
-          selected: false,
-          $$hashKey: 'object:89',
-        },
-        {
-          name: 'frog.jpg',
-          id: 'frog-image-id',
-          type: 'file',
-          linkedFileData: null,
-          created: '2023-05-04T16:11:04.352Z',
-          $$hashKey: 'object:108',
-        },
-      ],
-      selected: false,
-    },
     settings: {
       ...settings,
       overallTheme: theme === 'default-' ? '' : theme,
@@ -127,6 +129,7 @@ export const Visual = (args: any, { globals: { theme } }: any) => {
     'ol-completedTutorials': {
       'table-generator-promotion': '2023-09-01T00:00:00.000Z',
     },
+    'ol-project_id': '63e21c07946dd8c76505f85a',
   })
 
   return <SourceEditor />

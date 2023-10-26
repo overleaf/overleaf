@@ -3,6 +3,7 @@ import { placeSelectionInsideBlock } from '../selection'
 import { isEqual } from 'lodash'
 import { FigureData } from '../../figure-modal'
 import { debugConsole } from '@/utils/debugging'
+import { PreviewPath } from '../../../../../../../types/preview-path'
 
 export class GraphicsWidget extends WidgetType {
   destroyed = false
@@ -10,9 +11,7 @@ export class GraphicsWidget extends WidgetType {
 
   constructor(
     public filePath: string,
-    public getPreviewByPath: (
-      filePath: string
-    ) => { url: string; extension: string } | null,
+    public previewByPath: (path: string) => PreviewPath | null,
     public centered: boolean,
     public figureData: FigureData | null
   ) {
@@ -82,7 +81,7 @@ export class GraphicsWidget extends WidgetType {
   renderGraphic(element: HTMLElement, view: EditorView) {
     element.textContent = '' // ensure the element is empty
 
-    const preview = this.getPreviewByPath(this.filePath)
+    const preview = this.previewByPath(this.filePath)
     element.dataset.filepath = this.filePath
     element.dataset.width = this.figureData?.width?.toString()
 

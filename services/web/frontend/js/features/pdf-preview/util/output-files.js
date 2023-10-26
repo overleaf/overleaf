@@ -4,6 +4,7 @@ import BibLogParser from '../../../ide/log-parser/bib-log-parser'
 import { v4 as uuid } from 'uuid'
 import { enablePdfCaching } from './pdf-caching-flags'
 import { debugConsole } from '@/utils/debugging'
+import { dirname, findEntityByPath } from '@/features/file-tree/util/path'
 
 // Warnings that may disappear after a second LaTeX pass
 const TRANSIENT_WARNING_REGEX = /^(Reference|Citation).+undefined on input line/
@@ -133,8 +134,8 @@ export const handleLogFiles = async (outputFiles, data, signal) => {
   return result
 }
 
-export function buildLogEntryAnnotations(entries, fileTreeManager) {
-  const rootDocDirname = fileTreeManager.getRootDocDirname()
+export function buildLogEntryAnnotations(entries, fileTreeData, rootDocId) {
+  const rootDocDirname = dirname(fileTreeData, rootDocId)
 
   const logEntryAnnotations = {}
 
@@ -142,14 +143,14 @@ export function buildLogEntryAnnotations(entries, fileTreeManager) {
     if (entry.file) {
       entry.file = normalizeFilePath(entry.file, rootDocDirname)
 
-      const entity = fileTreeManager.findEntityByPath(entry.file)
+      const entity = findEntityByPath(fileTreeData, entry.file)?.entity
 
       if (entity) {
-        if (!(entity.id in logEntryAnnotations)) {
-          logEntryAnnotations[entity.id] = []
+        if (!(entity._id in logEntryAnnotations)) {
+          logEntryAnnotations[entity._id] = []
         }
 
-        logEntryAnnotations[entity.id].push({
+        logEntryAnnotations[entity._id].push({
           row: entry.line - 1,
           type: entry.level === 'error' ? 'error' : 'warning',
           text: entry.message,

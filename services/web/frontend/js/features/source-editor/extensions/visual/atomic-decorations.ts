@@ -66,13 +66,10 @@ import { skipPreambleWithCursor } from './skip-preamble-cursor'
 import { TableRenderingErrorWidget } from './visual-widgets/table-rendering-error'
 import { GraphicsWidget } from './visual-widgets/graphics'
 import { InlineGraphicsWidget } from './visual-widgets/inline-graphics'
+import { PreviewPath } from '../../../../../../types/preview-path'
 
 type Options = {
-  fileTreeManager: {
-    getPreviewByPath: (
-      path: string
-    ) => { url: string; extension: string } | null
-  }
+  previewByPath: (path: string) => PreviewPath | null
 }
 
 function shouldDecorate(
@@ -135,9 +132,7 @@ const hasClosingBrace = (node: SyntaxNode) =>
  * Decorations that span multiple lines must be contained in a StateField, not a ViewPlugin.
  */
 export const atomicDecorations = (options: Options) => {
-  const getPreviewByPath = (path: string) =>
-    options.fileTreeManager.getPreviewByPath(path)
-
+  const { previewByPath } = options
   const createDecorations = (
     state: EditorState,
     tree: Tree
@@ -895,7 +890,7 @@ export const atomicDecorations = (options: Options) => {
                     Decoration.replace({
                       widget: new Widget(
                         filePath,
-                        getPreviewByPath,
+                        previewByPath,
                         centered,
                         figureData
                       ),
@@ -910,7 +905,7 @@ export const atomicDecorations = (options: Options) => {
                     Decoration.replace({
                       widget: new Widget(
                         filePath,
-                        getPreviewByPath,
+                        previewByPath,
                         centered,
                         figureData
                       ),

@@ -1,6 +1,5 @@
 import { useEffect, useMemo } from 'react'
 import { get } from 'lodash'
-import { ContextRoot } from '../../js/shared/context/root-context'
 import { User } from '../../../types/user'
 import { Project } from '../../../types/project'
 import {
@@ -10,6 +9,18 @@ import {
 } from '../fixtures/compile'
 import useFetchMock from '../hooks/use-fetch-mock'
 import { useMeta } from '../hooks/use-meta'
+import { SplitTestProvider } from '@/shared/context/split-test-context'
+import { IdeAngularProvider } from '@/shared/context/ide-angular-provider'
+import { UserProvider } from '@/shared/context/user-context'
+import { ProjectProvider } from '@/shared/context/project-context'
+import { FileTreeDataProvider } from '@/shared/context/file-tree-data-context'
+import { EditorProvider } from '@/shared/context/editor-context'
+import { DetachProvider } from '@/shared/context/detach-context'
+import { LayoutProvider } from '@/shared/context/layout-context'
+import { LocalCompileProvider } from '@/shared/context/local-compile-context'
+import { DetachCompileProvider } from '@/shared/context/detach-compile-context'
+import { ProjectSettingsProvider } from '@/features/editor-left-menu/context/project-settings-context'
+import { FileTreePathProvider } from '@/features/file-tree/contexts/file-tree-path'
 
 const scopeWatchers: [string, (value: any) => void][] = []
 
@@ -96,19 +107,6 @@ const initialize = () => {
     socket: {
       on: () => {},
       removeListener: () => {},
-    },
-    fileTreeManager: {
-      findEntityById: () => null,
-      findEntityByPath: () => null,
-      getEntityPath: () => null,
-      getRootDocDirname: () => undefined,
-      getPreviewByPath: (path: string) =>
-        path === 'frog.jpg'
-          ? {
-              extension: 'png',
-              url: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsCAYAAAB5fY51AAABhWlDQ1BJQ0MgcHJvZmlsZQAAKJF9kT1Iw0AcxV9TpaJVETuIOGSogmBBVMRRq1CECqFWaNXB5NIvaNKQpLg4Cq4FBz8Wqw4uzro6uAqC4AeIq4uToouU+L+k0CLWg+N+vLv3uHsHCNUi06y2cUDTbTMRi4qp9KoYeIWAPnShB6Mys4w5SYqj5fi6h4+vdxGe1frcn6NbzVgM8InEs8wwbeIN4ulN2+C8TxxieVklPiceM+mCxI9cVzx+45xzWeCZITOZmCcOEYu5JlaamOVNjXiKOKxqOuULKY9VzluctWKZ1e/JXxjM6CvLXKc5hBgWsQQJIhSUUUARNiK06qRYSNB+tIV/0PVL5FLIVQAjxwJK0CC7fvA/+N2tlZ2c8JKCUaD9xXE+hoHALlCrOM73sePUTgD/M3ClN/ylKjDzSXqloYWPgN5t4OK6oSl7wOUOMPBkyKbsSn6aQjYLvJ/RN6WB/lugc83rrb6P0wcgSV3Fb4CDQ2AkR9nrLd7d0dzbv2fq/f0ARfNylZJUgMQAAAAGYktHRABuAP8AAGHZRr4AAAAJcEhZcwAALiMAAC4jAXilP3YAAAAHdElNRQfnAhELEhgyPeVkAAAAGXRFWHRDb21tZW50AENyZWF0ZWQgd2l0aCBHSU1QV4EOFwAAAyVJREFUeNrt1rEJgDAURVGVNCmS2hS6PziCteIYWjuEbiEfOWeEV1xe35bt6QhjnlYjBJLzbYRABhMAggUgWIBgAQgWgGABggUgWACCBQgWgGABCBYgWACCBSBYgGABCBaAYAGCBSBYAIIFCBaAYAEIFiBYAIIFIFiAYAEIFiBYAIIFIFiAYAEIFoBgAYIFIFgAggUIFoBgAQgWIFgAggUgWIBgAQgWgGABggUgWACCBQgWgGABCBYgWACCBSBYgGABCBYgWACCBSBYgGABCBaAYAGCBSBYAIIFCBaAYAEIFiBYAIIFIFiAYAEIFoBgAYIFIFgAggUIFoBgAQgWIFgAggUgWIBgAQgWIFgAggUgWIBgAQgWgGABggUgWACCBQgWgGABCBbwX6m13QqB5HwbIZBSLyN4WACCBQgWgGABCBYgWACCBSBYgGABCBaAYAGCBSBYAIIFCBaAYAEIFiBYAIIFCBaAYAEIFiBYAIIFIFiAYAEIFoBgAYIFIFgAggUIFoBgAQgWIFgAggUgWIBgAQgWgGABggUgWACCBQgWgGABCBYgWACCBQgWgGABCBYgWACCBSBYgGABCBaAYAGCBSBYAIIFCBaAYAEIFiBYAIIFIFiAYAEIFoBgAYIFIFgAggUIFoBgAQgWIFgAggUIFoBgAQgWIFgAggUgWIBgAQgWgGABggUgWACCBQgWgGABCBYgWACCBSBYgGABCBaAYAGCBfCFVMtphUBKvYwQSBsPI3hYAIIFCBaAYAEIFiBYAIIFIFiAYAEIFoBgAYIFIFgAggUIFoBgAQgWIFgAggUIFoBgAQgWIFgAggUgWIBgAQgWgGABggUgWACCBQgWgGABCBYgWACCBSBYgGABCBaAYAGCBSBYAIIFCBaAYAEIFiBYAIIFCBaAYAEIFiBYAIIFIFiAYAEIFoBgAYIFIFgAggUIFoBgAQgWIFgAggUgWIBgAQgWgGABggUgWACCBQgWgGABCBYgWACCBQgWgGABCBYgWACCBSBYgGABCBaAYAGCBSBYAIIFCBaAYAEIFiBYAIIFIFiAYAEIFoBgAYIF8IUXjtUMuBMh1xAAAAAASUVORK5CYII=',
-            }
-          : null,
     },
     editorManager: {
       getCurrentDocId: () => 'foo',
@@ -207,6 +205,7 @@ const initialize = () => {
 
 type ScopeDecoratorOptions = {
   mockCompileOnLoad: boolean
+  providers?: Record<string, any>
 }
 
 export const ScopeDecorator = (
@@ -237,9 +236,47 @@ export const ScopeDecorator = (
   // set values on window.metaAttributesCache (created in initialize, above)
   useMeta(meta)
 
+  const Providers = {
+    DetachCompileProvider,
+    DetachProvider,
+    EditorProvider,
+    FileTreeDataProvider,
+    FileTreePathProvider,
+    IdeAngularProvider,
+    LayoutProvider,
+    LocalCompileProvider,
+    ProjectProvider,
+    ProjectSettingsProvider,
+    SplitTestProvider,
+    UserProvider,
+    ...opts.providers,
+  }
+
   return (
-    <ContextRoot ide={ide}>
-      <Story />
-    </ContextRoot>
+    <Providers.SplitTestProvider>
+      <Providers.IdeAngularProvider ide={ide}>
+        <Providers.UserProvider>
+          <Providers.ProjectProvider>
+            <Providers.FileTreeDataProvider>
+              <Providers.FileTreePathProvider>
+                <Providers.DetachProvider>
+                  <Providers.EditorProvider>
+                    <Providers.ProjectSettingsProvider>
+                      <Providers.LayoutProvider>
+                        <Providers.LocalCompileProvider>
+                          <Providers.DetachCompileProvider>
+                            <Story />
+                          </Providers.DetachCompileProvider>
+                        </Providers.LocalCompileProvider>
+                      </Providers.LayoutProvider>
+                    </Providers.ProjectSettingsProvider>
+                  </Providers.EditorProvider>
+                </Providers.DetachProvider>
+              </Providers.FileTreePathProvider>
+            </Providers.FileTreeDataProvider>
+          </Providers.ProjectProvider>
+        </Providers.UserProvider>
+      </Providers.IdeAngularProvider>
+    </Providers.SplitTestProvider>
   )
 }

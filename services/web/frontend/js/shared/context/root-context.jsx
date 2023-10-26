@@ -13,6 +13,7 @@ import { ProjectProvider } from './project-context'
 import { SplitTestProvider } from './split-test-context'
 import { FileTreeDataProvider } from './file-tree-data-context'
 import { ProjectSettingsProvider } from '@/features/editor-left-menu/context/project-settings-context'
+import { FileTreePathProvider } from '@/features/file-tree/contexts/file-tree-path'
 
 export function ContextRoot({ children, ide }) {
   return (
@@ -21,19 +22,21 @@ export function ContextRoot({ children, ide }) {
         <UserProvider>
           <ProjectProvider>
             <FileTreeDataProvider>
-              <DetachProvider>
-                <EditorProvider>
-                  <ProjectSettingsProvider>
-                    <LayoutProvider>
-                      <LocalCompileProvider>
-                        <DetachCompileProvider>
-                          <ChatProvider>{children}</ChatProvider>
-                        </DetachCompileProvider>
-                      </LocalCompileProvider>
-                    </LayoutProvider>
-                  </ProjectSettingsProvider>
-                </EditorProvider>
-              </DetachProvider>
+              <FileTreePathProvider>
+                <DetachProvider>
+                  <EditorProvider>
+                    <ProjectSettingsProvider>
+                      <LayoutProvider>
+                        <LocalCompileProvider>
+                          <DetachCompileProvider>
+                            <ChatProvider>{children}</ChatProvider>
+                          </DetachCompileProvider>
+                        </LocalCompileProvider>
+                      </LayoutProvider>
+                    </ProjectSettingsProvider>
+                  </EditorProvider>
+                </DetachProvider>
+              </FileTreePathProvider>
             </FileTreeDataProvider>
           </ProjectProvider>
         </UserProvider>

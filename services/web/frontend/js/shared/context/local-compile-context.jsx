@@ -29,6 +29,8 @@ import { useEditorContext } from './editor-context'
 import { buildFileList } from '../../features/pdf-preview/util/file-list'
 import { useLayoutContext } from './layout-context'
 import { useUserContext } from './user-context'
+import { useFileTreeData } from '@/shared/context/file-tree-data-context'
+import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
 
 export const LocalCompileContext = createContext()
 
@@ -94,6 +96,9 @@ export function LocalCompileProvider({ children }) {
   const { pdfPreviewOpen } = useLayoutContext()
 
   const { features } = useUserContext()
+
+  const { fileTreeData } = useFileTreeData()
+  const { findEntityByPath } = useFileTreePathContext()
 
   // whether a compile is in progress
   const [compiling, setCompiling] = useState(false)
@@ -245,6 +250,17 @@ export function LocalCompileProvider({ children }) {
     compilingRef.current = compiling
   }, [compiling])
 
+  const _buildLogEntryAnnotations = useCallback(
+    entries => buildLogEntryAnnotations(entries, fileTreeData, rootDocId),
+    [fileTreeData, rootDocId]
+  )
+
+  const buildLogEntryAnnotationsRef = useRef(_buildLogEntryAnnotations)
+
+  useEffect(() => {
+    buildLogEntryAnnotationsRef.current = _buildLogEntryAnnotations
+  }, [_buildLogEntryAnnotations])
+
   // the document compiler
   const [compiler] = useState(() => {
     return new DocumentCompiler({
@@ -349,10 +365,7 @@ export function LocalCompileProvider({ children }) {
             setRawLog(result.log)
             setLogEntries(result.logEntries)
             setLogEntryAnnotations(
-              buildLogEntryAnnotations(
-                result.logEntries.all,
-                ide.fileTreeManager
-              )
+              buildLogEntryAnnotationsRef.current(result.logEntries.all)
             )
 
             // sample compile stats for real users
@@ -521,16 +534,16 @@ export function LocalCompileProvider({ children }) {
 
   const syncToEntry = useCallback(
     entry => {
-      const entity = ide.fileTreeManager.findEntityByPath(entry.file)
+      const result = findEntityByPath(entry.file)
 
-      if (entity && entity.type === 'doc') {
-        ide.editorManager.openDoc(entity, {
+      if (result && result.type === 'doc') {
+        ide.editorManager.openDocId(result.entity._id, {
           gotoLine: entry.line ?? undefined,
           gotoColumn: entry.column ?? undefined,
         })
       }
     },
-    [ide]
+    [findEntityByPath, ide.editorManager]
   )
 
   // clear the cache then run a compile, triggered by a menu item

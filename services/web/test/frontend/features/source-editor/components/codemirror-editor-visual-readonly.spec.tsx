@@ -1,20 +1,24 @@
 import { mockScope } from '../helpers/mock-scope'
 import { EditorProviders } from '../../../helpers/editor-providers'
 import CodemirrorEditor from '../../../../../frontend/js/features/source-editor/components/codemirror-editor'
-import { FC } from 'react'
+import { FC, ComponentProps } from 'react'
+import { FileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
 
 const Container: FC = ({ children }) => (
   <div style={{ width: 785, height: 785 }}>{children}</div>
 )
 
-const mountEditor = (content: string, ...args: any[]) => {
+const mountEditor = (
+  content: string,
+  props?: Omit<ComponentProps<typeof EditorProviders>, 'children' | 'scope'>
+) => {
   const scope = mockScope(content)
   scope.permissionsLevel = 'readOnly'
   scope.editor.showVisual = true
 
   cy.mount(
     <Container>
-      <EditorProviders scope={scope} {...args}>
+      <EditorProviders scope={scope} {...props}>
         <CodemirrorEditor />
       </EditorProviders>
     </Container>
@@ -81,15 +85,21 @@ describe('<CodeMirrorEditor/> in Visual mode with read-only permission', functio
   })
 
   it('does not display the figure edit button', function () {
-    const fileTreeManager = {
-      findEntityById: cy.stub(),
-      findEntityByPath: cy.stub(),
-      getEntityPath: cy.stub(),
-      getRootDocDirname: cy.stub(),
-      getPreviewByPath: cy
-        .stub()
-        .returns({ url: '/images/frog.jpg', extension: 'jpg' }),
-    }
+    const FileTreePathProvider: FC = ({ children }) => (
+      <FileTreePathContext.Provider
+        value={{
+          dirname: cy.stub(),
+          findEntityByPath: cy.stub(),
+          pathInFolder: cy.stub(),
+          previewByPath: cy
+            .stub()
+            .as('previewByPath')
+            .returns({ url: '/images/frog.jpg', extension: 'jpg' }),
+        }}
+      >
+        {children}
+      </FileTreePathContext.Provider>
+    )
 
     cy.intercept('/images/frog.jpg', { fixture: 'images/gradient.png' })
 
@@ -100,7 +110,9 @@ describe('<CodeMirrorEditor/> in Visual mode with read-only permission', functio
 \\caption{My caption}
 \\label{fig:my-label}
 \\end{figure}`,
-      { fileTreeManager }
+      {
+        providers: { FileTreePathProvider },
+      }
     )
 
     cy.get('img.ol-cm-graphics').should('have.length', 1)

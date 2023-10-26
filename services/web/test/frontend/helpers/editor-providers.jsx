@@ -1,7 +1,7 @@
 // Disable prop type checks for test harnesses
 /* eslint-disable react/prop-types */
 import sinon from 'sinon'
-import { get } from 'lodash'
+import { get, merge } from 'lodash'
 import { SplitTestProvider } from '@/shared/context/split-test-context'
 import { IdeAngularProvider } from '@/shared/context/ide-angular-provider'
 import { UserProvider } from '@/shared/context/user-context'
@@ -13,6 +13,7 @@ import { LayoutProvider } from '@/shared/context/layout-context'
 import { LocalCompileProvider } from '@/shared/context/local-compile-context'
 import { DetachCompileProvider } from '@/shared/context/detach-compile-context'
 import { ProjectSettingsProvider } from '@/features/editor-left-menu/context/project-settings-context'
+import { FileTreePathProvider } from '@/features/file-tree/contexts/file-tree-path'
 
 // these constants can be imported in tests instead of
 // using magic strings
@@ -70,33 +71,36 @@ export function EditorProviders({
       },
     },
   },
+  providers = {},
 }) {
   window.user = user || window.user
   window.gitBridgePublicBaseUrl = 'https://git.overleaf.test'
   window.project_id = projectId != null ? projectId : window.project_id
   window.isRestrictedTokenMember = isRestrictedTokenMember
 
-  const $scope = {
-    user: window.user,
-    project: {
-      _id: window.project_id,
-      name: PROJECT_NAME,
-      owner: projectOwner,
-      features,
-      rootDoc_id: rootDocId,
-      rootFolder,
+  const $scope = merge(
+    {
+      user: window.user,
+      project: {
+        _id: window.project_id,
+        name: PROJECT_NAME,
+        owner: projectOwner,
+        features,
+        rootDoc_id: rootDocId,
+        rootFolder,
+      },
+      ui,
+      $watch: (path, callback) => {
+        callback(get($scope, path))
+        return () => null
+      },
+      $on: sinon.stub(),
+      $applyAsync: sinon.stub(),
+      toggleHistory: sinon.stub(),
+      permissionsLevel,
     },
-    ui,
-    $watch: (path, callback) => {
-      callback(get($scope, path))
-      return () => null
-    },
-    $on: sinon.stub(),
-    $applyAsync: sinon.stub(),
-    toggleHistory: sinon.stub(),
-    permissionsLevel,
-    ...scope,
-  }
+    scope
+  )
 
   window._ide = {
     $scope,
@@ -109,30 +113,47 @@ export function EditorProviders({
 
   // Add details for useUserContext
   window.metaAttributesCache.set('ol-user', { ...user, features })
+  const Providers = {
+    DetachCompileProvider,
+    DetachProvider,
+    EditorProvider,
+    FileTreeDataProvider,
+    FileTreePathProvider,
+    IdeAngularProvider,
+    LayoutProvider,
+    LocalCompileProvider,
+    ProjectProvider,
+    ProjectSettingsProvider,
+    SplitTestProvider,
+    UserProvider,
+    ...providers,
+  }
 
   return (
-    <SplitTestProvider>
-      <IdeAngularProvider ide={window._ide}>
-        <UserProvider>
-          <ProjectProvider>
-            <FileTreeDataProvider>
-              <DetachProvider>
-                <EditorProvider>
-                  <ProjectSettingsProvider>
-                    <LayoutProvider>
-                      <LocalCompileProvider>
-                        <DetachCompileProvider>
-                          {children}
-                        </DetachCompileProvider>
-                      </LocalCompileProvider>
-                    </LayoutProvider>
-                  </ProjectSettingsProvider>
-                </EditorProvider>
-              </DetachProvider>
-            </FileTreeDataProvider>
-          </ProjectProvider>
-        </UserProvider>
-      </IdeAngularProvider>
-    </SplitTestProvider>
+    <Providers.SplitTestProvider>
+      <Providers.IdeAngularProvider ide={window._ide}>
+        <Providers.UserProvider>
+          <Providers.ProjectProvider>
+            <Providers.FileTreeDataProvider>
+              <Providers.FileTreePathProvider>
+                <Providers.DetachProvider>
+                  <Providers.EditorProvider>
+                    <Providers.ProjectSettingsProvider>
+                      <Providers.LayoutProvider>
+                        <Providers.LocalCompileProvider>
+                          <Providers.DetachCompileProvider>
+                            {children}
+                          </Providers.DetachCompileProvider>
+                        </Providers.LocalCompileProvider>
+                      </Providers.LayoutProvider>
+                    </Providers.ProjectSettingsProvider>
+                  </Providers.EditorProvider>
+                </Providers.DetachProvider>
+              </Providers.FileTreePathProvider>
+            </Providers.FileTreeDataProvider>
+          </Providers.ProjectProvider>
+        </Providers.UserProvider>
+      </Providers.IdeAngularProvider>
+    </Providers.SplitTestProvider>
   )
 }

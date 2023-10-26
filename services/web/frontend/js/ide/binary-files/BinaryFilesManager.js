@@ -50,6 +50,13 @@ export default BinaryFilesManager = class BinaryFilesManager {
     )
   }
 
+  openFileWithId(id) {
+    const entity = this.ide.fileTreeManager.findEntityById(id)
+    if (entity?.type === 'file') {
+      this.openFile(entity)
+    }
+  }
+
   closeFile() {
     return window.setTimeout(
       () => {
