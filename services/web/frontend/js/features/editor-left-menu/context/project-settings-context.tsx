@@ -1,5 +1,4 @@
-import { createContext, useContext, useMemo } from 'react'
-import type { PropsWithChildren } from 'react'
+import { createContext, FC, useContext, useMemo } from 'react'
 import useProjectWideSettings from '../hooks/use-project-wide-settings'
 import useUserWideSettings from '../hooks/use-user-wide-settings'
 import useProjectWideSettingsSocketListener from '../hooks/use-project-wide-settings-socket-listener'
@@ -36,9 +35,7 @@ export const ProjectSettingsContext = createContext<
   ProjectSettingsContextValue | undefined
 >(undefined)
 
-export function ProjectSettingsProvider({
-  children,
-}: PropsWithChildren<Record<string, never>>) {
+export const ProjectSettingsProvider: FC = ({ children }) => {
   const {
     compiler,
     setCompiler,

@@ -3,6 +3,7 @@ import { OAuthProviders } from './oauth-providers'
 import { OverallThemeMeta } from './project-settings'
 import { User } from './user'
 import 'recurly__recurly-js'
+import { UserSettings } from '@/features/editor-left-menu/utils/api'
 
 declare global {
   // eslint-disable-next-line no-unused-vars
@@ -10,6 +11,7 @@ declare global {
     csrfToken: string
     user: User
     user_id?: string
+    userSettings: UserSettings
     oauthProviders: OAuthProviders
     thirdPartyIds: Record<string, string>
     metaAttributesCache: Map<string, any>

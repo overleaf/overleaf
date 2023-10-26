@@ -19,7 +19,16 @@ import { debugConsole } from '@/utils/debugging'
  *   - frontend/js/ide/editor/Document.js
  *   - frontend/js/ide/editor/ShareJsDoc.js
  *   - frontend/js/ide/connection/EditorWatchdogManager.js
+ *   - frontend/js/features/ide-react/editor/document.ts
+ *   - frontend/js/features/ide-react/editor/share-js-doc.ts
+ *   - frontend/js/features/ide-react/connection/editor-watchdog-manager.js
  */
+
+export type ChangeDescription = {
+  origin: 'remote' | 'undo' | 'reject' | undefined
+  inserted: boolean
+  removed: boolean
+}
 
 /**
  * A custom extension that connects the CodeMirror 6 editor to the currently open ShareJS document.
@@ -203,7 +212,13 @@ export class EditorFacade extends EventEmitter {
             // TODO: mapPos instead?
             positionShift = positionShift - removedLength + insertedLength
 
-            this.emit('change', this, { origin, inserted, removed })
+            const changeDescription: ChangeDescription = {
+              origin,
+              inserted,
+              removed,
+            }
+
+            this.emit('change', this, changeDescription)
           }
         )
       }

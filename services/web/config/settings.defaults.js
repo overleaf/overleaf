@@ -836,6 +836,7 @@ module.exports = {
     sourceEditorExtensions: [],
     sourceEditorComponents: [],
     sourceEditorCompletionSources: [],
+    sourceEditorSymbolPalette: [],
     integrationLinkingWidgets: [],
     referenceLinkingWidgets: [],
     importProjectFromGithubModalWrapper: [],

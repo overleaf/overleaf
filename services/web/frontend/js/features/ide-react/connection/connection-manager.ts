@@ -253,7 +253,7 @@ export class ConnectionManager extends Emitter<Events> {
     return true
   }
 
-  private disconnect() {
+  disconnect() {
     this.changeState({
       ...this.state,
       readyState: WebSocket.CLOSED,

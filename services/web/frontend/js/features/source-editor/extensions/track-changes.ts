@@ -22,15 +22,14 @@ import {
 } from './changes/comments'
 import { invertedEffects } from '@codemirror/commands'
 import { CurrentDoc } from '../../../../../types/current-doc'
-import {
-  Change,
-  ChangeOperation,
-  CommentOperation,
-  DeleteOperation,
-  Operation,
-} from '../../../../../types/change'
+import { Change, DeleteOperation } from '../../../../../types/change'
 import { ChangeManager } from './changes/change-manager'
 import { debugConsole } from '@/utils/debugging'
+import {
+  isChangeOperation,
+  isCommentOperation,
+  isDeleteOperation,
+} from '@/utils/operations'
 
 const clearChangesEffect = StateEffect.define()
 const buildChangesEffect = StateEffect.define()
@@ -245,13 +244,6 @@ class ChangeCalloutWidget extends WidgetType {
     return true
   }
 }
-
-// const isInsertOperation = (op: Operation): op is InsertOperation => 'i' in op
-const isChangeOperation = (op: Operation): op is ChangeOperation =>
-  'c' in op && 't' in op
-const isCommentOperation = (op: Operation): op is CommentOperation =>
-  'c' in op && !('t' in op)
-const isDeleteOperation = (op: Operation): op is DeleteOperation => 'd' in op
 
 const createChangeRange = (change: Change, currentDoc: CurrentDoc) => {
   const { id, metadata, op } = change

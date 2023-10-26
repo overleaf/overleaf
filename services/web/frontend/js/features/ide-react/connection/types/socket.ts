@@ -21,6 +21,7 @@ export type Socket = {
     callback?: (error: Error, ...data: any[]) => void
   ): void
   socket: {
+    connected: boolean
     connect(): void
   }
   disconnect(): void

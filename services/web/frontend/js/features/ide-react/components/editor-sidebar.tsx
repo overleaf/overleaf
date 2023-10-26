@@ -1,14 +1,20 @@
 import React from 'react'
 import { Panel, PanelGroup } from 'react-resizable-panels'
 import { VerticalResizeHandle } from '@/features/ide-react/components/resize/vertical-resize-handle'
+import { FileTree } from '@/features/ide-react/components/file-tree'
+import { FileTreeSelectHandler } from '@/features/ide-react/types/file-tree'
 
-type PlaceholderEditorSidebarProps = {
+type EditorSidebarProps = {
   shouldPersistLayout: boolean
+  onFileTreeInit: () => void
+  onFileTreeSelect: FileTreeSelectHandler
 }
 
-export default function PlaceholderEditorSidebar({
+export default function EditorSidebar({
   shouldPersistLayout,
-}: PlaceholderEditorSidebarProps) {
+  onFileTreeInit,
+  onFileTreeSelect,
+}: EditorSidebarProps) {
   return (
     <aside className="ide-react-placeholder-editor-sidebar">
       <PanelGroup
@@ -17,7 +23,9 @@ export default function PlaceholderEditorSidebar({
         }
         direction="vertical"
       >
-        <Panel defaultSize={75}>File tree placeholder</Panel>
+        <Panel defaultSize={75} className="ide-react-file-tree-panel">
+          <FileTree onInit={onFileTreeInit} onSelect={onFileTreeSelect} />
+        </Panel>
         <VerticalResizeHandle />
         <Panel defaultSize={25}>File outline placeholder</Panel>
       </PanelGroup>

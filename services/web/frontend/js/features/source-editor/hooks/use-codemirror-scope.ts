@@ -89,6 +89,8 @@ function useCodeMirrorScope(view: EditorView) {
   const [visual] = useScopeValue<boolean>('editor.showVisual')
   const reactReviewPanel: boolean = getMeta('ol-isReviewPanelReact')
 
+  const [references] = useScopeValue<{ keys: string[] }>('$root._references')
+
   // build the translation phrases
   const phrases = usePhrases()
 
@@ -206,7 +208,7 @@ function useCodeMirrorScope(view: EditorView) {
   // TODO: read this data from the scope?
   const metadataRef = useRef({
     documents: ide.metadataManager.metadata.state.documents,
-    references: ide.$scope.$root._references.keys,
+    references: references.keys,
     fileTreeData,
   })
 

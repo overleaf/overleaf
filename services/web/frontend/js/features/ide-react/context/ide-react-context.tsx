@@ -1,12 +1,14 @@
-import {
+import React, {
   createContext,
   useContext,
   useState,
   FC,
   useMemo,
   useEffect,
+  useCallback,
 } from 'react'
 import { ReactScopeValueStore } from '@/features/ide-react/scope-value-store/react-scope-value-store'
+import populateLayoutScope from '@/features/ide-react/scope-adapters/layout-context-adapter'
 import { IdeProvider } from '@/shared/context/ide-context'
 import {
   createIdeEventEmitter,
@@ -15,22 +17,50 @@ import {
 import { JoinProjectPayload } from '@/features/ide-react/connection/join-project-payload'
 import { useConnectionContext } from '@/features/ide-react/context/connection-context'
 import { getMockIde } from '@/shared/context/mock/mock-ide'
+import { populateEditorScope } from '@/features/ide-react/context/editor-manager-context'
+import { debugConsole } from '@/utils/debugging'
+import { postJSON } from '@/infrastructure/fetch-json'
+import { EventLog } from '@/features/ide-react/editor/event-log'
+import { populateSettingsScope } from '@/features/ide-react/scope-adapters/settings-adapter'
+import { populateOnlineUsersScope } from '@/features/ide-react/context/online-users-context'
 import { ReactScopeEventEmitter } from '@/features/ide-react/scope-event-emitter/react-scope-event-emitter'
+import { populateReferenceScope } from '@/features/ide-react/context/references-context'
 
 type IdeReactContextValue = {
   projectId: string
   eventEmitter: IdeEventEmitter
+  eventLog: EventLog
+  startedFreeTrial: boolean
+  setStartedFreeTrial: React.Dispatch<
+    React.SetStateAction<IdeReactContextValue['startedFreeTrial']>
+  >
+  reportError: (error: any, meta?: Record<string, any>) => void
 }
 
-const IdeReactContext = createContext<IdeReactContextValue | null>(null)
+const IdeReactContext = createContext<IdeReactContextValue | undefined>(
+  undefined
+)
+
+function showGenericMessageModal(title: string, message: string) {
+  debugConsole.log('*** showGenericMessageModal ***', title, message)
+}
 
 function populateIdeReactScope(store: ReactScopeValueStore) {
   store.set('sync_tex_error', false)
+  store.set('settings', window.userSettings)
 }
 
 function populateProjectScope(store: ReactScopeValueStore) {
   store.allowNonExistentPath('project', true)
   store.set('permissionsLevel', 'readOnly')
+}
+
+function populatePdfScope(store: ReactScopeValueStore) {
+  store.allowNonExistentPath('pdf', true)
+}
+
+function populateFileTreeScope(store: ReactScopeValueStore) {
+  store.set('docs', [])
 }
 
 function createReactScopeValueStore() {
@@ -42,7 +72,17 @@ function createReactScopeValueStore() {
   // initialization code together with the context and would only populate
   // necessary values in the store, but this is simpler for now
   populateIdeReactScope(scopeStore)
+  populateEditorScope(scopeStore)
+  populateLayoutScope(scopeStore)
   populateProjectScope(scopeStore)
+  populatePdfScope(scopeStore)
+  populateSettingsScope(scopeStore)
+  populateOnlineUsersScope(scopeStore)
+  populateReferenceScope(scopeStore)
+  populateFileTreeScope(scopeStore)
+
+  scopeStore.allowNonExistentPath('hasLintingError')
+  scopeStore.allowNonExistentPath('loadingThreads')
 
   return scopeStore
 }
@@ -55,24 +95,42 @@ export const IdeReactProvider: FC = ({ children }) => {
   const [scopeEventEmitter] = useState(
     () => new ReactScopeEventEmitter(eventEmitter)
   )
+  const [eventLog] = useState(() => new EventLog())
+  const [startedFreeTrial, setStartedFreeTrial] = useState(false)
 
   const { socket } = useConnectionContext()
 
-  // Fire project:joined event
-  useEffect(() => {
-    function handleJoinProjectResponse({
-      project,
-      permissionsLevel,
-    }: JoinProjectPayload) {
-      eventEmitter.emit('project:joined', { project, permissionsLevel })
-    }
+  const reportError = useCallback(
+    (error: any, meta?: Record<string, any>) => {
+      const metadata = {
+        ...meta,
+        user_id: window.user_id,
+        project_id: projectId,
+        // @ts-ignore
+        client_id: socket.socket.sessionid,
+        // @ts-ignore
+        transport: socket.socket.transport,
+        client_now: new Date(),
+      }
 
-    socket.on('joinProjectResponse', handleJoinProjectResponse)
-
-    return () => {
-      socket.removeListener('joinProjectResponse', handleJoinProjectResponse)
-    }
-  }, [socket, eventEmitter])
+      const errorObj: Record<string, any> = {}
+      if (typeof error === 'object') {
+        for (const key of Object.getOwnPropertyNames(error)) {
+          errorObj[key] = error[key]
+        }
+      } else if (typeof error === 'string') {
+        errorObj.message = error
+      }
+      return postJSON('/error/client', {
+        body: {
+          error: errorObj,
+          meta: metadata,
+          _csrf: window.csrfToken,
+        },
+      })
+    },
+    [socket.socket]
+  )
 
   // Populate scope values when joining project, then fire project:joined event
   useEffect(() => {
@@ -98,15 +156,28 @@ export const IdeReactProvider: FC = ({ children }) => {
     return {
       ...getMockIde(),
       socket,
+      showGenericMessageModal,
+      reportError,
+      // TODO: MIGRATION: Remove this once it's no longer used
+      fileTreeManager: {
+        findEntityByPath: () => null,
+        selectEntity: () => {},
+        getPreviewByPath: () => null,
+        getRootDocDirname: () => '',
+      },
     }
-  }, [socket])
+  }, [socket, reportError])
 
   const value = useMemo(
     () => ({
       eventEmitter,
+      eventLog,
+      startedFreeTrial,
+      setStartedFreeTrial,
       projectId,
+      reportError,
     }),
-    [eventEmitter]
+    [eventEmitter, eventLog, reportError, startedFreeTrial]
   )
 
   return (

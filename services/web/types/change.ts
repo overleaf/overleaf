@@ -20,14 +20,18 @@ export interface CommentOperation extends Operation {
   c: string
 }
 
-export type AnyOperation =
+export type NonCommentOperation =
   | InsertOperation
   | ChangeOperation
   | DeleteOperation
-  | CommentOperation
+
+export type AnyOperation = NonCommentOperation | CommentOperation
 
 export type Change<T extends AnyOperation = AnyOperation> = {
   id: string
-  metadata?: string
+  metadata?: {
+    user_id: string
+    ts: Date
+  }
   op: T
 }

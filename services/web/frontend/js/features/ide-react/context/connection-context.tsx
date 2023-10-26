@@ -20,6 +20,7 @@ type ConnectionContextValue = {
   secondsUntilReconnect: () => number
   tryReconnectNow: () => void
   registerUserActivity: () => void
+  disconnect: () => void
 }
 
 const ConnectionContext = createContext<ConnectionContextValue | undefined>(
@@ -64,6 +65,10 @@ export const ConnectionProvider: FC = ({ children }) => {
     [connectionManager]
   )
 
+  const disconnect = useCallback(() => {
+    connectionManager.disconnect()
+  }, [connectionManager])
+
   const value = useMemo<ConnectionContextValue>(
     () => ({
       socket: connectionManager.socket,
@@ -73,6 +78,7 @@ export const ConnectionProvider: FC = ({ children }) => {
       secondsUntilReconnect,
       tryReconnectNow,
       registerUserActivity,
+      disconnect,
     }),
     [
       connectionManager.socket,
@@ -82,6 +88,7 @@ export const ConnectionProvider: FC = ({ children }) => {
       registerUserActivity,
       secondsUntilReconnect,
       tryReconnectNow,
+      disconnect,
     ]
   )
 

@@ -1,3 +1,8 @@
+export type RefProviders = {
+  mendeley?: boolean
+  zotero?: boolean
+}
+
 export type User = {
   id: string
   email: string
@@ -19,6 +24,7 @@ export type User = {
     versioning?: boolean
     zotero?: boolean
   }
+  refProviders?: RefProviders
 }
 
 export type MongoUser = Pick<User, Exclude<keyof User, 'id'>> & { _id: string }

@@ -3,6 +3,7 @@ import { LostConnectionAlert } from './lost-connection-alert'
 import { useConnectionContext } from '@/features/ide-react/context/connection-context'
 import { debugging } from '@/utils/debugging'
 import { Alert } from 'react-bootstrap'
+import useScopeValue from '@/shared/hooks/use-scope-value'
 
 // TODO SavingNotificationController, SystemMessagesController, out-of-sync modal
 export function Alerts() {
@@ -15,8 +16,7 @@ export function Alerts() {
     secondsUntilReconnect,
   } = useConnectionContext()
 
-  // TODO: Get this from a context
-  const synctexError = false
+  const [synctexError] = useScopeValue('sync_tex_error')
 
   return (
     <div className="global-alerts">

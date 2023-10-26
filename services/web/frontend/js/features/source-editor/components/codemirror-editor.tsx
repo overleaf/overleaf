@@ -20,6 +20,7 @@ import importOverleafModules from '../../../../macros/import-overleaf-module.mac
 import { FigureModal } from './figure-modal/figure-modal'
 import ReviewPanel from './review-panel/review-panel'
 import getMeta from '../../../utils/meta'
+import { useIdeContext } from '@/shared/context/ide-context'
 
 const sourceEditorComponents = importOverleafModules(
   'sourceEditorComponents'
@@ -33,6 +34,7 @@ function CodeMirrorEditor() {
 
   const isMounted = useIsMounted()
   const isReviewPanelReact = getMeta('ol-isReviewPanelReact')
+  const { isReactIde } = useIdeContext()
 
   // create the view using the initial state and intercept transactions
   const viewRef = useRef<EditorView | null>(null)
@@ -62,7 +64,7 @@ function CodeMirrorEditor() {
         <CodeMirrorSearch />
         <CodeMirrorToolbar />
         <CodeMirrorCommandTooltip />
-        {isReviewPanelReact && <ReviewPanel />}
+        {isReviewPanelReact && !isReactIde && <ReviewPanel />}
         {sourceEditorComponents.map(
           ({ import: { default: Component }, path }) => (
             <Component key={path} />

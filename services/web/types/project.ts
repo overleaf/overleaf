@@ -27,4 +27,5 @@ export type Project = {
   invites: ProjectInvite[]
   rootDoc_id?: string
   rootFolder?: Folder[]
+  deletedByExternalDataSource?: boolean
 }

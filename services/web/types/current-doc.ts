@@ -12,6 +12,10 @@ import {
 
 // type for the Document class in ide/editor/Document.js
 // note: this is a custom EventEmitter class
+
+// TODO: MIGRATION: This doesn't match the type for
+// ide-react/editor/document.ts, which has a nullable `ranges` property and some
+// other quirks. They should match.
 export interface CurrentDoc extends EventEmitter {
   doc_id: string
   docName: string
