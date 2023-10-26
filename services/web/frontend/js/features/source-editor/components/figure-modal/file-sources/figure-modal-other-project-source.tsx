@@ -14,7 +14,7 @@ import {
   useProjectOutputFiles,
 } from '../../../../file-tree/hooks/use-project-output-files'
 import { Button } from 'react-bootstrap'
-import { useCurrentProjectFolders } from '../../../hooks/useCurrentProjectFolders'
+import { useCurrentProjectFolders } from '../../../hooks/use-current-project-folders'
 import { File, isImageEntity } from '../../../utils/file'
 import { postJSON } from '../../../../../infrastructure/fetch-json'
 import { useProjectContext } from '../../../../../shared/context/project-context'
@@ -39,7 +39,7 @@ export const FigureModalOtherProjectSource: FC = () => {
   const [nameDirty, setNameDirty] = useState<boolean>(false)
   const [name, setName] = useState<string>('')
   const [folder, setFolder] = useState<File | null>(null)
-  const [, rootFile] = useCurrentProjectFolders()
+  const { rootFile } = useCurrentProjectFolders()
   const [file, setFile] = useState<OutputEntity | Entity | null>(null)
   const FileSelector = usingOutputFiles
     ? SelectFromProjectOutputFiles

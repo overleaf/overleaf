@@ -1,13 +1,13 @@
 import { FC, useMemo } from 'react'
-import useScopeValue from '../../../../../shared/hooks/use-scope-value'
 import { Select } from '../../../../../shared/components/select'
 import { useFigureModalContext } from '../figure-modal-context'
-import { FileOrDirectory, filterFiles, isImageFile } from '../../../utils/file'
+import { filterFiles, isImageFile } from '../../../utils/file'
 import { useTranslation } from 'react-i18next'
+import { useCurrentProjectFolders } from '@/features/source-editor/hooks/use-current-project-folders'
 
 export const FigureModalCurrentProjectSource: FC = () => {
   const { t } = useTranslation()
-  const [rootFolder] = useScopeValue<FileOrDirectory>('rootFolder')
+  const { rootFolder } = useCurrentProjectFolders()
   const files = useMemo(
     () => filterFiles(rootFolder)?.filter(isImageFile),
     [rootFolder]

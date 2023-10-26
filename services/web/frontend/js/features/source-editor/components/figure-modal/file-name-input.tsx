@@ -6,9 +6,9 @@ import {
   useState,
 } from 'react'
 import { File, FileOrDirectory } from '../../utils/file'
-import useScopeValue from '../../../../shared/hooks/use-scope-value'
 import { Alert } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
+import { useCurrentProjectFolders } from '@/features/source-editor/hooks/use-current-project-folders'
 
 type FileNameInputProps = Omit<
   DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>,
@@ -57,7 +57,7 @@ export const FileNameInput = ({
 }: FileNameInputProps) => {
   const { t } = useTranslation()
   const [overlap, setOverlap] = useState<boolean>(false)
-  const [rootFolder] = useScopeValue<FileOrDirectory>('rootFolder')
+  const { rootFolder } = useCurrentProjectFolders()
   const { value } = props
 
   useEffect(() => {

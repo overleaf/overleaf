@@ -2,7 +2,7 @@ import { useCallback } from 'react'
 import { FileNameInput } from './file-name-input'
 import { File } from '../../utils/file'
 import { Select } from '../../../../shared/components/select'
-import { useCurrentProjectFolders } from '../../hooks/useCurrentProjectFolders'
+import { useCurrentProjectFolders } from '../../hooks/use-current-project-folders'
 import { useTranslation } from 'react-i18next'
 
 export const FileRelocator = ({
@@ -25,7 +25,7 @@ export const FileRelocator = ({
   setNameDirty: (nameDirty: boolean) => void
 }) => {
   const { t } = useTranslation()
-  const [folders, rootFile] = useCurrentProjectFolders()
+  const { folders, rootFile } = useCurrentProjectFolders()
 
   const nameChanged = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {

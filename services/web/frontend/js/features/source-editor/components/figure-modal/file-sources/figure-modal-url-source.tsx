@@ -3,7 +3,7 @@ import { useFigureModalContext } from '../figure-modal-context'
 import { postJSON } from '../../../../../infrastructure/fetch-json'
 import { useProjectContext } from '../../../../../shared/context/project-context'
 import { File } from '../../../utils/file'
-import { useCurrentProjectFolders } from '../../../hooks/useCurrentProjectFolders'
+import { useCurrentProjectFolders } from '../../../hooks/use-current-project-folders'
 import { FileRelocator } from '../file-relocator'
 import { useTranslation } from 'react-i18next'
 import { useCodeMirrorViewContext } from '../../codemirror-editor'
@@ -44,7 +44,7 @@ export const FigureModalUrlSource: FC = () => {
   const [nameDirty, setNameDirty] = useState<boolean>(false)
   const [name, setName] = useState<string>('')
   const { _id: projectId } = useProjectContext()
-  const [, rootFile] = useCurrentProjectFolders()
+  const { rootFile } = useCurrentProjectFolders()
   const [folder, setFolder] = useState<File>(rootFile)
 
   const { dispatch, getPath } = useFigureModalContext()

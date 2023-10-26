@@ -1,6 +1,6 @@
 import { FC, useCallback, useEffect, useState } from 'react'
 import { useFigureModalContext } from '../figure-modal-context'
-import { useCurrentProjectFolders } from '../../../hooks/useCurrentProjectFolders'
+import { useCurrentProjectFolders } from '../../../hooks/use-current-project-folders'
 import { File } from '../../../utils/file'
 import { Dashboard, useUppy } from '@uppy/react'
 import '@uppy/core/dist/style.css'
@@ -33,7 +33,7 @@ export const FigureModalUploadFileSource: FC = () => {
   const view = useCodeMirrorViewContext()
   const { dispatch, pastedImageData } = useFigureModalContext()
   const { _id: projectId } = useProjectContext()
-  const [, rootFolder] = useCurrentProjectFolders()
+  const { rootFile } = useCurrentProjectFolders()
   const [folder, setFolder] = useState<File | null>(null)
   const [nameDirty, setNameDirty] = useState<boolean>(false)
   // Files are immutable, so this will point to a (possibly) old version of the file
@@ -77,7 +77,7 @@ export const FigureModalUploadFileSource: FC = () => {
           if (!uploadResult.successful) {
             throw new Error('Upload failed')
           }
-          const uploadFolder = folder ?? rootFolder
+          const uploadFolder = folder ?? rootFile
           return uploadFolder.path === '' && uploadFolder.name === 'rootFolder'
             ? `${name}`
             : `${uploadFolder.path ? uploadFolder.path + '/' : ''}${
@@ -86,7 +86,7 @@ export const FigureModalUploadFileSource: FC = () => {
         },
       })
     },
-    [dispatch, rootFolder, uppy, view]
+    [dispatch, rootFile, uppy, view]
   )
 
   useEffect(() => {
@@ -130,7 +130,7 @@ export const FigureModalUploadFileSource: FC = () => {
           xhrUpload: {
             ...(file as any).xhrUpload,
             endpoint: `/project/${projectId}/upload?folder_id=${
-              (folder ?? rootFolder).id
+              (folder ?? rootFile).id
             }`,
           },
         })
@@ -179,7 +179,7 @@ export const FigureModalUploadFileSource: FC = () => {
   }, [
     uppy,
     folder,
-    rootFolder,
+    rootFile,
     name,
     nameDirty,
     dispatchUploadAction,
@@ -245,7 +245,7 @@ export const FigureModalUploadFileSource: FC = () => {
         name={name}
         nameDisabled={!file && !nameDirty}
         onFolderChanged={item =>
-          dispatchUploadAction(name, file, item ?? rootFolder)
+          dispatchUploadAction(name, file, item ?? rootFile)
         }
         onNameChanged={name => dispatchUploadAction(name, file, folder)}
         setFolder={setFolder}
