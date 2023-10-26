@@ -290,15 +290,26 @@ const TokenAccessHandler = {
   checkTokenHashPrefix(token, tokenHashPrefix, type) {
     let hashPrefixStatus
 
+    if (tokenHashPrefix) {
+      tokenHashPrefix = tokenHashPrefix.replace('#', '')
+    }
+
     if (!tokenHashPrefix) {
       hashPrefixStatus = 'missing'
     } else {
-      const hashPrefix = TokenAccessHandler.createTokenHashPrefix(token)
-      if (hashPrefix === tokenHashPrefix.replace('#', '')) {
+      const expectedHashPrefix = TokenAccessHandler.createTokenHashPrefix(token)
+      if (expectedHashPrefix === tokenHashPrefix) {
         hashPrefixStatus = 'match'
       } else {
         hashPrefixStatus = 'mismatch'
       }
+    }
+
+    if (hashPrefixStatus === 'mismatch') {
+      logger.info(
+        { tokenHashPrefix, hashPrefixStatus },
+        'mismatched token hash prefix'
+      )
     }
 
     Metrics.inc('link-sharing.hash-check', {

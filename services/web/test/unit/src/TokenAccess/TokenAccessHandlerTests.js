@@ -654,7 +654,11 @@ describe('TokenAccessHandler', function () {
       const token = 'zxpxjrwdtsgd'
       const prefix = this.TokenAccessHandler.createTokenHashPrefix(token)
 
-      this.TokenAccessHandler.checkTokenHashPrefix(token, prefix, 'readOnly')
+      this.TokenAccessHandler.checkTokenHashPrefix(
+        token,
+        `#${prefix}`,
+        'readOnly'
+      )
 
       expect(this.Metrics.inc).to.have.been.calledWith(
         'link-sharing.hash-check',
@@ -667,10 +671,9 @@ describe('TokenAccessHandler', function () {
     it('sends "mismatch" to metrics when prefix does not match the prefix of the hash of the token', function () {
       const token = 'zxpxjrwdtsgd'
       const prefix = this.TokenAccessHandler.createTokenHashPrefix(token)
-
       this.TokenAccessHandler.checkTokenHashPrefix(
         'anothertoken',
-        prefix,
+        `#${prefix}`,
         'readOnly'
       )
 
@@ -681,11 +684,30 @@ describe('TokenAccessHandler', function () {
           status: 'mismatch',
         }
       )
+      expect(this.logger.info).to.have.been.calledWith(
+        { tokenHashPrefix: prefix, hashPrefixStatus: 'mismatch' },
+        'mismatched token hash prefix'
+      )
     })
     it('sends "missing" to metrics when prefix is undefined', function () {
       this.TokenAccessHandler.checkTokenHashPrefix(
         'anothertoken',
         undefined,
+        'readOnly'
+      )
+
+      expect(this.Metrics.inc).to.have.been.calledWith(
+        'link-sharing.hash-check',
+        {
+          path: 'readOnly',
+          status: 'missing',
+        }
+      )
+    })
+    it('sends "missing" to metrics when URL hash is sent as "#" only', function () {
+      this.TokenAccessHandler.checkTokenHashPrefix(
+        'anothertoken',
+        '#',
         'readOnly'
       )
 
