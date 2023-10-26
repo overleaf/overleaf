@@ -331,7 +331,6 @@
   "subscription_canceled_and_terminate_on_x": " Tilauksesi on peruutettu ja loppuu <0>__terminateDate__</0>. Lisämaksuja ei veloiteta.",
   "support_lots_of_features": "Tuemme lähes kaikkia LaTeXin ominaisuuksia, mukaanlukien kuvien lisäys, lähdeluettelot, yhtälöt ja paljon muuta! Lue mitä kaikkia jännittäviä asioita voit tehdä sovelluksen __appName__ avulla: <0>__help_guides_link__</0>",
   "sure_you_want_to_change_plan": "Oletko varma, että haluat vaihtaa sopimukseen <0>__planName__</0>?",
-  "sure_you_want_to_delete": "Oletko varma että haluat pysyvästi poistaa <strong>&#123;&#123; entity.name &#125;&#125;</strong>?",
   "sure_you_want_to_restore_before": "Oletko varma, että haluat palauttaa tiedoston <0>__filename__</0> versioon ennen __date__ tehtyjä päivityksiä?",
   "sv": "Ruotsi",
   "sync": "Synkronointi",

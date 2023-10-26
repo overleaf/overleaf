@@ -363,7 +363,6 @@
   "subscription_canceled_and_terminate_on_x": " Il tuo abbonamento è stato annullato e terminerà il <0>__terminateDate__</0>. Non saranno addebitati ulteriori costi.",
   "support_lots_of_features": "Supportiamo quasi tutte le funzionalità di LaTeX, inclusa l’aggiunta di immagini, bibliografie, equazioni e molto altro! Leggi di tutto ciò che puoi fare con __appName__ nelle nostre <0>__help_guides_link__</0>",
   "sure_you_want_to_change_plan": "Sei sicuro di voler cambiare il piano a <0>__planName__</0>?",
-  "sure_you_want_to_delete": "Sei sicuro di voler eliminare per sempre <strong>&#123;&#123; entity.name &#125;&#125;</strong>?",
   "sure_you_want_to_restore_before": "Sei sicuro di voler ripristinare <0>__filename__</0> a prima delle modifiche del __date__?",
   "sv": "Svedese",
   "sync": "Sincronizza",

@@ -538,7 +538,6 @@
   "suggestion": "제안",
   "support_lots_of_features": "이미지, 참고문헌, 방정식 등을 포함한 거의 모든 LaTeX 기능을 지원합니다!  <0>__help_guides_link__</0>에서 __appName__에 대한 모든 흥미로운 것들에 대해 알아보세요.",
   "sure_you_want_to_change_plan": "<0>__planName__</0>에 계획을 변경하길 원하시나요?",
-  "sure_you_want_to_delete": "정말 <strong>&#123;&#123; entity.name &#125;&#125;</strong>을 영구삭제하시겠습니까?",
   "sure_you_want_to_leave_group": "이 그룹을 떠나시겠습니까?",
   "sure_you_want_to_restore_before": "__date__날짜를 변경하기 전에, <0>__filename__</0> 복원을 원하시나요?",
   "sv": "Svenska",

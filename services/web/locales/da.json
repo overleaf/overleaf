@@ -326,7 +326,7 @@
   "delete": "Slet",
   "delete_account": "Slet konto",
   "delete_account_confirmation_label": "Jeg er indforstået med, at dette vil slette alle mine __appName__-projekter under e-mailadressen <0>__userDefaultEmail__</0>",
-  "delete_account_warning_message_3": "Du er ved permanent at <0>slette alle din kontos data</0>, herunder dine projekter og indstillinger. Vi beder dig skrive din kontos e-mailadresse og kodeord i felterne herunder, før du kan fortsætte.",
+  "delete_account_warning_message_3": "Du er ved permanent at <strong>slette alle din kontos data</strong>, herunder dine projekter og indstillinger. Vi beder dig skrive din kontos e-mailadresse og kodeord i felterne herunder, før du kan fortsætte.",
   "delete_acct_no_existing_pw": "Du bliver nødt til at bruge nulstillelsesformularen til at indstille et kodeord, før du kan slette din konto.",
   "delete_and_leave": "Slet / Forlad",
   "delete_and_leave_projects": "Slet og forlad projekter",
