@@ -435,8 +435,7 @@ describe('change list', function () {
       waitForData()
     })
 
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip('adds badge/label', function () {
+    it('adds badge/label', function () {
       cy.findAllByTestId('history-version-details').eq(1).as('version')
       cy.get('@version').within(() => {
         cy.findByRole('button', { name: /more actions/i }).click()

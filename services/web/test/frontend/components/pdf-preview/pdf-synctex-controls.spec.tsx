@@ -83,8 +83,7 @@ describe('<PdfSynctexControls/>', function () {
     cy.interceptEvents()
   })
 
-  // eslint-disable-next-line mocha/no-skipped-tests
-  it.skip('handles clicks on sync buttons', function () {
+  it('handles clicks on sync buttons', function () {
     cy.interceptCompile()
 
     const scope = mockScope()
@@ -214,8 +213,7 @@ describe('<PdfSynctexControls/>', function () {
       cy.get('.synctex-control-icon').should('not.exist')
     })
 
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip('send set highlights action', function () {
+    it('send set highlights action', function () {
       cy.interceptCompile()
 
       const scope = mockScope()

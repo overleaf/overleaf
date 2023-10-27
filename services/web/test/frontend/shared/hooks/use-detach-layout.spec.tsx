@@ -66,8 +66,7 @@ describe('useDetachLayout', function () {
     cy.get('#role').should('have.text', 'detacher')
   })
 
-  // eslint-disable-next-line mocha/no-skipped-tests
-  it.skip('detacher role', function () {
+  it('detacher role', function () {
     // 1. create hook in detacher mode
     window.metaAttributesCache.set('ol-detachRole', 'detacher')
 
@@ -136,8 +135,7 @@ describe('useDetachLayout', function () {
     })
   })
 
-  // eslint-disable-next-line mocha/no-skipped-tests
-  it.skip('reset detacher role when other detacher tab connects', function () {
+  it('reset detacher role when other detacher tab connects', function () {
     // 1. create hook in detacher mode
     window.metaAttributesCache.set('ol-detachRole', 'detacher')
 
