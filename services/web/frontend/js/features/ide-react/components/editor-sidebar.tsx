@@ -27,7 +27,9 @@ export default function EditorSidebar({
           <FileTree onInit={onFileTreeInit} onSelect={onFileTreeSelect} />
         </Panel>
         <VerticalResizeHandle />
-        <Panel defaultSize={25}>File outline placeholder</Panel>
+        <Panel defaultSize={25}>
+          <div className="outline-container" />
+        </Panel>
       </PanelGroup>
     </aside>
   )
