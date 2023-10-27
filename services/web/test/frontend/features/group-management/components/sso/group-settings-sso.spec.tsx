@@ -48,7 +48,7 @@ describe('GroupSettingsSSO', function () {
         statusCode: 200,
         body: {
           entryPoint: 'entrypoint',
-          certificate: 'cert',
+          certificates: ['cert1', 'cert2'],
           signatureAlgorithm: 'sha1',
           userIdAttribute: 'email',
           enabled: true,
@@ -66,12 +66,13 @@ describe('GroupSettingsSSO', function () {
         })
       })
     })
+
     it('updates the configuration, and checks the success message', function () {
       cy.intercept('GET', `/manage/groups/${GROUP_ID}/settings/sso`, {
         statusCode: 200,
         body: {
           entryPoint: 'entrypoint',
-          certificate: 'cert',
+          certificates: ['cert'],
           signatureAlgorithm: 'sha1',
           userIdAttribute: 'email',
           enabled: true,
@@ -82,7 +83,7 @@ describe('GroupSettingsSSO', function () {
         statusCode: 200,
         body: {
           entryPoint: 'entrypoint',
-          certificate: 'certi',
+          certificates: ['certi'],
           signatureAlgorithm: 'sha1',
           userIdAttribute: 'email',
           enabled: false,
@@ -113,7 +114,7 @@ describe('GroupSettingsSSO', function () {
           statusCode: 200,
           body: {
             entryPoint: 'entrypoint',
-            certificate: 'cert',
+            certificates: ['cert'],
             signatureAlgorithm: 'sha1',
             userIdAttribute: 'email',
             enabled: false,
@@ -156,7 +157,7 @@ describe('GroupSettingsSSO', function () {
           statusCode: 200,
           body: {
             entryPoint: 'entrypoint',
-            certificate: 'cert',
+            certificates: ['cert'],
             signatureAlgorithm: 'sha1',
             userIdAttribute: 'email',
             enabled: true,
@@ -176,13 +177,14 @@ describe('GroupSettingsSSO', function () {
         cy.findByText('SSO is enabled')
       })
     })
+
     describe('SSO disable modal', function () {
       beforeEach(function () {
         cy.intercept('GET', `/manage/groups/${GROUP_ID}/settings/sso`, {
           statusCode: 200,
           body: {
             entryPoint: 'entrypoint',
-            certificate: 'cert',
+            certificates: ['cert'],
             signatureAlgorithm: 'sha1',
             userIdAttribute: 'email',
             enabled: true,
@@ -227,7 +229,7 @@ describe('GroupSettingsSSO', function () {
           statusCode: 200,
           body: {
             entryPoint: 'entrypoint',
-            certificate: 'cert',
+            certificates: ['cert'],
             signatureAlgorithm: 'sha1',
             userIdAttribute: 'email',
             enabled: false,

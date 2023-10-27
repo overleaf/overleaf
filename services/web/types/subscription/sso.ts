@@ -1,6 +1,6 @@
 export type SSOConfig = {
   entryPoint?: string
-  certificate?: string
+  certificates: (string | undefined)[]
   signatureAlgorithm: 'sha1' | 'sha256' | 'sha512'
   userIdAttribute?: string
   userFirstNameAttribute?: string

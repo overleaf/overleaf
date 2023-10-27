@@ -4,7 +4,7 @@ const { Schema } = mongoose
 const SSOConfigSchema = new Schema(
   {
     entryPoint: { type: String, required: true },
-    certificate: { type: String, required: true },
+    certificates: { type: Array, default: [''], required: true },
     signatureAlgorithm: { type: String, required: true },
     userIdAttribute: { type: String, required: true },
     userFirstNameAttribute: { type: String },
