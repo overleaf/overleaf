@@ -125,7 +125,7 @@ export function previewByPath(
       const { name, _id: id } = result.entity
       return {
         url: `/project/${projectId}/file/${id}`,
-        extension: name.slice(name.lastIndexOf('.')),
+        extension: name.slice(name.lastIndexOf('.') + 1),
       }
     }
   }
