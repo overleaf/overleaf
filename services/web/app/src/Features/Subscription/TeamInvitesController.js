@@ -12,6 +12,7 @@ const HttpErrorHandler = require('../Errors/HttpErrorHandler')
 const PermissionsManager = require('../Authorization/PermissionsManager')
 const EmailHandler = require('../Email/EmailHandler')
 const { RateLimiter } = require('../../infrastructure/RateLimiter')
+const Modules = require('../../infrastructure/Modules')
 
 const rateLimiters = {
   resendGroupInvite: new RateLimiter('resend-group-invite', {
@@ -90,14 +91,19 @@ async function viewInvite(req, res, next) {
 
       const user = await UserGetter.promises.getUser(userId)
 
-      if (
-        user.enrollment?.managedBy &&
-        user.enrollment?.managedBy.toString() !== subscription._id.toString()
-      ) {
+      const isUserEnrolledInDifferentGroup =
+        (
+          await Modules.promises.hooks.fire(
+            'isUserEnrolledInDifferentGroup',
+            user.enrollment,
+            subscription._id
+          )
+        )?.[0] === true
+      if (isUserEnrolledInDifferentGroup) {
         return HttpErrorHandler.forbidden(
           req,
           res,
-          'User is already managed by a different subscription'
+          'User is already enrolled in a different subscription'
         )
       }
 
