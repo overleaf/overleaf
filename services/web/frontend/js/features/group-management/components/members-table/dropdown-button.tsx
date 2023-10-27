@@ -8,12 +8,9 @@ import {
 import { useTranslation } from 'react-i18next'
 import { Dropdown, MenuItem } from 'react-bootstrap'
 import { User } from '../../../../../../types/group-management/user'
-import useAsync from '../../../../shared/hooks/use-async'
-import {
-  type FetchError,
-  postJSON,
-} from '../../../../infrastructure/fetch-json'
-import Icon from '../../../../shared/components/icon'
+import useAsync from '@/shared/hooks/use-async'
+import { type FetchError, postJSON } from '@/infrastructure/fetch-json'
+import Icon from '@/shared/components/icon'
 import { ManagedUserAlert } from '../../utils/types'
 import { useGroupMembersContext } from '../../context/group-members-context'
 import getMeta from '@/utils/meta'
@@ -28,7 +25,7 @@ type ManagedUserDropdownButtonProps = {
   setManagedUserAlert: Dispatch<SetStateAction<ManagedUserAlert>>
 }
 
-export default function ManagedUserDropdownButton({
+export default function DropdownButton({
   user,
   openOffboardingModalForUser,
   groupId,

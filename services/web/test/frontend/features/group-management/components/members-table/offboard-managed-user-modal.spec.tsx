@@ -1,4 +1,4 @@
-import OffboardManagedUserModal from '../../../../../../frontend/js/features/group-management/components/managed-users/offboard-managed-user-modal'
+import OffboardManagedUserModal from '@/features/group-management/components/members-table/offboard-managed-user-modal'
 import sinon from 'sinon'
 
 describe('OffboardManagedUserModal', function () {

@@ -7,13 +7,9 @@ import {
   useState,
 } from 'react'
 import { User } from '../../../../../types/group-management/user'
-import {
-  deleteJSON,
-  FetchError,
-  postJSON,
-} from '../../../infrastructure/fetch-json'
-import { mapSeries } from '../../../infrastructure/promise'
-import getMeta from '../../../utils/meta'
+import { deleteJSON, FetchError, postJSON } from '@/infrastructure/fetch-json'
+import { mapSeries } from '@/infrastructure/promise'
+import getMeta from '@/utils/meta'
 import { APIError } from '../components/error-alert'
 import useUserSelection from '../hooks/use-user-selection'
 import { parseEmails } from '../utils/emails'

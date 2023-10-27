@@ -19,13 +19,13 @@ export default function SSOStatus({ user }: SSOStatusProps) {
   )
   const acceptedSSO = (
     <span className="security-state-managed">
-      <MaterialIcon type="check" accessibilityLabel={t('sso_linked')} />
+      <MaterialIcon type="check" accessibilityLabel={t('sso_active')} />
       &nbsp; {t('sso')}
     </span>
   )
   const notAcceptedSSO = (
     <span className="security-state-not-managed">
-      <MaterialIcon type="close" accessibilityLabel={t('sso_unlinked')} />
+      <MaterialIcon type="close" accessibilityLabel={t('sso_not_active')} />
       &nbsp; {t('sso')}
     </span>
   )

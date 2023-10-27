@@ -1,7 +1,7 @@
-import ManagedUserStatus from '../../../../../../frontend/js/features/group-management/components/managed-users/managed-user-status'
+import ManagedUserStatus from '@/features/group-management/components/members-table/managed-user-status'
 import { User } from '../../../../../../types/group-management/user'
 
-describe('ManagedUserStatus', function () {
+describe('MemberStatus', function () {
   describe('with a pending invite', function () {
     const user: User = {
       _id: 'some-user',

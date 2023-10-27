@@ -11,7 +11,7 @@ type GroupMemberRowProps = {
   selected: boolean
 }
 
-export default function GroupMemberRow({
+export default function UserRow({
   user,
   selectUser,
   unselectUser,

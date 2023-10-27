@@ -2,20 +2,21 @@ import { useState } from 'react'
 import { Col, Row } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import { User } from '../../../../../../types/group-management/user'
-import Tooltip from '../../../../shared/components/tooltip'
+import Tooltip from '@/shared/components/tooltip'
 import { useGroupMembersContext } from '../../context/group-members-context'
 import type { ManagedUserAlert } from '../../utils/types'
-import ManagedUserRow from './managed-user-row'
+import MemberRow from './member-row'
 import OffboardManagedUserModal from './offboard-managed-user-modal'
-import ManagedUsersListAlert from './managed-users-list-alert'
-import ManagedUsersSelectAllCheckbox from './managed-users-select-all-checkbox'
+import ListAlert from './list-alert'
+import SelectAllCheckbox from './select-all-checkbox'
+import classNames from 'classnames'
 import getMeta from '@/utils/meta'
 
 type ManagedUsersListProps = {
   groupId: string
 }
 
-export default function ManagedUsersList({ groupId }: ManagedUsersListProps) {
+export default function MembersList({ groupId }: ManagedUsersListProps) {
   const { t } = useTranslation()
   const [userToOffboard, setUserToOffboard] = useState<User | undefined>(
     undefined
@@ -23,32 +24,37 @@ export default function ManagedUsersList({ groupId }: ManagedUsersListProps) {
   const [managedUserAlert, setManagedUserAlert] =
     useState<ManagedUserAlert>(undefined)
   const { users } = useGroupMembersContext()
+  const managedUsersActive: any = getMeta('ol-managedUsersActive')
   const groupSSOActive = getMeta('ol-groupSSOActive')
 
   return (
     <div>
-      {managedUserAlert && (
-        <ManagedUsersListAlert
+      {managedUsersActive && managedUserAlert && (
+        <ListAlert
           variant={managedUserAlert.variant}
           invitedUserEmail={managedUserAlert.email}
           onDismiss={() => setManagedUserAlert(undefined)}
         />
       )}
-      <ul className="list-unstyled structured-list managed-users-list">
+      <ul
+        className={classNames(
+          'list-unstyled',
+          'structured-list',
+          'managed-users-list',
+          {
+            'managed-users-active': managedUsersActive,
+            'group-sso-active': groupSSOActive,
+          }
+        )}
+      >
         <li className="container-fluid">
           <Row id="managed-users-list-headers">
             <Col xs={12}>
               <table className="managed-users-table">
                 <thead>
                   <tr>
-                    <ManagedUsersSelectAllCheckbox />
-                    <td
-                      className={
-                        groupSSOActive
-                          ? 'cell-email-with-sso-col'
-                          : 'cell-email'
-                      }
-                    >
+                    <SelectAllCheckbox />
+                    <td className="cell-email">
                       <span className="header">{t('email')}</span>
                     </td>
                     <td className="cell-name">
@@ -73,9 +79,11 @@ export default function ManagedUsersList({ groupId }: ManagedUsersListProps) {
                         <span className="header">{t('security')}</span>
                       </td>
                     )}
-                    <td className="cell-managed">
-                      <span className="header">{t('managed')}</span>
-                    </td>
+                    {managedUsersActive && (
+                      <td className="cell-managed">
+                        <span className="header">{t('managed')}</span>
+                      </td>
+                    )}
                     <td />
                   </tr>
                 </thead>
@@ -88,7 +96,7 @@ export default function ManagedUsersList({ groupId }: ManagedUsersListProps) {
                     </tr>
                   )}
                   {users.map((user: any) => (
-                    <ManagedUserRow
+                    <MemberRow
                       key={user.email}
                       user={user}
                       openOffboardingModalForUser={setUserToOffboard}

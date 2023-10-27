@@ -1,17 +1,17 @@
-import ManagedUsersList from '../../../../../../frontend/js/features/group-management/components/managed-users/managed-users-list'
-import { GroupMembersProvider } from '../../../../../../frontend/js/features/group-management/context/group-members-context'
+import MembersList from '@/features/group-management/components/members-table/members-list'
+import { GroupMembersProvider } from '@/features/group-management/context/group-members-context'
 
 const groupId = 'somegroup'
 
 function mountManagedUsersList() {
   cy.mount(
     <GroupMembersProvider>
-      <ManagedUsersList groupId={groupId} />
+      <MembersList groupId={groupId} />
     </GroupMembersProvider>
   )
 }
 
-describe('ManagedUsersList', function () {
+describe('MembersList', function () {
   describe('with users', function () {
     const users = [
       {
@@ -98,7 +98,7 @@ describe('ManagedUsersList', function () {
       })
       cy.mount(
         <GroupMembersProvider>
-          <ManagedUsersList groupId={groupId} />
+          <MembersList groupId={groupId} />
         </GroupMembersProvider>
       )
     })

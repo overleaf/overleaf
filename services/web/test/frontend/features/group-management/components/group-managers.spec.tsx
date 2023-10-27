@@ -1,4 +1,4 @@
-import GroupManagers from '../../../../../frontend/js/features/group-management/components/group-managers'
+import GroupManagers from '@/features/group-management/components/group-managers'
 
 const JOHN_DOE = {
   _id: 'abc123def456',

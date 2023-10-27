@@ -1,5 +1,5 @@
-import GroupMembers from '../../../../../../frontend/js/features/group-management/components/group-members'
-import { GroupMembersProvider } from '../../../../../../frontend/js/features/group-management/context/group-members-context'
+import GroupMembers from '@/features/group-management/components/group-members'
+import { GroupMembersProvider } from '@/features/group-management/context/group-members-context'
 
 const GROUP_ID = '777fff777fff'
 const JOHN_DOE = {
@@ -241,16 +241,17 @@ describe('Group members when group SSO is enabled', function () {
     cy.get('ul.managed-users-list table > tbody').within(() => {
       cy.get('tr:nth-child(2)').within(() => {
         cy.contains('bobby.lapointe@test.com')
-        cy.get('.sr-only').contains('SSO unlinked').should('not.exist')
+        cy.get('.sr-only').contains('SSO not active').should('not.exist')
       })
 
       cy.get('tr:nth-child(3)').within(() => {
         cy.contains('claire.jennings@test.com')
-        cy.get('.sr-only').contains('SSO linked').should('not.exist')
+        cy.get('.sr-only').contains('SSO active').should('not.exist')
       })
     })
   })
-  it('should display SSO Column when group sso is not enabled', function () {
+
+  it('should display SSO Column when Group SSO is enabled', function () {
     cy.window().then(win => {
       win.metaAttributesCache.set('ol-groupSSOActive', true)
     })
@@ -258,12 +259,12 @@ describe('Group members when group SSO is enabled', function () {
     cy.get('ul.managed-users-list table > tbody').within(() => {
       cy.get('tr:nth-child(2)').within(() => {
         cy.contains('bobby.lapointe@test.com')
-        cy.get('.sr-only').contains('SSO unlinked')
+        cy.get('.sr-only').contains('SSO not active')
       })
 
       cy.get('tr:nth-child(3)').within(() => {
         cy.contains('claire.jennings@test.com')
-        cy.get('.sr-only').contains('SSO linked')
+        cy.get('.sr-only').contains('SSO active')
       })
     })
   })

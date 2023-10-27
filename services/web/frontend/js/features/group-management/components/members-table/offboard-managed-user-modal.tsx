@@ -8,13 +8,13 @@ import {
   FormGroup,
   Modal,
 } from 'react-bootstrap'
-import AccessibleModal from '../../../../shared/components/accessible-modal'
-import Icon from '../../../../shared/components/icon'
+import AccessibleModal from '@/shared/components/accessible-modal'
+import Icon from '@/shared/components/icon'
 import { useState } from 'react'
-import useAsync from '../../../../shared/hooks/use-async'
+import useAsync from '@/shared/hooks/use-async'
 import { useTranslation } from 'react-i18next'
-import { useLocation } from '../../../../shared/hooks/use-location'
-import { FetchError, postJSON } from '../../../../infrastructure/fetch-json'
+import { useLocation } from '@/shared/hooks/use-location'
+import { FetchError, postJSON } from '@/infrastructure/fetch-json'
 import { debugConsole } from '@/utils/debugging'
 
 type OffboardManagedUserModalProps = {

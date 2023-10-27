@@ -6,8 +6,7 @@ import useWaitForI18n from '../../../shared/hooks/use-wait-for-i18n'
 import getMeta from '../../../utils/meta'
 import { useGroupMembersContext } from '../context/group-members-context'
 import ErrorAlert from './error-alert'
-import ManagedUsersList from './managed-users/managed-users-list'
-import GroupMembersList from './group-members-list'
+import MembersList from './members-table/members-list'
 
 export default function GroupMembers() {
   const { isReady } = useWaitForI18n()
@@ -28,7 +27,6 @@ export default function GroupMembers() {
   const groupId: string = getMeta('ol-groupId')
   const groupName: string = getMeta('ol-groupName')
   const groupSize: number = getMeta('ol-groupSize')
-  const managedUsersActive: any = getMeta('ol-managedUsersActive')
 
   const handleEmailsChange = useCallback(
     e => {
@@ -91,11 +89,7 @@ export default function GroupMembers() {
             </div>
             <div className="row-spaced-small">
               <ErrorAlert error={removeMemberError} />
-              {managedUsersActive ? (
-                <ManagedUsersList groupId={groupId} />
-              ) : (
-                <GroupMembersList />
-              )}
+              <MembersList groupId={groupId} />
             </div>
             <hr />
             {users.length < groupSize && (

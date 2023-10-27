@@ -9,7 +9,7 @@ type ManagedUsersListAlertProps = {
   onDismiss: () => void
 }
 
-export default function ManagedUsersListAlert({
+export default function ListAlert({
   variant,
   invitedUserEmail,
   onDismiss,

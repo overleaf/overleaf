@@ -1,4 +1,4 @@
-import PublisherManagers from '../../../../../frontend/js/features/group-management/components/publisher-managers'
+import PublisherManagers from '@/features/group-management/components/publisher-managers'
 
 const JOHN_DOE = {
   _id: 'abc123def456',

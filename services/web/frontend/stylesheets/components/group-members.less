@@ -103,75 +103,39 @@
     }
   }
 
-  .cell-checkbox {
-    width: 5%;
-  }
-  .cell-checkbox-with-sso-col {
-    width: 2.5%;
-  }
-
-  .cell-email {
-    width: 45%;
-  }
-  .cell-email-with-sso-col {
-    width: 37%;
-  }
-
-  .cell-name {
-    width: 15%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .cell-last-active {
-    width: 15%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .cell-security {
-    width: 10%;
-    overflow-x: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .cell-managed {
-    width: 15%;
-    overflow-x: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .cell-dropdown {
-    width: 5%;
-    min-width: 25px;
-  }
-
   @media (min-width: @screen-xs) {
     .cell-checkbox {
       width: 5%;
-    }
-
-    .cell-checkbox-with-sso-col {
-      width: 2.5%;
+      .managed-users-active.group-sso-active & {
+        width: 3%;
+      }
     }
 
     .cell-email {
-      width: 34%;
-    }
-    .cell-email-with-sso-col {
-      width: 29%;
+      width: 50%;
+      .managed-users-active & {
+        width: 35%;
+      }
+      .group-sso-active & {
+        width: 37%;
+      }
+      .managed-users-active.group-sso-active & {
+        width: 29%;
+      }
     }
 
     .cell-name {
       width: 20%;
+      .managed-users-active.group-sso-active & {
+        width: 18%;
+      }
     }
 
     .cell-last-active {
       width: 20%;
+      .managed-users-active.group-sso-active & {
+        width: 16%;
+      }
     }
 
     .cell-security {
@@ -191,20 +155,28 @@
   @media (min-width: @screen-lg) {
     .cell-checkbox {
       width: 5%;
+      .managed-users-active.group-sso-active & {
+        width: 3%;
+      }
     }
-    .cell-checkbox-with-sso-col {
-      width: 2.5%;
-    }
-
     .cell-email {
-      width: 43%;
-    }
-    .cell-email-with-sso-col {
-      width: 37%;
+      width: 55%;
+      .managed-users-active & {
+        width: 42%;
+      }
+      .group-sso-active & {
+        width: 45%;
+      }
+      .managed-users-active.group-sso-active & {
+        width: 36%;
+      }
     }
 
     .cell-name {
       width: 20%;
+      .managed-users-active.group-sso-active & {
+        width: 18%;
+      }
     }
 
     .cell-last-active {
@@ -216,7 +188,7 @@
     }
 
     .cell-managed {
-      width: 12%;
+      width: 13%;
     }
 
     .cell-dropdown {

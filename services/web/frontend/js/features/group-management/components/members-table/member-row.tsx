@@ -7,8 +7,8 @@ import Tooltip from '../../../../shared/components/tooltip'
 import type { ManagedUserAlert } from '../../utils/types'
 import ManagedUserStatus from './managed-user-status'
 import SSOStatus from './sso-status'
-import ManagedUserDropdownButton from './managed-user-dropdown-button'
-import ManagedUsersSelectUserCheckbox from './managed-users-select-user-checkbox'
+import DropdownButton from './dropdown-button'
+import SelectUserCheckbox from './select-user-checkbox'
 import getMeta from '@/utils/meta'
 
 type ManagedUserRowProps = {
@@ -18,13 +18,14 @@ type ManagedUserRowProps = {
   setManagedUserAlert: Dispatch<SetStateAction<ManagedUserAlert>>
 }
 
-export default function ManagedUserRow({
+export default function MemberRow({
   user,
   openOffboardingModalForUser,
   setManagedUserAlert,
   groupId,
 }: ManagedUserRowProps) {
   const { t } = useTranslation()
+  const managedUsersActive: any = getMeta('ol-managedUsersActive')
   const groupSSOActive = getMeta('ol-groupSSOActive')
 
   return (
@@ -32,8 +33,8 @@ export default function ManagedUserRow({
       key={`user-${user.email}`}
       className={`managed-user-row ${user.invite ? 'text-muted' : ''}`}
     >
-      <ManagedUsersSelectUserCheckbox user={user} />
-      <td className={groupSSOActive ? 'cell-email-with-sso-col' : 'cell-email'}>
+      <SelectUserCheckbox user={user} />
+      <td className="cell-email">
         <span>
           {user.email}
           {user.invite ? (
@@ -83,13 +84,15 @@ export default function ManagedUserRow({
           </div>
         </td>
       )}
-      <td className="cell-managed">
-        <div className="managed-user-security">
-          <ManagedUserStatus user={user} />
-        </div>
-      </td>
+      {managedUsersActive && (
+        <td className="cell-managed">
+          <div className="managed-user-security">
+            <ManagedUserStatus user={user} />
+          </div>
+        </td>
+      )}
       <td className="cell-dropdown">
-        <ManagedUserDropdownButton
+        <DropdownButton
           user={user}
           openOffboardingModalForUser={openOffboardingModalForUser}
           setManagedUserAlert={setManagedUserAlert}

@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { User } from '../../../../../../types/group-management/user'
-import MaterialIcon from '../../../../shared/components/material-icon'
+import MaterialIcon from '@/shared/components/material-icon'
 
 type ManagedUserStatusProps = {
   user: User

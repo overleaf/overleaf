@@ -1,17 +1,13 @@
 import { useCallback, useState } from 'react'
 import { Button, Col, Form, FormControl, Row } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
-import {
-  deleteJSON,
-  FetchError,
-  postJSON,
-} from '../../../infrastructure/fetch-json'
+import { deleteJSON, FetchError, postJSON } from '@/infrastructure/fetch-json'
 import MaterialIcon from '../../../shared/components/material-icon'
 import Tooltip from '../../../shared/components/tooltip'
 import getMeta from '../../../utils/meta'
 import { parseEmails } from '../utils/emails'
 import ErrorAlert, { APIError } from './error-alert'
-import GroupMemberRow from './group-member-row'
+import UserRow from './user-row'
 import useUserSelection from '../hooks/use-user-selection'
 import { User } from '../../../../../types/group-management/user'
 import { debugConsole } from '@/utils/debugging'
@@ -216,7 +212,7 @@ export function ManagersTable({
                   </li>
                 )}
                 {users.map(user => (
-                  <GroupMemberRow
+                  <UserRow
                     key={user.email}
                     user={user}
                     selectUser={selectUser}

@@ -1,7 +1,7 @@
 import type { PropsWithChildren } from 'react'
 import sinon from 'sinon'
-import ManagedUserDropdownButton from '../../../../../../frontend/js/features/group-management/components/managed-users/managed-user-dropdown-button'
-import { GroupMembersProvider } from '../../../../../../frontend/js/features/group-management/context/group-members-context'
+import DropdownButton from '@/features/group-management/components/members-table/dropdown-button'
+import { GroupMembersProvider } from '@/features/group-management/context/group-members-context'
 import { User } from '../../../../../../types/group-management/user'
 
 function Wrapper({ children }: PropsWithChildren<Record<string, unknown>>) {
@@ -20,7 +20,7 @@ function Wrapper({ children }: PropsWithChildren<Record<string, unknown>>) {
 function mountDropDownComponent(user: User, subscriptionId: string) {
   cy.mount(
     <Wrapper>
-      <ManagedUserDropdownButton
+      <DropdownButton
         user={user}
         openOffboardingModalForUser={sinon.stub()}
         groupId={subscriptionId}
@@ -218,6 +218,7 @@ describe('ManagedUserDropdownButton', function () {
       cy.findByTestId('no-actions-available').should('exist')
     })
   })
+
   describe('sending SSO invite reminder', function () {
     const user = {
       _id: 'some-user',

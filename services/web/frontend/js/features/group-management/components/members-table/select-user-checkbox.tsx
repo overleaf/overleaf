@@ -2,17 +2,15 @@ import { useTranslation } from 'react-i18next'
 import type { User } from '../../../../../../types/group-management/user'
 import { useGroupMembersContext } from '../../context/group-members-context'
 import { useCallback } from 'react'
-import getMeta from '@/utils/meta'
 
 type ManagedUsersSelectUserCheckboxProps = {
   user: User
 }
 
-export default function ManagedUsersSelectUserCheckbox({
+export default function SelectUserCheckbox({
   user,
 }: ManagedUsersSelectUserCheckboxProps) {
   const { t } = useTranslation()
-  const groupSSOActive = getMeta('ol-groupSSOActive')
   const { users, selectedUsers, selectUser, unselectUser } =
     useGroupMembersContext()
 
@@ -40,11 +38,7 @@ export default function ManagedUsersSelectUserCheckbox({
   const selected = selectedUsers.includes(user)
 
   return (
-    <td
-      className={
-        groupSSOActive ? 'cell-checkbox-with-sso-col ' : 'cell-checkbox'
-      }
-    >
+    <td className="cell-checkbox">
       {/* the next check will hide the `checkbox` but still show the `td` */}
       {user.enrollment?.managedBy ? null : (
         <>

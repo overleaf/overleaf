@@ -1,4 +1,4 @@
-import InstitutionManagers from '../../../../../frontend/js/features/group-management/components/institution-managers'
+import InstitutionManagers from '@/features/group-management/components/institution-managers'
 
 const JOHN_DOE = {
   _id: 'abc123def456',
