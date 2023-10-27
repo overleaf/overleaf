@@ -7,14 +7,16 @@ import PlaceholderChat from '@/features/ide-react/components/layout/placeholder/
 import PlaceholderHistory from '@/features/ide-react/components/layout/placeholder/placeholder-history'
 import MainLayout from '@/features/ide-react/components/layout/main-layout'
 import { EditorAndSidebar } from '@/features/ide-react/components/editor-and-sidebar'
-import Header from '@/features/ide-react/components/header'
 import EditorLeftMenu from '@/features/editor-left-menu/components/editor-left-menu'
+import EditorNavigationToolbar from '@/features/ide-react/components/editor-navigation-toolbar'
 import { useLayoutEventTracking } from '@/features/ide-react/hooks/use-layout-event-tracking'
+import useSocketListeners from '@/features/ide-react/hooks/use-socket-listeners'
 
 // This is filled with placeholder content while the real content is migrated
 // away from Angular
 export default function IdePage() {
   useLayoutEventTracking()
+  useSocketListeners()
 
   const [leftColumnDefaultSize, setLeftColumnDefaultSize] = useState(20)
   const { registerUserActivity } = useConnectionContext()
@@ -32,24 +34,8 @@ export default function IdePage() {
     return () => document.body.removeEventListener('click', listener)
   }, [listener])
 
-  const { chatIsOpen, setChatIsOpen, view, setView } = useLayoutContext()
+  const { chatIsOpen, view } = useLayoutContext()
   const historyIsOpen = view === 'history'
-  const setHistoryIsOpen = useCallback(
-    (historyIsOpen: boolean) => {
-      setView(historyIsOpen ? 'history' : 'editor')
-    },
-    [setView]
-  )
-
-  const headerContent = (
-    <Header
-      chatIsOpen={chatIsOpen}
-      setChatIsOpen={setChatIsOpen}
-      historyIsOpen={historyIsOpen}
-      setHistoryIsOpen={setHistoryIsOpen}
-    />
-  )
-  const chatContent = <PlaceholderChat />
 
   const mainContent = historyIsOpen ? (
     <PlaceholderHistory
@@ -70,8 +56,8 @@ export default function IdePage() {
       <Alerts />
       <EditorLeftMenu />
       <MainLayout
-        headerContent={headerContent}
-        chatContent={chatContent}
+        headerContent={<EditorNavigationToolbar />}
+        chatContent={<PlaceholderChat />}
         mainContent={mainContent}
         chatIsOpen={chatIsOpen}
         shouldPersistLayout

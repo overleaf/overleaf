@@ -14,18 +14,22 @@ import {
 import { useSplitTestContext } from '../../../shared/context/split-test-context'
 import { sendMB } from '../../../infrastructure/event-tracking'
 
-const ShareProjectContext = createContext()
-
-ShareProjectContext.Provider.propTypes = {
-  value: PropTypes.shape({
-    updateProject: PropTypes.func.isRequired,
-    monitorRequest: PropTypes.func.isRequired,
-    inFlight: PropTypes.bool,
-    setInFlight: PropTypes.func,
-    error: PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
-    setError: PropTypes.func,
-  }),
+type ShareProjectContextValue = {
+  updateProject: (data: unknown) => void
+  monitorRequest: <T extends Promise<unknown>>(request: () => T) => T
+  inFlight: boolean
+  setInFlight: React.Dispatch<
+    React.SetStateAction<ShareProjectContextValue['inFlight']>
+  >
+  error: string | undefined
+  setError: React.Dispatch<
+    React.SetStateAction<ShareProjectContextValue['error']>
+  >
 }
+
+const ShareProjectContext = createContext<ShareProjectContextValue | undefined>(
+  undefined
+)
 
 export function useShareProjectContext() {
   const context = useContext(ShareProjectContext)
@@ -39,13 +43,20 @@ export function useShareProjectContext() {
   return context
 }
 
+type ShareProjectModalProps = {
+  handleHide: () => void
+  show: boolean
+  animation?: boolean
+}
+
 const ShareProjectModal = React.memo(function ShareProjectModal({
   handleHide,
   show,
   animation = true,
-}) {
-  const [inFlight, setInFlight] = useState(false)
-  const [error, setError] = useState()
+}: ShareProjectModalProps) {
+  const [inFlight, setInFlight] =
+    useState<ShareProjectContextValue['inFlight']>(false)
+  const [error, setError] = useState<ShareProjectContextValue['error']>()
 
   const project = useProjectContext(projectShape)
 
@@ -84,7 +95,7 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
 
     const promise = request()
 
-    promise.catch(error => {
+    promise.catch((error: { data?: Record<string, string> }) => {
       setError(
         error.data?.errorReason ||
           error.data?.error ||
@@ -130,10 +141,5 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
     </ShareProjectContext.Provider>
   )
 })
-ShareProjectModal.propTypes = {
-  animation: PropTypes.bool,
-  handleHide: PropTypes.func.isRequired,
-  show: PropTypes.bool.isRequired,
-}
 
 export default ShareProjectModal

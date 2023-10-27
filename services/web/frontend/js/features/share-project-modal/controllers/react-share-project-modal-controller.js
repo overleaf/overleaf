@@ -8,10 +8,11 @@ import { debugConsole } from '@/utils/debugging'
 
 App.component(
   'shareProjectModal',
-  react2angular(
-    rootContext.use(ShareProjectModal),
-    Object.keys(ShareProjectModal.propTypes)
-  )
+  react2angular(rootContext.use(ShareProjectModal), [
+    'animation',
+    'handleHide',
+    'show',
+  ])
 )
 
 export default App.controller('ReactShareProjectModalController', [

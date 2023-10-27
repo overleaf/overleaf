@@ -1,5 +1,6 @@
 import React from 'react'
 import ChatToggleButton from '@/features/editor-navigation-toolbar/components/chat-toggle-button'
+import ShareProjectButton from '@/features/editor-navigation-toolbar/components/share-project-button'
 import HistoryToggleButton from '@/features/editor-navigation-toolbar/components/history-toggle-button'
 import LayoutDropdownButton from '@/features/editor-navigation-toolbar/components/layout-dropdown-button'
 
@@ -16,6 +17,8 @@ export default function PlaceholderHeader({
   historyIsOpen,
   setHistoryIsOpen,
 }: PlaceholderHeaderProps) {
+  function handleOpenShareModal() {}
+
   function toggleChatOpen() {
     setChatIsOpen(!chatIsOpen)
   }
@@ -28,11 +31,12 @@ export default function PlaceholderHeader({
     <header className="toolbar toolbar-header">
       <div className="toolbar-left">Header placeholder</div>
       <div className="toolbar-right">
-        <LayoutDropdownButton />
+        <ShareProjectButton onClick={handleOpenShareModal} />
         <HistoryToggleButton
           historyIsOpen={historyIsOpen}
           onClick={toggleHistoryOpen}
         />
+        <LayoutDropdownButton />
         <ChatToggleButton
           chatIsOpen={chatIsOpen}
           onClick={toggleChatOpen}

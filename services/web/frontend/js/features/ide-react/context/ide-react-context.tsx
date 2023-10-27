@@ -18,7 +18,6 @@ import { JoinProjectPayload } from '@/features/ide-react/connection/join-project
 import { useConnectionContext } from '@/features/ide-react/context/connection-context'
 import { getMockIde } from '@/shared/context/mock/mock-ide'
 import { populateEditorScope } from '@/features/ide-react/context/editor-manager-context'
-import { debugConsole } from '@/utils/debugging'
 import { postJSON } from '@/infrastructure/fetch-json'
 import { EventLog } from '@/features/ide-react/editor/event-log'
 import { populateSettingsScope } from '@/features/ide-react/scope-adapters/settings-adapter'
@@ -40,10 +39,6 @@ type IdeReactContextValue = {
 const IdeReactContext = createContext<IdeReactContextValue | undefined>(
   undefined
 )
-
-function showGenericMessageModal(title: string, message: string) {
-  debugConsole.log('*** showGenericMessageModal ***', title, message)
-}
 
 function populateIdeReactScope(store: ReactScopeValueStore) {
   store.set('sync_tex_error', false)
@@ -156,7 +151,6 @@ export const IdeReactProvider: FC = ({ children }) => {
     return {
       ...getMockIde(),
       socket,
-      showGenericMessageModal,
       reportError,
       // TODO: MIGRATION: Remove this once it's no longer used
       fileTreeManager: {

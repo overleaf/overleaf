@@ -16,6 +16,7 @@ import { OnlineUsersProvider } from '@/features/ide-react/context/online-users-c
 import { MetadataProvider } from '@/features/ide-react/context/metadata-context'
 import { ReferencesProvider } from '@/features/ide-react/context/references-context'
 import { SplitTestProvider } from '@/shared/context/split-test-context'
+import { ModalsContextProvider } from '@/features/ide-react/context/modals-context'
 import { FileTreePathProvider } from '@/features/file-tree/contexts/file-tree-path'
 
 export const ReactContextRoot: FC = ({ children }) => {
@@ -38,7 +39,9 @@ export const ReactContextRoot: FC = ({ children }) => {
                                   <EditorManagerProvider>
                                     <OnlineUsersProvider>
                                       <MetadataProvider>
-                                        {children}
+                                        <ModalsContextProvider>
+                                          {children}
+                                        </ModalsContextProvider>
                                       </MetadataProvider>
                                     </OnlineUsersProvider>
                                   </EditorManagerProvider>
