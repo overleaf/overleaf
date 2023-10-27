@@ -3,7 +3,10 @@ import TwoColumnMainContent from '@/features/ide-react/components/layout/two-col
 import Editor from '@/features/ide-react/components/editor/editor'
 import EditorSidebar from '@/features/ide-react/components/editor-sidebar'
 import customLocalStorage from '@/infrastructure/local-storage'
+import History from '@/features/ide-react/components/history'
+import { HistoryProvider } from '@/features/history/context/history-context'
 import { useProjectContext } from '@/shared/context/project-context'
+import { useLayoutContext } from '@/shared/context/layout-context'
 import { FileTreeFindResult } from '@/features/ide-react/types/file-tree'
 
 type EditorAndSidebarProps = {
@@ -19,6 +22,8 @@ export function EditorAndSidebar({
 }: EditorAndSidebarProps) {
   const [leftColumnIsOpen, setLeftColumnIsOpen] = useState(true)
   const { rootDocId, _id: projectId } = useProjectContext()
+  const { view } = useLayoutContext()
+  const historyIsOpen = view === 'history'
 
   const [openDocId, setOpenDocId] = useState(
     () => customLocalStorage.getItem(`doc.open_id.${projectId}`) || rootDocId
@@ -46,12 +51,21 @@ export function EditorAndSidebar({
       onFileTreeSelect={handleFileTreeSelect}
     />
   )
+
   const rightColumnContent = (
-    <Editor
-      shouldPersistLayout={shouldPersistLayout}
-      openDocId={openDocId}
-      fileTreeReady={fileTreeReady}
-    />
+    <>
+      {/* Recreate the history context when the history view is toggled */}
+      {historyIsOpen && (
+        <HistoryProvider>
+          <History />
+        </HistoryProvider>
+      )}
+      <Editor
+        shouldPersistLayout={shouldPersistLayout}
+        openDocId={openDocId}
+        fileTreeReady={fileTreeReady}
+      />
+    </>
   )
 
   return (

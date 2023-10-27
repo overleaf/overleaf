@@ -12,6 +12,7 @@ import { useLayoutContext } from '@/shared/context/layout-context'
 import { EditorPane } from '@/features/ide-react/components/editor/editor-pane'
 import PlaceholderFile from '@/features/ide-react/components/layout/placeholder/placeholder-file'
 import PlaceholderPdf from '@/features/ide-react/components/layout/placeholder/placeholder-pdf'
+import classnames from 'classnames'
 
 export type EditorProps = {
   shouldPersistLayout?: boolean
@@ -38,9 +39,7 @@ export default function Editor({
     return <PlaceholderFile />
   }
 
-  if (view === 'history') {
-    return null
-  }
+  const historyIsOpen = view === 'history'
 
   function setPdfIsOpen(isOpen: boolean) {
     if (isOpen) {
@@ -56,6 +55,7 @@ export default function Editor({
         shouldPersistLayout ? 'ide-react-editor-and-pdf-layout' : undefined
       }
       direction="horizontal"
+      className={classnames({ hide: historyIsOpen })}
     >
       {editorIsVisible ? (
         <Panel id="editor" order={1} defaultSize={50}>

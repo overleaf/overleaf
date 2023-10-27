@@ -3,7 +3,6 @@ import useEventListener from '@/shared/hooks/use-event-listener'
 import { useCallback, useEffect, useState } from 'react'
 import { Alerts } from '@/features/ide-react/components/alerts/alerts'
 import { useLayoutContext } from '@/shared/context/layout-context'
-import PlaceholderHistory from '@/features/ide-react/components/layout/placeholder/placeholder-history'
 import MainLayout from '@/features/ide-react/components/layout/main-layout'
 import { EditorAndSidebar } from '@/features/ide-react/components/editor-and-sidebar'
 import EditorLeftMenu from '@/features/editor-left-menu/components/editor-left-menu'
@@ -34,16 +33,9 @@ export default function IdePage() {
     return () => document.body.removeEventListener('click', listener)
   }, [listener])
 
-  const { chatIsOpen, view } = useLayoutContext()
-  const historyIsOpen = view === 'history'
+  const { chatIsOpen } = useLayoutContext()
 
-  const mainContent = historyIsOpen ? (
-    <PlaceholderHistory
-      shouldPersistLayout
-      leftColumnDefaultSize={leftColumnDefaultSize}
-      setLeftColumnDefaultSize={setLeftColumnDefaultSize}
-    />
-  ) : (
+  const mainContent = (
     <EditorAndSidebar
       leftColumnDefaultSize={leftColumnDefaultSize}
       setLeftColumnDefaultSize={setLeftColumnDefaultSize}

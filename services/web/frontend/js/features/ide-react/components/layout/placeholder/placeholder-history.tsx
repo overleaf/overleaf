@@ -15,7 +15,7 @@ export default function PlaceholderHistory({
   const [leftColumnIsOpen, setLeftColumnIsOpen] = useState(true)
 
   const leftColumnContent = (
-    <aside className="ide-react-placeholder-editor-sidebar">
+    <aside className="ide-react-placeholder-editor-sidebar history-file-tree">
       History file tree placeholder
     </aside>
   )
