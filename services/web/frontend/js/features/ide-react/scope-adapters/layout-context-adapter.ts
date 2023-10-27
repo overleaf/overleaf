@@ -10,7 +10,7 @@ export default function populateLayoutScope(store: ReactScopeValueStore) {
   store.set('toggleHistory', () => {})
 
   store.set('openFile', null)
-  store.set('ui.chatOpen', false)
+  store.persisted('ui.chatOpen', false, 'ui.chatOpen')
   store.persisted('ui.reviewPanelOpen', false, reviewPanelStorageKey)
   store.set('ui.leftMenuShown', false)
   store.set('ui.pdfLayout', 'sideBySide')

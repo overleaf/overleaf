@@ -3,12 +3,12 @@ import useEventListener from '@/shared/hooks/use-event-listener'
 import { useCallback, useEffect, useState } from 'react'
 import { Alerts } from '@/features/ide-react/components/alerts/alerts'
 import { useLayoutContext } from '@/shared/context/layout-context'
-import PlaceholderChat from '@/features/ide-react/components/layout/placeholder/placeholder-chat'
 import PlaceholderHistory from '@/features/ide-react/components/layout/placeholder/placeholder-history'
 import MainLayout from '@/features/ide-react/components/layout/main-layout'
 import { EditorAndSidebar } from '@/features/ide-react/components/editor-and-sidebar'
 import EditorLeftMenu from '@/features/editor-left-menu/components/editor-left-menu'
 import EditorNavigationToolbar from '@/features/ide-react/components/editor-navigation-toolbar'
+import ChatPane from '@/features/chat/components/chat-pane'
 import { useLayoutEventTracking } from '@/features/ide-react/hooks/use-layout-event-tracking'
 import useSocketListeners from '@/features/ide-react/hooks/use-socket-listeners'
 
@@ -57,7 +57,7 @@ export default function IdePage() {
       <EditorLeftMenu />
       <MainLayout
         headerContent={<EditorNavigationToolbar />}
-        chatContent={<PlaceholderChat />}
+        chatContent={<ChatPane />}
         mainContent={mainContent}
         chatIsOpen={chatIsOpen}
         shouldPersistLayout

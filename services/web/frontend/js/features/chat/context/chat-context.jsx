@@ -16,6 +16,7 @@ import { getJSON, postJSON } from '../../../infrastructure/fetch-json'
 import { appendMessage, prependMessages } from '../utils/message-list-appender'
 import useBrowserWindow from '../../../shared/hooks/use-browser-window'
 import { useLayoutContext } from '../../../shared/context/layout-context'
+import { useIdeContext } from '@/shared/context/ide-context'
 
 const PAGE_SIZE = 50
 
@@ -226,7 +227,7 @@ export function ChatProvider({ children }) {
   }, [])
 
   // Handling receiving messages over the socket
-  const socket = window._ide?.socket
+  const { socket } = useIdeContext()
   useEffect(() => {
     if (!socket) return
 
