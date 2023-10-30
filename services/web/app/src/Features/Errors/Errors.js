@@ -90,6 +90,42 @@ class SAMLEmailAffiliatedWithAnotherInstitutionError extends OError {
   }
 }
 
+class SAMLAuthenticationError extends OError {
+  get i18nKey() {
+    return 'saml_auth_error'
+  }
+}
+
+class SAMLGroupSSOLoginIdentityMismatchError extends SAMLAuthenticationError {
+  get i18nKey() {
+    return 'saml_login_identity_mismatch_error'
+  }
+}
+
+class SAMLGroupSSOLoginIdentityNotFoundError extends SAMLAuthenticationError {
+  get i18nKey() {
+    return 'saml_login_identity_not_found_error'
+  }
+}
+
+class SAMLGroupSSODisabledError extends SAMLAuthenticationError {
+  get i18nKey() {
+    return 'saml_login_disabled_error'
+  }
+}
+
+class SAMLInvalidSignatureError extends SAMLAuthenticationError {
+  get i18nKey() {
+    return 'saml_invalid_signature_error'
+  }
+}
+
+class SAMLLoginFailureError extends SAMLAuthenticationError {
+  get i18nKey() {
+    return 'saml_login_failure'
+  }
+}
+
 class SAMLSessionDataMissing extends BackwardCompatibleError {
   constructor(arg) {
     super(arg)
@@ -218,6 +254,12 @@ module.exports = {
   SAMLEmailNotAffiliatedError,
   SAMLEmailAffiliatedWithAnotherInstitutionError,
   SAMLSessionDataMissing,
+  SAMLAuthenticationError,
+  SAMLGroupSSOLoginIdentityMismatchError,
+  SAMLGroupSSOLoginIdentityNotFoundError,
+  SAMLGroupSSODisabledError,
+  SAMLInvalidSignatureError,
+  SAMLLoginFailureError,
   SLInV2Error,
   ThirdPartyIdentityExistsError,
   ThirdPartyUserNotFoundError,
