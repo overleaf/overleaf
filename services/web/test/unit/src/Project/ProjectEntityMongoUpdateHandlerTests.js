@@ -37,6 +37,11 @@ describe('ProjectEntityMongoUpdateHandler', function () {
       fileSystem: '/test-folder/test-subfolder',
       mongo: 'rootFolder.0.folders.0.folders.0',
     }
+    this.notSubfolder = { _id: ObjectId(), name: 'test-folder-2' }
+    this.notSubfolderPath = {
+      fileSystem: '/test-folder-2/test-subfolder',
+      mongo: 'rootFolder.0.folders.0.folders.0',
+    }
     this.folder = {
       _id: ObjectId(),
       name: 'test-folder',
@@ -746,6 +751,19 @@ describe('ProjectEntityMongoUpdateHandler', function () {
             'folder'
           )
         ).to.be.rejectedWith(Errors.InvalidNameError)
+      })
+    })
+
+    describe('when moving a folder to a subfolder which starts with the same characters', function () {
+      it('does not throw an error', async function () {
+        await expect(
+          this.subject.promises.moveEntity(
+            this.project._id,
+            this.folder._id,
+            this.notSubfolder._id,
+            'folder'
+          )
+        ).not.to.be.rejectedWith(Errors.InvalidNameError)
       })
     })
   })

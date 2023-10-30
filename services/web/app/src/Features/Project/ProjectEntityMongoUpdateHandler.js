@@ -634,6 +634,26 @@ function _confirmFolder(project, folderId) {
   }
 }
 
+function _checkValidFolderPath(folderPath, destinationFolderPath) {
+  if (!folderPath.endsWith('/')) {
+    folderPath += '/'
+  }
+
+  if (!destinationFolderPath.endsWith('/')) {
+    destinationFolderPath += '/'
+  }
+
+  if (destinationFolderPath === folderPath) {
+    throw new Errors.InvalidNameError('destination folder is the same as me')
+  }
+
+  if (destinationFolderPath.startsWith(folderPath)) {
+    throw new Errors.InvalidNameError(
+      'destination folder is a child folder of me'
+    )
+  }
+}
+
 async function _checkValidMove(
   project,
   entityType,
@@ -647,18 +667,14 @@ async function _checkValidMove(
       element_id: destFolderId,
       type: 'folder',
     })
+
   // check if there is already a doc/file/folder with the same name
   // in the destination folder
   _checkValidElementName(destEntity, entity.name)
+
+  // check if the folder being moved is a parent of the destination folder
   if (/folder/.test(entityType)) {
-    const isNestedFolder =
-      destFolderPath.fileSystem.slice(0, entityPath.fileSystem.length) ===
-      entityPath.fileSystem
-    if (isNestedFolder) {
-      throw new Errors.InvalidNameError(
-        'destination folder is a child folder of me'
-      )
-    }
+    _checkValidFolderPath(entityPath.fileSystem, destFolderPath.fileSystem)
   }
 }
 
