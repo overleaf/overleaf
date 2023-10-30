@@ -1,4 +1,4 @@
-import { Trans, useTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 import { Button } from 'react-bootstrap'
 import { useCallback, useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
@@ -209,16 +209,12 @@ const projectContextPropTypes = {
 }
 
 function UploadErrorMessage({ error, maxNumberOfFiles }) {
+  const { t } = useTranslation()
   switch (error) {
     case 'too-many-files':
-      return (
-        <Trans
-          i18nKey="maximum_files_uploaded_together"
-          values={{ max: maxNumberOfFiles }}
-          shouldUnescape
-          tOptions={{ interpolation: { escapeValue: true } }}
-        />
-      )
+      return t('maximum_files_uploaded_together', {
+        max: maxNumberOfFiles,
+      })
 
     default:
       return <ErrorMessage error={error} />

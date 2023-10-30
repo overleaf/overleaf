@@ -18,7 +18,7 @@ export const CompileTimeoutChangingSoon: FC<{
   const { t } = useTranslation()
 
   const compileTimeoutBlogLinks = [
-    /* eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key */
+    /* eslint-disable-next-line jsx-a11y/anchor-has-content */
     <a
       aria-label={t('read_more_about_free_compile_timeouts_servers')}
       href="/blog/changes-to-free-compile-timeouts-and-servers"
@@ -27,7 +27,7 @@ export const CompileTimeoutChangingSoon: FC<{
       target="_blank"
       onClick={sendInfoClickEvent}
     />,
-    /* eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key */
+    /* eslint-disable-next-line jsx-a11y/anchor-has-content */
     <a
       aria-label={t('read_more_about_fix_prevent_timeout')}
       href="/learn/how-to/Fixing_and_preventing_compile_timeouts"

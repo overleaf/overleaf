@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types'
-import { useTranslation, Trans } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 import { FetchError } from '../../../../infrastructure/fetch-json'
 import RedirectToLogin from './redirect-to-login'
 import {
@@ -29,14 +29,9 @@ export default function ErrorMessage({ error }) {
       case 'invalid_filename':
         return (
           <DangerMessage>
-            <Trans
-              i18nKey="invalid_filename"
-              values={{
-                nameLimit: fileNameLimit,
-              }}
-              shouldUnescape
-              tOptions={{ interpolation: { escapeValue: true } }}
-            />
+            {t('invalid_filename', {
+              nameLimit: fileNameLimit,
+            })}
           </DangerMessage>
         )
 

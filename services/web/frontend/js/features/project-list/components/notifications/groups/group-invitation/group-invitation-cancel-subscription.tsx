@@ -1,5 +1,5 @@
 import { Button } from 'react-bootstrap'
-import { Trans, useTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 import type { Dispatch, SetStateAction } from 'react'
 import Notification from '../../notification'
 import { GroupInvitationStatus } from './hooks/use-group-invitation-notification'
@@ -26,14 +26,7 @@ export default function GroupInvitationCancelIndividualSubscriptionNotification(
   return (
     <Notification bsStyle="info" onDismiss={dismissGroupInviteNotification}>
       <Notification.Body>
-        <Trans
-          i18nKey="invited_to_group_have_individual_subcription"
-          values={{
-            inviterName,
-          }}
-          shouldUnescape
-          tOptions={{ interpolation: { escapeValue: true } }}
-        />
+        {t('invited_to_group_have_individual_subcription', { inviterName })}
       </Notification.Body>
       <Notification.Action className="group-invitation-cancel-subscription-notification-buttons">
         <Button

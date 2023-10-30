@@ -68,11 +68,15 @@ function ToggleMenu() {
           onClick={handleToggleFullTCStateCollapse}
         >
           {wantTrackChanges ? (
-            // eslint-disable-next-line react/jsx-key
-            <Trans i18nKey="track_changes_is_on" components={[<strong />]} />
+            <Trans
+              i18nKey="track_changes_is_on"
+              components={{ strong: <strong /> }}
+            />
           ) : (
-            // eslint-disable-next-line react/jsx-key
-            <Trans i18nKey="track_changes_is_off" components={[<strong />]} />
+            <Trans
+              i18nKey="track_changes_is_off"
+              components={{ strong: <strong /> }}
+            />
           )}
           <span
             className={classnames('rp-tc-state-collapse', {

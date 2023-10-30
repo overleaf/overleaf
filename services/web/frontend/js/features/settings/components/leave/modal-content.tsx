@@ -57,7 +57,7 @@ function LeaveModalContent({
         <p>
           <Trans
             i18nKey="delete_account_warning_message_3"
-            components={[<strong />]} // eslint-disable-line react/jsx-key
+            components={{ strong: <strong /> }}
           />
         </p>
         <LeaveModalContentBlock

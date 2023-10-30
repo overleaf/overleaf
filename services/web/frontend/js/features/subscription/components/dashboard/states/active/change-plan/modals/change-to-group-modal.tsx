@@ -22,14 +22,9 @@ function GroupPlanCollaboratorCount({ planCode }: { planCode: string }) {
   if (planCode === 'collaborator') {
     return (
       <>
-        <Trans
-          i18nKey="collabs_per_proj"
-          values={{
-            collabcount: 10,
-          }}
-          shouldUnescape
-          tOptions={{ interpolation: { escapeValue: true } }}
-        />
+        {t('collabs_per_proj', {
+          collabcount: 10,
+        })}
       </>
     )
   } else if (planCode === 'professional') {
@@ -39,28 +34,23 @@ function GroupPlanCollaboratorCount({ planCode }: { planCode: string }) {
 }
 
 function EducationDiscountAppliedOrNot({ groupSize }: { groupSize: string }) {
+  const { t } = useTranslation()
   const size = parseInt(groupSize)
   if (size >= groupSizeForEducationalDiscount) {
     return (
       <p className="applied">
-        <Trans
-          i18nKey="educational_percent_discount_applied"
-          values={{ percent: educationalPercentDiscount }}
-          shouldUnescape
-          tOptions={{ interpolation: { escapeValue: true } }}
-        />
+        {t('educational_percent_discount_applied', {
+          percent: educationalPercentDiscount,
+        })}
       </p>
     )
   }
 
   return (
     <p className="ineligible">
-      <Trans
-        i18nKey="educational_discount_for_groups_of_x_or_more"
-        values={{ size: groupSizeForEducationalDiscount }}
-        shouldUnescape
-        tOptions={{ interpolation: { escapeValue: true } }}
-      />
+      {t('educational_discount_for_groups_of_x_or_more', {
+        size: groupSizeForEducationalDiscount,
+      })}
     </p>
   )
 }
@@ -92,44 +82,27 @@ function GroupPrice({
         {totalPrice} <span className="small">/ {t('year')}</span>
       </span>
       <span className="sr-only">
-        {queryingGroupPlanToChangeToPrice ? (
-          t('loading_prices')
-        ) : (
-          <Trans
-            i18nKey="x_price_per_year"
-            values={{ price: groupPlanToChangeToPrice?.totalForDisplay }}
-            shouldUnescape
-            tOptions={{ interpolation: { escapeValue: true } }}
-          />
-        )}
+        {queryingGroupPlanToChangeToPrice
+          ? t('loading_prices')
+          : t('x_price_per_year', {
+              price: groupPlanToChangeToPrice?.totalForDisplay,
+            })}
       </span>
 
       <br />
 
       <span className="circle-subtext">
         <span aria-hidden>
-          <Trans
-            i18nKey="x_price_per_user"
-            values={{
-              price: perUserPrice,
-            }}
-            shouldUnescape
-            tOptions={{ interpolation: { escapeValue: true } }}
-          />
+          {t('x_price_per_user', {
+            price: perUserPrice,
+          })}
         </span>
         <span className="sr-only">
-          {queryingGroupPlanToChangeToPrice ? (
-            t('loading_prices')
-          ) : (
-            <Trans
-              i18nKey="x_price_per_user"
-              values={{
+          {queryingGroupPlanToChangeToPrice
+            ? t('loading_prices')
+            : t('x_price_per_user', {
                 price: perUserPrice,
-              }}
-              shouldUnescape
-              tOptions={{ interpolation: { escapeValue: true } }}
-            />
-          )}
+              })}
         </span>
       </span>
     </>
@@ -215,14 +188,9 @@ export function ChangeToGroupModal() {
         <div className="modal-title">
           <h2>{t('customize_your_group_subscription')}</h2>
           <h3>
-            <Trans
-              i18nKey="save_x_percent_or_more"
-              values={{
-                percent: '30',
-              }}
-              shouldUnescape
-              tOptions={{ interpolation: { escapeValue: true } }}
-            />
+            {t('save_x_percent_or_more', {
+              percent: '30',
+            })}
           </h3>
         </div>
       </Modal.Header>
@@ -304,15 +272,10 @@ export function ChangeToGroupModal() {
 
                 <div className="form-group">
                   <strong>
-                    <Trans
-                      i18nKey="percent_discount_for_groups"
-                      values={{
-                        percent: educationalPercentDiscount,
-                        size: groupSizeForEducationalDiscount,
-                      }}
-                      shouldUnescape
-                      tOptions={{ interpolation: { escapeValue: true } }}
-                    />
+                    {t('percent_discount_for_groups', {
+                      percent: educationalPercentDiscount,
+                      size: groupSizeForEducationalDiscount,
+                    })}
                   </strong>
                 </div>
 
@@ -393,12 +356,9 @@ export function ChangeToGroupModal() {
           </button>
           <hr className="thin" />
           <button className="btn-inline-link" onClick={handleGetInTouchButton}>
-            <Trans
-              i18nKey="need_more_than_x_licenses"
-              values={{ x: 50 }}
-              shouldUnescape
-              tOptions={{ interpolation: { escapeValue: true } }}
-            />{' '}
+            {t('need_more_than_x_licenses', {
+              x: 50,
+            })}{' '}
             {t('please_get_in_touch')}
           </button>
         </div>

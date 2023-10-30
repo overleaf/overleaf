@@ -80,10 +80,7 @@ function NotCancelOption({
             }}
             shouldUnescape
             tOptions={{ interpolation: { escapeValue: true } }}
-            components={[
-              // eslint-disable-next-line react/jsx-key
-              <strong />,
-            ]}
+            components={{ strong: <strong /> }}
           />
         </p>
         <p>

@@ -371,7 +371,7 @@
   "delete": "Delete",
   "delete_account": "Delete Account",
   "delete_account_confirmation_label": "I understand this will delete all projects in my __appName__ account with email address <0>__userDefaultEmail__</0>",
-  "delete_account_warning_message_3": "You are about to permanently <0>delete all of your account data</0>, including your projects and settings. Please type your account email address and password in the boxes below to proceed.",
+  "delete_account_warning_message_3": "You are about to permanently <strong>delete all of your account data</strong>, including your projects and settings. Please type your account email address and password in the boxes below to proceed.",
   "delete_acct_no_existing_pw": "Please use the password reset form to set a password before deleting your account",
   "delete_and_leave": "Delete / Leave",
   "delete_and_leave_projects": "Delete and Leave Projects",

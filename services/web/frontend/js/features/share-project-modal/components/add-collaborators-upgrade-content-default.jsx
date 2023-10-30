@@ -1,5 +1,5 @@
 import Icon from '../../../shared/components/icon'
-import { Trans, useTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 
 export default function AddCollaboratorsUpgradeContentDefault() {
   const { t } = useTranslation()
@@ -18,12 +18,9 @@ export default function AddCollaboratorsUpgradeContentDefault() {
         <li>
           <Icon type="check" />
           &nbsp;
-          <Trans
-            i18nKey="collabs_per_proj"
-            values={{ collabcount: 'Multiple' }}
-            shouldUnescape
-            tOptions={{ interpolation: { escapeValue: true } }}
-          />
+          {t('collabs_per_proj', {
+            collabcount: 'Multiple',
+          })}
         </li>
         <li>
           <Icon type="check" />

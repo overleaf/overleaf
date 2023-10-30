@@ -1,4 +1,4 @@
-import { Trans } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 import { formatDate, fromNowDate } from '../../../../../utils/dates'
 import { Project } from '../../../../../../../types/project/dashboard/api'
 import Tooltip from '../../../../../shared/components/tooltip'
@@ -9,20 +9,14 @@ type LastUpdatedCellProps = {
 }
 
 export default function LastUpdatedCell({ project }: LastUpdatedCellProps) {
-  const displayText = project.lastUpdatedBy ? (
-    <Trans
-      i18nKey="last_updated_date_by_x"
-      values={{
+  const { t } = useTranslation()
+
+  const displayText = project.lastUpdatedBy
+    ? t('last_updated_date_by_x', {
         lastUpdatedDate: fromNowDate(project.lastUpdated),
         person: getUserName(project.lastUpdatedBy),
-      }}
-      // eslint-disable-next-line react/jsx-boolean-value
-      shouldUnescape={true}
-      tOptions={{ interpolation: { escapeValue: true } }}
-    />
-  ) : (
-    fromNowDate(project.lastUpdated)
-  )
+      })
+    : fromNowDate(project.lastUpdated)
 
   const tooltipText = formatDate(project.lastUpdated)
   return (

@@ -34,8 +34,7 @@ function SsoLinkingInfo({ domainInfo, email }: SSOLinkingInfoProps) {
           i18nKey="to_add_email_accounts_need_to_be_linked_2"
           components={[<strong />]} // eslint-disable-line react/jsx-key
           values={{ institutionName: domainInfo.university.name }}
-          // eslint-disable-next-line react/jsx-boolean-value
-          shouldUnescape={true}
+          shouldUnescape
           tOptions={{ interpolation: { escapeValue: true } }}
         />
       </p>
@@ -44,8 +43,7 @@ function SsoLinkingInfo({ domainInfo, email }: SSOLinkingInfoProps) {
           i18nKey="doing_this_will_verify_affiliation_and_allow_log_in_2"
           components={[<strong />]} // eslint-disable-line react/jsx-key
           values={{ institutionName: domainInfo.university.name }}
-          // eslint-disable-next-line react/jsx-boolean-value
-          shouldUnescape={true}
+          shouldUnescape
           tOptions={{ interpolation: { escapeValue: true } }}
         />{' '}
         <a

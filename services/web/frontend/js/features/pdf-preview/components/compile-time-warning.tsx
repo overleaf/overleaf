@@ -90,8 +90,9 @@ function CompileTimeWarning() {
         <div className="warning-text">
           <Trans
             i18nKey="approaching_compile_timeout_limit_upgrade_for_more_compile_time"
-            // eslint-disable-next-line react/jsx-key
-            components={[<strong style={{ display: 'inline-block' }} />]}
+            components={{
+              strong: <strong style={{ display: 'inline-block' }} />,
+            }}
           />
         </div>
         <div className="upgrade-prompt">

@@ -1,7 +1,8 @@
-import { Trans } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 import getMeta from '../../../utils/meta'
 
 export default function ManagedAccountAlert() {
+  const { t } = useTranslation()
   const isManaged = getMeta('ol-isManagedAccount', false)
   const currentManagedUserAdminEmail: string = getMeta(
     'ol-currentManagedUserAdminEmail',
@@ -20,14 +21,9 @@ export default function ManagedAccountAlert() {
       <div>
         <div>
           <strong>
-            <Trans
-              i18nKey="account_managed_by_group_administrator"
-              values={{
-                admin: currentManagedUserAdminEmail,
-              }}
-              shouldUnescape
-              tOptions={{ interpolation: { escapeValue: true } }}
-            />
+            {t('account_managed_by_group_administrator', {
+              admin: currentManagedUserAdminEmail,
+            })}
           </strong>
         </div>
         <div>

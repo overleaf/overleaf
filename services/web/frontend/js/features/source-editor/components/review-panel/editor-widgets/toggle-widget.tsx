@@ -16,8 +16,10 @@ function ToggleWidget() {
       })}
       onClick={toggleReviewPanel}
     >
-      {/* eslint-disable-next-line react/jsx-key */}
-      <Trans i18nKey="track_changes_is_on" components={[<strong />]} />
+      <Trans
+        i18nKey="track_changes_is_on"
+        components={{ strong: <strong /> }}
+      />
     </button>
   )
 }

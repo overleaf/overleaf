@@ -23,6 +23,9 @@ i18n.use(initReactI18next).init({
     // translation strings asynchronously, we need to trigger a re-render once
     // they've loaded
     bindI18nStore: 'added',
+
+    // Disable automatic conversion of basic markup to React components
+    transSupportBasicHtmlNodes: false,
   },
 
   interpolation: {
