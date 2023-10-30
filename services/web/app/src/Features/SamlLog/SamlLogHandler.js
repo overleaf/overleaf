@@ -29,16 +29,7 @@ function log(req, data, samlAssertion) {
       if (data.error.tryAgain) {
         errSerialized.tryAgain = data.error.tryAgain
       }
-      logger.error(
-        {
-          providerId,
-          sessionId,
-          userId,
-          path,
-          query,
-        },
-        'SAML Error Encountered'
-      )
+      req.logger.addFields({ providerId, sessionId, userId })
       data.error = errSerialized
     }
 

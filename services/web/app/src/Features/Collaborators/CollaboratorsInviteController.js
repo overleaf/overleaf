@@ -85,6 +85,7 @@ const CollaboratorsInviteController = {
     let { email, privileges } = req.body
     const sendingUser = SessionManager.getSessionUser(req.session)
     const sendingUserId = sendingUser._id
+    req.logger.addFields({ email, sendingUserId })
 
     if (email === sendingUser.email) {
       logger.debug(

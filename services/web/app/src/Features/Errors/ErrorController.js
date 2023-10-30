@@ -1,6 +1,5 @@
 let ErrorController
 const Errors = require('./Errors')
-const logger = require('@overleaf/logger')
 const SessionManager = require('../Authentication/SessionManager')
 const SamlLogHandler = require('../SamlLog/SamlLogHandler')
 const HttpErrorHandler = require('./HttpErrorHandler')
@@ -25,20 +24,20 @@ module.exports = ErrorController = {
   handleError(error, req, res, next) {
     const shouldSendErrorResponse = !res.headersSent
     const user = SessionManager.getSessionUser(req.session)
+    req.logger.addFields({ err: error })
     // log errors related to SAML flow
     if (req.session && req.session.saml) {
+      req.logger.setLevel('error')
       SamlLogHandler.log(req, { error })
     }
     if (error.code === 'EBADCSRFTOKEN') {
-      logger.warn(
-        { err: error, url: req.url, method: req.method, user },
-        'invalid csrf'
-      )
+      req.logger.addFields({ user })
+      req.logger.setLevel('warn')
       if (shouldSendErrorResponse) {
         res.sendStatus(403)
       }
     } else if (error instanceof Errors.NotFoundError) {
-      logger.warn({ err: error, url: req.url }, 'not found error')
+      req.logger.setLevel('warn')
       if (shouldSendErrorResponse) {
         ErrorController.notFound(req, res)
       }
@@ -46,46 +45,40 @@ module.exports = ErrorController = {
       error instanceof URIError &&
       error.message.match(/^Failed to decode param/)
     ) {
-      logger.warn({ err: error, url: req.url }, 'Express URIError')
+      req.logger.setLevel('warn')
       if (shouldSendErrorResponse) {
         res.status(400)
         res.render('general/500', { title: 'Invalid Error' })
       }
     } else if (error instanceof Errors.ForbiddenError) {
-      logger.error({ err: error }, 'forbidden error')
+      req.logger.setLevel('warn')
       if (shouldSendErrorResponse) {
         ErrorController.forbidden(req, res)
       }
     } else if (error instanceof Errors.TooManyRequestsError) {
-      logger.warn({ err: error, url: req.url }, 'too many requests error')
+      req.logger.setLevel('warn')
       if (shouldSendErrorResponse) {
         res.sendStatus(429)
       }
     } else if (error instanceof Errors.InvalidError) {
-      logger.warn({ err: error, url: req.url }, 'invalid error')
+      req.logger.setLevel('warn')
       if (shouldSendErrorResponse) {
         res.status(400)
         plainTextResponse(res, error.message)
       }
     } else if (error instanceof Errors.InvalidNameError) {
-      logger.warn({ err: error, url: req.url }, 'invalid name error')
+      req.logger.setLevel('warn')
       if (shouldSendErrorResponse) {
         res.status(400)
         plainTextResponse(res, error.message)
       }
     } else if (error instanceof Errors.SAMLSessionDataMissing) {
-      logger.warn(
-        { err: error, url: req.url },
-        'missing SAML session data error'
-      )
+      req.logger.setLevel('warn')
       if (shouldSendErrorResponse) {
         HttpErrorHandler.badRequest(req, res, error.message)
       }
     } else {
-      logger.error(
-        { err: error, url: req.url, method: req.method, user },
-        'error passed to top level next middleware'
-      )
+      req.logger.setLevel('error')
       if (shouldSendErrorResponse) {
         ErrorController.serverError(req, res)
       }
@@ -97,21 +90,19 @@ module.exports = ErrorController = {
     }
   },
 
-  handleApiError(error, req, res, next) {
-    if (error instanceof Errors.NotFoundError) {
-      logger.warn({ err: error, url: req.url }, 'not found error')
+  handleApiError(err, req, res, next) {
+    req.logger.addFields({ err })
+    if (err instanceof Errors.NotFoundError) {
+      req.logger.setLevel('warn')
       res.sendStatus(404)
     } else if (
-      error instanceof URIError &&
-      error.message.match(/^Failed to decode param/)
+      err instanceof URIError &&
+      err.message.match(/^Failed to decode param/)
     ) {
-      logger.warn({ err: error, url: req.url }, 'Express URIError')
+      req.logger.setLevel('warn')
       res.sendStatus(400)
     } else {
-      logger.error(
-        { err: error, url: req.url, method: req.method },
-        'error passed to top level next middleware'
-      )
+      req.logger.setLevel('error')
       res.sendStatus(500)
     }
   },

@@ -45,14 +45,15 @@ function handleGeneric400Error(req, res, statusCode, message, info = {}) {
 
 let HttpErrorHandler
 module.exports = HttpErrorHandler = {
-  handleErrorByStatusCode(req, res, error, statusCode) {
+  handleErrorByStatusCode(req, res, err, statusCode) {
     const is400Error = statusCode >= 400 && statusCode < 500
     const is500Error = statusCode >= 500 && statusCode < 600
 
+    req.logger.addFields({ err })
     if (is400Error) {
-      logger.warn(error)
+      req.logger.setLevel('warn')
     } else if (is500Error) {
-      logger.error(error)
+      req.logger.setLevel('error')
     }
 
     if (statusCode === 403) {
@@ -68,10 +69,6 @@ module.exports = HttpErrorHandler = {
     } else if (is500Error) {
       handleGeneric500Error(req, res, statusCode)
     } else {
-      logger.error(
-        { err: error, statusCode },
-        `unable to handle error with status code ${statusCode}`
-      )
       res.sendStatus(500)
     }
   },
@@ -134,8 +131,9 @@ module.exports = HttpErrorHandler = {
     }
   },
 
-  legacyInternal(req, res, message, error) {
-    logger.error(error)
+  legacyInternal(req, res, message, err) {
+    req.logger.addFields({ err })
+    req.logger.setLevel('error')
     handleGeneric500Error(req, res, 500, message)
   },
 

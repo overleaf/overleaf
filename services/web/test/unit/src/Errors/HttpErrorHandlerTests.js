@@ -340,7 +340,10 @@ describe('HttpErrorHandler', function () {
           'message',
           error
         )
-        expect(this.logger.error).to.have.been.calledWith(error)
+        expect(this.req.logger.setLevel).to.have.been.calledWith('error')
+        expect(this.req.logger.addFields).to.have.been.calledWith({
+          err: error,
+        })
       })
 
       it('should print a message when no content-type is included', function () {
