@@ -28,7 +28,6 @@ type ReferencesContextValue = {
     doc: ShareJsDoc,
     shouldBroadcast: boolean
   ) => void
-  indexReferences: (docIds: string[], shouldBroadcast: boolean) => void
   indexAllReferences: (shouldBroadcast: boolean) => void
 }
 
@@ -68,20 +67,6 @@ export const ReferencesProvider: FC = ({ children }) => {
     [references.keys, setReferences]
   )
 
-  const indexReferences = useCallback(
-    (docIds: string[], shouldBroadcast: boolean) => {
-      postJSON(`/project/${projectId}/references/index`, {
-        body: {
-          docIds,
-          shouldBroadcast,
-        },
-      }).then((response: IndexReferencesResponse) => {
-        storeReferencesKeys(response.keys, false)
-      })
-    },
-    [projectId, storeReferencesKeys]
-  )
-
   const indexAllReferences = useCallback(
     (shouldBroadcast: boolean) => {
       postJSON(`/project/${projectId}/references/indexAll`, {
@@ -112,14 +97,14 @@ export const ReferencesProvider: FC = ({ children }) => {
         cacheEntry.timestamp > now - CACHE_LIFETIME &&
         cacheEntry.hash === sha1
       if (!isCached) {
-        indexReferences([docId], shouldBroadcast)
+        indexAllReferences(shouldBroadcast)
         setExistingIndexHash(existingIndexHash => ({
           ...existingIndexHash,
           [docId]: { hash: sha1, timestamp: now },
         }))
       }
     },
-    [existingIndexHash, indexReferences]
+    [existingIndexHash, indexAllReferences]
   )
 
   useEffect(() => {
@@ -171,10 +156,9 @@ export const ReferencesProvider: FC = ({ children }) => {
   const value = useMemo<ReferencesContextValue>(
     () => ({
       indexReferencesIfDocModified,
-      indexReferences,
       indexAllReferences,
     }),
-    [indexReferencesIfDocModified, indexReferences, indexAllReferences]
+    [indexReferencesIfDocModified, indexAllReferences]
   )
 
   return (
