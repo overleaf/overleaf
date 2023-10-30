@@ -118,4 +118,18 @@ describe('<CodeMirrorEditor/> in Visual mode with read-only permission', functio
     cy.get('img.ol-cm-graphics').should('have.length', 1)
     cy.findByRole('button', { name: 'Edit figure' }).should('not.exist')
   })
+
+  it('does not display editing features in the href tooltip', function () {
+    mountEditor('\\href{https://example.com/}{foo}\n\n')
+
+    // move the selection outside the link
+    cy.get('.cm-line').eq(2).click()
+
+    // put the selection inside the href command
+    cy.findByText('foo').click()
+
+    cy.findByRole('button', { name: 'Go to page' })
+    cy.findByLabelText('URL').should('be.disabled')
+    cy.findByRole('button', { name: 'Remove link' }).should('not.exist')
+  })
 })

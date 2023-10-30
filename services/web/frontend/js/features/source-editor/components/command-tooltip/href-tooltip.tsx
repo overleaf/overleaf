@@ -93,6 +93,7 @@ export const HrefTooltipContent: FC = () => {
                 view.dispatch(spec)
               }
             }}
+            disabled={state.readOnly}
           />
         </FormGroup>
       </form>
@@ -110,21 +111,23 @@ export const HrefTooltipContent: FC = () => {
         {t('open_link')}
       </Button>
 
-      <Button
-        type="button"
-        bsStyle="link"
-        className="ol-cm-command-tooltip-link"
-        onClick={() => {
-          const spec = removeLink(state)
-          if (spec) {
-            view.dispatch(spec)
-            view.focus()
-          }
-        }}
-      >
-        <Icon type="chain-broken" fw />
-        {t('remove_link')}
-      </Button>
+      {!state.readOnly && (
+        <Button
+          type="button"
+          bsStyle="link"
+          className="ol-cm-command-tooltip-link"
+          onClick={() => {
+            const spec = removeLink(state)
+            if (spec) {
+              view.dispatch(spec)
+              view.focus()
+            }
+          }}
+        >
+          <Icon type="chain-broken" fw />
+          {t('remove_link')}
+        </Button>
+      )}
     </div>
   )
 }
