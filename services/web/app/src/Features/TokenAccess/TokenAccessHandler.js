@@ -291,7 +291,7 @@ const TokenAccessHandler = {
     let hashPrefixStatus
 
     if (tokenHashPrefix) {
-      tokenHashPrefix = tokenHashPrefix.replace('#', '')
+      tokenHashPrefix = tokenHashPrefix.replace('#', '').replace('%23', '')
     }
 
     if (!tokenHashPrefix) {

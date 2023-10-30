@@ -719,5 +719,23 @@ describe('TokenAccessHandler', function () {
         }
       )
     })
+    it('it handles encoded hashtags', function () {
+      const token = 'zxpxjrwdtsgd'
+      const prefix = this.TokenAccessHandler.createTokenHashPrefix(token)
+
+      this.TokenAccessHandler.checkTokenHashPrefix(
+        token,
+        `%23${prefix}`,
+        'readOnly'
+      )
+
+      expect(this.Metrics.inc).to.have.been.calledWith(
+        'link-sharing.hash-check',
+        {
+          path: 'readOnly',
+          status: 'match',
+        }
+      )
+    })
   })
 })
