@@ -287,7 +287,7 @@ const TokenAccessHandler = {
     return hash.digest('hex').slice(0, 6)
   },
 
-  checkTokenHashPrefix(token, tokenHashPrefix, type) {
+  checkTokenHashPrefix(token, tokenHashPrefix, type, userId) {
     let hashPrefixStatus
 
     if (tokenHashPrefix) {
@@ -307,7 +307,7 @@ const TokenAccessHandler = {
 
     if (hashPrefixStatus === 'mismatch') {
       logger.info(
-        { tokenHashPrefix, hashPrefixStatus },
+        { tokenHashPrefix, hashPrefixStatus, userId },
         'mismatched token hash prefix'
       )
     }

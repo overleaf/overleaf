@@ -109,7 +109,12 @@ describe('TokenAccessController', function () {
       it('checks token hash', function () {
         expect(
           this.TokenAccessHandler.checkTokenHashPrefix
-        ).to.have.been.calledWith(this.token, 'prefix', 'readAndWrite')
+        ).to.have.been.calledWith(
+          this.token,
+          'prefix',
+          'readAndWrite',
+          this.user._id
+        )
       })
     })
 
@@ -153,7 +158,12 @@ describe('TokenAccessController', function () {
       it('sends missing hash to metrics', function () {
         expect(
           this.TokenAccessHandler.checkTokenHashPrefix
-        ).to.have.been.calledWith(this.token, undefined, 'readAndWrite')
+        ).to.have.been.calledWith(
+          this.token,
+          undefined,
+          'readAndWrite',
+          this.user._id
+        )
       })
     })
   })
@@ -192,7 +202,12 @@ describe('TokenAccessController', function () {
       it('sends checks if hash prefix matches', function () {
         expect(
           this.TokenAccessHandler.checkTokenHashPrefix
-        ).to.have.been.calledWith(this.token, 'prefix', 'readOnly')
+        ).to.have.been.calledWith(
+          this.token,
+          'prefix',
+          'readOnly',
+          this.user._id
+        )
       })
     })
 

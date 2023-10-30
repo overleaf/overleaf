@@ -233,7 +233,12 @@ async function grantTokenAccessReadAndWrite(req, res, next) {
   }
   const tokenType = TokenAccessHandler.TOKEN_TYPES.READ_AND_WRITE
 
-  TokenAccessHandler.checkTokenHashPrefix(token, tokenHashPrefix, tokenType)
+  TokenAccessHandler.checkTokenHashPrefix(
+    token,
+    tokenHashPrefix,
+    tokenType,
+    userId
+  )
 
   try {
     const [project, action] = await checkAndGetProjectOrResponseAction(
@@ -298,7 +303,12 @@ async function grantTokenAccessReadOnly(req, res, next) {
 
   const tokenType = TokenAccessHandler.TOKEN_TYPES.READ_ONLY
 
-  TokenAccessHandler.checkTokenHashPrefix(token, tokenHashPrefix, tokenType)
+  TokenAccessHandler.checkTokenHashPrefix(
+    token,
+    tokenHashPrefix,
+    tokenType,
+    userId
+  )
 
   const docPublishedInfo =
     await TokenAccessHandler.promises.getV1DocPublishedInfo(token)

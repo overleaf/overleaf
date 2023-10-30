@@ -650,6 +650,7 @@ describe('TokenAccessHandler', function () {
   })
 
   describe('checkTokenHashPrefix', function () {
+    const userId = 'abc123'
     it('sends "match" to metrics when prefix matches the prefix of the hash of the token', function () {
       const token = 'zxpxjrwdtsgd'
       const prefix = this.TokenAccessHandler.createTokenHashPrefix(token)
@@ -674,7 +675,8 @@ describe('TokenAccessHandler', function () {
       this.TokenAccessHandler.checkTokenHashPrefix(
         'anothertoken',
         `#${prefix}`,
-        'readOnly'
+        'readOnly',
+        userId
       )
 
       expect(this.Metrics.inc).to.have.been.calledWith(
@@ -685,7 +687,7 @@ describe('TokenAccessHandler', function () {
         }
       )
       expect(this.logger.info).to.have.been.calledWith(
-        { tokenHashPrefix: prefix, hashPrefixStatus: 'mismatch' },
+        { tokenHashPrefix: prefix, hashPrefixStatus: 'mismatch', userId },
         'mismatched token hash prefix'
       )
     })
