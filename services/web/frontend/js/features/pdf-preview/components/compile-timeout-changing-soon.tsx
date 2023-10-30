@@ -17,7 +17,7 @@ export const CompileTimeoutChangingSoon: FC<{
 }> = ({ isProjectOwner = false, handleDismissChangingSoon }) => {
   const { t } = useTranslation()
 
-  const compileTimeoutBlogLinks = [
+  const compileTimeoutChangesBlogLink = (
     /* eslint-disable-next-line jsx-a11y/anchor-has-content */
     <a
       aria-label={t('read_more_about_free_compile_timeouts_servers')}
@@ -26,7 +26,10 @@ export const CompileTimeoutChangingSoon: FC<{
       rel="noopener noreferrer"
       target="_blank"
       onClick={sendInfoClickEvent}
-    />,
+    />
+  )
+
+  const fixingCompileTimeoutsLearnLink = (
     /* eslint-disable-next-line jsx-a11y/anchor-has-content */
     <a
       aria-label={t('read_more_about_fix_prevent_timeout')}
@@ -34,8 +37,8 @@ export const CompileTimeoutChangingSoon: FC<{
       key="compileTimeoutBlogLink2"
       target="_blank"
       rel="noopener noreferrer"
-    />,
-  ]
+    />
+  )
 
   if (isProjectOwner) {
     return (
@@ -56,11 +59,14 @@ export const CompileTimeoutChangingSoon: FC<{
           <div>
             <p>
               <Trans
-                i18nKey="compile_timeout_will_be_reduced_project_exceeds_limit_speed_up_compile"
-                components={compileTimeoutBlogLinks}
-                values={{ date: 'October 27 2023' }}
-                shouldUnescape
-                tOptions={{ interpolation: { escapeValue: true } }}
+                i18nKey="compiles_on_our_free_plan_are_now_on_faster_servers"
+                components={[compileTimeoutChangesBlogLink]}
+              />
+            </p>
+            <p className="row-spaced">
+              <Trans
+                i18nKey="you_may_be_able_to_fix_issues_to_speed_up_the_compile"
+                components={[fixingCompileTimeoutsLearnLink]}
               />{' '}
               <Trans
                 i18nKey="and_you_can_upgrade_for_plenty_more_compile_time"
@@ -85,11 +91,12 @@ export const CompileTimeoutChangingSoon: FC<{
         <div>
           <p>
             <Trans
-              i18nKey="compile_timeout_will_be_reduced_project_exceeds_limit_speed_up_compile"
-              components={compileTimeoutBlogLinks}
-              values={{ date: 'October 27 2023' }}
-              shouldUnescape
-              tOptions={{ interpolation: { escapeValue: true } }}
+              i18nKey="compiles_on_our_free_plan_are_now_on_faster_servers"
+              components={[compileTimeoutChangesBlogLink]}
+            />{' '}
+            <Trans
+              i18nKey="you_may_be_able_to_fix_issues_to_speed_up_the_compile"
+              components={[fixingCompileTimeoutsLearnLink]}
             />
           </p>
           <p className="row-spaced">

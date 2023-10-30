@@ -298,6 +298,31 @@ describe('CompileManager', function () {
             .calledWith(null, sinon.match({ timeout: 60 }))
             .should.equal(true)
         })
+        describe('user is in the compile-timeout-20s-existing-users treatment', function () {
+          beforeEach(function () {
+            this.getAssignmentForMongoUser.callsFake((user, test, cb) => {
+              if (test === 'compile-backend-class-n2d') {
+                cb(null, { variant: 'n2d' })
+              }
+              if (test === 'compile-timeout-20s') {
+                cb(null, { variant: '20s' })
+              }
+              if (test === 'compile-timeout-20s-existing-users') {
+                cb(null, { variant: '20s' })
+              }
+            })
+          })
+
+          it('should reduce compile timeout to 20s', function () {
+            this.CompileManager.getProjectCompileLimits(
+              this.project_id,
+              this.callback
+            )
+            this.callback
+              .calledWith(null, sinon.match({ timeout: 20 }))
+              .should.equal(true)
+          })
+        })
       })
       describe('user registered after the cut off date', function () {
         beforeEach(function () {

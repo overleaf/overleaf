@@ -109,8 +109,18 @@ async function joinProject(req, res, next) {
           // New users will see a 10s warning and compile fail at 20s
           project.showNewCompileTimeoutUI = 'active'
         } else {
-          // Older users aren't limited to 20s, but will see a notice of upcoming changes if compile >20s
-          project.showNewCompileTimeoutUI = 'changing'
+          const existingUserTimeoutAssignment =
+            await SplitTestHandler.promises.getAssignmentForUser(
+              project.owner._id,
+              'compile-timeout-20s-existing-users'
+            )
+          if (existingUserTimeoutAssignment?.variant === '20s') {
+            // Older users in treatment see 10s warning and compile fail at 20s
+            project.showNewCompileTimeoutUI = 'active'
+          } else {
+            // Older users in control aren't limited to 20s, but will see a notice of upcoming changes if compile >20s
+            project.showNewCompileTimeoutUI = 'changing'
+          }
         }
       }
     }

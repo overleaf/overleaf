@@ -42,6 +42,7 @@ function TimeoutUpgradePromptNew() {
         compileTimeChanging={compileTimeChanging}
         handleEnableStopOnFirstErrorClick={handleEnableStopOnFirstErrorClick}
         lastCompileOptions={lastCompileOptions}
+        isProjectOwner={isProjectOwner}
       />
     </>
   )
@@ -123,12 +124,14 @@ type PreventTimeoutHelpMessageProps = {
   compileTimeChanging?: boolean
   lastCompileOptions: any
   handleEnableStopOnFirstErrorClick: () => void
+  isProjectOwner: boolean
 }
 
 const PreventTimeoutHelpMessage = memo(function PreventTimeoutHelpMessage({
   compileTimeChanging,
   lastCompileOptions,
   handleEnableStopOnFirstErrorClick,
+  isProjectOwner,
 }: PreventTimeoutHelpMessageProps) {
   const { t } = useTranslation()
 
@@ -139,38 +142,56 @@ const PreventTimeoutHelpMessage = memo(function PreventTimeoutHelpMessage({
     })
   }
 
+  const compileTimeoutChangesBlogLink = (
+    /* eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key */
+    <a
+      aria-label={t('read_more_about_free_compile_timeouts_servers')}
+      href="/blog/changes-to-free-compile-timeouts-and-servers"
+      rel="noopener noreferrer"
+      target="_blank"
+      onClick={sendInfoClickEvent}
+    />
+  )
+
   return (
     <PdfLogEntry
-      headerTitle={t('other_ways_to_prevent_compile_timeouts')}
+      headerTitle={t('reasons_for_compile_timeouts')}
       formattedContent={
         <>
           <p>
-            {t('you_may_be_able_to_prevent_a_compile_timeout')}
-            {compileTimeChanging && (
-              <>
-                {' '}
-                <Trans
-                  i18nKey="but_note_that_free_compile_timeout_limit_will_be_reduced_on_x_date"
-                  components={[
-                    // eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key
-                    <a
-                      aria-label={t(
-                        'read_more_about_free_compile_timeouts_servers'
-                      )}
-                      href="/blog/changes-to-free-compile-timeouts-and-servers"
-                      rel="noopener noreferrer"
-                      target="_blank"
-                      onClick={sendInfoClickEvent}
-                    />,
-                  ]}
-                  values={{ date: 'October 27 2023' }}
-                  shouldUnescape
-                  tOptions={{ interpolation: { escapeValue: true } }}
-                />
-              </>
-            )}
+            <em>
+              {compileTimeChanging ? (
+                <>
+                  {isProjectOwner ? (
+                    <Trans
+                      i18nKey="were_in_the_process_of_reducing_compile_timeout_which_may_affect_your_project"
+                      components={[compileTimeoutChangesBlogLink]}
+                    />
+                  ) : (
+                    <Trans
+                      i18nKey="were_in_the_process_of_reducing_compile_timeout_which_may_affect_this_project"
+                      components={[compileTimeoutChangesBlogLink]}
+                    />
+                  )}
+                </>
+              ) : (
+                <>
+                  {isProjectOwner ? (
+                    <Trans
+                      i18nKey="weve_recently_reduced_the_compile_timeout_limit_which_may_have_affected_your_project"
+                      components={[compileTimeoutChangesBlogLink]}
+                    />
+                  ) : (
+                    <Trans
+                      i18nKey="weve_recently_reduced_the_compile_timeout_limit_which_may_have_affected_this_project"
+                      components={[compileTimeoutChangesBlogLink]}
+                    />
+                  )}
+                </>
+              )}
+            </em>
           </p>
-          <p>{t('common_causes_of_compile_timeouts_are')}:</p>
+          <p>{t('common_causes_of_compile_timeouts_include')}:</p>
           <ul>
             <li>
               <Trans
@@ -233,7 +254,7 @@ const PreventTimeoutHelpMessage = memo(function PreventTimeoutHelpMessage({
         </>
       }
       // @ts-ignore
-      entryAriaLabel={t('other_ways_to_prevent_compile_timeouts')}
+      entryAriaLabel={t('reasons_for_compile_timeouts')}
       level="raw"
     />
   )

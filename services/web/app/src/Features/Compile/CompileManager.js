@@ -220,9 +220,23 @@ module.exports = CompileManager = {
                       if (assignment?.variant === '20s') {
                         if (owner.signUpDate > timeoutEnforcedCutoff) {
                           limits.timeout = 20
+                          callback(null, limits)
+                        } else {
+                          SplitTestHandler.getAssignmentForMongoUser(
+                            owner,
+                            'compile-timeout-20s-existing-users',
+                            (err, assignmentExistingUsers) => {
+                              if (err) return callback(err)
+                              if (assignmentExistingUsers?.variant === '20s') {
+                                limits.timeout = 20
+                              }
+                              callback(null, limits)
+                            }
+                          )
                         }
+                      } else {
+                        callback(null, limits)
                       }
-                      callback(null, limits)
                     }
                   )
                 } else {
