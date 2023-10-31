@@ -1,6 +1,6 @@
 services:
   cypress:
-    image: cypress/included:13.3.0
+    image: cypress/included:13.3.3
     volumes:
       - ../../:/overleaf
       - /tmp/.X11-unix:/tmp/.X11-unix
