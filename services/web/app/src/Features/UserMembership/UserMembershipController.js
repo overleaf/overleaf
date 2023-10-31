@@ -16,15 +16,13 @@ const Errors = require('../Errors/Errors')
 const EmailHelper = require('../Helpers/EmailHelper')
 const { csvAttachment } = require('../../infrastructure/Response')
 const { UserIsManagerError } = require('./UserMembershipErrors')
+const { SSOConfig } = require('../../models/SSOConfig')
 const CSVParser = require('json2csv').Parser
-const SSOConfigManager = require('../../../../modules/managed-users/app/src/SSOConfigManager')
 
 async function manageGroupMembers(req, res, next) {
   const { entity, entityConfig } = req
 
-  const ssoConfig = await SSOConfigManager.promises.getSSOConfig(
-    entity.ssoConfig
-  )
+  const ssoConfig = await SSOConfig.findById(entity.ssoConfig).exec()
   return entity.fetchV1Data(function (error, entity) {
     if (error != null) {
       return next(error)
