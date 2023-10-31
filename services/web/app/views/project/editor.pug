@@ -7,9 +7,8 @@ block vars
 	- var suppressCookieBanner = true
 	- metadata.robotsNoindexNofollow = true
 
-block css
-	each file in entrypointStyles('ide')
-		link(rel='stylesheet', href=file)
+block entrypointVar
+	- entrypoint = 'ide'
 
 block content
 	.editor(ng-controller="IdeController").full-size
@@ -119,9 +118,7 @@ block content
 block append meta
 	include ./editor/meta
 
-block foot-scripts
+block prepend foot-scripts
 	each file in (useOpenTelemetry ? entrypointScripts("tracing") : [])
 		script(type="text/javascript", nonce=scriptNonce, src=file)
 	script(type="text/javascript", nonce=scriptNonce, src=(wsUrl || '/socket.io') + '/socket.io.js')
-	each file in entrypointScripts("ide")
-		script(type="text/javascript", nonce=scriptNonce, src=file)
