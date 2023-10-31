@@ -6,7 +6,6 @@ import { mockScope } from '../helpers/mock-scope'
 import { EditorProviders } from '../../../helpers/editor-providers'
 import CodeMirrorEditor from '../../../../../frontend/js/features/source-editor/components/codemirror-editor'
 import { activeEditorLine } from '../helpers/active-editor-line'
-import { User } from '../../../../../types/user'
 
 const Container: FC = ({ children }) => (
   <div style={{ width: 785, height: 785 }}>{children}</div>
@@ -15,6 +14,7 @@ const Container: FC = ({ children }) => (
 describe('autocomplete', { scrollBehavior: false }, function () {
   beforeEach(function () {
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
+    window.metaAttributesCache.set('ol-showSymbolPalette', true)
     cy.interceptEvents()
     cy.interceptSpelling()
   })
@@ -858,39 +858,26 @@ describe('autocomplete', { scrollBehavior: false }, function () {
   it('displays symbol completions in autocomplete when the feature is enabled', function () {
     const scope = mockScope()
 
-    const createUser = (values: Partial<User>): User => ({
+    window.metaAttributesCache.set('ol-showSymbolPalette', true)
+    const user = {
       id: '123abd',
       email: 'testuser@example.com',
-      ...values,
-    })
-
-    const testSymbolAutocomplete = (user: User) => {
-      cy.mount(
-        <Container>
-          <EditorProviders user={user} scope={scope}>
-            <CodeMirrorEditor />
-          </EditorProviders>
-        </Container>
-      )
-      // put the cursor on a blank line to type in
-      cy.get('.cm-line').eq(16).as('line')
-      cy.get('@line').click()
-
-      // type the name of a symbol
-      cy.get('@line').type(' \\alpha')
-
-      cy.findAllByRole('listbox').should('have.length', 1)
     }
+    cy.mount(
+      <Container>
+        <EditorProviders user={user} scope={scope}>
+          <CodeMirrorEditor />
+        </EditorProviders>
+      </Container>
+    )
+    // put the cursor on a blank line to type in
+    cy.get('.cm-line').eq(16).as('line')
+    cy.get('@line').click()
 
-    // when the feature is not enabled, the symbol completion must not appear
-    testSymbolAutocomplete(createUser({ features: { symbolPalette: false } }))
+    // type the name of a symbol
+    cy.get('@line').type(' \\alpha')
 
-    cy.findAllByRole('option', {
-      name: /^\\alpha\s+Greek$/,
-    }).should('have.length', 0)
-
-    // when the feature is enabled, the symbol completion must appear
-    testSymbolAutocomplete(createUser({ features: { symbolPalette: true } }))
+    cy.findAllByRole('listbox').should('have.length', 1)
 
     // the symbol completion should exist
     cy.findAllByRole('option', {
@@ -898,6 +885,35 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     }).should('have.length', 1)
 
     cy.get('body').should('contain', 'Lowercase Greek letter alpha')
+  })
+
+  it('does not display symbol completions in autocomplete when the feature is disabled', function () {
+    const scope = mockScope()
+
+    window.metaAttributesCache.set('ol-showSymbolPalette', false)
+    const user = {
+      id: '123abd',
+      email: 'testuser@example.com',
+    }
+    cy.mount(
+      <Container>
+        <EditorProviders user={user} scope={scope}>
+          <CodeMirrorEditor />
+        </EditorProviders>
+      </Container>
+    )
+    // put the cursor on a blank line to type in
+    cy.get('.cm-line').eq(16).as('line')
+    cy.get('@line').click()
+
+    // type the name of a symbol
+    cy.get('@line').type(' \\alpha')
+
+    cy.findAllByRole('listbox').should('have.length', 1)
+
+    cy.findAllByRole('option', {
+      name: /^\\alpha\s+Greek$/,
+    }).should('have.length', 0)
   })
 
   it('displays environment completion when typing up to closing brace', function () {
