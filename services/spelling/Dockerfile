@@ -2,7 +2,7 @@
 # Instead run bin/update_build_scripts from
 # https://github.com/overleaf/internal/
 
-FROM node:18.18.0-buster as base
+FROM node:18.18.2-buster as base
 
 WORKDIR /overleaf/services/spelling
 COPY services/spelling/install_deps.sh /overleaf/services/spelling/
