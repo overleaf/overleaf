@@ -32,7 +32,16 @@ const UserSchema = new Schema(
     institution: { type: String, default: '' },
     hashedPassword: String,
     enrollment: {
-      // sso: { type: Boolean, default: false },
+      sso: [
+        {
+          groupId: {
+            type: ObjectId,
+            ref: 'Subscription',
+          },
+          linkedAt: Date,
+          primary: { type: Boolean, default: false },
+        },
+      ],
       managedBy: {
         type: ObjectId,
         ref: 'Subscription',
