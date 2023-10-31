@@ -212,6 +212,7 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
           return userSettings.overallTheme
         }
       }
+      return ''
     }
 
     res.locals.buildStylesheetPath = function (cssFileName) {
