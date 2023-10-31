@@ -171,8 +171,16 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
       return staticFilesBase + (webpackManifest[jsFile] || '/' + jsFile)
     }
 
+    let runtimeEmitted = false
+    const runtimeChunk = webpackManifest['runtime.js']
     res.locals.entrypointScripts = function (entrypoint) {
-      const chunks = getWebpackAssets(entrypoint, 'js')
+      // Each "entrypoint" contains the runtime chunk as imports.
+      // Loading the entrypoint twice results in broken execution.
+      let chunks = getWebpackAssets(entrypoint, 'js')
+      if (runtimeEmitted) {
+        chunks = chunks.filter(chunk => chunk !== runtimeChunk)
+      }
+      runtimeEmitted = true
       return chunks.map(chunk => staticFilesBase + chunk)
     }
 

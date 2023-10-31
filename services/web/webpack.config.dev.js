@@ -93,6 +93,8 @@ module.exports = merge(base, {
   },
 
   optimization: {
-    runtimeChunk: process.env.WEBPACK_RUNTIME_CHUNK || false,
+    runtimeChunk: {
+      name: 'runtime',
+    },
   },
 })
