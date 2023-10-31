@@ -157,9 +157,7 @@ async function _addInstitutionEmail(userId, email, providerId, auditLog) {
     throw new Errors.NotFoundError('user not found')
   }
   const emailAlreadyAssociated = user.emails.find(e => e.email === email)
-  if (emailAlreadyAssociated && emailAlreadyAssociated.confirmedAt) {
-    await UserUpdater.promises.updateUser(query, update)
-  } else if (emailAlreadyAssociated) {
+  if (emailAlreadyAssociated) {
     await UserUpdater.promises.updateUser(query, update)
   } else {
     await UserUpdater.promises.addEmailAddress(
