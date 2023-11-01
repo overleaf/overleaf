@@ -112,6 +112,10 @@ The ${settings.appName} Team - ${settings.siteUrl}\
         title:
           typeof content.title === 'function' ? content.title(opts) : undefined,
         greeting: content.greeting(opts),
+        highlightedText:
+          typeof content.highlightedText === 'function'
+            ? content.highlightedText(opts)
+            : undefined,
         message: content.message(opts),
         StringHelper,
       })
@@ -239,6 +243,32 @@ templates.confirmEmail = ctaTemplate({
   },
   ctaURL(opts) {
     return opts.confirmEmailUrl
+  },
+})
+
+templates.confirmCode = NoCTAEmailTemplate({
+  greeting(opts) {
+    return ''
+  },
+  subject(opts) {
+    return `Confirm your email address on Overleaf (${opts.confirmCode})`
+  },
+  title(opts) {
+    return 'Confirm your email address'
+  },
+  message(opts, isPlainText) {
+    const msg = [
+      `Welcome to Overleaf! We're so glad you joined us.`,
+      'Use this 6-digit confirmation code to finish your setup.',
+    ]
+
+    if (isPlainText && opts.confirmCode) {
+      msg.push(opts.confirmCode)
+    }
+    return msg
+  },
+  highlightedText(opts) {
+    return opts.confirmCode
   },
 })
 

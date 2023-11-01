@@ -94,13 +94,19 @@ async function createNewUser(attributes, options = {}) {
     emailData.samlProviderId = attributes.samlIdentifiers[0].providerId
   }
 
+  const affiliationOptions = options.affiliationOptions || {}
+
+  if (options.confirmedAt) {
+    emailData.confirmedAt = options.confirmedAt
+    affiliationOptions.confirmedAt = options.confirmedAt
+  }
   user.emails = [emailData]
 
   user = await user.save()
 
   if (Features.hasFeature('affiliations')) {
     try {
-      user = await _addAffiliation(user, options.affiliationOptions || {})
+      user = await _addAffiliation(user, affiliationOptions)
     } catch (error) {
       if (options.requireAffiliation) {
         await UserDeleter.promises.deleteMongoUser(user._id)

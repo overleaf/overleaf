@@ -29,9 +29,14 @@ module.exports = _.template(`\
 											<%= paragraph %>
 										</p>
 									<% }) %>
-								</td>
+                  <% if (highlightedText) { %>
+                    <div style="text-align: center; color: #1B222C; font-size: 20px; margin: 16px 0; padding: 16px 8px; border-radius: 8px; background: #F4F5F6;">
+                      <b><%= highlightedText %></b>
+                    </div>
+                  <% } %>
+                </td>
 							</tr>
-						</tr>
+            </tr>
 					</table>
 				</th>
 			</tr>

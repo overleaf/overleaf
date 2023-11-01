@@ -6,10 +6,12 @@ const Errors = require('../Errors/Errors')
 const UserUpdater = require('./UserUpdater')
 const UserGetter = require('./UserGetter')
 const { callbackify, promisify } = require('util')
+const crypto = require('crypto')
 
 // Reject email confirmation tokens after 90 days
 const TOKEN_EXPIRY_IN_S = 90 * 24 * 60 * 60
 const TOKEN_USE = 'email_confirmation'
+const CONFIRMATION_CODE_EXPIRY_IN_S = 10 * 60
 
 function sendConfirmationEmail(userId, email, emailTemplate, callback) {
   if (arguments.length === 3) {
@@ -44,6 +46,26 @@ function sendConfirmationEmail(userId, email, emailTemplate, callback) {
       EmailHandler.sendEmail(emailTemplate, emailOptions, callback)
     }
   )
+}
+
+async function sendConfirmationCode(email) {
+  if (!EmailHelper.parseEmail(email)) {
+    throw new Error('invalid email')
+  }
+
+  const confirmCode = crypto.randomInt(0, 1_000_000).toString().padStart(6, '0')
+  const confirmCodeExpiresTimestamp =
+    Date.now() + CONFIRMATION_CODE_EXPIRY_IN_S * 1000
+
+  await EmailHandler.promises.sendEmail('confirmCode', {
+    to: email,
+    confirmCode,
+  })
+
+  return {
+    confirmCode,
+    confirmCodeExpiresTimestamp,
+  }
 }
 
 async function sendReconfirmationEmail(userId, email) {
@@ -112,6 +134,10 @@ const UserEmailsConfirmationHandler = {
 
 UserEmailsConfirmationHandler.promises = {
   sendConfirmationEmail: promisify(sendConfirmationEmail),
+  confirmEmailFromToken: promisify(
+    UserEmailsConfirmationHandler.confirmEmailFromToken
+  ),
+  sendConfirmationCode,
 }
 
 module.exports = UserEmailsConfirmationHandler
