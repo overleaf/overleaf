@@ -78,7 +78,7 @@ mixin plans_v2_table(period, config)
 							data-toggle="tooltip"
 							title=translate(featuresPerSection.dividerInfo),
 							data-placement="top"
-)
+						)
 						//- will only appear on screen width < 768px (using CSS)
 						span.plans-v2-table-divider-learn-more-container
 							span (
@@ -88,6 +88,7 @@ mixin plans_v2_table(period, config)
 								data-placement="top"
 							) #{translate("learn_more_lowercase")}
 							span )
+						span.sr-only #{translate(featuresPerSection.dividerInfo)}
 		for feature, featureIndex in featuresPerSection.items
 			unless !showNewCompileTimeoutVariant && feature.feature === 'compile_servers'
 				tr(
@@ -119,6 +120,7 @@ mixin plans_v2_table(period, config)
 											data-placement="top"
 										) #{translate("learn_more_lowercase")}
 										span )
+									span.sr-only #{translate("compile_timeout_short_info_basic")}
 								else
 									i.fa.fa-question-circle.plans-v2-table-feature-name-question-icon(
 										data-toggle="tooltip"
@@ -134,6 +136,7 @@ mixin plans_v2_table(period, config)
 											data-placement="top"
 										) #{translate("learn_more_lowercase")}
 										span )
+									span.sr-only #{translate(feature.info)}
 							else
 								| #{translate(feature.feature)}
 					for plan, planIndex in Object.keys(feature.plans)
@@ -415,6 +418,7 @@ mixin group_plans_license_picker()
 					data-placement="bottom"
 				) #{translate("learn_more_lowercase")}
 				span )
+			span.sr-only #{translate("apply_educational_discount_info")}
 
 mixin btn_buy_individual(highlighted, discountHighlighted, eventTrackingKey, subscriptionPlan, period) 
 	a.btn.plans-v2-table-btn-buy(
