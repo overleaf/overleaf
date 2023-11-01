@@ -32,7 +32,7 @@
 }
 
 #onboarding-data-collection {
-  width: 720px;
+  max-width: 720px;
   padding: 24px;
   margin: 0 auto;
   background: #fff;
@@ -40,9 +40,13 @@
   flex-direction: column;
   gap: 24px;
 
-  p {
+  .onboarding-question-title {
     font-size: 20px;
-    margin-bottom: 5px;
+  }
+
+  p {
+    font-size: 16px;
+    margin-bottom: 16px;
   }
 
   .logo {
@@ -59,6 +63,11 @@
       display: flex;
       justify-content: stretch;
       gap: 24px;
+
+      @media (max-width: @screen-xs-max) {
+        flex-direction: column;
+        gap: 0;
+      }
 
       .form-group {
         flex-grow: 1;
