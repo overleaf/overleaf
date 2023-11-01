@@ -1,9 +1,8 @@
-const APP_ROOT = '../../../../app/src'
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 const { expect } = require('chai')
 
-const modulePath = `${APP_ROOT}/Features/SamlLog/SamlLogHandler`
+const modulePath = '../../../../app/src/Features/SamlLog/SamlLogHandler'
 
 describe('SamlLogHandler', function () {
   let SamlLog, SamlLogHandler, SamlLogModel
