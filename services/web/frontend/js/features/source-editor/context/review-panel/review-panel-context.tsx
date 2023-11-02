@@ -1,5 +1,10 @@
 import { createContext, useContext } from 'react'
 import useAngularReviewPanelState from './hooks/use-angular-review-panel-state'
+import {
+  ReviewPanelReactIdeUpdaterFnsContext,
+  ReviewPanelReactIdeValueContext,
+} from '@/features/ide-react/context/review-panel/review-panel-context'
+import { useIdeContext } from '@/shared/context/ide-context'
 import { ReviewPanelState } from './types/review-panel-state'
 
 const ReviewPanelValueContext = createContext<
@@ -27,7 +32,11 @@ export function ReviewPanelProvider({ children }: ReviewPanelProviderProps) {
 }
 
 export function useReviewPanelValueContext() {
-  const context = useContext(ReviewPanelValueContext)
+  const contextAngularIde = useContext(ReviewPanelValueContext)
+  const contextReactIde = useContext(ReviewPanelReactIdeValueContext)
+  const { isReactIde } = useIdeContext()
+  const context = isReactIde ? contextReactIde : contextAngularIde
+
   if (!context) {
     throw new Error(
       'ReviewPanelValueContext is only available inside ReviewPanelProvider'
@@ -37,7 +46,11 @@ export function useReviewPanelValueContext() {
 }
 
 export function useReviewPanelUpdaterFnsContext() {
-  const context = useContext(ReviewPanelUpdaterFnsContext)
+  const contextAngularIde = useContext(ReviewPanelUpdaterFnsContext)
+  const contextReactIde = useContext(ReviewPanelReactIdeUpdaterFnsContext)
+  const { isReactIde } = useIdeContext()
+  const context = isReactIde ? contextReactIde : contextAngularIde
+
   if (!context) {
     throw new Error(
       'ReviewPanelUpdaterFnsContext is only available inside ReviewPanelProvider'

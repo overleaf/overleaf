@@ -64,7 +64,7 @@ function CodeMirrorEditor() {
         <CodeMirrorSearch />
         <CodeMirrorToolbar />
         <CodeMirrorCommandTooltip />
-        {isReviewPanelReact && !isReactIde && <ReviewPanel />}
+        {(isReviewPanelReact || isReactIde) && <ReviewPanel />}
         {sourceEditorComponents.map(
           ({ import: { default: Component }, path }) => (
             <Component key={path} />

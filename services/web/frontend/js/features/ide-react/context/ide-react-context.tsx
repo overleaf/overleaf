@@ -9,6 +9,7 @@ import React, {
 } from 'react'
 import { ReactScopeValueStore } from '@/features/ide-react/scope-value-store/react-scope-value-store'
 import populateLayoutScope from '@/features/ide-react/scope-adapters/layout-context-adapter'
+import populateReviewPanelScope from '@/features/ide-react/scope-adapters/review-panel-context-adapter'
 import { IdeProvider } from '@/shared/context/ide-context'
 import {
   createIdeEventEmitter,
@@ -22,8 +23,8 @@ import { postJSON } from '@/infrastructure/fetch-json'
 import { EventLog } from '@/features/ide-react/editor/event-log'
 import { populateSettingsScope } from '@/features/ide-react/scope-adapters/settings-adapter'
 import { populateOnlineUsersScope } from '@/features/ide-react/context/online-users-context'
-import { ReactScopeEventEmitter } from '@/features/ide-react/scope-event-emitter/react-scope-event-emitter'
 import { populateReferenceScope } from '@/features/ide-react/context/references-context'
+import { ReactScopeEventEmitter } from '@/features/ide-react/scope-event-emitter/react-scope-event-emitter'
 
 type IdeReactContextValue = {
   projectId: string
@@ -75,6 +76,7 @@ function createReactScopeValueStore() {
   populateOnlineUsersScope(scopeStore)
   populateReferenceScope(scopeStore)
   populateFileTreeScope(scopeStore)
+  populateReviewPanelScope(scopeStore)
 
   scopeStore.allowNonExistentPath('hasLintingError')
   scopeStore.allowNonExistentPath('loadingThreads')

@@ -7,16 +7,22 @@ import {
   ReviewPanelProvider,
   useReviewPanelValueContext,
 } from '../../context/review-panel/review-panel-context'
+import { ReviewPanelReactIdeProvider } from '@/features/ide-react/context/review-panel/review-panel-context'
 import { isCurrentFileView } from '../../utils/sub-view'
+import { useLayoutContext } from '@/shared/context/layout-context'
+import { useIdeContext } from '@/shared/context/ide-context'
+import classnames from 'classnames'
 
 type ReviewPanelViewProps = {
   parentDomNode: Element
 }
 
 function ReviewPanelView({ parentDomNode }: ReviewPanelViewProps) {
-  const { subView } = useReviewPanelValueContext()
+  const { subView, loadingThreads } = useReviewPanelValueContext()
+  const { reviewPanelOpen } = useLayoutContext()
+  const { isReactIde } = useIdeContext()
 
-  return ReactDOM.createPortal(
+  const content = (
     <>
       <EditorWidgets />
       {isCurrentFileView(subView) ? (
@@ -24,15 +30,43 @@ function ReviewPanelView({ parentDomNode }: ReviewPanelViewProps) {
       ) : (
         <OverviewContainer />
       )}
-    </>,
+    </>
+  )
+
+  return ReactDOM.createPortal(
+    isReactIde ? (
+      <div
+        className={classnames('review-panel', {
+          'rp-state-current-file': subView === 'cur_file',
+          'rp-state-current-file-expanded':
+            subView === 'cur_file' && reviewPanelOpen,
+          'rp-state-current-file-mini':
+            subView === 'cur_file' && !reviewPanelOpen,
+          'rp-state-overview': subView === 'overview',
+          // 'rp-size-mini': ui.miniReviewPanelVisible,
+          'rp-size-expanded': reviewPanelOpen,
+          // 'rp-layout-left': reviewPanel.layoutToLeft,
+          'rp-loading-threads': loadingThreads,
+        })}
+      >
+        {content}
+      </div>
+    ) : (
+      content
+    ),
     parentDomNode
   )
 }
 
 function ReviewPanel() {
   const view = useCodeMirrorViewContext()
+  const { isReactIde } = useIdeContext()
 
-  return (
+  return isReactIde ? (
+    <ReviewPanelReactIdeProvider>
+      <ReviewPanelView parentDomNode={view.scrollDOM} />
+    </ReviewPanelReactIdeProvider>
+  ) : (
     <ReviewPanelProvider>
       <ReviewPanelView parentDomNode={view.scrollDOM} />
     </ReviewPanelProvider>
