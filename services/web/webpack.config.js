@@ -163,6 +163,19 @@ module.exports = {
               },
             },
           },
+          // Compile Less off the main event loop
+          {
+            loader: 'thread-loader',
+            options: {
+              // keep workers alive for dev-server, and shut them down when not needed
+              poolTimeout:
+                process.env.NODE_ENV === 'development' ? 10 * 60 * 1000 : 500,
+              // bring up more workers after they timed out
+              poolRespawn: true,
+              // limit concurrency (one per entrypoint and let the small includes queue up)
+              workers: 6,
+            },
+          },
           // Compiles the Less syntax to CSS
           { loader: 'less-loader' },
         ],

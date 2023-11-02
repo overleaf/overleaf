@@ -332,6 +332,7 @@
     "socket.io-mock": "^1.3.1",
     "strict-event-emitter": "^0.5.1",
     "terser-webpack-plugin": "^5.3.9",
+    "thread-loader": "^4.0.2",
     "timekeeper": "^2.2.0",
     "to-string-loader": "^1.2.0",
     "typescript": "^5.0.4",

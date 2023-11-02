@@ -1,0 +1,81 @@
+diff --git a/node_modules/thread-loader/dist/WorkerPool.js b/node_modules/thread-loader/dist/WorkerPool.js
+index 4145779..f0ff068 100644
+--- a/node_modules/thread-loader/dist/WorkerPool.js
++++ b/node_modules/thread-loader/dist/WorkerPool.js
+@@ -258,6 +258,19 @@ class PoolWorker {
+           finalCallback();
+           break;
+         }
++      case 'logMessage':
++        {
++          const {
++            data: { loggerName, methodName, args }
++          } = message;
++          const {
++            data: jobData
++          } = this.jobs[id];
++          const logger = jobData.getLogger(loggerName);
++          logger[methodName].apply(logger, args);
++          finalCallback();
++          break;
++        }
+       case 'emitWarning':
+         {
+           const {
+diff --git a/node_modules/thread-loader/dist/index.js b/node_modules/thread-loader/dist/index.js
+index 75cd30f..d834af6 100644
+--- a/node_modules/thread-loader/dist/index.js
++++ b/node_modules/thread-loader/dist/index.js
+@@ -43,6 +43,7 @@ function pitch() {
+     sourceMap: this.sourceMap,
+     emitError: this.emitError,
+     emitWarning: this.emitWarning,
++    getLogger: this.getLogger,
+     loadModule: this.loadModule,
+     resolve: this.resolve,
+     getResolve: this.getResolve,
+diff --git a/node_modules/thread-loader/dist/worker.js b/node_modules/thread-loader/dist/worker.js
+index 8e67959..aca94f1 100644
+--- a/node_modules/thread-loader/dist/worker.js
++++ b/node_modules/thread-loader/dist/worker.js
+@@ -90,6 +90,22 @@ function writeJson(data) {
+   writePipeWrite(lengthBuffer);
+   writePipeWrite(messageBuffer);
+ }
++const LOGGER_METHODS = ['error', 'warn', 'info', 'log', 'debug', 'trace', 'group', 'groupEnd', 'groupCollapsed', 'status', 'clear', 'profile', 'profileEnd'];
++class Logger {
++  constructor(id, loggerName) {
++    this.id = id
++    this.loggerName = loggerName
++    for (const methodName of LOGGER_METHODS) {
++      this[methodName] = (...args) => {
++        writeJson({
++          type: 'logMessage',
++          id: this.id,
++          data: { loggerName, methodName, args }
++        })
++      }
++    }
++  }
++}
+ const queue = (0, _queue.default)(({
+   id,
+   data
+@@ -190,6 +206,7 @@ const queue = (0, _queue.default)(({
+           }
+           return options;
+         },
++        getLogger: (name) => new Logger(id, name),
+         emitWarning: warning => {
+           writeJson({
+             type: 'emitWarning',
+@@ -211,6 +228,9 @@ const queue = (0, _queue.default)(({
+           module._compile(code, filename); // eslint-disable-line no-underscore-dangle
+           return module.exports;
+         },
++        addDependency: filename => {
++          buildDependencies.push(filename);
++        },
+         addBuildDependency: filename => {
+           buildDependencies.push(filename);
+         },
