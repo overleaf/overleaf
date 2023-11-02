@@ -1,1 +1,1 @@
-require(`../../../../../test/acceptance/src/helpers/InitApp`)
+require('../../../../../test/acceptance/src/helpers/InitApp')

@@ -9,7 +9,7 @@ const settings = require('@overleaf/settings')
 
 const CollaboratorsGetter =
   require('../Collaborators/CollaboratorsGetter').promises
-const UserGetter = require('../User/UserGetter.js').promises
+const UserGetter = require('../User/UserGetter').promises
 
 const tpdsUrl = _.get(settings, ['apis', 'thirdPartyDataStore', 'url'])
 

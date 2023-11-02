@@ -1,7 +1,6 @@
 const { expect } = require('chai')
 const cheerio = require('cheerio')
-const WEB_PATH = '../../../../..'
-const UserHelper = require(`${WEB_PATH}/test/acceptance/src/helpers/UserHelper`)
+const UserHelper = require('../../../../../test/acceptance/src/helpers/UserHelper')
 
 describe('Launchpad', function () {
   const adminEmail = 'admin@example.com'

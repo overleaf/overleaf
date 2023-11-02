@@ -1,4 +1,4 @@
-const App = require('../../../../app.js')
+const App = require('../../../../app')
 const QueueWorkers = require('../../../../app/src/infrastructure/QueueWorkers')
 const MongoHelper = require('./MongoHelper')
 const RedisHelper = require('./RedisHelper')

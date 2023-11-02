@@ -1,4 +1,4 @@
-const { BackwardCompatibleError } = require('../Errors/Errors.js')
+const { BackwardCompatibleError } = require('../Errors/Errors')
 
 class UrlFetchFailedError extends BackwardCompatibleError {}
 

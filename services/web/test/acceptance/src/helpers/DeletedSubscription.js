@@ -4,7 +4,7 @@ const SubscriptionUpdater = require('../../../../app/src/Features/Subscription/S
 const SubscriptionModel =
   require('../../../../app/src/models/Subscription').Subscription
 const DeletedSubscriptionModel =
-  require(`../../../../app/src/models/DeletedSubscription`).DeletedSubscription
+  require('../../../../app/src/models/DeletedSubscription').DeletedSubscription
 
 class DeletedSubscription {
   constructor(options = {}) {

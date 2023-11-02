@@ -2,7 +2,7 @@ const sinon = require('sinon')
 const { expect } = require('chai')
 const SandboxedModule = require('sandboxed-module')
 const { ObjectId } = require('mongodb')
-const Errors = require('../../../../app/src/Features/Errors/Errors.js')
+const Errors = require('../../../../app/src/Features/Errors/Errors')
 
 const MODULE_PATH =
   '../../../../app/src/Features/Authorization/AuthorizationMiddleware.js'

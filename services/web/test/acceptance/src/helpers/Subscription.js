@@ -7,7 +7,7 @@ const PermissionsManager = require('../../../../app/src/Features/Authorization/P
 const SubscriptionModel =
   require('../../../../app/src/models/Subscription').Subscription
 const DeletedSubscriptionModel =
-  require(`../../../../app/src/models/DeletedSubscription`).DeletedSubscription
+  require('../../../../app/src/models/DeletedSubscription').DeletedSubscription
 
 class Subscription {
   constructor(options = {}) {

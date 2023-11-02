@@ -11,13 +11,12 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const APP_PATH = '../../../app/src'
 
-const LockManager = require(`${APP_PATH}/infrastructure/LockManager`)
-const ProjectCreationHandler = require(`${APP_PATH}/Features/Project/ProjectCreationHandler.js`)
-const ProjectGetter = require(`${APP_PATH}/Features/Project/ProjectGetter.js`)
-const ProjectEntityMongoUpdateHandler = require(`${APP_PATH}/Features/Project/ProjectEntityMongoUpdateHandler.js`)
-const UserCreator = require(`${APP_PATH}/Features/User/UserCreator.js`)
+const LockManager = require('../../../app/src/infrastructure/LockManager')
+const ProjectCreationHandler = require('../../../app/src/Features/Project/ProjectCreationHandler')
+const ProjectGetter = require('../../../app/src/Features/Project/ProjectGetter')
+const ProjectEntityMongoUpdateHandler = require('../../../app/src/Features/Project/ProjectEntityMongoUpdateHandler')
+const UserCreator = require('../../../app/src/Features/User/UserCreator')
 
 const { expect } = require('chai')
 const _ = require('lodash')

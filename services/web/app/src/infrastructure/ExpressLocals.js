@@ -28,7 +28,7 @@ let webpackManifest
 switch (process.env.NODE_ENV) {
   case 'production':
     // Only load webpack manifest file in production.
-    webpackManifest = require(`../../../public/manifest.json`)
+    webpackManifest = require('../../../public/manifest.json')
     break
   case 'development': {
     // In dev, fetch the manifest from the webpack container.

@@ -12,7 +12,7 @@
 
 const { Certificate } = require('@fidm/x509')
 const UKAMFDB = require('./ukamf-db')
-const V1Api = require(`../../app/src/Features/V1/V1Api`).promises
+const V1Api = require('../../app/src/Features/V1/V1Api').promises
 const { db, waitForDb } = require('../../app/src/infrastructure/mongodb')
 const moment = require('moment')
 

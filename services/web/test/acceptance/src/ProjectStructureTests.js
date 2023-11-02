@@ -4,7 +4,7 @@ const Path = require('path')
 const fs = require('fs')
 
 const { Project } = require('../../../app/src/models/Project')
-const ProjectGetter = require('../../../app/src/Features/Project/ProjectGetter.js')
+const ProjectGetter = require('../../../app/src/Features/Project/ProjectGetter')
 
 const User = require('./helpers/User')
 const MockDocStoreApiClass = require('./mocks/MockDocstoreApi')

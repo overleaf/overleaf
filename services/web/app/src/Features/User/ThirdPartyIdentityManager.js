@@ -1,13 +1,12 @@
-const APP_ROOT = '../../../../app/src'
-const UserAuditLogHandler = require(`${APP_ROOT}/Features/User/UserAuditLogHandler`)
-const EmailHandler = require(`${APP_ROOT}/Features/Email/EmailHandler`)
-const EmailOptionsHelper = require(`${APP_ROOT}/Features/Email/EmailOptionsHelper`)
+const UserAuditLogHandler = require('../../../../app/src/Features/User/UserAuditLogHandler')
+const EmailHandler = require('../../../../app/src/Features/Email/EmailHandler')
+const EmailOptionsHelper = require('../../../../app/src/Features/Email/EmailOptionsHelper')
 const Errors = require('../Errors/Errors')
 const _ = require('lodash')
 const logger = require('@overleaf/logger')
 const OError = require('@overleaf/o-error')
 const settings = require('@overleaf/settings')
-const { User } = require(`${APP_ROOT}/models/User`)
+const { User } = require('../../../../app/src/models/User')
 const { promisifyAll } = require('@overleaf/promise-utils')
 
 const oauthProviders = settings.oauthProviders || {}

@@ -5,7 +5,7 @@ const fs = require('fs')
 const Settings = require('@overleaf/settings')
 const _ = require('underscore')
 
-const ProjectGetter = require('../../../../../app/src/Features/Project/ProjectGetter.js')
+const ProjectGetter = require('../../../../../app/src/Features/Project/ProjectGetter')
 
 const User = require('../../../../../test/acceptance/src/helpers/User')
 const MockDocUpdaterApiClass = require('../../../../../test/acceptance/src/mocks/MockDocUpdaterApi')
