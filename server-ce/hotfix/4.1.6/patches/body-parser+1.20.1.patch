@@ -1,0 +1,44 @@
+diff --git a/node_modules/body-parser/lib/read.js b/node_modules/body-parser/lib/read.js
+index fce6283..6131c31 100644
+--- a/node_modules/body-parser/lib/read.js
++++ b/node_modules/body-parser/lib/read.js
+@@ -18,7 +18,7 @@ var iconv = require('iconv-lite')
+ var onFinished = require('on-finished')
+ var unpipe = require('unpipe')
+ var zlib = require('zlib')
+-
++var Stream = require('stream')
+ /**
+  * Module exports.
+  */
+@@ -166,25 +166,25 @@ function contentstream (req, debug, inflate) {
+     case 'deflate':
+       stream = zlib.createInflate()
+       debug('inflate body')
+-      req.pipe(stream)
++      // req.pipe(stream)
+       break
+     case 'gzip':
+       stream = zlib.createGunzip()
+       debug('gunzip body')
+-      req.pipe(stream)
++      // req.pipe(stream)
+       break
+     case 'identity':
+       stream = req
+       stream.length = length
+-      break
++      return req
+     default:
+       throw createError(415, 'unsupported content encoding "' + encoding + '"', {
+         encoding: encoding,
+         type: 'encoding.unsupported'
+       })
+   }
+-
+-  return stream
++  var pass = new Stream.PassThrough(); Stream.pipeline(req, stream, pass, () => {})
++  return pass
+ }
+ 
+ /**

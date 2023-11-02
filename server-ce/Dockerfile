@@ -20,6 +20,10 @@ ADD services/ /overleaf/services/
 ARG MONOREPO_REVISION
 RUN echo "monorepo-server-ce,$MONOREPO_REVISION" > /var/www/revisions.txt
 
+# Add npm patches
+# -----------------------
+ADD patches/ /overleaf/patches
+
 # Install npm dependencies
 # ------------------------
 ENV CYPRESS_INSTALL_BINARY=0

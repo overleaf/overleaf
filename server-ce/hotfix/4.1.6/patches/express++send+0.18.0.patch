@@ -1,0 +1,57 @@
+diff --git a/node_modules/express/node_modules/send/index.js b/node_modules/express/node_modules/send/index.js
+index 89afd7e..de56daf 100644
+--- a/node_modules/express/node_modules/send/index.js
++++ b/node_modules/express/node_modules/send/index.js
+@@ -789,29 +789,29 @@ SendStream.prototype.stream = function stream (path, options) {
+   // pipe
+   var stream = fs.createReadStream(path, options)
+   this.emit('stream', stream)
+-  stream.pipe(res)
+-
+-  // cleanup
+-  function cleanup () {
+-    destroy(stream, true)
+-  }
+-
+-  // response finished, cleanup
+-  onFinished(res, cleanup)
+-
+-  // error handling
+-  stream.on('error', function onerror (err) {
+-    // clean up stream early
+-    cleanup()
+-
+-    // error
+-    self.onStatError(err)
+-  })
+-
+-  // end
+-  stream.on('end', function onend () {
+-    self.emit('end')
+-  })
++  Stream.pipeline(stream, res, err => { if (err) { self.onStatError(err) } else { self.emit('end') } })
++
++  // // cleanup
++  // function cleanup () {
++  //   destroy(stream, true)
++  // }
++  //
++  // // response finished, cleanup
++  // onFinished(res, cleanup)
++  //
++  // // error handling
++  // stream.on('error', function onerror (err) {
++  //   // clean up stream early
++  //   cleanup()
++  //
++  //   // error
++  //   self.onStatError(err)
++  // })
++  //
++  // // end
++  // stream.on('end', function onend () {
++  //   self.emit('end')
++  // })
+ }
+ 
+ /**
