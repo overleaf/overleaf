@@ -70,10 +70,10 @@ function requirePermission(...requiredCapabilities) {
     }
     try {
       // get the group policy applying to the user
-      const { groupPolicy } =
+      const { groupPolicy, managedUsersEnabled } =
         await ManagedUsersHandler.promises.getEnrollmentForUser(req.user)
-      // if there is no group policy, the user is not managed
-      if (!groupPolicy) {
+
+      if (!managedUsersEnabled) {
         return next()
       }
       // check that the user has all the required capabilities

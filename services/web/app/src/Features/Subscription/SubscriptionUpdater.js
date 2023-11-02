@@ -230,7 +230,7 @@ async function updateSubscriptionFromRecurly(
 ) {
   if (recurlySubscription.state === 'expired') {
     const hasManagedUsersFeature =
-      Features.hasFeature('saas') && subscription?.groupPolicy != null
+      Features.hasFeature('saas') && subscription?.managedUsersEnabled
     if (hasManagedUsersFeature) {
       // If a payment lapses and if the group is managed, as a temporary measure we need to
       // make sure that the group continues as-is and no destructive actions are taken.

@@ -121,6 +121,7 @@ describe('UserMembershipController', function () {
     })
 
     it('render group view', async function () {
+      this.subscription.managedUsersEnabled = false
       return await this.UserMembershipController.manageGroupMembers(this.req, {
         render: (viewPath, viewParams) => {
           expect(viewPath).to.equal('user_membership/group-members-react')
@@ -132,7 +133,7 @@ describe('UserMembershipController', function () {
     })
 
     it('render group view with managed users', async function () {
-      this.req.entity.groupPolicy = { somePolicy: true }
+      this.subscription.managedUsersEnabled = true
       return await this.UserMembershipController.manageGroupMembers(this.req, {
         render: (viewPath, viewParams) => {
           expect(viewPath).to.equal('user_membership/group-members-react')

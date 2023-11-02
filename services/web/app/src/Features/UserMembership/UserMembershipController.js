@@ -46,7 +46,7 @@ async function manageGroupMembers(req, res, next) {
           groupId: entityPrimaryKey,
           users,
           groupSize: entity.membersLimit,
-          managedUsersActive: entity.groupPolicy != null,
+          managedUsersActive: entity.managedUsersEnabled,
           groupSSOActive: ssoConfig?.enabled,
         })
       }

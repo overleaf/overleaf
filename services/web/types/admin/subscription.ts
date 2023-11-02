@@ -9,4 +9,5 @@ export type Subscription = {
   groupPlan: boolean
   customAccount: boolean
   ssoConfig: object
+  managedUsersEnabled: boolean
 }

@@ -71,7 +71,7 @@ async function acceptInvite(token, userId) {
 
   await SubscriptionUpdater.promises.addUserToGroup(subscription._id, userId)
 
-  if (subscription.groupPolicy) {
+  if (subscription.managedUsersEnabled) {
     await ManagedUsersHandler.promises.enrollInSubscription(
       userId,
       subscription
@@ -164,12 +164,11 @@ async function _createInvite(subscription, email, inviter) {
   }
 
   try {
-    const managedUsersEnabled = Boolean(subscription.groupPolicy)
     await _sendNotificationToExistingUser(
       subscription,
       email,
       invite,
-      managedUsersEnabled
+      subscription.managedUsersEnabled
     )
   } catch (err) {
     logger.error(
@@ -180,7 +179,7 @@ async function _createInvite(subscription, email, inviter) {
 
   await subscription.save()
 
-  if (subscription.groupPolicy) {
+  if (subscription.managedUsersEnabled) {
     let admin = {}
     try {
       admin = await SubscriptionLocator.promises.getAdminEmailAndName(

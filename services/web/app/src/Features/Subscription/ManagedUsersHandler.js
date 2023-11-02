@@ -32,12 +32,14 @@ const logger = require('@overleaf/logger')
  */
 async function enableManagedUsers(subscriptionId) {
   const subscription = await Subscription.findById(subscriptionId).exec()
+
   // create a new Group policy with the default settings for managed users
   const policy = ManagedUsersPolicy.getDefaultPolicy()
   const groupPolicy = new GroupPolicy(policy)
   await groupPolicy.save()
   // update the subscription to use the new policy
   subscription.groupPolicy = groupPolicy._id
+  subscription.managedUsersEnabled = true
   await subscription.save()
 
   await _sendEmailToGroupMembers(subscriptionId)
@@ -55,7 +57,6 @@ async function enableManagedUsers(subscriptionId) {
  */
 async function disableManagedUsers(subscriptionId) {
   const subscription = await Subscription.findById(subscriptionId).exec()
-
   for (const userId of subscription.member_ids || []) {
     const user = await UserGetter.promises.getUser(userId, { enrollment: 1 })
     if (
@@ -68,6 +69,7 @@ async function disableManagedUsers(subscriptionId) {
   }
 
   subscription.groupPolicy = undefined
+  subscription.managedUsersEnabled = false
   await subscription.save()
 }
 
@@ -110,6 +112,7 @@ async function getEnrollmentForUser(requestedUser) {
 
   return {
     groupPolicy,
+    managedUsersEnabled: subscription.managedUsersEnabled,
     managedBy: user.enrollment.managedBy,
     isManagedGroupAdmin,
   }

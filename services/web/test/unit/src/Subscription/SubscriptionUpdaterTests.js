@@ -279,7 +279,7 @@ describe('SubscriptionUpdater', function () {
 
     it('should not remove the subscription when expired if it has "managedUsers" feature', async function () {
       this.Features.hasFeature.withArgs('saas').returns(true)
-      this.subscription.groupPolicy = { policy: true }
+      this.subscription.managedUsersEnabled = true
 
       this.recurlySubscription.state = 'expired'
       await this.SubscriptionUpdater.promises.updateSubscriptionFromRecurly(
