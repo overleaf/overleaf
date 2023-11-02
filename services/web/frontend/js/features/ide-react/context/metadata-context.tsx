@@ -18,6 +18,8 @@ import { useEditorContext } from '@/shared/context/editor-context'
 import { useIdeContext } from '@/shared/context/ide-context'
 import useSocketListener from '@/features/ide-react/hooks/use-socket-listener'
 import useEventListener from '@/shared/hooks/use-event-listener'
+import { FileTreeFindResult } from '@/features/ide-react/types/file-tree'
+import { Project } from '../../../../../types/project'
 
 type DocumentMetadata = {
   labels: string[]
@@ -55,11 +57,19 @@ export const MetadataProvider: FC = ({ children }) => {
   const debouncerRef = useRef<Map<string, number>>(new Map()) // DocId => Timeout
 
   useEffect(() => {
-    eventEmitter.on('entity:deleted', entity => {
+    const handleEntityDeleted = (entity: FileTreeFindResult) => {
       if (entity.type === 'doc') {
-        setDocuments(documents => _.omit(documents, entity.id))
+        setDocuments(documents => {
+          return _.omit(documents, entity.entity._id)
+        })
       }
-    })
+    }
+
+    eventEmitter.on('entity:deleted', handleEntityDeleted)
+
+    return () => {
+      eventEmitter.off('entity:deleted', handleEntityDeleted)
+    }
   }, [eventEmitter])
 
   useEffect(() => {
@@ -76,10 +86,7 @@ export const MetadataProvider: FC = ({ children }) => {
   }, [])
 
   const getAllLabels = useCallback(
-    () =>
-      _.flattenDeep(
-        Array.from(Object.values(documents)).map(meta => meta.labels)
-      ),
+    () => _.flattenDeep(Object.values(documents).map(meta => meta.labels)),
     [documents]
   )
 
@@ -171,7 +178,7 @@ export const MetadataProvider: FC = ({ children }) => {
   useEventListener('editor:metadata-outdated', handleMetadataOutdated)
 
   useEffect(() => {
-    eventEmitter.once('project:joined', ({ project }) => {
+    const handleProjectJoined = ({ project }: { project: Project }) => {
       if (project.deletedByExternalDataSource) {
         // TODO: MIGRATION: Show generic message modal here
         /*
@@ -190,7 +197,13 @@ If the project has been renamed please look in your project list for a new proje
           loadProjectMetaFromServer()
         }
       }, 200)
-    })
+    }
+
+    eventEmitter.once('project:joined', handleProjectJoined)
+
+    return () => {
+      eventEmitter.off('project:joined', handleProjectJoined)
+    }
   }, [eventEmitter, loadProjectMetaFromServer, permissionsLevel])
 
   const value = useMemo<MetadataContextValue>(

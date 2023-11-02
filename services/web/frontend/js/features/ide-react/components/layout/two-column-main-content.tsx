@@ -74,7 +74,7 @@ export default function TwoColumnMainContent({
           tooltipWhenClosed={t('tooltip_show_filetree')}
         />
       </HorizontalResizeHandle>
-      <Panel>{rightColumnContent}</Panel>
+      <Panel className="ide-react-panel">{rightColumnContent}</Panel>
     </PanelGroup>
   )
 }

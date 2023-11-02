@@ -1,4 +1,3 @@
-/* eslint-disable no-use-before-define */
 import { ReactScopeValueStore } from '@/features/ide-react/scope-value-store/react-scope-value-store'
 import {
   createContext,
@@ -10,7 +9,6 @@ import {
   useRef,
   useState,
 } from 'react'
-import customLocalStorage from '@/infrastructure/local-storage'
 import { sendMB } from '@/infrastructure/event-tracking'
 import useScopeValue from '@/shared/hooks/use-scope-value'
 import { useIdeContext } from '@/shared/context/ide-context'
@@ -27,6 +25,8 @@ import { Doc } from '../../../../../types/doc'
 import { useFileTreeData } from '@/shared/context/file-tree-data-context'
 import { findDocEntityById } from '@/features/ide-react/util/find-doc-entity-by-id'
 import useScopeEventEmitter from '@/shared/hooks/use-scope-event-emitter'
+import { useModalsContext } from '@/features/ide-react/context/modals-context'
+import { useTranslation } from 'react-i18next'
 
 interface GotoOffsetOptions {
   gotoOffset: number
@@ -43,16 +43,15 @@ type EditorManager = {
   getEditorType: () => 'cm6' | 'cm6-rich-text' | null
   showSymbolPalette: boolean
   currentDocument: Document
+  currentDocumentId: string | null
   getCurrentDocValue: () => string | null
   getCurrentDocId: () => string | null
   startIgnoringExternalUpdates: () => void
   stopIgnoringExternalUpdates: () => void
   openDocId: (docId: string, options?: OpenDocOptions) => void
-  openDoc: (document: Document, options?: OpenDocOptions) => void
+  openDoc: (document: Doc, options?: OpenDocOptions) => void
   jumpToLine: (options: GotoLineOptions) => void
 }
-
-type DocumentOpenCallback = (error: Error | null, document?: Document) => void
 
 function hasGotoLine(options: OpenDocOptions): options is GotoLineOptions {
   return typeof options.gotoLine === 'number'
@@ -73,13 +72,13 @@ export type EditorScopeValue = {
   wantTrackChanges: boolean
   showVisual: boolean
   newSourceEditor: boolean
-  multiSelectedCount: number
   error_state: boolean
 }
 
-export function populateEditorScope(store: ReactScopeValueStore) {
-  const projectId = window.project_id
-
+export function populateEditorScope(
+  store: ReactScopeValueStore,
+  projectId: string
+) {
   // This value is not used in the React code. It's just here to prevent errors
   // from EditorProvider
   store.set('state.loading', false)
@@ -97,10 +96,6 @@ export function populateEditorScope(store: ReactScopeValueStore) {
     wantTrackChanges: false,
     // No Ace here
     newSourceEditor: true,
-    // TODO: Ignore multiSelectedCount and just default it to zero for now until
-    // we get to the file tree. It seems to be stored in two places in the
-    // Angular scope and needs further investigation.
-    multiSelectedCount: 0,
     error_state: false,
   })
   store.persisted('editor.showVisual', false, `editor.mode.${projectId}`, {
@@ -112,11 +107,12 @@ export function populateEditorScope(store: ReactScopeValueStore) {
 const EditorManagerContext = createContext<EditorManager | undefined>(undefined)
 
 export const EditorManagerProvider: FC = ({ children }) => {
+  const { t } = useTranslation()
   const ide = useIdeContext()
-  const { reportError, eventEmitter, eventLog, projectId } =
-    useIdeReactContext()
+  const { reportError, eventEmitter, eventLog } = useIdeReactContext()
   const { socket, disconnect } = useConnectionContext()
   const { view, setView } = useLayoutContext()
+  const { showGenericMessageModal, genericModalVisible } = useModalsContext()
 
   const [showSymbolPalette, setShowSymbolPalette] = useScopeValue<boolean>(
     'editor.showSymbolPalette'
@@ -153,7 +149,23 @@ export const EditorManagerProvider: FC = ({ children }) => {
       })
   )
 
+  // Store the most recent document error and consume it in an effect, which
+  // prevents circular dependencies in useCallbacks
+  const [docError, setDocError] = useState<{
+    doc: Doc
+    document: Document
+    error: Error | string
+    meta?: Record<string, any>
+    editorContent?: string
+  } | null>(null)
+
   const [docTooLongErrorShown, setDocTooLongErrorShown] = useState(false)
+
+  useEffect(() => {
+    if (!genericModalVisible) {
+      setDocTooLongErrorShown(false)
+    }
+  }, [genericModalVisible])
 
   const [openDocs] = useState(
     () =>
@@ -206,9 +218,6 @@ export const EditorManagerProvider: FC = ({ children }) => {
     []
   )
 
-  // Ignore insertSymbol from Angular EditorManager because it's only required
-  // for Ace.
-
   const jumpToLine = useCallback(
     (options: GotoLineOptions) => {
       goToLineEmitter(
@@ -224,19 +233,6 @@ export const EditorManagerProvider: FC = ({ children }) => {
     document.off()
   }
 
-  const openDocWithId = useCallback(
-    (docId: string, options: OpenDocOptions = {}) => {
-      const doc = findDocEntityById(fileTreeData, docId)
-      if (!doc) {
-        return
-      }
-      openDoc(doc, options)
-    },
-    // @ts-ignore
-    [fileTreeData, openDoc]
-  )
-
-  // @ts-ignore
   const attachErrorHandlerToDocument = useCallback(
     (doc: Doc, document: Document) => {
       document.on(
@@ -246,74 +242,11 @@ export const EditorManagerProvider: FC = ({ children }) => {
           meta?: Record<string, any>,
           editorContent?: string
         ) => {
-          const message =
-            typeof error === 'string' ? error : error?.message ?? ''
-          if (/maxDocLength/.test(message)) {
-            setDocTooLongErrorShown(true)
-            openDoc(doc, { forceReopen: true })
-
-            // TODO: MIGRATION: Show generic modal here
-            // const genericMessageModal = this.ide.showGenericMessageModal(
-            //   'Document Too Long',
-            //   'Sorry, this file is too long to be edited manually. Please upload it directly.'
-            // )
-            // genericMessageModal.result.finally(() => {
-            //   this.$scope.docTooLongErrorShown = false
-            // })
-          } else if (/too many comments or tracked changes/.test(message)) {
-            // TODO: MIGRATION: Show generic modal here
-            // this.ide.showGenericMessageModal(
-            //   'Too many comments or tracked changes',
-            //   'Sorry, this file has too many comments or tracked changes. Please try accepting or rejecting some existing changes, or resolving and deleting some comments.'
-            // )
-          } else if (!docTooLongErrorShown) {
-            // Do not allow this doc to open another error modal.
-            document.off('error')
-
-            // Preserve the sharejs contents before the teardown.
-            editorContent =
-              typeof editorContent === 'string'
-                ? editorContent
-                : document.doc?._doc.snapshot
-
-            // Tear down the ShareJsDoc.
-            if (document.doc) document.doc.clearInflightAndPendingOps()
-
-            // Do not re-join after re-connecting.
-            document.leaveAndCleanUp()
-
-            disconnect()
-            reportError(error, meta)
-
-            // Tell the user about the error state.
-            setIsInErrorState(true)
-
-            // TODO: MIGRATION: Show out-of-sync modal
-            // this.ide.showOutOfSyncModal(
-            //   'Out of sync',
-            //   "Sorry, this file has gone out of sync and we need to do a full refresh. <br> <a target='_blank' rel='noopener noreferrer' href='/learn/Kb/Editor_out_of_sync_problems'>Please see this help guide for more information</a>",
-            //   editorContent
-            // )
-
-            // Do not forceReopen the document.
-            return
-          }
-
-          eventEmitter.once('project:joined', () => {
-            openDoc(doc, { forceReopen: true })
-          })
+          setDocError({ doc, document, error, meta, editorContent })
         }
       )
     },
-    [
-      disconnect,
-      docTooLongErrorShown,
-      eventEmitter,
-      // @ts-ignore
-      openDoc,
-      reportError,
-      setIsInErrorState,
-    ]
+    []
   )
 
   const bindToDocumentEvents = useCallback(
@@ -329,17 +262,20 @@ export const EditorManagerProvider: FC = ({ children }) => {
           _.property(['meta', 'type'])(update) === 'external' &&
           _.property(['meta', 'source'])(update) === 'git-bridge'
         ) {
-          // eslint-disable-next-line no-useless-return
           return
         }
-        // TODO: MIGRATION: Show generic modal here
-        // this.ide.showGenericMessageModal(
-        //   'Document Updated Externally',
-        //   'This document was just updated externally. Any recent changes you have made may have been overwritten. To see previous versions please look in the history.'
-        // )
+        showGenericMessageModal(
+          t('document_updated_externally'),
+          t('document_updated_externally_detail')
+        )
       })
     },
-    [attachErrorHandlerToDocument, ignoringExternalUpdates]
+    [
+      attachErrorHandlerToDocument,
+      ignoringExternalUpdates,
+      showGenericMessageModal,
+      t,
+    ]
   )
 
   const syncTimeoutRef = useRef<number | null>(null)
@@ -378,39 +314,42 @@ export const EditorManagerProvider: FC = ({ children }) => {
   )
 
   const doOpenNewDocument = useCallback(
-    (doc: Doc, callback: DocumentOpenCallback) => {
-      debugConsole.log('[doOpenNewDocument] Opening...')
-      const newDocument = openDocs.getDocument(doc._id)
-      if (!newDocument) {
-        debugConsole.error(`No open document with ID '${doc._id}' found`)
-        return
-      }
-      const preJoinEpoch = ++editorOpenDocEpochRef.current
-      newDocument.join(error => {
-        if (error) {
-          debugConsole.log(
-            `[doOpenNewDocument] error joining doc ${doc._id}`,
-            error
-          )
-          callback(error)
+    (doc: Doc) =>
+      new Promise<Document>((resolve, reject) => {
+        debugConsole.log('[doOpenNewDocument] Opening...')
+        const newDocument = openDocs.getDocument(doc._id)
+        if (!newDocument) {
+          debugConsole.error(`No open document with ID '${doc._id}' found`)
+          reject(new Error('no open document found'))
+          return
         }
-        if (editorOpenDocEpochRef.current !== preJoinEpoch) {
-          debugConsole.log(
-            `[openNewDocument] editorOpenDocEpoch mismatch ${editorOpenDocEpochRef.current} vs ${preJoinEpoch}`
-          )
-          newDocument.leaveAndCleanUp()
-          return callback(new Error('another document was loaded'))
-        }
-        bindToDocumentEvents(doc, newDocument)
-        return callback(null, newDocument)
-      })
-    },
+        const preJoinEpoch = ++editorOpenDocEpochRef.current
+        newDocument.join(error => {
+          if (error) {
+            debugConsole.log(
+              `[doOpenNewDocument] error joining doc ${doc._id}`,
+              error
+            )
+            reject(error)
+            return
+          }
+
+          if (editorOpenDocEpochRef.current !== preJoinEpoch) {
+            debugConsole.log(
+              `[doOpenNewDocument] editorOpenDocEpoch mismatch ${editorOpenDocEpochRef.current} vs ${preJoinEpoch}`
+            )
+            newDocument.leaveAndCleanUp()
+            reject(new Error('another document was loaded'))
+          }
+          bindToDocumentEvents(doc, newDocument)
+          resolve(newDocument)
+        })
+      }),
     [bindToDocumentEvents, openDocs]
   )
 
-  // @ts-ignore
   const openNewDocument = useCallback(
-    (doc: Doc, callback: DocumentOpenCallback) => {
+    async (doc: Doc): Promise<Document> => {
       // Leave the current document
       //  - when we are opening a different new one, to avoid race conditions
       //     between leaving and joining the same document
@@ -434,32 +373,30 @@ export const EditorManagerProvider: FC = ({ children }) => {
         //  from scratch -- read: no corrupted internal state.
         const preLeaveEpoch = ++editorOpenDocEpochRef.current
 
-        currentDocument.leaveAndCleanUp(error => {
-          if (error) {
-            debugConsole.log(
-              `[_openNewDocument] error leaving doc ${currentDocId}`,
-              error
-            )
-            return callback(error)
-          }
-          if (editorOpenDocEpochRef.current !== preLeaveEpoch) {
-            debugConsole.log(
-              `[openNewDocument] editorOpenDocEpoch mismatch ${editorOpenDocEpochRef.current} vs ${preLeaveEpoch}`
-            )
-            callback(new Error('another document was loaded'))
-          }
-          doOpenNewDocument(doc, callback)
-        })
-      } else {
-        doOpenNewDocument(doc, callback)
+        try {
+          await currentDocument.leaveAndCleanUpPromise()
+        } catch (error) {
+          debugConsole.log(
+            `[openNewDocument] error leaving doc ${currentDocId}`,
+            error
+          )
+          throw error
+        }
+
+        if (editorOpenDocEpochRef.current !== preLeaveEpoch) {
+          debugConsole.log(
+            `[openNewDocument] editorOpenDocEpoch mismatch ${editorOpenDocEpochRef.current} vs ${preLeaveEpoch}`
+          )
+          throw new Error('another document was loaded')
+        }
       }
+      return doOpenNewDocument(doc)
     },
     [attachErrorHandlerToDocument, doOpenNewDocument, currentDocument]
   )
 
-  // @ts-ignore
   const openDoc = useCallback(
-    (doc: Doc, options: OpenDocOptions = {}) => {
+    async (doc: Doc, options: OpenDocOptions = {}) => {
       debugConsole.log(`[openDoc] Opening ${doc._id}`)
       if (view === 'editor') {
         // store position of previous doc before switching docs
@@ -491,9 +428,6 @@ export const EditorManagerProvider: FC = ({ children }) => {
       // Note: only use forceReopen:true to override this when the document is
       // out of sync and needs to be reloaded from the server.
       if (doc._id === openDocId && !options.forceReopen) {
-        window.dispatchEvent(
-          new CustomEvent('editor.openDoc', { detail: doc._id })
-        )
         done(false)
         return
       }
@@ -501,56 +435,139 @@ export const EditorManagerProvider: FC = ({ children }) => {
       // We're now either opening a new document or reloading a broken one.
       setOpenDocId(doc._id)
       setOpenDocName(doc.name)
-      customLocalStorage.setItem(`doc.open_id.${projectId}`, doc._id)
-
       setOpening(true)
 
-      openNewDocument(doc, (error: Error | null, document: Document) => {
+      try {
+        const document = await openNewDocument(doc)
+        syncTrackChangesState(document)
+        eventEmitter.emit('doc:opened')
+        setOpening(false)
+        setCurrentDocument(document)
+        done(true)
+      } catch (error: any) {
         if (error?.message === 'another document was loaded') {
           debugConsole.log(
             `[openDoc] another document was loaded while ${doc._id} was loading`
           )
           return
         }
-        if (error != null) {
-          // TODO: MIGRATION: Show generic modal here
-          // this.ide.showGenericMessageModal(
-          //   'Error opening document',
-          //   'Sorry, something went wrong opening this document. Please try again.'
-          // )
-          return
-        }
-
-        syncTrackChangesState(document)
-
-        eventEmitter.emit('doc:opened')
-
-        setOpening(false)
-        setCurrentDocument(document)
-        done(true)
-      })
+        showGenericMessageModal(
+          t('error_opening_document'),
+          t('error_opening_document_detail')
+        )
+      }
     },
     [
       eventEmitter,
       jumpToLine,
       openDocId,
       openNewDocument,
-      projectId,
       setCurrentDocument,
       setOpenDocId,
       setOpenDocName,
       setOpening,
       setView,
+      showGenericMessageModal,
       syncTrackChangesState,
+      t,
       view,
     ]
   )
+
+  const openDocWithId = useCallback(
+    (docId: string, options: OpenDocOptions = {}) => {
+      const doc = findDocEntityById(fileTreeData, docId)
+      if (!doc) {
+        return
+      }
+      openDoc(doc, options)
+    },
+    [fileTreeData, openDoc]
+  )
+
+  useEffect(() => {
+    if (docError) {
+      const { doc, document, error, meta } = docError
+      let { editorContent } = docError
+      const message = typeof error === 'string' ? error : error?.message ?? ''
+
+      // Clear document error so that it's only handled once
+      setDocError(null)
+
+      if (message.includes('maxDocLength')) {
+        openDoc(doc, { forceReopen: true })
+        showGenericMessageModal(
+          t('document_too_long'),
+          t('document_too_long_detail')
+        )
+        setDocTooLongErrorShown(true)
+      } else if (/too many comments or tracked changes/.test(message)) {
+        showGenericMessageModal(
+          t('too_many_comments_or_tracked_changes'),
+          t('too_many_comments_or_tracked_changes_detail')
+        )
+      } else if (!docTooLongErrorShown) {
+        // Do not allow this doc to open another error modal.
+        document.off('error')
+
+        // Preserve the sharejs contents before the teardown.
+        // eslint-disable-next-line no-unused-vars
+        editorContent =
+          typeof editorContent === 'string'
+            ? editorContent
+            : document.doc?._doc.snapshot
+
+        // Tear down the ShareJsDoc.
+        if (document.doc) document.doc.clearInflightAndPendingOps()
+
+        // Do not re-join after re-connecting.
+        document.leaveAndCleanUp()
+
+        disconnect()
+        reportError(error, meta)
+
+        // Tell the user about the error state.
+        setIsInErrorState(true)
+
+        // TODO: MIGRATION: Show out-of-sync modal
+        // this.ide.showOutOfSyncModal(
+        //   'Out of sync',
+        //   "Sorry, this file has gone out of sync and we need to do a full refresh. <br> <a target='_blank' rel='noopener noreferrer' href='/learn/Kb/Editor_out_of_sync_problems'>Please see this help guide for more information</a>",
+        //   editorContent
+        // )
+
+        // Do not forceReopen the document.
+        return
+      }
+
+      const handleProjectJoined = () => {
+        openDoc(doc, { forceReopen: true })
+      }
+
+      eventEmitter.once('project:joined', handleProjectJoined)
+
+      return () => {
+        eventEmitter.off('project:joined', handleProjectJoined)
+      }
+    }
+  }, [
+    disconnect,
+    docError,
+    docTooLongErrorShown,
+    eventEmitter,
+    openDoc,
+    reportError,
+    setIsInErrorState,
+    showGenericMessageModal,
+    t,
+  ])
 
   const editorManager = useMemo(
     () => ({
       getEditorType,
       showSymbolPalette,
       currentDocument,
+      currentDocumentId: openDocId,
       getCurrentDocValue,
       getCurrentDocId,
       startIgnoringExternalUpdates,
@@ -563,6 +580,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
       getEditorType,
       showSymbolPalette,
       currentDocument,
+      openDocId,
       getCurrentDocValue,
       getCurrentDocId,
       startIgnoringExternalUpdates,

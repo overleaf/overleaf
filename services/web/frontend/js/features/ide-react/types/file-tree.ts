@@ -36,3 +36,5 @@ export type FileTreeFindResult =
 export type FileTreeSelectHandler = (
   selectedEntities: FileTreeFindResult[]
 ) => void
+
+export type FileTreeDeleteHandler = (entity: FileTreeFindResult) => void

@@ -4,15 +4,19 @@ import { useUserContext } from '@/shared/context/user-context'
 import { useReferencesContext } from '@/features/ide-react/context/references-context'
 import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
 import { useConnectionContext } from '@/features/ide-react/context/connection-context'
-import { FileTreeSelectHandler } from '@/features/ide-react/types/file-tree'
+import {
+  FileTreeDeleteHandler,
+  FileTreeSelectHandler,
+} from '@/features/ide-react/types/file-tree'
 import { RefProviders } from '../../../../../types/user'
 
 type FileTreeProps = {
   onInit: () => void
   onSelect: FileTreeSelectHandler
+  onDelete: FileTreeDeleteHandler
 }
 
-export function FileTree({ onInit, onSelect }: FileTreeProps) {
+export function FileTree({ onInit, onSelect, onDelete }: FileTreeProps) {
   const user = useUserContext()
   const { indexAllReferences } = useReferencesContext()
   const { setStartedFreeTrial } = useIdeReactContext()
@@ -43,6 +47,7 @@ export function FileTree({ onInit, onSelect }: FileTreeProps) {
         isConnected={isConnected}
         onInit={onInit}
         onSelect={onSelect}
+        onDelete={onDelete}
       />
     </div>
   )

@@ -10,7 +10,7 @@ export default function PlaceholderEditorSidebar({
   shouldPersistLayout,
 }: PlaceholderEditorSidebarProps) {
   return (
-    <aside className="ide-react-placeholder-editor-sidebar">
+    <aside className="ide-react-editor-sidebar">
       <PanelGroup
         autoSaveId={
           shouldPersistLayout ? 'ide-react-editor-sidebar-layout' : undefined

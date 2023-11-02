@@ -224,6 +224,18 @@ export class Document extends EventEmitter {
     })
   }
 
+  leaveAndCleanUpPromise() {
+    return new Promise<void>((resolve, reject) => {
+      this.leaveAndCleanUp((error?: Error) => {
+        if (error) {
+          reject(error)
+        } else {
+          resolve()
+        }
+      })
+    })
+  }
+
   join(callback?: JoinCallback) {
     this.wantToBeJoined = true
     this.cancelLeave()

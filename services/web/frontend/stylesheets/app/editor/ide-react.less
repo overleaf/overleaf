@@ -37,6 +37,8 @@
 
 .ide-react-body {
   flex-grow: 1;
+  background-color: @pdf-bg;
+  overflow-y: hidden;
 }
 
 .horizontal-resize-handle {
@@ -71,6 +73,13 @@
   &::after {
     top: 75%;
   }
+
+  .synctex-controls {
+    left: -8px;
+    margin: 0;
+    // Ensure that SyncTex controls appear in front of PDF viewer controls and logs pane
+    z-index: 12;
+  }
 }
 
 .vertical-resize-handle {
@@ -91,20 +100,13 @@
   }
 }
 
-// Styles for placeholder elements that will eventually be replaced
-.ide-react-placeholder-chat {
-  background-color: var(--editor-toolbar-bg);
-  color: var(--neutral-20);
-  height: 100%;
-}
-
-.ide-react-placeholder-editor-sidebar {
+.ide-react-editor-sidebar {
   height: 100%;
   background-color: @file-tree-bg;
   color: var(--neutral-20);
 }
 
-.ide-react-placeholder-symbol-palette {
+.ide-react-symbol-palette {
   height: 100%;
   background-color: @symbol-palette-bg;
   color: var(--neutral-20);
@@ -112,4 +114,16 @@
 
 .ide-react-file-tree-panel {
   display: flex;
+}
+
+// Ensure an element with class "full-size", such as the binary file view, stays within the bounds of the panel
+.ide-react-panel {
+  position: relative;
+}
+
+// Styles for placeholder elements that will eventually be replaced
+.ide-react-placeholder-chat {
+  background-color: var(--editor-toolbar-bg);
+  color: var(--neutral-20);
+  height: 100%;
 }

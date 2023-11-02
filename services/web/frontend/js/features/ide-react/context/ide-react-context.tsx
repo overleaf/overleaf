@@ -25,6 +25,7 @@ import { populateSettingsScope } from '@/features/ide-react/scope-adapters/setti
 import { populateOnlineUsersScope } from '@/features/ide-react/context/online-users-context'
 import { populateReferenceScope } from '@/features/ide-react/context/references-context'
 import { ReactScopeEventEmitter } from '@/features/ide-react/scope-event-emitter/react-scope-event-emitter'
+import getMeta from '@/utils/meta'
 
 type IdeReactContextValue = {
   projectId: string
@@ -43,7 +44,6 @@ const IdeReactContext = createContext<IdeReactContextValue | undefined>(
 
 function populateIdeReactScope(store: ReactScopeValueStore) {
   store.set('sync_tex_error', false)
-  store.set('settings', window.userSettings)
 }
 
 function populateProjectScope(store: ReactScopeValueStore) {
@@ -59,7 +59,7 @@ function populateFileTreeScope(store: ReactScopeValueStore) {
   store.set('docs', [])
 }
 
-function createReactScopeValueStore() {
+function createReactScopeValueStore(projectId: string) {
   const scopeStore = new ReactScopeValueStore()
 
   // Populate the scope value store with default values that will be used by
@@ -68,7 +68,7 @@ function createReactScopeValueStore() {
   // initialization code together with the context and would only populate
   // necessary values in the store, but this is simpler for now
   populateIdeReactScope(scopeStore)
-  populateEditorScope(scopeStore)
+  populateEditorScope(scopeStore, projectId)
   populateLayoutScope(scopeStore)
   populateProjectScope(scopeStore)
   populatePdfScope(scopeStore)
@@ -87,7 +87,7 @@ function createReactScopeValueStore() {
 const projectId = window.project_id
 
 export const IdeReactProvider: FC = ({ children }) => {
-  const [scopeStore] = useState(createReactScopeValueStore)
+  const [scopeStore] = useState(() => createReactScopeValueStore(projectId))
   const [eventEmitter] = useState(createIdeEventEmitter)
   const [scopeEventEmitter] = useState(
     () => new ReactScopeEventEmitter(eventEmitter)
@@ -101,7 +101,7 @@ export const IdeReactProvider: FC = ({ children }) => {
     (error: any, meta?: Record<string, any>) => {
       const metadata = {
         ...meta,
-        user_id: window.user_id,
+        user_id: getMeta('ol-user_id'),
         project_id: projectId,
         // @ts-ignore
         client_id: socket.socket.sessionid,

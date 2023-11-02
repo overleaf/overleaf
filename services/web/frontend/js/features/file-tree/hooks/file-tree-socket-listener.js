@@ -4,9 +4,10 @@ import PropTypes from 'prop-types'
 import { useUserContext } from '../../../shared/context/user-context'
 import { useFileTreeData } from '../../../shared/context/file-tree-data-context'
 import { useFileTreeSelectable } from '../contexts/file-tree-selectable'
-import { findInTreeOrThrow } from '../util/find-in-tree'
+import { findInTree, findInTreeOrThrow } from '../util/find-in-tree'
+import { useIdeContext } from '@/shared/context/ide-context'
 
-export function useFileTreeSocketListener() {
+export function useFileTreeSocketListener(onDelete) {
   const user = useUserContext({
     id: PropTypes.string.isRequired,
   })
@@ -21,7 +22,7 @@ export function useFileTreeSocketListener() {
   } = useFileTreeData()
   const { selectedEntityIds, selectedEntityParentIds, select, unselect } =
     useFileTreeSelectable()
-  const socket = window._ide && window._ide.socket
+  const { socket } = useIdeContext()
 
   const selectEntityIfCreatedByUser = useCallback(
     // hack to automatically re-open refreshed linked files
@@ -52,6 +53,7 @@ export function useFileTreeSocketListener() {
 
   useEffect(() => {
     function handleDispatchDelete(entityId) {
+      const entity = findInTree(fileTreeData, entityId)
       unselect(entityId)
       if (selectedEntityParentIds.has(entityId)) {
         // we're deleting a folder with a selected children so we need to
@@ -67,6 +69,9 @@ export function useFileTreeSocketListener() {
         }
       }
       dispatchDelete(entityId)
+      if (onDelete) {
+        onDelete(entity)
+      }
     }
     if (socket) socket.on('removeEntity', handleDispatchDelete)
     return () => {
@@ -79,6 +84,7 @@ export function useFileTreeSocketListener() {
     fileTreeData,
     selectedEntityIds,
     selectedEntityParentIds,
+    onDelete,
   ])
 
   useEffect(() => {

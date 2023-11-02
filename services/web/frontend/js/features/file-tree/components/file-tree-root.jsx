@@ -29,6 +29,7 @@ const FileTreeRoot = React.memo(function FileTreeRoot({
   setStartedFreeTrial,
   onSelect,
   onInit,
+  onDelete,
   isConnected,
 }) {
   const { _id: projectId } = useProjectContext(projectContextPropTypes)
@@ -52,7 +53,7 @@ const FileTreeRoot = React.memo(function FileTreeRoot({
       <FileTreeToolbar />
       <FileTreeContextMenu />
       <FileTreeInner>
-        <FileTreeRootFolder />
+        <FileTreeRootFolder onDelete={onDelete} />
       </FileTreeInner>
       <FileTreeModalDelete />
       <FileTreeModalCreateFile />
@@ -62,8 +63,8 @@ const FileTreeRoot = React.memo(function FileTreeRoot({
   )
 })
 
-function FileTreeRootFolder() {
-  useFileTreeSocketListener()
+function FileTreeRootFolder({ onDelete }) {
+  useFileTreeSocketListener(onDelete)
   const { fileTreeData } = useFileTreeData()
 
   const { isOver, dropRef } = useDroppable(fileTreeData._id)
@@ -93,9 +94,14 @@ function FileTreeRootFolder() {
   )
 }
 
+FileTreeRootFolder.propTypes = {
+  onDelete: PropTypes.func,
+}
+
 FileTreeRoot.propTypes = {
   onSelect: PropTypes.func.isRequired,
   onInit: PropTypes.func.isRequired,
+  onDelete: PropTypes.func,
   isConnected: PropTypes.bool.isRequired,
   setRefProviderEnabled: PropTypes.func.isRequired,
   setStartedFreeTrial: PropTypes.func.isRequired,

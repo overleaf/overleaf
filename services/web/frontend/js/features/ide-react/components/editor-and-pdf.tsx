@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { ReactNode, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   ImperativePanelHandle,
@@ -9,21 +9,18 @@ import { HorizontalResizeHandle } from '@/features/ide-react/components/resize/h
 import { HorizontalToggler } from '@/features/ide-react/components/resize/horizontal-toggler'
 import useCollapsiblePanel from '@/features/ide-react/hooks/use-collapsible-panel'
 import { useLayoutContext } from '@/shared/context/layout-context'
-import { EditorPane } from '@/features/ide-react/components/editor/editor-pane'
-import PlaceholderFile from '@/features/ide-react/components/layout/placeholder/placeholder-file'
-import PlaceholderPdf from '@/features/ide-react/components/layout/placeholder/placeholder-pdf'
+import PdfPreview from '@/features/pdf-preview/components/pdf-preview'
+import { DefaultSynctexControl } from '@/features/pdf-preview/components/detach-synctex-control'
 import classnames from 'classnames'
 
 export type EditorProps = {
   shouldPersistLayout?: boolean
-  openDocId: string | null
-  fileTreeReady: boolean
+  editorContent: ReactNode
 }
 
-export default function Editor({
+export default function EditorAndPdf({
   shouldPersistLayout = false,
-  openDocId,
-  fileTreeReady,
+  editorContent,
 }: EditorProps) {
   const { t } = useTranslation()
   const { view, pdfLayout, changeLayout } = useLayoutContext()
@@ -34,10 +31,6 @@ export default function Editor({
   const pdfIsOpen = isDualPane || view === 'pdf'
 
   useCollapsiblePanel(pdfIsOpen, pdfPanelRef)
-
-  if (view === 'file') {
-    return <PlaceholderFile />
-  }
 
   const historyIsOpen = view === 'history'
 
@@ -58,12 +51,13 @@ export default function Editor({
       className={classnames({ hide: historyIsOpen })}
     >
       {editorIsVisible ? (
-        <Panel id="editor" order={1} defaultSize={50}>
-          <EditorPane
-            shouldPersistLayout={shouldPersistLayout}
-            openDocId={openDocId}
-            fileTreeReady={fileTreeReady}
-          />
+        <Panel
+          id="editor"
+          order={1}
+          defaultSize={50}
+          className="ide-react-panel"
+        >
+          {editorContent}
         </Panel>
       ) : null}
       {isDualPane ? (
@@ -76,6 +70,9 @@ export default function Editor({
             tooltipWhenOpen={t('tooltip_hide_pdf')}
             tooltipWhenClosed={t('tooltip_show_pdf')}
           />
+          <div className="synctex-controls">
+            <DefaultSynctexControl />
+          </div>
         </HorizontalResizeHandle>
       ) : null}
       {pdfIsOpen ? (
@@ -87,8 +84,9 @@ export default function Editor({
           minSize={5}
           collapsible
           onCollapse={collapsed => setPdfIsOpen(!collapsed)}
+          className="ide-react-panel"
         >
-          <PlaceholderPdf />
+          <PdfPreview />
         </Panel>
       ) : null}
     </PanelGroup>

@@ -11,6 +11,7 @@ import GenericMessageModal, {
 } from '@/features/ide-react/components/modals/generic-message-modal'
 
 type ModalsContextValue = {
+  genericModalVisible: boolean
   showGenericMessageModal: (
     title: GenericMessageModalOwnProps['title'],
     message: GenericMessageModalOwnProps['message']
@@ -42,8 +43,9 @@ export const ModalsContextProvider: FC = ({ children }) => {
   const value = useMemo<ModalsContextValue>(
     () => ({
       showGenericMessageModal,
+      genericModalVisible: showGenericModal,
     }),
-    [showGenericMessageModal]
+    [showGenericMessageModal, showGenericModal]
   )
 
   return (

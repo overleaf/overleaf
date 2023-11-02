@@ -36,15 +36,15 @@ export const ReactContextRoot: FC = ({ children }) => {
                             <LocalCompileProvider>
                               <DetachCompileProvider>
                                 <ChatProvider>
-                                  <EditorManagerProvider>
-                                    <OnlineUsersProvider>
-                                      <MetadataProvider>
-                                        <ModalsContextProvider>
+                                  <ModalsContextProvider>
+                                    <EditorManagerProvider>
+                                      <OnlineUsersProvider>
+                                        <MetadataProvider>
                                           {children}
-                                        </ModalsContextProvider>
-                                      </MetadataProvider>
-                                    </OnlineUsersProvider>
-                                  </EditorManagerProvider>
+                                        </MetadataProvider>
+                                      </OnlineUsersProvider>
+                                    </EditorManagerProvider>
+                                  </ModalsContextProvider>
                                 </ChatProvider>
                               </DetachCompileProvider>
                             </LocalCompileProvider>

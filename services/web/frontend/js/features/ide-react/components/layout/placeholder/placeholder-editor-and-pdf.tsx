@@ -58,7 +58,7 @@ export default function PlaceholderEditorAndPdf({
                 minSize={250}
                 maxSize={336}
               >
-                <div className="ide-react-placeholder-symbol-palette ">
+                <div className="ide-react-symbol-palette ">
                   Symbol palette placeholder
                 </div>
               </Panel>

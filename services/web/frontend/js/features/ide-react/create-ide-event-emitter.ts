@@ -4,6 +4,7 @@ import { PermissionsLevel } from '@/features/ide-react/types/permissions-level'
 import { ShareJsDoc } from '@/features/ide-react/editor/share-js-doc'
 import { GotoLineOptions } from '@/features/ide-react/types/goto-line-options'
 import { CursorPosition } from '@/features/ide-react/types/cursor-position'
+import { FileTreeFindResult } from '@/features/ide-react/types/file-tree'
 
 export type IdeEvents = {
   'project:joined': [{ project: Project; permissionsLevel: PermissionsLevel }]
@@ -26,8 +27,7 @@ export type IdeEvents = {
   'comment:start_adding': []
   'references:should-reindex': []
 
-  // TODO: MIGRATION: Create a proper type for entity when migrating the file tree
-  'entity:deleted': [entity: Record<string, any>]
+  'entity:deleted': [entity: FileTreeFindResult]
 }
 
 export type IdeEventEmitter = Emitter<IdeEvents>
