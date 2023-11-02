@@ -16,7 +16,7 @@ const HttpErrorHandler = require('../Errors/HttpErrorHandler')
 const OError = require('@overleaf/o-error')
 const EmailHandler = require('../Email/EmailHandler')
 const UrlHelper = require('../Helpers/UrlHelper')
-const { promisify } = require('util')
+const { promisify, callbackify } = require('util')
 const { expressify } = require('@overleaf/promise-utils')
 const {
   acceptsJson,
@@ -46,15 +46,15 @@ function _sendSecurityAlertPasswordChanged(user) {
     actionDescribed: `your password has been changed on your account ${user.email}`,
     action: 'password changed',
   }
-  EmailHandler.sendEmail('securityAlert', emailOptions, error => {
-    if (error) {
+  EmailHandler.promises
+    .sendEmail('securityAlert', emailOptions)
+    .catch(error => {
       // log error when sending security alert email but do not pass back
       logger.error(
         { error, userId: user._id },
         'could not send security alert email when password changed'
       )
-    }
-  })
+    })
 }
 
 async function _ensureAffiliation(userId, emailData) {
@@ -210,326 +210,276 @@ async function ensureAffiliationMiddleware(req, res, next) {
   return next()
 }
 
-const UserController = {
-  clearSessions: expressify(clearSessions),
+async function tryDeleteUser(req, res, next) {
+  const userId = SessionManager.getLoggedInUserId(req.session)
+  const { password } = req.body
+  req.logger.addFields({ userId })
 
-  tryDeleteUser(req, res, next) {
-    const userId = SessionManager.getLoggedInUserId(req.session)
-    const { password } = req.body
+  if (password == null || password === '') {
+    logger.err({ userId }, 'no password supplied for attempt to delete account')
+    return res.sendStatus(403)
+  }
 
-    if (password == null || password === '') {
-      logger.err(
-        { userId },
-        'no password supplied for attempt to delete account'
-      )
-      return res.sendStatus(403)
+  const user = await AuthenticationManager.promises.authenticate(
+    { _id: userId },
+    password
+  )
+  if (!user) {
+    logger.err({ userId }, 'auth failed during attempt to delete account')
+    return res.sendStatus(403)
+  }
+
+  try {
+    await UserDeleter.promises.deleteUser(userId, {
+      deleterUser: user,
+      ipAddress: req.ip,
+    })
+  } catch (err) {
+    const errorData = {
+      message: 'error while deleting user account',
+      info: { userId },
     }
-    AuthenticationManager.authenticate(
-      { _id: userId },
-      password,
-      (err, user) => {
-        if (err != null) {
-          OError.tag(
-            err,
-            'error authenticating during attempt to delete account',
-            {
-              userId,
-            }
-          )
-          return next(err)
-        }
-        if (!user) {
-          logger.err({ userId }, 'auth failed during attempt to delete account')
-          return res.sendStatus(403)
-        }
-        UserDeleter.deleteUser(
-          userId,
-          { deleterUser: user, ipAddress: req.ip },
-          err => {
-            if (err) {
-              const errorData = {
-                message: 'error while deleting user account',
-                info: { userId },
-              }
-              if (err instanceof Errors.SubscriptionAdminDeletionError) {
-                // set info.public.error for JSON response so frontend can display
-                // a specific message
-                errorData.info.public = {
-                  error: 'SubscriptionAdminDeletionError',
-                }
-                logger.warn(OError.tag(err, errorData.message, errorData.info))
-                return HttpErrorHandler.unprocessableEntity(
-                  req,
-                  res,
-                  errorData.message,
-                  errorData.info.public
-                )
-              } else {
-                return next(OError.tag(err, errorData.message, errorData.info))
-              }
-            }
-            const sessionId = req.sessionID
-            if (typeof req.logout === 'function') {
-              req.logout()
-            }
-            req.session.destroy(err => {
-              if (err != null) {
-                OError.tag(err, 'error destroying session')
-                return next(err)
-              }
-              UserSessionsManager.untrackSession(user, sessionId, () => {})
-              res.sendStatus(200)
-            })
-          }
+    if (err instanceof Errors.SubscriptionAdminDeletionError) {
+      // set info.public.error for JSON response so frontend can display
+      // a specific message
+      errorData.info.public = {
+        error: 'SubscriptionAdminDeletionError',
+      }
+      logger.warn(OError.tag(err, errorData.message, errorData.info))
+      return HttpErrorHandler.unprocessableEntity(
+        req,
+        res,
+        errorData.message,
+        errorData.info.public
+      )
+    } else {
+      throw err
+    }
+  }
+
+  const sessionId = req.sessionID
+
+  if (typeof req.logout === 'function') {
+    req.logout()
+  }
+
+  const destroySession = promisify(req.session.destroy.bind(req.session))
+  await destroySession()
+
+  UserSessionsManager.promises.untrackSession(user, sessionId).catch(err => {
+    logger.warn({ err, userId: user._id }, 'failed to untrack session')
+  })
+  res.sendStatus(200)
+}
+
+async function subscribe(req, res, next) {
+  const userId = SessionManager.getLoggedInUserId(req.session)
+  req.logger.addFields({ userId })
+
+  const user = await UserGetter.promises.getUser(userId, {
+    _id: 1,
+    email: 1,
+    first_name: 1,
+    last_name: 1,
+  })
+  await NewsletterManager.promises.subscribe(user)
+  res.json({
+    message: req.i18n.translate('thanks_settings_updated'),
+  })
+}
+
+async function unsubscribe(req, res, next) {
+  const userId = SessionManager.getLoggedInUserId(req.session)
+  req.logger.addFields({ userId })
+
+  const user = await UserGetter.promises.getUser(userId, {
+    _id: 1,
+    email: 1,
+    first_name: 1,
+    last_name: 1,
+  })
+  await NewsletterManager.promises.unsubscribe(user)
+  await Modules.promises.hooks.fire('newsletterUnsubscribed', user)
+  res.json({
+    message: req.i18n.translate('thanks_settings_updated'),
+  })
+}
+
+async function updateUserSettings(req, res, next) {
+  const userId = SessionManager.getLoggedInUserId(req.session)
+  req.logger.addFields({ userId })
+
+  const user = await User.findById(userId).exec()
+  if (user == null) {
+    throw new OError('problem updating user settings', { userId })
+  }
+
+  if (req.body.first_name != null) {
+    user.first_name = req.body.first_name.trim()
+  }
+  if (req.body.last_name != null) {
+    user.last_name = req.body.last_name.trim()
+  }
+  if (req.body.role != null) {
+    user.role = req.body.role.trim()
+  }
+  if (req.body.institution != null) {
+    user.institution = req.body.institution.trim()
+  }
+  if (req.body.mode != null) {
+    user.ace.mode = req.body.mode
+  }
+  if (req.body.editorTheme != null) {
+    user.ace.theme = req.body.editorTheme
+  }
+  if (req.body.overallTheme != null) {
+    user.ace.overallTheme = req.body.overallTheme
+  }
+  if (req.body.fontSize != null) {
+    user.ace.fontSize = req.body.fontSize
+  }
+  if (req.body.autoComplete != null) {
+    user.ace.autoComplete = req.body.autoComplete
+  }
+  if (req.body.autoPairDelimiters != null) {
+    user.ace.autoPairDelimiters = req.body.autoPairDelimiters
+  }
+  if (req.body.spellCheckLanguage != null) {
+    user.ace.spellCheckLanguage = req.body.spellCheckLanguage
+  }
+  if (req.body.pdfViewer != null) {
+    user.ace.pdfViewer = req.body.pdfViewer
+  }
+  if (req.body.syntaxValidation != null) {
+    user.ace.syntaxValidation = req.body.syntaxValidation
+  }
+  if (req.body.fontFamily != null) {
+    user.ace.fontFamily = req.body.fontFamily
+  }
+  if (req.body.lineHeight != null) {
+    user.ace.lineHeight = req.body.lineHeight
+  }
+  await user.save()
+
+  const newEmail = req.body.email?.trim().toLowerCase()
+  if (
+    newEmail == null ||
+    newEmail === user.email ||
+    req.externalAuthenticationSystemUsed()
+  ) {
+    // end here, don't update email
+    SessionManager.setInSessionUser(req.session, {
+      first_name: user.first_name,
+      last_name: user.last_name,
+    })
+    res.sendStatus(200)
+  } else if (newEmail.indexOf('@') === -1) {
+    // email invalid
+    res.sendStatus(400)
+  } else {
+    // update the user email
+    const auditLog = {
+      initiatorId: userId,
+      ipAddress: req.ip,
+    }
+
+    try {
+      await UserUpdater.promises.changeEmailAddress(userId, newEmail, auditLog)
+    } catch (err) {
+      if (err instanceof Errors.EmailExistsError) {
+        const translation = req.i18n.translate('email_already_registered')
+        return HttpErrorHandler.conflict(req, res, translation)
+      } else {
+        return HttpErrorHandler.legacyInternal(
+          req,
+          res,
+          req.i18n.translate('problem_changing_email_address'),
+          OError.tag(err, 'problem_changing_email_address', {
+            userId,
+            newEmail,
+          })
         )
       }
-    )
-  },
+    }
 
-  subscribe(req, res, next) {
-    const userId = SessionManager.getLoggedInUserId(req.session)
-    UserGetter.getUser(
-      userId,
-      { _id: 1, email: 1, first_name: 1, last_name: 1 },
-      (err, user) => {
-        if (err != null) {
-          return next(err)
-        }
-        NewsletterManager.subscribe(user, err => {
-          if (err != null) {
-            OError.tag(err, 'error subscribing to newsletter')
-            return next(err)
-          }
-          return res.json({
-            message: req.i18n.translate('thanks_settings_updated'),
-          })
-        })
-      }
-    )
-  },
-
-  unsubscribe(req, res, next) {
-    const userId = SessionManager.getLoggedInUserId(req.session)
-    UserGetter.getUser(
-      userId,
-      { _id: 1, email: 1, first_name: 1, last_name: 1 },
-      (err, user) => {
-        if (err != null) {
-          return next(err)
-        }
-        NewsletterManager.unsubscribe(user, err => {
-          if (err != null) {
-            OError.tag(err, 'error unsubscribing to newsletter')
-            return next(err)
-          }
-          Modules.hooks.fire('newsletterUnsubscribed', user, err => {
-            if (err) {
-              OError.tag(err, 'error firing "newsletterUnsubscribed" hook')
-              return next(err)
-            }
-            return res.json({
-              message: req.i18n.translate('thanks_settings_updated'),
-            })
-          })
-        })
-      }
-    )
-  },
-
-  updateUserSettings(req, res, next) {
-    const userId = SessionManager.getLoggedInUserId(req.session)
-    User.findById(userId, (err, user) => {
-      if (err != null || user == null) {
-        logger.err({ err, userId }, 'problem updaing user settings')
-        return res.sendStatus(500)
-      }
-
-      if (req.body.first_name != null) {
-        user.first_name = req.body.first_name.trim()
-      }
-      if (req.body.last_name != null) {
-        user.last_name = req.body.last_name.trim()
-      }
-      if (req.body.role != null) {
-        user.role = req.body.role.trim()
-      }
-      if (req.body.institution != null) {
-        user.institution = req.body.institution.trim()
-      }
-      if (req.body.mode != null) {
-        user.ace.mode = req.body.mode
-      }
-      if (req.body.editorTheme != null) {
-        user.ace.theme = req.body.editorTheme
-      }
-      if (req.body.overallTheme != null) {
-        user.ace.overallTheme = req.body.overallTheme
-      }
-      if (req.body.fontSize != null) {
-        user.ace.fontSize = req.body.fontSize
-      }
-      if (req.body.autoComplete != null) {
-        user.ace.autoComplete = req.body.autoComplete
-      }
-      if (req.body.autoPairDelimiters != null) {
-        user.ace.autoPairDelimiters = req.body.autoPairDelimiters
-      }
-      if (req.body.spellCheckLanguage != null) {
-        user.ace.spellCheckLanguage = req.body.spellCheckLanguage
-      }
-      if (req.body.pdfViewer != null) {
-        user.ace.pdfViewer = req.body.pdfViewer
-      }
-      if (req.body.syntaxValidation != null) {
-        user.ace.syntaxValidation = req.body.syntaxValidation
-      }
-      if (req.body.fontFamily != null) {
-        user.ace.fontFamily = req.body.fontFamily
-      }
-      if (req.body.lineHeight != null) {
-        user.ace.lineHeight = req.body.lineHeight
-      }
-
-      user.save(err => {
-        if (err != null) {
-          return next(err)
-        }
-        const newEmail =
-          req.body.email != null
-            ? req.body.email.trim().toLowerCase()
-            : undefined
-        if (
-          newEmail == null ||
-          newEmail === user.email ||
-          req.externalAuthenticationSystemUsed()
-        ) {
-          // end here, don't update email
-          SessionManager.setInSessionUser(req.session, {
-            first_name: user.first_name,
-            last_name: user.last_name,
-          })
-          res.sendStatus(200)
-        } else if (newEmail.indexOf('@') === -1) {
-          // email invalid
-          res.sendStatus(400)
-        } else {
-          // update the user email
-          const auditLog = {
-            initiatorId: userId,
-            ipAddress: req.ip,
-          }
-          UserUpdater.changeEmailAddress(userId, newEmail, auditLog, err => {
-            if (err) {
-              if (err instanceof Errors.EmailExistsError) {
-                const translation = req.i18n.translate(
-                  'email_already_registered'
-                )
-                return HttpErrorHandler.conflict(req, res, translation)
-              } else {
-                return HttpErrorHandler.legacyInternal(
-                  req,
-                  res,
-                  req.i18n.translate('problem_changing_email_address'),
-                  OError.tag(err, 'problem_changing_email_address', {
-                    userId,
-                    newEmail,
-                  })
-                )
-              }
-            }
-            User.findById(userId, (err, user) => {
-              if (err != null) {
-                logger.err(
-                  { err, userId },
-                  'error getting user for email update'
-                )
-                return res.sendStatus(500)
-              }
-              SessionManager.setInSessionUser(req.session, {
-                email: user.email,
-                first_name: user.first_name,
-                last_name: user.last_name,
-              })
-              UserHandler.populateTeamInvites(user, err => {
-                // need to refresh this in the background
-                if (err != null) {
-                  logger.err({ err }, 'error populateTeamInvites')
-                }
-                res.sendStatus(200)
-              })
-            })
-          })
-        }
-      })
+    const user = await User.findById(userId).exec()
+    SessionManager.setInSessionUser(req.session, {
+      email: user.email,
+      first_name: user.first_name,
+      last_name: user.last_name,
     })
-  },
 
-  doLogout(req, cb) {
-    metrics.inc('user.logout')
-    const user = SessionManager.getSessionUser(req.session)
-    logger.debug({ user }, 'logging out')
-    const sessionId = req.sessionID
-    if (typeof req.logout === 'function') {
-      req.logout()
-    } // passport logout
-    req.session.destroy(err => {
-      if (err) {
-        OError.tag(err, 'error destroying session')
-        return cb(err)
-      }
-      if (user != null) {
-        UserSessionsManager.untrackSession(user, sessionId, () => {})
-      }
-      cb()
+    try {
+      await UserHandler.promises.populateTeamInvites(user)
+    } catch (err) {
+      logger.error({ err }, 'error populateTeamInvites')
+    }
+
+    res.sendStatus(200)
+  }
+}
+
+async function doLogout(req) {
+  metrics.inc('user.logout')
+  const user = SessionManager.getSessionUser(req.session)
+  logger.debug({ user }, 'logging out')
+  const sessionId = req.sessionID
+
+  // passport logout
+  if (typeof req.logout === 'function') {
+    req.logout()
+  }
+
+  const destroySession = promisify(req.session.destroy.bind(req.session))
+  await destroySession()
+
+  if (user != null) {
+    UserSessionsManager.promises.untrackSession(user, sessionId).catch(err => {
+      logger.warn({ err, userId: user._id }, 'failed to untrack session')
     })
-  },
+  }
+}
 
-  logout(req, res, next) {
-    const requestedRedirect = req.body.redirect
-      ? UrlHelper.getSafeRedirectPath(req.body.redirect)
-      : undefined
-    const redirectUrl = requestedRedirect || '/login'
+async function logout(req, res, next) {
+  const requestedRedirect = req.body.redirect
+    ? UrlHelper.getSafeRedirectPath(req.body.redirect)
+    : undefined
+  const redirectUrl = requestedRedirect || '/login'
 
-    UserController.doLogout(req, err => {
-      if (err != null) {
-        return next(err)
-      }
-      if (acceptsJson(req)) {
-        res.status(200).json({ redir: redirectUrl })
-      } else {
-        res.redirect(redirectUrl)
-      }
-    })
-  },
+  await doLogout(req)
 
-  expireDeletedUser(req, res, next) {
-    const userId = req.params.userId
-    UserDeleter.expireDeletedUser(userId, error => {
-      if (error) {
-        return next(error)
-      }
+  if (acceptsJson(req)) {
+    res.status(200).json({ redir: redirectUrl })
+  } else {
+    res.redirect(redirectUrl)
+  }
+}
 
-      res.sendStatus(204)
-    })
-  },
+async function expireDeletedUser(req, res, next) {
+  const userId = req.params.userId
+  await UserDeleter.promises.expireDeletedUser(userId)
+  res.sendStatus(204)
+}
 
-  expireDeletedUsersAfterDuration(req, res, next) {
-    UserDeleter.expireDeletedUsersAfterDuration(error => {
-      if (error) {
-        return next(error)
-      }
+async function expireDeletedUsersAfterDuration(req, res, next) {
+  await UserDeleter.promises.expireDeletedUsersAfterDuration()
+  res.sendStatus(204)
+}
 
-      res.sendStatus(204)
-    })
-  },
-
+module.exports = {
+  clearSessions: expressify(clearSessions),
   changePassword: expressify(changePassword),
+  tryDeleteUser: expressify(tryDeleteUser),
+  subscribe: expressify(subscribe),
+  unsubscribe: expressify(unsubscribe),
+  updateUserSettings: expressify(updateUserSettings),
+  doLogout: callbackify(doLogout),
+  logout: expressify(logout),
+  expireDeletedUser: expressify(expireDeletedUser),
+  expireDeletedUsersAfterDuration: expressify(expireDeletedUsersAfterDuration),
+  promises: {
+    doLogout,
+    ensureAffiliation,
+    ensureAffiliationMiddleware,
+  },
 }
-
-UserController.promises = {
-  doLogout: promisify(UserController.doLogout),
-  ensureAffiliation,
-  ensureAffiliationMiddleware,
-}
-
-module.exports = UserController

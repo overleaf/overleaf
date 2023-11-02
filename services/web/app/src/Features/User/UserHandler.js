@@ -1,3 +1,4 @@
+const { promisifyAll } = require('@overleaf/promise-utils')
 const TeamInvitesHandler = require('../Subscription/TeamInvitesHandler')
 
 const UserHandler = {
@@ -13,3 +14,4 @@ const UserHandler = {
   },
 }
 module.exports = UserHandler
+module.exports.promises = promisifyAll(UserHandler)
