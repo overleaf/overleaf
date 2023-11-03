@@ -71,26 +71,33 @@ export function useRestoreDeletedFile() {
 
   const restoreDeletedFile = useCallback(
     (selection: HistoryContextValue['selection']) => {
-      const { selectedFile } = selection
+      const { selectedFile, files } = selection
 
       if (
         selectedFile &&
         selectedFile.pathname &&
         isFileRemoved(selectedFile)
       ) {
-        sendMB('history-v2-restore-deleted')
+        const file = files.find(file => file.pathname === selectedFile.pathname)
+        if (file && isFileRemoved(file)) {
+          sendMB('history-v2-restore-deleted')
 
-        setState('restoring')
-        restoreFile(projectId, selectedFile).then(
-          (data: RestoreFileResponse) => {
-            setRestoredFileMetadata(data)
-            setState('waitingForFileTree')
-          },
-          error => {
-            setState('error')
-            handleError(error)
-          }
-        )
+          setState('restoring')
+
+          restoreFile(projectId, {
+            ...selectedFile,
+            pathname: file.newPathname ?? file.pathname,
+          }).then(
+            (data: RestoreFileResponse) => {
+              setRestoredFileMetadata(data)
+              setState('waitingForFileTree')
+            },
+            error => {
+              setState('error')
+              handleError(error)
+            }
+          )
+        }
       }
     },
     [handleError, projectId]
