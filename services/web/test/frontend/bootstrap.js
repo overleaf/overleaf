@@ -112,6 +112,14 @@ globalThis.BroadcastChannel =
       postMessage(message) {}
     }
 
+// add stub for WebSocket state enum
+globalThis.WebSocket = class WebSocket {
+  static CONNECTING = 0
+  static OPEN = 1
+  static CLOSING = 2
+  static CLOSED = 3
+}
+
 // node-fetch doesn't accept relative URL's: https://github.com/node-fetch/node-fetch/blob/master/docs/v2-LIMITS.md#known-differences
 const fetch = require('node-fetch')
 globalThis.fetch =
