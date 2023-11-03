@@ -11,7 +11,6 @@ import {
   FileTreeFileRefFindResult,
   FileTreeFindResult,
 } from '@/features/ide-react/types/file-tree'
-import usePersistedState from '@/shared/hooks/use-persisted-state'
 import FileView from '@/features/file-view/components/file-view'
 import { FileRef } from '../../../../../types/file-ref'
 import { EditorPane } from '@/features/ide-react/components/editor/editor-pane'
@@ -23,11 +22,25 @@ import { useEditorManagerContext } from '@/features/ide-react/context/editor-man
 import NoOpenDocPane from '@/features/ide-react/components/editor/no-open-doc-pane'
 import { debugConsole } from '@/utils/debugging'
 import { HistorySidebar } from '@/features/ide-react/components/history-sidebar'
+import { BinaryFile } from '@/features/file-view/types/binary-file'
+import useScopeValue from '@/shared/hooks/use-scope-value'
 
 type EditorAndSidebarProps = {
   shouldPersistLayout: boolean
   leftColumnDefaultSize: number
   setLeftColumnDefaultSize: React.Dispatch<React.SetStateAction<number>>
+}
+
+function convertFileRefToBinaryFile(fileRef: FileRef): BinaryFile {
+  return {
+    _id: fileRef._id,
+    name: fileRef.name,
+    id: fileRef._id,
+    type: 'file',
+    selected: true,
+    linkedFileData: fileRef.linkedFileData,
+    created: fileRef.created ? new Date(fileRef.created) : new Date(),
+  }
 }
 
 // `FileViewHeader`, which is TypeScript, expects a BinaryFile, which has a
@@ -39,12 +52,7 @@ type EditorAndSidebarProps = {
 // does too.
 function fileViewFile(fileRef: FileRef) {
   return {
-    _id: fileRef._id,
-    name: fileRef.name,
-    id: fileRef._id,
-    type: 'file',
-    selected: true,
-    linkedFileData: fileRef.linkedFileData,
+    ...convertFileRefToBinaryFile(fileRef),
     created: fileRef.created,
   }
 }
@@ -55,18 +63,18 @@ export function EditorAndSidebar({
   setLeftColumnDefaultSize,
 }: EditorAndSidebarProps) {
   const [leftColumnIsOpen, setLeftColumnIsOpen] = useState(true)
-  const { rootDocId, _id: projectId } = useProjectContext()
+  const { rootDocId } = useProjectContext()
   const { eventEmitter } = useIdeReactContext()
-  const { openDocId: openDocWithId, currentDocumentId } =
-    useEditorManagerContext()
+  const {
+    openDocId: openDocWithId,
+    currentDocumentId: openDocId,
+    openInitialDoc,
+  } = useEditorManagerContext()
   const { view } = useLayoutContext()
+  const [, setOpenFile] = useScopeValue<BinaryFile | null>('openFile')
+
   const historyIsOpen = view === 'history'
 
-  // Persist the open document ID in local storage
-  const [openDocId, setOpenDocId] = usePersistedState(
-    `doc.open_id.${projectId}`,
-    rootDocId
-  )
   const [openEntity, setOpenEntity] = useState<
     FileTreeDocumentFindResult | FileTreeFileRefFindResult | null
   >(null)
@@ -92,11 +100,21 @@ export function EditorAndSidebar({
       }
 
       setOpenEntity(selected)
-      if (selected.type === 'doc') {
-        setOpenDocId(selected.entity._id)
+      if (selected.type === 'doc' && fileTreeReady) {
+        openDocWithId(selected.entity._id)
+      }
+
+      // Keep openFile scope value in sync with the file tree
+      const openFile =
+        selected.type === 'fileRef'
+          ? convertFileRefToBinaryFile(selected.entity)
+          : null
+      setOpenFile(openFile)
+      if (openFile) {
+        window.dispatchEvent(new CustomEvent('file-view:file-opened'))
       }
     },
-    [setOpenDocId]
+    [fileTreeReady, setOpenFile, openDocWithId]
   )
 
   const handleFileTreeDelete: FileTreeDeleteHandler = useCallback(
@@ -115,46 +133,38 @@ export function EditorAndSidebar({
   // trigger the onSelect handler in this component, which will update the local
   // state.
   useEffect(() => {
-    debugConsole.log(
-      `currentDocumentId changed to ${currentDocumentId}. Updating file tree`
-    )
-    if (currentDocumentId === null) {
+    debugConsole.log(`openDocId changed to ${openDocId}`)
+    if (openDocId === null) {
       return
     }
 
     window.dispatchEvent(
-      new CustomEvent('editor.openDoc', { detail: currentDocumentId })
+      new CustomEvent('editor.openDoc', { detail: openDocId })
     )
-  }, [currentDocumentId])
+  }, [openDocId])
 
-  // Store openDocWithId, which is unstable, in a ref and keep the ref
-  // synchronized with the source
-  const openDocWithIdRef = useRef(openDocWithId)
-
+  // Open a document once the file tree is ready
+  const initialOpenDoneRef = useRef(false)
   useEffect(() => {
-    openDocWithIdRef.current = openDocWithId
-  }, [openDocWithId])
-
-  // Open a document in the editor when the local document ID changes
-  useEffect(() => {
-    if (!fileTreeReady || !openDocId) {
-      return
+    if (fileTreeReady && !initialOpenDoneRef.current) {
+      initialOpenDoneRef.current = true
+      openInitialDoc(rootDocId)
     }
-    debugConsole.log(
-      `Observed change in local state. Opening document with ID ${openDocId}`
-    )
-    openDocWithIdRef.current(openDocId)
-  }, [fileTreeReady, openDocId])
+  }, [fileTreeReady, openInitialDoc, rootDocId])
 
-  const leftColumnContent = historyIsOpen ? (
-    <HistorySidebar />
-  ) : (
-    <EditorSidebar
-      shouldPersistLayout={shouldPersistLayout}
-      onFileTreeInit={handleFileTreeInit}
-      onFileTreeSelect={handleFileTreeSelect}
-      onFileTreeDelete={handleFileTreeDelete}
-    />
+  // Keep the editor file tree around so that it is available and up to date
+  // when restoring a file
+  const leftColumnContent = (
+    <>
+      <EditorSidebar
+        shouldShow={!historyIsOpen}
+        shouldPersistLayout={shouldPersistLayout}
+        onFileTreeInit={handleFileTreeInit}
+        onFileTreeSelect={handleFileTreeSelect}
+        onFileTreeDelete={handleFileTreeDelete}
+      />
+      {historyIsOpen ? <HistorySidebar /> : null}
+    </>
   )
 
   let rightColumnContent

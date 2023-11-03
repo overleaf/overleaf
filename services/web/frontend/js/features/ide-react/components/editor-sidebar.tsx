@@ -6,8 +6,10 @@ import {
   FileTreeDeleteHandler,
   FileTreeSelectHandler,
 } from '@/features/ide-react/types/file-tree'
+import classNames from 'classnames'
 
 type EditorSidebarProps = {
+  shouldShow: boolean
   shouldPersistLayout: boolean
   onFileTreeInit: () => void
   onFileTreeSelect: FileTreeSelectHandler
@@ -15,6 +17,7 @@ type EditorSidebarProps = {
 }
 
 export default function EditorSidebar({
+  shouldShow,
   shouldPersistLayout,
   onFileTreeInit,
   onFileTreeSelect,
@@ -22,7 +25,11 @@ export default function EditorSidebar({
 }: EditorSidebarProps) {
   return (
     <>
-      <aside className="ide-react-editor-sidebar">
+      <aside
+        className={classNames('ide-react-editor-sidebar', {
+          hidden: !shouldShow,
+        })}
+      >
         <PanelGroup
           autoSaveId={
             shouldPersistLayout ? 'ide-react-editor-sidebar-layout' : undefined

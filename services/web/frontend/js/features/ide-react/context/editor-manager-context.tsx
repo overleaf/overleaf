@@ -27,6 +27,7 @@ import { findDocEntityById } from '@/features/ide-react/util/find-doc-entity-by-
 import useScopeEventEmitter from '@/shared/hooks/use-scope-event-emitter'
 import { useModalsContext } from '@/features/ide-react/context/modals-context'
 import { useTranslation } from 'react-i18next'
+import customLocalStorage from '@/infrastructure/local-storage'
 
 interface GotoOffsetOptions {
   gotoOffset: number
@@ -50,6 +51,7 @@ type EditorManager = {
   stopIgnoringExternalUpdates: () => void
   openDocId: (docId: string, options?: OpenDocOptions) => void
   openDoc: (document: Doc, options?: OpenDocOptions) => void
+  openInitialDoc: (docId: string) => void
   jumpToLine: (options: GotoLineOptions) => void
 }
 
@@ -109,6 +111,7 @@ const EditorManagerContext = createContext<EditorManager | undefined>(undefined)
 export const EditorManagerProvider: FC = ({ children }) => {
   const { t } = useTranslation()
   const ide = useIdeContext()
+  const { projectId } = useIdeReactContext()
   const { reportError, eventEmitter, eventLog } = useIdeReactContext()
   const { socket, disconnect } = useConnectionContext()
   const { view, setView } = useLayoutContext()
@@ -136,7 +139,6 @@ export const EditorManagerProvider: FC = ({ children }) => {
 
   const { fileTreeData } = useFileTreeData()
 
-  // eslint-disable-next-line no-unused-vars
   const [ignoringExternalUpdates, setIgnoringExternalUpdates] = useState(false)
 
   const [globalEditorWatchdogManager] = useState(
@@ -176,6 +178,15 @@ export const EditorManagerProvider: FC = ({ children }) => {
         eventLog
       )
   )
+
+  const openDocIdStorageKey = `doc.open_id.${projectId}`
+
+  // Persist the open document ID to local storage
+  useEffect(() => {
+    if (openDocId) {
+      customLocalStorage.setItem(openDocIdStorageKey, openDocId)
+    }
+  }, [openDocId, openDocIdStorageKey])
 
   const editorOpenDocEpochRef = useRef(0)
 
@@ -485,6 +496,17 @@ export const EditorManagerProvider: FC = ({ children }) => {
     [fileTreeData, openDoc]
   )
 
+  const openInitialDoc = useCallback(
+    (fallbackDocId: string) => {
+      const docId =
+        customLocalStorage.getItem(openDocIdStorageKey) || fallbackDocId
+      if (docId) {
+        openDocWithId(docId)
+      }
+    },
+    [openDocIdStorageKey, openDocWithId]
+  )
+
   useEffect(() => {
     if (docError) {
       const { doc, document, error, meta } = docError
@@ -574,6 +596,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
       stopIgnoringExternalUpdates,
       openDocId: openDocWithId,
       openDoc,
+      openInitialDoc,
       jumpToLine,
     }),
     [
@@ -587,6 +610,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
       stopIgnoringExternalUpdates,
       openDocWithId,
       openDoc,
+      openInitialDoc,
       jumpToLine,
     ]
   )

@@ -10,12 +10,19 @@ import EditorNavigationToolbar from '@/features/ide-react/components/editor-navi
 import ChatPane from '@/features/chat/components/chat-pane'
 import { useLayoutEventTracking } from '@/features/ide-react/hooks/use-layout-event-tracking'
 import useSocketListeners from '@/features/ide-react/hooks/use-socket-listeners'
+import { useOpenFile } from '@/features/ide-react/hooks/use-open-file'
 
 // This is filled with placeholder content while the real content is migrated
 // away from Angular
 export default function IdePage() {
   useLayoutEventTracking()
   useSocketListeners()
+
+  // This returns a function to open a binary file but for now we just use the
+  // fact that it also patches in ide.binaryFilesManager. Once Angular is gone,
+  // we can remove this hook from here and use it in the history file restore
+  // component instead.
+  useOpenFile()
 
   const [leftColumnDefaultSize, setLeftColumnDefaultSize] = useState(20)
   const { registerUserActivity } = useConnectionContext()

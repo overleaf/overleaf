@@ -38,13 +38,14 @@ export function useRestoreDeletedFile() {
         setState('complete')
         const { _id: id } = result.entity
         setView('editor')
+
+        // Once Angular is gone, these can be replaced with calls to context
+        // methods
         if (restoredFileMetadata.type === 'doc') {
           ide.editorManager.openDocId(id)
         } else {
           ide.binaryFilesManager.openFileWithId(id)
         }
-        // Get the file tree to select the entity that has just been restored
-        window.dispatchEvent(new CustomEvent('editor.openDoc', { detail: id }))
       }
     }
   }, [
