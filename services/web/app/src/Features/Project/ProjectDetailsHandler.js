@@ -137,6 +137,19 @@ async function validateProjectName(name) {
       'Project name cannot contain \\ characters'
     )
   }
+  if (name !== name.trim()) {
+    const message = 'Project name cannot start or end with whitespace'
+
+    const error = new Errors.InvalidNameError({
+      message,
+      info: { name },
+    })
+
+    logger.warn({ error }, message)
+
+    // TODO: throw the error, after checking that it won't cause problems
+    // throw error
+  }
 }
 
 // FIXME: we should put a lock around this to make it completely safe, but we would need to do that at
@@ -163,7 +176,10 @@ async function generateUniqueName(userId, name, suffixes = []) {
 }
 
 function fixProjectName(name) {
-  if (name === '' || !name) {
+  // Remove any leading or trailing whitespace
+  name = typeof name === 'string' ? name.trim() : ''
+  // Apply a default name if the name is empty
+  if (name === '') {
     name = 'Untitled'
   }
   if (name.indexOf('/') > -1) {
