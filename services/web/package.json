@@ -172,7 +172,7 @@
     "@babel/preset-react": "^7.22.15",
     "@babel/preset-typescript": "^7.23.2",
     "@babel/register": "^7.22.15",
-    "@codemirror/autocomplete": "github:overleaf/codemirror-autocomplete#b795675768e25c442916c7190da75716c0a5ac80",
+    "@codemirror/autocomplete": "github:overleaf/codemirror-autocomplete#v6.10.2-overleaf-1",
     "@codemirror/commands": "^6.3.0",
     "@codemirror/lang-markdown": "^6.2.1",
     "@codemirror/language": "^6.9.1",
