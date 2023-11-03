@@ -56,8 +56,8 @@ const TextButton: FC<{
     <Button
       onClick={handleClick}
       bsSize="xsmall"
-      bsStyle="secondary"
-      className="copy-button"
+      bsStyle={null}
+      className="copy-button btn-secondary"
     >
       {t('copy')}
     </Button>
