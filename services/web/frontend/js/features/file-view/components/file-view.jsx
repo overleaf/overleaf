@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 
 import FileViewHeader from './file-view-header'
 import FileViewImage from './file-view-image'
+import FileViewPdf from './file-view-pdf'
 import FileViewText from './file-view-text'
 import Icon from '../../../shared/components/icon'
 
@@ -24,8 +25,8 @@ export default function FileView({ file }) {
     editableFilenames.includes(file.name.toLowerCase())
 
   const isImageFile = imageExtensions.includes(extension)
-
-  const isUnpreviewableFile = !isEditableTextFile && !isImageFile
+  const isPdfFile = extension === 'pdf'
+  const isUnpreviewableFile = !isEditableTextFile && !isImageFile && !isPdfFile
 
   const handleLoad = useCallback(() => {
     setContentLoading(false)
@@ -51,6 +52,13 @@ export default function FileView({ file }) {
       )}
       {isEditableTextFile && (
         <FileViewText file={file} onLoad={handleLoad} onError={handleError} />
+      )}
+      {isPdfFile && (
+        <FileViewPdf
+          fileId={file.id}
+          onLoad={handleLoad}
+          onError={handleError}
+        />
       )}
     </>
   )
