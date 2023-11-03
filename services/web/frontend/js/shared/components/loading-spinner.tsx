@@ -1,7 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import Icon from './icon'
 import { useEffect, useState } from 'react'
-import PropTypes from 'prop-types'
 
 function LoadingSpinner({ delay = 0 }) {
   const { t } = useTranslation()
@@ -31,10 +30,6 @@ function LoadingSpinner({ delay = 0 }) {
   )
 }
 
-LoadingSpinner.propTypes = {
-  delay: PropTypes.number,
-}
-
 export default LoadingSpinner
 
 export function FullSizeLoadingSpinner({
@@ -49,9 +44,4 @@ export function FullSizeLoadingSpinner({
       <LoadingSpinner delay={delay} />
     </div>
   )
-}
-
-FullSizeLoadingSpinner.propTypes = {
-  delay: PropTypes.number,
-  minHeight: PropTypes.string,
 }

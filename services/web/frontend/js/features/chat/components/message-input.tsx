@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 
 type MessageInputProps = {
@@ -38,11 +37,6 @@ function MessageInput({ resetUnreadMessages, sendMessage }: MessageInputProps) {
       />
     </form>
   )
-}
-
-MessageInput.propTypes = {
-  resetUnreadMessages: PropTypes.func.isRequired,
-  sendMessage: PropTypes.func.isRequired,
 }
 
 export default MessageInput
