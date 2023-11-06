@@ -3,6 +3,8 @@ extends ../../layout
 block append meta
 	meta(name="ol-hasIndividualRecurlySubscription" data-type="boolean" content=hasIndividualRecurlySubscription)
 	meta(name="ol-inviteToken" content=inviteToken)
+	meta(name="ol-groupSSOActive" data-type="boolean" content=groupSSOActive)
+	meta(name="ol-subscriptionId" data-type="string" content=subscriptionId)
 
 block content
 	main.content.content-alt.team-invite#main-content
@@ -42,4 +44,4 @@ block content
 						div(ng-show="view =='inviteAccepted'")
 							p(ng-non-bindable) #{translate("joined_team", {inviterName: inviterName})}
 							p
-								a.btn.btn.btn-primary(href="/project") #{translate("done")}
+								a.btn.btn.btn-primary(href=doneLink) #{translate("done")}

@@ -2,6 +2,7 @@ const { promisify } = require('util')
 const { Subscription } = require('../../models/Subscription')
 const { DeletedSubscription } = require('../../models/DeletedSubscription')
 const logger = require('@overleaf/logger')
+const { SSOConfig } = require('../../models/SSOConfig')
 require('./GroupPlansData') // make sure dynamic group plans are loaded
 
 const SubscriptionLocator = {
@@ -124,6 +125,11 @@ const SubscriptionLocator = {
   },
 }
 
+async function hasSSOEnabled(subscription) {
+  const ssoConfig = await SSOConfig.findById(subscription.ssoConfig).exec()
+  return ssoConfig?.enabled
+}
+
 SubscriptionLocator.promises = {
   getUsersSubscription: promisify(SubscriptionLocator.getUsersSubscription),
   getUserIndividualSubscription: promisify(
@@ -153,5 +159,6 @@ SubscriptionLocator.promises = {
   hasRecurlyGroupSubscription: promisify(
     SubscriptionLocator.hasRecurlyGroupSubscription
   ),
+  hasSSOEnabled,
 }
 module.exports = SubscriptionLocator

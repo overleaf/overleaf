@@ -84,6 +84,10 @@ async function viewInvite(req, res, next) {
       personalSubscription.recurlySubscription_id &&
       personalSubscription.recurlySubscription_id !== ''
 
+    const groupSSOActive = await SubscriptionLocator.promises.hasSSOEnabled(
+      subscription
+    )
+
     if (subscription?.groupPolicy) {
       if (!subscription.populated('groupPolicy')) {
         await subscription.populate('groupPolicy')
@@ -128,6 +132,8 @@ async function viewInvite(req, res, next) {
         expired: req.query.expired,
         validationStatus: Object.fromEntries(validationStatus),
         currentManagedUserAdminEmail,
+        groupSSOActive,
+        subscriptionId: subscription._id.toString(),
       })
     } else {
       let currentManagedUserAdminEmail
@@ -146,6 +152,8 @@ async function viewInvite(req, res, next) {
         expired: req.query.expired,
         userRestrictions: Array.from(req.userRestrictions || []),
         currentManagedUserAdminEmail,
+        groupSSOActive,
+        subscriptionId: subscription._id.toString(),
       })
     }
   } else {
@@ -167,8 +175,15 @@ async function acceptInvite(req, res, next) {
   const { token } = req.params
   const userId = SessionManager.getLoggedInUserId(req.session)
 
-  await TeamInvitesHandler.promises.acceptInvite(token, userId)
-  res.sendStatus(204)
+  const subscription = await TeamInvitesHandler.promises.acceptInvite(
+    token,
+    userId
+  )
+  const groupSSOActive = await SubscriptionLocator.promises.hasSSOEnabled(
+    subscription
+  )
+
+  res.status(204).json({ groupSSOActive })
 }
 
 function revokeInvite(req, res, next) {

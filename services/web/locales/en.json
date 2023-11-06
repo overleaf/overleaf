@@ -2104,6 +2104,7 @@
   "you_will_be_able_to_contact_us_any_time_to_share_your_feedback": "<0>You will be able to contact us</0> any time to share your feedback",
   "you_will_be_able_to_reassign_subscription": "You will be able to reassign their subscription membership to another person in your organization",
   "youll_get_best_results_in_visual_but_can_be_used_in_source": "You’ll get the best results from using this tool in the <0>Visual Editor</0>, although you can still use it to insert tables in the <1>Code Editor</1>. Once you’ve selected the number of rows and columns you need, the table will appear in your document and you can double click in a cell to add contents to it.",
+  "youll_no_longer_need_to_remember_credentials": "You’ll no longer need to remember a separate email address and password. Instead, you will use single-sign on to login to Overleaf. <0>Read more about SSO</0>.",
   "your_account_is_managed_by_admin_cant_join_additional_group": "Your __appName__ account is managed by your current group admin (__admin__). This means you can’t join additional group subscriptions. <0>Read more about Managed Users.</0>",
   "your_affiliation_is_confirmed": "Your <0>__institutionName__</0> affiliation is confirmed.",
   "your_browser_does_not_support_this_feature": "Sorry, your browser doesn’t support this feature. Please update your browser to its latest version.",

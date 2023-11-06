@@ -15,6 +15,9 @@ describe('Subscription Locator Tests', function () {
       findOne: sinon.stub().yields(),
       find: sinon.stub().yields(),
     }
+    this.SSOConfig = {
+      findById: sinon.stub().yields(),
+    }
     this.SubscriptionLocator = SandboxedModule.require(modulePath, {
       requires: {
         './GroupPlansData': {},
@@ -23,6 +26,9 @@ describe('Subscription Locator Tests', function () {
         },
         '../../models/DeletedSubscription': {
           DeletedSubscription: this.DeletedSubscription,
+        },
+        '../../models/SSOConfig': {
+          SSOConfig: this.SSOConfig,
         },
       },
     })

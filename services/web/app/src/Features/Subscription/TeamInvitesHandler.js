@@ -95,6 +95,8 @@ async function acceptInvite(token, userId) {
   await NotificationsBuilder.promises
     .groupInvitation(userId, subscription._id, false)
     .read()
+
+  return subscription
 }
 
 async function revokeInvite(teamManagerId, subscription, email) {
