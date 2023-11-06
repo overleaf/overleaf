@@ -42,7 +42,10 @@ FileTreeDraggablePreviewLayer.propTypes = {
   item: PropTypes.shape({
     title: PropTypes.string.isRequired,
   }),
-  clientOffset: PropTypes.number,
+  clientOffset: PropTypes.shape({
+    x: PropTypes.number,
+    y: PropTypes.number,
+  }),
 }
 
 function DraggablePreviewItem({ title }) {
