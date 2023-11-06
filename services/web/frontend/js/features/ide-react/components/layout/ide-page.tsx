@@ -10,6 +10,7 @@ import EditorNavigationToolbar from '@/features/ide-react/components/editor-navi
 import ChatPane from '@/features/chat/components/chat-pane'
 import { useLayoutEventTracking } from '@/features/ide-react/hooks/use-layout-event-tracking'
 import useSocketListeners from '@/features/ide-react/hooks/use-socket-listeners'
+import { useModalsContext } from '@/features/ide-react/context/modals-context'
 import { useOpenFile } from '@/features/ide-react/hooks/use-open-file'
 
 // This is filled with placeholder content while the real content is migrated
@@ -25,7 +26,19 @@ export default function IdePage() {
   useOpenFile()
 
   const [leftColumnDefaultSize, setLeftColumnDefaultSize] = useState(20)
-  const { registerUserActivity } = useConnectionContext()
+  const { connectionState, registerUserActivity } = useConnectionContext()
+  const { showLockEditorMessageModal } = useModalsContext()
+
+  // Show modal when editor is forcefully disconnected
+  useEffect(() => {
+    if (connectionState.forceDisconnected) {
+      showLockEditorMessageModal(connectionState.forcedDisconnectDelay)
+    }
+  }, [
+    connectionState.forceDisconnected,
+    connectionState.forcedDisconnectDelay,
+    showLockEditorMessageModal,
+  ])
 
   // Inform the connection manager when the user is active
   const listener = useCallback(

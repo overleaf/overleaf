@@ -9,6 +9,10 @@ import {
 import GenericMessageModal, {
   GenericMessageModalOwnProps,
 } from '@/features/ide-react/components/modals/generic-message-modal'
+import OutOfSyncModal, {
+  OutOfSyncModalProps,
+} from '@/features/ide-react/components/modals/out-of-sync-modal'
+import LockEditorMessageModal from '@/features/ide-react/components/modals/lock-editor-message-modal'
 
 type ModalsContextValue = {
   genericModalVisible: boolean
@@ -16,6 +20,10 @@ type ModalsContextValue = {
     title: GenericMessageModalOwnProps['title'],
     message: GenericMessageModalOwnProps['message']
   ) => void
+  showOutOfSyncModal: (
+    editorContent: OutOfSyncModalProps['editorContent']
+  ) => void
+  showLockEditorMessageModal: (delay: number) => void
 }
 
 const ModalsContext = createContext<ModalsContextValue | undefined>(undefined)
@@ -24,6 +32,18 @@ export const ModalsContextProvider: FC = ({ children }) => {
   const [showGenericModal, setShowGenericModal] = useState(false)
   const [genericMessageModalData, setGenericMessageModalData] =
     useState<GenericMessageModalOwnProps>({ title: '', message: '' })
+
+  const [shouldShowOutOfSyncModal, setShouldShowOutOfSyncModal] =
+    useState(false)
+  const [outOfSyncModalData, setOutOfSyncModalData] = useState({
+    editorContent: '',
+  })
+
+  const [shouldShowLockEditorModal, setShouldShowLockEditorModal] =
+    useState(false)
+  const [lockEditorModalData, setLockEditorModalData] = useState({
+    delay: 0,
+  })
 
   const handleHideGenericModal = useCallback(() => {
     setShowGenericModal(false)
@@ -40,12 +60,33 @@ export const ModalsContextProvider: FC = ({ children }) => {
     []
   )
 
+  const handleHideOutOfSyncModal = useCallback(() => {
+    setShouldShowOutOfSyncModal(false)
+  }, [])
+
+  const showOutOfSyncModal = useCallback((editorContent: string) => {
+    setOutOfSyncModalData({ editorContent })
+    setShouldShowOutOfSyncModal(true)
+  }, [])
+
+  const showLockEditorMessageModal = useCallback((delay: number) => {
+    setLockEditorModalData({ delay })
+    setShouldShowLockEditorModal(true)
+  }, [])
+
   const value = useMemo<ModalsContextValue>(
     () => ({
       showGenericMessageModal,
       genericModalVisible: showGenericModal,
+      showOutOfSyncModal,
+      showLockEditorMessageModal,
     }),
-    [showGenericMessageModal, showGenericModal]
+    [
+      showGenericMessageModal,
+      showGenericModal,
+      showOutOfSyncModal,
+      showLockEditorMessageModal,
+    ]
   )
 
   return (
@@ -55,6 +96,15 @@ export const ModalsContextProvider: FC = ({ children }) => {
         show={showGenericModal}
         onHide={handleHideGenericModal}
         {...genericMessageModalData}
+      />
+      <OutOfSyncModal
+        {...outOfSyncModalData}
+        show={shouldShowOutOfSyncModal}
+        onHide={handleHideOutOfSyncModal}
+      />
+      <LockEditorMessageModal
+        {...lockEditorModalData}
+        show={shouldShowLockEditorModal}
       />
     </ModalsContext.Provider>
   )

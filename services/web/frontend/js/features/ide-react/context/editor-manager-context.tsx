@@ -115,7 +115,8 @@ export const EditorManagerProvider: FC = ({ children }) => {
   const { reportError, eventEmitter, eventLog } = useIdeReactContext()
   const { socket, disconnect } = useConnectionContext()
   const { view, setView } = useLayoutContext()
-  const { showGenericMessageModal, genericModalVisible } = useModalsContext()
+  const { showGenericMessageModal, genericModalVisible, showOutOfSyncModal } =
+    useModalsContext()
 
   const [showSymbolPalette, setShowSymbolPalette] = useScopeValue<boolean>(
     'editor.showSymbolPalette'
@@ -550,13 +551,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
 
         // Tell the user about the error state.
         setIsInErrorState(true)
-
-        // TODO: MIGRATION: Show out-of-sync modal
-        // this.ide.showOutOfSyncModal(
-        //   'Out of sync',
-        //   "Sorry, this file has gone out of sync and we need to do a full refresh. <br> <a target='_blank' rel='noopener noreferrer' href='/learn/Kb/Editor_out_of_sync_problems'>Please see this help guide for more information</a>",
-        //   editorContent
-        // )
+        showOutOfSyncModal(editorContent || '')
 
         // Do not forceReopen the document.
         return
@@ -581,6 +576,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
     reportError,
     setIsInErrorState,
     showGenericMessageModal,
+    showOutOfSyncModal,
     t,
   ])
 

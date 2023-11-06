@@ -11,6 +11,7 @@ import { ConnectionState } from '../connection/types/connection-state'
 import { ConnectionManager } from '@/features/ide-react/connection/connection-manager'
 import { Socket } from '@/features/ide-react/connection/types/socket'
 import { secondsUntil } from '@/features/ide-react/connection/utils'
+import { useLocation } from '@/shared/hooks/use-location'
 
 type ConnectionContextValue = {
   socket: Socket
@@ -28,6 +29,8 @@ const ConnectionContext = createContext<ConnectionContextValue | undefined>(
 )
 
 export const ConnectionProvider: FC = ({ children }) => {
+  const location = useLocation()
+
   const [connectionManager] = useState(() => new ConnectionManager())
   const [connectionState, setConnectionState] = useState(
     connectionManager.state
@@ -68,6 +71,24 @@ export const ConnectionProvider: FC = ({ children }) => {
   const disconnect = useCallback(() => {
     connectionManager.disconnect()
   }, [connectionManager])
+
+  // Reload the page on force disconnect. Doing this in React-land means that we
+  // can use useLocation(), which provides mockable location methods
+  useEffect(() => {
+    if (connectionState.forceDisconnected) {
+      const timer = window.setTimeout(
+        () => location.reload(),
+        connectionState.forcedDisconnectDelay * 1000
+      )
+      return () => {
+        window.clearTimeout(timer)
+      }
+    }
+  }, [
+    connectionState.forceDisconnected,
+    connectionState.forcedDisconnectDelay,
+    location,
+  ])
 
   const value = useMemo<ConnectionContextValue>(
     () => ({

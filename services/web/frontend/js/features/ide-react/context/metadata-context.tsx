@@ -20,6 +20,8 @@ import useSocketListener from '@/features/ide-react/hooks/use-socket-listener'
 import useEventListener from '@/shared/hooks/use-event-listener'
 import { FileTreeFindResult } from '@/features/ide-react/types/file-tree'
 import { Project } from '../../../../../types/project'
+import { useModalsContext } from '@/features/ide-react/context/modals-context'
+import { useTranslation } from 'react-i18next'
 
 type DocumentMetadata = {
   labels: string[]
@@ -45,12 +47,14 @@ const MetadataContext = createContext<MetadataContextValue | undefined>(
 )
 
 export const MetadataProvider: FC = ({ children }) => {
+  const { t } = useTranslation()
   const ide = useIdeContext()
   const { eventEmitter, projectId } = useIdeReactContext()
   const { socket } = useConnectionContext()
   const { onlineUsersCount } = useOnlineUsersContext()
   const { permissionsLevel } = useEditorContext()
   const { currentDocument } = useEditorManagerContext()
+  const { showGenericMessageModal } = useModalsContext()
 
   const [documents, setDocuments] = useState<DocumentsMetadata>({})
 
@@ -180,17 +184,10 @@ export const MetadataProvider: FC = ({ children }) => {
   useEffect(() => {
     const handleProjectJoined = ({ project }: { project: Project }) => {
       if (project.deletedByExternalDataSource) {
-        // TODO: MIGRATION: Show generic message modal here
-        /*
-        ide.showGenericMessageModal(
-          'Project Renamed or Deleted',
-          `\
-This project has either been renamed or deleted by an external data source such as Dropbox.
-We don't want to delete your data on Overleaf, so this project still contains your history and collaborators.
-If the project has been renamed please look in your project list for a new project under the new name.\
-`
+        showGenericMessageModal(
+          t('project_renamed_or_deleted'),
+          t('project_renamed_or_deleted_detail')
         )
-*/
       }
       window.setTimeout(() => {
         if (permissionsLevel !== 'readOnly') {
@@ -204,7 +201,13 @@ If the project has been renamed please look in your project list for a new proje
     return () => {
       eventEmitter.off('project:joined', handleProjectJoined)
     }
-  }, [eventEmitter, loadProjectMetaFromServer, permissionsLevel])
+  }, [
+    eventEmitter,
+    loadProjectMetaFromServer,
+    permissionsLevel,
+    showGenericMessageModal,
+    t,
+  ])
 
   const value = useMemo<MetadataContextValue>(
     () => ({

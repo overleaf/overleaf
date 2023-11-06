@@ -13,6 +13,7 @@ export type ConnectionState = {
   forceDisconnected: boolean
   inactiveDisconnect: boolean
   reconnectAt: number | null
+  forcedDisconnectDelay: number
   lastConnectionAttempt: number
   error: '' | ConnectionError
 }

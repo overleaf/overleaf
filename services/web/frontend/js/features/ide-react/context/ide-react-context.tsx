@@ -104,9 +104,9 @@ export const IdeReactProvider: FC = ({ children }) => {
         user_id: getMeta('ol-user_id'),
         project_id: projectId,
         // @ts-ignore
-        client_id: socket.socket.sessionid,
+        client_id: socket.socket?.sessionid,
         // @ts-ignore
-        transport: socket.socket.transport,
+        transport: socket.socket?.transport?.name,
         client_now: new Date(),
       }
 

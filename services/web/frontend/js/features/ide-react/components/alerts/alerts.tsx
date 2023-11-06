@@ -21,7 +21,7 @@ export function Alerts() {
   return (
     <div className="global-alerts">
       {connectionState.forceDisconnected ? (
-        <Alert bsStyle="warning" className="small">
+        <Alert bsStyle="danger" className="small">
           <strong>{t('disconnected')}</strong>
         </Alert>
       ) : null}

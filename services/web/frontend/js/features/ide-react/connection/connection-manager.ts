@@ -24,6 +24,7 @@ const initialState: ConnectionState = {
   inactiveDisconnect: false,
   lastConnectionAttempt: 0,
   reconnectAt: null,
+  forcedDisconnectDelay: 0,
   error: '',
 }
 
@@ -181,9 +182,10 @@ export class ConnectionManager extends Emitter<Events> {
     this.changeState({
       ...this.state,
       forceDisconnected: true,
+      forcedDisconnectDelay: delay,
       error,
     })
-    setTimeout(() => this.disconnect(), delay * 1000)
+    setTimeout(() => this.disconnect(), 1000)
   }
 
   private onJoinProjectResponse({
