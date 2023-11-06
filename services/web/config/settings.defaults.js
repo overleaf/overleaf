@@ -116,7 +116,11 @@ module.exports = {
       maxPoolSize: parseInt(process.env.MONGO_POOL_SIZE, 10) || 100,
       serverSelectionTimeoutMS:
         parseInt(process.env.MONGO_SERVER_SELECTION_TIMEOUT, 10) || 60000,
-      socketTimeoutMS: parseInt(process.env.MONGO_SOCKET_TIMEOUT, 10) || 60000,
+      // Setting socketTimeoutMS to 0 means no timeout
+      socketTimeoutMS: parseInt(
+        process.env.MONGO_SOCKET_TIMEOUT ?? '60000',
+        10
+      ),
     },
     url:
       process.env.MONGO_CONNECTION_STRING ||

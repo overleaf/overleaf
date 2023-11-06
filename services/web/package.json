@@ -28,7 +28,7 @@
     "lint:fix": "eslint --fix --ext .js,.jsx,.mjs,.ts,.tsx .",
     "type-check": "tsc --noEmit",
     "extract-translations": "i18next-scanner",
-    "migrations": "east",
+    "migrations": "MONGO_SOCKET_TIMEOUT=0 east",
     "convert-themes": "node frontend/js/features/source-editor/themes/scripts/convert.js",
     "cypress:open-ct": "SHARELATEX_CONFIG=$PWD/config/settings.webpack.js cypress open --component",
     "cypress:run-ct": "SHARELATEX_CONFIG=$PWD/config/settings.webpack.js cypress run --component --browser chrome",
