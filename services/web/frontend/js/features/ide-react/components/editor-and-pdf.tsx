@@ -60,21 +60,21 @@ export default function EditorAndPdf({
           {editorContent}
         </Panel>
       ) : null}
-      {isDualPane ? (
-        <HorizontalResizeHandle>
-          <HorizontalToggler
-            id="editor-pdf"
-            togglerType="east"
-            isOpen={pdfIsOpen}
-            setIsOpen={isOpen => setPdfIsOpen(isOpen)}
-            tooltipWhenOpen={t('tooltip_hide_pdf')}
-            tooltipWhenClosed={t('tooltip_show_pdf')}
-          />
+      <HorizontalResizeHandle resizable={isDualPane}>
+        <HorizontalToggler
+          id="editor-pdf"
+          togglerType="east"
+          isOpen={pdfIsOpen}
+          setIsOpen={isOpen => setPdfIsOpen(isOpen)}
+          tooltipWhenOpen={t('tooltip_hide_pdf')}
+          tooltipWhenClosed={t('tooltip_show_pdf')}
+        />
+        {isDualPane ? (
           <div className="synctex-controls">
             <DefaultSynctexControl />
           </div>
-        </HorizontalResizeHandle>
-      ) : null}
+        ) : null}
+      </HorizontalResizeHandle>
       {pdfIsOpen ? (
         <Panel
           ref={pdfPanelRef}

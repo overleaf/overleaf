@@ -55,23 +55,29 @@
     border-width: 0;
   }
 
-  &::before,
-  &::after {
-    // This SVG has the colour hard-coded to the current value of @ol-blue-gray-2, so if we changed @ol-blue-gray-2,
-    // we'd have to change this SVG too
-    content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='18' viewBox='0 0 7 18'%3E%3Cpath d='M2 0h3v3H2zM2 5h3v3H2zM2 10h3v3H2zM2 15h3v3H2z' style='fill:%239da7b7'/%3E%3C/svg%3E");
-    display: block;
-    position: absolute;
-    text-align: center;
-    left: 0;
-    width: 7px;
-    height: 18px;
+  &.horizontal-resize-handle-enabled {
+    &::before,
+    &::after {
+      // This SVG has the colour hard-coded to the current value of @ol-blue-gray-2, so if we changed @ol-blue-gray-2,
+      // we'd have to change this SVG too
+      content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='18' viewBox='0 0 7 18'%3E%3Cpath d='M2 0h3v3H2zM2 5h3v3H2zM2 10h3v3H2zM2 15h3v3H2z' style='fill:%239da7b7'/%3E%3C/svg%3E");
+      display: block;
+      position: absolute;
+      text-align: center;
+      left: 0;
+      width: 7px;
+      height: 18px;
+    }
+    &::before {
+      top: 25%;
+    }
+    &::after {
+      top: 75%;
+    }
   }
-  &::before {
-    top: 25%;
-  }
-  &::after {
-    top: 75%;
+
+  &:not(.horizontal-resize-handle-enabled) {
+    cursor: default;
   }
 
   .synctex-controls {
