@@ -397,21 +397,13 @@
       td:last-child {
         padding-right: @line-height-computed - (@grid-gutter-width / 2);
       }
-
-      &:hover {
-        &:not(.no-projects) {
-          background-color: @structured-list-hover-color;
-        }
-      }
-    }
-
-    thead {
-      tr:hover {
-        background-color: transparent;
-      }
     }
 
     tbody {
+      tr:not(.no-projects):hover {
+        background-color: @structured-list-hover-color;
+      }
+
       tr:last-child {
         border-bottom: 0 none;
       }
