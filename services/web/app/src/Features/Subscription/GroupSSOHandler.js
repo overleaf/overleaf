@@ -5,17 +5,17 @@ const SAMLIdentityManager = require('../User/SAMLIdentityManager')
 const { User } = require('../../models/User')
 const Errors = require('../Errors/Errors')
 
-async function canEnrollInSubscription(userId, subscription) {
-  const ssoEnabled = await isSSOEnabled(subscription)
-  if (!ssoEnabled) {
-    return false
+async function checkUserCanEnrollInSubscription(userId, subscription) {
+  const ssoConfig = await SSOConfig.findById(subscription?.ssoConfig).exec()
+  if (!ssoConfig?.enabled) {
+    throw new Errors.SAMLGroupSSODisabledError()
   }
 
   const userIsMember = subscription.member_ids.some(
     memberId => memberId.toString() === userId.toString()
   )
   if (!userIsMember) {
-    return false
+    throw new Errors.SAMLGroupSSOLoginIdentityNotFoundError()
   }
 
   const user = await User.findOne(
@@ -27,9 +27,8 @@ async function canEnrollInSubscription(userId, subscription) {
     enrollment => enrollment.groupId.toString() === subscription._id.toString()
   )
   if (userIsEnrolled) {
-    return false
+    throw new Errors.SAMLIdentityExistsError()
   }
-  return true
 }
 
 async function enrollInSubscription(
@@ -39,15 +38,8 @@ async function enrollInSubscription(
   userIdAttribute,
   auditLog
 ) {
-  const canEnroll = await canEnrollInSubscription(userId, subscription)
-  if (!canEnroll) {
-    throw new Errors.SubscriptionNotFoundError(
-      'cannot enroll user in SSO subscription',
-      {
-        info: { userId, subscription },
-      }
-    )
-  }
+  await checkUserCanEnrollInSubscription(userId, subscription)
+
   const providerId = `ol-group-subscription-id:${subscription._id.toString()}`
 
   const userBySamlIdentifier = await SAMLIdentityManager.getUser(
@@ -86,15 +78,9 @@ async function enrollInSubscription(
   )
 }
 
-async function isSSOEnabled(subscription) {
-  const ssoConfig = await SSOConfig.findById(subscription.ssoConfig).exec()
-  return ssoConfig?.enabled
-}
-
 module.exports = {
   promises: {
-    canEnrollInSubscription,
+    checkUserCanEnrollInSubscription,
     enrollInSubscription,
-    isSSOEnabled,
   },
 }
