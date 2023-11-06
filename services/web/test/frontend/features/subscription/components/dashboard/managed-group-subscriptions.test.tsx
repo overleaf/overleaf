@@ -11,8 +11,8 @@ import {
   renderWithSubscriptionDashContext,
 } from '../../helpers/render-with-subscription-dash-context'
 
-const managedGroupSubscriptions: ManagedGroupSubscription[] = [
-  {
+function getManagedGroupSubscription(groupSSO: boolean, managedUsers: boolean) {
+  const subscriptionOne = {
     ...groupActiveSubscription,
     userIsGroupMember: true,
     planLevelName: 'Professional',
@@ -20,8 +20,13 @@ const managedGroupSubscriptions: ManagedGroupSubscription[] = [
       id: 'abc123abc123',
       email: 'you@example.com',
     },
-  },
-  {
+    features: {
+      groupSSO,
+      managedUsers,
+    },
+  }
+
+  const subscriptionTwo = {
     ...groupActiveSubscriptionWithPendingLicenseChange,
     userIsGroupMember: false,
     planLevelName: 'Collaborator',
@@ -29,8 +34,22 @@ const managedGroupSubscriptions: ManagedGroupSubscription[] = [
       id: 'bcd456bcd456',
       email: 'someone@example.com',
     },
-  },
-]
+    features: {
+      groupSSO,
+      managedUsers,
+    },
+  }
+  return [subscriptionOne, subscriptionTwo]
+}
+
+const managedGroupSubscriptions: ManagedGroupSubscription[] =
+  getManagedGroupSubscription(false, false)
+const managedGroupSubscriptions2: ManagedGroupSubscription[] =
+  getManagedGroupSubscription(true, true)
+const managedGroupSubscriptions3: ManagedGroupSubscription[] =
+  getManagedGroupSubscription(true, false)
+const managedGroupSubscriptions4: ManagedGroupSubscription[] =
+  getManagedGroupSubscription(false, true)
 
 describe('<ManagedGroupSubscriptions />', function () {
   afterEach(function () {
@@ -81,5 +100,52 @@ describe('<ManagedGroupSubscriptions />', function () {
       exact: false,
     })
     expect(elements.length).to.equal(0)
+  })
+  it('does not render the Manage group settings row when feature is turned off', function () {
+    expect(screen.queryByText('Manage group settings')).to.be.null
+    expect(screen.queryByText('Configure and manage SSO and Managed Users')).to
+      .be.null
+  })
+  it('renders the Manage group settings row when feature is turned on', async function () {
+    renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
+      metaTags: [
+        {
+          name: 'ol-managedGroupSubscriptions',
+          value: managedGroupSubscriptions2,
+        },
+      ],
+    })
+    await screen.findAllByText('Manage group settings')
+    await screen.findAllByText('Configure and manage SSO and Managed Users')
+  })
+  it('renders the the correct subText for Manage Group settings row', async function () {
+    renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
+      metaTags: [
+        {
+          name: 'ol-managedGroupSubscriptions',
+          value: managedGroupSubscriptions2,
+        },
+      ],
+    })
+    await screen.findAllByText('Configure and manage SSO and Managed Users')
+
+    renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
+      metaTags: [
+        {
+          name: 'ol-managedGroupSubscriptions',
+          value: managedGroupSubscriptions3,
+        },
+      ],
+    })
+    await screen.findAllByText('Configure and manage SSO')
+    renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
+      metaTags: [
+        {
+          name: 'ol-managedGroupSubscriptions',
+          value: managedGroupSubscriptions4,
+        },
+      ],
+    })
+    await screen.findAllByText('Turn on Managed Users')
   })
 })
