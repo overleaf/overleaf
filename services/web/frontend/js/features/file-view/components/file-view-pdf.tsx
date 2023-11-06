@@ -1,7 +1,6 @@
 import { FC, useCallback } from 'react'
 import useIsMounted from '@/shared/hooks/use-is-mounted'
 import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
-import { useIdeContext } from '@/shared/context/ide-context'
 import { debugConsole } from '@/utils/debugging'
 
 const FileViewPdf: FC<{
@@ -11,8 +10,7 @@ const FileViewPdf: FC<{
 }> = ({ fileId, onLoad, onError }) => {
   const mountedRef = useIsMounted()
 
-  const { fileTreeManager } = useIdeContext()
-  const { previewByPath } = useFileTreePathContext()
+  const { previewByPath, pathInFolder } = useFileTreePathContext()
 
   const handleContainer = useCallback(
     async (element: HTMLDivElement | null) => {
@@ -27,9 +25,8 @@ const FileViewPdf: FC<{
           return
         }
 
-        const entity = fileTreeManager.findEntityById(fileId)
-        const path = fileTreeManager.getEntityPath(entity)
-        const preview = previewByPath(path)
+        const path = pathInFolder(fileId)
+        const preview = path ? previewByPath(path) : null
 
         if (!preview) {
           onError()
@@ -61,7 +58,7 @@ const FileViewPdf: FC<{
         }
       }
     },
-    [fileTreeManager, mountedRef, previewByPath, fileId, onLoad, onError]
+    [mountedRef, pathInFolder, fileId, previewByPath, onLoad, onError]
   )
 
   return <div className="file-view-pdf" ref={handleContainer} />
