@@ -475,7 +475,7 @@ templates.inviteNewUserToJoinManagedUsers = ctaTemplate({
   },
 })
 
-templates.managedUsersEnabledSSO = ctaTemplate({
+templates.groupSSOLinkingInvite = ctaTemplate({
   subject(opts) {
     const subjectPrefix = opts.reminder ? 'Reminder: ' : 'Action required: '
     return `${subjectPrefix}Authenticate your Overleaf account`
@@ -493,10 +493,10 @@ templates.managedUsersEnabledSSO = ctaTemplate({
       </br>
       <div>
         <strong>What does this mean for you?</strong>
-      </div> 
+      </div>
       </br>
       <div>
-        You won't need to remember a separate email address and password to sign in to Overleaf. 
+        You won't need to remember a separate email address and password to sign in to Overleaf.
         All you need to do is authenticate your existing Overleaf account with your SSO provider.
       </div>
       `,
@@ -516,7 +516,7 @@ templates.managedUsersEnabledSSO = ctaTemplate({
   },
 })
 
-templates.managedUsersDisabledSSO = ctaTemplate({
+templates.groupSSODisabled = ctaTemplate({
   subject(opts) {
     return `Action required: Set your Overleaf password`
   },
@@ -532,7 +532,7 @@ templates.managedUsersDisabledSSO = ctaTemplate({
       </br>
       <div>
         <strong>What does this mean for you?</strong>
-      </div> 
+      </div>
       </br>
       <div>
         You now need an email address and password to sign in to your Overleaf account.

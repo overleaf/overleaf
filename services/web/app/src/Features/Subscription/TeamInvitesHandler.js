@@ -5,6 +5,7 @@ const settings = require('@overleaf/settings')
 const { ObjectId } = require('mongodb')
 
 const { Subscription } = require('../../models/Subscription')
+const { SSOConfig } = require('../../models/SSOConfig')
 
 const UserGetter = require('../User/UserGetter')
 const SubscriptionLocator = require('./SubscriptionLocator')
@@ -21,6 +22,7 @@ const {
   callbackifyMultiResult,
 } = require('@overleaf/promise-utils')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
+const Modules = require('../../infrastructure/Modules')
 
 async function getInvite(token) {
   const subscription = await Subscription.findOne({
@@ -76,6 +78,16 @@ async function acceptInvite(token, userId) {
       userId,
       subscription
     )
+  }
+  if (subscription.ssoConfig) {
+    const ssoConfig = await SSOConfig.findById(subscription.ssoConfig)
+    if (ssoConfig?.enabled) {
+      await Modules.promises.hooks.fire(
+        'scheduleGroupSSOReminder',
+        userId,
+        subscription._id
+      )
+    }
   }
 
   await _removeInviteFromTeam(subscription.id, invite.email)

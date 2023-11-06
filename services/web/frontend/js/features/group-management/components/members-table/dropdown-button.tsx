@@ -51,10 +51,10 @@ export default function DropdownButton({
     isLoading: isResendingGroupInvite,
   } = useAsync<resendInviteResponse>()
 
-  const userNotManaged =
-    !user.isEntityAdmin && !user.invite && !user.enrollment?.managedBy
-
   const userPending = user.invite
+
+  const userNotManaged =
+    !user.isEntityAdmin && !userPending && !user.enrollment?.managedBy
 
   const handleResendManagedUserInvite = useCallback(
     async user => {
@@ -219,7 +219,7 @@ export default function DropdownButton({
               ) : null}
             </MenuItemButton>
           ) : null}
-          {ssoEnabledButNotAccepted && (
+          {!userPending && ssoEnabledButNotAccepted && (
             <MenuItemButton
               onClick={onResendSSOLinkInviteClick}
               data-testid="resend-sso-link-invite-action"

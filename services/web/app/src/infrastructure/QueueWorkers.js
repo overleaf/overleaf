@@ -11,6 +11,7 @@ const {
 const EmailHandler = require('../Features/Email/EmailHandler')
 const logger = require('@overleaf/logger')
 const OError = require('@overleaf/o-error')
+const Modules = require('./Modules')
 
 function start() {
   if (!Features.hasFeature('saas')) {
@@ -79,6 +80,26 @@ function start() {
     }
   })
   registerCleanup(confirmInstitutionDomainQueue)
+
+  const groupSSOReminderQueue = Queues.getQueue('group-sso-reminder')
+  groupSSOReminderQueue.process(async job => {
+    const { userId, subscriptionId } = job.data
+    try {
+      await Modules.promises.hooks.fire(
+        'sendGroupSSOReminder',
+        userId,
+        subscriptionId
+      )
+    } catch (e) {
+      const error = OError.tag(
+        e,
+        'failed to send scheduled Group SSO account linking reminder'
+      )
+      logger.warn(error)
+      throw error
+    }
+  })
+  registerCleanup(groupSSOReminderQueue)
 }
 
 function registerCleanup(queue) {

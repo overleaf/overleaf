@@ -37,6 +37,10 @@ const QUEUES_JOB_OPTIONS = {
     removeOnFail: MAX_FAILED_JOBS_RETAINED,
     attempts: 3,
   },
+  'group-sso-reminder': {
+    removeOnFail: MAX_FAILED_JOBS_RETAINED,
+    attempts: 3,
+  },
 }
 
 const QUEUE_OPTIONS = {
