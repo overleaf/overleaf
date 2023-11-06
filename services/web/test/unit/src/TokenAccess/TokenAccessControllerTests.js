@@ -113,7 +113,8 @@ describe('TokenAccessController', function () {
           this.token,
           'prefix',
           'readAndWrite',
-          this.user._id
+          this.user._id,
+          this.project._id
         )
       })
     })
@@ -162,7 +163,8 @@ describe('TokenAccessController', function () {
           this.token,
           undefined,
           'readAndWrite',
-          this.user._id
+          this.user._id,
+          this.project._id
         )
       })
     })
@@ -199,14 +201,15 @@ describe('TokenAccessController', function () {
         )
       })
 
-      it('sends checks if hash prefix matches', function () {
+      it('checks if hash prefix matches', function () {
         expect(
           this.TokenAccessHandler.checkTokenHashPrefix
         ).to.have.been.calledWith(
           this.token,
           'prefix',
           'readOnly',
-          this.user._id
+          this.user._id,
+          this.project._id
         )
       })
     })
@@ -227,6 +230,18 @@ describe('TokenAccessController', function () {
       it("doesn't write a project audit log", function () {
         expect(this.ProjectAuditLogHandler.promises.addEntry).to.not.have.been
           .called
+      })
+
+      it('still checks if hash prefix matches', function () {
+        expect(
+          this.TokenAccessHandler.checkTokenHashPrefix
+        ).to.have.been.calledWith(
+          this.token,
+          undefined,
+          'readOnly',
+          this.user._id,
+          this.project._id
+        )
       })
     })
   })

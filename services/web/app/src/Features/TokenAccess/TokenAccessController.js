@@ -233,13 +233,6 @@ async function grantTokenAccessReadAndWrite(req, res, next) {
   }
   const tokenType = TokenAccessHandler.TOKEN_TYPES.READ_AND_WRITE
 
-  TokenAccessHandler.checkTokenHashPrefix(
-    token,
-    tokenHashPrefix,
-    tokenType,
-    userId
-  )
-
   try {
     const [project, action] = await checkAndGetProjectOrResponseAction(
       tokenType,
@@ -249,12 +242,22 @@ async function grantTokenAccessReadAndWrite(req, res, next) {
       res,
       next
     )
+
+    TokenAccessHandler.checkTokenHashPrefix(
+      token,
+      tokenHashPrefix,
+      tokenType,
+      userId,
+      project?._id
+    )
+
     if (action) {
       return action()
     }
     if (!project) {
       return next(new Errors.NotFoundError())
     }
+
     if (!confirmedByUser) {
       return res.json({
         requireAccept: {
@@ -303,13 +306,6 @@ async function grantTokenAccessReadOnly(req, res, next) {
 
   const tokenType = TokenAccessHandler.TOKEN_TYPES.READ_ONLY
 
-  TokenAccessHandler.checkTokenHashPrefix(
-    token,
-    tokenHashPrefix,
-    tokenType,
-    userId
-  )
-
   const docPublishedInfo =
     await TokenAccessHandler.promises.getV1DocPublishedInfo(token)
   if (docPublishedInfo.allow === false) {
@@ -324,12 +320,22 @@ async function grantTokenAccessReadOnly(req, res, next) {
       res,
       next
     )
+
+    TokenAccessHandler.checkTokenHashPrefix(
+      token,
+      tokenHashPrefix,
+      tokenType,
+      userId,
+      project?._id
+    )
+
     if (action) {
       return action()
     }
     if (!project) {
       return next(new Errors.NotFoundError())
     }
+
     if (!confirmedByUser) {
       return res.json({
         requireAccept: {

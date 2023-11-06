@@ -651,6 +651,7 @@ describe('TokenAccessHandler', function () {
 
   describe('checkTokenHashPrefix', function () {
     const userId = 'abc123'
+    const projectId = 'def456'
     it('sends "match" to metrics when prefix matches the prefix of the hash of the token', function () {
       const token = 'zxpxjrwdtsgd'
       const prefix = this.TokenAccessHandler.createTokenHashPrefix(token)
@@ -658,7 +659,9 @@ describe('TokenAccessHandler', function () {
       this.TokenAccessHandler.checkTokenHashPrefix(
         token,
         `#${prefix}`,
-        'readOnly'
+        'readOnly',
+        userId,
+        projectId
       )
 
       expect(this.Metrics.inc).to.have.been.calledWith(
@@ -676,7 +679,8 @@ describe('TokenAccessHandler', function () {
         'anothertoken',
         `#${prefix}`,
         'readOnly',
-        userId
+        userId,
+        projectId
       )
 
       expect(this.Metrics.inc).to.have.been.calledWith(
@@ -687,7 +691,12 @@ describe('TokenAccessHandler', function () {
         }
       )
       expect(this.logger.info).to.have.been.calledWith(
-        { tokenHashPrefix: prefix, hashPrefixStatus: 'mismatch', userId },
+        {
+          tokenHashPrefix: prefix,
+          hashPrefixStatus: 'mismatch',
+          userId,
+          projectId,
+        },
         'mismatched token hash prefix'
       )
     })
@@ -695,7 +704,9 @@ describe('TokenAccessHandler', function () {
       this.TokenAccessHandler.checkTokenHashPrefix(
         'anothertoken',
         undefined,
-        'readOnly'
+        'readOnly',
+        userId,
+        projectId
       )
 
       expect(this.Metrics.inc).to.have.been.calledWith(
@@ -710,7 +721,9 @@ describe('TokenAccessHandler', function () {
       this.TokenAccessHandler.checkTokenHashPrefix(
         'anothertoken',
         '#',
-        'readOnly'
+        'readOnly',
+        userId,
+        projectId
       )
 
       expect(this.Metrics.inc).to.have.been.calledWith(
@@ -728,7 +741,9 @@ describe('TokenAccessHandler', function () {
       this.TokenAccessHandler.checkTokenHashPrefix(
         token,
         `%23${prefix}`,
-        'readOnly'
+        'readOnly',
+        userId,
+        projectId
       )
 
       expect(this.Metrics.inc).to.have.been.calledWith(
