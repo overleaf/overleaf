@@ -1,15 +1,5 @@
-import _ from 'lodash'
 import * as eventTracking from '../../infrastructure/event-tracking'
-
-function isInViewport(element) {
-  const elTop = $(element).offset().top
-  const elBtm = elTop + $(element).outerHeight()
-
-  const viewportTop = $(window).scrollTop()
-  const viewportBtm = viewportTop + $(window).height()
-
-  return elBtm > viewportTop && elTop < viewportBtm
-}
+import { debugConsole } from '@/utils/debugging'
 
 function setupEventTracking(el) {
   const key = el.getAttribute('event-tracking')
@@ -46,7 +36,6 @@ function setupEventTracking(el) {
     }
   }
 
-  let handler
   let timer
   let timeoutAmt = 500
   switch (trigger) {
@@ -65,17 +54,9 @@ function setupEventTracking(el) {
       })
       el.addEventListener('mouseleave', () => clearTimeout(timer))
       break
-    case 'scroll':
-      handler = _.throttle(() => {
-        if (isInViewport(el)) {
-          submit()
-          window.removeEventListener('scroll', handler)
-          window.removeEventListener('resize', handler)
-        }
-      }, 500)
-      window.addEventListener('scroll', handler)
-      window.addEventListener('resize', handler)
-      break
+
+    default:
+      debugConsole.error(`unsupported event tracking action: ${trigger}`)
   }
 }
 
