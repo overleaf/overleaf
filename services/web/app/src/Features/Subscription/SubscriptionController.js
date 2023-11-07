@@ -240,20 +240,28 @@ async function userSubscriptionPage(req, res) {
 
   const groupPlansDataForDash = formatGroupPlansDataForDash()
 
-  // display the Group Settings button only to admins of group subscriptions with the Managed Users feature available
+  // display the Group Settings button only to admins of group subscriptions with either/or the Managed Users or Group SSO feature available
   let groupSettingsEnabledFor
   try {
     const managedGroups = await async.filter(
       managedGroupSubscriptions || [],
       async subscription => {
-        const results = await Modules.promises.hooks.fire(
+        const managedUsersResults = await Modules.promises.hooks.fire(
           'hasManagedUsersFeature',
+          subscription
+        )
+        const groupSSOResults = await Modules.promises.hooks.fire(
+          'hasGroupSSOFeature',
           subscription
         )
         const isGroupAdmin =
           (subscription.admin_id._id || subscription.admin_id).toString() ===
           user._id.toString()
-        return results?.[0] === true && isGroupAdmin
+        return (
+          (managedUsersResults?.[0] === true ||
+            groupSSOResults?.[0] === true) &&
+          isGroupAdmin
+        )
       }
     )
     groupSettingsEnabledFor = managedGroups.map(subscription =>

@@ -1,3 +1,5 @@
+import GroupSettingsButton from '@/features/subscription/components/dashboard/group-settings-button'
+import getMeta from '@/utils/meta'
 import { Trans, useTranslation } from 'react-i18next'
 import { useSubscriptionDashboardContext } from '../../context/subscription-dashboard-context'
 import { RowLink } from './row-link'
@@ -10,21 +12,14 @@ export default function ManagedGroupSubscriptions() {
     return null
   }
 
+  const groupSettingsEnabledFor = getMeta(
+    'ol-groupSettingsEnabledFor',
+    []
+  ) as string[]
+
   return (
     <>
       {managedGroupSubscriptions.map(subscription => {
-        let groupSettingRowSubText = ''
-        const subscriptionHasGroupSSO = subscription?.features?.groupSSO
-        const subscriptionHasManagedUsers = subscription?.features?.managedUsers
-        if (subscriptionHasGroupSSO && subscriptionHasManagedUsers) {
-          groupSettingRowSubText = t('manage_group_settings_subtext')
-        } else if (subscriptionHasGroupSSO) {
-          groupSettingRowSubText = t('manage_group_settings_subtext_group_sso')
-        } else if (subscriptionHasManagedUsers) {
-          groupSettingRowSubText = t(
-            'manage_group_settings_subtext_managed_users'
-          )
-        }
         return (
           <div key={`managed-group-${subscription._id}`}>
             <p>
@@ -76,13 +71,8 @@ export default function ManagedGroupSubscriptions() {
               subtext={t('manage_managers_subtext')}
               icon="manage_accounts"
             />
-            {(subscriptionHasGroupSSO || subscriptionHasManagedUsers) && (
-              <RowLink
-                href={`/manage/groups/${subscription._id}/settings`}
-                heading={t('manage_group_settings')}
-                subtext={groupSettingRowSubText}
-                icon="settings"
-              />
+            {groupSettingsEnabledFor?.includes(subscription._id) && (
+              <GroupSettingsButton subscription={subscription} />
             )}
             <RowLink
               href={`/metrics/groups/${subscription._id}`}

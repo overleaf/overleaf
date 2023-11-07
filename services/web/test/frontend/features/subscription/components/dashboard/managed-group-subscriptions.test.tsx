@@ -101,11 +101,26 @@ describe('<ManagedGroupSubscriptions />', function () {
     })
     expect(elements.length).to.equal(0)
   })
-  it('does not render the Manage group settings row when feature is turned off', function () {
+
+  it('does not render the Manage group settings row when the user is not the group admin', function () {
+    renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
+      metaTags: [
+        {
+          name: 'ol-managedGroupSubscriptions',
+          value: managedGroupSubscriptions2,
+        },
+        {
+          name: 'ol-groupSettingsEnabledFor',
+          value: [],
+        },
+      ],
+    })
+
     expect(screen.queryByText('Manage group settings')).to.be.null
     expect(screen.queryByText('Configure and manage SSO and Managed Users')).to
       .be.null
   })
+
   it('renders the Manage group settings row when feature is turned on', async function () {
     renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
       metaTags: [
@@ -113,17 +128,26 @@ describe('<ManagedGroupSubscriptions />', function () {
           name: 'ol-managedGroupSubscriptions',
           value: managedGroupSubscriptions2,
         },
+        {
+          name: 'ol-groupSettingsEnabledFor',
+          value: [managedGroupSubscriptions2[0]._id],
+        },
       ],
     })
     await screen.findAllByText('Manage group settings')
     await screen.findAllByText('Configure and manage SSO and Managed Users')
   })
+
   it('renders the the correct subText for Manage Group settings row', async function () {
     renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
       metaTags: [
         {
           name: 'ol-managedGroupSubscriptions',
           value: managedGroupSubscriptions2,
+        },
+        {
+          name: 'ol-groupSettingsEnabledFor',
+          value: [managedGroupSubscriptions2[0]._id],
         },
       ],
     })
@@ -135,6 +159,10 @@ describe('<ManagedGroupSubscriptions />', function () {
           name: 'ol-managedGroupSubscriptions',
           value: managedGroupSubscriptions3,
         },
+        {
+          name: 'ol-groupSettingsEnabledFor',
+          value: [managedGroupSubscriptions3[0]._id],
+        },
       ],
     })
     await screen.findAllByText('Configure and manage SSO')
@@ -143,6 +171,10 @@ describe('<ManagedGroupSubscriptions />', function () {
         {
           name: 'ol-managedGroupSubscriptions',
           value: managedGroupSubscriptions4,
+        },
+        {
+          name: 'ol-groupSettingsEnabledFor',
+          value: [managedGroupSubscriptions4[0]._id],
         },
       ],
     })
