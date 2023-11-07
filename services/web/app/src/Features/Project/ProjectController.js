@@ -834,10 +834,12 @@ const ProjectController = {
               !userHasInstitutionLicence
 
             const showPersonalAccessToken =
-              !Features.hasFeature('saas') ||
-              req.query?.personal_access_token === 'true'
+              userId &&
+              (!Features.hasFeature('saas') ||
+                req.query?.personal_access_token === 'true')
 
             const optionalPersonalAccessToken =
+              userId &&
               !showPersonalAccessToken &&
               personalAccessTokenAssignment.variant === 'enabled' // `?personal-access-token=enabled`
 

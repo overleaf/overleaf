@@ -664,6 +664,7 @@
   "git_bridge_modal_description": "You can git clone your project using the link displayed below.",
   "git_bridge_modal_enter_authentication_token": "When prompted for a password, enter your new authentication token:",
   "git_bridge_modal_git_authentication_tokens": "Git authentication tokens",
+  "git_bridge_modal_read_only": "<strong>You have read-only access to this project.</strong> This means you can pull from __appName__ but you can’t push any changes you make back to this project.",
   "git_bridge_modal_see_once": "You’ll only see this token once. To delete it or generate a new one, visit Account Settings. For detailed instructions and troubleshooting, read our <0>help page</0>.",
   "git_bridge_modal_tokens_description": "To git clone your project you’ll need the link below and a Git authentication token.",
   "git_bridge_modal_use_previous_token": "If you’re prompted for a password, you can use a previously generated Git authentication token. Or you can generate a new one in Account Settings. For more support, read our <0>help page</0>.",
