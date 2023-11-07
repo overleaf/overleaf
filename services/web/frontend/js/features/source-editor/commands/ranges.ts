@@ -1,10 +1,5 @@
 import { EditorView } from '@codemirror/view'
-import {
-  EditorSelection,
-  EditorState,
-  SelectionRange,
-  TransactionSpec,
-} from '@codemirror/state'
+import { EditorSelection, EditorState, SelectionRange } from '@codemirror/state'
 import {
   ensureSyntaxTree,
   foldedRanges,
@@ -413,10 +408,7 @@ function bubbleUpRange(
   return range
 }
 
-export function toggleRanges(
-  command: string,
-  annotations?: TransactionSpec['annotations']
-) {
+export function toggleRanges(command: string) {
   /* There are a number of situations we need to handle in this function.
    * In the following examples, the selection range is marked within <>
 
@@ -761,7 +753,7 @@ export function toggleRanges(
         // Shouldn't happen, but default to just wrapping the content
         return wrapRangeInCommand(view.state, range, command)
       }),
-      { scrollIntoView: true, annotations }
+      { scrollIntoView: true }
     )
     return true
   }

@@ -47,8 +47,6 @@ import { effectListeners } from './effect-listeners'
 import { highlightSpecialChars } from './highlight-special-chars'
 import { toolbarPanel } from './toolbar/toolbar-panel'
 import { geometryChangeEvent } from './geometry-change-event'
-import { completionLogger } from './completion-logger'
-import { shortcutLogger } from './shortcut-logger'
 
 const moduleExtensions: Array<() => Extension> = importOverleafModules(
   'sourceEditorExtensions'
@@ -130,8 +128,6 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   // The built-in extension that highlights the active line in the gutter.
   highlightActiveLineGutter(),
   inlineBackground(options.visual.visual),
-  completionLogger,
-  shortcutLogger,
   codemirrorDevTools(),
   exceptionLogger(),
   // CodeMirror extensions provided by modules

@@ -14,11 +14,3 @@ export function emitCommandEvent(
 export function emitToolbarEvent(view: EditorView, command: string) {
   emitCommandEvent(view, 'codemirror-toolbar-event', command)
 }
-
-export function emitCompletionEvent(view: EditorView, command: string) {
-  emitCommandEvent(view, 'codemirror-completion-event', command)
-}
-
-export function emitShortcutEvent(view: EditorView, command: string) {
-  emitCommandEvent(view, 'codemirror-shortcut-event', command)
-}
