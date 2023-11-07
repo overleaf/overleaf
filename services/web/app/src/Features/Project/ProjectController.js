@@ -906,6 +906,7 @@ const ProjectController = {
               brandVariation,
               allowedImageNames,
               gitBridgePublicBaseUrl: Settings.gitBridgePublicBaseUrl,
+              gitBridgeEnabled: Features.hasFeature('git-bridge'),
               wsUrl,
               showSupport: Features.hasFeature('support'),
               showTemplatesServerPro,

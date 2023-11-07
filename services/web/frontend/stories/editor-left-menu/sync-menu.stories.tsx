@@ -10,6 +10,7 @@ export default {
 
 export const WriteAccess = () => {
   window.metaAttributesCache.set('ol-anonymous', false)
+  window.metaAttributesCache.set('ol-gitBridgeEnabled', true)
   useScope({
     permissionsLevel: 'owner',
   })
@@ -23,6 +24,7 @@ export const WriteAccess = () => {
 
 export const ReadOnlyAccess = () => {
   window.metaAttributesCache.set('ol-anonymous', false)
+  window.metaAttributesCache.set('ol-gitBridgeEnabled', true)
   useScope({
     permissionsLevel: 'readOnly',
   })

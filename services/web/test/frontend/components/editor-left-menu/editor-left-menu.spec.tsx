@@ -43,6 +43,7 @@ describe('<EditorLeftMenu />', function () {
       window.metaAttributesCache.set('ol-overallThemes', overallThemes)
       window.metaAttributesCache.set('ol-allowedImageNames', allowedImageNames)
       window.metaAttributesCache.set('ol-anonymous', false)
+      window.metaAttributesCache.set('ol-gitBridgeEnabled', true)
       window.metaAttributesCache.set('ol-showSupport', true)
       window.metaAttributesCache.set('ol-user', {
         email: 'sherlock@holmes.co.uk',
@@ -318,6 +319,14 @@ describe('<EditorLeftMenu />', function () {
 
         cy.wait(['@user-status', '@project-status'])
         cy.findByText('Push to GitHub, pull to Overleaf')
+      })
+
+      it('hides the entire sync section when git bridge is disabled', function () {
+        window.metaAttributesCache.set('ol-gitBridgeEnabled', false)
+
+        cy.findByRole('button', { name: 'Dropbox' }).should('not.exist')
+        cy.findByRole('button', { name: 'Git' }).should('not.exist')
+        cy.findByRole('button', { name: 'GitHub' }).should('not.exist')
       })
     })
 
