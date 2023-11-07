@@ -1,8 +1,8 @@
 const MATHJAX_STUB = `
-window.MathJax = { 
+window.MathJax = {
   startup: {
     promise: Promise.resolve()
-  }, 
+  },
   svgStylesheet: () => document.createElement("STYLE"),
   typesetPromise: (elements) => {
     for (const element of elements) {
@@ -23,15 +23,10 @@ window.MathJax = {
 `
 
 export const interceptMathJax = () => {
+  // NOTE: this is just a URL to be intercepted with the stub, not the real (versioned) MathJax URL
+  const url = '/js/libs/mathjax-3/es5/tex-svg-full.js'
   cy.window().then(win => {
-    win.metaAttributesCache.set(
-      'ol-mathJax3Path',
-      '/js/libs/mathjax3/es5/tex-svg-full.js'
-    )
+    win.metaAttributesCache.set('ol-mathJax3Path', url)
   })
-  cy.intercept(
-    'GET',
-    '/js/libs/mathjax3/es5/tex-svg-full.js*',
-    MATHJAX_STUB
-  ).as('mathjax-load-request')
+  cy.intercept('GET', url, MATHJAX_STUB).as('mathjax-load-request')
 }

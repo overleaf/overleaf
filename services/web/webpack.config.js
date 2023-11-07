@@ -284,17 +284,20 @@ module.exports = {
         // https://www.npmjs.com/package/mathjax#user-content-hosting-your-own-copy-of-the-mathjax-components
         {
           from: 'es5/tex-svg-full.js',
-          to: 'js/libs/mathjax3/es5',
+          to: `js/libs/mathjax-3-${PackageVersions.version['mathjax-3']}/es5`,
+          toType: 'dir',
           context: mathjax3Dir,
         },
         {
           from: 'es5/input/tex/extensions/**/*.js',
-          to: 'js/libs/mathjax3',
+          to: `js/libs/mathjax-3-${PackageVersions.version['mathjax-3']}`,
+          toType: 'dir',
           context: mathjax3Dir,
         },
         {
           from: 'es5/ui/**/*',
-          to: 'js/libs/mathjax3',
+          to: `js/libs/mathjax-3-${PackageVersions.version['mathjax-3']}`,
+          toType: 'dir',
           context: mathjax3Dir,
         },
         { from: 'MathJax.js', to: 'js/libs/mathjax', context: mathjaxDir },

@@ -36,6 +36,13 @@ ENV CYPRESS_INSTALL_BINARY=0
 
 RUN cd /overleaf && npm install
 
+# the web image with only production dependencies but no webpack production build, for development
+FROM deps-prod as app-only
+
+COPY services/web /overleaf/services/web
+USER node
+
+CMD ["node", "--expose-gc", "app.js"]
 
 # the dev is suitable for running tests
 FROM deps as dev

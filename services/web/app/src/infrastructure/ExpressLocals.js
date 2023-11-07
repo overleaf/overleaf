@@ -196,11 +196,7 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
       }
     )}`
 
-    res.locals.mathJax3Path = `/js/libs/mathjax3/es5/tex-svg-full.js?${querystring.stringify(
-      {
-        v: PackageVersions.version['mathjax-3'],
-      }
-    )}`
+    res.locals.mathJax3Path = `/js/libs/mathjax-3-${PackageVersions.version['mathjax-3']}/es5/tex-svg-full.js`
 
     res.locals.lib = PackageVersions.lib
 
