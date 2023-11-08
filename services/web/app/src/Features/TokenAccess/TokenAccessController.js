@@ -134,6 +134,7 @@ async function checkAndGetProjectOrResponseAction(
           anonWriteAccessDenied: true,
         })
       },
+      { action: 'denied anonymous read-and-write token access' },
     ]
   }
 
@@ -155,13 +156,15 @@ async function checkAndGetProjectOrResponseAction(
             res.sendStatus(404)
           }
         },
+        { action: v1ImportData ? 'import v1' : '404' },
       ]
     } else {
-      return [null, null]
+      return [null, null, { action: '404' }]
     }
   }
 
   const projectId = project._id
+
   const tokenAccessEnabled =
     TokenAccessHandler.tokenAccessEnabledForProject(project)
   if (isAnonymousUser && tokenAccessEnabled) {
@@ -177,6 +180,7 @@ async function checkAndGetProjectOrResponseAction(
               grantAnonymousAccess: tokenType,
             })
           },
+          { projectId, action: 'granting read-write anonymous access' },
         ]
       } else {
         // anonymous read-and-write token access should have been denied already
@@ -195,6 +199,7 @@ async function checkAndGetProjectOrResponseAction(
             grantAnonymousAccess: tokenType,
           })
         },
+        { projectId, action: 'granting read-only anonymous access' },
       ]
     } else {
       throw new Error('unreachable')
@@ -211,6 +216,7 @@ async function checkAndGetProjectOrResponseAction(
       () => {
         res.json({ redirect: `/project/${project._id}`, higherAccess: true })
       },
+      { projectId, action: 'user already has higher or same privilege' },
     ]
   }
   if (!tokenAccessEnabled) {
@@ -219,9 +225,10 @@ async function checkAndGetProjectOrResponseAction(
       () => {
         next(new Errors.NotFoundError())
       },
+      { projectId, action: 'token access not enabled' },
     ]
   }
-  return [project, null]
+  return [project, null, { projectId, action: 'continue' }]
 }
 
 async function grantTokenAccessReadAndWrite(req, res, next) {
@@ -234,7 +241,7 @@ async function grantTokenAccessReadAndWrite(req, res, next) {
   const tokenType = TokenAccessHandler.TOKEN_TYPES.READ_AND_WRITE
 
   try {
-    const [project, action] = await checkAndGetProjectOrResponseAction(
+    const [project, action, logData] = await checkAndGetProjectOrResponseAction(
       tokenType,
       token,
       userId,
@@ -248,7 +255,7 @@ async function grantTokenAccessReadAndWrite(req, res, next) {
       tokenHashPrefix,
       tokenType,
       userId,
-      project?._id
+      logData
     )
 
     if (action) {
@@ -312,7 +319,7 @@ async function grantTokenAccessReadOnly(req, res, next) {
     return res.json({ redirect: docPublishedInfo.published_path })
   }
   try {
-    const [project, action] = await checkAndGetProjectOrResponseAction(
+    const [project, action, logData] = await checkAndGetProjectOrResponseAction(
       tokenType,
       token,
       userId,
@@ -326,7 +333,7 @@ async function grantTokenAccessReadOnly(req, res, next) {
       tokenHashPrefix,
       tokenType,
       userId,
-      project?._id
+      logData
     )
 
     if (action) {

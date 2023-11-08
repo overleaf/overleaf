@@ -680,7 +680,7 @@ describe('TokenAccessHandler', function () {
         `#${prefix}`,
         'readOnly',
         userId,
-        projectId
+        { projectId }
       )
 
       expect(this.Metrics.inc).to.have.been.calledWith(
@@ -696,6 +696,7 @@ describe('TokenAccessHandler', function () {
           hashPrefixStatus: 'mismatch',
           userId,
           projectId,
+          type: 'readOnly',
         },
         'mismatched token hash prefix'
       )
