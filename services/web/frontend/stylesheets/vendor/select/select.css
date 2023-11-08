@@ -277,6 +277,11 @@ body > .ui-select-bootstrap.open {
   white-space: nowrap;
 }
 
+.ui-select-title {
+  padding: 3px 20px;
+  font-size: 14px ;
+}
+
 .ui-select-bootstrap .ui-select-choices-row > span:hover, .ui-select-bootstrap .ui-select-choices-row > span:focus {
   text-decoration: none;
   color: #262626;

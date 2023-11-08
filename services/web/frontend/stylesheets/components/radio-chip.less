@@ -3,6 +3,7 @@
   border: 1px solid @neutral-60;
   border-radius: 999px;
   color: @neutral-90;
+  cursor: pointer;
   display: inline-flex;
   font-weight: 400;
   gap: 4px;
@@ -24,6 +25,7 @@
 
   input[type='radio'] {
     accent-color: @green-50;
+    cursor: pointer;
     height: 16px;
     margin: 4px;
     width: 15px;
@@ -39,19 +41,15 @@
   }
 }
 
-.radio-group-col-1 {
-  align-items: flex-start;
+.radio-group {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-}
-
-.radio-group-col-2 {
-  display: grid;
+  flex-wrap: wrap;
   grid-gap: 16px;
-  grid-template-columns: 1fr 1fr;
-
+  height: 180px;
+  width: 100%;
   @media (max-width: @screen-sm-min) {
-    grid-template-columns: 1fr;
+    flex-wrap: nowrap;
+    height: 100%;
   }
 }

@@ -40,6 +40,17 @@
   flex-direction: column;
   gap: 24px;
 
+  .ui-select-container,
+  .select-wrapper {
+    label {
+      font-size: 14px; // override DownshiftInput and Select component label size
+    }
+    .select-trigger {
+      border: 1px solid @neutral-60;
+      color: @neutral-60;
+    }
+  }
+
   .onboarding-question-title {
     font-size: 20px;
   }
@@ -84,7 +95,7 @@
         gap: 8px;
 
         button.btn-info-ghost {
-          color: @gray-dark;
+          color: @neutral-90;
         }
       }
     }

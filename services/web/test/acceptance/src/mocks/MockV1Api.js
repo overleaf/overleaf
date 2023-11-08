@@ -313,18 +313,32 @@ class MockV1Api extends AbstractMockApi {
     })
 
     this.app.get('/universities/list', (req, res) => {
-      if (req.query.country_code === 'en') {
-        res.json([
-          {
-            id: 1337,
-            name: 'Institution 1337',
-            country_code: 'en',
-            departments: [],
-          },
-        ])
-      } else {
-        res.json([])
+      const response = []
+
+      const university1 = {
+        id: 1337,
+        name: 'Institution 1337',
+        country_code: 'en',
+        departments: [],
       }
+
+      const university2 = {
+        id: 243,
+        name: 'Institution 243',
+        country_code: 'en',
+        departments: [],
+      }
+
+      if (req.query.country_code === 'en') {
+        response.push(university1)
+      }
+      if (req.query.search === 'Institution') {
+        response.push(university1)
+        if (req.query.max_results !== '1') {
+          response.push(university2)
+        }
+      }
+      res.json(response)
     })
 
     this.app.get('/universities/list/:id', (req, res) =>

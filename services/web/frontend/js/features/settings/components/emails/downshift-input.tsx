@@ -4,10 +4,13 @@ import classnames from 'classnames'
 
 type DownshiftInputProps = {
   items: string[]
+  itemsTitle?: string
   inputValue: string
   label: string
   setValue: React.Dispatch<React.SetStateAction<string>>
   inputRef?: React.ForwardedRef<HTMLInputElement>
+  showLabel?: boolean
+  showSuggestedText?: boolean
 } & React.InputHTMLAttributes<HTMLInputElement>
 
 const filterItemsByInputValue = (
@@ -17,12 +20,15 @@ const filterItemsByInputValue = (
 
 function Downshift({
   items,
+  itemsTitle,
   inputValue,
   placeholder,
   label,
   setValue,
   disabled,
   inputRef,
+  showLabel = false,
+  showSuggestedText = false,
 }: DownshiftInputProps) {
   const [inputItems, setInputItems] = useState(items)
 
@@ -68,7 +74,7 @@ function Downshift({
     >
       <div {...getComboboxProps()}>
         {/* eslint-disable-next-line jsx-a11y/label-has-for */}
-        <label {...getLabelProps()} className="sr-only">
+        <label {...getLabelProps()} className={showLabel ? '' : 'sr-only'}>
           {label}
         </label>
         <input
@@ -93,6 +99,9 @@ function Downshift({
         {...getMenuProps()}
         className="ui-select-choices ui-select-choices-content ui-select-dropdown dropdown-menu"
       >
+        {showSuggestedText && inputItems.length && (
+          <li className="ui-select-title">{itemsTitle}</li>
+        )}
         {inputItems.map((item, index) => (
           <li
             className="ui-select-choices-group"
