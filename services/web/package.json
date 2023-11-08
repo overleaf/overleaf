@@ -177,7 +177,7 @@
     "@codemirror/lang-markdown": "^6.2.1",
     "@codemirror/language": "^6.9.1",
     "@codemirror/lint": "^6.4.2",
-    "@codemirror/search": "github:overleaf/codemirror-search#6a09ea7eaad138d810f989753036eabce23cc969",
+    "@codemirror/search": "github:overleaf/codemirror-search#29f7a871969ad64b89341bacbe5d46dda02eee12",
     "@codemirror/state": "^6.2.1",
     "@codemirror/view": "^6.21.2",
     "@juggle/resize-observer": "^3.3.1",
