@@ -3,6 +3,7 @@ const sinon = require('sinon')
 const sinonChai = require('sinon-chai')
 const chaiAsPromised = require('chai-as-promised')
 const SandboxedModule = require('sandboxed-module')
+const timersPromises = require('timers/promises')
 
 process.env.BACKEND = 'gcs'
 
@@ -29,6 +30,7 @@ const stubs = {
 SandboxedModule.configure({
   requires: {
     '@overleaf/logger': stubs.logger,
+    'timers/promises': timersPromises,
   },
   globals: { Buffer, JSON, Math, console, process },
 })

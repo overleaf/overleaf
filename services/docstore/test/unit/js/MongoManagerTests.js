@@ -403,60 +403,42 @@ describe('MongoManager', function () {
     })
   })
 
-  describe('withRevCheck', function () {
+  describe('checkRevUnchanged', function () {
     this.beforeEach(function () {
       this.doc = { _id: ObjectId(), name: 'mock-doc', rev: 1 }
-      this.testFunction = sinon.stub().yields(null, 'foo')
     })
 
     it('should call the callback when the rev has not changed', function (done) {
       this.db.docs.findOne = sinon.stub().callsArgWith(2, null, { rev: 1 })
-      this.MongoManager.withRevCheck(
-        this.doc,
-        this.testFunction,
-        (err, result) => {
-          result.should.equal('foo')
-          assert.isNull(err)
-          done()
-        }
-      )
+      this.MongoManager.checkRevUnchanged(this.doc, err => {
+        assert.isUndefined(err)
+        done()
+      })
     })
 
     it('should return an error when the rev has changed', function (done) {
       this.db.docs.findOne = sinon.stub().callsArgWith(2, null, { rev: 2 })
-      this.MongoManager.withRevCheck(
-        this.doc,
-        this.testFunction,
-        (err, result) => {
-          err.should.be.instanceof(Errors.DocModifiedError)
-          done()
-        }
-      )
+      this.MongoManager.checkRevUnchanged(this.doc, err => {
+        err.should.be.instanceof(Errors.DocModifiedError)
+        done()
+      })
     })
 
     it('should return a value error if incoming rev is NaN', function (done) {
       this.db.docs.findOne = sinon.stub().callsArgWith(2, null, { rev: 2 })
       this.doc = { _id: ObjectId(), name: 'mock-doc', rev: NaN }
-      this.MongoManager.withRevCheck(
-        this.doc,
-        this.testFunction,
-        (err, result) => {
-          err.should.be.instanceof(Errors.DocRevValueError)
-          done()
-        }
-      )
+      this.MongoManager.checkRevUnchanged(this.doc, err => {
+        err.should.be.instanceof(Errors.DocRevValueError)
+        done()
+      })
     })
 
     it('should return a value error if checked doc rev is NaN', function (done) {
       this.db.docs.findOne = sinon.stub().callsArgWith(2, null, { rev: NaN })
-      this.MongoManager.withRevCheck(
-        this.doc,
-        this.testFunction,
-        (err, result) => {
-          err.should.be.instanceof(Errors.DocRevValueError)
-          done()
-        }
-      )
+      this.MongoManager.checkRevUnchanged(this.doc, err => {
+        err.should.be.instanceof(Errors.DocRevValueError)
+        done()
+      })
     })
   })
 

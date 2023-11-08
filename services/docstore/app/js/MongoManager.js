@@ -280,34 +280,34 @@ function getDocRev(docId, callback) {
   )
 }
 
-// Helper method  to support optimistic locking. Call the provided method for
-// an existing doc and return the result if the rev in mongo is unchanged when
-// checked afterwards. If the rev has changed, return a DocModifiedError.
-function withRevCheck(doc, method, callback) {
-  method(doc._id, function (err, result) {
+/**
+ * Helper method  to support optimistic locking.
+ *
+ * Check that the rev of an existing doc is unchanged. If the rev has
+ * changed, return a DocModifiedError.
+ */
+function checkRevUnchanged(doc, callback) {
+  getDocRev(doc._id, function (err, currentRev) {
     if (err) return callback(err)
-    getDocRev(doc._id, function (err, currentRev) {
-      if (err) return callback(err)
-      if (isNaN(currentRev) || isNaN(doc.rev)) {
-        return callback(
-          new Errors.DocRevValueError('doc rev is NaN', {
-            doc_id: doc._id,
-            rev: doc.rev,
-            currentRev,
-          })
-        )
-      }
-      if (doc.rev !== currentRev) {
-        return callback(
-          new Errors.DocModifiedError('doc rev has changed', {
-            doc_id: doc._id,
-            rev: doc.rev,
-            currentRev,
-          })
-        )
-      }
-      callback(null, result)
-    })
+    if (isNaN(currentRev) || isNaN(doc.rev)) {
+      return callback(
+        new Errors.DocRevValueError('doc rev is NaN', {
+          doc_id: doc._id,
+          rev: doc.rev,
+          currentRev,
+        })
+      )
+    }
+    if (doc.rev !== currentRev) {
+      return callback(
+        new Errors.DocModifiedError('doc rev has changed', {
+          doc_id: doc._id,
+          rev: doc.rev,
+          currentRev,
+        })
+      )
+    }
+    callback()
   })
 }
 
@@ -342,7 +342,7 @@ module.exports = {
   markDocAsArchived,
   getDocVersion,
   setDocVersion,
-  withRevCheck,
+  checkRevUnchanged,
   destroyProject,
 }
 
