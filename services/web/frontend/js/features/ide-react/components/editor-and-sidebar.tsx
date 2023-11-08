@@ -71,6 +71,7 @@ export function EditorAndSidebar({
     openInitialDoc,
   } = useEditorManagerContext()
   const { view } = useLayoutContext()
+  const { projectJoined } = useIdeReactContext()
   const [, setOpenFile] = useScopeValue<BinaryFile | null>('openFile')
 
   const historyIsOpen = view === 'history'
@@ -143,14 +144,14 @@ export function EditorAndSidebar({
     )
   }, [openDocId])
 
-  // Open a document once the file tree is ready
+  // Open a document once the file tree and project are ready
   const initialOpenDoneRef = useRef(false)
   useEffect(() => {
-    if (fileTreeReady && !initialOpenDoneRef.current) {
+    if (fileTreeReady && projectJoined && !initialOpenDoneRef.current) {
       initialOpenDoneRef.current = true
       openInitialDoc(rootDocId)
     }
-  }, [fileTreeReady, openInitialDoc, rootDocId])
+  }, [fileTreeReady, openInitialDoc, projectJoined, rootDocId])
 
   // Keep the editor file tree around so that it is available and up to date
   // when restoring a file

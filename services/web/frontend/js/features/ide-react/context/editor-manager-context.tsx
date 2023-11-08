@@ -463,6 +463,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
           )
           return
         }
+        debugConsole.error('Error opening document', error)
         showGenericMessageModal(
           t('error_opening_document'),
           t('error_opening_document_detail')

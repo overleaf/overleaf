@@ -36,6 +36,7 @@ type IdeReactContextValue = {
     React.SetStateAction<IdeReactContextValue['startedFreeTrial']>
   >
   reportError: (error: any, meta?: Record<string, any>) => void
+  projectJoined: boolean
 }
 
 const IdeReactContext = createContext<IdeReactContextValue | undefined>(
@@ -95,6 +96,10 @@ export const IdeReactProvider: FC = ({ children }) => {
   const [eventLog] = useState(() => new EventLog())
   const [startedFreeTrial, setStartedFreeTrial] = useState(false)
 
+  // Set to true only after project:joined has fired and all its listeners have
+  // been called
+  const [projectJoined, setProjectJoined] = useState(false)
+
   const { socket } = useConnectionContext()
 
   const reportError = useCallback(
@@ -140,6 +145,7 @@ export const IdeReactProvider: FC = ({ children }) => {
       // Make watchers update immediately
       scopeStore.flushUpdates()
       eventEmitter.emit('project:joined', { project, permissionsLevel })
+      setProjectJoined(true)
     }
 
     socket.on('joinProjectResponse', handleJoinProjectResponse)
@@ -154,13 +160,6 @@ export const IdeReactProvider: FC = ({ children }) => {
       ...getMockIde(),
       socket,
       reportError,
-      // TODO: MIGRATION: Remove this once it's no longer used
-      fileTreeManager: {
-        findEntityByPath: () => null,
-        selectEntity: () => {},
-        getPreviewByPath: () => null,
-        getRootDocDirname: () => '',
-      },
     }
   }, [socket, reportError])
 
@@ -172,8 +171,9 @@ export const IdeReactProvider: FC = ({ children }) => {
       setStartedFreeTrial,
       projectId,
       reportError,
+      projectJoined,
     }),
-    [eventEmitter, eventLog, reportError, startedFreeTrial]
+    [eventEmitter, eventLog, projectJoined, reportError, startedFreeTrial]
   )
 
   return (
