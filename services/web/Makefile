@@ -541,6 +541,7 @@ build:
 		--cache-from $(IMAGE_CI)-webpack \
 		--cache-from $(IMAGE_REPO_FINAL) \
 		--tag $(IMAGE_REPO_FINAL) \
+		--target app \
 		--file Dockerfile \
 		../..
 
