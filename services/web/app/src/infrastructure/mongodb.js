@@ -81,6 +81,9 @@ async function setupDb() {
   db.userAuditLogEntries = internalDb.collection('userAuditLogEntries')
   db.users = internalDb.collection('users')
   db.userstubs = internalDb.collection('userstubs')
+  db.onboardingDataCollection = internalDb.collection(
+    'onboardingDataCollection'
+  )
 }
 
 async function getCollectionNames() {

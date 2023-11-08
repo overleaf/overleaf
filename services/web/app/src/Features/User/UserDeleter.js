@@ -15,6 +15,7 @@ const UserSessionsManager = require('./UserSessionsManager')
 const InstitutionsAPI = require('../Institutions/InstitutionsAPI')
 const Modules = require('../../infrastructure/Modules')
 const Errors = require('../Errors/Errors')
+const OnboardingDataCollectionManager = require('../OnboardingDataCollection/OnboardingDataCollectionManager')
 
 module.exports = {
   deleteUser: callbackify(deleteUser),
@@ -72,6 +73,7 @@ async function expireDeletedUser(userId) {
   }).exec()
 
   await Feedback.deleteMany({ userId }).exec()
+  await OnboardingDataCollectionManager.deleteOnboardingDataCollection(userId)
 
   deletedUser.user = undefined
   deletedUser.deleterData.deleterIpAddress = undefined

@@ -96,6 +96,10 @@ describe('UserDeleter', function () {
       deleteMany: sinon.stub().returns({ exec: sinon.stub().resolves() }),
     }
 
+    this.OnboardingDataCollectionManager = {
+      deleteOnboardingDataCollection: sinon.stub().resolves(),
+    }
+
     this.UserDeleter = SandboxedModule.require(modulePath, {
       requires: {
         '../../models/User': { User },
@@ -113,6 +117,8 @@ describe('UserDeleter', function () {
           UserAuditLogEntry: this.UserAuditLogEntry,
         },
         '../../infrastructure/Modules': this.Modules,
+        '../OnboardingDataCollection/OnboardingDataCollectionManager':
+          this.OnboardingDataCollectionManager,
       },
     })
   })
