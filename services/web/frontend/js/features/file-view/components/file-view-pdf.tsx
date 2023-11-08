@@ -35,14 +35,19 @@ const FileViewPdf: FC<{
 
         const pdf = await PDFJS.getDocument(preview.url).promise
 
+        const scale = window.devicePixelRatio || 1
+
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i)
-          const viewport = page.getViewport({ scale: 1 })
+          const viewport = page.getViewport({ scale })
 
           const canvas = document.createElement('canvas')
           canvas.classList.add('pdf-page')
           canvas.width = viewport.width
           canvas.height = viewport.height
+          canvas.style.width = `${viewport.width / scale}px`
+          canvas.style.height = `${viewport.height / scale}px`
+
           element.append(canvas)
           page.render({
             canvasContext: canvas.getContext('2d'),
