@@ -57,8 +57,18 @@ module.exports = HomeController = {
           'failed to get "design-system-updates" split test assignment'
         )
       }
+
+      const onboardingFlowAssignment =
+        await SplitTestHandler.promises.getAssignment(
+          req,
+          res,
+          'onboarding-flow'
+        )
+
       return res.render('external/home/v2', {
         designSystemUpdatesVariant: designSystemUpdatesAssignment.variant,
+        hideNewsletterCheckbox:
+          onboardingFlowAssignment?.variant === 'token-confirmation-odc',
       })
     } else {
       return res.redirect('/login')
