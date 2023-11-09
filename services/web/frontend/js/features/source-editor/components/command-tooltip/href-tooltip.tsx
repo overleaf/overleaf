@@ -41,9 +41,13 @@ export const HrefTooltipContent: FC = () => {
         { signal: controller.signal }
       )
 
-      // focus the input element if there is content selected in the doc when the tooltip opens
-      if (!view.state.selection.main.empty) {
-        inputRef.current.focus()
+      // focus the URL input element when the tooltip opens, if the view is focused,
+      // there is content selected in the doc, and no URL has been entered
+      if (view.hasFocus && !view.state.selection.main.empty) {
+        const currentUrl = readUrl(view.state)
+        if (!currentUrl) {
+          inputRef.current.focus()
+        }
       }
 
       inputRef.current?.addEventListener(
