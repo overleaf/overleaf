@@ -42,6 +42,11 @@ describe('UserMembershipViewModel', function () {
       enrollment: {
         managedBy: 'mock-group-id',
         enrolledAt: new Date(),
+        sso: {
+          groupId: 'abc123abc123',
+          linkedAt: new Date(),
+          primary: true,
+        },
       },
     }
   })

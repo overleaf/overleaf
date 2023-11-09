@@ -1,7 +1,13 @@
+export type SSOEnrollment = {
+  groupId: string
+  linkedAt: Date
+  primary: boolean
+}
+
 export type UserEnrollment = {
   managedBy?: string
   enrolledAt?: Date
-  sso?: object
+  sso?: SSOEnrollment[]
 }
 
 export type User = {

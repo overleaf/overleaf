@@ -233,6 +233,7 @@ describe('ManagedUserDropdownButton', function () {
       },
       isEntityAdmin: undefined,
     }
+
     beforeEach(function () {
       cy.window().then(win => {
         win.metaAttributesCache.set('ol-users', [user])
@@ -241,11 +242,13 @@ describe('ManagedUserDropdownButton', function () {
         win.metaAttributesCache.set('ol-groupSSOActive', true)
       })
     })
+
     it('should show resend invite when user is admin', function () {
       mountDropDownComponent({ ...user, isEntityAdmin: true }, '123abc')
       cy.get('.action-btn').click()
       cy.findByTestId('resend-sso-link-invite-action').should('exist')
     })
+
     it('should not show resend invite when SSO is disabled', function () {
       cy.window().then(win => {
         win.metaAttributesCache.set('ol-groupSSOActive', false)
@@ -254,6 +257,7 @@ describe('ManagedUserDropdownButton', function () {
       cy.get('.action-btn').click()
       cy.findByTestId('resend-sso-link-invite-action').should('not.exist')
     })
+
     it('should not show resend invite when user has accepted SSO already', function () {
       cy.window().then(win => {
         win.metaAttributesCache.set('ol-groupSSOActive', false)
@@ -264,10 +268,13 @@ describe('ManagedUserDropdownButton', function () {
           enrollment: {
             managedBy: 'some-group',
             enrolledAt: new Date(),
-            sso: {
-              providerId: '123',
-              externalId: '123',
-            },
+            sso: [
+              {
+                groupId: 'abc123abc123',
+                linkedAt: new Date(),
+                primary: true,
+              },
+            ],
           },
         },
         '123abc'
@@ -275,6 +282,7 @@ describe('ManagedUserDropdownButton', function () {
       cy.get('.action-btn').click()
       cy.findByTestId('resend-sso-link-invite-action').should('not.exist')
     })
+
     it('should show the resend SSO invite option when dropdown button is clicked', function () {
       cy.window().then(win => {
         win.metaAttributesCache.set('ol-groupSSOActive', true)
@@ -286,6 +294,7 @@ describe('ManagedUserDropdownButton', function () {
         Cypress.dom.isVisible($el)
       })
     })
+
     it('should make the correct post request when resend SSO invite is clicked ', function () {
       cy.window().then(win => {
         win.metaAttributesCache.set('ol-groupSSOActive', true)

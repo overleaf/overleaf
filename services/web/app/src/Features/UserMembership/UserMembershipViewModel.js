@@ -66,6 +66,7 @@ function buildUserViewModel(user, isInvite) {
       ? {
           managedBy: user.enrollment.managedBy,
           enrolledAt: user.enrollment.enrolledAt,
+          sso: user.enrollment.sso,
         }
       : undefined,
   }

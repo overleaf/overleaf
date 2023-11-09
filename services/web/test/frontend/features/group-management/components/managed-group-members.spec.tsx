@@ -1,8 +1,9 @@
 import GroupMembers from '@/features/group-management/components/group-members'
 import { GroupMembersProvider } from '@/features/group-management/context/group-members-context'
+import { User } from '../../../../../types/group-management/user'
 
 const GROUP_ID = '777fff777fff'
-const JOHN_DOE = {
+const JOHN_DOE: User = {
   _id: 'abc123def456',
   first_name: 'John',
   last_name: 'Doe',
@@ -10,15 +11,24 @@ const JOHN_DOE = {
   last_active_at: new Date('2023-01-15'),
   invite: true,
 }
-const BOBBY_LAPOINTE = {
+const BOBBY_LAPOINTE: User = {
   _id: 'bcd234efa567',
   first_name: 'Bobby',
   last_name: 'Lapointe',
   email: 'bobby.lapointe@test.com',
   last_active_at: new Date('2023-01-02'),
   invite: false,
+  enrollment: {
+    sso: [
+      {
+        groupId: 'another',
+        linkedAt: new Date(),
+        primary: true,
+      },
+    ],
+  },
 }
-const CLAIRE_JENNINGS = {
+const CLAIRE_JENNINGS: User = {
   _id: 'defabc231453',
   first_name: 'Claire',
   last_name: 'Jennings',
@@ -28,10 +38,13 @@ const CLAIRE_JENNINGS = {
   enrollment: {
     managedBy: GROUP_ID,
     enrolledAt: new Date('2023-01-03'),
-    sso: {
-      providerId: '123',
-      externalId: '123',
-    },
+    sso: [
+      {
+        groupId: GROUP_ID,
+        linkedAt: new Date(),
+        primary: true,
+      },
+    ],
   },
 }
 const PATHS = {
