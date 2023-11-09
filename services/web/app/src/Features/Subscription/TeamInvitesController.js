@@ -171,6 +171,21 @@ async function viewInvite(req, res, next) {
   }
 }
 
+async function viewInvites(req, res, next) {
+  const userId = SessionManager.getLoggedInUserId(req.session)
+  const userEmail = await UserGetter.promises.getUserEmail(userId)
+  const groupSubscriptions =
+    await SubscriptionLocator.promises.getGroupsWithTeamInvitesEmail(userEmail)
+
+  const teamInvites = groupSubscriptions.map(groupSubscription =>
+    groupSubscription.teamInvites.find(invite => invite.email === userEmail)
+  )
+
+  return res.render('subscriptions/team/group-invites', {
+    teamInvites,
+  })
+}
+
 async function acceptInvite(req, res, next) {
   const { token } = req.params
   const userId = SessionManager.getLoggedInUserId(req.session)
@@ -255,6 +270,7 @@ async function resendInvite(req, res, next) {
 module.exports = {
   createInvite: expressify(createInvite),
   viewInvite: expressify(viewInvite),
+  viewInvites: expressify(viewInvites),
   acceptInvite: expressify(acceptInvite),
   revokeInvite,
   resendInvite: expressify(resendInvite),

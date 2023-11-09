@@ -99,6 +99,14 @@ const SubscriptionLocator = {
     Subscription.find({ invited_emails: email }, callback)
   },
 
+  getGroupsWithTeamInvitesEmail(email, callback) {
+    Subscription.find(
+      { teamInvites: { $elemMatch: { email } } },
+      { teamInvites: 1 },
+      callback
+    )
+  },
+
   getGroupWithV1Id(v1TeamId, callback) {
     Subscription.findOne({ 'overleaf.id': v1TeamId }, callback)
   },
@@ -150,6 +158,9 @@ SubscriptionLocator.promises = {
   ),
   getGroupsWithEmailInvite: promisify(
     SubscriptionLocator.getGroupsWithEmailInvite
+  ),
+  getGroupsWithTeamInvitesEmail: promisify(
+    SubscriptionLocator.getGroupsWithTeamInvitesEmail
   ),
   getGroupWithV1Id: promisify(SubscriptionLocator.getGroupWithV1Id),
   getUserDeletedSubscriptions: promisify(

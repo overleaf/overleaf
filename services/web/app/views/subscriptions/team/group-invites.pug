@@ -1,0 +1,10 @@
+extends ../../layout-marketing
+
+block entrypointVar
+	- entrypoint = 'pages/user/subscription/group-invites'
+
+block append meta
+	meta(name="ol-teamInvites" data-type="json" content=teamInvites)
+
+block content
+	main.content.content-alt.team-invite#group-invites-root

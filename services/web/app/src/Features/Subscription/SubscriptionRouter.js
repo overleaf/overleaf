@@ -64,6 +64,12 @@ module.exports = {
       PermissionsController.useCapabilities(),
       TeamInvitesController.viewInvite
     )
+    webRouter.get(
+      '/subscription/invites/',
+      AuthenticationController.requireLogin(),
+      PermissionsController.useCapabilities(),
+      TeamInvitesController.viewInvites
+    )
     webRouter.put(
       '/subscription/invites/:token/',
       AuthenticationController.requireLogin(),
