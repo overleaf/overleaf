@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { useProjectContext } from '../../../shared/context/project-context'
 import { debugConsole } from '@/utils/debugging'
+import useAbortController from '../../../shared/hooks/use-abort-controller'
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024
 
@@ -14,12 +15,20 @@ export default function FileViewText({ file, onLoad, onError }) {
   const [shouldShowDots, setShouldShowDots] = useState(false)
   const [inFlight, setInFlight] = useState(false)
 
+  const fetchContentLengthController = useAbortController()
+  const fetchDataController = useAbortController()
+
   useEffect(() => {
     if (inFlight) {
       return
     }
     let path = `/project/${projectId}/file/${file.id}`
-    fetch(path, { method: 'HEAD' })
+    const fetchContentLengthTimeout = setTimeout(
+      () => fetchContentLengthController.abort(),
+      10000
+    )
+    let fetchDataTimeout
+    fetch(path, { method: 'HEAD', signal: fetchContentLengthController.signal })
       .then(response => {
         if (!response.ok) throw new Error('HTTP Error Code: ' + response.status)
         return response.headers.get('Content-Length')
@@ -35,26 +44,39 @@ export default function FileViewText({ file, onLoad, onError }) {
         if (maxSize != null) {
           path += `?range=0-${maxSize}`
         }
-        return fetch(path).then(response => {
-          return response.text().then(text => {
-            if (truncated) {
-              text = text.replace(/\n.*$/, '')
-            }
+        fetchDataTimeout = setTimeout(() => fetchDataController.abort(), 60000)
+        return fetch(path, { signal: fetchDataController.signal }).then(
+          response => {
+            return response.text().then(text => {
+              if (truncated) {
+                text = text.replace(/\n.*$/, '')
+              }
 
-            setTextPreview(text)
-            onLoad()
-            setShouldShowDots(truncated)
-          })
-        })
+              setTextPreview(text)
+              onLoad()
+              setShouldShowDots(truncated)
+            })
+          }
+        )
       })
       .catch(err => {
-        debugConsole.error(err)
+        debugConsole.error('Error fetching file contents', err)
         onError()
       })
       .finally(() => {
         setInFlight(false)
+        clearTimeout(fetchContentLengthTimeout)
+        clearTimeout(fetchDataTimeout)
       })
-  }, [projectId, file.id, onError, onLoad, inFlight])
+  }, [
+    projectId,
+    file.id,
+    onError,
+    onLoad,
+    inFlight,
+    fetchContentLengthController,
+    fetchDataController,
+  ])
   return (
     <div>
       {textPreview && (
