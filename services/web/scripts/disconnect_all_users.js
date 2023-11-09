@@ -1,14 +1,53 @@
+const { promisify } = require('util')
+const Settings = require('@overleaf/settings')
 const AdminController = require('../app/src/Features/ServerAdmin/AdminController')
 
-if (require.main === module) {
-  if (['--help', 'help'].includes(process.argv[2])) {
-    console.log('\n  usage: node disconnect_all_users.js [delay-in-seconds]\n')
+const args = require('minimist')(process.argv.slice(2), {
+  string: ['confirm-site-url', 'delay-in-seconds'],
+  default: {
+    'delay-in-seconds': 10,
+    'confirm-site-url': '',
+  },
+})
+const sleep = promisify(setTimeout)
+
+async function main() {
+  if (args.help) {
+    console.error()
+    console.error(
+      '  usage: node disconnect_all_users.js [--delay-in-seconds=10] --confirm-site-url=https://www....\n'
+    )
     process.exit(1)
   }
-  const delaySecondsString = process.argv[2]
-  const delay = parseInt(delaySecondsString, 10) || 10
-  console.log(`Disconnect all users, with delay ${delay}`)
-  AdminController._sendDisconnectAllUsersMessage(delay)
+  if (Settings.overleaf && args['confirm-site-url'] !== Settings.siteUrl) {
+    console.error()
+    console.error(
+      'Please confirm the environment you want to disconnect ALL USERS from by specifying the site URL aka PUBLIC_URL, e.g. --confirm-site-url=https://www.dev-overleaf.com for the dev-env'
+    )
+    console.error()
+    console.error(
+      `!!!  --confirm-site-url=${
+        args['confirm-site-url'] || "''"
+      } does not match the PUBLIC_URL in this environment.`
+    )
+    console.error()
+    console.error('  Are you running this script in the correct environment?')
+    process.exit(1)
+  }
+  const delay = parseInt(args['delay-in-seconds'], 10) || 10
+  console.log()
+  console.log(
+    `Disconnect all users from ${args['confirm-site-url']}, with delay ${delay}`
+  )
+
+  console.error('  Use CTRL+C in the next 5s to abort.')
+  await sleep(5 * 1000)
+
+  await AdminController._sendDisconnectAllUsersMessage(delay)
+}
+
+if (require.main === module) {
+  main()
     .then(() => {
       console.error('Done.')
       process.exit(0)
