@@ -127,7 +127,7 @@ const SubscriptionLocator = {
 
 async function hasSSOEnabled(subscription) {
   const ssoConfig = await SSOConfig.findById(subscription.ssoConfig).exec()
-  return ssoConfig?.enabled
+  return !!ssoConfig?.enabled
 }
 
 SubscriptionLocator.promises = {

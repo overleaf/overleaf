@@ -4,6 +4,7 @@ const { promisify } = require('util')
 const SubscriptionUpdater = require('../../../../app/src/Features/Subscription/SubscriptionUpdater')
 const ManagedUsersHandler = require('../../../../app/src/Features/Subscription/ManagedUsersHandler')
 const PermissionsManager = require('../../../../app/src/Features/Authorization/PermissionsManager')
+const SSOConfigManager = require('../../../../modules/managed-users/app/src/SSOConfigManager')
 const SubscriptionModel =
   require('../../../../app/src/models/Subscription').Subscription
 const DeletedSubscriptionModel =
@@ -16,6 +17,7 @@ class Subscription {
     this.groupPlan = options.groupPlan
     this.manager_ids = options.managerIds || [this.admin_id]
     this.member_ids = options.memberIds || []
+    this.membersLimit = options.membersLimit || 0
     this.invited_emails = options.invitedEmails || []
     this.teamName = options.teamName
     this.teamInvites = options.teamInvites || []
@@ -57,6 +59,18 @@ class Subscription {
       { manager_ids: managerIds },
       callback
     )
+  }
+
+  setSSOConfig(ssoConfig, callback) {
+    this.get((err, subscription) => {
+      if (err) {
+        return callback(err)
+      }
+      SSOConfigManager.promises
+        .updateSubscriptionSSOConfig(subscription, ssoConfig)
+        .then(result => callback(null, result))
+        .catch(error => callback(error))
+    })
   }
 
   refreshUsersFeatures(callback) {

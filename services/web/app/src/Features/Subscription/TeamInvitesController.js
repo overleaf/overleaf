@@ -183,7 +183,7 @@ async function acceptInvite(req, res, next) {
     subscription
   )
 
-  res.status(204).json({ groupSSOActive })
+  res.json({ groupSSOActive })
 }
 
 function revokeInvite(req, res, next) {
