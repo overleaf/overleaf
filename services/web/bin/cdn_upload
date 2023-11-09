@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -eEu
 
 function upload_into_bucket() {
   bucket=$1
@@ -19,8 +19,34 @@ function upload_into_bucket() {
   wait
 }
 
-# Upload to staging CDN if branch is either 'master' or 'staging-master' or main variants
-if [[ "$BRANCH_NAME" == "master" || "$BRANCH_NAME" == "staging-master" || "$BRANCH_NAME" == "main" || "$BRANCH_NAME" == "staging-main" ]]; then
+verify_upload_into_bucket() {
+  local bucket
+  local missing_from_bucket
+  bucket=$1
+  printf '\nINFO: Verifying file availability in %s.\n' "$bucket"
+  readarray -t missing_from_bucket < <(
+    comm -13 \
+      <(gsutil ls "${bucket}/public/**" | sed "s@${bucket}/@@" | sort) \
+      <(find /tmp/public /tmp/compressed -type f | sed '
+          # Remove absolute path prefix
+          s@^/tmp/@@;
+          # Undo the compressed/ directory separation that does not exist in the bucket
+          s@^compressed/@@
+        ' | sort)
+  )
+  if [[ ${#missing_from_bucket[@]} -eq 0 ]]; then
+    printf 'INFO: Verification successful: all local files have been found in bucket %s.\n' \
+      "$bucket"
+  else
+    printf >&2 'WARN: %d local file(s) not available in bucket %s:\n' \
+      ${#missing_from_bucket[@]} "$bucket"
+    printf >&2 ' - %s\n' "${missing_from_bucket[@]}"
+    return 1
+  fi
+}
+
+# Upload to staging CDN if branch is either 'main' or 'staging-main'
+if [[ "$BRANCH_NAME" == "main" ]] || [[ "$BRANCH_NAME" == "staging-main" ]]; then
   tar --directory=/tmp/ -xf build.tar
 
   # delete source maps
@@ -28,11 +54,11 @@ if [[ "$BRANCH_NAME" == "master" || "$BRANCH_NAME" == "staging-master" || "$BRAN
 
   bin/compress_assets
 
-  upload_into_bucket $CDN_STAG
+  upload_into_bucket "$CDN_STAG" &&
+    verify_upload_into_bucket "$CDN_STAG" || exit 3
   # Only upload to production CDN if branch is
-  if [[ "$BRANCH_NAME" == "master" || "$BRANCH_NAME" == "main" ]]; then
-    upload_into_bucket $CDN_PROD
+  if [[ "$BRANCH_NAME" == "main" ]]; then
+    upload_into_bucket "$CDN_PROD" &&
+      verify_upload_into_bucket "$CDN_PROD" || exit 3
   fi
 fi
-
-
