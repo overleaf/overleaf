@@ -24,15 +24,6 @@ export default App.controller('TeamInviteController', [
       'ol-hasIndividualRecurlySubscription'
     )
 
-    const groupSSOActive = getMeta('ol-groupSSOActive', false)
-
-    if (groupSSOActive) {
-      const subscriptionId = getMeta('ol-subscriptionId')
-      $scope.doneLink = `/subscription/${subscriptionId}/sso_enrollment`
-    } else {
-      $scope.doneLink = '/project'
-    }
-
     if (hideJoinSubscription) {
       $scope.view = 'restrictedByManagedGroup'
     } else if (hasIndividualRecurlySubscription) {

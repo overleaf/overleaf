@@ -42,6 +42,7 @@ block content
 									a.btn.btn.btn-primary(ng-click="joinTeam()", ng-disabled="inflight") #{translate("accept_invitation")} 
 
 						div(ng-show="view =='inviteAccepted'")
+							- var doneLink = groupSSOActive ? `/subscription/${subscriptionId}/sso_enrollment` : '/project'
 							p(ng-non-bindable) #{translate("joined_team", {inviterName: inviterName})}
 							p
 								a.btn.btn.btn-primary(href=doneLink) #{translate("done")}
