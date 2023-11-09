@@ -193,6 +193,8 @@ function fixProjectName(name) {
   if (name.length > MAX_PROJECT_NAME_LENGTH) {
     name = name.substr(0, MAX_PROJECT_NAME_LENGTH)
   }
+  // Remove any leading or trailing whitespace after fixing
+  name = name.trim()
   return name
 }
 

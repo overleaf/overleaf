@@ -439,6 +439,12 @@ describe('ProjectDetailsHandler', function () {
     it('should accept normal names', function () {
       expect(this.handler.fixProjectName('foobar')).to.equal('foobar')
     })
+
+    it('should trim name after truncation', function () {
+      expect(this.handler.fixProjectName('a'.repeat(149) + ' a')).to.equal(
+        'a'.repeat(149)
+      )
+    })
   })
 
   describe('setPublicAccessLevel', function () {
