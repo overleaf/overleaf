@@ -67,8 +67,9 @@ module.exports = HomeController = {
 
       return res.render('external/home/v2', {
         designSystemUpdatesVariant: designSystemUpdatesAssignment.variant,
+        onboardingFlowVariant: onboardingFlowAssignment.variant,
         hideNewsletterCheckbox:
-          onboardingFlowAssignment?.variant === 'token-confirmation-odc',
+          onboardingFlowAssignment.variant === 'token-confirmation-odc',
       })
     } else {
       return res.redirect('/login')

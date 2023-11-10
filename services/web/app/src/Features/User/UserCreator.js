@@ -51,10 +51,17 @@ async function recordRegistrationEvent(user) {
     )
   }
 
+  const onboardingFlowAssignment =
+    await SplitTestHandler.promises.getAssignmentForUser(
+      user._id,
+      'onboarding-flow'
+    )
+
   try {
     const segmentation = {
       'home-registration': 'default',
       'split-test-design-system-updates': designSystemUpdatesAssignment.variant,
+      'onboarding-flow': onboardingFlowAssignment.variant,
     }
     if (user.thirdPartyIdentifiers && user.thirdPartyIdentifiers.length > 0) {
       segmentation.provider = user.thirdPartyIdentifiers[0].providerId
