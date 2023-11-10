@@ -186,7 +186,6 @@ describe('SAMLIdentityManager', function () {
               error = e
             } finally {
               expect(error).to.exist
-              console.log(error)
               expect(error.message).to.contain(
                 'missing data when linking institution SSO'
               )

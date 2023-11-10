@@ -299,7 +299,9 @@
         "**/app/**/*.{js,cjs,mjs}", "app.js", "modules/*/*.js",
         // Frontend: Prefer debugConsole over bare console
         //           Docs: https://manual.dev-overleaf.com/development/code/logging/#frontend
-        "**/frontend/**/*.{js,jsx,ts,tsx}"
+        "**/frontend/**/*.{js,jsx,ts,tsx}",
+	// Tests
+	"**/test/**/*.{js,cjs,mjs,jsx,ts,tsx}"
       ],
       "excludedFiles": [
         // Allow console logs in scripts

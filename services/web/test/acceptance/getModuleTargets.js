@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 // silence settings module
 console.log = function () {}
 const Settings = require('@overleaf/settings')
