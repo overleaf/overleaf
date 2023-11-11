@@ -612,7 +612,7 @@
   "github_repository_diverged": "Der Standard-Branch des verknüpften Repositorys wurde forciert gepusht. Das Pullen von GitHub-Änderungen nach einem forciertem Push kann dazu führen, dass Overleaf und GitHub nicht mehr synchron sind. Möglicherweise musst du Änderungen nach dem Pullen erneut Pushen um wieder synchron zu sein",
   "github_successfully_linked_description": "Danke, wir haben dein GitHub-Nutzerkonto erfolgreich mit __appName__ verknüpft. Du kannst die __appName__-Projekte jetzt in GitHub exportieren oder Projekte aus deinen GitHub-Repositories importieren.",
   "github_symlink_error": "Dein GitHub-Repository enthält Dateien mit symbolischen Links, was derzeit von Overleaf nicht unterstützt wird. Entferne diese und versuche es erneut.",
-  "github_sync": "GitHuB Synchronisierung",
+  "github_sync": "GitHub Synchronisierung",
   "github_sync_description": "Mit GitHub-Synchronisierung kannst du deine __appName__-Projekte mit GitHub-Repositories verlinken. Erstelle neue Commits aus __appName__ und führe sie mit Commits in GitHub zusammen.",
   "github_sync_error": "Entschuldigung, es gab ein Problem mit unserem GitHub-Dienst. Bitte versuche es später erneut.",
   "github_sync_repository_not_found_description": "Das verknüpfte Repository wurde entweder entfernt oder du hast keinen Zugriff mehr darauf. Du kannst die Synchronisierung mit einem neuen Repository einrichten, indem du das Projekt klonst und den Menüpunkt „GitHub“ verwendest. Du kannst das Repository auch von diesem Projekt trennen.",
