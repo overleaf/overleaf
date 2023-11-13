@@ -16,6 +16,7 @@ import {
 } from '../../features/file-tree/util/mutate-in-tree'
 import { countFiles } from '../../features/file-tree/util/count-in-tree'
 import useDeepCompareEffect from '../../shared/hooks/use-deep-compare-effect'
+import { docsInFolder } from '@/features/file-tree/util/docs-in-folder'
 
 const FileTreeDataContext = createContext()
 
@@ -147,6 +148,11 @@ export function FileTreeDataProvider({ children }) {
 
   const [selectedEntities, setSelectedEntities] = useState([])
 
+  const docs = useMemo(
+    () => (fileTreeData ? docsInFolder(fileTreeData) : undefined),
+    [fileTreeData]
+  )
+
   useDeepCompareEffect(() => {
     dispatch({
       type: ACTION_TYPES.RESET,
@@ -210,6 +216,7 @@ export function FileTreeDataProvider({ children }) {
       hasFolders: fileTreeData?.folders.length > 0,
       selectedEntities,
       setSelectedEntities,
+      docs,
     }
   }, [
     dispatchCreateDoc,
@@ -222,6 +229,7 @@ export function FileTreeDataProvider({ children }) {
     fileTreeData,
     selectedEntities,
     setSelectedEntities,
+    docs,
   ])
 
   return (

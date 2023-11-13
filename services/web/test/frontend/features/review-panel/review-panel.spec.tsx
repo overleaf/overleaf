@@ -22,6 +22,9 @@ describe('<ReviewPanel />', function () {
     const scope = mockScope('')
     scope.editor.showVisual = true
 
+    // The tests expect no documents, so remove them from the scope
+    scope.project.rootFolder = []
+
     cy.wrap(scope).as('scope')
 
     cy.mount(

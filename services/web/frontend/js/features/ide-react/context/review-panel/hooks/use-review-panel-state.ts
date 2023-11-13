@@ -33,7 +33,6 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
     'reviewPanel.commentThreads',
     true
   )
-  const [docs] = useScopeValue<ReviewPanel.Value<'docs'>>('docs')
   const [entries] = useScopeValue<ReviewPanel.Value<'entries'>>(
     'reviewPanel.entries',
     true
@@ -156,7 +155,6 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
     () => ({
       collapsed,
       commentThreads,
-      docs,
       entries,
       entryHover,
       isAddingComment,
@@ -183,7 +181,6 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
     [
       collapsed,
       commentThreads,
-      docs,
       entries,
       entryHover,
       isAddingComment,

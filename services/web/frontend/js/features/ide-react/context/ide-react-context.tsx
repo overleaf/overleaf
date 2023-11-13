@@ -56,10 +56,6 @@ function populatePdfScope(store: ReactScopeValueStore) {
   store.allowNonExistentPath('pdf', true)
 }
 
-function populateFileTreeScope(store: ReactScopeValueStore) {
-  store.set('docs', [])
-}
-
 function createReactScopeValueStore(projectId: string) {
   const scopeStore = new ReactScopeValueStore()
 
@@ -76,7 +72,6 @@ function createReactScopeValueStore(projectId: string) {
   populateSettingsScope(scopeStore)
   populateOnlineUsersScope(scopeStore)
   populateReferenceScope(scopeStore)
-  populateFileTreeScope(scopeStore)
   populateReviewPanelScope(scopeStore)
 
   scopeStore.allowNonExistentPath('hasLintingError')

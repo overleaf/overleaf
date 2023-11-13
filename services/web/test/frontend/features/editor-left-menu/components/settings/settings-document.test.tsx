@@ -5,21 +5,23 @@ import fetchMock from 'fetch-mock'
 import SettingsDocument from '../../../../../../frontend/js/features/editor-left-menu/components/settings/settings-document'
 import * as isValidTeXFileModule from '../../../../../../frontend/js/main/is-valid-tex-file'
 import { renderWithEditorContext } from '../../../../helpers/render-with-context'
-import type { MainDocument } from '../../../../../../types/project-settings'
+import { Folder } from '../../../../../../types/folder'
 
 describe('<SettingsDocument />', function () {
   let isValidTeXFileStub: sinon.SinonStub
-  const docs: MainDocument[] = [
-    {
-      path: 'main.tex',
-      doc: {
+
+  const rootFolder: Folder = {
+    _id: 'root-folder-id',
+    name: 'rootFolder',
+    docs: [
+      {
+        _id: '123abc',
         name: 'main.tex',
-        id: '123abc',
-        type: 'doc',
-        selected: false,
-      } as MainDocument['doc'],
-    },
-  ]
+      },
+    ],
+    fileRefs: [],
+    folders: [],
+  }
 
   beforeEach(function () {
     isValidTeXFileStub = sinon
@@ -34,9 +36,7 @@ describe('<SettingsDocument />', function () {
 
   it('shows correct menu', async function () {
     renderWithEditorContext(<SettingsDocument />, {
-      scope: {
-        docs,
-      },
+      rootFolder: [rootFolder],
     })
 
     const select = screen.getByLabelText('Main document')

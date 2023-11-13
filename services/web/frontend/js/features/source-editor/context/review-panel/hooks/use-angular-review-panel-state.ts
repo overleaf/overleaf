@@ -26,7 +26,6 @@ function useAngularReviewPanelState(): ReviewPanelState {
     'reviewPanel.commentThreads',
     true
   )
-  const [docs] = useScopeValue<ReviewPanel.Value<'docs'>>('docs')
   const [entries] = useScopeValue<ReviewPanel.Value<'entries'>>(
     'reviewPanel.entries',
     true
@@ -143,7 +142,6 @@ function useAngularReviewPanelState(): ReviewPanelState {
     () => ({
       collapsed,
       commentThreads,
-      docs,
       entries,
       entryHover,
       isAddingComment,
@@ -170,7 +168,6 @@ function useAngularReviewPanelState(): ReviewPanelState {
     [
       collapsed,
       commentThreads,
-      docs,
       entries,
       entryHover,
       isAddingComment,

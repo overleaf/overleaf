@@ -11,8 +11,6 @@ export type MainDocument = {
   doc: {
     name: string
     id: DocId
-    type: string
-    selected: boolean
   }
   path: string
 }

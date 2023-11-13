@@ -7,10 +7,7 @@ import {
   SubView,
   ThreadId,
 } from '../../../../../../../types/review-panel/review-panel'
-import {
-  DocId,
-  MainDocument,
-} from '../../../../../../../types/project-settings'
+import { DocId } from '../../../../../../../types/project-settings'
 import { dispatchReviewPanelLayout } from '../../../extensions/changes/change-manager'
 
 /* eslint-disable no-use-before-define */
@@ -18,7 +15,6 @@ export interface ReviewPanelState {
   values: {
     collapsed: Record<DocId, boolean>
     commentThreads: ReviewPanelCommentThreads
-    docs: MainDocument[] | undefined
     entries: ReviewPanelEntries
     entryHover: boolean
     isAddingComment: boolean

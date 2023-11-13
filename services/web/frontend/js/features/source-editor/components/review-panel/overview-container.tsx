@@ -5,9 +5,12 @@ import Nav from './nav'
 import Icon from '../../../../shared/components/icon'
 import OverviewFile from './overview-file'
 import { useReviewPanelValueContext } from '../../context/review-panel/review-panel-context'
+import { useFileTreeData } from '@/shared/context/file-tree-data-context'
+import { MainDocument } from '../../../../../../types/project-settings'
 
 function OverviewContainer() {
-  const { loading, docs } = useReviewPanelValueContext()
+  const { loading } = useReviewPanelValueContext()
+  const docs: MainDocument[] = useFileTreeData().docs
 
   return (
     <Container>

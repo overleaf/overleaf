@@ -1,12 +1,13 @@
 import EditorLeftMenu from '../../../../frontend/js/features/editor-left-menu/components/editor-left-menu'
 import {
   AllowedImageName,
-  MainDocument,
   OverallThemeMeta,
   SpellCheckLanguage,
 } from '../../../../types/project-settings'
 import { EditorProviders } from '../../helpers/editor-providers'
 import { mockScope } from './scope'
+import { Folder } from '../../../../types/folder'
+import { docsInFolder } from '@/features/file-tree/util/docs-in-folder'
 
 describe('<EditorLeftMenu />', function () {
   beforeEach(function () {
@@ -390,39 +391,36 @@ describe('<EditorLeftMenu />', function () {
       })
 
       it('shows document menu correctly', function () {
-        const docs: MainDocument[] = [
-          {
-            path: 'main.tex',
-            doc: {
+        const rootFolder: Folder = {
+          _id: 'root-folder-id',
+          name: 'rootFolder',
+          docs: [
+            {
+              _id: 'id1',
               name: 'main.tex',
-              id: 'id1',
-              type: 'doc',
-              selected: false,
-            } as MainDocument['doc'],
-          },
-          {
-            path: 'folder/main2.tex',
-            doc: {
+            },
+            {
+              _id: 'id2',
               name: 'main2.tex',
-              id: 'id2',
-              type: 'doc',
-              selected: false,
-            } as MainDocument['doc'],
-          },
-        ]
+            },
+          ],
+          fileRefs: [],
+          folders: [],
+        }
 
         const scope = mockScope({
           ui: {
             leftMenuShown: true,
           },
-          docs,
         })
 
         cy.mount(
-          <EditorProviders scope={scope}>
+          <EditorProviders scope={scope} rootFolder={[rootFolder as any]}>
             <EditorLeftMenu />
           </EditorProviders>
         )
+
+        const docs = docsInFolder(rootFolder)
 
         cy.get<HTMLOptionElement>('#settings-menu-rootDocId option').then(
           options => {
