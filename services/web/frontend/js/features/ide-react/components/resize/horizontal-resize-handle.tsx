@@ -4,9 +4,14 @@ import { useTranslation } from 'react-i18next'
 import { PanelResizeHandleProps } from 'react-resizable-panels/dist/declarations/src/PanelResizeHandle'
 import classNames from 'classnames'
 
+type HorizontalResizeHandleOwnProps = {
+  resizable?: boolean
+  onDoubleClick?: () => void
+}
+
 export const HorizontalResizeHandle: FC<
-  { resizable?: boolean } & PanelResizeHandleProps
-> = ({ children, resizable = true, ...props }) => {
+  HorizontalResizeHandleOwnProps & PanelResizeHandleProps
+> = ({ children, resizable = true, onDoubleClick, ...props }) => {
   const { t } = useTranslation()
 
   return (
@@ -16,6 +21,7 @@ export const HorizontalResizeHandle: FC<
           'horizontal-resize-handle-enabled': resizable,
         })}
         title={t('resize')}
+        onDoubleClick={() => onDoubleClick?.()}
       >
         {children}
       </div>

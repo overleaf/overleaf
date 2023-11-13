@@ -6,7 +6,7 @@ type HorizontalTogglerType = 'west' | 'east'
 type HorizontalTogglerProps = {
   id: string
   isOpen: boolean
-  setIsOpen: (isClosed: boolean) => void
+  setIsOpen: (isOpen: boolean) => void
   togglerType: HorizontalTogglerType
   tooltipWhenOpen: string
   tooltipWhenClosed: string

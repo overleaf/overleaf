@@ -64,12 +64,15 @@ export default function TwoColumnMainContent({
       >
         {leftColumnIsOpen ? leftColumnContent : null}
       </Panel>
-      <HorizontalResizeHandle>
+      <HorizontalResizeHandle
+        onDoubleClick={() => setLeftColumnIsOpen(!leftColumnIsOpen)}
+        resizable={leftColumnIsOpen}
+      >
         <HorizontalToggler
           id={leftColumnId}
           togglerType="west"
           isOpen={leftColumnIsOpen}
-          setIsOpen={isOpen => setLeftColumnIsOpen(isOpen)}
+          setIsOpen={setLeftColumnIsOpen}
           tooltipWhenOpen={t('tooltip_hide_filetree')}
           tooltipWhenClosed={t('tooltip_show_filetree')}
         />

@@ -60,12 +60,15 @@ export default function EditorAndPdf({
           {editorContent}
         </Panel>
       ) : null}
-      <HorizontalResizeHandle resizable={isDualPane}>
+      <HorizontalResizeHandle
+        resizable={isDualPane}
+        onDoubleClick={() => setPdfIsOpen(!pdfIsOpen)}
+      >
         <HorizontalToggler
           id="editor-pdf"
           togglerType="east"
           isOpen={pdfIsOpen}
-          setIsOpen={isOpen => setPdfIsOpen(isOpen)}
+          setIsOpen={setPdfIsOpen}
           tooltipWhenOpen={t('tooltip_hide_pdf')}
           tooltipWhenClosed={t('tooltip_show_pdf')}
         />

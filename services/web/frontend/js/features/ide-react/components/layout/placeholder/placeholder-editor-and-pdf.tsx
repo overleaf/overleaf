@@ -66,12 +66,12 @@ export default function PlaceholderEditorAndPdf({
           ) : null}
         </PanelGroup>
       </Panel>
-      <HorizontalResizeHandle>
+      <HorizontalResizeHandle onDoubleClick={() => setPdfIsOpen(!pdfIsOpen)}>
         <HorizontalToggler
           id="editor-pdf"
           togglerType="east"
           isOpen={pdfIsOpen}
-          setIsOpen={pdfIsOpen => setPdfIsOpen(pdfIsOpen)}
+          setIsOpen={setPdfIsOpen}
           tooltipWhenOpen={t('tooltip_hide_pdf')}
           tooltipWhenClosed={t('tooltip_show_pdf')}
         />
