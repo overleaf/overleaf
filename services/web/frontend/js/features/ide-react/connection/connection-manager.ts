@@ -50,7 +50,7 @@ export class ConnectionManager extends Emitter<Events> {
       this.disconnectIfIdleSince(DISCONNECT_AFTER_MS)
     }, ONE_HOUR_IN_MS)
 
-    window.addEventListener('online', this.onOnline)
+    window.addEventListener('online', () => this.onOnline())
 
     const socket = SocketIoShim.connect('', {
       'auto connect': false,
