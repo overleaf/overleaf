@@ -7,10 +7,16 @@ const Errors = require('../../../app/js/Errors')
 
 describe('DocManager', function () {
   beforeEach(function () {
+    this.doc_id = ObjectId().toString()
+    this.project_id = ObjectId().toString()
+    this.another_project_id = ObjectId().toString()
+    this.stubbedError = new Error('blew up')
+    this.version = 42
+
     this.MongoManager = {
       promises: {
         findDoc: sinon.stub(),
-        getDocVersion: sinon.stub(),
+        getDocVersion: sinon.stub().resolves(this.version),
         getProjectsDocs: sinon.stub(),
         patchDoc: sinon.stub().resolves(),
         upsertIntoDocCollection: sinon.stub().resolves(),
@@ -41,11 +47,6 @@ describe('DocManager', function () {
         './Errors': Errors,
       },
     })
-
-    this.doc_id = ObjectId().toString()
-    this.project_id = ObjectId().toString()
-    this.another_project_id = ObjectId().toString()
-    this.stubbedError = new Error('blew up')
   })
 
   describe('getFullDoc', function () {
@@ -121,8 +122,6 @@ describe('DocManager', function () {
         project_id: this.project_id,
         lines: ['mock-lines'],
       }
-      this.version = 42
-      this.MongoManager.promises.getDocVersion.resolves(this.version)
     })
 
     describe('when using a filter', function () {
@@ -174,7 +173,7 @@ describe('DocManager', function () {
           .should.equal(true)
       })
 
-      it('should return the callback with the doc with the version', function () {
+      it('should return the doc with the version', function () {
         this.result.lines.should.equal(this.doc.lines)
         this.result.version.should.equal(this.version)
       })
@@ -191,6 +190,29 @@ describe('DocManager', function () {
 
       it('should not get the doc version from the docOps collection', function () {
         this.MongoManager.promises.getDocVersion.called.should.equal(false)
+      })
+    })
+
+    describe('when the doc record already has a version', function () {
+      beforeEach(async function () {
+        this.docWithVersion = { ...this.doc, version: 109 }
+        this.MongoManager.promises.findDoc.resolves(this.docWithVersion)
+        this.result = await this.DocManager.promises._getDoc(
+          this.project_id,
+          this.doc_id,
+          {
+            version: true,
+            inS3: true,
+          }
+        )
+      })
+
+      it('should return that version', function () {
+        expect(this.result).to.deep.equal(this.docWithVersion)
+      })
+
+      it('should not fetch the doc version from the docOps collection', function () {
+        expect(this.MongoManager.promises.getDocVersion).not.to.have.been.called
       })
     })
 
@@ -222,7 +244,9 @@ describe('DocManager', function () {
         this.MongoManager.promises.findDoc.resolves(this.doc)
         this.DocArchiveManager.promises.unarchiveDoc.callsFake(
           async (projectId, docId) => {
-            this.MongoManager.promises.findDoc.resolves(this.unarchivedDoc)
+            this.MongoManager.promises.findDoc.resolves({
+              ...this.unarchivedDoc,
+            })
           }
         )
         this.result = await this.DocManager.promises._getDoc(
@@ -246,7 +270,10 @@ describe('DocManager', function () {
       })
 
       it('should return the doc', function () {
-        expect(this.result).to.deep.equal(this.unarchivedDoc)
+        expect(this.result).to.deep.equal({
+          ...this.unarchivedDoc,
+          version: this.version,
+        })
       })
     })
 
@@ -280,8 +307,7 @@ describe('DocManager', function () {
         this.filter = { lines: true }
         this.result = await this.DocManager.promises.getAllNonDeletedDocs(
           this.project_id,
-          this.filter,
-          this.callback
+          this.filter
         )
       })
 
@@ -582,7 +608,7 @@ describe('DocManager', function () {
           .should.equal(true)
       })
 
-      it('should return the callback with the old rev', function () {
+      it('should return the old rev', function () {
         expect(this.result).to.deep.equal({ modified: true, rev: this.rev })
       })
     })
@@ -609,7 +635,7 @@ describe('DocManager', function () {
         this.MongoManager.promises.setDocVersion.called.should.equal(false)
       })
 
-      it('should return the callback with the old rev and modified == false', function () {
+      it('should return the old rev and modified == false', function () {
         expect(this.result).to.deep.equal({ modified: false, rev: this.rev })
       })
     })
@@ -636,8 +662,7 @@ describe('DocManager', function () {
             this.doc_id,
             null,
             this.version,
-            this.originalRanges,
-            this.callback
+            this.originalRanges
           )
         ).to.be.rejectedWith('no lines, version or ranges provided')
       })
@@ -701,8 +726,7 @@ describe('DocManager', function () {
           this.doc_id,
           this.oldDocLines.slice(),
           this.version,
-          this.originalRanges,
-          this.callback
+          this.originalRanges
         )
       })
 
@@ -712,7 +736,7 @@ describe('DocManager', function () {
         )
       })
 
-      it('should return the callback with the existing rev', function () {
+      it('should return the existing rev', function () {
         expect(this.result).to.deep.equal({ modified: false, rev: this.rev })
       })
     })
@@ -744,7 +768,7 @@ describe('DocManager', function () {
           .should.equal(true)
       })
 
-      it('should return the callback with the new rev', function () {
+      it('should return the new rev', function () {
         expect(this.result).to.deep.equal({ modified: true, rev: 1 })
       })
     })
@@ -783,7 +807,7 @@ describe('DocManager', function () {
         this.MongoManager.promises.setDocVersion.should.have.been.calledOnce
       })
 
-      it('should return the callback with the new rev', function () {
+      it('should return the new rev', function () {
         expect(this.result).to.deep.equal({ modified: true, rev: this.rev + 1 })
       })
     })
