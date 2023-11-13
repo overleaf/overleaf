@@ -2,8 +2,8 @@
   &::before {
     content: '\00a0';
     position: absolute;
-    width: 100%;
-    right: 100%;
+    width: 9999px;
+    left: -9999px;
     background-color: @bg-color;
   }
 }
@@ -129,6 +129,7 @@
           outline: none;
         }
         background-color: transparent;
+        .fake-full-width-bg(transparent);
         &:hover {
           background-color: @file-tree-item-hover-bg;
 
