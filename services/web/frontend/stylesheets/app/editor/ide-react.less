@@ -120,6 +120,11 @@
 
 .ide-react-file-tree-panel {
   display: flex;
+
+  // Prevent the file tree expanding beyond the boundary of the panel
+  .file-tree {
+    width: 100%;
+  }
 }
 
 // Ensure an element with class "full-size", such as the binary file view, stays within the bounds of the panel
