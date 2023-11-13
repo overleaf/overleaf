@@ -40,6 +40,7 @@ export function EditorPane({ shouldPersistLayout, show }: EditorPaneProps) {
           flexDirection: 'column',
         }}
       >
+        <SourceEditor />
         {(!editor.sharejs_doc || editor.opening) &&
         !editor.error_state &&
         !!editor.open_doc_id ? (
@@ -50,7 +51,6 @@ export function EditorPane({ shouldPersistLayout, show }: EditorPaneProps) {
             </span>
           </div>
         ) : null}
-        <SourceEditor />
       </Panel>
       {editor.showSymbolPalette ? (
         <>
