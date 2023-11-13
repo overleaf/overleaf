@@ -28,6 +28,8 @@ import useScopeEventEmitter from '@/shared/hooks/use-scope-event-emitter'
 import { useModalsContext } from '@/features/ide-react/context/modals-context'
 import { useTranslation } from 'react-i18next'
 import customLocalStorage from '@/infrastructure/local-storage'
+import useEventListener from '@/shared/hooks/use-event-listener'
+import { EditorType } from '@/features/ide-react/editor/types/editor-type'
 
 interface GotoOffsetOptions {
   gotoOffset: number
@@ -41,7 +43,7 @@ interface OpenDocOptions
 }
 
 type EditorManager = {
-  getEditorType: () => 'cm6' | 'cm6-rich-text' | null
+  getEditorType: () => EditorType | null
   showSymbolPalette: boolean
   currentDocument: Document
   currentDocumentId: string | null
@@ -113,7 +115,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
   const ide = useIdeContext()
   const { projectId } = useIdeReactContext()
   const { reportError, eventEmitter, eventLog } = useIdeReactContext()
-  const { socket, disconnect } = useConnectionContext()
+  const { socket, disconnect, connectionState } = useConnectionContext()
   const { view, setView } = useLayoutContext()
   const { showGenericMessageModal, genericModalVisible, showOutOfSyncModal } =
     useModalsContext()
@@ -122,7 +124,6 @@ export const EditorManagerProvider: FC = ({ children }) => {
     'editor.showSymbolPalette'
   )
   const [showVisual] = useScopeValue<boolean>('editor.showVisual')
-  // eslint-disable-next-line no-unused-vars
   const [currentDocument, setCurrentDocument] =
     useScopeValue<Document>('editor.sharejs_doc')
   const [openDocId, setOpenDocId] = useScopeValue<string | null>(
@@ -207,7 +208,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
     })
   }, [ide.scopeStore, setShowSymbolPalette])
 
-  const getEditorType = useCallback(() => {
+  const getEditorType = useCallback((): EditorType | null => {
     if (!currentDocument) {
       return null
     }
@@ -580,6 +581,34 @@ export const EditorManagerProvider: FC = ({ children }) => {
     showOutOfSyncModal,
     t,
   ])
+
+  useEventListener('editor:insert-symbol', () => {
+    sendMB('symbol-palette-insert')
+  })
+
+  useEventListener('flush-changes', () => {
+    openDocs.flushAll()
+  })
+
+  useEventListener('blur', () => {
+    openDocs.flushAll()
+  })
+
+  // Flush changes before disconnecting
+  useEffect(() => {
+    if (connectionState.forceDisconnected) {
+      openDocs.flushAll()
+    }
+  }, [connectionState.forceDisconnected, openDocs])
+
+  // Watch for changes in wantTrackChanges
+  const previousWantTrackChangesRef = useRef(wantTrackChanges)
+  useEffect(() => {
+    if (wantTrackChanges !== previousWantTrackChangesRef.current) {
+      previousWantTrackChangesRef.current = wantTrackChanges
+      syncTrackChangesState(currentDocument)
+    }
+  }, [currentDocument, syncTrackChangesState, wantTrackChanges])
 
   const editorManager = useMemo(
     () => ({
