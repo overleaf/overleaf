@@ -3,8 +3,11 @@ const settings = require('@overleaf/settings')
 const ProjectDetailsHandler = require('../app/src/Features/Project/ProjectDetailsHandler')
 const mongodb = require('../app/src/infrastructure/mongodb')
 const mongoose = require('../app/src/infrastructure/Mongoose')
+const fs = require('fs')
+const path = require('path')
 const crypto = require('crypto')
 const fetch = require('node-fetch')
+const http = require('http')
 const { ObjectId } = mongodb
 const _ = require('lodash')
 
@@ -40,6 +43,7 @@ const argv = minimist(process.argv.slice(2), {
     'fetch-blob',
     'upload-file',
     'download-file',
+    'use-file',
     'abort',
   ],
   default: {
@@ -47,13 +51,14 @@ const argv = minimist(process.argv.slice(2), {
     j: 1,
     sleep: 1,
     size: 100 * 1024,
+    highWaterMark: 64 * 1024,
   },
 })
 
 const projectId = argv['project-id']
 if (!projectId) {
   console.error(
-    'Usage: node stress_test.js --project-id ID -n COUNT -j CONCURRENCY --sleep T --size BYTES --[create-blob|fetch-blob|download-zip|upload-file|download-file]'
+    'Usage: node stress_test.js --project-id ID -n COUNT -j CONCURRENCY --sleep T --size BYTES --use-file --[create-blob|fetch-blob|download-zip|upload-file|download-file]'
   )
   process.exit(1)
 }
@@ -160,7 +165,14 @@ async function stressTest(testCase, numberOfRuns, concurrentJobs) {
 }
 
 function generateRandomBuffer(size) {
-  return Buffer.alloc(size, crypto.randomUUID())
+  if (argv['fill-string']) {
+    const buffer = Buffer.alloc(size, argv['fill-string'])
+    // add some randomness at the start to avoid every random buffer being the same
+    buffer.write(crypto.randomUUID())
+    return buffer
+  } else {
+    return Buffer.alloc(size, crypto.randomUUID())
+  }
 }
 
 function computeGitHash(buffer) {
@@ -224,16 +236,47 @@ async function createBlob(projectId) {
     // create a random buffer and compute its hash
     const buffer = generateRandomBuffer(userSize.get())
     const { hashHex, byteLength } = computeGitHash(buffer)
-    const putUrl = `${settings.apis.v1_history.url}/projects/${v1Id}/blobs/${hashHex}`
-    const response = await historyFetch(putUrl, {
-      method: 'PUT',
-      body: buffer,
-      signal: abortSignal,
-    })
-    if (!response.ok) {
-      throw new Error(`failed to put blob ${putUrl} status=${response.status}`)
+    // write the buffer to a file for streaming
+    let readStream
+    let filepath
+    if (argv['use-file']) {
+      filepath = path.join('/tmp', `${v1Id}-${hashHex}-${crypto.randomUUID()}`)
+      await fs.promises.writeFile(filepath, buffer)
+      const filestream = fs.createReadStream(filepath, {
+        highWaterMark: argv.highWaterMark,
+      })
+      readStream = filestream
+    } else {
+      filepath = null
+      readStream = buffer
     }
-    return { hashHex, byteLength }
+    const putUrl = `${settings.apis.v1_history.url}/projects/${v1Id}/blobs/${hashHex}`
+    const options = {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/octet-stream',
+        'Content-Length': byteLength,
+        Authorization: `Basic ${Buffer.from(
+          `${settings.apis.v1_history.user}:${settings.apis.v1_history.pass}`
+        ).toString('base64')}`,
+      },
+    }
+    const req = http.request(putUrl, options)
+    return await new Promise((resolve, reject) => {
+      req.on('error', reject)
+      req.on('response', res => {
+        if (res.statusCode !== 201) {
+          reject(
+            new Error(
+              `failed to put blob ${putUrl} status=${res.statusCode} ${res.statusMessage}`
+            )
+          )
+        } else {
+          resolve({ hashHex, byteLength })
+        }
+      })
+      readStream.pipe(req)
+    })
   }
   return { action: putBlob, description: 'createBlob in history-v1' }
 }
