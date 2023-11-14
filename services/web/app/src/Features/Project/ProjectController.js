@@ -565,7 +565,7 @@ const ProjectController = {
           SplitTestHandler.getAssignment(
             req,
             res,
-            'pdfjs-36',
+            'pdfjs-40',
             {},
             (error, assignment) => {
               // do not fail editor load if assignment fails

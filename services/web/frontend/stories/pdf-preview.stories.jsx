@@ -21,6 +21,7 @@ import {
 } from './fixtures/compile'
 import { cloneDeep } from 'lodash'
 import { ScopeDecorator } from './decorators/scope'
+import { PdfPreviewProvider } from '@/features/pdf-preview/components/pdf-preview-provider'
 
 export default {
   title: 'Editor / PDF Preview',
@@ -332,7 +333,9 @@ export const Logs = () => {
 
   return (
     <div className="pdf">
-      <PdfLogsViewer />
+      <PdfPreviewProvider>
+        <PdfLogsViewer />
+      </PdfPreviewProvider>
     </div>
   )
 }

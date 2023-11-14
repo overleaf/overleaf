@@ -35,10 +35,8 @@ const buildConfig = () => {
   )
 
   // add entrypoints under '/' for pdfjs workers
-  const pdfjsVersions = ['pdfjs-dist213', 'pdfjs-dist36']
-  for (const name of pdfjsVersions) {
-    addWorker(name, `${name}/legacy/build/pdf.worker`)
-  }
+  addWorker('pdfjs-dist213', 'pdfjs-dist213/legacy/build/pdf.worker.js')
+  addWorker('pdfjs-dist401', 'pdfjs-dist401/legacy/build/pdf.worker.mjs')
 
   return webpackConfig
 }

@@ -9,6 +9,7 @@ import {
 } from './fixtures/compile'
 import { useEffect, Suspense } from 'react'
 import { ScopeDecorator } from './decorators/scope'
+import { PdfPreviewProvider } from '@/features/pdf-preview/components/pdf-preview-provider'
 
 export default {
   title: 'Editor / PDF Viewer',
@@ -36,7 +37,9 @@ export const Interactive = () => {
     <div>
       <div className="pdf-viewer">
         <Suspense fallback={null}>
-          <PdfViewer />
+          <PdfPreviewProvider>
+            <PdfViewer />
+          </PdfPreviewProvider>
         </Suspense>
       </div>
       <div style={{ position: 'absolute', top: 150, left: 50 }}>
