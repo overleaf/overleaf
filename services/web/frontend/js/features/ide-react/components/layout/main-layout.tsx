@@ -1,8 +1,9 @@
 import { Panel, PanelGroup } from 'react-resizable-panels'
-import { ReactNode } from 'react'
+import { ReactNode, useState } from 'react'
 import { HorizontalResizeHandle } from '../resize/horizontal-resize-handle'
 import useFixedSizeColumn from '@/features/ide-react/hooks/use-fixed-size-column'
 import useCollapsiblePanel from '@/features/ide-react/hooks/use-collapsible-panel'
+import classNames from 'classnames'
 
 const CHAT_DEFAULT_SIZE = 20
 
@@ -32,6 +33,8 @@ export default function MainLayout({
 
   useCollapsiblePanel(chatIsOpen, chatPanelRef)
 
+  const [resizing, setResizing] = useState(false)
+
   return (
     <div className="ide-react-main">
       {headerContent}
@@ -40,13 +43,16 @@ export default function MainLayout({
           autoSaveId={shouldPersistLayout ? 'ide-react-chat-layout' : undefined}
           direction="horizontal"
           onLayout={handleLayout}
+          className={classNames({
+            'ide-react-main-resizing': resizing,
+          })}
         >
           <Panel id="main" order={1}>
             {mainContent}
           </Panel>
           {chatIsOpen ? (
             <>
-              <HorizontalResizeHandle />
+              <HorizontalResizeHandle onDragging={setResizing} />
               <Panel
                 ref={chatPanelRef}
                 id="chat"

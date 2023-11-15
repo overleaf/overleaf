@@ -139,3 +139,17 @@
   color: var(--neutral-20);
   height: 100%;
 }
+
+// Hide panel contents while resizing
+.ide-react-main-resizing .ide-react-editor-and-pdf,
+.ide-react-main-content-resizing .ide-react-editor-and-pdf,
+.ide-react-editor-and-pdf-resizing .ide-react-editor-content,
+.ide-react-editor-and-pdf-resizing .pdf {
+  display: none !important;
+}
+
+.ide-react-main-resizing,
+.ide-react-main-content-resizing,
+.ide-react-editor-and-pdf-resizing {
+  background-color: white;
+}

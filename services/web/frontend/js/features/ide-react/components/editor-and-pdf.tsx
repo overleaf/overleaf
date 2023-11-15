@@ -1,4 +1,4 @@
-import { ReactNode, useRef } from 'react'
+import { ReactNode, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   ImperativePanelHandle,
@@ -25,6 +25,7 @@ export default function EditorAndPdf({
   const { t } = useTranslation()
   const { view, pdfLayout, changeLayout, detachRole, reattach } =
     useLayoutContext()
+  const [resizing, setResizing] = useState(false)
 
   const pdfPanelRef = useRef<ImperativePanelHandle>(null)
   const isDualPane = pdfLayout === 'sideBySide'
@@ -52,7 +53,10 @@ export default function EditorAndPdf({
         shouldPersistLayout ? 'ide-react-editor-and-pdf-layout' : undefined
       }
       direction="horizontal"
-      className={classnames({ hide: historyIsOpen })}
+      className={classnames('ide-react-editor-and-pdf', {
+        hide: historyIsOpen,
+        'ide-react-editor-and-pdf-resizing': resizing,
+      })}
     >
       {editorIsVisible ? (
         <Panel
@@ -61,12 +65,15 @@ export default function EditorAndPdf({
           defaultSize={50}
           className="ide-react-panel"
         >
-          {editorContent}
+          <div className="ide-react-editor-content full-size">
+            {editorContent}
+          </div>
         </Panel>
       ) : null}
       <HorizontalResizeHandle
         resizable={isDualPane}
         onDoubleClick={() => setPdfIsOpen(!pdfIsOpen)}
+        onDragging={setResizing}
       >
         <HorizontalToggler
           id="editor-pdf"
@@ -82,7 +89,7 @@ export default function EditorAndPdf({
           </div>
         ) : null}
       </HorizontalResizeHandle>
-      {pdfIsOpen ? (
+      {pdfIsOpen || resizing ? (
         <Panel
           ref={pdfPanelRef}
           id="pdf"

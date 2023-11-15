@@ -1,5 +1,5 @@
 import { PanelResizeHandle } from 'react-resizable-panels'
-import { FC } from 'react'
+import { FC, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { PanelResizeHandleProps } from 'react-resizable-panels/dist/declarations/src/PanelResizeHandle'
 import classNames from 'classnames'
@@ -13,9 +13,30 @@ export const HorizontalResizeHandle: FC<
   HorizontalResizeHandleOwnProps & PanelResizeHandleProps
 > = ({ children, resizable = true, onDoubleClick, ...props }) => {
   const { t } = useTranslation()
+  const [isDragging, setIsDragging] = useState(false)
+
+  // Only call onDragging prop when the pointer moves after starting a drag
+  useEffect(() => {
+    if (isDragging) {
+      const handlePointerMove = () => {
+        props.onDragging?.(true)
+      }
+
+      document.addEventListener('pointermove', handlePointerMove)
+      return () => {
+        document.removeEventListener('pointermove', handlePointerMove)
+      }
+    } else {
+      props.onDragging?.(false)
+    }
+  }, [isDragging, props])
 
   return (
-    <PanelResizeHandle {...props}>
+    <PanelResizeHandle
+      disabled={!resizable && !isDragging}
+      {...props}
+      onDragging={setIsDragging}
+    >
       <div
         className={classNames('horizontal-resize-handle', {
           'horizontal-resize-handle-enabled': resizable,
