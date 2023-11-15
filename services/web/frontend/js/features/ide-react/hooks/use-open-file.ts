@@ -5,16 +5,17 @@ import { findInTree } from '@/features/file-tree/util/find-in-tree'
 
 export function useOpenFile() {
   const ide = useIdeContext()
-  const { fileTreeData } = useFileTreeData()
+
+  const { fileTreeData, setSelectedEntities } = useFileTreeData()
 
   const openFileWithId = useCallback(
     (id: string) => {
       const result = findInTree(fileTreeData, id)
       if (result?.type === 'fileRef') {
-        window.dispatchEvent(new CustomEvent('editor.openDoc', { detail: id }))
+        setSelectedEntities(result)
       }
     },
-    [fileTreeData]
+    [fileTreeData, setSelectedEntities]
   )
 
   // Expose BinaryFilesManager via ide object solely for the benefit of the file

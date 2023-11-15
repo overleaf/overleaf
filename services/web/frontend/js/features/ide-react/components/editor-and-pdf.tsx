@@ -23,11 +23,12 @@ export default function EditorAndPdf({
   editorContent,
 }: EditorProps) {
   const { t } = useTranslation()
-  const { view, pdfLayout, changeLayout } = useLayoutContext()
+  const { view, pdfLayout, changeLayout, detachRole, reattach } =
+    useLayoutContext()
 
   const pdfPanelRef = useRef<ImperativePanelHandle>(null)
   const isDualPane = pdfLayout === 'sideBySide'
-  const editorIsVisible = isDualPane || view === 'editor'
+  const editorIsVisible = isDualPane || view === 'editor' || view === 'file'
   const pdfIsOpen = isDualPane || view === 'pdf'
 
   useCollapsiblePanel(pdfIsOpen, pdfPanelRef)
@@ -36,6 +37,9 @@ export default function EditorAndPdf({
 
   function setPdfIsOpen(isOpen: boolean) {
     if (isOpen) {
+      if (detachRole === 'detacher') {
+        reattach()
+      }
       changeLayout('sideBySide')
     } else {
       changeLayout('flat', 'editor')

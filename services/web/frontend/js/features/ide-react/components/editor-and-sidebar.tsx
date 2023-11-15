@@ -24,6 +24,7 @@ import { debugConsole } from '@/utils/debugging'
 import { HistorySidebar } from '@/features/ide-react/components/history-sidebar'
 import { BinaryFile } from '@/features/file-view/types/binary-file'
 import useScopeValue from '@/shared/hooks/use-scope-value'
+import { useSelectFileTreeEntity } from '@/features/ide-react/hooks/use-select-file-tree-entity'
 
 type EditorAndSidebarProps = {
   shouldPersistLayout: boolean
@@ -72,6 +73,7 @@ export function EditorAndSidebar({
   } = useEditorManagerContext()
   const { view } = useLayoutContext()
   const { projectJoined } = useIdeReactContext()
+  const { selectEntity } = useSelectFileTreeEntity()
   const [, setOpenFile] = useScopeValue<BinaryFile | null>('openFile')
 
   const historyIsOpen = view === 'history'
@@ -86,6 +88,7 @@ export function EditorAndSidebar({
     setFileTreeReady(true)
   }, [])
 
+  // Open a document in the editor when one is selected in the file tree
   const handleFileTreeSelect = useCallback(
     (selectedEntities: FileTreeFindResult[]) => {
       debugConsole.log('File tree selection changed', selectedEntities)
@@ -135,14 +138,10 @@ export function EditorAndSidebar({
   // state.
   useEffect(() => {
     debugConsole.log(`openDocId changed to ${openDocId}`)
-    if (openDocId === null) {
-      return
+    if (openDocId !== null) {
+      selectEntity(openDocId)
     }
-
-    window.dispatchEvent(
-      new CustomEvent('editor.openDoc', { detail: openDocId })
-    )
-  }, [openDocId])
+  }, [openDocId, selectEntity])
 
   // Open a document once the file tree and project are ready
   const initialOpenDoneRef = useRef(false)
