@@ -36,6 +36,7 @@ describe('MongoManager', function () {
     this.rev = 42
     this.callback = sinon.stub()
     this.stubbedErr = new Error('hello world')
+    this.lines = ['Three French hens', 'Two turtle doves']
   })
 
   describe('findDoc', function () {
@@ -370,36 +371,6 @@ describe('MongoManager', function () {
       it('should call the callback with 0', function () {
         this.callback.calledWith(null, 0).should.equal(true)
       })
-    })
-  })
-
-  describe('setDocVersion', function () {
-    beforeEach(function () {
-      this.version = 42
-      this.db.docOps.updateOne = sinon.stub().callsArg(3)
-      this.MongoManager.setDocVersion(this.docId, this.version, this.callback)
-    })
-
-    it('should update the doc version', function () {
-      this.db.docOps.updateOne
-        .calledWith(
-          {
-            doc_id: ObjectId(this.docId),
-          },
-          {
-            $set: {
-              version: this.version,
-            },
-          },
-          {
-            upsert: true,
-          }
-        )
-        .should.equal(true)
-    })
-
-    it('should call the callback', function () {
-      this.callback.called.should.equal(true)
     })
   })
 

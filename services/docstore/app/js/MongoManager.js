@@ -93,21 +93,20 @@ function upsertIntoDocCollection(
   callback
 ) {
   if (previousRev) {
+    const update = {
+      $set: updates,
+      $unset: { inS3: true },
+    }
+    if (updates.lines || updates.ranges) {
+      update.$inc = { rev: 1 }
+    }
     db.docs.updateOne(
       {
         _id: ObjectId(docId),
         project_id: ObjectId(projectId),
         rev: previousRev,
       },
-      {
-        $set: updates,
-        $inc: {
-          rev: 1,
-        },
-        $unset: {
-          inS3: true,
-        },
-      },
+      update,
       (err, result) => {
         if (err) return callback(err)
         if (result.matchedCount !== 1) {
@@ -248,21 +247,6 @@ function getDocVersion(docId, callback) {
   )
 }
 
-function setDocVersion(docId, version, callback) {
-  db.docOps.updateOne(
-    {
-      doc_id: ObjectId(docId),
-    },
-    {
-      $set: { version },
-    },
-    {
-      upsert: true,
-    },
-    callback
-  )
-}
-
 function getDocRev(docId, callback) {
   db.docs.findOne(
     {
@@ -341,7 +325,6 @@ module.exports = {
   getDocForArchiving,
   markDocAsArchived,
   getDocVersion,
-  setDocVersion,
   checkRevUnchanged,
   destroyProject,
 }

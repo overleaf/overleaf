@@ -20,7 +20,6 @@ describe('DocManager', function () {
         getProjectsDocs: sinon.stub(),
         patchDoc: sinon.stub().resolves(),
         upsertIntoDocCollection: sinon.stub().resolves(),
-        setDocVersion: sinon.stub().resolves(),
       },
     }
     this.DocArchiveManager = {
@@ -545,10 +544,6 @@ describe('DocManager', function () {
           .should.equal(true)
       })
 
-      it('should not update the version', function () {
-        this.MongoManager.promises.setDocVersion.called.should.equal(false)
-      })
-
       it('should return the new rev', function () {
         expect(this.result).to.deep.equal({ modified: true, rev: this.rev + 1 })
       })
@@ -575,10 +570,6 @@ describe('DocManager', function () {
           .should.equal(true)
       })
 
-      it('should not update the version', function () {
-        this.MongoManager.promises.setDocVersion.called.should.equal(false)
-      })
-
       it('should return the new rev', function () {
         expect(this.result).to.deep.equal({ modified: true, rev: this.rev + 1 })
       })
@@ -596,16 +587,13 @@ describe('DocManager', function () {
         )
       })
 
-      it('should not change the lines or ranges', function () {
-        this.MongoManager.promises.upsertIntoDocCollection.called.should.equal(
-          false
-        )
-      })
-
       it('should update the version', function () {
-        this.MongoManager.promises.setDocVersion
-          .calledWith(this.doc_id, this.version + 1)
-          .should.equal(true)
+        this.MongoManager.promises.upsertIntoDocCollection.should.have.been.calledWith(
+          this.project_id,
+          this.doc_id,
+          this.rev,
+          { version: this.version + 1 }
+        )
       })
 
       it('should return the old rev', function () {
@@ -625,14 +613,10 @@ describe('DocManager', function () {
         )
       })
 
-      it('should not update the ranges or lines', function () {
+      it('should not update the ranges or lines or version', function () {
         this.MongoManager.promises.upsertIntoDocCollection.called.should.equal(
           false
         )
-      })
-
-      it('should not update the version', function () {
-        this.MongoManager.promises.setDocVersion.called.should.equal(false)
       })
 
       it('should return the old rev and modified == false', function () {
@@ -754,18 +738,16 @@ describe('DocManager', function () {
       })
 
       it('should upsert the document to the doc collection', function () {
-        this.MongoManager.promises.upsertIntoDocCollection
-          .calledWith(this.project_id, this.doc_id, undefined, {
+        this.MongoManager.promises.upsertIntoDocCollection.should.have.been.calledWith(
+          this.project_id,
+          this.doc_id,
+          undefined,
+          {
             lines: this.newDocLines,
             ranges: this.originalRanges,
-          })
-          .should.equal(true)
-      })
-
-      it('should set the version', function () {
-        this.MongoManager.promises.setDocVersion
-          .calledWith(this.doc_id, this.version)
-          .should.equal(true)
+            version: this.version,
+          }
+        )
       })
 
       it('should return the new rev', function () {
@@ -797,14 +779,11 @@ describe('DocManager', function () {
           {
             ranges: this.newRanges,
             lines: this.newDocLines,
+            version: this.version + 1,
           }
         )
         this.MongoManager.promises.upsertIntoDocCollection.should.have.been
           .calledTwice
-      })
-
-      it('should update the version once', function () {
-        this.MongoManager.promises.setDocVersion.should.have.been.calledOnce
       })
 
       it('should return the new rev', function () {

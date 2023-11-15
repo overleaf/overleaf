@@ -9,10 +9,6 @@ const { callbackifyAll } = require('@overleaf/promise-utils')
 const { setTimeout } = require('timers/promises')
 
 const DocManager = {
-  // TODO: For historical reasons, the doc version is currently stored in the docOps
-  // collection (which is all that this collection contains). In future, we should
-  // migrate this version property to be part of the docs collection, to guarantee
-  // consitency between lines and version when writing/reading, and for a simpler schema.
   async _getDoc(projectId, docId, filter) {
     if (filter == null) {
       filter = {}
@@ -208,7 +204,7 @@ const DocManager = {
     let modified = false
     let rev = doc?.rev || 0
 
-    if (updateLines || updateRanges) {
+    if (updateLines || updateRanges || updateVersion) {
       const update = {}
       if (updateLines) {
         update.lines = lines
@@ -216,10 +212,19 @@ const DocManager = {
       if (updateRanges) {
         update.ranges = ranges
       }
-      logger.debug({ projectId, docId }, 'updating doc lines and ranges')
+      if (updateVersion) {
+        update.version = version
+      }
+      logger.debug(
+        { projectId, docId, oldVersion: doc?.version, newVersion: version },
+        'updating doc'
+      )
+
+      if (updateLines || updateRanges) {
+        rev += 1 // rev will be incremented in mongo by MongoManager.upsertIntoDocCollection
+      }
 
       modified = true
-      rev += 1 // rev will be incremented in mongo by MongoManager.upsertIntoDocCollection
       await MongoManager.promises.upsertIntoDocCollection(
         projectId,
         docId,
@@ -227,29 +232,7 @@ const DocManager = {
         update
       )
     } else {
-      logger.debug(
-        { projectId, docId },
-        'doc lines have not changed - not updating'
-      )
-    }
-
-    if (updateVersion) {
-      logger.debug(
-        {
-          projectId,
-          docId,
-          oldVersion: doc?.version,
-          newVersion: version,
-        },
-        'updating doc version'
-      )
-      modified = true
-      await MongoManager.promises.setDocVersion(docId, version)
-    } else {
-      logger.debug(
-        { projectId, docId, version },
-        'doc version has not changed - not updating'
-      )
+      logger.debug({ projectId, docId }, 'doc has not changed - not updating')
     }
 
     return { modified, rev }
