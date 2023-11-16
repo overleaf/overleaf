@@ -16,7 +16,6 @@ export default function populateReviewPanelScope(store: ReactScopeValueStore) {
   })
   store.set('users', {})
   store.set('reviewPanel.resolvedComments', {})
-  store.set('reviewPanel.fullTCStateCollapsed', true)
   store.set('reviewPanel.rendererData.lineHeight', 0)
   store.set('reviewPanel.trackChangesState', {})
   store.set('reviewPanel.trackChangesOnForEveryone', false)

@@ -52,9 +52,8 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
   >('editor.wantTrackChanges')
   const [openDocId] =
     useScopeValue<ReviewPanel.Value<'openDocId'>>('editor.open_doc_id')
-  const [shouldCollapse, setShouldCollapse] = useScopeValue<
-    ReviewPanel.Value<'shouldCollapse'>
-  >('reviewPanel.fullTCStateCollapsed')
+  const [shouldCollapse, setShouldCollapse] =
+    useState<ReviewPanel.Value<'shouldCollapse'>>(true)
   const [lineHeight] = useScopeValue<number>(
     'reviewPanel.rendererData.lineHeight'
   )
