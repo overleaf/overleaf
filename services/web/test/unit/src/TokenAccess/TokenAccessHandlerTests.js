@@ -661,7 +661,7 @@ describe('TokenAccessHandler', function () {
         `#${prefix}`,
         'readOnly',
         userId,
-        projectId
+        { projectId }
       )
 
       expect(this.Metrics.inc).to.have.been.calledWith(
@@ -707,7 +707,7 @@ describe('TokenAccessHandler', function () {
         undefined,
         'readOnly',
         userId,
-        projectId
+        { projectId }
       )
 
       expect(this.Metrics.inc).to.have.been.calledWith(
@@ -724,7 +724,7 @@ describe('TokenAccessHandler', function () {
         '#',
         'readOnly',
         userId,
-        projectId
+        { projectId }
       )
 
       expect(this.Metrics.inc).to.have.been.calledWith(
@@ -735,7 +735,7 @@ describe('TokenAccessHandler', function () {
         }
       )
     })
-    it('it handles encoded hashtags', function () {
+    it('handles encoded hashtags', function () {
       const token = 'zxpxjrwdtsgd'
       const prefix = this.TokenAccessHandler.createTokenHashPrefix(token)
 
@@ -744,7 +744,7 @@ describe('TokenAccessHandler', function () {
         `%23${prefix}`,
         'readOnly',
         userId,
-        projectId
+        { projectId }
       )
 
       expect(this.Metrics.inc).to.have.been.calledWith(
@@ -753,6 +753,68 @@ describe('TokenAccessHandler', function () {
           path: 'readOnly',
           status: 'match',
         }
+      )
+    })
+    it('sends "mismatch-v1-format" for suspected v1 URLs with 7 numbers in URL fragment', function () {
+      const token = '4112142489ddsbkrdzhxrq'
+      const prefix = '%2F1234567%2F'
+
+      this.TokenAccessHandler.checkTokenHashPrefix(
+        token,
+        `#${prefix}`,
+        'readAndWrite',
+        userId,
+        { projectId }
+      )
+
+      expect(this.Metrics.inc).to.have.been.calledWith(
+        'link-sharing.hash-check',
+        {
+          path: 'readAndWrite',
+          status: 'mismatch-v1-format',
+        }
+      )
+
+      expect(this.logger.info).to.have.been.calledWith(
+        {
+          tokenHashPrefix: prefix,
+          hashPrefixStatus: 'mismatch-v1-format',
+          userId,
+          projectId,
+          type: 'readAndWrite',
+        },
+        'mismatched token hash prefix'
+      )
+    })
+    it('sends "mismatch-v1-format" for suspected v1 URLs with 8 numbers in URL fragment', function () {
+      const token = '4112142489ddsbkrdzhxrq'
+      const prefix = '%2F12345678%2F'
+
+      this.TokenAccessHandler.checkTokenHashPrefix(
+        token,
+        `#${prefix}`,
+        'readAndWrite',
+        userId,
+        { projectId }
+      )
+
+      expect(this.Metrics.inc).to.have.been.calledWith(
+        'link-sharing.hash-check',
+        {
+          path: 'readAndWrite',
+          status: 'mismatch-v1-format',
+        }
+      )
+
+      expect(this.logger.info).to.have.been.calledWith(
+        {
+          tokenHashPrefix: prefix,
+          hashPrefixStatus: 'mismatch-v1-format',
+          userId,
+          projectId,
+          type: 'readAndWrite',
+        },
+        'mismatched token hash prefix'
       )
     })
   })

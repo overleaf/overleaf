@@ -294,20 +294,34 @@ const TokenAccessHandler = {
       tokenHashPrefix = tokenHashPrefix.replace('#', '').replace('%23', '')
     }
 
+    const v1Format = /%2F[0-9]{7,8}%2F/
+    const isSuspectedV1Format = v1Format.test(tokenHashPrefix)
+
     if (!tokenHashPrefix) {
       hashPrefixStatus = 'missing'
     } else {
       const expectedHashPrefix = TokenAccessHandler.createTokenHashPrefix(token)
       if (expectedHashPrefix === tokenHashPrefix) {
         hashPrefixStatus = 'match'
+      } else if (isSuspectedV1Format) {
+        hashPrefixStatus = 'mismatch-v1-format'
       } else {
         hashPrefixStatus = 'mismatch'
       }
     }
 
-    if (hashPrefixStatus === 'mismatch') {
+    if (
+      hashPrefixStatus === 'mismatch' ||
+      hashPrefixStatus === 'mismatch-v1-format'
+    ) {
       logger.info(
-        { tokenHashPrefix, hashPrefixStatus, userId, ...logData, type },
+        {
+          tokenHashPrefix,
+          hashPrefixStatus,
+          userId,
+          ...logData,
+          type,
+        },
         'mismatched token hash prefix'
       )
     }
