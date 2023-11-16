@@ -57,16 +57,7 @@ const getSplitTestOptions = callbackify(async function (req, res) {
   } catch (e) {}
   const editorReq = { ...req, query }
 
-  const { variant: domainVariant } =
-    await SplitTestHandler.promises.getAssignment(
-      editorReq,
-      res,
-      'pdf-download-domain'
-    )
-  const pdfDownloadDomain =
-    domainVariant === 'user' && Settings.compilesUserContentDomain
-      ? Settings.compilesUserContentDomain
-      : Settings.pdfDownloadDomain
+  const pdfDownloadDomain = Settings.pdfDownloadDomain
 
   if (!req.query.enable_pdf_caching) {
     // The frontend does not want to do pdf caching.
