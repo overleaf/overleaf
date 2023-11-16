@@ -89,6 +89,7 @@ export function ProjectProvider({ children }) {
     publicAccesLevel: publicAccessLevel,
     owner,
     showNewCompileTimeoutUI,
+    trackChangesState,
   } = project || projectFallback
 
   const tags = useMemo(
@@ -123,6 +124,7 @@ export function ProjectProvider({ children }) {
       showNewCompileTimeoutUI:
         newCompileTimeoutOverride || showNewCompileTimeoutUI,
       tags,
+      trackChangesState,
     }
   }, [
     _id,
@@ -136,6 +138,7 @@ export function ProjectProvider({ children }) {
     showNewCompileTimeoutUI,
     newCompileTimeoutOverride,
     tags,
+    trackChangesState,
   ])
 
   return (

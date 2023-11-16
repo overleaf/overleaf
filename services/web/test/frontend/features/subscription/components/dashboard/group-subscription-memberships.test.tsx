@@ -16,6 +16,7 @@ import {
   groupActiveSubscriptionWithPendingLicenseChange,
 } from '../../fixtures/subscriptions'
 import * as useLocationModule from '../../../../../../frontend/js/shared/hooks/use-location'
+import { UserId } from '../../../../../../types/user'
 
 const userId = 'fff999fff999'
 const memberGroupSubscriptions: MemberGroupSubscription[] = [
@@ -24,7 +25,7 @@ const memberGroupSubscriptions: MemberGroupSubscription[] = [
     userIsGroupManager: false,
     planLevelName: 'Professional',
     admin_id: {
-      id: 'abc123abc123',
+      id: 'abc123abc123' as UserId,
       email: 'you@example.com',
     },
   },
@@ -33,7 +34,7 @@ const memberGroupSubscriptions: MemberGroupSubscription[] = [
     userIsGroupManager: true,
     planLevelName: 'Collaborator',
     admin_id: {
-      id: 'bcd456bcd456',
+      id: 'bcd456bcd456' as UserId,
       email: 'someone@example.com',
     },
   },

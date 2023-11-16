@@ -1,5 +1,6 @@
 import { Brand } from '../helpers/brand'
 import { DocId } from '../project-settings'
+import { UserId } from '../user'
 import {
   ReviewPanelAddCommentEntry,
   ReviewPanelBulkActionsEntry,
@@ -28,8 +29,6 @@ export type ReviewPanelDocEntries = Record<
 >
 
 export type ReviewPanelEntries = Record<DocId, ReviewPanelDocEntries>
-
-export type UserId = Brand<string, 'UserId'>
 
 export interface ReviewPanelUser {
   avatar_text: string

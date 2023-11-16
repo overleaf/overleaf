@@ -1,4 +1,5 @@
-import { ThreadId, UserId } from './review-panel'
+import { ThreadId } from './review-panel'
+import { UserId } from '../user'
 
 export interface ReviewPanelEntryScreenPos {
   y: number

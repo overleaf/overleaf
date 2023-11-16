@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react'
 import { get } from 'lodash'
-import { User } from '../../../types/user'
+import { User, UserId } from '../../../types/user'
 import { Project } from '../../../types/project'
 import {
   mockBuildFile,
@@ -26,7 +26,7 @@ const scopeWatchers: [string, (value: any) => void][] = []
 
 const initialize = () => {
   const user: User = {
-    id: 'story-user',
+    id: 'story-user' as UserId,
     email: 'story-user@example.com',
     allowedFreeTrial: true,
     features: { dropbox: true, symbolPalette: true },

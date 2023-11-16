@@ -10,6 +10,7 @@ import {
   cleanUpContext,
   renderWithSubscriptionDashContext,
 } from '../../helpers/render-with-subscription-dash-context'
+import { UserId } from '../../../../../../types/user'
 
 function getManagedGroupSubscription(groupSSO: boolean, managedUsers: boolean) {
   const subscriptionOne = {
@@ -17,7 +18,7 @@ function getManagedGroupSubscription(groupSSO: boolean, managedUsers: boolean) {
     userIsGroupMember: true,
     planLevelName: 'Professional',
     admin_id: {
-      id: 'abc123abc123',
+      id: 'abc123abc123' as UserId,
       email: 'you@example.com',
     },
     features: {
@@ -31,7 +32,7 @@ function getManagedGroupSubscription(groupSSO: boolean, managedUsers: boolean) {
     userIsGroupMember: false,
     planLevelName: 'Collaborator',
     admin_id: {
-      id: 'bcd456bcd456',
+      id: 'bcd456bcd456' as UserId,
       email: 'someone@example.com',
     },
     features: {

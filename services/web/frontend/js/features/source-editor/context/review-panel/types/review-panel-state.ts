@@ -9,6 +9,7 @@ import {
 } from '../../../../../../../types/review-panel/review-panel'
 import { DocId } from '../../../../../../../types/project-settings'
 import { dispatchReviewPanelLayout } from '../../../extensions/changes/change-manager'
+import { UserId } from '../../../../../../../types/user'
 
 /* eslint-disable no-use-before-define */
 export interface ReviewPanelState {
@@ -31,14 +32,16 @@ export interface ReviewPanelState {
     loading: boolean
     openDocId: DocId | null
     lineHeight: number
-    trackChangesState: Record<string, { value: boolean; syncState: string }>
+    trackChangesState:
+      | Record<UserId, { value: boolean; syncState: 'synced' | 'pending' }>
+      | Record<UserId, undefined>
     trackChangesOnForEveryone: boolean
     trackChangesOnForGuests: boolean
     trackChangesForGuestsAvailable: boolean
     formattedProjectMembers: Record<
       string,
       {
-        id: string
+        id: UserId
         name: string
       }
     >
@@ -55,9 +58,9 @@ export interface ReviewPanelState {
     submitReply: (threadId: ThreadId, replyContent: string) => void
     acceptChanges: (entryIds: unknown) => void
     rejectChanges: (entryIds: unknown) => void
-    toggleTrackChangesForEveryone: (isOn: boolean) => unknown
-    toggleTrackChangesForUser: (isOn: boolean, memberId: string) => unknown
-    toggleTrackChangesForGuests: (isOn: boolean) => unknown
+    toggleTrackChangesForEveryone: (onForEveryone: boolean) => void
+    toggleTrackChangesForUser: (onForUser: boolean, userId: UserId) => void
+    toggleTrackChangesForGuests: (onForGuests: boolean) => void
     toggleReviewPanel: () => void
     bulkAcceptActions: () => void
     bulkRejectActions: () => void

@@ -1,8 +1,8 @@
 import {
   ReviewPanelCommentThreadMessage,
   ReviewPanelUser,
-  UserId,
 } from './review-panel'
+import { UserId } from '../user'
 import { DateString } from '../helpers/date'
 
 interface ReviewPanelCommentThreadBase {

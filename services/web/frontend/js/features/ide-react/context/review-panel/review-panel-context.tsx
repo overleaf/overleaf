@@ -1,4 +1,4 @@
-import { useContext, createContext } from 'react'
+import { createContext } from 'react'
 import useReviewPanelState from '@/features/ide-react/context/review-panel/hooks/use-review-panel-state'
 import { ReviewPanelStateReactIde } from '@/features/ide-react/context/review-panel/types/review-panel-state'
 
@@ -20,24 +20,4 @@ export const ReviewPanelReactIdeProvider: React.FC = ({ children }) => {
       </ReviewPanelReactIdeUpdaterFnsContext.Provider>
     </ReviewPanelReactIdeValueContext.Provider>
   )
-}
-
-export function useReviewPanelReactIdeValueContext() {
-  const context = useContext(ReviewPanelReactIdeValueContext)
-  if (!context) {
-    throw new Error(
-      'ReviewPanelReactIdeValueContext is only available inside ReviewPanelReactIdeProvider'
-    )
-  }
-  return context
-}
-
-export function useReviewPanelReactIdeUpdaterFnsContext() {
-  const context = useContext(ReviewPanelReactIdeUpdaterFnsContext)
-  if (!context) {
-    throw new Error(
-      'ReviewPanelReactIdeUpdaterFnsContext is only available inside ReviewPanelReactIdeProvider'
-    )
-  }
-  return context
 }

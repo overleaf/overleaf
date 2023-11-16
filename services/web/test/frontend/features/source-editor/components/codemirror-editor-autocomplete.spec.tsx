@@ -6,6 +6,7 @@ import { mockScope } from '../helpers/mock-scope'
 import { EditorProviders } from '../../../helpers/editor-providers'
 import CodeMirrorEditor from '../../../../../frontend/js/features/source-editor/components/codemirror-editor'
 import { activeEditorLine } from '../helpers/active-editor-line'
+import { UserId } from '../../../../../types/user'
 
 const Container: FC = ({ children }) => (
   <div style={{ width: 785, height: 785 }}>{children}</div>
@@ -860,7 +861,7 @@ describe('autocomplete', { scrollBehavior: false }, function () {
 
     window.metaAttributesCache.set('ol-showSymbolPalette', true)
     const user = {
-      id: '123abd',
+      id: '123abd' as UserId,
       email: 'testuser@example.com',
     }
     cy.mount(

@@ -1,10 +1,14 @@
+import { Brand } from './helpers/brand'
+
 export type RefProviders = {
   mendeley?: boolean
   zotero?: boolean
 }
 
+export type UserId = Brand<string, 'UserId'>
+
 export type User = {
-  id: string
+  id: UserId
   email: string
   allowedFreeTrial?: boolean
   signUpDate?: string // date string

@@ -141,11 +141,11 @@ function ToggleMenu() {
               description={t('track_changes_for_x', { name: member.name })}
               handleToggle={() =>
                 toggleTrackChangesForUser(
-                  !trackChangesState[member.id].value,
+                  !trackChangesState[member.id]?.value,
                   member.id
                 )
               }
-              value={trackChangesState[member.id].value}
+              value={Boolean(trackChangesState[member.id]?.value)}
               disabled={
                 trackChangesOnForEveryone ||
                 !project.features.trackChanges ||
