@@ -89,20 +89,18 @@ export default function EditorAndPdf({
           </div>
         ) : null}
       </HorizontalResizeHandle>
-      {pdfIsOpen || resizing ? (
-        <Panel
-          ref={pdfPanelRef}
-          id="pdf"
-          order={2}
-          defaultSize={50}
-          minSize={5}
-          collapsible
-          onCollapse={collapsed => setPdfIsOpen(!collapsed)}
-          className="ide-react-panel"
-        >
-          <PdfPreview />
-        </Panel>
-      ) : null}
+      <Panel
+        ref={pdfPanelRef}
+        id="pdf"
+        order={2}
+        defaultSize={50}
+        minSize={5}
+        collapsible
+        onCollapse={collapsed => setPdfIsOpen(!collapsed)}
+        className="ide-react-panel"
+      >
+        {pdfIsOpen || resizing ? <PdfPreview /> : null}
+      </Panel>
     </PanelGroup>
   )
 }

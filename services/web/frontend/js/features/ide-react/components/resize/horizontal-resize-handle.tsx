@@ -15,6 +15,12 @@ export const HorizontalResizeHandle: FC<
   const { t } = useTranslation()
   const [isDragging, setIsDragging] = useState(false)
 
+  function handleDragging(isDraggingParam: boolean) {
+    if (isDragging || resizable) {
+      setIsDragging(isDraggingParam)
+    }
+  }
+
   // Only call onDragging prop when the pointer moves after starting a drag
   useEffect(() => {
     if (isDragging) {
@@ -35,7 +41,7 @@ export const HorizontalResizeHandle: FC<
     <PanelResizeHandle
       disabled={!resizable && !isDragging}
       {...props}
-      onDragging={setIsDragging}
+      onDragging={handleDragging}
     >
       <div
         className={classNames('horizontal-resize-handle', {
