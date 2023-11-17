@@ -3,8 +3,7 @@ import { useCallback } from 'react'
 import { findInTree } from '@/features/file-tree/util/find-in-tree'
 
 export function useSelectFileTreeEntity() {
-  const { fileTreeData, selectedEntities, setSelectedEntities } =
-    useFileTreeData()
+  const { fileTreeData, selectedEntities } = useFileTreeData()
 
   const selectEntity = useCallback(
     id => {
@@ -16,10 +15,10 @@ export function useSelectFileTreeEntity() {
       }
       const entityToSelect = findInTree(fileTreeData, id)
       if (entityToSelect) {
-        setSelectedEntities([entityToSelect])
+        window.dispatchEvent(new CustomEvent('editor.openDoc', { detail: id }))
       }
     },
-    [fileTreeData, selectedEntities, setSelectedEntities]
+    [fileTreeData, selectedEntities]
   )
 
   return { selectEntity }
