@@ -392,7 +392,9 @@ export const EditorManagerProvider: FC = ({ children }) => {
           new CustomEvent('doc:after-opened', { detail: isNewDoc })
         )
         if (hasGotoLine(options)) {
-          // In CM6, jump to the line again after a stored scroll position has been restored
+          window.setTimeout(() => jumpToLine(options))
+
+          // Jump to the line again after a stored scroll position has been restored
           if (isNewDoc) {
             window.addEventListener(
               'editor:scroll-position-restored',
