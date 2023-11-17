@@ -39,7 +39,11 @@ function OverviewFile({ docId, docPath }: OverviewFileProps) {
 
     return orderedEntries
   }, [docEntries])
-  const entryCount = Object.keys(docEntries).length
+  const entryCount = useMemo(() => {
+    return Object.keys(docEntries).filter(
+      key => key !== 'add-comment' && key !== 'bulk-actions'
+    ).length
+  }, [docEntries])
 
   const handleToggleCollapsed = () => {
     setCollapsed({ ...collapsed, [docId]: !docCollapsed })
