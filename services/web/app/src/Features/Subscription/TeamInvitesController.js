@@ -13,6 +13,7 @@ const PermissionsManager = require('../Authorization/PermissionsManager')
 const EmailHandler = require('../Email/EmailHandler')
 const { RateLimiter } = require('../../infrastructure/RateLimiter')
 const Modules = require('../../infrastructure/Modules')
+const UserAuditLogHandler = require('../User/UserAuditLogHandler')
 
 const rateLimiters = {
   resendGroupInvite: new RateLimiter('resend-group-invite', {
@@ -197,6 +198,21 @@ async function acceptInvite(req, res, next) {
   const groupSSOActive = (
     await Modules.promises.hooks.fire('hasGroupSSOEnabled', subscription)
   )?.[0]
+
+  try {
+    await UserAuditLogHandler.promises.addEntry(
+      userId,
+      'accept-group-invitation',
+      userId,
+      req.ip,
+      { subscriptionId: subscription._id }
+    )
+  } catch (e) {
+    logger.error(
+      { err: e, userId, subscriptionId: subscription._id },
+      'error adding audit log entry'
+    )
+  }
 
   res.json({ groupSSOActive })
 }

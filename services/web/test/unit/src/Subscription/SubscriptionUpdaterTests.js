@@ -147,6 +147,12 @@ describe('SubscriptionUpdater', function () {
       hasFeature: sinon.stub().returns(false),
     }
 
+    this.UserAuditLogHandler = {
+      promises: {
+        addEntry: sinon.stub().resolves(),
+      },
+    }
+
     this.SubscriptionUpdater = SandboxedModule.require(modulePath, {
       requires: {
         '../../models/Subscription': {
@@ -162,6 +168,7 @@ describe('SubscriptionUpdater', function () {
         },
         '../Analytics/AnalyticsManager': this.AnalyticsManager,
         '../../infrastructure/Features': this.Features,
+        '../User/UserAuditLogHandler': this.UserAuditLogHandler,
       },
     })
   })
@@ -487,6 +494,23 @@ describe('SubscriptionUpdater', function () {
         'better_group_subscription'
       )
     })
+
+    it('should add an entry to the user audit log when joining a group', async function () {
+      await this.SubscriptionUpdater.promises.addUserToGroup(
+        this.subscription._id,
+        this.otherUserId
+      )
+      sinon.assert.calledWith(
+        this.UserAuditLogHandler.promises.addEntry,
+        this.otherUserId,
+        'join-group-subscription',
+        undefined,
+        undefined,
+        {
+          subscriptionId: this.subscription._id,
+        }
+      )
+    })
   })
 
   describe('removeUserFromGroup', function () {
@@ -553,6 +577,23 @@ describe('SubscriptionUpdater', function () {
       this.FeaturesUpdater.promises.refreshFeatures
         .calledWith(this.otherUserId)
         .should.equal(true)
+    })
+
+    it('should add an audit log when a user leaves a group', async function () {
+      await this.SubscriptionUpdater.promises.removeUserFromGroup(
+        this.subscription._id,
+        this.otherUserId
+      )
+      sinon.assert.calledWith(
+        this.UserAuditLogHandler.promises.addEntry,
+        this.otherUserId,
+        'leave-group-subscription',
+        undefined,
+        undefined,
+        {
+          subscriptionId: this.subscription._id,
+        }
+      )
     })
   })
 
@@ -635,6 +676,32 @@ describe('SubscriptionUpdater', function () {
         {
           groupId: 'fake-id-2',
           subscriptionId: 'fake-sub-2',
+        }
+      )
+    })
+
+    it('should add an audit log entry for each group the user leaves', async function () {
+      await this.SubscriptionUpdater.promises.removeUserFromAllGroups(
+        this.otherUserId
+      )
+      sinon.assert.calledWith(
+        this.UserAuditLogHandler.promises.addEntry,
+        this.otherUserId,
+        'leave-group-subscription',
+        undefined,
+        undefined,
+        {
+          subscriptionId: 'fake-id-1',
+        }
+      )
+      sinon.assert.calledWith(
+        this.UserAuditLogHandler.promises.addEntry,
+        this.otherUserId,
+        'leave-group-subscription',
+        undefined,
+        undefined,
+        {
+          subscriptionId: 'fake-id-2',
         }
       )
     })

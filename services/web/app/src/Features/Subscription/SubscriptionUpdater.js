@@ -9,6 +9,7 @@ const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const { DeletedSubscription } = require('../../models/DeletedSubscription')
 const logger = require('@overleaf/logger')
 const Features = require('../../infrastructure/Features')
+const UserAuditLogHandler = require('../User/UserAuditLogHandler')
 
 /**
  * Change the admin of the given subscription.
@@ -59,6 +60,13 @@ async function syncSubscription(
 }
 
 async function addUserToGroup(subscriptionId, userId) {
+  await UserAuditLogHandler.promises.addEntry(
+    userId,
+    'join-group-subscription',
+    undefined,
+    undefined,
+    { subscriptionId }
+  )
   await Subscription.updateOne(
     { _id: subscriptionId },
     { $addToSet: { member_ids: userId } }
@@ -73,6 +81,13 @@ async function addUserToGroup(subscriptionId, userId) {
 }
 
 async function removeUserFromGroup(subscriptionId, userId) {
+  await UserAuditLogHandler.promises.addEntry(
+    userId,
+    'leave-group-subscription',
+    undefined,
+    undefined,
+    { subscriptionId }
+  )
   await Subscription.updateOne(
     { _id: subscriptionId },
     { $pull: { member_ids: userId } }
@@ -97,6 +112,17 @@ async function removeUserFromAllGroups(userId) {
   }
   const subscriptionIds = subscriptions.map(sub => sub._id)
   const removeOperation = { $pull: { member_ids: userId } }
+
+  for (const subscriptionId of subscriptionIds) {
+    await UserAuditLogHandler.promises.addEntry(
+      userId,
+      'leave-group-subscription',
+      undefined,
+      undefined,
+      { subscriptionId }
+    )
+  }
+
   await Subscription.updateMany(
     { _id: subscriptionIds },
     removeOperation

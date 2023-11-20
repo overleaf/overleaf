@@ -2,12 +2,20 @@ const OError = require('@overleaf/o-error')
 const { UserAuditLogEntry } = require('../../models/UserAuditLogEntry')
 const { callbackify } = require('util')
 
+function _canHaveNoIpAddressId(operation) {
+  if (operation === 'join-group-subscription') return true
+  if (operation === 'leave-group-subscription') return true
+  return false
+}
+
 function _canHaveNoInitiatorId(operation, info) {
   if (operation === 'reset-password') return true
   if (operation === 'unlink-sso' && info.providerId === 'collabratec')
     return true
   if (operation === 'unlink-institution-sso-not-migrated') return true
   if (operation === 'remove-email' && info.script) return true
+  if (operation === 'join-group-subscription') return true
+  if (operation === 'leave-group-subscription') return true
 }
 
 /**
@@ -22,12 +30,19 @@ function _canHaveNoInitiatorId(operation, info) {
  * - info: an object detailing what happened
  */
 async function addEntry(userId, operation, initiatorId, ipAddress, info = {}) {
-  if (!operation || !ipAddress)
-    throw new OError('missing required audit log data', {
-      operation,
+  if (!operation) {
+    throw new OError('missing operation for audit log', {
       initiatorId,
       ipAddress,
     })
+  }
+
+  if (!ipAddress && !_canHaveNoIpAddressId(operation, info)) {
+    throw new OError('missing ipAddress for audit log', {
+      operation,
+      initiatorId,
+    })
+  }
 
   if (!initiatorId && !_canHaveNoInitiatorId(operation, info)) {
     throw new OError('missing initiatorId for audit log', {

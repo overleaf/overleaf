@@ -81,6 +81,18 @@ describe('UserAuditLogHandler', function () {
         )
         this.UserAuditLogEntryMock.verify()
       })
+
+      it('updates the log when no ip address or initiatorId is specified for a group join event', async function () {
+        this.UserAuditLogHandler.promises.addEntry(
+          this.userId,
+          'join-group-subscription',
+          undefined,
+          undefined,
+          {
+            subscriptionId: 'foo',
+          }
+        )
+      })
     })
 
     describe('errors', function () {
@@ -97,7 +109,7 @@ describe('UserAuditLogHandler', function () {
           ).to.be.rejected
         })
 
-        it('throws an error when no IP', async function () {
+        it('throws an error when no IP and not excempt', async function () {
           await expect(
             this.UserAuditLogHandler.promises.addEntry(
               this.userId,

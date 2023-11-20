@@ -41,11 +41,16 @@ describe('SubscriptionGroupController', function () {
       },
     }
 
+    this.UserAuditLogHandler = {
+      addEntry: sinon.stub().callsArgWith(5),
+    }
+
     this.Controller = SandboxedModule.require(modulePath, {
       requires: {
         './SubscriptionGroupHandler': this.GroupHandler,
         './SubscriptionLocator': this.SubscriptionLocator,
         '../Authentication/SessionManager': this.SessionManager,
+        '../User/UserAuditLogHandler': this.UserAuditLogHandler,
       },
     })
   })
@@ -61,6 +66,27 @@ describe('SubscriptionGroupController', function () {
           this.GroupHandler.removeUserFromGroup
             .calledWith(this.subscriptionId, userIdToRemove)
             .should.equal(true)
+          done()
+        },
+      }
+      this.Controller.removeUserFromGroup(this.req, res)
+    })
+
+    it('should log that the user has been removed', function (done) {
+      const userIdToRemove = '31231'
+      this.req.params = { user_id: userIdToRemove }
+      this.req.entity = this.subscription
+
+      const res = {
+        sendStatus: () => {
+          sinon.assert.calledWith(
+            this.UserAuditLogHandler.addEntry,
+            userIdToRemove,
+            'remove-from-group-subscription',
+            this.adminUserId,
+            this.req.ip,
+            { subscriptionId: this.subscriptionId }
+          )
           done()
         },
       }
@@ -84,6 +110,27 @@ describe('SubscriptionGroupController', function () {
             this.GroupHandler.removeUserFromGroup,
             this.subscriptionId,
             memberUserIdToremove
+          )
+          done()
+        },
+      }
+      this.Controller.removeSelfFromGroup(this.req, res)
+    })
+
+    it('should log that the user has left the subscription', function (done) {
+      this.req.query = { subscriptionId: this.subscriptionId }
+      const memberUserIdToremove = 123456789
+      this.req.session.user._id = memberUserIdToremove
+
+      const res = {
+        sendStatus: () => {
+          sinon.assert.calledWith(
+            this.UserAuditLogHandler.addEntry,
+            memberUserIdToremove,
+            'remove-from-group-subscription',
+            memberUserIdToremove,
+            this.req.ip,
+            { subscriptionId: this.subscriptionId }
           )
           done()
         },
