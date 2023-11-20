@@ -6,6 +6,8 @@ const EmailHandler = require('../Email/EmailHandler')
 const AuthenticationManager = require('../Authentication/AuthenticationManager')
 const { callbackify, promisify } = require('util')
 
+const AUDIT_LOG_TOKEN_PREFIX_LENGTH = 10
+
 function generateAndEmailResetToken(email, callback) {
   UserGetter.getUserByAnyEmail(email, (err, user) => {
     if (err || !user) {
@@ -103,7 +105,8 @@ async function setNewUserPassword(token, password, auditLog) {
     user._id,
     'reset-password',
     auditLog.initiatorId,
-    auditLog.ip
+    auditLog.ip,
+    { token: token.substring(0, AUDIT_LOG_TOKEN_PREFIX_LENGTH) }
   )
 
   const reset = await AuthenticationManager.promises.setUserPassword(

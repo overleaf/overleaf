@@ -56,6 +56,9 @@ describe('UserEmailsController', function () {
     this.AnalyticsManager = {
       recordEventForUser: sinon.stub(),
     }
+    this.UserAuditLogHandler = {
+      addEntry: sinon.stub().yields(),
+    }
     this.UserEmailsController = SandboxedModule.require(modulePath, {
       requires: {
         '../Authentication/SessionManager': this.SessionManager,
@@ -79,6 +82,7 @@ describe('UserEmailsController', function () {
         '../Institutions/InstitutionsAPI': this.InstitutionsAPI,
         '../Errors/HttpErrorHandler': this.HttpErrorHandler,
         '../Analytics/AnalyticsManager': this.AnalyticsManager,
+        './UserAuditLogHandler': this.UserAuditLogHandler,
       },
     })
   })
@@ -416,7 +420,7 @@ describe('UserEmailsController', function () {
     beforeEach(function () {
       this.UserEmailsConfirmationHandler.confirmEmailFromToken = sinon
         .stub()
-        .yields()
+        .yields(null, { userId: this.user._id, email: this.user.email })
       this.res = {
         sendStatus: sinon.stub(),
         json: sinon.stub(),
@@ -425,6 +429,7 @@ describe('UserEmailsController', function () {
       this.next = sinon.stub()
       this.token = 'mock-token'
       this.req.body = { token: this.token }
+      this.req.ip = '0.0.0.0'
     })
 
     describe('successfully', function () {
@@ -440,6 +445,20 @@ describe('UserEmailsController', function () {
 
       it('should return a 200 status', function () {
         this.res.sendStatus.calledWith(200).should.equal(true)
+      })
+
+      it('should log the confirmation to the audit log', function () {
+        sinon.assert.calledWith(
+          this.UserAuditLogHandler.addEntry,
+          this.user._id,
+          'confirm-email',
+          this.user._id,
+          this.req.ip,
+          {
+            token: this.token.substring(0, 10),
+            email: this.user.email,
+          }
+        )
       })
     })
 

@@ -125,7 +125,12 @@ const UserEmailsConfirmationHandler = {
           if (!emailExists) {
             return callback(new Errors.NotFoundError('email missing for user'))
           }
-          UserUpdater.confirmEmail(userId, email, callback)
+          UserUpdater.confirmEmail(userId, email, function (error) {
+            if (error) {
+              return callback(error)
+            }
+            callback(null, { userId, email })
+          })
         })
       }
     )

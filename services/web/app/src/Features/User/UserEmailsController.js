@@ -14,6 +14,9 @@ const { expressify } = require('@overleaf/promise-utils')
 const AsyncFormHelper = require('../Helpers/AsyncFormHelper')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const UserPrimaryEmailCheckHandler = require('../User/UserPrimaryEmailCheckHandler')
+const UserAuditLogHandler = require('./UserAuditLogHandler')
+
+const AUDIT_LOG_TOKEN_PREFIX_LENGTH = 10
 
 async function _sendSecurityAlertEmail(user, email) {
   const emailOptions = {
@@ -267,7 +270,7 @@ const UserEmailsController = {
     }
     UserEmailsConfirmationHandler.confirmEmailFromToken(
       token,
-      function (error) {
+      function (error, userData) {
         if (error) {
           if (error instanceof Errors.NotFoundError) {
             res.status(404).json({
@@ -277,7 +280,24 @@ const UserEmailsController = {
             next(error)
           }
         } else {
-          res.sendStatus(200)
+          const { userId, email } = userData
+          const tokenPrefix = token.substring(0, AUDIT_LOG_TOKEN_PREFIX_LENGTH)
+          UserAuditLogHandler.addEntry(
+            userId,
+            'confirm-email',
+            userId,
+            req.ip,
+            { token: tokenPrefix, email },
+            auditLogError => {
+              if (auditLogError) {
+                logger.error(
+                  { error: auditLogError, userId, token: tokenPrefix },
+                  'failed to add audit log entry'
+                )
+              }
+              res.sendStatus(200)
+            }
+          )
         }
       }
     )

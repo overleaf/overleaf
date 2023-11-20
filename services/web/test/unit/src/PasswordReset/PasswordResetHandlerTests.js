@@ -290,14 +290,15 @@ describe('PasswordResetHandler', function () {
               this.auditLog,
               (error, result) => {
                 const { reset, userId } = result
+                sinon.assert.calledWith(
+                  this.UserAuditLogHandler.promises.addEntry,
+                  this.user_id,
+                  'reset-password',
+                  undefined,
+                  this.auditLog.ip,
+                  { token: this.token.substring(0, 10) }
+                )
                 expect(error).to.not.exist
-                const logCall =
-                  this.UserAuditLogHandler.promises.addEntry.lastCall
-                expect(logCall.args[0]).to.equal(this.user_id)
-                expect(logCall.args[1]).to.equal('reset-password')
-                expect(logCall.args[2]).to.equal(undefined)
-                expect(logCall.args[3]).to.equal(this.auditLog.ip)
-                expect(logCall.args[4]).to.equal(undefined)
                 done()
               }
             )
@@ -344,13 +345,14 @@ describe('PasswordResetHandler', function () {
                 (error, result) => {
                   const { reset, userId } = result
                   expect(error).to.not.exist
-                  const logCall =
-                    this.UserAuditLogHandler.promises.addEntry.lastCall
-                  expect(logCall.args[0]).to.equal(this.user_id)
-                  expect(logCall.args[1]).to.equal('reset-password')
-                  expect(logCall.args[2]).to.equal(this.user_id)
-                  expect(logCall.args[3]).to.equal(this.auditLog.ip)
-                  expect(logCall.args[4]).to.equal(undefined)
+                  sinon.assert.calledWith(
+                    this.UserAuditLogHandler.promises.addEntry,
+                    this.user_id,
+                    'reset-password',
+                    this.user_id,
+                    this.auditLog.ip,
+                    { token: this.token.substring(0, 10) }
+                  )
                   done()
                 }
               )
